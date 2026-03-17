@@ -750,6 +750,267 @@ button:focus-visible {
 [data-theme="light"] ::-webkit-scrollbar-thumb { background: #ccc; }
 [data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #bbb; }
 
+/* ── Library Tabs ─────────────────────────────────────────────────────────── */
+.library-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.library-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dimmer);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.library-tab:hover { color: var(--text-dim); }
+.library-tab-active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Reader Pause Controls (WPM slider) ──────────────────────────────────── */
+.reader-pause-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 0 4px;
+}
+.reader-wpm-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.reader-wpm-label {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  min-width: 65px;
+}
+.reader-speed-slider {
+  width: 180px;
+  accent-color: var(--accent);
+}
+.reader-mode-switch {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-dimmer);
+  cursor: pointer;
+  font-size: 10px;
+  font-family: var(--mono);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.reader-mode-switch:hover { color: var(--text-dim); }
+
+/* ── Doc Card Favorites ───────────────────────────────────────────────────── */
+.doc-fav-btn {
+  font-size: 16px;
+  color: var(--text-dimmer);
+  line-height: 1;
+}
+.doc-fav-btn-active {
+  color: var(--accent);
+}
+.doc-card-fav-star {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+.doc-card-archived {
+  opacity: 0.5;
+}
+
+/* ── Import Confirm Dialog ────────────────────────────────────────────────── */
+.import-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.import-confirm-dialog {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  width: 420px;
+  max-width: 90vw;
+}
+.import-confirm-header {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.import-confirm-preview {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 12px;
+  max-height: 80px;
+  overflow: hidden;
+  word-break: break-all;
+}
+.import-confirm-title {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  font-family: var(--serif);
+  color: var(--text);
+  padding: 6px 0;
+  margin-bottom: 14px;
+  outline: none;
+}
+.import-confirm-title:focus { border-color: var(--accent); }
+.import-confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Scroll Reader ────────────────────────────────────────────────────────── */
+.scroll-reader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--reader-bg, #050505);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--serif);
+  -webkit-app-region: no-drag;
+}
+.scroll-reader-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0.55;
+  z-index: 1;
+}
+.scroll-reader-page {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.scroll-reader-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 60px 60px;
+}
+.scroll-reader-text {
+  max-width: 640px;
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--text);
+  letter-spacing: 0.1px;
+  user-select: text;
+}
+.scroll-reader-bottom {
+  padding: 0 32px 24px;
+}
+.scroll-reader-nav {
+  display: flex;
+  gap: 8px;
+}
+.scroll-reader-nav-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 4px 14px;
+  border-radius: 4px;
+}
+.scroll-reader-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.scroll-reader-nav-btn:hover:not(:disabled) {
+  color: var(--text);
+}
+
+/* ── Launch at login toggle ───────────────────────────────────────────────── */
+.launch-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.launch-toggle input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.launch-toggle-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dimmer);
+}
+
+/* ── Sort dropdown ────────────────────────────────────────────────────────── */
+.sort-select {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  cursor: pointer;
+  outline: none;
+  -webkit-app-region: no-drag;
+}
+.sort-select:focus { border-color: var(--accent); }
+
+/* ── E-ink theme overrides ────────────────────────────────────────────────── */
+[data-theme="eink"] body {
+  background: var(--bg);
+  color: var(--text);
+}
+[data-theme="eink"] .reader-container {
+  background: var(--reader-bg, #e8e4d9);
+}
+[data-theme="eink"] .reader-word-before,
+[data-theme="eink"] .reader-word-after {
+  color: var(--text);
+}
+[data-theme="eink"] .reader-word-focus {
+  text-shadow: none;
+}
+[data-theme="eink"] ::-webkit-scrollbar-thumb { background: #aaa; }
+[data-theme="eink"] ::-webkit-scrollbar-thumb:hover { background: #999; }
+[data-theme="eink"] .btn-fill {
+  background: #333;
+  color: #e8e4d9;
+}
+[data-theme="eink"] .btn-fill:hover {
+  background: #444;
+}
+
 /* ── Loading Spinner ──────────────────────────────────────────────────────── */
 .loading-screen {
   height: 100vh;

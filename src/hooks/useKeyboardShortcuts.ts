@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { WPM_STEP, REWIND_WORDS } from "../utils/text";
 
-const api = window.electronAPI;
+const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
-export function useReaderKeys(view, togglePlay, seekWords, adjustWpm, exitReader) {
+export function useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, exitReader) {
   useEffect(() => {
-    if (view !== "reader") return;
+    if (view !== "reader" || readerMode !== "speed") return;
     const handler = (e) => {
       if (e.code === "Space") { e.preventDefault(); togglePlay(); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); seekWords(-REWIND_WORDS); }
@@ -16,25 +16,34 @@ export function useReaderKeys(view, togglePlay, seekWords, adjustWpm, exitReader
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, togglePlay, seekWords, adjustWpm, exitReader]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader]);
 }
 
-export function useQuickRead(view, openDoc) {
+// Smart import: Alt+V detects URL vs text and shows confirmation dialog
+export function useSmartImport(view, onImport) {
   useEffect(() => {
-    const handler = (e) => {
-      if ((e.altKey || e.metaKey) && e.code === "KeyV") {
-        e.preventDefault();
-        const sel = window.getSelection().toString().trim();
-        if (sel && view === "library") {
-          (async () => {
-            const title = sel.slice(0, 40) + (sel.length > 40 ? "..." : "");
-            const doc = await api.addManualDoc(title, sel);
-            openDoc(doc);
-          })();
-        }
+    const handler = async (e) => {
+      if (!((e.altKey || e.metaKey) && e.code === "KeyV")) return;
+      if (view !== "library") return;
+      e.preventDefault();
+
+      // Try clipboard first, fall back to selection
+      let text = "";
+      try {
+        text = await navigator.clipboard.readText();
+      } catch {
+        text = window.getSelection()?.toString() || "";
       }
+      text = text.trim();
+      if (!text) {
+        text = window.getSelection()?.toString().trim() || "";
+      }
+      if (!text) return;
+
+      const isUrl = URL_REGEX.test(text);
+      onImport(text, isUrl);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, openDoc]);
+  }, [view, onImport]);
 }

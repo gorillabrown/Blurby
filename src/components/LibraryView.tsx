@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatTime, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
-import { useTheme } from "./ThemeProvider";
+import { useTheme, nextTheme, themeLabel } from "./ThemeProvider";
 import HelpPanel from "./HelpPanel";
 import AddEditPanel from "./AddEditPanel";
 import DocCard from "./DocCard";
@@ -13,8 +13,10 @@ export default function LibraryView({
   library, settings, wpm, isMac, folderName, loadingContent, toast,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, wpmRef, onSetFolderName,
+  onToggleFavorite, onArchiveDoc, onUnarchiveDoc,
 }) {
   const { theme, setTheme } = useTheme();
+  const [tab, setTab] = useState("all"); // "all" | "favorites" | "archived"
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
   const [urlInput, setUrlInput] = useState("");
@@ -28,25 +30,55 @@ export default function LibraryView({
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
   const [updateReady, setUpdateReady] = useState(null);
+  const [launchAtLogin, setLaunchAtLogin] = useState(false);
 
   useEffect(() => {
     const unsub = api.onUpdateDownloaded?.((version) => setUpdateReady(version));
     return () => unsub?.();
   }, []);
 
-  // Sync theme from settings on load
   useEffect(() => {
-    if (settings.theme && settings.theme !== theme) {
-      setTheme(settings.theme);
-    }
+    if (settings.theme && settings.theme !== theme) setTheme(settings.theme);
   }, [settings.theme]);
 
-  const filteredLibrary = library.filter((d) =>
-    !searchQuery || d.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
+  }, []);
 
-  const totalWords = library.reduce((a, d) => a + (d.wordCount || 0), 0);
+  // Filter and sort library
+  const getFilteredAndSorted = () => {
+    let docs = library;
+    if (tab === "favorites") docs = docs.filter((d) => d.favorite);
+    else if (tab === "archived") docs = docs.filter((d) => d.archived);
+    else docs = docs.filter((d) => !d.archived);
+    if (searchQuery) docs = docs.filter((d) => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    docs = [...docs];
+    if (sortBy === "progress") {
+      // Closest to finished first (highest % read), then alphabetical
+      docs.sort((a, b) => {
+        const pctA = a.wordCount > 0 ? (a.position || 0) / a.wordCount : 0;
+        const pctB = b.wordCount > 0 ? (b.position || 0) / b.wordCount : 0;
+        if (pctB !== pctA) return pctB - pctA;
+        return a.title.localeCompare(b.title);
+      });
+    } else if (sortBy === "alpha") {
+      docs.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "newest") {
+      docs.sort((a, b) => (b.created || 0) - (a.created || 0));
+    } else if (sortBy === "oldest") {
+      docs.sort((a, b) => (a.created || 0) - (b.created || 0));
+    }
+    return docs;
+  };
+  const filteredLibrary = getFilteredAndSorted();
+
+  const activeLibrary = library.filter((d) => !d.archived);
+  const totalWords = activeLibrary.reduce((a, d) => a + (d.wordCount || 0), 0);
+  const favCount = library.filter((d) => d.favorite).length;
+  const archivedCount = library.filter((d) => d.archived).length;
 
   const handleAddDoc = async () => {
     if (!newTitle.trim() || !newText.trim()) return;
@@ -68,10 +100,16 @@ export default function LibraryView({
     setEditingId(doc.id); setNewTitle(doc.title); setNewText(doc.content || ""); setShowAdd(true);
   };
 
-  const handleThemeToggle = () => {
-    const next = theme === "dark" ? "light" : "dark";
+  const handleThemeCycle = () => {
+    const next = nextTheme(theme);
     setTheme(next);
     api.saveSettings({ theme: next });
+  };
+
+  const handleLaunchToggle = async () => {
+    const next = !launchAtLogin;
+    await api.setLaunchAtLogin(next);
+    setLaunchAtLogin(next);
   };
 
   const handleExport = async () => {
@@ -95,10 +133,8 @@ export default function LibraryView({
         </div>
       )}
 
-      {/* Toast notification */}
       {toast && <div className="toast" role="status">{toast}</div>}
 
-      {/* Update banner */}
       {updateReady && (
         <div className="update-banner" role="alert">
           <span>Blurby {updateReady} ready to install</span>
@@ -130,14 +166,14 @@ export default function LibraryView({
               >{folderName}</h1>
             )}
             <p className="library-stats">
-              {library.length} {library.length === 1 ? "source" : "sources"}
+              {activeLibrary.length} {activeLibrary.length === 1 ? "source" : "sources"}
               {totalWords > 0 && <> · {formatTime(totalWords, wpm)} total at {wpm} wpm</>}
               {settings.sourceFolder && <> · <span className="library-folder-name">{settings.sourceFolder.split(/[/\\]/).pop()}</span></>}
             </p>
           </div>
           <div className="library-actions">
-            <button onClick={handleThemeToggle} className="btn" title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} aria-label="Toggle theme">
-              {theme === "dark" ? "☀" : "☾"}
+            <button onClick={handleThemeCycle} className="btn" title={`Theme: ${themeLabel(theme)}`} aria-label="Cycle theme">
+              {theme === "dark" ? "light" : theme === "light" ? "e-ink" : "dark"}
             </button>
             <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
@@ -172,26 +208,56 @@ export default function LibraryView({
           </div>
         </div>
 
-        {/* Stats panel */}
-        {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
+        {/* Tabs */}
+        <div className="library-tabs" role="tablist">
+          <button
+            className={`library-tab${tab === "all" ? " library-tab-active" : ""}`}
+            onClick={() => setTab("all")}
+            role="tab"
+            aria-selected={tab === "all"}
+          >all ({activeLibrary.length})</button>
+          <button
+            className={`library-tab${tab === "favorites" ? " library-tab-active" : ""}`}
+            onClick={() => setTab("favorites")}
+            role="tab"
+            aria-selected={tab === "favorites"}
+          >favorites ({favCount})</button>
+          <button
+            className={`library-tab${tab === "archived" ? " library-tab-active" : ""}`}
+            onClick={() => setTab("archived")}
+            role="tab"
+            aria-selected={tab === "archived"}
+          >archived ({archivedCount})</button>
+        </div>
 
-        {/* Help panel */}
+        {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
         {showHelp && <HelpPanel isMac={isMac} />}
 
-        {/* Search bar */}
+        {/* Search bar and sort */}
         {library.length > 3 && (
-          <div className="library-search-wrap">
+          <div className="library-search-wrap" style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <input
               placeholder="Filter sources..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="library-search"
+              style={{ flex: 1 }}
               aria-label="Filter library"
             />
+            <select
+              className="sort-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label="Sort order"
+            >
+              <option value="progress">closest to done</option>
+              <option value="alpha">A-Z</option>
+              <option value="newest">newest first</option>
+              <option value="oldest">oldest first</option>
+            </select>
           </div>
         )}
 
-        {/* URL input panel */}
         {showUrl && (
           <div className="add-edit-panel">
             <div className="url-input-row">
@@ -215,7 +281,6 @@ export default function LibraryView({
           </div>
         )}
 
-        {/* Add/Edit panel */}
         {showAdd && (
           <AddEditPanel
             newTitle={newTitle} newText={newText} editingId={editingId}
@@ -225,14 +290,20 @@ export default function LibraryView({
           />
         )}
 
-        {/* Empty state */}
-        {library.length === 0 && !showAdd && (
+        {/* Empty states per tab */}
+        {filteredLibrary.length === 0 && !showAdd && (
           <div className="library-empty">
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.2, marginBottom: 16 }}>
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
-            <p style={{ fontSize: 16, marginBottom: 6 }}>Your library is empty</p>
-            <p style={{ fontSize: 13 }}>Pick a source folder, drop files, or add text manually</p>
+            {tab === "all" && (
+              <>
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.2, marginBottom: 16 }}>
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+                <p style={{ fontSize: 16, marginBottom: 6 }}>Your library is empty</p>
+                <p style={{ fontSize: 13 }}>Pick a source folder, drop files, or add text manually</p>
+              </>
+            )}
+            {tab === "favorites" && <p style={{ fontSize: 14, color: "var(--text-dim)" }}>No favorites yet — star documents to see them here</p>}
+            {tab === "archived" && <p style={{ fontSize: 14, color: "var(--text-dim)" }}>No archived documents — completed readings auto-archive here</p>}
           </div>
         )}
 
@@ -242,13 +313,16 @@ export default function LibraryView({
             <DocCard
               key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
               onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
-              onDelete={onDeleteDoc} onConfirmDelete={setConfirmDelete}
+              onDelete={tab === "archived" ? onDeleteDoc : onDeleteDoc}
+              onConfirmDelete={setConfirmDelete}
               onCancelDelete={() => setConfirmDelete(null)}
+              onToggleFavorite={onToggleFavorite}
+              onOpenScroll={(d) => onOpenDoc(d, "scroll")}
             />
           ))}
         </div>
 
-        {/* Footer controls */}
+        {/* Footer */}
         <div className="library-footer">
           <div className="library-speed">
             <span>speed</span>
@@ -261,6 +335,14 @@ export default function LibraryView({
             <span className="library-speed-label">{wpm} wpm</span>
           </div>
           <div className="library-footer-actions">
+            <label className="launch-toggle" title="Start Blurby when computer starts">
+              <input
+                type="checkbox"
+                checked={launchAtLogin}
+                onChange={handleLaunchToggle}
+              />
+              <span className="launch-toggle-label">start at login</span>
+            </label>
             <button onClick={handleExport} className="btn library-change-folder" aria-label="Export library">export</button>
             <button onClick={handleImport} className="btn library-change-folder" aria-label="Import library">import</button>
             {settings.sourceFolder && (

@@ -41,6 +41,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
   importLibrary: () => ipcRenderer.invoke("import-library"),
   exportStatsCsv: () => ipcRenderer.invoke("export-stats-csv"),
 
+  // Launch at login
+  getLaunchAtLogin: () => ipcRenderer.invoke("get-launch-at-login"),
+  setLaunchAtLogin: (enabled) => ipcRenderer.invoke("set-launch-at-login", enabled),
+
+  // Favorites
+  toggleFavorite: (docId) => ipcRenderer.invoke("toggle-favorite", docId),
+
+  // Archive
+  archiveDoc: (docId) => ipcRenderer.invoke("archive-doc", docId),
+  unarchiveDoc: (docId) => ipcRenderer.invoke("unarchive-doc", docId),
+
   // Auto-updater
   installUpdate: () => ipcRenderer.invoke("install-update"),
 

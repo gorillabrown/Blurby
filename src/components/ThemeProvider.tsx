@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const ThemeContext = createContext({ theme: "dark", setTheme: () => {} });
+const ThemeContext = createContext({ theme: "dark", setTheme: (_t) => {} });
 
 const themes = {
   dark: {
@@ -29,7 +29,32 @@ const themes = {
     "--accent-glow": "rgba(139,111,71,0.3)",
     "--reader-bg": "#f0ede8",
   },
+  eink: {
+    "--bg": "#e8e4d9",
+    "--bg-raised": "#dedad0",
+    "--bg-hover": "#d4d0c6",
+    "--border": "#b8b4a8",
+    "--border-light": "#c8c4b8",
+    "--text": "#1a1a1a",
+    "--text-dim": "#4a4a4a",
+    "--text-dimmer": "#7a7a7a",
+    "--accent": "#333333",
+    "--accent-glow": "rgba(51,51,51,0.2)",
+    "--reader-bg": "#e8e4d9",
+  },
 };
+
+const themeOrder = ["dark", "light", "eink"];
+
+export function nextTheme(current) {
+  const idx = themeOrder.indexOf(current);
+  return themeOrder[(idx + 1) % themeOrder.length];
+}
+
+export function themeLabel(theme) {
+  if (theme === "eink") return "e-ink";
+  return theme;
+}
 
 export function ThemeProvider({ children, initialTheme = "dark" }) {
   const [theme, setTheme] = useState(initialTheme);

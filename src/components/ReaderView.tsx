@@ -1,9 +1,9 @@
 import { useRef, useEffect } from "react";
-import { focusChar, formatTime } from "../utils/text";
+import { focusChar, formatTime, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, escPending, isMac, togglePlay, exitReader }) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onSwitchToScroll }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -62,9 +62,34 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, 
         <div className="reader-guide-line reader-guide-bottom" />
       </div>
 
-      {/* Bottom bar */}
-      <div className="reader-bottom-bar" style={{ opacity: playing ? 0.08 : 0.45 }}>
+      {/* Bottom bar — enhanced when paused */}
+      <div className="reader-bottom-bar" style={{ opacity: playing ? 0.08 : 0.6 }}>
         <ProgressBar current={wordIndex} total={words.length} />
+
+        {/* WPM slider visible when paused */}
+        {!playing && (
+          <div className="reader-pause-controls" onClick={(e) => e.stopPropagation()}>
+            <div className="reader-wpm-slider">
+              <span className="reader-wpm-label">{wpm} wpm</span>
+              <input
+                type="range"
+                min={MIN_WPM}
+                max={MAX_WPM}
+                step={WPM_STEP}
+                value={wpm}
+                onChange={(e) => onSetWpm(Number(e.target.value))}
+                className="reader-speed-slider"
+                aria-label="Reading speed"
+              />
+            </div>
+            <button
+              className="reader-mode-switch"
+              onClick={onSwitchToScroll}
+              title="Switch to scroll reading"
+            >scroll mode</button>
+          </div>
+        )}
+
         <div className="reader-bottom-info">
           <span>{pct}%</span>
           <span className="reader-controls-hint">

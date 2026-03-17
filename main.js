@@ -88,7 +88,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow for multi-window
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark" };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 
@@ -604,6 +604,48 @@ function registerIPC() {
   // Auto-updater control
   ipcMain.handle("install-update", () => {
     try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(); } catch {}
+  });
+
+  // Launch at login
+  ipcMain.handle("get-launch-at-login", () => {
+    return app.getLoginItemSettings().openAtLogin;
+  });
+
+  ipcMain.handle("set-launch-at-login", (_, enabled) => {
+    app.setLoginItemSettings({ openAtLogin: enabled });
+    settings.launchAtLogin = enabled;
+    saveSettings();
+    return enabled;
+  });
+
+  // Favorites
+  ipcMain.handle("toggle-favorite", (_, docId) => {
+    const doc = getLibrary().find((d) => d.id === docId);
+    if (doc) {
+      doc.favorite = !doc.favorite;
+      saveLibrary();
+      return doc.favorite;
+    }
+    return false;
+  });
+
+  // Archive
+  ipcMain.handle("archive-doc", (_, docId) => {
+    const doc = getLibrary().find((d) => d.id === docId);
+    if (doc) {
+      doc.archived = true;
+      doc.archivedAt = Date.now();
+      saveLibrary();
+    }
+  });
+
+  ipcMain.handle("unarchive-doc", (_, docId) => {
+    const doc = getLibrary().find((d) => d.id === docId);
+    if (doc) {
+      doc.archived = false;
+      delete doc.archivedAt;
+      saveLibrary();
+    }
   });
 
   // Error logging

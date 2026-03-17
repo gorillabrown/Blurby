@@ -4,7 +4,7 @@ const api = window.electronAPI;
 
 export default function useLibrary() {
   const [library, setLibrary] = useState([]);
-  const [settings, setSettings] = useState({ wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark" });
+  const [settings, setSettings] = useState({ wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false });
   const [loaded, setLoaded] = useState(false);
   const [platform, setPlatform] = useState("win32");
   const [loadingContent, setLoadingContent] = useState(false);
@@ -60,10 +60,7 @@ export default function useLibrary() {
 
   const switchFolder = useCallback(async (folder) => {
     const result = await api.switchFolder(folder);
-    if (result.error) {
-      showToast(result.error);
-      return;
-    }
+    if (result.error) { showToast(result.error); return; }
     setSettings((prev) => ({ ...prev, sourceFolder: folder }));
     const state = await api.getState();
     setLibrary(state.library);
@@ -105,10 +102,27 @@ export default function useLibrary() {
     setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, position } : d)));
   }, []);
 
+  const toggleFavorite = useCallback(async (docId) => {
+    const result = await api.toggleFavorite(docId);
+    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, favorite: result } : d)));
+  }, []);
+
+  const archiveDoc = useCallback(async (docId) => {
+    await api.archiveDoc(docId);
+    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: true, archivedAt: Date.now() } : d)));
+    showToast("Document archived");
+  }, [showToast]);
+
+  const unarchiveDoc = useCallback(async (docId) => {
+    await api.unarchiveDoc(docId);
+    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: false, archivedAt: undefined } : d)));
+  }, []);
+
   return {
     library, setLibrary, settings, setSettings, loaded, platform,
     loadingContent, toast,
     addDoc, deleteDoc, resetProgress, selectFolder, switchFolder,
-    loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress, showToast,
+    loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
+    toggleFavorite, archiveDoc, unarchiveDoc, showToast,
   };
 }
