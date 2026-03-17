@@ -1,0 +1,51 @@
+{
+  "name": "blurby",
+  "version": "1.0.0",
+  "description": "RSVP Speed Reading App with local folder sync",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "vite build",
+    "dev": "concurrently \"vite --port 5173\" \"wait-on http://localhost:5173 && electron .\"",
+    "package:win": "electron-builder --win",
+    "package:mac": "electron-builder --mac",
+    "package:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.blurby.app",
+    "productName": "Blurby",
+    "files": [
+      "main.js",
+      "preload.js",
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    }
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
+    "vite": "^6.1.0",
+    "wait-on": "^8.0.3"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
