@@ -17,7 +17,7 @@ export default function App() {
 
   const {
     library, settings, loaded, platform, loadingContent,
-    addDoc, deleteDoc, resetProgress, selectFolder, loadDocContent, updateProgress,
+    addDoc, deleteDoc, resetProgress, selectFolder, loadDocContent, addDocFromUrl, updateProgress,
   } = useLibrary();
 
   const reader = useReader(wpm, setWpm);
@@ -99,6 +99,7 @@ export default function App() {
         loadingContent={loadingContent}
         onOpenDoc={openDoc}
         onAddDoc={addDoc}
+        onAddDocFromUrl={addDocFromUrl}
         onDeleteDoc={deleteDoc}
         onResetProgress={resetProgress}
         onSelectFolder={selectFolder}

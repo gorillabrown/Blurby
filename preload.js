@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
 
+  // URL ingestion
+  addDocFromUrl: (url) => ipcRenderer.invoke("add-doc-from-url", url),
+
   // Error logging
   logError: (message) => ipcRenderer.invoke("log-error", message),
 

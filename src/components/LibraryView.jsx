@@ -6,10 +6,13 @@ import DocCard from "./DocCard";
 
 export default function LibraryView({
   library, settings, wpm, isMac, folderName, loadingContent,
-  onOpenDoc, onAddDoc, onDeleteDoc, onResetProgress, onSelectFolder,
+  onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress, onSelectFolder,
   onSetWpm, wpmRef, onSetFolderName,
 }) {
   const [showAdd, setShowAdd] = useState(false);
+  const [showUrl, setShowUrl] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const [urlError, setUrlError] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newText, setNewText] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -31,6 +34,26 @@ export default function LibraryView({
     setNewText("");
     setShowAdd(false);
     setEditingId(null);
+  };
+
+  const handleAddFromUrl = async () => {
+    const url = urlInput.trim();
+    if (!url) return;
+    try {
+      new URL(url);
+    } catch {
+      setUrlError("Please enter a valid URL.");
+      return;
+    }
+    setUrlError("");
+    const result = await onAddDocFromUrl(url);
+    if (result?.error) {
+      setUrlError(result.error);
+    } else {
+      setUrlInput("");
+      setShowUrl(false);
+      setUrlError("");
+    }
   };
 
   const startEdit = (doc) => {
@@ -88,6 +111,13 @@ export default function LibraryView({
               </svg>
               folder
             </button>
+            <button onClick={() => { setShowUrl(true); setUrlInput(""); setUrlError(""); }} className="btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }}>
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              url
+            </button>
             <button onClick={() => { setShowAdd(true); setEditingId(null); setNewTitle(""); setNewText(""); }} className="btn-fill">+ add</button>
           </div>
         </div>
@@ -104,6 +134,30 @@ export default function LibraryView({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="library-search"
             />
+          </div>
+        )}
+
+        {/* URL input panel */}
+        {showUrl && (
+          <div className="add-edit-panel">
+            <div className="url-input-row">
+              <input
+                autoFocus
+                placeholder="Paste article URL..."
+                value={urlInput}
+                onChange={(e) => { setUrlInput(e.target.value); setUrlError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handleAddFromUrl()}
+                className="library-search"
+              />
+              <button
+                onClick={handleAddFromUrl}
+                disabled={!urlInput.trim() || loadingContent}
+                className="btn-fill"
+                style={{ opacity: urlInput.trim() && !loadingContent ? 1 : 0.3, whiteSpace: "nowrap" }}
+              >{loadingContent ? "fetching..." : "fetch"}</button>
+              <button onClick={() => { setShowUrl(false); setUrlError(""); }} className="btn">cancel</button>
+            </div>
+            {urlError && <div className="url-error">{urlError}</div>}
           </div>
         )}
 

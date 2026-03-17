@@ -521,6 +521,22 @@ button, input, textarea, a, [role="button"] {
   color: var(--text-dimmer);
 }
 
+/* ── URL Input ────────────────────────────────────────────────────────────── */
+.url-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.url-input-row .library-search {
+  flex: 1;
+}
+.url-error {
+  margin-top: 8px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--danger);
+}
+
 /* ── Loading Spinner ──────────────────────────────────────────────────────── */
 .loading-screen {
   height: 100vh;

@@ -20,6 +20,7 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
           <div className="doc-card-header">
             <span className="doc-card-title">{doc.title}</span>
             {doc.source === "folder" && <Badge color="#c4a882">file</Badge>}
+            {doc.source === "url" && <Badge color="#6b9fd4">url</Badge>}
             {isComplete && <Badge color="var(--success)">done</Badge>}
           </div>
           <div className="doc-card-meta">
@@ -32,7 +33,7 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
 
         <div className="doc-card-actions" onClick={(e) => e.stopPropagation()}>
           {pos > 0 && <IconBtn onClick={() => onReset(doc.id)} title="Reset" icon="reset" />}
-          {doc.source !== "folder" && <IconBtn onClick={() => onEdit(doc)} title="Edit" icon="edit" />}
+          {doc.source !== "folder" && doc.source !== "url" && <IconBtn onClick={() => onEdit(doc)} title="Edit" icon="edit" />}
           <IconBtn onClick={() => onConfirmDelete(doc.id)} title="Delete" icon="delete" danger />
         </div>
       </div>

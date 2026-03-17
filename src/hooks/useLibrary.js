@@ -64,6 +64,18 @@ export default function useLibrary() {
     }
   }, []);
 
+  const addDocFromUrl = useCallback(async (url) => {
+    setLoadingContent(true);
+    try {
+      const result = await api.addDocFromUrl(url);
+      if (result.error) return { error: result.error };
+      setLibrary((prev) => [result.doc, ...prev]);
+      return { doc: result.doc };
+    } finally {
+      setLoadingContent(false);
+    }
+  }, []);
+
   const updateProgress = useCallback((docId, position) => {
     setLibrary((prev) =>
       prev.map((d) => (d.id === docId ? { ...d, position } : d))
@@ -83,6 +95,7 @@ export default function useLibrary() {
     resetProgress,
     selectFolder,
     loadDocContent,
+    addDocFromUrl,
     updateProgress,
   };
 }

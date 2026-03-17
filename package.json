@@ -58,7 +58,9 @@
     "wait-on": "^8.0.3"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
     "chokidar": "^4.0.3",
+    "jsdom": "^29.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

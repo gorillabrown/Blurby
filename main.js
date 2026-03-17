@@ -4,6 +4,9 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 const chokidar = require("chokidar");
 
+const { Readability } = require("@mozilla/readability");
+const { JSDOM } = require("jsdom");
+
 const isDev = !app.isPackaged;
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst"];
 const CURRENT_SETTINGS_SCHEMA = 1;
@@ -403,6 +406,46 @@ function registerIPC() {
       return await readFileContentAsync(doc.filepath);
     }
     return null;
+  });
+
+  // Add document from URL — fetch page and extract article text
+  ipcMain.handle("add-doc-from-url", async (_, url) => {
+    try {
+      const response = await fetch(url, {
+        headers: { "User-Agent": "Blurby/1.0 (RSVP Reader)" },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!response.ok) {
+        return { error: `Failed to fetch: HTTP ${response.status}` };
+      }
+      const html = await response.text();
+      const dom = new JSDOM(html, { url });
+      const reader = new Readability(dom.window.document);
+      const article = reader.parse();
+      if (!article || !article.textContent?.trim()) {
+        return { error: "Could not extract readable content from this page." };
+      }
+
+      const content = article.textContent.trim();
+      const wordCount = content.split(/\s+/).filter(Boolean).length;
+      const title = article.title || new URL(url).hostname;
+
+      const doc = {
+        id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
+        title,
+        content,
+        wordCount,
+        sourceUrl: url,
+        position: 0,
+        created: Date.now(),
+        source: "url",
+      };
+      getLibrary().unshift(doc);
+      saveLibrary();
+      return { doc };
+    } catch (err) {
+      return { error: err.message || "Failed to fetch URL." };
+    }
   });
 
   // Error logging from renderer
