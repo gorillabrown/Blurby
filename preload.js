@@ -20,6 +20,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateDocProgress: (docId, position) => ipcRenderer.invoke("update-doc-progress", docId, position),
   reloadFile: (docId) => ipcRenderer.invoke("reload-file", docId),
 
+  // Lazy-load content
+  loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
+
+  // Error logging
+  logError: (message) => ipcRenderer.invoke("log-error", message),
+
   // Events from main
   onLibraryUpdated: (callback) => {
     const handler = (_event, library) => callback(library);
