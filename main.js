@@ -8,8 +8,8 @@ const { Readability } = require("@mozilla/readability");
 const { JSDOM } = require("jsdom");
 
 const isDev = !app.isPackaged;
-const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst"];
-const CURRENT_SETTINGS_SCHEMA = 1;
+const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
+const CURRENT_SETTINGS_SCHEMA = 2;
 const CURRENT_LIBRARY_SCHEMA = 1;
 
 // ── Paths ──────────────────────────────────────────────────────────────────────
@@ -18,18 +18,10 @@ function getDataPath() {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
 }
-
-function getSettingsPath() {
-  return path.join(getDataPath(), "settings.json");
-}
-
-function getLibraryPath() {
-  return path.join(getDataPath(), "library.json");
-}
-
-function getErrorLogPath() {
-  return path.join(getDataPath(), "error.log");
-}
+function getSettingsPath() { return path.join(getDataPath(), "settings.json"); }
+function getLibraryPath() { return path.join(getDataPath(), "library.json"); }
+function getErrorLogPath() { return path.join(getDataPath(), "error.log"); }
+function getHistoryPath() { return path.join(getDataPath(), "history.json"); }
 
 // ── Persistent JSON helpers ────────────────────────────────────────────────────
 function readJSON(filepath, fallback) {
@@ -38,31 +30,35 @@ function readJSON(filepath, fallback) {
   } catch {}
   return fallback;
 }
-
 function writeJSON(filepath, data) {
   fs.writeFileSync(filepath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 // ── Migration framework ────────────────────────────────────────────────────────
 const settingsMigrations = [
-  // v0 → v1: Add schemaVersion, ensure folderName and recentFolders exist
+  // v0 → v1
   (data) => {
     if (!data.folderName) data.folderName = "My reading list";
     if (!data.recentFolders) data.recentFolders = [];
     data.schemaVersion = 1;
     return data;
   },
+  // v1 → v2: Add theme setting
+  (data) => {
+    if (!data.theme) data.theme = "dark";
+    data.schemaVersion = 2;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
-  // v0 → v1: Add schemaVersion, add wordCount to all docs, remove content from folder-sourced docs
+  // v0 → v1
   (data) => {
     const docs = Array.isArray(data) ? data : (data.docs || []);
     for (const doc of docs) {
       if (!doc.wordCount && doc.content) {
         doc.wordCount = (doc.content || "").split(/\s+/).filter(Boolean).length;
       }
-      // Remove stored content for folder-sourced docs (will be loaded on demand)
       if (doc.source === "folder" && doc.filepath) {
         delete doc.content;
       }
@@ -73,7 +69,6 @@ const libraryMigrations = [
 
 function runMigrations(data, migrations, currentVersion) {
   let version = data?.schemaVersion || 0;
-  // Normalize: if data is a raw array (old library format), wrap it
   let migrated = data;
   while (version < currentVersion) {
     const migrateFn = migrations[version];
@@ -85,70 +80,99 @@ function runMigrations(data, migrations, currentVersion) {
 }
 
 function backupFile(filepath) {
-  try {
-    if (fs.existsSync(filepath)) {
-      fs.copyFileSync(filepath, filepath + ".bak");
-    }
-  } catch {}
+  try { if (fs.existsSync(filepath)) fs.copyFileSync(filepath, filepath + ".bak"); } catch {}
 }
 
 // ── State ──────────────────────────────────────────────────────────────────────
 let mainWindow = null;
+let readerWindows = new Map(); // docId → BrowserWindow for multi-window
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [] };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark" };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
+let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 
 function loadState() {
-  // Load and migrate settings
   const rawSettings = readJSON(getSettingsPath(), settings);
-  if ((rawSettings.schemaVersion || 0) < CURRENT_SETTINGS_SCHEMA) {
-    backupFile(getSettingsPath());
-  }
+  if ((rawSettings.schemaVersion || 0) < CURRENT_SETTINGS_SCHEMA) backupFile(getSettingsPath());
   settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
   saveSettings();
 
-  // Load and migrate library
   const rawLibrary = readJSON(getLibraryPath(), []);
-  if ((rawLibrary?.schemaVersion || 0) < CURRENT_LIBRARY_SCHEMA) {
-    backupFile(getLibraryPath());
-  }
+  if ((rawLibrary?.schemaVersion || 0) < CURRENT_LIBRARY_SCHEMA) backupFile(getLibraryPath());
   libraryData = runMigrations(rawLibrary, libraryMigrations, CURRENT_LIBRARY_SCHEMA);
   saveLibrary();
+
+  history = readJSON(getHistoryPath(), history);
 }
 
-function getLibrary() {
-  return libraryData.docs;
-}
+function getLibrary() { return libraryData.docs; }
+function setLibrary(docs) { libraryData.docs = docs; }
+function saveSettings() { writeJSON(getSettingsPath(), settings); }
+function saveLibrary() { writeJSON(getLibraryPath(), libraryData); }
+function saveHistory() { writeJSON(getHistoryPath(), history); }
 
-function setLibrary(docs) {
-  libraryData.docs = docs;
-}
-
-function saveSettings() {
-  writeJSON(getSettingsPath(), settings);
-}
-
-function saveLibrary() {
-  writeJSON(getLibraryPath(), libraryData);
-}
-
-// ── Async file reading ─────────────────────────────────────────────────────────
+// ── File content extraction ────────────────────────────────────────────────────
 async function readFileContentAsync(filepath) {
+  try { return await fsPromises.readFile(filepath, "utf-8"); } catch { return null; }
+}
+
+async function extractContent(filepath) {
+  const ext = path.extname(filepath).toLowerCase();
   try {
-    return await fsPromises.readFile(filepath, "utf-8");
+    if (ext === ".pdf") {
+      const pdfParse = require("pdf-parse");
+      const buffer = await fsPromises.readFile(filepath);
+      const data = await pdfParse(buffer);
+      return data.text || null;
+    }
+    if (ext === ".epub") {
+      // epub files are zip-based — use epubjs for extraction
+      const EPub = require("epubjs");
+      const book = EPub.default ? EPub.default(filepath) : EPub(filepath);
+      await book.ready;
+      const spine = book.spine;
+      const texts = [];
+      for (const section of spine.items || spine) {
+        try {
+          const contents = await section.load(book.load.bind(book));
+          if (contents && contents.textContent) {
+            texts.push(contents.textContent.trim());
+          }
+        } catch {}
+      }
+      book.destroy();
+      return texts.join("\n\n") || null;
+    }
+    if (ext === ".html" || ext === ".htm") {
+      const html = await fsPromises.readFile(filepath, "utf-8");
+      const cheerio = require("cheerio");
+      const $ = cheerio.load(html);
+      $("script, style, nav, footer, header, aside").remove();
+      return $("body").text().trim() || $.text().trim() || null;
+    }
+    // Plain text formats
+    return await readFileContentAsync(filepath);
   } catch {
-    return null;
+    return await readFileContentAsync(filepath);
   }
 }
 
+// ── Symlink-safe path validation ───────────────────────────────────────────────
+async function isPathWithinFolder(filepath, folderPath) {
+  try {
+    const realFile = await fsPromises.realpath(filepath);
+    const realFolder = await fsPromises.realpath(folderPath);
+    return realFile.startsWith(realFolder + path.sep) || realFile === realFolder;
+  } catch {
+    return false;
+  }
+}
+
+// ── Folder scanning ────────────────────────────────────────────────────────────
 async function scanFolderAsync(folderPath) {
   if (!folderPath) return [];
-  try {
-    await fsPromises.access(folderPath);
-  } catch {
-    return [];
-  }
+  try { await fsPromises.access(folderPath); } catch { return []; }
 
   const files = [];
   try {
@@ -156,6 +180,8 @@ async function scanFolderAsync(folderPath) {
     for (const entry of entries) {
       if (entry.isFile() && SUPPORTED_EXT.includes(path.extname(entry.name).toLowerCase())) {
         const fullPath = path.join(folderPath, entry.name);
+        // Symlink traversal protection
+        if (!await isPathWithinFolder(fullPath, folderPath)) continue;
         const stat = await fsPromises.stat(fullPath);
         files.push({
           filename: entry.name,
@@ -180,37 +206,32 @@ async function syncLibraryWithFolder() {
   for (const file of files) {
     const prev = existing.get(file.filepath);
     if (prev) {
-      // Keep existing progress, update metadata
       synced.push({ ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
     } else {
-      // For new files, compute word count but don't store content
-      const content = await readFileContentAsync(file.filepath);
+      const content = await extractContent(file.filepath);
       if (content) {
         const wordCount = content.split(/\s+/).filter(Boolean).length;
         synced.push({
           id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
           title: path.basename(file.filename, file.ext),
-          filepath: file.filepath,
-          filename: file.filename,
-          ext: file.ext,
-          size: file.size,
-          modified: file.modified,
-          wordCount,
-          position: 0,
-          created: Date.now(),
-          source: "folder",
+          filepath: file.filepath, filename: file.filename,
+          ext: file.ext, size: file.size, modified: file.modified,
+          wordCount, position: 0, created: Date.now(), source: "folder",
         });
       }
     }
   }
 
-  // Keep manually added docs
   for (const doc of docs) {
     if (doc.source !== "folder") synced.push(doc);
   }
 
   setLibrary(synced);
   saveLibrary();
+  broadcastLibrary();
+}
+
+function broadcastLibrary() {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("library-updated", getLibrary());
   }
@@ -222,33 +243,28 @@ function startWatcher() {
   if (!settings.sourceFolder) return;
 
   watcher = chokidar.watch(settings.sourceFolder, {
-    ignoreInitial: true,
-    depth: 0,
+    ignoreInitial: true, depth: 0,
     awaitWriteFinish: { stabilityThreshold: 500 },
   });
 
-  watcher.on("add", (filepath) => {
-    if (SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) {
-      syncLibraryWithFolder();
-    }
-  });
-
-  watcher.on("unlink", () => {
+  watcher.on("add", async (filepath) => {
+    if (!SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) return;
+    if (!await isPathWithinFolder(filepath, settings.sourceFolder)) return;
     syncLibraryWithFolder();
   });
 
+  watcher.on("unlink", () => syncLibraryWithFolder());
+
   watcher.on("change", async (filepath) => {
-    if (SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) {
-      const doc = getLibrary().find((d) => d.filepath === filepath);
-      if (doc) {
-        const content = await readFileContentAsync(filepath);
-        if (content) {
-          doc.wordCount = content.split(/\s+/).filter(Boolean).length;
-          saveLibrary();
-          if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.webContents.send("library-updated", getLibrary());
-          }
-        }
+    if (!SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) return;
+    if (!await isPathWithinFolder(filepath, settings.sourceFolder)) return;
+    const doc = getLibrary().find((d) => d.filepath === filepath);
+    if (doc) {
+      const content = await extractContent(filepath);
+      if (content) {
+        doc.wordCount = content.split(/\s+/).filter(Boolean).length;
+        saveLibrary();
+        broadcastLibrary();
       }
     }
   });
@@ -257,18 +273,14 @@ function startWatcher() {
 // ── Window ─────────────────────────────────────────────────────────────────────
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 720,
-    minWidth: 600,
-    minHeight: 500,
+    width: 1000, height: 720, minWidth: 600, minHeight: 500,
     title: "Blurby",
-    backgroundColor: nativeTheme.shouldUseDarkColors ? "#1a1a1a" : "#ffffff",
+    backgroundColor: settings.theme === "light" ? "#f5f3ef" : "#1a1a1a",
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 16, y: 16 },
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true,
-      nodeIntegration: false,
+      contextIsolation: true, nodeIntegration: false,
     },
     show: false,
   });
@@ -286,27 +298,87 @@ function createWindow() {
 
 // ── Tray ───────────────────────────────────────────────────────────────────────
 function createTray() {
-  try {
-    tray = new Tray(path.join(__dirname, "assets", "tray-icon.png"));
-  } catch {
-    return;
-  }
-
+  try { tray = new Tray(path.join(__dirname, "assets", "tray-icon.png")); } catch { return; }
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open Blurby", click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
     { type: "separator" },
     { label: "Quit", click: () => app.quit() },
   ]);
-
   tray.setToolTip("Blurby");
   tray.setContextMenu(contextMenu);
   tray.on("click", () => { if (mainWindow) mainWindow.show(); else createWindow(); });
 }
 
+// ── Auto-updater ───────────────────────────────────────────────────────────────
+function setupAutoUpdater() {
+  try {
+    const { autoUpdater } = require("electron-updater");
+    autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
+
+    autoUpdater.on("update-available", (info) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("update-available", info.version);
+      }
+    });
+
+    autoUpdater.on("update-downloaded", (info) => {
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("update-downloaded", info.version);
+      }
+    });
+
+    // Check after 5s delay to not block startup
+    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch {} }, 5000);
+  } catch {}
+}
+
+// ── Reading statistics ─────────────────────────────────────────────────────────
+function recordReadingSession(docTitle, wordsRead, durationMs, wpm) {
+  const today = new Date().toISOString().slice(0, 10);
+  history.sessions.push({ date: today, docTitle, wordsRead, durationMs, wpm });
+  history.totalWordsRead += wordsRead;
+  history.totalReadingTimeMs += durationMs;
+  // Keep only last 1000 sessions
+  if (history.sessions.length > 1000) history.sessions = history.sessions.slice(-1000);
+  saveHistory();
+}
+
+function getStats() {
+  const today = new Date().toISOString().slice(0, 10);
+  const dates = [...new Set(history.sessions.map((s) => s.date))].sort();
+
+  // Calculate streak
+  let streak = 0;
+  if (dates.length > 0) {
+    const d = new Date(today);
+    // Check if today or yesterday has a session
+    const lastDate = dates[dates.length - 1];
+    const diffDays = Math.floor((d - new Date(lastDate)) / 86400000);
+    if (diffDays <= 1) {
+      streak = 1;
+      for (let i = dates.length - 2; i >= 0; i--) {
+        const prev = new Date(dates[i + 1]);
+        const curr = new Date(dates[i]);
+        const gap = Math.floor((prev - curr) / 86400000);
+        if (gap <= 1) streak++;
+        else break;
+      }
+    }
+  }
+
+  return {
+    totalWordsRead: history.totalWordsRead,
+    totalReadingTimeMs: history.totalReadingTimeMs,
+    docsCompleted: history.docsCompleted || 0,
+    sessions: history.sessions.length,
+    streak,
+  };
+}
+
 // ── IPC Handlers ───────────────────────────────────────────────────────────────
 function registerIPC() {
   ipcMain.handle("get-state", () => ({ settings, library: getLibrary() }));
-
   ipcMain.handle("get-platform", () => process.platform);
 
   ipcMain.handle("select-folder", async () => {
@@ -317,7 +389,6 @@ function registerIPC() {
     if (result.canceled || !result.filePaths.length) return null;
     const folder = result.filePaths[0];
     settings.sourceFolder = folder;
-    // Track recent folders
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, 5);
     saveSettings();
     await syncLibraryWithFolder();
@@ -325,34 +396,33 @@ function registerIPC() {
     return folder;
   });
 
+  ipcMain.handle("switch-folder", async (_, folder) => {
+    try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
+    settings.sourceFolder = folder;
+    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, 5);
+    saveSettings();
+    await syncLibraryWithFolder();
+    startWatcher();
+    return { folder };
+  });
+
   ipcMain.handle("save-settings", (_, newSettings) => {
     settings = { ...settings, ...newSettings };
     saveSettings();
   });
 
-  ipcMain.handle("save-library", (_, newDocs) => {
-    setLibrary(newDocs);
-    saveLibrary();
-  });
+  ipcMain.handle("save-library", (_, newDocs) => { setLibrary(newDocs); saveLibrary(); });
 
   ipcMain.handle("update-doc-progress", (_, docId, position) => {
     const doc = getLibrary().find((d) => d.id === docId);
-    if (doc) {
-      doc.position = position;
-      saveLibrary();
-    }
+    if (doc) { doc.position = position; saveLibrary(); }
   });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
     const wordCount = (content || "").split(/\s+/).filter(Boolean).length;
     const doc = {
       id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
-      title,
-      content,
-      wordCount,
-      position: 0,
-      created: Date.now(),
-      source: "manual",
+      title, content, wordCount, position: 0, created: Date.now(), source: "manual",
     };
     getLibrary().unshift(doc);
     saveLibrary();
@@ -376,16 +446,13 @@ function registerIPC() {
 
   ipcMain.handle("reset-progress", (_, docId) => {
     const doc = getLibrary().find((d) => d.id === docId);
-    if (doc) {
-      doc.position = 0;
-      saveLibrary();
-    }
+    if (doc) { doc.position = 0; saveLibrary(); }
   });
 
   ipcMain.handle("reload-file", async (_, docId) => {
     const doc = getLibrary().find((d) => d.id === docId);
     if (doc && doc.filepath) {
-      const content = await readFileContentAsync(doc.filepath);
+      const content = await extractContent(doc.filepath);
       if (content) {
         doc.wordCount = content.split(/\s+/).filter(Boolean).length;
         saveLibrary();
@@ -395,50 +462,34 @@ function registerIPC() {
     return null;
   });
 
-  // Lazy-load document content on demand
   ipcMain.handle("load-doc-content", async (_, docId) => {
     const doc = getLibrary().find((d) => d.id === docId);
     if (!doc) return null;
-    // Manual docs have content stored inline
     if (doc.content) return doc.content;
-    // Folder-sourced docs: read from disk
-    if (doc.filepath) {
-      return await readFileContentAsync(doc.filepath);
-    }
+    if (doc.filepath) return await extractContent(doc.filepath);
     return null;
   });
 
-  // Add document from URL — fetch page and extract article text
   ipcMain.handle("add-doc-from-url", async (_, url) => {
     try {
       const response = await fetch(url, {
         headers: { "User-Agent": "Blurby/1.0 (RSVP Reader)" },
         signal: AbortSignal.timeout(15000),
       });
-      if (!response.ok) {
-        return { error: `Failed to fetch: HTTP ${response.status}` };
-      }
+      if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
       const html = await response.text();
       const dom = new JSDOM(html, { url });
       const reader = new Readability(dom.window.document);
       const article = reader.parse();
-      if (!article || !article.textContent?.trim()) {
-        return { error: "Could not extract readable content from this page." };
-      }
+      if (!article || !article.textContent?.trim()) return { error: "Could not extract readable content from this page." };
 
       const content = article.textContent.trim();
       const wordCount = content.split(/\s+/).filter(Boolean).length;
       const title = article.title || new URL(url).hostname;
-
       const doc = {
         id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
-        title,
-        content,
-        wordCount,
-        sourceUrl: url,
-        position: 0,
-        created: Date.now(),
-        source: "url",
+        title, content, wordCount, sourceUrl: url,
+        position: 0, created: Date.now(), source: "url",
       };
       getLibrary().unshift(doc);
       saveLibrary();
@@ -448,12 +499,118 @@ function registerIPC() {
     }
   });
 
-  // Error logging from renderer
+  // Drag-and-drop: import files from renderer
+  ipcMain.handle("import-dropped-files", async (_, filePaths) => {
+    const imported = [];
+    const rejected = [];
+    for (const fp of filePaths) {
+      const ext = path.extname(fp).toLowerCase();
+      if (!SUPPORTED_EXT.includes(ext)) {
+        rejected.push(path.basename(fp));
+        continue;
+      }
+      const content = await extractContent(fp);
+      if (!content) { rejected.push(path.basename(fp)); continue; }
+      const wordCount = content.split(/\s+/).filter(Boolean).length;
+      const doc = {
+        id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
+        title: path.basename(fp, ext),
+        content, wordCount, ext,
+        position: 0, created: Date.now(), source: "manual",
+      };
+      getLibrary().unshift(doc);
+      imported.push(doc.title);
+    }
+    if (imported.length > 0) saveLibrary();
+    return { imported, rejected };
+  });
+
+  // Reading statistics
+  ipcMain.handle("record-reading-session", (_, docTitle, wordsRead, durationMs, wpm) => {
+    recordReadingSession(docTitle, wordsRead, durationMs, wpm);
+  });
+
+  ipcMain.handle("mark-doc-completed", () => {
+    history.docsCompleted = (history.docsCompleted || 0) + 1;
+    saveHistory();
+  });
+
+  ipcMain.handle("get-stats", () => getStats());
+
+  // Import/export
+  ipcMain.handle("export-library", async () => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: "Export Blurby Library",
+      defaultPath: "blurby-backup.json",
+      filters: [{ name: "JSON", extensions: ["json"] }],
+    });
+    if (result.canceled) return null;
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      settings: { ...settings },
+      library: getLibrary(),
+      history,
+    };
+    await fsPromises.writeFile(result.filePath, JSON.stringify(exportData, null, 2), "utf-8");
+    return result.filePath;
+  });
+
+  ipcMain.handle("import-library", async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: "Import Blurby Library",
+      filters: [{ name: "JSON", extensions: ["json"] }],
+      properties: ["openFile"],
+    });
+    if (result.canceled || !result.filePaths.length) return null;
+    try {
+      const raw = await fsPromises.readFile(result.filePaths[0], "utf-8");
+      const data = JSON.parse(raw);
+      if (data.library && Array.isArray(data.library)) {
+        // Merge: add imported docs that don't exist by ID
+        const existingIds = new Set(getLibrary().map((d) => d.id));
+        let added = 0;
+        for (const doc of data.library) {
+          if (!existingIds.has(doc.id)) {
+            getLibrary().push(doc);
+            existingIds.add(doc.id);
+            added++;
+          }
+        }
+        saveLibrary();
+        broadcastLibrary();
+        return { added, total: data.library.length };
+      }
+      return { error: "Invalid backup file format." };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  ipcMain.handle("export-stats-csv", async () => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: "Export Reading Stats",
+      defaultPath: "blurby-stats.csv",
+      filters: [{ name: "CSV", extensions: ["csv"] }],
+    });
+    if (result.canceled) return null;
+    const header = "Date,Document,Words Read,Duration (min),WPM\n";
+    const rows = history.sessions.map((s) =>
+      `${s.date},"${(s.docTitle || "").replace(/"/g, '""')}",${s.wordsRead},${Math.round((s.durationMs || 0) / 60000)},${s.wpm}`
+    ).join("\n");
+    await fsPromises.writeFile(result.filePath, header + rows, "utf-8");
+    return result.filePath;
+  });
+
+  // Auto-updater control
+  ipcMain.handle("install-update", () => {
+    try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(); } catch {}
+  });
+
+  // Error logging
   ipcMain.handle("log-error", (_, message) => {
     try {
       const timestamp = new Date().toISOString();
-      const logLine = `[${timestamp}] ${message}\n`;
-      fs.appendFileSync(getErrorLogPath(), logLine, "utf-8");
+      fs.appendFileSync(getErrorLogPath(), `[${timestamp}] ${message}\n`, "utf-8");
     } catch {}
   });
 }
@@ -464,6 +621,7 @@ app.whenReady().then(async () => {
   registerIPC();
   createWindow();
   createTray();
+  if (!isDev) setupAutoUpdater();
 
   if (settings.sourceFolder) {
     await syncLibraryWithFolder();

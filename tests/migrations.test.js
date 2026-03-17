@@ -10,6 +10,11 @@ const settingsMigrations = [
     data.schemaVersion = 1;
     return data;
   },
+  (data) => {
+    if (!data.theme) data.theme = "dark";
+    data.schemaVersion = 2;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -64,8 +69,26 @@ describe("settings migrations", () => {
 
   it("handles missing/corrupt schemaVersion gracefully (treats as v0)", () => {
     const corrupt = { wpm: 200 };
-    const result = runMigrations(corrupt, settingsMigrations, 1);
-    expect(result.schemaVersion).toBe(1);
+    const result = runMigrations(corrupt, settingsMigrations, 2);
+    expect(result.schemaVersion).toBe(2);
+    expect(result.theme).toBe("dark");
+  });
+
+  it("migrates v1 to v2: adds theme", () => {
+    const v1 = { schemaVersion: 1, wpm: 300, folderName: "Test", recentFolders: [] };
+    const result = runMigrations(v1, settingsMigrations, 2);
+    expect(result.schemaVersion).toBe(2);
+    expect(result.theme).toBe("dark");
+    expect(result.wpm).toBe(300);
+  });
+
+  it("migrates v0 all the way to v2", () => {
+    const v0 = { wpm: 250 };
+    const result = runMigrations(v0, settingsMigrations, 2);
+    expect(result.schemaVersion).toBe(2);
+    expect(result.folderName).toBe("My reading list");
+    expect(result.recentFolders).toEqual([]);
+    expect(result.theme).toBe("dark");
   });
 });
 

@@ -1,9 +1,9 @@
 import { useRef, useEffect } from "react";
-import { tokenize, focusChar, formatTime } from "../utils/text";
+import { focusChar, formatTime } from "../utils/text";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, isMac, togglePlay, exitReader }) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, escPending, isMac, togglePlay, exitReader }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -22,19 +22,27 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, 
       className="reader-container"
       style={{ paddingTop: isMac ? 36 : 16 }}
       onClick={togglePlay}
+      role="application"
+      aria-label="RSVP speed reader"
+      aria-live="off"
     >
+      {/* Esc confirmation overlay */}
+      {escPending && (
+        <div className="esc-confirm" role="alert">
+          Press Esc again to exit
+        </div>
+      )}
+
       {/* Top bar */}
       <div
         className="reader-top-bar"
-        style={{
-          paddingTop: isMac ? 36 : 16,
-          opacity: playing ? 0.12 : 0.55,
-        }}
+        style={{ paddingTop: isMac ? 36 : 16, opacity: playing ? 0.12 : 0.55 }}
       >
         <div className="reader-top-left">
           <button
             onClick={(e) => { e.stopPropagation(); exitReader(); }}
             className="reader-esc-btn"
+            aria-label="Exit reader"
           >ESC</button>
           <span className="reader-doc-title">{activeDoc.title}</span>
         </div>
@@ -44,7 +52,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, 
       {/* Word display */}
       <div className="reader-word-area">
         <div className="reader-guide-line reader-guide-top" />
-        <div className="reader-word-display">
+        <div className="reader-word-display" aria-live="off" aria-atomic="true">
           <span className="reader-word-before">
             {before.split("").reverse().join("")}
           </span>
@@ -55,10 +63,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, playing, 
       </div>
 
       {/* Bottom bar */}
-      <div
-        className="reader-bottom-bar"
-        style={{ opacity: playing ? 0.08 : 0.45 }}
-      >
+      <div className="reader-bottom-bar" style={{ opacity: playing ? 0.08 : 0.45 }}>
         <ProgressBar current={wordIndex} total={words.length} />
         <div className="reader-bottom-info">
           <span>{pct}%</span>

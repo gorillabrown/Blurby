@@ -150,179 +150,179 @@ Without code signing, Windows SmartScreen will warn users that the app is from a
 
 ---
 
-## Phase 3 — Enhanced Features & Reliability (P3)
+## Phase 3 — Enhanced Features & Reliability (P3) ✅
 
 These are nice-to-haves that improve the experience and long-term reliability.
 
-### 3.1 Replace `setInterval` with `requestAnimationFrame`
+### 3.1 Replace `setInterval` with `requestAnimationFrame` ✅
 
 At high WPM (e.g., 1200 WPM = 50ms per word), `setInterval` drift causes inconsistent pacing.
 
-- [ ] Replace the `setInterval`-based playback engine in `startInterval()` with a `requestAnimationFrame` loop
-- [ ] Track elapsed time using `performance.now()` timestamps instead of relying on timer accuracy
-- [ ] Accumulate time delta each frame and advance words when the accumulated time exceeds the per-word interval (`60000 / wpm` ms)
-- [ ] Ensure pause/resume preserves the fractional time remainder so pacing stays smooth
-- [ ] Test at extreme WPM values (100 and 1200) to confirm consistent word pacing
-- [ ] Verify CPU usage is not significantly increased by the rAF loop (it should be similar since the loop only runs during playback)
+- [x] Replace the `setInterval`-based playback engine in `startInterval()` with a `requestAnimationFrame` loop
+- [x] Track elapsed time using `performance.now()` timestamps instead of relying on timer accuracy
+- [x] Accumulate time delta each frame and advance words when the accumulated time exceeds the per-word interval (`60000 / wpm` ms)
+- [x] Ensure pause/resume preserves the fractional time remainder so pacing stays smooth
+- [x] Test at extreme WPM values (100 and 1200) to confirm consistent word pacing
+- [x] Verify CPU usage is not significantly increased by the rAF loop (it should be similar since the loop only runs during playback)
 
-### 3.2 Drag-and-Drop File Support
+### 3.2 Drag-and-Drop File Support ✅
 
 Users expect to be able to drag files onto a document-based app.
 
-- [ ] Add a drop zone overlay to the Library view that appears when files are dragged over the window
-- [ ] Accept dropped `.txt`, `.md`, `.markdown`, `.text`, and `.rst` files (same as `SUPPORTED_EXT`)
-- [ ] Read dropped file content and add as manual documents (since they may not be in the watched folder)
-- [ ] Handle multiple files dropped at once
-- [ ] Show a brief toast/notification confirming how many files were imported
-- [ ] Reject unsupported file types with a clear message
-- [ ] Handle drag-and-drop of folders: scan the folder and offer to set it as the source folder
+- [x] Add a drop zone overlay to the Library view that appears when files are dragged over the window
+- [x] Accept dropped `.txt`, `.md`, `.markdown`, `.text`, and `.rst` files (same as `SUPPORTED_EXT`)
+- [x] Read dropped file content and add as manual documents (since they may not be in the watched folder)
+- [x] Handle multiple files dropped at once
+- [x] Show a brief toast/notification confirming how many files were imported
+- [x] Reject unsupported file types with a clear message
+- [x] Handle drag-and-drop of folders: scan the folder and offer to set it as the source folder
 
-### 3.3 Auto-Updater
+### 3.3 Auto-Updater ✅
 
 Once users install the app, there's no mechanism to push updates.
 
-- [ ] Install `electron-updater` as a dependency
-- [ ] Configure a release provider (GitHub Releases is the simplest for open-source projects):
-  - Add `"publish": { "provider": "github", "owner": "<owner>", "repo": "<repo>" }` to the build config
-- [ ] Add update checking logic in `main.js`:
-  - Check for updates on app startup (with a delay to not block launch)
-  - Notify the user when an update is available
-  - Download the update in the background
-  - Prompt the user to restart and install
-- [ ] Add UI in the renderer for update notifications (subtle banner or badge)
-- [ ] Ensure the auto-updater works with code-signed builds (if Phase 2.4 is completed)
-- [ ] Test the full update cycle: publish v1.0.1, confirm v1.0.0 detects and installs it
+- [x] Install `electron-updater` as a dependency
+- [x] Configure a release provider (GitHub Releases is the simplest for open-source projects):
+  - [x] Add `"publish": { "provider": "github", "owner": "<owner>", "repo": "<repo>" }` to the build config
+- [x] Add update checking logic in `main.js`:
+  - [x] Check for updates on app startup (with a delay to not block launch)
+  - [x] Notify the user when an update is available
+  - [x] Download the update in the background
+  - [x] Prompt the user to restart and install
+- [x] Add UI in the renderer for update notifications (subtle banner or badge)
+- [x] Ensure the auto-updater works with code-signed builds (if Phase 2.4 is completed)
+- [x] Test the full update cycle: publish v1.0.1, confirm v1.0.0 detects and installs it
 
-### 3.4 Symlink Path Traversal Protection
+### 3.4 Symlink Path Traversal Protection ✅
 
 The file watcher and folder scanner don't validate that resolved file paths stay within the selected folder. Symlinks could escape the intended directory.
 
-- [ ] In `scanFolder()`, resolve each file's real path using `fs.realpathSync()` (or async equivalent)
-- [ ] Verify the resolved path starts with the resolved source folder path
-- [ ] Skip files whose real path falls outside the source folder and log a warning
-- [ ] Apply the same validation in the Chokidar watcher event handlers
+- [x] In `scanFolder()`, resolve each file's real path using `fs.realpathSync()` (or async equivalent)
+- [x] Verify the resolved path starts with the resolved source folder path
+- [x] Skip files whose real path falls outside the source folder and log a warning
+- [x] Apply the same validation in the Chokidar watcher event handlers
 
-### 3.5 Reader Exit Confirmation
+### 3.5 Reader Exit Confirmation ✅
 
 Pressing Escape immediately exits the reader with no confirmation, which can be jarring during focused reading.
 
-- [ ] Add a brief confirmation prompt when pressing Escape during active playback (not when paused)
-- [ ] The confirmation should be minimal and non-disruptive — e.g., a small overlay: "Press Esc again to exit"
-- [ ] Auto-dismiss the confirmation after 2 seconds if no second press occurs
-- [ ] When paused, allow immediate exit without confirmation (progress is already saved)
+- [x] Add a brief confirmation prompt when pressing Escape during active playback (not when paused)
+- [x] The confirmation should be minimal and non-disruptive — e.g., a small overlay: "Press Esc again to exit"
+- [x] Auto-dismiss the confirmation after 2 seconds if no second press occurs
+- [x] When paused, allow immediate exit without confirmation (progress is already saved)
 
-### 3.6 Recent Folders List
+### 3.6 Recent Folders List ✅
 
 Users must re-select their folder via the system dialog every time they want to switch sources.
 
-- [ ] Store the last 5 selected folder paths in `settings.json`
-- [ ] Add a dropdown or menu to the "folder" button in the library header showing recent folders
-- [ ] Allow one-click switching to a previously used folder
-- [ ] Remove folders from the list if they no longer exist on disk
-- [ ] Highlight the currently active folder in the list
+- [x] Store the last 5 selected folder paths in `settings.json`
+- [x] Add a dropdown or menu to the "folder" button in the library header showing recent folders
+- [x] Allow one-click switching to a previously used folder
+- [x] Remove folders from the list if they no longer exist on disk
+- [x] Highlight the currently active folder in the list
 
-### 3.7 Reading Statistics & History
+### 3.7 Reading Statistics & History ✅
 
-- [ ] Track total words read, total reading time, and average WPM per session
-- [ ] Store reading history in a `history.json` file (date, document title, words read, duration, WPM)
-- [ ] Add a simple stats panel accessible from the library view showing:
-  - Total words read (all time)
-  - Total reading time
-  - Average WPM across sessions
-  - Documents completed count
-  - Reading streak (consecutive days)
-- [ ] Keep the stats display minimal and in-theme with the existing UI
+- [x] Track total words read, total reading time, and average WPM per session
+- [x] Store reading history in a `history.json` file (date, document title, words read, duration, WPM)
+- [x] Add a simple stats panel accessible from the library view showing:
+  - [x] Total words read (all time)
+  - [x] Total reading time
+  - [x] Average WPM across sessions
+  - [x] Documents completed count
+  - [x] Reading streak (consecutive days)
+- [x] Keep the stats display minimal and in-theme with the existing UI
 
 ---
 
-## Phase 4 — Future Enhancements (Backlog)
+## Phase 4 — Future Enhancements (Backlog) ✅
 
 Lower priority items to consider after the app is stable and distributed.
 
-### 4.1 Additional File Format Support
+### 4.1 Additional File Format Support ✅
 
 The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, `.text`, `.rst`). Expanding format support is essential for a general-purpose speed reading tool.
 
 **EPUB (.epub)** — Most common standard ebook format. Reflowable text, compatible with Kobo, Apple Books, Nook, and most e-readers.
 
-- [ ] Add EPUB parsing support using a library like `epub2` or `epubjs`
-- [ ] Extract chapter structure and allow chapter-by-chapter reading
-- [ ] Parse embedded HTML content within EPUB sections into plain text
-- [ ] Handle EPUB metadata (title, author, cover image) for library display
-- [ ] Support nested EPUB table of contents for navigation
+- [x] Add EPUB parsing support using a library like `epub2` or `epubjs`
+- [x] Extract chapter structure and allow chapter-by-chapter reading
+- [x] Parse embedded HTML content within EPUB sections into plain text
+- [x] Handle EPUB metadata (title, author, cover image) for library display
+- [x] Support nested EPUB table of contents for navigation
 
 **PDF (.pdf)** — Widely used for academic papers, textbooks, and complex-layout documents. Preserves original layout regardless of device.
 
-- [ ] Add PDF text extraction using `pdf-parse` or `pdfjs-dist`
-- [ ] Handle multi-page documents with page-level progress tracking
-- [ ] Extract text in correct reading order (handle multi-column layouts where possible)
-- [ ] Handle PDFs with no extractable text (scanned/image-only) — show a clear "unsupported: scanned PDF" message
+- [x] Add PDF text extraction using `pdf-parse` or `pdfjs-dist`
+- [x] Handle multi-page documents with page-level progress tracking
+- [x] Extract text in correct reading order (handle multi-column layouts where possible)
+- [x] Handle PDFs with no extractable text (scanned/image-only) — show a clear "unsupported: scanned PDF" message
 
 **AZW3/KFX** — Proprietary Amazon Kindle formats. AZW3 (KF8) is the current standard; KFX is the newest format with enhanced typesetting.
 
-- [ ] Research and integrate a library for parsing AZW3 format (e.g., convert via `calibre` CLI or use a Node parser if available)
-- [ ] Extract text content and chapter structure from AZW3 files
-- [ ] Add KFX support if a suitable parser exists, otherwise document the limitation and recommend converting to EPUB first
-- [ ] Handle DRM-protected files gracefully — detect and show a clear "DRM-protected file, cannot import" message
+- [x] Research and integrate a library for parsing AZW3 format (e.g., convert via `calibre` CLI or use a Node parser if available)
+- [x] Extract text content and chapter structure from AZW3 files
+- [x] Add KFX support if a suitable parser exists, otherwise document the limitation and recommend converting to EPUB first
+- [x] Handle DRM-protected files gracefully — detect and show a clear "DRM-protected file, cannot import" message
 
 **MOBI (.mobi)** — Older Amazon format, largely replaced by AZW3 but still found in many existing ebook libraries.
 
-- [ ] Add MOBI parsing support (MOBI is structurally similar to older PalmDOC/PRC formats)
-- [ ] Extract text content and basic metadata (title, author)
-- [ ] Handle the transition: if a library contains both `.mobi` and `.azw3` versions of the same book, avoid duplicates
+- [x] Add MOBI parsing support (MOBI is structurally similar to older PalmDOC/PRC formats)
+- [x] Extract text content and basic metadata (title, author)
+- [x] Handle the transition: if a library contains both `.mobi` and `.azw3` versions of the same book, avoid duplicates
 
 **HTML** — Web articles, saved pages, and locally stored web content.
 
-- [ ] Add HTML file import (`.html`, `.htm`)
-- [ ] Strip HTML tags and extract readable text content (use a library like `cheerio` or the built-in DOMParser approach)
-- [ ] Preserve paragraph structure for natural reading flow
-- [ ] Handle common web article patterns (skip nav bars, footers, ads if identifiable)
-- [ ] Support both local `.html` files in the watched folder and manual paste of HTML content
+- [x] Add HTML file import (`.html`, `.htm`)
+- [x] Strip HTML tags and extract readable text content (use a library like `cheerio` or the built-in DOMParser approach)
+- [x] Preserve paragraph structure for natural reading flow
+- [x] Handle common web article patterns (skip nav bars, footers, ads if identifiable)
+- [x] Support both local `.html` files in the watched folder and manual paste of HTML content
 
 **General format infrastructure:**
 
-- [ ] Update `SUPPORTED_EXT` in `main.js` to include all new format extensions
-- [ ] Update the folder scanner to recognize new file types
-- [ ] Add format-specific icons or badges in the library view (e.g., "epub", "pdf", "kindle")
-- [ ] Create a unified content extraction interface so each format parser returns the same structure: `{ text: string, chapters?: Array<{ title: string, text: string }>, metadata?: { author?: string, ... } }`
-- [ ] Add a format detection layer that routes files to the correct parser based on extension and file magic bytes
+- [x] Update `SUPPORTED_EXT` in `main.js` to include all new format extensions
+- [x] Update the folder scanner to recognize new file types
+- [x] Add format-specific icons or badges in the library view (e.g., "epub", "pdf", "kindle")
+- [x] Create a unified content extraction interface so each format parser returns the same structure: `{ text: string, chapters?: Array<{ title: string, text: string }>, metadata?: { author?: string, ... } }`
+- [x] Add a format detection layer that routes files to the correct parser based on extension and file magic bytes
 
-### 4.2 TypeScript Migration
+### 4.2 TypeScript Migration ✅
 
-- [ ] Add TypeScript and `@types/react` as dev dependencies
-- [ ] Create `tsconfig.json` with strict mode
-- [ ] Rename `.jsx` files to `.tsx` and `.js` files to `.ts`
-- [ ] Add type definitions for IPC messages, document schema, settings schema
-- [ ] Add type definitions for all component props
-- [ ] Fix all type errors and ensure the build passes cleanly
+- [x] Add TypeScript and `@types/react` as dev dependencies
+- [x] Create `tsconfig.json` with strict mode
+- [x] Rename `.jsx` files to `.tsx` and `.js` files to `.ts`
+- [x] Add type definitions for IPC messages, document schema, settings schema
+- [x] Add type definitions for all component props
+- [x] Fix all type errors and ensure the build passes cleanly
 
-### 4.3 Multi-Window Support
+### 4.3 Multi-Window Support ✅
 
-- [ ] Allow opening multiple reader windows simultaneously
-- [ ] Each reader window tracks its own document and playback state independently
-- [ ] Ensure progress saves correctly when multiple windows are open
+- [x] Allow opening multiple reader windows simultaneously
+- [x] Each reader window tracks its own document and playback state independently
+- [x] Ensure progress saves correctly when multiple windows are open
 
-### 4.4 Theming & Appearance
+### 4.4 Theming & Appearance ✅
 
-- [ ] Add a light theme option alongside the existing dark theme
-- [ ] Add a "system" theme option that follows the OS dark/light mode setting
-- [ ] Allow customizing the accent color
-- [ ] Allow customizing the reader font family and size
-- [ ] Persist theme preferences in settings
+- [x] Add a light theme option alongside the existing dark theme
+- [x] Add a "system" theme option that follows the OS dark/light mode setting
+- [x] Allow customizing the accent color
+- [x] Allow customizing the reader font family and size
+- [x] Persist theme preferences in settings
 
-### 4.5 Import/Export
+### 4.5 Import/Export ✅
 
-- [ ] Export reading progress and library metadata to a JSON backup file
-- [ ] Import from a previously exported backup
-- [ ] Export reading statistics to CSV
+- [x] Export reading progress and library metadata to a JSON backup file
+- [x] Import from a previously exported backup
+- [x] Export reading statistics to CSV
 
-### 4.6 Accessibility
+### 4.6 Accessibility ✅
 
-- [ ] Add ARIA labels to all interactive elements
-- [ ] Ensure keyboard navigation works throughout the library view (tab, enter, arrow keys)
-- [ ] Add screen reader announcements for reader state changes (play, pause, document complete)
-- [ ] Ensure sufficient color contrast ratios in both views
-- [ ] Support reduced motion preferences (disable animations when OS prefers-reduced-motion is set)
+- [x] Add ARIA labels to all interactive elements
+- [x] Ensure keyboard navigation works throughout the library view (tab, enter, arrow keys)
+- [x] Add screen reader announcements for reader state changes (play, pause, document complete)
+- [x] Ensure sufficient color contrast ratios in both views
+- [x] Support reduced motion preferences (disable animations when OS prefers-reduced-motion is set)
 
 ---
 

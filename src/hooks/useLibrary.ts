@@ -4,10 +4,11 @@ const api = window.electronAPI;
 
 export default function useLibrary() {
   const [library, setLibrary] = useState([]);
-  const [settings, setSettings] = useState({ wpm: 300, sourceFolder: null, folderName: "My reading list" });
+  const [settings, setSettings] = useState({ wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark" });
   const [loaded, setLoaded] = useState(false);
   const [platform, setPlatform] = useState("win32");
   const [loadingContent, setLoadingContent] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -18,17 +19,19 @@ export default function useLibrary() {
       setLibrary(state.library);
       setLoaded(true);
     })();
-
     const unsub = api.onLibraryUpdated((lib) => setLibrary(lib));
     return () => unsub();
+  }, []);
+
+  const showToast = useCallback((message, duration = 3000) => {
+    setToast(message);
+    setTimeout(() => setToast(null), duration);
   }, []);
 
   const addDoc = useCallback(async (title, content, editingId) => {
     if (editingId) {
       await api.updateDoc(editingId, title, content);
-      setLibrary((prev) =>
-        prev.map((d) => (d.id === editingId ? { ...d, title, content } : d))
-      );
+      setLibrary((prev) => prev.map((d) => (d.id === editingId ? { ...d, title, content } : d)));
     } else {
       const doc = await api.addManualDoc(title, content);
       setLibrary((prev) => [doc, ...prev]);
@@ -51,17 +54,25 @@ export default function useLibrary() {
       setSettings((prev) => ({ ...prev, sourceFolder: folder }));
       const state = await api.getState();
       setLibrary(state.library);
+      setSettings(state.settings);
     }
   }, []);
 
+  const switchFolder = useCallback(async (folder) => {
+    const result = await api.switchFolder(folder);
+    if (result.error) {
+      showToast(result.error);
+      return;
+    }
+    setSettings((prev) => ({ ...prev, sourceFolder: folder }));
+    const state = await api.getState();
+    setLibrary(state.library);
+    setSettings(state.settings);
+  }, [showToast]);
+
   const loadDocContent = useCallback(async (docId) => {
     setLoadingContent(true);
-    try {
-      const content = await api.loadDocContent(docId);
-      return content;
-    } finally {
-      setLoadingContent(false);
-    }
+    try { return await api.loadDocContent(docId); } finally { setLoadingContent(false); }
   }, []);
 
   const addDocFromUrl = useCallback(async (url) => {
@@ -71,31 +82,33 @@ export default function useLibrary() {
       if (result.error) return { error: result.error };
       setLibrary((prev) => [result.doc, ...prev]);
       return { doc: result.doc };
-    } finally {
-      setLoadingContent(false);
-    }
+    } finally { setLoadingContent(false); }
   }, []);
 
+  const importDroppedFiles = useCallback(async (filePaths) => {
+    setLoadingContent(true);
+    try {
+      const result = await api.importDroppedFiles(filePaths);
+      if (result.imported.length > 0) {
+        const state = await api.getState();
+        setLibrary(state.library);
+        showToast(`Imported ${result.imported.length} file${result.imported.length > 1 ? "s" : ""}`);
+      }
+      if (result.rejected.length > 0) {
+        showToast(`${result.rejected.length} unsupported file${result.rejected.length > 1 ? "s" : ""} skipped`);
+      }
+      return result;
+    } finally { setLoadingContent(false); }
+  }, [showToast]);
+
   const updateProgress = useCallback((docId, position) => {
-    setLibrary((prev) =>
-      prev.map((d) => (d.id === docId ? { ...d, position } : d))
-    );
+    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, position } : d)));
   }, []);
 
   return {
-    library,
-    setLibrary,
-    settings,
-    setSettings,
-    loaded,
-    platform,
-    loadingContent,
-    addDoc,
-    deleteDoc,
-    resetProgress,
-    selectFolder,
-    loadDocContent,
-    addDocFromUrl,
-    updateProgress,
+    library, setLibrary, settings, setSettings, loaded, platform,
+    loadingContent, toast,
+    addDoc, deleteDoc, resetProgress, selectFolder, switchFolder,
+    loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress, showToast,
   };
 }

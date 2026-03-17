@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Folder
   selectFolder: () => ipcRenderer.invoke("select-folder"),
+  switchFolder: (folder) => ipcRenderer.invoke("switch-folder", folder),
 
   // Settings
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
@@ -26,6 +27,23 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // URL ingestion
   addDocFromUrl: (url) => ipcRenderer.invoke("add-doc-from-url", url),
 
+  // Drag-and-drop
+  importDroppedFiles: (filePaths) => ipcRenderer.invoke("import-dropped-files", filePaths),
+
+  // Reading statistics
+  recordReadingSession: (docTitle, wordsRead, durationMs, wpm) =>
+    ipcRenderer.invoke("record-reading-session", docTitle, wordsRead, durationMs, wpm),
+  markDocCompleted: () => ipcRenderer.invoke("mark-doc-completed"),
+  getStats: () => ipcRenderer.invoke("get-stats"),
+
+  // Import/export
+  exportLibrary: () => ipcRenderer.invoke("export-library"),
+  importLibrary: () => ipcRenderer.invoke("import-library"),
+  exportStatsCsv: () => ipcRenderer.invoke("export-stats-csv"),
+
+  // Auto-updater
+  installUpdate: () => ipcRenderer.invoke("install-update"),
+
   // Error logging
   logError: (message) => ipcRenderer.invoke("log-error", message),
 
@@ -34,5 +52,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const handler = (_event, library) => callback(library);
     ipcRenderer.on("library-updated", handler);
     return () => ipcRenderer.removeListener("library-updated", handler);
+  },
+  onUpdateAvailable: (callback) => {
+    const handler = (_event, version) => callback(version);
+    ipcRenderer.on("update-available", handler);
+    return () => ipcRenderer.removeListener("update-available", handler);
+  },
+  onUpdateDownloaded: (callback) => {
+    const handler = (_event, version) => callback(version);
+    ipcRenderer.on("update-downloaded", handler);
+    return () => ipcRenderer.removeListener("update-downloaded", handler);
   },
 });
