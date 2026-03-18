@@ -128,6 +128,9 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         ref={scrollRef}
         onScroll={handleScroll}
         tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
+        }}
       >
         <div className="scroll-reader-text" style={{ fontSize: `${18 * scale}px` }}>
           {displayBlocks.map((block, i) => (

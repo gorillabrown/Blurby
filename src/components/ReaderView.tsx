@@ -93,6 +93,9 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
       className="reader-container"
       style={{ paddingTop: isMac ? 36 : 16 }}
       onClick={playing ? togglePlay : undefined}
+      onKeyDown={(e) => {
+        if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
+      }}
       role="application"
       aria-label="RSVP speed reader"
       aria-live="off"
