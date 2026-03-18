@@ -205,8 +205,10 @@ function AppInner() {
     sessionStartWordRef.current = doc.position || 0;
     if (mode === "scroll") {
       api.saveSettings({ readingMode: "flow" });
+      setSettings((prev) => ({ ...prev, readingMode: "flow" as const }));
     } else {
       api.saveSettings({ readingMode: "focus" });
+      setSettings((prev) => ({ ...prev, readingMode: "focus" as const }));
     }
     setView("reader");
   }, [loadDocContent, initReader]);
@@ -259,16 +261,18 @@ function AppInner() {
   }, [activeDoc, updateProgress]);
 
   const handleSwitchToScroll = useCallback(() => {
-    // Pause speed reader and switch to scroll mode
+    // Pause speed reader and switch to scroll/flow mode
     if (playing) {
       reader.togglePlay();
     }
     api.saveSettings({ readingMode: "flow" });
-  }, [playing, reader]);
+    setSettings((prev) => ({ ...prev, readingMode: "flow" as const }));
+  }, [playing, reader, setSettings]);
 
   const handleSwitchToFocus = useCallback(() => {
     api.saveSettings({ readingMode: "focus" });
-  }, []);
+    setSettings((prev) => ({ ...prev, readingMode: "focus" as const }));
+  }, [setSettings]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
