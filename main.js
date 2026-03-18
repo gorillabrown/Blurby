@@ -705,6 +705,20 @@ function fetchWithBrowser(url) {
 function extractArticleFromHtml(html, url) {
   const dom = new JSDOM(html, { url });
   const parsedDoc = dom.window.document;
+
+  // DEBUG: Log body structure
+  const body = parsedDoc.body;
+  console.log(`[extract] body exists: ${!!body}, body.innerHTML length: ${body?.innerHTML?.length || 0}`);
+  if (body) {
+    const children = Array.from(body.children).map((c) => `${c.tagName}${c.id ? "#" + c.id : ""}${c.className ? "." + String(c.className).split(" ").slice(0, 2).join(".") : ""}`);
+    console.log(`[extract] body children: ${children.join(", ")}`);
+    const bodyText = (body.textContent || "").trim();
+    console.log(`[extract] body.textContent length: ${bodyText.length}`);
+    if (bodyText.length > 0) {
+      console.log(`[extract] body text preview: ${bodyText.substring(0, 300)}`);
+    }
+  }
+
   // Remove paywall/ad elements
   parsedDoc.querySelectorAll([
     '[class*="paywall"]', '[class*="Paywall"]',
