@@ -324,24 +324,35 @@ async function scanFolderAsync(folderPath) {
   try { await fsPromises.access(folderPath); } catch { return []; }
 
   const files = [];
-  try {
-    const entries = await fsPromises.readdir(folderPath, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isFile() && SUPPORTED_EXT.includes(path.extname(entry.name).toLowerCase())) {
-        const fullPath = path.join(folderPath, entry.name);
-        // Symlink traversal protection
-        if (!await isPathWithinFolder(fullPath, folderPath)) continue;
-        const stat = await fsPromises.stat(fullPath);
-        files.push({
-          filename: entry.name,
-          filepath: fullPath,
-          ext: path.extname(entry.name).toLowerCase(),
-          size: stat.size,
-          modified: stat.mtimeMs,
-        });
+  const savedArticlesName = "Saved Articles";
+
+  async function walkDir(dir) {
+    try {
+      const entries = await fsPromises.readdir(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          // Skip Saved Articles subfolder (managed separately for URL-to-PDF exports)
+          if (entry.name === savedArticlesName && dir === folderPath) continue;
+          // Recurse into subdirectories
+          await walkDir(fullPath);
+        } else if (entry.isFile() && SUPPORTED_EXT.includes(path.extname(entry.name).toLowerCase())) {
+          // Symlink traversal protection
+          if (!await isPathWithinFolder(fullPath, folderPath)) continue;
+          const stat = await fsPromises.stat(fullPath);
+          files.push({
+            filename: entry.name,
+            filepath: fullPath,
+            ext: path.extname(entry.name).toLowerCase(),
+            size: stat.size,
+            modified: stat.mtimeMs,
+          });
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
+
+  await walkDir(folderPath);
   return files.sort((a, b) => a.filename.localeCompare(b.filename));
 }
 
@@ -540,8 +551,10 @@ function startWatcher() {
   if (watcher) watcher.close();
   if (!settings.sourceFolder) return;
 
+  const savedArticlesDir = path.join(settings.sourceFolder, "Saved Articles");
   watcher = chokidar.watch(settings.sourceFolder, {
-    ignoreInitial: true, depth: 0,
+    ignoreInitial: true,
+    ignored: [/(^|[\/\\])\../, savedArticlesDir],
     awaitWriteFinish: { stabilityThreshold: 500 },
   });
 
