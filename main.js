@@ -1314,7 +1314,7 @@ function registerIPC() {
     }
   });
 
-  // Drag-and-drop: import files from renderer
+  // Drag-and-drop: import files — copy to source folder if available, otherwise store as manual
   ipcMain.handle("import-dropped-files", async (_, filePaths) => {
     const imported = [];
     const rejected = [];
@@ -1324,19 +1324,65 @@ function registerIPC() {
         rejected.push(path.basename(fp));
         continue;
       }
-      const content = await extractContent(fp);
-      if (!content) { rejected.push(path.basename(fp)); continue; }
-      const wordCount = content.split(/\s+/).filter(Boolean).length;
-      const doc = {
-        id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
-        title: path.basename(fp, ext),
-        content, wordCount, ext,
-        position: 0, created: Date.now(), source: "manual",
-      };
-      getLibrary().unshift(doc);
-      imported.push(doc.title);
+
+      const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+
+      // If source folder is set, copy file there and add as folder-sourced
+      if (settings.sourceFolder) {
+        try {
+          const destPath = path.join(settings.sourceFolder, path.basename(fp));
+          // Don't overwrite if already exists
+          if (!require("fs").existsSync(destPath)) {
+            await fsPromises.copyFile(fp, destPath);
+          }
+          const content = await extractContent(destPath);
+          if (!content) { rejected.push(path.basename(fp)); continue; }
+          const wordCount = content.split(/\s+/).filter(Boolean).length;
+          const stat = await fsPromises.stat(destPath);
+
+          let author = null;
+          let coverPath = null;
+          let bookTitle = null;
+          if (ext === ".epub") {
+            const meta = await extractEpubMetadata(destPath);
+            author = meta.author;
+            bookTitle = meta.title;
+            coverPath = await extractEpubCover(destPath, docId);
+          }
+          if (!author) author = extractAuthorFromFilename(path.basename(fp));
+          if (!bookTitle) bookTitle = extractTitleFromFilename(path.basename(fp), author);
+
+          const doc = {
+            id: docId, title: bookTitle, filepath: destPath, filename: path.basename(destPath),
+            ext, size: stat.size, modified: stat.mtimeMs,
+            wordCount, position: 0, created: Date.now(), source: "folder",
+            author: author || null, coverPath: coverPath || null, lastReadAt: null,
+          };
+          getLibrary().unshift(doc);
+          imported.push(doc.title);
+        } catch (err) {
+          console.error("Failed to import dropped file:", err);
+          rejected.push(path.basename(fp));
+        }
+      } else {
+        // No source folder — store as manual doc with content inline
+        const content = await extractContent(fp);
+        if (!content) { rejected.push(path.basename(fp)); continue; }
+        const wordCount = content.split(/\s+/).filter(Boolean).length;
+        const doc = {
+          id: docId,
+          title: path.basename(fp, ext),
+          content, wordCount, ext,
+          position: 0, created: Date.now(), source: "manual",
+        };
+        getLibrary().unshift(doc);
+        imported.push(doc.title);
+      }
     }
-    if (imported.length > 0) saveLibrary();
+    if (imported.length > 0) {
+      saveLibrary();
+      broadcastLibrary();
+    }
     return { imported, rejected };
   });
 
