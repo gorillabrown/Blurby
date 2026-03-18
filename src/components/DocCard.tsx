@@ -27,8 +27,9 @@ function capitalizeFirst(s: string): string {
 }
 
 function formatTitle(s: string): string {
-  // Replace " - AuthorName" with " | AuthorName" for display
-  return s.replace(/\s+-\s+([A-Z][a-z]+([\s.][A-Z][a-z]*)*)\s*$/, " | $1");
+  return s
+    .replace(/_ /g, ": ")   // Restore "_ " → ": " (filesystem colon replacement)
+    .replace(/\s+-\s+([A-Z][a-z]+([\s.][A-Z][a-z]*)*)\s*$/, " | $1");
 }
 
 export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
