@@ -67,7 +67,7 @@ export default function LibraryView({
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchIndex, setSearchIndex] = useState(-1);
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
-  const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books" | "pdfs">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
 
@@ -84,9 +84,10 @@ export default function LibraryView({
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
   }, []);
 
-  const BOOK_EXTS = [".epub", ".pdf", ".mobi", ".azw3", ".kfx"];
+  const BOOK_EXTS = [".epub", ".mobi", ".azw3", ".kfx"];
   const isBook = (d: BlurbyDoc) => d.source === "folder" && d.ext && BOOK_EXTS.includes(d.ext);
-  const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual" || (d.source === "folder" && !isBook(d));
+  const isPdf = (d: BlurbyDoc) => d.source === "folder" && d.ext === ".pdf";
+  const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual" || (d.source === "folder" && !isBook(d) && !isPdf(d));
 
   // Filter and sort library
   const getFilteredAndSorted = () => {
@@ -97,6 +98,7 @@ export default function LibraryView({
     // Type filter
     if (typeFilter === "articles") docs = docs.filter(isArticle);
     else if (typeFilter === "books") docs = docs.filter(isBook);
+    else if (typeFilter === "pdfs") docs = docs.filter(isPdf);
     if (searchQuery) docs = docs.filter((d) => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
     docs = [...docs];
@@ -125,6 +127,7 @@ export default function LibraryView({
   const archivedCount = library.filter((d) => d.archived).length;
   const articleCount = activeLibrary.filter(isArticle).length;
   const bookCount = activeLibrary.filter(isBook).length;
+  const pdfCount = activeLibrary.filter(isPdf).length;
 
   // Live search results (limited to 8 for the dropdown)
   const searchResults = searchQuery
@@ -332,6 +335,12 @@ export default function LibraryView({
             role="tab"
             aria-selected={typeFilter === "books"}
           >books ({bookCount})</button>
+          <button
+            className={`library-tab${typeFilter === "pdfs" ? " library-tab-active" : ""}`}
+            onClick={() => setTypeFilter("pdfs")}
+            role="tab"
+            aria-selected={typeFilter === "pdfs"}
+          >PDFs ({pdfCount})</button>
         </div>
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
