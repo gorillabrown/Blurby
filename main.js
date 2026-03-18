@@ -71,7 +71,7 @@ async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate
 }
 
 const isDev = !app.isPackaged;
-const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
+const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf", ".mobi", ".azw3", ".azw"];
 const CURRENT_SETTINGS_SCHEMA = 5;
 const CURRENT_LIBRARY_SCHEMA = 3;
 
@@ -251,6 +251,249 @@ async function readFileContentAsync(filepath) {
   try { return await fsPromises.readFile(filepath, "utf-8"); } catch { return null; }
 }
 
+// ── MOBI/PDB Parser ────────────────────────────────────────────────────────
+function parseMobiContent(buffer) {
+  try {
+    if (buffer.length < 78) return null;
+    // PDB header: 78 bytes
+    const numRecords = buffer.readUInt16BE(76);
+    if (numRecords < 2) return null;
+
+    // Record offset table starts at byte 78, each entry is 8 bytes (4 offset + 4 attributes)
+    const recordOffsets = [];
+    for (let i = 0; i < numRecords; i++) {
+      const offset = buffer.readUInt32BE(78 + i * 8);
+      recordOffsets.push(offset);
+    }
+
+    // Record 0 contains the PalmDOC/MOBI header
+    const rec0Start = recordOffsets[0];
+    if (rec0Start + 16 > buffer.length) return null;
+
+    const compression = buffer.readUInt16BE(rec0Start);
+    const textLength = buffer.readUInt32BE(rec0Start + 4);
+    const textRecordCount = buffer.readUInt16BE(rec0Start + 8);
+
+    // Check for DRM encryption (offset 12 in PalmDOC header)
+    const encryption = buffer.readUInt16BE(rec0Start + 12);
+    if (encryption !== 0) {
+      console.log("MOBI file is DRM-encrypted, cannot extract text");
+      return null;
+    }
+
+    // Extract text records (records 1 through textRecordCount)
+    const textParts = [];
+    for (let i = 1; i <= textRecordCount && i < numRecords; i++) {
+      const start = recordOffsets[i];
+      const end = (i + 1 < numRecords) ? recordOffsets[i + 1] : buffer.length;
+      const recordData = buffer.slice(start, end);
+
+      if (compression === 1) {
+        // No compression
+        textParts.push(recordData.toString("utf-8"));
+      } else if (compression === 2) {
+        // PalmDOC LZ77 compression
+        textParts.push(palmDocDecompress(recordData));
+      } else if (compression === 17480) {
+        // HUFF/CDIC compression (older format) — not supported, try raw
+        textParts.push(recordData.toString("utf-8"));
+      } else {
+        textParts.push(recordData.toString("utf-8"));
+      }
+    }
+
+    const html = textParts.join("");
+    // Strip HTML tags to get plain text
+    const cheerio = require("cheerio");
+    const $ = cheerio.load(html);
+    $("script, style, head").remove();
+    let text = $("body").text() || $.text() || "";
+    // Clean up excessive whitespace
+    text = text.replace(/\r\n/g, "\n").replace(/ {2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+    return text || null;
+  } catch (err) {
+    console.error("MOBI parse error:", err.message);
+    return null;
+  }
+}
+
+function palmDocDecompress(data) {
+  const output = [];
+  let i = 0;
+  while (i < data.length) {
+    const byte = data[i++];
+    if (byte === 0) {
+      output.push(0);
+    } else if (byte >= 1 && byte <= 8) {
+      // Copy next 'byte' bytes literally
+      for (let j = 0; j < byte && i < data.length; j++) {
+        output.push(data[i++]);
+      }
+    } else if (byte >= 9 && byte <= 0x7f) {
+      // Literal byte
+      output.push(byte);
+    } else if (byte >= 0xc0) {
+      // Space + (byte XOR 0x80)
+      output.push(0x20); // space
+      output.push(byte ^ 0x80);
+    } else {
+      // byte 0x80-0xBF: LZ77 back-reference
+      if (i >= data.length) break;
+      const next = data[i++];
+      const distance = ((byte << 8) | next) >> 3 & 0x7ff;
+      const length = (next & 0x07) + 3;
+      for (let j = 0; j < length; j++) {
+        const pos = output.length - distance;
+        output.push(pos >= 0 ? output[pos] : 0);
+      }
+    }
+  }
+  return Buffer.from(output).toString("utf-8");
+}
+
+function parseMobiMetadata(buffer) {
+  try {
+    if (buffer.length < 78) return {};
+    const rec0Start = buffer.readUInt32BE(78);
+    // MOBI header starts at rec0 + 16 bytes into PalmDOC header
+    const mobiHeaderStart = rec0Start + 16;
+    if (mobiHeaderStart + 116 > buffer.length) return {};
+
+    // Check for MOBI magic ('MOBI' at offset 16 from record 0)
+    const magic = buffer.toString("ascii", mobiHeaderStart, mobiHeaderStart + 4);
+    if (magic !== "MOBI") return {};
+
+    const mobiHeaderLength = buffer.readUInt32BE(mobiHeaderStart + 4);
+    const encoding = buffer.readUInt32BE(mobiHeaderStart + 12); // 1252 or 65001 (UTF-8)
+    const exthFlag = buffer.readUInt32BE(mobiHeaderStart + 112);
+
+    const result = { encoding: encoding === 65001 ? "utf-8" : "cp1252" };
+
+    // EXTH header follows MOBI header if exthFlag & 0x40
+    if (exthFlag & 0x40) {
+      const exthStart = mobiHeaderStart + mobiHeaderLength;
+      if (exthStart + 12 > buffer.length) return result;
+      const exthMagic = buffer.toString("ascii", exthStart, exthStart + 4);
+      if (exthMagic !== "EXTH") return result;
+
+      const recordCount = buffer.readUInt32BE(exthStart + 8);
+      let offset = exthStart + 12;
+      for (let i = 0; i < recordCount && offset + 8 <= buffer.length; i++) {
+        const recType = buffer.readUInt32BE(offset);
+        const recLen = buffer.readUInt32BE(offset + 4);
+        if (recLen < 8 || offset + recLen > buffer.length) break;
+        const recData = buffer.slice(offset + 8, offset + recLen).toString("utf-8");
+        if (recType === 100) result.author = recData;        // Author
+        if (recType === 503) result.title = recData;          // Updated title
+        if (recType === 201) result.coverOffset = buffer.readUInt32BE(offset + 8); // Cover record index
+        offset += recLen;
+      }
+    }
+
+    // PDB title (first 32 bytes of file, null-terminated)
+    if (!result.title) {
+      const pdbTitle = buffer.toString("ascii", 0, 32).replace(/\0.*/, "").trim();
+      if (pdbTitle) result.title = pdbTitle;
+    }
+
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+function extractMobiCover(buffer, docId) {
+  try {
+    const rec0Start = buffer.readUInt32BE(78);
+    const mobiHeaderStart = rec0Start + 16;
+    if (mobiHeaderStart + 116 > buffer.length) return null;
+
+    const magic = buffer.toString("ascii", mobiHeaderStart, mobiHeaderStart + 4);
+    if (magic !== "MOBI") return null;
+
+    const mobiHeaderLength = buffer.readUInt32BE(mobiHeaderStart + 4);
+    const exthFlag = buffer.readUInt32BE(mobiHeaderStart + 112);
+    const firstImageRecord = buffer.readUInt32BE(mobiHeaderStart + 92); // first image record index
+
+    let coverRecordOffset = -1;
+
+    // Try EXTH cover offset first
+    if (exthFlag & 0x40) {
+      const exthStart = mobiHeaderStart + mobiHeaderLength;
+      if (exthStart + 12 <= buffer.length) {
+        const exthMagic = buffer.toString("ascii", exthStart, exthStart + 4);
+        if (exthMagic === "EXTH") {
+          const recordCount = buffer.readUInt32BE(exthStart + 8);
+          let offset = exthStart + 12;
+          for (let i = 0; i < recordCount && offset + 8 <= buffer.length; i++) {
+            const recType = buffer.readUInt32BE(offset);
+            const recLen = buffer.readUInt32BE(offset + 4);
+            if (recLen < 8 || offset + recLen > buffer.length) break;
+            if (recType === 201) {
+              coverRecordOffset = buffer.readUInt32BE(offset + 8);
+              break;
+            }
+            offset += recLen;
+          }
+        }
+      }
+    }
+
+    // Calculate actual record index for cover image
+    const numRecords = buffer.readUInt16BE(76);
+    const coverRecordIdx = coverRecordOffset >= 0 ? firstImageRecord + coverRecordOffset : firstImageRecord;
+    if (coverRecordIdx <= 0 || coverRecordIdx >= numRecords) return null;
+
+    // Get record data
+    const recordStart = buffer.readUInt32BE(78 + coverRecordIdx * 8);
+    const recordEnd = (coverRecordIdx + 1 < numRecords) ? buffer.readUInt32BE(78 + (coverRecordIdx + 1) * 8) : buffer.length;
+    const imageData = buffer.slice(recordStart, recordEnd);
+
+    // Verify it's a valid image (JPEG or PNG magic bytes)
+    const isJpeg = imageData[0] === 0xFF && imageData[1] === 0xD8;
+    const isPng = imageData[0] === 0x89 && imageData[1] === 0x50;
+    if (!isJpeg && !isPng) return null;
+
+    const ext = isPng ? ".png" : ".jpg";
+    const coversDir = path.join(app.getPath("userData"), "covers");
+    if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+    const coverPath = path.join(coversDir, `${docId}${ext}`);
+    fs.writeFileSync(coverPath, imageData);
+    return coverPath;
+  } catch {
+    return null;
+  }
+}
+
+// Also check for Calibre metadata.opf in the same directory
+async function parseCallibreOpf(filepath) {
+  try {
+    const dir = path.dirname(filepath);
+    const opfPath = path.join(dir, "metadata.opf");
+    if (!fs.existsSync(opfPath)) return null;
+    const cheerio = require("cheerio");
+    const opfContent = await fsPromises.readFile(opfPath, "utf-8");
+    const $ = cheerio.load(opfContent, { xmlMode: true });
+    const title = $("dc\\:title, title").first().text().trim() || null;
+    const author = $("dc\\:creator, creator").first().text().trim() || null;
+    // Check for cover.jpg in same directory
+    let coverPath = null;
+    const coverRef = $('reference[type="cover"]').attr("href") || $('meta[name="cover"]').attr("content");
+    const candidatePaths = [
+      coverRef ? path.join(dir, coverRef) : null,
+      path.join(dir, "cover.jpg"),
+      path.join(dir, "cover.jpeg"),
+      path.join(dir, "cover.png"),
+    ].filter(Boolean);
+    for (const p of candidatePaths) {
+      if (p && fs.existsSync(p)) { coverPath = p; break; }
+    }
+    return { title, author, coverPath };
+  } catch {
+    return null;
+  }
+}
+
 async function extractContent(filepath) {
   const ext = path.extname(filepath).toLowerCase();
   try {
@@ -336,6 +579,13 @@ async function extractContent(filepath) {
         if (text) texts.push(text);
       }
       return texts.join("\n\n") || null;
+    }
+    if (ext === ".mobi" || ext === ".azw3" || ext === ".azw") {
+      // MOBI/AZW is PDB + PalmDOC/MOBI structure containing HTML content
+      const buffer = await fsPromises.readFile(filepath);
+      const text = parseMobiContent(buffer);
+      if (text && text.length > 10) return text;
+      return null;
     }
     if (ext === ".html" || ext === ".htm") {
       const html = await fsPromises.readFile(filepath, "utf-8");
@@ -544,6 +794,29 @@ async function syncLibraryWithFolder() {
           author = meta.author;
           bookTitle = meta.title;
           coverPath = await extractEpubCover(file.filepath, docId);
+        } else if (file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") {
+          // Try Calibre metadata.opf first (richer metadata)
+          const opfMeta = await parseCallibreOpf(file.filepath);
+          if (opfMeta) {
+            author = opfMeta.author;
+            bookTitle = opfMeta.title;
+            if (opfMeta.coverPath) {
+              // Copy Calibre cover to our covers directory
+              const coversDir = path.join(app.getPath("userData"), "covers");
+              if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+              const ext = path.extname(opfMeta.coverPath);
+              const destCover = path.join(coversDir, `${docId}${ext}`);
+              try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
+            }
+          }
+          // Fall back to MOBI internal metadata
+          if (!author || !bookTitle) {
+            const buf = await fsPromises.readFile(file.filepath);
+            const mobiMeta = parseMobiMetadata(buf);
+            if (!author) author = mobiMeta.author;
+            if (!bookTitle) bookTitle = mobiMeta.title;
+            if (!coverPath) coverPath = extractMobiCover(buf, docId);
+          }
         }
         if (!author) {
           author = extractAuthorFromFilename(file.filename);
@@ -1459,20 +1732,36 @@ function registerIPC() {
         const prev = existing.get(file.filepath);
         if (prev) {
           let updates = { ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size };
-          // Re-extract metadata for EPUBs missing covers, authors, or with truncated titles
+          // Re-extract metadata for books missing covers, authors, or with truncated titles
           if (file.ext === ".epub") {
             if (!prev.coverPath || !prev.author || prev.title === path.basename(file.filename, file.ext)) {
               const meta = await extractEpubMetadata(file.filepath);
               if (!prev.author && meta.author) updates.author = meta.author;
-              // Update title from metadata if current title matches the filename (likely truncated)
               if (meta.title && prev.title === path.basename(file.filename, file.ext)) {
                 updates.title = meta.title;
               }
             }
             if (!prev.coverPath) {
-              console.log("[rescan] Extracting cover for:", prev.title?.slice(0, 40));
               updates.coverPath = await extractEpubCover(file.filepath, prev.id);
-              console.log("[rescan] Cover result:", updates.coverPath ? "saved" : "not found");
+            }
+          } else if ((file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") && (!prev.coverPath || !prev.author)) {
+            const opfMeta = await parseCallibreOpf(file.filepath);
+            if (opfMeta) {
+              if (!prev.author && opfMeta.author) updates.author = opfMeta.author;
+              if (opfMeta.title && prev.title === path.basename(file.filename, file.ext)) updates.title = opfMeta.title;
+              if (!prev.coverPath && opfMeta.coverPath) {
+                const coversDir = path.join(app.getPath("userData"), "covers");
+                if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+                const ext = path.extname(opfMeta.coverPath);
+                const destCover = path.join(coversDir, `${prev.id}${ext}`);
+                try { await fsPromises.copyFile(opfMeta.coverPath, destCover); updates.coverPath = destCover; } catch {}
+              }
+            }
+            if (!prev.coverPath && !updates.coverPath) {
+              try {
+                const buf = await fsPromises.readFile(file.filepath);
+                updates.coverPath = extractMobiCover(buf, prev.id);
+              } catch {}
             }
           }
           synced.push(updates);
@@ -1489,6 +1778,26 @@ function registerIPC() {
               author = meta.author;
               bookTitle = meta.title;
               coverPath = await extractEpubCover(file.filepath, docId);
+            } else if (file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") {
+              const opfMeta = await parseCallibreOpf(file.filepath);
+              if (opfMeta) {
+                author = opfMeta.author;
+                bookTitle = opfMeta.title;
+                if (opfMeta.coverPath) {
+                  const coversDir = path.join(app.getPath("userData"), "covers");
+                  if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+                  const ext = path.extname(opfMeta.coverPath);
+                  const destCover = path.join(coversDir, `${docId}${ext}`);
+                  try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
+                }
+              }
+              if (!author || !bookTitle || !coverPath) {
+                const buf = await fsPromises.readFile(file.filepath);
+                const mobiMeta = parseMobiMetadata(buf);
+                if (!author) author = mobiMeta.author;
+                if (!bookTitle) bookTitle = mobiMeta.title;
+                if (!coverPath) coverPath = extractMobiCover(buf, docId);
+              }
             }
             if (!author) author = extractAuthorFromFilename(file.filename);
             if (!bookTitle) bookTitle = extractTitleFromFilename(file.filename, author);
