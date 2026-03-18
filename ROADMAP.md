@@ -101,7 +101,7 @@ The entire application lived in a single 698-line `App.jsx`. Split into focused 
 - [x] Verify `Math.round()` does not introduce cumulative error across all WPM steps
 - [x] Playback engine uses refs for word advancement, minimizing React state update overhead
 - [x] Write tests verifying WPM interval math is correct and within ±5% accuracy
-- [ ] Consider replacing `setInterval` with `requestAnimationFrame` for sub-50ms accuracy (see Phase 3.1)
+- [x] Consider replacing `setInterval` with `requestAnimationFrame` for sub-50ms accuracy (see Phase 3.1)
 
 ---
 
@@ -327,6 +327,67 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 - [x] Add screen reader announcements for reader state changes (play, pause, document complete)
 - [x] Ensure sufficient color contrast ratios in both views
 - [x] Support reduced motion preferences (disable animations when OS prefers-reduced-motion is set)
+
+---
+
+## Phase 5 — Menu Flap & Settings Redesign (P5) ✅
+
+### 5.1 Menu Flap Shell
+- [x] Create `MenuFlap.tsx` with overlay, backdrop, slide-in animation
+- [x] Add hamburger icon to ReaderView and LibraryView headers
+- [x] Wire `Tab` keyboard shortcut to toggle flap
+- [x] Backdrop click to close
+- [x] Compact/relaxed toggle in flap header
+- [x] Respect `prefers-reduced-motion`
+
+### 5.2 Reading Queue
+- [x] Create `ReadingQueue.tsx` with in-progress and unread sections
+- [x] Implement bubble progress bar (10 bubbles, accent-colored)
+- [x] Sort in-progress by last read descending, unread by date added descending
+- [x] Click-to-read: close flap, open doc in reader
+- [x] Compact and relaxed display modes
+- [x] Empty state message
+
+### 5.3 Settings Reorganization
+- [x] Create `SettingsMenu.tsx` with drill-down category navigation
+- [x] Back arrow navigation through settings hierarchy
+- [x] Divider between main settings and help/hotkeys
+
+### 5.4 Settings Sub-pages (Implemented)
+- [x] `ThemeSettings.tsx` — migrate accent color, font family, dark/light/eink/system from LibraryView
+- [x] `ConnectorsSettings.tsx` — migrate site login UI from LibraryView
+- [x] `HelpSettings.tsx` — migrate HelpPanel content
+- [x] `HotkeyMapSettings.tsx` — read-only hotkey reference
+- [x] `TextSizeSettings.tsx` — wire existing focusTextSize (placeholder for separate sliders)
+
+### 5.5 Settings Sub-pages (Placeholder)
+- [x] `SpeedReadingSettings.tsx` — mode toggle, focus marks, reading ruler, focus span, rhythm pauses (UI rendered, controls disabled)
+- [x] `LayoutSettings.tsx` — line/character/word spacing sliders (disabled)
+
+### 5.6 URL-to-PDF Export
+- [x] Install pdfkit dependency
+- [x] Generate PDF on URL import with title/author/URL/date metadata
+- [x] Save to `<source-folder>/Saved Articles/` subfolder
+- [x] Protect `Saved Articles/` docs in `syncLibraryWithFolder` from being discarded
+- [x] Transition library entry from `source: "url"` to `source: "folder"`
+- [x] Disable URL import when no source folder is selected
+- [x] Verify pdfkit→pdf-parse round-trip text fidelity
+- [x] Handle PDF generation errors gracefully (log, keep URL-sourced entry)
+
+### 5.7 Schema Migrations
+- [x] Settings v3→v4: Add all new settings fields with defaults
+- [x] Settings v3→v4: Map existing `fontSize` to `focusTextSize`
+- [x] Settings v3→v4: Update all `fontSize` references across codebase to `focusTextSize`
+- [x] Library v1→v2: Add `lastReadAt` field to all docs (default null)
+- [x] Library v1→v2: Backfill `lastReadAt` from `modified` for docs with position > 0
+- [x] Update `lastReadAt` timestamp when opening a doc in the reader
+- [x] Add migration tests for both settings and library migrations
+- [x] Consolidate `readerMode` state with `readingMode` setting
+
+### 5.8 Remove Legacy Appearance Panel
+- [x] Delete appearance panel section from LibraryView
+- [x] Remove HelpPanel.tsx (content fully migrated)
+- [x] Clean up orphaned state and imports
 
 ---
 

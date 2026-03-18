@@ -9,7 +9,7 @@ Blurby is a desktop RSVP (Rapid Serial Visual Presentation) speed reading app bu
 - **Main process** (`main.js`): Electron, IPC handlers, file I/O (async), folder watching (Chokidar), data persistence, URL article extraction
 - **Preload** (`preload.js`): Context bridge exposing `window.electronAPI`
 - **Renderer** (`src/`): React 19 SPA with component architecture
-  - `src/components/` — 13 UI components (ReaderView, LibraryView, DocCard, etc.)
+  - `src/components/` — 26 UI components (ReaderView, LibraryView, MenuFlap, ReadingQueue, SettingsMenu, and 7 settings sub-pages in `settings/` subdirectory)
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts
   - `src/utils/text.js` — tokenize, formatTime, focusChar (pure functions)
   - `src/styles/global.css` — All styles with CSS custom properties
@@ -48,7 +48,7 @@ Both `settings.json` and `library.json` have `schemaVersion` fields. Migrations 
 
 ## Code Style
 
-- No TypeScript (yet) — plain JSX/JS
+- TypeScript — `.tsx`/`.ts` files in renderer (`src/`), CommonJS `.js` in main process
 - CSS classes in `src/styles/global.css`, not inline styles
 - CSS custom properties defined in `:root` for theming
 - Pure functions go in `src/utils/`, React hooks in `src/hooks/`
