@@ -34,8 +34,10 @@ export function useReaderKeys(
   }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap]);
 }
 
-export function useGlobalKeys({ toggleFlap }: { toggleFlap: () => void }) {
+export function useGlobalKeys({ toggleFlap, view }: { toggleFlap: () => void; view: string }) {
   useEffect(() => {
+    // Only handle Tab in library view — reader view has its own Tab handler in useReaderKeys
+    if (view === "reader") return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Tab" && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
         e.preventDefault();
@@ -44,7 +46,7 @@ export function useGlobalKeys({ toggleFlap }: { toggleFlap: () => void }) {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [toggleFlap]);
+  }, [toggleFlap, view]);
 }
 
 // Smart import: Alt+V detects URL vs text and shows confirmation dialog

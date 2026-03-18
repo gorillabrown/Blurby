@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { tokenize, formatTime, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { tokenize, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 
@@ -101,7 +101,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       <div className="scroll-reader-top" style={{ paddingTop: isMac ? 36 : 16 }}>
         <div className="reader-top-left">
           <button onClick={() => onExit(clampedPosition)} className="reader-esc-btn" aria-label="Exit reader">ESC</button>
-          <span className="reader-doc-title">{activeDoc.title}</span>
+          <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>
         </div>
         <div className="scroll-reader-top-right">
           <div className="reader-font-controls">

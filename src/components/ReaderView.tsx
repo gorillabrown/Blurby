@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import { focusChar, formatTime, detectChapters, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
+import { focusChar, formatTime, formatDisplayTitle, detectChapters, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
@@ -121,7 +121,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
             className="reader-esc-btn"
             aria-label="Exit reader"
           >ESC</button>
-          <span className="reader-doc-title">{activeDoc.title}</span>
+          <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>
         </div>
         <WpmGauge wpm={wpm} />
       </div>

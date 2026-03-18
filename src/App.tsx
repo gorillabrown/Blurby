@@ -279,7 +279,7 @@ function AppInner() {
   }, []);
 
   useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap);
-  useGlobalKeys({ toggleFlap: toggleMenuFlap });
+  useGlobalKeys({ toggleFlap: toggleMenuFlap, view });
 
   // Smart Alt+V handler
   const handleSmartImport = useCallback((content: string, isUrl: boolean) => {

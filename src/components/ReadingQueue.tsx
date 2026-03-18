@@ -1,6 +1,7 @@
 import React from "react";
 import type { BlurbyDoc } from "../types";
 import { sortReadingQueue, bubbleCount } from "../utils/queue";
+import { formatDisplayTitle } from "../utils/text";
 
 interface ReadingQueueProps {
   docs: BlurbyDoc[];
@@ -35,10 +36,10 @@ function formatDate(timestamp: number): string {
   return "Added " + date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function sourceBadgeLabel(source: BlurbyDoc["source"]): string {
-  if (source === "folder") return "folder";
-  if (source === "url") return "web";
-  return "manual";
+function typeBadgeLabel(doc: BlurbyDoc): string {
+  if (doc.source === "url") return "web";
+  if (doc.ext) return doc.ext.slice(1);
+  return "";
 }
 
 export default function ReadingQueue({ docs, compact, onDocClick }: ReadingQueueProps) {
@@ -70,9 +71,9 @@ export default function ReadingQueue({ docs, compact, onDocClick }: ReadingQueue
         }}
       >
         <div className="queue-item-header">
-          <span className="queue-item-title">{doc.title}</span>
+          <span className="queue-item-title">{formatDisplayTitle(doc.title)}</span>
           {!compact && (
-            <span className="badge">{sourceBadgeLabel(doc.source)}</span>
+            <span className="badge">{typeBadgeLabel(doc)}</span>
           )}
         </div>
         <div className="queue-item-meta">
@@ -80,7 +81,7 @@ export default function ReadingQueue({ docs, compact, onDocClick }: ReadingQueue
             <span className="queue-item-date">{formatDate(doc.created)}</span>
           )}
           {compact && (
-            <span className="badge">{sourceBadgeLabel(doc.source)}</span>
+            <span className="badge">{typeBadgeLabel(doc)}</span>
           )}
           <BubbleProgress progress={progress} compact={compact} />
         </div>
