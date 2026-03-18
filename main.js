@@ -706,19 +706,6 @@ function extractArticleFromHtml(html, url) {
   const dom = new JSDOM(html, { url });
   const parsedDoc = dom.window.document;
 
-  // DEBUG: Log body structure
-  const body = parsedDoc.body;
-  console.log(`[extract] body exists: ${!!body}, body.innerHTML length: ${body?.innerHTML?.length || 0}`);
-  if (body) {
-    const children = Array.from(body.children).map((c) => `${c.tagName}${c.id ? "#" + c.id : ""}${c.className ? "." + String(c.className).split(" ").slice(0, 2).join(".") : ""}`);
-    console.log(`[extract] body children: ${children.join(", ")}`);
-    const bodyText = (body.textContent || "").trim();
-    console.log(`[extract] body.textContent length: ${bodyText.length}`);
-    if (bodyText.length > 0) {
-      console.log(`[extract] body text preview: ${bodyText.substring(0, 300)}`);
-    }
-  }
-
   // Remove paywall/ad elements
   parsedDoc.querySelectorAll([
     '[class*="paywall"]', '[class*="Paywall"]',
@@ -732,87 +719,77 @@ function extractArticleFromHtml(html, url) {
   let title = null;
   let content = null;
 
-  // DEBUG: Log what we find
-  const ldScripts = parsedDoc.querySelectorAll('script[type="application/ld+json"]');
-  console.log(`[extract] JSON-LD scripts found: ${ldScripts.length}`);
-  for (const script of ldScripts) {
-    try {
-      const data = JSON.parse(script.textContent);
-      const items = Array.isArray(data) ? data : [data];
-      for (const item of items) {
-        console.log(`[extract] JSON-LD type: ${item["@type"]}, hasArticleBody: ${!!item.articleBody}, hasGraph: ${!!item["@graph"]}`);
-        if (item.articleBody) {
-          content = item.articleBody;
-          title = item.headline || null;
+  // 1. Try __preloadedData JSON (NYT and similar React-rendered news sites)
+  //    Article text is in sprinkledBody.content as ParagraphBlock objects
+  if (!content) {
+    for (const script of parsedDoc.querySelectorAll("script")) {
+      const text = script.textContent || "";
+      const preloadMatch = text.match(/window\.__preloadedData\s*=\s*(\{.+\})\s*;?\s*$/s);
+      if (!preloadMatch) continue;
+      try {
+        const data = JSON.parse(preloadMatch[1]);
+        const article = data?.initialData?.data?.article;
+        if (!article) continue;
+        title = article.headline?.default || null;
+        // Extract paragraph text from sprinkledBody or body
+        const bodyContent = article.sprinkledBody?.content || article.body?.content || [];
+        const paragraphs = [];
+        for (const block of bodyContent) {
+          if (block.__typename === "ParagraphBlock" && block.content) {
+            const text = block.content
+              .filter((c) => c.__typename === "TextInline")
+              .map((c) => c.text)
+              .join("");
+            if (text) paragraphs.push(text);
+          }
+        }
+        if (paragraphs.length > 0) {
+          content = paragraphs.join("\n\n");
           break;
         }
-        if (item["@graph"]) {
-          for (const node of item["@graph"]) {
-            console.log(`[extract]   @graph node type: ${node["@type"]}, hasArticleBody: ${!!node.articleBody}`);
-            if (node.articleBody) {
-              content = node.articleBody;
-              title = node.headline || null;
-              break;
+      } catch { /* skip parse errors */ }
+    }
+  }
+
+  // 2. Try JSON-LD structured data (articleBody field)
+  if (!content) {
+    for (const script of parsedDoc.querySelectorAll('script[type="application/ld+json"]')) {
+      try {
+        const data = JSON.parse(script.textContent);
+        const items = Array.isArray(data) ? data : [data];
+        for (const item of items) {
+          if (item.articleBody) { content = item.articleBody; title = title || item.headline; break; }
+          if (item["@graph"]) {
+            for (const node of item["@graph"]) {
+              if (node.articleBody) { content = node.articleBody; title = title || node.headline; break; }
             }
           }
         }
-      }
-      if (content) break;
-    } catch (err) { console.log(`[extract] JSON-LD parse error: ${err.message}`); }
-  }
-
-  // DEBUG: Check for preloaded data
-  if (!content) {
-    const scripts = parsedDoc.querySelectorAll("script");
-    console.log(`[extract] Total script tags: ${scripts.length}`);
-    let preloadedFound = false;
-    for (const script of scripts) {
-      const text = script.textContent || "";
-      if (text.includes("__preloadedData") || text.includes("preloadedData")) {
-        preloadedFound = true;
-        console.log(`[extract] Found preloadedData script (${text.length} chars)`);
-        console.log(`[extract] Has articleBody: ${text.includes("articleBody")}`);
-        const bodyMatch = text.match(/"articleBody"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-        if (bodyMatch) {
-          console.log(`[extract] articleBody match length: ${bodyMatch[1].length}`);
-          try {
-            content = JSON.parse('"' + bodyMatch[1] + '"');
-          } catch {
-            content = bodyMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"');
-          }
-          const titleMatch = text.match(/"headline"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-          if (titleMatch) {
-            try { title = JSON.parse('"' + titleMatch[1] + '"'); } catch { title = titleMatch[1]; }
-          }
-          break;
-        }
-      }
+        if (content) break;
+      } catch { /* skip */ }
     }
-    if (!preloadedFound) console.log("[extract] No preloadedData script found");
   }
 
-  // Fall back to Readability
+  // 3. Try Readability
   if (!content) {
     const reader = new Readability(parsedDoc);
     const article = reader.parse();
-    console.log(`[extract] Readability result: parsed=${!!article}, textLength=${article?.textContent?.trim()?.length || 0}`);
     if (article?.textContent?.trim()) {
       content = article.textContent.trim();
-      title = article.title || null;
+      title = title || article.title;
     }
   }
 
-  // Try specific article body selectors as last resort
+  // 4. Try specific article body selectors as last resort
   if (!content) {
     const selectors = [
-      'article[id="story"]', '[name="articleBody"]', "article .StoryBodyCompanionColumn",
-      "article .article-body", '[data-testid="article-body"]', "article .story-body",
-      ".article__body", ".post-content", "article .entry-content",
-      "article", "section[name='articleBody']",
+      'section[name="articleBody"]', 'article[id="story"]',
+      "article .StoryBodyCompanionColumn", "article .article-body",
+      '[data-testid="article-body"]', ".article__body",
+      ".post-content", "article .entry-content", "article",
     ];
     for (const sel of selectors) {
       const el = parsedDoc.querySelector(sel);
-      console.log(`[extract] Selector "${sel}": ${el ? `found (${el.textContent?.trim()?.length || 0} chars)` : "not found"}`);
       if (el?.textContent?.trim()?.length > 200) {
         content = el.textContent.trim();
         break;
@@ -949,36 +926,17 @@ function registerIPC() {
       let html;
       let result;
 
-      // Log cookie state for debugging
-      const loginSession = session.fromPartition("persist:site-login");
-      const sessionCookies = await loginSession.cookies.get({ url });
-      console.log(`[fetch] URL: ${url}`);
-      console.log(`[fetch] hasLogin: ${hasLogin}, siteCookies count: ${siteCookies[siteKey]?.length || 0}`);
-      console.log(`[fetch] Session cookies for URL: ${sessionCookies.length}`);
-      sessionCookies.forEach((c) => console.log(`  cookie: ${c.name} (domain: ${c.domain})`));
-
       if (hasLogin) {
         // Try fast HTTP fetch with session cookies first
         try {
           html = await fetchWithCookies(url);
-          console.log(`[fetch] Cookie fetch got ${html.length} chars`);
-          console.log(`[fetch] HTML preview: ${html.substring(0, 500)}`);
-          console.log(`[fetch] Contains 'paywall': ${html.includes("paywall") || html.includes("Paywall")}`);
-          console.log(`[fetch] Contains 'subscriber': ${html.includes("subscriber") || html.includes("Subscriber")}`);
           result = extractArticleFromHtml(html, url);
-          console.log(`[fetch] Cookie extraction result: ${result.error || result.title}`);
-        } catch (err) {
-          console.log(`[fetch] Cookie fetch failed: ${err.message}`);
-        }
+        } catch { /* fall through to browser fetch */ }
 
         // If cookie fetch didn't get article content, try BrowserWindow
         if (!result || result.error) {
-          console.log("[fetch] Falling back to BrowserWindow...");
           html = await fetchWithBrowser(url);
-          console.log(`[fetch] Browser fetch got ${html.length} chars`);
-          console.log(`[fetch] HTML preview: ${html.substring(0, 500)}`);
           result = extractArticleFromHtml(html, url);
-          console.log(`[fetch] Browser extraction result: ${result.error || result.title}`);
         }
       } else {
         html = await fetchWithCookies(url);
