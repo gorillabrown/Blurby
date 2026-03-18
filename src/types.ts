@@ -80,6 +80,9 @@ export interface ElectronAPI {
   openReaderWindow: (docId: string) => Promise<void>;
   installUpdate: () => Promise<void>;
   logError: (message: string) => Promise<void>;
+  getSiteLogins: () => Promise<Array<{ domain: string; cookieCount: number }>>;
+  siteLogin: (url: string) => Promise<{ success?: boolean; site?: string; cancelled?: boolean; error?: string }>;
+  siteLogout: (domain: string) => Promise<boolean>;
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
   onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;
   onUpdateAvailable?: (callback: (version: string) => void) => () => void;

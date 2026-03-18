@@ -1156,6 +1156,47 @@ button:focus-visible {
   color: var(--accent);
 }
 
+/* ── Site Logins ─────────────────────────────────────────────────────────── */
+.appearance-hint {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dimmer);
+  margin-bottom: 8px;
+}
+.site-logins-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.site-login-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--bg-hover);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.site-login-domain {
+  font-family: var(--mono);
+  color: var(--text);
+  font-size: 11px;
+}
+.site-login-logout {
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+  color: var(--text-dimmer) !important;
+}
+.site-login-logout:hover {
+  color: var(--danger) !important;
+}
+.site-login-add {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
 /* ── Loading Spinner ──────────────────────────────────────────────────────── */
 .loading-screen {
   height: 100vh;

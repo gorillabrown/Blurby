@@ -60,6 +60,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Error logging
   logError: (message) => ipcRenderer.invoke("log-error", message),
 
+  // Site logins (for paywalled content)
+  getSiteLogins: () => ipcRenderer.invoke("get-site-logins"),
+  siteLogin: (url) => ipcRenderer.invoke("site-login", url),
+  siteLogout: (domain) => ipcRenderer.invoke("site-logout", domain),
+
   // Events from main
   onLibraryUpdated: (callback) => {
     const handler = (_event, library) => callback(library);

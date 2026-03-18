@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeTheme } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeTheme, session } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
@@ -22,6 +22,7 @@ function getSettingsPath() { return path.join(getDataPath(), "settings.json"); }
 function getLibraryPath() { return path.join(getDataPath(), "library.json"); }
 function getErrorLogPath() { return path.join(getDataPath(), "error.log"); }
 function getHistoryPath() { return path.join(getDataPath(), "history.json"); }
+function getSiteCookiesPath() { return path.join(getDataPath(), "site-cookies.json"); }
 
 // ── Persistent JSON helpers ────────────────────────────────────────────────────
 function readJSON(filepath, fallback) {
@@ -98,6 +99,7 @@ let watcher = null;
 let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
+let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }
 
 function loadState() {
   const rawSettings = readJSON(getSettingsPath(), settings);
@@ -111,6 +113,7 @@ function loadState() {
   saveLibrary();
 
   history = readJSON(getHistoryPath(), history);
+  siteCookies = readJSON(getSiteCookiesPath(), {});
 }
 
 function getLibrary() { return libraryData.docs; }
@@ -118,6 +121,7 @@ function setLibrary(docs) { libraryData.docs = docs; }
 function saveSettings() { writeJSON(getSettingsPath(), settings); }
 function saveLibrary() { writeJSON(getLibraryPath(), libraryData); }
 function saveHistory() { writeJSON(getHistoryPath(), history); }
+function saveSiteCookies() { writeJSON(getSiteCookiesPath(), siteCookies); }
 
 // ── File content extraction ────────────────────────────────────────────────────
 async function readFileContentAsync(filepath) {
@@ -310,6 +314,81 @@ function createReaderWindow(docId) {
 
   readerWindows.set(docId, win);
   return win;
+}
+
+// ── Site login window ──────────────────────────────────────────────────────────
+function getSiteKey(url) {
+  try {
+    const hostname = new URL(url).hostname;
+    const parts = hostname.split(".");
+    // Use root domain (e.g., "nytimes.com" from "www.nytimes.com")
+    return parts.length > 2 ? parts.slice(-2).join(".") : hostname;
+  } catch { return null; }
+}
+
+function getCookiesForUrl(url) {
+  const siteKey = getSiteKey(url);
+  if (!siteKey) return [];
+  // Check all stored site keys that match this URL's domain
+  const cookies = [];
+  for (const [domain, domainCookies] of Object.entries(siteCookies)) {
+    if (siteKey === domain || siteKey.endsWith("." + domain)) {
+      cookies.push(...domainCookies);
+    }
+  }
+  return cookies;
+}
+
+function openSiteLogin(siteUrl) {
+  return new Promise((resolve) => {
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(siteUrl);
+    } catch {
+      resolve({ error: "Invalid URL" });
+      return;
+    }
+
+    const siteKey = getSiteKey(siteUrl);
+    const loginWin = new BrowserWindow({
+      width: 900, height: 750,
+      title: `Log in to ${parsedUrl.hostname}`,
+      parent: mainWindow,
+      modal: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        partition: "persist:site-login",
+      },
+    });
+
+    loginWin.setMenuBarVisibility(false);
+    loginWin.loadURL(parsedUrl.origin);
+
+    loginWin.on("closed", () => {
+      // Capture all cookies for this domain when the window closes
+      const loginSession = session.fromPartition("persist:site-login");
+      loginSession.cookies.get({})
+        .then((allCookies) => {
+          // Filter cookies relevant to this site
+          const relevant = allCookies.filter((c) => {
+            const cookieDomain = (c.domain || "").replace(/^\./, "");
+            return cookieDomain === siteKey || cookieDomain.endsWith("." + siteKey) || siteKey.endsWith("." + cookieDomain);
+          });
+          if (relevant.length > 0) {
+            siteCookies[siteKey] = relevant.map((c) => ({
+              name: c.name, value: c.value, domain: c.domain, path: c.path,
+              secure: c.secure, httpOnly: c.httpOnly,
+            }));
+            saveSiteCookies();
+            resolve({ success: true, site: siteKey });
+          } else {
+            resolve({ cancelled: true });
+          }
+        })
+        .catch(() => resolve({ cancelled: true }));
+    });
+  });
 }
 
 // ── File watcher ───────────────────────────────────────────────────────────────
@@ -577,20 +656,23 @@ function registerIPC() {
 
   ipcMain.handle("add-doc-from-url", async (_, url) => {
     try {
-      const response = await fetch(url, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
-        },
-        signal: AbortSignal.timeout(15000),
-      });
+      // Build headers, including stored cookies for logged-in sites
+      const headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+      };
+      const savedCookies = getCookiesForUrl(url);
+      if (savedCookies.length > 0) {
+        headers["Cookie"] = savedCookies.map((c) => `${c.name}=${c.value}`).join("; ");
+      }
+      const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
       if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
       const html = await response.text();
       const dom = new JSDOM(html, { url });
       // Remove common paywall/ad elements before parsing
-      const doc = dom.window.document;
-      doc.querySelectorAll([
+      const parsedDoc = dom.window.document;
+      parsedDoc.querySelectorAll([
         '[class*="paywall"]', '[class*="Paywall"]',
         '[class*="advert"]', '[class*="Advert"]',
         '[id*="paywall"]', '[id*="Paywall"]',
@@ -598,7 +680,7 @@ function registerIPC() {
         '[aria-label*="advertisement"]',
         '[data-testid*="paywall"]',
       ].join(",")).forEach((el) => el.remove());
-      const reader = new Readability(doc);
+      const reader = new Readability(parsedDoc);
       const article = reader.parse();
       if (!article || !article.textContent?.trim()) return { error: "Could not extract readable content from this page." };
 
@@ -616,14 +698,14 @@ function registerIPC() {
         .trim();
       const wordCount = content.split(/\s+/).filter(Boolean).length;
       const title = article.title || new URL(url).hostname;
-      const doc = {
+      const newDoc = {
         id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
         title, content, wordCount, sourceUrl: url,
         position: 0, created: Date.now(), source: "url",
       };
-      getLibrary().unshift(doc);
+      getLibrary().unshift(newDoc);
       saveLibrary();
-      return { doc };
+      return { doc: newDoc };
     } catch (err) {
       return { error: err.message || "Failed to fetch URL." };
     }
@@ -789,6 +871,36 @@ function registerIPC() {
       const timestamp = new Date().toISOString();
       fs.appendFileSync(getErrorLogPath(), `[${timestamp}] ${message}\n`, "utf-8");
     } catch {}
+  });
+
+  // Site logins for paywalled content
+  ipcMain.handle("get-site-logins", () => {
+    return Object.entries(siteCookies).map(([domain, cookies]) => ({
+      domain,
+      cookieCount: cookies.length,
+    }));
+  });
+
+  ipcMain.handle("site-login", async (_, url) => {
+    return await openSiteLogin(url);
+  });
+
+  ipcMain.handle("site-logout", (_, domain) => {
+    delete siteCookies[domain];
+    saveSiteCookies();
+    // Clear cookies from the login session partition too
+    const loginSession = session.fromPartition("persist:site-login");
+    loginSession.cookies.get({}).then((cookies) => {
+      const relevant = cookies.filter((c) => {
+        const d = (c.domain || "").replace(/^\./, "");
+        return d === domain || d.endsWith("." + domain);
+      });
+      for (const c of relevant) {
+        const url = `http${c.secure ? "s" : ""}://${c.domain.replace(/^\./, "")}${c.path}`;
+        loginSession.cookies.remove(url, c.name).catch(() => {});
+      }
+    }).catch(() => {});
+    return true;
   });
 }
 

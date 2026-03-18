@@ -75,6 +75,9 @@ export default function LibraryView({
   const [showAppearance, setShowAppearance] = useState(false);
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
+  const [siteLogins, setSiteLogins] = useState<Array<{ domain: string; cookieCount: number }>>([]);
+  const [loginUrl, setLoginUrl] = useState("");
+  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
     const unsub = api.onUpdateDownloaded?.((version) => setUpdateReady(version));
@@ -90,6 +93,28 @@ export default function LibraryView({
   useEffect(() => {
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
   }, []);
+
+  const refreshSiteLogins = () => {
+    api.getSiteLogins().then(setSiteLogins);
+  };
+  useEffect(() => { refreshSiteLogins(); }, []);
+
+  const handleSiteLogin = async () => {
+    let url = loginUrl.trim();
+    if (!url) return;
+    if (!url.startsWith("http")) url = "https://" + url;
+    try { new URL(url); } catch { return; }
+    setLoggingIn(true);
+    await api.siteLogin(url);
+    setLoggingIn(false);
+    setLoginUrl("");
+    refreshSiteLogins();
+  };
+
+  const handleSiteLogout = async (domain: string) => {
+    await api.siteLogout(domain);
+    refreshSiteLogins();
+  };
 
   // Filter and sort library
   const getFilteredAndSorted = () => {
@@ -334,6 +359,37 @@ export default function LibraryView({
                     style={preset.value ? { fontFamily: preset.value } : {}}
                   >{preset.label}</button>
                 ))}
+              </div>
+            </div>
+            <div className="appearance-section">
+              <span className="appearance-label">Site logins</span>
+              <div className="appearance-hint">Log in to paywalled sites to access full articles</div>
+              {siteLogins.length > 0 && (
+                <div className="site-logins-list">
+                  {siteLogins.map((site) => (
+                    <div key={site.domain} className="site-login-item">
+                      <span className="site-login-domain">{site.domain}</span>
+                      <button className="btn site-login-logout" onClick={() => handleSiteLogout(site.domain)}>log out</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="site-login-add">
+                <input
+                  placeholder="Enter site URL (e.g. nytimes.com)"
+                  value={loginUrl}
+                  onChange={(e) => setLoginUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSiteLogin()}
+                  className="library-search"
+                  style={{ flex: 1 }}
+                  disabled={loggingIn}
+                />
+                <button
+                  onClick={handleSiteLogin}
+                  disabled={!loginUrl.trim() || loggingIn}
+                  className="btn"
+                  style={{ opacity: loginUrl.trim() && !loggingIn ? 1 : 0.3 }}
+                >{loggingIn ? "logging in..." : "log in"}</button>
               </div>
             </div>
           </div>
