@@ -12,7 +12,7 @@ const api = window.electronAPI;
 export default function LibraryView({
   library, settings, wpm, isMac, folderName, loadingContent, toast,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
-  onSelectFolder, onSwitchFolder, onSetWpm, wpmRef, onSetFolderName,
+  onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc,
 }) {
   const { theme, setTheme } = useTheme();
@@ -193,6 +193,7 @@ export default function LibraryView({
                   recentFolders={settings.recentFolders}
                   currentFolder={settings.sourceFolder}
                   onSwitch={onSwitchFolder}
+                  onBrowse={onSelectFolder}
                   onClose={() => setShowRecent(false)}
                 />
               )}
@@ -313,10 +314,12 @@ export default function LibraryView({
             <DocCard
               key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
               onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
-              onDelete={tab === "archived" ? onDeleteDoc : onDeleteDoc}
+              onDelete={onDeleteDoc}
               onConfirmDelete={setConfirmDelete}
               onCancelDelete={() => setConfirmDelete(null)}
               onToggleFavorite={onToggleFavorite}
+              onArchive={onArchiveDoc}
+              onUnarchive={onUnarchiveDoc}
               onOpenScroll={(d) => onOpenDoc(d, "scroll")}
             />
           ))}
@@ -328,7 +331,7 @@ export default function LibraryView({
             <span>speed</span>
             <input
               type="range" min={MIN_WPM} max={MAX_WPM} step={WPM_STEP} value={wpm}
-              onChange={(e) => { onSetWpm(Number(e.target.value)); if (wpmRef) wpmRef.current = Number(e.target.value); }}
+              onChange={(e) => onSetWpm(Number(e.target.value))}
               className="library-speed-slider"
               aria-label="Reading speed"
             />

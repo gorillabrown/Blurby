@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, globalShortcut, nativeTheme } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
@@ -85,7 +85,6 @@ function backupFile(filepath) {
 
 // ── State ──────────────────────────────────────────────────────────────────────
 let mainWindow = null;
-let readerWindows = new Map(); // docId → BrowserWindow for multi-window
 let tray = null;
 let watcher = null;
 let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false };
@@ -127,21 +126,49 @@ async function extractContent(filepath) {
       return data.text || null;
     }
     if (ext === ".epub") {
-      // epub files are zip-based — use epubjs for extraction
-      const EPub = require("epubjs");
-      const book = EPub.default ? EPub.default(filepath) : EPub(filepath);
-      await book.ready;
-      const spine = book.spine;
-      const texts = [];
-      for (const section of spine.items || spine) {
-        try {
-          const contents = await section.load(book.load.bind(book));
-          if (contents && contents.textContent) {
-            texts.push(contents.textContent.trim());
-          }
-        } catch {}
+      // EPUB is a ZIP of XHTML files — extract text via adm-zip + cheerio
+      const AdmZip = require("adm-zip");
+      const cheerio = require("cheerio");
+      const zip = new AdmZip(filepath);
+      const entries = zip.getEntries();
+      // Parse container.xml to get spine order
+      const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
+      let opfPath = "";
+      if (containerEntry) {
+        const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+        opfPath = $("rootfile").attr("full-path") || "";
       }
-      book.destroy();
+      // Parse OPF to get spine item order
+      const opfEntry = entries.find((e) => e.entryName === opfPath);
+      const spineIds = [];
+      const manifestMap = new Map();
+      if (opfEntry) {
+        const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
+        const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+        $("manifest item").each((_, el) => {
+          const id = $(el).attr("id");
+          const href = $(el).attr("href");
+          if (id && href) manifestMap.set(id, opfDir + href);
+        });
+        $("spine itemref").each((_, el) => {
+          const idref = $(el).attr("idref");
+          if (idref) spineIds.push(idref);
+        });
+      }
+      // Extract text from spine XHTML files in order
+      const texts = [];
+      const processedPaths = new Set();
+      for (const id of spineIds) {
+        const href = manifestMap.get(id);
+        if (!href) continue;
+        const entry = entries.find((e) => e.entryName === href);
+        if (!entry || processedPaths.has(href)) continue;
+        processedPaths.add(href);
+        const $ = cheerio.load(entry.getData().toString("utf-8"));
+        $("script, style").remove();
+        const text = $("body").text().trim();
+        if (text) texts.push(text);
+      }
       return texts.join("\n\n") || null;
     }
     if (ext === ".html" || ext === ".htm") {
@@ -681,5 +708,4 @@ app.on("window-all-closed", () => {
 
 app.on("will-quit", () => {
   if (watcher) watcher.close();
-  globalShortcut.unregisterAll();
 });

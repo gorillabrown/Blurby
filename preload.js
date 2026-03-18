@@ -19,8 +19,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateDoc: (docId, title, content) => ipcRenderer.invoke("update-doc", docId, title, content),
   resetProgress: (docId) => ipcRenderer.invoke("reset-progress", docId),
   updateDocProgress: (docId, position) => ipcRenderer.invoke("update-doc-progress", docId, position),
-  reloadFile: (docId) => ipcRenderer.invoke("reload-file", docId),
-
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
 

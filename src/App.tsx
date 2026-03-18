@@ -216,7 +216,6 @@ function AppInner() {
           onSelectFolder={selectFolder}
           onSwitchFolder={switchFolder}
           onSetWpm={setWpm}
-          wpmRef={reader.wordIndexRef}
           onSetFolderName={setFolderName}
           onToggleFavorite={toggleFavorite}
           onArchiveDoc={archiveDoc}

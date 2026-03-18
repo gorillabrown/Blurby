@@ -3,7 +3,7 @@ import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
 
-export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onOpenScroll }) {
+export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll }) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
@@ -59,6 +59,31 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
           )}
           {pos > 0 && <IconBtn onClick={() => onReset(doc.id)} title="Reset" icon="reset" />}
           {doc.source !== "folder" && doc.source !== "url" && <IconBtn onClick={() => onEdit(doc)} title="Edit" icon="edit" />}
+          {doc.archived ? (
+            <button
+              className="icon-btn"
+              onClick={() => onUnarchive(doc.id)}
+              title="Unarchive"
+              aria-label="Restore from archive"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+              </svg>
+            </button>
+          ) : (
+            !isComplete && (
+              <button
+                className="icon-btn"
+                onClick={() => onArchive(doc.id)}
+                title="Archive"
+                aria-label="Archive document"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="21 8 21 21 3 21 3 8" /><rect x="1" y="3" width="22" height="5" /><line x1="10" y1="12" x2="14" y2="12" />
+                </svg>
+              </button>
+            )
+          )}
           <IconBtn onClick={() => onConfirmDelete(doc.id)} title="Delete" icon="delete" danger />
         </div>
       </div>

@@ -13,6 +13,9 @@ export interface BlurbyDoc {
   size?: number;
   modified?: number;
   sourceUrl?: string;
+  favorite?: boolean;
+  archived?: boolean;
+  archivedAt?: number;
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -22,7 +25,9 @@ export interface BlurbySettings {
   sourceFolder: string | null;
   folderName: string;
   recentFolders: string[];
-  theme: "dark" | "light";
+  theme: "dark" | "light" | "eink";
+  launchAtLogin: boolean;
+  fontSize: number;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────
@@ -55,7 +60,6 @@ export interface ElectronAPI {
   updateDoc: (docId: string, title: string, content: string) => Promise<void>;
   resetProgress: (docId: string) => Promise<void>;
   updateDocProgress: (docId: string, position: number) => Promise<void>;
-  reloadFile: (docId: string) => Promise<string | null>;
   loadDocContent: (docId: string) => Promise<string | null>;
   addDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
   importDroppedFiles: (filePaths: string[]) => Promise<{ imported: string[]; rejected: string[] }>;
@@ -65,6 +69,11 @@ export interface ElectronAPI {
   exportLibrary: () => Promise<string | null>;
   importLibrary: () => Promise<{ added?: number; total?: number; error?: string } | null>;
   exportStatsCsv: () => Promise<string | null>;
+  getLaunchAtLogin: () => Promise<boolean>;
+  setLaunchAtLogin: (enabled: boolean) => Promise<boolean>;
+  toggleFavorite: (docId: string) => Promise<boolean>;
+  archiveDoc: (docId: string) => Promise<void>;
+  unarchiveDoc: (docId: string) => Promise<void>;
   installUpdate: () => Promise<void>;
   logError: (message: string) => Promise<void>;
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;

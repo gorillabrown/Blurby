@@ -1,12 +1,8 @@
-const api = window.electronAPI;
-
-export default function RecentFolders({ recentFolders, currentFolder, onSwitch, onClose }) {
-  if (!recentFolders || recentFolders.length === 0) return null;
-
+export default function RecentFolders({ recentFolders, currentFolder, onSwitch, onBrowse, onClose }) {
   return (
     <div className="recent-folders">
       <div className="recent-folders-title">Recent folders</div>
-      {recentFolders.map((folder) => (
+      {recentFolders && recentFolders.length > 0 && recentFolders.map((folder) => (
         <button
           key={folder}
           className={`recent-folder-item${folder === currentFolder ? " recent-folder-active" : ""}`}
@@ -17,6 +13,13 @@ export default function RecentFolders({ recentFolders, currentFolder, onSwitch, 
           {folder === currentFolder && <span className="recent-folder-current">current</span>}
         </button>
       ))}
+      <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0" }} />
+      <button
+        className="recent-folder-item"
+        onClick={() => { onBrowse(); onClose(); }}
+      >
+        <span className="recent-folder-name">Browse for folder...</span>
+      </button>
     </div>
   );
 }

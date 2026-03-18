@@ -20,7 +20,10 @@ export default function StatsPanel({ wpm, onClose }) {
     <div className="stats-panel">
       <div className="stats-header">
         <span className="stats-title">Reading statistics</span>
-        <button onClick={onClose} className="btn stats-close">close</button>
+        <div style={{ display: "flex", gap: 6 }}>
+          <button onClick={() => api.exportStatsCsv()} className="btn stats-close" aria-label="Export stats CSV">export csv</button>
+          <button onClick={onClose} className="btn stats-close">close</button>
+        </div>
       </div>
       <div className="stats-grid">
         <div className="stats-item">
