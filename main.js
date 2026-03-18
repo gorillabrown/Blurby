@@ -718,22 +718,23 @@ function extractArticleFromHtml(html, url) {
   let title = null;
   let content = null;
 
-  // Try JSON-LD structured data first (most reliable for news sites)
+  // DEBUG: Log what we find
   const ldScripts = parsedDoc.querySelectorAll('script[type="application/ld+json"]');
+  console.log(`[extract] JSON-LD scripts found: ${ldScripts.length}`);
   for (const script of ldScripts) {
     try {
       const data = JSON.parse(script.textContent);
-      // Handle both single objects and arrays
       const items = Array.isArray(data) ? data : [data];
       for (const item of items) {
+        console.log(`[extract] JSON-LD type: ${item["@type"]}, hasArticleBody: ${!!item.articleBody}, hasGraph: ${!!item["@graph"]}`);
         if (item.articleBody) {
           content = item.articleBody;
           title = item.headline || null;
           break;
         }
-        // Some sites nest under @graph
         if (item["@graph"]) {
           for (const node of item["@graph"]) {
+            console.log(`[extract]   @graph node type: ${node["@type"]}, hasArticleBody: ${!!node.articleBody}`);
             if (node.articleBody) {
               content = node.articleBody;
               title = node.headline || null;
@@ -743,18 +744,23 @@ function extractArticleFromHtml(html, url) {
         }
       }
       if (content) break;
-    } catch { /* skip malformed JSON-LD */ }
+    } catch (err) { console.log(`[extract] JSON-LD parse error: ${err.message}`); }
   }
 
-  // Try __preloadedData for sites like NYT that embed content in JS
+  // DEBUG: Check for preloaded data
   if (!content) {
     const scripts = parsedDoc.querySelectorAll("script");
+    console.log(`[extract] Total script tags: ${scripts.length}`);
+    let preloadedFound = false;
     for (const script of scripts) {
       const text = script.textContent || "";
       if (text.includes("__preloadedData") || text.includes("preloadedData")) {
-        // Look for articleBody or body text in the preloaded data
+        preloadedFound = true;
+        console.log(`[extract] Found preloadedData script (${text.length} chars)`);
+        console.log(`[extract] Has articleBody: ${text.includes("articleBody")}`);
         const bodyMatch = text.match(/"articleBody"\s*:\s*"((?:[^"\\]|\\.)*)"/);
         if (bodyMatch) {
+          console.log(`[extract] articleBody match length: ${bodyMatch[1].length}`);
           try {
             content = JSON.parse('"' + bodyMatch[1] + '"');
           } catch {
@@ -768,12 +774,14 @@ function extractArticleFromHtml(html, url) {
         }
       }
     }
+    if (!preloadedFound) console.log("[extract] No preloadedData script found");
   }
 
   // Fall back to Readability
   if (!content) {
     const reader = new Readability(parsedDoc);
     const article = reader.parse();
+    console.log(`[extract] Readability result: parsed=${!!article}, textLength=${article?.textContent?.trim()?.length || 0}`);
     if (article?.textContent?.trim()) {
       content = article.textContent.trim();
       title = article.title || null;
@@ -786,9 +794,11 @@ function extractArticleFromHtml(html, url) {
       'article[id="story"]', '[name="articleBody"]', "article .StoryBodyCompanionColumn",
       "article .article-body", '[data-testid="article-body"]', "article .story-body",
       ".article__body", ".post-content", "article .entry-content",
+      "article", "section[name='articleBody']",
     ];
     for (const sel of selectors) {
       const el = parsedDoc.querySelector(sel);
+      console.log(`[extract] Selector "${sel}": ${el ? `found (${el.textContent?.trim()?.length || 0} chars)` : "not found"}`);
       if (el?.textContent?.trim()?.length > 200) {
         content = el.textContent.trim();
         break;
