@@ -61,6 +61,28 @@ export function tokenize(text: string | null | undefined): string[] {
   return (text || "").split(/\s+/).filter(Boolean);
 }
 
+export interface TokenizedContent {
+  words: string[];
+  paragraphBreaks: Set<number>; // indices of words that end a paragraph
+}
+
+/** Like tokenize() but also tracks which words end a paragraph (double newline). */
+export function tokenizeWithMeta(text: string | null | undefined): TokenizedContent {
+  if (!text) return { words: [], paragraphBreaks: new Set() };
+  const paragraphs = text.split(/\n{2,}/);
+  const words: string[] = [];
+  const paragraphBreaks = new Set<number>();
+
+  for (const para of paragraphs) {
+    const paraWords = para.split(/\s+/).filter(Boolean);
+    if (paraWords.length === 0) continue;
+    words.push(...paraWords);
+    paragraphBreaks.add(words.length - 1);
+  }
+
+  return { words, paragraphBreaks };
+}
+
 export function formatTime(words: number | null | undefined, wpm: number | null | undefined): string {
   if (!wpm || !words) return "0m";
   const mins = Math.round(words / wpm);
@@ -131,6 +153,14 @@ export function currentChapterIndex(chapters: Chapter[], wordIndex: number): num
     if (wordIndex >= chapters[i].wordIndex) return i;
   }
   return -1;
+}
+
+/** Calculate per-character opacity based on distance from ORP (Optimal Recognition Point). */
+export function calculateFocusOpacity(charIndex: number, orpIndex: number, wordLength: number, focusSpan: number): number {
+  if (focusSpan >= 1) return 1;
+  const spanChars = Math.max(1, Math.floor(focusSpan * wordLength));
+  const distance = Math.abs(charIndex - orpIndex);
+  return distance <= spanChars ? 1 : 0.3;
 }
 
 export function focusChar(word: string | null | undefined): { before: string; focus: string; after: string } {

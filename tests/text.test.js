@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tokenize, formatTime, focusChar, hasPunctuation, detectChapters, currentChapterIndex } from "../src/utils/text";
+import { tokenize, tokenizeWithMeta, formatTime, focusChar, hasPunctuation, detectChapters, currentChapterIndex, calculateFocusOpacity, formatDisplayTitle } from "../src/utils/text";
 
 describe("tokenize", () => {
   it("returns empty array for empty string", () => {
@@ -170,5 +170,78 @@ describe("currentChapterIndex", () => {
     expect(currentChapterIndex(chapters, 100)).toBe(1);
     expect(currentChapterIndex(chapters, 200)).toBe(1);
     expect(currentChapterIndex(chapters, 300)).toBe(2);
+  });
+});
+
+describe("tokenizeWithMeta", () => {
+  it("returns words and paragraph break indices", () => {
+    const result = tokenizeWithMeta("Hello world.\n\nSecond paragraph.\n\nThird.");
+    expect(result.words).toEqual(["Hello", "world.", "Second", "paragraph.", "Third."]);
+    expect(result.paragraphBreaks.has(1)).toBe(true);
+    expect(result.paragraphBreaks.has(3)).toBe(true);
+    expect(result.paragraphBreaks.has(4)).toBe(true);
+  });
+
+  it("handles single paragraph", () => {
+    const result = tokenizeWithMeta("Just one paragraph here.");
+    expect(result.words).toEqual(["Just", "one", "paragraph", "here."]);
+    expect(result.paragraphBreaks.size).toBe(1);
+    expect(result.paragraphBreaks.has(3)).toBe(true);
+  });
+
+  it("handles empty input", () => {
+    const result = tokenizeWithMeta("");
+    expect(result.words).toEqual([]);
+    expect(result.paragraphBreaks.size).toBe(0);
+  });
+
+  it("handles null/undefined", () => {
+    expect(tokenizeWithMeta(null).words).toEqual([]);
+    expect(tokenizeWithMeta(undefined).words).toEqual([]);
+  });
+});
+
+describe("calculateFocusOpacity", () => {
+  it("returns 1.0 for characters within span range", () => {
+    expect(calculateFocusOpacity(3, 3, 13, 0.4)).toBe(1);
+    expect(calculateFocusOpacity(4, 3, 13, 0.4)).toBe(1);
+  });
+
+  it("returns reduced opacity for characters outside span", () => {
+    expect(calculateFocusOpacity(10, 3, 13, 0.4)).toBeLessThan(1);
+  });
+
+  it("returns 1.0 for all chars when focusSpan is 1.0", () => {
+    expect(calculateFocusOpacity(0, 3, 13, 1.0)).toBe(1);
+    expect(calculateFocusOpacity(12, 3, 13, 1.0)).toBe(1);
+  });
+
+  it("returns 0.3 for distant characters", () => {
+    expect(calculateFocusOpacity(12, 3, 13, 0.2)).toBe(0.3);
+  });
+});
+
+describe("formatDisplayTitle", () => {
+  it("replaces underscore-space with colon-space", () => {
+    expect(formatDisplayTitle("Blink_ The Power")).toBe("Blink: The Power");
+  });
+
+  it("replaces remaining underscores with spaces", () => {
+    const result = formatDisplayTitle("trading_options_ebook");
+    expect(result.toLowerCase()).toContain("trading");
+    expect(result).not.toContain("_");
+  });
+
+  it("converts ALL CAPS to title case", () => {
+    expect(formatDisplayTitle("REIMAGINING CIVIL SOCIETY")).toBe("Reimagining Civil Society");
+  });
+
+  it("replaces dash-author with pipe", () => {
+    expect(formatDisplayTitle("Steve Jobs - Walter Isaacson")).toBe("Steve Jobs | Walter Isaacson");
+  });
+
+  it("capitalizes first letter", () => {
+    const result = formatDisplayTitle("lowercase");
+    expect(result[0]).toBe("L");
   });
 });
