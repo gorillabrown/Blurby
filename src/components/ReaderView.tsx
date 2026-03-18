@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
+import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
@@ -14,6 +14,7 @@ interface ReaderViewProps {
   escPending: boolean;
   isMac: boolean;
   settings?: BlurbySettings;
+  externalChapters?: Array<{ title: string; charOffset: number }>;
   togglePlay: () => void;
   exitReader: () => void;
   onSetWpm: (wpm: number) => void;
@@ -23,7 +24,7 @@ interface ReaderViewProps {
   onToggleFlap?: () => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
@@ -45,11 +46,13 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
   const remaining = formatTime(words.length - wordIndex, wpm);
   const scale = (focusTextSize || 100) / 100;
 
-  // Chapter detection and metrics
-  const chapters = useMemo(
-    () => detectChapters(activeDoc.content, words),
-    [activeDoc.content, words]
-  );
+  // Chapter detection: prefer EPUB TOC chapters, fall back to regex detection
+  const chapters = useMemo(() => {
+    if (externalChapters && externalChapters.length > 0) {
+      return chaptersFromCharOffsets(activeDoc.content, externalChapters);
+    }
+    return detectChapters(activeDoc.content, words);
+  }, [activeDoc.content, words, externalChapters]);
   const chIdx = currentChapterIndex(chapters, wordIndex);
   const hasChapters = chapters.length > 1;
   const chapterInfo = useMemo(() => {

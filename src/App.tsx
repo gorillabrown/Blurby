@@ -127,6 +127,7 @@ function AppInner() {
   const [folderName, setFolderName] = useState("My reading list");
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
+  const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number }>>([]);
 
   // MenuFlap state
   const [menuFlapOpen, setMenuFlapOpen] = useState(false);
@@ -209,6 +210,8 @@ function AppInner() {
     initReader(doc.position || 0);
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = doc.position || 0;
+    // Load EPUB chapter metadata if available
+    api.getDocChapters(doc.id).then((ch) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
     if (mode === "scroll") {
       api.saveSettings({ readingMode: "flow" });
       setSettings((prev) => ({ ...prev, readingMode: "flow" as const }));
@@ -393,6 +396,7 @@ function AppInner() {
             escPending={escPending}
             isMac={platform === "darwin"}
             settings={settings}
+            externalChapters={docChapters.length > 0 ? docChapters : undefined}
             togglePlay={togglePlay}
             exitReader={handleExitReader}
             onSetWpm={setWpm}

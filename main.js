@@ -219,6 +219,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
+const epubChapterCache = new Map(); // filepath → [{ title, charOffset }]
 let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 }, initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list" };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
@@ -547,25 +548,82 @@ async function extractContent(filepath) {
         const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
         opfPath = $("rootfile").attr("full-path") || "";
       }
-      // Parse OPF to get spine item order
+      // Parse OPF to get spine item order and TOC
       const opfEntry = entries.find((e) => e.entryName === opfPath);
       const spineIds = [];
-      const manifestMap = new Map();
+      const manifestMap = new Map(); // id → href
+      const hrefToId = new Map();    // href → id (for TOC matching)
+      let tocHref = null;
+      let ncxHref = null;
       if (opfEntry) {
         const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
         const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
         $("manifest item").each((_, el) => {
           const id = $(el).attr("id");
           const href = $(el).attr("href");
-          if (id && href) manifestMap.set(id, opfDir + href);
+          const mediaType = $(el).attr("media-type") || "";
+          if (id && href) {
+            const fullHref = opfDir + href;
+            manifestMap.set(id, fullHref);
+            hrefToId.set(fullHref, id);
+            // Find EPUB3 nav document
+            if ($(el).attr("properties")?.includes("nav")) tocHref = fullHref;
+            // Find EPUB2 NCX
+            if (mediaType === "application/x-dtbncx+xml") ncxHref = fullHref;
+          }
         });
         $("spine itemref").each((_, el) => {
           const idref = $(el).attr("idref");
           if (idref) spineIds.push(idref);
         });
+        // Also check spine toc attribute for NCX
+        const spineToc = $("spine").attr("toc");
+        if (spineToc && !ncxHref) ncxHref = manifestMap.get(spineToc);
       }
-      // Extract text from spine XHTML files in order
+
+      // Parse TOC (EPUB3 nav.xhtml or EPUB2 NCX) to get chapter titles per spine href
+      const tocMap = new Map(); // spine href (without fragment) → chapter title
+      try {
+        if (tocHref) {
+          // EPUB3 nav document
+          const navEntry = entries.find((e) => e.entryName === tocHref);
+          if (navEntry) {
+            const navDir = tocHref.includes("/") ? tocHref.substring(0, tocHref.lastIndexOf("/") + 1) : "";
+            const $ = cheerio.load(navEntry.getData().toString("utf-8"));
+            $('nav[*|type="toc"] a, nav#toc a, nav.toc a').each((_, el) => {
+              const href = $(el).attr("href");
+              const title = $(el).text().trim();
+              if (href && title) {
+                const fullHref = navDir + href.split("#")[0]; // strip fragment
+                tocMap.set(fullHref, title);
+              }
+            });
+          }
+        }
+        if (tocMap.size === 0 && ncxHref) {
+          // EPUB2 NCX
+          const ncxEntry = entries.find((e) => e.entryName === ncxHref);
+          if (ncxEntry) {
+            const ncxDir = ncxHref.includes("/") ? ncxHref.substring(0, ncxHref.lastIndexOf("/") + 1) : "";
+            const $ = cheerio.load(ncxEntry.getData().toString("utf-8"), { xmlMode: true });
+            $("navPoint").each((_, el) => {
+              const title = $(el).find("> navLabel > text").first().text().trim();
+              const src = $(el).find("> content").attr("src");
+              if (title && src) {
+                const fullSrc = ncxDir + src.split("#")[0];
+                tocMap.set(fullSrc, title);
+              }
+            });
+          }
+        }
+      } catch (tocErr) {
+        console.log("EPUB TOC parse error (non-fatal):", tocErr.message);
+      }
+
+      // Extract text from spine XHTML files in order, tracking chapters
       const texts = [];
+      const chapters = []; // { title, charOffset }
+      let charOffset = 0;
       const processedPaths = new Set();
       for (const id of spineIds) {
         const href = manifestMap.get(id);
@@ -576,9 +634,30 @@ async function extractContent(filepath) {
         const $ = cheerio.load(entry.getData().toString("utf-8"));
         $("script, style").remove();
         const text = $("body").text().trim();
-        if (text) texts.push(text);
+        if (!text) continue;
+
+        // Check if this spine item has a TOC entry
+        const chapterTitle = tocMap.get(href);
+        if (chapterTitle) {
+          chapters.push({ title: chapterTitle, charOffset });
+        } else {
+          // Fallback: look for <h1>/<h2> at the start of the content
+          const heading = $("h1, h2").first().text().trim();
+          if (heading && heading.length < 100) {
+            chapters.push({ title: heading, charOffset });
+          }
+        }
+
+        texts.push(text);
+        charOffset += text.length + 2; // +2 for the \n\n joiner
       }
-      return texts.join("\n\n") || null;
+
+      const fullText = texts.join("\n\n") || null;
+      // Store chapters in a cache keyed by filepath for later retrieval
+      if (fullText && chapters.length > 1) {
+        epubChapterCache.set(filepath, chapters);
+      }
+      return fullText;
     }
     if (ext === ".mobi" || ext === ".azw3" || ext === ".azw") {
       // MOBI/AZW is PDB + PalmDOC/MOBI structure containing HTML content
@@ -1523,6 +1602,22 @@ function registerIPC() {
     if (doc.content) return doc.content;
     if (doc.filepath) return await extractContent(doc.filepath);
     return null;
+  });
+
+  // Get chapter metadata for a document (from EPUB TOC or content analysis)
+  ipcMain.handle("get-doc-chapters", async (_, docId) => {
+    const doc = getLibrary().find((d) => d.id === docId);
+    if (!doc) return [];
+    // Check EPUB chapter cache first
+    if (doc.filepath && epubChapterCache.has(doc.filepath)) {
+      return epubChapterCache.get(doc.filepath);
+    }
+    // For EPUBs not in cache, re-extract to populate cache
+    if (doc.filepath && path.extname(doc.filepath).toLowerCase() === ".epub") {
+      await extractContent(doc.filepath); // populates epubChapterCache
+      return epubChapterCache.get(doc.filepath) || [];
+    }
+    return [];
   });
 
   ipcMain.handle("add-doc-from-url", async (_, url) => {

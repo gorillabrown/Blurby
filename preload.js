@@ -22,6 +22,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateDocProgress: (docId, position) => ipcRenderer.invoke("update-doc-progress", docId, position),
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
+  // Get chapter metadata (from EPUB TOC or content analysis)
+  getDocChapters: (docId) => ipcRenderer.invoke("get-doc-chapters", docId),
 
   // Cover images
   getCoverImage: (coverPath) => ipcRenderer.invoke("get-cover-image", coverPath),

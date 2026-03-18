@@ -155,6 +155,23 @@ export function currentChapterIndex(chapters: Chapter[], wordIndex: number): num
   return -1;
 }
 
+/** Convert charOffset-based chapters (from EPUB TOC) to wordIndex-based chapters. */
+export function chaptersFromCharOffsets(
+  content: string,
+  charOffsetChapters: Array<{ title: string; charOffset: number }>
+): Chapter[] {
+  if (!content || charOffsetChapters.length === 0) return [];
+  // Build a mapping from character offset to word index
+  const chapters: Chapter[] = [];
+  for (const ch of charOffsetChapters) {
+    // Count words in text up to charOffset
+    const textBefore = content.slice(0, ch.charOffset);
+    const wordIndex = textBefore.split(/\s+/).filter(Boolean).length;
+    chapters.push({ title: ch.title, wordIndex });
+  }
+  return chapters;
+}
+
 /** Calculate per-character opacity based on distance from ORP (Optimal Recognition Point). */
 export function calculateFocusOpacity(charIndex: number, orpIndex: number, wordLength: number, focusSpan: number): number {
   if (focusSpan >= 1) return 1;
