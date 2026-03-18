@@ -10,7 +10,7 @@ Two features delivered as a cohesive unit:
 
 1. **Menu Flap** — A right-side overlay drawer accessible from both the reader and dashboard via hamburger icon or `Tab` key. Default view shows a reading queue (in-progress and unread documents). A Settings section at the bottom provides drill-down access to all app settings, replacing the current appearance panel in LibraryView.
 
-2. **URL-to-PDF Export** — When importing articles from URLs, a PDF is automatically generated via pdfkit and saved to a `Saved Articles/` subfolder inside the user's watched source folder. The library entry transitions from `source: "url"` to `source: "folder"`, making the PDF the canonical copy.
+2. **URL-to-PDF Export** — When importing articles from URLs, a PDF is automatically generated via pdfkit and saved to a `Saved Articles/` subfolder inside the user's watched source folder. This subfolder is excluded from the folder watcher and scanner to avoid duplication. The library entry transitions from `source: "url"` to `source: "folder"`, making the PDF the canonical copy. URL import requires a source folder to be selected.
 
 ---
 
@@ -53,8 +53,10 @@ Two features delivered as a cohesive unit:
 
 Two sections, in order:
 
-1. **In-progress** (0% < progress < 100%) — sorted by last read date descending (most recently read at top)
+1. **In-progress** (0% < progress < 100%) — sorted by `lastReadAt` timestamp descending (most recently read at top)
 2. **Unread** (progress = 0%) — sorted by date added descending
+
+Sorting requires a `lastReadAt` field on each document — see Library Migration section below.
 
 Each item shows:
 - Document title
@@ -76,7 +78,7 @@ Accessed via Settings button pinned at the bottom of the flap. Replaces the read
 |----------|-----------|--------|
 | Text Size | `TextSizeSettings.tsx` | Partial — wire existing fontSize, placeholder for separate focus/flow sliders |
 | Speed Reading | `SpeedReadingSettings.tsx` | Placeholder — mode toggle wired to Focus/ScrollReader, rest disabled |
-| Theme | `ThemeSettings.tsx` | Full — migrates existing accent color, font family, dark/light/system |
+| Theme | `ThemeSettings.tsx` | Full — migrates existing accent color, font family, dark/light/eink/system |
 | Layout | `LayoutSettings.tsx` | Placeholder — line/character/word spacing sliders, disabled |
 | Connectors | `ConnectorsSettings.tsx` | Full — migrates existing site login/logout/cookie UI |
 | Help | `HelpSettings.tsx` | Full — migrates existing HelpPanel content |
@@ -109,25 +111,27 @@ RHYTHM PAUSES
 
 ### Hotkey Map Reference
 
-| Action | Shortcut |
-|--------|----------|
-| Jump back | Left Arrow |
-| Jump forward | Right Arrow |
-| Speed up | Up Arrow |
-| Slow down | Down Arrow |
-| Speed up (coarse) | Shift + Up Arrow |
-| Slow down (coarse) | Shift + Down Arrow |
-| Play / pause | Space |
-| Reader view | Ctrl/Cmd + 1 |
-| Source view | Ctrl/Cmd + 2 |
-| Reader settings | Ctrl/Cmd + , |
-| Reading speed | Shift + S |
-| Narration settings | Shift + T |
-| Speed reading mode | Shift + F |
-| Navigation modal | N |
-| Toggle favorite | B |
-| Toggle narration | T |
-| Toggle side menu | Tab |
+Implemented shortcuts display normally. Unimplemented shortcuts display greyed out with a "planned" label.
+
+| Action | Shortcut | Status |
+|--------|----------|--------|
+| Jump back | Left Arrow | Implemented |
+| Jump forward | Right Arrow | Implemented |
+| Speed up | Up Arrow | Implemented |
+| Slow down | Down Arrow | Implemented |
+| Speed up (coarse) | Shift + Up Arrow | Planned |
+| Slow down (coarse) | Shift + Down Arrow | Planned |
+| Play / pause | Space | Implemented |
+| Reader view | Ctrl/Cmd + 1 | Planned |
+| Source view | Ctrl/Cmd + 2 | Planned |
+| Reader settings | Ctrl/Cmd + , | Planned |
+| Reading speed | Shift + S | Planned |
+| Narration settings | Shift + T | Planned |
+| Speed reading mode | Shift + F | Planned |
+| Navigation modal | N | Planned |
+| Toggle favorite | B | Planned |
+| Toggle narration | T | Planned |
+| Toggle side menu | Tab | Implemented |
 
 ---
 
@@ -147,6 +151,7 @@ Automatic — immediately after successful URL article extraction in the `add-do
 - `<source-folder>/Saved Articles/` subfolder
 - Auto-created on first URL import if it doesn't exist
 - Filename: sanitized article title + `.pdf` (e.g., `AI-in-Education.pdf`)
+- **Watcher exclusion:** The `Saved Articles/` subfolder is excluded from both the Chokidar watcher (`ignored` option) and `scanFolderAsync` to prevent duplication
 
 ### PDF Content (pdfkit)
 
@@ -162,7 +167,9 @@ After PDF is successfully written:
 3. Remove `content` from library.json (now loaded on-demand from the PDF file)
 4. Preserve all other metadata (position, wordCount, created, etc.)
 
-This eliminates duplication — the folder scanner sees the PDF as a normal folder-sourced document.
+This eliminates duplication. The `Saved Articles/` subfolder is excluded from the watcher/scanner, so the PDF is managed entirely via its library entry and absolute filepath. `load-doc-content` reads it on demand.
+
+**Sync protection:** `syncLibraryWithFolder` must preserve folder-sourced docs whose filepath is inside the `Saved Articles/` subfolder, even though the scanner does not visit that subfolder.
 
 ### Error Handling
 
@@ -190,7 +197,7 @@ This eliminates duplication — the folder scanner sees the PDF as a normal fold
 
 ### Removed/Refactored
 
-- **Appearance panel in LibraryView.tsx** (lines 321-396): Deleted. Logic migrates to ThemeSettings + ConnectorsSettings.
+- **Appearance panel in LibraryView.tsx** (the `showAppearance` conditional block): Deleted. Logic migrates to ThemeSettings + ConnectorsSettings.
 - **HelpPanel.tsx**: Content migrates to HelpSettings. Old component removed.
 
 ### State Management
@@ -232,8 +239,26 @@ This eliminates duplication — the folder scanner sees the PDF as a normal fold
 ```
 
 - Existing `fontSize` maps to `focusTextSize`, then is removed
+- All references to `fontSize` in App.tsx, ReaderView.tsx, ScrollReaderView.tsx, types.ts, and standalone reader must be updated to `focusTextSize`
 - All other existing fields (`accentColor`, `fontFamily`, `theme`, etc.) are preserved unchanged
-- No library schema change needed
+
+### Library Migration: v1 → v2
+
+Add `lastReadAt` field to each document for reading queue sorting:
+
+```json
+{
+  "lastReadAt": null
+}
+```
+
+- Default: `null` for all existing docs (treated as "never read" in sort order)
+- Updated whenever the user opens a document in the reader (timestamp set to `Date.now()`)
+- Existing `position > 0` docs could have `lastReadAt` backfilled from `modified` as a best-effort estimate
+
+### Relationship between `readingMode` and existing `readerMode`
+
+The existing `readerMode` state in App.tsx ("speed"/"scroll") maps to the new `readingMode` setting ("focus"/"flow"). During implementation, consolidate these: `readingMode: "focus"` = current speed/RSVP reader, `readingMode: "flow"` = current scroll reader (to be enhanced later with word-by-word highlighting). The existing `readerMode` state variable should be derived from `settings.readingMode`.
 
 ---
 
@@ -244,13 +269,13 @@ This eliminates duplication — the folder scanner sees the PDF as a normal fold
 | File | Coverage |
 |------|----------|
 | `tests/menu-flap.test.js` | Queue sorting (in-progress by last-read, unread by date-added), bubble count calculation (`Math.floor(progress/10)`), compact mode toggle |
-| `tests/pdf-export.test.js` | Filename sanitization, metadata structure, doc source transition logic (url→folder field changes) |
+| `tests/pdf-export.test.js` | Filename sanitization, metadata structure, doc source transition logic (url→folder field changes), pdfkit→pdf-parse round-trip text fidelity |
 
 ### Existing Test Updates
 
 | File | Changes |
 |------|---------|
-| `tests/migrations.test.js` | Add v3→v4 cases: new fields with defaults, fontSize→focusTextSize rename, existing fields preserved |
+| `tests/migrations.test.js` | Add v3→v4 settings cases (new fields with defaults, fontSize→focusTextSize rename, existing fields preserved) and library v1→v2 case (lastReadAt added to all docs) |
 
 ### Tested (pure functions)
 
@@ -258,7 +283,9 @@ This eliminates duplication — the folder scanner sees the PDF as a normal fold
 - Bubble count from progress percentage
 - Migration function correctness
 - PDF filename sanitization
+- PDF text round-trip (pdfkit write → pdf-parse read)
 - Settings defaults after migration
+- Library migration (lastReadAt field added)
 
 ### Not tested (requires Electron)
 
@@ -293,7 +320,7 @@ This eliminates duplication — the folder scanner sees the PDF as a normal fold
 - [ ] Divider between main settings and help/hotkeys
 
 ### 5.4 Settings Sub-pages (Implemented)
-- [ ] `ThemeSettings.tsx` — migrate accent color, font family, dark/light/system from LibraryView
+- [ ] `ThemeSettings.tsx` — migrate accent color, font family, dark/light/eink/system from LibraryView
 - [ ] `ConnectorsSettings.tsx` — migrate site login UI from LibraryView
 - [ ] `HelpSettings.tsx` — migrate HelpPanel content
 - [ ] `HotkeyMapSettings.tsx` — read-only hotkey reference
@@ -307,14 +334,22 @@ This eliminates duplication — the folder scanner sees the PDF as a normal fold
 - [ ] Install pdfkit dependency
 - [ ] Generate PDF on URL import with title/author/URL/date metadata
 - [ ] Save to `<source-folder>/Saved Articles/` subfolder
+- [ ] Exclude `Saved Articles/` from Chokidar watcher and `scanFolderAsync`
+- [ ] Protect `Saved Articles/` docs in `syncLibraryWithFolder` from being discarded
 - [ ] Transition library entry from `source: "url"` to `source: "folder"`
 - [ ] Disable URL import when no source folder is selected
+- [ ] Verify pdfkit→pdf-parse round-trip text fidelity
 - [ ] Handle PDF generation errors gracefully (log, keep URL-sourced entry)
 
-### 5.7 Schema Migration v3→v4
-- [ ] Add migration function for all new settings fields
-- [ ] Map existing `fontSize` to `focusTextSize`
-- [ ] Add migration tests
+### 5.7 Schema Migrations
+- [ ] Settings v3→v4: Add all new settings fields with defaults
+- [ ] Settings v3→v4: Map existing `fontSize` to `focusTextSize`
+- [ ] Settings v3→v4: Update all `fontSize` references across codebase to `focusTextSize`
+- [ ] Library v1→v2: Add `lastReadAt` field to all docs (default null)
+- [ ] Library v1→v2: Backfill `lastReadAt` from `modified` for docs with position > 0
+- [ ] Update `lastReadAt` timestamp when opening a doc in the reader
+- [ ] Add migration tests for both settings and library migrations
+- [ ] Consolidate `readerMode` state with `readingMode` setting
 
 ### 5.8 Remove Legacy Appearance Panel
 - [ ] Delete appearance panel section from LibraryView
