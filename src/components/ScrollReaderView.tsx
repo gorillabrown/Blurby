@@ -216,23 +216,43 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         }}
       >
         {isFlowActive ? (
-          <div className="scroll-reader-text flow-text" style={{
-            fontSize: `${18 * scale}px`,
-            lineHeight: spacing?.line || undefined,
-            letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
-            wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
-          }}>
-            {words.map((word, i) => (
-              <span
-                key={i}
-                ref={i === flowWordIndex ? flowWordRef : undefined}
-                className={i === flowWordIndex ? "flow-word-active" : ""}
-                onClick={() => { flowWordIndexRef.current = i; setFlowWordIndex(i); }}
-              >
-                {word}{" "}
-              </span>
-            ))}
-          </div>
+          (() => {
+            // Virtual windowing: only render ~3000 words around current position for large docs
+            const VIRT_THRESHOLD = 10000;
+            const WINDOW_HALF = 1500;
+            const useVirtual = words.length > VIRT_THRESHOLD;
+            const windowStart = useVirtual ? Math.max(0, flowWordIndex - WINDOW_HALF) : 0;
+            const windowEnd = useVirtual ? Math.min(words.length, flowWordIndex + WINDOW_HALF) : words.length;
+            const visibleWords = useVirtual ? words.slice(windowStart, windowEnd) : words;
+            // Estimate spacer height for words before the window (approx 6 chars/word + space, ~14px per line of ~10 words)
+            const estLinesAbove = useVirtual ? Math.ceil(windowStart / 10) : 0;
+            const spacerHeight = estLinesAbove * (18 * scale * (spacing?.line || 1.8));
+
+            return (
+              <div className="scroll-reader-text flow-text" style={{
+                fontSize: `${18 * scale}px`,
+                lineHeight: spacing?.line || undefined,
+                letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+                wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+              }}>
+                {useVirtual && <div style={{ height: spacerHeight }} aria-hidden="true" />}
+                {visibleWords.map((word, vi) => {
+                  const globalIdx = windowStart + vi;
+                  return (
+                    <span
+                      key={globalIdx}
+                      ref={globalIdx === flowWordIndex ? flowWordRef : undefined}
+                      className={globalIdx === flowWordIndex ? "flow-word-active" : ""}
+                      onClick={() => { flowWordIndexRef.current = globalIdx; setFlowWordIndex(globalIdx); }}
+                    >
+                      {word}{" "}
+                    </span>
+                  );
+                })}
+                {useVirtual && <div style={{ height: Math.ceil((words.length - windowEnd) / 10) * (18 * scale * (spacing?.line || 1.8)) }} aria-hidden="true" />}
+              </div>
+            );
+          })()
         ) : (
           <div className="scroll-reader-text" style={{
             fontSize: `${18 * scale}px`,

@@ -13,7 +13,9 @@ export function useReaderKeys(
   adjustFocusTextSize: (delta: number) => void,
   toggleFlap?: () => void,
   toggleFavorite?: () => void,
-  switchMode?: () => void
+  switchMode?: () => void,
+  prevChapter?: () => void,
+  nextChapter?: () => void
 ) {
   useEffect(() => {
     if (view !== "reader") return;
@@ -25,6 +27,9 @@ export function useReaderKeys(
       // Shift+F toggles reading mode (focus ↔ scroll)
       if (e.code === "KeyF" && e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); switchMode?.(); return; }
       // Ctrl/Cmd+, opens settings (handled by useGlobalKeys)
+      // [ / ] for chapter navigation
+      if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); prevChapter?.(); return; }
+      if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); nextChapter?.(); return; }
       // Shift+Up/Down for coarse WPM adjustment (±100)
       if (e.code === "ArrowUp" && e.shiftKey) { e.preventDefault(); adjustWpm(100); return; }
       if (e.code === "ArrowDown" && e.shiftKey) { e.preventDefault(); adjustWpm(-100); return; }
@@ -41,7 +46,7 @@ export function useReaderKeys(
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode, prevChapter, nextChapter]);
 }
 
 export function useGlobalKeys({ toggleFlap, openSettings, view }: { toggleFlap: () => void; openSettings?: () => void; view: string }) {

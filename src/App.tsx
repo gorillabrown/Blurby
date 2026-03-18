@@ -300,7 +300,31 @@ function AppInner() {
     setMenuFlapOpen(true);
   }, []);
 
-  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode);
+  // Chapter navigation (uses chaptersFromCharOffsets or detectChapters)
+  const handlePrevChapter = useCallback(() => {
+    if (!activeDoc) return;
+    const { detectChapters, chaptersFromCharOffsets, currentChapterIndex: getCurChIdx } = require("./utils/text");
+    const chs = docChapters.length > 0
+      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
+      : detectChapters(activeDoc.content, words);
+    if (chs.length < 2) return;
+    const curIdx = getCurChIdx(chs, wordIndex);
+    if (curIdx > 0) jumpToWord(chs[curIdx - 1].wordIndex);
+    else jumpToWord(chs[0].wordIndex);
+  }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
+
+  const handleNextChapter = useCallback(() => {
+    if (!activeDoc) return;
+    const { detectChapters, chaptersFromCharOffsets, currentChapterIndex: getCurChIdx } = require("./utils/text");
+    const chs = docChapters.length > 0
+      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
+      : detectChapters(activeDoc.content, words);
+    if (chs.length < 2) return;
+    const curIdx = getCurChIdx(chs, wordIndex);
+    if (curIdx < chs.length - 1) jumpToWord(chs[curIdx + 1].wordIndex);
+  }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
+
+  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter);
   useGlobalKeys({ toggleFlap: toggleMenuFlap, openSettings: handleOpenSettings, view });
 
   // Smart Alt+V handler
@@ -404,6 +428,8 @@ function AppInner() {
             onSwitchToScroll={handleSwitchToScroll}
             onJumpToWord={jumpToWord}
             onToggleFlap={toggleMenuFlap}
+            onPrevChapter={handlePrevChapter}
+            onNextChapter={handleNextChapter}
           />
         </ErrorBoundary>
         {menuFlap}

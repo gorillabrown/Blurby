@@ -22,9 +22,11 @@ interface ReaderViewProps {
   onSwitchToScroll: () => void;
   onJumpToWord: (index: number) => void;
   onToggleFlap?: () => void;
+  onPrevChapter?: () => void;
+  onNextChapter?: () => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap, onPrevChapter, onNextChapter }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
@@ -260,12 +262,18 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           <span>{remaining} left</span>
         </div>
         {chapterInfo && (
-          <div className="reader-chapter-info">
+          <div className="reader-chapter-info" onClick={(e) => e.stopPropagation()}>
+            {onPrevChapter && chapterInfo.num > 1 && (
+              <button className="chapter-nav-btn" onClick={onPrevChapter} aria-label="Previous chapter" title="Previous chapter ([)">&lsaquo;</button>
+            )}
             <span className="reader-chapter-label">
               Ch. {chapterInfo.num}/{chapterInfo.total}
             </span>
             <span className="reader-chapter-pct">{chapterInfo.pct}%</span>
             <span className="reader-chapter-remaining">{chapterInfo.remaining} to ch. end</span>
+            {onNextChapter && chapterInfo.num < chapterInfo.total && (
+              <button className="chapter-nav-btn" onClick={onNextChapter} aria-label="Next chapter" title="Next chapter (])">&rsaquo;</button>
+            )}
           </div>
         )}
       </div>
