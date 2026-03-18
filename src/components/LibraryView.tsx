@@ -84,10 +84,9 @@ export default function LibraryView({
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
   }, []);
 
-  const BOOK_EXTS = [".epub", ".mobi", ".azw3", ".kfx"];
-  const isBook = (d: BlurbyDoc) => d.source === "folder" && d.ext && BOOK_EXTS.includes(d.ext);
-  const isPdf = (d: BlurbyDoc) => d.source === "folder" && d.ext === ".pdf";
-  const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual" || (d.source === "folder" && !isBook(d) && !isPdf(d));
+  const isPdf = (d: BlurbyDoc) => d.ext === ".pdf";
+  const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual";
+  const isBook = (d: BlurbyDoc) => !isArticle(d) && !isPdf(d);
 
   // Filter and sort library
   const getFilteredAndSorted = () => {
