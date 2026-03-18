@@ -21,6 +21,12 @@ const settingsMigrations = [
     data.schemaVersion = 3;
     return data;
   },
+  (data) => {
+    if (data.initialPauseMs == null) data.initialPauseMs = 3000;
+    if (data.punctuationPauseMs == null) data.punctuationPauseMs = 1000;
+    data.schemaVersion = 4;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -114,6 +120,22 @@ describe("settings migrations", () => {
     expect(result.theme).toBe("dark");
     expect(result.accentColor).toBe(null);
     expect(result.fontFamily).toBe(null);
+  });
+
+  it("migrates v3 to v4: adds pause duration settings", () => {
+    const v3 = { schemaVersion: 3, wpm: 300, folderName: "Test", recentFolders: [], theme: "dark", accentColor: null, fontFamily: null };
+    const result = runMigrations(v3, settingsMigrations, 4);
+    expect(result.schemaVersion).toBe(4);
+    expect(result.initialPauseMs).toBe(3000);
+    expect(result.punctuationPauseMs).toBe(1000);
+  });
+
+  it("migrates v0 all the way to v4", () => {
+    const v0 = { wpm: 250 };
+    const result = runMigrations(v0, settingsMigrations, 4);
+    expect(result.schemaVersion).toBe(4);
+    expect(result.initialPauseMs).toBe(3000);
+    expect(result.punctuationPauseMs).toBe(1000);
   });
 });
 

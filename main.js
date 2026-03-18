@@ -9,7 +9,7 @@ const { JSDOM } = require("jsdom");
 
 const isDev = !app.isPackaged;
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
-const CURRENT_SETTINGS_SCHEMA = 3;
+const CURRENT_SETTINGS_SCHEMA = 4;
 const CURRENT_LIBRARY_SCHEMA = 1;
 
 // ── Paths ──────────────────────────────────────────────────────────────────────
@@ -57,6 +57,13 @@ const settingsMigrations = [
     data.schemaVersion = 3;
     return data;
   },
+  // v3 → v4: Add pause duration settings
+  (data) => {
+    if (data.initialPauseMs == null) data.initialPauseMs = 3000;
+    if (data.punctuationPauseMs == null) data.punctuationPauseMs = 1000;
+    data.schemaVersion = 4;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -96,7 +103,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, fontSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, fontSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, initialPauseMs: 3000, punctuationPauseMs: 1000 };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }

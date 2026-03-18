@@ -30,6 +30,8 @@ export interface BlurbySettings {
   fontSize: number;
   accentColor: string | null;
   fontFamily: string | null;
+  initialPauseMs: number;     // pause before first word advances (default 3000)
+  punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────

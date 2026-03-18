@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import { focusChar, formatTime, MIN_WPM, MAX_WPM, WPM_STEP, FONT_SIZE_STEP } from "../utils/text";
+import { focusChar, formatTime, detectChapters, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FONT_SIZE_STEP, Chapter } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
@@ -42,6 +42,30 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
   const pct = words.length > 0 ? Math.round((wordIndex / words.length) * 100) : 0;
   const remaining = formatTime(words.length - wordIndex, wpm);
   const scale = (fontSize || 100) / 100;
+
+  // Chapter detection and metrics
+  const chapters = useMemo(
+    () => detectChapters(activeDoc.content, words),
+    [activeDoc.content, words]
+  );
+  const chIdx = currentChapterIndex(chapters, wordIndex);
+  const hasChapters = chapters.length > 1;
+  const chapterInfo = useMemo(() => {
+    if (!hasChapters || chIdx < 0) return null;
+    const chStart = chapters[chIdx].wordIndex;
+    const chEnd = chIdx + 1 < chapters.length ? chapters[chIdx + 1].wordIndex : words.length;
+    const chWords = chEnd - chStart;
+    const chWordsRead = wordIndex - chStart;
+    const chPct = chWords > 0 ? Math.round((chWordsRead / chWords) * 100) : 0;
+    const chRemaining = formatTime(chEnd - wordIndex, wpm);
+    return {
+      title: chapters[chIdx].title,
+      num: chIdx + 1,
+      total: chapters.length,
+      pct: chPct,
+      remaining: chRemaining,
+    };
+  }, [hasChapters, chIdx, chapters, wordIndex, words.length, wpm]);
 
   // Build content paragraphs from the raw content for the pause view
   const paragraphs = useMemo(() => {
@@ -192,6 +216,15 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
           </span>
           <span>{remaining} left</span>
         </div>
+        {chapterInfo && (
+          <div className="reader-chapter-info">
+            <span className="reader-chapter-label">
+              Ch. {chapterInfo.num}/{chapterInfo.total}
+            </span>
+            <span className="reader-chapter-pct">{chapterInfo.pct}%</span>
+            <span className="reader-chapter-remaining">{chapterInfo.remaining} to ch. end</span>
+          </div>
+        )}
       </div>
     </div>
   );

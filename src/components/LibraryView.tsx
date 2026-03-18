@@ -362,6 +362,31 @@ export default function LibraryView({
               </div>
             </div>
             <div className="appearance-section">
+              <span className="appearance-label">Reader pauses</span>
+              <div className="appearance-row" style={{ flexDirection: "column", gap: 8 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem" }}>
+                  <span style={{ minWidth: 120 }}>Initial pause</span>
+                  <input
+                    type="range" min={0} max={5000} step={500}
+                    value={settings.initialPauseMs ?? 3000}
+                    onChange={(e) => api.saveSettings({ initialPauseMs: Number(e.target.value) })}
+                    style={{ flex: 1 }}
+                  />
+                  <span style={{ minWidth: 36, textAlign: "right" }}>{((settings.initialPauseMs ?? 3000) / 1000).toFixed(1)}s</span>
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: "0.85rem" }}>
+                  <span style={{ minWidth: 120 }}>Punctuation pause</span>
+                  <input
+                    type="range" min={0} max={3000} step={250}
+                    value={settings.punctuationPauseMs ?? 1000}
+                    onChange={(e) => api.saveSettings({ punctuationPauseMs: Number(e.target.value) })}
+                    style={{ flex: 1 }}
+                  />
+                  <span style={{ minWidth: 36, textAlign: "right" }}>{((settings.punctuationPauseMs ?? 1000) / 1000).toFixed(1)}s</span>
+                </label>
+              </div>
+            </div>
+            <div className="appearance-section">
               <span className="appearance-label">Site logins</span>
               <div className="appearance-hint">Log in to paywalled sites to access full articles</div>
               {siteLogins.length > 0 && (
