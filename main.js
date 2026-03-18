@@ -220,6 +220,8 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
+let syncDebounceTimer = null;
+const failedExtractions = new Set(); // filepaths that yielded no content — skip on re-scan
 const epubChapterCache = new Map(); // filepath → [{ title, charOffset }]
 let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 }, initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list" };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
@@ -539,8 +541,9 @@ async function extractContent(filepath) {
           globalThis.DOMMatrix = canvas.DOMMatrix;
           globalThis.ImageData = canvas.ImageData;
           globalThis.Path2D = canvas.Path2D;
-        } catch {
-          // Minimal polyfills if native canvas not available
+        } catch (canvasErr) {
+          // Minimal polyfills if native canvas not available — PDF text extraction still works
+          console.log("Note: @napi-rs/canvas not available, using polyfills for PDF parsing. Run 'npm rebuild @napi-rs/canvas' if PDF extraction has issues.");
           globalThis.DOMMatrix = globalThis.DOMMatrix || class DOMMatrix { constructor() { this.a=1;this.b=0;this.c=0;this.d=1;this.e=0;this.f=0; } };
           globalThis.ImageData = globalThis.ImageData || class ImageData { constructor(w,h) { this.width=w;this.height=h;this.data=new Uint8ClampedArray(w*h*4); } };
           globalThis.Path2D = globalThis.Path2D || class Path2D { };
@@ -650,7 +653,10 @@ async function extractContent(filepath) {
           }
         }
       } catch (tocErr) {
-        console.log("EPUB TOC parse error (non-fatal):", tocErr.message);
+        // Only log novel TOC errors, not repetitive ones like "Namespaced attributes" for every EPUB
+        if (!tocErr.message?.includes("Namespaced attributes")) {
+          console.log("EPUB TOC parse error (non-fatal):", tocErr.message);
+        }
       }
 
       // Extract text from spine XHTML files in order, tracking chapters
@@ -882,6 +888,11 @@ async function scanFolderAsync(folderPath) {
   return files.sort((a, b) => a.filename.localeCompare(b.filename));
 }
 
+function debouncedSyncLibraryWithFolder() {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+  syncDebounceTimer = setTimeout(() => { syncDebounceTimer = null; syncLibraryWithFolder(); }, 1000);
+}
+
 async function syncLibraryWithFolder() {
   if (!settings.sourceFolder) return;
   const files = await scanFolderAsync(settings.sourceFolder);
@@ -893,8 +904,12 @@ async function syncLibraryWithFolder() {
     const prev = existing.get(file.filepath);
     if (prev) {
       synced.push({ ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
+    } else if (failedExtractions.has(file.filepath)) {
+      // Skip files that previously failed content extraction
+      continue;
     } else {
       const content = await extractContent(file.filepath);
+      if (!content) { failedExtractions.add(file.filepath); }
       if (content) {
         const wordCount = content.split(/\s+/).filter(Boolean).length;
         const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
@@ -1129,10 +1144,10 @@ function startWatcher() {
   watcher.on("add", async (filepath) => {
     if (!SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) return;
     if (!await isPathWithinFolder(filepath, settings.sourceFolder)) return;
-    syncLibraryWithFolder();
+    debouncedSyncLibraryWithFolder();
   });
 
-  watcher.on("unlink", () => syncLibraryWithFolder());
+  watcher.on("unlink", () => debouncedSyncLibraryWithFolder());
 
   watcher.on("change", async (filepath) => {
     if (!SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) return;
@@ -1905,6 +1920,7 @@ function registerIPC() {
   ipcMain.handle("rescan-folder", async () => {
     if (!settings.sourceFolder) return { error: "No source folder selected" };
     console.log("[rescan] Starting rescan of:", settings.sourceFolder);
+    failedExtractions.clear(); // Manual rescan retries previously failed files
     try {
       const files = await scanFolderAsync(settings.sourceFolder);
       const docs = getLibrary();
@@ -1990,6 +2006,8 @@ function registerIPC() {
               wordCount, position: 0, created: Date.now(), source: "folder",
               author: author || null, coverPath: coverPath || null, lastReadAt: null,
             });
+          } else {
+            failedExtractions.add(file.filepath);
           }
         }
       }
