@@ -36,10 +36,11 @@ function toTitleCase(s: string): string {
 
 export function formatDisplayTitle(s: string): string {
   let t = s;
-  // Replace underscores with spaces (e.g. "Tradingoptionsfordummies_ebook" → "Tradingoptionsfordummies ebook")
+  // "_ " (underscore+space) → ": " (filesystem colon substitution) — must come before general underscore replace
+  t = t.replace(/_ /g, ": ");
+  // Remaining underscores → spaces
   t = t.replace(/_/g, " ");
-  // Replace "_ " with ": " (filesystem colon substitution)
-  // Already handled by above, but catch " : " double-space
+  // Collapse multiple spaces
   t = t.replace(/\s{2,}/g, " ").trim();
   // Insert spaces before capitals in camelCase/PascalCase runs (e.g. "TradingOptionsForDummies" → "Trading Options For Dummies")
   t = t.replace(/([a-z])([A-Z])/g, "$1 $2");
