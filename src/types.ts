@@ -17,6 +17,8 @@ export interface BlurbyDoc {
   archived?: boolean;
   archivedAt?: number;
   lastReadAt?: number | null;
+  author?: string;
+  coverPath?: string; // absolute path to extracted cover image on disk
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -55,6 +57,7 @@ export interface BlurbySettings {
   layoutSpacing: LayoutSpacing;
   initialPauseMs: number;     // pause before first word advances (default 3000)
   punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
+  viewMode: "list" | "grid";
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────
@@ -108,6 +111,7 @@ export interface ElectronAPI {
   getSiteLogins: () => Promise<Array<{ domain: string; cookieCount: number }>>;
   siteLogin: (url: string) => Promise<{ success?: boolean; site?: string; cancelled?: boolean; error?: string }>;
   siteLogout: (domain: string) => Promise<boolean>;
+  getCoverImage: (coverPath: string) => Promise<string | null>;
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
   onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;
   onUpdateAvailable?: (callback: (version: string) => void) => () => void;

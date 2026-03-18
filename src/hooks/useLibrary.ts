@@ -22,6 +22,9 @@ const defaultSettings: BlurbySettings = {
   flowTextSize: 100,
   rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
   layoutSpacing: { line: 1.5, character: 0, word: 0 },
+  initialPauseMs: 3000,
+  punctuationPauseMs: 1000,
+  viewMode: "list" as const,
 };
 
 export default function useLibrary() {

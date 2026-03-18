@@ -72,8 +72,8 @@ async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate
 
 const isDev = !app.isPackaged;
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
-const CURRENT_SETTINGS_SCHEMA = 4;
-const CURRENT_LIBRARY_SCHEMA = 2;
+const CURRENT_SETTINGS_SCHEMA = 5;
+const CURRENT_LIBRARY_SCHEMA = 3;
 
 // ── Paths ──────────────────────────────────────────────────────────────────────
 function getDataPath() {
@@ -151,6 +151,12 @@ const settingsMigrations = [
     data.schemaVersion = 4;
     return data;
   },
+  // v4 → v5: add viewMode setting
+  (data) => {
+    if (data.viewMode === undefined) data.viewMode = "list";
+    data.schemaVersion = 5;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -181,6 +187,15 @@ const libraryMigrations = [
     }
     return { schemaVersion: 2, docs };
   },
+  // v2 → v3: add author and coverPath to all docs
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      if (doc.author === undefined) doc.author = null;
+      if (doc.coverPath === undefined) doc.coverPath = null;
+    }
+    return { schemaVersion: 3, docs };
+  },
 ];
 
 function runMigrations(data, migrations, currentVersion) {
@@ -204,7 +219,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 }, initialPauseMs: 3000, punctuationPauseMs: 1000 };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 }, initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list" };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }
@@ -307,6 +322,115 @@ async function extractContent(filepath) {
   }
 }
 
+// ── EPUB metadata extraction ───────────────────────────────────────────────────
+async function extractEpubCover(filepath, docId) {
+  try {
+    const AdmZip = require("adm-zip");
+    const zip = new AdmZip(filepath);
+    const entries = zip.getEntries();
+
+    // Parse container.xml to find OPF path
+    const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
+    let opfPath = "";
+    if (containerEntry) {
+      const cheerio = require("cheerio");
+      const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+      opfPath = $("rootfile").attr("full-path") || "";
+    }
+
+    const opfEntry = entries.find((e) => e.entryName === opfPath);
+    let coverEntry = null;
+
+    if (opfEntry) {
+      const cheerio = require("cheerio");
+      const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
+      const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+
+      // Look for manifest item with id containing "cover" and image media-type
+      let coverHref = null;
+      $("manifest item").each((_, el) => {
+        const id = ($(el).attr("id") || "").toLowerCase();
+        const mediaType = ($(el).attr("media-type") || "").toLowerCase();
+        const href = $(el).attr("href");
+        if (id.includes("cover") && mediaType.startsWith("image/") && href && !coverHref) {
+          coverHref = opfDir + href;
+        }
+      });
+
+      // Also check <meta name="cover"> pattern
+      if (!coverHref) {
+        let coverId = null;
+        $("meta[name='cover']").each((_, el) => {
+          coverId = $(el).attr("content");
+        });
+        if (coverId) {
+          $("manifest item").each((_, el) => {
+            if ($(el).attr("id") === coverId) {
+              coverHref = opfDir + $(el).attr("href");
+            }
+          });
+        }
+      }
+
+      if (coverHref) {
+        coverEntry = entries.find((e) => e.entryName === coverHref);
+      }
+    }
+
+    // Fallback: look for common cover filenames
+    if (!coverEntry) {
+      const commonNames = ["cover.jpg", "cover.jpeg", "cover.png", "images/cover.jpg", "images/cover.jpeg", "images/cover.png", "OEBPS/cover.jpg", "OEBPS/images/cover.jpg"];
+      for (const name of commonNames) {
+        coverEntry = entries.find((e) => e.entryName.toLowerCase() === name.toLowerCase());
+        if (coverEntry) break;
+      }
+    }
+
+    if (!coverEntry) return null;
+
+    const ext = path.extname(coverEntry.entryName).toLowerCase() || ".jpg";
+    const coversDir = path.join(getDataPath(), "covers");
+    await fsPromises.mkdir(coversDir, { recursive: true });
+    const coverFilePath = path.join(coversDir, `${docId}${ext}`);
+    await fsPromises.writeFile(coverFilePath, coverEntry.getData());
+    return coverFilePath;
+  } catch {
+    return null;
+  }
+}
+
+async function extractAuthorFromEpub(filepath) {
+  try {
+    const AdmZip = require("adm-zip");
+    const cheerio = require("cheerio");
+    const zip = new AdmZip(filepath);
+    const entries = zip.getEntries();
+
+    const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
+    let opfPath = "";
+    if (containerEntry) {
+      const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+      opfPath = $("rootfile").attr("full-path") || "";
+    }
+
+    const opfEntry = entries.find((e) => e.entryName === opfPath);
+    if (!opfEntry) return null;
+
+    const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+    const creator = $("dc\\:creator, creator").first().text().trim();
+    return creator || null;
+  } catch {
+    return null;
+  }
+}
+
+function extractAuthorFromFilename(filename) {
+  // Try "Title - Author" pattern
+  const base = path.basename(filename, path.extname(filename));
+  const match = base.match(/^.+\s+-\s+(.+)$/);
+  return match ? match[1].trim() : null;
+}
+
 // ── Symlink-safe path validation ───────────────────────────────────────────────
 async function isPathWithinFolder(filepath, folderPath) {
   try {
@@ -371,12 +495,24 @@ async function syncLibraryWithFolder() {
       const content = await extractContent(file.filepath);
       if (content) {
         const wordCount = content.split(/\s+/).filter(Boolean).length;
+        const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+        let author = null;
+        let coverPath = null;
+        if (file.ext === ".epub") {
+          author = await extractAuthorFromEpub(file.filepath);
+          coverPath = await extractEpubCover(file.filepath, docId);
+        } else {
+          author = extractAuthorFromFilename(file.filename);
+        }
         synced.push({
-          id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
+          id: docId,
           title: path.basename(file.filename, file.ext),
           filepath: file.filepath, filename: file.filename,
           ext: file.ext, size: file.size, modified: file.modified,
           wordCount, position: 0, created: Date.now(), source: "folder",
+          author: author || null,
+          coverPath: coverPath || null,
+          lastReadAt: null,
         });
       }
     }
@@ -1168,6 +1304,17 @@ function registerIPC() {
   });
 
   ipcMain.handle("get-stats", () => getStats());
+
+  // Cover images
+  ipcMain.handle("get-cover-image", async (_, coverPath) => {
+    if (!coverPath) return null;
+    try {
+      const buffer = await fsPromises.readFile(coverPath);
+      const ext = path.extname(coverPath).toLowerCase();
+      const mime = ext === ".png" ? "image/png" : ext === ".gif" ? "image/gif" : "image/jpeg";
+      return `data:${mime};base64,${buffer.toString("base64")}`;
+    } catch { return null; }
+  });
 
   // Import/export
   ipcMain.handle("export-library", async () => {

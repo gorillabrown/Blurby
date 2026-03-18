@@ -157,7 +157,7 @@ function AppInner() {
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
 
   const {
-    library, setLibrary, settings, loaded, platform, loadingContent, toast,
+    library, setLibrary, settings, setSettings, loaded, platform, loadingContent, toast,
     addDoc, deleteDoc, resetProgress, selectFolder, switchFolder,
     loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
     toggleFavorite, archiveDoc, unarchiveDoc, showToast,
@@ -310,7 +310,8 @@ function AppInner() {
 
   const handleSettingsChange = useCallback(async (updates: Partial<import("./types").BlurbySettings>) => {
     await api.saveSettings(updates);
-  }, []);
+    setSettings((prev) => ({ ...prev, ...updates }));
+  }, [setSettings]);
 
   if (!loaded) {
     return <div className="loading-screen">loading...</div>;
@@ -402,6 +403,7 @@ function AppInner() {
             onArchiveDoc={archiveDoc}
             onUnarchiveDoc={unarchiveDoc}
             onToggleFlap={toggleMenuFlap}
+            onSettingsChange={handleSettingsChange}
           />
           {importPending && (
             <ImportConfirmDialog

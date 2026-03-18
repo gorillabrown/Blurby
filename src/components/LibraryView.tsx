@@ -4,6 +4,7 @@ import { BlurbyDoc, BlurbySettings } from "../types";
 import { useTheme } from "./ThemeProvider";
 import AddEditPanel from "./AddEditPanel";
 import DocCard from "./DocCard";
+import DocGridCard from "./DocGridCard";
 import StatsPanel from "./StatsPanel";
 import RecentFolders from "./RecentFolders";
 
@@ -30,13 +31,14 @@ interface LibraryViewProps {
   onArchiveDoc: (id: string) => void;
   onUnarchiveDoc: (id: string) => void;
   onToggleFlap: () => void;
+  onSettingsChange: (patch: Partial<BlurbySettings>) => void;
 }
 
 export default function LibraryView({
   library, settings, wpm, isMac, folderName, loadingContent, toast,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
-  onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap,
+  onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
 }: LibraryViewProps) {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "favorites" | "archived"
@@ -195,6 +197,24 @@ export default function LibraryView({
             </div>
           </div>
           <div className="library-actions">
+            <button
+              className="view-toggle-btn btn"
+              title={settings.viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
+              aria-label={settings.viewMode === "grid" ? "List view" : "Grid view"}
+              onClick={() => onSettingsChange({ viewMode: settings.viewMode === "grid" ? "list" : "grid" })}
+            >
+              {settings.viewMode === "grid" ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              ) : (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+                </svg>
+              )}
+            </button>
             <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
                 <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
@@ -326,23 +346,44 @@ export default function LibraryView({
           </div>
         )}
 
-        {/* Document list */}
-        <div className="doc-list" role="list">
-          {filteredLibrary.map((doc) => (
-            <DocCard
-              key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
-              onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
-              onDelete={onDeleteDoc}
-              onConfirmDelete={setConfirmDelete}
-              onCancelDelete={() => setConfirmDelete(null)}
-              onToggleFavorite={onToggleFavorite}
-              onArchive={onArchiveDoc}
-              onUnarchive={onUnarchiveDoc}
-              onOpenScroll={(d) => onOpenDoc(d, "scroll")}
-              onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
-            />
-          ))}
-        </div>
+        {/* Document list / grid */}
+        {settings.viewMode === "grid" ? (
+          <div className="doc-grid" role="list">
+            {filteredLibrary.map((doc) => (
+              <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} />
+            ))}
+          </div>
+        ) : (
+          <>
+            {filteredLibrary.length > 0 && (
+              <div className="doc-list-header" aria-hidden="true">
+                <span className="doc-list-col-cover" />
+                <span className="doc-list-col-title">Title</span>
+                <span className="doc-list-col-author">Author</span>
+                <span className="doc-list-col-format">Format</span>
+                <span className="doc-list-col-words">Words</span>
+                <span className="doc-list-col-progress">Progress</span>
+                <span className="doc-list-col-time">Time</span>
+              </div>
+            )}
+            <div className="doc-list" role="list">
+              {filteredLibrary.map((doc) => (
+                <DocCard
+                  key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
+                  onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
+                  onDelete={onDeleteDoc}
+                  onConfirmDelete={setConfirmDelete}
+                  onCancelDelete={() => setConfirmDelete(null)}
+                  onToggleFavorite={onToggleFavorite}
+                  onArchive={onArchiveDoc}
+                  onUnarchive={onUnarchiveDoc}
+                  onOpenScroll={(d) => onOpenDoc(d, "scroll")}
+                  onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Footer */}
         <div className="library-footer">

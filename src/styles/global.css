@@ -1223,6 +1223,156 @@ button:focus-visible {
   font-size: 14px;
 }
 
+/* ── View Toggle Button ───────────────────────────────────────────────────── */
+.view-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+}
+
+/* ── Doc Grid (grid view) ─────────────────────────────────────────────────── */
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.doc-grid-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: border-color 0.12s ease;
+  overflow: hidden;
+}
+.doc-grid-card:hover {
+  border-color: var(--border);
+}
+
+.doc-grid-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background: var(--bg-raised);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.doc-grid-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.doc-grid-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-grid-cover-ext {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dimmer);
+  letter-spacing: 1px;
+}
+
+.doc-grid-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+}
+
+.doc-grid-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.doc-grid-done-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--success);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.doc-grid-fav-star {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.doc-grid-info {
+  padding: 8px 4px 4px;
+}
+
+.doc-grid-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.doc-grid-author {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text-dimmer);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* ── Doc List Header (list view column headers) ───────────────────────────── */
+.doc-list-header {
+  display: flex;
+  align-items: center;
+  padding: 0 18px 8px;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.doc-list-header span {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.doc-list-col-cover { width: 32px; flex-shrink: 0; }
+.doc-list-col-title { flex: 1; min-width: 0; }
+.doc-list-col-author { width: 140px; flex-shrink: 0; }
+.doc-list-col-format { width: 50px; flex-shrink: 0; }
+.doc-list-col-words { width: 60px; flex-shrink: 0; text-align: right; }
+.doc-list-col-progress { width: 60px; flex-shrink: 0; text-align: right; }
+.doc-list-col-time { width: 60px; flex-shrink: 0; text-align: right; }
+
 /* ===== Menu Flap ===== */
 
 .menu-flap-backdrop {

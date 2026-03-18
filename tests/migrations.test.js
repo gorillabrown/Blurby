@@ -52,6 +52,12 @@ const settingsMigrations = [
     data.schemaVersion = 4;
     return data;
   },
+  // v4 → v5: add viewMode setting
+  (data) => {
+    if (data.viewMode === undefined) data.viewMode = "list";
+    data.schemaVersion = 5;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -80,6 +86,15 @@ const libraryMigrations = [
       }
     }
     return { schemaVersion: 2, docs };
+  },
+  // v2 → v3: add author and coverPath to all docs
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      if (doc.author === undefined) doc.author = null;
+      if (doc.coverPath === undefined) doc.coverPath = null;
+    }
+    return { schemaVersion: 3, docs };
   },
 ];
 
@@ -211,6 +226,44 @@ describe("settings migrations", () => {
     expect(result.initialPauseMs).toBe(3000);
     expect(result.punctuationPauseMs).toBe(1000);
   });
+
+  it("migrates v4 to v5: adds viewMode with default 'list'", () => {
+    const v4 = {
+      schemaVersion: 4,
+      wpm: 300,
+      folderName: "Test",
+      recentFolders: [],
+      theme: "dark",
+      accentColor: null,
+      fontFamily: null,
+      focusTextSize: 100,
+      compactMode: false,
+      readingMode: "focus",
+      focusMarks: true,
+      readingRuler: false,
+      focusSpan: 0.4,
+      flowTextSize: 100,
+      rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
+      layoutSpacing: { line: 1.5, character: 0, word: 0 },
+      initialPauseMs: 3000,
+      punctuationPauseMs: 1000,
+    };
+    const result = runMigrations(v4, settingsMigrations, 5);
+    expect(result.schemaVersion).toBe(5);
+    expect(result.viewMode).toBe("list");
+    // preserved fields
+    expect(result.wpm).toBe(300);
+    expect(result.readingMode).toBe("focus");
+  });
+
+  it("migrates v0 all the way to v5", () => {
+    const v0 = { wpm: 250 };
+    const result = runMigrations(v0, settingsMigrations, 5);
+    expect(result.schemaVersion).toBe(5);
+    expect(result.viewMode).toBe("list");
+    expect(result.folderName).toBe("My reading list");
+    expect(result.theme).toBe("dark");
+  });
 });
 
 describe("library migrations", () => {
@@ -267,5 +320,36 @@ describe("library migrations", () => {
     expect(result.schemaVersion).toBe(2);
     expect(result.docs[0].wordCount).toBe(2);
     expect(result.docs[0].lastReadAt).toBe(1700000000000);
+  });
+
+  it("migrates v2 to v3: adds author and coverPath to all docs", () => {
+    const v2 = {
+      schemaVersion: 2,
+      docs: [
+        { id: "1", title: "Book One", wordCount: 100, position: 0, source: "manual", lastReadAt: null },
+        { id: "2", title: "Book Two", wordCount: 200, position: 50, source: "folder", lastReadAt: 1700000000000 },
+      ],
+    };
+    const result = runMigrations(v2, libraryMigrations, 3);
+    expect(result.schemaVersion).toBe(3);
+    expect(result.docs[0].author).toBe(null);
+    expect(result.docs[0].coverPath).toBe(null);
+    expect(result.docs[1].author).toBe(null);
+    expect(result.docs[1].coverPath).toBe(null);
+    // preserved fields
+    expect(result.docs[0].title).toBe("Book One");
+    expect(result.docs[1].lastReadAt).toBe(1700000000000);
+  });
+
+  it("migrates v0 all the way to v3", () => {
+    const v0 = [
+      { id: "1", title: "Test", content: "hello world foo", source: "manual", position: 5, modified: 1700000000000 },
+    ];
+    const result = runMigrations(v0, libraryMigrations, 3);
+    expect(result.schemaVersion).toBe(3);
+    expect(result.docs[0].wordCount).toBe(3);
+    expect(result.docs[0].lastReadAt).toBe(1700000000000);
+    expect(result.docs[0].author).toBe(null);
+    expect(result.docs[0].coverPath).toBe(null);
   });
 });

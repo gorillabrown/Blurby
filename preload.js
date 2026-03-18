@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
 
+  // Cover images
+  getCoverImage: (coverPath) => ipcRenderer.invoke("get-cover-image", coverPath),
+
   // URL ingestion
   addDocFromUrl: (url) => ipcRenderer.invoke("add-doc-from-url", url),
 
