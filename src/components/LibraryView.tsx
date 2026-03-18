@@ -1,32 +1,13 @@
 import { useState, useEffect } from "react";
 import { formatTime, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
-import { useTheme, nextTheme, themeLabel } from "./ThemeProvider";
-import HelpPanel from "./HelpPanel";
+import { useTheme } from "./ThemeProvider";
 import AddEditPanel from "./AddEditPanel";
 import DocCard from "./DocCard";
 import StatsPanel from "./StatsPanel";
 import RecentFolders from "./RecentFolders";
 
 const api = window.electronAPI;
-
-const ACCENT_PRESETS = [
-  { label: "gold", value: "#c4a882" },
-  { label: "blue", value: "#5b8fb9" },
-  { label: "green", value: "#6b9f6b" },
-  { label: "rose", value: "#c47882" },
-  { label: "purple", value: "#9b82c4" },
-  { label: "teal", value: "#5ba8a0" },
-];
-
-const FONT_PRESETS: { label: string; value: string | null }[] = [
-  { label: "system", value: null },
-  { label: "Georgia", value: "Georgia, serif" },
-  { label: "Merriweather", value: "'Merriweather', Georgia, serif" },
-  { label: "Mono", value: "'SF Mono', 'JetBrains Mono', 'Fira Code', monospace" },
-  { label: "Literata", value: "'Literata', Georgia, serif" },
-  { label: "OpenDyslexic", value: "'OpenDyslexic', sans-serif" },
-];
 
 interface LibraryViewProps {
   library: BlurbyDoc[];
@@ -57,7 +38,7 @@ export default function LibraryView({
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap,
 }: LibraryViewProps) {
-  const { theme, setTheme, accentColor, setAccentColor, fontFamily, setFontFamily } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "favorites" | "archived"
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
@@ -66,19 +47,14 @@ export default function LibraryView({
   const [newTitle, setNewTitle] = useState("");
   const [newText, setNewText] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [showHelp, setShowHelp] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showRecent, setShowRecent] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
-  const [showAppearance, setShowAppearance] = useState(false);
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
-  const [siteLogins, setSiteLogins] = useState<Array<{ domain: string; cookieCount: number }>>([]);
-  const [loginUrl, setLoginUrl] = useState("");
-  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
     const unsub = api.onUpdateDownloaded?.((version) => setUpdateReady(version));
@@ -87,35 +63,11 @@ export default function LibraryView({
 
   useEffect(() => {
     if (settings.theme && settings.theme !== theme) setTheme(settings.theme);
-    if (settings.accentColor !== undefined) setAccentColor(settings.accentColor);
-    if (settings.fontFamily !== undefined) setFontFamily(settings.fontFamily);
-  }, [settings.theme, settings.accentColor, settings.fontFamily]);
+  }, [settings.theme]);
 
   useEffect(() => {
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
   }, []);
-
-  const refreshSiteLogins = () => {
-    api.getSiteLogins().then(setSiteLogins);
-  };
-  useEffect(() => { refreshSiteLogins(); }, []);
-
-  const handleSiteLogin = async () => {
-    let url = loginUrl.trim();
-    if (!url) return;
-    if (!url.startsWith("http")) url = "https://" + url;
-    try { new URL(url); } catch { return; }
-    setLoggingIn(true);
-    await api.siteLogin(url);
-    setLoggingIn(false);
-    setLoginUrl("");
-    refreshSiteLogins();
-  };
-
-  const handleSiteLogout = async (domain: string) => {
-    await api.siteLogout(domain);
-    refreshSiteLogins();
-  };
 
   // Filter and sort library
   const getFilteredAndSorted = () => {
@@ -168,22 +120,6 @@ export default function LibraryView({
 
   const startEdit = (doc: BlurbyDoc) => {
     setEditingId(doc.id); setNewTitle(doc.title); setNewText(doc.content || ""); setShowAdd(true);
-  };
-
-  const handleThemeCycle = () => {
-    const next = nextTheme(theme) as BlurbySettings["theme"];
-    setTheme(next);
-    api.saveSettings({ theme: next });
-  };
-
-  const handleAccentChange = (color: string | null) => {
-    setAccentColor(color);
-    api.saveSettings({ accentColor: color });
-  };
-
-  const handleFontChange = (font: string | null) => {
-    setFontFamily(font);
-    api.saveSettings({ fontFamily: font });
   };
 
   const handleLaunchToggle = async () => {
@@ -252,20 +188,11 @@ export default function LibraryView({
             </p>
           </div>
           <div className="library-actions">
-            <button onClick={handleThemeCycle} className="btn" title={`Theme: ${themeLabel(theme)}`} aria-label="Cycle theme">
-              {themeLabel(nextTheme(theme))}
-            </button>
-            <button onClick={() => setShowAppearance(!showAppearance)} className="btn" title="Appearance settings" aria-label="Appearance settings">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
-                <circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-              </svg>
-            </button>
             <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
                 <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
               </svg>
             </button>
-            <button onClick={() => setShowHelp(!showHelp)} className="btn" aria-label="Show help">?</button>
             <div style={{ position: "relative" }}>
               <button onClick={() => setShowRecent(!showRecent)} className="btn" aria-label="Select folder">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }}>
@@ -322,84 +249,6 @@ export default function LibraryView({
         </div>
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
-        {showHelp && <HelpPanel isMac={isMac} />}
-
-        {showAppearance && (
-          <div className="appearance-panel">
-            <div className="stats-header">
-              <span className="stats-title">Appearance</span>
-              <button onClick={() => setShowAppearance(false)} className="btn stats-close">close</button>
-            </div>
-            <div className="appearance-section">
-              <span className="appearance-label">Accent color</span>
-              <div className="appearance-row">
-                {ACCENT_PRESETS.map((preset) => (
-                  <button
-                    key={preset.value}
-                    className={`accent-swatch${accentColor === preset.value || (!accentColor && preset.value === "#c4a882") ? " accent-swatch-active" : ""}`}
-                    style={{ background: preset.value }}
-                    onClick={() => handleAccentChange(preset.value === "#c4a882" ? null : preset.value)}
-                    title={preset.label}
-                    aria-label={`Accent color: ${preset.label}`}
-                  />
-                ))}
-                <label className="accent-custom" title="Custom color">
-                  <input
-                    type="color"
-                    value={accentColor || "#c4a882"}
-                    onChange={(e) => handleAccentChange(e.target.value)}
-                    className="accent-color-input"
-                  />
-                  <span className="accent-custom-label">custom</span>
-                </label>
-              </div>
-            </div>
-            <div className="appearance-section">
-              <span className="appearance-label">Reader font</span>
-              <div className="appearance-row">
-                {FONT_PRESETS.map((preset) => (
-                  <button
-                    key={preset.label}
-                    className={`font-preset${fontFamily === preset.value ? " font-preset-active" : ""}`}
-                    onClick={() => handleFontChange(preset.value)}
-                    style={preset.value ? { fontFamily: preset.value } : {}}
-                  >{preset.label}</button>
-                ))}
-              </div>
-            </div>
-            <div className="appearance-section">
-              <span className="appearance-label">Site logins</span>
-              <div className="appearance-hint">Log in to paywalled sites to access full articles</div>
-              {siteLogins.length > 0 && (
-                <div className="site-logins-list">
-                  {siteLogins.map((site) => (
-                    <div key={site.domain} className="site-login-item">
-                      <span className="site-login-domain">{site.domain}</span>
-                      <button className="btn site-login-logout" onClick={() => handleSiteLogout(site.domain)}>log out</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="site-login-add">
-                <input
-                  placeholder="Enter site URL (e.g. nytimes.com)"
-                  value={loginUrl}
-                  onChange={(e) => setLoginUrl(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSiteLogin()}
-                  className="library-search"
-                  style={{ flex: 1 }}
-                  disabled={loggingIn}
-                />
-                <button
-                  onClick={handleSiteLogin}
-                  disabled={!loginUrl.trim() || loggingIn}
-                  className="btn"
-                  style={{ opacity: loginUrl.trim() && !loggingIn ? 1 : 0.3 }}
-                >{loggingIn ? "logging in..." : "log in"}</button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Search bar and sort */}
         {library.length > 3 && (

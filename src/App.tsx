@@ -128,6 +128,27 @@ function AppInner() {
   const [menuFlapOpen, setMenuFlapOpen] = useState(false);
   const toggleMenuFlap = useCallback(() => setMenuFlapOpen((prev) => !prev), []);
 
+  // Site login state
+  const [siteLogins, setSiteLogins] = useState<Array<{ domain: string; cookieCount: number }>>([]);
+
+  useEffect(() => {
+    api.getSiteLogins().then(setSiteLogins);
+  }, []);
+
+  const handleSiteLogin = useCallback(async (url: string) => {
+    let normalizedUrl = url.trim();
+    if (!normalizedUrl) return;
+    if (!normalizedUrl.startsWith("http")) normalizedUrl = "https://" + normalizedUrl;
+    try { new URL(normalizedUrl); } catch { return; }
+    await api.siteLogin(normalizedUrl);
+    api.getSiteLogins().then(setSiteLogins);
+  }, []);
+
+  const handleSiteLogout = useCallback(async (domain: string) => {
+    await api.siteLogout(domain);
+    api.getSiteLogins().then(setSiteLogins);
+  }, []);
+
   // Smart import confirmation state
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
 
@@ -295,9 +316,9 @@ function AppInner() {
       settings={settings}
       onOpenDoc={handleOpenDocById}
       onSettingsChange={handleSettingsChange}
-      siteLogins={[]}
-      onSiteLogin={async () => {}}
-      onSiteLogout={async () => {}}
+      siteLogins={siteLogins}
+      onSiteLogin={handleSiteLogin}
+      onSiteLogout={handleSiteLogout}
     />
   );
 
