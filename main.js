@@ -719,35 +719,42 @@ function extractArticleFromHtml(html, url) {
   let title = null;
   let content = null;
 
-  // 1. Try __preloadedData JSON (NYT and similar React-rendered news sites)
+  // 1. Try __preloadedData JSON from raw HTML (NYT and similar React-rendered sites)
   //    Article text is in sprinkledBody.content as ParagraphBlock objects
-  if (!content) {
-    for (const script of parsedDoc.querySelectorAll("script")) {
-      const text = script.textContent || "";
-      const preloadMatch = text.match(/window\.__preloadedData\s*=\s*(\{.+\})\s*;?\s*$/s);
-      if (!preloadMatch) continue;
-      try {
-        const data = JSON.parse(preloadMatch[1]);
-        const article = data?.initialData?.data?.article;
-        if (!article) continue;
-        title = article.headline?.default || null;
-        // Extract paragraph text from sprinkledBody or body
-        const bodyContent = article.sprinkledBody?.content || article.body?.content || [];
-        const paragraphs = [];
-        for (const block of bodyContent) {
-          if (block.__typename === "ParagraphBlock" && block.content) {
-            const text = block.content
-              .filter((c) => c.__typename === "TextInline")
-              .map((c) => c.text)
-              .join("");
-            if (text) paragraphs.push(text);
-          }
+  const preloadIdx = html.indexOf("window.__preloadedData");
+  if (preloadIdx !== -1) {
+    const eqIdx = html.indexOf("=", preloadIdx);
+    if (eqIdx !== -1) {
+      // Find the JSON object start
+      const jsonStart = html.indexOf("{", eqIdx);
+      if (jsonStart !== -1) {
+        // Find the end of the script tag to bound our search
+        const scriptEnd = html.indexOf("</script>", jsonStart);
+        if (scriptEnd !== -1) {
+          const jsonStr = html.substring(jsonStart, scriptEnd).replace(/;\s*$/, "");
+          try {
+            const data = JSON.parse(jsonStr);
+            const article = data?.initialData?.data?.article;
+            if (article) {
+              title = article.headline?.default || null;
+              const bodyContent = article.sprinkledBody?.content || article.body?.content || [];
+              const paragraphs = [];
+              for (const block of bodyContent) {
+                if (block.__typename === "ParagraphBlock" && block.content) {
+                  const paraText = block.content
+                    .filter((c) => c.__typename === "TextInline")
+                    .map((c) => c.text)
+                    .join("");
+                  if (paraText) paragraphs.push(paraText);
+                }
+              }
+              if (paragraphs.length > 0) {
+                content = paragraphs.join("\n\n");
+              }
+            }
+          } catch { /* skip parse errors */ }
         }
-        if (paragraphs.length > 0) {
-          content = paragraphs.join("\n\n");
-          break;
-        }
-      } catch { /* skip parse errors */ }
+      }
     }
   }
 
