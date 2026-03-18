@@ -731,7 +731,9 @@ function extractArticleFromHtml(html, url) {
         // Find the end of the script tag to bound our search
         const scriptEnd = html.indexOf("</script>", jsonStart);
         if (scriptEnd !== -1) {
-          const jsonStr = html.substring(jsonStart, scriptEnd).replace(/;\s*$/, "");
+          let jsonStr = html.substring(jsonStart, scriptEnd).replace(/;\s*$/, "");
+          // NYT embeds JavaScript `undefined` values which aren't valid JSON
+          jsonStr = jsonStr.replace(/:\s*undefined\b/g, ": null");
           try {
             const data = JSON.parse(jsonStr);
             const article = data?.initialData?.data?.article;
