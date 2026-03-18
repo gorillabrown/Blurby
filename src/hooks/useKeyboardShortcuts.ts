@@ -14,9 +14,15 @@ export function useReaderKeys(
   toggleFlap?: () => void
 ) {
   useEffect(() => {
-    if (view !== "reader" || readerMode !== "speed") return;
+    if (view !== "reader") return;
+    // Tab toggles flap in any reader mode
+    const tabHandler = (e: KeyboardEvent) => {
+      if (e.key === "Tab") { e.preventDefault(); toggleFlap?.(); }
+    };
+    window.addEventListener("keydown", tabHandler);
+    if (readerMode !== "speed") return () => window.removeEventListener("keydown", tabHandler);
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Tab") { e.preventDefault(); toggleFlap?.(); return; }
+      if (e.key === "Tab") return; // handled above
       if (e.code === "Space") { e.preventDefault(); togglePlay(); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); seekWords(-REWIND_WORDS); }
       else if (e.code === "ArrowRight") { e.preventDefault(); seekWords(REWIND_WORDS); }
@@ -27,7 +33,7 @@ export function useReaderKeys(
       else if (e.code === "Escape") { e.preventDefault(); exitReader(); }
     };
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    return () => { window.removeEventListener("keydown", handler); window.removeEventListener("keydown", tabHandler); };
   }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap]);
 }
 

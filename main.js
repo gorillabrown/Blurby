@@ -240,10 +240,12 @@ async function extractContent(filepath) {
   const ext = path.extname(filepath).toLowerCase();
   try {
     if (ext === ".pdf") {
-      const pdfParse = require("pdf-parse");
+      const { PDFParse } = require("pdf-parse");
       const buffer = await fsPromises.readFile(filepath);
-      const data = await pdfParse(buffer);
-      return data.text || null;
+      const parser = new PDFParse({ data: new Uint8Array(buffer) });
+      const result = await parser.getText();
+      await parser.destroy();
+      return result.text || null;
     }
     if (ext === ".epub") {
       // EPUB is a ZIP of XHTML files — extract text via adm-zip + cheerio
