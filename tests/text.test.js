@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tokenize, formatTime, focusChar } from "../src/utils/text";
+import { tokenize, formatTime, focusChar, hasPunctuation, detectChapters, currentChapterIndex } from "../src/utils/text";
 
 describe("tokenize", () => {
   it("returns empty array for empty string", () => {
@@ -94,5 +94,81 @@ describe("formatTime", () => {
   it("handles null/undefined words", () => {
     expect(formatTime(null, 300)).toBe("0m");
     expect(formatTime(undefined, 300)).toBe("0m");
+  });
+});
+
+describe("hasPunctuation", () => {
+  it("detects sentence-ending punctuation", () => {
+    expect(hasPunctuation("word.")).toBe(true);
+    expect(hasPunctuation("word!")).toBe(true);
+    expect(hasPunctuation("word?")).toBe(true);
+    expect(hasPunctuation("word;")).toBe(true);
+    expect(hasPunctuation("word:")).toBe(true);
+  });
+
+  it("detects punctuation followed by quotes", () => {
+    expect(hasPunctuation('word."')).toBe(true);
+    expect(hasPunctuation("word.'")).toBe(true);
+    expect(hasPunctuation("word.)")).toBe(true);
+  });
+
+  it("returns false for words without ending punctuation", () => {
+    expect(hasPunctuation("word")).toBe(false);
+    expect(hasPunctuation("word,")).toBe(false);
+    expect(hasPunctuation("U.S")).toBe(false);
+  });
+});
+
+describe("detectChapters", () => {
+  it("returns empty for null/empty content", () => {
+    expect(detectChapters(null, [])).toEqual([]);
+    expect(detectChapters("", [])).toEqual([]);
+  });
+
+  it("detects 'Chapter X' headings", () => {
+    const content = "Chapter 1: The Beginning\n\nSome text here.\n\nChapter 2: The Middle\n\nMore text.";
+    const words = tokenize(content);
+    const chapters = detectChapters(content, words);
+    expect(chapters).toHaveLength(2);
+    expect(chapters[0].title).toBe("Chapter 1: The Beginning");
+    expect(chapters[0].wordIndex).toBe(0);
+    expect(chapters[1].title).toBe("Chapter 2: The Middle");
+  });
+
+  it("detects markdown headings", () => {
+    const content = "# Introduction\n\nHello world.\n\n## Methods\n\nWe did things.";
+    const words = tokenize(content);
+    const chapters = detectChapters(content, words);
+    expect(chapters).toHaveLength(2);
+    expect(chapters[0].title).toBe("Introduction");
+    expect(chapters[1].title).toBe("Methods");
+  });
+
+  it("detects Part/Prologue/Epilogue headings", () => {
+    const content = "Prologue\n\nOnce upon a time.\n\nPart 1\n\nThe story begins.";
+    const words = tokenize(content);
+    const chapters = detectChapters(content, words);
+    expect(chapters).toHaveLength(2);
+    expect(chapters[0].title).toBe("Prologue");
+  });
+});
+
+describe("currentChapterIndex", () => {
+  const chapters = [
+    { title: "Ch 1", wordIndex: 0 },
+    { title: "Ch 2", wordIndex: 100 },
+    { title: "Ch 3", wordIndex: 250 },
+  ];
+
+  it("returns -1 for no chapters", () => {
+    expect(currentChapterIndex([], 50)).toBe(-1);
+  });
+
+  it("returns correct chapter for word position", () => {
+    expect(currentChapterIndex(chapters, 0)).toBe(0);
+    expect(currentChapterIndex(chapters, 50)).toBe(0);
+    expect(currentChapterIndex(chapters, 100)).toBe(1);
+    expect(currentChapterIndex(chapters, 200)).toBe(1);
+    expect(currentChapterIndex(chapters, 300)).toBe(2);
   });
 });

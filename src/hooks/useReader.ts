@@ -1,10 +1,12 @@
 import { useState, useRef, useCallback } from "react";
-import { MIN_WPM, MAX_WPM } from "../utils/text";
+import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS, hasPunctuation } from "../utils/text";
 import { BlurbyDoc } from "../types";
 
 const api = window.electronAPI;
 
-export default function useReader(wpm: number, setWpm: (fn: (prev: number) => number) => void) {
+export default function useReader(wpm: number, setWpm: (fn: (prev: number) => number) => void, initialPauseMs?: number, punctuationPauseMs?: number) {
+  const initPause = initialPauseMs ?? INITIAL_PAUSE_MS;
+  const punctPause = punctuationPauseMs ?? PUNCTUATION_PAUSE_MS;
   const [wordIndex, setWordIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [escPending, setEscPending] = useState(false);
@@ -33,8 +35,14 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
 
     const interval = 60000 / wpmRef.current;
 
-    while (accumulatorRef.current >= interval) {
-      accumulatorRef.current -= interval;
+    // Dwell longer on words ending with punctuation (. ! ? ; :)
+    const currentWord = wordsRef.current[wordIndexRef.current] || "";
+    const effectiveInterval = hasPunctuation(currentWord)
+      ? interval + punctPause
+      : interval;
+
+    while (accumulatorRef.current >= effectiveInterval) {
+      accumulatorRef.current -= effectiveInterval;
       const next = wordIndexRef.current + 1;
       if (next >= wordsRef.current.length) {
         playingRef.current = false;
@@ -44,15 +52,19 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
         return;
       }
       wordIndexRef.current = next;
+      // Break after advancing so the *next* word's punctuation check
+      // is evaluated on the next frame (prevents skipping pauses)
+      break;
     }
 
     setWordIndex(wordIndexRef.current);
     rafRef.current = requestAnimationFrame(tick);
   }, []);
 
-  const startPlayback = useCallback(() => {
+  const startPlayback = useCallback((initialPause = false) => {
     lastTimeRef.current = 0;
-    accumulatorRef.current = 0;
+    // Negative accumulator creates a delay before the first word advances
+    accumulatorRef.current = initialPause ? -initPause : 0;
     rafRef.current = requestAnimationFrame(tick);
   }, [tick]);
 
@@ -65,6 +77,8 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
     accumulatorRef.current = 0;
   }, []);
 
+  const hasPlayedRef = useRef(false);
+
   const togglePlay = useCallback(() => {
     if (playingRef.current) {
       stopPlayback();
@@ -75,9 +89,12 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
         setWordIndex(0);
         wordIndexRef.current = 0;
       }
+      // Initial 3-second pause on first play of this document
+      const isFirstPlay = !hasPlayedRef.current;
+      hasPlayedRef.current = true;
       setPlaying(true);
       playingRef.current = true;
-      startPlayback();
+      startPlayback(isFirstPlay);
     }
   }, [startPlayback, stopPlayback]);
 
@@ -129,6 +146,7 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
     setWordIndex(position);
     wordIndexRef.current = position;
     setEscPending(false);
+    hasPlayedRef.current = false;
   }, []);
 
   return {

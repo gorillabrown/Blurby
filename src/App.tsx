@@ -36,7 +36,9 @@ function StandaloneReader() {
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
 
-  const reader = useReader(wpm, setWpm);
+  const [initPauseMs, setInitPauseMs] = useState(3000);
+  const [punctPauseMs, setPunctPauseMs] = useState(1000);
+  const reader = useReader(wpm, setWpm, initPauseMs, punctPauseMs);
   const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   useEffect(() => {
@@ -45,6 +47,8 @@ function StandaloneReader() {
       const state = await api.getState();
       if (state.settings.wpm) setWpm(state.settings.wpm);
       if (state.settings.focusTextSize) setFocusTextSize(state.settings.focusTextSize);
+      if (state.settings.initialPauseMs != null) setInitPauseMs(state.settings.initialPauseMs);
+      if (state.settings.punctuationPauseMs != null) setPunctPauseMs(state.settings.punctuationPauseMs);
       const doc = state.library.find((d) => d.id === docId);
       if (!doc) return;
       let content = doc.content;
@@ -159,7 +163,7 @@ function AppInner() {
     toggleFavorite, archiveDoc, unarchiveDoc, showToast,
   } = useLibrary();
 
-  const reader = useReader(wpm, setWpm);
+  const reader = useReader(wpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs);
   const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   // Sync wpm/folderName from loaded settings

@@ -21,7 +21,7 @@ const settingsMigrations = [
     data.schemaVersion = 3;
     return data;
   },
-  // v3 → v4: rename fontSize→focusTextSize, add new reader settings
+  // v3 → v4: rename fontSize→focusTextSize, add new reader settings, add pause durations
   (data) => {
     data.focusTextSize = data.fontSize !== undefined ? data.fontSize : 100;
     delete data.fontSize;
@@ -47,6 +47,8 @@ const settingsMigrations = [
         word: 0,
       };
     }
+    if (data.initialPauseMs == null) data.initialPauseMs = 3000;
+    if (data.punctuationPauseMs == null) data.punctuationPauseMs = 1000;
     data.schemaVersion = 4;
     return data;
   },
@@ -159,7 +161,7 @@ describe("settings migrations", () => {
     expect(result.fontFamily).toBe(null);
   });
 
-  it("migrates v3 to v4: renames fontSize→focusTextSize and adds new fields", () => {
+  it("migrates v3 to v4: renames fontSize→focusTextSize, adds new fields and pause durations", () => {
     const v3 = {
       schemaVersion: 3,
       wpm: 300,
@@ -190,6 +192,9 @@ describe("settings migrations", () => {
       longerWords: false,
     });
     expect(result.layoutSpacing).toEqual({ line: 1.5, character: 0, word: 0 });
+    // pause duration settings
+    expect(result.initialPauseMs).toBe(3000);
+    expect(result.punctuationPauseMs).toBe(1000);
     // preserved fields
     expect(result.wpm).toBe(300);
     expect(result.accentColor).toBe(null);
@@ -203,6 +208,8 @@ describe("settings migrations", () => {
     expect(result.focusTextSize).toBe(110);
     expect(result.fontSize).toBeUndefined();
     expect(result.readingMode).toBe("focus");
+    expect(result.initialPauseMs).toBe(3000);
+    expect(result.punctuationPauseMs).toBe(1000);
   });
 });
 

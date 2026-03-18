@@ -405,6 +405,19 @@ button, input, textarea, a, [role="button"] {
   display: flex;
   gap: 20px;
 }
+.reader-chapter-info {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-dimmer);
+  font-family: var(--mono);
+  opacity: 0.8;
+}
+.reader-chapter-label {
+  font-weight: 600;
+}
 
 /* ── READER PAUSE TEXT VIEW ── */
 .reader-pause-text {

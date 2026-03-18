@@ -53,6 +53,8 @@ export interface BlurbySettings {
   flowTextSize: number;
   rhythmPauses: RhythmPauses;
   layoutSpacing: LayoutSpacing;
+  initialPauseMs: number;     // pause before first word advances (default 3000)
+  punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────

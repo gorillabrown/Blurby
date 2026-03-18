@@ -120,7 +120,7 @@ const settingsMigrations = [
     data.schemaVersion = 3;
     return data;
   },
-  // v3 → v4: rename fontSize→focusTextSize, add new reader settings
+  // v3 → v4: rename fontSize→focusTextSize, add new reader settings, add pause durations
   (data) => {
     data.focusTextSize = data.fontSize !== undefined ? data.fontSize : 100;
     delete data.fontSize;
@@ -146,6 +146,8 @@ const settingsMigrations = [
         word: 0,
       };
     }
+    if (data.initialPauseMs == null) data.initialPauseMs = 3000;
+    if (data.punctuationPauseMs == null) data.punctuationPauseMs = 1000;
     data.schemaVersion = 4;
     return data;
   },
@@ -202,7 +204,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 } };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 }, initialPauseMs: 3000, punctuationPauseMs: 1000 };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }
