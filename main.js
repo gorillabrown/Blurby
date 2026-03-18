@@ -714,12 +714,100 @@ function extractArticleFromHtml(html, url) {
     '[aria-label*="advertisement"]',
     '[data-testid*="paywall"]',
   ].join(",")).forEach((el) => el.remove());
-  const reader = new Readability(parsedDoc);
-  const article = reader.parse();
-  if (!article || !article.textContent?.trim()) {
+
+  let title = null;
+  let content = null;
+
+  // Try JSON-LD structured data first (most reliable for news sites)
+  const ldScripts = parsedDoc.querySelectorAll('script[type="application/ld+json"]');
+  for (const script of ldScripts) {
+    try {
+      const data = JSON.parse(script.textContent);
+      // Handle both single objects and arrays
+      const items = Array.isArray(data) ? data : [data];
+      for (const item of items) {
+        if (item.articleBody) {
+          content = item.articleBody;
+          title = item.headline || null;
+          break;
+        }
+        // Some sites nest under @graph
+        if (item["@graph"]) {
+          for (const node of item["@graph"]) {
+            if (node.articleBody) {
+              content = node.articleBody;
+              title = node.headline || null;
+              break;
+            }
+          }
+        }
+      }
+      if (content) break;
+    } catch { /* skip malformed JSON-LD */ }
+  }
+
+  // Try __preloadedData for sites like NYT that embed content in JS
+  if (!content) {
+    const scripts = parsedDoc.querySelectorAll("script");
+    for (const script of scripts) {
+      const text = script.textContent || "";
+      if (text.includes("__preloadedData") || text.includes("preloadedData")) {
+        // Look for articleBody or body text in the preloaded data
+        const bodyMatch = text.match(/"articleBody"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+        if (bodyMatch) {
+          try {
+            content = JSON.parse('"' + bodyMatch[1] + '"');
+          } catch {
+            content = bodyMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"');
+          }
+          const titleMatch = text.match(/"headline"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+          if (titleMatch) {
+            try { title = JSON.parse('"' + titleMatch[1] + '"'); } catch { title = titleMatch[1]; }
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // Fall back to Readability
+  if (!content) {
+    const reader = new Readability(parsedDoc);
+    const article = reader.parse();
+    if (article?.textContent?.trim()) {
+      content = article.textContent.trim();
+      title = article.title || null;
+    }
+  }
+
+  // Try specific article body selectors as last resort
+  if (!content) {
+    const selectors = [
+      'article[id="story"]', '[name="articleBody"]', "article .StoryBodyCompanionColumn",
+      "article .article-body", '[data-testid="article-body"]', "article .story-body",
+      ".article__body", ".post-content", "article .entry-content",
+    ];
+    for (const sel of selectors) {
+      const el = parsedDoc.querySelector(sel);
+      if (el?.textContent?.trim()?.length > 200) {
+        content = el.textContent.trim();
+        break;
+      }
+    }
+  }
+
+  if (!content?.trim()) {
     return { error: "Could not extract readable content from this page." };
   }
-  let content = article.textContent.trim();
+
+  // Get title from meta tags if we don't have one
+  if (!title) {
+    const ogTitle = parsedDoc.querySelector('meta[property="og:title"]');
+    const metaTitle = parsedDoc.querySelector("title");
+    title = ogTitle?.getAttribute("content") || metaTitle?.textContent || new URL(url).hostname;
+  }
+
+  // Clean up common noise
   content = content
     .replace(/\bADVERTISEMENT\b/g, "")
     .replace(/\bSKIP ADVERTISEMENT\b/g, "")
@@ -730,7 +818,7 @@ function extractArticleFromHtml(html, url) {
     .replace(/Want all of The Times\?.*/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-  const title = article.title || new URL(url).hostname;
+
   return { title, content };
 }
 
