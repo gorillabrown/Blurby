@@ -1,8 +1,21 @@
 import { useState, useCallback, useEffect } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import ReadingQueue from "./ReadingQueue";
+import { SettingsMenu } from "./SettingsMenu";
 
 type FlapView = "queue" | "settings" | string;
+
+const TITLES: Record<string, string> = {
+  queue: "Reading Queue",
+  settings: "Settings",
+  "text-size": "Text Size",
+  "speed-reading": "Speed Reading",
+  theme: "Theme",
+  layout: "Layout",
+  connectors: "Connectors",
+  help: "Help",
+  hotkeys: "Hotkey Map",
+};
 
 interface MenuFlapProps {
   open: boolean;
@@ -14,6 +27,7 @@ interface MenuFlapProps {
   siteLogins: Array<{ domain: string; cookieCount: number }>;
   onSiteLogin: (url: string) => Promise<void>;
   onSiteLogout: (domain: string) => Promise<void>;
+  isMac?: boolean;
 }
 
 export default function MenuFlap({
@@ -26,6 +40,7 @@ export default function MenuFlap({
   siteLogins,
   onSiteLogin,
   onSiteLogout,
+  isMac = false,
 }: MenuFlapProps) {
   const [view, setView] = useState<FlapView>("queue");
 
@@ -37,8 +52,11 @@ export default function MenuFlap({
   }, [open]);
 
   const handleBack = useCallback(() => {
-    if (view === "settings" || (view !== "queue" && view !== "settings")) {
+    if (view === "settings") {
       setView("queue");
+    } else if (view !== "queue") {
+      // sub-page: go back to settings list
+      setView("settings");
     }
   }, [view]);
 
@@ -65,7 +83,7 @@ export default function MenuFlap({
   const isOnQueue = view === "queue";
   const isOnSettings = !isOnQueue;
 
-  const title = isOnQueue ? "Queue" : view === "settings" ? "Settings" : view;
+  const title = TITLES[view] ?? view;
 
   return (
     <>
@@ -153,7 +171,16 @@ export default function MenuFlap({
               onDocClick={handleDocClick}
             />
           ) : (
-            <div>Settings Menu (Task 6)</div>
+            <SettingsMenu
+              settings={settings}
+              onNavigate={handleSubPage}
+              onSettingsChange={onSettingsChange}
+              siteLogins={siteLogins}
+              onSiteLogin={onSiteLogin}
+              onSiteLogout={onSiteLogout}
+              activeSubPage={view !== "settings" ? view : undefined}
+              isMac={isMac}
+            />
           )}
         </div>
 
