@@ -1375,13 +1375,19 @@ function registerIPC() {
         const prev = existing.get(file.filepath);
         if (prev) {
           let updates = { ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size };
-          // Re-extract covers and author for docs missing them
-          if (!prev.coverPath && file.ext === ".epub") {
-            updates.coverPath = await extractEpubCover(file.filepath, prev.id);
-          }
-          if (!prev.author && file.ext === ".epub") {
-            const meta = await extractEpubMetadata(file.filepath);
-            if (meta.author) updates.author = meta.author;
+          // Re-extract metadata for EPUBs missing covers, authors, or with truncated titles
+          if (file.ext === ".epub") {
+            if (!prev.coverPath || !prev.author || prev.title === path.basename(file.filename, file.ext)) {
+              const meta = await extractEpubMetadata(file.filepath);
+              if (!prev.author && meta.author) updates.author = meta.author;
+              // Update title from metadata if current title matches the filename (likely truncated)
+              if (meta.title && prev.title === path.basename(file.filename, file.ext)) {
+                updates.title = meta.title;
+              }
+            }
+            if (!prev.coverPath) {
+              updates.coverPath = await extractEpubCover(file.filepath, prev.id);
+            }
           }
           synced.push(updates);
         } else {
