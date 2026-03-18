@@ -26,6 +26,11 @@ function capitalizeFirst(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
+function formatTitle(s: string): string {
+  // Replace " - AuthorName" with " | AuthorName" for display
+  return s.replace(/\s+-\s+([A-Z][a-z]+([\s.][A-Z][a-z]*)*)\s*$/, " | $1");
+}
+
 export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
@@ -48,7 +53,7 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
         <div className="doc-card-content">
           <div className="doc-card-header">
             {doc.favorite && <span className="doc-card-fav-star" title="Favorite">*</span>}
-            <span className="doc-card-title">{capitalizeFirst(doc.title)}</span>
+            <span className="doc-card-title">{capitalizeFirst(formatTitle(doc.title))}</span>
             {doc.author && <span className="doc-card-author">{doc.author}</span>}
             {sourceLabel && <Badge color={doc.source === "url" ? "#6b9fd4" : "#c4a882"}>{sourceLabel}</Badge>}
             {doc.archived && <Badge color="var(--text-dimmer)">archived</Badge>}
