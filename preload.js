@@ -24,6 +24,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
   // Get chapter metadata (from EPUB TOC or content analysis)
   getDocChapters: (docId) => ipcRenderer.invoke("get-doc-chapters", docId),
+  saveHighlight: (data) => ipcRenderer.invoke("save-highlight", data),
+  defineWord: (word) => ipcRenderer.invoke("define-word", word),
 
   // Cover images
   getCoverImage: (coverPath) => ipcRenderer.invoke("get-cover-image", coverPath),

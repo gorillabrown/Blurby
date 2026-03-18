@@ -493,6 +493,112 @@ button, input, textarea, a, [role="button"] {
 .chapter-list-num { color: var(--text-dimmer); min-width: 24px; flex-shrink: 0; }
 .chapter-list-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ── HIGHLIGHT MENU ── */
+.highlight-menu {
+  position: absolute;
+  display: flex;
+  gap: 2px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 4px;
+  z-index: 300;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  white-space: nowrap;
+}
+.highlight-menu-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px 14px;
+  border-radius: 16px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+.highlight-menu-btn:hover { background: var(--bg-hover); color: var(--accent); }
+.highlight-menu-caret {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--border);
+}
+
+/* ── DEFINITION POPUP ── */
+.definition-popup {
+  position: absolute;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  z-index: 300;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  transform: translateX(-50%);
+  width: 320px;
+  max-width: 90vw;
+  font-size: 13px;
+  color: var(--text);
+}
+.definition-loading { color: var(--text-dimmer); font-style: italic; padding: 8px 0; }
+.definition-error { color: var(--text-dim); font-style: italic; padding: 8px 0; }
+.definition-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.definition-word { font-size: 16px; font-weight: 600; color: var(--accent); }
+.definition-phonetic { font-size: 13px; color: var(--text-dimmer); }
+.definition-pos { font-size: 12px; color: var(--text-dimmer); font-style: italic; margin-bottom: 6px; }
+.definition-text { line-height: 1.5; margin-bottom: 6px; }
+.definition-example { color: var(--text-dim); font-style: italic; margin-bottom: 6px; }
+.definition-synonyms { font-size: 11px; color: var(--text-dimmer); margin-bottom: 10px; }
+.definition-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
+.definition-save-btn,
+.definition-close-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+.definition-save-btn:hover { color: var(--accent); border-color: var(--accent); }
+.definition-close-btn:hover { color: var(--text); }
+
+/* Toast notification */
+.highlight-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 400;
+  opacity: 0;
+  animation: toast-fade 1.5s ease-in-out forwards;
+}
+@keyframes toast-fade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Highlighted word in pause text */
+.reader-pause-word-highlighted {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
 /* ── FOCUS MARKS ── */
 .reader-guide-line {
   position: relative;
@@ -1423,6 +1529,30 @@ button:focus-visible {
   border: 1px solid #000000;
   color: #000000;
   box-shadow: none;
+}
+
+/* Highlight menu: borders, no shadows */
+[data-theme="eink"] .highlight-menu {
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: none;
+  border-radius: 4px;
+}
+[data-theme="eink"] .highlight-menu-btn { color: #000000; border-radius: 2px; }
+[data-theme="eink"] .highlight-menu-caret { border-top-color: #000000; }
+[data-theme="eink"] .definition-popup {
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: none;
+  border-radius: 4px;
+}
+[data-theme="eink"] .definition-word { color: #000000; font-weight: 700; text-decoration: underline; }
+[data-theme="eink"] .highlight-toast {
+  background: #000000;
+  color: #ffffff;
+  border-radius: 4px;
+  animation: none;
+  opacity: 1;
 }
 
 /* Scrollbar: simple, high contrast */

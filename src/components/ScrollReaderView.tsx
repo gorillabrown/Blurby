@@ -3,6 +3,10 @@ import { tokenize, tokenizeWithMeta, formatTime, formatDisplayTitle, FOCUS_TEXT_
 import { calculatePauseMs } from "../utils/rhythm";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
+import HighlightMenu from "./HighlightMenu";
+import DefinitionPopup from "./DefinitionPopup";
+
+const api = (window as any).electronAPI;
 
 const BLOCK_THRESHOLD = 200; // virtualize when > 200 paragraphs
 const BLOCK_WINDOW = 60;    // render 60 blocks at a time
@@ -79,6 +83,20 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const [scrollPct, setScrollPct] = useState(0);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Highlight menu state
+  const [highlightWord, setHighlightWord] = useState<string | null>(null);
+  const [highlightPos, setHighlightPos] = useState({ x: 0, y: 0 });
+  const [showDefinition, setShowDefinition] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const closeHighlight = useCallback(() => {
+    setHighlightWord(null);
+    setShowDefinition(false);
+  }, []);
+
+  const clampedPosRef = useRef(0);
+
   // Flow mode state
   const [flowPlaying, setFlowPlaying] = useState(false);
   const [flowWordIndex, setFlowWordIndex] = useState(activeDoc.position || 0);
@@ -100,6 +118,24 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const clampedPosition = Math.min(currentPosition, Math.max(0, words.length - 1));
   const pct = words.length > 0 ? Math.round((clampedPosition / words.length) * 100) : 0;
   const remaining = formatTime(Math.max(0, words.length - clampedPosition), wpm);
+
+  clampedPosRef.current = clampedPosition;
+
+  const handleSaveHighlight = useCallback(async (text?: string) => {
+    const wordToSave = text || highlightWord;
+    if (!wordToSave) return;
+    const result = await api.saveHighlight({
+      docTitle: activeDoc.title,
+      text: wordToSave,
+      wordIndex: clampedPosRef.current,
+      totalWords: words.length,
+    });
+    if (result?.ok) {
+      setToast("Saved to highlights");
+      setTimeout(() => setToast(null), 1600);
+    }
+    closeHighlight();
+  }, [highlightWord, activeDoc.title, words.length, closeHighlight]);
 
   const scale = ((settings?.flowTextSize || focusTextSize) || 100) / 100;
   const spacing = settings?.layoutSpacing;
@@ -228,7 +264,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const isFlowActive = flowPlaying || flowWordIndex > 0;
 
   return (
-    <div className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32 }}>
+    <div ref={containerRef} className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32, position: "relative" }}>
       {/* Top bar */}
       <div className="scroll-reader-top" style={{ paddingTop: isMac ? 36 : 16 }}>
         <div className="reader-top-left">
@@ -296,6 +332,16 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
                       ref={globalIdx === flowWordIndex ? flowWordRef : undefined}
                       className={globalIdx === flowWordIndex ? "flow-word-active" : ""}
                       onClick={() => { flowWordIndexRef.current = globalIdx; setFlowWordIndex(globalIdx); }}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        const rect = (e.target as HTMLElement).getBoundingClientRect();
+                        const container = containerRef.current?.getBoundingClientRect();
+                        if (container) {
+                          setHighlightWord(word);
+                          setHighlightPos({ x: rect.left + rect.width / 2 - container.left, y: rect.top - container.top });
+                          setShowDefinition(false);
+                        }
+                      }}
                     >
                       {word}{" "}
                     </span>
@@ -330,6 +376,27 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
           <span>{remaining} left</span>
         </div>
       </div>
+
+      {/* Highlight menu + definition popup */}
+      {highlightWord && (
+        <HighlightMenu
+          word={highlightWord}
+          position={highlightPos}
+          onSave={() => handleSaveHighlight()}
+          onDefine={() => setShowDefinition(true)}
+          onClose={closeHighlight}
+        />
+      )}
+      {showDefinition && highlightWord && (
+        <DefinitionPopup
+          word={highlightWord}
+          position={highlightPos}
+          onSaveWithDefinition={(text) => handleSaveHighlight(text)}
+          onClose={() => setShowDefinition(false)}
+        />
+      )}
+
+      {toast && <div className="highlight-toast">{toast}</div>}
     </div>
   );
 }

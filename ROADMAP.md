@@ -505,60 +505,11 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 
 ---
 
-## Phase 9 — Chrome Extension
-
-### 9.1 Extension Core
-- [ ] Create Chrome extension manifest (Manifest V3)
-- [ ] Content script that extracts article text from current page (using Readability.js)
-- [ ] "Read in Blurby" button in browser action popup
-- [ ] Context menu "Speed Read This" on selected text
-
-### 9.2 Desktop Integration
-- [ ] Local HTTP bridge in Electron app for receiving content from extension
-- [ ] Alternative: clipboard-based transfer with deep link
-- [ ] Extension sends extracted article to desktop Blurby
-
-### 9.3 Standalone In-Browser Reader
-- [ ] Embedded RSVP reader in extension popup (subset of focus mode)
-- [ ] WPM control and play/pause in popup
-- [ ] Reading queue stored in extension local storage
-
-### 9.4 Distribution
-- [ ] Chrome Web Store listing and assets
-- [ ] Extension auto-update configuration
-
----
-
-## Phase 10 — Android App (APK)
-
-### 10.1 Mobile Framework
-- [ ] Evaluate React Native vs Capacitor for mobile port
-- [ ] Set up mobile project with shared core utilities (text.ts, rhythm.ts)
-- [ ] Port RSVP engine to mobile (touch controls, swipe gestures)
-
-### 10.2 Mobile Features
-- [ ] Local document import (file picker, Android share intent)
-- [ ] Focus mode with tap-to-pause, swipe-to-seek
-- [ ] Flow mode with touch scrolling and auto-advance
-- [ ] Settings UI adapted for mobile (bottom sheets, gesture controls)
-
-### 10.3 Cloud Sync (Optional)
-- [ ] Cloud sync for reading progress and library metadata
-- [ ] Conflict resolution for concurrent desktop/mobile edits
-- [ ] Offline-first architecture with background sync
-
-### 10.4 Distribution
-- [ ] Google Play Store listing and assets
-- [ ] APK build pipeline
-- [ ] Beta testing via internal track
-
----
-
-## Phase 11 — Highlight Quick-Menu (Save & Define)
+## Phase 9 — Highlight Quick-Menu (Save & Define)
 
 Interactive word/phrase selection menu in the reader for saving highlights and looking up definitions.
 
-### 11.1 Text Selection & Quick Menu
+### 9.1 Text Selection & Quick Menu
 
 **Trigger:** Long-press (500ms) or double-click on a word in the paused reader view (flow or focus pause text). In focus (RSVP) mode while playing, pressing `H` highlights the current word.
 
@@ -582,7 +533,7 @@ Interactive word/phrase selection menu in the reader for saving highlights and l
 - **Phrase:** Click-drag to select a range of words (up to ~10 words)
 - **RSVP current word:** Press `H` during playback to select/save the current word without pausing
 
-### 11.2 Save Action
+### 9.2 Save Action
 
 **Behavior:** Clicking "Save" appends the highlighted text + context to a Markdown notebook file.
 
@@ -610,7 +561,7 @@ Saved: 2026-03-18 14:30
 - [ ] If no source folder is selected, save to `<userData>/highlights.md` instead
 - [ ] Highlight file is a regular watched folder file — it appears in the library and can be read
 
-### 11.3 Define Action
+### 9.3 Define Action
 
 **Behavior:** Clicking "Define" shows an inline definition popup below the quick menu.
 
@@ -649,7 +600,7 @@ Saved: 2026-03-18 14:30
 - [ ] Definition popup positioned below the quick menu, max-width 360px
 - [ ] For phrases (multiple words), only look up the first word or show "Select a single word for definition"
 
-### 11.4 Quick Menu Component
+### 9.4 Quick Menu Component
 
 - [ ] `HighlightMenu.tsx` — floating menu component
   - Props: `{ word, phrase, position: {x, y}, onSave, onDefine, onClose }`
@@ -664,13 +615,13 @@ Saved: 2026-03-18 14:30
 - [ ] Wire into `ReaderView.tsx` (pause text) and `ScrollReaderView.tsx`
 - [ ] State management: `selectedWord`, `menuPosition`, `showDefinition` in reader components
 
-### 11.5 Highlights Review
+### 9.5 Highlights Review
 
 - [ ] Highlights file is a standard Markdown file in the watched folder — appears in library automatically
 - [ ] Add "Highlights" badge to the document card when filename matches `Blurby Highlights.md`
 - [ ] Future: dedicated highlights browser panel (post-MVP, not in this phase)
 
-### 11.6 Keyboard Shortcuts
+### 9.6 Keyboard Shortcuts
 
 | Key | Context | Action |
 |-----|---------|--------|
@@ -680,7 +631,7 @@ Saved: 2026-03-18 14:30
 | `D` | Quick menu open | Define highlighted word |
 | `Esc` | Quick menu/definition open | Close popup |
 
-### 11.7 Data Flow
+### 9.7 Data Flow
 
 ```
 User selects word → HighlightMenu appears
@@ -689,7 +640,7 @@ User selects word → HighlightMenu appears
                                                └─ Save word → IPC save-highlight (with definition)
 ```
 
-### 11.8 Testing
+### 9.8 Testing
 
 - [ ] Unit test: highlight markdown formatting (text.test.ts)
 - [ ] Unit test: definition API response parsing
@@ -697,6 +648,55 @@ User selects word → HighlightMenu appears
 - [ ] Manual test: define word, verify popup renders correctly
 - [ ] Manual test: offline define gracefully degrades
 - [ ] Manual test: H key during RSVP saves without pausing
+
+---
+
+## Phase 10 — Chrome Extension
+
+### 10.1 Extension Core
+- [ ] Create Chrome extension manifest (Manifest V3)
+- [ ] Content script that extracts article text from current page (using Readability.js)
+- [ ] "Read in Blurby" button in browser action popup
+- [ ] Context menu "Speed Read This" on selected text
+
+### 10.2 Desktop Integration
+- [ ] Local HTTP bridge in Electron app for receiving content from extension
+- [ ] Alternative: clipboard-based transfer with deep link
+- [ ] Extension sends extracted article to desktop Blurby
+
+### 10.3 Standalone In-Browser Reader
+- [ ] Embedded RSVP reader in extension popup (subset of focus mode)
+- [ ] WPM control and play/pause in popup
+- [ ] Reading queue stored in extension local storage
+
+### 10.4 Distribution
+- [ ] Chrome Web Store listing and assets
+- [ ] Extension auto-update configuration
+
+---
+
+## Phase 11 — Android App (APK)
+
+### 11.1 Mobile Framework
+- [ ] Evaluate React Native vs Capacitor for mobile port
+- [ ] Set up mobile project with shared core utilities (text.ts, rhythm.ts)
+- [ ] Port RSVP engine to mobile (touch controls, swipe gestures)
+
+### 11.2 Mobile Features
+- [ ] Local document import (file picker, Android share intent)
+- [ ] Focus mode with tap-to-pause, swipe-to-seek
+- [ ] Flow mode with touch scrolling and auto-advance
+- [ ] Settings UI adapted for mobile (bottom sheets, gesture controls)
+
+### 11.3 Cloud Sync (Optional)
+- [ ] Cloud sync for reading progress and library metadata
+- [ ] Conflict resolution for concurrent desktop/mobile edits
+- [ ] Offline-first architecture with background sync
+
+### 11.4 Distribution
+- [ ] Google Play Store listing and assets
+- [ ] APK build pipeline
+- [ ] Beta testing via internal track
 
 ---
 

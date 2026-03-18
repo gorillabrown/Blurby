@@ -93,6 +93,8 @@ export interface ElectronAPI {
   updateDocProgress: (docId: string, position: number) => Promise<void>;
   loadDocContent: (docId: string) => Promise<string | null>;
   getDocChapters: (docId: string) => Promise<Array<{ title: string; charOffset: number }>>;
+  saveHighlight: (data: { docTitle: string; text: string; wordIndex: number; totalWords: number }) => Promise<{ ok?: boolean; error?: string }>;
+  defineWord: (word: string) => Promise<{ word: string; phonetic?: string; partOfSpeech?: string; definition?: string; example?: string; synonyms?: string[] } | { error: string }>;
   addDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
   importDroppedFiles: (filePaths: string[]) => Promise<{ imported: string[]; rejected: string[] }>;
   recordReadingSession: (docTitle: string, wordsRead: number, durationMs: number, wpm: number) => Promise<void>;

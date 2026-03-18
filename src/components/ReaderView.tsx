@@ -1,8 +1,12 @@
-import { useRef, useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
+import HighlightMenu from "./HighlightMenu";
+import DefinitionPopup from "./DefinitionPopup";
+
+const api = (window as any).electronAPI;
 
 interface ReaderViewProps {
   activeDoc: BlurbyDoc & { content: string };
@@ -31,6 +35,59 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
   const [chapterListOpen, setChapterListOpen] = useState(false);
+
+  // Highlight menu state
+  const [highlightWord, setHighlightWord] = useState<string | null>(null);
+  const [highlightIdx, setHighlightIdx] = useState(-1);
+  const [highlightPos, setHighlightPos] = useState({ x: 0, y: 0 });
+  const [showDefinition, setShowDefinition] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const closeHighlight = useCallback(() => {
+    setHighlightWord(null);
+    setHighlightIdx(-1);
+    setShowDefinition(false);
+  }, []);
+
+  // Close highlight menu when playback starts
+  useEffect(() => { if (playing) closeHighlight(); }, [playing, closeHighlight]);
+
+  const handleSaveHighlight = useCallback(async (text?: string) => {
+    const wordToSave = text || highlightWord;
+    if (!wordToSave) return;
+    const result = await api.saveHighlight({
+      docTitle: activeDoc.title,
+      text: wordToSave,
+      wordIndex: highlightIdx >= 0 ? highlightIdx : wordIndex,
+      totalWords: words.length,
+    });
+    if (result?.ok) {
+      setToast("Saved to highlights");
+      setTimeout(() => setToast(null), 1600);
+    }
+    closeHighlight();
+  }, [highlightWord, highlightIdx, wordIndex, words.length, activeDoc.title, closeHighlight]);
+
+  // H key: save current word during RSVP, or open menu when paused with selection
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.code !== "KeyH" || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (playing) {
+        // Save current word without pausing
+        e.preventDefault();
+        api.saveHighlight({
+          docTitle: activeDoc.title,
+          text: words[wordIndex] || "",
+          wordIndex,
+          totalWords: words.length,
+        }).then((r: any) => {
+          if (r?.ok) { setToast("Saved to highlights"); setTimeout(() => setToast(null), 1600); }
+        });
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [playing, wordIndex, words, activeDoc.title]);
 
   useEffect(() => {
     setTimeout(() => containerRef.current?.focus(), 50);
@@ -198,12 +255,27 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
                 {paraWords.map((word, wIdx) => {
                   const globalIdx = paraStart + wIdx;
                   const isCurrent = globalIdx === wordIndex;
+                  const isHighlighted = globalIdx === highlightIdx;
                   return (
                     <span
                       key={wIdx}
                       ref={isCurrent ? currentWordRef : undefined}
-                      className={isCurrent ? "reader-pause-word-current" : "reader-pause-word"}
+                      className={isHighlighted ? "reader-pause-word-highlighted" : isCurrent ? "reader-pause-word-current" : "reader-pause-word"}
                       onClick={() => onJumpToWord(globalIdx)}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        const rect = (e.target as HTMLElement).getBoundingClientRect();
+                        const container = containerRef.current?.getBoundingClientRect();
+                        if (container) {
+                          setHighlightWord(word);
+                          setHighlightIdx(globalIdx);
+                          setHighlightPos({
+                            x: rect.left + rect.width / 2 - container.left,
+                            y: rect.top - container.top,
+                          });
+                          setShowDefinition(false);
+                        }
+                      }}
                     >
                       {word}{" "}
                     </span>
@@ -307,6 +379,28 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           </div>
         )}
       </div>
+
+      {/* Highlight menu + definition popup */}
+      {highlightWord && (
+        <HighlightMenu
+          word={highlightWord}
+          position={highlightPos}
+          onSave={() => handleSaveHighlight()}
+          onDefine={() => setShowDefinition(true)}
+          onClose={closeHighlight}
+        />
+      )}
+      {showDefinition && highlightWord && (
+        <DefinitionPopup
+          word={highlightWord}
+          position={highlightPos}
+          onSaveWithDefinition={(text) => handleSaveHighlight(text)}
+          onClose={() => setShowDefinition(false)}
+        />
+      )}
+
+      {/* Toast notification */}
+      {toast && <div className="highlight-toast">{toast}</div>}
     </div>
   );
 }

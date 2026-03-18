@@ -7,6 +7,7 @@ const chokidar = require("chokidar");
 const { Readability } = require("@mozilla/readability");
 const { JSDOM } = require("jsdom");
 const PDFDocument = require("pdfkit");
+const https = require("https");
 
 function sanitizeFilenameForPdf(name) {
   return (name || "")
@@ -1618,6 +1619,98 @@ function registerIPC() {
       return epubChapterCache.get(doc.filepath) || [];
     }
     return [];
+  });
+
+  // ── Highlights ───────────────────────────────────────────────────────────
+  ipcMain.handle("save-highlight", async (_, { docTitle, text, wordIndex, totalWords }) => {
+    try {
+      const highlightPath = settings.sourceFolder
+        ? path.join(settings.sourceFolder, "Blurby Highlights.md")
+        : path.join(getDataPath(), "highlights.md");
+
+      // Create file with header if it doesn't exist
+      try {
+        await fsPromises.access(highlightPath);
+      } catch {
+        await fsPromises.writeFile(highlightPath, "# Blurby Highlights\n\n");
+      }
+
+      const pct = totalWords > 0 ? Math.round((wordIndex / totalWords) * 100) : 0;
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      const hh = String(now.getHours()).padStart(2, "0");
+      const min = String(now.getMinutes()).padStart(2, "0");
+
+      const entry =
+        `---\n\n> "${text}"\n\n` +
+        `— *${docTitle}*, position ${wordIndex}/${totalWords} (${pct}%)\n` +
+        `Saved: ${yyyy}-${mm}-${dd} ${hh}:${min}\n\n`;
+
+      await fsPromises.appendFile(highlightPath, entry);
+      return { ok: true };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  // ── Dictionary lookup ──────────────────────────────────────────────────
+  const definitionCache = new Map();
+
+  ipcMain.handle("define-word", async (_, word) => {
+    const key = word.toLowerCase().trim();
+    if (definitionCache.has(key)) return definitionCache.get(key);
+
+    try {
+      const data = await new Promise((resolve, reject) => {
+        const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(key)}`;
+        const req = https.get(url, (res) => {
+          let body = "";
+          res.on("data", (chunk) => (body += chunk));
+          res.on("end", () => {
+            try {
+              resolve(JSON.parse(body));
+            } catch (e) {
+              reject(new Error("Invalid JSON response"));
+            }
+          });
+        });
+        req.on("error", reject);
+        req.setTimeout(5000, () => {
+          req.destroy();
+          reject(new Error("Request timed out"));
+        });
+      });
+
+      if (!Array.isArray(data) || data.length === 0) {
+        return { error: data?.title || "No definition found" };
+      }
+
+      const entry = data[0];
+      const meaning = entry.meanings?.[0];
+      const def = meaning?.definitions?.[0];
+
+      const result = {
+        word: entry.word || word,
+        phonetic: entry.phonetic || undefined,
+        partOfSpeech: meaning?.partOfSpeech || undefined,
+        definition: def?.definition || undefined,
+        example: def?.example || undefined,
+        synonyms: (meaning?.synonyms || []).slice(0, 5),
+      };
+
+      // Cache with 500-entry limit (evict oldest)
+      if (definitionCache.size >= 500) {
+        const oldest = definitionCache.keys().next().value;
+        definitionCache.delete(oldest);
+      }
+      definitionCache.set(key, result);
+
+      return result;
+    } catch (err) {
+      return { error: err.message };
+    }
   });
 
   ipcMain.handle("add-doc-from-url", async (_, url) => {
