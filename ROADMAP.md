@@ -293,22 +293,26 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 - [x] Create `tsconfig.json` with strict mode
 - [x] Rename `.jsx` files to `.tsx` and `.js` files to `.ts`
 - [x] Add type definitions for IPC messages, document schema, settings schema
-- [x] Add type definitions for all component props
-- [x] Fix all type errors and ensure the build passes cleanly
+- [x] Add type definitions for all component props — all components have typed interfaces
+- [x] Fix all type errors and ensure `tsc --noEmit` passes cleanly with zero errors
 
 ### 4.3 Multi-Window Support ✅
 
-- [x] Allow opening multiple reader windows simultaneously
-- [x] Each reader window tracks its own document and playback state independently
+- [x] Allow opening multiple reader windows simultaneously via "open in new window" button on each document
+- [x] Each reader window tracks its own document and playback state independently (hash-based routing `#reader/:docId`)
 - [x] Ensure progress saves correctly when multiple windows are open
+- [x] Duplicate windows for same doc are prevented — existing window is focused instead
 
 ### 4.4 Theming & Appearance ✅
 
 - [x] Add a light theme option alongside the existing dark theme
-- [x] Add a "system" theme option that follows the OS dark/light mode setting
-- [x] Allow customizing the accent color
-- [x] Allow customizing the reader font family and size
-- [x] Persist theme preferences in settings
+- [x] Add a "system" theme option that follows the OS dark/light mode setting via `nativeTheme.shouldUseDarkColors`
+- [x] System theme auto-updates when OS appearance changes (listens to `nativeTheme.updated` event)
+- [x] Allow customizing the accent color — 6 presets + custom color picker
+- [x] Allow customizing the reader font family — 6 presets (system, Georgia, Merriweather, Mono, Literata, OpenDyslexic)
+- [x] Reader word display and scroll reader use the custom font via `--reader-font` CSS variable
+- [x] Persist theme preferences in settings (accentColor, fontFamily added via v2→v3 migration)
+- [x] Window background color updates to match theme
 
 ### 4.5 Import/Export ✅
 

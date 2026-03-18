@@ -15,6 +15,12 @@ const settingsMigrations = [
     data.schemaVersion = 2;
     return data;
   },
+  (data) => {
+    if (!data.accentColor) data.accentColor = null;
+    if (!data.fontFamily) data.fontFamily = null;
+    data.schemaVersion = 3;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -89,6 +95,25 @@ describe("settings migrations", () => {
     expect(result.folderName).toBe("My reading list");
     expect(result.recentFolders).toEqual([]);
     expect(result.theme).toBe("dark");
+  });
+
+  it("migrates v2 to v3: adds accentColor and fontFamily", () => {
+    const v2 = { schemaVersion: 2, wpm: 300, folderName: "Test", recentFolders: [], theme: "dark" };
+    const result = runMigrations(v2, settingsMigrations, 3);
+    expect(result.schemaVersion).toBe(3);
+    expect(result.accentColor).toBe(null);
+    expect(result.fontFamily).toBe(null);
+    expect(result.wpm).toBe(300);
+  });
+
+  it("migrates v0 all the way to v3", () => {
+    const v0 = { wpm: 250 };
+    const result = runMigrations(v0, settingsMigrations, 3);
+    expect(result.schemaVersion).toBe(3);
+    expect(result.folderName).toBe("My reading list");
+    expect(result.theme).toBe("dark");
+    expect(result.accentColor).toBe(null);
+    expect(result.fontFamily).toBe(null);
   });
 });
 

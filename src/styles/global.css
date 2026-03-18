@@ -359,6 +359,7 @@ button, input, textarea, a, [role="button"] {
 }
 .reader-word-before {
   font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
   font-weight: 300;
   letter-spacing: 2px;
   color: var(--text);
@@ -369,6 +370,7 @@ button, input, textarea, a, [role="button"] {
 }
 .reader-word-focus {
   font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
   font-weight: 600;
   color: var(--accent);
   text-shadow: 0 0 30px var(--accent-glow);
@@ -376,6 +378,7 @@ button, input, textarea, a, [role="button"] {
 }
 .reader-word-after {
   font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
   font-weight: 300;
   letter-spacing: 2px;
   color: var(--text);
@@ -954,6 +957,7 @@ button:focus-visible {
 .scroll-reader-text {
   max-width: 640px;
   font-size: 18px;
+  font-family: var(--reader-font, var(--serif));
   line-height: 1.8;
   color: var(--text);
   letter-spacing: 0.1px;
@@ -1040,6 +1044,81 @@ button:focus-visible {
 }
 [data-theme="eink"] .btn-fill:hover {
   background: #444;
+}
+
+/* ── Appearance Panel ─────────────────────────────────────────────────────── */
+.appearance-panel {
+  background: var(--bg-raised);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+.appearance-section {
+  margin-bottom: 14px;
+}
+.appearance-section:last-child { margin-bottom: 0; }
+.appearance-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dimmer);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 8px;
+}
+.appearance-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.accent-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.accent-swatch:hover { border-color: var(--text-dim); }
+.accent-swatch-active { border-color: var(--text); box-shadow: 0 0 0 1px var(--bg); }
+.accent-custom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+.accent-color-input {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+.accent-color-input::-webkit-color-swatch-wrapper { padding: 0; }
+.accent-color-input::-webkit-color-swatch { border: 1px solid var(--border); border-radius: 50%; }
+.accent-custom-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dimmer);
+}
+.font-preset {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.font-preset:hover { border-color: var(--text-dimmer); color: var(--text); }
+.font-preset-active {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ── Loading Spinner ──────────────────────────────────────────────────────── */

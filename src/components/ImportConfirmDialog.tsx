@@ -1,6 +1,13 @@
 import { useState } from "react";
 
-export default function ImportConfirmDialog({ content, isUrl, onConfirm, onCancel }) {
+interface ImportConfirmDialogProps {
+  content: string;
+  isUrl: boolean;
+  onConfirm: (title: string) => void;
+  onCancel: () => void;
+}
+
+export default function ImportConfirmDialog({ content, isUrl, onConfirm, onCancel }: ImportConfirmDialogProps) {
   const [title, setTitle] = useState(
     isUrl ? content : (content.slice(0, 40) + (content.length > 40 ? "..." : ""))
   );

@@ -1,8 +1,24 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const ThemeContext = createContext({ theme: "dark", setTheme: (_t) => {} });
+interface ThemeContextType {
+  theme: string;
+  setTheme: (t: string) => void;
+  accentColor: string | null;
+  setAccentColor: (c: string | null) => void;
+  fontFamily: string | null;
+  setFontFamily: (f: string | null) => void;
+}
 
-const themes = {
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "dark",
+  setTheme: () => {},
+  accentColor: null,
+  setAccentColor: () => {},
+  fontFamily: null,
+  setFontFamily: () => {},
+});
+
+const themes: Record<string, Record<string, string>> = {
   dark: {
     "--bg": "#0f0f0f",
     "--bg-raised": "#181818",
@@ -44,32 +60,69 @@ const themes = {
   },
 };
 
-const themeOrder = ["dark", "light", "eink"];
+const themeOrder = ["dark", "light", "eink", "system"];
 
-export function nextTheme(current) {
+export function nextTheme(current: string): string {
   const idx = themeOrder.indexOf(current);
   return themeOrder[(idx + 1) % themeOrder.length];
 }
 
-export function themeLabel(theme) {
+export function themeLabel(theme: string): string {
   if (theme === "eink") return "e-ink";
+  if (theme === "system") return "system";
   return theme;
 }
 
-export function ThemeProvider({ children, initialTheme = "dark" }) {
+// Parse hex color to r,g,b for generating glow
+function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) }
+    : null;
+}
+
+export function ThemeProvider({ children, initialTheme = "dark" }: { children: React.ReactNode; initialTheme?: string }) {
   const [theme, setTheme] = useState(initialTheme);
+  const [systemTheme, setSystemTheme] = useState<"dark" | "light">("dark");
+  const [accentColor, setAccentColor] = useState<string | null>(null);
+  const [fontFamily, setFontFamily] = useState<string | null>(null);
+
+  // Fetch initial system theme and listen for changes
+  useEffect(() => {
+    const api = window.electronAPI;
+    api.getSystemTheme?.().then((t) => setSystemTheme(t));
+    const unsub = api.onSystemThemeChanged?.((t) => setSystemTheme(t));
+    return () => unsub?.();
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
-    const vars = themes[theme] || themes.dark;
+    const resolvedTheme = theme === "system" ? systemTheme : theme;
+    const vars = themes[resolvedTheme] || themes.dark;
     for (const [key, value] of Object.entries(vars)) {
       root.style.setProperty(key, value);
     }
-    root.setAttribute("data-theme", theme);
-  }, [theme]);
+    root.setAttribute("data-theme", resolvedTheme);
+
+    // Apply custom accent color override
+    if (accentColor) {
+      root.style.setProperty("--accent", accentColor);
+      const rgb = hexToRgb(accentColor);
+      if (rgb) {
+        root.style.setProperty("--accent-glow", `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`);
+      }
+    }
+
+    // Apply custom font family override
+    if (fontFamily) {
+      root.style.setProperty("--reader-font", fontFamily);
+    } else {
+      root.style.removeProperty("--reader-font");
+    }
+  }, [theme, systemTheme, accentColor, fontFamily]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, accentColor, setAccentColor, fontFamily, setFontFamily }}>
       {children}
     </ThemeContext.Provider>
   );

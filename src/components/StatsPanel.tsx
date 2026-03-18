@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { formatTime } from "../utils/text";
+import { ReadingStats } from "../types";
 
 const api = window.electronAPI;
 
-export default function StatsPanel({ wpm, onClose }) {
-  const [stats, setStats] = useState(null);
+interface StatsPanelProps {
+  wpm: number;
+  onClose: () => void;
+}
+
+export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
+  const [stats, setStats] = useState<ReadingStats | null>(null);
 
   useEffect(() => {
     api.getStats().then(setStats);
@@ -35,7 +41,7 @@ export default function StatsPanel({ wpm, onClose }) {
           <span className="stats-label">total time</span>
         </div>
         <div className="stats-item">
-          <span className="stats-value">{avgWpm || "—"}</span>
+          <span className="stats-value">{avgWpm || "\u2014"}</span>
           <span className="stats-label">avg wpm</span>
         </div>
         <div className="stats-item">

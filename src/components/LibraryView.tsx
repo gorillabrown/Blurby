@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatTime, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
+import { BlurbyDoc, BlurbySettings } from "../types";
 import { useTheme, nextTheme, themeLabel } from "./ThemeProvider";
 import HelpPanel from "./HelpPanel";
 import AddEditPanel from "./AddEditPanel";
@@ -9,13 +10,53 @@ import RecentFolders from "./RecentFolders";
 
 const api = window.electronAPI;
 
+const ACCENT_PRESETS = [
+  { label: "gold", value: "#c4a882" },
+  { label: "blue", value: "#5b8fb9" },
+  { label: "green", value: "#6b9f6b" },
+  { label: "rose", value: "#c47882" },
+  { label: "purple", value: "#9b82c4" },
+  { label: "teal", value: "#5ba8a0" },
+];
+
+const FONT_PRESETS: { label: string; value: string | null }[] = [
+  { label: "system", value: null },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Merriweather", value: "'Merriweather', Georgia, serif" },
+  { label: "Mono", value: "'SF Mono', 'JetBrains Mono', 'Fira Code', monospace" },
+  { label: "Literata", value: "'Literata', Georgia, serif" },
+  { label: "OpenDyslexic", value: "'OpenDyslexic', sans-serif" },
+];
+
+interface LibraryViewProps {
+  library: BlurbyDoc[];
+  settings: BlurbySettings;
+  wpm: number;
+  isMac: boolean;
+  folderName: string;
+  loadingContent: boolean;
+  toast: string | null;
+  onOpenDoc: (doc: BlurbyDoc, mode?: string) => void;
+  onAddDoc: (title: string, content: string, editingId?: string | null) => void;
+  onAddDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
+  onDeleteDoc: (id: string) => void;
+  onResetProgress: (id: string) => void;
+  onSelectFolder: () => void;
+  onSwitchFolder: (folder: string) => void;
+  onSetWpm: (wpm: number) => void;
+  onSetFolderName: (name: string) => void;
+  onToggleFavorite: (id: string) => void;
+  onArchiveDoc: (id: string) => void;
+  onUnarchiveDoc: (id: string) => void;
+}
+
 export default function LibraryView({
   library, settings, wpm, isMac, folderName, loadingContent, toast,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc,
-}) {
-  const { theme, setTheme } = useTheme();
+}: LibraryViewProps) {
+  const { theme, setTheme, accentColor, setAccentColor, fontFamily, setFontFamily } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "favorites" | "archived"
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
@@ -23,15 +64,16 @@ export default function LibraryView({
   const [urlError, setUrlError] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newText, setNewText] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showRecent, setShowRecent] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
-  const [updateReady, setUpdateReady] = useState(null);
+  const [showAppearance, setShowAppearance] = useState(false);
+  const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
 
   useEffect(() => {
@@ -41,7 +83,9 @@ export default function LibraryView({
 
   useEffect(() => {
     if (settings.theme && settings.theme !== theme) setTheme(settings.theme);
-  }, [settings.theme]);
+    if (settings.accentColor !== undefined) setAccentColor(settings.accentColor);
+    if (settings.fontFamily !== undefined) setFontFamily(settings.fontFamily);
+  }, [settings.theme, settings.accentColor, settings.fontFamily]);
 
   useEffect(() => {
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
@@ -96,14 +140,24 @@ export default function LibraryView({
     else { setUrlInput(""); setShowUrl(false); setUrlError(""); }
   };
 
-  const startEdit = (doc) => {
+  const startEdit = (doc: BlurbyDoc) => {
     setEditingId(doc.id); setNewTitle(doc.title); setNewText(doc.content || ""); setShowAdd(true);
   };
 
   const handleThemeCycle = () => {
-    const next = nextTheme(theme);
+    const next = nextTheme(theme) as BlurbySettings["theme"];
     setTheme(next);
     api.saveSettings({ theme: next });
+  };
+
+  const handleAccentChange = (color: string | null) => {
+    setAccentColor(color);
+    api.saveSettings({ accentColor: color });
+  };
+
+  const handleFontChange = (font: string | null) => {
+    setFontFamily(font);
+    api.saveSettings({ fontFamily: font });
   };
 
   const handleLaunchToggle = async () => {
@@ -173,7 +227,12 @@ export default function LibraryView({
           </div>
           <div className="library-actions">
             <button onClick={handleThemeCycle} className="btn" title={`Theme: ${themeLabel(theme)}`} aria-label="Cycle theme">
-              {theme === "dark" ? "light" : theme === "light" ? "e-ink" : "dark"}
+              {themeLabel(nextTheme(theme))}
+            </button>
+            <button onClick={() => setShowAppearance(!showAppearance)} className="btn" title="Appearance settings" aria-label="Appearance settings">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
+                <circle cx="12" cy="12" r="3" /><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+              </svg>
             </button>
             <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
@@ -233,6 +292,52 @@ export default function LibraryView({
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
         {showHelp && <HelpPanel isMac={isMac} />}
+
+        {showAppearance && (
+          <div className="appearance-panel">
+            <div className="stats-header">
+              <span className="stats-title">Appearance</span>
+              <button onClick={() => setShowAppearance(false)} className="btn stats-close">close</button>
+            </div>
+            <div className="appearance-section">
+              <span className="appearance-label">Accent color</span>
+              <div className="appearance-row">
+                {ACCENT_PRESETS.map((preset) => (
+                  <button
+                    key={preset.value}
+                    className={`accent-swatch${accentColor === preset.value || (!accentColor && preset.value === "#c4a882") ? " accent-swatch-active" : ""}`}
+                    style={{ background: preset.value }}
+                    onClick={() => handleAccentChange(preset.value === "#c4a882" ? null : preset.value)}
+                    title={preset.label}
+                    aria-label={`Accent color: ${preset.label}`}
+                  />
+                ))}
+                <label className="accent-custom" title="Custom color">
+                  <input
+                    type="color"
+                    value={accentColor || "#c4a882"}
+                    onChange={(e) => handleAccentChange(e.target.value)}
+                    className="accent-color-input"
+                  />
+                  <span className="accent-custom-label">custom</span>
+                </label>
+              </div>
+            </div>
+            <div className="appearance-section">
+              <span className="appearance-label">Reader font</span>
+              <div className="appearance-row">
+                {FONT_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    className={`font-preset${fontFamily === preset.value ? " font-preset-active" : ""}`}
+                    onClick={() => handleFontChange(preset.value)}
+                    style={preset.value ? { fontFamily: preset.value } : {}}
+                  >{preset.label}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Search bar and sort */}
         {library.length > 3 && (
@@ -321,6 +426,7 @@ export default function LibraryView({
               onArchive={onArchiveDoc}
               onUnarchive={onUnarchiveDoc}
               onOpenScroll={(d) => onOpenDoc(d, "scroll")}
+              onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
             />
           ))}
         </div>

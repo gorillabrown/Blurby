@@ -1,12 +1,24 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { tokenize, formatTime, MIN_WPM, MAX_WPM, WPM_STEP, FONT_SIZE_STEP } from "../utils/text";
+import { tokenize, formatTime, FONT_SIZE_STEP } from "../utils/text";
+import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 
 const WORDS_PER_PAGE = 250;
 
-export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSetWpm, onAdjustFontSize, onExit, onProgressUpdate }) {
+interface ScrollReaderViewProps {
+  activeDoc: BlurbyDoc & { content: string };
+  wpm: number;
+  fontSize: number;
+  isMac: boolean;
+  onSetWpm: (wpm: number) => void;
+  onAdjustFontSize: (delta: number) => void;
+  onExit: (position: number) => void;
+  onProgressUpdate: (position: number) => void;
+}
+
+export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSetWpm, onAdjustFontSize, onExit, onProgressUpdate }: ScrollReaderViewProps) {
   const words = tokenize(activeDoc.content || "");
-  const scrollRef = useRef(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(
     Math.max(0, Math.floor((activeDoc.position || 0) / WORDS_PER_PAGE))
   );
@@ -14,7 +26,7 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
   const totalPages = Math.max(1, Math.ceil(words.length / WORDS_PER_PAGE));
 
   // Build pages of text
-  const pages = [];
+  const pages: string[] = [];
   for (let i = 0; i < totalPages; i++) {
     const start = i * WORDS_PER_PAGE;
     const end = Math.min(start + WORDS_PER_PAGE, words.length);
@@ -29,16 +41,15 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
 
   const scale = (fontSize || 100) / 100;
 
-  const goToPage = useCallback((page) => {
+  const goToPage = useCallback((page: number) => {
     const next = Math.max(0, Math.min(totalPages - 1, page));
     setCurrentPage(next);
-    // Report position as the first word of the new page
     const pos = next * WORDS_PER_PAGE;
     onProgressUpdate(pos);
   }, [totalPages, onProgressUpdate]);
 
   useEffect(() => {
-    const handler = (e) => {
+    const handler = (e: KeyboardEvent) => {
       if (e.code === "ArrowRight" || e.code === "Space") { e.preventDefault(); goToPage(currentPage + 1); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); goToPage(currentPage - 1); }
       else if (e.code === "Escape") { e.preventDefault(); onExit(clampedPosition); }

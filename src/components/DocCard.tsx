@@ -1,9 +1,27 @@
 import { formatTime } from "../utils/text";
+import { BlurbyDoc } from "../types";
 import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
 
-export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll }) {
+interface DocCardProps {
+  doc: BlurbyDoc;
+  wpm: number;
+  confirmDelete: string | null;
+  onOpen: (doc: BlurbyDoc, mode?: string) => void;
+  onReset: (id: string) => void;
+  onEdit: (doc: BlurbyDoc) => void;
+  onDelete: (id: string) => void;
+  onConfirmDelete: (id: string) => void;
+  onCancelDelete: () => void;
+  onToggleFavorite: (id: string) => void;
+  onArchive: (id: string) => void;
+  onUnarchive: (id: string) => void;
+  onOpenScroll?: (doc: BlurbyDoc) => void;
+  onOpenNewWindow?: (doc: BlurbyDoc) => void;
+}
+
+export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
@@ -54,6 +72,18 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </button>
+          )}
+          {onOpenNewWindow && (
+            <button
+              className="icon-btn"
+              onClick={() => onOpenNewWindow(doc)}
+              title="Open in new window"
+              aria-label="Open in new window"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d="M14 9l3 3-3 3" />
               </svg>
             </button>
           )}

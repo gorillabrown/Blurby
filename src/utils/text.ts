@@ -9,11 +9,11 @@ export const MIN_FONT_SIZE = 60;
 export const MAX_FONT_SIZE = 200;
 export const FONT_SIZE_STEP = 10;
 
-export function tokenize(text) {
+export function tokenize(text: string | null | undefined): string[] {
   return (text || "").split(/\s+/).filter(Boolean);
 }
 
-export function formatTime(words, wpm) {
+export function formatTime(words: number | null | undefined, wpm: number | null | undefined): string {
   if (!wpm || !words) return "0m";
   const mins = Math.round(words / wpm);
   if (mins < 1) return "<1m";
@@ -23,10 +23,10 @@ export function formatTime(words, wpm) {
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
-export function focusChar(word) {
+export function focusChar(word: string | null | undefined): { before: string; focus: string; after: string } {
   if (!word) return { before: "", focus: "", after: "" };
   const len = word.length;
-  let pivot;
+  let pivot: number;
   if (len <= 1) pivot = 0;
   else if (len <= 5) pivot = 1;
   else if (len <= 9) pivot = 2;

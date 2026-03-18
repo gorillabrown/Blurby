@@ -1,10 +1,15 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, ReactNode, DragEvent } from "react";
 
-export default function DropZone({ onFilesDropped, children }) {
+interface DropZoneProps {
+  onFilesDropped: (files: File[]) => void;
+  children: ReactNode;
+}
+
+export default function DropZone({ onFilesDropped, children }: DropZoneProps) {
   const [dragging, setDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
 
-  const handleDragEnter = useCallback((e) => {
+  const handleDragEnter = useCallback((e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragCounter((c) => {
@@ -13,7 +18,7 @@ export default function DropZone({ onFilesDropped, children }) {
     });
   }, []);
 
-  const handleDragLeave = useCallback((e) => {
+  const handleDragLeave = useCallback((e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragCounter((c) => {
@@ -26,12 +31,12 @@ export default function DropZone({ onFilesDropped, children }) {
     });
   }, []);
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragOver = useCallback((e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback((e) => {
+  const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragging(false);

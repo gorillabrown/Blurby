@@ -1,4 +1,14 @@
-export default function AddEditPanel({ newTitle, newText, editingId, onTitleChange, onTextChange, onSave, onCancel }) {
+interface AddEditPanelProps {
+  newTitle: string;
+  newText: string;
+  editingId: string | null;
+  onTitleChange: (value: string) => void;
+  onTextChange: (value: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}
+
+export default function AddEditPanel({ newTitle, newText, editingId, onTitleChange, onTextChange, onSave, onCancel }: AddEditPanelProps) {
   return (
     <div className="add-edit-panel">
       <input

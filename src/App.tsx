@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { tokenize, DEFAULT_WPM, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE, FONT_SIZE_STEP } from "./utils/text";
+import { BlurbyDoc } from "./types";
 import useLibrary from "./hooks/useLibrary";
 import useReader from "./hooks/useReader";
 import { useReaderKeys, useSmartImport } from "./hooks/useKeyboardShortcuts";
@@ -13,18 +14,117 @@ import { ThemeProvider } from "./components/ThemeProvider";
 
 const api = window.electronAPI;
 
+type DocWithContent = BlurbyDoc & { content: string };
+
+// Check if launched as a standalone reader window via hash route
+function getReaderDocId(): string | null {
+  const hash = window.location.hash; // e.g. "#reader/docId123"
+  if (hash.startsWith("#reader/")) {
+    return hash.slice("#reader/".length);
+  }
+  return null;
+}
+
+// Standalone reader window component — opened via "open in new window"
+function StandaloneReader() {
+  const docId = getReaderDocId();
+  const [activeDoc, setActiveDoc] = useState<DocWithContent | null>(null);
+  const [wpm, setWpm] = useState(DEFAULT_WPM);
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const [loaded, setLoaded] = useState(false);
+  const sessionStartRef = useRef<number | null>(null);
+  const sessionStartWordRef = useRef(0);
+
+  const reader = useReader(wpm, setWpm);
+  const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, requestExit, initReader } = reader;
+
+  useEffect(() => {
+    if (!docId) return;
+    (async () => {
+      const state = await api.getState();
+      if (state.settings.wpm) setWpm(state.settings.wpm);
+      if (state.settings.fontSize) setFontSize(state.settings.fontSize);
+      const doc = state.library.find((d) => d.id === docId);
+      if (!doc) return;
+      let content = doc.content;
+      if (!content) content = await api.loadDocContent(docId) || undefined;
+      if (!content) return;
+      const docWithContent: DocWithContent = { ...doc, content };
+      setActiveDoc(docWithContent);
+      initReader(doc.position || 0);
+      sessionStartRef.current = Date.now();
+      sessionStartWordRef.current = doc.position || 0;
+      setLoaded(true);
+    })();
+  }, [docId, initReader]);
+
+  const words = activeDoc ? tokenize(activeDoc.content) : [];
+  wordsRef.current = words;
+
+  const finishReading = useCallback((finalPos: number) => {
+    if (activeDoc) {
+      api.updateDocProgress(activeDoc.id, finalPos);
+      const elapsed = Date.now() - (sessionStartRef.current || Date.now());
+      const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
+      if (wordsRead > 0 && elapsed > 1000) {
+        api.recordReadingSession(activeDoc.title, wordsRead, elapsed, wpm);
+      }
+      const docWords = tokenize(activeDoc.content);
+      if (finalPos >= docWords.length - 1 && docWords.length > 0) {
+        api.markDocCompleted();
+        api.archiveDoc(activeDoc.id);
+      }
+    }
+    window.close();
+  }, [activeDoc, wpm]);
+
+  const handleExitReader = useCallback(() => {
+    requestExit(activeDoc, finishReading);
+  }, [activeDoc, requestExit, finishReading]);
+
+  const adjustFontSize = useCallback((delta: number) => {
+    setFontSize((prev) => Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, prev + delta)));
+  }, []);
+
+  useReaderKeys("reader", "speed", togglePlay, seekWords, adjustWpm, handleExitReader, adjustFontSize);
+
+  if (!loaded || !activeDoc) {
+    return <div className="loading-screen">loading...</div>;
+  }
+
+  return (
+    <ErrorBoundary onReset={() => window.close()}>
+      <ReaderView
+        activeDoc={activeDoc}
+        words={words}
+        wordIndex={wordIndex}
+        wpm={wpm}
+        fontSize={fontSize}
+        playing={playing}
+        escPending={escPending}
+        isMac={false}
+        togglePlay={togglePlay}
+        exitReader={handleExitReader}
+        onSetWpm={setWpm}
+        onAdjustFontSize={adjustFontSize}
+        onSwitchToScroll={() => {}}
+      />
+    </ErrorBoundary>
+  );
+}
+
 function AppInner() {
   const [view, setView] = useState("library");
   const [readerMode, setReaderMode] = useState("speed"); // "speed" | "scroll"
-  const [activeDoc, setActiveDoc] = useState(null);
+  const [activeDoc, setActiveDoc] = useState<DocWithContent | null>(null);
   const [wpm, setWpm] = useState(DEFAULT_WPM);
   const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
   const [folderName, setFolderName] = useState("My reading list");
-  const sessionStartRef = useRef(null);
+  const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
 
   // Smart import confirmation state
-  const [importPending, setImportPending] = useState(null); // { content, isUrl }
+  const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
 
   const {
     library, settings, loaded, platform, loadingContent, toast,
@@ -46,26 +146,26 @@ function AppInner() {
   }
 
   // Persist settings on change
-  const prevWpm = useState(wpm);
-  const prevFolder = useState(folderName);
-  const prevFontSize = useState(fontSize);
-  if (loaded && (prevWpm[0] !== wpm || prevFolder[0] !== folderName || prevFontSize[0] !== fontSize)) {
-    prevWpm[0] = wpm;
-    prevFolder[0] = folderName;
-    prevFontSize[0] = fontSize;
+  const prevWpmRef = useRef(wpm);
+  const prevFolderRef = useRef(folderName);
+  const prevFontSizeRef = useRef(fontSize);
+  if (loaded && (prevWpmRef.current !== wpm || prevFolderRef.current !== folderName || prevFontSizeRef.current !== fontSize)) {
+    prevWpmRef.current = wpm;
+    prevFolderRef.current = folderName;
+    prevFontSizeRef.current = fontSize;
     api.saveSettings({ wpm, folderName, fontSize });
   }
 
   const words = activeDoc ? tokenize(activeDoc.content) : [];
   wordsRef.current = words;
 
-  const openDoc = useCallback(async (doc, mode = "speed") => {
+  const openDoc = useCallback(async (doc: BlurbyDoc, mode = "speed") => {
     let content = doc.content;
     if (!content && (doc.source === "folder")) {
-      content = await loadDocContent(doc.id);
+      content = await loadDocContent(doc.id) || undefined;
       if (!content) return;
     }
-    const docWithContent = { ...doc, content };
+    const docWithContent: DocWithContent = { ...doc, content: content! };
     setActiveDoc(docWithContent);
     initReader(doc.position || 0);
     sessionStartRef.current = Date.now();
@@ -74,7 +174,7 @@ function AppInner() {
     setView("reader");
   }, [loadDocContent, initReader]);
 
-  const finishReading = useCallback((finalPos) => {
+  const finishReading = useCallback((finalPos: number) => {
     if (activeDoc) {
       updateProgress(activeDoc.id, finalPos);
       api.updateDocProgress(activeDoc.id, finalPos);
@@ -99,11 +199,11 @@ function AppInner() {
     requestExit(activeDoc, finishReading);
   }, [activeDoc, requestExit, finishReading]);
 
-  const handleScrollExit = useCallback((finalPos) => {
+  const handleScrollExit = useCallback((finalPos: number) => {
     finishReading(finalPos);
   }, [finishReading]);
 
-  const handleScrollProgress = useCallback((pos) => {
+  const handleScrollProgress = useCallback((pos: number) => {
     if (activeDoc) {
       api.updateDocProgress(activeDoc.id, pos);
       updateProgress(activeDoc.id, pos);
@@ -118,18 +218,18 @@ function AppInner() {
     setReaderMode("scroll");
   }, [playing, reader]);
 
-  const adjustFontSize = useCallback((delta) => {
+  const adjustFontSize = useCallback((delta: number) => {
     setFontSize((prev) => Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, prev + delta)));
   }, []);
 
   useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFontSize);
 
   // Smart Alt+V handler
-  const handleSmartImport = useCallback((content, isUrl) => {
+  const handleSmartImport = useCallback((content: string, isUrl: boolean) => {
     setImportPending({ content, isUrl });
   }, []);
 
-  const handleImportConfirm = useCallback(async (title) => {
+  const handleImportConfirm = useCallback(async (title: string) => {
     if (!importPending) return;
     if (importPending.isUrl) {
       const result = await addDocFromUrl(importPending.content);
@@ -148,8 +248,8 @@ function AppInner() {
 
   useSmartImport(view, handleSmartImport);
 
-  const handleFilesDropped = useCallback(async (files) => {
-    const paths = files.map((f) => f.path).filter(Boolean);
+  const handleFilesDropped = useCallback(async (files: File[]) => {
+    const paths = files.map((f) => (f as File & { path?: string }).path).filter(Boolean) as string[];
     if (paths.length > 0) {
       await importDroppedFiles(paths);
     }
@@ -235,9 +335,11 @@ function AppInner() {
 }
 
 export default function App() {
+  const isStandaloneReader = getReaderDocId() !== null;
+
   return (
     <ThemeProvider initialTheme="dark">
-      <AppInner />
+      {isStandaloneReader ? <StandaloneReader /> : <AppInner />}
     </ThemeProvider>
   );
 }

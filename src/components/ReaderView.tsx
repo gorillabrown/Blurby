@@ -1,10 +1,27 @@
 import { useRef, useEffect } from "react";
 import { focusChar, formatTime, MIN_WPM, MAX_WPM, WPM_STEP, FONT_SIZE_STEP } from "../utils/text";
+import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFontSize, onSwitchToScroll }) {
-  const containerRef = useRef(null);
+interface ReaderViewProps {
+  activeDoc: BlurbyDoc & { content: string };
+  words: string[];
+  wordIndex: number;
+  wpm: number;
+  fontSize: number;
+  playing: boolean;
+  escPending: boolean;
+  isMac: boolean;
+  togglePlay: () => void;
+  exitReader: () => void;
+  onSetWpm: (wpm: number) => void;
+  onAdjustFontSize: (delta: number) => void;
+  onSwitchToScroll: () => void;
+}
+
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFontSize, onSwitchToScroll }: ReaderViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setTimeout(() => containerRef.current?.focus(), 50);
@@ -103,8 +120,8 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
         <div className="reader-bottom-info">
           <span>{pct}%</span>
           <span className="reader-controls-hint">
-            <span>← → rewind</span>
-            <span>↑ ↓ speed</span>
+            <span>&larr; &rarr; rewind</span>
+            <span>&uarr; &darr; speed</span>
             <span>+/- font</span>
             <span>space {playing ? "pause" : "play"}</span>
           </span>

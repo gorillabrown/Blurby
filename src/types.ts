@@ -25,9 +25,11 @@ export interface BlurbySettings {
   sourceFolder: string | null;
   folderName: string;
   recentFolders: string[];
-  theme: "dark" | "light" | "eink";
+  theme: "dark" | "light" | "eink" | "system";
   launchAtLogin: boolean;
   fontSize: number;
+  accentColor: string | null;
+  fontFamily: string | null;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────
@@ -51,6 +53,7 @@ export interface ReadingStats {
 export interface ElectronAPI {
   getState: () => Promise<{ settings: BlurbySettings; library: BlurbyDoc[] }>;
   getPlatform: () => Promise<string>;
+  getSystemTheme: () => Promise<"dark" | "light">;
   selectFolder: () => Promise<string | null>;
   switchFolder: (folder: string) => Promise<{ folder?: string; error?: string }>;
   saveSettings: (settings: Partial<BlurbySettings>) => Promise<void>;
@@ -74,9 +77,11 @@ export interface ElectronAPI {
   toggleFavorite: (docId: string) => Promise<boolean>;
   archiveDoc: (docId: string) => Promise<void>;
   unarchiveDoc: (docId: string) => Promise<void>;
+  openReaderWindow: (docId: string) => Promise<void>;
   installUpdate: () => Promise<void>;
   logError: (message: string) => Promise<void>;
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
+  onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;
   onUpdateAvailable?: (callback: (version: string) => void) => () => void;
   onUpdateDownloaded?: (callback: (version: string) => void) => () => void;
 }

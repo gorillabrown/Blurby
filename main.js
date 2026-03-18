@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeTheme } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
@@ -9,7 +9,7 @@ const { JSDOM } = require("jsdom");
 
 const isDev = !app.isPackaged;
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
-const CURRENT_SETTINGS_SCHEMA = 2;
+const CURRENT_SETTINGS_SCHEMA = 3;
 const CURRENT_LIBRARY_SCHEMA = 1;
 
 // ── Paths ──────────────────────────────────────────────────────────────────────
@@ -49,6 +49,13 @@ const settingsMigrations = [
     data.schemaVersion = 2;
     return data;
   },
+  // v2 → v3: Add accentColor and fontFamily
+  (data) => {
+    if (!data.accentColor) data.accentColor = null; // null = use theme default
+    if (!data.fontFamily) data.fontFamily = null; // null = use default system font
+    data.schemaVersion = 3;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -85,9 +92,10 @@ function backupFile(filepath) {
 
 // ── State ──────────────────────────────────────────────────────────────────────
 let mainWindow = null;
+let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 
@@ -264,6 +272,46 @@ function broadcastLibrary() {
   }
 }
 
+// ── Reader windows ─────────────────────────────────────────────────────────────
+function createReaderWindow(docId) {
+  if (readerWindows.has(docId)) {
+    const existing = readerWindows.get(docId);
+    if (!existing.isDestroyed()) {
+      existing.focus();
+      return existing;
+    }
+    readerWindows.delete(docId);
+  }
+
+  const win = new BrowserWindow({
+    width: 900, height: 650, minWidth: 500, minHeight: 400,
+    title: "Blurby Reader",
+    backgroundColor: settings.theme === "light" ? "#f5f3ef" : "#050505",
+    titleBarStyle: "hiddenInset",
+    trafficLightPosition: { x: 16, y: 16 },
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true, nodeIntegration: false,
+    },
+    show: false,
+  });
+
+  win.once("ready-to-show", () => win.show());
+
+  if (isDev) {
+    win.loadURL("http://localhost:5173#reader/" + docId);
+  } else {
+    win.loadFile(path.join(__dirname, "dist", "index.html"), { hash: "reader/" + docId });
+  }
+
+  win.on("closed", () => {
+    readerWindows.delete(docId);
+  });
+
+  readerWindows.set(docId, win);
+  return win;
+}
+
 // ── File watcher ───────────────────────────────────────────────────────────────
 function startWatcher() {
   if (watcher) watcher.close();
@@ -403,10 +451,37 @@ function getStats() {
   };
 }
 
+// ── System theme ───────────────────────────────────────────────────────────────
+function getSystemTheme() {
+  return nativeTheme.shouldUseDarkColors ? "dark" : "light";
+}
+
+function broadcastSystemTheme() {
+  const systemTheme = getSystemTheme();
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("system-theme-changed", systemTheme);
+  }
+  for (const [, win] of readerWindows) {
+    if (!win.isDestroyed()) {
+      win.webContents.send("system-theme-changed", systemTheme);
+    }
+  }
+}
+
+function updateWindowTheme() {
+  // Update title bar / background color based on resolved theme
+  const resolvedTheme = settings.theme === "system" ? getSystemTheme() : settings.theme;
+  const bgColor = resolvedTheme === "light" ? "#f5f3ef" : resolvedTheme === "eink" ? "#e8e4d9" : "#1a1a1a";
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setBackgroundColor(bgColor);
+  }
+}
+
 // ── IPC Handlers ───────────────────────────────────────────────────────────────
 function registerIPC() {
   ipcMain.handle("get-state", () => ({ settings, library: getLibrary() }));
   ipcMain.handle("get-platform", () => process.platform);
+  ipcMain.handle("get-system-theme", () => getSystemTheme());
 
   ipcMain.handle("select-folder", async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -436,6 +511,7 @@ function registerIPC() {
   ipcMain.handle("save-settings", (_, newSettings) => {
     settings = { ...settings, ...newSettings };
     saveSettings();
+    if (newSettings.theme !== undefined) updateWindowTheme();
   });
 
   ipcMain.handle("save-library", (_, newDocs) => { setLibrary(newDocs); saveLibrary(); });
@@ -675,6 +751,11 @@ function registerIPC() {
     }
   });
 
+  // Multi-window reader
+  ipcMain.handle("open-reader-window", (_, docId) => {
+    createReaderWindow(docId);
+  });
+
   // Error logging
   ipcMain.handle("log-error", (_, message) => {
     try {
@@ -690,7 +771,14 @@ app.whenReady().then(async () => {
   registerIPC();
   createWindow();
   createTray();
+  updateWindowTheme();
   if (!isDev) setupAutoUpdater();
+
+  // Listen for OS theme changes
+  nativeTheme.on("updated", () => {
+    broadcastSystemTheme();
+    if (settings.theme === "system") updateWindowTheme();
+  });
 
   if (settings.sourceFolder) {
     await syncLibraryWithFolder();

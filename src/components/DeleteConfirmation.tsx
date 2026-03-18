@@ -1,4 +1,9 @@
-export default function DeleteConfirmation({ onConfirm, onCancel }) {
+interface DeleteConfirmationProps {
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+export default function DeleteConfirmation({ onConfirm, onCancel }: DeleteConfirmationProps) {
   return (
     <div className="delete-confirm">
       <span className="delete-confirm-label">Delete?</span>

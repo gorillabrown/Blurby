@@ -1,4 +1,12 @@
-export default function RecentFolders({ recentFolders, currentFolder, onSwitch, onBrowse, onClose }) {
+interface RecentFoldersProps {
+  recentFolders: string[];
+  currentFolder: string | null;
+  onSwitch: (folder: string) => void;
+  onBrowse: () => void;
+  onClose: () => void;
+}
+
+export default function RecentFolders({ recentFolders, currentFolder, onSwitch, onBrowse, onClose }: RecentFoldersProps) {
   return (
     <div className="recent-folders">
       <div className="recent-folders-title">Recent folders</div>

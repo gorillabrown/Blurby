@@ -1,14 +1,28 @@
 import { useState, useEffect, useCallback } from "react";
+import { BlurbyDoc, BlurbySettings } from "../types";
 
 const api = window.electronAPI;
 
+const defaultSettings: BlurbySettings = {
+  schemaVersion: 0,
+  wpm: 300,
+  sourceFolder: null,
+  folderName: "My reading list",
+  recentFolders: [],
+  theme: "dark",
+  launchAtLogin: false,
+  fontSize: 100,
+  accentColor: null,
+  fontFamily: null,
+};
+
 export default function useLibrary() {
-  const [library, setLibrary] = useState([]);
-  const [settings, setSettings] = useState({ wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false });
+  const [library, setLibrary] = useState<BlurbyDoc[]>([]);
+  const [settings, setSettings] = useState<BlurbySettings>(defaultSettings);
   const [loaded, setLoaded] = useState(false);
   const [platform, setPlatform] = useState("win32");
   const [loadingContent, setLoadingContent] = useState(false);
-  const [toast, setToast] = useState(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -23,12 +37,12 @@ export default function useLibrary() {
     return () => unsub();
   }, []);
 
-  const showToast = useCallback((message, duration = 3000) => {
+  const showToast = useCallback((message: string, duration = 3000) => {
     setToast(message);
     setTimeout(() => setToast(null), duration);
   }, []);
 
-  const addDoc = useCallback(async (title, content, editingId) => {
+  const addDoc = useCallback(async (title: string, content: string, editingId?: string | null) => {
     if (editingId) {
       await api.updateDoc(editingId, title, content);
       setLibrary((prev) => prev.map((d) => (d.id === editingId ? { ...d, title, content } : d)));
@@ -38,12 +52,12 @@ export default function useLibrary() {
     }
   }, []);
 
-  const deleteDoc = useCallback(async (id) => {
+  const deleteDoc = useCallback(async (id: string) => {
     await api.deleteDoc(id);
     setLibrary((prev) => prev.filter((d) => d.id !== id));
   }, []);
 
-  const resetProgress = useCallback(async (id) => {
+  const resetProgress = useCallback(async (id: string) => {
     await api.resetProgress(id);
     setLibrary((prev) => prev.map((d) => (d.id === id ? { ...d, position: 0 } : d)));
   }, []);
@@ -58,7 +72,7 @@ export default function useLibrary() {
     }
   }, []);
 
-  const switchFolder = useCallback(async (folder) => {
+  const switchFolder = useCallback(async (folder: string) => {
     const result = await api.switchFolder(folder);
     if (result.error) { showToast(result.error); return; }
     setSettings((prev) => ({ ...prev, sourceFolder: folder }));
@@ -67,22 +81,22 @@ export default function useLibrary() {
     setSettings(state.settings);
   }, [showToast]);
 
-  const loadDocContent = useCallback(async (docId) => {
+  const loadDocContent = useCallback(async (docId: string) => {
     setLoadingContent(true);
     try { return await api.loadDocContent(docId); } finally { setLoadingContent(false); }
   }, []);
 
-  const addDocFromUrl = useCallback(async (url) => {
+  const addDocFromUrl = useCallback(async (url: string) => {
     setLoadingContent(true);
     try {
       const result = await api.addDocFromUrl(url);
       if (result.error) return { error: result.error };
-      setLibrary((prev) => [result.doc, ...prev]);
+      setLibrary((prev) => [result.doc!, ...prev]);
       return { doc: result.doc };
     } finally { setLoadingContent(false); }
   }, []);
 
-  const importDroppedFiles = useCallback(async (filePaths) => {
+  const importDroppedFiles = useCallback(async (filePaths: string[]) => {
     setLoadingContent(true);
     try {
       const result = await api.importDroppedFiles(filePaths);
@@ -98,22 +112,22 @@ export default function useLibrary() {
     } finally { setLoadingContent(false); }
   }, [showToast]);
 
-  const updateProgress = useCallback((docId, position) => {
+  const updateProgress = useCallback((docId: string, position: number) => {
     setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, position } : d)));
   }, []);
 
-  const toggleFavorite = useCallback(async (docId) => {
+  const toggleFavorite = useCallback(async (docId: string) => {
     const result = await api.toggleFavorite(docId);
     setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, favorite: result } : d)));
   }, []);
 
-  const archiveDoc = useCallback(async (docId) => {
+  const archiveDoc = useCallback(async (docId: string) => {
     await api.archiveDoc(docId);
     setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: true, archivedAt: Date.now() } : d)));
     showToast("Document archived");
   }, [showToast]);
 
-  const unarchiveDoc = useCallback(async (docId) => {
+  const unarchiveDoc = useCallback(async (docId: string) => {
     await api.unarchiveDoc(docId);
     setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: false, archivedAt: undefined } : d)));
   }, []);

@@ -3,10 +3,18 @@ import { WPM_STEP, REWIND_WORDS, FONT_SIZE_STEP } from "../utils/text";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
-export function useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFontSize) {
+export function useReaderKeys(
+  view: string,
+  readerMode: string,
+  togglePlay: () => void,
+  seekWords: (delta: number) => void,
+  adjustWpm: (delta: number) => void,
+  exitReader: () => void,
+  adjustFontSize: (delta: number) => void
+) {
   useEffect(() => {
     if (view !== "reader" || readerMode !== "speed") return;
-    const handler = (e) => {
+    const handler = (e: KeyboardEvent) => {
       if (e.code === "Space") { e.preventDefault(); togglePlay(); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); seekWords(-REWIND_WORDS); }
       else if (e.code === "ArrowRight") { e.preventDefault(); seekWords(REWIND_WORDS); }
@@ -22,9 +30,9 @@ export function useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm
 }
 
 // Smart import: Alt+V detects URL vs text and shows confirmation dialog
-export function useSmartImport(view, onImport) {
+export function useSmartImport(view: string, onImport: (content: string, isUrl: boolean) => void) {
   useEffect(() => {
-    const handler = async (e) => {
+    const handler = async (e: KeyboardEvent) => {
       if (!((e.altKey || e.metaKey) && e.code === "KeyV")) return;
       if (view !== "library") return;
       e.preventDefault();

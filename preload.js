@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // State
   getState: () => ipcRenderer.invoke("get-state"),
   getPlatform: () => ipcRenderer.invoke("get-platform"),
+  getSystemTheme: () => ipcRenderer.invoke("get-system-theme"),
 
   // Folder
   selectFolder: () => ipcRenderer.invoke("select-folder"),
@@ -50,6 +51,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   archiveDoc: (docId) => ipcRenderer.invoke("archive-doc", docId),
   unarchiveDoc: (docId) => ipcRenderer.invoke("unarchive-doc", docId),
 
+  // Multi-window reader
+  openReaderWindow: (docId) => ipcRenderer.invoke("open-reader-window", docId),
+
   // Auto-updater
   installUpdate: () => ipcRenderer.invoke("install-update"),
 
@@ -66,6 +70,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const handler = (_event, version) => callback(version);
     ipcRenderer.on("update-available", handler);
     return () => ipcRenderer.removeListener("update-available", handler);
+  },
+  onSystemThemeChanged: (callback) => {
+    const handler = (_event, theme) => callback(theme);
+    ipcRenderer.on("system-theme-changed", handler);
+    return () => ipcRenderer.removeListener("system-theme-changed", handler);
   },
   onUpdateDownloaded: (callback) => {
     const handler = (_event, version) => callback(version);

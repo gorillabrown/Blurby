@@ -1,25 +1,26 @@
 import { useState, useRef, useCallback } from "react";
-import { MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
+import { MIN_WPM, MAX_WPM } from "../utils/text";
+import { BlurbyDoc } from "../types";
 
 const api = window.electronAPI;
 
-export default function useReader(wpm, setWpm) {
+export default function useReader(wpm: number, setWpm: (fn: (prev: number) => number) => void) {
   const [wordIndex, setWordIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [escPending, setEscPending] = useState(false);
 
-  const rafRef = useRef(null);
+  const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef(0);
   const accumulatorRef = useRef(0);
-  const wordsRef = useRef([]);
+  const wordsRef = useRef<string[]>([]);
   const wordIndexRef = useRef(0);
   const playingRef = useRef(false);
   const wpmRef = useRef(wpm);
-  const escTimerRef = useRef(null);
+  const escTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   wpmRef.current = wpm;
 
   // requestAnimationFrame-based playback loop
-  const tick = useCallback((timestamp) => {
+  const tick = useCallback((timestamp: number) => {
     if (!playingRef.current) return;
 
     if (lastTimeRef.current === 0) {
@@ -80,16 +81,15 @@ export default function useReader(wpm, setWpm) {
     }
   }, [startPlayback, stopPlayback]);
 
-  const adjustWpm = useCallback((delta) => {
-    setWpm((prev) => {
+  const adjustWpm = useCallback((delta: number) => {
+    setWpm((prev: number) => {
       const next = Math.max(MIN_WPM, Math.min(MAX_WPM, prev + delta));
       wpmRef.current = next;
-      // rAF loop automatically uses new wpmRef value — no restart needed
       return next;
     });
   }, [setWpm]);
 
-  const seekWords = useCallback((delta) => {
+  const seekWords = useCallback((delta: number) => {
     setWordIndex((prev) => {
       const next = Math.max(0, Math.min(wordsRef.current.length - 1, prev + delta));
       wordIndexRef.current = next;
@@ -97,15 +97,15 @@ export default function useReader(wpm, setWpm) {
     });
   }, []);
 
-  const requestExit = useCallback((activeDoc, onExit) => {
+  const requestExit = useCallback((activeDoc: (BlurbyDoc & { content?: string }) | null, onExit: (pos: number) => void) => {
     // If playing, require double-Esc
     if (playingRef.current && !escPending) {
       setEscPending(true);
-      clearTimeout(escTimerRef.current);
+      if (escTimerRef.current) clearTimeout(escTimerRef.current);
       escTimerRef.current = setTimeout(() => setEscPending(false), 2000);
       return;
     }
-    clearTimeout(escTimerRef.current);
+    if (escTimerRef.current) clearTimeout(escTimerRef.current);
     setEscPending(false);
     stopPlayback();
     setPlaying(false);
@@ -119,7 +119,7 @@ export default function useReader(wpm, setWpm) {
     onExit(finalPos);
   }, [escPending, stopPlayback]);
 
-  const initReader = useCallback((position) => {
+  const initReader = useCallback((position: number) => {
     setWordIndex(position);
     wordIndexRef.current = position;
     setEscPending(false);
