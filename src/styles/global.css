@@ -51,8 +51,8 @@ button, input, textarea, a, [role="button"] {
 .btn:hover { border-color: var(--text-dimmer); color: var(--text); }
 
 .btn-fill {
-  background: var(--text);
-  color: #111;
+  background: var(--accent);
+  color: var(--bg);
   border: none;
   border-radius: 6px;
   padding: 7px 16px;
@@ -62,7 +62,7 @@ button, input, textarea, a, [role="button"] {
   cursor: pointer;
   letter-spacing: 0.3px;
 }
-.btn-fill:hover { background: #d8d4ce; }
+.btn-fill:hover { opacity: 0.85; }
 
 /* ── Badge ────────────────────────────────────────────────────────────────── */
 .badge {
@@ -1080,13 +1080,6 @@ button:focus-visible {
 }
 [data-theme="eink"] ::-webkit-scrollbar-thumb { background: #aaa; }
 [data-theme="eink"] ::-webkit-scrollbar-thumb:hover { background: #999; }
-[data-theme="eink"] .btn-fill {
-  background: #333;
-  color: #e8e4d9;
-}
-[data-theme="eink"] .btn-fill:hover {
-  background: #444;
-}
 
 /* ── Appearance Panel ─────────────────────────────────────────────────────── */
 .appearance-panel {

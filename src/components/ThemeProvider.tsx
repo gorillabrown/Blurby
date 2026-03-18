@@ -87,6 +87,18 @@ export function ThemeProvider({ children, initialTheme = "dark" }: { children: R
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string | null>(null);
 
+  // Load saved theme preferences on mount
+  useEffect(() => {
+    const api = window.electronAPI;
+    api.getState?.().then((state) => {
+      if (state?.settings) {
+        if (state.settings.theme) setTheme(state.settings.theme);
+        if (state.settings.accentColor !== undefined) setAccentColor(state.settings.accentColor);
+        if (state.settings.fontFamily !== undefined) setFontFamily(state.settings.fontFamily);
+      }
+    });
+  }, []);
+
   // Fetch initial system theme and listen for changes
   useEffect(() => {
     const api = window.electronAPI;
