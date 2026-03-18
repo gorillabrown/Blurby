@@ -1302,9 +1302,11 @@ function registerIPC() {
           const docs = getLibrary();
           setLibrary(docs.map((d) => (d.id === newDoc.id ? newDoc : d)));
           saveLibrary();
+          broadcastLibrary();
         } catch (err) {
           console.error("PDF generation failed, keeping URL-sourced doc:", err);
-          logToFile(`PDF generation error: ${err.message}`);
+          console.error("PDF generation error stack:", err.stack);
+          logToFile(`PDF generation error for "${newDoc.title}": ${err.message}\n${err.stack}`);
         }
       }
 
@@ -1462,12 +1464,36 @@ function registerIPC() {
         }
       }
 
-      // Preserve non-folder and Saved Articles docs
+      // Preserve non-folder docs; convert URL docs to PDFs if they have content
       const savedArticlesPath = settings.sourceFolder
         ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
         : null;
       for (const doc of docs) {
-        if (doc.source !== "folder") {
+        if (doc.source === "url" && doc.content && settings.sourceFolder) {
+          // Retroactively generate PDF for URL-sourced doc
+          try {
+            const pdfPath = await generateArticlePdf({
+              title: doc.title,
+              author: null,
+              content: doc.content,
+              sourceUrl: doc.sourceUrl || "",
+              fetchDate: new Date(doc.created || Date.now()),
+              outputDir: settings.sourceFolder,
+            });
+            synced.push({
+              ...doc,
+              source: "folder",
+              filepath: pdfPath,
+              filename: path.basename(pdfPath),
+              ext: ".pdf",
+              content: undefined,
+            });
+            console.log(`Converted URL doc to PDF: ${doc.title}`);
+          } catch (err) {
+            console.error(`Failed to convert URL doc "${doc.title}" to PDF:`, err.message);
+            synced.push(doc); // keep as-is on failure
+          }
+        } else if (doc.source !== "folder") {
           synced.push(doc);
         } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
           synced.push(doc);
