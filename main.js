@@ -605,6 +605,28 @@ function updateWindowTheme() {
 }
 
 // ── Article extraction helpers ─────────────────────────────────────────────────
+async function getSessionCookieHeader(url) {
+  try {
+    const loginSession = session.fromPartition("persist:site-login");
+    const cookies = await loginSession.cookies.get({ url });
+    if (cookies.length === 0) return null;
+    return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+  } catch { return null; }
+}
+
+async function fetchWithCookies(url) {
+  const cookieHeader = await getSessionCookieHeader(url);
+  const headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+  };
+  if (cookieHeader) headers["Cookie"] = cookieHeader;
+  const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000), redirect: "follow" });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return await response.text();
+}
+
 function fetchWithBrowser(url) {
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
@@ -617,7 +639,6 @@ function fetchWithBrowser(url) {
       },
     });
 
-    // Set a real browser user agent
     win.webContents.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     );
@@ -627,18 +648,17 @@ function fetchWithBrowser(url) {
       if (!win.isDestroyed()) win.destroy();
     };
 
+    // Hard timeout — force resolve with whatever we have
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        // On timeout, grab whatever has rendered so far
         win.webContents.executeJavaScript("document.documentElement.outerHTML")
           .then((html) => { cleanup(); resolve(html); })
           .catch(() => { cleanup(); reject(new Error("Timed out loading page.")); });
       }
-    }, 25000);
+    }, 20000);
 
     win.webContents.on("did-finish-load", () => {
-      // Wait for JS frameworks to render dynamic content
       setTimeout(async () => {
         if (resolved) return;
         resolved = true;
@@ -651,11 +671,10 @@ function fetchWithBrowser(url) {
           cleanup();
           reject(err);
         }
-      }, 4000);
+      }, 3000);
     });
 
-    // Only reject on main frame failures, not sub-resources
-    win.webContents.on("did-fail-load", (_event, errorCode, errorDesc, validatedURL, isMainFrame) => {
+    win.webContents.on("did-fail-load", (_event, errorCode, errorDesc, _url, isMainFrame) => {
       if (isMainFrame && !resolved) {
         resolved = true;
         clearTimeout(timeout);
@@ -801,27 +820,26 @@ function registerIPC() {
       const siteKey = getSiteKey(url);
       const hasLogin = siteKey && siteCookies[siteKey] && siteCookies[siteKey].length > 0;
       let html;
+      let result;
 
       if (hasLogin) {
-        // Load in a hidden BrowserWindow with the login session so JS renders
-        // the full article content (bypasses JS-based paywalls)
-        html = await fetchWithBrowser(url);
+        // Try fast HTTP fetch with session cookies first
+        try {
+          html = await fetchWithCookies(url);
+          result = extractArticleFromHtml(html, url);
+        } catch { /* fall through to browser fetch */ }
+
+        // If cookie fetch didn't get article content, try BrowserWindow
+        if (!result || result.error) {
+          html = await fetchWithBrowser(url);
+          result = extractArticleFromHtml(html, url);
+        }
       } else {
-        const response = await fetch(url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-          },
-          signal: AbortSignal.timeout(15000),
-        });
-        if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
-        html = await response.text();
+        html = await fetchWithCookies(url);
+        result = extractArticleFromHtml(html, url);
       }
 
-      if (!html) return { error: "Failed to load page content." };
-      const result = extractArticleFromHtml(html, url);
-      if (result.error) return result;
+      if (!result || result.error) return result || { error: "Failed to load page content." };
 
       const newDoc = {
         id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
