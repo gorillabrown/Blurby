@@ -275,7 +275,7 @@ async function extractContent(filepath) {
       // Timeout to prevent hanging on problematic PDFs
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("PDF parse timeout")), 30000));
       try {
-        const result = await Promise.race([parser.getText(), timeout]);
+        const result = await Promise.race([parser.getText({ pageJoiner: "\n\n" }), timeout]);
         await parser.destroy();
         const text = result.text || "";
         // Validate extracted text isn't binary garbage
