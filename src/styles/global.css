@@ -252,22 +252,34 @@ button, input, textarea, a, [role="button"] {
 .doc-card-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
 .doc-card-title {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 400;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.doc-card-meta {
+.doc-card-author {
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text-dimmer);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.doc-card-header .doc-list-col-words,
+.doc-card-header .doc-list-col-progress,
+.doc-card-header .doc-list-col-time {
   font-size: 11px;
   font-family: var(--mono);
   color: var(--text-dimmer);
-  display: flex;
-  gap: 14px;
+}
+.doc-card-meta {
+  display: none; /* Replaced by column layout in doc-card-header */
 }
 .doc-card-progress { color: var(--accent); }
 .doc-card-actions {

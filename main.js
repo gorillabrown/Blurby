@@ -399,7 +399,7 @@ async function extractEpubCover(filepath, docId) {
   }
 }
 
-async function extractAuthorFromEpub(filepath) {
+async function extractEpubMetadata(filepath) {
   try {
     const AdmZip = require("adm-zip");
     const cheerio = require("cheerio");
@@ -414,21 +414,32 @@ async function extractAuthorFromEpub(filepath) {
     }
 
     const opfEntry = entries.find((e) => e.entryName === opfPath);
-    if (!opfEntry) return null;
+    if (!opfEntry) return { title: null, author: null };
 
     const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
     const creator = $("dc\\:creator, creator").first().text().trim();
-    return creator || null;
+    const title = $("dc\\:title, title").first().text().trim();
+    return { title: title || null, author: creator || null };
   } catch {
-    return null;
+    return { title: null, author: null };
   }
 }
 
 function extractAuthorFromFilename(filename) {
   // Try "Title - Author" pattern
   const base = path.basename(filename, path.extname(filename));
-  const match = base.match(/^.+\s+-\s+(.+)$/);
-  return match ? match[1].trim() : null;
+  const match = base.match(/^(.+?)\s+-\s+(.+)$/);
+  return match ? match[2].trim() : null;
+}
+
+function extractTitleFromFilename(filename, author) {
+  const base = path.basename(filename, path.extname(filename));
+  if (author) {
+    // Strip " - Author" suffix from title
+    const match = base.match(/^(.+?)\s+-\s+.+$/);
+    if (match) return match[1].trim();
+  }
+  return base;
 }
 
 // ── Symlink-safe path validation ───────────────────────────────────────────────
@@ -498,15 +509,22 @@ async function syncLibraryWithFolder() {
         const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
         let author = null;
         let coverPath = null;
+        let bookTitle = null;
         if (file.ext === ".epub") {
-          author = await extractAuthorFromEpub(file.filepath);
+          const meta = await extractEpubMetadata(file.filepath);
+          author = meta.author;
+          bookTitle = meta.title;
           coverPath = await extractEpubCover(file.filepath, docId);
-        } else {
+        }
+        if (!author) {
           author = extractAuthorFromFilename(file.filename);
+        }
+        if (!bookTitle) {
+          bookTitle = extractTitleFromFilename(file.filename, author);
         }
         synced.push({
           id: docId,
-          title: path.basename(file.filename, file.ext),
+          title: bookTitle,
           filepath: file.filepath, filename: file.filename,
           ext: file.ext, size: file.size, modified: file.modified,
           wordCount, position: 0, created: Date.now(), source: "folder",

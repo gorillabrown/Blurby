@@ -6,6 +6,13 @@ interface DocGridCardProps {
   onOpen: (doc: BlurbyDoc) => void;
 }
 
+function deriveAuthorAndTitle(doc: BlurbyDoc): { displayTitle: string; displayAuthor: string } {
+  if (doc.author) return { displayTitle: doc.title, displayAuthor: doc.author };
+  const match = doc.title.match(/^(.+?)\s+-\s+(.+)$/);
+  if (match) return { displayTitle: match[1].trim(), displayAuthor: match[2].trim() };
+  return { displayTitle: doc.title, displayAuthor: "" };
+}
+
 export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
 
@@ -38,7 +45,7 @@ export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onOpen(doc)}
-      aria-label={`${doc.title}${doc.author ? `, by ${doc.author}` : ""}${isComplete ? ", completed" : progress > 0 ? `, ${progress}% read` : ""}`}
+      aria-label={`${deriveAuthorAndTitle(doc).displayTitle}${deriveAuthorAndTitle(doc).displayAuthor ? `, by ${deriveAuthorAndTitle(doc).displayAuthor}` : ""}${isComplete ? ", completed" : progress > 0 ? `, ${progress}% read` : ""}`}
     >
       <div className="doc-grid-cover">
         {coverSrc ? (
@@ -57,8 +64,8 @@ export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
         {doc.favorite && <div className="doc-grid-fav-star">*</div>}
       </div>
       <div className="doc-grid-info">
-        <div className="doc-grid-title">{doc.title}</div>
-        {doc.author && <div className="doc-grid-author">{doc.author}</div>}
+        <div className="doc-grid-title">{deriveAuthorAndTitle(doc).displayTitle}</div>
+        {deriveAuthorAndTitle(doc).displayAuthor && <div className="doc-grid-author">{deriveAuthorAndTitle(doc).displayAuthor}</div>}
       </div>
     </div>
   );

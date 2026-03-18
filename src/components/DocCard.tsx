@@ -21,12 +21,27 @@ interface DocCardProps {
   onOpenNewWindow?: (doc: BlurbyDoc) => void;
 }
 
+function deriveAuthorAndTitle(doc: BlurbyDoc): { displayTitle: string; displayAuthor: string } {
+  if (doc.author) {
+    return { displayTitle: doc.title, displayAuthor: doc.author };
+  }
+  // Try to split "Title - Author" from title for legacy docs
+  const match = doc.title.match(/^(.+?)\s+-\s+(.+)$/);
+  if (match) {
+    return { displayTitle: match[1].trim(), displayAuthor: match[2].trim() };
+  }
+  return { displayTitle: doc.title, displayAuthor: "" };
+}
+
 export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
+  const { displayTitle, displayAuthor } = deriveAuthorAndTitle(doc);
+  const sourceLabel = doc.source === "url" ? "web" : doc.source === "folder" ? "folder" : "manual";
+  const formatLabel = doc.ext ? doc.ext.slice(1) : "";
 
   return (
     <div style={{ position: "relative" }} role="listitem">
@@ -36,23 +51,21 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && onOpen(doc)}
-        aria-label={`${doc.title}, ${wordCount} words, ${readTime}${isComplete ? ", completed" : pos > 0 ? `, ${progress}% read` : ""}${doc.favorite ? ", favorite" : ""}`}
+        aria-label={`${displayTitle}${displayAuthor ? ` by ${displayAuthor}` : ""}, ${wordCount} words, ${readTime}${isComplete ? ", completed" : pos > 0 ? `, ${progress}% read` : ""}${doc.favorite ? ", favorite" : ""}`}
       >
         <div className="doc-card-content">
           <div className="doc-card-header">
             {doc.favorite && <span className="doc-card-fav-star" title="Favorite">*</span>}
-            <span className="doc-card-title">{doc.title}</span>
-            {doc.source === "folder" && <Badge color="#c4a882">file</Badge>}
-            {doc.source === "url" && <Badge color="#6b9fd4">url</Badge>}
-            {doc.ext && [".epub", ".pdf", ".html", ".htm"].includes(doc.ext) && <Badge color="#7b8fa8">{doc.ext.slice(1)}</Badge>}
-            {doc.archived && <Badge color="var(--text-dimmer)">archived</Badge>}
-            {isComplete && !doc.archived && <Badge color="var(--success)">done</Badge>}
-          </div>
-          <div className="doc-card-meta">
-            <span>{wordCount.toLocaleString()} words</span>
-            <span>{readTime}</span>
-            {doc.ext && ![".epub", ".pdf", ".html", ".htm"].includes(doc.ext) && <span>{doc.ext}</span>}
-            {pos > 0 && !isComplete && <span className="doc-card-progress">{progress}%</span>}
+            <span className="doc-card-title doc-list-col-title">{displayTitle}</span>
+            <span className="doc-card-author doc-list-col-author">{displayAuthor}</span>
+            <span className="doc-list-col-format">
+              {formatLabel && <Badge color="#7b8fa8">{formatLabel}</Badge>}
+            </span>
+            <span className="doc-list-col-words">{wordCount.toLocaleString()}</span>
+            <span className="doc-list-col-progress">
+              {isComplete ? <Badge color="var(--success)">done</Badge> : pos > 0 ? `${progress}%` : ""}
+            </span>
+            <span className="doc-list-col-time">{readTime}</span>
           </div>
         </div>
 
