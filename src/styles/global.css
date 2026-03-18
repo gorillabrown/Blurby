@@ -576,7 +576,8 @@ button, input, textarea, a, [role="button"] {
   gap: 10px;
   transition: background 0.1s ease;
 }
-.search-result-item:hover { background: var(--bg-hover, rgba(196,168,130,0.08)); }
+.search-result-item:hover,
+.search-result-active { background: var(--bg-hover, rgba(196,168,130,0.08)); }
 .search-result-title {
   font-size: 13px;
   color: var(--text);

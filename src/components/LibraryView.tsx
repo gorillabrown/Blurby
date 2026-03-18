@@ -65,6 +65,7 @@ export default function LibraryView({
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
+  const [searchIndex, setSearchIndex] = useState(-1);
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
   const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
@@ -342,20 +343,38 @@ export default function LibraryView({
               <input
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(-1); }}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                onKeyDown={(e) => {
+                  if (!searchQuery || !searchFocused || searchResults.length === 0) return;
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setSearchIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
+                  } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setSearchIndex((prev) => Math.max(prev - 1, -1));
+                  } else if (e.key === "Enter" && searchIndex >= 0) {
+                    e.preventDefault();
+                    onOpenDoc(searchResults[searchIndex]);
+                    setSearchQuery("");
+                    setSearchIndex(-1);
+                  } else if (e.key === "Escape") {
+                    setSearchQuery("");
+                    setSearchIndex(-1);
+                  }
+                }}
                 className="library-search"
                 aria-label="Search library"
               />
               {searchQuery && searchFocused && (
                 <div className="search-dropdown">
                   {searchResults.length > 0 ? (
-                    searchResults.map((doc) => (
+                    searchResults.map((doc, idx) => (
                       <div
                         key={doc.id}
-                        className="search-result-item"
-                        onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); }}
+                        className={`search-result-item${idx === searchIndex ? " search-result-active" : ""}`}
+                        onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); setSearchIndex(-1); }}
                       >
                         <span className="search-result-title">{capitalizeFirst(doc.title)}</span>
                         {doc.author && <span className="search-result-author">{doc.author}</span>}
