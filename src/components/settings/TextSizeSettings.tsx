@@ -23,9 +23,9 @@ export function TextSizeSettings({ settings, onSettingsChange }: TextSizeSetting
         aria-label="Focus text size"
       />
 
-      <div className="settings-section-label" style={{ opacity: 0.4 }}>Flow Reader</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4, opacity: 0.4 }}>
-        Coming soon
+      <div className="settings-section-label">Flow Reader</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+        Text size: {settings.flowTextSize}%
       </div>
       <input
         type="range"
@@ -33,10 +33,9 @@ export function TextSizeSettings({ settings, onSettingsChange }: TextSizeSetting
         min={60}
         max={200}
         step={10}
-        value={100}
-        disabled
-        aria-label="Flow text size (coming soon)"
-        style={{ opacity: 0.4 }}
+        value={settings.flowTextSize}
+        onChange={(e) => onSettingsChange({ flowTextSize: Number(e.target.value) })}
+        aria-label="Flow text size"
       />
     </div>
   );

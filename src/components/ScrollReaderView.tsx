@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { tokenize, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
-import { BlurbyDoc } from "../types";
+import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
 
 interface ScrollReaderViewProps {
@@ -8,6 +8,7 @@ interface ScrollReaderViewProps {
   wpm: number;
   focusTextSize: number;
   isMac: boolean;
+  settings?: BlurbySettings;
   onSetWpm: (wpm: number) => void;
   onAdjustFocusTextSize: (delta: number) => void;
   onExit: (position: number) => void;
@@ -16,7 +17,7 @@ interface ScrollReaderViewProps {
   onToggleFlap?: () => void;
 }
 
-export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap }: ScrollReaderViewProps) {
+export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, settings, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap }: ScrollReaderViewProps) {
   const words = tokenize(activeDoc.content || "");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPct, setScrollPct] = useState(0);
@@ -34,7 +35,8 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const pct = words.length > 0 ? Math.round((clampedPosition / words.length) * 100) : 0;
   const remaining = formatTime(Math.max(0, words.length - clampedPosition), wpm);
 
-  const scale = (focusTextSize || 100) / 100;
+  const scale = ((settings?.flowTextSize || focusTextSize) || 100) / 100;
+  const spacing = settings?.layoutSpacing;
 
   // Scroll to initial position on mount
   useEffect(() => {
@@ -132,12 +134,21 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
           if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
         }}
       >
-        <div className="scroll-reader-text" style={{ fontSize: `${18 * scale}px` }}>
+        <div className="scroll-reader-text" style={{
+          fontSize: `${18 * scale}px`,
+          lineHeight: spacing?.line || undefined,
+          letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+          wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+        }}>
           {displayBlocks.map((block, i) => (
             <p key={i} className="scroll-reader-paragraph">{block}</p>
           ))}
         </div>
       </div>
+
+      {settings?.readingRuler && (
+        <div className="reading-ruler" aria-hidden="true" />
+      )}
 
       {/* Bottom bar */}
       <div className="scroll-reader-bottom">

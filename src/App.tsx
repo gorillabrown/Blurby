@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from "react";
-import { tokenize, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { tokenize, tokenizeWithMeta, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
 import { BlurbyDoc } from "./types";
 import useLibrary from "./hooks/useLibrary";
 import useReader from "./hooks/useReader";
@@ -163,7 +163,13 @@ function AppInner() {
     toggleFavorite, archiveDoc, unarchiveDoc, showToast,
   } = useLibrary();
 
-  const reader = useReader(wpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs);
+  // Compute paragraph breaks for rhythm pauses
+  const tokenized = useMemo(() => {
+    if (!activeDoc?.content) return { words: [] as string[], paragraphBreaks: new Set<number>() };
+    return tokenizeWithMeta(activeDoc.content);
+  }, [activeDoc?.content]);
+
+  const reader = useReader(wpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   // Sync wpm/folderName from loaded settings
@@ -348,6 +354,7 @@ function AppInner() {
               wpm={wpm}
               focusTextSize={focusTextSize}
               isMac={platform === "darwin"}
+              settings={settings}
               onSetWpm={setWpm}
               onAdjustFocusTextSize={adjustFocusTextSize}
               onExit={handleScrollExit}
@@ -372,6 +379,7 @@ function AppInner() {
             playing={playing}
             escPending={escPending}
             isMac={platform === "darwin"}
+            settings={settings}
             togglePlay={togglePlay}
             exitReader={handleExitReader}
             onSetWpm={setWpm}

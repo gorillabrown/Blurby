@@ -62,7 +62,9 @@ export function SettingsMenu({
         {activeSubPage === "speed-reading" && (
           <SpeedReadingSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
-        {activeSubPage === "layout" && <LayoutSettings />}
+        {activeSubPage === "layout" && (
+          <LayoutSettings settings={settings} onSettingsChange={onSettingsChange} />
+        )}
       </div>
     );
   }

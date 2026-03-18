@@ -428,6 +428,34 @@ button, input, textarea, a, [role="button"] {
   font-weight: 600;
 }
 
+/* ── FOCUS MARKS ── */
+.reader-guide-line {
+  position: relative;
+}
+.focus-mark {
+  position: absolute;
+  font-size: 10px;
+  color: var(--accent);
+  transform: translateX(-50%);
+  line-height: 1;
+  pointer-events: none;
+}
+.reader-guide-top .focus-mark { bottom: 0; }
+.reader-guide-bottom .focus-mark { top: 0; }
+
+/* ── READING RULER ── */
+.reading-ruler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 40%;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 10;
+}
+
 /* ── READER PAUSE TEXT VIEW ── */
 .reader-pause-text {
   position: absolute;

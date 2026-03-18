@@ -1,12 +1,24 @@
 import { useState, useRef, useCallback } from "react";
 import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS, hasPunctuation } from "../utils/text";
-import { BlurbyDoc } from "../types";
+import { calculatePauseMs } from "../utils/rhythm";
+import { BlurbyDoc, RhythmPauses } from "../types";
 
 const api = window.electronAPI;
 
-export default function useReader(wpm: number, setWpm: (fn: (prev: number) => number) => void, initialPauseMs?: number, punctuationPauseMs?: number) {
+export default function useReader(
+  wpm: number,
+  setWpm: (fn: (prev: number) => number) => void,
+  initialPauseMs?: number,
+  punctuationPauseMs?: number,
+  rhythmPauses?: RhythmPauses,
+  paragraphBreaks?: Set<number>
+) {
   const initPause = initialPauseMs ?? INITIAL_PAUSE_MS;
   const punctPause = punctuationPauseMs ?? PUNCTUATION_PAUSE_MS;
+  const rhythmPausesRef = useRef(rhythmPauses);
+  const paragraphBreaksRef = useRef(paragraphBreaks);
+  rhythmPausesRef.current = rhythmPauses;
+  paragraphBreaksRef.current = paragraphBreaks;
   const [wordIndex, setWordIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [escPending, setEscPending] = useState(false);
@@ -35,11 +47,20 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
 
     const interval = 60000 / wpmRef.current;
 
-    // Dwell longer on words ending with punctuation (. ! ? ; :)
+    // Dwell longer based on rhythm pauses (granular) or fallback to simple punctuation check
     const currentWord = wordsRef.current[wordIndexRef.current] || "";
-    const effectiveInterval = hasPunctuation(currentWord)
-      ? interval + punctPause
-      : interval;
+    let extraPause = 0;
+    if (rhythmPausesRef.current) {
+      extraPause = calculatePauseMs(
+        currentWord,
+        rhythmPausesRef.current,
+        punctPause,
+        paragraphBreaksRef.current?.has(wordIndexRef.current) || false
+      );
+    } else if (hasPunctuation(currentWord)) {
+      extraPause = punctPause;
+    }
+    const effectiveInterval = interval + extraPause;
 
     while (accumulatorRef.current >= effectiveInterval) {
       accumulatorRef.current -= effectiveInterval;

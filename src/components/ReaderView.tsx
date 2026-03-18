@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo } from "react";
-import { focusChar, formatTime, formatDisplayTitle, detectChapters, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
-import { BlurbyDoc } from "../types";
+import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
+import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
 
@@ -13,6 +13,7 @@ interface ReaderViewProps {
   playing: boolean;
   escPending: boolean;
   isMac: boolean;
+  settings?: BlurbySettings;
   togglePlay: () => void;
   exitReader: () => void;
   onSetWpm: (wpm: number) => void;
@@ -22,7 +23,7 @@ interface ReaderViewProps {
   onToggleFlap?: () => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
@@ -131,23 +132,51 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
 
       {playing ? (
         /* RSVP word display during playback */
-        <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
-          <div className="reader-guide-line reader-guide-top" />
-          <div className="reader-word-display" aria-live="off" aria-atomic="true">
-            <span className="reader-word-before">
-              {before.split("").reverse().join("")}
-            </span>
-            <span className="reader-word-focus">{focus}</span>
-            <span className="reader-word-after">{after}</span>
-          </div>
-          <div className="reader-guide-line reader-guide-bottom" />
-        </div>
+        (() => {
+          const pivotIndex = before.length;
+          const orpPercent = currentWord.length > 0 ? ((pivotIndex + 0.5) / currentWord.length) * 100 : 50;
+          const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
+          return (
+            <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
+              <div className="reader-guide-line reader-guide-top">
+                {settings?.focusMarks && <span className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25BC;</span>}
+              </div>
+              <div className="reader-word-display" aria-live="off" aria-atomic="true">
+                {useFocusSpan ? (
+                  currentWord.split("").map((char, i) => (
+                    <span
+                      key={i}
+                      className={i === pivotIndex ? "reader-word-focus" : ""}
+                      style={{ opacity: calculateFocusOpacity(i, pivotIndex, currentWord.length, settings!.focusSpan) }}
+                    >{char}</span>
+                  ))
+                ) : (
+                  <>
+                    <span className="reader-word-before">
+                      {before.split("").reverse().join("")}
+                    </span>
+                    <span className="reader-word-focus">{focus}</span>
+                    <span className="reader-word-after">{after}</span>
+                  </>
+                )}
+              </div>
+              <div className="reader-guide-line reader-guide-bottom">
+                {settings?.focusMarks && <span className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25B2;</span>}
+              </div>
+            </div>
+          );
+        })()
       ) : (
         /* Scrollable full text when paused */
         <div
           ref={scrollBodyRef}
           className="reader-pause-text"
           onClick={(e) => e.stopPropagation()}
+          style={{
+            lineHeight: settings?.layoutSpacing?.line || undefined,
+            letterSpacing: settings?.layoutSpacing?.character ? `${settings.layoutSpacing.character}px` : undefined,
+            wordSpacing: settings?.layoutSpacing?.word ? `${settings.layoutSpacing.word}px` : undefined,
+          }}
         >
           {paragraphs.map((para, paraIdx) => {
             const paraWords = para.split(/\s+/).filter(Boolean);
