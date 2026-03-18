@@ -406,6 +406,56 @@ button, input, textarea, a, [role="button"] {
   gap: 20px;
 }
 
+/* ── READER PAUSE TEXT VIEW ── */
+.reader-pause-text {
+  position: absolute;
+  inset: 60px 0 120px 0;
+  overflow-y: auto;
+  padding: 20px 60px;
+  line-height: 1.8;
+  font-family: var(--reader-font, var(--serif));
+  font-size: 16px;
+  color: rgba(255,255,255,0.5);
+  user-select: text;
+  cursor: text;
+}
+.reader-pause-paragraph {
+  margin: 0 0 1.2em;
+}
+.reader-pause-word {
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color 0.15s;
+}
+.reader-pause-word:hover {
+  color: rgba(255,255,255,0.85);
+}
+.reader-pause-word-current {
+  color: var(--accent);
+  background: rgba(196,168,130,0.15);
+  border-radius: 2px;
+  padding: 1px 2px;
+  cursor: pointer;
+}
+.reader-pause-text-end {
+  text-align: center;
+  padding: 20px 0 40px;
+}
+.reader-resume-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.reader-resume-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
 /* ══════════════════════════════════════════════════════════════════════════ */
 /* ── LIBRARY VIEW                                                        ── */
 /* ══════════════════════════════════════════════════════════════════════════ */

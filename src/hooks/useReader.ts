@@ -97,6 +97,12 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
     });
   }, []);
 
+  const jumpToWord = useCallback((index: number) => {
+    const clamped = Math.max(0, Math.min(wordsRef.current.length - 1, index));
+    wordIndexRef.current = clamped;
+    setWordIndex(clamped);
+  }, []);
+
   const requestExit = useCallback((activeDoc: (BlurbyDoc & { content?: string }) | null, onExit: (pos: number) => void) => {
     // If playing, require double-Esc
     if (playingRef.current && !escPending) {
@@ -134,6 +140,7 @@ export default function useReader(wpm: number, setWpm: (fn: (prev: number) => nu
     togglePlay,
     adjustWpm,
     seekWords,
+    jumpToWord,
     requestExit,
     initReader,
   };

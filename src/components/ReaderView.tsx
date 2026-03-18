@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { focusChar, formatTime, MIN_WPM, MAX_WPM, WPM_STEP, FONT_SIZE_STEP } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
@@ -18,14 +18,24 @@ interface ReaderViewProps {
   onSetWpm: (wpm: number) => void;
   onAdjustFontSize: (delta: number) => void;
   onSwitchToScroll: () => void;
+  onJumpToWord: (index: number) => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFontSize, onSwitchToScroll }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFontSize, onSwitchToScroll, onJumpToWord }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const currentWordRef = useRef<HTMLSpanElement>(null);
+  const scrollBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setTimeout(() => containerRef.current?.focus(), 50);
   }, []);
+
+  // Auto-scroll to the current word when pausing
+  useEffect(() => {
+    if (!playing && currentWordRef.current && scrollBodyRef.current) {
+      currentWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [playing, wordIndex]);
 
   const currentWord = words[wordIndex] || "";
   const { before, focus, after } = focusChar(currentWord);
@@ -33,13 +43,31 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
   const remaining = formatTime(words.length - wordIndex, wpm);
   const scale = (fontSize || 100) / 100;
 
+  // Build content paragraphs from the raw content for the pause view
+  const paragraphs = useMemo(() => {
+    if (!activeDoc.content) return [];
+    return activeDoc.content.split(/\n\s*\n/).filter((p) => p.trim());
+  }, [activeDoc.content]);
+
+  // Build a mapping: for each paragraph, its starting global word index
+  const paraStartIndices = useMemo(() => {
+    const starts: number[] = [];
+    let globalIdx = 0;
+    paragraphs.forEach((para) => {
+      starts.push(globalIdx);
+      const paraWords = para.split(/\s+/).filter(Boolean);
+      globalIdx += paraWords.length;
+    });
+    return starts;
+  }, [paragraphs]);
+
   return (
     <div
       ref={containerRef}
       tabIndex={0}
       className="reader-container"
       style={{ paddingTop: isMac ? 36 : 16 }}
-      onClick={togglePlay}
+      onClick={playing ? togglePlay : undefined}
       role="application"
       aria-label="RSVP speed reader"
       aria-live="off"
@@ -66,18 +94,55 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
         <WpmGauge wpm={wpm} />
       </div>
 
-      {/* Word display */}
-      <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
-        <div className="reader-guide-line reader-guide-top" />
-        <div className="reader-word-display" aria-live="off" aria-atomic="true">
-          <span className="reader-word-before">
-            {before.split("").reverse().join("")}
-          </span>
-          <span className="reader-word-focus">{focus}</span>
-          <span className="reader-word-after">{after}</span>
+      {playing ? (
+        /* RSVP word display during playback */
+        <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
+          <div className="reader-guide-line reader-guide-top" />
+          <div className="reader-word-display" aria-live="off" aria-atomic="true">
+            <span className="reader-word-before">
+              {before.split("").reverse().join("")}
+            </span>
+            <span className="reader-word-focus">{focus}</span>
+            <span className="reader-word-after">{after}</span>
+          </div>
+          <div className="reader-guide-line reader-guide-bottom" />
         </div>
-        <div className="reader-guide-line reader-guide-bottom" />
-      </div>
+      ) : (
+        /* Scrollable full text when paused */
+        <div
+          ref={scrollBodyRef}
+          className="reader-pause-text"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {paragraphs.map((para, paraIdx) => {
+            const paraWords = para.split(/\s+/).filter(Boolean);
+            const paraStart = paraStartIndices[paraIdx];
+            return (
+              <p key={paraIdx} className="reader-pause-paragraph">
+                {paraWords.map((word, wIdx) => {
+                  const globalIdx = paraStart + wIdx;
+                  const isCurrent = globalIdx === wordIndex;
+                  return (
+                    <span
+                      key={wIdx}
+                      ref={isCurrent ? currentWordRef : undefined}
+                      className={isCurrent ? "reader-pause-word-current" : "reader-pause-word"}
+                      onClick={() => onJumpToWord(globalIdx)}
+                    >
+                      {word}{" "}
+                    </span>
+                  );
+                })}
+              </p>
+            );
+          })}
+          <div className="reader-pause-text-end">
+            <button className="reader-resume-btn" onClick={togglePlay}>
+              resume reading
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bottom bar */}
       <div className="reader-bottom-bar" style={{ opacity: playing ? 0.08 : 0.6 }}>

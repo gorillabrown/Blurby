@@ -36,7 +36,7 @@ function StandaloneReader() {
   const sessionStartWordRef = useRef(0);
 
   const reader = useReader(wpm, setWpm);
-  const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, requestExit, initReader } = reader;
+  const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   useEffect(() => {
     if (!docId) return;
@@ -108,6 +108,7 @@ function StandaloneReader() {
         onSetWpm={setWpm}
         onAdjustFontSize={adjustFontSize}
         onSwitchToScroll={() => {}}
+        onJumpToWord={jumpToWord}
       />
     </ErrorBoundary>
   );
@@ -134,7 +135,7 @@ function AppInner() {
   } = useLibrary();
 
   const reader = useReader(wpm, setWpm);
-  const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, requestExit, initReader } = reader;
+  const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   // Sync wpm/folderName from loaded settings
   const [didInit, setDidInit] = useState(false);
@@ -292,6 +293,7 @@ function AppInner() {
           onSetWpm={setWpm}
           onAdjustFontSize={adjustFontSize}
           onSwitchToScroll={handleSwitchToScroll}
+          onJumpToWord={jumpToWord}
         />
       </ErrorBoundary>
     );

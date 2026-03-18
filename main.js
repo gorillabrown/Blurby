@@ -472,6 +472,8 @@ function updateWindowTheme() {
   // Update title bar / background color based on resolved theme
   const resolvedTheme = settings.theme === "system" ? getSystemTheme() : settings.theme;
   const bgColor = resolvedTheme === "light" ? "#f5f3ef" : resolvedTheme === "eink" ? "#e8e4d9" : "#1a1a1a";
+  // Set native theme so Windows title/menu bar matches
+  nativeTheme.themeSource = resolvedTheme === "light" || resolvedTheme === "eink" ? "light" : "dark";
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.setBackgroundColor(bgColor);
   }
@@ -576,7 +578,11 @@ function registerIPC() {
   ipcMain.handle("add-doc-from-url", async (_, url) => {
     try {
       const response = await fetch(url, {
-        headers: { "User-Agent": "Blurby/1.0 (RSVP Reader)" },
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.5",
+        },
         signal: AbortSignal.timeout(15000),
       });
       if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
