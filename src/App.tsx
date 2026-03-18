@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { tokenize, DEFAULT_WPM } from "./utils/text";
+import { tokenize, DEFAULT_WPM, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE, FONT_SIZE_STEP } from "./utils/text";
 import useLibrary from "./hooks/useLibrary";
 import useReader from "./hooks/useReader";
 import { useReaderKeys, useSmartImport } from "./hooks/useKeyboardShortcuts";
@@ -18,6 +18,7 @@ function AppInner() {
   const [readerMode, setReaderMode] = useState("speed"); // "speed" | "scroll"
   const [activeDoc, setActiveDoc] = useState(null);
   const [wpm, setWpm] = useState(DEFAULT_WPM);
+  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
   const [folderName, setFolderName] = useState("My reading list");
   const sessionStartRef = useRef(null);
   const sessionStartWordRef = useRef(0);
@@ -40,16 +41,19 @@ function AppInner() {
   if (loaded && !didInit) {
     setDidInit(true);
     if (settings.wpm) setWpm(settings.wpm);
+    if (settings.fontSize) setFontSize(settings.fontSize);
     if (settings.folderName) setFolderName(settings.folderName);
   }
 
   // Persist settings on change
   const prevWpm = useState(wpm);
   const prevFolder = useState(folderName);
-  if (loaded && (prevWpm[0] !== wpm || prevFolder[0] !== folderName)) {
+  const prevFontSize = useState(fontSize);
+  if (loaded && (prevWpm[0] !== wpm || prevFolder[0] !== folderName || prevFontSize[0] !== fontSize)) {
     prevWpm[0] = wpm;
     prevFolder[0] = folderName;
-    api.saveSettings({ wpm, folderName });
+    prevFontSize[0] = fontSize;
+    api.saveSettings({ wpm, folderName, fontSize });
   }
 
   const words = activeDoc ? tokenize(activeDoc.content) : [];
@@ -114,7 +118,11 @@ function AppInner() {
     setReaderMode("scroll");
   }, [playing, reader]);
 
-  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader);
+  const adjustFontSize = useCallback((delta) => {
+    setFontSize((prev) => Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, prev + delta)));
+  }, []);
+
+  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFontSize);
 
   // Smart Alt+V handler
   const handleSmartImport = useCallback((content, isUrl) => {
@@ -158,8 +166,10 @@ function AppInner() {
           <ScrollReaderView
             activeDoc={activeDoc}
             wpm={wpm}
+            fontSize={fontSize}
             isMac={platform === "darwin"}
             onSetWpm={setWpm}
+            onAdjustFontSize={adjustFontSize}
             onExit={handleScrollExit}
             onProgressUpdate={handleScrollProgress}
           />
@@ -173,12 +183,14 @@ function AppInner() {
           words={words}
           wordIndex={wordIndex}
           wpm={wpm}
+          fontSize={fontSize}
           playing={playing}
           escPending={escPending}
           isMac={platform === "darwin"}
           togglePlay={togglePlay}
           exitReader={handleExitReader}
           onSetWpm={setWpm}
+          onAdjustFontSize={adjustFontSize}
           onSwitchToScroll={handleSwitchToScroll}
         />
       </ErrorBoundary>

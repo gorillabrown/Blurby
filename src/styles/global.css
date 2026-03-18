@@ -809,6 +809,37 @@ button:focus-visible {
 }
 .reader-mode-switch:hover { color: var(--text-dim); }
 
+/* ── Font Size Controls ───────────────────────────────────────────────────── */
+.reader-font-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.reader-font-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 3px 8px;
+  border-radius: 4px;
+  line-height: 1;
+}
+.reader-font-btn:hover { color: var(--text); }
+.reader-font-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dimmer);
+  min-width: 35px;
+  text-align: center;
+}
+.scroll-reader-top-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 /* ── Doc Card Favorites ───────────────────────────────────────────────────── */
 .doc-fav-btn {
   font-size: 16px;

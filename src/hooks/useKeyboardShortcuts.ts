@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { WPM_STEP, REWIND_WORDS } from "../utils/text";
+import { WPM_STEP, REWIND_WORDS, FONT_SIZE_STEP } from "../utils/text";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
-export function useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, exitReader) {
+export function useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFontSize) {
   useEffect(() => {
     if (view !== "reader" || readerMode !== "speed") return;
     const handler = (e) => {
@@ -12,11 +12,13 @@ export function useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm
       else if (e.code === "ArrowRight") { e.preventDefault(); seekWords(REWIND_WORDS); }
       else if (e.code === "ArrowUp") { e.preventDefault(); adjustWpm(WPM_STEP); }
       else if (e.code === "ArrowDown") { e.preventDefault(); adjustWpm(-WPM_STEP); }
+      else if (e.code === "Equal" || e.code === "NumpadAdd") { e.preventDefault(); adjustFontSize(FONT_SIZE_STEP); }
+      else if (e.code === "Minus" || e.code === "NumpadSubtract") { e.preventDefault(); adjustFontSize(-FONT_SIZE_STEP); }
       else if (e.code === "Escape") { e.preventDefault(); exitReader(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFontSize]);
 }
 
 // Smart import: Alt+V detects URL vs text and shows confirmation dialog
