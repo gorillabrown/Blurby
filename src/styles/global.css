@@ -296,7 +296,7 @@ button, input, textarea, a, [role="button"] {
   justify-content: center;
   font-family: var(--mono);
   outline: none;
-  cursor: none;
+  cursor: default;
   user-select: none;
   -webkit-app-region: no-drag;
 }
