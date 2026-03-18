@@ -16,9 +16,24 @@ export interface BlurbyDoc {
   favorite?: boolean;
   archived?: boolean;
   archivedAt?: number;
+  lastReadAt?: number | null;
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
+export interface RhythmPauses {
+  commas: boolean;
+  sentences: boolean;
+  paragraphs: boolean;
+  numbers: boolean;
+  longerWords: boolean;
+}
+
+export interface LayoutSpacing {
+  line: number;
+  character: number;
+  word: number;
+}
+
 export interface BlurbySettings {
   schemaVersion: number;
   wpm: number;
@@ -27,9 +42,17 @@ export interface BlurbySettings {
   recentFolders: string[];
   theme: "dark" | "light" | "eink" | "system";
   launchAtLogin: boolean;
-  fontSize: number;
+  focusTextSize: number;
   accentColor: string | null;
   fontFamily: string | null;
+  compactMode: boolean;
+  readingMode: "focus" | "flow";
+  focusMarks: boolean;
+  readingRuler: boolean;
+  focusSpan: number;
+  flowTextSize: number;
+  rhythmPauses: RhythmPauses;
+  layoutSpacing: LayoutSpacing;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────

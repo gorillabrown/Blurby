@@ -9,8 +9,8 @@ const { JSDOM } = require("jsdom");
 
 const isDev = !app.isPackaged;
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
-const CURRENT_SETTINGS_SCHEMA = 3;
-const CURRENT_LIBRARY_SCHEMA = 1;
+const CURRENT_SETTINGS_SCHEMA = 4;
+const CURRENT_LIBRARY_SCHEMA = 2;
 
 // ── Paths ──────────────────────────────────────────────────────────────────────
 function getDataPath() {
@@ -57,6 +57,35 @@ const settingsMigrations = [
     data.schemaVersion = 3;
     return data;
   },
+  // v3 → v4: rename fontSize→focusTextSize, add new reader settings
+  (data) => {
+    data.focusTextSize = data.fontSize !== undefined ? data.fontSize : 100;
+    delete data.fontSize;
+    if (data.compactMode === undefined) data.compactMode = false;
+    if (data.readingMode === undefined) data.readingMode = "focus";
+    if (data.focusMarks === undefined) data.focusMarks = true;
+    if (data.readingRuler === undefined) data.readingRuler = false;
+    if (data.focusSpan === undefined) data.focusSpan = 0.4;
+    if (data.flowTextSize === undefined) data.flowTextSize = 100;
+    if (data.rhythmPauses === undefined) {
+      data.rhythmPauses = {
+        commas: true,
+        sentences: true,
+        paragraphs: true,
+        numbers: false,
+        longerWords: false,
+      };
+    }
+    if (data.layoutSpacing === undefined) {
+      data.layoutSpacing = {
+        line: 1.5,
+        character: 0,
+        word: 0,
+      };
+    }
+    data.schemaVersion = 4;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -72,6 +101,20 @@ const libraryMigrations = [
       }
     }
     return { schemaVersion: 1, docs };
+  },
+  // v1 → v2: add lastReadAt to all docs
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      if (doc.lastReadAt === undefined) {
+        if (doc.position > 0 && doc.modified) {
+          doc.lastReadAt = doc.modified;
+        } else {
+          doc.lastReadAt = null;
+        }
+      }
+    }
+    return { schemaVersion: 2, docs };
   },
 ];
 
@@ -96,7 +139,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, fontSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null, compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false, focusSpan: 0.4, flowTextSize: 100, rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false }, layoutSpacing: { line: 1.5, character: 0, word: 0 } };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }

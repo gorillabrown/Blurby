@@ -1,5 +1,5 @@
 import { useRef, useEffect, useMemo } from "react";
-import { focusChar, formatTime, MIN_WPM, MAX_WPM, WPM_STEP, FONT_SIZE_STEP } from "../utils/text";
+import { focusChar, formatTime, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
@@ -9,19 +9,19 @@ interface ReaderViewProps {
   words: string[];
   wordIndex: number;
   wpm: number;
-  fontSize: number;
+  focusTextSize: number;
   playing: boolean;
   escPending: boolean;
   isMac: boolean;
   togglePlay: () => void;
   exitReader: () => void;
   onSetWpm: (wpm: number) => void;
-  onAdjustFontSize: (delta: number) => void;
+  onAdjustFocusTextSize: (delta: number) => void;
   onSwitchToScroll: () => void;
   onJumpToWord: (index: number) => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFontSize, onSwitchToScroll, onJumpToWord }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
@@ -41,7 +41,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
   const { before, focus, after } = focusChar(currentWord);
   const pct = words.length > 0 ? Math.round((wordIndex / words.length) * 100) : 0;
   const remaining = formatTime(words.length - wordIndex, wpm);
-  const scale = (fontSize || 100) / 100;
+  const scale = (focusTextSize || 100) / 100;
 
   // Build content paragraphs from the raw content for the pause view
   const paragraphs = useMemo(() => {
@@ -164,13 +164,13 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, fontSize,
             <div className="reader-font-controls">
               <button
                 className="reader-font-btn"
-                onClick={() => onAdjustFontSize(-FONT_SIZE_STEP)}
+                onClick={() => onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP)}
                 aria-label="Decrease font size"
               >A-</button>
-              <span className="reader-font-label">{fontSize}%</span>
+              <span className="reader-font-label">{focusTextSize}%</span>
               <button
                 className="reader-font-btn"
-                onClick={() => onAdjustFontSize(FONT_SIZE_STEP)}
+                onClick={() => onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP)}
                 aria-label="Increase font size"
               >A+</button>
             </div>

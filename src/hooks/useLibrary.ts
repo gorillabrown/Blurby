@@ -11,9 +11,17 @@ const defaultSettings: BlurbySettings = {
   recentFolders: [],
   theme: "dark",
   launchAtLogin: false,
-  fontSize: 100,
+  focusTextSize: 100,
   accentColor: null,
   fontFamily: null,
+  compactMode: false,
+  readingMode: "focus",
+  focusMarks: true,
+  readingRuler: false,
+  focusSpan: 0.4,
+  flowTextSize: 100,
+  rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
+  layoutSpacing: { line: 1.5, character: 0, word: 0 },
 };
 
 export default function useLibrary() {

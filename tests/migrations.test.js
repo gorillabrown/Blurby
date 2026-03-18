@@ -21,6 +21,35 @@ const settingsMigrations = [
     data.schemaVersion = 3;
     return data;
   },
+  // v3 → v4: rename fontSize→focusTextSize, add new reader settings
+  (data) => {
+    data.focusTextSize = data.fontSize !== undefined ? data.fontSize : 100;
+    delete data.fontSize;
+    if (data.compactMode === undefined) data.compactMode = false;
+    if (data.readingMode === undefined) data.readingMode = "focus";
+    if (data.focusMarks === undefined) data.focusMarks = true;
+    if (data.readingRuler === undefined) data.readingRuler = false;
+    if (data.focusSpan === undefined) data.focusSpan = 0.4;
+    if (data.flowTextSize === undefined) data.flowTextSize = 100;
+    if (data.rhythmPauses === undefined) {
+      data.rhythmPauses = {
+        commas: true,
+        sentences: true,
+        paragraphs: true,
+        numbers: false,
+        longerWords: false,
+      };
+    }
+    if (data.layoutSpacing === undefined) {
+      data.layoutSpacing = {
+        line: 1.5,
+        character: 0,
+        word: 0,
+      };
+    }
+    data.schemaVersion = 4;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -35,6 +64,20 @@ const libraryMigrations = [
       }
     }
     return { schemaVersion: 1, docs };
+  },
+  // v1 → v2: add lastReadAt to all docs
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      if (doc.lastReadAt === undefined) {
+        if (doc.position > 0 && doc.modified) {
+          doc.lastReadAt = doc.modified;
+        } else {
+          doc.lastReadAt = null;
+        }
+      }
+    }
+    return { schemaVersion: 2, docs };
   },
 ];
 
@@ -115,6 +158,52 @@ describe("settings migrations", () => {
     expect(result.accentColor).toBe(null);
     expect(result.fontFamily).toBe(null);
   });
+
+  it("migrates v3 to v4: renames fontSize→focusTextSize and adds new fields", () => {
+    const v3 = {
+      schemaVersion: 3,
+      wpm: 300,
+      fontSize: 120,
+      folderName: "Test",
+      recentFolders: [],
+      theme: "dark",
+      accentColor: null,
+      fontFamily: null,
+    };
+    const result = runMigrations(v3, settingsMigrations, 4);
+    expect(result.schemaVersion).toBe(4);
+    // fontSize renamed to focusTextSize
+    expect(result.focusTextSize).toBe(120);
+    expect(result.fontSize).toBeUndefined();
+    // new fields with defaults
+    expect(result.compactMode).toBe(false);
+    expect(result.readingMode).toBe("focus");
+    expect(result.focusMarks).toBe(true);
+    expect(result.readingRuler).toBe(false);
+    expect(result.focusSpan).toBe(0.4);
+    expect(result.flowTextSize).toBe(100);
+    expect(result.rhythmPauses).toEqual({
+      commas: true,
+      sentences: true,
+      paragraphs: true,
+      numbers: false,
+      longerWords: false,
+    });
+    expect(result.layoutSpacing).toEqual({ line: 1.5, character: 0, word: 0 });
+    // preserved fields
+    expect(result.wpm).toBe(300);
+    expect(result.accentColor).toBe(null);
+    expect(result.theme).toBe("dark");
+  });
+
+  it("migrates v0 all the way to v4", () => {
+    const v0 = { wpm: 250, fontSize: 110 };
+    const result = runMigrations(v0, settingsMigrations, 4);
+    expect(result.schemaVersion).toBe(4);
+    expect(result.focusTextSize).toBe(110);
+    expect(result.fontSize).toBeUndefined();
+    expect(result.readingMode).toBe("focus");
+  });
 });
 
 describe("library migrations", () => {
@@ -142,5 +231,34 @@ describe("library migrations", () => {
     const v1 = { schemaVersion: 1, docs: [{ id: "1", title: "Test", wordCount: 5 }] };
     const result = runMigrations(v1, libraryMigrations, 1);
     expect(result).toEqual(v1);
+  });
+
+  it("migrates v1 to v2: adds lastReadAt to all docs", () => {
+    const v1 = {
+      schemaVersion: 1,
+      docs: [
+        { id: "1", title: "Read book", position: 50, modified: 1700000000000, wordCount: 100, source: "manual" },
+        { id: "2", title: "Unread book", position: 0, modified: 1700000001000, wordCount: 200, source: "manual" },
+        { id: "3", title: "No modified", position: 10, wordCount: 50, source: "folder" },
+      ],
+    };
+    const result = runMigrations(v1, libraryMigrations, 2);
+    expect(result.schemaVersion).toBe(2);
+    // doc with position > 0 and modified → lastReadAt = modified
+    expect(result.docs[0].lastReadAt).toBe(1700000000000);
+    // doc with position === 0 → lastReadAt = null
+    expect(result.docs[1].lastReadAt).toBe(null);
+    // doc with position > 0 but no modified → lastReadAt = null
+    expect(result.docs[2].lastReadAt).toBe(null);
+  });
+
+  it("migrates v0 all the way to v2", () => {
+    const v0 = [
+      { id: "1", title: "Test", content: "hello world", source: "manual", position: 5, modified: 1700000000000 },
+    ];
+    const result = runMigrations(v0, libraryMigrations, 2);
+    expect(result.schemaVersion).toBe(2);
+    expect(result.docs[0].wordCount).toBe(2);
+    expect(result.docs[0].lastReadAt).toBe(1700000000000);
   });
 });

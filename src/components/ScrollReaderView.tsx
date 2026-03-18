@@ -1,20 +1,20 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { tokenize, formatTime, FONT_SIZE_STEP } from "../utils/text";
+import { tokenize, formatTime, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 
 interface ScrollReaderViewProps {
   activeDoc: BlurbyDoc & { content: string };
   wpm: number;
-  fontSize: number;
+  focusTextSize: number;
   isMac: boolean;
   onSetWpm: (wpm: number) => void;
-  onAdjustFontSize: (delta: number) => void;
+  onAdjustFocusTextSize: (delta: number) => void;
   onExit: (position: number) => void;
   onProgressUpdate: (position: number) => void;
 }
 
-export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSetWpm, onAdjustFontSize, onExit, onProgressUpdate }: ScrollReaderViewProps) {
+export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate }: ScrollReaderViewProps) {
   const words = tokenize(activeDoc.content || "");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPct, setScrollPct] = useState(0);
@@ -32,7 +32,7 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
   const pct = words.length > 0 ? Math.round((clampedPosition / words.length) * 100) : 0;
   const remaining = formatTime(Math.max(0, words.length - clampedPosition), wpm);
 
-  const scale = (fontSize || 100) / 100;
+  const scale = (focusTextSize || 100) / 100;
 
   // Scroll to initial position on mount
   useEffect(() => {
@@ -76,16 +76,16 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
         onExit(clampedPosition);
       } else if (e.code === "Equal" || e.code === "NumpadAdd") {
         e.preventDefault();
-        onAdjustFontSize(FONT_SIZE_STEP);
+        onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP);
       } else if (e.code === "Minus" || e.code === "NumpadSubtract") {
         e.preventDefault();
-        onAdjustFontSize(-FONT_SIZE_STEP);
+        onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP);
       }
       // Let arrow keys / space / page up/down work naturally for scrolling
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onExit, clampedPosition, onAdjustFontSize]);
+  }, [onExit, clampedPosition, onAdjustFocusTextSize]);
 
   // Cleanup save timer
   useEffect(() => {
@@ -104,9 +104,9 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
         </div>
         <div className="scroll-reader-top-right">
           <div className="reader-font-controls">
-            <button className="reader-font-btn" onClick={() => onAdjustFontSize(-FONT_SIZE_STEP)} aria-label="Decrease font size">A-</button>
-            <span className="reader-font-label">{fontSize}%</span>
-            <button className="reader-font-btn" onClick={() => onAdjustFontSize(FONT_SIZE_STEP)} aria-label="Increase font size">A+</button>
+            <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP)} aria-label="Decrease font size">A-</button>
+            <span className="reader-font-label">{focusTextSize}%</span>
+            <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP)} aria-label="Increase font size">A+</button>
           </div>
           <span className="scroll-reader-page">{pct}%</span>
         </div>

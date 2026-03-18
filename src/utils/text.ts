@@ -4,10 +4,10 @@ export const MAX_WPM = 1200;
 export const WPM_STEP = 25;
 export const REWIND_WORDS = 5;
 
-export const DEFAULT_FONT_SIZE = 100; // percentage scale
-export const MIN_FONT_SIZE = 60;
-export const MAX_FONT_SIZE = 200;
-export const FONT_SIZE_STEP = 10;
+export const DEFAULT_FOCUS_TEXT_SIZE = 100; // percentage scale
+export const MIN_FOCUS_TEXT_SIZE = 60;
+export const MAX_FOCUS_TEXT_SIZE = 200;
+export const FOCUS_TEXT_SIZE_STEP = 10;
 
 export function tokenize(text: string | null | undefined): string[] {
   return (text || "").split(/\s+/).filter(Boolean);

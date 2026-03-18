@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { tokenize, DEFAULT_WPM, DEFAULT_FONT_SIZE, MIN_FONT_SIZE, MAX_FONT_SIZE, FONT_SIZE_STEP } from "./utils/text";
+import { tokenize, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
 import { BlurbyDoc } from "./types";
 import useLibrary from "./hooks/useLibrary";
 import useReader from "./hooks/useReader";
@@ -30,7 +30,7 @@ function StandaloneReader() {
   const docId = getReaderDocId();
   const [activeDoc, setActiveDoc] = useState<DocWithContent | null>(null);
   const [wpm, setWpm] = useState(DEFAULT_WPM);
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const [focusTextSize, setFocusTextSize] = useState(DEFAULT_FOCUS_TEXT_SIZE);
   const [loaded, setLoaded] = useState(false);
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
@@ -43,7 +43,7 @@ function StandaloneReader() {
     (async () => {
       const state = await api.getState();
       if (state.settings.wpm) setWpm(state.settings.wpm);
-      if (state.settings.fontSize) setFontSize(state.settings.fontSize);
+      if (state.settings.focusTextSize) setFocusTextSize(state.settings.focusTextSize);
       const doc = state.library.find((d) => d.id === docId);
       if (!doc) return;
       let content = doc.content;
@@ -82,11 +82,11 @@ function StandaloneReader() {
     requestExit(activeDoc, finishReading);
   }, [activeDoc, requestExit, finishReading]);
 
-  const adjustFontSize = useCallback((delta: number) => {
-    setFontSize((prev) => Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, prev + delta)));
+  const adjustFocusTextSize = useCallback((delta: number) => {
+    setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
   }, []);
 
-  useReaderKeys("reader", "speed", togglePlay, seekWords, adjustWpm, handleExitReader, adjustFontSize);
+  useReaderKeys("reader", "speed", togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize);
 
   if (!loaded || !activeDoc) {
     return <div className="loading-screen">loading...</div>;
@@ -99,14 +99,14 @@ function StandaloneReader() {
         words={words}
         wordIndex={wordIndex}
         wpm={wpm}
-        fontSize={fontSize}
+        focusTextSize={focusTextSize}
         playing={playing}
         escPending={escPending}
         isMac={false}
         togglePlay={togglePlay}
         exitReader={handleExitReader}
         onSetWpm={setWpm}
-        onAdjustFontSize={adjustFontSize}
+        onAdjustFocusTextSize={adjustFocusTextSize}
         onSwitchToScroll={() => {}}
         onJumpToWord={jumpToWord}
       />
@@ -116,10 +116,9 @@ function StandaloneReader() {
 
 function AppInner() {
   const [view, setView] = useState("library");
-  const [readerMode, setReaderMode] = useState("speed"); // "speed" | "scroll"
   const [activeDoc, setActiveDoc] = useState<DocWithContent | null>(null);
   const [wpm, setWpm] = useState(DEFAULT_WPM);
-  const [fontSize, setFontSize] = useState(DEFAULT_FONT_SIZE);
+  const [focusTextSize, setFocusTextSize] = useState(DEFAULT_FOCUS_TEXT_SIZE);
   const [folderName, setFolderName] = useState("My reading list");
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
@@ -142,19 +141,22 @@ function AppInner() {
   if (loaded && !didInit) {
     setDidInit(true);
     if (settings.wpm) setWpm(settings.wpm);
-    if (settings.fontSize) setFontSize(settings.fontSize);
+    if (settings.focusTextSize) setFocusTextSize(settings.focusTextSize);
     if (settings.folderName) setFolderName(settings.folderName);
   }
+
+  // Derive readerMode from settings instead of storing as separate state
+  const readerMode = settings.readingMode === "flow" ? "scroll" : "speed";
 
   // Persist settings on change
   const prevWpmRef = useRef(wpm);
   const prevFolderRef = useRef(folderName);
-  const prevFontSizeRef = useRef(fontSize);
-  if (loaded && (prevWpmRef.current !== wpm || prevFolderRef.current !== folderName || prevFontSizeRef.current !== fontSize)) {
+  const prevFocusTextSizeRef = useRef(focusTextSize);
+  if (loaded && (prevWpmRef.current !== wpm || prevFolderRef.current !== folderName || prevFocusTextSizeRef.current !== focusTextSize)) {
     prevWpmRef.current = wpm;
     prevFolderRef.current = folderName;
-    prevFontSizeRef.current = fontSize;
-    api.saveSettings({ wpm, folderName, fontSize });
+    prevFocusTextSizeRef.current = focusTextSize;
+    api.saveSettings({ wpm, folderName, focusTextSize });
   }
 
   const words = activeDoc ? tokenize(activeDoc.content) : [];
@@ -171,7 +173,11 @@ function AppInner() {
     initReader(doc.position || 0);
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = doc.position || 0;
-    setReaderMode(mode);
+    if (mode === "scroll") {
+      api.saveSettings({ readingMode: "flow" });
+    } else {
+      api.saveSettings({ readingMode: "focus" });
+    }
     setView("reader");
   }, [loadDocContent, initReader]);
 
@@ -216,14 +222,14 @@ function AppInner() {
     if (playing) {
       reader.togglePlay();
     }
-    setReaderMode("scroll");
+    api.saveSettings({ readingMode: "flow" });
   }, [playing, reader]);
 
-  const adjustFontSize = useCallback((delta: number) => {
-    setFontSize((prev) => Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, prev + delta)));
+  const adjustFocusTextSize = useCallback((delta: number) => {
+    setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
   }, []);
 
-  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFontSize);
+  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize);
 
   // Smart Alt+V handler
   const handleSmartImport = useCallback((content: string, isUrl: boolean) => {
@@ -267,10 +273,10 @@ function AppInner() {
           <ScrollReaderView
             activeDoc={activeDoc}
             wpm={wpm}
-            fontSize={fontSize}
+            focusTextSize={focusTextSize}
             isMac={platform === "darwin"}
             onSetWpm={setWpm}
-            onAdjustFontSize={adjustFontSize}
+            onAdjustFocusTextSize={adjustFocusTextSize}
             onExit={handleScrollExit}
             onProgressUpdate={handleScrollProgress}
           />
@@ -284,14 +290,14 @@ function AppInner() {
           words={words}
           wordIndex={wordIndex}
           wpm={wpm}
-          fontSize={fontSize}
+          focusTextSize={focusTextSize}
           playing={playing}
           escPending={escPending}
           isMac={platform === "darwin"}
           togglePlay={togglePlay}
           exitReader={handleExitReader}
           onSetWpm={setWpm}
-          onAdjustFontSize={adjustFontSize}
+          onAdjustFocusTextSize={adjustFocusTextSize}
           onSwitchToScroll={handleSwitchToScroll}
           onJumpToWord={jumpToWord}
         />

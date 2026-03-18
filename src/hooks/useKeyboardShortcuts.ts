@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { WPM_STEP, REWIND_WORDS, FONT_SIZE_STEP } from "../utils/text";
+import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -10,7 +10,7 @@ export function useReaderKeys(
   seekWords: (delta: number) => void,
   adjustWpm: (delta: number) => void,
   exitReader: () => void,
-  adjustFontSize: (delta: number) => void
+  adjustFocusTextSize: (delta: number) => void
 ) {
   useEffect(() => {
     if (view !== "reader" || readerMode !== "speed") return;
@@ -20,13 +20,13 @@ export function useReaderKeys(
       else if (e.code === "ArrowRight") { e.preventDefault(); seekWords(REWIND_WORDS); }
       else if (e.code === "ArrowUp") { e.preventDefault(); adjustWpm(WPM_STEP); }
       else if (e.code === "ArrowDown") { e.preventDefault(); adjustWpm(-WPM_STEP); }
-      else if (e.code === "Equal" || e.code === "NumpadAdd") { e.preventDefault(); adjustFontSize(FONT_SIZE_STEP); }
-      else if (e.code === "Minus" || e.code === "NumpadSubtract") { e.preventDefault(); adjustFontSize(-FONT_SIZE_STEP); }
+      else if (e.code === "Equal" || e.code === "NumpadAdd") { e.preventDefault(); adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); }
+      else if (e.code === "Minus" || e.code === "NumpadSubtract") { e.preventDefault(); adjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP); }
       else if (e.code === "Escape") { e.preventDefault(); exitReader(); }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFontSize]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize]);
 }
 
 // Smart import: Alt+V detects URL vs text and shows confirmation dialog
