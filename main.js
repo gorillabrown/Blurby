@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeTheme, session } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeTheme, session, net } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
@@ -656,17 +656,31 @@ function registerIPC() {
 
   ipcMain.handle("add-doc-from-url", async (_, url) => {
     try {
-      // Build headers, including stored cookies for logged-in sites
-      const headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-      };
-      const savedCookies = getCookiesForUrl(url);
-      if (savedCookies.length > 0) {
-        headers["Cookie"] = savedCookies.map((c) => `${c.name}=${c.value}`).join("; ");
+      const siteKey = getSiteKey(url);
+      const hasLogin = siteKey && siteCookies[siteKey] && siteCookies[siteKey].length > 0;
+      let response;
+
+      if (hasLogin) {
+        // Use Electron's net.fetch from the login session — automatically includes all cookies
+        const loginSession = session.fromPartition("persist:site-login");
+        response = await net.fetch(url, {
+          session: loginSession,
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+          },
+        });
+      } else {
+        response = await fetch(url, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+          },
+          signal: AbortSignal.timeout(15000),
+        });
       }
-      const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
       if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
       const html = await response.text();
       const dom = new JSDOM(html, { url });
