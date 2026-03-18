@@ -1,5 +1,6 @@
 import { formatTime } from "../utils/text";
 import { BlurbyDoc } from "../types";
+import { bubbleCount } from "../utils/queue";
 import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
@@ -57,7 +58,12 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
             {formatLabel && <span>{formatLabel}</span>}
             <span>{wordCount.toLocaleString()} words</span>
             <span>{readTime}</span>
-            {pos > 0 && !isComplete && <span className="doc-card-progress">{progress}%</span>}
+            <span className="bubble-progress">
+              {Array.from({ length: 10 }, (_, i) => (
+                <span key={i} className={`bubble-progress-dot${i < bubbleCount(progress) ? " filled" : ""}`} />
+              ))}
+              <span className="bubble-progress-label">{progress}%</span>
+            </span>
           </div>
         </div>
 
