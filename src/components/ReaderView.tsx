@@ -109,6 +109,13 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         style={{ paddingTop: isMac ? 36 : 16, opacity: playing ? 0.12 : 0.55 }}
       >
         <div className="reader-top-left">
+          {onToggleFlap && (
+            <button className="hamburger-btn" onClick={(e) => { e.stopPropagation(); onToggleFlap(); }} aria-label="Open menu" title="Menu (Tab)">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); exitReader(); }}
             className="reader-esc-btn"
@@ -117,13 +124,6 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           <span className="reader-doc-title">{activeDoc.title}</span>
         </div>
         <WpmGauge wpm={wpm} />
-        {onToggleFlap && (
-          <button className="hamburger-btn" onClick={(e) => { e.stopPropagation(); onToggleFlap(); }} aria-label="Open menu" title="Menu (Tab)">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </button>
-        )}
       </div>
 
       {playing ? (

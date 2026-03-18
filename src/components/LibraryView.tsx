@@ -161,31 +161,38 @@ export default function LibraryView({
       <div className="library-scroll">
         {/* Header */}
         <div className="library-header">
-          <div>
-            {editFolder ? (
-              <input
-                autoFocus value={folderName}
-                onChange={(e) => onSetFolderName(e.target.value)}
-                onBlur={() => setEditFolder(false)}
-                onKeyDown={(e) => e.key === "Enter" && setEditFolder(false)}
-                className="library-folder-input"
-                aria-label="Library name"
-              />
-            ) : (
-              <h1
-                onClick={() => setEditFolder(true)}
-                className="library-folder-title"
-                title="Click to rename"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && setEditFolder(true)}
-              >{folderName}</h1>
-            )}
-            <p className="library-stats">
-              {activeLibrary.length} {activeLibrary.length === 1 ? "source" : "sources"}
-              {totalWords > 0 && <> · {formatTime(totalWords, wpm)} total at {wpm} wpm</>}
-              {settings.sourceFolder && <> · <span className="library-folder-name">{settings.sourceFolder.split(/[/\\]/).pop()}</span></>}
-            </p>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <button className="hamburger-btn" onClick={onToggleFlap} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <div>
+              {editFolder ? (
+                <input
+                  autoFocus value={folderName}
+                  onChange={(e) => onSetFolderName(e.target.value)}
+                  onBlur={() => setEditFolder(false)}
+                  onKeyDown={(e) => e.key === "Enter" && setEditFolder(false)}
+                  className="library-folder-input"
+                  aria-label="Library name"
+                />
+              ) : (
+                <h1
+                  onClick={() => setEditFolder(true)}
+                  className="library-folder-title"
+                  title="Click to rename"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === "Enter" && setEditFolder(true)}
+                >{folderName}</h1>
+              )}
+              <p className="library-stats">
+                {activeLibrary.length} {activeLibrary.length === 1 ? "source" : "sources"}
+                {totalWords > 0 && <> · {formatTime(totalWords, wpm)} total at {wpm} wpm</>}
+                {settings.sourceFolder && <> · <span className="library-folder-name">{settings.sourceFolder.split(/[/\\]/).pop()}</span></>}
+              </p>
+            </div>
           </div>
           <div className="library-actions">
             <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics">
@@ -210,11 +217,6 @@ export default function LibraryView({
                 />
               )}
             </div>
-            <button className="hamburger-btn" onClick={onToggleFlap} aria-label="Open menu" title="Menu (Tab)">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
             <button onClick={() => { setShowUrl(true); setUrlInput(""); setUrlError(""); }} className="btn" aria-label="Add from URL">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }}>
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
