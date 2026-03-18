@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="uuid_id" version="2.0">
+    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+        <dc:identifier opf:scheme="calibre" id="calibre_id">25</dc:identifier>
+        <dc:identifier opf:scheme="uuid" id="uuid_id">bd1e8995-e5e6-4b2e-b418-5dcb1ae48f4b</dc:identifier>
+        <dc:title>How to Avoid a Climate Disaster: The Solutions We Have and the Breakthroughs We Need</dc:title>
+        <dc:creator opf:file-as="Gates, Bill" opf:role="aut">Bill Gates</dc:creator>
+        <dc:contributor opf:file-as="calibre" opf:role="bkp">calibre (5.39.1) [https://calibre-ebook.com]</dc:contributor>
+        <dc:date>2021-02-16T00:00:00+00:00</dc:date>
+        <dc:description>&lt;b&gt;Bill Gates shares what he's learned in more than a decade of studying climate change and investing in innovations to address the problems, and sets out a vision for how the world can build the tools it needs to get to zero greenhouse gas emissions.&lt;/b&gt;&lt;br&gt;Bill Gates explains why he cares so deeply about climate change and what makes him optimistic that the world can prevent the worst impacts of the climate crisis. Gates says, "we can work on a local, national, and global level to build the technologies, businesses, and industries to avoid the worst impacts of climate change." His interest in climate change is a natural outgrowth of the efforts by his foundation to reduce poverty and disease. Climate change, according to Gates, will have the biggest impact on the people who have done the least to cause it. As a technologist, he has seen first-hand how innovation can change the world. By investing in research, inventing new technologies, and by deploying them quickly at large...</dc:description>
+        <dc:publisher>Knopf Doubleday Publishing Group</dc:publisher>
+        <dc:language>eng</dc:language>
+        <meta name="calibre:author_link_map" content="{&quot;Bill Gates&quot;: &quot;&quot;}"/>
+        <meta name="calibre:timestamp" content="2022-03-30T16:24:07.688796+00:00"/>
+        <meta name="calibre:title_sort" content="How to Avoid a Climate Disaster: The Solutions We Have and the Breakthroughs We Need"/>
+    </metadata>
+    <guide>
+        <reference type="cover" title="Cover" href="cover.jpg"/>
+    </guide>
+</package>
