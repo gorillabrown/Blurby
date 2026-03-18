@@ -2,9 +2,8 @@ interface QueueDoc {
   id: string;
   position: number;
   wordCount: number;
-  lastReadAt: number | null;
+  lastReadAt?: number | null;
   created: number;
-  [key: string]: unknown;
 }
 
 export function bubbleCount(progressPercent: number): number {

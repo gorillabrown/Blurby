@@ -1616,18 +1616,6 @@ function registerIPC() {
     if (doc) { doc.position = 0; saveLibrary(); }
   });
 
-  ipcMain.handle("reload-file", async (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
-    if (doc && doc.filepath) {
-      const content = await extractContent(doc.filepath);
-      if (content) {
-        doc.wordCount = content.split(/\s+/).filter(Boolean).length;
-        saveLibrary();
-        return content;
-      }
-    }
-    return null;
-  });
 
   ipcMain.handle("load-doc-content", async (_, docId) => {
     const doc = getLibrary().find((d) => d.id === docId);
