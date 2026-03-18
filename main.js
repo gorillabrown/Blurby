@@ -558,6 +558,94 @@ function updateWindowTheme() {
   }
 }
 
+// ── Article extraction helpers ─────────────────────────────────────────────────
+function fetchWithBrowser(url) {
+  return new Promise((resolve, reject) => {
+    const win = new BrowserWindow({
+      width: 1280, height: 900,
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        partition: "persist:site-login",
+        // Allow images/CSS to load so JS-rendered content works
+        images: true,
+      },
+    });
+
+    let resolved = false;
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        // Even on timeout, try to grab whatever rendered
+        win.webContents.executeJavaScript("document.documentElement.outerHTML")
+          .then((html) => { win.destroy(); resolve(html); })
+          .catch(() => { win.destroy(); reject(new Error("Timed out loading page.")); });
+      }
+    }, 20000);
+
+    win.webContents.on("did-finish-load", () => {
+      // Wait for JS to render dynamic content
+      setTimeout(async () => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeout);
+        try {
+          const html = await win.webContents.executeJavaScript("document.documentElement.outerHTML");
+          win.destroy();
+          resolve(html);
+        } catch (err) {
+          win.destroy();
+          reject(err);
+        }
+      }, 3000); // 3s for JS to finish rendering
+    });
+
+    win.webContents.on("did-fail-load", (_event, errorCode, errorDesc) => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        win.destroy();
+        reject(new Error(`Failed to load: ${errorDesc}`));
+      }
+    });
+
+    win.loadURL(url);
+  });
+}
+
+function extractArticleFromHtml(html, url) {
+  const dom = new JSDOM(html, { url });
+  const parsedDoc = dom.window.document;
+  // Remove paywall/ad elements
+  parsedDoc.querySelectorAll([
+    '[class*="paywall"]', '[class*="Paywall"]',
+    '[class*="advert"]', '[class*="Advert"]',
+    '[id*="paywall"]', '[id*="Paywall"]',
+    '[class*="gateway"]', '[class*="Gateway"]',
+    '[aria-label*="advertisement"]',
+    '[data-testid*="paywall"]',
+  ].join(",")).forEach((el) => el.remove());
+  const reader = new Readability(parsedDoc);
+  const article = reader.parse();
+  if (!article || !article.textContent?.trim()) {
+    return { error: "Could not extract readable content from this page." };
+  }
+  let content = article.textContent.trim();
+  content = content
+    .replace(/\bADVERTISEMENT\b/g, "")
+    .replace(/\bSKIP ADVERTISEMENT\b/g, "")
+    .replace(/AdvertisementSKIP/g, "")
+    .replace(/Thank you for your patience while we verify access\..*/g, "")
+    .replace(/If you are in Reader mode please exit and log into your Times account.*/g, "")
+    .replace(/Already a subscriber\? Log in\.?.*/g, "")
+    .replace(/Want all of The Times\?.*/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  const title = article.title || new URL(url).hostname;
+  return { title, content };
+}
+
 // ── IPC Handlers ───────────────────────────────────────────────────────────────
 function registerIPC() {
   ipcMain.handle("get-state", () => ({ settings, library: getLibrary() }));
@@ -658,21 +746,14 @@ function registerIPC() {
     try {
       const siteKey = getSiteKey(url);
       const hasLogin = siteKey && siteCookies[siteKey] && siteCookies[siteKey].length > 0;
-      let response;
+      let html;
 
       if (hasLogin) {
-        // Use Electron's net.fetch from the login session — automatically includes all cookies
-        const loginSession = session.fromPartition("persist:site-login");
-        response = await net.fetch(url, {
-          session: loginSession,
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-          },
-        });
+        // Load in a hidden BrowserWindow with the login session so JS renders
+        // the full article content (bypasses JS-based paywalls)
+        html = await fetchWithBrowser(url);
       } else {
-        response = await fetch(url, {
+        const response = await fetch(url, {
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -680,42 +761,19 @@ function registerIPC() {
           },
           signal: AbortSignal.timeout(15000),
         });
+        if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
+        html = await response.text();
       }
-      if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
-      const html = await response.text();
-      const dom = new JSDOM(html, { url });
-      // Remove common paywall/ad elements before parsing
-      const parsedDoc = dom.window.document;
-      parsedDoc.querySelectorAll([
-        '[class*="paywall"]', '[class*="Paywall"]',
-        '[class*="advert"]', '[class*="Advert"]',
-        '[id*="paywall"]', '[id*="Paywall"]',
-        '[class*="gateway"]', '[class*="Gateway"]',
-        '[aria-label*="advertisement"]',
-        '[data-testid*="paywall"]',
-      ].join(",")).forEach((el) => el.remove());
-      const reader = new Readability(parsedDoc);
-      const article = reader.parse();
-      if (!article || !article.textContent?.trim()) return { error: "Could not extract readable content from this page." };
 
-      // Clean up extracted text: remove ad markers and paywall notices
-      let content = article.textContent.trim();
-      content = content
-        .replace(/\bADVERTISEMENT\b/g, "")
-        .replace(/\bSKIP ADVERTISEMENT\b/g, "")
-        .replace(/AdvertisementSKIP/g, "")
-        .replace(/Thank you for your patience while we verify access\..*/g, "")
-        .replace(/If you are in Reader mode please exit and log into your Times account.*/g, "")
-        .replace(/Already a subscriber\? Log in\.?.*/g, "")
-        .replace(/Want all of The Times\?.*/g, "")
-        .replace(/\n{3,}/g, "\n\n")
-        .trim();
-      const wordCount = content.split(/\s+/).filter(Boolean).length;
-      const title = article.title || new URL(url).hostname;
+      if (!html) return { error: "Failed to load page content." };
+      const result = extractArticleFromHtml(html, url);
+      if (result.error) return result;
+
       const newDoc = {
         id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
-        title, content, wordCount, sourceUrl: url,
-        position: 0, created: Date.now(), source: "url",
+        title: result.title, content: result.content,
+        wordCount: result.content.split(/\s+/).filter(Boolean).length,
+        sourceUrl: url, position: 0, created: Date.now(), source: "url",
       };
       getLibrary().unshift(newDoc);
       saveLibrary();
