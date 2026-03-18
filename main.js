@@ -255,12 +255,41 @@ async function extractContent(filepath) {
   const ext = path.extname(filepath).toLowerCase();
   try {
     if (ext === ".pdf") {
+      // pdf-parse v2 requires pdfjs-dist which needs canvas polyfills in Node
+      if (!globalThis.DOMMatrix) {
+        try {
+          const canvas = require("@napi-rs/canvas");
+          globalThis.DOMMatrix = canvas.DOMMatrix;
+          globalThis.ImageData = canvas.ImageData;
+          globalThis.Path2D = canvas.Path2D;
+        } catch {
+          // Minimal polyfills if native canvas not available
+          globalThis.DOMMatrix = globalThis.DOMMatrix || class DOMMatrix { constructor() { this.a=1;this.b=0;this.c=0;this.d=1;this.e=0;this.f=0; } };
+          globalThis.ImageData = globalThis.ImageData || class ImageData { constructor(w,h) { this.width=w;this.height=h;this.data=new Uint8ClampedArray(w*h*4); } };
+          globalThis.Path2D = globalThis.Path2D || class Path2D { };
+        }
+      }
       const { PDFParse } = require("pdf-parse");
       const buffer = await fsPromises.readFile(filepath);
       const parser = new PDFParse({ data: new Uint8Array(buffer) });
-      const result = await parser.getText();
-      await parser.destroy();
-      return result.text || null;
+      // Timeout to prevent hanging on problematic PDFs
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("PDF parse timeout")), 30000));
+      try {
+        const result = await Promise.race([parser.getText(), timeout]);
+        await parser.destroy();
+        const text = result.text || "";
+        // Validate extracted text isn't binary garbage
+        const printableRatio = text.replace(/[\x00-\x1f\x7f-\x9f]/g, "").length / (text.length || 1);
+        if (printableRatio < 0.8 || text.length < 10) {
+          console.log(`PDF extraction yielded non-text content for ${filepath} (${Math.round(printableRatio*100)}% printable)`);
+          return null;
+        }
+        return text;
+      } catch (err) {
+        try { await parser.destroy(); } catch {}
+        console.error(`PDF extraction failed for ${filepath}:`, err.message);
+        return null;
+      }
     }
     if (ext === ".epub") {
       // EPUB is a ZIP of XHTML files — extract text via adm-zip + cheerio
