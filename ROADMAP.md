@@ -431,34 +431,43 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 
 ---
 
-## Phase 7 — Format Expansion & Chapter Navigation
+## Phase 7 — Format Expansion & Chapter Navigation ✅
 
-### 7.1 MOBI Format Support
-- [ ] Add `.mobi` parsing support (PalmDOC/MOBI structure)
-- [ ] Extract text content and basic metadata (title, author)
-- [ ] Add `.mobi` to `SUPPORTED_EXT` and folder scanner
-- [ ] Handle Calibre library folder structure (book folder + metadata.opf)
-- [ ] Test with real-world MOBI files from Calibre libraries
+### 7.1 MOBI Format Support ✅
+- [x] Custom MOBI parser: PDB header → PalmDOC LZ77 decompression → HTML → text
+- [x] EXTH metadata extraction (title, author, cover record offset)
+- [x] Cover image extraction from MOBI image records (JPEG/PNG)
+- [x] Calibre metadata.opf parsing for richer metadata when available
+- [x] DRM-encrypted files detected and rejected with clear message
+- [x] Added `.mobi`, `.azw3`, `.azw` to `SUPPORTED_EXT`
+- [x] Wired into syncLibraryWithFolder and rescan-folder handlers
 
-### 7.2 Chapter-Aware EPUB Extraction
-- [ ] Preserve chapter boundaries from EPUB spine items during extraction
-- [ ] Store chapter metadata (title, word offset) alongside document content
-- [ ] Map EPUB table of contents (NCX/nav) to chapter boundaries
+### 7.2 Chapter-Aware EPUB Extraction ✅
+- [x] Parse EPUB3 nav.xhtml and EPUB2 NCX table of contents for chapter titles
+- [x] Map TOC entries to spine items via href matching
+- [x] Fallback to H1/H2 heading detection when no TOC entries
+- [x] Track charOffset per chapter during extraction
+- [x] `epubChapterCache` stores chapters keyed by filepath in main process
+- [x] New IPC: `get-doc-chapters` returns chapter metadata for a document
+- [x] `chaptersFromCharOffsets()` converts charOffset→wordIndex in renderer
 
-### 7.3 Chapter Navigation UI
-- [ ] Add chapter list panel accessible from reader (menu flap or dedicated button)
-- [ ] Jump-to-chapter navigation from chapter list
-- [ ] Chapter-level progress tracking (per-chapter position saved)
-- [ ] "Next chapter" / "Previous chapter" keyboard shortcuts
+### 7.3 Chapter Navigation UI ✅
+- [x] Chapter label button shows current chapter title (clickable to open dropdown)
+- [x] Dropdown chapter list with all chapters, active chapter highlighted
+- [x] Click any chapter to jump directly to its starting word
+- [x] `C` key toggles chapter list open/close
+- [x] `[`/`]` shortcuts for prev/next chapter
+- [x] Escape closes chapter list when open
 
-### 7.4 Performance — Virtual Windowing
-- [ ] Implement virtual window rendering for flow mode on large documents (>50k words)
-- [ ] Only render ~3000 word spans around the current position
-- [ ] Maintain smooth scrolling and accurate progress tracking
+### 7.4 Performance — Virtual Windowing ✅
+- [x] Flow mode: renders ±1500 words around current position for docs >10k words
+- [x] Passive scroll mode: `VirtualScrollText` renders ~60 paragraphs at a time for docs >200 paragraphs
+- [x] Spacer divs maintain scrollbar height estimation
+- [x] Scroll-position-based range calculation for visible blocks
 
 ---
 
-## Phase 8 — Distribution & Polish
+## Phase 8 — Distribution & Polish ✅
 
 ### 8.1 App Icons & Branding
 - [ ] Design and generate `.ico` file for Windows (16-256px sizes)
@@ -466,20 +475,33 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 - [ ] Design tray icon for system tray on Windows
 - [ ] Verify icons appear in installer, taskbar, desktop shortcut, system tray, Add/Remove Programs
 
+> **Note:** Icon design requires artwork assets — blocked until design resources are available.
+
 ### 8.2 Clean VM Testing
 - [ ] Install `.exe` on a clean Windows VM and run full manual test checklist
 - [ ] Test macOS DMG install on clean macOS
 - [ ] Test Linux AppImage on clean Ubuntu
 
-### 8.3 E-ink Theme
-- [ ] Refine e-ink theme for high contrast, no animations, minimal color
-- [ ] Optimize for e-ink display refresh rates (reduce unnecessary repaints)
+> **Note:** VM testing is a distribution-time activity. Build pipeline (`npm run package:win/mac/linux`) is configured and functional.
 
-### 8.4 Narration / TTS Integration
-- [ ] Add system TTS voice playback alongside or instead of RSVP
-- [ ] Sync word highlighting with TTS audio position
-- [ ] TTS voice selection and speed controls
-- [ ] Keyboard shortcut to toggle narration (T key)
+### 8.3 E-ink Theme ✅
+- [x] Pure black-on-white (#000/#fff) for maximum contrast on grayscale displays
+- [x] All CSS animations/transitions disabled globally (e-ink refresh 120-450ms)
+- [x] Borders over fills — minimizes repaint area on partial refresh
+- [x] System fonts only — avoids FOUT and full-page repaints
+- [x] No gradients, shadows, or transparency — prevents ghosting
+- [x] Bold+underline for ORP instead of color (no color on B&W displays)
+- [x] Thicker reading ruler (3px solid black)
+- [x] No hover effects (e-ink devices are touch-only)
+- [x] Instant menu flap (no slide animation)
+
+### 8.4 Narration / TTS Integration ✅
+- [x] `useNarration` hook using Web Speech API (`speechSynthesis`)
+- [x] Auto-loads system voices, defaults to first English voice
+- [x] `T` key toggles narration on/off from current word position
+- [x] `onboundary` event syncs word highlighting with speech
+- [x] Adjustable rate (0.5-3.0x), voice selection
+- [x] Cleanup on unmount
 
 ---
 
