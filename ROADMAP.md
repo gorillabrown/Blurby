@@ -431,6 +431,117 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 
 ---
 
+## Phase 7 — Format Expansion & Chapter Navigation
+
+### 7.1 MOBI Format Support
+- [ ] Add `.mobi` parsing support (PalmDOC/MOBI structure)
+- [ ] Extract text content and basic metadata (title, author)
+- [ ] Add `.mobi` to `SUPPORTED_EXT` and folder scanner
+- [ ] Handle Calibre library folder structure (book folder + metadata.opf)
+- [ ] Test with real-world MOBI files from Calibre libraries
+
+### 7.2 Chapter-Aware EPUB Extraction
+- [ ] Preserve chapter boundaries from EPUB spine items during extraction
+- [ ] Store chapter metadata (title, word offset) alongside document content
+- [ ] Map EPUB table of contents (NCX/nav) to chapter boundaries
+
+### 7.3 Chapter Navigation UI
+- [ ] Add chapter list panel accessible from reader (menu flap or dedicated button)
+- [ ] Jump-to-chapter navigation from chapter list
+- [ ] Chapter-level progress tracking (per-chapter position saved)
+- [ ] "Next chapter" / "Previous chapter" keyboard shortcuts
+
+### 7.4 Performance — Virtual Windowing
+- [ ] Implement virtual window rendering for flow mode on large documents (>50k words)
+- [ ] Only render ~3000 word spans around the current position
+- [ ] Maintain smooth scrolling and accurate progress tracking
+
+---
+
+## Phase 8 — Distribution & Polish
+
+### 8.1 App Icons & Branding
+- [ ] Design and generate `.ico` file for Windows (16-256px sizes)
+- [ ] Design and generate `.icns` file for macOS
+- [ ] Design tray icon for system tray on Windows
+- [ ] Verify icons appear in installer, taskbar, desktop shortcut, system tray, Add/Remove Programs
+
+### 8.2 Clean VM Testing
+- [ ] Install `.exe` on a clean Windows VM and run full manual test checklist
+- [ ] Test macOS DMG install on clean macOS
+- [ ] Test Linux AppImage on clean Ubuntu
+
+### 8.3 E-ink Theme
+- [ ] Refine e-ink theme for high contrast, no animations, minimal color
+- [ ] Optimize for e-ink display refresh rates (reduce unnecessary repaints)
+
+### 8.4 Narration / TTS Integration
+- [ ] Add system TTS voice playback alongside or instead of RSVP
+- [ ] Sync word highlighting with TTS audio position
+- [ ] TTS voice selection and speed controls
+- [ ] Keyboard shortcut to toggle narration (T key)
+
+---
+
+## Phase 9 — Chrome Extension
+
+### 9.1 Extension Core
+- [ ] Create Chrome extension manifest (Manifest V3)
+- [ ] Content script that extracts article text from current page (using Readability.js)
+- [ ] "Read in Blurby" button in browser action popup
+- [ ] Context menu "Speed Read This" on selected text
+
+### 9.2 Desktop Integration
+- [ ] Local HTTP bridge in Electron app for receiving content from extension
+- [ ] Alternative: clipboard-based transfer with deep link
+- [ ] Extension sends extracted article to desktop Blurby
+
+### 9.3 Standalone In-Browser Reader
+- [ ] Embedded RSVP reader in extension popup (subset of focus mode)
+- [ ] WPM control and play/pause in popup
+- [ ] Reading queue stored in extension local storage
+
+### 9.4 Distribution
+- [ ] Chrome Web Store listing and assets
+- [ ] Extension auto-update configuration
+
+---
+
+## Phase 10 — Android App (APK)
+
+### 10.1 Mobile Framework
+- [ ] Evaluate React Native vs Capacitor for mobile port
+- [ ] Set up mobile project with shared core utilities (text.ts, rhythm.ts)
+- [ ] Port RSVP engine to mobile (touch controls, swipe gestures)
+
+### 10.2 Mobile Features
+- [ ] Local document import (file picker, Android share intent)
+- [ ] Focus mode with tap-to-pause, swipe-to-seek
+- [ ] Flow mode with touch scrolling and auto-advance
+- [ ] Settings UI adapted for mobile (bottom sheets, gesture controls)
+
+### 10.3 Cloud Sync (Optional)
+- [ ] Cloud sync for reading progress and library metadata
+- [ ] Conflict resolution for concurrent desktop/mobile edits
+- [ ] Offline-first architecture with background sync
+
+### 10.4 Distribution
+- [ ] Google Play Store listing and assets
+- [ ] APK build pipeline
+- [ ] Beta testing via internal track
+
+---
+
+## Someday — Code Signing
+
+- [ ] Research and obtain Windows code signing certificate (DigiCert/Sectigo OV or Azure Trusted Signing)
+- [ ] Configure `electron-builder` to sign `.exe` and installer during build
+- [ ] Verify signed installer no longer triggers SmartScreen warnings
+- [ ] macOS code signing and notarization via Apple Developer Program
+- [ ] Document signing process and renewal timeline
+
+---
+
 ## Execution Notes
 
 - **Phases are sequential** — complete Phase 0 before starting Phase 1, etc.
