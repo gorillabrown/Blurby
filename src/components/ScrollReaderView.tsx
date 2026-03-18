@@ -13,9 +13,10 @@ interface ScrollReaderViewProps {
   onExit: (position: number) => void;
   onProgressUpdate: (position: number) => void;
   onSwitchToFocus?: () => void;
+  onToggleFlap?: () => void;
 }
 
-export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus }: ScrollReaderViewProps) {
+export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap }: ScrollReaderViewProps) {
   const words = tokenize(activeDoc.content || "");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPct, setScrollPct] = useState(0);
@@ -72,7 +73,10 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.code === "Escape") {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        onToggleFlap?.();
+      } else if (e.code === "Escape") {
         e.preventDefault();
         onExit(clampedPosition);
       } else if (e.code === "Equal" || e.code === "NumpadAdd") {
@@ -86,7 +90,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onExit, clampedPosition, onAdjustFocusTextSize]);
+  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap]);
 
   // Cleanup save timer
   useEffect(() => {

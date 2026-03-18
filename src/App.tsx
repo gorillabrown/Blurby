@@ -353,6 +353,7 @@ function AppInner() {
               onExit={handleScrollExit}
               onProgressUpdate={handleScrollProgress}
               onSwitchToFocus={handleSwitchToFocus}
+              onToggleFlap={toggleMenuFlap}
             />
           </ErrorBoundary>
           {menuFlap}
