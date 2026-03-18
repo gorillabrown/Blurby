@@ -6,6 +6,10 @@ interface DocGridCardProps {
   onOpen: (doc: BlurbyDoc) => void;
 }
 
+function capitalizeFirst(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
 
@@ -57,7 +61,7 @@ export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
         {doc.favorite && <div className="doc-grid-fav-star">*</div>}
       </div>
       <div className="doc-grid-info">
-        <div className="doc-grid-title">{doc.title}</div>
+        <div className="doc-grid-title">{capitalizeFirst(doc.title)}</div>
         {doc.author && <div className="doc-grid-author">{doc.author}</div>}
       </div>
     </div>

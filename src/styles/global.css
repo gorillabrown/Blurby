@@ -848,6 +848,22 @@ button:focus-visible {
   color: var(--text);
   border-bottom-color: var(--accent);
 }
+.library-tab-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  align-self: center;
+  margin: 0 8px;
+}
+.library-section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-dimmer);
+  padding: 16px 18px 6px;
+}
 
 /* ── Reader Pause Controls (WPM slider) ──────────────────────────────────── */
 .reader-pause-controls {

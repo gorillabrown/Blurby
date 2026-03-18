@@ -65,6 +65,7 @@ export default function LibraryView({
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
+  const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
 
@@ -81,12 +82,19 @@ export default function LibraryView({
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
   }, []);
 
+  const BOOK_EXTS = [".epub", ".pdf", ".mobi", ".azw3", ".kfx"];
+  const isBook = (d: BlurbyDoc) => d.source === "folder" && d.ext && BOOK_EXTS.includes(d.ext);
+  const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual" || (d.source === "folder" && !isBook(d));
+
   // Filter and sort library
   const getFilteredAndSorted = () => {
     let docs = library;
     if (tab === "favorites") docs = docs.filter((d) => d.favorite);
     else if (tab === "archived") docs = docs.filter((d) => d.archived);
     else docs = docs.filter((d) => !d.archived);
+    // Type filter
+    if (typeFilter === "articles") docs = docs.filter(isArticle);
+    else if (typeFilter === "books") docs = docs.filter(isBook);
     if (searchQuery) docs = docs.filter((d) => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
     docs = [...docs];
@@ -113,6 +121,12 @@ export default function LibraryView({
   const totalWords = activeLibrary.reduce((a, d) => a + (d.wordCount || 0), 0);
   const favCount = library.filter((d) => d.favorite).length;
   const archivedCount = library.filter((d) => d.archived).length;
+  const articleCount = activeLibrary.filter(isArticle).length;
+  const bookCount = activeLibrary.filter(isBook).length;
+
+  // Split filtered docs into reading now vs not started
+  const readingNow = filteredLibrary.filter((d) => (d.position || 0) > 0 && (d.wordCount ? (d.position || 0) < d.wordCount : true));
+  const notStarted = filteredLibrary.filter((d) => (d.position || 0) === 0);
 
   const handleAddDoc = async () => {
     if (!newTitle.trim() || !newText.trim()) return;
@@ -287,6 +301,25 @@ export default function LibraryView({
             role="tab"
             aria-selected={tab === "archived"}
           >archived ({archivedCount})</button>
+          <span className="library-tab-divider" />
+          <button
+            className={`library-tab${typeFilter === "all" ? " library-tab-active" : ""}`}
+            onClick={() => setTypeFilter("all")}
+            role="tab"
+            aria-selected={typeFilter === "all"}
+          >all types</button>
+          <button
+            className={`library-tab${typeFilter === "articles" ? " library-tab-active" : ""}`}
+            onClick={() => setTypeFilter("articles")}
+            role="tab"
+            aria-selected={typeFilter === "articles"}
+          >articles ({articleCount})</button>
+          <button
+            className={`library-tab${typeFilter === "books" ? " library-tab-active" : ""}`}
+            onClick={() => setTypeFilter("books")}
+            role="tab"
+            aria-selected={typeFilter === "books"}
+          >books ({bookCount})</button>
         </div>
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
@@ -365,31 +398,74 @@ export default function LibraryView({
           </div>
         )}
 
-        {/* Document list / grid */}
+        {/* Document list / grid — sectioned by Reading Now / Not Started */}
         {settings.viewMode === "grid" ? (
-          <div className="doc-grid" role="list">
-            {filteredLibrary.map((doc) => (
-              <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} />
-            ))}
-          </div>
+          <>
+            {readingNow.length > 0 && (
+              <>
+                <div className="library-section-label">Reading Now</div>
+                <div className="doc-grid" role="list">
+                  {readingNow.map((doc) => (
+                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} />
+                  ))}
+                </div>
+              </>
+            )}
+            {notStarted.length > 0 && (
+              <>
+                <div className="library-section-label">Not Started</div>
+                <div className="doc-grid" role="list">
+                  {notStarted.map((doc) => (
+                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <>
-            <div className="doc-list" role="list">
-              {filteredLibrary.map((doc) => (
-                <DocCard
-                  key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
-                  onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
-                  onDelete={onDeleteDoc}
-                  onConfirmDelete={setConfirmDelete}
-                  onCancelDelete={() => setConfirmDelete(null)}
-                  onToggleFavorite={onToggleFavorite}
-                  onArchive={onArchiveDoc}
-                  onUnarchive={onUnarchiveDoc}
-                  onOpenScroll={(d) => onOpenDoc(d, "scroll")}
-                  onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
-                />
-              ))}
-            </div>
+            {readingNow.length > 0 && (
+              <>
+                <div className="library-section-label">Reading Now</div>
+                <div className="doc-list" role="list">
+                  {readingNow.map((doc) => (
+                    <DocCard
+                      key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
+                      onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
+                      onDelete={onDeleteDoc}
+                      onConfirmDelete={setConfirmDelete}
+                      onCancelDelete={() => setConfirmDelete(null)}
+                      onToggleFavorite={onToggleFavorite}
+                      onArchive={onArchiveDoc}
+                      onUnarchive={onUnarchiveDoc}
+                      onOpenScroll={(d) => onOpenDoc(d, "scroll")}
+                      onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            {notStarted.length > 0 && (
+              <>
+                <div className="library-section-label">Not Started</div>
+                <div className="doc-list" role="list">
+                  {notStarted.map((doc) => (
+                    <DocCard
+                      key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
+                      onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
+                      onDelete={onDeleteDoc}
+                      onConfirmDelete={setConfirmDelete}
+                      onCancelDelete={() => setConfirmDelete(null)}
+                      onToggleFavorite={onToggleFavorite}
+                      onArchive={onArchiveDoc}
+                      onUnarchive={onUnarchiveDoc}
+                      onOpenScroll={(d) => onOpenDoc(d, "scroll")}
+                      onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </>
         )}
 
