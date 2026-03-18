@@ -588,11 +588,32 @@ function registerIPC() {
       if (!response.ok) return { error: `Failed to fetch: HTTP ${response.status}` };
       const html = await response.text();
       const dom = new JSDOM(html, { url });
-      const reader = new Readability(dom.window.document);
+      // Remove common paywall/ad elements before parsing
+      const doc = dom.window.document;
+      doc.querySelectorAll([
+        '[class*="paywall"]', '[class*="Paywall"]',
+        '[class*="advert"]', '[class*="Advert"]',
+        '[id*="paywall"]', '[id*="Paywall"]',
+        '[class*="gateway"]', '[class*="Gateway"]',
+        '[aria-label*="advertisement"]',
+        '[data-testid*="paywall"]',
+      ].join(",")).forEach((el) => el.remove());
+      const reader = new Readability(doc);
       const article = reader.parse();
       if (!article || !article.textContent?.trim()) return { error: "Could not extract readable content from this page." };
 
-      const content = article.textContent.trim();
+      // Clean up extracted text: remove ad markers and paywall notices
+      let content = article.textContent.trim();
+      content = content
+        .replace(/\bADVERTISEMENT\b/g, "")
+        .replace(/\bSKIP ADVERTISEMENT\b/g, "")
+        .replace(/AdvertisementSKIP/g, "")
+        .replace(/Thank you for your patience while we verify access\..*/g, "")
+        .replace(/If you are in Reader mode please exit and log into your Times account.*/g, "")
+        .replace(/Already a subscriber\? Log in\.?.*/g, "")
+        .replace(/Want all of The Times\?.*/g, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
       const wordCount = content.split(/\s+/).filter(Boolean).length;
       const title = article.title || new URL(url).hostname;
       const doc = {
