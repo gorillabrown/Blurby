@@ -1351,14 +1351,28 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #f5f3ef;
 }
 
-.doc-grid-cover-ext {
-  font-family: var(--mono);
+.doc-grid-placeholder-banner {
+  background: #b0b5ba;
+  width: 100%;
+  padding: 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.doc-grid-placeholder-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-dimmer);
-  letter-spacing: 1px;
+  color: #2a2a2a;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
 }
 
 .doc-grid-progress-bar {

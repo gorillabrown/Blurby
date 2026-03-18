@@ -45,8 +45,10 @@ export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
         {coverSrc ? (
           <img src={coverSrc} alt={`Cover of ${doc.title}`} className="doc-grid-cover-img" />
         ) : (
-          <div className="doc-grid-cover-placeholder" style={{ background: placeholderColor }}>
-            <span className="doc-grid-cover-ext">{ext}</span>
+          <div className="doc-grid-cover-placeholder">
+            <div className="doc-grid-placeholder-banner">
+              <span className="doc-grid-placeholder-title">{formatDisplayTitle(doc.title)}</span>
+            </div>
           </div>
         )}
         {progress > 0 && !isComplete && (
