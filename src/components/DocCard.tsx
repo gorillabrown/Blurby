@@ -6,15 +6,15 @@ import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
 
 const TYPE_COLORS: Record<string, string> = {
-  epub: "#5b8fb9",
+  epub: "#6b9f6b",
   pdf: "#c47882",
   mobi: "#9b82c4",
-  azw3: "#6b9f6b",
-  txt: "#c4a882",
+  azw3: "#c4a882",
+  txt: "#8a8a8a",
   md: "#82c4a8",
   html: "#5ba8a0",
   htm: "#5ba8a0",
-  url: "#6b9fd4",
+  url: "#5b8fb9",
 };
 
 interface DocCardProps {
