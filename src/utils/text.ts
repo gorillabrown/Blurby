@@ -18,6 +18,44 @@ export const MIN_FOCUS_TEXT_SIZE = 60;
 export const MAX_FOCUS_TEXT_SIZE = 200;
 export const FOCUS_TEXT_SIZE_STEP = 10;
 
+// Title case minor words that should stay lowercase (unless first/last word)
+const MINOR_WORDS = new Set([
+  "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",
+  "in", "on", "at", "to", "by", "of", "up", "as", "is", "it",
+  "from", "with", "into", "than", "that", "this",
+]);
+
+function toTitleCase(s: string): string {
+  const words = s.split(/\s+/);
+  return words.map((w, i) => {
+    if (i === 0 || i === words.length - 1) return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+    if (MINOR_WORDS.has(w.toLowerCase())) return w.toLowerCase();
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  }).join(" ");
+}
+
+export function formatDisplayTitle(s: string): string {
+  let t = s;
+  // Replace underscores with spaces (e.g. "Tradingoptionsfordummies_ebook" → "Tradingoptionsfordummies ebook")
+  t = t.replace(/_/g, " ");
+  // Replace "_ " with ": " (filesystem colon substitution)
+  // Already handled by above, but catch " : " double-space
+  t = t.replace(/\s{2,}/g, " ").trim();
+  // Insert spaces before capitals in camelCase/PascalCase runs (e.g. "TradingOptionsForDummies" → "Trading Options For Dummies")
+  t = t.replace(/([a-z])([A-Z])/g, "$1 $2");
+  // Fix ALL CAPS titles → Title Case (if more than 60% uppercase letters)
+  const letters = t.replace(/[^a-zA-Z]/g, "");
+  const upperCount = (letters.match(/[A-Z]/g) || []).length;
+  if (letters.length > 3 && upperCount / letters.length > 0.6) {
+    t = toTitleCase(t);
+  }
+  // Replace " - PersonName" with " | PersonName" at end
+  t = t.replace(/\s+-\s+([A-Z][a-z]+([\s.][A-Z][a-z]*)*)\s*$/, " | $1");
+  // Ensure first character is uppercase
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  return t;
+}
+
 export function tokenize(text: string | null | undefined): string[] {
   return (text || "").split(/\s+/).filter(Boolean);
 }

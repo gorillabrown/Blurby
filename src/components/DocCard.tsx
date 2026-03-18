@@ -1,9 +1,21 @@
-import { formatTime } from "../utils/text";
+import { formatTime, formatDisplayTitle } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import { bubbleCount } from "../utils/queue";
 import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
+
+const TYPE_COLORS: Record<string, string> = {
+  epub: "#5b8fb9",
+  pdf: "#c47882",
+  mobi: "#9b82c4",
+  azw3: "#6b9f6b",
+  txt: "#c4a882",
+  md: "#82c4a8",
+  html: "#5ba8a0",
+  htm: "#5ba8a0",
+  url: "#6b9fd4",
+};
 
 interface DocCardProps {
   doc: BlurbyDoc;
@@ -22,16 +34,6 @@ interface DocCardProps {
   onOpenNewWindow?: (doc: BlurbyDoc) => void;
 }
 
-function capitalizeFirst(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
-
-function formatTitle(s: string): string {
-  return s
-    .replace(/_ /g, ": ")   // Restore "_ " → ": " (filesystem colon replacement)
-    .replace(/\s+-\s+([A-Z][a-z]+([\s.][A-Z][a-z]*)*)\s*$/, " | $1");
-}
-
 export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
@@ -39,6 +41,7 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
   const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;
+  const typeColor = TYPE_COLORS[typeLabel] || "#c4a882";
 
   return (
     <div style={{ position: "relative" }} role="listitem">
@@ -53,9 +56,9 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
         <div className="doc-card-content">
           <div className="doc-card-header">
             {doc.favorite && <span className="doc-card-fav-star" title="Favorite">*</span>}
-            <span className="doc-card-title">{capitalizeFirst(formatTitle(doc.title))}</span>
+            <span className="doc-card-title">{formatDisplayTitle(doc.title)}</span>
             {doc.author && <span className="doc-card-author">{doc.author}</span>}
-            {typeLabel && <Badge color={doc.source === "url" ? "#6b9fd4" : "#c4a882"}>{typeLabel}</Badge>}
+            {typeLabel && <Badge color={typeColor}>{typeLabel}</Badge>}
             {doc.archived && <Badge color="var(--text-dimmer)">archived</Badge>}
             {isComplete && !doc.archived && <Badge color="var(--success)">done</Badge>}
           </div>

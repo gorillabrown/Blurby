@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { formatTime, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
+import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import { useTheme } from "./ThemeProvider";
 import AddEditPanel from "./AddEditPanel";
@@ -136,7 +136,7 @@ export default function LibraryView({
       }).slice(0, 8)
     : [];
 
-  const capitalizeFirst = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  // formatDisplayTitle imported from utils/text
 
   // Split filtered docs into reading now vs not started
   const readingNow = filteredLibrary.filter((d) => (d.position || 0) > 0 && (d.wordCount ? (d.position || 0) < d.wordCount : true));
@@ -384,7 +384,7 @@ export default function LibraryView({
                         className={`search-result-item${idx === searchIndex ? " search-result-active" : ""}`}
                         onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); setSearchIndex(-1); }}
                       >
-                        <span className="search-result-title">{capitalizeFirst(doc.title)}</span>
+                        <span className="search-result-title">{formatDisplayTitle(doc.title)}</span>
                         {doc.author && <span className="search-result-author">{doc.author}</span>}
                         <span className="search-result-meta">{doc.ext?.slice(1) || doc.source}</span>
                       </div>

@@ -1,19 +1,10 @@
 import { useState, useEffect } from "react";
 import { BlurbyDoc } from "../types";
+import { formatDisplayTitle } from "../utils/text";
 
 interface DocGridCardProps {
   doc: BlurbyDoc;
   onOpen: (doc: BlurbyDoc) => void;
-}
-
-function capitalizeFirst(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
-
-function formatTitle(s: string): string {
-  return s
-    .replace(/_ /g, ": ")
-    .replace(/\s+-\s+([A-Z][a-z]+([\s.][A-Z][a-z]*)*)\s*$/, " | $1");
 }
 
 export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
@@ -67,7 +58,7 @@ export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
         {doc.favorite && <div className="doc-grid-fav-star">*</div>}
       </div>
       <div className="doc-grid-info">
-        <div className="doc-grid-title">{capitalizeFirst(formatTitle(doc.title))}</div>
+        <div className="doc-grid-title">{formatDisplayTitle(doc.title)}</div>
         {doc.author && <div className="doc-grid-author">{doc.author}</div>}
       </div>
     </div>
