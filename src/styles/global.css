@@ -305,7 +305,7 @@ button, input, textarea, a, [role="button"] {
   top: 0;
   left: 0;
   right: 0;
-  padding: 16px 32px 16px;
+  padding: 16px 140px 16px 32px; /* Right padding clears Windows title bar buttons */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -904,6 +904,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 16px;
+  padding-right: 140px; /* Clear Windows title bar buttons */
 }
 
 /* ── Doc Card Favorites ───────────────────────────────────────────────────── */

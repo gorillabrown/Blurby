@@ -12,9 +12,10 @@ interface ScrollReaderViewProps {
   onAdjustFocusTextSize: (delta: number) => void;
   onExit: (position: number) => void;
   onProgressUpdate: (position: number) => void;
+  onSwitchToFocus?: () => void;
 }
 
-export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate }: ScrollReaderViewProps) {
+export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus }: ScrollReaderViewProps) {
   const words = tokenize(activeDoc.content || "");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPct, setScrollPct] = useState(0);
@@ -108,6 +109,11 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
             <span className="reader-font-label">{focusTextSize}%</span>
             <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP)} aria-label="Increase font size">A+</button>
           </div>
+          {onSwitchToFocus && (
+            <button className="btn reader-mode-btn" onClick={onSwitchToFocus} aria-label="Switch to focus reading mode">
+              focus mode
+            </button>
+          )}
           <span className="scroll-reader-page">{pct}%</span>
         </div>
       </div>

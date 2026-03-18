@@ -266,6 +266,10 @@ function AppInner() {
     api.saveSettings({ readingMode: "flow" });
   }, [playing, reader]);
 
+  const handleSwitchToFocus = useCallback(() => {
+    api.saveSettings({ readingMode: "focus" });
+  }, []);
+
   const adjustFocusTextSize = useCallback((delta: number) => {
     setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
   }, []);
@@ -340,6 +344,7 @@ function AppInner() {
               onAdjustFocusTextSize={adjustFocusTextSize}
               onExit={handleScrollExit}
               onProgressUpdate={handleScrollProgress}
+              onSwitchToFocus={handleSwitchToFocus}
             />
           </ErrorBoundary>
           {menuFlap}
