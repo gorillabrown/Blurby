@@ -38,8 +38,7 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
-  const sourceLabel = doc.source === "url" ? "url" : doc.source === "folder" ? "file" : "";
-  const formatLabel = doc.ext ? doc.ext.slice(1) : "";
+  const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;
 
   return (
     <div style={{ position: "relative" }} role="listitem">
@@ -56,12 +55,11 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
             {doc.favorite && <span className="doc-card-fav-star" title="Favorite">*</span>}
             <span className="doc-card-title">{capitalizeFirst(formatTitle(doc.title))}</span>
             {doc.author && <span className="doc-card-author">{doc.author}</span>}
-            {sourceLabel && <Badge color={doc.source === "url" ? "#6b9fd4" : "#c4a882"}>{sourceLabel}</Badge>}
+            {typeLabel && <Badge color={doc.source === "url" ? "#6b9fd4" : "#c4a882"}>{typeLabel}</Badge>}
             {doc.archived && <Badge color="var(--text-dimmer)">archived</Badge>}
             {isComplete && !doc.archived && <Badge color="var(--success)">done</Badge>}
           </div>
           <div className="doc-card-meta">
-            {formatLabel && <span>{formatLabel}</span>}
             <span>{wordCount.toLocaleString()} words</span>
             <span>{readTime}</span>
             <span className="bubble-progress">
