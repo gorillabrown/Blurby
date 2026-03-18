@@ -554,6 +554,152 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 
 ---
 
+## Phase 11 — Highlight Quick-Menu (Save & Define)
+
+Interactive word/phrase selection menu in the reader for saving highlights and looking up definitions.
+
+### 11.1 Text Selection & Quick Menu
+
+**Trigger:** Long-press (500ms) or double-click on a word in the paused reader view (flow or focus pause text). In focus (RSVP) mode while playing, pressing `H` highlights the current word.
+
+**UI:** A small floating pill menu appears directly above the selected word/phrase:
+
+```
+┌──────────────────────────┐
+│  📌 Save  │  📖 Define  │
+└──────────────────────────┘
+         ▼ (caret)
+      [selected word]
+```
+
+- Positioned with CSS `position: absolute` relative to the word span
+- Caret/arrow pointing down to the selected word
+- Dismiss on click-outside, Escape, or any playback action
+- Menu floats above bottom bar (z-index above progress bar)
+
+**Selection modes:**
+- **Single word:** Double-click or long-press on one word
+- **Phrase:** Click-drag to select a range of words (up to ~10 words)
+- **RSVP current word:** Press `H` during playback to select/save the current word without pausing
+
+### 11.2 Save Action
+
+**Behavior:** Clicking "Save" appends the highlighted text + context to a Markdown notebook file.
+
+**File location:** `<source-folder>/Blurby Highlights.md` (created automatically on first save)
+
+**Format per entry:**
+```markdown
+---
+
+> "highlighted word or phrase"
+
+— *Document Title*, position 1234/5678 (22%)
+Saved: 2026-03-18 14:30
+
+```
+
+**Implementation:**
+- [ ] IPC handler `save-highlight` in `main.js`:
+  - Params: `{ docId, text, context, wordIndex, totalWords }`
+  - Appends to `<sourceFolder>/Blurby Highlights.md` using `fs.promises.appendFile`
+  - Creates the file with a header (`# Blurby Highlights\n\n`) if it doesn't exist
+  - Returns `{ ok: true }` or `{ error: string }`
+- [ ] Expose `saveHighlight` in `preload.js`
+- [ ] Brief toast confirmation: "Saved to highlights" (1.5s auto-dismiss)
+- [ ] If no source folder is selected, save to `<userData>/highlights.md` instead
+- [ ] Highlight file is a regular watched folder file — it appears in the library and can be read
+
+### 11.3 Define Action
+
+**Behavior:** Clicking "Define" shows an inline definition popup below the quick menu.
+
+**Dictionary source:** Free Dictionary API (`https://api.dictionaryapi.dev/api/v2/entries/en/<word>`)
+- No API key required
+- Returns phonetic, part of speech, definitions, examples, synonyms
+- Fallback for offline/error: "Definition unavailable — check your connection"
+
+**Definition popup UI:**
+```
+┌────────────────────────────────────┐
+│  ephemeral  /ɪˈfɛm.ər.əl/        │
+│  adjective                         │
+│  lasting for a very short time     │
+│  "fashions are ephemeral"          │
+│                                    │
+│  Synonyms: transient, fleeting     │
+│  ──────────────────────            │
+│  [Save word]  [Close]              │
+└────────────────────────────────────┘
+```
+
+**Implementation:**
+- [ ] IPC handler `define-word` in `main.js`:
+  - Makes HTTPS request to Free Dictionary API
+  - Parses response: phonetic, meanings[0] (part of speech, definition, example, synonyms)
+  - Returns `{ word, phonetic, partOfSpeech, definition, example, synonyms }` or `{ error }`
+  - Caches results in-memory (Map, max 500 entries, LRU eviction)
+- [ ] Expose `defineWord` in `preload.js`
+- [ ] `DefinitionPopup.tsx` component:
+  - Loading state (skeleton)
+  - Error state ("Definition unavailable")
+  - Renders phonetic, part of speech, definition, example, synonyms
+  - "Save word" button appends to highlights file with definition included
+  - "Close" button or click-outside dismisses
+- [ ] Definition popup positioned below the quick menu, max-width 360px
+- [ ] For phrases (multiple words), only look up the first word or show "Select a single word for definition"
+
+### 11.4 Quick Menu Component
+
+- [ ] `HighlightMenu.tsx` — floating menu component
+  - Props: `{ word, phrase, position: {x, y}, onSave, onDefine, onClose }`
+  - Renders pill menu at calculated position
+  - Save and Define buttons
+  - Keyboard: `S` for save, `D` for define, `Esc` to close
+- [ ] CSS styles in `global.css`:
+  - `.highlight-menu` — floating pill, dark bg, rounded, shadow
+  - `.highlight-menu-btn` — menu action buttons
+  - `.definition-popup` — definition card below menu
+  - E-ink theme overrides (borders, no shadows)
+- [ ] Wire into `ReaderView.tsx` (pause text) and `ScrollReaderView.tsx`
+- [ ] State management: `selectedWord`, `menuPosition`, `showDefinition` in reader components
+
+### 11.5 Highlights Review
+
+- [ ] Highlights file is a standard Markdown file in the watched folder — appears in library automatically
+- [ ] Add "Highlights" badge to the document card when filename matches `Blurby Highlights.md`
+- [ ] Future: dedicated highlights browser panel (post-MVP, not in this phase)
+
+### 11.6 Keyboard Shortcuts
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `H` | RSVP playing | Save current word to highlights (no pause) |
+| `H` | Paused, word selected | Open quick menu for selected word |
+| `S` | Quick menu open | Save highlighted text |
+| `D` | Quick menu open | Define highlighted word |
+| `Esc` | Quick menu/definition open | Close popup |
+
+### 11.7 Data Flow
+
+```
+User selects word → HighlightMenu appears
+  ├─ Save → IPC save-highlight → appendFile → toast "Saved"
+  └─ Define → IPC define-word → API fetch → DefinitionPopup
+                                               └─ Save word → IPC save-highlight (with definition)
+```
+
+### 11.8 Testing
+
+- [ ] Unit test: highlight markdown formatting (text.test.ts)
+- [ ] Unit test: definition API response parsing
+- [ ] Manual test: save highlight, verify Blurby Highlights.md content
+- [ ] Manual test: define word, verify popup renders correctly
+- [ ] Manual test: offline define gracefully degrades
+- [ ] Manual test: H key during RSVP saves without pausing
+
+---
+
 ## Someday — Code Signing
 
 - [ ] Research and obtain Windows code signing certificate (DigiCert/Sectigo OV or Azure Trusted Signing)
