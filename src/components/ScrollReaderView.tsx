@@ -4,6 +4,58 @@ import { calculatePauseMs } from "../utils/rhythm";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
 
+const BLOCK_THRESHOLD = 200; // virtualize when > 200 paragraphs
+const BLOCK_WINDOW = 60;    // render 60 blocks at a time
+
+function VirtualScrollText({ displayBlocks, scale, spacing, scrollRef }: {
+  displayBlocks: string[];
+  scale: number;
+  spacing?: { line?: number; character?: number; word?: number };
+  scrollRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: Math.min(BLOCK_WINDOW, displayBlocks.length) });
+  const useVirtual = displayBlocks.length > BLOCK_THRESHOLD;
+
+  useEffect(() => {
+    if (!useVirtual) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = () => {
+      const scrollFraction = el.scrollHeight > el.clientHeight
+        ? el.scrollTop / (el.scrollHeight - el.clientHeight)
+        : 0;
+      const centerBlock = Math.floor(scrollFraction * displayBlocks.length);
+      const half = Math.floor(BLOCK_WINDOW / 2);
+      const start = Math.max(0, centerBlock - half);
+      const end = Math.min(displayBlocks.length, centerBlock + half);
+      setVisibleRange((prev) => {
+        if (prev.start === start && prev.end === end) return prev;
+        return { start, end };
+      });
+    };
+    el.addEventListener("scroll", observer, { passive: true });
+    return () => el.removeEventListener("scroll", observer);
+  }, [useVirtual, displayBlocks.length, scrollRef]);
+
+  const estBlockHeight = 24 * scale * (spacing?.line || 1.8);
+  const blocks = useVirtual ? displayBlocks.slice(visibleRange.start, visibleRange.end) : displayBlocks;
+
+  return (
+    <div className="scroll-reader-text" style={{
+      fontSize: `${18 * scale}px`,
+      lineHeight: spacing?.line || undefined,
+      letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+      wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+    }}>
+      {useVirtual && <div style={{ height: visibleRange.start * estBlockHeight }} aria-hidden="true" />}
+      {blocks.map((block, i) => (
+        <p key={useVirtual ? visibleRange.start + i : i} className="scroll-reader-paragraph">{block}</p>
+      ))}
+      {useVirtual && <div style={{ height: (displayBlocks.length - visibleRange.end) * estBlockHeight }} aria-hidden="true" />}
+    </div>
+  );
+}
+
 interface ScrollReaderViewProps {
   activeDoc: BlurbyDoc & { content: string };
   wpm: number;
@@ -254,16 +306,12 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
             );
           })()
         ) : (
-          <div className="scroll-reader-text" style={{
-            fontSize: `${18 * scale}px`,
-            lineHeight: spacing?.line || undefined,
-            letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
-            wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
-          }}>
-            {displayBlocks.map((block, i) => (
-              <p key={i} className="scroll-reader-paragraph">{block}</p>
-            ))}
-          </div>
+          <VirtualScrollText
+            displayBlocks={displayBlocks}
+            scale={scale}
+            spacing={spacing}
+            scrollRef={scrollRef}
+          />
         )}
       </div>
 
