@@ -64,6 +64,7 @@ export default function LibraryView({
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
   const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
@@ -123,6 +124,16 @@ export default function LibraryView({
   const archivedCount = library.filter((d) => d.archived).length;
   const articleCount = activeLibrary.filter(isArticle).length;
   const bookCount = activeLibrary.filter(isBook).length;
+
+  // Live search results (limited to 8 for the dropdown)
+  const searchResults = searchQuery
+    ? library.filter((d) => {
+        const q = searchQuery.toLowerCase();
+        return d.title.toLowerCase().includes(q) || (d.author || "").toLowerCase().includes(q);
+      }).slice(0, 8)
+    : [];
+
+  const capitalizeFirst = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 
   // Split filtered docs into reading now vs not started
   const readingNow = filteredLibrary.filter((d) => (d.position || 0) > 0 && (d.wordCount ? (d.position || 0) < d.wordCount : true));
@@ -326,15 +337,37 @@ export default function LibraryView({
 
         {/* Search bar and sort */}
         {library.length > 3 && (
-          <div className="library-search-wrap" style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input
-              placeholder="Filter sources..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="library-search"
-              style={{ flex: 1 }}
-              aria-label="Filter library"
-            />
+          <div className="library-search-wrap">
+            <div className="search-container">
+              <input
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                className="library-search"
+                aria-label="Search library"
+              />
+              {searchQuery && searchFocused && (
+                <div className="search-dropdown">
+                  {searchResults.length > 0 ? (
+                    searchResults.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="search-result-item"
+                        onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); }}
+                      >
+                        <span className="search-result-title">{capitalizeFirst(doc.title)}</span>
+                        {doc.author && <span className="search-result-author">{doc.author}</span>}
+                        <span className="search-result-meta">{doc.ext?.slice(1) || doc.source}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="search-result-empty">No results</div>
+                  )}
+                </div>
+              )}
+            </div>
             <select
               className="sort-select"
               value={sortBy}
