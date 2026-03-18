@@ -1291,8 +1291,8 @@ function registerIPC() {
             outputDir: settings.sourceFolder,
           });
 
-          // Transition doc from url to folder source
-          newDoc.source = "folder";
+          // Save PDF but keep source as "url" for badge display
+          newDoc.source = "url";
           newDoc.filepath = pdfPath;
           newDoc.filename = path.basename(pdfPath);
           newDoc.ext = ".pdf";
@@ -1318,6 +1318,7 @@ function registerIPC() {
 
   // Drag-and-drop: import files — copy to source folder if available, otherwise store as manual
   ipcMain.handle("import-dropped-files", async (_, filePaths) => {
+    console.log("[drop] Importing", filePaths.length, "files, sourceFolder:", settings.sourceFolder?.slice(-30));
     const imported = [];
     const rejected = [];
     for (const fp of filePaths) {
@@ -1413,6 +1414,7 @@ function registerIPC() {
 
   ipcMain.handle("rescan-folder", async () => {
     if (!settings.sourceFolder) return { error: "No source folder selected" };
+    console.log("[rescan] Starting rescan of:", settings.sourceFolder);
     try {
       const files = await scanFolderAsync(settings.sourceFolder);
       const docs = getLibrary();
@@ -1434,7 +1436,9 @@ function registerIPC() {
               }
             }
             if (!prev.coverPath) {
+              console.log("[rescan] Extracting cover for:", prev.title?.slice(0, 40));
               updates.coverPath = await extractEpubCover(file.filepath, prev.id);
+              console.log("[rescan] Cover result:", updates.coverPath ? "saved" : "not found");
             }
           }
           synced.push(updates);
@@ -1482,7 +1486,7 @@ function registerIPC() {
             });
             synced.push({
               ...doc,
-              source: "folder",
+              source: "url",  // Keep as URL source for badge display
               filepath: pdfPath,
               filename: path.basename(pdfPath),
               ext: ".pdf",
