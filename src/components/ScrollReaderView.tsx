@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState, useCallback } from "react";
-import { tokenize, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import { tokenize, tokenizeWithMeta, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { calculatePauseMs } from "../utils/rhythm";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
 
@@ -18,20 +19,33 @@ interface ScrollReaderViewProps {
 }
 
 export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, settings, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap }: ScrollReaderViewProps) {
-  const words = tokenize(activeDoc.content || "");
+  const { words, paragraphBreaks } = useMemo(
+    () => tokenizeWithMeta(activeDoc.content || ""),
+    [activeDoc.content]
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPct, setScrollPct] = useState(0);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Split content into paragraphs for natural rendering
-  const paragraphs = (activeDoc.content || "").split(/\n{2,}/).filter((p) => p.trim());
-  // If no paragraph breaks, split on single newlines
-  const displayBlocks = paragraphs.length > 1
-    ? paragraphs
-    : (activeDoc.content || "").split(/\n/).filter((p) => p.trim());
+  // Flow mode state
+  const [flowPlaying, setFlowPlaying] = useState(false);
+  const [flowWordIndex, setFlowWordIndex] = useState(activeDoc.position || 0);
+  const flowAccRef = useRef(0);
+  const flowRafRef = useRef<number | null>(null);
+  const flowLastTimeRef = useRef(0);
+  const flowWordRef = useRef<HTMLSpanElement | null>(null);
+  const flowWordIndexRef = useRef(flowWordIndex);
 
-  const wordPosition = Math.round(scrollPct * words.length);
-  const clampedPosition = Math.min(wordPosition, Math.max(0, words.length - 1));
+  // Split content into paragraphs for natural rendering (passive scroll)
+  const displayBlocks = useMemo(() => {
+    const paragraphs = (activeDoc.content || "").split(/\n{2,}/).filter((p) => p.trim());
+    return paragraphs.length > 1
+      ? paragraphs
+      : (activeDoc.content || "").split(/\n/).filter((p) => p.trim());
+  }, [activeDoc.content]);
+
+  const currentPosition = flowPlaying || flowWordIndex > 0 ? flowWordIndex : Math.round(scrollPct * words.length);
+  const clampedPosition = Math.min(currentPosition, Math.max(0, words.length - 1));
   const pct = words.length > 0 ? Math.round((clampedPosition / words.length) * 100) : 0;
   const remaining = formatTime(Math.max(0, words.length - clampedPosition), wpm);
 
@@ -42,7 +56,6 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   useEffect(() => {
     const el = scrollRef.current;
     if (!el || !words.length) return;
-    // Wait a frame for content to render
     requestAnimationFrame(() => {
       const startPct = (activeDoc.position || 0) / words.length;
       const maxScroll = el.scrollHeight - el.clientHeight;
@@ -52,25 +65,78 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     });
   }, []); // only on mount
 
-  // Track scroll position for progress
+  // Track scroll position for progress (passive scroll mode)
   const handleScroll = useCallback(() => {
+    if (flowPlaying) return; // Don't track scroll when flow is active
     const el = scrollRef.current;
     if (!el) return;
     const maxScroll = el.scrollHeight - el.clientHeight;
-    if (maxScroll <= 0) {
-      setScrollPct(0);
-      return;
-    }
+    if (maxScroll <= 0) { setScrollPct(0); return; }
     const pct = Math.min(1, Math.max(0, el.scrollTop / maxScroll));
     setScrollPct(pct);
 
-    // Debounce progress save
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const pos = Math.round(pct * words.length);
       onProgressUpdate(pos);
     }, 300);
-  }, [words.length, onProgressUpdate]);
+  }, [words.length, onProgressUpdate, flowPlaying]);
+
+  // Flow mode RAF tick
+  const flowTick = useCallback((timestamp: number) => {
+    if (!flowLastTimeRef.current) flowLastTimeRef.current = timestamp;
+    const delta = timestamp - flowLastTimeRef.current;
+    flowLastTimeRef.current = timestamp;
+
+    flowAccRef.current += delta;
+    const interval = 60000 / wpm;
+
+    const currentWord = words[flowWordIndexRef.current] || "";
+    const extraPause = settings?.rhythmPauses
+      ? calculatePauseMs(currentWord, settings.rhythmPauses, settings?.punctuationPauseMs || 1000, paragraphBreaks.has(flowWordIndexRef.current))
+      : 0;
+    const effectiveInterval = interval + extraPause;
+
+    if (flowAccRef.current >= effectiveInterval) {
+      flowAccRef.current -= effectiveInterval;
+      const next = flowWordIndexRef.current + 1;
+      if (next >= words.length) {
+        setFlowPlaying(false);
+      } else {
+        flowWordIndexRef.current = next;
+        setFlowWordIndex(next);
+      }
+    }
+
+    flowRafRef.current = requestAnimationFrame(flowTick);
+  }, [wpm, words, settings?.rhythmPauses, settings?.punctuationPauseMs, paragraphBreaks]);
+
+  // Start/stop flow loop
+  useEffect(() => {
+    if (flowPlaying) {
+      flowLastTimeRef.current = 0;
+      flowAccRef.current = 0;
+      flowRafRef.current = requestAnimationFrame(flowTick);
+    } else if (flowRafRef.current) {
+      cancelAnimationFrame(flowRafRef.current);
+      flowRafRef.current = null;
+    }
+    return () => { if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current); };
+  }, [flowPlaying, flowTick]);
+
+  // Auto-scroll to keep highlighted word visible during flow
+  useEffect(() => {
+    if (flowPlaying && flowWordRef.current) {
+      flowWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [flowWordIndex, flowPlaying]);
+
+  // Save flow progress
+  useEffect(() => {
+    if (flowPlaying && flowWordIndex > 0) {
+      onProgressUpdate(flowWordIndex);
+    }
+  }, [flowWordIndex, flowPlaying, onProgressUpdate]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -78,9 +144,16 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       if (e.key === "Tab") {
         e.preventDefault();
         onToggleFlap?.();
+      } else if (e.code === "Space" && e.shiftKey) {
+        e.preventDefault();
+        setFlowPlaying((prev) => !prev);
+      } else if (e.code === "Space" && !e.shiftKey) {
+        e.preventDefault();
+        onSwitchToFocus?.();
       } else if (e.code === "Escape") {
         e.preventDefault();
-        onExit(clampedPosition);
+        if (flowPlaying) setFlowPlaying(false);
+        else onExit(clampedPosition);
       } else if (e.code === "Equal" || e.code === "NumpadAdd") {
         e.preventDefault();
         onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP);
@@ -88,18 +161,19 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         e.preventDefault();
         onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP);
       }
-      // Let arrow keys / space / page up/down work naturally for scrolling
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap]);
+  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap, onSwitchToFocus, flowPlaying]);
 
-  // Cleanup save timer
+  // Cleanup
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
   }, []);
+
+  const isFlowActive = flowPlaying || flowWordIndex > 0;
 
   return (
     <div className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32 }}>
@@ -110,9 +184,16 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
           <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>
         </div>
         <div className="scroll-reader-top-right">
+          <button
+            className={`btn reader-mode-btn${flowPlaying ? " active" : ""}`}
+            onClick={() => setFlowPlaying((prev) => !prev)}
+            aria-label={flowPlaying ? "Pause flow reading" : "Start flow reading"}
+          >
+            {flowPlaying ? "pause" : "flow"}
+          </button>
           <div className="reader-font-controls">
             <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP)} aria-label="Decrease font size">A-</button>
-            <span className="reader-font-label">{focusTextSize}%</span>
+            <span className="reader-font-label">{Math.round(scale * 100)}%</span>
             <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP)} aria-label="Increase font size">A+</button>
           </div>
           {onSwitchToFocus && (
@@ -134,16 +215,36 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
           if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
         }}
       >
-        <div className="scroll-reader-text" style={{
-          fontSize: `${18 * scale}px`,
-          lineHeight: spacing?.line || undefined,
-          letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
-          wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
-        }}>
-          {displayBlocks.map((block, i) => (
-            <p key={i} className="scroll-reader-paragraph">{block}</p>
-          ))}
-        </div>
+        {isFlowActive ? (
+          <div className="scroll-reader-text flow-text" style={{
+            fontSize: `${18 * scale}px`,
+            lineHeight: spacing?.line || undefined,
+            letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+            wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+          }}>
+            {words.map((word, i) => (
+              <span
+                key={i}
+                ref={i === flowWordIndex ? flowWordRef : undefined}
+                className={i === flowWordIndex ? "flow-word-active" : ""}
+                onClick={() => { flowWordIndexRef.current = i; setFlowWordIndex(i); }}
+              >
+                {word}{" "}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="scroll-reader-text" style={{
+            fontSize: `${18 * scale}px`,
+            lineHeight: spacing?.line || undefined,
+            letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+            wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+          }}>
+            {displayBlocks.map((block, i) => (
+              <p key={i} className="scroll-reader-paragraph">{block}</p>
+            ))}
+          </div>
+        )}
       </div>
 
       {settings?.readingRuler && (
@@ -155,7 +256,9 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         <ProgressBar current={clampedPosition} total={words.length} />
         <div className="reader-bottom-info">
           <span>{pct}%</span>
-          <span className="scroll-reader-hint">scroll to read &middot; Esc to exit &middot; +/- font</span>
+          <span className="scroll-reader-hint">
+            {flowPlaying ? "Shift+Space pause" : "Shift+Space flow"} &middot; Space focus &middot; Esc exit
+          </span>
           <span>{remaining} left</span>
         </div>
       </div>
