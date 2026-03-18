@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
+import ReadingQueue from "./ReadingQueue";
 
 type FlapView = "queue" | "settings" | string;
 
@@ -52,6 +53,14 @@ export default function MenuFlap({
   const handleCompactToggle = useCallback(() => {
     onSettingsChange({ compactMode: !settings.compactMode });
   }, [onSettingsChange, settings.compactMode]);
+
+  const handleDocClick = useCallback(
+    (docId: string) => {
+      onOpenDoc(docId);
+      onClose();
+    },
+    [onOpenDoc, onClose]
+  );
 
   const isOnQueue = view === "queue";
   const isOnSettings = !isOnQueue;
@@ -138,7 +147,11 @@ export default function MenuFlap({
 
         <div className="menu-flap-body">
           {isOnQueue ? (
-            <div>Reading Queue (Task 5)</div>
+            <ReadingQueue
+              docs={docs}
+              compact={settings.compactMode}
+              onDocClick={handleDocClick}
+            />
           ) : (
             <div>Settings Menu (Task 6)</div>
           )}
