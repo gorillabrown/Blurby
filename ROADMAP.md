@@ -505,7 +505,7 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 
 ---
 
-## Phase 9 — Highlight Quick-Menu (Save & Define)
+## Phase 9 — Highlight Quick-Menu (Save & Define) ✅
 
 Interactive word/phrase selection menu in the reader for saving highlights and looking up definitions.
 
@@ -551,15 +551,15 @@ Saved: 2026-03-18 14:30
 ```
 
 **Implementation:**
-- [ ] IPC handler `save-highlight` in `main.js`:
-  - Params: `{ docId, text, context, wordIndex, totalWords }`
+- [x] IPC handler `save-highlight` in `main.js`:
+  - Params: `{ docTitle, text, wordIndex, totalWords }`
   - Appends to `<sourceFolder>/Blurby Highlights.md` using `fs.promises.appendFile`
   - Creates the file with a header (`# Blurby Highlights\n\n`) if it doesn't exist
   - Returns `{ ok: true }` or `{ error: string }`
-- [ ] Expose `saveHighlight` in `preload.js`
-- [ ] Brief toast confirmation: "Saved to highlights" (1.5s auto-dismiss)
-- [ ] If no source folder is selected, save to `<userData>/highlights.md` instead
-- [ ] Highlight file is a regular watched folder file — it appears in the library and can be read
+- [x] Expose `saveHighlight` in `preload.js`
+- [x] Brief toast confirmation: "Saved to highlights" (1.6s auto-dismiss)
+- [x] If no source folder is selected, save to `<userData>/highlights.md` instead
+- [x] Highlight file is a regular watched folder file — it appears in the library and can be read
 
 ### 9.3 Define Action
 
@@ -585,40 +585,40 @@ Saved: 2026-03-18 14:30
 ```
 
 **Implementation:**
-- [ ] IPC handler `define-word` in `main.js`:
+- [x] IPC handler `define-word` in `main.js`:
   - Makes HTTPS request to Free Dictionary API
   - Parses response: phonetic, meanings[0] (part of speech, definition, example, synonyms)
   - Returns `{ word, phonetic, partOfSpeech, definition, example, synonyms }` or `{ error }`
   - Caches results in-memory (Map, max 500 entries, LRU eviction)
-- [ ] Expose `defineWord` in `preload.js`
-- [ ] `DefinitionPopup.tsx` component:
+- [x] Expose `defineWord` in `preload.js`
+- [x] `DefinitionPopup.tsx` component:
   - Loading state (skeleton)
   - Error state ("Definition unavailable")
   - Renders phonetic, part of speech, definition, example, synonyms
   - "Save word" button appends to highlights file with definition included
   - "Close" button or click-outside dismisses
-- [ ] Definition popup positioned below the quick menu, max-width 360px
-- [ ] For phrases (multiple words), only look up the first word or show "Select a single word for definition"
+- [x] Definition popup positioned below the quick menu, max-width 320px
+- [x] `parseDefinitionResponse()` extracted as testable pure function
 
 ### 9.4 Quick Menu Component
 
-- [ ] `HighlightMenu.tsx` — floating menu component
+- [x] `HighlightMenu.tsx` — floating pill menu component
   - Props: `{ word, phrase, position: {x, y}, onSave, onDefine, onClose }`
   - Renders pill menu at calculated position
   - Save and Define buttons
   - Keyboard: `S` for save, `D` for define, `Esc` to close
-- [ ] CSS styles in `global.css`:
+- [x] CSS styles in `global.css`:
   - `.highlight-menu` — floating pill, dark bg, rounded, shadow
   - `.highlight-menu-btn` — menu action buttons
   - `.definition-popup` — definition card below menu
   - E-ink theme overrides (borders, no shadows)
-- [ ] Wire into `ReaderView.tsx` (pause text) and `ScrollReaderView.tsx`
-- [ ] State management: `selectedWord`, `menuPosition`, `showDefinition` in reader components
+- [x] Wire into `ReaderView.tsx` (pause text) and `ScrollReaderView.tsx`
+- [x] State management: `highlightWord`, `highlightPos`, `showDefinition` in reader components
 
 ### 9.5 Highlights Review
 
-- [ ] Highlights file is a standard Markdown file in the watched folder — appears in library automatically
-- [ ] Add "Highlights" badge to the document card when filename matches `Blurby Highlights.md`
+- [x] Highlights file is a standard Markdown file in the watched folder — appears in library automatically
+- [x] "Highlights" badge on document card when filename contains "Blurby Highlights"
 - [ ] Future: dedicated highlights browser panel (post-MVP, not in this phase)
 
 ### 9.6 Keyboard Shortcuts
@@ -642,8 +642,8 @@ User selects word → HighlightMenu appears
 
 ### 9.8 Testing
 
-- [ ] Unit test: highlight markdown formatting (text.test.ts)
-- [ ] Unit test: definition API response parsing
+- [x] Unit test: `formatHighlightEntry` — 10 tests covering formatting, edge cases, date padding
+- [x] Unit test: `parseDefinitionResponse` — 8 tests covering valid response, errors, missing fields
 - [ ] Manual test: save highlight, verify Blurby Highlights.md content
 - [ ] Manual test: define word, verify popup renders correctly
 - [ ] Manual test: offline define gracefully degrades

@@ -253,6 +253,38 @@ async function readFileContentAsync(filepath) {
   try { return await fsPromises.readFile(filepath, "utf-8"); } catch { return null; }
 }
 
+// ── Highlight Formatting (pure, testable) ──────────────────────────────────
+function formatHighlightEntry(text, docTitle, wordIndex, totalWords, date) {
+  const pct = totalWords > 0 ? Math.round((wordIndex / totalWords) * 100) : 0;
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return (
+    `---\n\n> "${text}"\n\n` +
+    `— *${docTitle}*, position ${wordIndex}/${totalWords} (${pct}%)\n` +
+    `Saved: ${yyyy}-${mm}-${dd} ${hh}:${min}\n\n`
+  );
+}
+
+function parseDefinitionResponse(data, word) {
+  if (!Array.isArray(data) || data.length === 0) {
+    return { error: data?.title || "No definition found" };
+  }
+  const entry = data[0];
+  const meaning = entry.meanings?.[0];
+  const def = meaning?.definitions?.[0];
+  return {
+    word: entry.word || word,
+    phonetic: entry.phonetic || undefined,
+    partOfSpeech: meaning?.partOfSpeech || undefined,
+    definition: def?.definition || undefined,
+    example: def?.example || undefined,
+    synonyms: (meaning?.synonyms || []).slice(0, 5),
+  };
+}
+
 // ── MOBI/PDB Parser ────────────────────────────────────────────────────────
 function parseMobiContent(buffer) {
   try {
@@ -1635,18 +1667,7 @@ function registerIPC() {
         await fsPromises.writeFile(highlightPath, "# Blurby Highlights\n\n");
       }
 
-      const pct = totalWords > 0 ? Math.round((wordIndex / totalWords) * 100) : 0;
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const mm = String(now.getMonth() + 1).padStart(2, "0");
-      const dd = String(now.getDate()).padStart(2, "0");
-      const hh = String(now.getHours()).padStart(2, "0");
-      const min = String(now.getMinutes()).padStart(2, "0");
-
-      const entry =
-        `---\n\n> "${text}"\n\n` +
-        `— *${docTitle}*, position ${wordIndex}/${totalWords} (${pct}%)\n` +
-        `Saved: ${yyyy}-${mm}-${dd} ${hh}:${min}\n\n`;
+      const entry = formatHighlightEntry(text, docTitle, wordIndex, totalWords, new Date());
 
       await fsPromises.appendFile(highlightPath, entry);
       return { ok: true };
@@ -1683,22 +1704,8 @@ function registerIPC() {
         });
       });
 
-      if (!Array.isArray(data) || data.length === 0) {
-        return { error: data?.title || "No definition found" };
-      }
-
-      const entry = data[0];
-      const meaning = entry.meanings?.[0];
-      const def = meaning?.definitions?.[0];
-
-      const result = {
-        word: entry.word || word,
-        phonetic: entry.phonetic || undefined,
-        partOfSpeech: meaning?.partOfSpeech || undefined,
-        definition: def?.definition || undefined,
-        example: def?.example || undefined,
-        synonyms: (meaning?.synonyms || []).slice(0, 5),
-      };
+      const result = parseDefinitionResponse(data, word);
+      if (result.error) return result;
 
       // Cache with 500-entry limit (evict oldest)
       if (definitionCache.size >= 500) {
@@ -2232,3 +2239,8 @@ app.on("window-all-closed", () => {
 app.on("will-quit", () => {
   if (watcher) watcher.close();
 });
+
+// Export pure functions for testing
+if (typeof module !== "undefined") {
+  module.exports = { formatHighlightEntry, parseDefinitionResponse, palmDocDecompress };
+}

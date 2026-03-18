@@ -59,6 +59,7 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
             <span className="doc-card-title">{formatDisplayTitle(doc.title)}</span>
             {doc.author && <span className="doc-card-author">{doc.author}</span>}
             {typeLabel && <Badge color={typeColor}>{typeLabel}</Badge>}
+            {doc.filename?.toLowerCase().includes("blurby highlights") && <Badge color="var(--accent)">highlights</Badge>}
             {doc.archived && <Badge color="var(--text-dimmer)">archived</Badge>}
             {isComplete && !doc.archived && <Badge color="var(--success)">done</Badge>}
           </div>
