@@ -374,6 +374,21 @@ function openSiteLogin(siteUrl) {
       },
     });
 
+    // Ensure OAuth popups (Google, Apple, etc.) use the same session partition
+    loginWin.webContents.setWindowOpenHandler(({ url }) => {
+      return {
+        action: "allow",
+        overrideBrowserWindowOptions: {
+          width: 500, height: 700,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            partition: "persist:site-login",
+          },
+        },
+      };
+    });
+
     loginWin.setMenuBarVisibility(false);
     loginWin.loadURL(parsedUrl.origin);
 
