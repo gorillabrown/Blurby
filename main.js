@@ -6,6 +6,69 @@ const chokidar = require("chokidar");
 
 const { Readability } = require("@mozilla/readability");
 const { JSDOM } = require("jsdom");
+const PDFDocument = require("pdfkit");
+
+function sanitizeFilenameForPdf(name) {
+  return (name || "")
+    .replace(/[<>:"/\\|?*\x00-\x1f\s]/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100) || "untitled";
+}
+
+async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate, outputDir }) {
+  const safeName = sanitizeFilenameForPdf(title);
+  const savedArticlesDir = path.join(outputDir, "Saved Articles");
+  await fsPromises.mkdir(savedArticlesDir, { recursive: true });
+  const pdfPath = path.join(savedArticlesDir, `${safeName}.pdf`);
+
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({
+      info: {
+        Title: title,
+        Author: author || "Unknown",
+        Keywords: `source:${sourceUrl}`,
+        CreationDate: fetchDate,
+      },
+    });
+
+    const chunks = [];
+    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("end", async () => {
+      try {
+        await fsPromises.writeFile(pdfPath, Buffer.concat(chunks));
+        resolve(pdfPath);
+      } catch (err) {
+        reject(err);
+      }
+    });
+    doc.on("error", reject);
+
+    // Header
+    doc.fontSize(18).text(title, { align: "center" });
+    doc.moveDown(0.5);
+    if (author) {
+      doc.fontSize(11).fillColor("#666").text(`by ${author}`, { align: "center" });
+      doc.moveDown(0.3);
+    }
+    doc.fontSize(9).fillColor("#999").text(sourceUrl, { align: "center", link: sourceUrl });
+    doc.text(`Fetched: ${fetchDate.toLocaleDateString()}`, { align: "center" });
+    doc.moveDown(1.5);
+
+    // Body
+    doc.fontSize(11).fillColor("#333");
+    const paragraphs = content.split(/\n\n+/);
+    for (const para of paragraphs) {
+      const trimmed = para.trim();
+      if (trimmed) {
+        doc.text(trimmed, { align: "left", lineGap: 4 });
+        doc.moveDown(0.8);
+      }
+    }
+
+    doc.end();
+  });
+}
 
 const isDev = !app.isPackaged;
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf"];
@@ -304,8 +367,15 @@ async function syncLibraryWithFolder() {
     }
   }
 
+  const savedArticlesPath = settings.sourceFolder
+    ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
+    : null;
   for (const doc of docs) {
-    if (doc.source !== "folder") synced.push(doc);
+    if (doc.source !== "folder") {
+      synced.push(doc);
+    } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
+      synced.push(doc);
+    }
   }
 
   setLibrary(synced);
@@ -972,6 +1042,9 @@ function registerIPC() {
   });
 
   ipcMain.handle("add-doc-from-url", async (_, url) => {
+    if (!settings.sourceFolder) {
+      return { error: "A source folder must be selected before importing from URLs." };
+    }
     try {
       const siteKey = getSiteKey(url);
       const hasLogin = siteKey && siteCookies[siteKey] && siteCookies[siteKey].length > 0;
@@ -1005,6 +1078,36 @@ function registerIPC() {
       };
       getLibrary().unshift(newDoc);
       saveLibrary();
+
+      // Generate PDF if source folder is set
+      if (settings.sourceFolder) {
+        try {
+          const pdfPath = await generateArticlePdf({
+            title: newDoc.title,
+            author: result.author || null,
+            content: result.content,
+            sourceUrl: url,
+            fetchDate: new Date(),
+            outputDir: settings.sourceFolder,
+          });
+
+          // Transition doc from url to folder source
+          newDoc.source = "folder";
+          newDoc.filepath = pdfPath;
+          newDoc.filename = path.basename(pdfPath);
+          newDoc.ext = ".pdf";
+          delete newDoc.content;
+
+          // Update in library
+          const docs = getLibrary();
+          setLibrary(docs.map((d) => (d.id === newDoc.id ? newDoc : d)));
+          saveLibrary();
+        } catch (err) {
+          console.error("PDF generation failed, keeping URL-sourced doc:", err);
+          logToFile(`PDF generation error: ${err.message}`);
+        }
+      }
+
       return { doc: newDoc };
     } catch (err) {
       return { error: err.message || "Failed to fetch URL." };
