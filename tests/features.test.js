@@ -286,3 +286,31 @@ describe("Library sorting", () => {
     expect(sorted[2].id).toBe("2"); // created: 2000
   });
 });
+
+describe("bubbleCount edge cases", () => {
+  // Import from queue.ts
+  const { bubbleCount } = require("../src/utils/queue.ts");
+
+  it("returns 0 for 0% progress", () => {
+    expect(bubbleCount(0)).toBe(0);
+  });
+
+  it("handles negative progress", () => {
+    // bubbleCount uses Math.floor(pct/10), negative values produce negative counts
+    expect(bubbleCount(-5)).toBe(-1);
+  });
+
+  it("returns 10 for 100% progress", () => {
+    expect(bubbleCount(100)).toBe(10);
+  });
+
+  it("floors partial percentages", () => {
+    expect(bubbleCount(75)).toBe(7);
+    expect(bubbleCount(99)).toBe(9);
+  });
+
+  it("handles > 100%", () => {
+    // bubbleCount uses Math.floor(pct/10), so 150 → 15
+    expect(bubbleCount(150)).toBe(15);
+  });
+});

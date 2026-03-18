@@ -466,7 +466,7 @@ export default function LibraryView({
                 <div className="library-section-label">Reading Now</div>
                 <div className="doc-grid" role="list">
                   {readingNow.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} />
+                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc} />
                   ))}
                 </div>
               </>
@@ -476,7 +476,7 @@ export default function LibraryView({
                 <div className="library-section-label">Not Started</div>
                 <div className="doc-grid" role="list">
                   {notStarted.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} />
+                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc} />
                   ))}
                 </div>
               </>
@@ -550,8 +550,8 @@ export default function LibraryView({
               />
               <span className="launch-toggle-label">start at login</span>
             </label>
-            <button onClick={handleExport} className="btn library-change-folder" aria-label="Export library">export</button>
-            <button onClick={handleImport} className="btn library-change-folder" aria-label="Import library">import</button>
+            <button onClick={handleExport} className="btn library-change-folder" aria-label="Backup library">backup</button>
+            <button onClick={handleImport} className="btn library-change-folder" aria-label="Restore library">restore</button>
             {settings.sourceFolder && (
               <button onClick={onSelectFolder} className="btn library-change-folder">change folder</button>
             )}

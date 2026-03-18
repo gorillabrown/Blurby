@@ -5,9 +5,12 @@ import { formatDisplayTitle } from "../utils/text";
 interface DocGridCardProps {
   doc: BlurbyDoc;
   onOpen: (doc: BlurbyDoc) => void;
+  onToggleFavorite?: (id: string) => void;
+  onArchive?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
+export default function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,6 +61,23 @@ export default function DocGridCard({ doc, onOpen }: DocGridCardProps) {
         )}
         {isComplete && <div className="doc-grid-done-badge">done</div>}
         {doc.favorite && <div className="doc-grid-fav-star">*</div>}
+        <div className="doc-grid-actions">
+          {onToggleFavorite && (
+            <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(doc.id); }} title="Toggle favorite" aria-label="Toggle favorite">
+              {doc.favorite ? "★" : "☆"}
+            </button>
+          )}
+          {onArchive && (
+            <button onClick={(e) => { e.stopPropagation(); onArchive(doc.id); }} title="Archive" aria-label="Archive">
+              ▼
+            </button>
+          )}
+          {onDelete && (
+            <button onClick={(e) => { e.stopPropagation(); onDelete(doc.id); }} title="Delete" aria-label="Delete">
+              ✕
+            </button>
+          )}
+        </div>
       </div>
       <div className="doc-grid-info">
         <div className="doc-grid-title">{formatDisplayTitle(doc.title)}</div>

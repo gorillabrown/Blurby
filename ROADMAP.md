@@ -391,6 +391,46 @@ The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, 
 
 ---
 
+## Phase 6 — Sprint 2: Speed Reading Features & Flow Mode ✅
+
+### 6.1 Rhythm Pause Engine
+- [x] `calculatePauseMs()` in `src/utils/rhythm.ts` — granular pause types (commas, sentences, paragraphs, numbers, long words)
+- [x] `tokenizeWithMeta()` in `src/utils/text.ts` — paragraph boundary tracking
+- [x] Wire into useReader RAF tick loop with fallback to simple punctuation check
+- [x] All rhythm pause toggles functional in SpeedReadingSettings
+
+### 6.2 Focus Mode Enhancements
+- [x] Focus marks (▼▲) at ORP position with settings toggle
+- [x] Focus span variable opacity with slider control
+- [x] `calculateFocusOpacity()` in `src/utils/text.ts`
+
+### 6.3 Flow Mode
+- [x] Word-level rendering with accent-colored highlight
+- [x] RAF-based auto-advance loop with rhythm pause integration
+- [x] Auto-scroll to keep highlighted word centered
+- [x] Shift+Space toggle, click-to-jump, progress tracking
+
+### 6.4 Settings Controls
+- [x] Enable all SpeedReadingSettings (rhythm pauses, focus marks, reading ruler, focus span)
+- [x] Enable LayoutSettings (line, character, word spacing)
+- [x] Enable TextSizeSettings flow text size slider
+- [x] Reading ruler overlay in scroll/flow mode
+
+### 6.5 Keyboard Shortcuts
+- [x] Shift+Up/Down: coarse WPM ±100
+- [x] B: toggle favorite
+- [x] Shift+F: switch focus ↔ scroll mode
+- [x] Ctrl/Cmd+,: open settings
+- [x] All 15 shortcuts documented in HotkeyMapSettings
+
+### 6.6 UX Polish & Testing
+- [x] Rename export/import → backup/restore
+- [x] Grid card hover actions (favorite, archive, delete)
+- [x] Manual test checklist document
+- [x] Expanded unit tests (104+ passing)
+
+---
+
 ## Execution Notes
 
 - **Phases are sequential** — complete Phase 0 before starting Phase 1, etc.
