@@ -15,13 +15,16 @@ export function useReaderKeys(
   toggleFavorite?: () => void,
   switchMode?: () => void,
   prevChapter?: () => void,
-  nextChapter?: () => void
+  nextChapter?: () => void,
+  toggleNarration?: () => void
 ) {
   useEffect(() => {
     if (view !== "reader") return;
     const handler = (e: KeyboardEvent) => {
       // Tab toggles flap in any reader mode
       if (e.key === "Tab") { e.preventDefault(); toggleFlap?.(); return; }
+      // T toggles narration in any reader mode
+      if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); toggleNarration?.(); return; }
       // B toggles favorite in any reader mode
       if (e.code === "KeyB" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); toggleFavorite?.(); return; }
       // Shift+F toggles reading mode (focus ↔ scroll)
@@ -46,7 +49,7 @@ export function useReaderKeys(
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode, prevChapter, nextChapter]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode, prevChapter, nextChapter, toggleNarration]);
 }
 
 export function useGlobalKeys({ toggleFlap, openSettings, view }: { toggleFlap: () => void; openSettings?: () => void; view: string }) {

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenize, tokenizeWithMeta, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
+import useNarration from "./hooks/useNarration";
 import { BlurbyDoc } from "./types";
 import useLibrary from "./hooks/useLibrary";
 import useReader from "./hooks/useReader";
@@ -300,6 +301,24 @@ function AppInner() {
     setMenuFlapOpen(true);
   }, []);
 
+  // Narration (TTS)
+  const narration = useNarration();
+  const handleToggleNarration = useCallback(() => {
+    if (!activeDoc) return;
+    if (narration.speaking) {
+      narration.stop();
+    } else {
+      // Calculate character offset from word position
+      const textBefore = activeDoc.content.split(/\s+/).slice(0, wordIndex).join(" ");
+      const charOffset = textBefore.length;
+      narration.speak(activeDoc.content, charOffset, (charIdx) => {
+        // Estimate word index from character index
+        const wordsBeforeChar = activeDoc.content.slice(0, charIdx).split(/\s+/).filter(Boolean).length;
+        jumpToWord(wordsBeforeChar);
+      });
+    }
+  }, [activeDoc, narration, wordIndex, jumpToWord]);
+
   // Chapter navigation (uses chaptersFromCharOffsets or detectChapters)
   const handlePrevChapter = useCallback(() => {
     if (!activeDoc) return;
@@ -324,7 +343,7 @@ function AppInner() {
     if (curIdx < chs.length - 1) jumpToWord(chs[curIdx + 1].wordIndex);
   }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
 
-  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter);
+  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration);
   useGlobalKeys({ toggleFlap: toggleMenuFlap, openSettings: handleOpenSettings, view });
 
   // Smart Alt+V handler
