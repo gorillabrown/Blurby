@@ -614,45 +614,53 @@ function fetchWithBrowser(url) {
         nodeIntegration: false,
         contextIsolation: true,
         partition: "persist:site-login",
-        // Allow images/CSS to load so JS-rendered content works
-        images: true,
       },
     });
 
+    // Set a real browser user agent
+    win.webContents.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    );
+
     let resolved = false;
+    const cleanup = () => {
+      if (!win.isDestroyed()) win.destroy();
+    };
+
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        // Even on timeout, try to grab whatever rendered
+        // On timeout, grab whatever has rendered so far
         win.webContents.executeJavaScript("document.documentElement.outerHTML")
-          .then((html) => { win.destroy(); resolve(html); })
-          .catch(() => { win.destroy(); reject(new Error("Timed out loading page.")); });
+          .then((html) => { cleanup(); resolve(html); })
+          .catch(() => { cleanup(); reject(new Error("Timed out loading page.")); });
       }
-    }, 20000);
+    }, 25000);
 
     win.webContents.on("did-finish-load", () => {
-      // Wait for JS to render dynamic content
+      // Wait for JS frameworks to render dynamic content
       setTimeout(async () => {
         if (resolved) return;
         resolved = true;
         clearTimeout(timeout);
         try {
           const html = await win.webContents.executeJavaScript("document.documentElement.outerHTML");
-          win.destroy();
+          cleanup();
           resolve(html);
         } catch (err) {
-          win.destroy();
+          cleanup();
           reject(err);
         }
-      }, 3000); // 3s for JS to finish rendering
+      }, 4000);
     });
 
-    win.webContents.on("did-fail-load", (_event, errorCode, errorDesc) => {
-      if (!resolved) {
+    // Only reject on main frame failures, not sub-resources
+    win.webContents.on("did-fail-load", (_event, errorCode, errorDesc, validatedURL, isMainFrame) => {
+      if (isMainFrame && !resolved) {
         resolved = true;
         clearTimeout(timeout);
-        win.destroy();
-        reject(new Error(`Failed to load: ${errorDesc}`));
+        cleanup();
+        reject(new Error(`Failed to load page: ${errorDesc} (${errorCode})`));
       }
     });
 
