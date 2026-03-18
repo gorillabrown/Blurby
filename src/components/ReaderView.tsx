@@ -19,9 +19,10 @@ interface ReaderViewProps {
   onAdjustFocusTextSize: (delta: number) => void;
   onSwitchToScroll: () => void;
   onJumpToWord: (index: number) => void;
+  onToggleFlap?: () => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
@@ -92,6 +93,13 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           <span className="reader-doc-title">{activeDoc.title}</span>
         </div>
         <WpmGauge wpm={wpm} />
+        {onToggleFlap && (
+          <button className="hamburger-btn" onClick={(e) => { e.stopPropagation(); onToggleFlap(); }} aria-label="Open menu" title="Menu (Tab)">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       {playing ? (

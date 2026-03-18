@@ -3,7 +3,7 @@ import { tokenize, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MA
 import { BlurbyDoc } from "./types";
 import useLibrary from "./hooks/useLibrary";
 import useReader from "./hooks/useReader";
-import { useReaderKeys, useSmartImport } from "./hooks/useKeyboardShortcuts";
+import { useReaderKeys, useSmartImport, useGlobalKeys } from "./hooks/useKeyboardShortcuts";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ReaderView from "./components/ReaderView";
 import ScrollReaderView from "./components/ScrollReaderView";
@@ -11,6 +11,7 @@ import LibraryView from "./components/LibraryView";
 import DropZone from "./components/DropZone";
 import ImportConfirmDialog from "./components/ImportConfirmDialog";
 import { ThemeProvider } from "./components/ThemeProvider";
+import MenuFlap from "./components/MenuFlap";
 
 const api = window.electronAPI;
 
@@ -123,11 +124,15 @@ function AppInner() {
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
 
+  // MenuFlap state
+  const [menuFlapOpen, setMenuFlapOpen] = useState(false);
+  const toggleMenuFlap = useCallback(() => setMenuFlapOpen((prev) => !prev), []);
+
   // Smart import confirmation state
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
 
   const {
-    library, settings, loaded, platform, loadingContent, toast,
+    library, setLibrary, settings, loaded, platform, loadingContent, toast,
     addDoc, deleteDoc, resetProgress, selectFolder, switchFolder,
     loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
     toggleFavorite, archiveDoc, unarchiveDoc, showToast,
@@ -181,6 +186,17 @@ function AppInner() {
     setView("reader");
   }, [loadDocContent, initReader]);
 
+  const handleOpenDocById = useCallback(async (docId: string) => {
+    const doc = library.find((d) => d.id === docId);
+    if (!doc) return;
+    const updated = { ...doc, lastReadAt: Date.now() };
+    // Persist lastReadAt via saveLibrary
+    const updatedLibrary = library.map((d) => d.id === docId ? updated : d);
+    await api.saveLibrary(updatedLibrary);
+    setLibrary((prev) => prev.map((d) => d.id === docId ? updated : d));
+    openDoc(updated);
+  }, [library, openDoc]);
+
   const finishReading = useCallback((finalPos: number) => {
     if (activeDoc) {
       updateProgress(activeDoc.id, finalPos);
@@ -229,7 +245,8 @@ function AppInner() {
     setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
   }, []);
 
-  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize);
+  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap);
+  useGlobalKeys({ toggleFlap: toggleMenuFlap });
 
   // Smart Alt+V handler
   const handleSmartImport = useCallback((content: string, isUrl: boolean) => {
@@ -262,83 +279,112 @@ function AppInner() {
     }
   }, [importDroppedFiles]);
 
+  const handleSettingsChange = useCallback(async (updates: Partial<import("./types").BlurbySettings>) => {
+    await api.saveSettings(updates);
+  }, []);
+
   if (!loaded) {
     return <div className="loading-screen">loading...</div>;
   }
 
+  const menuFlap = (
+    <MenuFlap
+      open={menuFlapOpen}
+      onClose={() => setMenuFlapOpen(false)}
+      docs={library}
+      settings={settings}
+      onOpenDoc={handleOpenDocById}
+      onSettingsChange={handleSettingsChange}
+      siteLogins={[]}
+      onSiteLogin={async () => {}}
+      onSiteLogout={async () => {}}
+    />
+  );
+
   if (view === "reader" && activeDoc) {
     if (readerMode === "scroll") {
       return (
-        <ErrorBoundary onReset={() => { setView("library"); setActiveDoc(null); }}>
-          <ScrollReaderView
-            activeDoc={activeDoc}
-            wpm={wpm}
-            focusTextSize={focusTextSize}
-            isMac={platform === "darwin"}
-            onSetWpm={setWpm}
-            onAdjustFocusTextSize={adjustFocusTextSize}
-            onExit={handleScrollExit}
-            onProgressUpdate={handleScrollProgress}
-          />
-        </ErrorBoundary>
+        <>
+          <ErrorBoundary onReset={() => { setView("library"); setActiveDoc(null); }}>
+            <ScrollReaderView
+              activeDoc={activeDoc}
+              wpm={wpm}
+              focusTextSize={focusTextSize}
+              isMac={platform === "darwin"}
+              onSetWpm={setWpm}
+              onAdjustFocusTextSize={adjustFocusTextSize}
+              onExit={handleScrollExit}
+              onProgressUpdate={handleScrollProgress}
+            />
+          </ErrorBoundary>
+          {menuFlap}
+        </>
       );
     }
     return (
-      <ErrorBoundary onReset={() => { setView("library"); setActiveDoc(null); }}>
-        <ReaderView
-          activeDoc={activeDoc}
-          words={words}
-          wordIndex={wordIndex}
-          wpm={wpm}
-          focusTextSize={focusTextSize}
-          playing={playing}
-          escPending={escPending}
-          isMac={platform === "darwin"}
-          togglePlay={togglePlay}
-          exitReader={handleExitReader}
-          onSetWpm={setWpm}
-          onAdjustFocusTextSize={adjustFocusTextSize}
-          onSwitchToScroll={handleSwitchToScroll}
-          onJumpToWord={jumpToWord}
-        />
-      </ErrorBoundary>
+      <>
+        <ErrorBoundary onReset={() => { setView("library"); setActiveDoc(null); }}>
+          <ReaderView
+            activeDoc={activeDoc}
+            words={words}
+            wordIndex={wordIndex}
+            wpm={wpm}
+            focusTextSize={focusTextSize}
+            playing={playing}
+            escPending={escPending}
+            isMac={platform === "darwin"}
+            togglePlay={togglePlay}
+            exitReader={handleExitReader}
+            onSetWpm={setWpm}
+            onAdjustFocusTextSize={adjustFocusTextSize}
+            onSwitchToScroll={handleSwitchToScroll}
+            onJumpToWord={jumpToWord}
+            onToggleFlap={toggleMenuFlap}
+          />
+        </ErrorBoundary>
+        {menuFlap}
+      </>
     );
   }
 
   return (
-    <ErrorBoundary onReset={() => setView("library")}>
-      <DropZone onFilesDropped={handleFilesDropped}>
-        <LibraryView
-          library={library}
-          settings={settings}
-          wpm={wpm}
-          isMac={platform === "darwin"}
-          folderName={folderName}
-          loadingContent={loadingContent}
-          toast={toast}
-          onOpenDoc={openDoc}
-          onAddDoc={addDoc}
-          onAddDocFromUrl={addDocFromUrl}
-          onDeleteDoc={deleteDoc}
-          onResetProgress={resetProgress}
-          onSelectFolder={selectFolder}
-          onSwitchFolder={switchFolder}
-          onSetWpm={setWpm}
-          onSetFolderName={setFolderName}
-          onToggleFavorite={toggleFavorite}
-          onArchiveDoc={archiveDoc}
-          onUnarchiveDoc={unarchiveDoc}
-        />
-        {importPending && (
-          <ImportConfirmDialog
-            content={importPending.content}
-            isUrl={importPending.isUrl}
-            onConfirm={handleImportConfirm}
-            onCancel={handleImportCancel}
+    <>
+      <ErrorBoundary onReset={() => setView("library")}>
+        <DropZone onFilesDropped={handleFilesDropped}>
+          <LibraryView
+            library={library}
+            settings={settings}
+            wpm={wpm}
+            isMac={platform === "darwin"}
+            folderName={folderName}
+            loadingContent={loadingContent}
+            toast={toast}
+            onOpenDoc={openDoc}
+            onAddDoc={addDoc}
+            onAddDocFromUrl={addDocFromUrl}
+            onDeleteDoc={deleteDoc}
+            onResetProgress={resetProgress}
+            onSelectFolder={selectFolder}
+            onSwitchFolder={switchFolder}
+            onSetWpm={setWpm}
+            onSetFolderName={setFolderName}
+            onToggleFavorite={toggleFavorite}
+            onArchiveDoc={archiveDoc}
+            onUnarchiveDoc={unarchiveDoc}
+            onToggleFlap={toggleMenuFlap}
           />
-        )}
-      </DropZone>
-    </ErrorBoundary>
+          {importPending && (
+            <ImportConfirmDialog
+              content={importPending.content}
+              isUrl={importPending.isUrl}
+              onConfirm={handleImportConfirm}
+              onCancel={handleImportCancel}
+            />
+          )}
+        </DropZone>
+      </ErrorBoundary>
+      {menuFlap}
+    </>
   );
 }
 

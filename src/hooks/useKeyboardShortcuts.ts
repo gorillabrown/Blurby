@@ -10,11 +10,13 @@ export function useReaderKeys(
   seekWords: (delta: number) => void,
   adjustWpm: (delta: number) => void,
   exitReader: () => void,
-  adjustFocusTextSize: (delta: number) => void
+  adjustFocusTextSize: (delta: number) => void,
+  toggleFlap?: () => void
 ) {
   useEffect(() => {
     if (view !== "reader" || readerMode !== "speed") return;
     const handler = (e: KeyboardEvent) => {
+      if (e.key === "Tab") { e.preventDefault(); toggleFlap?.(); return; }
       if (e.code === "Space") { e.preventDefault(); togglePlay(); }
       else if (e.code === "ArrowLeft") { e.preventDefault(); seekWords(-REWIND_WORDS); }
       else if (e.code === "ArrowRight") { e.preventDefault(); seekWords(REWIND_WORDS); }
@@ -26,7 +28,20 @@ export function useReaderKeys(
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap]);
+}
+
+export function useGlobalKeys({ toggleFlap }: { toggleFlap: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Tab" && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
+        e.preventDefault();
+        toggleFlap();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [toggleFlap]);
 }
 
 // Smart import: Alt+V detects URL vs text and shows confirmation dialog
