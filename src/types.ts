@@ -113,6 +113,7 @@ export interface ElectronAPI {
   siteLogout: (domain: string) => Promise<boolean>;
   getCoverImage: (coverPath: string) => Promise<string | null>;
   rescanFolder: () => Promise<{ count?: number; error?: string }>;
+  getFilePathForDrop: (file: File) => string;
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
   onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;
   onUpdateAvailable?: (callback: (version: string) => void) => () => void;

@@ -1130,6 +1130,17 @@ function extractArticleFromHtml(html, url) {
     title = ogTitle?.getAttribute("content") || metaTitle?.textContent || new URL(url).hostname;
   }
 
+  // Extract article image (og:image preferred)
+  let imageUrl = null;
+  const ogImage = parsedDoc.querySelector('meta[property="og:image"]');
+  if (ogImage) {
+    imageUrl = ogImage.getAttribute("content");
+  }
+  if (!imageUrl) {
+    const twitterImage = parsedDoc.querySelector('meta[name="twitter:image"]');
+    if (twitterImage) imageUrl = twitterImage.getAttribute("content");
+  }
+
   // Clean up common noise
   content = content
     .replace(/\bADVERTISEMENT\b/g, "")
@@ -1142,7 +1153,7 @@ function extractArticleFromHtml(html, url) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-  return { title, content };
+  return { title, content, imageUrl };
 }
 
 // ── IPC Handlers ───────────────────────────────────────────────────────────────
@@ -1270,11 +1281,34 @@ function registerIPC() {
 
       if (!result || result.error) return result || { error: "Failed to load page content." };
 
+      const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+
+      // Download article cover image if available
+      let coverPath = null;
+      if (result.imageUrl) {
+        try {
+          const imgUrl = result.imageUrl.startsWith("//") ? "https:" + result.imageUrl : result.imageUrl;
+          const imgResponse = await net.fetch(imgUrl);
+          if (imgResponse.ok) {
+            const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+            const imgExt = imgUrl.match(/\.(jpg|jpeg|png|gif|webp)/i)?.[0] || ".jpg";
+            const coversDir = path.join(getDataPath(), "covers");
+            await fsPromises.mkdir(coversDir, { recursive: true });
+            coverPath = path.join(coversDir, `${docId}${imgExt}`);
+            await fsPromises.writeFile(coverPath, imgBuffer);
+          }
+        } catch (err) {
+          console.log("[url] Failed to download article image:", err.message);
+        }
+      }
+
       const newDoc = {
-        id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
+        id: docId,
         title: result.title, content: result.content,
         wordCount: result.content.split(/\s+/).filter(Boolean).length,
         sourceUrl: url, position: 0, created: Date.now(), source: "url",
+        author: result.author || null,
+        coverPath,
       };
       getLibrary().unshift(newDoc);
       saveLibrary();

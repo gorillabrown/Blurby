@@ -306,14 +306,12 @@ function AppInner() {
   useSmartImport(view, handleSmartImport);
 
   const handleFilesDropped = useCallback(async (files: File[]) => {
-    console.log("[drop] Files received:", files.length, files.map(f => f.name));
-    const paths = files.map((f) => (f as File & { path?: string }).path).filter(Boolean) as string[];
-    console.log("[drop] Paths extracted:", paths);
+    // Use Electron's webUtils.getPathForFile() for sandboxed renderer (Electron 33+)
+    const paths = files.map((f) => {
+      try { return window.electronAPI.getFilePathForDrop(f); } catch { return null; }
+    }).filter(Boolean) as string[];
     if (paths.length > 0) {
-      const result = await importDroppedFiles(paths);
-      console.log("[drop] Import result:", result);
-    } else {
-      console.log("[drop] No file paths available - Electron File.path may not be set");
+      await importDroppedFiles(paths);
     }
   }, [importDroppedFiles]);
 

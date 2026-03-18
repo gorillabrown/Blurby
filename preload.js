@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   // State
@@ -26,6 +26,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Cover images
   getCoverImage: (coverPath) => ipcRenderer.invoke("get-cover-image", coverPath),
   rescanFolder: () => ipcRenderer.invoke("rescan-folder"),
+  getFilePathForDrop: (file) => webUtils.getPathForFile(file),
 
   // URL ingestion
   addDocFromUrl: (url) => ipcRenderer.invoke("add-doc-from-url", url),
