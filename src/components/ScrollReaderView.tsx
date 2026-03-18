@@ -3,8 +3,6 @@ import { tokenize, formatTime, FONT_SIZE_STEP } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 
-const WORDS_PER_PAGE = 250;
-
 interface ScrollReaderViewProps {
   activeDoc: BlurbyDoc & { content: string };
   wpm: number;
@@ -19,46 +17,82 @@ interface ScrollReaderViewProps {
 export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSetWpm, onAdjustFontSize, onExit, onProgressUpdate }: ScrollReaderViewProps) {
   const words = tokenize(activeDoc.content || "");
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [currentPage, setCurrentPage] = useState(
-    Math.max(0, Math.floor((activeDoc.position || 0) / WORDS_PER_PAGE))
-  );
+  const [scrollPct, setScrollPct] = useState(0);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const totalPages = Math.max(1, Math.ceil(words.length / WORDS_PER_PAGE));
+  // Split content into paragraphs for natural rendering
+  const paragraphs = (activeDoc.content || "").split(/\n{2,}/).filter((p) => p.trim());
+  // If no paragraph breaks, split on single newlines
+  const displayBlocks = paragraphs.length > 1
+    ? paragraphs
+    : (activeDoc.content || "").split(/\n/).filter((p) => p.trim());
 
-  // Build pages of text
-  const pages: string[] = [];
-  for (let i = 0; i < totalPages; i++) {
-    const start = i * WORDS_PER_PAGE;
-    const end = Math.min(start + WORDS_PER_PAGE, words.length);
-    pages.push(words.slice(start, end).join(" "));
-  }
-
-  // Progress = index of first word on current page
-  const wordPosition = currentPage * WORDS_PER_PAGE;
-  const clampedPosition = Math.min(wordPosition, words.length - 1);
+  const wordPosition = Math.round(scrollPct * words.length);
+  const clampedPosition = Math.min(wordPosition, Math.max(0, words.length - 1));
   const pct = words.length > 0 ? Math.round((clampedPosition / words.length) * 100) : 0;
-  const remaining = formatTime(words.length - clampedPosition, wpm);
+  const remaining = formatTime(Math.max(0, words.length - clampedPosition), wpm);
 
   const scale = (fontSize || 100) / 100;
 
-  const goToPage = useCallback((page: number) => {
-    const next = Math.max(0, Math.min(totalPages - 1, page));
-    setCurrentPage(next);
-    const pos = next * WORDS_PER_PAGE;
-    onProgressUpdate(pos);
-  }, [totalPages, onProgressUpdate]);
+  // Scroll to initial position on mount
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !words.length) return;
+    // Wait a frame for content to render
+    requestAnimationFrame(() => {
+      const startPct = (activeDoc.position || 0) / words.length;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      if (maxScroll > 0) {
+        el.scrollTop = startPct * maxScroll;
+      }
+    });
+  }, []); // only on mount
 
+  // Track scroll position for progress
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    if (maxScroll <= 0) {
+      setScrollPct(0);
+      return;
+    }
+    const pct = Math.min(1, Math.max(0, el.scrollTop / maxScroll));
+    setScrollPct(pct);
+
+    // Debounce progress save
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      const pos = Math.round(pct * words.length);
+      onProgressUpdate(pos);
+    }, 300);
+  }, [words.length, onProgressUpdate]);
+
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.code === "ArrowRight" || e.code === "Space") { e.preventDefault(); goToPage(currentPage + 1); }
-      else if (e.code === "ArrowLeft") { e.preventDefault(); goToPage(currentPage - 1); }
-      else if (e.code === "Escape") { e.preventDefault(); onExit(clampedPosition); }
-      else if (e.code === "Equal" || e.code === "NumpadAdd") { e.preventDefault(); onAdjustFontSize(FONT_SIZE_STEP); }
-      else if (e.code === "Minus" || e.code === "NumpadSubtract") { e.preventDefault(); onAdjustFontSize(-FONT_SIZE_STEP); }
+      if (e.code === "Escape") {
+        e.preventDefault();
+        onExit(clampedPosition);
+      } else if (e.code === "Equal" || e.code === "NumpadAdd") {
+        e.preventDefault();
+        onAdjustFontSize(FONT_SIZE_STEP);
+      } else if (e.code === "Minus" || e.code === "NumpadSubtract") {
+        e.preventDefault();
+        onAdjustFontSize(-FONT_SIZE_STEP);
+      }
+      // Let arrow keys / space / page up/down work naturally for scrolling
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [currentPage, goToPage, onExit, clampedPosition, onAdjustFontSize]);
+  }, [onExit, clampedPosition, onAdjustFontSize]);
+
+  // Cleanup save timer
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
 
   return (
     <div className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32 }}>
@@ -74,14 +108,21 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
             <span className="reader-font-label">{fontSize}%</span>
             <button className="reader-font-btn" onClick={() => onAdjustFontSize(FONT_SIZE_STEP)} aria-label="Increase font size">A+</button>
           </div>
-          <span className="scroll-reader-page">{currentPage + 1} / {totalPages}</span>
+          <span className="scroll-reader-page">{pct}%</span>
         </div>
       </div>
 
-      {/* Page content */}
-      <div className="scroll-reader-content" ref={scrollRef}>
+      {/* Full scrollable content */}
+      <div
+        className="scroll-reader-content"
+        ref={scrollRef}
+        onScroll={handleScroll}
+        tabIndex={0}
+      >
         <div className="scroll-reader-text" style={{ fontSize: `${18 * scale}px` }}>
-          {pages[currentPage] || ""}
+          {displayBlocks.map((block, i) => (
+            <p key={i} className="scroll-reader-paragraph">{block}</p>
+          ))}
         </div>
       </div>
 
@@ -90,18 +131,7 @@ export default function ScrollReaderView({ activeDoc, wpm, fontSize, isMac, onSe
         <ProgressBar current={clampedPosition} total={words.length} />
         <div className="reader-bottom-info">
           <span>{pct}%</span>
-          <div className="scroll-reader-nav">
-            <button
-              className="scroll-reader-nav-btn"
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage <= 0}
-            >prev</button>
-            <button
-              className="scroll-reader-nav-btn"
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage >= totalPages - 1}
-            >next</button>
-          </div>
+          <span className="scroll-reader-hint">scroll to read &middot; Esc to exit &middot; +/- font</span>
           <span>{remaining} left</span>
         </div>
       </div>

@@ -948,14 +948,14 @@ button:focus-visible {
 }
 .scroll-reader-content {
   flex: 1;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 80px 60px 60px;
+  outline: none;
 }
 .scroll-reader-text {
   max-width: 640px;
+  margin: 0 auto;
   font-size: 18px;
   font-family: var(--reader-font, var(--serif));
   line-height: 1.8;
@@ -963,29 +963,21 @@ button:focus-visible {
   letter-spacing: 0.1px;
   user-select: text;
 }
+.scroll-reader-paragraph {
+  margin-bottom: 1.2em;
+  text-indent: 0;
+}
+.scroll-reader-paragraph:last-child {
+  margin-bottom: 0;
+}
 .scroll-reader-bottom {
+  flex-shrink: 0;
   padding: 0 32px 24px;
 }
-.scroll-reader-nav {
-  display: flex;
-  gap: 8px;
-}
-.scroll-reader-nav-btn {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: var(--text-dim);
-  cursor: pointer;
-  font-size: 11px;
+.scroll-reader-hint {
   font-family: var(--mono);
-  padding: 4px 14px;
-  border-radius: 4px;
-}
-.scroll-reader-nav-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-.scroll-reader-nav-btn:hover:not(:disabled) {
-  color: var(--text);
+  font-size: 11px;
+  color: var(--text-dimmer);
 }
 
 /* ── Launch at login toggle ───────────────────────────────────────────────── */
