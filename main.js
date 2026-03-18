@@ -837,17 +837,36 @@ function registerIPC() {
       let html;
       let result;
 
+      // Log cookie state for debugging
+      const loginSession = session.fromPartition("persist:site-login");
+      const sessionCookies = await loginSession.cookies.get({ url });
+      console.log(`[fetch] URL: ${url}`);
+      console.log(`[fetch] hasLogin: ${hasLogin}, siteCookies count: ${siteCookies[siteKey]?.length || 0}`);
+      console.log(`[fetch] Session cookies for URL: ${sessionCookies.length}`);
+      sessionCookies.forEach((c) => console.log(`  cookie: ${c.name} (domain: ${c.domain})`));
+
       if (hasLogin) {
         // Try fast HTTP fetch with session cookies first
         try {
           html = await fetchWithCookies(url);
+          console.log(`[fetch] Cookie fetch got ${html.length} chars`);
+          console.log(`[fetch] HTML preview: ${html.substring(0, 500)}`);
+          console.log(`[fetch] Contains 'paywall': ${html.includes("paywall") || html.includes("Paywall")}`);
+          console.log(`[fetch] Contains 'subscriber': ${html.includes("subscriber") || html.includes("Subscriber")}`);
           result = extractArticleFromHtml(html, url);
-        } catch { /* fall through to browser fetch */ }
+          console.log(`[fetch] Cookie extraction result: ${result.error || result.title}`);
+        } catch (err) {
+          console.log(`[fetch] Cookie fetch failed: ${err.message}`);
+        }
 
         // If cookie fetch didn't get article content, try BrowserWindow
         if (!result || result.error) {
+          console.log("[fetch] Falling back to BrowserWindow...");
           html = await fetchWithBrowser(url);
+          console.log(`[fetch] Browser fetch got ${html.length} chars`);
+          console.log(`[fetch] HTML preview: ${html.substring(0, 500)}`);
           result = extractArticleFromHtml(html, url);
+          console.log(`[fetch] Browser extraction result: ${result.error || result.title}`);
         }
       } else {
         html = await fetchWithCookies(url);
