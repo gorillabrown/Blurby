@@ -96,7 +96,7 @@ let mainWindow = null;
 let readerWindows = new Map(); // docId → BrowserWindow
 let tray = null;
 let watcher = null;
-let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null };
+let settings = { schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, fontSize: 100, sourceFolder: null, folderName: "My reading list", recentFolders: [], theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }
@@ -287,12 +287,24 @@ function createReaderWindow(docId) {
     readerWindows.delete(docId);
   }
 
+  const colors = getThemeColors();
+  const isMac = process.platform === "darwin";
   const win = new BrowserWindow({
     width: 900, height: 650, minWidth: 500, minHeight: 400,
     title: "Blurby Reader",
-    backgroundColor: settings.theme === "light" ? "#f5f3ef" : "#050505",
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 16, y: 16 },
+    backgroundColor: colors.bg,
+    ...(isMac
+      ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } }
+      : {
+          titleBarStyle: "hidden",
+          titleBarOverlay: {
+            color: colors.titleBar,
+            symbolColor: colors.titleText,
+            height: 32,
+          },
+        }
+    ),
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true, nodeIntegration: false,
@@ -425,13 +437,40 @@ function startWatcher() {
 }
 
 // ── Window ─────────────────────────────────────────────────────────────────────
+function getThemeColors() {
+  const resolvedTheme = settings.theme === "system"
+    ? (nativeTheme.shouldUseDarkColors ? "dark" : "light")
+    : settings.theme;
+  switch (resolvedTheme) {
+    case "light":
+      return { bg: "#f5f3ef", titleBar: "#c4c1bb", titleText: "#1a1a1a" }; // 20% darker
+    case "eink":
+      return { bg: "#e8e4d9", titleBar: "#b9b6ae", titleText: "#1a1a1a" }; // 20% darker
+    default: // dark
+      return { bg: "#0f0f0f", titleBar: "#1c1c1c", titleText: "#e8e4de" }; // 10% lighter
+  }
+}
+
 function createWindow() {
+  const colors = getThemeColors();
+  const isMac = process.platform === "darwin";
+
   mainWindow = new BrowserWindow({
     width: 1000, height: 720, minWidth: 600, minHeight: 500,
     title: "Blurby",
-    backgroundColor: settings.theme === "light" ? "#f5f3ef" : "#1a1a1a",
-    titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 16, y: 16 },
+    backgroundColor: colors.bg,
+    ...(isMac
+      ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } }
+      : {
+          titleBarStyle: "hidden",
+          titleBarOverlay: {
+            color: colors.titleBar,
+            symbolColor: colors.titleText,
+            height: 32,
+          },
+        }
+    ),
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true, nodeIntegration: false,
@@ -548,13 +587,20 @@ function broadcastSystemTheme() {
 }
 
 function updateWindowTheme() {
-  // Update title bar / background color based on resolved theme
+  const colors = getThemeColors();
   const resolvedTheme = settings.theme === "system" ? getSystemTheme() : settings.theme;
-  const bgColor = resolvedTheme === "light" ? "#f5f3ef" : resolvedTheme === "eink" ? "#e8e4d9" : "#1a1a1a";
-  // Set native theme so Windows title/menu bar matches
   nativeTheme.themeSource = resolvedTheme === "light" || resolvedTheme === "eink" ? "light" : "dark";
   if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.setBackgroundColor(bgColor);
+    mainWindow.setBackgroundColor(colors.bg);
+    // Update title bar overlay colors on Windows
+    if (process.platform !== "darwin") {
+      try {
+        mainWindow.setTitleBarOverlay({
+          color: colors.titleBar,
+          symbolColor: colors.titleText,
+        });
+      } catch {}
+    }
   }
 }
 
