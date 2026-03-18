@@ -284,8 +284,21 @@ function AppInner() {
     setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
   }, []);
 
-  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap);
-  useGlobalKeys({ toggleFlap: toggleMenuFlap, view });
+  const handleToggleFavoriteReader = useCallback(() => {
+    if (activeDoc) toggleFavorite(activeDoc.id);
+  }, [activeDoc, toggleFavorite]);
+
+  const handleSwitchMode = useCallback(() => {
+    if (readerMode === "speed") handleSwitchToScroll();
+    else handleSwitchToFocus();
+  }, [readerMode, handleSwitchToScroll, handleSwitchToFocus]);
+
+  const handleOpenSettings = useCallback(() => {
+    setMenuFlapOpen(true);
+  }, []);
+
+  useReaderKeys(view, readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode);
+  useGlobalKeys({ toggleFlap: toggleMenuFlap, openSettings: handleOpenSettings, view });
 
   // Smart Alt+V handler
   const handleSmartImport = useCallback((content: string, isUrl: boolean) => {

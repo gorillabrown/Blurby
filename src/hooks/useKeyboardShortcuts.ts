@@ -11,13 +11,23 @@ export function useReaderKeys(
   adjustWpm: (delta: number) => void,
   exitReader: () => void,
   adjustFocusTextSize: (delta: number) => void,
-  toggleFlap?: () => void
+  toggleFlap?: () => void,
+  toggleFavorite?: () => void,
+  switchMode?: () => void
 ) {
   useEffect(() => {
     if (view !== "reader") return;
     const handler = (e: KeyboardEvent) => {
       // Tab toggles flap in any reader mode
       if (e.key === "Tab") { e.preventDefault(); toggleFlap?.(); return; }
+      // B toggles favorite in any reader mode
+      if (e.code === "KeyB" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); toggleFavorite?.(); return; }
+      // Shift+F toggles reading mode (focus ↔ scroll)
+      if (e.code === "KeyF" && e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); switchMode?.(); return; }
+      // Ctrl/Cmd+, opens settings (handled by useGlobalKeys)
+      // Shift+Up/Down for coarse WPM adjustment (±100)
+      if (e.code === "ArrowUp" && e.shiftKey) { e.preventDefault(); adjustWpm(100); return; }
+      if (e.code === "ArrowDown" && e.shiftKey) { e.preventDefault(); adjustWpm(-100); return; }
       // Other keys only work in speed/focus mode
       if (readerMode !== "speed") return;
       if (e.code === "Space") { e.preventDefault(); togglePlay(); }
@@ -31,14 +41,20 @@ export function useReaderKeys(
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap]);
+  }, [view, readerMode, togglePlay, seekWords, adjustWpm, exitReader, adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode]);
 }
 
-export function useGlobalKeys({ toggleFlap, view }: { toggleFlap: () => void; view: string }) {
+export function useGlobalKeys({ toggleFlap, openSettings, view }: { toggleFlap: () => void; openSettings?: () => void; view: string }) {
   useEffect(() => {
-    // Only handle Tab in library view — reader view has its own Tab handler in useReaderKeys
-    if (view === "reader") return;
     const handler = (e: KeyboardEvent) => {
+      // Ctrl/Cmd+, opens settings in any view
+      if ((e.ctrlKey || e.metaKey) && e.key === ",") {
+        e.preventDefault();
+        openSettings?.();
+        return;
+      }
+      // Only handle Tab in library view — reader view has its own Tab handler in useReaderKeys
+      if (view === "reader") return;
       if (e.key === "Tab" && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
         e.preventDefault();
         toggleFlap();
@@ -46,7 +62,7 @@ export function useGlobalKeys({ toggleFlap, view }: { toggleFlap: () => void; vi
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [toggleFlap, view]);
+  }, [toggleFlap, openSettings, view]);
 }
 
 // Smart import: Alt+V detects URL vs text and shows confirmation dialog
