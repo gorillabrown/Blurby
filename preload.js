@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Cover images
   getCoverImage: (coverPath) => ipcRenderer.invoke("get-cover-image", coverPath),
+  rescanFolder: () => ipcRenderer.invoke("rescan-folder"),
 
   // URL ingestion
   addDocFromUrl: (url) => ipcRenderer.invoke("add-doc-from-url", url),

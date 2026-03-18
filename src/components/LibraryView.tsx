@@ -44,6 +44,16 @@ export default function LibraryView({
   const [tab, setTab] = useState("all"); // "all" | "favorites" | "archived"
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
+  const [rescanning, setRescanning] = useState(false);
+
+  const handleRescan = async () => {
+    setRescanning(true);
+    try {
+      await api.rescanFolder();
+    } finally {
+      setRescanning(false);
+    }
+  };
   const [urlInput, setUrlInput] = useState("");
   const [urlError, setUrlError] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -237,6 +247,15 @@ export default function LibraryView({
                 />
               )}
             </div>
+            <button
+              onClick={handleRescan}
+              disabled={!settings.sourceFolder || rescanning}
+              className="btn"
+              aria-label="Rescan folder"
+              title="Rescan folder for new items and covers"
+            >
+              {rescanning ? "..." : "⟳"}
+            </button>
             <button onClick={() => { setShowUrl(true); setUrlInput(""); setUrlError(""); }} className="btn" aria-label="Add from URL">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }}>
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -355,17 +374,6 @@ export default function LibraryView({
           </div>
         ) : (
           <>
-            {filteredLibrary.length > 0 && (
-              <div className="doc-list-header" aria-hidden="true">
-                <span className="doc-list-col-cover" />
-                <span className="doc-list-col-title">Title</span>
-                <span className="doc-list-col-author">Author</span>
-                <span className="doc-list-col-format">Format</span>
-                <span className="doc-list-col-words">Words</span>
-                <span className="doc-list-col-progress">Progress</span>
-                <span className="doc-list-col-time">Time</span>
-              </div>
-            )}
             <div className="doc-list" role="list">
               {filteredLibrary.map((doc) => (
                 <DocCard

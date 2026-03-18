@@ -1363,6 +1363,75 @@ function registerIPC() {
     } catch { return null; }
   });
 
+  ipcMain.handle("rescan-folder", async () => {
+    if (!settings.sourceFolder) return { error: "No source folder selected" };
+    try {
+      const files = await scanFolderAsync(settings.sourceFolder);
+      const docs = getLibrary();
+      const existing = new Map(docs.map((d) => [d.filepath, d]));
+      const synced = [];
+
+      for (const file of files) {
+        const prev = existing.get(file.filepath);
+        if (prev) {
+          let updates = { ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size };
+          // Re-extract covers and author for docs missing them
+          if (!prev.coverPath && file.ext === ".epub") {
+            updates.coverPath = await extractEpubCover(file.filepath, prev.id);
+          }
+          if (!prev.author && file.ext === ".epub") {
+            const meta = await extractEpubMetadata(file.filepath);
+            if (meta.author) updates.author = meta.author;
+          }
+          synced.push(updates);
+        } else {
+          const content = await extractContent(file.filepath);
+          if (content) {
+            const wordCount = content.split(/\s+/).filter(Boolean).length;
+            const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+            let author = null;
+            let coverPath = null;
+            let bookTitle = null;
+            if (file.ext === ".epub") {
+              const meta = await extractEpubMetadata(file.filepath);
+              author = meta.author;
+              bookTitle = meta.title;
+              coverPath = await extractEpubCover(file.filepath, docId);
+            }
+            if (!author) author = extractAuthorFromFilename(file.filename);
+            if (!bookTitle) bookTitle = extractTitleFromFilename(file.filename, author);
+            synced.push({
+              id: docId, title: bookTitle, filepath: file.filepath, filename: file.filename,
+              ext: file.ext, size: file.size, modified: file.modified,
+              wordCount, position: 0, created: Date.now(), source: "folder",
+              author: author || null, coverPath: coverPath || null, lastReadAt: null,
+            });
+          }
+        }
+      }
+
+      // Preserve non-folder and Saved Articles docs
+      const savedArticlesPath = settings.sourceFolder
+        ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
+        : null;
+      for (const doc of docs) {
+        if (doc.source !== "folder") {
+          synced.push(doc);
+        } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
+          synced.push(doc);
+        }
+      }
+
+      setLibrary(synced);
+      saveLibrary();
+      broadcastLibrary();
+      return { count: synced.length };
+    } catch (err) {
+      console.error("Rescan failed:", err);
+      return { error: err.message };
+    }
+  });
+
   // Import/export
   ipcMain.handle("export-library", async () => {
     const result = await dialog.showSaveDialog(mainWindow, {
