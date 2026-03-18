@@ -15,9 +15,10 @@ export function useReaderKeys(
 ) {
   useEffect(() => {
     if (view !== "reader") return;
+    console.log("[keys] useReaderKeys registered, view:", view, "readerMode:", readerMode, "hasToggleFlap:", !!toggleFlap);
     const handler = (e: KeyboardEvent) => {
       // Tab toggles flap in any reader mode
-      if (e.key === "Tab") { e.preventDefault(); toggleFlap?.(); return; }
+      if (e.key === "Tab") { e.preventDefault(); console.log("[keys] Tab in reader"); toggleFlap?.(); return; }
       // Other keys only work in speed/focus mode
       if (readerMode !== "speed") return;
       if (e.code === "Space") { e.preventDefault(); togglePlay(); }
