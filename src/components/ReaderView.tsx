@@ -1,4 +1,4 @@
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import ProgressBar from "./ProgressBar";
@@ -30,6 +30,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
+  const [chapterListOpen, setChapterListOpen] = useState(false);
 
   useEffect(() => {
     setTimeout(() => containerRef.current?.focus(), 50);
@@ -101,6 +102,12 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
       onClick={playing ? togglePlay : undefined}
       onKeyDown={(e) => {
         if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
+        if (e.code === "KeyC" && !e.shiftKey && !e.ctrlKey && !e.metaKey && hasChapters) {
+          e.preventDefault(); e.stopPropagation(); setChapterListOpen((v) => !v);
+        }
+        if (e.key === "Escape" && chapterListOpen) {
+          e.preventDefault(); e.stopPropagation(); setChapterListOpen(false);
+        }
       }}
       role="application"
       aria-label="RSVP speed reader"
@@ -258,6 +265,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
             <span>&uarr; &darr; speed</span>
             <span>+/- font</span>
             <span>space {playing ? "pause" : "play"}</span>
+            {hasChapters && <span>C chapters</span>}
           </span>
           <span>{remaining} left</span>
         </div>
@@ -266,13 +274,35 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
             {onPrevChapter && chapterInfo.num > 1 && (
               <button className="chapter-nav-btn" onClick={onPrevChapter} aria-label="Previous chapter" title="Previous chapter ([)">&lsaquo;</button>
             )}
-            <span className="reader-chapter-label">
-              Ch. {chapterInfo.num}/{chapterInfo.total}
-            </span>
+            <button
+              className="chapter-label-btn"
+              onClick={() => setChapterListOpen(!chapterListOpen)}
+              title="Jump to chapter (click to open list)"
+              aria-expanded={chapterListOpen}
+              aria-haspopup="listbox"
+            >
+              Ch. {chapterInfo.num}/{chapterInfo.total}: {chapterInfo.title.length > 30 ? chapterInfo.title.slice(0, 30) + "…" : chapterInfo.title}
+            </button>
             <span className="reader-chapter-pct">{chapterInfo.pct}%</span>
             <span className="reader-chapter-remaining">{chapterInfo.remaining} to ch. end</span>
             {onNextChapter && chapterInfo.num < chapterInfo.total && (
               <button className="chapter-nav-btn" onClick={onNextChapter} aria-label="Next chapter" title="Next chapter (])">&rsaquo;</button>
+            )}
+            {chapterListOpen && (
+              <div className="chapter-list-dropdown" role="listbox" aria-label="Chapter list">
+                {chapters.map((ch, i) => (
+                  <button
+                    key={i}
+                    className={`chapter-list-item${i === chIdx ? " chapter-list-active" : ""}`}
+                    role="option"
+                    aria-selected={i === chIdx}
+                    onClick={() => { onJumpToWord(ch.wordIndex); setChapterListOpen(false); }}
+                  >
+                    <span className="chapter-list-num">{i + 1}.</span>
+                    <span className="chapter-list-title">{ch.title}</span>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
