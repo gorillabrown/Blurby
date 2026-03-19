@@ -1847,12 +1847,12 @@ function registerIPC() {
             outputDir: settings.sourceFolder,
           });
 
-          // Save PDF but keep source as "url" for badge display
+          // Save PDF path but keep content in library for reliable loading
+          // (PDF re-extraction can fail for generated PDFs without @napi-rs/canvas)
           newDoc.source = "url";
           newDoc.filepath = pdfPath;
           newDoc.filename = path.basename(pdfPath);
           newDoc.ext = ".pdf";
-          delete newDoc.content;
 
           // Update in library
           const docs = getLibrary();

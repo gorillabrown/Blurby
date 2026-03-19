@@ -215,7 +215,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
                   currentWord.split("").map((char, i) => (
                     <span
                       key={i}
-                      className={i === pivotIndex ? "reader-word-focus" : ""}
+                      className={i === pivotIndex ? "reader-word-focus" : "reader-word-char"}
                       style={{ opacity: calculateFocusOpacity(i, pivotIndex, currentWord.length, settings!.focusSpan) }}
                     >{char}</span>
                   ))

@@ -256,14 +256,14 @@ button, input, textarea, a, [role="button"] {
   margin-bottom: 4px;
 }
 .doc-card-title {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 400;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .doc-card-author {
-  font-size: 13px;
+  font-size: 14px;
   font-family: var(--mono);
   color: var(--text-dimmer);
   overflow: hidden;
@@ -272,7 +272,7 @@ button, input, textarea, a, [role="button"] {
   flex-shrink: 0;
 }
 .doc-card-meta {
-  font-size: 11px;
+  font-size: 13px;
   font-family: var(--mono);
   color: var(--text-dimmer);
   display: flex;
@@ -393,6 +393,12 @@ button, input, textarea, a, [role="button"] {
   color: var(--text);
   text-align: left;
   min-width: 40%;
+}
+.reader-word-char {
+  font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
+  font-weight: 300;
+  color: var(--text);
 }
 .reader-bottom-bar {
   position: absolute;

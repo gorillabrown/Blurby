@@ -60,6 +60,83 @@ function VirtualScrollText({ displayBlocks, scale, spacing, scrollRef }: {
   );
 }
 
+// Flow mode: renders words grouped by paragraphs with a small virtual window for performance
+function FlowText({ words, paragraphBreaks, flowWordIndex, flowWordRef, scale, spacing, containerRef, onClickWord, onHighlight }: {
+  words: string[];
+  paragraphBreaks: Set<number>;
+  flowWordIndex: number;
+  flowWordRef: React.RefObject<HTMLSpanElement | null>;
+  scale: number;
+  spacing?: { line?: number; character?: number; word?: number };
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  onClickWord: (idx: number) => void;
+  onHighlight: (word: string, pos: { x: number; y: number }) => void;
+}) {
+  // Build paragraph ranges once
+  const paragraphs = useMemo(() => {
+    const paras: { start: number; end: number }[] = [];
+    let start = 0;
+    for (let i = 0; i < words.length; i++) {
+      if (paragraphBreaks.has(i) || i === words.length - 1) {
+        paras.push({ start, end: i + 1 });
+        start = i + 1;
+      }
+    }
+    return paras;
+  }, [words.length, paragraphBreaks]);
+
+  // Find which paragraph the current word is in
+  const activePara = useMemo(() => {
+    for (let i = 0; i < paragraphs.length; i++) {
+      if (flowWordIndex < paragraphs[i].end) return i;
+    }
+    return paragraphs.length - 1;
+  }, [paragraphs, flowWordIndex]);
+
+  // Virtual window: render ~15 paragraphs around the active one
+  const PARA_WINDOW = 7;
+  const paraStart = Math.max(0, activePara - PARA_WINDOW);
+  const paraEnd = Math.min(paragraphs.length, activePara + PARA_WINDOW + 1);
+
+  return (
+    <div className="scroll-reader-text flow-text" style={{
+      fontSize: `${18 * scale}px`,
+      lineHeight: spacing?.line || undefined,
+      letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+      wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+    }}>
+      {paraStart > 0 && <div style={{ height: paraStart * 2.4 * 18 * scale }} aria-hidden="true" />}
+      {paragraphs.slice(paraStart, paraEnd).map((para, pi) => (
+        <p key={paraStart + pi} className="scroll-reader-paragraph">
+          {words.slice(para.start, para.end).map((word, wi) => {
+            const globalIdx = para.start + wi;
+            const isActive = globalIdx === flowWordIndex;
+            return (
+              <span
+                key={globalIdx}
+                ref={isActive ? flowWordRef : undefined}
+                className={isActive ? "flow-word-active" : ""}
+                onClick={() => onClickWord(globalIdx)}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  const rect = (e.target as HTMLElement).getBoundingClientRect();
+                  const container = containerRef.current?.getBoundingClientRect();
+                  if (container) {
+                    onHighlight(word, { x: rect.left + rect.width / 2 - container.left, y: rect.top - container.top });
+                  }
+                }}
+              >
+                {word}{" "}
+              </span>
+            );
+          })}
+        </p>
+      ))}
+      {paraEnd < paragraphs.length && <div style={{ height: (paragraphs.length - paraEnd) * 2.4 * 18 * scale }} aria-hidden="true" />}
+    </div>
+  );
+}
+
 interface ScrollReaderViewProps {
   activeDoc: BlurbyDoc & { content: string };
   wpm: number;
@@ -212,10 +289,16 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     return () => { if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current); };
   }, [flowPlaying, flowTick]);
 
-  // Auto-scroll to keep highlighted word visible during flow
+  // Auto-scroll to keep highlighted word visible during flow (throttled to avoid jank)
+  const lastScrollRef = useRef(0);
   useEffect(() => {
     if (flowPlaying && flowWordRef.current) {
-      flowWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      const now = performance.now();
+      // Only scroll every 300ms to prevent smooth-scroll queuing
+      if (now - lastScrollRef.current > 300) {
+        lastScrollRef.current = now;
+        flowWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
   }, [flowWordIndex, flowPlaying]);
 
@@ -304,53 +387,17 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         }}
       >
         {isFlowActive ? (
-          (() => {
-            // Virtual windowing: only render ~3000 words around current position for large docs
-            const VIRT_THRESHOLD = 10000;
-            const WINDOW_HALF = 1500;
-            const useVirtual = words.length > VIRT_THRESHOLD;
-            const windowStart = useVirtual ? Math.max(0, flowWordIndex - WINDOW_HALF) : 0;
-            const windowEnd = useVirtual ? Math.min(words.length, flowWordIndex + WINDOW_HALF) : words.length;
-            const visibleWords = useVirtual ? words.slice(windowStart, windowEnd) : words;
-            // Estimate spacer height for words before the window (approx 6 chars/word + space, ~14px per line of ~10 words)
-            const estLinesAbove = useVirtual ? Math.ceil(windowStart / 10) : 0;
-            const spacerHeight = estLinesAbove * (18 * scale * (spacing?.line || 1.8));
-
-            return (
-              <div className="scroll-reader-text flow-text" style={{
-                fontSize: `${18 * scale}px`,
-                lineHeight: spacing?.line || undefined,
-                letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
-                wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
-              }}>
-                {useVirtual && <div style={{ height: spacerHeight }} aria-hidden="true" />}
-                {visibleWords.map((word, vi) => {
-                  const globalIdx = windowStart + vi;
-                  return (
-                    <span
-                      key={globalIdx}
-                      ref={globalIdx === flowWordIndex ? flowWordRef : undefined}
-                      className={globalIdx === flowWordIndex ? "flow-word-active" : ""}
-                      onClick={() => { flowWordIndexRef.current = globalIdx; setFlowWordIndex(globalIdx); }}
-                      onDoubleClick={(e) => {
-                        e.stopPropagation();
-                        const rect = (e.target as HTMLElement).getBoundingClientRect();
-                        const container = containerRef.current?.getBoundingClientRect();
-                        if (container) {
-                          setHighlightWord(word);
-                          setHighlightPos({ x: rect.left + rect.width / 2 - container.left, y: rect.top - container.top });
-                          setShowDefinition(false);
-                        }
-                      }}
-                    >
-                      {word}{" "}
-                    </span>
-                  );
-                })}
-                {useVirtual && <div style={{ height: Math.ceil((words.length - windowEnd) / 10) * (18 * scale * (spacing?.line || 1.8)) }} aria-hidden="true" />}
-              </div>
-            );
-          })()
+          <FlowText
+            words={words}
+            paragraphBreaks={paragraphBreaks}
+            flowWordIndex={flowWordIndex}
+            flowWordRef={flowWordRef}
+            scale={scale}
+            spacing={spacing}
+            containerRef={containerRef}
+            onClickWord={(idx) => { flowWordIndexRef.current = idx; setFlowWordIndex(idx); }}
+            onHighlight={(word, pos) => { setHighlightWord(word); setHighlightPos(pos); setShowDefinition(false); }}
+          />
         ) : (
           <VirtualScrollText
             displayBlocks={displayBlocks}
