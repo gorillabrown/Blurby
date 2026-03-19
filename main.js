@@ -317,11 +317,22 @@ function parseMobiContent(buffer) {
       return null;
     }
 
+    // HUFF/CDIC compression is not supported — raw decode produces garbage
+    if (compression === 17480) {
+      console.log("MOBI file uses HUFF/CDIC compression (unsupported)");
+      return null;
+    }
+
+    // Cap text extraction at 10MB to prevent freezes on huge files
+    const maxTextBytes = 10 * 1024 * 1024;
+
     // Extract text records (records 1 through textRecordCount)
     const textParts = [];
+    let totalBytes = 0;
     for (let i = 1; i <= textRecordCount && i < numRecords; i++) {
       const start = recordOffsets[i];
       const end = (i + 1 < numRecords) ? recordOffsets[i + 1] : buffer.length;
+      if (start >= buffer.length || end > buffer.length || start >= end) continue;
       const recordData = buffer.slice(start, end);
 
       if (compression === 1) {
@@ -330,22 +341,34 @@ function parseMobiContent(buffer) {
       } else if (compression === 2) {
         // PalmDOC LZ77 compression
         textParts.push(palmDocDecompress(recordData));
-      } else if (compression === 17480) {
-        // HUFF/CDIC compression (older format) — not supported, try raw
-        textParts.push(recordData.toString("utf-8"));
       } else {
         textParts.push(recordData.toString("utf-8"));
       }
+      totalBytes += (textParts[textParts.length - 1] || "").length;
+      if (totalBytes > maxTextBytes) break;
     }
 
     const html = textParts.join("");
-    // Strip HTML tags to get plain text
-    const cheerio = require("cheerio");
-    const $ = cheerio.load(html);
-    $("script, style, head").remove();
-    let text = $("body").text() || $.text() || "";
-    // Clean up excessive whitespace
-    text = text.replace(/\r\n/g, "\n").replace(/ {2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+    // Strip HTML tags to get plain text — use regex for speed instead of cheerio on huge strings
+    let text = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n\n")
+      .replace(/<\/div>/gi, "\n")
+      .replace(/<\/h[1-6]>/gi, "\n\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+      .replace(/\r\n/g, "\n")
+      .replace(/ {2,}/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
     return text || null;
   } catch (err) {
     console.error("MOBI parse error:", err.message);
@@ -354,37 +377,50 @@ function parseMobiContent(buffer) {
 }
 
 function palmDocDecompress(data) {
-  const output = [];
+  // Pre-allocate buffer (PalmDOC records decompress to ~4096 bytes typically)
+  let output = Buffer.alloc(4096 * 2);
+  let pos = 0;
+
+  function ensureCapacity(need) {
+    if (pos + need > output.length) {
+      const newBuf = Buffer.alloc(Math.max(output.length * 2, pos + need));
+      output.copy(newBuf);
+      output = newBuf;
+    }
+  }
+
   let i = 0;
   while (i < data.length) {
     const byte = data[i++];
     if (byte === 0) {
-      output.push(0);
+      ensureCapacity(1);
+      output[pos++] = 0;
     } else if (byte >= 1 && byte <= 8) {
-      // Copy next 'byte' bytes literally
+      ensureCapacity(byte);
       for (let j = 0; j < byte && i < data.length; j++) {
-        output.push(data[i++]);
+        output[pos++] = data[i++];
       }
     } else if (byte >= 9 && byte <= 0x7f) {
-      // Literal byte
-      output.push(byte);
+      ensureCapacity(1);
+      output[pos++] = byte;
     } else if (byte >= 0xc0) {
-      // Space + (byte XOR 0x80)
-      output.push(0x20); // space
-      output.push(byte ^ 0x80);
+      ensureCapacity(2);
+      output[pos++] = 0x20; // space
+      output[pos++] = byte ^ 0x80;
     } else {
       // byte 0x80-0xBF: LZ77 back-reference
       if (i >= data.length) break;
       const next = data[i++];
       const distance = ((byte << 8) | next) >> 3 & 0x7ff;
       const length = (next & 0x07) + 3;
+      ensureCapacity(length);
       for (let j = 0; j < length; j++) {
-        const pos = output.length - distance;
-        output.push(pos >= 0 ? output[pos] : 0);
+        const srcPos = pos - distance;
+        output[pos++] = srcPos >= 0 ? output[srcPos] : 0;
       }
     }
   }
-  return Buffer.from(output).toString("utf-8");
+  return output.slice(0, pos).toString("utf-8");
 }
 
 function parseMobiMetadata(buffer) {
@@ -885,7 +921,22 @@ async function scanFolderAsync(folderPath) {
   }
 
   await walkDir(folderPath);
-  return files.sort((a, b) => a.filename.localeCompare(b.filename));
+
+  // Deduplicate: when the same book exists in multiple formats (e.g. .epub + .mobi),
+  // keep the best format. Priority: epub > pdf > mobi/azw3/azw > txt/md/html
+  const FORMAT_PRIORITY = { ".epub": 0, ".pdf": 1, ".mobi": 2, ".azw3": 2, ".azw": 2, ".html": 3, ".htm": 3, ".txt": 4, ".md": 4, ".markdown": 4, ".text": 4, ".rst": 4 };
+  const byDirAndStem = new Map(); // "dir/stem" → best file
+  for (const file of files) {
+    const dir = path.dirname(file.filepath);
+    const stem = path.basename(file.filename, file.ext).toLowerCase();
+    const key = `${dir}\0${stem}`;
+    const existing = byDirAndStem.get(key);
+    if (!existing || (FORMAT_PRIORITY[file.ext] ?? 99) < (FORMAT_PRIORITY[existing.ext] ?? 99)) {
+      byDirAndStem.set(key, file);
+    }
+  }
+
+  return [...byDirAndStem.values()].sort((a, b) => a.filename.localeCompare(b.filename));
 }
 
 function debouncedSyncLibraryWithFolder() {
