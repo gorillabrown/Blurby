@@ -8,8 +8,8 @@ import DefinitionPopup from "./DefinitionPopup";
 
 const api = (window as any).electronAPI;
 
-const BLOCK_THRESHOLD = 200; // virtualize when > 200 paragraphs
-const BLOCK_WINDOW = 60;    // render 60 blocks at a time
+const BLOCK_THRESHOLD = 50;  // virtualize when > 50 paragraphs
+const BLOCK_WINDOW = 30;    // render 30 blocks at a time
 
 function VirtualScrollText({ displayBlocks, scale, spacing, scrollRef }: {
   displayBlocks: string[];

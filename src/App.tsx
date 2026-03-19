@@ -64,7 +64,7 @@ function StandaloneReader() {
     })();
   }, [docId, initReader]);
 
-  const words = activeDoc ? tokenize(activeDoc.content) : [];
+  const words = useMemo(() => activeDoc ? tokenize(activeDoc.content) : [], [activeDoc?.content]);
   wordsRef.current = words;
 
   const finishReading = useCallback((finalPos: number) => {
@@ -75,7 +75,7 @@ function StandaloneReader() {
       if (wordsRead > 0 && elapsed > 1000) {
         api.recordReadingSession(activeDoc.title, wordsRead, elapsed, wpm);
       }
-      const docWords = tokenize(activeDoc.content);
+      const docWords = words;
       if (finalPos >= docWords.length - 1 && docWords.length > 0) {
         api.markDocCompleted();
         api.archiveDoc(activeDoc.id);
@@ -197,7 +197,8 @@ function AppInner() {
     api.saveSettings({ wpm, folderName, focusTextSize });
   }
 
-  const words = activeDoc ? tokenize(activeDoc.content) : [];
+  // Use tokenized.words from the memoized tokenizeWithMeta result
+  const words = tokenized.words;
   wordsRef.current = words;
 
   const openDoc = useCallback(async (doc: BlurbyDoc, mode = "speed") => {
@@ -245,8 +246,7 @@ function AppInner() {
         api.recordReadingSession(activeDoc.title, wordsRead, elapsed, wpm);
       }
       // Auto-archive at 100%
-      const docWords = tokenize(activeDoc.content);
-      if (finalPos >= docWords.length - 1 && docWords.length > 0) {
+      if (finalPos >= words.length - 1 && words.length > 0) {
         api.markDocCompleted();
         archiveDoc(activeDoc.id);
       }
