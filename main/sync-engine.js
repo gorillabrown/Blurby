@@ -233,11 +233,31 @@ async function syncFile(storage, fileName, localData, mergeFn) {
 
 // ── Public API ────────────────────────────────────────────────────────────
 
+async function isMeteredConnection() {
+  try {
+    const { BrowserWindow } = require("electron");
+    const win = BrowserWindow.getAllWindows()[0];
+    if (!win) return false;
+    return await win.webContents.executeJavaScript(
+      `!!(navigator.connection && navigator.connection.type === 'cellular')`
+    );
+  } catch { return false; /* Assume unmetered if check fails */ }
+}
+
 async function startSync() {
   const auth = getAuthState();
   if (!auth) return { status: "not-signed-in" };
 
   if (syncStatus === "syncing") return { status: "already-syncing" };
+
+  // Skip sync on metered connections if user opted out
+  if (ctx && !ctx.getSettings().syncOnMeteredConnection) {
+    const metered = await isMeteredConnection();
+    if (metered) {
+      setSyncStatus("idle");
+      return { status: "skipped-metered" };
+    }
+  }
 
   setSyncStatus("syncing");
 
