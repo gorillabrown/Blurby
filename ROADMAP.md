@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
 **Last updated**: Session 1 (2026-03-21) — Full rewrite. Prior roadmap archived in old ROADMAP.md on dev branch.
-**Current branch**: `claude/review-blurby-roadmap-1lsoT` (102 commits ahead of main, PR #1 open)
-**Current state**: Feature-complete MVP. Phases 0-4 of original roadmap substantially built. Performance, distribution, and platform expansion remain.
+**Current branch**: `master` (tracking `origin/main`, PR #1 squash-merged as commit 91718e3)
+**Current state**: Feature-complete MVP on main. Sprints 2-8 in progress/planned for performance, polish, and distribution.
 
 > **Navigation:** Sprints are numbered sequentially. Each sprint has a scope statement, agent assignments, and acceptance criteria ready for dispatch to Claude Code CLI.
 
@@ -21,9 +21,9 @@
 | Phase 4 | Format Expansion (EPUB, PDF, MOBI/AZW3, HTML, URL import) | ✅ COMPLETED |
 | Sprint 2 | Menu Flap, Settings, PDF Export, Scroll Reader, Highlights, Narration | ✅ COMPLETED |
 
-### What's NOT on main
+### What's on main now
 
-**Critical:** The `main` branch has only 12 commits (the Day 1 skeleton). ALL feature work lives on the dev branch. PR #1 must squash-merge before any further work makes sense.
+PR #1 squash-merged (2026-03-21). All feature work from phases 0-4 is now on main as a single clean commit. Sprint 2+ work proceeds from this baseline.
 
 ---
 
@@ -31,11 +31,11 @@
 
 | Sprint | Status | Key Milestone |
 |--------|--------|---------------|
-| **Sprint 1: Merge & Stabilize** | 🔶 READY | Squash-merge PR #1, verify build, establish baseline |
-| **Sprint 2: Performance — React Rendering** | 🔶 READY | Memoize LibraryView, React.memo on list items, stabilize callbacks |
-| **Sprint 3: Main.js Modularization** | 🔶 READY | Split 93KB main.js into 6 focused modules |
-| **Sprint 4: Performance — Main Process** | 🔶 READY | Async I/O audit, debounced saves, library index-by-ID, lazy-load modules |
-| **Sprint 5: Performance — Reader Modes** | 📋 SPEC'D | Ref-based playback, throttled progress saves |
+| **Sprint 1: Merge & Stabilize** | ✅ COMPLETED | Squash-merged PR #1 (commit 91718e3), 135 tests pass, build clean |
+| **Sprint 2: Performance — React Rendering** | ✅ COMPLETED | Memoized computed state, stabilized callbacks, ref-based keyboard hooks |
+| **Sprint 3: Main.js Modularization** | ✅ COMPLETED | Split into 7 files: orchestrator + 6 modules (ipc, parsers, url, window, migrations, watcher) |
+| **Sprint 4: Performance — Main Process** | ✅ COMPLETED | Async I/O already clean, debounce+index in place, lazy-loaded 5 heavy modules |
+| **Sprint 5: Performance — Reader Modes** | ✅ COMPLETED | Ref-based RSVP+flow playback, throttled saves (5s/50w), split settings props |
 | **Sprint 6: Polish Sprint** | 📋 SPEC'D | Auto-updater, exit confirmation, drag-drop, recent folders |
 | **Sprint 7: Stats & History** | 📋 SPEC'D | Reading history, stats panel, reading streaks |
 | **Sprint 8: Distribution** | 📋 SPEC'D | CI/CD, code signing research, GitHub Actions |
@@ -551,11 +551,464 @@ SPRINT 2: React Rendering  SPRINT 3: Main.js Modular.  │
 
 ---
 
+## Sprint 9: Security & Data Integrity Hardening
+
+**Goal:** Fix all security vulnerabilities and data corruption risks identified in the codebase review. These are pre-release blockers — ship nothing until these are resolved.
+
+**Prerequisite:** Sprint 8 complete.
+
+### Spec
+
+**9A. Unsafe image extension validation**
+- `ipc-handlers.js:336`: Image extension extracted from URL via regex, not validated against MIME type
+- Malicious URL could write files with arbitrary extensions (`.php`, `.exe`)
+- **Fix**: Validate MIME type from response Content-Type header; whitelist extensions to `.jpg`, `.png`, `.gif`, `.webp` only
+- Add download size limit (max 10MB) to prevent DoS via oversized image downloads
+- Files affected: `main/ipc-handlers.js:333-340, 537-540, 570-574`
+
+**9B. Atomic JSON writes**
+- `main.js:46`: `writeJSON()` uses direct `writeFile()` — if write fails midway (disk full, power loss), file is corrupted with no recovery
+- **Fix**: Write to `.tmp` file, then `rename()` (atomic on all OS). Pattern: `writeFile(path + ".tmp", data)` → `rename(path + ".tmp", path)`
+- Backup `.bak` exists but no automated recovery mechanism
+- Files affected: `main.js:46-47`
+
+**9C. Swallowed error catches (15+ instances)**
+- Empty `catch {}` blocks across main.js, file-parsers.js, ipc-handlers.js silently discard errors
+- User has no way to know when data corruption, file I/O failure, or metadata extraction was skipped
+- **Fix**: Add `console.warn()` with context (file path, operation type) to every empty catch. Critical operations (readJSON, backupFile, saveLibrary) should also write to an error log file
+- Key locations: `main.js:43` (readJSON), `main.js:50` (backupFile), `file-parsers.js:241` (cover extraction), `ipc-handlers.js:343` (URL cover), `ipc-handlers.js:716` (auto-updater), `window-manager.js:146` (update check)
+
+**9D. Content Security Policy**
+- No CSP header on any BrowserWindow — if URL-fetched content via Readability contains XSS, it executes in app context
+- **Fix**: Add CSP meta tag in `index.html`: `default-src 'self'; script-src 'self'`
+- Also: change `persist:site-login` partition to ephemeral (no "persist:") unless user explicitly saves credentials
+
+**9E. Optimistic update bug in useLibrary**
+- `useLibrary.ts:56-64`: `addDoc()` updates local library state before async API call returns. If API fails, library state is corrupted — UI shows a doc that doesn't exist on disk
+- **Fix**: Await API response before updating local state, or implement rollback on failure
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Fix image validation + size limit (9A) | `electron-fixer` (sonnet) | — |
+| 2 | Implement atomic writes (9B) | `electron-fixer` (sonnet) | — |
+| 3 | Add error logging to all empty catches (9C) | `electron-fixer` (sonnet) | — |
+| 4 | Add CSP + fix cookie persistence (9D) | `electron-fixer` (sonnet) | — |
+| 5 | Fix optimistic update (9E) | `renderer-fixer` (sonnet) | — |
+| 6 | Run tests + build | `test-runner` (haiku) | Steps 1-5 |
+
+> **Note:** Steps 1-5 are PARALLELIZABLE.
+
+### Acceptance Criteria
+
+- [ ] Image downloads validate MIME type and enforce 10MB size limit
+- [ ] JSON writes are atomic (write-to-temp + rename pattern)
+- [ ] Zero empty `catch {}` blocks — all have contextual logging
+- [ ] CSP header present on all BrowserWindows
+- [ ] Site login uses ephemeral partition by default
+- [ ] `addDoc()` waits for API confirmation before updating state
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 10: Memory & Scalability
+
+**Goal:** Fix all memory leaks and ensure the app handles large libraries (10,000+ docs) and long-running sessions (weeks without restart) gracefully.
+
+**Prerequisite:** Sprint 9 complete.
+
+### Spec
+
+**10A. Bound all in-memory caches with LRU eviction**
+- `epubChapterCache` (file-parsers.js:274): grows unbounded — every EPUB processed adds chapters, never evicted. 100 large EPUBs = megabytes of cached strings
+- `definitionCache` (ipc-handlers.js:128): bounded to 500 entries but arbitrary, no LRU
+- `coverCache` (ipc-handlers.js): bounded to 100 entries, acceptable
+- `failedExtractions` Set (main.js:59): grows with every failed extraction, never auto-cleaned — only manual via "rescan-folder" IPC
+- **Fix**: Implement simple LRU (Map with size check + oldest-key eviction) for epubChapterCache (max 50), definitionCache (max 200). Auto-clean failedExtractions when corresponding file is removed from library
+
+**10B. Incremental library index updates**
+- `rebuildLibraryIndex()` (main.js:76-78): called after every library operation, rebuilds entire `Map<id, doc>` from scratch — O(n) for each add/delete/update
+- With 10,000 documents, this is measurably slow on every single operation
+- **Fix**: Replace with incremental `addDocToIndex(doc)`, `removeDocFromIndex(id)`, `updateDocInIndex(doc)`. Only call full rebuild on startup and migration
+
+**10C. Chunked folder sync with progress**
+- `syncLibraryWithFolder()` (main.js:197-237): processes all files at once with BATCH_SIZE=4. With 10,000 files, this is slow, blocks UI, and provides no progress feedback
+- `rescan-folder` (ipc-handlers.js:503-642): same issue, no cancellation
+- **Fix**: Emit progress events via IPC (`sync-progress: {current, total, phase}`). Process in chunks of 50 with `await` between chunks so event loop isn't starved. Add cancellation via AbortController
+
+**10D. PDF parser cleanup on timeout**
+- `file-parsers.js:298`: 30-second timeout races with `parser.getText()`, but if timeout fires, the parser may still be running and leaking memory
+- **Fix**: Call `parser.destroy()` in the timeout branch, not just the catch. Use `finally` block
+
+**10E. Reader window tracking**
+- `window-manager.js:106-108`: readerWindows Map tracks open windows, but no deduplication for login windows — multiple concurrent site-login requests open multiple windows
+- **Fix**: Store active login windows in a Map keyed by domain, prevent duplicate requests
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Implement LRU caches + auto-clean failedExtractions (10A) | `electron-fixer` (sonnet) | — |
+| 2 | Incremental library index (10B) | `electron-fixer` (sonnet) | — |
+| 3 | Chunked folder sync + progress events (10C) | `electron-fixer` (sonnet) | — |
+| 4 | PDF parser cleanup (10D) | `electron-fixer` (sonnet) | — |
+| 5 | Login window deduplication (10E) | `electron-fixer` (sonnet) | — |
+| 6 | Run tests + build | `test-runner` (haiku) | Steps 1-5 |
+
+> **Note:** Steps 1-5 are PARALLELIZABLE.
+
+### Acceptance Criteria
+
+- [ ] epubChapterCache bounded to 50 entries with LRU eviction
+- [ ] definitionCache bounded to 200 entries with LRU eviction
+- [ ] failedExtractions auto-cleaned when file removed from library
+- [ ] Library index updated incrementally — no full rebuild except startup
+- [ ] Folder sync emits progress events and supports cancellation
+- [ ] PDF parser properly destroyed on timeout
+- [ ] No duplicate login windows for same domain
+- [ ] App runs for 7 days with 1000+ docs opened without memory growth (manual test)
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 11: Renderer Architecture Refactor
+
+**Goal:** Break apart the god components, eliminate prop drilling, fix React anti-patterns, and establish a sustainable component architecture for future features.
+
+**Prerequisite:** Sprint 10 complete. PARALLEL-SAFE with Sprint 12.
+
+### Spec
+
+**11A. Split App.tsx (509 lines → 3 containers)**
+- App.tsx manages reader state, library state, menu state, import state, keyboard shortcuts, settings, and narration — all in one component
+- **Fix**: Extract into:
+  - `ReaderContainer.tsx` — reader state, playback, chapter nav, progress tracking
+  - `LibraryContainer.tsx` — library state, folder management, import/export
+  - `AppController.tsx` — high-level coordination, routing between views
+- Move word tokenization into ReaderContainer (currently passed as prop from parent)
+
+**11B. Reader state context (eliminate 18-prop drilling)**
+- ReaderView receives 18 props from App.tsx. ScrollReaderView receives similar
+- **Fix**: Create `ReaderContext` with provider in ReaderContainer. Reader components consume via `useReaderContext()` instead of props
+- Same treatment for LibraryView (19 props → `useLibraryContext()`)
+
+**11C. Extract nested components to separate files**
+- `PausedTextView` (ReaderView.tsx:35-138): 100-line nested component with 11 props and complex scroll logic — should be its own file
+- `FlowText` (ScrollReaderView.tsx:64-138): same issue, nested with tight coupling
+- **Fix**: Extract to `src/components/PausedTextView.tsx` and `src/components/FlowText.tsx`
+
+**11D. Fix React anti-patterns**
+- `App.tsx:190-198`: Ref-based settings sync in render body — should be `useEffect` with dependency array
+- `App.tsx:325,337`: Dynamic `require()` inside useCallback — should be top-level import
+- `ReaderView.tsx:144-150`: Derived state (highlightWord, highlightIdx, highlightPos) stored as separate state — should be computed from single highlight state
+- `(window as any).electronAPI` in 3+ components — should use typed `window.electronAPI`
+
+**11E. Lazy-load settings subpages**
+- All 7 settings sub-pages imported eagerly in SettingsMenu — unnecessary for initial load
+- **Fix**: `const ThemeSettings = lazy(() => import('./settings/ThemeSettings'))` with Suspense wrapper
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Extract PausedTextView + FlowText (11C) | `renderer-fixer` (sonnet) | — |
+| 2 | Fix React anti-patterns (11D) | `renderer-fixer` (sonnet) | — |
+| 3 | Create ReaderContext + LibraryContext (11B) | `renderer-fixer` (sonnet) | Step 1 |
+| 4 | Split App.tsx into containers (11A) | `renderer-fixer` (sonnet) | Steps 2-3 |
+| 5 | Lazy-load settings (11E) | `renderer-fixer` (sonnet) | Step 4 |
+| 6 | Run tests + build | `test-runner` (haiku) | Step 5 |
+| 7 | Architecture compliance check | `code-reviewer` (sonnet) | Step 6 |
+
+### Acceptance Criteria
+
+- [ ] App.tsx under 150 lines — orchestration only
+- [ ] ReaderContainer.tsx owns all reader state and playback logic
+- [ ] LibraryContainer.tsx owns all library state and folder management
+- [ ] ReaderView receives ≤5 props (rest via context)
+- [ ] PausedTextView and FlowText are standalone files with tests
+- [ ] Zero `(window as any)` casts — all use typed API
+- [ ] Zero `require()` in renderer — all top-level imports
+- [ ] Settings subpages lazy-loaded with Suspense
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 12: Code Deduplication & Utilities Cleanup
+
+**Goal:** Eliminate duplicated logic, fix utility inefficiencies, and establish shared helpers that future sprints build on.
+
+**Prerequisite:** Sprint 10 complete. PARALLEL-SAFE with Sprint 11.
+
+### Spec
+
+**12A. Extract shared metadata enrichment function**
+- Document metadata extraction (author, title, cover, word count) is duplicated 3+ times:
+  - `main.js:152-195` (extractNewFileDoc)
+  - `ipc-handlers.js:409-435` (import-dropped-files)
+  - `ipc-handlers.js:551-592` (rescan-folder)
+- Cover file copy logic also duplicated 4+ times
+- **Fix**: Create `main/doc-enrichment.js` with `enrichDocWithMetadata(doc, filepath, docId, dataPath)` that handles all format-specific metadata extraction and cover handling. All three callsites call this one function
+
+**12B. Efficient word count utility**
+- `content.split(/\s+/).filter(Boolean).length` appears 6+ times across main.js and ipc-handlers.js
+- Creates full word array just to get length — O(n) memory for a scalar result
+- **Fix**: Create `function wordCount(text) { return (text.match(/\S+/g) || []).length; }` in a shared utility. Replace all instances
+
+**12C. Fix O(n²) chapter detection**
+- `text.ts:122-141` (detectChapters): For each line, creates array with `split(/\s+/).filter(Boolean)`, counts globally
+- `text.ts:169` (chaptersFromCharOffsets): `textBefore.split(/\s+/).filter(Boolean).length` — recalculates word count for every chapter
+- **Fix**: Build word-to-character-offset index once, reuse for all chapter boundary calculations. Also move `chapterPattern` regex to module level (currently recompiled on every call)
+
+**12D. Fix multibyte character handling in chaptersFromCharOffsets**
+- Character offsets assume UTF-16, but JavaScript string indices are UTF-16 code units — emoji and certain Unicode will produce wrong offsets
+- **Fix**: Use `Array.from(text)` for accurate character counting, or switch to byte offsets
+
+**12E. Define magic numbers as named constants**
+- CSS: `clamp(38px, 6vw, 72px)` repeated 4 times — define as `--reader-font-size`
+- CSS: `padding: 16px 140px 16px 32px` where 140px is Windows title bar width — not in a variable
+- rhythm.ts: Hardcoded multipliers `1.5`, `0.5`, `2`, `15` — export as named constants
+- main.js: `500ms` debounce, `200ms` broadcast debounce, `1000ms` sync debounce, `BATCH_SIZE=4` — define at top with rationale
+- ReaderView.tsx: `PAUSE_PARA_WINDOW = 10`, `estParaHeight = 40` — no explanation for values
+- **Fix**: All magic numbers become named constants with a one-line comment explaining the value
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Create doc-enrichment.js + refactor callsites (12A) | `electron-fixer` (sonnet) | — |
+| 2 | Create wordCount utility + replace all instances (12B) | `electron-fixer` (sonnet) | — |
+| 3 | Fix chapter detection perf + multibyte (12C, 12D) | `renderer-fixer` (sonnet) | — |
+| 4 | Define all magic numbers as constants (12E) | `electron-fixer` + `renderer-fixer` (sonnet) | — |
+| 5 | Run tests + build | `test-runner` (haiku) | Steps 1-4 |
+
+> **Note:** Steps 1-4 are PARALLELIZABLE.
+
+### Acceptance Criteria
+
+- [ ] Metadata extraction logic exists in exactly one place (`main/doc-enrichment.js`)
+- [ ] `wordCount()` utility used everywhere — zero instances of `split(/\s+/).filter(Boolean).length`
+- [ ] Chapter detection is O(n) — word index built once, reused
+- [ ] Multibyte characters handled correctly in chapter offsets
+- [ ] Zero unexplained magic numbers — all are named constants with comments
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 13: Test Coverage Expansion
+
+**Goal:** Close critical test coverage gaps. Every core hook, every edge case in text processing, every data-layer operation gets tested.
+
+**Prerequisite:** Sprints 11 and 12 complete.
+
+### Spec
+
+**13A. Hook tests (currently ZERO coverage)**
+- `useReader.ts`: Test RAF timing, accumulator-based word advancement, throttled state sync, edge cases (WPM boundaries, rapid play/stop, seek during playback)
+- `useLibrary.ts`: Test optimistic updates, API failure rollback, folder switching, document CRUD
+- `useKeyboardShortcuts.ts`: Test key routing matrix (modifier keys, mode-dependent shortcuts)
+- `useNarration.ts`: Test speech synthesis lifecycle, cleanup on unmount
+- **Approach**: Use `@testing-library/react-hooks` or `renderHook` from `@testing-library/react`
+
+**13B. Chapter detection edge cases**
+- Current tests only cover "Chapter 1: The Beginning" format
+- Missing: mixed formats (Chapter 1 / CHAPTER 2 / # Chapter 3), Roman numerals (I, II, III), number-only chapters, duplicate chapter titles, Prologue as sole chapter
+- Missing: `chaptersFromCharOffsets()` — completely untested, has off-by-one risk with multibyte chars
+
+**13C. Fix timezone-dependent tests**
+- `features.test.js:62-94`: Streak calculation uses `Date.now() - 86400000` which can fail near midnight in non-UTC timezones
+- **Fix**: Use fixed dates: `new Date("2026-03-20T12:00:00Z")`
+- Add midnight-boundary test (23:59 → 00:01 crossover), same-day multi-session test
+
+**13D. Fix test duplication problem**
+- `highlights.test.js` and `features.test.js` re-implement `formatHighlightEntry` and `parseDefinitionResponse` because they can't import from main.js
+- Tests pass even if main.js diverges — false confidence
+- **Fix**: After Sprint 12's modularization, import directly from `main/` modules. Delete re-implementations from test files
+
+**13E. Large document stress tests**
+- All current tests use <10k words. Add tests with 100k+ and 1M+ word synthetic documents
+- Test: tokenization performance, chapter detection, word count, scroll rendering (virtual windowing correctness)
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Write hook tests (13A) | `renderer-fixer` (sonnet) | — |
+| 2 | Write chapter detection edge case tests (13B) | `renderer-fixer` (sonnet) | — |
+| 3 | Fix timezone tests + add boundary tests (13C) | `renderer-fixer` (sonnet) | — |
+| 4 | Fix test imports from main/ modules (13D) | `electron-fixer` (sonnet) | — |
+| 5 | Write large-document stress tests (13E) | `renderer-fixer` (sonnet) | — |
+| 6 | Run full test suite | `test-runner` (haiku) | Steps 1-5 |
+
+> **Note:** Steps 1-5 are PARALLELIZABLE.
+
+### Acceptance Criteria
+
+- [ ] useReader has ≥10 tests covering timing, sync, and edge cases
+- [ ] useLibrary has ≥8 tests covering CRUD, failures, and folder switching
+- [ ] useKeyboardShortcuts has ≥6 tests covering modifier keys and mode switching
+- [ ] Chapter detection tested with 5+ format variants including Roman numerals
+- [ ] `chaptersFromCharOffsets()` tested with multibyte content
+- [ ] Zero timezone-dependent tests — all use fixed dates
+- [ ] Test files import from main/ modules directly — no re-implementations
+- [ ] 100k-word stress test passes in <2 seconds
+- [ ] Total test count ≥200 (up from 135)
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 14: CSS & Theming Overhaul
+
+**Goal:** Fix all hardcoded colors that break in light theme, eliminate dead CSS, extract repeated values into custom properties, and add basic responsive support.
+
+**Prerequisite:** Sprint 11 complete (component extraction needed first).
+
+### Spec
+
+**14A. Fix hardcoded colors that break light theme**
+- 10+ locations use `rgba(255,255,255,...)` hardcoded white — invisible on light backgrounds
+- Key locations: progress bar (line 81), reader esc button (line 329), scrollbar thumbs (lines 34-37), various hover states
+- **Fix**: Define `--bg-subtle`, `--bg-hover`, `--border-subtle` with light/dark theme variants. Replace all hardcoded rgba values
+
+**14B. Extract repeated CSS values into custom properties**
+- `clamp(38px, 6vw, 72px)` repeated 4 times → `--reader-font-size`
+- `padding: 16px 140px 16px 32px` (Windows title bar) → `--titlebar-padding-right: 140px`
+- `min-width: 40%` on reader word sides → `--reader-word-side-width`
+- Reader toolbar heights, spacing values — all should be variables
+
+**14C. Remove dead CSS rules**
+- `.reader-guide-line` defined twice (lines 354 and 609) with conflicting `position` values — first is dead
+- Audit all rules: grep component classnames against CSS selectors, flag any orphaned rules
+
+**14D. Fix focus indicators**
+- `:focus-visible` defined twice with different styles (lines 1058-1065) — consolidate
+- Add `outline-offset` to prevent overlap with content
+- Ensure all interactive elements have visible focus indicators in both themes
+
+**14E. Add responsive breakpoints**
+- No media queries for screens < 768px
+- `.reader-word-area` has 60px padding — unreadable on narrow screens
+- **Fix**: Add `@media (max-width: 768px)` rules for reader area, library grid, settings panels
+- Not full mobile support (that's Phase 10), just not-broken on small windows
+
+**14F. Theme-aware scrollbar styling**
+- Scrollbar pseudo-elements use hardcoded colors (`#333`, `#444`, `#ccc`, `#bbb`)
+- CSS doesn't re-evaluate `::-webkit-scrollbar-thumb` on dynamic theme switch
+- **Fix**: Use CSS custom properties for scrollbar colors, test theme toggle
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Fix hardcoded colors (14A) | `renderer-fixer` (sonnet) | — |
+| 2 | Extract CSS variables (14B) | `renderer-fixer` (sonnet) | — |
+| 3 | Remove dead CSS (14C) | `renderer-fixer` (sonnet) | — |
+| 4 | Fix focus indicators (14D) | `renderer-fixer` (sonnet) | — |
+| 5 | Add responsive breakpoints (14E) | `renderer-fixer` (sonnet) | Step 2 |
+| 6 | Fix scrollbar theming (14F) | `renderer-fixer` (sonnet) | Step 1 |
+| 7 | Visual regression check (all themes) | `ux-reviewer` (opus) | Steps 1-6 |
+| 8 | Run tests + build | `test-runner` (haiku) | Step 7 |
+
+### Acceptance Criteria
+
+- [ ] Zero hardcoded `rgba(255,255,255,...)` in global.css — all use CSS variables
+- [ ] ≤5 repeated values — rest extracted to custom properties
+- [ ] Zero dead CSS rules (verified by grep against component classnames)
+- [ ] Focus indicators visible in both light and dark themes
+- [ ] Reader view readable at 768px window width
+- [ ] Scrollbar colors update on theme toggle
+- [ ] Visual check: dark, light, e-ink, and system themes all render correctly
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 15: Accessibility Audit & Remediation
+
+**Goal:** Achieve WCAG 2.1 AA compliance for all interactive flows.
+
+**Prerequisite:** Sprint 14 complete (CSS fixes needed first).
+
+### Spec
+
+**15A. ARIA labels and roles**
+- Decorative elements (triangle glyph in ReaderView:318) missing `aria-hidden="true"`
+- Scrollable regions (PausedTextView scroll body) missing `role="region"` and `aria-label`
+- Reader word display: `aria-live="off"` during playback is correct, but should switch to `aria-live="polite"` when paused so screen readers announce current word
+
+**15B. Keyboard navigation completeness**
+- Search results dropdown (LibraryView:365-382): arrow keys work but focus doesn't return to search input after Enter selection
+- Settings subpages: verify Tab order is logical
+- Reader controls: verify all buttons reachable via Tab
+
+**15C. Screen reader testing**
+- Test with NVDA (Windows) for all core flows: library browse, open document, read, pause, navigate chapters, exit
+- Document any flows that require mouse-only interaction
+
+**15D. Reduced motion support**
+- Add `@media (prefers-reduced-motion: reduce)` to disable toast animations, esc-fade animation, and any other CSS transitions
+- Respect user preference for reduced motion in playback UI
+
+### Acceptance Criteria
+
+- [ ] All decorative elements have `aria-hidden="true"`
+- [ ] All scrollable regions have `role="region"` and `aria-label`
+- [ ] Screen reader announces current word on pause
+- [ ] All interactive elements reachable via keyboard
+- [ ] Search dropdown returns focus after selection
+- [ ] `prefers-reduced-motion` disables all animations
+- [ ] Core flows tested with NVDA — documented
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Updated Execution Order (Post-Sprint 8)
+
+```
+Sprint 8: Distribution ──────────────────────────────── GATE
+    │
+    ▼
+Sprint 9: Security & Data Integrity Hardening
+    │
+    ▼
+Sprint 10: Memory & Scalability
+    │
+    ├───────────────────────┐
+    │                       │
+    ▼                       ▼
+SPRINT 11: Renderer      SPRINT 12: Code Dedup
+Architecture Refactor     & Utilities Cleanup
+(PARALLEL)                (PARALLEL)
+    │                       │
+    └───────────┬───────────┘
+                │
+                ▼
+        Sprint 13: Test Coverage Expansion
+                │
+                ▼
+        Sprint 14: CSS & Theming Overhaul
+                │
+                ▼
+        Sprint 15: Accessibility Audit ──────── GATE
+                │
+                ▼
+        Phase 9: Chrome Extension
+                │
+                ▼
+        Phase 10: Android App
+```
+
+---
+
 ## Someday Backlog
 
 - Code signing certificate for Windows SmartScreen trust
 - Multi-window support (multiple reader windows simultaneously)
 - Import/export (backup library, stats to CSV)
-- Accessibility audit (ARIA labels, keyboard nav, screen reader, reduced motion)
 - Symlink path traversal protection in folder scanner
 - requestAnimationFrame migration for all remaining setInterval timers
+- Streaming ZIP parsing for large EPUBs (replace AdmZip full-memory load)
+- Time-window stats archival (keep last year, archive older sessions)
+- Toast queue system (replace setTimeout-based toast dismissal)
+- Reading queue sort by remaining words (prioritize closest to completion)
+- Version-pin critical dependencies (pdf-parse, adm-zip, readability)
+- Unload lazy-loaded modules after use if memory pressure detected

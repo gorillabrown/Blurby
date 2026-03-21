@@ -64,6 +64,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openReaderWindow: (docId) => ipcRenderer.invoke("open-reader-window", docId),
 
   // Auto-updater
+  checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
   installUpdate: () => ipcRenderer.invoke("install-update"),
 
   // Error logging

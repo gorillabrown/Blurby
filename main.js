@@ -306,6 +306,18 @@ app.whenReady().then(async () => {
     if (settings.theme === "system") updateWindowTheme(mainWindow, settings);
   });
 
+  // Clean stale entries from recent folders (non-blocking)
+  if (settings.recentFolders && settings.recentFolders.length > 0) {
+    const valid = [];
+    for (const folder of settings.recentFolders) {
+      try { await fsPromises.access(folder); valid.push(folder); } catch { /* stale, remove */ }
+    }
+    if (valid.length !== settings.recentFolders.length) {
+      settings.recentFolders = valid;
+      saveSettings();
+    }
+  }
+
   if (settings.sourceFolder) {
     syncLibraryWithFolder().then(() => startWatcherFn());
   }

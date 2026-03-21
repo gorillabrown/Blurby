@@ -875,17 +875,26 @@ button, input, textarea, a, [role="button"] {
 }
 
 /* ── Drop Zone ────────────────────────────────────────────────────────────── */
+.drop-zone-wrapper {
+  position: relative;
+  height: 100%;
+}
 .drop-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(15,15,15,0.9);
+  background: rgba(15,15,15,0.92);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 3px dashed var(--accent);
   border-radius: 12px;
   margin: 8px;
+  animation: drop-fade-in 0.15s ease;
+}
+@keyframes drop-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .drop-overlay-content {
   display: flex;
@@ -895,6 +904,11 @@ button, input, textarea, a, [role="button"] {
   color: var(--accent);
   font-family: var(--mono);
   font-size: 16px;
+}
+.drop-overlay-hint {
+  font-size: 11px;
+  color: var(--text-dimmer);
+  letter-spacing: 0.5px;
 }
 
 /* ── Stats Panel ──────────────────────────────────────────────────────────── */
@@ -1011,6 +1025,18 @@ button, input, textarea, a, [role="button"] {
 @keyframes toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(10px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Help Update Row ──────────────────────────────────────────────────────── */
+.help-update-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.help-update-status {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
 }
 
 /* ── Update Banner ────────────────────────────────────────────────────────── */

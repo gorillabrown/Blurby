@@ -215,6 +215,11 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const [scrollPct, setScrollPct] = useState(0);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Double-escape exit confirmation
+  const [escPending, setEscPending] = useState(false);
+  const escTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastEscTimeRef = useRef(0);
+
   // Highlight menu state
   const [highlightWord, setHighlightWord] = useState<string | null>(null);
   const [highlightPos, setHighlightPos] = useState({ x: 0, y: 0 });
@@ -392,8 +397,23 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         onSwitchToFocus?.();
       } else if (e.code === "Escape") {
         e.preventDefault();
-        if (flowPlaying) setFlowPlaying(false);
-        else onExit(clampedPosition);
+        if (flowPlaying) {
+          // First Escape during flow playback: pause
+          setFlowPlaying(false);
+          // Start double-escape window
+          lastEscTimeRef.current = Date.now();
+          setEscPending(true);
+          if (escTimerRef.current) clearTimeout(escTimerRef.current);
+          escTimerRef.current = setTimeout(() => setEscPending(false), 2000);
+        } else if (escPending && Date.now() - lastEscTimeRef.current < 2000) {
+          // Second Escape within 2s: exit
+          if (escTimerRef.current) clearTimeout(escTimerRef.current);
+          setEscPending(false);
+          onExit(clampedPosition);
+        } else {
+          // Not playing, no pending: exit immediately
+          onExit(clampedPosition);
+        }
       } else if (e.code === "Equal" || e.code === "NumpadAdd") {
         e.preventDefault();
         onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP);
@@ -404,12 +424,13 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap, onSwitchToFocus, flowPlaying]);
+  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap, onSwitchToFocus, flowPlaying, escPending]);
 
   // Cleanup
   useEffect(() => {
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      if (escTimerRef.current) clearTimeout(escTimerRef.current);
     };
   }, []);
 
@@ -417,6 +438,11 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
 
   return (
     <div ref={containerRef} className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32, position: "relative" }}>
+      {escPending && (
+        <div className="esc-confirm" role="alert">
+          Press Esc again to exit
+        </div>
+      )}
       {/* Top bar */}
       <div className="scroll-reader-top" style={{ paddingTop: isMac ? 36 : 16 }}>
         <div className="reader-top-left">

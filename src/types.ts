@@ -109,6 +109,7 @@ export interface ElectronAPI {
   archiveDoc: (docId: string) => Promise<void>;
   unarchiveDoc: (docId: string) => Promise<void>;
   openReaderWindow: (docId: string) => Promise<void>;
+  checkForUpdates: () => Promise<{ status: string; version?: string | null; message?: string }>;
   installUpdate: () => Promise<void>;
   logError: (message: string) => Promise<void>;
   getSiteLogins: () => Promise<Array<{ domain: string; cookieCount: number }>>;

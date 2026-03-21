@@ -712,6 +712,18 @@ function registerIpcHandlers(ctx) {
 
   // ── Auto-updater ─────────────────────────────────────────────────────────
 
+  ipcMain.handle("check-for-updates", async () => {
+    const { app } = require("electron");
+    if (!app.isPackaged) return { status: "dev" };
+    try {
+      const { autoUpdater } = require("electron-updater");
+      const result = await autoUpdater.checkForUpdates();
+      return { status: "checked", version: result?.updateInfo?.version || null };
+    } catch (err) {
+      return { status: "error", message: err.message };
+    }
+  });
+
   ipcMain.handle("install-update", () => {
     try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(); } catch {}
   });

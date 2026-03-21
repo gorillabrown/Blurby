@@ -395,6 +395,11 @@ function AppInner() {
     }
   }, [importDroppedFiles]);
 
+  const handleDropReject = useCallback((extensions: string[]) => {
+    const unique = [...new Set(extensions)];
+    showToast(`Unsupported file type${unique.length > 1 ? "s" : ""}: ${unique.join(", ")}`);
+  }, [showToast]);
+
   const handleSettingsChange = useCallback(async (updates: Partial<import("./types").BlurbySettings>) => {
     await api.saveSettings(updates);
     setSettings((prev) => ({ ...prev, ...updates }));
@@ -492,7 +497,7 @@ function AppInner() {
   return (
     <>
       <ErrorBoundary onReset={() => setView("library")}>
-        <DropZone onFilesDropped={handleFilesDropped}>
+        <DropZone onFilesDropped={handleFilesDropped} onReject={handleDropReject}>
           <LibraryView
             library={library}
             settings={settings}
