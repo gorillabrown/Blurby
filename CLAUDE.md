@@ -86,42 +86,50 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ---
 
-## Current System State (Post-Sprint 16 — E-Ink Optimization Complete)
+## Current System State (Post-Sprint 17 — Cloud Sync Complete)
 
 ### Codebase (branch: `main`)
 
-- **23 commits** on main (PR #1 squash-merged as commit 91718e3, then Sprints 2-8 layered on top)
-- All core sprints (1-8 + 7b) complete — performance, polish, stats, and distribution done
+- **36 commits** on main (PR #1 squash-merged as commit 91718e3, then Sprints 2-17 layered on top)
+- All sprints (1-17) complete — security, performance, accessibility, cloud sync done
 - CI/CD active via GitHub Actions
 
 ### Tech Stack
 
 - Electron 33 + React 19 + Vite 6 + TypeScript 5.9
 - Vitest 4.1 for testing, electron-builder 25 for packaging
-- Dependencies: chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, @napi-rs/canvas (lazy-loaded)
+- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater
 
 ### Architecture
 
-- **Main process** — modularized into 7 files (Sprint 3):
-  - `main.js` (993 lines) — thin orchestrator, app lifecycle, context object
-  - `main/ipc-handlers.js` (858 lines) — all IPC registrations
-  - `main/file-parsers.js` (580 lines) — EPUB, MOBI, PDF, HTML, TXT format parsers
+- **Main process** — modularized into 11 files:
+  - `main.js` (1063 lines) — orchestrator, app lifecycle, context object
+  - `main/ipc-handlers.js` (918 lines) — all IPC registrations (incl. cloud sync channels)
+  - `main/file-parsers.js` (694 lines) — EPUB, MOBI, PDF, HTML, TXT format parsers
+  - `main/sync-engine.js` (487 lines) — offline-first sync with hash-based change detection, field/doc/history merge
+  - `main/auth.js` (421 lines) — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
   - `main/url-extractor.js` (392 lines) — URL/article extraction, Readability, PDF export
-  - `main/window-manager.js` (188 lines) — BrowserWindow, tray, menu, auto-updater
-  - `main/migrations.js` (124 lines) — schema migrations with backup
-  - `main/folder-watcher.js` (108 lines) — chokidar folder watching
+  - `main/cloud-google.js` (316 lines) — Google Drive appDataFolder, resumable uploads, retry
+  - `main/window-manager.js` (216 lines) — BrowserWindow, tray, menu, auto-updater
+  - `main/cloud-onedrive.js` (201 lines) — OneDrive App Folder via Microsoft Graph, chunked uploads
+  - `main/migrations.js` (137 lines) — schema migrations with backup
+  - `main/folder-watcher.js` (110 lines) — chokidar folder watching
+  - `main/cloud-storage.js` (18 lines) — provider factory (OneDrive/Google)
   - Context object pattern shares state (mainWindow, library, settings, paths) across modules
-- **Preload** (`preload.js`, 4KB): Context bridge -> `window.electronAPI`
+- **Preload** (`preload.js`): Context bridge -> `window.electronAPI` (incl. cloud sync APIs)
 - **Renderer** (`src/`): React 19 SPA
-  - `App.tsx` — Central orchestrator
-  - `src/components/` — 23 UI components (incl. StatsPanel, EinkRefreshOverlay) + 7 settings sub-pages
+  - `App.tsx` — Thin orchestrator (Sprint 11 refactor)
+  - `src/components/` — 29 UI components + 8 settings sub-pages
+    - Key additions: `ReaderContainer.tsx`, `LibraryContainer.tsx` (Sprint 11), `CloudSyncIndicator.tsx` (Sprint 17), `EinkRefreshOverlay.tsx` (Sprint 16), `VirtualScrollText.tsx`
+  - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
+  - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration
   - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts
-  - `src/styles/global.css` — All styles with CSS custom properties
+  - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Tests** (`tests/`): 8 test files (135+ tests)
+- **Tests** (`tests/`): 14 test files, 293 tests (Sprint 13 expansion)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags, NSIS installer)
-- **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework
+- **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
 ### Feature Status
 
@@ -134,7 +142,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | URL Article Import | ✅ Built | Readability + authenticated fetching (lazy-loaded) |
 | Multi-Format Support | ✅ Built | TXT, MD, PDF, EPUB, MOBI/AZW3, HTML |
 | Chapter Navigation | ✅ Built | NCX/nav TOC, dropdown jump-to-chapter |
-| Settings System | ✅ Built | 7 sub-pages (theme, layout, speed, hotkeys, connectors, help, text size) |
+| Settings System | ✅ Built | 8 sub-pages (theme, layout, speed, hotkeys, connectors, help, text size, cloud sync) |
 | Menu Flap | ✅ Built | Collapsible sidebar with settings access |
 | Reading Queue | ✅ Built | Queue management with progress tracking |
 | Highlights & Definitions | ✅ Built | Quick-menu with save and dictionary define |
@@ -144,31 +152,41 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | Schema Migrations | ✅ Built | Versioned settings.json + library.json with backup |
 | Error Boundaries | ✅ Built | Wrapping Library and Reader views |
 | TypeScript | ✅ Migrated | .tsx/.ts in renderer, types.ts for shared types |
-| Unit Tests | ✅ 135+ tests | Vitest — text, rhythm, highlights, migrations, WPM, PDF |
+| Unit Tests | ✅ 293 tests | Vitest — 14 test files incl. hooks, stress, chapters (Sprint 13) |
 | Auto-Updater | ✅ Built | check-for-updates IPC, Settings > Help UI (Sprint 6) |
 | Drag-and-Drop | ✅ Polished | Client-side extension filtering, rejection toasts, format hints (Sprint 6) |
 | Reader Exit Confirmation | ✅ Built | Double-Escape pattern in ScrollReaderView (Sprint 6) |
 | Recent Folders | ✅ Built | Stale folder cleanup on startup (Sprint 6) |
 | Reading Statistics | ✅ Built | history.json, StatsPanel, streaks, actual reading time, reset (Sprint 7/7b) |
 | CI/CD | ✅ Built | GitHub Actions: CI on push/PR, release on v* tags (Sprint 8) |
-| E-Ink Display Optimization | ✅ Built | WPM ceiling, phrase grouping, paginated scroll, ghosting prevention, touch targets, EinkRefreshOverlay (Sprint 16) |
+| Security Hardening | ✅ Built | Image validation, atomic writes, CSP, error logging, pessimistic updates (Sprint 9) |
+| Memory & Scalability | ✅ Built | LRU caches, incremental index, PDF cleanup, login dedup (Sprint 10) |
+| Renderer Architecture | ✅ Built | App.tsx split into containers, component extraction, typed API (Sprint 11) |
+| Code Deduplication | ✅ Built | Shared metadata, countWords utility, named constants (Sprint 12) |
+| CSS & Theming | ✅ Built | Cross-theme consistency, CSS custom properties, responsive (Sprint 14) |
+| Accessibility | ✅ Built | WCAG 2.1 AA — ARIA, keyboard nav, screen reader, reduced motion (Sprint 15) |
+| E-Ink Display Optimization | ✅ Built | WPM ceiling, phrase grouping, paginated scroll, ghosting prevention, touch targets (Sprint 16) |
+| Cloud Sync — Auth | ✅ Built | OAuth2 Microsoft (MSAL/PKCE) + Google, encrypted token storage (Sprint 17) |
+| Cloud Sync — Engine | ✅ Built | Offline-first, hash-based change detection, field/doc/history merge (Sprint 17) |
+| Cloud Sync — UI | ✅ Built | CloudSyncSettings page, CloudSyncIndicator, first-time merge dialog (Sprint 17) |
 
 ### What's NOT Done (Roadmap Forward)
 
+- **Sprint 18A: Windows .exe production** — code signing, auto-update e2e, installer polish, ARM64
+- **Sprint 18B: Chrome extension** — "Send to Blurby" with WebSocket + cloud fallback
+- **Sprint 18C: Android app** — React Native port with cloud sync
+- **Cloud sync hardening** — deferred from Sprint 17: operation log, tombstones, staging directory, revision counters, document content sync, checksum verification, full reconciliation
 - **Code signing** — researched (docs/code-signing.md), Azure Trusted Signing recommended, not obtained
-- **Chrome extension** (Phase 9) — design only
-- **Android app** (Phase 10) — design only
 - **Symlink protection** — not implemented
-- **requestAnimationFrame playback** — ref-based approach used instead (bypasses React render cycle)
 - **Multi-window support** — someday backlog
-- **Accessibility audit** — someday backlog
 
 ---
 
 ## Dependency Chain
 
-✅ Sprint 1 (merge) -> ✅ Sprint 2 (React perf) || ✅ Sprint 3 (modularization) -> ✅ Sprint 4 (main perf) -> ✅ Sprint 5 (reader perf) -> ✅ Sprint 6 (polish) -> ✅ Sprint 7/7b (stats) || ✅ Sprint 8 (distribution) -> **Phase 9** (Chrome extension) -> **Phase 10** (Android)
+✅ Sprints 1-8 (core) -> ✅ Sprint 9 (security) -> ✅ Sprint 10 (memory) -> ✅ Sprints 11+12 (refactor) -> ✅ Sprint 13 (tests) -> ✅ Sprint 14 (CSS) -> ✅ Sprint 15 (a11y) -> ✅ Sprint 17 (cloud sync) -> **Sprint 18** (platform expansion)
 ✅ Sprint 16 (e-ink optimization) — independent track, completed
+Sprint 18A (.exe) || Sprint 18B (Chrome ext) || Sprint 18C (Android) — all parallelizable after Sprint 17
 
 ---
 
