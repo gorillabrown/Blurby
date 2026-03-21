@@ -4,6 +4,13 @@
 const path = require("path");
 const fsPromises = require("fs/promises");
 
+// ── Lazy-loaded heavy modules (cached after first require) ─────────────────
+let _cheerio, _admZip, _pdfParse, _canvas;
+function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
+function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
+function getPDFParse() { if (!_pdfParse) { _pdfParse = require("pdf-parse"); } return _pdfParse; }
+function getCanvas() { if (!_canvas) { try { _canvas = require("@napi-rs/canvas"); } catch { _canvas = null; } } return _canvas; }
+
 // ── MOBI/PDB Parser ────────────────────────────────────────────────────────
 
 function palmDocDecompress(data) {
@@ -241,7 +248,7 @@ async function parseCallibreOpf(filepath) {
     const dir = path.dirname(filepath);
     const opfPath = path.join(dir, "metadata.opf");
     try { await fsPromises.access(opfPath); } catch { return null; }
-    const cheerio = require("cheerio");
+    const cheerio = getCheerio();
     const opfContent = await fsPromises.readFile(opfPath, "utf-8");
     const $ = cheerio.load(opfContent, { xmlMode: true });
     const title = $("dc\\:title, title").first().text().trim() || null;
@@ -272,10 +279,12 @@ async function extractContent(filepath) {
     if (ext === ".pdf") {
       if (!globalThis.DOMMatrix) {
         try {
-          const canvas = require("@napi-rs/canvas");
-          globalThis.DOMMatrix = canvas.DOMMatrix;
-          globalThis.ImageData = canvas.ImageData;
-          globalThis.Path2D = canvas.Path2D;
+          const canvas = getCanvas();
+          if (canvas) {
+            globalThis.DOMMatrix = canvas.DOMMatrix;
+            globalThis.ImageData = canvas.ImageData;
+            globalThis.Path2D = canvas.Path2D;
+          } else { throw new Error("canvas not available"); }
         } catch (canvasErr) {
           console.log("Note: @napi-rs/canvas not available, using polyfills for PDF parsing. Run 'npm rebuild @napi-rs/canvas' if PDF extraction has issues.");
           globalThis.DOMMatrix = globalThis.DOMMatrix || class DOMMatrix { constructor() { this.a=1;this.b=0;this.c=0;this.d=1;this.e=0;this.f=0; } };
@@ -283,7 +292,7 @@ async function extractContent(filepath) {
           globalThis.Path2D = globalThis.Path2D || class Path2D { };
         }
       }
-      const { PDFParse } = require("pdf-parse");
+      const { PDFParse } = getPDFParse();
       const buffer = await fsPromises.readFile(filepath);
       const parser = new PDFParse({ data: new Uint8Array(buffer) });
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("PDF parse timeout")), 30000));
@@ -304,8 +313,8 @@ async function extractContent(filepath) {
       }
     }
     if (ext === ".epub") {
-      const AdmZip = require("adm-zip");
-      const cheerio = require("cheerio");
+      const AdmZip = getAdmZip();
+      const cheerio = getCheerio();
       const zip = new AdmZip(filepath);
       const entries = zip.getEntries();
       const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
@@ -424,7 +433,7 @@ async function extractContent(filepath) {
     }
     if (ext === ".html" || ext === ".htm") {
       const html = await fsPromises.readFile(filepath, "utf-8");
-      const cheerio = require("cheerio");
+      const cheerio = getCheerio();
       const $ = cheerio.load(html);
       $("script, style, nav, footer, header, aside").remove();
       return $("body").text().trim() || $.text().trim() || null;
@@ -444,14 +453,14 @@ async function readFileContentAsync(filepath) {
 
 async function extractEpubCover(filepath, docId, dataPath) {
   try {
-    const AdmZip = require("adm-zip");
+    const AdmZip = getAdmZip();
     const zip = new AdmZip(filepath);
     const entries = zip.getEntries();
 
     const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
     let opfPath = "";
     if (containerEntry) {
-      const cheerio = require("cheerio");
+      const cheerio = getCheerio();
       const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
       opfPath = $("rootfile").attr("full-path") || "";
     }
@@ -460,7 +469,7 @@ async function extractEpubCover(filepath, docId, dataPath) {
     let coverEntry = null;
 
     if (opfEntry) {
-      const cheerio = require("cheerio");
+      const cheerio = getCheerio();
       const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
       const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
 
@@ -516,8 +525,8 @@ async function extractEpubCover(filepath, docId, dataPath) {
 
 async function extractEpubMetadata(filepath) {
   try {
-    const AdmZip = require("adm-zip");
-    const cheerio = require("cheerio");
+    const AdmZip = getAdmZip();
+    const cheerio = getCheerio();
     const zip = new AdmZip(filepath);
     const entries = zip.getEntries();
 

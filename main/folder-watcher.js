@@ -3,7 +3,8 @@
 
 const path = require("path");
 const fsPromises = require("fs/promises");
-const chokidar = require("chokidar");
+let _chokidar;
+function getChokidar() { if (!_chokidar) { _chokidar = require("chokidar"); } return _chokidar; }
 
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf", ".mobi", ".azw3", ".azw"];
 const FORMAT_PRIORITY = { ".epub": 0, ".pdf": 1, ".mobi": 2, ".azw3": 2, ".azw": 2, ".html": 3, ".htm": 3, ".txt": 4, ".md": 4, ".markdown": 4, ".text": 4, ".rst": 4 };
@@ -75,7 +76,7 @@ function startWatcher(sourceFolder, callbacks) {
   const { onAdd, onUnlink, onChange } = callbacks;
   const savedArticlesDir = path.join(sourceFolder, "Saved Articles");
 
-  const watcher = chokidar.watch(sourceFolder, {
+  const watcher = getChokidar().watch(sourceFolder, {
     ignoreInitial: true,
     ignored: [/(^|[\/\\])\../, savedArticlesDir],
     awaitWriteFinish: { stabilityThreshold: 500 },
