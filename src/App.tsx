@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { tokenize, tokenizeWithMeta, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
+import { tokenize, tokenizeWithMeta, countWords, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
 import useNarration from "./hooks/useNarration";
 import { BlurbyDoc } from "./types";
 import useLibrary from "./hooks/useLibrary";
@@ -328,7 +328,7 @@ function AppInner() {
       const charOffset = textBefore.length;
       narration.speak(activeDoc.content, charOffset, (charIdx) => {
         // Estimate word index from character index
-        const wordsBeforeChar = activeDoc.content.slice(0, charIdx).split(/\s+/).filter(Boolean).length;
+        const wordsBeforeChar = countWords(activeDoc.content.slice(0, charIdx));
         jumpToWord(wordsBeforeChar);
       });
     }

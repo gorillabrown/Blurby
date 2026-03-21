@@ -13,12 +13,26 @@ const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = r
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
-const { extractContent, extractNewFileDoc, extractEpubMetadata, extractEpubCover,
+const { extractContent, extractDocMetadata, countWords,
+        extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
         extractAuthorFromFilename, extractTitleFromFilename,
         palmDocDecompress } = require("./main/file-parsers");
 
 const isDev = !app.isPackaged;
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const LIBRARY_SAVE_DEBOUNCE_MS = 500;
+const BROADCAST_DEBOUNCE_MS = 200;
+const FOLDER_SYNC_DEBOUNCE_MS = 1000;
+const FOLDER_SYNC_BATCH_SIZE = 4;
+const MAX_RECENT_FOLDERS = 5;
+const MAX_HISTORY_SESSIONS = 1000;
+const MS_PER_DAY = 86400000;
+const AUTO_UPDATE_DELAY_MS = 5000;
+const BROWSER_FETCH_TIMEOUT_MS = 20000;
+const BROWSER_CONTENT_SETTLE_MS = 3000;
+const URL_FETCH_TIMEOUT_MS = 15000;
 
 // ── Paths (initialized once at startup) ────────────────────────────────────
 let _dataPath = null;
@@ -122,7 +136,7 @@ function saveLibrary() {
         _libraryDirty = false;
         await writeJSON(getLibraryPath(), libraryData);
       }
-    }, 500);
+    }, LIBRARY_SAVE_DEBOUNCE_MS);
   }
 }
 async function saveLibraryNow() {
@@ -141,7 +155,7 @@ function broadcastLibrary() {
   _broadcastTimer = setTimeout(() => {
     _broadcastTimer = null;
     _doBroadcastLibrary();
-  }, 200);
+  }, BROADCAST_DEBOUNCE_MS);
 }
 function _doBroadcastLibrary() {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -173,53 +187,21 @@ async function loadState() {
 // ── Folder sync ────────────────────────────────────────────────────────────
 function debouncedSyncLibraryWithFolder() {
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
-  syncDebounceTimer = setTimeout(() => { syncDebounceTimer = null; syncLibraryWithFolder(); }, 1000);
+  syncDebounceTimer = setTimeout(() => { syncDebounceTimer = null; syncLibraryWithFolder(); }, FOLDER_SYNC_DEBOUNCE_MS);
 }
 
 async function extractNewFileDoc(file) {
   const content = await extractContent(file.filepath);
   if (!content) { addFailedExtraction(file.filepath); return null; }
-  const wordCount = content.split(/\s+/).filter(Boolean).length;
+  const wordCount = countWords(content);
   const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
-  let author = null;
-  let coverPath = null;
-  let bookTitle = null;
-  if (file.ext === ".epub") {
-    const meta = await extractEpubMetadata(file.filepath);
-    author = meta.author;
-    bookTitle = meta.title;
-    coverPath = await extractEpubCover(file.filepath, docId, getDataPath());
-  } else if (file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") {
-    const opfMeta = await parseCallibreOpf(file.filepath);
-    if (opfMeta) {
-      author = opfMeta.author;
-      bookTitle = opfMeta.title;
-      if (opfMeta.coverPath) {
-        const coversDir = path.join(app.getPath("userData"), "covers");
-        await fsPromises.mkdir(coversDir, { recursive: true });
-        const ext = path.extname(opfMeta.coverPath);
-        const destCover = path.join(coversDir, `${docId}${ext}`);
-        try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch (err) {
-          console.log("Failed to copy Calibre cover:", err.message);
-        }
-      }
-    }
-    if (!author || !bookTitle) {
-      const buf = await fsPromises.readFile(file.filepath);
-      const mobiMeta = parseMobiMetadata(buf);
-      if (!author) author = mobiMeta.author;
-      if (!bookTitle) bookTitle = mobiMeta.title;
-      if (!coverPath) coverPath = await extractMobiCover(buf, docId, app.getPath("userData"));
-    }
-  }
-  if (!author) author = extractAuthorFromFilename(file.filename);
-  if (!bookTitle) bookTitle = extractTitleFromFilename(file.filename, author);
+  const meta = await extractDocMetadata(file.filepath, docId, getDataPath());
   return {
-    id: docId, title: bookTitle,
+    id: docId, title: meta.title,
     filepath: file.filepath, filename: file.filename,
     ext: file.ext, size: file.size, modified: file.modified,
     wordCount, position: 0, created: Date.now(), source: "folder",
-    author: author || null, coverPath: coverPath || null, lastReadAt: null,
+    author: meta.author, coverPath: meta.coverPath, lastReadAt: null,
   };
 }
 
@@ -257,7 +239,7 @@ async function syncLibraryWithFolder() {
 
   emitSyncProgress(0, newFiles.length, "extracting");
 
-  const BATCH_SIZE = 4;
+  const BATCH_SIZE = FOLDER_SYNC_BATCH_SIZE;
   for (let i = 0; i < newFiles.length; i += BATCH_SIZE) {
     if (syncCancelled) break;
     const batch = newFiles.slice(i, i + BATCH_SIZE);
@@ -304,7 +286,7 @@ function startWatcherFn() {
       if (doc) {
         const content = await extractContent(filepath);
         if (content) {
-          doc.wordCount = content.split(/\s+/).filter(Boolean).length;
+          doc.wordCount = countWords(content);
   const isMac = process.platform === "darwin";
 
   mainWindow = new BrowserWindow({
@@ -373,10 +355,10 @@ function setupAutoUpdater() {
       }
     });
 
-    // Check after 5s delay to not block startup
+    // Check after delay to not block startup
     setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {
       console.log("Auto-update check failed:", err.message);
-    } }, 5000);
+    } }, AUTO_UPDATE_DELAY_MS);
   } catch { /* Expected: electron-updater may not be available in dev */ }
 }
 
@@ -393,7 +375,7 @@ function recordReadingSession(docTitle, wordsRead, durationMs, wpm) {
   if (last === today) {
     // Same day — streak unchanged
   } else if (last) {
-    const diff = Math.floor((new Date(today) - new Date(last)) / 86400000);
+    const diff = Math.floor((new Date(today) - new Date(last)) / MS_PER_DAY);
     if (diff === 1) {
       history.streaks.current += 1;
     } else {
@@ -408,7 +390,7 @@ function recordReadingSession(docTitle, wordsRead, durationMs, wpm) {
   }
 
   // Keep only last 1000 sessions
-  if (history.sessions.length > 1000) history.sessions = history.sessions.slice(-1000);
+  if (history.sessions.length > MAX_HISTORY_SESSIONS) history.sessions = history.sessions.slice(-MAX_HISTORY_SESSIONS);
   saveHistory();
 }
 
@@ -422,13 +404,13 @@ function getStats() {
     const d = new Date(today);
     // Check if today or yesterday has a session
     const lastDate = dates[dates.length - 1];
-    const diffDays = Math.floor((d - new Date(lastDate)) / 86400000);
+    const diffDays = Math.floor((d - new Date(lastDate)) / MS_PER_DAY);
     if (diffDays <= 1) {
       streak = 1;
       for (let i = dates.length - 2; i >= 0; i--) {
         const prev = new Date(dates[i + 1]);
         const curr = new Date(dates[i]);
-        const gap = Math.floor((prev - curr) / 86400000);
+        const gap = Math.floor((prev - curr) / MS_PER_DAY);
         if (gap <= 1) streak++;
         else break;
       }
@@ -499,7 +481,7 @@ async function fetchWithCookies(url) {
     "Accept-Language": "en-US,en;q=0.5",
   };
   if (cookieHeader) headers["Cookie"] = cookieHeader;
-  const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000), redirect: "follow" });
+  const response = await fetch(url, { headers, signal: AbortSignal.timeout(URL_FETCH_TIMEOUT_MS), redirect: "follow" });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return await response.text();
 }
@@ -533,7 +515,7 @@ function fetchWithBrowser(url) {
           .then((html) => { cleanup(); resolve(html); })
           .catch(() => { cleanup(); reject(new Error("Timed out loading page.")); });
       }
-    }, 20000);
+    }, BROWSER_FETCH_TIMEOUT_MS);
 
     win.webContents.on("did-finish-load", () => {
       setTimeout(async () => {
@@ -548,7 +530,7 @@ function fetchWithBrowser(url) {
           cleanup();
           reject(err);
         }
-      }, 3000);
+      }, BROWSER_CONTENT_SETTLE_MS);
     });
 
     win.webContents.on("did-fail-load", (_event, errorCode, errorDesc, _url, isMainFrame) => {
@@ -719,7 +701,7 @@ function registerIPC() {
     if (result.canceled || !result.filePaths.length) return null;
     const folder = result.filePaths[0];
     settings.sourceFolder = folder;
-    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, 5);
+    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     saveSettings();
     await syncLibraryWithFolder();
     startWatcher();
@@ -729,7 +711,7 @@ function registerIPC() {
   ipcMain.handle("switch-folder", async (_, folder) => {
     try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
     settings.sourceFolder = folder;
-    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, 5);
+    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     saveSettings();
     await syncLibraryWithFolder();
     startWatcher();
@@ -750,7 +732,7 @@ function registerIPC() {
   });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
-    const wordCount = (content || "").split(/\s+/).filter(Boolean).length;
+    const wordCount = countWords(content);
     const doc = {
       id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
       title, content, wordCount, position: 0, created: Date.now(), source: "manual",
@@ -770,7 +752,7 @@ function registerIPC() {
     if (doc) {
       doc.title = title;
       doc.content = content;
-      doc.wordCount = (content || "").split(/\s+/).filter(Boolean).length;
+      doc.wordCount = countWords(content);
       saveLibrary();
     }
   });
@@ -925,7 +907,7 @@ function registerIPC() {
       const newDoc = {
         id: docId,
         title: result.title, content: result.content,
-        wordCount: result.content.split(/\s+/).filter(Boolean).length,
+        wordCount: countWords(result.content),
         sourceUrl: url, position: 0, created: Date.now(), source: "url",
         author: result.author || null,
         coverPath,

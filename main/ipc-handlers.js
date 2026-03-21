@@ -6,12 +6,20 @@ const path = require("path");
 const fsPromises = require("fs/promises");
 const https = require("https");
 
-const { extractContent, extractEpubMetadata, extractEpubCover, extractMobiCover,
+const { extractContent, extractDocMetadata, countWords,
+        extractEpubMetadata, extractEpubCover, extractMobiCover,
         parseMobiMetadata, parseCallibreOpf, extractAuthorFromFilename,
         extractTitleFromFilename, epubChapterCache, clearChapterCache } = require("./file-parsers");
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
         generateArticlePdf, openSiteLogin } = require("./url-extractor");
 const { getSystemTheme, createReaderWindow, updateWindowTheme } = require("./window-manager");
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const DEFINITION_CACHE_MAX = 500;
+const DEFINITION_TIMEOUT_MS = 5000;
+const MAX_RECENT_FOLDERS = 5;
+const MAX_HISTORY_SESSIONS = 1000;
+const MS_PER_DAY = 86400000;
 
 // ── Highlight Formatting (pure, testable) ──────────────────────────────────
 
@@ -60,7 +68,7 @@ function recordReadingSession(history, docTitle, wordsRead, durationMs, wpm, sav
   if (last === today) {
     // Same day — streak unchanged
   } else if (last) {
-    const diff = Math.floor((new Date(today) - new Date(last)) / 86400000);
+    const diff = Math.floor((new Date(today) - new Date(last)) / MS_PER_DAY);
     history.streaks.current = diff === 1 ? history.streaks.current + 1 : 1;
   } else {
     history.streaks.current = 1;
@@ -70,7 +78,7 @@ function recordReadingSession(history, docTitle, wordsRead, durationMs, wpm, sav
     history.streaks.longest = history.streaks.current;
   }
 
-  if (history.sessions.length > 1000) history.sessions = history.sessions.slice(-1000);
+  if (history.sessions.length > MAX_HISTORY_SESSIONS) history.sessions = history.sessions.slice(-1000);
   saveHistory();
 }
 
@@ -82,13 +90,13 @@ function getStats(history) {
   if (dates.length > 0) {
     const d = new Date(today);
     const lastDate = dates[dates.length - 1];
-    const diffDays = Math.floor((d - new Date(lastDate)) / 86400000);
+    const diffDays = Math.floor((d - new Date(lastDate)) / MS_PER_DAY);
     if (diffDays <= 1) {
       streak = 1;
       for (let i = dates.length - 2; i >= 0; i--) {
         const prev = new Date(dates[i + 1]);
         const curr = new Date(dates[i]);
-        const gap = Math.floor((prev - curr) / 86400000);
+        const gap = Math.floor((prev - curr) / MS_PER_DAY);
         if (gap <= 1) streak++;
         else break;
       }
@@ -162,7 +170,7 @@ function registerIpcHandlers(ctx) {
     if (result.canceled || !result.filePaths.length) return null;
     const folder = result.filePaths[0];
     settings.sourceFolder = folder;
-    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, 5);
+    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     ctx.saveSettings();
     await ctx.syncLibraryWithFolder();
     ctx.startWatcher();
@@ -173,7 +181,7 @@ function registerIpcHandlers(ctx) {
     const settings = ctx.getSettings();
     try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
     settings.sourceFolder = folder;
-    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, 5);
+    settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     ctx.saveSettings();
     await ctx.syncLibraryWithFolder();
     ctx.startWatcher();
@@ -195,7 +203,7 @@ function registerIpcHandlers(ctx) {
   });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
-    const wordCount = (content || "").split(/\s+/).filter(Boolean).length;
+    const wordCount = countWords(content);
     const doc = {
       id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
       title, content, wordCount, position: 0, created: Date.now(), source: "manual",
@@ -225,7 +233,7 @@ function registerIpcHandlers(ctx) {
     if (doc) {
       doc.title = title;
       doc.content = content;
-      doc.wordCount = (content || "").split(/\s+/).filter(Boolean).length;
+      doc.wordCount = countWords(content);
       ctx.saveLibrary();
     }
   });
@@ -300,7 +308,7 @@ function registerIpcHandlers(ctx) {
           });
         });
         req.on("error", reject);
-        req.setTimeout(5000, () => {
+        req.setTimeout(DEFINITION_TIMEOUT_MS, () => {
           req.destroy();
           reject(new Error("Request timed out"));
         });
@@ -309,7 +317,7 @@ function registerIpcHandlers(ctx) {
       const result = parseDefinitionResponse(data, word);
       if (result.error) return result;
 
-      if (definitionCache.size >= 500) {
+      if (definitionCache.size >= DEFINITION_CACHE_MAX) {
         const oldest = definitionCache.keys().next().value;
         definitionCache.delete(oldest);
       }
@@ -376,7 +384,7 @@ function registerIpcHandlers(ctx) {
       const newDoc = {
         id: docId,
         title: result.title, content: result.content,
-        wordCount: result.content.split(/\s+/).filter(Boolean).length,
+        wordCount: countWords(result.content),
         sourceUrl: url, position: 0, created: Date.now(), source: "url",
         author: result.author || null,
         coverPath,
@@ -441,26 +449,15 @@ function registerIpcHandlers(ctx) {
           try { await fsPromises.access(destPath); } catch { await fsPromises.copyFile(fp, destPath); }
           const content = await extractContent(destPath);
           if (!content) { rejected.push(path.basename(fp)); continue; }
-          const wordCount = content.split(/\s+/).filter(Boolean).length;
+          const wordCount = countWords(content);
           const stat = await fsPromises.stat(destPath);
-
-          let author = null;
-          let coverPath = null;
-          let bookTitle = null;
-          if (ext === ".epub") {
-            const meta = await extractEpubMetadata(destPath);
-            author = meta.author;
-            bookTitle = meta.title;
-            coverPath = await extractEpubCover(destPath, docId, ctx.getDataPath());
-          }
-          if (!author) author = extractAuthorFromFilename(path.basename(fp));
-          if (!bookTitle) bookTitle = extractTitleFromFilename(path.basename(fp), author);
+          const meta = await extractDocMetadata(destPath, docId, ctx.getDataPath());
 
           const doc = {
-            id: docId, title: bookTitle, filepath: destPath, filename: path.basename(destPath),
+            id: docId, title: meta.title, filepath: destPath, filename: path.basename(destPath),
             ext, size: stat.size, modified: stat.mtimeMs,
             wordCount, position: 0, created: Date.now(), source: "folder",
-            author: author || null, coverPath: coverPath || null, lastReadAt: null,
+            author: meta.author, coverPath: meta.coverPath, lastReadAt: null,
           };
           ctx.addDocToLibrary(doc);
           imported.push(doc.title);
@@ -471,7 +468,7 @@ function registerIpcHandlers(ctx) {
       } else {
         const content = await extractContent(fp);
         if (!content) { rejected.push(path.basename(fp)); continue; }
-        const wordCount = content.split(/\s+/).filter(Boolean).length;
+        const wordCount = countWords(content);
         const doc = {
           id: docId,
           title: path.basename(fp, ext),
@@ -602,46 +599,14 @@ function registerIpcHandlers(ctx) {
         } else {
           const content = await extractContent(file.filepath);
           if (content) {
-            const wordCount = content.split(/\s+/).filter(Boolean).length;
+            const wordCount = countWords(content);
             const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
-            let author = null;
-            let coverPath = null;
-            let bookTitle = null;
-            if (file.ext === ".epub") {
-              const meta = await extractEpubMetadata(file.filepath);
-              author = meta.author;
-              bookTitle = meta.title;
-              coverPath = await extractEpubCover(file.filepath, docId, ctx.getDataPath());
-            } else if (file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") {
-              const opfMeta = await parseCallibreOpf(file.filepath);
-              if (opfMeta) {
-                author = opfMeta.author;
-                bookTitle = opfMeta.title;
-                if (opfMeta.coverPath) {
-                  const coversDir = path.join(ctx.getUserDataPath(), "covers");
-                  await fsPromises.mkdir(coversDir, { recursive: true });
-                  const coverExt = path.extname(opfMeta.coverPath);
-                  const destCover = path.join(coversDir, `${docId}${coverExt}`);
-                  try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch (err) {
-                    console.log("Failed to copy Calibre cover:", err.message);
-                  }
-                }
-              }
-              if (!author || !bookTitle || !coverPath) {
-                const buf = await fsPromises.readFile(file.filepath);
-                const mobiMeta = parseMobiMetadata(buf);
-                if (!author) author = mobiMeta.author;
-                if (!bookTitle) bookTitle = mobiMeta.title;
-                if (!coverPath) coverPath = await extractMobiCover(buf, docId, ctx.getUserDataPath());
-              }
-            }
-            if (!author) author = extractAuthorFromFilename(file.filename);
-            if (!bookTitle) bookTitle = extractTitleFromFilename(file.filename, author);
+            const meta = await extractDocMetadata(file.filepath, docId, ctx.getDataPath());
             synced.push({
-              id: docId, title: bookTitle, filepath: file.filepath, filename: file.filename,
+              id: docId, title: meta.title, filepath: file.filepath, filename: file.filename,
               ext: file.ext, size: file.size, modified: file.modified,
               wordCount, position: 0, created: Date.now(), source: "folder",
-              author: author || null, coverPath: coverPath || null, lastReadAt: null,
+              author: meta.author, coverPath: meta.coverPath, lastReadAt: null,
             });
           } else {
             ctx.addFailedExtraction(file.filepath);

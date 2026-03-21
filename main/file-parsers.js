@@ -11,18 +11,35 @@ function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _a
 function getPDFParse() { if (!_pdfParse) { _pdfParse = require("pdf-parse"); } return _pdfParse; }
 function getCanvas() { if (!_canvas) { try { _canvas = require("@napi-rs/canvas"); } catch { _canvas = null; } } return _canvas; }
 
+// ── Constants ─────────────────────────────────────────────────────────────
+const PDF_PARSE_TIMEOUT_MS = 30000;
+const MIN_PRINTABLE_RATIO = 0.8;
+const MIN_TEXT_LENGTH = 10;
+const MAX_MOBI_TEXT_BYTES = 10 * 1024 * 1024;
+const EPUB_HEADING_MAX_LENGTH = 100;
+
 // ── Image validation helpers ───────────────────────────────────────────────
 
 /** Validate image data by checking magic bytes. Returns extension or null. */
 function validateImageMagicBytes(buffer) {
   if (!buffer || buffer.length < 4) return null;
-  // JPEG: FF D8 FF
   if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return ".jpg";
-  // PNG: 89 50 4E 47
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return ".png";
-  // GIF: 47 49 46
   if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return ".gif";
   return null;
+}
+
+// ── Word count utility ────────────────────────────────────────────────────
+function countWords(text) {
+  if (!text) return 0;
+  let count = 0, inWord = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    const isSpace = ch <= 32;
+    if (!isSpace && !inWord) count++;
+    inWord = !isSpace;
+  }
+  return count;
 }
 
 // ── MOBI/PDB Parser ────────────────────────────────────────────────────────
@@ -103,7 +120,7 @@ function parseMobiContent(buffer) {
       return null;
     }
 
-    const maxTextBytes = 10 * 1024 * 1024;
+    const maxTextBytes = MAX_MOBI_TEXT_BYTES;
 
     const textParts = [];
     let totalBytes = 0;
@@ -327,14 +344,14 @@ async function extractContent(filepath) {
       const parser = new PDFParse({ data: new Uint8Array(buffer) });
       let timeoutId;
       const timeout = new Promise((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error("PDF parse timeout")), 30000);
+        timeoutId = setTimeout(() => reject(new Error("PDF parse timeout")), PDF_PARSE_TIMEOUT_MS);
       });
       try {
         const result = await Promise.race([parser.getText({ pageJoiner: "\n\n" }), timeout]);
         clearTimeout(timeoutId);
         const text = result.text || "";
         const printableRatio = text.replace(/[\x00-\x1f\x7f-\x9f]/g, "").length / (text.length || 1);
-        if (printableRatio < 0.8 || text.length < 10) {
+        if (printableRatio < MIN_PRINTABLE_RATIO || text.length < MIN_TEXT_LENGTH) {
           console.log(`PDF extraction yielded non-text content for ${filepath} (${Math.round(printableRatio*100)}% printable)`);
           return null;
         }
@@ -446,7 +463,7 @@ async function extractContent(filepath) {
           chapters.push({ title: chapterTitle, charOffset });
         } else {
           const heading = $("h1, h2").first().text().trim();
-          if (heading && heading.length < 100) {
+          if (heading && heading.length < EPUB_HEADING_MAX_LENGTH) {
             chapters.push({ title: heading, charOffset });
           }
         }
@@ -464,7 +481,7 @@ async function extractContent(filepath) {
     if (ext === ".mobi" || ext === ".azw3" || ext === ".azw") {
       const buffer = await fsPromises.readFile(filepath);
       const text = parseMobiContent(buffer);
-      if (text && text.length > 10) return text;
+      if (text && text.length > MIN_TEXT_LENGTH) return text;
       return null;
     }
     if (ext === ".html" || ext === ".htm") {
@@ -604,6 +621,59 @@ function extractTitleFromFilename(filename, author) {
   return base;
 }
 
+/**
+ * Consolidated metadata extraction for all supported book formats.
+ * Extracts title, author, and cover from EPUB/MOBI/AZW files,
+ * falling back to filename-based extraction.
+ *
+ * @param {string} filepath - Path to the book file
+ * @param {string} docId - Unique document ID (used for cover filename)
+ * @param {string} dataPath - Path to app data directory (for cover storage)
+ * @returns {Promise<{title: string|null, author: string|null, coverPath: string|null}>}
+ */
+async function extractDocMetadata(filepath, docId, dataPath) {
+  const ext = path.extname(filepath).toLowerCase();
+  const filename = path.basename(filepath);
+  let author = null;
+  let bookTitle = null;
+  let coverPath = null;
+
+  if (ext === ".epub") {
+    const meta = await extractEpubMetadata(filepath);
+    author = meta.author;
+    bookTitle = meta.title;
+    coverPath = await extractEpubCover(filepath, docId, dataPath);
+  } else if (ext === ".mobi" || ext === ".azw3" || ext === ".azw") {
+    // Try Calibre OPF sidecar first
+    const opfMeta = await parseCallibreOpf(filepath);
+    if (opfMeta) {
+      author = opfMeta.author;
+      bookTitle = opfMeta.title;
+      if (opfMeta.coverPath) {
+        const coversDir = path.join(dataPath, "covers");
+        await fsPromises.mkdir(coversDir, { recursive: true });
+        const coverExt = path.extname(opfMeta.coverPath);
+        const destCover = path.join(coversDir, `${docId}${coverExt}`);
+        try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
+      }
+    }
+    // Fill gaps from MOBI binary metadata
+    if (!author || !bookTitle || !coverPath) {
+      const buf = await fsPromises.readFile(filepath);
+      const mobiMeta = parseMobiMetadata(buf);
+      if (!author) author = mobiMeta.author;
+      if (!bookTitle) bookTitle = mobiMeta.title;
+      if (!coverPath) coverPath = await extractMobiCover(buf, docId, dataPath);
+    }
+  }
+
+  // Fall back to filename-based extraction
+  if (!author) author = extractAuthorFromFilename(filename);
+  if (!bookTitle) bookTitle = extractTitleFromFilename(filename, author);
+
+  return { title: bookTitle, author: author || null, coverPath: coverPath || null };
+}
+
 module.exports = {
   palmDocDecompress,
   parseMobiContent,
@@ -616,6 +686,8 @@ module.exports = {
   extractEpubMetadata,
   extractAuthorFromFilename,
   extractTitleFromFilename,
+  extractDocMetadata,
+  countWords,
   epubChapterCache,
   validateImageMagicBytes,
   clearChapterCache,

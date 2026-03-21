@@ -4,6 +4,19 @@
 const CURRENT_SETTINGS_SCHEMA = 5;
 const CURRENT_LIBRARY_SCHEMA = 3;
 
+/** Count words without creating intermediate arrays. */
+function countWords(text) {
+  if (!text) return 0;
+  let count = 0, inWord = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    const isSpace = ch <= 32;
+    if (!isSpace && !inWord) count++;
+    inWord = !isSpace;
+  }
+  return count;
+}
+
 const settingsMigrations = [
   // v0 → v1
   (data) => {
@@ -70,7 +83,7 @@ const libraryMigrations = [
     const docs = Array.isArray(data) ? data : (data.docs || []);
     for (const doc of docs) {
       if (!doc.wordCount && doc.content) {
-        doc.wordCount = (doc.content || "").split(/\s+/).filter(Boolean).length;
+        doc.wordCount = countWords(doc.content);
       }
       if (doc.source === "folder" && doc.filepath) {
         delete doc.content;

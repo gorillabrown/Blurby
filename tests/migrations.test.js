@@ -65,7 +65,10 @@ const libraryMigrations = [
     const docs = Array.isArray(data) ? data : (data.docs || []);
     for (const doc of docs) {
       if (!doc.wordCount && doc.content) {
-        doc.wordCount = (doc.content || "").split(/\s+/).filter(Boolean).length;
+        const text = doc.content || "";
+        let wc = 0, inW = false;
+        for (let i = 0; i < text.length; i++) { const c = text.charCodeAt(i); if (c > 32 && !inW) wc++; inW = c > 32; }
+        doc.wordCount = wc;
       }
       if (doc.source === "folder" && doc.filepath) {
         delete doc.content;

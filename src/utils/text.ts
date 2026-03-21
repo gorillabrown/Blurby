@@ -7,6 +7,22 @@ export const REWIND_WORDS = 5;
 export const INITIAL_PAUSE_MS = 3000;   // pause before first word advances
 export const PUNCTUATION_PAUSE_MS = 1000; // extra dwell on punctuation words
 
+/**
+ * Count words in text without creating intermediate arrays.
+ * Equivalent to text.split(/\s+/).filter(Boolean).length but O(n) with no allocation.
+ */
+export function countWords(text: string | null | undefined): number {
+  if (!text) return 0;
+  let count = 0, inWord = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    const isSpace = ch <= 32;
+    if (!isSpace && !inWord) count++;
+    inWord = !isSpace;
+  }
+  return count;
+}
+
 /** Does this word end with sentence/clause-ending punctuation? */
 export function hasPunctuation(word: string): boolean {
   // Match punctuation at end, possibly followed by closing quotes/parens
@@ -155,21 +171,40 @@ export function currentChapterIndex(chapters: Chapter[], wordIndex: number): num
   return -1;
 }
 
-/** Convert charOffset-based chapters (from EPUB TOC) to wordIndex-based chapters. */
+/** Convert charOffset-based chapters (from EPUB TOC) to wordIndex-based chapters.
+ *  Single-pass O(n) implementation — sorts offsets and scans content once. */
 export function chaptersFromCharOffsets(
   content: string,
   charOffsetChapters: Array<{ title: string; charOffset: number }>
 ): Chapter[] {
   if (!content || charOffsetChapters.length === 0) return [];
-  // Build a mapping from character offset to word index
-  const chapters: Chapter[] = [];
-  for (const ch of charOffsetChapters) {
-    // Count words in text up to charOffset
-    const textBefore = content.slice(0, ch.charOffset);
-    const wordIndex = textBefore.split(/\s+/).filter(Boolean).length;
-    chapters.push({ title: ch.title, wordIndex });
+
+  // Sort by charOffset so we can scan once left-to-right
+  const sorted = charOffsetChapters
+    .map((ch, idx) => ({ ...ch, origIdx: idx }))
+    .sort((a, b) => a.charOffset - b.charOffset);
+
+  const results: Array<{ title: string; wordIndex: number; origIdx: number }> = [];
+  let wordCount = 0;
+  let inWord = false;
+  let nextChapterIdx = 0;
+
+  for (let i = 0; i <= content.length && nextChapterIdx < sorted.length; i++) {
+    // When we reach a chapter's charOffset, record the current word count
+    while (nextChapterIdx < sorted.length && i === sorted[nextChapterIdx].charOffset) {
+      results.push({ title: sorted[nextChapterIdx].title, wordIndex: wordCount, origIdx: sorted[nextChapterIdx].origIdx });
+      nextChapterIdx++;
+    }
+    if (i < content.length) {
+      const isSpace = content.charCodeAt(i) <= 32;
+      if (!isSpace && !inWord) wordCount++;
+      inWord = !isSpace;
+    }
   }
-  return chapters;
+
+  // Restore original order
+  results.sort((a, b) => a.origIdx - b.origIdx);
+  return results.map(r => ({ title: r.title, wordIndex: r.wordIndex }));
 }
 
 /** Calculate per-character opacity based on distance from ORP (Optimal Recognition Point). */
@@ -182,12 +217,18 @@ export function calculateFocusOpacity(charIndex: number, orpIndex: number, wordL
 
 export function focusChar(word: string | null | undefined): { before: string; focus: string; after: string } {
   if (!word) return { before: "", focus: "", after: "" };
-  const len = word.length;
+  // Use Array.from to handle surrogate pairs (emoji, CJK supplementary)
+  const chars = Array.from(word);
+  const len = chars.length;
   let pivot: number;
   if (len <= 1) pivot = 0;
   else if (len <= 5) pivot = 1;
   else if (len <= 9) pivot = 2;
   else if (len <= 13) pivot = 3;
   else pivot = 4;
-  return { before: word.slice(0, pivot), focus: word[pivot], after: word.slice(pivot + 1) };
+  return {
+    before: chars.slice(0, pivot).join(""),
+    focus: chars[pivot] || "",
+    after: chars.slice(pivot + 1).join(""),
+  };
 }
