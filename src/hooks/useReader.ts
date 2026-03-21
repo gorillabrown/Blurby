@@ -5,6 +5,9 @@ import { BlurbyDoc, RhythmPauses } from "../types";
 
 const api = window.electronAPI;
 
+/** Callback for direct DOM updates on every word advance (bypasses React) */
+export type WordUpdateCallback = (word: string, index: number) => void;
+
 export default function useReader(
   wpm: number,
   setWpm: (fn: (prev: number) => number) => void,
@@ -33,6 +36,9 @@ export default function useReader(
   const escTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastStateSyncRef = useRef(0);
   wpmRef.current = wpm;
+
+  // Direct DOM update callback — registered by ReaderView for ref-based RSVP rendering
+  const onWordUpdateRef = useRef<WordUpdateCallback | null>(null);
 
   // requestAnimationFrame-based playback loop
   const tick = useCallback((timestamp: number) => {
@@ -74,14 +80,20 @@ export default function useReader(
         return;
       }
       wordIndexRef.current = next;
+
+      // Direct DOM update on every word advance (bypasses React re-render)
+      if (onWordUpdateRef.current) {
+        onWordUpdateRef.current(wordsRef.current[next] || "", next);
+      }
+
       // Break after advancing so the *next* word's punctuation check
       // is evaluated on the next frame (prevents skipping pauses)
       break;
     }
 
-    // Throttle React state syncs to ~100ms (10fps) for progress display
+    // Throttle React state syncs to ~500ms for progress bar / bottom info
     const now = performance.now();
-    if (now - lastStateSyncRef.current >= 100) {
+    if (now - lastStateSyncRef.current >= 500) {
       lastStateSyncRef.current = now;
       setWordIndex(wordIndexRef.current);
     }
@@ -185,6 +197,7 @@ export default function useReader(
     escPending,
     wordsRef,
     wordIndexRef,
+    onWordUpdateRef,
     togglePlay,
     adjustWpm,
     seekWords,

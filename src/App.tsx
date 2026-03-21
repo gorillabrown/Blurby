@@ -172,7 +172,7 @@ function AppInner() {
   }, [activeDoc?.content]);
 
   const reader = useReader(wpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
-  const { wordIndex, playing, escPending, wordsRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
+  const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   // Sync wpm/folderName from loaded settings
   const [didInit, setDidInit] = useState(false);
@@ -269,6 +269,21 @@ function AppInner() {
       updateProgress(activeDoc.id, pos);
     }
   }, [activeDoc, updateProgress]);
+
+  // Throttled RSVP progress save: every 5s or 50 words during playback
+  const rsvpLastSaveRef = useRef({ time: 0, wordIndex: 0 });
+  useEffect(() => {
+    if (!playing || !activeDoc || readerMode !== "speed") return;
+    const now = Date.now();
+    const last = rsvpLastSaveRef.current;
+    const timeDelta = now - last.time;
+    const wordDelta = Math.abs(wordIndex - last.wordIndex);
+    if (timeDelta >= 5000 || wordDelta >= 50) {
+      rsvpLastSaveRef.current = { time: now, wordIndex };
+      api.updateDocProgress(activeDoc.id, wordIndex);
+      updateProgress(activeDoc.id, wordIndex);
+    }
+  }, [playing, wordIndex, activeDoc, readerMode, updateProgress]);
 
   const handleSwitchToScroll = useCallback(() => {
     // Pause speed reader and switch to scroll/flow mode
@@ -385,6 +400,23 @@ function AppInner() {
     setSettings((prev) => ({ ...prev, ...updates }));
   }, [setSettings]);
 
+  // Memoized settings slices — prevent reader re-renders when unrelated settings change
+  const rsvpSettings = useMemo(() => ({
+    focusSpan: settings.focusSpan,
+    focusMarks: settings.focusMarks,
+    layoutSpacing: settings.layoutSpacing,
+    fontFamily: settings.fontFamily,
+  }), [settings.focusSpan, settings.focusMarks, settings.layoutSpacing, settings.fontFamily]);
+
+  const scrollSettings = useMemo(() => ({
+    flowTextSize: settings.flowTextSize,
+    layoutSpacing: settings.layoutSpacing,
+    rhythmPauses: settings.rhythmPauses,
+    punctuationPauseMs: settings.punctuationPauseMs,
+    readingRuler: settings.readingRuler,
+    fontFamily: settings.fontFamily,
+  }), [settings.flowTextSize, settings.layoutSpacing, settings.rhythmPauses, settings.punctuationPauseMs, settings.readingRuler, settings.fontFamily]);
+
   if (!loaded) {
     return <div className="loading-screen">loading...</div>;
   }
@@ -413,7 +445,7 @@ function AppInner() {
               wpm={wpm}
               focusTextSize={focusTextSize}
               isMac={platform === "darwin"}
-              settings={settings}
+              settings={scrollSettings}
               onSetWpm={setWpm}
               onAdjustFocusTextSize={adjustFocusTextSize}
               onExit={handleScrollExit}
@@ -438,8 +470,9 @@ function AppInner() {
             playing={playing}
             escPending={escPending}
             isMac={platform === "darwin"}
-            settings={settings}
+            settings={rsvpSettings}
             externalChapters={docChapters.length > 0 ? docChapters : undefined}
+            onWordUpdateRef={onWordUpdateRef}
             togglePlay={togglePlay}
             exitReader={handleExitReader}
             onSetWpm={setWpm}

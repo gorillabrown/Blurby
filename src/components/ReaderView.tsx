@@ -1,6 +1,15 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
-import { BlurbyDoc, BlurbySettings } from "../types";
+import { BlurbyDoc, LayoutSpacing } from "../types";
+import type { WordUpdateCallback } from "../hooks/useReader";
+
+/** Sliced settings for RSVP reader — only fields it actually uses */
+interface RsvpSettings {
+  focusSpan?: number;
+  focusMarks?: boolean;
+  layoutSpacing?: LayoutSpacing;
+  fontFamily?: string | null;
+}
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
 import HighlightMenu from "./HighlightMenu";
@@ -17,8 +26,9 @@ interface ReaderViewProps {
   playing: boolean;
   escPending: boolean;
   isMac: boolean;
-  settings?: BlurbySettings;
+  settings?: RsvpSettings;
   externalChapters?: Array<{ title: string; charOffset: number }>;
+  onWordUpdateRef?: React.MutableRefObject<WordUpdateCallback | null>;
   togglePlay: () => void;
   exitReader: () => void;
   onSetWpm: (wpm: number) => void;
@@ -40,7 +50,7 @@ function PausedTextView({ paragraphs, paraStartIndices, wordIndex, highlightIdx,
   currentWordRef: React.RefObject<HTMLSpanElement | null>;
   scrollBodyRef: React.RefObject<HTMLDivElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
-  settings?: BlurbySettings;
+  settings?: RsvpSettings;
   onJumpToWord: (index: number) => void;
   onHighlight: (word: string, idx: number, pos: { x: number; y: number }) => void;
   togglePlay: () => void;
@@ -137,11 +147,67 @@ function PausedTextView({ paragraphs, paraStartIndices, wordIndex, highlightIdx,
   );
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap, onPrevChapter, onNextChapter }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, onWordUpdateRef, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap, onPrevChapter, onNextChapter }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
   const [chapterListOpen, setChapterListOpen] = useState(false);
+
+  // Refs for direct DOM RSVP updates (bypass React on hot path)
+  const beforeRef = useRef<HTMLSpanElement>(null);
+  const focusRef = useRef<HTMLSpanElement>(null);
+  const afterRef = useRef<HTMLSpanElement>(null);
+  const focusMarkTopRef = useRef<HTMLSpanElement>(null);
+  const focusMarkBottomRef = useRef<HTMLSpanElement>(null);
+  // For focus-span mode (per-character opacity)
+  const charContainerRef = useRef<HTMLDivElement>(null);
+
+  // Register direct DOM update callback with useReader's RAF loop
+  useEffect(() => {
+    if (!onWordUpdateRef) return;
+    onWordUpdateRef.current = (word: string, _index: number) => {
+      if (!playing) return;
+      const { before: b, focus: f, after: a } = focusChar(word);
+      const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
+
+      if (useFocusSpan && charContainerRef.current) {
+        // Per-character opacity mode: rebuild children
+        const pivotIndex = b.length;
+        const chars = word.split("");
+        const container = charContainerRef.current;
+        // Reuse existing spans if count matches, otherwise rebuild
+        if (container.childNodes.length === chars.length) {
+          chars.forEach((char, i) => {
+            const span = container.childNodes[i] as HTMLSpanElement;
+            span.textContent = char;
+            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, word.length, settings!.focusSpan));
+            span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
+          });
+        } else {
+          container.innerHTML = "";
+          chars.forEach((char, i) => {
+            const span = document.createElement("span");
+            span.textContent = char;
+            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, word.length, settings!.focusSpan));
+            span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
+            container.appendChild(span);
+          });
+        }
+      } else {
+        // Standard ORP mode: update before/focus/after spans
+        if (beforeRef.current) beforeRef.current.textContent = b.split("").reverse().join("");
+        if (focusRef.current) focusRef.current.textContent = f;
+        if (afterRef.current) afterRef.current.textContent = a;
+      }
+
+      // Update focus mark positions
+      const pivotIndex = b.length;
+      const orpPercent = word.length > 0 ? ((pivotIndex + 0.5) / word.length) * 100 : 50;
+      if (focusMarkTopRef.current) focusMarkTopRef.current.style.left = `${orpPercent}%`;
+      if (focusMarkBottomRef.current) focusMarkBottomRef.current.style.left = `${orpPercent}%`;
+    };
+    return () => { onWordUpdateRef.current = null; };
+  }, [onWordUpdateRef, playing, settings?.focusSpan]);
 
   // Highlight menu state
   const [highlightWord, setHighlightWord] = useState<string | null>(null);
@@ -307,7 +373,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
       </div>
 
       {playing ? (
-        /* RSVP word display during playback */
+        /* RSVP word display during playback — DOM updated directly via refs */
         (() => {
           const pivotIndex = before.length;
           const orpPercent = currentWord.length > 0 ? ((pivotIndex + 0.5) / currentWord.length) * 100 : 50;
@@ -315,29 +381,31 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           return (
             <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
               <div className="reader-guide-line reader-guide-top">
-                {settings?.focusMarks && <span className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25BC;</span>}
+                {settings?.focusMarks && <span ref={focusMarkTopRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25BC;</span>}
               </div>
               <div className="reader-word-display" aria-live="off" aria-atomic="true">
                 {useFocusSpan ? (
-                  currentWord.split("").map((char, i) => (
-                    <span
-                      key={i}
-                      className={i === pivotIndex ? "reader-word-focus" : "reader-word-char"}
-                      style={{ opacity: calculateFocusOpacity(i, pivotIndex, currentWord.length, settings!.focusSpan) }}
-                    >{char}</span>
-                  ))
+                  <div ref={charContainerRef}>
+                    {currentWord.split("").map((char, i) => (
+                      <span
+                        key={i}
+                        className={i === pivotIndex ? "reader-word-focus" : "reader-word-char"}
+                        style={{ opacity: calculateFocusOpacity(i, pivotIndex, currentWord.length, settings!.focusSpan) }}
+                      >{char}</span>
+                    ))}
+                  </div>
                 ) : (
                   <>
-                    <span className="reader-word-before">
+                    <span ref={beforeRef} className="reader-word-before">
                       {before.split("").reverse().join("")}
                     </span>
-                    <span className="reader-word-focus">{focus}</span>
-                    <span className="reader-word-after">{after}</span>
+                    <span ref={focusRef} className="reader-word-focus">{focus}</span>
+                    <span ref={afterRef} className="reader-word-after">{after}</span>
                   </>
                 )}
               </div>
               <div className="reader-guide-line reader-guide-bottom">
-                {settings?.focusMarks && <span className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25B2;</span>}
+                {settings?.focusMarks && <span ref={focusMarkBottomRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25B2;</span>}
               </div>
             </div>
           );

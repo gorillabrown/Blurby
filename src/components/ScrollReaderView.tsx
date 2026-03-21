@@ -1,7 +1,17 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import { tokenize, tokenizeWithMeta, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
 import { calculatePauseMs } from "../utils/rhythm";
-import { BlurbyDoc, BlurbySettings } from "../types";
+import { BlurbyDoc, LayoutSpacing, RhythmPauses } from "../types";
+
+/** Sliced settings for scroll/flow reader — only fields it actually uses */
+interface ScrollSettings {
+  flowTextSize?: number;
+  layoutSpacing?: LayoutSpacing;
+  rhythmPauses?: RhythmPauses;
+  punctuationPauseMs?: number;
+  readingRuler?: boolean;
+  fontFamily?: string | null;
+}
 import ProgressBar from "./ProgressBar";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
@@ -60,11 +70,14 @@ function VirtualScrollText({ displayBlocks, scale, spacing, scrollRef }: {
   );
 }
 
-// Flow mode: renders words grouped by paragraphs with a small virtual window for performance
-function FlowText({ words, paragraphBreaks, flowWordIndex, flowWordRef, scale, spacing, containerRef, onClickWord, onHighlight }: {
+// Flow mode: renders words grouped by paragraphs with a small virtual window for performance.
+// During playback, word highlighting is done via direct DOM class swaps (bypasses React).
+function FlowText({ words, paragraphBreaks, flowWordIndex, flowWordIndexRef, flowPlaying, flowWordRef, scale, spacing, containerRef, onClickWord, onHighlight }: {
   words: string[];
   paragraphBreaks: Set<number>;
   flowWordIndex: number;
+  flowWordIndexRef: React.RefObject<number>;
+  flowPlaying: boolean;
   flowWordRef: React.RefObject<HTMLSpanElement | null>;
   scale: number;
   spacing?: { line?: number; character?: number; word?: number };
@@ -98,8 +111,49 @@ function FlowText({ words, paragraphBreaks, flowWordIndex, flowWordRef, scale, s
   const paraStart = Math.max(0, activePara - PARA_WINDOW);
   const paraEnd = Math.min(paragraphs.length, activePara + PARA_WINDOW + 1);
 
+  // Ref-based DOM class swaps during flow playback
+  const flowTextContainerRef = useRef<HTMLDivElement>(null);
+  const prevHighlightRef = useRef<HTMLElement | null>(null);
+
+  // Direct DOM highlight update — runs on RAF outside React
+  useEffect(() => {
+    if (!flowPlaying) return;
+    let rafId: number;
+    let lastIdx = -1;
+
+    const updateHighlight = () => {
+      const currentIdx = flowWordIndexRef.current;
+      if (currentIdx !== lastIdx && flowTextContainerRef.current) {
+        // Remove previous highlight
+        if (prevHighlightRef.current) {
+          prevHighlightRef.current.classList.remove("flow-word-active");
+        }
+        // Find new word span by data attribute
+        const span = flowTextContainerRef.current.querySelector(`[data-widx="${currentIdx}"]`) as HTMLElement | null;
+        if (span) {
+          span.classList.add("flow-word-active");
+          prevHighlightRef.current = span;
+          // Update flowWordRef for auto-scroll
+          (flowWordRef as React.MutableRefObject<HTMLSpanElement | null>).current = span as HTMLSpanElement;
+        }
+        lastIdx = currentIdx;
+      }
+      rafId = requestAnimationFrame(updateHighlight);
+    };
+    rafId = requestAnimationFrame(updateHighlight);
+    return () => cancelAnimationFrame(rafId);
+  }, [flowPlaying, flowWordIndexRef, flowWordRef]);
+
+  // Cleanup highlight class when stopping
+  useEffect(() => {
+    if (!flowPlaying && prevHighlightRef.current) {
+      prevHighlightRef.current.classList.remove("flow-word-active");
+      prevHighlightRef.current = null;
+    }
+  }, [flowPlaying]);
+
   return (
-    <div className="scroll-reader-text flow-text" style={{
+    <div ref={flowTextContainerRef} className="scroll-reader-text flow-text" style={{
       fontSize: `${18 * scale}px`,
       lineHeight: spacing?.line || undefined,
       letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
@@ -110,10 +164,11 @@ function FlowText({ words, paragraphBreaks, flowWordIndex, flowWordRef, scale, s
         <p key={paraStart + pi} className="scroll-reader-paragraph">
           {words.slice(para.start, para.end).map((word, wi) => {
             const globalIdx = para.start + wi;
-            const isActive = globalIdx === flowWordIndex;
+            const isActive = !flowPlaying && globalIdx === flowWordIndex;
             return (
               <span
                 key={globalIdx}
+                data-widx={globalIdx}
                 ref={isActive ? flowWordRef : undefined}
                 className={isActive ? "flow-word-active" : ""}
                 onClick={() => onClickWord(globalIdx)}
@@ -142,7 +197,7 @@ interface ScrollReaderViewProps {
   wpm: number;
   focusTextSize: number;
   isMac: boolean;
-  settings?: BlurbySettings;
+  settings?: ScrollSettings;
   onSetWpm: (wpm: number) => void;
   onAdjustFocusTextSize: (delta: number) => void;
   onExit: (position: number) => void;
@@ -271,9 +326,9 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         setFlowPlaying(false);
       } else {
         flowWordIndexRef.current = next;
-        // Throttle React state sync to ~100ms
+        // Throttle React state sync to ~500ms (DOM highlighting is ref-based)
         const now = performance.now();
-        if (now - flowLastStateSyncRef.current >= 100) {
+        if (now - flowLastStateSyncRef.current >= 500) {
           flowLastStateSyncRef.current = now;
           setFlowWordIndex(next);
         }
@@ -405,6 +460,8 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
             words={words}
             paragraphBreaks={paragraphBreaks}
             flowWordIndex={flowWordIndex}
+            flowWordIndexRef={flowWordIndexRef}
+            flowPlaying={flowPlaying}
             flowWordRef={flowWordRef}
             scale={scale}
             spacing={spacing}
