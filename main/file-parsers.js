@@ -281,8 +281,27 @@ async function parseCallibreOpf(filepath) {
   return null;
 }
 
-// EPUB chapter cache shared across extractions
+// EPUB chapter cache shared across extractions (LRU, bounded)
+const EPUB_CHAPTER_CACHE_MAX = 50;
 const epubChapterCache = new Map();
+
+function epubChapterCacheSet(key, value) {
+  // Delete first so re-insertion moves it to end (most recent)
+  if (epubChapterCache.has(key)) epubChapterCache.delete(key);
+  epubChapterCache.set(key, value);
+  // Evict oldest entry if over limit
+  if (epubChapterCache.size > EPUB_CHAPTER_CACHE_MAX) {
+    const oldest = epubChapterCache.keys().next().value;
+    epubChapterCache.delete(oldest);
+  }
+}
+
+function clearChapterCache(docId) {
+  // docId could be a filepath key; also search by value if needed
+  if (epubChapterCache.has(docId)) {
+    epubChapterCache.delete(docId);
+  }
+}
 
 async function extractContent(filepath) {
   const ext = path.extname(filepath).toLowerCase();
@@ -306,10 +325,13 @@ async function extractContent(filepath) {
       const { PDFParse } = getPDFParse();
       const buffer = await fsPromises.readFile(filepath);
       const parser = new PDFParse({ data: new Uint8Array(buffer) });
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("PDF parse timeout")), 30000));
+      let timeoutId;
+      const timeout = new Promise((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error("PDF parse timeout")), 30000);
+      });
       try {
         const result = await Promise.race([parser.getText({ pageJoiner: "\n\n" }), timeout]);
-        await parser.destroy();
+        clearTimeout(timeoutId);
         const text = result.text || "";
         const printableRatio = text.replace(/[\x00-\x1f\x7f-\x9f]/g, "").length / (text.length || 1);
         if (printableRatio < 0.8 || text.length < 10) {
@@ -318,9 +340,12 @@ async function extractContent(filepath) {
         }
         return text;
       } catch (err) {
-        try { await parser.destroy(); } catch { /* Best-effort cleanup */ }
+        clearTimeout(timeoutId);
         console.error(`PDF extraction failed for ${filepath}:`, err.message);
         return null;
+      } finally {
+        // Always destroy parser to prevent memory leaks
+        try { await parser.destroy(); } catch { /* Best-effort cleanup */ }
       }
     }
     if (ext === ".epub") {
@@ -432,7 +457,7 @@ async function extractContent(filepath) {
 
       const fullText = texts.join("\n\n") || null;
       if (fullText && chapters.length > 1) {
-        epubChapterCache.set(filepath, chapters);
+        epubChapterCacheSet(filepath, chapters);
       }
       return fullText;
     }
@@ -593,4 +618,5 @@ module.exports = {
   extractTitleFromFilename,
   epubChapterCache,
   validateImageMagicBytes,
+  clearChapterCache,
 };

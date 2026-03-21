@@ -61,7 +61,25 @@ let readerWindows = new Map();
 let tray = null;
 let watcher = null;
 let syncDebounceTimer = null;
-const failedExtractions = new Set();
+// failedExtractions: Map<filepath, timestamp> — bounded, auto-cleans
+const FAILED_EXTRACTIONS_MAX = 500;
+const failedExtractions = new Map();
+
+function addFailedExtraction(filepath) {
+  failedExtractions.set(filepath, Date.now());
+  // When over limit, clear oldest half
+  if (failedExtractions.size > FAILED_EXTRACTIONS_MAX) {
+    const entries = [...failedExtractions.entries()].sort((a, b) => a[1] - b[1]);
+    const toRemove = Math.floor(entries.length / 2);
+    for (let i = 0; i < toRemove; i++) {
+      failedExtractions.delete(entries[i][0]);
+    }
+  }
+}
+
+function removeFailedExtraction(filepath) {
+  failedExtractions.delete(filepath);
+}
 
 let settings = {
   schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100,
@@ -86,6 +104,10 @@ function getDocById(id) { return libraryIndex.get(id); }
 function getLibrary() { return libraryData.docs; }
 function setLibrary(docs) { libraryData.docs = docs; rebuildLibraryIndex(); }
 function addDocToLibrary(doc) { libraryData.docs.unshift(doc); libraryIndex.set(doc.id, doc); }
+function removeDocFromLibrary(id) {
+  libraryData.docs = libraryData.docs.filter((d) => d.id !== id);
+  libraryIndex.delete(id);
+}
 function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }
 
 // ── Debounced library persistence ──────────────────────────────────────────
@@ -156,7 +178,7 @@ function debouncedSyncLibraryWithFolder() {
 
 async function extractNewFileDoc(file) {
   const content = await extractContent(file.filepath);
-  if (!content) { failedExtractions.add(file.filepath); return null; }
+  if (!content) { addFailedExtraction(file.filepath); return null; }
   const wordCount = content.split(/\s+/).filter(Boolean).length;
   const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
   let author = null;
@@ -201,9 +223,24 @@ async function extractNewFileDoc(file) {
   };
 }
 
+// Cancellation flag for folder sync
+let syncCancelled = false;
+function cancelSync() { syncCancelled = true; }
+
+function emitSyncProgress(current, total, phase) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("sync-progress", { current, total, phase });
+  }
+}
+
 async function syncLibraryWithFolder() {
   if (!settings.sourceFolder) return;
+  syncCancelled = false;
+
+  emitSyncProgress(0, 0, "scanning");
   const files = await scanFolderAsync(settings.sourceFolder);
+  if (syncCancelled) return;
+
   const docs = getLibrary();
   const existing = new Map(docs.map((d) => [d.filepath, d]));
   const synced = [];
@@ -218,14 +255,24 @@ async function syncLibraryWithFolder() {
     }
   }
 
+  emitSyncProgress(0, newFiles.length, "extracting");
+
   const BATCH_SIZE = 4;
   for (let i = 0; i < newFiles.length; i += BATCH_SIZE) {
+    if (syncCancelled) break;
     const batch = newFiles.slice(i, i + BATCH_SIZE);
     const results = await Promise.all(batch.map(extractNewFileDoc));
     for (const doc of results) {
       if (doc) synced.push(doc);
     }
+    emitSyncProgress(Math.min(i + BATCH_SIZE, newFiles.length), newFiles.length, "extracting");
+    // Yield to event loop between batches so UI stays responsive
+    if (i + BATCH_SIZE < newFiles.length) {
+      await new Promise((resolve) => setImmediate(resolve));
+    }
   }
+
+  if (syncCancelled) return;
 
   const savedArticlesPath = settings.sourceFolder
     ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
@@ -241,6 +288,7 @@ async function syncLibraryWithFolder() {
   setLibrary(synced);
   saveLibrary();
   broadcastLibrary();
+  emitSyncProgress(newFiles.length, newFiles.length, "done");
 }
 
 // ── Watcher management ─────────────────────────────────────────────────────
@@ -924,6 +972,7 @@ const ipcContext = {
   setLibrary,
   getDocById,
   addDocToLibrary,
+  removeDocFromLibrary,
   saveSettings: saveSettingsFn,
   saveLibrary,
   saveLibraryNow,
@@ -937,9 +986,12 @@ const ipcContext = {
   getErrorLogPath,
   getUserDataPath: () => app.getPath("userData"),
   syncLibraryWithFolder,
+  cancelSync,
   startWatcher: startWatcherFn,
   clearFailedExtractions: () => failedExtractions.clear(),
-  addFailedExtraction: (fp) => failedExtractions.add(fp),
+  addFailedExtraction: addFailedExtraction,
+  removeFailedExtraction: removeFailedExtraction,
+  hasFailedExtraction: (fp) => failedExtractions.has(fp),
   readerWindows,
   isDev,
 };

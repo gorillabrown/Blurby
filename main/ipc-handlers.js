@@ -8,7 +8,7 @@ const https = require("https");
 
 const { extractContent, extractEpubMetadata, extractEpubCover, extractMobiCover,
         parseMobiMetadata, parseCallibreOpf, extractAuthorFromFilename,
-        extractTitleFromFilename, epubChapterCache } = require("./file-parsers");
+        extractTitleFromFilename, epubChapterCache, clearChapterCache } = require("./file-parsers");
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
         generateArticlePdf, openSiteLogin } = require("./url-extractor");
 const { getSystemTheme, createReaderWindow, updateWindowTheme } = require("./window-manager");
@@ -206,7 +206,17 @@ function registerIpcHandlers(ctx) {
   });
 
   ipcMain.handle("delete-doc", (_, docId) => {
-    ctx.setLibrary(ctx.getLibrary().filter((d) => d.id !== docId));
+    const doc = ctx.getDocById(docId);
+    if (doc && doc.filepath) {
+      // Clean up caches for deleted doc
+      clearChapterCache(doc.filepath);
+      if (ctx.removeFailedExtraction) ctx.removeFailedExtraction(doc.filepath);
+    }
+    if (ctx.removeDocFromLibrary) {
+      ctx.removeDocFromLibrary(docId);
+    } else {
+      ctx.setLibrary(ctx.getLibrary().filter((d) => d.id !== docId));
+    }
     ctx.saveLibrary();
   });
 
@@ -526,6 +536,13 @@ function registerIpcHandlers(ctx) {
       coverCache.set(coverPath, dataUrl);
       return dataUrl;
     } catch { return null; /* Expected: cover file may have been deleted */ }
+  });
+
+  // ── Cancel sync ─────────────────────────────────────────────────────────
+
+  ipcMain.handle("cancel-sync", () => {
+    if (ctx.cancelSync) ctx.cancelSync();
+    return { ok: true };
   });
 
   // ── Rescan folder ────────────────────────────────────────────────────────

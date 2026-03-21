@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Cover images
   getCoverImage: (coverPath) => ipcRenderer.invoke("get-cover-image", coverPath),
   rescanFolder: () => ipcRenderer.invoke("rescan-folder"),
+  cancelSync: () => ipcRenderer.invoke("cancel-sync"),
   getFilePathForDrop: (file) => webUtils.getPathForFile(file),
 
   // URL ingestion
@@ -77,6 +78,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   siteLogout: (domain) => ipcRenderer.invoke("site-logout", domain),
 
   // Events from main
+  onSyncProgress: (callback) => {
+    const handler = (_event, progress) => callback(progress);
+    ipcRenderer.on("sync-progress", handler);
+    return () => ipcRenderer.removeListener("sync-progress", handler);
+  },
   onLibraryUpdated: (callback) => {
     const handler = (_event, library) => callback(library);
     ipcRenderer.on("library-updated", handler);
