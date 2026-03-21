@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const api = (window as any).electronAPI;
+const api = window.electronAPI;
 
 interface DefinitionData {
   word: string;

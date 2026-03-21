@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { REWIND_WORDS, WPM_STEP } from "../../utils/text";
 
-const api = (window as any).electronAPI;
+const api = window.electronAPI;
 
 interface HelpSettingsProps {
   isMac: boolean;
