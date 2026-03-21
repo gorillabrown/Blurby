@@ -46,7 +46,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 - **OneDrive-first development.** Working directory on OneDrive for cross-machine access. Push to GitHub when sprints complete.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
-- **All file I/O in main.js must be async** (fs.promises). No synchronous reads/writes.
+- **All file I/O in main process modules must be async** (fs.promises). No synchronous reads/writes.
 - **preload.js is the security boundary.** Keep it minimal. All system access goes through IPC.
 - **LESSONS_LEARNED is a required engineering artifact.** Update immediately on non-trivial discovery.
 - **After any engine change → test-runner before proceeding.** `npm test` must pass.
@@ -86,42 +86,52 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ---
 
-## Current System State (Session 1 — Post-Review Baseline)
+## Current System State (Post-Sprint 8 — All Core Sprints Complete)
 
-### Codebase (dev branch: `claude/review-blurby-roadmap-1lsoT`)
+### Codebase (branch: `main`)
 
-- **105 commits**, 80 files changed (+25,349 / -1,108 lines) vs main
-- **PR #1** open: "Implement roadmap phases 0-2: architecture, data safety, and distribution"
-- **main branch is stale** — 12 commits, essentially the Day 1 skeleton
+- **23 commits** on main (PR #1 squash-merged as commit 91718e3, then Sprints 2-8 layered on top)
+- All core sprints (1-8 + 7b) complete — performance, polish, stats, and distribution done
+- CI/CD active via GitHub Actions
 
 ### Tech Stack
 
 - Electron 33 + React 19 + Vite 6 + TypeScript 5.9
 - Vitest 4.1 for testing, electron-builder 25 for packaging
-- Dependencies: chokidar (folder watch), @mozilla/readability + jsdom (URL extraction), pdf-parse (PDF reading), pdfkit (PDF export), adm-zip (EPUB/MOBI), cheerio (HTML), electron-updater
+- Dependencies: chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, @napi-rs/canvas (lazy-loaded)
 
 ### Architecture
 
-- **Main process** (`main.js`, 93KB): Electron shell, IPC handlers, file I/O, folder watching, data persistence, URL article extraction, format parsers
-- **Preload** (`preload.js`, 4KB): Context bridge → `window.electronAPI`
+- **Main process** — modularized into 7 files (Sprint 3):
+  - `main.js` (993 lines) — thin orchestrator, app lifecycle, context object
+  - `main/ipc-handlers.js` (858 lines) — all IPC registrations
+  - `main/file-parsers.js` (580 lines) — EPUB, MOBI, PDF, HTML, TXT format parsers
+  - `main/url-extractor.js` (392 lines) — URL/article extraction, Readability, PDF export
+  - `main/window-manager.js` (188 lines) — BrowserWindow, tray, menu, auto-updater
+  - `main/migrations.js` (124 lines) — schema migrations with backup
+  - `main/folder-watcher.js` (108 lines) — chokidar folder watching
+  - Context object pattern shares state (mainWindow, library, settings, paths) across modules
+- **Preload** (`preload.js`, 4KB): Context bridge -> `window.electronAPI`
 - **Renderer** (`src/`): React 19 SPA
-  - `App.tsx` (20KB) — Central orchestrator
-  - `src/components/` — 23 UI components + 7 settings sub-pages
+  - `App.tsx` — Central orchestrator
+  - `src/components/` — 22 UI components (incl. StatsPanel) + 7 settings sub-pages
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration
   - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts
   - `src/styles/global.css` — All styles with CSS custom properties
-- **Tests** (`tests/`): 9 test files (135+ tests)
-- **Data**: JSON files in user data dir (settings.json, library.json) with schema versioning + migration framework
+  - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
+- **Tests** (`tests/`): 8 test files (135+ tests)
+- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags, NSIS installer)
+- **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework
 
 ### Feature Status
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| RSVP Reader (ReaderView) | ✅ Built | ORP highlighting, WPM control, keyboard shortcuts |
-| Scroll/Flow Reader (ScrollReaderView) | ✅ Built | Word-level highlighting, virtual windowing |
-| Library Management | ✅ Built | Grid/list view, search, favorites, archives, import/export |
-| Folder Watching | ✅ Built | Chokidar, on-demand content loading |
-| URL Article Import | ✅ Built | Readability + authenticated fetching |
+| RSVP Reader (ReaderView) | ✅ Built | ORP highlighting, WPM control, ref-based playback (Sprint 5) |
+| Scroll/Flow Reader (ScrollReaderView) | ✅ Built | Word-level highlighting, ref-based flow mode, double-Escape exit |
+| Library Management | ✅ Built | Grid/list view, search, favorites, archives, memoized computed state |
+| Folder Watching | ✅ Built | Chokidar (lazy-loaded), on-demand content loading, stale folder cleanup |
+| URL Article Import | ✅ Built | Readability + authenticated fetching (lazy-loaded) |
 | Multi-Format Support | ✅ Built | TXT, MD, PDF, EPUB, MOBI/AZW3, HTML |
 | Chapter Navigation | ✅ Built | NCX/nav TOC, dropdown jump-to-chapter |
 | Settings System | ✅ Built | 7 sub-pages (theme, layout, speed, hotkeys, connectors, help, text size) |
@@ -135,28 +145,28 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | Error Boundaries | ✅ Built | Wrapping Library and Reader views |
 | TypeScript | ✅ Migrated | .tsx/.ts in renderer, types.ts for shared types |
 | Unit Tests | ✅ 135+ tests | Vitest — text, rhythm, highlights, migrations, WPM, PDF |
+| Auto-Updater | ✅ Built | check-for-updates IPC, Settings > Help UI (Sprint 6) |
+| Drag-and-Drop | ✅ Polished | Client-side extension filtering, rejection toasts, format hints (Sprint 6) |
+| Reader Exit Confirmation | ✅ Built | Double-Escape pattern in ScrollReaderView (Sprint 6) |
+| Recent Folders | ✅ Built | Stale folder cleanup on startup (Sprint 6) |
+| Reading Statistics | ✅ Built | history.json, StatsPanel, streaks, actual reading time, reset (Sprint 7/7b) |
+| CI/CD | ✅ Built | GitHub Actions: CI on push/PR, release on v* tags (Sprint 8) |
 
 ### What's NOT Done (Roadmap Forward)
 
-- **PR #1 not merged** — 102 commits sitting on dev branch
-- **Performance optimization** — SPRINT-PERF.md planned but not executed
-- **Auto-updater wiring** — electron-updater installed but not configured
-- **Code signing** — documented but not obtained
+- **Code signing** — researched (docs/code-signing.md), Azure Trusted Signing recommended, not obtained
 - **Chrome extension** (Phase 9) — design only
 - **Android app** (Phase 10) — design only
-- **CI/CD** — no GitHub Actions, no automated tests on PR
-- **Reading statistics** — no history.json, no stats panel
-- **Drag-and-drop** — DropZone component exists but may need polish
-- **Recent folders** — RecentFolders component exists but integration unclear
-- **Reader exit confirmation** — not implemented
 - **Symlink protection** — not implemented
-- **requestAnimationFrame playback** — not migrated from setInterval
+- **requestAnimationFrame playback** — ref-based approach used instead (bypasses React render cycle)
+- **Multi-window support** — someday backlog
+- **Accessibility audit** — someday backlog
 
 ---
 
 ## Dependency Chain
 
-PR #1 Squash-Merge → **Sprint 2** (React perf) ∥ **Sprint 3** (main.js modularization) → **Sprint 4** (main process perf) → **Sprint 5** (reader mode perf) → **Sprint 6** (polish) → **Sprint 7** (stats) ∥ **Sprint 8** (distribution) → **Phase 9** (Chrome extension) → **Phase 10** (Android)
+✅ Sprint 1 (merge) -> ✅ Sprint 2 (React perf) || ✅ Sprint 3 (modularization) -> ✅ Sprint 4 (main perf) -> ✅ Sprint 5 (reader perf) -> ✅ Sprint 6 (polish) -> ✅ Sprint 7/7b (stats) || ✅ Sprint 8 (distribution) -> **Phase 9** (Chrome extension) -> **Phase 10** (Android)
 
 ---
 
