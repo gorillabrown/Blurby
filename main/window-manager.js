@@ -1,7 +1,7 @@
 // main/window-manager.js — Window creation, tray, theme, and auto-updater
 // CommonJS only — Electron main process
 
-const { BrowserWindow, Tray, Menu, nativeTheme } = require("electron");
+const { BrowserWindow, Tray, Menu, nativeTheme, session } = require("electron");
 const path = require("path");
 
 function getThemeColors(settings) {
@@ -22,7 +22,32 @@ function getSystemTheme() {
   return nativeTheme.shouldUseDarkColors ? "dark" : "light";
 }
 
+let _cspInstalled = false;
+function installContentSecurityPolicy(isDev) {
+  if (_cspInstalled) return;
+  _cspInstalled = true;
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    // Build CSP: allow self, inline styles (needed for dynamic styling), data/file URIs for images
+    let csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
+              "img-src 'self' data: file:; font-src 'self'; connect-src 'self'";
+    // In dev mode, allow websocket connections for Vite HMR
+    if (isDev) {
+      csp += " ws: http://localhost:*";
+      csp = csp.replace("script-src 'self'", "script-src 'self' 'unsafe-inline' http://localhost:*");
+      csp = csp.replace("connect-src 'self'", "connect-src 'self' ws: http://localhost:*");
+    }
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        "Content-Security-Policy": [csp],
+      },
+    });
+  });
+}
+
 function createMainWindow(settings, isDev) {
+  installContentSecurityPolicy(isDev);
   const colors = getThemeColors(settings);
   const isMac = process.platform === "darwin";
 
@@ -113,7 +138,7 @@ function createReaderWindow(docId, settings, isDev, readerWindows) {
 
 function createTray(mainWindow, createWindowFn) {
   let tray;
-  try { tray = new Tray(path.join(__dirname, "..", "assets", "tray-icon.png")); } catch { return null; }
+  try { tray = new Tray(path.join(__dirname, "..", "assets", "tray-icon.png")); } catch { return null; /* Expected: tray icon may not exist */ }
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open Blurby", click: () => { if (mainWindow) mainWindow.show(); else createWindowFn(); } },
     { type: "separator" },
@@ -143,8 +168,10 @@ function setupAutoUpdater(mainWindow) {
       }
     });
 
-    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch {} }, 5000);
-  } catch {}
+    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {
+      console.log("Auto-update check failed:", err.message);
+    } }, 5000);
+  } catch { /* Expected: electron-updater may not be available in dev */ }
 }
 
 function updateWindowTheme(mainWindow, settings) {
@@ -159,7 +186,7 @@ function updateWindowTheme(mainWindow, settings) {
           color: colors.titleBar,
           symbolColor: colors.titleText,
         });
-      } catch {}
+      } catch { /* Expected: setTitleBarOverlay may not be supported on all platforms */ }
     }
   }
 }
@@ -179,6 +206,7 @@ function broadcastSystemTheme(mainWindow, readerWindows) {
 module.exports = {
   getThemeColors,
   getSystemTheme,
+  installContentSecurityPolicy,
   createMainWindow,
   createReaderWindow,
   createTray,

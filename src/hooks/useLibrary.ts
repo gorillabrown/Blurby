@@ -54,24 +54,42 @@ export default function useLibrary() {
   }, []);
 
   const addDoc = useCallback(async (title: string, content: string, editingId?: string | null) => {
-    if (editingId) {
-      await api.updateDoc(editingId, title, content);
-      setLibrary((prev) => prev.map((d) => (d.id === editingId ? { ...d, title, content } : d)));
-    } else {
-      const doc = await api.addManualDoc(title, content);
-      setLibrary((prev) => [doc, ...prev]);
+    try {
+      if (editingId) {
+        await api.updateDoc(editingId, title, content);
+        setLibrary((prev) => prev.map((d) => (d.id === editingId ? { ...d, title, content } : d)));
+      } else {
+        const doc = await api.addManualDoc(title, content);
+        setLibrary((prev) => [doc, ...prev]);
+      }
+    } catch (err) {
+      showToast("Failed to save document");
+      const state = await api.getState();
+      setLibrary(state.library);
     }
-  }, []);
+  }, [showToast]);
 
   const deleteDoc = useCallback(async (id: string) => {
-    await api.deleteDoc(id);
-    setLibrary((prev) => prev.filter((d) => d.id !== id));
-  }, []);
+    try {
+      await api.deleteDoc(id);
+      setLibrary((prev) => prev.filter((d) => d.id !== id));
+    } catch (err) {
+      showToast("Failed to delete document");
+      const state = await api.getState();
+      setLibrary(state.library);
+    }
+  }, [showToast]);
 
   const resetProgress = useCallback(async (id: string) => {
-    await api.resetProgress(id);
-    setLibrary((prev) => prev.map((d) => (d.id === id ? { ...d, position: 0 } : d)));
-  }, []);
+    try {
+      await api.resetProgress(id);
+      setLibrary((prev) => prev.map((d) => (d.id === id ? { ...d, position: 0 } : d)));
+    } catch (err) {
+      showToast("Failed to reset progress");
+      const state = await api.getState();
+      setLibrary(state.library);
+    }
+  }, [showToast]);
 
   const selectFolder = useCallback(async () => {
     const folder = await api.selectFolder();
@@ -128,20 +146,38 @@ export default function useLibrary() {
   }, []);
 
   const toggleFavorite = useCallback(async (docId: string) => {
-    const result = await api.toggleFavorite(docId);
-    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, favorite: result } : d)));
-  }, []);
+    try {
+      const result = await api.toggleFavorite(docId);
+      setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, favorite: result } : d)));
+    } catch (err) {
+      showToast("Failed to toggle favorite");
+      const state = await api.getState();
+      setLibrary(state.library);
+    }
+  }, [showToast]);
 
   const archiveDoc = useCallback(async (docId: string) => {
-    await api.archiveDoc(docId);
-    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: true, archivedAt: Date.now() } : d)));
-    showToast("Document archived");
+    try {
+      await api.archiveDoc(docId);
+      setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: true, archivedAt: Date.now() } : d)));
+      showToast("Document archived");
+    } catch (err) {
+      showToast("Failed to archive document");
+      const state = await api.getState();
+      setLibrary(state.library);
+    }
   }, [showToast]);
 
   const unarchiveDoc = useCallback(async (docId: string) => {
-    await api.unarchiveDoc(docId);
-    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: false, archivedAt: undefined } : d)));
-  }, []);
+    try {
+      await api.unarchiveDoc(docId);
+      setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: false, archivedAt: undefined } : d)));
+    } catch (err) {
+      showToast("Failed to unarchive document");
+      const state = await api.getState();
+      setLibrary(state.library);
+    }
+  }, [showToast]);
 
   return {
     library, setLibrary, settings, setSettings, loaded, platform,

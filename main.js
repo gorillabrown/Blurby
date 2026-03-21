@@ -40,14 +40,19 @@ async function readJSON(filepath, fallback) {
   try {
     const data = await fsPromises.readFile(filepath, "utf-8");
     return JSON.parse(data);
-  } catch {}
+  } catch { /* Expected: file may not exist on first launch */ }
   return fallback;
 }
 async function writeJSON(filepath, data) {
-  await fsPromises.writeFile(filepath, JSON.stringify(data, null, 2), "utf-8");
+  // Atomic write: write to temp file first, then rename (rename is atomic on most filesystems)
+  const tmp = filepath + ".tmp";
+  await fsPromises.writeFile(tmp, JSON.stringify(data, null, 2), "utf-8");
+  await fsPromises.rename(tmp, filepath);
 }
 async function backupFile(filepath) {
-  try { await fsPromises.copyFile(filepath, filepath + ".bak"); } catch {}
+  try { await fsPromises.copyFile(filepath, filepath + ".bak"); } catch (err) {
+    console.error(`Backup failed for ${filepath}:`, err.message);
+  }
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -172,7 +177,9 @@ async function extractNewFileDoc(file) {
         await fsPromises.mkdir(coversDir, { recursive: true });
         const ext = path.extname(opfMeta.coverPath);
         const destCover = path.join(coversDir, `${docId}${ext}`);
-        try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
+        try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch (err) {
+          console.log("Failed to copy Calibre cover:", err.message);
+        }
       }
     }
     if (!author || !bookTitle) {
@@ -288,7 +295,7 @@ function startWatcherFn() {
 
 // ── Tray ───────────────────────────────────────────────────────────────────────
 function createTray() {
-  try { tray = new Tray(path.join(__dirname, "assets", "tray-icon.png")); } catch { return; }
+  try { tray = new Tray(path.join(__dirname, "assets", "tray-icon.png")); } catch { return; /* Expected: tray icon may not exist */ }
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open Blurby", click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
     { type: "separator" },
@@ -319,8 +326,10 @@ function setupAutoUpdater() {
     });
 
     // Check after 5s delay to not block startup
-    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch {} }, 5000);
-  } catch {}
+    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {
+      console.log("Auto-update check failed:", err.message);
+    } }, 5000);
+  } catch { /* Expected: electron-updater may not be available in dev */ }
 }
 
 // ── Reading statistics ─────────────────────────────────────────────────────────
@@ -419,7 +428,7 @@ function updateWindowTheme() {
           color: colors.titleBar,
           symbolColor: colors.titleText,
         });
-      } catch {}
+      } catch { /* Expected: setTitleBarOverlay may not be supported on all platforms */ }
     }
   }
 }
@@ -431,7 +440,7 @@ async function getSessionCookieHeader(url) {
     const cookies = await loginSession.cookies.get({ url });
     if (cookies.length === 0) return null;
     return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-  } catch { return null; }
+  } catch { return null; /* Expected: session partition may not have cookies */ }
 }
 
 async function fetchWithCookies(url) {

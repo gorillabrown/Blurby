@@ -50,7 +50,9 @@ async function scanFolderAsync(folderPath) {
           });
         }
       }
-    } catch {}
+    } catch (err) {
+      console.log("Skipping inaccessible directory:", dir, err.message);
+    }
   }
 
   await walkDir(folderPath);

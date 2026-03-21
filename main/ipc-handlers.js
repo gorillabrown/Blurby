@@ -112,7 +112,7 @@ async function logToFile(message, errorLogPath) {
   try {
     const timestamp = new Date().toISOString();
     await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
-  } catch {}
+  } catch { /* Intentional: error logging should never crash the app */ }
 }
 
 /**
@@ -525,7 +525,7 @@ function registerIpcHandlers(ctx) {
       }
       coverCache.set(coverPath, dataUrl);
       return dataUrl;
-    } catch { return null; }
+    } catch { return null; /* Expected: cover file may have been deleted */ }
   });
 
   // ── Rescan folder ────────────────────────────────────────────────────────
@@ -567,14 +567,18 @@ function registerIpcHandlers(ctx) {
                 await fsPromises.mkdir(coversDir, { recursive: true });
                 const coverExt = path.extname(opfMeta.coverPath);
                 const destCover = path.join(coversDir, `${prev.id}${coverExt}`);
-                try { await fsPromises.copyFile(opfMeta.coverPath, destCover); updates.coverPath = destCover; } catch {}
+                try { await fsPromises.copyFile(opfMeta.coverPath, destCover); updates.coverPath = destCover; } catch (err) {
+                  console.log("Failed to copy Calibre cover:", err.message);
+                }
               }
             }
             if (!prev.coverPath && !updates.coverPath) {
               try {
                 const buf = await fsPromises.readFile(file.filepath);
                 updates.coverPath = await extractMobiCover(buf, prev.id, ctx.getUserDataPath());
-              } catch {}
+              } catch (err) {
+                console.log("Failed to extract MOBI cover:", err.message);
+              }
             }
           }
           synced.push(updates);
@@ -601,7 +605,9 @@ function registerIpcHandlers(ctx) {
                   await fsPromises.mkdir(coversDir, { recursive: true });
                   const coverExt = path.extname(opfMeta.coverPath);
                   const destCover = path.join(coversDir, `${docId}${coverExt}`);
-                  try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
+                  try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch (err) {
+                    console.log("Failed to copy Calibre cover:", err.message);
+                  }
                 }
               }
               if (!author || !bookTitle || !coverPath) {
@@ -755,7 +761,9 @@ function registerIpcHandlers(ctx) {
   });
 
   ipcMain.handle("install-update", () => {
-    try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(); } catch {}
+    try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(); } catch (err) {
+      console.error("Failed to install update:", err.message);
+    }
   });
 
   // ── Launch at login ──────────────────────────────────────────────────────

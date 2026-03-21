@@ -11,6 +11,20 @@ function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _a
 function getPDFParse() { if (!_pdfParse) { _pdfParse = require("pdf-parse"); } return _pdfParse; }
 function getCanvas() { if (!_canvas) { try { _canvas = require("@napi-rs/canvas"); } catch { _canvas = null; } } return _canvas; }
 
+// ── Image validation helpers ───────────────────────────────────────────────
+
+/** Validate image data by checking magic bytes. Returns extension or null. */
+function validateImageMagicBytes(buffer) {
+  if (!buffer || buffer.length < 4) return null;
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return ".jpg";
+  // PNG: 89 50 4E 47
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return ".png";
+  // GIF: 47 49 46
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46) return ".gif";
+  return null;
+}
+
 // ── MOBI/PDB Parser ────────────────────────────────────────────────────────
 
 function palmDocDecompress(data) {
@@ -179,9 +193,8 @@ function parseMobiMetadata(buffer) {
     }
 
     return result;
-  } catch {
-    return {};
-  }
+  } catch { /* Expected: MOBI metadata parsing is best-effort */ }
+  return {};
 }
 
 async function extractMobiCover(buffer, docId, userDataPath) {
@@ -228,17 +241,16 @@ async function extractMobiCover(buffer, docId, userDataPath) {
     const recordEnd = (coverRecordIdx + 1 < numRecords) ? buffer.readUInt32BE(78 + (coverRecordIdx + 1) * 8) : buffer.length;
     const imageData = buffer.slice(recordStart, recordEnd);
 
-    const isJpeg = imageData[0] === 0xFF && imageData[1] === 0xD8;
-    const isPng = imageData[0] === 0x89 && imageData[1] === 0x50;
-    if (!isJpeg && !isPng) return null;
+    const ext = validateImageMagicBytes(imageData);
+    if (!ext) return null;
 
-    const ext = isPng ? ".png" : ".jpg";
     const coversDir = path.join(userDataPath, "covers");
     await fsPromises.mkdir(coversDir, { recursive: true });
     const coverPath = path.join(coversDir, `${docId}${ext}`);
     await fsPromises.writeFile(coverPath, imageData);
     return coverPath;
-  } catch {
+  } catch (err) {
+    console.log("MOBI cover extraction failed:", err.message);
     return null;
   }
 }
@@ -262,12 +274,11 @@ async function parseCallibreOpf(filepath) {
       path.join(dir, "cover.png"),
     ].filter(Boolean);
     for (const p of candidatePaths) {
-      if (p) { try { await fsPromises.access(p); coverPath = p; break; } catch {} }
+      if (p) { try { await fsPromises.access(p); coverPath = p; break; } catch { /* Expected: probing for cover file existence */ } }
     }
     return { title, author, coverPath };
-  } catch {
-    return null;
-  }
+  } catch { /* Expected: Calibre OPF parsing is best-effort */ }
+  return null;
 }
 
 // EPUB chapter cache shared across extractions
@@ -307,7 +318,7 @@ async function extractContent(filepath) {
         }
         return text;
       } catch (err) {
-        try { await parser.destroy(); } catch {}
+        try { await parser.destroy(); } catch { /* Best-effort cleanup */ }
         console.error(`PDF extraction failed for ${filepath}:`, err.message);
         return null;
       }
@@ -440,13 +451,14 @@ async function extractContent(filepath) {
     }
     // Plain text formats
     return await readFileContentAsync(filepath);
-  } catch {
+  } catch (err) {
+    console.log(`Content extraction failed for ${filepath}, falling back to plain text:`, err.message);
     return await readFileContentAsync(filepath);
   }
 }
 
 async function readFileContentAsync(filepath) {
-  try { return await fsPromises.readFile(filepath, "utf-8"); } catch { return null; }
+  try { return await fsPromises.readFile(filepath, "utf-8"); } catch { return null; /* Expected: file may be inaccessible or binary */ }
 }
 
 // ── EPUB metadata extraction ───────────────────────────────────────────────────
@@ -512,13 +524,17 @@ async function extractEpubCover(filepath, docId, dataPath) {
 
     if (!coverEntry) return null;
 
-    const ext = path.extname(coverEntry.entryName).toLowerCase() || ".jpg";
+    const coverData = coverEntry.getData();
+    const ext = validateImageMagicBytes(coverData);
+    if (!ext) return null; // Skip cover if not a valid image format
+
     const coversDir = path.join(dataPath, "covers");
     await fsPromises.mkdir(coversDir, { recursive: true });
     const coverFilePath = path.join(coversDir, `${docId}${ext}`);
-    await fsPromises.writeFile(coverFilePath, coverEntry.getData());
+    await fsPromises.writeFile(coverFilePath, coverData);
     return coverFilePath;
-  } catch {
+  } catch (err) {
+    console.log("EPUB cover extraction failed:", err.message);
     return null;
   }
 }
@@ -544,9 +560,8 @@ async function extractEpubMetadata(filepath) {
     const creator = $("dc\\:creator, creator").first().text().trim();
     const title = $("dc\\:title, title").first().text().trim();
     return { title: title || null, author: creator || null };
-  } catch {
-    return { title: null, author: null };
-  }
+  } catch { /* Expected: EPUB metadata extraction is best-effort */ }
+  return { title: null, author: null };
 }
 
 function extractAuthorFromFilename(filename) {
@@ -577,4 +592,5 @@ module.exports = {
   extractAuthorFromFilename,
   extractTitleFromFilename,
   epubChapterCache,
+  validateImageMagicBytes,
 };
