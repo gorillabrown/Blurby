@@ -44,8 +44,8 @@ Ship a production-grade Windows installer for Blurby that auto-updates via GitHu
 - Each leg runs: `npm ci` → `npm run build` → `npx electron-builder --win --arch {arch}`
 
 **Artifact collection**:
-- Each matrix leg uploads its installer `.exe`, `.blockmap`, and `latest{-arm64}.yml` as workflow artifacts
-- A `publish` job (runs after both builds complete) downloads all artifacts and creates/updates the GitHub Release
+- Each matrix leg uploads its installer `.exe`, `.blockmap`, and `latest{-arm64}.yml` as workflow artifacts (glob: `release/*.exe`, `release/*.blockmap`, `release/latest*.yml`)
+- A `publish` job (runs after both builds complete) downloads all artifacts and creates/updates the GitHub Release using `softprops/action-gh-release` with files glob covering `*.exe`, `*.blockmap`, `latest*.yml`, and `checksums.sha256`
 
 **SHA-256 checksums**:
 - The `publish` job generates `checksums.sha256` covering all `.exe` and `.blockmap` files
@@ -72,17 +72,9 @@ Ship a production-grade Windows installer for Blurby that auto-updates via GitHu
 
 ### Changes
 
-**Enable blockmaps** in `package.json` electron-builder config:
-```json
-{
-  "build": {
-    "publish": [{ "provider": "github" }],
-    "nsis": {
-      "differentialPackage": true
-    }
-  }
-}
-```
+**Blockmap generation**: electron-builder generates `.blockmap` files automatically for NSIS targets — no special config needed. The key requirement is that the CI workflow uploads these files alongside the installers (the current workflow only uploads `*.exe` — see Section 1).
+
+**Publish provider config** in `package.json`: add `"publish": [{ "provider": "github" }]` to the `build` section. This tells electron-updater where to look for updates at runtime (it reads this to construct the feed URL). The actual upload to GitHub Releases is handled by the CI workflow using `softprops/action-gh-release`, NOT electron-builder's `--publish` flag.
 
 electron-builder auto-generates:
 - `Blurby-Setup-{version}-x64.exe.blockmap` alongside x64 installer
@@ -102,7 +94,7 @@ The auto-updater reads the correct manifest based on `process.arch`.
 
 ### Files Affected
 
-- `package.json` — electron-builder `publish` and `nsis` config
+- `package.json` — electron-builder `publish` config (feed URL for auto-updater)
 - `main/window-manager.js` — verify existing auto-updater wiring, adjust if needed
 
 ---
@@ -146,7 +138,7 @@ The auto-updater reads the correct manifest based on `process.arch`.
 
 **Installer behavior**:
 - Assisted mode (not one-click) — user sees install directory picker and shortcut options
-- Desktop shortcut checkbox (opt-in via `createDesktopShortcut: "always"` which shows the checkbox)
+- Desktop shortcut created by default (via `createDesktopShortcut: "always"`)
 - Start Menu entry created automatically
 - "Launch Blurby" checkbox on finish page
 - App icon shown on the installer `.exe` itself
@@ -159,6 +151,7 @@ The auto-updater reads the correct manifest based on `process.arch`.
 ### Files Affected
 
 - `package.json` — NSIS config section
+- New: `assets/icon.ico` — converted from existing `assets/icon.png` (multi-size ICO: 16, 32, 48, 64, 128, 256px)
 - New: `assets/installer/installerHeader.bmp`
 - New: `assets/installer/installerSidebar.bmp`
 
@@ -187,9 +180,9 @@ Each release on GitHub Releases contains:
 **CI verification**: Both matrix legs must produce installers successfully. Workflow fails if either architecture fails to build.
 
 **End-to-end auto-update test** (manual, one-time after pipeline is built):
-1. Bump version to `0.1.0`, tag and push → CI builds and publishes
+1. Tag current version (e.g., `v1.0.0`), push → CI builds and publishes
 2. Install x64 build on a Windows machine
-3. Bump version to `0.1.1`, tag and push → CI builds and publishes
+3. Bump version to next patch (e.g., `v1.0.1`), tag and push → CI builds and publishes
 4. Confirm installed app detects update, downloads delta, applies after restart
 5. Repeat steps 2-4 for ARM64 on ARM64 device
 
