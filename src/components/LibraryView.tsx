@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import { useTheme } from "./ThemeProvider";
@@ -131,18 +131,20 @@ export default function LibraryView({
   }, [library]);
 
   // Live search results (limited to 8 for the dropdown)
-  const searchResults = searchQuery
+  const searchResults = useMemo(() => searchQuery
     ? library.filter((d) => {
         const q = searchQuery.toLowerCase();
         return d.title.toLowerCase().includes(q) || (d.author || "").toLowerCase().includes(q);
       }).slice(0, 8)
-    : [];
+    : [], [searchQuery, library]);
 
   // formatDisplayTitle imported from utils/text
 
   // Split filtered docs into reading now vs not started
-  const readingNow = filteredLibrary.filter((d) => (d.position || 0) > 0 && (d.wordCount ? (d.position || 0) < d.wordCount : true));
-  const notStarted = filteredLibrary.filter((d) => (d.position || 0) === 0);
+  const { readingNow, notStarted } = useMemo(() => ({
+    readingNow: filteredLibrary.filter((d) => (d.position || 0) > 0 && (d.wordCount ? (d.position || 0) < d.wordCount : true)),
+    notStarted: filteredLibrary.filter((d) => (d.position || 0) === 0),
+  }), [filteredLibrary]);
 
   const handleAddDoc = async () => {
     if (!newTitle.trim() || !newText.trim()) return;
@@ -160,9 +162,13 @@ export default function LibraryView({
     else { setUrlInput(""); setShowUrl(false); setUrlError(""); }
   };
 
-  const startEdit = (doc: BlurbyDoc) => {
+  const startEdit = useCallback((doc: BlurbyDoc) => {
     setEditingId(doc.id); setNewTitle(doc.title); setNewText(doc.content || ""); setShowAdd(true);
-  };
+  }, []);
+
+  const handleCancelDelete = useCallback(() => setConfirmDelete(null), []);
+  const handleOpenScroll = useCallback((d: BlurbyDoc) => onOpenDoc(d, "scroll"), [onOpenDoc]);
+  const handleOpenNewWindow = useCallback((d: BlurbyDoc) => window.electronAPI.openReaderWindow(d.id), []);
 
   const handleLaunchToggle = async () => {
     const next = !launchAtLogin;
@@ -496,12 +502,12 @@ export default function LibraryView({
                       onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
                       onDelete={onDeleteDoc}
                       onConfirmDelete={setConfirmDelete}
-                      onCancelDelete={() => setConfirmDelete(null)}
+                      onCancelDelete={handleCancelDelete}
                       onToggleFavorite={onToggleFavorite}
                       onArchive={onArchiveDoc}
                       onUnarchive={onUnarchiveDoc}
-                      onOpenScroll={(d) => onOpenDoc(d, "scroll")}
-                      onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
+                      onOpenScroll={handleOpenScroll}
+                      onOpenNewWindow={handleOpenNewWindow}
                     />
                   ))}
                 </div>
@@ -517,12 +523,12 @@ export default function LibraryView({
                       onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
                       onDelete={onDeleteDoc}
                       onConfirmDelete={setConfirmDelete}
-                      onCancelDelete={() => setConfirmDelete(null)}
+                      onCancelDelete={handleCancelDelete}
                       onToggleFavorite={onToggleFavorite}
                       onArchive={onArchiveDoc}
                       onUnarchive={onUnarchiveDoc}
-                      onOpenScroll={(d) => onOpenDoc(d, "scroll")}
-                      onOpenNewWindow={(d) => window.electronAPI.openReaderWindow(d.id)}
+                      onOpenScroll={handleOpenScroll}
+                      onOpenNewWindow={handleOpenNewWindow}
                     />
                   ))}
                 </div>
