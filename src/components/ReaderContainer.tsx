@@ -7,6 +7,7 @@ import { useReaderKeys } from "../hooks/useKeyboardShortcuts";
 import ErrorBoundary from "./ErrorBoundary";
 import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
+import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
 
@@ -52,9 +53,30 @@ export default function ReaderContainer({
   onOpenDocById,
 }: ReaderContainerProps) {
   const { settings, updateSettings } = useSettings();
+  const isEink = settings.theme === "eink";
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
   );
+  // E-ink ghosting prevention: track page turns for periodic refresh
+  const [einkPageTurns, setEinkPageTurns] = useState(0);
+  const [showEinkRefresh, setShowEinkRefresh] = useState(false);
+  const triggerEinkRefresh = useCallback(() => {
+    if (!isEink) return;
+    setShowEinkRefresh(true);
+    // Black phase -> white phase -> done (100ms each)
+    setTimeout(() => setShowEinkRefresh(false), 200);
+  }, [isEink]);
+  const handleEinkPageTurn = useCallback(() => {
+    if (!isEink) return;
+    setEinkPageTurns((prev) => {
+      const next = prev + 1;
+      if (next >= (settings.einkRefreshInterval || 20)) {
+        triggerEinkRefresh();
+        return 0;
+      }
+      return next;
+    });
+  }, [isEink, settings.einkRefreshInterval, triggerEinkRefresh]);
   const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number }>>([]);
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
@@ -65,7 +87,10 @@ export default function ReaderContainer({
     return tokenizeWithMeta(activeDoc.content);
   }, [activeDoc?.content]);
 
-  const reader = useReader(wpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
+  // Enforce e-ink WPM ceiling
+  const effectiveWpm = isEink ? Math.min(wpm, settings.einkWpmCeiling || 250) : wpm;
+
+  const reader = useReader(effectiveWpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   // Derive readerMode from settings
@@ -203,7 +228,10 @@ export default function ReaderContainer({
     focusMarks: settings.focusMarks,
     layoutSpacing: settings.layoutSpacing,
     fontFamily: settings.fontFamily,
-  }), [settings.focusSpan, settings.focusMarks, settings.layoutSpacing, settings.fontFamily]);
+    isEink,
+    einkPhraseGrouping: settings.einkPhraseGrouping,
+    einkWpmCeiling: settings.einkWpmCeiling,
+  }), [settings.focusSpan, settings.focusMarks, settings.layoutSpacing, settings.fontFamily, isEink, settings.einkPhraseGrouping, settings.einkWpmCeiling]);
 
   const scrollSettings = useMemo(() => ({
     flowTextSize: settings.flowTextSize,
@@ -212,7 +240,9 @@ export default function ReaderContainer({
     punctuationPauseMs: settings.punctuationPauseMs,
     readingRuler: settings.readingRuler,
     fontFamily: settings.fontFamily,
-  }), [settings.flowTextSize, settings.layoutSpacing, settings.rhythmPauses, settings.punctuationPauseMs, settings.readingRuler, settings.fontFamily]);
+    isEink,
+    einkRefreshInterval: settings.einkRefreshInterval,
+  }), [settings.flowTextSize, settings.layoutSpacing, settings.rhythmPauses, settings.punctuationPauseMs, settings.readingRuler, settings.fontFamily, isEink, settings.einkRefreshInterval]);
 
   const menuFlap = (
     <MenuFlap
@@ -234,7 +264,7 @@ export default function ReaderContainer({
         <ErrorBoundary onReset={() => onExitReader(wordIndex)}>
           <ScrollReaderView
             activeDoc={activeDoc}
-            wpm={wpm}
+            wpm={effectiveWpm}
             focusTextSize={focusTextSize}
             isMac={platform === "darwin"}
             settings={scrollSettings}
@@ -244,9 +274,11 @@ export default function ReaderContainer({
             onProgressUpdate={handleScrollProgress}
             onSwitchToFocus={handleSwitchToFocus}
             onToggleFlap={toggleMenuFlap}
+            onPageTurn={handleEinkPageTurn}
           />
         </ErrorBoundary>
         {menuFlap}
+        {showEinkRefresh && <EinkRefreshOverlay />}
       </>
     );
   }
@@ -258,7 +290,7 @@ export default function ReaderContainer({
           activeDoc={activeDoc}
           words={words}
           wordIndex={wordIndex}
-          wpm={wpm}
+          wpm={effectiveWpm}
           focusTextSize={focusTextSize}
           playing={playing}
           escPending={escPending}
@@ -275,9 +307,11 @@ export default function ReaderContainer({
           onToggleFlap={toggleMenuFlap}
           onPrevChapter={handlePrevChapter}
           onNextChapter={handleNextChapter}
+          onEinkRefresh={triggerEinkRefresh}
         />
       </ErrorBoundary>
       {menuFlap}
+      {showEinkRefresh && <EinkRefreshOverlay />}
     </>
   );
 }

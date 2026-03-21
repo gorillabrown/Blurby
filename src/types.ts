@@ -58,6 +58,10 @@ export interface BlurbySettings {
   initialPauseMs: number;     // pause before first word advances (default 3000)
   punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
   viewMode: "list" | "grid";
+  // E-ink display optimization settings
+  einkWpmCeiling: number;
+  einkRefreshInterval: number;
+  einkPhraseGrouping: boolean;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────

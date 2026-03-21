@@ -11,6 +11,8 @@ interface ScrollSettings {
   punctuationPauseMs?: number;
   readingRuler?: boolean;
   fontFamily?: string | null;
+  isEink?: boolean;
+  einkRefreshInterval?: number;
 }
 import ProgressBar from "./ProgressBar";
 import HighlightMenu from "./HighlightMenu";
@@ -32,9 +34,10 @@ interface ScrollReaderViewProps {
   onProgressUpdate: (position: number) => void;
   onSwitchToFocus?: () => void;
   onToggleFlap?: () => void;
+  onPageTurn?: () => void;
 }
 
-export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, settings, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap }: ScrollReaderViewProps) {
+export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, settings, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap, onPageTurn }: ScrollReaderViewProps) {
   const { words, paragraphBreaks } = useMemo(
     () => tokenizeWithMeta(activeDoc.content || ""),
     [activeDoc.content]
@@ -62,6 +65,11 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
 
   const clampedPosRef = useRef(0);
 
+  // E-ink paginated mode state (declarations that don't depend on displayBlocks)
+  const isEink = settings?.isEink || false;
+  const [einkPage, setEinkPage] = useState(0);
+  const einkLinesPerPage = 20; // approximate lines per "page"
+
   // Flow mode state
   const [flowPlaying, setFlowPlaying] = useState(false);
   const [flowWordIndex, setFlowWordIndex] = useState(activeDoc.position || 0);
@@ -79,6 +87,39 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       ? paragraphs
       : (activeDoc.content || "").split(/\n/).filter((p) => p.trim());
   }, [activeDoc.content]);
+
+  // E-ink paginated mode (displayBlocks-dependent)
+  const einkTotalPages = useMemo(() => {
+    if (!isEink) return 0;
+    return Math.max(1, Math.ceil(displayBlocks.length / einkLinesPerPage));
+  }, [isEink, displayBlocks.length]);
+  const einkPageBlocks = useMemo(() => {
+    if (!isEink) return displayBlocks;
+    const start = einkPage * einkLinesPerPage;
+    return displayBlocks.slice(start, start + einkLinesPerPage);
+  }, [isEink, einkPage, displayBlocks]);
+
+  const einkPageForward = useCallback(() => {
+    if (!isEink) return;
+    setEinkPage((prev) => {
+      const next = Math.min(prev + 1, einkTotalPages - 1);
+      if (next !== prev) onPageTurn?.();
+      const pos = Math.round(((next + 1) / einkTotalPages) * words.length);
+      onProgressUpdate(Math.min(pos, words.length - 1));
+      return next;
+    });
+  }, [isEink, einkTotalPages, words.length, onProgressUpdate, onPageTurn]);
+
+  const einkPageBack = useCallback(() => {
+    if (!isEink) return;
+    setEinkPage((prev) => {
+      const next = Math.max(prev - 1, 0);
+      if (next !== prev) onPageTurn?.();
+      const pos = Math.round(((next + 1) / einkTotalPages) * words.length);
+      onProgressUpdate(Math.min(pos, words.length - 1));
+      return next;
+    });
+  }, [isEink, einkTotalPages, words.length, onProgressUpdate, onPageTurn]);
 
   const currentPosition = flowPlaying || flowWordIndex > 0 ? flowWordIndex : Math.round(scrollPct * words.length);
   const clampedPosition = Math.min(currentPosition, Math.max(0, words.length - 1));
@@ -248,11 +289,17 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       } else if (e.code === "Minus" || e.code === "NumpadSubtract") {
         e.preventDefault();
         onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP);
+      } else if (isEink && (e.code === "ArrowRight" || e.code === "ArrowDown" || e.code === "PageDown")) {
+        e.preventDefault();
+        einkPageForward();
+      } else if (isEink && (e.code === "ArrowLeft" || e.code === "ArrowUp" || e.code === "PageUp")) {
+        e.preventDefault();
+        einkPageBack();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap, onSwitchToFocus, flowPlaying, escPending]);
+  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap, onSwitchToFocus, flowPlaying, escPending, isEink, einkPageForward, einkPageBack]);
 
   // Cleanup
   useEffect(() => {
@@ -299,39 +346,65 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         </div>
       </div>
 
-      {/* Full scrollable content */}
-      <div
-        className="scroll-reader-content"
-        ref={scrollRef}
-        onScroll={handleScroll}
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
-        }}
-      >
-        {isFlowActive ? (
-          <FlowText
-            words={words}
-            paragraphBreaks={paragraphBreaks}
-            flowWordIndex={flowWordIndex}
-            flowWordIndexRef={flowWordIndexRef}
-            flowPlaying={flowPlaying}
-            flowWordRef={flowWordRef}
-            scale={scale}
-            spacing={spacing}
-            containerRef={containerRef}
-            onClickWord={(idx) => { flowWordIndexRef.current = idx; setFlowWordIndex(idx); }}
-            onHighlight={(word, pos) => { setHighlightWord(word); setHighlightPos(pos); setShowDefinition(false); }}
-          />
-        ) : (
+      {/* Full scrollable content — paginated in e-ink mode */}
+      {isEink && !isFlowActive ? (
+        <div
+          className="scroll-reader-content eink-paginated"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
+          }}
+          onClick={(e) => {
+            // Tap right half = forward, left half = back
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            if (e.clientX > rect.left + rect.width / 2) einkPageForward();
+            else einkPageBack();
+          }}
+        >
           <VirtualScrollText
-            displayBlocks={displayBlocks}
+            displayBlocks={einkPageBlocks}
             scale={scale}
             spacing={spacing}
             scrollRef={scrollRef}
           />
-        )}
-      </div>
+          <div className="eink-page-indicator" aria-live="polite">
+            Page {einkPage + 1} of {einkTotalPages}
+          </div>
+        </div>
+      ) : (
+        <div
+          className="scroll-reader-content"
+          ref={scrollRef}
+          onScroll={handleScroll}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
+          }}
+        >
+          {isFlowActive ? (
+            <FlowText
+              words={words}
+              paragraphBreaks={paragraphBreaks}
+              flowWordIndex={flowWordIndex}
+              flowWordIndexRef={flowWordIndexRef}
+              flowPlaying={flowPlaying}
+              flowWordRef={flowWordRef}
+              scale={scale}
+              spacing={spacing}
+              containerRef={containerRef}
+              onClickWord={(idx) => { flowWordIndexRef.current = idx; setFlowWordIndex(idx); }}
+              onHighlight={(word, pos) => { setHighlightWord(word); setHighlightPos(pos); setShowDefinition(false); }}
+            />
+          ) : (
+            <VirtualScrollText
+              displayBlocks={displayBlocks}
+              scale={scale}
+              spacing={spacing}
+              scrollRef={scrollRef}
+            />
+          )}
+        </div>
+      )}
 
       {settings?.readingRuler && (
         <div className="reading-ruler" aria-hidden="true" />
@@ -341,9 +414,12 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       <div className="scroll-reader-bottom">
         <ProgressBar current={clampedPosition} total={words.length} />
         <div className="reader-bottom-info">
-          <span>{pct}%</span>
+          <span>{isEink ? `Page ${einkPage + 1}/${einkTotalPages}` : `${pct}%`}</span>
           <span className="scroll-reader-hint" aria-hidden="true">
-            {flowPlaying ? "Shift+Space pause" : "Shift+Space flow"} &middot; Space focus &middot; Esc exit
+            {isEink
+              ? "arrows page \u00b7 Space focus \u00b7 Esc exit"
+              : <>{flowPlaying ? "Shift+Space pause" : "Shift+Space flow"} &middot; Space focus &middot; Esc exit</>
+            }
           </span>
           <span>{remaining} left</span>
         </div>

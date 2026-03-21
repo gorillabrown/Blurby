@@ -104,6 +104,7 @@ let settings = {
   rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
   layoutSpacing: { line: 1.5, character: 0, word: 0 },
   initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list",
+  einkWpmCeiling: 250, einkRefreshInterval: 20, einkPhraseGrouping: true,
 };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, streaks: { current: 0, longest: 0, lastReadDate: null } };

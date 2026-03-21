@@ -1575,6 +1575,81 @@ button:focus-visible {
   background: #ffffff;
 }
 
+/* ── E-ink: Toolbar auto-hide during playback (16C) ─────────────────────── */
+[data-theme="eink"] .eink-toolbar-hidden {
+  display: none !important;
+}
+
+/* ── E-ink: Touch-optimized layout (16E) ─────────────────────────────────── */
+[data-theme="eink"] button {
+  min-height: 48px;
+  min-width: 48px;
+}
+[data-theme="eink"] .reader-esc-btn,
+[data-theme="eink"] .reader-font-btn,
+[data-theme="eink"] .reader-mode-btn,
+[data-theme="eink"] .reader-mode-switch,
+[data-theme="eink"] .chapter-nav-btn,
+[data-theme="eink"] .chapter-label-btn {
+  padding: 12px 16px;
+  font-size: 13px;
+}
+[data-theme="eink"] .icon-btn {
+  padding: 12px;
+}
+[data-theme="eink"] .hamburger-btn {
+  padding: 12px;
+}
+
+/* ── E-ink: Static feedback — no animations (16F) ───────────────────────── */
+/* Replace highlight animations with border toggles */
+[data-theme="eink"] .flow-word-active {
+  border: 2px solid #000000;
+  text-decoration: none;
+}
+/* Toast: instant appear/disappear, no slide */
+[data-theme="eink"] .highlight-toast {
+  animation: none !important;
+  opacity: 1;
+}
+/* Loading: text-only, no spinner */
+[data-theme="eink"] .loading-screen {
+  font-size: 16px;
+}
+
+/* ── E-ink: Ghosting prevention overlay (16D) ────────────────────────────── */
+.eink-refresh-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+/* Refresh screen button */
+[data-theme="eink"] .eink-refresh-btn {
+  border: 2px solid #000000;
+  font-weight: 700;
+}
+
+/* ── E-ink: Paginated scroll reader (16B) ────────────────────────────────── */
+.eink-paginated {
+  overflow: hidden !important;
+  position: relative;
+}
+.eink-page-indicator {
+  position: absolute;
+  bottom: 8px;
+  right: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+/* ── E-ink: Progress bar throttled updates (16C) ─────────────────────────── */
+[data-theme="eink"] .progress-bar-fill {
+  transition: none !important;
+}
+
 /* ── Appearance Settings ─────────────────────────────────────────────────── */
 .appearance-row {
   display: flex;

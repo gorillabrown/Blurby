@@ -9,6 +9,9 @@ interface RsvpSettings {
   focusMarks?: boolean;
   layoutSpacing?: LayoutSpacing;
   fontFamily?: string | null;
+  isEink?: boolean;
+  einkPhraseGrouping?: boolean;
+  einkWpmCeiling?: number;
 }
 import ProgressBar from "./ProgressBar";
 import WpmGauge from "./WpmGauge";
@@ -39,9 +42,10 @@ interface ReaderViewProps {
   onToggleFlap?: () => void;
   onPrevChapter?: () => void;
   onNextChapter?: () => void;
+  onEinkRefresh?: () => void;
 }
 
-export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, onWordUpdateRef, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap, onPrevChapter, onNextChapter }: ReaderViewProps) {
+export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusTextSize, playing, escPending, isMac, settings, externalChapters, onWordUpdateRef, togglePlay, exitReader, onSetWpm, onAdjustFocusTextSize, onSwitchToScroll, onJumpToWord, onToggleFlap, onPrevChapter, onNextChapter, onEinkRefresh }: ReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentWordRef = useRef<HTMLSpanElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
@@ -56,25 +60,41 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
   // For focus-span mode (per-character opacity)
   const charContainerRef = useRef<HTMLDivElement>(null);
 
+  // E-ink phrase grouping: build a phrase of 2-3 words at natural boundaries
+  const buildEinkPhrase = useCallback((index: number): string => {
+    if (!settings?.einkPhraseGrouping || !settings?.isEink) return words[index] || "";
+    const maxWords = 3;
+    const phrase: string[] = [];
+    for (let i = index; i < Math.min(index + maxWords, words.length); i++) {
+      phrase.push(words[i]);
+      // Break at natural boundaries: punctuation at end of word, or conjunctions
+      if (i > index && /[.!?,;:\u2014]$/.test(words[i])) break;
+      if (i + 1 < words.length && /^(and|but|or|the|a|an|in|on|at|to|for|of|is|was|are|were)$/i.test(words[i + 1]) && phrase.length >= 2) break;
+    }
+    return phrase.join(" ");
+  }, [words, settings?.einkPhraseGrouping, settings?.isEink]);
+
   // Register direct DOM update callback with useReader's RAF loop
   useEffect(() => {
     if (!onWordUpdateRef) return;
     onWordUpdateRef.current = (word: string, _index: number) => {
       if (!playing) return;
-      const { before: b, focus: f, after: a } = focusChar(word);
+      // In e-ink phrase mode, display the phrase instead of a single word
+      const displayWord = settings?.isEink && settings?.einkPhraseGrouping ? buildEinkPhrase(_index) : word;
+      const { before: b, focus: f, after: a } = focusChar(displayWord);
       const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
 
       if (useFocusSpan && charContainerRef.current) {
         // Per-character opacity mode: rebuild children
         const pivotIndex = b.length;
-        const chars = word.split("");
+        const chars = displayWord.split("");
         const container = charContainerRef.current;
         // Reuse existing spans if count matches, otherwise rebuild
         if (container.childNodes.length === chars.length) {
           chars.forEach((char, i) => {
             const span = container.childNodes[i] as HTMLSpanElement;
             span.textContent = char;
-            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, word.length, settings!.focusSpan!));
+            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, displayWord.length, settings!.focusSpan!));
             span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
           });
         } else {
@@ -82,7 +102,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           chars.forEach((char, i) => {
             const span = document.createElement("span");
             span.textContent = char;
-            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, word.length, settings!.focusSpan!));
+            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, displayWord.length, settings!.focusSpan!));
             span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
             container.appendChild(span);
           });
@@ -96,12 +116,12 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
 
       // Update focus mark positions
       const pivotIndex = b.length;
-      const orpPercent = word.length > 0 ? ((pivotIndex + 0.5) / word.length) * 100 : 50;
+      const orpPercent = displayWord.length > 0 ? ((pivotIndex + 0.5) / displayWord.length) * 100 : 50;
       if (focusMarkTopRef.current) focusMarkTopRef.current.style.left = `${orpPercent}%`;
       if (focusMarkBottomRef.current) focusMarkBottomRef.current.style.left = `${orpPercent}%`;
     };
     return () => { onWordUpdateRef.current = null; };
-  }, [onWordUpdateRef, playing, settings?.focusSpan]);
+  }, [onWordUpdateRef, playing, settings?.focusSpan, settings?.isEink, settings?.einkPhraseGrouping, buildEinkPhrase]);
 
   // Highlight menu state
   const [highlightWord, setHighlightWord] = useState<string | null>(null);
@@ -244,10 +264,10 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         </div>
       )}
 
-      {/* Top bar */}
+      {/* Top bar — hidden during e-ink playback to reduce refreshes */}
       <div
-        className="reader-top-bar"
-        style={{ paddingTop: isMac ? 36 : 16, opacity: playing ? 0.12 : 0.55 }}
+        className={`reader-top-bar${settings?.isEink && playing ? " eink-toolbar-hidden" : ""}`}
+        style={{ paddingTop: isMac ? 36 : 16, opacity: playing && !settings?.isEink ? 0.12 : settings?.isEink ? 1 : 0.55 }}
       >
         <div className="reader-top-left">
           {onToggleFlap && (
@@ -327,8 +347,8 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         />
       )}
 
-      {/* Bottom bar */}
-      <div className="reader-bottom-bar" style={{ opacity: playing ? 0.08 : 0.6 }}>
+      {/* Bottom bar — hidden during e-ink playback to reduce refreshes */}
+      <div className={`reader-bottom-bar${settings?.isEink && playing ? " eink-toolbar-hidden" : ""}`} style={{ opacity: playing && !settings?.isEink ? 0.08 : settings?.isEink ? 1 : 0.6 }}>
         <ProgressBar current={wordIndex} total={words.length} />
 
         {!playing && (
@@ -363,6 +383,14 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
               title="Switch to scroll reading"
               aria-label="Switch to scroll reading mode"
             >scroll mode</button>
+            {settings?.isEink && onEinkRefresh && (
+              <button
+                className="btn eink-refresh-btn"
+                onClick={(e) => { e.stopPropagation(); onEinkRefresh(); }}
+                title="Refresh e-ink screen"
+                aria-label="Refresh e-ink screen"
+              >refresh screen</button>
+            )}
           </div>
         )}
 

@@ -64,9 +64,21 @@ export default function LibraryView({
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [editFolder, setEditFolder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchIndex, setSearchIndex] = useState(-1);
   const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
+
+  // E-ink: debounce search to 500ms to reduce repaints
+  const isEinkTheme = settings.theme === "eink";
+  useEffect(() => {
+    if (!isEinkTheme) {
+      setDebouncedSearchQuery(searchQuery);
+      return;
+    }
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery, isEinkTheme]);
   const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books" | "pdfs">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
@@ -97,7 +109,8 @@ export default function LibraryView({
     if (typeFilter === "articles") docs = docs.filter(isArticle);
     else if (typeFilter === "books") docs = docs.filter(isBook);
     else if (typeFilter === "pdfs") docs = docs.filter(isPdf);
-    if (searchQuery) docs = docs.filter((d) => d.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    const effectiveSearch = isEinkTheme ? debouncedSearchQuery : searchQuery;
+    if (effectiveSearch) docs = docs.filter((d) => d.title.toLowerCase().includes(effectiveSearch.toLowerCase()));
 
     docs = [...docs];
     if (sortBy === "progress") {
@@ -115,7 +128,7 @@ export default function LibraryView({
       docs.sort((a, b) => (a.created || 0) - (b.created || 0));
     }
     return docs;
-  }, [library, tab, typeFilter, searchQuery, sortBy]);
+  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme, sortBy]);
 
   const { activeLibrary, totalWords, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
     const active = library.filter((d) => !d.archived);

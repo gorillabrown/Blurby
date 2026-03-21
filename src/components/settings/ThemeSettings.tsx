@@ -82,6 +82,55 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
           </button>
         ))}
       </div>
+
+      {/* E-ink specific settings — only visible when e-ink theme is selected */}
+      {settings.theme === "eink" && (
+        <>
+          <div className="settings-section-label" style={{ marginTop: 20 }}>E-Ink Display</div>
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">Phrase grouping (2-3 words per tick)</span>
+            <div
+              className={`settings-toggle${settings.einkPhraseGrouping ? " active" : ""}`}
+              onClick={() => onSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping })}
+              role="switch"
+              aria-checked={settings.einkPhraseGrouping}
+            >
+              <div className="settings-toggle-thumb" />
+            </div>
+          </div>
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">WPM ceiling</span>
+            <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-dim)" }}>{settings.einkWpmCeiling ?? 250} wpm</span>
+          </div>
+          <input
+            type="range"
+            className="settings-slider"
+            min={100}
+            max={400}
+            step={10}
+            value={settings.einkWpmCeiling ?? 250}
+            onChange={(e) => onSettingsChange({ einkWpmCeiling: Number(e.target.value) })}
+            aria-label="E-ink WPM ceiling"
+          />
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">Screen refresh interval (page turns)</span>
+            <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-dim)" }}>{settings.einkRefreshInterval ?? 20}</span>
+          </div>
+          <input
+            type="range"
+            className="settings-slider"
+            min={5}
+            max={50}
+            step={5}
+            value={settings.einkRefreshInterval ?? 20}
+            onChange={(e) => onSettingsChange({ einkRefreshInterval: Number(e.target.value) })}
+            aria-label="E-ink refresh interval"
+          />
+        </>
+      )}
     </div>
   );
 }
