@@ -43,9 +43,9 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
     : 0;
 
   return (
-    <div className="stats-panel">
+    <div className="stats-panel" role="region" aria-label="Reading statistics" aria-live="polite">
       <div className="stats-header">
-        <span className="stats-title">Reading statistics</span>
+        <span className="stats-title" id="stats-title">Reading statistics</span>
         <div className="stats-header-actions">
           <button onClick={handleReset} className={`btn stats-close${confirmReset ? " stats-reset-confirm" : ""}`} aria-label="Reset statistics">
             {confirmReset ? "confirm reset?" : "reset"}

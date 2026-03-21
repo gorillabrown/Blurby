@@ -221,6 +221,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
     <div
       ref={containerRef}
       tabIndex={0}
+      id="main-content"
       className="reader-container"
       style={{ paddingTop: isMac ? 36 : 16 }}
       onClick={playing ? togglePlay : undefined}
@@ -251,7 +252,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         <div className="reader-top-left">
           {onToggleFlap && (
             <button className="hamburger-btn" onClick={(e) => { e.stopPropagation(); onToggleFlap(); }} aria-label="Open menu" title="Menu (Tab)">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
@@ -274,7 +275,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
           return (
             <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
-              <div className="reader-guide-line reader-guide-top">
+              <div className="reader-guide-line reader-guide-top" aria-hidden="true">
                 {settings?.focusMarks && <span ref={focusMarkTopRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25BC;</span>}
               </div>
               <div className="reader-word-display" aria-live="off" aria-atomic="true">
@@ -298,7 +299,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
                   </>
                 )}
               </div>
-              <div className="reader-guide-line reader-guide-bottom">
+              <div className="reader-guide-line reader-guide-bottom" aria-hidden="true">
                 {settings?.focusMarks && <span ref={focusMarkBottomRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25B2;</span>}
               </div>
             </div>
@@ -360,13 +361,14 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
               className="reader-mode-switch"
               onClick={onSwitchToScroll}
               title="Switch to scroll reading"
+              aria-label="Switch to scroll reading mode"
             >scroll mode</button>
           </div>
         )}
 
         <div className="reader-bottom-info">
           <span>{pct}%</span>
-          <span className="reader-controls-hint">
+          <span className="reader-controls-hint" aria-hidden="true">
             <span>&larr; &rarr; rewind</span>
             <span>&uarr; &darr; speed</span>
             <span>+/- font</span>
@@ -433,8 +435,13 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         />
       )}
 
+      {/* Screen reader announcement of current word */}
+      <div className="sr-only" aria-live="assertive" aria-atomic="true">
+        {playing ? currentWord : ""}
+      </div>
+
       {/* Toast notification */}
-      {toast && <div className="highlight-toast">{toast}</div>}
+      {toast && <div className="highlight-toast" role="status" aria-live="polite">{toast}</div>}
     </div>
   );
 }

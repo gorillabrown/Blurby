@@ -15,7 +15,7 @@ export default function ImportConfirmDialog({ content, isUrl, onConfirm, onCance
   const preview = isUrl ? content : content.slice(0, 200) + (content.length > 200 ? "..." : "");
 
   return (
-    <div className="import-confirm-overlay" onClick={onCancel}>
+    <div className="import-confirm-overlay" onClick={onCancel} role="dialog" aria-modal="true" aria-label={isUrl ? "Import from URL" : "Import selected text"}>
       <div className="import-confirm-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="import-confirm-header">
           {isUrl ? "Import from URL?" : "Import selected text?"}
@@ -28,6 +28,7 @@ export default function ImportConfirmDialog({ content, isUrl, onConfirm, onCance
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title..."
           onKeyDown={(e) => e.key === "Enter" && onConfirm(title)}
+          aria-label="Import title"
         />
         <div className="import-confirm-actions">
           <button onClick={onCancel} className="btn">cancel</button>

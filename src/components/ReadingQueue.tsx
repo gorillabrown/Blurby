@@ -19,11 +19,12 @@ function BubbleProgress({ progress, compact }: BubbleProgressProps) {
   const total = 10;
 
   return (
-    <div className={`bubble-progress${compact ? " compact" : ""}`}>
+    <div className={`bubble-progress${compact ? " compact" : ""}`} role="meter" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label={`${Math.round(progress)}% read`}>
       {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
           className={`bubble-progress-dot${i < filled ? " filled" : ""}`}
+          aria-hidden="true"
         />
       ))}
       <span className="bubble-progress-label">{Math.round(progress)}%</span>
@@ -61,8 +62,9 @@ export default function ReadingQueue({ docs, compact, onDocClick }: ReadingQueue
         key={doc.id}
         className="queue-item"
         onClick={() => onDocClick(doc.id)}
-        role="button"
+        role="listitem"
         tabIndex={0}
+        aria-label={`${formatDisplayTitle(doc.title)}, ${Math.round(doc.wordCount > 0 ? (doc.position / doc.wordCount) * 100 : 0)}% read`}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -90,15 +92,15 @@ export default function ReadingQueue({ docs, compact, onDocClick }: ReadingQueue
   }
 
   return (
-    <div>
+    <div role="list" aria-label="Reading queue">
       {inProgress.length > 0 && (
-        <div>
+        <div role="group" aria-label="Continue Reading">
           <div className="queue-section-label">Continue Reading</div>
           {inProgress.map(renderDoc)}
         </div>
       )}
       {unread.length > 0 && (
-        <div>
+        <div role="group" aria-label="Unread">
           <div className="queue-section-label">Unread</div>
           {unread.map(renderDoc)}
         </div>

@@ -188,7 +188,7 @@ export default function LibraryView({
   };
 
   return (
-    <div className="library-container">
+    <div className="library-container" id="main-content" role="main" aria-label="Library">
       <div className="library-titlebar" style={{ height: isMac ? 48 : 32 }} />
 
       {loadingContent && (
@@ -197,7 +197,7 @@ export default function LibraryView({
         </div>
       )}
 
-      {toast && <div className="toast" role="status">{toast}</div>}
+      {toast && <div className="toast" role="status" aria-live="polite">{toast}</div>}
 
       {updateReady && (
         <div className="update-banner" role="alert">
@@ -211,7 +211,7 @@ export default function LibraryView({
         <div className="library-header">
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <button className="hamburger-btn" onClick={onToggleFlap} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                 <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
             </button>
@@ -250,25 +250,25 @@ export default function LibraryView({
               onClick={() => onSettingsChange({ viewMode: settings.viewMode === "grid" ? "list" : "grid" })}
             >
               {settings.viewMode === "grid" ? (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
                   <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
                 </svg>
               ) : (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
                   <rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
                 </svg>
               )}
             </button>
-            <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }}>
+            <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics" aria-expanded={showStats}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }} aria-hidden="true">
                 <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
               </svg>
             </button>
             <div style={{ position: "relative" }}>
-              <button onClick={() => setShowRecent(!showRecent)} className="btn" aria-label="Select folder">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }}>
+              <button onClick={() => setShowRecent(!showRecent)} className="btn" aria-label="Select folder" aria-expanded={showRecent}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }} aria-hidden="true">
                   <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                 </svg>
                 folder
@@ -293,7 +293,7 @@ export default function LibraryView({
               {rescanning ? "..." : "⟳"}
             </button>
             <button onClick={() => { setShowUrl(true); setUrlInput(""); setUrlError(""); }} className="btn" aria-label="Add from URL">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }} aria-hidden="true">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
@@ -323,7 +323,7 @@ export default function LibraryView({
             role="tab"
             aria-selected={tab === "archived"}
           >archived ({archivedCount})</button>
-          <span className="library-tab-divider" />
+          <span className="library-tab-divider" aria-hidden="true" />
           <button
             className={`library-tab${typeFilter === "all" ? " library-tab-active" : ""}`}
             onClick={() => setTypeFilter("all")}
@@ -454,7 +454,7 @@ export default function LibraryView({
           <div className="library-empty">
             {tab === "all" && (
               <>
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.2, marginBottom: 16 }}>
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.2, marginBottom: 16 }} aria-hidden="true">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
                 <p style={{ fontSize: 16, marginBottom: 6 }}>Your library is empty</p>

@@ -97,6 +97,7 @@ export default function MenuFlap({
         role="dialog"
         aria-label="Menu"
         aria-modal="true"
+        aria-expanded={open}
       >
         <div className="menu-flap-header">
           {isOnSettings && (
@@ -105,7 +106,7 @@ export default function MenuFlap({
               onClick={handleBack}
               aria-label="Back"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path
                   d="M10 3L5 8l5 5"
                   stroke="currentColor"
@@ -127,7 +128,7 @@ export default function MenuFlap({
                 aria-label={settings.compactMode ? "Expand view" : "Compact view"}
                 title={settings.compactMode ? "Expand view" : "Compact view"}
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   {settings.compactMode ? (
                     <path
                       d="M2 4h12M2 8h12M2 12h12"
@@ -151,7 +152,7 @@ export default function MenuFlap({
               onClick={onClose}
               aria-label="Close menu"
             >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path
                   d="M3 3l10 10M13 3L3 13"
                   stroke="currentColor"
@@ -189,6 +190,7 @@ export default function MenuFlap({
             <button
               className="menu-flap-settings-btn"
               onClick={handleGoToSettings}
+              aria-label="Go to settings"
             >
               Settings
             </button>

@@ -48,7 +48,7 @@ export default function HighlightMenu({ word, phrase, position, onSave, onDefine
       <button className="highlight-menu-btn" onClick={onDefine} role="menuitem">
         Define
       </button>
-      <div className="highlight-menu-caret" />
+      <div className="highlight-menu-caret" aria-hidden="true" />
     </div>
   );
 }

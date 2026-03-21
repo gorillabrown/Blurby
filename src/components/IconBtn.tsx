@@ -18,9 +18,10 @@ export default function IconBtn({ onClick, title, icon, danger }: IconBtnProps) 
     <button
       onClick={onClick}
       title={title}
+      aria-label={title}
       className={`icon-btn${danger ? " icon-btn--danger" : ""}`}
     >
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{paths[icon]}</svg>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">{paths[icon]}</svg>
     </button>
   );
 }

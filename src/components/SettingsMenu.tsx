@@ -81,14 +81,14 @@ export function SettingsMenu({
           onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onNavigate(cat.id)}
         >
           <span>
-            <span className="settings-menu-item-icon">{cat.icon}</span>
+            <span className="settings-menu-item-icon" aria-hidden="true">{cat.icon}</span>
             {cat.label}
           </span>
-          <span className="settings-menu-item-chevron">▸</span>
+          <span className="settings-menu-item-chevron" aria-hidden="true">▸</span>
         </div>
       ))}
 
-      <div className="settings-menu-divider" />
+      <div className="settings-menu-divider" aria-hidden="true" />
 
       {SECONDARY_CATEGORIES.map((cat) => (
         <div
@@ -100,10 +100,10 @@ export function SettingsMenu({
           onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onNavigate(cat.id)}
         >
           <span>
-            <span className="settings-menu-item-icon">{cat.icon}</span>
+            <span className="settings-menu-item-icon" aria-hidden="true">{cat.icon}</span>
             {cat.label}
           </span>
-          <span className="settings-menu-item-chevron">▸</span>
+          <span className="settings-menu-item-chevron" aria-hidden="true">▸</span>
         </div>
       ))}
     </div>

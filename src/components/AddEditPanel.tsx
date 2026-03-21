@@ -17,6 +17,7 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
         value={newTitle}
         onChange={(e) => onTitleChange(e.target.value)}
         className="add-edit-title"
+        aria-label="Document title"
       />
       <textarea
         placeholder="Paste your reading material here..."
@@ -24,6 +25,7 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
         onChange={(e) => onTextChange(e.target.value)}
         rows={8}
         className="add-edit-textarea"
+        aria-label="Document content"
       />
       <div className="add-edit-actions">
         <button onClick={onCancel} className="btn">cancel</button>

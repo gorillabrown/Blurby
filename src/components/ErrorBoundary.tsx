@@ -37,7 +37,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{
+        <div role="alert" style={{
           height: "100vh",
           display: "flex",
           flexDirection: "column",

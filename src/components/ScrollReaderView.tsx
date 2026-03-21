@@ -265,7 +265,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const isFlowActive = flowPlaying || flowWordIndex > 0;
 
   return (
-    <div ref={containerRef} className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32, position: "relative" }}>
+    <div ref={containerRef} id="main-content" className="scroll-reader" role="region" aria-label="Scroll reader" style={{ paddingTop: isMac ? 48 : 32, position: "relative" }}>
       {escPending && (
         <div className="esc-confirm" role="alert">
           Press Esc again to exit
@@ -342,7 +342,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         <ProgressBar current={clampedPosition} total={words.length} />
         <div className="reader-bottom-info">
           <span>{pct}%</span>
-          <span className="scroll-reader-hint">
+          <span className="scroll-reader-hint" aria-hidden="true">
             {flowPlaying ? "Shift+Space pause" : "Shift+Space flow"} &middot; Space focus &middot; Esc exit
           </span>
           <span>{remaining} left</span>
@@ -368,7 +368,14 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         />
       )}
 
-      {toast && <div className="highlight-toast">{toast}</div>}
+      {/* Screen reader flow word announcement */}
+      {flowPlaying && (
+        <div className="sr-only" aria-live="assertive" aria-atomic="true">
+          {words[flowWordIndex] || ""}
+        </div>
+      )}
+
+      {toast && <div className="highlight-toast" role="status" aria-live="polite">{toast}</div>}
     </div>
   );
 }

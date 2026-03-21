@@ -59,8 +59,8 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
             <div className="doc-grid-progress-fill" style={{ width: `${progress}%` }} />
           </div>
         )}
-        {isComplete && <div className="doc-grid-done-badge">done</div>}
-        {doc.favorite && <div className="doc-grid-fav-star">*</div>}
+        {isComplete && <div className="doc-grid-done-badge" aria-hidden="true">done</div>}
+        {doc.favorite && <div className="doc-grid-fav-star" aria-hidden="true">*</div>}
         <div className="doc-grid-actions">
           {onToggleFavorite && (
             <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(doc.id); }} title="Toggle favorite" aria-label="Toggle favorite">

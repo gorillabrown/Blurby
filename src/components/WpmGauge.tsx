@@ -7,8 +7,8 @@ interface WpmGaugeProps {
 export default function WpmGauge({ wpm }: WpmGaugeProps) {
   const pct = ((wpm - MIN_WPM) / (MAX_WPM - MIN_WPM)) * 100;
   return (
-    <div className="wpm-gauge">
-      <div className="wpm-gauge-track">
+    <div className="wpm-gauge" role="meter" aria-valuenow={wpm} aria-valuemin={MIN_WPM} aria-valuemax={MAX_WPM} aria-label={`Reading speed: ${wpm} words per minute`}>
+      <div className="wpm-gauge-track" aria-hidden="true">
         <div className="wpm-gauge-fill" style={{ width: `${pct}%` }} />
       </div>
       <span className="wpm-gauge-label">{wpm} wpm</span>

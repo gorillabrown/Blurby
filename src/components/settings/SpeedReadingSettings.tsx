@@ -34,7 +34,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${settings.focusMarks ? " active" : ""}`}
           onClick={() => onSettingsChange({ focusMarks: !settings.focusMarks })}
           role="switch"
+          tabIndex={0}
           aria-checked={settings.focusMarks}
+          aria-label="Focus Marks"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ focusMarks: !settings.focusMarks }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>
@@ -46,7 +49,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${settings.readingRuler ? " active" : ""}`}
           onClick={() => onSettingsChange({ readingRuler: !settings.readingRuler })}
           role="switch"
+          tabIndex={0}
           aria-checked={settings.readingRuler}
+          aria-label="Reading Ruler"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ readingRuler: !settings.readingRuler }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>
@@ -75,7 +81,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${rp.commas ? " active" : ""}`}
           onClick={() => onSettingsChange({ rhythmPauses: { ...rp, commas: !rp.commas } })}
           role="switch"
+          tabIndex={0}
           aria-checked={rp.commas}
+          aria-label="Commas, colons, semicolons"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ rhythmPauses: { ...rp, commas: !rp.commas } }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>
@@ -87,7 +96,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${rp.sentences ? " active" : ""}`}
           onClick={() => onSettingsChange({ rhythmPauses: { ...rp, sentences: !rp.sentences } })}
           role="switch"
+          tabIndex={0}
           aria-checked={rp.sentences}
+          aria-label="Sentence endings"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ rhythmPauses: { ...rp, sentences: !rp.sentences } }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>
@@ -99,7 +111,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${rp.paragraphs ? " active" : ""}`}
           onClick={() => onSettingsChange({ rhythmPauses: { ...rp, paragraphs: !rp.paragraphs } })}
           role="switch"
+          tabIndex={0}
           aria-checked={rp.paragraphs}
+          aria-label="Paragraph breaks"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ rhythmPauses: { ...rp, paragraphs: !rp.paragraphs } }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>
@@ -111,7 +126,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${rp.numbers ? " active" : ""}`}
           onClick={() => onSettingsChange({ rhythmPauses: { ...rp, numbers: !rp.numbers } })}
           role="switch"
+          tabIndex={0}
           aria-checked={rp.numbers}
+          aria-label="Numbers"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ rhythmPauses: { ...rp, numbers: !rp.numbers } }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>
@@ -123,7 +141,10 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           className={`settings-toggle${rp.longerWords ? " active" : ""}`}
           onClick={() => onSettingsChange({ rhythmPauses: { ...rp, longerWords: !rp.longerWords } })}
           role="switch"
+          tabIndex={0}
           aria-checked={rp.longerWords}
+          aria-label="Longer words"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ rhythmPauses: { ...rp, longerWords: !rp.longerWords } }); } }}
         >
           <div className="settings-toggle-thumb" />
         </div>

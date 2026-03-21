@@ -67,9 +67,9 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
           <div className="doc-card-meta">
             <span>{wordCount.toLocaleString()} words</span>
             <span>{readTime}</span>
-            <span className="bubble-progress">
+            <span className="bubble-progress" role="meter" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${progress}% read`}>
               {Array.from({ length: 10 }, (_, i) => (
-                <span key={i} className={`bubble-progress-dot${i < bubbleCount(progress) ? " filled" : ""}`} />
+                <span key={i} className={`bubble-progress-dot${i < bubbleCount(progress) ? " filled" : ""}`} aria-hidden="true" />
               ))}
               <span className="bubble-progress-label">{progress}%</span>
             </span>
@@ -90,7 +90,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
               title="Read (scroll)"
               aria-label="Open in scroll reader"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
               </svg>
             </button>
@@ -102,7 +102,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
               title="Open in new window"
               aria-label="Open in new window"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /><path d="M14 9l3 3-3 3" />
               </svg>
             </button>
@@ -116,7 +116,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
               title="Unarchive"
               aria-label="Restore from archive"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
               </svg>
             </button>
@@ -128,7 +128,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
                 title="Archive"
                 aria-label="Archive document"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <polyline points="21 8 21 21 3 21 3 8" /><rect x="1" y="3" width="22" height="5" /><line x1="10" y1="12" x2="14" y2="12" />
                 </svg>
               </button>

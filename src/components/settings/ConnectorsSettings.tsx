@@ -52,6 +52,7 @@ export function ConnectorsSettings({
               <button
                 className="btn site-login-logout"
                 onClick={() => handleLogout(site.domain)}
+                aria-label={`Log out of ${site.domain}`}
               >
                 Log out
               </button>
@@ -69,6 +70,7 @@ export function ConnectorsSettings({
           value={loginUrl}
           onChange={(e) => setLoginUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+          aria-label="Site URL to log in to"
         />
         <button
           className="btn btn-fill"
