@@ -36,9 +36,9 @@ PR #1 squash-merged (2026-03-21). All feature work from phases 0-4 is now on mai
 | **Sprint 3: Main.js Modularization** | ✅ COMPLETED | Split into 7 files: orchestrator + 6 modules (ipc, parsers, url, window, migrations, watcher) |
 | **Sprint 4: Performance — Main Process** | ✅ COMPLETED | Async I/O already clean, debounce+index in place, lazy-loaded 5 heavy modules |
 | **Sprint 5: Performance — Reader Modes** | ✅ COMPLETED | Ref-based RSVP+flow playback, throttled saves (5s/50w), split settings props |
-| **Sprint 6: Polish Sprint** | 📋 SPEC'D | Auto-updater, exit confirmation, drag-drop, recent folders |
-| **Sprint 7: Stats & History** | 📋 SPEC'D | Reading history, stats panel, reading streaks |
-| **Sprint 8: Distribution** | 📋 SPEC'D | CI/CD, code signing research, GitHub Actions |
+| **Sprint 6: Polish Sprint** | ✅ COMPLETED | Auto-updater check UI, double-Escape exit, drop filtering+toasts, stale folder cleanup |
+| **Sprint 7: Stats & History** | ✅ COMPLETED | Streak tracking, actual reading time, longestStreak KPI, reset stats button |
+| **Sprint 8: Distribution** | ✅ COMPLETED | GitHub Actions CI (win+linux), release workflow (NSIS on tag), code signing docs |
 | **Phase 9: Chrome Extension** | 📐 DESIGN ONLY | Browser-based RSVP reader for web articles |
 | **Phase 10: Android App** | 📐 DESIGN ONLY | Mobile speed reader |
 | **Someday: Code Signing** | 📐 RESEARCH | Windows SmartScreen trust |
