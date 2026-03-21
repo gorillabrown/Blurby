@@ -931,6 +931,10 @@ button, input, textarea, a, [role="button"] {
   font-size: 13px;
   font-family: var(--mono);
 }
+.stats-header-actions {
+  display: flex;
+  gap: 6px;
+}
 .stats-close { font-size: 10px; }
 .stats-grid {
   display: grid;

@@ -75,6 +75,7 @@ export interface ReadingStats {
   docsCompleted: number;
   sessions: number;
   streak: number;
+  longestStreak: number;
 }
 
 // ── IPC API exposed via preload ─────────────────────────────────────────────

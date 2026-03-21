@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
-import { formatTime } from "../utils/text";
 import { ReadingStats } from "../types";
 
 const api = window.electronAPI;
+
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.round(ms / 60000);
+  if (totalMinutes < 1) return "<1m";
+  if (totalMinutes < 60) return `${totalMinutes}m`;
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
 
 interface StatsPanelProps {
   wpm: number;
@@ -26,7 +34,7 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
     <div className="stats-panel">
       <div className="stats-header">
         <span className="stats-title">Reading statistics</span>
-        <div style={{ display: "flex", gap: 6 }}>
+        <div className="stats-header-actions">
           <button onClick={() => api.exportStatsCsv()} className="btn stats-close" aria-label="Export stats CSV">export csv</button>
           <button onClick={onClose} className="btn stats-close">close</button>
         </div>
@@ -37,7 +45,7 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
           <span className="stats-label">words read</span>
         </div>
         <div className="stats-item">
-          <span className="stats-value">{formatTime(stats.totalWordsRead, avgWpm || wpm)}</span>
+          <span className="stats-value">{formatDuration(stats.totalReadingTimeMs)}</span>
           <span className="stats-label">total time</span>
         </div>
         <div className="stats-item">
@@ -49,12 +57,12 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
           <span className="stats-label">completed</span>
         </div>
         <div className="stats-item">
-          <span className="stats-value">{stats.sessions}</span>
-          <span className="stats-label">sessions</span>
+          <span className="stats-value">{stats.streak}</span>
+          <span className="stats-label">current streak</span>
         </div>
         <div className="stats-item">
-          <span className="stats-value">{stats.streak}</span>
-          <span className="stats-label">day streak</span>
+          <span className="stats-value">{stats.longestStreak}</span>
+          <span className="stats-label">longest streak</span>
         </div>
       </div>
     </div>

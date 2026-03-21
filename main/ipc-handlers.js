@@ -53,6 +53,23 @@ function recordReadingSession(history, docTitle, wordsRead, durationMs, wpm, sav
   history.sessions.push({ date: today, docTitle, wordsRead, durationMs, wpm });
   history.totalWordsRead += wordsRead;
   history.totalReadingTimeMs += durationMs;
+
+  // Update streaks
+  if (!history.streaks) history.streaks = { current: 0, longest: 0, lastReadDate: null };
+  const last = history.streaks.lastReadDate;
+  if (last === today) {
+    // Same day — streak unchanged
+  } else if (last) {
+    const diff = Math.floor((new Date(today) - new Date(last)) / 86400000);
+    history.streaks.current = diff === 1 ? history.streaks.current + 1 : 1;
+  } else {
+    history.streaks.current = 1;
+  }
+  history.streaks.lastReadDate = today;
+  if (history.streaks.current > history.streaks.longest) {
+    history.streaks.longest = history.streaks.current;
+  }
+
   if (history.sessions.length > 1000) history.sessions = history.sessions.slice(-1000);
   saveHistory();
 }
@@ -78,12 +95,14 @@ function getStats(history) {
     }
   }
 
+  const longestStreak = Math.max(streak, (history.streaks && history.streaks.longest) || 0);
   return {
     totalWordsRead: history.totalWordsRead,
     totalReadingTimeMs: history.totalReadingTimeMs,
     docsCompleted: history.docsCompleted || 0,
     sessions: history.sessions.length,
     streak,
+    longestStreak,
   };
 }
 
