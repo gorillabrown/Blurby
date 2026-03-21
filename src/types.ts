@@ -101,6 +101,7 @@ export interface ElectronAPI {
   recordReadingSession: (docTitle: string, wordsRead: number, durationMs: number, wpm: number) => Promise<void>;
   markDocCompleted: () => Promise<void>;
   getStats: () => Promise<ReadingStats>;
+  resetStats: () => Promise<{ success: boolean }>;
   exportLibrary: () => Promise<string | null>;
   importLibrary: () => Promise<{ added?: number; total?: number; error?: string } | null>;
   exportStatsCsv: () => Promise<string | null>;

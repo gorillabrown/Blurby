@@ -936,6 +936,7 @@ button, input, textarea, a, [role="button"] {
   gap: 6px;
 }
 .stats-close { font-size: 10px; }
+.stats-reset-confirm { color: var(--accent, #D04716); font-weight: 600; }
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

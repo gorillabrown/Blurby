@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("record-reading-session", docTitle, wordsRead, durationMs, wpm),
   markDocCompleted: () => ipcRenderer.invoke("mark-doc-completed"),
   getStats: () => ipcRenderer.invoke("get-stats"),
+  resetStats: () => ipcRenderer.invoke("reset-stats"),
 
   // Import/export
   exportLibrary: () => ipcRenderer.invoke("export-library"),

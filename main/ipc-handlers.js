@@ -493,6 +493,17 @@ function registerIpcHandlers(ctx) {
 
   ipcMain.handle("get-stats", () => getStats(ctx.getHistory()));
 
+  ipcMain.handle("reset-stats", async () => {
+    const history = ctx.getHistory();
+    history.sessions = [];
+    history.totalWordsRead = 0;
+    history.totalReadingTimeMs = 0;
+    history.docsCompleted = 0;
+    history.streaks = { current: 0, longest: 0, lastReadDate: null };
+    ctx.saveHistory();
+    return { success: true };
+  });
+
   // ── Cover images ─────────────────────────────────────────────────────────
 
   ipcMain.handle("get-cover-image", async (_, coverPath) => {

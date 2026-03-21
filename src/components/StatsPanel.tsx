@@ -19,10 +19,22 @@ interface StatsPanelProps {
 
 export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
   const [stats, setStats] = useState<ReadingStats | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   useEffect(() => {
     api.getStats().then(setStats);
   }, []);
+
+  const handleReset = async () => {
+    if (!confirmReset) {
+      setConfirmReset(true);
+      setTimeout(() => setConfirmReset(false), 3000);
+      return;
+    }
+    await api.resetStats();
+    api.getStats().then(setStats);
+    setConfirmReset(false);
+  };
 
   if (!stats) return null;
 
@@ -35,6 +47,9 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
       <div className="stats-header">
         <span className="stats-title">Reading statistics</span>
         <div className="stats-header-actions">
+          <button onClick={handleReset} className={`btn stats-close${confirmReset ? " stats-reset-confirm" : ""}`} aria-label="Reset statistics">
+            {confirmReset ? "confirm reset?" : "reset"}
+          </button>
           <button onClick={() => api.exportStatsCsv()} className="btn stats-close" aria-label="Export stats CSV">export csv</button>
           <button onClick={onClose} className="btn stats-close">close</button>
         </div>
