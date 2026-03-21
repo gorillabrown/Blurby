@@ -9,7 +9,9 @@
     "dev": "concurrently \"vite --port 5173\" \"wait-on http://localhost:5173 && electron .\"",
     "package:win": "electron-builder --win",
     "package:mac": "electron-builder --mac",
-    "package:linux": "electron-builder --linux"
+    "package:linux": "electron-builder --linux",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
   },
   "build": {
     "appId": "com.blurby.app",
@@ -26,25 +28,48 @@
       "target": "nsis",
       "icon": "assets/icon.png"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.png",
+      "uninstallerIcon": "assets/icon.png",
+      "installerHeaderIcon": "assets/icon.png",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Blurby"
+    },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "category": "public.app-category.productivity"
     },
     "linux": {
       "target": "AppImage",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "category": "Utility"
     }
   },
   "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
-    "electron": "^33.3.1",
-    "electron-builder": "^25.1.8",
+    "electron": "^41.0.3",
+    "electron-builder": "^26.8.1",
+    "typescript": "^5.9.3",
     "vite": "^6.1.0",
+    "vitest": "^4.1.0",
     "wait-on": "^8.0.3"
   },
   "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "adm-zip": "^0.5.16",
+    "cheerio": "^1.2.0",
     "chokidar": "^4.0.3",
+    "electron-updater": "^6.8.3",
+    "jsdom": "^24.1.0",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.18.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

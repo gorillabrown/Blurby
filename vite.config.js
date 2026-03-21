@@ -12,4 +12,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  test: {
+    setupFiles: ["./tests/setup.js"],
+    exclude: [".Backup/**", "node_modules/**"],
+  },
 });

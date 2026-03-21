@@ -1,0 +1,463 @@
+import { useRef, useEffect, useState, useCallback, useMemo } from "react";
+import { tokenize, tokenizeWithMeta, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { calculatePauseMs } from "../utils/rhythm";
+import { BlurbyDoc, BlurbySettings } from "../types";
+import ProgressBar from "./ProgressBar";
+import HighlightMenu from "./HighlightMenu";
+import DefinitionPopup from "./DefinitionPopup";
+
+const api = (window as any).electronAPI;
+
+const BLOCK_THRESHOLD = 50;  // virtualize when > 50 paragraphs
+const BLOCK_WINDOW = 30;    // render 30 blocks at a time
+
+function VirtualScrollText({ displayBlocks, scale, spacing, scrollRef }: {
+  displayBlocks: string[];
+  scale: number;
+  spacing?: { line?: number; character?: number; word?: number };
+  scrollRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: Math.min(BLOCK_WINDOW, displayBlocks.length) });
+  const useVirtual = displayBlocks.length > BLOCK_THRESHOLD;
+
+  useEffect(() => {
+    if (!useVirtual) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    const observer = () => {
+      const scrollFraction = el.scrollHeight > el.clientHeight
+        ? el.scrollTop / (el.scrollHeight - el.clientHeight)
+        : 0;
+      const centerBlock = Math.floor(scrollFraction * displayBlocks.length);
+      const half = Math.floor(BLOCK_WINDOW / 2);
+      const start = Math.max(0, centerBlock - half);
+      const end = Math.min(displayBlocks.length, centerBlock + half);
+      setVisibleRange((prev) => {
+        if (prev.start === start && prev.end === end) return prev;
+        return { start, end };
+      });
+    };
+    el.addEventListener("scroll", observer, { passive: true });
+    return () => el.removeEventListener("scroll", observer);
+  }, [useVirtual, displayBlocks.length, scrollRef]);
+
+  const estBlockHeight = 24 * scale * (spacing?.line || 1.8);
+  const blocks = useVirtual ? displayBlocks.slice(visibleRange.start, visibleRange.end) : displayBlocks;
+
+  return (
+    <div className="scroll-reader-text" style={{
+      fontSize: `${18 * scale}px`,
+      lineHeight: spacing?.line || undefined,
+      letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+      wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+    }}>
+      {useVirtual && <div style={{ height: visibleRange.start * estBlockHeight }} aria-hidden="true" />}
+      {blocks.map((block, i) => (
+        <p key={useVirtual ? visibleRange.start + i : i} className="scroll-reader-paragraph">{block}</p>
+      ))}
+      {useVirtual && <div style={{ height: (displayBlocks.length - visibleRange.end) * estBlockHeight }} aria-hidden="true" />}
+    </div>
+  );
+}
+
+// Flow mode: renders words grouped by paragraphs with a small virtual window for performance
+function FlowText({ words, paragraphBreaks, flowWordIndex, flowWordRef, scale, spacing, containerRef, onClickWord, onHighlight }: {
+  words: string[];
+  paragraphBreaks: Set<number>;
+  flowWordIndex: number;
+  flowWordRef: React.RefObject<HTMLSpanElement | null>;
+  scale: number;
+  spacing?: { line?: number; character?: number; word?: number };
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  onClickWord: (idx: number) => void;
+  onHighlight: (word: string, pos: { x: number; y: number }) => void;
+}) {
+  // Build paragraph ranges once
+  const paragraphs = useMemo(() => {
+    const paras: { start: number; end: number }[] = [];
+    let start = 0;
+    for (let i = 0; i < words.length; i++) {
+      if (paragraphBreaks.has(i) || i === words.length - 1) {
+        paras.push({ start, end: i + 1 });
+        start = i + 1;
+      }
+    }
+    return paras;
+  }, [words.length, paragraphBreaks]);
+
+  // Find which paragraph the current word is in
+  const activePara = useMemo(() => {
+    for (let i = 0; i < paragraphs.length; i++) {
+      if (flowWordIndex < paragraphs[i].end) return i;
+    }
+    return paragraphs.length - 1;
+  }, [paragraphs, flowWordIndex]);
+
+  // Virtual window: render ~15 paragraphs around the active one
+  const PARA_WINDOW = 7;
+  const paraStart = Math.max(0, activePara - PARA_WINDOW);
+  const paraEnd = Math.min(paragraphs.length, activePara + PARA_WINDOW + 1);
+
+  return (
+    <div className="scroll-reader-text flow-text" style={{
+      fontSize: `${18 * scale}px`,
+      lineHeight: spacing?.line || undefined,
+      letterSpacing: spacing?.character ? `${spacing.character}px` : undefined,
+      wordSpacing: spacing?.word ? `${spacing.word}px` : undefined,
+    }}>
+      {paraStart > 0 && <div style={{ height: paraStart * 2.4 * 18 * scale }} aria-hidden="true" />}
+      {paragraphs.slice(paraStart, paraEnd).map((para, pi) => (
+        <p key={paraStart + pi} className="scroll-reader-paragraph">
+          {words.slice(para.start, para.end).map((word, wi) => {
+            const globalIdx = para.start + wi;
+            const isActive = globalIdx === flowWordIndex;
+            return (
+              <span
+                key={globalIdx}
+                ref={isActive ? flowWordRef : undefined}
+                className={isActive ? "flow-word-active" : ""}
+                onClick={() => onClickWord(globalIdx)}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  const rect = (e.target as HTMLElement).getBoundingClientRect();
+                  const container = containerRef.current?.getBoundingClientRect();
+                  if (container) {
+                    onHighlight(word, { x: rect.left + rect.width / 2 - container.left, y: rect.top - container.top });
+                  }
+                }}
+              >
+                {word}{" "}
+              </span>
+            );
+          })}
+        </p>
+      ))}
+      {paraEnd < paragraphs.length && <div style={{ height: (paragraphs.length - paraEnd) * 2.4 * 18 * scale }} aria-hidden="true" />}
+    </div>
+  );
+}
+
+interface ScrollReaderViewProps {
+  activeDoc: BlurbyDoc & { content: string };
+  wpm: number;
+  focusTextSize: number;
+  isMac: boolean;
+  settings?: BlurbySettings;
+  onSetWpm: (wpm: number) => void;
+  onAdjustFocusTextSize: (delta: number) => void;
+  onExit: (position: number) => void;
+  onProgressUpdate: (position: number) => void;
+  onSwitchToFocus?: () => void;
+  onToggleFlap?: () => void;
+}
+
+export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac, settings, onSetWpm, onAdjustFocusTextSize, onExit, onProgressUpdate, onSwitchToFocus, onToggleFlap }: ScrollReaderViewProps) {
+  const { words, paragraphBreaks } = useMemo(
+    () => tokenizeWithMeta(activeDoc.content || ""),
+    [activeDoc.content]
+  );
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollPct, setScrollPct] = useState(0);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Highlight menu state
+  const [highlightWord, setHighlightWord] = useState<string | null>(null);
+  const [highlightPos, setHighlightPos] = useState({ x: 0, y: 0 });
+  const [showDefinition, setShowDefinition] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const closeHighlight = useCallback(() => {
+    setHighlightWord(null);
+    setShowDefinition(false);
+  }, []);
+
+  const clampedPosRef = useRef(0);
+
+  // Flow mode state
+  const [flowPlaying, setFlowPlaying] = useState(false);
+  const [flowWordIndex, setFlowWordIndex] = useState(activeDoc.position || 0);
+  const flowAccRef = useRef(0);
+  const flowRafRef = useRef<number | null>(null);
+  const flowLastTimeRef = useRef(0);
+  const flowWordRef = useRef<HTMLSpanElement | null>(null);
+  const flowWordIndexRef = useRef(flowWordIndex);
+  const flowLastStateSyncRef = useRef(0);
+
+  // Split content into paragraphs for natural rendering (passive scroll)
+  const displayBlocks = useMemo(() => {
+    const paragraphs = (activeDoc.content || "").split(/\n{2,}/).filter((p) => p.trim());
+    return paragraphs.length > 1
+      ? paragraphs
+      : (activeDoc.content || "").split(/\n/).filter((p) => p.trim());
+  }, [activeDoc.content]);
+
+  const currentPosition = flowPlaying || flowWordIndex > 0 ? flowWordIndex : Math.round(scrollPct * words.length);
+  const clampedPosition = Math.min(currentPosition, Math.max(0, words.length - 1));
+  const pct = words.length > 0 ? Math.round((clampedPosition / words.length) * 100) : 0;
+  const remaining = formatTime(Math.max(0, words.length - clampedPosition), wpm);
+
+  clampedPosRef.current = clampedPosition;
+
+  const handleSaveHighlight = useCallback(async (text?: string) => {
+    const wordToSave = text || highlightWord;
+    if (!wordToSave) return;
+    const result = await api.saveHighlight({
+      docTitle: activeDoc.title,
+      text: wordToSave,
+      wordIndex: clampedPosRef.current,
+      totalWords: words.length,
+    });
+    if (result?.ok) {
+      setToast("Saved to highlights");
+      setTimeout(() => setToast(null), 1600);
+    }
+    closeHighlight();
+  }, [highlightWord, activeDoc.title, words.length, closeHighlight]);
+
+  const scale = ((settings?.flowTextSize || focusTextSize) || 100) / 100;
+  const spacing = settings?.layoutSpacing;
+
+  // Scroll to initial position on mount
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || !words.length) return;
+    requestAnimationFrame(() => {
+      const startPct = (activeDoc.position || 0) / words.length;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      if (maxScroll > 0) {
+        el.scrollTop = startPct * maxScroll;
+      }
+    });
+  }, []); // only on mount
+
+  // Track scroll position for progress (passive scroll mode)
+  const handleScroll = useCallback(() => {
+    if (flowPlaying) return; // Don't track scroll when flow is active
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    if (maxScroll <= 0) { setScrollPct(0); return; }
+    const pct = Math.min(1, Math.max(0, el.scrollTop / maxScroll));
+    setScrollPct(pct);
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      const pos = Math.round(pct * words.length);
+      onProgressUpdate(pos);
+    }, 300);
+  }, [words.length, onProgressUpdate, flowPlaying]);
+
+  // Flow mode RAF tick
+  const flowTick = useCallback((timestamp: number) => {
+    if (!flowLastTimeRef.current) flowLastTimeRef.current = timestamp;
+    const delta = timestamp - flowLastTimeRef.current;
+    flowLastTimeRef.current = timestamp;
+
+    flowAccRef.current += delta;
+    const interval = 60000 / wpm;
+
+    const currentWord = words[flowWordIndexRef.current] || "";
+    const extraPause = settings?.rhythmPauses
+      ? calculatePauseMs(currentWord, settings.rhythmPauses, settings?.punctuationPauseMs || 1000, paragraphBreaks.has(flowWordIndexRef.current))
+      : 0;
+    const effectiveInterval = interval + extraPause;
+
+    if (flowAccRef.current >= effectiveInterval) {
+      flowAccRef.current -= effectiveInterval;
+      const next = flowWordIndexRef.current + 1;
+      if (next >= words.length) {
+        setFlowWordIndex(flowWordIndexRef.current);
+        setFlowPlaying(false);
+      } else {
+        flowWordIndexRef.current = next;
+        // Throttle React state sync to ~100ms
+        const now = performance.now();
+        if (now - flowLastStateSyncRef.current >= 100) {
+          flowLastStateSyncRef.current = now;
+          setFlowWordIndex(next);
+        }
+      }
+    }
+
+    flowRafRef.current = requestAnimationFrame(flowTick);
+  }, [wpm, words, settings?.rhythmPauses, settings?.punctuationPauseMs, paragraphBreaks]);
+
+  // Start/stop flow loop
+  useEffect(() => {
+    if (flowPlaying) {
+      flowLastTimeRef.current = 0;
+      flowAccRef.current = 0;
+      flowRafRef.current = requestAnimationFrame(flowTick);
+    } else if (flowRafRef.current) {
+      cancelAnimationFrame(flowRafRef.current);
+      flowRafRef.current = null;
+      // Sync final word position when stopping
+      setFlowWordIndex(flowWordIndexRef.current);
+    }
+    return () => { if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current); };
+  }, [flowPlaying, flowTick]);
+
+  // Auto-scroll to keep highlighted word visible during flow (throttled to avoid jank)
+  const lastScrollRef = useRef(0);
+  useEffect(() => {
+    if (flowPlaying && flowWordRef.current) {
+      const now = performance.now();
+      // Only scroll every 300ms to prevent smooth-scroll queuing
+      if (now - lastScrollRef.current > 300) {
+        lastScrollRef.current = now;
+        flowWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [flowWordIndex, flowPlaying]);
+
+  // Save flow progress (throttled to every 5s)
+  const lastProgressSaveRef = useRef(0);
+  useEffect(() => {
+    if (flowPlaying && flowWordIndex > 0) {
+      const now = Date.now();
+      if (now - lastProgressSaveRef.current >= 5000) {
+        lastProgressSaveRef.current = now;
+        onProgressUpdate(flowWordIndex);
+      }
+    }
+  }, [flowWordIndex, flowPlaying, onProgressUpdate]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        onToggleFlap?.();
+      } else if (e.code === "Space" && e.shiftKey) {
+        e.preventDefault();
+        setFlowPlaying((prev) => !prev);
+      } else if (e.code === "Space" && !e.shiftKey) {
+        e.preventDefault();
+        onSwitchToFocus?.();
+      } else if (e.code === "Escape") {
+        e.preventDefault();
+        if (flowPlaying) setFlowPlaying(false);
+        else onExit(clampedPosition);
+      } else if (e.code === "Equal" || e.code === "NumpadAdd") {
+        e.preventDefault();
+        onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP);
+      } else if (e.code === "Minus" || e.code === "NumpadSubtract") {
+        e.preventDefault();
+        onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onExit, clampedPosition, onAdjustFocusTextSize, onToggleFlap, onSwitchToFocus, flowPlaying]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, []);
+
+  const isFlowActive = flowPlaying || flowWordIndex > 0;
+
+  return (
+    <div ref={containerRef} className="scroll-reader" style={{ paddingTop: isMac ? 48 : 32, position: "relative" }}>
+      {/* Top bar */}
+      <div className="scroll-reader-top" style={{ paddingTop: isMac ? 36 : 16 }}>
+        <div className="reader-top-left">
+          <button onClick={() => onExit(clampedPosition)} className="reader-esc-btn" aria-label="Exit reader">ESC</button>
+          <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>
+        </div>
+        <div className="scroll-reader-top-right">
+          <button
+            className={`btn reader-mode-btn${flowPlaying ? " active" : ""}`}
+            onClick={() => setFlowPlaying((prev) => !prev)}
+            aria-label={flowPlaying ? "Pause flow reading" : "Start flow reading"}
+          >
+            {flowPlaying ? "pause" : "flow"}
+          </button>
+          <div className="reader-font-controls">
+            <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP)} aria-label="Decrease font size">A-</button>
+            <span className="reader-font-label">{Math.round(scale * 100)}%</span>
+            <button className="reader-font-btn" onClick={() => onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP)} aria-label="Increase font size">A+</button>
+          </div>
+          {onSwitchToFocus && (
+            <button className="btn reader-mode-btn" onClick={onSwitchToFocus} aria-label="Switch to focus reading mode">
+              focus mode
+            </button>
+          )}
+          <span className="scroll-reader-page">{pct}%</span>
+        </div>
+      </div>
+
+      {/* Full scrollable content */}
+      <div
+        className="scroll-reader-content"
+        ref={scrollRef}
+        onScroll={handleScroll}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
+        }}
+      >
+        {isFlowActive ? (
+          <FlowText
+            words={words}
+            paragraphBreaks={paragraphBreaks}
+            flowWordIndex={flowWordIndex}
+            flowWordRef={flowWordRef}
+            scale={scale}
+            spacing={spacing}
+            containerRef={containerRef}
+            onClickWord={(idx) => { flowWordIndexRef.current = idx; setFlowWordIndex(idx); }}
+            onHighlight={(word, pos) => { setHighlightWord(word); setHighlightPos(pos); setShowDefinition(false); }}
+          />
+        ) : (
+          <VirtualScrollText
+            displayBlocks={displayBlocks}
+            scale={scale}
+            spacing={spacing}
+            scrollRef={scrollRef}
+          />
+        )}
+      </div>
+
+      {settings?.readingRuler && (
+        <div className="reading-ruler" aria-hidden="true" />
+      )}
+
+      {/* Bottom bar */}
+      <div className="scroll-reader-bottom">
+        <ProgressBar current={clampedPosition} total={words.length} />
+        <div className="reader-bottom-info">
+          <span>{pct}%</span>
+          <span className="scroll-reader-hint">
+            {flowPlaying ? "Shift+Space pause" : "Shift+Space flow"} &middot; Space focus &middot; Esc exit
+          </span>
+          <span>{remaining} left</span>
+        </div>
+      </div>
+
+      {/* Highlight menu + definition popup */}
+      {highlightWord && (
+        <HighlightMenu
+          word={highlightWord}
+          position={highlightPos}
+          onSave={() => handleSaveHighlight()}
+          onDefine={() => setShowDefinition(true)}
+          onClose={closeHighlight}
+        />
+      )}
+      {showDefinition && highlightWord && (
+        <DefinitionPopup
+          word={highlightWord}
+          position={highlightPos}
+          onSaveWithDefinition={(text) => handleSaveHighlight(text)}
+          onClose={() => setShowDefinition(false)}
+        />
+      )}
+
+      {toast && <div className="highlight-toast">{toast}</div>}
+    </div>
+  );
+}

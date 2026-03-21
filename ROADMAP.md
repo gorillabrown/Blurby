@@ -1,374 +1,561 @@
 # Blurby — Development Roadmap
 
-> Roadmap for bringing the Blurby app from early design to a production-ready, distributable Windows package (.exe installer).
+**Last updated**: Session 1 (2026-03-21) — Full rewrite. Prior roadmap archived in old ROADMAP.md on dev branch.
+**Current branch**: `claude/review-blurby-roadmap-1lsoT` (102 commits ahead of main, PR #1 open)
+**Current state**: Feature-complete MVP. Phases 0-4 of original roadmap substantially built. Performance, distribution, and platform expansion remain.
+
+> **Navigation:** Sprints are numbered sequentially. Each sprint has a scope statement, agent assignments, and acceptance criteria ready for dispatch to Claude Code CLI.
 
 ---
 
-## Phase 0 — Critical Pre-Release (P0)
+## Where We Are
 
-These items **must** be resolved before any public distribution.
+### Completed Work (all on dev branch, PR #1)
 
-### 0.1 End-to-End Build Verification
+| Phase | What | Status |
+|-------|------|--------|
+| Phase 0 | Critical Pre-Release (schema versioning, error boundaries, build verification) | ✅ COMPLETED |
+| Phase 1 | Code Quality (component split, lazy-load content, async I/O, unit tests, WPM calibration) | ✅ COMPLETED |
+| Phase 2 | Distribution Polish (CSS extraction, NSIS branding, migration framework) | ✅ COMPLETED |
+| Phase 3 | Enhanced Features (rAF TBD, drag-drop, auto-updater dep, reader exit TBD, recent folders, reading queue) | ⚠️ PARTIAL |
+| Phase 4 | Format Expansion (EPUB, PDF, MOBI/AZW3, HTML, URL import) | ✅ COMPLETED |
+| Sprint 2 | Menu Flap, Settings, PDF Export, Scroll Reader, Highlights, Narration | ✅ COMPLETED |
 
-- [ ] Run `npm run build` and confirm Vite produces a clean `dist/` output with no warnings
-- [ ] Run `npm run package:win` and confirm electron-builder generates an NSIS installer in `release/`
-- [ ] Install the generated `.exe` on a clean Windows machine (or VM) and verify:
-  - App launches without errors
-  - Library view renders correctly
-  - Folder selection dialog opens and scans files
-  - Manual document add/edit/delete works
-  - Reader view displays words with ORP highlighting
-  - Playback (play, pause, rewind, forward, speed adjust) works
-  - Reading progress persists across app restarts
-  - System tray icon appears and context menu works
-  - `asar` packaging does not break asset resolution (`preload.js`, icons, etc.)
+### What's NOT on main
 
-### 0.2 Data Schema Versioning
-
-- [ ] Add a `version` field to `settings.json` (e.g., `"schemaVersion": 1`)
-- [ ] Add a `version` field to `library.json` (e.g., `"schemaVersion": 1`)
-- [ ] On app startup in `loadState()`, check the schema version and apply migrations if the stored version is older than the current expected version
-- [ ] Write a migration framework in `main.js` that can run sequential migration functions (v1→v2, v2→v3, etc.) so future schema changes don't break existing user data
-
-### 0.3 React Error Boundaries
-
-- [ ] Create an `ErrorBoundary` component that catches render errors and displays a friendly fallback UI instead of a white screen
-- [ ] Wrap the Library view in an error boundary
-- [ ] Wrap the Reader view in an error boundary
-- [ ] Include a "Reload" button in the error fallback that resets state and returns to the library view
-- [ ] Log caught errors to a local error log file for debugging (`%APPDATA%/blurby/blurby-data/error.log`)
+**Critical:** The `main` branch has only 12 commits (the Day 1 skeleton). ALL feature work lives on the dev branch. PR #1 must squash-merge before any further work makes sense.
 
 ---
 
-## Phase 1 — Strongly Recommended Improvements (P1)
+## Phase Status Summary
 
-These significantly improve code quality, maintainability, and user experience.
+| Sprint | Status | Key Milestone |
+|--------|--------|---------------|
+| **Sprint 1: Merge & Stabilize** | 🔶 READY | Squash-merge PR #1, verify build, establish baseline |
+| **Sprint 2: Performance — React Rendering** | 🔶 READY | Memoize LibraryView, React.memo on list items, stabilize callbacks |
+| **Sprint 3: Main.js Modularization** | 🔶 READY | Split 93KB main.js into 6 focused modules |
+| **Sprint 4: Performance — Main Process** | 🔶 READY | Async I/O audit, debounced saves, library index-by-ID, lazy-load modules |
+| **Sprint 5: Performance — Reader Modes** | 📋 SPEC'D | Ref-based playback, throttled progress saves |
+| **Sprint 6: Polish Sprint** | 📋 SPEC'D | Auto-updater, exit confirmation, drag-drop, recent folders |
+| **Sprint 7: Stats & History** | 📋 SPEC'D | Reading history, stats panel, reading streaks |
+| **Sprint 8: Distribution** | 📋 SPEC'D | CI/CD, code signing research, GitHub Actions |
+| **Phase 9: Chrome Extension** | 📐 DESIGN ONLY | Browser-based RSVP reader for web articles |
+| **Phase 10: Android App** | 📐 DESIGN ONLY | Mobile speed reader |
+| **Someday: Code Signing** | 📐 RESEARCH | Windows SmartScreen trust |
 
-### 1.1 Component Architecture — Split `App.jsx`
-
-The entire application lives in a single 698-line `App.jsx`. Split into focused modules:
-
-- [ ] Extract `ReaderView.jsx` — full-screen RSVP reader, word display, top/bottom bars, playback controls
-- [ ] Extract `LibraryView.jsx` — document list, header, search, folder selection, empty state
-- [ ] Extract `components/ProgressBar.jsx` — progress bar used in both views
-- [ ] Extract `components/WpmGauge.jsx` — WPM visual gauge
-- [ ] Extract `components/Badge.jsx` — small tag component
-- [ ] Extract `components/IconBtn.jsx` — action button with SVG icons
-- [ ] Extract `components/AddEditPanel.jsx` — manual document add/edit form
-- [ ] Extract `components/HelpPanel.jsx` — keyboard shortcuts documentation panel
-- [ ] Extract `components/DocCard.jsx` — individual document list item with metadata and actions
-- [ ] Extract `components/DeleteConfirmation.jsx` — inline delete confirmation dialog
-- [ ] Extract `hooks/useReader.js` — playback engine (startInterval, togglePlay, adjustWpm, seekWords, exitReader), word index state, interval refs
-- [ ] Extract `hooks/useLibrary.js` — library CRUD operations (addDoc, deleteDoc, resetProgress, startEdit, selectFolder), library state
-- [ ] Extract `hooks/useKeyboardShortcuts.js` — reader hotkeys and Alt+V quick-read handler
-- [ ] Extract `utils/text.js` — `tokenize()`, `formatTime()`, `focusChar()` pure functions
-- [ ] Extract `styles/theme.js` — CSS variables object, `btnStyle`, `btnFillStyle` shared style constants
-- [ ] Verify all extracted components work identically to the current monolithic implementation
-
-### 1.2 Lazy-Load File Content
-
-Currently every file's full text content is stored in `library.json` and loaded into memory at startup. A folder with large `.txt` files will balloon both disk and memory usage.
-
-- [ ] Remove the `content` field from library entries stored in `library.json` for folder-sourced documents
-- [ ] Store only metadata (id, title, filepath, filename, ext, size, modified, position, created, source) in the library JSON
-- [ ] Add a `load-doc-content` IPC handler in `main.js` that reads file content on demand when the user opens a document
-- [ ] For manual documents, continue storing content in the library JSON (they have no filepath)
-- [ ] Update `syncLibraryWithFolder()` to no longer read file content during folder scans — only collect metadata
-- [ ] Update the renderer to call `load-doc-content` when opening a document and show a brief loading state
-- [ ] Update word count display in the library to either: (a) store word count as metadata during scan, or (b) calculate lazily and cache
-
-### 1.3 Async File Reading with Loading States
-
-`scanFolder()` uses `fs.readFileSync` and `fs.readdirSync`, which block the main process. A large folder will freeze the UI.
-
-- [ ] Convert `readFileContent()` to use `fs.promises.readFile()`
-- [ ] Convert `scanFolder()` to use `fs.promises.readdir()` and `fs.promises.stat()`
-- [ ] Convert `syncLibraryWithFolder()` to be fully async
-- [ ] Add a loading indicator in the renderer while folder scanning is in progress
-- [ ] Handle the case where a file is being written to while being read (retry with backoff, or skip and re-read on next watcher event)
-- [ ] Ensure the file watcher's `change` event handler doesn't produce partial reads — use the `awaitWriteFinish` option (already present, but verify it handles edge cases under load)
-
-### 1.4 Unit Tests for Core Functions
-
-There are currently zero tests in the project.
-
-- [ ] Install Vitest as a dev dependency (`npm install -D vitest`)
-- [ ] Add a `test` script to `package.json`: `"test": "vitest run"`
-- [ ] Create `tests/text.test.js` with tests for `tokenize()`:
-  - Empty string returns empty array
-  - Single word returns array with one element
-  - Multiple spaces between words are handled
-  - Leading/trailing whitespace is trimmed
-  - Tabs, newlines, and mixed whitespace are handled
-- [ ] Create tests for `focusChar()`:
-  - Empty string returns `{ before: "", focus: "", after: "" }`
-  - Single character word: pivot at 0
-  - 2–5 character words: pivot at 1
-  - 6–9 character words: pivot at 2
-  - 10–13 character words: pivot at 3
-  - 14+ character words: pivot at 4
-  - Verify before/focus/after slicing is correct for each bracket
-- [ ] Create tests for `formatTime()`:
-  - 0 words or 0 WPM returns "0m"
-  - Less than 1 minute returns "<1m"
-  - Minutes less than 60 return "{N}m"
-  - 60+ minutes return hours and minutes format
-  - Edge case: exactly 60 minutes returns "1h"
-- [ ] Ensure all tests pass in CI-compatible mode (no Electron dependency required)
-
-### 1.5 WPM Accuracy Calibration
-
-The current WPM does not appear to be correctly calibrated. The playback interval is calculated as `Math.round(60000 / wpm)` ms per word, which is mathematically correct for raw words-per-minute but may not match perceived reading speed due to several factors.
-
-- [ ] Audit the current WPM calculation in `startInterval()` (`App.jsx`): confirm that `60000 / wpm` produces the expected interval (e.g., 300 WPM = 200ms per word)
-- [ ] Measure actual playback speed: create a test document with a known word count, start at a known WPM, and time how long it takes to play through — compare elapsed time against expected time (`wordCount / wpm * 60` seconds)
-- [ ] Investigate `setInterval` drift: at higher WPMs the interval is very short (50ms at 1200 WPM) and JavaScript timer resolution may cause words to display slower than intended
-- [ ] Check whether `Math.round()` on the interval introduces cumulative error (e.g., 250 WPM = 240ms, but rounding 60000/250 = 240.0 — no error here, but verify across all WPM steps)
-- [ ] Investigate whether `setWordIndex` (React state update) adds latency on top of the interval, effectively reducing the actual WPM
-- [ ] Consider compensating for state update overhead by using refs for word advancement and only syncing to React state periodically (e.g., every 10 words) during playback
-- [ ] Add a real-time "actual WPM" display (calculated from words advanced / elapsed time) to help users verify calibration
-- [ ] Write a test that programmatically runs the playback engine for N words at a target WPM and asserts the elapsed time is within ±5% of the expected duration
+**Legend:** ✅ = implemented & tested, 🔶 = fully scoped with agent assignments (ready for dispatch), 📋 = spec'd but needs agent assignments, 📐 = design/vision only
 
 ---
 
-## Phase 2 — Quality & Distribution Polish (P2)
+## Execution Order & Dependency Graph
 
-These improve the user experience and prepare for professional-grade distribution.
-
-### 2.1 Extract Inline Styles to CSS Modules
-
-Every component uses `style={{...}}` objects, making the codebase hard to scan and theme changes tedious.
-
-- [ ] Create a CSS module for each extracted component (e.g., `ReaderView.module.css`, `LibraryView.module.css`)
-- [ ] Move all inline style objects into corresponding CSS classes
-- [ ] Preserve CSS custom properties (variables) for theming — define them in a global stylesheet
-- [ ] Move `btnStyle` and `btnFillStyle` into a shared `styles/buttons.module.css`
-- [ ] Move scrollbar styles from `index.html` `<style>` tag into the global stylesheet
-- [ ] Verify hover/focus/transition states still work correctly (replace inline `onMouseEnter`/`onMouseLeave` style manipulation with CSS `:hover` pseudo-classes)
-- [ ] Ensure Vite bundles CSS modules correctly for the production Electron build
-
-### 2.2 Windows Installer Icon & Branding
-
-- [ ] Generate a proper `.ico` file from `assets/icon.png` with all required sizes (16x16, 32x32, 48x48, 64x64, 128x128, 256x256)
-- [ ] Update `package.json` build config to reference the `.ico` file for Windows: `"win": { "icon": "assets/icon.ico" }`
-- [ ] Verify the icon appears correctly in:
-  - The installer wizard
-  - The installed app's taskbar icon
-  - The desktop shortcut (if created)
-  - The system tray
-  - The "Add or Remove Programs" list
-- [ ] Add a `tray-icon.ico` for the system tray on Windows (16x16 and 32x32)
-- [ ] Configure NSIS installer metadata: publisher name, license agreement (if any), install directory default
-
-### 2.3 Data Migration Framework
-
-Building on the schema versioning from Phase 0:
-
-- [ ] Create a `migrations/` directory in the project
-- [ ] Implement a migration runner that reads the current schema version from stored JSON and applies all pending migrations in sequence
-- [ ] Write a template migration file showing the expected structure (input schema → output schema)
-- [ ] Add tests for the migration runner:
-  - No migrations needed (current version)
-  - Single migration applied
-  - Multiple sequential migrations applied
-  - Corrupt or missing version field handled gracefully (treat as version 0)
-- [ ] Back up the existing JSON files before running migrations (copy to `.bak` files)
-
-### 2.4 Code Signing for Windows
-
-Without code signing, Windows SmartScreen will warn users that the app is from an "Unknown Publisher," which significantly reduces install trust and completion rates.
-
-- [ ] Research and obtain a code signing certificate (options: OV certificate from a CA like DigiCert/Sectigo, or use Azure Trusted Signing)
-- [ ] Configure `electron-builder` to sign the `.exe` and installer during the build process
-- [ ] Add the signing configuration to `package.json` or `electron-builder.yml`:
-  - Certificate file path or Windows Certificate Store reference
-  - Timestamp server URL for long-term validity
-- [ ] Verify the signed installer no longer triggers SmartScreen warnings
-- [ ] Document the signing process and renewal timeline for the certificate
-
----
-
-## Phase 3 — Enhanced Features & Reliability (P3)
-
-These are nice-to-haves that improve the experience and long-term reliability.
-
-### 3.1 Replace `setInterval` with `requestAnimationFrame`
-
-At high WPM (e.g., 1200 WPM = 50ms per word), `setInterval` drift causes inconsistent pacing.
-
-- [ ] Replace the `setInterval`-based playback engine in `startInterval()` with a `requestAnimationFrame` loop
-- [ ] Track elapsed time using `performance.now()` timestamps instead of relying on timer accuracy
-- [ ] Accumulate time delta each frame and advance words when the accumulated time exceeds the per-word interval (`60000 / wpm` ms)
-- [ ] Ensure pause/resume preserves the fractional time remainder so pacing stays smooth
-- [ ] Test at extreme WPM values (100 and 1200) to confirm consistent word pacing
-- [ ] Verify CPU usage is not significantly increased by the rAF loop (it should be similar since the loop only runs during playback)
-
-### 3.2 Drag-and-Drop File Support
-
-Users expect to be able to drag files onto a document-based app.
-
-- [ ] Add a drop zone overlay to the Library view that appears when files are dragged over the window
-- [ ] Accept dropped `.txt`, `.md`, `.markdown`, `.text`, and `.rst` files (same as `SUPPORTED_EXT`)
-- [ ] Read dropped file content and add as manual documents (since they may not be in the watched folder)
-- [ ] Handle multiple files dropped at once
-- [ ] Show a brief toast/notification confirming how many files were imported
-- [ ] Reject unsupported file types with a clear message
-- [ ] Handle drag-and-drop of folders: scan the folder and offer to set it as the source folder
-
-### 3.3 Auto-Updater
-
-Once users install the app, there's no mechanism to push updates.
-
-- [ ] Install `electron-updater` as a dependency
-- [ ] Configure a release provider (GitHub Releases is the simplest for open-source projects):
-  - Add `"publish": { "provider": "github", "owner": "<owner>", "repo": "<repo>" }` to the build config
-- [ ] Add update checking logic in `main.js`:
-  - Check for updates on app startup (with a delay to not block launch)
-  - Notify the user when an update is available
-  - Download the update in the background
-  - Prompt the user to restart and install
-- [ ] Add UI in the renderer for update notifications (subtle banner or badge)
-- [ ] Ensure the auto-updater works with code-signed builds (if Phase 2.4 is completed)
-- [ ] Test the full update cycle: publish v1.0.1, confirm v1.0.0 detects and installs it
-
-### 3.4 Symlink Path Traversal Protection
-
-The file watcher and folder scanner don't validate that resolved file paths stay within the selected folder. Symlinks could escape the intended directory.
-
-- [ ] In `scanFolder()`, resolve each file's real path using `fs.realpathSync()` (or async equivalent)
-- [ ] Verify the resolved path starts with the resolved source folder path
-- [ ] Skip files whose real path falls outside the source folder and log a warning
-- [ ] Apply the same validation in the Chokidar watcher event handlers
-
-### 3.5 Reader Exit Confirmation
-
-Pressing Escape immediately exits the reader with no confirmation, which can be jarring during focused reading.
-
-- [ ] Add a brief confirmation prompt when pressing Escape during active playback (not when paused)
-- [ ] The confirmation should be minimal and non-disruptive — e.g., a small overlay: "Press Esc again to exit"
-- [ ] Auto-dismiss the confirmation after 2 seconds if no second press occurs
-- [ ] When paused, allow immediate exit without confirmation (progress is already saved)
-
-### 3.6 Recent Folders List
-
-Users must re-select their folder via the system dialog every time they want to switch sources.
-
-- [ ] Store the last 5 selected folder paths in `settings.json`
-- [ ] Add a dropdown or menu to the "folder" button in the library header showing recent folders
-- [ ] Allow one-click switching to a previously used folder
-- [ ] Remove folders from the list if they no longer exist on disk
-- [ ] Highlight the currently active folder in the list
-
-### 3.7 Reading Statistics & History
-
-- [ ] Track total words read, total reading time, and average WPM per session
-- [ ] Store reading history in a `history.json` file (date, document title, words read, duration, WPM)
-- [ ] Add a simple stats panel accessible from the library view showing:
-  - Total words read (all time)
-  - Total reading time
-  - Average WPM across sessions
-  - Documents completed count
-  - Reading streak (consecutive days)
-- [ ] Keep the stats display minimal and in-theme with the existing UI
+```
+Sprint 1: Merge & Stabilize ─────────────────────────────── GATE
+    │
+    │   Squash-merge PR #1. Verify clean build. Run all tests. Baseline.
+    │
+    ├───────────────────────┬───────────────────────────┐
+    │                       │                           │
+    ▼                       ▼                           │
+SPRINT 2: React Rendering  SPRINT 3: Main.js Modular.  │
+(PARALLEL)                 (PARALLEL)                   │
+    │                       │                           │
+    │ 2A. useMemo on        │ 3A. Extract ipc-handlers  │
+    │     LibraryView       │ 3B. Extract file-parsers  │
+    │ 2B. React.memo on     │ 3C. Extract migrations    │
+    │     DocCard/GridCard  │ 3D. Extract window-mgr    │
+    │ 2C. useCallback       │ 3E. Extract folder-watch  │
+    │     stabilization     │ 3F. Extract url-extractor │
+    │ 2D. Keyboard handler  │ 3G. Thin orchestrator     │
+    │     ref pattern       │                           │
+    │                       │                           │
+    │ Agent: renderer-fixer │ Agent: electron-fixer     │
+    │                       │   + code-reviewer         │
+    │                       │                           │
+    └───────────┬───────────┘                           │
+                │                                       │
+                ▼                                       │
+        SPRINT 4: Performance — Main Process ───────────┘
+            │
+            │ 4A. Async I/O audit (now across clean modules)
+            │ 4B. Debounced saves (500ms lib, 200ms broadcast)
+            │ 4C. Map<id,doc> index (O(1) lookups)
+            │ 4D. Lazy-load heavy modules (~13MB saved)
+            │
+            │ Agent: electron-fixer
+            │
+            ▼
+        SPRINT 5: Performance — Reader Modes
+            │
+            │ 5A. Ref-based RSVP playback (bypass React on hot path)
+            │ 5B. Ref-based flow mode (DOM class swaps during play)
+            │ 5C. Throttled progress saves (5s / 50 words)
+            │ 5D. Split settings prop (only pass what reader needs)
+            │
+            │ Agent: renderer-fixer + electron-fixer
+            │
+            ▼
+        SPRINT 6: Polish ──────────────────────────── GATE
+            │
+            │ 6A. Auto-updater wiring (GitHub Releases provider)
+            │ 6B. Reader exit confirmation (double-Esc pattern)
+            │ 6C. Drag-and-drop polish (multi-file, toast, rejection)
+            │ 6D. Recent folders integration (last 5, stale removal)
+            │
+            │ Agent: electron-fixer + renderer-fixer
+            │
+            ├───────────────────────┬──────────────────┐
+            │                       │                  │
+            ▼                       ▼                  │
+        SPRINT 7: Stats        SPRINT 8: Distribution │
+        (PARALLEL)             (PARALLEL)              │
+            │                       │                  │
+            │ history.json          │ GitHub Actions   │
+            │ Stats panel           │   CI workflow    │
+            │ Reading streaks       │ Release workflow │
+            │ Words/time/WPM       │ Code signing     │
+            │                       │   research       │
+            │                       │                  │
+            └───────────┴──────────────────────────────┘
+                        │
+                        ▼
+                Phase 9: Chrome Extension (design phase)
+                    │
+                    ▼
+                Phase 10: Android App (design phase)
+```
 
 ---
 
-## Phase 4 — Future Enhancements (Backlog)
+## Sprint 1: Merge & Stabilize
 
-Lower priority items to consider after the app is stable and distributed.
+**Goal:** Get all existing work onto `main`. Establish a clean, tested, building baseline.
 
-### 4.1 Additional File Format Support
+**Division of labor:** Cowork reviews PR. Claude Code executes merge and verification.
 
-The app currently only supports plain text formats (`.txt`, `.md`, `.markdown`, `.text`, `.rst`). Expanding format support is essential for a general-purpose speed reading tool.
+### Agent Assignments
 
-**EPUB (.epub)** — Most common standard ebook format. Reflowable text, compatible with Kobo, Apple Books, Nook, and most e-readers.
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Rebase dev branch onto main (resolve 9-commit divergence) | `blurby-lead` | — |
+| 2 | Squash-merge PR #1 into main | `blurby-lead` | Step 1 |
+| 3 | Run full test suite (`npm test`) | `test-runner` (haiku) | Step 2 |
+| 4 | Run build (`npm run build`) | `test-runner` (haiku) | Step 3 |
+| 5 | TypeScript check (`npx tsc --noEmit`) | `test-runner` (haiku) | Step 4 |
+| 6 | Update CLAUDE.md with post-merge state | `doc-keeper` (sonnet) | Step 5 |
 
-- [ ] Add EPUB parsing support using a library like `epub2` or `epubjs`
-- [ ] Extract chapter structure and allow chapter-by-chapter reading
-- [ ] Parse embedded HTML content within EPUB sections into plain text
-- [ ] Handle EPUB metadata (title, author, cover image) for library display
-- [ ] Support nested EPUB table of contents for navigation
+### Acceptance Criteria
 
-**PDF (.pdf)** — Widely used for academic papers, textbooks, and complex-layout documents. Preserves original layout regardless of device.
-
-- [ ] Add PDF text extraction using `pdf-parse` or `pdfjs-dist`
-- [ ] Handle multi-page documents with page-level progress tracking
-- [ ] Extract text in correct reading order (handle multi-column layouts where possible)
-- [ ] Handle PDFs with no extractable text (scanned/image-only) — show a clear "unsupported: scanned PDF" message
-
-**AZW3/KFX** — Proprietary Amazon Kindle formats. AZW3 (KF8) is the current standard; KFX is the newest format with enhanced typesetting.
-
-- [ ] Research and integrate a library for parsing AZW3 format (e.g., convert via `calibre` CLI or use a Node parser if available)
-- [ ] Extract text content and chapter structure from AZW3 files
-- [ ] Add KFX support if a suitable parser exists, otherwise document the limitation and recommend converting to EPUB first
-- [ ] Handle DRM-protected files gracefully — detect and show a clear "DRM-protected file, cannot import" message
-
-**MOBI (.mobi)** — Older Amazon format, largely replaced by AZW3 but still found in many existing ebook libraries.
-
-- [ ] Add MOBI parsing support (MOBI is structurally similar to older PalmDOC/PRC formats)
-- [ ] Extract text content and basic metadata (title, author)
-- [ ] Handle the transition: if a library contains both `.mobi` and `.azw3` versions of the same book, avoid duplicates
-
-**HTML** — Web articles, saved pages, and locally stored web content.
-
-- [ ] Add HTML file import (`.html`, `.htm`)
-- [ ] Strip HTML tags and extract readable text content (use a library like `cheerio` or the built-in DOMParser approach)
-- [ ] Preserve paragraph structure for natural reading flow
-- [ ] Handle common web article patterns (skip nav bars, footers, ads if identifiable)
-- [ ] Support both local `.html` files in the watched folder and manual paste of HTML content
-
-**General format infrastructure:**
-
-- [ ] Update `SUPPORTED_EXT` in `main.js` to include all new format extensions
-- [ ] Update the folder scanner to recognize new file types
-- [ ] Add format-specific icons or badges in the library view (e.g., "epub", "pdf", "kindle")
-- [ ] Create a unified content extraction interface so each format parser returns the same structure: `{ text: string, chapters?: Array<{ title: string, text: string }>, metadata?: { author?: string, ... } }`
-- [ ] Add a format detection layer that routes files to the correct parser based on extension and file magic bytes
-
-### 4.2 TypeScript Migration
-
-- [ ] Add TypeScript and `@types/react` as dev dependencies
-- [ ] Create `tsconfig.json` with strict mode
-- [ ] Rename `.jsx` files to `.tsx` and `.js` files to `.ts`
-- [ ] Add type definitions for IPC messages, document schema, settings schema
-- [ ] Add type definitions for all component props
-- [ ] Fix all type errors and ensure the build passes cleanly
-
-### 4.3 Multi-Window Support
-
-- [ ] Allow opening multiple reader windows simultaneously
-- [ ] Each reader window tracks its own document and playback state independently
-- [ ] Ensure progress saves correctly when multiple windows are open
-
-### 4.4 Theming & Appearance
-
-- [ ] Add a light theme option alongside the existing dark theme
-- [ ] Add a "system" theme option that follows the OS dark/light mode setting
-- [ ] Allow customizing the accent color
-- [ ] Allow customizing the reader font family and size
-- [ ] Persist theme preferences in settings
-
-### 4.5 Import/Export
-
-- [ ] Export reading progress and library metadata to a JSON backup file
-- [ ] Import from a previously exported backup
-- [ ] Export reading statistics to CSV
-
-### 4.6 Accessibility
-
-- [ ] Add ARIA labels to all interactive elements
-- [ ] Ensure keyboard navigation works throughout the library view (tab, enter, arrow keys)
-- [ ] Add screen reader announcements for reader state changes (play, pause, document complete)
-- [ ] Ensure sufficient color contrast ratios in both views
-- [ ] Support reduced motion preferences (disable animations when OS prefers-reduced-motion is set)
+- [ ] Dev branch rebased cleanly onto main
+- [ ] PR #1 squash-merged — single commit on main
+- [ ] `npm test` passes — all 135+ tests
+- [ ] `npm run build` succeeds with no errors
+- [ ] `npx tsc --noEmit` passes with no type errors
+- [ ] CLAUDE.md updated to reflect post-merge state
 
 ---
 
-## Execution Notes
+## Sprint 2: Performance — React Rendering
 
-- **Phases are sequential** — complete Phase 0 before starting Phase 1, etc.
-- **Items within a phase can be parallelized** where they don't depend on each other (e.g., 1.1 and 1.4 can happen concurrently).
-- **Phase 0 is the minimum** to produce a distributable `.exe` with confidence.
-- **Phase 1 is the minimum** for a maintainable codebase that can evolve.
-- **Phase 2 is the minimum** for professional-grade distribution.
-- After Phase 2, the app is ready for public release. Phases 3 and 4 are iterative improvements.
+**Goal:** Eliminate library view lag and reduce unnecessary re-renders. Targets from SPRINT-PERF.md Phase 3.
+
+**Prerequisite:** Sprint 1 complete. PARALLEL-SAFE with Sprint 3.
+
+### Spec
+
+**2A. Memoize LibraryView computed state**
+- `getFilteredAndSorted()` runs on every render — O(n log n) sort on full library
+- Wrap in `useMemo` keyed on `[library, filter, sort, searchQuery, typeFilter]`
+- Memoize `readingNow` and `notStarted` splits
+- Memoize search results
+
+**2B. React.memo on list item components**
+- Wrap `DocCard` and `DocGridCard` with `React.memo` and custom comparator
+- Comparator checks: `doc.id`, `doc.position`, `doc.title`, `doc.archived`, `doc.favorite`
+- Same treatment for `ReadingQueue` item renderer
+
+**2C. Stabilize callback references**
+- Extract inline callback props to `useCallback` with minimal dependency arrays
+- Targets: `onHighlight` in ReaderView, `onSwitchToFocus`/`onExit` in ScrollReaderView, `onOpenDoc`/`onDelete` in LibraryView→DocCard, `handleDocClick` in MenuFlap
+- Use refs for values that change often but don't need to trigger re-creation
+
+**2D. Reduce keyboard handler churn**
+- `useReaderKeys` has 13 dependencies — re-attaches all listeners on any callback change
+- Store all callbacks in a single ref object
+- Single `useEffect` with empty deps attaches once
+- Handler reads from `ref.current` at call time
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Implement 2A (memoize LibraryView) | `renderer-fixer` (sonnet) | — |
+| 2 | Implement 2B (React.memo on cards) | `renderer-fixer` (sonnet) | — |
+| 3 | Implement 2C (useCallback stabilization) | `renderer-fixer` (sonnet) | — |
+| 4 | Implement 2D (keyboard handler refs) | `renderer-fixer` (sonnet) | — |
+| 5 | Run tests + build | `test-runner` (haiku) | Steps 1-4 |
+| 6 | Update docs | `doc-keeper` (sonnet) | Step 5 |
+
+> **Note:** Steps 1-4 are PARALLELIZABLE — they touch different files/hooks.
+
+### Acceptance Criteria
+
+- [ ] LibraryView computed values wrapped in useMemo
+- [ ] DocCard and DocGridCard wrapped in React.memo with custom comparators
+- [ ] All callback props extracted to useCallback — no inline functions passed as props
+- [ ] useReaderKeys uses ref-based callback pattern — single useEffect, empty deps
+- [ ] `npm test` passes (all existing + any new tests)
+- [ ] `npm run build` succeeds
+- [ ] Library with 500+ docs scrolls smoothly in grid and list view (manual smoke test)
+
+---
+
+## Sprint 3: Main.js Modularization
+
+**Goal:** Split the 93KB monolithic main.js into focused, maintainable modules. Every subsequent sprint that touches main-process code benefits from this structure.
+
+**Prerequisite:** Sprint 1 complete. PARALLEL-SAFE with Sprint 2.
+
+**Rationale for early placement:** Sprints 4, 5, 6, 7 all modify main-process code. Working in a 93KB monolith is slow, error-prone, and makes parallel agent work on different subsystems impossible. Modularizing first means every future sprint touches a focused ~5-15KB file instead.
+
+### Spec
+
+**3A. Extract `main/ipc-handlers.js`**
+- All `ipcMain.handle(...)` registrations move here
+- Export a single `registerHandlers(mainWindow, state)` function
+- main.js calls it once during initialization
+
+**3B. Extract `main/file-parsers.js`**
+- EPUB, MOBI/AZW3, PDF, HTML, TXT content extraction functions
+- Export: `parseEpub()`, `parseMobi()`, `parsePdf()`, `parseHtml()`, `parseTxt()`
+- Chapter extraction and metadata extraction included
+
+**3C. Extract `main/migrations.js`**
+- Schema migration framework for settings.json and library.json
+- Export: `runMigrations(dataPath)`, `CURRENT_SETTINGS_SCHEMA`, `CURRENT_LIBRARY_SCHEMA`
+- Backup-before-migrate logic stays here
+
+**3D. Extract `main/window-manager.js`**
+- BrowserWindow creation, tray icon, menu setup
+- Export: `createMainWindow()`, `createTray()`, `setupMenu()`
+
+**3E. Extract `main/folder-watcher.js`**
+- Chokidar setup and event handling
+- Export: `startWatcher(folderPath, library)`, `stopWatcher()`
+- `syncLibraryWithFolder()` moves here
+
+**3F. Extract `main/url-extractor.js`**
+- URL article fetching, Readability processing, authenticated fetching
+- PDF export from articles (pdfkit)
+- Export: `extractArticle(url)`, `generateArticlePdf(article)`
+
+**3G. Thin orchestrator in main.js**
+- Import all modules
+- Wire them together during app lifecycle (app.whenReady, window-all-closed, before-quit)
+- Target: main.js under 200 lines
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Plan module boundaries (read all of main.js, identify cut points) | `code-reviewer` (sonnet) | — |
+| 2 | Extract file-parsers.js (3B) — least coupled, safest first | `electron-fixer` (sonnet) | Step 1 |
+| 3 | Extract migrations.js (3C) | `electron-fixer` (sonnet) | Step 2 |
+| 4 | Extract url-extractor.js (3F) | `electron-fixer` (sonnet) | Step 3 |
+| 5 | Extract folder-watcher.js (3E) | `electron-fixer` (sonnet) | Step 4 |
+| 6 | Extract window-manager.js (3D) | `electron-fixer` (sonnet) | Step 5 |
+| 7 | Extract ipc-handlers.js (3A) — most coupled, last | `electron-fixer` (sonnet) | Step 6 |
+| 8 | Reduce main.js to thin orchestrator (3G) | `electron-fixer` (sonnet) | Step 7 |
+| 9 | Run tests + build | `test-runner` (haiku) | Step 8 |
+| 10 | Architecture compliance check | `code-reviewer` (sonnet) | Step 9 |
+| 11 | Update docs + LESSONS_LEARNED | `doc-keeper` (sonnet) | Step 10 |
+
+> **Sequence matters here.** Extract from least-coupled to most-coupled. Test after each extraction if possible. IPC handlers go last because they reference almost everything.
+
+### Acceptance Criteria
+
+- [ ] main.js is under 200 lines — orchestrator only
+- [ ] 6 new modules in `main/` directory, each under 15KB
+- [ ] All CommonJS (require/module.exports) — no ESM in main process
+- [ ] Zero behavior change — all existing IPC channels work identically
+- [ ] `npm test` passes — all 135+ existing tests
+- [ ] `npm run build` succeeds
+- [ ] Electron app launches and runs identically to pre-modularization (manual smoke test)
+- [ ] `electron-builder` packages correctly (all modules included in asar)
+
+---
+
+## Sprint 4: Performance — Main Process
+
+**Goal:** Eliminate UI freezes caused by synchronous I/O and unbatched writes. Targets from SPRINT-PERF.md Phases 1-2. Now working in clean, focused modules from Sprint 3.
+
+**Prerequisite:** Sprint 3 complete.
+
+### Spec
+
+**4A. Async I/O audit**
+- Grep all `main/` modules for `readFileSync`, `writeFileSync`, `existsSync`, `mkdirSync`, `copyFileSync`
+- Replace each with `fs.promises` equivalent
+- Targets: `readJSON()`, `writeJSON()`, `getDataPath()`, `backupFile()`, cover extraction, import handler
+
+**4B. Debounced library saves**
+- `saveLibrary()` called after every single document change — disk-thrashing on bulk operations
+- Add `debouncedSaveLibrary()` with 500ms debounce for non-critical writes
+- Keep immediate save only for app quit
+- Debounce `broadcastLibrary()` to 200ms — rapid changes coalesce
+
+**4C. Index library by ID**
+- Every IPC handler does `.find(d => d.id === docId)` — linear scan on every operation
+- Maintain a `Map<string, BlurbyDoc>` index alongside the array
+- Update index on add/remove/modify
+- O(1) lookups for `update-doc-progress`, `delete-doc`, `load-doc-content`, `toggle-favorite`, `archive-doc`, etc.
+
+**4D. Lazy-load heavy modules**
+- `@mozilla/readability` (~200KB), `jsdom` (~4.3MB), `pdfkit` (~8.2MB) loaded at startup
+- Move `require()` calls inside the functions that use them (now cleanly isolated in `main/url-extractor.js` and `main/file-parsers.js`)
+- Saves ~13MB heap at startup
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Audit + fix all sync I/O (4A) | `electron-fixer` (sonnet) | — |
+| 2 | Implement debounced saves (4B) | `electron-fixer` (sonnet) | Step 1 |
+| 3 | Implement Map index (4C) | `electron-fixer` (sonnet) | Step 2 |
+| 4 | Lazy-load heavy modules (4D) | `electron-fixer` (sonnet) | — |
+| 5 | Run tests + build | `test-runner` (haiku) | Steps 1-4 |
+| 6 | Update docs | `doc-keeper` (sonnet) | Step 5 |
+
+> **Note:** Step 4 is PARALLELIZABLE with Steps 1-3.
+
+### Acceptance Criteria
+
+- [ ] Zero `readFileSync` / `writeFileSync` across all `main/` modules (except app quit save)
+- [ ] Library saves debounced to 500ms, broadcasts to 200ms
+- [ ] `Map<id, doc>` index used for all single-document lookups
+- [ ] Readability, JSDOM, PDFKit loaded lazily (not at startup)
+- [ ] `npm test` passes
+- [ ] `npm run build` succeeds
+- [ ] App window visible within 2 seconds of launch (manual smoke test)
+
+---
+
+## Sprint 5: Performance — Reader Modes
+
+**Goal:** Smooth 60fps reading on 100K+ word books. Targets from SPRINT-PERF.md Phases 3-4.
+
+**Prerequisite:** Sprints 2 and 4 complete.
+
+### Spec
+
+**5A. Ref-based RSVP playback (ReaderView)**
+- During playback, `setWordIndex()` fires every RAF tick — full React re-render
+- Use a ref for the word display during playback (bypass React render cycle)
+- Only sync to React state every 5th word or every 100ms for progress display
+- Directly update the DOM for the focus word via ref
+
+**5B. Ref-based flow mode (ScrollReaderView)**
+- `setFlowWordIndex()` fires every word — re-renders entire FlowText
+- Use a ref for the active word highlight
+- Swap CSS classes directly via DOM manipulation during playback
+- Update React state every N words for progress tracking only
+
+**5C. Throttled progress saves**
+- `onProgressUpdate()` fires on every word advance — IPC on every tick
+- Throttle to once every 5 seconds or every 50 words
+- Save immediately on pause/exit
+
+**5D. Split settings prop**
+- ReaderView/ScrollReaderView receive the entire `settings` object
+- Any settings change (theme, accent color) re-renders the reader
+- Destructure only needed settings fields before passing
+- Or create `useReaderSettings()` hook that memoizes the subset
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Implement 5A (ref-based RSVP) | `renderer-fixer` (sonnet) | — |
+| 2 | Implement 5B (ref-based flow) | `renderer-fixer` (sonnet) | — |
+| 3 | Implement 5C (throttled saves) | `electron-fixer` (sonnet) | — |
+| 4 | Implement 5D (settings split) | `renderer-fixer` (sonnet) | — |
+| 5 | Run tests + build | `test-runner` (haiku) | Steps 1-4 |
+
+> **Note:** Steps 1-4 are PARALLELIZABLE.
+
+### Acceptance Criteria
+
+- [ ] RSVP playback uses ref-based DOM updates during active play
+- [ ] Flow mode uses ref-based word highlighting during active play
+- [ ] Progress saves throttled to 5s / 50 words
+- [ ] Reader components receive only the settings fields they need
+- [ ] 100K-word book plays smoothly at 300+ WPM (manual smoke test)
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 6: Polish Sprint
+
+**Goal:** UX improvements that make the app feel production-ready.
+
+**Prerequisite:** Sprint 5 complete.
+
+### Spec
+
+**6A. Auto-updater wiring**
+- electron-updater is already a dependency
+- Configure GitHub Releases as provider in `main/window-manager.js`
+- Check for updates on app startup (delayed 5s to not block launch)
+- Show subtle notification banner when update available
+- Download in background, prompt to restart
+
+**6B. Reader exit confirmation**
+- Pressing Escape during active playback exits immediately — jarring
+- Show "Press Esc again to exit" overlay on first press
+- Auto-dismiss after 2 seconds if no second press
+- When paused, allow immediate exit
+
+**6C. Drag-and-drop polish**
+- DropZone component exists — verify it handles all supported formats
+- Handle multiple files dropped at once
+- Show brief toast confirming how many files imported
+- Reject unsupported types with clear message
+
+**6D. Recent folders**
+- RecentFolders component exists — verify integration
+- Store last 5 folder paths in settings.json (schema migration if needed)
+- Remove folders that no longer exist on disk
+- Highlight currently active folder
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Implement 6A (auto-updater) | `electron-fixer` (sonnet) | — |
+| 2 | Implement 6B (exit confirmation) | `renderer-fixer` (sonnet) | — |
+| 3 | Implement 6C (drag-drop) | `renderer-fixer` (sonnet) | — |
+| 4 | Implement 6D (recent folders) | `electron-fixer` + `renderer-fixer` (sonnet) | — |
+| 5 | Run tests + build | `test-runner` (haiku) | Steps 1-4 |
+| 6 | Update docs | `doc-keeper` (sonnet) | Step 5 |
+
+> **Note:** Steps 1-4 are PARALLELIZABLE.
+
+### Acceptance Criteria
+
+- [ ] Auto-updater checks on startup, shows notification, downloads and installs
+- [ ] Reader exit requires double-Escape during playback
+- [ ] Drag-drop handles multi-file, shows toast, rejects unsupported types
+- [ ] Recent folders dropdown shows last 5, removes stale paths
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 7: Stats & History (PARALLEL-SAFE with Sprint 8)
+
+**Goal:** Track and display reading statistics.
+
+**Prerequisite:** Sprint 6 complete.
+
+### Spec
+
+**7A. Reading history data layer**
+- Create `history.json` in user data dir (with schema versioning)
+- Track per-session: date, document title, words read, duration, average WPM
+- New IPC handlers in `main/ipc-handlers.js`: `save-reading-session`, `get-reading-history`, `get-reading-stats`
+
+**7B. Stats panel UI**
+- New `StatsPanel.tsx` component (exists as stub — flesh out)
+- Accessible from library view header
+- Display: total words read (all time), total reading time, average WPM, documents completed, reading streak (consecutive days)
+- Minimal, in-theme with existing UI using CSS custom properties
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Implement 7A (history data layer) | `electron-fixer` (sonnet) | — |
+| 2 | Implement 7B (stats panel UI) | `renderer-fixer` (sonnet) | Step 1 |
+| 3 | Write tests for history tracking | `renderer-fixer` (sonnet) | Step 2 |
+| 4 | Run tests + build | `test-runner` (haiku) | Step 3 |
+
+### Acceptance Criteria
+
+- [ ] Reading sessions saved to history.json with schema versioning
+- [ ] Stats panel displays 5 KPIs correctly
+- [ ] Reading streak calculates consecutive days accurately
+- [ ] New tests for history data layer
+- [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 8: Distribution (PARALLEL-SAFE with Sprint 7)
+
+**Goal:** Automated build and release pipeline.
+
+**Prerequisite:** Sprint 6 complete.
+
+### Spec
+
+**8A. CI workflow**
+- GitHub Actions workflow: `npm test` + `npm run build` on push to main and on PRs
+- Node.js matrix: test on Node 18 + 20
+
+**8B. Release workflow**
+- GitHub Actions workflow: build Windows NSIS installer on release tag
+- Upload installer as release artifact
+- Mac DMG and Linux AppImage if feasible
+
+**8C. Code signing research**
+- Document options: OV certificate (DigiCert/Sectigo) vs Azure Trusted Signing
+- Estimate costs and renewal timeline
+- Document the integration path with electron-builder
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Create CI workflow (8A) | `blurby-lead` (opus) | — |
+| 2 | Create release workflow (8B) | `blurby-lead` (opus) | Step 1 |
+| 3 | Research + document code signing (8C) | `doc-keeper` (sonnet) | — |
+
+> **Note:** Step 3 is PARALLELIZABLE with Steps 1-2.
+
+### Acceptance Criteria
+
+- [ ] CI workflow runs on push to main — tests + build pass
+- [ ] Release workflow triggers on tag — produces Windows installer
+- [ ] Code signing options documented with cost estimates
+- [ ] Workflows committed to `.github/workflows/`
+
+---
+
+## Phase 9: Chrome Extension (Design Only)
+
+**Goal:** Browser-based RSVP reader for web articles.
+
+- Extension popup with speed controls
+- Content script extracts article text (Readability-like)
+- Overlay RSVP reader on the page
+- Sync settings with desktop app (optional)
+
+---
+
+## Phase 10: Android App (Design Only)
+
+**Goal:** Mobile speed reading experience.
+
+- React Native or Kotlin-based
+- File picker for local documents
+- Cloud sync for reading progress
+- Reduced feature set focused on reading
+
+---
+
+## Someday Backlog
+
+- Code signing certificate for Windows SmartScreen trust
+- Multi-window support (multiple reader windows simultaneously)
+- Import/export (backup library, stats to CSV)
+- Accessibility audit (ARIA labels, keyboard nav, screen reader, reduced motion)
+- Symlink path traversal protection in folder scanner
+- requestAnimationFrame migration for all remaining setInterval timers
