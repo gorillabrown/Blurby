@@ -77,6 +77,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
   siteLogin: (url) => ipcRenderer.invoke("site-login", url),
   siteLogout: (domain) => ipcRenderer.invoke("site-logout", domain),
 
+  // Cloud sync
+  cloudSignIn: (provider) => ipcRenderer.invoke("cloud-sign-in", provider),
+  cloudSignOut: (provider) => ipcRenderer.invoke("cloud-sign-out", provider),
+  cloudGetAuthState: () => ipcRenderer.invoke("cloud-get-auth-state"),
+  cloudSyncNow: () => ipcRenderer.invoke("cloud-sync-now"),
+  cloudGetSyncStatus: () => ipcRenderer.invoke("cloud-get-sync-status"),
+  cloudGetMergePreview: () => ipcRenderer.invoke("cloud-get-merge-preview"),
+  cloudForceSync: (direction) => ipcRenderer.invoke("cloud-force-sync", direction),
+  cloudStartAutoSync: (intervalMs) => ipcRenderer.invoke("cloud-start-auto-sync", intervalMs),
+  cloudStopAutoSync: () => ipcRenderer.invoke("cloud-stop-auto-sync"),
+
   // Events from main
   onSyncProgress: (callback) => {
     const handler = (_event, progress) => callback(progress);
@@ -102,5 +113,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const handler = (_event, version) => callback(version);
     ipcRenderer.on("update-downloaded", handler);
     return () => ipcRenderer.removeListener("update-downloaded", handler);
+  },
+  onCloudSyncStatusChanged: (callback) => {
+    const handler = (_event, status) => callback(status);
+    ipcRenderer.on("cloud-sync-status-changed", handler);
+    return () => ipcRenderer.removeListener("cloud-sync-status-changed", handler);
+  },
+  onCloudAuthRequired: (callback) => {
+    const handler = (_event, provider) => callback(provider);
+    ipcRenderer.on("cloud-auth-required", handler);
+    return () => ipcRenderer.removeListener("cloud-auth-required", handler);
   },
 });

@@ -105,6 +105,7 @@ let settings = {
   layoutSpacing: { line: 1.5, character: 0, word: 0 },
   initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list",
   einkWpmCeiling: 250, einkRefreshInterval: 20, einkPhraseGrouping: true,
+  syncIntervalMinutes: 5, syncOnMeteredConnection: false,
 };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, streaks: { current: 0, longest: 0, lastReadDate: null } };
@@ -981,7 +982,14 @@ const ipcContext = {
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
-  loadState();
+  await loadState();
+
+  // Initialize cloud sync modules
+  const auth = require("./main/auth");
+  const syncEngine = require("./main/sync-engine");
+  await auth.initAuth(getDataPath());
+  await syncEngine.initSyncEngine(ipcContext);
+
   registerIpcHandlers(ipcContext);
   mainWindow = createMainWindow(settings, isDev);
   mainWindow.on("closed", () => { mainWindow = null; });
@@ -1014,6 +1022,13 @@ app.whenReady().then(async () => {
     syncLibraryWithFolder().then(() => startWatcherFn());
   }
 
+  // Start cloud sync if signed in
+  if (auth.getAuthState()) {
+    syncEngine.startSync().catch((err) => console.log("[cloud] Startup sync failed:", err.message));
+    const intervalMs = (settings.syncIntervalMinutes || 5) * 60 * 1000;
+    if (intervalMs > 0) syncEngine.startAutoSync(intervalMs);
+  }
+
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       mainWindow = createMainWindow(settings, isDev);
@@ -1029,6 +1044,17 @@ app.on("window-all-closed", () => {
 app.on("will-quit", async () => {
   if (watcher) watcher.close();
   await saveLibraryNow();
+  // Final cloud sync before quit
+  try {
+    const syncEngine = require("./main/sync-engine");
+    syncEngine.stopAutoSync();
+    const auth = require("./main/auth");
+    if (auth.getAuthState()) {
+      await syncEngine.startSync();
+    }
+  } catch (err) {
+    console.log("[cloud] Quit sync failed:", err.message);
+  }
 });
 
 // Export pure functions for testing

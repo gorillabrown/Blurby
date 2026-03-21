@@ -33,6 +33,8 @@ const defaultSettings: BlurbySettings = {
   einkWpmCeiling: 250,
   einkRefreshInterval: 20,
   einkPhraseGrouping: true,
+  syncIntervalMinutes: 5,
+  syncOnMeteredConnection: false,
 };
 
 export const SettingsContext = createContext<SettingsContextType>({

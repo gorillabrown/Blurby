@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useSyncExternalStore } from "react";
 import { BlurbyDoc } from "../types";
 import useLibrary from "../hooks/useLibrary";
 import { useSmartImport, useGlobalKeys } from "../hooks/useKeyboardShortcuts";
@@ -15,7 +15,17 @@ const api = window.electronAPI;
 
 type DocWithContent = BlurbyDoc & { content: string };
 
+// Online status hook using useSyncExternalStore
+function subscribeOnline(cb: () => void) {
+  window.addEventListener("online", cb);
+  window.addEventListener("offline", cb);
+  return () => { window.removeEventListener("online", cb); window.removeEventListener("offline", cb); };
+}
+function getOnlineSnapshot() { return navigator.onLine; }
+function useOnlineStatus() { return useSyncExternalStore(subscribeOnline, getOnlineSnapshot); }
+
 export default function LibraryContainer() {
+  const isOnline = useOnlineStatus();
   const [view, setView] = useState("library");
   const [activeDoc, setActiveDoc] = useState<DocWithContent | null>(null);
   const [wpm, setWpm] = useState(300);
@@ -235,6 +245,7 @@ export default function LibraryContainer() {
           </DropZone>
         </ErrorBoundary>
         {menuFlap}
+        {!isOnline && <div className="offline-badge">Offline</div>}
       </ToastContext.Provider>
     </SettingsContext.Provider>
   );

@@ -2389,3 +2389,277 @@ button:focus-visible {
     transition: none;
   }
 }
+
+/* ── Cloud Sync ─────────────────────────────────────────────────────────── */
+
+/* Sign-in buttons */
+.cloud-sync-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.cloud-sign-in-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.cloud-sign-in-microsoft {
+  background: #2f2f2f;
+  color: #fff;
+}
+.cloud-sign-in-microsoft:hover:not(:disabled) {
+  background: #0078d4;
+  border-color: #0078d4;
+}
+.cloud-sign-in-google {
+  background: #2f2f2f;
+  color: #fff;
+}
+.cloud-sign-in-google:hover:not(:disabled) {
+  background: #4285f4;
+  border-color: #4285f4;
+}
+.cloud-sign-in-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 12px;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Error display */
+.cloud-sync-error {
+  background: var(--danger-muted);
+  color: var(--danger);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin: 10px 0;
+}
+
+/* Signed-in state */
+.cloud-sync-info {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin: 12px 0;
+}
+.cloud-sync-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cloud-sync-account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cloud-sync-email {
+  font-size: 13px;
+  font-weight: 500;
+}
+.cloud-sync-provider {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.cloud-sync-last {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 8px;
+}
+
+/* Status dots */
+.cloud-sync-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cloud-status-synced { background: var(--success); }
+.cloud-status-syncing { background: var(--accent); animation: cloud-pulse 1.2s ease-in-out infinite; }
+.cloud-status-error { background: var(--danger); }
+.cloud-status-offline { background: var(--text-dimmer); }
+
+@keyframes cloud-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Controls */
+.cloud-sync-controls {
+  margin: 12px 0;
+}
+
+/* Frequency */
+.cloud-sync-frequency {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+.cloud-sync-freq-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.cloud-sync-freq-option input[type="radio"] {
+  accent-color: var(--accent);
+}
+
+/* Toggle */
+.cloud-sync-toggle {
+  margin: 16px 0;
+}
+.cloud-sync-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.cloud-sync-toggle-label input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* Sign out */
+.cloud-sync-signout {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.cloud-sign-out-btn {
+  color: var(--danger);
+  border: 1px solid var(--danger-muted);
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+}
+.cloud-sign-out-btn:hover {
+  background: var(--danger-muted);
+}
+
+/* Merge dialog */
+.cloud-merge-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.cloud-merge-dialog {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+.cloud-merge-dialog h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.cloud-merge-info {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+.cloud-merge-info p {
+  margin: 4px 0;
+}
+.cloud-merge-dialog p {
+  font-size: 13px;
+  margin: 10px 0;
+  color: var(--text-dim);
+}
+.cloud-merge-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.cloud-merge-actions .btn {
+  font-size: 12px;
+  padding: 7px 14px;
+}
+
+/* Library header indicator */
+.cloud-sync-indicator {
+  position: relative;
+  padding: 4px 6px;
+}
+.cloud-ind-synced svg { color: var(--success); }
+.cloud-ind-syncing svg { color: var(--accent); }
+.cloud-ind-error svg { color: var(--danger); }
+.cloud-ind-offline svg { color: var(--text-dimmer); }
+.cloud-ind-spinner {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border: 1.5px solid var(--accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: cloud-spin 0.8s linear infinite;
+}
+@keyframes cloud-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Offline badge */
+.offline-badge {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 4px 14px;
+  font-size: 11px;
+  color: var(--text-dim);
+  z-index: 900;
+  pointer-events: none;
+}
+
+/* Light theme overrides */
+[data-theme="light"] .cloud-sign-in-microsoft {
+  background: #fff;
+  color: #333;
+  border-color: #ccc;
+}
+[data-theme="light"] .cloud-sign-in-microsoft:hover:not(:disabled) {
+  background: #0078d4;
+  color: #fff;
+}
+[data-theme="light"] .cloud-sign-in-google {
+  background: #fff;
+  color: #333;
+  border-color: #ccc;
+}
+[data-theme="light"] .cloud-sign-in-google:hover:not(:disabled) {
+  background: #4285f4;
+  color: #fff;
+}

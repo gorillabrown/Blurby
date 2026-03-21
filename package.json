@@ -19,6 +19,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "main/**/*",
       "dist/**/*"
     ],
     "directories": {
@@ -62,11 +63,13 @@
     "wait-on": "^8.0.3"
   },
   "dependencies": {
+    "@azure/msal-node": "^3.8.10",
     "@mozilla/readability": "^0.6.0",
     "adm-zip": "^0.5.16",
     "cheerio": "^1.2.0",
     "chokidar": "^4.0.3",
     "electron-updater": "^6.8.3",
+    "googleapis": "^171.4.0",
     "jsdom": "^24.1.0",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.18.0",

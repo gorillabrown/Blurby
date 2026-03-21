@@ -6,6 +6,7 @@ import { HotkeyMapSettings } from "./settings/HotkeyMapSettings";
 import { TextSizeSettings } from "./settings/TextSizeSettings";
 import { SpeedReadingSettings } from "./settings/SpeedReadingSettings";
 import { LayoutSettings } from "./settings/LayoutSettings";
+import { CloudSyncSettings } from "./settings/CloudSyncSettings";
 
 interface SettingsMenuProps {
   settings: BlurbySettings;
@@ -24,6 +25,7 @@ const CATEGORIES = [
   { id: "theme", label: "Theme", icon: "🎨" },
   { id: "layout", label: "Layout", icon: "📐" },
   { id: "connectors", label: "Connectors", icon: "🔌" },
+  { id: "cloud-sync", label: "Cloud Sync", icon: "☁️" },
 ];
 
 const SECONDARY_CATEGORIES = [
@@ -64,6 +66,9 @@ export function SettingsMenu({
         )}
         {activeSubPage === "layout" && (
           <LayoutSettings settings={settings} onSettingsChange={onSettingsChange} />
+        )}
+        {activeSubPage === "cloud-sync" && (
+          <CloudSyncSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
       </div>
     );

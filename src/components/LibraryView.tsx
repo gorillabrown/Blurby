@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
-import { BlurbyDoc, BlurbySettings } from "../types";
+import { BlurbyDoc, BlurbySettings, SyncStatusValue } from "../types";
 import { useTheme } from "./ThemeProvider";
 import AddEditPanel from "./AddEditPanel";
 import DocCard from "./DocCard";
 import DocGridCard from "./DocGridCard";
 import StatsPanel from "./StatsPanel";
 import RecentFolders from "./RecentFolders";
+import CloudSyncIndicator from "./CloudSyncIndicator";
 
 const api = window.electronAPI;
 
@@ -256,6 +257,7 @@ export default function LibraryView({
             </div>
           </div>
           <div className="library-actions">
+            <CloudSyncIndicator onOpenSettings={() => onToggleFlap()} />
             <button
               className="view-toggle-btn btn"
               title={settings.viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}

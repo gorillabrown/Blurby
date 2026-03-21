@@ -62,6 +62,9 @@ export interface BlurbySettings {
   einkWpmCeiling: number;
   einkRefreshInterval: number;
   einkPhraseGrouping: boolean;
+  // Cloud sync settings
+  syncIntervalMinutes: number;
+  syncOnMeteredConnection: boolean;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────
@@ -80,6 +83,41 @@ export interface ReadingStats {
   sessions: number;
   streak: number;
   longestStreak: number;
+}
+
+// ── Cloud sync ──────────────────────────────────────────────────────────────
+export type SyncStatusValue = "idle" | "syncing" | "error" | "offline";
+
+export interface AuthState {
+  provider: "microsoft" | "google";
+  email: string;
+  name: string;
+}
+
+export interface SyncResult {
+  status: "success" | "error" | "not-signed-in" | "already-syncing";
+  results?: {
+    settings: string;
+    library: string;
+    history: string;
+  };
+  lastSync?: number;
+  error?: string;
+}
+
+export interface SyncStatus {
+  status: SyncStatusValue;
+  lastSync: number;
+  provider: string | null;
+}
+
+export interface MergePreview {
+  cloudDocs: number;
+  localDocs: number;
+  cloudHasData: boolean;
+  localHasData: boolean;
+  lastSync: number;
+  error?: string;
 }
 
 // ── IPC API exposed via preload ─────────────────────────────────────────────
@@ -124,10 +162,23 @@ export interface ElectronAPI {
   getCoverImage: (coverPath: string) => Promise<string | null>;
   rescanFolder: () => Promise<{ count?: number; error?: string }>;
   getFilePathForDrop: (file: File) => string;
+  // Cloud sync
+  cloudSignIn: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string; email?: string; name?: string; provider?: string }>;
+  cloudSignOut: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string }>;
+  cloudGetAuthState: () => Promise<AuthState | null>;
+  cloudSyncNow: () => Promise<SyncResult>;
+  cloudGetSyncStatus: () => Promise<SyncStatus>;
+  cloudGetMergePreview: () => Promise<MergePreview | null>;
+  cloudForceSync: (direction: "upload" | "download" | "merge") => Promise<SyncResult>;
+  cloudStartAutoSync: (intervalMs: number) => Promise<{ ok: boolean }>;
+  cloudStopAutoSync: () => Promise<{ ok: boolean }>;
+  // Events from main
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
   onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;
   onUpdateAvailable?: (callback: (version: string) => void) => () => void;
   onUpdateDownloaded?: (callback: (version: string) => void) => () => void;
+  onCloudSyncStatusChanged?: (callback: (status: SyncStatusValue) => void) => () => void;
+  onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
 }
 
 declare global {
