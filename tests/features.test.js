@@ -1,20 +1,22 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // ── Stats calculation logic (replicated from main.js getStats) ──────────────
-function getStats(history) {
-  const today = new Date().toISOString().slice(0, 10);
+// Note: main.js getStats lives in CommonJS, so we replicate the pure logic here.
+// The function is parameterized with 'today' to avoid timezone flakiness.
+function getStats(history, today) {
+  if (!today) today = new Date().toISOString().slice(0, 10);
   const dates = [...new Set(history.sessions.map((s) => s.date))].sort();
 
   let streak = 0;
   if (dates.length > 0) {
-    const d = new Date(today);
+    const d = new Date(today + "T00:00:00Z");
     const lastDate = dates[dates.length - 1];
-    const diffDays = Math.floor((d - new Date(lastDate)) / 86400000);
+    const diffDays = Math.floor((d - new Date(lastDate + "T00:00:00Z")) / 86400000);
     if (diffDays <= 1) {
       streak = 1;
       for (let i = dates.length - 2; i >= 0; i--) {
-        const prev = new Date(dates[i + 1]);
-        const curr = new Date(dates[i]);
+        const prev = new Date(dates[i + 1] + "T00:00:00Z");
+        const curr = new Date(dates[i] + "T00:00:00Z");
         const gap = Math.floor((prev - curr) / 86400000);
         if (gap <= 1) streak++;
         else break;
@@ -60,9 +62,10 @@ describe("Reading statistics", () => {
   });
 
   it("calculates streak for consecutive days", () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    const dayBefore = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
+    // Use fixed dates to avoid timezone flakiness
+    const today = "2026-03-21";
+    const yesterday = "2026-03-20";
+    const dayBefore = "2026-03-19";
     const history = {
       sessions: [
         { date: dayBefore, docTitle: "A", wordsRead: 100, durationMs: 30000, wpm: 200 },
@@ -73,13 +76,13 @@ describe("Reading statistics", () => {
       totalReadingTimeMs: 180000,
       docsCompleted: 0,
     };
-    const stats = getStats(history);
+    const stats = getStats(history, today);
     expect(stats.streak).toBe(3);
   });
 
   it("streak resets on gap of 2+ days", () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const threeDaysAgo = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10);
+    const today = "2026-03-21";
+    const threeDaysAgo = "2026-03-18";
     const history = {
       sessions: [
         { date: threeDaysAgo, docTitle: "A", wordsRead: 100, durationMs: 30000, wpm: 200 },
@@ -89,12 +92,13 @@ describe("Reading statistics", () => {
       totalReadingTimeMs: 90000,
       docsCompleted: 0,
     };
-    const stats = getStats(history);
+    const stats = getStats(history, today);
     expect(stats.streak).toBe(1);
   });
 
   it("no streak if last session was more than 1 day ago", () => {
-    const fiveDaysAgo = new Date(Date.now() - 5 * 86400000).toISOString().slice(0, 10);
+    const today = "2026-03-21";
+    const fiveDaysAgo = "2026-03-16";
     const history = {
       sessions: [
         { date: fiveDaysAgo, docTitle: "A", wordsRead: 100, durationMs: 30000, wpm: 200 },
@@ -103,7 +107,7 @@ describe("Reading statistics", () => {
       totalReadingTimeMs: 30000,
       docsCompleted: 0,
     };
-    const stats = getStats(history);
+    const stats = getStats(history, today);
     expect(stats.streak).toBe(0);
   });
 });
@@ -141,9 +145,10 @@ describe("Favorites", () => {
 describe("Archive", () => {
   it("archive a doc sets archived=true with timestamp", () => {
     const doc = { id: "1", title: "Test", archived: false };
-    const archived = { ...doc, archived: true, archivedAt: Date.now() };
+    const fixedTimestamp = 1711000000000; // fixed to avoid flakiness
+    const archived = { ...doc, archived: true, archivedAt: fixedTimestamp };
     expect(archived.archived).toBe(true);
-    expect(archived.archivedAt).toBeGreaterThan(0);
+    expect(archived.archivedAt).toBe(1711000000000);
   });
 
   it("unarchive a doc sets archived=false and removes timestamp", () => {
@@ -287,9 +292,11 @@ describe("Library sorting", () => {
   });
 });
 
+// Import bubbleCount properly (eliminating require re-implementation)
+import { bubbleCount as bubbleCountFromQueue } from "../src/utils/queue.ts";
+
 describe("bubbleCount edge cases", () => {
-  // Import from queue.ts
-  const { bubbleCount } = require("../src/utils/queue.ts");
+  const bubbleCount = bubbleCountFromQueue;
 
   it("returns 0 for 0% progress", () => {
     expect(bubbleCount(0)).toBe(0);

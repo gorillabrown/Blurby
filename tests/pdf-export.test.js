@@ -39,7 +39,7 @@ describe("buildPdfMetadata", () => {
     const meta = buildPdfMetadata({
       title: "Test",
       sourceUrl: "https://example.com",
-      fetchDate: new Date(),
+      fetchDate: new Date("2026-03-21T12:00:00Z"),
     });
     expect(meta.Author).toBe("Unknown");
   });
