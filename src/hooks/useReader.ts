@@ -31,6 +31,7 @@ export default function useReader(
   const playingRef = useRef(false);
   const wpmRef = useRef(wpm);
   const escTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastStateSyncRef = useRef(0);
   wpmRef.current = wpm;
 
   // requestAnimationFrame-based playback loop
@@ -78,7 +79,12 @@ export default function useReader(
       break;
     }
 
-    setWordIndex(wordIndexRef.current);
+    // Throttle React state syncs to ~100ms (10fps) for progress display
+    const now = performance.now();
+    if (now - lastStateSyncRef.current >= 100) {
+      lastStateSyncRef.current = now;
+      setWordIndex(wordIndexRef.current);
+    }
     rafRef.current = requestAnimationFrame(tick);
   }, []);
 
@@ -96,6 +102,9 @@ export default function useReader(
     }
     lastTimeRef.current = 0;
     accumulatorRef.current = 0;
+    lastStateSyncRef.current = 0;
+    // Sync final position to React state
+    setWordIndex(wordIndexRef.current);
   }, []);
 
   const hasPlayedRef = useRef(false);

@@ -4,9 +4,11 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 const chokidar = require("chokidar");
 
-const { Readability } = require("@mozilla/readability");
-const { JSDOM } = require("jsdom");
-const PDFDocument = require("pdfkit");
+// Lazy-loaded heavy modules (Phase 2: saves ~13MB heap at startup)
+let _Readability, _JSDOM, _PDFDocument;
+function getReadability() { if (!_Readability) { _Readability = require("@mozilla/readability").Readability; } return _Readability; }
+function getJSDOM() { if (!_JSDOM) { _JSDOM = require("jsdom").JSDOM; } return _JSDOM; }
+function getPDFDocument() { if (!_PDFDocument) { _PDFDocument = require("pdfkit"); } return _PDFDocument; }
 const https = require("https");
 
 function sanitizeFilenameForPdf(name) {
@@ -24,7 +26,7 @@ async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate
   const pdfPath = path.join(savedArticlesDir, `${safeName}.pdf`);
 
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({
+    const doc = new (getPDFDocument())({
       info: {
         Title: title,
         Author: author || "Unknown",
@@ -76,11 +78,14 @@ const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".h
 const CURRENT_SETTINGS_SCHEMA = 5;
 const CURRENT_LIBRARY_SCHEMA = 3;
 
-// ── Paths ──────────────────────────────────────────────────────────────────────
+// ── Paths (initialized once at startup) ─────────────────────────────────────
+let _dataPath = null;
 function getDataPath() {
-  const dir = path.join(app.getPath("userData"), "blurby-data");
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  return dir;
+  if (!_dataPath) {
+    _dataPath = path.join(app.getPath("userData"), "blurby-data");
+    fs.mkdirSync(_dataPath, { recursive: true }); // sync only on first call during startup
+  }
+  return _dataPath;
 }
 function getSettingsPath() { return path.join(getDataPath(), "settings.json"); }
 function getLibraryPath() { return path.join(getDataPath(), "library.json"); }
@@ -88,15 +93,16 @@ function getErrorLogPath() { return path.join(getDataPath(), "error.log"); }
 function getHistoryPath() { return path.join(getDataPath(), "history.json"); }
 function getSiteCookiesPath() { return path.join(getDataPath(), "site-cookies.json"); }
 
-// ── Persistent JSON helpers ────────────────────────────────────────────────────
-function readJSON(filepath, fallback) {
+// ── Persistent JSON helpers (async) ─────────────────────────────────────────
+async function readJSON(filepath, fallback) {
   try {
-    if (fs.existsSync(filepath)) return JSON.parse(fs.readFileSync(filepath, "utf-8"));
+    const data = await fsPromises.readFile(filepath, "utf-8");
+    return JSON.parse(data);
   } catch {}
   return fallback;
 }
-function writeJSON(filepath, data) {
-  fs.writeFileSync(filepath, JSON.stringify(data, null, 2), "utf-8");
+async function writeJSON(filepath, data) {
+  await fsPromises.writeFile(filepath, JSON.stringify(data, null, 2), "utf-8");
 }
 
 // ── Migration framework ────────────────────────────────────────────────────────
@@ -211,8 +217,8 @@ function runMigrations(data, migrations, currentVersion) {
   return migrated;
 }
 
-function backupFile(filepath) {
-  try { if (fs.existsSync(filepath)) fs.copyFileSync(filepath, filepath + ".bak"); } catch {}
+async function backupFile(filepath) {
+  try { await fsPromises.copyFile(filepath, filepath + ".bak"); } catch {}
 }
 
 // ── State ──────────────────────────────────────────────────────────────────────
@@ -228,27 +234,78 @@ let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0 };
 let siteCookies = {}; // { "nytimes.com": [ {name, value, domain, path, ...} ] }
 
-function loadState() {
-  const rawSettings = readJSON(getSettingsPath(), settings);
-  if ((rawSettings.schemaVersion || 0) < CURRENT_SETTINGS_SCHEMA) backupFile(getSettingsPath());
+async function loadState() {
+  const rawSettings = await readJSON(getSettingsPath(), settings);
+  if ((rawSettings.schemaVersion || 0) < CURRENT_SETTINGS_SCHEMA) await backupFile(getSettingsPath());
   settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
-  saveSettings();
+  await saveSettings();
 
-  const rawLibrary = readJSON(getLibraryPath(), []);
-  if ((rawLibrary?.schemaVersion || 0) < CURRENT_LIBRARY_SCHEMA) backupFile(getLibraryPath());
+  const rawLibrary = await readJSON(getLibraryPath(), []);
+  if ((rawLibrary?.schemaVersion || 0) < CURRENT_LIBRARY_SCHEMA) await backupFile(getLibraryPath());
   libraryData = runMigrations(rawLibrary, libraryMigrations, CURRENT_LIBRARY_SCHEMA);
-  saveLibrary();
+  rebuildLibraryIndex();
+  await saveLibraryNow();
 
-  history = readJSON(getHistoryPath(), history);
-  siteCookies = readJSON(getSiteCookiesPath(), {});
+  history = await readJSON(getHistoryPath(), history);
+  siteCookies = await readJSON(getSiteCookiesPath(), {});
 }
 
+// ── Library index (O(1) lookups by id) ──────────────────────────────────────
+let libraryIndex = new Map(); // id → doc reference
+function rebuildLibraryIndex() {
+  libraryIndex = new Map(libraryData.docs.map((d) => [d.id, d]));
+}
+function getDocById(id) { return libraryIndex.get(id); }
+
 function getLibrary() { return libraryData.docs; }
-function setLibrary(docs) { libraryData.docs = docs; }
+function setLibrary(docs) { libraryData.docs = docs; rebuildLibraryIndex(); }
+function addDocToLibrary(doc) { libraryData.docs.unshift(doc); libraryIndex.set(doc.id, doc); }
 function saveSettings() { writeJSON(getSettingsPath(), settings); }
-function saveLibrary() { writeJSON(getLibraryPath(), libraryData); }
+
+// ── Debounced library persistence ───────────────────────────────────────────
+let _saveLibraryTimer = null;
+let _libraryDirty = false;
+function saveLibrary() {
+  _libraryDirty = true;
+  if (!_saveLibraryTimer) {
+    _saveLibraryTimer = setTimeout(async () => {
+      _saveLibraryTimer = null;
+      if (_libraryDirty) {
+        _libraryDirty = false;
+        await writeJSON(getLibraryPath(), libraryData);
+      }
+    }, 500);
+  }
+}
+// Immediate save for critical paths (shutdown, folder switch)
+async function saveLibraryNow() {
+  if (_saveLibraryTimer) { clearTimeout(_saveLibraryTimer); _saveLibraryTimer = null; }
+  _libraryDirty = false;
+  await writeJSON(getLibraryPath(), libraryData);
+}
+
 function saveHistory() { writeJSON(getHistoryPath(), history); }
 function saveSiteCookies() { writeJSON(getSiteCookiesPath(), siteCookies); }
+
+// ── Debounced library broadcast ─────────────────────────────────────────────
+let _broadcastTimer = null;
+function broadcastLibrary() {
+  if (_broadcastTimer) return; // already scheduled
+  _broadcastTimer = setTimeout(() => {
+    _broadcastTimer = null;
+    _doBroadcastLibrary();
+  }, 200);
+}
+function _doBroadcastLibrary() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("library-updated", getLibrary());
+  }
+}
+// Immediate broadcast for user-initiated actions
+function broadcastLibraryNow() {
+  if (_broadcastTimer) { clearTimeout(_broadcastTimer); _broadcastTimer = null; }
+  _doBroadcastLibrary();
+}
 
 // ── File content extraction ────────────────────────────────────────────────────
 async function readFileContentAsync(filepath) {
@@ -474,7 +531,7 @@ function parseMobiMetadata(buffer) {
   }
 }
 
-function extractMobiCover(buffer, docId) {
+async function extractMobiCover(buffer, docId) {
   try {
     const rec0Start = buffer.readUInt32BE(78);
     const mobiHeaderStart = rec0Start + 16;
@@ -528,9 +585,9 @@ function extractMobiCover(buffer, docId) {
 
     const ext = isPng ? ".png" : ".jpg";
     const coversDir = path.join(app.getPath("userData"), "covers");
-    if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+    await fsPromises.mkdir(coversDir, { recursive: true });
     const coverPath = path.join(coversDir, `${docId}${ext}`);
-    fs.writeFileSync(coverPath, imageData);
+    await fsPromises.writeFile(coverPath, imageData);
     return coverPath;
   } catch {
     return null;
@@ -542,7 +599,7 @@ async function parseCallibreOpf(filepath) {
   try {
     const dir = path.dirname(filepath);
     const opfPath = path.join(dir, "metadata.opf");
-    if (!fs.existsSync(opfPath)) return null;
+    try { await fsPromises.access(opfPath); } catch { return null; }
     const cheerio = require("cheerio");
     const opfContent = await fsPromises.readFile(opfPath, "utf-8");
     const $ = cheerio.load(opfContent, { xmlMode: true });
@@ -558,7 +615,7 @@ async function parseCallibreOpf(filepath) {
       path.join(dir, "cover.png"),
     ].filter(Boolean);
     for (const p of candidatePaths) {
-      if (p && fs.existsSync(p)) { coverPath = p; break; }
+      if (p) { try { await fsPromises.access(p); coverPath = p; break; } catch {} }
     }
     return { title, author, coverPath };
   } catch {
@@ -944,6 +1001,52 @@ function debouncedSyncLibraryWithFolder() {
   syncDebounceTimer = setTimeout(() => { syncDebounceTimer = null; syncLibraryWithFolder(); }, 1000);
 }
 
+// Extract a single new file and return a doc object (or null)
+async function extractNewFileDoc(file) {
+  const content = await extractContent(file.filepath);
+  if (!content) { failedExtractions.add(file.filepath); return null; }
+  const wordCount = content.split(/\s+/).filter(Boolean).length;
+  const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+  let author = null;
+  let coverPath = null;
+  let bookTitle = null;
+  if (file.ext === ".epub") {
+    const meta = await extractEpubMetadata(file.filepath);
+    author = meta.author;
+    bookTitle = meta.title;
+    coverPath = await extractEpubCover(file.filepath, docId);
+  } else if (file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") {
+    const opfMeta = await parseCallibreOpf(file.filepath);
+    if (opfMeta) {
+      author = opfMeta.author;
+      bookTitle = opfMeta.title;
+      if (opfMeta.coverPath) {
+        const coversDir = path.join(app.getPath("userData"), "covers");
+        await fsPromises.mkdir(coversDir, { recursive: true });
+        const ext = path.extname(opfMeta.coverPath);
+        const destCover = path.join(coversDir, `${docId}${ext}`);
+        try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
+      }
+    }
+    if (!author || !bookTitle) {
+      const buf = await fsPromises.readFile(file.filepath);
+      const mobiMeta = parseMobiMetadata(buf);
+      if (!author) author = mobiMeta.author;
+      if (!bookTitle) bookTitle = mobiMeta.title;
+      if (!coverPath) coverPath = await extractMobiCover(buf, docId);
+    }
+  }
+  if (!author) author = extractAuthorFromFilename(file.filename);
+  if (!bookTitle) bookTitle = extractTitleFromFilename(file.filename, author);
+  return {
+    id: docId, title: bookTitle,
+    filepath: file.filepath, filename: file.filename,
+    ext: file.ext, size: file.size, modified: file.modified,
+    wordCount, position: 0, created: Date.now(), source: "folder",
+    author: author || null, coverPath: coverPath || null, lastReadAt: null,
+  };
+}
+
 async function syncLibraryWithFolder() {
   if (!settings.sourceFolder) return;
   const files = await scanFolderAsync(settings.sourceFolder);
@@ -951,68 +1054,24 @@ async function syncLibraryWithFolder() {
   const existing = new Map(docs.map((d) => [d.filepath, d]));
   const synced = [];
 
+  // Separate existing vs new files
+  const newFiles = [];
   for (const file of files) {
     const prev = existing.get(file.filepath);
     if (prev) {
       synced.push({ ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
-    } else if (failedExtractions.has(file.filepath)) {
-      // Skip files that previously failed content extraction
-      continue;
-    } else {
-      const content = await extractContent(file.filepath);
-      if (!content) { failedExtractions.add(file.filepath); }
-      if (content) {
-        const wordCount = content.split(/\s+/).filter(Boolean).length;
-        const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
-        let author = null;
-        let coverPath = null;
-        let bookTitle = null;
-        if (file.ext === ".epub") {
-          const meta = await extractEpubMetadata(file.filepath);
-          author = meta.author;
-          bookTitle = meta.title;
-          coverPath = await extractEpubCover(file.filepath, docId);
-        } else if (file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") {
-          // Try Calibre metadata.opf first (richer metadata)
-          const opfMeta = await parseCallibreOpf(file.filepath);
-          if (opfMeta) {
-            author = opfMeta.author;
-            bookTitle = opfMeta.title;
-            if (opfMeta.coverPath) {
-              // Copy Calibre cover to our covers directory
-              const coversDir = path.join(app.getPath("userData"), "covers");
-              if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
-              const ext = path.extname(opfMeta.coverPath);
-              const destCover = path.join(coversDir, `${docId}${ext}`);
-              try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
-            }
-          }
-          // Fall back to MOBI internal metadata
-          if (!author || !bookTitle) {
-            const buf = await fsPromises.readFile(file.filepath);
-            const mobiMeta = parseMobiMetadata(buf);
-            if (!author) author = mobiMeta.author;
-            if (!bookTitle) bookTitle = mobiMeta.title;
-            if (!coverPath) coverPath = extractMobiCover(buf, docId);
-          }
-        }
-        if (!author) {
-          author = extractAuthorFromFilename(file.filename);
-        }
-        if (!bookTitle) {
-          bookTitle = extractTitleFromFilename(file.filename, author);
-        }
-        synced.push({
-          id: docId,
-          title: bookTitle,
-          filepath: file.filepath, filename: file.filename,
-          ext: file.ext, size: file.size, modified: file.modified,
-          wordCount, position: 0, created: Date.now(), source: "folder",
-          author: author || null,
-          coverPath: coverPath || null,
-          lastReadAt: null,
-        });
-      }
+    } else if (!failedExtractions.has(file.filepath)) {
+      newFiles.push(file);
+    }
+  }
+
+  // Extract new files in parallel batches of 4
+  const BATCH_SIZE = 4;
+  for (let i = 0; i < newFiles.length; i += BATCH_SIZE) {
+    const batch = newFiles.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(batch.map(extractNewFileDoc));
+    for (const doc of results) {
+      if (doc) synced.push(doc);
     }
   }
 
@@ -1032,11 +1091,7 @@ async function syncLibraryWithFolder() {
   broadcastLibrary();
 }
 
-function broadcastLibrary() {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send("library-updated", getLibrary());
-  }
-}
+// broadcastLibrary is now debounced — defined above with saveLibrary
 
 // ── Reader windows ─────────────────────────────────────────────────────────────
 function createReaderWindow(docId) {
@@ -1467,7 +1522,7 @@ function fetchWithBrowser(url) {
 }
 
 function extractArticleFromHtml(html, url) {
-  const dom = new JSDOM(html, { url });
+  const dom = new (getJSDOM())(html, { url });
   const parsedDoc = dom.window.document;
 
   // Remove paywall/ad elements
@@ -1545,7 +1600,7 @@ function extractArticleFromHtml(html, url) {
 
   // 3. Try Readability
   if (!content) {
-    const reader = new Readability(parsedDoc);
+    const reader = new (getReadability())(parsedDoc);
     const article = reader.parse();
     if (article?.textContent?.trim()) {
       content = article.textContent.trim();
@@ -1647,7 +1702,7 @@ function registerIPC() {
   ipcMain.handle("save-library", (_, newDocs) => { setLibrary(newDocs); saveLibrary(); });
 
   ipcMain.handle("update-doc-progress", (_, docId, position) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (doc) { doc.position = position; saveLibrary(); }
   });
 
@@ -1657,7 +1712,7 @@ function registerIPC() {
       id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
       title, content, wordCount, position: 0, created: Date.now(), source: "manual",
     };
-    getLibrary().unshift(doc);
+    addDocToLibrary(doc);
     saveLibrary();
     return doc;
   });
@@ -1668,7 +1723,7 @@ function registerIPC() {
   });
 
   ipcMain.handle("update-doc", (_, docId, title, content) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (doc) {
       doc.title = title;
       doc.content = content;
@@ -1678,13 +1733,13 @@ function registerIPC() {
   });
 
   ipcMain.handle("reset-progress", (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (doc) { doc.position = 0; saveLibrary(); }
   });
 
 
   ipcMain.handle("load-doc-content", async (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (!doc) return null;
     if (doc.content) return doc.content;
     if (doc.filepath) return await extractContent(doc.filepath);
@@ -1693,7 +1748,7 @@ function registerIPC() {
 
   // Get chapter metadata for a document (from EPUB TOC or content analysis)
   ipcMain.handle("get-doc-chapters", async (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (!doc) return [];
     // Check EPUB chapter cache first
     if (doc.filepath && epubChapterCache.has(doc.filepath)) {
@@ -1832,7 +1887,7 @@ function registerIPC() {
         author: result.author || null,
         coverPath,
       };
-      getLibrary().unshift(newDoc);
+      addDocToLibrary(newDoc);
       saveLibrary();
 
       // Generate PDF if source folder is set
@@ -1891,9 +1946,7 @@ function registerIPC() {
         try {
           const destPath = path.join(settings.sourceFolder, path.basename(fp));
           // Don't overwrite if already exists
-          if (!require("fs").existsSync(destPath)) {
-            await fsPromises.copyFile(fp, destPath);
-          }
+          try { await fsPromises.access(destPath); } catch { await fsPromises.copyFile(fp, destPath); }
           const content = await extractContent(destPath);
           if (!content) { rejected.push(path.basename(fp)); continue; }
           const wordCount = content.split(/\s+/).filter(Boolean).length;
@@ -1917,7 +1970,7 @@ function registerIPC() {
             wordCount, position: 0, created: Date.now(), source: "folder",
             author: author || null, coverPath: coverPath || null, lastReadAt: null,
           };
-          getLibrary().unshift(doc);
+          addDocToLibrary(doc);
           imported.push(doc.title);
         } catch (err) {
           console.error("Failed to import dropped file:", err);
@@ -1934,7 +1987,7 @@ function registerIPC() {
           content, wordCount, ext,
           position: 0, created: Date.now(), source: "manual",
         };
-        getLibrary().unshift(doc);
+        addDocToLibrary(doc);
         imported.push(doc.title);
       }
     }
@@ -1957,14 +2010,30 @@ function registerIPC() {
 
   ipcMain.handle("get-stats", () => getStats());
 
-  // Cover images
+  // Cover images — LRU cache to avoid re-reading on every grid render
+  const coverCache = new Map(); // coverPath → data URL
+  const COVER_CACHE_MAX = 100;
   ipcMain.handle("get-cover-image", async (_, coverPath) => {
     if (!coverPath) return null;
+    if (coverCache.has(coverPath)) {
+      // Move to end (most recently used)
+      const val = coverCache.get(coverPath);
+      coverCache.delete(coverPath);
+      coverCache.set(coverPath, val);
+      return val;
+    }
     try {
       const buffer = await fsPromises.readFile(coverPath);
       const ext = path.extname(coverPath).toLowerCase();
       const mime = ext === ".png" ? "image/png" : ext === ".gif" ? "image/gif" : "image/jpeg";
-      return `data:${mime};base64,${buffer.toString("base64")}`;
+      const dataUrl = `data:${mime};base64,${buffer.toString("base64")}`;
+      // Evict oldest if at capacity
+      if (coverCache.size >= COVER_CACHE_MAX) {
+        const oldest = coverCache.keys().next().value;
+        coverCache.delete(oldest);
+      }
+      coverCache.set(coverPath, dataUrl);
+      return dataUrl;
     } catch { return null; }
   });
 
@@ -2001,7 +2070,7 @@ function registerIPC() {
               if (opfMeta.title && prev.title === path.basename(file.filename, file.ext)) updates.title = opfMeta.title;
               if (!prev.coverPath && opfMeta.coverPath) {
                 const coversDir = path.join(app.getPath("userData"), "covers");
-                if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+                await fsPromises.mkdir(coversDir, { recursive: true });
                 const ext = path.extname(opfMeta.coverPath);
                 const destCover = path.join(coversDir, `${prev.id}${ext}`);
                 try { await fsPromises.copyFile(opfMeta.coverPath, destCover); updates.coverPath = destCover; } catch {}
@@ -2010,7 +2079,7 @@ function registerIPC() {
             if (!prev.coverPath && !updates.coverPath) {
               try {
                 const buf = await fsPromises.readFile(file.filepath);
-                updates.coverPath = extractMobiCover(buf, prev.id);
+                updates.coverPath = await extractMobiCover(buf, prev.id);
               } catch {}
             }
           }
@@ -2035,7 +2104,7 @@ function registerIPC() {
                 bookTitle = opfMeta.title;
                 if (opfMeta.coverPath) {
                   const coversDir = path.join(app.getPath("userData"), "covers");
-                  if (!fs.existsSync(coversDir)) fs.mkdirSync(coversDir, { recursive: true });
+                  await fsPromises.mkdir(coversDir, { recursive: true });
                   const ext = path.extname(opfMeta.coverPath);
                   const destCover = path.join(coversDir, `${docId}${ext}`);
                   try { await fsPromises.copyFile(opfMeta.coverPath, destCover); coverPath = destCover; } catch {}
@@ -2046,7 +2115,7 @@ function registerIPC() {
                 const mobiMeta = parseMobiMetadata(buf);
                 if (!author) author = mobiMeta.author;
                 if (!bookTitle) bookTitle = mobiMeta.title;
-                if (!coverPath) coverPath = extractMobiCover(buf, docId);
+                if (!coverPath) coverPath = await extractMobiCover(buf, docId);
               }
             }
             if (!author) author = extractAuthorFromFilename(file.filename);
@@ -2143,7 +2212,8 @@ function registerIPC() {
         let added = 0;
         for (const doc of data.library) {
           if (!existingIds.has(doc.id)) {
-            getLibrary().push(doc);
+            libraryData.docs.push(doc);
+            libraryIndex.set(doc.id, doc);
             existingIds.add(doc.id);
             added++;
           }
@@ -2192,7 +2262,7 @@ function registerIPC() {
 
   // Favorites
   ipcMain.handle("toggle-favorite", (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (doc) {
       doc.favorite = !doc.favorite;
       saveLibrary();
@@ -2203,7 +2273,7 @@ function registerIPC() {
 
   // Archive
   ipcMain.handle("archive-doc", (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (doc) {
       doc.archived = true;
       doc.archivedAt = Date.now();
@@ -2212,7 +2282,7 @@ function registerIPC() {
   });
 
   ipcMain.handle("unarchive-doc", (_, docId) => {
-    const doc = getLibrary().find((d) => d.id === docId);
+    const doc = getDocById(docId);
     if (doc) {
       doc.archived = false;
       delete doc.archivedAt;
@@ -2226,10 +2296,10 @@ function registerIPC() {
   });
 
   // Error logging
-  ipcMain.handle("log-error", (_, message) => {
+  ipcMain.handle("log-error", async (_, message) => {
     try {
       const timestamp = new Date().toISOString();
-      fs.appendFileSync(getErrorLogPath(), `[${timestamp}] ${message}\n`, "utf-8");
+      await fsPromises.appendFile(getErrorLogPath(), `[${timestamp}] ${message}\n`, "utf-8");
     } catch {}
   });
 
@@ -2280,8 +2350,8 @@ app.whenReady().then(async () => {
   });
 
   if (settings.sourceFolder) {
-    await syncLibraryWithFolder();
-    startWatcher();
+    // Non-blocking: sync runs in background, UI is available immediately
+    syncLibraryWithFolder().then(() => startWatcher());
   }
 
   app.on("activate", () => {
@@ -2293,8 +2363,10 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-app.on("will-quit", () => {
+app.on("will-quit", async () => {
   if (watcher) watcher.close();
+  // Flush any pending debounced writes
+  await saveLibraryNow();
 });
 
 // Export pure functions for testing

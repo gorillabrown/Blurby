@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { BlurbyDoc } from "../types";
 import { formatDisplayTitle } from "../utils/text";
 
@@ -10,7 +10,7 @@ interface DocGridCardProps {
   onDelete?: (id: string) => void;
 }
 
-export default function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete }: DocGridCardProps) {
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -85,4 +85,6 @@ export default function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, 
       </div>
     </div>
   );
-}
+});
+
+export default DocGridCard;

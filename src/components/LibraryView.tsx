@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import { useTheme } from "./ThemeProvider";
@@ -89,12 +89,11 @@ export default function LibraryView({
   const isBook = (d: BlurbyDoc) => !isArticle(d) && !isPdf(d);
 
   // Filter and sort library
-  const getFilteredAndSorted = () => {
+  const filteredLibrary = useMemo(() => {
     let docs = library;
     if (tab === "favorites") docs = docs.filter((d) => d.favorite);
     else if (tab === "archived") docs = docs.filter((d) => d.archived);
     else docs = docs.filter((d) => !d.archived);
-    // Type filter
     if (typeFilter === "articles") docs = docs.filter(isArticle);
     else if (typeFilter === "books") docs = docs.filter(isBook);
     else if (typeFilter === "pdfs") docs = docs.filter(isPdf);
@@ -102,7 +101,6 @@ export default function LibraryView({
 
     docs = [...docs];
     if (sortBy === "progress") {
-      // Closest to finished first (highest % read), then alphabetical
       docs.sort((a, b) => {
         const pctA = a.wordCount > 0 ? (a.position || 0) / a.wordCount : 0;
         const pctB = b.wordCount > 0 ? (b.position || 0) / b.wordCount : 0;
@@ -117,16 +115,20 @@ export default function LibraryView({
       docs.sort((a, b) => (a.created || 0) - (b.created || 0));
     }
     return docs;
-  };
-  const filteredLibrary = getFilteredAndSorted();
+  }, [library, tab, typeFilter, searchQuery, sortBy]);
 
-  const activeLibrary = library.filter((d) => !d.archived);
-  const totalWords = activeLibrary.reduce((a, d) => a + (d.wordCount || 0), 0);
-  const favCount = library.filter((d) => d.favorite).length;
-  const archivedCount = library.filter((d) => d.archived).length;
-  const articleCount = activeLibrary.filter(isArticle).length;
-  const bookCount = activeLibrary.filter(isBook).length;
-  const pdfCount = activeLibrary.filter(isPdf).length;
+  const { activeLibrary, totalWords, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
+    const active = library.filter((d) => !d.archived);
+    return {
+      activeLibrary: active,
+      totalWords: active.reduce((a, d) => a + (d.wordCount || 0), 0),
+      favCount: library.filter((d) => d.favorite).length,
+      archivedCount: library.filter((d) => d.archived).length,
+      articleCount: active.filter(isArticle).length,
+      bookCount: active.filter(isBook).length,
+      pdfCount: active.filter(isPdf).length,
+    };
+  }, [library]);
 
   // Live search results (limited to 8 for the dropdown)
   const searchResults = searchQuery

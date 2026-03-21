@@ -182,6 +182,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const flowLastTimeRef = useRef(0);
   const flowWordRef = useRef<HTMLSpanElement | null>(null);
   const flowWordIndexRef = useRef(flowWordIndex);
+  const flowLastStateSyncRef = useRef(0);
 
   // Split content into paragraphs for natural rendering (passive scroll)
   const displayBlocks = useMemo(() => {
@@ -266,10 +267,16 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       flowAccRef.current -= effectiveInterval;
       const next = flowWordIndexRef.current + 1;
       if (next >= words.length) {
+        setFlowWordIndex(flowWordIndexRef.current);
         setFlowPlaying(false);
       } else {
         flowWordIndexRef.current = next;
-        setFlowWordIndex(next);
+        // Throttle React state sync to ~100ms
+        const now = performance.now();
+        if (now - flowLastStateSyncRef.current >= 100) {
+          flowLastStateSyncRef.current = now;
+          setFlowWordIndex(next);
+        }
       }
     }
 
@@ -285,6 +292,8 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     } else if (flowRafRef.current) {
       cancelAnimationFrame(flowRafRef.current);
       flowRafRef.current = null;
+      // Sync final word position when stopping
+      setFlowWordIndex(flowWordIndexRef.current);
     }
     return () => { if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current); };
   }, [flowPlaying, flowTick]);
@@ -302,10 +311,15 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     }
   }, [flowWordIndex, flowPlaying]);
 
-  // Save flow progress
+  // Save flow progress (throttled to every 5s)
+  const lastProgressSaveRef = useRef(0);
   useEffect(() => {
     if (flowPlaying && flowWordIndex > 0) {
-      onProgressUpdate(flowWordIndex);
+      const now = Date.now();
+      if (now - lastProgressSaveRef.current >= 5000) {
+        lastProgressSaveRef.current = now;
+        onProgressUpdate(flowWordIndex);
+      }
     }
   }, [flowWordIndex, flowPlaying, onProgressUpdate]);
 

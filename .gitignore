@@ -3,3 +3,12 @@ dist/
 release/
 .DS_Store
 *.log
+
+# Large binary assets (keep on disk, not in repo)
+Blurby Brand/
+Blurby Brand.zip
+Example book/
+{src,public}/
+
+# Superpowers working files
+.superpowers/

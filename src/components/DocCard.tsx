@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import { bubbleCount } from "../utils/queue";
@@ -34,7 +35,7 @@ interface DocCardProps {
   onOpenNewWindow?: (doc: BlurbyDoc) => void;
 }
 
-export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
+const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
@@ -145,4 +146,6 @@ export default function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEd
       )}
     </div>
   );
-}
+});
+
+export default DocCard;
