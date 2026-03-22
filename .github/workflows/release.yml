@@ -47,7 +47,7 @@ jobs:
         run: npm run build
 
       - name: Package Windows installer (${{ matrix.arch }})
-        run: npx electron-builder --win --arch ${{ matrix.arch }}
+        run: npx electron-builder --win --${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
