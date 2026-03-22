@@ -132,6 +132,13 @@ export function useReaderKeys(
     const handler = (e: KeyboardEvent) => {
       const s = stateRef.current;
       if (s.view !== "reader") return;
+
+      // Don't intercept keys when typing in inputs/textareas (e.g. NotePopover)
+      // Only allow Escape and Ctrl/Meta combos through
+      const target = e.target as HTMLElement;
+      const isTyping = target?.closest?.("input, textarea, select, [contenteditable]");
+      if (isTyping && e.key !== "Escape" && !e.ctrlKey && !e.metaKey) return;
+
       const isPage = s.readerMode === "page";
 
       // ── Universal keys (all modes) ─────────────────────────────────
