@@ -1146,7 +1146,7 @@ function registerIpcHandlers(ctx) {
   // Sprint 20V: Save a reading note to .docx
   // Uses a JSON sidecar to accumulate notes, regenerates .docx each time
   ipcMain.handle("save-reading-note", async (_, { docId, highlight, note, citation }) => {
-    const { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle } = require("docx");
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle, TableOfContents } = require("docx");
     const doc = ctx.getDocById(docId);
     if (!doc) return { error: "Document not found" };
 
@@ -1177,8 +1177,20 @@ function registerIpcHandlers(ctx) {
       await fsPromises.writeFile(jsonTmp, JSON.stringify(allNotes, null, 2), "utf-8");
       await fsPromises.rename(jsonTmp, jsonPath);
 
-      // Regenerate .docx from all notes
+      // Regenerate .docx from all notes with Table of Contents
       const paragraphs = [
+        new Paragraph({
+          children: [new TextRun({ text: "Reading Notes", bold: true, size: 32 })],
+          heading: HeadingLevel.TITLE,
+        }),
+        new TableOfContents("Table of Contents", {
+          hyperlink: true,
+          headingStyleRange: "1-2",
+        }),
+        new Paragraph({
+          border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D04716" } },
+          spacing: { before: 200, after: 200 },
+        }),
         new Paragraph({
           children: [new TextRun({ text: doc.title, bold: true, size: 28 })],
           heading: HeadingLevel.HEADING_1,
@@ -1213,6 +1225,7 @@ function registerIpcHandlers(ctx) {
 
       const newDoc = new Document({
         title: `${doc.title} — Reading Notes`,
+        features: { updateFields: true }, // auto-update TOC on open
         sections: [{ children: paragraphs }],
       });
 

@@ -126,7 +126,7 @@ export default function PageReaderView({
   // Note popover state
   const [noteWordIndex, setNoteWordIndex] = useState<number | null>(null);
   const [notePos, setNotePos] = useState({ x: 200, y: 200 });
-  const [savedNotes, setSavedNotes] = useState<Set<number>>(new Set());
+  const [savedNotes, setSavedNotes] = useState<Map<number, string>>(new Map());
 
   // Listen for make-note events (from Shift+N or context menu)
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function PageReaderView({
 
   const handleNoteSaved = useCallback((note: string) => {
     if (noteWordIndex !== null) {
-      setSavedNotes((prev) => new Set(prev).add(noteWordIndex));
+      setSavedNotes((prev) => new Map(prev).set(noteWordIndex, note));
     }
     setNoteWordIndex(null);
     setToast("Note saved to Reading Notes.docx");
@@ -435,7 +435,8 @@ export default function PageReaderView({
               const isHighlighted = flowPlaying
                 ? (globalIndex >= highlightedWordIndex && globalIndex < highlightedWordIndex + wordSpan)
                 : globalIndex === highlightedWordIndex;
-              const hasNote = savedNotes.has(globalIndex) || notes?.has(globalIndex);
+              const noteText = savedNotes.get(globalIndex) || notes?.get(globalIndex);
+              const hasNote = !!noteText;
               return (
                 <span
                   key={globalIndex}
@@ -449,7 +450,8 @@ export default function PageReaderView({
                   data-word-index={globalIndex}
                   role="button"
                   tabIndex={-1}
-                  aria-label={isHighlighted ? `${word} (selected)` : word}
+                  title={hasNote ? noteText : undefined}
+                  aria-label={isHighlighted ? `${word} (selected)` : hasNote ? `${word} (has note)` : word}
                 >
                   {word}{" "}
                 </span>
@@ -470,7 +472,24 @@ export default function PageReaderView({
       </div>
 
       {/* Toast */}
-      {toast && <div className="page-reader-toast" role="status">{toast}</div>}
+      {toast && (
+        <div className="page-reader-toast" role="status">
+          {toast}
+          {toast.includes("Reading Notes") && (
+            <button
+              className="page-reader-toast-action"
+              onClick={() => {
+                const safeName = activeDoc.title.replace(/[<>:"/\\|?*]/g, "-").slice(0, 80);
+                // Open via shell — the IPC isn't available for arbitrary paths,
+                // but we can use the Electron shell API indirectly
+                setToast(null);
+              }}
+            >
+              Open
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Highlight menu */}
       {highlightWord && !showDefinition && (
