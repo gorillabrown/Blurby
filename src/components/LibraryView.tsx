@@ -363,6 +363,21 @@ export default function LibraryView({
             role="tab"
             aria-selected={typeFilter === "pdfs"}
           >PDFs ({pdfCount})</button>
+          {/* Sort dropdown right-justified on filter line (21I) */}
+          {library.length > 3 && (
+            <select
+              className="sort-select"
+              style={{ marginLeft: "auto" }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label="Sort order"
+            >
+              <option value="progress">closest to done</option>
+              <option value="alpha">A-Z</option>
+              <option value="newest">newest first</option>
+              <option value="oldest">oldest first</option>
+            </select>
+          )}
         </div>
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
@@ -436,19 +451,6 @@ export default function LibraryView({
                 </div>
               )}
             </div>
-            {/* Sort dropdown right-justified (21I) */}
-            <select
-              className="sort-select"
-              style={{ marginLeft: "auto" }}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort order"
-            >
-              <option value="progress">closest to done</option>
-              <option value="alpha">A-Z</option>
-              <option value="newest">newest first</option>
-              <option value="oldest">oldest first</option>
-            </select>
           </div>
         )}
 
