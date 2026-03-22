@@ -1373,6 +1373,40 @@ function registerIpcHandlers(ctx) {
       return { error: "Reading log not found. Start a reading session first." };
     }
   });
+
+  // Open reading notes .docx for the current or most recent document
+  ipcMain.handle("open-reading-notes", async (_, docId) => {
+    const { shell } = require("electron");
+    const settings = ctx.getSettings();
+    const outputDir = settings.sourceFolder || ctx.getDataPath();
+
+    if (docId) {
+      // Open notes for a specific document
+      const doc = ctx.getDocById(docId);
+      if (doc) {
+        const safeName = doc.title.replace(/[<>:"/\\|?*]/g, "-").slice(0, 80);
+        const docxPath = path.join(outputDir, `${safeName} — Reading Notes.docx`);
+        try {
+          await fsPromises.access(docxPath);
+          await shell.openPath(docxPath);
+          return { ok: true };
+        } catch {
+          return { error: "No notes yet for this document." };
+        }
+      }
+    }
+
+    // Fallback: find any notes .docx in the output dir
+    try {
+      const files = await fsPromises.readdir(outputDir);
+      const notesFile = files.find((f) => f.endsWith("— Reading Notes.docx"));
+      if (notesFile) {
+        await shell.openPath(path.join(outputDir, notesFile));
+        return { ok: true };
+      }
+    } catch { /* ignore */ }
+    return { error: "No reading notes found. Highlight a word and press Shift+N to create a note." };
+  });
 }
 
 module.exports = {

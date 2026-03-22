@@ -89,6 +89,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveReadingNote: (data) => ipcRenderer.invoke("save-reading-note", data),
   logReadingSession: (data) => ipcRenderer.invoke("log-reading-session", data),
   openReadingLog: () => ipcRenderer.invoke("open-reading-log"),
+  openReadingNotes: (docId) => ipcRenderer.invoke("open-reading-notes", docId),
 
   // Cloud sync
   cloudSignIn: (provider) => ipcRenderer.invoke("cloud-sign-in", provider),

@@ -98,6 +98,24 @@ export default function CommandPalette({
       },
       {
         type: "action",
+        label: "Open Reading Notes",
+        sublabel: "Open .docx notes file in default editor",
+        onSelect: () => {
+          onAction(() => window.electronAPI.openReadingNotes());
+          onClose();
+        },
+      },
+      {
+        type: "action",
+        label: "Open Reading Log",
+        sublabel: "Open .xlsx reading log in spreadsheet app",
+        onSelect: () => {
+          onAction(() => window.electronAPI.openReadingLog());
+          onClose();
+        },
+      },
+      {
+        type: "action",
         label: "Export Library",
         sublabel: "Save library to JSON file",
         onSelect: () => { onAction(() => window.electronAPI.exportLibrary()); onClose(); },

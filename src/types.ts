@@ -190,6 +190,7 @@ export interface ElectronAPI {
   saveReadingNote: (data: { docId: string; highlight: string; note: string; citation: string }) => Promise<{ ok?: boolean; path?: string; error?: string }>;
   logReadingSession: (data: { docId: string; duration: number; wordsRead: number; finalWpm: number; mode: string; chapter?: string }) => Promise<{ ok?: boolean; path?: string; error?: string }>;
   openReadingLog: () => Promise<{ ok?: boolean; error?: string }>;
+  openReadingNotes: (docId?: string) => Promise<{ ok?: boolean; error?: string }>;
   // Cloud sync
   cloudSignIn: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string; email?: string; name?: string; provider?: string }>;
   cloudSignOut: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string }>;
