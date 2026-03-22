@@ -39,7 +39,10 @@ export default function HighlightMenu({ word, phrase, position, onSave, onDefine
     <div
       ref={menuRef}
       className="highlight-menu"
-      style={{ left: position.x, top: position.y }}
+      style={{
+        left: Math.min(position.x, window.innerWidth - 180),
+        top: position.y < 120 ? position.y + 30 : position.y - 10,
+      }}
       role="menu"
       aria-label="Highlight actions"
     >

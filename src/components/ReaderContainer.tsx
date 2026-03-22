@@ -463,30 +463,32 @@ export default function ReaderContainer({
 
   return (
     <>
-      <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
-        {renderView()}
-      </ErrorBoundary>
+      <div className="reader-layout">
+        <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
+          {renderView()}
+        </ErrorBoundary>
 
-      {/* Unified bottom bar — rendered at container level */}
-      <ReaderBottomBar
-        activeDoc={activeDoc}
-        words={words}
-        wordIndex={currentWordIndex}
-        wpm={effectiveWpm}
-        focusTextSize={focusTextSize}
-        readingMode={readingMode}
-        playing={playing}
-        isEink={isEink}
-        chapters={docChapters}
-        onSetWpm={setWpm}
-        onAdjustFocusTextSize={adjustFocusTextSize}
-        onEnterFocus={handleEnterFocus}
-        onEnterFlow={handleEnterFlow}
-        onPrevChapter={handlePrevChapter}
-        onNextChapter={handleNextChapter}
-        onJumpToChapter={handleJumpToChapter}
-        onEinkRefresh={triggerEinkRefresh}
-      />
+        {/* Unified bottom bar — rendered at container level */}
+        <ReaderBottomBar
+          activeDoc={activeDoc}
+          words={words}
+          wordIndex={currentWordIndex}
+          wpm={effectiveWpm}
+          focusTextSize={focusTextSize}
+          readingMode={readingMode}
+          playing={playing}
+          isEink={isEink}
+          chapters={docChapters}
+          onSetWpm={setWpm}
+          onAdjustFocusTextSize={adjustFocusTextSize}
+          onEnterFocus={handleEnterFocus}
+          onEnterFlow={handleEnterFlow}
+          onPrevChapter={handlePrevChapter}
+          onNextChapter={handleNextChapter}
+          onJumpToChapter={handleJumpToChapter}
+          onEinkRefresh={triggerEinkRefresh}
+        />
+      </div>
 
       {menuFlap}
       {showEinkRefresh && <EinkRefreshOverlay />}

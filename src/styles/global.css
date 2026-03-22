@@ -395,11 +395,8 @@ button, input, textarea, a, [role="button"] {
   color: var(--text);
 }
 .reader-bottom-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 12px 32px 24px;
+  flex-shrink: 0;
+  padding: 12px 32px 16px;
   background: var(--bg);
   border-top: 1px solid var(--color-border, #333);
   z-index: 10;
@@ -3268,13 +3265,24 @@ button:focus-visible {
 
 /* ── Sprint 20U: Page Reader View ──────────────────────────────────────── */
 
-.page-reader-view {
-  position: relative;
+.reader-layout {
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   width: 100%;
-  padding: 40px 60px 160px;
+  background: var(--bg);
+}
+
+.page-reader-view {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 40px 60px 20px;
   box-sizing: border-box;
   background: var(--bg);
+  display: flex;
+  flex-direction: column;
   color: var(--text);
   cursor: default;
   overflow: hidden;
@@ -3315,6 +3323,7 @@ button:focus-visible {
 
 .page-reader-content {
   flex: 1;
+  min-height: 0;
   transition: opacity 100ms ease;
   overflow: hidden;
 }
