@@ -245,8 +245,9 @@ describe("enqueue and getPendingOps", () => {
     await drainSyncedOps(5);
     const ops = getPendingOps();
     const remaining = ops.filter((o) => o.docId === "doc-3");
-    // Only revision 7 should survive
-    expect(remaining.every((o) => o.revision > 5)).toBe(true);
+    // Only revision 7 should survive — verify it exists and revision 3 is gone
+    expect(remaining).toHaveLength(1);
+    expect(remaining[0].revision).toBe(7);
   });
 
   it("clearQueue empties all pending ops", async () => {

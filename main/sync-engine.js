@@ -431,7 +431,7 @@ function mergeHistory(localHistory, cloudHistory) {
 
 /**
  * Download a file and verify its SHA-256 hash. Retry up to MAX_CHECKSUM_RETRIES.
- * @returns {Buffer} verified buffer
+ * @returns {Buffer|null} verified buffer, or null if checksum fails after all retries (caller must skip)
  */
 async function downloadWithVerification(storage, fileName, expectedHash) {
   for (let attempt = 0; attempt < MAX_CHECKSUM_RETRIES; attempt++) {
@@ -443,7 +443,7 @@ async function downloadWithVerification(storage, fileName, expectedHash) {
     if (attempt === MAX_CHECKSUM_RETRIES - 1) {
       // Log and skip — do not crash sync
       await appendReconcileLog(`CHECKSUM_FAIL: ${fileName} — expected ${expectedHash} got ${actual}`);
-      throw new Error(`Checksum verification failed for ${fileName} after ${MAX_CHECKSUM_RETRIES} attempts`);
+      return null;
     }
   }
 }
@@ -646,20 +646,16 @@ async function downloadDocContent(docId) {
   try {
     const storage = getCloudStorage(auth.provider);
     const cloudPath = `documents/${docId}.json`;
-    const buffer = await storage.readFile(cloudPath);
+
+    // Use downloadWithVerification so the checksum retry+skip logic is reused (L4).
+    // The expected hash is keyed by doc content hash stored during upload.
+    const expectedHash = syncState.fileHashes[`doc:${docId}:contentHash`] || null;
+    const buffer = await downloadWithVerification(storage, cloudPath, expectedHash);
+
+    // null means checksum failed after all retries — already logged by downloadWithVerification
+    if (buffer === null) return { error: "checksum-mismatch" };
+
     const { content } = JSON.parse(buffer.toString("utf-8"));
-
-    // Verify checksum
-    const expectedHash = syncState.fileHashes[`doc:${docId}:contentHash`];
-    if (expectedHash) {
-      const actual = sha256(JSON.stringify({ docId, content }, null, 2));
-      if (actual !== expectedHash) {
-        await appendReconcileLog(`Content checksum mismatch for doc ${docId}`);
-        // Don't return corrupt content
-        return { error: "checksum-mismatch" };
-      }
-    }
-
     return { content };
   } catch (err) {
     if (err.status === 404) return { error: "not-found" };
@@ -726,7 +722,7 @@ async function fullReconciliation() {
       }
     }
 
-    // 4. Check for orphaned document content files
+    // 4. Check for orphaned document content files and delete them
     const localDocs = ctx ? ctx.getLibrary() : [];
     const localDocIds = new Set(localDocs.map((d) => d.id));
     const docFiles = cloudFiles.filter((f) => f.name && f.name.startsWith("documents/"));
@@ -734,8 +730,14 @@ async function fullReconciliation() {
       const docId = df.name.replace("documents/", "").replace(".json", "");
       if (!localDocIds.has(docId)) {
         await appendReconcileLog(`ORPHAN_CONTENT: ${df.name} — no matching local doc`);
-        // Optionally delete orphaned content (conservative: just log for now)
-        errors.push(`orphan:${df.name}`);
+        try {
+          await storage.deleteFile(df.name);
+          fixed.push(`deleted-orphan:${df.name}`);
+          await appendReconcileLog(`DELETED_ORPHAN: ${df.name}`);
+        } catch (delErr) {
+          errors.push(`orphan-delete-failed:${df.name}`);
+          await appendReconcileLog(`ORPHAN_DELETE_FAIL: ${df.name} — ${delErr.message}`);
+        }
       }
     }
 
@@ -769,13 +771,10 @@ async function startSync() {
 
   if (syncStatus === "syncing") return { status: "already-syncing" };
 
-  if (ctx && !ctx.getSettings().syncOnMeteredConnection) {
-    const metered = await isMeteredConnection();
-    if (metered) {
-      setSyncStatus("idle");
-      return { status: "skipped-metered" };
-    }
-  }
+  // On metered connections (cellular), allow metadata sync but skip heavy document content.
+  // If syncOnMeteredConnection is true the user has explicitly opted in — skip the guard entirely.
+  const meteredMode =
+    ctx && !ctx.getSettings().syncOnMeteredConnection && (await isMeteredConnection());
 
   setSyncStatus("syncing");
 
@@ -853,19 +852,23 @@ async function startSync() {
     }
 
     // ── 19E: Sync changed document content ────────────────────────────
-    // Metadata-only on metered connections (already skipped above if metered)
+    // Skip on metered connections — metadata (settings/library/history) already synced above.
     const library = ctx.getLibrary();
     let contentSynced = 0;
-    for (const doc of library) {
-      if (doc.deleted || !doc.syncContent) continue;
-      try {
-        await syncDocContent(storage, doc);
-        contentSynced++;
-      } catch (err) {
-        console.warn(`[sync] Content sync failed for doc ${doc.id}:`, err.message);
+    if (meteredMode) {
+      results.contentSynced = "skipped-metered";
+    } else {
+      for (const doc of library) {
+        if (doc.deleted || !doc.syncContent) continue;
+        try {
+          await syncDocContent(storage, doc);
+          contentSynced++;
+        } catch (err) {
+          console.warn(`[sync] Content sync failed for doc ${doc.id}:`, err.message);
+        }
       }
+      results.contentSynced = contentSynced;
     }
-    results.contentSynced = contentSynced;
 
     // ── 19A: Increment and push new revision ──────────────────────────
     syncState.revision = syncState.revision + 1;
@@ -892,7 +895,13 @@ async function startSync() {
     }
 
     setSyncStatus("idle");
-    return { status: "success", results, lastSync: syncState.lastSync, revision: syncState.revision };
+    return {
+      status: meteredMode ? "success-metadata-only" : "success",
+      results,
+      lastSync: syncState.lastSync,
+      revision: syncState.revision,
+      meteredMode: !!meteredMode,
+    };
   } catch (err) {
     console.error("[sync] Sync failed:", err.message);
     setSyncStatus("error");

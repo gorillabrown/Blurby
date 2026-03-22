@@ -242,10 +242,8 @@ describe("extractArticleFromHtml — lead image fallback to article body image",
 </body>
 </html>`;
     const result = extractArticleFromHtml(html, "https://example.com/article");
-    // Narrow image should not be selected; imageUrl may be null
-    if (result.imageUrl) {
-      expect(result.imageUrl).not.toBe("https://example.com/icon.jpg");
-    }
+    // Narrow image should not be selected — only a 100px icon exists, so imageUrl must be null
+    expect(result.imageUrl).toBeNull();
   });
 });
 

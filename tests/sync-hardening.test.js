@@ -243,8 +243,8 @@ describe("offline 7 days then sync — merge produces correct result", () => {
     const result = mergeLibrary([localDoc], [cloudDoc], 50);
     // Cloud revision is higher → cloud doc wins
     expect(result[0].revision).toBe(50);
-    // Position is max(local, cloud)
-    expect(result[0].position).toBeGreaterThanOrEqual(100);
+    // Position is max(local, cloud) = max(100, 450)
+    expect(result[0].position).toBe(450);
   });
 
   it("local additions made while offline appear in merge result", () => {

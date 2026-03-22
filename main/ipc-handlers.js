@@ -156,7 +156,7 @@ function registerIpcHandlers(ctx) {
   const coverCache = new Map();
   const COVER_CACHE_MAX = 100;
 
-  ipcMain.handle("get-state", () => ({ settings: ctx.getSettings(), library: ctx.getLibrary() }));
+  ipcMain.handle("get-state", () => ({ settings: ctx.getSettings(), library: ctx.getLibrary().filter((d) => !d.deleted) }));
   ipcMain.handle("get-platform", () => process.platform);
   ipcMain.handle("get-system-theme", () => getSystemTheme());
 
@@ -193,23 +193,53 @@ function registerIpcHandlers(ctx) {
     Object.assign(settings, newSettings);
     ctx.saveSettings();
     if (newSettings.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+
+    // Enqueue update-settings for sync
+    const syncEngine = require("./sync-engine");
+    const syncQueue = require("./sync-queue");
+    const syncStatus = syncEngine.getSyncStatus();
+    const revision = syncStatus.revision || 0;
+    syncQueue.enqueue("update-settings", { revision }).catch(() => {});
   });
 
   ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
 
   ipcMain.handle("update-doc-progress", (_, docId, position) => {
     const doc = ctx.getDocById(docId);
-    if (doc) { doc.position = position; ctx.saveLibrary(); }
+    if (doc) {
+      const syncEngine = require("./sync-engine");
+      const syncQueue = require("./sync-queue");
+      const syncStatus = syncEngine.getSyncStatus();
+      const revision = syncStatus.revision || 0;
+
+      doc.position = position;
+      doc.modified = Date.now();
+      doc.revision = revision;
+      ctx.saveLibrary();
+
+      // Enqueue update-progress for sync
+      syncQueue.enqueue("update-progress", { docId, value: position, revision }).catch(() => {});
+    }
   });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
+    const syncEngine = require("./sync-engine");
+    const syncQueue = require("./sync-queue");
+    const syncStatus = syncEngine.getSyncStatus();
+    const revision = syncStatus.revision || 0;
+
     const wordCount = countWords(content);
     const doc = {
       id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
       title, content, wordCount, position: 0, created: Date.now(), source: "manual",
+      modified: Date.now(), revision,
     };
     ctx.addDocToLibrary(doc);
     ctx.saveLibrary();
+
+    // Enqueue add-doc for sync
+    syncQueue.enqueue("add-doc", { docId: doc.id, revision }).catch(() => {});
+
     return doc;
   });
 
@@ -259,9 +289,15 @@ function registerIpcHandlers(ctx) {
   ipcMain.handle("update-doc", (_, docId, title, content) => {
     const doc = ctx.getDocById(docId);
     if (doc) {
+      const syncEngine = require("./sync-engine");
+      const syncStatus = syncEngine.getSyncStatus();
+      const revision = syncStatus.revision || 0;
+
       doc.title = title;
       doc.content = content;
       doc.wordCount = countWords(content);
+      doc.modified = Date.now();
+      doc.revision = revision;
       ctx.saveLibrary();
     }
   });
@@ -731,11 +767,13 @@ function registerIpcHandlers(ctx) {
           try {
             const pdfPath = await generateArticlePdf({
               title: doc.title,
-              author: null,
+              author: doc.authorFull || doc.author || null,
               content: doc.content,
               sourceUrl: doc.sourceUrl || "",
               fetchDate: new Date(doc.created || Date.now()),
               outputDir: settings.sourceFolder,
+              sourceDomain: doc.sourceDomain || null,
+              publishedDate: doc.publishedDate || null,
             });
             synced.push({
               ...doc,
