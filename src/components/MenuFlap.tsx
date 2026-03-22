@@ -51,6 +51,26 @@ export default function MenuFlap({
     }
   }, [open]);
 
+  // Escape closes flap (or navigates back in settings sub-pages)
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (view !== "queue") {
+          // Go back within settings first
+          if (view === "settings") setView("queue");
+          else setView("settings");
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener("keydown", handler, true); // capture phase
+    return () => window.removeEventListener("keydown", handler, true);
+  }, [open, view, onClose]);
+
   const handleBack = useCallback(() => {
     if (view === "settings") {
       setView("queue");

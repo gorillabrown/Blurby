@@ -2011,6 +2011,7 @@ button:focus-visible {
 .menu-flap-backdrop.open {
   opacity: 1;
   pointer-events: auto;
+  cursor: pointer;
 }
 
 .menu-flap {
