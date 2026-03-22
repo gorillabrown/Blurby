@@ -400,6 +400,10 @@ export default function PageReaderView({
           onSave={handleSaveHighlight}
           onDefine={handleDefine}
           onClose={closeHighlight}
+          onMakeNote={() => {
+            window.dispatchEvent(new CustomEvent("blurby:make-note", { detail: highlightedWordIndex }));
+            closeHighlight();
+          }}
         />
       )}
 

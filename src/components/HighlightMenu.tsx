@@ -7,9 +7,10 @@ interface HighlightMenuProps {
   onSave: () => void;
   onDefine: () => void;
   onClose: () => void;
+  onMakeNote?: () => void;
 }
 
-export default function HighlightMenu({ word, phrase, position, onSave, onDefine, onClose }: HighlightMenuProps) {
+export default function HighlightMenu({ word, phrase, position, onSave, onDefine, onClose, onMakeNote }: HighlightMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close on click outside
@@ -48,6 +49,11 @@ export default function HighlightMenu({ word, phrase, position, onSave, onDefine
       <button className="highlight-menu-btn" onClick={onDefine} role="menuitem">
         Define
       </button>
+      {onMakeNote && (
+        <button className="highlight-menu-btn" onClick={onMakeNote} role="menuitem">
+          Make Note
+        </button>
+      )}
       <div className="highlight-menu-caret" aria-hidden="true" />
     </div>
   );
