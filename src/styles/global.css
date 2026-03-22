@@ -3564,42 +3564,48 @@ button:focus-visible {
 /* ── Sprint 20V: Note Popover ──────────────────────────────────────────── */
 
 .note-popover {
-  background: var(--bg);
-  border: 1px solid var(--color-border, #444);
+  background: var(--bg-raised, var(--bg));
+  border: 1px solid var(--color-border, #555);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  padding: 12px;
-  width: 280px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  padding: 14px;
+  width: 300px;
   z-index: 200;
+  color: var(--text, #e0e0e0);
 }
 
 .note-popover-header {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .note-popover-highlight {
   font-size: 13px;
-  color: var(--text-dim, #888);
+  color: var(--color-primary, #D04716);
   font-style: italic;
 }
 
 .note-popover-input {
   width: 100%;
-  background: var(--color-input-bg, #222);
-  color: var(--text);
-  border: 1px solid var(--color-border, #444);
-  border-radius: 4px;
-  padding: 8px;
-  font-size: 13px;
+  background: var(--bg, #111);
+  color: #f0f0f0;
+  border: 1px solid var(--color-border, #555);
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
   resize: vertical;
-  min-height: 60px;
+  min-height: 70px;
   font-family: inherit;
   box-sizing: border-box;
+}
+
+.note-popover-input::placeholder {
+  color: #777;
 }
 
 .note-popover-input:focus {
   outline: none;
   border-color: var(--color-primary, #D04716);
+  box-shadow: 0 0 0 2px rgba(208, 71, 22, 0.2);
 }
 
 .note-popover-actions {
