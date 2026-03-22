@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import { BlurbyDoc, BlurbySettings, SyncStatusValue } from "../types";
 import { useTheme } from "./ThemeProvider";
+import { triggerCoachHint } from "./HotkeyCoach";
 import AddEditPanel from "./AddEditPanel";
 import DocCard from "./DocCard";
 import DocGridCard from "./DocGridCard";
@@ -294,7 +295,7 @@ export default function LibraryView({
             <CloudSyncIndicator onOpenSettings={() => onToggleFlap()} />
             <button
               className="btn"
-              onClick={() => setSearchFocused(true)}
+              onClick={() => { triggerCoachHint("search"); setSearchFocused(true); }}
               aria-label="Search library"
               title="Search (/ key)"
             >

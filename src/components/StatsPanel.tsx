@@ -50,7 +50,7 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
           <button onClick={handleReset} className={`btn stats-close${confirmReset ? " stats-reset-confirm" : ""}`} aria-label="Reset statistics">
             {confirmReset ? "confirm reset?" : "reset"}
           </button>
-          <button onClick={() => api.exportStatsCsv()} className="btn stats-close" aria-label="Export stats CSV">export csv</button>
+          <button onClick={() => api.openReadingLog()} className="btn stats-close" aria-label="Open Reading Log">Open Reading Log</button>
           <button onClick={onClose} className="btn stats-close">close</button>
         </div>
       </div>

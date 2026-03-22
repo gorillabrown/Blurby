@@ -1,6 +1,7 @@
 import { useState, useEffect, memo } from "react";
 import { BlurbyDoc } from "../types";
 import { formatDisplayTitle } from "../utils/text";
+import { triggerCoachHint } from "./HotkeyCoach";
 
 interface DocGridCardProps {
   doc: BlurbyDoc;
@@ -91,19 +92,19 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
         {doc.unread && <div className="doc-grid-unread-dot" aria-hidden="true" />}
         <div className="doc-grid-actions">
           {onToggleFavorite && (
-            <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(doc.id); }} title={doc.favorite ? "Unfavorite" : "Favorite"} aria-label={doc.favorite ? "Remove from favorites" : "Add to favorites"}>
+            <button onClick={(e) => { e.stopPropagation(); triggerCoachHint("favorite"); onToggleFavorite(doc.id); }} title={doc.favorite ? "Unfavorite" : "Favorite"} aria-label={doc.favorite ? "Remove from favorites" : "Add to favorites"}>
               {doc.favorite ? "\u2605" : "\u2606"}
             </button>
           )}
           {onArchive && (
-            <button onClick={(e) => { e.stopPropagation(); onArchive(doc.id); }} title="Archive" aria-label="Archive document">
+            <button onClick={(e) => { e.stopPropagation(); triggerCoachHint("archive"); onArchive(doc.id); }} title="Archive" aria-label="Archive document">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <polyline points="21 8 21 21 3 21 3 8" /><rect x="1" y="3" width="22" height="5" /><line x1="10" y1="12" x2="14" y2="12" />
               </svg>
             </button>
           )}
           {onDelete && (
-            <button onClick={(e) => { e.stopPropagation(); onDelete(doc.id); }} title="Delete" aria-label="Delete document">
+            <button onClick={(e) => { e.stopPropagation(); triggerCoachHint("delete"); onDelete(doc.id); }} title="Delete" aria-label="Delete document">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
               </svg>
