@@ -86,19 +86,18 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ---
 
-## Current System State (Post-Sprint 18A — Windows .exe Production Complete)
+## Current System State (Post-Sprint 21 — UX Polish & Reading Intelligence Complete)
 
-### Codebase (branch: `main`)
+### Codebase (branch: `sprint/19-20-21-combined`, pending merge to `main`)
 
-- **45 commits** on main (PR #1 squash-merged as commit 91718e3, then Sprints 2-18A layered on top)
-- All sprints (1-18A) complete — security, performance, accessibility, cloud sync, production installer
+- All sprints (1-21) complete — security, performance, accessibility, cloud sync, production installer, sync hardening, keyboard-first UX, UX polish
 - CI/CD active via GitHub Actions (x64 + ARM64 release matrix)
 
 ### Tech Stack
 
 - Electron 41 + React 19 + Vite 6 + TypeScript 5.9
 - Vitest 4.1 for testing, electron-builder 26 for packaging
-- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater
+- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log)
 
 ### Architecture
 
@@ -106,7 +105,8 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
   - `main.js` (1063 lines) — orchestrator, app lifecycle, context object
   - `main/ipc-handlers.js` (918 lines) — all IPC registrations (incl. cloud sync channels)
   - `main/file-parsers.js` (694 lines) — EPUB, MOBI, PDF, HTML, TXT format parsers
-  - `main/sync-engine.js` (487 lines) — offline-first sync with hash-based change detection, field/doc/history merge
+  - `main/sync-engine.js` (~950 lines) — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
+  - `main/sync-queue.js` (229 lines) — offline operation queue with compaction and idempotent replay
   - `main/auth.js` (421 lines) — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
   - `main/url-extractor.js` (392 lines) — URL/article extraction, Readability, PDF export
   - `main/cloud-google.js` (316 lines) — Google Drive appDataFolder, resumable uploads, retry
@@ -119,15 +119,16 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 - **Preload** (`preload.js`): Context bridge -> `window.electronAPI` (incl. cloud sync APIs)
 - **Renderer** (`src/`): React 19 SPA
   - `App.tsx` — Thin orchestrator (Sprint 11 refactor)
-  - `src/components/` — 29 UI components + 8 settings sub-pages
-    - Key additions: `ReaderContainer.tsx`, `LibraryContainer.tsx` (Sprint 11), `CloudSyncIndicator.tsx` (Sprint 17), `EinkRefreshOverlay.tsx` (Sprint 16), `VirtualScrollText.tsx`
+  - `src/components/` — 37 UI components + 8 settings sub-pages
+    - Sprint 20 additions: `PageReaderView.tsx` (default paginated reader), `ReaderBottomBar.tsx` (unified controls), `CommandPalette.tsx`, `ShortcutsOverlay.tsx`, `GoToIndicator.tsx`, `SnoozePickerOverlay.tsx`, `TagPickerOverlay.tsx`, `HighlightsOverlay.tsx`, `QuickSettingsPopover.tsx`, `NotePopover.tsx`
+    - Sprint 21 addition: `HotkeyCoach.tsx` (mouse-click coaching toasts)
   - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
   - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration
   - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Tests** (`tests/`): 14 test files, 293 tests (Sprint 13 expansion)
+- **Tests** (`tests/`): 21 test files, 425+ tests (Sprint 13 base + Sprint 19/20/21 additions)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -135,12 +136,12 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Page View (PageReaderView) | 📋 Sprint 20U | DEFAULT reading view — paginated, word selection, note/define, launches Focus/Flow |
+| Page View (PageReaderView) | ✅ Built | DEFAULT reading view — paginated, word selection, note/define, launches Focus/Flow (Sprint 20U) |
 | Focus Mode (ReaderView) | ✅ Built | RSVP word-at-a-time, ORP highlighting, WPM control — sub-mode of Page (Sprint 20U) |
 | Flow Mode (ScrollReaderView) | ✅ Built | Scrolling text with word-level highlighting — sub-mode of Page (Sprint 20U) |
-| Unified Bottom Bar (ReaderBottomBar) | 📋 Sprint 20U | Shared controls across Page/Focus/Flow — WPM, font, mode buttons, chapters |
-| Notes System | 📋 Sprint 20V | Inline notes from Page view, exported to .docx with APA citations |
-| Reading Log | 📋 Sprint 20W | Session logging to .xlsx with dashboard KPIs |
+| Unified Bottom Bar (ReaderBottomBar) | ✅ Built | Shared controls across Page/Focus/Flow — WPM, font, mode buttons, chapters (Sprint 20U) |
+| Notes System | ✅ Built | Inline notes from Page view, exported to .docx with APA citations (Sprint 20V) |
+| Reading Log | ✅ Built | Session logging to .xlsx with dashboard KPIs (Sprint 20W) |
 | Library Management | ✅ Built | Grid/list view, search, favorites, archives, memoized computed state |
 | Folder Watching | ✅ Built | Chokidar (lazy-loaded), on-demand content loading, stale folder cleanup |
 | URL Article Import | ✅ Built | Readability + authenticated fetching (lazy-loaded) |
@@ -174,14 +175,19 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | Cloud Sync — Engine | ✅ Built | Offline-first, hash-based change detection, field/doc/history merge (Sprint 17) |
 | Cloud Sync — UI | ✅ Built | CloudSyncSettings page, CloudSyncIndicator, first-time merge dialog (Sprint 17) |
 | Windows Installer | ✅ Production | Branded NSIS (x64+ARM64), delta updates, auto-updater, draft releases (Sprint 18A) |
+| Sync Hardening | ✅ Built | Revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation (Sprint 19) |
+| Article Provenance | ✅ Built | Author, source domain, pub date extraction from URLs; APA-format PDF headers; lead image cascade with magic-byte validation (Sprint 19) |
+| Keyboard-First UX | ✅ Built | Command palette, J/K nav, G-sequences, 30+ shortcuts, undo, snooze, tags, collections, filter shortcuts (Sprint 20) |
+| Three-Mode Reader | ✅ Built | Page (default) → Focus (RSVP) → Flow (scroll); unified ReaderBottomBar; position mapping (Sprint 20U) |
+| Notes System | ✅ Built | NotePopover → .docx with APA citations and TOC (Sprint 20V) |
+| Reading Log | ✅ Built | Session data → .xlsx with ReadLog table + Dashboard KPIs (Sprint 20W) |
+| UX Polish | ✅ Built | Sticky headers, magnifying glass search, file badges, thumbnails, coaching toasts, drag-drop anywhere (Sprint 21) |
+| Reading Intelligence | ✅ Built | Active-only session timer, AVG WPM fix, time-to-end displays (Sprint 21) |
 
 ### What's NOT Done (Roadmap Forward)
 
 - **Sprint 18B: Chrome extension** — "Send to Blurby" with WebSocket + cloud fallback
 - **Sprint 18C: Android app** — React Native port with cloud sync
-- **Sprint 19: Sync hardening** — operation log, tombstones, staging directory, revision counters, document content sync, checksum verification, full reconciliation
-- **Sprint 20: Keyboard-First UX** — Command palette (`Ctrl+K` non-library, `/` library search), J/K nav, G-sequences, undo (Z), snooze (H), tags (L), Page-as-parent reader (`PageReaderView` default → Space=Focus, Shift+Space=Flow → Space pauses to Page), unified bottom bar (`ReaderBottomBar`), `M` for menu flap, notes system (.docx), reading log (.xlsx), 11 new components, 30+ shortcuts. Spec: `docs/project/three-mode-reader-redesign.md`
-- **Sprint 21: UX Polish & Reading Intelligence** — Frozen library headers, search→magnifying glass, book thumbnails in list, file badges in grid, hotkey coaching toasts, session timer, AVG WPM fix, drag-drop anywhere, paywall login, Focus time-to-end, "sources"→"readings", 17 items
 - **Code signing** — not doing (explicit decision)
 - **Symlink protection** — not implemented
 - **Multi-window support** — someday backlog
@@ -192,9 +198,10 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ✅ Sprints 1-8 (core) -> ✅ Sprint 9 (security) -> ✅ Sprint 10 (memory) -> ✅ Sprints 11+12 (refactor) -> ✅ Sprint 13 (tests) -> ✅ Sprint 14 (CSS) -> ✅ Sprint 15 (a11y) -> ✅ Sprint 17 (cloud sync) -> ✅ Sprint 18A (.exe production)
 ✅ Sprint 16 (e-ink optimization) — independent track, completed
-**Sprint 18B** (Chrome ext) || **Sprint 18C** (Android) — parallelizable, next up
-**Sprint 19** (sync hardening) || **Sprint 20** (keyboard-first UX) — parallelizable after Sprint 18
-**Sprint 21** (UX polish) — after Sprint 20
+✅ Sprint 19 (sync hardening + provenance) — completed
+✅ Sprint 20 (keyboard-first UX + three-mode reader) — completed
+✅ Sprint 21 (UX polish + reading intelligence) — completed
+**Sprint 18B** (Chrome ext) || **Sprint 18C** (Android) — next up
 
 ---
 
