@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import ReadingQueue from "./ReadingQueue";
 import { SettingsMenu } from "./SettingsMenu";
@@ -124,7 +125,8 @@ export default function MenuFlap({
 
   const title = TITLES[view] ?? view;
 
-  return (
+  // Render via portal on document.body to escape any stacking context
+  return createPortal(
     <>
       <div
         className={`menu-flap-backdrop${open ? " open" : ""}`}
@@ -240,6 +242,7 @@ export default function MenuFlap({
 
         {/* Settings button moved to header (21C) */}
       </div>
-    </>
+    </>,
+    document.body
   );
 }
