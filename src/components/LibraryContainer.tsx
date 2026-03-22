@@ -94,7 +94,7 @@ export default function LibraryContainer() {
     api.saveSettings({ wpm, folderName });
   }, [wpm, folderName, loaded, didInit]);
 
-  const openDoc = useCallback(async (doc: BlurbyDoc, mode = "speed") => {
+  const openDoc = useCallback(async (doc: BlurbyDoc) => {
     let content = doc.content;
     if (!content && (doc.source === "folder")) {
       content = await loadDocContent(doc.id) || undefined;
@@ -102,11 +102,8 @@ export default function LibraryContainer() {
     }
     const docWithContent: DocWithContent = { ...doc, content: content! };
     setActiveDoc(docWithContent);
-    if (mode === "scroll") {
-      settingsValue.updateSettings({ readingMode: "flow" });
-    } else {
-      settingsValue.updateSettings({ readingMode: "focus" });
-    }
+    // Always open in Page view (Sprint 20U: Page is default parent)
+    settingsValue.updateSettings({ readingMode: "page" });
     setView("reader");
   }, [loadDocContent, settingsValue]);
 

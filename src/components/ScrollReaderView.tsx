@@ -427,20 +427,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         <div className="reading-ruler" aria-hidden="true" />
       )}
 
-      {/* Bottom bar */}
-      <div className="scroll-reader-bottom">
-        <ProgressBar current={clampedPosition} total={words.length} />
-        <div className="reader-bottom-info">
-          <span>{isEink ? `Page ${einkPage + 1}/${einkTotalPages}` : `${pct}%`}</span>
-          <span className="scroll-reader-hint" aria-hidden="true">
-            {isEink
-              ? "arrows page \u00b7 Space focus \u00b7 Esc exit"
-              : <>{flowPlaying ? "Shift+Space pause" : "Shift+Space flow"} &middot; Space focus &middot; Esc exit</>
-            }
-          </span>
-          <span>{remaining} left</span>
-        </div>
-      </div>
+      {/* Bottom bar removed — unified ReaderBottomBar rendered by ReaderContainer */}
 
       {/* Highlight menu + definition popup */}
       {highlightWord && (

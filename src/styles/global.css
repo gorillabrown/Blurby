@@ -3615,21 +3615,8 @@ button:focus-visible {
   background: var(--bg);
 }
 
-/* ── Sprint 21E: File Type Badge in Grid ─────────────────────────────── */
-
-.grid-card-type-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
+/* ── Sprint 21E: File Type Badge in Grid (styled via .doc-grid-type-badge above) ── */
+/* Removed duplicate — actual styles at .doc-grid-type-badge (line ~1876) */
 
 /* ── Sprint 21D: List Thumbnail ──────────────────────────────────────── */
 
