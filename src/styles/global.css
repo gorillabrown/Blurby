@@ -1919,6 +1919,29 @@ button:focus-visible {
   background: var(--bg-raised);
 }
 
+.menu-flap-back-btn,
+.menu-flap-close-btn,
+.menu-flap-compact-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim, #888);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.menu-flap-back-btn:hover,
+.menu-flap-close-btn:hover,
+.menu-flap-compact-btn:hover {
+  color: var(--text);
+  background: var(--bg-raised, rgba(255,255,255,0.05));
+}
+
 .doc-grid-actions {
   position: absolute;
   bottom: 0;
