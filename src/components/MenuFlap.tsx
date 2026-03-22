@@ -52,24 +52,26 @@ export default function MenuFlap({
     }
   }, [open]);
 
-  // Click outside flap panel closes it (document-level listener)
+  // Click outside flap panel closes it
   const flapRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
       if (flapRef.current && !flapRef.current.contains(e.target as Node)) {
-        onClose();
+        onCloseRef.current();
       }
     };
-    // Use setTimeout to avoid closing immediately from the same click that opened it
+    // Delay to avoid the opening click from immediately closing
     const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handler);
-    }, 50);
+      document.addEventListener("mousedown", handler, true);
+    }, 100);
     return () => {
       clearTimeout(timer);
-      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("mousedown", handler, true);
     };
-  }, [open, onClose]);
+  }, [open]);
 
   // Escape closes flap (or navigates back in settings sub-pages)
   useEffect(() => {
