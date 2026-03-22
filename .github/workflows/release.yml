@@ -4,13 +4,23 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.1)'
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build:
+    strategy:
+      matrix:
+        arch: [x64, arm64]
     runs-on: windows-latest
+    name: Build (${{ matrix.arch }})
 
     steps:
       - name: Checkout
@@ -26,32 +36,75 @@ jobs:
         run: npm ci
 
       - name: Run tests
+        if: matrix.arch == 'x64'
         run: npm test
 
       - name: Typecheck
+        if: matrix.arch == 'x64'
         run: npm run typecheck
 
       - name: Build renderer
         run: npm run build
 
-      - name: Package Windows installer
-        run: npm run package:win
+      - name: Package Windows installer (${{ matrix.arch }})
+        run: npx electron-builder --win --arch ${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload installer artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: blurby-windows-installer
-          path: release/*.exe
+          name: blurby-${{ matrix.arch }}
+          path: |
+            release/*.exe
+            release/*.blockmap
+            release/latest*.yml
           if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    name: Publish Release
+
+    steps:
+      - name: Download x64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: blurby-x64
+          path: artifacts/
+
+      - name: Download arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: blurby-arm64
+          path: artifacts/
+
+      - name: Generate SHA-256 checksums
+        run: |
+          cd artifacts
+          sha256sum *.exe *.blockmap > checksums.sha256
+          cat checksums.sha256
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/*.exe
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: |
+            artifacts/*.exe
+            artifacts/*.blockmap
+            artifacts/latest*.yml
+            artifacts/checksums.sha256
           generate_release_notes: true
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
+          draft: true
+          prerelease: ${{ contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-rc') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
