@@ -260,6 +260,16 @@ export default function LibraryView({
           <div className="library-actions">
             <CloudSyncIndicator onOpenSettings={() => onToggleFlap()} />
             <button
+              className="btn"
+              onClick={() => setSearchFocused(true)}
+              aria-label="Search library"
+              title="Search (/ key)"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+            <button
               className="view-toggle-btn btn"
               title={settings.viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
               aria-label={settings.viewMode === "grid" ? "List view" : "Grid view"}
@@ -384,75 +394,59 @@ export default function LibraryView({
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
 
-        {/* Search bar and sort */}
-        {library.length > 3 && (
-          <div className="library-search-wrap">
-            {/* Magnifying glass search toggle (21H) */}
-            <div className="search-container">
-              {!searchFocused && !searchQuery ? (
-                <button
-                  className="btn library-search-toggle"
-                  onClick={() => setSearchFocused(true)}
-                  aria-label="Search library"
-                  title="Search (/ key)"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                </button>
-              ) : (
-                <input
-                  autoFocus
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(-1); }}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setTimeout(() => { if (!searchQuery) setSearchFocused(false); }, 150)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      setSearchQuery("");
-                      setSearchIndex(-1);
-                      setSearchFocused(false);
-                      return;
-                    }
-                    if (!searchQuery || searchResults.length === 0) return;
-                    if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      setSearchIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
-                    } else if (e.key === "ArrowUp") {
-                      e.preventDefault();
-                      setSearchIndex((prev) => Math.max(prev - 1, -1));
-                    } else if (e.key === "Enter" && searchIndex >= 0) {
-                      e.preventDefault();
-                      onOpenDoc(searchResults[searchIndex]);
-                      setSearchQuery("");
-                      setSearchIndex(-1);
-                    }
-                  }}
-                  className="library-search"
-                  aria-label="Search library"
-                />
-              )}
-              {searchQuery && searchFocused && (
-                <div className="search-dropdown">
-                  {searchResults.length > 0 ? (
-                    searchResults.map((doc, idx) => (
-                      <div
-                        key={doc.id}
-                        className={`search-result-item${idx === searchIndex ? " search-result-active" : ""}`}
-                        onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); setSearchIndex(-1); }}
-                      >
-                        <span className="search-result-title">{formatDisplayTitle(doc.title)}</span>
-                        {doc.author && <span className="search-result-author">{doc.author}</span>}
-                        <span className="search-result-meta">{doc.ext?.slice(1) || doc.source}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="search-result-empty">No results</div>
-                  )}
-                </div>
-              )}
-            </div>
+        {/* Floating search input — appears when search icon clicked or / pressed */}
+        {searchFocused && (
+          <div className="library-search-floating">
+            <input
+              autoFocus
+              placeholder="Search readings..."
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(-1); }}
+              onBlur={() => setTimeout(() => { if (!searchQuery) setSearchFocused(false); }, 150)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchQuery("");
+                  setSearchIndex(-1);
+                  setSearchFocused(false);
+                  return;
+                }
+                if (!searchQuery || searchResults.length === 0) return;
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  setSearchIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setSearchIndex((prev) => Math.max(prev - 1, -1));
+                } else if (e.key === "Enter" && searchIndex >= 0) {
+                  e.preventDefault();
+                  onOpenDoc(searchResults[searchIndex]);
+                  setSearchQuery("");
+                  setSearchIndex(-1);
+                  setSearchFocused(false);
+                }
+              }}
+              className="library-search"
+              aria-label="Search library"
+            />
+            {searchQuery && (
+              <div className="search-dropdown">
+                {searchResults.length > 0 ? (
+                  searchResults.map((doc, idx) => (
+                    <div
+                      key={doc.id}
+                      className={`search-result-item${idx === searchIndex ? " search-result-active" : ""}`}
+                      onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); setSearchIndex(-1); setSearchFocused(false); }}
+                    >
+                      <span className="search-result-title">{formatDisplayTitle(doc.title)}</span>
+                      {doc.author && <span className="search-result-author">{doc.author}</span>}
+                      <span className="search-result-meta">{doc.ext?.slice(1) || doc.source}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="search-result-empty">No results</div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

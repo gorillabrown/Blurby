@@ -3635,6 +3635,22 @@ button:focus-visible {
   top: 0;
   z-index: 10;
   background: var(--bg);
+  padding-bottom: 0;
+}
+
+/* Padding between sticky header and first content section */
+.library-sticky-top + .library-search-floating,
+.library-sticky-top + div,
+.library-sticky-top ~ .doc-grid,
+.library-sticky-top ~ .doc-list {
+  margin-top: 16px;
+}
+
+/* Floating search overlay */
+.library-search-floating {
+  position: relative;
+  padding: 8px 24px;
+  z-index: 9;
 }
 
 /* ── Sprint 21E: File Type Badge in Grid (styled via .doc-grid-type-badge above) ── */
