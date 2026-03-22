@@ -74,8 +74,8 @@ export default function ReaderBottomBar({
   // Font size percentage
   const fontPct = focusTextSize || 100;
 
-  // Opacity: full in Page, fades during Focus/Flow playback. E-ink: always full.
-  const opacity = isEink ? 1 : (readingMode === "page" || !playing) ? 1 : 0.08;
+  // Always fully visible
+  const opacity = 1;
 
   // WPM slider
   const handleWpmSlider = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
