@@ -239,6 +239,13 @@ export function useGlobalKeys({ toggleFlap, openSettings, view, activeOverlay, s
         return;
       }
 
+      // / opens library search overlay (any view — Sprint 20X)
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
+        e.preventDefault();
+        s.setActiveOverlay?.(s.activeOverlay === "librarySearch" ? null : "librarySearch");
+        return;
+      }
+
       // ? shows shortcuts overlay (not in input fields)
       if (e.key === "?" && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
         e.preventDefault();

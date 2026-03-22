@@ -322,26 +322,66 @@ export default function LibraryContainer() {
   if (view === "reader" && activeDoc) {
     return (
       <SettingsContext.Provider value={settingsValue}>
-        <DropZone onFilesDropped={handleFilesDropped} onReject={handleDropReject}>
-          <ReaderContainer
-            activeDoc={activeDoc}
-            library={library}
-            wpm={wpm}
-            setWpm={setWpm}
-            platform={platform}
-            menuFlapOpen={menuFlapOpen}
-            toggleMenuFlap={toggleMenuFlap}
-            setMenuFlapOpen={setMenuFlapOpen}
-            siteLogins={siteLogins}
-            onSiteLogin={handleSiteLogin}
-            onSiteLogout={handleSiteLogout}
-            onExitReader={handleExitReader}
-            onUpdateProgress={updateProgress}
-            onArchiveDoc={archiveDoc}
-            onToggleFavorite={toggleFavorite}
-            onOpenDocById={handleOpenDocById}
-          />
-        </DropZone>
+        <ToastContext.Provider value={toastValue}>
+          <DropZone onFilesDropped={handleFilesDropped} onReject={handleDropReject}>
+            <ReaderContainer
+              activeDoc={activeDoc}
+              library={library}
+              wpm={wpm}
+              setWpm={setWpm}
+              platform={platform}
+              menuFlapOpen={menuFlapOpen}
+              toggleMenuFlap={toggleMenuFlap}
+              setMenuFlapOpen={setMenuFlapOpen}
+              siteLogins={siteLogins}
+              onSiteLogin={handleSiteLogin}
+              onSiteLogout={handleSiteLogout}
+              onExitReader={handleExitReader}
+              onUpdateProgress={updateProgress}
+              onArchiveDoc={archiveDoc}
+              onToggleFavorite={toggleFavorite}
+              onOpenDocById={handleOpenDocById}
+            />
+          </DropZone>
+          {/* Global overlays — available in reader view too */}
+          {kbState.activeOverlay === "commandPalette" && (
+            <CommandPalette
+              mode="commands"
+              library={filteredLibrary}
+              onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+              onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
+              onClose={() => kbState.setActiveOverlay(null)}
+              onOpenSettings={handleOpenSettings}
+            />
+          )}
+          {kbState.activeOverlay === "librarySearch" && (
+            <CommandPalette
+              mode="library"
+              library={filteredLibrary}
+              onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+              onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
+              onClose={() => kbState.setActiveOverlay(null)}
+              onOpenSettings={handleOpenSettings}
+            />
+          )}
+          {kbState.activeOverlay === "shortcuts" && (
+            <ShortcutsOverlay onClose={() => kbState.setActiveOverlay(null)} context="reader-page" />
+          )}
+          {kbState.activeOverlay === "highlights" && (
+            <HighlightsOverlay
+              onClose={() => kbState.setActiveOverlay(null)}
+              onJumpTo={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+            />
+          )}
+          {kbState.activeOverlay === "quickSettings" && (
+            <QuickSettingsPopover
+              context="reader"
+              settings={settings as any}
+              onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
+              onClose={() => kbState.setActiveOverlay(null)}
+            />
+          )}
+        </ToastContext.Provider>
       </SettingsContext.Provider>
     );
   }
