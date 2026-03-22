@@ -3305,6 +3305,11 @@ button:focus-visible {
   opacity: 0;
 }
 
+.page-reader-content--flow {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
 .page-reader-paragraph {
   margin-bottom: 1em;
   line-height: inherit;

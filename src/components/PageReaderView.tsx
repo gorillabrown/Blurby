@@ -247,10 +247,21 @@ export default function PageReaderView({
             setCurrentPage(targetPage);
             flowCurrentPageRef.current = targetPage;
           }
-          // Scroll the highlighted word into view
+          // Scroll highlighted word into view — position 3 lines above center
+          // so the reader sees upcoming text, not just what they've read
           requestAnimationFrame(() => {
-            const el = document.querySelector(`[data-word-index="${next}"]`);
-            if (el) el.scrollIntoView({ block: "nearest", behavior: "auto" });
+            const el = document.querySelector(`[data-word-index="${next}"]`) as HTMLElement;
+            if (el) {
+              const container = el.closest(".page-reader-content");
+              if (container) {
+                const containerRect = container.getBoundingClientRect();
+                const elRect = el.getBoundingClientRect();
+                const targetY = containerRect.top + containerRect.height * 0.35; // 35% from top
+                if (elRect.top > targetY + 50 || elRect.top < containerRect.top) {
+                  el.scrollIntoView({ block: "center", behavior: "smooth" });
+                }
+              }
+            }
           });
         }
       }
@@ -311,28 +322,33 @@ export default function PageReaderView({
     setShowDefinition(true);
   }, []);
 
-  // Render current page's words
+  // In Flow mode, render ALL words for continuous scrolling.
+  // In Page mode, render only the current page's words.
   const page = pages[currentPage] || { start: 0, end: 0 };
-  const pageWords = words.slice(page.start, page.end + 1);
-  const progress = words.length > 0 ? ((page.end + 1) / words.length) * 100 : 0;
+  const visibleStart = flowPlaying ? 0 : page.start;
+  const visibleEnd = flowPlaying ? words.length - 1 : page.end;
+  const visibleWords = words.slice(visibleStart, visibleEnd + 1);
+  const progress = words.length > 0
+    ? ((flowPlaying ? highlightedWordIndex : page.end + 1) / words.length) * 100
+    : 0;
 
-  // Build rendered paragraphs for current page
+  // Build rendered paragraphs
   const renderedParagraphs = useMemo(() => {
     const paragraphs: Array<Array<{ word: string; globalIndex: number }>> = [];
     let currentPara: Array<{ word: string; globalIndex: number }> = [];
 
-    for (let localIdx = 0; localIdx < pageWords.length; localIdx++) {
-      const globalIdx = page.start + localIdx;
-      currentPara.push({ word: pageWords[localIdx], globalIndex: globalIdx });
+    for (let localIdx = 0; localIdx < visibleWords.length; localIdx++) {
+      const globalIdx = visibleStart + localIdx;
+      currentPara.push({ word: visibleWords[localIdx], globalIndex: globalIdx });
 
-      if (paragraphBreaks.has(globalIdx) || localIdx === pageWords.length - 1) {
+      if (paragraphBreaks.has(globalIdx) || localIdx === visibleWords.length - 1) {
         paragraphs.push(currentPara);
         currentPara = [];
       }
     }
     if (currentPara.length > 0) paragraphs.push(currentPara);
     return paragraphs;
-  }, [pageWords, page.start, paragraphBreaks]);
+  }, [visibleWords, visibleStart, paragraphBreaks]);
 
   return (
     <div
@@ -372,7 +388,7 @@ export default function PageReaderView({
 
       {/* Page content */}
       <div
-        className={`page-reader-content ${transitioning ? "page-reader-content--transitioning" : ""}`}
+        className={`page-reader-content ${transitioning ? "page-reader-content--transitioning" : ""} ${flowPlaying ? "page-reader-content--flow" : ""}`}
         style={{
           fontSize: `${fontSize}px`,
           lineHeight: `${lineHeight}px`,

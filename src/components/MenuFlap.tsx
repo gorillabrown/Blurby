@@ -52,24 +52,20 @@ export default function MenuFlap({
     }
   }, [open]);
 
-  // Click outside flap panel closes it
+  // Click anywhere outside flap closes it
   const flapRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (flapRef.current && !flapRef.current.contains(e.target as Node)) {
-        onCloseRef.current();
-      }
-    };
-    // Delay to avoid the opening click from immediately closing
-    const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handler, true);
-    }, 100);
+    // Any click on window closes the flap.
+    // The flap div uses stopPropagation to prevent its own clicks from reaching here.
+    const handler = () => onCloseRef.current();
+    // Small delay so the click that opened the flap doesn't immediately close it
+    const timer = setTimeout(() => window.addEventListener("click", handler), 100);
     return () => {
       clearTimeout(timer);
-      document.removeEventListener("mousedown", handler, true);
+      window.removeEventListener("click", handler);
     };
   }, [open]);
 
@@ -150,6 +146,7 @@ export default function MenuFlap({
       <div
         ref={flapRef}
         className={`menu-flap${open ? " open" : ""}`}
+        onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Menu"
         aria-modal="true"
