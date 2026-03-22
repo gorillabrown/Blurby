@@ -289,79 +289,12 @@ function startWatcherFn() {
         const content = await extractContent(filepath);
         if (content) {
           doc.wordCount = countWords(content);
-  const isMac = process.platform === "darwin";
-
-  mainWindow = new BrowserWindow({
-    width: 1000, height: 720, minWidth: 600, minHeight: 500,
-    title: "Blurby",
-    backgroundColor: colors.bg,
-    ...(isMac
-      ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } }
-      : {
-          titleBarStyle: "hidden",
-          titleBarOverlay: {
-            color: colors.titleBar,
-            symbolColor: colors.titleText,
-            height: 32,
-          },
+          saveLibrary();
+          broadcastLibrary();
         }
-    ),
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      contextIsolation: true, nodeIntegration: false,
+      }
     },
-    show: false,
   });
-
-  mainWindow.once("ready-to-show", () => mainWindow.show());
-
-  if (isDev) {
-    mainWindow.loadURL("http://localhost:5173");
-  } else {
-    mainWindow.loadFile(path.join(__dirname, "dist", "index.html"));
-  }
-
-  mainWindow.on("closed", () => { mainWindow = null; });
-}
-
-// ── Tray ───────────────────────────────────────────────────────────────────────
-function createTray() {
-  try { tray = new Tray(path.join(__dirname, "assets", "tray-icon.png")); } catch { return; /* Expected: tray icon may not exist */ }
-  const contextMenu = Menu.buildFromTemplate([
-    { label: "Open Blurby", click: () => { if (mainWindow) mainWindow.show(); else createWindow(); } },
-    { type: "separator" },
-    { label: "Quit", click: () => app.quit() },
-  ]);
-  tray.setToolTip("Blurby");
-  tray.setContextMenu(contextMenu);
-  tray.on("click", () => { if (mainWindow) mainWindow.show(); else createWindow(); });
-}
-
-// ── Auto-updater ───────────────────────────────────────────────────────────────
-function setupAutoUpdater() {
-  try {
-    const { autoUpdater } = require("electron-updater");
-    autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
-
-    autoUpdater.on("update-available", (info) => {
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("update-available", info.version);
-      }
-    });
-
-    autoUpdater.on("update-downloaded", (info) => {
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("update-downloaded", info.version);
-      }
-    });
-
-    // Check after delay to not block startup
-    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {
-      console.log("Auto-update check failed:", err.message);
-    } }, AUTO_UPDATE_DELAY_MS);
-  } catch { /* Expected: electron-updater may not be available in dev */ }
 }
 
 // ── Reading statistics ─────────────────────────────────────────────────────────
@@ -428,41 +361,6 @@ function getStats() {
     streak,
     longestStreak,
   };
-}
-
-// ── System theme ───────────────────────────────────────────────────────────────
-function getSystemTheme() {
-  return nativeTheme.shouldUseDarkColors ? "dark" : "light";
-}
-
-function broadcastSystemTheme() {
-  const systemTheme = getSystemTheme();
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.webContents.send("system-theme-changed", systemTheme);
-  }
-  for (const [, win] of readerWindows) {
-    if (!win.isDestroyed()) {
-      win.webContents.send("system-theme-changed", systemTheme);
-    }
-  }
-}
-
-function updateWindowTheme() {
-  const colors = getThemeColors();
-  const resolvedTheme = settings.theme === "system" ? getSystemTheme() : settings.theme;
-  nativeTheme.themeSource = resolvedTheme === "light" || resolvedTheme === "eink" ? "light" : "dark";
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.setBackgroundColor(colors.bg);
-    // Update title bar overlay colors on Windows
-    if (process.platform !== "darwin") {
-      try {
-        mainWindow.setTitleBarOverlay({
-          color: colors.titleBar,
-          symbolColor: colors.titleText,
-        });
-      } catch { /* Expected: setTitleBarOverlay may not be supported on all platforms */ }
-    }
-  }
 }
 
 // ── Article extraction helpers ─────────────────────────────────────────────────
@@ -941,9 +839,14 @@ function registerIPC() {
           setLibrary(docs.map((d) => (d.id === newDoc.id ? newDoc : d)));
           saveLibrary();
           broadcastLibrary();
+        } catch (err) {
+          console.log("[url] Failed to generate article PDF:", err.message);
         }
       }
-    },
+    } catch (err) {
+      console.error("[url] Failed to import article:", err.message);
+      return { error: err.message };
+    }
   });
 }
 
