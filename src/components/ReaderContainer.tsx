@@ -67,6 +67,9 @@ export default function ReaderContainer({
   // Highlighted word in Page view — anchor for Focus/Flow entry
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
 
+  // Flow mode plays within Page view (word highlight advances at WPM)
+  const [flowPlaying, setFlowPlaying] = useState(false);
+
   // E-ink ghosting prevention
   const [einkPageTurns, setEinkPageTurns] = useState(0);
   const [showEinkRefresh, setShowEinkRefresh] = useState(false);
@@ -107,9 +110,10 @@ export default function ReaderContainer({
   const reader = useReader(effectiveWpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
-  // Track active reading time when entering/leaving Focus or Flow
+  // Track active reading time when in Focus (playing) or Flow (flowPlaying)
+  const isActivelyReading = (readingMode === "focus" && playing) || (readingMode === "flow" && flowPlaying);
   useEffect(() => {
-    if (readingMode !== "page" && playing) {
+    if (isActivelyReading) {
       activeReadingStartRef.current = Date.now();
     } else {
       if (activeReadingStartRef.current) {
@@ -117,7 +121,7 @@ export default function ReaderContainer({
         activeReadingStartRef.current = null;
       }
     }
-  }, [readingMode, playing]);
+  }, [isActivelyReading]);
 
   // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
   const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : "page";
@@ -213,33 +217,35 @@ export default function ReaderContainer({
     if (!playing) setTimeout(() => reader.togglePlay(), 50);
   }, [highlightedWordIndex, jumpToWord, updateSettings, playing, reader]);
 
-  /** Enter Flow from Page at highlighted word */
+  /** Enter Flow from Page — starts word advancement within Page view */
   const handleEnterFlow = useCallback(() => {
-    // Update doc position so ScrollReaderView picks up the right starting point
-    api.updateDocProgress(activeDoc.id, highlightedWordIndex);
-    onUpdateProgress(activeDoc.id, highlightedWordIndex);
     setReadingMode("flow");
+    setFlowPlaying(true);
     updateSettings({ readingMode: "flow" });
-  }, [activeDoc.id, highlightedWordIndex, onUpdateProgress, updateSettings]);
+  }, [updateSettings]);
 
   /** Pause Focus/Flow → return to Page */
   const handlePauseToPage = useCallback(() => {
     if (playing) reader.togglePlay();
-    setHighlightedWordIndex(wordIndex);
+    if (flowPlaying) setFlowPlaying(false);
+    if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
-  }, [playing, reader, wordIndex, updateSettings]);
+  }, [playing, flowPlaying, readingMode, reader, wordIndex, updateSettings]);
 
-  /** Toggle play in Focus/Flow: Space = pause + return to Page */
+  /** Toggle play: Space behavior per mode */
   const handleTogglePlay = useCallback(() => {
     if (readingMode === "page") {
       // Space in Page → enter Focus
       handleEnterFocus();
+    } else if (readingMode === "flow") {
+      // Space in Flow → pause flow, return to Page
+      handlePauseToPage();
     } else if (playing) {
-      // Space while playing in Focus/Flow → pause → Page
+      // Space while playing in Focus → pause → Page
       handlePauseToPage();
     } else {
-      // Space while paused in Focus/Flow → resume play
+      // Space while paused in Focus → resume play
       reader.togglePlay();
     }
   }, [readingMode, playing, handleEnterFocus, handlePauseToPage, reader]);
@@ -381,28 +387,30 @@ export default function ReaderContainer({
     />
   );
 
-  // Determine current word index for bottom bar (varies by mode)
-  const currentWordIndex = readingMode === "page" ? highlightedWordIndex : wordIndex;
+  // Determine current word index for bottom bar
+  const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
   // ── Render ─────────────────────────────────────────────────────────────
 
   const renderView = () => {
     switch (readingMode) {
       case "flow":
+        // Flow mode renders PageReaderView with flowPlaying=true
+        // Word highlight advances at WPM speed within the paginated view
         return (
-          <ScrollReaderView
+          <PageReaderView
             activeDoc={activeDoc}
             wpm={effectiveWpm}
             focusTextSize={focusTextSize}
-            isMac={platform === "darwin"}
-            settings={scrollSettings}
-            onSetWpm={setWpm}
-            onAdjustFocusTextSize={adjustFocusTextSize}
-            onExit={handleScrollExit}
-            onProgressUpdate={handleScrollProgress}
-            onSwitchToFocus={handleEnterFocus}
+            settings={pageSettings}
+            highlightedWordIndex={highlightedWordIndex}
+            onHighlightedWordChange={setHighlightedWordIndex}
+            onEnterFocus={handleEnterFocus}
+            onEnterFlow={handleEnterFlow}
+            onExit={(pos) => finishReading(pos)}
             onToggleFlap={toggleMenuFlap}
-            onPageTurn={handleEinkPageTurn}
+            pageNavRef={pageNavRef}
+            flowPlaying={true}
           />
         );
       case "focus":
@@ -446,6 +454,7 @@ export default function ReaderContainer({
             onExit={(pos) => finishReading(pos)}
             onToggleFlap={toggleMenuFlap}
             pageNavRef={pageNavRef}
+            flowPlaying={false}
           />
         );
     }

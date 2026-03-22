@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { tokenizeWithMeta, formatDisplayTitle } from "../utils/text";
+import { tokenizeWithMeta, formatDisplayTitle, hasPunctuation } from "../utils/text";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
@@ -26,6 +26,7 @@ interface PageReaderViewProps {
   onToggleFlap?: () => void;
   notes?: Map<number, string>; // wordIndex → note preview
   pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void }>;
+  flowPlaying: boolean; // Flow mode: word highlight advances at WPM within page view
 }
 
 // ── Pagination helpers ────────────────────────────────────────────────────
@@ -101,6 +102,7 @@ export default function PageReaderView({
   onToggleFlap,
   notes,
   pageNavRef,
+  flowPlaying,
 }: PageReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(600);
@@ -179,6 +181,57 @@ export default function PageReaderView({
       pageNavRef.current = { prevPage, nextPage };
     }
   }, [pageNavRef, prevPage, nextPage]);
+
+  // ── Flow mode: advance highlighted word at WPM speed ────────────────
+  const flowRafRef = useRef<number | null>(null);
+  const flowLastTimeRef = useRef(0);
+  const flowAccRef = useRef(0);
+
+  useEffect(() => {
+    if (!flowPlaying) {
+      if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
+      flowRafRef.current = null;
+      flowLastTimeRef.current = 0;
+      flowAccRef.current = 0;
+      return;
+    }
+
+    const tick = (timestamp: number) => {
+      if (flowLastTimeRef.current === 0) {
+        flowLastTimeRef.current = timestamp;
+      }
+      const delta = timestamp - flowLastTimeRef.current;
+      flowLastTimeRef.current = timestamp;
+      flowAccRef.current += delta;
+
+      const interval = 60000 / wpm;
+      // Extra pause on punctuation (sentence-end gets more pause)
+      const currentWord = words[highlightedWordIndex] || "";
+      let extraPause = 0;
+      if (/[.!?]$/.test(currentWord)) extraPause = 300; // sentence-end
+      else if (/[,;:]$/.test(currentWord)) extraPause = 150; // mid-sentence
+      const effectiveInterval = interval + extraPause;
+
+      if (flowAccRef.current >= effectiveInterval) {
+        flowAccRef.current -= effectiveInterval;
+        const next = highlightedWordIndex + 1;
+        if (next < words.length) {
+          onHighlightedWordChange(next);
+          // Auto-flip page if word is beyond current page
+          const targetPage = pageForWord(pages, next);
+          if (targetPage !== currentPage) {
+            setCurrentPage(targetPage);
+          }
+        }
+      }
+      flowRafRef.current = requestAnimationFrame(tick);
+    };
+
+    flowRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
+    };
+  }, [flowPlaying, wpm, words, highlightedWordIndex, onHighlightedWordChange, pages, currentPage]);
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
