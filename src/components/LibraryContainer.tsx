@@ -96,7 +96,7 @@ export default function LibraryContainer() {
 
   const openDoc = useCallback(async (doc: BlurbyDoc) => {
     let content = doc.content;
-    if (!content && (doc.source === "folder")) {
+    if (!content) {
       content = await loadDocContent(doc.id) || undefined;
       if (!content) return;
     }
