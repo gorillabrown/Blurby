@@ -16,6 +16,11 @@
   "build": {
     "appId": "com.blurby.app",
     "productName": "Blurby",
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ],
     "files": [
       "main.js",
       "preload.js",
@@ -27,17 +32,20 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "assets/icon.png",
-      "uninstallerIcon": "assets/icon.png",
-      "installerHeaderIcon": "assets/icon.png",
-      "createDesktopShortcut": true,
+      "installerHeader": "assets/installer/installerHeader.bmp",
+      "installerSidebar": "assets/installer/installerSidebar.bmp",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "shortcutName": "Blurby"
+      "shortcutName": "Blurby",
+      "menuCategory": true,
+      "runAfterFinish": true
     },
     "mac": {
       "target": "dmg",
