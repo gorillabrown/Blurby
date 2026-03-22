@@ -316,9 +316,8 @@ export default function LibraryView({
             </button>
             <button onClick={() => { setShowAdd(true); setEditingId(null); setNewTitle(""); setNewText(""); }} className="btn-fill" aria-label="Add document">+ add</button>
           </div>
-        </div>
 
-        {/* Tabs */}
+        {/* Tabs + sort on same line — inside library-header for sticky */}
         <div className="library-tabs" role="tablist">
           <button
             className={`library-tab${tab === "all" ? " library-tab-active" : ""}`}
@@ -363,11 +362,27 @@ export default function LibraryView({
             role="tab"
             aria-selected={typeFilter === "pdfs"}
           >PDFs ({pdfCount})</button>
+          {/* Sort dropdown right-justified on filter line (21I) */}
+          {library.length > 3 && (
+            <select
+              className="sort-select"
+              style={{ marginLeft: "auto" }}
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label="Sort order"
+            >
+              <option value="progress">closest to done</option>
+              <option value="alpha">A-Z</option>
+              <option value="newest">newest first</option>
+              <option value="oldest">oldest first</option>
+            </select>
+          )}
         </div>
+        </div>{/* close library-header — sticky covers header + tabs */}
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
 
-        {/* Search bar and sort */}
+        {/* Search bar */}
         {library.length > 3 && (
           <div className="library-search-wrap">
             {/* Magnifying glass search toggle (21H) */}
@@ -436,19 +451,6 @@ export default function LibraryView({
                 </div>
               )}
             </div>
-            {/* Sort dropdown right-justified (21I) */}
-            <select
-              className="sort-select"
-              style={{ marginLeft: "auto" }}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort order"
-            >
-              <option value="progress">closest to done</option>
-              <option value="alpha">A-Z</option>
-              <option value="newest">newest first</option>
-              <option value="oldest">oldest first</option>
-            </select>
           </div>
         )}
 
