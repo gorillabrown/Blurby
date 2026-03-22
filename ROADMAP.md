@@ -68,6 +68,7 @@ All feature work from phases 0-4 plus Sprints 1-17 are on main. The app has clou
 | **Sprint 18B: Chrome Extension** | 📋 SPEC'D | "Send to Blurby" — Readability extraction, local WebSocket + cloud fallback |
 | **Sprint 18C: Android APK** | 📋 SPEC'D | Full Blurby Mobile — React Native, RSVP + flow, cloud sync, share intent |
 | **Sprint 19: Sync Hardening** | 📋 SPEC'D | Revision counters, operation log, staging, tombstones, content sync, reconciliation |
+| **Sprint 20: Keyboard-First UX** | 📋 SPEC'D | Command palette, J/K navigation, G-sequences, undo, snooze, tags, 27 new shortcuts |
 
 **Legend:** ✅ = implemented & tested, 🔶 = fully scoped with agent assignments (ready for dispatch), 📋 = spec'd but needs agent assignments, 📐 = design/vision only
 
@@ -1480,11 +1481,16 @@ Production            "Send to Blurby"      Full Blurby Mobile
                ▼
         Sprint 18 Complete ──────────────────── GATE
                │
-               ▼
-        Sprint 19: Sync Hardening & Content Sync
-               │
-               ▼
-        Someday Backlog
+               ├──────────────────────────────────────────┐
+               ▼                                          ▼
+        Sprint 19: Sync Hardening          Sprint 20: Keyboard-First UX
+        & Content Sync                     (Superhuman-Inspired)
+        (PARALLEL)                         (PARALLEL)
+               │                                          │
+               └──────────────┬───────────────────────────┘
+                              │
+                              ▼
+                       Someday Backlog
 ```
 
 ---
@@ -1631,6 +1637,392 @@ Production            "Send to Blurby"      Full Blurby Mobile
 - [ ] Test: Upload fails at file 8 of 15 — cloud state remains consistent (staging pattern)
 - [ ] Test: 500KB document syncs via resumable upload, downloads lazily on new device
 - [ ] `npm test` passes (including all new sync hardening tests)
+- [ ] `npm run build` succeeds
+
+---
+
+## Sprint 20: Keyboard-First UX (Superhuman-Inspired)
+
+**Goal:** Transform Blurby from "keyboard-supported" to "keyboard-first." Adopt proven patterns from Superhuman's shortcut system — command palette, J/K navigation, G-sequences, single-key actions — and extend them for a speed reading context. After this sprint, a power user can do everything in Blurby without touching a mouse.
+
+**Prerequisite:** Sprint 18A (.exe production) complete. Independent of Sprints 18B/18C/19 — can run in parallel.
+
+**Tier:** Full (new feature, touches hooks, components, settings, and global CSS).
+
+**Inspiration:** Superhuman Keyboard Shortcuts v7 (Windows & Linux Edition). Direct adoption where concepts overlap; novel extensions where Blurby's reading-app context creates unique opportunities.
+
+### Spec
+
+**20A. Command Palette (`Ctrl+K`)**
+- Superhuman's "Superhuman Command" — the single most impactful keyboard feature
+- Full-screen fuzzy search overlay that searches EVERYTHING:
+  - Documents (by title, author, source)
+  - Actions ("archive", "favorite", "open settings", "toggle theme")
+  - Settings (jump directly to any settings sub-page)
+  - Chapters (within current document, if in reader)
+  - Keyboard shortcuts (type a shortcut name to learn its key)
+- Ranked results with type badges: 📄 Doc, ⚡ Action, ⚙️ Setting, 📑 Chapter, ⌨️ Shortcut
+- Arrow keys to navigate results, `Enter` to select, `Escape` to dismiss
+- Recent actions shown on open (before typing) for repeat access
+- Implementation: New `CommandPalette.tsx` component, mounted at App level, triggered by global keydown handler
+- Fuzzy matching via simple scored substring (no external dependency — keep it Pike Rule 3)
+- Files affected: new `src/components/CommandPalette.tsx`, `src/hooks/useKeyboardShortcuts.ts` (add Ctrl+K handler), `src/styles/global.css` (overlay styles)
+
+**20B. Library Search (`/`)**
+- Superhuman's `/` for Search
+- From library view, pressing `/` focuses the search/filter input instantly
+- If search input doesn't exist yet, create a persistent filter bar at top of library
+- Type to filter documents by title/author in real-time
+- `Escape` clears search and returns focus to library grid
+- Files affected: `src/components/LibraryContainer.tsx` or `src/components/LibraryView.tsx`, `useKeyboardShortcuts.ts`
+
+**20C. Shortcuts Overlay (`?`)**
+- Superhuman's `?` for Shortcuts
+- Lightweight modal overlay showing ALL keyboard shortcuts, organized by context (Global, Library, Reader — RSVP, Reader — Scroll, Highlight Menu)
+- Dismissible with `Escape` or `?` again
+- Replaces the need to navigate to Settings > Hotkeys for reference
+- Current `HotkeyMapSettings.tsx` remains for settings page, but this overlay is the quick-reference
+- Shows context-appropriate shortcuts highlighted based on current view
+- Files affected: new `src/components/ShortcutsOverlay.tsx`, `useKeyboardShortcuts.ts`, `global.css`
+
+**20D. Undo System (`Z`)**
+- Superhuman's `Z` for Undo
+- Introduce an undo stack for reversible actions:
+  - Archive / un-archive
+  - Favorite / un-favorite
+  - Delete (soft — moves to trash, undo restores)
+  - Queue add / remove
+  - Tag add / remove
+- On action, show a toast with undo prompt: "Archived 'Document Title' — Press Z to undo"
+- `Z` triggers undo while toast is visible (5-second window)
+- Stack depth of 1 (undo the last action only, not arbitrary depth)
+- Uses existing `ToastContext.tsx` — extend toast to accept an `onUndo` callback
+- Files affected: `src/contexts/ToastContext.tsx`, `useKeyboardShortcuts.ts`, `LibraryContainer.tsx`
+
+**20E. Library Navigation (`J`/`K`, `Enter`, `X`, `Ctrl+Shift+A`)**
+- Superhuman's `J`/`K` (next/previous), `Enter` (open), `X` (select), `Ctrl+Shift+A` (select all)
+- Currently Blurby library has NO keyboard navigation — this is the biggest gap
+- **J/K movement:** Maintain a `focusedIndex` state in LibraryContainer. `J` increments, `K` decrements. Visual focus ring (2px orange outline) on the focused document card. Scrolls into view automatically
+- **Enter to open:** Opens focused document in reader at last reading position
+- **X to select:** Toggles multi-select on focused document. Selected docs get a checkbox overlay. Enables batch actions (archive, delete, tag, queue)
+- **Ctrl+A / Ctrl+Shift+A:** Select all visible (filtered) documents
+- **Escape:** Clears selection, then clears search, then closes menu (layered dismiss)
+- Grid vs list view: `J`/`K` move linearly through documents regardless of visual layout. In grid view, also support arrow keys (←/→ for column, ↑/↓ for row)
+- Files affected: `LibraryContainer.tsx` (focus state, selection state), `DocCard.tsx` / `GridCard.tsx` (focus ring + selection checkbox), `useKeyboardShortcuts.ts`, `global.css`
+
+**20F. Single-Key Document Actions (`E`, `Shift+E`, `S`, `#`, `U`, `R`)**
+- Superhuman's single-key action model — no modifier keys for common operations
+- All operate on the focused document (via J/K) or current document (in reader):
+  - **`E`** → Archive document (Superhuman: Mark Done). Toast with undo. In library, auto-advance focus to next document
+  - **`Shift+E`** → Restore from archive (Superhuman: Mark Not Done). Available when viewing archive
+  - **`S`** → Toggle star/favorite (Superhuman: Star). **Replaces current `B` binding.** `S` is more intuitive and matches Superhuman. `B` retired
+  - **`#`** → Trash document (Superhuman: Trash). Requires Shift+3, which is slightly deliberate — prevents accidental deletion. Toast with undo via `Z`
+  - **`U`** → Toggle read/unread status (Superhuman: Mark Read or Unread). New concept for Blurby: marks a document as "unread" even if partially read. Visual: unread docs show bold title + dot indicator in library. Useful for "I need to revisit this"
+  - **`R`** → Resume reading (NEW — no Superhuman equivalent). Opens focused document at last reading position. Distinct from `Enter` which could open doc detail/info in a future update
+- Files affected: `useKeyboardShortcuts.ts`, `LibraryContainer.tsx` (action dispatch), `DocCard.tsx` (unread indicator), `src/types.ts` (add `unread` field to BlurbyDoc)
+
+**20G. Go-To Sequences (`G then ...`)**
+- Superhuman's signature two-key navigation pattern
+- Press `G` to enter "go-to mode" — a subtle indicator appears (small "G..." badge in bottom-left corner, 2-second timeout). Then press a second key to navigate:
+  - **`G` then `L`** → Library (all documents)
+  - **`G` then `F`** → Favorites
+  - **`G` then `A`** → Archive
+  - **`G` then `Q`** → Queue
+  - **`G` then `R`** → Recent
+  - **`G` then `S`** → Stats panel
+  - **`G` then `T`** → Settings (T for sTuff? or reassign)
+- Implementation: State machine in keyboard hook — `pendingSequence` flag with 2-second auto-clear timeout
+- After navigation, focus returns to library with the new filter applied
+- Files affected: `useKeyboardShortcuts.ts` (sequence state machine), `LibraryContainer.tsx` (filter activation), new `src/components/GoToIndicator.tsx` (the "G..." badge), `global.css`
+
+**20H. Snooze / Read Later (`H`)**
+- Superhuman's "Remind Me" — adapted for reading
+- Press `H` on focused document. Quick-picker overlay appears:
+  - `1` → In 1 hour
+  - `2` → Tonight (8 PM)
+  - `3` → Tomorrow morning (8 AM)
+  - `4` → This weekend (Saturday 9 AM)
+  - `5` → Next week (Monday 8 AM)
+  - `Escape` → Cancel
+- Snoozed documents:
+  - Disappear from main library view
+  - Stored with `snoozedUntil` timestamp in BlurbyDoc
+  - Reappear automatically when time arrives (checked on app launch + periodic 60s check)
+  - System notification on reappearance: "Time to read: 'Document Title'"
+  - Viewable anytime via `G then H` (Go to Snoozed)
+- Add `G then H` to the Go-To sequence table in 20G
+- Files affected: `src/types.ts` (add `snoozedUntil` to BlurbyDoc), new `src/components/SnoozePickerOverlay.tsx`, `useKeyboardShortcuts.ts`, `LibraryContainer.tsx` (filter snoozed), `main/ipc-handlers.js` (snooze timer + notification)
+
+**20I. Tags System (`L`, `V`)**
+- Superhuman's Labels (`L`) and Move (`V`) — adapted for reading collections
+- **`L`** → Add/remove tag. Opens a small overlay listing existing tags with checkboxes. Type to filter or create a new tag. `Enter` to toggle, `Escape` to close
+- **`V`** → Move to collection. Same overlay but single-select (moves the doc into exactly one collection, removing from others). Collections are higher-order grouping than tags
+- Tags are free-form strings stored in `BlurbyDoc.tags: string[]`
+- Collections stored in `BlurbyDoc.collection: string | null`
+- Library view: filter by tag (`Shift+L` opens tag filter) or collection (via `G then C` — add to Go-To sequences)
+- Files affected: `src/types.ts` (add `tags`, `collection` to BlurbyDoc), new `src/components/TagPickerOverlay.tsx`, `useKeyboardShortcuts.ts`, `LibraryContainer.tsx` (tag/collection filters), `main/ipc-handlers.js` (persist tags)
+
+**20J. Filter Shortcuts (`Shift+U`, `Shift+S`, `Shift+R`, `Shift+I`)**
+- Superhuman's filter keys — instant library filtering without opening a menu
+- **`Shift+U`** → Filter: unread only
+- **`Shift+S`** → Filter: starred/favorites only
+- **`Shift+R`** → Filter: currently reading (has progress > 0% but < 100%)
+- **`Shift+I`** → Filter: imported today
+- Pressing the same filter again clears it (toggle behavior)
+- Active filter shown as a pill/chip below the search bar: "Showing: Unread" with `×` to clear
+- Multiple filters are NOT combinable (each replaces the previous — keep it simple per Pike Rule 4)
+- Files affected: `LibraryContainer.tsx` (filter state + UI), `useKeyboardShortcuts.ts`, `global.css`
+
+**20K. Open Source / Original (`O`)**
+- Superhuman uses `O` to expand a message
+- In Blurby library: if the focused document was imported from a URL, `O` opens the original URL in the default browser via `shell.openExternal()`. For local files, opens the file's parent folder in the system file manager. Toast feedback: "Opening source..." or "No source URL available"
+- In reader: same behavior — opens the source of the current document
+- Files affected: `useKeyboardShortcuts.ts`, `main/ipc-handlers.js` (new `open-doc-source` IPC channel), `preload.js` (expose channel)
+
+**20L. Chapter Navigation Aliases (`N`/`P`)**
+- Superhuman uses `N`/`P` for next/previous message
+- In Blurby reader, add `N` = next chapter, `P` = previous chapter as aliases for existing `]`/`[`
+- More discoverable than bracket keys. Both bindings coexist
+- Files affected: `useKeyboardShortcuts.ts` only (add `N`/`P` cases alongside `]`/`[`)
+
+**20M. Highlights & Notes Quick-Access (`;`)**
+- Superhuman uses `;` for Snippets
+- In Blurby, `;` opens a searchable overlay of ALL saved highlights and notes across every document
+- Each entry shows: highlighted text, document title, date saved
+- Type to filter. `Enter` to jump to that document at the highlight's position
+- Personal knowledge base at your fingertips
+- Files affected: new `src/components/HighlightsOverlay.tsx`, `useKeyboardShortcuts.ts`, `main/ipc-handlers.js` (new `get-all-highlights` IPC for cross-document query), `preload.js`
+
+**20N. Quick Settings Popover (`Ctrl+Shift+,`)**
+- Beyond `Ctrl+,` (full settings), add a compact, context-sensitive settings popover
+- In reader: shows WPM slider, font size, theme toggle, reading mode switch
+- In library: shows sort order, view mode (grid/list), density
+- Small floating panel, not a full-page navigation. Dismiss with `Escape`
+- Enables rapid setting tweaks without leaving the current context
+- Files affected: new `src/components/QuickSettingsPopover.tsx`, `useKeyboardShortcuts.ts`, `global.css`
+
+**20O. Font Size Controls (`Ctrl+=`, `Ctrl+-`, `Ctrl+0`)**
+- Match Superhuman AND universal browser convention
+- **`Ctrl+=`** → Increase font size (reader text, replaces bare `=`)
+- **`Ctrl+-`** → Decrease font size (reader text, replaces bare `-`)
+- **`Ctrl+0`** → Reset font size to default (NEW — Blurby has no reset)
+- Bare `=`/`-` freed up for future use
+- Regular `Up`/`Down` remain as WPM fine-tune (±25). `Shift+Up`/`Shift+Down` remain as coarse WPM (±100). No change to speed controls
+- Files affected: `useKeyboardShortcuts.ts` (modify existing handlers to require Ctrl)
+
+**20P. Jump to Top/Bottom (`Ctrl+↑`/`Ctrl+↓`)**
+- Superhuman's jump-to-top/bottom navigation
+- In scroll reader: `Ctrl+↑` jumps to start of document, `Ctrl+↓` jumps to end
+- In library: `Ctrl+↑` jumps focus to first document, `Ctrl+↓` to last
+- Regular `Up`/`Down` remain as WPM speed controls in reader — no conflict since Ctrl modifier distinguishes them
+- Files affected: `useKeyboardShortcuts.ts`, `ScrollReaderView.tsx` (scroll-to-position)
+
+**20Q. Tab Refinement — Zone Cycling**
+- Superhuman uses `Tab`/`Shift+Tab` for split navigation
+- Current Blurby: `Tab` toggles sidebar menu. Refine to be smarter:
+  - In library: `Tab` cycles focus between zones — search bar → library grid → sidebar. `Shift+Tab` reverses
+  - In reader: `Tab` keeps current behavior (toggle menu flap)
+- Sidebar menu toggle moves to `G then M` (add to Go-To sequences)
+- Files affected: `useKeyboardShortcuts.ts` (Tab handler context logic), `LibraryContainer.tsx` (zone focus management)
+
+**20R. Escape Layering**
+- Superhuman's `Esc` → Back — adopt layered dismiss pattern
+- `Escape` closes the topmost open layer in this priority:
+  1. Command palette (20A)
+  2. Snooze picker (20H)
+  3. Tag picker (20I)
+  4. Shortcuts overlay (20C)
+  5. Highlights overlay (20M)
+  6. Quick settings popover (20N)
+  7. Highlight menu (existing)
+  8. Search bar focus (return to library)
+  9. Multi-select (clear selection)
+  10. Reader (exit to library — keep existing double-Escape in scroll mode)
+- Implementation: Escape handler checks overlay/focus state top-down, first match wins
+- Files affected: `useKeyboardShortcuts.ts` (unified Escape handler), all overlay components (expose `isOpen` state)
+
+**20S. Settings & Docs Updates**
+- Update `HotkeyMapSettings.tsx` to show ALL new shortcuts (currently missing some even before this sprint)
+- Organize into sections: Global, Library, Reader (RSVP), Reader (Scroll), Overlays
+- Add "Keyboard-first mode" toggle in settings that shows a subtle cheat-sheet tooltip on first launch
+- Update `src/types.ts` with new fields: `BlurbyDoc.unread`, `BlurbyDoc.snoozedUntil`, `BlurbyDoc.tags`, `BlurbyDoc.collection`
+- Schema migration in `main/migrations.js` to add new fields with defaults to existing library data
+- Files affected: `HotkeyMapSettings.tsx`, `src/types.ts`, `main/migrations.js`
+
+### Summary of Key Reassignments
+
+| Key | Before Sprint 20 | After Sprint 20 | Rationale |
+|-----|------------------|-----------------|-----------|
+| `B` | Toggle favorite | **Retired** | Replaced by `S` (Superhuman convention) |
+| `S` | Save highlight (in highlight menu only) | **Star/Favorite** (global) + save highlight (in highlight menu) | Context-dependent: library/reader = star, highlight menu = save |
+| `=`/`-` (bare) | Font size ±10% | **Freed up** | Moved to `Ctrl+=`/`Ctrl+-` (browser convention) |
+| `Tab` (library) | Toggle sidebar | **Zone cycling** | Sidebar toggle moves to `G then M` |
+| `Tab` (reader) | Toggle menu flap | **No change** | Stays as-is |
+
+### New Data Model Fields
+
+```typescript
+interface BlurbyDoc {
+  // ... existing fields ...
+  unread?: boolean;        // 20F: mark-as-unread feature
+  snoozedUntil?: number;   // 20H: epoch ms, null = not snoozed
+  tags?: string[];          // 20I: free-form tags
+  collection?: string;      // 20I: single collection assignment
+}
+```
+
+### New Components
+
+| Component | Sprint Task | Purpose |
+|-----------|-------------|---------|
+| `CommandPalette.tsx` | 20A | Fuzzy search everything |
+| `ShortcutsOverlay.tsx` | 20C | Quick-reference shortcut sheet |
+| `GoToIndicator.tsx` | 20G | "G..." pending sequence badge |
+| `SnoozePickerOverlay.tsx` | 20H | Time picker for read-later |
+| `TagPickerOverlay.tsx` | 20I | Tag/collection manager |
+| `HighlightsOverlay.tsx` | 20M | Cross-document highlights search |
+| `QuickSettingsPopover.tsx` | 20N | Context-sensitive mini settings |
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Data model + migrations (types.ts, migrations.js) — add `unread`, `snoozedUntil`, `tags`, `collection` fields with defaults | `electron-fixer` (sonnet) | — |
+| 2 | Keyboard state machine — refactor `useKeyboardShortcuts.ts`: G-sequence engine, Escape layering, context routing (library vs reader), Ctrl-modified font size, `N`/`P` chapter aliases | `renderer-fixer` (sonnet) | — |
+| 3 | Library navigation + selection — `J`/`K` focus, `Enter` open, `X` select, `Ctrl+Shift+A` select all, focus ring + selection checkbox in DocCard/GridCard | `renderer-fixer` (sonnet) | Step 2 |
+| 4 | Single-key actions — `E` archive, `Shift+E` restore, `S` star, `#` trash, `U` unread toggle, `R` resume, `O` open source. Undo system (`Z`) with toast integration | `renderer-fixer` (sonnet) | Steps 1, 3 |
+| 5 | Command palette (`Ctrl+K`) — fuzzy search component, action registry, result ranking, keyboard navigation within overlay | `renderer-fixer` (sonnet) | Step 2 |
+| 6 | Library search (`/`) — focus filter input, instant filtering, Escape clear | `renderer-fixer` (sonnet) | Step 3 |
+| 7 | G-sequence navigation — Go-To indicator badge, all `G then X` routes, 2-second timeout | `renderer-fixer` (sonnet) | Steps 2, 3 |
+| 8 | Overlays — Shortcuts (`?`), Highlights (`;`), Quick Settings (`Ctrl+Shift+,`), Snooze (`H`), Tag/Collection (`L`/`V`) | `renderer-fixer` (sonnet) | Steps 2, 4 |
+| 9 | Filter shortcuts — `Shift+U`/`Shift+S`/`Shift+R`/`Shift+I`, filter pill UI, toggle behavior | `renderer-fixer` (sonnet) | Step 3 |
+| 10 | IPC channels — `open-doc-source`, `get-all-highlights`, snooze timer + notification in main process | `electron-fixer` (sonnet) | Step 1 |
+| 11 | Tab zone cycling (library) — focus management between search/grid/sidebar | `renderer-fixer` (sonnet) | Steps 3, 6 |
+| 12 | Settings update — `HotkeyMapSettings.tsx` full rewrite with all new shortcuts, organized by section | `renderer-fixer` (sonnet) | Steps 2-11 |
+| 13 | CSS — focus rings, overlay styles, filter pills, command palette, Go-To badge, selection checkboxes. All via CSS custom properties | `renderer-fixer` (sonnet) | Steps 3-11 |
+| 14 | Tests — keyboard shortcut tests (all contexts), overlay dismiss tests, undo stack tests, G-sequence timeout tests, filter toggle tests | `renderer-fixer` (sonnet) | Steps 2-13 |
+| 15 | Full test suite + build verification | `test-runner` (haiku) | Step 14 |
+
+> **Parallelization:** Steps 1-2 are parallel (main vs renderer). Steps 5-9 are all parallelizable after their deps. Step 10 is parallel with Steps 3-9. Steps 12-13 wait for all feature work.
+
+### Acceptance Criteria
+
+**Command Palette (20A)**
+- [ ] `Ctrl+K` opens command palette from any view
+- [ ] Fuzzy search matches documents, actions, settings, chapters, and shortcuts
+- [ ] Results ranked by relevance with type badges
+- [ ] Arrow keys navigate results, `Enter` selects, `Escape` dismisses
+- [ ] Recent actions shown before typing
+
+**Library Search (20B)**
+- [ ] `/` focuses search input from library view
+- [ ] Real-time filtering by title/author as user types
+- [ ] `Escape` clears search and returns focus
+
+**Shortcuts Overlay (20C)**
+- [ ] `?` shows shortcuts overlay from any view
+- [ ] All shortcuts organized by context (Global, Library, Reader RSVP, Reader Scroll, Overlays)
+- [ ] Dismissible with `Escape` or `?`
+
+**Undo System (20D)**
+- [ ] `Z` undoes last reversible action while toast is visible
+- [ ] Toast shows action description and "Press Z to undo" prompt
+- [ ] Undo works for: archive, favorite, delete, queue, tag operations
+
+**Library Navigation (20E)**
+- [ ] `J`/`K` move focus through library documents
+- [ ] Focused document has visible focus ring (2px orange, `--color-primary`)
+- [ ] Focused document scrolls into view automatically
+- [ ] `Enter` opens focused document in reader
+- [ ] `X` toggles multi-select on focused document
+- [ ] `Ctrl+Shift+A` selects all visible documents
+- [ ] `Escape` clears selection, then search, then menu (layered)
+- [ ] Arrow keys work for grid navigation (← → ↑ ↓)
+
+**Single-Key Actions (20F)**
+- [ ] `E` archives focused/current document, auto-advances focus
+- [ ] `Shift+E` restores from archive
+- [ ] `S` toggles star/favorite (replaces `B`)
+- [ ] `#` trashes document with undo via `Z`
+- [ ] `U` toggles read/unread — unread docs show bold title + dot indicator
+- [ ] `R` opens document at last reading position (resume)
+
+**Go-To Sequences (20G)**
+- [ ] `G` enters go-to mode with visible "G..." badge
+- [ ] Badge auto-clears after 2 seconds if no second key pressed
+- [ ] All sequences work: `G+L` (library), `G+F` (favorites), `G+A` (archive), `G+Q` (queue), `G+R` (recent), `G+S` (stats), `G+H` (snoozed), `G+C` (collections), `G+M` (toggle menu)
+
+**Snooze (20H)**
+- [ ] `H` opens snooze picker on focused document
+- [ ] Number keys 1-5 select time option, `Escape` cancels
+- [ ] Snoozed docs disappear from main library
+- [ ] Snoozed docs reappear on schedule with system notification
+- [ ] `G then H` navigates to snoozed documents view
+
+**Tags & Collections (20I)**
+- [ ] `L` opens tag picker overlay
+- [ ] Type to filter or create new tags, `Enter` to toggle
+- [ ] `V` opens collection picker (single-select move)
+- [ ] Tags stored in `BlurbyDoc.tags`, collection in `BlurbyDoc.collection`
+- [ ] `G then C` navigates to collection view
+
+**Filter Shortcuts (20J)**
+- [ ] `Shift+U` filters to unread, `Shift+S` to starred, `Shift+R` to reading, `Shift+I` to imported today
+- [ ] Same filter key toggles off (clears filter)
+- [ ] Active filter shown as pill/chip with `×` to clear
+- [ ] Filters are mutually exclusive (one active at a time)
+
+**Open Source (20K)**
+- [ ] `O` opens original URL in default browser (for URL-imported docs)
+- [ ] `O` opens parent folder in file manager (for local files)
+- [ ] Toast feedback for all cases including "No source available"
+
+**Chapter Aliases (20L)**
+- [ ] `N` = next chapter (alias for `]`), `P` = previous chapter (alias for `[`)
+
+**Highlights Search (20M)**
+- [ ] `;` opens searchable highlights overlay
+- [ ] Shows highlight text, document title, date
+- [ ] Type to filter, `Enter` to jump to source document at highlight position
+
+**Quick Settings (20N)**
+- [ ] `Ctrl+Shift+,` opens context-sensitive mini settings
+- [ ] Reader context: WPM, font size, theme, reading mode
+- [ ] Library context: sort order, view mode, density
+- [ ] Dismissible with `Escape`
+
+**Font Size (20O)**
+- [ ] `Ctrl+=` increases, `Ctrl+-` decreases, `Ctrl+0` resets font size
+- [ ] Bare `=`/`-` no longer trigger font size changes
+- [ ] Regular `Up`/`Down` remain as WPM fine-tune (±25 WPM) — unchanged
+
+**Jump Top/Bottom (20P)**
+- [ ] `Ctrl+↑` jumps to start, `Ctrl+↓` jumps to end in scroll reader
+- [ ] In library: `Ctrl+↑` focuses first doc, `Ctrl+↓` focuses last doc
+
+**Tab Zones (20Q)**
+- [ ] `Tab` cycles focus: search bar → library grid → sidebar in library view
+- [ ] `Shift+Tab` reverses cycle
+- [ ] Reader `Tab` behavior unchanged (toggle menu flap)
+- [ ] Sidebar menu toggle available via `G then M`
+
+**Escape Layering (20R)**
+- [ ] `Escape` closes topmost layer in defined priority order
+- [ ] All overlays respect the layered dismiss pattern
+- [ ] Double-Escape in scroll reader maintained for exit confirmation
+
+**Settings & Data (20S)**
+- [ ] `HotkeyMapSettings.tsx` displays ALL shortcuts organized by section
+- [ ] Schema migration adds `unread`, `snoozedUntil`, `tags`, `collection` with safe defaults
+- [ ] Existing library data migrates without data loss
+
+**General**
+- [ ] No shortcut conflicts between contexts (library keys don't fire in reader and vice versa)
+- [ ] All shortcuts respect input focus (don't fire when typing in search bar, command palette, or tag picker)
+- [ ] All overlay components use CSS custom properties for theming
+- [ ] All overlays accessible: ARIA roles, keyboard-navigable, screen-reader-announced
+- [ ] E-ink mode respected: overlays use solid borders instead of shadows, no animations
+- [ ] `npm test` passes (including all new keyboard/overlay tests)
 - [ ] `npm run build` succeeds
 
 ---

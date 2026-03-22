@@ -175,7 +175,8 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 - **Sprint 18B: Chrome extension** — "Send to Blurby" with WebSocket + cloud fallback
 - **Sprint 18C: Android app** — React Native port with cloud sync
-- **Cloud sync hardening** — deferred from Sprint 17: operation log, tombstones, staging directory, revision counters, document content sync, checksum verification, full reconciliation
+- **Sprint 19: Sync hardening** — operation log, tombstones, staging directory, revision counters, document content sync, checksum verification, full reconciliation
+- **Sprint 20: Keyboard-First UX** — Command palette (Ctrl+K), J/K navigation, G-sequences, undo (Z), snooze (H), tags (L), 7 new overlay components, 27 new shortcuts (Superhuman-inspired)
 - **Code signing** — not doing (explicit decision)
 - **Symlink protection** — not implemented
 - **Multi-window support** — someday backlog
@@ -187,6 +188,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 ✅ Sprints 1-8 (core) -> ✅ Sprint 9 (security) -> ✅ Sprint 10 (memory) -> ✅ Sprints 11+12 (refactor) -> ✅ Sprint 13 (tests) -> ✅ Sprint 14 (CSS) -> ✅ Sprint 15 (a11y) -> ✅ Sprint 17 (cloud sync) -> ✅ Sprint 18A (.exe production)
 ✅ Sprint 16 (e-ink optimization) — independent track, completed
 **Sprint 18B** (Chrome ext) || **Sprint 18C** (Android) — parallelizable, next up
+**Sprint 19** (sync hardening) || **Sprint 20** (keyboard-first UX) — parallelizable after Sprint 18
 
 ---
 
