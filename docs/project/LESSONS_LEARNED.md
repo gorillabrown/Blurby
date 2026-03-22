@@ -180,3 +180,80 @@ This document captures hard-won knowledge from Blurby development. Every entry r
 **Fix:** Added missing catch blocks, restored the truncated `startWatcherFn` body, removed 6 dead duplicate functions (97 lines of dead code).
 
 **Guardrail:** Add `node -c main.js` as a syntax check step before packaging. Consider adding it to the CI pipeline. Always run the packaged build (not just dev mode) before releasing.
+
+---
+
+### [2026-03-22] LL-010: React Word Spans Need Explicit Whitespace
+
+**Area:** renderer, text rendering
+**Status:** resolved
+**Priority:** critical
+
+**Context:** PageReaderView rendered each word as a separate `<span>` element. React does not insert whitespace between adjacent inline elements, causing all words to run together into an unreadable block. The text appeared as "Hello.world.this.is.a.test" instead of "Hello. world. this is a test."
+
+**Fix:** Added `{" "}` inside each word span after the word text: `<span>{word}{" "}</span>`. Alternatively could use CSS `word-spacing`, but explicit text nodes are more reliable across browsers.
+
+**Guardrail:** When rendering tokenized words as individual spans/elements, always include a whitespace text node or CSS spacing. This applies to PageReaderView, FlowText, and any future per-word rendering.
+
+---
+
+### [2026-03-22] LL-011: Pagination Off-by-One Causes Word Duplication
+
+**Area:** renderer, PageReaderView
+**Status:** resolved
+**Priority:** high
+
+**Context:** The pagination algorithm set `pageStart = i` when breaking to a new page, but the word at index `i` was already included as the `end` of the previous page. This caused the last word of every page to appear as the first word of the next page. Similarly, paragraph break detection used `paragraphBreaks.has(globalIdx + 1)` but the tokenizer marks the LAST word of each paragraph, not the first word of the next.
+
+**Fix:** Changed `pageStart = i` to `pageStart = i + 1`, and `paragraphBreaks.has(globalIdx + 1)` to `paragraphBreaks.has(globalIdx)`.
+
+**Guardrail:** When implementing pagination with start/end ranges, verify that boundary words are not counted in both the current and next page. Write a test with known word counts and verify page word counts sum to the total.
+
+---
+
+### [2026-03-22] LL-012: Keyboard Mode Gate Must Be Per-Mode, Not Universal
+
+**Area:** renderer, keyboard shortcuts
+**Status:** resolved
+**Priority:** critical
+
+**Context:** The keyboard shortcut handler had a `if (s.readerMode !== "speed") return;` gate that blocked Space, arrow keys, and Escape from working in non-Focus modes. When the three-mode reader was introduced (Page/Focus/Flow), this gate prevented all keyboard interaction in Page view — arrow keys couldn't flip pages, Space couldn't enter Focus, etc.
+
+The fix was more nuanced than just removing the gate: different modes need DIFFERENT key behaviors. ← → should flip pages in Page mode but seek words in Focus mode. Shift+arrows should select words in Page mode but adjust coarse WPM in Focus/Flow.
+
+**Fix:** Restructured the handler into three sections: universal keys (M, Tab, Escape, Ctrl combos), Page-specific keys (page flip, word selection, define, note), and Focus/Flow-specific keys (seek, WPM).
+
+**Guardrail:** When adding a new reader mode, audit EVERY key handler for mode-specific behavior. Create a keyboard behavior matrix (key × mode → action) and verify each cell is implemented.
+
+---
+
+### [2026-03-22] LL-013: Flow Mode Belongs in Page View, Not a Separate Component
+
+**Area:** architecture, reader
+**Status:** resolved
+**Priority:** high
+
+**Context:** The original spec described Flow mode as a "scrollable view with word-level highlight." The initial implementation used ScrollReaderView as a completely separate view for Flow mode, which was jarring — the user lost their paginated reading context when entering Flow. User clarification revealed the intent: Flow mode should advance the word highlight within the same paginated Page view, like a karaoke cursor walking through the text.
+
+**Fix:** Integrated Flow mode directly into PageReaderView as a `flowPlaying` prop. When active, a requestAnimationFrame loop advances `highlightedWordIndex` at WPM speed, auto-flipping pages as the highlight crosses page boundaries. This reduced bundle size by ~14KB and provided a smoother experience.
+
+**Guardrail:** When a "mode" is described as running "within" or "from" a parent view, implement it as behavior within that view, not as a separate component. Ask the user to clarify before building separate views.
+
+---
+
+## Persistent Rules and Guardrails (Updated Sprint 21)
+
+| ID | Rule | Source |
+|----|------|--------|
+| PR-13 | Always include whitespace between per-word spans | LL-010 |
+| PR-14 | Pagination boundary: `pageStart = end + 1`, not `end` | LL-011 |
+| PR-15 | Keyboard handlers must be structured per-mode, not gated | LL-012 |
+| PR-16 | Sub-modes render within parent view, not as separate components | LL-013 |
+
+## Known Traps (Updated Sprint 21)
+
+| Trap | Area | Mitigation |
+|------|------|------------|
+| Node v24 spawn UNKNOWN with Electron | Development | Use `.\node_modules\electron\dist\electron.exe .` directly, or downgrade to Node v22 LTS |
+| ARM64 Electron binary on x64 Windows | Development | `npm install electron --arch=x64` to force correct architecture |
+| CSS class name mismatch between component and stylesheet | CSS | Grep for the class name in both `.tsx` and `.css` before shipping |
