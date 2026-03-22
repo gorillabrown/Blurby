@@ -73,6 +73,8 @@ export interface BlurbySettings {
   initialPauseMs: number;     // pause before first word advances (default 3000)
   punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
   viewMode: "list" | "grid";
+  // Flow mode settings
+  flowWordSpan: number; // how many words to highlight at once in Flow mode (1-5, default 1)
   // E-ink display optimization settings
   einkWpmCeiling: number;
   einkRefreshInterval: number;

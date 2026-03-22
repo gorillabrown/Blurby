@@ -371,7 +371,8 @@ export default function ReaderContainer({
     layoutSpacing: settings.layoutSpacing,
     fontFamily: settings.fontFamily,
     isEink,
-  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink]);
+    flowWordSpan: settings.flowWordSpan || 1,
+  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink, settings.flowWordSpan]);
 
   const menuFlap = (
     <MenuFlap

@@ -11,6 +11,7 @@ interface PageSettings {
   layoutSpacing?: LayoutSpacing;
   fontFamily?: string | null;
   isEink?: boolean;
+  flowWordSpan?: number; // 1-5, how many words highlighted at once in Flow
 }
 
 interface PageReaderViewProps {
@@ -182,10 +183,23 @@ export default function PageReaderView({
     }
   }, [pageNavRef, prevPage, nextPage]);
 
-  // ── Flow mode: advance highlighted word at WPM speed ────────────────
+  // ── Flow mode: advance highlighted word(s) at WPM speed ─────────────
   const flowRafRef = useRef<number | null>(null);
   const flowLastTimeRef = useRef(0);
   const flowAccRef = useRef(0);
+  // Use refs so the RAF loop always reads fresh values without restarting
+  const flowHighlightRef = useRef(highlightedWordIndex);
+  const flowWpmRef = useRef(wpm);
+  const flowPagesRef = useRef(pages);
+  const flowCurrentPageRef = useRef(currentPage);
+  const flowWordsRef = useRef(words);
+  flowHighlightRef.current = highlightedWordIndex;
+  flowWpmRef.current = wpm;
+  flowPagesRef.current = pages;
+  flowCurrentPageRef.current = currentPage;
+  flowWordsRef.current = words;
+
+  const wordSpan = settings?.flowWordSpan || 1;
 
   useEffect(() => {
     if (!flowPlaying) {
@@ -204,23 +218,34 @@ export default function PageReaderView({
       flowLastTimeRef.current = timestamp;
       flowAccRef.current += delta;
 
-      const interval = 60000 / wpm;
-      // Extra pause on punctuation (sentence-end gets more pause)
-      const currentWord = words[highlightedWordIndex] || "";
+      // Interval scales with word span: more words per step = longer interval
+      // so effective WPM stays constant
+      const baseInterval = 60000 / flowWpmRef.current;
+      const interval = baseInterval * wordSpan;
+
+      // Extra pause on punctuation at the END of the current span
+      const spanEnd = Math.min(
+        flowHighlightRef.current + wordSpan - 1,
+        flowWordsRef.current.length - 1
+      );
+      const endWord = flowWordsRef.current[spanEnd] || "";
       let extraPause = 0;
-      if (/[.!?]$/.test(currentWord)) extraPause = 300; // sentence-end
-      else if (/[,;:]$/.test(currentWord)) extraPause = 150; // mid-sentence
+      if (/[.!?]$/.test(endWord)) extraPause = 400; // sentence-end
+      else if (/[,;:]$/.test(endWord)) extraPause = 200; // mid-sentence
+
       const effectiveInterval = interval + extraPause;
 
       if (flowAccRef.current >= effectiveInterval) {
         flowAccRef.current -= effectiveInterval;
-        const next = highlightedWordIndex + 1;
-        if (next < words.length) {
+        const next = flowHighlightRef.current + wordSpan;
+        if (next < flowWordsRef.current.length) {
           onHighlightedWordChange(next);
-          // Auto-flip page if word is beyond current page
-          const targetPage = pageForWord(pages, next);
-          if (targetPage !== currentPage) {
+          flowHighlightRef.current = next;
+          // Auto-flip page when highlight moves beyond current page
+          const targetPage = pageForWord(flowPagesRef.current, next);
+          if (targetPage !== flowCurrentPageRef.current) {
             setCurrentPage(targetPage);
+            flowCurrentPageRef.current = targetPage;
           }
         }
       }
@@ -231,7 +256,7 @@ export default function PageReaderView({
     return () => {
       if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
     };
-  }, [flowPlaying, wpm, words, highlightedWordIndex, onHighlightedWordChange, pages, currentPage]);
+  }, [flowPlaying, wordSpan, onHighlightedWordChange]);
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
@@ -354,7 +379,9 @@ export default function PageReaderView({
         {renderedParagraphs.map((para, pIdx) => (
           <p key={pIdx} className="page-reader-paragraph">
             {para.map(({ word, globalIndex }) => {
-              const isHighlighted = globalIndex === highlightedWordIndex;
+              const isHighlighted = flowPlaying
+                ? (globalIndex >= highlightedWordIndex && globalIndex < highlightedWordIndex + wordSpan)
+                : globalIndex === highlightedWordIndex;
               const hasNote = notes?.has(globalIndex);
               return (
                 <span

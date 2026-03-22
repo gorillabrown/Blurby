@@ -73,6 +73,26 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         aria-label="Focus span"
       />
 
+      <div className="settings-section-label" style={{ marginTop: 16 }}>Flow Mode Options</div>
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Words per highlight</span>
+        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.flowWordSpan || 1} word{(settings.flowWordSpan || 1) > 1 ? "s" : ""}</span>
+      </div>
+      <input
+        type="range"
+        className="settings-slider"
+        min={1}
+        max={5}
+        step={1}
+        value={settings.flowWordSpan || 1}
+        onChange={(e) => onSettingsChange({ flowWordSpan: Number(e.target.value) })}
+        aria-label="Flow mode words per highlight"
+      />
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+        How many words Flow mode highlights at once. Speed adjusts automatically to maintain your WPM.
+      </div>
+
       <div className="settings-section-label" style={{ marginTop: 16 }}>Rhythm Pauses</div>
 
       <div className="settings-toggle-row">

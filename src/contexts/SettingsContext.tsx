@@ -35,6 +35,7 @@ const defaultSettings: BlurbySettings = {
   einkPhraseGrouping: true,
   syncIntervalMinutes: 5,
   syncOnMeteredConnection: false,
+  flowWordSpan: 1,
 };
 
 export const SettingsContext = createContext<SettingsContextType>({

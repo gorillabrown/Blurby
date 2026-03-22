@@ -1,7 +1,7 @@
 // main/migrations.js — Schema migration framework for settings.json and library.json
 // CommonJS only — Electron main process
 
-const CURRENT_SETTINGS_SCHEMA = 6;
+const CURRENT_SETTINGS_SCHEMA = 7;
 const CURRENT_LIBRARY_SCHEMA = 5;
 
 /** Count words without creating intermediate arrays. */
@@ -79,6 +79,12 @@ const settingsMigrations = [
   (data) => {
     data.readingMode = "page";
     data.schemaVersion = 6;
+    return data;
+  },
+  // v6 → v7: Flow word span setting
+  (data) => {
+    if (data.flowWordSpan === undefined) data.flowWordSpan = 1;
+    data.schemaVersion = 7;
     return data;
   },
 ];
