@@ -25,6 +25,7 @@ interface PageReaderViewProps {
   onExit: (position: number) => void;
   onToggleFlap?: () => void;
   notes?: Map<number, string>; // wordIndex → note preview
+  pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void }>;
 }
 
 // ── Pagination helpers ────────────────────────────────────────────────────
@@ -63,7 +64,7 @@ function paginateWords(
 
     if (lineCount >= linesPerPage) {
       pages.push({ start: pageStart, end: i });
-      pageStart = i;
+      pageStart = i + 1; // next page starts AFTER this word
       lineCount = 0;
       lineChars = 0;
     }
@@ -99,6 +100,7 @@ export default function PageReaderView({
   onExit,
   onToggleFlap,
   notes,
+  pageNavRef,
 }: PageReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(600);
@@ -149,13 +151,13 @@ export default function PageReaderView({
     return () => observer.disconnect();
   }, []);
 
-  // Navigate to page containing highlighted word on mount
+  // Navigate to page containing highlighted word on mount or mode return
   useEffect(() => {
-    if (highlightedWordIndex > 0 && pages.length > 1) {
+    if (pages.length > 1) {
       const page = pageForWord(pages, highlightedWordIndex);
-      setCurrentPage(page);
+      if (page !== currentPage) setCurrentPage(page);
     }
-  }, [activeDoc.id]); // Only on doc change
+  }, [activeDoc.id, highlightedWordIndex, pages]); // Runs on doc change AND on return from Focus/Flow
 
   // Page navigation
   const goToPage = useCallback((page: number) => {
@@ -170,6 +172,13 @@ export default function PageReaderView({
 
   const prevPage = useCallback(() => goToPage(currentPage - 1), [currentPage, goToPage]);
   const nextPage = useCallback(() => goToPage(currentPage + 1), [currentPage, goToPage]);
+
+  // Register page nav callbacks for keyboard hook
+  useEffect(() => {
+    if (pageNavRef) {
+      pageNavRef.current = { prevPage, nextPage };
+    }
+  }, [pageNavRef, prevPage, nextPage]);
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
@@ -233,7 +242,7 @@ export default function PageReaderView({
       const globalIdx = page.start + localIdx;
       currentPara.push({ word: pageWords[localIdx], globalIndex: globalIdx });
 
-      if (paragraphBreaks.has(globalIdx + 1) || localIdx === pageWords.length - 1) {
+      if (paragraphBreaks.has(globalIdx) || localIdx === pageWords.length - 1) {
         paragraphs.push(currentPara);
         currentPara = [];
       }
@@ -309,7 +318,7 @@ export default function PageReaderView({
                   tabIndex={-1}
                   aria-label={isHighlighted ? `${word} (selected)` : word}
                 >
-                  {word}
+                  {word}{" "}
                 </span>
               );
             })}

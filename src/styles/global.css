@@ -3607,7 +3607,8 @@ button:focus-visible {
 
 /* ── Sprint 21G: Sticky Library Header ─────────────────────────────────── */
 
-.library-top-bar {
+.library-top-bar,
+.library-header {
   position: sticky;
   top: 0;
   z-index: 10;

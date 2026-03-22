@@ -215,9 +215,12 @@ export default function ReaderContainer({
 
   /** Enter Flow from Page at highlighted word */
   const handleEnterFlow = useCallback(() => {
+    // Update doc position so ScrollReaderView picks up the right starting point
+    api.updateDocProgress(activeDoc.id, highlightedWordIndex);
+    onUpdateProgress(activeDoc.id, highlightedWordIndex);
     setReadingMode("flow");
     updateSettings({ readingMode: "flow" });
-  }, [updateSettings]);
+  }, [activeDoc.id, highlightedWordIndex, onUpdateProgress, updateSettings]);
 
   /** Pause Focus/Flow → return to Page */
   const handlePauseToPage = useCallback(() => {
@@ -303,8 +306,37 @@ export default function ReaderContainer({
     }
   }, [activeDoc, docChapters, words, jumpToWord, readingMode]);
 
-  // Keyboard shortcuts — pass handleTogglePlay which handles Space→Page behavior
-  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration);
+  // ── Page-mode callbacks for keyboard hook ────────────────────────────
+
+  // Page refs for keyboard navigation (updated by PageReaderView via callbacks)
+  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void }>({
+    prevPage: () => {},
+    nextPage: () => {},
+  });
+
+  const handlePrevPage = useCallback(() => pageNavRef.current.prevPage(), []);
+  const handleNextPage = useCallback(() => pageNavRef.current.nextPage(), []);
+
+  const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
+    // Move highlight by 1 word (left/right) or ~10 words (up/down, approximate line jump)
+    const delta = direction === "left" ? -1 : direction === "right" ? 1 : direction === "up" ? -10 : 10;
+    setHighlightedWordIndex((prev) => Math.max(0, Math.min(words.length - 1, prev + delta)));
+  }, [words.length]);
+
+  const handleDefineWord = useCallback(() => {
+    const word = words[highlightedWordIndex];
+    if (word) {
+      window.electronAPI.defineWord(word);
+    }
+  }, [words, highlightedWordIndex]);
+
+  const handleMakeNote = useCallback(() => {
+    // Note-making handled by PageReaderView's context menu — dispatch custom event
+    window.dispatchEvent(new CustomEvent("blurby:make-note", { detail: highlightedWordIndex }));
+  }, [highlightedWordIndex]);
+
+  // Keyboard shortcuts — fully mode-aware
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({
@@ -413,6 +445,7 @@ export default function ReaderContainer({
             onEnterFlow={handleEnterFlow}
             onExit={(pos) => finishReading(pos)}
             onToggleFlap={toggleMenuFlap}
+            pageNavRef={pageNavRef}
           />
         );
     }
