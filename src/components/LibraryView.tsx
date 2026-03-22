@@ -127,6 +127,19 @@ export default function LibraryView({
       docs.sort((a, b) => (b.created || 0) - (a.created || 0));
     } else if (sortBy === "oldest") {
       docs.sort((a, b) => (a.created || 0) - (b.created || 0));
+    } else if (sortBy === "author") {
+      docs.sort((a, b) => {
+        const authorA = (a.author || a.authorFull || "").trim();
+        const authorB = (b.author || b.authorFull || "").trim();
+        // Extract last name: last whitespace-separated token
+        const lastA = authorA.split(/\s+/).pop() || "";
+        const lastB = authorB.split(/\s+/).pop() || "";
+        if (!lastA && !lastB) return a.title.localeCompare(b.title);
+        if (!lastA) return 1; // no author sorts last
+        if (!lastB) return -1;
+        const cmp = lastA.localeCompare(lastB, undefined, { sensitivity: "base" });
+        return cmp !== 0 ? cmp : a.title.localeCompare(b.title);
+      });
     }
     return docs;
   }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme, sortBy]);
@@ -384,7 +397,8 @@ export default function LibraryView({
               aria-label="Sort order"
             >
               <option value="progress">closest to done</option>
-              <option value="alpha">A-Z</option>
+              <option value="alpha">A-Z by title</option>
+              <option value="author">A-Z by author</option>
               <option value="newest">newest first</option>
               <option value="oldest">oldest first</option>
             </select>
