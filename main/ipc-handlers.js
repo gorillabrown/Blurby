@@ -1305,6 +1305,14 @@ function registerIpcHandlers(ctx) {
         }
         workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(xlsxPath);
+        // Clear sample data rows from template, keeping header row
+        const rlSheet = workbook.getWorksheet("Reading Log");
+        if (rlSheet && rlSheet.rowCount > 1) {
+          for (let r = rlSheet.rowCount; r >= 2; r--) {
+            rlSheet.spliceRows(r, 1);
+          }
+        }
+        await workbook.xlsx.writeFile(xlsxPath);
       }
 
       const sheet = workbook.getWorksheet("Reading Log");
@@ -1401,6 +1409,17 @@ function registerIpcHandlers(ctx) {
           const bundledTemplate = path.join(app.getAppPath(), "docs", "project", "Reading_Log_Blurby_Template.xlsx");
           await fsPromises.copyFile(bundledTemplate, xlsxPath);
         }
+        // Clear sample data rows from template, keeping header + formulas
+        const ExcelJS = require("exceljs");
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.readFile(xlsxPath);
+        const rlSheet = wb.getWorksheet("Reading Log");
+        if (rlSheet && rlSheet.rowCount > 1) {
+          for (let r = rlSheet.rowCount; r >= 2; r--) {
+            rlSheet.spliceRows(r, 1);
+          }
+        }
+        await wb.xlsx.writeFile(xlsxPath);
       } catch (createErr) {
         return { error: `Could not create reading log: ${createErr.message}` };
       }
