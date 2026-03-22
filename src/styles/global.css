@@ -3272,7 +3272,7 @@ button:focus-visible {
   position: relative;
   height: 100vh;
   width: 100%;
-  padding: 40px 60px 120px;
+  padding: 40px 60px 160px;
   box-sizing: border-box;
   background: var(--bg);
   color: var(--text);
@@ -3316,6 +3316,7 @@ button:focus-visible {
 .page-reader-content {
   flex: 1;
   transition: opacity 100ms ease;
+  overflow: hidden;
 }
 
 .page-reader-content--transitioning {
@@ -3325,6 +3326,7 @@ button:focus-visible {
 .page-reader-content--flow {
   overflow-y: auto;
   scroll-behavior: smooth;
+  padding-bottom: 20px;
 }
 
 .page-reader-paragraph {
