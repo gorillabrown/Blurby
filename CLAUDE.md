@@ -169,14 +169,14 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | Cloud Sync — Auth | ✅ Built | OAuth2 Microsoft (MSAL/PKCE) + Google, encrypted token storage (Sprint 17) |
 | Cloud Sync — Engine | ✅ Built | Offline-first, hash-based change detection, field/doc/history merge (Sprint 17) |
 | Cloud Sync — UI | ✅ Built | CloudSyncSettings page, CloudSyncIndicator, first-time merge dialog (Sprint 17) |
+| Windows Installer | ✅ Production | Branded NSIS (x64+ARM64), delta updates, auto-updater, draft releases (Sprint 18A) |
 
 ### What's NOT Done (Roadmap Forward)
 
-- **Sprint 18A: Windows .exe production** — code signing, auto-update e2e, installer polish, ARM64
 - **Sprint 18B: Chrome extension** — "Send to Blurby" with WebSocket + cloud fallback
 - **Sprint 18C: Android app** — React Native port with cloud sync
 - **Cloud sync hardening** — deferred from Sprint 17: operation log, tombstones, staging directory, revision counters, document content sync, checksum verification, full reconciliation
-- **Code signing** — researched (docs/code-signing.md), Azure Trusted Signing recommended, not obtained
+- **Code signing** — not doing (explicit decision)
 - **Symlink protection** — not implemented
 - **Multi-window support** — someday backlog
 
@@ -184,9 +184,9 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ## Dependency Chain
 
-✅ Sprints 1-8 (core) -> ✅ Sprint 9 (security) -> ✅ Sprint 10 (memory) -> ✅ Sprints 11+12 (refactor) -> ✅ Sprint 13 (tests) -> ✅ Sprint 14 (CSS) -> ✅ Sprint 15 (a11y) -> ✅ Sprint 17 (cloud sync) -> **Sprint 18** (platform expansion)
+✅ Sprints 1-8 (core) -> ✅ Sprint 9 (security) -> ✅ Sprint 10 (memory) -> ✅ Sprints 11+12 (refactor) -> ✅ Sprint 13 (tests) -> ✅ Sprint 14 (CSS) -> ✅ Sprint 15 (a11y) -> ✅ Sprint 17 (cloud sync) -> ✅ Sprint 18A (.exe production)
 ✅ Sprint 16 (e-ink optimization) — independent track, completed
-Sprint 18A (.exe) || Sprint 18B (Chrome ext) || Sprint 18C (Android) — all parallelizable after Sprint 17
+**Sprint 18B** (Chrome ext) || **Sprint 18C** (Android) — parallelizable, next up
 
 ---
 
