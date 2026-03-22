@@ -1996,6 +1996,13 @@ button:focus-visible {
   margin-top: 2px;
 }
 
+.doc-grid-progress {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text-dimmer);
+  margin-top: 2px;
+}
+
 /* ===== Menu Flap ===== */
 
 .menu-flap-backdrop {

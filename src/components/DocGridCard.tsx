@@ -120,6 +120,11 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
         ) : (
           doc.author && <div className="doc-grid-author">{doc.author}</div>
         )}
+        {doc.wordCount > 0 && (
+          <div className="doc-grid-progress">
+            {Math.round(((doc.position || 0) / doc.wordCount) * 100)}% read
+          </div>
+        )}
       </div>
     </div>
   );
