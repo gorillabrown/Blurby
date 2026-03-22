@@ -1452,10 +1452,44 @@ function registerIpcHandlers(ctx) {
     const xlsxPath = path.join(outputDir, "Blurby Reading Log.xlsx");
     try {
       await fsPromises.access(xlsxPath);
+    } catch {
+      // Create from template if file doesn't exist yet
+      try {
+        const ExcelJS = require("exceljs");
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = "Blurby";
+        const sheet = workbook.addWorksheet("Reading Log");
+        sheet.columns = [
+          { header: "#", key: "num", width: 5 },
+          { header: "Title", key: "title", width: 40 },
+          { header: "Lead Author Last Name", key: "authorLast", width: 20 },
+          { header: "Lead Author First Name", key: "authorFirst", width: 20 },
+          { header: "Pub. Year", key: "pubYear", width: 10 },
+          { header: "Publisher / Source", key: "publisher", width: 25 },
+          { header: "DOI / URL", key: "url", width: 30 },
+          { header: "Work Type", key: "workType", width: 12 },
+          { header: "Format", key: "format", width: 10 },
+          { header: "Pages", key: "pages", width: 8 },
+          { header: "Date Started", key: "dateStarted", width: 15 },
+          { header: "Sessions", key: "sessions", width: 10 },
+          { header: "Total Time (min)", key: "totalTime", width: 15 },
+          { header: "Avg WPM", key: "avgWpm", width: 10 },
+          { header: "% Read", key: "pctRead", width: 10 },
+          { header: "Date Finished", key: "dateFinished", width: 15 },
+          { header: "Rating (1-5)", key: "rating", width: 12 },
+          { header: "Notes / Key Takeaway", key: "notes", width: 40 },
+        ];
+        workbook.addWorksheet("Dashboard");
+        await workbook.xlsx.writeFile(xlsxPath);
+      } catch (createErr) {
+        return { error: `Could not create reading log: ${createErr.message}` };
+      }
+    }
+    try {
       await shell.openPath(xlsxPath);
       return { ok: true };
-    } catch {
-      return { error: "Reading log not found. Start a reading session first." };
+    } catch (openErr) {
+      return { error: `Could not open reading log: ${openErr.message}` };
     }
   });
 
