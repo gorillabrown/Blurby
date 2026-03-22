@@ -100,7 +100,8 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
             span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
           });
         } else {
-          container.innerHTML = "";
+          // Clear children safely without innerHTML (avoids React reconciliation conflicts)
+          while (container.firstChild) container.removeChild(container.firstChild);
           chars.forEach((char, i) => {
             const span = document.createElement("span");
             span.textContent = char;
@@ -285,6 +286,23 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
             aria-label="Exit reader"
           >ESC</button>
           <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>
+          {activeDoc.source === "url" && (activeDoc.authorFull || activeDoc.sourceDomain) && (
+            <span className="reader-apa-citation">
+              {activeDoc.authorFull && <span>{activeDoc.authorFull} </span>}
+              {activeDoc.publishedDate ? (() => {
+                try {
+                  const d = new Date(activeDoc.publishedDate);
+                  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                  return <span>({d.getFullYear()}, {months[d.getMonth()]} {d.getDate()}). </span>;
+                } catch { return <span>(n.d.). </span>; }
+              })() : (activeDoc.authorFull ? <span>(n.d.). </span> : null)}
+              {activeDoc.sourceDomain && activeDoc.sourceUrl ? (
+                <a className="reader-apa-source-link" href="#" onClick={(e) => { e.preventDefault(); window.electronAPI.openDocSource(activeDoc.id); }}>{activeDoc.sourceDomain}</a>
+              ) : activeDoc.sourceDomain ? (
+                <span>{activeDoc.sourceDomain}</span>
+              ) : null}
+            </span>
+          )}
         </div>
         <WpmGauge wpm={wpm} />
       </div>
@@ -302,15 +320,9 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
               </div>
               <div className="reader-word-display" aria-live="off" aria-atomic="true">
                 {useFocusSpan ? (
-                  <div ref={charContainerRef}>
-                    {currentWord.split("").map((char, i) => (
-                      <span
-                        key={i}
-                        className={i === pivotIndex ? "reader-word-focus" : "reader-word-char"}
-                        style={{ opacity: calculateFocusOpacity(i, pivotIndex, currentWord.length, settings!.focusSpan!) }}
-                      >{char}</span>
-                    ))}
-                  </div>
+                  /* Children managed entirely by RAF callback via direct DOM —
+                     React must NOT render children here to avoid removeChild conflicts */
+                  <div ref={charContainerRef} />
                 ) : (
                   <>
                     <span ref={beforeRef} className="reader-word-before">

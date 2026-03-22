@@ -67,8 +67,8 @@ All feature work from phases 0-4 plus Sprints 1-17 are on main. The app has clou
 | **Sprint 18A: Windows .exe Production** | ✅ COMPLETED | Branded NSIS, auto-update with deltas, x64+ARM64 CI, no code signing |
 | **Sprint 18B: Chrome Extension** | 📋 SPEC'D | "Send to Blurby" — Readability extraction, local WebSocket + cloud fallback |
 | **Sprint 18C: Android APK** | 📋 SPEC'D | Full Blurby Mobile — React Native, RSVP + flow, cloud sync, share intent |
-| **Sprint 19: Sync Hardening** | 📋 SPEC'D | Revision counters, operation log, staging, tombstones, content sync, reconciliation |
-| **Sprint 20: Keyboard-First UX** | 📋 SPEC'D | Command palette, J/K navigation, G-sequences, undo, snooze, tags, 27 new shortcuts |
+| **Sprint 19: Sync Hardening + Provenance** | 📋 SPEC'D | Revision counters, operation log, staging, tombstones, content sync, reconciliation, article provenance extraction, APA-format PDFs |
+| **Sprint 20: Keyboard-First UX** | 📋 SPEC'D | Command palette, J/K navigation, G-sequences, undo, snooze, tags, APA provenance display, 27 new shortcuts |
 
 **Legend:** ✅ = implemented & tested, 🔶 = fully scoped with agent assignments (ready for dispatch), 📋 = spec'd but needs agent assignments, 📐 = design/vision only
 
@@ -1585,6 +1585,64 @@ Production            "Send to Blurby"      Full Blurby Mobile
 - **Re-reading:** User re-reads an earlier section on Device A (position goes backward) while Device B is further ahead. On sync, Device B's position wins. This is correct — the user can re-navigate on Device A. No special handling needed, but document the behavior in the "Cloud Sync" help text
 - Files affected: `main/sync-engine.js` (reset op handling), `main/sync-queue.js`
 
+**19I. Article provenance metadata extraction (URL imports)**
+- Current state: `extractArticleFromHtml()` returns `{ title, content, imageUrl }` but does NOT extract author, source domain, or publication date — even though `generateArticlePdf()` already has slots for `author` and renders it in the PDF header. The `author` field in `ipc-handlers.js` line 389 always receives `result.author` which is currently always `undefined` from the extraction function
+- **Fix:** Extend `extractArticleFromHtml()` to extract three new fields:
+  - **Author(s)**: Check in priority order:
+    1. JSON-LD `author.name` or `author[].name` (most structured)
+    2. `__preloadedData` → `article.bylines` (NYT-specific)
+    3. `<meta name="author">` content
+    4. `<meta property="article:author">` content
+    5. Readability `byline` field (from `reader.parse().byline`)
+    6. DOM selectors: `[class*="byline"]`, `[class*="author"]`, `[rel="author"]`
+    - Clean up: strip "By " prefix, normalize whitespace, handle multiple authors (join with " & ")
+  - **Source domain** (display name): Check in priority order:
+    1. `<meta property="og:site_name">` content (e.g., "The New York Times")
+    2. `<meta name="application-name">` content
+    3. JSON-LD `publisher.name`
+    4. Fallback: derive from hostname — strip `www.`, extract domain name, title-case it (e.g., `www.nytimes.com` → "Nytimes", `arstechnica.com` → "Arstechnica")
+  - **Publication date**: Check in priority order:
+    1. JSON-LD `datePublished`
+    2. `<meta property="article:published_time">` content
+    3. `<meta name="date">` or `<meta name="publication_date">` content
+    4. `<time>` element with `datetime` attribute inside article
+    5. Fallback: null (use fetch date as display fallback)
+    - Parse to ISO 8601 string, store as `publishedDate: string | null`
+- **Lead image (hardening)**: The extractor already grabs `og:image` and `twitter:image`, and `ipc-handlers.js` already downloads them to `covers/{docId}.ext` and stores the path as `coverPath`. However, the current implementation has gaps:
+  - Only tries `og:image` and `twitter:image` — no further fallbacks
+  - **Add fallback cascade** (after existing og:image/twitter:image):
+    1. JSON-LD `image` or `image.url` field
+    2. `__preloadedData` → `article.leadMedia` or `article.promotionalMedia` (NYT-specific)
+    3. First `<img>` inside the article body with `width >= 400px` (heuristic: skip tiny icons/avatars)
+    4. `<meta property="og:image:secure_url">` (some sites use this instead of `og:image`)
+  - **Image validation**: Before saving, verify the downloaded image is valid (check first bytes for JPEG/PNG/GIF/WebP magic numbers). Reject HTML error pages served as images (common with CDN auth failures)
+  - **Minimum dimensions**: Skip images smaller than 200x200 (likely icons or tracking pixels). Use image header inspection (read dimensions without decoding full image)
+  - **WebP conversion note**: If image is WebP, save as `.webp` — current regex only matches `.jpg|.jpeg|.png|.gif` and falls back to `.jpg`. Add `.webp` to the extension match
+- Return signature changes to: `{ title, content, imageUrl, author, sourceDomain, publishedDate }`
+- Update `ipc-handlers.js` URL import handler to pass all new fields into the BlurbyDoc
+- Files affected: `main/url-extractor.js` (extractArticleFromHtml), `main/ipc-handlers.js` (import-url handler)
+
+**19J. Article provenance in PDF generation (APA format)**
+- Current PDF header renders: title (centered, 18pt), author as "by Author" (centered, 11pt gray), source URL (centered, 9pt gray link), fetch date
+- **Fix:** Reformat the PDF header to follow APA-style citation rendering:
+  - Line 1: **Author(s)** — `Last, F. M.` format if parseable, otherwise raw byline. Multiple authors: `Last, F. M., & Last, F. M.` (11pt, black, left-aligned)
+  - Line 2: **(Year, Month Day)** — from `publishedDate` if available, otherwise `fetchDate`. Formatted as `(2026, March 21).` (11pt, black, left-aligned)
+  - Line 3: **Title** — article title in italics (14pt, black, left-aligned)
+  - Line 4: **Source** — `sourceDomain`. Displayed as-is from `og:site_name` (e.g., "The New York Times"). (11pt, black, left-aligned)
+  - Line 5: **URL** — full source URL as clickable link (9pt, gray, left-aligned)
+  - Separator: horizontal rule (0.5pt, `#D04716` brand orange) after the header block, 1em spacing before body text
+- Update PDF metadata fields: `Author`, `Title`, `Keywords` (include `source:domain`, `published:date`)
+- Files affected: `main/url-extractor.js` (generateArticlePdf function)
+
+**19K. BlurbyDoc schema extension for provenance**
+- Add three new fields to `BlurbyDoc` in `src/types.ts`:
+  - `sourceDomain?: string` — display name of source (e.g., "The New York Times", "Ars Technica")
+  - `publishedDate?: string` — ISO 8601 date string of original publication
+  - `authorFull?: string` — full byline string for display (existing `author` field kept for backward compat, `authorFull` stores the complete multi-author string)
+- Schema migration: existing URL-imported docs get `sourceDomain` derived from `sourceUrl` hostname (fallback extraction), `publishedDate` as null, `authorFull` copied from `author`
+- These fields sync via the existing field-level sync (Sprint 17) — no special handling needed
+- Files affected: `src/types.ts`, `main/migrations.js`
+
 ### Agent Assignments
 
 | Step | What | Agent | Depends On |
@@ -1597,12 +1655,14 @@ Production            "Send to Blurby"      Full Blurby Mobile
 | 6 | Checksum verification + full reconciliation (19F) | `electron-fixer` (sonnet) | Step 3 |
 | 7 | Simultaneous sync protection (19G) | `electron-fixer` (sonnet) | Step 3 |
 | 8 | Reading position edge cases (19H) | `electron-fixer` (sonnet) | Step 2 |
-| 9 | Lazy content download UI (19E renderer) | `renderer-fixer` (sonnet) | Step 5 |
-| 10 | Full Sync button + reconciliation UI (19F renderer) | `renderer-fixer` (sonnet) | Step 6 |
-| 11 | Write sync hardening tests (all edge cases) | `renderer-fixer` (sonnet) | Steps 2-8 |
-| 12 | Run full test suite + build | `test-runner` (haiku) | Steps 9-11 |
+| 9 | Article provenance extraction + schema (19I, 19K) — extend extractArticleFromHtml, add BlurbyDoc fields, migration | `electron-fixer` (sonnet) | — |
+| 10 | APA-format PDF header (19J) — reformat generateArticlePdf with APA citation style | `electron-fixer` (sonnet) | Step 9 |
+| 11 | Lazy content download UI (19E renderer) | `renderer-fixer` (sonnet) | Step 5 |
+| 12 | Full Sync button + reconciliation UI (19F renderer) | `renderer-fixer` (sonnet) | Step 6 |
+| 13 | Write sync hardening tests + provenance extraction tests | `renderer-fixer` (sonnet) | Steps 2-10 |
+| 14 | Run full test suite + build | `test-runner` (haiku) | Steps 11-13 |
 
-> **Note:** Steps 2-4 are PARALLELIZABLE after Step 1. Steps 6-8 are PARALLELIZABLE after Step 3.
+> **Note:** Steps 2-4 are PARALLELIZABLE after Step 1. Steps 6-8 are PARALLELIZABLE after Step 3. Steps 9-10 are INDEPENDENT of Steps 1-8 (can run fully in parallel with sync work).
 
 ### Acceptance Criteria
 
@@ -1636,7 +1696,24 @@ Production            "Send to Blurby"      Full Blurby Mobile
 - [ ] Test: Two devices sync simultaneously — no data loss or corruption
 - [ ] Test: Upload fails at file 8 of 15 — cloud state remains consistent (staging pattern)
 - [ ] Test: 500KB document syncs via resumable upload, downloads lazily on new device
-- [ ] `npm test` passes (including all new sync hardening tests)
+- [ ] `extractArticleFromHtml` returns `author`, `sourceDomain`, `publishedDate` from URL-imported articles
+- [ ] Author extracted from JSON-LD, meta tags, Readability byline, or DOM selectors (priority cascade)
+- [ ] Source domain extracted from `og:site_name` with hostname fallback
+- [ ] Publication date extracted from JSON-LD `datePublished` or `article:published_time` meta tag
+- [ ] BlurbyDoc stores `sourceDomain`, `publishedDate`, `authorFull` fields
+- [ ] Schema migration backfills `sourceDomain` from existing `sourceUrl` hostname for URL-imported docs
+- [ ] Generated PDF uses APA-style citation header: Author last-name-first, (Year, Month Day), *Title* in italics, Source domain, URL as link
+- [ ] PDF header uses brand orange (#D04716) separator line between citation block and body text
+- [ ] Multi-author articles formatted as `Last, F. M., & Last, F. M.` in PDF header
+- [ ] Lead image extracted via expanded fallback cascade: og:image → twitter:image → JSON-LD image → article body first large `<img>` → og:image:secure_url
+- [ ] Downloaded images validated: magic bytes checked, HTML error pages rejected
+- [ ] Images below 200x200 skipped (icons, tracking pixels)
+- [ ] WebP images saved with `.webp` extension (not misnamed `.jpg`)
+- [ ] Test: NYT article extracts author, "The New York Times" as domain, publish date, AND lead image
+- [ ] Test: Article with no og:image falls back to first large in-article image
+- [ ] Test: Article with no author gracefully falls back (no "by Unknown" in APA format — omit author line)
+- [ ] Test: Article with no publish date uses fetch date with "(n.d.)" APA convention
+- [ ] `npm test` passes (including all new sync hardening + provenance tests)
 - [ ] `npm run build` succeeds
 
 ---
@@ -1841,11 +1918,29 @@ Production            "Send to Blurby"      Full Blurby Mobile
 - Implementation: Escape handler checks overlay/focus state top-down, first match wins
 - Files affected: `useKeyboardShortcuts.ts` (unified Escape handler), all overlay components (expose `isOpen` state)
 
-**20S. Settings & Docs Updates**
+**20S. Article Provenance Display (renderer side of Sprint 19I)**
+- Sprint 19 adds `sourceDomain`, `publishedDate`, `authorFull`, and hardened lead image extraction to BlurbyDoc and the generated PDF. Sprint 20 displays this metadata in the Blurby UI
+- **Library view (DocCard / GridCard):**
+  - **Lead image as card hero**: For URL-imported docs with a `coverPath`, display the lead image as the card's hero/thumbnail — the primary visual anchor in both grid and list view. Grid view: image fills top portion of card (aspect ratio preserved, object-fit cover, max-height ~140px). List view: square thumbnail on the left (~60x60px). This uses the existing `get-cover-image` IPC + LRU cache — same pipeline as EPUB/MOBI covers
+  - For URL-imported docs: show APA-style subtext below the title: `Author Last, F. M. (Year, Month Day). Source Domain.`
+  - If no author: show `Source Domain. (Year, Month Day).`
+  - If no published date: show `Author. Source Domain. (n.d.).`
+  - If no lead image: show a placeholder card with the source domain's first letter as a large monogram (styled with `--color-primary` background, white text) — visually distinct from book covers
+  - For books (EPUB/MOBI/PDF): continue showing `by Author` and book cover as-is (no APA — books aren't articles)
+  - Subtext styled: 11px, `var(--color-text-secondary)`, single line with text-overflow ellipsis
+- **Reader header (ReaderContainer / ScrollReaderView):**
+  - For URL-imported docs: display APA citation line below the document title at the top of the reader
+  - Format: `Author Last, F. M. (Year, Month Day). Source Domain.` — matching the PDF header
+  - Styled as secondary text, smaller than title, clickable source domain opens original URL
+  - For books: show `by Author` as currently implemented
+- **Command palette (20A):** Include `sourceDomain` and `authorFull` in the fuzzy search index so users can search by source (e.g., typing "NYT" finds all New York Times articles)
+- Files affected: `DocCard.tsx`, `GridCard.tsx`, `ReaderContainer.tsx`, `ScrollReaderView.tsx`, `CommandPalette.tsx`, `global.css`
+
+**20T. Settings & Docs Updates**
 - Update `HotkeyMapSettings.tsx` to show ALL new shortcuts (currently missing some even before this sprint)
 - Organize into sections: Global, Library, Reader (RSVP), Reader (Scroll), Overlays
 - Add "Keyboard-first mode" toggle in settings that shows a subtle cheat-sheet tooltip on first launch
-- Update `src/types.ts` with new fields: `BlurbyDoc.unread`, `BlurbyDoc.snoozedUntil`, `BlurbyDoc.tags`, `BlurbyDoc.collection`
+- Update `src/types.ts` with new fields: `BlurbyDoc.unread`, `BlurbyDoc.snoozedUntil`, `BlurbyDoc.tags`, `BlurbyDoc.collection` (note: `sourceDomain`, `publishedDate`, `authorFull` added in Sprint 19K)
 - Schema migration in `main/migrations.js` to add new fields with defaults to existing library data
 - Files affected: `HotkeyMapSettings.tsx`, `src/types.ts`, `main/migrations.js`
 
@@ -1898,12 +1993,13 @@ interface BlurbyDoc {
 | 9 | Filter shortcuts — `Shift+U`/`Shift+S`/`Shift+R`/`Shift+I`, filter pill UI, toggle behavior | `renderer-fixer` (sonnet) | Step 3 |
 | 10 | IPC channels — `open-doc-source`, `get-all-highlights`, snooze timer + notification in main process | `electron-fixer` (sonnet) | Step 1 |
 | 11 | Tab zone cycling (library) — focus management between search/grid/sidebar | `renderer-fixer` (sonnet) | Steps 3, 6 |
-| 12 | Settings update — `HotkeyMapSettings.tsx` full rewrite with all new shortcuts, organized by section | `renderer-fixer` (sonnet) | Steps 2-11 |
-| 13 | CSS — focus rings, overlay styles, filter pills, command palette, Go-To badge, selection checkboxes. All via CSS custom properties | `renderer-fixer` (sonnet) | Steps 3-11 |
-| 14 | Tests — keyboard shortcut tests (all contexts), overlay dismiss tests, undo stack tests, G-sequence timeout tests, filter toggle tests | `renderer-fixer` (sonnet) | Steps 2-13 |
-| 15 | Full test suite + build verification | `test-runner` (haiku) | Step 14 |
+| 12 | Article provenance display (20S) — APA subtext in DocCard/GridCard, reader header, command palette search index | `renderer-fixer` (sonnet) | Steps 3, 5 |
+| 13 | Settings update — `HotkeyMapSettings.tsx` full rewrite with all new shortcuts, organized by section | `renderer-fixer` (sonnet) | Steps 2-12 |
+| 14 | CSS — focus rings, overlay styles, filter pills, command palette, Go-To badge, selection checkboxes, provenance subtext. All via CSS custom properties | `renderer-fixer` (sonnet) | Steps 3-12 |
+| 15 | Tests — keyboard shortcut tests (all contexts), overlay dismiss tests, undo stack tests, G-sequence timeout tests, filter toggle tests, provenance display tests | `renderer-fixer` (sonnet) | Steps 2-14 |
+| 16 | Full test suite + build verification | `test-runner` (haiku) | Step 15 |
 
-> **Parallelization:** Steps 1-2 are parallel (main vs renderer). Steps 5-9 are all parallelizable after their deps. Step 10 is parallel with Steps 3-9. Steps 12-13 wait for all feature work.
+> **Parallelization:** Steps 1-2 are parallel (main vs renderer). Steps 5-9 + 12 are all parallelizable after their deps. Step 10 is parallel with Steps 3-9. Steps 13-14 wait for all feature work.
 
 ### Acceptance Criteria
 
@@ -2011,7 +2107,18 @@ interface BlurbyDoc {
 - [ ] All overlays respect the layered dismiss pattern
 - [ ] Double-Escape in scroll reader maintained for exit confirmation
 
-**Settings & Data (20S)**
+**Article Provenance Display (20S)**
+- [ ] URL-imported docs with lead image display it as card hero (grid: top fill ~140px; list: 60x60 thumbnail)
+- [ ] URL-imported docs without lead image show source-domain monogram placeholder (first letter, brand orange bg)
+- [ ] Lead images loaded via existing `get-cover-image` IPC + LRU cache (same pipeline as book covers)
+- [ ] URL-imported docs show APA-style subtext in library cards: `Author Last, F. M. (Year, Month Day). Source Domain.`
+- [ ] Books continue showing `by Author` and book cover (no APA formatting for non-article sources)
+- [ ] Reader header displays APA citation line below document title for URL-imported docs
+- [ ] Source domain in reader header is clickable (opens original URL)
+- [ ] Command palette fuzzy search matches `sourceDomain` and `authorFull` fields
+- [ ] Graceful fallbacks: no author → omit; no date → "(n.d.)"; no domain → hostname
+
+**Settings & Data (20T)**
 - [ ] `HotkeyMapSettings.tsx` displays ALL shortcuts organized by section
 - [ ] Schema migration adds `unread`, `snoozedUntil`, `tags`, `collection` with safe defaults
 - [ ] Existing library data migrates without data loss

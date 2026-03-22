@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import { bubbleCount } from "../utils/queue";
@@ -18,6 +18,38 @@ const TYPE_COLORS: Record<string, string> = {
   url: "#5b8fb9",
 };
 
+// List-view thumbnail for cover images (60x60)
+function CoverThumbnail({ coverPath, title }: { coverPath: string; title: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    window.electronAPI.getCoverImage(coverPath).then((s) => { if (s) setSrc(s); });
+  }, [coverPath]);
+  if (!src) return null;
+  return <img src={src} alt={`Cover of ${title}`} className="doc-card-thumbnail" />;
+}
+
+// Format APA-style subtext for URL-imported articles
+function formatApaSubtext(doc: BlurbyDoc): string | null {
+  if (doc.source !== "url") return null;
+  const parts: string[] = [];
+  if (doc.authorFull) {
+    parts.push(doc.authorFull);
+  }
+  if (doc.publishedDate) {
+    try {
+      const d = new Date(doc.publishedDate);
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      parts.push(`(${d.getFullYear()}, ${months[d.getMonth()]} ${d.getDate()}).`);
+    } catch {
+      parts.push("(n.d.).");
+    }
+  } else {
+    if (doc.authorFull) parts.push("(n.d.).");
+  }
+  if (doc.sourceDomain) parts.push(doc.sourceDomain + ".");
+  return parts.length > 0 ? parts.join(" ") : null;
+}
+
 interface DocCardProps {
   doc: BlurbyDoc;
   wpm: number;
@@ -33,9 +65,12 @@ interface DocCardProps {
   onUnarchive: (id: string) => void;
   onOpenScroll?: (doc: BlurbyDoc) => void;
   onOpenNewWindow?: (doc: BlurbyDoc) => void;
+  focused?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
-const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow }: DocCardProps) {
+const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, onToggleSelect }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
@@ -43,27 +78,47 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
   const readTime = formatTime(wordCount, wpm);
   const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;
   const typeColor = TYPE_COLORS[typeLabel] || "#c4a882";
+  const apaSubtext = formatApaSubtext(doc);
 
   return (
     <div style={{ position: "relative" }} role="listitem">
       <div
         onClick={() => onOpen(doc)}
-        className={`doc-card${doc.archived ? " doc-card-archived" : ""}`}
+        className={`doc-card${doc.archived ? " doc-card-archived" : ""}${focused ? " doc-card-focused" : ""}${selected ? " doc-card-selected" : ""}${doc.unread ? " doc-card-unread" : ""}`}
         role="button"
-        tabIndex={0}
+        tabIndex={focused ? 0 : -1}
         onKeyDown={(e) => e.key === "Enter" && onOpen(doc)}
-        aria-label={`${doc.title}${doc.author ? ` by ${doc.author}` : ""}, ${wordCount} words, ${readTime}${isComplete ? ", completed" : pos > 0 ? `, ${progress}% read` : ""}${doc.favorite ? ", favorite" : ""}`}
+        aria-label={`${doc.title}${doc.author ? ` by ${doc.author}` : ""}, ${wordCount} words, ${readTime}${isComplete ? ", completed" : pos > 0 ? `, ${progress}% read` : ""}${doc.favorite ? ", favorite" : ""}${doc.unread ? ", unread" : ""}`}
+        data-doc-id={doc.id}
       >
+        {/* Selection checkbox */}
+        {onToggleSelect && (
+          <div className="doc-card-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>
+            <input type="checkbox" checked={selected || false} readOnly aria-label={`Select ${doc.title}`} tabIndex={-1} />
+          </div>
+        )}
+        {/* List-view thumbnail for URL docs with cover */}
+        {doc.source === "url" && doc.coverPath && (
+          <CoverThumbnail coverPath={doc.coverPath} title={doc.title} />
+        )}
+        {/* Monogram placeholder for URL docs without cover */}
+        {doc.source === "url" && !doc.coverPath && (
+          <div className="doc-card-monogram" aria-hidden="true">
+            {(doc.sourceDomain || doc.title || "?")[0].toUpperCase()}
+          </div>
+        )}
         <div className="doc-card-content">
           <div className="doc-card-header">
+            {doc.unread && <span className="doc-card-unread-dot" aria-hidden="true" />}
             {doc.favorite && <span className="doc-card-fav-star" title="Favorite">*</span>}
-            <span className="doc-card-title">{formatDisplayTitle(doc.title)}</span>
-            {doc.author && <span className="doc-card-author">{doc.author}</span>}
+            <span className={`doc-card-title${doc.unread ? " doc-card-title-bold" : ""}`}>{formatDisplayTitle(doc.title)}</span>
+            {doc.source !== "url" && doc.author && <span className="doc-card-author">{doc.author}</span>}
             {typeLabel && <Badge color={typeColor}>{typeLabel}</Badge>}
             {doc.filename?.toLowerCase().includes("blurby highlights") && <Badge color="var(--accent)">highlights</Badge>}
             {doc.archived && <Badge color="var(--text-dimmer)">archived</Badge>}
             {isComplete && !doc.archived && <Badge color="var(--success)">done</Badge>}
           </div>
+          {apaSubtext && <div className="doc-card-apa-subtext">{apaSubtext}</div>}
           <div className="doc-card-meta">
             <span>{wordCount.toLocaleString()} words</span>
             <span>{readTime}</span>

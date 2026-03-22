@@ -220,12 +220,40 @@ function registerIpcHandlers(ctx) {
       clearChapterCache(doc.filepath);
       if (ctx.removeFailedExtraction) ctx.removeFailedExtraction(doc.filepath);
     }
-    if (ctx.removeDocFromLibrary) {
+
+    // 19D: Apply tombstone instead of hard-deleting, so sync can propagate the deletion
+    const syncEngine = require("./sync-engine");
+    const syncQueue = require("./sync-queue");
+    const syncStatus = syncEngine.getSyncStatus();
+    const deviceId = syncQueue.getDeviceId();
+    const revision = syncStatus.revision || 0;
+
+    const library = ctx.getLibrary();
+    const docExists = library.some((d) => d.id === docId);
+    if (docExists) {
+      const now = Date.now();
+      const updated = library.map((d) => {
+        if (d.id !== docId) return d;
+        // Apply tombstone fields
+        return {
+          ...d,
+          deleted: true,
+          deletedAt: revision,
+          deletedBy: deviceId,
+          deletedAtTimestamp: now,
+          // Clear heavy content to keep library.json lean
+          content: undefined,
+        };
+      });
+      ctx.setLibrary(updated);
+    } else if (ctx.removeDocFromLibrary) {
       ctx.removeDocFromLibrary(docId);
-    } else {
-      ctx.setLibrary(ctx.getLibrary().filter((d) => d.id !== docId));
     }
+
     ctx.saveLibrary();
+
+    // Enqueue the delete-doc operation in the sync queue (19B)
+    syncQueue.enqueue("delete-doc", { docId, revision }).catch(() => {});
   });
 
   ipcMain.handle("update-doc", (_, docId, title, content) => {
@@ -240,7 +268,18 @@ function registerIpcHandlers(ctx) {
 
   ipcMain.handle("reset-progress", (_, docId) => {
     const doc = ctx.getDocById(docId);
-    if (doc) { doc.position = 0; ctx.saveLibrary(); }
+    if (doc) {
+      doc.position = 0;
+      ctx.saveLibrary();
+
+      // 19H: Enqueue reset-progress as a first-class sync operation
+      // A reset with higher revision always beats furthest-ahead on merge
+      const syncEngine = require("./sync-engine");
+      const syncQueue = require("./sync-queue");
+      const syncStatus = syncEngine.getSyncStatus();
+      const revision = syncStatus.revision || 0;
+      syncQueue.enqueue("reset-progress", { docId, value: 0, revision }).catch(() => {});
+    }
   });
 
   ipcMain.handle("load-doc-content", async (_, docId) => {
@@ -362,7 +401,7 @@ function registerIpcHandlers(ctx) {
 
       const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
 
-      // Download article cover image if available
+      // ── Download and validate article cover image ────────────────────────
       let coverPath = null;
       if (result.imageUrl) {
         try {
@@ -370,11 +409,75 @@ function registerIpcHandlers(ctx) {
           const imgResponse = await net.fetch(imgUrl);
           if (imgResponse.ok) {
             const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
-            const imgExt = imgUrl.match(/\.(jpg|jpeg|png|gif|webp)/i)?.[0] || ".jpg";
-            const coversDir = path.join(ctx.getDataPath(), "covers");
-            await fsPromises.mkdir(coversDir, { recursive: true });
-            coverPath = path.join(coversDir, `${docId}${imgExt}`);
-            await fsPromises.writeFile(coverPath, imgBuffer);
+
+            // Magic byte validation — reject HTML error pages and unknown formats
+            let detectedExt = null;
+            if (imgBuffer.length >= 4) {
+              const b = imgBuffer;
+              if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) {
+                detectedExt = ".jpg";
+              } else if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) {
+                detectedExt = ".png";
+              } else if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) {
+                detectedExt = ".gif";
+              } else if (
+                b.length >= 12 &&
+                b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+                b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50
+              ) {
+                detectedExt = ".webp";
+              }
+              // Reject HTML responses masquerading as images
+              const firstChar = b[0];
+              const snippet = b.slice(0, 20).toString("ascii").toLowerCase();
+              if (firstChar === 0x3C || snippet.includes("<!doctype") || snippet.includes("<html")) {
+                detectedExt = null; // reject
+                console.log("[url] Rejected HTML error page served as image");
+              }
+            }
+
+            if (detectedExt) {
+              // Dimension check: reject images smaller than 200x200
+              let tooSmall = false;
+              try {
+                if (detectedExt === ".png") {
+                  // PNG IHDR: bytes 16-23 = width (4 bytes) + height (4 bytes)
+                  if (imgBuffer.length >= 24) {
+                    const w = imgBuffer.readUInt32BE(16);
+                    const h = imgBuffer.readUInt32BE(20);
+                    if (w < 200 || h < 200) tooSmall = true;
+                  }
+                } else if (detectedExt === ".jpg") {
+                  // Scan JPEG SOF markers (0xFF 0xC0/0xC2) for dimensions
+                  let i = 2;
+                  while (i < imgBuffer.length - 8) {
+                    if (imgBuffer[i] === 0xFF) {
+                      const marker = imgBuffer[i + 1];
+                      if (marker === 0xC0 || marker === 0xC2 || marker === 0xC1 || marker === 0xC3) {
+                        const h = imgBuffer.readUInt16BE(i + 5);
+                        const w = imgBuffer.readUInt16BE(i + 7);
+                        if (w < 200 || h < 200) tooSmall = true;
+                        break;
+                      }
+                      const segLen = imgBuffer.readUInt16BE(i + 2);
+                      i += 2 + segLen;
+                    } else {
+                      i++;
+                    }
+                  }
+                }
+                // For GIF and WebP, skip dimension check (rare, acceptable)
+              } catch { /* dimension check failed; allow the image */ }
+
+              if (!tooSmall) {
+                const coversDir = path.join(ctx.getDataPath(), "covers");
+                await fsPromises.mkdir(coversDir, { recursive: true });
+                coverPath = path.join(coversDir, `${docId}${detectedExt}`);
+                await fsPromises.writeFile(coverPath, imgBuffer);
+              } else {
+                console.log("[url] Skipped image smaller than 200x200");
+              }
+            }
           }
         } catch (err) {
           console.log("[url] Failed to download article image:", err.message);
@@ -387,6 +490,9 @@ function registerIpcHandlers(ctx) {
         wordCount: countWords(result.content),
         sourceUrl: url, position: 0, created: Date.now(), source: "url",
         author: result.author || null,
+        authorFull: result.author || null,
+        sourceDomain: result.sourceDomain || null,
+        publishedDate: result.publishedDate || null,
         coverPath,
       };
       ctx.addDocToLibrary(newDoc);
@@ -402,6 +508,8 @@ function registerIpcHandlers(ctx) {
             sourceUrl: url,
             fetchDate: new Date(),
             outputDir: settings.sourceFolder,
+            sourceDomain: result.sourceDomain || null,
+            publishedDate: result.publishedDate || null,
           });
 
           newDoc.source = "url";
@@ -893,6 +1001,16 @@ function registerIpcHandlers(ctx) {
     return { ok: true };
   });
 
+  // 19E: Download document content on demand (lazy load from cloud)
+  ipcMain.handle("cloud-download-doc-content", async (_, docId) => {
+    return await syncEngine.downloadDocContent(docId);
+  });
+
+  // 19F: Trigger a full cloud reconciliation (on-demand or from settings UI)
+  ipcMain.handle("cloud-full-reconciliation", async () => {
+    return await syncEngine.fullReconciliation();
+  });
+
   // Forward sync status changes to renderer
   syncEngine.onSyncStatusChange((status) => {
     const mainWindow = ctx.getMainWindow();
@@ -908,6 +1026,122 @@ function registerIpcHandlers(ctx) {
       mainWindow.webContents.send("cloud-auth-required", provider);
     }
   });
+
+  // ── Sprint 20: Keyboard-First UX IPC Handlers ──────────────────────────
+
+  // Open document source (URL in browser or folder in file manager)
+  ipcMain.handle("open-doc-source", async (_, docId) => {
+    const { shell } = require("electron");
+    const doc = ctx.getDocById(docId);
+    if (!doc) return { error: "Document not found" };
+
+    if (doc.sourceUrl) {
+      await shell.openExternal(doc.sourceUrl);
+      return { opened: true };
+    } else if (doc.filepath) {
+      shell.showItemInFolder(doc.filepath);
+      return { opened: true };
+    }
+    return { error: "No source available" };
+  });
+
+  // Get all highlights across all documents
+  ipcMain.handle("get-all-highlights", async () => {
+    const settings = ctx.getSettings();
+    const highlightPath = settings.sourceFolder
+      ? path.join(settings.sourceFolder, "Blurby Highlights.md")
+      : path.join(ctx.getDataPath(), "highlights.md");
+
+    try {
+      const content = await fsPromises.readFile(highlightPath, "utf-8");
+      const highlights = [];
+      const blocks = content.split("---\n\n");
+
+      for (const block of blocks) {
+        const quoteMatch = block.match(/> "(.+?)"/s);
+        const metaMatch = block.match(/— \*(.+?)\*, position (\d+)\/(\d+)/);
+        const dateMatch = block.match(/Saved: (.+)/);
+
+        if (quoteMatch && metaMatch) {
+          highlights.push({
+            text: quoteMatch[1],
+            docTitle: metaMatch[1],
+            docId: "",
+            wordIndex: parseInt(metaMatch[2], 10),
+            totalWords: parseInt(metaMatch[3], 10),
+            date: dateMatch ? dateMatch[1].trim() : "",
+          });
+        }
+      }
+
+      // Try to resolve docIds from library
+      const library = ctx.getLibrary();
+      for (const h of highlights) {
+        const doc = library.find((d) => d.title === h.docTitle);
+        if (doc) h.docId = doc.id;
+      }
+
+      return highlights;
+    } catch {
+      return [];
+    }
+  });
+
+  // Snooze a document until a specific time
+  ipcMain.handle("snooze-doc", (_, docId, until) => {
+    const library = ctx.getLibrary();
+    const doc = library.find((d) => d.id === docId);
+    if (doc) {
+      doc.snoozedUntil = until;
+      ctx.saveLibrary();
+      ctx.broadcastLibrary();
+    }
+  });
+
+  // Unsnooze a document
+  ipcMain.handle("unsnooze-doc", (_, docId) => {
+    const library = ctx.getLibrary();
+    const doc = library.find((d) => d.id === docId);
+    if (doc) {
+      doc.snoozedUntil = null;
+      ctx.saveLibrary();
+      ctx.broadcastLibrary();
+    }
+  });
+
+  // Check for snoozed docs that should reappear (called periodically)
+  function checkSnoozedDocs() {
+    const library = ctx.getLibrary();
+    const now = Date.now();
+    let changed = false;
+
+    for (const doc of library) {
+      if (doc.snoozedUntil && doc.snoozedUntil <= now) {
+        doc.snoozedUntil = null;
+        changed = true;
+
+        // Show system notification
+        const { Notification } = require("electron");
+        if (Notification.isSupported()) {
+          const notification = new Notification({
+            title: "Time to read",
+            body: doc.title,
+            icon: undefined,
+          });
+          notification.show();
+        }
+      }
+    }
+
+    if (changed) {
+      ctx.saveLibrary();
+      ctx.broadcastLibrary();
+    }
+  }
+
+  // Check snoozed docs on startup and every 60 seconds
+  checkSnoozedDocs();
+  setInterval(checkSnoozedDocs, 60000);
 }
 
 module.exports = {

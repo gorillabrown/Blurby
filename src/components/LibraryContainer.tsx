@@ -1,13 +1,20 @@
-import { useState, useCallback, useEffect, useSyncExternalStore } from "react";
+import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { BlurbyDoc } from "../types";
 import useLibrary from "../hooks/useLibrary";
-import { useSmartImport, useGlobalKeys } from "../hooks/useKeyboardShortcuts";
+import { useSmartImport, useGlobalKeys, useLibraryKeyboard, type OverlayId, type LibraryFilter } from "../hooks/useKeyboardShortcuts";
 import ErrorBoundary from "./ErrorBoundary";
 import LibraryView from "./LibraryView";
 import DropZone from "./DropZone";
 import ImportConfirmDialog from "./ImportConfirmDialog";
 import MenuFlap from "./MenuFlap";
 import ReaderContainer from "./ReaderContainer";
+import CommandPalette from "./CommandPalette";
+import ShortcutsOverlay from "./ShortcutsOverlay";
+import HighlightsOverlay from "./HighlightsOverlay";
+import GoToIndicator from "./GoToIndicator";
+import SnoozePickerOverlay from "./SnoozePickerOverlay";
+import TagPickerOverlay from "./TagPickerOverlay";
+import QuickSettingsPopover from "./QuickSettingsPopover";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
 
@@ -121,7 +128,155 @@ export default function LibraryContainer() {
     setMenuFlapOpen(true);
   }, []);
 
-  useGlobalKeys({ toggleFlap: toggleMenuFlap, openSettings: handleOpenSettings, view });
+  // ── Sprint 20: Library keyboard navigation ────────────────────────────
+  // Initialize keyboard state first (hooks must be called unconditionally)
+  const snoozeTargetRef = useRef<string | null>(null);
+  const tagTargetRef = useRef<string | null>(null);
+  const kbActionsRef = useRef<any>(null);
+  const kbState = useLibraryKeyboard(view, kbActionsRef.current || {});
+
+  const filteredLibrary = useMemo(() => {
+    let docs = library.filter((d) => !d.deleted);
+    if (kbState.activeFilter !== "snoozed") {
+      docs = docs.filter((d) => !d.snoozedUntil || d.snoozedUntil <= Date.now());
+    }
+    switch (kbState.activeFilter) {
+      case "unread": return docs.filter((d) => d.unread);
+      case "starred":
+      case "favorites": return docs.filter((d) => d.favorite);
+      case "archive": return docs.filter((d) => d.archived);
+      case "reading": return docs.filter((d) => (d.position || 0) > 0 && (d.position || 0) < (d.wordCount || 1));
+      case "importedToday": {
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        return docs.filter((d) => d.created >= today.getTime());
+      }
+      case "queue": return docs;
+      case "recent": return docs.filter((d) => d.lastReadAt).sort((a, b) => (b.lastReadAt || 0) - (a.lastReadAt || 0));
+      case "snoozed": return library.filter((d) => !d.deleted && d.snoozedUntil && d.snoozedUntil > Date.now());
+      case "collections": return docs.filter((d) => d.collection);
+      default: return docs.filter((d) => !d.archived);
+    }
+  }, [library, kbState.activeFilter]);
+
+  const kbActions = useMemo(() => ({
+    onArchive: (docId: string) => {
+      archiveDoc(docId);
+      const doc = library.find((d) => d.id === docId);
+      if (doc) {
+        kbState.setUndoAction(() => () => unarchiveDoc(docId));
+        showToast(`Archived "${doc.title}" — Press Z to undo`);
+      }
+    },
+    onUnarchive: (docId: string) => {
+      unarchiveDoc(docId);
+      showToast("Restored from archive");
+    },
+    onToggleStar: (docId: string) => {
+      toggleFavorite(docId);
+    },
+    onTrash: (docId: string) => {
+      const doc = library.find((d) => d.id === docId);
+      if (doc) {
+        deleteDoc(docId);
+        kbState.setUndoAction(() => () => {
+          // Re-add is not trivially undoable — toast only
+        });
+        showToast(`Trashed "${doc.title}" — Press Z to undo`);
+      }
+    },
+    onToggleUnread: (docId: string) => {
+      const updatedLibrary = library.map((d) =>
+        d.id === docId ? { ...d, unread: !d.unread } : d
+      );
+      setLibrary(updatedLibrary);
+      api.saveLibrary(updatedLibrary);
+    },
+    onResume: (docId: string) => handleOpenDocById(docId),
+    onOpenSource: async (docId: string) => {
+      const result = await api.openDocSource(docId);
+      if (result?.error) showToast(result.error);
+      else showToast("Opening source...");
+    },
+    onOpenDoc: (docId: string) => handleOpenDocById(docId),
+    onSnooze: (docId: string) => {
+      kbState.setActiveOverlay("snoozePicker");
+      snoozeTargetRef.current = docId;
+    },
+    onAddTag: (docId: string) => {
+      kbState.setActiveOverlay("tagPicker");
+      tagTargetRef.current = docId;
+    },
+    onMoveCollection: (docId: string) => {
+      kbState.setActiveOverlay("collectionPicker");
+      tagTargetRef.current = docId;
+    },
+    onFocusSearch: () => {
+      const searchInput = document.querySelector<HTMLInputElement>('.library-search input, .search-input');
+      searchInput?.focus();
+    },
+    onNavigateFilter: (_filter: LibraryFilter) => { /* filter state managed by kbState */ },
+    onSelectAll: () => {
+      const allIds = new Set(filteredLibrary.map((d) => d.id));
+      kbState.setSelectedIds(allIds);
+    },
+    onClearSelection: () => kbState.setSelectedIds(new Set()),
+    onScrollToTop: () => {
+      document.querySelector('.library-grid, .library-list')?.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    onScrollToBottom: () => {
+      const el = document.querySelector('.library-grid, .library-list');
+      el?.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    },
+    getDocIdAtIndex: (index: number) => filteredLibrary[index]?.id,
+    getVisibleDocCount: () => filteredLibrary.length,
+  }), [library, filteredLibrary, archiveDoc, unarchiveDoc, toggleFavorite, deleteDoc, showToast, handleOpenDocById, setLibrary]);
+
+  // Update the actions ref so the keyboard hook sees latest actions
+  kbActionsRef.current = kbActions;
+
+  // Snooze handler
+  const handleSnooze = useCallback(async (until: number) => {
+    const docId = snoozeTargetRef.current;
+    if (!docId) return;
+    await api.snoozeDoc(docId, until);
+    const doc = library.find((d) => d.id === docId);
+    showToast(`Snoozed "${doc?.title || 'document'}"`);
+    kbState.setActiveOverlay(null);
+    snoozeTargetRef.current = null;
+  }, [library, showToast, kbState]);
+
+  // Tag handler
+  const handleTagToggle = useCallback((tag: string) => {
+    const docId = tagTargetRef.current;
+    if (!docId) return;
+    const updatedLibrary = library.map((d) => {
+      if (d.id !== docId) return d;
+      const tags = d.tags || [];
+      const hasTag = tags.includes(tag);
+      return { ...d, tags: hasTag ? tags.filter((t) => t !== tag) : [...tags, tag] };
+    });
+    setLibrary(updatedLibrary);
+    api.saveLibrary(updatedLibrary);
+  }, [library, setLibrary]);
+
+  const handleCollectionMove = useCallback((collection: string | null) => {
+    const docId = tagTargetRef.current;
+    if (!docId) return;
+    const updatedLibrary = library.map((d) =>
+      d.id === docId ? { ...d, collection } : d
+    );
+    setLibrary(updatedLibrary);
+    api.saveLibrary(updatedLibrary);
+    kbState.setActiveOverlay(null);
+  }, [library, setLibrary, kbState]);
+
+  useGlobalKeys({
+    toggleFlap: toggleMenuFlap,
+    openSettings: handleOpenSettings,
+    view,
+    activeOverlay: kbState.activeOverlay,
+    setActiveOverlay: kbState.setActiveOverlay,
+  });
 
   // Smart Alt+V handler
   const handleSmartImport = useCallback((content: string, isUrl: boolean) => {
@@ -246,6 +401,58 @@ export default function LibraryContainer() {
         </ErrorBoundary>
         {menuFlap}
         {!isOnline && <div className="offline-badge">Offline</div>}
+        {/* Sprint 20: Overlays */}
+        {kbState.activeOverlay === "commandPalette" && (
+          <CommandPalette
+            library={filteredLibrary}
+            onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+            onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
+            onClose={() => kbState.setActiveOverlay(null)}
+            onOpenSettings={handleOpenSettings}
+          />
+        )}
+        {kbState.activeOverlay === "shortcuts" && (
+          <ShortcutsOverlay onClose={() => kbState.setActiveOverlay(null)} context={view} />
+        )}
+        {kbState.activeOverlay === "highlights" && (
+          <HighlightsOverlay
+            onClose={() => kbState.setActiveOverlay(null)}
+            onJumpTo={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+          />
+        )}
+        {kbState.activeOverlay === "quickSettings" && (
+          <QuickSettingsPopover
+            context={view}
+            settings={settings as any}
+            onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
+            onClose={() => kbState.setActiveOverlay(null)}
+          />
+        )}
+        {kbState.activeOverlay === "snoozePicker" && (
+          <SnoozePickerOverlay
+            onSelect={handleSnooze}
+            onClose={() => kbState.setActiveOverlay(null)}
+          />
+        )}
+        {(kbState.activeOverlay === "tagPicker" || kbState.activeOverlay === "collectionPicker") && (
+          <TagPickerOverlay
+            mode={kbState.activeOverlay === "tagPicker" ? "tag" : "collection"}
+            currentTags={library.find((d) => d.id === tagTargetRef.current)?.tags || []}
+            currentCollection={library.find((d) => d.id === tagTargetRef.current)?.collection || null}
+            allTags={[...new Set(library.flatMap((d) => d.tags || []))]}
+            allCollections={[...new Set(library.map((d) => d.collection).filter(Boolean) as string[])]}
+            onToggleTag={handleTagToggle}
+            onMoveCollection={handleCollectionMove}
+            onClose={() => kbState.setActiveOverlay(null)}
+          />
+        )}
+        {kbState.goToPending && <GoToIndicator />}
+        {kbState.activeFilter !== "all" && (
+          <div className="filter-pill" role="status">
+            Showing: {kbState.activeFilter}
+            <button className="filter-pill-clear" onClick={() => kbState.setActiveFilter("all")} aria-label="Clear filter">&times;</button>
+          </div>
+        )}
       </ToastContext.Provider>
     </SettingsContext.Provider>
   );

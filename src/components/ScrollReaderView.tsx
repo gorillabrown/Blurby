@@ -323,6 +323,23 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         <div className="reader-top-left">
           <button onClick={() => onExit(clampedPosition)} className="reader-esc-btn" aria-label="Exit reader">ESC</button>
           <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>
+          {activeDoc.source === "url" && (activeDoc.authorFull || activeDoc.sourceDomain) && (
+            <span className="reader-apa-citation">
+              {activeDoc.authorFull && <span>{activeDoc.authorFull} </span>}
+              {activeDoc.publishedDate ? (() => {
+                try {
+                  const d = new Date(activeDoc.publishedDate);
+                  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                  return <span>({d.getFullYear()}, {months[d.getMonth()]} {d.getDate()}). </span>;
+                } catch { return <span>(n.d.). </span>; }
+              })() : (activeDoc.authorFull ? <span>(n.d.). </span> : null)}
+              {activeDoc.sourceDomain && activeDoc.sourceUrl ? (
+                <a className="reader-apa-source-link" href="#" onClick={(e) => { e.preventDefault(); window.electronAPI.openDocSource(activeDoc.id); }}>{activeDoc.sourceDomain}</a>
+              ) : activeDoc.sourceDomain ? (
+                <span>{activeDoc.sourceDomain}</span>
+              ) : null}
+            </span>
+          )}
         </div>
         <div className="scroll-reader-top-right">
           <button

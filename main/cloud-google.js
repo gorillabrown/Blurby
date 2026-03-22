@@ -84,6 +84,26 @@ async function getFileId(fileName) {
   return null;
 }
 
+/**
+ * Get the generation number for a file (used for conditional writes, 19G).
+ * Returns null if the file doesn't exist.
+ */
+async function getFileGeneration(fileName) {
+  try {
+    const fileId = await getFileId(fileName);
+    if (!fileId) return null;
+
+    const response = await driveFetch(
+      `/files/${fileId}?fields=generation`
+    );
+    const data = await response.json();
+    return data.generation ? String(data.generation) : null;
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
+}
+
 // ── Google Drive Storage Implementation ──────────────────────────────────
 
 async function readFile(filePath) {
@@ -184,6 +204,89 @@ async function writeFile(filePath, data) {
   });
 }
 
+/**
+ * Conditional write using generation number to prevent simultaneous sync conflicts (19G).
+ * Uses ifGenerationMatch parameter on the upload URL.
+ * @param {string} filePath
+ * @param {Buffer|string} data
+ * @param {string|null} generation - Current generation from getFileGeneration(); null = create only
+ * @returns {{ ok: boolean, conflict: boolean, newGeneration: string|null }}
+ */
+async function writeFileConditional(filePath, data, generation) {
+  const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+
+  if (buffer.length > CHUNK_SIZE) {
+    // Large files: conditional write not supported via resumable upload
+    // Fall back to normal write (staging protects against races for large files)
+    await writeFileLarge(filePath, buffer);
+    return { ok: true, conflict: false, newGeneration: null };
+  }
+
+  try {
+    const existingId = await getFileId(filePath);
+    const token = await getAccessToken("google");
+
+    const boundary = "blurby_boundary_" + Date.now();
+    const metadata = JSON.stringify({ name: filePath });
+    const bodyParts = [
+      `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n`,
+      `--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`,
+    ];
+    const bodyPrefix = Buffer.from(bodyParts[0]);
+    const bodyMid = Buffer.from(bodyParts[1]);
+    const bodySuffix = Buffer.from(`\r\n--${boundary}--`);
+    const body = Buffer.concat([bodyPrefix, bodyMid, buffer, bodySuffix]);
+
+    let url;
+    let method;
+    if (existingId) {
+      // Update with generation check
+      const genParam = generation ? `&ifGenerationMatch=${encodeURIComponent(generation)}` : "";
+      url = `${UPLOAD_API}/files/${existingId}?uploadType=multipart${genParam}`;
+      method = "PATCH";
+    } else {
+      // Create new (ifGenerationMatch=0 means "only create if not exists")
+      const genParam = generation ? `&ifGenerationMatch=${encodeURIComponent(generation)}` : "&ifGenerationMatch=0";
+      url = `${UPLOAD_API}/files?uploadType=multipart${genParam}`;
+      method = "POST";
+    }
+
+    const response = await net.fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": `multipart/related; boundary=${boundary}`,
+      },
+      body,
+    });
+
+    // 412 Precondition Failed = generation mismatch
+    if (response.status === 412) {
+      return { ok: false, conflict: true, newGeneration: null };
+    }
+
+    if (!response.ok) {
+      const err = new Error(`Google Drive conditional write error: ${response.status}`);
+      err.status = response.status;
+      throw err;
+    }
+
+    let newGeneration = null;
+    try {
+      const result = await response.json();
+      if (result.id && !existingId) fileIdCache.set(filePath, result.id);
+      newGeneration = result.generation ? String(result.generation) : null;
+    } catch { /* ignore */ }
+
+    return { ok: true, conflict: false, newGeneration };
+  } catch (err) {
+    if (err.status === 412) {
+      return { ok: false, conflict: true, newGeneration: null };
+    }
+    throw err;
+  }
+}
+
 async function writeFileLarge(filePath, buffer) {
   const token = await getAccessToken("google");
   const existingId = await getFileId(filePath);
@@ -251,11 +354,16 @@ async function writeFileLarge(filePath, buffer) {
 
 async function listFiles(folder) {
   return await withRetry(async () => {
+    // Google Drive appDataFolder doesn't support true folder hierarchy in the same
+    // way — files are identified by name. We emulate folders via name prefixes.
     let query = "trashed=false";
-    // In appDataFolder, "folder" isn't really a path — all files are at root
-    // We just list all files
+    if (folder) {
+      // Filter by name prefix to simulate folder listing
+      query += ` and name contains '${folder}/'`;
+    }
+
     const response = await driveFetch(
-      `/files?spaces=appDataFolder&q=${encodeURIComponent(query)}&fields=files(id,name,modifiedTime,size)&pageSize=100`
+      `/files?spaces=appDataFolder&q=${encodeURIComponent(query)}&fields=files(id,name,modifiedTime,size,generation)&pageSize=100`
     );
     const data = await response.json();
 
@@ -264,6 +372,7 @@ async function listFiles(folder) {
       modified: item.modifiedTime ? new Date(item.modifiedTime).getTime() : 0,
       size: parseInt(item.size || "0", 10),
       isFolder: false,
+      generation: item.generation ? String(item.generation) : null,
     }));
   });
 }
@@ -298,19 +407,71 @@ async function getFileMetadata(filePath) {
       throw err;
     }
 
-    const response = await driveFetch(`/files/${fileId}?fields=modifiedTime,size,md5Checksum`);
+    const response = await driveFetch(`/files/${fileId}?fields=modifiedTime,size,md5Checksum,generation`);
     const data = await response.json();
 
     return {
       modified: data.modifiedTime ? new Date(data.modifiedTime).getTime() : 0,
       size: parseInt(data.size || "0", 10),
       hash: data.md5Checksum || null,
+      generation: data.generation ? String(data.generation) : null,
     };
   });
 }
 
+/**
+ * Create a "folder" in Google Drive appDataFolder (19C).
+ * Since appDataFolder is flat, we track folders via a naming convention
+ * and create a sentinel file to mark the folder as existing.
+ */
+async function createFolder(folderPath) {
+  // In Google Drive appDataFolder, we can't create real folders.
+  // We simulate folders by using path-prefix names. No-op here,
+  // but we return success so callers don't error.
+  // Files created with names like "staging/library.json" are sufficient.
+  return true;
+}
+
+/**
+ * Check whether a "folder" exists in Google Drive appDataFolder (19C).
+ * We check for any file with the folder path as a prefix.
+ */
+async function folderExists(folderPath) {
+  try {
+    const files = await listFiles(folderPath);
+    return files.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Move/rename a file in Google Drive appDataFolder (19C).
+ * Since we use flat name-based storage, this is a copy + delete.
+ */
+async function moveFile(srcPath, destPath) {
+  return await withRetry(async () => {
+    const buffer = await readFile(srcPath);
+    await writeFile(destPath, buffer);
+    await deleteFile(srcPath);
+  });
+}
+
 function getGoogleDriveStorage() {
-  return { readFile, writeFile, listFiles, deleteFile, getFileMetadata };
+  return {
+    readFile,
+    writeFile,
+    writeFileConditional,
+    listFiles,
+    deleteFile,
+    getFileMetadata,
+    getFileGeneration,
+    // For uniform interface with OneDrive, alias getFileEtag → getFileGeneration
+    getFileEtag: getFileGeneration,
+    createFolder,
+    folderExists,
+    moveFile,
+  };
 }
 
 module.exports = { getGoogleDriveStorage };

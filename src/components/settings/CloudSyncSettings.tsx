@@ -35,6 +35,8 @@ export function CloudSyncSettings({ settings, onSettingsChange }: CloudSyncSetti
   const [error, setError] = useState<string | null>(null);
   const [mergePreview, setMergePreview] = useState<MergePreview | null>(null);
   const [showMergeDialog, setShowMergeDialog] = useState(false);
+  const [reconciling, setReconciling] = useState(false);
+  const [lastReconciliation, setLastReconciliation] = useState<number>(0);
 
   // Load initial state
   useEffect(() => {
@@ -135,6 +137,23 @@ export function CloudSyncSettings({ settings, onSettingsChange }: CloudSyncSetti
       setError(err instanceof Error ? err.message : "Sync failed");
     } finally {
       setSyncing(false);
+    }
+  }, []);
+
+  const handleFullReconciliation = useCallback(async () => {
+    setReconciling(true);
+    setError(null);
+    try {
+      const result = await api.cloudFullReconciliation();
+      if (result.status === "error") {
+        setError(result.error || "Reconciliation failed");
+      } else {
+        setLastReconciliation(Date.now());
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Reconciliation failed");
+    } finally {
+      setReconciling(false);
     }
   }, []);
 
@@ -248,6 +267,22 @@ export function CloudSyncSettings({ settings, onSettingsChange }: CloudSyncSetti
           <span>Sync on metered connections</span>
         </label>
         <div className="appearance-hint">When disabled, only metadata syncs on mobile data.</div>
+      </div>
+
+      {/* Full Reconciliation (Sprint 19F) */}
+      <div className="settings-section-label" style={{ marginTop: 16 }}>Data Integrity</div>
+      <div className="cloud-sync-controls">
+        <button
+          className="btn"
+          onClick={handleFullReconciliation}
+          disabled={syncing || reconciling}
+        >
+          {reconciling ? "Reconciling..." : "Full Sync"}
+        </button>
+        <div className="appearance-hint">
+          Compares all local and cloud files, fixes any drift.
+          {lastReconciliation ? ` Last run: ${formatLastSync(lastReconciliation)}` : " Never run."}
+        </div>
       </div>
 
       {/* Sign out */}

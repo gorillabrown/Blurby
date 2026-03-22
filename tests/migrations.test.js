@@ -356,3 +356,281 @@ describe("library migrations", () => {
     expect(result.docs[0].coverPath).toBe(null);
   });
 });
+
+// ── Sprint 19K: library v3 → v4 (provenance + sync hardening fields) ──────
+
+// We replicate the v3→v4 migration inline, exactly as written in migrations.js,
+// so these tests remain self-contained and match the established project pattern.
+const libraryMigrationV3ToV4 = (data) => {
+  const docs = Array.isArray(data) ? data : (data.docs || []);
+  for (const doc of docs) {
+    if (doc.sourceDomain === undefined) {
+      if (doc.sourceUrl) {
+        try {
+          const hostname = new URL(doc.sourceUrl).hostname.replace(/^www\./, "");
+          doc.sourceDomain = hostname;
+        } catch { doc.sourceDomain = null; }
+      } else {
+        doc.sourceDomain = null;
+      }
+    }
+    if (doc.publishedDate === undefined) doc.publishedDate = null;
+    if (doc.authorFull === undefined) doc.authorFull = doc.author || null;
+    if (doc.deleted === undefined) doc.deleted = false;
+    if (doc.syncContent === undefined) doc.syncContent = doc.source !== "folder";
+    if (doc.contentHash === undefined) doc.contentHash = null;
+  }
+  return { schemaVersion: 4, docs };
+};
+
+// We replicate the v4→v5 migration inline for the same reason.
+const libraryMigrationV4ToV5 = (data) => {
+  const docs = Array.isArray(data) ? data : (data.docs || []);
+  for (const doc of docs) {
+    if (doc.unread === undefined) doc.unread = doc.position === 0 && !doc.lastReadAt;
+    if (doc.snoozedUntil === undefined) doc.snoozedUntil = null;
+    if (doc.tags === undefined) doc.tags = [];
+    if (doc.collection === undefined) doc.collection = null;
+  }
+  return { schemaVersion: 5, docs };
+};
+
+describe("library migration v3 → v4: sourceDomain backfilled from sourceUrl", () => {
+  it("backfills sourceDomain from sourceUrl hostname for URL-imported docs", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [
+        { id: "1", title: "Article", source: "url", sourceUrl: "https://www.example.com/article", author: null, coverPath: null },
+      ],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.schemaVersion).toBe(4);
+    expect(result.docs[0].sourceDomain).toBe("example.com");
+  });
+
+  it("strips www. from the backfilled sourceDomain", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [
+        { id: "1", title: "Article", source: "url", sourceUrl: "https://www.bbc.co.uk/news/story", author: null, coverPath: null },
+      ],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].sourceDomain).toBe("bbc.co.uk");
+  });
+
+  it("sets sourceDomain to null for non-URL docs", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [
+        { id: "2", title: "Book", source: "file", author: null, coverPath: null },
+      ],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].sourceDomain).toBeNull();
+  });
+
+  it("does not overwrite an existing sourceDomain", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [
+        { id: "3", title: "Existing", source: "url", sourceUrl: "https://example.com/", sourceDomain: "Custom Domain", author: null, coverPath: null },
+      ],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].sourceDomain).toBe("Custom Domain");
+  });
+});
+
+describe("library migration v3 → v4: publishedDate defaults to null", () => {
+  it("adds publishedDate: null when missing", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [{ id: "1", title: "Doc", source: "file", author: null, coverPath: null }],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].publishedDate).toBeNull();
+  });
+
+  it("does not overwrite an existing publishedDate", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [{ id: "1", title: "Doc", source: "url", author: null, coverPath: null, publishedDate: "2025-01-01T00:00:00.000Z" }],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].publishedDate).toBe("2025-01-01T00:00:00.000Z");
+  });
+});
+
+describe("library migration v3 → v4: authorFull copied from author", () => {
+  it("copies author to authorFull when author is set", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [{ id: "1", title: "Doc", source: "file", author: "Jane Smith", coverPath: null }],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].authorFull).toBe("Jane Smith");
+  });
+
+  it("sets authorFull to null when author is null", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [{ id: "1", title: "Doc", source: "file", author: null, coverPath: null }],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].authorFull).toBeNull();
+  });
+
+  it("does not overwrite an existing authorFull", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [{ id: "1", title: "Doc", source: "file", author: "Jane Smith", authorFull: "Jane Marie Smith", coverPath: null }],
+    };
+    const result = libraryMigrationV3ToV4(v3);
+    expect(result.docs[0].authorFull).toBe("Jane Marie Smith");
+  });
+});
+
+// ── Sprint 20T: library v4 → v5 (keyboard-first UX fields) ───────────────
+
+describe("library migration v4 → v5: unread defaults based on position/lastReadAt", () => {
+  it("sets unread=true when position===0 and lastReadAt is null", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "New Doc", source: "file", position: 0, lastReadAt: null }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].unread).toBe(true);
+  });
+
+  it("sets unread=false when position > 0", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "In Progress", source: "file", position: 50, lastReadAt: 1700000000000 }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].unread).toBe(false);
+  });
+
+  it("sets unread=false when lastReadAt is set even with position===0", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Opened Once", source: "file", position: 0, lastReadAt: 1700000000000 }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].unread).toBe(false);
+  });
+
+  it("does not overwrite an existing unread field", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null, unread: false }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    // Already set to false — should remain false
+    expect(result.docs[0].unread).toBe(false);
+  });
+});
+
+describe("library migration v4 → v5: snoozedUntil defaults to null", () => {
+  it("adds snoozedUntil: null when missing", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].snoozedUntil).toBeNull();
+  });
+
+  it("does not overwrite an existing snoozedUntil", () => {
+    const futureTs = Date.now() + 86400000;
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null, snoozedUntil: futureTs }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].snoozedUntil).toBe(futureTs);
+  });
+});
+
+describe("library migration v4 → v5: tags defaults to empty array", () => {
+  it("adds tags: [] when missing", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].tags).toEqual([]);
+  });
+
+  it("does not overwrite existing tags", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null, tags: ["work", "read-later"] }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].tags).toEqual(["work", "read-later"]);
+  });
+});
+
+describe("library migration v4 → v5: collection defaults to null", () => {
+  it("adds collection: null when missing", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].collection).toBeNull();
+  });
+
+  it("does not overwrite existing collection", () => {
+    const v4 = {
+      schemaVersion: 4,
+      docs: [{ id: "1", title: "Doc", source: "file", position: 0, lastReadAt: null, collection: "To Read" }],
+    };
+    const result = libraryMigrationV4ToV5(v4);
+    expect(result.docs[0].collection).toBe("To Read");
+  });
+});
+
+describe("library migration v3 → v5 full chain", () => {
+  it("migrates all the way from v3 to v5 applying both migrations", () => {
+    const v3 = {
+      schemaVersion: 3,
+      docs: [
+        {
+          id: "1",
+          title: "Long Article",
+          source: "url",
+          sourceUrl: "https://www.theguardian.com/article",
+          author: "Alice Brown",
+          coverPath: null,
+          position: 0,
+          lastReadAt: null,
+        },
+      ],
+    };
+    const migrations = [
+      null,           // v0→v1 (skip — not needed in chain)
+      null,           // v1→v2
+      null,           // v2→v3
+      libraryMigrationV3ToV4,
+      libraryMigrationV4ToV5,
+    ];
+
+    // Run v3→v4 then v4→v5 directly
+    const v4 = libraryMigrationV3ToV4(v3);
+    const v5 = libraryMigrationV4ToV5(v4);
+
+    expect(v5.schemaVersion).toBe(5);
+    // v3→v4 provenance fields
+    expect(v5.docs[0].sourceDomain).toBe("theguardian.com");
+    expect(v5.docs[0].publishedDate).toBeNull();
+    expect(v5.docs[0].authorFull).toBe("Alice Brown");
+    // v4→v5 keyboard-first fields
+    expect(v5.docs[0].unread).toBe(true);
+    expect(v5.docs[0].snoozedUntil).toBeNull();
+    expect(v5.docs[0].tags).toEqual([]);
+    expect(v5.docs[0].collection).toBeNull();
+  });
+});

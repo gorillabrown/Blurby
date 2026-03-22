@@ -19,18 +19,79 @@ function sanitizeFilenameForPdf(name) {
     .slice(0, 100) || "untitled";
 }
 
-async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate, outputDir }) {
+// ── APA citation helpers ─────────────────────────────────────────────────────
+
+/**
+ * Format a single author name in APA style: "First Last" → "Last, F."
+ * "First Middle Last" → "Last, F. M."
+ */
+function formatSingleAuthorAPA(name) {
+  const trimmed = name.trim();
+  if (!trimmed) return "";
+  // Already in "Last, F." format?
+  if (/^[^,]+,\s*[A-Z]\./.test(trimmed)) return trimmed;
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) return parts[0]; // single token, just return it
+  const last = parts[parts.length - 1];
+  const initials = parts.slice(0, -1).map((p) => `${p[0].toUpperCase()}.`).join(" ");
+  return `${last}, ${initials}`;
+}
+
+/**
+ * Format author string(s) in APA style.
+ * Handles multiple authors separated by " & ", " and ", or ", ".
+ * Returns APA-formatted string, or raw string if unparseable.
+ */
+function formatAuthorAPA(authorString) {
+  if (!authorString || !authorString.trim()) return "";
+  // Split on " & ", " and " (word boundary), or "; "
+  const parts = authorString
+    .split(/\s+&\s+|\s+and\s+|;\s*/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return authorString;
+  const formatted = parts.map(formatSingleAuthorAPA);
+  if (formatted.length === 1) return formatted[0];
+  const allButLast = formatted.slice(0, -1).join(", ");
+  return `${allButLast}, & ${formatted[formatted.length - 1]}`;
+}
+
+/**
+ * Format a date for APA: "(2024, March 15)." or "(n.d.)."
+ * Accepts ISO string, Date object, or null.
+ */
+function formatDateAPA(publishedDate) {
+  if (!publishedDate) return "(n.d.).";
+  try {
+    const d = new Date(publishedDate);
+    if (isNaN(d.getTime())) return "(n.d.).";
+    const year = d.getFullYear();
+    const month = d.toLocaleString("en-US", { month: "long" });
+    const day = d.getDate();
+    return `(${year}, ${month} ${day}).`;
+  } catch {
+    return "(n.d.).";
+  }
+}
+
+async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate, outputDir, sourceDomain, publishedDate }) {
   const safeName = sanitizeFilenameForPdf(title);
   const savedArticlesDir = path.join(outputDir, "Saved Articles");
   await fsPromises.mkdir(savedArticlesDir, { recursive: true });
   const pdfPath = path.join(savedArticlesDir, `${safeName}.pdf`);
 
+  const apaAuthor = author ? formatAuthorAPA(author) : null;
+  const apaDate = formatDateAPA(publishedDate);
+  const keywordParts = [`source:${sourceUrl}`];
+  if (sourceDomain) keywordParts.push(`domain:${sourceDomain}`);
+  if (publishedDate) keywordParts.push(`published:${publishedDate}`);
+
   return new Promise((resolve, reject) => {
     const doc = new (getPDFDocument())({
       info: {
         Title: title,
-        Author: author || "Unknown",
-        Keywords: `source:${sourceUrl}`,
+        Author: apaAuthor || author || "",
+        Keywords: keywordParts.join(", "),
         CreationDate: fetchDate,
       },
     });
@@ -47,19 +108,46 @@ async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate
     });
     doc.on("error", reject);
 
-    // Header
-    doc.fontSize(18).text(title, { align: "center" });
-    doc.moveDown(0.5);
-    if (author) {
-      doc.fontSize(11).fillColor("#666").text(`by ${author}`, { align: "center" });
+    // ── APA Header ────────────────────────────────────────────────────────
+    // Line 1: APA author(s) — omit entirely if no author
+    if (apaAuthor) {
+      doc.fontSize(11).fillColor("#222").text(apaAuthor, { align: "left" });
       doc.moveDown(0.3);
     }
-    doc.fontSize(9).fillColor("#999").text(sourceUrl, { align: "center", link: sourceUrl });
-    doc.text(`Fetched: ${fetchDate.toLocaleDateString()}`, { align: "center" });
-    doc.moveDown(1.5);
 
-    // Body
-    doc.fontSize(11).fillColor("#333");
+    // Line 2: APA date "(Year, Month Day)." or "(n.d.)."
+    doc.fontSize(11).fillColor("#222").text(apaDate, { align: "left" });
+    doc.moveDown(0.3);
+
+    // Line 3: Title in italics, 14pt, black, left-aligned
+    doc.fontSize(14).fillColor("#000").font("Helvetica-Oblique").text(title, { align: "left" });
+    doc.moveDown(0.3);
+
+    // Line 4: Source domain, 11pt, black
+    if (sourceDomain) {
+      doc.fontSize(11).fillColor("#000").font("Helvetica").text(sourceDomain, { align: "left" });
+      doc.moveDown(0.3);
+    }
+
+    // Line 5: Full URL as clickable link, 9pt, gray
+    doc.fontSize(9).fillColor("#666").font("Helvetica").text(sourceUrl, { align: "left", link: sourceUrl, underline: true });
+    doc.moveDown(1);
+
+    // Separator: 0.5pt horizontal rule in brand orange #D04716
+    const pageMargin = 72; // pdfkit default left margin
+    const lineY = doc.y;
+    doc
+      .save()
+      .moveTo(pageMargin, lineY)
+      .lineTo(doc.page.width - pageMargin, lineY)
+      .lineWidth(0.5)
+      .strokeColor("#D04716")
+      .stroke()
+      .restore();
+    doc.moveDown(1);
+
+    // ── Body ──────────────────────────────────────────────────────────────
+    doc.fontSize(11).fillColor("#333").font("Helvetica");
     const paragraphs = content.split(/\n\n+/);
     for (const para of paragraphs) {
       const trimmed = para.trim();
@@ -242,6 +330,49 @@ function fetchWithBrowser(url) {
   });
 }
 
+// ── Provenance helpers ───────────────────────────────────────────────────────
+
+/** Strip "By " prefix (case-insensitive) and normalize whitespace. */
+function cleanAuthorName(raw) {
+  if (!raw) return null;
+  return raw.replace(/^\s*[Bb][Yy]\s+/, "").replace(/\s+/g, " ").trim() || null;
+}
+
+/** Extract author from JSON-LD author field (object or array). */
+function extractAuthorFromJsonLd(item) {
+  const authorField = item.author;
+  if (!authorField) return null;
+  if (Array.isArray(authorField)) {
+    const names = authorField.map((a) => (typeof a === "string" ? a : a.name)).filter(Boolean);
+    return names.length ? names.join(" & ") : null;
+  }
+  if (typeof authorField === "string") return authorField;
+  return authorField.name || null;
+}
+
+/** Extract date from JSON-LD item. Returns ISO string or null. */
+function extractDateFromJsonLd(item) {
+  const raw = item.datePublished || item.dateCreated || null;
+  if (!raw) return null;
+  try { return new Date(raw).toISOString(); } catch { return null; }
+}
+
+/** Extract publisher/site name from JSON-LD item. */
+function extractPublisherFromJsonLd(item) {
+  const pub = item.publisher;
+  if (!pub) return null;
+  if (typeof pub === "string") return pub;
+  return pub.name || null;
+}
+
+/** Title-case a hostname: e.g. "bbc.com" → "BBC.com" would just return "bbc.com" title-cased. */
+function titleCaseHostname(hostname) {
+  return hostname
+    .split(".")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(".");
+}
+
 function extractArticleFromHtml(html, url) {
   const dom = new (getJSDOM())(html, { url });
   const parsedDoc = dom.window.document;
@@ -259,7 +390,17 @@ function extractArticleFromHtml(html, url) {
   let title = null;
   let content = null;
 
+  // Provenance accumulators
+  let author = null;
+  let sourceDomain = null;
+  let publishedDate = null;
+  let imageUrl = null;
+
+  // Collected JSON-LD items for provenance (populated in step 2)
+  let jsonLdItems = [];
+
   // 1. Try __preloadedData JSON from raw HTML (NYT and similar React-rendered sites)
+  let preloadedArticle = null;
   const preloadIdx = html.indexOf("window.__preloadedData");
   if (preloadIdx !== -1) {
     const eqIdx = html.indexOf("=", preloadIdx);
@@ -274,6 +415,7 @@ function extractArticleFromHtml(html, url) {
             const data = JSON.parse(jsonStr);
             const article = data?.initialData?.data?.article;
             if (article) {
+              preloadedArticle = article;
               title = article.headline?.default || null;
               const bodyContent = article.sprinkledBody?.content || article.body?.content || [];
               const paragraphs = [];
@@ -289,6 +431,30 @@ function extractArticleFromHtml(html, url) {
               if (paragraphs.length > 0) {
                 content = paragraphs.join("\n\n");
               }
+
+              // NYT-specific provenance: bylines
+              if (!author) {
+                const bylines = article.bylines || [];
+                const bylineNames = bylines
+                  .map((b) => b.renderedRepresentation || b.bylineString || null)
+                  .filter(Boolean);
+                if (bylineNames.length) {
+                  author = cleanAuthorName(bylineNames.join(" & "));
+                }
+              }
+
+              // NYT lead image from preloadedData
+              if (!imageUrl) {
+                const leadMedia = article.leadMedia || article.promotionalMedia;
+                if (leadMedia) {
+                  // Navigate to URL within media object
+                  const mediaUrl = leadMedia.url ||
+                    leadMedia.renditions?.[0]?.url ||
+                    leadMedia.crops?.[0]?.renditions?.[0]?.url ||
+                    null;
+                  if (mediaUrl) imageUrl = mediaUrl;
+                }
+              }
             }
           } catch { /* skip parse errors */ }
         }
@@ -296,32 +462,148 @@ function extractArticleFromHtml(html, url) {
     }
   }
 
-  // 2. Try JSON-LD structured data (articleBody field)
-  if (!content) {
-    for (const script of parsedDoc.querySelectorAll('script[type="application/ld+json"]')) {
-      try {
-        const data = JSON.parse(script.textContent);
-        const items = Array.isArray(data) ? data : [data];
-        for (const item of items) {
-          if (item.articleBody) { content = item.articleBody; title = title || item.headline; break; }
-          if (item["@graph"]) {
-            for (const node of item["@graph"]) {
-              if (node.articleBody) { content = node.articleBody; title = title || node.headline; break; }
-            }
-          }
+  // 2. Try JSON-LD structured data (articleBody field + provenance)
+  for (const script of parsedDoc.querySelectorAll('script[type="application/ld+json"]')) {
+    try {
+      const data = JSON.parse(script.textContent);
+      const items = Array.isArray(data) ? data : [data];
+      // Flatten @graph
+      const expanded = [];
+      for (const item of items) {
+        expanded.push(item);
+        if (item["@graph"]) expanded.push(...item["@graph"]);
+      }
+      jsonLdItems.push(...expanded);
+
+      for (const item of expanded) {
+        if (!content && item.articleBody) {
+          content = item.articleBody;
+          title = title || item.headline;
         }
-        if (content) break;
-      } catch { /* skip */ }
+      }
+    } catch { /* skip */ }
+  }
+
+  // Extract provenance from JSON-LD items
+  for (const item of jsonLdItems) {
+    if (!author) {
+      const a = extractAuthorFromJsonLd(item);
+      if (a) author = cleanAuthorName(a);
+    }
+    if (!publishedDate) {
+      publishedDate = extractDateFromJsonLd(item);
+    }
+    if (!sourceDomain) {
+      const pub = extractPublisherFromJsonLd(item);
+      if (pub) sourceDomain = pub;
+    }
+    // JSON-LD image field
+    if (!imageUrl) {
+      const imgField = item.image;
+      if (imgField) {
+        if (typeof imgField === "string") imageUrl = imgField;
+        else if (imgField.url) imageUrl = imgField.url;
+        else if (Array.isArray(imgField) && imgField[0]) {
+          imageUrl = typeof imgField[0] === "string" ? imgField[0] : imgField[0].url || null;
+        }
+      }
     }
   }
 
-  // 3. Try Readability
+  // 3. Try Readability (also captures byline)
+  let readabilityByline = null;
   if (!content) {
-    const reader = new (getReadability())(parsedDoc);
+    // Clone the document since Readability mutates it
+    const readerDom = new (getJSDOM())(html, { url });
+    const reader = new (getReadability())(readerDom.window.document);
     const article = reader.parse();
     if (article?.textContent?.trim()) {
       content = article.textContent.trim();
       title = title || article.title;
+    }
+    if (article?.byline) readabilityByline = article.byline;
+  } else {
+    // Still want Readability byline even if we got content elsewhere
+    try {
+      const readerDom = new (getJSDOM())(html, { url });
+      const reader = new (getReadability())(readerDom.window.document);
+      const article = reader.parse();
+      if (article?.byline) readabilityByline = article.byline;
+    } catch { /* ignore */ }
+  }
+
+  // Author fallback cascade (after JSON-LD and preloadedData)
+  if (!author) {
+    // meta[name="author"]
+    const metaAuthor = parsedDoc.querySelector('meta[name="author"]');
+    if (metaAuthor?.getAttribute("content")) {
+      author = cleanAuthorName(metaAuthor.getAttribute("content"));
+    }
+  }
+  if (!author) {
+    // meta[property="article:author"]
+    const articleAuthor = parsedDoc.querySelector('meta[property="article:author"]');
+    if (articleAuthor?.getAttribute("content")) {
+      author = cleanAuthorName(articleAuthor.getAttribute("content"));
+    }
+  }
+  if (!author && readabilityByline) {
+    author = cleanAuthorName(readabilityByline);
+  }
+  if (!author) {
+    // DOM selectors: byline/author classes, rel="author"
+    const authorSelectors = [
+      '[class*="byline"] [itemprop="name"]',
+      '[class*="author"] [itemprop="name"]',
+      '[rel="author"]',
+      '[class*="byline"]',
+      '[class*="author"]',
+    ];
+    for (const sel of authorSelectors) {
+      const el = parsedDoc.querySelector(sel);
+      const text = el?.textContent?.trim();
+      if (text && text.length < 100) {
+        author = cleanAuthorName(text);
+        if (author) break;
+      }
+    }
+  }
+
+  // Source domain cascade
+  if (!sourceDomain) {
+    const ogSiteName = parsedDoc.querySelector('meta[property="og:site_name"]');
+    if (ogSiteName?.getAttribute("content")) sourceDomain = ogSiteName.getAttribute("content").trim();
+  }
+  if (!sourceDomain) {
+    const appName = parsedDoc.querySelector('meta[name="application-name"]');
+    if (appName?.getAttribute("content")) sourceDomain = appName.getAttribute("content").trim();
+  }
+  if (!sourceDomain) {
+    // Fallback: hostname without leading www., title-cased
+    try {
+      const hostname = new URL(url).hostname.replace(/^www\./, "");
+      sourceDomain = titleCaseHostname(hostname);
+    } catch { /* ignore */ }
+  }
+
+  // Publication date cascade
+  if (!publishedDate) {
+    const articlePubTime = parsedDoc.querySelector('meta[property="article:published_time"]');
+    if (articlePubTime?.getAttribute("content")) {
+      try { publishedDate = new Date(articlePubTime.getAttribute("content")).toISOString(); } catch { /* skip */ }
+    }
+  }
+  if (!publishedDate) {
+    const metaDate = parsedDoc.querySelector('meta[name="date"], meta[name="publication_date"]');
+    if (metaDate?.getAttribute("content")) {
+      try { publishedDate = new Date(metaDate.getAttribute("content")).toISOString(); } catch { /* skip */ }
+    }
+  }
+  if (!publishedDate) {
+    // <time> with datetime inside article body
+    const timeEl = parsedDoc.querySelector("article time[datetime], [role='main'] time[datetime]");
+    if (timeEl?.getAttribute("datetime")) {
+      try { publishedDate = new Date(timeEl.getAttribute("datetime")).toISOString(); } catch { /* skip */ }
     }
   }
 
@@ -353,15 +635,40 @@ function extractArticleFromHtml(html, url) {
     title = ogTitle?.getAttribute("content") || metaTitle?.textContent || new URL(url).hostname;
   }
 
-  // Extract article image (og:image preferred)
-  let imageUrl = null;
-  const ogImage = parsedDoc.querySelector('meta[property="og:image"]');
-  if (ogImage) {
-    imageUrl = ogImage.getAttribute("content");
+  // ── Lead image cascade ────────────────────────────────────────────────────
+  // og:image (highest priority for social sharing contexts)
+  if (!imageUrl) {
+    const ogImage = parsedDoc.querySelector('meta[property="og:image"]');
+    if (ogImage?.getAttribute("content")) imageUrl = ogImage.getAttribute("content");
   }
+  // og:image:secure_url
+  if (!imageUrl) {
+    const ogSecure = parsedDoc.querySelector('meta[property="og:image:secure_url"]');
+    if (ogSecure?.getAttribute("content")) imageUrl = ogSecure.getAttribute("content");
+  }
+  // twitter:image
   if (!imageUrl) {
     const twitterImage = parsedDoc.querySelector('meta[name="twitter:image"]');
-    if (twitterImage) imageUrl = twitterImage.getAttribute("content");
+    if (twitterImage?.getAttribute("content")) imageUrl = twitterImage.getAttribute("content");
+  }
+  // JSON-LD image already handled above
+  // preloadedData image already handled above
+  // First <img> in article body with width >= 400px (attribute-based, no decode needed)
+  if (!imageUrl) {
+    const articleEl = parsedDoc.querySelector("article, [role='main'], .article-body, [data-testid='article-body']");
+    if (articleEl) {
+      for (const img of articleEl.querySelectorAll("img[src]")) {
+        const w = parseInt(img.getAttribute("width") || "0", 10);
+        const naturalW = parseInt(img.getAttribute("naturalWidth") || "0", 10);
+        if ((w >= 400 || naturalW >= 400) && img.getAttribute("src")) {
+          let src = img.getAttribute("src");
+          // Resolve relative URLs
+          try { src = new URL(src, url).href; } catch { /* keep as-is */ }
+          imageUrl = src;
+          break;
+        }
+      }
+    }
   }
 
   // Clean up common noise
@@ -376,11 +683,14 @@ function extractArticleFromHtml(html, url) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-  return { title, content, imageUrl };
+  return { title, content, imageUrl, author: author || null, sourceDomain: sourceDomain || null, publishedDate: publishedDate || null };
 }
 
 module.exports = {
   sanitizeFilenameForPdf,
+  formatAuthorAPA,
+  formatSingleAuthorAPA,
+  formatDateAPA,
   generateArticlePdf,
   getSiteKey,
   getCookiesForUrl,

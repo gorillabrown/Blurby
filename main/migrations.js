@@ -2,7 +2,7 @@
 // CommonJS only — Electron main process
 
 const CURRENT_SETTINGS_SCHEMA = 5;
-const CURRENT_LIBRARY_SCHEMA = 3;
+const CURRENT_LIBRARY_SCHEMA = 5;
 
 /** Count words without creating intermediate arrays. */
 function countWords(text) {
@@ -113,6 +113,42 @@ const libraryMigrations = [
       if (doc.coverPath === undefined) doc.coverPath = null;
     }
     return { schemaVersion: 3, docs };
+  },
+  // v3 → v4: Sprint 19 — add provenance + sync fields
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      // Provenance fields
+      if (doc.sourceDomain === undefined) {
+        // Backfill sourceDomain from sourceUrl hostname for URL-imported docs
+        if (doc.sourceUrl) {
+          try {
+            const hostname = new URL(doc.sourceUrl).hostname.replace(/^www\./, "");
+            doc.sourceDomain = hostname;
+          } catch { doc.sourceDomain = null; }
+        } else {
+          doc.sourceDomain = null;
+        }
+      }
+      if (doc.publishedDate === undefined) doc.publishedDate = null;
+      if (doc.authorFull === undefined) doc.authorFull = doc.author || null;
+      // Sync hardening fields
+      if (doc.deleted === undefined) doc.deleted = false;
+      if (doc.syncContent === undefined) doc.syncContent = doc.source !== "folder";
+      if (doc.contentHash === undefined) doc.contentHash = null;
+    }
+    return { schemaVersion: 4, docs };
+  },
+  // v4 → v5: Sprint 20 — add keyboard-first UX fields
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      if (doc.unread === undefined) doc.unread = doc.position === 0 && !doc.lastReadAt;
+      if (doc.snoozedUntil === undefined) doc.snoozedUntil = null;
+      if (doc.tags === undefined) doc.tags = [];
+      if (doc.collection === undefined) doc.collection = null;
+    }
+    return { schemaVersion: 5, docs };
   },
 ];
 

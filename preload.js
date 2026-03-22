@@ -77,6 +77,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
   siteLogin: (url) => ipcRenderer.invoke("site-login", url),
   siteLogout: (domain) => ipcRenderer.invoke("site-logout", domain),
 
+  // Sprint 19: Sync hardening
+  cloudFullReconciliation: () => ipcRenderer.invoke("cloud-full-reconciliation"),
+  cloudDownloadDocContent: (docId) => ipcRenderer.invoke("cloud-download-doc-content", docId),
+
+  // Sprint 20: Keyboard-first UX
+  openDocSource: (docId) => ipcRenderer.invoke("open-doc-source", docId),
+  getAllHighlights: () => ipcRenderer.invoke("get-all-highlights"),
+  snoozeDoc: (docId, until) => ipcRenderer.invoke("snooze-doc", docId, until),
+  unsnoozeDoc: (docId) => ipcRenderer.invoke("unsnooze-doc", docId),
+
   // Cloud sync
   cloudSignIn: (provider) => ipcRenderer.invoke("cloud-sign-in", provider),
   cloudSignOut: (provider) => ipcRenderer.invoke("cloud-sign-out", provider),

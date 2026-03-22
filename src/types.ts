@@ -19,6 +19,21 @@ export interface BlurbyDoc {
   lastReadAt?: number | null;
   author?: string;
   coverPath?: string; // absolute path to extracted cover image on disk
+  // Sprint 19: Article provenance
+  sourceDomain?: string;      // display name of source (e.g., "The New York Times")
+  publishedDate?: string;     // ISO 8601 date string of original publication
+  authorFull?: string;        // full byline string for display (multi-author)
+  // Sprint 19: Sync hardening
+  deleted?: boolean;
+  deletedAt?: number;         // revision number when deleted
+  deletedBy?: string;         // deviceId that deleted
+  syncContent?: boolean;      // false for folder-sourced docs
+  contentHash?: string;       // SHA-256 of full content for sync
+  // Sprint 20: Keyboard-first UX
+  unread?: boolean;
+  snoozedUntil?: number;      // epoch ms, null/undefined = not snoozed
+  tags?: string[];
+  collection?: string | null;
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -162,6 +177,14 @@ export interface ElectronAPI {
   getCoverImage: (coverPath: string) => Promise<string | null>;
   rescanFolder: () => Promise<{ count?: number; error?: string }>;
   getFilePathForDrop: (file: File) => string;
+  // Sprint 19: Sync hardening
+  cloudFullReconciliation: () => Promise<{ status: string; fixed?: number; error?: string }>;
+  cloudDownloadDocContent: (docId: string) => Promise<{ content?: string; error?: string }>;
+  // Sprint 20: Keyboard-first UX
+  openDocSource: (docId: string) => Promise<{ opened?: boolean; error?: string }>;
+  getAllHighlights: () => Promise<Array<{ text: string; docTitle: string; docId: string; wordIndex: number; totalWords: number; date: string }>>;
+  snoozeDoc: (docId: string, until: number) => Promise<void>;
+  unsnoozeDoc: (docId: string) => Promise<void>;
   // Cloud sync
   cloudSignIn: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string; email?: string; name?: string; provider?: string }>;
   cloudSignOut: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string }>;

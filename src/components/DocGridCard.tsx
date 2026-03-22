@@ -8,9 +8,32 @@ interface DocGridCardProps {
   onToggleFavorite?: (id: string) => void;
   onArchive?: (id: string) => void;
   onDelete?: (id: string) => void;
+  focused?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
-const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete }: DocGridCardProps) {
+// Format APA subtext for URL-imported articles
+function formatApaSubtext(doc: BlurbyDoc): string | null {
+  if (doc.source !== "url") return null;
+  const parts: string[] = [];
+  if (doc.authorFull) parts.push(doc.authorFull);
+  if (doc.publishedDate) {
+    try {
+      const d = new Date(doc.publishedDate);
+      const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      parts.push(`(${d.getFullYear()}, ${months[d.getMonth()]} ${d.getDate()}).`);
+    } catch {
+      if (doc.authorFull) parts.push("(n.d.).");
+    }
+  } else {
+    if (doc.authorFull) parts.push("(n.d.).");
+  }
+  if (doc.sourceDomain) parts.push(doc.sourceDomain + ".");
+  return parts.length > 0 ? parts.join(" ") : null;
+}
+
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, focused, selected, onToggleSelect }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,32 +44,35 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
   }, [doc.coverPath]);
 
   const ext = doc.ext ? doc.ext.slice(1).toUpperCase() : (doc.source === "url" ? "URL" : "TXT");
-
-  // Generate a stable color from the doc id for placeholder backgrounds
-  const placeholderColor = (() => {
-    let hash = 0;
-    for (let i = 0; i < doc.id.length; i++) {
-      hash = doc.id.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const colors = ["#2a2a3a", "#2a3a2a", "#3a2a2a", "#2a3a3a", "#3a2a3a", "#3a3a2a"];
-    return colors[Math.abs(hash) % colors.length];
-  })();
-
   const progress = doc.wordCount > 0 ? Math.round(((doc.position || 0) / doc.wordCount) * 100) : 0;
   const isComplete = (doc.position || 0) >= doc.wordCount - 1 && doc.wordCount > 0;
+  const apaSubtext = formatApaSubtext(doc);
+  const isUrlDoc = doc.source === "url";
 
   return (
     <div
-      className="doc-grid-card"
+      className={`doc-grid-card${focused ? " doc-grid-card-focused" : ""}${selected ? " doc-grid-card-selected" : ""}${doc.unread ? " doc-grid-card-unread" : ""}`}
       onClick={() => onOpen(doc)}
       role="button"
-      tabIndex={0}
+      tabIndex={focused ? 0 : -1}
       onKeyDown={(e) => e.key === "Enter" && onOpen(doc)}
-      aria-label={`${doc.title}${doc.author ? `, by ${doc.author}` : ""}${isComplete ? ", completed" : progress > 0 ? `, ${progress}% read` : ""}`}
+      aria-label={`${doc.title}${doc.author ? `, by ${doc.author}` : ""}${isComplete ? ", completed" : progress > 0 ? `, ${progress}% read` : ""}${doc.unread ? ", unread" : ""}`}
+      data-doc-id={doc.id}
     >
+      {/* Selection checkbox */}
+      {onToggleSelect && selected !== undefined && (
+        <div className="doc-grid-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>
+          <input type="checkbox" checked={selected} readOnly aria-label={`Select ${doc.title}`} tabIndex={-1} />
+        </div>
+      )}
       <div className="doc-grid-cover">
         {coverSrc ? (
-          <img src={coverSrc} alt={`Cover of ${doc.title}`} className="doc-grid-cover-img" />
+          <img src={coverSrc} alt={`Cover of ${doc.title}`} className={`doc-grid-cover-img${isUrlDoc ? " doc-grid-cover-hero" : ""}`} />
+        ) : isUrlDoc ? (
+          /* Monogram placeholder for URL docs without lead image */
+          <div className="doc-grid-monogram" aria-hidden="true">
+            {(doc.sourceDomain || doc.title || "?")[0].toUpperCase()}
+          </div>
         ) : (
           <div className="doc-grid-cover-placeholder">
             <div className="doc-grid-placeholder-banner">
@@ -61,27 +87,33 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
         )}
         {isComplete && <div className="doc-grid-done-badge" aria-hidden="true">done</div>}
         {doc.favorite && <div className="doc-grid-fav-star" aria-hidden="true">*</div>}
+        {doc.unread && <div className="doc-grid-unread-dot" aria-hidden="true" />}
         <div className="doc-grid-actions">
           {onToggleFavorite && (
             <button onClick={(e) => { e.stopPropagation(); onToggleFavorite(doc.id); }} title="Toggle favorite" aria-label="Toggle favorite">
-              {doc.favorite ? "★" : "☆"}
+              {doc.favorite ? "\u2605" : "\u2606"}
             </button>
           )}
           {onArchive && (
             <button onClick={(e) => { e.stopPropagation(); onArchive(doc.id); }} title="Archive" aria-label="Archive">
-              ▼
+              \u25BC
             </button>
           )}
           {onDelete && (
             <button onClick={(e) => { e.stopPropagation(); onDelete(doc.id); }} title="Delete" aria-label="Delete">
-              ✕
+              \u2715
             </button>
           )}
         </div>
       </div>
       <div className="doc-grid-info">
-        <div className="doc-grid-title">{formatDisplayTitle(doc.title)}</div>
-        {doc.author && <div className="doc-grid-author">{doc.author}</div>}
+        <div className={`doc-grid-title${doc.unread ? " doc-grid-title-bold" : ""}`}>{formatDisplayTitle(doc.title)}</div>
+        {/* APA subtext for URL-imported docs, regular author for books */}
+        {apaSubtext ? (
+          <div className="doc-grid-apa-subtext">{apaSubtext}</div>
+        ) : (
+          doc.author && <div className="doc-grid-author">{doc.author}</div>
+        )}
       </div>
     </div>
   );
