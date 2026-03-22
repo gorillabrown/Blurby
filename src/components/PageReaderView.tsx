@@ -396,12 +396,14 @@ export default function PageReaderView({
         {activeDoc.source === "url" && activeDoc.sourceDomain && (
           <span className="page-reader-provenance">
             {activeDoc.authorFull && `${activeDoc.authorFull}. `}
-            {activeDoc.publishedDate ? (() => {
+            {(() => {
+              const dateStr = activeDoc.publishedDate || (activeDoc.created ? new Date(activeDoc.created).toISOString() : null);
+              if (!dateStr) return "";
               try {
-                const d = new Date(activeDoc.publishedDate);
+                const d = new Date(dateStr);
                 return `(${d.getFullYear()}, ${d.toLocaleString("en-US", { month: "long" })} ${d.getDate()}). `;
-              } catch { return "(n.d.). "; }
-            })() : "(n.d.). "}
+              } catch { return ""; }
+            })()}
             <span
               className="page-reader-source-link"
               onClick={(e) => {

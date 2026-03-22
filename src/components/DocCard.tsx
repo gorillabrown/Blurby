@@ -35,16 +35,15 @@ function formatApaSubtext(doc: BlurbyDoc): string | null {
   if (doc.authorFull) {
     parts.push(doc.authorFull);
   }
-  if (doc.publishedDate) {
+  const dateStr = doc.publishedDate || (doc.created ? new Date(doc.created).toISOString() : null);
+  if (dateStr) {
     try {
-      const d = new Date(doc.publishedDate);
+      const d = new Date(dateStr);
       const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       parts.push(`(${d.getFullYear()}, ${months[d.getMonth()]} ${d.getDate()}).`);
     } catch {
       parts.push("(n.d.).");
     }
-  } else {
-    if (doc.authorFull) parts.push("(n.d.).");
   }
   if (doc.sourceDomain) parts.push(doc.sourceDomain + ".");
   return parts.length > 0 ? parts.join(" ") : null;
