@@ -90,11 +90,13 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         const chars = displayWord.split("");
         const container = charContainerRef.current;
         // Reuse existing spans if count matches, otherwise rebuild
+        const focusSpanVal = settings?.focusSpan ?? 0.5;
         if (container.childNodes.length === chars.length) {
           chars.forEach((char, i) => {
-            const span = container.childNodes[i] as HTMLSpanElement;
+            const span = container.childNodes[i] as HTMLSpanElement | null;
+            if (!span) return;
             span.textContent = char;
-            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, displayWord.length, settings!.focusSpan!));
+            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, displayWord.length, focusSpanVal));
             span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
           });
         } else {
@@ -102,7 +104,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           chars.forEach((char, i) => {
             const span = document.createElement("span");
             span.textContent = char;
-            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, displayWord.length, settings!.focusSpan!));
+            span.style.opacity = String(calculateFocusOpacity(i, pivotIndex, displayWord.length, focusSpanVal));
             span.className = i === pivotIndex ? "reader-word-focus" : "reader-word-char";
             container.appendChild(span);
           });
