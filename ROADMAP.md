@@ -68,7 +68,8 @@ All feature work from phases 0-4 plus Sprints 1-17 are on main. The app has clou
 | **Sprint 18B: Chrome Extension** | 📋 SPEC'D | "Send to Blurby" — Readability extraction, local WebSocket + cloud fallback |
 | **Sprint 18C: Android APK** | 📋 SPEC'D | Full Blurby Mobile — React Native, RSVP + flow, cloud sync, share intent |
 | **Sprint 19: Sync Hardening + Provenance** | 📋 SPEC'D | Revision counters, operation log, staging, tombstones, content sync, reconciliation, article provenance extraction, APA-format PDFs |
-| **Sprint 20: Keyboard-First UX** | 📋 SPEC'D | Command palette, J/K navigation, G-sequences, undo, snooze, tags, APA provenance display, 27 new shortcuts |
+| **Sprint 20: Keyboard-First UX** | 📋 SPEC'D | Command palette, J/K navigation, G-sequences, undo, snooze, tags, APA provenance display, Page-as-parent reader (Page→Focus/Flow), unified bottom bar, notes system, reading log, 30+ new shortcuts |
+| **Sprint 21: UX Polish & Reading Intelligence** | 📋 SPEC'D | Frozen headers, search icon, book thumbnails, file type badges, hotkey coaching, session timer, AVG WPM fix, drag-drop anywhere, paywall login, 17 items |
 
 **Legend:** ✅ = implemented & tested, 🔶 = fully scoped with agent assignments (ready for dispatch), 📋 = spec'd but needs agent assignments, 📐 = design/vision only
 
@@ -1894,13 +1895,12 @@ Production            "Send to Blurby"      Full Blurby Mobile
 - Regular `Up`/`Down` remain as WPM speed controls in reader — no conflict since Ctrl modifier distinguishes them
 - Files affected: `useKeyboardShortcuts.ts`, `ScrollReaderView.tsx` (scroll-to-position)
 
-**20Q. Tab Refinement — Zone Cycling**
+**20Q. Tab / Zone Cycling**
 - Superhuman uses `Tab`/`Shift+Tab` for split navigation
-- Current Blurby: `Tab` toggles sidebar menu. Refine to be smarter:
-  - In library: `Tab` cycles focus between zones — search bar → library grid → sidebar. `Shift+Tab` reverses
-  - In reader: `Tab` keeps current behavior (toggle menu flap)
-- Sidebar menu toggle moves to `G then M` (add to Go-To sequences)
-- Files affected: `useKeyboardShortcuts.ts` (Tab handler context logic), `LibraryContainer.tsx` (zone focus management)
+- **Library:** `Tab` cycles focus between zones — search bar → library grid → sidebar. `Shift+Tab` reverses. Sidebar menu toggle available via `G then M`
+- **Reader:** `Tab` cycles reading mode: Focus → Flow → Page → Focus. `Shift+Tab` reverses: Focus → Page → Flow → Focus. Menu flap toggle moves to `M` (standalone key, no conflict — `M` is only used inside G-sequences as `G then M` in library context)
+- `Shift+F` (old mode toggle) **removed** — replaced by `Tab`
+- Files affected: `useKeyboardShortcuts.ts` (Tab handler context logic), `LibraryContainer.tsx` (zone focus management), `ReaderContainer.tsx` (mode cycling)
 
 **20R. Escape Layering**
 - Superhuman's `Esc` → Back — adopt layered dismiss pattern
@@ -1938,11 +1938,96 @@ Production            "Send to Blurby"      Full Blurby Mobile
 
 **20T. Settings & Docs Updates**
 - Update `HotkeyMapSettings.tsx` to show ALL new shortcuts (currently missing some even before this sprint)
-- Organize into sections: Global, Library, Reader (RSVP), Reader (Scroll), Overlays
+- Organize into sections: Global, Library, Reader (Universal), Reader (Focus), Reader (Flow), Reader (Page), Overlays
 - Add "Keyboard-first mode" toggle in settings that shows a subtle cheat-sheet tooltip on first launch
 - Update `src/types.ts` with new fields: `BlurbyDoc.unread`, `BlurbyDoc.snoozedUntil`, `BlurbyDoc.tags`, `BlurbyDoc.collection` (note: `sourceDomain`, `publishedDate`, `authorFull` added in Sprint 19K)
 - Schema migration in `main/migrations.js` to add new fields with defaults to existing library data
 - Files affected: `HotkeyMapSettings.tsx`, `src/types.ts`, `main/migrations.js`
+
+**20U. Page-as-Parent Reader Architecture**
+- **Design spec:** `docs/project/three-mode-reader-redesign.md`
+- **Paradigm shift**: Page is the DEFAULT reading view (parent). Focus and Flow are speed-reading sub-modes launched FROM Page. User always returns to Page on pause.
+- **Workflow**: Open document → Page view → `Space` enters Focus at highlighted word → `Space` pauses back to Page → `Shift+Space` enters Flow → `Space` pauses back to Page
+- Add `"page"` to `readingMode` type in `types.ts` (was `"focus" | "flow"`, now `"focus" | "flow" | "page"`, default `"page"`)
+- **New component: `PageReaderView.tsx`** — Default reading view, paginated book-like display
+  - Derived from existing e-ink pagination in `ScrollReaderView.tsx` (uses `VirtualScrollText` with computed page blocks)
+  - Full text paginated into screen-sized pages based on viewport height minus bottom bar
+  - Left/Right arrows flip pages, tap left/right screen halves also flips
+  - CSS opacity fade transition between pages (100ms)
+  - **Word selection**: Click a word to highlight it (sets anchor for Focus/Flow). `Shift+←`/`→`/`↑`/`↓` moves highlight between words for precision selection
+  - **Context menu**: Right-click highlighted word → "Define" or "Make Note" submenu
+  - **Hotkeys on selected word**: `Shift+D` = define, `Shift+N` = make note (opens inline note popover)
+  - `Space` = enter Focus at highlighted word. `Shift+Space` = enter Flow at highlighted word
+- **New component: `ReaderBottomBar.tsx`** — Unified bottom bar for Page/Focus/Flow
+  - Rendered by `ReaderContainer.tsx`, NOT by individual view components
+  - Always visible with identical layout across all views
+  - Row 1: Progress bar
+  - Row 2: WPM label + slider (always visible), A-/A+ font controls, Focus + Flow mode buttons (brand orange when active, neutral in Page), chapter nav, e-ink refresh
+  - Row 3: percentage (left), context-sensitive hints (center), time remaining (right)
+  - Hint text: Page → `← → page ↑ ↓ speed space focus ⇧space flow M menu`, Focus → `← → rewind ↑ ↓ speed space pause M menu`, Flow → `← → seek ↑ ↓ speed space pause M menu`
+  - Opacity: full in Page, fades to ~8% during Focus/Flow playback. E-ink: always full
+- **Refactor `ReaderContainer.tsx`:**
+  - Page is default view on document open (not Focus)
+  - Focus/Flow are sub-modes entered via Space/Shift+Space, exited via Space (pause) back to Page
+  - Position mapping: highlighted word in Page → wordIndex in Focus/Flow → highlighted word in Page on pause
+- **Refactor `useReaderKeys`:**
+  - Remove `if (s.readerMode !== "speed") return;` gate — Up/Down WPM works in all views
+  - Page view: Space → enter Focus, Shift+Space → enter Flow, Shift+arrows → word selection, Shift+D/N → define/note
+  - Focus/Flow: Space → pause + return to Page (not just toggle play)
+  - `M` → toggle menu flap (all views). Remove `Shift+F` and old Tab-for-menu
+- **Clean up per-mode components:**
+  - `ScrollReaderView.tsx`: Remove local Space handler (lines 261-266), remove mode switch buttons, remove local bottom bar
+  - `ReaderView.tsx`: Remove "scroll mode" button, remove local bottom bar
+- Files affected: `src/types.ts`, new `src/components/PageReaderView.tsx`, new `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`, `src/components/ReaderView.tsx`, `src/components/ScrollReaderView.tsx`, `src/hooks/useKeyboardShortcuts.ts`, `src/styles/global.css`
+
+**20V. Notes System**
+- **Inline note-taking** from Page view when a word/phrase is highlighted
+- `Shift+N` or right-click → "Make Note" opens a floating note popover anchored to the highlighted word
+- Popover: single text field + "Save" button, auto-focused, `Enter` saves, `Escape` cancels
+- Saved notes indicated by subtle dot/underline on the word in Page view; hover shows tooltip preview
+- Notes exported to a running `.docx` file in the source folder: `{Document Title} — Reading Notes.docx`
+- **Docx format**: Linked Table of Contents → document header sections → entries with: quoted highlight, APA citation, user's note, timestamp
+- Newest notes appended to bottom; same-document notes grouped under shared header
+- APA citation derived from BlurbyDoc metadata (author, title, sourceUrl, publishedDate)
+- IPC: `save-reading-note` channel → main process generates/appends docx (requires `docx` npm package)
+- Toast on save: "Note saved to Reading Notes.docx" with "Open" action
+- Files affected: new note popover component, `main/ipc-handlers.js`, `preload.js`, `src/styles/global.css`
+
+**20W. Reading Log (Excel Workbook)**
+- **Template**: `docs/project/Reading_Log_Blurby_Template.xlsx` — match structure exactly
+- Automated reading session logging to `Blurby Reading Log.xlsx` in source folder
+- On first reading session, auto-create workbook from template if it doesn't exist
+- **Tab 1 — "Reading Log"** (named table `ReadLog`, one row per work):
+  - Columns: `#` (auto-increment), `Title`, `Lead Author Last Name`, `Lead Author First Name`, `Other Authors`, `Pub. Year`, `Publisher / Source`, `Edition / Vol.`, `DOI / URL`, `Work Type` (Book/Article), `Format` (Print/Digital/Audio), `Pages`, `Pages Read` (formula: Pages × % Read), `Date Started`, `Date Finished`, `Days to Complete` (formula: Finished − Started), `Sessions`, `Total Time (min)`, `Avg WPM`, `Completed?` (Y/N), `% Read`, `Rating (1–5)`, `Notes / Key Takeaway`
+  - Blurby auto-populates on first read: Title, Author (split into Last/First), Pub. Year, Publisher/Source, DOI/URL, Work Type, Format (always "Digital"), Pages (from word count ÷ ~250), Date Started
+  - Blurby updates incrementally: Sessions (++), Total Time (+=session duration), Avg WPM (session-weighted), % Read (from progress), Date Finished (when 100%)
+  - User manually fills: Other Authors, Edition/Vol., Rating, Notes/Key Takeaway, Completed? override
+- **Tab 2 — "Dashboard"** (KPIs with formulas from ReadLog table):
+  - **Volume & Pace**: Total Works Read, Works Read YTD, Total Pages Read, Avg Pages/Day, Avg Days/Book, Books/Month
+  - **Volume & Pace (detail row)**: Most Pages Read, Fewest Pages Read, Longest Read (Days), Quickest Read (Days), Books/Year, Pages Read YTD
+  - **Sessions & Speed**: Total Sessions, Avg Sessions/Book, Total Reading Time (hrs), Avg Time/Session (min), Weighted Avg WPM, Completed Time (hrs)
+  - **Sessions & Speed (detail row)**: Most Sessions (Single Work), Fewest Sessions, Fastest WPM, Slowest WPM, Avg Time/Book (min), Longest Read Time (hrs)
+  - **Completion & Commitment**: Completion Rate, Abandonment Rate, Total DNFs, Avg % Read on DNF, DNF: Books, DNF: Articles
+  - **Temporal Patterns**: Median Publication Year, Median Publication Lag (Yrs), Oldest Work (Pub Year), Newest Work (Pub Year), Reading Since, Reading Span (Months)
+  - **Monthly Reading Volume**: Jan–Dec bar chart data (COUNTIFS by month from Date Started, year-selectable)
+  - **Diversity & Breadth**: Unique Authors, Most-Read Author Count, Repeat Author Rate, Books count, Articles count, PDFs/Other count
+  - **Format breakdown**: Print/Digital/Audio counts and percentages
+  - **Quality & Preference**: Avg Rating, Highest Rating, Lowest Rating, 5-Star Reads, Below 3-Star, Avg Rating (Completed)
+  - **Rating Distribution**: ★1 through ★5 counts
+  - **Footer**: "Blurby. — Fast · Friendly · Focused"
+- All dashboard cells use formulas referencing the ReadLog structured table — no hardcoded values
+- IPC: `log-reading-session` channel → main process opens/creates workbook, appends/updates row
+- IPC: `open-reading-log` channel → `shell.openPath()` to open in user's default spreadsheet app
+- In Reading Statistics panel, replace "Export CSV" with "Open Reading Log" button
+- Requires `exceljs` npm package for .xlsx read/write with formula preservation
+- Files affected: `main/ipc-handlers.js`, `preload.js`, stats panel component, `package.json`
+
+**20X. Search Split (`/` vs `Ctrl+K`)**
+- `/` = Library search overlay (documents only — titles, authors, source domains, tags, collections)
+- `Ctrl+K` = Command palette scoped to NON-library items (actions, settings, chapters, shortcuts)
+- Library search uses same visual treatment as command palette but filtered to documents
+- Both available from any view
+- Files affected: `src/components/CommandPalette.tsx`, `src/hooks/useKeyboardShortcuts.ts`
 
 ### Summary of Key Reassignments
 
@@ -1951,8 +2036,18 @@ Production            "Send to Blurby"      Full Blurby Mobile
 | `B` | Toggle favorite | **Retired** | Replaced by `S` (Superhuman convention) |
 | `S` | Save highlight (in highlight menu only) | **Star/Favorite** (global) + save highlight (in highlight menu) | Context-dependent: library/reader = star, highlight menu = save |
 | `=`/`-` (bare) | Font size ±10% | **Freed up** | Moved to `Ctrl+=`/`Ctrl+-` (browser convention) |
-| `Tab` (library) | Toggle sidebar | **Zone cycling** | Sidebar toggle moves to `G then M` |
-| `Tab` (reader) | Toggle menu flap | **No change** | Stays as-is |
+| `Tab` (library) | Toggle sidebar | **Zone cycling** (search → grid → sidebar) | Sidebar toggle moves to `G then M` |
+| `M` (reader) | N/A | **Toggle menu flap** | Replaces Tab in reader |
+| `Shift+F` (reader) | Toggle mode (speed ↔ scroll) | **Removed** | Replaced by Space/Shift+Space from Page |
+| `Space` (page) | N/A | **Enter Focus** at highlighted word | Page is parent, Space launches Focus |
+| `Shift+Space` (page) | N/A | **Enter Flow** at highlighted word | Page is parent, Shift+Space launches Flow |
+| `Space` (focus/flow) | Play/pause toggle | **Pause + return to Page** | Pausing always returns to Page for context |
+| `Shift+←`/`→`/`↑`/`↓` (page) | N/A | **Word-level selection** | Navigate between words to set anchor |
+| `Shift+D` (page) | N/A | **Define** highlighted word | Quick define from Page |
+| `Shift+N` (page) | N/A | **Make Note** on highlighted word | Opens inline note popover |
+| `↑`/`↓` (all reader views) | WPM (focus only) | **Adjust WPM** (±25) in all views | Universal |
+| `/` (any) | Focus search (library only) | **Library search** (dedicated overlay) | Fastest key for most common search |
+| `Ctrl+K` (any) | Command palette (everything) | **Command palette** (non-library only) | Actions, settings, chapters, shortcuts |
 
 ### New Data Model Fields
 
@@ -1964,6 +2059,10 @@ interface BlurbyDoc {
   tags?: string[];          // 20I: free-form tags
   collection?: string;      // 20I: single collection assignment
 }
+
+// Settings type change (20U):
+// readingMode: "focus" | "flow"        ← before
+// readingMode: "focus" | "flow" | "page"  ← after
 ```
 
 ### New Components
@@ -1977,6 +2076,10 @@ interface BlurbyDoc {
 | `TagPickerOverlay.tsx` | 20I | Tag/collection manager |
 | `HighlightsOverlay.tsx` | 20M | Cross-document highlights search |
 | `QuickSettingsPopover.tsx` | 20N | Context-sensitive mini settings |
+| `PageReaderView.tsx` | 20U | Default reading view — paginated, word selection, note/define triggers |
+| `ReaderBottomBar.tsx` | 20U | Unified bottom bar across Page/Focus/Flow |
+| `NotePopover.tsx` | 20V | Inline floating note input anchored to highlighted word |
+| `ReadingLogExporter.tsx` | 20W | Session logging UI + "Open Reading Log" button |
 
 ### Agent Assignments
 
@@ -1994,12 +2097,13 @@ interface BlurbyDoc {
 | 10 | IPC channels — `open-doc-source`, `get-all-highlights`, snooze timer + notification in main process | `electron-fixer` (sonnet) | Step 1 |
 | 11 | Tab zone cycling (library) — focus management between search/grid/sidebar | `renderer-fixer` (sonnet) | Steps 3, 6 |
 | 12 | Article provenance display (20S) — APA subtext in DocCard/GridCard, reader header, command palette search index | `renderer-fixer` (sonnet) | Steps 3, 5 |
-| 13 | Settings update — `HotkeyMapSettings.tsx` full rewrite with all new shortcuts, organized by section | `renderer-fixer` (sonnet) | Steps 2-12 |
-| 14 | CSS — focus rings, overlay styles, filter pills, command palette, Go-To badge, selection checkboxes, provenance subtext. All via CSS custom properties | `renderer-fixer` (sonnet) | Steps 3-12 |
-| 15 | Tests — keyboard shortcut tests (all contexts), overlay dismiss tests, undo stack tests, G-sequence timeout tests, filter toggle tests, provenance display tests | `renderer-fixer` (sonnet) | Steps 2-14 |
-| 16 | Full test suite + build verification | `test-runner` (haiku) | Step 15 |
+| 13 | Three-mode reader (20U) — `PageReaderView.tsx`, `ReaderBottomBar.tsx`, ReaderContainer three-way rendering, unified `useReaderKeys` (remove mode gates, add Tab/M/universal hotkeys), remove per-mode bottom bars, position mapping between modes | `renderer-fixer` (sonnet) | Step 2 |
+| 14 | Settings update — `HotkeyMapSettings.tsx` full rewrite with all new shortcuts, organized by section (Global, Library, Reader Universal, Reader Focus, Reader Flow, Reader Page, Overlays) | `renderer-fixer` (sonnet) | Steps 2-13 |
+| 15 | CSS — focus rings, overlay styles, filter pills, command palette, Go-To badge, selection checkboxes, provenance subtext, mode selector buttons, page transition, unified bottom bar. All via CSS custom properties | `renderer-fixer` (sonnet) | Steps 3-13 |
+| 16 | Tests — keyboard shortcut tests (all contexts + all 3 reader modes), overlay dismiss tests, undo stack tests, G-sequence timeout tests, filter toggle tests, provenance display tests, page mode pagination tests, mode cycling tests | `renderer-fixer` (sonnet) | Steps 2-15 |
+| 17 | Full test suite + build verification | `test-runner` (haiku) | Step 16 |
 
-> **Parallelization:** Steps 1-2 are parallel (main vs renderer). Steps 5-9 + 12 are all parallelizable after their deps. Step 10 is parallel with Steps 3-9. Steps 13-14 wait for all feature work.
+> **Parallelization:** Steps 1-2 are parallel (main vs renderer). Steps 5-9 + 12-13 are all parallelizable after their deps. Step 10 is parallel with Steps 3-9. Steps 14-15 wait for all feature work.
 
 ### Acceptance Criteria
 
@@ -2096,11 +2200,13 @@ interface BlurbyDoc {
 - [ ] `Ctrl+↑` jumps to start, `Ctrl+↓` jumps to end in scroll reader
 - [ ] In library: `Ctrl+↑` focuses first doc, `Ctrl+↓` focuses last doc
 
-**Tab Zones (20Q)**
-- [ ] `Tab` cycles focus: search bar → library grid → sidebar in library view
-- [ ] `Shift+Tab` reverses cycle
-- [ ] Reader `Tab` behavior unchanged (toggle menu flap)
-- [ ] Sidebar menu toggle available via `G then M`
+**Tab / Zone Cycling (20Q)**
+- [ ] Library: `Tab` cycles focus — search bar → library grid → sidebar. `Shift+Tab` reverses
+- [ ] Reader: `Tab` cycles reading mode — Focus → Flow → Page → Focus
+- [ ] Reader: `Shift+Tab` reverses — Focus → Page → Flow → Focus
+- [ ] Reader: `M` toggles menu flap (replaces old Tab behavior)
+- [ ] `Shift+F` mode switch removed (Tab replaces it)
+- [ ] Sidebar menu toggle available via `G then M` in library
 
 **Escape Layering (20R)**
 - [ ] `Escape` closes topmost layer in defined priority order
@@ -2119,9 +2225,56 @@ interface BlurbyDoc {
 - [ ] Graceful fallbacks: no author → omit; no date → "(n.d.)"; no domain → hostname
 
 **Settings & Data (20T)**
-- [ ] `HotkeyMapSettings.tsx` displays ALL shortcuts organized by section
+- [ ] `HotkeyMapSettings.tsx` displays ALL shortcuts organized by section (Global, Library, Reader Universal, Reader Focus, Reader Flow, Reader Page, Overlays)
 - [ ] Schema migration adds `unread`, `snoozedUntil`, `tags`, `collection` with safe defaults
 - [ ] Existing library data migrates without data loss
+
+**Page-as-Parent Reader (20U)**
+- [ ] `readingMode` type is `"focus" | "flow" | "page"` in `types.ts`, default `"page"`
+- [ ] Opening a document from library lands in Page view (not Focus)
+- [ ] `PageReaderView.tsx` renders paginated text with no word highlighting
+- [ ] Page: Left/Right arrows flip pages, tap left/right screen halves also flips
+- [ ] Page: CSS opacity fade transition between pages (100ms)
+- [ ] Page: Click a word to highlight it (sets anchor for Focus/Flow)
+- [ ] Page: `Shift+←`/`→`/`↑`/`↓` moves highlight between words for precision selection
+- [ ] Page: `Shift+D` defines highlighted word, `Shift+N` opens note popover
+- [ ] Page: Right-click highlighted word → context menu with "Define" and "Make Note"
+- [ ] Page: `Space` enters Focus at highlighted word, `Shift+Space` enters Flow
+- [ ] Focus/Flow: `Space` pauses AND returns to Page view (not just toggle play)
+- [ ] On return to Page: word position is highlighted, user can re-enter Focus or Flow
+- [ ] `ReaderBottomBar.tsx` renders identically across Page/Focus/Flow
+- [ ] Bottom bar: WPM slider always visible, font controls, Focus + Flow mode buttons (orange when active), chapter nav
+- [ ] Bottom bar hint text adapts per view
+- [ ] Bottom bar opacity: full in Page, fades to ~8% during Focus/Flow playback
+- [ ] Per-mode bottom bars removed from `ReaderView.tsx` and `ScrollReaderView.tsx`
+- [ ] `Up/Down` = ±25 WPM in all views. `Shift+Up/Down` = ±100 WPM in all views
+- [ ] `M` toggles menu flap in all views. `Shift+F` removed. Tab removed from reader
+- [ ] Position mapping: Page highlight ↔ Focus wordIndex ↔ Flow flowWordIndex
+
+**Notes System (20V)**
+- [ ] `Shift+N` on highlighted word opens floating note popover
+- [ ] Popover: text field, Save button, auto-focused, `Enter` saves, `Escape` cancels
+- [ ] Saved notes shown as subtle dot/underline on word in Page view
+- [ ] Hover on noted word shows tooltip preview
+- [ ] Notes exported to `{Document Title} — Reading Notes.docx` in source folder
+- [ ] Docx format: TOC → document headers → quoted highlight + APA citation + note + timestamp
+- [ ] Same-document notes grouped under shared header
+- [ ] Toast: "Note saved to Reading Notes.docx" with "Open" action
+- [ ] `save-reading-note` IPC channel in main process
+
+**Reading Log (20W)**
+- [ ] Each Focus/Flow session logged as a row in `Blurby Reading Log.xlsx`
+- [ ] Session timer starts on entering Focus/Flow, stops on pause/exit
+- [ ] Final WPM recorded (not intermediate changes)
+- [ ] Tab 1: Reading Log table (Date, Document, Author, Format, Duration, Words Read, WPM, Pages, Mode, Chapter)
+- [ ] Tab 2: Dashboard with KPIs and charts (formulas from Tab 1)
+- [ ] "Export CSV" replaced with "Open Reading Log" in Reading Statistics
+- [ ] `log-reading-session` IPC channel in main process
+
+**Search Split (20X)**
+- [ ] `/` opens library search overlay (documents only)
+- [ ] `Ctrl+K` scoped to non-library items (actions, settings, chapters, shortcuts)
+- [ ] Both available from any view
 
 **General**
 - [ ] No shortcut conflicts between contexts (library keys don't fire in reader and vice versa)
@@ -2131,6 +2284,140 @@ interface BlurbyDoc {
 - [ ] E-ink mode respected: overlays use solid borders instead of shadows, no animations
 - [ ] `npm test` passes (including all new keyboard/overlay tests)
 - [ ] `npm run build` succeeds
+
+---
+
+## Sprint 21: UX Polish & Reading Intelligence
+
+**Goal:** Close the gap between functional and polished. Fix known UX friction, add reading session intelligence, and elevate the library experience to feel professional and intentional.
+
+**Prerequisite:** Sprint 20 (keyboard-first UX, Page-as-parent reader). Independent of Sprints 18B/18C/19.
+
+**Tier:** Full (touches library, reader, stats, main process, CSS).
+
+**Design spec references:** `docs/project/three-mode-reader-redesign.md`, `docs/project/hotkey-reference.md`
+
+### Spec
+
+**21A. Enter Opens Last Read**
+- In library, pressing `Enter` on any document opens it at its last reading position (existing `position` field in BlurbyDoc)
+- If no prior position, opens at the beginning (page 1 in Page view)
+- Files affected: `LibraryContainer.tsx`, `ReaderContainer.tsx`
+
+**21B. Click-Outside Closes Flap**
+- When the menu flap is open, clicking anywhere outside the flap closes it
+- Implement via overlay backdrop or document-level click listener with `stopPropagation` on flap
+- Files affected: `MenuFlap.tsx`, `src/styles/global.css`
+
+**21C. Move Settings to Top-Right of Flap**
+- Settings gear icon/link moves to the top-right corner of the menu flap panel
+- Currently at bottom — easy to miss
+- Files affected: `MenuFlap.tsx`, `src/styles/global.css`
+
+**21D. Book Thumbnails in List Mode**
+- List mode currently shows no images for books. Add small square thumbnails (~60x60px) on the left side, matching URL article cards (visible in the library screenshot)
+- Use existing `get-cover-image` IPC + LRU cache pipeline
+- For docs without covers: show monogram placeholder (first letter of title, brand orange bg)
+- Files affected: `DocCard.tsx`, `src/styles/global.css`
+
+**21E. File Type Badge in Grid Mode**
+- List mode shows file type badges (epub, pdf, mobi, url) but grid mode does not
+- Add file type badge to top-right corner of the hero image/cover in grid cards
+- Styled: small pill, semi-transparent background, white text, same design as list mode badges
+- Files affected: `GridCard.tsx`, `src/styles/global.css`
+
+**21F. Hover Actions as Buttons, Not Text**
+- When hovering over a library card's hero image, action buttons appear but currently render as text
+- Replace with proper icon buttons (star, copy, queue, archive, trash) with tooltips
+- Files affected: `DocCard.tsx`, `GridCard.tsx`, `src/styles/global.css`
+
+**21G. Frozen Top Menu on Scroll**
+- As user scrolls down in library, the top menu bar (title row, filter tabs, and the line under filters) should be sticky/frozen
+- Use `position: sticky; top: 0; z-index: 10;` with a background color matching the theme
+- Ensure the scroll content starts below the frozen header
+- Files affected: `LibraryView.tsx` or `LibraryContainer.tsx`, `src/styles/global.css`
+
+**21H. Search Bar → Magnifying Glass Icon**
+- Remove the full-width search bar from the library
+- Replace with a magnifying glass icon placed left of the grid/list toggle buttons
+- Clicking the icon (or pressing `/`) opens the search overlay
+- Files affected: `LibraryView.tsx`, `src/styles/global.css`
+
+**21I. Move Sort Dropdown to Filter Line**
+- Sort dropdown ("closest to done", etc.) currently sits right of search bar
+- Move it to the filter tab line, right-justified (aligned with filter tabs like "all", "favorites", "archived")
+- Files affected: `LibraryView.tsx`, `src/styles/global.css`
+
+**21J. Open Reading Log from Stats**
+- In Reading Statistics panel, replace "Export CSV" button with "Open Reading Log"
+- Opens the `Blurby Reading Log.xlsx` file in the user's default spreadsheet app via `shell.openPath()`
+- If the file doesn't exist yet, create it from template first
+- Files affected: stats panel component, `main/ipc-handlers.js`
+
+**21K. Rename "Sources" to "Readings"**
+- At the top of the library view, the label currently says "sources" (e.g., "31 sources")
+- Change to "readings" (e.g., "31 readings")
+- Files affected: `LibraryView.tsx`
+
+**21L. Paywall Login Prompt**
+- When a URL import fails due to paywall (detected via HTTP 403, paywall meta tags, or content length suspiciously short), prompt the user to log in to the site
+- UI flow: Toast → "This article may be behind a paywall. Log in to access it?" → Button opens site login modal (existing authenticated fetch infrastructure from `url-extractor.js` line 220-230)
+- Connection saved for future imports from the same domain
+- Files affected: `main/url-extractor.js`, `main/ipc-handlers.js`, renderer toast/dialog
+
+**21M. Hotkey Coaching Toasts**
+- When a user mouse-clicks something they could have hotkey'd, briefly show a light gray floating tooltip in the bottom-right corner: "Next time try `[HOTKEY]` to get there faster"
+- Rounded corners, subtle, auto-dismisses after 3 seconds
+- Tracking: only show each coaching toast once per action (store shown hints in settings to avoid nagging)
+- Examples: clicking archive → "Try `E`", clicking star → "Try `S`", clicking search → "Try `/`"
+- Files affected: new `HotkeyCoach.tsx` component, settings persistence, `src/styles/global.css`
+
+**21N. Reading Session Timer**
+- Each reading session (Focus or Flow) must be timed from entry to exit/pause
+- Total session duration recorded alongside final WPM
+- If WPM changes during session, only the final WPM is logged
+- Data stored in reading log (20W) and existing Reading Statistics (`history.json`)
+- Files affected: `ReaderContainer.tsx` (session state), `main/ipc-handlers.js` (log entry)
+
+**21O. Fix AVG WPM Miscalculation**
+- Current "AVG WPM" in Reading Statistics shows dramatically low values (e.g., 26 WPM)
+- Likely counting paused/idle time in the denominator, or using total elapsed time instead of active reading time
+- Fix: AVG WPM = total words read ÷ total active reading time (Focus + Flow time only, excluding paused/Page time)
+- Files affected: stats calculation in `main/ipc-handlers.js` or renderer stats component
+
+**21P. Drag-and-Drop Anywhere**
+- Currently drag-and-drop file import only works when hovering over the "NOT STARTED" section
+- Must be viable over the entire app window (library, reader, settings — any view)
+- Implement at the App.tsx level with a full-window drop zone overlay
+- Files affected: `App.tsx` or `LibraryContainer.tsx`, `src/styles/global.css`
+
+**21Q. Focus Mode Time Displays**
+- In Focus mode, display two time indicators:
+  - **Time to end of chapter**: calculated from current word position to chapter end at current WPM
+  - **Time to end of document**: calculated from current word position to document end at current WPM
+- Shown in the bottom bar or as subtle overlays in the Focus view
+- Updates live as WPM changes
+- Files affected: `ReaderView.tsx` or `ReaderBottomBar.tsx`
+
+### Acceptance Criteria
+
+**21A** — [ ] `Enter` opens document at last `position`; no position → page 1
+**21B** — [ ] Clicking outside open flap closes it; clicking inside flap does not close it
+**21C** — [ ] Settings link/icon is in top-right corner of flap
+**21D** — [ ] List mode shows ~60x60 thumbnails for all docs; monogram fallback for missing covers
+**21E** — [ ] Grid mode shows file type badge (epub/pdf/mobi/url) in top-right of hero image
+**21F** — [ ] Hover actions on cards render as icon buttons with tooltips, not text
+**21G** — [ ] Top menu (title, filters, divider line) stays visible while scrolling library
+**21H** — [ ] Search bar replaced with magnifying glass icon; clicking or `/` opens search overlay
+**21I** — [ ] Sort dropdown on the filter line, right-justified
+**21J** — [ ] "Open Reading Log" button in stats opens .xlsx; creates from template if needed
+**21K** — [ ] "sources" label changed to "readings" throughout library
+**21L** — [ ] Paywall detection prompts user to log in; saved connection reused for future imports
+**21M** — [ ] Mouse-click on hotkey-able action shows coaching toast once; auto-dismisses after 3s
+**21N** — [ ] Session timer tracks Focus/Flow duration; final WPM logged per session
+**21O** — [ ] AVG WPM uses active reading time only; no idle/paused inflation
+**21P** — [ ] Drag-and-drop works from any area of the app window, not just "NOT STARTED"
+**21Q** — [ ] Focus mode shows time-to-end-of-chapter and time-to-end-of-document
 
 ---
 

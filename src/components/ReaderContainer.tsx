@@ -7,6 +7,8 @@ import { useReaderKeys } from "../hooks/useKeyboardShortcuts";
 import ErrorBoundary from "./ErrorBoundary";
 import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
+import PageReaderView from "./PageReaderView";
+import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
@@ -57,13 +59,20 @@ export default function ReaderContainer({
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
   );
-  // E-ink ghosting prevention: track page turns for periodic refresh
+
+  // ── Three-mode state ───────────────────────────────────────────────────
+  // "page" is the default parent view. "focus"/"flow" are sub-modes.
+  const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow">("page");
+
+  // Highlighted word in Page view — anchor for Focus/Flow entry
+  const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
+
+  // E-ink ghosting prevention
   const [einkPageTurns, setEinkPageTurns] = useState(0);
   const [showEinkRefresh, setShowEinkRefresh] = useState(false);
   const triggerEinkRefresh = useCallback(() => {
     if (!isEink) return;
     setShowEinkRefresh(true);
-    // Black phase -> white phase -> done (100ms each)
     setTimeout(() => setShowEinkRefresh(false), 200);
   }, [isEink]);
   const handleEinkPageTurn = useCallback(() => {
@@ -77,11 +86,16 @@ export default function ReaderContainer({
       return next;
     });
   }, [isEink, settings.einkRefreshInterval, triggerEinkRefresh]);
+
   const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number }>>([]);
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
 
-  // Compute paragraph breaks for rhythm pauses
+  // 21N: Active reading session timer (Focus/Flow only, not Page)
+  const activeReadingMsRef = useRef(0);
+  const activeReadingStartRef = useRef<number | null>(null);
+
+  // Tokenize content
   const tokenized = useMemo(() => {
     if (!activeDoc?.content) return { words: [] as string[], paragraphBreaks: new Set<number>() };
     return tokenizeWithMeta(activeDoc.content);
@@ -93,8 +107,20 @@ export default function ReaderContainer({
   const reader = useReader(effectiveWpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
-  // Derive readerMode from settings
-  const readerMode = settings.readingMode === "flow" ? "scroll" : "speed";
+  // Track active reading time when entering/leaving Focus or Flow
+  useEffect(() => {
+    if (readingMode !== "page" && playing) {
+      activeReadingStartRef.current = Date.now();
+    } else {
+      if (activeReadingStartRef.current) {
+        activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
+        activeReadingStartRef.current = null;
+      }
+    }
+  }, [readingMode, playing]);
+
+  // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
+  const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : "page";
 
   const words = tokenized.words;
   wordsRef.current = words;
@@ -102,8 +128,10 @@ export default function ReaderContainer({
   // Init reader on mount / doc change
   useEffect(() => {
     initReader(activeDoc.position || 0);
+    setHighlightedWordIndex(activeDoc.position || 0);
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = activeDoc.position || 0;
+    setReadingMode("page"); // Always start in Page view
     api.getDocChapters(activeDoc.id).then((ch) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
   }, [activeDoc.id, initReader]);
 
@@ -119,13 +147,16 @@ export default function ReaderContainer({
   const finishReading = useCallback((finalPos: number) => {
     onUpdateProgress(activeDoc.id, finalPos);
     api.updateDocProgress(activeDoc.id, finalPos);
-    // Record reading session
-    const elapsed = Date.now() - (sessionStartRef.current || Date.now());
-    const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
-    if (wordsRead > 0 && elapsed > 1000) {
-      api.recordReadingSession(activeDoc.title, wordsRead, elapsed, wpm);
+    // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
+    if (activeReadingStartRef.current) {
+      activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
+      activeReadingStartRef.current = null;
     }
-    // Auto-archive at 100%
+    const activeMs = activeReadingMsRef.current;
+    const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
+    if (wordsRead > 0 && activeMs > 1000) {
+      api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
+    }
     if (finalPos >= words.length - 1 && words.length > 0) {
       api.markDocCompleted();
       onArchiveDoc(activeDoc.id);
@@ -134,22 +165,32 @@ export default function ReaderContainer({
   }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, onExitReader, words.length]);
 
   const handleExitReader = useCallback(() => {
-    requestExit(activeDoc, finishReading);
-  }, [activeDoc, requestExit, finishReading]);
+    if (readingMode === "page") {
+      // Exit from Page → leave reader entirely
+      requestExit(activeDoc, finishReading);
+    } else {
+      // Exit from Focus/Flow → return to Page (pause)
+      if (playing) reader.togglePlay();
+      setHighlightedWordIndex(wordIndex);
+      setReadingMode("page");
+    }
+  }, [readingMode, requestExit, activeDoc, finishReading, playing, reader, wordIndex]);
 
   const handleScrollExit = useCallback((finalPos: number) => {
-    finishReading(finalPos);
-  }, [finishReading]);
+    // Flow mode pause → return to Page
+    setHighlightedWordIndex(finalPos);
+    setReadingMode("page");
+  }, []);
 
   const handleScrollProgress = useCallback((pos: number) => {
     api.updateDocProgress(activeDoc.id, pos);
     onUpdateProgress(activeDoc.id, pos);
   }, [activeDoc, onUpdateProgress]);
 
-  // Throttled RSVP progress save: every 5s or 50 words during playback
+  // Throttled RSVP progress save
   const rsvpLastSaveRef = useRef({ time: 0, wordIndex: 0 });
   useEffect(() => {
-    if (!playing || readerMode !== "speed") return;
+    if (!playing || readingMode !== "focus") return;
     const now = Date.now();
     const last = rsvpLastSaveRef.current;
     const timeDelta = now - last.time;
@@ -159,18 +200,46 @@ export default function ReaderContainer({
       api.updateDocProgress(activeDoc.id, wordIndex);
       onUpdateProgress(activeDoc.id, wordIndex);
     }
-  }, [playing, wordIndex, activeDoc, readerMode, onUpdateProgress]);
+  }, [playing, wordIndex, activeDoc, readingMode, onUpdateProgress]);
 
-  const handleSwitchToScroll = useCallback(() => {
-    if (playing) {
+  // ── Mode transitions ───────────────────────────────────────────────────
+
+  /** Enter Focus from Page at highlighted word */
+  const handleEnterFocus = useCallback(() => {
+    jumpToWord(highlightedWordIndex);
+    setReadingMode("focus");
+    updateSettings({ readingMode: "focus" });
+    // Auto-play Focus mode
+    if (!playing) setTimeout(() => reader.togglePlay(), 50);
+  }, [highlightedWordIndex, jumpToWord, updateSettings, playing, reader]);
+
+  /** Enter Flow from Page at highlighted word */
+  const handleEnterFlow = useCallback(() => {
+    setReadingMode("flow");
+    updateSettings({ readingMode: "flow" });
+  }, [updateSettings]);
+
+  /** Pause Focus/Flow → return to Page */
+  const handlePauseToPage = useCallback(() => {
+    if (playing) reader.togglePlay();
+    setHighlightedWordIndex(wordIndex);
+    setReadingMode("page");
+    updateSettings({ readingMode: "page" });
+  }, [playing, reader, wordIndex, updateSettings]);
+
+  /** Toggle play in Focus/Flow: Space = pause + return to Page */
+  const handleTogglePlay = useCallback(() => {
+    if (readingMode === "page") {
+      // Space in Page → enter Focus
+      handleEnterFocus();
+    } else if (playing) {
+      // Space while playing in Focus/Flow → pause → Page
+      handlePauseToPage();
+    } else {
+      // Space while paused in Focus/Flow → resume play
       reader.togglePlay();
     }
-    updateSettings({ readingMode: "flow" });
-  }, [playing, reader, updateSettings]);
-
-  const handleSwitchToFocus = useCallback(() => {
-    updateSettings({ readingMode: "focus" });
-  }, [updateSettings]);
+  }, [readingMode, playing, handleEnterFocus, handlePauseToPage, reader]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
@@ -181,9 +250,11 @@ export default function ReaderContainer({
   }, [activeDoc, onToggleFavorite]);
 
   const handleSwitchMode = useCallback(() => {
-    if (readerMode === "speed") handleSwitchToScroll();
-    else handleSwitchToFocus();
-  }, [readerMode, handleSwitchToScroll, handleSwitchToFocus]);
+    // Cycle: page → focus → flow → page
+    if (readingMode === "page") handleEnterFocus();
+    else if (readingMode === "focus") handleEnterFlow();
+    else handlePauseToPage();
+  }, [readingMode, handleEnterFocus, handleEnterFlow, handlePauseToPage]);
 
   // Narration (TTS)
   const narration = useNarration();
@@ -220,7 +291,20 @@ export default function ReaderContainer({
     if (curIdx < chs.length - 1) jumpToWord(chs[curIdx + 1].wordIndex);
   }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
 
-  useReaderKeys("reader", readerMode, togglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration);
+  const handleJumpToChapter = useCallback((chapterIndex: number) => {
+    const chs = docChapters.length > 0
+      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
+      : detectChapters(activeDoc.content, words);
+    if (chs[chapterIndex]) {
+      jumpToWord(chs[chapterIndex].wordIndex);
+      if (readingMode === "page") {
+        setHighlightedWordIndex(chs[chapterIndex].wordIndex);
+      }
+    }
+  }, [activeDoc, docChapters, words, jumpToWord, readingMode]);
+
+  // Keyboard shortcuts — pass handleTogglePlay which handles Space→Page behavior
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({
@@ -244,6 +328,13 @@ export default function ReaderContainer({
     einkRefreshInterval: settings.einkRefreshInterval,
   }), [settings.flowTextSize, settings.layoutSpacing, settings.rhythmPauses, settings.punctuationPauseMs, settings.readingRuler, settings.fontFamily, isEink, settings.einkRefreshInterval]);
 
+  const pageSettings = useMemo(() => ({
+    flowTextSize: settings.flowTextSize,
+    layoutSpacing: settings.layoutSpacing,
+    fontFamily: settings.fontFamily,
+    isEink,
+  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink]);
+
   const menuFlap = (
     <MenuFlap
       open={menuFlapOpen}
@@ -258,10 +349,15 @@ export default function ReaderContainer({
     />
   );
 
-  if (readerMode === "scroll") {
-    return (
-      <>
-        <ErrorBoundary onReset={() => onExitReader(wordIndex)}>
+  // Determine current word index for bottom bar (varies by mode)
+  const currentWordIndex = readingMode === "page" ? highlightedWordIndex : wordIndex;
+
+  // ── Render ─────────────────────────────────────────────────────────────
+
+  const renderView = () => {
+    switch (readingMode) {
+      case "flow":
+        return (
           <ScrollReaderView
             activeDoc={activeDoc}
             wpm={effectiveWpm}
@@ -272,44 +368,83 @@ export default function ReaderContainer({
             onAdjustFocusTextSize={adjustFocusTextSize}
             onExit={handleScrollExit}
             onProgressUpdate={handleScrollProgress}
-            onSwitchToFocus={handleSwitchToFocus}
+            onSwitchToFocus={handleEnterFocus}
             onToggleFlap={toggleMenuFlap}
             onPageTurn={handleEinkPageTurn}
           />
-        </ErrorBoundary>
-        {menuFlap}
-        {showEinkRefresh && <EinkRefreshOverlay />}
-      </>
-    );
-  }
+        );
+      case "focus":
+        return (
+          <ReaderView
+            activeDoc={activeDoc}
+            words={words}
+            wordIndex={wordIndex}
+            wpm={effectiveWpm}
+            focusTextSize={focusTextSize}
+            playing={playing}
+            escPending={escPending}
+            isMac={platform === "darwin"}
+            settings={rsvpSettings}
+            externalChapters={docChapters.length > 0 ? docChapters : undefined}
+            onWordUpdateRef={onWordUpdateRef}
+            togglePlay={handleTogglePlay}
+            exitReader={handleExitReader}
+            onSetWpm={setWpm}
+            onAdjustFocusTextSize={adjustFocusTextSize}
+            onSwitchToScroll={handleEnterFlow}
+            onJumpToWord={jumpToWord}
+            onToggleFlap={toggleMenuFlap}
+            onPrevChapter={handlePrevChapter}
+            onNextChapter={handleNextChapter}
+            onEinkRefresh={triggerEinkRefresh}
+          />
+        );
+      case "page":
+      default:
+        return (
+          <PageReaderView
+            activeDoc={activeDoc}
+            wpm={effectiveWpm}
+            focusTextSize={focusTextSize}
+            settings={pageSettings}
+            highlightedWordIndex={highlightedWordIndex}
+            onHighlightedWordChange={setHighlightedWordIndex}
+            onEnterFocus={handleEnterFocus}
+            onEnterFlow={handleEnterFlow}
+            onExit={(pos) => finishReading(pos)}
+            onToggleFlap={toggleMenuFlap}
+          />
+        );
+    }
+  };
 
   return (
     <>
-      <ErrorBoundary onReset={() => onExitReader(wordIndex)}>
-        <ReaderView
-          activeDoc={activeDoc}
-          words={words}
-          wordIndex={wordIndex}
-          wpm={effectiveWpm}
-          focusTextSize={focusTextSize}
-          playing={playing}
-          escPending={escPending}
-          isMac={platform === "darwin"}
-          settings={rsvpSettings}
-          externalChapters={docChapters.length > 0 ? docChapters : undefined}
-          onWordUpdateRef={onWordUpdateRef}
-          togglePlay={togglePlay}
-          exitReader={handleExitReader}
-          onSetWpm={setWpm}
-          onAdjustFocusTextSize={adjustFocusTextSize}
-          onSwitchToScroll={handleSwitchToScroll}
-          onJumpToWord={jumpToWord}
-          onToggleFlap={toggleMenuFlap}
-          onPrevChapter={handlePrevChapter}
-          onNextChapter={handleNextChapter}
-          onEinkRefresh={triggerEinkRefresh}
-        />
+      <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
+        {renderView()}
       </ErrorBoundary>
+
+      {/* Unified bottom bar — rendered at container level */}
+      <ReaderBottomBar
+        activeDoc={activeDoc}
+        words={words}
+        wordIndex={currentWordIndex}
+        wpm={effectiveWpm}
+        focusTextSize={focusTextSize}
+        readingMode={readingMode}
+        playing={playing}
+        isEink={isEink}
+        chapters={docChapters}
+        onSetWpm={setWpm}
+        onAdjustFocusTextSize={adjustFocusTextSize}
+        onEnterFocus={handleEnterFocus}
+        onEnterFlow={handleEnterFlow}
+        onPrevChapter={handlePrevChapter}
+        onNextChapter={handleNextChapter}
+        onJumpToChapter={handleJumpToChapter}
+        onEinkRefresh={triggerEinkRefresh}
+      />
+
       {menuFlap}
       {showEinkRefresh && <EinkRefreshOverlay />}
     </>

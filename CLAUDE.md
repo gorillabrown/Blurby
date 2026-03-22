@@ -6,7 +6,7 @@
 1. **Always update Blurby documentation** (CLAUDE.md with architecture/feature changes, LESSONS_LEARNED.md on non-trivial discoveries).
 2. **Always review CLAUDE.md and LESSONS_LEARNED.md** before sessions that may change the codebase, architecture, or UX.
 3. After completion of codebase work by Claude Code, tag each completed item with inline `✅ COMPLETED` markers in ROADMAP.md.
-4. **Use plain language with codebase terms parenthetical** — e.g., speed reading view (ReaderView), scroll reading view (ScrollReaderView), word index (wordIndex), etc.
+4. **Use plain language with codebase terms parenthetical** — e.g., focus reading (ReaderView), flow reading (ScrollReaderView), page reading (PageReaderView), bottom bar (ReaderBottomBar), word index (wordIndex), etc.
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 7. **CLAUDE.md stays under ~20k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
@@ -135,8 +135,12 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| RSVP Reader (ReaderView) | ✅ Built | ORP highlighting, WPM control, ref-based playback (Sprint 5) |
-| Scroll/Flow Reader (ScrollReaderView) | ✅ Built | Word-level highlighting, ref-based flow mode, double-Escape exit |
+| Page View (PageReaderView) | 📋 Sprint 20U | DEFAULT reading view — paginated, word selection, note/define, launches Focus/Flow |
+| Focus Mode (ReaderView) | ✅ Built | RSVP word-at-a-time, ORP highlighting, WPM control — sub-mode of Page (Sprint 20U) |
+| Flow Mode (ScrollReaderView) | ✅ Built | Scrolling text with word-level highlighting — sub-mode of Page (Sprint 20U) |
+| Unified Bottom Bar (ReaderBottomBar) | 📋 Sprint 20U | Shared controls across Page/Focus/Flow — WPM, font, mode buttons, chapters |
+| Notes System | 📋 Sprint 20V | Inline notes from Page view, exported to .docx with APA citations |
+| Reading Log | 📋 Sprint 20W | Session logging to .xlsx with dashboard KPIs |
 | Library Management | ✅ Built | Grid/list view, search, favorites, archives, memoized computed state |
 | Folder Watching | ✅ Built | Chokidar (lazy-loaded), on-demand content loading, stale folder cleanup |
 | URL Article Import | ✅ Built | Readability + authenticated fetching (lazy-loaded) |
@@ -176,7 +180,8 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 - **Sprint 18B: Chrome extension** — "Send to Blurby" with WebSocket + cloud fallback
 - **Sprint 18C: Android app** — React Native port with cloud sync
 - **Sprint 19: Sync hardening** — operation log, tombstones, staging directory, revision counters, document content sync, checksum verification, full reconciliation
-- **Sprint 20: Keyboard-First UX** — Command palette (Ctrl+K), J/K navigation, G-sequences, undo (Z), snooze (H), tags (L), 7 new overlay components, 27 new shortcuts (Superhuman-inspired)
+- **Sprint 20: Keyboard-First UX** — Command palette (`Ctrl+K` non-library, `/` library search), J/K nav, G-sequences, undo (Z), snooze (H), tags (L), Page-as-parent reader (`PageReaderView` default → Space=Focus, Shift+Space=Flow → Space pauses to Page), unified bottom bar (`ReaderBottomBar`), `M` for menu flap, notes system (.docx), reading log (.xlsx), 11 new components, 30+ shortcuts. Spec: `docs/project/three-mode-reader-redesign.md`
+- **Sprint 21: UX Polish & Reading Intelligence** — Frozen library headers, search→magnifying glass, book thumbnails in list, file badges in grid, hotkey coaching toasts, session timer, AVG WPM fix, drag-drop anywhere, paywall login, Focus time-to-end, "sources"→"readings", 17 items
 - **Code signing** — not doing (explicit decision)
 - **Symlink protection** — not implemented
 - **Multi-window support** — someday backlog
@@ -189,6 +194,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 ✅ Sprint 16 (e-ink optimization) — independent track, completed
 **Sprint 18B** (Chrome ext) || **Sprint 18C** (Android) — parallelizable, next up
 **Sprint 19** (sync hardening) || **Sprint 20** (keyboard-first UX) — parallelizable after Sprint 18
+**Sprint 21** (UX polish) — after Sprint 20
 
 ---
 

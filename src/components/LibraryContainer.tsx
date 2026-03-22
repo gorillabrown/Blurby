@@ -15,6 +15,7 @@ import GoToIndicator from "./GoToIndicator";
 import SnoozePickerOverlay from "./SnoozePickerOverlay";
 import TagPickerOverlay from "./TagPickerOverlay";
 import QuickSettingsPopover from "./QuickSettingsPopover";
+import HotkeyCoach from "./HotkeyCoach";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
 
@@ -320,28 +321,30 @@ export default function LibraryContainer() {
     return <div className="loading-screen">loading...</div>;
   }
 
-  // Reader view
+  // Reader view — 21P: DropZone wraps reader too for drag-drop anywhere
   if (view === "reader" && activeDoc) {
     return (
       <SettingsContext.Provider value={settingsValue}>
-        <ReaderContainer
-          activeDoc={activeDoc}
-          library={library}
-          wpm={wpm}
-          setWpm={setWpm}
-          platform={platform}
-          menuFlapOpen={menuFlapOpen}
-          toggleMenuFlap={toggleMenuFlap}
-          setMenuFlapOpen={setMenuFlapOpen}
-          siteLogins={siteLogins}
-          onSiteLogin={handleSiteLogin}
-          onSiteLogout={handleSiteLogout}
-          onExitReader={handleExitReader}
-          onUpdateProgress={updateProgress}
-          onArchiveDoc={archiveDoc}
-          onToggleFavorite={toggleFavorite}
-          onOpenDocById={handleOpenDocById}
-        />
+        <DropZone onFilesDropped={handleFilesDropped} onReject={handleDropReject}>
+          <ReaderContainer
+            activeDoc={activeDoc}
+            library={library}
+            wpm={wpm}
+            setWpm={setWpm}
+            platform={platform}
+            menuFlapOpen={menuFlapOpen}
+            toggleMenuFlap={toggleMenuFlap}
+            setMenuFlapOpen={setMenuFlapOpen}
+            siteLogins={siteLogins}
+            onSiteLogin={handleSiteLogin}
+            onSiteLogout={handleSiteLogout}
+            onExitReader={handleExitReader}
+            onUpdateProgress={updateProgress}
+            onArchiveDoc={archiveDoc}
+            onToggleFavorite={toggleFavorite}
+            onOpenDocById={handleOpenDocById}
+          />
+        </DropZone>
       </SettingsContext.Provider>
     );
   }
@@ -404,6 +407,17 @@ export default function LibraryContainer() {
         {/* Sprint 20: Overlays */}
         {kbState.activeOverlay === "commandPalette" && (
           <CommandPalette
+            mode="commands"
+            library={filteredLibrary}
+            onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+            onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
+            onClose={() => kbState.setActiveOverlay(null)}
+            onOpenSettings={handleOpenSettings}
+          />
+        )}
+        {kbState.activeOverlay === "librarySearch" && (
+          <CommandPalette
+            mode="library"
             library={filteredLibrary}
             onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
             onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
@@ -453,6 +467,7 @@ export default function LibraryContainer() {
             <button className="filter-pill-clear" onClick={() => kbState.setActiveFilter("all")} aria-label="Clear filter">&times;</button>
           </div>
         )}
+        <HotkeyCoach />
       </ToastContext.Provider>
     </SettingsContext.Provider>
   );

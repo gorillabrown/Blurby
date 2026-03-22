@@ -250,7 +250,7 @@ export default function LibraryView({
                 >{folderName}</h1>
               )}
               <p className="library-stats">
-                {activeLibrary.length} {activeLibrary.length === 1 ? "source" : "sources"}
+                {activeLibrary.length} {activeLibrary.length === 1 ? "reading" : "readings"}
                 {totalWords > 0 && <> · {formatTime(totalWords, wpm)} total at {wpm} wpm</>}
                 {settings.sourceFolder && <> · <span className="library-folder-name">{settings.sourceFolder.split(/[/\\]/).pop()}</span></>}
               </p>
@@ -370,34 +370,52 @@ export default function LibraryView({
         {/* Search bar and sort */}
         {library.length > 3 && (
           <div className="library-search-wrap">
+            {/* Magnifying glass search toggle (21H) */}
             <div className="search-container">
-              <input
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(-1); }}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-                onKeyDown={(e) => {
-                  if (!searchQuery || !searchFocused || searchResults.length === 0) return;
-                  if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    setSearchIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
-                  } else if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    setSearchIndex((prev) => Math.max(prev - 1, -1));
-                  } else if (e.key === "Enter" && searchIndex >= 0) {
-                    e.preventDefault();
-                    onOpenDoc(searchResults[searchIndex]);
-                    setSearchQuery("");
-                    setSearchIndex(-1);
-                  } else if (e.key === "Escape") {
-                    setSearchQuery("");
-                    setSearchIndex(-1);
-                  }
-                }}
-                className="library-search"
-                aria-label="Search library"
-              />
+              {!searchFocused && !searchQuery ? (
+                <button
+                  className="btn library-search-toggle"
+                  onClick={() => setSearchFocused(true)}
+                  aria-label="Search library"
+                  title="Search (/ key)"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
+              ) : (
+                <input
+                  autoFocus
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(-1); }}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => { if (!searchQuery) setSearchFocused(false); }, 150)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSearchQuery("");
+                      setSearchIndex(-1);
+                      setSearchFocused(false);
+                      return;
+                    }
+                    if (!searchQuery || searchResults.length === 0) return;
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setSearchIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
+                    } else if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setSearchIndex((prev) => Math.max(prev - 1, -1));
+                    } else if (e.key === "Enter" && searchIndex >= 0) {
+                      e.preventDefault();
+                      onOpenDoc(searchResults[searchIndex]);
+                      setSearchQuery("");
+                      setSearchIndex(-1);
+                    }
+                  }}
+                  className="library-search"
+                  aria-label="Search library"
+                />
+              )}
               {searchQuery && searchFocused && (
                 <div className="search-dropdown">
                   {searchResults.length > 0 ? (
@@ -418,8 +436,10 @@ export default function LibraryView({
                 </div>
               )}
             </div>
+            {/* Sort dropdown right-justified (21I) */}
             <select
               className="sort-select"
+              style={{ marginLeft: "auto" }}
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               aria-label="Sort order"

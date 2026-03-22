@@ -97,14 +97,12 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
             <input type="checkbox" checked={selected || false} readOnly aria-label={`Select ${doc.title}`} tabIndex={-1} />
           </div>
         )}
-        {/* List-view thumbnail for URL docs with cover */}
-        {doc.source === "url" && doc.coverPath && (
+        {/* List-view thumbnail (21D) — cover image or monogram fallback */}
+        {doc.coverPath ? (
           <CoverThumbnail coverPath={doc.coverPath} title={doc.title} />
-        )}
-        {/* Monogram placeholder for URL docs without cover */}
-        {doc.source === "url" && !doc.coverPath && (
+        ) : (
           <div className="doc-card-monogram" aria-hidden="true">
-            {(doc.sourceDomain || doc.title || "?")[0].toUpperCase()}
+            {(doc.title || "?")[0].toUpperCase()}
           </div>
         )}
         <div className="doc-card-content">

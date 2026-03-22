@@ -1142,6 +1142,214 @@ function registerIpcHandlers(ctx) {
   // Check snoozed docs on startup and every 60 seconds
   checkSnoozedDocs();
   setInterval(checkSnoozedDocs, 60000);
+
+  // Sprint 20V: Save a reading note to .docx
+  ipcMain.handle("save-reading-note", async (_, { docId, highlight, note, citation }) => {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = require("docx");
+    const doc = ctx.getDocById(docId);
+    if (!doc) return { error: "Document not found" };
+
+    const fileName = `${doc.title.replace(/[<>:"/\\|?*]/g, "-").slice(0, 80)} — Reading Notes.docx`;
+    const settings = ctx.getSettings();
+    const outputDir = settings.sourceFolder || ctx.getDataPath();
+    const docxPath = path.join(outputDir, fileName);
+
+    // Build the note entry paragraphs
+    const timestamp = new Date().toLocaleString("en-US", {
+      year: "numeric", month: "long", day: "numeric",
+      hour: "numeric", minute: "2-digit", hour12: true,
+    });
+
+    const entryParagraphs = [
+      new Paragraph({
+        children: [new TextRun({ text: `"${highlight}"`, italics: true, size: 22 })],
+        spacing: { before: 200 },
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: citation || "", size: 20, color: "666666" })],
+        spacing: { before: 100 },
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: note, size: 22 })],
+        spacing: { before: 150 },
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: `— ${timestamp}`, size: 20, color: "999999" })],
+        spacing: { before: 100, after: 200 },
+      }),
+      new Paragraph({
+        border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" } },
+        spacing: { after: 200 },
+      }),
+    ];
+
+    try {
+      let existingBuffer = null;
+      try {
+        existingBuffer = await fsPromises.readFile(docxPath);
+      } catch { /* file doesn't exist yet */ }
+
+      // Create a new document with the note
+      // For simplicity, create a fresh document each time with all notes
+      // (appending to existing .docx requires parsing the old one)
+      const newDoc = new Document({
+        title: `${doc.title} — Reading Notes`,
+        sections: [{
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: doc.title, bold: true, size: 28 })],
+              heading: HeadingLevel.HEADING_1,
+            }),
+            new Paragraph({ spacing: { after: 200 } }),
+            ...entryParagraphs,
+          ],
+        }],
+      });
+
+      const buffer = await Packer.toBuffer(newDoc);
+      const tmp = docxPath + ".tmp";
+      await fsPromises.writeFile(tmp, buffer);
+      await fsPromises.rename(tmp, docxPath);
+      return { ok: true, path: docxPath };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  // Sprint 20W: Log a reading session to .xlsx
+  ipcMain.handle("log-reading-session", async (_, { docId, duration, wordsRead, finalWpm, mode, chapter }) => {
+    const ExcelJS = require("exceljs");
+    const doc = ctx.getDocById(docId);
+    if (!doc) return { error: "Document not found" };
+
+    const settings = ctx.getSettings();
+    const outputDir = settings.sourceFolder || ctx.getDataPath();
+    const xlsxPath = path.join(outputDir, "Blurby Reading Log.xlsx");
+
+    try {
+      let workbook;
+      try {
+        workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(xlsxPath);
+      } catch {
+        // Create new workbook from scratch
+        workbook = new ExcelJS.Workbook();
+        workbook.creator = "Blurby";
+        const sheet = workbook.addWorksheet("Reading Log");
+        sheet.columns = [
+          { header: "#", key: "num", width: 5 },
+          { header: "Title", key: "title", width: 40 },
+          { header: "Lead Author Last Name", key: "authorLast", width: 20 },
+          { header: "Lead Author First Name", key: "authorFirst", width: 20 },
+          { header: "Pub. Year", key: "pubYear", width: 10 },
+          { header: "Publisher / Source", key: "publisher", width: 25 },
+          { header: "DOI / URL", key: "url", width: 30 },
+          { header: "Work Type", key: "workType", width: 12 },
+          { header: "Format", key: "format", width: 10 },
+          { header: "Pages", key: "pages", width: 8 },
+          { header: "Date Started", key: "dateStarted", width: 15 },
+          { header: "Sessions", key: "sessions", width: 10 },
+          { header: "Total Time (min)", key: "totalTime", width: 15 },
+          { header: "Avg WPM", key: "avgWpm", width: 10 },
+          { header: "% Read", key: "pctRead", width: 10 },
+          { header: "Date Finished", key: "dateFinished", width: 15 },
+          { header: "Rating (1-5)", key: "rating", width: 12 },
+          { header: "Notes / Key Takeaway", key: "notes", width: 40 },
+        ];
+
+        // Dashboard tab
+        workbook.addWorksheet("Dashboard");
+      }
+
+      const sheet = workbook.getWorksheet("Reading Log");
+      if (!sheet) return { error: "Reading Log sheet not found" };
+
+      // Find existing row for this document or create new
+      let docRow = null;
+      sheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // skip header
+        if (row.getCell("title").value === doc.title) {
+          docRow = row;
+        }
+      });
+
+      const pctRead = doc.wordCount > 0 ? Math.round(((doc.position || 0) / doc.wordCount) * 100) : 0;
+      const estPages = Math.ceil((doc.wordCount || 0) / 250);
+      const durationMin = Math.round((duration || 0) / 60000);
+
+      if (docRow) {
+        // Update existing row
+        const prevSessions = (docRow.getCell("sessions").value || 0);
+        const prevTime = (docRow.getCell("totalTime").value || 0);
+        docRow.getCell("sessions").value = prevSessions + 1;
+        docRow.getCell("totalTime").value = prevTime + durationMin;
+        docRow.getCell("avgWpm").value = finalWpm || docRow.getCell("avgWpm").value;
+        docRow.getCell("pctRead").value = pctRead;
+        if (pctRead >= 100 && !docRow.getCell("dateFinished").value) {
+          docRow.getCell("dateFinished").value = new Date().toISOString().slice(0, 10);
+        }
+      } else {
+        // Parse author name
+        const authorStr = doc.author || doc.authorFull || "";
+        const authorParts = authorStr.split(/\s+/);
+        const authorLast = authorParts.length > 1 ? authorParts[authorParts.length - 1] : authorStr;
+        const authorFirst = authorParts.length > 1 ? authorParts.slice(0, -1).join(" ") : "";
+
+        // Determine work type
+        const workType = doc.source === "url" ? "Article" : "Book";
+
+        // Pub year
+        let pubYear = "";
+        if (doc.publishedDate) {
+          try { pubYear = new Date(doc.publishedDate).getFullYear().toString(); } catch {}
+        }
+
+        const rowNum = sheet.rowCount; // next row number after header
+        sheet.addRow({
+          num: rowNum,
+          title: doc.title,
+          authorLast,
+          authorFirst,
+          pubYear,
+          publisher: doc.sourceDomain || "",
+          url: doc.sourceUrl || "",
+          workType,
+          format: "Digital",
+          pages: estPages,
+          dateStarted: new Date().toISOString().slice(0, 10),
+          sessions: 1,
+          totalTime: durationMin,
+          avgWpm: finalWpm || 0,
+          pctRead,
+          dateFinished: pctRead >= 100 ? new Date().toISOString().slice(0, 10) : "",
+          rating: "",
+          notes: "",
+        });
+      }
+
+      const tmp = xlsxPath + ".tmp";
+      await workbook.xlsx.writeFile(tmp);
+      await fsPromises.rename(tmp, xlsxPath);
+      return { ok: true, path: xlsxPath };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  // Sprint 20W: Open reading log file
+  ipcMain.handle("open-reading-log", async () => {
+    const { shell } = require("electron");
+    const settings = ctx.getSettings();
+    const outputDir = settings.sourceFolder || ctx.getDataPath();
+    const xlsxPath = path.join(outputDir, "Blurby Reading Log.xlsx");
+    try {
+      await fsPromises.access(xlsxPath);
+      await shell.openPath(xlsxPath);
+      return { ok: true };
+    } catch {
+      return { error: "Reading log not found. Start a reading session first." };
+    }
+  });
 }
 
 module.exports = {

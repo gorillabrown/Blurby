@@ -1,7 +1,7 @@
 // main/migrations.js — Schema migration framework for settings.json and library.json
 // CommonJS only — Electron main process
 
-const CURRENT_SETTINGS_SCHEMA = 5;
+const CURRENT_SETTINGS_SCHEMA = 6;
 const CURRENT_LIBRARY_SCHEMA = 5;
 
 /** Count words without creating intermediate arrays. */
@@ -73,6 +73,12 @@ const settingsMigrations = [
   (data) => {
     if (data.viewMode === undefined) data.viewMode = "list";
     data.schemaVersion = 5;
+    return data;
+  },
+  // v5 → v6: Sprint 20U — default readingMode to "page" (three-mode reader)
+  (data) => {
+    data.readingMode = "page";
+    data.schemaVersion = 6;
     return data;
   },
 ];

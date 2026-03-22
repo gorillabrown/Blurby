@@ -8,6 +8,7 @@ const G_SEQUENCE_TIMEOUT = 2000;
 
 export type OverlayId =
   | "commandPalette"
+  | "librarySearch"
   | "shortcuts"
   | "highlights"
   | "quickSettings"
@@ -117,39 +118,38 @@ export function useReaderKeys(
       const s = stateRef.current;
       if (s.view !== "reader") return;
 
-      // Tab toggles flap in reader
-      if (e.key === "Tab") { e.preventDefault(); s.toggleFlap?.(); return; }
+      // M toggles menu flap (all views) — replaces old Tab behavior
+      if (e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
+      // Tab cycles reading mode (page→focus→flow→page)
+      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.switchMode?.(); return; }
       // T toggles narration
       if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
-      // S toggles favorite (replaces B)
+      // S toggles favorite
       if (e.code === "KeyS" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFavorite?.(); return; }
-      // B still works for backward compat (deprecated)
-      if (e.code === "KeyB" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFavorite?.(); return; }
-      // Shift+F toggles reading mode
-      if (e.code === "KeyF" && e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.switchMode?.(); return; }
       // [ / ] and N / P for chapter navigation
       if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevChapter?.(); return; }
       if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextChapter?.(); return; }
       if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.nextChapter?.(); return; }
       if (e.code === "KeyP" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.prevChapter?.(); return; }
-      // Shift+Up/Down for coarse WPM
+      // Shift+Up/Down for coarse WPM (all views)
       if (e.code === "ArrowUp" && e.shiftKey) { e.preventDefault(); s.adjustWpm(100); return; }
       if (e.code === "ArrowDown" && e.shiftKey) { e.preventDefault(); s.adjustWpm(-100); return; }
-      // Ctrl+=/Ctrl+- for font size (moved from bare =/-)
+      // Ctrl+=/Ctrl+- for font size
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }
       if ((e.ctrlKey || e.metaKey) && (e.code === "Minus" || e.code === "NumpadSubtract")) { e.preventDefault(); s.adjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP); return; }
-      if ((e.ctrlKey || e.metaKey) && e.code === "Digit0") { e.preventDefault(); /* reset font size handled by caller */ return; }
-      // Ctrl+Up/Down for jump to top/bottom in scroll reader
+      if ((e.ctrlKey || e.metaKey) && e.code === "Digit0") { e.preventDefault(); return; }
+      // Ctrl+Up/Down for jump to top/bottom
       if (e.ctrlKey && e.code === "ArrowUp") { e.preventDefault(); s.seekWords(-Infinity); return; }
       if (e.ctrlKey && e.code === "ArrowDown") { e.preventDefault(); s.seekWords(Infinity); return; }
-      // Speed/focus mode specific keys
-      if (s.readerMode !== "speed") return;
-      if (e.code === "Space") { e.preventDefault(); s.togglePlay(); }
-      else if (e.code === "ArrowLeft") { e.preventDefault(); s.seekWords(-REWIND_WORDS); }
-      else if (e.code === "ArrowRight") { e.preventDefault(); s.seekWords(REWIND_WORDS); }
-      else if (e.code === "ArrowUp") { e.preventDefault(); s.adjustWpm(WPM_STEP); }
-      else if (e.code === "ArrowDown") { e.preventDefault(); s.adjustWpm(-WPM_STEP); }
-      else if (e.code === "Escape") { e.preventDefault(); s.exitReader(); }
+      // Space — works in ALL views (togglePlay handles Page→Focus, Focus/Flow→pause→Page)
+      if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
+      // Arrow keys for seek/WPM — work in ALL views (no mode gate)
+      if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.seekWords(-REWIND_WORDS); return; }
+      if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.seekWords(REWIND_WORDS); return; }
+      if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
+      if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
+      // Escape — exit reader (all views)
+      if (e.code === "Escape") { e.preventDefault(); s.exitReader(); return; }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -338,11 +338,10 @@ export function useLibraryKeyboard(
         return;
       }
 
-      // / focuses search
+      // / opens library search overlay (Sprint 20X)
       if (e.key === "/" && !e.ctrlKey) {
         e.preventDefault();
-        a.onFocusSearch?.();
-        setFocusZone("search");
+        setActiveOverlay("librarySearch");
         return;
       }
 

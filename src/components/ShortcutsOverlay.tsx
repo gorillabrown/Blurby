@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from "react";
 
 interface ShortcutsOverlayProps {
   onClose: () => void;
-  context: string; // "library" | "reader-rsvp" | "reader-scroll" | "global"
+  context: string; // "library" | "reader-page" | "reader-rsvp" | "reader-scroll" | "global"
 }
 
 interface ShortcutRow {
@@ -67,23 +67,44 @@ const SECTIONS: ShortcutSection[] = [
     ],
   },
   {
-    title: "Reader (RSVP / Focus mode)",
+    title: "Reader (Page view)",
+    contextKey: "reader-page",
+    rows: [
+      { keys: ["Space"], description: "Enter Focus mode at highlighted word" },
+      { keys: ["Shift", "Space"], description: "Enter Flow mode at highlighted word" },
+      { keys: ["←"], description: "Previous page" },
+      { keys: ["→"], description: "Next page" },
+      { keys: ["Shift", "←"], description: "Move word selection left" },
+      { keys: ["Shift", "→"], description: "Move word selection right" },
+      { keys: ["Shift", "↑"], description: "Move word selection up" },
+      { keys: ["Shift", "↓"], description: "Move word selection down" },
+      { keys: ["Shift", "D"], description: "Define selected word" },
+      { keys: ["Shift", "N"], description: "Make note on selected word" },
+      { keys: ["M"], description: "Toggle menu" },
+      { keys: ["↑"], description: "Adjust WPM (+25)" },
+      { keys: ["↓"], description: "Adjust WPM (-25)" },
+      { keys: ["Shift", "↑"], description: "Adjust WPM (+100)" },
+      { keys: ["Shift", "↓"], description: "Adjust WPM (-100)" },
+      { keys: ["Escape"], description: "Exit reader" },
+    ],
+  },
+  {
+    title: "Reader (Focus mode)",
     contextKey: "reader-rsvp",
     rows: [
-      { keys: ["Space"], description: "Pause / resume playback" },
-      { keys: ["←"], description: "Step back one word" },
-      { keys: ["→"], description: "Step forward one word" },
-      { keys: ["↑"], description: "Increase WPM by 10" },
-      { keys: ["↓"], description: "Decrease WPM by 10" },
-      { keys: ["Shift", "↑"], description: "Increase WPM by 50" },
-      { keys: ["Shift", "↓"], description: "Decrease WPM by 50" },
+      { keys: ["Space"], description: "Pause and return to Page view" },
+      { keys: ["←"], description: "Rewind one word" },
+      { keys: ["→"], description: "Forward one word" },
+      { keys: ["↑"], description: "Adjust WPM (+25)" },
+      { keys: ["↓"], description: "Adjust WPM (-25)" },
+      { keys: ["Shift", "↑"], description: "Adjust WPM (+100)" },
+      { keys: ["Shift", "↓"], description: "Adjust WPM (-100)" },
       { keys: ["S"], description: "Save current word as highlight" },
-      { keys: ["T"], description: "Toggle reading mode (focus / flow)" },
-      { keys: ["Shift", "F"], description: "Toggle fullscreen" },
+      { keys: ["M"], description: "Toggle menu" },
+      { keys: ["N"], description: "Next chapter" },
+      { keys: ["P"], description: "Previous chapter" },
       { keys: ["["], description: "Previous chapter" },
       { keys: ["]"], description: "Next chapter" },
-      { keys: ["N"], description: "Next document in queue" },
-      { keys: ["P"], description: "Previous document in queue" },
       { keys: ["Ctrl", "="], description: "Increase focus text size" },
       { keys: ["Ctrl", "-"], description: "Decrease focus text size" },
       { keys: ["Ctrl", "0"], description: "Reset focus text size" },
@@ -91,20 +112,21 @@ const SECTIONS: ShortcutSection[] = [
     ],
   },
   {
-    title: "Reader (Scroll / Flow mode)",
+    title: "Reader (Flow mode)",
     contextKey: "reader-scroll",
     rows: [
-      { keys: ["Escape", "Escape"], description: "Exit reader (double-press)" },
+      { keys: ["Space"], description: "Pause and return to Page view" },
       { keys: ["S"], description: "Save highlighted word" },
-      { keys: ["T"], description: "Toggle reading mode (focus / flow)" },
-      { keys: ["Shift", "F"], description: "Toggle fullscreen" },
+      { keys: ["M"], description: "Toggle menu" },
+      { keys: ["N"], description: "Next chapter" },
+      { keys: ["P"], description: "Previous chapter" },
       { keys: ["["], description: "Previous chapter" },
       { keys: ["]"], description: "Next chapter" },
-      { keys: ["N"], description: "Next document in queue" },
-      { keys: ["P"], description: "Previous document in queue" },
-      { keys: ["Ctrl", "↑"], description: "Scroll up faster" },
-      { keys: ["Ctrl", "↓"], description: "Scroll down faster" },
-      { keys: ["Tab"], description: "Cycle chapter navigation" },
+      { keys: ["↑"], description: "Adjust WPM (+25)" },
+      { keys: ["↓"], description: "Adjust WPM (-25)" },
+      { keys: ["Shift", "↑"], description: "Adjust WPM (+100)" },
+      { keys: ["Shift", "↓"], description: "Adjust WPM (-100)" },
+      { keys: ["Escape"], description: "Exit to Page view" },
     ],
   },
   {
@@ -122,6 +144,7 @@ const SECTIONS: ShortcutSection[] = [
 // Contexts that map to section contextKeys for highlighting
 const CONTEXT_SECTION_MAP: Record<string, string[]> = {
   "library": ["global", "library", "overlays"],
+  "reader-page": ["global", "reader-page", "overlays"],
   "reader-rsvp": ["global", "reader-rsvp", "overlays"],
   "reader-scroll": ["global", "reader-scroll", "overlays"],
   "global": ["global"],

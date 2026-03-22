@@ -14,6 +14,8 @@ interface CommandPaletteProps {
   onAction: (action: () => void) => void;
   onClose: () => void;
   onOpenSettings: () => void;
+  /** "commands" shows actions/settings/shortcuts only; "library" shows documents only */
+  mode?: "commands" | "library";
 }
 
 // Simple scored fuzzy match — no external deps.
@@ -63,6 +65,7 @@ export default function CommandPalette({
   onAction,
   onClose,
   onOpenSettings,
+  mode = "commands",
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(0);
@@ -160,24 +163,35 @@ export default function CommandPalette({
     ];
   }, [onAction, onClose, onOpenSettings]);
 
-  // Build doc items
+  // Build doc items — sublabel includes extra fields for richer fuzzy matching in library mode
   const buildDocItems = useCallback((): PaletteItem[] => {
     return library.map((doc) => ({
       type: "doc" as const,
       label: doc.title,
-      sublabel: [doc.author || doc.authorFull, doc.sourceDomain].filter(Boolean).join(" · "),
+      sublabel: [
+        doc.author,
+        doc.authorFull,
+        doc.sourceDomain,
+        ...(doc.tags ?? []),
+      ].filter(Boolean).join(" · "),
       onSelect: () => { onSelect(doc.id); onClose(); },
     }));
   }, [library, onSelect, onClose]);
 
-  // Scored, filtered results
+  // Scored, filtered results — scoped by mode
   const results: PaletteItem[] = useCallback(() => {
     const actions = buildActions();
     const docs = buildDocItems();
-    const all = [...docs, ...actions];
+
+    // Pick the candidate pool based on mode
+    const pool = mode === "library" ? docs : actions;
 
     if (!query.trim()) {
-      // Show recent actions when query is empty
+      if (mode === "library") {
+        // Show first 12 docs when library search is empty
+        return docs.slice(0, 12);
+      }
+      // Show recent actions when command search is empty
       const recent = getRecentActions();
       const recentItems = recent
         .map((label) => actions.find((a) => a.label === label))
@@ -185,7 +199,7 @@ export default function CommandPalette({
       return recentItems.length > 0 ? recentItems : actions.slice(0, 8);
     }
 
-    return all
+    return pool
       .map((item) => {
         const searchTarget = [item.label, item.sublabel].filter(Boolean).join(" ");
         const score = fuzzyScore(query, searchTarget);
@@ -195,7 +209,7 @@ export default function CommandPalette({
       .sort((a, b) => b.score - a.score)
       .map(({ item }) => item)
       .slice(0, 12);
-  }, [query, buildActions, buildDocItems])();
+  }, [query, mode, buildActions, buildDocItems])();
 
   // Reset focus when results change
   useEffect(() => {
@@ -264,7 +278,11 @@ export default function CommandPalette({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Search documents, actions, settings..."
+          placeholder={
+            mode === "library"
+              ? "Search readings by title, author, source..."
+              : "Search actions, settings, shortcuts..."
+          }
           aria-label="Command palette search"
           aria-autocomplete="list"
           aria-controls="command-palette-results"

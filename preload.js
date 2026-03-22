@@ -86,6 +86,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getAllHighlights: () => ipcRenderer.invoke("get-all-highlights"),
   snoozeDoc: (docId, until) => ipcRenderer.invoke("snooze-doc", docId, until),
   unsnoozeDoc: (docId) => ipcRenderer.invoke("unsnooze-doc", docId),
+  saveReadingNote: (data) => ipcRenderer.invoke("save-reading-note", data),
+  logReadingSession: (data) => ipcRenderer.invoke("log-reading-session", data),
+  openReadingLog: () => ipcRenderer.invoke("open-reading-log"),
 
   // Cloud sync
   cloudSignIn: (provider) => ipcRenderer.invoke("cloud-sign-in", provider),

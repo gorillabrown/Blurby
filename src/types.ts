@@ -63,7 +63,7 @@ export interface BlurbySettings {
   accentColor: string | null;
   fontFamily: string | null;
   compactMode: boolean;
-  readingMode: "focus" | "flow";
+  readingMode: "focus" | "flow" | "page";
   focusMarks: boolean;
   readingRuler: boolean;
   focusSpan: number;
@@ -185,6 +185,9 @@ export interface ElectronAPI {
   getAllHighlights: () => Promise<Array<{ text: string; docTitle: string; docId: string; wordIndex: number; totalWords: number; date: string }>>;
   snoozeDoc: (docId: string, until: number) => Promise<void>;
   unsnoozeDoc: (docId: string) => Promise<void>;
+  saveReadingNote: (data: { docId: string; highlight: string; note: string; citation: string }) => Promise<{ ok?: boolean; path?: string; error?: string }>;
+  logReadingSession: (data: { docId: string; duration: number; wordsRead: number; finalWpm: number; mode: string; chapter?: string }) => Promise<{ ok?: boolean; path?: string; error?: string }>;
+  openReadingLog: () => Promise<{ ok?: boolean; error?: string }>;
   // Cloud sync
   cloudSignIn: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string; email?: string; name?: string; provider?: string }>;
   cloudSignOut: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string }>;

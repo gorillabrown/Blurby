@@ -1872,6 +1872,53 @@ button:focus-visible {
   line-height: 1;
 }
 
+/* File type badge in grid cards (21E) */
+.doc-grid-type-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9px;
+  text-transform: lowercase;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  z-index: 1;
+}
+/* Shift type badge down when done badge is also present */
+.doc-grid-done-badge ~ .doc-grid-type-badge {
+  top: 28px;
+}
+
+/* Search toggle button (21H) */
+.library-search-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+}
+
+/* Settings gear in menu flap header (21C) */
+.menu-flap-settings-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.menu-flap-settings-btn:hover {
+  color: var(--accent);
+  background: var(--bg-raised);
+}
+
 .doc-grid-actions {
   position: absolute;
   bottom: 0;
@@ -3176,4 +3223,461 @@ button:focus-visible {
 [data-theme="eink"] .snooze-picker-overlay,
 [data-theme="eink"] .tag-picker-overlay {
   background: rgba(0, 0, 0, 0.3);
+}
+
+/* ── Sprint 20U: Page Reader View ──────────────────────────────────────── */
+
+.page-reader-view {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  padding: 40px 60px 120px;
+  box-sizing: border-box;
+  background: var(--bg);
+  color: var(--text);
+  cursor: default;
+  overflow: hidden;
+}
+
+.page-reader-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--color-border, #333);
+  padding-bottom: 12px;
+}
+
+.page-reader-title {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.page-reader-provenance {
+  display: block;
+  font-size: 11px;
+  color: var(--text-dim, #888);
+  line-height: 1.4;
+}
+
+.page-reader-source-link {
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--color-primary, #D04716);
+}
+
+.page-reader-author {
+  display: block;
+  font-size: 12px;
+  color: var(--text-dim, #888);
+}
+
+.page-reader-content {
+  flex: 1;
+  transition: opacity 100ms ease;
+}
+
+.page-reader-content--transitioning {
+  opacity: 0;
+}
+
+.page-reader-paragraph {
+  margin-bottom: 1em;
+  line-height: inherit;
+}
+
+.page-word {
+  cursor: pointer;
+  padding: 1px 0;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.page-word:hover {
+  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.1));
+}
+
+.page-word--highlighted {
+  background: var(--color-primary, #D04716);
+  color: #fff;
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+
+.page-word--noted {
+  border-bottom: 2px dotted var(--color-primary, #D04716);
+}
+
+.page-reader-footer {
+  position: absolute;
+  bottom: 120px;
+  left: 60px;
+  right: 60px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dimmer, #666);
+  font-family: var(--mono, monospace);
+}
+
+.page-reader-toast {
+  position: fixed;
+  bottom: 160px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-primary, #D04716);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  z-index: 100;
+}
+
+/* ── Sprint 20U: Unified Reader Bottom Bar ─────────────────────────────── */
+
+.reader-bottom-bar-progress {
+  margin-bottom: 8px;
+}
+
+.reader-bottom-bar-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.rbb-wpm-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rbb-wpm-label {
+  font-size: 12px;
+  font-family: var(--mono, monospace);
+  color: var(--text-dim, #888);
+  min-width: 60px;
+}
+
+.rbb-wpm-slider {
+  width: 100px;
+  accent-color: var(--color-primary, #D04716);
+}
+
+.rbb-font-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rbb-font-btn {
+  background: none;
+  border: 1px solid var(--color-border, #444);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.rbb-font-btn:hover {
+  background: var(--color-border, #444);
+}
+
+.rbb-font-pct {
+  font-size: 11px;
+  color: var(--text-dim, #888);
+  min-width: 32px;
+  text-align: center;
+}
+
+.rbb-mode-group {
+  display: flex;
+  gap: 4px;
+}
+
+.rbb-mode-btn {
+  background: none;
+  border: 1px solid var(--color-border, #444);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.rbb-mode-btn:hover {
+  background: var(--color-border, #444);
+}
+
+.rbb-mode-btn--active {
+  background: var(--color-primary, #D04716);
+  border-color: var(--color-primary, #D04716);
+  color: #fff;
+}
+
+.rbb-chapter-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
+.rbb-chapter-arrow {
+  background: none;
+  border: none;
+  color: var(--text-dim, #888);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.rbb-chapter-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.rbb-chapter-name {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rbb-chapter-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: var(--bg);
+  border: 1px solid var(--color-border, #444);
+  border-radius: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 50;
+  list-style: none;
+  padding: 4px 0;
+  margin: 0 0 4px;
+  min-width: 200px;
+}
+
+.rbb-chapter-option {
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.rbb-chapter-option:hover,
+.rbb-chapter-option--active {
+  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.15));
+}
+
+.rbb-eink-refresh {
+  background: none;
+  border: 1px solid var(--color-border, #444);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.reader-bottom-bar-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-dimmer, #666);
+  font-family: var(--mono, monospace);
+}
+
+.rbb-info-hint {
+  opacity: 0.7;
+}
+
+/* ── Sprint 20V: Note Popover ──────────────────────────────────────────── */
+
+.note-popover {
+  background: var(--bg);
+  border: 1px solid var(--color-border, #444);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  width: 280px;
+  z-index: 200;
+}
+
+.note-popover-header {
+  margin-bottom: 8px;
+}
+
+.note-popover-highlight {
+  font-size: 13px;
+  color: var(--text-dim, #888);
+  font-style: italic;
+}
+
+.note-popover-input {
+  width: 100%;
+  background: var(--color-input-bg, #222);
+  color: var(--text);
+  border: 1px solid var(--color-border, #444);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 13px;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.note-popover-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #D04716);
+}
+
+.note-popover-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.note-popover-save {
+  background: var(--color-primary, #D04716);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.note-popover-save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.note-popover-cancel {
+  background: none;
+  color: var(--text-dim, #888);
+  border: 1px solid var(--color-border, #444);
+  border-radius: 4px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* ── Sprint 21M: Hotkey Coach Toast ──────────────────────────────────── */
+
+.hotkey-coach {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--color-surface, rgba(50, 50, 50, 0.9));
+  color: var(--text-dim, #aaa);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  z-index: 300;
+  cursor: pointer;
+  animation: coach-fade-in 0.2s ease;
+}
+
+.hotkey-coach-key {
+  display: inline-block;
+  background: var(--color-border, #555);
+  color: var(--text);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  margin: 0 2px;
+}
+
+@keyframes coach-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Sprint 21G: Sticky Library Header ─────────────────────────────────── */
+
+.library-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+}
+
+/* ── Sprint 21E: File Type Badge in Grid ─────────────────────────────── */
+
+.grid-card-type-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ── Sprint 21D: List Thumbnail ──────────────────────────────────────── */
+
+.doc-card-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-primary, #D04716);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-card-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doc-card-thumbnail-monogram {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* ── Sprint 21F: Hover Action Icon Buttons ───────────────────────────── */
+
+.hover-action-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.hover-action-btn:hover {
+  opacity: 1;
+  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.15));
+}
+
+[data-theme="eink"] .note-popover,
+[data-theme="eink"] .hotkey-coach {
+  box-shadow: none;
+  border-width: 2px;
+  border-style: solid;
 }
