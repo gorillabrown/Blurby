@@ -247,6 +247,11 @@ export default function PageReaderView({
             setCurrentPage(targetPage);
             flowCurrentPageRef.current = targetPage;
           }
+          // Scroll the highlighted word into view
+          requestAnimationFrame(() => {
+            const el = document.querySelector(`[data-word-index="${next}"]`);
+            if (el) el.scrollIntoView({ block: "nearest", behavior: "auto" });
+          });
         }
       }
       flowRafRef.current = requestAnimationFrame(tick);

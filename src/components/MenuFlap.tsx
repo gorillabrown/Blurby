@@ -130,12 +130,23 @@ export default function MenuFlap({
   // Render via portal on document.body to escape any stacking context
   return createPortal(
     <>
-      <div
-        className={`menu-flap-backdrop${open ? " open" : ""}`}
-        onClick={onClose}
-        onMouseDown={(e) => { e.stopPropagation(); onClose(); }}
-        aria-hidden="true"
-      />
+      {open && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 100000,
+            cursor: "pointer",
+          }}
+          onClick={onClose}
+          onMouseDown={onClose}
+          aria-hidden="true"
+        />
+      )}
       <div
         ref={flapRef}
         className={`menu-flap${open ? " open" : ""}`}
