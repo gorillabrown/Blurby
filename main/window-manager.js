@@ -170,7 +170,7 @@ function setupAutoUpdater(mainWindow) {
 
     setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {
       console.log("Auto-update check failed:", err.message);
-    } }, 5000);
+    } }, 10000);
   } catch { /* Expected: electron-updater may not be available in dev */ }
 }
 
