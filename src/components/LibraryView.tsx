@@ -42,7 +42,8 @@ export default function LibraryView({
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
 }: LibraryViewProps) {
   const { theme, setTheme } = useTheme();
-  const [tab, setTab] = useState("all"); // "all" | "favorites" | "archived"
+  const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
+  const NEW_DAYS = 7; // "new" filter: items added in the last N days
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
   const [rescanning, setRescanning] = useState(false);
@@ -106,6 +107,10 @@ export default function LibraryView({
     let docs = library;
     if (tab === "favorites") docs = docs.filter((d) => d.favorite);
     else if (tab === "archived") docs = docs.filter((d) => d.archived);
+    else if (tab === "new") {
+      const cutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
+      docs = docs.filter((d) => !d.archived && (d.created || 0) >= cutoff);
+    }
     else docs = docs.filter((d) => !d.archived);
     if (typeFilter === "articles") docs = docs.filter(isArticle);
     else if (typeFilter === "books") docs = docs.filter(isBook);
@@ -144,11 +149,13 @@ export default function LibraryView({
     return docs;
   }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme, sortBy]);
 
-  const { activeLibrary, totalWords, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
+  const { activeLibrary, totalWords, newCount, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
     const active = library.filter((d) => !d.archived);
+    const cutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
     return {
       activeLibrary: active,
       totalWords: active.reduce((a, d) => a + (d.wordCount || 0), 0),
+      newCount: active.filter((d) => (d.created || 0) >= cutoff).length,
       favCount: library.filter((d) => d.favorite).length,
       archivedCount: library.filter((d) => d.archived).length,
       articleCount: active.filter(isArticle).length,
@@ -350,6 +357,12 @@ export default function LibraryView({
             role="tab"
             aria-selected={tab === "all"}
           >all ({activeLibrary.length})</button>
+          <button
+            className={`library-tab${tab === "new" ? " library-tab-active" : ""}`}
+            onClick={() => setTab("new")}
+            role="tab"
+            aria-selected={tab === "new"}
+          >new ({newCount})</button>
           <button
             className={`library-tab${tab === "favorites" ? " library-tab-active" : ""}`}
             onClick={() => setTab("favorites")}
