@@ -1144,73 +1144,83 @@ function registerIpcHandlers(ctx) {
   setInterval(checkSnoozedDocs, 60000);
 
   // Sprint 20V: Save a reading note to .docx
+  // Uses a JSON sidecar to accumulate notes, regenerates .docx each time
   ipcMain.handle("save-reading-note", async (_, { docId, highlight, note, citation }) => {
-    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } = require("docx");
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, BorderStyle } = require("docx");
     const doc = ctx.getDocById(docId);
     if (!doc) return { error: "Document not found" };
 
-    const fileName = `${doc.title.replace(/[<>:"/\\|?*]/g, "-").slice(0, 80)} — Reading Notes.docx`;
+    const safeName = doc.title.replace(/[<>:"/\\|?*]/g, "-").slice(0, 80);
     const settings = ctx.getSettings();
     const outputDir = settings.sourceFolder || ctx.getDataPath();
-    const docxPath = path.join(outputDir, fileName);
+    const docxPath = path.join(outputDir, `${safeName} — Reading Notes.docx`);
+    const jsonPath = path.join(ctx.getDataPath(), `notes-${docId}.json`);
 
-    // Build the note entry paragraphs
     const timestamp = new Date().toLocaleString("en-US", {
       year: "numeric", month: "long", day: "numeric",
       hour: "numeric", minute: "2-digit", hour12: true,
     });
 
-    const entryParagraphs = [
-      new Paragraph({
-        children: [new TextRun({ text: `"${highlight}"`, italics: true, size: 22 })],
-        spacing: { before: 200 },
-      }),
-      new Paragraph({
-        children: [new TextRun({ text: citation || "", size: 20, color: "666666" })],
-        spacing: { before: 100 },
-      }),
-      new Paragraph({
-        children: [new TextRun({ text: note, size: 22 })],
-        spacing: { before: 150 },
-      }),
-      new Paragraph({
-        children: [new TextRun({ text: `— ${timestamp}`, size: 20, color: "999999" })],
-        spacing: { before: 100, after: 200 },
-      }),
-      new Paragraph({
-        border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" } },
-        spacing: { after: 200 },
-      }),
-    ];
-
     try {
-      let existingBuffer = null;
+      // Load existing notes from JSON sidecar
+      let allNotes = [];
       try {
-        existingBuffer = await fsPromises.readFile(docxPath);
-      } catch { /* file doesn't exist yet */ }
+        const raw = await fsPromises.readFile(jsonPath, "utf-8");
+        allNotes = JSON.parse(raw);
+      } catch { /* no existing notes */ }
 
-      // Create a new document with the note
-      // For simplicity, create a fresh document each time with all notes
-      // (appending to existing .docx requires parsing the old one)
+      // Append new note
+      allNotes.push({ highlight, note, citation, timestamp, docTitle: doc.title });
+
+      // Save JSON sidecar (atomic)
+      const jsonTmp = jsonPath + ".tmp";
+      await fsPromises.writeFile(jsonTmp, JSON.stringify(allNotes, null, 2), "utf-8");
+      await fsPromises.rename(jsonTmp, jsonPath);
+
+      // Regenerate .docx from all notes
+      const paragraphs = [
+        new Paragraph({
+          children: [new TextRun({ text: doc.title, bold: true, size: 28 })],
+          heading: HeadingLevel.HEADING_1,
+        }),
+        new Paragraph({ spacing: { after: 200 } }),
+      ];
+
+      for (const n of allNotes) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: `"${n.highlight}"`, italics: true, size: 22 })],
+            spacing: { before: 200 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: n.citation || "", size: 20, color: "666666" })],
+            spacing: { before: 100 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: n.note, size: 22 })],
+            spacing: { before: 150 },
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: `— ${n.timestamp}`, size: 20, color: "999999" })],
+            spacing: { before: 100, after: 200 },
+          }),
+          new Paragraph({
+            border: { bottom: { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" } },
+            spacing: { after: 200 },
+          })
+        );
+      }
+
       const newDoc = new Document({
         title: `${doc.title} — Reading Notes`,
-        sections: [{
-          children: [
-            new Paragraph({
-              children: [new TextRun({ text: doc.title, bold: true, size: 28 })],
-              heading: HeadingLevel.HEADING_1,
-            }),
-            new Paragraph({ spacing: { after: 200 } }),
-            ...entryParagraphs,
-          ],
-        }],
+        sections: [{ children: paragraphs }],
       });
 
       const buffer = await Packer.toBuffer(newDoc);
       const tmp = docxPath + ".tmp";
       await fsPromises.writeFile(tmp, buffer);
       await fsPromises.rename(tmp, docxPath);
-      return { ok: true, path: docxPath };
+      return { ok: true, path: docxPath, count: allNotes.length };
     } catch (err) {
       return { error: err.message };
     }

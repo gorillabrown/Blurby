@@ -3,6 +3,7 @@ import { tokenizeWithMeta, formatDisplayTitle, hasPunctuation } from "../utils/t
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
+import NotePopover from "./NotePopover";
 
 const api = window.electronAPI;
 
@@ -121,6 +122,37 @@ export default function PageReaderView({
     setHighlightWord(null);
     setShowDefinition(false);
   }, []);
+
+  // Note popover state
+  const [noteWordIndex, setNoteWordIndex] = useState<number | null>(null);
+  const [notePos, setNotePos] = useState({ x: 200, y: 200 });
+  const [savedNotes, setSavedNotes] = useState<Set<number>>(new Set());
+
+  // Listen for make-note events (from Shift+N or context menu)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const wordIdx = (e as CustomEvent).detail as number;
+      // Find the word element to anchor the popover
+      const el = document.querySelector(`[data-word-index="${wordIdx}"]`);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        setNotePos({ x: rect.left, y: rect.bottom });
+      }
+      setNoteWordIndex(wordIdx);
+      closeHighlight();
+    };
+    window.addEventListener("blurby:make-note", handler);
+    return () => window.removeEventListener("blurby:make-note", handler);
+  }, [closeHighlight]);
+
+  const handleNoteSaved = useCallback((note: string) => {
+    if (noteWordIndex !== null) {
+      setSavedNotes((prev) => new Set(prev).add(noteWordIndex));
+    }
+    setNoteWordIndex(null);
+    setToast("Note saved to Reading Notes.docx");
+    setTimeout(() => setToast(null), 3000);
+  }, [noteWordIndex]);
 
   // Tokenize content
   const { words, paragraphBreaks } = useMemo(
@@ -403,7 +435,7 @@ export default function PageReaderView({
               const isHighlighted = flowPlaying
                 ? (globalIndex >= highlightedWordIndex && globalIndex < highlightedWordIndex + wordSpan)
                 : globalIndex === highlightedWordIndex;
-              const hasNote = notes?.has(globalIndex);
+              const hasNote = savedNotes.has(globalIndex) || notes?.has(globalIndex);
               return (
                 <span
                   key={globalIndex}
@@ -470,6 +502,22 @@ export default function PageReaderView({
             closeHighlight();
           }}
           onClose={closeHighlight}
+        />
+      )}
+
+      {/* Note popover */}
+      {noteWordIndex !== null && (
+        <NotePopover
+          word={words[noteWordIndex] || ""}
+          wordIndex={noteWordIndex}
+          docId={activeDoc.id}
+          docTitle={activeDoc.title}
+          author={activeDoc.authorFull || activeDoc.author}
+          sourceUrl={activeDoc.sourceUrl}
+          publishedDate={activeDoc.publishedDate}
+          position={notePos}
+          onSave={handleNoteSaved}
+          onClose={() => setNoteWordIndex(null)}
         />
       )}
     </div>
