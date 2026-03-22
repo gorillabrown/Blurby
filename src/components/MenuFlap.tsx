@@ -133,6 +133,7 @@ export default function MenuFlap({
       <div
         className={`menu-flap-backdrop${open ? " open" : ""}`}
         onClick={onClose}
+        onMouseDown={(e) => { e.stopPropagation(); onClose(); }}
         aria-hidden="true"
       />
       <div

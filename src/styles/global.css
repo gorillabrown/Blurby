@@ -1999,18 +1999,18 @@ button:focus-visible {
 /* ===== Menu Flap ===== */
 
 .menu-flap-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 100000;
-  opacity: 0;
-  transition: opacity 200ms ease;
-  pointer-events: none;
+  display: none;
 }
 
 .menu-flap-backdrop.open {
-  opacity: 1;
-  pointer-events: auto;
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100000;
   cursor: pointer;
 }
 
