@@ -221,7 +221,8 @@ export default function LibraryView({
       )}
 
       <div className="library-scroll">
-        {/* Header */}
+        {/* Sticky top section: header + filter tabs + divider line */}
+        <div className="library-sticky-top">
         <div className="library-header">
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <button className="hamburger-btn" onClick={onToggleFlap} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
@@ -379,6 +380,7 @@ export default function LibraryView({
             </select>
           )}
         </div>
+        </div>{/* close library-sticky-top */}
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
 
