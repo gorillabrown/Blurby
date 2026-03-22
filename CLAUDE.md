@@ -86,18 +86,18 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ---
 
-## Current System State (Post-Sprint 17 — Cloud Sync Complete)
+## Current System State (Post-Sprint 18A — Windows .exe Production Complete)
 
 ### Codebase (branch: `main`)
 
-- **36 commits** on main (PR #1 squash-merged as commit 91718e3, then Sprints 2-17 layered on top)
-- All sprints (1-17) complete — security, performance, accessibility, cloud sync done
-- CI/CD active via GitHub Actions
+- **45 commits** on main (PR #1 squash-merged as commit 91718e3, then Sprints 2-18A layered on top)
+- All sprints (1-18A) complete — security, performance, accessibility, cloud sync, production installer
+- CI/CD active via GitHub Actions (x64 + ARM64 release matrix)
 
 ### Tech Stack
 
-- Electron 33 + React 19 + Vite 6 + TypeScript 5.9
-- Vitest 4.1 for testing, electron-builder 25 for packaging
+- Electron 41 + React 19 + Vite 6 + TypeScript 5.9
+- Vitest 4.1 for testing, electron-builder 26 for packaging
 - Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater
 
 ### Architecture
@@ -128,7 +128,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
 - **Tests** (`tests/`): 14 test files, 293 tests (Sprint 13 expansion)
-- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags, NSIS installer)
+- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
 ### Feature Status
@@ -158,7 +158,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | Reader Exit Confirmation | ✅ Built | Double-Escape pattern in ScrollReaderView (Sprint 6) |
 | Recent Folders | ✅ Built | Stale folder cleanup on startup (Sprint 6) |
 | Reading Statistics | ✅ Built | history.json, StatsPanel, streaks, actual reading time, reset (Sprint 7/7b) |
-| CI/CD | ✅ Built | GitHub Actions: CI on push/PR, release on v* tags (Sprint 8) |
+| CI/CD | ✅ Built | GitHub Actions: CI on push/PR, release on v* tags + workflow_dispatch (Sprint 8 + 18A) |
 | Security Hardening | ✅ Built | Image validation, atomic writes, CSP, error logging, pessimistic updates (Sprint 9) |
 | Memory & Scalability | ✅ Built | LRU caches, incremental index, PDF cleanup, login dedup (Sprint 10) |
 | Renderer Architecture | ✅ Built | App.tsx split into containers, component extraction, typed API (Sprint 11) |
