@@ -102,7 +102,14 @@ export default function CommandPalette({
         label: "Open Reading Notes",
         sublabel: "Open .docx notes file in default editor",
         onSelect: () => {
-          onAction(() => window.electronAPI.openReadingNotes());
+          onAction(() => {
+            window.electronAPI.openReadingNotes().then((result) => {
+              if (result?.error) {
+                // No notes yet — show an alert
+                alert(result.error);
+              }
+            });
+          });
           onClose();
         },
       },
