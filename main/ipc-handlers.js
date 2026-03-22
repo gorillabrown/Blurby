@@ -1318,8 +1318,55 @@ function registerIpcHandlers(ctx) {
           { header: "Notes / Key Takeaway", key: "notes", width: 40 },
         ];
 
-        // Dashboard tab
-        workbook.addWorksheet("Dashboard");
+        // Dashboard tab with formula-based KPIs
+        const dash = workbook.addWorksheet("Dashboard");
+        dash.getColumn(1).width = 30;
+        dash.getColumn(2).width = 18;
+
+        // Helper: reference range for ReadLog data columns
+        const rl = "'Reading Log'";
+
+        // Volume & Pace
+        dash.getCell("A1").value = "Volume & Pace";
+        dash.getCell("A1").font = { bold: true, size: 13 };
+        dash.getCell("A2").value = "Total Works Read";
+        dash.getCell("B2").value = { formula: `COUNTA(${rl}!B:B)-1` };
+        dash.getCell("A3").value = "Total Pages Read";
+        dash.getCell("B3").value = { formula: `SUM(${rl}!J:J)` };
+        dash.getCell("A4").value = "Avg Sessions/Book";
+        dash.getCell("B4").value = { formula: `IFERROR(AVERAGE(${rl}!L:L),0)` };
+        dash.getCell("A5").value = "Completion Rate";
+        dash.getCell("B5").value = { formula: `IFERROR(COUNTIF(${rl}!O:O,">=100")/COUNTA(${rl}!B:B)-1,0)` };
+        dash.getCell("B5").numFmt = "0%";
+
+        // Sessions & Speed
+        dash.getCell("A7").value = "Sessions & Speed";
+        dash.getCell("A7").font = { bold: true, size: 13 };
+        dash.getCell("A8").value = "Total Sessions";
+        dash.getCell("B8").value = { formula: `SUM(${rl}!L:L)` };
+        dash.getCell("A9").value = "Total Reading Time (hrs)";
+        dash.getCell("B9").value = { formula: `IFERROR(SUM(${rl}!M:M)/60,0)` };
+        dash.getCell("B9").numFmt = "0.0";
+        dash.getCell("A10").value = "Weighted Avg WPM";
+        dash.getCell("B10").value = { formula: `IFERROR(SUMPRODUCT(${rl}!N2:N9999,${rl}!M2:M9999)/SUM(${rl}!M2:M9999),0)` };
+        dash.getCell("B10").numFmt = "0";
+
+        // Diversity
+        dash.getCell("A12").value = "Diversity & Breadth";
+        dash.getCell("A12").font = { bold: true, size: 13 };
+        dash.getCell("A13").value = "Unique Authors";
+        dash.getCell("B13").value = { formula: `SUMPRODUCT(1/COUNTIF(${rl}!C2:C9999,${rl}!C2:C9999))` };
+
+        // Quality
+        dash.getCell("A15").value = "Quality & Preference";
+        dash.getCell("A15").font = { bold: true, size: 13 };
+        dash.getCell("A16").value = "Avg Rating";
+        dash.getCell("B16").value = { formula: `IFERROR(AVERAGE(${rl}!Q:Q),0)` };
+        dash.getCell("B16").numFmt = "0.0";
+
+        // Footer
+        dash.getCell("A18").value = "Blurby. — Fast · Friendly · Focused";
+        dash.getCell("A18").font = { italic: true, color: { argb: "FF888888" } };
       }
 
       const sheet = workbook.getWorksheet("Reading Log");

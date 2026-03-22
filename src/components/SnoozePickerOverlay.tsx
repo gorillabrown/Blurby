@@ -113,7 +113,7 @@ export default function SnoozePickerOverlay({ onSelect, onClose }: SnoozePickerO
       onClick={onClose}
     >
       <div
-        className="snooze-picker-dialog"
+        className="snooze-picker-container"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="snooze-picker-header">

@@ -306,7 +306,7 @@ export default function CommandPalette({
     >
       <div
         ref={dialogRef}
-        className="command-palette-dialog"
+        className="command-palette-container"
         onClick={(e) => e.stopPropagation()}
       >
         <input

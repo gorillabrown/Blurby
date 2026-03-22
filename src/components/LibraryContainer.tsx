@@ -130,6 +130,7 @@ export default function LibraryContainer() {
   // Initialize keyboard state first (hooks must be called unconditionally)
   const snoozeTargetRef = useRef<string | null>(null);
   const tagTargetRef = useRef<string | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kbActionsRef = useRef<any>(null);
   const kbState = useLibraryKeyboard(view, kbActionsRef.current || {});
 
@@ -161,8 +162,15 @@ export default function LibraryContainer() {
       archiveDoc(docId);
       const doc = library.find((d) => d.id === docId);
       if (doc) {
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
         kbState.setUndoAction(() => () => unarchiveDoc(docId));
+        undoTimerRef.current = setTimeout(() => kbState.setUndoAction(null), 5000);
         showToast(`Archived "${doc.title}" — Press Z to undo`);
+        // Auto-advance focus: clamp to the new list length after removal
+        const newLength = filteredLibrary.length - 1;
+        if (newLength > 0 && kbState.focusedIndex >= newLength) {
+          kbState.setFocusedIndex(newLength - 1);
+        }
       }
     },
     onUnarchive: (docId: string) => {
@@ -170,24 +178,30 @@ export default function LibraryContainer() {
       showToast("Restored from archive");
     },
     onToggleStar: (docId: string) => {
+      const doc = library.find((d) => d.id === docId);
       toggleFavorite(docId);
+      if (doc) showToast(doc.favorite ? "Removed from favorites" : "Added to favorites");
     },
     onTrash: (docId: string) => {
       const doc = library.find((d) => d.id === docId);
       if (doc) {
         deleteDoc(docId);
+        if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
         kbState.setUndoAction(() => () => {
           // Re-add is not trivially undoable — toast only
         });
+        undoTimerRef.current = setTimeout(() => kbState.setUndoAction(null), 5000);
         showToast(`Trashed "${doc.title}" — Press Z to undo`);
       }
     },
     onToggleUnread: (docId: string) => {
+      const doc = library.find((d) => d.id === docId);
       const updatedLibrary = library.map((d) =>
         d.id === docId ? { ...d, unread: !d.unread } : d
       );
       setLibrary(updatedLibrary);
       api.saveLibrary(updatedLibrary);
+      if (doc) showToast(doc.unread ? "Marked as read" : "Marked as unread");
     },
     onResume: (docId: string) => handleOpenDocById(docId),
     onOpenSource: async (docId: string) => {
@@ -212,7 +226,10 @@ export default function LibraryContainer() {
       const searchInput = document.querySelector<HTMLInputElement>('.library-search input, .search-input');
       searchInput?.focus();
     },
-    onNavigateFilter: (_filter: LibraryFilter) => { /* filter state managed by kbState */ },
+    onNavigateFilter: (filter: LibraryFilter) => {
+      if (filter === "stats") handleOpenSettings(); // G+S → open stats via settings
+    },
+    onToggleFlap: toggleMenuFlap,
     onSelectAll: () => {
       const allIds = new Set(filteredLibrary.map((d) => d.id));
       kbState.setSelectedIds(allIds);
@@ -227,7 +244,7 @@ export default function LibraryContainer() {
     },
     getDocIdAtIndex: (index: number) => filteredLibrary[index]?.id,
     getVisibleDocCount: () => filteredLibrary.length,
-  }), [library, filteredLibrary, archiveDoc, unarchiveDoc, toggleFavorite, deleteDoc, showToast, handleOpenDocById, setLibrary]);
+  }), [library, filteredLibrary, archiveDoc, unarchiveDoc, toggleFavorite, deleteDoc, showToast, handleOpenDocById, setLibrary, toggleMenuFlap, handleOpenSettings]);
 
   // Update the actions ref so the keyboard hook sees latest actions
   kbActionsRef.current = kbActions;
@@ -365,7 +382,16 @@ export default function LibraryContainer() {
             />
           )}
           {kbState.activeOverlay === "shortcuts" && (
-            <ShortcutsOverlay onClose={() => kbState.setActiveOverlay(null)} context="reader-page" />
+            <ShortcutsOverlay
+              onClose={() => kbState.setActiveOverlay(null)}
+              context={
+                settings.readingMode === "focus"
+                  ? "reader-rsvp"
+                  : settings.readingMode === "flow"
+                    ? "reader-scroll"
+                    : "reader-page"
+              }
+            />
           )}
           {kbState.activeOverlay === "highlights" && (
             <HighlightsOverlay
@@ -428,6 +454,13 @@ export default function LibraryContainer() {
               onUnarchiveDoc={unarchiveDoc}
               onToggleFlap={toggleMenuFlap}
               onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
+              focusedDocId={kbState.focusedIndex >= 0 ? kbActions.getDocIdAtIndex(kbState.focusedIndex) : null}
+              selectedIds={kbState.selectedIds}
+              onToggleSelect={(docId) => {
+                const next = new Set(kbState.selectedIds);
+                if (next.has(docId)) next.delete(docId); else next.add(docId);
+                kbState.setSelectedIds(next);
+              }}
             />
             {importPending && (
               <ImportConfirmDialog

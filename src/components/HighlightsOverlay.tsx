@@ -119,7 +119,7 @@ export default function HighlightsOverlay({ onClose, onJumpTo }: HighlightsOverl
       onClick={onClose}
     >
       <div
-        className="highlights-dialog"
+        className="highlights-container"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="highlights-header">

@@ -114,7 +114,7 @@ export default function TagPickerOverlay({
       onClick={onClose}
     >
       <div
-        className="tag-picker-dialog"
+        className="tag-picker-container"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="tag-picker-header">
