@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { BlurbyDoc } from "../types";
 
 interface PaletteItem {
@@ -277,15 +278,27 @@ export default function CommandPalette({
     shortcut: "Shortcut",
   };
 
-  return (
+  // Close on any click outside the dialog
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dialogRef.current && !dialogRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    const timer = setTimeout(() => window.addEventListener("click", handler), 50);
+    return () => { clearTimeout(timer); window.removeEventListener("click", handler); };
+  }, [onClose]);
+
+  return createPortal(
     <div
       className="command-palette-overlay"
       role="dialog"
       aria-modal="true"
       aria-label="Command palette"
-      onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="command-palette-dialog"
         onClick={(e) => e.stopPropagation()}
       >
@@ -356,6 +369,7 @@ export default function CommandPalette({
           </ul>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
