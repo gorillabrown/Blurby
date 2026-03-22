@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import ReadingQueue from "./ReadingQueue";
 import { SettingsMenu } from "./SettingsMenu";
@@ -50,6 +50,25 @@ export default function MenuFlap({
       setView("queue");
     }
   }, [open]);
+
+  // Click outside flap panel closes it (document-level listener)
+  const flapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (flapRef.current && !flapRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    // Use setTimeout to avoid closing immediately from the same click that opened it
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handler);
+    }, 50);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handler);
+    };
+  }, [open, onClose]);
 
   // Escape closes flap (or navigates back in settings sub-pages)
   useEffect(() => {
@@ -113,6 +132,7 @@ export default function MenuFlap({
         aria-hidden="true"
       />
       <div
+        ref={flapRef}
         className={`menu-flap${open ? " open" : ""}`}
         role="dialog"
         aria-label="Menu"
