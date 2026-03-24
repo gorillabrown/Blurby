@@ -37,6 +37,7 @@ interface LibraryViewProps {
   onSettingsChange: (patch: Partial<BlurbySettings>) => void;
   focusedDocId?: string | null;
   selectedIds?: Set<string>;
+  selectionMode?: boolean;
   onToggleSelect?: (docId: string) => void;
 }
 
@@ -45,7 +46,7 @@ export default function LibraryView({
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
-  focusedDocId, selectedIds, onToggleSelect,
+  focusedDocId, selectedIds, selectionMode, onToggleSelect,
 }: LibraryViewProps) {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
@@ -561,6 +562,7 @@ export default function LibraryView({
                     <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
+                      selectionMode={selectionMode}
                       onToggleSelect={onToggleSelect}
                     />
                   ))}
@@ -575,6 +577,7 @@ export default function LibraryView({
                     <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
+                      selectionMode={selectionMode}
                       onToggleSelect={onToggleSelect}
                     />
                   ))}
@@ -602,6 +605,7 @@ export default function LibraryView({
                       onOpenNewWindow={handleOpenNewWindow}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
+                      selectionMode={selectionMode}
                       onToggleSelect={onToggleSelect}
                     />
                   ))}
@@ -626,6 +630,7 @@ export default function LibraryView({
                       onOpenNewWindow={handleOpenNewWindow}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
+                      selectionMode={selectionMode}
                       onToggleSelect={onToggleSelect}
                     />
                   ))}

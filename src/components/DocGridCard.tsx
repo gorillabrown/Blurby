@@ -11,6 +11,7 @@ interface DocGridCardProps {
   onDelete?: (id: string) => void;
   focused?: boolean;
   selected?: boolean;
+  selectionMode?: boolean;
   onToggleSelect?: (id: string) => void;
 }
 
@@ -33,7 +34,7 @@ function formatApaSubtext(doc: BlurbyDoc): string | null {
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, focused, selected, onToggleSelect }: DocGridCardProps) {
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, focused, selected, selectionMode, onToggleSelect }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
       data-doc-id={doc.id}
     >
       {/* Selection checkbox */}
-      {onToggleSelect && selected !== undefined && (
+      {selectionMode && onToggleSelect && (
         <div className="doc-grid-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>
           <input type="checkbox" checked={selected} readOnly aria-label={`Select ${doc.title}`} tabIndex={-1} />
         </div>

@@ -493,6 +493,7 @@ export default function LibraryContainer() {
               onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
               focusedDocId={kbState.focusedIndex >= 0 ? kbActions.getDocIdAtIndex(kbState.focusedIndex) : null}
               selectedIds={kbState.selectedIds}
+              selectionMode={kbState.selectedIds.size > 0}
               onToggleSelect={(docId) => {
                 const next = new Set(kbState.selectedIds);
                 if (next.has(docId)) next.delete(docId); else next.add(docId);

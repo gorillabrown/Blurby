@@ -67,10 +67,11 @@ interface DocCardProps {
   onOpenNewWindow?: (doc: BlurbyDoc) => void;
   focused?: boolean;
   selected?: boolean;
+  selectionMode?: boolean;
   onToggleSelect?: (id: string) => void;
 }
 
-const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, onToggleSelect }: DocCardProps) {
+const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
@@ -92,7 +93,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
         data-doc-id={doc.id}
       >
         {/* Selection checkbox */}
-        {onToggleSelect && (
+        {selectionMode && onToggleSelect && (
           <div className="doc-card-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>
             <input type="checkbox" checked={selected || false} readOnly aria-label={`Select ${doc.title}`} tabIndex={-1} />
           </div>
