@@ -178,14 +178,17 @@ export default function ReaderContainer({
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
       // Exit from Page → leave reader entirely
+      handleStopTts(); // Cancel TTS on exit
       requestExit(activeDoc, finishReading);
     } else {
       // Exit from Focus/Flow → return to Page (pause)
       if (playing) reader.togglePlay();
+      if (flowPlaying) setFlowPlaying(false);
+      narration.stop(); // Cancel TTS on mode exit
       setHighlightedWordIndex(wordIndex);
       setReadingMode("page");
     }
-  }, [readingMode, requestExit, activeDoc, finishReading, playing, reader, wordIndex]);
+  }, [readingMode, requestExit, activeDoc, finishReading, playing, flowPlaying, reader, wordIndex, handleStopTts, narration]);
 
   const handleScrollExit = useCallback((finalPos: number) => {
     // Flow mode pause → return to Page
@@ -222,23 +225,36 @@ export default function ReaderContainer({
     updateSettings({ readingMode: "focus" });
     // Auto-play Focus mode
     if (!playing) setTimeout(() => reader.togglePlay(), 50);
-  }, [highlightedWordIndex, jumpToWord, updateSettings, playing, reader]);
+    // Start cursor-driven TTS if active
+    if (ttsActive) {
+      narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
+        jumpToWord(idx);
+      });
+    }
+  }, [highlightedWordIndex, jumpToWord, updateSettings, playing, reader, ttsActive, narration, words, effectiveWpm]);
 
   /** Enter Flow from Page — starts word advancement within Page view */
   const handleEnterFlow = useCallback(() => {
     setReadingMode("flow");
     setFlowPlaying(true);
     updateSettings({ readingMode: "flow" });
-  }, [updateSettings]);
+    // Start cursor-driven TTS if active
+    if (ttsActive) {
+      narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
+        setHighlightedWordIndex(idx);
+      });
+    }
+  }, [updateSettings, ttsActive, narration, words, highlightedWordIndex, effectiveWpm]);
 
   /** Pause Focus/Flow → return to Page */
   const handlePauseToPage = useCallback(() => {
     if (playing) reader.togglePlay();
     if (flowPlaying) setFlowPlaying(false);
     if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
+    narration.stop(); // Pause TTS when returning to page
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
-  }, [playing, flowPlaying, readingMode, reader, wordIndex, updateSettings]);
+  }, [playing, flowPlaying, readingMode, reader, wordIndex, updateSettings, narration]);
 
   /** Toggle play: Space behavior per mode */
   const handleTogglePlay = useCallback(() => {
@@ -273,20 +289,62 @@ export default function ReaderContainer({
     else handlePauseToPage();
   }, [readingMode, handleEnterFocus, handleEnterFlow, handlePauseToPage]);
 
-  // Narration (TTS)
+  // ── TTS (Narration) ───────────────────────────────────────────────────
+  const TTS_WPM_CAP = 400;
   const narration = useNarration();
-  const handleToggleNarration = useCallback(() => {
-    if (narration.speaking) {
+  const [ttsActive, setTtsActive] = useState(false);
+  const preCapWpmRef = useRef<number | null>(null);
+
+  const handleToggleTts = useCallback(() => {
+    if (ttsActive) {
+      // Turn off TTS — restore original WPM
       narration.stop();
+      setTtsActive(false);
+      if (preCapWpmRef.current !== null) {
+        setWpm(() => preCapWpmRef.current!);
+        preCapWpmRef.current = null;
+      }
     } else {
-      const textBefore = activeDoc.content.split(/\s+/).slice(0, wordIndex).join(" ");
-      const charOffset = textBefore.length;
-      narration.speak(activeDoc.content, charOffset, (charIdx) => {
-        const wordsBeforeChar = countWords(activeDoc.content.slice(0, charIdx));
-        jumpToWord(wordsBeforeChar);
-      });
+      // Turn on TTS — cap WPM if > 400
+      setTtsActive(true);
+      if (wpm > TTS_WPM_CAP) {
+        preCapWpmRef.current = wpm;
+        setWpm(() => TTS_WPM_CAP);
+      }
     }
-  }, [activeDoc, narration, wordIndex, jumpToWord]);
+  }, [ttsActive, narration, wpm, setWpm]);
+
+  // If user raises WPM while TTS is active, enforce cap
+  useEffect(() => {
+    if (ttsActive && wpm > TTS_WPM_CAP) {
+      if (preCapWpmRef.current === null) preCapWpmRef.current = wpm;
+      setWpm(() => TTS_WPM_CAP);
+    }
+  }, [ttsActive, wpm, setWpm]);
+
+  // Cancel TTS when exiting reader modes
+  useEffect(() => {
+    if (readingMode === "page" && !flowPlaying && !playing) {
+      // Only stop TTS when not in any active reading mode
+    }
+  }, [readingMode, flowPlaying, playing]);
+
+  // Stop TTS on mode exit
+  const handleStopTts = useCallback(() => {
+    if (ttsActive) {
+      narration.stop();
+      setTtsActive(false);
+      if (preCapWpmRef.current !== null) {
+        setWpm(() => preCapWpmRef.current!);
+        preCapWpmRef.current = null;
+      }
+    }
+  }, [ttsActive, narration, setWpm]);
+
+  // Legacy toggle for keyboard shortcut (N key)
+  const handleToggleNarration = useCallback(() => {
+    handleToggleTts();
+  }, [handleToggleTts]);
 
   // Chapter navigation
   const handlePrevChapter = useCallback(() => {
@@ -487,6 +545,8 @@ export default function ReaderContainer({
           playing={playing}
           isEink={isEink}
           chapters={docChapters}
+          ttsActive={ttsActive}
+          onToggleTts={handleToggleTts}
           onSetWpm={setWpm}
           onAdjustFocusTextSize={adjustFocusTextSize}
           onEnterFocus={handleEnterFocus}

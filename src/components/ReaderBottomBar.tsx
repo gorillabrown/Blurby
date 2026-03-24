@@ -17,6 +17,8 @@ interface ReaderBottomBarProps {
   onAdjustFocusTextSize: (delta: number) => void;
   onEnterFocus: () => void;
   onEnterFlow: () => void;
+  ttsActive?: boolean;
+  onToggleTts?: () => void;
   onPrevChapter?: () => void;
   onNextChapter?: () => void;
   onJumpToChapter?: (chapterIndex: number) => void;
@@ -43,6 +45,8 @@ export default function ReaderBottomBar({
   onAdjustFocusTextSize,
   onEnterFocus,
   onEnterFlow,
+  ttsActive,
+  onToggleTts,
   onPrevChapter,
   onNextChapter,
   onJumpToChapter,
@@ -166,6 +170,19 @@ export default function ReaderBottomBar({
             Flow
           </button>
         </div>
+
+        {/* TTS toggle — Page view only */}
+        {readingMode === "page" && onToggleTts && (
+          <button
+            className={`rbb-tts-btn ${ttsActive ? "rbb-tts-btn--active" : ""}`}
+            onClick={onToggleTts}
+            aria-label={ttsActive ? "Turn off narration" : "Turn on narration"}
+            aria-pressed={ttsActive}
+            title="Narration (N)"
+          >
+            {ttsActive ? "🔊" : "🔇"}
+          </button>
+        )}
 
         {/* Chapter nav */}
         {chapterList.length > 1 && (

@@ -105,6 +105,7 @@ let settings = {
   layoutSpacing: { line: 1.5, character: 0, word: 0 },
   initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list",
   einkWpmCeiling: 250, einkRefreshInterval: 20, einkPhraseGrouping: true,
+  ttsEnabled: false, ttsVoiceName: null, ttsRate: 1.0,
   syncIntervalMinutes: 5, syncOnMeteredConnection: false,
 };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };

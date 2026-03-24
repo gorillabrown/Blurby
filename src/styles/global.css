@@ -359,6 +359,39 @@ button, input, textarea, a, [role="button"] {
   justify-content: center;
   align-items: baseline;
   min-height: 90px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Focus mode word transition layers */
+.reader-word-layer {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  width: 100%;
+  will-change: transform, opacity;
+}
+.reader-word-layer--entering {
+  animation: focus-word-enter var(--focus-transition-ms, 30ms) ease-out forwards;
+}
+.reader-word-layer--exiting {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  animation: focus-word-exit var(--focus-transition-ms, 30ms) ease-in forwards;
+}
+@keyframes focus-word-enter {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes focus-word-exit {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to { opacity: 0; transform: translate3d(0, -8px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reader-word-layer--entering,
+  .reader-word-layer--exiting {
+    animation: none;
+  }
 }
 .reader-word-before {
   font-size: clamp(38px, 6vw, 72px);
@@ -3326,6 +3359,7 @@ button:focus-visible {
   min-height: 0;
   transition: opacity 100ms ease;
   overflow: hidden;
+  position: relative;
 }
 
 .page-reader-content--transitioning {
@@ -3359,6 +3393,34 @@ button:focus-visible {
   color: #fff;
   padding: 1px 2px;
   border-radius: 2px;
+}
+
+/* Flow mode: smooth sliding highlight cursor (GPU-accelerated) */
+.flow-highlight-cursor {
+  position: absolute;
+  background: var(--color-primary, #D04716);
+  opacity: 0.25;
+  border-radius: 3px;
+  pointer-events: none;
+  will-change: transform, width;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.15s cubic-bezier(0.25, 0.1, 0.25, 1),
+              width 0.1s cubic-bezier(0.25, 0.1, 0.25, 1);
+  z-index: 1;
+}
+/* When crossing to a new line, snap Y instantly and only slide X */
+.flow-highlight-cursor--line-wrap {
+  transition: transform 0.05s cubic-bezier(0.25, 0.1, 0.25, 1),
+              width 0.1s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+/* Disable animations at high WPM or reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .flow-highlight-cursor {
+    transition: none;
+  }
+}
+.flow-highlight-cursor--fast {
+  transition: none;
 }
 
 .page-word--noted {
@@ -3489,6 +3551,25 @@ button:focus-visible {
   background: var(--color-primary, #D04716);
   border-color: var(--color-primary, #D04716);
   color: #fff;
+}
+
+.rbb-tts-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: background 0.15s, border-color 0.15s;
+}
+.rbb-tts-btn:hover {
+  border-color: var(--color-primary, #D04716);
+}
+.rbb-tts-btn--active {
+  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.15));
+  border-color: var(--color-primary, #D04716);
+  color: var(--text);
 }
 
 .rbb-chapter-group {

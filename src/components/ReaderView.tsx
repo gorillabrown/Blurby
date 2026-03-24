@@ -59,6 +59,12 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
   const focusMarkBottomRef = useRef<HTMLSpanElement>(null);
   // For focus-span mode (per-character opacity)
   const charContainerRef = useRef<HTMLDivElement>(null);
+  // Word transition animation container
+  const wordDisplayRef = useRef<HTMLDivElement>(null);
+  const animFrameRef = useRef(0);
+  // WPM ref for RAF callback (avoids stale closure)
+  const wpmRefLocal = useRef(wpm);
+  wpmRefLocal.current = wpm;
 
   // E-ink phrase grouping: build a phrase of 2-3 words at natural boundaries
   const buildEinkPhrase = useCallback((index: number): string => {
@@ -83,6 +89,21 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
       const displayWord = settings?.isEink && settings?.einkPhraseGrouping ? buildEinkPhrase(_index) : word;
       const { before: b, focus: f, after: a } = focusChar(displayWord);
       const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
+
+      // Trigger word transition animation (disabled at WPM > 500)
+      const currentWpm = wpmRefLocal.current;
+      if (currentWpm <= 500 && wordDisplayRef.current) {
+        const container = wordDisplayRef.current;
+        const interval = 60000 / currentWpm;
+        const transitionMs = Math.min(30, Math.floor(interval * 0.15));
+        container.style.setProperty("--focus-transition-ms", `${transitionMs}ms`);
+        // Toggle animation by incrementing a counter to force re-trigger
+        animFrameRef.current++;
+        container.classList.remove("reader-word-layer--entering");
+        // Force reflow to restart animation
+        void container.offsetWidth;
+        container.classList.add("reader-word-layer--entering");
+      }
 
       if (useFocusSpan && charContainerRef.current) {
         // Per-character opacity mode: rebuild children
@@ -318,7 +339,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
               <div className="reader-guide-line reader-guide-top" aria-hidden="true">
                 {settings?.focusMarks && <span ref={focusMarkTopRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25BC;</span>}
               </div>
-              <div className="reader-word-display" aria-live="off" aria-atomic="true">
+              <div ref={wordDisplayRef} className="reader-word-display reader-word-layer" aria-live="off" aria-atomic="true">
                 {useFocusSpan ? (
                   /* Children managed entirely by RAF callback via direct DOM —
                      React must NOT render children here to avoid removeChild conflicts */

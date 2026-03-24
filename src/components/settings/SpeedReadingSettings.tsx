@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import type { BlurbySettings } from "../../types";
 
 interface SpeedReadingSettingsProps {
@@ -7,6 +8,33 @@ interface SpeedReadingSettingsProps {
 
 export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadingSettingsProps) {
   const rp = settings.rhythmPauses;
+
+  // TTS voice picker
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [testPlaying, setTestPlaying] = useState(false);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const v = window.speechSynthesis?.getVoices() || [];
+      if (v.length > 0) setVoices(v);
+    };
+    loadVoices();
+    window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
+    return () => window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices);
+  }, []);
+
+  const handleTestVoice = () => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance("The quick brown fox jumps over the lazy dog.");
+    const voice = voices.find((v) => v.name === settings.ttsVoiceName);
+    if (voice) utterance.voice = voice;
+    utterance.rate = settings.ttsRate || 1.0;
+    utterance.onend = () => setTestPlaying(false);
+    utterance.onerror = () => setTestPlaying(false);
+    setTestPlaying(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   return (
     <div>
@@ -168,6 +196,70 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         >
           <div className="settings-toggle-thumb" />
         </div>
+      </div>
+
+      <div className="settings-section-label" style={{ marginTop: 16 }}>Narration (Text-to-Speech)</div>
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Enable TTS</span>
+        <div
+          className={`settings-toggle${settings.ttsEnabled ? " active" : ""}`}
+          onClick={() => onSettingsChange({ ttsEnabled: !settings.ttsEnabled })}
+          role="switch"
+          tabIndex={0}
+          aria-checked={settings.ttsEnabled}
+          aria-label="Enable text-to-speech"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ ttsEnabled: !settings.ttsEnabled }); } }}
+        >
+          <div className="settings-toggle-thumb" />
+        </div>
+      </div>
+
+      {voices.length > 0 && (
+        <div className="settings-toggle-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 6 }}>
+          <span className="settings-toggle-label">Voice</span>
+          <select
+            className="settings-select"
+            value={settings.ttsVoiceName || ""}
+            onChange={(e) => onSettingsChange({ ttsVoiceName: e.target.value || null })}
+            aria-label="TTS voice"
+            style={{ width: "100%", padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
+          >
+            <option value="">System default</option>
+            {voices.map((v) => (
+              <option key={v.name} value={v.name}>
+                {v.name} ({v.lang})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Speech rate</span>
+        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{(settings.ttsRate || 1.0).toFixed(1)}x</span>
+      </div>
+      <input
+        type="range"
+        className="settings-slider"
+        min={0.5}
+        max={2.0}
+        step={0.1}
+        value={settings.ttsRate || 1.0}
+        onChange={(e) => onSettingsChange({ ttsRate: Number(e.target.value) })}
+        aria-label="TTS speech rate"
+      />
+
+      <button
+        className="settings-btn-secondary"
+        onClick={handleTestVoice}
+        disabled={testPlaying}
+        style={{ marginTop: 8, padding: "6px 14px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 12 }}
+      >
+        {testPlaying ? "Playing..." : "Test voice"}
+      </button>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 6 }}>
+        Press N in the reader to toggle narration. WPM is capped at 400 when narration is active.
       </div>
     </div>
   );

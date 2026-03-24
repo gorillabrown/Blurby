@@ -79,6 +79,10 @@ export interface BlurbySettings {
   einkWpmCeiling: number;
   einkRefreshInterval: number;
   einkPhraseGrouping: boolean;
+  // TTS settings
+  ttsEnabled: boolean;
+  ttsVoiceName: string | null; // SpeechSynthesisVoice.name
+  ttsRate: number; // 0.5-2.0, default 1.0
   // Cloud sync settings
   syncIntervalMinutes: number;
   syncOnMeteredConnection: boolean;
