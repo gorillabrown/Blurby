@@ -215,6 +215,48 @@ export default function PageReaderView({
     }
   }, [pageNavRef, prevPage, nextPage]);
 
+  // ── Flow highlight cursor (smooth sliding overlay) ──────────────────
+  const flowCursorRef = useRef<HTMLDivElement>(null);
+  const flowCursorLastY = useRef(0);
+
+  /** Position the flow highlight cursor over a word element (direct DOM, no React) */
+  const positionFlowCursor = useCallback((wordIdx: number) => {
+    const cursor = flowCursorRef.current;
+    if (!cursor) return;
+    const el = document.querySelector(`[data-word-index="${wordIdx}"]`) as HTMLElement;
+    if (!el) return;
+    const container = el.closest(".page-reader-content") as HTMLElement;
+    if (!container) return;
+    const cRect = container.getBoundingClientRect();
+    const wRect = el.getBoundingClientRect();
+    const x = wRect.left - cRect.left + container.scrollLeft;
+    const y = wRect.top - cRect.top + container.scrollTop;
+    const w = wRect.width;
+    const h = wRect.height;
+
+    // Detect line wrap: if Y changed significantly, add snap class
+    const isLineWrap = Math.abs(y - flowCursorLastY.current) > h * 0.5;
+    flowCursorLastY.current = y;
+
+    // Disable animation at high WPM (>500) or during line wrap
+    const fast = wpm > 500;
+    cursor.className = "flow-highlight-cursor"
+      + (isLineWrap ? " flow-highlight-cursor--line-wrap" : "")
+      + (fast ? " flow-highlight-cursor--fast" : "");
+
+    cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    cursor.style.width = `${w}px`;
+    cursor.style.height = `${h}px`;
+    cursor.style.display = "";
+  }, [wpm]);
+
+  // Hide cursor when not in flow mode
+  useEffect(() => {
+    if (!flowPlaying && flowCursorRef.current) {
+      flowCursorRef.current.style.display = "none";
+    }
+  }, [flowPlaying]);
+
   // ── Flow mode: advance highlighted word(s) at WPM speed ─────────────
   const flowRafRef = useRef<number | null>(null);
   const flowLastTimeRef = useRef(0);
@@ -279,16 +321,16 @@ export default function PageReaderView({
             setCurrentPage(targetPage);
             flowCurrentPageRef.current = targetPage;
           }
-          // Scroll highlighted word into view — position 3 lines above center
-          // so the reader sees upcoming text, not just what they've read
+          // Position smooth highlight cursor + scroll into view
           requestAnimationFrame(() => {
+            positionFlowCursor(next);
             const el = document.querySelector(`[data-word-index="${next}"]`) as HTMLElement;
             if (el) {
               const container = el.closest(".page-reader-content");
               if (container) {
                 const containerRect = container.getBoundingClientRect();
                 const elRect = el.getBoundingClientRect();
-                const targetY = containerRect.top + containerRect.height * 0.35; // 35% from top
+                const targetY = containerRect.top + containerRect.height * 0.35;
                 if (elRect.top > targetY + 50 || elRect.top < containerRect.top) {
                   el.scrollIntoView({ block: "center", behavior: "smooth" });
                 }
@@ -304,7 +346,14 @@ export default function PageReaderView({
     return () => {
       if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
     };
-  }, [flowPlaying, wordSpan, onHighlightedWordChange]);
+  }, [flowPlaying, wordSpan, onHighlightedWordChange, positionFlowCursor]);
+
+  // Position cursor on initial flow start
+  useEffect(() => {
+    if (flowPlaying) {
+      requestAnimationFrame(() => positionFlowCursor(highlightedWordIndex));
+    }
+  }, [flowPlaying]); // Only on flow start, not on every highlight change
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
@@ -431,6 +480,8 @@ export default function PageReaderView({
           fontFamily: settings?.fontFamily || undefined,
         }}
       >
+        {/* Flow highlight cursor — positioned via direct DOM, CSS transition for smooth glide */}
+        {flowPlaying && <div ref={flowCursorRef} className="flow-highlight-cursor" style={{ display: "none" }} />}
         {renderedParagraphs.map((para, pIdx) => (
           <p key={pIdx} className="page-reader-paragraph">
             {para.map(({ word, globalIndex }) => {
