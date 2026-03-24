@@ -86,3 +86,65 @@ export const SNOOZE_TOMORROW_HOUR = 8;
 export const SNOOZE_WEEKEND_HOUR = 9;
 /** Hour for "Next week" snooze (Monday) */
 export const SNOOZE_NEXT_WEEK_HOUR = 8;
+
+// ── E-ink Defaults ───────────────────────────────────────────────────────────
+/** Default e-ink WPM ceiling */
+export const DEFAULT_EINK_WPM_CEILING = 250;
+/** Default e-ink refresh interval (page turns) */
+export const DEFAULT_EINK_REFRESH_INTERVAL = 20;
+
+// ── Sync ─────────────────────────────────────────────────────────────────────
+/** Default auto-sync interval (minutes) */
+export const DEFAULT_SYNC_INTERVAL_MINUTES = 5;
+
+// ── Reader Defaults ──────────────────────────────────────────────────────────
+/** Default flow word span (words highlighted at once) */
+export const DEFAULT_FLOW_WORD_SPAN = 1;
+/** Default focus span (character opacity gradient width) */
+export const DEFAULT_FOCUS_SPAN = 0.4;
+
+// ── Undo / Indicators ────────────────────────────────────────────────────────
+/** Duration undo toast is shown before action expires (ms) */
+export const UNDO_DISMISS_MS = 5000;
+/** Duration GoToIndicator stays visible (ms) */
+export const GOTO_INDICATOR_DISMISS_MS = 1500;
+
+// ── Animation ────────────────────────────────────────────────────────────────
+/** WPM threshold above which word transition animations are disabled */
+export const ANIMATION_DISABLE_WPM = 500;
+
+// ── Default Settings ─────────────────────────────────────────────────────────
+/** Single source of truth for BlurbySettings defaults.
+ *  Import in SettingsContext and useLibrary instead of duplicating. */
+export const DEFAULT_SETTINGS = {
+  schemaVersion: 0,
+  wpm: DEFAULT_WPM,
+  sourceFolder: null as string | null,
+  folderName: "My reading list",
+  recentFolders: [] as string[],
+  theme: "dark" as const,
+  launchAtLogin: false,
+  focusTextSize: DEFAULT_FOCUS_TEXT_SIZE,
+  accentColor: null as string | null,
+  fontFamily: null as string | null,
+  compactMode: false,
+  readingMode: "focus" as const,
+  focusMarks: true,
+  readingRuler: false,
+  focusSpan: DEFAULT_FOCUS_SPAN,
+  flowTextSize: DEFAULT_FOCUS_TEXT_SIZE,
+  rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
+  layoutSpacing: { line: 1.5, character: 0, word: 0 },
+  initialPauseMs: INITIAL_PAUSE_MS,
+  punctuationPauseMs: PUNCTUATION_PAUSE_MS,
+  viewMode: "list" as const,
+  einkWpmCeiling: DEFAULT_EINK_WPM_CEILING,
+  einkRefreshInterval: DEFAULT_EINK_REFRESH_INTERVAL,
+  einkPhraseGrouping: true,
+  syncIntervalMinutes: DEFAULT_SYNC_INTERVAL_MINUTES,
+  syncOnMeteredConnection: false,
+  flowWordSpan: DEFAULT_FLOW_WORD_SPAN,
+  ttsEnabled: false,
+  ttsVoiceName: null as string | null,
+  ttsRate: 1.0,
+};

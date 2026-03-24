@@ -54,6 +54,20 @@ const EPUB_HEADING_MAX_LENGTH = 100;
 /** Maximum entries in the EPUB chapter LRU cache */
 const EPUB_CHAPTER_CACHE_MAX = 50;
 
+// ── Auth ────────────────────────────────────────────────────────────────────
+/** Token expiry fallback when provider does not return an expiry (ms, 1 hour) */
+const TOKEN_EXPIRY_FALLBACK_MS = 3600000;
+
+// ── Snooze ──────────────────────────────────────────────────────────────────
+/** How often to check for due snoozed documents (ms, 1 minute) */
+const SNOOZE_CHECK_INTERVAL_MS = 60000;
+
+// ── Migrations / Defaults ───────────────────────────────────────────────────
+/** Default initial pause before first word advances in Focus mode (ms) */
+const DEFAULT_INITIAL_PAUSE_MS = 3000;
+/** Default punctuation pause after punctuation words in Focus mode (ms) */
+const DEFAULT_PUNCTUATION_PAUSE_MS = 1000;
+
 module.exports = {
   // Sync
   TOMBSTONE_TTL_MS,
@@ -81,4 +95,11 @@ module.exports = {
   MAX_MOBI_TEXT_BYTES,
   EPUB_HEADING_MAX_LENGTH,
   EPUB_CHAPTER_CACHE_MAX,
+  // Auth
+  TOKEN_EXPIRY_FALLBACK_MS,
+  // Snooze
+  SNOOZE_CHECK_INTERVAL_MS,
+  // Migrations / Defaults
+  DEFAULT_INITIAL_PAUSE_MS,
+  DEFAULT_PUNCTUATION_PAUSE_MS,
 };

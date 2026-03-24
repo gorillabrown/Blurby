@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface Highlight {
   text: string;
@@ -33,6 +34,7 @@ export default function HighlightsOverlay({ onClose, onJumpTo }: HighlightsOverl
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -65,6 +67,8 @@ export default function HighlightsOverlay({ onClose, onJumpTo }: HighlightsOverl
       h.docTitle.toLowerCase().includes(q)
     );
   });
+
+  useFocusTrap(containerRef, [filtered]);
 
   useEffect(() => {
     setFocusedIndex(0);
@@ -119,6 +123,7 @@ export default function HighlightsOverlay({ onClose, onJumpTo }: HighlightsOverl
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="highlights-container"
         onClick={(e) => e.stopPropagation()}
       >

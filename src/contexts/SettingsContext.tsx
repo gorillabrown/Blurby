@@ -1,5 +1,6 @@
 import { createContext, useContext, useCallback, useMemo } from "react";
 import type { BlurbySettings } from "../types";
+import { DEFAULT_SETTINGS } from "../constants";
 
 const api = window.electronAPI;
 
@@ -8,35 +9,7 @@ interface SettingsContextType {
   updateSettings: (updates: Partial<BlurbySettings>) => Promise<void>;
 }
 
-const defaultSettings: BlurbySettings = {
-  schemaVersion: 0,
-  wpm: 300,
-  sourceFolder: null,
-  folderName: "My reading list",
-  recentFolders: [],
-  theme: "dark",
-  launchAtLogin: false,
-  focusTextSize: 100,
-  accentColor: null,
-  fontFamily: null,
-  compactMode: false,
-  readingMode: "focus",
-  focusMarks: true,
-  readingRuler: false,
-  focusSpan: 0.4,
-  flowTextSize: 100,
-  rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
-  layoutSpacing: { line: 1.5, character: 0, word: 0 },
-  initialPauseMs: 3000,
-  punctuationPauseMs: 1000,
-  viewMode: "list" as const,
-  einkWpmCeiling: 250,
-  einkRefreshInterval: 20,
-  einkPhraseGrouping: true,
-  syncIntervalMinutes: 5,
-  syncOnMeteredConnection: false,
-  flowWordSpan: 1,
-};
+const defaultSettings = DEFAULT_SETTINGS as BlurbySettings;
 
 export const SettingsContext = createContext<SettingsContextType>({
   settings: defaultSettings,

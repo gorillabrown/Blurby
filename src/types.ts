@@ -6,7 +6,7 @@ export interface BlurbyDoc {
   wordCount: number;
   position: number;
   created: number;
-  source: "manual" | "folder" | "url";
+  source: "manual" | "folder" | "url" | "sample";
   filepath?: string;
   filename?: string;
   ext?: string;
@@ -88,6 +88,17 @@ export interface BlurbySettings {
   syncOnMeteredConnection: boolean;
   // Sprint 23: First-run onboarding
   firstRunCompleted?: boolean;
+}
+
+// ── Toast ───────────────────────────────────────────────────────────────────
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+export interface ToastState {
+  message: string;
+  action?: ToastAction;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
 import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS } from "../constants";
-import { BlurbyDoc, BlurbySettings, SyncStatusValue } from "../types";
+import { BlurbyDoc, BlurbySettings, SyncStatusValue, ToastState } from "../types";
 import { useTheme } from "./ThemeProvider";
 import { triggerCoachHint } from "./HotkeyCoach";
 import AddEditPanel from "./AddEditPanel";
@@ -20,7 +20,7 @@ interface LibraryViewProps {
   isMac: boolean;
   folderName: string;
   loadingContent: boolean;
-  toast: string | null;
+  toast: ToastState | null;
   onOpenDoc: (doc: BlurbyDoc, mode?: string) => void;
   onAddDoc: (title: string, content: string, editingId?: string | null) => void;
   onAddDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
@@ -246,7 +246,16 @@ export default function LibraryView({
         </div>
       )}
 
-      {toast && <div className="toast" role="status" aria-live="polite">{toast}</div>}
+      {toast && (
+        <div className="toast" role="status" aria-live="polite">
+          <span>{toast.message}</span>
+          {toast.action && (
+            <button className="toast-action" onClick={toast.action.onClick}>
+              {toast.action.label}
+            </button>
+          )}
+        </div>
+      )}
 
       {updateReady && (
         <div className="update-banner" role="alert">

@@ -20,6 +20,7 @@ const {
   MAX_HISTORY_SESSIONS,
   MS_PER_DAY,
   COVER_CACHE_MAX,
+  SNOOZE_CHECK_INTERVAL_MS,
 } = require("./constants");
 
 // ── Highlight Formatting (pure, testable) ──────────────────────────────────
@@ -1219,7 +1220,7 @@ function registerIpcHandlers(ctx) {
 
   // Check snoozed docs on startup and every 60 seconds
   checkSnoozedDocs();
-  setInterval(checkSnoozedDocs, 60000);
+  setInterval(checkSnoozedDocs, SNOOZE_CHECK_INTERVAL_MS);
 
   // Sprint 20V: Save a reading note to .docx
   // Uses a JSON sidecar to accumulate notes, regenerates .docx each time

@@ -1,4 +1,5 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface ShortcutsOverlayProps {
   onClose: () => void;
@@ -152,6 +153,9 @@ const CONTEXT_SECTION_MAP: Record<string, string[]> = {
 
 export default function ShortcutsOverlay({ onClose, context }: ShortcutsOverlayProps) {
   const relevantContexts = CONTEXT_SECTION_MAP[context] ?? ["global"];
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(containerRef);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -177,6 +181,7 @@ export default function ShortcutsOverlay({ onClose, context }: ShortcutsOverlayP
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="shortcuts-container"
         onClick={(e) => e.stopPropagation()}
       >
@@ -186,6 +191,7 @@ export default function ShortcutsOverlay({ onClose, context }: ShortcutsOverlayP
             className="shortcuts-close"
             onClick={onClose}
             aria-label="Close shortcuts overlay"
+            autoFocus
           >
             <span className="shortcuts-key">Esc</span>
           </button>

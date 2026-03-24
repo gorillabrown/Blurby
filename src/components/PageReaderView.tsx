@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { tokenizeWithMeta, formatDisplayTitle, hasPunctuation } from "../utils/text";
-import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_FLOW_SENTENCE_PAUSE_MS, PAGE_FLOW_CLAUSE_PAUSE_MS } from "../constants";
+import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_FLOW_SENTENCE_PAUSE_MS, PAGE_FLOW_CLAUSE_PAUSE_MS, ANIMATION_DISABLE_WPM } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
@@ -239,8 +239,8 @@ export default function PageReaderView({
     const isLineWrap = Math.abs(y - flowCursorLastY.current) > h * 0.5;
     flowCursorLastY.current = y;
 
-    // Disable animation at high WPM (>500) or during line wrap
-    const fast = wpm > 500;
+    // Disable animation at high WPM (>ANIMATION_DISABLE_WPM) or during line wrap
+    const fast = wpm > ANIMATION_DISABLE_WPM;
     cursor.className = "flow-highlight-cursor"
       + (isLineWrap ? " flow-highlight-cursor--line-wrap" : "")
       + (fast ? " flow-highlight-cursor--fast" : "");

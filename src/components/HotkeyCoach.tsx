@@ -69,6 +69,17 @@ export default function HotkeyCoach() {
     };
   }, [handleHintEvent]);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setHint(null);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (!hint) return null;
 
   return (

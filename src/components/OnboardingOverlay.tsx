@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 const api = window.electronAPI;
 
@@ -33,30 +34,18 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
   const overlayRef = useRef<HTMLDivElement>(null);
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
-  // Focus trap: keep focus inside overlay
+  useFocusTrap(overlayRef, [phase, step]);
+
   useEffect(() => {
     const el = overlayRef.current;
     if (!el) return;
-    const focusable = el.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Tab") {
-        if (e.shiftKey) {
-          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
-        } else {
-          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
-        }
-      }
-      if (e.key === "Escape") { handleSkip(); }
+      if (e.key === "Escape") handleSkip();
     }
     el.addEventListener("keydown", handleKeyDown);
-    // Auto-focus the primary button on phase change
     if (firstFocusRef.current) firstFocusRef.current.focus();
     return () => el.removeEventListener("keydown", handleKeyDown);
-  }, [phase, step]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, step, handleSkip]);
 
   const handleComplete = useCallback(async () => {
     await api.saveSettings({ firstRunCompleted: true } as any);

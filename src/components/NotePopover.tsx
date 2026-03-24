@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface NotePopoverProps {
   word: string;
@@ -50,7 +51,10 @@ export default function NotePopover({
   onClose,
 }: NotePopoverProps) {
   const [text, setText] = useState("");
+  const popoverRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useFocusTrap(popoverRef);
 
   // Auto-focus
   useEffect(() => {
@@ -95,6 +99,7 @@ export default function NotePopover({
 
   return (
     <div
+      ref={popoverRef}
       className="note-popover"
       style={style}
       role="dialog"

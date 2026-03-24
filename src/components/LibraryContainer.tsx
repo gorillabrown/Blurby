@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { BlurbyDoc } from "../types";
+import { UNDO_DISMISS_MS } from "../constants";
 import useLibrary from "../hooks/useLibrary";
 import { useSmartImport, useGlobalKeys, useLibraryKeyboard, type OverlayId, type LibraryFilter } from "../hooks/useKeyboardShortcuts";
 import ErrorBoundary from "./ErrorBoundary";
@@ -119,8 +120,7 @@ export default function LibraryContainer() {
       const result = await loadDocContent(doc.id);
       // Handle user-facing parse errors (PDF encrypted/corrupted, EPUB invalid, etc.)
       if (result && typeof result === "object" && "userError" in result) {
-        const hasSourceUrl = !!(doc as BlurbyDoc & { sourceUrl?: string }).sourceUrl;
-        showToast(result.userError + (hasSourceUrl ? " — try removing and re-importing." : " — try removing and re-adding the file."), 6000);
+        showToast(result.userError, 8000, { label: "Remove", onClick: () => deleteDoc(doc.id) });
         return;
       }
       content = (result as string | null) || undefined;
@@ -190,7 +190,7 @@ export default function LibraryContainer() {
       if (doc) {
         if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
         kbState.setUndoAction(() => () => unarchiveDoc(docId));
-        undoTimerRef.current = setTimeout(() => kbState.setUndoAction(null), 5000);
+        undoTimerRef.current = setTimeout(() => kbState.setUndoAction(null), UNDO_DISMISS_MS);
         showToast(`Archived "${doc.title}" — Press Z to undo`);
         // Auto-advance focus: clamp to the new list length after removal
         const newLength = filteredLibrary.length - 1;
@@ -216,7 +216,7 @@ export default function LibraryContainer() {
         kbState.setUndoAction(() => () => {
           // Re-add is not trivially undoable — toast only
         });
-        undoTimerRef.current = setTimeout(() => kbState.setUndoAction(null), 5000);
+        undoTimerRef.current = setTimeout(() => kbState.setUndoAction(null), UNDO_DISMISS_MS);
         showToast(`Trashed "${doc.title}" — Press Z to undo`);
       }
     },
@@ -334,15 +334,10 @@ export default function LibraryContainer() {
     if (importPending.isUrl) {
       const result = await addDocFromUrl(importPending.content);
       if (result?.error) {
-        // Show error with "Open in browser" fallback if we have a source URL
         const sourceUrl = result.sourceUrl || importPending.content;
-        showToast(result.error, 7000);
-        // Offer "Open in browser" as a follow-up after brief delay
-        setTimeout(() => {
-          if (window.electronAPI?.openUrlInBrowser && sourceUrl) {
-            showToast("Tip: Try opening the article in your browser first, then use Ctrl+A, Ctrl+C to paste it.", 6000);
-          }
-        }, 7500);
+        showToast(result.error, 8000,
+          sourceUrl ? { label: "Open in browser", onClick: () => window.electronAPI.openUrlInBrowser(sourceUrl) } : undefined
+        );
       } else {
         showToast("Imported from URL");
       }

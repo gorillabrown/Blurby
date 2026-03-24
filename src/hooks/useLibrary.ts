@@ -1,37 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { BlurbyDoc, BlurbySettings } from "../types";
+import { BlurbyDoc, BlurbySettings, ToastAction, ToastState } from "../types";
+import { DEFAULT_SETTINGS, TOAST_DEFAULT_DURATION_MS } from "../constants";
 
 const api = window.electronAPI;
 
-const defaultSettings: BlurbySettings = {
-  schemaVersion: 0,
-  wpm: 300,
-  sourceFolder: null,
-  folderName: "My reading list",
-  recentFolders: [],
-  theme: "dark",
-  launchAtLogin: false,
-  focusTextSize: 100,
-  accentColor: null,
-  fontFamily: null,
-  compactMode: false,
-  readingMode: "focus",
-  focusMarks: true,
-  readingRuler: false,
-  focusSpan: 0.4,
-  flowTextSize: 100,
-  rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
-  layoutSpacing: { line: 1.5, character: 0, word: 0 },
-  initialPauseMs: 3000,
-  punctuationPauseMs: 1000,
-  viewMode: "list" as const,
-  einkWpmCeiling: 250,
-  einkRefreshInterval: 20,
-  einkPhraseGrouping: true,
-  syncIntervalMinutes: 5,
-  syncOnMeteredConnection: false,
-  flowWordSpan: 1,
-};
+const defaultSettings = DEFAULT_SETTINGS as BlurbySettings;
 
 export default function useLibrary() {
   const [library, setLibrary] = useState<BlurbyDoc[]>([]);
@@ -39,7 +12,7 @@ export default function useLibrary() {
   const [loaded, setLoaded] = useState(false);
   const [platform, setPlatform] = useState("win32");
   const [loadingContent, setLoadingContent] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -54,8 +27,8 @@ export default function useLibrary() {
     return () => unsub();
   }, []);
 
-  const showToast = useCallback((message: string, duration = 3000) => {
-    setToast(message);
+  const showToast = useCallback((message: string, duration = TOAST_DEFAULT_DURATION_MS, action?: ToastAction) => {
+    setToast({ message, action });
     setTimeout(() => setToast(null), duration);
   }, []);
 

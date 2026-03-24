@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { BlurbyDoc } from "../types";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface PaletteItem {
   type: "doc" | "action" | "setting" | "shortcut";
@@ -297,26 +298,7 @@ export default function CommandPalette({
     return () => { clearTimeout(timer); window.removeEventListener("click", handler); };
   }, [onClose]);
 
-  // Focus trap: keep focus inside the palette while open
-  useEffect(() => {
-    const container = dialogRef.current;
-    if (!container) return;
-    const focusable = container.querySelectorAll<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    function trapTab(e: KeyboardEvent) {
-      if (e.key !== "Tab") return;
-      if (e.shiftKey) {
-        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
-      } else {
-        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
-      }
-    }
-    container.addEventListener("keydown", trapTab);
-    return () => container.removeEventListener("keydown", trapTab);
-  }, [results]); // re-run when results change (focusable elements may shift)
+  useFocusTrap(dialogRef, [results]);
 
   return createPortal(
     <div

@@ -1,6 +1,8 @@
 // main/auth.js — OAuth2 authentication layer for cloud sync
 // CommonJS only — Electron main process
 
+const { TOKEN_EXPIRY_FALLBACK_MS } = require('./constants');
+
 const { BrowserWindow, safeStorage } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
@@ -167,7 +169,7 @@ async function signInMicrosoft() {
   tokens.microsoft = {
     accessToken: tokenResponse.accessToken,
     refreshToken: tokenResponse.refreshToken || null,
-    expiresOn: tokenResponse.expiresOn ? tokenResponse.expiresOn.getTime() : Date.now() + 3600000,
+    expiresOn: tokenResponse.expiresOn ? tokenResponse.expiresOn.getTime() : Date.now() + TOKEN_EXPIRY_FALLBACK_MS,
     account: account ? JSON.parse(JSON.stringify(account)) : null,
     userInfo,
   };
@@ -196,7 +198,7 @@ async function refreshMicrosoftToken() {
     tokens.microsoft = {
       ...msData,
       accessToken: tokenResponse.accessToken,
-      expiresOn: tokenResponse.expiresOn ? tokenResponse.expiresOn.getTime() : Date.now() + 3600000,
+      expiresOn: tokenResponse.expiresOn ? tokenResponse.expiresOn.getTime() : Date.now() + TOKEN_EXPIRY_FALLBACK_MS,
     };
     await saveTokens(tokens);
 
@@ -252,7 +254,7 @@ async function signInGoogle() {
   tokens.google = {
     accessToken: googleTokens.access_token,
     refreshToken: googleTokens.refresh_token || null,
-    expiresOn: googleTokens.expiry_date || Date.now() + 3600000,
+    expiresOn: googleTokens.expiry_date || Date.now() + TOKEN_EXPIRY_FALLBACK_MS,
     userInfo,
   };
   await saveTokens(tokens);
@@ -275,7 +277,7 @@ async function refreshGoogleToken() {
     tokens.google = {
       ...gData,
       accessToken: credentials.access_token,
-      expiresOn: credentials.expiry_date || Date.now() + 3600000,
+      expiresOn: credentials.expiry_date || Date.now() + TOKEN_EXPIRY_FALLBACK_MS,
     };
     await saveTokens(tokens);
 
