@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { HOTKEY_COACH_DISMISS_MS } from "../constants";
 
 const COACH_STORAGE_KEY = "blurby_hotkey_coach_shown";
-const AUTO_DISMISS_MS = 3000;
 
 interface CoachHint {
   action: string;
@@ -58,7 +58,7 @@ export default function HotkeyCoach() {
     setHint(coachHint);
 
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setHint(null), AUTO_DISMISS_MS);
+    timerRef.current = setTimeout(() => setHint(null), HOTKEY_COACH_DISMISS_MS);
   }, []);
 
   useEffect(() => {

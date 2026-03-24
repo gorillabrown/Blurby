@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { REWIND_WORDS, WPM_STEP } from "../../utils/text";
+import { REWIND_WORDS, WPM_STEP } from "../../constants";
 
 const api = window.electronAPI;
 

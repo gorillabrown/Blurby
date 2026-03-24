@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP } from "../constants";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
@@ -290,7 +291,6 @@ export default function ReaderContainer({
   }, [readingMode, handleEnterFocus, handleEnterFlow, handlePauseToPage]);
 
   // ── TTS (Narration) ───────────────────────────────────────────────────
-  const TTS_WPM_CAP = 400;
   const narration = useNarration();
   const [ttsActive, setTtsActive] = useState(false);
   const preCapWpmRef = useRef<number | null>(null);
@@ -305,7 +305,7 @@ export default function ReaderContainer({
         preCapWpmRef.current = null;
       }
     } else {
-      // Turn on TTS — cap WPM if > 400
+      // Turn on TTS — cap WPM if > TTS_WPM_CAP
       setTtsActive(true);
       if (wpm > TTS_WPM_CAP) {
         preCapWpmRef.current = wpm;

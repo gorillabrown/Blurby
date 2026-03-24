@@ -3,12 +3,11 @@
 
 const http = require("http");
 const crypto = require("crypto");
+const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS } = require("./constants");
 
 // ── Constants ────────────────────────────────────────────────────────────────
-const WS_PORT = 48924;
 const WS_PATH = "/blurby";
-const HEARTBEAT_INTERVAL_MS = 30000;
-const WS_GUID = "258EAFA5-E914-47DA-95CA-5AB9DC508C65"; // RFC 6455
+const WS_GUID = "258EAFA5-E914-47DA-95CA-5AB9DC508C65"; // RFC 6455 — protocol constant, not tunable
 
 let _server = null;
 let _heartbeatTimer = null;
@@ -326,11 +325,11 @@ function startServer(ctx) {
   _server.on("error", (err) => {
     console.error("[ws-server] Server error:", err.message);
     if (err.code === "EADDRINUSE") {
-      console.error(`[ws-server] Port ${WS_PORT} is in use. Will retry in 5s.`);
+      console.error(`[ws-server] Port ${WS_PORT} is in use. Will retry in ${WS_RETRY_DELAY_MS}ms.`);
       setTimeout(() => {
         _server = null;
         startServer(ctx);
-      }, 5000);
+      }, WS_RETRY_DELAY_MS);
     }
   });
 

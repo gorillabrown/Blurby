@@ -288,11 +288,25 @@ function startWatcherFn() {
       const doc = getLibrary().find((d) => d.filepath === filepath);
       if (doc) {
         const content = await extractContent(filepath);
-        if (content) {
+        if (content && typeof content === "string") {
           doc.wordCount = countWords(content);
           saveLibrary();
           broadcastLibrary();
         }
+      }
+    },
+    onError: (err, folderPath) => {
+      const isPermission = err.message && (
+        err.message.includes("EACCES") ||
+        err.message.includes("EPERM") ||
+        err.message.includes("permission")
+      );
+      const userMessage = isPermission
+        ? `Can't watch this folder — check permissions: ${folderPath}`
+        : `File watcher error for ${folderPath}: ${err.message}`;
+      console.error("[watcher] Error:", err.message);
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send("watcher-error", { message: userMessage });
       }
     },
   });
@@ -402,6 +416,39 @@ const ipcContext = {
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   await loadState();
+
+  // Sprint 23: Insert sample document on first run
+  if (!settings.firstRunCompleted && !getDocById("sample-meditations")) {
+    try {
+      const sampleEpubPath = path.join(
+        app.isPackaged ? process.resourcesPath : __dirname,
+        app.isPackaged ? "resources" : "resources",
+        "sample-meditations.epub"
+      );
+      const exists = await fsPromises.access(sampleEpubPath).then(() => true).catch(() => false);
+      if (exists) {
+        const content = await extractContent(sampleEpubPath);
+        if (content && typeof content === "string") {
+          const meta = await extractDocMetadata(sampleEpubPath, "sample-meditations", getDataPath());
+          addDocToLibrary({
+            id: "sample-meditations",
+            title: "[Sample] Meditations \u2014 Marcus Aurelius",
+            filepath: sampleEpubPath,
+            wordCount: countWords(content),
+            position: 0,
+            created: Date.now(),
+            source: "sample",
+            author: "Marcus Aurelius",
+            coverPath: meta.coverPath || null,
+            lastReadAt: null,
+          });
+          await saveLibraryNow();
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load sample document:", e.message);
+    }
+  }
 
   // Initialize cloud sync modules
   const auth = require("./main/auth");

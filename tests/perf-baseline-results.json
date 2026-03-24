@@ -1,0 +1,148 @@
+{
+  "timestamp": "2026-03-24T18:44:26.819Z",
+  "node_version": "v24.14.0",
+  "platform": "win32",
+  "arch": "x64",
+  "automated": {
+    "tokenize_1k": {
+      "mean_ms": 0.09407400000000003,
+      "p99_ms": 0.5859000000000023,
+      "min_ms": 0.04679999999999751,
+      "max_ms": 0.7199999999999989,
+      "iterations": 100,
+      "threshold_ms": 10,
+      "pass": true
+    },
+    "tokenize_10k": {
+      "mean_ms": 0.8112339999999996,
+      "p99_ms": 1.6125000000000114,
+      "min_ms": 0.4638999999999953,
+      "max_ms": 1.9298000000000002,
+      "iterations": 100,
+      "threshold_ms": 100,
+      "pass": true
+    },
+    "tokenize_50k": {
+      "mean_ms": 5.7069140000000065,
+      "p99_ms": 17.791500000000042,
+      "min_ms": 3.332299999999975,
+      "max_ms": 17.791500000000042,
+      "iterations": 50,
+      "threshold_ms": 500,
+      "pass": true
+    },
+    "tokenize_100k": {
+      "mean_ms": 11.644619999999986,
+      "p99_ms": 24.77830000000006,
+      "min_ms": 6.847600000000057,
+      "max_ms": 24.77830000000006,
+      "iterations": 20,
+      "threshold_ms": 1000,
+      "pass": true
+    },
+    "tokenizeWithMeta_1k": {
+      "mean_ms": 0.2648639999999955,
+      "p99_ms": 0.2824999999999136,
+      "min_ms": 0.09430000000008931,
+      "max_ms": 6.008000000000038,
+      "iterations": 100,
+      "threshold_ms": 20,
+      "pass": true
+    },
+    "tokenizeWithMeta_10k": {
+      "mean_ms": 0.8593669999999985,
+      "p99_ms": 1.4404000000000678,
+      "min_ms": 0.6843000000000075,
+      "max_ms": 1.472099999999955,
+      "iterations": 100,
+      "threshold_ms": 200,
+      "pass": true
+    },
+    "tokenizeWithMeta_50k": {
+      "mean_ms": 5.726584000000023,
+      "p99_ms": 9.936500000000024,
+      "min_ms": 3.5305000000000746,
+      "max_ms": 9.936500000000024,
+      "iterations": 50,
+      "threshold_ms": 1000,
+      "pass": true
+    },
+    "tokenizeWithMeta_100k": {
+      "mean_ms": 10.078269999999986,
+      "p99_ms": 14.898599999999988,
+      "min_ms": 7.281400000000076,
+      "max_ms": 14.898599999999988,
+      "iterations": 20,
+      "threshold_ms": 2000,
+      "pass": true
+    },
+    "countWords_1k": {
+      "mean_ms": 0.037962000000009086,
+      "p99_ms": 0.11740000000008877,
+      "min_ms": 0.019199999999955253,
+      "max_ms": 0.24959999999987303,
+      "iterations": 100,
+      "threshold_ms": 5,
+      "pass": true
+    },
+    "countWords_10k": {
+      "mean_ms": 0.19618400000000746,
+      "p99_ms": 0.23849999999993088,
+      "min_ms": 0.19059999999990396,
+      "max_ms": 0.3028999999999087,
+      "iterations": 100,
+      "threshold_ms": 50,
+      "pass": true
+    },
+    "countWords_50k": {
+      "mean_ms": 1.15230399999999,
+      "p99_ms": 1.7836999999999534,
+      "min_ms": 0.9541999999999007,
+      "max_ms": 1.7836999999999534,
+      "iterations": 50,
+      "threshold_ms": 250,
+      "pass": true
+    },
+    "countWords_100k": {
+      "mean_ms": 2.2210559999999715,
+      "p99_ms": 3.587299999999914,
+      "min_ms": 1.8478000000000065,
+      "max_ms": 3.587299999999914,
+      "iterations": 50,
+      "threshold_ms": 500,
+      "pass": true
+    },
+    "word_advance_single": {
+      "mean_ms": 0.001368299999996907,
+      "p99_ms": 0.004699999999957072,
+      "min_ms": 0.0003999999998995918,
+      "max_ms": 0.06709999999998217,
+      "iterations": 1000,
+      "threshold_ms": 2,
+      "pass": true
+    },
+    "word_advance_1k_bulk": {
+      "mean_ms": 0.5355590000000052,
+      "p99_ms": 0.9242999999999029,
+      "min_ms": 0.371599999999944,
+      "max_ms": 5.029899999999998,
+      "iterations": 100,
+      "threshold_ms": 100,
+      "pass": true
+    }
+  },
+  "manual_procedures": {
+    "startup_time": "See docs/testing/perf-manual.md#startup-time",
+    "memory_usage": "See docs/testing/perf-manual.md#memory-usage",
+    "scroll_fps": "See docs/testing/perf-manual.md#scroll-fps",
+    "sync_cycle": "See docs/testing/perf-manual.md#sync-cycle-time"
+  },
+  "thresholds": {
+    "startup_cold_s": 3,
+    "startup_warm_s": 1.5,
+    "doc_open_50k_ms": 500,
+    "word_advance_p99_ms": 2,
+    "flow_fps_min": 55
+  },
+  "pass": true
+}

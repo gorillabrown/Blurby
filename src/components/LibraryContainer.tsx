@@ -16,6 +16,7 @@ import SnoozePickerOverlay from "./SnoozePickerOverlay";
 import TagPickerOverlay from "./TagPickerOverlay";
 import QuickSettingsPopover from "./QuickSettingsPopover";
 import HotkeyCoach from "./HotkeyCoach";
+import OnboardingOverlay from "./OnboardingOverlay";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
 
@@ -50,6 +51,14 @@ export default function LibraryContainer() {
     api.getSiteLogins().then(setSiteLogins);
   }, []);
 
+  // Watcher error notifications
+  useEffect(() => {
+    const cleanup = api.onWatcherError?.((data) => {
+      showToast(data.message, 7000);
+    });
+    return cleanup;
+  }, [showToast]);
+
   const handleSiteLogin = useCallback(async (url: string) => {
     let normalizedUrl = url.trim();
     if (!normalizedUrl) return;
@@ -64,6 +73,9 @@ export default function LibraryContainer() {
     api.getSiteLogins().then(setSiteLogins);
   }, []);
 
+  // Sprint 23: First-run onboarding
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   // Smart import confirmation state
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
 
@@ -77,6 +89,13 @@ export default function LibraryContainer() {
   // Create context providers
   const settingsValue = useSettingsProvider(settings, setSettings);
   const toastValue = useToastProvider();
+
+  // Sprint 23: Show onboarding on first run
+  useEffect(() => {
+    if (loaded && !settings.firstRunCompleted) {
+      setShowOnboarding(true);
+    }
+  }, [loaded]); // intentionally only on load — not reactive to settings changes
 
   // Sync wpm/folderName from loaded settings (using useEffect instead of render-body side effect)
   const [didInit, setDidInit] = useState(false);
@@ -97,7 +116,14 @@ export default function LibraryContainer() {
   const openDoc = useCallback(async (doc: BlurbyDoc) => {
     let content = doc.content;
     if (!content) {
-      content = await loadDocContent(doc.id) || undefined;
+      const result = await loadDocContent(doc.id);
+      // Handle user-facing parse errors (PDF encrypted/corrupted, EPUB invalid, etc.)
+      if (result && typeof result === "object" && "userError" in result) {
+        const hasSourceUrl = !!(doc as BlurbyDoc & { sourceUrl?: string }).sourceUrl;
+        showToast(result.userError + (hasSourceUrl ? " — try removing and re-importing." : " — try removing and re-adding the file."), 6000);
+        return;
+      }
+      content = (result as string | null) || undefined;
       if (!content) return;
     }
     const docWithContent: DocWithContent = { ...doc, content: content! };
@@ -105,7 +131,7 @@ export default function LibraryContainer() {
     // Always open in Page view (Sprint 20U: Page is default parent)
     settingsValue.updateSettings({ readingMode: "page" });
     setView("reader");
-  }, [loadDocContent, settingsValue]);
+  }, [loadDocContent, settingsValue, showToast]);
 
   const handleOpenDocById = useCallback(async (docId: string) => {
     const doc = library.find((d) => d.id === docId);
@@ -285,6 +311,11 @@ export default function LibraryContainer() {
     kbState.setActiveOverlay(null);
   }, [library, setLibrary, kbState]);
 
+  const handleOnboardingComplete = useCallback(() => {
+    setShowOnboarding(false);
+    setSettings((prev) => ({ ...prev, firstRunCompleted: true }));
+  }, [setSettings]);
+
   useGlobalKeys({
     toggleFlap: toggleMenuFlap,
     openSettings: handleOpenSettings,
@@ -302,8 +333,19 @@ export default function LibraryContainer() {
     if (!importPending) return;
     if (importPending.isUrl) {
       const result = await addDocFromUrl(importPending.content);
-      if (result?.error) showToast(result.error);
-      else showToast("Imported from URL");
+      if (result?.error) {
+        // Show error with "Open in browser" fallback if we have a source URL
+        const sourceUrl = result.sourceUrl || importPending.content;
+        showToast(result.error, 7000);
+        // Offer "Open in browser" as a follow-up after brief delay
+        setTimeout(() => {
+          if (window.electronAPI?.openUrlInBrowser && sourceUrl) {
+            showToast("Tip: Try opening the article in your browser first, then use Ctrl+A, Ctrl+C to paste it.", 6000);
+          }
+        }, 7500);
+      } else {
+        showToast("Imported from URL");
+      }
     } else {
       await addDoc(title, importPending.content);
       showToast("Text imported");
@@ -538,6 +580,9 @@ export default function LibraryContainer() {
           </div>
         )}
         <HotkeyCoach />
+        {showOnboarding && (
+          <OnboardingOverlay onComplete={handleOnboardingComplete} />
+        )}
       </ToastContext.Provider>
     </SettingsContext.Provider>
   );

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
-import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS, hasPunctuation } from "../utils/text";
+import { hasPunctuation } from "../utils/text";
+import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS } from "../constants";
 import { calculatePauseMs } from "../utils/rhythm";
 import { BlurbyDoc, RhythmPauses } from "../types";
 

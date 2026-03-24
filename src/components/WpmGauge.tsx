@@ -1,4 +1,4 @@
-import { MIN_WPM, MAX_WPM } from "../utils/text";
+import { MIN_WPM, MAX_WPM } from "../constants";
 
 interface WpmGaugeProps {
   wpm: number;

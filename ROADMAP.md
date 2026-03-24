@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-03-21 — Post-Sprint 17 doc refresh. All sprints (1-17) complete.
-**Current branch**: `main` (36 commits — PR #1 squash-merged, then Sprints 2-17 layered on top)
-**Current state**: Feature-complete with cloud sync. Sprint 18 (platform expansion: .exe hardening, Chrome extension, Android) is next.
+**Last updated**: 2026-03-24 — Post-Sprint 21 roadmap expansion. Sprints 1-21 complete. Sprints 22-25 spec'd.
+**Current branch**: `sprint/19-20-21-combined` (pending merge to `main`)
+**Current state**: Core app stable through Sprint 21 (UX polish + reading intelligence). Sprint 18B (Chrome extension) in progress. Sprints 22-25 spec'd for v1 launch.
 
 > **Navigation:** Sprints are numbered sequentially. Each sprint has a scope statement, agent assignments, and acceptance criteria ready for dispatch to Claude Code CLI.
 
@@ -67,9 +67,13 @@ All feature work from phases 0-4 plus Sprints 1-17 are on main. The app has clou
 | **Sprint 18A: Windows .exe Production** | ✅ COMPLETED | Branded NSIS, auto-update with deltas, x64+ARM64 CI, no code signing |
 | **Sprint 18B: Chrome Extension** | 📋 SPEC'D | "Send to Blurby" — Readability extraction, local WebSocket + cloud fallback |
 | **Sprint 18C: Android APK** | 📋 SPEC'D | Full Blurby Mobile — React Native, RSVP + flow, cloud sync, share intent |
-| **Sprint 19: Sync Hardening + Provenance** | 📋 SPEC'D | Revision counters, operation log, staging, tombstones, content sync, reconciliation, article provenance extraction, APA-format PDFs |
-| **Sprint 20: Keyboard-First UX** | 📋 SPEC'D | Command palette, J/K navigation, G-sequences, undo, snooze, tags, APA provenance display, Page-as-parent reader (Page→Focus/Flow), unified bottom bar, notes system, reading log, 30+ new shortcuts |
-| **Sprint 21: UX Polish & Reading Intelligence** | 📋 SPEC'D | Frozen headers, search icon, book thumbnails, file type badges, hotkey coaching, session timer, AVG WPM fix, drag-drop anywhere, paywall login, 17 items |
+| **Sprint 19: Sync Hardening + Provenance** | ✅ COMPLETED | Revision counters, operation log, staging, tombstones, content sync, reconciliation, article provenance extraction, APA-format PDFs |
+| **Sprint 20: Keyboard-First UX** | ✅ COMPLETED | Command palette, J/K navigation, G-sequences, undo, snooze, tags, APA provenance display, Page-as-parent reader (Page→Focus/Flow), unified bottom bar, notes system, reading log, 30+ new shortcuts |
+| **Sprint 21: UX Polish & Reading Intelligence** | ✅ COMPLETED | Frozen headers, search icon, book thumbnails, file type badges, hotkey coaching, session timer, AVG WPM fix, drag-drop anywhere, paywall login, 17 items |
+| **Sprint 22: Reading Animation + TTS Sync** | 🔶 SPEC'D | Smooth cursor sliding (Flow + Focus), TTS-at-cursor-pace, WPM cap with TTS, TTS toggle in bottom bar |
+| **Sprint 23: V1 Hardening** | 🔶 SPEC'D | First-run onboarding, error recovery UX, constants extraction, a11y audit, perf baselines, auto-update E2E |
+| **Sprint 24: External Audit** | 🔶 SPEC'D | Full 6-step external audit per workflow skill — code quality, architecture, tests, docs |
+| **Sprint 25: RSS Library + Paywall Integration** | 📋 SPEC'D | Feed aggregation from paywall sites, RSS Library screen, "Add to Blurby" pipeline |
 
 **Legend:** ✅ = implemented & tested, 🔶 = fully scoped with agent assignments (ready for dispatch), 📋 = spec'd but needs agent assignments, 📐 = design/vision only
 
@@ -2418,6 +2422,553 @@ interface BlurbyDoc {
 **21O** — [ ] AVG WPM uses active reading time only; no idle/paused inflation
 **21P** — [ ] Drag-and-drop works from any area of the app window, not just "NOT STARTED"
 **21Q** — [ ] Focus mode shows time-to-end-of-chapter and time-to-end-of-document
+
+---
+
+## Sprint 22: Reading Animation + TTS Sync
+
+**Goal:** Transform the reading experience with smooth, elegant cursor/highlight motion in Flow and Focus modes, and introduce text-to-speech that reads at the exact pace of the user's WPM setting. After this sprint, reading in Blurby feels fluid rather than mechanical.
+
+**Prerequisite:** Sprint 21 complete (reading intelligence features provide the session timer and WPM tracking that TTS sync depends on).
+
+**Context:** Flow mode currently jumps the highlight between words — it should glide. Focus mode swaps words instantly — it should transition. TTS exists (`useNarration.ts`) but operates independently from the cursor. This sprint marries the visual and audio reading experiences under a single clock: user WPM → cursor advance → TTS output.
+
+### Spec
+
+**22A. Smooth highlight sliding in Flow mode (ScrollReaderView)**
+- Current behavior: word-level highlight jumps discretely from word to word in the scrolling text body
+- Target behavior: highlight slides smoothly between words as a continuous glide animation
+- Implementation approach:
+  - Use CSS `transition` on the highlight element's `transform`/`left`/`top` properties
+  - On each word advance from `useReader`, calculate the pixel position of the next word in the text flow
+  - Apply a CSS transition duration derived from the current WPM interval (`60000 / wpm` ms)
+  - The highlight should arrive at the next word position just as the word advance fires
+  - Use `getBoundingClientRect()` on the next word's `<span>` to get target coordinates
+  - Handle line wraps gracefully — when the highlight reaches end of line, it should flow to the start of the next line (not teleport diagonally)
+  - Handle page/scroll boundaries — auto-scroll should stay smooth and not fight the highlight animation
+- Performance constraints:
+  - Use CSS `transform: translate3d()` for GPU-accelerated movement (avoid `top`/`left` which trigger layout)
+  - No React re-renders per word — continue using the existing ref-based DOM callback pattern
+  - At 600 WPM (100ms per word), the animation must complete within the interval
+- Edge cases:
+  - Pause/resume: on pause, highlight freezes at current position; on resume, glides to next word
+  - WPM change mid-read: transition duration updates immediately on next word advance
+  - Chapter boundaries: no animation across chapter breaks (instant jump to new chapter's first word)
+  - Window resize: recalculate positions on resize without visual glitch
+- Files affected: `src/components/ScrollReaderView.tsx`, `src/styles/global.css`
+
+**22B. Smooth word transition in Focus mode (ReaderView)**
+- Current behavior: RSVP display hard-swaps the current word for the next word
+- Target behavior: subtle, fast transition that doesn't interfere with reading at speed
+- Implementation approach:
+  - Outgoing word fades/slides out while incoming word fades/slides in
+  - Animation must be **fast** — transition duration ≤ 15% of the word display interval
+    - At 300 WPM (200ms/word): transition ≤ 30ms
+    - At 600 WPM (100ms/word): transition ≤ 15ms
+    - At 100 WPM (600ms/word): transition ≤ 90ms
+  - ORP (Optimal Recognition Point) anchor position stays fixed — the pivot character doesn't move
+  - Use CSS `opacity` + `transform: translateX()` for the swap animation
+  - Two-element approach: element A displays current word, element B waits offscreen; on advance, A slides out, B slides in; roles swap for next word
+  - At WPM > 500, disable transition entirely (too fast to perceive, would just blur)
+- Performance constraints:
+  - GPU-accelerated properties only (`opacity`, `transform`)
+  - No layout thrash — both word elements are absolutely positioned
+  - Continue using ref-based DOM updates (no React state per word)
+- Edge cases:
+  - Rhythm pauses: transition still plays at pause boundaries, but hold time extends
+  - Punctuation pauses: transition duration stays the same, only the dwell time increases
+  - Very long words: ensure no text overflow during transition
+- Files affected: `src/components/ReaderView.tsx`, `src/styles/global.css`
+
+**22C. TTS toggle and WPM cap architecture**
+- New TTS toggle button in `ReaderBottomBar` — visible only in Page view (before entering Focus/Flow)
+- Toggle states: OFF (default) → ON (speaker icon, highlighted in accent color)
+- When TTS is ON and user enters Focus or Flow mode:
+  - If user's current WPM > 400: WPM is capped to 400 on mode entry
+  - Store the user's original WPM so it restores when TTS is toggled off or mode is exited
+  - WPM slider in bottom bar shows the cap indicator when TTS-limited
+  - User can still lower WPM below 400 while TTS is active
+  - If user raises WPM above 400 while TTS is on: clamp to 400
+- When TTS is OFF:
+  - No WPM cap — user's full range (MIN_WPM to MAX_WPM) is available
+  - WPM restores to original value if it was capped
+- TTS toggle is NOT available within Focus/Flow modes — must be set from Page view before entering
+- Keyboard shortcut: `N` toggles narration (from Page view only)
+- Files affected: `src/components/ReaderBottomBar.tsx`, `src/hooks/useReader.ts`, `src/types.ts`
+- New constants: `TTS_WPM_CAP = 400`, `TTS_TRANSITION_DISABLE_WPM = 500` → add to `src/constants.ts` (or existing constants location)
+
+**22D. Cursor-driven TTS engine**
+- Architecture: **cursor drives TTS** — the user's WPM controls the cursor, and TTS reads at the cursor's pace
+- Implementation:
+  - On each word advance (from `useReader` RAF loop), feed the current word (or short phrase) to `speechSynthesis`
+  - Chunk strategy: buffer 3-5 words ahead and queue as a single utterance for natural speech flow
+  - Each utterance's `rate` is dynamically calculated to match the cursor's pace:
+    - Measure the time window for the chunk (number of words × ms per word at current WPM)
+    - Set `utterance.rate` so the speech fills that window
+    - Rate clamped to speechSynthesis limits (0.1–10.0 on most engines, practically 0.5–3.0)
+  - Use `SpeechSynthesisUtterance.onend` to detect when a chunk finishes — if cursor has advanced past it, skip; if cursor hasn't reached the end, let the next chunk handle it
+  - Use `onboundary` events for fine-grained word-level sync feedback (optional visual indicator)
+- Sync protocol:
+  - Cursor is the master clock — TTS follows
+  - If TTS falls behind (slow voice at high WPM): cancel current utterance, re-queue from cursor position
+  - If TTS gets ahead (fast voice at low WPM): pause TTS, wait for cursor to catch up
+  - On pause: `speechSynthesis.pause()`; on resume: `speechSynthesis.resume()`
+  - On WPM change: cancel current utterance, re-queue with new rate from cursor position
+  - On mode exit: `speechSynthesis.cancel()`
+- Voice selection: respect user's voice choice from settings (existing `useNarration` voice picker)
+- Works in both Flow and Focus modes — same engine, different visual layers
+- Files affected: `src/hooks/useNarration.ts` (major refactor), `src/hooks/useReader.ts` (add TTS callback), `src/components/ReaderView.tsx`, `src/components/ScrollReaderView.tsx`
+
+**22E. TTS settings integration**
+- Add TTS section to existing Speed Reading Settings page:
+  - Voice picker dropdown (shows system voices, defaults to first English)
+  - "Test voice" button — speaks a sample sentence at current settings
+  - TTS WPM cap display: "When narration is active, max WPM is 400"
+- Persist TTS preferences in `settings.json`:
+  - `tts.enabled` (boolean, default false) — last toggle state
+  - `tts.voiceURI` (string) — selected voice URI
+  - `tts.volume` (number, 0.0–1.0, default 1.0)
+- Settings sync via cloud sync engine (existing settings merge handles new fields)
+- Files affected: `src/components/settings/SpeedReadingSettings.tsx`, `main/ipc-handlers.js` (settings schema)
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Smooth highlight sliding in Flow mode (22A) | `renderer-fixer` | — |
+| 2 | Smooth word transition in Focus mode (22B) | `renderer-fixer` | — |
+| 3 | TTS toggle + WPM cap architecture (22C) | `renderer-fixer` | — |
+| 4 | Cursor-driven TTS engine (22D) | `renderer-fixer` | Steps 1-3 |
+| 5 | TTS settings integration (22E) | `renderer-fixer` | Step 4 |
+| 6 | Spec compliance review | `spec-reviewer` | Steps 1-5 |
+| 7 | Run all tests + build verification | `test-runner` | Step 6 |
+
+> Steps 1, 2, and 3 are PARALLELIZABLE. Step 4 depends on all three. Step 5 depends on 4. Steps 6-7 are sequential gates.
+
+### Acceptance Criteria
+
+**22A** — [ ] Flow mode highlight glides smoothly between words (no discrete jumping)
+**22A** — [ ] Highlight handles line wraps (end-of-line → start-of-next-line) without diagonal teleport
+**22A** — [ ] Animation uses GPU-accelerated CSS properties only (`transform`, `opacity`)
+**22A** — [ ] At 600 WPM, animation completes within 100ms interval with no stutter
+**22A** — [ ] Pause freezes highlight in place; resume continues glide
+**22B** — [ ] Focus mode words transition with subtle slide/fade instead of hard swap
+**22B** — [ ] ORP pivot character stays anchored during transition
+**22B** — [ ] Transition duration ≤ 15% of word display interval at any WPM
+**22B** — [ ] Transition disabled at WPM > 500 (too fast to perceive)
+**22C** — [ ] TTS toggle visible in bottom bar from Page view only
+**22C** — [ ] Toggling TTS ON + entering Focus/Flow caps WPM to 400 (when user's WPM > 400)
+**22C** — [ ] Original WPM restores when TTS toggled off or mode exited
+**22C** — [ ] `N` keyboard shortcut toggles narration from Page view
+**22D** — [ ] TTS reads words synchronized to cursor position in Focus mode
+**22D** — [ ] TTS reads words synchronized to cursor position in Flow mode
+**22D** — [ ] TTS auto-recovers when voice falls behind cursor (cancel + re-queue)
+**22D** — [ ] Pause/resume pauses and resumes both cursor and TTS together
+**22D** — [ ] WPM change mid-read re-queues TTS at new rate
+**22D** — [ ] Mode exit cancels all speech
+**22E** — [ ] Voice picker in Speed Reading Settings shows available system voices
+**22E** — [ ] "Test voice" button speaks sample sentence
+**22E** — [ ] TTS preferences persist in `settings.json` and sync across devices
+**22E** — [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 23: V1 Hardening
+
+**Goal:** Everything that stands between the current app and a confident v1.0.0 release. First-run experience, error recovery, constants extraction, accessibility audit on new components, performance baselines, and the manual auto-update E2E verification.
+
+**Prerequisite:** Sprint 22 complete (TTS adds new UI components that need a11y audit).
+
+**Context:** The app is feature-rich but hasn't been polished for first-time users or edge-case failures. No performance baselines exist. Constants are still scattered. The 11 new components from Sprint 20/21 haven't been audited for WCAG 2.1 AA. The auto-update pipeline has never been tested end-to-end.
+
+### Spec
+
+**23A. First-run onboarding experience**
+- Detect first launch: check for absence of `settings.json` or a `firstRunCompleted` flag
+- Welcome screen (full-window overlay):
+  - Blurby branding (logo, tagline)
+  - Brief intro: "Blurby helps you read faster and remember more"
+  - "Get Started" button
+- Sample document pre-loaded:
+  - Include a public-domain classic (e.g., opening chapter of a Dickens novel, or a Thoreau essay — confirm no copyright concern)
+  - Pre-loaded into library on first run so the user sees content immediately
+  - Document title clearly marked as "[Sample] ..."
+- Guided tooltips (3-step tour):
+  1. Point to library → "Your reading library — add documents here"
+  2. Point to a document card → "Click to open in Page view"
+  3. Point to mode buttons in bottom bar → "Switch between Focus (speed reading) and Flow (guided scroll)"
+- Tooltip implementation: simple overlay with arrow pointing to target, "Next" / "Skip" buttons
+- Set `firstRunCompleted: true` in settings after tour completion or skip
+- Files affected: new `src/components/OnboardingOverlay.tsx`, `src/components/App.tsx`, `main/ipc-handlers.js` (settings schema)
+
+**23B. Error recovery UX pass**
+- Audit every error boundary and catch block for user-facing quality
+- Specific scenarios to handle gracefully:
+  - **PDF parse failure**: Show toast "Could not read this PDF — the file may be encrypted or corrupted" + "Try Again" / "Remove" options
+  - **EPUB extraction failure**: Show specific error (missing content.opf, corrupted ZIP, etc.)
+  - **URL import failure**: "Could not extract article from this URL" + "Open in browser" fallback
+  - **Cloud sync conflict**: Show conflict resolution dialog (already exists from Sprint 17, verify it still works post-Sprint 19)
+  - **WebSocket disconnect** (Chrome ext → desktop): Extension popup shows "Reconnecting..." with spinner, auto-retry 3x
+  - **Network failure during sync**: Toast "Sync paused — will retry when online" with offline indicator
+  - **File watcher permission error**: "Can't watch this folder — check permissions" with folder path
+- Each error should have: clear message (no technical jargon), actionable suggestion, retry option where applicable
+- Add error logging to `error.log` for all caught errors (already exists from Sprint 9, verify coverage)
+- Files affected: multiple components (audit-driven), `src/styles/global.css` (error toast styles)
+
+**23C. Constants extraction (AF-001)**
+- Create `src/constants.ts` for renderer constants:
+  - `MIN_WPM`, `MAX_WPM`, `WPM_STEP`, `DEFAULT_WPM`
+  - `INITIAL_PAUSE_MS`, `PUNCTUATION_PAUSE_MS`
+  - `REWIND_WORDS`, `FOCUS_TEXT_SIZE_STEP`
+  - `DEFAULT_WORDS_PER_FLOW_PAGE`
+  - `SNOOZE_INTERVALS` (array of durations)
+  - `TOAST_DURATION_MS`, `COACHING_TOAST_LIMIT`
+  - `TTS_WPM_CAP`, `TTS_TRANSITION_DISABLE_WPM` (from Sprint 22)
+  - `G_SEQUENCE_TIMEOUT_MS` (2000ms for keyboard G-sequences)
+  - `SEARCH_DEBOUNCE_MS`
+- Create `main/constants.js` for main process constants:
+  - `LRU_CACHE_SIZE`
+  - `SYNC_INTERVAL_MS`, `SYNC_RETRY_DELAY_MS`
+  - `TOMBSTONE_TTL_MS`, `RECONCILIATION_PERIOD_MS`
+  - `SAVE_THROTTLE_MS`, `SAVE_THROTTLE_WORDS`
+  - `WS_PORT` (WebSocket port for Chrome extension)
+  - `PAIRING_TOKEN_LENGTH`
+  - `MAX_DOCUMENT_SIZE_BYTES`
+- Update all source files to import from the new constants files instead of hardcoding
+- CSS custom properties in `global.css` are exempt (already centralized)
+- Files affected: new `src/constants.ts`, new `main/constants.js`, all files that currently define inline constants
+
+**23D. Accessibility audit on Sprint 20/21 components**
+- Components to audit (added after Sprint 15 a11y pass):
+  - `CommandPalette.tsx` — keyboard nav, ARIA role=dialog, search input labeling
+  - `ShortcutsOverlay.tsx` — ARIA role=dialog, close on Escape
+  - `GoToIndicator.tsx` — ARIA live region for position announcements
+  - `SnoozePickerOverlay.tsx` — ARIA role=dialog, time picker accessibility
+  - `TagPickerOverlay.tsx` — ARIA role=dialog, listbox pattern for tag selection
+  - `HighlightsOverlay.tsx` — ARIA role=dialog, list navigation
+  - `QuickSettingsPopover.tsx` — ARIA role=menu, focus trapping
+  - `NotePopover.tsx` — ARIA role=dialog, textarea labeling
+  - `HotkeyCoach.tsx` — ARIA role=status (live region), auto-dismiss timing
+  - `ReaderBottomBar.tsx` — ARIA labels on all icon buttons, slider accessibility
+  - `PageReaderView.tsx` — reading region labeling, word selection ARIA
+- For each component verify:
+  - Proper ARIA roles and labels
+  - Keyboard navigation (Tab, Escape, Enter, Arrow keys as appropriate)
+  - Focus trapping in overlays/dialogs
+  - Screen reader announcement of state changes
+  - Color contrast meets WCAG 2.1 AA (4.5:1 for text, 3:1 for large text)
+  - Reduced motion respected (`prefers-reduced-motion`)
+- Files affected: all 11 listed components, `src/styles/global.css`
+
+**23E. Performance baselines**
+- Create a performance benchmark script (`tests/perf-baseline.js`) that measures:
+  - **Startup time**: app launch → first paint → interactive (library visible)
+  - **Document open time**: click document → reader view rendered (for TXT, EPUB, PDF at various sizes)
+  - **Memory usage**: RSS at startup, after opening 1/5/20 documents, after 30-minute reading session
+  - **Word advance latency**: time from RAF callback to DOM update in Focus mode (target: < 2ms)
+  - **Scroll performance**: FPS during Flow mode at various WPM (target: 60fps)
+  - **Sync cycle time**: full sync cycle duration (local → cloud → resolve → apply)
+- Output results to `tests/perf-baseline-results.json` with timestamps for tracking over time
+- Establish pass/fail thresholds:
+  - Startup to interactive: < 3s (cold), < 1.5s (warm)
+  - Document open (50k words): < 500ms
+  - Word advance latency: < 2ms (p99)
+  - Flow mode FPS: > 55fps sustained
+- Files affected: new `tests/perf-baseline.js`, `package.json` (add `npm run perf` script)
+
+**23F. Auto-update E2E verification**
+- Manual test procedure (documented in `docs/testing/auto-update-e2e.md`):
+  1. Tag `v0.9.9-test` → CI builds → install the resulting .exe
+  2. Tag `v0.9.10-test` → CI builds → verify the installed app detects and applies the update
+  3. Verify delta update (blockmap) is used (smaller download than full installer)
+  4. Verify Settings > Help shows "Update available" → "Downloading" → "Restart to update"
+  5. After restart, verify version number updated in Settings > Help
+- Document results and any issues found
+- Files affected: new `docs/testing/auto-update-e2e.md`
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | First-run onboarding (23A) | `renderer-fixer` | — |
+| 2 | Error recovery UX audit + fixes (23B) | `renderer-fixer` + `electron-fixer` | — |
+| 3 | Constants extraction (23C) | `renderer-fixer` + `electron-fixer` | — |
+| 4 | Accessibility audit (23D) | `renderer-fixer` | Steps 1 (new components need audit too) |
+| 5 | Performance baseline script (23E) | `perf-auditor` | — |
+| 6 | Auto-update E2E doc (23F) | `doc-keeper` | — |
+| 7 | Spec compliance review | `spec-reviewer` | Steps 1-6 |
+| 8 | Run all tests + build | `test-runner` | Step 7 |
+
+> Steps 1, 2, 3, 5, and 6 are PARALLELIZABLE. Step 4 depends on 1. Steps 7-8 are sequential gates.
+
+### Acceptance Criteria
+
+**23A** — [ ] First launch shows welcome screen with branding and "Get Started"
+**23A** — [ ] Sample public-domain document pre-loaded in library on first run
+**23A** — [ ] 3-step tooltip tour points to library, document card, mode buttons
+**23A** — [ ] Tour can be skipped; `firstRunCompleted` flag prevents re-showing
+**23B** — [ ] PDF parse failure shows user-friendly toast with "Try Again" / "Remove"
+**23B** — [ ] URL import failure shows "Open in browser" fallback
+**23B** — [ ] Sync conflict shows resolution dialog
+**23B** — [ ] Network failure shows "Sync paused — will retry when online"
+**23B** — [ ] All caught errors logged to `error.log`
+**23C** — [ ] `src/constants.ts` contains all renderer constants (no inline magic numbers remain)
+**23C** — [ ] `main/constants.js` contains all main process constants
+**23C** — [ ] All source files import from constants files instead of hardcoding
+**23D** — [ ] All 11 Sprint 20/21 components pass WCAG 2.1 AA audit
+**23D** — [ ] Keyboard navigation works in all overlays/dialogs
+**23D** — [ ] Screen reader announcements verified for state changes
+**23D** — [ ] `prefers-reduced-motion` respected in all new components
+**23E** — [ ] `npm run perf` produces `perf-baseline-results.json` with all 6 metrics
+**23E** — [ ] Startup to interactive < 3s (cold start)
+**23E** — [ ] Word advance latency < 2ms (p99)
+**23E** — [ ] Flow mode FPS > 55fps sustained
+**23F** — [ ] Auto-update E2E test procedure documented in `docs/testing/`
+**23F** — [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Sprint 24: External Audit
+
+**Goal:** Run the full external audit pipeline per `.workflow/skills/external-audit/SKILL.md` before declaring v1. This is the quality gate — an independent, systematic review of the entire codebase.
+
+**Prerequisite:** Sprint 23 complete (all v1 features and hardening in place before audit).
+
+**Context:** Per the External Audit Cadence rule (CLAUDE.md), audits run after every 3rd sprint or at major phase boundaries. Sprint 24 falls at the v1 launch boundary — the most critical audit point. This audit covers everything from Sprint 15 (last a11y pass) through Sprint 23.
+
+### Spec
+
+**24A. Code quality audit**
+- Lint pass: identify dead code, unused imports, inconsistent naming, type safety gaps
+- Architecture compliance: verify all standing rules from CLAUDE.md are followed
+  - Main process stays CommonJS, renderer stays ESM/TypeScript
+  - All file I/O async (no synchronous reads/writes)
+  - preload.js is minimal (security boundary)
+  - No Node.js imports in renderer code
+  - All system access through IPC via `window.electronAPI`
+  - CSS custom properties for theming (no inline styles)
+  - Constants in dedicated files (post-Sprint 23)
+- Known-trap regression: check for re-introduced patterns from LESSONS_LEARNED.md
+- Files affected: read-only audit, findings go to `docs/project/AGENT_FINDINGS.md`
+
+**24B. Test coverage audit**
+- Map test files to features: identify any feature with zero test coverage
+- Measure line/branch coverage if tooling supports it (Vitest c8/istanbul)
+- Priority gaps to flag:
+  - IPC handler coverage (currently untested — integration test gap)
+  - Sync engine edge cases (concurrent device sync simulation)
+  - New Sprint 22 TTS sync logic
+  - New Sprint 23 onboarding component
+- Recommend specific tests to add (but don't write them in this sprint — log as findings)
+
+**24C. Architecture review**
+- Module dependency graph: verify no circular dependencies
+- Bundle size analysis: identify largest contributors, flag anything > 100KB that could be lazy-loaded
+- Security surface: review all IPC channels, CSP headers, token storage
+- Cloud sync audit: verify revision counter logic, tombstone cleanup, merge correctness
+
+**24D. Documentation alignment**
+- CLAUDE.md accuracy: verify all file paths, line counts, feature statuses match reality
+- ROADMAP.md accuracy: verify acceptance criteria match implementations
+- LESSONS_LEARNED.md completeness: verify recent sprints have entries
+- API surface documentation: verify preload.js exposes match what renderer consumes
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Code quality audit (24A) | `code-reviewer` | — |
+| 2 | Test coverage audit (24B) | `code-reviewer` | — |
+| 3 | Architecture review (24C) | `ui-investigator` | — |
+| 4 | Documentation alignment (24D) | `doc-keeper` | — |
+| 5 | Findings consolidation | `blurby-lead` | Steps 1-4 |
+
+> Steps 1-4 are FULLY PARALLELIZABLE. Step 5 consolidates.
+
+### Acceptance Criteria
+
+**24A** — [ ] Zero known-trap regressions from LESSONS_LEARNED.md
+**24A** — [ ] All standing rules verified compliant
+**24A** — [ ] Dead code and unused imports flagged in findings
+**24B** — [ ] Every feature set has at least one test file mapped
+**24B** — [ ] Coverage gaps logged with recommended test additions
+**24C** — [ ] No circular dependencies
+**24C** — [ ] Bundle analysis completed, largest modules identified
+**24C** — [ ] Security surface reviewed (IPC, CSP, tokens)
+**24D** — [ ] CLAUDE.md file paths and feature statuses match codebase
+**24D** — [ ] ROADMAP.md acceptance criteria match implementations
+**24D** — [ ] Audit findings consolidated in `docs/project/AGENT_FINDINGS.md`
+
+---
+
+## Sprint 25: RSS Library + Paywall Site Integration
+
+**Goal:** Add a separate RSS Library surface where users can browse articles from authenticated paywall sites and selectively import them into their main Blurby library. This bridges the gap between discovery (what's available to read) and commitment (what you've added to your reading list).
+
+**Prerequisite:** Sprint 24 complete (v1 audit passed). This is a post-v1 feature — it adds a new data model and UI surface.
+
+**Context:** Sprint 21L added paywall detection and login persistence for URL imports. This sprint extends that foundation into a full feed aggregation system. When users are logged into a paywall site (e.g., NYT, WSJ, The Atlantic), Blurby can discover and list articles from that site's RSS/Atom feed, presenting them in a browsable RSS Library separate from the user's curated reading library.
+
+### Spec
+
+**25A. Feed discovery and management**
+- Data model: `Feed` object
+  ```
+  {
+    id: string,              // UUID
+    url: string,             // RSS/Atom feed URL
+    siteUrl: string,         // Base URL of the site
+    title: string,           // Feed title (from XML)
+    iconUrl: string,         // Site favicon
+    authRequired: boolean,   // Does this feed need authentication?
+    lastFetched: timestamp,  // Last successful fetch
+    fetchInterval: number,   // Minutes between fetches (default: 60)
+    itemCount: number        // Number of items in last fetch
+  }
+  ```
+- Feed discovery methods:
+  - **Auto-discover from URL imports**: When user imports a URL from a paywall site (already logged in via Sprint 21L), offer "Subscribe to this site's feed?"
+  - **Manual add**: User pastes an RSS/Atom URL directly
+  - **Auto-detect**: Given a site URL, probe common feed locations (`/feed`, `/rss`, `/atom.xml`, `<link rel="alternate" type="application/rss+xml">` in HTML head)
+- Feed storage: `feeds.json` in user data directory (alongside library.json, settings.json)
+- Feed CRUD: add, remove, rename, change fetch interval
+- Files affected: new `main/feed-manager.js`, new IPC channels (`add-feed`, `remove-feed`, `list-feeds`, `refresh-feed`)
+
+**25B. Feed item fetching and caching**
+- Data model: `FeedItem` object
+  ```
+  {
+    id: string,              // GUID from feed or hash of URL
+    feedId: string,          // Parent feed ID
+    url: string,             // Article URL
+    title: string,           // Article title
+    author: string,          // Author (from feed metadata)
+    publishedAt: timestamp,  // Publication date
+    summary: string,         // Feed description/excerpt (first ~200 chars)
+    imageUrl: string,        // Featured image from feed
+    read: boolean,           // Has user opened this item?
+    addedToBlurby: boolean,  // Has user imported this to main library?
+    blurbyDocId: string|null // If imported, link to library doc ID
+  }
+  ```
+- Fetch engine:
+  - Parse RSS 2.0, Atom 1.0, and JSON Feed formats
+  - Use `xml2js` or lightweight XML parser (new dependency, ~50KB)
+  - For authenticated feeds: reuse stored cookies/session from Sprint 21L paywall login
+  - Fetch on app launch + at configured interval per feed
+  - Cache items in `feed-items.json` (or per-feed files if lists grow large)
+  - Deduplicate by URL — same article from multiple feeds appears once
+- Item lifecycle: new items appear as unread → user opens → marked read → user imports → linked to library doc
+- Retention: keep last 200 items per feed, prune older items on each fetch
+- Files affected: `main/feed-manager.js`, new `main/feed-parser.js`
+
+**25C. RSS Library UI**
+- New top-level navigation item: "Feeds" (alongside existing library)
+  - Accessible from menu flap sidebar
+  - Separate from the main "Library" (readings) section
+- RSS Library layout:
+  - Left sidebar: list of subscribed feeds with unread counts
+  - "All Feeds" view aggregates all items sorted by recency
+  - Individual feed view shows items from one source
+  - Each feed item card shows: title, author, date, excerpt, featured image thumbnail
+- Item actions:
+  - **"Add to Blurby"** button (primary action) — triggers URL extraction pipeline (Readability + authenticated fetch from Sprint 19) → imports into main library
+  - **"Open in Browser"** — opens the original URL in the user's default browser
+  - **"Mark Read"** — marks as read without importing
+  - **"Mark All Read"** for bulk operations
+- Feed management:
+  - "Add Feed" button → URL input dialog with auto-detection
+  - Right-click feed → Remove, Rename, Change interval
+  - Feed error states: "Feed not found", "Authentication required", "Parse error"
+- Keyboard shortcuts (extend Sprint 20 pattern):
+  - `G F` — go to Feeds view
+  - `J/K` — navigate feed items
+  - `A` — add to Blurby
+  - `O` — open in browser
+  - `M` — mark read
+- Files affected: new `src/components/FeedLibrary.tsx`, new `src/components/FeedItemCard.tsx`, `src/components/MenuFlap.tsx` (add Feeds nav), `src/hooks/useKeyboardShortcuts.ts`
+
+**25D. Cloud sync for feeds**
+- Sync `feeds.json` and feed read/imported states across devices
+- Feed items themselves are NOT synced (re-fetched per device) — only the feed list and per-item read/addedToBlurby states sync
+- Use existing sync engine (Sprint 19) — feeds are a new sync entity type alongside library, settings, history
+- Conflict resolution: feed list uses set-union (adding a feed on either device adds it everywhere); read state uses latest-wins
+- Files affected: `main/sync-engine.js` (add feed sync entity), `main/feed-manager.js`
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Feed discovery + management (25A) | `electron-fixer` | — |
+| 2 | Feed item fetching + caching (25B) | `format-parser` | Step 1 |
+| 3 | RSS Library UI (25C) | `renderer-fixer` | Step 2 |
+| 4 | Cloud sync for feeds (25D) | `electron-fixer` | Steps 1-2 |
+| 5 | Spec compliance review | `spec-reviewer` | Steps 1-4 |
+| 6 | Run all tests + build | `test-runner` | Step 5 |
+
+> Steps 1 and partial 4 can begin in parallel. Step 2 depends on 1. Step 3 depends on 2. Step 4 fully depends on 1-2.
+
+### Acceptance Criteria
+
+**25A** — [ ] Feeds can be added by URL (manual) and auto-discovered from site URLs
+**25A** — [ ] Feed CRUD operations work (add, remove, rename, change interval)
+**25A** — [ ] `feeds.json` persists feed list in user data directory
+**25B** — [ ] RSS 2.0, Atom 1.0, and JSON Feed formats parse correctly
+**25B** — [ ] Authenticated feeds use stored cookies from paywall login
+**25B** — [ ] Items deduplicated by URL across feeds
+**25B** — [ ] Old items pruned (max 200 per feed)
+**25C** — [ ] "Feeds" navigation item visible in menu flap sidebar
+**25C** — [ ] Feed items display title, author, date, excerpt, thumbnail
+**25C** — [ ] "Add to Blurby" imports article into main library via Readability pipeline
+**25C** — [ ] "Open in Browser" opens original URL
+**25C** — [ ] `G F` keyboard shortcut navigates to Feeds view
+**25C** — [ ] `J/K` navigates feed items, `A` imports, `O` opens, `M` marks read
+**25D** — [ ] Feed list syncs across devices (set-union merge)
+**25D** — [ ] Read/imported states sync (latest-wins)
+**25D** — [ ] Feed items re-fetched per device (not synced)
+**25D** — [ ] `npm test` passes, `npm run build` succeeds
+
+---
+
+## Updated Execution Order
+
+```
+Sprints 1-21 ──────────────────────────────────── COMPLETED
+    │
+    │   Core app: reading engine, library, sync, keyboard UX,
+    │   accessibility, security, e-ink, cloud sync, installer
+    │
+    ├──────────────────────────────────────────────┐
+    │                                              │
+    ▼                                              ▼
+Sprint 18B:                                Sprint 22:
+Chrome Extension                           Reading Animation
+"Send to Blurby"                          + TTS Sync
+(IN PROGRESS)                             (NEXT UP)
+    │                                              │
+    │                                              ▼
+    │                                       Sprint 23:
+    │                                       V1 Hardening
+    │                                       (onboarding, errors,
+    │                                        constants, a11y, perf)
+    │                                              │
+    │                                              ▼
+    │                                       Sprint 24:
+    │                                       External Audit
+    │                                       (quality gate)
+    │                                              │
+    └──────────────────┬───────────────────────────┘
+                       │
+                       ▼
+                v1.0.0 RELEASE ──────────────────── GATE
+                       │
+                       ├──────────────────────────────────┐
+                       ▼                                  ▼
+                Sprint 25:                         Sprint 18C:
+                RSS Library +                      Android APK
+                Paywall Integration                (React Native)
+                (POST-V1)                          (POST-V1)
+```
 
 ---
 

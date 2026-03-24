@@ -1,5 +1,6 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from "react";
-import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, Chapter } from "../utils/text";
+import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, Chapter } from "../utils/text";
+import { MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import type { WordUpdateCallback } from "../hooks/useReader";
 

@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
+import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
+import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP } from "../constants";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 

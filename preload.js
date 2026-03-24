@@ -35,6 +35,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // URL ingestion
   addDocFromUrl: (url) => ipcRenderer.invoke("add-doc-from-url", url),
+  openUrlInBrowser: (url) => ipcRenderer.invoke("open-url-in-browser", url),
 
   // Drag-and-drop
   importDroppedFiles: (filePaths) => ipcRenderer.invoke("import-dropped-files", filePaths),
@@ -144,5 +145,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const handler = (_event, provider) => callback(provider);
     ipcRenderer.on("cloud-auth-required", handler);
     return () => ipcRenderer.removeListener("cloud-auth-required", handler);
+  },
+  onWatcherError: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("watcher-error", handler);
+    return () => ipcRenderer.removeListener("watcher-error", handler);
   },
 });

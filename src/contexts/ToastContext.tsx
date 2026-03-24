@@ -1,4 +1,5 @@
 import { createContext, useContext, useCallback, useState, useMemo } from "react";
+import { TOAST_DEFAULT_DURATION_MS } from "../constants";
 
 interface ToastContextType {
   toast: string | null;
@@ -21,7 +22,7 @@ export function useToast() {
 export function useToastProvider() {
   const [toast, setToast] = useState<string | null>(null);
 
-  const showToast = useCallback((message: string, duration = 3000) => {
+  const showToast = useCallback((message: string, duration = TOAST_DEFAULT_DURATION_MS) => {
     setToast(message);
     setTimeout(() => setToast(null), duration);
   }, []);

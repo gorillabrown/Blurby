@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { tokenize, DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./utils/text";
+import { tokenize } from "./utils/text";
+import { DEFAULT_WPM, DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP } from "./constants";
 import { BlurbyDoc } from "./types";
 import useReader from "./hooks/useReader";
 import { useReaderKeys } from "./hooks/useKeyboardShortcuts";
@@ -47,7 +48,15 @@ function StandaloneReader() {
       const doc = state.library.find((d) => d.id === docId);
       if (!doc) return;
       let content = doc.content;
-      if (!content) content = await api.loadDocContent(docId) || undefined;
+      if (!content) {
+        const result = await api.loadDocContent(docId);
+        if (result && typeof result === "object" && "userError" in result) {
+          // User-facing error — can't display the document
+          console.error("Could not load document content:", result.userError);
+          return;
+        }
+        content = (result as string | null) || undefined;
+      }
       if (!content) return;
       const docWithContent: DocWithContent = { ...doc, content };
       setActiveDoc(docWithContent);

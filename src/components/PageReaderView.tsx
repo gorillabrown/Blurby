@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { tokenizeWithMeta, formatDisplayTitle, hasPunctuation } from "../utils/text";
+import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_FLOW_SENTENCE_PAUSE_MS, PAGE_FLOW_CLAUSE_PAUSE_MS } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
@@ -151,7 +152,7 @@ export default function PageReaderView({
     }
     setNoteWordIndex(null);
     setToast("Note saved to Reading Notes.docx");
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), TOAST_DEFAULT_DURATION_MS);
   }, [noteWordIndex]);
 
   // Tokenize content
@@ -202,7 +203,7 @@ export default function PageReaderView({
     setTimeout(() => {
       setCurrentPage(clamped);
       setTransitioning(false);
-    }, 100);
+    }, PAGE_TRANSITION_MS);
   }, [currentPage, pages.length]);
 
   const prevPage = useCallback(() => goToPage(currentPage - 1), [currentPage, goToPage]);
@@ -304,8 +305,8 @@ export default function PageReaderView({
       );
       const endWord = flowWordsRef.current[spanEnd] || "";
       let extraPause = 0;
-      if (/[.!?]$/.test(endWord)) extraPause = 400; // sentence-end
-      else if (/[,;:]$/.test(endWord)) extraPause = 200; // mid-sentence
+      if (/[.!?]$/.test(endWord)) extraPause = PAGE_FLOW_SENTENCE_PAUSE_MS; // sentence-end
+      else if (/[,;:]$/.test(endWord)) extraPause = PAGE_FLOW_CLAUSE_PAUSE_MS; // mid-sentence
 
       const effectiveInterval = interval + extraPause;
 
@@ -393,7 +394,7 @@ export default function PageReaderView({
     });
     if (result?.ok) {
       setToast("Highlight saved");
-      setTimeout(() => setToast(null), 2000);
+      setTimeout(() => setToast(null), TOAST_DEFAULT_DURATION_MS);
     }
     closeHighlight();
   }, [activeDoc.title, highlightWord, highlightedWordIndex, words.length, closeHighlight]);
