@@ -54,6 +54,7 @@ function createMainWindow(settings, isDev) {
   const win = new BrowserWindow({
     width: 1000, height: 720, minWidth: 600, minHeight: 500,
     title: "Blurby",
+    icon: path.join(__dirname, "..", "assets", "icon.ico"),
     backgroundColor: colors.bg,
     ...(isMac
       ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } }
@@ -100,6 +101,7 @@ function createReaderWindow(docId, settings, isDev, readerWindows) {
   const win = new BrowserWindow({
     width: 900, height: 650, minWidth: 500, minHeight: 400,
     title: "Blurby Reader",
+    icon: path.join(__dirname, "..", "assets", "icon.ico"),
     backgroundColor: colors.bg,
     ...(isMac
       ? { titleBarStyle: "hiddenInset", trafficLightPosition: { x: 16, y: 16 } }
