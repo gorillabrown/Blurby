@@ -36,6 +36,16 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
 
   useFocusTrap(overlayRef, [phase, step]);
 
+  const handleComplete = useCallback(async () => {
+    await api.saveSettings({ firstRunCompleted: true } as any);
+    onComplete();
+  }, [onComplete]);
+
+  const handleSkip = useCallback(async () => {
+    await api.saveSettings({ firstRunCompleted: true } as any);
+    onComplete();
+  }, [onComplete]);
+
   useEffect(() => {
     const el = overlayRef.current;
     if (!el) return;
@@ -46,16 +56,6 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
     if (firstFocusRef.current) firstFocusRef.current.focus();
     return () => el.removeEventListener("keydown", handleKeyDown);
   }, [phase, step, handleSkip]);
-
-  const handleComplete = useCallback(async () => {
-    await api.saveSettings({ firstRunCompleted: true } as any);
-    onComplete();
-  }, [onComplete]);
-
-  const handleSkip = useCallback(async () => {
-    await api.saveSettings({ firstRunCompleted: true } as any);
-    onComplete();
-  }, [onComplete]);
 
   const handleStartTour = useCallback(() => {
     setPhase("tour");

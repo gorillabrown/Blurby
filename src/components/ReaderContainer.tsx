@@ -176,6 +176,57 @@ export default function ReaderContainer({
     onExitReader(finalPos);
   }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, onExitReader, words.length]);
 
+  // ── TTS (Narration) ───────────────────────────────────────────────────
+  const narration = useNarration();
+  const [ttsActive, setTtsActive] = useState(false);
+  const preCapWpmRef = useRef<number | null>(null);
+
+  const handleToggleTts = useCallback(() => {
+    if (ttsActive) {
+      // Turn off TTS — restore original WPM
+      narration.stop();
+      setTtsActive(false);
+      if (preCapWpmRef.current !== null) {
+        setWpm(() => preCapWpmRef.current!);
+        preCapWpmRef.current = null;
+      }
+    } else {
+      // Turn on TTS — cap WPM if > TTS_WPM_CAP
+      setTtsActive(true);
+      if (wpm > TTS_WPM_CAP) {
+        preCapWpmRef.current = wpm;
+        setWpm(() => TTS_WPM_CAP);
+      }
+    }
+  }, [ttsActive, narration, wpm, setWpm]);
+
+  // If user raises WPM while TTS is active, enforce cap
+  useEffect(() => {
+    if (ttsActive && wpm > TTS_WPM_CAP) {
+      if (preCapWpmRef.current === null) preCapWpmRef.current = wpm;
+      setWpm(() => TTS_WPM_CAP);
+    }
+  }, [ttsActive, wpm, setWpm]);
+
+  // Cancel TTS when exiting reader modes
+  useEffect(() => {
+    if (readingMode === "page" && !flowPlaying && !playing) {
+      // Only stop TTS when not in any active reading mode
+    }
+  }, [readingMode, flowPlaying, playing]);
+
+  // Stop TTS on mode exit
+  const handleStopTts = useCallback(() => {
+    if (ttsActive) {
+      narration.stop();
+      setTtsActive(false);
+      if (preCapWpmRef.current !== null) {
+        setWpm(() => preCapWpmRef.current!);
+        preCapWpmRef.current = null;
+      }
+    }
+  }, [ttsActive, narration, setWpm]);
+
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
       // Exit from Page → leave reader entirely
@@ -289,57 +340,6 @@ export default function ReaderContainer({
     else if (readingMode === "focus") handleEnterFlow();
     else handlePauseToPage();
   }, [readingMode, handleEnterFocus, handleEnterFlow, handlePauseToPage]);
-
-  // ── TTS (Narration) ───────────────────────────────────────────────────
-  const narration = useNarration();
-  const [ttsActive, setTtsActive] = useState(false);
-  const preCapWpmRef = useRef<number | null>(null);
-
-  const handleToggleTts = useCallback(() => {
-    if (ttsActive) {
-      // Turn off TTS — restore original WPM
-      narration.stop();
-      setTtsActive(false);
-      if (preCapWpmRef.current !== null) {
-        setWpm(() => preCapWpmRef.current!);
-        preCapWpmRef.current = null;
-      }
-    } else {
-      // Turn on TTS — cap WPM if > TTS_WPM_CAP
-      setTtsActive(true);
-      if (wpm > TTS_WPM_CAP) {
-        preCapWpmRef.current = wpm;
-        setWpm(() => TTS_WPM_CAP);
-      }
-    }
-  }, [ttsActive, narration, wpm, setWpm]);
-
-  // If user raises WPM while TTS is active, enforce cap
-  useEffect(() => {
-    if (ttsActive && wpm > TTS_WPM_CAP) {
-      if (preCapWpmRef.current === null) preCapWpmRef.current = wpm;
-      setWpm(() => TTS_WPM_CAP);
-    }
-  }, [ttsActive, wpm, setWpm]);
-
-  // Cancel TTS when exiting reader modes
-  useEffect(() => {
-    if (readingMode === "page" && !flowPlaying && !playing) {
-      // Only stop TTS when not in any active reading mode
-    }
-  }, [readingMode, flowPlaying, playing]);
-
-  // Stop TTS on mode exit
-  const handleStopTts = useCallback(() => {
-    if (ttsActive) {
-      narration.stop();
-      setTtsActive(false);
-      if (preCapWpmRef.current !== null) {
-        setWpm(() => preCapWpmRef.current!);
-        preCapWpmRef.current = null;
-      }
-    }
-  }, [ttsActive, narration, setWpm]);
 
   // Legacy toggle for keyboard shortcut (N key)
   const handleToggleNarration = useCallback(() => {

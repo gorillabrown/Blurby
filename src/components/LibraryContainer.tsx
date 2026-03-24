@@ -52,14 +52,6 @@ export default function LibraryContainer() {
     api.getSiteLogins().then(setSiteLogins);
   }, []);
 
-  // Watcher error notifications
-  useEffect(() => {
-    const cleanup = api.onWatcherError?.((data) => {
-      showToast(data.message, 7000);
-    });
-    return cleanup;
-  }, [showToast]);
-
   const handleSiteLogin = useCallback(async (url: string) => {
     let normalizedUrl = url.trim();
     if (!normalizedUrl) return;
@@ -86,6 +78,14 @@ export default function LibraryContainer() {
     loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
     toggleFavorite, archiveDoc, unarchiveDoc, showToast,
   } = useLibrary();
+
+  // Watcher error notifications (must be after useLibrary which provides showToast)
+  useEffect(() => {
+    const cleanup = api.onWatcherError?.((data) => {
+      showToast(data.message, 7000);
+    });
+    return cleanup;
+  }, [showToast]);
 
   // Create context providers
   const settingsValue = useSettingsProvider(settings, setSettings);
@@ -334,9 +334,9 @@ export default function LibraryContainer() {
     if (importPending.isUrl) {
       const result = await addDocFromUrl(importPending.content);
       if (result?.error) {
-        const sourceUrl = result.sourceUrl || importPending.content;
+        const fallbackUrl = importPending.content;
         showToast(result.error, 8000,
-          sourceUrl ? { label: "Open in browser", onClick: () => window.electronAPI.openUrlInBrowser(sourceUrl) } : undefined
+          fallbackUrl ? { label: "Open in browser", onClick: () => window.electronAPI.openUrlInBrowser(fallbackUrl) } : undefined
         );
       } else {
         showToast("Imported from URL");
