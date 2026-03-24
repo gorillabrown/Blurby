@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS, hasPunctuation } from "../src/utils/text";
+import { hasPunctuation } from "../src/utils/text";
+import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS } from "../src/constants";
 
 /**
  * useReader hook tests — testing the pure logic that the hook relies on.

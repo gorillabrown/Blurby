@@ -13,13 +13,14 @@ const { extractContent, extractDocMetadata, countWords,
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
         generateArticlePdf, openSiteLogin } = require("./url-extractor");
 const { getSystemTheme, createReaderWindow, updateWindowTheme } = require("./window-manager");
-
-// ── Constants ────────────────────────────────────────────────────────────────
-const DEFINITION_CACHE_MAX = 500;
-const DEFINITION_TIMEOUT_MS = 5000;
-const MAX_RECENT_FOLDERS = 5;
-const MAX_HISTORY_SESSIONS = 1000;
-const MS_PER_DAY = 86400000;
+const {
+  DEFINITION_CACHE_MAX,
+  DEFINITION_TIMEOUT_MS,
+  MAX_RECENT_FOLDERS,
+  MAX_HISTORY_SESSIONS,
+  MS_PER_DAY,
+  COVER_CACHE_MAX,
+} = require("./constants");
 
 // ── Highlight Formatting (pure, testable) ──────────────────────────────────
 
@@ -154,7 +155,6 @@ async function logToFile(message, errorLogPath) {
 function registerIpcHandlers(ctx) {
   const definitionCache = new Map();
   const coverCache = new Map();
-  const COVER_CACHE_MAX = 100;
 
   ipcMain.handle("get-state", () => ({ settings: ctx.getSettings(), library: ctx.getLibrary().filter((d) => !d.deleted) }));
   ipcMain.handle("get-platform", () => process.platform);
@@ -322,7 +322,15 @@ function registerIpcHandlers(ctx) {
     const doc = ctx.getDocById(docId);
     if (!doc) return null;
     if (doc.content) return doc.content;
-    if (doc.filepath) return await extractContent(doc.filepath);
+    if (doc.filepath) {
+      const result = await extractContent(doc.filepath);
+      // extractContent returns { userError } for user-facing parse failures
+      if (result && typeof result === "object" && result.userError) {
+        logToFile(`load-doc-content error for doc "${doc.title}" (${doc.filepath}): ${result.userError}`, ctx.getErrorLogPath());
+        return { userError: result.userError };
+      }
+      return result;
+    }
     return null;
   });
 
@@ -433,7 +441,11 @@ function registerIpcHandlers(ctx) {
         result = extractArticleFromHtml(html, url);
       }
 
-      if (!result || result.error) return result || { error: "Failed to load page content." };
+      if (!result || result.error) {
+        const techMsg = result?.error || "Failed to load page content.";
+        logToFile(`URL import extraction failed for "${url}": ${techMsg}`, ctx.getErrorLogPath());
+        return { error: "Could not extract article from this URL. The page may be behind a paywall or require login.", sourceUrl: url };
+      }
 
       const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
 
@@ -566,7 +578,35 @@ function registerIpcHandlers(ctx) {
 
       return { doc: newDoc };
     } catch (err) {
-      return { error: err.message || "Failed to fetch URL." };
+      const isNetwork = err.message && (
+        err.message.includes("ENOTFOUND") ||
+        err.message.includes("ECONNREFUSED") ||
+        err.message.includes("ETIMEDOUT") ||
+        err.message.includes("network") ||
+        err.message.includes("fetch")
+      );
+      const userMessage = isNetwork
+        ? "Could not reach this URL — check your internet connection and try again."
+        : "Could not extract article from this URL. Try opening it in your browser instead.";
+      logToFile(`URL import fetch failed for "${url}": ${err.message}`, ctx.getErrorLogPath());
+      return { error: userMessage, sourceUrl: url };
+    }
+  });
+
+  // ── Open URL in default browser ──────────────────────────────────────────
+
+  ipcMain.handle("open-url-in-browser", async (_, url) => {
+    try {
+      const { shell } = require("electron");
+      // Only allow http/https URLs for security
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        return { error: "Only http/https URLs can be opened." };
+      }
+      await shell.openExternal(url);
+      return { ok: true };
+    } catch (err) {
+      return { error: "Could not open the URL in your browser." };
     }
   });
 

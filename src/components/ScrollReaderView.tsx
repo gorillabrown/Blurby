@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from "react";
-import { tokenizeWithMeta, formatTime, formatDisplayTitle, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { tokenizeWithMeta, formatTime, formatDisplayTitle } from "../utils/text";
+import { FOCUS_TEXT_SIZE_STEP, DOUBLE_ESC_WINDOW_MS, SCROLL_SAVE_DEBOUNCE_MS, FLOW_SCROLL_THROTTLE_MS, FLOW_PROGRESS_SAVE_MS, FLOW_STATE_SYNC_MS, TOAST_DEFAULT_DURATION_MS, EINK_LINES_PER_PAGE } from "../constants";
 import { calculatePauseMs } from "../utils/rhythm";
 import { BlurbyDoc, LayoutSpacing, RhythmPauses } from "../types";
 
@@ -68,7 +69,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   // E-ink paginated mode state (declarations that don't depend on displayBlocks)
   const isEink = settings?.isEink || false;
   const [einkPage, setEinkPage] = useState(0);
-  const einkLinesPerPage = 20; // approximate lines per "page"
+  const einkLinesPerPage = EINK_LINES_PER_PAGE; // approximate lines per "page"
 
   // Flow mode state
   const [flowPlaying, setFlowPlaying] = useState(false);
@@ -139,7 +140,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     });
     if (result?.ok) {
       setToast("Saved to highlights");
-      setTimeout(() => setToast(null), 1600);
+      setTimeout(() => setToast(null), TOAST_DEFAULT_DURATION_MS);
     }
     closeHighlight();
   }, [highlightWord, activeDoc.title, words.length, closeHighlight]);
@@ -174,7 +175,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
     saveTimerRef.current = setTimeout(() => {
       const pos = Math.round(pct * words.length);
       onProgressUpdate(pos);
-    }, 300);
+    }, SCROLL_SAVE_DEBOUNCE_MS);
   }, [words.length, onProgressUpdate, flowPlaying]);
 
   // Flow mode RAF tick
@@ -200,9 +201,9 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
         setFlowPlaying(false);
       } else {
         flowWordIndexRef.current = next;
-        // Throttle React state sync to ~500ms (DOM highlighting is ref-based)
+        // Throttle React state sync (DOM highlighting is ref-based)
         const now = performance.now();
-        if (now - flowLastStateSyncRef.current >= 500) {
+        if (now - flowLastStateSyncRef.current >= FLOW_STATE_SYNC_MS) {
           flowLastStateSyncRef.current = now;
           setFlowWordIndex(next);
         }
@@ -232,8 +233,8 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   useEffect(() => {
     if (flowPlaying && flowWordRef.current) {
       const now = performance.now();
-      // Only scroll every 300ms to prevent smooth-scroll queuing
-      if (now - lastScrollRef.current > 300) {
+      // Only scroll every FLOW_SCROLL_THROTTLE_MS to prevent smooth-scroll queuing
+      if (now - lastScrollRef.current > FLOW_SCROLL_THROTTLE_MS) {
         lastScrollRef.current = now;
         flowWordRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -245,7 +246,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   useEffect(() => {
     if (flowPlaying && flowWordIndex > 0) {
       const now = Date.now();
-      if (now - lastProgressSaveRef.current >= 5000) {
+      if (now - lastProgressSaveRef.current >= FLOW_PROGRESS_SAVE_MS) {
         lastProgressSaveRef.current = now;
         onProgressUpdate(flowWordIndex);
       }
@@ -273,8 +274,8 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
           lastEscTimeRef.current = Date.now();
           setEscPending(true);
           if (escTimerRef.current) clearTimeout(escTimerRef.current);
-          escTimerRef.current = setTimeout(() => setEscPending(false), 2000);
-        } else if (escPending && Date.now() - lastEscTimeRef.current < 2000) {
+          escTimerRef.current = setTimeout(() => setEscPending(false), DOUBLE_ESC_WINDOW_MS);
+        } else if (escPending && Date.now() - lastEscTimeRef.current < DOUBLE_ESC_WINDOW_MS) {
           // Second Escape within 2s: exit
           if (escTimerRef.current) clearTimeout(escTimerRef.current);
           setEscPending(false);

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM } from "../constants";
 
 export interface NarrationState {
   speaking: boolean;
@@ -7,13 +8,9 @@ export interface NarrationState {
   rate: number; // 0.5-3.0
 }
 
-const TTS_CHUNK_SIZE = 4; // Buffer 4 words per utterance for natural flow
-const TTS_MAX_RATE = 2.0;
-const TTS_MIN_RATE = 0.5;
-
-/** Calculate TTS rate from WPM. ~150 WPM = rate 1.0, scale linearly. */
+/** Calculate TTS rate from WPM. TTS_RATE_BASELINE_WPM = rate 1.0, scale linearly. */
 function wpmToRate(wpm: number): number {
-  const rate = wpm / 150;
+  const rate = wpm / TTS_RATE_BASELINE_WPM;
   return Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, rate));
 }
 

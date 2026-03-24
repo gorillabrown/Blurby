@@ -1,8 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP } from "../utils/text";
+import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS } from "../constants";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
-const G_SEQUENCE_TIMEOUT = 2000;
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -309,7 +308,7 @@ export function useLibraryKeyboard(
     goToTimerRef.current = setTimeout(() => {
       setGoToPending(false);
       window.dispatchEvent(new CustomEvent("blurby:goto-resolved"));
-    }, G_SEQUENCE_TIMEOUT);
+    }, G_SEQUENCE_TIMEOUT_MS);
   }, []);
 
   useEffect(() => {

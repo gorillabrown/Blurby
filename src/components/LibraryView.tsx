@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
+import { formatTime, formatDisplayTitle } from "../utils/text";
+import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS } from "../constants";
 import { BlurbyDoc, BlurbySettings, SyncStatusValue } from "../types";
 import { useTheme } from "./ThemeProvider";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -83,7 +84,7 @@ export default function LibraryView({
       setDebouncedSearchQuery(searchQuery);
       return;
     }
-    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500);
+    const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), EINK_SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchQuery, isEinkTheme]);
   const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books" | "pdfs">("all");

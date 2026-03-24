@@ -54,7 +54,8 @@ export default function CloudSyncIndicator({ onOpenSettings }: CloudSyncIndicato
   // Don't render if not signed in
   if (!authState) return null;
 
-  const effectiveStatus = !isOnline ? "offline" : syncStatus;
+  // "offline" can come from browser detection OR from sync engine detecting network errors
+  const effectiveStatus = (!isOnline || syncStatus === "offline") ? "offline" : syncStatus;
 
   const statusClass =
     effectiveStatus === "idle" ? "cloud-ind-synced" :
@@ -65,8 +66,8 @@ export default function CloudSyncIndicator({ onOpenSettings }: CloudSyncIndicato
   const tooltip =
     effectiveStatus === "idle" ? formatLastSync(lastSync) :
     effectiveStatus === "syncing" ? "Syncing..." :
-    effectiveStatus === "error" ? "Sync error - click for details" :
-    "Offline";
+    effectiveStatus === "error" ? "Sync error — click for details" :
+    "Sync paused — will retry when online";
 
   return (
     <button

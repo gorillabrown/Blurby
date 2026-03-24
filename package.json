@@ -12,10 +12,14 @@
     "package:mac": "electron-builder --mac",
     "package:linux": "electron-builder --linux",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "perf": "node tests/perf-baseline.js"
   },
   "build": {
     "appId": "com.blurby.app",
+    "extraResources": [
+      { "from": "resources/", "to": "resources/", "filter": ["**/*"] }
+    ],
     "productName": "Blurby",
     "publish": [
       {

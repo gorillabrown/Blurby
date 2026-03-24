@@ -17,16 +17,17 @@ const path = require("path");
 const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
 const syncQueue = require("./sync-queue");
+const {
+  TOMBSTONE_TTL_MS,
+  STAGING_STALE_MS,
+  RECONCILE_PERIOD_MS,
+  MAX_CHECKSUM_RETRIES,
+  MAX_CONFLICT_RETRIES,
+  CONTENT_SIZE_LIMIT,
+  COVER_MAX_BYTES,
+} = require("./constants");
 
-// ── Constants ─────────────────────────────────────────────────────────────
-
-const TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
-const STAGING_STALE_MS = 24 * 60 * 60 * 1000;       // 24 hours
-const MAX_CHECKSUM_RETRIES = 3;
-const MAX_CONFLICT_RETRIES = 3;
-const CONTENT_SIZE_LIMIT = 4 * 1024 * 1024;          // 4MB threshold for large-file path
-const COVER_MAX_BYTES = 200 * 1024;                   // 200KB cover target
-const RECONCILE_LOG_FILE = "sync-reconciliation.log";
+const RECONCILE_LOG_FILE = "sync-reconciliation.log"; // Fixed filename, not tunable
 
 // ── State ─────────────────────────────────────────────────────────────────
 
@@ -886,8 +887,7 @@ async function startSync() {
     await saveSyncState();
 
     // ── 19F: Weekly auto-reconciliation ───────────────────────────────
-    const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-    if (Date.now() - syncState.lastReconcile > WEEK_MS) {
+    if (Date.now() - syncState.lastReconcile > RECONCILE_PERIOD_MS) {
       // Run in background — don't block the sync response
       fullReconciliation().catch((err) => {
         console.warn("[sync] Background reconciliation failed:", err.message);
@@ -903,7 +903,24 @@ async function startSync() {
       meteredMode: !!meteredMode,
     };
   } catch (err) {
+    const isNetworkError = err.message && (
+      err.message.includes("ENOTFOUND") ||
+      err.message.includes("ECONNREFUSED") ||
+      err.message.includes("ETIMEDOUT") ||
+      err.message.includes("network") ||
+      err.message.includes("fetch") ||
+      err.message.includes("Network") ||
+      err.message.includes("offline") ||
+      err.message.includes("getaddrinfo")
+    );
+    if (isNetworkError) {
+      console.warn("[sync] Sync paused — network unavailable:", err.message);
+      await appendReconcileLog(`NETWORK_OFFLINE: ${err.message}`);
+      setSyncStatus("offline");
+      return { status: "offline", error: "Sync paused — will retry when online." };
+    }
     console.error("[sync] Sync failed:", err.message);
+    await appendReconcileLog(`SYNC_ERROR: ${err.message}`);
     setSyncStatus("error");
     return { status: "error", error: err.message };
   }

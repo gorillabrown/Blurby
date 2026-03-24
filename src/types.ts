@@ -86,6 +86,8 @@ export interface BlurbySettings {
   // Cloud sync settings
   syncIntervalMinutes: number;
   syncOnMeteredConnection: boolean;
+  // Sprint 23: First-run onboarding
+  firstRunCompleted?: boolean;
 }
 
 // ── Reading history ─────────────────────────────────────────────────────────
@@ -155,11 +157,12 @@ export interface ElectronAPI {
   updateDoc: (docId: string, title: string, content: string) => Promise<void>;
   resetProgress: (docId: string) => Promise<void>;
   updateDocProgress: (docId: string, position: number) => Promise<void>;
-  loadDocContent: (docId: string) => Promise<string | null>;
+  loadDocContent: (docId: string) => Promise<string | { userError: string } | null>;
   getDocChapters: (docId: string) => Promise<Array<{ title: string; charOffset: number }>>;
   saveHighlight: (data: { docTitle: string; text: string; wordIndex: number; totalWords: number }) => Promise<{ ok?: boolean; error?: string }>;
   defineWord: (word: string) => Promise<{ word: string; phonetic?: string; partOfSpeech?: string; definition?: string; example?: string; synonyms?: string[] } | { error: string }>;
-  addDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
+  addDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string; sourceUrl?: string }>;
+  openUrlInBrowser: (url: string) => Promise<{ ok?: boolean; error?: string }>;
   importDroppedFiles: (filePaths: string[]) => Promise<{ imported: string[]; rejected: string[] }>;
   recordReadingSession: (docTitle: string, wordsRead: number, durationMs: number, wpm: number) => Promise<void>;
   markDocCompleted: () => Promise<void>;
@@ -218,6 +221,7 @@ export interface ElectronAPI {
   onUpdateDownloaded?: (callback: (version: string) => void) => () => void;
   onCloudSyncStatusChanged?: (callback: (status: SyncStatusValue) => void) => () => void;
   onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
+  onWatcherError?: (callback: (data: { message: string }) => void) => () => void;
 }
 
 declare global {

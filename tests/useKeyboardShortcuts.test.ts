@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP } from "../src/utils/text";
+import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP } from "../src/constants";
 
 /**
  * useKeyboardShortcuts tests — testing the key binding resolution and

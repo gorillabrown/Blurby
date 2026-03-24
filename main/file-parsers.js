@@ -3,6 +3,14 @@
 
 const path = require("path");
 const fsPromises = require("fs/promises");
+const {
+  PDF_PARSE_TIMEOUT_MS,
+  MIN_PRINTABLE_RATIO,
+  MIN_TEXT_LENGTH,
+  MAX_MOBI_TEXT_BYTES,
+  EPUB_HEADING_MAX_LENGTH,
+  EPUB_CHAPTER_CACHE_MAX,
+} = require("./constants");
 
 // ── Lazy-loaded heavy modules (cached after first require) ─────────────────
 let _cheerio, _admZip, _pdfParse, _canvas;
@@ -10,13 +18,6 @@ function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return
 function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
 function getPDFParse() { if (!_pdfParse) { _pdfParse = require("pdf-parse"); } return _pdfParse; }
 function getCanvas() { if (!_canvas) { try { _canvas = require("@napi-rs/canvas"); } catch { _canvas = null; } } return _canvas; }
-
-// ── Constants ─────────────────────────────────────────────────────────────
-const PDF_PARSE_TIMEOUT_MS = 30000;
-const MIN_PRINTABLE_RATIO = 0.8;
-const MIN_TEXT_LENGTH = 10;
-const MAX_MOBI_TEXT_BYTES = 10 * 1024 * 1024;
-const EPUB_HEADING_MAX_LENGTH = 100;
 
 // ── Image validation helpers ───────────────────────────────────────────────
 
@@ -299,7 +300,6 @@ async function parseCallibreOpf(filepath) {
 }
 
 // EPUB chapter cache shared across extractions (LRU, bounded)
-const EPUB_CHAPTER_CACHE_MAX = 50;
 const epubChapterCache = new Map();
 
 function epubChapterCacheSet(key, value) {
@@ -353,22 +353,40 @@ async function extractContent(filepath) {
         const printableRatio = text.replace(/[\x00-\x1f\x7f-\x9f]/g, "").length / (text.length || 1);
         if (printableRatio < MIN_PRINTABLE_RATIO || text.length < MIN_TEXT_LENGTH) {
           console.log(`PDF extraction yielded non-text content for ${filepath} (${Math.round(printableRatio*100)}% printable)`);
-          return null;
+          return { userError: "Could not read this PDF — it may be image-based or contain no selectable text." };
         }
         return text;
       } catch (err) {
         clearTimeout(timeoutId);
+        const isEncrypted = err.message && (err.message.toLowerCase().includes("encrypt") || err.message.toLowerCase().includes("password"));
+        const isTimeout = err.message && err.message.includes("timeout");
+        const userMessage = isEncrypted
+          ? "Could not read this PDF — the file is encrypted or password-protected."
+          : isTimeout
+            ? "Could not read this PDF — it timed out. The file may be very large or corrupted."
+            : "Could not read this PDF — the file may be encrypted or corrupted.";
         console.error(`PDF extraction failed for ${filepath}:`, err.message);
-        return null;
+        return { userError: userMessage };
       } finally {
         // Always destroy parser to prevent memory leaks
         try { await parser.destroy(); } catch { /* Best-effort cleanup */ }
       }
     }
     if (ext === ".epub") {
+      let zip;
+      try {
+        const AdmZip = getAdmZip();
+        zip = new AdmZip(filepath);
+      } catch (err) {
+        const msg = err.message || "";
+        const userMessage = msg.toLowerCase().includes("invalid") || msg.toLowerCase().includes("zip")
+          ? "Could not open this EPUB — the file appears to be a corrupted ZIP archive."
+          : "Could not open this EPUB — the file may be corrupted.";
+        console.error(`EPUB ZIP open failed for ${filepath}:`, msg);
+        return { userError: userMessage };
+      }
       const AdmZip = getAdmZip();
       const cheerio = getCheerio();
-      const zip = new AdmZip(filepath);
       const entries = zip.getEntries();
       const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
       let opfPath = "";
@@ -377,6 +395,13 @@ async function extractContent(filepath) {
         opfPath = $("rootfile").attr("full-path") || "";
       }
       const opfEntry = entries.find((e) => e.entryName === opfPath);
+      if (!opfEntry) {
+        const userMessage = opfPath
+          ? `Could not open this EPUB — the content manifest (${opfPath}) is missing or invalid.`
+          : "Could not open this EPUB — missing content.opf (the file structure is invalid).";
+        console.error(`EPUB missing OPF for ${filepath}: opfPath=${opfPath || "(none)"}`);
+        return { userError: userMessage };
+      }
       const spineIds = [];
       const manifestMap = new Map();
       const hrefToId = new Map();
@@ -495,6 +520,11 @@ async function extractContent(filepath) {
     return await readFileContentAsync(filepath);
   } catch (err) {
     console.log(`Content extraction failed for ${filepath}, falling back to plain text:`, err.message);
+    // For PDF/EPUB errors, don't fall back to plain text — they are binary formats
+    const ext2 = path.extname(filepath).toLowerCase();
+    if (ext2 === ".pdf" || ext2 === ".epub") {
+      return { userError: "Could not read this file — it may be corrupted or in an unsupported format." };
+    }
     return await readFileContentAsync(filepath);
   }
 }

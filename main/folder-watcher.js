@@ -75,7 +75,7 @@ async function scanFolderAsync(folderPath) {
 // ── File watcher ───────────────────────────────────────────────────────────
 
 function startWatcher(sourceFolder, callbacks) {
-  const { onAdd, onUnlink, onChange } = callbacks;
+  const { onAdd, onUnlink, onChange, onError } = callbacks;
   const savedArticlesDir = path.join(sourceFolder, "Saved Articles");
 
   const watcher = getChokidar().watch(sourceFolder, {
@@ -96,6 +96,11 @@ function startWatcher(sourceFolder, callbacks) {
     if (!SUPPORTED_EXT.includes(path.extname(filepath).toLowerCase())) return;
     if (!await isPathWithinFolder(filepath, sourceFolder)) return;
     onChange(filepath);
+  });
+
+  watcher.on("error", (err) => {
+    console.error("[watcher] Chokidar error:", err.message);
+    if (onError) onError(err, sourceFolder);
   });
 
   return watcher;

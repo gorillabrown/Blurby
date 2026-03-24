@@ -1,11 +1,18 @@
-export const DEFAULT_WPM = 300;
-export const MIN_WPM = 100;
-export const MAX_WPM = 1200;
-export const WPM_STEP = 25;
-export const REWIND_WORDS = 5;
-
-export const INITIAL_PAUSE_MS = 3000;   // pause before first word advances
-export const PUNCTUATION_PAUSE_MS = 1000; // extra dwell on punctuation words
+// Constants have moved to src/constants.ts — import from there directly.
+// Re-exported here for backward compatibility with any remaining import sites.
+export {
+  DEFAULT_WPM,
+  MIN_WPM,
+  MAX_WPM,
+  WPM_STEP,
+  REWIND_WORDS,
+  INITIAL_PAUSE_MS,
+  PUNCTUATION_PAUSE_MS,
+  DEFAULT_FOCUS_TEXT_SIZE,
+  MIN_FOCUS_TEXT_SIZE,
+  MAX_FOCUS_TEXT_SIZE,
+  FOCUS_TEXT_SIZE_STEP,
+} from "../constants";
 
 /**
  * Count words in text without creating intermediate arrays.
@@ -28,11 +35,6 @@ export function hasPunctuation(word: string): boolean {
   // Match punctuation at end, possibly followed by closing quotes/parens
   return /[.!?;:]["'»)\]]*$/.test(word);
 }
-
-export const DEFAULT_FOCUS_TEXT_SIZE = 100; // percentage scale
-export const MIN_FOCUS_TEXT_SIZE = 60;
-export const MAX_FOCUS_TEXT_SIZE = 200;
-export const FOCUS_TEXT_SIZE_STEP = 10;
 
 // Title case minor words that should stay lowercase (unless first/last word)
 const MINOR_WORDS = new Set([

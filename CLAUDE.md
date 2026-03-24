@@ -40,10 +40,12 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | `format-parser` | sonnet | File format integration — EPUB, MOBI, PDF, HTML parsing and extraction |
 | `ux-reviewer` | opus | Comprehensive UX audit on app screenshots/flows. Read-only. |
 | `code-reviewer` | sonnet | Architecture compliance, known-trap detection, code quality |
+| `spec-reviewer` | sonnet | Spec-compliance verification — does implementation match ROADMAP acceptance criteria exactly? |
 | `doc-keeper` | sonnet | Updates all documentation files |
 
 ### Standing Rules
 
+- **Branch-per-sprint.** One branch per sprint dispatch (`sprint/<N>-<name>`). Never commit directly to main. Merge with `--no-ff` after tests pass. Delete branch after merge.
 - **OneDrive-first development.** Working directory on OneDrive for cross-machine access. Push to GitHub when sprints complete.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
 - **All file I/O in main process modules must be async** (fs.promises). No synchronous reads/writes.
@@ -79,18 +81,60 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 - **Project Constitution**: `docs/project/Blurby_Project_Constitution.md`
 - **Lessons Learned**: `docs/project/LESSONS_LEARNED.md`
-- **Sprint Dispatch Template**: `.claude/agents/blurby-lead.md` §Sprint Dispatch Template
+- **Sprint Dispatch Template**: `.workflow/docs/sprint-dispatch-template.md` (CLI Evergreen format)
+- **Sprint Queue**: `docs/project/sprint-queue.md` (ready-to-dispatch sprints, FIFO)
 - **Roadmap**: `ROADMAP.md`
 - **Agent Findings**: `docs/project/AGENT_FINDINGS.md`
 - **Performance Sprint Plan**: `SPRINT-PERF.md`
+- **Workflow System**: `.workflow/WORKFLOW_ORIENTATION.md` (process discipline, session bootstrap)
+- **Session Bootstrap**: `.workflow/session-bootstrap.md` (Skill Gate Rule, anti-rationalization, priorities)
+- **Skill Library**: `.workflow/skills/` (brainstorming, planning, execution, verification, debugging, parallel-agents, etc.)
+- **Feedback Log**: `.claude/agents/feedback.log` (sprint outcome memory — what worked, what didn't)
 
 ---
 
-## Current System State (Post-Sprint 21 — UX Polish & Reading Intelligence Complete)
+## Workflow Integration
 
-### Codebase (branch: `sprint/19-20-21-combined`, pending merge to `main`)
+### Skill Gate Rule
 
-- All sprints (1-21) complete — security, performance, accessibility, cloud sync, production installer, sync hardening, keyboard-first UX, UX polish
+Before any task that involves work, check `.workflow/skills/` for an applicable process skill. Even a 30% match → read the skill and follow its process. Priority order: brainstorming → planning → execution → verification → debugging → documentation.
+
+### Session Start Protocol
+
+1. Read `CLAUDE.md` (this file)
+2. Read `.workflow/session-bootstrap.md` (Skill Gate Rule, anti-rationalization tables)
+3. Read `docs/project/LESSONS_LEARNED.md` (if session may change codebase)
+4. Read `ROADMAP.md` (if session involves planned work)
+
+### Workflow Customization Values
+
+These replace `[CUSTOMIZE]` markers in `.workflow/` files (Option A — values stored here, workflow files stay clean):
+
+| Marker | Value |
+|--------|-------|
+| `[PROJECT_CONFIG]` | `CLAUDE.md` (project root) |
+| `[PROJECT_CONSTITUTION]` | `docs/project/Blurby_Project_Constitution.md` |
+| `[LESSONS_LEARNED]` | `docs/project/LESSONS_LEARNED.md` |
+| `[PROJECT_TEST_FAST_COMMAND]` | `npm test` |
+| `[PROJECT_TEST_FULL_COMMAND]` | `npm test && npm run build` |
+| `[BRANCH_NAMING_CONVENTION]` | `sprint/<N>-<name>` (e.g., `sprint/22-chrome-ext`) |
+
+### Constants Separation Rule
+
+All tunable behavioral constants must be extracted into a dedicated constants file — not hardcoded in source. This includes default WPM, default word count per flow page, snooze intervals, toast durations, coaching limits, LRU cache sizes, sync intervals, tombstone TTL, reconciliation period, and similar values currently scattered across main process and renderer code. CSS custom properties for theming are exempt (they already live in `global.css`).
+
+### External Audit Cadence
+
+Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every 3rd sprint completion, or at any major phase boundary (e.g., before Chrome extension launch, before Android launch). Audit scope: code quality, architecture compliance, test coverage, known-trap regression, documentation alignment.
+
+---
+
+## Current System State (Post-Sprint 18B — Chrome Extension Complete)
+
+### Codebase (branch: `main`, all merged and pushed)
+
+- All sprints (1-21 + 18A + 18B) complete — security, performance, accessibility, cloud sync, production installer, sync hardening, keyboard-first UX, UX polish, Chrome extension
+- 512 tests passing across 22 test files
 - CI/CD active via GitHub Actions (x64 + ARM64 release matrix)
 
 ### Tech Stack
@@ -113,6 +157,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
   - `main/window-manager.js` (216 lines) — BrowserWindow, tray, menu, auto-updater
   - `main/cloud-onedrive.js` (201 lines) — OneDrive App Folder via Microsoft Graph, chunked uploads
   - `main/migrations.js` (137 lines) — schema migrations with backup
+  - `main/ws-server.js` (402 lines) — localhost WebSocket server for Chrome extension (port 48924, pairing token auth)
   - `main/folder-watcher.js` (110 lines) — chokidar folder watching
   - `main/cloud-storage.js` (18 lines) — provider factory (OneDrive/Google)
   - Context object pattern shares state (mainWindow, library, settings, paths) across modules
@@ -183,11 +228,19 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 | Reading Log | ✅ Built | Session data → .xlsx with ReadLog table + Dashboard KPIs (Sprint 20W) |
 | UX Polish | ✅ Built | Sticky headers, magnifying glass search, file badges, thumbnails, coaching toasts, drag-drop anywhere (Sprint 21) |
 | Reading Intelligence | ✅ Built | Active-only session timer, AVG WPM fix, time-to-end displays (Sprint 21) |
+| Flow Highlight Animation | ✅ Built | GPU-accelerated translate3d() cursor glide, line-wrap snap, disabled >500 WPM, reduced motion (Sprint 22) |
+| Focus Word Transition | ✅ Built | CSS fade/slide on word advance, duration ≤15% of interval, disabled >500 WPM (Sprint 22) |
+| TTS Sync | ✅ Built | Cursor-driven TTS — 4-word chunk buffering, WPM-derived rate, word-boundary sync, auto-chain (Sprint 22) |
+| TTS Toggle + WPM Cap | ✅ Built | Narration button in bottom bar (Page view only), WPM capped at 400, N shortcut (Sprint 22) |
 
 ### What's NOT Done (Roadmap Forward)
 
-- **Sprint 18B: Chrome extension** — "Send to Blurby" with WebSocket + cloud fallback
-- **Sprint 18C: Android app** — React Native port with cloud sync
+- ~~Sprint 18B: Chrome extension~~ — ✅ COMPLETED (merged to main)
+- ~~Sprint 22: Reading Animation + TTS Sync~~ — ✅ COMPLETED (merged to main)
+- **Sprint 23: V1 Hardening** — First-run onboarding, error recovery UX, constants extraction (AF-001), a11y audit on Sprint 20/21 components, performance baselines, auto-update E2E test
+- **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release
+- **Sprint 25: RSS Library + Paywall Integration** — Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline (post-v1)
+- **Sprint 18C: Android app** — React Native port with cloud sync (post-v1)
 - **Code signing** — not doing (explicit decision)
 - **Symlink protection** — not implemented
 - **Multi-window support** — someday backlog
@@ -201,7 +254,10 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 ✅ Sprint 19 (sync hardening + provenance) — completed
 ✅ Sprint 20 (keyboard-first UX + three-mode reader) — completed
 ✅ Sprint 21 (UX polish + reading intelligence) — completed
-**Sprint 18B** (Chrome ext) || **Sprint 18C** (Android) — next up
+✅ Sprint 18B (Chrome extension) — completed
+✅ Sprint 22 (reading animation + TTS sync) — completed
+**Sprint 23** (v1 hardening) → **Sprint 24** (external audit) → **v1.0.0 RELEASE**
+**Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 
 ---
 
