@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { formatTime, formatDisplayTitle, MIN_WPM, MAX_WPM, WPM_STEP } from "../utils/text";
 import { BlurbyDoc, BlurbySettings, SyncStatusValue } from "../types";
 import { useTheme } from "./ThemeProvider";
+import { triggerCoachHint } from "./HotkeyCoach";
 import AddEditPanel from "./AddEditPanel";
 import DocCard from "./DocCard";
 import DocGridCard from "./DocGridCard";
@@ -33,6 +34,9 @@ interface LibraryViewProps {
   onUnarchiveDoc: (id: string) => void;
   onToggleFlap: () => void;
   onSettingsChange: (patch: Partial<BlurbySettings>) => void;
+  focusedDocId?: string | null;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (docId: string) => void;
 }
 
 export default function LibraryView({
@@ -40,6 +44,7 @@ export default function LibraryView({
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
+  focusedDocId, selectedIds, onToggleSelect,
 }: LibraryViewProps) {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
@@ -97,6 +102,15 @@ export default function LibraryView({
   useEffect(() => {
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
   }, []);
+
+  // Scroll focused card into view when keyboard focus changes
+  const prevFocusedRef = useRef<string | null | undefined>(null);
+  useEffect(() => {
+    if (!focusedDocId || focusedDocId === prevFocusedRef.current) return;
+    prevFocusedRef.current = focusedDocId;
+    const el = document.querySelector<HTMLElement>(`[data-doc-id="${focusedDocId}"]`);
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [focusedDocId]);
 
   const isPdf = (d: BlurbyDoc) => d.ext === ".pdf";
   const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual";
@@ -281,7 +295,7 @@ export default function LibraryView({
             <CloudSyncIndicator onOpenSettings={() => onToggleFlap()} />
             <button
               className="btn"
-              onClick={() => setSearchFocused(true)}
+              onClick={() => { triggerCoachHint("search"); setSearchFocused(true); }}
               aria-label="Search library"
               title="Search (/ key)"
             >
@@ -534,7 +548,11 @@ export default function LibraryView({
                 <div className="library-section-label">Reading Now</div>
                 <div className="doc-grid" role="list">
                   {readingNow.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc} />
+                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                      focused={focusedDocId === doc.id}
+                      selected={selectedIds?.has(doc.id) || false}
+                      onToggleSelect={onToggleSelect}
+                    />
                   ))}
                 </div>
               </>
@@ -544,7 +562,11 @@ export default function LibraryView({
                 <div className="library-section-label">Not Started</div>
                 <div className="doc-grid" role="list">
                   {notStarted.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc} />
+                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                      focused={focusedDocId === doc.id}
+                      selected={selectedIds?.has(doc.id) || false}
+                      onToggleSelect={onToggleSelect}
+                    />
                   ))}
                 </div>
               </>
@@ -568,6 +590,9 @@ export default function LibraryView({
                       onUnarchive={onUnarchiveDoc}
                       onOpenScroll={handleOpenScroll}
                       onOpenNewWindow={handleOpenNewWindow}
+                      focused={focusedDocId === doc.id}
+                      selected={selectedIds?.has(doc.id) || false}
+                      onToggleSelect={onToggleSelect}
                     />
                   ))}
                 </div>
@@ -589,6 +614,9 @@ export default function LibraryView({
                       onUnarchive={onUnarchiveDoc}
                       onOpenScroll={handleOpenScroll}
                       onOpenNewWindow={handleOpenNewWindow}
+                      focused={focusedDocId === doc.id}
+                      selected={selectedIds?.has(doc.id) || false}
+                      onToggleSelect={onToggleSelect}
                     />
                   ))}
                 </div>

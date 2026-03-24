@@ -58,14 +58,21 @@ export default function MenuFlap({
   onCloseRef.current = onClose;
   useEffect(() => {
     if (!open) return;
-    // Any click on window closes the flap.
-    // The flap div uses stopPropagation to prevent its own clicks from reaching here.
-    const handler = () => onCloseRef.current();
-    // Small delay so the click that opened the flap doesn't immediately close it
-    const timer = setTimeout(() => window.addEventListener("click", handler), 100);
+    // Close flap on any mousedown outside the flap panel.
+    // Uses document capture phase so it fires before any element's own handler.
+    const handler = (e: MouseEvent) => {
+      if (flapRef.current && flapRef.current.contains(e.target as Node)) return;
+      onCloseRef.current();
+    };
+    // Delay registration so the opening click/mousedown doesn't immediately close
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handler, true);
+      document.addEventListener("pointerdown", handler, true);
+    }, 150);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("click", handler);
+      document.removeEventListener("mousedown", handler, true);
+      document.removeEventListener("pointerdown", handler, true);
     };
   }, [open]);
 

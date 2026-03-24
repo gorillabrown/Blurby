@@ -177,7 +177,7 @@ export default function ShortcutsOverlay({ onClose, context }: ShortcutsOverlayP
       onClick={onClose}
     >
       <div
-        className="shortcuts-dialog"
+        className="shortcuts-container"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shortcuts-header">

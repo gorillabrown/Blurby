@@ -481,9 +481,7 @@ export default function PageReaderView({
             <button
               className="page-reader-toast-action"
               onClick={() => {
-                const safeName = activeDoc.title.replace(/[<>:"/\\|?*]/g, "-").slice(0, 80);
-                // Open via shell — the IPC isn't available for arbitrary paths,
-                // but we can use the Electron shell API indirectly
+                api.openReadingNotes(activeDoc.id);
                 setToast(null);
               }}
             >

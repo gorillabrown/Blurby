@@ -156,7 +156,7 @@ function registerIpcHandlers(ctx) {
   const coverCache = new Map();
   const COVER_CACHE_MAX = 100;
 
-  ipcMain.handle("get-state", () => ({ settings: ctx.getSettings(), library: ctx.getLibrary() }));
+  ipcMain.handle("get-state", () => ({ settings: ctx.getSettings(), library: ctx.getLibrary().filter((d) => !d.deleted) }));
   ipcMain.handle("get-platform", () => process.platform);
   ipcMain.handle("get-system-theme", () => getSystemTheme());
 
@@ -193,23 +193,53 @@ function registerIpcHandlers(ctx) {
     Object.assign(settings, newSettings);
     ctx.saveSettings();
     if (newSettings.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+
+    // Enqueue update-settings for sync
+    const syncEngine = require("./sync-engine");
+    const syncQueue = require("./sync-queue");
+    const syncStatus = syncEngine.getSyncStatus();
+    const revision = syncStatus.revision || 0;
+    syncQueue.enqueue("update-settings", { revision }).catch(() => {});
   });
 
   ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
 
   ipcMain.handle("update-doc-progress", (_, docId, position) => {
     const doc = ctx.getDocById(docId);
-    if (doc) { doc.position = position; ctx.saveLibrary(); }
+    if (doc) {
+      const syncEngine = require("./sync-engine");
+      const syncQueue = require("./sync-queue");
+      const syncStatus = syncEngine.getSyncStatus();
+      const revision = syncStatus.revision || 0;
+
+      doc.position = position;
+      doc.modified = Date.now();
+      doc.revision = revision;
+      ctx.saveLibrary();
+
+      // Enqueue update-progress for sync
+      syncQueue.enqueue("update-progress", { docId, value: position, revision }).catch(() => {});
+    }
   });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
+    const syncEngine = require("./sync-engine");
+    const syncQueue = require("./sync-queue");
+    const syncStatus = syncEngine.getSyncStatus();
+    const revision = syncStatus.revision || 0;
+
     const wordCount = countWords(content);
     const doc = {
       id: Date.now().toString() + Math.random().toString(36).slice(2, 8),
       title, content, wordCount, position: 0, created: Date.now(), source: "manual",
+      modified: Date.now(), revision,
     };
     ctx.addDocToLibrary(doc);
     ctx.saveLibrary();
+
+    // Enqueue add-doc for sync
+    syncQueue.enqueue("add-doc", { docId: doc.id, revision }).catch(() => {});
+
     return doc;
   });
 
@@ -259,9 +289,15 @@ function registerIpcHandlers(ctx) {
   ipcMain.handle("update-doc", (_, docId, title, content) => {
     const doc = ctx.getDocById(docId);
     if (doc) {
+      const syncEngine = require("./sync-engine");
+      const syncStatus = syncEngine.getSyncStatus();
+      const revision = syncStatus.revision || 0;
+
       doc.title = title;
       doc.content = content;
       doc.wordCount = countWords(content);
+      doc.modified = Date.now();
+      doc.revision = revision;
       ctx.saveLibrary();
     }
   });
@@ -731,11 +767,13 @@ function registerIpcHandlers(ctx) {
           try {
             const pdfPath = await generateArticlePdf({
               title: doc.title,
-              author: null,
+              author: doc.authorFull || doc.author || null,
               content: doc.content,
               sourceUrl: doc.sourceUrl || "",
               fetchDate: new Date(doc.created || Date.now()),
               outputDir: settings.sourceFolder,
+              sourceDomain: doc.sourceDomain || null,
+              publishedDate: doc.publishedDate || null,
             });
             synced.push({
               ...doc,
@@ -1255,33 +1293,26 @@ function registerIpcHandlers(ctx) {
         workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(xlsxPath);
       } catch {
-        // Create new workbook from scratch
+        // Copy from template — preserves all formatting, formulas, charts, and layout
+        const templatePath = path.join(__dirname, "..", "docs", "project", "Reading_Log_Blurby_Template.xlsx");
+        try {
+          await fsPromises.copyFile(templatePath, xlsxPath);
+        } catch {
+          // Fallback: template may be in app resources (packaged build)
+          const { app } = require("electron");
+          const bundledTemplate = path.join(app.getAppPath(), "docs", "project", "Reading_Log_Blurby_Template.xlsx");
+          await fsPromises.copyFile(bundledTemplate, xlsxPath);
+        }
         workbook = new ExcelJS.Workbook();
-        workbook.creator = "Blurby";
-        const sheet = workbook.addWorksheet("Reading Log");
-        sheet.columns = [
-          { header: "#", key: "num", width: 5 },
-          { header: "Title", key: "title", width: 40 },
-          { header: "Lead Author Last Name", key: "authorLast", width: 20 },
-          { header: "Lead Author First Name", key: "authorFirst", width: 20 },
-          { header: "Pub. Year", key: "pubYear", width: 10 },
-          { header: "Publisher / Source", key: "publisher", width: 25 },
-          { header: "DOI / URL", key: "url", width: 30 },
-          { header: "Work Type", key: "workType", width: 12 },
-          { header: "Format", key: "format", width: 10 },
-          { header: "Pages", key: "pages", width: 8 },
-          { header: "Date Started", key: "dateStarted", width: 15 },
-          { header: "Sessions", key: "sessions", width: 10 },
-          { header: "Total Time (min)", key: "totalTime", width: 15 },
-          { header: "Avg WPM", key: "avgWpm", width: 10 },
-          { header: "% Read", key: "pctRead", width: 10 },
-          { header: "Date Finished", key: "dateFinished", width: 15 },
-          { header: "Rating (1-5)", key: "rating", width: 12 },
-          { header: "Notes / Key Takeaway", key: "notes", width: 40 },
-        ];
-
-        // Dashboard tab
-        workbook.addWorksheet("Dashboard");
+        await workbook.xlsx.readFile(xlsxPath);
+        // Clear sample data rows from template, keeping header row
+        const rlSheet = workbook.getWorksheet("Reading Log");
+        if (rlSheet && rlSheet.rowCount > 1) {
+          for (let r = rlSheet.rowCount; r >= 2; r--) {
+            rlSheet.spliceRows(r, 1);
+          }
+        }
+        await workbook.xlsx.writeFile(xlsxPath);
       }
 
       const sheet = workbook.getWorksheet("Reading Log");
@@ -1367,10 +1398,37 @@ function registerIpcHandlers(ctx) {
     const xlsxPath = path.join(outputDir, "Blurby Reading Log.xlsx");
     try {
       await fsPromises.access(xlsxPath);
+    } catch {
+      // Copy from template — preserves all formatting, formulas, charts, and layout
+      try {
+        const templatePath = path.join(__dirname, "..", "docs", "project", "Reading_Log_Blurby_Template.xlsx");
+        try {
+          await fsPromises.copyFile(templatePath, xlsxPath);
+        } catch {
+          const { app } = require("electron");
+          const bundledTemplate = path.join(app.getAppPath(), "docs", "project", "Reading_Log_Blurby_Template.xlsx");
+          await fsPromises.copyFile(bundledTemplate, xlsxPath);
+        }
+        // Clear sample data rows from template, keeping header + formulas
+        const ExcelJS = require("exceljs");
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.readFile(xlsxPath);
+        const rlSheet = wb.getWorksheet("Reading Log");
+        if (rlSheet && rlSheet.rowCount > 1) {
+          for (let r = rlSheet.rowCount; r >= 2; r--) {
+            rlSheet.spliceRows(r, 1);
+          }
+        }
+        await wb.xlsx.writeFile(xlsxPath);
+      } catch (createErr) {
+        return { error: `Could not create reading log: ${createErr.message}` };
+      }
+    }
+    try {
       await shell.openPath(xlsxPath);
       return { ok: true };
-    } catch {
-      return { error: "Reading log not found. Start a reading session first." };
+    } catch (openErr) {
+      return { error: `Could not open reading log: ${openErr.message}` };
     }
   });
 
@@ -1406,6 +1464,38 @@ function registerIpcHandlers(ctx) {
       }
     } catch { /* ignore */ }
     return { error: "No reading notes found. Highlight a word and press Shift+N to create a note." };
+  });
+
+  // ── WebSocket server for Chrome extension ─────────────────────────────────
+
+  const wsServer = require("./ws-server");
+
+  ipcMain.handle("start-ws-server", () => {
+    return wsServer.startServer(ctx);
+  });
+
+  ipcMain.handle("stop-ws-server", () => {
+    wsServer.stopServer();
+    return { ok: true };
+  });
+
+  ipcMain.handle("get-ws-status", () => {
+    return wsServer.getStatus();
+  });
+
+  ipcMain.handle("get-ws-pairing-token", () => {
+    const status = wsServer.getStatus();
+    return status.token || null;
+  });
+
+  ipcMain.handle("regenerate-ws-pairing-token", () => {
+    const token = wsServer.generatePairingToken();
+    const settings = ctx.getSettings();
+    settings._wsPairingToken = token;
+    ctx.saveSettings();
+    // Restart server with new token
+    wsServer.stopServer();
+    return wsServer.startServer(ctx);
   });
 }
 

@@ -5,6 +5,7 @@ import { bubbleCount } from "../utils/queue";
 import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
+import { triggerCoachHint } from "./HotkeyCoach";
 
 const TYPE_COLORS: Record<string, string> = {
   epub: "#6b9f6b",
@@ -131,7 +132,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
         <div className="doc-card-actions" onClick={(e) => e.stopPropagation()}>
           <button
             className={`icon-btn doc-fav-btn${doc.favorite ? " doc-fav-btn-active" : ""}`}
-            onClick={() => onToggleFavorite(doc.id)}
+            onClick={() => { triggerCoachHint("favorite"); onToggleFavorite(doc.id); }}
             title={doc.favorite ? "Unfavorite" : "Favorite"}
             aria-label={doc.favorite ? "Remove from favorites" : "Add to favorites"}
           >*</button>
@@ -164,7 +165,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
           {doc.archived ? (
             <button
               className="icon-btn"
-              onClick={() => onUnarchive(doc.id)}
+              onClick={() => { triggerCoachHint("archive"); onUnarchive(doc.id); }}
               title="Unarchive"
               aria-label="Restore from archive"
             >
@@ -176,7 +177,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
             !isComplete && (
               <button
                 className="icon-btn"
-                onClick={() => onArchive(doc.id)}
+                onClick={() => { triggerCoachHint("archive"); onArchive(doc.id); }}
                 title="Archive"
                 aria-label="Archive document"
               >
@@ -186,7 +187,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
               </button>
             )
           )}
-          <IconBtn onClick={() => onConfirmDelete(doc.id)} title="Delete" icon="delete" danger />
+          <IconBtn onClick={() => { triggerCoachHint("delete"); onConfirmDelete(doc.id); }} title="Delete" icon="delete" danger />
         </div>
       </div>
 

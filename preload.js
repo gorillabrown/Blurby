@@ -91,6 +91,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openReadingLog: () => ipcRenderer.invoke("open-reading-log"),
   openReadingNotes: (docId) => ipcRenderer.invoke("open-reading-notes", docId),
 
+  // WebSocket server (Chrome extension)
+  startWsServer: () => ipcRenderer.invoke("start-ws-server"),
+  stopWsServer: () => ipcRenderer.invoke("stop-ws-server"),
+  getWsStatus: () => ipcRenderer.invoke("get-ws-status"),
+  getWsPairingToken: () => ipcRenderer.invoke("get-ws-pairing-token"),
+  regenerateWsPairingToken: () => ipcRenderer.invoke("regenerate-ws-pairing-token"),
+
   // Cloud sync
   cloudSignIn: (provider) => ipcRenderer.invoke("cloud-sign-in", provider),
   cloudSignOut: (provider) => ipcRenderer.invoke("cloud-sign-out", provider),

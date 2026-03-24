@@ -28,7 +28,8 @@ export type LibraryFilter =
   | "archive"
   | "queue"
   | "recent"
-  | "collections";
+  | "collections"
+  | "stats";
 
 export interface GoToState {
   pending: boolean;
@@ -82,6 +83,7 @@ export interface LibraryKeyboardActions {
   onMoveCollection?: (docId: string) => void;
   onFocusSearch?: () => void;
   onNavigateFilter?: (filter: LibraryFilter) => void;
+  onToggleFlap?: () => void;
   onSelectAll?: () => void;
   onClearSelection?: () => void;
   onScrollToTop?: () => void;
@@ -158,7 +160,7 @@ export function useReaderKeys(
       // Ctrl font size
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }
       if ((e.ctrlKey || e.metaKey) && (e.code === "Minus" || e.code === "NumpadSubtract")) { e.preventDefault(); s.adjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP); return; }
-      if ((e.ctrlKey || e.metaKey) && e.code === "Digit0") { e.preventDefault(); return; }
+      if ((e.ctrlKey || e.metaKey) && e.code === "Digit0") { e.preventDefault(); s.adjustFocusTextSize(-Infinity); return; }
       // Ctrl+Up/Down jump to top/bottom
       if (e.ctrlKey && e.code === "ArrowUp") { e.preventDefault(); s.seekWords(-Infinity); return; }
       if (e.ctrlKey && e.code === "ArrowDown") { e.preventDefault(); s.seekWords(Infinity); return; }
@@ -303,8 +305,10 @@ export function useLibraryKeyboard(
   // Start G-sequence with timeout
   const startGoTo = useCallback(() => {
     setGoToPending(true);
+    window.dispatchEvent(new CustomEvent("blurby:goto-pending"));
     goToTimerRef.current = setTimeout(() => {
       setGoToPending(false);
+      window.dispatchEvent(new CustomEvent("blurby:goto-resolved"));
     }, G_SEQUENCE_TIMEOUT);
   }, []);
 
@@ -332,6 +336,7 @@ export function useLibraryKeyboard(
       // G-sequence handler
       if (goToPending) {
         clearGoTo();
+        window.dispatchEvent(new CustomEvent("blurby:goto-resolved"));
         e.preventDefault();
         const key = e.code;
         if (key === "KeyL") { setActiveFilter("all"); a.onNavigateFilter?.("all"); }
@@ -339,10 +344,10 @@ export function useLibraryKeyboard(
         else if (key === "KeyA") { setActiveFilter("archive"); a.onNavigateFilter?.("archive"); }
         else if (key === "KeyQ") { setActiveFilter("queue"); a.onNavigateFilter?.("queue"); }
         else if (key === "KeyR") { setActiveFilter("recent"); a.onNavigateFilter?.("recent"); }
-        else if (key === "KeyS") { /* navigate to stats — handled by caller */ }
+        else if (key === "KeyS") { a.onNavigateFilter?.("stats"); }
         else if (key === "KeyH") { setActiveFilter("snoozed"); a.onNavigateFilter?.("snoozed"); }
         else if (key === "KeyC") { setActiveFilter("collections"); a.onNavigateFilter?.("collections"); }
-        else if (key === "KeyM") { /* toggle menu handled by caller */ }
+        else if (key === "KeyM") { a.onToggleFlap?.(); }
         return;
       }
 

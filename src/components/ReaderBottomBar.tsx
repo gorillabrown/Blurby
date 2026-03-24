@@ -71,11 +71,25 @@ export default function ReaderBottomBar({
   );
   const currentChapter = chapterList[curChapterIdx];
 
+  // Chapter time remaining
+  const chapterTimeRemaining = useMemo(() => {
+    if (chapterList.length <= 1) return null;
+    const chEnd = curChapterIdx + 1 < chapterList.length
+      ? chapterList[curChapterIdx + 1].wordIndex
+      : words.length;
+    const chWordsLeft = Math.max(0, chEnd - wordIndex);
+    return formatTime(chWordsLeft, wpm);
+  }, [chapterList, curChapterIdx, wordIndex, words.length, wpm]);
+
   // Font size percentage
   const fontPct = focusTextSize || 100;
 
-  // Always fully visible
-  const opacity = 1;
+  // Fade bar during active Focus/Flow playback; fully visible in Page mode or e-ink
+  const opacity = (readingMode === "page" || isEink)
+    ? 1
+    : playing
+      ? 0.08
+      : 1;
 
   // WPM slider
   const handleWpmSlider = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,7 +232,9 @@ export default function ReaderBottomBar({
       <div className="reader-bottom-bar-info">
         <span className="rbb-info-progress">{Math.round(progress)}%</span>
         <span className="rbb-info-hint">{HINT_TEXT[readingMode] || ""}</span>
-        <span className="rbb-info-time">{timeRemaining}</span>
+        <span className="rbb-info-time">
+          {chapterTimeRemaining ? `Ch: ${chapterTimeRemaining} | Doc: ${timeRemaining}` : timeRemaining}
+        </span>
       </div>
     </div>
   );

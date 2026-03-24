@@ -160,6 +160,13 @@ export default function ReaderContainer({
     const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
     if (wordsRead > 0 && activeMs > 1000) {
       api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
+      api.logReadingSession({
+        docId: activeDoc.id,
+        duration: activeMs,
+        wordsRead,
+        finalWpm: wpm,
+        mode: readingMode,
+      }).catch(() => {});
     }
     if (finalPos >= words.length - 1 && words.length > 0) {
       api.markDocCompleted();
@@ -251,6 +258,7 @@ export default function ReaderContainer({
   }, [readingMode, playing, handleEnterFocus, handlePauseToPage, reader]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
+    if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
     setFocusTextSize((prev) => Math.max(MIN_FOCUS_TEXT_SIZE, Math.min(MAX_FOCUS_TEXT_SIZE, prev + delta)));
   }, []);
 
