@@ -1,6 +1,8 @@
 // main/migrations.js — Schema migration framework for settings.json and library.json
 // CommonJS only — Electron main process
 
+const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
+
 const CURRENT_SETTINGS_SCHEMA = 7;
 const CURRENT_LIBRARY_SCHEMA = 5;
 
@@ -64,8 +66,8 @@ const settingsMigrations = [
         word: 0,
       };
     }
-    if (data.initialPauseMs == null) data.initialPauseMs = 3000;
-    if (data.punctuationPauseMs == null) data.punctuationPauseMs = 1000;
+    if (data.initialPauseMs == null) data.initialPauseMs = DEFAULT_INITIAL_PAUSE_MS;
+    if (data.punctuationPauseMs == null) data.punctuationPauseMs = DEFAULT_PUNCTUATION_PAUSE_MS;
     data.schemaVersion = 4;
     return data;
   },

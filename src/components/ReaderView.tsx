@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, Chapter } from "../utils/text";
-import { MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP } from "../constants";
+import { MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, ANIMATION_DISABLE_WPM } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import type { WordUpdateCallback } from "../hooks/useReader";
 
@@ -91,9 +91,9 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
       const { before: b, focus: f, after: a } = focusChar(displayWord);
       const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
 
-      // Trigger word transition animation (disabled at WPM > 500)
+      // Trigger word transition animation (disabled at WPM > ANIMATION_DISABLE_WPM)
       const currentWpm = wpmRefLocal.current;
-      if (currentWpm <= 500 && wordDisplayRef.current) {
+      if (currentWpm <= ANIMATION_DISABLE_WPM && wordDisplayRef.current) {
         const container = wordDisplayRef.current;
         const interval = 60000 / currentWpm;
         const transitionMs = Math.min(30, Math.floor(interval * 0.15));

@@ -1086,6 +1086,24 @@ button, input, textarea, a, [role="button"] {
   color: var(--text);
   box-shadow: var(--shadow-md);
   animation: toast-in 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toast-action {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--accent, #D04716);
+  border-radius: var(--radius-sm);
+  padding: 2px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+.toast-action:hover {
+  background: var(--bg-hover);
 }
 @keyframes toast-in {
   from { opacity: 0; transform: translateX(-50%) translateY(10px); }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { GOTO_INDICATOR_DISMISS_MS } from "../constants";
 
 // GoToIndicator is a pure display component — it listens for a custom DOM event
 // dispatched by useKeyboardShortcuts when a G-sequence is pending, rather than
@@ -31,7 +32,7 @@ export default function GoToIndicator() {
     let timeout: ReturnType<typeof setTimeout>;
     const reset = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(() => setVisible(false), 1500);
+      timeout = setTimeout(() => setVisible(false), GOTO_INDICATOR_DISMISS_MS);
     };
     window.addEventListener(GOTO_PENDING_EVENT, reset);
 

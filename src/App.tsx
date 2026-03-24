@@ -126,6 +126,21 @@ function StandaloneReader() {
 export default function App() {
   const isStandaloneReader = getReaderDocId() !== null;
 
+  useEffect(() => {
+    const handleError = (e: ErrorEvent) => {
+      window.electronAPI?.logError?.(`Unhandled: ${e.message} at ${e.filename}:${e.lineno}`);
+    };
+    const handleRejection = (e: PromiseRejectionEvent) => {
+      window.electronAPI?.logError?.(`Unhandled rejection: ${e.reason}`);
+    };
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleRejection);
+    return () => {
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleRejection);
+    };
+  }, []);
+
   return (
     <ThemeProvider initialTheme="dark">
       <a href="#main-content" className="skip-to-content">Skip to content</a>

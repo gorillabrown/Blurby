@@ -1,4 +1,5 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface SnoozePickerOverlayProps {
   onSelect: (until: number) => void;
@@ -82,11 +83,32 @@ const SNOOZE_OPTIONS: SnoozeOption[] = [
 ];
 
 export default function SnoozePickerOverlay({ onSelect, onClose }: SnoozePickerOverlayProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+
+  useFocusTrap(containerRef);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
         onClose();
+        return;
+      }
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setFocusedIndex((i) => Math.min(i + 1, SNOOZE_OPTIONS.length - 1));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setFocusedIndex((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const opt = SNOOZE_OPTIONS[focusedIndex];
+        if (opt) onSelect(opt.getTimestamp());
         return;
       }
       const optionIndex = parseInt(e.key, 10) - 1;
@@ -96,7 +118,7 @@ export default function SnoozePickerOverlay({ onSelect, onClose }: SnoozePickerO
         onSelect(opt.getTimestamp());
       }
     },
-    [onSelect, onClose]
+    [onSelect, onClose, focusedIndex]
   );
 
   useEffect(() => {
@@ -113,6 +135,7 @@ export default function SnoozePickerOverlay({ onSelect, onClose }: SnoozePickerO
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="snooze-picker-container"
         onClick={(e) => e.stopPropagation()}
       >
@@ -125,10 +148,15 @@ export default function SnoozePickerOverlay({ onSelect, onClose }: SnoozePickerO
           {SNOOZE_OPTIONS.map((opt, i) => (
             <li
               key={opt.key}
-              className="snooze-option"
+              className={[
+                "snooze-option",
+                i === focusedIndex ? "snooze-option--focused" : "",
+              ].filter(Boolean).join(" ")}
               role="option"
+              aria-selected={i === focusedIndex}
               aria-label={`${opt.label} — ${opt.sublabel}`}
               onClick={() => onSelect(opt.getTimestamp())}
+              onMouseEnter={() => setFocusedIndex(i)}
             >
               <span className="snooze-option-key" aria-hidden="true">
                 {i + 1}

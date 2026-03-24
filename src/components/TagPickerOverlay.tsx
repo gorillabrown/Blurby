@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface TagPickerOverlayProps {
   mode: "tag" | "collection";
@@ -23,6 +24,7 @@ export default function TagPickerOverlay({
 }: TagPickerOverlayProps) {
   const [filter, setFilter] = useState("");
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -45,6 +47,8 @@ export default function TagPickerOverlay({
     ...filteredItems.map((v) => ({ value: v, isNew: false })),
     ...(canCreate ? [{ value: filter.trim(), isNew: true }] : []),
   ];
+
+  useFocusTrap(containerRef, [displayItems]);
 
   useEffect(() => {
     setFocusedIndex(0);
@@ -114,6 +118,7 @@ export default function TagPickerOverlay({
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="tag-picker-container"
         onClick={(e) => e.stopPropagation()}
       >

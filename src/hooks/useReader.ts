@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { hasPunctuation } from "../utils/text";
-import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS } from "../constants";
+import { MIN_WPM, MAX_WPM, INITIAL_PAUSE_MS, PUNCTUATION_PAUSE_MS, FLOW_STATE_SYNC_MS, DOUBLE_ESC_WINDOW_MS } from "../constants";
 import { calculatePauseMs } from "../utils/rhythm";
 import { BlurbyDoc, RhythmPauses } from "../types";
 
@@ -94,7 +94,7 @@ export default function useReader(
 
     // Throttle React state syncs to ~500ms for progress bar / bottom info
     const now = performance.now();
-    if (now - lastStateSyncRef.current >= 500) {
+    if (now - lastStateSyncRef.current >= FLOW_STATE_SYNC_MS) {
       lastStateSyncRef.current = now;
       setWordIndex(wordIndexRef.current);
     }
@@ -168,7 +168,7 @@ export default function useReader(
     if (playingRef.current && !escPending) {
       setEscPending(true);
       if (escTimerRef.current) clearTimeout(escTimerRef.current);
-      escTimerRef.current = setTimeout(() => setEscPending(false), 2000);
+      escTimerRef.current = setTimeout(() => setEscPending(false), DOUBLE_ESC_WINDOW_MS);
       return;
     }
     if (escTimerRef.current) clearTimeout(escTimerRef.current);

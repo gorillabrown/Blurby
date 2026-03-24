@@ -1,9 +1,10 @@
 import { createContext, useContext, useCallback, useState, useMemo } from "react";
 import { TOAST_DEFAULT_DURATION_MS } from "../constants";
+import type { ToastAction, ToastState } from "../types";
 
 interface ToastContextType {
-  toast: string | null;
-  showToast: (message: string, duration?: number) => void;
+  toast: ToastState | null;
+  showToast: (message: string, duration?: number, action?: ToastAction) => void;
 }
 
 export const ToastContext = createContext<ToastContextType>({
@@ -20,10 +21,10 @@ export function useToast() {
  * Call this in the provider component, pass the result to ToastContext.Provider.
  */
 export function useToastProvider() {
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
 
-  const showToast = useCallback((message: string, duration = TOAST_DEFAULT_DURATION_MS) => {
-    setToast(message);
+  const showToast = useCallback((message: string, duration = TOAST_DEFAULT_DURATION_MS, action?: ToastAction) => {
+    setToast({ message, action });
     setTimeout(() => setToast(null), duration);
   }, []);
 

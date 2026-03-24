@@ -1,4 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
+import { MIN_WPM, MAX_WPM, WPM_STEP } from "../constants";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface QuickSettingsPopoverProps {
   context: string; // "library" | "reader-rsvp" | "reader-scroll" | "reader"
@@ -15,9 +17,6 @@ interface QuickSettingsPopoverProps {
   onClose: () => void;
 }
 
-const WPM_MIN = 100;
-const WPM_MAX = 1000;
-const WPM_STEP = 10;
 const FONT_MIN = 12;
 const FONT_MAX = 48;
 const FONT_STEP = 1;
@@ -43,6 +42,8 @@ export default function QuickSettingsPopover({
   onClose,
 }: QuickSettingsPopoverProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(dialogRef);
 
   const isReaderContext =
     context === "reader" ||
@@ -80,6 +81,14 @@ export default function QuickSettingsPopover({
     document.addEventListener("mousedown", handler, true);
     return () => document.removeEventListener("mousedown", handler, true);
   }, [onClose]);
+
+  // Auto-focus the first slider on open
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (!el) return;
+    const firstSlider = el.querySelector<HTMLElement>('input[type="range"]');
+    firstSlider?.focus();
+  }, []);
 
   const wpm = typeof settings.wpm === "number" ? settings.wpm : 300;
   const focusTextSize =
@@ -129,16 +138,16 @@ export default function QuickSettingsPopover({
               <input
                 id="qs-wpm"
                 type="range"
-                min={WPM_MIN}
-                max={WPM_MAX}
+                min={MIN_WPM}
+                max={MAX_WPM}
                 step={WPM_STEP}
                 value={wpm}
                 onChange={(e) =>
                   onSettingsChange({ wpm: parseInt(e.target.value, 10) })
                 }
                 aria-label={`Reading speed: ${wpm} words per minute`}
-                aria-valuemin={WPM_MIN}
-                aria-valuemax={WPM_MAX}
+                aria-valuemin={MIN_WPM}
+                aria-valuemax={MAX_WPM}
                 aria-valuenow={wpm}
               />
               <span className="quick-settings-value" aria-hidden="true">
