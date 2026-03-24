@@ -1465,6 +1465,38 @@ function registerIpcHandlers(ctx) {
     } catch { /* ignore */ }
     return { error: "No reading notes found. Highlight a word and press Shift+N to create a note." };
   });
+
+  // ── WebSocket server for Chrome extension ─────────────────────────────────
+
+  const wsServer = require("./ws-server");
+
+  ipcMain.handle("start-ws-server", () => {
+    return wsServer.startServer(ctx);
+  });
+
+  ipcMain.handle("stop-ws-server", () => {
+    wsServer.stopServer();
+    return { ok: true };
+  });
+
+  ipcMain.handle("get-ws-status", () => {
+    return wsServer.getStatus();
+  });
+
+  ipcMain.handle("get-ws-pairing-token", () => {
+    const status = wsServer.getStatus();
+    return status.token || null;
+  });
+
+  ipcMain.handle("regenerate-ws-pairing-token", () => {
+    const token = wsServer.generatePairingToken();
+    const settings = ctx.getSettings();
+    settings._wsPairingToken = token;
+    ctx.saveSettings();
+    // Restart server with new token
+    wsServer.stopServer();
+    return wsServer.startServer(ctx);
+  });
 }
 
 module.exports = {

@@ -191,6 +191,12 @@ export interface ElectronAPI {
   logReadingSession: (data: { docId: string; duration: number; wordsRead: number; finalWpm: number; mode: string; chapter?: string }) => Promise<{ ok?: boolean; path?: string; error?: string }>;
   openReadingLog: () => Promise<{ ok?: boolean; error?: string }>;
   openReadingNotes: (docId?: string) => Promise<{ ok?: boolean; error?: string }>;
+  // WebSocket server (Chrome extension)
+  startWsServer: () => Promise<{ port: number; token: string }>;
+  stopWsServer: () => Promise<{ ok: boolean }>;
+  getWsStatus: () => Promise<{ running: boolean; port: number; clients: number; token: string | null }>;
+  getWsPairingToken: () => Promise<string | null>;
+  regenerateWsPairingToken: () => Promise<{ port: number; token: string }>;
   // Cloud sync
   cloudSignIn: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string; email?: string; name?: string; provider?: string }>;
   cloudSignOut: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string }>;

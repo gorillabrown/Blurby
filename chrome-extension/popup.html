@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=280">
+  <title>Blurby</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      min-height: 200px;
+      max-height: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #fff;
+      overflow-y: auto;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px 8px;
+      border-bottom: 2px solid #D04716;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo {
+      font-size: 16px;
+      font-weight: 700;
+      color: #050F32;
+      letter-spacing: -0.5px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .status-badge.connected {
+      background: #e6f7e6;
+      color: #2d7d2d;
+    }
+    .status-badge.disconnected {
+      background: #f0f0f0;
+      color: #666;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-badge.connected .status-dot { background: #2d7d2d; }
+    .status-badge.disconnected .status-dot { background: #999; }
+
+    /* Preview */
+    .preview {
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+    }
+    .preview-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #050F32;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .preview-meta {
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .preview-loading {
+      color: #999;
+      font-style: italic;
+      padding: 8px 0;
+    }
+    .preview-error {
+      color: #cc3333;
+      font-size: 12px;
+      padding: 8px 0;
+    }
+
+    /* Send button */
+    .send-section {
+      padding: 12px 14px;
+    }
+    .send-btn {
+      width: 100%;
+      padding: 10px;
+      background: #D04716;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .send-btn:hover { background: #b83d12; }
+    .send-btn:active { background: #a03510; }
+    .send-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .send-btn.success {
+      background: #2d7d2d;
+    }
+    .send-status {
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      margin-top: 6px;
+      min-height: 14px;
+    }
+
+    /* Mode selector */
+    .mode-selector {
+      display: flex;
+      gap: 6px;
+      padding: 0 14px 8px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 5px 4px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fafafa;
+      font-size: 10px;
+      text-align: center;
+      cursor: pointer;
+      color: #333;
+      transition: all 0.15s;
+    }
+    .mode-btn:hover { border-color: #D04716; color: #D04716; }
+    .mode-btn.active {
+      border-color: #D04716;
+      background: #fff5f2;
+      color: #D04716;
+      font-weight: 600;
+    }
+
+    /* Recent sends */
+    .recent {
+      padding: 8px 14px 12px;
+      border-top: 1px solid #eee;
+    }
+    .recent-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #999;
+      margin-bottom: 6px;
+    }
+    .recent-item {
+      padding: 4px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    .recent-item-title {
+      color: #333;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+    .recent-item-meta {
+      color: #999;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .recent-empty {
+      color: #ccc;
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 8px 14px;
+      border-top: 1px solid #eee;
+      text-align: center;
+    }
+    .footer a {
+      font-size: 11px;
+      color: #D04716;
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <span class="logo">Blurby</span>
+    </div>
+    <span class="status-badge disconnected" id="statusBadge">
+      <span class="status-dot"></span>
+      <span id="statusText">Checking...</span>
+    </span>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview" id="previewSection">
+    <div class="preview-loading" id="previewLoading">Extracting page content...</div>
+    <div id="previewContent" style="display: none;">
+      <div class="preview-title" id="previewTitle"></div>
+      <div class="preview-meta">
+        <span id="previewAuthor"></span>
+        <span id="previewWords"></span>
+        <span id="previewTime"></span>
+      </div>
+    </div>
+    <div class="preview-error" id="previewError" style="display: none;"></div>
+  </div>
+
+  <!-- Mode selector -->
+  <div class="mode-selector">
+    <button class="mode-btn active" data-mode="library" id="modeLibrary">Add to Library</button>
+    <button class="mode-btn" data-mode="focus" id="modeFocus">Open in Focus</button>
+    <button class="mode-btn" data-mode="flow" id="modeFlow">Open in Flow</button>
+  </div>
+
+  <!-- Send button -->
+  <div class="send-section">
+    <button class="send-btn" id="sendBtn" disabled>Send to Blurby</button>
+    <div class="send-status" id="sendStatus"></div>
+  </div>
+
+  <!-- Recent sends -->
+  <div class="recent" id="recentSection">
+    <div class="recent-title">Recent</div>
+    <div id="recentList">
+      <div class="recent-empty">No articles sent yet</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <a href="#" id="settingsLink">Settings</a>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -409,6 +409,11 @@ app.whenReady().then(async () => {
   await syncEngine.initSyncEngine(ipcContext);
 
   registerIpcHandlers(ipcContext);
+
+  // Start WebSocket server for Chrome extension
+  const wsServer = require("./main/ws-server");
+  wsServer.startServer(ipcContext);
+
   mainWindow = createMainWindow(settings, isDev);
   mainWindow.on("closed", () => { mainWindow = null; });
   tray = createTray(mainWindow, () => {
@@ -461,6 +466,8 @@ app.on("window-all-closed", () => {
 
 app.on("will-quit", async () => {
   if (watcher) watcher.close();
+  // Stop WebSocket server
+  try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
   await saveLibraryNow();
   // Final cloud sync before quit
   try {
