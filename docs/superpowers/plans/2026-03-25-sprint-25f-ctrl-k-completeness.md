@@ -35,7 +35,7 @@
 
 - [ ] **Step 1: Add hotkey-row, hotkey-settings, hotkey-section-title CSS rules**
 
-After the existing `.hotkey-key.planned` rule (around line 2539), add:
+After the `.hotkey-planned-badge` rule (around line 2545), keeping all hotkey CSS grouped together, add:
 
 ```css
 .hotkey-row {
@@ -120,19 +120,21 @@ git commit -m "fix: remove redundant keyboard shortcuts from Help settings (BUG-
 **Files:**
 - Modify: `src/components/CommandPalette.tsx:78-161` (buildActions function)
 
+**Note on line numbers:** Step 1 removes one line, so all subsequent line references shift by -1. Use the textual anchors (entry labels) as authoritative, not line numbers.
+
 - [ ] **Step 1: Remove duplicate "Settings: Toggle Theme" entry**
 
-In `CommandPalette.tsx`, remove line 84:
+In `CommandPalette.tsx`, find and remove the entry labeled `"Settings: Toggle Theme"` (around line 84):
 
 ```typescript
 { type: "setting", label: "Settings: Toggle Theme", sublabel: "Dark, light, e-ink themes", onSelect: act(() => onOpenSettings("theme")) },
 ```
 
-This duplicates the "Settings: Theme" entry on line 99.
+This duplicates the `"Settings: Theme"` entry later in the array.
 
 - [ ] **Step 2: Add Library Layout entries (BUG-058)**
 
-After the existing "Settings: Cloud Sync" entry (line 106), add:
+After the `"Settings: Cloud Sync"` entry, add:
 
 ```typescript
 // Library Layout
@@ -145,7 +147,7 @@ After the existing "Settings: Cloud Sync" entry (line 106), add:
 
 - [ ] **Step 3: Add Layout text size entries (BUG-058)**
 
-After the existing "Word Spacing" entry (line 119), add:
+After the `"Word Spacing"` entry, add:
 
 ```typescript
 { type: "setting", label: "Focus Text Size", sublabel: "Adjust focus reader text size", onSelect: act(() => onOpenSettings("layout")) },
@@ -154,7 +156,7 @@ After the existing "Word Spacing" entry (line 119), add:
 
 - [ ] **Step 4: Add ThemeSettings sub-entries (BUG-059)**
 
-After the existing "Font" entry (around line 115), add:
+After the `"Font"` entry (in the Theme sub-sections area), add:
 
 ```typescript
 { type: "setting", label: "Theme Mode", sublabel: "Blurby, dark, light, e-ink, system", onSelect: act(() => onOpenSettings("theme")) },
@@ -165,7 +167,7 @@ After the existing "Font" entry (around line 115), add:
 
 - [ ] **Step 5: Add SpeedReadingSettings sub-entries (BUG-059)**
 
-After the existing "Narration (TTS)" entry (around line 112), add:
+After the `"Narration (TTS)"` entry (in the Speed Reading sub-sections area), add:
 
 ```typescript
 { type: "setting", label: "Focus Marks", sublabel: "Toggle ORP focus marks", onSelect: act(() => onOpenSettings("speed-reading")) },
@@ -257,7 +259,9 @@ In `tests/notes-reading-log.test.js`, update the `COACH_HINTS` object (line 58) 
 const COACH_HINTS = {
   archive: { action: "archive", hotkey: "E" },
   favorite: { action: "favorite", hotkey: "S" },
+  star: { action: "star", hotkey: "S" },
   search: { action: "search", hotkey: "/" },
+  delete: { action: "delete", hotkey: "#" },
   queue: { action: "queue", hotkey: "Q" },
   settings: { action: "open settings", hotkey: "Ctrl+," },
   play: { action: "play/pause", hotkey: "Space" },
@@ -271,13 +275,18 @@ const COACH_HINTS = {
 };
 ```
 
-Remove the `openReader` entry (not in the actual component). Update existing test assertions for `menu` (new hotkey "Tab" instead of "M") and `settings` (new action text "open settings"). Add new test assertions for `play`, `narration`, `enterFocus`:
+Remove the `openReader` entry (not in the actual component). Update existing test assertions for `menu` (new hotkey "Tab" instead of "M") and `settings` (new action text "open settings"). Add new test assertions for reader hints:
 
 ```javascript
 it("returns reader coaching hints", () => {
   expect(getCoachHint("play")).toEqual({ action: "play/pause", hotkey: "Space" });
   expect(getCoachHint("narration")).toEqual({ action: "toggle narration", hotkey: "N" });
   expect(getCoachHint("enterFocus")).toEqual({ action: "enter Focus mode", hotkey: "Shift+Space" });
+});
+
+it("returns updated menu and settings hints", () => {
+  expect(getCoachHint("menu")).toEqual({ action: "toggle menu", hotkey: "Tab" });
+  expect(getCoachHint("settings")).toEqual({ action: "open settings", hotkey: "Ctrl+," });
 });
 ```
 

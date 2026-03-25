@@ -14,14 +14,96 @@ import type { BlurbyDoc, BlurbySettings } from "../types";
 
 const api = (window as any).electronAPI;
 
+/** Extract all words from a foliate view's current visible sections.
+ *  Returns word strings and their DOM Ranges for highlighting. */
+function extractWordsFromView(view: any): Array<{ word: string; range: Range; sectionIndex: number }> {
+  const words: Array<{ word: string; range: Range; sectionIndex: number }> = [];
+  if (!view?.renderer?.getContents) return words;
+
+  for (const { doc, index } of view.renderer.getContents()) {
+    if (!doc?.body) continue;
+    const segmenter = new (Intl as any).Segmenter("en", { granularity: "word" });
+    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node: Node) => {
+        const parent = node.parentElement;
+        if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+
+    let node: Text | null;
+    while ((node = walker.nextNode() as Text | null)) {
+      const text = node.textContent || "";
+      for (const { segment, isWordLike, index: segIdx } of segmenter.segment(text)) {
+        if (!isWordLike) continue;
+        const range = doc.createRange();
+        range.setStart(node, segIdx);
+        range.setEnd(node, segIdx + segment.length);
+        words.push({ word: segment, range, sectionIndex: index });
+      }
+    }
+  }
+  return words;
+}
+
 interface FoliatePageViewProps {
   activeDoc: BlurbyDoc & { content?: string };
   settings: BlurbySettings;
   onRelocate?: (detail: { cfi: string; fraction: number; tocItem?: any; pageItem?: any }) => void;
   onTocReady?: (toc: any[]) => void;
+  onWordClick?: (cfi: string, word: string) => void;
   onLoad?: () => void;
   initialCfi?: string | null;
   focusTextSize?: number;
+  /** Ref for imperative access (getWords, goTo, next, prev) */
+  viewApiRef?: React.MutableRefObject<FoliateViewAPI | null>;
+}
+
+export interface FoliateViewAPI {
+  getWords: () => Array<{ word: string; range: Range; sectionIndex: number }>;
+  goTo: (target: string | number) => Promise<any>;
+  goToFraction: (frac: number) => Promise<void>;
+  next: () => void;
+  prev: () => void;
+  highlightWord: (range: Range, sectionIndex: number) => void;
+  clearHighlight: () => void;
+  getView: () => any;
+}
+
+/** Expand a caret position to the full word boundary, return the word text and Range. */
+function getWordAtPoint(doc: Document, x: number, y: number): { word: string; range: Range } | null {
+  // caretRangeFromPoint gives us a collapsed Range at the click point
+  const caretRange = (doc as any).caretRangeFromPoint?.(x, y) || (doc as any).caretPositionFromPoint?.(x, y);
+  if (!caretRange) return null;
+
+  let range: Range;
+  if (caretRange instanceof Range) {
+    range = caretRange;
+  } else {
+    // CaretPosition (Firefox) → convert to Range
+    range = doc.createRange();
+    range.setStart(caretRange.offsetNode, caretRange.offset);
+    range.collapse(true);
+  }
+
+  const node = range.startContainer;
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+  const text = node.textContent || "";
+  const offset = range.startOffset;
+
+  // Find word boundaries around the offset
+  let start = offset;
+  let end = offset;
+  while (start > 0 && /\w/.test(text[start - 1])) start--;
+  while (end < text.length && /\w/.test(text[end])) end++;
+
+  if (start === end) return null;
+  const word = text.slice(start, end);
+
+  const wordRange = doc.createRange();
+  wordRange.setStart(node, start);
+  wordRange.setEnd(node, end);
+  return { word, range: wordRange };
 }
 
 export default function FoliatePageView({
@@ -29,9 +111,11 @@ export default function FoliatePageView({
   settings,
   onRelocate,
   onTocReady,
+  onWordClick,
   onLoad,
   initialCfi,
   focusTextSize,
+  viewApiRef,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -93,6 +177,37 @@ export default function FoliatePageView({
           const { doc } = e.detail;
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
+          // Word click detection — highlight clicked word and fire callback
+          doc.addEventListener("click", (ce: MouseEvent) => {
+            const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
+            if (!result) return;
+
+            // Clear previous selection highlight
+            const prevHighlight = doc.querySelector(".blurby-word-highlight");
+            if (prevHighlight) prevHighlight.remove();
+
+            // Create highlight span around the word
+            const highlight = doc.createElement("span");
+            highlight.className = "blurby-word-highlight";
+            highlight.style.cssText = `
+              background: var(--accent, #D04716)33;
+              border-radius: 2px;
+              padding: 1px 0;
+            `;
+            result.range.surroundContents(highlight);
+
+            // Get CFI for the clicked position
+            const v = viewRef.current;
+            if (v) {
+              const contents = v.renderer.getContents?.() ?? [];
+              const match = contents.find((c: any) => c.doc === doc);
+              if (match) {
+                const cfi = v.getCFI(match.index, result.range);
+                onWordClick?.(cfi, result.word);
+              }
+            }
+          });
+
           // Forward keyboard events from iframe to parent window
           doc.addEventListener("keydown", (ke: KeyboardEvent) => {
             window.dispatchEvent(new KeyboardEvent("keydown", {
@@ -136,6 +251,44 @@ export default function FoliatePageView({
           lastLocation: initialCfi || null,
           showTextStart: !initialCfi,
         });
+
+        // Populate imperative API ref
+        if (viewApiRef) {
+          let currentHighlight: HTMLElement | null = null;
+          viewApiRef.current = {
+            getWords: () => extractWordsFromView(view),
+            goTo: (target) => view.goTo(target),
+            goToFraction: (frac) => view.goToFraction(frac),
+            next: () => view.renderer.next(),
+            prev: () => view.renderer.prev(),
+            highlightWord: (range, _sectionIndex) => {
+              // Clear previous
+              if (currentHighlight?.parentNode) {
+                const parent = currentHighlight.parentNode;
+                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
+                parent.removeChild(currentHighlight);
+              }
+              currentHighlight = null;
+              // Wrap new word
+              try {
+                const span = range.startContainer.ownerDocument!.createElement("span");
+                span.className = "blurby-word-highlight";
+                span.style.cssText = "background: var(--accent, #D04716)33; border-radius: 2px; padding: 1px 0;";
+                range.surroundContents(span);
+                currentHighlight = span;
+              } catch { /* range may cross element boundaries */ }
+            },
+            clearHighlight: () => {
+              if (currentHighlight?.parentNode) {
+                const parent = currentHighlight.parentNode;
+                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
+                parent.removeChild(currentHighlight);
+              }
+              currentHighlight = null;
+            },
+            getView: () => view,
+          };
+        }
 
         setLoading(false);
       } catch (err: any) {

@@ -670,6 +670,11 @@ export default function ReaderContainer({
                   href: item.href,
                 })));
               }}
+              onWordClick={(cfi, word) => {
+                // Save clicked position as reading position
+                activeDoc.cfi = cfi;
+                console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
+              }}
             />
           );
         }
