@@ -12,7 +12,7 @@ function getThemeColors(settings) {
     case "blurby":
       return { bg: "#ffffff", titleBar: "#ffffff", titleText: "#1a1a1a" };
     case "light":
-      return { bg: "#f5f3ef", titleBar: "#c4c1bb", titleText: "#1a1a1a" };
+      return { bg: "#f5f3ef", titleBar: "#f5f3ef", titleText: "#1a1a1a" };
     case "eink":
       return { bg: "#e8e4d9", titleBar: "#b9b6ae", titleText: "#1a1a1a" };
     default: // dark

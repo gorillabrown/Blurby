@@ -132,6 +132,8 @@ export default function PageReaderView({
   const [userBrowsing, setUserBrowsing] = useState(false);
   const ttsTargetPageRef = useRef(0);
 
+  const prevTtsActiveRef = useRef(ttsActive);
+
   // Highlight menu state
   const [highlightWord, setHighlightWord] = useState<string | null>(null);
   const [highlightPos, setHighlightPos] = useState({ x: 0, y: 0 });
@@ -373,9 +375,11 @@ export default function PageReaderView({
     if (flowControllerRef.current?.isRunning()) {
       flowControllerRef.current.jumpTo(index);
     } else {
+      // Clear browsing state — user chose a new position, TTS will resync
+      if (userBrowsing) setUserBrowsing(false);
       onHighlightedWordChange(index);
     }
-  }, [onHighlightedWordChange]);
+  }, [onHighlightedWordChange, userBrowsing]);
 
   // Right-click context menu
   const handleWordContextMenu = useCallback((index: number, e: React.MouseEvent) => {

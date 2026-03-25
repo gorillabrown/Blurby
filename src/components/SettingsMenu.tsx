@@ -3,9 +3,9 @@ import { ThemeSettings } from "./settings/ThemeSettings";
 import { ConnectorsSettings } from "./settings/ConnectorsSettings";
 import { HelpSettings } from "./settings/HelpSettings";
 import { HotkeyMapSettings } from "./settings/HotkeyMapSettings";
-import { TextSizeSettings } from "./settings/TextSizeSettings";
 import { SpeedReadingSettings } from "./settings/SpeedReadingSettings";
 import { LayoutSettings } from "./settings/LayoutSettings";
+import { LibraryLayoutSettings } from "./settings/LibraryLayoutSettings";
 import { CloudSyncSettings } from "./settings/CloudSyncSettings";
 
 interface SettingsMenuProps {
@@ -20,10 +20,10 @@ interface SettingsMenuProps {
 }
 
 const CATEGORIES = [
-  { id: "text-size", label: "Text Size", icon: "🔤" },
+  { id: "layout", label: "Reading Layout", icon: "📐" },
   { id: "speed-reading", label: "Speed Reading", icon: "⚡" },
   { id: "theme", label: "Theme", icon: "🎨" },
-  { id: "layout", label: "Layout", icon: "📐" },
+  { id: "library-layout", label: "Library Layout", icon: "📚" },
   { id: "connectors", label: "Connectors", icon: "🔌" },
   { id: "cloud-sync", label: "Cloud Sync", icon: "☁️" },
 ];
@@ -58,14 +58,14 @@ export function SettingsMenu({
         )}
         {activeSubPage === "help" && <HelpSettings isMac={isMac} />}
         {activeSubPage === "hotkeys" && <HotkeyMapSettings />}
-        {activeSubPage === "text-size" && (
-          <TextSizeSettings settings={settings} onSettingsChange={onSettingsChange} />
-        )}
         {activeSubPage === "speed-reading" && (
           <SpeedReadingSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
         {activeSubPage === "layout" && (
           <LayoutSettings settings={settings} onSettingsChange={onSettingsChange} />
+        )}
+        {activeSubPage === "library-layout" && (
+          <LibraryLayoutSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
         {activeSubPage === "cloud-sync" && (
           <CloudSyncSettings settings={settings} onSettingsChange={onSettingsChange} />

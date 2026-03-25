@@ -9,10 +9,10 @@ type FlapView = "queue" | "settings" | string;
 const TITLES: Record<string, string> = {
   queue: "Reading Queue",
   settings: "Settings",
-  "text-size": "Text Size",
   "speed-reading": "Speed Reading",
   theme: "Theme",
-  layout: "Layout",
+  layout: "Reading Layout",
+  "library-layout": "Library Layout",
   connectors: "Connectors",
   help: "Help",
   hotkeys: "Hotkey Map",

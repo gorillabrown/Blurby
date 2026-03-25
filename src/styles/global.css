@@ -1928,6 +1928,24 @@ button:focus-visible {
   -webkit-app-region: no-drag;
 }
 
+/* Card size variants */
+.doc-grid-size-small { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+.doc-grid-size-small .doc-grid-title { font-size: 10px; }
+.doc-grid-size-small .doc-grid-author,
+.doc-grid-size-small .doc-grid-bookdata { font-size: 9px; }
+.doc-grid-size-medium { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+.doc-grid-size-large { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+/* Card spacing variants */
+.doc-grid-spacing-compact { gap: 8px; }
+.doc-grid-spacing-cozy { gap: 16px; }
+.doc-grid-spacing-roomy { gap: 24px; }
+
+/* List spacing variants */
+.doc-list-spacing-compact { gap: 4px; }
+.doc-list-spacing-cozy { gap: 8px; }
+.doc-list-spacing-roomy { gap: 16px; }
+
 .doc-grid-card {
   position: relative;
   display: flex;
@@ -2068,6 +2086,8 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
 }
 .menu-flap-settings-btn:hover {
   color: var(--accent);
@@ -2086,8 +2106,8 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  min-height: 28px;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .menu-flap-back-btn:hover,
@@ -2330,7 +2350,7 @@ button:focus-visible {
 /* Settings menu */
 
 .settings-menu-item {
-  padding: 10px 12px;
+  padding: 12px;
   color: var(--text);
   font-size: 12px;
   display: flex;
@@ -2340,6 +2360,9 @@ button:focus-visible {
   cursor: pointer;
   margin-bottom: 2px;
   transition: background 150ms ease;
+  min-height: 44px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .settings-menu-item:hover {
@@ -2370,13 +2393,6 @@ button:focus-visible {
   letter-spacing: 1.5px;
   text-transform: uppercase;
   margin-bottom: 8px;
-}
-
-.settings-toggle-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
 }
 
 .settings-toggle-label {
@@ -2447,6 +2463,52 @@ button:focus-visible {
   background: var(--accent-faded);
   color: var(--accent);
   font-weight: 600;
+}
+
+/* Settings toggle buttons (Library Layout etc.) */
+.settings-toggle-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  transition: all 150ms ease;
+  min-height: 36px;
+}
+.settings-toggle-btn-active {
+  border-color: var(--accent);
+  background: var(--accent-faded);
+  color: var(--accent);
+  font-weight: 600;
+}
+.settings-toggle-btn:hover:not(.settings-toggle-btn-active) {
+  background: var(--bg-raised);
+}
+.settings-toggle-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+/* Settings select dropdown */
+.settings-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.settings-select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 /* Hotkey map */

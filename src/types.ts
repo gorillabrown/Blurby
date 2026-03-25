@@ -34,6 +34,8 @@ export interface BlurbyDoc {
   snoozedUntil?: number;      // epoch ms, null/undefined = not snoozed
   tags?: string[];
   collection?: string | null;
+  // Sprint 25C: "New" dot tracking
+  seenAt?: number;        // timestamp when card was seen in library view
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -92,6 +94,11 @@ export interface BlurbySettings {
   syncOnMeteredConnection: boolean;
   // Sprint 23: First-run onboarding
   firstRunCompleted?: boolean;
+  // Sprint 25C: Library layout settings
+  defaultSort?: string;
+  defaultViewMode?: "grid" | "list";
+  libraryCardSize?: "small" | "medium" | "large";
+  libraryCardSpacing?: "compact" | "cozy" | "roomy";
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────

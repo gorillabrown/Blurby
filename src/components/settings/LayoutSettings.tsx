@@ -10,7 +10,39 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
 
   return (
     <div>
-      <div className="settings-section-label">Spacing</div>
+      {/* Text Size (merged from TextSizeSettings) */}
+      <div className="settings-section-label">Text Size</div>
+
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+        Focus Reader: {settings.focusTextSize}%
+      </div>
+      <input
+        type="range"
+        className="settings-slider"
+        min={60}
+        max={200}
+        step={10}
+        value={settings.focusTextSize}
+        onChange={(e) => onSettingsChange({ focusTextSize: Number(e.target.value) })}
+        aria-label="Focus text size"
+      />
+
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4, marginTop: 12 }}>
+        Flow Reader: {settings.flowTextSize}%
+      </div>
+      <input
+        type="range"
+        className="settings-slider"
+        min={60}
+        max={200}
+        step={10}
+        value={settings.flowTextSize}
+        onChange={(e) => onSettingsChange({ flowTextSize: Number(e.target.value) })}
+        aria-label="Flow text size"
+      />
+
+      {/* Spacing */}
+      <div className="settings-section-label" style={{ marginTop: 20 }}>Spacing</div>
 
       <div className="settings-toggle-label" style={{ fontSize: 12, marginBottom: 4 }}>
         Line Spacing: {sp.line.toFixed(1)}

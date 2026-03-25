@@ -317,6 +317,18 @@ export default function LibraryContainer() {
     kbState.setActiveOverlay(null);
   }, [library, setLibrary, kbState]);
 
+  // BUG-067: Mark docs as seen (clear "new" dot after scrolling into view + navigating away)
+  const markDocsSeen = useCallback((docIds: string[]) => {
+    if (docIds.length === 0) return;
+    const now = Date.now();
+    const idSet = new Set(docIds);
+    const updatedLibrary = library.map((d) =>
+      idSet.has(d.id) && !d.seenAt ? { ...d, seenAt: now, unread: false } : d
+    );
+    setLibrary(updatedLibrary);
+    api.saveLibrary(updatedLibrary);
+  }, [library, setLibrary]);
+
   const handleOnboardingComplete = useCallback(() => {
     setShowOnboarding(false);
     setSettings((prev) => ({ ...prev, firstRunCompleted: true }));
@@ -500,6 +512,7 @@ export default function LibraryContainer() {
               onUnarchiveDoc={unarchiveDoc}
               onToggleFlap={toggleMenuFlap}
               onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
+              onMarkDocsSeen={markDocsSeen}
               focusedDocId={kbState.focusedIndex >= 0 ? kbActions.getDocIdAtIndex(kbState.focusedIndex) : null}
               selectedIds={kbState.selectedIds}
               selectionMode={kbState.selectedIds.size > 0}
