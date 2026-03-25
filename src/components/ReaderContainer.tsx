@@ -602,39 +602,107 @@ export default function ReaderContainer({
   // Determine current word index for bottom bar
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
+  // Foliate word highlighting — when highlightedWordIndex changes during Flow/Narration,
+  // highlight the corresponding word in the foliate DOM
+  useEffect(() => {
+    if (!useFoliate || readingMode === "page" || readingMode === "focus") return;
+    if (!foliateWordsRef.current.length) return;
+    const wordData = foliateWordsRef.current[highlightedWordIndex];
+    if (wordData) {
+      foliateApiRef.current?.highlightWord(wordData.range, wordData.sectionIndex);
+    }
+  }, [highlightedWordIndex, readingMode, useFoliate]);
+
+  // Flow mode word advancement timer for foliate EPUBs
+  useEffect(() => {
+    if (!useFoliate || readingMode !== "flow" || !flowPlaying) return;
+    if (!foliateWordsRef.current.length) return;
+
+    const msPerWord = 60000 / effectiveWpm;
+    const timer = setInterval(() => {
+      setHighlightedWordIndex(prev => {
+        const next = prev + 1;
+        if (next >= foliateWordsRef.current.length) {
+          setFlowPlaying(false);
+          return prev;
+        }
+        return next;
+      });
+    }, msPerWord);
+
+    return () => clearInterval(timer);
+  }, [useFoliate, readingMode, flowPlaying, effectiveWpm]);
+
   // ── Render ─────────────────────────────────────────────────────────────
 
+  // Foliate EPUB view — always rendered for EPUBs, modes overlay on top
+  const foliateView = useFoliate ? (
+    <FoliatePageView
+      activeDoc={activeDoc}
+      settings={settings}
+      focusTextSize={focusTextSize}
+      initialCfi={activeDoc.cfi || null}
+      onRelocate={(detail) => {
+        if (detail.cfi) {
+          activeDoc.cfi = detail.cfi;
+          const approxWordIdx = Math.floor((detail.fraction || 0) * (activeDoc.wordCount || 0));
+          setHighlightedWordIndex(approxWordIdx);
+        }
+      }}
+      onTocReady={(toc) => {
+        setDocChapters(toc.map((item: any, idx: number) => ({
+          title: item.label || item.title || `Chapter ${idx + 1}`,
+          charOffset: 0,
+          href: item.href,
+        })));
+      }}
+      onWordClick={(cfi, word) => {
+        activeDoc.cfi = cfi;
+        console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
+      }}
+      viewApiRef={foliateApiRef}
+    />
+  ) : null;
+
   const renderView = () => {
-    // For foliate EPUBs: Flow and Narration modes keep FoliatePageView mounted
-    // with word highlighting in the formatted DOM. Focus mode still uses overlay.
-    if (useFoliate && (readingMode === "flow" || readingMode === "narration" || readingMode === "page")) {
-      return (
-        <FoliatePageView
-          activeDoc={activeDoc}
-          settings={settings}
-          focusTextSize={focusTextSize}
-          initialCfi={activeDoc.cfi || null}
-          onRelocate={(detail) => {
-            if (detail.cfi) {
-              activeDoc.cfi = detail.cfi;
-              const approxWordIdx = Math.floor((detail.fraction || 0) * (activeDoc.wordCount || 0));
-              setHighlightedWordIndex(approxWordIdx);
-            }
-          }}
-          onTocReady={(toc) => {
-            setDocChapters(toc.map((item: any, idx: number) => ({
-              title: item.label || item.title || `Chapter ${idx + 1}`,
-              charOffset: 0,
-              href: item.href,
-            })));
-          }}
-          onWordClick={(cfi, word) => {
-            activeDoc.cfi = cfi;
-            console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
-          }}
-          viewApiRef={foliateApiRef}
-        />
-      );
+    // For foliate EPUBs in Page/Flow/Narration: show foliate view
+    // Focus mode overlays ReaderView on top of foliate
+    if (useFoliate) {
+      if (readingMode === "focus") {
+        // Focus overlay on top of foliate (RSVP display)
+        return (
+          <>
+            {foliateView}
+            <div style={{ position: "absolute", inset: 0, zIndex: 15, background: "var(--bg)" }}>
+              <ReaderView
+                activeDoc={activeDoc}
+                words={wordsRef.current}
+                wordIndex={wordIndex}
+                wpm={effectiveWpm}
+                focusTextSize={focusTextSize}
+                playing={playing}
+                escPending={escPending}
+                isMac={platform === "darwin"}
+                settings={rsvpSettings}
+                externalChapters={docChapters.length > 0 ? docChapters : undefined}
+                onWordUpdateRef={onWordUpdateRef}
+                togglePlay={handleTogglePlay}
+                exitReader={handleExitReader}
+                onSetWpm={setWpm}
+                onAdjustFocusTextSize={adjustFocusTextSize}
+                onSwitchToScroll={handleEnterFlow}
+                onJumpToWord={jumpToWord}
+                onToggleFlap={toggleMenuFlap}
+                onPrevChapter={handlePrevChapter}
+                onNextChapter={handleNextChapter}
+                onEinkRefresh={triggerEinkRefresh}
+              />
+            </div>
+          </>
+        );
+      }
+      // Page, Flow, Narration — foliate handles rendering
+      return foliateView;
     }
 
     switch (readingMode) {
