@@ -49,10 +49,6 @@ body {
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
-  -webkit-app-region: drag;
-}
-button, input, textarea, a, [role="button"] {
-  -webkit-app-region: no-drag;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
@@ -290,10 +286,22 @@ button, input, textarea, a, [role="button"] {
 /* ── READER VIEW                                                         ── */
 /* ══════════════════════════════════════════════════════════════════════════ */
 
+.reader-drag-handle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 100px;
+  height: 10px;
+  -webkit-app-region: drag;
+  z-index: 99999;
+}
 .reader-container {
   position: fixed;
-  inset: 0;
-  z-index: 9999;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 80px;
+  z-index: 10;
   background: var(--reader-bg);
   display: flex;
   flex-direction: column;
@@ -434,7 +442,8 @@ button, input, textarea, a, [role="button"] {
   padding: 12px 32px 16px;
   background: var(--bg);
   border-top: 1px solid var(--color-border, #333);
-  z-index: 10;
+  z-index: 20;
+  position: relative;
 }
 .reader-bottom-info {
   display: flex;
@@ -1204,22 +1213,38 @@ button:focus-visible {
    Scrollbar colors auto-update via var(--border) and var(--text-muted). */
 
 /* ── Library Tabs ─────────────────────────────────────────────────────────── */
+.library-tabs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
 .library-tabs {
   display: flex;
-  gap: 2px;
-  margin-bottom: 16px;
+  flex-wrap: nowrap;
+  gap: clamp(0px, 0.5vw, 2px);
+  flex: 1;
+  min-width: 0;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.library-tabs::-webkit-scrollbar { display: none; }
+.library-tabs-row .sort-select {
+  flex-shrink: 0;
 }
 .library-tab {
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
-  padding: 8px 16px;
+  padding: 8px clamp(6px, 1.2vw, 16px);
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-dimmer);
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .library-tab:hover { color: var(--text-dim); }
 .library-tab-active {
@@ -2129,6 +2154,7 @@ button:focus-visible {
   transform: translateX(-100%);
   transition: transform 200ms ease;
   box-shadow: var(--shadow-lg);
+  -webkit-app-region: no-drag;
 }
 
 .menu-flap.open {
@@ -2521,9 +2547,12 @@ button:focus-visible {
     gap: 8px;
   }
   .library-tabs {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .library-tabs::-webkit-scrollbar { display: none; }
   .library-tab {
     padding: 6px 10px;
     font-size: 10px;
@@ -3367,6 +3396,13 @@ button:focus-visible {
   width: 100%;
   background: var(--bg);
 }
+.reader-view-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 
 .page-reader-view {
   position: relative;
@@ -3462,8 +3498,8 @@ button:focus-visible {
 }
 
 .page-word--highlighted {
-  background: var(--color-primary, #D04716);
-  color: #fff;
+  background: rgba(208, 71, 22, 0.3);
+  color: inherit;
   padding: 1px 2px;
   border-radius: 2px;
 }
@@ -3508,7 +3544,7 @@ button:focus-visible {
 
 .page-reader-footer {
   position: absolute;
-  bottom: 120px;
+  bottom: 70px;
   left: 60px;
   right: 60px;
   display: flex;
@@ -3517,6 +3553,33 @@ button:focus-visible {
   color: var(--text-dimmer, #666);
   font-family: var(--mono, monospace);
 }
+
+/* Translucent page navigation side buttons */
+.page-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 80px;
+  background: rgba(128, 128, 128, 0.08);
+  border: none;
+  color: var(--text-dimmer, #888);
+  font-size: 28px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  z-index: 5;
+  -webkit-app-region: no-drag;
+}
+.page-nav-btn:hover {
+  background: rgba(128, 128, 128, 0.18);
+  color: var(--text-dim);
+}
+.page-nav-btn--left { left: 8px; }
+.page-nav-btn--right { right: 8px; }
 
 .page-reader-toast {
   position: fixed;
@@ -3557,6 +3620,7 @@ button:focus-visible {
 .reader-bottom-bar-controls {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
   flex-wrap: wrap;
 }
@@ -3629,6 +3693,51 @@ button:focus-visible {
 .rbb-mode-btn--active {
   background: var(--color-primary, #D04716);
   border-color: var(--color-primary, #D04716);
+  color: #fff;
+}
+.rbb-mode-btn--last {
+  background: var(--accent-faded, rgba(196,168,130,0.2));
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.kokoro-loading-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(80, 80, 80, 0.85);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: var(--mono, monospace);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.rbb-play-btn {
+  background: none;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-top: -6px;
+  letter-spacing: -2px;
+}
+.rbb-play-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.rbb-play-btn--active {
+  background: var(--accent);
   color: #fff;
 }
 

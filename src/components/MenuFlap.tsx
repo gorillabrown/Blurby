@@ -54,29 +54,8 @@ export default function MenuFlap({
     }
   }, [open, targetView]);
 
-  // Click anywhere outside flap closes it
+  // Outside clicks are handled by the backdrop overlay (onClick/onMouseDown={onClose})
   const flapRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-  useEffect(() => {
-    if (!open) return;
-    // Close flap on any mousedown outside the flap panel.
-    // Uses document capture phase so it fires before any element's own handler.
-    const handler = (e: MouseEvent) => {
-      if (flapRef.current && flapRef.current.contains(e.target as Node)) return;
-      onCloseRef.current();
-    };
-    // Delay registration so the opening click/mousedown doesn't immediately close
-    const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handler, true);
-      document.addEventListener("pointerdown", handler, true);
-    }, 150);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("mousedown", handler, true);
-      document.removeEventListener("pointerdown", handler, true);
-    };
-  }, [open]);
 
   // Escape closes flap (or navigates back in settings sub-pages)
   useEffect(() => {
@@ -156,6 +135,8 @@ export default function MenuFlap({
         ref={flapRef}
         className={`menu-flap${open ? " open" : ""}`}
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Menu"
         aria-modal="true"

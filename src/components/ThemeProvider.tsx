@@ -9,7 +9,7 @@ interface ThemeContextType {
   setFontFamily: (f: string | null) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({
+export const ThemeContext = createContext<ThemeContextType>({
   theme: "dark",
   setTheme: () => {},
   accentColor: null,

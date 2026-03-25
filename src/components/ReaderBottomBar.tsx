@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
 import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP } from "../constants";
 import { BlurbyDoc } from "../types";
@@ -10,7 +10,7 @@ interface ReaderBottomBarProps {
   wordIndex: number;
   wpm: number;
   focusTextSize: number;
-  readingMode: "page" | "focus" | "flow";
+  readingMode: "page" | "focus" | "flow" | "narration";
   playing: boolean;
   isEink: boolean;
   chapters: Array<{ title: string; charOffset: number }>;
@@ -24,11 +24,17 @@ interface ReaderBottomBarProps {
   onNextChapter?: () => void;
   onJumpToChapter?: (chapterIndex: number) => void;
   onEinkRefresh?: () => void;
+  onTogglePlay?: () => void;
+  chapterListRef?: React.MutableRefObject<{ toggle: () => void } | null>;
+  lastReadingMode?: "focus" | "flow" | "narration";
+  ttsRate?: number;
+  onSetTtsRate?: (rate: number) => void;
 }
 
 const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space flow  ⇧space focus  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space pause  M menu",
+  narration: "← → page  ↑ ↓ speed  space pause  N narration  M menu",
   flow: "← → seek  ↑ ↓ speed  space pause  M menu",
 };
 
@@ -52,8 +58,20 @@ export default function ReaderBottomBar({
   onNextChapter,
   onJumpToChapter,
   onEinkRefresh,
+  onTogglePlay,
+  chapterListRef,
+  lastReadingMode = "flow",
+  ttsRate = 1.0,
+  onSetTtsRate,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
+
+  // Expose toggle to parent via ref (for C hotkey)
+  useEffect(() => {
+    if (chapterListRef) {
+      chapterListRef.current = { toggle: () => setChapterDropdownOpen((p) => !p) };
+    }
+  }, [chapterListRef]);
 
   // Progress
   const progress = words.length > 0 ? (wordIndex / words.length) * 100 : 0;
@@ -89,12 +107,8 @@ export default function ReaderBottomBar({
   // Font size percentage
   const fontPct = focusTextSize || 100;
 
-  // Fade bar during active Focus/Flow playback; fully visible in Page mode or e-ink
-  const opacity = (readingMode === "page" || isEink)
-    ? 1
-    : playing
-      ? 0.08
-      : 1;
+  // Bar always fully visible — all modes need access to controls
+  const opacity = 1;
 
   // WPM slider
   const handleWpmSlider = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,20 +132,36 @@ export default function ReaderBottomBar({
 
       {/* Row 2: Controls */}
       <div className="reader-bottom-bar-controls">
-        {/* WPM */}
-        <div className="rbb-wpm-group">
-          <span className="rbb-wpm-label">{wpm} wpm</span>
-          <input
-            type="range"
-            className="rbb-wpm-slider"
-            min={MIN_WPM}
-            max={MAX_WPM}
-            step={25}
-            value={wpm}
-            onChange={handleWpmSlider}
-            aria-label="Words per minute"
-          />
-        </div>
+        {/* WPM or TTS Rate — swaps based on mode */}
+        {readingMode === "narration" && onSetTtsRate ? (
+          <div className="rbb-wpm-group">
+            <span className="rbb-wpm-label">{ttsRate.toFixed(1)}x</span>
+            <input
+              type="range"
+              className="rbb-wpm-slider"
+              min={0.5}
+              max={2.0}
+              step={0.1}
+              value={ttsRate}
+              onChange={(e) => onSetTtsRate(Number(e.target.value))}
+              aria-label="Speech rate"
+            />
+          </div>
+        ) : (
+          <div className="rbb-wpm-group">
+            <span className="rbb-wpm-label">{wpm} wpm</span>
+            <input
+              type="range"
+              className="rbb-wpm-slider"
+              min={MIN_WPM}
+              max={MAX_WPM}
+              step={25}
+              value={wpm}
+              onChange={handleWpmSlider}
+              aria-label="Words per minute"
+            />
+          </div>
+        )}
 
         {/* Font size */}
         <div className="rbb-font-group">
@@ -152,10 +182,22 @@ export default function ReaderBottomBar({
           </button>
         </div>
 
-        {/* Mode buttons */}
+        {/* Play/Pause button — visible in all modes */}
+        {onTogglePlay && (
+          <button
+            className={`rbb-play-btn ${playing ? "rbb-play-btn--active" : ""}`}
+            onClick={onTogglePlay}
+            aria-label={playing ? "Pause" : "Play"}
+            title={playing ? "Pause (Space)" : "Play (Space)"}
+          >
+            {playing ? "❚❚" : "▶"}
+          </button>
+        )}
+
+        {/* Mode buttons — all four modes in one group */}
         <div className="rbb-mode-group">
           <button
-            className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}`}
+            className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "focus" ? " rbb-mode-btn--last" : ""}`}
             onClick={onEnterFocus}
             aria-label="Focus mode"
             aria-pressed={readingMode === "focus"}
@@ -163,27 +205,25 @@ export default function ReaderBottomBar({
             Focus
           </button>
           <button
-            className={`rbb-mode-btn ${readingMode === "flow" ? "rbb-mode-btn--active" : ""}`}
+            className={`rbb-mode-btn ${readingMode === "flow" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "flow" ? " rbb-mode-btn--last" : ""}`}
             onClick={onEnterFlow}
             aria-label="Flow mode"
             aria-pressed={readingMode === "flow"}
           >
             Flow
           </button>
+          {onToggleTts && (
+            <button
+              className={`rbb-mode-btn ${readingMode === "narration" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narration" ? " rbb-mode-btn--last" : ""}`}
+              onClick={onToggleTts}
+              aria-label={readingMode === "narration" ? "Stop narration" : "Start narration"}
+              aria-pressed={readingMode === "narration"}
+              title="Narration (N)"
+            >
+              Narrate
+            </button>
+          )}
         </div>
-
-        {/* TTS toggle — Page view only */}
-        {readingMode === "page" && onToggleTts && (
-          <button
-            className={`rbb-tts-btn ${ttsActive ? "rbb-tts-btn--active" : ""}`}
-            onClick={onToggleTts}
-            aria-label={ttsActive ? "Turn off narration" : "Turn on narration"}
-            aria-pressed={ttsActive}
-            title="Narration (N)"
-          >
-            {ttsActive ? "🔊" : "🔇"}
-          </button>
-        )}
 
         {/* Chapter nav */}
         {chapterList.length > 1 && (

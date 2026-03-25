@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { tokenizeWithMeta, formatDisplayTitle, hasPunctuation } from "../utils/text";
-import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_FLOW_SENTENCE_PAUSE_MS, PAGE_FLOW_CLAUSE_PAUSE_MS, ANIMATION_DISABLE_WPM, FLOW_PAGE_TURN_PAUSE_MS } from "../constants";
+import { tokenizeWithMeta, formatDisplayTitle } from "../utils/text";
+import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS } from "../constants";
+import { FlowCursorController } from "../utils/FlowCursorController";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
@@ -30,8 +31,10 @@ interface PageReaderViewProps {
   onToggleFlap?: () => void;
   notes?: Map<number, string>; // wordIndex → note preview
   pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void }>;
+  flowNavRef?: React.MutableRefObject<{ prevLine: () => void; nextLine: () => void }>;
   flowPlaying: boolean; // Flow mode: word highlight advances at WPM within page view
   ttsActive?: boolean; // When true, TTS drives cursor — skip RAF advancement
+  onPageEndWordChange?: (endWordIndex: number) => void; // Reports current page's last word index
 }
 
 // ── Pagination helpers ────────────────────────────────────────────────────
@@ -47,9 +50,11 @@ function paginateWords(
 ): Array<{ start: number; end: number }> {
   if (words.length === 0 || containerHeight <= 0) return [{ start: 0, end: 0 }];
 
-  const linesPerPage = Math.max(1, Math.floor(containerHeight / lineHeight));
+  // Track height in pixels for accuracy.
+  // Paragraph margin-bottom is 1em (= fontSize), not a full lineHeight.
+  const paraMargin = fontSize;
   const pages: Array<{ start: number; end: number }> = [];
-  let lineCount = 0;
+  let usedHeight = lineHeight; // First line is already present
   let lineChars = 0;
   let pageStart = 0;
 
@@ -58,21 +63,22 @@ function paginateWords(
     lineChars += wordLen;
 
     if (lineChars > charsPerLine) {
-      lineCount++;
+      // Word wraps to new line
+      usedHeight += lineHeight;
       lineChars = wordLen;
     }
 
-    // Paragraph break adds an extra line
+    // Paragraph break adds margin
     if (paragraphBreaks.has(i)) {
-      lineCount++;
+      usedHeight += paraMargin;
       lineChars = 0;
     }
 
-    if (lineCount >= linesPerPage) {
-      pages.push({ start: pageStart, end: i });
-      pageStart = i + 1; // next page starts AFTER this word
-      lineCount = 0;
-      lineChars = 0;
+    if (usedHeight > containerHeight) {
+      pages.push({ start: pageStart, end: Math.max(pageStart, i - 1) });
+      pageStart = i;
+      usedHeight = lineHeight; // New page starts with first line
+      lineChars = words[i].length + 1;
     }
   }
 
@@ -107,13 +113,19 @@ export default function PageReaderView({
   onToggleFlap,
   notes,
   pageNavRef,
+  flowNavRef,
   flowPlaying,
   ttsActive,
+  onPageEndWordChange,
 }: PageReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const flowCursorRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(600);
   const [containerWidth, setContainerWidth] = useState(800);
   const [currentPage, setCurrentPage] = useState(0);
+  const currentPageRef = useRef(currentPage);
+  currentPageRef.current = currentPage;
   const [transitioning, setTransitioning] = useState(false);
 
   // Highlight menu state
@@ -168,17 +180,22 @@ export default function PageReaderView({
   const scale = (focusTextSize || 100) / 100;
   const fontSize = 18 * scale;
   const lineHeight = fontSize * (settings?.layoutSpacing?.line || 1.8);
-  const charsPerLine = Math.max(20, Math.floor(containerWidth / (fontSize * 0.55)));
+  // Detect two-column mode (CSS column-count: 2 at ≥1280px)
+  const isMultiColumn = containerWidth >= 1280 - 240; // 1280px viewport minus page padding
+  const columnWidth = isMultiColumn ? (containerWidth - 48) / 2 : containerWidth;
+  const charsPerLine = Math.max(20, Math.floor(columnWidth / (fontSize * 0.50)));
+  // Two columns = 2x the available height for pagination
+  const effectiveHeight = isMultiColumn ? containerHeight * 2 : containerHeight;
 
   // Compute pages
   const pages = useMemo(
-    () => paginateWords(words, paragraphBreaks, containerHeight - 40, lineHeight, fontSize, charsPerLine),
-    [words, paragraphBreaks, containerHeight, lineHeight, fontSize, charsPerLine]
+    () => paginateWords(words, paragraphBreaks, effectiveHeight, lineHeight, fontSize, charsPerLine),
+    [words, paragraphBreaks, effectiveHeight, lineHeight, fontSize, charsPerLine]
   );
 
-  // Measure container on mount/resize
+  // Measure the content area (not the outer view with padding/header)
   useEffect(() => {
-    const el = containerRef.current;
+    const el = contentRef.current;
     if (!el) return;
     const measure = () => {
       setContainerHeight(el.clientHeight);
@@ -190,15 +207,22 @@ export default function PageReaderView({
     return () => observer.disconnect();
   }, []);
 
-  // Navigate to page containing highlighted word on mount or mode return
+  // Navigate to page containing highlighted word — fires on every word advance
+  // This is the primary page-turn mechanism for Narration and TTS-driven modes.
   useEffect(() => {
-    if (pages.length > 1) {
-      const page = pageForWord(pages, highlightedWordIndex);
-      if (page !== currentPage) setCurrentPage(page);
+    if (pages.length <= 1) return;
+    const targetPage = pageForWord(pages, highlightedWordIndex);
+    if (targetPage !== currentPage) {
+      currentPageRef.current = targetPage;
+      setCurrentPage(targetPage);
     }
-  }, [activeDoc.id, highlightedWordIndex, pages]); // Runs on doc change AND on return from Focus/Flow
+    // Report current page's end word to narration system (prevents cross-page chunks)
+    if (onPageEndWordChange && pages[targetPage]) {
+      onPageEndWordChange(pages[targetPage].end);
+    }
+  }, [highlightedWordIndex, pages, currentPage, onPageEndWordChange]);
 
-  // Page navigation
+  // Page navigation — saves progress on every page turn
   const goToPage = useCallback((page: number) => {
     const clamped = Math.max(0, Math.min(pages.length - 1, page));
     if (clamped === currentPage) return;
@@ -206,8 +230,11 @@ export default function PageReaderView({
     setTimeout(() => {
       setCurrentPage(clamped);
       setTransitioning(false);
+      // Save progress: first word of the new page becomes the saved position
+      const pageStart = pages[clamped]?.start ?? 0;
+      onHighlightedWordChange(pageStart);
     }, PAGE_TRANSITION_MS);
-  }, [currentPage, pages.length]);
+  }, [currentPage, pages.length, pages, onHighlightedWordChange]);
 
   const prevPage = useCallback(() => goToPage(currentPage - 1), [currentPage, goToPage]);
   const nextPage = useCallback(() => goToPage(currentPage + 1), [currentPage, goToPage]);
@@ -219,253 +246,99 @@ export default function PageReaderView({
     }
   }, [pageNavRef, prevPage, nextPage]);
 
-  // ── Flow highlight cursor (smooth sliding overlay) ──────────────────
-  const flowCursorRef = useRef<HTMLDivElement>(null);
-  const flowCursorLastY = useRef(0);
-
-  const wordSpan = Math.max(3, settings?.flowWordSpan || 3);
-
-  // Hide cursor when not in flow mode
-  useEffect(() => {
-    if (!flowPlaying && flowCursorRef.current) {
-      flowCursorRef.current.style.display = "none";
-    }
-  }, [flowPlaying]);
-
-  // ── Flow mode: continuous line-level bar slide at WPM speed ─────────────
-  const flowRafRef = useRef<number | null>(null);
-  const flowPagePausingRef = useRef(false);
-  const ttsActiveRef = useRef(ttsActive || false);
-  ttsActiveRef.current = ttsActive || false;
-  const flowWpmRef = useRef(wpm);
-  const flowPagesRef = useRef(pages);
-  const flowCurrentPageRef = useRef(currentPage);
-  const flowWordsRef = useRef(words);
-  const flowHighlightRef = useRef(highlightedWordIndex);
-  const flowSavedPosRef = useRef(highlightedWordIndex); // survives render, never overwritten by body
-  const onHighlightRef = useRef(onHighlightedWordChange);
-  flowWpmRef.current = wpm;
-  flowPagesRef.current = pages;
-  flowCurrentPageRef.current = currentPage;
-  flowWordsRef.current = words;
-  // Never overwrite flowHighlightRef from prop during render — it's set explicitly:
-  //   1. At flow start (in effect)
-  //   2. During slide (by startLineSlide)
-  //   3. On word click (by handleWordClick)
-  onHighlightRef.current = onHighlightedWordChange;
-
-  /** Build a line map from rendered word elements on the current page */
-  const buildLineMap = useCallback(() => {
-    const container = document.querySelector(".page-reader-content") as HTMLElement;
-    if (!container) return [];
-    const cRect = container.getBoundingClientRect();
-    const wordEls = container.querySelectorAll("[data-word-index]");
-    if (wordEls.length === 0) return [];
-
-    type LineInfo = { y: number; bottom: number; left: number; right: number; firstWord: number; lastWord: number; wordCount: number };
-    const lines: LineInfo[] = [];
-    let currentLine: LineInfo | null = null;
-
-    wordEls.forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      const wordIdx = parseInt(el.getAttribute("data-word-index") || "0", 10);
-      const relTop = rect.top - cRect.top + container.scrollTop;
-      const relBottom = rect.bottom - cRect.top + container.scrollTop;
-      const relLeft = rect.left - cRect.left + container.scrollLeft;
-      const relRight = rect.right - cRect.left + container.scrollLeft;
-
-      if (!currentLine || Math.abs(relTop - currentLine.y) > rect.height * 0.5) {
-        // New line
-        currentLine = { y: relTop, bottom: relBottom, left: relLeft, right: relRight, firstWord: wordIdx, lastWord: wordIdx, wordCount: 1 };
-        lines.push(currentLine);
-      } else {
-        // Same line — extend
-        currentLine.right = relRight;
-        currentLine.lastWord = wordIdx;
-        currentLine.wordCount++;
-      }
-    });
-    return lines;
-  }, []);
-
-  const flowLineIdxRef = useRef(0);
-  const flowWordUpdateRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  /** Start sliding the cursor across a line using CSS transition */
-  const startLineSlide = useCallback((lines: ReturnType<typeof buildLineMap>, lineIdx: number) => {
-    const cursor = flowCursorRef.current;
-    if (!cursor || lineIdx >= lines.length) return;
-    const line = lines[lineIdx];
-    const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
-    const barWidth = 40;
-    const lineWidth = line.right - line.left;
-    const y = isUnderline ? line.bottom - 3 : line.y;
-    const h = isUnderline ? 3 : (line.bottom - line.y);
-    const duration = (line.wordCount / flowWpmRef.current) * 60000;
-
-    // 1. Position at line start with NO transition
-    cursor.style.transition = "none";
-    cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
-    cursor.style.transform = `translate3d(${line.left}px, ${y}px, 0)`;
-    cursor.style.width = `${barWidth}px`;
-    cursor.style.height = `${h}px`;
-    cursor.style.display = "";
-
-    // 2. On next frame, set transition and target position — slide to line end
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!flowCursorRef.current) return;
-        cursor.style.transition = `transform ${duration}ms linear`;
-        cursor.style.transform = `translate3d(${line.right - barWidth}px, ${y}px, 0)`;
-      });
-    });
-
-    // 3. Track position in refs (no React state updates during slide)
-    flowHighlightRef.current = line.firstWord;
-    flowSavedPosRef.current = line.firstWord;
-
-    // 4. When line completes, move to next line
-    const lineTimer = setTimeout(() => {
-      flowHighlightRef.current = line.lastWord;
-      flowSavedPosRef.current = line.lastWord;
-      flowLineIdxRef.current = lineIdx + 1;
-
-      if (lineIdx + 1 >= lines.length) {
-        // End of page — check for next page
-        const nextPageIdx = flowCurrentPageRef.current + 1;
-        if (nextPageIdx < flowPagesRef.current.length) {
-          // Page turn pause
-          setTimeout(() => {
-            setCurrentPage(nextPageIdx);
-            flowCurrentPageRef.current = nextPageIdx;
-            // Rebuild line map after page renders
-            setTimeout(() => {
-              const newLines = buildLineMap();
-              if (newLines.length > 0) {
-                flowLineIdxRef.current = 0;
-                startLineSlide(newLines, 0);
-              }
-            }, PAGE_TRANSITION_MS + 100);
-          }, FLOW_PAGE_TURN_PAUSE_MS);
-        }
-        // else: end of document — stop
-        return;
-      }
-
-      // Next line
-      startLineSlide(lines, lineIdx + 1);
-    }, duration);
-
-    // Store timer for cleanup
-    flowRafRef.current = lineTimer as unknown as number;
-  }, [buildLineMap, settings?.flowCursorStyle]);
-
-  // Stable ref for the slide launcher so the effect doesn't depend on startLineSlide
-  const startLineSlideRef = useRef(startLineSlide);
-  startLineSlideRef.current = startLineSlide;
-  const buildLineMapRef = useRef(buildLineMap);
-  buildLineMapRef.current = buildLineMap;
+  // ── Flow mode: imperative controller handles everything ──────────────
+  const flowControllerRef = useRef<FlowCursorController | null>(null);
+  const flowStopPosRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!flowPlaying) {
-      if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      flowRafRef.current = null;
+      if (flowControllerRef.current) {
+        const finalPos = flowControllerRef.current.stop();
+        flowStopPosRef.current = finalPos; // Save in ref (bypasses React batching)
+        onHighlightedWordChange(finalPos);
+        flowControllerRef.current = null;
+      }
       return;
     }
 
-    // Capture starting position from React state (only time we read from prop)
-    flowHighlightRef.current = highlightedWordIndex;
-    flowSavedPosRef.current = highlightedWordIndex;
+    // When TTS is active, it drives word position — skip the cursor controller.
+    // TTS fires onWordAdvance → setHighlightedWordIndex → page-sync effect handles page turns.
+    if (ttsActive) return;
 
-    // Restart function — used by word click and WPM change
-    const restartFromCurrent = () => {
-      if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      const newLines = buildLineMapRef.current();
-      if (newLines.length === 0) return;
-      const idx = flowHighlightRef.current;
-      let li = 0;
-      for (let i = 0; i < newLines.length; i++) {
-        if (idx >= newLines[i].firstWord && idx <= newLines[i].lastWord) { li = i; break; }
-      }
-      flowLineIdxRef.current = li;
-      startLineSlideRef.current(newLines, li);
-    };
-    flowRestartRef.current = restartFromCurrent;
+    // Resume position: ref is authoritative (avoids stale state from React batching)
+    const startPos = flowStopPosRef.current ?? highlightedWordIndex;
+    flowStopPosRef.current = null;
 
-    // Navigate to the page containing the current reading position
-    const targetPage = pageForWord(flowPagesRef.current, flowHighlightRef.current);
-    const needsPageChange = targetPage !== flowCurrentPageRef.current;
-    if (needsPageChange) {
+    // Navigate to page containing the reading position
+    const targetPage = pageForWord(pages, startPos);
+    if (targetPage !== currentPage) {
+      currentPageRef.current = targetPage;
       setCurrentPage(targetPage);
-      flowCurrentPageRef.current = targetPage;
     }
 
-    // Launch slide — immediate for same page, short delay for page change
-    let startTimer: ReturnType<typeof setTimeout> | null = null;
-    const launchSlide = () => {
-      const lines = buildLineMapRef.current();
-      if (lines.length === 0) return;
-      const startWordIdx = flowHighlightRef.current;
-      let lineIdx = 0;
-      for (let i = 0; i < lines.length; i++) {
-        if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
-          lineIdx = i;
-          break;
-        }
-      }
-      flowLineIdxRef.current = lineIdx;
-      startLineSlideRef.current(lines, lineIdx);
+    const startController = () => {
+      const cursorEl = flowCursorRef.current;
+      if (!cursorEl) return;
+      const ctrl = new FlowCursorController({
+        cursorStyle: settings?.flowCursorStyle || "underline",
+        onPageTurn: (nextIdx) => {
+          currentPageRef.current = nextIdx; // Immediate update for controller
+          setCurrentPage(nextIdx);          // React update for render
+        },
+        getPageCount: () => pages.length,
+        getCurrentPageIdx: () => currentPageRef.current, // Always fresh via ref
+      });
+      ctrl.start(startPos, wpm, cursorEl);
+      flowControllerRef.current = ctrl;
     };
 
-    if (needsPageChange) {
-      startTimer = setTimeout(() => requestAnimationFrame(launchSlide), 150);
+    // No delay when already on the right page
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    if (targetPage !== currentPage) {
+      // Page change needed — wait for DOM to repaint
+      timer = setTimeout(startController, 200);
     } else {
-      requestAnimationFrame(launchSlide);
+      // Same page — start immediately (forced reflow in controller handles layout)
+      startController();
     }
 
     return () => {
-      flowRestartRef.current = null;
-      if (startTimer) clearTimeout(startTimer);
-      if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      // Save flow position from dedicated ref (component body never overwrites this)
-      onHighlightRef.current(flowSavedPosRef.current);
+      if (timer) clearTimeout(timer);
+      if (flowControllerRef.current) {
+        const finalPos = flowControllerRef.current.stop();
+        flowStopPosRef.current = finalPos;
+        onHighlightedWordChange(finalPos);
+        flowControllerRef.current = null;
+      }
     };
-  // Only re-run when flowPlaying toggles — all other values accessed via stable refs
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowPlaying]);
+  }, [flowPlaying, ttsActive]);
 
-  // Restart slide when WPM changes during flow (so up/down arrows take effect immediately)
-  const prevWpmRef = useRef(wpm);
+  // Sync WPM changes to controller
   useEffect(() => {
-    if (flowPlaying && wpm !== prevWpmRef.current && flowRestartRef.current) {
-      prevWpmRef.current = wpm;
-      flowRestartRef.current();
+    if (flowControllerRef.current?.isRunning()) {
+      flowControllerRef.current.setWpm(wpm);
     }
-    prevWpmRef.current = wpm;
-  }, [wpm, flowPlaying]);
+  }, [wpm]);
 
-  // Click on left/right halves of screen
-  const handlePageClick = useCallback((e: React.MouseEvent) => {
-    const el = containerRef.current;
-    if (!el) return;
-    // Don't navigate if clicking on a word
-    if ((e.target as HTMLElement).closest(".page-word")) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    if (x < rect.width / 2) prevPage();
-    else nextPage();
-  }, [prevPage, nextPage]);
+  // Expose flow line navigation to parent via ref
+  useEffect(() => {
+    if (flowNavRef) {
+      flowNavRef.current = {
+        prevLine: () => flowControllerRef.current?.prevLine(),
+        nextLine: () => flowControllerRef.current?.nextLine(),
+      };
+    }
+  }, [flowNavRef]);
 
-  // Word click handler — set highlight anchor; during flow, restart slide from clicked word
-  const flowRestartRef = useRef<(() => void) | null>(null);
+  // Side buttons for page navigation (replacing click-zone approach)
+
+  // Word click handler — set highlight anchor; during flow, jump controller
   const handleWordClick = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    flowHighlightRef.current = index;
-    if (flowRestartRef.current) {
-      // During flow: update ref and restart slide (no React state update)
-      flowRestartRef.current();
+    if (flowControllerRef.current?.isRunning()) {
+      flowControllerRef.current.jumpTo(index);
     } else {
-      // Not in flow: update React state for visual highlight
       onHighlightedWordChange(index);
     }
   }, [onHighlightedWordChange]);
@@ -500,11 +373,11 @@ export default function PageReaderView({
     setShowDefinition(true);
   }, []);
 
-  // In Flow mode, render ALL words for continuous scrolling.
-  // In Page mode, render only the current page's words.
+  // Always render only the current page's words — flow mode uses paginated
+  // rendering with the controller driving page turns at end-of-page.
   const page = pages[currentPage] || { start: 0, end: 0 };
-  const visibleStart = flowPlaying ? 0 : page.start;
-  const visibleEnd = flowPlaying ? words.length - 1 : page.end;
+  const visibleStart = page.start;
+  const visibleEnd = page.end;
   const visibleWords = words.slice(visibleStart, visibleEnd + 1);
   const progress = words.length > 0
     ? ((flowPlaying ? highlightedWordIndex : page.end + 1) / words.length) * 100
@@ -532,7 +405,6 @@ export default function PageReaderView({
     <div
       className="page-reader-view"
       ref={containerRef}
-      onClick={handlePageClick}
       role="document"
       aria-label={`Reading ${formatDisplayTitle(activeDoc.title)}`}
     >
@@ -568,7 +440,8 @@ export default function PageReaderView({
 
       {/* Page content */}
       <div
-        className={`page-reader-content ${transitioning ? "page-reader-content--transitioning" : ""} ${flowPlaying ? "page-reader-content--flow" : ""}`}
+        ref={contentRef}
+        className={`page-reader-content ${transitioning ? "page-reader-content--transitioning" : ""}`}
         style={{
           fontSize: `${fontSize}px`,
           lineHeight: `${lineHeight}px`,
@@ -577,17 +450,18 @@ export default function PageReaderView({
           fontFamily: settings?.fontFamily || undefined,
         }}
       >
-        {/* Flow highlight cursor — positioned via direct DOM, CSS transition for smooth glide */}
-        {flowPlaying && <div ref={flowCursorRef} className="flow-highlight-cursor" style={{ display: "none" }} />}
+        {/* React-owned cursor div — controller styles it, React owns the DOM node */}
+        <div
+          ref={flowCursorRef}
+          className="flow-highlight-cursor"
+          style={{ display: "none" }}
+          aria-hidden="true"
+        />
         {renderedParagraphs.map((para, pIdx) => (
           <p key={pIdx} className="page-reader-paragraph">
             {para.map(({ word, globalIndex }) => {
-              // During flow with underline cursor, no word background — underline handles it
-              // With highlight cursor, show word backgrounds as before
-              const useHighlightCursor = settings?.flowCursorStyle === "highlight";
-              const isHighlighted = flowPlaying
-                ? (useHighlightCursor && globalIndex >= highlightedWordIndex && globalIndex < highlightedWordIndex + wordSpan)
-                : globalIndex === highlightedWordIndex;
+              // Show word highlight in Page mode always, and in Flow when TTS drives position
+              const isHighlighted = (!flowPlaying || ttsActive) && globalIndex === highlightedWordIndex;
               const noteText = savedNotes.get(globalIndex) || notes?.get(globalIndex);
               const hasNote = !!noteText;
               return (
@@ -623,6 +497,28 @@ export default function PageReaderView({
           {Math.round(progress)}%
         </span>
       </div>
+
+      {/* Page navigation side buttons */}
+      {currentPage > 0 && (
+        <button
+          className="page-nav-btn page-nav-btn--left"
+          onClick={prevPage}
+          aria-label="Previous page"
+          title="Previous page (←)"
+        >
+          ‹
+        </button>
+      )}
+      {currentPage < pages.length - 1 && (
+        <button
+          className="page-nav-btn page-nav-btn--right"
+          onClick={nextPage}
+          aria-label="Next page"
+          title="Next page (→)"
+        >
+          ›
+        </button>
+      )}
 
       {/* Toast */}
       {toast && (

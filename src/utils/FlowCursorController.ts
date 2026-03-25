@@ -1,4 +1,4 @@
-import { PAGE_TRANSITION_MS, FLOW_PAGE_TURN_PAUSE_MS } from "../constants";
+import { FLOW_PAGE_TURN_PAUSE_MS } from "../constants";
 
 interface LineInfo {
   y: number;
@@ -26,13 +26,18 @@ export class FlowCursorController {
   private wpm = 300;
   private lineTimer: ReturnType<typeof setTimeout> | null = null;
   private running = false;
+  private ownsCursor = false;
   private options: FlowCursorOptions;
 
   constructor(options: FlowCursorOptions) {
     this.options = options;
   }
 
-  start(wordIndex: number, wpm: number): void {
+  /**
+   * Start the flow cursor. If cursorEl is provided (React-owned div), use it
+   * instead of creating a new DOM element — prevents orphaning on re-render.
+   */
+  start(wordIndex: number, wpm: number, cursorEl?: HTMLElement): void {
     this.stop();
     this.wordIndex = wordIndex;
     this.wpm = wpm;
@@ -41,11 +46,22 @@ export class FlowCursorController {
     this.container = document.querySelector(".page-reader-content") as HTMLElement;
     if (!this.container) return;
 
-    this.cursor = document.createElement("div");
-    const isUnderline = this.options.cursorStyle === "underline";
-    this.cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
-    this.cursor.style.display = "none";
-    this.container.appendChild(this.cursor);
+    if (cursorEl) {
+      // React-owned element — just style it, don't create/destroy
+      this.cursor = cursorEl as HTMLDivElement;
+      const isUnderline = this.options.cursorStyle === "underline";
+      this.cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
+      this.cursor.style.display = "none";
+      this.ownsCursor = false;
+    } else {
+      // Fallback: controller creates its own div
+      this.cursor = document.createElement("div");
+      const isUnderline = this.options.cursorStyle === "underline";
+      this.cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
+      this.cursor.style.display = "none";
+      this.container.appendChild(this.cursor);
+      this.ownsCursor = true;
+    }
 
     this.lines = this.buildLineMap();
     if (this.lines.length === 0) return;
@@ -64,11 +80,18 @@ export class FlowCursorController {
   stop(): number {
     this.running = false;
     if (this.lineTimer) { clearTimeout(this.lineTimer); this.lineTimer = null; }
-    if (this.cursor && this.cursor.parentNode) {
-      this.cursor.parentNode.removeChild(this.cursor);
+    if (this.cursor) {
+      if (this.ownsCursor && this.cursor.parentNode) {
+        this.cursor.parentNode.removeChild(this.cursor);
+      } else {
+        // React-owned: just hide it, don't remove from DOM
+        this.cursor.style.display = "none";
+        this.cursor.style.transition = "none";
+      }
     }
     this.cursor = null;
     this.container = null;
+    this.ownsCursor = false;
     this.lines = [];
     return this.wordIndex;
   }
@@ -97,6 +120,29 @@ export class FlowCursorController {
       }
     }
     this.slideLine();
+  }
+
+  /** Jump to start of previous line and resume sliding */
+  prevLine(): void {
+    if (!this.running) return;
+    if (this.lineTimer) { clearTimeout(this.lineTimer); this.lineTimer = null; }
+    if (this.lineIdx > 0) {
+      this.lineIdx--;
+    }
+    this.wordIndex = this.lines[this.lineIdx]?.firstWord ?? this.wordIndex;
+    this.slideLine();
+  }
+
+  /** Jump to start of next line and resume sliding */
+  nextLine(): void {
+    if (!this.running) return;
+    if (this.lineTimer) { clearTimeout(this.lineTimer); this.lineTimer = null; }
+    if (this.lineIdx < this.lines.length - 1) {
+      this.lineIdx++;
+      this.wordIndex = this.lines[this.lineIdx].firstWord;
+      this.slideLine();
+    }
+    // At last line — let slideLine's end-of-page logic handle page turn
   }
 
   isRunning(): boolean { return this.running; }
@@ -136,8 +182,8 @@ export class FlowCursorController {
     if (!this.running || !this.cursor || this.lineIdx >= this.lines.length) return;
     const line = this.lines[this.lineIdx];
     const isUnderline = this.options.cursorStyle === "underline";
-    const barWidth = 40;
-    const y = isUnderline ? line.bottom - 3 : line.y;
+    const barWidth = 120;
+    const y = isUnderline ? line.bottom : line.y;
     const h = isUnderline ? 3 : (line.bottom - line.y);
     const duration = (line.wordCount / this.wpm) * 60000;
 
@@ -164,15 +210,26 @@ export class FlowCursorController {
         const nextPageIdx = this.options.getCurrentPageIdx() + 1;
         if (nextPageIdx < this.options.getPageCount()) {
           this.options.onPageTurn(nextPageIdx);
+          // Brief pause, then wait for React to render the new page's words
           setTimeout(() => {
             this.container = document.querySelector(".page-reader-content") as HTMLElement;
-            if (this.cursor && this.container && !this.container.contains(this.cursor)) {
-              this.container.appendChild(this.cursor);
+            if (this.cursor && this.container) {
+              if (this.ownsCursor && !this.container.contains(this.cursor)) {
+                this.container.appendChild(this.cursor);
+              }
             }
-            this.lines = this.buildLineMap();
-            this.lineIdx = 0;
-            if (this.lines.length > 0) this.slideLine();
-          }, FLOW_PAGE_TURN_PAUSE_MS + PAGE_TRANSITION_MS + 50);
+            // Retry buildLineMap until words appear (React may still be rendering)
+            const tryResume = (attempts: number) => {
+              this.lines = this.buildLineMap();
+              if (this.lines.length > 0) {
+                this.lineIdx = 0;
+                this.slideLine();
+              } else if (attempts > 0) {
+                setTimeout(() => tryResume(attempts - 1), 50);
+              }
+            };
+            tryResume(5);
+          }, FLOW_PAGE_TURN_PAUSE_MS);
         }
         return;
       }

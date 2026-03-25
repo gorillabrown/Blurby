@@ -10,15 +10,91 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: Sprint 23 — V1 Hardening
+Queue depth: 4
+Next sprint: HOTFIX-1 — Grid Interaction Bugs
 Health: OK
-Action needed: None (at minimum — backfill after Sprint 23 completes)
+Action needed: Dispatch HOTFIX-1, then resume Sprint 23
 ```
 
 ---
 
 ## Queue
+
+---
+
+## HOTFIX-1 — Grid Interaction Bugs (Checkbox Bleed + Drag-Region Scroll Block)
+
+### KEY CONTEXT
+App is post-Sprint 23B merge (v1.0.2 tag pushed). Two UI bugs visible in production: a stray checkbox renders in the top-left window corner, and empty grid gaps between book cards swallow click and scroll events. Both are regressions from Sprint 20/23 code (selection checkboxes + body drag region).
+
+### PROBLEM
+1. **Stray checkbox**: Every `DocGridCard` renders a selection checkbox (`doc-grid-checkbox`) because the guard condition `onToggleSelect && selected !== undefined` is always true — `selected` is passed as `false` (not `undefined`) from LibraryContainer line 563/577. The checkbox at `position: absolute; top: 8px; left: 8px; z-index: 2` appears on every card, with the top-left one bleeding into the window corner.
+2. **Grid gaps block interaction**: The `body` element has `-webkit-app-region: drag` (global.css line 52). Grid gaps between cards inherit this, making them window-drag zones that swallow clicks and scroll events. Cards themselves work because their interactive children (`button`, `input`, `[role="button"]`) get the `no-drag` rule (line 54), but the empty space between cards has no such override.
+
+### EVIDENCE OF PROBLEM
+- Screenshot: checked checkbox visible at ~(10, 10) window coordinates, above the hamburger menu
+- Screenshot: user cannot scroll library when cursor is positioned over blank grid gap; scroll works when cursor is over a card
+- Code: `DocGridCard.tsx` line 63: `{onToggleSelect && selected !== undefined && (` — `selected` is `boolean`, never `undefined`
+- Code: `global.css` line 51-52: `overflow: hidden; -webkit-app-region: drag;` on `body`
+
+### HYPOTHESIZED SOLUTION
+**Bug 1 fix**: Change the checkbox guard in `DocGridCard.tsx` to only show when selection mode is active. Replace condition with `{onToggleSelect && selected && (` — checkboxes only appear on cards that are actually selected. Alternatively, add a `selectionMode` prop that LibraryContainer sets to `true` only when `selectedIds.size > 0`.
+**Bug 2 fix**: Add `-webkit-app-region: no-drag` to `.doc-grid` in `global.css`. This ensures grid gaps don't act as drag regions. The titlebar area (`.library-titlebar`) already has its own drag region.
+
+### WHAT (Tasks to Complete)
+
+| Step | Task | Agent | Model |
+|------|------|-------|-------|
+| 1 | Fix checkbox guard in `DocGridCard.tsx` — only render when `selected === true` | `renderer-fixer` | sonnet |
+| 2 | Add `-webkit-app-region: no-drag` to `.doc-grid` and `.library-content` in `global.css` | `renderer-fixer` | sonnet |
+| 3 | Run `npm test` — all 512 tests must pass | `test-runner` | haiku |
+| 4 | Run `npm run build` — must compile clean, zero TS errors | `test-runner` | haiku |
+| 5 | Commit on branch `hotfix/grid-interaction`, merge to main with `--no-ff` | `blurby-lead` | — |
+| 6 | Print terminal summary of changes | `blurby-lead` | — |
+
+### WHERE (Read in This Order)
+
+1. `src/components/DocGridCard.tsx` — lines 62-67, checkbox rendering guard
+2. `src/styles/global.css` — line 51-52 (body drag region), line 1860-1865 (`.doc-grid`), line 2856-2869 (checkbox styles)
+3. `src/components/LibraryContainer.tsx` — lines 494-500 (selectedIds/onToggleSelect props passed to LibraryView)
+
+### HOW (Agent Assignments)
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| `renderer-fixer` | sonnet | Both CSS and component fixes — small scope, same domain |
+| `test-runner` | haiku | Verify tests + build |
+| `blurby-lead` | — | Orchestrate, commit, merge |
+
+### WHEN (Execution Order)
+
+```
+[1-2] PARALLEL:
+    ├─ [1] Fix checkbox guard (renderer-fixer)
+    └─ [2] Add no-drag to grid (renderer-fixer)
+    ↓ (both complete)
+[3-4] PARALLEL:
+    ├─ [3] npm test (test-runner)
+    └─ [4] npm run build (test-runner)
+    ↓ (both pass)
+[5] Commit + merge (blurby-lead)
+[6] Print summary (blurby-lead)
+```
+
+### ADDITIONAL GUIDANCE
+- **Do NOT add `pointer-events: none` to overlays** — those are conditionally rendered and only visible when active. They're not the cause.
+- The `onToggleSelect` prop is always passed (it's a function from LibraryContainer). The fix must key off selection *state*, not prop presence.
+- After merge, a new `v1.0.3` tag + release build will be needed to push the fix to users via auto-update.
+
+### SUCCESS CRITERIA
+
+1. No checkbox visible on any card when no cards are selected (`selectedIds.size === 0`)
+2. Scrolling works everywhere in the library grid — over cards AND between cards
+3. Clicking blank grid space closes the menu flap (if open)
+4. Window dragging still works from the title bar area
+5. `npm test`: 512 pass, 0 fail
+6. `npm run build`: 0 TypeScript errors
+7. Branch `hotfix/grid-interaction` merged to main
 
 ---
 

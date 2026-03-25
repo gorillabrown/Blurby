@@ -82,8 +82,11 @@ export interface BlurbySettings {
   einkPhraseGrouping: boolean;
   // TTS settings
   ttsEnabled: boolean;
-  ttsVoiceName: string | null; // SpeechSynthesisVoice.name
+  ttsEngine: "web" | "kokoro"; // which TTS backend to use
+  ttsVoiceName: string | null; // SpeechSynthesisVoice.name (web) or Kokoro voice ID
   ttsRate: number; // 0.5-2.0, default 1.0
+  // Last-used reading mode (Space bar starts this mode from Page view)
+  lastReadingMode: "focus" | "flow" | "narration";
   // Cloud sync settings
   syncIntervalMinutes: number;
   syncOnMeteredConnection: boolean;

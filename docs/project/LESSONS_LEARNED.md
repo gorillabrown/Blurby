@@ -285,6 +285,7 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 
 | PR-17 | Never drive imperative DOM animations from React useEffect — use a plain class | LL-014 |
 | PR-18 | Use forced reflow (offsetWidth) for CSS transition sequencing, not rAF | LL-015 |
+| PR-29 | Never put `-webkit-app-region: drag` on body — only on the specific title bar element | LL-026 |
 
 ## Known Traps (Updated Sprint 24)
 
@@ -293,3 +294,169 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 | Node v24 spawn UNKNOWN with Electron | Development | Use `.\node_modules\electron\dist\electron.exe .` directly, or downgrade to Node v22 LTS |
 | ARM64 Electron binary on x64 Windows | Development | `npm install electron --arch=x64` to force correct architecture |
 | CSS class name mismatch between component and stylesheet | CSS | Grep for the class name in both `.tsx` and `.css` before shipping |
+| React state batching breaks effect cleanup→re-run flows | Renderer | Use refs to pass values between effect cleanup and next run |
+| Closures in imperative controllers capture stale state | Renderer | Pass `() => ref.current` instead of `() => stateVar` |
+| Flow mode rendering all words causes DOM explosion | Reader | Flow cursor must operate on paginated word set, not infinite scroll |
+| Pagination first-line off-by-one | Reader | Start `usedHeight` at `lineHeight`, not 0 |
+| Paragraph margin ≠ lineHeight in pagination | Reader | Use `fontSize` (1em) for paragraph breaks, not `lineHeight` (1.8em) |
+| Small TTS chunk size causes choppy speech | TTS | Use ~40 words with sentence-boundary detection, not 4-word chunks |
+| TTS and flow cursor fight over word position | Reader, TTS | When TTS active, disable cursor controller; let TTS drive via onboundary |
+| TTS settings disconnected from narration engine | Settings, TTS | Bridge settings state to useNarration via useEffect syncs |
+| `-webkit-app-region: drag` on `body` cascades everywhere | CSS, Electron | Never put `drag` on body — apply only to `.library-titlebar`; `no-drag` on buttons is insufficient because intermediate divs with padding still absorb clicks |
+| DOM elements created by imperative code orphaned by React | Renderer | Render element in JSX, pass ref to controller; controller styles only |
+
+---
+
+### [2026-03-24] LL-016: React State Batching Breaks Pause/Resume Flows
+
+**Area:** renderer, React state, effects
+**Status:** active
+**Priority:** high
+
+**Context:** When an effect cleanup sets state (e.g., saving a stop position) and a new effect run immediately reads that state, React's batching means the new value hasn't propagated yet. The effect re-run sees the OLD state value, causing incorrect behavior in pause/resume flows where the stop position must carry forward.
+
+**Fix:** Use a ref (`flowStopPosRef`) to pass values between cleanup and re-run of the same effect. Refs update synchronously and bypass React's batching.
+
+**Rule:** PR-19: Use refs (not state) to pass values between effect cleanup and the next effect run — React batching delays state propagation.
+
+---
+
+### [2026-03-24] LL-017: Closures in Imperative Controllers Capture Stale React State
+
+**Area:** renderer, imperative code, closures
+**Status:** active
+**Priority:** high
+
+**Context:** When passing callbacks like `getCurrentPageIdx: () => currentPage` to an imperative class, the closure captures the render-time value of `currentPage`. After state updates, the closure still returns the stale value from when it was created, causing the controller to operate on outdated page indices.
+
+**Fix:** Use a ref (`currentPageRef.current = currentPage` updated on every render) and pass `() => currentPageRef.current` instead. The ref always holds the latest value regardless of when the closure executes.
+
+**Rule:** PR-20: When passing state-reading callbacks to imperative code, always read from a ref, never close over state directly.
+
+---
+
+### [2026-03-24] LL-018: Flow Mode Must Stay Paginated, Not Infinite-Scroll
+
+**Area:** reader, flow mode, performance
+**Status:** active
+**Priority:** high
+
+**Context:** An early approach rendered all words when flow was playing (`flowPlaying ? 0 : page.start`), making the DOM enormous. This caused `buildLineMap()` to find thousands of lines, and the cursor controller raced through content at impossible speed.
+
+**Fix:** Flow cursor operates on the same paginated word set as page mode. The controller handles page turns at end-of-page, keeping the DOM small and the line map manageable.
+
+**Rule:** PR-21: Flow cursor must operate on paginated word sets — never render the full document to DOM for animation purposes.
+
+---
+
+### [2026-03-24] LL-019: Pagination Estimation — Count the First Line
+
+**Area:** renderer, pagination
+**Status:** active
+**Priority:** medium
+
+**Context:** When tracking `usedHeight` in pixels for pagination, starting at 0 means the first line is never counted toward the height budget. Each page silently gets one extra line of words, causing overflow past the container bottom.
+
+**Fix:** Initialize `usedHeight` at `lineHeight` (the first line exists from the start), not 0.
+
+**Rule:** PR-22: Start pagination height tracking at `lineHeight`, not 0 — the first line occupies space immediately.
+
+---
+
+### [2026-03-24] LL-020: Paragraph Margin Is Not Equal to lineHeight
+
+**Area:** renderer, pagination, CSS
+**Status:** active
+**Priority:** medium
+
+**Context:** Paragraph breaks in pagination were adding a full `lineHeight` (fontSize x 1.8) to the height budget, but CSS `margin-bottom: 1em` only adds `fontSize`. Counting paragraph breaks as full lines made pages ~30% too conservative — far fewer words per page than the container could hold.
+
+**Fix:** Add `fontSize` for paragraph breaks, not `lineHeight`.
+
+**Rule:** PR-23: Paragraph break height in pagination must match CSS margin (1em = fontSize), not lineHeight.
+
+---
+
+### [2026-03-24] LL-021: TTS Chunk Size Dramatically Affects Speech Quality
+
+**Area:** TTS, narration
+**Status:** active
+**Priority:** high
+
+**Context:** `SpeechSynthesisUtterance` has per-utterance startup overhead. At 4 words per chunk, the gaps between utterances cause severe choppiness that makes the speech unusable. Increasing chunk size smooths this out dramatically.
+
+**Fix:** Use ~40 words per chunk with sentence-boundary detection. This gives smooth, natural-sounding speech with minimal inter-utterance gaps.
+
+**Rule:** PR-24: TTS chunks should be ~40 words with sentence-boundary splitting — small chunks cause unacceptable choppiness.
+
+---
+
+### [2026-03-24] LL-022: TTS and Flow Cursor Are Independent Systems That Conflict
+
+**Area:** reader, TTS, flow cursor
+**Status:** active
+**Priority:** high
+
+**Context:** When both TTS and the flow cursor run simultaneously, TTS advances `highlightedWordIndex` via `onboundary` events (triggering page turns), while the cursor controller independently slides through its own line map on potentially a different page. The two systems fight over word position, causing visual chaos.
+
+**Fix:** When TTS is active, disable the cursor controller entirely. Let TTS drive word position via `onboundary` events. The cursor visual follows TTS, not the other way around.
+
+**Rule:** PR-25: TTS and flow cursor cannot both drive word position — when TTS is active, it owns highlighting; cursor controller must be disabled.
+
+---
+
+### [2026-03-24] LL-023: TTS Settings Were Disconnected From Narration Engine
+
+**Area:** settings, TTS, narration
+**Status:** active
+**Priority:** medium
+
+**Context:** The settings panel wrote `ttsVoiceName` and `ttsRate` to settings state, but `useNarration()` maintained its own independent voice and rate values. Changing TTS voice or rate in settings had no effect on actual speech output.
+
+**Fix:** Added `useEffect` syncs in ReaderContainer to bridge settings state to the narration engine, so changes in the settings panel propagate to active narration.
+
+**Rule:** PR-26: Any settings that control a runtime engine must have explicit sync bridges — settings state and engine state are separate systems.
+
+---
+
+### [2026-03-24] LL-024: `-webkit-app-region: drag` on Body Inherits Into Grid Gaps
+
+**Area:** CSS, Electron, window management
+**Status:** active
+**Priority:** high
+
+**Context:** Setting `-webkit-app-region: drag` on the body element makes the whole window draggable, but grid gaps between cards inherit this property. Cards themselves work because interactive children get `no-drag`, but the gaps between them swallow click and scroll events — users can't scroll the library by dragging in empty space.
+
+**Fix:** Add `-webkit-app-region: no-drag` to the grid container. This stops the drag region from capturing events in gaps while keeping the intended drag areas (title bar, etc.) functional.
+
+**Rule:** PR-27: Grid containers need explicit `-webkit-app-region: no-drag` to prevent gap areas from inheriting drag behavior.
+
+---
+
+### [2026-03-24] LL-025: DOM Elements Created by Imperative Code Get Orphaned by React
+
+**Area:** renderer, imperative code, React reconciliation
+**Status:** active
+**Priority:** high
+
+**Context:** When an imperative controller creates a DOM element (e.g., a cursor div) and appends it to a React-managed container, React reconciliation can destroy the element on re-render because React doesn't know about it. The controller then references a detached node, causing silent failures.
+
+**Fix:** Render the element in JSX so React owns its lifecycle. Pass a ref to the imperative controller, and have the controller only style the element (position, opacity, transform) — never create or remove it.
+
+**Rule:** PR-28: Imperative controllers must never create DOM elements in React-managed containers — render in JSX, pass ref, controller styles only.
+
+---
+
+### [2026-03-24] LL-026: Never Put `-webkit-app-region: drag` on `body`
+
+**Area:** CSS, Electron, window management
+**Status:** active
+**Priority:** critical
+
+**Context:** Applying `-webkit-app-region: drag` to the `body` element makes the entire window a drag region. The obvious countermeasure — adding `no-drag` to `button, input, [role="button"]` — is insufficient because intermediate `div` elements with padding still inherit `drag` from body and absorb clicks in their padding areas. This cascades into dozens of bugs: grid gaps block scrolling, settings buttons have tiny click areas (only the text inside responds, not the button padding), flap toggles don't respond, empty space in lists swallows events, and any element not explicitly marked `no-drag` becomes a dead zone for mouse interaction.
+
+**Root Cause:** `-webkit-app-region` inherits through the entire DOM tree. Opting out individual interactive elements is a whack-a-mole approach that can never be complete — every `div`, `section`, `nav`, `li`, `label`, and layout container with any padding or margin becomes a drag surface that eats mouse events in its non-content areas.
+
+**Fix:** Remove `-webkit-app-region: drag` from `body` entirely. Apply `drag` ONLY to the specific title bar element (e.g., `.library-titlebar`) that should be draggable. If you need drag behavior on a narrow area, use a dedicated wrapper element — never the body or any high-level container.
+
+**Rule:** PR-29: Never apply `-webkit-app-region: drag` to `body` or any high-level container. Apply it only to the specific title bar element. The `no-drag` countermeasure on interactive elements is insufficient because intermediate elements with padding still inherit drag and absorb clicks.

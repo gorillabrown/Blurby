@@ -76,73 +76,47 @@ export default function CommandPalette({
 
   // Build action registry
   const buildActions = useCallback((): PaletteItem[] => {
+    // Helper: execute action then close palette.
+    const act = (fn: () => void) => () => { fn(); onClose(); };
+
     return [
-      {
-        type: "action",
-        label: "Open Settings",
-        sublabel: "Ctrl+,",
-        onSelect: () => { onAction(onOpenSettings); onClose(); },
-      },
-      {
-        type: "action",
-        label: "Toggle Theme",
-        sublabel: "Cycle dark / light / e-ink",
-        onSelect: () => {
-          onAction(() => {
-            window.electronAPI.getState().then(({ settings }) => {
-              const themes: Array<"dark" | "light" | "eink" | "system"> = ["dark", "light", "eink", "system"];
-              const next = themes[(themes.indexOf(settings.theme) + 1) % themes.length];
-              window.electronAPI.saveSettings({ theme: next });
-            });
-          });
-          onClose();
-        },
-      },
+      { type: "action", label: "Open Settings", sublabel: "Ctrl+,", onSelect: act(() => onOpenSettings()) },
+      { type: "setting", label: "Settings: Toggle Theme", sublabel: "Dark, light, e-ink themes", onSelect: act(() => onOpenSettings("theme")) },
       {
         type: "action",
         label: "Open Reading Notes",
         sublabel: "Open .docx notes file in default editor",
-        onSelect: () => {
-          onAction(() => {
-            window.electronAPI.openReadingNotes().then((result) => {
-              if (result?.error) {
-                // No notes yet — show an alert
-                alert(result.error);
-              }
-            });
+        onSelect: act(() => {
+          window.electronAPI.openReadingNotes().then((result) => {
+            if (result?.error) alert(result.error);
           });
-          onClose();
-        },
+        }),
       },
-      {
-        type: "action",
-        label: "Open Reading Log",
-        sublabel: "Open .xlsx reading log in spreadsheet app",
-        onSelect: () => {
-          onAction(() => window.electronAPI.openReadingLog());
-          onClose();
-        },
-      },
-      {
-        type: "action",
-        label: "Export Library",
-        sublabel: "Save library to JSON file",
-        onSelect: () => { onAction(() => window.electronAPI.exportLibrary()); onClose(); },
-      },
-      {
-        type: "action",
-        label: "Import Library",
-        sublabel: "Merge library from JSON file",
-        onSelect: () => { onAction(() => window.electronAPI.importLibrary()); onClose(); },
-      },
-      { type: "setting", label: "Settings: Theme", sublabel: "Dark, light, e-ink, system themes", onSelect: () => { onAction(() => onOpenSettings("theme")); onClose(); } },
-      { type: "setting", label: "Settings: Layout", sublabel: "Page layout and spacing", onSelect: () => { onAction(() => onOpenSettings("layout")); onClose(); } },
-      { type: "setting", label: "Settings: Speed Reading", sublabel: "WPM, pauses, flow word span", onSelect: () => { onAction(() => onOpenSettings("speed-reading")); onClose(); } },
-      { type: "setting", label: "Settings: Hotkeys", sublabel: "Keyboard shortcut reference", onSelect: () => { onAction(() => onOpenSettings("hotkeys")); onClose(); } },
-      { type: "setting", label: "Settings: Connectors", sublabel: "Site logins and integrations", onSelect: () => { onAction(() => onOpenSettings("connectors")); onClose(); } },
-      { type: "setting", label: "Settings: Help", sublabel: "About, updates, support", onSelect: () => { onAction(() => onOpenSettings("help")); onClose(); } },
-      { type: "setting", label: "Settings: Text Size", sublabel: "Adjust reading text size", onSelect: () => { onAction(() => onOpenSettings("text-size")); onClose(); } },
-      { type: "setting", label: "Settings: Cloud Sync", sublabel: "OneDrive / Google Drive sync", onSelect: () => { onAction(() => onOpenSettings("cloud-sync")); onClose(); } },
+      { type: "action", label: "Open Reading Log", sublabel: "Open .xlsx reading log in spreadsheet app", onSelect: act(() => window.electronAPI.openReadingLog()) },
+      { type: "action", label: "Export Library", sublabel: "Save library to JSON file", onSelect: act(() => window.electronAPI.exportLibrary()) },
+      { type: "action", label: "Import Library", sublabel: "Merge library from JSON file", onSelect: act(() => window.electronAPI.importLibrary()) },
+      // Settings pages
+      { type: "setting", label: "Settings: Theme", sublabel: "Dark, light, e-ink, system themes", onSelect: act(() => onOpenSettings("theme")) },
+      { type: "setting", label: "Settings: Layout", sublabel: "Page layout and spacing", onSelect: act(() => onOpenSettings("layout")) },
+      { type: "setting", label: "Settings: Speed Reading", sublabel: "WPM, pauses, flow word span", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Settings: Hotkeys", sublabel: "Keyboard shortcut reference", onSelect: act(() => onOpenSettings("hotkeys")) },
+      { type: "setting", label: "Settings: Connectors", sublabel: "Site logins and integrations", onSelect: act(() => onOpenSettings("connectors")) },
+      { type: "setting", label: "Settings: Help", sublabel: "About, updates, support", onSelect: act(() => onOpenSettings("help")) },
+      { type: "setting", label: "Settings: Text Size", sublabel: "Adjust reading text size", onSelect: act(() => onOpenSettings("text-size")) },
+      { type: "setting", label: "Settings: Cloud Sync", sublabel: "OneDrive / Google Drive sync", onSelect: act(() => onOpenSettings("cloud-sync")) },
+      // Sub-sections within Speed Reading
+      { type: "setting", label: "Reading Mode", sublabel: "Switch between Focus and Flow", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Focus Mode Options", sublabel: "Focus marks, reading ruler, focus span", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Flow Mode Options", sublabel: "Words per highlight, cursor style", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Rhythm Pauses", sublabel: "Commas, sentences, paragraphs, numbers", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Narration (TTS)", sublabel: "Enable TTS, voice engine, Kokoro AI", onSelect: act(() => onOpenSettings("speed-reading")) },
+      // Sub-sections within Theme
+      { type: "setting", label: "Accent Color", sublabel: "Change app accent color", onSelect: act(() => onOpenSettings("theme")) },
+      { type: "setting", label: "Font", sublabel: "Change reading font family", onSelect: act(() => onOpenSettings("theme")) },
+      // Sub-sections within Layout
+      { type: "setting", label: "Line Spacing", sublabel: "Adjust line height", onSelect: act(() => onOpenSettings("layout")) },
+      { type: "setting", label: "Character Spacing", sublabel: "Adjust letter spacing", onSelect: act(() => onOpenSettings("layout")) },
+      { type: "setting", label: "Word Spacing", sublabel: "Adjust word gap", onSelect: act(() => onOpenSettings("layout")) },
       {
         type: "shortcut",
         label: "Shortcut: ? — Show keyboard shortcuts",

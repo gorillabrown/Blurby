@@ -74,7 +74,8 @@ interface DocCardProps {
 const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
-  const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
+  const rawPct = wordCount > 0 ? (pos / wordCount) * 100 : 0;
+  const progress = rawPct > 0 && rawPct < 1 ? 1 : Math.round(rawPct);
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
   const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;

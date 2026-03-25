@@ -18,7 +18,13 @@
   "build": {
     "appId": "com.blurby.app",
     "extraResources": [
-      { "from": "resources/", "to": "resources/", "filter": ["**/*"] }
+      {
+        "from": "resources/",
+        "to": "resources/",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "productName": "Blurby",
     "publish": [
@@ -87,6 +93,7 @@
     "exceljs": "^4.4.0",
     "googleapis": "^171.4.0",
     "jsdom": "^24.1.0",
+    "kokoro-js": "^1.2.1",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.18.0",
     "react": "^19.0.0",

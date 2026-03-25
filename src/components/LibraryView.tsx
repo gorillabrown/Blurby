@@ -374,7 +374,8 @@ export default function LibraryView({
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs + Sort row */}
+        <div className="library-tabs-row">
         <div className="library-tabs" role="tablist">
           <button
             className={`library-tab${tab === "all" ? " library-tab-active" : ""}`}
@@ -425,23 +426,23 @@ export default function LibraryView({
             role="tab"
             aria-selected={typeFilter === "pdfs"}
           >PDFs ({pdfCount})</button>
-          {/* Sort dropdown right-justified on filter line (21I) */}
-          {library.length > 3 && (
-            <select
-              className="sort-select"
-              style={{ marginLeft: "auto" }}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort order"
-            >
-              <option value="progress">closest to done</option>
-              <option value="alpha">A-Z by title</option>
-              <option value="author">A-Z by author</option>
-              <option value="newest">newest first</option>
-              <option value="oldest">oldest first</option>
-            </select>
-          )}
         </div>
+        {/* Sort dropdown pinned right, never scrolls with tabs */}
+        {library.length > 3 && (
+          <select
+            className="sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort order"
+          >
+            <option value="progress">closest to done</option>
+            <option value="alpha">A-Z by title</option>
+            <option value="author">A-Z by author</option>
+            <option value="newest">newest first</option>
+            <option value="oldest">oldest first</option>
+          </select>
+        )}
+        </div>{/* close library-tabs-row */}
         </div>{/* close library-sticky-top */}
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
