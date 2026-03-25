@@ -65,6 +65,9 @@ interface ReaderKeysState {
   defineWord?: () => void;
   makeNote?: () => void;
   openChapterList?: () => void;
+  // Paragraph navigation (Page mode)
+  paragraphPrev?: () => void;
+  paragraphNext?: () => void;
   // Flow-mode line navigation
   flowPrevLine?: () => void;
   flowNextLine?: () => void;
@@ -118,6 +121,8 @@ export function useReaderKeys(
   moveWordSelection?: (direction: "left" | "right" | "up" | "down") => void,
   defineWord?: () => void,
   makeNote?: () => void,
+  paragraphPrev?: () => void,
+  paragraphNext?: () => void,
   flowPrevLine?: () => void,
   flowNextLine?: () => void,
   openChapterList?: () => void
@@ -127,6 +132,7 @@ export function useReaderKeys(
     adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
     prevChapter, nextChapter, toggleNarration,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
+    paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
   });
 
@@ -135,6 +141,7 @@ export function useReaderKeys(
     adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
     prevChapter, nextChapter, toggleNarration,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
+    paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
   };
 
@@ -188,6 +195,9 @@ export function useReaderKeys(
         // ←/→ flip pages
         if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevPage?.(); return; }
         if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextPage?.(); return; }
+        // Ctrl+←/→ jump paragraphs
+        if (e.ctrlKey && e.code === "ArrowLeft") { e.preventDefault(); s.paragraphPrev?.(); return; }
+        if (e.ctrlKey && e.code === "ArrowRight") { e.preventDefault(); s.paragraphNext?.(); return; }
         // Shift+arrows move word selection
         if (e.shiftKey && !e.ctrlKey) {
           if (e.code === "ArrowLeft") { e.preventDefault(); s.moveWordSelection?.("left"); return; }

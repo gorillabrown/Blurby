@@ -352,6 +352,21 @@ export default function PageReaderView({
 
   // Side buttons for page navigation (replacing click-zone approach)
 
+  // Wheel handler — scroll word-by-word in page mode (not during flow/focus playing)
+  const lastWheelRef = useRef(0);
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (flowPlaying) return; // Don't interfere with Flow mode
+    const now = Date.now();
+    if (now - lastWheelRef.current < 80) return; // Throttle: one word per 80ms
+    lastWheelRef.current = now;
+    const delta = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
+    if (delta === 0) return;
+    const newIdx = Math.max(0, Math.min(words.length - 1, highlightedWordIndex + delta));
+    if (newIdx !== highlightedWordIndex) {
+      onHighlightedWordChange(newIdx);
+    }
+  }, [flowPlaying, words.length, highlightedWordIndex, onHighlightedWordChange]);
+
   // Word click handler — set highlight anchor; during flow, jump controller
   const handleWordClick = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -367,7 +382,9 @@ export default function PageReaderView({
     e.preventDefault();
     e.stopPropagation();
     onHighlightedWordChange(index);
-    setHighlightWord(words[index] || null);
+    const raw = words[index] || "";
+    const cleaned = raw.replace(/^[^\w]+|[^\w]+$/g, "") || raw;
+    setHighlightWord(cleaned);
     setHighlightPos({ x: e.clientX, y: e.clientY });
   }, [words, onHighlightedWordChange]);
 
@@ -468,6 +485,7 @@ export default function PageReaderView({
           wordSpacing: settings?.layoutSpacing?.word ? `${settings.layoutSpacing.word}px` : undefined,
           fontFamily: settings?.fontFamily || undefined,
         }}
+        onWheel={handleWheel}
       >
         {/* React-owned cursor div — controller styles it, React owns the DOM node */}
         <div

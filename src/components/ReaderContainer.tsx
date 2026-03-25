@@ -469,10 +469,44 @@ export default function ReaderContainer({
     }
   }, [isNarrationSelected, settings.ttsRate, updateSettings, narration, adjustWpm]);
 
+  // Paragraph navigation — jump to first word of prev/next paragraph
+  const paragraphBreaksArray = useMemo(() => {
+    return Array.from(tokenized.paragraphBreaks).sort((a, b) => a - b);
+  }, [tokenized.paragraphBreaks]);
+
+  const handleParagraphPrev = useCallback(() => {
+    // Jump to first word of current paragraph, or previous paragraph if already at start
+    const idx = highlightedWordIndex;
+    // Find the paragraph break just before the current word
+    let target = 0;
+    for (let i = paragraphBreaksArray.length - 1; i >= 0; i--) {
+      // paragraphBreaks stores the LAST word of each paragraph; the next paragraph starts at breakIndex + 1
+      const paraStart = paragraphBreaksArray[i] + 1;
+      if (paraStart < idx) {
+        target = paraStart;
+        break;
+      }
+    }
+    setHighlightedWordIndex(target);
+  }, [highlightedWordIndex, paragraphBreaksArray]);
+
+  const handleParagraphNext = useCallback(() => {
+    const idx = highlightedWordIndex;
+    let target = words.length - 1;
+    for (let i = 0; i < paragraphBreaksArray.length; i++) {
+      const paraStart = paragraphBreaksArray[i] + 1;
+      if (paraStart > idx) {
+        target = Math.min(paraStart, words.length - 1);
+        break;
+      }
+    }
+    setHighlightedWordIndex(target);
+  }, [highlightedWordIndex, paragraphBreaksArray, words.length]);
+
   // Keyboard shortcuts — fully mode-aware
   const chapterListRef = useRef<{ toggle: () => void } | null>(null);
   const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
-  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList);
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({

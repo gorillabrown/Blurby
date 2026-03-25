@@ -337,6 +337,40 @@ This makes the time estimate meaningful regardless of which mode is selected.
 5. If the user clicks a word on the browsed page, NM picks up from that word instead
 6. When the narration cursor naturally advances to the page the user is viewing, the button disappears
 
+### BUG-074: Author name format inconsistent — should be "Last, First"
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `main/file-parsers.js` (metadata extraction), `main/ipc-handlers.js` (import pipeline)
+**Description:** Author names across the library are inconsistent — some show "First Last" (e.g., "Dan Brown"), others show "Last, First" (e.g., "Deaton, Angus"). This is because different file formats (EPUB OPF, PDF metadata, filename parsing) return names in different formats and no normalization is applied. The app should standardize all author names to **"Last Name, First Name"** format during import.
+**Expected behavior:**
+1. On import, detect whether author string is "First Last" or "Last, First" format
+2. Normalize to "Last, First" — e.g., "Dan Brown" → "Brown, Dan"
+3. Handle multi-word last names heuristically (e.g., "Gabriel García Márquez" → "García Márquez, Gabriel")
+4. Handle "et al." and multiple authors: "Smith, John; Doe, Jane"
+5. Existing library entries should be normalized on next load via a migration or lazy update
+
+### BUG-075: Intake pipeline should complete metadata and consider EPUB normalization
+**Reported:** 2026-03-25
+**Severity:** Medium (architecture)
+**Location:** `main/file-parsers.js`, `main/ipc-handlers.js`
+**Description:** The import pipeline strips content to plain text and loses formatting, images, and structure. A proposed approach is to normalize all incoming formats (PDF, TXT, MOBI, HTML) into EPUB as the internal canonical format. This would:
+1. **Preserve formatting** — EPUB supports HTML content natively (lists, headers, bold/italic, images)
+2. **Standardize chapters** — NCX/nav TOC structure works for all formats
+3. **Enable consistent metadata** — OPF metadata schema covers title, author, publisher, date, language
+4. **Simplify the reader** — only one format to render (EPUB HTML pages)
+5. **Enable image support** — images stored inside the EPUB ZIP archive
+
+**Trade-offs to analyze:**
+- PDF → EPUB conversion is lossy (PDFs are visual layout, not semantic)
+- TXT has no structure to preserve (headers would need heuristic detection)
+- MOBI/AZW3 → EPUB is well-supported (Calibre does this)
+- HTML → EPUB is straightforward (wrap in EPUB container)
+- Conversion adds import time and potential errors
+- Original files should be archived (not deleted) after conversion
+- Large PDFs with complex layouts may convert poorly
+
+**Recommendation:** Sprint 26 (Content Pipeline) should include a feasibility analysis. EPUBs that arrive as EPUBs stay as-is. For other formats, build format-specific converters that produce EPUB output, with the original file archived in `userData/originals/`.
+
 ---
 
 ## Complete

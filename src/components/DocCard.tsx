@@ -2,6 +2,7 @@ import { memo, useState, useEffect } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import { bubbleCount } from "../utils/queue";
+import { formatBookDataLine } from "../utils/bookData";
 import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
@@ -120,8 +121,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
           </div>
           {apaSubtext && <div className="doc-card-apa-subtext">{apaSubtext}</div>}
           <div className="doc-card-meta">
-            <span>{wordCount.toLocaleString()} words</span>
-            <span>{readTime}</span>
+            <span>{wordCount > 0 ? formatBookDataLine(wordCount, pos) : readTime}</span>
             <span className="bubble-progress" role="meter" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${progress}% read`}>
               {Array.from({ length: 10 }, (_, i) => (
                 <span key={i} className={`bubble-progress-dot${i < bubbleCount(progress) ? " filled" : ""}`} aria-hidden="true" />

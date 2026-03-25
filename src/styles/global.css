@@ -572,6 +572,11 @@ body {
 }
 
 /* ── DEFINITION POPUP ── */
+.definition-popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+}
 .definition-popup {
   position: absolute;
   background: var(--bg);
@@ -2151,6 +2156,16 @@ button:focus-visible {
   font-family: var(--mono);
   color: var(--text-dimmer);
   margin-top: 2px;
+}
+
+.doc-grid-bookdata {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text-dimmer);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===== Menu Flap ===== */

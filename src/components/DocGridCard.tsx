@@ -2,6 +2,7 @@ import { useState, useEffect, memo } from "react";
 import { BlurbyDoc } from "../types";
 import { formatDisplayTitle } from "../utils/text";
 import { triggerCoachHint } from "./HotkeyCoach";
+import { formatBookDataLine } from "../utils/bookData";
 
 interface DocGridCardProps {
   doc: BlurbyDoc;
@@ -116,16 +117,15 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
       </div>
       <div className="doc-grid-info">
         <div className={`doc-grid-title${doc.unread ? " doc-grid-title-bold" : ""}`}>{formatDisplayTitle(doc.title)}</div>
-        {/* APA subtext for URL-imported docs, regular author for books */}
+        {/* Line 2: APA subtext for URL-imported docs, regular author for books */}
         {apaSubtext ? (
           <div className="doc-grid-apa-subtext">{apaSubtext}</div>
         ) : (
-          doc.author && <div className="doc-grid-author">{doc.author}</div>
+          <div className="doc-grid-author">{doc.author || "\u00A0"}</div>
         )}
-        {doc.wordCount > 0 && (doc.position || 0) > 0 && (
-          <div className="doc-grid-progress">
-            {Math.round(((doc.position || 0) / doc.wordCount) * 100)}% read
-          </div>
+        {/* Line 3: Book data — progress/pages/time */}
+        {doc.wordCount > 0 && (
+          <div className="doc-grid-bookdata">{formatBookDataLine(doc.wordCount, doc.position || 0)}</div>
         )}
       </div>
     </div>
