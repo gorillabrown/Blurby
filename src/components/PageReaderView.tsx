@@ -222,6 +222,8 @@ export default function PageReaderView({
   const flowCursorRef = useRef<HTMLDivElement>(null);
   const flowCursorLastY = useRef(0);
 
+  const wordSpan = Math.max(3, settings?.flowWordSpan || 3);
+
   /** Position the flow highlight cursor over a word element (direct DOM, no React) */
   const positionFlowCursor = useCallback((wordIdx: number) => {
     const cursor = flowCursorRef.current;
@@ -287,8 +289,6 @@ export default function PageReaderView({
   flowPagesRef.current = pages;
   flowCurrentPageRef.current = currentPage;
   flowWordsRef.current = words;
-
-  const wordSpan = Math.max(3, settings?.flowWordSpan || 3);
 
   useEffect(() => {
     if (!flowPlaying) {
