@@ -27,7 +27,7 @@ interface ReaderBottomBarProps {
 }
 
 const HINT_TEXT: Record<string, string> = {
-  page: "← → page  ↑ ↓ speed  space focus  ⇧space flow  M menu",
+  page: "← → page  ↑ ↓ speed  space flow  ⇧space focus  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space pause  M menu",
   flow: "← → seek  ↑ ↓ speed  space pause  M menu",
 };

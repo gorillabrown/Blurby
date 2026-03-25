@@ -53,7 +53,7 @@ interface ReaderKeysState {
   adjustFocusTextSize: (delta: number) => void;
   toggleFlap?: () => void;
   toggleFavorite?: () => void;
-  switchMode?: () => void;
+  enterFocus?: () => void;
   prevChapter?: () => void;
   nextChapter?: () => void;
   toggleNarration?: () => void;
@@ -104,7 +104,7 @@ export function useReaderKeys(
   adjustFocusTextSize: (delta: number) => void,
   toggleFlap?: () => void,
   toggleFavorite?: () => void,
-  switchMode?: () => void,
+  enterFocus?: () => void,
   prevChapter?: () => void,
   nextChapter?: () => void,
   toggleNarration?: () => void,
@@ -117,14 +117,14 @@ export function useReaderKeys(
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
-    adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode,
+    adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
     prevChapter, nextChapter, toggleNarration,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
   });
 
   stateRef.current = {
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
-    adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode,
+    adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
     prevChapter, nextChapter, toggleNarration,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
   };
@@ -145,8 +145,8 @@ export function useReaderKeys(
       // ── Universal keys (all modes) ─────────────────────────────────
       // M toggles menu flap
       if (e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
-      // Tab cycles reading mode
-      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.switchMode?.(); return; }
+      // Tab toggles menu flap
+      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
       // T toggles narration
       if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
       // S toggles favorite
@@ -168,10 +168,10 @@ export function useReaderKeys(
 
       // ── Page-mode specific keys ────────────────────────────────────
       if (isPage) {
-        // Space → enter Focus
+        // Space → enter Flow
         if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); s.togglePlay(); return; }
-        // Shift+Space → enter Flow
-        if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.enterFlow?.(); return; }
+        // Shift+Space → enter Focus
+        if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.enterFocus?.(); return; }
         // ←/→ flip pages
         if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevPage?.(); return; }
         if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextPage?.(); return; }
@@ -409,8 +409,14 @@ export function useLibraryKeyboard(
         return;
       }
 
-      // Tab cycles focus zones
-      if (e.key === "Tab") {
+      // Tab toggles menu flap
+      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        s.toggleFlap?.();
+        return;
+      }
+      // F6 cycles focus zones (a11y replacement for Tab)
+      if (e.key === "F6") {
         e.preventDefault();
         const zones: Array<"search" | "grid" | "sidebar"> = ["search", "grid", "sidebar"];
         const currentIdx = zones.indexOf(focusZone);

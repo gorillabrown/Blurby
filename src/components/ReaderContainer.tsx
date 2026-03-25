@@ -311,8 +311,8 @@ export default function ReaderContainer({
   /** Toggle play: Space behavior per mode */
   const handleTogglePlay = useCallback(() => {
     if (readingMode === "page") {
-      // Space in Page → enter Focus
-      handleEnterFocus();
+      // Space in Page → enter Flow
+      handleEnterFlow();
     } else if (readingMode === "flow") {
       // Space in Flow → pause flow, return to Page
       handlePauseToPage();
@@ -323,7 +323,7 @@ export default function ReaderContainer({
       // Space while paused in Focus → resume play
       reader.togglePlay();
     }
-  }, [readingMode, playing, handleEnterFocus, handlePauseToPage, reader]);
+  }, [readingMode, playing, handleEnterFlow, handlePauseToPage, reader]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
@@ -333,13 +333,6 @@ export default function ReaderContainer({
   const handleToggleFavoriteReader = useCallback(() => {
     onToggleFavorite(activeDoc.id);
   }, [activeDoc, onToggleFavorite]);
-
-  const handleSwitchMode = useCallback(() => {
-    // Cycle: page → focus → flow → page
-    if (readingMode === "page") handleEnterFocus();
-    else if (readingMode === "focus") handleEnterFlow();
-    else handlePauseToPage();
-  }, [readingMode, handleEnterFocus, handleEnterFlow, handlePauseToPage]);
 
   // Legacy toggle for keyboard shortcut (N key)
   const handleToggleNarration = useCallback(() => {
@@ -408,7 +401,7 @@ export default function ReaderContainer({
   }, [highlightedWordIndex]);
 
   // Keyboard shortcuts — fully mode-aware
-  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote);
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({
