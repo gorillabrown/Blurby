@@ -258,7 +258,7 @@ export default function useNarration() {
               if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
                 pauseMs = 750;
               } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
-                pauseMs = 500;
+                pauseMs = 400;
               } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
                 pauseMs = TTS_PUNCT_BASE;
               }
