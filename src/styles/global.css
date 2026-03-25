@@ -1540,7 +1540,7 @@ button:focus-visible {
   display: block;
   margin-top: 12px;
   margin-bottom: 24px;
-  height: 4.5px;
+  height: 3px;
   background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
   border-radius: 1px;
 }
@@ -1555,7 +1555,7 @@ button:focus-visible {
 [data-theme="blurby"] .library-sticky-top::after {
   content: "";
   display: block;
-  height: 4.5px;
+  height: 3px;
   background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
   border-radius: 1px;
   margin-top: 0;
