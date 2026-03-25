@@ -189,9 +189,10 @@ export default function PageReaderView({
   // Detect two-column mode (CSS column-count: 2 at ≥1280px)
   const isMultiColumn = containerWidth >= 1280 - 240; // 1280px viewport minus page padding
   const columnWidth = isMultiColumn ? (containerWidth - 48) / 2 : containerWidth;
-  const charsPerLine = Math.max(20, Math.floor(columnWidth / (fontSize * 0.50)));
-  // Two columns = 2x the available height for pagination
-  const effectiveHeight = isMultiColumn ? containerHeight * 2 : containerHeight;
+  // Conservative char width (0.52) prevents overflow — better to under-fill than lose content
+  const charsPerLine = Math.max(20, Math.floor(columnWidth / (fontSize * 0.52)));
+  // Two columns = 2x the available height for pagination, with 5% safety margin
+  const effectiveHeight = isMultiColumn ? containerHeight * 2 * 0.95 : containerHeight * 0.95;
 
   // Compute pages
   const pages = useMemo(
