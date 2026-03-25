@@ -359,8 +359,6 @@ export default function PageReaderView({
     if (!flowPlaying) {
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
       flowRafRef.current = null;
-      // Save final position to React state when flow stops
-      onHighlightRef.current(flowHighlightRef.current);
       return;
     }
 
@@ -387,31 +385,35 @@ export default function PageReaderView({
       flowCurrentPageRef.current = targetPage;
     }
 
-    // Start slide after DOM settles
-    const delay = needsPageChange ? 150 : 0;
-    const startTimer = setTimeout(() => {
-      requestAnimationFrame(() => {
-        const lines = buildLineMap();
-        if (lines.length === 0) return;
-
-        const startWordIdx = flowHighlightRef.current;
-        let lineIdx = 0;
-        for (let i = 0; i < lines.length; i++) {
-          if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
-            lineIdx = i;
-            break;
-          }
+    // Start slide — immediate for same page, short delay for page change
+    let startTimer: ReturnType<typeof setTimeout> | null = null;
+    const launchSlide = () => {
+      const lines = buildLineMap();
+      if (lines.length === 0) return;
+      const startWordIdx = flowHighlightRef.current;
+      let lineIdx = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
+          lineIdx = i;
+          break;
         }
+      }
+      flowLineIdxRef.current = lineIdx;
+      startLineSlide(lines, lineIdx);
+    };
 
-        flowLineIdxRef.current = lineIdx;
-        startLineSlide(lines, lineIdx);
-      });
-    }, delay);
+    if (needsPageChange) {
+      startTimer = setTimeout(() => requestAnimationFrame(launchSlide), 150);
+    } else {
+      requestAnimationFrame(launchSlide);
+    }
 
     return () => {
       flowRestartRef.current = null;
-      clearTimeout(startTimer);
+      if (startTimer) clearTimeout(startTimer);
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
+      // Save final flow position to React state BEFORE component body overwrites ref
+      onHighlightRef.current(flowHighlightRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flowPlaying, buildLineMap, startLineSlide]);
