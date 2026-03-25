@@ -29,6 +29,7 @@ export default function useNarration() {
   const onWordAdvanceRef = useRef<((wordIndex: number) => void) | null>(null);
   const isCursorDrivenRef = useRef(false);
   const cursorWordIndexRef = useRef(0);
+  const holdRef = useRef(false);
 
   // Load available voices
   useEffect(() => {
@@ -125,8 +126,8 @@ export default function useNarration() {
       if (onWordAdvanceRef.current) {
         onWordAdvanceRef.current(endIdx);
       }
-      // Speak next chunk
-      if (isCursorDrivenRef.current) {
+      // Speak next chunk (unless held for page boundary pause)
+      if (isCursorDrivenRef.current && !holdRef.current) {
         speakNextChunk();
       }
     };
@@ -196,7 +197,17 @@ export default function useNarration() {
     setSpeaking(false);
     utteranceRef.current = null;
     isCursorDrivenRef.current = false;
+    holdRef.current = false;
   }, []);
+
+  /** Hold TTS chaining — prevents speakNextChunk from auto-firing (for page boundary pauses) */
+  const hold = useCallback(() => { holdRef.current = true; }, []);
+
+  /** Resume TTS chaining after a hold — speaks next chunk if still in cursor-driven mode */
+  const resumeChaining = useCallback(() => {
+    holdRef.current = false;
+    if (isCursorDrivenRef.current) speakNextChunk();
+  }, [speakNextChunk]);
 
   const selectVoice = useCallback((voice: SpeechSynthesisVoice) => {
     setCurrentVoice(voice);
@@ -225,6 +236,8 @@ export default function useNarration() {
     pause,
     resume,
     stop,
+    hold,
+    resumeChaining,
     selectVoice,
     adjustRate,
   };

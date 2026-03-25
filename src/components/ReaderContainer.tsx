@@ -476,6 +476,7 @@ export default function ReaderContainer({
             onToggleFlap={toggleMenuFlap}
             pageNavRef={pageNavRef}
             flowPlaying={true}
+            ttsActive={ttsActive}
           />
         );
       case "focus":
@@ -520,6 +521,7 @@ export default function ReaderContainer({
             onToggleFlap={toggleMenuFlap}
             pageNavRef={pageNavRef}
             flowPlaying={false}
+            ttsActive={ttsActive}
           />
         );
     }

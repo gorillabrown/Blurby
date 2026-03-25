@@ -30,6 +30,7 @@ interface PageReaderViewProps {
   notes?: Map<number, string>; // wordIndex → note preview
   pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void }>;
   flowPlaying: boolean; // Flow mode: word highlight advances at WPM within page view
+  ttsActive?: boolean; // When true, TTS drives cursor — skip RAF advancement
 }
 
 // ── Pagination helpers ────────────────────────────────────────────────────
@@ -106,6 +107,7 @@ export default function PageReaderView({
   notes,
   pageNavRef,
   flowPlaying,
+  ttsActive,
 }: PageReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(600);
@@ -272,6 +274,8 @@ export default function PageReaderView({
   const flowLastTimeRef = useRef(0);
   const flowAccRef = useRef(0);
   const flowPagePausingRef = useRef(false);
+  const ttsActiveRef = useRef(ttsActive || false);
+  ttsActiveRef.current = ttsActive || false;
   // Use refs so the RAF loop always reads fresh values without restarting
   const flowHighlightRef = useRef(highlightedWordIndex);
   const flowWpmRef = useRef(wpm);
@@ -301,6 +305,12 @@ export default function PageReaderView({
       }
       // Skip advancement during page turn pause
       if (flowPagePausingRef.current) {
+        flowLastTimeRef.current = timestamp;
+        flowRafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+      // When TTS drives the cursor, skip RAF-based advancement
+      if (ttsActiveRef.current) {
         flowLastTimeRef.current = timestamp;
         flowRafRef.current = requestAnimationFrame(tick);
         return;
