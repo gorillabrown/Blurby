@@ -482,9 +482,24 @@ async function extractContent(filepath) {
         $("script, style").remove();
         // Remove EPUB page-break markers, editorial annotations, and hidden metadata
         $(".pb, .pagebreak, [role='doc-pagebreak'], [epub\\:type='pagebreak']").remove();
+        // Insert newlines before block elements to preserve paragraph/heading structure
+        $("p, div, h1, h2, h3, h4, h5, h6, br, li, blockquote, tr, dt, dd, figcaption, section, article").each((_, el) => {
+          $(el).before("\n");
+          $(el).after("\n");
+        });
+        // Add extra break after headings for visual separation
+        $("h1, h2, h3, h4, h5, h6").each((_, el) => {
+          $(el).after("\n");
+        });
+        // Add bullet markers for list items
+        $("li").each((_, el) => {
+          $(el).prepend("• ");
+        });
         let text = $("body").text().trim();
         // Strip residual page markers (e.g., "Edition: current; Page: [vi]")
-        text = text.replace(/Edition:\s*current;\s*Page:\s*\[[^\]]*\]/g, "").trim();
+        text = text.replace(/Edition:\s*current;\s*Page:\s*\[[^\]]*\]/g, "");
+        // Collapse excessive blank lines (3+ → 2)
+        text = text.replace(/\n{3,}/g, "\n\n").trim();
         if (!text) continue;
 
         const chapterTitle = tocMap.get(href);
@@ -518,7 +533,15 @@ async function extractContent(filepath) {
       const cheerio = getCheerio();
       const $ = cheerio.load(html);
       $("script, style, nav, footer, header, aside").remove();
-      return $("body").text().trim() || $.text().trim() || null;
+      // Preserve block structure (same as EPUB parser)
+      $("p, div, h1, h2, h3, h4, h5, h6, br, li, blockquote, tr, dt, dd, section, article").each((_, el) => {
+        $(el).before("\n"); $(el).after("\n");
+      });
+      $("h1, h2, h3, h4, h5, h6").each((_, el) => { $(el).after("\n"); });
+      $("li").each((_, el) => { $(el).prepend("• "); });
+      let htmlText = $("body").text().trim() || $.text().trim() || null;
+      if (htmlText) htmlText = htmlText.replace(/\n{3,}/g, "\n\n").trim();
+      return htmlText;
     }
     // Plain text formats
     return await readFileContentAsync(filepath);
