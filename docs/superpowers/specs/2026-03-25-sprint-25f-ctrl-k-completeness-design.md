@@ -9,7 +9,7 @@
 
 ## Overview
 
-Make the Ctrl+K command palette a complete entry point to every app action and setting, wire up the dormant hotkey coaching system so users discover keyboard shortcuts naturally, clean up Help settings, and fix the hotkey map layout.
+Make the Ctrl+K command palette a complete entry point to every app action and setting, expand hotkey coaching coverage to reader views, clean up Help settings, and fix the hotkey map layout.
 
 Five items, one theme: **discoverability**.
 
@@ -19,7 +19,7 @@ Five items, one theme: **discoverability**.
 
 ### Problem
 
-CommandPalette.tsx has zero entries for LibraryLayoutSettings (sort, grid/list, card size, spacing). LayoutSettings is partially covered — missing text size entries.
+CommandPalette.tsx has zero entries for LibraryLayoutSettings (sort, grid/list, card size, spacing). LayoutSettings is partially covered — missing text size entries. (Existing entries for Line/Character/Word Spacing are fine and stay.)
 
 ### Solution
 
@@ -45,11 +45,11 @@ Add 7 new entries to the `buildActions()` registry in CommandPalette.tsx:
 
 ### Problem
 
-Only ~30 entries exist in the command palette. Many settings pages have no sub-entries, making individual settings undiscoverable via Ctrl+K.
+Only ~33 entries exist in the command palette. Many settings pages have no sub-entries, making individual settings undiscoverable via Ctrl+K.
 
 ### Solution
 
-Add ~30 new entries across all settings pages. All use Option A behavior: selecting an entry navigates to the settings page containing that setting.
+Add ~23 new entries across all settings pages. All use Option A behavior: selecting an entry navigates to the settings page containing that setting.
 
 Remove the duplicate "Settings: Toggle Theme" entry (line 84), which overlaps with "Settings: Theme" (line 99).
 
@@ -106,7 +106,7 @@ Remove the duplicate "Settings: Toggle Theme" entry (line 84), which overlaps wi
 - 7 entries from BUG-058
 - 23 entries from BUG-059
 - 1 duplicate removed
-- Final count: ~60 entries (up from ~30)
+- Final count: ~62 entries (up from ~33)
 
 ### Files Changed
 
@@ -118,59 +118,59 @@ Remove the duplicate "Settings: Toggle Theme" entry (line 84), which overlaps wi
 
 ### Problem
 
-`HotkeyCoach.tsx` exists as dead code. The component is never imported or rendered. `triggerCoachHint()` is never called anywhere. The coaching system is fully built but completely unwired.
+`HotkeyCoach.tsx` is partially wired. The component renders in `LibraryContainer.tsx`, and `triggerCoachHint()` is already called in library card components (`DocCard.tsx`, `DocGridCard.tsx`) and `LibraryView.tsx` for archive, favorite, delete, and search actions. However, coaching is completely absent from all reader views — no hints for bottom bar button clicks (play, focus, flow, TTS, chapter nav, font size, menu).
 
 ### Solution
 
 Three changes:
 
-#### 1. Render HotkeyCoach globally
+#### 1. Move HotkeyCoach to App.tsx (global render)
 
-Mount `<HotkeyCoach />` once in `App.tsx` rather than per-container. The component uses a global custom event listener, so it works regardless of which view is active.
+Move `<HotkeyCoach />` from `LibraryContainer.tsx` to `App.tsx` so it works in both library and reader views. Remove the import and render from `LibraryContainer.tsx` to avoid double-rendering.
 
 #### 2. Expand COACH_HINTS map
 
-Add entries for all clickable UI elements that have keyboard equivalents. Only coach where a mouse click has a faster keyboard alternative — skip pure-keyboard actions (arrow nav, Escape layering, filter combos).
+Add reader bottom bar entries. Only coach where a mouse click has a faster keyboard alternative — skip pure-keyboard actions (arrow nav, Escape layering, filter combos).
 
-**Library view hints** (existing 7 + new sidebar hints):
+**Library view hints** (already wired — no changes needed):
 
-| Coach Key | Action Label | Hotkey |
-|-----------|-------------|--------|
-| `archive` | archive | E |
-| `favorite` | favorite | S |
-| `star` | star | S |
-| `search` | search | / |
-| `delete` | delete | # |
-| `queue` | queue | Q |
-| `settings` | settings | Ctrl+, |
-| `goToFavorites` | jump to Favorites | G then F |
-| `goToArchive` | jump to Archive | G then A |
-| `goToQueue` | jump to Queue | G then Q |
-| `goToRecent` | jump to Recent | G then R |
-| `goToStats` | jump to Stats | G then S |
-| `goToSnoozed` | jump to Snoozed | G then H |
-| `goToCollections` | jump to Collections | G then C |
+| Coach Key | Action Label | Hotkey | Wired In |
+|-----------|-------------|--------|----------|
+| `archive` | archive | E | DocCard, DocGridCard |
+| `favorite` | favorite | S | DocCard, DocGridCard |
+| `star` | star | S | DocCard, DocGridCard |
+| `search` | search | / | LibraryView |
+| `delete` | delete | # | DocCard, DocGridCard |
+| `queue` | queue | Q | (existing hint, no click target — orphaned) |
+| `settings` | settings | Ctrl+, | (existing hint, wire to MenuFlap settings click) |
 
 **Reader bottom bar hints** (all new):
 
-| Coach Key | Action Label | Hotkey |
-|-----------|-------------|--------|
-| `play` | play/pause | Space |
-| `enterFocus` | enter Focus mode | Shift+Space |
-| `enterFlow` | enter Flow mode | Space |
-| `narration` | toggle narration | T |
-| `fontSize` | adjust font size | Ctrl+=/- |
-| `prevChapter` | previous chapter | [ |
-| `nextChapter` | next chapter | ] |
-| `menu` | toggle menu | Tab |
+| Coach Key | Action Label | Hotkey | Notes |
+|-----------|-------------|--------|-------|
+| `play` | play/pause | Space | |
+| `enterFocus` | enter Focus mode | Shift+Space | Page mode only |
+| `enterFlow` | enter Flow mode | Space | Page mode only |
+| `narration` | toggle narration | N | Page-mode TTS button uses N key (T is universal but N is context-correct here) |
+| `fontSize` | adjust font size | Ctrl+=/- | |
+| `prevChapter` | previous chapter | [ | |
+| `nextChapter` | next chapter | ] | |
+| `menu` | toggle menu | Tab | |
 
-**Total:** ~22 coaching hints (7 existing + 15 new).
+**Total:** 15 entries in COACH_HINTS map (7 existing + 8 new reader hints).
 
-#### 3. Wire triggerCoachHint() into click handlers
+#### 3. Wire triggerCoachHint() into reader click handlers
 
-**Library view:** Import `triggerCoachHint` in `LibraryContainer.tsx` (or wherever archive/favorite/delete/queue click handlers live). Add calls inside existing `onClick` handlers. Also wire sidebar filter clicks for Go-To hints.
+Import `triggerCoachHint` in `ReaderBottomBar.tsx`. Add calls inside existing `onClick` handlers for: play/pause, Focus mode button, Flow mode button, TTS toggle, font size +/- buttons, chapter prev/next buttons, and menu toggle.
 
-**Reader view:** Import `triggerCoachHint` in `ReaderBottomBar.tsx`. Add calls inside existing `onClick` handlers for play, focus, flow, TTS, font size, chapter nav, and menu buttons.
+Also wire `triggerCoachHint("settings")` in `MenuFlap.tsx` (or wherever the Settings button click handler lives) to activate the existing orphaned hint.
+
+### Existing wiring (no changes needed)
+
+These files already call `triggerCoachHint` and should not be modified:
+- `src/components/DocCard.tsx` — favorite, archive, unarchive, delete
+- `src/components/DocGridCard.tsx` — favorite, archive, delete
+- `src/components/LibraryView.tsx` — search
 
 ### Behavior (unchanged from existing design)
 
@@ -183,10 +183,10 @@ Add entries for all clickable UI elements that have keyboard equivalents. Only c
 ### Files Changed
 
 - `src/App.tsx` — import and render `<HotkeyCoach />`
-- `src/components/HotkeyCoach.tsx` — expand `COACH_HINTS` map (~15 new entries)
+- `src/components/LibraryContainer.tsx` — **remove** `<HotkeyCoach />` import and render (moved to App.tsx)
+- `src/components/HotkeyCoach.tsx` — add 8 new reader entries to `COACH_HINTS` map
 - `src/components/ReaderBottomBar.tsx` — import `triggerCoachHint`, add calls in click handlers
-- `src/components/LibraryContainer.tsx` (or `LibraryView.tsx`) — import `triggerCoachHint`, add calls in click handlers
-- Sidebar filter click handlers — add `triggerCoachHint` for Go-To sequence hints
+- `src/components/MenuFlap.tsx` — add `triggerCoachHint("settings")` to settings button click
 
 ---
 
@@ -222,7 +222,7 @@ The hotkey map page has broken layout — action labels and key labels run toget
 
 ### Solution
 
-Add `display: contents` to `.hotkey-row` in `global.css`. This makes the row wrapper transparent to the grid layout — its children (`.hotkey-action` and `.hotkey-key`) participate directly in the parent grid columns.
+Add `display: contents` to `.hotkey-row` in `global.css`. This makes the row wrapper transparent to the grid layout — its children (`.hotkey-action` and `.hotkey-key`) participate directly in the parent grid columns. (`display: contents` is safe in Electron 41 / Chromium 136+.)
 
 Additionally, add basic styling for `.hotkey-section-title` and `.hotkey-settings` which are also unstyled:
 
@@ -270,14 +270,16 @@ Additionally, add basic styling for `.hotkey-section-title` and `.hotkey-setting
 - [ ] Fuzzy search works across labels and sublabels
 
 ### BUG-038
-- [ ] `<HotkeyCoach />` renders globally in App.tsx
-- [ ] Clicking archive button in library shows coaching toast "Next time try E to archive faster"
+- [ ] `<HotkeyCoach />` renders in App.tsx (not in LibraryContainer)
+- [ ] No double-render of HotkeyCoach (removed from LibraryContainer)
+- [ ] Existing library coaching still works (archive, favorite, delete, search)
 - [ ] Clicking play button in reader bottom bar shows coaching toast "Next time try Space to play/pause faster"
-- [ ] Clicking TTS toggle shows coaching toast "Next time try T to toggle narration faster"
+- [ ] Clicking TTS toggle shows coaching toast "Next time try N to toggle narration faster"
+- [ ] Clicking Focus mode button shows coaching toast
 - [ ] Each coaching toast shows only once per action (localStorage persistence)
 - [ ] Coaching toast auto-dismisses after timeout
 - [ ] Escape key dismisses active coaching toast
-- [ ] All 22+ coach hints have entries in COACH_HINTS map
+- [ ] 15 coach hints in COACH_HINTS map (7 existing + 8 new)
 
 ### BUG-060
 - [ ] Help settings page shows only "Adding Content" and "Updates" sections
@@ -293,7 +295,7 @@ Additionally, add basic styling for `.hotkey-section-title` and `.hotkey-setting
 - [ ] `npm test` passes
 - [ ] `npm run build` succeeds
 - [ ] No regressions in existing Ctrl+K functionality
-- [ ] Palette performance acceptable with ~60 entries (fuzzy search stays fast)
+- [ ] Palette performance acceptable with ~62 entries (fuzzy search stays fast)
 
 ---
 
@@ -302,6 +304,7 @@ Additionally, add basic styling for `.hotkey-section-title` and `.hotkey-setting
 - No inline setting modification from palette (Option C) — just navigation
 - No auto-scroll to specific controls within settings pages (Option B)
 - No coaching for pure-keyboard actions (arrow nav, escape layering, filter combos)
+- No coaching for sidebar Go-To navigation (no click targets exist — G-sequences are keyboard-only)
 - No new keyboard shortcuts — only wiring existing ones to coaching
 
 ## Dependencies
@@ -311,5 +314,5 @@ Additionally, add basic styling for `.hotkey-section-title` and `.hotkey-setting
 ## Risk
 
 - Low. All changes are additive. No architecture changes, no new components, no new IPC channels.
-- The only structural change is mounting HotkeyCoach in App.tsx instead of per-container.
-- The CSS fix uses `display: contents` which has excellent browser support (Chromium 65+, and Electron 41 is Chromium 136+).
+- The only structural change is moving HotkeyCoach from LibraryContainer to App.tsx.
+- The CSS fix uses `display: contents` which is safe in Electron 41 (Chromium 136+).
