@@ -293,44 +293,34 @@ export default function PageReaderView({
     if (!cursor || lineIdx >= lines.length) return;
     const line = lines[lineIdx];
     const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
-    const barWidth = 60;
+    const barWidth = 40;
     const lineWidth = line.right - line.left;
     const y = isUnderline ? line.bottom - 3 : line.y;
     const h = isUnderline ? 3 : (line.bottom - line.y);
-    const w = Math.min(barWidth, lineWidth);
     const duration = (line.wordCount / flowWpmRef.current) * 60000;
 
     // 1. Position at line start with NO transition
     cursor.style.transition = "none";
     cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
     cursor.style.transform = `translate3d(${line.left}px, ${y}px, 0)`;
-    cursor.style.width = `${w}px`;
+    cursor.style.width = `${barWidth}px`;
     cursor.style.height = `${h}px`;
     cursor.style.display = "";
 
-    // 2. On next frame, set transition and target position (line end)
+    // 2. On next frame, set transition and target position — slide to line end
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (!flowCursorRef.current) return;
         cursor.style.transition = `transform ${duration}ms linear`;
-        cursor.style.transform = `translate3d(${line.left + lineWidth - w}px, ${y}px, 0)`;
+        cursor.style.transform = `translate3d(${line.right - barWidth}px, ${y}px, 0)`;
       });
     });
 
-    // 3. Update word index periodically during the slide
-    const startTime = performance.now();
-    if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
-    flowWordUpdateRef.current = setInterval(() => {
-      const elapsed = performance.now() - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      const wordInLine = Math.floor(progress * line.wordCount);
-      const globalWordIdx = Math.min(line.firstWord + wordInLine, line.lastWord);
-      onHighlightRef.current(globalWordIdx);
-    }, 200);
+    // 3. Update word index at line start and end only (reduces re-renders / lag)
+    onHighlightRef.current(line.firstWord);
 
     // 4. When line completes, move to next line
     const lineTimer = setTimeout(() => {
-      if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
       // Final word update for this line
       onHighlightRef.current(line.lastWord);
       flowLineIdxRef.current = lineIdx + 1;
@@ -368,11 +358,24 @@ export default function PageReaderView({
   useEffect(() => {
     if (!flowPlaying) {
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
       flowRafRef.current = null;
-      flowWordUpdateRef.current = null;
       return;
     }
+
+    // Restart function — used by word click to restart slide from new position
+    const restartFromCurrent = () => {
+      if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
+      const newLines = buildLineMap();
+      if (newLines.length === 0) return;
+      const idx = flowHighlightRef.current;
+      let li = 0;
+      for (let i = 0; i < newLines.length; i++) {
+        if (idx >= newLines[i].firstWord && idx <= newLines[i].lastWord) { li = i; break; }
+      }
+      flowLineIdxRef.current = li;
+      startLineSlide(newLines, li);
+    };
+    flowRestartRef.current = restartFromCurrent;
 
     // Delay to ensure DOM has rendered word elements
     const startDelay = requestAnimationFrame(() => {
@@ -394,9 +397,9 @@ export default function PageReaderView({
     });
 
     return () => {
+      flowRestartRef.current = null;
       cancelAnimationFrame(startDelay);
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flowPlaying, buildLineMap, startLineSlide]);
@@ -413,10 +416,14 @@ export default function PageReaderView({
     else nextPage();
   }, [prevPage, nextPage]);
 
-  // Word click handler — set highlight anchor
+  // Word click handler — set highlight anchor; during flow, restart slide from clicked word
+  const flowRestartRef = useRef<(() => void) | null>(null);
   const handleWordClick = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     onHighlightedWordChange(index);
+    flowHighlightRef.current = index;
+    // If flow is playing, restart the slide from this word
+    if (flowRestartRef.current) flowRestartRef.current();
   }, [onHighlightedWordChange]);
 
   // Right-click context menu
