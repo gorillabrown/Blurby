@@ -177,24 +177,20 @@ export default function FoliatePageView({
           const { doc } = e.detail;
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
-          // Word click detection — highlight clicked word and fire callback
+          // Word click detection — highlight via native Selection API (no DOM mutation)
           doc.addEventListener("click", (ce: MouseEvent) => {
+            // Don't intercept link clicks
+            if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
+
             const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
             if (!result) return;
 
-            // Clear previous selection highlight
-            const prevHighlight = doc.querySelector(".blurby-word-highlight");
-            if (prevHighlight) prevHighlight.remove();
-
-            // Create highlight span around the word
-            const highlight = doc.createElement("span");
-            highlight.className = "blurby-word-highlight";
-            highlight.style.cssText = `
-              background: var(--accent, #D04716)33;
-              border-radius: 2px;
-              padding: 1px 0;
-            `;
-            result.range.surroundContents(highlight);
+            // Highlight using native selection (safe, no DOM mutation)
+            const sel = doc.getSelection();
+            if (sel) {
+              sel.removeAllRanges();
+              sel.addRange(result.range);
+            }
 
             // Get CFI for the clicked position
             const v = viewRef.current;
@@ -262,29 +258,23 @@ export default function FoliatePageView({
             next: () => view.renderer.next(),
             prev: () => view.renderer.prev(),
             highlightWord: (range, _sectionIndex) => {
-              // Clear previous
-              if (currentHighlight?.parentNode) {
-                const parent = currentHighlight.parentNode;
-                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
-                parent.removeChild(currentHighlight);
-              }
-              currentHighlight = null;
-              // Wrap new word
+              // Use native selection API — safe across element boundaries
               try {
-                const span = range.startContainer.ownerDocument!.createElement("span");
-                span.className = "blurby-word-highlight";
-                span.style.cssText = "background: var(--accent, #D04716)33; border-radius: 2px; padding: 1px 0;";
-                range.surroundContents(span);
-                currentHighlight = span;
-              } catch { /* range may cross element boundaries */ }
+                const doc = range.startContainer.ownerDocument;
+                if (doc) {
+                  const sel = doc.getSelection();
+                  if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+                }
+              } catch { /* range may be invalid after page navigation */ }
             },
             clearHighlight: () => {
-              if (currentHighlight?.parentNode) {
-                const parent = currentHighlight.parentNode;
-                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
-                parent.removeChild(currentHighlight);
+              // Clear selection in all visible section docs
+              const v = viewRef.current;
+              if (v?.renderer?.getContents) {
+                for (const { doc: d } of v.renderer.getContents()) {
+                  d?.getSelection()?.removeAllRanges();
+                }
               }
-              currentHighlight = null;
             },
             getView: () => view,
           };
