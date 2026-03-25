@@ -334,33 +334,36 @@ export default function ReaderContainer({
   // ── Mode transitions ───────────────────────────────────────────────────
 
   /** Start Focus mode (internal — called by handleTogglePlay) */
+  // Extract words from foliate DOM (populate foliateWordsRef for modes)
+  const extractFoliateWords = useCallback(() => {
+    if (!useFoliate || !foliateApiRef.current) return;
+    const extracted = foliateApiRef.current.getWords();
+    if (extracted.length > 0) {
+      foliateWordsRef.current = extracted;
+      wordsRef.current = extracted.map(w => w.word);
+      console.log(`[Foliate] Extracted ${extracted.length} words from DOM`);
+    }
+  }, [useFoliate, wordsRef]);
+
   const startFocus = useCallback(() => {
     stopAllModes();
-    // For foliate EPUBs, extract words from DOM for Focus mode
-    if (useFoliate && foliateApiRef.current) {
-      const foliateWords = foliateApiRef.current.getWords();
-      foliateWordsRef.current = foliateWords;
-      wordsRef.current = foliateWords.map(w => w.word);
-    }
+    // For foliate EPUBs, ensure words are extracted
+    if (useFoliate) extractFoliateWords();
     jumpToWord(highlightedWordIndex);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
     setTimeout(() => reader.togglePlay(), 50);
-  }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes, useFoliate, wordsRef]);
+  }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes, useFoliate, extractFoliateWords]);
 
   /** Start Flow mode (internal — called by handleTogglePlay) */
   const startFlow = useCallback(() => {
     stopAllModes();
-    // For foliate EPUBs, extract words from DOM for Flow cursor
-    if (useFoliate && foliateApiRef.current) {
-      const foliateWords = foliateApiRef.current.getWords();
-      foliateWordsRef.current = foliateWords;
-      wordsRef.current = foliateWords.map(w => w.word);
-    }
+    // For foliate EPUBs, ensure words are extracted
+    if (useFoliate) extractFoliateWords();
     setReadingMode("flow");
     setFlowPlaying(true);
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
-  }, [updateSettings, stopAllModes, useFoliate, wordsRef]);
+  }, [updateSettings, stopAllModes, useFoliate, extractFoliateWords]);
 
   /** Pause any sub-mode → return to Page */
   const handlePauseToPage = useCallback(() => {
@@ -660,6 +663,10 @@ export default function ReaderContainer({
         activeDoc.cfi = cfi;
         console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
       }}
+      onLoad={() => {
+        // Extract words from DOM after each section loads
+        setTimeout(extractFoliateWords, 100);
+      }}
       viewApiRef={foliateApiRef}
     />
   ) : null;
@@ -673,7 +680,7 @@ export default function ReaderContainer({
         return (
           <>
             {foliateView}
-            <div style={{ position: "absolute", inset: 0, zIndex: 15, background: "var(--bg)" }}>
+            <div style={{ position: "absolute", inset: 0, zIndex: 15, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
               <ReaderView
                 activeDoc={activeDoc}
                 words={wordsRef.current}
