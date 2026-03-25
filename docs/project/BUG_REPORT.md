@@ -308,11 +308,34 @@ Page count is derived from word count and the pagination algorithm (or estimated
 **Description:** In reading modes, the mouse scroll wheel should advance or retreat one word at a time (scroll down = forward, scroll up = backward) instead of scrolling the page. This gives fine-grained navigation control.
 
 ### BUG-071: Tab key not opening settings flap in Library view
-**Reported:** 2026-03-25
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
 **Severity:** Medium
 **Location:** `src/hooks/useKeyboardShortcuts.ts`
 **Description:** Pressing Tab in Library view should toggle the menu flap open/closed. Currently nothing happens. The keyboard handler was referencing `s.toggleFlap?.()` (reader scope variable) instead of `a.onToggleFlap?.()` (library scope).
 **Solution:** Fixed variable reference from `s.toggleFlap?.()` to `a.onToggleFlap?.()` in the library keyboard handler.
+
+### BUG-072: Time-to-complete should reflect active mode's speed
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/components/ReaderBottomBar.tsx` (time remaining calculation), `src/components/LibraryView.tsx` (card time display)
+**Description:** The "time until chapter/book completes" display is always based on WPM. It should be mode-aware:
+- **Page view, Focus, Flow, Library:** Time based on current WPM setting
+- **Narration mode (active or selected):** Time based on TTS rate. A TTS rate of 1.0x ≈ 150 WPM natural speech. So `effectiveWpm = ttsRate * 150`.
+This makes the time estimate meaningful regardless of which mode is selected.
+
+### BUG-073: NM page browsing yanks user back to current narration position
+**Reported:** 2026-03-25
+**Severity:** High
+**Location:** `src/components/PageReaderView.tsx` (page sync effect), `src/components/ReaderContainer.tsx`
+**Description:** During active Narration mode, if the user manually navigates pages (Left/Right arrows), the page-sync effect immediately yanks them back to the page containing the current narration word. Users should be able to browse ahead/behind while NM continues speaking.
+
+**Desired behavior:**
+1. Left/Right arrows change pages freely even during active NM
+2. NM continues speaking in the background uninterrupted
+3. A floating "Return to narration" button appears when the user is on a different page than the narration cursor
+4. Clicking the button (or pressing a hotkey like Backspace) snaps back to the page containing the current narration word
+5. If the user clicks a word on the browsed page, NM picks up from that word instead
+6. When the narration cursor naturally advances to the page the user is viewing, the button disappears
 
 ---
 

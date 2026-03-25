@@ -76,9 +76,11 @@ export default function ReaderBottomBar({
   // Progress
   const progress = words.length > 0 ? (wordIndex / words.length) * 100 : 0;
 
-  // Time remaining
+  // Time remaining — use TTS-derived WPM when narration is selected
+  const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration");
+  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * 150) : wpm;
   const wordsRemaining = Math.max(0, words.length - wordIndex);
-  const timeRemaining = formatTime(wordsRemaining, wpm);
+  const timeRemaining = formatTime(wordsRemaining, effectiveWpm);
 
   // Chapter info
   const chapterList = useMemo(() => {
