@@ -225,52 +225,6 @@ export default function PageReaderView({
 
   const wordSpan = Math.max(3, settings?.flowWordSpan || 3);
 
-  /** Position the flow highlight cursor over a word element (direct DOM, no React) */
-  const positionFlowCursor = useCallback((wordIdx: number) => {
-    const cursor = flowCursorRef.current;
-    if (!cursor) return;
-    // First word in sliding window
-    const firstEl = document.querySelector(`[data-word-index="${wordIdx}"]`) as HTMLElement;
-    if (!firstEl) return;
-    const container = firstEl.closest(".page-reader-content") as HTMLElement;
-    if (!container) return;
-    const cRect = container.getBoundingClientRect();
-    const firstRect = firstEl.getBoundingClientRect();
-
-    // Last word in sliding window
-    const lastIdx = Math.min(wordIdx + wordSpan - 1, (flowWordsRef.current?.length || 1) - 1);
-    const lastEl = document.querySelector(`[data-word-index="${lastIdx}"]`) as HTMLElement;
-    const lastRect = lastEl ? lastEl.getBoundingClientRect() : firstRect;
-
-    // Column break detection: if last word is left of first word, clamp to first word's column
-    const clampedLastRect = (lastRect.left < firstRect.left) ? firstRect : lastRect;
-
-    const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
-    const x = firstRect.left - cRect.left + container.scrollLeft;
-    const y = isUnderline
-      ? firstRect.bottom - cRect.top + container.scrollTop - 3
-      : firstRect.top - cRect.top + container.scrollTop;
-    const w = clampedLastRect.right - firstRect.left;
-    const h = isUnderline ? 3 : firstRect.height;
-
-    // Detect line wrap: if Y changed significantly, add snap class
-    const isLineWrap = Math.abs(y - flowCursorLastY.current) > (isUnderline ? 20 : h * 0.5);
-    flowCursorLastY.current = y;
-
-    // Continuous slide: transition duration matches word interval for seamless motion
-    const fast = wpm > ANIMATION_DISABLE_WPM;
-    const intervalMs = 60000 / wpm;
-    const transMs = isLineWrap ? 50 : (fast ? 0 : intervalMs);
-    cursor.className = "flow-highlight-cursor"
-      + (isUnderline ? "" : " flow-highlight-cursor--box");
-    // Set transition dynamically for continuous motion
-    cursor.style.transition = fast ? "none" : `transform ${transMs}ms linear, width ${transMs}ms linear`;
-    cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-    cursor.style.width = `${w}px`;
-    cursor.style.height = `${h}px`;
-    cursor.style.display = "";
-  }, [wpm, wordSpan]);
-
   // Hide cursor when not in flow mode
   useEffect(() => {
     if (!flowPlaying && flowCursorRef.current) {
@@ -278,108 +232,161 @@ export default function PageReaderView({
     }
   }, [flowPlaying]);
 
-  // ── Flow mode: advance highlighted word(s) at WPM speed ─────────────
+  // ── Flow mode: continuous line-level bar slide at WPM speed ─────────────
   const flowRafRef = useRef<number | null>(null);
-  const flowLastTimeRef = useRef(0);
-  const flowAccRef = useRef(0);
   const flowPagePausingRef = useRef(false);
   const ttsActiveRef = useRef(ttsActive || false);
   ttsActiveRef.current = ttsActive || false;
-  // Use refs so the RAF loop always reads fresh values without restarting
-  const flowHighlightRef = useRef(highlightedWordIndex);
   const flowWpmRef = useRef(wpm);
   const flowPagesRef = useRef(pages);
   const flowCurrentPageRef = useRef(currentPage);
   const flowWordsRef = useRef(words);
-  flowHighlightRef.current = highlightedWordIndex;
   flowWpmRef.current = wpm;
   flowPagesRef.current = pages;
   flowCurrentPageRef.current = currentPage;
   flowWordsRef.current = words;
 
+  /** Build a line map from rendered word elements on the current page */
+  const buildLineMap = useCallback(() => {
+    const container = document.querySelector(".page-reader-content") as HTMLElement;
+    if (!container) return [];
+    const cRect = container.getBoundingClientRect();
+    const wordEls = container.querySelectorAll("[data-word-index]");
+    if (wordEls.length === 0) return [];
+
+    type LineInfo = { y: number; bottom: number; left: number; right: number; firstWord: number; lastWord: number; wordCount: number };
+    const lines: LineInfo[] = [];
+    let currentLine: LineInfo | null = null;
+
+    wordEls.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const wordIdx = parseInt(el.getAttribute("data-word-index") || "0", 10);
+      const relTop = rect.top - cRect.top + container.scrollTop;
+      const relBottom = rect.bottom - cRect.top + container.scrollTop;
+      const relLeft = rect.left - cRect.left + container.scrollLeft;
+      const relRight = rect.right - cRect.left + container.scrollLeft;
+
+      if (!currentLine || Math.abs(relTop - currentLine.y) > rect.height * 0.5) {
+        // New line
+        currentLine = { y: relTop, bottom: relBottom, left: relLeft, right: relRight, firstWord: wordIdx, lastWord: wordIdx, wordCount: 1 };
+        lines.push(currentLine);
+      } else {
+        // Same line — extend
+        currentLine.right = relRight;
+        currentLine.lastWord = wordIdx;
+        currentLine.wordCount++;
+      }
+    });
+    return lines;
+  }, []);
+
   useEffect(() => {
     if (!flowPlaying) {
       if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
       flowRafRef.current = null;
-      flowLastTimeRef.current = 0;
-      flowAccRef.current = 0;
       return;
     }
 
+    const cursor = flowCursorRef.current;
+    if (!cursor) return;
+
+    // Build line map for current page
+    let lines = buildLineMap();
+    if (lines.length === 0) return;
+
+    // Find starting line based on current highlighted word
+    let lineIdx = 0;
+    for (let i = 0; i < lines.length; i++) {
+      if (highlightedWordIndex >= lines[i].firstWord && highlightedWordIndex <= lines[i].lastWord) {
+        lineIdx = i;
+        break;
+      }
+    }
+
+    const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
+    const barWidth = 60; // fixed bar width in pixels
+    let lineStartTime = performance.now();
+    let currentLineIdx = lineIdx;
+
+    // Calculate how long a line takes: (wordCount / WPM) * 60000 ms
+    const getLineDurationMs = (line: typeof lines[0]) => (line.wordCount / flowWpmRef.current) * 60000;
+
+    const positionOnLine = (line: typeof lines[0], progress: number) => {
+      const lineWidth = line.right - line.left;
+      const x = line.left + progress * (lineWidth - barWidth);
+      const y = isUnderline ? line.bottom - 3 : line.y;
+      const h = isUnderline ? 3 : (line.bottom - line.y);
+      cursor.style.transition = "none";
+      cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
+      cursor.style.transform = `translate3d(${Math.max(line.left, x)}px, ${y}px, 0)`;
+      cursor.style.width = `${Math.min(barWidth, lineWidth)}px`;
+      cursor.style.height = `${h}px`;
+      cursor.style.display = "";
+    };
+
     const tick = (timestamp: number) => {
-      if (flowLastTimeRef.current === 0) {
-        flowLastTimeRef.current = timestamp;
-      }
-      // Skip advancement during page turn pause
-      if (flowPagePausingRef.current) {
-        flowLastTimeRef.current = timestamp;
+      if (flowPagePausingRef.current || ttsActiveRef.current) {
+        lineStartTime = timestamp - (timestamp - lineStartTime); // preserve offset
         flowRafRef.current = requestAnimationFrame(tick);
         return;
       }
-      // When TTS drives the cursor, skip RAF-based advancement
-      if (ttsActiveRef.current) {
-        flowLastTimeRef.current = timestamp;
-        flowRafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-      const delta = timestamp - flowLastTimeRef.current;
-      flowLastTimeRef.current = timestamp;
-      flowAccRef.current += delta;
 
-      // Sliding window: advance 1 word per tick, continuous motion
-      const baseInterval = 60000 / flowWpmRef.current;
-      const effectiveInterval = baseInterval;
+      const line = lines[currentLineIdx];
+      if (!line) return;
 
-      if (flowAccRef.current >= effectiveInterval) {
-        flowAccRef.current -= effectiveInterval;
-        const next = flowHighlightRef.current + 1; // slide by 1 word
-        if (next >= flowWordsRef.current.length) {
-          // Document end — stop flow
-          return;
-        }
-        onHighlightedWordChange(next);
-        flowHighlightRef.current = next;
-        // Check if next word crosses a page boundary — pause and turn
-        const curPageData = flowPagesRef.current[flowCurrentPageRef.current];
-        if (curPageData && next > curPageData.end) {
-          const nextPageIdx = flowCurrentPageRef.current + 1;
+      const elapsed = timestamp - lineStartTime;
+      const duration = getLineDurationMs(line);
+      const progress = Math.min(1, elapsed / duration);
+
+      positionOnLine(line, progress);
+
+      // Update word index based on progress through the line
+      const wordInLine = Math.floor(progress * line.wordCount);
+      const globalWordIdx = Math.min(line.firstWord + wordInLine, line.lastWord);
+      onHighlightedWordChange(globalWordIdx);
+
+      if (progress >= 1) {
+        // Line complete — move to next line
+        currentLineIdx++;
+        lineStartTime = timestamp;
+
+        if (currentLineIdx >= lines.length) {
+          // End of page — check for next page
+          const curPageIdx = flowCurrentPageRef.current;
+          const nextPageIdx = curPageIdx + 1;
           if (nextPageIdx < flowPagesRef.current.length) {
-            // Pause at page boundary, then turn
             flowPagePausingRef.current = true;
             setTimeout(() => {
               setCurrentPage(nextPageIdx);
               flowCurrentPageRef.current = nextPageIdx;
-              // Wait for page transition animation before resuming
               setTimeout(() => {
+                // Rebuild line map for new page
+                lines = buildLineMap();
+                currentLineIdx = 0;
+                lineStartTime = performance.now();
                 flowPagePausingRef.current = false;
-                // Reposition cursor on new page
-                requestAnimationFrame(() => positionFlowCursor(flowHighlightRef.current));
               }, PAGE_TRANSITION_MS + 50);
             }, FLOW_PAGE_TURN_PAUSE_MS);
+          } else {
+            // End of document
+            return;
           }
-          // Don't position cursor during page turn (word not rendered yet)
-          return;
         }
-        // Position smooth highlight cursor
-        requestAnimationFrame(() => {
-          positionFlowCursor(next);
-        });
       }
+
       flowRafRef.current = requestAnimationFrame(tick);
     };
+
+    // Initial position
+    if (lines[currentLineIdx]) {
+      positionOnLine(lines[currentLineIdx], 0);
+    }
 
     flowRafRef.current = requestAnimationFrame(tick);
     return () => {
       if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
     };
-  }, [flowPlaying, wordSpan, onHighlightedWordChange, positionFlowCursor]);
-
-  // Position cursor on initial flow start
-  useEffect(() => {
-    if (flowPlaying) {
-      requestAnimationFrame(() => positionFlowCursor(highlightedWordIndex));
-    }
-  }, [flowPlaying]); // Only on flow start, not on every highlight change
+  }, [flowPlaying, highlightedWordIndex, onHighlightedWordChange, buildLineMap, settings?.flowCursorStyle]);
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
