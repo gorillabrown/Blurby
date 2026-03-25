@@ -118,7 +118,20 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         aria-label="Flow mode words per highlight"
       />
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
-        How many words the sliding underline spans. The highlight advances one word at a time.
+        How many words the sliding cursor spans. The highlight advances one word at a time.
+      </div>
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Cursor style</span>
+        <select
+          className="settings-select"
+          value={settings.flowCursorStyle || "underline"}
+          onChange={(e) => onSettingsChange({ flowCursorStyle: e.target.value as "underline" | "highlight" })}
+          aria-label="Flow cursor style"
+        >
+          <option value="underline">Underline</option>
+          <option value="highlight">Highlight</option>
+        </select>
       </div>
 
       <div className="settings-section-label" style={{ marginTop: 16 }}>Rhythm Pauses</div>

@@ -74,7 +74,8 @@ export interface BlurbySettings {
   punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
   viewMode: "list" | "grid";
   // Flow mode settings
-  flowWordSpan: number; // how many words to highlight at once in Flow mode (1-5, default 1)
+  flowWordSpan: number; // how many words to highlight at once in Flow mode (3-5, default 3)
+  flowCursorStyle: "underline" | "highlight"; // flow cursor visual style (default: underline)
   // E-ink display optimization settings
   einkWpmCeiling: number;
   einkRefreshInterval: number;

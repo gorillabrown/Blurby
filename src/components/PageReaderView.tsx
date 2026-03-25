@@ -13,7 +13,8 @@ interface PageSettings {
   layoutSpacing?: LayoutSpacing;
   fontFamily?: string | null;
   isEink?: boolean;
-  flowWordSpan?: number; // 1-5, how many words highlighted at once in Flow
+  flowWordSpan?: number; // 3-5, how many words highlighted at once in Flow
+  flowCursorStyle?: "underline" | "highlight";
 }
 
 interface PageReaderViewProps {
@@ -244,23 +245,29 @@ export default function PageReaderView({
     // Column break detection: if last word is left of first word, clamp to first word's column
     const clampedLastRect = (lastRect.left < firstRect.left) ? firstRect : lastRect;
 
+    const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
     const x = firstRect.left - cRect.left + container.scrollLeft;
-    const y = firstRect.bottom - cRect.top + container.scrollTop - 3; // underline at bottom
+    const y = isUnderline
+      ? firstRect.bottom - cRect.top + container.scrollTop - 3
+      : firstRect.top - cRect.top + container.scrollTop;
     const w = clampedLastRect.right - firstRect.left;
+    const h = isUnderline ? 3 : firstRect.height;
 
     // Detect line wrap: if Y changed significantly, add snap class
-    const isLineWrap = Math.abs(y - flowCursorLastY.current) > 20;
+    const isLineWrap = Math.abs(y - flowCursorLastY.current) > (isUnderline ? 20 : h * 0.5);
     flowCursorLastY.current = y;
 
-    // Disable animation at high WPM (>ANIMATION_DISABLE_WPM) or during line wrap
+    // Continuous slide: transition duration matches word interval for seamless motion
     const fast = wpm > ANIMATION_DISABLE_WPM;
+    const intervalMs = 60000 / wpm;
+    const transMs = isLineWrap ? 50 : (fast ? 0 : intervalMs);
     cursor.className = "flow-highlight-cursor"
-      + (isLineWrap ? " flow-highlight-cursor--line-wrap" : "")
-      + (fast ? " flow-highlight-cursor--fast" : "");
-
+      + (isUnderline ? "" : " flow-highlight-cursor--box");
+    // Set transition dynamically for continuous motion
+    cursor.style.transition = fast ? "none" : `transform ${transMs}ms linear, width ${transMs}ms linear`;
     cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     cursor.style.width = `${w}px`;
-    cursor.style.height = "3px";
+    cursor.style.height = `${h}px`;
     cursor.style.display = "";
   }, [wpm, wordSpan]);
 
@@ -319,21 +326,9 @@ export default function PageReaderView({
       flowLastTimeRef.current = timestamp;
       flowAccRef.current += delta;
 
-      // Sliding window: advance 1 word per tick, keep wordSpan words highlighted
+      // Sliding window: advance 1 word per tick, continuous motion
       const baseInterval = 60000 / flowWpmRef.current;
-      const interval = baseInterval;
-
-      // Extra pause on punctuation at the END of the current span
-      const spanEnd = Math.min(
-        flowHighlightRef.current + wordSpan - 1,
-        flowWordsRef.current.length - 1
-      );
-      const endWord = flowWordsRef.current[spanEnd] || "";
-      let extraPause = 0;
-      if (/[.!?]$/.test(endWord)) extraPause = PAGE_FLOW_SENTENCE_PAUSE_MS; // sentence-end
-      else if (/[,;:]$/.test(endWord)) extraPause = PAGE_FLOW_CLAUSE_PAUSE_MS; // mid-sentence
-
-      const effectiveInterval = interval + extraPause;
+      const effectiveInterval = baseInterval;
 
       if (flowAccRef.current >= effectiveInterval) {
         flowAccRef.current -= effectiveInterval;
@@ -516,8 +511,11 @@ export default function PageReaderView({
         {renderedParagraphs.map((para, pIdx) => (
           <p key={pIdx} className="page-reader-paragraph">
             {para.map(({ word, globalIndex }) => {
+              // During flow with underline cursor, no word background — underline handles it
+              // With highlight cursor, show word backgrounds as before
+              const useHighlightCursor = settings?.flowCursorStyle === "highlight";
               const isHighlighted = flowPlaying
-                ? (globalIndex >= highlightedWordIndex && globalIndex < highlightedWordIndex + wordSpan)
+                ? (useHighlightCursor && globalIndex >= highlightedWordIndex && globalIndex < highlightedWordIndex + wordSpan)
                 : globalIndex === highlightedWordIndex;
               const noteText = savedNotes.get(globalIndex) || notes?.get(globalIndex);
               const hasNote = !!noteText;

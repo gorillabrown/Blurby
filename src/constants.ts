@@ -102,6 +102,8 @@ export const DEFAULT_SYNC_INTERVAL_MINUTES = 5;
 // ── Reader Defaults ──────────────────────────────────────────────────────────
 /** Default flow word span (words highlighted at once) */
 export const DEFAULT_FLOW_WORD_SPAN = 3;
+/** Default flow cursor style */
+export const DEFAULT_FLOW_CURSOR_STYLE = "underline" as const;
 /** Default focus span (character opacity gradient width) */
 export const DEFAULT_FOCUS_SPAN = 0.4;
 

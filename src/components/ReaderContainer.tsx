@@ -434,8 +434,9 @@ export default function ReaderContainer({
     layoutSpacing: settings.layoutSpacing,
     fontFamily: settings.fontFamily,
     isEink,
-    flowWordSpan: settings.flowWordSpan || 1,
-  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink, settings.flowWordSpan]);
+    flowWordSpan: settings.flowWordSpan || 3,
+    flowCursorStyle: settings.flowCursorStyle || "underline",
+  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink, settings.flowWordSpan, settings.flowCursorStyle]);
 
   const menuFlap = (
     <MenuFlap

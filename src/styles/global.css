@@ -3482,6 +3482,11 @@ button:focus-visible {
               width 0.1s cubic-bezier(0.25, 0.1, 0.25, 1);
   z-index: 1;
 }
+/* Box/highlight mode — translucent overlay (user preference) */
+.flow-highlight-cursor--box {
+  opacity: 0.25;
+  border-radius: 3px;
+}
 /* When crossing to a new line, snap Y instantly and only slide X */
 .flow-highlight-cursor--line-wrap {
   transition: transform 0.05s cubic-bezier(0.25, 0.1, 0.25, 1),
