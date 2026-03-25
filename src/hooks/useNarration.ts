@@ -246,15 +246,23 @@ export default function useNarration() {
           cursorWordIndexRef.current = endIdx;
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
           if (isCursorDrivenRef.current && !holdRef.current) {
-            // Rhythm pause: add silence between chunks at sentence/paragraph boundaries
-            // Use half the Focus mode pause — Kokoro already adds natural prosody
+            // Rhythm pause: add silence between chunks at punctuation boundaries
+            // TTS uses reduced base (250ms) since Kokoro adds its own prosody
+            // Commas: 250ms, Sentences: 500ms (250×1.5→375, capped), Paragraphs: 750ms
+            const TTS_PUNCT_BASE = 250;
             const lastWord = chunkWords[chunkWords.length - 1] || "";
             const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
             const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
-            const fullPause = rhythmPausesRef.current
-              ? calculatePauseMs(lastWord, rhythmPausesRef.current, PUNCTUATION_PAUSE_MS, isParagraphEnd)
-              : 0;
-            const pauseMs = Math.round(fullPause * 0.5);
+            let pauseMs = 0;
+            if (rhythmPausesRef.current) {
+              if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
+                pauseMs = 750;
+              } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
+                pauseMs = 500;
+              } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
+                pauseMs = TTS_PUNCT_BASE;
+              }
+            }
             if (pauseMs > 0) {
               chunkPauseTimerRef.current = setTimeout(() => {
                 chunkPauseTimerRef.current = null;
