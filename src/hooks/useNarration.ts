@@ -248,21 +248,20 @@ export default function useNarration() {
           cursorWordIndexRef.current = endIdx;
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
           if (isCursorDrivenRef.current && !holdRef.current) {
-            // Rhythm pause: add silence between chunks at punctuation boundaries
-            // TTS uses reduced base (250ms) since Kokoro adds its own prosody
-            // Commas: 250ms, Sentences: 500ms (250×1.5→375, capped), Paragraphs: 750ms
-            const TTS_PUNCT_BASE = 250;
-            const lastWord = chunkWords[chunkWords.length - 1] || "";
-            const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
-            const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
+            // Rhythm pause: only add silence if pre-buffer is ready.
+            // If not ready, generation time IS the natural pause — don't stack delays.
+            const hasPreBuffer = nextChunkBufferRef.current !== null;
             let pauseMs = 0;
-            if (rhythmPausesRef.current) {
+            if (hasPreBuffer && rhythmPausesRef.current) {
+              const lastWord = chunkWords[chunkWords.length - 1] || "";
+              const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
+              const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
               if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
                 pauseMs = 750;
               } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
                 pauseMs = 400;
               } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
-                pauseMs = TTS_PUNCT_BASE;
+                pauseMs = 250;
               }
             }
             if (pauseMs > 0) {
