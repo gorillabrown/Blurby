@@ -284,115 +284,122 @@ export default function PageReaderView({
     return lines;
   }, []);
 
-  useEffect(() => {
-    if (!flowPlaying) {
-      if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
-      flowRafRef.current = null;
-      return;
-    }
+  const flowLineIdxRef = useRef(0);
+  const flowWordUpdateRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  /** Start sliding the cursor across a line using CSS transition */
+  const startLineSlide = useCallback((lines: ReturnType<typeof buildLineMap>, lineIdx: number) => {
     const cursor = flowCursorRef.current;
-    if (!cursor) return;
-
-    // Build line map for current page
-    let lines = buildLineMap();
-    if (lines.length === 0) return;
-
-    // Find starting line based on current highlighted word
-    const startWordIdx = flowHighlightRef.current;
-    let lineIdx = 0;
-    for (let i = 0; i < lines.length; i++) {
-      if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
-        lineIdx = i;
-        break;
-      }
-    }
-
+    if (!cursor || lineIdx >= lines.length) return;
+    const line = lines[lineIdx];
     const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
-    const barWidth = 60; // fixed bar width in pixels
-    let lineStartTime = performance.now();
-    let currentLineIdx = lineIdx;
+    const barWidth = 60;
+    const lineWidth = line.right - line.left;
+    const y = isUnderline ? line.bottom - 3 : line.y;
+    const h = isUnderline ? 3 : (line.bottom - line.y);
+    const w = Math.min(barWidth, lineWidth);
+    const duration = (line.wordCount / flowWpmRef.current) * 60000;
 
-    // Calculate how long a line takes: (wordCount / WPM) * 60000 ms
-    const getLineDurationMs = (line: typeof lines[0]) => (line.wordCount / flowWpmRef.current) * 60000;
+    // 1. Position at line start with NO transition
+    cursor.style.transition = "none";
+    cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
+    cursor.style.transform = `translate3d(${line.left}px, ${y}px, 0)`;
+    cursor.style.width = `${w}px`;
+    cursor.style.height = `${h}px`;
+    cursor.style.display = "";
 
-    const positionOnLine = (line: typeof lines[0], progress: number) => {
-      const lineWidth = line.right - line.left;
-      const x = line.left + progress * (lineWidth - barWidth);
-      const y = isUnderline ? line.bottom - 3 : line.y;
-      const h = isUnderline ? 3 : (line.bottom - line.y);
-      cursor.style.transition = "none";
-      cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
-      cursor.style.transform = `translate3d(${Math.max(line.left, x)}px, ${y}px, 0)`;
-      cursor.style.width = `${Math.min(barWidth, lineWidth)}px`;
-      cursor.style.height = `${h}px`;
-      cursor.style.display = "";
-    };
+    // 2. On next frame, set transition and target position (line end)
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!flowCursorRef.current) return;
+        cursor.style.transition = `transform ${duration}ms linear`;
+        cursor.style.transform = `translate3d(${line.left + lineWidth - w}px, ${y}px, 0)`;
+      });
+    });
 
-    const tick = (timestamp: number) => {
-      if (flowPagePausingRef.current || ttsActiveRef.current) {
-        lineStartTime = timestamp - (timestamp - lineStartTime); // preserve offset
-        flowRafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      const line = lines[currentLineIdx];
-      if (!line) return;
-
-      const elapsed = timestamp - lineStartTime;
-      const duration = getLineDurationMs(line);
+    // 3. Update word index periodically during the slide
+    const startTime = performance.now();
+    if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
+    flowWordUpdateRef.current = setInterval(() => {
+      const elapsed = performance.now() - startTime;
       const progress = Math.min(1, elapsed / duration);
-
-      positionOnLine(line, progress);
-
-      // Update word index based on progress through the line
       const wordInLine = Math.floor(progress * line.wordCount);
       const globalWordIdx = Math.min(line.firstWord + wordInLine, line.lastWord);
       onHighlightRef.current(globalWordIdx);
+    }, 200);
 
-      if (progress >= 1) {
-        // Line complete — move to next line
-        currentLineIdx++;
-        lineStartTime = timestamp;
+    // 4. When line completes, move to next line
+    const lineTimer = setTimeout(() => {
+      if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
+      // Final word update for this line
+      onHighlightRef.current(line.lastWord);
+      flowLineIdxRef.current = lineIdx + 1;
 
-        if (currentLineIdx >= lines.length) {
-          // End of page — check for next page
-          const curPageIdx = flowCurrentPageRef.current;
-          const nextPageIdx = curPageIdx + 1;
-          if (nextPageIdx < flowPagesRef.current.length) {
-            flowPagePausingRef.current = true;
+      if (lineIdx + 1 >= lines.length) {
+        // End of page — check for next page
+        const nextPageIdx = flowCurrentPageRef.current + 1;
+        if (nextPageIdx < flowPagesRef.current.length) {
+          // Page turn pause
+          setTimeout(() => {
+            setCurrentPage(nextPageIdx);
+            flowCurrentPageRef.current = nextPageIdx;
+            // Rebuild line map after page renders
             setTimeout(() => {
-              setCurrentPage(nextPageIdx);
-              flowCurrentPageRef.current = nextPageIdx;
-              setTimeout(() => {
-                // Rebuild line map for new page
-                lines = buildLineMap();
-                currentLineIdx = 0;
-                lineStartTime = performance.now();
-                flowPagePausingRef.current = false;
-              }, PAGE_TRANSITION_MS + 50);
-            }, FLOW_PAGE_TURN_PAUSE_MS);
-          } else {
-            // End of document
-            return;
-          }
+              const newLines = buildLineMap();
+              if (newLines.length > 0) {
+                flowLineIdxRef.current = 0;
+                startLineSlide(newLines, 0);
+              }
+            }, PAGE_TRANSITION_MS + 100);
+          }, FLOW_PAGE_TURN_PAUSE_MS);
+        }
+        // else: end of document — stop
+        return;
+      }
+
+      // Next line
+      startLineSlide(lines, lineIdx + 1);
+    }, duration);
+
+    // Store timer for cleanup
+    flowRafRef.current = lineTimer as unknown as number;
+  }, [buildLineMap, settings?.flowCursorStyle]);
+
+  useEffect(() => {
+    if (!flowPlaying) {
+      if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
+      if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
+      flowRafRef.current = null;
+      flowWordUpdateRef.current = null;
+      return;
+    }
+
+    // Delay to ensure DOM has rendered word elements
+    const startDelay = requestAnimationFrame(() => {
+      const lines = buildLineMap();
+      if (lines.length === 0) return;
+
+      // Find starting line
+      const startWordIdx = flowHighlightRef.current;
+      let lineIdx = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
+          lineIdx = i;
+          break;
         }
       }
 
-      flowRafRef.current = requestAnimationFrame(tick);
-    };
+      flowLineIdxRef.current = lineIdx;
+      startLineSlide(lines, lineIdx);
+    });
 
-    // Initial position
-    if (lines[currentLineIdx]) {
-      positionOnLine(lines[currentLineIdx], 0);
-    }
-
-    flowRafRef.current = requestAnimationFrame(tick);
     return () => {
-      if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
+      cancelAnimationFrame(startDelay);
+      if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
+      if (flowWordUpdateRef.current) clearInterval(flowWordUpdateRef.current);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowPlaying, buildLineMap, settings?.flowCursorStyle]);
+  }, [flowPlaying, buildLineMap, startLineSlide]);
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
