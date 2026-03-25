@@ -106,6 +106,8 @@ export default function ReaderContainer({
 
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
+  const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
+  const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
 
   // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
@@ -138,6 +140,16 @@ export default function ReaderContainer({
 
   const words = tokenized.words;
   wordsRef.current = words;
+
+  /** Get the effective words array — from foliate DOM for EPUBs, from text extraction otherwise */
+  const getEffectiveWords = useCallback((): string[] => {
+    if (useFoliate && foliateApiRef.current) {
+      const foliateWords = foliateApiRef.current.getWords();
+      foliateWordsRef.current = foliateWords;
+      return foliateWords.map(w => w.word);
+    }
+    return words;
+  }, [useFoliate, words]);
 
   // Init reader on mount / doc change
   useEffect(() => {
@@ -266,13 +278,19 @@ export default function ReaderContainer({
     }
     // Pass rhythm pause rules so TTS pauses naturally at punctuation/paragraphs
     narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
+    // Get words from foliate DOM (EPUB) or extracted text (other formats)
+    const effectiveWords = getEffectiveWords();
     // Start cursor-driven TTS using the user's ttsRate setting (not WPM-derived)
-    narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
+    narration.startCursorDriven(effectiveWords, highlightedWordIndex, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
+      // Highlight word in foliate DOM if available
+      if (useFoliate && foliateWordsRef.current[idx]) {
+        foliateApiRef.current?.highlightWord(foliateWordsRef.current[idx].range, foliateWordsRef.current[idx].sectionIndex);
+      }
     });
     // Override the WPM-derived rate with the user's explicit ttsRate setting
     if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
-  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks]);
+  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);
 
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
@@ -318,19 +336,31 @@ export default function ReaderContainer({
   /** Start Focus mode (internal — called by handleTogglePlay) */
   const startFocus = useCallback(() => {
     stopAllModes();
+    // For foliate EPUBs, extract words from DOM for Focus mode
+    if (useFoliate && foliateApiRef.current) {
+      const foliateWords = foliateApiRef.current.getWords();
+      foliateWordsRef.current = foliateWords;
+      wordsRef.current = foliateWords.map(w => w.word);
+    }
     jumpToWord(highlightedWordIndex);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
     setTimeout(() => reader.togglePlay(), 50);
-  }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes]);
+  }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes, useFoliate, wordsRef]);
 
   /** Start Flow mode (internal — called by handleTogglePlay) */
   const startFlow = useCallback(() => {
     stopAllModes();
+    // For foliate EPUBs, extract words from DOM for Flow cursor
+    if (useFoliate && foliateApiRef.current) {
+      const foliateWords = foliateApiRef.current.getWords();
+      foliateWordsRef.current = foliateWords;
+      wordsRef.current = foliateWords.map(w => w.word);
+    }
     setReadingMode("flow");
     setFlowPlaying(true);
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
-  }, [updateSettings, stopAllModes]);
+  }, [updateSettings, stopAllModes, useFoliate, wordsRef]);
 
   /** Pause any sub-mode → return to Page */
   const handlePauseToPage = useCallback(() => {
@@ -575,9 +605,41 @@ export default function ReaderContainer({
   // ── Render ─────────────────────────────────────────────────────────────
 
   const renderView = () => {
+    // For foliate EPUBs: Flow and Narration modes keep FoliatePageView mounted
+    // with word highlighting in the formatted DOM. Focus mode still uses overlay.
+    if (useFoliate && (readingMode === "flow" || readingMode === "narration" || readingMode === "page")) {
+      return (
+        <FoliatePageView
+          activeDoc={activeDoc}
+          settings={settings}
+          focusTextSize={focusTextSize}
+          initialCfi={activeDoc.cfi || null}
+          onRelocate={(detail) => {
+            if (detail.cfi) {
+              activeDoc.cfi = detail.cfi;
+              const approxWordIdx = Math.floor((detail.fraction || 0) * (activeDoc.wordCount || 0));
+              setHighlightedWordIndex(approxWordIdx);
+            }
+          }}
+          onTocReady={(toc) => {
+            setDocChapters(toc.map((item: any, idx: number) => ({
+              title: item.label || item.title || `Chapter ${idx + 1}`,
+              charOffset: 0,
+              href: item.href,
+            })));
+          }}
+          onWordClick={(cfi, word) => {
+            activeDoc.cfi = cfi;
+            console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
+          }}
+          viewApiRef={foliateApiRef}
+        />
+      );
+    }
+
     switch (readingMode) {
       case "flow":
-        // Flow mode: silent cursor advancement at WPM speed (no TTS)
+        // Flow mode (non-EPUB): silent cursor advancement at WPM speed
         return (
           <PageReaderView
             activeDoc={activeDoc}
@@ -645,39 +707,7 @@ export default function ReaderContainer({
         );
       case "page":
       default:
-        // EPUB files with filepath → use foliate-js for native HTML rendering
-        if (useFoliate) {
-          return (
-            <FoliatePageView
-              activeDoc={activeDoc}
-              settings={settings}
-              focusTextSize={focusTextSize}
-              initialCfi={activeDoc.cfi || null}
-              onRelocate={(detail) => {
-                // Save CFI position for resume
-                if (detail.cfi) {
-                  activeDoc.cfi = detail.cfi;
-                  // Approximate word index from fraction for compatibility
-                  const approxWordIdx = Math.floor((detail.fraction || 0) * (activeDoc.wordCount || 0));
-                  setHighlightedWordIndex(approxWordIdx);
-                }
-              }}
-              onTocReady={(toc) => {
-                // Convert foliate TOC to chapter format for bottom bar
-                setDocChapters(toc.map((item: any, idx: number) => ({
-                  title: item.label || item.title || `Chapter ${idx + 1}`,
-                  charOffset: 0, // Not used with foliate — navigation via href
-                  href: item.href,
-                })));
-              }}
-              onWordClick={(cfi, word) => {
-                // Save clicked position as reading position
-                activeDoc.cfi = cfi;
-                console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
-              }}
-            />
-          );
-        }
+        // Non-EPUB page mode (foliate EPUBs handled by top-level check above)
         return (
           <PageReaderView
             activeDoc={activeDoc}
