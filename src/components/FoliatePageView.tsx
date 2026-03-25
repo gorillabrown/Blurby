@@ -72,38 +72,44 @@ export interface FoliateViewAPI {
 
 /** Expand a caret position to the full word boundary, return the word text and Range. */
 function getWordAtPoint(doc: Document, x: number, y: number): { word: string; range: Range } | null {
-  // caretRangeFromPoint gives us a collapsed Range at the click point
-  const caretRange = (doc as any).caretRangeFromPoint?.(x, y) || (doc as any).caretPositionFromPoint?.(x, y);
-  if (!caretRange) return null;
+  try {
+    // caretRangeFromPoint returns a Range in Chromium/Electron
+    const caretRange = (doc as any).caretRangeFromPoint?.(x, y);
+    if (!caretRange) return null;
 
-  let range: Range;
-  if (caretRange instanceof Range) {
-    range = caretRange;
-  } else {
-    // CaretPosition (Firefox) → convert to Range
-    range = doc.createRange();
-    range.setStart(caretRange.offsetNode, caretRange.offset);
-    range.collapse(true);
+    // Extract the text node and offset
+    let node: Node | null = null;
+    let offset = 0;
+
+    if (caretRange instanceof Range) {
+      node = caretRange.startContainer;
+      offset = caretRange.startOffset;
+    } else if (caretRange && caretRange.offsetNode) {
+      // CaretPosition (Firefox)
+      node = caretRange.offsetNode;
+      offset = caretRange.offset;
+    }
+
+    if (!node || node.nodeType !== Node.TEXT_NODE) return null;
+    const text = node.textContent || "";
+    if (offset > text.length) return null;
+
+    // Find word boundaries around the offset
+    let start = offset;
+    let end = offset;
+    while (start > 0 && /[\w'\u2019-]/.test(text[start - 1])) start--;
+    while (end < text.length && /[\w'\u2019-]/.test(text[end])) end++;
+
+    if (start === end) return null;
+    const word = text.slice(start, end);
+
+    const wordRange = doc.createRange();
+    wordRange.setStart(node, start);
+    wordRange.setEnd(node, end);
+    return { word, range: wordRange };
+  } catch {
+    return null;
   }
-
-  const node = range.startContainer;
-  if (node.nodeType !== Node.TEXT_NODE) return null;
-  const text = node.textContent || "";
-  const offset = range.startOffset;
-
-  // Find word boundaries around the offset
-  let start = offset;
-  let end = offset;
-  while (start > 0 && /\w/.test(text[start - 1])) start--;
-  while (end < text.length && /\w/.test(text[end])) end++;
-
-  if (start === end) return null;
-  const word = text.slice(start, end);
-
-  const wordRange = doc.createRange();
-  wordRange.setStart(node, start);
-  wordRange.setEnd(node, end);
-  return { word, range: wordRange };
 }
 
 export default function FoliatePageView({
@@ -170,10 +176,10 @@ export default function FoliatePageView({
         host.innerHTML = "";
         host.appendChild(view);
         viewRef.current = view;
-        console.log("[Foliate] View element mounted, opening book...");
+        console.log("[Foliate] View element mounted, attaching listeners before open...");
 
-        // Configure renderer attributes for pagination
-        view.addEventListener("load", (e: any) => {
+        // Attach load listener BEFORE open() — events may fire during init
+        const onSectionLoad = (e: any) => {
           const { doc, index } = e.detail;
           console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
@@ -216,7 +222,8 @@ export default function FoliatePageView({
             }));
           });
           onLoad?.();
-        });
+        };
+        view.addEventListener("load", onSectionLoad);
 
         view.addEventListener("relocate", (e: any) => {
           if (cancelled) return;
