@@ -51,6 +51,10 @@ export default function LibraryContainer() {
 
   useEffect(() => {
     api.getSiteLogins().then(setSiteLogins);
+    // Pre-load Kokoro model at app startup (non-blocking) — eliminates "Not Responding" flash
+    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) {
+      api.kokoroPreload().catch(() => {});
+    }
   }, []);
 
   const handleSiteLogin = useCallback(async (url: string) => {

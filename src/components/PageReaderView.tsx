@@ -226,6 +226,9 @@ export default function PageReaderView({
       if (targetPage === currentPage) {
         setUserBrowsing(false);
       }
+    } else if (userBrowsing && !ttsActive) {
+      // NM was paused while user was browsing — stay on browsed page, clear browsing flag
+      setUserBrowsing(false);
     } else if (targetPage !== currentPage) {
       currentPageRef.current = targetPage;
       setCurrentPage(targetPage);

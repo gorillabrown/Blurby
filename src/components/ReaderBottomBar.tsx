@@ -119,8 +119,8 @@ export default function ReaderBottomBar({
       ? chapterList[curChapterIdx + 1].wordIndex
       : words.length;
     const chWordsLeft = Math.max(0, chEnd - wordIndex);
-    return formatTime(chWordsLeft, wpm);
-  }, [chapterList, curChapterIdx, wordIndex, words.length, wpm]);
+    return formatTime(chWordsLeft, effectiveWpm);
+  }, [chapterList, curChapterIdx, wordIndex, words.length, effectiveWpm]);
 
   // Font size percentage
   const fontPct = focusTextSize || 100;

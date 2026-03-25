@@ -371,6 +371,30 @@ This makes the time estimate meaningful regardless of which mode is selected.
 
 **Recommendation:** Sprint 26 (Content Pipeline) should include a feasibility analysis. EPUBs that arrive as EPUBs stay as-is. For other formats, build format-specific converters that produce EPUB output, with the original file archived in `userData/originals/`.
 
+### BUG-076: First-run onboarding must include library folder selection
+**Reported:** 2026-03-25
+**Severity:** High (first-use experience)
+**Location:** `src/components/OnboardingOverlay.tsx`, `main/ipc-handlers.js`
+**Description:** When a new user opens Blurby for the first time, the onboarding flow must include a mandatory step where the user selects the folder location for their Blurby library. This is the root directory where all imported books will be stored and managed.
+
+**Requirements:**
+1. **Mandatory step** — cannot be skipped. User must pick a folder before proceeding to the library.
+2. **Folder picker dialog** — native OS folder browser (`dialog.showOpenDialog` with `properties: ['openDirectory']`).
+3. **Default suggestion** — `Documents/Blurby Library` or similar sensible default, pre-filled but changeable.
+4. **Explanation text** — brief guidance: "Choose where Blurby stores your books. If your books are in a different folder, you can connect that folder later — Blurby will copy them here."
+5. **Validation** — confirm folder is writable. If it doesn't exist, create it. If it already contains a `library.json`, detect as existing library and offer to load it (cloud sync / multi-machine scenario).
+6. **Persist** — save the chosen path in `settings.json` as `libraryPath`. All subsequent file operations (import, folder watch, content loading) use this path.
+7. **Later folder connections** — when the user later connects a different folder via Settings > Connectors or the folder button, files from that folder are **copied** into the Blurby library folder (not moved, to avoid data loss). The connected folder becomes a "watched" source, not the library root.
+8. **Migration** — existing users who upgrade should not see this step (`libraryPath` already set via current default behavior).
+
+**UX flow:**
+```
+Welcome to Blurby! → [Next]
+Where should Blurby keep your books? → [Browse...] → /Users/evan/Documents/Blurby Library → [Confirm]
+[Optional: Connect an existing book folder] → [Browse...] or [Skip]
+You're all set! → [Open Library]
+```
+
 ---
 
 ## Complete
