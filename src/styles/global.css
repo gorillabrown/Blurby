@@ -3612,6 +3612,30 @@ button:focus-visible {
 .page-nav-btn--left { left: 8px; }
 .page-nav-btn--right { right: 8px; }
 
+.return-to-narration-btn {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-raised, #222);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: var(--mono, monospace);
+  cursor: pointer;
+  z-index: 50;
+  opacity: 0.9;
+  transition: opacity 0.15s, background 0.15s;
+  -webkit-app-region: no-drag;
+}
+.return-to-narration-btn:hover {
+  opacity: 1;
+  background: var(--accent);
+  color: #fff;
+}
+
 .page-reader-toast {
   position: fixed;
   bottom: 160px;

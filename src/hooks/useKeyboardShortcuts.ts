@@ -199,7 +199,7 @@ export function useReaderKeys(
         if (e.code === "KeyD" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.defineWord?.(); return; }
         // Shift+N make note
         if (e.code === "KeyN" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.makeNote?.(); return; }
-        // Up/Down WPM in Page view
+        // Up/Down WPM (or TTS rate when narration selected — handled by adjustWpm wrapper)
         if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
         if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
         return;
@@ -221,7 +221,7 @@ export function useReaderKeys(
         else s.seekWords(REWIND_WORDS);
         return;
       }
-      // Up/Down WPM
+      // Up/Down WPM (or TTS rate when narration selected — handled by adjustWpm wrapper)
       if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
       if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
       // Shift+Up/Down coarse WPM (Focus/Flow only)

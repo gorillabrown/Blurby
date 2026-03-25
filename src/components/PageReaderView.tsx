@@ -128,6 +128,10 @@ export default function PageReaderView({
   currentPageRef.current = currentPage;
   const [transitioning, setTransitioning] = useState(false);
 
+  // NM browsing — user manually navigated away from narration page
+  const [userBrowsing, setUserBrowsing] = useState(false);
+  const ttsTargetPageRef = useRef(0);
+
   // Highlight menu state
   const [highlightWord, setHighlightWord] = useState<string | null>(null);
   const [highlightPos, setHighlightPos] = useState({ x: 0, y: 0 });
@@ -209,10 +213,18 @@ export default function PageReaderView({
 
   // Navigate to page containing highlighted word — fires on every word advance
   // This is the primary page-turn mechanism for Narration and TTS-driven modes.
+  // When user is browsing (manually navigated during NM), track TTS page but don't navigate.
   useEffect(() => {
     if (pages.length <= 1) return;
     const targetPage = pageForWord(pages, highlightedWordIndex);
-    if (targetPage !== currentPage) {
+    ttsTargetPageRef.current = targetPage;
+
+    if (userBrowsing && ttsActive) {
+      // User is browsing away from NM — don't yank. But if TTS catches up to user's page, clear browsing.
+      if (targetPage === currentPage) {
+        setUserBrowsing(false);
+      }
+    } else if (targetPage !== currentPage) {
       currentPageRef.current = targetPage;
       setCurrentPage(targetPage);
     }
@@ -220,21 +232,28 @@ export default function PageReaderView({
     if (onPageEndWordChange && pages[targetPage]) {
       onPageEndWordChange(pages[targetPage].end);
     }
-  }, [highlightedWordIndex, pages, currentPage, onPageEndWordChange]);
+  }, [highlightedWordIndex, pages, currentPage, onPageEndWordChange, userBrowsing, ttsActive]);
 
   // Page navigation — saves progress on every page turn
+  // During active narration, manual navigation sets browsing mode (NM continues independently)
   const goToPage = useCallback((page: number) => {
     const clamped = Math.max(0, Math.min(pages.length - 1, page));
     if (clamped === currentPage) return;
     setTransitioning(true);
     setTimeout(() => {
       setCurrentPage(clamped);
+      currentPageRef.current = clamped;
       setTransitioning(false);
-      // Save progress: first word of the new page becomes the saved position
-      const pageStart = pages[clamped]?.start ?? 0;
-      onHighlightedWordChange(pageStart);
+      if (ttsActive) {
+        // Don't change highlighted word — NM continues reading independently
+        setUserBrowsing(true);
+      } else {
+        // Save progress: first word of the new page becomes the saved position
+        const pageStart = pages[clamped]?.start ?? 0;
+        onHighlightedWordChange(pageStart);
+      }
     }, PAGE_TRANSITION_MS);
-  }, [currentPage, pages.length, pages, onHighlightedWordChange]);
+  }, [currentPage, pages.length, pages, onHighlightedWordChange, ttsActive]);
 
   const prevPage = useCallback(() => goToPage(currentPage - 1), [currentPage, goToPage]);
   const nextPage = useCallback(() => goToPage(currentPage + 1), [currentPage, goToPage]);
@@ -536,6 +555,22 @@ export default function PageReaderView({
             </button>
           )}
         </div>
+      )}
+
+      {/* Return to narration button — shown when user browsed away during NM */}
+      {userBrowsing && ttsActive && (
+        <button
+          className="return-to-narration-btn"
+          onClick={() => {
+            const targetPage = ttsTargetPageRef.current;
+            setCurrentPage(targetPage);
+            currentPageRef.current = targetPage;
+            setUserBrowsing(false);
+          }}
+          aria-label="Return to current narration position"
+        >
+          ↩ Return to narration
+        </button>
       )}
 
       {/* Highlight menu */}

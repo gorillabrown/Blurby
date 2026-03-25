@@ -334,15 +334,6 @@ export default function ReaderContainer({
     updateSettings({ readingMode: "page" });
   }, [readingMode, wordIndex, updateSettings, stopAllModes]);
 
-  /** Toggle narration — used by N key shortcut (starts or stops) */
-  const handleToggleTts = useCallback(() => {
-    if (readingMode === "narration") {
-      handlePauseToPage();
-    } else {
-      startNarration();
-    }
-  }, [readingMode, handlePauseToPage, startNarration]);
-
   /** Select a mode (button click) — saves preference but does NOT auto-start.
    *  If the mode is already active, pause back to Page. */
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
@@ -359,6 +350,11 @@ export default function ReaderContainer({
       updateSettings({ lastReadingMode: mode });
     }
   }, [readingMode, handlePauseToPage, stopAllModes, updateSettings]);
+
+  /** Toggle narration — used by N key shortcut (starts or stops) */
+  const handleToggleTts = useCallback(() => {
+    handleSelectMode("narration");
+  }, [handleSelectMode]);
 
   /** Convenience wrappers for bottom bar buttons */
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
