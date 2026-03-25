@@ -3472,8 +3472,9 @@ button:focus-visible {
 .flow-highlight-cursor {
   position: absolute;
   background: var(--color-primary, #D04716);
-  opacity: 0.25;
-  border-radius: 3px;
+  opacity: 1;
+  height: var(--flow-cursor-height, 3px);
+  border-radius: 1.5px;
   pointer-events: none;
   will-change: transform, width;
   transform: translate3d(0, 0, 0);

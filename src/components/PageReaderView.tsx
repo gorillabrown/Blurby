@@ -224,19 +224,28 @@ export default function PageReaderView({
   const positionFlowCursor = useCallback((wordIdx: number) => {
     const cursor = flowCursorRef.current;
     if (!cursor) return;
-    const el = document.querySelector(`[data-word-index="${wordIdx}"]`) as HTMLElement;
-    if (!el) return;
-    const container = el.closest(".page-reader-content") as HTMLElement;
+    // First word in sliding window
+    const firstEl = document.querySelector(`[data-word-index="${wordIdx}"]`) as HTMLElement;
+    if (!firstEl) return;
+    const container = firstEl.closest(".page-reader-content") as HTMLElement;
     if (!container) return;
     const cRect = container.getBoundingClientRect();
-    const wRect = el.getBoundingClientRect();
-    const x = wRect.left - cRect.left + container.scrollLeft;
-    const y = wRect.top - cRect.top + container.scrollTop;
-    const w = wRect.width;
-    const h = wRect.height;
+    const firstRect = firstEl.getBoundingClientRect();
+
+    // Last word in sliding window
+    const lastIdx = Math.min(wordIdx + wordSpan - 1, (flowWordsRef.current?.length || 1) - 1);
+    const lastEl = document.querySelector(`[data-word-index="${lastIdx}"]`) as HTMLElement;
+    const lastRect = lastEl ? lastEl.getBoundingClientRect() : firstRect;
+
+    // Column break detection: if last word is left of first word, clamp to first word's column
+    const clampedLastRect = (lastRect.left < firstRect.left) ? firstRect : lastRect;
+
+    const x = firstRect.left - cRect.left + container.scrollLeft;
+    const y = firstRect.bottom - cRect.top + container.scrollTop - 3; // underline at bottom
+    const w = clampedLastRect.right - firstRect.left;
 
     // Detect line wrap: if Y changed significantly, add snap class
-    const isLineWrap = Math.abs(y - flowCursorLastY.current) > h * 0.5;
+    const isLineWrap = Math.abs(y - flowCursorLastY.current) > 20;
     flowCursorLastY.current = y;
 
     // Disable animation at high WPM (>ANIMATION_DISABLE_WPM) or during line wrap
@@ -247,9 +256,9 @@ export default function PageReaderView({
 
     cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     cursor.style.width = `${w}px`;
-    cursor.style.height = `${h}px`;
+    cursor.style.height = "3px";
     cursor.style.display = "";
-  }, [wpm]);
+  }, [wpm, wordSpan]);
 
   // Hide cursor when not in flow mode
   useEffect(() => {
@@ -274,7 +283,7 @@ export default function PageReaderView({
   flowCurrentPageRef.current = currentPage;
   flowWordsRef.current = words;
 
-  const wordSpan = settings?.flowWordSpan || 1;
+  const wordSpan = Math.max(3, settings?.flowWordSpan || 3);
 
   useEffect(() => {
     if (!flowPlaying) {
@@ -293,10 +302,9 @@ export default function PageReaderView({
       flowLastTimeRef.current = timestamp;
       flowAccRef.current += delta;
 
-      // Interval scales with word span: more words per step = longer interval
-      // so effective WPM stays constant
+      // Sliding window: advance 1 word per tick, keep wordSpan words highlighted
       const baseInterval = 60000 / flowWpmRef.current;
-      const interval = baseInterval * wordSpan;
+      const interval = baseInterval;
 
       // Extra pause on punctuation at the END of the current span
       const spanEnd = Math.min(
@@ -312,7 +320,7 @@ export default function PageReaderView({
 
       if (flowAccRef.current >= effectiveInterval) {
         flowAccRef.current -= effectiveInterval;
-        const next = flowHighlightRef.current + wordSpan;
+        const next = flowHighlightRef.current + 1; // slide by 1 word
         if (next < flowWordsRef.current.length) {
           onHighlightedWordChange(next);
           flowHighlightRef.current = next;

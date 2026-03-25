@@ -50,6 +50,8 @@ export const FLOW_STATE_SYNC_MS = 500;
 export const PAGE_FLOW_SENTENCE_PAUSE_MS = 400;
 /** Extra pause after mid-sentence punctuation (comma, semicolon, colon) in PageReaderView (ms) */
 export const PAGE_FLOW_CLAUSE_PAUSE_MS = 200;
+/** Pause duration at end of page before auto-turning in Flow mode (ms) */
+export const FLOW_PAGE_TURN_PAUSE_MS = 600;
 
 // ── Keyboard ──────────────────────────────────────────────────────────────────
 /** G-sequence timeout — how long to wait for second key in "gg", "gf", etc. (ms) */
@@ -99,7 +101,7 @@ export const DEFAULT_SYNC_INTERVAL_MINUTES = 5;
 
 // ── Reader Defaults ──────────────────────────────────────────────────────────
 /** Default flow word span (words highlighted at once) */
-export const DEFAULT_FLOW_WORD_SPAN = 1;
+export const DEFAULT_FLOW_WORD_SPAN = 3;
 /** Default focus span (character opacity gradient width) */
 export const DEFAULT_FOCUS_SPAN = 0.4;
 
