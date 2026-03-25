@@ -31,8 +31,11 @@ function installContentSecurityPolicy(isDev) {
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     // Build CSP: allow self, inline styles (needed for dynamic styling), data/file URIs for images
-    let csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
-              "img-src 'self' data: file:; font-src 'self'; connect-src 'self'";
+    // foliate-js needs blob: for iframe content, images, and fonts from EPUBs
+    let csp = "default-src 'self' blob:; script-src 'self' blob: 'unsafe-inline'; " +
+              "style-src 'self' 'unsafe-inline' blob:; " +
+              "img-src 'self' data: file: blob:; font-src 'self' blob: data:; " +
+              "frame-src 'self' blob:; connect-src 'self'";
     // In dev mode, allow websocket connections for Vite HMR
     if (isDev) {
       csp += " ws: http://localhost:*";

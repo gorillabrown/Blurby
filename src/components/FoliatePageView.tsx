@@ -51,21 +51,33 @@ export default function FoliatePageView({
         setError(null);
 
         // Import foliate-js modules (ESM, runs in renderer)
-        const { makeBook, View } = await import("foliate-js/view.js");
+        console.log("[Foliate] Importing foliate-js...");
+        await import("foliate-js/view.js");
+        console.log("[Foliate] Custom element registered:", !!customElements.get("foliate-view"));
 
         // Read file as arraybuffer via IPC
+        console.log("[Foliate] Reading file:", activeDoc.filepath);
         const buffer: ArrayBuffer = await api.readFileBuffer(activeDoc.filepath);
         if (cancelled) return;
+        console.log("[Foliate] Buffer size:", buffer?.byteLength);
+
+        if (!buffer) {
+          setError("Could not read EPUB file");
+          setLoading(false);
+          return;
+        }
 
         // Create File object from buffer
         const fileName = (activeDoc.filepath || "book.epub").split(/[\\/]/).pop() || "book.epub";
         const file = new File([buffer], fileName, { type: "application/epub+zip" });
+        console.log("[Foliate] File created:", file.name, file.size, "bytes");
 
         // Create and mount the foliate-view element
         const view = document.createElement("foliate-view") as any;
         container.innerHTML = "";
         container.appendChild(view);
         viewRef.current = view;
+        console.log("[Foliate] View element mounted, opening book...");
 
         // Configure renderer attributes for pagination
         view.addEventListener("load", (e: any) => {
@@ -85,6 +97,7 @@ export default function FoliatePageView({
         // Open the book
         await view.open(file);
         if (cancelled) return;
+        console.log("[Foliate] Book opened. Sections:", view.book?.sections?.length, "TOC items:", view.book?.toc?.length);
 
         // Set renderer attributes
         const scale = (focusTextSize || 100) / 100;

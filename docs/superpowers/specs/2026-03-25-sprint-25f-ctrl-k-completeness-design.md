@@ -1,7 +1,7 @@
 # Sprint 25F — Ctrl+K Completeness
 
 **Date:** 2026-03-25
-**Scope:** BUG-058, BUG-059, BUG-038
+**Scope:** BUG-058, BUG-059, BUG-038, BUG-060, CSS fix
 **Estimated effort:** 4-6 hours
 **Branch:** `sprint/25f-ctrl-k-completeness`
 
@@ -9,9 +9,9 @@
 
 ## Overview
 
-Make the Ctrl+K command palette a complete entry point to every app action and setting, and wire up the dormant hotkey coaching system so users discover keyboard shortcuts naturally.
+Make the Ctrl+K command palette a complete entry point to every app action and setting, wire up the dormant hotkey coaching system so users discover keyboard shortcuts naturally, clean up Help settings, and fix the hotkey map layout.
 
-Three bugs, one theme: **discoverability**.
+Five items, one theme: **discoverability**.
 
 ---
 
@@ -190,6 +190,69 @@ Add entries for all clickable UI elements that have keyboard equivalents. Only c
 
 ---
 
+## BUG-060: Remove Keyboard Shortcuts from Help Settings
+
+### Problem
+
+HelpSettings.tsx has a hardcoded "Keyboard Shortcuts" section with only 7 shortcuts (Play/Pause, Rewind, Forward, Speed +/-, Exit reader, Quick-read). The full Hotkey Map settings page already exists as a separate settings sub-page with 50+ shortcuts across 6 sections. The Help shortcuts are redundant, incomplete, and misleading.
+
+### Solution
+
+Remove the "Keyboard Shortcuts" section entirely from HelpSettings.tsx (lines 34-50: the section label, the `hotkey-grid` div, and all its children). Keep only "Adding Content" and "Updates" sections.
+
+The Hotkey Map page remains the single source of truth for keyboard shortcuts. It is already accessible via:
+- Settings sidebar ("Hotkey Map" entry)
+- Ctrl+K ("Settings: Hotkeys")
+- `?` shortcut (ShortcutsOverlay)
+
+### Files Changed
+
+- `src/components/settings/HelpSettings.tsx` — remove Keyboard Shortcuts section
+- `src/components/settings/HelpSettings.tsx` — remove unused `REWIND_WORDS`, `WPM_STEP` imports from constants
+
+---
+
+## CSS Fix: Hotkey Map Grid Layout
+
+### Problem
+
+The hotkey map page has broken layout — action labels and key labels run together without column separation (e.g., "Command paletteCtrl + K" on one line instead of two columns).
+
+**Root cause:** The CSS `.hotkey-grid` uses `display: grid; grid-template-columns: 1fr auto` expecting flat children (action, key, action, key alternating). But `HotkeyMapSettings.tsx` wraps each pair in a `<div className="hotkey-row">`, which becomes a single grid item. The `.hotkey-row` class has no CSS definition.
+
+### Solution
+
+Add `display: contents` to `.hotkey-row` in `global.css`. This makes the row wrapper transparent to the grid layout — its children (`.hotkey-action` and `.hotkey-key`) participate directly in the parent grid columns.
+
+Additionally, add basic styling for `.hotkey-section-title` and `.hotkey-settings` which are also unstyled:
+
+```css
+.hotkey-row {
+  display: contents;
+}
+
+.hotkey-settings {
+  padding: 0;
+}
+
+.hotkey-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 16px 0 8px;
+}
+
+.hotkey-section-title:first-child {
+  margin-top: 0;
+}
+```
+
+### Files Changed
+
+- `src/styles/global.css` — add `.hotkey-row`, `.hotkey-settings`, `.hotkey-section-title` rules
+
+---
+
 ## Acceptance Criteria
 
 ### BUG-058
@@ -216,6 +279,16 @@ Add entries for all clickable UI elements that have keyboard equivalents. Only c
 - [ ] Escape key dismisses active coaching toast
 - [ ] All 22+ coach hints have entries in COACH_HINTS map
 
+### BUG-060
+- [ ] Help settings page shows only "Adding Content" and "Updates" sections
+- [ ] No keyboard shortcuts listed in Help
+- [ ] `REWIND_WORDS` and `WPM_STEP` imports removed from HelpSettings.tsx
+
+### CSS Fix
+- [ ] Hotkey Map page shows two-column layout: action on left, key on right
+- [ ] Section titles (Global, Library, Go-To Sequences, etc.) visually separate groups
+- [ ] No text running together — clear gap between action and key columns
+
 ### General
 - [ ] `npm test` passes
 - [ ] `npm run build` succeeds
@@ -233,9 +306,10 @@ Add entries for all clickable UI elements that have keyboard equivalents. Only c
 
 ## Dependencies
 
-- None — all three bugs are independent of each other and can be parallelized
+- None — all five items are independent of each other and can be parallelized
 
 ## Risk
 
 - Low. All changes are additive. No architecture changes, no new components, no new IPC channels.
 - The only structural change is mounting HotkeyCoach in App.tsx instead of per-container.
+- The CSS fix uses `display: contents` which has excellent browser support (Chromium 65+, and Electron 41 is Chromium 136+).
