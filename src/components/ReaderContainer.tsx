@@ -250,31 +250,23 @@ export default function ReaderContainer({
     }
   }, [narration, setWpm]);
 
-  /** Toggle narration mode on/off */
-  const handleToggleTts = useCallback(() => {
-    if (readingMode === "narration") {
-      // Exit narration → return to page
-      stopAllModes();
-      setReadingMode("page");
-    } else {
-      // Enter narration mode (stop whatever else is running)
-      stopAllModes();
-      if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
-      setReadingMode("narration");
-      updateSettings({ lastReadingMode: "narration" });
-      // Cap WPM for TTS
-      if (wpm > TTS_WPM_CAP) {
-        preCapWpmRef.current = wpm;
-        setWpm(() => TTS_WPM_CAP);
-      }
-      // Start cursor-driven TTS using the user's ttsRate setting (not WPM-derived)
-      narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
-        setHighlightedWordIndex(idx);
-      });
-      // Override the WPM-derived rate with the user's explicit ttsRate setting
-      if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
+  /** Start Narration mode (internal — called by handleTogglePlay) */
+  const startNarration = useCallback(() => {
+    stopAllModes();
+    setReadingMode("narration");
+    updateSettings({ readingMode: "narration", lastReadingMode: "narration" });
+    // Cap WPM for TTS
+    if (wpm > TTS_WPM_CAP) {
+      preCapWpmRef.current = wpm;
+      setWpm(() => TTS_WPM_CAP);
     }
-  }, [readingMode, stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, wordIndex]);
+    // Start cursor-driven TTS using the user's ttsRate setting (not WPM-derived)
+    narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
+      setHighlightedWordIndex(idx);
+    });
+    // Override the WPM-derived rate with the user's explicit ttsRate setting
+    if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
+  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate]);
 
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
@@ -342,6 +334,15 @@ export default function ReaderContainer({
     updateSettings({ readingMode: "page" });
   }, [readingMode, wordIndex, updateSettings, stopAllModes]);
 
+  /** Toggle narration — used by N key shortcut (starts or stops) */
+  const handleToggleTts = useCallback(() => {
+    if (readingMode === "narration") {
+      handlePauseToPage();
+    } else {
+      startNarration();
+    }
+  }, [readingMode, handlePauseToPage, startNarration]);
+
   /** Select a mode (button click) — saves preference but does NOT auto-start.
    *  If the mode is already active, pause back to Page. */
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
@@ -369,12 +370,12 @@ export default function ReaderContainer({
       // Start the selected mode
       const lastMode = settings.lastReadingMode || "flow";
       if (lastMode === "focus") startFocus();
-      else if (lastMode === "narration") handleToggleTts();
+      else if (lastMode === "narration") startNarration();
       else startFlow();
     } else {
       handlePauseToPage();
     }
-  }, [readingMode, settings.lastReadingMode, startFlow, startFocus, handleToggleTts, handlePauseToPage]);
+  }, [readingMode, settings.lastReadingMode, startFlow, startFocus, startNarration, handlePauseToPage]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
@@ -459,9 +460,10 @@ export default function ReaderContainer({
     window.dispatchEvent(new CustomEvent("blurby:make-note", { detail: highlightedWordIndex }));
   }, [highlightedWordIndex]);
 
-  // Wrap adjustWpm: in narration mode, Up/Down adjusts TTS rate instead
+  // Wrap adjustWpm: when narration is selected (active or paused), Up/Down adjusts TTS rate
+  const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && settings.lastReadingMode === "narration");
   const adjustSpeed = useCallback((delta: number) => {
-    if (readingMode === "narration") {
+    if (isNarrationSelected) {
       const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
       const newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;
       updateSettings({ ttsRate: newRate });
@@ -469,7 +471,7 @@ export default function ReaderContainer({
     } else {
       adjustWpm(delta);
     }
-  }, [readingMode, settings.ttsRate, updateSettings, narration, adjustWpm]);
+  }, [isNarrationSelected, settings.ttsRate, updateSettings, narration, adjustWpm]);
 
   // Keyboard shortcuts — fully mode-aware
   const chapterListRef = useRef<{ toggle: () => void } | null>(null);

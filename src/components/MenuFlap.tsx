@@ -166,32 +166,6 @@ export default function MenuFlap({
           <div className="menu-flap-header-actions">
             {isOnQueue && (
               <button
-                className="menu-flap-compact-btn"
-                onClick={handleCompactToggle}
-                aria-label={settings.compactMode ? "Expand view" : "Compact view"}
-                title={settings.compactMode ? "Expand view" : "Compact view"}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  {settings.compactMode ? (
-                    <path
-                      d="M2 4h12M2 8h12M2 12h12"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  ) : (
-                    <path
-                      d="M2 3h12M2 6h8M2 9h12M2 12h8"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  )}
-                </svg>
-              </button>
-            )}
-            {isOnQueue && (
-              <button
                 className="menu-flap-settings-btn"
                 onClick={handleGoToSettings}
                 aria-label="Go to settings"

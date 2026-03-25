@@ -132,8 +132,8 @@ export default function ReaderBottomBar({
 
       {/* Row 2: Controls */}
       <div className="reader-bottom-bar-controls">
-        {/* WPM or TTS Rate — swaps based on mode */}
-        {readingMode === "narration" && onSetTtsRate ? (
+        {/* WPM or TTS Rate — show TTS rate when narration is selected (active or paused) */}
+        {(readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration")) && onSetTtsRate ? (
           <div className="rbb-wpm-group">
             <span className="rbb-wpm-label">{ttsRate.toFixed(1)}x</span>
             <input

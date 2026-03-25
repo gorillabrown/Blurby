@@ -63,7 +63,7 @@ export interface BlurbySettings {
   accentColor: string | null;
   fontFamily: string | null;
   compactMode: boolean;
-  readingMode: "focus" | "flow" | "page";
+  readingMode: "focus" | "flow" | "narration" | "page";
   focusMarks: boolean;
   readingRuler: boolean;
   focusSpan: number;
