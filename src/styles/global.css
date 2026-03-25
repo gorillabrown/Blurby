@@ -1540,7 +1540,22 @@ button:focus-visible {
   display: block;
   margin-top: 12px;
   margin-bottom: 24px;
-  height: 3px;
+  height: 6px;
+  background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
+  border-radius: 1px;
+}
+[data-theme="blurby"] .library-header {
+  position: relative;
+  padding-bottom: 12px;
+  border-bottom: none;
+}
+[data-theme="blurby"] .library-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
   background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
   border-radius: 1px;
 }
