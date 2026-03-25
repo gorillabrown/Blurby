@@ -73,32 +73,59 @@ export interface FoliateViewAPI {
 /** Expand a caret position to the full word boundary, return the word text and Range. */
 function getWordAtPoint(doc: Document, x: number, y: number): { word: string; range: Range } | null {
   try {
-    // caretRangeFromPoint returns a Range in Chromium/Electron
+    // Try caretRangeFromPoint first (works in standard HTML)
     const caretRange = (doc as any).caretRangeFromPoint?.(x, y);
-    if (!caretRange) return null;
-
-    // Extract the text node and offset
     let node: Node | null = null;
     let offset = 0;
 
-    if (caretRange instanceof Range) {
-      node = caretRange.startContainer;
-      offset = caretRange.startOffset;
-    } else if (caretRange && caretRange.offsetNode) {
-      // CaretPosition (Firefox)
-      node = caretRange.offsetNode;
-      offset = caretRange.offset;
+    if (caretRange) {
+      if (caretRange instanceof Range) {
+        node = caretRange.startContainer;
+        offset = caretRange.startOffset;
+      } else if (caretRange.offsetNode) {
+        node = caretRange.offsetNode;
+        offset = caretRange.offset;
+      }
+    }
+
+    // If we got an element node (common in XHTML/epub iframes), walk into its text children
+    if (node && node.nodeType === Node.ELEMENT_NODE) {
+      // Find the text node child closest to the click point
+      const walker = doc.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      let best: Text | null = null;
+      let textNode: Text | null;
+      while ((textNode = walker.nextNode() as Text | null)) {
+        if (textNode.textContent && textNode.textContent.trim()) {
+          best = textNode;
+          break; // Take the first text node (good enough for word detection)
+        }
+      }
+      if (best) {
+        node = best;
+        // Estimate offset within the text node based on click x position
+        const range = doc.createRange();
+        range.selectNodeContents(best);
+        const rects = range.getClientRects();
+        if (rects.length > 0) {
+          // Simple approach: proportion of x within the text's bounding rect
+          const rect = rects[0];
+          const textLen = best.textContent?.length || 1;
+          offset = Math.max(0, Math.min(textLen, Math.round((x - rect.left) / rect.width * textLen)));
+        } else {
+          offset = 0;
+        }
+      }
     }
 
     if (!node || node.nodeType !== Node.TEXT_NODE) return null;
     const text = node.textContent || "";
-    if (offset > text.length) return null;
+    if (offset > text.length) offset = text.length;
 
     // Find word boundaries around the offset
     let start = offset;
     let end = offset;
-    while (start > 0 && /[\w'\u2019-]/.test(text[start - 1])) start--;
-    while (end < text.length && /[\w'\u2019-]/.test(text[end])) end++;
+    while (start > 0 && /[\w'\u2019\u00C0-\u024F-]/.test(text[start - 1])) start--;
+    while (end < text.length && /[\w'\u2019\u00C0-\u024F-]/.test(text[end])) end++;
 
     if (start === end) return null;
     const word = text.slice(start, end);
@@ -184,31 +211,40 @@ export default function FoliatePageView({
           console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
-          // Word click detection — highlight via native Selection API (no DOM mutation)
+          // Word detection: single click expands to word, double click uses native selection
           doc.addEventListener("click", (ce: MouseEvent) => {
-            console.log("[Foliate] Click in doc at", ce.clientX, ce.clientY, "target:", (ce.target as HTMLElement)?.tagName);
-            // Don't intercept link clicks
             if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
-
+            // Try to select word at click point
             const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
-            console.log("[Foliate] Word at point:", result?.word || "NONE");
-            if (!result) return;
-
-            // Highlight using native selection (safe, no DOM mutation)
-            const sel = doc.getSelection();
-            if (sel) {
-              sel.removeAllRanges();
-              sel.addRange(result.range);
+            if (result) {
+              const sel = doc.getSelection();
+              if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
+              const v = viewRef.current;
+              if (v) {
+                const contents = v.renderer.getContents?.() ?? [];
+                const match = contents.find((c: any) => c.doc === doc);
+                if (match) {
+                  const cfi = v.getCFI(match.index, result.range);
+                  onWordClick?.(cfi, result.word);
+                }
+              }
             }
+          });
 
-            // Get CFI for the clicked position
+          // Also detect double-click word selection (native browser behavior)
+          doc.addEventListener("selectionchange", () => {
+            const sel = doc.getSelection();
+            if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            const word = sel.toString().trim();
+            if (!word || word.includes(" ")) return; // Only single words
             const v = viewRef.current;
             if (v) {
               const contents = v.renderer.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match) {
-                const cfi = v.getCFI(match.index, result.range);
-                onWordClick?.(cfi, result.word);
+                const cfi = v.getCFI(match.index, range);
+                onWordClick?.(cfi, word);
               }
             }
           });
