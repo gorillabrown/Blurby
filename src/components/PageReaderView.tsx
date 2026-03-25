@@ -377,8 +377,15 @@ export default function PageReaderView({
     };
     flowRestartRef.current = restartFromCurrent;
 
-    // Delay to ensure DOM has rendered word elements
-    const startDelay = requestAnimationFrame(() => {
+    // Navigate to the page containing the current reading position
+    const targetPage = pageForWord(flowPagesRef.current, flowHighlightRef.current);
+    if (targetPage !== flowCurrentPageRef.current) {
+      setCurrentPage(targetPage);
+      flowCurrentPageRef.current = targetPage;
+    }
+
+    // Delay to ensure DOM has rendered word elements (extra frame for page change)
+    const startDelay = requestAnimationFrame(() => { requestAnimationFrame(() => {
       const lines = buildLineMap();
       if (lines.length === 0) return;
 
@@ -394,7 +401,7 @@ export default function PageReaderView({
 
       flowLineIdxRef.current = lineIdx;
       startLineSlide(lines, lineIdx);
-    });
+    }); });
 
     return () => {
       flowRestartRef.current = null;
