@@ -22,6 +22,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateDocProgress: (docId, position) => ipcRenderer.invoke("update-doc-progress", docId, position),
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
+  // Read raw file buffer (for foliate-js EPUB rendering in renderer)
+  readFileBuffer: (filePath) => ipcRenderer.invoke("read-file-buffer", filePath),
   // Get chapter metadata (from EPUB TOC or content analysis)
   getDocChapters: (docId) => ipcRenderer.invoke("get-doc-chapters", docId),
   saveHighlight: (data) => ipcRenderer.invoke("save-highlight", data),

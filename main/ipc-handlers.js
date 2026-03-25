@@ -335,6 +335,17 @@ function registerIpcHandlers(ctx) {
     return null;
   });
 
+  // Read raw file buffer — used by foliate-js to load EPUBs in the renderer
+  ipcMain.handle("read-file-buffer", async (_, filePath) => {
+    try {
+      const buffer = await fsPromises.readFile(filePath);
+      return buffer.buffer; // Return ArrayBuffer
+    } catch (err) {
+      console.error("read-file-buffer error:", err.message);
+      return null;
+    }
+  });
+
   ipcMain.handle("get-doc-chapters", async (_, docId) => {
     const doc = ctx.getDocById(docId);
     if (!doc) return [];

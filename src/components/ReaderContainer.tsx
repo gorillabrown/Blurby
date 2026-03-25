@@ -9,6 +9,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
+import FoliatePageView from "./FoliatePageView";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import MenuFlap from "./MenuFlap";
@@ -103,7 +104,10 @@ export default function ReaderContainer({
   const activeReadingMsRef = useRef(0);
   const activeReadingStartRef = useRef<number | null>(null);
 
-  // Tokenize content
+  // Detect if this is an EPUB with filepath (use foliate-js for rendering)
+  const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
+
+  // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
     if (!activeDoc?.content) return { words: [] as string[], paragraphBreaks: new Set<number>() };
     return tokenizeWithMeta(activeDoc.content);
@@ -641,6 +645,34 @@ export default function ReaderContainer({
         );
       case "page":
       default:
+        // EPUB files with filepath → use foliate-js for native HTML rendering
+        if (useFoliate) {
+          return (
+            <FoliatePageView
+              activeDoc={activeDoc}
+              settings={settings}
+              focusTextSize={focusTextSize}
+              initialCfi={activeDoc.cfi || null}
+              onRelocate={(detail) => {
+                // Save CFI position for resume
+                if (detail.cfi) {
+                  activeDoc.cfi = detail.cfi;
+                  // Approximate word index from fraction for compatibility
+                  const approxWordIdx = Math.floor((detail.fraction || 0) * (activeDoc.wordCount || 0));
+                  setHighlightedWordIndex(approxWordIdx);
+                }
+              }}
+              onTocReady={(toc) => {
+                // Convert foliate TOC to chapter format for bottom bar
+                setDocChapters(toc.map((item: any, idx: number) => ({
+                  title: item.label || item.title || `Chapter ${idx + 1}`,
+                  charOffset: 0, // Not used with foliate — navigation via href
+                  href: item.href,
+                })));
+              }}
+            />
+          );
+        }
         return (
           <PageReaderView
             activeDoc={activeDoc}
