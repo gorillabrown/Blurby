@@ -480,7 +480,11 @@ async function extractContent(filepath) {
         processedPaths.add(href);
         const $ = cheerio.load(entry.getData().toString("utf-8"));
         $("script, style").remove();
-        const text = $("body").text().trim();
+        // Remove EPUB page-break markers, editorial annotations, and hidden metadata
+        $(".pb, .pagebreak, [role='doc-pagebreak'], [epub\\:type='pagebreak']").remove();
+        let text = $("body").text().trim();
+        // Strip residual page markers (e.g., "Edition: current; Page: [vi]")
+        text = text.replace(/Edition:\s*current;\s*Page:\s*\[[^\]]*\]/g, "").trim();
         if (!text) continue;
 
         const chapterTitle = tocMap.get(href);
