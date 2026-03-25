@@ -280,12 +280,16 @@ export default function ReaderContainer({
     narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
     // Get words from foliate DOM (EPUB) or extracted text (other formats)
     const effectiveWords = getEffectiveWords();
-    // Start cursor-driven TTS using the user's ttsRate setting (not WPM-derived)
-    narration.startCursorDriven(effectiveWords, highlightedWordIndex, effectiveWpm, (idx) => {
+    // For foliate: start at 0 (words are from visible sections only), else use global position
+    const startIdx = useFoliate ? 0 : highlightedWordIndex;
+    // Start cursor-driven TTS
+    narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
       // Highlight word in foliate DOM if available
       if (useFoliate && foliateWordsRef.current[idx]) {
-        foliateApiRef.current?.highlightWord(foliateWordsRef.current[idx].range, foliateWordsRef.current[idx].sectionIndex);
+        try {
+          foliateApiRef.current?.highlightWord(foliateWordsRef.current[idx].range, foliateWordsRef.current[idx].sectionIndex);
+        } catch { /* range may be stale after page navigation */ }
       }
     });
     // Override the WPM-derived rate with the user's explicit ttsRate setting

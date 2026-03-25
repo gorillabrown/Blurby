@@ -304,22 +304,41 @@ export default function FoliatePageView({
             next: () => view.renderer.next(),
             prev: () => view.renderer.prev(),
             highlightWord: (range, _sectionIndex) => {
-              // Use native selection API — safe across element boundaries
+              // Remove previous highlight
+              if (currentHighlight?.parentNode) {
+                const parent = currentHighlight.parentNode;
+                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
+                parent.removeChild(currentHighlight);
+                currentHighlight = null;
+              }
+              // Wrap word in a visible <mark> element
               try {
                 const doc = range.startContainer.ownerDocument;
-                if (doc) {
-                  const sel = doc.getSelection();
-                  if (sel) { sel.removeAllRanges(); sel.addRange(range); }
-                }
-              } catch { /* range may be invalid after page navigation */ }
+                if (!doc) return;
+                const mark = doc.createElement("mark");
+                mark.style.cssText = "background: rgba(var(--accent-rgb, 208,71,22), 0.3); border-radius: 2px; padding: 0 1px;";
+                mark.className = "blurby-word-hl";
+                range.surroundContents(mark);
+                currentHighlight = mark;
+                // Scroll into view if needed
+                mark.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+              } catch {
+                // surroundContents fails across element boundaries — use selection fallback
+                try {
+                  const doc = range.startContainer.ownerDocument;
+                  if (doc) {
+                    const sel = doc.getSelection();
+                    if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+                  }
+                } catch { /* completely stale range */ }
+              }
             },
             clearHighlight: () => {
-              // Clear selection in all visible section docs
-              const v = viewRef.current;
-              if (v?.renderer?.getContents) {
-                for (const { doc: d } of v.renderer.getContents()) {
-                  d?.getSelection()?.removeAllRanges();
-                }
+              if (currentHighlight?.parentNode) {
+                const parent = currentHighlight.parentNode;
+                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
+                parent.removeChild(currentHighlight);
+                currentHighlight = null;
               }
             },
             getView: () => view,
@@ -445,6 +464,7 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
+    .blurby-word-hl { background: ${accent}4D !important; border-radius: 2px; padding: 0 1px; }
   `;
   doc.head.appendChild(style);
 }
