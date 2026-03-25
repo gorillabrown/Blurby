@@ -178,7 +178,8 @@ export default function useNarration() {
     if (!isCursorDrivenRef.current || !api?.kokoroGenerate) return;
     const words = allWordsRef.current;
     if (afterEndIdx >= words.length) return;
-    const nextEnd = findSentenceBoundary(words, afterEndIdx, TTS_CHUNK_SIZE, pageEndWordRef.current);
+    // Pre-buffer ignores page boundary — looks ahead past current page for seamless page turns
+    const nextEnd = findSentenceBoundary(words, afterEndIdx, TTS_CHUNK_SIZE, null);
     const text = words.slice(afterEndIdx, nextEnd).join(" ");
     try {
       const result = await api.kokoroGenerate(text, kokoroVoiceRef.current, speedRef.current);
@@ -246,12 +247,14 @@ export default function useNarration() {
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
           if (isCursorDrivenRef.current && !holdRef.current) {
             // Rhythm pause: add silence between chunks at sentence/paragraph boundaries
+            // Use half the Focus mode pause — Kokoro already adds natural prosody
             const lastWord = chunkWords[chunkWords.length - 1] || "";
             const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
             const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
-            const pauseMs = rhythmPausesRef.current
+            const fullPause = rhythmPausesRef.current
               ? calculatePauseMs(lastWord, rhythmPausesRef.current, PUNCTUATION_PAUSE_MS, isParagraphEnd)
               : 0;
+            const pauseMs = Math.round(fullPause * 0.5);
             if (pauseMs > 0) {
               chunkPauseTimerRef.current = setTimeout(() => {
                 chunkPauseTimerRef.current = null;
