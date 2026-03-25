@@ -404,6 +404,16 @@ export default function PageReaderView({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flowPlaying, buildLineMap, startLineSlide]);
 
+  // Restart slide when WPM changes during flow (so up/down arrows take effect immediately)
+  const prevWpmRef = useRef(wpm);
+  useEffect(() => {
+    if (flowPlaying && wpm !== prevWpmRef.current && flowRestartRef.current) {
+      prevWpmRef.current = wpm;
+      flowRestartRef.current();
+    }
+    prevWpmRef.current = wpm;
+  }, [wpm, flowPlaying]);
+
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
     const el = containerRef.current;
