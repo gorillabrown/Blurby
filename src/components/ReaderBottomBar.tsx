@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
 import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP } from "../constants";
 import { BlurbyDoc } from "../types";
@@ -65,6 +65,22 @@ export default function ReaderBottomBar({
   onSetTtsRate,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
+  const [rateStatus, setRateStatus] = useState<"idle" | "confirming" | "set">("idle");
+  const rateStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Show CONFIRMED → SET sequence when TTS rate changes
+  const handleSetTtsRate = useCallback((newRate: number) => {
+    if (onSetTtsRate) onSetTtsRate(newRate);
+    setRateStatus("confirming");
+    if (rateStatusTimerRef.current) clearTimeout(rateStatusTimerRef.current);
+    rateStatusTimerRef.current = setTimeout(() => {
+      setRateStatus("set");
+      rateStatusTimerRef.current = setTimeout(() => {
+        setRateStatus("idle");
+        rateStatusTimerRef.current = null;
+      }, 1200);
+    }, 500);
+  }, [onSetTtsRate]);
 
   // Expose toggle to parent via ref (for C hotkey)
   useEffect(() => {
@@ -145,9 +161,14 @@ export default function ReaderBottomBar({
               max={2.0}
               step={0.1}
               value={ttsRate}
-              onChange={(e) => onSetTtsRate(Number(e.target.value))}
+              onChange={(e) => handleSetTtsRate(Number(e.target.value))}
               aria-label="Speech rate"
             />
+            {rateStatus !== "idle" && (
+              <span className={`rbb-rate-status ${rateStatus === "set" ? "rbb-rate-status--set" : ""}`}>
+                {rateStatus === "confirming" ? "CONFIRMED" : "SET"}
+              </span>
+            )}
           </div>
         ) : (
           <div className="rbb-wpm-group">
