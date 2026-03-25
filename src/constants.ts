@@ -70,6 +70,8 @@ export const TTS_MIN_RATE = 0.5;
 export const TTS_RATE_BASELINE_WPM = 150;
 /** Maximum WPM allowed when TTS narration is active */
 export const TTS_WPM_CAP = 400;
+/** Step size for TTS rate adjustment via Up/Down arrows */
+export const TTS_RATE_STEP = 0.1;
 
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */

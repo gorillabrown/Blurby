@@ -258,6 +258,62 @@ This theme should be added to the theme selector alongside dark, light, and syst
 
 Page count is derived from word count and the pagination algorithm (or estimated at ~250 words/page). Time estimate uses current WPM setting. Time read is calculated from `position / wordCount * totalTime`.
 
+### BUG-063: Define word includes punctuation, preventing dictionary lookup
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/components/PageReaderView.tsx` (word selection), `src/components/HighlightMenu.tsx` (define action)
+**Description:** When right-clicking a word and selecting "Define", the word passed to the dictionary lookup includes adjacent punctuation (e.g., "word." or "word,"). This causes the dictionary API to fail to find the word. All conjoined punctuation marks must be stripped before lookup.
+
+### BUG-064: Definition popup cannot be dismissed by clicking elsewhere
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/components/DefinitionPopup.tsx`
+**Description:** After viewing a word definition, the user should be able to click anywhere on the screen to close the definition popup. Currently the popup only closes via its own close button or Escape key.
+
+### BUG-065: Word highlight color should use theme accent color
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/styles/global.css` (highlight styles)
+**Description:** Word selection/highlight in Page view should use `var(--accent)` as the highlight color instead of hardcoded values. Applies to all highlight-related elements.
+
+### BUG-066: UI accent elements should all use theme accent color
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/styles/global.css`
+**Description:** The following elements must use `var(--accent)` for their primary color: WPM slider thumb/track, selected mode button background, flow cursor underline, and narration word highlight. Currently some use hardcoded colors.
+
+### BUG-067: "New" dot on library cards should clear after being seen
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/components/DocGridCard.tsx`, `src/components/LibraryContainer.tsx`
+**Description:** Library cards show a "new" dot indicator. This dot should vanish after: (1) the item has scrolled into the visible viewport at least once, AND (2) the user has navigated away from Library view after observing it. Requires IntersectionObserver tracking and a `seenAt` timestamp on the doc metadata.
+
+### BUG-068: Blurby theme should lock accent/font modifications
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Severity:** Low
+**Location:** `src/components/settings/ThemeSettings.tsx`
+**Description:** When the "Blurby" brand theme is selected, accent color and font family modifications should be disabled (greyed out). Only other themes allow customization. The Blurby theme is a locked brand experience.
+**Solution:** Wrapped accent color and font sections in `{settings.theme !== "blurby" && (...)}` guard.
+
+### BUG-069: Shift+Left/Right should jump between paragraphs in reading modes
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/PageReaderView.tsx`
+**Description:** In all reading modes, Shift+Left should jump back to the 1st word of the current paragraph. Pressing again jumps to the previous paragraph's first word. Shift+Right does the opposite — jumps to next paragraph start. Requires paragraph boundary detection in the words array.
+
+### BUG-070: Mouse scroll wheel should advance word-by-word
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/components/PageReaderView.tsx`
+**Description:** In reading modes, the mouse scroll wheel should advance or retreat one word at a time (scroll down = forward, scroll up = backward) instead of scrolling the page. This gives fine-grained navigation control.
+
+### BUG-071: Tab key not opening settings flap in Library view
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/hooks/useKeyboardShortcuts.ts`
+**Description:** Pressing Tab in Library view should toggle the menu flap open/closed. Currently nothing happens. The keyboard handler was referencing `s.toggleFlap?.()` (reader scope variable) instead of `a.onToggleFlap?.()` (library scope).
+**Solution:** Fixed variable reference from `s.toggleFlap?.()` to `a.onToggleFlap?.()` in the library keyboard handler.
+
 ---
 
 ## Complete

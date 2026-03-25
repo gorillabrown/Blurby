@@ -296,12 +296,8 @@ body {
   z-index: 99999;
 }
 .reader-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 80px;
-  z-index: 10;
+  flex: 1;
+  min-height: 0;
   background: var(--reader-bg);
   display: flex;
   flex-direction: column;
@@ -2027,7 +2023,7 @@ button:focus-visible {
   border: none;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 4px;
+  padding: 12px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -2045,7 +2041,7 @@ button:focus-visible {
   border: none;
   color: var(--text-dim, #888);
   cursor: pointer;
-  padding: 6px;
+  padding: 12px;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -3706,14 +3702,15 @@ button:focus-visible {
   bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(80, 80, 80, 0.85);
+  background: rgba(80, 80, 80, 0.92);
   color: #fff;
-  padding: 8px 20px;
+  padding: 10px 24px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 14px;
   font-family: var(--mono, monospace);
-  z-index: 1000;
+  z-index: 99998;
   animation: fadeIn 0.2s ease;
+  pointer-events: none;
 }
 
 .rbb-play-btn {

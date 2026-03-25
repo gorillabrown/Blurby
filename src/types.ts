@@ -57,7 +57,7 @@ export interface BlurbySettings {
   sourceFolder: string | null;
   folderName: string;
   recentFolders: string[];
-  theme: "dark" | "light" | "eink" | "system";
+  theme: "dark" | "light" | "blurby" | "eink" | "system";
   launchAtLogin: boolean;
   focusTextSize: number;
   accentColor: string | null;
@@ -237,6 +237,14 @@ export interface ElectronAPI {
   onCloudSyncStatusChanged?: (callback: (status: SyncStatusValue) => void) => () => void;
   onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
   onWatcherError?: (callback: (data: { message: string }) => void) => () => void;
+  // Kokoro TTS
+  kokoroPreload?: () => Promise<void>;
+  kokoroModelStatus: () => Promise<{ ready: boolean }>;
+  kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
+  kokoroDownload?: () => Promise<{ ok?: boolean; error?: string }>;
+  kokoroGenerate?: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; error?: string }>;
+  onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
+  onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
 }
 
 declare global {

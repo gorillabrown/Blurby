@@ -10,6 +10,7 @@ import DocGridCard from "./DocGridCard";
 import StatsPanel from "./StatsPanel";
 import RecentFolders from "./RecentFolders";
 import CloudSyncIndicator from "./CloudSyncIndicator";
+import blurbyIcon from "../assets/blurby-icon.png";
 
 const api = window.electronAPI;
 
@@ -271,9 +272,7 @@ export default function LibraryView({
         <div className="library-header">
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
             <button className="hamburger-btn" onClick={onToggleFlap} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <img src={blurbyIcon} alt="" width="48" height="48" style={{ borderRadius: 8, display: "block" }} aria-hidden="true" />
             </button>
             <div>
               {editFolder ? (

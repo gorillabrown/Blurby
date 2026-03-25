@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, DEFAULT_EINK_WPM_CEILING, DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
@@ -317,18 +317,17 @@ export default function ReaderContainer({
 
   // ── Mode transitions ───────────────────────────────────────────────────
 
-  /** Enter Focus from any mode at highlighted word */
-  const handleEnterFocus = useCallback(() => {
+  /** Start Focus mode (internal — called by handleTogglePlay) */
+  const startFocus = useCallback(() => {
     stopAllModes();
     jumpToWord(highlightedWordIndex);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
-    // Auto-play Focus mode
     setTimeout(() => reader.togglePlay(), 50);
   }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes]);
 
-  /** Enter Flow from any mode — starts silent word advancement within Page view */
-  const handleEnterFlow = useCallback(() => {
+  /** Start Flow mode (internal — called by handleTogglePlay) */
+  const startFlow = useCallback(() => {
     stopAllModes();
     setReadingMode("flow");
     setFlowPlaying(true);
@@ -343,18 +342,39 @@ export default function ReaderContainer({
     updateSettings({ readingMode: "page" });
   }, [readingMode, wordIndex, updateSettings, stopAllModes]);
 
+  /** Select a mode (button click) — saves preference but does NOT auto-start.
+   *  If the mode is already active, pause back to Page. */
+  const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
+    if (readingMode === mode) {
+      // Already active → pause back to Page
+      handlePauseToPage();
+    } else if (readingMode !== "page") {
+      // Different mode active → stop it, select new one, stay in Page
+      stopAllModes();
+      setReadingMode("page");
+      updateSettings({ lastReadingMode: mode });
+    } else {
+      // In Page view → just select the mode (don't start)
+      updateSettings({ lastReadingMode: mode });
+    }
+  }, [readingMode, handlePauseToPage, stopAllModes, updateSettings]);
+
+  /** Convenience wrappers for bottom bar buttons */
+  const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
+  const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
+
   /** Toggle play: Space starts last-used mode from Page, or pauses active mode → Page. */
   const handleTogglePlay = useCallback(() => {
     if (readingMode === "page") {
-      // Dispatch to last-used mode (default: flow)
+      // Start the selected mode
       const lastMode = settings.lastReadingMode || "flow";
-      if (lastMode === "focus") handleEnterFocus();
+      if (lastMode === "focus") startFocus();
       else if (lastMode === "narration") handleToggleTts();
-      else handleEnterFlow();
+      else startFlow();
     } else {
       handlePauseToPage();
     }
-  }, [readingMode, settings.lastReadingMode, handleEnterFlow, handleEnterFocus, handleToggleTts, handlePauseToPage]);
+  }, [readingMode, settings.lastReadingMode, startFlow, startFocus, handleToggleTts, handlePauseToPage]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
@@ -439,10 +459,22 @@ export default function ReaderContainer({
     window.dispatchEvent(new CustomEvent("blurby:make-note", { detail: highlightedWordIndex }));
   }, [highlightedWordIndex]);
 
+  // Wrap adjustWpm: in narration mode, Up/Down adjusts TTS rate instead
+  const adjustSpeed = useCallback((delta: number) => {
+    if (readingMode === "narration") {
+      const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
+      const newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;
+      updateSettings({ ttsRate: newRate });
+      narration.adjustRate(newRate);
+    } else {
+      adjustWpm(delta);
+    }
+  }, [readingMode, settings.ttsRate, updateSettings, narration, adjustWpm]);
+
   // Keyboard shortcuts — fully mode-aware
   const chapterListRef = useRef<{ toggle: () => void } | null>(null);
   const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
-  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList);
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({

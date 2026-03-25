@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find . -name *perf* -o -name *benchmark*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(grep -c import.*constants src/**/*.tsx src/**/*.ts)",
+      "Bash(xargs grep:*)",
+      "Bash(gh release:*)",
+      "Bash(sort -k3)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(ls -la /c/Users/estra/OneDrive/Projects/Blurby/main/*.js)",
+      "Bash(grep -E \"^.*main\\\\.js$|^.*App\\\\.tsx$|^.*index\\\\.js$\")",
+      "Bash(ls C:/Users/estra/OneDrive/Projects/Blurby/*.js)"
+    ]
+  }
+}

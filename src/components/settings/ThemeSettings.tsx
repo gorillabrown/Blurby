@@ -27,7 +27,7 @@ interface ThemeSettingsProps {
 
 export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps) {
   const { setAccentColor, setFontFamily } = useContext(ThemeContext);
-  const themes: BlurbySettings["theme"][] = ["dark", "light", "eink", "system"];
+  const themes: BlurbySettings["theme"][] = ["blurby", "dark", "light", "eink", "system"];
 
   // Wrap onSettingsChange to also update ThemeContext instantly
   const handleSettingsChange = (updates: Partial<BlurbySettings>) => {
@@ -55,43 +55,47 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
         ))}
       </div>
 
-      <div className="settings-section-label">Accent Color</div>
-      <div className="appearance-row" style={{ marginBottom: 16 }}>
-        {ACCENT_PRESETS.map((preset) => (
-          <button
-            key={preset.value}
-            className={`accent-swatch${settings.accentColor === preset.value ? " accent-swatch-active" : ""}`}
-            style={{ background: preset.value }}
-            title={preset.label}
-            onClick={() => handleSettingsChange({ accentColor: preset.value })}
-            aria-label={`Accent color: ${preset.label}`}
-          />
-        ))}
-        <label className="accent-custom" title="Custom color">
-          <input
-            type="color"
-            className="accent-color-input"
-            value={customColor}
-            onChange={(e) => handleSettingsChange({ accentColor: e.target.value })}
-            aria-label="Custom accent color"
-          />
-          <span className="accent-custom-label">custom</span>
-        </label>
-      </div>
+      {settings.theme !== "blurby" && (
+        <>
+          <div className="settings-section-label">Accent Color</div>
+          <div className="appearance-row" style={{ marginBottom: 16 }}>
+            {ACCENT_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                className={`accent-swatch${settings.accentColor === preset.value ? " accent-swatch-active" : ""}`}
+                style={{ background: preset.value }}
+                title={preset.label}
+                onClick={() => handleSettingsChange({ accentColor: preset.value })}
+                aria-label={`Accent color: ${preset.label}`}
+              />
+            ))}
+            <label className="accent-custom" title="Custom color">
+              <input
+                type="color"
+                className="accent-color-input"
+                value={customColor}
+                onChange={(e) => handleSettingsChange({ accentColor: e.target.value })}
+                aria-label="Custom accent color"
+              />
+              <span className="accent-custom-label">custom</span>
+            </label>
+          </div>
 
-      <div className="settings-section-label">Font</div>
-      <div className="appearance-row">
-        {FONT_PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            className={`font-preset${settings.fontFamily === preset.value ? " font-preset-active" : ""}`}
-            style={preset.value ? { fontFamily: preset.value } : undefined}
-            onClick={() => handleSettingsChange({ fontFamily: preset.value })}
-          >
-            {preset.label}
-          </button>
-        ))}
-      </div>
+          <div className="settings-section-label">Font</div>
+          <div className="appearance-row">
+            {FONT_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                className={`font-preset${settings.fontFamily === preset.value ? " font-preset-active" : ""}`}
+                style={preset.value ? { fontFamily: preset.value } : undefined}
+                onClick={() => handleSettingsChange({ fontFamily: preset.value })}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* E-ink specific settings — only visible when e-ink theme is selected */}
       {settings.theme === "eink" && (

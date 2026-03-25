@@ -435,7 +435,7 @@ export function useLibraryKeyboard(
       // Tab toggles menu flap
       if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        s.toggleFlap?.();
+        a.onToggleFlap?.();
         return;
       }
       // F6 cycles focus zones (a11y replacement for Tab)

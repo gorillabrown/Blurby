@@ -71,6 +71,32 @@ const themes: Record<string, Record<string, string>> = {
     "--placeholder-text": "#555",
     "--badge-on-color": "#fff",
   },
+  blurby: {
+    "--bg": "#ffffff",
+    "--bg-raised": "#CAE4FE",
+    "--bg-hover": "#b8d9fc",
+    "--bg-secondary": "#f0f7ff",
+    "--border": "#2E73FF",
+    "--border-light": "#a8d0fa",
+    "--text": "#1a1a1a",
+    "--text-dim": "#4a4a4a",
+    "--text-dimmer": "#767676",
+    "--text-muted": "#888",
+    "--accent": "#E63946",
+    "--accent-glow": "rgba(230,57,70,0.3)",
+    "--accent-faded": "rgba(230,57,70,0.13)",
+    "--danger-muted": "rgba(230,57,70,0.2)",
+    "--reader-bg": "#ffffff",
+    "--overlay-light": "rgba(0,0,0,0.04)",
+    "--overlay-medium": "rgba(0,0,0,0.06)",
+    "--overlay-heavy": "rgba(0,0,0,0.10)",
+    "--overlay-backdrop": "rgba(255,255,255,0.9)",
+    "--overlay-gradient": "rgba(255,255,255,0.7)",
+    "--placeholder-bg": "#e8f0fe",
+    "--placeholder-banner": "#CAE4FE",
+    "--placeholder-text": "#333",
+    "--badge-on-color": "#fff",
+  },
   eink: {
     "--bg": "#e8e4d9",
     "--bg-raised": "#dedad0",
@@ -99,7 +125,7 @@ const themes: Record<string, Record<string, string>> = {
   },
 };
 
-const themeOrder = ["dark", "light", "eink", "system"];
+const themeOrder = ["blurby", "dark", "light", "eink", "system"];
 
 export function nextTheme(current: string): string {
   const idx = themeOrder.indexOf(current);
