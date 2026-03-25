@@ -3373,7 +3373,7 @@ button:focus-visible {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 40px 60px 20px;
+  padding: 40px 120px 20px;
   box-sizing: border-box;
   background: var(--bg);
   display: flex;
@@ -3432,6 +3432,17 @@ button:focus-visible {
   overflow-y: auto;
   scroll-behavior: smooth;
   padding-bottom: 20px;
+}
+
+@media (min-width: 1280px) {
+  .page-reader-content {
+    column-count: 2;
+    column-gap: 48px;
+  }
+  .page-reader-content p,
+  .page-reader-content .page-word-line {
+    break-inside: avoid;
+  }
 }
 
 .page-reader-paragraph {

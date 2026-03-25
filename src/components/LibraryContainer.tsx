@@ -43,6 +43,7 @@ export default function LibraryContainer() {
 
   // MenuFlap state
   const [menuFlapOpen, setMenuFlapOpen] = useState(false);
+  const [settingsPage, setSettingsPage] = useState<string | null>(null);
   const toggleMenuFlap = useCallback(() => setMenuFlapOpen((prev) => !prev), []);
 
   // Site login state
@@ -148,7 +149,8 @@ export default function LibraryContainer() {
     setView("library");
   }, []);
 
-  const handleOpenSettings = useCallback(() => {
+  const handleOpenSettings = useCallback((page?: string) => {
+    setSettingsPage(page || null);
     setMenuFlapOpen(true);
   }, []);
 
@@ -395,6 +397,8 @@ export default function LibraryContainer() {
               onArchiveDoc={archiveDoc}
               onToggleFavorite={toggleFavorite}
               onOpenDocById={handleOpenDocById}
+              settingsPage={settingsPage}
+              onClearSettingsPage={() => setSettingsPage(null)}
             />
           </DropZone>
           {/* Global overlays — available in reader view too */}
@@ -453,7 +457,7 @@ export default function LibraryContainer() {
   const menuFlap = (
     <MenuFlap
       open={menuFlapOpen}
-      onClose={() => setMenuFlapOpen(false)}
+      onClose={() => { setMenuFlapOpen(false); setSettingsPage(null); }}
       docs={library}
       settings={settings}
       onOpenDoc={handleOpenDocById}
@@ -461,6 +465,7 @@ export default function LibraryContainer() {
       siteLogins={siteLogins}
       onSiteLogin={handleSiteLogin}
       onSiteLogout={handleSiteLogout}
+      targetView={settingsPage}
     />
   );
 

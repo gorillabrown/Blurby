@@ -15,7 +15,7 @@ interface CommandPaletteProps {
   onSelect: (docId: string) => void;
   onAction: (action: () => void) => void;
   onClose: () => void;
-  onOpenSettings: () => void;
+  onOpenSettings: (page?: string) => void;
   /** "commands" shows actions/settings/shortcuts only; "library" shows documents only */
   mode?: "commands" | "library";
 }
@@ -135,18 +135,14 @@ export default function CommandPalette({
         sublabel: "Merge library from JSON file",
         onSelect: () => { onAction(() => window.electronAPI.importLibrary()); onClose(); },
       },
-      {
-        type: "setting",
-        label: "Settings: Cloud Sync",
-        sublabel: "Manage OneDrive / Google Drive sync",
-        onSelect: () => { onAction(onOpenSettings); onClose(); },
-      },
-      {
-        type: "setting",
-        label: "Settings: Reading Speed",
-        sublabel: "Adjust WPM and pauses",
-        onSelect: () => { onAction(onOpenSettings); onClose(); },
-      },
+      { type: "setting", label: "Settings: Theme", sublabel: "Dark, light, e-ink, system themes", onSelect: () => { onAction(() => onOpenSettings("theme")); onClose(); } },
+      { type: "setting", label: "Settings: Layout", sublabel: "Page layout and spacing", onSelect: () => { onAction(() => onOpenSettings("layout")); onClose(); } },
+      { type: "setting", label: "Settings: Speed Reading", sublabel: "WPM, pauses, flow word span", onSelect: () => { onAction(() => onOpenSettings("speed-reading")); onClose(); } },
+      { type: "setting", label: "Settings: Hotkeys", sublabel: "Keyboard shortcut reference", onSelect: () => { onAction(() => onOpenSettings("hotkeys")); onClose(); } },
+      { type: "setting", label: "Settings: Connectors", sublabel: "Site logins and integrations", onSelect: () => { onAction(() => onOpenSettings("connectors")); onClose(); } },
+      { type: "setting", label: "Settings: Help", sublabel: "About, updates, support", onSelect: () => { onAction(() => onOpenSettings("help")); onClose(); } },
+      { type: "setting", label: "Settings: Text Size", sublabel: "Adjust reading text size", onSelect: () => { onAction(() => onOpenSettings("text-size")); onClose(); } },
+      { type: "setting", label: "Settings: Cloud Sync", sublabel: "OneDrive / Google Drive sync", onSelect: () => { onAction(() => onOpenSettings("cloud-sync")); onClose(); } },
       {
         type: "shortcut",
         label: "Shortcut: ? — Show keyboard shortcuts",

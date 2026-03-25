@@ -35,6 +35,8 @@ interface ReaderContainerProps {
   onArchiveDoc: (docId: string) => void;
   onToggleFavorite: (docId: string) => void;
   onOpenDocById: (docId: string) => void;
+  settingsPage?: string | null;
+  onClearSettingsPage?: () => void;
 }
 
 export default function ReaderContainer({
@@ -54,6 +56,8 @@ export default function ReaderContainer({
   onArchiveDoc,
   onToggleFavorite,
   onOpenDocById,
+  settingsPage,
+  onClearSettingsPage,
 }: ReaderContainerProps) {
   const { settings, updateSettings } = useSettings();
   const isEink = settings.theme === "eink";
@@ -436,7 +440,7 @@ export default function ReaderContainer({
   const menuFlap = (
     <MenuFlap
       open={menuFlapOpen}
-      onClose={() => setMenuFlapOpen(false)}
+      onClose={() => { setMenuFlapOpen(false); onClearSettingsPage?.(); }}
       docs={library}
       settings={settings}
       onOpenDoc={onOpenDocById}
@@ -444,6 +448,7 @@ export default function ReaderContainer({
       siteLogins={siteLogins}
       onSiteLogin={onSiteLogin}
       onSiteLogout={onSiteLogout}
+      targetView={settingsPage}
     />
   );
 

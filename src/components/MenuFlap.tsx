@@ -29,6 +29,7 @@ interface MenuFlapProps {
   onSiteLogin: (url: string) => Promise<void>;
   onSiteLogout: (domain: string) => Promise<void>;
   isMac?: boolean;
+  targetView?: string | null;
 }
 
 export default function MenuFlap({
@@ -42,15 +43,16 @@ export default function MenuFlap({
   onSiteLogin,
   onSiteLogout,
   isMac = false,
+  targetView,
 }: MenuFlapProps) {
   const [view, setView] = useState<FlapView>("queue");
 
-  // Reset to queue whenever the flap is opened
+  // Reset to queue (or target sub-page) whenever the flap is opened
   useEffect(() => {
     if (open) {
-      setView("queue");
+      setView(targetView || "queue");
     }
-  }, [open]);
+  }, [open, targetView]);
 
   // Click anywhere outside flap closes it
   const flapRef = useRef<HTMLDivElement>(null);

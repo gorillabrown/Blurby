@@ -21,7 +21,7 @@ export const PUNCTUATION_PAUSE_MS = 1000;
 
 // ── Focus Mode Text Size ──────────────────────────────────────────────────────
 /** Default focus/flow text size as a percentage scale */
-export const DEFAULT_FOCUS_TEXT_SIZE = 100;
+export const DEFAULT_FOCUS_TEXT_SIZE = 110;
 /** Minimum focus/flow text size (percentage) */
 export const MIN_FOCUS_TEXT_SIZE = 60;
 /** Maximum focus/flow text size (percentage) */
