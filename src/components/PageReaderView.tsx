@@ -247,7 +247,8 @@ export default function PageReaderView({
   flowPagesRef.current = pages;
   flowCurrentPageRef.current = currentPage;
   flowWordsRef.current = words;
-  flowHighlightRef.current = highlightedWordIndex;
+  // Only sync ref from prop when NOT playing — during play, the ref drives position
+  if (!flowPlaying) flowHighlightRef.current = highlightedWordIndex;
   onHighlightRef.current = onHighlightedWordChange;
 
   /** Build a line map from rendered word elements on the current page */
@@ -316,13 +317,12 @@ export default function PageReaderView({
       });
     });
 
-    // 3. Update word index at line start and end only (reduces re-renders / lag)
-    onHighlightRef.current(line.firstWord);
+    // 3. Track position in ref only (no React state updates during slide)
+    flowHighlightRef.current = line.firstWord;
 
     // 4. When line completes, move to next line
     const lineTimer = setTimeout(() => {
-      // Final word update for this line
-      onHighlightRef.current(line.lastWord);
+      flowHighlightRef.current = line.lastWord;
       flowLineIdxRef.current = lineIdx + 1;
 
       if (lineIdx + 1 >= lines.length) {
@@ -359,6 +359,8 @@ export default function PageReaderView({
     if (!flowPlaying) {
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
       flowRafRef.current = null;
+      // Save final position to React state when flow stops
+      onHighlightRef.current(flowHighlightRef.current);
       return;
     }
 
@@ -440,10 +442,14 @@ export default function PageReaderView({
   const flowRestartRef = useRef<(() => void) | null>(null);
   const handleWordClick = useCallback((index: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    onHighlightedWordChange(index);
     flowHighlightRef.current = index;
-    // If flow is playing, restart the slide from this word
-    if (flowRestartRef.current) flowRestartRef.current();
+    if (flowRestartRef.current) {
+      // During flow: update ref and restart slide (no React state update)
+      flowRestartRef.current();
+    } else {
+      // Not in flow: update React state for visual highlight
+      onHighlightedWordChange(index);
+    }
   }, [onHighlightedWordChange]);
 
   // Right-click context menu
