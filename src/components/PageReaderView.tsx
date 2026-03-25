@@ -385,27 +385,7 @@ export default function PageReaderView({
       flowCurrentPageRef.current = targetPage;
     }
 
-    // Show cursor immediately at approximate position for instant feedback
-    const cursor = flowCursorRef.current;
-    if (cursor) {
-      const wordEl = document.querySelector(`[data-word-index="${flowHighlightRef.current}"]`) as HTMLElement;
-      if (wordEl) {
-        const container = wordEl.closest(".page-reader-content") as HTMLElement;
-        if (container) {
-          const cRect = container.getBoundingClientRect();
-          const wRect = wordEl.getBoundingClientRect();
-          const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
-          cursor.style.transition = "none";
-          cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
-          cursor.style.transform = `translate3d(${wRect.left - cRect.left}px, ${isUnderline ? wRect.bottom - cRect.top - 3 : wRect.top - cRect.top}px, 0)`;
-          cursor.style.width = "40px";
-          cursor.style.height = isUnderline ? "3px" : `${wRect.height}px`;
-          cursor.style.display = "";
-        }
-      }
-    }
-
-    // Start slide after DOM settles (single frame, or extra delay if page changed)
+    // Start slide after DOM settles
     const delay = needsPageChange ? 150 : 0;
     const startTimer = setTimeout(() => {
       requestAnimationFrame(() => {
