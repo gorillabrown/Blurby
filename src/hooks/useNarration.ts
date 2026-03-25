@@ -203,7 +203,9 @@ export default function useNarration() {
       return;
     }
 
-    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, pageEndWordRef.current);
+    // Don't limit chunks to page boundary — narration flows across pages seamlessly.
+    // Word-advance callback triggers page turns when highlighted word crosses boundary.
+    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
     const chunkWords = words.slice(startIdx, endIdx);
     const chunkText = chunkWords.join(" ");
     chunkStartRef.current = startIdx;
@@ -294,7 +296,8 @@ export default function useNarration() {
       return;
     }
 
-    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, pageEndWordRef.current);
+    // No page boundary limit — narration flows across pages seamlessly
+    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
     const chunkWords = words.slice(startIdx, endIdx);
     const chunkText = chunkWords.join(" ");
     chunkStartRef.current = startIdx;
