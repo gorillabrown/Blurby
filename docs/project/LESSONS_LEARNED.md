@@ -250,7 +250,43 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 | PR-15 | Keyboard handlers must be structured per-mode, not gated | LL-012 |
 | PR-16 | Sub-modes render within parent view, not as separate components | LL-013 |
 
-## Known Traps (Updated Sprint 21)
+### [2026-03-24] LL-014: React Effects Cannot Drive Imperative DOM Animation
+
+**Area:** rendering, animation, flow cursor
+**Status:** active
+**Priority:** high
+
+**Context:** Sprint 24 attempted to build a flow reading cursor (a bar sliding across text lines at WPM speed) using React useEffect + refs + CSS transitions. After 10+ iterations of fixes, the approach proved fundamentally unworkable.
+
+**Root causes:**
+1. **Ref-vs-state timing:** React's render cycle runs the component body (updating refs from props) BEFORE effect cleanup runs. Any ref synced from props in the body gets overwritten before cleanup can read the "during animation" value.
+2. **Effect dependency cascades:** Callbacks in dependency arrays cause effects to re-run on re-renders, restarting animations. Stabilizing with refs creates a maze of indirection.
+3. **State updates during animation:** Any call to setState during a CSS transition triggers a re-render, which can orphan DOM elements the animation is manipulating, restart effects, or overwrite refs.
+
+**Resolution:** Extracted animation into a standalone imperative TypeScript class (`FlowCursorController`) that owns its own DOM element, timers, and state. React only calls `start()` and `stop()` — no effects, no refs, no dependency arrays during playback.
+
+**Rule:** PR-17: Never use React useEffect to drive imperative DOM animations that need continuous state (position, timers). Extract into a plain class and let React only trigger start/stop.
+
+---
+
+### [2026-03-24] LL-015: Forced Reflow for CSS Transition Sequencing
+
+**Area:** animation, CSS
+**Status:** active
+**Priority:** medium
+
+**Context:** When setting `transition: none` followed by a new `transition: Xms linear` on the same element, the browser may batch both changes and skip the "instant" positioning. Using `requestAnimationFrame` (even double-rAF) added visible delays.
+
+**Resolution:** Reading `element.offsetWidth` between the two style assignments forces the browser to commit the "no transition" position synchronously before starting the new transition. This is the standard technique and eliminates the need for rAF delays.
+
+**Rule:** PR-18: Use forced reflow (read offsetWidth/offsetHeight) between transition:none and new transition, not requestAnimationFrame.
+
+---
+
+| PR-17 | Never drive imperative DOM animations from React useEffect — use a plain class | LL-014 |
+| PR-18 | Use forced reflow (offsetWidth) for CSS transition sequencing, not rAF | LL-015 |
+
+## Known Traps (Updated Sprint 24)
 
 | Trap | Area | Mitigation |
 |------|------|------------|
