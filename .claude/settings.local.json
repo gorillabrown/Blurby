@@ -13,7 +13,8 @@
       "Bash(npx tsc:*)",
       "Bash(ls -la /c/Users/estra/OneDrive/Projects/Blurby/main/*.js)",
       "Bash(grep -E \"^.*main\\\\.js$|^.*App\\\\.tsx$|^.*index\\\\.js$\")",
-      "Bash(ls C:/Users/estra/OneDrive/Projects/Blurby/*.js)"
+      "Bash(ls C:/Users/estra/OneDrive/Projects/Blurby/*.js)",
+      "Bash(grep -rn \"style.*=.*{.*#D04716\\\\|style.*=.*{.*#c4a882\\\\|style.*=.*{.*#5b8fb9\\\\|style.*=.*{.*#4CAF50\\\\|style.*=.*{.*#E63946\\\\|backgroundColor.*:#\\\\|color.*:#[A-Fa-f0-9]\" /c/Users/estra/OneDrive/Projects/Blurby/src/components/ --include=*.tsx)"
     ]
   }
 }

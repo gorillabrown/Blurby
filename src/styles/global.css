@@ -13,6 +13,7 @@
   --accent: #c4a882;
   --accent-glow: rgba(196,168,130,0.3);
   --accent-faded: rgba(196,168,130,0.13);
+  --accent-highlighted: rgba(196,168,130,0.3);
   --danger: #e24b4a;
   --danger-muted: rgba(226,75,74,0.2);
   --success: #639922;
@@ -1526,6 +1527,24 @@ button:focus-visible {
  * - No hover effects — many e-ink devices are touch-only
  * - Larger default sizes — e-ink pixels are less dense than LCD
  */
+
+/* ── Blurby Theme Overrides ──────────────────────────────────────────────── */
+[data-theme="blurby"] .page-reader-header {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  position: relative;
+}
+[data-theme="blurby"] .page-reader-header::after {
+  content: "";
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 24px;
+  height: 3px;
+  background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
+  border-radius: 1px;
+}
+
 [data-theme="eink"] {
   /* Override all CSS custom properties for pure B&W */
   --bg: #ffffff;
@@ -2865,22 +2884,22 @@ button:focus-visible {
 
 /* Focus rings for J/K navigation */
 .doc-card-focused {
-  outline: 2px solid var(--color-primary, #D04716);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
   border-radius: 4px;
 }
 .doc-grid-card-focused {
-  outline: 2px solid var(--color-primary, #D04716);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 
 /* Selection checkboxes */
 .doc-card-selected {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.08));
+  background: var(--accent-faded);
 }
 .doc-grid-card-selected {
-  outline: 2px solid var(--color-primary, #D04716);
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.08));
+  outline: 2px solid var(--accent);
+  background: var(--accent-faded);
 }
 .doc-card-checkbox,
 .doc-grid-checkbox {
@@ -2891,7 +2910,7 @@ button:focus-visible {
 }
 .doc-card-checkbox input,
 .doc-grid-checkbox input {
-  accent-color: var(--color-primary, #D04716);
+  accent-color: var(--accent);
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -2902,7 +2921,7 @@ button:focus-visible {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   display: inline-block;
   flex-shrink: 0;
   margin-right: 6px;
@@ -2918,7 +2937,7 @@ button:focus-visible {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   z-index: 2;
 }
 
@@ -2937,7 +2956,7 @@ button:focus-visible {
   width: 60px;
   height: 60px;
   border-radius: 4px;
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   color: #fff;
   display: flex;
   align-items: center;
@@ -2950,7 +2969,7 @@ button:focus-visible {
 .doc-grid-monogram {
   width: 100%;
   height: 140px;
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   color: #fff;
   display: flex;
   align-items: center;
@@ -2988,7 +3007,7 @@ button:focus-visible {
   max-width: 400px;
 }
 .reader-apa-source-link {
-  color: var(--color-primary, #D04716);
+  color: var(--accent);
   text-decoration: none;
   cursor: pointer;
 }
@@ -3019,7 +3038,7 @@ button:focus-visible {
   top: 12px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   color: #fff;
   padding: 4px 16px 4px 12px;
   border-radius: 16px;
@@ -3093,7 +3112,7 @@ button:focus-visible {
 }
 .command-palette-item:hover,
 .command-palette-item--focused {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.12));
+  background: var(--accent-faded);
 }
 .command-palette-badge {
   font-size: 10px;
@@ -3143,7 +3162,7 @@ button:focus-visible {
 .shortcuts-section h3 {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-primary, #D04716);
+  color: var(--accent);
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -3207,7 +3226,7 @@ button:focus-visible {
   margin-bottom: 4px;
 }
 .highlights-item:hover {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.1));
+  background: var(--accent-faded);
 }
 .highlights-item-text {
   font-style: italic;
@@ -3253,7 +3272,7 @@ button:focus-visible {
   color: var(--color-text, #e0e0e0);
 }
 .snooze-option:hover {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.1));
+  background: var(--accent-faded);
 }
 .snooze-option-key {
   font-family: monospace;
@@ -3312,7 +3331,7 @@ button:focus-visible {
   font-size: 13px;
 }
 .tag-picker-item:hover {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.1));
+  background: var(--accent-faded);
 }
 
 /* Quick settings popover */
@@ -3354,7 +3373,7 @@ button:focus-visible {
 }
 .quick-settings-row input[type="range"] {
   flex: 1;
-  accent-color: var(--color-primary, #D04716);
+  accent-color: var(--accent);
 }
 .quick-settings-row select {
   background: var(--color-border, #333);
@@ -3439,7 +3458,7 @@ button:focus-visible {
 .page-reader-source-link {
   cursor: pointer;
   text-decoration: underline;
-  color: var(--color-primary, #D04716);
+  color: var(--accent);
 }
 
 .page-reader-author {
@@ -3490,11 +3509,11 @@ button:focus-visible {
 }
 
 .page-word:hover {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.1));
+  background: var(--accent-faded);
 }
 
 .page-word--highlighted {
-  background: rgba(208, 71, 22, 0.3);
+  background: var(--accent-highlighted);
   color: inherit;
   padding: 1px 2px;
   border-radius: 2px;
@@ -3503,7 +3522,7 @@ button:focus-visible {
 /* Flow mode: smooth sliding highlight cursor (GPU-accelerated) */
 .flow-highlight-cursor {
   position: absolute;
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   opacity: 1;
   height: var(--flow-cursor-height, 3px);
   border-radius: 1.5px;
@@ -3535,7 +3554,7 @@ button:focus-visible {
 }
 
 .page-word--noted {
-  border-bottom: 2px dotted var(--color-primary, #D04716);
+  border-bottom: 2px dotted var(--accent);
 }
 
 .page-reader-footer {
@@ -3582,7 +3601,7 @@ button:focus-visible {
   bottom: 160px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   color: #fff;
   padding: 8px 16px;
   border-radius: 6px;
@@ -3719,8 +3738,8 @@ button:focus-visible {
 }
 
 .rbb-mode-btn--active {
-  background: var(--color-primary, #D04716);
-  border-color: var(--color-primary, #D04716);
+  background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
 }
 .rbb-mode-btn--last {
@@ -3781,11 +3800,11 @@ button:focus-visible {
   transition: background 0.15s, border-color 0.15s;
 }
 .rbb-tts-btn:hover {
-  border-color: var(--color-primary, #D04716);
+  border-color: var(--accent);
 }
 .rbb-tts-btn--active {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.15));
-  border-color: var(--color-primary, #D04716);
+  background: var(--accent-faded);
+  border-color: var(--accent);
   color: var(--text);
 }
 
@@ -3847,7 +3866,7 @@ button:focus-visible {
 
 .rbb-chapter-option:hover,
 .rbb-chapter-option--active {
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.15));
+  background: var(--accent-faded);
 }
 
 .rbb-eink-refresh {
@@ -3891,7 +3910,7 @@ button:focus-visible {
 
 .note-popover-highlight {
   font-size: 13px;
-  color: var(--color-primary, #D04716);
+  color: var(--accent);
   font-style: italic;
 }
 
@@ -3915,8 +3934,8 @@ button:focus-visible {
 
 .note-popover-input:focus {
   outline: none;
-  border-color: var(--color-primary, #D04716);
-  box-shadow: 0 0 0 2px rgba(208, 71, 22, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-faded);
 }
 
 .note-popover-actions {
@@ -3927,7 +3946,7 @@ button:focus-visible {
 }
 
 .note-popover-save {
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -4019,7 +4038,7 @@ button:focus-visible {
   border-radius: 4px;
   overflow: hidden;
   flex-shrink: 0;
-  background: var(--color-primary, #D04716);
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4053,7 +4072,7 @@ button:focus-visible {
 
 .hover-action-btn:hover {
   opacity: 1;
-  background: var(--color-primary-alpha, rgba(208, 71, 22, 0.15));
+  background: var(--accent-faded);
 }
 
 [data-theme="eink"] .note-popover,
@@ -4132,7 +4151,7 @@ button:focus-visible {
 /* ── Shared button styles ── */
 
 .onboarding-btn-primary {
-  background: #D04716;
+  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius-pill);
@@ -4153,7 +4172,7 @@ button:focus-visible {
 }
 
 .onboarding-btn-primary:focus-visible {
-  outline: 2px solid #D04716;
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -4174,7 +4193,7 @@ button:focus-visible {
 }
 
 .onboarding-btn-skip:focus-visible {
-  outline: 2px solid #D04716;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -4233,7 +4252,7 @@ button:focus-visible {
 
 .onboarding-step-dot--active {
   opacity: 1;
-  background: #D04716;
+  background: var(--accent);
 }
 
 .onboarding-tooltip-title {

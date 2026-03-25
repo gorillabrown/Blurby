@@ -9,6 +9,8 @@ function getThemeColors(settings) {
     ? (nativeTheme.shouldUseDarkColors ? "dark" : "light")
     : settings.theme;
   switch (resolvedTheme) {
+    case "blurby":
+      return { bg: "#ffffff", titleBar: "#ffffff", titleText: "#1a1a1a" };
     case "light":
       return { bg: "#f5f3ef", titleBar: "#c4c1bb", titleText: "#1a1a1a" };
     case "eink":
