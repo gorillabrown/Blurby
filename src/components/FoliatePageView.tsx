@@ -34,6 +34,7 @@ export default function FoliatePageView({
   focusTextSize,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +45,14 @@ export default function FoliatePageView({
 
     let cancelled = false;
     const container = containerRef.current;
+
+    // Create a host div that React doesn't manage — prevents removeChild conflicts
+    if (!foliateHostRef.current) {
+      foliateHostRef.current = document.createElement("div");
+      foliateHostRef.current.style.cssText = "width:100%;height:100%;position:absolute;inset:0;";
+      container.appendChild(foliateHostRef.current);
+    }
+    const host = foliateHostRef.current;
 
     const loadBook = async () => {
       try {
@@ -72,10 +81,10 @@ export default function FoliatePageView({
         const file = new File([buffer], fileName, { type: "application/epub+zip" });
         console.log("[Foliate] File created:", file.name, file.size, "bytes");
 
-        // Create and mount the foliate-view element
+        // Create and mount the foliate-view element inside the non-React host
         const view = document.createElement("foliate-view") as any;
-        container.innerHTML = "";
-        container.appendChild(view);
+        host.innerHTML = "";
+        host.appendChild(view);
         viewRef.current = view;
         console.log("[Foliate] View element mounted, opening book...");
 
@@ -138,7 +147,7 @@ export default function FoliatePageView({
         viewRef.current.close?.();
         viewRef.current = null;
       }
-      container.innerHTML = "";
+      if (foliateHostRef.current) foliateHostRef.current.innerHTML = "";
     };
   }, [activeDoc.filepath, activeDoc.id]);
 
