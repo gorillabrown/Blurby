@@ -1546,6 +1546,11 @@ button:focus-visible {
 }
 [data-theme="blurby"] .library-tabs {
   border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+[data-theme="blurby"] .library-tabs-row {
+  margin-bottom: 0;
 }
 [data-theme="blurby"] .library-sticky-top::after {
   content: "";
@@ -1553,7 +1558,7 @@ button:focus-visible {
   height: 4.5px;
   background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
   border-radius: 1px;
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 [data-theme="eink"] {
