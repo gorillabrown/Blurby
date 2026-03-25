@@ -420,7 +420,9 @@ export default function useNarration() {
   }, []);
 
   const adjustRate = useCallback((newRate: number) => {
-    setRate(Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate)));
+    const clamped = Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate));
+    speedRef.current = clamped;
+    setRate(clamped);
   }, []);
 
   // Cleanup on unmount
