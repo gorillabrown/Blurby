@@ -227,6 +227,7 @@ button, input, textarea, a, [role="button"] {
 
 /* ── Doc Card ─────────────────────────────────────────────────────────────── */
 .doc-card {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -282,6 +283,7 @@ button, input, textarea, a, [role="button"] {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  -webkit-app-region: no-drag;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════ */
@@ -1862,9 +1864,11 @@ button:focus-visible {
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
+  -webkit-app-region: no-drag;
 }
 
 .doc-grid-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   cursor: pointer;
