@@ -379,33 +379,56 @@ export default function PageReaderView({
 
     // Navigate to the page containing the current reading position
     const targetPage = pageForWord(flowPagesRef.current, flowHighlightRef.current);
-    if (targetPage !== flowCurrentPageRef.current) {
+    const needsPageChange = targetPage !== flowCurrentPageRef.current;
+    if (needsPageChange) {
       setCurrentPage(targetPage);
       flowCurrentPageRef.current = targetPage;
     }
 
-    // Delay to ensure DOM has rendered word elements (extra frame for page change)
-    const startDelay = requestAnimationFrame(() => { requestAnimationFrame(() => {
-      const lines = buildLineMap();
-      if (lines.length === 0) return;
-
-      // Find starting line
-      const startWordIdx = flowHighlightRef.current;
-      let lineIdx = 0;
-      for (let i = 0; i < lines.length; i++) {
-        if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
-          lineIdx = i;
-          break;
+    // Show cursor immediately at approximate position for instant feedback
+    const cursor = flowCursorRef.current;
+    if (cursor) {
+      const wordEl = document.querySelector(`[data-word-index="${flowHighlightRef.current}"]`) as HTMLElement;
+      if (wordEl) {
+        const container = wordEl.closest(".page-reader-content") as HTMLElement;
+        if (container) {
+          const cRect = container.getBoundingClientRect();
+          const wRect = wordEl.getBoundingClientRect();
+          const isUnderline = (settings?.flowCursorStyle || "underline") === "underline";
+          cursor.style.transition = "none";
+          cursor.className = "flow-highlight-cursor" + (isUnderline ? "" : " flow-highlight-cursor--box");
+          cursor.style.transform = `translate3d(${wRect.left - cRect.left}px, ${isUnderline ? wRect.bottom - cRect.top - 3 : wRect.top - cRect.top}px, 0)`;
+          cursor.style.width = "40px";
+          cursor.style.height = isUnderline ? "3px" : `${wRect.height}px`;
+          cursor.style.display = "";
         }
       }
+    }
 
-      flowLineIdxRef.current = lineIdx;
-      startLineSlide(lines, lineIdx);
-    }); });
+    // Start slide after DOM settles (single frame, or extra delay if page changed)
+    const delay = needsPageChange ? 150 : 0;
+    const startTimer = setTimeout(() => {
+      requestAnimationFrame(() => {
+        const lines = buildLineMap();
+        if (lines.length === 0) return;
+
+        const startWordIdx = flowHighlightRef.current;
+        let lineIdx = 0;
+        for (let i = 0; i < lines.length; i++) {
+          if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
+            lineIdx = i;
+            break;
+          }
+        }
+
+        flowLineIdxRef.current = lineIdx;
+        startLineSlide(lines, lineIdx);
+      });
+    }, delay);
 
     return () => {
       flowRestartRef.current = null;
-      cancelAnimationFrame(startDelay);
+      clearTimeout(startTimer);
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
