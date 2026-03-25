@@ -16,7 +16,6 @@ import GoToIndicator from "./GoToIndicator";
 import SnoozePickerOverlay from "./SnoozePickerOverlay";
 import TagPickerOverlay from "./TagPickerOverlay";
 import QuickSettingsPopover from "./QuickSettingsPopover";
-import HotkeyCoach from "./HotkeyCoach";
 import OnboardingOverlay from "./OnboardingOverlay";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
@@ -601,7 +600,6 @@ export default function LibraryContainer() {
             <button className="filter-pill-clear" onClick={() => kbState.setActiveFilter("all")} aria-label="Clear filter">&times;</button>
           </div>
         )}
-        <HotkeyCoach />
         {showOnboarding && (
           <OnboardingOverlay onComplete={handleOnboardingComplete} />
         )}

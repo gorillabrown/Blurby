@@ -2544,6 +2544,25 @@ button:focus-visible {
   margin-left: 4px;
 }
 
+.hotkey-row {
+  display: contents;
+}
+
+.hotkey-settings {
+  padding: 0;
+}
+
+.hotkey-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 16px 0 8px;
+}
+
+.hotkey-section-title:first-child {
+  margin-top: 0;
+}
+
 /* Hamburger button */
 
 .hamburger-btn {

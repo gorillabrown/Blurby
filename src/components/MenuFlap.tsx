@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import ReadingQueue from "./ReadingQueue";
 import { SettingsMenu } from "./SettingsMenu";
+import { triggerCoachHint } from "./HotkeyCoach";
 
 type FlapView = "queue" | "settings" | string;
 
@@ -167,7 +168,7 @@ export default function MenuFlap({
             {isOnQueue && (
               <button
                 className="menu-flap-settings-btn"
-                onClick={handleGoToSettings}
+                onClick={() => { triggerCoachHint("settings"); handleGoToSettings(); }}
                 aria-label="Go to settings"
                 title="Settings"
               >

@@ -174,15 +174,18 @@ export default function FoliatePageView({
 
         // Configure renderer attributes for pagination
         view.addEventListener("load", (e: any) => {
-          const { doc } = e.detail;
+          const { doc, index } = e.detail;
+          console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
           // Word click detection — highlight via native Selection API (no DOM mutation)
           doc.addEventListener("click", (ce: MouseEvent) => {
+            console.log("[Foliate] Click in doc at", ce.clientX, ce.clientY, "target:", (ce.target as HTMLElement)?.tagName);
             // Don't intercept link clicks
             if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
 
             const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
+            console.log("[Foliate] Word at point:", result?.word || "NONE");
             if (!result) return;
 
             // Highlight using native selection (safe, no DOM mutation)

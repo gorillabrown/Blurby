@@ -3,6 +3,7 @@ import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterInde
 import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP } from "../constants";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
+import { triggerCoachHint } from "./HotkeyCoach";
 
 interface ReaderBottomBarProps {
   activeDoc: BlurbyDoc & { content: string };
@@ -190,7 +191,7 @@ export default function ReaderBottomBar({
         <div className="rbb-font-group">
           <button
             className="rbb-font-btn"
-            onClick={() => onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP)}
+            onClick={() => { triggerCoachHint("fontSize"); onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP); }}
             aria-label="Decrease font size"
           >
             A-
@@ -198,7 +199,7 @@ export default function ReaderBottomBar({
           <span className="rbb-font-pct">{fontPct}%</span>
           <button
             className="rbb-font-btn"
-            onClick={() => onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP)}
+            onClick={() => { triggerCoachHint("fontSize"); onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); }}
             aria-label="Increase font size"
           >
             A+
@@ -209,7 +210,7 @@ export default function ReaderBottomBar({
         {onTogglePlay && (
           <button
             className={`rbb-play-btn ${playing ? "rbb-play-btn--active" : ""}`}
-            onClick={onTogglePlay}
+            onClick={() => { triggerCoachHint("play"); onTogglePlay(); }}
             aria-label={playing ? "Pause" : "Play"}
             title={playing ? "Pause (Space)" : "Play (Space)"}
           >
@@ -221,7 +222,7 @@ export default function ReaderBottomBar({
         <div className="rbb-mode-group">
           <button
             className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "focus" ? " rbb-mode-btn--last" : ""}`}
-            onClick={onEnterFocus}
+            onClick={() => { triggerCoachHint("enterFocus"); onEnterFocus(); }}
             aria-label="Focus mode"
             aria-pressed={readingMode === "focus"}
           >
@@ -229,7 +230,7 @@ export default function ReaderBottomBar({
           </button>
           <button
             className={`rbb-mode-btn ${readingMode === "flow" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "flow" ? " rbb-mode-btn--last" : ""}`}
-            onClick={onEnterFlow}
+            onClick={() => { triggerCoachHint("enterFlow"); onEnterFlow(); }}
             aria-label="Flow mode"
             aria-pressed={readingMode === "flow"}
           >
@@ -238,7 +239,7 @@ export default function ReaderBottomBar({
           {onToggleTts && (
             <button
               className={`rbb-mode-btn ${readingMode === "narration" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narration" ? " rbb-mode-btn--last" : ""}`}
-              onClick={onToggleTts}
+              onClick={() => { triggerCoachHint("narration"); onToggleTts(); }}
               aria-label={readingMode === "narration" ? "Stop narration" : "Start narration"}
               aria-pressed={readingMode === "narration"}
               title="Narration (N)"
@@ -253,7 +254,7 @@ export default function ReaderBottomBar({
           <div className="rbb-chapter-group">
             <button
               className="rbb-chapter-arrow"
-              onClick={onPrevChapter}
+              onClick={() => { triggerCoachHint("prevChapter"); onPrevChapter(); }}
               disabled={curChapterIdx <= 0}
               aria-label="Previous chapter"
             >
@@ -269,7 +270,7 @@ export default function ReaderBottomBar({
             </button>
             <button
               className="rbb-chapter-arrow"
-              onClick={onNextChapter}
+              onClick={() => { triggerCoachHint("nextChapter"); onNextChapter(); }}
               disabled={curChapterIdx >= chapterList.length - 1}
               aria-label="Next chapter"
             >

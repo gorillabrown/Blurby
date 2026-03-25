@@ -81,7 +81,6 @@ export default function CommandPalette({
 
     return [
       { type: "action", label: "Open Settings", sublabel: "Ctrl+,", onSelect: act(() => onOpenSettings()) },
-      { type: "setting", label: "Settings: Toggle Theme", sublabel: "Dark, light, e-ink themes", onSelect: act(() => onOpenSettings("theme")) },
       {
         type: "action",
         label: "Open Reading Notes",
@@ -101,7 +100,7 @@ export default function CommandPalette({
       { type: "setting", label: "Settings: Speed Reading", sublabel: "WPM, pauses, flow word span", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Settings: Hotkeys", sublabel: "Keyboard shortcut reference", onSelect: act(() => onOpenSettings("hotkeys")) },
       { type: "setting", label: "Settings: Connectors", sublabel: "Site logins and integrations", onSelect: act(() => onOpenSettings("connectors")) },
-      { type: "setting", label: "Settings: Help", sublabel: "About, updates, support", onSelect: act(() => onOpenSettings("help")) },
+      { type: "setting", label: "Settings: Help", sublabel: "Adding content, updates", onSelect: act(() => onOpenSettings()) },
       { type: "setting", label: "Settings: Text Size", sublabel: "Adjust reading text size", onSelect: act(() => onOpenSettings("text-size")) },
       { type: "setting", label: "Settings: Cloud Sync", sublabel: "OneDrive / Google Drive sync", onSelect: act(() => onOpenSettings("cloud-sync")) },
       // Sub-sections within Speed Reading
@@ -117,6 +116,42 @@ export default function CommandPalette({
       { type: "setting", label: "Line Spacing", sublabel: "Adjust line height", onSelect: act(() => onOpenSettings("layout")) },
       { type: "setting", label: "Character Spacing", sublabel: "Adjust letter spacing", onSelect: act(() => onOpenSettings("layout")) },
       { type: "setting", label: "Word Spacing", sublabel: "Adjust word gap", onSelect: act(() => onOpenSettings("layout")) },
+      { type: "setting", label: "Focus Text Size", sublabel: "Adjust focus reader text size", onSelect: act(() => onOpenSettings("layout")) },
+      { type: "setting", label: "Flow Text Size", sublabel: "Adjust flow reader text size", onSelect: act(() => onOpenSettings("layout")) },
+      // Library Layout
+      { type: "setting", label: "Settings: Library Layout", sublabel: "Sort, grid/list, card size, spacing", onSelect: act(() => onOpenSettings("library-layout")) },
+      { type: "setting", label: "Default Sort Order", sublabel: "Closest to done, A-Z, newest, oldest", onSelect: act(() => onOpenSettings("library-layout")) },
+      { type: "setting", label: "Library View Mode", sublabel: "Grid or list view", onSelect: act(() => onOpenSettings("library-layout")) },
+      { type: "setting", label: "Card Size", sublabel: "Small, medium, large cards", onSelect: act(() => onOpenSettings("library-layout")) },
+      { type: "setting", label: "Card Spacing", sublabel: "Compact, cozy, roomy", onSelect: act(() => onOpenSettings("library-layout")) },
+      // Sub-sections within Theme (additional)
+      { type: "setting", label: "Theme Mode", sublabel: "Blurby, dark, light, e-ink, system", onSelect: act(() => onOpenSettings("theme")) },
+      { type: "setting", label: "E-Ink Phrase Grouping", sublabel: "2-3 words per tick on e-ink displays", onSelect: act(() => onOpenSettings("theme")) },
+      { type: "setting", label: "E-Ink WPM Ceiling", sublabel: "Max reading speed for e-ink", onSelect: act(() => onOpenSettings("theme")) },
+      { type: "setting", label: "E-Ink Screen Refresh", sublabel: "Refresh interval for e-ink ghosting", onSelect: act(() => onOpenSettings("theme")) },
+      // Sub-sections within Speed Reading (individual settings)
+      { type: "setting", label: "Focus Marks", sublabel: "Toggle ORP focus marks", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Reading Ruler", sublabel: "Toggle reading ruler line", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Focus Span", sublabel: "Adjust focus area width", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Words Per Highlight", sublabel: "Flow mode highlight word count", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Flow Cursor Style", sublabel: "Underline or highlight cursor", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Comma Pauses", sublabel: "Pause on commas, colons, semicolons", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Sentence Pauses", sublabel: "Pause at sentence endings", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Paragraph Pauses", sublabel: "Pause at paragraph breaks", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Number Pauses", sublabel: "Pause on numbers", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Long Word Pauses", sublabel: "Pause on words longer than 8 chars", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Enable TTS", sublabel: "Turn text-to-speech on/off", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Voice Engine", sublabel: "System or Kokoro AI voices", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "TTS Voice", sublabel: "Choose narration voice", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Speech Rate", sublabel: "Adjust TTS playback speed", onSelect: act(() => onOpenSettings("speed-reading")) },
+      // Sub-sections within Cloud Sync
+      { type: "setting", label: "Sync Interval", sublabel: "How often to sync (1/5/15/30 min, manual)", onSelect: act(() => onOpenSettings("cloud-sync")) },
+      { type: "setting", label: "Microsoft Account", sublabel: "Connect OneDrive for sync", onSelect: act(() => onOpenSettings("cloud-sync")) },
+      { type: "setting", label: "Google Account", sublabel: "Connect Google Drive for sync", onSelect: act(() => onOpenSettings("cloud-sync")) },
+      // Connectors
+      { type: "setting", label: "Site Login", sublabel: "Add authenticated site for article import", onSelect: act(() => onOpenSettings("connectors")) },
+      // Help
+      { type: "setting", label: "Check for Updates", sublabel: "Check if a newer version is available", onSelect: act(() => onOpenSettings()) },
       {
         type: "shortcut",
         label: "Shortcut: ? — Show keyboard shortcuts",

@@ -29,7 +29,6 @@ const CATEGORIES = [
 ];
 
 const SECONDARY_CATEGORIES = [
-  { id: "help", label: "Help", icon: "❓" },
   { id: "hotkeys", label: "Hotkey Map", icon: "⌨️" },
 ];
 
@@ -56,7 +55,6 @@ export function SettingsMenu({
             onSiteLogout={onSiteLogout}
           />
         )}
-        {activeSubPage === "help" && <HelpSettings isMac={isMac} />}
         {activeSubPage === "hotkeys" && <HotkeyMapSettings />}
         {activeSubPage === "speed-reading" && (
           <SpeedReadingSettings settings={settings} onSettingsChange={onSettingsChange} />
@@ -111,6 +109,10 @@ export function SettingsMenu({
           <span className="settings-menu-item-chevron" aria-hidden="true">▸</span>
         </div>
       ))}
+
+      <div className="settings-menu-divider" aria-hidden="true" />
+
+      <HelpSettings isMac={isMac} />
     </div>
   );
 }

@@ -10,13 +10,23 @@ interface CoachHint {
 
 // Map of mouse-clickable actions to their keyboard equivalents
 const COACH_HINTS: Record<string, CoachHint> = {
+  // Library hints
   archive: { action: "archive", hotkey: "E" },
   favorite: { action: "favorite", hotkey: "S" },
   star: { action: "star", hotkey: "S" },
   search: { action: "search", hotkey: "/" },
   delete: { action: "delete", hotkey: "#" },
   queue: { action: "queue", hotkey: "Q" },
-  settings: { action: "settings", hotkey: "Ctrl+," },
+  settings: { action: "open settings", hotkey: "Ctrl+," },
+  // Reader hints
+  play: { action: "play/pause", hotkey: "Space" },
+  enterFocus: { action: "enter Focus mode", hotkey: "Shift+Space" },
+  enterFlow: { action: "enter Flow mode", hotkey: "Space" },
+  narration: { action: "toggle narration", hotkey: "N" },
+  fontSize: { action: "adjust font size", hotkey: "Ctrl+=/\u2212" },
+  prevChapter: { action: "go to previous chapter", hotkey: "[" },
+  nextChapter: { action: "go to next chapter", hotkey: "]" },
+  menu: { action: "toggle menu", hotkey: "Tab" },
 };
 
 function getShownHints(): Set<string> {
