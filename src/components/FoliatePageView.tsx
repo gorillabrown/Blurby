@@ -196,6 +196,19 @@ export default function FoliatePageView({
 
   return (
     <div className="foliate-page-view" ref={containerRef} style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+      {/* Page turn buttons overlaid on left/right edges — z-index above foliate host */}
+      <button
+        className="page-nav-btn page-nav-btn--left"
+        onClick={goPrev}
+        aria-label="Previous page"
+        style={{ zIndex: 10 }}
+      >&#x2039;</button>
+      <button
+        className="page-nav-btn page-nav-btn--right"
+        onClick={goNext}
+        aria-label="Next page"
+        style={{ zIndex: 10 }}
+      >&#x203A;</button>
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
     </div>
