@@ -242,13 +242,16 @@ export default function PageReaderView({
   const flowCurrentPageRef = useRef(currentPage);
   const flowWordsRef = useRef(words);
   const flowHighlightRef = useRef(highlightedWordIndex);
+  const flowSavedPosRef = useRef(highlightedWordIndex); // survives render, never overwritten by body
   const onHighlightRef = useRef(onHighlightedWordChange);
   flowWpmRef.current = wpm;
   flowPagesRef.current = pages;
   flowCurrentPageRef.current = currentPage;
   flowWordsRef.current = words;
-  // Only sync ref from prop when NOT playing — during play, the ref drives position
-  if (!flowPlaying) flowHighlightRef.current = highlightedWordIndex;
+  // Never overwrite flowHighlightRef from prop during render — it's set explicitly:
+  //   1. At flow start (in effect)
+  //   2. During slide (by startLineSlide)
+  //   3. On word click (by handleWordClick)
   onHighlightRef.current = onHighlightedWordChange;
 
   /** Build a line map from rendered word elements on the current page */
@@ -317,12 +320,14 @@ export default function PageReaderView({
       });
     });
 
-    // 3. Track position in ref only (no React state updates during slide)
+    // 3. Track position in refs (no React state updates during slide)
     flowHighlightRef.current = line.firstWord;
+    flowSavedPosRef.current = line.firstWord;
 
     // 4. When line completes, move to next line
     const lineTimer = setTimeout(() => {
       flowHighlightRef.current = line.lastWord;
+      flowSavedPosRef.current = line.lastWord;
       flowLineIdxRef.current = lineIdx + 1;
 
       if (lineIdx + 1 >= lines.length) {
@@ -355,6 +360,12 @@ export default function PageReaderView({
     flowRafRef.current = lineTimer as unknown as number;
   }, [buildLineMap, settings?.flowCursorStyle]);
 
+  // Stable ref for the slide launcher so the effect doesn't depend on startLineSlide
+  const startLineSlideRef = useRef(startLineSlide);
+  startLineSlideRef.current = startLineSlide;
+  const buildLineMapRef = useRef(buildLineMap);
+  buildLineMapRef.current = buildLineMap;
+
   useEffect(() => {
     if (!flowPlaying) {
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
@@ -362,10 +373,14 @@ export default function PageReaderView({
       return;
     }
 
-    // Restart function — used by word click to restart slide from new position
+    // Capture starting position from React state (only time we read from prop)
+    flowHighlightRef.current = highlightedWordIndex;
+    flowSavedPosRef.current = highlightedWordIndex;
+
+    // Restart function — used by word click and WPM change
     const restartFromCurrent = () => {
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      const newLines = buildLineMap();
+      const newLines = buildLineMapRef.current();
       if (newLines.length === 0) return;
       const idx = flowHighlightRef.current;
       let li = 0;
@@ -373,7 +388,7 @@ export default function PageReaderView({
         if (idx >= newLines[i].firstWord && idx <= newLines[i].lastWord) { li = i; break; }
       }
       flowLineIdxRef.current = li;
-      startLineSlide(newLines, li);
+      startLineSlideRef.current(newLines, li);
     };
     flowRestartRef.current = restartFromCurrent;
 
@@ -385,10 +400,10 @@ export default function PageReaderView({
       flowCurrentPageRef.current = targetPage;
     }
 
-    // Start slide — immediate for same page, short delay for page change
+    // Launch slide — immediate for same page, short delay for page change
     let startTimer: ReturnType<typeof setTimeout> | null = null;
     const launchSlide = () => {
-      const lines = buildLineMap();
+      const lines = buildLineMapRef.current();
       if (lines.length === 0) return;
       const startWordIdx = flowHighlightRef.current;
       let lineIdx = 0;
@@ -399,7 +414,7 @@ export default function PageReaderView({
         }
       }
       flowLineIdxRef.current = lineIdx;
-      startLineSlide(lines, lineIdx);
+      startLineSlideRef.current(lines, lineIdx);
     };
 
     if (needsPageChange) {
@@ -412,11 +427,12 @@ export default function PageReaderView({
       flowRestartRef.current = null;
       if (startTimer) clearTimeout(startTimer);
       if (flowRafRef.current) clearTimeout(flowRafRef.current as unknown as ReturnType<typeof setTimeout>);
-      // Save final flow position to React state BEFORE component body overwrites ref
-      onHighlightRef.current(flowHighlightRef.current);
+      // Save flow position from dedicated ref (component body never overwrites this)
+      onHighlightRef.current(flowSavedPosRef.current);
     };
+  // Only re-run when flowPlaying toggles — all other values accessed via stable refs
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowPlaying, buildLineMap, startLineSlide]);
+  }, [flowPlaying]);
 
   // Restart slide when WPM changes during flow (so up/down arrows take effect immediately)
   const prevWpmRef = useRef(wpm);
