@@ -71,6 +71,7 @@ export default function useNarration() {
   const speedRef = useRef(1.0);
   const kokoroInFlightRef = useRef(false);
   const nextChunkBufferRef = useRef<{ audio: number[]; sampleRate: number; durationMs: number; text: string; endIdx: number } | null>(null);
+  const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check Kokoro model status on mount
   useEffect(() => {
@@ -423,6 +424,12 @@ export default function useNarration() {
     const clamped = Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate));
     speedRef.current = clamped;
     setRate(clamped);
+    // Debounce pre-buffer invalidation (500ms) so rapid adjustments settle
+    if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
+    rateDebounceRef.current = setTimeout(() => {
+      nextChunkBufferRef.current = null;
+      rateDebounceRef.current = null;
+    }, 500);
   }, []);
 
   // Cleanup on unmount
