@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM } from "../constants";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS } from "../constants";
+import { calculatePauseMs } from "../utils/rhythm";
 import * as audioPlayer from "../utils/audioPlayer";
+import type { RhythmPauses } from "../types";
 
 export interface NarrationState {
   speaking: boolean;
@@ -23,21 +25,27 @@ function wpmToRate(wpm: number): number {
 }
 
 /** Find sentence boundary in word array, returns end index (exclusive).
+ *  Prefers shorter, sentence-aligned chunks so TTS speaks one sentence at a time
+ *  with natural prosody at boundaries. Minimum 5 words to avoid tiny chunks.
  *  If pageEnd is provided, never exceeds it (prevents reading across page boundaries). */
 function findSentenceBoundary(words: string[], startIdx: number, chunkSize: number, pageEnd?: number | null): number {
   const hardMax = pageEnd != null ? Math.min(pageEnd + 1, words.length) : words.length;
-  const minEnd = Math.min(startIdx + chunkSize, hardMax);
-  let endIdx = minEnd;
-  for (let i = minEnd - 1; i >= startIdx; i--) {
-    if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) { endIdx = i + 1; break; }
+  const maxEnd = Math.min(startIdx + chunkSize, hardMax);
+  const minWords = 5; // Minimum chunk size to avoid overhead from tiny chunks
+
+  // Scan forward from minimum to find the FIRST sentence ending
+  for (let i = startIdx + minWords - 1; i < maxEnd; i++) {
+    if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) return Math.min(i + 1, hardMax);
   }
-  if (endIdx === minEnd && hardMax > minEnd) {
-    const maxScan = Math.min(startIdx + chunkSize * 2, hardMax);
-    for (let i = minEnd; i < maxScan; i++) {
-      if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) { endIdx = i + 1; break; }
+  // No sentence ending found within chunk — scan further (up to 2x) for one
+  if (hardMax > maxEnd) {
+    const extendedMax = Math.min(startIdx + chunkSize * 2, hardMax);
+    for (let i = maxEnd; i < extendedMax; i++) {
+      if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) return Math.min(i + 1, hardMax);
     }
   }
-  return Math.min(endIdx, hardMax);
+  // Still no boundary — use the chunk size limit
+  return maxEnd;
 }
 
 const api = (window as any).electronAPI;
@@ -72,6 +80,9 @@ export default function useNarration() {
   const kokoroInFlightRef = useRef(false);
   const nextChunkBufferRef = useRef<{ audio: number[]; sampleRate: number; durationMs: number; text: string; endIdx: number } | null>(null);
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rhythmPausesRef = useRef<RhythmPauses | null>(null);
+  const paragraphBreaksRef = useRef<Set<number>>(new Set());
+  const chunkPauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Check Kokoro model status on mount
   useEffect(() => {
@@ -234,7 +245,21 @@ export default function useNarration() {
           cursorWordIndexRef.current = endIdx;
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
           if (isCursorDrivenRef.current && !holdRef.current) {
-            speakNextChunkKokoro();
+            // Rhythm pause: add silence between chunks at sentence/paragraph boundaries
+            const lastWord = chunkWords[chunkWords.length - 1] || "";
+            const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
+            const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
+            const pauseMs = rhythmPausesRef.current
+              ? calculatePauseMs(lastWord, rhythmPausesRef.current, PUNCTUATION_PAUSE_MS, isParagraphEnd)
+              : 0;
+            if (pauseMs > 0) {
+              chunkPauseTimerRef.current = setTimeout(() => {
+                chunkPauseTimerRef.current = null;
+                if (isCursorDrivenRef.current && !holdRef.current) speakNextChunkKokoro();
+              }, pauseMs);
+            } else {
+              speakNextChunkKokoro();
+            }
           }
         },
       );
@@ -407,6 +432,7 @@ export default function useNarration() {
     holdRef.current = false;
     kokoroInFlightRef.current = false;
     nextChunkBufferRef.current = null;
+    if (chunkPauseTimerRef.current) { clearTimeout(chunkPauseTimerRef.current); chunkPauseTimerRef.current = null; }
   }, []);
 
   const hold = useCallback(() => { holdRef.current = true; }, []);
@@ -465,5 +491,9 @@ export default function useNarration() {
     setKokoroVoice,
     setPageEndWord,
     downloadKokoroModel,
+    setRhythmPauses: (pauses: RhythmPauses | null, paragraphBreaks?: Set<number>) => {
+      rhythmPausesRef.current = pauses;
+      if (paragraphBreaks) paragraphBreaksRef.current = paragraphBreaks;
+    },
   };
 }

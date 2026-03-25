@@ -260,13 +260,15 @@ export default function ReaderContainer({
       preCapWpmRef.current = wpm;
       setWpm(() => TTS_WPM_CAP);
     }
+    // Pass rhythm pause rules so TTS pauses naturally at punctuation/paragraphs
+    narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
     // Start cursor-driven TTS using the user's ttsRate setting (not WPM-derived)
     narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
     });
     // Override the WPM-derived rate with the user's explicit ttsRate setting
     if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
-  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate]);
+  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks]);
 
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
