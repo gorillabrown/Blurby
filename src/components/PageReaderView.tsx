@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { tokenizeWithMeta, formatDisplayTitle, hasPunctuation } from "../utils/text";
-import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_FLOW_SENTENCE_PAUSE_MS, PAGE_FLOW_CLAUSE_PAUSE_MS, ANIMATION_DISABLE_WPM } from "../constants";
+import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_FLOW_SENTENCE_PAUSE_MS, PAGE_FLOW_CLAUSE_PAUSE_MS, ANIMATION_DISABLE_WPM, FLOW_PAGE_TURN_PAUSE_MS } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
@@ -271,6 +271,7 @@ export default function PageReaderView({
   const flowRafRef = useRef<number | null>(null);
   const flowLastTimeRef = useRef(0);
   const flowAccRef = useRef(0);
+  const flowPagePausingRef = useRef(false);
   // Use refs so the RAF loop always reads fresh values without restarting
   const flowHighlightRef = useRef(highlightedWordIndex);
   const flowWpmRef = useRef(wpm);
@@ -298,6 +299,12 @@ export default function PageReaderView({
       if (flowLastTimeRef.current === 0) {
         flowLastTimeRef.current = timestamp;
       }
+      // Skip advancement during page turn pause
+      if (flowPagePausingRef.current) {
+        flowLastTimeRef.current = timestamp;
+        flowRafRef.current = requestAnimationFrame(tick);
+        return;
+      }
       const delta = timestamp - flowLastTimeRef.current;
       flowLastTimeRef.current = timestamp;
       flowAccRef.current += delta;
@@ -321,32 +328,37 @@ export default function PageReaderView({
       if (flowAccRef.current >= effectiveInterval) {
         flowAccRef.current -= effectiveInterval;
         const next = flowHighlightRef.current + 1; // slide by 1 word
-        if (next < flowWordsRef.current.length) {
-          onHighlightedWordChange(next);
-          flowHighlightRef.current = next;
-          // Auto-flip page when highlight moves beyond current page
-          const targetPage = pageForWord(flowPagesRef.current, next);
-          if (targetPage !== flowCurrentPageRef.current) {
-            setCurrentPage(targetPage);
-            flowCurrentPageRef.current = targetPage;
-          }
-          // Position smooth highlight cursor + scroll into view
-          requestAnimationFrame(() => {
-            positionFlowCursor(next);
-            const el = document.querySelector(`[data-word-index="${next}"]`) as HTMLElement;
-            if (el) {
-              const container = el.closest(".page-reader-content");
-              if (container) {
-                const containerRect = container.getBoundingClientRect();
-                const elRect = el.getBoundingClientRect();
-                const targetY = containerRect.top + containerRect.height * 0.35;
-                if (elRect.top > targetY + 50 || elRect.top < containerRect.top) {
-                  el.scrollIntoView({ block: "center", behavior: "smooth" });
-                }
-              }
-            }
-          });
+        if (next >= flowWordsRef.current.length) {
+          // Document end — stop flow
+          return;
         }
+        onHighlightedWordChange(next);
+        flowHighlightRef.current = next;
+        // Check if next word crosses a page boundary — pause and turn
+        const curPageData = flowPagesRef.current[flowCurrentPageRef.current];
+        if (curPageData && next > curPageData.end) {
+          const nextPageIdx = flowCurrentPageRef.current + 1;
+          if (nextPageIdx < flowPagesRef.current.length) {
+            // Pause at page boundary, then turn
+            flowPagePausingRef.current = true;
+            setTimeout(() => {
+              setCurrentPage(nextPageIdx);
+              flowCurrentPageRef.current = nextPageIdx;
+              // Wait for page transition animation before resuming
+              setTimeout(() => {
+                flowPagePausingRef.current = false;
+                // Reposition cursor on new page
+                requestAnimationFrame(() => positionFlowCursor(flowHighlightRef.current));
+              }, PAGE_TRANSITION_MS + 50);
+            }, FLOW_PAGE_TURN_PAUSE_MS);
+          }
+          // Don't position cursor during page turn (word not rendered yet)
+          return;
+        }
+        // Position smooth highlight cursor
+        requestAnimationFrame(() => {
+          positionFlowCursor(next);
+        });
       }
       flowRafRef.current = requestAnimationFrame(tick);
     };
