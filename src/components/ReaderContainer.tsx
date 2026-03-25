@@ -672,6 +672,17 @@ export default function ReaderContainer({
         setTimeout(extractFoliateWords, 100);
       }}
       viewApiRef={foliateApiRef}
+      isReading={readingMode === "flow" || readingMode === "narration"}
+      onJumpToHighlight={() => {
+        // Scroll foliate to the current highlighted word
+        if (foliateWordsRef.current[highlightedWordIndex]) {
+          try {
+            const wordData = foliateWordsRef.current[highlightedWordIndex];
+            const el = wordData.range.startContainer.parentElement;
+            el?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+          } catch { /* stale range */ }
+        }
+      }}
     />
   ) : null;
 

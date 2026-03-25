@@ -57,6 +57,10 @@ interface FoliatePageViewProps {
   focusTextSize?: number;
   /** Ref for imperative access (getWords, goTo, next, prev) */
   viewApiRef?: React.MutableRefObject<FoliateViewAPI | null>;
+  /** Whether a reading mode (flow/narration) is actively advancing words */
+  isReading?: boolean;
+  /** Callback to scroll foliate to where the current highlight is */
+  onJumpToHighlight?: () => void;
 }
 
 export interface FoliateViewAPI {
@@ -149,6 +153,8 @@ export default function FoliatePageView({
   initialCfi,
   focusTextSize,
   viewApiRef,
+  isReading,
+  onJumpToHighlight,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -425,6 +431,16 @@ export default function FoliatePageView({
         aria-label="Next page"
         style={{ zIndex: 10 }}
       >&#x203A;</button>
+      {/* Jump to reading position button — shown when reading mode is active */}
+      {isReading && onJumpToHighlight && (
+        <button
+          className="return-to-narration-btn"
+          onClick={onJumpToHighlight}
+          style={{ zIndex: 20 }}
+        >
+          ↩ Jump to reading position
+        </button>
+      )}
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
     </div>
