@@ -241,10 +241,14 @@ export default function PageReaderView({
   const flowPagesRef = useRef(pages);
   const flowCurrentPageRef = useRef(currentPage);
   const flowWordsRef = useRef(words);
+  const flowHighlightRef = useRef(highlightedWordIndex);
+  const onHighlightRef = useRef(onHighlightedWordChange);
   flowWpmRef.current = wpm;
   flowPagesRef.current = pages;
   flowCurrentPageRef.current = currentPage;
   flowWordsRef.current = words;
+  flowHighlightRef.current = highlightedWordIndex;
+  onHighlightRef.current = onHighlightedWordChange;
 
   /** Build a line map from rendered word elements on the current page */
   const buildLineMap = useCallback(() => {
@@ -295,9 +299,10 @@ export default function PageReaderView({
     if (lines.length === 0) return;
 
     // Find starting line based on current highlighted word
+    const startWordIdx = flowHighlightRef.current;
     let lineIdx = 0;
     for (let i = 0; i < lines.length; i++) {
-      if (highlightedWordIndex >= lines[i].firstWord && highlightedWordIndex <= lines[i].lastWord) {
+      if (startWordIdx >= lines[i].firstWord && startWordIdx <= lines[i].lastWord) {
         lineIdx = i;
         break;
       }
@@ -343,7 +348,7 @@ export default function PageReaderView({
       // Update word index based on progress through the line
       const wordInLine = Math.floor(progress * line.wordCount);
       const globalWordIdx = Math.min(line.firstWord + wordInLine, line.lastWord);
-      onHighlightedWordChange(globalWordIdx);
+      onHighlightRef.current(globalWordIdx);
 
       if (progress >= 1) {
         // Line complete — move to next line
@@ -386,7 +391,8 @@ export default function PageReaderView({
     return () => {
       if (flowRafRef.current) cancelAnimationFrame(flowRafRef.current);
     };
-  }, [flowPlaying, highlightedWordIndex, onHighlightedWordChange, buildLineMap, settings?.flowCursorStyle]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowPlaying, buildLineMap, settings?.flowCursorStyle]);
 
   // Click on left/right halves of screen
   const handlePageClick = useCallback((e: React.MouseEvent) => {
