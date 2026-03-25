@@ -93,6 +93,14 @@ export default function FoliatePageView({
           const { doc } = e.detail;
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
+          // Forward keyboard events from iframe to parent window
+          doc.addEventListener("keydown", (ke: KeyboardEvent) => {
+            window.dispatchEvent(new KeyboardEvent("keydown", {
+              key: ke.key, code: ke.code, keyCode: ke.keyCode,
+              ctrlKey: ke.ctrlKey, shiftKey: ke.shiftKey, altKey: ke.altKey, metaKey: ke.metaKey,
+              bubbles: true, cancelable: true,
+            }));
+          });
           onLoad?.();
         });
 
