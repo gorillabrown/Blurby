@@ -195,8 +195,14 @@ export default function useNarration() {
   // ── Kokoro cursor-driven chunk (with in-flight guard + pre-buffer) ─────
 
   const speakNextChunkKokoro = useCallback(async () => {
-    if (!isCursorDrivenRef.current || !api?.kokoroGenerate) return;
-    if (kokoroInFlightRef.current) return; // prevent overlapping requests (item 15)
+    if (!isCursorDrivenRef.current || !api?.kokoroGenerate) {
+      console.log(`[TTS Kokoro] Early return: cursorDriven=${isCursorDrivenRef.current}, hasApi=${!!api?.kokoroGenerate}`);
+      return;
+    }
+    if (kokoroInFlightRef.current) {
+      console.log("[TTS Kokoro] Early return: already in-flight");
+      return;
+    }
 
     const words = allWordsRef.current;
     const startIdx = cursorWordIndexRef.current;
@@ -216,6 +222,7 @@ export default function useNarration() {
 
     kokoroInFlightRef.current = true;
     const genId = generationIdRef.current;
+    console.log(`[TTS Kokoro] Generating chunk: "${chunkText.substring(0, 50)}..." voice=${kokoroVoiceRef.current} rate=${speedRef.current}`);
     try {
       // Check pre-buffer first (item 14)
       let result;
@@ -223,19 +230,23 @@ export default function useNarration() {
       if (buf && buf.text === chunkText) {
         result = buf;
         nextChunkBufferRef.current = null;
+        console.log("[TTS Kokoro] Using pre-buffered chunk");
       } else {
         nextChunkBufferRef.current = null;
         result = await api.kokoroGenerate(chunkText, kokoroVoiceRef.current, speedRef.current);
+        console.log(`[TTS Kokoro] IPC result: error=${result?.error}, hasAudio=${!!result?.audio}, sampleRate=${result?.sampleRate}`);
       }
 
       if (result.error) {
+        console.log(`[TTS Kokoro] Error: ${result.error} — falling back to Web Speech`);
         engineRef.current = "web";
         speakNextChunkWeb();
         return;
       }
-      if (!isCursorDrivenRef.current) return;
+      if (!isCursorDrivenRef.current) { console.log("[TTS Kokoro] No longer cursor-driven, aborting"); return; }
       // Discard stale IPC result if rate changed during generation — re-generate at new rate
       if (genId !== generationIdRef.current) {
+        console.log("[TTS Kokoro] Stale genId, re-generating");
         speakNextChunk();
         return;
       }
