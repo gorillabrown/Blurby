@@ -313,7 +313,11 @@ export default function ReaderContainer({
       setWpm(() => TTS_WPM_CAP);
     }
     // Pass rhythm pause rules so TTS pauses naturally at punctuation/paragraphs
-    narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
+    // For EPUBs, use paragraph breaks from foliate DOM (block element boundaries)
+    const paragraphBreaks = useFoliate
+      ? (foliateApiRef.current?.getParagraphBreaks?.() ?? new Set<number>())
+      : tokenized.paragraphBreaks;
+    narration.setRhythmPauses(settings.rhythmPauses || null, paragraphBreaks);
     // Get words from foliate DOM (EPUB) or extracted text (other formats)
     const effectiveWords = getEffectiveWords();
     // For non-EPUB: highlightedWordIndex maps directly to the words array

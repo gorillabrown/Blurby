@@ -34,9 +34,20 @@ const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 /** Extract all words from a foliate view's currently loaded sections.
  *  Returns word strings and their DOM Ranges for highlighting. */
-function extractWordsFromView(view: any): FoliateWord[] {
+const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
+
+function getBlockParent(node: Node): Element | null {
+  let el = node.parentElement;
+  while (el && !BLOCK_TAGS.has(el.tagName)) el = el.parentElement;
+  return el;
+}
+
+function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreaks: Set<number> } {
   const words: FoliateWord[] = [];
-  if (!view?.renderer?.getContents) return words;
+  const paragraphBreaks = new Set<number>();
+  if (!view?.renderer?.getContents) return { words, paragraphBreaks };
+
+  let prevBlock: Element | null = null;
 
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
@@ -51,16 +62,26 @@ function extractWordsFromView(view: any): FoliateWord[] {
     let node: Text | null;
     while ((node = walker.nextNode() as Text | null)) {
       const text = node.textContent || "";
+      const block = getBlockParent(node);
       for (const { segment, isWordLike, index: segIdx } of wordSegmenter.segment(text)) {
         if (!isWordLike) continue;
+        // Detect paragraph boundary: block parent changed from previous word
+        if (prevBlock && block && block !== prevBlock && words.length > 0) {
+          paragraphBreaks.add(words.length - 1); // Last word of previous block
+        }
+        prevBlock = block;
         const range = doc.createRange();
         range.setStart(node, segIdx);
         range.setEnd(node, segIdx + segment.length);
         words.push({ word: segment, range, sectionIndex: index });
       }
     }
+    // Section boundary = paragraph break
+    if (words.length > 0) {
+      paragraphBreaks.add(words.length - 1);
+    }
   }
-  return words;
+  return { words, paragraphBreaks };
 }
 
 /** Extract words from a single section's document (for incremental updates during narration) */
@@ -270,6 +291,7 @@ interface FoliatePageViewProps {
 
 export interface FoliateViewAPI {
   getWords: () => FoliateWord[];
+  getParagraphBreaks: () => Set<number>;
   goTo: (target: string | number) => Promise<any>;
   goToFraction: (frac: number) => Promise<void>;
   next: () => void;
@@ -304,6 +326,7 @@ export default function FoliatePageView({
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
   const foliateWordsRef = useRef<FoliateWord[]>([]);
+  const foliateParagraphBreaksRef = useRef<Set<number>>(new Set());
   const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
@@ -405,11 +428,12 @@ export default function FoliatePageView({
               onWordsReextracted?.();
             } else {
               // Full re-extraction (Page mode or first load)
-              const freshWords = extractWordsFromView(v2);
-              foliateWordsRef.current = freshWords;
+              const extracted = extractWordsFromView(v2);
+              foliateWordsRef.current = extracted.words;
+              foliateParagraphBreaksRef.current = extracted.paragraphBreaks;
               onWordsReextracted?.();
               // Wrap this section's words
-              const sectionStart = freshWords.findIndex(w => w.sectionIndex === index);
+              const sectionStart = extracted.words.findIndex(w => w.sectionIndex === index);
               if (sectionStart >= 0) {
                 wrapWordsInSpans(doc, index, sectionStart);
               }
@@ -528,9 +552,14 @@ export default function FoliatePageView({
         // Populate imperative API ref
         if (viewApiRef) {
           viewApiRef.current = {
-            getWords: () => foliateWordsRef.current.length > 0
-              ? foliateWordsRef.current
-              : extractWordsFromView(view),
+            getWords: () => {
+              if (foliateWordsRef.current.length > 0) return foliateWordsRef.current;
+              const extracted = extractWordsFromView(view);
+              foliateWordsRef.current = extracted.words;
+              foliateParagraphBreaksRef.current = extracted.paragraphBreaks;
+              return extracted.words;
+            },
+            getParagraphBreaks: () => foliateParagraphBreaksRef.current,
             goTo: (target) => view.goTo(target),
             goToFraction: (frac) => view.goToFraction(frac),
             next: () => view.renderer.next(),
