@@ -330,10 +330,9 @@ export default function FoliatePageView({
           onTocReady?.(view.book.toc);
         }
 
-        // Navigate to last position or start
+        // Navigate to last position or start from the very beginning (cover page)
         await view.init({
           lastLocation: initialCfi || null,
-          showTextStart: !initialCfi,
         });
 
         // Populate imperative API ref

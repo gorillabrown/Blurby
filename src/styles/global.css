@@ -157,6 +157,15 @@ body {
   padding: 22px;
   margin-bottom: 20px;
 }
+.add-edit-label {
+  display: block;
+  font-size: 11px;
+  font-family: var(--mono, monospace);
+  color: var(--text-dim, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
 .add-edit-title {
   width: 100%;
   background: transparent;
@@ -2171,6 +2180,31 @@ button:focus-visible {
 }
 .doc-context-menu button:hover {
   background: var(--overlay-light, rgba(255,255,255,0.08));
+}
+.doc-context-menu-danger {
+  color: #e63946 !important;
+}
+.doc-context-menu-danger:hover {
+  background: rgba(230, 57, 70, 0.12) !important;
+}
+.doc-context-menu-disabled {
+  opacity: 0.4;
+  cursor: default !important;
+}
+.doc-context-menu-divider {
+  height: 1px;
+  background: var(--border, #444);
+  margin: 4px 0;
+}
+.doc-context-menu-confirm {
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--text-dim, #aaa);
+}
+.doc-context-menu-confirm button {
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  border-radius: 4px;
 }
 
 .doc-grid-info {

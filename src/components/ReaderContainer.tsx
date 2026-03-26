@@ -178,8 +178,17 @@ export default function ReaderContainer({
   const lastSavedPosRef = useRef(activeDoc.position || 0);
   const currentPos = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
+  // Only save progress when user is actively reading (in a mode) or has manually navigated
+  // Don't save on initial book open to prevent false "started" status
+  const userHasInteractedRef = useRef(false);
+  useEffect(() => {
+    if (readingMode !== "page") userHasInteractedRef.current = true;
+  }, [readingMode]);
+
   useEffect(() => {
     if (currentPos === lastSavedPosRef.current) return;
+    // For foliate EPUBs: don't save progress from initial onRelocate events in page mode
+    if (useFoliate && readingMode === "page" && !userHasInteractedRef.current) return;
     if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
     pageSaveTimerRef.current = setTimeout(() => {
       lastSavedPosRef.current = currentPos;
@@ -187,7 +196,7 @@ export default function ReaderContainer({
       onUpdateProgress(activeDoc.id, currentPos);
     }, 2000);
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
-  }, [currentPos, activeDoc.id, onUpdateProgress, readingMode]);
+  }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
 
   const finishReading = useCallback((finalPos: number) => {
     // Flush any pending debounced save
@@ -660,6 +669,8 @@ export default function ReaderContainer({
           const fraction = detail.fraction || 0;
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
           setHighlightedWordIndex(approxWordIdx);
+          // Only save progress if user has interacted (prevents false "started")
+          if (!userHasInteractedRef.current && readingMode === "page") return;
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
