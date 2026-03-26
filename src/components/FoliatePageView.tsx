@@ -11,18 +11,34 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
+import { segmentWords } from "../utils/segmentWords";
 
 const api = (window as any).electronAPI;
 
-/** Extract all words from a foliate view's current visible sections.
+/** Word entry with optional Range — Range is null when the section is unloaded. */
+export interface FoliateWord {
+  word: string;
+  range: Range | null;
+  sectionIndex: number;
+}
+
+/** Safely perform an operation on a Range, returning fallback if the Range is stale or null. */
+function safeRangeOp<T>(range: Range | null, fn: (r: Range) => T, fallback: T): T {
+  if (!range || !range.startContainer.isConnected) return fallback;
+  try { return fn(range); } catch { return fallback; }
+}
+
+/** Intl.Segmenter instance shared within this module for inline word detection. */
+const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+
+/** Extract all words from a foliate view's currently loaded sections.
  *  Returns word strings and their DOM Ranges for highlighting. */
-function extractWordsFromView(view: any): Array<{ word: string; range: Range; sectionIndex: number }> {
-  const words: Array<{ word: string; range: Range; sectionIndex: number }> = [];
+function extractWordsFromView(view: any): FoliateWord[] {
+  const words: FoliateWord[] = [];
   if (!view?.renderer?.getContents) return words;
 
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
-    const segmenter = new (Intl as any).Segmenter("en", { granularity: "word" });
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node: Node) => {
         const parent = node.parentElement;
@@ -34,7 +50,7 @@ function extractWordsFromView(view: any): Array<{ word: string; range: Range; se
     let node: Text | null;
     while ((node = walker.nextNode() as Text | null)) {
       const text = node.textContent || "";
-      for (const { segment, isWordLike, index: segIdx } of segmenter.segment(text)) {
+      for (const { segment, isWordLike, index: segIdx } of wordSegmenter.segment(text)) {
         if (!isWordLike) continue;
         const range = doc.createRange();
         range.setStart(node, segIdx);
@@ -46,6 +62,95 @@ function extractWordsFromView(view: any): Array<{ word: string; range: Range; se
   return words;
 }
 
+/**
+ * Merge freshly extracted words with the existing word array.
+ * - Words from loaded sections get fresh Ranges.
+ * - Words from unloaded sections keep their word string but Range is nulled.
+ * - New sections discovered in fresh extraction are inserted at the correct position.
+ */
+function mergeWords(existing: FoliateWord[], fresh: FoliateWord[], loadedSections: Set<number>): FoliateWord[] {
+  // Build a map of fresh words grouped by section
+  const freshBySection = new Map<number, FoliateWord[]>();
+  for (const w of fresh) {
+    let arr = freshBySection.get(w.sectionIndex);
+    if (!arr) { arr = []; freshBySection.set(w.sectionIndex, arr); }
+    arr.push(w);
+  }
+
+  // Collect existing sections in order
+  const existingSections = new Set<number>();
+  for (const w of existing) existingSections.add(w.sectionIndex);
+
+  // Find new sections not in existing
+  const newSections = new Set<number>();
+  for (const s of freshBySection.keys()) {
+    if (!existingSections.has(s)) newSections.add(s);
+  }
+
+  // Build merged result
+  const merged: FoliateWord[] = [];
+  let lastSection = -1;
+
+  for (const w of existing) {
+    // Before processing a new section from existing, insert any new sections that come before it
+    if (w.sectionIndex !== lastSection) {
+      for (const ns of newSections) {
+        if (ns > lastSection && ns < w.sectionIndex) {
+          const nsWords = freshBySection.get(ns);
+          if (nsWords) merged.push(...nsWords);
+          newSections.delete(ns);
+        }
+      }
+      lastSection = w.sectionIndex;
+    }
+
+    if (freshBySection.has(w.sectionIndex)) {
+      // This section is freshly loaded — skip old words, we'll add fresh ones once per section
+      continue;
+    } else if (!loadedSections.has(w.sectionIndex)) {
+      // Section is unloaded — null out Range, keep word string
+      merged.push({ word: w.word, range: null, sectionIndex: w.sectionIndex });
+    } else {
+      // Section is loaded but not in fresh (shouldn't happen, but keep as-is)
+      merged.push(w);
+    }
+  }
+
+  // Now insert fresh words for sections that replaced existing ones, in section order
+  const freshSectionsSorted = Array.from(freshBySection.keys()).sort((a, b) => a - b);
+
+  // Rebuild: insert fresh section words at the right position
+  const result: FoliateWord[] = [];
+  let mergedIdx = 0;
+
+  for (const freshSec of freshSectionsSorted) {
+    // Add all merged words from sections before this fresh section
+    while (mergedIdx < merged.length && merged[mergedIdx].sectionIndex < freshSec) {
+      result.push(merged[mergedIdx++]);
+    }
+    // Skip any merged words from this section (shouldn't exist since we skipped above)
+    while (mergedIdx < merged.length && merged[mergedIdx].sectionIndex === freshSec) {
+      mergedIdx++;
+    }
+    // Add fresh words for this section
+    const freshWords = freshBySection.get(freshSec);
+    if (freshWords) result.push(...freshWords);
+  }
+
+  // Add remaining merged words
+  while (mergedIdx < merged.length) {
+    result.push(merged[mergedIdx++]);
+  }
+
+  // Append any new sections that come after all existing sections
+  for (const ns of newSections) {
+    const nsWords = freshBySection.get(ns);
+    if (nsWords) result.push(...nsWords);
+  }
+
+  return result;
+}
+
 interface FoliatePageViewProps {
   activeDoc: BlurbyDoc & { content?: string };
   settings: BlurbySettings;
@@ -53,6 +158,7 @@ interface FoliatePageViewProps {
   onTocReady?: (toc: any[]) => void;
   onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number) => void;
   onLoad?: () => void;
+  onWordsReextracted?: () => void;
   initialCfi?: string | null;
   focusTextSize?: number;
   /** Ref for imperative access (getWords, goTo, next, prev) */
@@ -64,12 +170,12 @@ interface FoliatePageViewProps {
 }
 
 export interface FoliateViewAPI {
-  getWords: () => Array<{ word: string; range: Range; sectionIndex: number }>;
+  getWords: () => FoliateWord[];
   goTo: (target: string | number) => Promise<any>;
   goToFraction: (frac: number) => Promise<void>;
   next: () => void;
   prev: () => void;
-  highlightWord: (range: Range, sectionIndex: number) => void;
+  highlightWord: (range: Range | null, sectionIndex: number) => void;
   clearHighlight: () => void;
   getView: () => any;
 }
@@ -150,6 +256,7 @@ export default function FoliatePageView({
   onTocReady,
   onWordClick,
   onLoad,
+  onWordsReextracted,
   initialCfi,
   focusTextSize,
   viewApiRef,
@@ -159,6 +266,8 @@ export default function FoliatePageView({
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
+  const foliateWordsRef = useRef<FoliateWord[]>([]);
+  const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -217,6 +326,33 @@ export default function FoliatePageView({
           console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
+
+          // Cache iframe ref for this section's document
+          if (doc !== document) {
+            const iframes = host.querySelectorAll("iframe");
+            for (const f of iframes) {
+              try {
+                if (f.contentDocument === doc) { foliateIframeRef.current = f; break; }
+              } catch { /* cross-origin */ }
+            }
+          }
+
+          // Re-extract words on section change — merge with existing word array
+          const v2 = viewRef.current;
+          if (v2) {
+            const freshWords = extractWordsFromView(v2);
+            const loadedSections = new Set<number>();
+            for (const { index: si } of v2.renderer?.getContents?.() ?? []) {
+              loadedSections.add(si);
+            }
+            if (foliateWordsRef.current.length > 0) {
+              foliateWordsRef.current = mergeWords(foliateWordsRef.current, freshWords, loadedSections);
+            } else {
+              foliateWordsRef.current = freshWords;
+            }
+            onWordsReextracted?.();
+          }
+
           // Word detection: single click highlights word with a <mark> overlay
           doc.addEventListener("click", (ce: MouseEvent) => {
             if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
@@ -346,7 +482,9 @@ export default function FoliatePageView({
         if (viewApiRef) {
           let currentHighlight: HTMLElement | null = null;
           viewApiRef.current = {
-            getWords: () => extractWordsFromView(view),
+            getWords: () => foliateWordsRef.current.length > 0
+              ? foliateWordsRef.current
+              : extractWordsFromView(view),
             goTo: (target) => view.goTo(target),
             goToFraction: (frac) => view.goToFraction(frac),
             next: () => view.renderer.next(),
@@ -359,19 +497,22 @@ export default function FoliatePageView({
                 parent.removeChild(currentHighlight);
                 currentHighlight = null;
               }
+              // Guard: skip if range is null or stale (section unloaded)
+              if (!range || !range.startContainer.isConnected) return;
               // Wrap word in a visible <mark> element
-              try {
-                const doc = range.startContainer.ownerDocument;
+              safeRangeOp(range, (r) => {
+                const doc = r.startContainer.ownerDocument;
                 if (!doc) return;
                 const mark = doc.createElement("mark");
                 mark.style.cssText = "background: rgba(var(--accent-rgb, 208,71,22), 0.3); border-radius: 2px; padding: 0 1px;";
                 mark.className = "blurby-word-hl";
-                range.surroundContents(mark);
+                r.surroundContents(mark);
                 currentHighlight = mark;
                 // Scroll into view if needed
                 mark.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-              } catch {
-                // surroundContents fails across element boundaries — use selection fallback
+              }, undefined);
+              // If surroundContents failed (safeRangeOp caught it), try selection fallback
+              if (!currentHighlight && range.startContainer.isConnected) {
                 try {
                   const doc = range.startContainer.ownerDocument;
                   if (doc) {
