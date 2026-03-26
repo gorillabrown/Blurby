@@ -613,13 +613,10 @@ export default function FoliatePageView({
                   if (span) {
                     span.classList.add("page-word--highlighted");
                     const rect = span.getBoundingClientRect();
-                    const iw = d.defaultView?.innerWidth ?? 9999;
-                    const visible = rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= iw + 10;
+                    // Use the HOST container width, not iframe innerWidth (which is 7200+ for all columns)
+                    const hostWidth = containerRef.current?.clientWidth ?? 1400;
+                    const visible = rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= hostWidth + 10;
                     if (visible) found = true;
-                    // Log every 20th word to trace visibility
-                    if (wordIndex % 20 === 0) {
-                      console.log(`[PageTurn] word=${wordIndex} rect.left=${rect.left.toFixed(0)} rect.right=${rect.right.toFixed(0)} innerWidth=${iw} visible=${visible} found=${found}`);
-                    }
                     break;
                   }
                 } catch { /* */ }
