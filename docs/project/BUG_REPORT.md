@@ -8,6 +8,27 @@
 
 ## Incomplete
 
+### BUG-090: EPUB narration does not auto-advance pages
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (open)
+**Location:** `src/components/FoliatePageView.tsx` (highlightWordByIndex, narration page-sync)
+**Description:** During Kokoro TTS narration on EPUBs, the page does not advance when narration reads past visible content. Narration audio continues playing correctly, word highlighting works within the visible page, but the foliate view stays on the same page. Multiple approaches attempted (CSS column visibility detection, span-not-found, fraction comparison) — all failed due to foliate's CSS multi-column layout keeping all section words in DOM simultaneously. See LL-035 for full analysis of approaches tried.
+
+### BUG-091: EPUB Flow mode cursor not working
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (open)
+**Location:** `src/components/FoliatePageView.tsx` (Flow cursor overlay)
+**Description:** Flow mode overlay cursor in the rAF loop queries foliate iframes for word spans but cannot determine visibility in CSS columns. Same root cause as BUG-090. Flow cursor code exists but has the same coordinate space mismatch.
+
+### BUG-092: EPUB Focus mode starts from wrong position
+**Reported:** 2026-03-26
+**Severity:** Medium
+**Sprint:** 25S-STABLE (open)
+**Location:** `src/components/ReaderContainer.tsx` (startFocus)
+**Description:** Focus mode on EPUBs starts from word 0 or wrong position instead of the clicked word. The `wordsRef` in useReader may not be populated with foliate words at the time Focus starts.
+
 ### BUG-031: Bottom bar not visible in Focus mode (FSM) or Flow mode (FLM)
 **Reported:** 2026-03-25
 **Severity:** High

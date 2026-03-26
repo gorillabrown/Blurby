@@ -576,4 +576,32 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 
 These are significantly shorter than Focus mode's visual pauses (1000/1500/2000ms) because Kokoro's neural prosody already adds natural micro-pauses within the audio. The between-chunk gaps only need to fill the transition, not the full rhythm.
 
-**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Use `calculatePauseMs()` from rhythm.ts with a TTS-tuned base of 250ms (not Focus mode's 1000ms). The `hasPreBuffer` guard is critical — if next chunk isn't ready, generation time IS the pause (no artificial delay added). If pre-buffer IS ready, add the calculated delay. Kokoro handles within-chunk prosody well; we only control between-chunk gaps. Never add rhythm pauses AND generation wait — that causes uncomfortably long silence ("double pause" anti-pattern).
+**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Pause values from constants.ts (TTS_PAUSE_COMMA_MS=250, TTS_PAUSE_SENTENCE_MS=400, TTS_PAUSE_PARAGRAPH_MS=750). The `hasPreBuffer` guard is critical — if next chunk isn't ready, generation time IS the pause. If pre-buffer IS ready, add the delay. Never add rhythm pauses AND generation wait — "double pause" anti-pattern. Also: `Intl.Segmenter` strips punctuation from words — must append trailing punctuation in extractWordsFromView for sentence boundary detection.
+
+### [2026-03-26] LL-035: EPUB Page Auto-Advance During Narration — Unsolved
+
+**Area:** foliate-js, CSS columns, TTS narration, page navigation
+**Status:** active — OPEN PROBLEM
+**Priority:** high
+
+**Context:** During Kokoro TTS narration on EPUBs, the page needs to auto-advance when the narrated word moves past visible content. Multiple approaches attempted and failed.
+
+**Approaches tried and failures:**
+1. `d.defaultView.innerWidth` check — iframe width is 7200px (all CSS columns), not visible column width. Always passes.
+2. Host container `clientWidth` — mismatched coordinate spaces (iframe vs parent). Constant jumping.
+3. `querySelectorAll("iframe")` — returns 0 results due to shadow DOM. Must use `view.renderer.getContents()`.
+4. Span-not-found detection — all section words have spans in DOM even when off-screen (CSS columns). Always found.
+5. `view.renderer.next()` rapid-fire — without debounce, cascades and unloads narration's section.
+6. Fraction-based comparison — WIP, untested at session end.
+
+**Root cause:** Foliate's CSS multi-column pagination keeps ALL section words in DOM simultaneously. No reliable way from JS to detect which words are in the visible column vs off-screen columns.
+
+**What works for non-EPUB:** PageReaderView has a `pages` array mapping word indices to pages. useEffect watches `highlightedWordIndex` and auto-turns at page boundary.
+
+**Potential approaches not yet tried:**
+- `IntersectionObserver` inside the iframe
+- Build word-to-page mapping by scanning visible words after each `onRelocate`
+- Use CFI for each word boundary with `view.goTo(cfi)`
+- Query foliate's internal CSS column transform/scroll position
+
+**Rule:** PR-38: EPUB narration page auto-advance requires knowing which CSS column is visible. Simple DOM queries cannot determine this.
