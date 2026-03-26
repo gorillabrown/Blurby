@@ -619,11 +619,16 @@ export default function FoliatePageView({
                   }
                 } catch { /* */ }
               }
-              // Page auto-advance: when narration reaches a word in the next CSS column,
-              // scroll to make it visible. Only check when targetSpan is found and stable.
-              // DISABLED during section loads (word array rebuild causes index shifts).
-              // Re-enable once word array stability is solved.
-              // TODO: Re-implement page advance after word index stability fix
+              // Page auto-advance: scroll to keep the highlighted word visible
+              // Uses scrollToAnchor which lets foliate handle CSS column math
+              if (targetSpan && targetDoc) {
+                try {
+                  const range = targetDoc.createRange();
+                  range.selectNodeContents(targetSpan);
+                  // scrollToAnchor is a no-op if the range is already visible
+                  view.renderer.scrollToAnchor?.(range);
+                } catch { /* safe to ignore */ }
+              }
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
