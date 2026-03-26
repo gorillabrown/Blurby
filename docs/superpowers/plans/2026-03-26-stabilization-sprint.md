@@ -87,11 +87,17 @@ git commit -m "fix(S-01): make Kokoro AI button clickable in settings flap"
 **Files:**
 - Modify: `.github/workflows/release.yml:82-106`
 
-- [ ] **Step 1: Read the current merge logic**
+- [ ] **Step 1: Check if electron-builder supports single-job multi-arch**
 
-Read `.github/workflows/release.yml` lines 82-106. Understand how x64 and arm64 `latest.yml` files are currently merged via sed.
+Check if electron-builder can produce both x64 and arm64 installers in a single job via `--arch x64 --arch arm64` or equivalent. If so, this eliminates the merge problem entirely — electron-builder would produce a single `latest.yml` with both entries natively. Two separate jobs inherently race.
 
-- [ ] **Step 2: Fix the sed merge logic**
+Run: Check electron-builder docs or `npx electron-builder --help` for multi-arch flags.
+
+- [ ] **Step 2: If single-job works, restructure workflow**
+
+Replace the two-job matrix with a single build job that produces both architectures. This is the preferred approach.
+
+- [ ] **Step 3: If single-job doesn't work, fix the sed merge logic**
 
 The current logic extracts ARM64 entries and inserts them into the x64 base. Common failure modes:
 - sed anchoring on wrong line (e.g., first `size:` match vs the one in `files:` array)
@@ -207,45 +213,58 @@ In `src/types.ts`, add to the `BlurbyDoc` interface:
 furthestPosition?: number; // Page number (non-EPUB) or fraction 0.0-1.0 (EPUB)
 ```
 
-- [ ] **Step 2: Update progress calculation to be page-based**
+- [ ] **Step 2: Gate progress saves behind engagement**
 
-In `ReaderContainer.tsx`, find the progress save logic. Ensure:
-- For non-EPUB: `progress = currentPage / totalPages` (should already be correct)
-- For EPUB: `progress = fraction` from foliate relocate event
-- Key fix: page 0 / fraction 0 = 0% even when `highlightedWordIndex > 0`
+**This is the key fix.** Currently `onRelocate` fires immediately on EPUB open and persists progress > 0%. The fix: don't persist progress until the user has engaged.
 
 ```typescript
-// In the progress save function:
-const progress = useFoliate
-  ? currentFractionRef.current  // fraction from foliate relocate
-  : totalPages > 0 ? currentPage / totalPages : 0;
+const hasEngagedRef = useRef(false);
 
-// Page 0 / fraction 0 = 0% regardless of word index
-const displayProgress = Math.max(0, progress);
+// Set true on: mode start (Space), word click, deliberate page turn
+// In startFocus/startFlow/startNarration:
+hasEngagedRef.current = true;
+// In word click handler:
+hasEngagedRef.current = true;
+// In page turn handler (arrow keys, nav buttons):
+hasEngagedRef.current = true;
 ```
+
+In the `onRelocate` handler (and equivalent non-EPUB progress save):
+
+```typescript
+// Only persist progress when user has engaged
+if (!hasEngagedRef.current) return;
+
+const progress = useFoliate
+  ? detail.fraction  // fraction from foliate relocate (0.0-1.0)
+  : totalPages > 0 ? currentPage / totalPages : 0;
+```
+
+**NOTE:** For foliate EPUBs, `totalPages` is NOT fixed — it varies with viewport size, font size, and column count. `detail.fraction` from the relocate event IS the correct progress value. For non-EPUB, `currentPage / totalPages` from our pagination is correct.
 
 - [ ] **Step 3: Track high-water mark**
 
-Add `furthestPositionRef` and update it whenever position advances:
+Add `furthestPositionRef` and update it only when engaged:
 
 ```typescript
 const furthestPositionRef = useRef<number>(activeDoc?.furthestPosition ?? 0);
 
-// In relocate/progress handler:
-const currentPos = useFoliate ? fraction : currentPage;
+// In relocate/progress handler (after engagement gate):
+const currentPos = useFoliate ? detail.fraction : currentPage / totalPages;
 if (currentPos > furthestPositionRef.current) {
   furthestPositionRef.current = currentPos;
 }
 ```
 
-- [ ] **Step 4: Add engagement tracking**
+- [ ] **Step 4: (engagement tracking already in Step 2 — verify all trigger points)**
+
+Verify `hasEngagedRef = true` is set in ALL of these locations:
+- `startFocus()`, `startFlow()`, `startNarration()` (mode start)
+- Word click handler in PageReaderView / FoliatePageView
+- Page turn handlers (Left/Right arrow, nav button clicks)
+- Do NOT set on: initial open, `onRelocate` itself, or automatic page turns from Flow/Narrate cursor advancement
 
 ```typescript
-const hasEngagedRef = useRef(false);
-
-// Set true on: mode start, word click, page turn
-// In startFocus/startFlow/startNarration:
-hasEngagedRef.current = true;
 // In word click handler:
 hasEngagedRef.current = true;
 // In page turn handler:
@@ -513,51 +532,73 @@ export interface OverlayRect {
 }
 
 /**
- * Get viewport-relative position for a DOM Range, accounting for
- * shadow DOM vs iframe rendering in foliate.
+ * Get parent-window-relative position for a DOM Range inside foliate's iframe.
+ *
+ * Foliate renders EPUB content in iframes (one per loaded section).
+ * getBoundingClientRect() on a Range inside an iframe returns coordinates
+ * relative to the IFRAME's viewport, not the parent window. We must add
+ * the iframe element's own position to get parent-window coordinates.
  *
  * @param range - DOM Range from extracted word
- * @param containerEl - The foliate container element for offset calculation
- * @returns OverlayRect in viewport coordinates, or null if range is disconnected
+ * @param containerEl - The foliate container element (used for iframe lookup)
+ * @param cachedIframeRef - Optional cached iframe element (Addition A)
+ * @returns OverlayRect in parent-window coordinates, or null if disconnected
  */
 export function getOverlayPosition(
   range: Range,
-  containerEl: HTMLElement
+  containerEl: HTMLElement,
+  cachedIframeRef?: HTMLIFrameElement | null
 ): OverlayRect | null {
   // Guard: check range is still connected to DOM
   if (!range.startContainer.isConnected) return null;
 
-  const rangeRect = range.getBoundingClientRect();
+  try {
+    const rangeRect = range.getBoundingClientRect();
 
-  // Check if range lives in an iframe (range's document differs from main document)
-  const rangeDoc = range.startContainer.ownerDocument;
-  if (rangeDoc && rangeDoc !== document) {
-    // Find the iframe element that contains this document
-    const iframes = containerEl.querySelectorAll("iframe");
-    for (const iframe of iframes) {
-      try {
-        if (iframe.contentDocument === rangeDoc) {
-          const iframeRect = iframe.getBoundingClientRect();
-          return {
-            top: rangeRect.top + iframeRect.top,
-            left: rangeRect.left + iframeRect.left,
-            width: rangeRect.width,
-            height: rangeRect.height,
-          };
+    // Check if range lives in an iframe (range's document differs from main document)
+    const rangeDoc = range.startContainer.ownerDocument;
+    if (rangeDoc && rangeDoc !== document) {
+      // Use cached iframe ref if available, otherwise find it
+      let iframe = cachedIframeRef;
+      if (!iframe) {
+        const iframes = containerEl.querySelectorAll("iframe");
+        for (const f of iframes) {
+          try {
+            if (f.contentDocument === rangeDoc) {
+              iframe = f;
+              break;
+            }
+          } catch {
+            // Cross-origin iframe — skip
+          }
         }
-      } catch {
-        // Cross-origin iframe — skip
+      }
+
+      if (iframe) {
+        const iframeRect = iframe.getBoundingClientRect();
+        // rangeRect is relative to iframe viewport
+        // iframeRect is relative to parent window
+        // Parent coords = iframe position + range position within iframe
+        return {
+          top: iframeRect.top + rangeRect.top,
+          left: iframeRect.left + rangeRect.left,
+          width: rangeRect.width,
+          height: rangeRect.height,
+        };
       }
     }
-  }
 
-  // Shadow DOM or same document — getBoundingClientRect is viewport-relative
-  return {
-    top: rangeRect.top,
-    left: rangeRect.left,
-    width: rangeRect.width,
-    height: rangeRect.height,
-  };
+    // Same document (non-iframe) — getBoundingClientRect is already viewport-relative
+    return {
+      top: rangeRect.top,
+      left: rangeRect.left,
+      width: rangeRect.width,
+      height: rangeRect.height,
+    };
+  } catch {
+    // Range operation failed (Addition B: error boundary)
+    return null;
+  }
 }
 ```
 
@@ -658,6 +699,60 @@ Open an EPUB. Enter Flow mode. Navigate across 3+ sections. Verify:
 ```bash
 git add src/utils/segmentWords.ts tests/segmentWords.test.ts src/utils/getOverlayPosition.ts tests/getOverlayPosition.test.ts src/components/FoliatePageView.tsx
 git commit -m "fix(S-10): re-extract words on section change, shared segmentWords + getOverlayPosition utilities"
+```
+
+- [ ] **Step 11: Cache iframe reference (Addition A)**
+
+In `FoliatePageView.tsx`, add an iframe ref that updates on each section load:
+
+```typescript
+const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
+
+// In section load handler:
+const contents = view?.renderer?.getContents?.() ?? [];
+for (const { doc } of contents) {
+  // Find the iframe containing this document
+  const iframes = containerRef.current?.querySelectorAll("iframe") ?? [];
+  for (const iframe of iframes) {
+    try {
+      if (iframe.contentDocument === doc) {
+        foliateIframeRef.current = iframe;
+        break;
+      }
+    } catch { /* cross-origin */ }
+  }
+}
+```
+
+Pass `foliateIframeRef.current` to `getOverlayPosition()` calls in S-06 and S-08 to avoid repeated DOM traversal on every tick.
+
+- [ ] **Step 12: Add safeRangeOp error boundary (Addition B)**
+
+Create a helper for all Range operations:
+
+```typescript
+function safeRangeOp<T>(range: Range | null, fn: (r: Range) => T, fallback: T): T {
+  if (!range || !range.startContainer.isConnected) return fallback;
+  try {
+    return fn(range);
+  } catch {
+    // Range operation failed — stale Range or mid-reflow timing
+    return fallback;
+  }
+}
+```
+
+Use this in all Range-dependent code: overlay cursor positioning, highlight positioning, word click mapping. If the operation fails, pause the active mode and trigger re-extraction rather than crashing the reader.
+
+- [ ] **Step 13: Verify Intl.Segmenter not needed in worker thread**
+
+Check `tts-worker.js` (or any main-process worker) for word tokenization usage. `Intl.Segmenter` is available in Chromium (renderer) but may not be in older Node.js worker V8 builds. Currently the worker handles audio generation only. Confirm no tokenization happens there. If it does, add a regex fallback: `text.split(/[\s]+/).filter(Boolean)`.
+
+- [ ] **Step 14: Commit additions**
+
+```bash
+git add src/components/FoliatePageView.tsx
+git commit -m "feat: cache iframe ref, add safeRangeOp guard, verify Segmenter availability"
 ```
 
 ---
@@ -1071,26 +1166,42 @@ if (!shouldFollowHighlight) {
 
 ```typescript
 const [isBrowsedAway, setIsBrowsedAway] = useState(false);
-const highlightPageRef = useRef<number>(0); // Page where highlight lives
+
+// "Highlight page" = the page/section containing highlightedWordIndex
+// For non-EPUB: calculate from word-to-page mapping
+// For foliate EPUB: the section containing the highlighted word's CFI
+// Since narration is paused, highlightedWordIndex is stable (not advancing)
+const highlightPageRef = useRef<number>(0);         // Non-EPUB: page number
+const highlightSectionRef = useRef<number>(0);       // EPUB: section index
+
+// Update highlight location when narration pauses:
+// highlightPageRef.current = wordIndexToPage(highlightedWordIndex)
+// highlightSectionRef.current = foliateWordsRef.current[highlightedWordIndex]?.sectionIndex ?? 0
 
 // On page change:
 const handlePageChange = (newPage: number) => {
   if (readingMode === "narration" && !narration.speaking) {
-    const onHighlightPage = newPage === highlightPageRef.current;
-    setIsBrowsedAway(!onHighlightPage);
+    if (useFoliate) {
+      // For EPUB: compare current visible section to highlight's section
+      const currentSection = getCurrentVisibleSection(); // from foliate relocate
+      setIsBrowsedAway(currentSection !== highlightSectionRef.current);
+    } else {
+      setIsBrowsedAway(newPage !== highlightPageRef.current);
+    }
   }
 };
 
 // Return handler:
 const handleReturnToReading = useCallback(() => {
-  // Navigate to highlight's page
   if (useFoliate) {
-    foliateApiRef.current?.goToHighlightPage?.();
+    // Navigate to the section containing the highlighted word
+    const word = foliateWordsRef.current[highlightedWordIndex];
+    if (word) foliateApiRef.current?.goToSection?.(word.sectionIndex);
   } else {
     setCurrentPage(highlightPageRef.current);
   }
   setIsBrowsedAway(false);
-}, [useFoliate]);
+}, [useFoliate, highlightedWordIndex]);
 ```
 
 Add to JSX:

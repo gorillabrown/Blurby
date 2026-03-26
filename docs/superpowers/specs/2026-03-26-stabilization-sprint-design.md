@@ -81,7 +81,9 @@ sprint/25s-stabilization
 
 **Root cause:** ARM64 build overwrites `latest.yml` instead of merging. The existing sed-based merge logic has a bug — likely inserting the ARM64 entry at the wrong position or not preserving the x64 base file.
 
-**Fix:** Correct the sed insertion logic to reliably produce a `latest.yml` with both `files:` entries. Add a verification step that greps the final `latest.yml` for both architecture strings before uploading.
+**Fix (preferred):** Check if electron-builder supports `--arch x64 --arch arm64` in a single job. If so, let it produce a single `latest.yml` with both entries natively — eliminates the merge problem entirely. Two separate jobs inherently race.
+
+**Fix (fallback):** If single-job multi-arch isn't supported, correct the sed insertion logic to reliably produce a `latest.yml` with both `files:` entries. Add a verification step that greps the final `latest.yml` for both architecture strings before uploading.
 
 **Verification (V-02):** Trigger test workflow run. Inspect uploaded `latest.yml` — must contain both x64 and arm64 installer entries in the `files:` array.
 
@@ -109,13 +111,15 @@ sprint/25s-stabilization
 
 **Fix (two parts):**
 
-**Part A — Page-based progress floor:**
-- Progress percentage uses page position as primary gate: `progress = currentPage / totalPages`
-- Page 0 = 0% regardless of word index
-- For foliate EPUBs: use the `fraction` from relocate events
-- For non-EPUB formats: existing `currentPage / totalPages` computation (already correct)
+**Part A — Engagement-gated progress:**
+- Progress formula:
+  - **Foliate EPUBs:** `progress = detail.fraction` from relocate event (0.0–1.0). `totalPages` is NOT fixed — it depends on viewport size, font size, column count. The fraction IS the correct progress.
+  - **Non-EPUB:** `progress = currentPage / totalPages` (our pagination, already correct)
+- **Key fix:** Don't update progress from `onRelocate` until the user has engaged. Currently `onRelocate` fires immediately on open and sets progress > 0%. Gate progress saves behind `hasEngagedRef`:
+  - `hasEngagedRef` starts `false` on reader open
+  - Set `true` on: mode start (Space), word click, or deliberate page turn
+  - `onRelocate` only persists progress when `hasEngagedRef.current === true`
 - Word index within a page is used only for resumption (which word to highlight on reopen), not for the progress bar
-- Key change: ensure page 0 / fraction 0 = 0% even when `highlightedWordIndex > 0` due to word extraction skipping images
 
 **Part B — High-water mark with backtrack prompt:**
 - Track `furthestPosition` alongside current position in the doc's library entry
@@ -170,6 +174,8 @@ This makes narration consistent with Focus and Flow — click/key selects, Space
 
 **Index continuity:** `foliateWordsRef` must always represent the full document's word array, not just the current section. On section change, re-extract words for the newly-loaded section(s) and merge into the full array at the correct offset (using `sectionIndex` to determine position). `highlightedWordIndex` is a global document index and must remain valid across re-extractions. If a section is unloaded and its Ranges become stale, keep the word strings in the array (for text display in Focus mode) but null out the Range references; re-populate Ranges when the section is loaded again.
 
+**`Intl.Segmenter` availability:** Available in Chromium (Electron's renderer process). All word tokenization via `segmentWords()` runs in the renderer (useNarration.ts, FoliatePageView.tsx). Verify it is NOT needed in `tts-worker.js` (Node.js worker thread) — if the worker ever needs tokenization, a regex fallback will be required. Currently the worker handles audio generation only, not word splitting.
+
 **Verification (V-10):** Start Flow mode on EPUB. Navigate across 3+ sections. Cursor continues smoothly. No console errors about detached nodes.
 
 ---
@@ -201,7 +207,7 @@ This makes narration consistent with Focus and Flow — click/key selects, Space
 1. Create absolutely-positioned cursor `<div>` layered above the foliate container
 2. On each Flow tick, get current word's Range from `foliateWordsRef`
 3. Call `range.getBoundingClientRect()` for viewport position
-4. **Coordinate transform:** Foliate uses a `<foliate-view>` custom element with shadow DOM. `getBoundingClientRect()` on Ranges inside shadow DOM returns viewport-relative coordinates — no iframe offset needed. If foliate wraps content in an iframe (some EPUB renderers do), detect via `range.startContainer.ownerDocument !== document` and add `iframe.getBoundingClientRect()` offset. Implement as a `getOverlayPosition(range, containerEl)` utility that handles both cases.
+4. **Coordinate transform:** Foliate renders EPUB content inside iframes (one per loaded section). `getBoundingClientRect()` on a Range inside an iframe returns coordinates relative to the iframe's viewport, NOT the parent window. The transform must be: `parentX = iframeRect.left + rangeRect.left`, `parentY = iframeRect.top + rangeRect.top`, where `iframeRect` comes from the iframe element's `getBoundingClientRect()` in the parent document. Implement as a `getOverlayPosition(range, containerEl)` utility. Detect iframe via `range.startContainer.ownerDocument !== document`, find the iframe via `view.renderer.getContents()`, and cache the iframe ref (see Addition A below).
 5. Animate cursor div to position using `translate3d()` — same GPU-accelerated approach as existing FlowCursorController
 6. On line wrap / page turn: snap (no glide) to new line's first word position
 
@@ -243,7 +249,7 @@ Ensure overlay div uses identical centering CSS: `display: flex; align-items: ce
 5. If new word is on different page/section, trigger foliate page turn *before* positioning highlight
 6. If Range is stale (S-10 scenario), hide highlight and queue; apply after re-extraction fires
 
-**Why overlay, not `<mark>` injection:** The existing `highlightWord` method uses `surroundContents(mark)` which mutates foliate's DOM. This breaks when foliate re-renders sections (same reason Option A was rejected for S-06). The overlay approach is consistent across S-06, S-07, and S-08 — all EPUB visual feedback uses positioned overlays, never DOM injection.
+**Why overlay, not `<mark>` injection:** The existing `highlightWord` method uses `surroundContents(mark)` which mutates foliate's DOM. This breaks when foliate re-renders sections (same reason Option A was rejected for S-06). Additionally, cross-section mark cleanup is problematic — if the previous highlight was in section 3's iframe and the new one is in section 5's iframe, the old `<mark>` in section 3 is in a different document context. The existing cleanup code iterates all loaded sections via `v?.renderer?.getContents?.()`, but this is fragile. The overlay approach eliminates cross-section cleanup entirely — a single overlay div in the parent document is simply repositioned. Consistent across S-06, S-07, and S-08.
 
 **Page turn sequencing:** `foliateApi.next()` → wait for relocate event → re-extract words (S-10) → reposition highlight. Prevents "highlight disappears after page turn."
 
@@ -267,9 +273,10 @@ Ensure overlay div uses identical centering CSS: `display: flex; align-items: ce
 - Floating pill at bottom-center, just above bottom bar
 - Accent-colored, semi-transparent background
 - Text: "Return to reading"
-- Appears when visible page differs from highlight's page
+- **Highlight page determination:** The page containing `highlightedWordIndex`, calculated from word-to-page mapping. For foliate EPUBs, this is the section containing the highlighted word's CFI — pill dismisses when the visible section matches the highlight's section. Since narration is paused, the highlight index isn't advancing, so this is a stable reference.
+- Appears when visible page/section differs from highlight's page/section
 - Click or press **Enter** → navigate to highlight page, dismiss pill
-- Auto-dismisses when user manually navigates back to highlight page
+- Auto-dismisses when user manually navigates back to highlight page/section
 - CSS: `position: fixed; bottom: [above-bottom-bar]; left: 50%; transform: translateX(-50%); z-index` above reader content
 
 **Part C — Resume behavior:**
@@ -364,9 +371,45 @@ Ensure this logic applies to both chapter time remaining AND document time remai
 
 ## Design Decisions
 
-1. **Range-based overlay (Option B) for EPUB Flow/Narrate** — avoids fighting foliate's DOM lifecycle. Overlay cursor reads `getBoundingClientRect()` from extracted Ranges rather than injecting attributes into foliate's shadow DOM.
-2. **Page-based progress, not word-based** — page 0 = 0% regardless of word index. Eliminates false progress from word extraction skipping images.
+1. **Range-based overlay (Option B) for EPUB Flow/Narrate** — avoids fighting foliate's DOM lifecycle. Overlay cursor reads `getBoundingClientRect()` from extracted Ranges. Coordinate transform: `parentX = iframeRect.left + rangeRect.left` since foliate renders in iframes.
+2. **Engagement-gated progress** — don't persist progress from `onRelocate` until `hasEngagedRef` is true. For EPUBs, `progress = detail.fraction` (not page-based — `totalPages` is viewport-dependent).
 3. **High-water mark prompt on backtrack** — only when closing >2 pages behind furthest + engagement detected. Default keeps furthest position (safe).
 4. **Narrate click = select, Space = start** — consistent with Focus and Flow interaction model.
 5. **S-10 (stale Ranges) fixed first in Track A** — all other foliate bugs depend on reliable word extraction.
 6. **S-13 and S-15 not reimplemented** — already fixed, verified in Phase 4 matrix.
+
+---
+
+## Cross-Cutting Additions
+
+### Addition A: Foliate Iframe Reference Caching
+
+Multiple S-items need the iframe element reference (S-06 coordinate transforms, S-08 highlight positioning, S-10 re-extraction). On each section load, find the iframe via `view.renderer.getContents()` and store in a `foliateIframeRef`. This avoids repeated DOM traversal on every Flow tick or narration word advance.
+
+### Addition B: Error Boundary for Range Operations
+
+All Range-based operations (S-06, S-08, S-09, S-10) must be wrapped in try-catch. The `isConnected` guard catches most failures, but edge cases (mid-reflow timing, concurrent section unload) can still throw. Fallback behavior: pause the active mode and trigger re-extraction. Applied uniformly via a `safeRangeOp(range, fn)` helper.
+
+### Addition C: `Intl.Segmenter` Worker Thread Fallback
+
+`Intl.Segmenter` is available in Chromium (Electron renderer) where all word tokenization runs. If `tts-worker.js` (Node.js worker thread) ever needs tokenization, provide a regex fallback: `text.split(/[\s]+/).filter(Boolean)`. Currently not needed — verify during implementation that the worker handles audio only.
+
+---
+
+## BUG_REPORT Cross-Reference
+
+| S-Number | BUG ID | Notes |
+|----------|--------|-------|
+| S-01 | BUG-080 | Kokoro button |
+| S-02 | BUG-081 | latest.yml |
+| S-03 | BUG-082 | EPUB start page |
+| S-04 | BUG-083 | False progress |
+| S-05 | BUG-051 | Mode auto-start (narrate subset) |
+| S-06 | BUG-084 | Flow invisible on EPUB |
+| S-07 | BUG-085 | Focus offset on EPUB |
+| S-08 | BUG-086 | Narrate highlight on EPUB |
+| S-09 | BUG-087 | Word click mapping |
+| S-10 | BUG-088 | Stale Ranges |
+| S-11 | BUG-073 | Page browsing yanks back |
+| S-12 | BUG-052 | Speed changes delayed |
+| S-14 | BUG-072, BUG-089 | Time-to-complete mode-aware |
