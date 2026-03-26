@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { BlurbyDoc } from "../types";
 import { formatDisplayTitle } from "../utils/text";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -10,6 +10,8 @@ interface DocGridCardProps {
   onToggleFavorite?: (id: string) => void;
   onArchive?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onResetProgress?: (id: string) => void;
+  onEditMetadata?: (doc: BlurbyDoc) => void;
   focused?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
@@ -35,8 +37,24 @@ function formatApaSubtext(doc: BlurbyDoc): string | null {
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, focused, selected, selectionMode, onToggleSelect }: DocGridCardProps) {
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, focused, selected, selectionMode, onToggleSelect }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  // Close context menu on any click
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    window.addEventListener("click", close);
+    window.addEventListener("contextmenu", close);
+    return () => { window.removeEventListener("click", close); window.removeEventListener("contextmenu", close); };
+  }, [contextMenu]);
 
   useEffect(() => {
     if (!doc.coverPath) return;
@@ -56,12 +74,32 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
     <div
       className={`doc-grid-card${focused ? " doc-grid-card-focused" : ""}${selected ? " doc-grid-card-selected" : ""}${doc.unread ? " doc-grid-card-unread" : ""}`}
       onClick={() => onOpen(doc)}
+      onContextMenu={handleContextMenu}
       role="button"
       tabIndex={focused ? 0 : -1}
       onKeyDown={(e) => e.key === "Enter" && onOpen(doc)}
       aria-label={`${doc.title}${doc.author ? `, by ${doc.author}` : ""}${isComplete ? ", completed" : progress > 0 ? `, ${progress}% read` : ""}${doc.unread ? ", unread" : ""}`}
       data-doc-id={doc.id}
     >
+      {/* Context menu (right-click) */}
+      {contextMenu && (
+        <div
+          className="doc-context-menu"
+          style={{ position: "fixed", left: contextMenu.x, top: contextMenu.y, zIndex: 10000 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {onResetProgress && (
+            <button onClick={() => { onResetProgress(doc.id); setContextMenu(null); }}>
+              Reset Progress
+            </button>
+          )}
+          {onEditMetadata && (
+            <button onClick={() => { onEditMetadata(doc); setContextMenu(null); }}>
+              Edit Metadata
+            </button>
+          )}
+        </div>
+      )}
       {/* Selection checkbox */}
       {selectionMode && onToggleSelect && (
         <div className="doc-grid-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>

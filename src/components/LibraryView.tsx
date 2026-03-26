@@ -609,6 +609,8 @@ export default function LibraryView({
                 <div className={gridClassName} role="list">
                   {readingNow.map((doc) => (
                     <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                      onResetProgress={onResetProgress}
+                      onEditMetadata={startEdit}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
                       selectionMode={selectionMode}
@@ -624,6 +626,8 @@ export default function LibraryView({
                 <div className={gridClassName} role="list">
                   {notStarted.map((doc) => (
                     <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                      onResetProgress={onResetProgress}
+                      onEditMetadata={startEdit}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
                       selectionMode={selectionMode}
