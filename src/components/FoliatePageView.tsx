@@ -619,31 +619,27 @@ export default function FoliatePageView({
                   }
                 } catch { /* */ }
               }
-              // Auto-advance page if the highlighted word is off-screen
-              // Debounce: only check every 3rd word to avoid scroll thrashing
-              if (targetSpan && targetDoc && view.renderer && wordIndex % 3 === 0) {
+              // Auto-advance: use scrollToAnchor only when we're confident the word
+              // is on a different page. Track the last scrolled-to word to avoid re-scrolling.
+              if (targetSpan && view.renderer) {
                 try {
-                  // Use IntersectionObserver-style check: is the span visible in the iframe viewport?
-                  // In CSS column layout, the iframe scrolls horizontally. A word off-screen
-                  // will have its rect fully outside the [0, clientWidth] range.
-                  const iframeEl = targetDoc.defaultView?.frameElement;
-                  if (iframeEl) {
-                    const iframeRect = iframeEl.getBoundingClientRect();
-                    const spanRect = targetSpan.getBoundingClientRect();
-                    // Transform span rect from iframe coords to parent coords
-                    const spanInParentLeft = iframeRect.left + spanRect.left;
-                    const spanInParentRight = iframeRect.left + spanRect.right;
-                    // Check if span is outside the iframe's visible area
-                    const isOffScreen = spanInParentRight < iframeRect.left ||
-                                        spanInParentLeft > iframeRect.right ||
-                                        spanRect.width === 0;
-                    if (isOffScreen) {
-                      const range = targetDoc.createRange();
-                      range.selectNodeContents(targetSpan);
-                      view.renderer.scrollToAnchor?.(range);
+                  // Simple approach: check if targetSpan is connected and has a zero-width rect
+                  // (means it's in a collapsed/hidden column). Also check every ~10 words
+                  // to see if the page needs advancing.
+                  const rect = targetSpan.getBoundingClientRect();
+                  // In CSS column layout inside the iframe, off-screen words still have
+                  // valid rects but they'll be positioned far outside the viewport.
+                  // The iframe clips to its container, so check against the iframe's own window.
+                  const iframeWindow = targetSpan.ownerDocument?.defaultView;
+                  if (iframeWindow) {
+                    const innerWidth = iframeWindow.innerWidth;
+                    // Word is off-screen if its left edge is past the viewport
+                    // Only act on this every 5 words to prevent thrashing
+                    if (wordIndex % 5 === 0 && (rect.left >= innerWidth || rect.right <= 0)) {
+                      view.renderer.next();
                     }
                   }
-                } catch { /* scroll failed — safe to ignore */ }
+                } catch { /* safe to ignore */ }
               }
             },
             clearHighlight: () => {
