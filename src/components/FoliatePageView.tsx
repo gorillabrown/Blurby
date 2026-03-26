@@ -597,39 +597,45 @@ export default function FoliatePageView({
             highlightWord: (_range, _sectionIndex) => {
               // No-op: use highlightWordByIndex instead
             },
-            highlightWordByIndex: (wordIndex: number) => {
-              // Toggle page-word--highlighted class on word spans inside foliate iframes
-              // Uses view.renderer.getContents() to access shadow DOM iframes
-              const contents = view.renderer?.getContents?.() ?? [];
-              // Clear previous highlight
-              for (const { doc: d } of contents) {
-                try {
-                  d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
-                } catch { /* */ }
-              }
-              // Apply highlight to target word
-              let found = false;
-              for (const { doc: d } of contents) {
-                try {
-                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
-                  if (span) {
-                    span.classList.add("page-word--highlighted");
-                    // Check if the span is actually visible on the current foliate "page"
-                    // (foliate uses CSS columns — span may exist in DOM but be in an off-screen column)
-                    const rect = span.getBoundingClientRect();
-                    if (rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= (d.defaultView?.innerWidth ?? 9999) + 10) {
-                      found = true;
+            highlightWordByIndex: (() => {
+              let pageTurnPending = false;
+              return (wordIndex: number) => {
+                // Toggle page-word--highlighted class on word spans inside foliate iframes
+                const contents = view.renderer?.getContents?.() ?? [];
+                // Clear previous highlight
+                for (const { doc: d } of contents) {
+                  try {
+                    d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
+                  } catch { /* */ }
+                }
+                // Apply highlight to target word
+                let found = false;
+                for (const { doc: d } of contents) {
+                  try {
+                    const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
+                    if (span) {
+                      span.classList.add("page-word--highlighted");
+                      // Check if span is visible on current foliate "page"
+                      // (CSS columns: span in DOM but may be in off-screen column)
+                      const rect = span.getBoundingClientRect();
+                      const viewWidth = d.defaultView?.innerWidth ?? 9999;
+                      if (rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= viewWidth + 10) {
+                        found = true;
+                        pageTurnPending = false;
+                      }
+                      break;
                     }
-                    // else: span exists but is off-screen — need page turn
-                    break;
-                  }
-                } catch { /* */ }
-              }
-              // Word not visible (off-screen column) or not in any loaded section
-              if (!found) {
-                view.renderer.next();
-              }
-            },
+                  } catch { /* */ }
+                }
+                // Word off-screen or not found — advance page (debounced)
+                if (!found && !pageTurnPending) {
+                  pageTurnPending = true;
+                  view.renderer.next();
+                  // Reset after a delay to allow onSectionLoad to fire and re-wrap spans
+                  setTimeout(() => { pageTurnPending = false; }, 500);
+                }
+              };
+            })(),
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
               const contents = view.renderer?.getContents?.() ?? [];
