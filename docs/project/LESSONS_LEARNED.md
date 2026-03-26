@@ -569,4 +569,11 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 
 **Fix:** Changed `findSentenceBoundary` to scan from the first word (not word 5), producing one sentence per chunk. Each chunk ends at a sentence boundary (`.!?`). The pre-buffer generates the next sentence during the pause, keeping playback smooth. Trade-off: more IPC calls (one per sentence vs one per 40 words), but Kokoro generation is fast enough (~100-300ms per sentence) that pre-buffering covers the gap.
 
-**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Use `calculatePauseMs()` from rhythm.ts with a TTS-tuned base of 250ms (not Focus mode's 1000ms). The `hasPreBuffer` guard is correct — if next chunk isn't ready, generation time IS the pause. If pre-buffer IS ready, add the calculated delay. Kokoro handles within-chunk prosody well; we only control between-chunk gaps.
+**Tuned pause values (TTS-specific):**
+- Commas, colons, semicolons: **250ms**
+- Sentence endings (. ! ?): **400ms**
+- Paragraph breaks: **750ms**
+
+These are significantly shorter than Focus mode's visual pauses (1000/1500/2000ms) because Kokoro's neural prosody already adds natural micro-pauses within the audio. The between-chunk gaps only need to fill the transition, not the full rhythm.
+
+**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Use `calculatePauseMs()` from rhythm.ts with a TTS-tuned base of 250ms (not Focus mode's 1000ms). The `hasPreBuffer` guard is critical — if next chunk isn't ready, generation time IS the pause (no artificial delay added). If pre-buffer IS ready, add the calculated delay. Kokoro handles within-chunk prosody well; we only control between-chunk gaps. Never add rhythm pauses AND generation wait — that causes uncomfortably long silence ("double pause" anti-pattern).
