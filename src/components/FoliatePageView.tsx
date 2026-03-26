@@ -605,17 +605,27 @@ export default function FoliatePageView({
                   d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
                 } catch { /* */ }
               }
-              // Apply highlight
+              // Apply highlight to target word
+              let found = false;
               for (const { doc: d } of contents) {
                 try {
-                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`);
+                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                   if (span) {
                     span.classList.add("page-word--highlighted");
+                    // Check if span is visible on current foliate "page"
+                    // (CSS columns: span in DOM but may be in off-screen column)
+                    const rect = span.getBoundingClientRect();
+                    if (rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= (d.defaultView?.innerWidth ?? 9999) + 10) {
+                      found = true;
+                    }
                     break;
                   }
                 } catch { /* */ }
               }
-              // Page turns handled by narrationPageSync useEffect below
+              // Word not visible (off-screen column) or not in loaded section — turn page
+              if (!found) {
+                view.renderer.next();
+              }
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
@@ -759,42 +769,6 @@ export default function FoliatePageView({
         }
       } catch { /* cross-origin */ }
     }
-  }, [narrationWordIndex]);
-
-  // Narration page-sync — auto-turn page when narration word crosses page boundary
-  // Same pattern as PageReaderView's ttsTargetPage effect
-  const narrationPageTurnPendingRef = useRef(false);
-  useEffect(() => {
-    if (narrationWordIndex == null || narrationWordIndex < 0) return;
-    if (narrationPageTurnPendingRef.current) return;
-
-    const v = viewRef.current;
-    if (!v?.renderer?.getContents) return;
-
-    // Check if the narration word's span is visible or off-screen
-    const contents = v.renderer.getContents();
-    for (const { doc: d } of contents) {
-      try {
-        const span = d?.querySelector?.(`[data-word-index="${narrationWordIndex}"]`) as HTMLElement;
-        if (span) {
-          // Check visibility: in CSS column layout, foliate translates the body.
-          // Off-screen words have rect.left < 0 (previous page) or beyond viewport.
-          const rect = span.getBoundingClientRect();
-          const viewportWidth = d.documentElement?.clientWidth || d.defaultView?.innerWidth || 800;
-          if (rect.left < -5 || rect.left > viewportWidth + 5) {
-            // Word is off-screen — turn page
-            narrationPageTurnPendingRef.current = true;
-            v.renderer.next();
-            setTimeout(() => { narrationPageTurnPendingRef.current = false; }, 400);
-          }
-          return; // Found the span, done
-        }
-      } catch { /* */ }
-    }
-    // Span not found in any loaded section — turn page to load it
-    narrationPageTurnPendingRef.current = true;
-    v.renderer.next();
-    setTimeout(() => { narrationPageTurnPendingRef.current = false; }, 400);
   }, [narrationWordIndex]);
 
   // Keyboard navigation
