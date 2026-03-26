@@ -63,8 +63,25 @@ function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreak
     while ((node = walker.nextNode() as Text | null)) {
       const text = node.textContent || "";
       const block = getBlockParent(node);
-      for (const { segment, isWordLike, index: segIdx } of wordSegmenter.segment(text)) {
+      const segments = Array.from(wordSegmenter.segment(text));
+      for (let si = 0; si < segments.length; si++) {
+        const { segment, isWordLike, index: segIdx } = segments[si];
         if (!isWordLike) continue;
+        // Include trailing punctuation (e.g., "world" + "." → "world.")
+        // Intl.Segmenter separates punctuation, but TTS rhythm needs it attached
+        let wordWithPunct = segment;
+        let endOffset = segIdx + segment.length;
+        // Scan forward for trailing punctuation segments
+        for (let pi = si + 1; pi < segments.length; pi++) {
+          const next = segments[pi];
+          if (next.isWordLike) break; // Hit next word — stop
+          if (/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/.test(next.segment)) {
+            wordWithPunct += next.segment;
+            endOffset = next.index + next.segment.length;
+          } else {
+            break; // Whitespace or other — stop
+          }
+        }
         // Detect paragraph boundary: block parent changed from previous word
         if (prevBlock && block && block !== prevBlock && words.length > 0) {
           paragraphBreaks.add(words.length - 1); // Last word of previous block
@@ -72,8 +89,8 @@ function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreak
         prevBlock = block;
         const range = doc.createRange();
         range.setStart(node, segIdx);
-        range.setEnd(node, segIdx + segment.length);
-        words.push({ word: segment, range, sectionIndex: index });
+        range.setEnd(node, endOffset);
+        words.push({ word: wordWithPunct, range, sectionIndex: index });
       }
     }
     // Section boundary = paragraph break
@@ -98,12 +115,25 @@ function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWo
   let node: Text | null;
   while ((node = walker.nextNode() as Text | null)) {
     const text = node.textContent || "";
-    for (const { segment, isWordLike, index: segIdx } of wordSegmenter.segment(text)) {
+    const segments = Array.from(wordSegmenter.segment(text));
+    for (let si = 0; si < segments.length; si++) {
+      const { segment, isWordLike, index: segIdx } = segments[si];
       if (!isWordLike) continue;
+      // Include trailing punctuation (same as extractWordsFromView)
+      let wordWithPunct = segment;
+      let endOffset = segIdx + segment.length;
+      for (let pi = si + 1; pi < segments.length; pi++) {
+        const next = segments[pi];
+        if (next.isWordLike) break;
+        if (/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/.test(next.segment)) {
+          wordWithPunct += next.segment;
+          endOffset = next.index + next.segment.length;
+        } else break;
+      }
       const range = doc.createRange();
       range.setStart(node, segIdx);
-      range.setEnd(node, segIdx + segment.length);
-      words.push({ word: segment, range, sectionIndex });
+      range.setEnd(node, endOffset);
+      words.push({ word: wordWithPunct, range, sectionIndex });
     }
   }
   return words;
