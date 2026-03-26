@@ -599,8 +599,8 @@ export default function FoliatePageView({
             },
             highlightWordByIndex: (() => {
               let pageTurnPending = false;
+              let lastHighlightedIdx = -1;
               return (wordIndex: number) => {
-                // Toggle page-word--highlighted class on word spans inside foliate iframes
                 const contents = view.renderer?.getContents?.() ?? [];
                 // Clear previous highlight
                 for (const { doc: d } of contents) {
@@ -615,23 +615,47 @@ export default function FoliatePageView({
                     const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                     if (span) {
                       span.classList.add("page-word--highlighted");
-                      // Check if span is visible on current foliate "page"
-                      // (CSS columns: span in DOM but may be in off-screen column)
-                      const rect = span.getBoundingClientRect();
-                      const viewWidth = d.defaultView?.innerWidth ?? 9999;
-                      if (rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= viewWidth + 10) {
-                        found = true;
-                        pageTurnPending = false;
+                      // Check if span is visible on current foliate page
+                      // Span rect is in iframe coordinates — transform to parent
+                      const spanRect = span.getBoundingClientRect();
+                      const hostEl = containerRef.current;
+                      if (spanRect.width > 0 && spanRect.height > 0 && hostEl) {
+                        // Find the iframe containing this document to get the transform
+                        const iframes = hostEl.querySelectorAll("iframe");
+                        let iframeEl: HTMLIFrameElement | null = null;
+                        for (const f of iframes) {
+                          try { if (f.contentDocument === d) { iframeEl = f; break; } } catch { /* */ }
+                        }
+                        // If we can't find the iframe in light DOM, use shadow DOM search
+                        if (!iframeEl) {
+                          const shadowIframes = view.renderer?.element?.shadowRoot?.querySelectorAll?.("iframe") ?? [];
+                          for (const f of shadowIframes) {
+                            try { if (f.contentDocument === d) { iframeEl = f; break; } } catch { /* */ }
+                          }
+                        }
+                        if (iframeEl) {
+                          const iframeRect = iframeEl.getBoundingClientRect();
+                          const hostRect = hostEl.getBoundingClientRect();
+                          // Transform span position to parent coordinates
+                          const parentLeft = iframeRect.left + spanRect.left;
+                          const parentRight = iframeRect.left + spanRect.right;
+                          const visible = parentLeft >= hostRect.left - 10 &&
+                                          parentRight <= hostRect.right + 10;
+                          if (visible) {
+                            found = true;
+                            pageTurnPending = false;
+                          }
+                        }
                       }
                       break;
                     }
                   } catch { /* */ }
                 }
+                lastHighlightedIdx = wordIndex;
                 // Word off-screen or not found — advance page (debounced)
                 if (!found && !pageTurnPending) {
                   pageTurnPending = true;
                   view.renderer.next();
-                  // Reset after a delay to allow onSectionLoad to fire and re-wrap spans
                   setTimeout(() => { pageTurnPending = false; }, 500);
                 }
               };
