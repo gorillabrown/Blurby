@@ -611,19 +611,21 @@ export default function FoliatePageView({
               let found = false;
               for (const { doc: d } of contents) {
                 try {
-                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`);
+                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                   if (span) {
                     span.classList.add("page-word--highlighted");
-                    // Scroll into view if needed (word might be below fold on same page)
-                    span.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
-                    found = true;
+                    // Check if the span is actually visible on the current foliate "page"
+                    // (foliate uses CSS columns — span may exist in DOM but be in an off-screen column)
+                    const rect = span.getBoundingClientRect();
+                    if (rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= (d.defaultView?.innerWidth ?? 9999) + 10) {
+                      found = true;
+                    }
+                    // else: span exists but is off-screen — need page turn
                     break;
                   }
                 } catch { /* */ }
               }
-              // Word not found in any loaded section — advance to next page
-              // The word is on the next page/section; foliate will fire onSectionLoad
-              // which re-extracts and re-wraps words, making the span available
+              // Word not visible (off-screen column) or not in any loaded section
               if (!found) {
                 view.renderer.next();
               }
