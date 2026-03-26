@@ -613,10 +613,17 @@ export default function FoliatePageView({
                   if (span) {
                     span.classList.add("page-word--highlighted");
                     const rect = span.getBoundingClientRect();
-                    // Use the HOST container width, not iframe innerWidth (which is 7200+ for all columns)
+                    // Log diagnostics on every 10th word to understand coordinate spaces
                     const hostWidth = containerRef.current?.clientWidth ?? 1400;
-                    const visible = rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= hostWidth + 10;
-                    if (visible) found = true;
+                    const iw = d.defaultView?.innerWidth ?? 9999;
+                    const docEl = d.documentElement;
+                    const scrollLeft = docEl?.scrollLeft ?? 0;
+                    const bodyTransform = d.body?.style?.transform || "none";
+                    if (wordIndex % 10 === 0) {
+                      console.log(`[PageTurn] word=${wordIndex} rect.left=${rect.left.toFixed(0)} rect.right=${rect.right.toFixed(0)} iframeIW=${iw} hostW=${hostWidth} scrollLeft=${scrollLeft} bodyTransform="${bodyTransform}"`);
+                    }
+                    // Temporarily: always found (no page turn) — diagnostic only
+                    found = true;
                     break;
                   }
                 } catch { /* */ }
