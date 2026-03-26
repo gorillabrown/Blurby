@@ -569,4 +569,4 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 
 **Fix:** Changed `findSentenceBoundary` to scan from the first word (not word 5), producing one sentence per chunk. Each chunk ends at a sentence boundary (`.!?`). The pre-buffer generates the next sentence during the pause, keeping playback smooth. Trade-off: more IPC calls (one per sentence vs one per 40 words), but Kokoro generation is fast enough (~100-300ms per sentence) that pre-buffering covers the gap.
 
-**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. One sentence per chunk = one pause per sentence. The pre-buffer system compensates for the increased IPC frequency. Never increase chunk size beyond one sentence — the pause mechanism depends on chunk boundaries aligning with sentence boundaries.
+**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. One sentence per chunk = one pause per sentence. Always apply rhythm pauses (do NOT gate behind `hasPreBuffer`) — with short chunks, Kokoro generates too fast for "generation time IS the pause" to produce audible gaps. The pre-buffer system compensates for the increased IPC frequency.
