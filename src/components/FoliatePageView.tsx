@@ -763,35 +763,37 @@ export default function FoliatePageView({
     }
   }, [narrationWordIndex]);
 
-  // Narration page-sync — turn page when narrated word isn't found in visible sections
-  const lastPageTurnTimeRef = useRef(0);
+  // Narration page-sync — advance page when narration reads past current view
+  // Tracks foliate's reported fraction vs narration's progress fraction
+  const foliateCurrentFractionRef = useRef(0);
+  const pageTurnCooldownRef = useRef(false);
+  // Updated by onRelocate prop callback — store fraction on every relocate
+  const origOnRelocate = onRelocate;
+  const wrappedOnRelocate = useCallback((detail: any) => {
+    if (detail.fraction != null) foliateCurrentFractionRef.current = detail.fraction;
+    origOnRelocate?.(detail);
+  }, [origOnRelocate]);
+
   useEffect(() => {
     if (narrationWordIndex == null || narrationWordIndex < 0) return;
+    if (pageTurnCooldownRef.current) return;
     const v = viewRef.current;
     if (!v?.renderer) return;
 
-    // Debounce: only allow page turn every 1 second
-    const now = Date.now();
-    if (now - lastPageTurnTimeRef.current < 1000) return;
+    const totalWords = activeDoc.wordCount || foliateWordsRef.current.length || 1;
+    const narrationFraction = narrationWordIndex / totalWords;
+    const viewFraction = foliateCurrentFractionRef.current;
 
-    // Check if the narrated word's span exists in any loaded section
-    const contents = v.renderer.getContents?.() ?? [];
-    let spanFound = false;
-    for (const { doc: d } of contents) {
-      try {
-        if (d?.querySelector?.(`[data-word-index="${narrationWordIndex}"]`)) {
-          spanFound = true;
-          break;
-        }
-      } catch { /* */ }
-    }
+    // Estimate words per page: ~250 words on a typical page
+    // Threshold: when narration is more than ~1 page ahead of the view
+    const wordsPerPage = 250;
+    const threshold = wordsPerPage / totalWords;
 
-    // If span not found, the section containing this word isn't loaded — navigate to it
-    if (!spanFound) {
-      const totalWords = activeDoc.wordCount || foliateWordsRef.current.length || 1;
-      const fraction = Math.min(narrationWordIndex / totalWords, 0.999);
-      lastPageTurnTimeRef.current = now;
-      v.goToFraction(fraction);
+    if (narrationFraction > viewFraction + threshold) {
+      pageTurnCooldownRef.current = true;
+      v.renderer.next();
+      // Cooldown: wait for relocate to update fraction before checking again
+      setTimeout(() => { pageTurnCooldownRef.current = false; }, 800);
     }
   }, [narrationWordIndex, activeDoc.wordCount]);
 
