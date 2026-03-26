@@ -578,30 +578,51 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 
 **Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Pause values from constants.ts (TTS_PAUSE_COMMA_MS=250, TTS_PAUSE_SENTENCE_MS=400, TTS_PAUSE_PARAGRAPH_MS=750). The `hasPreBuffer` guard is critical — if next chunk isn't ready, generation time IS the pause. If pre-buffer IS ready, add the delay. Never add rhythm pauses AND generation wait — "double pause" anti-pattern. Also: `Intl.Segmenter` strips punctuation from words — must append trailing punctuation in extractWordsFromView for sentence boundary detection.
 
-### [2026-03-26] LL-035: EPUB Page Auto-Advance During Narration — Unsolved
+### [2026-03-26] LL-035: EPUB Page Auto-Advance During Narration — SOLVED
 
-**Area:** foliate-js, CSS columns, TTS narration, page navigation
-**Status:** active — OPEN PROBLEM
+**Area:** foliate-js, CSS columns, TTS narration, page navigation, React Strict Mode
+**Status:** resolved
 **Priority:** high
 
-**Context:** During Kokoro TTS narration on EPUBs, the page needs to auto-advance when the narrated word moves past visible content. Multiple approaches attempted and failed.
+**Context:** During Kokoro TTS narration on EPUBs, the page needs to auto-advance when the narrated word moves past visible content. This took 6 failed approaches and 8 commits to solve. The problem was NOT visibility detection — it was 5 stacked root causes creating a feedback loop.
 
-**Approaches tried and failures:**
-1. `d.defaultView.innerWidth` check — iframe width is 7200px (all CSS columns), not visible column width. Always passes.
-2. Host container `clientWidth` — mismatched coordinate spaces (iframe vs parent). Constant jumping.
-3. `querySelectorAll("iframe")` — returns 0 results due to shadow DOM. Must use `view.renderer.getContents()`.
-4. Span-not-found detection — all section words have spans in DOM even when off-screen (CSS columns). Always found.
-5. `view.renderer.next()` rapid-fire — without debounce, cascades and unloads narration's section.
-6. Fraction-based comparison — WIP, untested at session end.
+**Root causes (all 5 had to be fixed):**
 
-**Root cause:** Foliate's CSS multi-column pagination keeps ALL section words in DOM simultaneously. No reliable way from JS to detect which words are in the visible column vs off-screen columns.
+1. **Stale `readingMode` closure in `onRelocate`** — The `onRelocate` callback was captured at render time with `readingMode = "page"`. During narration, every foliate `relocate` event called `setHighlightedWordIndex(approxFraction * totalWords)`, overwriting the narration's precise word index with an approximate value. This caused the highlight to jump to wrong words.
+   - **Fix:** Use `readingModeRef.current` (always current) instead of the closure-captured `readingMode`.
 
-**What works for non-EPUB:** PageReaderView has a `pages` array mapping word indices to pages. useEffect watches `highlightedWordIndex` and auto-turns at page boundary.
+2. **Word array rebuilds during active narration** — Foliate pre-loads adjacent sections. Each section load triggered `extractFoliateWords()` which rebuilt the entire word array and renumbered all `data-word-index` DOM attributes. The narration engine was using indices from before the rebuild.
+   - **Fix:** Skip `extractFoliateWords()` during narration/flow modes (uses `readingModeRef.current`).
 
-**Potential approaches not yet tried:**
-- `IntersectionObserver` inside the iframe
-- Build word-to-page mapping by scanning visible words after each `onRelocate`
-- Use CFI for each word boundary with `view.goTo(cfi)`
-- Query foliate's internal CSS column transform/scroll position
+3. **Fraction-based page advance with mismatched denominators** — A `useEffect` watched `narrationWordIndex` and called `renderer.next()` when `narrationWordIndex / totalBookWords > viewFraction + threshold`. But `narrationWordIndex` was relative to extracted words (visible sections only), not the full book. This produced wildly wrong fractions.
+   - **Fix:** Removed entirely. Page advance handled by `scrollToAnchor` instead.
+
+4. **React Strict Mode double-mounting foliate view** — React 19 mounts, unmounts, remounts components in dev mode. Each mount called `loadBook()` → `view.goTo(initialCfi)`, creating two competing foliate views that fought over page position.
+   - **Fix:** Guard at effect start: if `viewRef.current` already exists, skip `loadBook()`.
+
+5. **Double audio stream from double `startNarration`** — Same Strict Mode issue. `startNarration()` called twice, each starting Kokoro generation. First IPC result played alongside the second.
+   - **Fix:** Call `narration.stop()` explicitly before `stopAllModes()` in `startNarration`.
+
+**Working solution for page advance:**
+`view.renderer.scrollToAnchor(range)` — Readest's approach. On each `highlightWordByIndex` call, create a Range around the highlighted `<span>`, pass it to foliate's `scrollToAnchor`. This is a **no-op when the word is already visible** (foliate checks internally). It only scrolls when the word is in a different CSS column. Foliate handles all the column math, scroll position, and RTL/vertical mode transforms internally.
+
+**Approaches that FAILED (for reference):**
+1. `d.defaultView.innerWidth` — iframe reports full column layout width (7200px), not visible width
+2. Host container `clientWidth` + iframe rect transform — mismatched coordinate spaces, constant jumping
+3. `querySelectorAll("iframe")` — returns 0 due to shadow DOM barrier
+4. Span-not-found detection — all words have DOM spans even when off-screen (CSS columns)
+5. `renderer.next()` rapid-fire — cascades without debounce
+6. Fraction-based comparison — wrong denominators (extracted words vs total book words)
+7. `getBoundingClientRect` inside iframe — coordinates relative to full column layout, not viewport
+8. Parent-space rect transform — still mismatched when columns scroll
+
+**Key insight:** The page jumping was never a visibility detection problem. It was a state management problem — 5 independent bugs creating feedback loops. Once all 5 were fixed, the simplest possible approach (`scrollToAnchor` on every word) worked perfectly.
+
+**Rule:** PR-38: When integrating imperative libraries (foliate-js) with React:
+- ALL callback props that read React state must use refs, not closure values
+- Never rebuild DOM state (word arrays, attributes) during active modes
+- Guard useEffects against React Strict Mode double-invocation with ref checks
+- Use the library's own scroll/navigation APIs instead of manual coordinate math
+- Fix ALL root causes before re-attempting the feature — stacked bugs create deceptive symptoms
 
 **Rule:** PR-38: EPUB narration page auto-advance requires knowing which CSS column is visible. Simple DOM queries cannot determine this.
