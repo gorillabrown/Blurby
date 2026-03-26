@@ -13,6 +13,7 @@ import FoliatePageView from "./FoliatePageView";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
+import ReturnToReadingPill from "./ReturnToReadingPill";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
 
@@ -200,6 +201,9 @@ export default function ReaderContainer({
   const [showBacktrackPrompt, setShowBacktrackPrompt] = useState(false);
   const [backtrackPages, setBacktrackPages] = useState<{ current: number; furthest: number }>({ current: 0, furthest: 0 });
 
+  // NM page browsing — tracks when user has browsed away from highlight position during narration
+  const [isBrowsedAway, setIsBrowsedAway] = useState(false);
+
   useEffect(() => {
     if (currentPos === lastSavedPosRef.current) return;
     // Don't save progress until user has engaged (prevents false "started" on open)
@@ -286,6 +290,7 @@ export default function ReaderContainer({
       setWpm(() => preCapWpmRef.current!);
       preCapWpmRef.current = null;
     }
+    setIsBrowsedAway(false);
   }, [playing, flowPlaying, reader, narration, setWpm]);
 
   const handleStopTts = useCallback(() => {
@@ -375,6 +380,17 @@ export default function ReaderContainer({
     const furthest = furthestPositionRef.current;
     finishReading(furthest);
   }, [stopAllModes, finishReading]);
+
+  // Called by PageReaderView when user manually browses away from (or back to) the NM position
+  const handleUserBrowsed = useCallback((isBrowsed: boolean) => {
+    setIsBrowsedAway(isBrowsed);
+  }, []);
+
+  // Return to the page containing the highlight — used by the pill and Space-while-browsed
+  const handleReturnToReading = useCallback(() => {
+    pageNavRef.current.returnToHighlight();
+    setIsBrowsedAway(false);
+  }, []);
 
   const handleScrollExit = useCallback((finalPos: number) => {
     // Flow mode pause → return to Page
@@ -485,10 +501,13 @@ export default function ReaderContainer({
       if (lastMode === "focus") startFocus();
       else if (lastMode === "narration") startNarration();
       else startFlow();
+    } else if (readingMode === "narration" && isBrowsedAway) {
+      // User browsed away during narration — return to highlight first, then continue reading
+      handleReturnToReading();
     } else {
       handlePauseToPage();
     }
-  }, [readingMode, settings.lastReadingMode, startFlow, startFocus, startNarration, handlePauseToPage]);
+  }, [readingMode, isBrowsedAway, settings.lastReadingMode, startFlow, startFocus, startNarration, handlePauseToPage, handleReturnToReading]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
@@ -545,9 +564,11 @@ export default function ReaderContainer({
   // ── Page-mode callbacks for keyboard hook ────────────────────────────
 
   // Page refs for keyboard navigation (updated by PageReaderView via callbacks)
-  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void }>({
+  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void }>({
     prevPage: () => {},
     nextPage: () => {},
+    goToPage: () => {},
+    returnToHighlight: () => {},
   });
 
   const handlePrevPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.prevPage(); }, []);
@@ -916,6 +937,7 @@ export default function ReaderContainer({
             flowPlaying={false}
             ttsActive={true}
             onPageEndWordChange={(endIdx) => narration.setPageEndWord(endIdx)}
+            onUserBrowsed={handleUserBrowsed}
           />
         );
       case "page":
@@ -992,6 +1014,11 @@ export default function ReaderContainer({
       </div>
 
       {menuFlap}
+      <ReturnToReadingPill
+        visible={isBrowsedAway && readingMode === "narration" && !narration.speaking}
+        activeOverlay={menuFlapOpen || showBacktrackPrompt}
+        onReturn={handleReturnToReading}
+      />
       {showEinkRefresh && <EinkRefreshOverlay />}
       {showBacktrackPrompt && (
         <BacktrackPrompt

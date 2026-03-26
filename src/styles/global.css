@@ -3794,6 +3794,27 @@ button:focus-visible {
   color: #fff;
 }
 
+.return-to-reading-pill {
+  position: fixed;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 20px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.85;
+  z-index: 500;
+  transition: opacity 0.2s;
+  -webkit-app-region: no-drag;
+}
+.return-to-reading-pill:hover {
+  opacity: 1;
+}
+
 .page-reader-toast {
   position: fixed;
   bottom: 160px;

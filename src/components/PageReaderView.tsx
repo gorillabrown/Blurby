@@ -30,11 +30,12 @@ interface PageReaderViewProps {
   onExit: (position: number) => void;
   onToggleFlap?: () => void;
   notes?: Map<number, string>; // wordIndex → note preview
-  pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void }>;
+  pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void }>;
   flowNavRef?: React.MutableRefObject<{ prevLine: () => void; nextLine: () => void }>;
   flowPlaying: boolean; // Flow mode: word highlight advances at WPM within page view
   ttsActive?: boolean; // When true, TTS drives cursor — skip RAF advancement
   onPageEndWordChange?: (endWordIndex: number) => void; // Reports current page's last word index
+  onUserBrowsed?: (isBrowsed: boolean) => void; // Called when user manually browses away from NM position
 }
 
 // ── Pagination helpers ────────────────────────────────────────────────────
@@ -117,6 +118,7 @@ export default function PageReaderView({
   flowPlaying,
   ttsActive,
   onPageEndWordChange,
+  onUserBrowsed,
 }: PageReaderViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -226,10 +228,12 @@ export default function PageReaderView({
       // User is browsing away from NM — don't yank. But if TTS catches up to user's page, clear browsing.
       if (targetPage === currentPage) {
         setUserBrowsing(false);
+        onUserBrowsed?.(false);
       }
     } else if (userBrowsing && !ttsActive) {
       // NM was paused while user was browsing — stay on browsed page, clear browsing flag
       setUserBrowsing(false);
+      onUserBrowsed?.(false);
     } else if (targetPage !== currentPage) {
       currentPageRef.current = targetPage;
       setCurrentPage(targetPage);
@@ -253,6 +257,7 @@ export default function PageReaderView({
       if (ttsActive) {
         // Don't change highlighted word — NM continues reading independently
         setUserBrowsing(true);
+        onUserBrowsed?.(true);
       } else {
         // Save progress: first word of the new page becomes the saved position
         const pageStart = pages[clamped]?.start ?? 0;
@@ -264,12 +269,25 @@ export default function PageReaderView({
   const prevPage = useCallback(() => goToPage(currentPage - 1), [currentPage, goToPage]);
   const nextPage = useCallback(() => goToPage(currentPage + 1), [currentPage, goToPage]);
 
+  // Navigate back to the TTS target page (the page containing the highlight)
+  const returnToHighlight = useCallback(() => {
+    const targetPage = ttsTargetPageRef.current;
+    setTransitioning(true);
+    setTimeout(() => {
+      setCurrentPage(targetPage);
+      currentPageRef.current = targetPage;
+      setTransitioning(false);
+      setUserBrowsing(false);
+      onUserBrowsed?.(false);
+    }, PAGE_TRANSITION_MS);
+  }, [onUserBrowsed]);
+
   // Register page nav callbacks for keyboard hook
   useEffect(() => {
     if (pageNavRef) {
-      pageNavRef.current = { prevPage, nextPage };
+      pageNavRef.current = { prevPage, nextPage, goToPage, returnToHighlight };
     }
-  }, [pageNavRef, prevPage, nextPage]);
+  }, [pageNavRef, prevPage, nextPage, goToPage, returnToHighlight]);
 
   // ── Flow mode: imperative controller handles everything ──────────────
   const flowControllerRef = useRef<FlowCursorController | null>(null);
