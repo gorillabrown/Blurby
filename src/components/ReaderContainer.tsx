@@ -709,7 +709,9 @@ export default function ReaderContainer({
   }, [readingMode, narration, effectiveWpm]);
 
   // Determine current word index for bottom bar
-  const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+  // Gate: don't show progress until user has engaged (prevents false 1% on EPUB title pages)
+  const rawWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+  const currentWordIndex = hasEngagedRef.current ? rawWordIndex : 0;
 
   // Foliate word highlighting — when highlightedWordIndex changes during Flow/Narration,
   // highlight the corresponding word in the foliate DOM
@@ -756,7 +758,10 @@ export default function ReaderContainer({
           activeDoc.cfi = detail.cfi;
           const fraction = detail.fraction || 0;
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
-          setHighlightedWordIndex(approxWordIdx);
+          // Only update displayed word index after engagement (prevents false 1% on title pages)
+          if (hasEngagedRef.current) {
+            setHighlightedWordIndex(approxWordIdx);
+          }
           // Only save progress if user has engaged (prevents false "started")
           if (!hasEngagedRef.current && readingMode === "page") return;
           // Debounced save of CFI for resume on reopen
