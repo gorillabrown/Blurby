@@ -2650,38 +2650,38 @@ interface BlurbyDoc {
 **Design spec:** `docs/superpowers/specs/2026-03-26-stabilization-sprint-design.md`
 **Implementation plan:** `docs/superpowers/plans/2026-03-26-stabilization-sprint.md`
 
-### Phase 1: Critical Blockers (serial)
-- [ ] **S-01** — Kokoro AI button unclickable (CSS `-webkit-app-region: no-drag` on `.settings-mode-toggle`)
-- [ ] **S-02** — Auto-updater latest.yml missing x64 (fix sed merge in release.yml + verification step)
-- [ ] **S-03** — EPUB starts on page ~3 (guard initial CFI, `goToFraction(0)` fallback)
-- [ ] **S-04** — False progress on open (page-based progress floor + high-water mark backtrack prompt)
-- [ ] **S-05** — Narrate auto-starts on click (button calls `handleSelectMode`, not `startNarration`)
+### Phase 1: Critical Blockers (serial) ✅ COMPLETED
+- [x] **S-01** — Kokoro AI button unclickable (CSS `-webkit-app-region: no-drag` on `.settings-mode-toggle`) ✅ COMPLETED
+- [x] **S-02** — Auto-updater latest.yml missing x64 (single-job multi-arch build, eliminated sed merge) ✅ COMPLETED
+- [x] **S-03** — EPUB starts on page ~3 (guard initial CFI, `goToFraction(0)` fallback) ✅ COMPLETED
+- [x] **S-04** — False progress on open (engagement-gated progress + high-water mark backtrack prompt) ✅ COMPLETED
+- [x] **S-05** — Narrate auto-starts on click (fixed button wiring + added mode deselect) ✅ COMPLETED
 
-### Phase 2: Mode Integrity (parallel tracks)
+### Phase 2: Mode Integrity (parallel tracks) ✅ COMPLETED
 
 **Track A: Foliate DOM (serial, S-10 first)**
-- [ ] **S-10** — Stale Range objects (re-extract on section change, full-doc word array, Range nulling)
-- [ ] **S-09** — Word click wrong position (unify tokenization via shared `segmentWords` using `Intl.Segmenter`)
-- [ ] **S-06** — Flow invisible on EPUBs (Range-based overlay cursor via `getOverlayPosition`)
-- [ ] **S-07** — Focus not centered (full-viewport overlay, not inside foliate)
-- [ ] **S-08** — Narrate highlight doesn't advance (overlay highlight div, remove `<mark>` injection)
+- [x] **S-10** — Stale Range objects (re-extract on section change, full-doc word array, Range nulling, shared utilities) ✅ COMPLETED
+- [x] **S-09** — Word click wrong position (unified tokenization via shared `segmentWords` using `Intl.Segmenter`) ✅ COMPLETED
+- [x] **S-06** — Flow invisible on EPUBs (Range-based overlay cursor via `getOverlayPosition`) ✅ COMPLETED
+- [x] **S-07** — Focus not centered (full-viewport `position: fixed` overlay) ✅ COMPLETED
+- [x] **S-08** — Narrate highlight doesn't advance (overlay highlight div, removed `<mark>` injection) ✅ COMPLETED
 
 **Track B: Narration UX (parallel with Track A)**
-- [ ] **S-11** — Page browsing yanks back (decouple on pause + "Return to reading" pill + Enter shortcut)
-- [ ] **S-12** — Speed changes delayed (generation ID guard for Kokoro, pre-buffer invalidation)
-- [ ] **S-14** — Time-to-complete ignores mode (use `ttsRate * TTS_RATE_BASELINE_WPM` for narration)
+- [x] **S-11** — Page browsing yanks back (decouple on pause + "Return to reading" pill + Enter shortcut) ✅ COMPLETED
+- [x] **S-12** — Speed changes delayed (generation ID guard for Kokoro, pre-buffer invalidation) ✅ COMPLETED
+- [x] **S-14** — Time-to-complete ignores mode (uses `TTS_RATE_BASELINE_WPM` constant for narration) ✅ COMPLETED
 
 ### Verified (no implementation — confirm in Phase 4)
 - [x] **S-13** — TTS rate slider synced between bottom bar and flap (fixed prior session)
 - [x] **S-15** — Kokoro page-turn pause (fixed prior session, pre-buffer crosses pages, rhythm pauses tuned)
 
 ### Acceptance Criteria
-- [ ] `npm test` passes (512+ tests)
-- [ ] `npm run build` succeeds
-- [ ] V-01 through V-15 manual verification matrix passes
-- [ ] I-01 through I-06 integration tests pass
-- [ ] No console errors during EPUB reading across 3+ sections
-- [ ] All four modes work identically for EPUB and non-EPUB content
+- [x] `npm test` passes (522 tests across 24 files)
+- [x] `npm run build` succeeds
+- [ ] V-01 through V-15 manual verification matrix passes (pending smoke test)
+- [ ] I-01 through I-06 integration tests pass (pending smoke test)
+- [ ] No console errors during EPUB reading across 3+ sections (pending smoke test)
+- [ ] All four modes work identically for EPUB and non-EPUB content (pending smoke test)
 
 ---
 
