@@ -357,24 +357,17 @@ export default function FoliatePageView({
             }
           }
 
-          // Re-extract words on section change — merge with existing word array
+          // Extract words fresh from ALL currently loaded sections
+          // Simple approach: no merge, no accumulation — just re-extract everything visible
           const v2 = viewRef.current;
           if (v2) {
             const freshWords = extractWordsFromView(v2);
-            const loadedSections = new Set<number>();
-            for (const { index: si } of v2.renderer?.getContents?.() ?? []) {
-              loadedSections.add(si);
-            }
-            if (foliateWordsRef.current.length > 0) {
-              foliateWordsRef.current = mergeWords(foliateWordsRef.current, freshWords, loadedSections);
-            } else {
-              foliateWordsRef.current = freshWords;
-            }
+            foliateWordsRef.current = freshWords;
             onWordsReextracted?.();
 
-            // Wrap words in <span class="page-word" data-word-index="N"> — AFTER extraction
-            // so extractWordsFromView gets clean text nodes for Range creation.
-            const sectionStart = foliateWordsRef.current.findIndex(w => w.sectionIndex === index);
+            // Wrap words in this newly loaded section with <span data-word-index="N">
+            // The global index offset is this section's position in the freshWords array
+            const sectionStart = freshWords.findIndex(w => w.sectionIndex === index);
             if (sectionStart >= 0) {
               wrapWordsInSpans(doc, index, sectionStart);
             }
@@ -564,17 +557,21 @@ export default function FoliatePageView({
         lastAdvance = now;
         onFlowWordAdvanceRef.current?.(currentIdx);
       }
-      const words = foliateWordsRef.current;
-      const word = words[currentIdx];
-      if (word?.range) {
-        const pos = getOverlayPosition(word.range, container, foliateIframeRef.current);
-        if (pos) {
-          cursor.style.transform = `translate3d(${pos.left}px, ${pos.top + pos.height}px, 0)`;
-          cursor.style.width = `${pos.width}px`;
+      // Find the word span by data-word-index in the foliate iframe
+      // (Ranges are stale after wrapWordsInSpans replaces text nodes)
+      const iframe = foliateIframeRef.current;
+      const iframeDoc = iframe?.contentDocument;
+      if (iframeDoc) {
+        const span = iframeDoc.querySelector(`[data-word-index="${currentIdx}"]`) as HTMLElement;
+        if (span) {
+          const spanRect = span.getBoundingClientRect();
+          const iframeRect = iframe!.getBoundingClientRect();
+          cursor.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top + spanRect.height}px, 0)`;
+          cursor.style.width = `${spanRect.width}px`;
+          cursor.style.display = "block";
+        } else {
+          cursor.style.display = "none";
         }
-      } else if (word && !word.range) {
-        // Range is null (section unloaded) — hide cursor until re-extraction
-        cursor.style.display = "none";
       }
       flowRafRef.current = requestAnimationFrame(tick);
     };
@@ -593,8 +590,16 @@ export default function FoliatePageView({
       return;
     }
 
-    const word = foliateWordsRef.current[narrationWordIndex];
-    if (!word?.range) {
+    // Find the word span by data-word-index in the foliate iframe
+    // (Ranges are stale after wrapWordsInSpans replaces text nodes)
+    const iframe = foliateIframeRef.current;
+    const iframeDoc = iframe?.contentDocument;
+    if (!iframeDoc) {
+      highlight.style.display = "none";
+      return;
+    }
+    const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`) as HTMLElement;
+    if (!span) {
       highlight.style.display = "none";
       return;
     }
