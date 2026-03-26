@@ -227,7 +227,7 @@ export default function ReaderContainer({
     // Persist furthest position as metadata on the doc
     activeDoc.furthestPosition = Math.max(furthestPositionRef.current, finalPos);
     onUpdateProgress(activeDoc.id, finalPos);
-    api.updateDocProgress(activeDoc.id, finalPos);
+    api.updateDocProgress(activeDoc.id, finalPos, activeDoc.cfi || undefined);
     // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
     if (activeReadingStartRef.current) {
       activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
@@ -328,13 +328,30 @@ export default function ReaderContainer({
     // the generation ID, poisoning the in-flight Kokoro IPC call.
     if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
     // Start cursor-driven TTS
+    let prevHighlightSpan: Element | null = null;
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
-      // Highlight word in foliate DOM if available
-      if (useFoliate && foliateWordsRef.current[idx]) {
-        try {
-          foliateApiRef.current?.highlightWord(foliateWordsRef.current[idx].range, foliateWordsRef.current[idx].sectionIndex);
-        } catch { /* range may be stale after page navigation */ }
+      // Directly toggle highlight class on word spans in foliate iframes
+      // (bypasses React render cycle for immediate visual feedback)
+      if (useFoliate) {
+        // Clear previous highlight
+        prevHighlightSpan?.classList.remove("page-word--highlighted");
+        prevHighlightSpan = null;
+        // Find and highlight current word across all iframes
+        const host = document.querySelector(".foliate-page-view");
+        if (host) {
+          const iframes = host.querySelectorAll("iframe");
+          for (const iframe of iframes) {
+            try {
+              const span = iframe.contentDocument?.querySelector(`[data-word-index="${idx}"]`);
+              if (span) {
+                span.classList.add("page-word--highlighted");
+                prevHighlightSpan = span;
+                break;
+              }
+            } catch { /* cross-origin */ }
+          }
+        }
       }
     });
   }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);
