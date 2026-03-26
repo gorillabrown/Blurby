@@ -205,7 +205,7 @@ function registerIpcHandlers(ctx) {
 
   ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
 
-  ipcMain.handle("update-doc-progress", (_, docId, position) => {
+  ipcMain.handle("update-doc-progress", (_, docId, position, cfi) => {
     const doc = ctx.getDocById(docId);
     if (doc) {
       const syncEngine = require("./sync-engine");
@@ -214,6 +214,7 @@ function registerIpcHandlers(ctx) {
       const revision = syncStatus.revision || 0;
 
       doc.position = position;
+      if (cfi) doc.cfi = cfi;
       doc.modified = Date.now();
       doc.revision = revision;
       ctx.saveLibrary();

@@ -183,7 +183,7 @@ export default function ReaderContainer({
     if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
     pageSaveTimerRef.current = setTimeout(() => {
       lastSavedPosRef.current = currentPos;
-      api.updateDocProgress(activeDoc.id, currentPos);
+      api.updateDocProgress(activeDoc.id, currentPos, useFoliate ? activeDoc.cfi : undefined);
       onUpdateProgress(activeDoc.id, currentPos);
     }, 2000);
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
@@ -280,8 +280,8 @@ export default function ReaderContainer({
     narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
     // Get words from foliate DOM (EPUB) or extracted text (other formats)
     const effectiveWords = getEffectiveWords();
-    // For foliate: start at 0 (words are from visible sections only), else use global position
-    const startIdx = useFoliate ? 0 : highlightedWordIndex;
+    // Start from the current highlighted position (word click updates this for foliate EPUBs too)
+    const startIdx = highlightedWordIndex;
     // Start cursor-driven TTS
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
@@ -657,8 +657,16 @@ export default function ReaderContainer({
       onRelocate={(detail) => {
         if (detail.cfi) {
           activeDoc.cfi = detail.cfi;
-          const approxWordIdx = Math.floor((detail.fraction || 0) * (activeDoc.wordCount || 0));
+          const fraction = detail.fraction || 0;
+          const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
           setHighlightedWordIndex(approxWordIdx);
+          // Debounced save of CFI for resume on reopen
+          if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
+          pageSaveTimerRef.current = setTimeout(() => {
+            api.updateDocProgress(activeDoc.id, approxWordIdx, detail.cfi);
+            onUpdateProgress(activeDoc.id, approxWordIdx);
+            lastSavedPosRef.current = approxWordIdx;
+          }, 2000);
         }
       }}
       onTocReady={(toc) => {
@@ -668,30 +676,34 @@ export default function ReaderContainer({
           href: item.href,
         })));
       }}
-      onWordClick={(cfi, word) => {
+      onWordClick={(cfi, word, sectionIndex, wordOffsetInSection) => {
         activeDoc.cfi = cfi;
-        console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
-        // Find this word in the extracted words array and update highlightedWordIndex
+        console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}, section: ${sectionIndex}, offset: ${wordOffsetInSection}`);
+        // Map section + word offset to our extracted words array index
         const words = foliateWordsRef.current;
-        if (words.length > 0) {
-          const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
-          // Search near current position first
-          const start = Math.max(0, highlightedWordIndex - 100);
-          const end = Math.min(words.length, highlightedWordIndex + 500);
-          for (let i = start; i < end; i++) {
-            if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
-              setHighlightedWordIndex(i);
-              // Progress saved via highlightedWordIndex change
-              console.log(`[Foliate] Mapped click to word index ${i}`);
-              return;
+        if (words.length > 0 && sectionIndex !== undefined && wordOffsetInSection !== undefined) {
+          // Find the first word in this section, then add the offset
+          let sectionStart = -1;
+          for (let i = 0; i < words.length; i++) {
+            if (words[i].sectionIndex === sectionIndex) {
+              sectionStart = i;
+              break;
             }
           }
-          // Broad search
+          if (sectionStart >= 0) {
+            const targetIdx = Math.min(sectionStart + wordOffsetInSection, words.length - 1);
+            setHighlightedWordIndex(targetIdx);
+            console.log(`[Foliate] Mapped click to word index ${targetIdx} (section ${sectionIndex} + offset ${wordOffsetInSection})`);
+            return;
+          }
+        }
+        // Fallback: text search (less precise)
+        if (words.length > 0) {
+          const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
           for (let i = 0; i < words.length; i++) {
             if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
               setHighlightedWordIndex(i);
-              // Progress saved via highlightedWordIndex change
-              console.log(`[Foliate] Mapped click to word index ${i} (broad)`);
+              console.log(`[Foliate] Mapped click to word index ${i} (text fallback)`);
               return;
             }
           }
@@ -704,8 +716,10 @@ export default function ReaderContainer({
       viewApiRef={foliateApiRef}
       isReading={readingMode === "flow" || readingMode === "narration"}
       onJumpToHighlight={() => {
-        // Scroll foliate to the current highlighted word
-        if (foliateWordsRef.current[highlightedWordIndex]) {
+        // Navigate foliate to the saved CFI position
+        if (activeDoc.cfi) {
+          foliateApiRef.current?.goTo?.(activeDoc.cfi);
+        } else if (foliateWordsRef.current[highlightedWordIndex]) {
           try {
             const wordData = foliateWordsRef.current[highlightedWordIndex];
             const el = wordData.range.startContainer.parentElement;

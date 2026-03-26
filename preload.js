@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   deleteDoc: (docId) => ipcRenderer.invoke("delete-doc", docId),
   updateDoc: (docId, title, content) => ipcRenderer.invoke("update-doc", docId, title, content),
   resetProgress: (docId) => ipcRenderer.invoke("reset-progress", docId),
-  updateDocProgress: (docId, position) => ipcRenderer.invoke("update-doc-progress", docId, position),
+  updateDocProgress: (docId, position, cfi) => ipcRenderer.invoke("update-doc-progress", docId, position, cfi),
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
   // Read raw file buffer (for foliate-js EPUB rendering in renderer)

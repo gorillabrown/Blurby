@@ -51,7 +51,7 @@ interface FoliatePageViewProps {
   settings: BlurbySettings;
   onRelocate?: (detail: { cfi: string; fraction: number; tocItem?: any; pageItem?: any }) => void;
   onTocReady?: (toc: any[]) => void;
-  onWordClick?: (cfi: string, word: string) => void;
+  onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number) => void;
   onLoad?: () => void;
   initialCfi?: string | null;
   focusTextSize?: number;
@@ -253,7 +253,21 @@ export default function FoliatePageView({
                 const match = contents.find((c: any) => c.doc === doc);
                 if (match) {
                   const cfi = v.getCFI(match.index, result.range);
-                  onWordClick?.(cfi, result.word);
+                  // Count word offset: walk all text nodes before the click to count words
+                  let wordOffset = 0;
+                  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+                  let tn: Text | null;
+                  outer: while ((tn = walker.nextNode() as Text | null)) {
+                    const words = (tn.textContent || "").split(/\s+/).filter(Boolean);
+                    if (tn === result.range.startContainer) {
+                      // Count words before the offset in this text node
+                      const beforeText = (tn.textContent || "").slice(0, result.range.startOffset);
+                      wordOffset += beforeText.split(/\s+/).filter(Boolean).length;
+                      break outer;
+                    }
+                    wordOffset += words.length;
+                  }
+                  onWordClick?.(cfi, result.word, match.index, wordOffset);
                 }
               }
             }

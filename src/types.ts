@@ -180,7 +180,7 @@ export interface ElectronAPI {
   deleteDoc: (docId: string) => Promise<void>;
   updateDoc: (docId: string, title: string, content: string) => Promise<void>;
   resetProgress: (docId: string) => Promise<void>;
-  updateDocProgress: (docId: string, position: number) => Promise<void>;
+  updateDocProgress: (docId: string, position: number, cfi?: string) => Promise<void>;
   loadDocContent: (docId: string) => Promise<string | { userError: string } | null>;
   getDocChapters: (docId: string) => Promise<Array<{ title: string; charOffset: number }>>;
   saveHighlight: (data: { docTitle: string; text: string; wordIndex: number; totalWords: number }) => Promise<{ ok?: boolean; error?: string }>;
