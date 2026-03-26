@@ -763,15 +763,13 @@ export default function ReaderContainer({
       initialCfi={activeDoc.cfi || null}
       onRelocate={(detail) => {
         if (detail.cfi) {
-          activeDoc.cfi = detail.cfi;
           const fraction = detail.fraction || 0;
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
-          // Only update displayed word index after engagement (prevents false 1% on title pages)
-          if (hasEngagedRef.current) {
-            setHighlightedWordIndex(approxWordIdx);
-          }
-          // Only save progress if user has engaged (prevents false "started")
+          // Only update CFI, word index, and progress after engagement
+          // (prevents overwriting saved 8% CFI with title page CFI on initial load)
           if (!hasEngagedRef.current && readingMode === "page") return;
+          activeDoc.cfi = detail.cfi;
+          setHighlightedWordIndex(approxWordIdx);
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
