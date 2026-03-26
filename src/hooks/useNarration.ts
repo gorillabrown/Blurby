@@ -265,9 +265,13 @@ export default function useNarration() {
               const lastWord = chunkWords[chunkWords.length - 1] || "";
               const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
               const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
-              // Use calculatePauseMs with TTS-tuned base duration (250ms)
-              // Kokoro handles within-chunk prosody; we only add between-chunk gaps
-              pauseMs = calculatePauseMs(lastWord, rhythmPausesRef.current, 250, isParagraphEnd);
+              if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
+                pauseMs = 750;
+              } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
+                pauseMs = 400;
+              } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
+                pauseMs = 250;
+              }
             }
             if (pauseMs > 0) {
               chunkPauseTimerRef.current = setTimeout(() => {
