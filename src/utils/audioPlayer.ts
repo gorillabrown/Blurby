@@ -43,7 +43,6 @@ export function playBuffer(
   onEndCallback = onEnd || null;
 
   // Time-based word advance estimation
-  console.log(`[AudioPlayer] playBuffer: durationMs=${durationMs}, wordCount=${wordCount}, msPerWord=${wordCount > 0 ? (durationMs / wordCount).toFixed(0) : "N/A"}`);
   if (onWordAdvance && wordCount > 0) {
     const msPerWord = durationMs / wordCount;
     let wordOffset = 0;
