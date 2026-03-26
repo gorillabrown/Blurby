@@ -209,6 +209,8 @@ export default function ReaderContainer({
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
 
   useEffect(() => {
+    // For foliate EPUBs, progress is saved via onRelocate (fraction-based) — skip this effect
+    if (useFoliate) return;
     if (currentPos === lastSavedPosRef.current) return;
     // Don't save progress until user has engaged (prevents false "started" on open)
     if (!hasEngagedRef.current) return;
@@ -219,13 +221,8 @@ export default function ReaderContainer({
     if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
     pageSaveTimerRef.current = setTimeout(() => {
       lastSavedPosRef.current = currentPos;
-      // For foliate EPUBs, use the fraction-based position (authoritative from foliate's relocate)
-      // not the extracted word index (which is relative to visible sections only)
-      const savePos = useFoliate
-        ? Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0))
-        : currentPos;
-      api.updateDocProgress(activeDoc.id, savePos, useFoliate ? activeDoc.cfi : undefined);
-      onUpdateProgress(activeDoc.id, savePos);
+      api.updateDocProgress(activeDoc.id, currentPos);
+      onUpdateProgress(activeDoc.id, currentPos);
     }, 2000);
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
   }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
@@ -807,7 +804,7 @@ export default function ReaderContainer({
             setHighlightedWordIndex(approxWordIdx);
           }
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
-          if (!hasEngagedRef.current && readingMode === "page") return;
+          if (!hasEngagedRef.current && mode === "page") return;
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
