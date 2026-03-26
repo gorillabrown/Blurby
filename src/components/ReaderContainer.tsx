@@ -827,6 +827,13 @@ export default function ReaderContainer({
           } catch { /* stale range */ }
         }
       }}
+      readingMode={readingMode}
+      flowPlaying={flowPlaying}
+      highlightedWordIndex={highlightedWordIndex}
+      wpm={effectiveWpm}
+      narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
+      onFlowWordAdvance={(idx) => setHighlightedWordIndex(idx)}
+      onWordsReextracted={() => { /* foliate re-extracted words — refs already updated */ }}
     />
   ) : null;
 

@@ -396,11 +396,11 @@ export default function FoliatePageView({
               const sel = doc.getSelection();
               if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
 
-              if (v) {
-                const contents = v.renderer.getContents?.() ?? [];
+              if (v2) {
+                const contents = v2.renderer.getContents?.() ?? [];
                 const match = contents.find((c: any) => c.doc === doc);
                 if (match) {
-                  const cfi = v.getCFI(match.index, result.range);
+                  const cfi = v2.getCFI(match.index, result.range);
                   // Count word offset using Intl.Segmenter — must match extractWordsFromView tokenization
                   let wordOffset = 0;
                   const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
