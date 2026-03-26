@@ -316,8 +316,14 @@ export default function ReaderContainer({
     narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
     // Get words from foliate DOM (EPUB) or extracted text (other formats)
     const effectiveWords = getEffectiveWords();
-    // Start from the current highlighted position (word click updates this for foliate EPUBs too)
-    const startIdx = highlightedWordIndex;
+    // For non-EPUB: highlightedWordIndex maps directly to the words array
+    // For EPUB: effectiveWords only contains loaded sections, so highlightedWordIndex
+    // (a global index) may exceed the array. Clamp to valid range — narration will
+    // advance through the loaded words and trigger page turns for more content.
+    let startIdx = highlightedWordIndex;
+    if (useFoliate && startIdx >= effectiveWords.length) {
+      startIdx = 0; // Start from beginning of loaded content
+    }
     // Start cursor-driven TTS
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
@@ -808,7 +814,7 @@ export default function ReaderContainer({
         setTimeout(extractFoliateWords, 100);
       }}
       viewApiRef={foliateApiRef}
-      isReading={readingMode === "flow" || readingMode === "narration"}
+      isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
       onJumpToHighlight={() => {
         // Navigate foliate to the saved CFI position
         if (activeDoc.cfi) {
