@@ -72,6 +72,12 @@ export const TTS_RATE_BASELINE_WPM = 150;
 export const TTS_WPM_CAP = 400;
 /** Step size for TTS rate adjustment via Up/Down arrows */
 export const TTS_RATE_STEP = 0.1;
+/** Between-chunk rhythm pause: comma, colon, semicolon endings */
+export const TTS_PAUSE_COMMA_MS = 250;
+/** Between-chunk rhythm pause: sentence endings (. ! ?) */
+export const TTS_PAUSE_SENTENCE_MS = 400;
+/** Between-chunk rhythm pause: paragraph boundaries */
+export const TTS_PAUSE_PARAGRAPH_MS = 750;
 
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */

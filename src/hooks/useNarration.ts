@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS } from "../constants";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS } from "../constants";
 import { calculatePauseMs } from "../utils/rhythm";
 import * as audioPlayer from "../utils/audioPlayer";
 import type { RhythmPauses } from "../types";
@@ -266,11 +266,11 @@ export default function useNarration() {
               const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
               const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
               if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
-                pauseMs = 750;
+                pauseMs = TTS_PAUSE_PARAGRAPH_MS;
               } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
-                pauseMs = 400;
+                pauseMs = TTS_PAUSE_SENTENCE_MS;
               } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
-                pauseMs = 250;
+                pauseMs = TTS_PAUSE_COMMA_MS;
               }
             }
             if (pauseMs > 0) {
