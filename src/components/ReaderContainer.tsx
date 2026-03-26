@@ -331,35 +331,9 @@ export default function ReaderContainer({
     let prevHighlightSpan: Element | null = null;
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
-      // Directly toggle highlight class on word spans in foliate iframes
+      // Highlight word in foliate DOM via imperative API (accesses shadow DOM iframes)
       if (useFoliate) {
-        prevHighlightSpan?.classList.remove("page-word--highlighted");
-        prevHighlightSpan = null;
-        const host = document.querySelector(".foliate-page-view");
-        if (host) {
-          const iframes = host.querySelectorAll("iframe");
-          let found = false;
-          for (const iframe of iframes) {
-            try {
-              const iframeDoc = iframe.contentDocument;
-              if (!iframeDoc) continue;
-              const span = iframeDoc.querySelector(`[data-word-index="${idx}"]`);
-              if (span) {
-                span.classList.add("page-word--highlighted");
-                prevHighlightSpan = span;
-                found = true;
-                break;
-              }
-            } catch (e) {
-              console.log(`[Narrate] iframe access error:`, e);
-            }
-          }
-          if (!found && idx % 20 === 0) {
-            console.log(`[Narrate] Word ${idx} NOT found in ${iframes.length} iframes`);
-          }
-        } else {
-          if (idx % 20 === 0) console.log("[Narrate] .foliate-page-view not found in DOM");
-        }
+        foliateApiRef.current?.highlightWordByIndex(idx);
       }
     });
   }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);

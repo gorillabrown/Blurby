@@ -275,6 +275,7 @@ export interface FoliateViewAPI {
   next: () => void;
   prev: () => void;
   highlightWord: (range: Range | null, sectionIndex: number) => void;
+  highlightWordByIndex: (wordIndex: number) => void;
   clearHighlight: () => void;
   getView: () => any;
 }
@@ -535,12 +536,35 @@ export default function FoliatePageView({
             next: () => view.renderer.next(),
             prev: () => view.renderer.prev(),
             highlightWord: (_range, _sectionIndex) => {
-              // No-op: narration highlight is now driven by narrationWordIndex prop
-              // and rendered via the overlay div. Callers should set narrationWordIndex instead.
+              // No-op: use highlightWordByIndex instead
+            },
+            highlightWordByIndex: (wordIndex: number) => {
+              // Toggle page-word--highlighted class on word spans inside foliate iframes
+              // Uses view.renderer.getContents() to access shadow DOM iframes
+              const contents = view.renderer?.getContents?.() ?? [];
+              // Clear previous highlight
+              for (const { doc: d } of contents) {
+                try {
+                  d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
+                } catch { /* */ }
+              }
+              // Apply highlight to target word
+              for (const { doc: d } of contents) {
+                try {
+                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`);
+                  if (span) {
+                    span.classList.add("page-word--highlighted");
+                    break;
+                  }
+                } catch { /* */ }
+              }
             },
             clearHighlight: () => {
-              // Hide the overlay highlight div
-              if (highlightRef.current) highlightRef.current.style.display = "none";
+              // Clear all highlights in foliate iframes
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d } of contents) {
+                try { d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted"); } catch { /* */ }
+              }
             },
             getView: () => view,
           };
@@ -608,25 +632,29 @@ export default function FoliatePageView({
         lastAdvance = now;
         onFlowWordAdvanceRef.current?.(currentIdx);
       }
-      // Find the word span by data-word-index across ALL loaded section iframes
-      const host = containerRef.current;
-      const iframes = host ? host.querySelectorAll("iframe") : [];
+      // Find word span via view.renderer.getContents() (pierces shadow DOM)
+      const v = viewRef.current;
+      const contents = v?.renderer?.getContents?.() ?? [];
       let found = false;
-      for (const iframe of iframes) {
+      for (const { doc: d } of contents) {
         try {
-          const iframeDoc = iframe.contentDocument;
-          if (!iframeDoc) continue;
-          const span = iframeDoc.querySelector(`[data-word-index="${currentIdx}"]`) as HTMLElement;
+          const span = d?.querySelector?.(`[data-word-index="${currentIdx}"]`) as HTMLElement;
           if (span) {
             const spanRect = span.getBoundingClientRect();
-            const iframeRect = iframe.getBoundingClientRect();
-            cursor.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top + spanRect.height}px, 0)`;
+            // getContents docs are inside iframes — find the iframe for coordinate transform
+            const iframe = foliateIframeRef.current;
+            if (iframe) {
+              const iframeRect = iframe.getBoundingClientRect();
+              cursor.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top + spanRect.height}px, 0)`;
+            } else {
+              cursor.style.transform = `translate3d(${spanRect.left}px, ${spanRect.top + spanRect.height}px, 0)`;
+            }
             cursor.style.width = `${spanRect.width}px`;
             cursor.style.display = "block";
             found = true;
             break;
           }
-        } catch { /* cross-origin */ }
+        } catch { /* */ }
       }
       if (!found) cursor.style.display = "none";
       flowRafRef.current = requestAnimationFrame(tick);
