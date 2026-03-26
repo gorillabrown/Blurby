@@ -247,7 +247,18 @@ export default function LibraryView({
   const listClassName = `doc-list doc-list-spacing-${cardSpacing}`;
 
   const handleAddDoc = async () => {
-    if (!newTitle.trim() || !newText.trim()) return;
+    if (editMetaMode && editingId) {
+      // Metadata-only save (file-based docs — update title + author)
+      const doc = library.find(d => d.id === editingId);
+      if (doc) {
+        doc.title = newTitle.trim() || doc.title;
+        doc.author = newAuthor.trim() || doc.author;
+        api.updateDocProgress(doc.id, doc.position || 0); // triggers library save
+      }
+      setNewTitle(""); setNewAuthor(""); setShowAdd(false); setEditingId(null); setEditMetaMode(false);
+      return;
+    }
+    if (!newTitle.trim()) return;
     await onAddDoc(newTitle.trim(), newText.trim(), editingId);
     setNewTitle(""); setNewText(""); setShowAdd(false); setEditingId(null);
   };
@@ -262,8 +273,22 @@ export default function LibraryView({
     else { setUrlInput(""); setShowUrl(false); setUrlError(""); }
   };
 
+  const [newAuthor, setNewAuthor] = useState("");
+  const [editMetaMode, setEditMetaMode] = useState(false);
+
   const startEdit = useCallback((doc: BlurbyDoc) => {
-    setEditingId(doc.id); setNewTitle(doc.title); setNewText(doc.content || ""); setShowAdd(true);
+    setEditingId(doc.id);
+    setNewTitle(doc.title);
+    setNewAuthor(doc.author || "");
+    // For file-based docs, open metadata editor (no content editing)
+    if (doc.filepath) {
+      setEditMetaMode(true);
+      setShowAdd(true);
+    } else {
+      setEditMetaMode(false);
+      setNewText(doc.content || "");
+      setShowAdd(true);
+    }
   }, []);
 
   const handleCancelDelete = useCallback(() => setConfirmDelete(null), []);
@@ -579,7 +604,10 @@ export default function LibraryView({
             newTitle={newTitle} newText={newText} editingId={editingId}
             onTitleChange={setNewTitle} onTextChange={setNewText}
             onSave={handleAddDoc}
-            onCancel={() => { setShowAdd(false); setEditingId(null); }}
+            onCancel={() => { setShowAdd(false); setEditingId(null); setEditMetaMode(false); }}
+            metaMode={editMetaMode}
+            newAuthor={newAuthor}
+            onAuthorChange={setNewAuthor}
           />
         )}
 
