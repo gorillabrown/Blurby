@@ -178,6 +178,8 @@ interface FoliatePageViewProps {
   wpm?: number;
   /** Callback when Flow mode advances to the next word */
   onFlowWordAdvance?: (idx: number) => void;
+  /** Current word index being narrated (overlay highlight) */
+  narrationWordIndex?: number;
 }
 
 export interface FoliateViewAPI {
@@ -278,6 +280,7 @@ export default function FoliatePageView({
   highlightedWordIndex,
   wpm,
   onFlowWordAdvance,
+  narrationWordIndex,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -285,6 +288,7 @@ export default function FoliatePageView({
   const foliateWordsRef = useRef<FoliateWord[]>([]);
   const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
   const flowRafRef = useRef<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -377,36 +381,20 @@ export default function FoliatePageView({
             onWordsReextracted?.();
           }
 
-          // Word detection: single click highlights word with a <mark> overlay
+          // Word detection: single click selects word via native selection
           doc.addEventListener("click", (ce: MouseEvent) => {
             if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
 
-            // Remove any previous highlight marks in ALL loaded docs
-            const v = viewRef.current;
-            for (const { doc: d } of v?.renderer?.getContents?.() ?? []) {
-              d.querySelectorAll("mark.blurby-word-highlight").forEach((m: Element) => {
-                const parent = m.parentNode;
-                if (parent) {
-                  while (m.firstChild) parent.insertBefore(m.firstChild, m);
-                  parent.removeChild(m);
-                  parent.normalize(); // merge adjacent text nodes
-                }
-              });
-            }
+            // Clear any previous selection
+            const prevSel = doc.getSelection();
+            if (prevSel) prevSel.removeAllRanges();
 
             // Try to select word at click point
             const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
             if (result) {
-              // Wrap the word in a visible <mark> element
-              try {
-                const mark = doc.createElement("mark");
-                mark.className = "blurby-word-highlight";
-                mark.style.cssText = `background: var(--blurby-accent, rgba(230,57,70,0.25)); border-radius: 2px; padding: 0 1px;`;
-                result.range.surroundContents(mark);
-              } catch { /* range crosses element boundary — fall back to selection */
-                const sel = doc.getSelection();
-                if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
-              }
+              // Highlight via native selection (no DOM mutation)
+              const sel = doc.getSelection();
+              if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
 
               if (v) {
                 const contents = v.renderer.getContents?.() ?? [];
@@ -503,7 +491,6 @@ export default function FoliatePageView({
 
         // Populate imperative API ref
         if (viewApiRef) {
-          let currentHighlight: HTMLElement | null = null;
           viewApiRef.current = {
             getWords: () => foliateWordsRef.current.length > 0
               ? foliateWordsRef.current
@@ -512,46 +499,13 @@ export default function FoliatePageView({
             goToFraction: (frac) => view.goToFraction(frac),
             next: () => view.renderer.next(),
             prev: () => view.renderer.prev(),
-            highlightWord: (range, _sectionIndex) => {
-              // Remove previous highlight
-              if (currentHighlight?.parentNode) {
-                const parent = currentHighlight.parentNode;
-                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
-                parent.removeChild(currentHighlight);
-                currentHighlight = null;
-              }
-              // Guard: skip if range is null or stale (section unloaded)
-              if (!range || !range.startContainer.isConnected) return;
-              // Wrap word in a visible <mark> element
-              safeRangeOp(range, (r) => {
-                const doc = r.startContainer.ownerDocument;
-                if (!doc) return;
-                const mark = doc.createElement("mark");
-                mark.style.cssText = "background: rgba(var(--accent-rgb, 208,71,22), 0.3); border-radius: 2px; padding: 0 1px;";
-                mark.className = "blurby-word-hl";
-                r.surroundContents(mark);
-                currentHighlight = mark;
-                // Scroll into view if needed
-                mark.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-              }, undefined);
-              // If surroundContents failed (safeRangeOp caught it), try selection fallback
-              if (!currentHighlight && range.startContainer.isConnected) {
-                try {
-                  const doc = range.startContainer.ownerDocument;
-                  if (doc) {
-                    const sel = doc.getSelection();
-                    if (sel) { sel.removeAllRanges(); sel.addRange(range); }
-                  }
-                } catch { /* completely stale range */ }
-              }
+            highlightWord: (_range, _sectionIndex) => {
+              // No-op: narration highlight is now driven by narrationWordIndex prop
+              // and rendered via the overlay div. Callers should set narrationWordIndex instead.
             },
             clearHighlight: () => {
-              if (currentHighlight?.parentNode) {
-                const parent = currentHighlight.parentNode;
-                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
-                parent.removeChild(currentHighlight);
-                currentHighlight = null;
-              }
+              // Hide the overlay highlight div
+              if (highlightRef.current) highlightRef.current.style.display = "none";
             },
             getView: () => view,
           };
@@ -637,6 +591,34 @@ export default function FoliatePageView({
     return () => cancelAnimationFrame(flowRafRef.current);
   }, [readingMode, flowPlaying, wpm]);
 
+  // Narration highlight overlay — positions a div over the current narrated word
+  useEffect(() => {
+    const highlight = highlightRef.current;
+    const container = containerRef.current;
+    if (!highlight || !container) return;
+
+    if (narrationWordIndex == null || narrationWordIndex < 0) {
+      highlight.style.display = "none";
+      return;
+    }
+
+    const word = foliateWordsRef.current[narrationWordIndex];
+    if (!word?.range) {
+      highlight.style.display = "none";
+      return;
+    }
+
+    const pos = getOverlayPosition(word.range, container, foliateIframeRef.current);
+    if (pos) {
+      highlight.style.display = "block";
+      highlight.style.transform = `translate3d(${pos.left}px, ${pos.top}px, 0)`;
+      highlight.style.width = `${pos.width}px`;
+      highlight.style.height = `${pos.height}px`;
+    } else {
+      highlight.style.display = "none";
+    }
+  }, [narrationWordIndex]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -690,6 +672,7 @@ export default function FoliatePageView({
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
       <div ref={cursorRef} className="foliate-flow-cursor" style={{ display: "none" }} />
+      <div ref={highlightRef} className="foliate-narration-highlight" style={{ display: "none" }} />
     </div>
   );
 }
@@ -727,7 +710,6 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
-    .blurby-word-hl { background: ${accent}4D !important; border-radius: 2px; padding: 0 1px; }
   `;
   doc.head.appendChild(style);
 }

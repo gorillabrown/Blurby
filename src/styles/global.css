@@ -3814,6 +3814,16 @@ button:focus-visible {
   will-change: transform;
 }
 
+/* Overlay highlight for EPUB narration — positioned over current spoken word */
+.foliate-narration-highlight {
+  position: fixed;
+  background: var(--accent-highlighted);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 100;
+  will-change: transform;
+}
+
 .return-to-reading-pill {
   position: fixed;
   bottom: 72px;
