@@ -56,13 +56,13 @@ In `global.css`, add `-webkit-app-region: no-drag` to the voice engine toggle bu
 
 ```css
 /* Voice engine toggle — prevent drag region from swallowing clicks */
-.voice-engine-toggle,
-.voice-engine-toggle button {
+.settings-mode-toggle,
+.settings-mode-toggle .settings-mode-btn {
   -webkit-app-region: no-drag;
 }
 ```
 
-Adjust the selector to match the actual class name found in Step 1.
+The actual class names in SpeedReadingSettings.tsx are `settings-mode-toggle` (line 314) and `settings-mode-btn` (lines 316, 322). Verify these match before applying.
 
 - [ ] **Step 3: Verify click handler wiring**
 
@@ -375,9 +375,14 @@ git commit -m "fix(S-04): page-based progress with high-water mark backtrack pro
 
 In `ReaderBottomBar.tsx`, find the Narrate button (around line 242). Check what callback it fires — likely `onToggleTts` prop. Trace this prop back to `ReaderContainer.tsx` to see what function it maps to.
 
-- [ ] **Step 2: Fix button wiring**
+**NOTE:** The button wiring may already be correct — `onToggleTts` at line 242 may already map to `handleSelectMode("narration")` (lines 391-404, 407-409). If so, the auto-start bug is elsewhere. Check if `handleSelectMode` itself, or a `useEffect` watching `lastReadingMode`/`readingMode`, inadvertently triggers `startNarration()`. The bug could also be in the `N` key handler or in `handleTogglePlay` being called instead of `handleSelectMode`.
 
-If the Narrate button calls `startNarration()` (which begins TTS), change it to call `handleSelectMode("narration")` instead. The `handleSelectMode` function (line 391) only sets `lastReadingMode` without starting playback.
+- [ ] **Step 2: Fix the actual auto-start trigger**
+
+Once the root cause is identified:
+- If button wiring is wrong: change to call `handleSelectMode("narration")`
+- If `handleSelectMode` auto-starts: remove the `startNarration()` call from within it
+- If a `useEffect` triggers it: guard the effect with a `readingMode === "page"` check
 
 In `ReaderContainer.tsx`, ensure the prop passed to `ReaderBottomBar` for the narrate button is `handleSelectMode("narration")`:
 
@@ -440,9 +445,12 @@ export function segmentWords(text: string): string[] {
 }
 
 /**
- * Count words in text using the same tokenization as segmentWords.
+ * Count words using Intl.Segmenter tokenization (same as segmentWords).
+ * NOTE: src/utils/text.ts already exports a countWords using whitespace splitting.
+ * After creating this file, update all foliate-related imports to use this version.
+ * Keep text.ts countWords for non-EPUB paths where Segmenter isn't needed.
  */
-export function countWords(text: string): number {
+export function countWordsSegmenter(text: string): number {
   let count = 0;
   for (const s of segmenter.segment(text)) {
     if (s.isWordLike) count++;
@@ -457,7 +465,7 @@ Create `tests/segmentWords.test.ts`:
 
 ```typescript
 import { describe, it, expect } from "vitest";
-import { segmentWords, countWords } from "../src/utils/segmentWords";
+import { segmentWords, countWordsSegmenter } from "../src/utils/segmentWords";
 
 describe("segmentWords", () => {
   it("splits simple sentence", () => {
@@ -482,7 +490,7 @@ describe("segmentWords", () => {
 
   it("countWords matches segmentWords length", () => {
     const text = "The quick brown fox jumps over the lazy dog.";
-    expect(countWords(text)).toBe(segmentWords(text).length);
+    expect(countWordsSegmenter(text)).toBe(segmentWords(text).length);
   });
 });
 ```
@@ -664,7 +672,7 @@ git commit -m "fix(S-10): re-extract words on section change, shared segmentWord
 In the click handler (around line 221-274), find where the text-node walker counts words to determine the clicked word's offset. Replace any `split(/\s+/)` usage with `segmentWords()`:
 
 ```typescript
-import { segmentWords, countWords } from "../utils/segmentWords";
+import { segmentWords, countWordsSegmenter } from "../utils/segmentWords";
 
 // In the click position mapping:
 // Walk text nodes in the section, counting words with segmentWords()
@@ -675,10 +683,10 @@ while ((node = walker.nextNode() as Text)) {
   if (node === clickedTextNode) {
     // Count words in this node up to the click offset
     const textBeforeClick = node.textContent!.slice(0, clickOffset);
-    wordOffset += countWords(textBeforeClick);
+    wordOffset += countWordsSegmenter(textBeforeClick);
     break;
   }
-  wordOffset += countWords(node.textContent || "");
+  wordOffset += countWordsSegmenter(node.textContent || "");
 }
 ```
 
@@ -1132,6 +1140,8 @@ git commit -m "fix(S-11): decouple narrate view from highlight on pause, add Ret
 
 - [ ] **Step 1: Add generation ID guard to useNarration**
 
+**NOTE:** `useNarration.ts` already has partial rate-change handling at lines 407-419 (`updateWpm`): it nulls `nextChunkBufferRef`, checks `kokoroInFlightRef`, and calls `speakNextChunk()`. Add the `generationIdRef` pattern alongside the existing `kokoroInFlightRef` guard — the generation ID handles stale IPC results returning after a rate change, while `kokoroInFlightRef` prevents overlapping requests. Both are needed.
+
 In `useNarration.ts`:
 
 ```typescript
@@ -1173,27 +1183,18 @@ if (genId !== generationIdRef.current) {
 }
 ```
 
-- [ ] **Step 3: Add CONFIRMED indicator to ReaderBottomBar**
+- [ ] **Step 3: Verify CONFIRMED indicator in ReaderBottomBar**
 
-In `ReaderBottomBar.tsx`, add a state for showing the indicator:
+**NOTE:** `ReaderBottomBar.tsx` already has a `rateStatus` state machine (lines 69-84) with "confirming" and "set" states and a `handleSetTtsRate` callback that shows a CONFIRMED/SET visual indicator. Verify this existing indicator:
+1. Triggers correctly on rate changes during active narration
+2. Is visible in the bottom bar UI (not hidden by CSS)
+3. Shows during both Kokoro and Web Speech rate changes
 
-```typescript
-const [showConfirmed, setShowConfirmed] = useState(false);
+If the indicator already works, skip to Step 5. If it's not rendering or not triggering during active narration, debug and fix the existing implementation rather than adding new state.
 
-const handleSetTtsRate = (newRate: number) => {
-  onSetTtsRate(newRate);
-  setShowConfirmed(true);
-  setTimeout(() => setShowConfirmed(false), 1000);
-};
-```
+- [ ] **Step 4: Add CONFIRMED styles (if needed)**
 
-In JSX, next to the rate slider:
-
-```tsx
-{showConfirmed && <span className="rate-confirmed">CONFIRMED</span>}
-```
-
-- [ ] **Step 4: Add CONFIRMED styles**
+Only add these styles if Step 3 finds the existing indicator lacks CSS:
 
 ```css
 .rate-confirmed {
