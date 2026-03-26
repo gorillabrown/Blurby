@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP } from "../constants";
+import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM } from "../constants";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -95,7 +95,7 @@ export default function ReaderBottomBar({
 
   // Time remaining — use TTS-derived WPM when narration is selected
   const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration");
-  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * 150) : wpm;
+  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
   const wordsRemaining = Math.max(0, words.length - wordIndex);
   const timeRemaining = formatTime(wordsRemaining, effectiveWpm);
 
