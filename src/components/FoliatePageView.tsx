@@ -63,6 +63,31 @@ function extractWordsFromView(view: any): FoliateWord[] {
   return words;
 }
 
+/** Extract words from a single section's document (for incremental updates during narration) */
+function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWord[] {
+  const words: FoliateWord[] = [];
+  if (!doc?.body) return words;
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node: Node) => {
+      const parent = node.parentElement;
+      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) {
+    const text = node.textContent || "";
+    for (const { segment, isWordLike, index: segIdx } of wordSegmenter.segment(text)) {
+      if (!isWordLike) continue;
+      const range = doc.createRange();
+      range.setStart(node, segIdx);
+      range.setEnd(node, segIdx + segment.length);
+      words.push({ word: segment, range, sectionIndex });
+    }
+  }
+  return words;
+}
+
 /**
  * Merge freshly extracted words with the existing word array.
  * - Words from loaded sections get fresh Ranges.
@@ -290,6 +315,8 @@ export default function FoliatePageView({
   onFlowWordAdvanceRef.current = onFlowWordAdvance;
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
+  const readingModeRef = useRef(readingMode);
+  readingModeRef.current = readingMode;
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -357,19 +384,34 @@ export default function FoliatePageView({
             }
           }
 
-          // Extract words fresh from ALL currently loaded sections
-          // Simple approach: no merge, no accumulation — just re-extract everything visible
+          // Extract words and wrap in spans
           const v2 = viewRef.current;
           if (v2) {
-            const freshWords = extractWordsFromView(v2);
-            foliateWordsRef.current = freshWords;
-            onWordsReextracted?.();
+            // During narration/flow, only wrap the new section without re-extracting everything
+            // (re-extraction shifts indices, breaking the narration's word array mapping)
+            const isActiveMode = readingModeRef.current === "narration" || readingModeRef.current === "flow";
 
-            // Wrap words in this newly loaded section with <span data-word-index="N">
-            // The global index offset is this section's position in the freshWords array
-            const sectionStart = freshWords.findIndex(w => w.sectionIndex === index);
-            if (sectionStart >= 0) {
+            if (isActiveMode && foliateWordsRef.current.length > 0) {
+              // Extract just this section's words and append/update in the existing array
+              const sectionWords = extractWordsFromSection(doc, index);
+              // Find the insertion point: after the last word of the previous section
+              const existingEnd = foliateWordsRef.current.length;
+              const sectionStart = existingEnd; // Append at end
+              // Wrap this section's words with indices continuing from existing
               wrapWordsInSpans(doc, index, sectionStart);
+              // Append to the word array
+              foliateWordsRef.current = [...foliateWordsRef.current, ...sectionWords.map(w => ({ ...w, sectionIndex: index }))];
+              onWordsReextracted?.();
+            } else {
+              // Full re-extraction (Page mode or first load)
+              const freshWords = extractWordsFromView(v2);
+              foliateWordsRef.current = freshWords;
+              onWordsReextracted?.();
+              // Wrap this section's words
+              const sectionStart = freshWords.findIndex(w => w.sectionIndex === index);
+              if (sectionStart >= 0) {
+                wrapWordsInSpans(doc, index, sectionStart);
+              }
             }
           }
 
