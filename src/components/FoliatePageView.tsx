@@ -557,22 +557,27 @@ export default function FoliatePageView({
         lastAdvance = now;
         onFlowWordAdvanceRef.current?.(currentIdx);
       }
-      // Find the word span by data-word-index in the foliate iframe
-      // (Ranges are stale after wrapWordsInSpans replaces text nodes)
-      const iframe = foliateIframeRef.current;
-      const iframeDoc = iframe?.contentDocument;
-      if (iframeDoc) {
-        const span = iframeDoc.querySelector(`[data-word-index="${currentIdx}"]`) as HTMLElement;
-        if (span) {
-          const spanRect = span.getBoundingClientRect();
-          const iframeRect = iframe!.getBoundingClientRect();
-          cursor.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top + spanRect.height}px, 0)`;
-          cursor.style.width = `${spanRect.width}px`;
-          cursor.style.display = "block";
-        } else {
-          cursor.style.display = "none";
-        }
+      // Find the word span by data-word-index across ALL loaded section iframes
+      const host = containerRef.current;
+      const iframes = host ? host.querySelectorAll("iframe") : [];
+      let found = false;
+      for (const iframe of iframes) {
+        try {
+          const iframeDoc = iframe.contentDocument;
+          if (!iframeDoc) continue;
+          const span = iframeDoc.querySelector(`[data-word-index="${currentIdx}"]`) as HTMLElement;
+          if (span) {
+            const spanRect = span.getBoundingClientRect();
+            const iframeRect = iframe.getBoundingClientRect();
+            cursor.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top + spanRect.height}px, 0)`;
+            cursor.style.width = `${spanRect.width}px`;
+            cursor.style.display = "block";
+            found = true;
+            break;
+          }
+        } catch { /* cross-origin */ }
       }
+      if (!found) cursor.style.display = "none";
       flowRafRef.current = requestAnimationFrame(tick);
     };
     flowRafRef.current = requestAnimationFrame(tick);
@@ -590,27 +595,28 @@ export default function FoliatePageView({
       return;
     }
 
-    // Find the word span by data-word-index in the foliate iframe
-    // (Ranges are stale after wrapWordsInSpans replaces text nodes)
-    const iframe = foliateIframeRef.current;
-    const iframeDoc = iframe?.contentDocument;
-    if (!iframeDoc) {
-      highlight.style.display = "none";
-      return;
+    // Find the word span across ALL loaded section iframes
+    const host = containerRef.current;
+    const iframes = host ? host.querySelectorAll("iframe") : [];
+    let found = false;
+    for (const iframe of iframes) {
+      try {
+        const iframeDoc = iframe.contentDocument;
+        if (!iframeDoc) continue;
+        const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`) as HTMLElement;
+        if (span) {
+          const spanRect = span.getBoundingClientRect();
+          const iframeRect = iframe.getBoundingClientRect();
+          highlight.style.display = "block";
+          highlight.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top}px, 0)`;
+          highlight.style.width = `${spanRect.width}px`;
+          highlight.style.height = `${spanRect.height}px`;
+          found = true;
+          break;
+        }
+      } catch { /* cross-origin */ }
     }
-    const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`) as HTMLElement;
-    if (!span) {
-      highlight.style.display = "none";
-      return;
-    }
-
-    const pos = getOverlayPosition(word.range, container, foliateIframeRef.current);
-    if (pos) {
-      highlight.style.display = "block";
-      highlight.style.transform = `translate3d(${pos.left}px, ${pos.top}px, 0)`;
-      highlight.style.width = `${pos.width}px`;
-      highlight.style.height = `${pos.height}px`;
-    } else {
+    if (!found) {
       highlight.style.display = "none";
     }
   }, [narrationWordIndex]);
