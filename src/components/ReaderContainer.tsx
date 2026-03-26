@@ -332,25 +332,33 @@ export default function ReaderContainer({
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
       // Directly toggle highlight class on word spans in foliate iframes
-      // (bypasses React render cycle for immediate visual feedback)
       if (useFoliate) {
-        // Clear previous highlight
         prevHighlightSpan?.classList.remove("page-word--highlighted");
         prevHighlightSpan = null;
-        // Find and highlight current word across all iframes
         const host = document.querySelector(".foliate-page-view");
         if (host) {
           const iframes = host.querySelectorAll("iframe");
+          let found = false;
           for (const iframe of iframes) {
             try {
-              const span = iframe.contentDocument?.querySelector(`[data-word-index="${idx}"]`);
+              const iframeDoc = iframe.contentDocument;
+              if (!iframeDoc) continue;
+              const span = iframeDoc.querySelector(`[data-word-index="${idx}"]`);
               if (span) {
                 span.classList.add("page-word--highlighted");
                 prevHighlightSpan = span;
+                found = true;
                 break;
               }
-            } catch { /* cross-origin */ }
+            } catch (e) {
+              console.log(`[Narrate] iframe access error:`, e);
+            }
           }
+          if (!found && idx % 20 === 0) {
+            console.log(`[Narrate] Word ${idx} NOT found in ${iframes.length} iframes`);
+          }
+        } else {
+          if (idx % 20 === 0) console.log("[Narrate] .foliate-page-view not found in DOM");
         }
       }
     });
