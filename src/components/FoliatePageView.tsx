@@ -330,6 +330,8 @@ export interface FoliateViewAPI {
   highlightWordByIndex: (wordIndex: number) => void;
   clearHighlight: () => void;
   getView: () => any;
+  /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
+  findFirstVisibleWordIndex: () => number;
 }
 
 export default function FoliatePageView({
@@ -638,6 +640,27 @@ export default function FoliatePageView({
               }
             },
             getView: () => view,
+            findFirstVisibleWordIndex: () => {
+              // Walk all loaded sections to find the first word span that's visible
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d } of contents) {
+                try {
+                  const spans = d.querySelectorAll("[data-word-index]");
+                  for (const span of spans) {
+                    const rect = (span as HTMLElement).getBoundingClientRect();
+                    const iframeWin = d.defaultView;
+                    if (!iframeWin) continue;
+                    // Check if the span is within the visible viewport of the iframe
+                    if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
+                        rect.top >= 0 && rect.top < iframeWin.innerHeight) {
+                      const idx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
+                      if (idx >= 0) return idx;
+                    }
+                  }
+                } catch { /* safe to ignore */ }
+              }
+              return -1; // No visible words (e.g., cover page with only images)
+            },
           };
         }
 

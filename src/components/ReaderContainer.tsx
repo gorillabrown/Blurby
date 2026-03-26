@@ -332,14 +332,30 @@ export default function ReaderContainer({
       : tokenized.paragraphBreaks;
     narration.setRhythmPauses(settings.rhythmPauses || null, paragraphBreaks);
     // Get words from foliate DOM (EPUB) or extracted text (other formats)
-    const effectiveWords = getEffectiveWords();
+    let effectiveWords = getEffectiveWords();
+    // For EPUB: if no words on current page (cover/image page), advance to next section
+    if (useFoliate && effectiveWords.length === 0 && foliateApiRef.current) {
+      foliateApiRef.current.next();
+      // Wait for section to load, re-extract
+      setTimeout(() => {
+        extractFoliateWords();
+        const words = getEffectiveWords();
+        if (words.length > 0) {
+          startNarration(); // Retry now that we have words
+        }
+      }, 500);
+      return;
+    }
     // For non-EPUB: highlightedWordIndex maps directly to the words array
-    // For EPUB: effectiveWords only contains loaded sections, so highlightedWordIndex
-    // (a global index) may exceed the array. Clamp to valid range — narration will
-    // advance through the loaded words and trigger page turns for more content.
+    // For EPUB: use findFirstVisibleWordIndex for accurate start position
     let startIdx = highlightedWordIndex;
-    if (useFoliate && startIdx >= effectiveWords.length) {
-      startIdx = 0; // Start from beginning of loaded content
+    if (useFoliate) {
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+      if (firstVisible >= 0) {
+        startIdx = firstVisible;
+      } else if (startIdx >= effectiveWords.length) {
+        startIdx = 0;
+      }
     }
     // Set the TTS rate BEFORE starting — adjustRate() after start would increment
     // the generation ID, poisoning the in-flight Kokoro IPC call.
@@ -853,8 +869,16 @@ export default function ReaderContainer({
           const mode = readingModeRef.current;
           if (mode !== "narration" && mode !== "flow") {
             extractFoliateWords();
+            // After extraction, sync highlightedWordIndex to the first visible word
+            // so pressing Space starts from the correct position (not stale approx index)
+            if (foliateApiRef.current) {
+              const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
+              if (firstVisible >= 0) {
+                setHighlightedWordIndex(firstVisible);
+              }
+            }
           }
-        }, 100);
+        }, 200); // Slightly longer delay to ensure foliate has finished rendering
       }}
       viewApiRef={foliateApiRef}
       isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
