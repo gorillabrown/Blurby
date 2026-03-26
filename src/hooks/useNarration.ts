@@ -80,6 +80,7 @@ export default function useNarration() {
   const kokoroInFlightRef = useRef(false);
   const nextChunkBufferRef = useRef<{ audio: number[]; sampleRate: number; durationMs: number; text: string; endIdx: number } | null>(null);
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const generationIdRef = useRef(0);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
   const paragraphBreaksRef = useRef<Set<number>>(new Set());
   const chunkPauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -181,9 +182,11 @@ export default function useNarration() {
     // Pre-buffer ignores page boundary — looks ahead past current page for seamless page turns
     const nextEnd = findSentenceBoundary(words, afterEndIdx, TTS_CHUNK_SIZE, null);
     const text = words.slice(afterEndIdx, nextEnd).join(" ");
+    const genId = generationIdRef.current;
     try {
       const result = await api.kokoroGenerate(text, kokoroVoiceRef.current, speedRef.current);
-      if (!result.error && isCursorDrivenRef.current) {
+      // Discard pre-buffer result if rate changed during generation
+      if (!result.error && isCursorDrivenRef.current && genId === generationIdRef.current) {
         nextChunkBufferRef.current = { audio: result.audio, sampleRate: result.sampleRate, durationMs: result.durationMs, text, endIdx: nextEnd };
       }
     } catch { /* pre-buffer failed, will generate on-demand */ }
@@ -212,6 +215,7 @@ export default function useNarration() {
     chunkWordsRef.current = chunkWords;
 
     kokoroInFlightRef.current = true;
+    const genId = generationIdRef.current;
     try {
       // Check pre-buffer first (item 14)
       let result;
@@ -230,6 +234,11 @@ export default function useNarration() {
         return;
       }
       if (!isCursorDrivenRef.current) return;
+      // Discard stale IPC result if rate changed during generation — re-generate at new rate
+      if (genId !== generationIdRef.current) {
+        speakNextChunk();
+        return;
+      }
 
       // Start pre-buffering next chunk while this one plays
       preBufferNextKokoro(endIdx);
@@ -408,14 +417,22 @@ export default function useNarration() {
     const newRate = wpmToRate(wpm);
     speedRef.current = newRate;
     setRate(newRate);
-    // Invalidate pre-buffer (speed changed)
+    // Invalidate pre-buffer and increment generation ID to discard any in-flight IPC results
     nextChunkBufferRef.current = null;
-    if (isCursorDrivenRef.current && !kokoroInFlightRef.current) {
-      window.speechSynthesis?.cancel();
-      audioPlayer.stop();
-      speakNextChunk();
+    generationIdRef.current++;
+    if (isCursorDrivenRef.current) {
+      if (engineRef.current === "web") {
+        // Web Speech: cancel current utterance — new chunk will use updated rate immediately
+        window.speechSynthesis?.cancel();
+        speakNextChunk();
+      } else if (!kokoroInFlightRef.current) {
+        // Kokoro: no in-flight request — restart immediately at new rate
+        audioPlayer.stop();
+        speakNextChunk();
+      }
+      // Kokoro in-flight: generation ID increment above ensures the result is discarded
+      // and speakNextChunk() is called with the new rate from within speakNextChunkKokoro
     }
-    // If Kokoro is in-flight, the new speed will take effect on the next chunk
   }, [speakNextChunk]);
 
   const pause = useCallback(() => {
@@ -463,13 +480,25 @@ export default function useNarration() {
     const clamped = Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate));
     speedRef.current = clamped;
     setRate(clamped);
-    // Debounce pre-buffer invalidation (500ms) so rapid adjustments settle
+    // Invalidate pre-buffer immediately and increment generation ID to discard stale IPC results
+    nextChunkBufferRef.current = null;
+    generationIdRef.current++;
+    // Debounce the restart so rapid slider adjustments settle before triggering re-generation
     if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
     rateDebounceRef.current = setTimeout(() => {
-      nextChunkBufferRef.current = null;
       rateDebounceRef.current = null;
+      if (isCursorDrivenRef.current) {
+        if (engineRef.current === "web") {
+          window.speechSynthesis?.cancel();
+          speakNextChunk();
+        } else if (!kokoroInFlightRef.current) {
+          audioPlayer.stop();
+          speakNextChunk();
+        }
+        // Kokoro in-flight: generation ID increment ensures stale result is discarded on arrival
+      }
     }, 500);
-  }, []);
+  }, [speakNextChunk]);
 
   // Cleanup on unmount
   useEffect(() => {
