@@ -266,11 +266,11 @@ export default function useNarration() {
               const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
               const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
               if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
-                pauseMs = 750;
+                pauseMs = 1500;
               } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
-                pauseMs = 400;
+                pauseMs = 800;
               } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
-                pauseMs = 250;
+                pauseMs = 500;
               }
             }
             if (pauseMs > 0) {
