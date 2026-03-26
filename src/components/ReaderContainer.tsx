@@ -324,6 +324,9 @@ export default function ReaderContainer({
     if (useFoliate && startIdx >= effectiveWords.length) {
       startIdx = 0; // Start from beginning of loaded content
     }
+    // Set the TTS rate BEFORE starting — adjustRate() after start would increment
+    // the generation ID, poisoning the in-flight Kokoro IPC call.
+    if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
     // Start cursor-driven TTS
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
@@ -334,8 +337,6 @@ export default function ReaderContainer({
         } catch { /* range may be stale after page navigation */ }
       }
     });
-    // Override the WPM-derived rate with the user's explicit ttsRate setting
-    if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
   }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);
 
   const handleExitReader = useCallback(() => {
