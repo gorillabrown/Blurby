@@ -460,3 +460,47 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 **Fix:** Remove `-webkit-app-region: drag` from `body` entirely. Apply `drag` ONLY to the specific title bar element (e.g., `.library-titlebar`) that should be draggable. If you need drag behavior on a narrow area, use a dedicated wrapper element — never the body or any high-level container.
 
 **Rule:** PR-29: Never apply `-webkit-app-region: drag` to `body` or any high-level container. Apply it only to the specific title bar element. The `no-drag` countermeasure on interactive elements is insufficient because intermediate elements with padding still inherit drag and absorb clicks.
+
+---
+
+## Sprint 25S Stabilization Discoveries
+
+### [2026-03-26] LL-027: Foliate EPUB DOM Is Not Your DOM — Use Overlays
+
+**Area:** EPUB rendering, foliate-js, React integration
+**Status:** active
+**Priority:** high
+
+**Context:** Three independent bugs (Flow cursor invisible, Focus mode offset, narration highlight stuck) all had the same root cause: trying to manipulate or query DOM elements inside foliate's rendering context. Foliate uses shadow DOM / iframes and re-renders sections on navigation, destroying any injected elements. The `<mark>` injection approach for narration highlights broke on every page turn.
+
+**Root Cause:** Foliate's DOM lifecycle is opaque and uncontrollable from React. Any DOM injection (`surroundContents`, attribute injection, element insertion) is temporary and gets wiped on section changes. `getBoundingClientRect()` on Ranges inside foliate may require coordinate transforms depending on whether the content is in shadow DOM vs iframe.
+
+**Fix:** All EPUB visual feedback (cursors, highlights, word overlays) must use absolutely-positioned overlay divs above the foliate container, positioned via `Range.getBoundingClientRect()` from extracted word Ranges. Never inject into foliate's DOM. Extract a shared `getOverlayPosition(range, containerEl)` utility that handles both shadow DOM (viewport-relative coords, no offset) and iframe (needs `iframe.getBoundingClientRect()` offset) cases.
+
+**Rule:** PR-30: Never inject DOM elements into foliate's rendered content. Use positioned overlay divs above the foliate container. All visual feedback for EPUBs uses the overlay pattern: extract Range → `getBoundingClientRect()` → position overlay div via `translate3d()`.
+
+### [2026-03-26] LL-028: Word Tokenization Must Be Unified Across All Paths
+
+**Area:** Text processing, EPUB word extraction, click handling
+**Status:** active
+**Priority:** high
+
+**Context:** Word click position mapping in EPUBs was broken because two code paths counted words differently. The word extractor used `Intl.Segmenter` (Unicode-aware, handles contractions and punctuation-attached words correctly), while the click handler's text-node walker used `split(/\s+/)` (loses count on edge cases). A click on "the" in paragraph 5 mapped to "the" in paragraph 1.
+
+**Root Cause:** When multiple code paths need to agree on word positions, they must use identical tokenization. Different splitting strategies produce different counts for the same text, especially with punctuation, contractions ("don't"), hyphenated words, and Unicode.
+
+**Fix:** Extract a shared `segmentWords(text)` utility using `Intl.Segmenter` with `granularity: "word"` and `isWordLike` filtering. Use it in both word extraction and click position mapping.
+
+**Rule:** PR-31: All word-counting and word-splitting code must use the same tokenization function. If two paths produce `(sectionIndex, wordOffset)` tuples, they must agree on what a "word" is. Prefer `Intl.Segmenter` over regex splitting for Unicode correctness.
+
+### [2026-03-26] LL-029: Stale Ranges Are Silent Killers — Guard Every Access
+
+**Area:** DOM, EPUB, Range API
+**Status:** active
+**Priority:** high
+
+**Context:** Foliate unloads DOM nodes when navigating between sections. Any stored Range objects pointing to those nodes become "detached" — they still exist as JavaScript objects but their `startContainer` and `endContainer` are no longer in the document. Calling `getBoundingClientRect()` on a detached Range returns zeroes. Calling `surroundContents()` throws. These failures are silent (no exceptions for getBoundingClientRect) or inconsistent, making them hard to debug.
+
+**Fix:** Before any Range operation, check `range.startContainer.isConnected`. If false, skip the operation and wait for re-extraction. The word array must preserve word strings even when Ranges are nulled (so Focus mode can still display words as text), and re-populate Ranges when sections are loaded again.
+
+**Rule:** PR-32: Always guard Range access with `range.startContainer.isConnected` before any DOM operation. Treat Ranges as ephemeral cache — the word strings are the source of truth, Ranges are just a rendering convenience that must be re-extracted on section changes.

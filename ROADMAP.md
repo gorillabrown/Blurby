@@ -2640,6 +2640,51 @@ interface BlurbyDoc {
 
 ---
 
+## Sprint 25S: Stabilization Sprint
+
+**Goal:** Fix 13 critical bugs to achieve a fully stable reader across all four modes (Page, Focus, Flow, Narration) for both EPUB and non-EPUB formats. Two previously-fixed bugs (S-13, S-15) verified only.
+
+**Prerequisite:** Sprint 22 complete.
+**Branch:** `sprint/25s-stabilization`
+
+**Design spec:** `docs/superpowers/specs/2026-03-26-stabilization-sprint-design.md`
+**Implementation plan:** `docs/superpowers/plans/2026-03-26-stabilization-sprint.md`
+
+### Phase 1: Critical Blockers (serial)
+- [ ] **S-01** — Kokoro AI button unclickable (CSS `-webkit-app-region: no-drag` on `.settings-mode-toggle`)
+- [ ] **S-02** — Auto-updater latest.yml missing x64 (fix sed merge in release.yml + verification step)
+- [ ] **S-03** — EPUB starts on page ~3 (guard initial CFI, `goToFraction(0)` fallback)
+- [ ] **S-04** — False progress on open (page-based progress floor + high-water mark backtrack prompt)
+- [ ] **S-05** — Narrate auto-starts on click (button calls `handleSelectMode`, not `startNarration`)
+
+### Phase 2: Mode Integrity (parallel tracks)
+
+**Track A: Foliate DOM (serial, S-10 first)**
+- [ ] **S-10** — Stale Range objects (re-extract on section change, full-doc word array, Range nulling)
+- [ ] **S-09** — Word click wrong position (unify tokenization via shared `segmentWords` using `Intl.Segmenter`)
+- [ ] **S-06** — Flow invisible on EPUBs (Range-based overlay cursor via `getOverlayPosition`)
+- [ ] **S-07** — Focus not centered (full-viewport overlay, not inside foliate)
+- [ ] **S-08** — Narrate highlight doesn't advance (overlay highlight div, remove `<mark>` injection)
+
+**Track B: Narration UX (parallel with Track A)**
+- [ ] **S-11** — Page browsing yanks back (decouple on pause + "Return to reading" pill + Enter shortcut)
+- [ ] **S-12** — Speed changes delayed (generation ID guard for Kokoro, pre-buffer invalidation)
+- [ ] **S-14** — Time-to-complete ignores mode (use `ttsRate * TTS_RATE_BASELINE_WPM` for narration)
+
+### Verified (no implementation — confirm in Phase 4)
+- [x] **S-13** — TTS rate slider synced between bottom bar and flap (fixed prior session)
+- [x] **S-15** — Kokoro page-turn pause (fixed prior session, pre-buffer crosses pages, rhythm pauses tuned)
+
+### Acceptance Criteria
+- [ ] `npm test` passes (512+ tests)
+- [ ] `npm run build` succeeds
+- [ ] V-01 through V-15 manual verification matrix passes
+- [ ] I-01 through I-06 integration tests pass
+- [ ] No console errors during EPUB reading across 3+ sections
+- [ ] All four modes work identically for EPUB and non-EPUB content
+
+---
+
 ## Sprint 23: V1 Hardening
 
 **Goal:** Everything that stands between the current app and a confident v1.0.0 release. First-run experience, error recovery, constants extraction, accessibility audit on new components, performance baselines, and the manual auto-update E2E verification.
@@ -3000,41 +3045,38 @@ interface BlurbyDoc {
 ## Updated Execution Order
 
 ```
-Sprints 1-21 ──────────────────────────────────── COMPLETED
+Sprints 1-22 + 18B ────────────────────────────── COMPLETED
     │
     │   Core app: reading engine, library, sync, keyboard UX,
-    │   accessibility, security, e-ink, cloud sync, installer
+    │   accessibility, security, e-ink, cloud sync, installer,
+    │   Chrome extension, reading animation, TTS sync
     │
-    ├──────────────────────────────────────────────┐
-    │                                              │
-    ▼                                              ▼
-Sprint 18B:                                Sprint 22:
-Chrome Extension                           Reading Animation
-"Send to Blurby"                          + TTS Sync
-(IN PROGRESS)                             (NEXT UP)
-    │                                              │
-    │                                              ▼
-    │                                       Sprint 23:
-    │                                       V1 Hardening
-    │                                       (onboarding, errors,
-    │                                        constants, a11y, perf)
-    │                                              │
-    │                                              ▼
-    │                                       Sprint 24:
-    │                                       External Audit
-    │                                       (quality gate)
-    │                                              │
-    └──────────────────┬───────────────────────────┘
-                       │
-                       ▼
-                v1.0.0 RELEASE ──────────────────── GATE
-                       │
-                       ├──────────────────────────────────┐
-                       ▼                                  ▼
-                Sprint 25:                         Sprint 18C:
-                RSS Library +                      Android APK
-                Paywall Integration                (React Native)
-                (POST-V1)                          (POST-V1)
+    ▼
+Sprint 25S:                                ◄── CURRENT
+Stabilization Sprint
+(13 bug fixes: reader modes,
+ EPUB, progress, narration)
+    │
+    ▼
+Sprint 23:
+V1 Hardening
+(onboarding, errors,
+ constants, a11y, perf)
+    │
+    ▼
+Sprint 24:
+External Audit
+(quality gate)
+    │
+    ▼
+v1.0.0 RELEASE ──────────────────── GATE
+    │
+    ├──────────────────────────────────┐
+    ▼                                  ▼
+Sprint 25:                         Sprint 18C:
+RSS Library +                      Android APK
+Paywall Integration                (React Native)
+(POST-V1)                          (POST-V1)
 ```
 
 ---

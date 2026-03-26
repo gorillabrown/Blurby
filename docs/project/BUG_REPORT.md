@@ -2,7 +2,7 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-03-25
+**Last updated:** 2026-03-26
 
 ---
 
@@ -196,9 +196,65 @@ This makes the time estimate meaningful regardless of which mode is selected.
 ### BUG-081: Auto-updater latest.yml only contains ARM64 architecture
 **Reported:** 2026-03-26
 **Severity:** Critical (x64 users never get updates)
-**Sprint:** 26-STABLE (Stabilization)
+**Sprint:** 25S-STABLE (Stabilization)
 **Location:** `.github/workflows/release.yml`
 **Description:** The release workflow builds x64 and ARM64 as separate jobs. The ARM64 job runs last and overwrites `latest.yml` with only its own entry. x64 users' auto-updater finds no matching installer and reports "You're up to date" even when a new version exists. Fix: merge both architectures into a single `latest.yml` with both `files:` entries.
+
+### BUG-082: EPUB starts on page ~3 instead of cover
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** When opening a new EPUB (no saved position), foliate's initial CFI navigation skips cover/TOC pages and lands on the first text content section. The user sees page ~3 instead of the cover. First open should land on page 0 (cover). Only subsequent opens should restore saved CFI.
+
+### BUG-083: Opening a book falsely marks it as "started" with >0% progress
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/ReaderContainer.tsx`, `src/types.ts`
+**Description:** EPUB word extraction starts at the first real text word (past cover images), giving a non-zero word index. The progress bar shows >0% immediately on open without any reading. Fix: page-based progress (page 0 = 0% regardless of word index) + high-water mark backtrack prompt when closing far behind furthest-read position.
+
+### BUG-084: Flow mode invisible on EPUBs (no underline cursor)
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/FoliatePageView.tsx`, `src/utils/FlowCursorController.ts`
+**Description:** FlowCursorController looks for `[data-word-index]` DOM elements. Foliate renders EPUB content in shadow DOM — these elements don't exist. Cursor never appears. Fix: Range-based overlay cursor positioned via `getBoundingClientRect()` on extracted word Ranges.
+
+### BUG-085: Focus mode not centered in foliate overlay for EPUBs
+**Reported:** 2026-03-26
+**Severity:** Medium
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+**Description:** When Focus mode (RSVP) activates on an EPUB, the word display appears offset from center because it's positioned relative to foliate's container. Fix: Focus overlay sits at reader viewport level (full-viewport centered div on top of foliate).
+
+### BUG-086: Narration highlight doesn't advance in foliate DOM for EPUBs
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** During narration on EPUBs, the word highlight stays on the first word or disappears after page turn. The `<mark>` injection approach breaks when foliate re-renders sections. Fix: overlay-based highlight div positioned via Range bounding rects, consistent with Flow cursor approach.
+
+### BUG-087: Word click maps to wrong position in EPUB
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/FoliatePageView.tsx`
+**Description:** Clicking a common word like "the" in EPUB highlights the first occurrence instead of the clicked one. Root cause: click handler's text-node walker uses `split(/\s+/)` while word extractor uses `Intl.Segmenter`, producing different word counts. Fix: unify both to shared `segmentWords()` utility using `Intl.Segmenter`.
+
+### BUG-088: Stale Range objects after foliate page navigation
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/FoliatePageView.tsx`
+**Description:** Words extracted from section N hold DOM Range references. When foliate navigates to section M, those nodes are unloaded and any Range operation throws or returns garbage. Fix: re-extract words on section change, maintain full-document word array with Range nulling for unloaded sections.
+
+### BUG-089: Time-to-complete always shows WPM estimate regardless of active mode
+**Reported:** 2026-03-26
+**Severity:** Medium
+**Sprint:** 25S-STABLE (Stabilization)
+**Location:** `src/components/ReaderBottomBar.tsx`
+**Description:** Duplicate of BUG-072 with refined spec. Time remaining should use `ttsRate * TTS_RATE_BASELINE_WPM` when narration is active, WPM for all other modes. Both chapter and document time displays must use the mode-aware calculation.
 
 ---
 
