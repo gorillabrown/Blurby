@@ -257,20 +257,17 @@ export default function useNarration() {
           cursorWordIndexRef.current = endIdx;
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
           if (isCursorDrivenRef.current && !holdRef.current) {
-            // Rhythm pause: always pause at sentence/paragraph/clause boundaries
-            // With one-sentence-per-chunk, every chunk boundary is a sentence boundary
+            // Rhythm pause at chunk boundaries: only add silence if pre-buffer is ready.
+            // If not ready, generation time IS the natural pause — don't stack delays.
+            const hasPreBuffer = nextChunkBufferRef.current !== null;
             let pauseMs = 0;
-            if (rhythmPausesRef.current) {
+            if (hasPreBuffer && rhythmPausesRef.current) {
               const lastWord = chunkWords[chunkWords.length - 1] || "";
               const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
               const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
-              if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
-                pauseMs = 1500;
-              } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
-                pauseMs = 800;
-              } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
-                pauseMs = 500;
-              }
+              // Use calculatePauseMs with TTS-tuned base duration (250ms)
+              // Kokoro handles within-chunk prosody; we only add between-chunk gaps
+              pauseMs = calculatePauseMs(lastWord, rhythmPausesRef.current, 250, isParagraphEnd);
             }
             if (pauseMs > 0) {
               chunkPauseTimerRef.current = setTimeout(() => {
