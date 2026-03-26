@@ -646,6 +646,13 @@ export default function FoliatePageView({
       }
     };
 
+    // Guard against React Strict Mode double-mount: if a view is already loaded
+    // for this book, skip the second initialization entirely
+    if (viewRef.current && !cancelled) {
+      console.log("[Foliate] Skipping double-mount — view already exists");
+      return () => { cancelled = true; };
+    }
+
     loadBook();
 
     return () => {
