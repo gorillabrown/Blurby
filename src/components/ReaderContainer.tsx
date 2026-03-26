@@ -839,7 +839,7 @@ export default function ReaderContainer({
         return (
           <>
             {foliateView}
-            <div style={{ position: "absolute", inset: 0, zIndex: 15, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+            <div className="focus-overlay">
               <ReaderView
                 activeDoc={activeDoc}
                 words={wordsRef.current}
