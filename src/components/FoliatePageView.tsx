@@ -608,14 +608,24 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
               // Apply highlight to target word
+              let found = false;
               for (const { doc: d } of contents) {
                 try {
                   const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`);
                   if (span) {
                     span.classList.add("page-word--highlighted");
+                    // Scroll into view if needed (word might be below fold on same page)
+                    span.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+                    found = true;
                     break;
                   }
                 } catch { /* */ }
+              }
+              // Word not found in any loaded section — advance to next page
+              // The word is on the next page/section; foliate will fire onSectionLoad
+              // which re-extracts and re-wraps words, making the span available
+              if (!found) {
+                view.renderer.next();
               }
             },
             clearHighlight: () => {

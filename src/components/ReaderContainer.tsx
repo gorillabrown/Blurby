@@ -781,9 +781,13 @@ export default function ReaderContainer({
         if (detail.cfi) {
           const fraction = detail.fraction || 0;
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
-          // Always update display position (for progress bar)
+          // Update CFI for position restoration
           activeDoc.cfi = detail.cfi;
-          setHighlightedWordIndex(approxWordIdx);
+          // During narration, the word-advance callback owns highlightedWordIndex —
+          // don't overwrite with approximate fraction-based index from onRelocate
+          if (readingMode !== "narration") {
+            setHighlightedWordIndex(approxWordIdx);
+          }
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
           if (!hasEngagedRef.current && readingMode === "page") return;
           // Debounced save of CFI for resume on reopen
