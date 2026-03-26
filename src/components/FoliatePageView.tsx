@@ -330,10 +330,17 @@ export default function FoliatePageView({
           onTocReady?.(view.book.toc);
         }
 
-        // Navigate to last position or start from the very beginning (cover page)
-        await view.init({
-          lastLocation: initialCfi || null,
-        });
+        // Navigate to last position or start from the very beginning (cover page).
+        // Only pass lastLocation when a real CFI exists — passing null causes foliate
+        // to skip the cover and land on the first text section (~page 3).
+        const initOptions = initialCfi ? { lastLocation: initialCfi } : {};
+        await view.init(initOptions);
+
+        // If no saved position, force the cover page explicitly.
+        // foliate's default start point may be the first text section, not section 0.
+        if (!initialCfi) {
+          await view.goToFraction(0);
+        }
 
         // Populate imperative API ref
         if (viewApiRef) {
