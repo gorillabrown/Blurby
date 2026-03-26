@@ -612,18 +612,20 @@ export default function FoliatePageView({
                   const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                   if (span) {
                     span.classList.add("page-word--highlighted");
-                    // Check if span is visible on current foliate "page"
-                    // (CSS columns: span in DOM but may be in off-screen column)
                     const rect = span.getBoundingClientRect();
-                    if (rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= (d.defaultView?.innerWidth ?? 9999) + 10) {
-                      found = true;
+                    const iw = d.defaultView?.innerWidth ?? 9999;
+                    const visible = rect.width > 0 && rect.height > 0 && rect.left >= -10 && rect.right <= iw + 10;
+                    if (visible) found = true;
+                    // Log every 20th word to trace visibility
+                    if (wordIndex % 20 === 0) {
+                      console.log(`[PageTurn] word=${wordIndex} rect.left=${rect.left.toFixed(0)} rect.right=${rect.right.toFixed(0)} innerWidth=${iw} visible=${visible} found=${found}`);
                     }
                     break;
                   }
                 } catch { /* */ }
               }
-              // Word not visible (off-screen column) or not in loaded section — turn page
               if (!found) {
+                console.log(`[PageTurn] word=${wordIndex} NOT visible — calling next()`);
                 view.renderer.next();
               }
             },
