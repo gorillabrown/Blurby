@@ -11,7 +11,7 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
-import { segmentWords, countWordsSegmenter } from "../utils/segmentWords";
+import { segmentWords } from "../utils/segmentWords";
 import { getOverlayPosition } from "../utils/getOverlayPosition";
 
 const api = (window as any).electronAPI;
@@ -152,6 +152,67 @@ function mergeWords(existing: FoliateWord[], fresh: FoliateWord[], loadedSection
   return result;
 }
 
+/** Walk the EPUB section DOM and wrap each word in a <span class="page-word" data-word-index="N">.
+ *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
+ *  Returns the next available global index. */
+function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): number {
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node: Node) => {
+      const parent = node.parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      const tag = parent.tagName?.toUpperCase();
+      if (tag === "SCRIPT" || tag === "STYLE") return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+
+  let globalIndex = globalOffset;
+  const textNodes: Text[] = [];
+  let tn: Text | null;
+  while ((tn = walker.nextNode() as Text | null)) {
+    textNodes.push(tn);
+  }
+
+  for (const textNode of textNodes) {
+    const text = textNode.textContent || "";
+    const words = segmentWords(text);
+    if (words.length === 0) continue;
+
+    const parent = textNode.parentNode;
+    if (!parent) continue;
+
+    // Build a document fragment with word spans + whitespace preserved
+    const frag = doc.createDocumentFragment();
+    let remaining = text;
+
+    for (const word of words) {
+      const wordStart = remaining.indexOf(word);
+      if (wordStart > 0) {
+        // Preserve whitespace/punctuation before the word
+        frag.appendChild(doc.createTextNode(remaining.slice(0, wordStart)));
+      }
+
+      const span = doc.createElement("span");
+      span.className = "page-word";
+      span.setAttribute("data-word-index", String(globalIndex));
+      span.textContent = word;
+      frag.appendChild(span);
+
+      remaining = remaining.slice(wordStart + word.length);
+      globalIndex++;
+    }
+
+    // Append any trailing whitespace/punctuation
+    if (remaining) {
+      frag.appendChild(doc.createTextNode(remaining));
+    }
+
+    parent.replaceChild(frag, textNode);
+  }
+
+  return globalIndex;
+}
+
 interface FoliatePageViewProps {
   activeDoc: BlurbyDoc & { content?: string };
   settings: BlurbySettings;
@@ -191,75 +252,6 @@ export interface FoliateViewAPI {
   highlightWord: (range: Range | null, sectionIndex: number) => void;
   clearHighlight: () => void;
   getView: () => any;
-}
-
-/** Expand a caret position to the full word boundary, return the word text and Range. */
-function getWordAtPoint(doc: Document, x: number, y: number): { word: string; range: Range } | null {
-  try {
-    // Try caretRangeFromPoint first (works in standard HTML)
-    const caretRange = (doc as any).caretRangeFromPoint?.(x, y);
-    let node: Node | null = null;
-    let offset = 0;
-
-    if (caretRange) {
-      if (caretRange instanceof Range) {
-        node = caretRange.startContainer;
-        offset = caretRange.startOffset;
-      } else if (caretRange.offsetNode) {
-        node = caretRange.offsetNode;
-        offset = caretRange.offset;
-      }
-    }
-
-    // If we got an element node (common in XHTML/epub iframes), walk into its text children
-    if (node && node.nodeType === Node.ELEMENT_NODE) {
-      // Find the text node child closest to the click point
-      const walker = doc.createTreeWalker(node, NodeFilter.SHOW_TEXT);
-      let best: Text | null = null;
-      let textNode: Text | null;
-      while ((textNode = walker.nextNode() as Text | null)) {
-        if (textNode.textContent && textNode.textContent.trim()) {
-          best = textNode;
-          break; // Take the first text node (good enough for word detection)
-        }
-      }
-      if (best) {
-        node = best;
-        // Estimate offset within the text node based on click x position
-        const range = doc.createRange();
-        range.selectNodeContents(best);
-        const rects = range.getClientRects();
-        if (rects.length > 0) {
-          // Simple approach: proportion of x within the text's bounding rect
-          const rect = rects[0];
-          const textLen = best.textContent?.length || 1;
-          offset = Math.max(0, Math.min(textLen, Math.round((x - rect.left) / rect.width * textLen)));
-        } else {
-          offset = 0;
-        }
-      }
-    }
-
-    if (!node || node.nodeType !== Node.TEXT_NODE) return null;
-    const text = node.textContent || "";
-    if (offset > text.length) offset = text.length;
-
-    // Find word boundaries around the offset
-    let start = offset;
-    let end = offset;
-    while (start > 0 && /[\w'\u2019\u00C0-\u024F-]/.test(text[start - 1])) start--;
-    while (end < text.length && /[\w'\u2019\u00C0-\u024F-]/.test(text[end])) end++;
-
-    if (start === end) return null;
-    const word = text.slice(start, end);
-
-    const wordRange = doc.createRange();
-    wordRange.setStart(node, start);
-    wordRange.setEnd(node, end);
-    return { word, range: wordRange };
-  } catch {
-    return null;
-  }
 }
 
 export default function FoliatePageView({
@@ -379,43 +371,42 @@ export default function FoliatePageView({
               foliateWordsRef.current = freshWords;
             }
             onWordsReextracted?.();
+
+            // Wrap words in <span class="page-word" data-word-index="N"> — AFTER extraction
+            // so extractWordsFromView gets clean text nodes for Range creation.
+            const sectionStart = foliateWordsRef.current.findIndex(w => w.sectionIndex === index);
+            if (sectionStart >= 0) {
+              wrapWordsInSpans(doc, index, sectionStart);
+            }
           }
 
-          // Word detection: single click selects word via native selection
-          doc.addEventListener("click", (ce: MouseEvent) => {
-            if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
+          // Delegated click handler — uses injected word spans (same pattern as PageReaderView)
+          doc.body.addEventListener("click", (e: MouseEvent) => {
+            const target = (e.target as HTMLElement)?.closest?.("[data-word-index]");
+            if (!target) return;
+            if ((e.target as HTMLElement)?.closest?.("a[href]")) return;
 
-            // Clear any previous selection
-            const prevSel = doc.getSelection();
-            if (prevSel) prevSel.removeAllRanges();
+            const idx = parseInt(target.getAttribute("data-word-index") || "", 10);
+            if (isNaN(idx)) return;
 
-            // Try to select word at click point
-            const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
-            if (result) {
-              // Highlight via native selection (no DOM mutation)
-              const sel = doc.getSelection();
-              if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
+            // Highlight via CSS class (same as PageReaderView)
+            doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
+              el.classList.remove("page-word--highlighted")
+            );
+            (target as HTMLElement).classList.add("page-word--highlighted");
 
-              if (v2) {
-                const contents = v2.renderer.getContents?.() ?? [];
-                const match = contents.find((c: any) => c.doc === doc);
-                if (match) {
-                  const cfi = v2.getCFI(match.index, result.range);
-                  // Count word offset using Intl.Segmenter — must match extractWordsFromView tokenization
-                  let wordOffset = 0;
-                  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
-                  let tn: Text | null;
-                  while ((tn = walker.nextNode() as Text | null)) {
-                    if (tn === result.range.startContainer) {
-                      // Count only words before the click offset in this text node
-                      const textBeforeClick = (tn.textContent || "").slice(0, result.range.startOffset);
-                      wordOffset += countWordsSegmenter(textBeforeClick);
-                      break;
-                    }
-                    wordOffset += countWordsSegmenter(tn.textContent || "");
-                  }
-                  onWordClick?.(cfi, result.word, match.index, wordOffset);
-                }
+            // Report click to parent
+            const v = viewRef.current;
+            if (v) {
+              const contents = v.renderer?.getContents?.() ?? [];
+              const match = contents.find((c: any) => c.doc === doc);
+              if (match) {
+                const range = doc.createRange();
+                range.selectNodeContents(target);
+                const cfi = v.getCFI(match.index, range);
+                const sectionBase = foliateWordsRef.current.findIndex(w => w.sectionIndex === match.index);
+                const wordOffsetInSection = sectionBase >= 0 ? idx - sectionBase : 0;
+                onWordClick?.(cfi, target.textContent || "", match.index, wordOffsetInSection);
               }
             }
           });
@@ -710,6 +701,9 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
+    .page-word { cursor: pointer; border-radius: 2px; transition: background 0.1s; }
+    .page-word:hover { background: ${accent}22; }
+    .page-word--highlighted { background: ${accent}4D; }
   `;
   doc.head.appendChild(style);
 }
