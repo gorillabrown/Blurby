@@ -209,6 +209,20 @@ export default function ReaderContainer({
   // NM page browsing — tracks when user has browsed away from highlight position during narration
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
 
+  // Sync isBrowsedAway with foliate's userBrowsing state (checked on relocate events)
+  useEffect(() => {
+    if (!useFoliate || readingMode !== "narration") {
+      if (isBrowsedAway) setIsBrowsedAway(false);
+      return;
+    }
+    const checkBrowsing = () => {
+      const browsing = foliateApiRef.current?.isUserBrowsing?.() ?? false;
+      setIsBrowsedAway(browsing);
+    };
+    const timer = setInterval(checkBrowsing, 500);
+    return () => clearInterval(timer);
+  }, [useFoliate, readingMode]);
+
   useEffect(() => {
     // For foliate EPUBs, progress is saved via onRelocate (fraction-based) — skip this effect
     if (useFoliate) return;
@@ -489,12 +503,16 @@ export default function ReaderContainer({
     stopAllModes();
     hasEngagedRef.current = true;
     // For foliate EPUBs, ensure words are extracted and start from visible word
+    let startWord = highlightedWordIndex;
     if (useFoliate) {
       extractFoliateWords();
       const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-      if (firstVisible >= 0) setHighlightedWordIndex(firstVisible);
+      if (firstVisible >= 0) {
+        startWord = firstVisible;
+        setHighlightedWordIndex(firstVisible);
+      }
     }
-    jumpToWord(highlightedWordIndex);
+    jumpToWord(startWord);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
     setTimeout(() => reader.togglePlay(), 50);
@@ -889,15 +907,12 @@ export default function ReaderContainer({
       viewApiRef={foliateApiRef}
       isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
       onJumpToHighlight={() => {
-        // Navigate foliate to the saved CFI position
-        if (activeDoc.cfi) {
+        // Use the foliate API's returnToNarration which clears browsing flag + scrolls
+        if (foliateApiRef.current?.returnToNarration) {
+          foliateApiRef.current.returnToNarration();
+          setIsBrowsedAway(false);
+        } else if (activeDoc.cfi) {
           foliateApiRef.current?.goTo?.(activeDoc.cfi);
-        } else if (foliateWordsRef.current[highlightedWordIndex]) {
-          try {
-            const wordData = foliateWordsRef.current[highlightedWordIndex];
-            const el = wordData.range.startContainer.parentElement;
-            el?.scrollIntoView?.({ block: "center", behavior: "smooth" });
-          } catch { /* stale range */ }
         }
       }}
       readingMode={readingMode}

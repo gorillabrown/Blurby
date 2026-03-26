@@ -332,6 +332,10 @@ export interface FoliateViewAPI {
   getView: () => any;
   /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
   findFirstVisibleWordIndex: () => number;
+  /** Whether the user has manually browsed away from narration position */
+  isUserBrowsing: () => boolean;
+  /** Clear the user browsing flag and scroll to current narration word */
+  returnToNarration: () => void;
 }
 
 export default function FoliatePageView({
@@ -372,6 +376,8 @@ export default function FoliatePageView({
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
   const readingModeRef = useRef(readingMode);
+  // Track when user has manually browsed away during narration — suppresses scrollToAnchor
+  const userBrowsingRef = useRef(false);
   readingModeRef.current = readingMode;
 
   // Load EPUB via foliate-js
@@ -622,14 +628,23 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
               // Page auto-advance: scroll to keep the highlighted word visible
-              // Uses scrollToAnchor which lets foliate handle CSS column math
-              if (targetSpan && targetDoc) {
+              // Skip if user has manually browsed away during narration
+              if (targetSpan && targetDoc && !userBrowsingRef.current) {
                 try {
                   const range = targetDoc.createRange();
                   range.selectNodeContents(targetSpan);
-                  // scrollToAnchor is a no-op if the range is already visible
                   view.renderer.scrollToAnchor?.(range);
                 } catch { /* safe to ignore */ }
+              }
+              // If user was browsing and the word is now visible, auto-clear browsing flag
+              if (userBrowsingRef.current && targetSpan) {
+                try {
+                  const rect = targetSpan.getBoundingClientRect();
+                  const iframeWin = targetDoc?.defaultView;
+                  if (iframeWin && rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth) {
+                    userBrowsingRef.current = false; // Narration caught up to where user browsed
+                  }
+                } catch { /* */ }
               }
             },
             clearHighlight: () => {
@@ -660,6 +675,24 @@ export default function FoliatePageView({
                 } catch { /* safe to ignore */ }
               }
               return -1; // No visible words (e.g., cover page with only images)
+            },
+            isUserBrowsing: () => userBrowsingRef.current,
+            returnToNarration: () => {
+              userBrowsingRef.current = false;
+              // Re-highlight and scroll to current narration word
+              const contents = view.renderer?.getContents?.() ?? [];
+              const currentIdx = highlightedWordIndexRef.current;
+              for (const { doc: d } of contents) {
+                try {
+                  const span = d?.querySelector?.(`[data-word-index="${currentIdx}"]`) as HTMLElement;
+                  if (span) {
+                    const range = d.createRange();
+                    range.selectNodeContents(span);
+                    view.renderer.scrollToAnchor?.(range);
+                    break;
+                  }
+                } catch { /* */ }
+              }
             },
           };
         }
@@ -831,9 +864,12 @@ export default function FoliatePageView({
 
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
+        // During narration, flag that user is browsing away — don't yank back
+        if (readingModeRef.current === "narration") userBrowsingRef.current = true;
         view.renderer.next();
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
+        if (readingModeRef.current === "narration") userBrowsingRef.current = true;
         view.renderer.prev();
       }
     };
