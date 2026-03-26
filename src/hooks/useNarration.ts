@@ -31,13 +31,13 @@ function wpmToRate(wpm: number): number {
 function findSentenceBoundary(words: string[], startIdx: number, chunkSize: number, pageEnd?: number | null): number {
   const hardMax = pageEnd != null ? Math.min(pageEnd + 1, words.length) : words.length;
   const maxEnd = Math.min(startIdx + chunkSize, hardMax);
-  const minWords = 5; // Minimum chunk size to avoid overhead from tiny chunks
 
-  // Scan forward from minimum to find the FIRST sentence ending
-  for (let i = startIdx + minWords - 1; i < maxEnd; i++) {
+  // Find the FIRST sentence ending — one sentence per chunk for natural pauses
+  // Start scanning from word 1 (allow at least 1 word per chunk)
+  for (let i = startIdx; i < maxEnd; i++) {
     if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) return Math.min(i + 1, hardMax);
   }
-  // No sentence ending found within chunk — scan further (up to 2x) for one
+  // No sentence ending within chunk — scan further (up to 2x) for one
   if (hardMax > maxEnd) {
     const extendedMax = Math.min(startIdx + chunkSize * 2, hardMax);
     for (let i = maxEnd; i < extendedMax; i++) {
