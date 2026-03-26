@@ -11,7 +11,7 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
-import { segmentWords } from "../utils/segmentWords";
+import { segmentWords, countWordsSegmenter } from "../utils/segmentWords";
 
 const api = (window as any).electronAPI;
 
@@ -389,19 +389,18 @@ export default function FoliatePageView({
                 const match = contents.find((c: any) => c.doc === doc);
                 if (match) {
                   const cfi = v.getCFI(match.index, result.range);
-                  // Count word offset: walk all text nodes before the click to count words
+                  // Count word offset using Intl.Segmenter — must match extractWordsFromView tokenization
                   let wordOffset = 0;
                   const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
                   let tn: Text | null;
-                  outer: while ((tn = walker.nextNode() as Text | null)) {
-                    const words = (tn.textContent || "").split(/\s+/).filter(Boolean);
+                  while ((tn = walker.nextNode() as Text | null)) {
                     if (tn === result.range.startContainer) {
-                      // Count words before the offset in this text node
-                      const beforeText = (tn.textContent || "").slice(0, result.range.startOffset);
-                      wordOffset += beforeText.split(/\s+/).filter(Boolean).length;
-                      break outer;
+                      // Count only words before the click offset in this text node
+                      const textBeforeClick = (tn.textContent || "").slice(0, result.range.startOffset);
+                      wordOffset += countWordsSegmenter(textBeforeClick);
+                      break;
                     }
-                    wordOffset += words.length;
+                    wordOffset += countWordsSegmenter(tn.textContent || "");
                   }
                   onWordClick?.(cfi, result.word, match.index, wordOffset);
                 }
