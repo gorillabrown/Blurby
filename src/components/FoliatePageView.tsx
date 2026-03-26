@@ -620,20 +620,28 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
               // Auto-advance page if the highlighted word is off-screen
-              // Uses Readest's approach: scrollToAnchor lets foliate handle all CSS column math
-              if (targetSpan && targetDoc) {
+              // Debounce: only check every 3rd word to avoid scroll thrashing
+              if (targetSpan && targetDoc && view.renderer && wordIndex % 3 === 0) {
                 try {
-                  const rect = targetSpan.getBoundingClientRect();
-                  const viewportWidth = targetDoc.documentElement.clientWidth;
-                  const viewportHeight = targetDoc.documentElement.clientHeight;
-                  const isOffScreen = rect.right < 0 || rect.left > viewportWidth ||
-                                      rect.bottom < 0 || rect.top > viewportHeight ||
-                                      rect.width === 0;
-                  if (isOffScreen) {
-                    // Create a range around the word and scroll foliate to it
-                    const range = targetDoc.createRange();
-                    range.selectNodeContents(targetSpan);
-                    view.renderer.scrollToAnchor?.(range);
+                  // Use IntersectionObserver-style check: is the span visible in the iframe viewport?
+                  // In CSS column layout, the iframe scrolls horizontally. A word off-screen
+                  // will have its rect fully outside the [0, clientWidth] range.
+                  const iframeEl = targetDoc.defaultView?.frameElement;
+                  if (iframeEl) {
+                    const iframeRect = iframeEl.getBoundingClientRect();
+                    const spanRect = targetSpan.getBoundingClientRect();
+                    // Transform span rect from iframe coords to parent coords
+                    const spanInParentLeft = iframeRect.left + spanRect.left;
+                    const spanInParentRight = iframeRect.left + spanRect.right;
+                    // Check if span is outside the iframe's visible area
+                    const isOffScreen = spanInParentRight < iframeRect.left ||
+                                        spanInParentLeft > iframeRect.right ||
+                                        spanRect.width === 0;
+                    if (isOffScreen) {
+                      const range = targetDoc.createRange();
+                      range.selectNodeContents(targetSpan);
+                      view.renderer.scrollToAnchor?.(range);
+                    }
                   }
                 } catch { /* scroll failed — safe to ignore */ }
               }
