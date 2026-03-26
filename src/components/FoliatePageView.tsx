@@ -649,6 +649,7 @@ export default function FoliatePageView({
     loadBook();
 
     return () => {
+      console.log("[Foliate] CLEANUP — effect unmounting, cancelled=true");
       cancelled = true;
       if (viewRef.current) {
         viewRef.current.close?.();
@@ -780,28 +781,12 @@ export default function FoliatePageView({
     origOnRelocate?.(detail);
   }, [origOnRelocate]);
 
-  useEffect(() => {
-    if (narrationWordIndex == null || narrationWordIndex < 0) return;
-    if (pageTurnCooldownRef.current) return;
-    const v = viewRef.current;
-    if (!v?.renderer) return;
-
-    const totalWords = activeDoc.wordCount || foliateWordsRef.current.length || 1;
-    const narrationFraction = narrationWordIndex / totalWords;
-    const viewFraction = foliateCurrentFractionRef.current;
-
-    // Estimate words per page: ~250 words on a typical page
-    // Threshold: when narration is more than ~1 page ahead of the view
-    const wordsPerPage = 250;
-    const threshold = wordsPerPage / totalWords;
-
-    if (narrationFraction > viewFraction + threshold) {
-      pageTurnCooldownRef.current = true;
-      v.renderer.next();
-      // Cooldown: wait for relocate to update fraction before checking again
-      setTimeout(() => { pageTurnCooldownRef.current = false; }, 800);
-    }
-  }, [narrationWordIndex, activeDoc.wordCount]);
+  // Page auto-advance during narration — DISABLED
+  // This fraction-based approach causes page jumping because narrationWordIndex
+  // is relative to the extracted word array (visible sections only), not the full book.
+  // The division narrationWordIndex/totalWords produces wrong fractions.
+  // Page advance is now handled by highlightWordByIndex's off-screen detection instead.
+  // TODO: Re-implement once word index stability across sections is solved.
 
   // Keyboard navigation
   useEffect(() => {
