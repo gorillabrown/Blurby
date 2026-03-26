@@ -71,6 +71,8 @@ export default function ReaderContainer({
   // ── Four-mode state (mutually exclusive) ────────────────────────────────
   // "page" is the default. "focus"/"flow"/"narration" are sub-modes.
   const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow" | "narration">("page");
+  const readingModeRef = useRef(readingMode);
+  readingModeRef.current = readingMode; // Always up-to-date for closures
 
   // Highlighted word in Page view — anchor for Focus/Flow entry
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
@@ -829,11 +831,15 @@ export default function ReaderContainer({
       }}
       onLoad={() => {
         // Extract words from DOM after each section loads
-        // BUT NOT during active narration — rebuilding the word array mid-narration
-        // shifts all data-word-index attributes, causing highlight/page jumps
-        if (readingMode !== "narration" && readingMode !== "flow") {
-          setTimeout(extractFoliateWords, 100);
-        }
+        // BUT NOT during active narration/flow — rebuilding the word array mid-mode
+        // shifts all data-word-index attributes, causing highlight/page jumps.
+        // Uses ref (not state) because this callback is captured in a closure at render time.
+        setTimeout(() => {
+          const mode = readingModeRef.current;
+          if (mode !== "narration" && mode !== "flow") {
+            extractFoliateWords();
+          }
+        }, 100);
       }}
       viewApiRef={foliateApiRef}
       isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
