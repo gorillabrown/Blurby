@@ -419,6 +419,43 @@ You're all set! → [Open Library]
 **Location:** New feature — `src/components/ReadingQueue.tsx`, library data model
 **Description:** Users can right-click a card and select "Add to Queue" to add it to an ordered reading list. Queue is separate from the main library sort and represents the user's intended reading order. Already stubbed in the context menu (grayed out).
 
+### BUG-079: Universal EPUB Pipeline — convert all formats to EPUB on intake
+**Reported:** 2026-03-26
+**Severity:** Medium (architecture — future sprint)
+**Sprint:** 27 (Universal EPUB Pipeline)
+**Location:** New module — `main/epub-converter.js`, `main/file-parsers.js` (intake pipeline)
+**Description:** Every document in Blurby should be an EPUB. The app consumes all input formats and converts them to EPUB for a single, optimized rendering pipeline via foliate-js. This eliminates format-specific rendering paths. Supported conversions:
+
+| Source | Approach |
+|--------|----------|
+| HTML | `cheerio` → EPUB builder |
+| PDF | `pdf-parse` → structured text → EPUB (OCR fallback for scanned) |
+| MOBI/AZW/AZW3 | `adm-zip` decompress → extract HTML/CSS → repackage as EPUB |
+| DOCX | `mammoth` → HTML → EPUB |
+| TXT | Paragraph detection → `<p>` tags → minimal EPUB |
+| Markdown | `marked`/`markdown-it` → HTML → EPUB |
+| RTF | `pandoc` or `rtf-parser` → HTML → EPUB |
+| FB2 | `cheerio` XML parse → transform schema → EPUB |
+| KFX | Calibre CLI or `kfxlib` → EPUB |
+| PDB | `pdb-parser` → text → EPUB |
+| DjVu | `djvulibre` CLI → text/images → EPUB |
+
+Architecture: On file add, detect format → convert to EPUB → store in library folder → index. Keep original alongside for reference. Mark conversion quality (lossless/approximate/OCR-required). Background conversion for large files with progress indicator.
+
+### BUG-080: Kokoro AI button unclickable in Speed Reading settings
+**Reported:** 2026-03-26
+**Severity:** High (blocks TTS engine selection)
+**Sprint:** 26-STABLE (Stabilization)
+**Location:** `src/components/settings/SpeedReadingSettings.tsx`, `src/styles/global.css`
+**Description:** The System/Kokoro AI toggle buttons in Speed Reading settings render visually but clicking "Kokoro AI" has no effect. Likely `-webkit-app-region: drag` inheritance from the flap container, or a z-index issue covering the button's click target.
+
+### BUG-081: Auto-updater latest.yml only contains ARM64 architecture
+**Reported:** 2026-03-26
+**Severity:** Critical (x64 users never get updates)
+**Sprint:** 26-STABLE (Stabilization)
+**Location:** `.github/workflows/release.yml`
+**Description:** The release workflow builds x64 and ARM64 as separate jobs. The ARM64 job runs last and overwrites `latest.yml` with only its own entry. x64 users' auto-updater finds no matching installer and reports "You're up to date" even when a new version exists. Fix: merge both architectures into a single `latest.yml` with both `files:` entries.
+
 ---
 
 ## Complete

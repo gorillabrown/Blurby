@@ -73,7 +73,15 @@ All feature work from phases 0-4 plus Sprints 1-17 are on main. The app has clou
 | **Sprint 22: Reading Animation + TTS Sync** | 🔶 SPEC'D | Smooth cursor sliding (Flow + Focus), TTS-at-cursor-pace, WPM cap with TTS, TTS toggle in bottom bar |
 | **Sprint 23: V1 Hardening** | 🔶 SPEC'D | First-run onboarding, error recovery UX, constants extraction, a11y audit, perf baselines, auto-update E2E |
 | **Sprint 24: External Audit** | 🔶 SPEC'D | Full 6-step external audit per workflow skill — code quality, architecture, tests, docs |
-| **Sprint 25: RSS Library + Paywall Integration** | 📋 SPEC'D | Feed aggregation from paywall sites, RSS Library screen, "Add to Blurby" pipeline |
+| **Sprint 24-26: Reader UX Overhaul + Kokoro TTS** | ✅ COMPLETED | foliate-js EPUB rendering, Kokoro neural TTS (28 voices), 4-mode reader (Page/Focus/Flow/Narrate), library UX overhaul, Blurby brand theme, 76+ bugs fixed |
+| **Sprint 26-STABLE: Stabilization** | 🔶 SPEC'D | 20 fixes across 4 phases — critical blockers, mode integrity, library/nav, verification. Zero new features. See `plans/cosmic-spinning-lemon.md` |
+| **Sprint 27: Universal EPUB Pipeline** | 📐 DESIGN | Convert all formats to EPUB on intake. HTML/TXT/MD/DOCX/PDF/MOBI/AZW/FB2/RTF/KFX/PDB/DjVu → EPUB. Single rendering path via foliate-js. ~44h across 4 phases |
+| **Sprint 28: Per-Book Settings + Search** | 📐 DESIGN | 3-tier settings cascade (global → book → view), in-book search with CFI navigation, highlight style variants |
+| **Sprint 29: Content Pipeline + Metadata** | 📐 DESIGN | Author name normalization (Last, First), metadata wizard (auto-derive Author/Title/Year), first-run library folder picker, chapter detection heuristics, auto-generated TOC |
+| **Sprint 30: E-Ink Overhaul** | 📐 DESIGN | E-ink as display mode (not theme), full decouple, new settings panel, ghosting prevention across all views |
+| **Sprint 31: Edge TTS** | 📐 DESIGN | 200+ voices via msedge-tts, SSML support, word boundary marks, 3-engine selector (System/Kokoro/Edge) |
+| **Sprint 25 (renumbered): RSS Library + Paywall Integration** | 📋 SPEC'D | Feed aggregation from paywall sites, RSS Library screen, "Add to Blurby" pipeline |
+| **Sprint 18C: Android APK** | 📋 SPEC'D | Full Blurby Mobile — React Native, RSVP + flow, cloud sync, share intent |
 
 **Legend:** ✅ = implemented & tested, 🔶 = fully scoped with agent assignments (ready for dispatch), 📋 = spec'd but needs agent assignments, 📐 = design/vision only
 
