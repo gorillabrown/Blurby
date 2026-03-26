@@ -245,12 +245,20 @@ function registerIpcHandlers(ctx) {
     return doc;
   });
 
-  ipcMain.handle("delete-doc", (_, docId) => {
+  ipcMain.handle("delete-doc", async (_, docId) => {
     const doc = ctx.getDocById(docId);
     if (doc && doc.filepath) {
       // Clean up caches for deleted doc
       clearChapterCache(doc.filepath);
       if (ctx.removeFailedExtraction) ctx.removeFailedExtraction(doc.filepath);
+      // Delete the actual file from disk
+      try {
+        const fs = require("fs").promises;
+        await fs.unlink(doc.filepath);
+      } catch (err) {
+        // File may already be gone or inaccessible — log but don't block
+        console.warn(`[delete-doc] Could not delete file: ${doc.filepath}`, err.message);
+      }
     }
 
     // 19D: Apply tombstone instead of hard-deleting, so sync can propagate the deletion

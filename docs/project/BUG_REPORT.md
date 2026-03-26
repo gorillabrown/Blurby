@@ -395,6 +395,30 @@ Where should Blurby keep your books? → [Browse...] → /Users/evan/Documents/B
 You're all set! → [Open Library]
 ```
 
+### BUG-077: Metadata Wizard — auto-derive book metadata for entire library
+**Reported:** 2026-03-25
+**Severity:** Medium (data quality)
+**Sprint:** 29 (Metadata & Queue)
+**Location:** New feature — `main/metadata-wizard.js`, `src/components/MetadataWizard.tsx`
+**Description:** A wizard that scans all books in the library and automatically derives: Author (Last, First), Title, and Year of publication. Uses EPUB OPF metadata, PDF metadata fields, filename parsing, and optionally an external API (Open Library, Google Books) as fallback for missing data.
+
+**Requirements:**
+1. **Batch scan** — processes all books in library with a progress bar
+2. **Auto-extract from file metadata** — EPUB OPF `dc:creator`, `dc:title`, `dc:date`; PDF info dict `Author`, `Title`, `CreationDate`
+3. **Filename parsing fallback** — extract "Author - Title (Year)" patterns from filenames
+4. **API enrichment** (optional) — query Open Library / Google Books API by ISBN or title+author for missing fields
+5. **Author normalization** — all authors stored as "Last, First" format. Parse "First Last" → "Last, First"
+6. **Review UI** — show derived metadata in a table, user can accept/edit each before committing
+7. **Incremental** — only process books without complete metadata (skip already-filled entries)
+8. **Year extraction** — from publication date, copyright page text, or filename
+
+### BUG-078: Reading Queue — add books to an ordered reading queue
+**Reported:** 2026-03-25
+**Severity:** Low (feature request)
+**Sprint:** 29 (Metadata & Queue)
+**Location:** New feature — `src/components/ReadingQueue.tsx`, library data model
+**Description:** Users can right-click a card and select "Add to Queue" to add it to an ordered reading list. Queue is separate from the main library sort and represents the user's intended reading order. Already stubbed in the context menu (grayed out).
+
 ---
 
 ## Complete
