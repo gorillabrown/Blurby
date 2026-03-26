@@ -95,6 +95,8 @@ sprint/25s-stabilization
 
 **Fix:** On first open (no saved CFI), don't pass an `initialCfi` to foliate — let it open to its natural first page (the cover). Only restore CFI on subsequent opens where a saved position exists. In `FoliatePageView.tsx`, guard the initial navigation: if `savedCfi` is null/undefined, don't call `view.goTo()`.
 
+**Implementation note:** Verify that foliate's `view.init({ lastLocation: null })` actually opens to the cover. If it skips the cover even with `null`, add an explicit `view.goToFraction(0)` call after initialization to force page 0. Test with EPUBs that have cover images (e.g., the Project Gutenberg titles in the library).
+
 **Verification (V-03):** Open new EPUB → lands on cover. Close and reopen → lands on saved position. Open previously-read EPUB → restores to last position, not cover.
 
 ---
@@ -116,12 +118,14 @@ sprint/25s-stabilization
 - Key change: ensure page 0 / fraction 0 = 0% even when `highlightedWordIndex > 0` due to word extraction skipping images
 
 **Part B — High-water mark with backtrack prompt:**
-- Track `furthestPageReached` alongside `currentPage` in the doc's library entry
+- Track `furthestPosition` alongside current position in the doc's library entry
+  - **Non-EPUB:** `furthestPosition` is a page number (integer). Threshold: closing > 2 pages behind.
+  - **Foliate EPUB:** `furthestPosition` is a fraction (0.0–1.0) from relocate events. No stable "page number" exists — foliate uses CSS columns. Threshold: closing fraction < furthest fraction by more than `2 / totalEstimatedPages` (approximate 2-page equivalent using `fraction * estimatedTotalPages`).
 - On reader close, evaluate:
-  - If `currentPage >= furthestPageReached - 2`: silent save at current position
-  - If `currentPage < furthestPageReached - 2` AND user has engaged with backtracked content (mode start, word click, or page turn): show prompt
+  - If current position is within threshold of `furthestPosition`: silent save at current position
+  - If current position is beyond threshold behind `furthestPosition` AND user has engaged with backtracked content (mode start, word click, or page turn): show prompt
 - Prompt UI: floating dialog (not modal), two buttons:
-  - **Left (secondary):** "Save at page [current]"
+  - **Left (secondary):** "Save at page [current]" (for EPUBs, show approximate page via `Math.round(fraction * estimatedPages)`)
   - **Right (primary/default):** "Keep at page [furthest]"
 - Default action (Enter / dismiss) = keep at furthest
 - Engagement tracking: set a `hasEngagedRef` boolean to true on mode start, word click, or page turn events
@@ -136,13 +140,11 @@ sprint/25s-stabilization
 
 **Files:** `ReaderContainer.tsx`
 
-**Root cause:** Clicking the Narrate button in the bottom bar calls `startNarration()` which immediately begins TTS playback.
+**Root cause:** The bottom bar Narrate button is likely wired to `startNarration()` directly instead of `handleSelectMode("narration")`. The `handleSelectMode` path (ReaderContainer ~lines 391-404) already correctly sets `lastReadingMode` without starting playback. The `handleTogglePlay` path (Space, ~lines 416-426) then calls `startNarration()` which begins TTS. The bug is in the button's onClick handler, not the mode architecture.
 
-**Fix:** Split into two actions:
-- **Click Narrate button:** Sets `readingMode = "narration"` and `lastReadingMode = "narration"`. Highlights the button. Switches bottom bar to TTS rate display. Does NOT start playback.
-- **Press Space:** Calls `narration.start()` — begins TTS from current position.
+**Fix:** Ensure the bottom bar Narrate button calls `handleSelectMode("narration")` (select only), NOT `startNarration()`. Also verify the `N` keyboard shortcut follows the same path. The Space → `handleTogglePlay` → `startNarration()` flow is correct and should not change.
 
-This mirrors how Focus and Flow already work — click selects, Space starts.
+This makes narration consistent with Focus and Flow — click/key selects, Space starts.
 
 **Verification (V-05):** Click Narrate → button highlights, no audio. Press Space → TTS begins. Press Space again → pauses. Click Narrate again while active → stops and deselects.
 
@@ -166,6 +168,8 @@ This mirrors how Focus and Flow already work — click selects, Space starts.
 5. Emit callback (`onWordsReextracted`) so ReaderContainer knows the word array is fresh
 6. Guard: any code touching a Range must check `range.startContainer.isConnected` first. If disconnected, skip and wait for re-extraction.
 
+**Index continuity:** `foliateWordsRef` must always represent the full document's word array, not just the current section. On section change, re-extract words for the newly-loaded section(s) and merge into the full array at the correct offset (using `sectionIndex` to determine position). `highlightedWordIndex` is a global document index and must remain valid across re-extractions. If a section is unloaded and its Ranges become stale, keep the word strings in the array (for text display in Focus mode) but null out the Range references; re-populate Ranges when the section is loaded again.
+
 **Verification (V-10):** Start Flow mode on EPUB. Navigate across 3+ sections. Cursor continues smoothly. No console errors about detached nodes.
 
 ---
@@ -176,11 +180,12 @@ This mirrors how Focus and Flow already work — click selects, Space starts.
 
 **Root cause:** Text node walker and word extractor use different tokenization, causing word offset counts to diverge.
 
-**Fix:** Unify both paths to identical tokenization: `text.split(/\s+/).filter(w => w.length > 0)`.
+**Fix:** Unify both paths to use `Intl.Segmenter` with `granularity: "word"` (already used by `extractWordsFromView()`). The click handler's text-node walker currently uses `split(/\s+/)` which counts differently for punctuation-attached words, contractions, and Unicode. Extract a shared `countWordsInTextNode(textNode)` utility that uses `Intl.Segmenter`, and use it in both paths.
 
-1. Click handler's text-node walker: split each `textNode.textContent` with `/\s+/`, filter empties, count words until reaching clicked node + offset
-2. `extractWordsFromView()`: same split, same filter
-3. Both produce `(sectionIndex, wordOffsetInSection)` → look up in `foliateWordsRef` by matching section index + adding offset
+1. Extract shared utility: `segmentWords(text: string): string[]` using `Intl.Segmenter({ granularity: "word" })`, filtering to `segment.isWordLike`
+2. Click handler's text-node walker: use `segmentWords()` on each `textNode.textContent`, count words until reaching clicked node + offset
+3. `extractWordsFromView()`: use same `segmentWords()` function (replacing its current inline Segmenter usage)
+4. Both produce `(sectionIndex, wordOffsetInSection)` → look up in `foliateWordsRef` by matching section index + adding offset
 
 **Verification (V-09):** Open EPUB. Click the word "the" in the middle of a paragraph. Highlighted word is the exact one clicked, not an earlier occurrence. Repeat across 5+ different words in different sections.
 
@@ -193,10 +198,10 @@ This mirrors how Focus and Flow already work — click selects, Space starts.
 **Root cause:** `FlowCursorController` looks for `[data-word-index]` elements in the DOM. Foliate renders in a shadow DOM / iframe — those elements don't exist.
 
 **Fix (Option B — Range-based overlay, recommended):**
-1. Create absolutely-positioned cursor `<div>` layered above the foliate iframe
+1. Create absolutely-positioned cursor `<div>` layered above the foliate container
 2. On each Flow tick, get current word's Range from `foliateWordsRef`
 3. Call `range.getBoundingClientRect()` for viewport position
-4. Transform rect relative to overlay container (accounting for iframe offset)
+4. **Coordinate transform:** Foliate uses a `<foliate-view>` custom element with shadow DOM. `getBoundingClientRect()` on Ranges inside shadow DOM returns viewport-relative coordinates — no iframe offset needed. If foliate wraps content in an iframe (some EPUB renderers do), detect via `range.startContainer.ownerDocument !== document` and add `iframe.getBoundingClientRect()` offset. Implement as a `getOverlayPosition(range, containerEl)` utility that handles both cases.
 5. Animate cursor div to position using `translate3d()` — same GPU-accelerated approach as existing FlowCursorController
 6. On line wrap / page turn: snap (no glide) to new line's first word position
 
@@ -230,14 +235,17 @@ Ensure overlay div uses identical centering CSS: `display: flex; align-items: ce
 
 **Root cause:** Narration cursor advances `highlightedWordIndex`, but highlight rendering in foliate doesn't update — `<mark>` wrapper not applied to new word, or old one not removed.
 
-**Fix:** Range-based highlight system (same foundation as S-06):
-1. On each `onWordAdvance` callback from useNarration, get current word's Range from `foliateWordsRef`
-2. Clear previous `<mark>` highlight (remove wrapper, restore original text node)
-3. Wrap new word's Range in `<mark class="blurby-word-highlight">`
-4. If new word is on different page/section, trigger foliate page turn *before* applying highlight
-5. If Range is stale (S-10 scenario), queue highlight and apply after re-extraction
+**Fix:** Overlay-based highlight system (consistent with S-06 — no DOM mutation in foliate):
+1. Create an absolutely-positioned highlight `<div>` layered above the foliate container (same overlay layer as the Flow cursor from S-06)
+2. On each `onWordAdvance` callback from useNarration, get current word's Range from `foliateWordsRef`
+3. Use `getOverlayPosition(range, containerEl)` (shared utility from S-06) to get viewport-relative position
+4. Position the highlight div over the word using `translate3d()` with accent background + opacity
+5. If new word is on different page/section, trigger foliate page turn *before* positioning highlight
+6. If Range is stale (S-10 scenario), hide highlight and queue; apply after re-extraction fires
 
-**Page turn sequencing:** `foliateApi.next()` → wait for relocate event → re-extract words (S-10) → apply highlight. Prevents "highlight disappears after page turn."
+**Why overlay, not `<mark>` injection:** The existing `highlightWord` method uses `surroundContents(mark)` which mutates foliate's DOM. This breaks when foliate re-renders sections (same reason Option A was rejected for S-06). The overlay approach is consistent across S-06, S-07, and S-08 — all EPUB visual feedback uses positioned overlays, never DOM injection.
+
+**Page turn sequencing:** `foliateApi.next()` → wait for relocate event → re-extract words (S-10) → reposition highlight. Prevents "highlight disappears after page turn."
 
 **Verification (V-08):** Start narration on EPUB. Highlight advances word-by-word through formatted text. Cross page boundary — highlight continues on new page without gaps. Cross section boundary — same.
 
@@ -279,9 +287,9 @@ Ensure overlay div uses identical centering CSS: `display: flex; align-items: ce
 **Root cause:** Changing TTS rate only takes effect on next chunk (~40 words later). Pre-buffer not invalidated on rate change.
 
 **Fix:**
-1. In `useNarration.ts`, when `speedRef.current` changes: immediately cancel pre-buffered chunk
+1. In `useNarration.ts`, when `speedRef.current` changes: null out `nextChunkBufferRef.current` to discard the pre-buffered chunk
 2. Regenerate pre-buffer at new rate from current word position
-3. If Kokoro is mid-generation, abort and restart at new rate
+3. If Kokoro is mid-generation via IPC (`api.kokoroGenerate`): use a generation ID guard — increment a `generationIdRef` counter on rate change; when the IPC result returns, compare its generation ID to current; discard if stale. This avoids needing an abort mechanism on the IPC channel.
 4. Visual confirmation: when rate changes, show "CONFIRMED" indicator briefly next to rate display in bottom bar (CSS fade, 1s duration)
 
 **Verification (V-12):** Start narration. Change rate mid-sentence. Audio speed changes within 1-2 words. "CONFIRMED" indicator flashes. Repeat 3x rapidly — no crashes, final rate applied.
@@ -296,9 +304,9 @@ Ensure overlay div uses identical centering CSS: `display: flex; align-items: ce
 
 **Fix:** Mode-aware time calculation:
 - **Page / Focus / Flow:** `wordsRemaining / wpm` (existing)
-- **Narration:** `wordsRemaining / (ttsRate * 150)` — derives effective WPM from TTS rate
+- **Narration:** `wordsRemaining / (ttsRate * TTS_RATE_BASELINE_WPM)` — derives effective WPM from TTS rate using the existing constant (currently 150)
 
-Ensure this logic applies to both chapter time remaining AND document time remaining displays.
+Ensure this logic applies to both chapter time remaining AND document time remaining displays. Use the `TTS_RATE_BASELINE_WPM` constant from `src/constants.ts`, not a magic number.
 
 **Verification (V-14):** Enter narration at 1.0x → time based on ~150 WPM. Change to 2.0x → time halves. Switch to Focus → recalculates based on WPM setting.
 
@@ -312,7 +320,7 @@ Ensure this logic applies to both chapter time remaining AND document time remai
 | **I-02** | S-08 + S-11 + S-12 | Open EPUB → Narrate → change rate 3x → cross page boundary → pause → browse 5 pages → Return pill → resume |
 | **I-03** | S-03 + S-04 | Open EPUB → read to page 50 → return to cover → close → prompt → "Save at page 0" → reopen → cover at 0% |
 | **I-04** | S-06 + S-07 + S-08 | Open EPUB → Focus (centered) → Flow (cursor visible) → Narrate (highlight advances) → exit to Page |
-| **I-05** | Non-EPUB regression | Open TXT → repeat I-01 through I-04 equivalents → no regressions |
+| **I-05** | Non-EPUB regression | Open TXT file → Focus mode (word centered, advances at WPM) → Flow mode (cursor slides across lines) → Narrate (highlight advances, rate change immediate) → pause, browse pages (no snap-back, pill appears) → click word (correct word highlighted) → close at start (0% progress) |
 | **I-06** | S-01 + S-13 | Settings flap → toggle Kokoro AI → change TTS rate in flap → enter Narrate → bottom bar shows same rate |
 
 ---
@@ -324,7 +332,7 @@ Ensure this logic applies to both chapter time remaining AND document time remai
 | V-01 | Click Kokoro AI button in Speed Reading settings | Toggle activates, setting persists |
 | V-02 | Trigger release workflow, inspect latest.yml | Both x64 and arm64 entries present |
 | V-03 | Open new EPUB with cover image | Lands on cover/page 0 |
-| V-04 | Open EPUB, don't engage, close | 0% progress |
+| V-04 | Open EPUB, don't engage (no mode start, word click, or page turn), close | 0% progress, no backtrack prompt (hasEngaged = false) |
 | V-04b | Read to page 50, go back to page 2, close | Prompt appears with both options |
 | V-05 | Click Narrate button | Button highlights, no audio. Space starts. |
 | V-06 | EPUB Flow mode | Cursor slides across words, visible across sections |
@@ -346,10 +354,9 @@ Ensure this logic applies to both chapter time remaining AND document time remai
 
 | Agent | Tasks |
 |-------|-------|
-| `renderer-fixer` (sonnet) | S-01, S-05, S-07, S-11, S-14 |
+| `renderer-fixer` (sonnet) | S-01, S-04 (Part A progress calc), S-05, S-07, S-11, S-12, S-14 |
 | `electron-fixer` (sonnet) | S-02, S-04 (Part B prompt UI) |
 | `format-parser` (sonnet) | S-03, S-06, S-08, S-09, S-10 (all foliate/EPUB) |
-| `renderer-fixer` (sonnet) | S-04 (Part A progress calc), S-12 |
 | `test-runner` (haiku) | Phase 3 + Phase 4 verification |
 | `code-reviewer` (sonnet) | Post-fix architecture compliance check |
 
