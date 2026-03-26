@@ -606,18 +606,37 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
               // Apply highlight to target word
-              let found = false;
+              let targetSpan: HTMLElement | null = null;
+              let targetDoc: Document | null = null;
               for (const { doc: d } of contents) {
                 try {
                   const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                   if (span) {
                     span.classList.add("page-word--highlighted");
-                    found = true;
+                    targetSpan = span;
+                    targetDoc = d;
                     break;
                   }
                 } catch { /* */ }
               }
-              // No page turn from here — page turns handled by narrationPageSync effect
+              // Auto-advance page if the highlighted word is off-screen
+              // Uses Readest's approach: scrollToAnchor lets foliate handle all CSS column math
+              if (targetSpan && targetDoc) {
+                try {
+                  const rect = targetSpan.getBoundingClientRect();
+                  const viewportWidth = targetDoc.documentElement.clientWidth;
+                  const viewportHeight = targetDoc.documentElement.clientHeight;
+                  const isOffScreen = rect.right < 0 || rect.left > viewportWidth ||
+                                      rect.bottom < 0 || rect.top > viewportHeight ||
+                                      rect.width === 0;
+                  if (isOffScreen) {
+                    // Create a range around the word and scroll foliate to it
+                    const range = targetDoc.createRange();
+                    range.selectNodeContents(targetSpan);
+                    view.renderer.scrollToAnchor?.(range);
+                  }
+                } catch { /* scroll failed — safe to ignore */ }
+              }
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
