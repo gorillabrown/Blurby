@@ -3794,6 +3794,17 @@ button:focus-visible {
   color: #fff;
 }
 
+/* Overlay cursor for EPUB Flow mode — Range-based, GPU-accelerated */
+.foliate-flow-cursor {
+  position: fixed;
+  height: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 100;
+  transition: transform 0.05s linear, width 0.05s linear;
+  will-change: transform;
+}
+
 .return-to-reading-pill {
   position: fixed;
   bottom: 72px;

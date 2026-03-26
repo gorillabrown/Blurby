@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords, countWordsSegmenter } from "../utils/segmentWords";
+import { getOverlayPosition } from "../utils/getOverlayPosition";
 
 const api = (window as any).electronAPI;
 
@@ -167,6 +168,16 @@ interface FoliatePageViewProps {
   isReading?: boolean;
   /** Callback to scroll foliate to where the current highlight is */
   onJumpToHighlight?: () => void;
+  /** Current reading mode — "page", "flow", or "focus" */
+  readingMode?: string;
+  /** Whether Flow mode is actively playing */
+  flowPlaying?: boolean;
+  /** Currently highlighted word index in Flow mode */
+  highlightedWordIndex?: number;
+  /** Words per minute for Flow mode timing */
+  wpm?: number;
+  /** Callback when Flow mode advances to the next word */
+  onFlowWordAdvance?: (idx: number) => void;
 }
 
 export interface FoliateViewAPI {
@@ -262,14 +273,27 @@ export default function FoliatePageView({
   viewApiRef,
   isReading,
   onJumpToHighlight,
+  readingMode,
+  flowPlaying,
+  highlightedWordIndex,
+  wpm,
+  onFlowWordAdvance,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
   const foliateWordsRef = useRef<FoliateWord[]>([]);
   const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const flowRafRef = useRef<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Store flow-mode callback in a ref to avoid re-render loops
+  const onFlowWordAdvanceRef = useRef(onFlowWordAdvance);
+  onFlowWordAdvanceRef.current = onFlowWordAdvance;
+  const highlightedWordIndexRef = useRef(highlightedWordIndex);
+  highlightedWordIndexRef.current = highlightedWordIndex;
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -573,6 +597,46 @@ export default function FoliatePageView({
     }
   }, [settings.theme, settings.fontFamily, focusTextSize, settings.layoutSpacing]);
 
+  // Flow mode overlay cursor animation (EPUB-only, Range-based)
+  useEffect(() => {
+    if (readingMode !== "flow" || !flowPlaying) {
+      if (cursorRef.current) cursorRef.current.style.display = "none";
+      cancelAnimationFrame(flowRafRef.current);
+      return;
+    }
+    const cursor = cursorRef.current;
+    const container = containerRef.current;
+    if (!cursor || !container) return;
+    cursor.style.display = "block";
+
+    let currentIdx = highlightedWordIndexRef.current ?? 0;
+    const msPerWord = 60000 / (wpm || 300);
+    let lastAdvance = performance.now();
+
+    const tick = (now: number) => {
+      if (now - lastAdvance >= msPerWord) {
+        currentIdx++;
+        lastAdvance = now;
+        onFlowWordAdvanceRef.current?.(currentIdx);
+      }
+      const words = foliateWordsRef.current;
+      const word = words[currentIdx];
+      if (word?.range) {
+        const pos = getOverlayPosition(word.range, container, foliateIframeRef.current);
+        if (pos) {
+          cursor.style.transform = `translate3d(${pos.left}px, ${pos.top + pos.height}px, 0)`;
+          cursor.style.width = `${pos.width}px`;
+        }
+      } else if (word && !word.range) {
+        // Range is null (section unloaded) — hide cursor until re-extraction
+        cursor.style.display = "none";
+      }
+      flowRafRef.current = requestAnimationFrame(tick);
+    };
+    flowRafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(flowRafRef.current);
+  }, [readingMode, flowPlaying, wpm]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -625,6 +689,7 @@ export default function FoliatePageView({
       )}
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
+      <div ref={cursorRef} className="foliate-flow-cursor" style={{ display: "none" }} />
     </div>
   );
 }
