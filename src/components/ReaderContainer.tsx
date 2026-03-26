@@ -332,8 +332,22 @@ export default function ReaderContainer({
     narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
       setHighlightedWordIndex(idx);
       // Highlight word in foliate DOM via imperative API (accesses shadow DOM iframes)
-      if (useFoliate) {
-        foliateApiRef.current?.highlightWordByIndex(idx);
+      if (useFoliate && foliateApiRef.current) {
+        if (typeof foliateApiRef.current.highlightWordByIndex === "function") {
+          foliateApiRef.current.highlightWordByIndex(idx);
+        } else {
+          // Fallback: access view.renderer.getContents directly
+          const view = foliateApiRef.current.getView?.();
+          if (view?.renderer?.getContents) {
+            for (const { doc: d } of view.renderer.getContents()) {
+              try {
+                d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
+                const span = d?.querySelector?.(`[data-word-index="${idx}"]`);
+                if (span) { span.classList.add("page-word--highlighted"); break; }
+              } catch { /* */ }
+            }
+          }
+        }
       }
     });
   }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);
