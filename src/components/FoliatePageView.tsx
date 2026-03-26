@@ -593,41 +593,43 @@ export default function FoliatePageView({
     return () => cancelAnimationFrame(flowRafRef.current);
   }, [readingMode, flowPlaying, wpm]);
 
-  // Narration highlight overlay — positions a div over the current narrated word
+  // Narration highlight — toggle CSS class on word spans inside iframe (same as click highlight)
+  const prevNarrationRef = useRef<{ iframe: Document; idx: number } | null>(null);
   useEffect(() => {
-    const highlight = highlightRef.current;
-    const container = containerRef.current;
-    if (!highlight || !container) return;
-
     if (narrationWordIndex == null || narrationWordIndex < 0) {
-      highlight.style.display = "none";
+      // Clear previous highlight
+      if (prevNarrationRef.current) {
+        const prev = prevNarrationRef.current.iframe.querySelector(`[data-word-index="${prevNarrationRef.current.idx}"]`);
+        prev?.classList.remove("page-word--highlighted");
+        prevNarrationRef.current = null;
+      }
       return;
     }
 
-    // Find the word span across ALL loaded section iframes
-    console.log(`[Foliate] Narration highlight: looking for word index ${narrationWordIndex}`);
     const host = containerRef.current;
-    const iframes = host ? host.querySelectorAll("iframe") : [];
-    let found = false;
+    if (!host) return;
+    const iframes = host.querySelectorAll("iframe");
+
+    // Clear previous highlight
+    if (prevNarrationRef.current) {
+      const prev = prevNarrationRef.current.iframe.querySelector(`[data-word-index="${prevNarrationRef.current.idx}"]`);
+      prev?.classList.remove("page-word--highlighted");
+    }
+
+    // Apply highlight to current word
     for (const iframe of iframes) {
       try {
         const iframeDoc = iframe.contentDocument;
         if (!iframeDoc) continue;
-        const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`) as HTMLElement;
+        const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`);
         if (span) {
-          const spanRect = span.getBoundingClientRect();
-          const iframeRect = iframe.getBoundingClientRect();
-          highlight.style.display = "block";
-          highlight.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top}px, 0)`;
-          highlight.style.width = `${spanRect.width}px`;
-          highlight.style.height = `${spanRect.height}px`;
-          found = true;
+          span.classList.add("page-word--highlighted");
+          prevNarrationRef.current = { iframe: iframeDoc, idx: narrationWordIndex };
+          // Scroll span into view if needed
+          span.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
           break;
         }
       } catch { /* cross-origin */ }
-    }
-    if (!found) {
-      highlight.style.display = "none";
     }
   }, [narrationWordIndex]);
 
