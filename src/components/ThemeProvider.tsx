@@ -9,7 +9,7 @@ interface ThemeContextType {
   setFontFamily: (f: string | null) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({
+export const ThemeContext = createContext<ThemeContextType>({
   theme: "dark",
   setTheme: () => {},
   accentColor: null,
@@ -33,6 +33,7 @@ const themes: Record<string, Record<string, string>> = {
     "--accent": "#c4a882",
     "--accent-glow": "rgba(196,168,130,0.3)",
     "--accent-faded": "rgba(196,168,130,0.13)",
+    "--accent-highlighted": "rgba(196,168,130,0.3)",
     "--danger-muted": "rgba(226,75,74,0.2)",
     "--reader-bg": "#050505",
     "--overlay-light": "rgba(255,255,255,0.06)",
@@ -59,6 +60,7 @@ const themes: Record<string, Record<string, string>> = {
     "--accent": "#8b6f47",
     "--accent-glow": "rgba(139,111,71,0.3)",
     "--accent-faded": "rgba(139,111,71,0.13)",
+    "--accent-highlighted": "rgba(139,111,71,0.3)",
     "--danger-muted": "rgba(226,75,74,0.15)",
     "--reader-bg": "#f0ede8",
     "--overlay-light": "rgba(0,0,0,0.04)",
@@ -69,6 +71,33 @@ const themes: Record<string, Record<string, string>> = {
     "--placeholder-bg": "#e8e5e0",
     "--placeholder-banner": "#c8c4bc",
     "--placeholder-text": "#555",
+    "--badge-on-color": "#fff",
+  },
+  blurby: {
+    "--bg": "#ffffff",
+    "--bg-raised": "#CAE4FE",
+    "--bg-hover": "#b8d9fc",
+    "--bg-secondary": "#f0f7ff",
+    "--border": "#2E73FF",
+    "--border-light": "#a8d0fa",
+    "--text": "#1a1a1a",
+    "--text-dim": "#4a4a4a",
+    "--text-dimmer": "#767676",
+    "--text-muted": "#888",
+    "--accent": "#E63946",
+    "--accent-glow": "rgba(230,57,70,0.3)",
+    "--accent-faded": "rgba(230,57,70,0.13)",
+    "--accent-highlighted": "rgba(230,57,70,0.3)",
+    "--danger-muted": "rgba(230,57,70,0.2)",
+    "--reader-bg": "#ffffff",
+    "--overlay-light": "rgba(0,0,0,0.04)",
+    "--overlay-medium": "rgba(0,0,0,0.06)",
+    "--overlay-heavy": "rgba(0,0,0,0.10)",
+    "--overlay-backdrop": "rgba(255,255,255,0.9)",
+    "--overlay-gradient": "rgba(255,255,255,0.7)",
+    "--placeholder-bg": "#e8f0fe",
+    "--placeholder-banner": "#CAE4FE",
+    "--placeholder-text": "#333",
     "--badge-on-color": "#fff",
   },
   eink: {
@@ -85,6 +114,7 @@ const themes: Record<string, Record<string, string>> = {
     "--accent": "#333333",
     "--accent-glow": "rgba(51,51,51,0.2)",
     "--accent-faded": "rgba(51,51,51,0.13)",
+    "--accent-highlighted": "rgba(51,51,51,0.3)",
     "--danger-muted": "rgba(226,75,74,0.15)",
     "--reader-bg": "#e8e4d9",
     "--overlay-light": "rgba(0,0,0,0.04)",
@@ -99,7 +129,7 @@ const themes: Record<string, Record<string, string>> = {
   },
 };
 
-const themeOrder = ["dark", "light", "eink", "system"];
+const themeOrder = ["blurby", "dark", "light", "eink", "system"];
 
 export function nextTheme(current: string): string {
   const idx = themeOrder.indexOf(current);
@@ -161,6 +191,8 @@ export function ThemeProvider({ children, initialTheme = "dark" }: { children: R
       const rgb = hexToRgb(accentColor);
       if (rgb) {
         root.style.setProperty("--accent-glow", `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`);
+        root.style.setProperty("--accent-faded", `rgba(${rgb.r},${rgb.g},${rgb.b},0.13)`);
+        root.style.setProperty("--accent-highlighted", `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`);
       }
     }
 

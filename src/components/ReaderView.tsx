@@ -19,6 +19,7 @@ import WpmGauge from "./WpmGauge";
 import HighlightMenu from "./HighlightMenu";
 import DefinitionPopup from "./DefinitionPopup";
 import PausedTextView from "./PausedTextView";
+import blurbyIcon from "../assets/blurby-icon.png";
 
 const api = window.electronAPI;
 
@@ -297,9 +298,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         <div className="reader-top-left">
           {onToggleFlap && (
             <button className="hamburger-btn" onClick={(e) => { e.stopPropagation(); onToggleFlap(); }} aria-label="Open menu" title="Menu (Tab)">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+              <img src={blurbyIcon} alt="" width="48" height="48" style={{ borderRadius: 8, display: "block" }} aria-hidden="true" />
             </button>
           )}
           <button

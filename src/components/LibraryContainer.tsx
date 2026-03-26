@@ -16,7 +16,6 @@ import GoToIndicator from "./GoToIndicator";
 import SnoozePickerOverlay from "./SnoozePickerOverlay";
 import TagPickerOverlay from "./TagPickerOverlay";
 import QuickSettingsPopover from "./QuickSettingsPopover";
-import HotkeyCoach from "./HotkeyCoach";
 import OnboardingOverlay from "./OnboardingOverlay";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
@@ -43,6 +42,7 @@ export default function LibraryContainer() {
 
   // MenuFlap state
   const [menuFlapOpen, setMenuFlapOpen] = useState(false);
+  const [settingsPage, setSettingsPage] = useState<string | null>(null);
   const toggleMenuFlap = useCallback(() => setMenuFlapOpen((prev) => !prev), []);
 
   // Site login state
@@ -50,6 +50,10 @@ export default function LibraryContainer() {
 
   useEffect(() => {
     api.getSiteLogins().then(setSiteLogins);
+    // Pre-load Kokoro model at app startup (non-blocking) — eliminates "Not Responding" flash
+    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) {
+      api.kokoroPreload().catch(() => {});
+    }
   }, []);
 
   const handleSiteLogin = useCallback(async (url: string) => {
@@ -143,12 +147,17 @@ export default function LibraryContainer() {
     openDoc(updated);
   }, [library, openDoc, setLibrary]);
 
-  const handleExitReader = useCallback((_finalPos: number) => {
+  const handleExitReader = useCallback((finalPos: number) => {
+    // Save reading position before exiting
+    if (activeDoc) {
+      updateProgress(activeDoc.id, finalPos);
+    }
     setActiveDoc(null);
     setView("library");
-  }, []);
+  }, [activeDoc, updateProgress]);
 
-  const handleOpenSettings = useCallback(() => {
+  const handleOpenSettings = useCallback((page?: string) => {
+    setSettingsPage(page || null);
     setMenuFlapOpen(true);
   }, []);
 
@@ -311,6 +320,18 @@ export default function LibraryContainer() {
     kbState.setActiveOverlay(null);
   }, [library, setLibrary, kbState]);
 
+  // BUG-067: Mark docs as seen (clear "new" dot after scrolling into view + navigating away)
+  const markDocsSeen = useCallback((docIds: string[]) => {
+    if (docIds.length === 0) return;
+    const now = Date.now();
+    const idSet = new Set(docIds);
+    const updatedLibrary = library.map((d) =>
+      idSet.has(d.id) && !d.seenAt ? { ...d, seenAt: now, unread: false } : d
+    );
+    setLibrary(updatedLibrary);
+    api.saveLibrary(updatedLibrary);
+  }, [library, setLibrary]);
+
   const handleOnboardingComplete = useCallback(() => {
     setShowOnboarding(false);
     setSettings((prev) => ({ ...prev, firstRunCompleted: true }));
@@ -395,6 +416,8 @@ export default function LibraryContainer() {
               onArchiveDoc={archiveDoc}
               onToggleFavorite={toggleFavorite}
               onOpenDocById={handleOpenDocById}
+              settingsPage={settingsPage}
+              onClearSettingsPage={() => setSettingsPage(null)}
             />
           </DropZone>
           {/* Global overlays — available in reader view too */}
@@ -453,7 +476,7 @@ export default function LibraryContainer() {
   const menuFlap = (
     <MenuFlap
       open={menuFlapOpen}
-      onClose={() => setMenuFlapOpen(false)}
+      onClose={() => { setMenuFlapOpen(false); setSettingsPage(null); }}
       docs={library}
       settings={settings}
       onOpenDoc={handleOpenDocById}
@@ -461,6 +484,7 @@ export default function LibraryContainer() {
       siteLogins={siteLogins}
       onSiteLogin={handleSiteLogin}
       onSiteLogout={handleSiteLogout}
+      targetView={settingsPage}
     />
   );
 
@@ -491,6 +515,7 @@ export default function LibraryContainer() {
               onUnarchiveDoc={unarchiveDoc}
               onToggleFlap={toggleMenuFlap}
               onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
+              onMarkDocsSeen={markDocsSeen}
               focusedDocId={kbState.focusedIndex >= 0 ? kbActions.getDocIdAtIndex(kbState.focusedIndex) : null}
               selectedIds={kbState.selectedIds}
               selectionMode={kbState.selectedIds.size > 0}
@@ -575,7 +600,6 @@ export default function LibraryContainer() {
             <button className="filter-pill-clear" onClick={() => kbState.setActiveFilter("all")} aria-label="Clear filter">&times;</button>
           </div>
         )}
-        <HotkeyCoach />
         {showOnboarding && (
           <OnboardingOverlay onComplete={handleOnboardingComplete} />
         )}

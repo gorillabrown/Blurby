@@ -10,6 +10,7 @@ import DocGridCard from "./DocGridCard";
 import StatsPanel from "./StatsPanel";
 import RecentFolders from "./RecentFolders";
 import CloudSyncIndicator from "./CloudSyncIndicator";
+import blurbyIcon from "../assets/blurby-icon.png";
 
 const api = window.electronAPI;
 
@@ -39,6 +40,7 @@ interface LibraryViewProps {
   selectedIds?: Set<string>;
   selectionMode?: boolean;
   onToggleSelect?: (docId: string) => void;
+  onMarkDocsSeen?: (docIds: string[]) => void;
 }
 
 export default function LibraryView({
@@ -46,7 +48,7 @@ export default function LibraryView({
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
-  focusedDocId, selectedIds, selectionMode, onToggleSelect,
+  focusedDocId, selectedIds, selectionMode, onToggleSelect, onMarkDocsSeen,
 }: LibraryViewProps) {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
@@ -76,7 +78,7 @@ export default function LibraryView({
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchIndex, setSearchIndex] = useState(-1);
-  const [sortBy, setSortBy] = useState("progress"); // "progress" | "alpha" | "newest" | "oldest"
+  const [sortBy, setSortBy] = useState(settings.defaultSort || "progress"); // "progress" | "alpha" | "newest" | "oldest"
 
   // E-ink: debounce search to 500ms to reduce repaints
   const isEinkTheme = settings.theme === "eink";
@@ -165,6 +167,48 @@ export default function LibraryView({
     return docs;
   }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme, sortBy]);
 
+  // BUG-067: IntersectionObserver to track "new" cards seen in viewport
+  const seenDocIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const scrollContainer = document.querySelector(".library-scroll");
+    if (!scrollContainer) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const docId = (entry.target as HTMLElement).dataset.docId;
+            if (docId) seenDocIdsRef.current.add(docId);
+          }
+        }
+      },
+      { root: scrollContainer, threshold: 0.5 }
+    );
+    // Observe all unread cards
+    const unreadCards = scrollContainer.querySelectorAll<HTMLElement>(".doc-grid-card-unread, .doc-card-unread");
+    unreadCards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [filteredLibrary]);
+
+  // Flush seen docs when navigating away from library
+  const flushSeenDocs = useCallback(() => {
+    if (seenDocIdsRef.current.size > 0 && onMarkDocsSeen) {
+      onMarkDocsSeen(Array.from(seenDocIdsRef.current));
+      seenDocIdsRef.current.clear();
+    }
+  }, [onMarkDocsSeen]);
+
+  // Wrap onOpenDoc to flush seen docs before navigating
+  const handleOpenDocWithSeen = useCallback((doc: BlurbyDoc, mode?: string) => {
+    flushSeenDocs();
+    onOpenDoc(doc, mode);
+  }, [onOpenDoc, flushSeenDocs]);
+
+  // Wrap onToggleFlap to flush seen docs
+  const handleToggleFlapWithSeen = useCallback(() => {
+    flushSeenDocs();
+    onToggleFlap();
+  }, [onToggleFlap, flushSeenDocs]);
+
   const { activeLibrary, totalWords, newCount, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
     const active = library.filter((d) => !d.archived);
     const cutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
@@ -196,8 +240,25 @@ export default function LibraryView({
     notStarted: filteredLibrary.filter((d) => (d.position || 0) === 0),
   }), [filteredLibrary]);
 
+  // Library layout CSS class modifiers
+  const cardSize = settings.libraryCardSize || "medium";
+  const cardSpacing = settings.libraryCardSpacing || "cozy";
+  const gridClassName = `doc-grid doc-grid-size-${cardSize} doc-grid-spacing-${cardSpacing}`;
+  const listClassName = `doc-list doc-list-spacing-${cardSpacing}`;
+
   const handleAddDoc = async () => {
-    if (!newTitle.trim() || !newText.trim()) return;
+    if (editMetaMode && editingId) {
+      // Metadata-only save (file-based docs — update title + author)
+      const doc = library.find(d => d.id === editingId);
+      if (doc) {
+        doc.title = newTitle.trim() || doc.title;
+        doc.author = newAuthor.trim() || doc.author;
+        api.updateDocProgress(doc.id, doc.position || 0); // triggers library save
+      }
+      setNewTitle(""); setNewAuthor(""); setShowAdd(false); setEditingId(null); setEditMetaMode(false);
+      return;
+    }
+    if (!newTitle.trim()) return;
     await onAddDoc(newTitle.trim(), newText.trim(), editingId);
     setNewTitle(""); setNewText(""); setShowAdd(false); setEditingId(null);
   };
@@ -212,12 +273,26 @@ export default function LibraryView({
     else { setUrlInput(""); setShowUrl(false); setUrlError(""); }
   };
 
+  const [newAuthor, setNewAuthor] = useState("");
+  const [editMetaMode, setEditMetaMode] = useState(false);
+
   const startEdit = useCallback((doc: BlurbyDoc) => {
-    setEditingId(doc.id); setNewTitle(doc.title); setNewText(doc.content || ""); setShowAdd(true);
+    setEditingId(doc.id);
+    setNewTitle(doc.title);
+    setNewAuthor(doc.author || "");
+    // For file-based docs, open metadata editor (no content editing)
+    if (doc.filepath) {
+      setEditMetaMode(true);
+      setShowAdd(true);
+    } else {
+      setEditMetaMode(false);
+      setNewText(doc.content || "");
+      setShowAdd(true);
+    }
   }, []);
 
   const handleCancelDelete = useCallback(() => setConfirmDelete(null), []);
-  const handleOpenScroll = useCallback((d: BlurbyDoc) => onOpenDoc(d, "scroll"), [onOpenDoc]);
+  const handleOpenScroll = useCallback((d: BlurbyDoc) => handleOpenDocWithSeen(d, "scroll"), [handleOpenDocWithSeen]);
   const handleOpenNewWindow = useCallback((d: BlurbyDoc) => window.electronAPI.openReaderWindow(d.id), []);
 
   const handleLaunchToggle = async () => {
@@ -270,10 +345,8 @@ export default function LibraryView({
         <div className="library-sticky-top">
         <div className="library-header">
           <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <button className="hamburger-btn" onClick={onToggleFlap} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
+            <button className="hamburger-btn" onClick={handleToggleFlapWithSeen} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
+              <img src={blurbyIcon} alt="" width="48" height="48" style={{ borderRadius: 8, display: "block" }} aria-hidden="true" />
             </button>
             <div>
               {editFolder ? (
@@ -374,7 +447,8 @@ export default function LibraryView({
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs + Sort row */}
+        <div className="library-tabs-row">
         <div className="library-tabs" role="tablist">
           <button
             className={`library-tab${tab === "all" ? " library-tab-active" : ""}`}
@@ -425,23 +499,23 @@ export default function LibraryView({
             role="tab"
             aria-selected={typeFilter === "pdfs"}
           >PDFs ({pdfCount})</button>
-          {/* Sort dropdown right-justified on filter line (21I) */}
-          {library.length > 3 && (
-            <select
-              className="sort-select"
-              style={{ marginLeft: "auto" }}
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              aria-label="Sort order"
-            >
-              <option value="progress">closest to done</option>
-              <option value="alpha">A-Z by title</option>
-              <option value="author">A-Z by author</option>
-              <option value="newest">newest first</option>
-              <option value="oldest">oldest first</option>
-            </select>
-          )}
         </div>
+        {/* Sort dropdown pinned right, never scrolls with tabs */}
+        {library.length > 3 && (
+          <select
+            className="sort-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            aria-label="Sort order"
+          >
+            <option value="progress">closest to done</option>
+            <option value="alpha">A-Z by title</option>
+            <option value="author">A-Z by author</option>
+            <option value="newest">newest first</option>
+            <option value="oldest">oldest first</option>
+          </select>
+        )}
+        </div>{/* close library-tabs-row */}
         </div>{/* close library-sticky-top */}
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
@@ -471,7 +545,7 @@ export default function LibraryView({
                   setSearchIndex((prev) => Math.max(prev - 1, -1));
                 } else if (e.key === "Enter" && searchIndex >= 0) {
                   e.preventDefault();
-                  onOpenDoc(searchResults[searchIndex]);
+                  handleOpenDocWithSeen(searchResults[searchIndex]);
                   setSearchQuery("");
                   setSearchIndex(-1);
                   setSearchFocused(false);
@@ -487,7 +561,7 @@ export default function LibraryView({
                     <div
                       key={doc.id}
                       className={`search-result-item${idx === searchIndex ? " search-result-active" : ""}`}
-                      onMouseDown={() => { onOpenDoc(doc); setSearchQuery(""); setSearchIndex(-1); setSearchFocused(false); }}
+                      onMouseDown={() => { handleOpenDocWithSeen(doc); setSearchQuery(""); setSearchIndex(-1); setSearchFocused(false); }}
                     >
                       <span className="search-result-title">{formatDisplayTitle(doc.title)}</span>
                       {doc.author && <span className="search-result-author">{doc.author}</span>}
@@ -530,7 +604,10 @@ export default function LibraryView({
             newTitle={newTitle} newText={newText} editingId={editingId}
             onTitleChange={setNewTitle} onTextChange={setNewText}
             onSave={handleAddDoc}
-            onCancel={() => { setShowAdd(false); setEditingId(null); }}
+            onCancel={() => { setShowAdd(false); setEditingId(null); setEditMetaMode(false); }}
+            metaMode={editMetaMode}
+            newAuthor={newAuthor}
+            onAuthorChange={setNewAuthor}
           />
         )}
 
@@ -557,9 +634,11 @@ export default function LibraryView({
             {readingNow.length > 0 && (
               <>
                 <div className="library-section-label">Reading Now</div>
-                <div className="doc-grid" role="list">
+                <div className={gridClassName} role="list">
                   {readingNow.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                    <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                      onResetProgress={onResetProgress}
+                      onEditMetadata={startEdit}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
                       selectionMode={selectionMode}
@@ -572,9 +651,11 @@ export default function LibraryView({
             {notStarted.length > 0 && (
               <>
                 <div className="library-section-label">Not Started</div>
-                <div className="doc-grid" role="list">
+                <div className={gridClassName} role="list">
                   {notStarted.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={onOpenDoc} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                    <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                      onResetProgress={onResetProgress}
+                      onEditMetadata={startEdit}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
                       selectionMode={selectionMode}
@@ -590,11 +671,11 @@ export default function LibraryView({
             {readingNow.length > 0 && (
               <>
                 <div className="library-section-label">Reading Now</div>
-                <div className="doc-list" role="list">
+                <div className={listClassName} role="list">
                   {readingNow.map((doc) => (
                     <DocCard
                       key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
-                      onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
+                      onOpen={handleOpenDocWithSeen} onReset={onResetProgress} onEdit={startEdit}
                       onDelete={onDeleteDoc}
                       onConfirmDelete={setConfirmDelete}
                       onCancelDelete={handleCancelDelete}
@@ -615,11 +696,11 @@ export default function LibraryView({
             {notStarted.length > 0 && (
               <>
                 <div className="library-section-label">Not Started</div>
-                <div className="doc-list" role="list">
+                <div className={listClassName} role="list">
                   {notStarted.map((doc) => (
                     <DocCard
                       key={doc.id} doc={doc} wpm={wpm} confirmDelete={confirmDelete}
-                      onOpen={onOpenDoc} onReset={onResetProgress} onEdit={startEdit}
+                      onOpen={handleOpenDocWithSeen} onReset={onResetProgress} onEdit={startEdit}
                       onDelete={onDeleteDoc}
                       onConfirmDelete={setConfirmDelete}
                       onCancelDelete={handleCancelDelete}

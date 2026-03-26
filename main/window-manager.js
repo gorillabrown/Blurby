@@ -9,8 +9,10 @@ function getThemeColors(settings) {
     ? (nativeTheme.shouldUseDarkColors ? "dark" : "light")
     : settings.theme;
   switch (resolvedTheme) {
+    case "blurby":
+      return { bg: "#ffffff", titleBar: "#ffffff", titleText: "#1a1a1a" };
     case "light":
-      return { bg: "#f5f3ef", titleBar: "#c4c1bb", titleText: "#1a1a1a" };
+      return { bg: "#f5f3ef", titleBar: "#f5f3ef", titleText: "#1a1a1a" };
     case "eink":
       return { bg: "#e8e4d9", titleBar: "#b9b6ae", titleText: "#1a1a1a" };
     default: // dark
@@ -28,15 +30,19 @@ function installContentSecurityPolicy(isDev) {
   _cspInstalled = true;
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    // Build CSP: allow self, inline styles (needed for dynamic styling), data/file URIs for images
-    let csp = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; " +
-              "img-src 'self' data: file:; font-src 'self'; connect-src 'self'";
-    // In dev mode, allow websocket connections for Vite HMR
     if (isDev) {
-      csp += " ws: http://localhost:*";
-      csp = csp.replace("script-src 'self'", "script-src 'self' 'unsafe-inline' http://localhost:*");
-      csp = csp.replace("connect-src 'self'", "connect-src 'self' ws: http://localhost:*");
+      // In dev mode, remove any CSP to allow foliate-js blob: iframes + Vite HMR
+      const headers = { ...details.responseHeaders };
+      delete headers["Content-Security-Policy"];
+      delete headers["content-security-policy"];
+      callback({ responseHeaders: headers });
+      return;
     }
+    // Production CSP: foliate-js needs blob: for iframe content, images, and fonts from EPUBs
+    const csp = "default-src 'self' blob:; script-src 'self' blob: 'unsafe-inline'; " +
+              "style-src 'self' 'unsafe-inline' blob:; " +
+              "img-src 'self' data: file: blob:; font-src 'self' blob: data:; " +
+              "frame-src 'self' blob:; connect-src 'self'";
     callback({
       responseHeaders: {
         ...details.responseHeaders,

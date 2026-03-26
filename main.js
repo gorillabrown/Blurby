@@ -432,7 +432,7 @@ app.whenReady().then(async () => {
           const meta = await extractDocMetadata(sampleEpubPath, "sample-meditations", getDataPath());
           addDocToLibrary({
             id: "sample-meditations",
-            title: "[Sample] Meditations \u2014 Marcus Aurelius",
+            title: "Meditations",
             filepath: sampleEpubPath,
             wordCount: countWords(content),
             position: 0,

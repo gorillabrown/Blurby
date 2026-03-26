@@ -34,6 +34,10 @@ export interface BlurbyDoc {
   snoozedUntil?: number;      // epoch ms, null/undefined = not snoozed
   tags?: string[];
   collection?: string | null;
+  // Sprint 25C: "New" dot tracking
+  seenAt?: number;        // timestamp when card was seen in library view
+  // Sprint 26: EPUB CFI position tracking
+  cfi?: string;           // EPUB Canonical Fragment Identifier — exact reading position
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -57,13 +61,13 @@ export interface BlurbySettings {
   sourceFolder: string | null;
   folderName: string;
   recentFolders: string[];
-  theme: "dark" | "light" | "eink" | "system";
+  theme: "dark" | "light" | "blurby" | "eink" | "system";
   launchAtLogin: boolean;
   focusTextSize: number;
   accentColor: string | null;
   fontFamily: string | null;
   compactMode: boolean;
-  readingMode: "focus" | "flow" | "page";
+  readingMode: "focus" | "flow" | "narration" | "page";
   focusMarks: boolean;
   readingRuler: boolean;
   focusSpan: number;
@@ -74,20 +78,29 @@ export interface BlurbySettings {
   punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
   viewMode: "list" | "grid";
   // Flow mode settings
-  flowWordSpan: number; // how many words to highlight at once in Flow mode (1-5, default 1)
+  flowWordSpan: number; // how many words to highlight at once in Flow mode (3-5, default 3)
+  flowCursorStyle: "underline" | "highlight"; // flow cursor visual style (default: underline)
   // E-ink display optimization settings
   einkWpmCeiling: number;
   einkRefreshInterval: number;
   einkPhraseGrouping: boolean;
   // TTS settings
   ttsEnabled: boolean;
-  ttsVoiceName: string | null; // SpeechSynthesisVoice.name
+  ttsEngine: "web" | "kokoro"; // which TTS backend to use
+  ttsVoiceName: string | null; // SpeechSynthesisVoice.name (web) or Kokoro voice ID
   ttsRate: number; // 0.5-2.0, default 1.0
+  // Last-used reading mode (Space bar starts this mode from Page view)
+  lastReadingMode: "focus" | "flow" | "narration";
   // Cloud sync settings
   syncIntervalMinutes: number;
   syncOnMeteredConnection: boolean;
   // Sprint 23: First-run onboarding
   firstRunCompleted?: boolean;
+  // Sprint 25C: Library layout settings
+  defaultSort?: string;
+  defaultViewMode?: "grid" | "list";
+  libraryCardSize?: "small" | "medium" | "large";
+  libraryCardSpacing?: "compact" | "cozy" | "roomy";
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────
@@ -167,7 +180,7 @@ export interface ElectronAPI {
   deleteDoc: (docId: string) => Promise<void>;
   updateDoc: (docId: string, title: string, content: string) => Promise<void>;
   resetProgress: (docId: string) => Promise<void>;
-  updateDocProgress: (docId: string, position: number) => Promise<void>;
+  updateDocProgress: (docId: string, position: number, cfi?: string) => Promise<void>;
   loadDocContent: (docId: string) => Promise<string | { userError: string } | null>;
   getDocChapters: (docId: string) => Promise<Array<{ title: string; charOffset: number }>>;
   saveHighlight: (data: { docTitle: string; text: string; wordIndex: number; totalWords: number }) => Promise<{ ok?: boolean; error?: string }>;
@@ -233,6 +246,14 @@ export interface ElectronAPI {
   onCloudSyncStatusChanged?: (callback: (status: SyncStatusValue) => void) => () => void;
   onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
   onWatcherError?: (callback: (data: { message: string }) => void) => () => void;
+  // Kokoro TTS
+  kokoroPreload?: () => Promise<void>;
+  kokoroModelStatus: () => Promise<{ ready: boolean }>;
+  kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
+  kokoroDownload?: () => Promise<{ ok?: boolean; error?: string }>;
+  kokoroGenerate?: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; error?: string }>;
+  onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
+  onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
 }
 
 declare global {

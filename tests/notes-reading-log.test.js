@@ -58,10 +58,19 @@ function estimatePages(wordCount) {
 const COACH_HINTS = {
   archive: { action: "archive", hotkey: "E" },
   favorite: { action: "favorite", hotkey: "S" },
+  star: { action: "star", hotkey: "S" },
   search: { action: "search", hotkey: "/" },
+  delete: { action: "delete", hotkey: "#" },
   queue: { action: "queue", hotkey: "Q" },
-  openReader: { action: "openReader", hotkey: "Enter" },
-  menu: { action: "menu", hotkey: "M" },
+  settings: { action: "open settings", hotkey: "Ctrl+," },
+  play: { action: "play/pause", hotkey: "Space" },
+  enterFocus: { action: "enter Focus mode", hotkey: "Shift+Space" },
+  enterFlow: { action: "enter Flow mode", hotkey: "Space" },
+  narration: { action: "toggle narration", hotkey: "N" },
+  fontSize: { action: "adjust font size", hotkey: "Ctrl+=/\u2212" },
+  prevChapter: { action: "go to previous chapter", hotkey: "[" },
+  nextChapter: { action: "go to next chapter", hotkey: "]" },
+  menu: { action: "toggle menu", hotkey: "Tab" },
 };
 
 function getCoachHint(action) {
@@ -261,9 +270,23 @@ describe("getCoachHint (HotkeyCoach)", () => {
 
   it("menu hint", () => {
     expect(getCoachHint("menu")).toEqual({
-      action: "menu",
-      hotkey: "M",
+      action: "toggle menu",
+      hotkey: "Tab",
     });
+  });
+
+  it("settings hint", () => {
+    expect(getCoachHint("settings")).toEqual({
+      action: "open settings",
+      hotkey: "Ctrl+,",
+    });
+  });
+
+  it("reader coaching hints", () => {
+    expect(getCoachHint("play")).toEqual({ action: "play/pause", hotkey: "Space" });
+    expect(getCoachHint("narration")).toEqual({ action: "toggle narration", hotkey: "N" });
+    expect(getCoachHint("enterFocus")).toEqual({ action: "enter Focus mode", hotkey: "Shift+Space" });
+    expect(getCoachHint("prevChapter")).toEqual({ action: "go to previous chapter", hotkey: "[" });
   });
 });
 

@@ -3,16 +3,17 @@ import { createPortal } from "react-dom";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import ReadingQueue from "./ReadingQueue";
 import { SettingsMenu } from "./SettingsMenu";
+import { triggerCoachHint } from "./HotkeyCoach";
 
 type FlapView = "queue" | "settings" | string;
 
 const TITLES: Record<string, string> = {
   queue: "Reading Queue",
   settings: "Settings",
-  "text-size": "Text Size",
   "speed-reading": "Speed Reading",
   theme: "Theme",
-  layout: "Layout",
+  layout: "Reading Layout",
+  "library-layout": "Library Layout",
   connectors: "Connectors",
   help: "Help",
   hotkeys: "Hotkey Map",
@@ -29,6 +30,7 @@ interface MenuFlapProps {
   onSiteLogin: (url: string) => Promise<void>;
   onSiteLogout: (domain: string) => Promise<void>;
   isMac?: boolean;
+  targetView?: string | null;
 }
 
 export default function MenuFlap({
@@ -42,39 +44,19 @@ export default function MenuFlap({
   onSiteLogin,
   onSiteLogout,
   isMac = false,
+  targetView,
 }: MenuFlapProps) {
   const [view, setView] = useState<FlapView>("queue");
 
-  // Reset to queue whenever the flap is opened
+  // Reset to queue (or target sub-page) whenever the flap is opened
   useEffect(() => {
     if (open) {
-      setView("queue");
+      setView(targetView || "queue");
     }
-  }, [open]);
+  }, [open, targetView]);
 
-  // Click anywhere outside flap closes it
+  // Outside clicks are handled by the backdrop overlay (onClick/onMouseDown={onClose})
   const flapRef = useRef<HTMLDivElement>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-  useEffect(() => {
-    if (!open) return;
-    // Close flap on any mousedown outside the flap panel.
-    // Uses document capture phase so it fires before any element's own handler.
-    const handler = (e: MouseEvent) => {
-      if (flapRef.current && flapRef.current.contains(e.target as Node)) return;
-      onCloseRef.current();
-    };
-    // Delay registration so the opening click/mousedown doesn't immediately close
-    const timer = setTimeout(() => {
-      document.addEventListener("mousedown", handler, true);
-      document.addEventListener("pointerdown", handler, true);
-    }, 150);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener("mousedown", handler, true);
-      document.removeEventListener("pointerdown", handler, true);
-    };
-  }, [open]);
 
   // Escape closes flap (or navigates back in settings sub-pages)
   useEffect(() => {
@@ -154,6 +136,8 @@ export default function MenuFlap({
         ref={flapRef}
         className={`menu-flap${open ? " open" : ""}`}
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Menu"
         aria-modal="true"
@@ -183,34 +167,8 @@ export default function MenuFlap({
           <div className="menu-flap-header-actions">
             {isOnQueue && (
               <button
-                className="menu-flap-compact-btn"
-                onClick={handleCompactToggle}
-                aria-label={settings.compactMode ? "Expand view" : "Compact view"}
-                title={settings.compactMode ? "Expand view" : "Compact view"}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  {settings.compactMode ? (
-                    <path
-                      d="M2 4h12M2 8h12M2 12h12"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  ) : (
-                    <path
-                      d="M2 3h12M2 6h8M2 9h12M2 12h8"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  )}
-                </svg>
-              </button>
-            )}
-            {isOnQueue && (
-              <button
                 className="menu-flap-settings-btn"
-                onClick={handleGoToSettings}
+                onClick={() => { triggerCoachHint("settings"); handleGoToSettings(); }}
                 aria-label="Go to settings"
                 title="Settings"
               >

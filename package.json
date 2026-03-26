@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -18,7 +18,13 @@
   "build": {
     "appId": "com.blurby.app",
     "extraResources": [
-      { "from": "resources/", "to": "resources/", "filter": ["**/*"] }
+      {
+        "from": "resources/",
+        "to": "resources/",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "productName": "Blurby",
     "publish": [
@@ -85,8 +91,10 @@
     "docx": "^9.6.1",
     "electron-updater": "^6.8.3",
     "exceljs": "^4.4.0",
+    "foliate-js": "^1.0.1",
     "googleapis": "^171.4.0",
     "jsdom": "^24.1.0",
+    "kokoro-js": "^1.2.1",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.18.0",
     "react": "^19.0.0",

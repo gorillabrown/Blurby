@@ -57,6 +57,12 @@ export default function DefinitionPopup({ word, position, onSaveWithDefinition, 
   };
 
   return (
+    <>
+    <div
+      className="definition-popup-overlay"
+      onClick={onClose}
+      aria-hidden="true"
+    />
     <div
       className="definition-popup"
       style={{ left: position.x, top: position.y + 44 }}
@@ -96,5 +102,6 @@ export default function DefinitionPopup({ word, position, onSaveWithDefinition, 
         </>
       )}
     </div>
+    </>
   );
 }

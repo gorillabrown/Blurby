@@ -21,7 +21,7 @@ export const PUNCTUATION_PAUSE_MS = 1000;
 
 // ── Focus Mode Text Size ──────────────────────────────────────────────────────
 /** Default focus/flow text size as a percentage scale */
-export const DEFAULT_FOCUS_TEXT_SIZE = 100;
+export const DEFAULT_FOCUS_TEXT_SIZE = 110;
 /** Minimum focus/flow text size (percentage) */
 export const MIN_FOCUS_TEXT_SIZE = 60;
 /** Maximum focus/flow text size (percentage) */
@@ -50,6 +50,8 @@ export const FLOW_STATE_SYNC_MS = 500;
 export const PAGE_FLOW_SENTENCE_PAUSE_MS = 400;
 /** Extra pause after mid-sentence punctuation (comma, semicolon, colon) in PageReaderView (ms) */
 export const PAGE_FLOW_CLAUSE_PAUSE_MS = 200;
+/** Pause duration at end of page before auto-turning in Flow mode (ms) */
+export const FLOW_PAGE_TURN_PAUSE_MS = 200;
 
 // ── Keyboard ──────────────────────────────────────────────────────────────────
 /** G-sequence timeout — how long to wait for second key in "gg", "gf", etc. (ms) */
@@ -58,8 +60,8 @@ export const G_SEQUENCE_TIMEOUT_MS = 2000;
 export const DOUBLE_ESC_WINDOW_MS = 2000;
 
 // ── TTS (Text-to-Speech) ──────────────────────────────────────────────────────
-/** Number of words per TTS utterance chunk — balances latency and flow */
-export const TTS_CHUNK_SIZE = 4;
+/** Number of words per TTS utterance chunk — larger = smoother speech, smaller = tighter cursor sync */
+export const TTS_CHUNK_SIZE = 40;
 /** Maximum TTS speech rate (Web Speech API rate, 0.5–3.0 scale) */
 export const TTS_MAX_RATE = 2.0;
 /** Minimum TTS speech rate */
@@ -68,6 +70,47 @@ export const TTS_MIN_RATE = 0.5;
 export const TTS_RATE_BASELINE_WPM = 150;
 /** Maximum WPM allowed when TTS narration is active */
 export const TTS_WPM_CAP = 400;
+/** Step size for TTS rate adjustment via Up/Down arrows */
+export const TTS_RATE_STEP = 0.1;
+
+// ── Kokoro TTS ──────────────────────────────────────────────────────────────
+/** HuggingFace model ID for Kokoro ONNX */
+export const KOKORO_MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
+/** Quantization level for Kokoro model (q8 = 92MB, good quality/size) */
+export const KOKORO_DTYPE = "q8";
+/** Kokoro output sample rate (Hz) */
+export const KOKORO_SAMPLE_RATE = 24000;
+/** Friendly names for Kokoro voices */
+export const KOKORO_VOICE_NAMES: Record<string, string> = {
+  af_heart: "Heart (American Female)",
+  af_alloy: "Alloy (American Female)",
+  af_aoede: "Aoede (American Female)",
+  af_bella: "Bella (American Female)",
+  af_jessica: "Jessica (American Female)",
+  af_kore: "Kore (American Female)",
+  af_nicole: "Nicole (American Female)",
+  af_nova: "Nova (American Female)",
+  af_river: "River (American Female)",
+  af_sarah: "Sarah (American Female)",
+  af_sky: "Sky (American Female)",
+  am_adam: "Adam (American Male)",
+  am_echo: "Echo (American Male)",
+  am_eric: "Eric (American Male)",
+  am_fenrir: "Fenrir (American Male)",
+  am_liam: "Liam (American Male)",
+  am_michael: "Michael (American Male)",
+  am_onyx: "Onyx (American Male)",
+  am_puck: "Puck (American Male)",
+  am_santa: "Santa (American Male)",
+  bf_alice: "Alice (British Female)",
+  bf_emma: "Emma (British Female)",
+  bf_isabella: "Isabella (British Female)",
+  bf_lily: "Lily (British Female)",
+  bm_daniel: "Daniel (British Male)",
+  bm_fable: "Fable (British Male)",
+  bm_george: "George (British Male)",
+  bm_lewis: "Lewis (British Male)",
+};
 
 // ── E-ink ─────────────────────────────────────────────────────────────────────
 /** Approximate lines per e-ink page in ScrollReaderView paginated mode */
@@ -99,7 +142,9 @@ export const DEFAULT_SYNC_INTERVAL_MINUTES = 5;
 
 // ── Reader Defaults ──────────────────────────────────────────────────────────
 /** Default flow word span (words highlighted at once) */
-export const DEFAULT_FLOW_WORD_SPAN = 1;
+export const DEFAULT_FLOW_WORD_SPAN = 3;
+/** Default flow cursor style */
+export const DEFAULT_FLOW_CURSOR_STYLE = "underline" as const;
 /** Default focus span (character opacity gradient width) */
 export const DEFAULT_FOCUS_SPAN = 0.4;
 
@@ -144,7 +189,9 @@ export const DEFAULT_SETTINGS = {
   syncIntervalMinutes: DEFAULT_SYNC_INTERVAL_MINUTES,
   syncOnMeteredConnection: false,
   flowWordSpan: DEFAULT_FLOW_WORD_SPAN,
+  lastReadingMode: "flow" as const,
   ttsEnabled: false,
+  ttsEngine: "web" as const,
   ttsVoiceName: null as string | null,
   ttsRate: 1.0,
 };

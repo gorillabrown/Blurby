@@ -1,10 +1,12 @@
+import { useContext } from "react";
 import type { BlurbySettings } from "../../types";
+import { ThemeContext } from "../ThemeProvider";
 
 const ACCENT_PRESETS = [
   { label: "gold", value: "#c4a882" },
-  { label: "blue", value: "#5b8fb9" },
+  { label: "blurby blue", value: "#2E73FF" },
   { label: "green", value: "#6b9f6b" },
-  { label: "rose", value: "#c47882" },
+  { label: "blurby red", value: "#E63946" },
   { label: "purple", value: "#9b82c4" },
   { label: "teal", value: "#5ba8a0" },
 ];
@@ -24,7 +26,15 @@ interface ThemeSettingsProps {
 }
 
 export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps) {
-  const themes: BlurbySettings["theme"][] = ["dark", "light", "eink", "system"];
+  const { setAccentColor, setFontFamily } = useContext(ThemeContext);
+  const themes: BlurbySettings["theme"][] = ["blurby", "dark", "light", "eink", "system"];
+
+  // Wrap onSettingsChange to also update ThemeContext instantly
+  const handleSettingsChange = (updates: Partial<BlurbySettings>) => {
+    onSettingsChange(updates);
+    if (updates.accentColor !== undefined) setAccentColor(updates.accentColor as string | null);
+    if (updates.fontFamily !== undefined) setFontFamily(updates.fontFamily as string | null);
+  };
 
   const isPresetAccent = ACCENT_PRESETS.some((p) => p.value === settings.accentColor);
   const customColor =
@@ -45,43 +55,47 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
         ))}
       </div>
 
-      <div className="settings-section-label">Accent Color</div>
-      <div className="appearance-row" style={{ marginBottom: 16 }}>
-        {ACCENT_PRESETS.map((preset) => (
-          <button
-            key={preset.value}
-            className={`accent-swatch${settings.accentColor === preset.value ? " accent-swatch-active" : ""}`}
-            style={{ background: preset.value }}
-            title={preset.label}
-            onClick={() => onSettingsChange({ accentColor: preset.value })}
-            aria-label={`Accent color: ${preset.label}`}
-          />
-        ))}
-        <label className="accent-custom" title="Custom color">
-          <input
-            type="color"
-            className="accent-color-input"
-            value={customColor}
-            onChange={(e) => onSettingsChange({ accentColor: e.target.value })}
-            aria-label="Custom accent color"
-          />
-          <span className="accent-custom-label">custom</span>
-        </label>
-      </div>
+      {settings.theme !== "blurby" && (
+        <>
+          <div className="settings-section-label">Accent Color</div>
+          <div className="appearance-row" style={{ marginBottom: 16 }}>
+            {ACCENT_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                className={`accent-swatch${settings.accentColor === preset.value ? " accent-swatch-active" : ""}`}
+                style={{ background: preset.value }}
+                title={preset.label}
+                onClick={() => handleSettingsChange({ accentColor: preset.value })}
+                aria-label={`Accent color: ${preset.label}`}
+              />
+            ))}
+            <label className="accent-custom" title="Custom color">
+              <input
+                type="color"
+                className="accent-color-input"
+                value={customColor}
+                onChange={(e) => handleSettingsChange({ accentColor: e.target.value })}
+                aria-label="Custom accent color"
+              />
+              <span className="accent-custom-label">custom</span>
+            </label>
+          </div>
 
-      <div className="settings-section-label">Font</div>
-      <div className="appearance-row">
-        {FONT_PRESETS.map((preset) => (
-          <button
-            key={preset.label}
-            className={`font-preset${settings.fontFamily === preset.value ? " font-preset-active" : ""}`}
-            style={preset.value ? { fontFamily: preset.value } : undefined}
-            onClick={() => onSettingsChange({ fontFamily: preset.value })}
-          >
-            {preset.label}
-          </button>
-        ))}
-      </div>
+          <div className="settings-section-label">Font</div>
+          <div className="appearance-row">
+            {FONT_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                className={`font-preset${settings.fontFamily === preset.value ? " font-preset-active" : ""}`}
+                style={preset.value ? { fontFamily: preset.value } : undefined}
+                onClick={() => handleSettingsChange({ fontFamily: preset.value })}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* E-ink specific settings — only visible when e-ink theme is selected */}
       {settings.theme === "eink" && (

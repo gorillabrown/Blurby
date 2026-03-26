@@ -19,9 +19,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   deleteDoc: (docId) => ipcRenderer.invoke("delete-doc", docId),
   updateDoc: (docId, title, content) => ipcRenderer.invoke("update-doc", docId, title, content),
   resetProgress: (docId) => ipcRenderer.invoke("reset-progress", docId),
-  updateDocProgress: (docId, position) => ipcRenderer.invoke("update-doc-progress", docId, position),
+  updateDocProgress: (docId, position, cfi) => ipcRenderer.invoke("update-doc-progress", docId, position, cfi),
   // Lazy-load content
   loadDocContent: (docId) => ipcRenderer.invoke("load-doc-content", docId),
+  // Read raw file buffer (for foliate-js EPUB rendering in renderer)
+  readFileBuffer: (filePath) => ipcRenderer.invoke("read-file-buffer", filePath),
   // Get chapter metadata (from EPUB TOC or content analysis)
   getDocChapters: (docId) => ipcRenderer.invoke("get-doc-chapters", docId),
   saveHighlight: (data) => ipcRenderer.invoke("save-highlight", data),
@@ -109,6 +111,23 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cloudForceSync: (direction) => ipcRenderer.invoke("cloud-force-sync", direction),
   cloudStartAutoSync: (intervalMs) => ipcRenderer.invoke("cloud-start-auto-sync", intervalMs),
   cloudStopAutoSync: () => ipcRenderer.invoke("cloud-stop-auto-sync"),
+
+  // Kokoro TTS
+  kokoroPreload: () => ipcRenderer.invoke("tts-kokoro-preload"),
+  kokoroGenerate: (text, voice, speed) => ipcRenderer.invoke("tts-kokoro-generate", text, voice, speed),
+  kokoroVoices: () => ipcRenderer.invoke("tts-kokoro-voices"),
+  kokoroModelStatus: () => ipcRenderer.invoke("tts-kokoro-model-status"),
+  kokoroDownload: () => ipcRenderer.invoke("tts-kokoro-download"),
+  onKokoroDownloadProgress: (callback) => {
+    const handler = (_event, progress) => callback(progress);
+    ipcRenderer.on("tts-kokoro-download-progress", handler);
+    return () => ipcRenderer.removeListener("tts-kokoro-download-progress", handler);
+  },
+  onKokoroLoading: (callback) => {
+    const handler = (_event, loading) => callback(loading);
+    ipcRenderer.on("tts-kokoro-loading", handler);
+    return () => ipcRenderer.removeListener("tts-kokoro-loading", handler);
+  },
 
   // Events from main
   onSyncProgress: (callback) => {

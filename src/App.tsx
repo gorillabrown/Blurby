@@ -8,6 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import ReaderView from "./components/ReaderView";
 import { ThemeProvider } from "./components/ThemeProvider";
 import LibraryContainer from "./components/LibraryContainer";
+import HotkeyCoach from "./components/HotkeyCoach";
 
 const api = window.electronAPI;
 
@@ -147,6 +148,7 @@ export default function App() {
       <div id="main-content">
         {isStandaloneReader ? <StandaloneReader /> : <LibraryContainer />}
       </div>
+      <HotkeyCoach />
     </ThemeProvider>
   );
 }

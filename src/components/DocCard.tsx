@@ -2,6 +2,7 @@ import { memo, useState, useEffect } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
 import { BlurbyDoc } from "../types";
 import { bubbleCount } from "../utils/queue";
+import { formatBookDataLine } from "../utils/bookData";
 import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
@@ -74,7 +75,8 @@ interface DocCardProps {
 const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
-  const progress = wordCount > 0 ? Math.round((pos / wordCount) * 100) : 0;
+  const rawPct = wordCount > 0 ? (pos / wordCount) * 100 : 0;
+  const progress = rawPct > 0 && rawPct < 1 ? 1 : Math.round(rawPct);
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
   const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;
@@ -119,8 +121,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
           </div>
           {apaSubtext && <div className="doc-card-apa-subtext">{apaSubtext}</div>}
           <div className="doc-card-meta">
-            <span>{wordCount.toLocaleString()} words</span>
-            <span>{readTime}</span>
+            <span>{wordCount > 0 ? formatBookDataLine(wordCount, pos) : readTime}</span>
             <span className="bubble-progress" role="meter" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label={`${progress}% read`}>
               {Array.from({ length: 10 }, (_, i) => (
                 <span key={i} className={`bubble-progress-dot${i < bubbleCount(progress) ? " filled" : ""}`} aria-hidden="true" />

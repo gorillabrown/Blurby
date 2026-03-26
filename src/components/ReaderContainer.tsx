@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, DEFAULT_EINK_WPM_CEILING, DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
@@ -9,6 +9,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
+import FoliatePageView from "./FoliatePageView";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import MenuFlap from "./MenuFlap";
@@ -35,6 +36,8 @@ interface ReaderContainerProps {
   onArchiveDoc: (docId: string) => void;
   onToggleFavorite: (docId: string) => void;
   onOpenDocById: (docId: string) => void;
+  settingsPage?: string | null;
+  onClearSettingsPage?: () => void;
 }
 
 export default function ReaderContainer({
@@ -54,6 +57,8 @@ export default function ReaderContainer({
   onArchiveDoc,
   onToggleFavorite,
   onOpenDocById,
+  settingsPage,
+  onClearSettingsPage,
 }: ReaderContainerProps) {
   const { settings, updateSettings } = useSettings();
   const isEink = settings.theme === "eink";
@@ -61,9 +66,9 @@ export default function ReaderContainer({
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
   );
 
-  // ── Three-mode state ───────────────────────────────────────────────────
-  // "page" is the default parent view. "focus"/"flow" are sub-modes.
-  const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow">("page");
+  // ── Four-mode state (mutually exclusive) ────────────────────────────────
+  // "page" is the default. "focus"/"flow"/"narration" are sub-modes.
+  const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow" | "narration">("page");
 
   // Highlighted word in Page view — anchor for Focus/Flow entry
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
@@ -99,7 +104,12 @@ export default function ReaderContainer({
   const activeReadingMsRef = useRef(0);
   const activeReadingStartRef = useRef<number | null>(null);
 
-  // Tokenize content
+  // Detect if this is an EPUB with filepath (use foliate-js for rendering)
+  const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
+  const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
+  const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
+
+  // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
     if (!activeDoc?.content) return { words: [] as string[], paragraphBreaks: new Set<number>() };
     return tokenizeWithMeta(activeDoc.content);
@@ -111,8 +121,8 @@ export default function ReaderContainer({
   const reader = useReader(effectiveWpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
-  // Track active reading time when in Focus (playing) or Flow (flowPlaying)
-  const isActivelyReading = (readingMode === "focus" && playing) || (readingMode === "flow" && flowPlaying);
+  // Track active reading time when in any active sub-mode
+  const isActivelyReading = (readingMode === "focus" && playing) || (readingMode === "flow" && flowPlaying) || readingMode === "narration";
   useEffect(() => {
     if (isActivelyReading) {
       activeReadingStartRef.current = Date.now();
@@ -125,10 +135,21 @@ export default function ReaderContainer({
   }, [isActivelyReading]);
 
   // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
+  // Map 4-mode to legacy 3-mode for keyboard hooks. Narration uses "page" layout.
   const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : "page";
 
   const words = tokenized.words;
   wordsRef.current = words;
+
+  /** Get the effective words array — from foliate DOM for EPUBs, from text extraction otherwise */
+  const getEffectiveWords = useCallback((): string[] => {
+    if (useFoliate && foliateApiRef.current) {
+      const foliateWords = foliateApiRef.current.getWords();
+      foliateWordsRef.current = foliateWords;
+      return foliateWords.map(w => w.word);
+    }
+    return words;
+  }, [useFoliate, words]);
 
   // Init reader on mount / doc change
   useEffect(() => {
@@ -138,7 +159,9 @@ export default function ReaderContainer({
     sessionStartWordRef.current = activeDoc.position || 0;
     setReadingMode("page"); // Always start in Page view
     api.getDocChapters(activeDoc.id).then((ch) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
-  }, [activeDoc.id, initReader]);
+    // Pre-load Kokoro model in background worker (non-blocking)
+    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) api.kokoroPreload().catch(() => {});
+  }, [activeDoc.id, initReader, settings.ttsEngine]);
 
   // Persist focusTextSize changes
   const prevFocusTextSizeRef = useRef(focusTextSize);
@@ -149,7 +172,35 @@ export default function ReaderContainer({
     }
   }, [focusTextSize]);
 
+  // Save progress from the active position source (debounced 2s)
+  // Page/Flow mode: highlightedWordIndex. Focus mode: wordIndex.
+  const pageSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSavedPosRef = useRef(activeDoc.position || 0);
+  const currentPos = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+
+  // Only save progress when user is actively reading (in a mode) or has manually navigated
+  // Don't save on initial book open to prevent false "started" status
+  const userHasInteractedRef = useRef(false);
+  useEffect(() => {
+    if (readingMode !== "page") userHasInteractedRef.current = true;
+  }, [readingMode]);
+
+  useEffect(() => {
+    if (currentPos === lastSavedPosRef.current) return;
+    // For foliate EPUBs: don't save progress from initial onRelocate events in page mode
+    if (useFoliate && readingMode === "page" && !userHasInteractedRef.current) return;
+    if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
+    pageSaveTimerRef.current = setTimeout(() => {
+      lastSavedPosRef.current = currentPos;
+      api.updateDocProgress(activeDoc.id, currentPos, useFoliate ? activeDoc.cfi : undefined);
+      onUpdateProgress(activeDoc.id, currentPos);
+    }, 2000);
+    return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
+  }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
+
   const finishReading = useCallback((finalPos: number) => {
+    // Flush any pending debounced save
+    if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
     onUpdateProgress(activeDoc.id, finalPos);
     api.updateDocProgress(activeDoc.id, finalPos);
     // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
@@ -176,71 +227,96 @@ export default function ReaderContainer({
     onExitReader(finalPos);
   }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, onExitReader, words.length]);
 
-  // ── TTS (Narration) ───────────────────────────────────────────────────
+  // ── TTS (Narration) — now a discrete mode, not a layer ─────────────────
   const narration = useNarration();
-  const [ttsActive, setTtsActive] = useState(false);
+  const ttsActive = readingMode === "narration"; // derived, not separate state
   const preCapWpmRef = useRef<number | null>(null);
 
-  const handleToggleTts = useCallback(() => {
-    if (ttsActive) {
-      // Turn off TTS — restore original WPM
-      narration.stop();
-      setTtsActive(false);
-      if (preCapWpmRef.current !== null) {
-        setWpm(() => preCapWpmRef.current!);
-        preCapWpmRef.current = null;
-      }
-    } else {
-      // Turn on TTS — cap WPM if > TTS_WPM_CAP
-      setTtsActive(true);
-      if (wpm > TTS_WPM_CAP) {
-        preCapWpmRef.current = wpm;
-        setWpm(() => TTS_WPM_CAP);
+  // Sync TTS engine/voice/rate from settings → narration hook
+  useEffect(() => {
+    narration.setEngine(settings.ttsEngine || "web");
+  }, [settings.ttsEngine, narration.setEngine]);
+
+  useEffect(() => {
+    if (settings.ttsEngine === "kokoro" && settings.ttsVoiceName) {
+      narration.setKokoroVoice(settings.ttsVoiceName);
+    } else if (settings.ttsVoiceName && narration.voices.length > 0) {
+      const voice = narration.voices.find((v) => v.name === settings.ttsVoiceName);
+      if (voice && voice.name !== narration.currentVoice?.name) {
+        narration.selectVoice(voice);
       }
     }
-  }, [ttsActive, narration, wpm, setWpm]);
+  }, [settings.ttsEngine, settings.ttsVoiceName, narration.voices, narration.currentVoice, narration.selectVoice, narration.setKokoroVoice]);
 
-  // If user raises WPM while TTS is active, enforce cap
   useEffect(() => {
-    if (ttsActive && wpm > TTS_WPM_CAP) {
-      if (preCapWpmRef.current === null) preCapWpmRef.current = wpm;
+    if (settings.ttsRate && settings.ttsRate !== narration.rate) {
+      narration.adjustRate(settings.ttsRate);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.ttsRate]);
+
+  /** Stop all active sub-modes cleanly — call before entering any mode */
+  const stopAllModes = useCallback(() => {
+    if (playing) reader.togglePlay();
+    if (flowPlaying) setFlowPlaying(false);
+    narration.stop();
+    narration.setPageEndWord(null); // clear page boundary
+    if (preCapWpmRef.current !== null) {
+      setWpm(() => preCapWpmRef.current!);
+      preCapWpmRef.current = null;
+    }
+  }, [playing, flowPlaying, reader, narration, setWpm]);
+
+  const handleStopTts = useCallback(() => {
+    narration.stop();
+    if (preCapWpmRef.current !== null) {
+      setWpm(() => preCapWpmRef.current!);
+      preCapWpmRef.current = null;
+    }
+  }, [narration, setWpm]);
+
+  /** Start Narration mode (internal — called by handleTogglePlay) */
+  const startNarration = useCallback(() => {
+    stopAllModes();
+    setReadingMode("narration");
+    updateSettings({ readingMode: "narration", lastReadingMode: "narration" });
+    // Cap WPM for TTS
+    if (wpm > TTS_WPM_CAP) {
+      preCapWpmRef.current = wpm;
       setWpm(() => TTS_WPM_CAP);
     }
-  }, [ttsActive, wpm, setWpm]);
-
-  // Cancel TTS when exiting reader modes
-  useEffect(() => {
-    if (readingMode === "page" && !flowPlaying && !playing) {
-      // Only stop TTS when not in any active reading mode
-    }
-  }, [readingMode, flowPlaying, playing]);
-
-  // Stop TTS on mode exit
-  const handleStopTts = useCallback(() => {
-    if (ttsActive) {
-      narration.stop();
-      setTtsActive(false);
-      if (preCapWpmRef.current !== null) {
-        setWpm(() => preCapWpmRef.current!);
-        preCapWpmRef.current = null;
+    // Pass rhythm pause rules so TTS pauses naturally at punctuation/paragraphs
+    narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
+    // Get words from foliate DOM (EPUB) or extracted text (other formats)
+    const effectiveWords = getEffectiveWords();
+    // Start from the current highlighted position (word click updates this for foliate EPUBs too)
+    const startIdx = highlightedWordIndex;
+    // Start cursor-driven TTS
+    narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
+      setHighlightedWordIndex(idx);
+      // Highlight word in foliate DOM if available
+      if (useFoliate && foliateWordsRef.current[idx]) {
+        try {
+          foliateApiRef.current?.highlightWord(foliateWordsRef.current[idx].range, foliateWordsRef.current[idx].sectionIndex);
+        } catch { /* range may be stale after page navigation */ }
       }
-    }
-  }, [ttsActive, narration, setWpm]);
+    });
+    // Override the WPM-derived rate with the user's explicit ttsRate setting
+    if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
+  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);
 
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
       // Exit from Page → leave reader entirely
-      handleStopTts(); // Cancel TTS on exit
-      requestExit(activeDoc, finishReading);
+      stopAllModes();
+      finishReading(highlightedWordIndex);
     } else {
-      // Exit from Focus/Flow → return to Page (pause)
-      if (playing) reader.togglePlay();
-      if (flowPlaying) setFlowPlaying(false);
-      narration.stop(); // Cancel TTS on mode exit
-      setHighlightedWordIndex(wordIndex);
+      // Exit from any sub-mode → return to Page
+      if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
+      stopAllModes();
       setReadingMode("page");
     }
-  }, [readingMode, requestExit, activeDoc, finishReading, playing, flowPlaying, reader, wordIndex, handleStopTts, narration]);
+  }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex]);
 
   const handleScrollExit = useCallback((finalPos: number) => {
     // Flow mode pause → return to Page
@@ -270,60 +346,84 @@ export default function ReaderContainer({
 
   // ── Mode transitions ───────────────────────────────────────────────────
 
-  /** Enter Focus from Page at highlighted word */
-  const handleEnterFocus = useCallback(() => {
+  /** Start Focus mode (internal — called by handleTogglePlay) */
+  // Extract words from foliate DOM (populate foliateWordsRef for modes)
+  const extractFoliateWords = useCallback(() => {
+    if (!useFoliate || !foliateApiRef.current) return;
+    const extracted = foliateApiRef.current.getWords();
+    if (extracted.length > 0) {
+      foliateWordsRef.current = extracted;
+      wordsRef.current = extracted.map(w => w.word);
+      console.log(`[Foliate] Extracted ${extracted.length} words from DOM`);
+    }
+  }, [useFoliate, wordsRef]);
+
+  const startFocus = useCallback(() => {
+    stopAllModes();
+    // For foliate EPUBs, ensure words are extracted
+    if (useFoliate) extractFoliateWords();
     jumpToWord(highlightedWordIndex);
     setReadingMode("focus");
-    updateSettings({ readingMode: "focus" });
-    // Auto-play Focus mode
-    if (!playing) setTimeout(() => reader.togglePlay(), 50);
-    // Start cursor-driven TTS if active
-    if (ttsActive) {
-      narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
-        jumpToWord(idx);
-      });
-    }
-  }, [highlightedWordIndex, jumpToWord, updateSettings, playing, reader, ttsActive, narration, words, effectiveWpm]);
+    updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
+    setTimeout(() => reader.togglePlay(), 50);
+  }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes, useFoliate, extractFoliateWords]);
 
-  /** Enter Flow from Page — starts word advancement within Page view */
-  const handleEnterFlow = useCallback(() => {
+  /** Start Flow mode (internal — called by handleTogglePlay) */
+  const startFlow = useCallback(() => {
+    stopAllModes();
+    // For foliate EPUBs, ensure words are extracted
+    if (useFoliate) extractFoliateWords();
     setReadingMode("flow");
     setFlowPlaying(true);
-    updateSettings({ readingMode: "flow" });
-    // Start cursor-driven TTS if active
-    if (ttsActive) {
-      narration.startCursorDriven(words, highlightedWordIndex, effectiveWpm, (idx) => {
-        setHighlightedWordIndex(idx);
-      });
-    }
-  }, [updateSettings, ttsActive, narration, words, highlightedWordIndex, effectiveWpm]);
+    updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
+  }, [updateSettings, stopAllModes, useFoliate, extractFoliateWords]);
 
-  /** Pause Focus/Flow → return to Page */
+  /** Pause any sub-mode → return to Page */
   const handlePauseToPage = useCallback(() => {
-    if (playing) reader.togglePlay();
-    if (flowPlaying) setFlowPlaying(false);
     if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
-    narration.stop(); // Pause TTS when returning to page
+    stopAllModes();
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
-  }, [playing, flowPlaying, readingMode, reader, wordIndex, updateSettings, narration]);
+  }, [readingMode, wordIndex, updateSettings, stopAllModes]);
 
-  /** Toggle play: Space behavior per mode */
+  /** Select a mode (button click) — saves preference but does NOT auto-start.
+   *  If the mode is already active, pause back to Page. */
+  const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
+    if (readingMode === mode) {
+      // Already active → pause back to Page
+      handlePauseToPage();
+    } else if (readingMode !== "page") {
+      // Different mode active → stop it, select new one, stay in Page
+      stopAllModes();
+      setReadingMode("page");
+      updateSettings({ lastReadingMode: mode });
+    } else {
+      // In Page view → just select the mode (don't start)
+      updateSettings({ lastReadingMode: mode });
+    }
+  }, [readingMode, handlePauseToPage, stopAllModes, updateSettings]);
+
+  /** Toggle narration — used by N key shortcut (starts or stops) */
+  const handleToggleTts = useCallback(() => {
+    handleSelectMode("narration");
+  }, [handleSelectMode]);
+
+  /** Convenience wrappers for bottom bar buttons */
+  const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
+  const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
+
+  /** Toggle play: Space starts last-used mode from Page, or pauses active mode → Page. */
   const handleTogglePlay = useCallback(() => {
     if (readingMode === "page") {
-      // Space in Page → enter Focus
-      handleEnterFocus();
-    } else if (readingMode === "flow") {
-      // Space in Flow → pause flow, return to Page
-      handlePauseToPage();
-    } else if (playing) {
-      // Space while playing in Focus → pause → Page
-      handlePauseToPage();
+      // Start the selected mode
+      const lastMode = settings.lastReadingMode || "flow";
+      if (lastMode === "focus") startFocus();
+      else if (lastMode === "narration") startNarration();
+      else startFlow();
     } else {
-      // Space while paused in Focus → resume play
-      reader.togglePlay();
+      handlePauseToPage();
     }
-  }, [readingMode, playing, handleEnterFocus, handlePauseToPage, reader]);
+  }, [readingMode, settings.lastReadingMode, startFlow, startFocus, startNarration, handlePauseToPage]);
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
@@ -333,13 +433,6 @@ export default function ReaderContainer({
   const handleToggleFavoriteReader = useCallback(() => {
     onToggleFavorite(activeDoc.id);
   }, [activeDoc, onToggleFavorite]);
-
-  const handleSwitchMode = useCallback(() => {
-    // Cycle: page → focus → flow → page
-    if (readingMode === "page") handleEnterFocus();
-    else if (readingMode === "focus") handleEnterFlow();
-    else handlePauseToPage();
-  }, [readingMode, handleEnterFocus, handleEnterFlow, handlePauseToPage]);
 
   // Legacy toggle for keyboard shortcut (N key)
   const handleToggleNarration = useCallback(() => {
@@ -367,6 +460,11 @@ export default function ReaderContainer({
   }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
 
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
+    // For foliate EPUBs, navigate using the href from the TOC
+    if (useFoliate && (docChapters[chapterIndex] as any)?.href) {
+      foliateApiRef.current?.goTo?.((docChapters[chapterIndex] as any).href);
+      return;
+    }
     const chs = docChapters.length > 0
       ? chaptersFromCharOffsets(activeDoc.content, docChapters)
       : detectChapters(activeDoc.content, words);
@@ -389,6 +487,14 @@ export default function ReaderContainer({
   const handlePrevPage = useCallback(() => pageNavRef.current.prevPage(), []);
   const handleNextPage = useCallback(() => pageNavRef.current.nextPage(), []);
 
+  // Flow line navigation ref (updated by PageReaderView)
+  const flowNavRef = useRef<{ prevLine: () => void; nextLine: () => void }>({
+    prevLine: () => {},
+    nextLine: () => {},
+  });
+  const handleFlowPrevLine = useCallback(() => flowNavRef.current.prevLine(), []);
+  const handleFlowNextLine = useCallback(() => flowNavRef.current.nextLine(), []);
+
   const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
     // Move highlight by 1 word (left/right) or ~10 words (up/down, approximate line jump)
     const delta = direction === "left" ? -1 : direction === "right" ? 1 : direction === "up" ? -10 : 10;
@@ -407,8 +513,57 @@ export default function ReaderContainer({
     window.dispatchEvent(new CustomEvent("blurby:make-note", { detail: highlightedWordIndex }));
   }, [highlightedWordIndex]);
 
+  // Wrap adjustWpm: when narration is selected (active or paused), Up/Down adjusts TTS rate
+  const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && settings.lastReadingMode === "narration");
+  const adjustSpeed = useCallback((delta: number) => {
+    if (isNarrationSelected) {
+      const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
+      const newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;
+      updateSettings({ ttsRate: newRate });
+      narration.adjustRate(newRate);
+    } else {
+      adjustWpm(delta);
+    }
+  }, [isNarrationSelected, settings.ttsRate, updateSettings, narration, adjustWpm]);
+
+  // Paragraph navigation — jump to first word of prev/next paragraph
+  const paragraphBreaksArray = useMemo(() => {
+    return Array.from(tokenized.paragraphBreaks).sort((a, b) => a - b);
+  }, [tokenized.paragraphBreaks]);
+
+  const handleParagraphPrev = useCallback(() => {
+    // Jump to first word of current paragraph, or previous paragraph if already at start
+    const idx = highlightedWordIndex;
+    // Find the paragraph break just before the current word
+    let target = 0;
+    for (let i = paragraphBreaksArray.length - 1; i >= 0; i--) {
+      // paragraphBreaks stores the LAST word of each paragraph; the next paragraph starts at breakIndex + 1
+      const paraStart = paragraphBreaksArray[i] + 1;
+      if (paraStart < idx) {
+        target = paraStart;
+        break;
+      }
+    }
+    setHighlightedWordIndex(target);
+  }, [highlightedWordIndex, paragraphBreaksArray]);
+
+  const handleParagraphNext = useCallback(() => {
+    const idx = highlightedWordIndex;
+    let target = words.length - 1;
+    for (let i = 0; i < paragraphBreaksArray.length; i++) {
+      const paraStart = paragraphBreaksArray[i] + 1;
+      if (paraStart > idx) {
+        target = Math.min(paraStart, words.length - 1);
+        break;
+      }
+    }
+    setHighlightedWordIndex(target);
+  }, [highlightedWordIndex, paragraphBreaksArray, words.length]);
+
   // Keyboard shortcuts — fully mode-aware
-  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustWpm, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleSwitchMode, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote);
+  const chapterListRef = useRef<{ toggle: () => void } | null>(null);
+  const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({
@@ -437,13 +592,14 @@ export default function ReaderContainer({
     layoutSpacing: settings.layoutSpacing,
     fontFamily: settings.fontFamily,
     isEink,
-    flowWordSpan: settings.flowWordSpan || 1,
-  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink, settings.flowWordSpan]);
+    flowWordSpan: settings.flowWordSpan || 3,
+    flowCursorStyle: settings.flowCursorStyle || "underline",
+  }), [settings.flowTextSize, settings.layoutSpacing, settings.fontFamily, isEink, settings.flowWordSpan, settings.flowCursorStyle]);
 
   const menuFlap = (
     <MenuFlap
       open={menuFlapOpen}
-      onClose={() => setMenuFlapOpen(false)}
+      onClose={() => { setMenuFlapOpen(false); onClearSettingsPage?.(); }}
       docs={library}
       settings={settings}
       onOpenDoc={onOpenDocById}
@@ -451,19 +607,184 @@ export default function ReaderContainer({
       siteLogins={siteLogins}
       onSiteLogin={onSiteLogin}
       onSiteLogout={onSiteLogout}
+      targetView={settingsPage}
     />
   );
+
+  // Word change handler — resyncs TTS if in narration mode
+  const handleHighlightedWordChange = useCallback((index: number) => {
+    setHighlightedWordIndex(index);
+    if (readingMode === "narration") {
+      // Resync TTS to new position
+      narration.resyncToCursor(index, effectiveWpm);
+    }
+  }, [readingMode, narration, effectiveWpm]);
 
   // Determine current word index for bottom bar
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
+  // Foliate word highlighting — when highlightedWordIndex changes during Flow/Narration,
+  // highlight the corresponding word in the foliate DOM
+  useEffect(() => {
+    if (!useFoliate || readingMode === "page" || readingMode === "focus") return;
+    if (!foliateWordsRef.current.length) return;
+    const wordData = foliateWordsRef.current[highlightedWordIndex];
+    if (wordData) {
+      foliateApiRef.current?.highlightWord(wordData.range, wordData.sectionIndex);
+    }
+  }, [highlightedWordIndex, readingMode, useFoliate]);
+
+  // Flow mode word advancement timer for foliate EPUBs
+  useEffect(() => {
+    if (!useFoliate || readingMode !== "flow" || !flowPlaying) return;
+    if (!foliateWordsRef.current.length) return;
+
+    const msPerWord = 60000 / effectiveWpm;
+    const timer = setInterval(() => {
+      setHighlightedWordIndex(prev => {
+        const next = prev + 1;
+        if (next >= foliateWordsRef.current.length) {
+          setFlowPlaying(false);
+          return prev;
+        }
+        return next;
+      });
+    }, msPerWord);
+
+    return () => clearInterval(timer);
+  }, [useFoliate, readingMode, flowPlaying, effectiveWpm]);
+
   // ── Render ─────────────────────────────────────────────────────────────
 
+  // Foliate EPUB view — always rendered for EPUBs, modes overlay on top
+  const foliateView = useFoliate ? (
+    <FoliatePageView
+      activeDoc={activeDoc}
+      settings={settings}
+      focusTextSize={focusTextSize}
+      initialCfi={activeDoc.cfi || null}
+      onRelocate={(detail) => {
+        if (detail.cfi) {
+          activeDoc.cfi = detail.cfi;
+          const fraction = detail.fraction || 0;
+          const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
+          setHighlightedWordIndex(approxWordIdx);
+          // Only save progress if user has interacted (prevents false "started")
+          if (!userHasInteractedRef.current && readingMode === "page") return;
+          // Debounced save of CFI for resume on reopen
+          if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
+          pageSaveTimerRef.current = setTimeout(() => {
+            api.updateDocProgress(activeDoc.id, approxWordIdx, detail.cfi);
+            onUpdateProgress(activeDoc.id, approxWordIdx);
+            lastSavedPosRef.current = approxWordIdx;
+          }, 2000);
+        }
+      }}
+      onTocReady={(toc) => {
+        setDocChapters(toc.map((item: any, idx: number) => ({
+          title: item.label || item.title || `Chapter ${idx + 1}`,
+          charOffset: 0,
+          href: item.href,
+        })));
+      }}
+      onWordClick={(cfi, word, sectionIndex, wordOffsetInSection) => {
+        activeDoc.cfi = cfi;
+        console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}, section: ${sectionIndex}, offset: ${wordOffsetInSection}`);
+        // Map section + word offset to our extracted words array index
+        const words = foliateWordsRef.current;
+        if (words.length > 0 && sectionIndex !== undefined && wordOffsetInSection !== undefined) {
+          // Find the first word in this section, then add the offset
+          let sectionStart = -1;
+          for (let i = 0; i < words.length; i++) {
+            if (words[i].sectionIndex === sectionIndex) {
+              sectionStart = i;
+              break;
+            }
+          }
+          if (sectionStart >= 0) {
+            const targetIdx = Math.min(sectionStart + wordOffsetInSection, words.length - 1);
+            setHighlightedWordIndex(targetIdx);
+            console.log(`[Foliate] Mapped click to word index ${targetIdx} (section ${sectionIndex} + offset ${wordOffsetInSection})`);
+            return;
+          }
+        }
+        // Fallback: text search (less precise)
+        if (words.length > 0) {
+          const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
+          for (let i = 0; i < words.length; i++) {
+            if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
+              setHighlightedWordIndex(i);
+              console.log(`[Foliate] Mapped click to word index ${i} (text fallback)`);
+              return;
+            }
+          }
+        }
+      }}
+      onLoad={() => {
+        // Extract words from DOM after each section loads
+        setTimeout(extractFoliateWords, 100);
+      }}
+      viewApiRef={foliateApiRef}
+      isReading={readingMode === "flow" || readingMode === "narration"}
+      onJumpToHighlight={() => {
+        // Navigate foliate to the saved CFI position
+        if (activeDoc.cfi) {
+          foliateApiRef.current?.goTo?.(activeDoc.cfi);
+        } else if (foliateWordsRef.current[highlightedWordIndex]) {
+          try {
+            const wordData = foliateWordsRef.current[highlightedWordIndex];
+            const el = wordData.range.startContainer.parentElement;
+            el?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+          } catch { /* stale range */ }
+        }
+      }}
+    />
+  ) : null;
+
   const renderView = () => {
+    // For foliate EPUBs in Page/Flow/Narration: show foliate view
+    // Focus mode overlays ReaderView on top of foliate
+    if (useFoliate) {
+      if (readingMode === "focus") {
+        // Focus overlay on top of foliate (RSVP display)
+        return (
+          <>
+            {foliateView}
+            <div style={{ position: "absolute", inset: 0, zIndex: 15, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+              <ReaderView
+                activeDoc={activeDoc}
+                words={wordsRef.current}
+                wordIndex={wordIndex}
+                wpm={effectiveWpm}
+                focusTextSize={focusTextSize}
+                playing={playing}
+                escPending={escPending}
+                isMac={platform === "darwin"}
+                settings={rsvpSettings}
+                externalChapters={docChapters.length > 0 ? docChapters : undefined}
+                onWordUpdateRef={onWordUpdateRef}
+                togglePlay={handleTogglePlay}
+                exitReader={handleExitReader}
+                onSetWpm={setWpm}
+                onAdjustFocusTextSize={adjustFocusTextSize}
+                onSwitchToScroll={handleEnterFlow}
+                onJumpToWord={jumpToWord}
+                onToggleFlap={toggleMenuFlap}
+                onPrevChapter={handlePrevChapter}
+                onNextChapter={handleNextChapter}
+                onEinkRefresh={triggerEinkRefresh}
+              />
+            </div>
+          </>
+        );
+      }
+      // Page, Flow, Narration — foliate handles rendering
+      return foliateView;
+    }
+
     switch (readingMode) {
       case "flow":
-        // Flow mode renders PageReaderView with flowPlaying=true
-        // Word highlight advances at WPM speed within the paginated view
+        // Flow mode (non-EPUB): silent cursor advancement at WPM speed
         return (
           <PageReaderView
             activeDoc={activeDoc}
@@ -477,7 +798,9 @@ export default function ReaderContainer({
             onExit={(pos) => finishReading(pos)}
             onToggleFlap={toggleMenuFlap}
             pageNavRef={pageNavRef}
+            flowNavRef={flowNavRef}
             flowPlaying={true}
+            ttsActive={false}
           />
         );
       case "focus":
@@ -506,8 +829,30 @@ export default function ReaderContainer({
             onEinkRefresh={triggerEinkRefresh}
           />
         );
+      case "narration":
+        // Narration mode: same PageReaderView layout, TTS drives word highlight
+        return (
+          <PageReaderView
+            activeDoc={activeDoc}
+            wpm={effectiveWpm}
+            focusTextSize={focusTextSize}
+            settings={pageSettings}
+            highlightedWordIndex={highlightedWordIndex}
+            onHighlightedWordChange={handleHighlightedWordChange}
+            onEnterFocus={handleEnterFocus}
+            onEnterFlow={handleEnterFlow}
+            onExit={(pos) => finishReading(pos)}
+            onToggleFlap={toggleMenuFlap}
+            pageNavRef={pageNavRef}
+            flowNavRef={flowNavRef}
+            flowPlaying={false}
+            ttsActive={true}
+            onPageEndWordChange={(endIdx) => narration.setPageEndWord(endIdx)}
+          />
+        );
       case "page":
       default:
+        // Non-EPUB page mode (foliate EPUBs handled by top-level check above)
         return (
           <PageReaderView
             activeDoc={activeDoc}
@@ -521,7 +866,9 @@ export default function ReaderContainer({
             onExit={(pos) => finishReading(pos)}
             onToggleFlap={toggleMenuFlap}
             pageNavRef={pageNavRef}
+            flowNavRef={flowNavRef}
             flowPlaying={false}
+            ttsActive={false}
           />
         );
     }
@@ -529,10 +876,20 @@ export default function ReaderContainer({
 
   return (
     <>
+      {/* Thin drag region at top for window dragging */}
+      <div className="reader-drag-handle" />
       <div className="reader-layout">
-        <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
-          {renderView()}
-        </ErrorBoundary>
+        <div className="reader-view-area">
+          <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
+            {renderView()}
+          </ErrorBoundary>
+          {/* Kokoro loading indicator */}
+          {narration.kokoroLoading && (
+            <div className="kokoro-loading-toast" role="status" aria-live="polite">
+              Loading voice model...
+            </div>
+          )}
+        </div>
 
         {/* Unified bottom bar — rendered at container level */}
         <ReaderBottomBar
@@ -542,7 +899,7 @@ export default function ReaderContainer({
           wpm={effectiveWpm}
           focusTextSize={focusTextSize}
           readingMode={readingMode}
-          playing={playing}
+          playing={readingMode !== "page"}
           isEink={isEink}
           chapters={docChapters}
           ttsActive={ttsActive}
@@ -555,6 +912,14 @@ export default function ReaderContainer({
           onNextChapter={handleNextChapter}
           onJumpToChapter={handleJumpToChapter}
           onEinkRefresh={triggerEinkRefresh}
+          onTogglePlay={handleTogglePlay}
+          chapterListRef={chapterListRef}
+          lastReadingMode={settings.lastReadingMode || "flow"}
+          ttsRate={settings.ttsRate || 1.0}
+          onSetTtsRate={(rate) => {
+            updateSettings({ ttsRate: rate });
+            narration.adjustRate(rate);
+          }}
         />
       </div>
 

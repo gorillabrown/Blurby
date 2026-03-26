@@ -205,7 +205,7 @@ function registerIpcHandlers(ctx) {
 
   ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
 
-  ipcMain.handle("update-doc-progress", (_, docId, position) => {
+  ipcMain.handle("update-doc-progress", (_, docId, position, cfi) => {
     const doc = ctx.getDocById(docId);
     if (doc) {
       const syncEngine = require("./sync-engine");
@@ -214,6 +214,7 @@ function registerIpcHandlers(ctx) {
       const revision = syncStatus.revision || 0;
 
       doc.position = position;
+      if (cfi) doc.cfi = cfi;
       doc.modified = Date.now();
       doc.revision = revision;
       ctx.saveLibrary();
@@ -244,12 +245,20 @@ function registerIpcHandlers(ctx) {
     return doc;
   });
 
-  ipcMain.handle("delete-doc", (_, docId) => {
+  ipcMain.handle("delete-doc", async (_, docId) => {
     const doc = ctx.getDocById(docId);
     if (doc && doc.filepath) {
       // Clean up caches for deleted doc
       clearChapterCache(doc.filepath);
       if (ctx.removeFailedExtraction) ctx.removeFailedExtraction(doc.filepath);
+      // Delete the actual file from disk
+      try {
+        const fs = require("fs").promises;
+        await fs.unlink(doc.filepath);
+      } catch (err) {
+        // File may already be gone or inaccessible — log but don't block
+        console.warn(`[delete-doc] Could not delete file: ${doc.filepath}`, err.message);
+      }
     }
 
     // 19D: Apply tombstone instead of hard-deleting, so sync can propagate the deletion
@@ -333,6 +342,17 @@ function registerIpcHandlers(ctx) {
       return result;
     }
     return null;
+  });
+
+  // Read raw file buffer — used by foliate-js to load EPUBs in the renderer
+  ipcMain.handle("read-file-buffer", async (_, filePath) => {
+    try {
+      const buffer = await fsPromises.readFile(filePath);
+      return buffer.buffer; // Return ArrayBuffer
+    } catch (err) {
+      console.error("read-file-buffer error:", err.message);
+      return null;
+    }
   });
 
   ipcMain.handle("get-doc-chapters", async (_, docId) => {
@@ -1537,6 +1557,68 @@ function registerIpcHandlers(ctx) {
     // Restart server with new token
     wsServer.stopServer();
     return wsServer.startServer(ctx);
+  });
+
+  // ── Kokoro TTS ──────────────────────────────────────────────────────────
+
+  const ttsEngine = require("./tts-engine");
+
+  // Set up loading callback to notify renderer
+  ttsEngine.setLoadingCallback((loading) => {
+    const mainWindow = ctx.getMainWindow();
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send("tts-kokoro-loading", loading);
+    }
+  });
+
+  ipcMain.handle("tts-kokoro-generate", async (_, text, voice, speed) => {
+    try {
+      const result = await ttsEngine.generate(text, voice, speed);
+      // audio is already an Array from the worker
+      return {
+        audio: result.audio,
+        sampleRate: result.sampleRate,
+        durationMs: result.durationMs,
+      };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  ipcMain.handle("tts-kokoro-voices", async () => {
+    try {
+      return { voices: await ttsEngine.listVoices() };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  ipcMain.handle("tts-kokoro-model-status", () => {
+    return { ready: ttsEngine.isModelReady() };
+  });
+
+  ipcMain.handle("tts-kokoro-download", async () => {
+    try {
+      await ttsEngine.downloadModel((progress) => {
+        const mainWindow = ctx.getMainWindow();
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("tts-kokoro-download-progress", progress);
+        }
+      });
+      return { success: true };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  // Pre-load Kokoro model when reader opens (non-blocking)
+  ipcMain.handle("tts-kokoro-preload", async () => {
+    try {
+      await ttsEngine.preload();
+      return { success: true };
+    } catch (err) {
+      return { error: err.message };
+    }
   });
 }
 

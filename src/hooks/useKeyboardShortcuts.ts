@@ -53,7 +53,7 @@ interface ReaderKeysState {
   adjustFocusTextSize: (delta: number) => void;
   toggleFlap?: () => void;
   toggleFavorite?: () => void;
-  switchMode?: () => void;
+  enterFocus?: () => void;
   prevChapter?: () => void;
   nextChapter?: () => void;
   toggleNarration?: () => void;
@@ -64,6 +64,13 @@ interface ReaderKeysState {
   moveWordSelection?: (direction: "left" | "right" | "up" | "down") => void;
   defineWord?: () => void;
   makeNote?: () => void;
+  openChapterList?: () => void;
+  // Paragraph navigation (Page mode)
+  paragraphPrev?: () => void;
+  paragraphNext?: () => void;
+  // Flow-mode line navigation
+  flowPrevLine?: () => void;
+  flowNextLine?: () => void;
 }
 
 // ── Library Keyboard Actions ──────────────────────────────────────────────
@@ -104,7 +111,7 @@ export function useReaderKeys(
   adjustFocusTextSize: (delta: number) => void,
   toggleFlap?: () => void,
   toggleFavorite?: () => void,
-  switchMode?: () => void,
+  enterFocus?: () => void,
   prevChapter?: () => void,
   nextChapter?: () => void,
   toggleNarration?: () => void,
@@ -113,20 +120,29 @@ export function useReaderKeys(
   enterFlow?: () => void,
   moveWordSelection?: (direction: "left" | "right" | "up" | "down") => void,
   defineWord?: () => void,
-  makeNote?: () => void
+  makeNote?: () => void,
+  paragraphPrev?: () => void,
+  paragraphNext?: () => void,
+  flowPrevLine?: () => void,
+  flowNextLine?: () => void,
+  openChapterList?: () => void
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
-    adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode,
+    adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
     prevChapter, nextChapter, toggleNarration,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
+    paragraphPrev, paragraphNext,
+    flowPrevLine, flowNextLine, openChapterList,
   });
 
   stateRef.current = {
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
-    adjustFocusTextSize, toggleFlap, toggleFavorite, switchMode,
+    adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
     prevChapter, nextChapter, toggleNarration,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
+    paragraphPrev, paragraphNext,
+    flowPrevLine, flowNextLine, openChapterList,
   };
 
   useEffect(() => {
@@ -145,10 +161,12 @@ export function useReaderKeys(
       // ── Universal keys (all modes) ─────────────────────────────────
       // M toggles menu flap
       if (e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
-      // Tab cycles reading mode
-      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.switchMode?.(); return; }
+      // Tab toggles menu flap
+      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
       // T toggles narration
       if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
+      // C opens chapter list
+      if (e.code === "KeyC" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.openChapterList?.(); return; }
       // S toggles favorite
       if (e.code === "KeyS" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFavorite?.(); return; }
       // [ ] N P chapter navigation (N/P not in page mode — conflict with Shift+N note)
@@ -168,13 +186,18 @@ export function useReaderKeys(
 
       // ── Page-mode specific keys ────────────────────────────────────
       if (isPage) {
-        // Space → enter Focus
+        // N toggles narration in Page view
+        if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
+        // Space → enter Flow
         if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); s.togglePlay(); return; }
-        // Shift+Space → enter Flow
-        if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.enterFlow?.(); return; }
+        // Shift+Space → enter Focus
+        if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.enterFocus?.(); return; }
         // ←/→ flip pages
         if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevPage?.(); return; }
         if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextPage?.(); return; }
+        // Ctrl+←/→ jump paragraphs
+        if (e.ctrlKey && e.code === "ArrowLeft") { e.preventDefault(); s.paragraphPrev?.(); return; }
+        if (e.ctrlKey && e.code === "ArrowRight") { e.preventDefault(); s.paragraphNext?.(); return; }
         // Shift+arrows move word selection
         if (e.shiftKey && !e.ctrlKey) {
           if (e.code === "ArrowLeft") { e.preventDefault(); s.moveWordSelection?.("left"); return; }
@@ -186,7 +209,7 @@ export function useReaderKeys(
         if (e.code === "KeyD" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.defineWord?.(); return; }
         // Shift+N make note
         if (e.code === "KeyN" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.makeNote?.(); return; }
-        // Up/Down WPM in Page view
+        // Up/Down WPM (or TTS rate when narration selected — handled by adjustWpm wrapper)
         if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
         if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
         return;
@@ -195,10 +218,20 @@ export function useReaderKeys(
       // ── Focus/Flow mode keys ───────────────────────────────────────
       // Space = pause → return to Page
       if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
-      // ←/→ seek words
-      if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.seekWords(-REWIND_WORDS); return; }
-      if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.seekWords(REWIND_WORDS); return; }
-      // Up/Down WPM
+      // ←/→ in Flow: jump lines; in Focus: seek words
+      if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) {
+        e.preventDefault();
+        if (s.readerMode === "flow" && s.flowPrevLine) s.flowPrevLine();
+        else s.seekWords(-REWIND_WORDS);
+        return;
+      }
+      if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) {
+        e.preventDefault();
+        if (s.readerMode === "flow" && s.flowNextLine) s.flowNextLine();
+        else s.seekWords(REWIND_WORDS);
+        return;
+      }
+      // Up/Down WPM (or TTS rate when narration selected — handled by adjustWpm wrapper)
       if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
       if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
       // Shift+Up/Down coarse WPM (Focus/Flow only)
@@ -409,8 +442,14 @@ export function useLibraryKeyboard(
         return;
       }
 
-      // Tab cycles focus zones
-      if (e.key === "Tab") {
+      // Tab toggles menu flap
+      if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        a.onToggleFlap?.();
+        return;
+      }
+      // F6 cycles focus zones (a11y replacement for Tab)
+      if (e.key === "F6") {
         e.preventDefault();
         const zones: Array<"search" | "grid" | "sidebar"> = ["search", "grid", "sidebar"];
         const currentIdx = zones.indexOf(focusZone);
