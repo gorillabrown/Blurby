@@ -220,6 +220,12 @@ furthestPosition?: number; // Page number (non-EPUB) or fraction 0.0-1.0 (EPUB)
 ```typescript
 const hasEngagedRef = useRef(false);
 
+// CRITICAL: Reset when activeDoc changes (prevents stale engagement from Book A
+// carrying over to Book B and saving false progress)
+useEffect(() => {
+  hasEngagedRef.current = false;
+}, [activeDoc?.id]);
+
 // Set true on: mode start (Space), word click, deliberate page turn
 // In startFocus/startFlow/startNarration:
 hasEngagedRef.current = true;
@@ -663,12 +669,58 @@ const handleSectionChange = useCallback(() => {
   const view = viewRef.current;
   if (!view) return;
 
-  const freshWords = extractWordsFromView(view);
-  const existingWords = foliateWordsRef.current;
+  // Step 1: Get currently loaded sections from foliate
+  const loadedContents = view.renderer?.getContents?.() ?? [];
+  const loadedSectionIndices = new Set(
+    loadedContents.map((_: any, i: number) => i) // adjust to actual section index mapping
+  );
 
-  // Merge: update ranges for sections present in fresh extraction,
-  // null out ranges for sections no longer loaded
-  // ... merge logic ...
+  // Step 2: Extract fresh words from all loaded sections
+  const freshWords = extractWordsFromView(view);
+  // Group fresh words by sectionIndex for efficient lookup
+  const freshBySectionIndex = new Map<number, FoliateWord[]>();
+  for (const w of freshWords) {
+    const arr = freshBySectionIndex.get(w.sectionIndex) ?? [];
+    arr.push(w);
+    freshBySectionIndex.set(w.sectionIndex, arr);
+  }
+
+  // Step 3: Merge into existing full-document array
+  const existingWords = foliateWordsRef.current;
+  const mergedWords: FoliateWord[] = existingWords.map(existingWord => {
+    // If this word's section is in the fresh extraction, use fresh Range
+    const freshSection = freshBySectionIndex.get(existingWord.sectionIndex);
+    if (freshSection) {
+      // Find matching word by offset within section
+      const match = freshSection.find(fw =>
+        fw.word === existingWord.word && fw.offsetInSection === existingWord.offsetInSection
+      );
+      if (match) return { ...existingWord, range: match.range };
+    }
+
+    // If section is still loaded but word wasn't in fresh extraction, keep as-is
+    if (loadedSectionIndices.has(existingWord.sectionIndex)) {
+      return existingWord;
+    }
+
+    // Section is unloaded — null out Range, keep word string
+    return { ...existingWord, range: null };
+  });
+
+  // Step 4: If fresh extraction has NEW sections not in existing array,
+  // append them (this handles first extraction or added sections)
+  for (const [sectionIdx, sectionWords] of freshBySectionIndex) {
+    const existsInMerged = mergedWords.some(w => w.sectionIndex === sectionIdx);
+    if (!existsInMerged) {
+      // Find insertion point to maintain section order
+      const insertIdx = mergedWords.findIndex(w => w.sectionIndex > sectionIdx);
+      if (insertIdx >= 0) {
+        mergedWords.splice(insertIdx, 0, ...sectionWords);
+      } else {
+        mergedWords.push(...sectionWords);
+      }
+    }
+  }
 
   foliateWordsRef.current = mergedWords;
   onWordsReextracted?.();
@@ -824,6 +876,10 @@ git commit -m "fix(S-09): unify word click tokenization with Intl.Segmenter"
 
 Add to props: `readingMode`, `flowPlaying`, `highlightedWordIndex`, `wpm`
 
+**RE-RENDER WARNING:** The `onWordAdvance` callback (Step 2) updates `highlightedWordIndex` in ReaderContainer, which is passed back as a prop. If FoliatePageView re-renders on every prop change, the rAF loop will break. Ensure either: (a) `onWordAdvance` updates a ref in the parent, not state, and the word index flows down only when needed, or (b) FoliatePageView is wrapped in `React.memo` with a custom comparator that ignores `highlightedWordIndex` changes (since the cursor position is handled imperatively via refs, not via React rendering).
+
+**PROP CONSOLIDATION (suggestion):** Tasks 8-10 add ~9 new props. Consider bundling into a `readerState` object: `{ readingMode, flowPlaying, highlightedWordIndex, wpm, narrationWordIndex }` and a `readerCallbacks` object: `{ onWordAdvance, onWordsReextracted }`. This keeps the interface manageable.
+
 Add internal state:
 
 ```typescript
@@ -882,8 +938,10 @@ useEffect(() => {
 
 - [ ] **Step 3: Add cursor div to JSX**
 
+**IMPORTANT:** Render the cursor div as a **sibling** of the foliate container, NOT a child. This avoids stacking context issues where foliate's own `overflow`, `transform`, or `z-index` could interfere. The cursor uses `position: fixed` (viewport-relative), which escapes `overflow: hidden`, but placing it inside foliate's container creates an unnecessary stacking dependency.
+
 ```tsx
-{/* Flow cursor overlay for EPUB */}
+{/* Flow cursor overlay for EPUB — sibling of foliate container, not child */}
 <div
   ref={cursorRef}
   className="foliate-flow-cursor"
@@ -1050,7 +1108,7 @@ useEffect(() => {
 ```css
 .foliate-narration-highlight {
   position: fixed;
-  background: rgba(var(--accent-rgb), 0.3);
+  background: var(--accent-highlighted); /* already defined as rgba(accent, 0.3) — no --accent-rgb needed */
   border-radius: 2px;
   pointer-events: none;
   z-index: 100;
@@ -1062,12 +1120,22 @@ useEffect(() => {
 
 Find and remove the `highlightWord` implementation in `FoliateViewAPI` that uses `surroundContents(mark)`. Replace it with a call to update `narrationWordIndex` state, which the overlay handles.
 
+**Cleanup verification (REQUIRED):**
+```bash
+# Must return zero results after cleanup
+grep -rn "surroundContents" src/components/FoliatePageView.tsx
+grep -rn "blurby-word-highlight" src/components/FoliatePageView.tsx
+```
+
+If either grep returns results, the old injection code wasn't fully removed. Having both the overlay AND mark injection active will produce duplicate highlights. Remove ALL `surroundContents` and mark-creation code from FoliatePageView.
+
 - [ ] **Step 7: Manual test**
 
 Open EPUB → start narration. Verify:
 - Highlight advances word-by-word
 - Highlight continues across page boundaries
 - Highlight continues across section boundaries
+- **No duplicate highlights** (inspect DOM — zero `<mark>` elements in foliate iframes)
 - No leftover `<mark>` elements in foliate DOM
 
 - [ ] **Step 8: Commit**
@@ -1097,13 +1165,16 @@ import { useEffect } from "react";
 
 interface ReturnToReadingPillProps {
   visible: boolean;
+  activeOverlay: boolean; // true if command palette, dialog, etc. is open
   onReturn: () => void;
 }
 
-export default function ReturnToReadingPill({ visible, onReturn }: ReturnToReadingPillProps) {
+export default function ReturnToReadingPill({ visible, activeOverlay, onReturn }: ReturnToReadingPillProps) {
   useEffect(() => {
     if (!visible) return;
     const handler = (e: KeyboardEvent) => {
+      // Don't consume Enter if another overlay is active (command palette, dialogs, etc.)
+      if (activeOverlay) return;
       if (e.key === "Enter") {
         e.preventDefault();
         onReturn();
@@ -1111,7 +1182,7 @@ export default function ReturnToReadingPill({ visible, onReturn }: ReturnToReadi
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [visible, onReturn]);
+  }, [visible, activeOverlay, onReturn]);
 
   if (!visible) return null;
 
