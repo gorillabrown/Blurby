@@ -619,28 +619,11 @@ export default function FoliatePageView({
                   }
                 } catch { /* */ }
               }
-              // Auto-advance: use scrollToAnchor only when we're confident the word
-              // is on a different page. Track the last scrolled-to word to avoid re-scrolling.
-              if (targetSpan && view.renderer) {
-                try {
-                  // Simple approach: check if targetSpan is connected and has a zero-width rect
-                  // (means it's in a collapsed/hidden column). Also check every ~10 words
-                  // to see if the page needs advancing.
-                  const rect = targetSpan.getBoundingClientRect();
-                  // In CSS column layout inside the iframe, off-screen words still have
-                  // valid rects but they'll be positioned far outside the viewport.
-                  // The iframe clips to its container, so check against the iframe's own window.
-                  const iframeWindow = targetSpan.ownerDocument?.defaultView;
-                  if (iframeWindow) {
-                    const innerWidth = iframeWindow.innerWidth;
-                    // Word is off-screen if its left edge is past the viewport
-                    // Only act on this every 5 words to prevent thrashing
-                    if (wordIndex % 5 === 0 && (rect.left >= innerWidth || rect.right <= 0)) {
-                      view.renderer.next();
-                    }
-                  }
-                } catch { /* safe to ignore */ }
-              }
+              // Page auto-advance: when narration reaches a word in the next CSS column,
+              // scroll to make it visible. Only check when targetSpan is found and stable.
+              // DISABLED during section loads (word array rebuild causes index shifts).
+              // Re-enable once word array stability is solved.
+              // TODO: Re-implement page advance after word index stability fix
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes

@@ -829,7 +829,11 @@ export default function ReaderContainer({
       }}
       onLoad={() => {
         // Extract words from DOM after each section loads
-        setTimeout(extractFoliateWords, 100);
+        // BUT NOT during active narration — rebuilding the word array mid-narration
+        // shifts all data-word-index attributes, causing highlight/page jumps
+        if (readingMode !== "narration" && readingMode !== "flow") {
+          setTimeout(extractFoliateWords, 100);
+        }
       }}
       viewApiRef={foliateApiRef}
       isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
