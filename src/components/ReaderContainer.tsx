@@ -449,10 +449,12 @@ export default function ReaderContainer({
     hasEngagedRef.current = true;
     // For foliate EPUBs, ensure words are extracted
     if (useFoliate) extractFoliateWords();
+    // Start Flow from the current highlighted word position
+    jumpToWord(highlightedWordIndex);
     setReadingMode("flow");
     setFlowPlaying(true);
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
-  }, [updateSettings, stopAllModes, useFoliate, extractFoliateWords]);
+  }, [highlightedWordIndex, jumpToWord, updateSettings, stopAllModes, useFoliate, extractFoliateWords]);
 
   /** Pause any sub-mode → return to Page */
   const handlePauseToPage = useCallback(() => {
@@ -780,27 +782,14 @@ export default function ReaderContainer({
           href: item.href,
         })));
       }}
-      onWordClick={(cfi, word, sectionIndex, wordOffsetInSection) => {
+      onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
         activeDoc.cfi = cfi;
-        console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}, section: ${sectionIndex}, offset: ${wordOffsetInSection}`);
-        // Map section + word offset to our extracted words array index
-        const words = foliateWordsRef.current;
-        if (words.length > 0 && sectionIndex !== undefined && wordOffsetInSection !== undefined) {
-          // Find the first word in this section, then add the offset
-          let sectionStart = -1;
-          for (let i = 0; i < words.length; i++) {
-            if (words[i].sectionIndex === sectionIndex) {
-              sectionStart = i;
-              break;
-            }
-          }
-          if (sectionStart >= 0) {
-            const targetIdx = Math.min(sectionStart + wordOffsetInSection, words.length - 1);
-            setHighlightedWordIndex(targetIdx);
-            console.log(`[Foliate] Mapped click to word index ${targetIdx} (section ${sectionIndex} + offset ${wordOffsetInSection})`);
-            return;
-          }
+        // Use global word index directly when available (from data-word-index span)
+        if (globalWordIndex !== undefined && globalWordIndex >= 0) {
+          setHighlightedWordIndex(globalWordIndex);
+          console.log(`[Foliate] Word clicked: "${word}" at global index ${globalWordIndex}`);
+          return;
         }
         // Fallback: text search (less precise)
         if (words.length > 0) {

@@ -218,7 +218,7 @@ interface FoliatePageViewProps {
   settings: BlurbySettings;
   onRelocate?: (detail: { cfi: string; fraction: number; tocItem?: any; pageItem?: any }) => void;
   onTocReady?: (toc: any[]) => void;
-  onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number) => void;
+  onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number) => void;
   onLoad?: () => void;
   onWordsReextracted?: () => void;
   initialCfi?: string | null;
@@ -406,7 +406,7 @@ export default function FoliatePageView({
                 const cfi = v.getCFI(match.index, range);
                 const sectionBase = foliateWordsRef.current.findIndex(w => w.sectionIndex === match.index);
                 const wordOffsetInSection = sectionBase >= 0 ? idx - sectionBase : 0;
-                onWordClick?.(cfi, target.textContent || "", match.index, wordOffsetInSection);
+                onWordClick?.(cfi, target.textContent || "", match.index, wordOffsetInSection, idx);
               }
             }
           });

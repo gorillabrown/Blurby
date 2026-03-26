@@ -256,8 +256,10 @@ export default function PageReaderView({
       setTransitioning(false);
       if (ttsActive) {
         // Don't change highlighted word — NM continues reading independently
-        setUserBrowsing(true);
-        onUserBrowsed?.(true);
+        // Only mark as browsed away if the destination page differs from the TTS highlight page
+        const isOnHighlightPage = clamped === ttsTargetPageRef.current;
+        setUserBrowsing(!isOnHighlightPage);
+        onUserBrowsed?.(!isOnHighlightPage);
       } else {
         // Save progress: first word of the new page becomes the saved position
         const pageStart = pages[clamped]?.start ?? 0;
