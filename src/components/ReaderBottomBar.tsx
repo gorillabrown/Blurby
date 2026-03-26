@@ -254,7 +254,7 @@ export default function ReaderBottomBar({
           <div className="rbb-chapter-group">
             <button
               className="rbb-chapter-arrow"
-              onClick={() => { triggerCoachHint("prevChapter"); onPrevChapter(); }}
+              onClick={() => { triggerCoachHint("prevChapter"); onPrevChapter?.(); }}
               disabled={curChapterIdx <= 0}
               aria-label="Previous chapter"
             >
@@ -270,7 +270,7 @@ export default function ReaderBottomBar({
             </button>
             <button
               className="rbb-chapter-arrow"
-              onClick={() => { triggerCoachHint("nextChapter"); onNextChapter(); }}
+              onClick={() => { triggerCoachHint("nextChapter"); onNextChapter?.(); }}
               disabled={curChapterIdx >= chapterList.length - 1}
               aria-label="Next chapter"
             >

@@ -451,6 +451,11 @@ export default function ReaderContainer({
   }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
 
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
+    // For foliate EPUBs, navigate using the href from the TOC
+    if (useFoliate && (docChapters[chapterIndex] as any)?.href) {
+      foliateApiRef.current?.goTo?.((docChapters[chapterIndex] as any).href);
+      return;
+    }
     const chs = docChapters.length > 0
       ? chaptersFromCharOffsets(activeDoc.content, docChapters)
       : detectChapters(activeDoc.content, words);
@@ -666,6 +671,31 @@ export default function ReaderContainer({
       onWordClick={(cfi, word) => {
         activeDoc.cfi = cfi;
         console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}`);
+        // Find this word in the extracted words array and update highlightedWordIndex
+        const words = foliateWordsRef.current;
+        if (words.length > 0) {
+          const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
+          // Search near current position first
+          const start = Math.max(0, highlightedWordIndex - 100);
+          const end = Math.min(words.length, highlightedWordIndex + 500);
+          for (let i = start; i < end; i++) {
+            if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
+              setHighlightedWordIndex(i);
+              // Progress saved via highlightedWordIndex change
+              console.log(`[Foliate] Mapped click to word index ${i}`);
+              return;
+            }
+          }
+          // Broad search
+          for (let i = 0; i < words.length; i++) {
+            if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
+              setHighlightedWordIndex(i);
+              // Progress saved via highlightedWordIndex change
+              console.log(`[Foliate] Mapped click to word index ${i} (broad)`);
+              return;
+            }
+          }
+        }
       }}
       onLoad={() => {
         // Extract words from DOM after each section loads

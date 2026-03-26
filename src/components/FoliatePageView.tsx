@@ -217,15 +217,37 @@ export default function FoliatePageView({
           console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
-          // Word detection: single click expands to word, double click uses native selection
+          // Word detection: single click highlights word with a <mark> overlay
           doc.addEventListener("click", (ce: MouseEvent) => {
             if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
+
+            // Remove any previous highlight marks in ALL loaded docs
+            const v = viewRef.current;
+            for (const { doc: d } of v?.renderer?.getContents?.() ?? []) {
+              d.querySelectorAll("mark.blurby-word-highlight").forEach((m: Element) => {
+                const parent = m.parentNode;
+                if (parent) {
+                  while (m.firstChild) parent.insertBefore(m.firstChild, m);
+                  parent.removeChild(m);
+                  parent.normalize(); // merge adjacent text nodes
+                }
+              });
+            }
+
             // Try to select word at click point
             const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
             if (result) {
-              const sel = doc.getSelection();
-              if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
-              const v = viewRef.current;
+              // Wrap the word in a visible <mark> element
+              try {
+                const mark = doc.createElement("mark");
+                mark.className = "blurby-word-highlight";
+                mark.style.cssText = `background: var(--blurby-accent, rgba(230,57,70,0.25)); border-radius: 2px; padding: 0 1px;`;
+                result.range.surroundContents(mark);
+              } catch { /* range crosses element boundary — fall back to selection */
+                const sel = doc.getSelection();
+                if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
+              }
+
               if (v) {
                 const contents = v.renderer.getContents?.() ?? [];
                 const match = contents.find((c: any) => c.doc === doc);
