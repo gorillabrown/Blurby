@@ -464,12 +464,14 @@ export default function FoliatePageView({
         // Navigate to last position or start from the very beginning (cover page).
         // Only pass lastLocation when a real CFI exists — passing null causes foliate
         // to skip the cover and land on the first text section (~page 3).
+        console.log("[Foliate] initialCfi:", initialCfi ? initialCfi.substring(0, 60) + "..." : "null/undefined — will start at cover");
         const initOptions = initialCfi ? { lastLocation: initialCfi } : {};
         await view.init(initOptions);
 
         // If no saved position, force the cover page explicitly.
         // foliate's default start point may be the first text section, not section 0.
         if (!initialCfi) {
+          console.log("[Foliate] No saved CFI — forcing goToFraction(0) for cover page");
           await view.goToFraction(0);
         }
 
@@ -596,6 +598,7 @@ export default function FoliatePageView({
     }
 
     // Find the word span across ALL loaded section iframes
+    console.log(`[Foliate] Narration highlight: looking for word index ${narrationWordIndex}`);
     const host = containerRef.current;
     const iframes = host ? host.querySelectorAll("iframe") : [];
     let found = false;

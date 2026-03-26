@@ -345,6 +345,7 @@ export default function useNarration() {
 
   /** Dispatch to the correct engine's chunk speaker */
   const speakNextChunk = useCallback(() => {
+    console.log(`[TTS] speakNextChunk: engine=${engineRef.current}, kokoroReady=${kokoroReady}`);
     if (engineRef.current === "kokoro" && kokoroReady) {
       speakNextChunkKokoro();
     } else {
