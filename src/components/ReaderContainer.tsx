@@ -12,6 +12,7 @@ import PageReaderView from "./PageReaderView";
 import FoliatePageView from "./FoliatePageView";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
+import BacktrackPrompt from "./BacktrackPrompt";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
 
@@ -178,17 +179,35 @@ export default function ReaderContainer({
   const lastSavedPosRef = useRef(activeDoc.position || 0);
   const currentPos = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
-  // Only save progress when user is actively reading (in a mode) or has manually navigated
-  // Don't save on initial book open to prevent false "started" status
-  const userHasInteractedRef = useRef(false);
+  // Engagement gate: don't persist progress until user has actively read
+  // Set true by mode starts, word clicks, page turns — NOT by initial open or onRelocate
+  const hasEngagedRef = useRef(false);
+
+  // Reset engagement when activeDoc changes
   useEffect(() => {
-    if (readingMode !== "page") userHasInteractedRef.current = true;
-  }, [readingMode]);
+    hasEngagedRef.current = false;
+  }, [activeDoc?.id]);
+
+  // High-water mark for backtrack detection
+  const furthestPositionRef = useRef<number>(activeDoc?.furthestPosition ?? activeDoc?.position ?? 0);
+
+  // Reset furthest position when activeDoc changes
+  useEffect(() => {
+    furthestPositionRef.current = activeDoc?.furthestPosition ?? activeDoc?.position ?? 0;
+  }, [activeDoc?.id]);
+
+  // Backtrack prompt state
+  const [showBacktrackPrompt, setShowBacktrackPrompt] = useState(false);
+  const [backtrackPages, setBacktrackPages] = useState<{ current: number; furthest: number }>({ current: 0, furthest: 0 });
 
   useEffect(() => {
     if (currentPos === lastSavedPosRef.current) return;
-    // For foliate EPUBs: don't save progress from initial onRelocate events in page mode
-    if (useFoliate && readingMode === "page" && !userHasInteractedRef.current) return;
+    // Don't save progress until user has engaged (prevents false "started" on open)
+    if (!hasEngagedRef.current) return;
+    // Update high-water mark when position advances
+    if (currentPos > furthestPositionRef.current) {
+      furthestPositionRef.current = currentPos;
+    }
     if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
     pageSaveTimerRef.current = setTimeout(() => {
       lastSavedPosRef.current = currentPos;
@@ -201,6 +220,8 @@ export default function ReaderContainer({
   const finishReading = useCallback((finalPos: number) => {
     // Flush any pending debounced save
     if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
+    // Persist furthest position as metadata on the doc
+    activeDoc.furthestPosition = Math.max(furthestPositionRef.current, finalPos);
     onUpdateProgress(activeDoc.id, finalPos);
     api.updateDocProgress(activeDoc.id, finalPos);
     // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
@@ -278,6 +299,7 @@ export default function ReaderContainer({
   /** Start Narration mode (internal — called by handleTogglePlay) */
   const startNarration = useCallback(() => {
     stopAllModes();
+    hasEngagedRef.current = true;
     setReadingMode("narration");
     updateSettings({ readingMode: "narration", lastReadingMode: "narration" });
     // Cap WPM for TTS
@@ -307,7 +329,26 @@ export default function ReaderContainer({
 
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
-      // Exit from Page → leave reader entirely
+      // Check for backtrack before exiting
+      const furthest = furthestPositionRef.current;
+      const current = highlightedWordIndex;
+      const totalWords = activeDoc.wordCount || words.length || 1;
+      // Threshold: ~2 pages worth of words (rough estimate: 250 words/page)
+      const threshold = useFoliate
+        ? Math.max(2, Math.round(2 * totalWords / Math.max(1, Math.round(totalWords / 250))))
+        : Math.max(2, 500);
+      const isBacktracked = current < (furthest - threshold);
+      if (isBacktracked && hasEngagedRef.current) {
+        // Show backtrack prompt instead of closing
+        const approxWordsPerPage = 250;
+        setBacktrackPages({
+          current: Math.max(1, Math.ceil(current / approxWordsPerPage)),
+          furthest: Math.max(1, Math.ceil(furthest / approxWordsPerPage)),
+        });
+        setShowBacktrackPrompt(true);
+        return;
+      }
+      // Normal exit
       stopAllModes();
       finishReading(highlightedWordIndex);
     } else {
@@ -316,7 +357,24 @@ export default function ReaderContainer({
       stopAllModes();
       setReadingMode("page");
     }
-  }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex]);
+  }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex, activeDoc.wordCount, words.length, useFoliate]);
+
+  // Backtrack prompt handlers
+  const handleSaveAtCurrent = useCallback(() => {
+    setShowBacktrackPrompt(false);
+    stopAllModes();
+    // Save at the current (backtracked) position
+    furthestPositionRef.current = highlightedWordIndex;
+    finishReading(highlightedWordIndex);
+  }, [stopAllModes, finishReading, highlightedWordIndex]);
+
+  const handleKeepFurthest = useCallback(() => {
+    setShowBacktrackPrompt(false);
+    stopAllModes();
+    // Keep the furthest position as current
+    const furthest = furthestPositionRef.current;
+    finishReading(furthest);
+  }, [stopAllModes, finishReading]);
 
   const handleScrollExit = useCallback((finalPos: number) => {
     // Flow mode pause → return to Page
@@ -360,6 +418,7 @@ export default function ReaderContainer({
 
   const startFocus = useCallback(() => {
     stopAllModes();
+    hasEngagedRef.current = true;
     // For foliate EPUBs, ensure words are extracted
     if (useFoliate) extractFoliateWords();
     jumpToWord(highlightedWordIndex);
@@ -371,6 +430,7 @@ export default function ReaderContainer({
   /** Start Flow mode (internal — called by handleTogglePlay) */
   const startFlow = useCallback(() => {
     stopAllModes();
+    hasEngagedRef.current = true;
     // For foliate EPUBs, ensure words are extracted
     if (useFoliate) extractFoliateWords();
     setReadingMode("flow");
@@ -460,6 +520,7 @@ export default function ReaderContainer({
   }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
 
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
+    hasEngagedRef.current = true;
     // For foliate EPUBs, navigate using the href from the TOC
     if (useFoliate && (docChapters[chapterIndex] as any)?.href) {
       foliateApiRef.current?.goTo?.((docChapters[chapterIndex] as any).href);
@@ -484,8 +545,8 @@ export default function ReaderContainer({
     nextPage: () => {},
   });
 
-  const handlePrevPage = useCallback(() => pageNavRef.current.prevPage(), []);
-  const handleNextPage = useCallback(() => pageNavRef.current.nextPage(), []);
+  const handlePrevPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.prevPage(); }, []);
+  const handleNextPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.nextPage(); }, []);
 
   // Flow line navigation ref (updated by PageReaderView)
   const flowNavRef = useRef<{ prevLine: () => void; nextLine: () => void }>({
@@ -496,6 +557,7 @@ export default function ReaderContainer({
   const handleFlowNextLine = useCallback(() => flowNavRef.current.nextLine(), []);
 
   const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
+    hasEngagedRef.current = true;
     // Move highlight by 1 word (left/right) or ~10 words (up/down, approximate line jump)
     const delta = direction === "left" ? -1 : direction === "right" ? 1 : direction === "up" ? -10 : 10;
     setHighlightedWordIndex((prev) => Math.max(0, Math.min(words.length - 1, prev + delta)));
@@ -669,8 +731,8 @@ export default function ReaderContainer({
           const fraction = detail.fraction || 0;
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
           setHighlightedWordIndex(approxWordIdx);
-          // Only save progress if user has interacted (prevents false "started")
-          if (!userHasInteractedRef.current && readingMode === "page") return;
+          // Only save progress if user has engaged (prevents false "started")
+          if (!hasEngagedRef.current && readingMode === "page") return;
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
@@ -688,6 +750,7 @@ export default function ReaderContainer({
         })));
       }}
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection) => {
+        hasEngagedRef.current = true;
         activeDoc.cfi = cfi;
         console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}, section: ${sectionIndex}, offset: ${wordOffsetInSection}`);
         // Map section + word offset to our extracted words array index
@@ -925,6 +988,14 @@ export default function ReaderContainer({
 
       {menuFlap}
       {showEinkRefresh && <EinkRefreshOverlay />}
+      {showBacktrackPrompt && (
+        <BacktrackPrompt
+          currentPage={backtrackPages.current}
+          furthestPage={backtrackPages.furthest}
+          onSaveAtCurrent={handleSaveAtCurrent}
+          onKeepFurthest={handleKeepFurthest}
+        />
+      )}
     </>
   );
 }

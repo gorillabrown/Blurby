@@ -36,6 +36,8 @@ export interface BlurbyDoc {
   collection?: string | null;
   // Sprint 25C: "New" dot tracking
   seenAt?: number;        // timestamp when card was seen in library view
+  // Sprint 25S: High-water mark for backtrack detection
+  furthestPosition?: number; // Page number (non-EPUB) or fraction 0.0-1.0 (EPUB)
   // Sprint 26: EPUB CFI position tracking
   cfi?: string;           // EPUB Canonical Fragment Identifier — exact reading position
 }
