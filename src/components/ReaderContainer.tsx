@@ -305,6 +305,8 @@ export default function ReaderContainer({
 
   /** Start Narration mode (internal — called by handleTogglePlay) */
   const startNarration = useCallback(() => {
+    // Force-stop any existing narration first (handles Strict Mode double-invoke)
+    narration.stop();
     stopAllModes();
     hasEngagedRef.current = true;
     setReadingMode("narration");
