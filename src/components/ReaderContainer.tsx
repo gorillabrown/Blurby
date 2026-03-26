@@ -114,6 +114,7 @@ export default function ReaderContainer({
   const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
   // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
   const foliateFractionRef = useRef(0);
+  const [foliateFraction, setFoliateFraction] = useState(0);
 
   // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
@@ -793,6 +794,7 @@ export default function ReaderContainer({
         if (detail.cfi) {
           const fraction = detail.fraction || 0;
           foliateFractionRef.current = fraction;
+          setFoliateFraction(fraction);
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
           // Update CFI for position restoration
           activeDoc.cfi = detail.cfi;
@@ -1058,6 +1060,7 @@ export default function ReaderContainer({
             updateSettings({ ttsRate: rate });
             narration.adjustRate(rate);
           }}
+          foliateFraction={useFoliate ? foliateFraction : undefined}
         />
       </div>
 
