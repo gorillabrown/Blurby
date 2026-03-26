@@ -112,6 +112,8 @@ export default function ReaderContainer({
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
   const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
+  // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
+  const foliateFractionRef = useRef(0);
 
   // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
@@ -217,8 +219,13 @@ export default function ReaderContainer({
     if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
     pageSaveTimerRef.current = setTimeout(() => {
       lastSavedPosRef.current = currentPos;
-      api.updateDocProgress(activeDoc.id, currentPos, useFoliate ? activeDoc.cfi : undefined);
-      onUpdateProgress(activeDoc.id, currentPos);
+      // For foliate EPUBs, use the fraction-based position (authoritative from foliate's relocate)
+      // not the extracted word index (which is relative to visible sections only)
+      const savePos = useFoliate
+        ? Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0))
+        : currentPos;
+      api.updateDocProgress(activeDoc.id, savePos, useFoliate ? activeDoc.cfi : undefined);
+      onUpdateProgress(activeDoc.id, savePos);
     }, 2000);
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
   }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
@@ -226,10 +233,14 @@ export default function ReaderContainer({
   const finishReading = useCallback((finalPos: number) => {
     // Flush any pending debounced save
     if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
+    // For foliate EPUBs, use fraction-based position (not extracted word index)
+    const savePos = useFoliate
+      ? Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0))
+      : finalPos;
     // Persist furthest position as metadata on the doc
-    activeDoc.furthestPosition = Math.max(furthestPositionRef.current, finalPos);
-    onUpdateProgress(activeDoc.id, finalPos);
-    api.updateDocProgress(activeDoc.id, finalPos, activeDoc.cfi || undefined);
+    activeDoc.furthestPosition = Math.max(furthestPositionRef.current, savePos);
+    onUpdateProgress(activeDoc.id, savePos);
+    api.updateDocProgress(activeDoc.id, savePos, activeDoc.cfi || undefined);
     // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
     if (activeReadingStartRef.current) {
       activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
@@ -784,6 +795,7 @@ export default function ReaderContainer({
       onRelocate={(detail) => {
         if (detail.cfi) {
           const fraction = detail.fraction || 0;
+          foliateFractionRef.current = fraction;
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
           // Update CFI for position restoration
           activeDoc.cfi = detail.cfi;
