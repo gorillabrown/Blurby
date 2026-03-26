@@ -83,7 +83,8 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 - **Lessons Learned**: `docs/project/LESSONS_LEARNED.md`
 - **Sprint Dispatch Template**: `.workflow/docs/sprint-dispatch-template.md` (CLI Evergreen format)
 - **Sprint Queue**: `docs/project/sprint-queue.md` (ready-to-dispatch sprints, FIFO)
-- **Roadmap**: `ROADMAP.md`
+- **Roadmap**: `ROADMAP.md` — Forward-looking: features, enhancements, architecture changes, Feature Backlog
+- **Bug Report**: `docs/project/BUG_REPORT.md` — Backward-looking: ONLY bugs in existing implemented features. New features/enhancements go in ROADMAP.md
 - **Agent Findings**: `docs/project/AGENT_FINDINGS.md`
 - **Performance Sprint Plan**: `SPRINT-PERF.md`
 - **Workflow System**: `.workflow/WORKFLOW_ORIENTATION.md` (process discipline, session bootstrap)

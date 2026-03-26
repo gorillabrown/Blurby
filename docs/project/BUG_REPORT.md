@@ -1,6 +1,6 @@
 # Blurby — Running Bug Report
 
-**Purpose:** Living document tracking all bugs reported during development and testing. Each entry contains enough context for any developer to understand and fix the issue without additional direction.
+**Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
 **Last updated:** 2026-03-25
 
@@ -39,35 +39,6 @@
 **Description:** Inline images within EPUB, MOBI, and HTML books are completely removed during content extraction. Only cover images are preserved (extracted separately). Users see text-only content even when the original book contains figures, diagrams, or illustrations.
 **Root cause:** Same as BUG-033 — text-only extraction pipeline. EPUB images exist in the ZIP archive but are never extracted or referenced in the output content.
 **Planned fix:** Wave 3 — extract EPUB images to `userData/images/<docId>/`, reference in Markdown content.
-
-### BUG-035: No chapter detection for non-EPUB formats
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `main/ipc-handlers.js` (get-doc-chapters handler), `main/file-parsers.js`
-**Description:** Chapter navigation (bottom bar dropdown, C hotkey) only works for EPUB files that have NCX/nav TOC metadata. PDF, MOBI, TXT, and HTML files always show "Ch. 0" with no chapter list, even when the content clearly contains chapter headings like "Chapter 1", "Part One", etc.
-**Root cause:** `get-doc-chapters` returns `[]` for non-EPUB formats. No heuristic chapter detection exists.
-**Planned fix:** Wave 3 — pattern-matching chapter detection + auto-generated TOC. See `.claude/plans/wave3-content-pipeline.md`.
-
-### BUG-036: No auto-generated Table of Contents for books without one
-**Reported:** 2026-03-25
-**Severity:** Low
-**Location:** `src/components/PageReaderView.tsx`
-**Description:** When a book has no embedded TOC (or when chapters are detected heuristically), there is no generated TOC page at the beginning of the book. Users must scroll through content to find section starts.
-**Planned fix:** Wave 3 items 7-9.
-
-### BUG-037: E-ink mode is a theme instead of a display mode
-**Reported:** 2026-03-25
-**Severity:** Low
-**Location:** `src/components/ThemeProvider.tsx`, `src/styles/global.css`
-**Description:** E-ink is implemented as a theme option ("dark", "light", "eink", "system") instead of an independent display mode. This means users on e-ink devices cannot use dark/light themes while keeping e-ink-specific behavior (no animations, large touch targets, ghosting prevention, WPM ceiling). Ghosting prevention only works in ScrollReaderView, not PageReaderView. Phrase grouping only works in Focus mode.
-**Planned fix:** Wave 4 — full e-ink mode overhaul. See `.claude/plans/wave4-eink-mode-overhaul.md`.
-
-### BUG-038: Hotkey coaching not shown in reader views
-**Reported:** 2026-03-25
-**Severity:** Low
-**Location:** `src/components/HotkeyCoach.tsx`, `src/components/ReaderContainer.tsx`
-**Description:** When users click buttons in the reader (page turn, mode switch, WPM change, etc.) with the mouse instead of using keyboard shortcuts, no coaching toast appears suggesting the keyboard shortcut. Coaching only works in the library view for archive/favorite/delete/search actions. User requested: brief message at bottom quarter of screen saying "Next time, hit [HOTKEY] to do this instantly!" in light grey, 80% opacity.
-**Planned fix:** Wave 3 item 3 — expand HotkeyCoach to reader views.
 
 ### BUG-039: Space bar should start the last-used reading mode
 **Reported:** 2026-03-25
@@ -146,97 +117,6 @@
 **Description:** Buttons and interactive elements inside the menu flap have very small clickable areas. Users must click precisely on the text or icon to trigger the action — clicking on the surrounding padding or whitespace within the button does nothing. This is a recurring issue that was partially fixed earlier by removing `-webkit-app-region: drag` from body, but the flap's internal button styling still has insufficient hit targets.
 **Root cause (suspected):** Button elements may have small intrinsic size with padding on a parent container that doesn't forward clicks, or there may be overlapping invisible elements absorbing pointer events.
 
-### BUG-055: Combine Text Size and Layout settings into "Reading Layout"
-**Reported:** 2026-03-25
-**Severity:** Low (UX improvement)
-**Location:** `src/components/MenuFlap.tsx`, `src/components/settings/`
-**Description:** The settings menu currently has separate "Text Size" and "Layout" options. These should be combined into a single settings page called "Reading Layout" that contains all reading-related visual settings: text size, line spacing, character spacing, word spacing, font family, and any other layout controls.
-
-### BUG-056: New settings page — "Library Layout"
-**Reported:** 2026-03-25
-**Severity:** Low (feature request)
-**Location:** `src/components/settings/` (new file), `src/components/MenuFlap.tsx`
-**Description:** Create a new settings page called "Library Layout" with the following configurable options:
-1. **Default Sort** — dropdown matching existing sort options (closest to done, A-Z title, A-Z author, newest, oldest). Persisted in settings so the library always opens with this sort.
-2. **Default Layout** — toggle between List View and Grid View. Persisted.
-3. **Card/List Size** — three options: Small, Medium, Large. Controls the size of grid cards or list row height.
-4. **Card/List Spacing** — three options: Compact, Cozy, Roomy. Controls the gap between cards/rows.
-5. **List View Columns** — 1 or 2 columns when in List View mode. Controls whether list items stack in a single column or flow into two columns side-by-side.
-
-Each option must be persisted in `BlurbySettings` and applied immediately when changed. The library grid/list components must read these settings and apply appropriate CSS classes or style values.
-
-### BUG-057: Library Layout settings — implement CSS rules and code adaptations
-**Reported:** 2026-03-25
-**Severity:** Low (feature request)
-**Location:** `src/styles/global.css`, `src/components/LibraryView.tsx`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
-**Description:** Implement the visual rules for BUG-056 Library Layout options:
-- **Card Size Small:** grid `minmax(120px, 1fr)`, smaller cover images, compact text
-- **Card Size Medium:** current default grid `minmax(160px, 1fr)`
-- **Card Size Large:** grid `minmax(220px, 1fr)`, larger covers, more text visible
-- **Spacing Compact:** grid gap 8px, list gap 4px
-- **Spacing Cozy:** current default grid gap 16px, list gap 8px
-- **Spacing Roomy:** grid gap 24px, list gap 16px
-- **Default Sort:** applied on library load from `settings.defaultSort`
-- **Default Layout:** applied on library load from `settings.defaultViewMode`
-
-### BUG-058: Make Library Layout and Reading Layout searchable in Ctrl+K
-**Reported:** 2026-03-25
-**Severity:** Low
-**Location:** `src/components/CommandPalette.tsx`
-**Description:** Add "Settings: Library Layout" and "Settings: Reading Layout" entries to the command palette, along with sub-entries for each individual setting within those pages (Default Sort, Default Layout, Card Size, Card Spacing, Text Size, Line Spacing, etc.).
-
-### BUG-059: Every individual setting must be searchable in Ctrl+K
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/components/CommandPalette.tsx`
-**Description:** The command palette should contain an entry for EVERY individual setting in the app — not just the settings page headers. When the user searches for "line spacing" or "card size" or "default sort" or "focus marks" or "phrase grouping", they should find a matching entry that navigates directly to the settings page containing that option. This requires a comprehensive audit of all settings pages and adding an entry for each toggle, slider, dropdown, and option.
-
-Current settings pages and their individual settings that need entries:
-- **Theme:** dark/light/system, accent color presets, custom color, font presets
-- **Reading Layout (new):** text size, line spacing, character spacing, word spacing
-- **Speed Reading:** reading mode, focus marks, reading ruler, focus span, words per highlight, cursor style, rhythm pauses (commas, sentences, paragraphs, numbers, longer words), TTS enable, TTS engine, TTS voice, TTS rate
-- **Library Layout (new):** default sort, default view mode, card size, card spacing
-- **Hotkeys:** (read-only reference, but should be searchable)
-- **Connectors:** site logins
-- **Cloud Sync:** provider, sync interval, metered connection
-- **Help:** version, updates
-
-### BUG-061: Replace hamburger menu button with Blurby icon across all themes
-**Reported:** 2026-03-25
-**Severity:** Low (branding)
-**Location:** `src/components/MenuFlap.tsx` or wherever the hamburger (☰) is rendered, `src/styles/global.css`
-**Description:** The top-left menu button currently shows a generic hamburger icon (three horizontal lines). It should be replaced with the Blurby brand icon/logo across all themes. The icon should be appropriately sized (~24-28px), respect the current theme's text color for contrast, and function identically to the current hamburger (click to toggle the menu flap, keyboard shortcut Tab/M).
-**Assets available:** `Blurby Brand/Blurby.icon.png`, `Blurby Brand/Blurby.icon.jpeg`, `Blurby Brand/Blurby.tray-icon.png`. Use the PNG icon scaled to ~24px for the menu button.
-
-### BUG-062: New "Blurby" default theme based on brand standards
-**Reported:** 2026-03-25
-**Severity:** Low (branding)
-**Location:** `src/components/ThemeProvider.tsx`, `src/styles/global.css`
-**Description:** Create a new theme option called "Blurby" (or make it the default) based on the official Blurby brand color palette:
-- **Background:** Crisp white (#FFFFFF or near-white)
-- **Menu flap & reader bottom bar:** Highlight Blue (#CAE4FE)
-- **Accent color:** Accent Red (#E63946) — used for active buttons, progress bars, highlights
-- **Dividers and lines:** Core Blue (#2E73FF) — used for borders, separators, tab underlines
-- **Text:** Dark/black for readability against white background
-
-This theme should be added to the theme selector alongside dark, light, and system. All CSS custom properties (`--bg`, `--accent`, `--border`, `--bg-raised`, etc.) need Blurby-specific values. The menu flap background, reader bottom bar background, and any chrome areas should use the Highlight Blue, while content areas remain white.
-
-**Brand palette reference:**
-| Token | Color | Use |
-|-------|-------|-----|
-| Background | #FFFFFF | Page/content background |
-| Highlight Blue | #CAE4FE | Menu flap, bottom bar, raised surfaces |
-| Core Blue | #2E73FF | Dividers, borders, lines, tab indicators |
-| Accent Red | #E63946 | Active states, buttons, progress, highlights |
-| Text | #1A1A1A | Primary text |
-| Text Dim | #666666 | Secondary/muted text |
-
-### BUG-060: Remove "[Sample]" prefix from first-run onboarding book title
-**Reported:** 2026-03-25
-**Severity:** Low
-**Location:** `src/components/OnboardingOverlay.tsx` or `main/ipc-handlers.js` (wherever the sample doc is created)
-**Description:** The book pre-loaded for first-time users is titled "[Sample] Meditations — Marcus Aurelius". The "[Sample]" prefix is unnecessary and looks unprofessional — it's a full legitimate public-domain book, not a demo excerpt. The title should simply be "Meditations" with author "Marcus Aurelius".
-
 ### BUG-049: Window control buttons (min/max/close) don't match theme background
 **Reported:** 2026-03-25
 **Severity:** Low
@@ -244,19 +124,6 @@ This theme should be added to the theme selector alongside dark, light, and syst
 **Description:** The minimize, maximize, and close buttons in the top-right window chrome use the default Windows title bar color instead of matching the app's selected background theme. In light/warm themes, the dark default title bar buttons clash visually. These buttons should adopt the same background color as the current theme.
 **Root cause:** Electron's default frame uses the OS title bar. To customize, either use `titleBarStyle: "hidden"` with custom CSS buttons, or use `titleBarOverlay` with color matching.
 **Expected:** Button area background matches `var(--bg)` from the active theme.
-
-### BUG-050: Library cards should show three lines — Title, Author, Book Data
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
-**Description:** Library cards currently show Title and Author (or "X% read"). They should consistently show three lines of text:
-1. **Title** — book title (truncated with ellipsis if too long)
-2. **Author** — author name
-3. **Book Data** — contextual reading stats:
-   - If currently reading (progress > 0%): `7% | 16/323p | 1.1h/6.2h` (percent read | current page/total pages | time read/total time)
-   - If not started: `323p | 6.2h` (total pages | total reading time estimate)
-
-Page count is derived from word count and the pagination algorithm (or estimated at ~250 words/page). Time estimate uses current WPM setting. Time read is calculated from `position / wordCount * totalTime`.
 
 ### BUG-063: Define word includes punctuation, preventing dictionary lookup
 **Reported:** 2026-03-25
@@ -282,30 +149,12 @@ Page count is derived from word count and the pagination algorithm (or estimated
 **Location:** `src/styles/global.css`
 **Description:** The following elements must use `var(--accent)` for their primary color: WPM slider thumb/track, selected mode button background, flow cursor underline, and narration word highlight. Currently some use hardcoded colors.
 
-### BUG-067: "New" dot on library cards should clear after being seen
-**Reported:** 2026-03-25
-**Severity:** Low
-**Location:** `src/components/DocGridCard.tsx`, `src/components/LibraryContainer.tsx`
-**Description:** Library cards show a "new" dot indicator. This dot should vanish after: (1) the item has scrolled into the visible viewport at least once, AND (2) the user has navigated away from Library view after observing it. Requires IntersectionObserver tracking and a `seenAt` timestamp on the doc metadata.
-
 ### BUG-068: Blurby theme should lock accent/font modifications
 **Reported:** 2026-03-25 | **Fixed:** 2026-03-25
 **Severity:** Low
 **Location:** `src/components/settings/ThemeSettings.tsx`
 **Description:** When the "Blurby" brand theme is selected, accent color and font family modifications should be disabled (greyed out). Only other themes allow customization. The Blurby theme is a locked brand experience.
 **Solution:** Wrapped accent color and font sections in `{settings.theme !== "blurby" && (...)}` guard.
-
-### BUG-069: Shift+Left/Right should jump between paragraphs in reading modes
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/PageReaderView.tsx`
-**Description:** In all reading modes, Shift+Left should jump back to the 1st word of the current paragraph. Pressing again jumps to the previous paragraph's first word. Shift+Right does the opposite — jumps to next paragraph start. Requires paragraph boundary detection in the words array.
-
-### BUG-070: Mouse scroll wheel should advance word-by-word
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/components/PageReaderView.tsx`
-**Description:** In reading modes, the mouse scroll wheel should advance or retreat one word at a time (scroll down = forward, scroll up = backward) instead of scrolling the page. This gives fine-grained navigation control.
 
 ### BUG-071: Tab key not opening settings flap in Library view
 **Reported:** 2026-03-25 | **Fixed:** 2026-03-25
@@ -336,111 +185,6 @@ This makes the time estimate meaningful regardless of which mode is selected.
 4. Clicking the button (or pressing a hotkey like Backspace) snaps back to the page containing the current narration word
 5. If the user clicks a word on the browsed page, NM picks up from that word instead
 6. When the narration cursor naturally advances to the page the user is viewing, the button disappears
-
-### BUG-074: Author name format inconsistent — should be "Last, First"
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `main/file-parsers.js` (metadata extraction), `main/ipc-handlers.js` (import pipeline)
-**Description:** Author names across the library are inconsistent — some show "First Last" (e.g., "Dan Brown"), others show "Last, First" (e.g., "Deaton, Angus"). This is because different file formats (EPUB OPF, PDF metadata, filename parsing) return names in different formats and no normalization is applied. The app should standardize all author names to **"Last Name, First Name"** format during import.
-**Expected behavior:**
-1. On import, detect whether author string is "First Last" or "Last, First" format
-2. Normalize to "Last, First" — e.g., "Dan Brown" → "Brown, Dan"
-3. Handle multi-word last names heuristically (e.g., "Gabriel García Márquez" → "García Márquez, Gabriel")
-4. Handle "et al." and multiple authors: "Smith, John; Doe, Jane"
-5. Existing library entries should be normalized on next load via a migration or lazy update
-
-### BUG-075: Intake pipeline should complete metadata and consider EPUB normalization
-**Reported:** 2026-03-25
-**Severity:** Medium (architecture)
-**Location:** `main/file-parsers.js`, `main/ipc-handlers.js`
-**Description:** The import pipeline strips content to plain text and loses formatting, images, and structure. A proposed approach is to normalize all incoming formats (PDF, TXT, MOBI, HTML) into EPUB as the internal canonical format. This would:
-1. **Preserve formatting** — EPUB supports HTML content natively (lists, headers, bold/italic, images)
-2. **Standardize chapters** — NCX/nav TOC structure works for all formats
-3. **Enable consistent metadata** — OPF metadata schema covers title, author, publisher, date, language
-4. **Simplify the reader** — only one format to render (EPUB HTML pages)
-5. **Enable image support** — images stored inside the EPUB ZIP archive
-
-**Trade-offs to analyze:**
-- PDF → EPUB conversion is lossy (PDFs are visual layout, not semantic)
-- TXT has no structure to preserve (headers would need heuristic detection)
-- MOBI/AZW3 → EPUB is well-supported (Calibre does this)
-- HTML → EPUB is straightforward (wrap in EPUB container)
-- Conversion adds import time and potential errors
-- Original files should be archived (not deleted) after conversion
-- Large PDFs with complex layouts may convert poorly
-
-**Recommendation:** Sprint 26 (Content Pipeline) should include a feasibility analysis. EPUBs that arrive as EPUBs stay as-is. For other formats, build format-specific converters that produce EPUB output, with the original file archived in `userData/originals/`.
-
-### BUG-076: First-run onboarding must include library folder selection
-**Reported:** 2026-03-25
-**Severity:** High (first-use experience)
-**Location:** `src/components/OnboardingOverlay.tsx`, `main/ipc-handlers.js`
-**Description:** When a new user opens Blurby for the first time, the onboarding flow must include a mandatory step where the user selects the folder location for their Blurby library. This is the root directory where all imported books will be stored and managed.
-
-**Requirements:**
-1. **Mandatory step** — cannot be skipped. User must pick a folder before proceeding to the library.
-2. **Folder picker dialog** — native OS folder browser (`dialog.showOpenDialog` with `properties: ['openDirectory']`).
-3. **Default suggestion** — `Documents/Blurby Library` or similar sensible default, pre-filled but changeable.
-4. **Explanation text** — brief guidance: "Choose where Blurby stores your books. If your books are in a different folder, you can connect that folder later — Blurby will copy them here."
-5. **Validation** — confirm folder is writable. If it doesn't exist, create it. If it already contains a `library.json`, detect as existing library and offer to load it (cloud sync / multi-machine scenario).
-6. **Persist** — save the chosen path in `settings.json` as `libraryPath`. All subsequent file operations (import, folder watch, content loading) use this path.
-7. **Later folder connections** — when the user later connects a different folder via Settings > Connectors or the folder button, files from that folder are **copied** into the Blurby library folder (not moved, to avoid data loss). The connected folder becomes a "watched" source, not the library root.
-8. **Migration** — existing users who upgrade should not see this step (`libraryPath` already set via current default behavior).
-
-**UX flow:**
-```
-Welcome to Blurby! → [Next]
-Where should Blurby keep your books? → [Browse...] → /Users/evan/Documents/Blurby Library → [Confirm]
-[Optional: Connect an existing book folder] → [Browse...] or [Skip]
-You're all set! → [Open Library]
-```
-
-### BUG-077: Metadata Wizard — auto-derive book metadata for entire library
-**Reported:** 2026-03-25
-**Severity:** Medium (data quality)
-**Sprint:** 29 (Metadata & Queue)
-**Location:** New feature — `main/metadata-wizard.js`, `src/components/MetadataWizard.tsx`
-**Description:** A wizard that scans all books in the library and automatically derives: Author (Last, First), Title, and Year of publication. Uses EPUB OPF metadata, PDF metadata fields, filename parsing, and optionally an external API (Open Library, Google Books) as fallback for missing data.
-
-**Requirements:**
-1. **Batch scan** — processes all books in library with a progress bar
-2. **Auto-extract from file metadata** — EPUB OPF `dc:creator`, `dc:title`, `dc:date`; PDF info dict `Author`, `Title`, `CreationDate`
-3. **Filename parsing fallback** — extract "Author - Title (Year)" patterns from filenames
-4. **API enrichment** (optional) — query Open Library / Google Books API by ISBN or title+author for missing fields
-5. **Author normalization** — all authors stored as "Last, First" format. Parse "First Last" → "Last, First"
-6. **Review UI** — show derived metadata in a table, user can accept/edit each before committing
-7. **Incremental** — only process books without complete metadata (skip already-filled entries)
-8. **Year extraction** — from publication date, copyright page text, or filename
-
-### BUG-078: Reading Queue — add books to an ordered reading queue
-**Reported:** 2026-03-25
-**Severity:** Low (feature request)
-**Sprint:** 29 (Metadata & Queue)
-**Location:** New feature — `src/components/ReadingQueue.tsx`, library data model
-**Description:** Users can right-click a card and select "Add to Queue" to add it to an ordered reading list. Queue is separate from the main library sort and represents the user's intended reading order. Already stubbed in the context menu (grayed out).
-
-### BUG-079: Universal EPUB Pipeline — convert all formats to EPUB on intake
-**Reported:** 2026-03-26
-**Severity:** Medium (architecture — future sprint)
-**Sprint:** 27 (Universal EPUB Pipeline)
-**Location:** New module — `main/epub-converter.js`, `main/file-parsers.js` (intake pipeline)
-**Description:** Every document in Blurby should be an EPUB. The app consumes all input formats and converts them to EPUB for a single, optimized rendering pipeline via foliate-js. This eliminates format-specific rendering paths. Supported conversions:
-
-| Source | Approach |
-|--------|----------|
-| HTML | `cheerio` → EPUB builder |
-| PDF | `pdf-parse` → structured text → EPUB (OCR fallback for scanned) |
-| MOBI/AZW/AZW3 | `adm-zip` decompress → extract HTML/CSS → repackage as EPUB |
-| DOCX | `mammoth` → HTML → EPUB |
-| TXT | Paragraph detection → `<p>` tags → minimal EPUB |
-| Markdown | `marked`/`markdown-it` → HTML → EPUB |
-| RTF | `pandoc` or `rtf-parser` → HTML → EPUB |
-| FB2 | `cheerio` XML parse → transform schema → EPUB |
-| KFX | Calibre CLI or `kfxlib` → EPUB |
-| PDB | `pdb-parser` → text → EPUB |
-| DjVu | `djvulibre` CLI → text/images → EPUB |
-
-Architecture: On file add, detect format → convert to EPUB → store in library folder → index. Keep original alongside for reference. Mark conversion quality (lossless/approximate/OCR-required). Background conversion for large files with progress indicator.
 
 ### BUG-080: Kokoro AI button unclickable in Speed Reading settings
 **Reported:** 2026-03-26
@@ -679,3 +423,34 @@ Architecture: On file add, detect format → convert to EPUB → store in librar
 **Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
 **Problem:** WPM slider showed in all modes including Narration, where it was irrelevant. Users needed to control TTS speech rate directly.
 **Solution:** When `readingMode === "narration"`, the slider swaps to show `{rate}x` (0.5–2.0 range) instead of WPM. Changing the rate immediately updates both `settings.ttsRate` and the live narration engine via `narration.adjustRate()`.
+
+---
+
+## Moved to Roadmap
+
+The following items were originally filed as bugs but are actually feature requests, enhancements, or architecture changes. They have been moved to ROADMAP.md > Feature Backlog.
+
+| ID | Description | Category |
+|----|-------------|----------|
+| BUG-035 | Chapter detection for non-EPUB formats (heuristic pattern matching) | Feature |
+| BUG-036 | Auto-generated TOC for books without one | Feature |
+| BUG-037 | E-ink as independent display mode instead of theme | Enhancement |
+| BUG-038 | Hotkey coaching toasts in reader views | Enhancement |
+| BUG-050 | 3-line library cards (Title, Author, Book Data with stats) | Enhancement |
+| BUG-055 | Combine Text Size + Layout settings into "Reading Layout" | Enhancement |
+| BUG-056 | New "Library Layout" settings page (sort, view mode, card size, spacing) | Feature |
+| BUG-057 | CSS rules and code for Library Layout settings | Feature |
+| BUG-058 | Library Layout and Reading Layout searchable in Ctrl+K | Feature |
+| BUG-059 | Every individual setting searchable in Ctrl+K | Enhancement |
+| BUG-060 | Remove "[Sample]" prefix from onboarding book + replace hamburger with Blurby icon | Branding |
+| BUG-061 | Replace hamburger menu button with Blurby icon | Branding |
+| BUG-062 | New "Blurby" default theme based on brand palette | Branding |
+| BUG-067 | "New" dot clears after card scrolled into view | Enhancement |
+| BUG-069 | Shift+Left/Right paragraph jump shortcuts | Feature |
+| BUG-070 | Scroll wheel word-by-word advance in reader | Feature |
+| BUG-074 | Author name normalization to "Last, First" format | Enhancement |
+| BUG-075 | Intake pipeline metadata completion + EPUB normalization analysis | Architecture |
+| BUG-076 | First-run onboarding library folder picker | Feature |
+| BUG-077 | Metadata Wizard (auto-derive Author/Title/Year) | Feature |
+| BUG-078 | Reading Queue (ordered reading list) | Feature |
+| BUG-079 | Universal EPUB Pipeline (convert all formats to EPUB on intake) | Architecture |

@@ -87,6 +87,65 @@ All feature work from phases 0-4 plus Sprints 1-17 are on main. The app has clou
 
 ---
 
+## Feature Backlog
+
+Items migrated from BUG_REPORT.md — these are feature requests, enhancements, and architecture changes (not bugs in existing features). Grouped by sprint/theme.
+
+### Content Pipeline & Format (Sprints 27, 29)
+
+| ID | Feature | Sprint | Description |
+|----|---------|--------|-------------|
+| BUG-035 | Chapter detection for non-EPUB | 29 | Heuristic pattern matching for chapter headings in PDF, MOBI, TXT, HTML. Currently only EPUB NCX/nav TOC works. |
+| BUG-036 | Auto-generated TOC | 29 | Generate a TOC page at book start when no embedded TOC exists or when chapters are detected heuristically. |
+| BUG-033/034 | Rich content preservation | 27 | Related: formatting and images stripped during import. EPUB pipeline would preserve structure. |
+| BUG-075 | Intake pipeline + EPUB normalization | 27 | Normalize all incoming formats to EPUB as internal canonical format. Preserves formatting, chapters, metadata, images. |
+| BUG-079 | Universal EPUB Pipeline | 27 | Convert HTML/PDF/MOBI/DOCX/TXT/MD/RTF/FB2/KFX/PDB/DjVu to EPUB on intake. Single rendering path via foliate-js. |
+
+### Metadata & Library (Sprint 29)
+
+| ID | Feature | Sprint | Description |
+|----|---------|--------|-------------|
+| BUG-074 | Author name normalization | 29 | Standardize all author names to "Last, First" format during import. Handle multi-word names, multiple authors. |
+| BUG-077 | Metadata Wizard | 29 | Batch scan library to auto-derive Author, Title, Year from file metadata, filename parsing, and optional API enrichment. |
+| BUG-078 | Reading Queue | 29 | Ordered reading list separate from library sort. Right-click "Add to Queue". Already stubbed in context menu. |
+| BUG-076 | First-run library folder picker | 29 | Mandatory onboarding step where user selects library storage folder. Default suggestion, validation, migration for existing users. |
+
+### Settings & Command Palette UX
+
+| ID | Feature | Sprint | Description |
+|----|---------|--------|-------------|
+| BUG-055 | Combine settings into "Reading Layout" | Backlog | Merge Text Size + Layout into single "Reading Layout" settings page. |
+| BUG-056 | New "Library Layout" settings page | Backlog | Default sort, default view mode, card/list size (S/M/L), spacing (compact/cozy/roomy), list columns. |
+| BUG-057 | Library Layout CSS implementation | Backlog | CSS grid rules for card sizes, spacing values, default sort/layout application on load. |
+| BUG-058 | Settings pages in Ctrl+K | Backlog | Add Library Layout and Reading Layout entries plus sub-entries to command palette. |
+| BUG-059 | All individual settings in Ctrl+K | Backlog | Every toggle, slider, dropdown across all settings pages searchable in command palette. |
+
+### Library & Reader UX
+
+| ID | Feature | Sprint | Description |
+|----|---------|--------|-------------|
+| BUG-050 | 3-line library cards | Backlog | Cards show Title, Author, and Book Data line (progress %, pages, time read/remaining). |
+| BUG-067 | "New" dot auto-clear | Backlog | New-item dot clears after card scrolls into viewport and user navigates away. IntersectionObserver + seenAt timestamp. |
+| BUG-038 | Hotkey coaching in reader | Backlog | Expand HotkeyCoach to show keyboard shortcut suggestions when users click reader buttons with the mouse. |
+| BUG-069 | Paragraph jump shortcuts | Backlog | Shift+Left/Right jumps to paragraph boundaries in all reading modes. Requires paragraph detection in words array. |
+| BUG-070 | Scroll wheel word advance | Backlog | Mouse scroll wheel advances/retreats one word at a time in reading modes instead of page scrolling. |
+
+### E-Ink (Sprint 30)
+
+| ID | Feature | Sprint | Description |
+|----|---------|--------|-------------|
+| BUG-037 | E-ink as display mode | 30 | Decouple e-ink from theme system. Users can use dark/light themes while keeping e-ink behavior (no animations, large touch targets, ghosting prevention). |
+
+### Branding
+
+| ID | Feature | Sprint | Description |
+|----|---------|--------|-------------|
+| BUG-060 | Remove "[Sample]" prefix | Backlog | Onboarding book title should be "Meditations" not "[Sample] Meditations — Marcus Aurelius". |
+| BUG-061 | Blurby icon replaces hamburger | Backlog | Replace hamburger menu icon with Blurby brand icon (~24px, theme-aware). |
+| BUG-062 | Blurby brand theme | Backlog | New theme: white background, Highlight Blue (#CAE4FE) chrome, Accent Red (#E63946), Core Blue (#2E73FF) dividers. |
+
+---
+
 ## Execution Order & Dependency Graph
 
 ```
