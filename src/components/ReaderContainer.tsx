@@ -447,21 +447,26 @@ export default function ReaderContainer({
   }, [readingMode, wordIndex, updateSettings, stopAllModes]);
 
   /** Select a mode (button click) — saves preference but does NOT auto-start.
-   *  If the mode is already active, pause back to Page. */
+   *  If the mode is already active (running), pause back to Page.
+   *  If the mode is selected-but-paused (page mode + lastReadingMode matches), deselect it.
+   *  Otherwise, select the mode without starting playback. */
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
     if (readingMode === mode) {
-      // Already active → pause back to Page
+      // Already active (running) → pause back to Page
       handlePauseToPage();
     } else if (readingMode !== "page") {
       // Different mode active → stop it, select new one, stay in Page
       stopAllModes();
       setReadingMode("page");
       updateSettings({ lastReadingMode: mode });
+    } else if (settings.lastReadingMode === mode) {
+      // In Page view, mode already selected → deselect (toggle off), revert to flow
+      updateSettings({ lastReadingMode: "flow" });
     } else {
       // In Page view → just select the mode (don't start)
       updateSettings({ lastReadingMode: mode });
     }
-  }, [readingMode, handlePauseToPage, stopAllModes, updateSettings]);
+  }, [readingMode, settings.lastReadingMode, handlePauseToPage, stopAllModes, updateSettings]);
 
   /** Toggle narration — used by N key shortcut (starts or stops) */
   const handleToggleTts = useCallback(() => {
