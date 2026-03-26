@@ -488,8 +488,12 @@ export default function ReaderContainer({
   const startFocus = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
-    // For foliate EPUBs, ensure words are extracted
-    if (useFoliate) extractFoliateWords();
+    // For foliate EPUBs, ensure words are extracted and start from visible word
+    if (useFoliate) {
+      extractFoliateWords();
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+      if (firstVisible >= 0) setHighlightedWordIndex(firstVisible);
+    }
     jumpToWord(highlightedWordIndex);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
@@ -500,9 +504,12 @@ export default function ReaderContainer({
   const startFlow = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
-    // For foliate EPUBs, ensure words are extracted
-    if (useFoliate) extractFoliateWords();
-    // Start Flow from the current highlighted word position
+    // For foliate EPUBs, ensure words are extracted and start from visible word
+    if (useFoliate) {
+      extractFoliateWords();
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+      if (firstVisible >= 0) setHighlightedWordIndex(firstVisible);
+    }
     jumpToWord(highlightedWordIndex);
     setReadingMode("flow");
     setFlowPlaying(true);
@@ -767,14 +774,13 @@ export default function ReaderContainer({
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
   // Foliate word highlighting — when highlightedWordIndex changes during Flow/Narration,
-  // highlight the corresponding word in the foliate DOM
+  // highlight the corresponding word in the foliate DOM and auto-advance page if needed
   useEffect(() => {
     if (!useFoliate || readingMode === "page" || readingMode === "focus") return;
-    if (!foliateWordsRef.current.length) return;
-    const wordData = foliateWordsRef.current[highlightedWordIndex];
-    if (wordData) {
-      foliateApiRef.current?.highlightWord(wordData.range, wordData.sectionIndex);
-    }
+    if (!foliateApiRef.current) return;
+    // Use highlightWordByIndex which queries data-word-index spans in the DOM
+    // and calls scrollToAnchor to auto-advance pages when the word is off-screen
+    foliateApiRef.current.highlightWordByIndex(highlightedWordIndex);
   }, [highlightedWordIndex, readingMode, useFoliate]);
 
   // Flow mode word advancement timer for foliate EPUBs
