@@ -612,26 +612,12 @@ export default function FoliatePageView({
                   const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                   if (span) {
                     span.classList.add("page-word--highlighted");
-                    const rect = span.getBoundingClientRect();
-                    // Log diagnostics on every 10th word to understand coordinate spaces
-                    const hostWidth = containerRef.current?.clientWidth ?? 1400;
-                    const iw = d.defaultView?.innerWidth ?? 9999;
-                    const docEl = d.documentElement;
-                    const scrollLeft = docEl?.scrollLeft ?? 0;
-                    const bodyTransform = d.body?.style?.transform || "none";
-                    if (wordIndex % 10 === 0) {
-                      console.log(`[PageTurn] word=${wordIndex} rect.left=${rect.left.toFixed(0)} rect.right=${rect.right.toFixed(0)} iframeIW=${iw} hostW=${hostWidth} scrollLeft=${scrollLeft} bodyTransform="${bodyTransform}"`);
-                    }
-                    // Temporarily: always found (no page turn) — diagnostic only
                     found = true;
                     break;
                   }
                 } catch { /* */ }
               }
-              if (!found) {
-                console.log(`[PageTurn] word=${wordIndex} NOT visible — calling next()`);
-                view.renderer.next();
-              }
+              // No page turn from here — page turns handled by narrationPageSync effect
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
@@ -776,6 +762,38 @@ export default function FoliatePageView({
       } catch { /* cross-origin */ }
     }
   }, [narrationWordIndex]);
+
+  // Narration page-sync — turn page when narrated word isn't found in visible sections
+  const lastPageTurnTimeRef = useRef(0);
+  useEffect(() => {
+    if (narrationWordIndex == null || narrationWordIndex < 0) return;
+    const v = viewRef.current;
+    if (!v?.renderer) return;
+
+    // Debounce: only allow page turn every 1 second
+    const now = Date.now();
+    if (now - lastPageTurnTimeRef.current < 1000) return;
+
+    // Check if the narrated word's span exists in any loaded section
+    const contents = v.renderer.getContents?.() ?? [];
+    let spanFound = false;
+    for (const { doc: d } of contents) {
+      try {
+        if (d?.querySelector?.(`[data-word-index="${narrationWordIndex}"]`)) {
+          spanFound = true;
+          break;
+        }
+      } catch { /* */ }
+    }
+
+    // If span not found, the section containing this word isn't loaded — navigate to it
+    if (!spanFound) {
+      const totalWords = activeDoc.wordCount || foliateWordsRef.current.length || 1;
+      const fraction = Math.min(narrationWordIndex / totalWords, 0.999);
+      lastPageTurnTimeRef.current = now;
+      v.goToFraction(fraction);
+    }
+  }, [narrationWordIndex, activeDoc.wordCount]);
 
   // Keyboard navigation
   useEffect(() => {
