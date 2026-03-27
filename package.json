@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
