@@ -528,9 +528,8 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
 
-              // Word not found in DOM — auto-advance page to load the next section
+              // Word not found in loaded sections — caller decides what to do
               if (!targetSpan) {
-                try { view.renderer.next(); } catch { /* */ }
                 return false;
               }
 

@@ -648,3 +648,36 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 4. **Section-load retry pattern must be applied to ALL EPUB modes, not just Narration.** Focus and Flow on EPUBs can start on cover pages with zero extractable words. The same `renderer.next()` → wait → retry pattern from `startNarration` must be duplicated in `startFocus` and `startFlow`.
 
 **Rule:** PR-39: When bridging imperative class instances to React state: hold the instance in a `useRef` (not `useState` — instances are mutable); use stable callback refs for all callbacks the instance receives; and pass dynamic data (words, config) at call time, not at hook initialization.
+
+---
+
+### [2026-03-27] LL-037: Foliate Dynamic DOM vs. Static-Array Mode Classes
+
+**Area:** foliate, reading modes, architecture
+**Status:** active
+**Priority:** high
+
+**Context:** TD-2's mode class refactor broke Flow, Narration, and Focus resume on foliate-rendered EPUBs. Mode classes (FocusMode, FlowMode, NarrateMode) operate on a static word array with simple index-based timers. Foliate loads EPUB sections dynamically — words are extracted from the DOM, and when the reader advances past the loaded section, word spans don't exist yet.
+
+**Root Causes:**
+
+1. **`highlightWordByIndex` had a side effect** — when a word span wasn't found, it called `view.renderer.next()` (page turn) AND returned false. Any bridge code that also turned the page on miss would cause double page-turns.
+
+2. **Stale closure in Focus resume** — `startFocus` captured `highlightedWordIndex` (React state) in its useCallback closure. When `handlePauseToPage` set the state and the user immediately resumed, the closure still held the old value (0). Fix: `useRef` that's written synchronously in both `handlePauseToPage` and `handleExitReader`.
+
+3. **Global index into section-relative array** — `startNarration` used `highlightedWordIndex` (a global document position) as an index into `effectiveWords` (words from the current loaded section). On section boundaries, the index exceeded the array length. Fix: same ref-based approach.
+
+4. **Silent failure on miss** — Flow and Narration `onWordAdvance` callbacks called `highlightWordByIndex` but ignored the false return. The highlight silently disappeared at section boundaries.
+
+**Solution (HOTFIX-2B):**
+
+- Made `highlightWordByIndex` pure — returns boolean, no page-turn side effect
+- Added `highlightedWordIndexRef` — always-current ref replaces state in all start functions
+- Pause-on-miss bridge for Flow: pause mode on highlight miss → turn page → `onWordsReextracted` resumes after DOM settles
+- Page-turn-on-miss bridge for Narration: TTS keeps speaking (no pause — avoids audible stutter), page turns to load new sections, `onWordsReextracted` re-applies highlight
+- Symbol-guarded `setTimeout` in `startFocus` prevents orphan timers during rapid mode switches
+
+**Rules:**
+- PR-40: Functions that query the DOM (highlight, scroll, find) must be pure — return success/failure, never trigger navigation side effects. Let the caller decide what to do on failure.
+- PR-41: When React state is read inside `useCallback` closures that survive across async gaps (setTimeout, rAF, event handlers), always use a `useRef` mirror. Write the ref synchronously at the mutation site. Never add the state variable back to the dependency array — that reintroduces the stale closure.
+- PR-42: When bridging static-array mode classes to a dynamic-DOM renderer (foliate), the bridge must handle miss detection (word not in DOM), navigation (page turn to load new content), and resume (re-highlight after DOM updates). Mode classes must stay dumb — no DOM awareness.

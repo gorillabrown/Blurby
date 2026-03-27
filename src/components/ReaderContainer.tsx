@@ -703,6 +703,34 @@ export default function ReaderContainer({
           wordsRef.current = wordStrings;
           setFoliateWordStrings(wordStrings);
           modeInstanceHook.updateModeWords(wordStrings);
+
+          // Resume a paused mode after section load (Flow/Narration bridge)
+          const pending = modeInstanceHook.pendingResumeRef.current;
+          if (pending) {
+            modeInstanceHook.pendingResumeRef.current = null;
+            // Allow DOM to settle after word extraction + span wrapping
+            requestAnimationFrame(() => {
+              if (pending.mode === "narration") {
+                // Narration doesn't pause — just re-apply the highlight
+                foliateApiRef.current?.highlightWordByIndex(pending.wordIndex, "narration");
+              } else {
+                // Flow: try highlighting the pending word in the new section
+                const instance = modeInstanceHook.modeRef.current;
+                if (instance && instance.type === pending.mode) {
+                  const found = foliateApiRef.current?.highlightWordByIndex(
+                    pending.wordIndex, pending.mode
+                  );
+                  if (found) {
+                    instance.resume();
+                  } else {
+                    // Still not found — word may be further ahead. Turn another page.
+                    modeInstanceHook.pendingResumeRef.current = pending;
+                    foliateApiRef.current?.next();
+                  }
+                }
+              }
+            });
+          }
         }
       }}
     />

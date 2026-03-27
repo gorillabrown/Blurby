@@ -49,6 +49,8 @@ export interface UseReadingModeInstanceReturn {
   jumpToWordInMode: (wordIdx: number) => void;
   /** Update the active mode's word array (when new EPUB sections load) */
   updateModeWords: (words: string[]) => void;
+  /** Pending resume after section load (Flow/Narration pause-on-miss bridge) */
+  pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: "flow" | "narration" } | null>;
 }
 
 /**
@@ -78,6 +80,7 @@ export function useReadingModeInstance({
   setFlowPlaying,
 }: UseReadingModeInstanceParams): UseReadingModeInstanceReturn {
   const modeRef = useRef<ReadingMode | null>(null);
+  const pendingResumeRef = useRef<{ wordIndex: number; mode: "flow" | "narration" } | null>(null);
 
   // Stable callback refs (avoid stale closures in mode instances)
   const onWordAdvanceRef = useRef(onWordAdvance);
@@ -129,23 +132,36 @@ export function useReadingModeInstance({
 
       case "flow":
         if (isFoliate) {
-          // EPUB Flow: FlowMode timer + foliate highlight
+          // EPUB Flow: FlowMode timer + foliate highlight + pause-on-miss bridge
           config.callbacks.onWordAdvance = (idx: number) => {
             onWordAdvanceRef.current(idx);
             if (foliateApiRefStable.current) {
-              foliateApiRefStable.current.highlightWordByIndex(idx, "flow");
+              const found = foliateApiRefStable.current.highlightWordByIndex(idx, "flow");
+              if (!found) {
+                // Word not in loaded sections — pause, turn page, wait for section load
+                modeRef.current?.pause();
+                pendingResumeRef.current = { wordIndex: idx, mode: "flow" };
+                foliateApiRefStable.current.next(); // Request page turn
+                // onWordsReextracted (wired in ReaderContainer) will resume
+              }
             }
           };
         }
         return new FlowMode(config);
 
       case "narration":
-        // NarrateMode's onWordAdvance also highlights in foliate
+        // NarrateMode's onWordAdvance: highlight in foliate + page-turn-on-miss bridge
+        // Note: Narration does NOT pause on miss — TTS keeps speaking to avoid audible stutter.
+        // Only the visual highlight is lost temporarily until the page turns.
         config.callbacks.onWordAdvance = (idx: number) => {
           onWordAdvanceRef.current(idx);
           if (isFoliate && foliateApiRefStable.current) {
-            if (typeof foliateApiRefStable.current.highlightWordByIndex === "function") {
-              foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
+            const found = foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
+            if (!found) {
+              // Word not in loaded sections — turn page so highlights catch up
+              pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
+              foliateApiRefStable.current.next();
+              // onWordsReextracted will re-apply the highlight
             }
           }
         };
@@ -240,5 +256,6 @@ export function useReadingModeInstance({
     setSpeed,
     jumpToWordInMode,
     updateModeWords,
+    pendingResumeRef,
   };
 }
