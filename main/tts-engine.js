@@ -49,6 +49,11 @@ function getWorker(cacheDir) {
       case "warm-up-done":
         // Model fully primed
         break;
+      case "load-error":
+        console.error("[kokoro] Worker load failed:", msg.error);
+        if (msg.stack) console.error("[kokoro] Stack:", msg.stack);
+        loadingPromise = null;
+        break;
       case "result": {
         const p = pending.get(msg.id);
         if (p) {

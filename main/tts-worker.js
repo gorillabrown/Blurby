@@ -80,7 +80,11 @@ async function listVoices(id) {
 parentPort.on("message", async (msg) => {
   switch (msg.type) {
     case "load":
-      await loadModel(msg.cacheDir);
+      try {
+        await loadModel(msg.cacheDir);
+      } catch (err) {
+        parentPort.postMessage({ type: "load-error", error: err.message, stack: err.stack });
+      }
       break;
     case "generate":
       await generate(msg.id, msg.text, msg.voice, msg.speed);
