@@ -133,6 +133,26 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         </button>
       </div>
 
+      <div className="settings-section-label" style={{ marginTop: 16 }}>EPUB Renderer</div>
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Use legacy renderer</span>
+        <div
+          className={`settings-toggle${settings.useLegacyRenderer ? " active" : ""}`}
+          onClick={() => onSettingsChange({ useLegacyRenderer: !settings.useLegacyRenderer })}
+          role="switch"
+          tabIndex={0}
+          aria-checked={!!settings.useLegacyRenderer}
+          aria-label="Use legacy renderer"
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ useLegacyRenderer: !settings.useLegacyRenderer }); } }}
+        >
+          <div className="settings-toggle-thumb" />
+        </div>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+        Fall back to word-by-word text rendering instead of the EPUB reader.
+      </div>
+
       <div className="settings-section-label">Focus Mode Options</div>
 
       <div className="settings-toggle-row">

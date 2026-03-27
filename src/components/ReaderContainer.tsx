@@ -109,7 +109,11 @@ export default function ReaderContainer({
   const activeReadingStartRef = useRef<number | null>(null);
 
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
-  const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
+  const useFoliate = Boolean(
+    (activeDoc?.filepath || activeDoc?.convertedEpubPath) &&
+    activeDoc?.ext === ".epub" &&
+    !settings.useLegacyRenderer
+  );
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
   const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
   // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
