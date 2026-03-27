@@ -47,6 +47,8 @@ export interface UseReadingModeInstanceReturn {
   setSpeed: (value: number) => void;
   /** Jump to a specific word */
   jumpToWordInMode: (wordIdx: number) => void;
+  /** Update the active mode's word array (when new EPUB sections load) */
+  updateModeWords: (words: string[]) => void;
 }
 
 /**
@@ -222,6 +224,13 @@ export function useReadingModeInstance({
     }
   }, []);
 
+  /** Update the active mode's word array (called when new EPUB sections load) */
+  const updateModeWords = useCallback((words: string[]) => {
+    if (modeRef.current?.updateWords) {
+      modeRef.current.updateWords(words);
+    }
+  }, []);
+
   return {
     modeRef,
     startMode,
@@ -230,5 +239,6 @@ export function useReadingModeInstance({
     stopMode,
     setSpeed,
     jumpToWordInMode,
+    updateModeWords,
   };
 }

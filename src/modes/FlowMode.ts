@@ -107,6 +107,14 @@ export class FlowMode implements ReadingMode {
     this.jumpTo(lineStartWordIndex);
   }
 
+  /**
+   * Update the word array when new EPUB sections load.
+   * Keeps current position — only extends the available words.
+   */
+  updateWords(words: string[]): void {
+    this.config.words = words;
+  }
+
   // ── Internal ─────────────────────────────────────────────────────
 
   private scheduleNext(): void {

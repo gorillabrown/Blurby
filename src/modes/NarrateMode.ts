@@ -119,6 +119,14 @@ export class NarrateMode implements ReadingMode {
     };
   }
 
+  /**
+   * Update the word array when new EPUB sections load.
+   * Keeps current position — only extends the available words.
+   */
+  updateWords(words: string[]): void {
+    this.config.words = words;
+  }
+
   destroy(): void {
     this.narration.stop();
     this.playing = false;

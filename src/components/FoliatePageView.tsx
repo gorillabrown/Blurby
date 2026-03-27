@@ -233,7 +233,8 @@ export interface FoliateViewAPI {
   next: () => void;
   prev: () => void;
   highlightWord: (range: Range | null, sectionIndex: number) => void;
-  highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration") => void;
+  /** Highlight a word by global index. Returns true if found, false if span not in DOM. */
+  highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration") => boolean;
   clearHighlight: () => void;
   getView: () => any;
   /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
@@ -500,7 +501,7 @@ export default function FoliatePageView({
             highlightWord: (_range, _sectionIndex) => {
               // No-op: use highlightWordByIndex instead
             },
-            highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration") => {
+            highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration"): boolean => {
               const contents = view.renderer?.getContents?.() ?? [];
               // Use explicit style hint from caller (avoids stale readingModeRef during state transitions)
               const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
@@ -526,9 +527,16 @@ export default function FoliatePageView({
                   }
                 } catch { /* */ }
               }
+
+              // Word not found in DOM — auto-advance page to load the next section
+              if (!targetSpan) {
+                try { view.renderer.next(); } catch { /* */ }
+                return false;
+              }
+
               // Page auto-advance: scroll to keep the highlighted word visible
               // Skip if user has manually browsed away during narration
-              if (targetSpan && targetDoc && !userBrowsingRef.current) {
+              if (targetDoc && !userBrowsingRef.current) {
                 try {
                   const range = targetDoc.createRange();
                   range.selectNodeContents(targetSpan);
@@ -536,7 +544,7 @@ export default function FoliatePageView({
                 } catch { /* safe to ignore */ }
               }
               // If user was browsing and the word is now visible, auto-clear browsing flag
-              if (userBrowsingRef.current && targetSpan) {
+              if (userBrowsingRef.current) {
                 try {
                   const rect = targetSpan.getBoundingClientRect();
                   const iframeWin = targetDoc?.defaultView;
@@ -545,6 +553,7 @@ export default function FoliatePageView({
                   }
                 } catch { /* */ }
               }
+              return true;
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes

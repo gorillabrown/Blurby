@@ -694,7 +694,17 @@ export default function ReaderContainer({
       wpm={effectiveWpm}
       narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
       onFlowWordAdvance={(idx) => setHighlightedWordIndex(idx)}
-      onWordsReextracted={() => { /* foliate re-extracted words — refs already updated */ }}
+      onWordsReextracted={() => {
+        // New EPUB section loaded — update the active mode's word array
+        // so FlowMode/NarrateMode don't go out of bounds
+        const newWords = foliateApiRef.current?.getWords?.() ?? [];
+        if (newWords.length > 0) {
+          const wordStrings = newWords.map((w: { word: string }) => w.word);
+          wordsRef.current = wordStrings;
+          setFoliateWordStrings(wordStrings);
+          modeInstanceHook.updateModeWords(wordStrings);
+        }
+      }}
     />
   ) : null;
 

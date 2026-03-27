@@ -41,8 +41,8 @@ export function resolveFoliateStartWord(
   wordsLength: number,
   findFirstVisibleWordIndex: () => number
 ): number {
-  // If user clicked a valid word, use it
-  const isValid = highlightedWordIndex > 0 && highlightedWordIndex < wordsLength;
+  // If user has a valid position (clicked a word or resumed from saved progress), use it
+  const isValid = highlightedWordIndex >= 0 && highlightedWordIndex < wordsLength;
   if (isValid) return highlightedWordIndex;
 
   // Find first visible word on current page

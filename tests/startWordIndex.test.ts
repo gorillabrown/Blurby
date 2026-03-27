@@ -35,14 +35,14 @@ describe("getStartWordIndex", () => {
 });
 
 describe("resolveFoliateStartWord", () => {
-  it("returns highlightedWordIndex when valid and > 0", () => {
+  it("returns highlightedWordIndex when valid and >= 0", () => {
     const result = resolveFoliateStartWord(42, 100, () => 10);
     expect(result).toBe(42);
   });
 
-  it("falls back to findFirstVisibleWordIndex when index is 0", () => {
+  it("returns 0 when highlightedWordIndex is 0 (valid first word)", () => {
     const result = resolveFoliateStartWord(0, 100, () => 15);
-    expect(result).toBe(15);
+    expect(result).toBe(0);
   });
 
   it("falls back to findFirstVisibleWordIndex when index exceeds length", () => {
