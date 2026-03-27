@@ -10,198 +10,15 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 5
-Next sprint: TD-2 — Wire Mode Instances + Remaining Stabilization
+Queue depth: 3
+Next sprint: Sprint 23 — V1 Hardening
 Health: OK
-Action needed: Dispatch TD-2
+Action needed: Dispatch Sprint 23
 ```
 
 ---
 
 ## Queue
-
----
-
-## TD-2 — Wire Mode Instances + Remaining Stabilization
-
-### KEY CONTEXT
-Sprint TD-1 (technical debt) merged to main as v2.1.0. Four mode classes exist in `src/modes/` (PageMode, FocusMode, FlowMode, NarrateMode) implementing the `ReadingMode` interface, but they're not wired into the app. ReaderContainer still uses inline mode logic in `useReaderMode` hook. Three stabilization bugs remain from Sprint 25S, plus the auto-updater fix.
-
-### PROBLEM
-1. Mode classes exist but aren't used — all mode timing/advancement is still inline in `useReaderMode.ts` (294 lines of callbacks that should delegate to mode instances)
-2. Flow cursor invisible on EPUBs (BUG-091) — FlowCursorController can't find `[data-word-index]` in foliate shadow DOM. Need overlay cursor using `getBoundingClientRect` on word spans inside iframes.
-3. Focus starts from wrong position on EPUBs (BUG-092) — `wordsRef` not populated with foliate words before Focus starts. `jumpToWord` receives stale index 0.
-4. Auto-updater `latest.yml` only has ARM64 (S-02) — x64 users never get updates. Release workflow builds x64 and ARM64 as separate jobs; ARM64 overwrites `latest.yml`.
-5. Zero unit tests for the 4 mode classes.
-
-### EVIDENCE OF PROBLEM
-- `src/modes/*.ts` — 629 lines of mode logic never imported by any component
-- `src/hooks/useReaderMode.ts` lines 120-230 — inline `stopAllModes`, `startNarration`, `startFocus`, `startFlow` that duplicate mode class logic
-- BUG-091: User screenshot shows Flow mode active on EPUB but no underline cursor visible
-- BUG-092: Console log `[Foliate] Word clicked: "using" at global index 4152` but Focus starts at word 0
-- S-02: `gh release download v2.0.0 --pattern "latest.yml"` shows only `Blurby-Setup-2.0.0-arm64.exe`
-
-### HYPOTHESIZED SOLUTION
-1. Create `useReadingModeInstance` hook that instantiates the correct mode class based on `readingMode` state, bridging callbacks to React state
-2. Replace inline timer/advancement logic in `useReaderMode` with `modeInstance.start()` / `.pause()` / `.stop()` calls
-3. BUG-091: Overlay `<div>` positioned above foliate iframe, coordinates from `span.getBoundingClientRect()` + `iframe.getBoundingClientRect()`, animated with CSS `transition: transform`
-4. BUG-092: Call `extractFoliateWords()` then `findFirstVisibleWordIndex()` synchronously, pass result directly to `jumpToWord(startWord)` instead of going through `setHighlightedWordIndex` (React batching delay)
-5. S-02: Single-job matrix build in `release.yml` with `--x64 --arm64` flags, or post-build YAML merge step
-
-### WHAT (Tasks to Complete)
-
-| Step | Task | Agent | Model |
-|------|------|-------|-------|
-| 1 | Create `src/hooks/useReadingModeInstance.ts` — instantiates mode classes, bridges callbacks to React state via refs | renderer-fixer | sonnet |
-| 2 | Wire `useReadingModeInstance` into `ReaderContainer.tsx` — replace inline timer logic with `modeInstance.start()`/`.pause()`/`.stop()` calls | renderer-fixer | sonnet |
-| 3 | Fix BUG-091: Flow cursor overlay for EPUBs — `<div>` above iframe, `getBoundingClientRect` coords, CSS transition animation | renderer-fixer | sonnet |
-| 4 | Fix BUG-092: Focus start position — synchronous `extractFoliateWords` + `findFirstVisibleWordIndex` before `jumpToWord` | renderer-fixer | sonnet |
-| 5 | Fix S-02: `release.yml` single-job multi-arch build producing one `latest.yml` with both x64 and arm64 entries | electron-fixer | sonnet |
-| 6 | Write `tests/modes.test.ts` — ≥20 unit tests across 4 mode classes (timing, pauses, callbacks, lifecycle) | test-runner | sonnet |
-| 7 | Run `npm test` + `npm run build` — all pass, zero TS errors | test-runner | haiku |
-| 8 | Commit on branch `sprint/td2-mode-wiring`, merge to main with `--no-ff` | blurby-lead | — |
-| 9 | Print terminal summary with line counts, test counts, files changed | blurby-lead | — |
-
-### WHERE (Read in This Order)
-
-1. `src/modes/ModeInterface.ts` — ReadingMode interface, ModeConfig, ModeCallbacks (the contract all modes implement)
-2. `src/modes/FocusMode.ts` — setTimeout chain with rhythm pauses (reference implementation)
-3. `src/modes/NarrateMode.ts` — TTS delegation via NarrationInterface (most complex mode)
-4. `src/hooks/useReaderMode.ts` — current inline mode logic (294 lines to be replaced with instance delegation)
-5. `src/components/ReaderContainer.tsx` — where `useReaderMode` is called (line ~248), where modeInstances would be created
-6. `src/components/FoliatePageView.tsx` — `highlightWordByIndex`, `findFirstVisibleWordIndex`, `scrollToAnchor`, `wrapWordsInSpans` (BUG-091 + BUG-092 context)
-7. `src/hooks/useNarration.ts` — `startCursorDriven`, `adjustRate`, `pause`, `resume`, `stop` (matches NarrationInterface)
-8. `.github/workflows/release.yml` — current dual-job build workflow (S-02 fix target)
-9. `docs/governance/LESSONS_LEARNED.md` — LL-035 (EPUB page auto-advance), PR-37 (Kokoro rhythm pauses) for context on foliate iframe challenges
-
-### HOW (Agent Assignments)
-
-| Agent | Model | Responsibility |
-|-------|-------|----------------|
-| renderer-fixer | sonnet | Steps 1-4: hook creation, ReaderContainer wiring, Flow cursor overlay, Focus start fix. Touch: `src/hooks/useReadingModeInstance.ts` (new), `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx` |
-| electron-fixer | sonnet | Step 5: release.yml multi-arch fix. Touch: `.github/workflows/release.yml` only |
-| test-runner | sonnet/haiku | Steps 6-7: mode class unit tests + full suite verification |
-| blurby-lead | — | Steps 8-9: orchestrate, merge, summary |
-
-**Execution mode:** All commands run directly in bash (no sub-agents for long commands). Steps 1-2 are the riskiest — if the app breaks after wiring, revert Step 2 changes and debug before proceeding.
-
-### WHEN (Execution Order)
-
-```
-[1] Create useReadingModeInstance hook (renderer-fixer)
-    ↓
-[2] Wire into ReaderContainer (renderer-fixer) — depends on 1
-    ↓
-[3-5] PARALLEL:
-    ├─ [3] BUG-091: Flow cursor on EPUBs (renderer-fixer)
-    ├─ [4] BUG-092: Focus start position (renderer-fixer)
-    └─ [5] S-02: release.yml multi-arch (electron-fixer)
-    ↓ (all complete)
-[6] Unit tests for mode classes (test-runner)
-    ↓
-[7] npm test + npm run build (test-runner)
-    ↓
-[8] Commit + merge (blurby-lead)
-[9] Print summary (blurby-lead)
-```
-
-### ADDITIONAL GUIDANCE
-
-- **useReadingModeInstance hook pattern:** Use `useRef<ReadingMode | null>(null)` to hold the instance. On `readingMode` change, call `current?.destroy()`, then create new instance. Pass callbacks as stable refs (`useRef` wrappers) to avoid recreating instances on every render.
-- **Flow cursor overlay (BUG-091):** Parent coordinates = `iframeRect.left + spanRect.left`, `iframeRect.top + spanRect.top`. The overlay `<div>` lives in FoliatePageView (React-owned), not inside the iframe. Width = `spanRect.width`, height = 3px (underline) or `spanRect.height` (box). Animate with `transition: transform 0.15s ease`. When span is off-screen, call `scrollToAnchor` to page-turn.
-- **Focus start (BUG-092):** The fix is to use the return value of `findFirstVisibleWordIndex()` directly in the same synchronous call, not go through `setHighlightedWordIndex` which is async (React batching). Pattern: `const startWord = findFirstVisible(); jumpToWord(startWord);`
-- **S-02 preferred approach:** Single job with `electron-builder --x64 --arm64` in one command. If electron-builder doesn't support combined arch builds, use a post-build step: after both builds, read both `latest.yml` files, merge the `files:` arrays into one YAML, upload the merged file.
-- **Anti-pattern:** Do NOT move visual/DOM rendering logic into mode classes. Modes are pure logic (timing, word index, callbacks). React components own the DOM. The `onWordAdvance` callback is the bridge.
-- **Branch:** `sprint/td2-mode-wiring`
-
-### SUCCESS CRITERIA
-
-1. `useReadingModeInstance` hook creates correct mode class for each mode type
-2. ReaderContainer uses `modeInstance.start()` / `.pause()` / `.stop()` — no inline `setInterval` or `setTimeout` for word advancement
-3. All 4 modes work correctly after wiring: Page (click + nav), Focus (RSVP), Flow (cursor), Narrate (TTS + highlight)
-4. Flow cursor visible on EPUBs — underline slides across words in foliate view, auto-turns pages
-5. Focus mode starts from first visible word on EPUBs, not beginning of book
-6. `latest.yml` contains both x64 and arm64 installer entries after release build
-7. Unit tests: ≥20 tests across 4 mode classes, all passing
-8. `npm test`: all pass (585+ existing + 20+ new)
-9. `npm run build`: 0 TypeScript errors
-10. Branch `sprint/td2-mode-wiring` merged to main with `--no-ff`
-
----
-
-## HOTFIX-1 — Grid Interaction Bugs (Checkbox Bleed + Drag-Region Scroll Block)
-
-### KEY CONTEXT
-App is post-Sprint 23B merge (v1.0.2 tag pushed). Two UI bugs visible in production: a stray checkbox renders in the top-left window corner, and empty grid gaps between book cards swallow click and scroll events. Both are regressions from Sprint 20/23 code (selection checkboxes + body drag region).
-
-### PROBLEM
-1. **Stray checkbox**: Every `DocGridCard` renders a selection checkbox (`doc-grid-checkbox`) because the guard condition `onToggleSelect && selected !== undefined` is always true — `selected` is passed as `false` (not `undefined`) from LibraryContainer line 563/577. The checkbox at `position: absolute; top: 8px; left: 8px; z-index: 2` appears on every card, with the top-left one bleeding into the window corner.
-2. **Grid gaps block interaction**: The `body` element has `-webkit-app-region: drag` (global.css line 52). Grid gaps between cards inherit this, making them window-drag zones that swallow clicks and scroll events. Cards themselves work because their interactive children (`button`, `input`, `[role="button"]`) get the `no-drag` rule (line 54), but the empty space between cards has no such override.
-
-### EVIDENCE OF PROBLEM
-- Screenshot: checked checkbox visible at ~(10, 10) window coordinates, above the hamburger menu
-- Screenshot: user cannot scroll library when cursor is positioned over blank grid gap; scroll works when cursor is over a card
-- Code: `DocGridCard.tsx` line 63: `{onToggleSelect && selected !== undefined && (` — `selected` is `boolean`, never `undefined`
-- Code: `global.css` line 51-52: `overflow: hidden; -webkit-app-region: drag;` on `body`
-
-### HYPOTHESIZED SOLUTION
-**Bug 1 fix**: Change the checkbox guard in `DocGridCard.tsx` to only show when selection mode is active. Replace condition with `{onToggleSelect && selected && (` — checkboxes only appear on cards that are actually selected. Alternatively, add a `selectionMode` prop that LibraryContainer sets to `true` only when `selectedIds.size > 0`.
-**Bug 2 fix**: Add `-webkit-app-region: no-drag` to `.doc-grid` in `global.css`. This ensures grid gaps don't act as drag regions. The titlebar area (`.library-titlebar`) already has its own drag region.
-
-### WHAT (Tasks to Complete)
-
-| Step | Task | Agent | Model |
-|------|------|-------|-------|
-| 1 | Fix checkbox guard in `DocGridCard.tsx` — only render when `selected === true` | `renderer-fixer` | sonnet |
-| 2 | Add `-webkit-app-region: no-drag` to `.doc-grid` and `.library-content` in `global.css` | `renderer-fixer` | sonnet |
-| 3 | Run `npm test` — all 512 tests must pass | `test-runner` | haiku |
-| 4 | Run `npm run build` — must compile clean, zero TS errors | `test-runner` | haiku |
-| 5 | Commit on branch `hotfix/grid-interaction`, merge to main with `--no-ff` | `blurby-lead` | — |
-| 6 | Print terminal summary of changes | `blurby-lead` | — |
-
-### WHERE (Read in This Order)
-
-1. `src/components/DocGridCard.tsx` — lines 62-67, checkbox rendering guard
-2. `src/styles/global.css` — line 51-52 (body drag region), line 1860-1865 (`.doc-grid`), line 2856-2869 (checkbox styles)
-3. `src/components/LibraryContainer.tsx` — lines 494-500 (selectedIds/onToggleSelect props passed to LibraryView)
-
-### HOW (Agent Assignments)
-
-| Agent | Model | Responsibility |
-|-------|-------|----------------|
-| `renderer-fixer` | sonnet | Both CSS and component fixes — small scope, same domain |
-| `test-runner` | haiku | Verify tests + build |
-| `blurby-lead` | — | Orchestrate, commit, merge |
-
-### WHEN (Execution Order)
-
-```
-[1-2] PARALLEL:
-    ├─ [1] Fix checkbox guard (renderer-fixer)
-    └─ [2] Add no-drag to grid (renderer-fixer)
-    ↓ (both complete)
-[3-4] PARALLEL:
-    ├─ [3] npm test (test-runner)
-    └─ [4] npm run build (test-runner)
-    ↓ (both pass)
-[5] Commit + merge (blurby-lead)
-[6] Print summary (blurby-lead)
-```
-
-### ADDITIONAL GUIDANCE
-- **Do NOT add `pointer-events: none` to overlays** — those are conditionally rendered and only visible when active. They're not the cause.
-- The `onToggleSelect` prop is always passed (it's a function from LibraryContainer). The fix must key off selection *state*, not prop presence.
-- After merge, a new `v1.0.3` tag + release build will be needed to push the fix to users via auto-update.
-
-### SUCCESS CRITERIA
-
-1. No checkbox visible on any card when no cards are selected (`selectedIds.size === 0`)
-2. Scrolling works everywhere in the library grid — over cards AND between cards
-3. Clicking blank grid space closes the menu flap (if open)
-4. Window dragging still works from the title bar area
-5. `npm test`: 512 pass, 0 fail
-6. `npm run build`: 0 TypeScript errors
-7. Branch `hotfix/grid-interaction` merged to main
 
 ---
 
@@ -494,6 +311,10 @@ New data model (`Feed`, `FeedItem`), feed parser (RSS 2.0/Atom 1.0/JSON Feed), R
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TD-2 | 2026-03-27 | ✅ PASS | Wire mode instances into reader + EPUB flow cursor + focus start fix, 618 tests |
+| HOTFIX-1 | 2026-03-27 | ✅ PRE-RESOLVED | Checkbox guard (selectionMode prop) and grid no-drag already in codebase |
+| TD-1 | 2026-03-26 | ✅ PASS | Technical debt — foliate-js, Kokoro TTS, universal EPUB, mode verticals, IPC split |
+| Sprint 25S | 2026-03-25 | ✅ PASS | Stabilization — 13 bug fixes, EPUB overlays, engagement-gated progress |
 | Sprint 22 | 2026-03-24 | ✅ PASS | Reading animation + TTS sync — GPU-accelerated Flow highlight, Focus fade/slide, cursor-driven TTS engine, WPM cap at 400, 512 tests |
 | Sprint 18B | 2026-03-24 | ✅ PASS | Chrome extension "Send to Blurby" — Manifest V3, Readability, WebSocket + cloud fallback, 20 new tests (512 total) |
 | Sprint 21 | 2026-03-21 | ✅ PASS | UX polish + reading intelligence — 17 items delivered |
