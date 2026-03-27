@@ -14,6 +14,6 @@ export default defineConfig({
   },
   test: {
     setupFiles: ["./tests/setup.js"],
-    exclude: [".Backup/**", ".claude/**", "node_modules/**"],
+    exclude: [".Backup/**", ".claude/**", "node_modules/**", "Example App/**"],
   },
 });
