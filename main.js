@@ -302,8 +302,8 @@ function startWatcherFn() {
         err.message.includes("permission")
       );
       const userMessage = isPermission
-        ? `Can't watch this folder — check permissions: ${folderPath}`
-        : `File watcher error for ${folderPath}: ${err.message}`;
+        ? "Can't watch this folder — check permissions."
+        : "Folder watching encountered an error — try re-selecting the folder.";
       console.error("[watcher] Error:", err.message);
       if (mainWindow && !mainWindow.isDestroyed()) {
         mainWindow.webContents.send("watcher-error", { message: userMessage });

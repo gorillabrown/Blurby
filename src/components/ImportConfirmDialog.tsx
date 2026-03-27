@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IMPORT_PREVIEW_LENGTH } from "../constants";
 
 interface ImportConfirmDialogProps {
   content: string;
@@ -12,7 +13,7 @@ export default function ImportConfirmDialog({ content, isUrl, onConfirm, onCance
     isUrl ? content : (content.slice(0, 40) + (content.length > 40 ? "..." : ""))
   );
 
-  const preview = isUrl ? content : content.slice(0, 200) + (content.length > 200 ? "..." : "");
+  const preview = isUrl ? content : content.slice(0, IMPORT_PREVIEW_LENGTH) + (content.length > IMPORT_PREVIEW_LENGTH ? "..." : "");
 
   return (
     <div className="import-confirm-overlay" onClick={onCancel} role="dialog" aria-modal="true" aria-label={isUrl ? "Import from URL" : "Import selected text"}>

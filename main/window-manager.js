@@ -3,6 +3,7 @@
 
 const { BrowserWindow, Tray, Menu, nativeTheme, session } = require("electron");
 const path = require("path");
+const { MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, MAIN_WINDOW_MIN_WIDTH, MAIN_WINDOW_MIN_HEIGHT } = require("./constants");
 
 function getThemeColors(settings) {
   const resolvedTheme = settings.theme === "system"
@@ -58,7 +59,7 @@ function createMainWindow(settings, isDev) {
   const isMac = process.platform === "darwin";
 
   const win = new BrowserWindow({
-    width: 1000, height: 720, minWidth: 600, minHeight: 500,
+    width: MAIN_WINDOW_WIDTH, height: MAIN_WINDOW_HEIGHT, minWidth: MAIN_WINDOW_MIN_WIDTH, minHeight: MAIN_WINDOW_MIN_HEIGHT,
     title: "Blurby",
     icon: path.join(__dirname, "..", "assets", "icon.ico"),
     backgroundColor: colors.bg,

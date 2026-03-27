@@ -681,3 +681,29 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 - PR-40: Functions that query the DOM (highlight, scroll, find) must be pure — return success/failure, never trigger navigation side effects. Let the caller decide what to do on failure.
 - PR-41: When React state is read inside `useCallback` closures that survive across async gaps (setTimeout, rAF, event handlers), always use a `useRef` mirror. Write the ref synchronously at the mutation site. Never add the state variable back to the dependency array — that reintroduces the stale closure.
 - PR-42: When bridging static-array mode classes to a dynamic-DOM renderer (foliate), the bridge must handle miss detection (word not in DOM), navigation (page turn to load new content), and resume (re-highlight after DOM updates). Mode classes must stay dumb — no DOM awareness.
+
+### [2026-03-27] LL-038: Constants Extraction Coverage — TD-1 Was Not Complete
+
+**Area:** code quality, constants, architecture
+**Status:** resolved
+**Priority:** medium
+
+**Context:** TD-1 created `src/constants.ts` and `main/constants.js` and extracted many hardcoded values. Sprint 23 audit found 33 additional hardcoded constants across 16 source files that TD-1 missed — cloud provider chunk sizes, auth window dimensions, retry delays, UI timing values, watcher stability thresholds, and more.
+
+**Root Cause:** TD-1 focused on the most obvious constants (WPM, timing, TTS) but didn't systematically grep every source file for numeric literals. Constants that "looked like implementation details" (chunk sizes, retry delays, window dimensions) were left inline.
+
+**Rules:**
+- PR-43: When extracting constants, grep every source file for numeric literals > 1 and string literals that configure behavior. Don't rely on "obvious" extraction — the non-obvious ones (retry delays, chunk sizes, cache limits) are just as important to centralize.
+- PR-44: After any constants extraction pass, a second audit pass should verify completeness. First pass typically catches 60-70% of scattered constants.
+
+### [2026-03-27] LL-039: Sprint 15 A11y Pass Didn't Cover Post-Sprint-15 Components
+
+**Area:** accessibility, process
+**Status:** resolved
+**Priority:** medium
+
+**Context:** Sprint 23 audited 12 components added after Sprint 15's WCAG 2.1 AA pass. 7 of 12 were already compliant (developers followed Sprint 15 patterns), but 5 needed fixes: missing combobox role, missing slider valuetext, missing ARIA on button groups, and a non-keyboard-accessible link.
+
+**Rules:**
+- PR-45: Every new overlay/dialog component must include `role="dialog"`, `aria-modal="true"`, `aria-label`, `useFocusTrap`, and Escape-to-close. These are table stakes, not optional enhancements.
+- PR-46: Every range input (slider) needs `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, and `aria-valuetext` with human-readable text (e.g., "300 words per minute" not just "300").

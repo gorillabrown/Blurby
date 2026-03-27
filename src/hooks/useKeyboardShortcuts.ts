@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS } from "../constants";
+import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS, WPM_COARSE_STEP } from "../constants";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -235,8 +235,8 @@ export function useReaderKeys(
       if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
       if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
       // Shift+Up/Down coarse WPM (Focus/Flow only)
-      if (e.code === "ArrowUp" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(100); return; }
-      if (e.code === "ArrowDown" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-100); return; }
+      if (e.code === "ArrowUp" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_COARSE_STEP); return; }
+      if (e.code === "ArrowDown" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_COARSE_STEP); return; }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);

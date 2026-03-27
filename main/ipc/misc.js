@@ -355,7 +355,7 @@ function register(ctx) {
       if (msg.includes("404") || msg.includes("HttpError") || msg.includes("net::")) {
         return { status: "error", message: "Could not reach update server. The repository may be private." };
       }
-      return { status: "error", message: msg };
+      return { status: "error", message: "Could not check for updates — please try again later." };
     }
   });
 

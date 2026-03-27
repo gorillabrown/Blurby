@@ -1,147 +1,182 @@
 {
-  "timestamp": "2026-03-24T21:37:34.504Z",
-  "node_version": "v24.14.0",
+  "timestamp": "2026-03-27T21:22:13.684Z",
+  "version": "2.1.6",
+  "node_version": "v24.14.1",
   "platform": "win32",
-  "arch": "arm64",
+  "arch": "x64",
   "automated": {
     "tokenize_1k": {
-      "mean_ms": 0.04758900000000011,
-      "p99_ms": 0.38110000000000355,
-      "min_ms": 0.031100000000002126,
-      "max_ms": 0.5459000000000032,
+      "mean_ms": 0.07250100000000145,
+      "p50_ms": 0.05880000000001928,
+      "p99_ms": 0.14170000000001437,
+      "min_ms": 0.049200000000041655,
+      "max_ms": 0.7668999999999642,
       "iterations": 100,
       "threshold_ms": 10,
       "pass": true
     },
     "tokenize_10k": {
-      "mean_ms": 0.3961169999999997,
-      "p99_ms": 0.6831999999999994,
-      "min_ms": 0.3042999999999978,
-      "max_ms": 0.9562999999999988,
+      "mean_ms": 0.45995599999999115,
+      "p50_ms": 0.41149999999998954,
+      "p99_ms": 0.8503000000000043,
+      "min_ms": 0.39229999999997744,
+      "max_ms": 0.8564999999999827,
       "iterations": 100,
       "threshold_ms": 100,
       "pass": true
     },
     "tokenize_50k": {
-      "mean_ms": 3.0653180000000035,
-      "p99_ms": 9.129399999999976,
-      "min_ms": 2.2121999999999957,
-      "max_ms": 9.129399999999976,
+      "mean_ms": 3.4348559999999977,
+      "p50_ms": 2.704999999999984,
+      "p99_ms": 8.795200000000023,
+      "min_ms": 2.5242000000000075,
+      "max_ms": 8.795200000000023,
       "iterations": 50,
       "threshold_ms": 500,
       "pass": true
     },
     "tokenize_100k": {
-      "mean_ms": 6.240310000000003,
-      "p99_ms": 18.486999999999966,
-      "min_ms": 4.33280000000002,
-      "max_ms": 18.486999999999966,
+      "mean_ms": 6.884935000000008,
+      "p50_ms": 5.330699999999979,
+      "p99_ms": 13.406400000000076,
+      "min_ms": 4.994000000000028,
+      "max_ms": 13.406400000000076,
       "iterations": 20,
       "threshold_ms": 1000,
       "pass": true
     },
     "tokenizeWithMeta_1k": {
-      "mean_ms": 0.1121819999999991,
-      "p99_ms": 0.1472999999999729,
-      "min_ms": 0.052099999999995816,
-      "max_ms": 3.3158000000000243,
+      "mean_ms": 0.08627299999999423,
+      "p50_ms": 0.06380000000001473,
+      "p99_ms": 0.14080000000001291,
+      "min_ms": 0.06150000000002365,
+      "max_ms": 1.8868999999999687,
       "iterations": 100,
       "threshold_ms": 20,
       "pass": true
     },
     "tokenizeWithMeta_10k": {
-      "mean_ms": 0.47551700000000097,
-      "p99_ms": 0.8018999999999892,
-      "min_ms": 0.4189999999999827,
-      "max_ms": 0.9460000000000264,
+      "mean_ms": 0.747032000000006,
+      "p50_ms": 0.644800000000032,
+      "p99_ms": 1.3663000000000238,
+      "min_ms": 0.6203000000000429,
+      "max_ms": 6.1539000000000215,
       "iterations": 100,
       "threshold_ms": 200,
       "pass": true
     },
     "tokenizeWithMeta_50k": {
-      "mean_ms": 2.6158739999999967,
-      "p99_ms": 6.324899999999957,
-      "min_ms": 2.1096000000000004,
-      "max_ms": 6.324899999999957,
+      "mean_ms": 3.859097999999997,
+      "p50_ms": 3.50649999999996,
+      "p99_ms": 6.314899999999966,
+      "min_ms": 3.030200000000036,
+      "max_ms": 6.314899999999966,
       "iterations": 50,
       "threshold_ms": 1000,
       "pass": true
     },
     "tokenizeWithMeta_100k": {
-      "mean_ms": 5.6740600000000025,
-      "p99_ms": 9.424099999999953,
-      "min_ms": 4.640599999999949,
-      "max_ms": 9.424099999999953,
+      "mean_ms": 7.1136950000000185,
+      "p50_ms": 6.247900000000072,
+      "p99_ms": 13.161399999999958,
+      "min_ms": 5.744300000000067,
+      "max_ms": 13.161399999999958,
       "iterations": 20,
       "threshold_ms": 2000,
       "pass": true
     },
     "countWords_1k": {
-      "mean_ms": 0.023053999999997358,
-      "p99_ms": 0.11140000000000327,
-      "min_ms": 0.012799999999970169,
-      "max_ms": 0.16039999999998145,
+      "mean_ms": 0.023472999999996774,
+      "p50_ms": 0.024100000000089494,
+      "p99_ms": 0.04800000000000182,
+      "min_ms": 0.015299999999797365,
+      "max_ms": 0.04930000000013024,
       "iterations": 100,
       "threshold_ms": 5,
       "pass": true
     },
     "countWords_10k": {
-      "mean_ms": 0.12799399999998967,
-      "p99_ms": 0.1310999999999467,
-      "min_ms": 0.1268000000000029,
-      "max_ms": 0.13139999999998508,
+      "mean_ms": 0.15767100000000484,
+      "p50_ms": 0.1517999999998665,
+      "p99_ms": 0.2683999999999287,
+      "min_ms": 0.1513999999999669,
+      "max_ms": 0.2716000000000349,
       "iterations": 100,
       "threshold_ms": 50,
       "pass": true
     },
     "countWords_50k": {
-      "mean_ms": 0.6433019999999897,
-      "p99_ms": 0.7108999999999241,
-      "min_ms": 0.63149999999996,
-      "max_ms": 0.7108999999999241,
+      "mean_ms": 0.9973340000000053,
+      "p50_ms": 0.770200000000159,
+      "p99_ms": 1.4730999999999312,
+      "min_ms": 0.7560000000000855,
+      "max_ms": 1.4730999999999312,
       "iterations": 50,
       "threshold_ms": 250,
       "pass": true
     },
     "countWords_100k": {
-      "mean_ms": 1.2862300000000118,
-      "p99_ms": 1.3687000000001035,
-      "min_ms": 1.2631000000000085,
-      "max_ms": 1.3687000000001035,
+      "mean_ms": 1.6774659999999995,
+      "p50_ms": 1.5731000000000677,
+      "p99_ms": 2.667799999999943,
+      "min_ms": 1.5118999999999687,
+      "max_ms": 2.667799999999943,
       "iterations": 50,
       "threshold_ms": 500,
       "pass": true
     },
     "word_advance_single": {
-      "mean_ms": 0.000686300000001097,
-      "p99_ms": 0.0027999999999792635,
-      "min_ms": 0.00029999999992469384,
-      "max_ms": 0.03330000000005384,
+      "mean_ms": 0.0010351000000030125,
+      "p50_ms": 0.0009000000000014552,
+      "p99_ms": 0.002300000000104774,
+      "min_ms": 0.0004999999998744897,
+      "max_ms": 0.036800000000084765,
       "iterations": 1000,
       "threshold_ms": 2,
       "pass": true
     },
     "word_advance_1k_bulk": {
-      "mean_ms": 0.30052000000000817,
-      "p99_ms": 0.36970000000007985,
-      "min_ms": 0.24360000000001492,
-      "max_ms": 4.6293000000000575,
+      "mean_ms": 0.4185649999999964,
+      "p50_ms": 0.3764000000001033,
+      "p99_ms": 0.5044000000000324,
+      "min_ms": 0.35779999999999745,
+      "max_ms": 3.634999999999991,
       "iterations": 100,
       "threshold_ms": 100,
       "pass": true
     }
   },
-  "manual_procedures": {
-    "startup_time": "See docs/testing/perf-manual.md#startup-time",
-    "memory_usage": "See docs/testing/perf-manual.md#memory-usage",
-    "scroll_fps": "See docs/testing/perf-manual.md#scroll-fps",
-    "sync_cycle": "See docs/testing/perf-manual.md#sync-cycle-time"
+  "manual": {
+    "startupCold": {
+      "threshold": 3000,
+      "unit": "ms",
+      "procedure": "See docs/testing/perf-manual.md#startup-time"
+    },
+    "startupWarm": {
+      "threshold": 1500,
+      "unit": "ms",
+      "procedure": "See docs/testing/perf-manual.md#startup-time"
+    },
+    "memoryStartup": {
+      "unit": "MB",
+      "procedure": "See docs/testing/perf-manual.md#memory-usage"
+    },
+    "flowFps": {
+      "threshold": 55,
+      "unit": "fps",
+      "procedure": "See docs/testing/perf-manual.md#scroll-fps"
+    },
+    "syncCycleTime": {
+      "unit": "ms",
+      "procedure": "See docs/testing/perf-manual.md#sync-cycle-time"
+    }
   },
   "thresholds": {
-    "startup_cold_s": 3,
-    "startup_warm_s": 1.5,
     "doc_open_50k_ms": 500,
     "word_advance_p99_ms": 2,
+    "word_advance_bulk_1k_ms": 100,
+    "startup_cold_s": 3,
+    "startup_warm_s": 1.5,
     "flow_fps_min": 55
   },
   "pass": true

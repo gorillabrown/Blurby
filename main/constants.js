@@ -76,6 +76,56 @@ const DEFAULT_INITIAL_PAUSE_MS = 3000;
 /** Default punctuation pause after punctuation words in Focus mode (ms) */
 const DEFAULT_PUNCTUATION_PAUSE_MS = 1000;
 
+// ── Cloud Upload ──────────────────────────────────────────────────────────
+/** OneDrive chunked upload size (bytes, 4MB) */
+const ONEDRIVE_CHUNK_SIZE = 4 * 1024 * 1024;
+/** Google Drive resumable upload chunk size (bytes, 5MB) */
+const GOOGLE_CHUNK_SIZE = 5 * 1024 * 1024;
+/** Maximum retry attempts for cloud API calls */
+const CLOUD_MAX_RETRIES = 5;
+/** Base delay for exponential backoff retries (ms) */
+const RETRY_BASE_DELAY_MS = 1000;
+/** Maximum delay cap for exponential backoff retries (ms) */
+const RETRY_MAX_DELAY_MS = 60000;
+
+// ── Auth Window ──────────────────────────────────────────────────────────
+/** OAuth sign-in popup window width (px) */
+const AUTH_WINDOW_WIDTH = 600;
+/** OAuth sign-in popup window height (px) */
+const AUTH_WINDOW_HEIGHT = 750;
+/** Buffer before token expiry to trigger a refresh (ms, 5 minutes) */
+const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
+/** Microsoft OAuth redirect callback port */
+const AUTH_MS_REDIRECT_PORT = 44321;
+/** Google OAuth redirect callback port */
+const AUTH_GOOGLE_REDIRECT_PORT = 44322;
+
+// ── TTS Engine ──────────────────────────────────────────────────────────
+/** Kokoro TTS output sample rate (Hz) */
+const KOKORO_SAMPLE_RATE = 24000;
+/** Idle timeout before TTS worker is terminated to free memory (ms, 5 minutes) */
+const TTS_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
+/** Timeout for Kokoro model loading before aborting (ms, 2 minutes) */
+const TTS_MODEL_LOAD_TIMEOUT_MS = 120000;
+
+// ── Folder Watcher ──────────────────────────────────────────────────────
+/** Chokidar write-finish stability threshold — file must be stable this long (ms) */
+const FOLDER_WATCHER_STABILITY_MS = 500;
+
+// ── Window Dimensions ───────────────────────────────────────────────────
+/** Default main window width (px) */
+const MAIN_WINDOW_WIDTH = 1000;
+/** Default main window height (px) */
+const MAIN_WINDOW_HEIGHT = 720;
+/** Minimum main window width (px) */
+const MAIN_WINDOW_MIN_WIDTH = 600;
+/** Minimum main window height (px) */
+const MAIN_WINDOW_MIN_HEIGHT = 500;
+
+// ── Reading Log ─────────────────────────────────────────────────────────
+/** Words per page estimate for reading log export */
+const READING_LOG_WORDS_PER_PAGE = 250;
+
 module.exports = {
   // Sync
   TOMBSTONE_TTL_MS,
@@ -114,4 +164,29 @@ module.exports = {
   // Migrations / Defaults
   DEFAULT_INITIAL_PAUSE_MS,
   DEFAULT_PUNCTUATION_PAUSE_MS,
+  // Cloud Upload
+  ONEDRIVE_CHUNK_SIZE,
+  GOOGLE_CHUNK_SIZE,
+  CLOUD_MAX_RETRIES,
+  RETRY_BASE_DELAY_MS,
+  RETRY_MAX_DELAY_MS,
+  // Auth Window
+  AUTH_WINDOW_WIDTH,
+  AUTH_WINDOW_HEIGHT,
+  TOKEN_REFRESH_BUFFER_MS,
+  AUTH_MS_REDIRECT_PORT,
+  AUTH_GOOGLE_REDIRECT_PORT,
+  // TTS Engine
+  KOKORO_SAMPLE_RATE,
+  TTS_IDLE_TIMEOUT_MS,
+  TTS_MODEL_LOAD_TIMEOUT_MS,
+  // Folder Watcher
+  FOLDER_WATCHER_STABILITY_MS,
+  // Window Dimensions
+  MAIN_WINDOW_WIDTH,
+  MAIN_WINDOW_HEIGHT,
+  MAIN_WINDOW_MIN_WIDTH,
+  MAIN_WINDOW_MIN_HEIGHT,
+  // Reading Log
+  READING_LOG_WORDS_PER_PAGE,
 };

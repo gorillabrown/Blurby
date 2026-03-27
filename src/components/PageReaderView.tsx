@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { tokenizeWithMeta, formatDisplayTitle } from "../utils/text";
-import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS } from "../constants";
+import { PAGE_TRANSITION_MS, TOAST_DEFAULT_DURATION_MS, PAGE_REPAINT_DELAY_MS } from "../constants";
 import { FlowCursorController } from "../utils/FlowCursorController";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import HighlightMenu from "./HighlightMenu";
@@ -341,7 +341,7 @@ export default function PageReaderView({
     let timer: ReturnType<typeof setTimeout> | null = null;
     if (targetPage !== currentPage) {
       // Page change needed — wait for DOM to repaint
-      timer = setTimeout(startController, 200);
+      timer = setTimeout(startController, PAGE_REPAINT_DELAY_MS);
     } else {
       // Same page — start immediately (forced reflow in controller handles layout)
       startController();
@@ -488,10 +488,19 @@ export default function PageReaderView({
             })()}
             <span
               className="page-reader-source-link"
+              role="link"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 if (activeDoc.sourceUrl) api.openDocSource(activeDoc.id);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  if (activeDoc.sourceUrl) api.openDocSource(activeDoc.id);
+                }
+              }}
+              aria-label={`Open source: ${activeDoc.sourceDomain}`}
             >
               {activeDoc.sourceDomain}
             </span>

@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM } from "../constants";
+import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS } from "../constants";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -82,8 +82,8 @@ export default function ReaderBottomBar({
       rateStatusTimerRef.current = setTimeout(() => {
         setRateStatus("idle");
         rateStatusTimerRef.current = null;
-      }, 1200);
-    }, 500);
+      }, TTS_RATE_SET_DISPLAY_MS);
+    }, TTS_RATE_CONFIRMING_MS);
   }, [onSetTtsRate]);
 
   // Expose toggle to parent via ref (for C hotkey)
@@ -169,9 +169,13 @@ export default function ReaderBottomBar({
               value={ttsRate}
               onChange={(e) => handleSetTtsRate(Number(e.target.value))}
               aria-label="Speech rate"
+              aria-valuemin={0.5}
+              aria-valuemax={2.0}
+              aria-valuenow={ttsRate}
+              aria-valuetext={`${ttsRate.toFixed(1)}x speed`}
             />
             {rateStatus !== "idle" && (
-              <span className={`rbb-rate-status ${rateStatus === "set" ? "rbb-rate-status--set" : ""}`}>
+              <span className={`rbb-rate-status ${rateStatus === "set" ? "rbb-rate-status--set" : ""}`} role="status" aria-live="polite">
                 {rateStatus === "confirming" ? "CONFIRMED" : "SET"}
               </span>
             )}
@@ -188,12 +192,16 @@ export default function ReaderBottomBar({
               value={wpm}
               onChange={handleWpmSlider}
               aria-label="Words per minute"
+              aria-valuemin={MIN_WPM}
+              aria-valuemax={MAX_WPM}
+              aria-valuenow={wpm}
+              aria-valuetext={`${wpm} words per minute`}
             />
           </div>
         )}
 
         {/* Font size */}
-        <div className="rbb-font-group">
+        <div className="rbb-font-group" role="group" aria-label="Font size controls">
           <button
             className="rbb-font-btn"
             onClick={() => { triggerCoachHint("fontSize"); onAdjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP); }}
@@ -201,7 +209,7 @@ export default function ReaderBottomBar({
           >
             A-
           </button>
-          <span className="rbb-font-pct">{fontPct}%</span>
+          <span className="rbb-font-pct" aria-live="polite">{fontPct}%</span>
           <button
             className="rbb-font-btn"
             onClick={() => { triggerCoachHint("fontSize"); onAdjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); }}
@@ -224,7 +232,7 @@ export default function ReaderBottomBar({
         )}
 
         {/* Mode buttons — all four modes in one group */}
-        <div className="rbb-mode-group">
+        <div className="rbb-mode-group" role="group" aria-label="Reading modes">
           <button
             className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "focus" ? " rbb-mode-btn--last" : ""}`}
             onClick={() => { triggerCoachHint("enterFocus"); onEnterFocus(); }}
@@ -318,7 +326,7 @@ export default function ReaderBottomBar({
       {/* Row 3: Info line */}
       <div className="reader-bottom-bar-info">
         <span className="rbb-info-progress">{Math.round(progress)}%</span>
-        <span className="rbb-info-hint">{HINT_TEXT[readingMode] || ""}</span>
+        <span className="rbb-info-hint" aria-label="Keyboard shortcuts hint">{HINT_TEXT[readingMode] || ""}</span>
         <span className="rbb-info-time">
           {chapterTimeRemaining ? `Ch: ${chapterTimeRemaining} | Doc: ${timeRemaining}` : timeRemaining}
         </span>

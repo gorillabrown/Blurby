@@ -537,7 +537,7 @@ describe("mobiToEpub", () => {
     const outputPath = path.join(tmpDir, "bad.epub");
     await expect(
       mobiToEpub(inputPath, outputPath, {}, { fileParsers: fakeFileParsers })
-    ).rejects.toThrow(/Failed to extract text from MOBI/);
+    ).rejects.toThrow(/could not be read/);
   });
 });
 
@@ -606,7 +606,7 @@ describe("convertToEpub", () => {
     await fs.writeFile(inputPath, "data");
 
     await expect(convertToEpub(inputPath, tmpDir, "doc-005")).rejects.toThrow(
-      /Unsupported format/
+      /not supported/
     );
   });
 

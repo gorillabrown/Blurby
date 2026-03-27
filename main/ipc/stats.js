@@ -4,7 +4,7 @@
 const { ipcMain, dialog } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
-const { MAX_HISTORY_SESSIONS, MS_PER_DAY } = require("../constants");
+const { MAX_HISTORY_SESSIONS, MS_PER_DAY, READING_LOG_WORDS_PER_PAGE } = require("../constants");
 
 // ── Reading statistics helpers ─────────────────────────────────────────────
 
@@ -30,7 +30,7 @@ function recordReadingSession(history, docTitle, wordsRead, durationMs, wpm, sav
     history.streaks.longest = history.streaks.current;
   }
 
-  if (history.sessions.length > MAX_HISTORY_SESSIONS) history.sessions = history.sessions.slice(-1000);
+  if (history.sessions.length > MAX_HISTORY_SESSIONS) history.sessions = history.sessions.slice(-MAX_HISTORY_SESSIONS);
   saveHistory();
 }
 
@@ -152,7 +152,7 @@ function register(ctx) {
       });
 
       const pctRead = doc.wordCount > 0 ? Math.round(((doc.position || 0) / doc.wordCount) * 100) : 0;
-      const estPages = Math.ceil((doc.wordCount || 0) / 250);
+      const estPages = Math.ceil((doc.wordCount || 0) / READING_LOG_WORDS_PER_PAGE);
       const durationMin = Math.round((duration || 0) / 60000);
 
       if (docRow) {

@@ -659,8 +659,13 @@ async function downloadDocContent(docId) {
     const { content } = JSON.parse(buffer.toString("utf-8"));
     return { content };
   } catch (err) {
+    console.error("[sync] downloadDocContent failed for", docId, ":", err.message);
     if (err.status === 404) return { error: "not-found" };
-    return { error: err.message };
+    const isNetwork = err.message && (
+      err.message.includes("ENOTFOUND") || err.message.includes("ECONNREFUSED") ||
+      err.message.includes("ETIMEDOUT") || err.message.includes("network")
+    );
+    return { error: isNetwork ? "offline" : "download-failed" };
   }
 }
 
@@ -922,7 +927,12 @@ async function startSync() {
     console.error("[sync] Sync failed:", err.message);
     await appendReconcileLog(`SYNC_ERROR: ${err.message}`);
     setSyncStatus("error");
-    return { status: "error", error: err.message };
+    const isAuth = err.status === 401 || err.status === 403 ||
+      (err.message && (err.message.includes("token") || err.message.includes("auth") || err.message.includes("unauthorized")));
+    const userError = isAuth
+      ? "Sync failed — please sign in again."
+      : "Sync failed — please try again later.";
+    return { status: "error", error: userError };
   }
 }
 
@@ -1084,8 +1094,17 @@ async function forceSync(direction) {
     setSyncStatus("idle");
     return { status: "success", revision: syncState.revision };
   } catch (err) {
+    console.error("[sync] forceSync failed:", err.message);
     setSyncStatus("error");
-    return { status: "error", error: err.message };
+    const isNetwork = err.message && (
+      err.message.includes("ENOTFOUND") || err.message.includes("ECONNREFUSED") ||
+      err.message.includes("ETIMEDOUT") || err.message.includes("network") ||
+      err.message.includes("offline")
+    );
+    const userError = isNetwork
+      ? "Sync paused — will retry when online."
+      : "Sync failed — please try again later.";
+    return { status: "error", error: userError };
   }
 }
 

@@ -572,7 +572,9 @@ async function mobiToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
   const buffer = await fsPromises.readFile(inputPath);
   const text = parseMobiContent(buffer);
   if (!text) {
-    throw new Error(`Failed to extract text from MOBI: ${inputPath}`);
+    const err = new Error("This MOBI file could not be read — it may be DRM-protected or corrupted.");
+    err.userError = true;
+    throw err;
   }
 
   const mobiMeta = parseMobiMetadata(buffer);
@@ -661,8 +663,11 @@ async function convertToEpub(inputPath, outputDir, docId, meta = {}) {
       return { epubPath: outputPath, title, author, valid: validation.valid, errors: validation.errors };
     }
 
-    default:
-      throw new Error(`Unsupported format for EPUB conversion: ${ext}`);
+    default: {
+      const err = new Error(`This file format (${ext}) is not supported.`);
+      err.userError = true;
+      throw err;
+    }
   }
 }
 

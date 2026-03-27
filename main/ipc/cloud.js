@@ -12,7 +12,22 @@ function register(ctx) {
       const result = await auth.signIn(provider);
       return { success: true, ...result };
     } catch (err) {
-      return { error: err.message };
+      console.error("[cloud] Sign-in failed:", err.message);
+      const isNetwork = err.message && (
+        err.message.includes("ENOTFOUND") || err.message.includes("ECONNREFUSED") ||
+        err.message.includes("ETIMEDOUT") || err.message.includes("network") ||
+        err.message.includes("fetch") || err.message.includes("offline")
+      );
+      const isCancelled = err.message && (
+        err.message.includes("cancel") || err.message.includes("Cancel") ||
+        err.message.includes("user_cancel") || err.message.includes("interaction_required")
+      );
+      const userMessage = isCancelled
+        ? "Sign-in was cancelled."
+        : isNetwork
+          ? "Could not reach the sign-in server — check your internet connection."
+          : "Sign-in failed — please try again.";
+      return { error: userMessage };
     }
   });
 
@@ -22,7 +37,8 @@ function register(ctx) {
       syncEngine.stopAutoSync();
       return { success: true };
     } catch (err) {
-      return { error: err.message };
+      console.error("[cloud] Sign-out failed:", err.message);
+      return { error: "Sign-out failed — please try again." };
     }
   });
 
@@ -31,7 +47,12 @@ function register(ctx) {
   });
 
   ipcMain.handle("cloud-sync-now", async () => {
-    return await syncEngine.startSync();
+    try {
+      return await syncEngine.startSync();
+    } catch (err) {
+      console.error("[cloud] Sync failed:", err.message);
+      return { status: "error", error: "Sync failed — please try again later." };
+    }
   });
 
   ipcMain.handle("cloud-get-sync-status", () => {

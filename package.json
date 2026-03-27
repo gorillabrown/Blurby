@@ -13,7 +13,7 @@
     "package:linux": "electron-builder --linux",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "perf": "node tests/perf-baseline.js"
+    "perf": "vitest run tests/perf-baseline.test.ts"
   },
   "build": {
     "appId": "com.blurby.app",
@@ -80,7 +80,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
-    "electron": "^41.0.3",
+    "electron": "^41.1.0",
     "electron-builder": "^26.8.1",
     "typescript": "^5.9.3",
     "vite": "^6.1.0",

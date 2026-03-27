@@ -196,6 +196,56 @@ export const FOLIATE_RENDERER_HEIGHT_MARGIN_PX = 20;
 /** Viewport width at which the EPUB renderer switches to two-column layout (px) */
 export const FOLIATE_TWO_COLUMN_BREAKPOINT_PX = 1040;
 
+// ── Highlight / Toast (Reader) ──────────────────────────────────────────────
+/** Toast auto-dismiss after saving a highlight in ReaderView (ms) */
+export const HIGHLIGHT_TOAST_DISMISS_MS = 1600;
+
+// ── E-ink Refresh Overlay ──────────────────────────────────────────────────
+/** Total duration of the e-ink refresh flash overlay (ms) */
+export const EINK_REFRESH_FLASH_MS = 200;
+/** Duration of the black phase before switching to white in the e-ink refresh overlay (ms) */
+export const EINK_REFRESH_PHASE_MS = 100;
+
+// ── Stats Panel ────────────────────────────────────────────────────────────
+/** How long the "Are you sure?" reset confirmation stays active (ms) */
+export const CONFIRM_RESET_DISMISS_MS = 3000;
+
+// ── WPM Adjustments ────────────────────────────────────────────────────────
+/** Coarse WPM step for Shift+Arrow shortcuts */
+export const WPM_COARSE_STEP = 100;
+
+// ── Import Preview ─────────────────────────────────────────────────────────
+/** Maximum characters shown in the import confirmation content preview */
+export const IMPORT_PREVIEW_LENGTH = 200;
+
+// ── Library Filters ────────────────────────────────────────────────────────
+/** Number of days a document is considered "new" in the library view */
+export const NEW_LIBRARY_DAYS = 7;
+
+// ── TTS Rate Display ───────────────────────────────────────────────────────
+/** Delay before transitioning from "confirming" to "set" after TTS rate change (ms) */
+export const TTS_RATE_CONFIRMING_MS = 500;
+/** Delay before transitioning from "set" back to "idle" after TTS rate change (ms) */
+export const TTS_RATE_SET_DISPLAY_MS = 1200;
+
+// ── Page Reader ────────────────────────────────────────────────────────────
+/** Delay after page change to let DOM repaint before starting flow controller (ms) */
+export const PAGE_REPAINT_DELAY_MS = 200;
+
+// ── Scroll Edge Detection ──────────────────────────────────────────────────
+/** Pixel distance from top/bottom edge of scroll container to trigger range expansion */
+export const SCROLL_EDGE_THRESHOLD_PX = 200;
+
+// ── Search UI ──────────────────────────────────────────────────────────────
+/** Delay before unfocusing search field on blur to prevent flicker (ms) */
+export const SEARCH_BLUR_DELAY_MS = 150;
+
+// ── Non-Foliate Progress ───────────────────────────────────────────────────
+/** Debounce for saving progress in non-foliate (word-indexed) documents (ms) */
+export const NON_FOLIATE_PROGRESS_SAVE_MS = 2000;
+/** Minimum active reading time before a session is recorded (ms) */
+export const MIN_ACTIVE_READING_MS = 1000;
+
 // ── Default Settings ─────────────────────────────────────────────────────────
 /** Single source of truth for BlurbySettings defaults.
  *  Import in SettingsContext and useLibrary instead of duplicating. */

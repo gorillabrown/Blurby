@@ -1,7 +1,7 @@
 // main/auth.js — OAuth2 authentication layer for cloud sync
 // CommonJS only — Electron main process
 
-const { TOKEN_EXPIRY_FALLBACK_MS } = require('./constants');
+const { TOKEN_EXPIRY_FALLBACK_MS, AUTH_WINDOW_WIDTH, AUTH_WINDOW_HEIGHT, TOKEN_REFRESH_BUFFER_MS, AUTH_MS_REDIRECT_PORT, AUTH_GOOGLE_REDIRECT_PORT } = require('./constants');
 
 const { BrowserWindow, safeStorage } = require("electron");
 const path = require("path");
@@ -11,13 +11,13 @@ const crypto = require("crypto");
 // ── Configuration ─────────────────────────────────────────────────────────
 // Replace these with your registered OAuth app credentials
 const MICROSOFT_CLIENT_ID = "YOUR_AZURE_CLIENT_ID";
-const MICROSOFT_REDIRECT_URI = "http://localhost:44321/auth/callback";
+const MICROSOFT_REDIRECT_URI = `http://localhost:${AUTH_MS_REDIRECT_PORT}/auth/callback`;
 const MICROSOFT_AUTHORITY = "https://login.microsoftonline.com/common";
 const MICROSOFT_SCOPES = ["User.Read", "Files.ReadWrite.AppFolder", "offline_access"];
 
 const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
 const GOOGLE_CLIENT_SECRET = "YOUR_GOOGLE_CLIENT_SECRET"; // For installed apps this is acceptable
-const GOOGLE_REDIRECT_URI = "http://localhost:44322/auth/callback";
+const GOOGLE_REDIRECT_URI = `http://localhost:${AUTH_GOOGLE_REDIRECT_PORT}/auth/callback`;
 const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/drive.appdata",
   "https://www.googleapis.com/auth/userinfo.email",
@@ -294,8 +294,8 @@ async function refreshGoogleToken() {
 function openAuthWindow(authUrl, redirectUri) {
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
-      width: 600,
-      height: 750,
+      width: AUTH_WINDOW_WIDTH,
+      height: AUTH_WINDOW_HEIGHT,
       title: "Sign in",
       webPreferences: {
         nodeIntegration: false,
@@ -378,7 +378,7 @@ async function getAccessToken(provider) {
   if (!data) throw new Error(`Not signed in to ${provider}`);
 
   // Check if token is still valid (with 5 minute buffer)
-  const bufferMs = 5 * 60 * 1000;
+  const bufferMs = TOKEN_REFRESH_BUFFER_MS;
   if (data.accessToken && data.expiresOn && Date.now() < data.expiresOn - bufferMs) {
     return data.accessToken;
   }

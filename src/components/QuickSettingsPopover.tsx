@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { MIN_WPM, MAX_WPM, WPM_STEP } from "../constants";
+import { MIN_WPM, MAX_WPM, WPM_STEP, DEFAULT_WPM } from "../constants";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 
 interface QuickSettingsPopoverProps {
@@ -90,7 +90,7 @@ export default function QuickSettingsPopover({
     firstSlider?.focus();
   }, []);
 
-  const wpm = typeof settings.wpm === "number" ? settings.wpm : 300;
+  const wpm = typeof settings.wpm === "number" ? settings.wpm : DEFAULT_WPM;
   const focusTextSize =
     typeof settings.focusTextSize === "number" ? settings.focusTextSize : 18;
   const flowTextSize =
@@ -149,6 +149,7 @@ export default function QuickSettingsPopover({
                 aria-valuemin={MIN_WPM}
                 aria-valuemax={MAX_WPM}
                 aria-valuenow={wpm}
+                aria-valuetext={`${wpm} words per minute`}
               />
               <span className="quick-settings-value" aria-hidden="true">
                 {wpm} wpm
@@ -181,6 +182,7 @@ export default function QuickSettingsPopover({
                 aria-valuemin={FONT_MIN}
                 aria-valuemax={FONT_MAX}
                 aria-valuenow={currentFontSize}
+                aria-valuetext={`${currentFontSize} pixels`}
               />
               <span className="quick-settings-value" aria-hidden="true">
                 {currentFontSize}px

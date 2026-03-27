@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detectChapters, chaptersFromCharOffsets, currentChapterIndex, Chapter } from "../utils/text";
-import { MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, ANIMATION_DISABLE_WPM } from "../constants";
+import { MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, ANIMATION_DISABLE_WPM, HIGHLIGHT_TOAST_DISMISS_MS } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import type { WordUpdateCallback } from "../hooks/useReader";
 
@@ -176,7 +176,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
     });
     if (result?.ok) {
       setToast("Saved to highlights");
-      setTimeout(() => setToast(null), 1600);
+      setTimeout(() => setToast(null), HIGHLIGHT_TOAST_DISMISS_MS);
     }
     closeHighlight();
   }, [highlightWord, highlightIdx, wordIndex, words.length, activeDoc.title, closeHighlight]);
@@ -194,7 +194,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           wordIndex,
           totalWords: words.length,
         }).then((r: any) => {
-          if (r?.ok) { setToast("Saved to highlights"); setTimeout(() => setToast(null), 1600); }
+          if (r?.ok) { setToast("Saved to highlights"); setTimeout(() => setToast(null), HIGHLIGHT_TOAST_DISMISS_MS); }
         });
       }
     };
