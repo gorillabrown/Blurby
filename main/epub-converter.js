@@ -624,8 +624,55 @@ async function convertToEpub(inputPath, outputDir, docId, meta = {}) {
   }
 }
 
+/**
+ * Validate that an EPUB file has the required structure.
+ * Checks: mimetype entry, container.xml, content.opf, at least one content file.
+ * @param {string} epubPath — path to the EPUB file
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+async function validateEpub(epubPath) {
+  const errors = [];
+  try {
+    const Zip = getAdmZip();
+    const zip = new Zip(epubPath);
+    const entries = zip.getEntries().map((e) => e.entryName);
+
+    // Check mimetype
+    if (!entries.includes("mimetype")) {
+      errors.push("Missing mimetype entry");
+    } else {
+      const mimetype = zip.readAsText("mimetype").trim();
+      if (mimetype !== "application/epub+zip") {
+        errors.push(`Invalid mimetype: "${mimetype}"`);
+      }
+    }
+
+    // Check container.xml
+    const containerEntry = entries.find((e) => e.endsWith("container.xml"));
+    if (!containerEntry) {
+      errors.push("Missing META-INF/container.xml");
+    }
+
+    // Check content.opf
+    const opfEntry = entries.find((e) => e.endsWith(".opf"));
+    if (!opfEntry) {
+      errors.push("Missing content.opf");
+    }
+
+    // Check at least one XHTML content file
+    const xhtmlFiles = entries.filter((e) => e.endsWith(".xhtml") || e.endsWith(".html"));
+    if (xhtmlFiles.length === 0) {
+      errors.push("No XHTML content files found");
+    }
+  } catch (err) {
+    errors.push(`Failed to read EPUB: ${err.message}`);
+  }
+  return { valid: errors.length === 0, errors };
+}
+
 module.exports = {
   buildEpubZip,
+  validateEpub,
   txtToEpub,
   mdToEpub,
   htmlToEpub,

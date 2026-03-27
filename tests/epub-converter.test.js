@@ -589,3 +589,65 @@ describe("convertToEpub", () => {
     expect(result.epubPath).toContain("doc-007.epub");
   });
 });
+
+describe("validateEpub", () => {
+  let tmpDir;
+  beforeEach(async () => {
+    tmpDir = path.join(os.tmpdir(), `blurby-test-validate-${crypto.randomUUID()}`);
+    await fs.mkdir(tmpDir, { recursive: true });
+  });
+  afterEach(async () => {
+    await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  });
+
+  it("validates a correctly built EPUB", async () => {
+    const { buildEpubZip, validateEpub } = await import("../main/epub-converter.js");
+    const epubPath = path.join(tmpDir, "valid.epub");
+    await buildEpubZip({
+      outputPath: epubPath,
+      title: "Valid Book",
+      author: "Author",
+      chapters: [{ title: "Ch1", xhtml: "<p>Hello</p>" }],
+    });
+    const result = await validateEpub(epubPath);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("detects missing mimetype", async () => {
+    const { validateEpub } = await import("../main/epub-converter.js");
+    const AdmZip = (await import("adm-zip")).default;
+    const zip = new AdmZip();
+    zip.addFile("META-INF/container.xml", Buffer.from("<container/>"));
+    zip.addFile("OEBPS/content.opf", Buffer.from("<package/>"));
+    zip.addFile("OEBPS/ch.xhtml", Buffer.from("<html/>"));
+    const epubPath = path.join(tmpDir, "no-mime.epub");
+    zip.writeZip(epubPath);
+    const result = await validateEpub(epubPath);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Missing mimetype entry");
+  });
+
+  it("detects missing content files", async () => {
+    const { validateEpub } = await import("../main/epub-converter.js");
+    const AdmZip = (await import("adm-zip")).default;
+    const zip = new AdmZip();
+    zip.addFile("mimetype", Buffer.from("application/epub+zip"));
+    zip.addFile("META-INF/container.xml", Buffer.from("<container/>"));
+    zip.addFile("OEBPS/content.opf", Buffer.from("<package/>"));
+    const epubPath = path.join(tmpDir, "no-content.epub");
+    zip.writeZip(epubPath);
+    const result = await validateEpub(epubPath);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("No XHTML content files found");
+  });
+
+  it("detects non-EPUB file", async () => {
+    const { validateEpub } = await import("../main/epub-converter.js");
+    const txtPath = path.join(tmpDir, "not-epub.epub");
+    await fs.writeFile(txtPath, "This is not an EPUB", "utf-8");
+    const result = await validateEpub(txtPath);
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
