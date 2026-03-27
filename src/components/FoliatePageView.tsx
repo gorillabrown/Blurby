@@ -530,6 +530,9 @@ export default function FoliatePageView({
 
               // Word not found in loaded sections — caller decides what to do
               if (!targetSpan) {
+                if (process.env.NODE_ENV !== 'production') {
+                  console.debug(`[foliate] highlightWordByIndex miss: word ${wordIndex} not in DOM`);
+                }
                 return false;
               }
 

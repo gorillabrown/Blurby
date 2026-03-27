@@ -707,3 +707,27 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 **Rules:**
 - PR-45: Every new overlay/dialog component must include `role="dialog"`, `aria-modal="true"`, `aria-label`, `useFocusTrap`, and Escape-to-close. These are table stakes, not optional enhancements.
 - PR-46: Every range input (slider) needs `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, and `aria-valuetext` with human-readable text (e.g., "300 words per minute" not just "300").
+
+### [2026-03-27] LL-040: Test Coverage on Glue Code Prevents Repeated Breakage
+
+**Area:** testing, architecture, process
+**Status:** active
+**Priority:** high
+
+**Context:** The reading mode system broke 3 times in 3 sprints (TD-2, HOTFIX-2, HOTFIX-2B). Mode classes themselves had 420 lines of tests and never broke. All breakages occurred in the untested bridge layer — `useReadingModeInstance` (callback wiring, pause-on-miss) and `useReaderMode` (ref sync, stale closures, Symbol guards). Every failure shipped with all tests green because the tests covered the wrong layer.
+
+**Root Cause:** Mode classes are pure, testable objects. The bridge hooks that wire them to React state and foliate's dynamic DOM were treated as "just glue" and left untested. But glue code is where integration bugs live — stale closures, double page turns, orphan timers, wrong callback targets.
+
+**Solution (Sprint MH):** 44 new tests across 4 files targeting specifically the code that kept breaking:
+- `useReadingModeInstance.test.ts` (15 tests) — callback wiring, pause-on-miss bridge, pendingResumeRef
+- `useReaderMode.test.ts` (14 tests) — ref sync, Symbol guard, mode memory, WPM cap
+- `foliate-bridge.test.ts` (9 tests) — MockFoliateAPI integration, section boundary crossing, multi-page recovery
+- `modes.test.ts` (+6 tests) — updateWords contract across all mode classes
+
+Plus defensive guards: bounds checks in scheduleNext, Object.freeze on callbacks, debug logging on highlight miss.
+
+**Rules:**
+- PR-47: When a subsystem breaks repeatedly, add tests to the *integration layer* (hooks, bridges, wiring), not just the isolated units. The units are probably fine — the breakage is in how they connect.
+- PR-48: `updateWords` is now a required method on ModeInterface (not optional). All modes must implement it. This prevents future refactors from silently dropping dynamic word support.
+- PR-49: `Object.freeze(config.callbacks)` after mode creation prevents accidental callback mutation. If a future developer tries to overwrite a callback after mode instantiation, they'll get a TypeError instead of a silent bug.
+- PR-50: Bounds guards in `scheduleNext` should clamp (not throw). A negative word index clamps to 0. The timer chain must never crash — silent degradation beats a white screen.

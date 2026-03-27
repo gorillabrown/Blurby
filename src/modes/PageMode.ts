@@ -46,6 +46,8 @@ export class PageMode implements ReadingMode {
     };
   }
 
+  updateWords(_words: string[]): void { /* Page mode doesn't track words */ }
+
   destroy(): void { /* Nothing to clean up */ }
 
   /**

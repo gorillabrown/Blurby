@@ -121,6 +121,7 @@ export function useReadingModeInstance({
   // Create mode instance for the given mode type
   const createInstance = useCallback((mode: ModeType, words: string[], paragraphBreaks: Set<number>): ReadingMode => {
     const config = buildConfig(words, paragraphBreaks);
+    let instance: ReadingMode;
     switch (mode) {
       case "focus":
         // FocusMode's onWordAdvance also syncs useReader's wordIndex for ReaderView display
@@ -128,7 +129,8 @@ export function useReadingModeInstance({
           jumpToWordRef.current(idx);
           onWordAdvanceRef.current(idx);
         };
-        return new FocusMode(config);
+        instance = new FocusMode(config);
+        break;
 
       case "flow":
         if (isFoliate) {
@@ -147,7 +149,8 @@ export function useReadingModeInstance({
             }
           };
         }
-        return new FlowMode(config);
+        instance = new FlowMode(config);
+        break;
 
       case "narration":
         // NarrateMode's onWordAdvance: highlight in foliate + page-turn-on-miss bridge
@@ -165,12 +168,16 @@ export function useReadingModeInstance({
             }
           }
         };
-        return new NarrateMode(config, narration);
+        instance = new NarrateMode(config, narration);
+        break;
 
       case "page":
       default:
-        return new PageMode(config);
+        instance = new PageMode(config);
+        break;
     }
+    Object.freeze(config.callbacks);
+    return instance;
   }, [buildConfig, isFoliate, narration, foliateApiRefStable]);
 
   // Destroy old instance when mode changes or component unmounts
@@ -242,7 +249,7 @@ export function useReadingModeInstance({
 
   /** Update the active mode's word array (called when new EPUB sections load) */
   const updateModeWords = useCallback((words: string[]) => {
-    if (modeRef.current?.updateWords) {
+    if (modeRef.current) {
       modeRef.current.updateWords(words);
     }
   }, []);
