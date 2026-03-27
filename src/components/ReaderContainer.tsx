@@ -289,10 +289,16 @@ export default function ReaderContainer({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    // Resolve start position — uses shared utility to eliminate duplication with startFocus/startFlow
-    const startIdx = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndex, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
-      : highlightedWordIndex;
+    // Resolve start position — for narration, prefer the user's clicked position even if it
+    // exceeds the currently extracted word array (the extraction catches up during playback).
+    // Only use findFirstVisibleWordIndex as absolute fallback when highlightedWordIndex is 0.
+    let startIdx = highlightedWordIndex;
+    if (useFoliate && startIdx === 0) {
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+      if (firstVisible > 0) startIdx = firstVisible;
+    }
+    // Clamp to extracted words length (narration needs valid indices for its word array)
+    startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
     // Set the TTS rate BEFORE starting — adjustRate() after start would increment
     // the generation ID, poisoning the in-flight Kokoro IPC call.
     if (settings.ttsRate) narration.adjustRate(settings.ttsRate);

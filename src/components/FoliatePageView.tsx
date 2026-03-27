@@ -670,15 +670,27 @@ export default function FoliatePageView({
             const spanRect = span.getBoundingClientRect();
             // getContents docs are inside iframes — find the iframe for coordinate transform
             const iframe = foliateIframeRef.current;
-            if (iframe) {
-              const iframeRect = iframe.getBoundingClientRect();
-              cursor.style.transform = `translate3d(${iframeRect.left + spanRect.left}px, ${iframeRect.top + spanRect.top + spanRect.height}px, 0)`;
+            const iframeRect = iframe?.getBoundingClientRect();
+            // Compute position in page viewport
+            const x = (iframeRect ? iframeRect.left : 0) + spanRect.left;
+            const y = (iframeRect ? iframeRect.top : 0) + spanRect.top + spanRect.height;
+            const w = spanRect.width;
+            // Only show if the word is within the visible viewport
+            const viewportWidth = container.clientWidth;
+            const viewportHeight = container.clientHeight;
+            if (w > 0 && x >= 0 && x < viewportWidth + 100 && y >= 0 && y < viewportHeight + 100) {
+              cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+              cursor.style.width = `${w}px`;
+              cursor.style.display = "block";
+              found = true;
             } else {
-              cursor.style.transform = `translate3d(${spanRect.left}px, ${spanRect.top + spanRect.height}px, 0)`;
+              // Word is off-screen (different CSS column) — trigger page advance
+              const v2 = viewRef.current;
+              if (v2?.renderer?.next) {
+                v2.renderer.next();
+              }
+              cursor.style.display = "none";
             }
-            cursor.style.width = `${spanRect.width}px`;
-            cursor.style.display = "block";
-            found = true;
             break;
           }
         } catch { /* */ }
