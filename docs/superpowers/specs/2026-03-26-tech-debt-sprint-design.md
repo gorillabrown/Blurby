@@ -21,6 +21,43 @@ Sprint 25S (stabilization) revealed structural debt that makes every EPUB bug fi
 
 ---
 
+## Phase 0: Dead Code Removal (2-3h)
+
+> **IMPORTANT:** Do this FIRST, before any restructuring. Removing dead code before splitting files prevents moving dead code into new modules.
+
+**Executor:** CLI (mechanical, zero judgment needed)
+
+### TD-00a: Remove `mergeWords()` function
+**File:** `src/components/FoliatePageView.tsx`
+**Action:** Delete the entire `mergeWords()` function (82 lines, never called).
+
+### TD-00b: Remove `safeRangeOp()` function
+**File:** `src/components/FoliatePageView.tsx`
+**Action:** Delete the `safeRangeOp()` function (4 lines, never called).
+
+### TD-00c: Remove unused `getOverlayPosition` import
+**File:** `src/components/FoliatePageView.tsx`
+**Action:** Remove the unused import statement.
+
+### TD-00d: Remove debug `console.log` statements
+**Files:** `src/components/FoliatePageView.tsx` (13 statements tagged `[Foliate]`), `src/components/ReaderContainer.tsx` (3 statements)
+**Action:** Delete all 16 debug console.log statements.
+
+### TD-00e: Remove commented-out code blocks
+**Files:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Action:** Delete all commented-out code blocks from Sprint 25S iteration (~50+ lines).
+
+### Phase 0 Acceptance Criteria
+
+- [ ] Zero `console.log` statements with `[Foliate]` tag
+- [ ] `mergeWords` and `safeRangeOp` functions deleted
+- [ ] No commented-out code blocks from Sprint 25S
+- [ ] ~200+ lines removed
+- [ ] `npm test` passes, `npm run build` succeeds
+- [ ] All existing functionality unchanged
+
+---
+
 ## Phase 1: Universal EPUB Pipeline (8-12h)
 
 ### Overview
@@ -30,6 +67,7 @@ Convert all document formats (TXT, MD, HTML, PDF, MOBI/AZW3) to EPUB on import. 
 ### TD-01: Custom Format Converters
 
 **Create:** `main/epub-converter.js`
+**Executor:** CLI (well-spec'd, mechanical)
 
 **EPUB Packaging Helper — `buildEpubZip(options)`**
 
@@ -63,6 +101,17 @@ Parameters:
 
 The content.opf includes: `dc:identifier` (UUID), `dc:title`, `dc:creator`, `dc:language`, `dcterms:modified`. Manifest lists all chapters + nav. Spine references chapters in order.
 
+**EPUB Validation — `validateEpub(epubPath)`**
+
+After `buildEpubZip`, validate the output:
+1. Check mimetype is first ZIP entry and uncompressed
+2. Check `META-INF/container.xml` exists and parses as XML
+3. Check `content.opf` references all spine items
+4. Check each XHTML chapter is well-formed XML (parse with DOMParser, check for errors)
+5. Return `{ valid: boolean, errors: string[] }`
+
+If validation fails, log errors and fall back to legacy renderer for that document. Corrupt EPUBs must not crash foliate silently.
+
 **Text-to-EPUB — `txtToEpub(inputPath, outputPath, meta)`**
 
 1. Read file as UTF-8
@@ -74,6 +123,7 @@ The content.opf includes: `dc:identifier` (UUID), `dc:title`, `dc:creator`, `dc:
 4. Convert paragraph groups (separated by blank lines) to `<p>` elements
 5. Escape XML entities
 6. Feed chapters to `buildEpubZip`
+7. Validate with `validateEpub`
 
 Returns: `{ epubPath, title, author, chapterCount }`
 
@@ -90,6 +140,7 @@ Returns: `{ epubPath, title, author, chapterCount }`
    - Blank line → paragraph break
    - Code fences → `<pre><code>`
 4. Feed to `buildEpubZip`
+5. Validate with `validateEpub`
 
 **HTML-to-EPUB — `htmlToEpub(inputPath, outputPath, meta)`**
 
@@ -99,6 +150,7 @@ Returns: `{ epubPath, title, author, chapterCount }`
 4. Preserve paragraph structure
 5. Extract `<title>` for book title if not provided
 6. Feed to `buildEpubZip`
+7. Validate with `validateEpub`
 
 **PDF-to-EPUB — `pdfToEpub(inputPath, outputPath, meta)`**
 
@@ -106,6 +158,7 @@ Returns: `{ epubPath, title, author, chapterCount }`
 2. Split text by page breaks (`\f` or large whitespace gaps) as chapter boundaries
 3. Feed extracted text through `txtToEpub` chapter detection + paragraph wrapping
 4. Feed to `buildEpubZip`
+5. Validate with `validateEpub`
 
 Note: PDF→EPUB is inherently lossy (layout, images, tables lost). The legacy renderer toggle (TD-04) provides a fallback.
 
@@ -116,6 +169,7 @@ Note: PDF→EPUB is inherently lossy (layout, images, tables lost). The legacy r
 3. Reuse `extractMobiCover()` from `file-parsers.js:218-274` (cover image extraction)
 4. Feed decompressed text through `txtToEpub` logic
 5. Include cover image in EPUB via `buildEpubZip({ coverImage })`
+6. Validate with `validateEpub`
 
 **Orchestrator — `convertToEpub(inputPath, outputDir, docId, meta)`**
 
@@ -127,12 +181,13 @@ Routes by file extension:
 - `.mobi`, `.azw3`, `.azw` → `mobiToEpub`
 - `.epub` → copy to output dir (already EPUB)
 
-Returns: `{ epubPath, title, author }`
+Returns: `{ epubPath, title, author, valid, errors }`
 
 **Dependencies:** None new. Uses existing adm-zip, cheerio, pdf-parse.
 
 **Tests:** `tests/epub-converter.test.js`
 - `buildEpubZip` produces valid EPUB structure (mimetype, container.xml, content.opf, chapters)
+- `validateEpub` catches malformed EPUBs (missing mimetype, broken XML, missing spine items)
 - `txtToEpub` converts text with paragraphs, detects chapter headings
 - `htmlToEpub` strips nav/script, splits at headings
 - `pdfToEpub` extracts text and packages
@@ -144,18 +199,20 @@ Returns: `{ epubPath, title, author }`
 ### TD-02: Import Pipeline Integration
 
 **Modify:** `main/ipc-handlers.js` — `import-dropped-files` handler (line 636), `add-doc-from-url` handler (line 438)
+**Executor:** CLI (follows spec)
 
 **On import of any non-EPUB file:**
 
 1. Extract metadata first (existing `extractDocMetadata` — needed for title/author/cover)
 2. Call `convertToEpub(filepath, convertedDir, docId, { title, author, coverImage })`
-3. Store converted EPUB at `<userData>/converted/<docId>.epub`
-4. Update doc object:
+3. If `valid === false`, log errors and set `doc.legacyRenderer = true` (auto-fallback)
+4. Store converted EPUB at `<userData>/converted/<docId>.epub`
+5. Update doc object:
    - `doc.convertedEpubPath = result.epubPath`
    - `doc.originalFilepath = filepath` (preserve original)
    - `doc.filepath = result.epubPath` (point to converted)
    - `doc.ext = ".epub"`
-5. Standard doc creation continues (addDocToLibrary, broadcastLibrary)
+6. Standard doc creation continues (addDocToLibrary, broadcastLibrary)
 
 **For URL imports** (`add-doc-from-url`):
 1. Extract article via Readability (existing flow)
@@ -167,7 +224,7 @@ Returns: `{ epubPath, title, author }`
 ```typescript
 convertedEpubPath?: string;    // path to converted EPUB in userData/converted/
 originalFilepath?: string;     // original file path before conversion
-legacyRenderer?: boolean;      // user opted for PageReaderView
+legacyRenderer?: boolean;      // user opted for PageReaderView (or auto-fallback on conversion failure)
 ```
 
 **Constants (main/constants.js):**
@@ -180,9 +237,12 @@ TXT_CHAPTER_MIN_LINES = 50         // minimum lines between chapter break candid
 
 ---
 
-### TD-03: Collapse useFoliate Conditionals
+### TD-03: Update useFoliate Logic (NOT full collapse)
 
 **Modify:** `src/components/ReaderContainer.tsx`
+**Executor:** Cowork (judgment on legacy handling)
+
+> **IMPORTANT:** This sprint does NOT delete useFoliate branches. The 29 conditionals remain for backward compatibility with pre-conversion docs. Full branch deletion requires a batch migration of existing library docs (deferred to Sprint TD-2).
 
 Current (line 112):
 ```typescript
@@ -194,13 +254,14 @@ After:
 const useFoliate = Boolean(
   (activeDoc?.filepath || activeDoc?.convertedEpubPath) &&
   activeDoc?.ext === ".epub" &&
+  !activeDoc?.legacyRenderer &&
   !settings.useLegacyRenderer
 );
 ```
 
-With all new docs having `.epub` extension after conversion, `useFoliate` is true for all new imports. Legacy docs without conversion still fall through to PageReaderView.
+With all new docs having `.epub` extension after conversion, `useFoliate` is true for all new imports. Legacy docs without conversion still fall through to PageReaderView. Auto-fallback docs (where validation failed) also use legacy renderer via `legacyRenderer: true`.
 
-**Impact:** Most of the 29 `useFoliate` conditional branches in ReaderContainer become dead code for new documents. They remain for backward compatibility with pre-conversion docs but can be progressively simplified.
+**Impact:** New documents always go through foliate. Existing pre-conversion docs and failed conversions use legacy path. The 29 branches stay but are progressively less relevant as the library fills with converted docs.
 
 ---
 
@@ -208,12 +269,15 @@ With all new docs having `.epub` extension after conversion, `useFoliate` is tru
 
 **Modify:** `src/types.ts` — add `useLegacyRenderer?: boolean` to `BlurbySettings`
 **Modify:** Settings UI — add toggle in Layout or Help settings page
+**Executor:** CLI (small UI change)
 
 Behavior:
 - **OFF (default):** All docs render via FoliatePageView (EPUB path)
 - **ON:** All docs render via PageReaderView (word-by-word text path)
 
 This is the safety net. If EPUB conversion produces artifacts or foliate has rendering issues, users can toggle back. PageReaderView is NOT deleted.
+
+**Acceptance test:** Toggle ON → open any EPUB → renders in PageReaderView. Toggle OFF → same EPUB renders in foliate.
 
 ---
 
@@ -222,28 +286,41 @@ This is the safety net. If EPUB conversion produces artifacts or foliate has ren
 **Create:** `main/legacy-parsers.js` — copy of `extractContent()` from file-parsers.js
 **Modify:** `main/file-parsers.js` — mark `extractContent()` as deprecated
 **Modify:** `main/ipc-handlers.js` — `load-doc-content` handler uses legacy path for pre-conversion docs
+**Executor:** CLI (file moves)
 
 The `load-doc-content` IPC handler checks:
 ```javascript
-if (doc.convertedEpubPath && !settings.useLegacyRenderer) {
+if (doc.convertedEpubPath && !doc.legacyRenderer && !settings.useLegacyRenderer) {
   return { filepath: doc.convertedEpubPath }; // foliate loads directly
 }
-// Legacy fallback for pre-conversion docs
+// Legacy fallback for pre-conversion docs or failed conversions
 const { extractContent } = require("./legacy-parsers");
-return extractContent(doc.filepath);
+return extractContent(doc.filepath || doc.originalFilepath);
 ```
 
 Metadata functions (`extractDocMetadata`, `extractEpubMetadata`, `extractMobiCover`, etc.) remain active in file-parsers.js — still needed at import time.
 
 ---
 
+### Phase 1 Performance Gate
+
+After Phase 1 is complete, measure:
+- **Import time** for a 500-page PDF (before conversion vs after)
+- **EPUB file size** for converted docs vs originals
+- **Foliate open time** for converted EPUBs vs native EPUBs
+
+If conversion adds >5 seconds import time or >50% file size, investigate before proceeding.
+
 ### Phase 1 Acceptance Criteria
 
 - [ ] `convertToEpub()` handles TXT, MD, HTML, PDF, MOBI/AZW3
+- [ ] `validateEpub()` catches malformed EPUBs (missing mimetype, broken XML)
 - [ ] Converted EPUBs have valid structure (mimetype, container.xml, content.opf, XHTML chapters)
 - [ ] Import pipeline converts on ingest, foliate renders the result
+- [ ] Failed conversions auto-fallback to legacy renderer (no crash)
 - [ ] Pre-conversion (legacy) docs still open correctly
 - [ ] `useLegacyRenderer` toggle switches between foliate and PageReaderView
+- [ ] Performance gate: conversion time, file size, open time measured
 - [ ] `npm test` passes, `npm run build` succeeds
 - [ ] Manual smoke: drop TXT, PDF, MOBI files — each opens and reads in foliate
 
@@ -254,6 +331,8 @@ Metadata functions (`extractDocMetadata`, `extractEpubMetadata`, `extractMobiCov
 ### Overview
 
 Split ReaderContainer.tsx (1,142 lines) into 3 focused hooks + 1 utility, leaving a thin ~450-line orchestrator.
+
+**Executor:** Cowork (architecture decisions, hook API design)
 
 ### TD-06: useReaderMode Hook
 
@@ -270,9 +349,11 @@ Extracts from ReaderContainer (~300 lines):
 - `handlePauseToPage()` — return to Page mode
 - `handleExitReader()` — exit reader with backtrack check
 
-**Interface:**
+**Interface — use context provider instead of 13 parameters:**
+
 ```typescript
-function useReaderMode(params: {
+// Create ReaderContext to avoid parameter explosion
+interface ReaderContextValue {
   reader: UseReaderReturn;
   narration: UseNarrationReturn;
   foliateApiRef: MutableRefObject<FoliateViewAPI | null>;
@@ -286,16 +367,28 @@ function useReaderMode(params: {
   useFoliate: boolean;
   getEffectiveWords: () => string[];
   onExitReader: (pos: number) => void;
-}): UseReaderModeReturn;
+}
+
+// Hook consumes context
+function useReaderMode(): UseReaderModeReturn;
 ```
 
+ReaderContainer wraps children in `<ReaderContext.Provider>` and hooks consume via `useContext(ReaderContext)`.
+
 **Dependencies:** Uses `getStartWordIndex()` from TD-07 for all three mode starts.
+
+**Tests:** `tests/useReaderMode.test.ts`
+- Mode transitions: page → focus → page, page → flow → page, page → narration → page
+- Space bar starts last-used mode
+- Select mode without starting (click button)
+- Exit with backtrack detection
 
 ---
 
 ### TD-07: getStartWordIndex Utility
 
 **Create:** `src/utils/startWordIndex.ts`
+**Executor:** CLI (pure function, well-defined)
 
 Currently duplicated 3 times in ReaderContainer (in startFocus, startFlow, startNarration). Each does:
 1. Take `highlightedWordIndex`
@@ -316,6 +409,12 @@ export function getStartWordIndex(
 }
 ```
 
+**Tests:** `tests/startWordIndex.test.ts`
+- Returns 0 when index exceeds array length (foliate mode)
+- Clamps to last word when index exceeds length (non-foliate)
+- Returns index unchanged when within bounds
+- Returns 0 for negative input
+
 ---
 
 ### TD-08: useProgressTracker Hook
@@ -333,26 +432,20 @@ Extracts from ReaderContainer (~200 lines):
 - `finishReading(finalPos)` — flush saves, log session, exit
 - `markEngaged()` — set engagement flag (called by mode starts, word clicks, page turns)
 
-**Interface:**
-```typescript
-function useProgressTracker(params: {
-  activeDoc: BlurbyDoc;
-  words: string[];
-  wpm: number;
-  readingMode: string;
-  useFoliate: boolean;
-  api: ElectronAPI;
-  onUpdateProgress: (docId: string, pos: number) => void;
-  onArchiveDoc: (docId: string) => void;
-  onExitReader: (pos: number) => void;
-}): UseProgressTrackerReturn;
-```
+Consumes `ReaderContext` (from TD-06) instead of explicit parameters.
+
+**Tests:** `tests/useProgressTracker.test.ts`
+- Engagement gating: progress not saved until `markEngaged()` called
+- Debounced save: rapid position changes produce one save
+- Backtrack detection: closing behind furthest position triggers prompt
+- Session timer: active reading time accumulates only during active modes
 
 ---
 
 ### TD-09: useEinkController Hook
 
 **Create:** `src/hooks/useEinkController.ts`
+**Executor:** CLI (self-contained, simple)
 
 Extracts from ReaderContainer (~100 lines):
 - `einkPageTurns` state
@@ -374,6 +467,7 @@ function useEinkController(settings: BlurbySettings): {
 ### TD-10: Thin Orchestrator Result
 
 After extracting TD-06 through TD-09, ReaderContainer retains:
+- `ReaderContext.Provider` setup
 - Hook composition (call useReaderMode, useProgressTracker, useEinkController)
 - `foliateApiRef` setup and `getEffectiveWords()`
 - Foliate view instantiation (`foliateView` variable)
@@ -390,6 +484,7 @@ After extracting TD-06 through TD-09, ReaderContainer retains:
 - [ ] All 4 reading modes work identically to before
 - [ ] Backtrack prompt, progress saving, e-ink refresh all function
 - [ ] No regressions in Focus/Flow/Narration mode transitions
+- [ ] Tests for useReaderMode, useProgressTracker, getStartWordIndex
 - [ ] `npm test` passes, `npm run build` succeeds
 
 ---
@@ -399,6 +494,15 @@ After extracting TD-06 through TD-09, ReaderContainer retains:
 ### Overview
 
 Replace 18 refs in useNarration.ts with a `useReducer` state machine. Separate Kokoro and Web Speech into strategy pattern.
+
+**Executor:** CLI (well-typed, mechanical refactor)
+
+> **IMPORTANT — Incremental Migration:** Do NOT convert all 18 refs at once. Migrate incrementally:
+> 1. Add `useReducer` alongside existing refs
+> 2. Migrate refs one group at a time: status refs first, then engine refs, then chunk state
+> 3. After each group, run tests to verify no regression
+> 4. Delete old ref declarations only after the replacement is verified
+> This prevents a "big bang" refactor that breaks everything simultaneously.
 
 ### TD-11: NarrationState + NarrationAction Types
 
@@ -453,26 +557,41 @@ export type NarrationAction =
 - any + STOP → `idle`
 - any + ERROR → `error`
 
+**Tests:** `tests/narrationReducer.test.ts`
+- All state transitions (idle→speaking, speaking→paused, etc.)
+- Invalid transitions rejected (idle + PAUSE → idle)
+- Generation ID increments correctly
+- Pre-buffer set/clear
+
 ---
 
-### TD-12: Convert Refs to useReducer
+### TD-12: Convert Refs to useReducer (Incremental)
 
 **Modify:** `src/hooks/useNarration.ts`
 
-**Refs replaced by reducer state (12-13):**
+**Migration order (one group at a time, test after each):**
 
+**Group 1 — Status refs:**
+| Ref | → Reducer Field |
+|-----|-----------------|
+| `isCursorDrivenRef` | derived: `state.status !== "idle"` |
+| `holdRef` | derived: `state.status === "holding"` |
+
+**Group 2 — Engine refs:**
 | Ref | → Reducer Field |
 |-----|-----------------|
 | `engineRef` | `state.engine` |
+| `kokoroInFlightRef` | `state.kokoroInFlight` |
+| `kokoroVoiceRef` | moved to strategy (TD-13) |
+
+**Group 3 — Chunk state refs:**
+| Ref | → Reducer Field |
+|-----|-----------------|
 | `chunkStartRef` | `state.chunkStart` |
 | `chunkWordsRef` | `state.chunkWords` |
-| `isCursorDrivenRef` | derived: `state.status !== "idle"` |
 | `cursorWordIndexRef` | `state.cursorWordIndex` |
-| `holdRef` | derived: `state.status === "holding"` |
-| `kokoroVoiceRef` | moved to strategy (TD-13) |
 | `pageEndWordRef` | `state.pageEndWord` |
 | `speedRef` | `state.speed` |
-| `kokoroInFlightRef` | `state.kokoroInFlight` |
 | `nextChunkBufferRef` | `state.nextChunkBuffer` |
 | `generationIdRef` | `state.generationId` |
 
@@ -553,6 +672,7 @@ Both strategies call this after each chunk completes.
 - [ ] Rhythm pause calculator is a pure function
 - [ ] TTS narration works in both Web Speech and Kokoro modes
 - [ ] No regressions in pause/resume/hold/resync
+- [ ] Tests for narration reducer state transitions
 - [ ] `npm test` passes
 
 ---
@@ -561,7 +681,9 @@ Both strategies call this after each chunk completes.
 
 ### Overview
 
-Add foliate types, type window.electronAPI, remove dead code, consolidate constants, split IPC handlers.
+Add foliate types, type window.electronAPI, consolidate constants, split IPC handlers.
+
+**Executor:** CLI (mechanical typing, file moves)
 
 ### TD-15: Foliate Type Definitions
 
@@ -592,6 +714,7 @@ export interface FoliateRenderer {
   next(): void;
   prev(): void;
   setAttribute(key: string, value: string): void;
+  scrollToAnchor?(range: Range): void;
   element?: { shadowRoot?: ShadowRoot };
 }
 
@@ -643,7 +766,7 @@ Move hardcoded values from:
 
 **Modify:** `src/components/FoliatePageView.tsx`
 
-Current flat interface (12 methods) → grouped sub-interfaces:
+Current flat interface (12+ methods) → grouped sub-interfaces:
 
 ```typescript
 export interface FoliateViewAPI {
@@ -656,33 +779,25 @@ export interface FoliateViewAPI {
   words: {
     getWords: () => FoliateWord[];
     getParagraphBreaks: () => Set<number>;
+    findFirstVisibleWordIndex: () => number;
   };
   highlight: {
     highlightWordByIndex: (idx: number) => void;
     clearHighlight: () => void;
   };
+  browsing: {
+    isUserBrowsing: () => boolean;
+    returnToNarration: () => void;
+  };
   raw: {
-    getView: () => any;
+    getView: () => FoliateViewElement;
   };
 }
 ```
 
 ---
 
-### Dead Code Removal (bundled with Phase 4)
-
-**FoliatePageView.tsx:**
-- Delete `mergeWords()` function (82 lines, never called)
-- Delete `safeRangeOp()` function (4 lines, never called)
-- Remove unused `import { getOverlayPosition }`
-- Remove 13 `console.log` statements (all tagged `[Foliate]`)
-
-**ReaderContainer.tsx:**
-- Remove 3 `console.log` statements
-
----
-
-### IPC Handler Split (bundled with Phase 4)
+### IPC Handler Split
 
 **Split `main/ipc-handlers.js` (1,630 lines) into 8 domain files:**
 
@@ -717,7 +832,6 @@ Each sub-module exports `{ register(ctx) }` and receives the context object. Clo
 
 - [ ] Zero `any` in FoliatePageView.tsx and ReaderContainer.tsx
 - [ ] `window.electronAPI` typed — no `(window as any)` casts
-- [ ] Dead code removed (mergeWords, safeRangeOp, console.logs)
 - [ ] ipc-handlers.js is ~50 line coordinator
 - [ ] All 71 IPC handlers still function
 - [ ] Constants consolidated — no hardcoded magic numbers in components
@@ -727,6 +841,8 @@ Each sub-module exports `{ register(ctx) }` and receives the context object. Clo
 
 ## Phase 5: Mode Verticals (6-8h)
 
+> **DEPENDENCY:** Phase 5 depends on BOTH Phase 2 (ReaderContainer decomposition) AND Phase 3 (Narration state machine). NarrateMode wraps useNarration, which must be refactored first.
+
 ### Overview
 
 Each reading mode becomes a self-contained module implementing a shared interface. ReaderContainer dispatches to mode objects instead of inline callbacks.
@@ -734,6 +850,7 @@ Each reading mode becomes a self-contained module implementing a shared interfac
 ### TD-23: Mode Interface Contract
 
 **Create:** `src/modes/ModeInterface.ts`
+**Executor:** Cowork (design contract)
 
 ```typescript
 export interface ReadingMode {
@@ -764,6 +881,7 @@ All modes implement this. `useReaderMode` (TD-06) dispatches to the active mode 
 ### TD-19: PageMode
 
 **Create:** `src/modes/PageMode.ts`
+**Executor:** CLI (simplest mode, reference implementation)
 
 Page mode is passive — no auto-advancing:
 - `start(wordIndex)` — sets highlighted word, no timer
@@ -779,6 +897,7 @@ Simplest implementation, serves as reference.
 ### TD-20: FocusMode
 
 **Create:** `src/modes/FocusMode.ts`
+**Executor:** Cowork (complex, depends on useReader hook)
 
 Wraps the existing `useReader` hook's RAF-based RSVP loop:
 - `start(wordIndex)` — calls `reader.jumpToWord(wordIndex)` + `reader.togglePlay()`
@@ -793,6 +912,7 @@ Wraps the existing `useReader` hook's RAF-based RSVP loop:
 ### TD-21: FlowMode
 
 **Create:** `src/modes/FlowMode.ts`
+**Executor:** CLI (follows existing FlowCursorController pattern)
 
 Manages the flow cursor advancement at WPM speed:
 - For foliate: drives the overlay cursor via rAF loop + `highlightWordByIndex`
@@ -809,6 +929,7 @@ Manages the flow cursor advancement at WPM speed:
 ### TD-22: NarrateMode
 
 **Create:** `src/modes/NarrateMode.ts`
+**Executor:** Cowork (complex, depends on refactored useNarration from Phase 3)
 
 Wraps the refactored `useNarration` hook (Phase 3):
 - `start(wordIndex)` — calls `narration.adjustRate()` then `narration.startCursorDriven()`
@@ -845,6 +966,14 @@ function handleTogglePlay() {
 }
 ```
 
+### Mode Tests
+
+**Tests:** `tests/modes/*.test.ts`
+- PageMode: start sets word, pause/resume are no-ops, isActive always false
+- FocusMode: start/pause/resume/stop lifecycle, getCurrentWordIndex tracks reader
+- FlowMode: WPM-based advancement, pause/resume preserves position
+- NarrateMode: delegates to narration hook, start/pause/resume/stop
+
 ### Phase 5 Acceptance Criteria
 
 - [ ] Each mode implements ReadingMode interface
@@ -852,6 +981,7 @@ function handleTogglePlay() {
 - [ ] Modes are unit-testable without rendering React components
 - [ ] All 4 modes pass smoke test (start/pause/resume/stop)
 - [ ] ReaderContainer under 450 lines after integration
+- [ ] Tests for each mode vertical
 - [ ] `npm test` passes, `npm run build` succeeds
 
 ---
@@ -859,27 +989,73 @@ function handleTogglePlay() {
 ## Execution Order
 
 ```
-Phase 1 [TD-01→TD-05] — EPUB pipeline (independent track)
-    ↓
-Phase 2 [TD-06→TD-10] — ReaderContainer split
-  ├── Phase 3 [TD-11→TD-14] — Narration (parallel, different files)
-  └── Phase 4 [TD-15→TD-18] — Types + cleanup (parallel)
-    ↓
-Phase 5 [TD-19→TD-23] — Mode verticals (depends on Phase 2)
+PHASE 0: Dead Code Removal (2-3h)
+├── Executor: CLI
+└── SEQUENTIAL (do first, before anything)
+    TD-00a → TD-00b → TD-00c → TD-00d → TD-00e
+
+PHASE 1: EPUB Pipeline (8-12h)
+├── Executor: CLI (TD-01, TD-02, TD-04, TD-05) + Cowork (TD-03)
+└── SEQUENTIAL (each builds on previous)
+    TD-01 → TD-02 → TD-03 → TD-04 → TD-05
+
+PHASE 2 + 3 + 4: PARALLEL TRACKS (different files, no conflicts)
+├── Phase 2: ReaderContainer Split → Cowork (6-8h)
+│   TD-06 → TD-07 → TD-08 → TD-09 → TD-10 (SEQUENTIAL)
+│
+├── Phase 3: Narration State Machine → CLI (4-6h)
+│   TD-11 → TD-12 (Group 1) → TD-12 (Group 2) → TD-12 (Group 3) → TD-13 → TD-14 (SEQUENTIAL)
+│
+└── Phase 4: Types + IPC Split → CLI (4-6h)
+    TD-15 + TD-16 (PARALLEL) → TD-17 → TD-18 → IPC Split (SEQUENTIAL)
+
+PHASE 5: Mode Verticals (6-8h)
+├── BLOCKS ON: Phase 2 AND Phase 3 (both must complete)
+├── Executor: TD-23 (Cowork) → TD-19, TD-21 (CLI) + TD-20, TD-22 (Cowork) PARALLEL
+└── TD-23 → [TD-19 + TD-20 + TD-21 + TD-22] (interface first, then implementations parallel)
 ```
+
+## Assignment Summary
+
+| Phase | Task | Executor | Reason |
+|-------|------|----------|--------|
+| 0 | TD-00a–00e (dead code) | CLI | Mechanical, zero judgment |
+| 1 | TD-01 (converters) | CLI | Well-spec'd, mechanical |
+| 1 | TD-02 (import pipeline) | CLI | Follows spec |
+| 1 | TD-03 (useFoliate logic) | Cowork | Judgment on legacy handling |
+| 1 | TD-04 (fallback toggle) | CLI | Small UI change |
+| 1 | TD-05 (archive legacy) | CLI | File moves |
+| 2 | TD-06 (useReaderMode) | Cowork | Architecture, hook API design |
+| 2 | TD-07 (getStartWordIndex) | CLI | Pure function |
+| 2 | TD-08 (useProgressTracker) | Cowork | Complex state, engagement logic |
+| 2 | TD-09 (useEinkController) | CLI | Self-contained, simple |
+| 2 | TD-10 (thin orchestrator) | Cowork | Integration, verify composition |
+| 3 | TD-11 (narration types) | CLI | Typing, well-defined |
+| 3 | TD-12 (refs → reducer) | CLI | Incremental, mechanical |
+| 3 | TD-13 (TTS strategies) | CLI | Well-defined interface |
+| 3 | TD-14 (rhythm calculator) | CLI | Pure function extraction |
+| 4 | TD-15–18 + IPC split | CLI | Typing, file moves |
+| 5 | TD-23 (interface) | Cowork | Design contract |
+| 5 | TD-19 (PageMode) | CLI | Simplest, reference impl |
+| 5 | TD-20 (FocusMode) | Cowork | Complex, useReader dependency |
+| 5 | TD-21 (FlowMode) | CLI | Follows existing pattern |
+| 5 | TD-22 (NarrateMode) | Cowork | Complex, useNarration dependency |
+
+**Split: ~60% CLI, ~40% Cowork**
 
 ## Impact Summary
 
 | Metric | Before | After |
 |--------|--------|-------|
 | ReaderContainer.tsx | 1,142 lines | ~450 lines |
-| useFoliate conditionals | 29 | 0-2 (legacy toggle only) |
-| Rendering paths | 2 | 1 primary + 1 fallback |
+| useFoliate conditionals | 29 | 29 (remain for backward compat; NEW docs bypass them) |
+| Rendering paths | 2 | 1 primary + 1 fallback toggle |
 | Mode start duplication | 3x | 1 shared function |
 | `any` types | ~55 | ~5 |
 | useNarration refs | 18 | 5 (rest in reducer) |
 | ipc-handlers.js | 1,630 lines | ~50 line coordinator |
 | Dead code removed | — | ~200+ lines |
+| Test files added | — | 7 new test files |
 
 ## Verification
 
@@ -889,9 +1065,18 @@ After each phase:
 3. Manual smoke: open EPUB, TXT, PDF. Test all 4 modes. Test narration start/pause/resume.
 4. Verify legacy renderer toggle (Phase 1)
 5. Verify converted EPUBs render in foliate (Phase 1)
+6. Performance gate check (Phase 1)
+
+## Rollback Strategy
+
+- **Phase 1:** `useLegacyRenderer` toggle provides immediate fallback. Test explicitly: toggle ON → open any doc → renders in PageReaderView.
+- **Phase 2-5:** Each phase is a refactor, not a feature change. If a phase breaks something, revert the phase's commits. Phases are isolated — reverting Phase 3 doesn't affect Phase 2.
+- **Individual task rollback:** Each TD is committed separately. Revert individual commits if needed.
 
 ## Risk
 
-1. **EPUB conversion quality** — PDF/MOBI are lossy. Mitigated by PageReaderView fallback toggle.
-2. **Narration ref→reducer timing** — keep timer/callback refs as refs, only computed state in reducer.
+1. **EPUB conversion quality** — PDF/MOBI are lossy. Mitigated by `validateEpub` + auto-fallback to legacy renderer on failure + user toggle.
+2. **Narration ref→reducer timing** — Mitigated by incremental migration (3 groups, test after each). Keep timer/callback refs as refs, only computed state in reducer.
 3. **IPC split registration order** — each sub-module creates own closure scope, coordinator passes ctx only.
+4. **Phase 5 dependency chain** — NarrateMode can't be built until Phase 3 completes. Schedule accordingly.
+5. **Performance regression** — EPUB conversion adds import time. Mitigated by performance gate measurement after Phase 1.
