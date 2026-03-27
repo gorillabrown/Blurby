@@ -3702,6 +3702,13 @@ button:focus-visible {
   border-radius: 2px;
 }
 
+/* Flow mode cursor for EPUB words (foliate shadow DOM) — underline on word spans */
+.page-word--flow-cursor {
+  border-bottom: 3px solid var(--accent);
+  padding-bottom: 1px;
+  transition: border-color 0.15s ease;
+}
+
 /* Flow mode: smooth sliding highlight cursor (GPU-accelerated) */
 .flow-highlight-cursor {
   position: absolute;
