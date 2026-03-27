@@ -42,9 +42,8 @@ jobs:
         run: npm run build
 
       - name: Package Windows installers (x64 + arm64)
-        # Build both architectures in a single electron-builder invocation so
-        # it produces one latest.yml that already lists both file entries —
-        # no post-processing merge required.
+        # electron-builder uploads assets directly to the GitHub draft release
+        # via GH_TOKEN — no need for a separate artifact upload/publish job.
         run: npx electron-builder --win --x64 --arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,61 +56,17 @@ jobs:
           echo "Both architectures verified in latest.yml"
           cat release/latest.yml
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: blurby-release
-          path: |
-            release/*.exe
-            release/*.blockmap
-            release/latest*.yml
-          if-no-files-found: error
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    name: Publish Release
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: blurby-release
-          path: artifacts/
-
-      - name: Verify latest.yml contains both architectures
+      - name: Generate and upload SHA-256 checksums
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          grep -q "x64" artifacts/latest.yml || (echo "ERROR: x64 missing" && exit 1)
-          grep -q "arm64" artifacts/latest.yml || (echo "ERROR: arm64 missing" && exit 1)
-          echo "Both architectures verified in latest.yml"
-          cat artifacts/latest.yml
-
-      - name: Generate SHA-256 checksums
-        run: |
-          cd artifacts
+          cd release
           sha256sum *.exe *.blockmap > checksums.sha256
           cat checksums.sha256
-
-      - name: Determine version
-        id: version
-        run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            TAG="v${{ github.event.inputs.version }}"
           else
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            TAG="${{ github.ref_name }}"
           fi
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          files: |
-            artifacts/*.exe
-            artifacts/*.blockmap
-            artifacts/latest*.yml
-            artifacts/checksums.sha256
-          generate_release_notes: true
-          draft: true
-          prerelease: ${{ contains(steps.version.outputs.tag, '-beta') || contains(steps.version.outputs.tag, '-rc') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          gh release upload "$TAG" checksums.sha256 --clobber
