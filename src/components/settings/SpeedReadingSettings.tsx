@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import type { BlurbySettings } from "../../types";
 import { KOKORO_VOICE_NAMES } from "../../constants";
 
-const api = (window as any).electronAPI;
+const api = window.electronAPI;
 
 interface SpeedReadingSettingsProps {
   settings: BlurbySettings;

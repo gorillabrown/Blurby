@@ -13,7 +13,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords } from "../utils/segmentWords";
 
-const api = (window as any).electronAPI;
+const api = window.electronAPI;
 
 /** Word entry with optional Range — Range is null when the section is unloaded. */
 export interface FoliateWord {

@@ -48,7 +48,7 @@ function findSentenceBoundary(words: string[], startIdx: number, chunkSize: numb
   return maxEnd;
 }
 
-const api = (window as any).electronAPI;
+const api = window.electronAPI;
 
 export default function useNarration() {
   const [speaking, setSpeaking] = useState(false);
