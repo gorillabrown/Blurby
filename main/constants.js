@@ -54,6 +54,12 @@ const EPUB_HEADING_MAX_LENGTH = 100;
 /** Maximum entries in the EPUB chapter LRU cache */
 const EPUB_CHAPTER_CACHE_MAX = 50;
 
+// ── EPUB Converter ──────────────────────────────────────────────────────────
+/** Subdirectory for converted EPUBs in userData */
+const EPUB_CONVERTED_DIR = "converted";
+/** Min lines between heading-like patterns for chapter detection in TXT */
+const TXT_CHAPTER_MIN_LINES = 50;
+
 // ── Auth ────────────────────────────────────────────────────────────────────
 /** Token expiry fallback when provider does not return an expiry (ms, 1 hour) */
 const TOKEN_EXPIRY_FALLBACK_MS = 3600000;
@@ -95,6 +101,9 @@ module.exports = {
   MAX_MOBI_TEXT_BYTES,
   EPUB_HEADING_MAX_LENGTH,
   EPUB_CHAPTER_CACHE_MAX,
+  // EPUB Converter
+  EPUB_CONVERTED_DIR,
+  TXT_CHAPTER_MIN_LINES,
   // Auth
   TOKEN_EXPIRY_FALLBACK_MS,
   // Snooze
