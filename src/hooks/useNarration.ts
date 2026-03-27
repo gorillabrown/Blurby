@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
-import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
+import { calculateChunkBoundaryPause } from "../utils/rhythm";
 import type { RhythmPauses } from "../types";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
@@ -222,15 +223,15 @@ export default function useNarration() {
   /** Compute rhythm pause duration at chunk boundaries (Kokoro only). */
   const computeChunkPauseMs = useCallback((chunkWords: string[], chunkStart: number): number => {
     const currentState = stateRef.current;
-    const hasPreBuffer = currentState.nextChunkBuffer !== null;
-    if (!hasPreBuffer || !rhythmPausesRef.current) return 0;
     const lastWord = chunkWords[chunkWords.length - 1] || "";
     const lastWordGlobalIdx = chunkStart + chunkWords.length - 1;
-    const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
-    if (isParagraphEnd && rhythmPausesRef.current.paragraphs) return TTS_PAUSE_PARAGRAPH_MS;
-    if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) return TTS_PAUSE_SENTENCE_MS;
-    if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) return TTS_PAUSE_COMMA_MS;
-    return 0;
+    return calculateChunkBoundaryPause(
+      lastWord,
+      lastWordGlobalIdx,
+      paragraphBreaksRef.current,
+      rhythmPausesRef.current,
+      currentState.nextChunkBuffer !== null,
+    );
   }, []);
 
   /** Speak the next chunk using the Web Speech strategy. */
