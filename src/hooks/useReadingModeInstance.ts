@@ -131,7 +131,7 @@ export function useReadingModeInstance({
           config.callbacks.onWordAdvance = (idx: number) => {
             onWordAdvanceRef.current(idx);
             if (foliateApiRefStable.current) {
-              foliateApiRefStable.current.highlightWordByIndex(idx);
+              foliateApiRefStable.current.highlightWordByIndex(idx, "flow");
             }
           };
         }
@@ -143,7 +143,7 @@ export function useReadingModeInstance({
           onWordAdvanceRef.current(idx);
           if (isFoliate && foliateApiRefStable.current) {
             if (typeof foliateApiRefStable.current.highlightWordByIndex === "function") {
-              foliateApiRefStable.current.highlightWordByIndex(idx);
+              foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
             }
           }
         };

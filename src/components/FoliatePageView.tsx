@@ -233,7 +233,7 @@ export interface FoliateViewAPI {
   next: () => void;
   prev: () => void;
   highlightWord: (range: Range | null, sectionIndex: number) => void;
-  highlightWordByIndex: (wordIndex: number) => void;
+  highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration") => void;
   clearHighlight: () => void;
   getView: () => any;
   /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
@@ -500,9 +500,10 @@ export default function FoliatePageView({
             highlightWord: (_range, _sectionIndex) => {
               // No-op: use highlightWordByIndex instead
             },
-            highlightWordByIndex: (wordIndex: number) => {
+            highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration") => {
               const contents = view.renderer?.getContents?.() ?? [];
-              const isFlowMode = readingModeRef.current === "flow";
+              // Use explicit style hint from caller (avoids stale readingModeRef during state transitions)
+              const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
               const highlightClass = isFlowMode ? "page-word--flow-cursor" : "page-word--highlighted";
               // Clear previous highlight (both classes)
               for (const { doc: d } of contents) {

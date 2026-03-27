@@ -99,6 +99,8 @@ export default function ReaderContainer({
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
   const foliateWordsRef = useRef<Array<{ word: string; range: Range | null; sectionIndex: number }>>([]);
+  // State-backed foliate word strings for React rendering (refs don't trigger re-renders)
+  const [foliateWordStrings, setFoliateWordStrings] = useState<string[]>([]);
   // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
@@ -134,7 +136,12 @@ export default function ReaderContainer({
   const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : "page";
 
   const words = tokenized.words;
-  wordsRef.current = words;
+  // Only set wordsRef from tokenized content for non-foliate docs.
+  // For foliate EPUBs, wordsRef is populated by extractFoliateWords() and must
+  // not be overwritten with the empty tokenized array on re-render.
+  if (!useFoliate) {
+    wordsRef.current = words;
+  }
 
   /** Get the effective words array — from foliate DOM for EPUBs, from text extraction otherwise */
   const getEffectiveWords = useCallback((): string[] => {
@@ -250,7 +257,9 @@ export default function ReaderContainer({
     const extracted = foliateApiRef.current.getWords();
     if (extracted.length > 0) {
       foliateWordsRef.current = extracted;
-      wordsRef.current = extracted.map(w => w.word);
+      const wordStrings = extracted.map(w => w.word);
+      wordsRef.current = wordStrings;
+      setFoliateWordStrings(wordStrings);
     }
   }, [useFoliate, wordsRef]);
 
@@ -263,7 +272,14 @@ export default function ReaderContainer({
     isFoliate: useFoliate,
     jumpToWord,
     foliateApiRef,
-    onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
+    onWordAdvance: (idx: number) => {
+      setHighlightedWordIndex(idx);
+      // Also fire the RAF-based DOM update for ReaderView's focus span rendering
+      // (ReaderView uses direct DOM manipulation when focusSpan < 1, bypassing React)
+      if (onWordUpdateRef.current && wordsRef.current[idx]) {
+        onWordUpdateRef.current(wordsRef.current[idx], idx);
+      }
+    },
     onComplete: () => {
       // Mode reached end of words — return to page mode
       setReadingMode("page");
@@ -694,7 +710,7 @@ export default function ReaderContainer({
             <div className="focus-overlay">
               <ReaderView
                 activeDoc={activeDoc}
-                words={wordsRef.current}
+                words={foliateWordStrings}
                 wordIndex={wordIndex}
                 wpm={effectiveWpm}
                 focusTextSize={focusTextSize}
