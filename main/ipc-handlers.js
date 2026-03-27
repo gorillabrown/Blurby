@@ -11,6 +11,7 @@ const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover, extractMobiCover,
         parseMobiMetadata, parseCallibreOpf, extractAuthorFromFilename,
         extractTitleFromFilename, epubChapterCache, clearChapterCache } = require("./file-parsers");
+const { extractContent: extractLegacyContent } = require("./legacy-parsers");
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
         generateArticlePdf, openSiteLogin } = require("./url-extractor");
 const { getSystemTheme, createReaderWindow, updateWindowTheme } = require("./window-manager");
@@ -339,8 +340,8 @@ function registerIpcHandlers(ctx) {
       return { filepath: doc.convertedEpubPath, ext: ".epub" };
     }
     if (doc.filepath) {
-      const result = await extractContent(doc.filepath);
-      // extractContent returns { userError } for user-facing parse failures
+      const result = await extractLegacyContent(doc.filepath);
+      // extractLegacyContent returns { userError } for user-facing parse failures
       if (result && typeof result === "object" && result.userError) {
         logToFile(`load-doc-content error for doc "${doc.title}" (${doc.filepath}): ${result.userError}`, ctx.getErrorLogPath());
         return { userError: result.userError };
@@ -596,6 +597,10 @@ function registerIpcHandlers(ctx) {
         ctx.saveLibrary();
       } catch (convErr) {
         logToFile(`URL EPUB conversion failed: ${convErr.message}`, ctx.getErrorLogPath());
+        if (!convErr.userError) {
+          // Non-user errors: fall back to legacy text extraction
+          newDoc.legacyRenderer = true;
+        }
         // Fall back to inline content (existing behavior)
       }
 
@@ -717,6 +722,7 @@ function registerIpcHandlers(ctx) {
                 continue; // Skip adding to library — file is not readable
               }
               // Non-user errors: fall back to legacy text extraction
+              doc.legacyRenderer = true;
             }
           }
 
@@ -757,6 +763,7 @@ function registerIpcHandlers(ctx) {
               continue; // Skip adding to library — file is not readable
             }
             // Non-user errors: fall back to legacy text extraction
+            doc.legacyRenderer = true;
           }
         }
 

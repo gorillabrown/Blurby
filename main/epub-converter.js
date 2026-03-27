@@ -288,11 +288,16 @@ async function txtToEpub(inputPath, outputPath, meta = {}) {
 
   await buildEpubZip({ outputPath, title, author, chapters });
 
+  // Validate the generated EPUB
+  const validation = await validateEpub(outputPath);
+
   return {
     epubPath: outputPath,
     title,
     author,
     chapterCount: chapters.length,
+    valid: validation.valid,
+    errors: validation.errors,
   };
 }
 
@@ -417,11 +422,16 @@ async function mdToEpub(inputPath, outputPath, meta = {}) {
 
   await buildEpubZip({ outputPath, title, author, chapters });
 
+  // Validate the generated EPUB
+  const validation = await validateEpub(outputPath);
+
   return {
     epubPath: outputPath,
     title,
     author,
     chapterCount: chapters.length,
+    valid: validation.valid,
+    errors: validation.errors,
   };
 }
 
@@ -484,11 +494,16 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
 
   await buildEpubZip({ outputPath, title, author, chapters });
 
+  // Validate the generated EPUB
+  const validation = await validateEpub(outputPath);
+
   return {
     epubPath: outputPath,
     title,
     author,
     chapterCount: chapters.length,
+    valid: validation.valid,
+    errors: validation.errors,
   };
 }
 
@@ -531,11 +546,16 @@ async function pdfToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
 
   await buildEpubZip({ outputPath, title, author, chapters });
 
+  // Validate the generated EPUB
+  const validation = await validateEpub(outputPath);
+
   return {
     epubPath: outputPath,
     title,
     author,
     chapterCount: chapters.length,
+    valid: validation.valid,
+    errors: validation.errors,
   };
 }
 
@@ -580,11 +600,16 @@ async function mobiToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
 
   await buildEpubZip({ outputPath, title, author, chapters, coverImage });
 
+  // Validate the generated EPUB
+  const validation = await validateEpub(outputPath);
+
   return {
     epubPath: outputPath,
     title,
     author,
     chapterCount: chapters.length,
+    valid: validation.valid,
+    errors: validation.errors,
   };
 }
 
@@ -629,7 +654,9 @@ async function convertToEpub(inputPath, outputDir, docId, meta = {}) {
       const title =
         meta.title || path.basename(inputPath, ".epub");
       const author = meta.author || "Unknown";
-      return { epubPath: outputPath, title, author };
+      // Validate the copied EPUB
+      const validation = await validateEpub(outputPath);
+      return { epubPath: outputPath, title, author, valid: validation.valid, errors: validation.errors };
     }
 
     default:
