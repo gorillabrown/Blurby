@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
 import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
+import { useProgressTracker } from "../hooks/useProgressTracker";
 import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
@@ -164,32 +165,27 @@ export default function ReaderContainer({
     }
   }, [focusTextSize]);
 
-  // Save progress from the active position source (debounced 2s)
-  // Page/Flow mode: highlightedWordIndex. Focus mode: wordIndex.
-  const pageSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSavedPosRef = useRef(activeDoc.position || 0);
-  const currentPos = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+  // ── Progress tracking (extracted to useProgressTracker hook) ─────────
+  const progress = useProgressTracker({
+    activeDoc,
+    wordIndex,
+    highlightedWordIndex,
+    readingMode,
+    useFoliate,
+    foliateFractionRef,
+    wpm,
+    wordsLength: words.length,
+    sessionStartWordRef,
+    activeReadingMsRef,
+    activeReadingStartRef,
+    onUpdateProgress,
+    onArchiveDoc,
+    onExitReader,
+  });
+  const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef } = progress;
+  const { finishReading, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
 
-  // Engagement gate: don't persist progress until user has actively read
-  // Set true by mode starts, word clicks, page turns — NOT by initial open or onRelocate
-  const hasEngagedRef = useRef(false);
-
-  // Reset engagement when activeDoc changes
-  useEffect(() => {
-    hasEngagedRef.current = false;
-  }, [activeDoc?.id]);
-
-  // High-water mark for backtrack detection
-  const furthestPositionRef = useRef<number>(activeDoc?.furthestPosition ?? activeDoc?.position ?? 0);
-
-  // Reset furthest position when activeDoc changes
-  useEffect(() => {
-    furthestPositionRef.current = activeDoc?.furthestPosition ?? activeDoc?.position ?? 0;
-  }, [activeDoc?.id]);
-
-  // Backtrack prompt state
-  const [showBacktrackPrompt, setShowBacktrackPrompt] = useState(false);
-  const [backtrackPages, setBacktrackPages] = useState<{ current: number; furthest: number }>({ current: 0, furthest: 0 });
+  // Backtrack prompt state — managed by useProgressTracker
 
   // NM page browsing — tracks when user has browsed away from highlight position during narration
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
@@ -208,59 +204,7 @@ export default function ReaderContainer({
     return () => clearInterval(timer);
   }, [useFoliate, readingMode]);
 
-  useEffect(() => {
-    // For foliate EPUBs, progress is saved via onRelocate (fraction-based) — skip this effect
-    if (useFoliate) return;
-    if (currentPos === lastSavedPosRef.current) return;
-    // Don't save progress until user has engaged (prevents false "started" on open)
-    if (!hasEngagedRef.current) return;
-    // Update high-water mark when position advances
-    if (currentPos > furthestPositionRef.current) {
-      furthestPositionRef.current = currentPos;
-    }
-    if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
-    pageSaveTimerRef.current = setTimeout(() => {
-      lastSavedPosRef.current = currentPos;
-      api.updateDocProgress(activeDoc.id, currentPos);
-      onUpdateProgress(activeDoc.id, currentPos);
-    }, 2000);
-    return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
-  }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
-
-  const finishReading = useCallback((finalPos: number) => {
-    // Flush any pending debounced save
-    if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
-    // For foliate EPUBs, use fraction-based position (not extracted word index)
-    const savePos = useFoliate
-      ? Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0))
-      : finalPos;
-    // Persist furthest position as metadata on the doc
-    activeDoc.furthestPosition = Math.max(furthestPositionRef.current, savePos);
-    onUpdateProgress(activeDoc.id, savePos);
-    api.updateDocProgress(activeDoc.id, savePos, activeDoc.cfi || undefined);
-    // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
-    if (activeReadingStartRef.current) {
-      activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
-      activeReadingStartRef.current = null;
-    }
-    const activeMs = activeReadingMsRef.current;
-    const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
-    if (wordsRead > 0 && activeMs > 1000) {
-      api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
-      api.logReadingSession({
-        docId: activeDoc.id,
-        duration: activeMs,
-        wordsRead,
-        finalWpm: wpm,
-        mode: readingMode,
-      }).catch(() => {});
-    }
-    if (finalPos >= words.length - 1 && words.length > 0) {
-      api.markDocCompleted();
-      onArchiveDoc(activeDoc.id);
-    }
-    onExitReader(finalPos);
-  }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, onExitReader, words.length]);
+  // Progress save effect + finishReading — managed by useProgressTracker hook
 
   // ── TTS (Narration) — now a discrete mode, not a layer ─────────────────
   const narration = useNarration();
@@ -379,25 +323,9 @@ export default function ReaderContainer({
 
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
-      // Check for backtrack before exiting
-      const furthest = furthestPositionRef.current;
-      const current = highlightedWordIndex;
+      // Check for backtrack — hook handles threshold + prompt display
       const totalWords = activeDoc.wordCount || words.length || 1;
-      // Threshold: ~2 pages worth of words (rough estimate: 250 words/page)
-      const threshold = useFoliate
-        ? Math.max(2, Math.round(2 * totalWords / Math.max(1, Math.round(totalWords / 250))))
-        : Math.max(2, 500);
-      const isBacktracked = current < (furthest - threshold);
-      if (isBacktracked && hasEngagedRef.current) {
-        // Show backtrack prompt instead of closing
-        const approxWordsPerPage = 250;
-        setBacktrackPages({
-          current: Math.max(1, Math.ceil(current / approxWordsPerPage)),
-          furthest: Math.max(1, Math.ceil(furthest / approxWordsPerPage)),
-        });
-        setShowBacktrackPrompt(true);
-        return;
-      }
+      if (checkBacktrack(highlightedWordIndex, totalWords, useFoliate)) return; // Prompt shown
       // Normal exit
       stopAllModes();
       finishReading(highlightedWordIndex);
@@ -409,22 +337,8 @@ export default function ReaderContainer({
     }
   }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex, activeDoc.wordCount, words.length, useFoliate]);
 
-  // Backtrack prompt handlers
-  const handleSaveAtCurrent = useCallback(() => {
-    setShowBacktrackPrompt(false);
-    stopAllModes();
-    // Save at the current (backtracked) position
-    furthestPositionRef.current = highlightedWordIndex;
-    finishReading(highlightedWordIndex);
-  }, [stopAllModes, finishReading, highlightedWordIndex]);
-
-  const handleKeepFurthest = useCallback(() => {
-    setShowBacktrackPrompt(false);
-    stopAllModes();
-    // Keep the furthest position as current
-    const furthest = furthestPositionRef.current;
-    finishReading(furthest);
-  }, [stopAllModes, finishReading]);
+  // Backtrack prompt handlers — managed by useProgressTracker hook
+  const { handleSaveAtCurrent, handleKeepFurthest } = progress;
 
   // Called by PageReaderView when user manually browses away from (or back to) the NM position
   const handleUserBrowsed = useCallback((isBrowsed: boolean) => {

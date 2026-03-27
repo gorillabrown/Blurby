@@ -592,6 +592,9 @@ function registerIpcHandlers(ctx) {
         newDoc.convertedEpubPath = convResult.epubPath;
         newDoc.filepath = convResult.epubPath;
         newDoc.ext = ".epub";
+        if (convResult && !convResult.valid) {
+          newDoc.legacyRenderer = true;
+        }
         const docsAfterConv = ctx.getLibrary();
         ctx.setLibrary(docsAfterConv.map((d) => (d.id === newDoc.id ? newDoc : d)));
         ctx.saveLibrary();
@@ -715,6 +718,9 @@ function registerIpcHandlers(ctx) {
               doc.originalFilepath = destPath;
               doc.filepath = convResult.epubPath;
               doc.ext = ".epub";
+              if (convResult && !convResult.valid) {
+                doc.legacyRenderer = true;
+              }
             } catch (convErr) {
               logToFile(`EPUB conversion failed for ${destPath}: ${convErr.message}`, ctx.getErrorLogPath());
               if (convErr.userError) {
@@ -756,6 +762,9 @@ function registerIpcHandlers(ctx) {
             doc.originalFilepath = fp;
             doc.filepath = convResult.epubPath;
             doc.ext = ".epub";
+            if (convResult && !convResult.valid) {
+              doc.legacyRenderer = true;
+            }
           } catch (convErr) {
             logToFile(`EPUB conversion failed for ${fp}: ${convErr.message}`, ctx.getErrorLogPath());
             if (convErr.userError) {
