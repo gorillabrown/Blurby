@@ -1,8 +1,9 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useReducer } from "react";
 import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS } from "../constants";
 import { calculatePauseMs } from "../utils/rhythm";
 import * as audioPlayer from "../utils/audioPlayer";
 import type { RhythmPauses } from "../types";
+import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
 
 export interface NarrationState {
   speaking: boolean;
@@ -51,36 +52,26 @@ function findSentenceBoundary(words: string[], startIdx: number, chunkSize: numb
 const api = window.electronAPI;
 
 export default function useNarration() {
-  const [speaking, setSpeaking] = useState(false);
+  // ── Reducer state machine ──────────────────────────────────────────────
+  const [state, dispatch] = useReducer(narrationReducer, undefined, createInitialNarrationState);
+
+  // Mirror reducer state into a ref for synchronous reads inside async callbacks
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  // ── UI-bound state (not part of the state machine) ─────────────────────
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [currentVoice, setCurrentVoice] = useState<SpeechSynthesisVoice | null>(null);
-  const [rate, setRate] = useState(1.0);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const onWordRef = useRef<((charIndex: number) => void) | null>(null);
-
-  // Kokoro state
-  const [kokoroReady, setKokoroReady] = useState(false);
-  const [kokoroDownloading, setKokoroDownloading] = useState(false);
-  const [kokoroDownloadProgress, setKokoroDownloadProgress] = useState(0);
   const [kokoroVoices, setKokoroVoices] = useState<string[]>([]);
   const [kokoroLoading, setKokoroLoading] = useState(false);
-  const engineRef = useRef<TtsEngine>("web");
 
-  // Cursor-driven state
-  const chunkStartRef = useRef(0);
-  const chunkWordsRef = useRef<string[]>([]);
+  // ── Refs that need synchronous access ──────────────────────────────────
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const onWordRef = useRef<((charIndex: number) => void) | null>(null);
   const allWordsRef = useRef<string[]>([]);
   const onWordAdvanceRef = useRef<((wordIndex: number) => void) | null>(null);
-  const isCursorDrivenRef = useRef(false);
-  const cursorWordIndexRef = useRef(0);
-  const holdRef = useRef(false);
   const kokoroVoiceRef = useRef("af_bella");
-  const pageEndWordRef = useRef<number | null>(null); // max word index for current page (narration chunks stop here)
-  const speedRef = useRef(1.0);
-  const kokoroInFlightRef = useRef(false);
-  const nextChunkBufferRef = useRef<{ audio: number[]; sampleRate: number; durationMs: number; text: string; endIdx: number } | null>(null);
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const generationIdRef = useRef(0);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
   const paragraphBreaksRef = useRef<Set<number>>(new Set());
   const chunkPauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -89,24 +80,23 @@ export default function useNarration() {
   useEffect(() => {
     if (!api?.kokoroModelStatus) return;
     api.kokoroModelStatus().then((result: { ready: boolean }) => {
-      setKokoroReady(result.ready);
+      if (result.ready) dispatch({ type: "KOKORO_READY" });
     }).catch(() => {});
 
     // Listen for download progress and loading state
     const cleanups: (() => void)[] = [];
     if (api.onKokoroDownloadProgress) {
       cleanups.push(api.onKokoroDownloadProgress((progress: number) => {
-        setKokoroDownloadProgress(progress);
+        dispatch({ type: "KOKORO_DOWNLOAD_PROGRESS", progress });
         if (progress >= 100) {
-          setKokoroReady(true);
-          setKokoroDownloading(false);
+          dispatch({ type: "KOKORO_READY" });
         }
       }));
     }
     if (api.onKokoroLoading) {
       cleanups.push(api.onKokoroLoading((loading: boolean) => {
         setKokoroLoading(loading);
-        if (!loading) setKokoroReady(true);
+        if (!loading) dispatch({ type: "KOKORO_READY" });
       }));
     }
     return () => cleanups.forEach((c) => c());
@@ -114,11 +104,11 @@ export default function useNarration() {
 
   // Load Kokoro voices when ready
   useEffect(() => {
-    if (!kokoroReady || !api?.kokoroVoices) return;
+    if (!state.kokoroReady || !api?.kokoroVoices) return;
     api.kokoroVoices().then((result: { voices?: string[]; error?: string }) => {
       if (result.voices) setKokoroVoices(result.voices);
     }).catch(() => {});
-  }, [kokoroReady]);
+  }, [state.kokoroReady]);
 
   // Load Web Speech API voices
   useEffect(() => {
@@ -137,15 +127,15 @@ export default function useNarration() {
 
   /** Set which engine to use */
   const setEngine = useCallback((engine: TtsEngine) => {
-    engineRef.current = engine;
+    dispatch({ type: "SET_ENGINE", engine });
+  }, []);
+
+  /** Set the max word index for the current page — chunks won't cross this boundary */
+  const setPageEndWord = useCallback((endIdx: number | null) => {
+    dispatch({ type: "SET_PAGE_END", endIdx });
   }, []);
 
   /** Set Kokoro voice ID */
-  /** Set the max word index for the current page — chunks won't cross this boundary */
-  const setPageEndWord = useCallback((endIdx: number | null) => {
-    pageEndWordRef.current = endIdx;
-  }, []);
-
   const setKokoroVoice = useCallback((voiceId: string) => {
     kokoroVoiceRef.current = voiceId;
   }, []);
@@ -153,15 +143,13 @@ export default function useNarration() {
   /** Download Kokoro model */
   const downloadKokoroModel = useCallback(async () => {
     if (!api?.kokoroDownload) return;
-    setKokoroDownloading(true);
-    setKokoroDownloadProgress(0);
+    dispatch({ type: "KOKORO_DOWNLOAD_PROGRESS", progress: 0 });
     try {
       const result = await api.kokoroDownload();
       if (result.error) {
-        setKokoroDownloading(false);
+        dispatch({ type: "ERROR", message: result.error });
       } else {
-        setKokoroReady(true);
-        setKokoroDownloading(false);
+        dispatch({ type: "KOKORO_READY" });
         // Load voices after download
         if (api.kokoroVoices) {
           const vResult = await api.kokoroVoices();
@@ -169,25 +157,26 @@ export default function useNarration() {
         }
       }
     } catch {
-      setKokoroDownloading(false);
+      dispatch({ type: "ERROR", message: "Download failed" });
     }
   }, []);
 
   // ── Kokoro pre-buffer: generate next chunk while current plays ──────────
 
   const preBufferNextKokoro = useCallback(async (afterEndIdx: number) => {
-    if (!isCursorDrivenRef.current || !api?.kokoroGenerate) return;
+    const s = stateRef.current;
+    if (s.status === "idle" || !api?.kokoroGenerate) return;
     const words = allWordsRef.current;
     if (afterEndIdx >= words.length) return;
     // Pre-buffer ignores page boundary — looks ahead past current page for seamless page turns
     const nextEnd = findSentenceBoundary(words, afterEndIdx, TTS_CHUNK_SIZE, null);
     const text = words.slice(afterEndIdx, nextEnd).join(" ");
-    const genId = generationIdRef.current;
+    const genId = s.generationId;
     try {
-      const result = await api.kokoroGenerate(text, kokoroVoiceRef.current, speedRef.current);
+      const result = await api.kokoroGenerate(text, kokoroVoiceRef.current, stateRef.current.speed);
       // Discard pre-buffer result if rate changed during generation
-      if (!result.error && isCursorDrivenRef.current && genId === generationIdRef.current) {
-        nextChunkBufferRef.current = { audio: result.audio, sampleRate: result.sampleRate, durationMs: result.durationMs, text, endIdx: nextEnd };
+      if (!result.error && stateRef.current.status !== "idle" && genId === stateRef.current.generationId) {
+        dispatch({ type: "SET_PRE_BUFFER", buffer: { audio: result.audio, sampleRate: result.sampleRate, durationMs: result.durationMs, text } });
       }
     } catch { /* pre-buffer failed, will generate on-demand */ }
   }, []);
@@ -195,14 +184,14 @@ export default function useNarration() {
   // ── Kokoro cursor-driven chunk (with in-flight guard + pre-buffer) ─────
 
   const speakNextChunkKokoro = useCallback(async () => {
-    if (!isCursorDrivenRef.current || !api?.kokoroGenerate) return;
-    if (kokoroInFlightRef.current) return;
+    const s = stateRef.current;
+    if (s.status === "idle" || !api?.kokoroGenerate) return;
+    if (s.kokoroInFlight) return;
 
     const words = allWordsRef.current;
-    const startIdx = cursorWordIndexRef.current;
+    const startIdx = s.cursorWordIndex;
     if (startIdx >= words.length) {
-      setSpeaking(false);
-      isCursorDrivenRef.current = false;
+      dispatch({ type: "STOP" });
       return;
     }
 
@@ -211,31 +200,31 @@ export default function useNarration() {
     const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
     const chunkWords = words.slice(startIdx, endIdx);
     const chunkText = chunkWords.join(" ");
-    chunkStartRef.current = startIdx;
-    chunkWordsRef.current = chunkWords;
+    // Store chunkStart/chunkWords locally — they are only used inside this callback chain
+    const chunkStart = startIdx;
 
-    kokoroInFlightRef.current = true;
-    const genId = generationIdRef.current;
+    dispatch({ type: "KOKORO_IN_FLIGHT", inFlight: true });
+    const genId = s.generationId;
     try {
       // Check pre-buffer first
       let result;
-      const buf = nextChunkBufferRef.current;
+      const buf = s.nextChunkBuffer;
       if (buf && buf.text === chunkText) {
         result = buf;
-        nextChunkBufferRef.current = null;
+        dispatch({ type: "CLEAR_PRE_BUFFER" });
       } else {
-        nextChunkBufferRef.current = null;
-        result = await api.kokoroGenerate(chunkText, kokoroVoiceRef.current, speedRef.current);
+        dispatch({ type: "CLEAR_PRE_BUFFER" });
+        result = await api.kokoroGenerate(chunkText, kokoroVoiceRef.current, stateRef.current.speed);
       }
 
       if (result.error) {
-        engineRef.current = "web";
+        dispatch({ type: "SET_ENGINE", engine: "web" });
         speakNextChunkWeb();
         return;
       }
-      if (!isCursorDrivenRef.current) return;
+      if (stateRef.current.status === "idle") return;
       // Discard stale IPC result if rate changed during generation — re-generate at new rate
-      if (genId !== generationIdRef.current) {
+      if (genId !== stateRef.current.generationId) {
         speakNextChunk();
         return;
       }
@@ -249,21 +238,22 @@ export default function useNarration() {
         result.durationMs,
         chunkWords.length,
         (wordOffset: number) => {
-          const globalIdx = chunkStartRef.current + wordOffset;
-          cursorWordIndexRef.current = globalIdx;
+          const globalIdx = chunkStart + wordOffset;
+          dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
         },
         () => {
-          cursorWordIndexRef.current = endIdx;
+          dispatch({ type: "CHUNK_COMPLETE", endIdx });
           if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
-          if (isCursorDrivenRef.current && !holdRef.current) {
+          const currentState = stateRef.current;
+          if (currentState.status !== "idle" && currentState.status !== "holding") {
             // Rhythm pause at chunk boundaries: only add silence if pre-buffer is ready.
             // If not ready, generation time IS the natural pause — don't stack delays.
-            const hasPreBuffer = nextChunkBufferRef.current !== null;
+            const hasPreBuffer = currentState.nextChunkBuffer !== null;
             let pauseMs = 0;
             if (hasPreBuffer && rhythmPausesRef.current) {
               const lastWord = chunkWords[chunkWords.length - 1] || "";
-              const lastWordGlobalIdx = chunkStartRef.current + chunkWords.length - 1;
+              const lastWordGlobalIdx = chunkStart + chunkWords.length - 1;
               const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
               if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
                 pauseMs = TTS_PAUSE_PARAGRAPH_MS;
@@ -276,7 +266,8 @@ export default function useNarration() {
             if (pauseMs > 0) {
               chunkPauseTimerRef.current = setTimeout(() => {
                 chunkPauseTimerRef.current = null;
-                if (isCursorDrivenRef.current && !holdRef.current) speakNextChunkKokoro();
+                const st = stateRef.current;
+                if (st.status !== "idle" && st.status !== "holding") speakNextChunkKokoro();
               }, pauseMs);
             } else {
               speakNextChunkKokoro();
@@ -285,22 +276,22 @@ export default function useNarration() {
         },
       );
     } catch {
-      engineRef.current = "web";
+      dispatch({ type: "SET_ENGINE", engine: "web" });
       speakNextChunkWeb();
     } finally {
-      kokoroInFlightRef.current = false;
+      dispatch({ type: "KOKORO_IN_FLIGHT", inFlight: false });
     }
   }, [preBufferNextKokoro]);
 
   // ── Web Speech cursor-driven chunk ──────────────────────────────────────
 
   const speakNextChunkWeb = useCallback(() => {
-    if (!window.speechSynthesis || !isCursorDrivenRef.current) return;
+    const s = stateRef.current;
+    if (!window.speechSynthesis || s.status === "idle") return;
     const words = allWordsRef.current;
-    const startIdx = cursorWordIndexRef.current;
+    const startIdx = s.cursorWordIndex;
     if (startIdx >= words.length) {
-      setSpeaking(false);
-      isCursorDrivenRef.current = false;
+      dispatch({ type: "STOP" });
       return;
     }
 
@@ -308,60 +299,60 @@ export default function useNarration() {
     const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
     const chunkWords = words.slice(startIdx, endIdx);
     const chunkText = chunkWords.join(" ");
-    chunkStartRef.current = startIdx;
-    chunkWordsRef.current = chunkWords;
+    const chunkStart = startIdx;
 
     const utterance = new SpeechSynthesisUtterance(chunkText);
     if (currentVoice) utterance.voice = currentVoice;
-    utterance.rate = rate;
+    utterance.rate = state.speed;
     utterance.pitch = 1;
     let wordInChunk = 0;
 
     utterance.onboundary = (event) => {
       if (event.name === "word") {
-        const globalIdx = chunkStartRef.current + wordInChunk;
+        const globalIdx = chunkStart + wordInChunk;
         wordInChunk++;
-        cursorWordIndexRef.current = globalIdx;
+        dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
       }
     };
 
     utterance.onend = () => {
       utteranceRef.current = null;
-      cursorWordIndexRef.current = endIdx;
+      dispatch({ type: "CHUNK_COMPLETE", endIdx });
       if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
-      if (isCursorDrivenRef.current && !holdRef.current) speakNextChunkWeb();
+      const currentState = stateRef.current;
+      if (currentState.status !== "idle" && currentState.status !== "holding") speakNextChunkWeb();
     };
 
     utterance.onerror = () => {
       utteranceRef.current = null;
-      setSpeaking(false);
-      isCursorDrivenRef.current = false;
+      dispatch({ type: "STOP" });
     };
 
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
-  }, [currentVoice, rate]);
+  }, [currentVoice, state.speed]);
 
   /** Dispatch to the correct engine's chunk speaker */
   const speakNextChunk = useCallback(() => {
-    if (engineRef.current === "kokoro" && kokoroReady) {
+    const s = stateRef.current;
+    if (s.engine === "kokoro" && s.kokoroReady) {
       speakNextChunkKokoro();
     } else {
       speakNextChunkWeb();
     }
-  }, [speakNextChunkKokoro, speakNextChunkWeb, kokoroReady]);
+  }, [speakNextChunkKokoro, speakNextChunkWeb]);
 
   // ── Legacy speak (full text, independent TTS) ────────────────────────
   const speak = useCallback((text: string, startCharOffset = 0, onWord?: (charIndex: number) => void) => {
     if (!window.speechSynthesis) return;
-    isCursorDrivenRef.current = false;
+    dispatch({ type: "STOP" });
     window.speechSynthesis.cancel();
 
     const textToSpeak = text.slice(startCharOffset);
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     if (currentVoice) utterance.voice = currentVoice;
-    utterance.rate = rate;
+    utterance.rate = state.speed;
     utterance.pitch = 1;
     onWordRef.current = onWord || null;
 
@@ -370,13 +361,13 @@ export default function useNarration() {
         onWordRef.current(startCharOffset + event.charIndex);
       }
     };
-    utterance.onend = () => { setSpeaking(false); utteranceRef.current = null; };
-    utterance.onerror = () => { setSpeaking(false); utteranceRef.current = null; };
+    utterance.onend = () => { dispatch({ type: "STOP" }); utteranceRef.current = null; };
+    utterance.onerror = () => { dispatch({ type: "STOP" }); utteranceRef.current = null; };
 
     utteranceRef.current = utterance;
-    setSpeaking(true);
+    dispatch({ type: "START_CURSOR_DRIVEN", startIdx: 0, speed: state.speed });
     window.speechSynthesis.speak(utterance);
-  }, [currentVoice, rate]);
+  }, [currentVoice, state.speed]);
 
   // ── Cursor-driven start ─────────────────────────────────────────────────
 
@@ -389,43 +380,55 @@ export default function useNarration() {
     // Stop any existing playback
     window.speechSynthesis?.cancel();
     audioPlayer.stop();
-    kokoroInFlightRef.current = false;
-    nextChunkBufferRef.current = null;
 
-    isCursorDrivenRef.current = true;
     allWordsRef.current = words;
-    cursorWordIndexRef.current = startWordIndex;
     onWordAdvanceRef.current = onWordAdvance;
-    speedRef.current = wpmToRate(wpm);
-    setRate(speedRef.current);
+    const newSpeed = wpmToRate(wpm);
 
-    setSpeaking(true);
+    dispatch({ type: "STOP" }); // Reset all state first
+    dispatch({ type: "START_CURSOR_DRIVEN", startIdx: startWordIndex, speed: newSpeed });
+
+    // speakNextChunk reads from stateRef, but dispatch is async — update stateRef manually
+    // so the immediately-following speakNextChunk sees the new values.
+    stateRef.current = {
+      ...stateRef.current,
+      status: "speaking",
+      cursorWordIndex: startWordIndex,
+      speed: newSpeed,
+      chunkStart: startWordIndex,
+      chunkWords: [],
+      kokoroInFlight: false,
+      nextChunkBuffer: null,
+    };
+
     speakNextChunk();
   }, [speakNextChunk]);
 
   const resyncToCursor = useCallback((wordIndex: number, wpm: number) => {
-    if (!isCursorDrivenRef.current) return;
+    const s = stateRef.current;
+    if (s.status === "idle") return;
     window.speechSynthesis?.cancel();
     audioPlayer.stop();
-    cursorWordIndexRef.current = wordIndex;
-    speedRef.current = wpmToRate(wpm);
-    setRate(speedRef.current);
+    const newSpeed = wpmToRate(wpm);
+    dispatch({ type: "WORD_ADVANCE", wordIndex });
+    dispatch({ type: "SET_SPEED", speed: newSpeed });
+    // Update stateRef for immediate speakNextChunk
+    stateRef.current = { ...stateRef.current, cursorWordIndex: wordIndex, speed: newSpeed };
     speakNextChunk();
   }, [speakNextChunk]);
 
   const updateWpm = useCallback((wpm: number) => {
     const newRate = wpmToRate(wpm);
-    speedRef.current = newRate;
-    setRate(newRate);
-    // Invalidate pre-buffer and increment generation ID to discard any in-flight IPC results
-    nextChunkBufferRef.current = null;
-    generationIdRef.current++;
-    if (isCursorDrivenRef.current) {
-      if (engineRef.current === "web") {
+    dispatch({ type: "SET_SPEED", speed: newRate });
+    // Update stateRef for immediate reads
+    stateRef.current = { ...stateRef.current, speed: newRate, generationId: stateRef.current.generationId + 1, nextChunkBuffer: null };
+    const s = stateRef.current;
+    if (s.status !== "idle") {
+      if (s.engine === "web") {
         // Web Speech: cancel current utterance — new chunk will use updated rate immediately
         window.speechSynthesis?.cancel();
         speakNextChunk();
-      } else if (!kokoroInFlightRef.current) {
+      } else if (!s.kokoroInFlight) {
         // Kokoro: no in-flight request — restart immediately at new rate
         audioPlayer.stop();
         speakNextChunk();
@@ -436,40 +439,43 @@ export default function useNarration() {
   }, [speakNextChunk]);
 
   const pause = useCallback(() => {
-    if (engineRef.current === "kokoro") {
+    const s = stateRef.current;
+    if (s.engine === "kokoro") {
       audioPlayer.pause();
     } else {
       window.speechSynthesis?.pause();
     }
-    setSpeaking(false);
+    dispatch({ type: "PAUSE" });
   }, []);
 
   const resume = useCallback(() => {
-    if (engineRef.current === "kokoro") {
+    const s = stateRef.current;
+    if (s.engine === "kokoro") {
       audioPlayer.resume();
     } else {
       window.speechSynthesis?.resume();
     }
-    setSpeaking(true);
+    dispatch({ type: "RESUME" });
   }, []);
 
   const stop = useCallback(() => {
     window.speechSynthesis?.cancel();
     audioPlayer.stop();
-    setSpeaking(false);
+    dispatch({ type: "STOP" });
     utteranceRef.current = null;
-    isCursorDrivenRef.current = false;
-    holdRef.current = false;
-    kokoroInFlightRef.current = false;
-    nextChunkBufferRef.current = null;
     if (chunkPauseTimerRef.current) { clearTimeout(chunkPauseTimerRef.current); chunkPauseTimerRef.current = null; }
   }, []);
 
-  const hold = useCallback(() => { holdRef.current = true; }, []);
+  const hold = useCallback(() => { dispatch({ type: "HOLD" }); }, []);
 
   const resumeChaining = useCallback(() => {
-    holdRef.current = false;
-    if (isCursorDrivenRef.current) speakNextChunk();
+    dispatch({ type: "RESUME_CHAINING" });
+    // Need to check after dispatch — update stateRef and trigger chunk
+    const s = stateRef.current;
+    if (s.status === "holding") {
+      stateRef.current = { ...stateRef.current, status: "speaking" };
+      speakNextChunk();
+    }
   }, [speakNextChunk]);
 
   const selectVoice = useCallback((voice: SpeechSynthesisVoice) => {
@@ -478,20 +484,19 @@ export default function useNarration() {
 
   const adjustRate = useCallback((newRate: number) => {
     const clamped = Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate));
-    speedRef.current = clamped;
-    setRate(clamped);
-    // Invalidate pre-buffer immediately and increment generation ID to discard stale IPC results
-    nextChunkBufferRef.current = null;
-    generationIdRef.current++;
+    dispatch({ type: "SET_SPEED", speed: clamped });
+    // Update stateRef for immediate reads
+    stateRef.current = { ...stateRef.current, speed: clamped, generationId: stateRef.current.generationId + 1, nextChunkBuffer: null };
     // Debounce the restart so rapid slider adjustments settle before triggering re-generation
     if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
     rateDebounceRef.current = setTimeout(() => {
       rateDebounceRef.current = null;
-      if (isCursorDrivenRef.current) {
-        if (engineRef.current === "web") {
+      const s = stateRef.current;
+      if (s.status !== "idle") {
+        if (s.engine === "web") {
           window.speechSynthesis?.cancel();
           speakNextChunk();
-        } else if (!kokoroInFlightRef.current) {
+        } else if (!s.kokoroInFlight) {
           audioPlayer.stop();
           speakNextChunk();
         }
@@ -509,13 +514,13 @@ export default function useNarration() {
   }, []);
 
   return {
-    speaking,
+    speaking: state.status === "speaking" || state.status === "holding",
     voices,
     currentVoice,
-    rate,
-    kokoroReady,
-    kokoroDownloading,
-    kokoroDownloadProgress,
+    rate: state.speed,
+    kokoroReady: state.kokoroReady,
+    kokoroDownloading: state.kokoroDownloading,
+    kokoroDownloadProgress: state.kokoroDownloadProgress,
     kokoroVoices,
     kokoroLoading,
     speak,
