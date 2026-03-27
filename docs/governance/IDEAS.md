@@ -76,6 +76,8 @@
 |---|------|-------------|--------|--------|
 | 36 | Android App | React Native port with cloud sync. (Sprint 18C roadmap) | High | Large |
 | 37 | Window Control Theme Matching | Minimize/maximize/close buttons adopt theme background color. Requires `titleBarStyle: "hidden"` or `titleBarOverlay` with color matching. (BUG-049) | Low | Small |
+| 40 | Chromecast Integration | Cast narration audio and/or reading display to Chromecast devices. Play TTS through TV/speaker, show current text on screen. | Medium | Large |
+| 41 | APK Wrapper | Package Blurby as an Android APK (e.g., via Capacitor, TWA, or WebView wrapper) for lightweight mobile distribution without a full React Native rewrite. | High | Medium |
 
 ### [Category: AI & Intelligence]
 
