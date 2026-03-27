@@ -35,7 +35,15 @@ function resetIdleTimer() {
 
 function getWorker(cacheDir) {
   if (worker) return worker;
-  worker = new Worker(path.join(__dirname, "tts-worker.js"));
+  const { app } = require("electron");
+  const workerOpts = {};
+  if (app.isPackaged) {
+    // In packaged app, unpacked modules live in app.asar.unpacked/node_modules/
+    const unpackedModules = path.join(process.resourcesPath, "app.asar.unpacked", "node_modules");
+    workerOpts.workerData = { modulePath: unpackedModules };
+    workerOpts.env = { ...process.env, NODE_PATH: unpackedModules };
+  }
+  worker = new Worker(path.join(__dirname, "tts-worker.js"), workerOpts);
 
   worker.on("message", (msg) => {
     switch (msg.type) {

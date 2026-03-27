@@ -34,8 +34,9 @@ export interface UseReadingModeInstanceParams {
 export interface UseReadingModeInstanceReturn {
   /** Ref to the current mode instance */
   modeRef: React.MutableRefObject<ReadingMode | null>;
-  /** Start a mode at a word index with the given words and paragraph breaks */
-  startMode: (wordIdx: number, words: string[], paragraphBreaks: Set<number>) => void;
+  /** Start a mode at a word index with the given words and paragraph breaks.
+   *  Pass the intended mode type explicitly — React state may not have flushed yet. */
+  startMode: (mode: ModeType, wordIdx: number, words: string[], paragraphBreaks: Set<number>) => void;
   /** Pause the current mode */
   pauseMode: () => void;
   /** Resume the current mode */
@@ -164,15 +165,16 @@ export function useReadingModeInstance({
     };
   }, [readingMode]);
 
-  const startMode = useCallback((wordIdx: number, words: string[], paragraphBreaks: Set<number>) => {
+  const startMode = useCallback((mode: ModeType, wordIdx: number, words: string[], paragraphBreaks: Set<number>) => {
     // Destroy previous instance
     if (modeRef.current) {
       modeRef.current.destroy();
     }
-    const instance = createInstance(readingMode, words, paragraphBreaks);
+    // Use the explicit mode param — React state (readingMode) may not have flushed yet
+    const instance = createInstance(mode, words, paragraphBreaks);
     modeRef.current = instance;
 
-    if (readingMode === "flow" && !isFoliate) {
+    if (mode === "flow" && !isFoliate) {
       // Non-EPUB flow: delegate to FlowCursorController via flowPlaying
       instance.start(wordIdx); // Record position in FlowMode
       instance.pause(); // Don't use FlowMode's internal timer
@@ -180,7 +182,7 @@ export function useReadingModeInstance({
     } else {
       instance.start(wordIdx);
     }
-  }, [readingMode, isFoliate, createInstance, setFlowPlaying]);
+  }, [isFoliate, createInstance, setFlowPlaying]);
 
   const pauseMode = useCallback(() => {
     if (!modeRef.current) return;

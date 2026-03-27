@@ -184,7 +184,7 @@ export function useReaderMode({
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
     const pBreaks = getEffectiveParagraphBreaks();
     // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
-    modeInstance.startMode(startIdx, effectiveWords, pBreaks);
+    modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
   }, [stopAllModes, wpm, setWpm, narration, highlightedWordIndex, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);
 
   // ── Start Focus ────────────────────────────────────────────────────
@@ -212,7 +212,7 @@ export function useReaderMode({
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
     const pBreaks = getEffectiveParagraphBreaks();
     // FocusMode timer replaces reader.togglePlay() — drives word advancement via setTimeout chain
-    setTimeout(() => modeInstance.startMode(startWord, effectiveWords, pBreaks), FOCUS_MODE_START_DELAY_MS);
+    setTimeout(() => modeInstance.startMode("focus", startWord, effectiveWords, pBreaks), FOCUS_MODE_START_DELAY_MS);
   }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
 
   // ── Start Flow ─────────────────────────────────────────────────────
@@ -240,7 +240,7 @@ export function useReaderMode({
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
     const pBreaks = getEffectiveParagraphBreaks();
     // FlowMode: for EPUB uses internal timer; for non-EPUB delegates to FlowCursorController
-    modeInstance.startMode(startWord, effectiveWords, pBreaks);
+    modeInstance.startMode("flow", startWord, effectiveWords, pBreaks);
   }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
 
   // ── Pause → Page ───────────────────────────────────────────────────

@@ -16,11 +16,20 @@ const SAMPLE_RATE = 24000;
 async function loadModel(cacheDir) {
   if (ttsInstance && modelReady) return;
 
-  const kokoro = await import("kokoro-js");
+  let kokoro, transformersEnv;
+  if (workerData?.modulePath) {
+    // Packaged app: resolve from unpacked directory using require()
+    kokoro = require(path.join(workerData.modulePath, "kokoro-js"));
+    const transformers = require(path.join(workerData.modulePath, "@huggingface", "transformers"));
+    transformersEnv = transformers.env;
+  } else {
+    // Dev mode: normal ESM import
+    kokoro = await import("kokoro-js");
+    const transformersMod = await import("@huggingface/transformers");
+    transformersEnv = transformersMod.env;
+  }
   KokoroTTS = kokoro.KokoroTTS;
-
-  const { env } = await import("@huggingface/transformers");
-  env.cacheDir = cacheDir;
+  transformersEnv.cacheDir = cacheDir;
 
   ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
     dtype: DTYPE,
