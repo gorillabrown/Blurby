@@ -333,6 +333,11 @@ function registerIpcHandlers(ctx) {
     const doc = ctx.getDocById(docId);
     if (!doc) return null;
     if (doc.content) return doc.content;
+    if (doc.convertedEpubPath) {
+      // EPUB path — renderer loads via foliate directly using read-file-buffer
+      // Return the converted EPUB filepath so FoliatePageView can load it
+      return { filepath: doc.convertedEpubPath, ext: ".epub" };
+    }
     if (doc.filepath) {
       const result = await extractContent(doc.filepath);
       // extractContent returns { userError } for user-facing parse failures
