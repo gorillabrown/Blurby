@@ -120,10 +120,16 @@ export function useReaderMode({
   const readingModeRef = useRef<ReadingMode>(readingMode);
   readingModeRef.current = readingMode;
 
+  const highlightedWordIndexRef = useRef(highlightedWordIndex);
+  highlightedWordIndexRef.current = highlightedWordIndex;
+
   const preCapWpmRef = useRef<number | null>(null);
+  const pendingFocusStartRef = useRef<symbol | null>(null);
 
   // ── Stop all sub-modes ─────────────────────────────────────────────
   const stopAllModes = useCallback(() => {
+    // Cancel any pending startFocus setTimeout
+    pendingFocusStartRef.current = null;
     // Stop mode instance (handles Focus timer, Flow state, NarrateMode TTS)
     modeInstance.stopMode();
     // Also stop legacy hooks as safety net during transition
@@ -176,7 +182,7 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    let startIdx = highlightedWordIndex;
+    let startIdx = highlightedWordIndexRef.current;
     if (useFoliate && startIdx === 0) {
       const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
       if (firstVisible > 0) startIdx = firstVisible;
@@ -185,7 +191,7 @@ export function useReaderMode({
     const pBreaks = getEffectiveParagraphBreaks();
     // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
     modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
-  }, [stopAllModes, wpm, setWpm, narration, highlightedWordIndex, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);
+  }, [stopAllModes, wpm, setWpm, narration, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);
 
   // ── Start Focus ────────────────────────────────────────────────────
   const startFocus = useCallback(() => {
@@ -204,16 +210,21 @@ export function useReaderMode({
       return;
     }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndex, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
-      : highlightedWordIndex;
-    if (useFoliate && startWord !== highlightedWordIndex) setHighlightedWordIndex(startWord);
+      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      : highlightedWordIndexRef.current;
+    if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord); // Sync useReader's wordIndex for ReaderView display
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
     const pBreaks = getEffectiveParagraphBreaks();
     // FocusMode timer replaces reader.togglePlay() — drives word advancement via setTimeout chain
-    setTimeout(() => modeInstance.startMode("focus", startWord, effectiveWords, pBreaks), FOCUS_MODE_START_DELAY_MS);
-  }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
+    const focusStartId = Symbol();
+    pendingFocusStartRef.current = focusStartId;
+    setTimeout(() => {
+      if (pendingFocusStartRef.current !== focusStartId) return;
+      modeInstance.startMode("focus", startWord, effectiveWords, pBreaks);
+    }, FOCUS_MODE_START_DELAY_MS);
+  }, [reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
 
   // ── Start Flow ─────────────────────────────────────────────────────
   const startFlow = useCallback(() => {
@@ -232,23 +243,25 @@ export function useReaderMode({
       return;
     }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndex, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
-      : highlightedWordIndex;
-    if (useFoliate && startWord !== highlightedWordIndex) setHighlightedWordIndex(startWord);
+      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      : highlightedWordIndexRef.current;
+    if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord);
     setReadingMode("flow");
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
     const pBreaks = getEffectiveParagraphBreaks();
     // FlowMode: for EPUB uses internal timer; for non-EPUB delegates to FlowCursorController
     modeInstance.startMode("flow", startWord, effectiveWords, pBreaks);
-  }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
+  }, [reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
 
   // ── Pause → Page ───────────────────────────────────────────────────
   const handlePauseToPage = useCallback(() => {
     // Sync highlighted word from mode instance before stopping
     const instance = modeInstance.modeRef.current;
     if (instance && readingMode === "focus") {
-      setHighlightedWordIndex(instance.getCurrentWord());
+      const currentWord = instance.getCurrentWord();
+      setHighlightedWordIndex(currentWord);
+      highlightedWordIndexRef.current = currentWord; // Sync ref immediately
     }
     stopAllModes();
     setReadingMode("page");
@@ -302,7 +315,9 @@ export function useReaderMode({
     if (readingMode !== "page") {
       const instance = modeInstance.modeRef.current;
       if (instance && readingMode === "focus") {
-        setHighlightedWordIndex(instance.getCurrentWord());
+        const currentWord = instance.getCurrentWord();
+        setHighlightedWordIndex(currentWord);
+        highlightedWordIndexRef.current = currentWord; // Sync ref immediately
       }
       stopAllModes();
       setReadingMode("page");
