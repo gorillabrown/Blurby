@@ -1,10 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
-import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
-import { calculatePauseMs } from "../utils/rhythm";
-import * as audioPlayer from "../utils/audioPlayer";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
 import type { RhythmPauses } from "../types";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
-import type { TtsStrategy } from "../types/narration";
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
 
@@ -212,116 +209,31 @@ export default function useNarration() {
     try {
       const result = await api.kokoroGenerate(text, kokoroVoiceRef.current, stateRef.current.speed);
       // Discard pre-buffer result if rate changed during generation
-      if (!result.error && stateRef.current.status !== "idle" && genId === stateRef.current.generationId) {
-        dispatch({ type: "SET_PRE_BUFFER", buffer: { audio: result.audio, sampleRate: result.sampleRate, durationMs: result.durationMs, text } });
+      if (!result.error && result.audio && result.sampleRate && stateRef.current.status !== "idle" && genId === stateRef.current.generationId) {
+        const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
+        dispatch({ type: "SET_PRE_BUFFER", buffer: { audio: result.audio, sampleRate: result.sampleRate, durationMs, text } });
       }
     } catch { /* pre-buffer failed, will generate on-demand */ }
   }, []);
+  preBufferNextRef.current = preBufferNextKokoro;
 
-  // ── Kokoro cursor-driven chunk (with in-flight guard + pre-buffer) ─────
+  // ── Strategy-based chunk dispatch ─────────────────────────────────────
 
-  const speakNextChunkKokoro = useCallback(async () => {
-    const s = stateRef.current;
-    if (s.status === "idle" || !api?.kokoroGenerate) return;
-    if (s.kokoroInFlight) return;
+  /** Compute rhythm pause duration at chunk boundaries (Kokoro only). */
+  const computeChunkPauseMs = useCallback((chunkWords: string[], chunkStart: number): number => {
+    const currentState = stateRef.current;
+    const hasPreBuffer = currentState.nextChunkBuffer !== null;
+    if (!hasPreBuffer || !rhythmPausesRef.current) return 0;
+    const lastWord = chunkWords[chunkWords.length - 1] || "";
+    const lastWordGlobalIdx = chunkStart + chunkWords.length - 1;
+    const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
+    if (isParagraphEnd && rhythmPausesRef.current.paragraphs) return TTS_PAUSE_PARAGRAPH_MS;
+    if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) return TTS_PAUSE_SENTENCE_MS;
+    if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) return TTS_PAUSE_COMMA_MS;
+    return 0;
+  }, []);
 
-    const words = allWordsRef.current;
-    const startIdx = s.cursorWordIndex;
-    if (startIdx >= words.length) {
-      dispatch({ type: "STOP" });
-      return;
-    }
-
-    // Don't limit chunks to page boundary — narration flows across pages seamlessly.
-    // Word-advance callback triggers page turns when highlighted word crosses boundary.
-    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
-    const chunkWords = words.slice(startIdx, endIdx);
-    const chunkText = chunkWords.join(" ");
-    // Store chunkStart/chunkWords locally — they are only used inside this callback chain
-    const chunkStart = startIdx;
-
-    dispatch({ type: "KOKORO_IN_FLIGHT", inFlight: true });
-    const genId = s.generationId;
-    try {
-      // Check pre-buffer first
-      let result;
-      const buf = s.nextChunkBuffer;
-      if (buf && buf.text === chunkText) {
-        result = buf;
-        dispatch({ type: "CLEAR_PRE_BUFFER" });
-      } else {
-        dispatch({ type: "CLEAR_PRE_BUFFER" });
-        result = await api.kokoroGenerate(chunkText, kokoroVoiceRef.current, stateRef.current.speed);
-      }
-
-      if (result.error) {
-        dispatch({ type: "SET_ENGINE", engine: "web" });
-        speakNextChunkWeb();
-        return;
-      }
-      if (stateRef.current.status === "idle") return;
-      // Discard stale IPC result if rate changed during generation — re-generate at new rate
-      if (genId !== stateRef.current.generationId) {
-        speakNextChunk();
-        return;
-      }
-
-      // Start pre-buffering next chunk while this one plays
-      preBufferNextKokoro(endIdx);
-
-      audioPlayer.playBuffer(
-        result.audio,
-        result.sampleRate,
-        result.durationMs,
-        chunkWords.length,
-        (wordOffset: number) => {
-          const globalIdx = chunkStart + wordOffset;
-          dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
-          if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
-        },
-        () => {
-          dispatch({ type: "CHUNK_COMPLETE", endIdx });
-          if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
-          const currentState = stateRef.current;
-          if (currentState.status !== "idle" && currentState.status !== "holding") {
-            // Rhythm pause at chunk boundaries: only add silence if pre-buffer is ready.
-            // If not ready, generation time IS the natural pause — don't stack delays.
-            const hasPreBuffer = currentState.nextChunkBuffer !== null;
-            let pauseMs = 0;
-            if (hasPreBuffer && rhythmPausesRef.current) {
-              const lastWord = chunkWords[chunkWords.length - 1] || "";
-              const lastWordGlobalIdx = chunkStart + chunkWords.length - 1;
-              const isParagraphEnd = paragraphBreaksRef.current.has(lastWordGlobalIdx);
-              if (isParagraphEnd && rhythmPausesRef.current.paragraphs) {
-                pauseMs = TTS_PAUSE_PARAGRAPH_MS;
-              } else if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.sentences) {
-                pauseMs = TTS_PAUSE_SENTENCE_MS;
-              } else if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPausesRef.current.commas) {
-                pauseMs = TTS_PAUSE_COMMA_MS;
-              }
-            }
-            if (pauseMs > 0) {
-              chunkPauseTimerRef.current = setTimeout(() => {
-                chunkPauseTimerRef.current = null;
-                const st = stateRef.current;
-                if (st.status !== "idle" && st.status !== "holding") speakNextChunkKokoro();
-              }, pauseMs);
-            } else {
-              speakNextChunkKokoro();
-            }
-          }
-        },
-      );
-    } catch {
-      dispatch({ type: "SET_ENGINE", engine: "web" });
-      speakNextChunkWeb();
-    } finally {
-      dispatch({ type: "KOKORO_IN_FLIGHT", inFlight: false });
-    }
-  }, [preBufferNextKokoro]);
-
-  // ── Web Speech cursor-driven chunk ──────────────────────────────────────
-
+  /** Speak the next chunk using the Web Speech strategy. */
   const speakNextChunkWeb = useCallback(() => {
     const s = stateRef.current;
     if (!window.speechSynthesis || s.status === "idle") return;
@@ -332,43 +244,83 @@ export default function useNarration() {
       return;
     }
 
-    // No page boundary limit — narration flows across pages seamlessly
     const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
     const chunkWords = words.slice(startIdx, endIdx);
     const chunkText = chunkWords.join(" ");
     const chunkStart = startIdx;
 
-    const utterance = new SpeechSynthesisUtterance(chunkText);
-    if (currentVoice) utterance.voice = currentVoice;
-    utterance.rate = state.speed;
-    utterance.pitch = 1;
-    let wordInChunk = 0;
-
-    utterance.onboundary = (event) => {
-      if (event.name === "word") {
-        const globalIdx = chunkStart + wordInChunk;
-        wordInChunk++;
+    webStrategy.speakChunk(
+      chunkText,
+      chunkWords,
+      chunkStart,
+      s.speed,
+      (wordOffset) => {
+        const globalIdx = chunkStart + wordOffset;
         dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
-      }
-    };
+      },
+      () => {
+        dispatch({ type: "CHUNK_COMPLETE", endIdx });
+        if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
+        const currentState = stateRef.current;
+        if (currentState.status !== "idle" && currentState.status !== "holding") speakNextChunkWeb();
+      },
+      () => {
+        dispatch({ type: "STOP" });
+      },
+    );
+  }, [webStrategy, computeChunkPauseMs]);
 
-    utterance.onend = () => {
-      utteranceRef.current = null;
-      dispatch({ type: "CHUNK_COMPLETE", endIdx });
-      if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
-      const currentState = stateRef.current;
-      if (currentState.status !== "idle" && currentState.status !== "holding") speakNextChunkWeb();
-    };
-
-    utterance.onerror = () => {
-      utteranceRef.current = null;
+  /** Speak the next chunk using the Kokoro strategy. */
+  const speakNextChunkKokoro = useCallback(() => {
+    const s = stateRef.current;
+    if (s.status === "idle") return;
+    const words = allWordsRef.current;
+    const startIdx = s.cursorWordIndex;
+    if (startIdx >= words.length) {
       dispatch({ type: "STOP" });
-    };
+      return;
+    }
 
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, [currentVoice, state.speed]);
+    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
+    const chunkWords = words.slice(startIdx, endIdx);
+    const chunkText = chunkWords.join(" ");
+    const chunkStart = startIdx;
+
+    kokoroStrategy.speakChunk(
+      chunkText,
+      chunkWords,
+      chunkStart,
+      s.speed,
+      (wordOffset) => {
+        const globalIdx = chunkStart + wordOffset;
+        dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
+        if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
+      },
+      () => {
+        dispatch({ type: "CHUNK_COMPLETE", endIdx });
+        if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
+        const currentState = stateRef.current;
+        if (currentState.status !== "idle" && currentState.status !== "holding") {
+          // Rhythm pause at chunk boundaries: only add silence if pre-buffer is ready.
+          // If not ready, generation time IS the natural pause — don't stack delays.
+          const pauseMs = computeChunkPauseMs(chunkWords, chunkStart);
+          if (pauseMs > 0) {
+            chunkPauseTimerRef.current = setTimeout(() => {
+              chunkPauseTimerRef.current = null;
+              const st = stateRef.current;
+              if (st.status !== "idle" && st.status !== "holding") speakNextChunkKokoro();
+            }, pauseMs);
+          } else {
+            speakNextChunkKokoro();
+          }
+        }
+      },
+      () => {
+        dispatch({ type: "STOP" });
+      },
+    );
+  }, [kokoroStrategy, computeChunkPauseMs]);
 
   /** Dispatch to the correct engine's chunk speaker */
   const speakNextChunk = useCallback(() => {
@@ -379,6 +331,10 @@ export default function useNarration() {
       speakNextChunkWeb();
     }
   }, [speakNextChunkKokoro, speakNextChunkWeb]);
+
+  // Keep refs in sync for strategy callbacks that need to break circular deps
+  speakNextChunkRef.current = speakNextChunk;
+  speakNextChunkWebRef.current = speakNextChunkWeb;
 
   // ── Legacy speak (full text, independent TTS) ────────────────────────
   const speak = useCallback((text: string, startCharOffset = 0, onWord?: (charIndex: number) => void) => {
@@ -415,8 +371,8 @@ export default function useNarration() {
     onWordAdvance: (wordIndex: number) => void
   ) => {
     // Stop any existing playback
-    window.speechSynthesis?.cancel();
-    audioPlayer.stop();
+    webStrategy.stop();
+    kokoroStrategy.stop();
 
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
@@ -439,20 +395,20 @@ export default function useNarration() {
     };
 
     speakNextChunk();
-  }, [speakNextChunk]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
   const resyncToCursor = useCallback((wordIndex: number, wpm: number) => {
     const s = stateRef.current;
     if (s.status === "idle") return;
-    window.speechSynthesis?.cancel();
-    audioPlayer.stop();
+    webStrategy.stop();
+    kokoroStrategy.stop();
     const newSpeed = wpmToRate(wpm);
     dispatch({ type: "WORD_ADVANCE", wordIndex });
     dispatch({ type: "SET_SPEED", speed: newSpeed });
     // Update stateRef for immediate speakNextChunk
     stateRef.current = { ...stateRef.current, cursorWordIndex: wordIndex, speed: newSpeed };
     speakNextChunk();
-  }, [speakNextChunk]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
   const updateWpm = useCallback((wpm: number) => {
     const newRate = wpmToRate(wpm);
@@ -463,45 +419,44 @@ export default function useNarration() {
     if (s.status !== "idle") {
       if (s.engine === "web") {
         // Web Speech: cancel current utterance — new chunk will use updated rate immediately
-        window.speechSynthesis?.cancel();
+        webStrategy.stop();
         speakNextChunk();
       } else if (!s.kokoroInFlight) {
         // Kokoro: no in-flight request — restart immediately at new rate
-        audioPlayer.stop();
+        kokoroStrategy.stop();
         speakNextChunk();
       }
       // Kokoro in-flight: generation ID increment above ensures the result is discarded
-      // and speakNextChunk() is called with the new rate from within speakNextChunkKokoro
+      // and speakNextChunk() is called with the new rate from within the Kokoro strategy
     }
-  }, [speakNextChunk]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
   const pause = useCallback(() => {
     const s = stateRef.current;
     if (s.engine === "kokoro") {
-      audioPlayer.pause();
+      kokoroStrategy.pause();
     } else {
-      window.speechSynthesis?.pause();
+      webStrategy.pause();
     }
     dispatch({ type: "PAUSE" });
-  }, []);
+  }, [webStrategy, kokoroStrategy]);
 
   const resume = useCallback(() => {
     const s = stateRef.current;
     if (s.engine === "kokoro") {
-      audioPlayer.resume();
+      kokoroStrategy.resume();
     } else {
-      window.speechSynthesis?.resume();
+      webStrategy.resume();
     }
     dispatch({ type: "RESUME" });
-  }, []);
+  }, [webStrategy, kokoroStrategy]);
 
   const stop = useCallback(() => {
-    window.speechSynthesis?.cancel();
-    audioPlayer.stop();
+    webStrategy.stop();
+    kokoroStrategy.stop();
     dispatch({ type: "STOP" });
-    utteranceRef.current = null;
     if (chunkPauseTimerRef.current) { clearTimeout(chunkPauseTimerRef.current); chunkPauseTimerRef.current = null; }
-  }, []);
+  }, [webStrategy, kokoroStrategy]);
 
   const hold = useCallback(() => { dispatch({ type: "HOLD" }); }, []);
 
@@ -531,24 +486,24 @@ export default function useNarration() {
       const s = stateRef.current;
       if (s.status !== "idle") {
         if (s.engine === "web") {
-          window.speechSynthesis?.cancel();
+          webStrategy.stop();
           speakNextChunk();
         } else if (!s.kokoroInFlight) {
-          audioPlayer.stop();
+          kokoroStrategy.stop();
           speakNextChunk();
         }
         // Kokoro in-flight: generation ID increment ensures stale result is discarded on arrival
       }
     }, TTS_RATE_RESTART_DEBOUNCE_MS);
-  }, [speakNextChunk]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      window.speechSynthesis?.cancel();
-      audioPlayer.stop();
+      webStrategy.stop();
+      kokoroStrategy.stop();
     };
-  }, []);
+  }, [webStrategy, kokoroStrategy]);
 
   return {
     speaking: state.status === "speaking" || state.status === "holding",
