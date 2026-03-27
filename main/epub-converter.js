@@ -75,8 +75,10 @@ async function buildEpubZip(options) {
   const zip = new Zip();
   const uuid = crypto.randomUUID();
 
-  // mimetype must be the FIRST entry, uncompressed
+  // mimetype must be the FIRST entry, stored uncompressed (EPUB spec requirement)
   zip.addFile("mimetype", Buffer.from("application/epub+zip", "ascii"));
+  const mimetypeEntry = zip.getEntry("mimetype");
+  if (mimetypeEntry) mimetypeEntry.header.method = 0; // 0 = STORED (no compression)
 
   // META-INF/container.xml
   zip.addFile(
@@ -693,16 +695,49 @@ async function validateEpub(epubPath) {
       errors.push("Missing META-INF/container.xml");
     }
 
-    // Check content.opf
+    // Check content.opf and validate spine references
     const opfEntry = entries.find((e) => e.endsWith(".opf"));
     if (!opfEntry) {
       errors.push("Missing content.opf");
+    } else {
+      const opfXml = zip.readAsText(opfEntry);
+      const $ = getCheerio().load(opfXml, { xmlMode: true });
+
+      // Extract manifest items: id → href
+      const manifestIds = new Set();
+      $("manifest item").each((_, el) => {
+        const id = $(el).attr("id");
+        if (id) manifestIds.add(id);
+      });
+
+      // Extract spine itemrefs and verify each references a manifest item
+      const spineRefs = [];
+      $("spine itemref").each((_, el) => {
+        const idref = $(el).attr("idref");
+        if (idref) spineRefs.push(idref);
+      });
+
+      if (spineRefs.length === 0) {
+        errors.push("Spine has no itemref entries");
+      }
+
+      for (const idref of spineRefs) {
+        if (!manifestIds.has(idref)) {
+          errors.push(`Spine references unknown manifest id: "${idref}"`);
+        }
+      }
     }
 
     // Check at least one XHTML content file
     const xhtmlFiles = entries.filter((e) => e.endsWith(".xhtml") || e.endsWith(".html"));
     if (xhtmlFiles.length === 0) {
       errors.push("No XHTML content files found");
+    }
+
+    // Check mimetype compression method (EPUB spec: must be STORED, not DEFLATED)
+    const mimetypeZipEntry = zip.getEntry("mimetype");
+    if (mimetypeZipEntry && mimetypeZipEntry.header.method !== 0) {
+      errors.push("Mimetype entry must be stored uncompressed (method=STORED)");
     }
   } catch (err) {
     errors.push(`Failed to read EPUB: ${err.message}`);

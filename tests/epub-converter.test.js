@@ -691,4 +691,66 @@ describe("validateEpub", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
   });
+
+  it("detects broken spine references", async () => {
+    const { validateEpub } = await import("../main/epub-converter.js");
+    const AdmZip = (await import("adm-zip")).default;
+    const zip = new AdmZip();
+    zip.addFile("mimetype", Buffer.from("application/epub+zip"));
+    const entry = zip.getEntry("mimetype");
+    if (entry) entry.header.method = 0;
+    zip.addFile("META-INF/container.xml", Buffer.from(
+      '<?xml version="1.0"?><container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'
+    ));
+    // OPF with spine referencing "ch2" which doesn't exist in manifest
+    zip.addFile("OEBPS/content.opf", Buffer.from(
+      '<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Test</dc:title></metadata><manifest><item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="ch1"/><itemref idref="ch2"/></spine></package>'
+    ));
+    zip.addFile("OEBPS/ch1.xhtml", Buffer.from("<html><body><p>Ch1</p></body></html>"));
+    const epubPath = path.join(tmpDir, "bad-spine.epub");
+    zip.writeZip(epubPath);
+    const result = await validateEpub(epubPath);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Spine references unknown manifest id: "ch2"');
+  });
+
+  it("detects compressed mimetype entry", async () => {
+    const { validateEpub } = await import("../main/epub-converter.js");
+    const AdmZip = (await import("adm-zip")).default;
+    const zip = new AdmZip();
+    // Add mimetype WITHOUT setting method to STORED (default is DEFLATED)
+    zip.addFile("mimetype", Buffer.from("application/epub+zip"));
+    // Force DEFLATED compression on mimetype
+    const entry = zip.getEntry("mimetype");
+    if (entry) entry.header.method = 8; // 8 = DEFLATED
+    zip.addFile("META-INF/container.xml", Buffer.from(
+      '<?xml version="1.0"?><container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'
+    ));
+    zip.addFile("OEBPS/content.opf", Buffer.from(
+      '<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Test</dc:title></metadata><manifest><item id="ch1" href="ch1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="ch1"/></spine></package>'
+    ));
+    zip.addFile("OEBPS/ch1.xhtml", Buffer.from("<html><body><p>Ch1</p></body></html>"));
+    const epubPath = path.join(tmpDir, "compressed-mime.epub");
+    zip.writeZip(epubPath);
+    const result = await validateEpub(epubPath);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain("Mimetype entry must be stored uncompressed (method=STORED)");
+  });
+
+  it("validates our own buildEpubZip output passes all checks including spine and compression", async () => {
+    const { buildEpubZip, validateEpub } = await import("../main/epub-converter.js");
+    const epubPath = path.join(tmpDir, "full-check.epub");
+    await buildEpubZip({
+      outputPath: epubPath,
+      title: "Full Check",
+      author: "Author",
+      chapters: [
+        { title: "Ch1", xhtml: "<p>First</p>" },
+        { title: "Ch2", xhtml: "<p>Second</p>" },
+      ],
+    });
+    const result = await validateEpub(epubPath);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
 });
