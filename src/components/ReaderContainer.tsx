@@ -360,15 +360,20 @@ export default function ReaderContainer({
       }, 500);
       return;
     }
-    // For non-EPUB: highlightedWordIndex maps directly to the words array
-    // For EPUB: use findFirstVisibleWordIndex for accurate start position
+    // Start from highlightedWordIndex (set by word click or previous position).
+    // For EPUB: only use findFirstVisibleWordIndex as FALLBACK when no word was selected
+    // (highlightedWordIndex is 0 or out of range for the current section)
     let startIdx = highlightedWordIndex;
     if (useFoliate) {
-      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-      if (firstVisible >= 0) {
-        startIdx = firstVisible;
-      } else if (startIdx >= effectiveWords.length) {
-        startIdx = 0;
+      // Check if highlightedWordIndex is valid in the current word array
+      const isValid = startIdx > 0 && startIdx < effectiveWords.length;
+      if (!isValid) {
+        const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+        if (firstVisible >= 0) {
+          startIdx = firstVisible;
+        } else {
+          startIdx = 0;
+        }
       }
     }
     // Set the TTS rate BEFORE starting — adjustRate() after start would increment
@@ -502,14 +507,18 @@ export default function ReaderContainer({
   const startFocus = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
-    // For foliate EPUBs, ensure words are extracted and start from visible word
+    // For foliate EPUBs, ensure words are extracted
     let startWord = highlightedWordIndex;
     if (useFoliate) {
       extractFoliateWords();
-      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-      if (firstVisible >= 0) {
-        startWord = firstVisible;
-        setHighlightedWordIndex(firstVisible);
+      // Only use findFirstVisibleWordIndex as fallback if no word was clicked
+      const isValid = startWord > 0 && startWord < (wordsRef.current?.length || Infinity);
+      if (!isValid) {
+        const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+        if (firstVisible >= 0) {
+          startWord = firstVisible;
+          setHighlightedWordIndex(firstVisible);
+        }
       }
     }
     jumpToWord(startWord);
@@ -522,11 +531,15 @@ export default function ReaderContainer({
   const startFlow = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
-    // For foliate EPUBs, ensure words are extracted and start from visible word
+    // For foliate EPUBs, ensure words are extracted
     if (useFoliate) {
       extractFoliateWords();
-      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-      if (firstVisible >= 0) setHighlightedWordIndex(firstVisible);
+      // Only use findFirstVisibleWordIndex as fallback if no word was clicked
+      const isValid = highlightedWordIndex > 0 && highlightedWordIndex < (wordsRef.current?.length || Infinity);
+      if (!isValid) {
+        const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+        if (firstVisible >= 0) setHighlightedWordIndex(firstVisible);
+      }
     }
     jumpToWord(highlightedWordIndex);
     setReadingMode("flow");
