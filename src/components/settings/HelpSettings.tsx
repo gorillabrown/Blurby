@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 
 const api = window.electronAPI;
+const appVersion = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
 
 interface HelpSettingsProps {
   isMac: boolean;
@@ -9,16 +10,21 @@ interface HelpSettingsProps {
 export function HelpSettings({ isMac }: HelpSettingsProps) {
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [canInstall, setCanInstall] = useState(false);
 
   const handleCheckForUpdates = useCallback(async () => {
     setChecking(true);
     setUpdateStatus(null);
+    setCanInstall(false);
     try {
       const result = await api.checkForUpdates();
       if (result.status === "dev") {
         setUpdateStatus("Updates not available in dev mode");
-      } else if (result.version) {
+      } else if (result.status === "error") {
+        setUpdateStatus(result.message || "Could not check for updates");
+      } else if (result.version && result.version !== appVersion) {
         setUpdateStatus(`Update available: v${result.version}`);
+        setCanInstall(true);
       } else {
         setUpdateStatus("You're up to date");
       }
@@ -26,6 +32,10 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
       setUpdateStatus("Could not check for updates");
     }
     setChecking(false);
+  }, []);
+
+  const handleInstallUpdate = useCallback(() => {
+    api.installUpdate();
   }, []);
 
   return (
@@ -44,6 +54,9 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
       </div>
 
       <div className="settings-section-label">Updates</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>
+        Version {appVersion}
+      </div>
       <div className="help-update-row">
         <button
           className="btn"
@@ -53,6 +66,15 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
           {checking ? "Checking..." : "Check for updates"}
         </button>
         {updateStatus && <span className="help-update-status">{updateStatus}</span>}
+        {canInstall && (
+          <button
+            className="btn"
+            onClick={handleInstallUpdate}
+            style={{ marginLeft: 8 }}
+          >
+            Install &amp; restart
+          </button>
+        )}
       </div>
     </div>
   );

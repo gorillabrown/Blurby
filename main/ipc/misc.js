@@ -344,10 +344,18 @@ function register(ctx) {
     if (!app.isPackaged) return { status: "dev" };
     try {
       const { autoUpdater } = require("electron-updater");
+      autoUpdater.autoDownload = true;
+      autoUpdater.autoInstallOnAppQuit = true;
       const result = await autoUpdater.checkForUpdates();
-      return { status: "checked", version: result?.updateInfo?.version || null };
+      const latestVersion = result?.updateInfo?.version || null;
+      return { status: "checked", version: latestVersion };
     } catch (err) {
-      return { status: "error", message: err.message };
+      const msg = err.message || String(err);
+      // Private repo or network error — surface a helpful message
+      if (msg.includes("404") || msg.includes("HttpError") || msg.includes("net::")) {
+        return { status: "error", message: "Could not reach update server. The repository may be private." };
+      }
+      return { status: "error", message: msg };
     }
   });
 

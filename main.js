@@ -471,6 +471,22 @@ app.whenReady().then(async () => {
   updateWindowTheme(mainWindow, settings);
   if (!isDev) setupAutoUpdater(mainWindow);
 
+  // Auto-download Kokoro TTS model if not already present (non-blocking)
+  {
+    const ttsEngine = require("./main/tts-engine");
+    if (!ttsEngine.isModelReady()) {
+      ttsEngine.downloadModel((progress) => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send("tts-kokoro-download-progress", progress);
+        }
+      }).then(() => {
+        console.log("[kokoro] Model auto-download complete");
+      }).catch((err) => {
+        console.log("[kokoro] Auto-download failed (will retry on demand):", err.message);
+      });
+    }
+  }
+
   // Listen for OS theme changes
   nativeTheme.on("updated", () => {
     broadcastSystemTheme(mainWindow, readerWindows);
