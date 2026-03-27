@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING } from "../constants";
+import { useEinkController } from "../hooks/useEinkController";
+import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
@@ -80,25 +82,8 @@ export default function ReaderContainer({
   // Flow mode plays within Page view (word highlight advances at WPM)
   const [flowPlaying, setFlowPlaying] = useState(false);
 
-  // E-ink ghosting prevention
-  const [einkPageTurns, setEinkPageTurns] = useState(0);
-  const [showEinkRefresh, setShowEinkRefresh] = useState(false);
-  const triggerEinkRefresh = useCallback(() => {
-    if (!isEink) return;
-    setShowEinkRefresh(true);
-    setTimeout(() => setShowEinkRefresh(false), 200);
-  }, [isEink]);
-  const handleEinkPageTurn = useCallback(() => {
-    if (!isEink) return;
-    setEinkPageTurns((prev) => {
-      const next = prev + 1;
-      if (next >= (settings.einkRefreshInterval || DEFAULT_EINK_REFRESH_INTERVAL)) {
-        triggerEinkRefresh();
-        return 0;
-      }
-      return next;
-    });
-  }, [isEink, settings.einkRefreshInterval, triggerEinkRefresh]);
+  // E-ink ghosting prevention (extracted to useEinkController hook)
+  const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
 
   const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number }>>([]);
   const sessionStartRef = useRef<number | null>(null);
@@ -111,7 +96,7 @@ export default function ReaderContainer({
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
-  const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
+  const foliateWordsRef = useRef<Array<{ word: string; range: Range | null; sectionIndex: number }>>([]);
   // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
@@ -360,22 +345,10 @@ export default function ReaderContainer({
       }, 500);
       return;
     }
-    // Start from highlightedWordIndex (set by word click or previous position).
-    // For EPUB: only use findFirstVisibleWordIndex as FALLBACK when no word was selected
-    // (highlightedWordIndex is 0 or out of range for the current section)
-    let startIdx = highlightedWordIndex;
-    if (useFoliate) {
-      // Check if highlightedWordIndex is valid in the current word array
-      const isValid = startIdx > 0 && startIdx < effectiveWords.length;
-      if (!isValid) {
-        const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-        if (firstVisible >= 0) {
-          startIdx = firstVisible;
-        } else {
-          startIdx = 0;
-        }
-      }
-    }
+    // Resolve start position — uses shared utility to eliminate duplication with startFocus/startFlow
+    const startIdx = useFoliate
+      ? resolveFoliateStartWord(highlightedWordIndex, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      : highlightedWordIndex;
     // Set the TTS rate BEFORE starting — adjustRate() after start would increment
     // the generation ID, poisoning the in-flight Kokoro IPC call.
     if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
@@ -506,20 +479,11 @@ export default function ReaderContainer({
   const startFocus = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
-    // For foliate EPUBs, ensure words are extracted
-    let startWord = highlightedWordIndex;
-    if (useFoliate) {
-      extractFoliateWords();
-      // Only use findFirstVisibleWordIndex as fallback if no word was clicked
-      const isValid = startWord > 0 && startWord < (wordsRef.current?.length || Infinity);
-      if (!isValid) {
-        const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-        if (firstVisible >= 0) {
-          startWord = firstVisible;
-          setHighlightedWordIndex(firstVisible);
-        }
-      }
-    }
+    if (useFoliate) extractFoliateWords();
+    const startWord = useFoliate
+      ? resolveFoliateStartWord(highlightedWordIndex, wordsRef.current?.length || 0, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      : highlightedWordIndex;
+    if (useFoliate && startWord !== highlightedWordIndex) setHighlightedWordIndex(startWord);
     jumpToWord(startWord);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
@@ -530,17 +494,12 @@ export default function ReaderContainer({
   const startFlow = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
-    // For foliate EPUBs, ensure words are extracted
-    if (useFoliate) {
-      extractFoliateWords();
-      // Only use findFirstVisibleWordIndex as fallback if no word was clicked
-      const isValid = highlightedWordIndex > 0 && highlightedWordIndex < (wordsRef.current?.length || Infinity);
-      if (!isValid) {
-        const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-        if (firstVisible >= 0) setHighlightedWordIndex(firstVisible);
-      }
-    }
-    jumpToWord(highlightedWordIndex);
+    if (useFoliate) extractFoliateWords();
+    const startWord = useFoliate
+      ? resolveFoliateStartWord(highlightedWordIndex, wordsRef.current?.length || 0, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      : highlightedWordIndex;
+    if (useFoliate && startWord !== highlightedWordIndex) setHighlightedWordIndex(startWord);
+    jumpToWord(startWord);
     setReadingMode("flow");
     setFlowPlaying(true);
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
@@ -883,11 +842,12 @@ export default function ReaderContainer({
           setHighlightedWordIndex(globalWordIndex);
           return;
         }
-        // Fallback: text search (less precise)
-        if (words.length > 0) {
+        // Fallback: text search in foliate word array (less precise)
+        const fWords = foliateWordsRef.current;
+        if (fWords.length > 0) {
           const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
-          for (let i = 0; i < words.length; i++) {
-            if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
+          for (let i = 0; i < fWords.length; i++) {
+            if (fWords[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
               setHighlightedWordIndex(i);
               return;
             }
