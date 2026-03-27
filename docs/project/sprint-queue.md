@@ -10,15 +10,122 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 4
-Next sprint: HOTFIX-1 — Grid Interaction Bugs
+Queue depth: 5
+Next sprint: TD-2 — Wire Mode Instances + Remaining Stabilization
 Health: OK
-Action needed: Dispatch HOTFIX-1, then resume Sprint 23
+Action needed: Dispatch TD-2
 ```
 
 ---
 
 ## Queue
+
+---
+
+## TD-2 — Wire Mode Instances + Remaining Stabilization
+
+### KEY CONTEXT
+Sprint TD-1 (technical debt) merged to main as v2.1.0. Four mode classes exist in `src/modes/` (PageMode, FocusMode, FlowMode, NarrateMode) implementing the `ReadingMode` interface, but they're not wired into the app. ReaderContainer still uses inline mode logic in `useReaderMode` hook. Three stabilization bugs remain from Sprint 25S, plus the auto-updater fix.
+
+### PROBLEM
+1. Mode classes exist but aren't used — all mode timing/advancement is still inline in `useReaderMode.ts` (294 lines of callbacks that should delegate to mode instances)
+2. Flow cursor invisible on EPUBs (BUG-091) — FlowCursorController can't find `[data-word-index]` in foliate shadow DOM. Need overlay cursor using `getBoundingClientRect` on word spans inside iframes.
+3. Focus starts from wrong position on EPUBs (BUG-092) — `wordsRef` not populated with foliate words before Focus starts. `jumpToWord` receives stale index 0.
+4. Auto-updater `latest.yml` only has ARM64 (S-02) — x64 users never get updates. Release workflow builds x64 and ARM64 as separate jobs; ARM64 overwrites `latest.yml`.
+5. Zero unit tests for the 4 mode classes.
+
+### EVIDENCE OF PROBLEM
+- `src/modes/*.ts` — 629 lines of mode logic never imported by any component
+- `src/hooks/useReaderMode.ts` lines 120-230 — inline `stopAllModes`, `startNarration`, `startFocus`, `startFlow` that duplicate mode class logic
+- BUG-091: User screenshot shows Flow mode active on EPUB but no underline cursor visible
+- BUG-092: Console log `[Foliate] Word clicked: "using" at global index 4152` but Focus starts at word 0
+- S-02: `gh release download v2.0.0 --pattern "latest.yml"` shows only `Blurby-Setup-2.0.0-arm64.exe`
+
+### HYPOTHESIZED SOLUTION
+1. Create `useReadingModeInstance` hook that instantiates the correct mode class based on `readingMode` state, bridging callbacks to React state
+2. Replace inline timer/advancement logic in `useReaderMode` with `modeInstance.start()` / `.pause()` / `.stop()` calls
+3. BUG-091: Overlay `<div>` positioned above foliate iframe, coordinates from `span.getBoundingClientRect()` + `iframe.getBoundingClientRect()`, animated with CSS `transition: transform`
+4. BUG-092: Call `extractFoliateWords()` then `findFirstVisibleWordIndex()` synchronously, pass result directly to `jumpToWord(startWord)` instead of going through `setHighlightedWordIndex` (React batching delay)
+5. S-02: Single-job matrix build in `release.yml` with `--x64 --arm64` flags, or post-build YAML merge step
+
+### WHAT (Tasks to Complete)
+
+| Step | Task | Agent | Model |
+|------|------|-------|-------|
+| 1 | Create `src/hooks/useReadingModeInstance.ts` — instantiates mode classes, bridges callbacks to React state via refs | renderer-fixer | sonnet |
+| 2 | Wire `useReadingModeInstance` into `ReaderContainer.tsx` — replace inline timer logic with `modeInstance.start()`/`.pause()`/`.stop()` calls | renderer-fixer | sonnet |
+| 3 | Fix BUG-091: Flow cursor overlay for EPUBs — `<div>` above iframe, `getBoundingClientRect` coords, CSS transition animation | renderer-fixer | sonnet |
+| 4 | Fix BUG-092: Focus start position — synchronous `extractFoliateWords` + `findFirstVisibleWordIndex` before `jumpToWord` | renderer-fixer | sonnet |
+| 5 | Fix S-02: `release.yml` single-job multi-arch build producing one `latest.yml` with both x64 and arm64 entries | electron-fixer | sonnet |
+| 6 | Write `tests/modes.test.ts` — ≥20 unit tests across 4 mode classes (timing, pauses, callbacks, lifecycle) | test-runner | sonnet |
+| 7 | Run `npm test` + `npm run build` — all pass, zero TS errors | test-runner | haiku |
+| 8 | Commit on branch `sprint/td2-mode-wiring`, merge to main with `--no-ff` | blurby-lead | — |
+| 9 | Print terminal summary with line counts, test counts, files changed | blurby-lead | — |
+
+### WHERE (Read in This Order)
+
+1. `src/modes/ModeInterface.ts` — ReadingMode interface, ModeConfig, ModeCallbacks (the contract all modes implement)
+2. `src/modes/FocusMode.ts` — setTimeout chain with rhythm pauses (reference implementation)
+3. `src/modes/NarrateMode.ts` — TTS delegation via NarrationInterface (most complex mode)
+4. `src/hooks/useReaderMode.ts` — current inline mode logic (294 lines to be replaced with instance delegation)
+5. `src/components/ReaderContainer.tsx` — where `useReaderMode` is called (line ~248), where modeInstances would be created
+6. `src/components/FoliatePageView.tsx` — `highlightWordByIndex`, `findFirstVisibleWordIndex`, `scrollToAnchor`, `wrapWordsInSpans` (BUG-091 + BUG-092 context)
+7. `src/hooks/useNarration.ts` — `startCursorDriven`, `adjustRate`, `pause`, `resume`, `stop` (matches NarrationInterface)
+8. `.github/workflows/release.yml` — current dual-job build workflow (S-02 fix target)
+9. `docs/project/LESSONS_LEARNED.md` — LL-035 (EPUB page auto-advance), PR-37 (Kokoro rhythm pauses) for context on foliate iframe challenges
+
+### HOW (Agent Assignments)
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| renderer-fixer | sonnet | Steps 1-4: hook creation, ReaderContainer wiring, Flow cursor overlay, Focus start fix. Touch: `src/hooks/useReadingModeInstance.ts` (new), `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx` |
+| electron-fixer | sonnet | Step 5: release.yml multi-arch fix. Touch: `.github/workflows/release.yml` only |
+| test-runner | sonnet/haiku | Steps 6-7: mode class unit tests + full suite verification |
+| blurby-lead | — | Steps 8-9: orchestrate, merge, summary |
+
+**Execution mode:** All commands run directly in bash (no sub-agents for long commands). Steps 1-2 are the riskiest — if the app breaks after wiring, revert Step 2 changes and debug before proceeding.
+
+### WHEN (Execution Order)
+
+```
+[1] Create useReadingModeInstance hook (renderer-fixer)
+    ↓
+[2] Wire into ReaderContainer (renderer-fixer) — depends on 1
+    ↓
+[3-5] PARALLEL:
+    ├─ [3] BUG-091: Flow cursor on EPUBs (renderer-fixer)
+    ├─ [4] BUG-092: Focus start position (renderer-fixer)
+    └─ [5] S-02: release.yml multi-arch (electron-fixer)
+    ↓ (all complete)
+[6] Unit tests for mode classes (test-runner)
+    ↓
+[7] npm test + npm run build (test-runner)
+    ↓
+[8] Commit + merge (blurby-lead)
+[9] Print summary (blurby-lead)
+```
+
+### ADDITIONAL GUIDANCE
+
+- **useReadingModeInstance hook pattern:** Use `useRef<ReadingMode | null>(null)` to hold the instance. On `readingMode` change, call `current?.destroy()`, then create new instance. Pass callbacks as stable refs (`useRef` wrappers) to avoid recreating instances on every render.
+- **Flow cursor overlay (BUG-091):** Parent coordinates = `iframeRect.left + spanRect.left`, `iframeRect.top + spanRect.top`. The overlay `<div>` lives in FoliatePageView (React-owned), not inside the iframe. Width = `spanRect.width`, height = 3px (underline) or `spanRect.height` (box). Animate with `transition: transform 0.15s ease`. When span is off-screen, call `scrollToAnchor` to page-turn.
+- **Focus start (BUG-092):** The fix is to use the return value of `findFirstVisibleWordIndex()` directly in the same synchronous call, not go through `setHighlightedWordIndex` which is async (React batching). Pattern: `const startWord = findFirstVisible(); jumpToWord(startWord);`
+- **S-02 preferred approach:** Single job with `electron-builder --x64 --arm64` in one command. If electron-builder doesn't support combined arch builds, use a post-build step: after both builds, read both `latest.yml` files, merge the `files:` arrays into one YAML, upload the merged file.
+- **Anti-pattern:** Do NOT move visual/DOM rendering logic into mode classes. Modes are pure logic (timing, word index, callbacks). React components own the DOM. The `onWordAdvance` callback is the bridge.
+- **Branch:** `sprint/td2-mode-wiring`
+
+### SUCCESS CRITERIA
+
+1. `useReadingModeInstance` hook creates correct mode class for each mode type
+2. ReaderContainer uses `modeInstance.start()` / `.pause()` / `.stop()` — no inline `setInterval` or `setTimeout` for word advancement
+3. All 4 modes work correctly after wiring: Page (click + nav), Focus (RSVP), Flow (cursor), Narrate (TTS + highlight)
+4. Flow cursor visible on EPUBs — underline slides across words in foliate view, auto-turns pages
+5. Focus mode starts from first visible word on EPUBs, not beginning of book
+6. `latest.yml` contains both x64 and arm64 installer entries after release build
+7. Unit tests: ≥20 tests across 4 mode classes, all passing
+8. `npm test`: all pass (585+ existing + 20+ new)
+9. `npm run build`: 0 TypeScript errors
+10. Branch `sprint/td2-mode-wiring` merged to main with `--no-ff`
 
 ---
 
