@@ -1,6 +1,10 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS } from "../constants";
+import { useEinkController } from "../hooks/useEinkController";
+import { useProgressTracker } from "../hooks/useProgressTracker";
+import { useReaderMode } from "../hooks/useReaderMode";
+import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
@@ -12,6 +16,8 @@ import PageReaderView from "./PageReaderView";
 import FoliatePageView from "./FoliatePageView";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
+import BacktrackPrompt from "./BacktrackPrompt";
+import ReturnToReadingPill from "./ReturnToReadingPill";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
 
@@ -67,8 +73,9 @@ export default function ReaderContainer({
   );
 
   // ── Four-mode state (mutually exclusive) ────────────────────────────────
-  // "page" is the default. "focus"/"flow"/"narration" are sub-modes.
   const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow" | "narration">("page");
+  const readingModeRef = useRef(readingMode);
+  readingModeRef.current = readingMode;
 
   // Highlighted word in Page view — anchor for Focus/Flow entry
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
@@ -76,25 +83,8 @@ export default function ReaderContainer({
   // Flow mode plays within Page view (word highlight advances at WPM)
   const [flowPlaying, setFlowPlaying] = useState(false);
 
-  // E-ink ghosting prevention
-  const [einkPageTurns, setEinkPageTurns] = useState(0);
-  const [showEinkRefresh, setShowEinkRefresh] = useState(false);
-  const triggerEinkRefresh = useCallback(() => {
-    if (!isEink) return;
-    setShowEinkRefresh(true);
-    setTimeout(() => setShowEinkRefresh(false), 200);
-  }, [isEink]);
-  const handleEinkPageTurn = useCallback(() => {
-    if (!isEink) return;
-    setEinkPageTurns((prev) => {
-      const next = prev + 1;
-      if (next >= (settings.einkRefreshInterval || DEFAULT_EINK_REFRESH_INTERVAL)) {
-        triggerEinkRefresh();
-        return 0;
-      }
-      return next;
-    });
-  }, [isEink, settings.einkRefreshInterval, triggerEinkRefresh]);
+  // E-ink ghosting prevention (extracted to useEinkController hook)
+  const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
 
   const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number }>>([]);
   const sessionStartRef = useRef<number | null>(null);
@@ -107,7 +97,10 @@ export default function ReaderContainer({
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
-  const foliateWordsRef = useRef<Array<{ word: string; range: Range; sectionIndex: number }>>([]);
+  const foliateWordsRef = useRef<Array<{ word: string; range: Range | null; sectionIndex: number }>>([]);
+  // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
+  const foliateFractionRef = useRef(0);
+  const [foliateFraction, setFoliateFraction] = useState(0);
 
   // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
@@ -172,65 +165,51 @@ export default function ReaderContainer({
     }
   }, [focusTextSize]);
 
-  // Save progress from the active position source (debounced 2s)
-  // Page/Flow mode: highlightedWordIndex. Focus mode: wordIndex.
-  const pageSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastSavedPosRef = useRef(activeDoc.position || 0);
-  const currentPos = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+  // ── Progress tracking (extracted to useProgressTracker hook) ─────────
+  const progress = useProgressTracker({
+    activeDoc,
+    wordIndex,
+    highlightedWordIndex,
+    readingMode,
+    useFoliate,
+    foliateFractionRef,
+    wpm,
+    wordsLength: words.length,
+    sessionStartWordRef,
+    activeReadingMsRef,
+    activeReadingStartRef,
+    onUpdateProgress,
+    onArchiveDoc,
+    onExitReader,
+  });
+  const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef } = progress;
+  const { finishReading, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
 
-  // Only save progress when user is actively reading (in a mode) or has manually navigated
-  // Don't save on initial book open to prevent false "started" status
-  const userHasInteractedRef = useRef(false);
+  // Backtrack prompt state — managed by useProgressTracker
+
+  // NM page browsing — tracks when user has browsed away from highlight position during narration
+  const [isBrowsedAway, setIsBrowsedAway] = useState(false);
+
+  // Sync isBrowsedAway with foliate's userBrowsing state (checked on relocate events)
   useEffect(() => {
-    if (readingMode !== "page") userHasInteractedRef.current = true;
-  }, [readingMode]);
+    if (!useFoliate || readingMode !== "narration") {
+      if (isBrowsedAway) setIsBrowsedAway(false);
+      return;
+    }
+    const checkBrowsing = () => {
+      const browsing = foliateApiRef.current?.isUserBrowsing?.() ?? false;
+      setIsBrowsedAway(browsing);
+    };
+    const timer = setInterval(checkBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [useFoliate, readingMode]);
 
-  useEffect(() => {
-    if (currentPos === lastSavedPosRef.current) return;
-    // For foliate EPUBs: don't save progress from initial onRelocate events in page mode
-    if (useFoliate && readingMode === "page" && !userHasInteractedRef.current) return;
-    if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
-    pageSaveTimerRef.current = setTimeout(() => {
-      lastSavedPosRef.current = currentPos;
-      api.updateDocProgress(activeDoc.id, currentPos, useFoliate ? activeDoc.cfi : undefined);
-      onUpdateProgress(activeDoc.id, currentPos);
-    }, 2000);
-    return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
-  }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
-
-  const finishReading = useCallback((finalPos: number) => {
-    // Flush any pending debounced save
-    if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
-    onUpdateProgress(activeDoc.id, finalPos);
-    api.updateDocProgress(activeDoc.id, finalPos);
-    // 21N/21O: Use active reading time (Focus/Flow only), not total elapsed
-    if (activeReadingStartRef.current) {
-      activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
-      activeReadingStartRef.current = null;
-    }
-    const activeMs = activeReadingMsRef.current;
-    const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
-    if (wordsRead > 0 && activeMs > 1000) {
-      api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
-      api.logReadingSession({
-        docId: activeDoc.id,
-        duration: activeMs,
-        wordsRead,
-        finalWpm: wpm,
-        mode: readingMode,
-      }).catch(() => {});
-    }
-    if (finalPos >= words.length - 1 && words.length > 0) {
-      api.markDocCompleted();
-      onArchiveDoc(activeDoc.id);
-    }
-    onExitReader(finalPos);
-  }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, onExitReader, words.length]);
+  // Progress save effect + finishReading — managed by useProgressTracker hook
 
   // ── TTS (Narration) — now a discrete mode, not a layer ─────────────────
   const narration = useNarration();
   const ttsActive = readingMode === "narration"; // derived, not separate state
-  const preCapWpmRef = useRef<number | null>(null);
+  // preCapWpmRef managed by useReaderMode hook
 
   // Sync TTS engine/voice/rate from settings → narration hook
   useEffect(() => {
@@ -255,74 +234,81 @@ export default function ReaderContainer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.ttsRate]);
 
-  /** Stop all active sub-modes cleanly — call before entering any mode */
-  const stopAllModes = useCallback(() => {
-    if (playing) reader.togglePlay();
-    if (flowPlaying) setFlowPlaying(false);
-    narration.stop();
-    narration.setPageEndWord(null); // clear page boundary
-    if (preCapWpmRef.current !== null) {
-      setWpm(() => preCapWpmRef.current!);
-      preCapWpmRef.current = null;
-    }
-  }, [playing, flowPlaying, reader, narration, setWpm]);
+  // Page navigation ref (needed by useReaderMode for return-to-reading)
+  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void }>({
+    prevPage: () => {},
+    nextPage: () => {},
+    goToPage: () => {},
+    returnToHighlight: () => {},
+  });
 
-  const handleStopTts = useCallback(() => {
-    narration.stop();
-    if (preCapWpmRef.current !== null) {
-      setWpm(() => preCapWpmRef.current!);
-      preCapWpmRef.current = null;
+  // Extract words from foliate DOM (needed by useReaderMode)
+  const extractFoliateWords = useCallback(() => {
+    if (!useFoliate || !foliateApiRef.current) return;
+    const extracted = foliateApiRef.current.getWords();
+    if (extracted.length > 0) {
+      foliateWordsRef.current = extracted;
+      wordsRef.current = extracted.map(w => w.word);
     }
-  }, [narration, setWpm]);
+  }, [useFoliate, wordsRef]);
 
-  /** Start Narration mode (internal — called by handleTogglePlay) */
-  const startNarration = useCallback(() => {
-    stopAllModes();
-    setReadingMode("narration");
-    updateSettings({ readingMode: "narration", lastReadingMode: "narration" });
-    // Cap WPM for TTS
-    if (wpm > TTS_WPM_CAP) {
-      preCapWpmRef.current = wpm;
-      setWpm(() => TTS_WPM_CAP);
-    }
-    // Pass rhythm pause rules so TTS pauses naturally at punctuation/paragraphs
-    narration.setRhythmPauses(settings.rhythmPauses || null, tokenized.paragraphBreaks);
-    // Get words from foliate DOM (EPUB) or extracted text (other formats)
-    const effectiveWords = getEffectiveWords();
-    // Start from the current highlighted position (word click updates this for foliate EPUBs too)
-    const startIdx = highlightedWordIndex;
-    // Start cursor-driven TTS
-    narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
-      setHighlightedWordIndex(idx);
-      // Highlight word in foliate DOM if available
-      if (useFoliate && foliateWordsRef.current[idx]) {
-        try {
-          foliateApiRef.current?.highlightWord(foliateWordsRef.current[idx].range, foliateWordsRef.current[idx].sectionIndex);
-        } catch { /* range may be stale after page navigation */ }
-      }
-    });
-    // Override the WPM-derived rate with the user's explicit ttsRate setting
-    if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
-  }, [stopAllModes, wpm, setWpm, narration, words, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, tokenized.paragraphBreaks, getEffectiveWords, useFoliate]);
+  // ── Mode transitions (extracted to useReaderMode hook) ──────────────
+  const modeHook = useReaderMode({
+    reader: { playing, wordIndex, wordsRef, togglePlay, jumpToWord },
+    narration,
+    foliateApiRef,
+    foliateWordsRef,
+    useFoliate,
+    settings,
+    updateSettings,
+    wpm,
+    setWpm,
+    effectiveWpm,
+    getEffectiveWords,
+    extractFoliateWords,
+    paragraphBreaks: tokenized.paragraphBreaks,
+    highlightedWordIndex,
+    setHighlightedWordIndex,
+    hasEngagedRef,
+    flowPlaying,
+    setFlowPlaying,
+    isBrowsedAway,
+    setIsBrowsedAway,
+    pageNavRef,
+    readingMode,
+    setReadingMode,
+  });
+  const {
+    stopAllModes, startFocus, startFlow, startNarration,
+    handleTogglePlay, handleSelectMode, handlePauseToPage,
+    handleToggleTts, handleEnterFocus, handleEnterFlow,
+    handleStopTts, handleReturnToReading, preCapWpmRef,
+  } = modeHook;
 
+  // Exit reader — uses both mode hook and progress hook
   const handleExitReader = useCallback(() => {
     if (readingMode === "page") {
-      // Exit from Page → leave reader entirely
+      const totalWords = activeDoc.wordCount || words.length || 1;
+      if (checkBacktrack(highlightedWordIndex, totalWords, useFoliate)) return;
       stopAllModes();
       finishReading(highlightedWordIndex);
     } else {
-      // Exit from any sub-mode → return to Page
       if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
       stopAllModes();
       setReadingMode("page");
     }
-  }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex]);
+  }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex, activeDoc.wordCount, words.length, useFoliate, checkBacktrack, setReadingMode, setHighlightedWordIndex]);
+
+  const { handleSaveAtCurrent, handleKeepFurthest } = progress;
+
+  const handleUserBrowsed = useCallback((isBrowsed: boolean) => {
+    setIsBrowsedAway(isBrowsed);
+  }, []);
 
   const handleScrollExit = useCallback((finalPos: number) => {
-    // Flow mode pause → return to Page
     setHighlightedWordIndex(finalPos);
     setReadingMode("page");
-  }, []);
+  }, [setHighlightedWordIndex, setReadingMode]);
 
   const handleScrollProgress = useCallback((pos: number) => {
     api.updateDocProgress(activeDoc.id, pos);
@@ -337,93 +323,14 @@ export default function ReaderContainer({
     const last = rsvpLastSaveRef.current;
     const timeDelta = now - last.time;
     const wordDelta = Math.abs(wordIndex - last.wordIndex);
-    if (timeDelta >= 5000 || wordDelta >= 50) {
+    if (timeDelta >= RSVP_PROGRESS_SAVE_INTERVAL_MS || wordDelta >= RSVP_PROGRESS_SAVE_WORD_DELTA) {
       rsvpLastSaveRef.current = { time: now, wordIndex };
       api.updateDocProgress(activeDoc.id, wordIndex);
       onUpdateProgress(activeDoc.id, wordIndex);
     }
   }, [playing, wordIndex, activeDoc, readingMode, onUpdateProgress]);
 
-  // ── Mode transitions ───────────────────────────────────────────────────
-
-  /** Start Focus mode (internal — called by handleTogglePlay) */
-  // Extract words from foliate DOM (populate foliateWordsRef for modes)
-  const extractFoliateWords = useCallback(() => {
-    if (!useFoliate || !foliateApiRef.current) return;
-    const extracted = foliateApiRef.current.getWords();
-    if (extracted.length > 0) {
-      foliateWordsRef.current = extracted;
-      wordsRef.current = extracted.map(w => w.word);
-      console.log(`[Foliate] Extracted ${extracted.length} words from DOM`);
-    }
-  }, [useFoliate, wordsRef]);
-
-  const startFocus = useCallback(() => {
-    stopAllModes();
-    // For foliate EPUBs, ensure words are extracted
-    if (useFoliate) extractFoliateWords();
-    jumpToWord(highlightedWordIndex);
-    setReadingMode("focus");
-    updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
-    setTimeout(() => reader.togglePlay(), 50);
-  }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes, useFoliate, extractFoliateWords]);
-
-  /** Start Flow mode (internal — called by handleTogglePlay) */
-  const startFlow = useCallback(() => {
-    stopAllModes();
-    // For foliate EPUBs, ensure words are extracted
-    if (useFoliate) extractFoliateWords();
-    setReadingMode("flow");
-    setFlowPlaying(true);
-    updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
-  }, [updateSettings, stopAllModes, useFoliate, extractFoliateWords]);
-
-  /** Pause any sub-mode → return to Page */
-  const handlePauseToPage = useCallback(() => {
-    if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
-    stopAllModes();
-    setReadingMode("page");
-    updateSettings({ readingMode: "page" });
-  }, [readingMode, wordIndex, updateSettings, stopAllModes]);
-
-  /** Select a mode (button click) — saves preference but does NOT auto-start.
-   *  If the mode is already active, pause back to Page. */
-  const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
-    if (readingMode === mode) {
-      // Already active → pause back to Page
-      handlePauseToPage();
-    } else if (readingMode !== "page") {
-      // Different mode active → stop it, select new one, stay in Page
-      stopAllModes();
-      setReadingMode("page");
-      updateSettings({ lastReadingMode: mode });
-    } else {
-      // In Page view → just select the mode (don't start)
-      updateSettings({ lastReadingMode: mode });
-    }
-  }, [readingMode, handlePauseToPage, stopAllModes, updateSettings]);
-
-  /** Toggle narration — used by N key shortcut (starts or stops) */
-  const handleToggleTts = useCallback(() => {
-    handleSelectMode("narration");
-  }, [handleSelectMode]);
-
-  /** Convenience wrappers for bottom bar buttons */
-  const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
-  const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
-
-  /** Toggle play: Space starts last-used mode from Page, or pauses active mode → Page. */
-  const handleTogglePlay = useCallback(() => {
-    if (readingMode === "page") {
-      // Start the selected mode
-      const lastMode = settings.lastReadingMode || "flow";
-      if (lastMode === "focus") startFocus();
-      else if (lastMode === "narration") startNarration();
-      else startFlow();
-    } else {
-      handlePauseToPage();
-    }
-  }, [readingMode, settings.lastReadingMode, startFlow, startFocus, startNarration, handlePauseToPage]);
+  // extractFoliateWords moved above useReaderMode hook call
 
   const adjustFocusTextSize = useCallback((delta: number) => {
     if (!isFinite(delta)) { setFocusTextSize(DEFAULT_FOCUS_TEXT_SIZE); return; }
@@ -460,6 +367,7 @@ export default function ReaderContainer({
   }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
 
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
+    hasEngagedRef.current = true;
     // For foliate EPUBs, navigate using the href from the TOC
     if (useFoliate && (docChapters[chapterIndex] as any)?.href) {
       foliateApiRef.current?.goTo?.((docChapters[chapterIndex] as any).href);
@@ -479,13 +387,10 @@ export default function ReaderContainer({
   // ── Page-mode callbacks for keyboard hook ────────────────────────────
 
   // Page refs for keyboard navigation (updated by PageReaderView via callbacks)
-  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void }>({
-    prevPage: () => {},
-    nextPage: () => {},
-  });
+  // pageNavRef moved above useReaderMode hook call
 
-  const handlePrevPage = useCallback(() => pageNavRef.current.prevPage(), []);
-  const handleNextPage = useCallback(() => pageNavRef.current.nextPage(), []);
+  const handlePrevPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.prevPage(); }, []);
+  const handleNextPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.nextPage(); }, []);
 
   // Flow line navigation ref (updated by PageReaderView)
   const flowNavRef = useRef<{ prevLine: () => void; nextLine: () => void }>({
@@ -496,6 +401,7 @@ export default function ReaderContainer({
   const handleFlowNextLine = useCallback(() => flowNavRef.current.nextLine(), []);
 
   const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
+    hasEngagedRef.current = true;
     // Move highlight by 1 word (left/right) or ~10 words (up/down, approximate line jump)
     const delta = direction === "left" ? -1 : direction === "right" ? 1 : direction === "up" ? -10 : 10;
     setHighlightedWordIndex((prev) => Math.max(0, Math.min(words.length - 1, prev + delta)));
@@ -624,14 +530,13 @@ export default function ReaderContainer({
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
   // Foliate word highlighting — when highlightedWordIndex changes during Flow/Narration,
-  // highlight the corresponding word in the foliate DOM
+  // highlight the corresponding word in the foliate DOM and auto-advance page if needed
   useEffect(() => {
     if (!useFoliate || readingMode === "page" || readingMode === "focus") return;
-    if (!foliateWordsRef.current.length) return;
-    const wordData = foliateWordsRef.current[highlightedWordIndex];
-    if (wordData) {
-      foliateApiRef.current?.highlightWord(wordData.range, wordData.sectionIndex);
-    }
+    if (!foliateApiRef.current) return;
+    // Use highlightWordByIndex which queries data-word-index spans in the DOM
+    // and calls scrollToAnchor to auto-advance pages when the word is off-screen
+    foliateApiRef.current.highlightWordByIndex(highlightedWordIndex);
   }, [highlightedWordIndex, readingMode, useFoliate]);
 
   // Flow mode word advancement timer for foliate EPUBs
@@ -665,19 +570,28 @@ export default function ReaderContainer({
       initialCfi={activeDoc.cfi || null}
       onRelocate={(detail) => {
         if (detail.cfi) {
-          activeDoc.cfi = detail.cfi;
           const fraction = detail.fraction || 0;
+          foliateFractionRef.current = fraction;
+          setFoliateFraction(fraction);
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
-          setHighlightedWordIndex(approxWordIdx);
-          // Only save progress if user has interacted (prevents false "started")
-          if (!userHasInteractedRef.current && readingMode === "page") return;
+          // Update CFI for position restoration
+          activeDoc.cfi = detail.cfi;
+          // During narration/flow, the word-advance callback owns highlightedWordIndex —
+          // don't overwrite with approximate fraction-based index from onRelocate.
+          // Uses ref (not closure state) to avoid stale value bug.
+          const mode = readingModeRef.current;
+          if (mode !== "narration" && mode !== "flow") {
+            setHighlightedWordIndex(approxWordIdx);
+          }
+          // Only PERSIST progress after engagement (prevents saving false progress on browse)
+          if (!hasEngagedRef.current && mode === "page") return;
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
             api.updateDocProgress(activeDoc.id, approxWordIdx, detail.cfi);
             onUpdateProgress(activeDoc.id, approxWordIdx);
             lastSavedPosRef.current = approxWordIdx;
-          }, 2000);
+          }, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS);
         }
       }}
       onTocReady={(toc) => {
@@ -687,34 +601,21 @@ export default function ReaderContainer({
           href: item.href,
         })));
       }}
-      onWordClick={(cfi, word, sectionIndex, wordOffsetInSection) => {
+      onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
+        hasEngagedRef.current = true;
         activeDoc.cfi = cfi;
-        console.log(`[Foliate] Word clicked: "${word}" at CFI: ${cfi}, section: ${sectionIndex}, offset: ${wordOffsetInSection}`);
-        // Map section + word offset to our extracted words array index
-        const words = foliateWordsRef.current;
-        if (words.length > 0 && sectionIndex !== undefined && wordOffsetInSection !== undefined) {
-          // Find the first word in this section, then add the offset
-          let sectionStart = -1;
-          for (let i = 0; i < words.length; i++) {
-            if (words[i].sectionIndex === sectionIndex) {
-              sectionStart = i;
-              break;
-            }
-          }
-          if (sectionStart >= 0) {
-            const targetIdx = Math.min(sectionStart + wordOffsetInSection, words.length - 1);
-            setHighlightedWordIndex(targetIdx);
-            console.log(`[Foliate] Mapped click to word index ${targetIdx} (section ${sectionIndex} + offset ${wordOffsetInSection})`);
-            return;
-          }
+        // Use global word index directly when available (from data-word-index span)
+        if (globalWordIndex !== undefined && globalWordIndex >= 0) {
+          setHighlightedWordIndex(globalWordIndex);
+          return;
         }
-        // Fallback: text search (less precise)
-        if (words.length > 0) {
+        // Fallback: text search in foliate word array (less precise)
+        const fWords = foliateWordsRef.current;
+        if (fWords.length > 0) {
           const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
-          for (let i = 0; i < words.length; i++) {
-            if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
+          for (let i = 0; i < fWords.length; i++) {
+            if (fWords[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
               setHighlightedWordIndex(i);
-              console.log(`[Foliate] Mapped click to word index ${i} (text fallback)`);
               return;
             }
           }
@@ -722,22 +623,42 @@ export default function ReaderContainer({
       }}
       onLoad={() => {
         // Extract words from DOM after each section loads
-        setTimeout(extractFoliateWords, 100);
+        // BUT NOT during active narration/flow — rebuilding the word array mid-mode
+        // shifts all data-word-index attributes, causing highlight/page jumps.
+        // Uses ref (not state) because this callback is captured in a closure at render time.
+        setTimeout(() => {
+          const mode = readingModeRef.current;
+          if (mode !== "narration" && mode !== "flow") {
+            extractFoliateWords();
+            // After extraction, sync highlightedWordIndex to the first visible word
+            // so pressing Space starts from the correct position (not stale approx index)
+            if (foliateApiRef.current) {
+              const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
+              if (firstVisible >= 0) {
+                setHighlightedWordIndex(firstVisible);
+              }
+            }
+          }
+        }, 200); // Slightly longer delay to ensure foliate has finished rendering
       }}
       viewApiRef={foliateApiRef}
-      isReading={readingMode === "flow" || readingMode === "narration"}
+      isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
       onJumpToHighlight={() => {
-        // Navigate foliate to the saved CFI position
-        if (activeDoc.cfi) {
+        // Use the foliate API's returnToNarration which clears browsing flag + scrolls
+        if (foliateApiRef.current?.returnToNarration) {
+          foliateApiRef.current.returnToNarration();
+          setIsBrowsedAway(false);
+        } else if (activeDoc.cfi) {
           foliateApiRef.current?.goTo?.(activeDoc.cfi);
-        } else if (foliateWordsRef.current[highlightedWordIndex]) {
-          try {
-            const wordData = foliateWordsRef.current[highlightedWordIndex];
-            const el = wordData.range.startContainer.parentElement;
-            el?.scrollIntoView?.({ block: "center", behavior: "smooth" });
-          } catch { /* stale range */ }
         }
       }}
+      readingMode={readingMode}
+      flowPlaying={flowPlaying}
+      highlightedWordIndex={highlightedWordIndex}
+      wpm={effectiveWpm}
+      narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
+      onFlowWordAdvance={(idx) => setHighlightedWordIndex(idx)}
+      onWordsReextracted={() => { /* foliate re-extracted words — refs already updated */ }}
     />
   ) : null;
 
@@ -750,7 +671,7 @@ export default function ReaderContainer({
         return (
           <>
             {foliateView}
-            <div style={{ position: "absolute", inset: 0, zIndex: 15, background: "var(--bg)", display: "flex", flexDirection: "column" }}>
+            <div className="focus-overlay">
               <ReaderView
                 activeDoc={activeDoc}
                 words={wordsRef.current}
@@ -848,6 +769,7 @@ export default function ReaderContainer({
             flowPlaying={false}
             ttsActive={true}
             onPageEndWordChange={(endIdx) => narration.setPageEndWord(endIdx)}
+            onUserBrowsed={handleUserBrowsed}
           />
         );
       case "page":
@@ -920,11 +842,25 @@ export default function ReaderContainer({
             updateSettings({ ttsRate: rate });
             narration.adjustRate(rate);
           }}
+          foliateFraction={useFoliate ? foliateFraction : undefined}
         />
       </div>
 
       {menuFlap}
+      <ReturnToReadingPill
+        visible={isBrowsedAway && readingMode === "narration" && !narration.speaking}
+        activeOverlay={menuFlapOpen || showBacktrackPrompt}
+        onReturn={handleReturnToReading}
+      />
       {showEinkRefresh && <EinkRefreshOverlay />}
+      {showBacktrackPrompt && (
+        <BacktrackPrompt
+          currentPage={backtrackPages.current}
+          furthestPage={backtrackPages.furthest}
+          onSaveAtCurrent={handleSaveAtCurrent}
+          onKeepFurthest={handleKeepFurthest}
+        />
+      )}
     </>
   );
 }

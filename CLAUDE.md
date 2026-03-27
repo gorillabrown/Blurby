@@ -11,6 +11,7 @@
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 7. **CLAUDE.md stays under ~20k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
 8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt using the **Sprint Dispatch Template** in `.claude/agents/blurby-lead.md`. Dispatches are POINTERS not PAYLOADS — reference the Roadmap section for full spec, don't duplicate it.
+9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 
 ---
 
@@ -130,13 +131,13 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ---
 
-## Current System State (Post-Sprint 18B — Chrome Extension Complete)
+## Current System State (Post-Sprint 25S — Stabilization Complete)
 
-### Codebase (branch: `main`, all merged and pushed)
+### Codebase (branch: `sprint/25s-stabilization`, pending merge to main)
 
-- All sprints (1-21 + 18A + 18B) complete — security, performance, accessibility, cloud sync, production installer, sync hardening, keyboard-first UX, UX polish, Chrome extension
-- 512 tests passing across 22 test files
-- CI/CD active via GitHub Actions (x64 + ARM64 release matrix)
+- All sprints (1-22 + 18A + 18B + 25S) complete — core app, security, performance, accessibility, cloud sync, production installer, sync hardening, keyboard-first UX, UX polish, Chrome extension, reading animation, TTS sync, stabilization
+- 522 tests passing across 24 test files
+- CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
 
 ### Tech Stack
 
@@ -165,17 +166,18 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 - **Preload** (`preload.js`): Context bridge -> `window.electronAPI` (incl. cloud sync APIs)
 - **Renderer** (`src/`): React 19 SPA
   - `App.tsx` — Thin orchestrator (Sprint 11 refactor)
-  - `src/components/` — 37 UI components + 8 settings sub-pages
+  - `src/components/` — 39 UI components + 8 settings sub-pages
     - Sprint 20 additions: `PageReaderView.tsx` (default paginated reader), `ReaderBottomBar.tsx` (unified controls), `CommandPalette.tsx`, `ShortcutsOverlay.tsx`, `GoToIndicator.tsx`, `SnoozePickerOverlay.tsx`, `TagPickerOverlay.tsx`, `HighlightsOverlay.tsx`, `QuickSettingsPopover.tsx`, `NotePopover.tsx`
     - Sprint 21 addition: `HotkeyCoach.tsx` (mouse-click coaching toasts)
+    - Sprint 25S additions: `BacktrackPrompt.tsx` (high-water mark progress prompt), `ReturnToReadingPill.tsx` (floating narration return button)
   - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
   - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration
-  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts
+  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts (Sprint 25S), getOverlayPosition.ts (Sprint 25S), FlowCursorController.ts
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Tests** (`tests/`): 21 test files, 425+ tests (Sprint 13 base + Sprint 19/20/21 additions)
-- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, x64+ARM64 NSIS, draft releases, delta updates)
+- **Tests** (`tests/`): 24 test files, 522 tests (Sprint 13 base + Sprint 19/20/21/25S additions)
+- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
 ### Feature Status
@@ -233,12 +235,19 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 | Focus Word Transition | ✅ Built | CSS fade/slide on word advance, duration ≤15% of interval, disabled >500 WPM (Sprint 22) |
 | TTS Sync | ✅ Built | Cursor-driven TTS — 4-word chunk buffering, WPM-derived rate, word-boundary sync, auto-chain (Sprint 22) |
 | TTS Toggle + WPM Cap | ✅ Built | Narration button in bottom bar (Page view only), WPM capped at 400, N shortcut (Sprint 22) |
+| EPUB Overlay System | ✅ Built | Range-based overlays for Flow cursor, narration highlight, Focus centering on EPUBs — no DOM injection (Sprint 25S) |
+| Engagement-Gated Progress | ✅ Built | Progress only saved after deliberate interaction; backtrack prompt on close behind high-water mark (Sprint 25S) |
+| Word Tokenization | ✅ Built | Shared `segmentWords` utility via `Intl.Segmenter` — unified across extraction and click mapping (Sprint 25S) |
+| Stale Range Guards | ✅ Built | `safeRangeOp` + `isConnected` guards, word re-extraction on section change, iframe ref caching (Sprint 25S) |
+| TTS Rate Guard | ✅ Built | Generation ID pattern discards stale Kokoro IPC results on rate change (Sprint 25S) |
+| Return to Reading Pill | ✅ Built | Floating pill during paused narration when browsed away, Enter key shortcut (Sprint 25S) |
 
 ### What's NOT Done (Roadmap Forward)
 
 - ~~Sprint 18B: Chrome extension~~ — ✅ COMPLETED (merged to main)
 - ~~Sprint 22: Reading Animation + TTS Sync~~ — ✅ COMPLETED (merged to main)
-- **Sprint 23: V1 Hardening** — First-run onboarding, error recovery UX, constants extraction (AF-001), a11y audit on Sprint 20/21 components, performance baselines, auto-update E2E test
+- ~~Sprint 25S: Stabilization~~ — ✅ COMPLETED (pending merge to main after smoke test)
+- **Sprint 23: V1 Hardening** — First-run onboarding, error recovery UX, constants extraction (AF-001), a11y audit on Sprint 20/21/25S components, performance baselines, auto-update E2E test
 - **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release
 - **Sprint 25: RSS Library + Paywall Integration** — Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline (post-v1)
 - **Sprint 18C: Android app** — React Native port with cloud sync (post-v1)
@@ -257,6 +266,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 ✅ Sprint 21 (UX polish + reading intelligence) — completed
 ✅ Sprint 18B (Chrome extension) — completed
 ✅ Sprint 22 (reading animation + TTS sync) — completed
+✅ Sprint 25S (stabilization — 13 bug fixes, EPUB overlays, engagement-gated progress) — completed
 **Sprint 23** (v1 hardening) → **Sprint 24** (external audit) → **v1.0.0 RELEASE**
 **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 

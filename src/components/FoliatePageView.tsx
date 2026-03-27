@@ -11,18 +11,40 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
+import { segmentWords } from "../utils/segmentWords";
+import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX } from "../constants";
 
-const api = (window as any).electronAPI;
+const api = window.electronAPI;
 
-/** Extract all words from a foliate view's current visible sections.
+/** Word entry with optional Range — Range is null when the section is unloaded. */
+export interface FoliateWord {
+  word: string;
+  range: Range | null;
+  sectionIndex: number;
+}
+
+/** Intl.Segmenter instance shared within this module for inline word detection. */
+const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+
+/** Extract all words from a foliate view's currently loaded sections.
  *  Returns word strings and their DOM Ranges for highlighting. */
-function extractWordsFromView(view: any): Array<{ word: string; range: Range; sectionIndex: number }> {
-  const words: Array<{ word: string; range: Range; sectionIndex: number }> = [];
-  if (!view?.renderer?.getContents) return words;
+const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
+
+function getBlockParent(node: Node): Element | null {
+  let el = node.parentElement;
+  while (el && !BLOCK_TAGS.has(el.tagName)) el = el.parentElement;
+  return el;
+}
+
+function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreaks: Set<number> } {
+  const words: FoliateWord[] = [];
+  const paragraphBreaks = new Set<number>();
+  if (!view?.renderer?.getContents) return { words, paragraphBreaks };
+
+  let prevBlock: Element | null = null;
 
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
-    const segmenter = new (Intl as any).Segmenter("en", { granularity: "word" });
     const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
       acceptNode: (node: Node) => {
         const parent = node.parentElement;
@@ -34,16 +56,143 @@ function extractWordsFromView(view: any): Array<{ word: string; range: Range; se
     let node: Text | null;
     while ((node = walker.nextNode() as Text | null)) {
       const text = node.textContent || "";
-      for (const { segment, isWordLike, index: segIdx } of segmenter.segment(text)) {
+      const block = getBlockParent(node);
+      const segments = Array.from(wordSegmenter.segment(text));
+      for (let si = 0; si < segments.length; si++) {
+        const { segment, isWordLike, index: segIdx } = segments[si];
         if (!isWordLike) continue;
+        // Include trailing punctuation (e.g., "world" + "." → "world.")
+        // Intl.Segmenter separates punctuation, but TTS rhythm needs it attached
+        let wordWithPunct = segment;
+        let endOffset = segIdx + segment.length;
+        // Scan forward for trailing punctuation segments
+        for (let pi = si + 1; pi < segments.length; pi++) {
+          const next = segments[pi];
+          if (next.isWordLike) break; // Hit next word — stop
+          if (/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/.test(next.segment)) {
+            wordWithPunct += next.segment;
+            endOffset = next.index + next.segment.length;
+          } else {
+            break; // Whitespace or other — stop
+          }
+        }
+        // Detect paragraph boundary: block parent changed from previous word
+        if (prevBlock && block && block !== prevBlock && words.length > 0) {
+          paragraphBreaks.add(words.length - 1); // Last word of previous block
+        }
+        prevBlock = block;
         const range = doc.createRange();
         range.setStart(node, segIdx);
-        range.setEnd(node, segIdx + segment.length);
-        words.push({ word: segment, range, sectionIndex: index });
+        range.setEnd(node, endOffset);
+        words.push({ word: wordWithPunct, range, sectionIndex: index });
       }
+    }
+    // Section boundary = paragraph break
+    if (words.length > 0) {
+      paragraphBreaks.add(words.length - 1);
+    }
+  }
+  return { words, paragraphBreaks };
+}
+
+/** Extract words from a single section's document (for incremental updates during narration) */
+function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWord[] {
+  const words: FoliateWord[] = [];
+  if (!doc?.body) return words;
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node: Node) => {
+      const parent = node.parentElement;
+      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) {
+    const text = node.textContent || "";
+    const segments = Array.from(wordSegmenter.segment(text));
+    for (let si = 0; si < segments.length; si++) {
+      const { segment, isWordLike, index: segIdx } = segments[si];
+      if (!isWordLike) continue;
+      // Include trailing punctuation (same as extractWordsFromView)
+      let wordWithPunct = segment;
+      let endOffset = segIdx + segment.length;
+      for (let pi = si + 1; pi < segments.length; pi++) {
+        const next = segments[pi];
+        if (next.isWordLike) break;
+        if (/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/.test(next.segment)) {
+          wordWithPunct += next.segment;
+          endOffset = next.index + next.segment.length;
+        } else break;
+      }
+      const range = doc.createRange();
+      range.setStart(node, segIdx);
+      range.setEnd(node, endOffset);
+      words.push({ word: wordWithPunct, range, sectionIndex });
     }
   }
   return words;
+}
+
+
+/** Walk the EPUB section DOM and wrap each word in a <span class="page-word" data-word-index="N">.
+ *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
+ *  Returns the next available global index. */
+function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): number {
+  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node: Node) => {
+      const parent = node.parentElement;
+      if (!parent) return NodeFilter.FILTER_REJECT;
+      const tag = parent.tagName?.toUpperCase();
+      if (tag === "SCRIPT" || tag === "STYLE") return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+
+  let globalIndex = globalOffset;
+  const textNodes: Text[] = [];
+  let tn: Text | null;
+  while ((tn = walker.nextNode() as Text | null)) {
+    textNodes.push(tn);
+  }
+
+  for (const textNode of textNodes) {
+    const text = textNode.textContent || "";
+    const words = segmentWords(text);
+    if (words.length === 0) continue;
+
+    const parent = textNode.parentNode;
+    if (!parent) continue;
+
+    // Build a document fragment with word spans + whitespace preserved
+    const frag = doc.createDocumentFragment();
+    let remaining = text;
+
+    for (const word of words) {
+      const wordStart = remaining.indexOf(word);
+      if (wordStart > 0) {
+        // Preserve whitespace/punctuation before the word
+        frag.appendChild(doc.createTextNode(remaining.slice(0, wordStart)));
+      }
+
+      const span = doc.createElement("span");
+      span.className = "page-word";
+      span.setAttribute("data-word-index", String(globalIndex));
+      span.textContent = word;
+      frag.appendChild(span);
+
+      remaining = remaining.slice(wordStart + word.length);
+      globalIndex++;
+    }
+
+    // Append any trailing whitespace/punctuation
+    if (remaining) {
+      frag.appendChild(doc.createTextNode(remaining));
+    }
+
+    parent.replaceChild(frag, textNode);
+  }
+
+  return globalIndex;
 }
 
 interface FoliatePageViewProps {
@@ -51,8 +200,9 @@ interface FoliatePageViewProps {
   settings: BlurbySettings;
   onRelocate?: (detail: { cfi: string; fraction: number; tocItem?: any; pageItem?: any }) => void;
   onTocReady?: (toc: any[]) => void;
-  onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number) => void;
+  onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number) => void;
   onLoad?: () => void;
+  onWordsReextracted?: () => void;
   initialCfi?: string | null;
   focusTextSize?: number;
   /** Ref for imperative access (getWords, goTo, next, prev) */
@@ -61,86 +211,37 @@ interface FoliatePageViewProps {
   isReading?: boolean;
   /** Callback to scroll foliate to where the current highlight is */
   onJumpToHighlight?: () => void;
+  /** Current reading mode — "page", "flow", or "focus" */
+  readingMode?: string;
+  /** Whether Flow mode is actively playing */
+  flowPlaying?: boolean;
+  /** Currently highlighted word index in Flow mode */
+  highlightedWordIndex?: number;
+  /** Words per minute for Flow mode timing */
+  wpm?: number;
+  /** Callback when Flow mode advances to the next word */
+  onFlowWordAdvance?: (idx: number) => void;
+  /** Current word index being narrated (overlay highlight) */
+  narrationWordIndex?: number;
 }
 
 export interface FoliateViewAPI {
-  getWords: () => Array<{ word: string; range: Range; sectionIndex: number }>;
+  getWords: () => FoliateWord[];
+  getParagraphBreaks: () => Set<number>;
   goTo: (target: string | number) => Promise<any>;
   goToFraction: (frac: number) => Promise<void>;
   next: () => void;
   prev: () => void;
-  highlightWord: (range: Range, sectionIndex: number) => void;
+  highlightWord: (range: Range | null, sectionIndex: number) => void;
+  highlightWordByIndex: (wordIndex: number) => void;
   clearHighlight: () => void;
   getView: () => any;
-}
-
-/** Expand a caret position to the full word boundary, return the word text and Range. */
-function getWordAtPoint(doc: Document, x: number, y: number): { word: string; range: Range } | null {
-  try {
-    // Try caretRangeFromPoint first (works in standard HTML)
-    const caretRange = (doc as any).caretRangeFromPoint?.(x, y);
-    let node: Node | null = null;
-    let offset = 0;
-
-    if (caretRange) {
-      if (caretRange instanceof Range) {
-        node = caretRange.startContainer;
-        offset = caretRange.startOffset;
-      } else if (caretRange.offsetNode) {
-        node = caretRange.offsetNode;
-        offset = caretRange.offset;
-      }
-    }
-
-    // If we got an element node (common in XHTML/epub iframes), walk into its text children
-    if (node && node.nodeType === Node.ELEMENT_NODE) {
-      // Find the text node child closest to the click point
-      const walker = doc.createTreeWalker(node, NodeFilter.SHOW_TEXT);
-      let best: Text | null = null;
-      let textNode: Text | null;
-      while ((textNode = walker.nextNode() as Text | null)) {
-        if (textNode.textContent && textNode.textContent.trim()) {
-          best = textNode;
-          break; // Take the first text node (good enough for word detection)
-        }
-      }
-      if (best) {
-        node = best;
-        // Estimate offset within the text node based on click x position
-        const range = doc.createRange();
-        range.selectNodeContents(best);
-        const rects = range.getClientRects();
-        if (rects.length > 0) {
-          // Simple approach: proportion of x within the text's bounding rect
-          const rect = rects[0];
-          const textLen = best.textContent?.length || 1;
-          offset = Math.max(0, Math.min(textLen, Math.round((x - rect.left) / rect.width * textLen)));
-        } else {
-          offset = 0;
-        }
-      }
-    }
-
-    if (!node || node.nodeType !== Node.TEXT_NODE) return null;
-    const text = node.textContent || "";
-    if (offset > text.length) offset = text.length;
-
-    // Find word boundaries around the offset
-    let start = offset;
-    let end = offset;
-    while (start > 0 && /[\w'\u2019\u00C0-\u024F-]/.test(text[start - 1])) start--;
-    while (end < text.length && /[\w'\u2019\u00C0-\u024F-]/.test(text[end])) end++;
-
-    if (start === end) return null;
-    const word = text.slice(start, end);
-
-    const wordRange = doc.createRange();
-    wordRange.setStart(node, start);
-    wordRange.setEnd(node, end);
-    return { word, range: wordRange };
-  } catch {
-    return null;
-  }
+  /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
+  findFirstVisibleWordIndex: () => number;
+  /** Whether the user has manually browsed away from narration position */
+  isUserBrowsing: () => boolean;
+  /** Clear the user browsing flag and scroll to current narration word */
+  returnToNarration: () => void;
 }
 
 export default function FoliatePageView({
@@ -150,17 +251,40 @@ export default function FoliatePageView({
   onTocReady,
   onWordClick,
   onLoad,
+  onWordsReextracted,
   initialCfi,
   focusTextSize,
   viewApiRef,
   isReading,
   onJumpToHighlight,
+  readingMode,
+  flowPlaying,
+  highlightedWordIndex,
+  wpm,
+  onFlowWordAdvance,
+  narrationWordIndex,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
+  const foliateWordsRef = useRef<FoliateWord[]>([]);
+  const foliateParagraphBreaksRef = useRef<Set<number>>(new Set());
+  const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
+  const flowRafRef = useRef<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Store flow-mode callback in a ref to avoid re-render loops
+  const onFlowWordAdvanceRef = useRef(onFlowWordAdvance);
+  onFlowWordAdvanceRef.current = onFlowWordAdvance;
+  const highlightedWordIndexRef = useRef(highlightedWordIndex);
+  highlightedWordIndexRef.current = highlightedWordIndex;
+  const readingModeRef = useRef(readingMode);
+  // Track when user has manually browsed away during narration — suppresses scrollToAnchor
+  const userBrowsingRef = useRef(false);
+  readingModeRef.current = readingMode;
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -183,15 +307,11 @@ export default function FoliatePageView({
         setError(null);
 
         // Import foliate-js modules (ESM, runs in renderer)
-        console.log("[Foliate] Importing foliate-js...");
         await import("foliate-js/view.js");
-        console.log("[Foliate] Custom element registered:", !!customElements.get("foliate-view"));
 
         // Read file as arraybuffer via IPC
-        console.log("[Foliate] Reading file:", activeDoc.filepath);
         const buffer: ArrayBuffer = await api.readFileBuffer(activeDoc.filepath);
         if (cancelled) return;
-        console.log("[Foliate] Buffer size:", buffer?.byteLength);
 
         if (!buffer) {
           setError("Could not read EPUB file");
@@ -202,73 +322,88 @@ export default function FoliatePageView({
         // Create File object from buffer
         const fileName = (activeDoc.filepath || "book.epub").split(/[\\/]/).pop() || "book.epub";
         const file = new File([buffer], fileName, { type: "application/epub+zip" });
-        console.log("[Foliate] File created:", file.name, file.size, "bytes");
 
         // Create and mount the foliate-view element inside the non-React host
         const view = document.createElement("foliate-view") as any;
         host.innerHTML = "";
         host.appendChild(view);
         viewRef.current = view;
-        console.log("[Foliate] View element mounted, attaching listeners before open...");
 
         // Attach load listener BEFORE open() — events may fire during init
         const onSectionLoad = (e: any) => {
           const { doc, index } = e.detail;
-          console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
-          // Word detection: single click highlights word with a <mark> overlay
-          doc.addEventListener("click", (ce: MouseEvent) => {
-            if ((ce.target as HTMLElement)?.closest?.("a[href]")) return;
 
-            // Remove any previous highlight marks in ALL loaded docs
-            const v = viewRef.current;
-            for (const { doc: d } of v?.renderer?.getContents?.() ?? []) {
-              d.querySelectorAll("mark.blurby-word-highlight").forEach((m: Element) => {
-                const parent = m.parentNode;
-                if (parent) {
-                  while (m.firstChild) parent.insertBefore(m.firstChild, m);
-                  parent.removeChild(m);
-                  parent.normalize(); // merge adjacent text nodes
-                }
-              });
-            }
-
-            // Try to select word at click point
-            const result = getWordAtPoint(doc, ce.clientX, ce.clientY);
-            if (result) {
-              // Wrap the word in a visible <mark> element
+          // Cache iframe ref for this section's document
+          if (doc !== document) {
+            const iframes = host.querySelectorAll("iframe");
+            for (const f of iframes) {
               try {
-                const mark = doc.createElement("mark");
-                mark.className = "blurby-word-highlight";
-                mark.style.cssText = `background: var(--blurby-accent, rgba(230,57,70,0.25)); border-radius: 2px; padding: 0 1px;`;
-                result.range.surroundContents(mark);
-              } catch { /* range crosses element boundary — fall back to selection */
-                const sel = doc.getSelection();
-                if (sel) { sel.removeAllRanges(); sel.addRange(result.range); }
-              }
+                if (f.contentDocument === doc) { foliateIframeRef.current = f; break; }
+              } catch { /* cross-origin */ }
+            }
+          }
 
-              if (v) {
-                const contents = v.renderer.getContents?.() ?? [];
-                const match = contents.find((c: any) => c.doc === doc);
-                if (match) {
-                  const cfi = v.getCFI(match.index, result.range);
-                  // Count word offset: walk all text nodes before the click to count words
-                  let wordOffset = 0;
-                  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
-                  let tn: Text | null;
-                  outer: while ((tn = walker.nextNode() as Text | null)) {
-                    const words = (tn.textContent || "").split(/\s+/).filter(Boolean);
-                    if (tn === result.range.startContainer) {
-                      // Count words before the offset in this text node
-                      const beforeText = (tn.textContent || "").slice(0, result.range.startOffset);
-                      wordOffset += beforeText.split(/\s+/).filter(Boolean).length;
-                      break outer;
-                    }
-                    wordOffset += words.length;
-                  }
-                  onWordClick?.(cfi, result.word, match.index, wordOffset);
-                }
+          // Extract words and wrap in spans
+          const v2 = viewRef.current;
+          if (v2) {
+            // During narration/flow, only wrap the new section without re-extracting everything
+            // (re-extraction shifts indices, breaking the narration's word array mapping)
+            const isActiveMode = readingModeRef.current === "narration" || readingModeRef.current === "flow";
+
+            if (isActiveMode && foliateWordsRef.current.length > 0) {
+              // Extract just this section's words and append/update in the existing array
+              const sectionWords = extractWordsFromSection(doc, index);
+              // Find the insertion point: after the last word of the previous section
+              const existingEnd = foliateWordsRef.current.length;
+              const sectionStart = existingEnd; // Append at end
+              // Wrap this section's words with indices continuing from existing
+              wrapWordsInSpans(doc, index, sectionStart);
+              // Append to the word array
+              foliateWordsRef.current = [...foliateWordsRef.current, ...sectionWords.map(w => ({ ...w, sectionIndex: index }))];
+              onWordsReextracted?.();
+            } else {
+              // Full re-extraction (Page mode or first load)
+              const extracted = extractWordsFromView(v2);
+              foliateWordsRef.current = extracted.words;
+              foliateParagraphBreaksRef.current = extracted.paragraphBreaks;
+              onWordsReextracted?.();
+              // Wrap this section's words
+              const sectionStart = extracted.words.findIndex(w => w.sectionIndex === index);
+              if (sectionStart >= 0) {
+                wrapWordsInSpans(doc, index, sectionStart);
+              }
+            }
+          }
+
+          // Delegated click handler — uses injected word spans (same pattern as PageReaderView)
+          doc.body.addEventListener("click", (e: MouseEvent) => {
+            const target = (e.target as HTMLElement)?.closest?.("[data-word-index]");
+            if (!target) return;
+            if ((e.target as HTMLElement)?.closest?.("a[href]")) return;
+
+            const idx = parseInt(target.getAttribute("data-word-index") || "", 10);
+            if (isNaN(idx)) return;
+
+            // Highlight via CSS class (same as PageReaderView)
+            doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
+              el.classList.remove("page-word--highlighted")
+            );
+            (target as HTMLElement).classList.add("page-word--highlighted");
+
+            // Report click to parent
+            const v = viewRef.current;
+            if (v) {
+              const contents = v.renderer?.getContents?.() ?? [];
+              const match = contents.find((c: any) => c.doc === doc);
+              if (match) {
+                const range = doc.createRange();
+                range.selectNodeContents(target);
+                const cfi = v.getCFI(match.index, range);
+                const sectionBase = foliateWordsRef.current.findIndex(w => w.sectionIndex === match.index);
+                const wordOffsetInSection = sectionBase >= 0 ? idx - sectionBase : 0;
+                onWordClick?.(cfi, target.textContent || "", match.index, wordOffsetInSection, idx);
               }
             }
           });
@@ -313,88 +448,164 @@ export default function FoliatePageView({
         // Open the book
         await view.open(file);
         if (cancelled) return;
-        console.log("[Foliate] Book opened. Sections:", view.book?.sections?.length, "TOC items:", view.book?.toc?.length);
 
         // Set renderer attributes
         const scale = (focusTextSize || 100) / 100;
-        const fontSize = Math.round(18 * scale);
+        const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
         view.renderer.setAttribute("flow", "paginated");
         view.renderer.setAttribute("margin", "40px");
         view.renderer.setAttribute("gap", "5%");
         view.renderer.setAttribute("max-inline-size", "720px");
-        view.renderer.setAttribute("max-block-size", `${container.clientHeight - 20}px`);
-        view.renderer.setAttribute("max-column-count", container.clientWidth >= 1040 ? "2" : "1");
+        view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
+        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
 
         // Provide TOC
         if (view.book?.toc) {
           onTocReady?.(view.book.toc);
         }
 
-        // Navigate to last position or start from the very beginning (cover page)
-        await view.init({
-          lastLocation: initialCfi || null,
-        });
+        // Navigate to last position or start from the very beginning (cover page).
+        // Only pass lastLocation when a real CFI exists — passing null causes foliate
+        // to skip the cover and land on the first text section (~page 3).
+        const initOptions = initialCfi ? { lastLocation: initialCfi } : {};
+        await view.init(initOptions);
+
+        if (!initialCfi) {
+          // No saved CFI — check if there's a saved position (word index) to approximate
+          const savedPos = activeDoc.position || 0;
+          const wordCount = activeDoc.wordCount || 1;
+          if (savedPos > 0 && wordCount > 0) {
+            const fraction = Math.min(savedPos / wordCount, 1);
+            await view.goToFraction(fraction);
+          } else {
+            await view.goToFraction(0);
+          }
+        }
 
         // Populate imperative API ref
         if (viewApiRef) {
-          let currentHighlight: HTMLElement | null = null;
           viewApiRef.current = {
-            getWords: () => extractWordsFromView(view),
+            getWords: () => {
+              if (foliateWordsRef.current.length > 0) return foliateWordsRef.current;
+              const extracted = extractWordsFromView(view);
+              foliateWordsRef.current = extracted.words;
+              foliateParagraphBreaksRef.current = extracted.paragraphBreaks;
+              return extracted.words;
+            },
+            getParagraphBreaks: () => foliateParagraphBreaksRef.current,
             goTo: (target) => view.goTo(target),
             goToFraction: (frac) => view.goToFraction(frac),
             next: () => view.renderer.next(),
             prev: () => view.renderer.prev(),
-            highlightWord: (range, _sectionIndex) => {
-              // Remove previous highlight
-              if (currentHighlight?.parentNode) {
-                const parent = currentHighlight.parentNode;
-                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
-                parent.removeChild(currentHighlight);
-                currentHighlight = null;
-              }
-              // Wrap word in a visible <mark> element
-              try {
-                const doc = range.startContainer.ownerDocument;
-                if (!doc) return;
-                const mark = doc.createElement("mark");
-                mark.style.cssText = "background: rgba(var(--accent-rgb, 208,71,22), 0.3); border-radius: 2px; padding: 0 1px;";
-                mark.className = "blurby-word-hl";
-                range.surroundContents(mark);
-                currentHighlight = mark;
-                // Scroll into view if needed
-                mark.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-              } catch {
-                // surroundContents fails across element boundaries — use selection fallback
+            highlightWord: (_range, _sectionIndex) => {
+              // No-op: use highlightWordByIndex instead
+            },
+            highlightWordByIndex: (wordIndex: number) => {
+              const contents = view.renderer?.getContents?.() ?? [];
+              // Clear previous highlight
+              for (const { doc: d } of contents) {
                 try {
-                  const doc = range.startContainer.ownerDocument;
-                  if (doc) {
-                    const sel = doc.getSelection();
-                    if (sel) { sel.removeAllRanges(); sel.addRange(range); }
+                  d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
+                } catch { /* */ }
+              }
+              // Apply highlight to target word
+              let targetSpan: HTMLElement | null = null;
+              let targetDoc: Document | null = null;
+              for (const { doc: d } of contents) {
+                try {
+                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
+                  if (span) {
+                    span.classList.add("page-word--highlighted");
+                    targetSpan = span;
+                    targetDoc = d;
+                    break;
                   }
-                } catch { /* completely stale range */ }
+                } catch { /* */ }
+              }
+              // Page auto-advance: scroll to keep the highlighted word visible
+              // Skip if user has manually browsed away during narration
+              if (targetSpan && targetDoc && !userBrowsingRef.current) {
+                try {
+                  const range = targetDoc.createRange();
+                  range.selectNodeContents(targetSpan);
+                  view.renderer.scrollToAnchor?.(range);
+                } catch { /* safe to ignore */ }
+              }
+              // If user was browsing and the word is now visible, auto-clear browsing flag
+              if (userBrowsingRef.current && targetSpan) {
+                try {
+                  const rect = targetSpan.getBoundingClientRect();
+                  const iframeWin = targetDoc?.defaultView;
+                  if (iframeWin && rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth) {
+                    userBrowsingRef.current = false; // Narration caught up to where user browsed
+                  }
+                } catch { /* */ }
               }
             },
             clearHighlight: () => {
-              if (currentHighlight?.parentNode) {
-                const parent = currentHighlight.parentNode;
-                while (currentHighlight.firstChild) parent.insertBefore(currentHighlight.firstChild, currentHighlight);
-                parent.removeChild(currentHighlight);
-                currentHighlight = null;
+              // Clear all highlights in foliate iframes
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d } of contents) {
+                try { d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted"); } catch { /* */ }
               }
             },
             getView: () => view,
+            findFirstVisibleWordIndex: () => {
+              // Walk all loaded sections to find the first word span that's visible
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d } of contents) {
+                try {
+                  const spans = d.querySelectorAll("[data-word-index]");
+                  for (const span of spans) {
+                    const rect = (span as HTMLElement).getBoundingClientRect();
+                    const iframeWin = d.defaultView;
+                    if (!iframeWin) continue;
+                    // Check if the span is within the visible viewport of the iframe
+                    if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
+                        rect.top >= 0 && rect.top < iframeWin.innerHeight) {
+                      const idx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
+                      if (idx >= 0) return idx;
+                    }
+                  }
+                } catch { /* safe to ignore */ }
+              }
+              return -1; // No visible words (e.g., cover page with only images)
+            },
+            isUserBrowsing: () => userBrowsingRef.current,
+            returnToNarration: () => {
+              userBrowsingRef.current = false;
+              // Re-highlight and scroll to current narration word
+              const contents = view.renderer?.getContents?.() ?? [];
+              const currentIdx = highlightedWordIndexRef.current;
+              for (const { doc: d } of contents) {
+                try {
+                  const span = d?.querySelector?.(`[data-word-index="${currentIdx}"]`) as HTMLElement;
+                  if (span) {
+                    const range = d.createRange();
+                    range.selectNodeContents(span);
+                    view.renderer.scrollToAnchor?.(range);
+                    break;
+                  }
+                } catch { /* */ }
+              }
+            },
           };
         }
 
         setLoading(false);
       } catch (err: any) {
         if (!cancelled) {
-          console.error("FoliatePageView load error:", err);
           setError(err.message || "Failed to load EPUB");
           setLoading(false);
         }
       }
     };
+
+    // Guard against React Strict Mode double-mount: if a view is already loaded
+    // for this book, skip the second initialization entirely
+    if (viewRef.current && !cancelled) {
+      return () => { cancelled = true; };
+    }
 
     loadBook();
 
@@ -417,14 +628,137 @@ export default function FoliatePageView({
     const container = containerRef.current;
     if (!container) return;
 
-    view.renderer.setAttribute("max-column-count", container.clientWidth >= 1040 ? "2" : "1");
-    view.renderer.setAttribute("max-block-size", `${container.clientHeight - 20}px`);
+    view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+    view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
 
     // Re-inject styles on settings change
     for (const { doc } of view.renderer.getContents?.() ?? []) {
       injectStyles(doc, settings, focusTextSize);
     }
   }, [settings.theme, settings.fontFamily, focusTextSize, settings.layoutSpacing]);
+
+  // Flow mode overlay cursor animation (EPUB-only, Range-based)
+  useEffect(() => {
+    if (readingMode !== "flow" || !flowPlaying) {
+      if (cursorRef.current) cursorRef.current.style.display = "none";
+      cancelAnimationFrame(flowRafRef.current);
+      return;
+    }
+    const cursor = cursorRef.current;
+    const container = containerRef.current;
+    if (!cursor || !container) return;
+    cursor.style.display = "block";
+
+    let currentIdx = highlightedWordIndexRef.current ?? 0;
+    const msPerWord = 60000 / (wpm || DEFAULT_WPM);
+    let lastAdvance = performance.now();
+
+    const tick = (now: number) => {
+      if (now - lastAdvance >= msPerWord) {
+        currentIdx++;
+        lastAdvance = now;
+        onFlowWordAdvanceRef.current?.(currentIdx);
+      }
+      // Find word span via view.renderer.getContents() (pierces shadow DOM)
+      const v = viewRef.current;
+      const contents = v?.renderer?.getContents?.() ?? [];
+      let found = false;
+      for (const { doc: d } of contents) {
+        try {
+          const span = d?.querySelector?.(`[data-word-index="${currentIdx}"]`) as HTMLElement;
+          if (span) {
+            const spanRect = span.getBoundingClientRect();
+            // getContents docs are inside iframes — find the iframe for coordinate transform
+            const iframe = foliateIframeRef.current;
+            const iframeRect = iframe?.getBoundingClientRect();
+            // Compute position in page viewport
+            const x = (iframeRect ? iframeRect.left : 0) + spanRect.left;
+            const y = (iframeRect ? iframeRect.top : 0) + spanRect.top + spanRect.height;
+            const w = spanRect.width;
+            // Only show if the word is within the visible viewport
+            const viewportWidth = container.clientWidth;
+            const viewportHeight = container.clientHeight;
+            if (w > 0 && x >= 0 && x < viewportWidth + 100 && y >= 0 && y < viewportHeight + 100) {
+              cursor.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+              cursor.style.width = `${w}px`;
+              cursor.style.display = "block";
+              found = true;
+            } else {
+              // Word is off-screen (different CSS column) — trigger page advance
+              const v2 = viewRef.current;
+              if (v2?.renderer?.next) {
+                v2.renderer.next();
+              }
+              cursor.style.display = "none";
+            }
+            break;
+          }
+        } catch { /* */ }
+      }
+      if (!found) cursor.style.display = "none";
+      flowRafRef.current = requestAnimationFrame(tick);
+    };
+    flowRafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(flowRafRef.current);
+  }, [readingMode, flowPlaying, wpm]);
+
+  // Narration highlight — toggle CSS class on word spans inside iframe (same as click highlight)
+  const prevNarrationRef = useRef<{ iframe: Document; idx: number } | null>(null);
+  useEffect(() => {
+    if (narrationWordIndex == null || narrationWordIndex < 0) {
+      // Clear previous highlight
+      if (prevNarrationRef.current) {
+        const prev = prevNarrationRef.current.iframe.querySelector(`[data-word-index="${prevNarrationRef.current.idx}"]`);
+        prev?.classList.remove("page-word--highlighted");
+        prevNarrationRef.current = null;
+      }
+      return;
+    }
+
+    const host = containerRef.current;
+    if (!host) return;
+    const iframes = host.querySelectorAll("iframe");
+
+    // Clear previous highlight
+    if (prevNarrationRef.current) {
+      const prev = prevNarrationRef.current.iframe.querySelector(`[data-word-index="${prevNarrationRef.current.idx}"]`);
+      prev?.classList.remove("page-word--highlighted");
+    }
+
+    // Apply highlight to current word
+    for (const iframe of iframes) {
+      try {
+        const iframeDoc = iframe.contentDocument;
+        if (!iframeDoc) continue;
+        const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`);
+        if (span) {
+          span.classList.add("page-word--highlighted");
+          prevNarrationRef.current = { iframe: iframeDoc, idx: narrationWordIndex };
+          // Scroll span into view if needed
+          span.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+          break;
+        }
+      } catch { /* cross-origin */ }
+    }
+  }, [narrationWordIndex]);
+
+  // Narration page-sync — advance page when narration reads past current view
+  // Tracks foliate's reported fraction vs narration's progress fraction
+  const foliateCurrentFractionRef = useRef(0);
+  const pageTurnCooldownRef = useRef(false);
+  // Updated by onRelocate prop callback — store fraction on every relocate
+  const origOnRelocate = onRelocate;
+  const wrappedOnRelocate = useCallback((detail: any) => {
+    if (detail.fraction != null) foliateCurrentFractionRef.current = detail.fraction;
+    origOnRelocate?.(detail);
+  }, [origOnRelocate]);
+
+  // Page auto-advance during narration — DISABLED
+  // This fraction-based approach causes page jumping because narrationWordIndex
+  // is relative to the extracted word array (visible sections only), not the full book.
+  // The division narrationWordIndex/totalWords produces wrong fractions.
+  // Page advance is now handled by highlightWordByIndex's off-screen detection instead.
+  // TODO: Re-implement once word index stability across sections is solved.
 
   // Keyboard navigation
   useEffect(() => {
@@ -434,9 +768,12 @@ export default function FoliatePageView({
 
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
+        // During narration, flag that user is browsing away — don't yank back
+        if (readingModeRef.current === "narration") userBrowsingRef.current = true;
         view.renderer.next();
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
+        if (readingModeRef.current === "narration") userBrowsingRef.current = true;
         view.renderer.prev();
       }
     };
@@ -478,6 +815,8 @@ export default function FoliatePageView({
       )}
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
+      <div ref={cursorRef} className="foliate-flow-cursor" style={{ display: "none" }} />
+      <div ref={highlightRef} className="foliate-narration-highlight" style={{ display: "none" }} />
     </div>
   );
 }
@@ -490,7 +829,7 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
   if (existing) existing.remove();
 
   const scale = (focusTextSize || 100) / 100;
-  const fontSize = Math.round(18 * scale);
+  const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
   const lineHeight = settings.layoutSpacing?.line || 1.8;
   const fontFamily = settings.fontFamily || "Georgia, serif";
 
@@ -515,7 +854,9 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
-    .blurby-word-hl { background: ${accent}4D !important; border-radius: 2px; padding: 0 1px; }
+    .page-word { cursor: pointer; border-radius: 2px; transition: background 0.1s; }
+    .page-word:hover { background: ${accent}22; }
+    .page-word--highlighted { background: ${accent}4D; }
   `;
   doc.head.appendChild(style);
 }

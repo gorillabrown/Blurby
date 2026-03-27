@@ -504,3 +504,125 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 **Fix:** Before any Range operation, check `range.startContainer.isConnected`. If false, skip the operation and wait for re-extraction. The word array must preserve word strings even when Ranges are nulled (so Focus mode can still display words as text), and re-populate Ranges when sections are loaded again.
 
 **Rule:** PR-32: Always guard Range access with `range.startContainer.isConnected` before any DOM operation. Treat Ranges as ephemeral cache — the word strings are the source of truth, Ranges are just a rendering convenience that must be re-extracted on section changes.
+
+### [2026-03-26] LL-030: Engagement Gating Prevents Ghost Progress
+
+**Area:** State management, progress tracking, EPUB
+**Status:** active
+**Priority:** high
+
+**Context:** Opening an EPUB triggers foliate's `onRelocate` event immediately, even before the user has done anything. Because word extraction starts at the first text word (past cover images), the word index is already >0, and `onRelocate` persists this as progress. The book appears "started" just by being opened.
+
+**Root Cause:** Progress save was ungated — any `onRelocate` event wrote to the library. The engagement concept (has the user actually interacted?) was missing from the save path.
+
+**Fix:** Add `hasEngagedRef` that starts false on each doc open (resets on `activeDoc.id` change). Set true only on deliberate engagement: mode start, word click, or manual page turn. `onRelocate` checks `hasEngagedRef.current` before persisting.
+
+**Rule:** PR-33: Always gate progress persistence behind explicit user engagement. Never save progress from automatic navigation events (initial load, auto-page-turn from modes, auto-scroll). The engagement ref must reset per document to prevent carry-over from previous books.
+
+### [2026-03-26] LL-031: Generation ID Pattern for Stale Async Results
+
+**Area:** TTS, async IPC, state management
+**Status:** active
+**Priority:** medium
+
+**Context:** Kokoro TTS generates audio via IPC calls that take 500ms-2s. If the user changes TTS rate during generation, the result arrives at the old rate and plays — noticeably wrong speed for 1-2 sentences before the next chunk corrects.
+
+**Fix:** Monotonic `generationIdRef` counter. Increment on rate change. Capture before IPC call, compare after. Discard if stale. No `AbortController` needed — the guard is lightweight and works with any async pattern (IPC, fetch, promises).
+
+**Rule:** PR-34: For async operations where input parameters can change mid-flight (rate, position, config), use a generation ID guard. Increment a counter when parameters change; capture before the async call; compare after completion; discard stale results. Cheaper than abort mechanisms and works universally.
+
+### [2026-03-26] LL-032: Foliate Shadow DOM Blocks querySelectorAll
+
+**Area:** DOM, foliate-js, Electron, shadow DOM
+**Status:** active
+**Priority:** critical
+
+**Context:** After injecting `<span data-word-index>` into foliate's EPUB sections, attempts to find those spans via `document.querySelector(".foliate-page-view").querySelectorAll("iframe")` returned 0 results. The iframes exist but are inside `<foliate-view>`'s shadow DOM, which blocks traversal from the light DOM.
+
+**Root Cause:** Custom elements with shadow DOM encapsulate their internal structure. `querySelectorAll` on a parent element cannot see into shadow children. The iframes holding EPUB section documents are invisible to the parent document's DOM queries.
+
+**Fix:** Use `view.renderer.getContents()` — foliate's internal API that provides direct access to the section document objects (`{ doc, index }` pairs). This bypasses the shadow DOM entirely. Applied to narration highlight (`highlightWordByIndex` API method) and Flow cursor positioning.
+
+**Rule:** PR-35: Never query foliate's internal iframes via `querySelectorAll("iframe")`. Always use `view.renderer.getContents()` which provides direct `{ doc, index }` pairs. This applies to ALL DOM operations that need to reach inside EPUB section documents — word highlighting, click handling, span injection, style injection.
+
+### [2026-03-26] LL-033: adjustRate Before startCursorDriven, Never After
+
+**Area:** TTS, Kokoro, async IPC, state management
+**Status:** active
+**Priority:** high
+
+**Context:** Kokoro narration silently failed — audio generated successfully but was discarded. The `startCursorDriven` function fires `speakNextChunk()` which sends an IPC call to Kokoro. Immediately after, `adjustRate(settings.ttsRate)` was called, which increments `generationIdRef`. By the time the Kokoro audio returned (~1-2s later), the generation ID no longer matched, so the result was discarded as "stale."
+
+**Fix:** Move `adjustRate()` BEFORE `startCursorDriven()`. The rate is set first, then the IPC call uses the correct rate with a stable generation ID.
+
+**Rule:** PR-36: Any call that increments `generationIdRef` (adjustRate, updateWpm) must happen BEFORE `startCursorDriven` or `speakNextChunk`, never after. The generation ID must be stable during the entire IPC round-trip.
+
+### [2026-03-26] LL-034: TTS Chunks Must Be One Sentence for Natural Pauses
+
+**Area:** TTS, Kokoro, audio UX
+**Status:** active
+**Priority:** high
+
+**Context:** Rhythm pauses (sentence: 800ms, paragraph: 1500ms, clause: 500ms) only fire BETWEEN Kokoro audio chunks, not within them. With 40-word chunks containing 2-3 sentences, the listener heard continuous speech with no breaks between sentences, making it difficult to follow.
+
+**Root Cause:** Kokoro generates one continuous audio buffer per chunk. There's no way to insert silence into the middle of a generated buffer. Pauses can only exist between buffers.
+
+**Fix:** Changed `findSentenceBoundary` to scan from the first word (not word 5), producing one sentence per chunk. Each chunk ends at a sentence boundary (`.!?`). The pre-buffer generates the next sentence during the pause, keeping playback smooth. Trade-off: more IPC calls (one per sentence vs one per 40 words), but Kokoro generation is fast enough (~100-300ms per sentence) that pre-buffering covers the gap.
+
+**Tuned pause values (TTS-specific):**
+- Commas, colons, semicolons: **250ms**
+- Sentence endings (. ! ?): **400ms**
+- Paragraph breaks: **750ms**
+
+These are significantly shorter than Focus mode's visual pauses (1000/1500/2000ms) because Kokoro's neural prosody already adds natural micro-pauses within the audio. The between-chunk gaps only need to fill the transition, not the full rhythm.
+
+**Rule:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Pause values from constants.ts (TTS_PAUSE_COMMA_MS=250, TTS_PAUSE_SENTENCE_MS=400, TTS_PAUSE_PARAGRAPH_MS=750). The `hasPreBuffer` guard is critical — if next chunk isn't ready, generation time IS the pause. If pre-buffer IS ready, add the delay. Never add rhythm pauses AND generation wait — "double pause" anti-pattern. Also: `Intl.Segmenter` strips punctuation from words — must append trailing punctuation in extractWordsFromView for sentence boundary detection.
+
+### [2026-03-26] LL-035: EPUB Page Auto-Advance During Narration — SOLVED
+
+**Area:** foliate-js, CSS columns, TTS narration, page navigation, React Strict Mode
+**Status:** resolved
+**Priority:** high
+
+**Context:** During Kokoro TTS narration on EPUBs, the page needs to auto-advance when the narrated word moves past visible content. This took 6 failed approaches and 8 commits to solve. The problem was NOT visibility detection — it was 5 stacked root causes creating a feedback loop.
+
+**Root causes (all 5 had to be fixed):**
+
+1. **Stale `readingMode` closure in `onRelocate`** — The `onRelocate` callback was captured at render time with `readingMode = "page"`. During narration, every foliate `relocate` event called `setHighlightedWordIndex(approxFraction * totalWords)`, overwriting the narration's precise word index with an approximate value. This caused the highlight to jump to wrong words.
+   - **Fix:** Use `readingModeRef.current` (always current) instead of the closure-captured `readingMode`.
+
+2. **Word array rebuilds during active narration** — Foliate pre-loads adjacent sections. Each section load triggered `extractFoliateWords()` which rebuilt the entire word array and renumbered all `data-word-index` DOM attributes. The narration engine was using indices from before the rebuild.
+   - **Fix:** Skip `extractFoliateWords()` during narration/flow modes (uses `readingModeRef.current`).
+
+3. **Fraction-based page advance with mismatched denominators** — A `useEffect` watched `narrationWordIndex` and called `renderer.next()` when `narrationWordIndex / totalBookWords > viewFraction + threshold`. But `narrationWordIndex` was relative to extracted words (visible sections only), not the full book. This produced wildly wrong fractions.
+   - **Fix:** Removed entirely. Page advance handled by `scrollToAnchor` instead.
+
+4. **React Strict Mode double-mounting foliate view** — React 19 mounts, unmounts, remounts components in dev mode. Each mount called `loadBook()` → `view.goTo(initialCfi)`, creating two competing foliate views that fought over page position.
+   - **Fix:** Guard at effect start: if `viewRef.current` already exists, skip `loadBook()`.
+
+5. **Double audio stream from double `startNarration`** — Same Strict Mode issue. `startNarration()` called twice, each starting Kokoro generation. First IPC result played alongside the second.
+   - **Fix:** Call `narration.stop()` explicitly before `stopAllModes()` in `startNarration`.
+
+**Working solution for page advance:**
+`view.renderer.scrollToAnchor(range)` — Readest's approach. On each `highlightWordByIndex` call, create a Range around the highlighted `<span>`, pass it to foliate's `scrollToAnchor`. This is a **no-op when the word is already visible** (foliate checks internally). It only scrolls when the word is in a different CSS column. Foliate handles all the column math, scroll position, and RTL/vertical mode transforms internally.
+
+**Approaches that FAILED (for reference):**
+1. `d.defaultView.innerWidth` — iframe reports full column layout width (7200px), not visible width
+2. Host container `clientWidth` + iframe rect transform — mismatched coordinate spaces, constant jumping
+3. `querySelectorAll("iframe")` — returns 0 due to shadow DOM barrier
+4. Span-not-found detection — all words have DOM spans even when off-screen (CSS columns)
+5. `renderer.next()` rapid-fire — cascades without debounce
+6. Fraction-based comparison — wrong denominators (extracted words vs total book words)
+7. `getBoundingClientRect` inside iframe — coordinates relative to full column layout, not viewport
+8. Parent-space rect transform — still mismatched when columns scroll
+
+**Key insight:** The page jumping was never a visibility detection problem. It was a state management problem — 5 independent bugs creating feedback loops. Once all 5 were fixed, the simplest possible approach (`scrollToAnchor` on every word) worked perfectly.
+
+**Rule:** PR-38: When integrating imperative libraries (foliate-js) with React:
+- ALL callback props that read React state must use refs, not closure values
+- Never rebuild DOM state (word arrays, attributes) during active modes
+- Guard useEffects against React Strict Mode double-invocation with ref checks
+- Use the library's own scroll/navigation APIs instead of manual coordinate math
+- Fix ALL root causes before re-attempting the feature — stacked bugs create deceptive symptoms
+
+**Rule:** PR-38: EPUB narration page auto-advance requires knowing which CSS column is visible. Simple DOM queries cannot determine this.

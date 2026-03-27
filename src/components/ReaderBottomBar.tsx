@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP } from "../constants";
+import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM } from "../constants";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -30,6 +30,8 @@ interface ReaderBottomBarProps {
   lastReadingMode?: "focus" | "flow" | "narration";
   ttsRate?: number;
   onSetTtsRate?: (rate: number) => void;
+  /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
+  foliateFraction?: number;
 }
 
 const HINT_TEXT: Record<string, string> = {
@@ -64,6 +66,7 @@ export default function ReaderBottomBar({
   lastReadingMode = "flow",
   ttsRate = 1.0,
   onSetTtsRate,
+  foliateFraction,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [rateStatus, setRateStatus] = useState<"idle" | "confirming" | "set">("idle");
@@ -90,12 +93,14 @@ export default function ReaderBottomBar({
     }
   }, [chapterListRef]);
 
-  // Progress
-  const progress = words.length > 0 ? (wordIndex / words.length) * 100 : 0;
+  // Progress — for foliate EPUBs use the authoritative fraction, else word-based
+  const progress = foliateFraction != null && foliateFraction >= 0
+    ? foliateFraction * 100
+    : words.length > 0 ? (wordIndex / words.length) * 100 : 0;
 
   // Time remaining — use TTS-derived WPM when narration is selected
   const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration");
-  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * 150) : wpm;
+  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
   const wordsRemaining = Math.max(0, words.length - wordIndex);
   const timeRemaining = formatTime(wordsRemaining, effectiveWpm);
 
@@ -144,8 +149,8 @@ export default function ReaderBottomBar({
       {/* Row 1: Progress bar */}
       <div className="reader-bottom-bar-progress">
         <ProgressBar
-          current={wordIndex}
-          total={words.length}
+          current={foliateFraction != null ? Math.round(foliateFraction * 1000) : wordIndex}
+          total={foliateFraction != null ? 1000 : words.length}
         />
       </div>
 

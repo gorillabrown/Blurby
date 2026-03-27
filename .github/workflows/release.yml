@@ -16,11 +16,8 @@ permissions:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        arch: [x64, arm64]
     runs-on: windows-latest
-    name: Build (${{ matrix.arch }})
+    name: Build (x64 + arm64)
 
     steps:
       - name: Checkout
@@ -36,25 +33,34 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        if: matrix.arch == 'x64'
         run: npm test
 
       - name: Typecheck
-        if: matrix.arch == 'x64'
         run: npm run typecheck
 
       - name: Build renderer
         run: npm run build
 
-      - name: Package Windows installer (${{ matrix.arch }})
-        run: npx electron-builder --win --${{ matrix.arch }}
+      - name: Package Windows installers (x64 + arm64)
+        # Build both architectures in a single electron-builder invocation so
+        # it produces one latest.yml that already lists both file entries —
+        # no post-processing merge required.
+        run: npx electron-builder --win --x64 --arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify latest.yml contains both architectures
+        shell: bash
+        run: |
+          grep -q "x64" release/latest.yml || (echo "ERROR: x64 missing from latest.yml" && exit 1)
+          grep -q "arm64" release/latest.yml || (echo "ERROR: arm64 missing from latest.yml" && exit 1)
+          echo "Both architectures verified in latest.yml"
+          cat release/latest.yml
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: blurby-${{ matrix.arch }}
+          name: blurby-release
           path: |
             release/*.exe
             release/*.blockmap
@@ -67,43 +73,18 @@ jobs:
     name: Publish Release
 
     steps:
-      - name: Download x64 artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: blurby-x64
-          path: artifacts-x64/
+          name: blurby-release
+          path: artifacts/
 
-      - name: Download arm64 artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: blurby-arm64
-          path: artifacts-arm64/
-
-      - name: Combine artifacts and merge latest.yml
+      - name: Verify latest.yml contains both architectures
         run: |
-          mkdir -p artifacts
-          # Copy all exe and blockmap files
-          cp artifacts-x64/*.exe artifacts-x64/*.blockmap artifacts/ 2>/dev/null || true
-          cp artifacts-arm64/*.exe artifacts-arm64/*.blockmap artifacts/ 2>/dev/null || true
-          # Use the x64 latest.yml as base (electron-updater matches by arch automatically)
-          # But we need BOTH files listed so either arch can find its installer
-          # Take the x64 latest.yml and append arm64 file entry
-          if [ -f artifacts-x64/latest.yml ] && [ -f artifacts-arm64/latest.yml ]; then
-            # Extract arm64 file block from arm64's latest.yml and append to x64's files array
-            cp artifacts-x64/latest.yml artifacts/latest.yml
-            # Parse arm64 file entry
-            ARM_URL=$(grep '  - url:' artifacts-arm64/latest.yml | head -1 | sed 's/.*url: //')
-            ARM_SHA=$(grep '    sha512:' artifacts-arm64/latest.yml | head -1 | sed 's/.*sha512: //')
-            ARM_SIZE=$(grep '    size:' artifacts-arm64/latest.yml | head -1 | sed 's/.*size: //')
-            # Insert arm64 entry after the x64 entry in the files array
-            sed -i "/^    size:/a\\  - url: ${ARM_URL}\n    sha512: ${ARM_SHA}\n    size: ${ARM_SIZE}" artifacts/latest.yml
-            echo "--- Merged latest.yml ---"
-            cat artifacts/latest.yml
-          elif [ -f artifacts-x64/latest.yml ]; then
-            cp artifacts-x64/latest.yml artifacts/
-          elif [ -f artifacts-arm64/latest.yml ]; then
-            cp artifacts-arm64/latest.yml artifacts/
-          fi
+          grep -q "x64" artifacts/latest.yml || (echo "ERROR: x64 missing" && exit 1)
+          grep -q "arm64" artifacts/latest.yml || (echo "ERROR: arm64 missing" && exit 1)
+          echo "Both architectures verified in latest.yml"
+          cat artifacts/latest.yml
 
       - name: Generate SHA-256 checksums
         run: |

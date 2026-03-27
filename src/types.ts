@@ -36,8 +36,14 @@ export interface BlurbyDoc {
   collection?: string | null;
   // Sprint 25C: "New" dot tracking
   seenAt?: number;        // timestamp when card was seen in library view
+  // Sprint 25S: High-water mark for backtrack detection
+  furthestPosition?: number; // Page number (non-EPUB) or fraction 0.0-1.0 (EPUB)
   // Sprint 26: EPUB CFI position tracking
   cfi?: string;           // EPUB Canonical Fragment Identifier — exact reading position
+  // TD-02: Import pipeline
+  convertedEpubPath?: string;    // path to converted EPUB in userData/converted/
+  originalFilepath?: string;     // original file path before conversion
+  legacyRenderer?: boolean;      // user opted for PageReaderView
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -101,6 +107,8 @@ export interface BlurbySettings {
   defaultViewMode?: "grid" | "list";
   libraryCardSize?: "small" | "medium" | "large";
   libraryCardSpacing?: "compact" | "cozy" | "roomy";
+  // TD-02: Import pipeline
+  useLegacyRenderer?: boolean;   // opt-in for legacy word-by-word renderer
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────

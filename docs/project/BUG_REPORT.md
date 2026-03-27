@@ -8,6 +8,27 @@
 
 ## Incomplete
 
+### BUG-090: EPUB narration does not auto-advance pages
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (open)
+**Location:** `src/components/FoliatePageView.tsx` (highlightWordByIndex, narration page-sync)
+**Description:** During Kokoro TTS narration on EPUBs, the page does not advance when narration reads past visible content. Narration audio continues playing correctly, word highlighting works within the visible page, but the foliate view stays on the same page. Multiple approaches attempted (CSS column visibility detection, span-not-found, fraction comparison) — all failed due to foliate's CSS multi-column layout keeping all section words in DOM simultaneously. See LL-035 for full analysis of approaches tried.
+
+### BUG-091: EPUB Flow mode cursor not working
+**Reported:** 2026-03-26
+**Severity:** High
+**Sprint:** 25S-STABLE (open)
+**Location:** `src/components/FoliatePageView.tsx` (Flow cursor overlay)
+**Description:** Flow mode overlay cursor in the rAF loop queries foliate iframes for word spans but cannot determine visibility in CSS columns. Same root cause as BUG-090. Flow cursor code exists but has the same coordinate space mismatch.
+
+### BUG-092: EPUB Focus mode starts from wrong position
+**Reported:** 2026-03-26
+**Severity:** Medium
+**Sprint:** 25S-STABLE (open)
+**Location:** `src/components/ReaderContainer.tsx` (startFocus)
+**Description:** Focus mode on EPUBs starts from word 0 or wrong position instead of the clicked word. The `wordsRef` in useReader may not be populated with foliate words at the time Focus starts.
+
 ### BUG-031: Bottom bar not visible in Focus mode (FSM) or Flow mode (FLM)
 **Reported:** 2026-03-25
 **Severity:** High
@@ -79,25 +100,6 @@
 **Description:** When in Page view, the last-used mode button has a subtle bottom border accent. User requests the entire button be filled with the accent color to make the selection more apparent (similar to the active state but perhaps slightly muted).
 **Solution:** Changed to `background: var(--accent-faded); border-color: var(--accent)`.
 
-### BUG-051: Clicking a mode button should select it, not auto-start it
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/components/ReaderContainer.tsx` (handleEnterFocus, handleEnterFlow, handleToggleTts)
-**Description:** When the user clicks Focus, Flow, or Narrate in the bottom bar, the mode immediately starts (Focus auto-plays, Flow starts cursor advancement, Narrate begins speaking). Instead, clicking a mode button should only **select** it as the active mode (visually highlighted, becomes the Space bar target) while staying in Page view. Only pressing Space bar should actually start the selected mode. This gives users a chance to position themselves (click a word, navigate to a page) before the mode begins.
-**Expected behavior:**
-- Click "Focus" → Focus button highlighted as selected (last-used mode), stay in Page view
-- Click "Narrate" → Narrate button highlighted as selected, stay in Page view
-- Press Space → selected mode starts from current position
-- If mode is already active (playing), clicking the same mode button pauses it (returns to Page)
-- If mode is active, clicking a different mode button switches selection but pauses current mode first
-
-### BUG-052: NM speed changes should take effect immediately during active narration
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
-**Description:** When Narration mode is active and the user adjusts the TTS rate slider in the bottom bar, the speed change should apply immediately to the current reading — not wait for the next chunk. The user should hear the pace change in real-time as they drag the slider.
-**Root cause:** The `onSetTtsRate` handler calls `narration.adjustRate(rate)` which sets the rate for the NEXT utterance/chunk, but doesn't interrupt and restart the currently playing audio at the new speed.
-**Expected:** Slider drag → voice speed changes within ~200ms.
 
 ### BUG-053: Up/Down arrow keys should adjust NM speed by 0.1 increments during narration
 **Reported:** 2026-03-25
@@ -163,102 +165,102 @@
 **Description:** Pressing Tab in Library view should toggle the menu flap open/closed. Currently nothing happens. The keyboard handler was referencing `s.toggleFlap?.()` (reader scope variable) instead of `a.onToggleFlap?.()` (library scope).
 **Solution:** Fixed variable reference from `s.toggleFlap?.()` to `a.onToggleFlap?.()` in the library keyboard handler.
 
-### BUG-072: Time-to-complete should reflect active mode's speed
-**Reported:** 2026-03-25
-**Severity:** Medium
-**Location:** `src/components/ReaderBottomBar.tsx` (time remaining calculation), `src/components/LibraryView.tsx` (card time display)
-**Description:** The "time until chapter/book completes" display is always based on WPM. It should be mode-aware:
-- **Page view, Focus, Flow, Library:** Time based on current WPM setting
-- **Narration mode (active or selected):** Time based on TTS rate. A TTS rate of 1.0x ≈ 150 WPM natural speech. So `effectiveWpm = ttsRate * 150`.
-This makes the time estimate meaningful regardless of which mode is selected.
 
-### BUG-073: NM page browsing yanks user back to current narration position
-**Reported:** 2026-03-25
-**Severity:** High
-**Location:** `src/components/PageReaderView.tsx` (page sync effect), `src/components/ReaderContainer.tsx`
-**Description:** During active Narration mode, if the user manually navigates pages (Left/Right arrows), the page-sync effect immediately yanks them back to the page containing the current narration word. Users should be able to browse ahead/behind while NM continues speaking.
-
-**Desired behavior:**
-1. Left/Right arrows change pages freely even during active NM
-2. NM continues speaking in the background uninterrupted
-3. A floating "Return to narration" button appears when the user is on a different page than the narration cursor
-4. Clicking the button (or pressing a hotkey like Backspace) snaps back to the page containing the current narration word
-5. If the user clicks a word on the browsed page, NM picks up from that word instead
-6. When the narration cursor naturally advances to the page the user is viewing, the button disappears
-
-### BUG-080: Kokoro AI button unclickable in Speed Reading settings
-**Reported:** 2026-03-26
-**Severity:** High (blocks TTS engine selection)
-**Sprint:** 26-STABLE (Stabilization)
-**Location:** `src/components/settings/SpeedReadingSettings.tsx`, `src/styles/global.css`
-**Description:** The System/Kokoro AI toggle buttons in Speed Reading settings render visually but clicking "Kokoro AI" has no effect. Likely `-webkit-app-region: drag` inheritance from the flap container, or a z-index issue covering the button's click target.
-
-### BUG-081: Auto-updater latest.yml only contains ARM64 architecture
-**Reported:** 2026-03-26
-**Severity:** Critical (x64 users never get updates)
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `.github/workflows/release.yml`
-**Description:** The release workflow builds x64 and ARM64 as separate jobs. The ARM64 job runs last and overwrites `latest.yml` with only its own entry. x64 users' auto-updater finds no matching installer and reports "You're up to date" even when a new version exists. Fix: merge both architectures into a single `latest.yml` with both `files:` entries.
-
-### BUG-082: EPUB starts on page ~3 instead of cover
-**Reported:** 2026-03-26
-**Severity:** High
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
-**Description:** When opening a new EPUB (no saved position), foliate's initial CFI navigation skips cover/TOC pages and lands on the first text content section. The user sees page ~3 instead of the cover. First open should land on page 0 (cover). Only subsequent opens should restore saved CFI.
-
-### BUG-083: Opening a book falsely marks it as "started" with >0% progress
-**Reported:** 2026-03-26
-**Severity:** High
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/ReaderContainer.tsx`, `src/types.ts`
-**Description:** EPUB word extraction starts at the first real text word (past cover images), giving a non-zero word index. The progress bar shows >0% immediately on open without any reading. Fix: page-based progress (page 0 = 0% regardless of word index) + high-water mark backtrack prompt when closing far behind furthest-read position.
-
-### BUG-084: Flow mode invisible on EPUBs (no underline cursor)
-**Reported:** 2026-03-26
-**Severity:** High
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/FoliatePageView.tsx`, `src/utils/FlowCursorController.ts`
-**Description:** FlowCursorController looks for `[data-word-index]` DOM elements. Foliate renders EPUB content in shadow DOM — these elements don't exist. Cursor never appears. Fix: Range-based overlay cursor positioned via `getBoundingClientRect()` on extracted word Ranges.
-
-### BUG-085: Focus mode not centered in foliate overlay for EPUBs
-**Reported:** 2026-03-26
-**Severity:** Medium
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
-**Description:** When Focus mode (RSVP) activates on an EPUB, the word display appears offset from center because it's positioned relative to foliate's container. Fix: Focus overlay sits at reader viewport level (full-viewport centered div on top of foliate).
-
-### BUG-086: Narration highlight doesn't advance in foliate DOM for EPUBs
-**Reported:** 2026-03-26
-**Severity:** High
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
-**Description:** During narration on EPUBs, the word highlight stays on the first word or disappears after page turn. The `<mark>` injection approach breaks when foliate re-renders sections. Fix: overlay-based highlight div positioned via Range bounding rects, consistent with Flow cursor approach.
-
-### BUG-087: Word click maps to wrong position in EPUB
-**Reported:** 2026-03-26
-**Severity:** High
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/FoliatePageView.tsx`
-**Description:** Clicking a common word like "the" in EPUB highlights the first occurrence instead of the clicked one. Root cause: click handler's text-node walker uses `split(/\s+/)` while word extractor uses `Intl.Segmenter`, producing different word counts. Fix: unify both to shared `segmentWords()` utility using `Intl.Segmenter`.
-
-### BUG-088: Stale Range objects after foliate page navigation
-**Reported:** 2026-03-26
-**Severity:** High
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/FoliatePageView.tsx`
-**Description:** Words extracted from section N hold DOM Range references. When foliate navigates to section M, those nodes are unloaded and any Range operation throws or returns garbage. Fix: re-extract words on section change, maintain full-document word array with Range nulling for unloaded sections.
-
-### BUG-089: Time-to-complete always shows WPM estimate regardless of active mode
-**Reported:** 2026-03-26
-**Severity:** Medium
-**Sprint:** 25S-STABLE (Stabilization)
-**Location:** `src/components/ReaderBottomBar.tsx`
-**Description:** Duplicate of BUG-072 with refined spec. Time remaining should use `ttsRate * TTS_RATE_BASELINE_WPM` when narration is active, WPM for all other modes. Both chapter and document time displays must use the mode-aware calculation.
 
 ---
 
 ## Complete
+
+### BUG-080: Kokoro AI button unclickable in Speed Reading settings
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High (blocks TTS engine selection)
+**Location:** `src/components/settings/SpeedReadingSettings.tsx`, `src/styles/global.css`
+**Problem:** The System/Kokoro AI toggle buttons in Speed Reading settings render visually but clicking "Kokoro AI" has no effect. Likely `-webkit-app-region: drag` inheritance from the flap container, or a z-index issue covering the button's click target.
+**Solution:** Added `-webkit-app-region: no-drag` to `.settings-mode-toggle` and `.settings-mode-btn` in global.css.
+
+### BUG-081: Auto-updater latest.yml only contains ARM64 architecture
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** Critical (x64 users never get updates)
+**Location:** `.github/workflows/release.yml`
+**Problem:** The release workflow builds x64 and ARM64 as separate jobs. The ARM64 job runs last and overwrites `latest.yml` with only its own entry. x64 users' auto-updater finds no matching installer and reports "You're up to date" even when a new version exists.
+**Solution:** Replaced two-job matrix with single-job multi-arch build (`--x64 --arm64`). electron-builder produces single latest.yml natively. Added verification grep step.
+
+### BUG-082: EPUB starts on page ~3 instead of cover
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** When opening a new EPUB (no saved position), foliate's initial CFI navigation skips cover/TOC pages and lands on the first text content section. The user sees page ~3 instead of the cover. First open should land on page 0 (cover). Only subsequent opens should restore saved CFI.
+**Solution:** Guard initial CFI in FoliatePageView; only pass `lastLocation` when saved CFI exists. Explicit `goToFraction(0)` fallback for first open.
+
+### BUG-083: Opening a book falsely marks it as "started" with >0% progress
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/types.ts`
+**Problem:** EPUB word extraction starts at the first real text word (past cover images), giving a non-zero word index. The progress bar shows >0% immediately on open without any reading.
+**Solution:** Engagement-gated progress via `hasEngagedRef` (resets on doc change). Progress only saved after mode start, word click, or deliberate page turn. Added high-water mark backtrack prompt.
+
+### BUG-084: Flow mode invisible on EPUBs (no underline cursor)
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/utils/FlowCursorController.ts`
+**Problem:** FlowCursorController looks for `[data-word-index]` DOM elements. Foliate renders EPUB content in shadow DOM — these elements don't exist. Cursor never appears.
+**Solution:** Range-based overlay cursor using `getOverlayPosition()` with iframe coordinate transform. GPU-accelerated `translate3d()`.
+
+### BUG-085: Focus mode not centered in foliate overlay for EPUBs
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+**Problem:** When Focus mode (RSVP) activates on an EPUB, the word display appears offset from center because it's positioned relative to foliate's container.
+**Solution:** Changed Focus overlay from `position: absolute` to `position: fixed` with `inset: 0`, ensuring viewport-level centering.
+
+### BUG-086: Narration highlight doesn't advance in foliate DOM for EPUBs
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** During narration on EPUBs, the word highlight stays on the first word or disappears after page turn. The `<mark>` injection approach breaks when foliate re-renders sections.
+**Solution:** Replaced `<mark>` DOM injection with overlay highlight div. Removed all `surroundContents` code from FoliatePageView.
+
+### BUG-087: Word click maps to wrong position in EPUB
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`
+**Problem:** Clicking a common word like "the" in EPUB highlights the first occurrence instead of the clicked one. Root cause: click handler's text-node walker uses `split(/\s+/)` while word extractor uses `Intl.Segmenter`, producing different word counts.
+**Solution:** Unified click handler tokenization with `countWordsSegmenter()` from shared `segmentWords.ts` utility using `Intl.Segmenter`.
+
+### BUG-088: Stale Range objects after foliate page navigation
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`
+**Problem:** Words extracted from section N hold DOM Range references. When foliate navigates to section M, those nodes are unloaded and any Range operation throws or returns garbage.
+**Solution:** Re-extract words on section change via merge algorithm. Full-document word array with Range nulling for unloaded sections. `isConnected` guards on all Range operations.
+
+### BUG-073: NM page browsing yanks user back to current narration position
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Severity:** High
+**Location:** `src/components/PageReaderView.tsx` (page sync effect), `src/components/ReaderContainer.tsx`
+**Problem:** During active Narration mode, if the user manually navigates pages (Left/Right arrows), the page-sync effect immediately yanks them back to the page containing the current narration word. Users should be able to browse ahead/behind while NM continues speaking.
+**Solution:** Decouple view from highlight when narration paused. Added `ReturnToReadingPill` component with Enter key shortcut (guarded by activeOverlay).
+
+### BUG-052: NM speed changes should take effect immediately during active narration
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Severity:** Medium
+**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** When Narration mode is active and the user adjusts the TTS rate slider in the bottom bar, the speed change should apply immediately to the current reading — not wait for the next chunk.
+**Solution:** Added `generationIdRef` guard to discard stale Kokoro IPC results. Pre-buffer invalidated synchronously on rate change.
+
+### BUG-072: Time-to-complete should reflect active mode's speed
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Severity:** Medium
+**Location:** `src/components/ReaderBottomBar.tsx` (time remaining calculation), `src/components/LibraryView.tsx` (card time display)
+**Problem:** The "time until chapter/book completes" display is always based on WPM. It should be mode-aware: Page/Focus/Flow/Library uses WPM; Narration uses TTS rate (1.0x ≈ 150 WPM).
+**Solution:** Replaced magic number 150 with `TTS_RATE_BASELINE_WPM` constant. Mode-aware calculation was already wired.
+
+### BUG-051: Clicking a mode button should select it, not auto-start it
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx` (handleEnterFocus, handleEnterFlow, handleToggleTts)
+**Problem:** When the user clicks Focus, Flow, or Narrate in the bottom bar, the mode immediately starts instead of only selecting it as the active mode. Only pressing Space bar should actually start the selected mode.
+**Solution:** Narrate button already routed through `handleSelectMode`. Added mode deselect (clicking already-selected mode reverts to flow).
 
 ### BUG-001: Stray checkbox in top-left window corner
 **Reported:** 2026-03-25 | **Fixed:** 2026-03-25
