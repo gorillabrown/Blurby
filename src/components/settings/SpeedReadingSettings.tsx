@@ -85,12 +85,12 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           voice,
           settings.ttsRate || 1.0
         );
-        if (!result.error) {
+        if (!result.error && result.audio) {
           const { playBuffer } = await import("../../utils/audioPlayer");
           playBuffer(
             result.audio,
-            result.sampleRate,
-            result.durationMs,
+            result.sampleRate ?? 24000,
+            result.durationMs ?? 0,
             9, // word count of test sentence
             undefined,
             () => setTestPlaying(false),

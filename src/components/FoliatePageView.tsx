@@ -310,7 +310,7 @@ export default function FoliatePageView({
         await import("foliate-js/view.js");
 
         // Read file as arraybuffer via IPC
-        const buffer: ArrayBuffer = await api.readFileBuffer(activeDoc.filepath);
+        const buffer: ArrayBuffer = await api.readFileBuffer(activeDoc.filepath!);
         if (cancelled) return;
 
         if (!buffer) {

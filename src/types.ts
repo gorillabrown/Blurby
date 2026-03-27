@@ -216,6 +216,7 @@ export interface ElectronAPI {
   siteLogin: (url: string) => Promise<{ success?: boolean; site?: string; cancelled?: boolean; error?: string }>;
   siteLogout: (domain: string) => Promise<boolean>;
   getCoverImage: (coverPath: string) => Promise<string | null>;
+  readFileBuffer: (filepath: string) => Promise<ArrayBuffer>;
   rescanFolder: () => Promise<{ count?: number; error?: string }>;
   getFilePathForDrop: (file: File) => string;
   // Sprint 19: Sync hardening
@@ -259,7 +260,7 @@ export interface ElectronAPI {
   kokoroModelStatus: () => Promise<{ ready: boolean }>;
   kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
   kokoroDownload?: () => Promise<{ ok?: boolean; error?: string }>;
-  kokoroGenerate?: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; error?: string }>;
+  kokoroGenerate?: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; error?: string }>;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
 }
