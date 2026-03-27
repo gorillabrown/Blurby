@@ -626,3 +626,25 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 - Fix ALL root causes before re-attempting the feature — stacked bugs create deceptive symptoms
 
 **Rule:** PR-38: EPUB narration page auto-advance requires knowing which CSS column is visible. Simple DOM queries cannot determine this.
+
+---
+
+### [2026-03-27] LL-036: Mode Instance Wiring — Timer Ownership and FlowCursorController Granularity Mismatch
+
+**Area:** architecture, reading modes, React hooks
+**Status:** active
+**Priority:** medium
+
+**Context:** Sprint TD-2 wired the four mode classes (PageMode, FocusMode, FlowMode, NarrateMode) into the app via `useReadingModeInstance`. Key architectural decisions emerged from attempting to replace inline timer logic with mode instance calls.
+
+**Discoveries:**
+
+1. **FocusMode can replace useReader's rAF timer.** FocusMode's setTimeout chain drives word advancement; its `onWordAdvance` callback calls `reader.jumpToWord(idx)` to sync useReader's `wordIndex` for ReaderView display. `reader.togglePlay()` is no longer called — FocusMode is the sole timer. `playing` prop to ReaderView is derived from `readingMode === "focus"` instead of useReader's internal flag.
+
+2. **FlowCursorController and FlowMode have incompatible granularities.** FlowMode advances word-by-word with setTimeout. FlowCursorController slides a CSS-animated cursor across visual lines — one transition per line, not per word. The smooth line-slide animation is a core UX feature. Replacing FlowCursorController with word-by-word updates would regress the visual experience. **Resolution:** Non-EPUB Flow delegates to FlowCursorController via `flowPlaying` state. EPUB Flow uses FlowMode's timer + CSS class underline on word spans.
+
+3. **Words must be passed at start time, not as hook params.** EPUB words come from `extractFoliateWords()` called just before mode start. React state hasn't re-rendered yet, so hook params would be stale. `startMode(wordIdx, words, paragraphBreaks)` accepts words directly.
+
+4. **Section-load retry pattern must be applied to ALL EPUB modes, not just Narration.** Focus and Flow on EPUBs can start on cover pages with zero extractable words. The same `renderer.next()` → wait → retry pattern from `startNarration` must be duplicated in `startFocus` and `startFlow`.
+
+**Rule:** PR-39: When bridging imperative class instances to React state: hold the instance in a `useRef` (not `useState` — instances are mutable); use stable callback refs for all callbacks the instance receives; and pass dynamic data (words, config) at call time, not at hook initialization.

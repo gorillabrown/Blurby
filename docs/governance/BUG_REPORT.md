@@ -15,12 +15,7 @@
 **Description:** During Kokoro TTS narration on EPUBs, the page does not advance when narration reads past visible content. Audio continues correctly and word highlighting works within the visible page, but the foliate view stays on the same page. Multiple approaches attempted (CSS column visibility detection, span-not-found, fraction comparison) all failed due to foliate's CSS multi-column layout keeping all section words in DOM simultaneously. See LL-035 for full analysis.
 **Status:** Open. Root cause identified but no viable fix yet.
 
-### BUG-092: EPUB Focus mode starts from wrong position
-**Reported:** 2026-03-26
-**Severity:** Medium
-**Location:** `src/components/ReaderContainer.tsx` (startFocus)
-**Description:** Focus mode on EPUBs starts from word 0 or wrong position instead of the clicked word. The `wordsRef` in useReader may not be populated with foliate words at the time Focus starts.
-**Status:** Open.
+### ~~BUG-092~~ ✅ Fixed — see Complete section
 
 ### BUG-031: Bottom bar not visible in Focus mode or Flow mode
 **Reported:** 2026-03-25
@@ -117,11 +112,17 @@
 
 ## Complete
 
+### BUG-092: EPUB Focus mode starts from wrong position
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-27
+**Location:** `src/hooks/useReaderMode.ts` (startFocus, startFlow)
+**Problem:** Focus/Flow on EPUBs started from word 0 because `wordsRef` wasn't populated with foliate words before the mode started. On cover pages or freshly loaded EPUBs, `getWords()` returned empty.
+**Solution:** Added section-load retry: if `effectiveWords.length === 0` on an EPUB, trigger `renderer.next()` and retry after `FOLIATE_SECTION_LOAD_WAIT_MS` (same pattern already used by startNarration). Also switched from `reader.wordsRef.current.length` to `effectiveWords.length` for start word resolution, avoiding stale ref reads (Sprint TD-2, commit 237ecb4).
+
 ### BUG-091: EPUB Flow mode cursor not working
-**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
-**Location:** `src/components/FoliatePageView.tsx` (Flow cursor overlay)
-**Problem:** Flow mode overlay cursor in the rAF loop queried foliate iframes for word spans but could not determine visibility in CSS columns. Same coordinate space mismatch as BUG-090.
-**Solution:** Fixed flow cursor visibility and narration start position (commit ee812a9).
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-27
+**Location:** `src/components/FoliatePageView.tsx` (highlightWordByIndex), `src/styles/global.css`
+**Problem:** FlowCursorController couldn't find `[data-word-index]` spans in foliate shadow DOM iframes. External overlay div couldn't reach across the shadow DOM boundary.
+**Solution:** Two-part fix: (1) FlowMode class drives word-by-word timing for EPUBs via `useReadingModeInstance`, calling `highlightWordByIndex` on each advance. (2) `highlightWordByIndex` applies `page-word--flow-cursor` CSS class (3px accent underline) when `readingModeRef.current === "flow"`, injected into EPUB iframes via `injectStyles` (Sprint TD-2, commit 237ecb4).
 
 ### BUG-080: Kokoro AI button unclickable in Speed Reading settings
 **Reported:** 2026-03-26 | **Fixed:** 2026-03-26
