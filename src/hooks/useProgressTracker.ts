@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { BlurbyDoc } from "../types";
+import { APPROX_WORDS_PER_PAGE, BACKTRACK_THRESHOLD_WORDS } from "../constants";
 
 const api = window.electronAPI;
 
@@ -160,11 +161,11 @@ export function useProgressTracker({
   const checkBacktrack = useCallback((currentWordIdx: number, totalWords: number, isFoliate: boolean): boolean => {
     const furthest = furthestPositionRef.current;
     const threshold = isFoliate
-      ? Math.max(2, Math.round(2 * totalWords / Math.max(1, Math.round(totalWords / 250))))
-      : Math.max(2, 500);
+      ? Math.max(2, Math.round(2 * totalWords / Math.max(1, Math.round(totalWords / APPROX_WORDS_PER_PAGE))))
+      : Math.max(2, BACKTRACK_THRESHOLD_WORDS);
     const isBacktracked = currentWordIdx < (furthest - threshold);
     if (isBacktracked && hasEngagedRef.current) {
-      const approxWordsPerPage = 250;
+      const approxWordsPerPage = APPROX_WORDS_PER_PAGE;
       setBacktrackPages({
         current: Math.max(1, Math.ceil(currentWordIdx / approxWordsPerPage)),
         furthest: Math.max(1, Math.ceil(furthest / approxWordsPerPage)),

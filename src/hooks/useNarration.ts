@@ -1,9 +1,12 @@
-import { useState, useRef, useCallback, useEffect, useReducer } from "react";
-import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS } from "../constants";
+import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, PUNCTUATION_PAUSE_MS, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
 import { calculatePauseMs } from "../utils/rhythm";
 import * as audioPlayer from "../utils/audioPlayer";
 import type { RhythmPauses } from "../types";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
+import type { TtsStrategy } from "../types/narration";
+import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
+import { createKokoroStrategy } from "./narration/kokoroStrategy";
 
 export interface NarrationState {
   speaking: boolean;
@@ -75,6 +78,40 @@ export default function useNarration() {
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
   const paragraphBreaksRef = useRef<Set<number>>(new Set());
   const chunkPauseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── TTS Strategy instances ──────────────────────────────────────────────
+  const webStrategy = useMemo(
+    () => createWebSpeechStrategy(() => currentVoice),
+    [currentVoice],
+  );
+
+  // Stable refs to break circular dependency (strategy → speakNextChunk → strategy).
+  // Assigned after the useCallback definitions below.
+  const speakNextChunkRef = useRef<() => void>(() => {});
+  const speakNextChunkWebRef = useRef<() => void>(() => {});
+  const preBufferNextRef = useRef<(afterEndIdx: number) => void>(() => {});
+
+  const kokoroStrategy = useMemo(
+    () => createKokoroStrategy({
+      getVoiceId: () => kokoroVoiceRef.current,
+      getGenerationId: () => stateRef.current.generationId,
+      getInFlight: () => stateRef.current.kokoroInFlight,
+      getPreBuffer: () => stateRef.current.nextChunkBuffer,
+      getStatus: () => stateRef.current.status,
+      getSpeed: () => stateRef.current.speed,
+      setInFlight: (inFlight) => dispatch({ type: "KOKORO_IN_FLIGHT", inFlight }),
+      clearPreBuffer: () => dispatch({ type: "CLEAR_PRE_BUFFER" }),
+      preBufferNext: (afterEndIdx) => preBufferNextRef.current(afterEndIdx),
+      onFallbackToWeb: () => {
+        dispatch({ type: "SET_ENGINE", engine: "web" });
+        speakNextChunkWebRef.current();
+      },
+      onStaleGeneration: () => {
+        speakNextChunkRef.current();
+      },
+    }),
+    [], // stable — all deps accessed via refs/getters
+  );
 
   // Check Kokoro model status on mount
   useEffect(() => {
@@ -502,7 +539,7 @@ export default function useNarration() {
         }
         // Kokoro in-flight: generation ID increment ensures stale result is discarded on arrival
       }
-    }, 500);
+    }, TTS_RATE_RESTART_DEBOUNCE_MS);
   }, [speakNextChunk]);
 
   // Cleanup on unmount

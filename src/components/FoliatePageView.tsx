@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords } from "../utils/segmentWords";
+import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX } from "../constants";
 
 const api = window.electronAPI;
 
@@ -450,13 +451,13 @@ export default function FoliatePageView({
 
         // Set renderer attributes
         const scale = (focusTextSize || 100) / 100;
-        const fontSize = Math.round(18 * scale);
+        const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
         view.renderer.setAttribute("flow", "paginated");
         view.renderer.setAttribute("margin", "40px");
         view.renderer.setAttribute("gap", "5%");
         view.renderer.setAttribute("max-inline-size", "720px");
-        view.renderer.setAttribute("max-block-size", `${container.clientHeight - 20}px`);
-        view.renderer.setAttribute("max-column-count", container.clientWidth >= 1040 ? "2" : "1");
+        view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
+        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
 
         // Provide TOC
         if (view.book?.toc) {
@@ -627,8 +628,8 @@ export default function FoliatePageView({
     const container = containerRef.current;
     if (!container) return;
 
-    view.renderer.setAttribute("max-column-count", container.clientWidth >= 1040 ? "2" : "1");
-    view.renderer.setAttribute("max-block-size", `${container.clientHeight - 20}px`);
+    view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+    view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
 
     // Re-inject styles on settings change
     for (const { doc } of view.renderer.getContents?.() ?? []) {
@@ -649,7 +650,7 @@ export default function FoliatePageView({
     cursor.style.display = "block";
 
     let currentIdx = highlightedWordIndexRef.current ?? 0;
-    const msPerWord = 60000 / (wpm || 300);
+    const msPerWord = 60000 / (wpm || DEFAULT_WPM);
     let lastAdvance = performance.now();
 
     const tick = (now: number) => {
@@ -816,7 +817,7 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
   if (existing) existing.remove();
 
   const scale = (focusTextSize || 100) / 100;
-  const fontSize = Math.round(18 * scale);
+  const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
   const lineHeight = settings.layoutSpacing?.line || 1.8;
   const fontFamily = settings.fontFamily || "Georgia, serif";
 

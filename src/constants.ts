@@ -164,6 +164,38 @@ export const GOTO_INDICATOR_DISMISS_MS = 1500;
 /** WPM threshold above which word transition animations are disabled */
 export const ANIMATION_DISABLE_WPM = 500;
 
+// ── Progress Tracking ────────────────────────────────────────────────────────
+/** Approximate words per page — used for backtrack detection and page number estimation */
+export const APPROX_WORDS_PER_PAGE = 250;
+/** Backtrack threshold (words) for non-foliate documents — how far back triggers the prompt */
+export const BACKTRACK_THRESHOLD_WORDS = 500;
+/** How often to save progress during RSVP/Focus mode playback (ms) */
+export const RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000;
+/** Minimum word delta before saving progress during RSVP/Focus mode playback */
+export const RSVP_PROGRESS_SAVE_WORD_DELTA = 50;
+/** Debounce for saving Foliate (EPUB) page position after a relocate event (ms) */
+export const FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS = 2000;
+
+// ── Mode Transitions ─────────────────────────────────────────────────────────
+/** Delay before calling reader.togglePlay() after entering Focus mode (ms) — lets React commit */
+export const FOCUS_MODE_START_DELAY_MS = 50;
+/** Wait time for an EPUB section to load before retrying narration start (ms) */
+export const FOLIATE_SECTION_LOAD_WAIT_MS = 500;
+/** Interval for polling whether user is browsing away during narration mode (ms) */
+export const FOLIATE_BROWSING_CHECK_INTERVAL_MS = 500;
+
+// ── TTS Debounce ─────────────────────────────────────────────────────────────
+/** Debounce before restarting TTS after a rate change — lets rapid slider adjustments settle (ms) */
+export const TTS_RATE_RESTART_DEBOUNCE_MS = 500;
+
+// ── Foliate Renderer ─────────────────────────────────────────────────────────
+/** Base font size (px) injected into EPUB iframe — scaled by focusTextSize percentage */
+export const FOLIATE_BASE_FONT_SIZE_PX = 18;
+/** Height margin subtracted from container when setting max-block-size on the EPUB renderer (px) */
+export const FOLIATE_RENDERER_HEIGHT_MARGIN_PX = 20;
+/** Viewport width at which the EPUB renderer switches to two-column layout (px) */
+export const FOLIATE_TWO_COLUMN_BREAKPOINT_PX = 1040;
+
 // ── Default Settings ─────────────────────────────────────────────────────────
 /** Single source of truth for BlurbySettings defaults.
  *  Import in SettingsContext and useLibrary instead of duplicating. */

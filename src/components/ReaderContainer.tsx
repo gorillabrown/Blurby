@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
@@ -200,7 +200,7 @@ export default function ReaderContainer({
       const browsing = foliateApiRef.current?.isUserBrowsing?.() ?? false;
       setIsBrowsedAway(browsing);
     };
-    const timer = setInterval(checkBrowsing, 500);
+    const timer = setInterval(checkBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [useFoliate, readingMode]);
 
@@ -286,7 +286,7 @@ export default function ReaderContainer({
         if (words.length > 0) {
           startNarration(); // Retry now that we have words
         }
-      }, 500);
+      }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
     // Resolve start position — uses shared utility to eliminate duplication with startFocus/startFlow
@@ -370,7 +370,7 @@ export default function ReaderContainer({
     const last = rsvpLastSaveRef.current;
     const timeDelta = now - last.time;
     const wordDelta = Math.abs(wordIndex - last.wordIndex);
-    if (timeDelta >= 5000 || wordDelta >= 50) {
+    if (timeDelta >= RSVP_PROGRESS_SAVE_INTERVAL_MS || wordDelta >= RSVP_PROGRESS_SAVE_WORD_DELTA) {
       rsvpLastSaveRef.current = { time: now, wordIndex };
       api.updateDocProgress(activeDoc.id, wordIndex);
       onUpdateProgress(activeDoc.id, wordIndex);
@@ -401,7 +401,7 @@ export default function ReaderContainer({
     jumpToWord(startWord);
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
-    setTimeout(() => reader.togglePlay(), 50);
+    setTimeout(() => reader.togglePlay(), FOCUS_MODE_START_DELAY_MS);
   }, [highlightedWordIndex, jumpToWord, updateSettings, reader, stopAllModes, useFoliate, extractFoliateWords]);
 
   /** Start Flow mode (internal — called by handleTogglePlay) */
@@ -738,7 +738,7 @@ export default function ReaderContainer({
             api.updateDocProgress(activeDoc.id, approxWordIdx, detail.cfi);
             onUpdateProgress(activeDoc.id, approxWordIdx);
             lastSavedPosRef.current = approxWordIdx;
-          }, 2000);
+          }, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS);
         }
       }}
       onTocReady={(toc) => {
