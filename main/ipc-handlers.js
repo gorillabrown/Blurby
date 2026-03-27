@@ -3,6 +3,7 @@
 
 const { ipcMain, dialog, session, net } = require("electron");
 const path = require("path");
+const os = require("os");
 const fsPromises = require("fs/promises");
 const https = require("https");
 
@@ -567,6 +568,32 @@ function registerIpcHandlers(ctx) {
       ctx.addDocToLibrary(newDoc);
       ctx.saveLibrary();
 
+      // Convert extracted HTML to EPUB
+      try {
+        const { convertToEpub } = require("./epub-converter");
+        const { EPUB_CONVERTED_DIR } = require("./constants");
+        const tempHtmlPath = path.join(os.tmpdir(), `blurby-url-${docId}.html`);
+        await fsPromises.writeFile(
+          tempHtmlPath,
+          `<html><head><title>${result.title}</title></head><body>${result.content}</body></html>`
+        );
+        const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
+        const convResult = await convertToEpub(tempHtmlPath, convertedDir, docId, {
+          title: result.title,
+          author: result.author,
+        });
+        await fsPromises.unlink(tempHtmlPath).catch(() => {});
+        newDoc.convertedEpubPath = convResult.epubPath;
+        newDoc.filepath = convResult.epubPath;
+        newDoc.ext = ".epub";
+        const docsAfterConv = ctx.getLibrary();
+        ctx.setLibrary(docsAfterConv.map((d) => (d.id === newDoc.id ? newDoc : d)));
+        ctx.saveLibrary();
+      } catch (convErr) {
+        logToFile(`URL EPUB conversion failed: ${convErr.message}`, ctx.getErrorLogPath());
+        // Fall back to inline content (existing behavior)
+      }
+
       // Generate PDF if source folder is set
       if (settings.sourceFolder) {
         try {
@@ -664,6 +691,25 @@ function registerIpcHandlers(ctx) {
             wordCount, position: 0, created: Date.now(), source: "folder",
             author: meta.author, coverPath: meta.coverPath, lastReadAt: null,
           };
+
+          if (ext !== ".epub") {
+            try {
+              const { convertToEpub } = require("./epub-converter");
+              const { EPUB_CONVERTED_DIR } = require("./constants");
+              const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
+              const convResult = await convertToEpub(destPath, convertedDir, docId, {
+                title: meta.title || path.basename(destPath, ext),
+                author: meta.author,
+              });
+              doc.convertedEpubPath = convResult.epubPath;
+              doc.originalFilepath = destPath;
+              doc.filepath = convResult.epubPath;
+              doc.ext = ".epub";
+            } catch (convErr) {
+              logToFile(`EPUB conversion failed for ${destPath}: ${convErr.message}`, ctx.getErrorLogPath());
+            }
+          }
+
           ctx.addDocToLibrary(doc);
           imported.push(doc.title);
         } catch (err) {
@@ -680,6 +726,25 @@ function registerIpcHandlers(ctx) {
           content, wordCount, ext,
           position: 0, created: Date.now(), source: "manual",
         };
+
+        if (ext !== ".epub") {
+          try {
+            const { convertToEpub } = require("./epub-converter");
+            const { EPUB_CONVERTED_DIR } = require("./constants");
+            const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
+            const convResult = await convertToEpub(fp, convertedDir, docId, {
+              title: doc.title,
+              author: undefined,
+            });
+            doc.convertedEpubPath = convResult.epubPath;
+            doc.originalFilepath = fp;
+            doc.filepath = convResult.epubPath;
+            doc.ext = ".epub";
+          } catch (convErr) {
+            logToFile(`EPUB conversion failed for ${fp}: ${convErr.message}`, ctx.getErrorLogPath());
+          }
+        }
+
         ctx.addDocToLibrary(doc);
         imported.push(doc.title);
       }
