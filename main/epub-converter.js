@@ -7,6 +7,7 @@ const fsPromises = require("fs").promises;
 const {
   EPUB_CONVERTED_DIR,
   TXT_CHAPTER_MIN_LINES,
+  PDF_MIN_EXTRACTABLE_WORDS,
 } = require("./constants");
 
 // Lazy-loaded heavy dependencies
@@ -509,7 +510,19 @@ async function pdfToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
     (data.info && data.info.Author) ||
     "Unknown";
 
-  const text = data.text || "";
+  const text = (data.text || "").trim();
+
+  // Detect scanned/image-based PDFs that produce no extractable text
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  if (wordCount < PDF_MIN_EXTRACTABLE_WORDS) {
+    const err = new Error(
+      "This PDF appears to be image-based or scanned. Blurby can only read text-based PDFs."
+    );
+    err.code = "PDF_NOT_READABLE";
+    err.userError = true;
+    throw err;
+  }
+
   const detected = detectChapters(text);
   const chapters = detected.map((ch) => ({
     title: ch.title,

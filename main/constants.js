@@ -59,6 +59,8 @@ const EPUB_CHAPTER_CACHE_MAX = 50;
 const EPUB_CONVERTED_DIR = "converted";
 /** Min lines between heading-like patterns for chapter detection in TXT */
 const TXT_CHAPTER_MIN_LINES = 50;
+/** Min words extracted from PDF to consider it readable (below = likely scanned/image-based) */
+const PDF_MIN_EXTRACTABLE_WORDS = 50;
 
 // ── Auth ────────────────────────────────────────────────────────────────────
 /** Token expiry fallback when provider does not return an expiry (ms, 1 hour) */
@@ -104,6 +106,7 @@ module.exports = {
   // EPUB Converter
   EPUB_CONVERTED_DIR,
   TXT_CHAPTER_MIN_LINES,
+  PDF_MIN_EXTRACTABLE_WORDS,
   // Auth
   TOKEN_EXPIRY_FALLBACK_MS,
   // Snooze

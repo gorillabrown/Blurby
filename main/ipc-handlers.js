@@ -712,6 +712,11 @@ function registerIpcHandlers(ctx) {
               doc.ext = ".epub";
             } catch (convErr) {
               logToFile(`EPUB conversion failed for ${destPath}: ${convErr.message}`, ctx.getErrorLogPath());
+              if (convErr.userError) {
+                rejected.push(path.basename(destPath) + ": " + convErr.message);
+                continue; // Skip adding to library — file is not readable
+              }
+              // Non-user errors: fall back to legacy text extraction
             }
           }
 
@@ -747,6 +752,11 @@ function registerIpcHandlers(ctx) {
             doc.ext = ".epub";
           } catch (convErr) {
             logToFile(`EPUB conversion failed for ${fp}: ${convErr.message}`, ctx.getErrorLogPath());
+            if (convErr.userError) {
+              rejected.push(path.basename(fp) + ": " + convErr.message);
+              continue; // Skip adding to library — file is not readable
+            }
+            // Non-user errors: fall back to legacy text extraction
           }
         }
 

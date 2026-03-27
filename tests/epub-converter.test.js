@@ -433,9 +433,15 @@ describe("pdfToEpub", () => {
     const { pdfToEpub } = await import("../main/epub-converter.js");
     const AdmZip = (await import("adm-zip")).default;
 
-    // Fake pdf-parse function injected via _deps
+    // Fake pdf-parse function injected via _deps (must have 50+ words to pass readability check)
+    const longText = "First paragraph of the PDF document with enough words to pass the readability threshold. " +
+      "This is a second sentence that adds more content to the extracted text. " +
+      "And a third sentence to ensure we are well above the minimum word count requirement. " +
+      "The quick brown fox jumps over the lazy dog several times in this test paragraph. " +
+      "Finally we add one more line to be absolutely certain this has more than fifty words total.\n\n" +
+      "Second paragraph with additional content for good measure.";
     const fakePdfParse = async () => ({
-      text: "First paragraph of the PDF.\n\nSecond paragraph.",
+      text: longText,
       info: { Title: "PDF Book", Author: "PDF Author" },
     });
 
@@ -452,7 +458,42 @@ describe("pdfToEpub", () => {
 
     const zip = new AdmZip(outputPath);
     const ch = zip.getEntry("OEBPS/Text/chapter_0.xhtml").getData().toString();
-    expect(ch).toContain("First paragraph of the PDF.");
+    expect(ch).toContain("First paragraph of the PDF document");
+  });
+
+  it("rejects scanned/image-based PDFs with fewer than 50 extractable words", async () => {
+    const { pdfToEpub } = await import("../main/epub-converter.js");
+
+    // Fake pdf-parse returning almost no text (simulates scanned PDF)
+    const fakePdfParse = async () => ({
+      text: "Page 1   Page 2",
+      info: { Title: "Scanned Doc" },
+    });
+
+    const inputPath = path.join(tmpDir, "scanned.pdf");
+    await fs.writeFile(inputPath, Buffer.from("fake-pdf"));
+    const outputPath = path.join(tmpDir, "scanned.epub");
+
+    await expect(
+      pdfToEpub(inputPath, outputPath, {}, { pdfParse: fakePdfParse })
+    ).rejects.toThrow("image-based or scanned");
+  });
+
+  it("sets userError and code on scanned PDF rejection", async () => {
+    const { pdfToEpub } = await import("../main/epub-converter.js");
+
+    const fakePdfParse = async () => ({ text: "", info: {} });
+    const inputPath = path.join(tmpDir, "empty.pdf");
+    await fs.writeFile(inputPath, Buffer.from("fake-pdf"));
+    const outputPath = path.join(tmpDir, "empty.epub");
+
+    try {
+      await pdfToEpub(inputPath, outputPath, {}, { pdfParse: fakePdfParse });
+      expect.unreachable("Should have thrown");
+    } catch (err) {
+      expect(err.code).toBe("PDF_NOT_READABLE");
+      expect(err.userError).toBe(true);
+    }
   });
 });
 
