@@ -500,7 +500,6 @@ export default function ReaderContainer({
     if (extracted.length > 0) {
       foliateWordsRef.current = extracted;
       wordsRef.current = extracted.map(w => w.word);
-      console.log(`[Foliate] Extracted ${extracted.length} words from DOM`);
     }
   }, [useFoliate, wordsRef]);
 
@@ -882,7 +881,6 @@ export default function ReaderContainer({
         // Use global word index directly when available (from data-word-index span)
         if (globalWordIndex !== undefined && globalWordIndex >= 0) {
           setHighlightedWordIndex(globalWordIndex);
-          console.log(`[Foliate] Word clicked: "${word}" at global index ${globalWordIndex}`);
           return;
         }
         // Fallback: text search (less precise)
@@ -891,7 +889,6 @@ export default function ReaderContainer({
           for (let i = 0; i < words.length; i++) {
             if (words[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
               setHighlightedWordIndex(i);
-              console.log(`[Foliate] Mapped click to word index ${i} (text fallback)`);
               return;
             }
           }

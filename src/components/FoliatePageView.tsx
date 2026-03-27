@@ -12,7 +12,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords } from "../utils/segmentWords";
-import { getOverlayPosition } from "../utils/getOverlayPosition";
 
 const api = (window as any).electronAPI;
 
@@ -21,12 +20,6 @@ export interface FoliateWord {
   word: string;
   range: Range | null;
   sectionIndex: number;
-}
-
-/** Safely perform an operation on a Range, returning fallback if the Range is stale or null. */
-function safeRangeOp<T>(range: Range | null, fn: (r: Range) => T, fallback: T): T {
-  if (!range || !range.startContainer.isConnected) return fallback;
-  try { return fn(range); } catch { return fallback; }
 }
 
 /** Intl.Segmenter instance shared within this module for inline word detection. */
@@ -139,94 +132,6 @@ function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWo
   return words;
 }
 
-/**
- * Merge freshly extracted words with the existing word array.
- * - Words from loaded sections get fresh Ranges.
- * - Words from unloaded sections keep their word string but Range is nulled.
- * - New sections discovered in fresh extraction are inserted at the correct position.
- */
-function mergeWords(existing: FoliateWord[], fresh: FoliateWord[], loadedSections: Set<number>): FoliateWord[] {
-  // Build a map of fresh words grouped by section
-  const freshBySection = new Map<number, FoliateWord[]>();
-  for (const w of fresh) {
-    let arr = freshBySection.get(w.sectionIndex);
-    if (!arr) { arr = []; freshBySection.set(w.sectionIndex, arr); }
-    arr.push(w);
-  }
-
-  // Collect existing sections in order
-  const existingSections = new Set<number>();
-  for (const w of existing) existingSections.add(w.sectionIndex);
-
-  // Find new sections not in existing
-  const newSections = new Set<number>();
-  for (const s of freshBySection.keys()) {
-    if (!existingSections.has(s)) newSections.add(s);
-  }
-
-  // Build merged result
-  const merged: FoliateWord[] = [];
-  let lastSection = -1;
-
-  for (const w of existing) {
-    // Before processing a new section from existing, insert any new sections that come before it
-    if (w.sectionIndex !== lastSection) {
-      for (const ns of newSections) {
-        if (ns > lastSection && ns < w.sectionIndex) {
-          const nsWords = freshBySection.get(ns);
-          if (nsWords) merged.push(...nsWords);
-          newSections.delete(ns);
-        }
-      }
-      lastSection = w.sectionIndex;
-    }
-
-    if (freshBySection.has(w.sectionIndex)) {
-      // This section is freshly loaded — skip old words, we'll add fresh ones once per section
-      continue;
-    } else if (!loadedSections.has(w.sectionIndex)) {
-      // Section is unloaded — null out Range, keep word string
-      merged.push({ word: w.word, range: null, sectionIndex: w.sectionIndex });
-    } else {
-      // Section is loaded but not in fresh (shouldn't happen, but keep as-is)
-      merged.push(w);
-    }
-  }
-
-  // Now insert fresh words for sections that replaced existing ones, in section order
-  const freshSectionsSorted = Array.from(freshBySection.keys()).sort((a, b) => a - b);
-
-  // Rebuild: insert fresh section words at the right position
-  const result: FoliateWord[] = [];
-  let mergedIdx = 0;
-
-  for (const freshSec of freshSectionsSorted) {
-    // Add all merged words from sections before this fresh section
-    while (mergedIdx < merged.length && merged[mergedIdx].sectionIndex < freshSec) {
-      result.push(merged[mergedIdx++]);
-    }
-    // Skip any merged words from this section (shouldn't exist since we skipped above)
-    while (mergedIdx < merged.length && merged[mergedIdx].sectionIndex === freshSec) {
-      mergedIdx++;
-    }
-    // Add fresh words for this section
-    const freshWords = freshBySection.get(freshSec);
-    if (freshWords) result.push(...freshWords);
-  }
-
-  // Add remaining merged words
-  while (mergedIdx < merged.length) {
-    result.push(merged[mergedIdx++]);
-  }
-
-  // Append any new sections that come after all existing sections
-  for (const ns of newSections) {
-    const nsWords = freshBySection.get(ns);
-    if (nsWords) result.push(...nsWords);
-  }
-
-  return result;
-}
 
 /** Walk the EPUB section DOM and wrap each word in a <span class="page-word" data-word-index="N">.
  *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
@@ -401,15 +306,11 @@ export default function FoliatePageView({
         setError(null);
 
         // Import foliate-js modules (ESM, runs in renderer)
-        console.log("[Foliate] Importing foliate-js...");
         await import("foliate-js/view.js");
-        console.log("[Foliate] Custom element registered:", !!customElements.get("foliate-view"));
 
         // Read file as arraybuffer via IPC
-        console.log("[Foliate] Reading file:", activeDoc.filepath);
         const buffer: ArrayBuffer = await api.readFileBuffer(activeDoc.filepath);
         if (cancelled) return;
-        console.log("[Foliate] Buffer size:", buffer?.byteLength);
 
         if (!buffer) {
           setError("Could not read EPUB file");
@@ -420,19 +321,16 @@ export default function FoliatePageView({
         // Create File object from buffer
         const fileName = (activeDoc.filepath || "book.epub").split(/[\\/]/).pop() || "book.epub";
         const file = new File([buffer], fileName, { type: "application/epub+zip" });
-        console.log("[Foliate] File created:", file.name, file.size, "bytes");
 
         // Create and mount the foliate-view element inside the non-React host
         const view = document.createElement("foliate-view") as any;
         host.innerHTML = "";
         host.appendChild(view);
         viewRef.current = view;
-        console.log("[Foliate] View element mounted, attaching listeners before open...");
 
         // Attach load listener BEFORE open() — events may fire during init
         const onSectionLoad = (e: any) => {
           const { doc, index } = e.detail;
-          console.log("[Foliate] Section loaded:", index, "doc body:", doc?.body?.tagName, "children:", doc?.body?.childElementCount);
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
 
@@ -549,7 +447,6 @@ export default function FoliatePageView({
         // Open the book
         await view.open(file);
         if (cancelled) return;
-        console.log("[Foliate] Book opened. Sections:", view.book?.sections?.length, "TOC items:", view.book?.toc?.length);
 
         // Set renderer attributes
         const scale = (focusTextSize || 100) / 100;
@@ -569,7 +466,6 @@ export default function FoliatePageView({
         // Navigate to last position or start from the very beginning (cover page).
         // Only pass lastLocation when a real CFI exists — passing null causes foliate
         // to skip the cover and land on the first text section (~page 3).
-        console.log("[Foliate] initialCfi:", initialCfi ? initialCfi.substring(0, 60) + "..." : "null/undefined");
         const initOptions = initialCfi ? { lastLocation: initialCfi } : {};
         await view.init(initOptions);
 
@@ -579,10 +475,8 @@ export default function FoliatePageView({
           const wordCount = activeDoc.wordCount || 1;
           if (savedPos > 0 && wordCount > 0) {
             const fraction = Math.min(savedPos / wordCount, 1);
-            console.log(`[Foliate] No CFI but position=${savedPos}/${wordCount} — goToFraction(${fraction.toFixed(3)})`);
             await view.goToFraction(fraction);
           } else {
-            console.log("[Foliate] No saved position — forcing goToFraction(0) for cover page");
             await view.goToFraction(0);
           }
         }
@@ -700,7 +594,6 @@ export default function FoliatePageView({
         setLoading(false);
       } catch (err: any) {
         if (!cancelled) {
-          console.error("FoliatePageView load error:", err);
           setError(err.message || "Failed to load EPUB");
           setLoading(false);
         }
@@ -710,14 +603,12 @@ export default function FoliatePageView({
     // Guard against React Strict Mode double-mount: if a view is already loaded
     // for this book, skip the second initialization entirely
     if (viewRef.current && !cancelled) {
-      console.log("[Foliate] Skipping double-mount — view already exists");
       return () => { cancelled = true; };
     }
 
     loadBook();
 
     return () => {
-      console.log("[Foliate] CLEANUP — effect unmounting, cancelled=true");
       cancelled = true;
       if (viewRef.current) {
         viewRef.current.close?.();
