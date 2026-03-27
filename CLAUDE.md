@@ -80,14 +80,24 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ## Key References
 
+### 7 Governing Documents
+
+Every session starts with awareness of these 7 documents. They are the single source of truth for all project decisions.
+
+| # | Document | Path | Lane |
+|---|----------|------|------|
+| 1 | **Technical Reference** | `docs/governance/TECHNICAL_REFERENCE.md` | What Blurby IS — architecture, data model, every feature |
+| 2 | **Roadmap** | `ROADMAP.md` | What we're building next — sprints, acceptance criteria |
+| 3 | **Bug Report** | `docs/governance/BUG_REPORT.md` | What's broken — severity, location, resolution |
+| 4 | **Lessons Learned** | `docs/governance/LESSONS_LEARNED.md` | Engineering discoveries, persistent rules, anti-patterns |
+| 5 | **Ideas** | `docs/governance/IDEAS.md` | Unroadmapped concepts — reviewed at phase pauses |
+| 6 | **CLAUDE.md** | `CLAUDE.md` | Agent operational config — rules, agents, workflow |
+| 7 | **Sprint Queue** | `docs/governance/SPRINT_QUEUE.md` | Next 3 ready-to-dispatch sprint specs (FIFO) |
+
+### Other References
+
 - **Project Constitution**: `docs/project/Blurby_Project_Constitution.md`
-- **Lessons Learned**: `docs/project/LESSONS_LEARNED.md`
 - **Sprint Dispatch Template**: `.workflow/docs/sprint-dispatch-template.md` (CLI Evergreen format)
-- **Sprint Queue**: `docs/project/sprint-queue.md` (ready-to-dispatch sprints, FIFO)
-- **Roadmap**: `ROADMAP.md` — Forward-looking: features, enhancements, architecture changes, Feature Backlog
-- **Bug Report**: `docs/project/BUG_REPORT.md` — Backward-looking: ONLY bugs in existing implemented features. New features/enhancements go in ROADMAP.md
-- **Agent Findings**: `docs/project/AGENT_FINDINGS.md`
-- **Performance Sprint Plan**: `SPRINT-PERF.md`
 - **Workflow System**: `.workflow/WORKFLOW_ORIENTATION.md` (process discipline, session bootstrap)
 - **Session Bootstrap**: `.workflow/session-bootstrap.md` (Skill Gate Rule, anti-rationalization, priorities)
 - **Skill Library**: `.workflow/skills/` (brainstorming, planning, execution, verification, debugging, parallel-agents, etc.)
@@ -103,10 +113,12 @@ Before any task that involves work, check `.workflow/skills/` for an applicable 
 
 ### Session Start Protocol
 
-1. Read `CLAUDE.md` (this file)
+1. Read `CLAUDE.md` (this file) — rules, agents, current system state
 2. Read `.workflow/session-bootstrap.md` (Skill Gate Rule, anti-rationalization tables)
-3. Read `docs/project/LESSONS_LEARNED.md` (if session may change codebase)
+3. Read `docs/governance/LESSONS_LEARNED.md` (if session may change codebase)
 4. Read `ROADMAP.md` (if session involves planned work)
+5. Read `docs/governance/BUG_REPORT.md` (if session involves bug fixes)
+6. Read `docs/governance/SPRINT_QUEUE.md` (if dispatching work to CLI)
 
 ### Workflow Customization Values
 
@@ -116,7 +128,7 @@ These replace `[CUSTOMIZE]` markers in `.workflow/` files (Option A — values s
 |--------|-------|
 | `[PROJECT_CONFIG]` | `CLAUDE.md` (project root) |
 | `[PROJECT_CONSTITUTION]` | `docs/project/Blurby_Project_Constitution.md` |
-| `[LESSONS_LEARNED]` | `docs/project/LESSONS_LEARNED.md` |
+| `[LESSONS_LEARNED]` | `docs/governance/LESSONS_LEARNED.md` |
 | `[PROJECT_TEST_FAST_COMMAND]` | `npm test` |
 | `[PROJECT_TEST_FULL_COMMAND]` | `npm test && npm run build` |
 | `[BRANCH_NAMING_CONVENTION]` | `sprint/<N>-<name>` (e.g., `sprint/22-chrome-ext`) |
@@ -131,52 +143,57 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ---
 
-## Current System State (Post-Sprint 25S — Stabilization Complete)
+## Current System State (v2.1.0 — Post-TD-1 Technical Debt Sprint)
 
-### Codebase (branch: `sprint/25s-stabilization`, pending merge to main)
+### Codebase (branch: `sprint/td1-tech-debt`)
 
-- All sprints (1-22 + 18A + 18B + 25S) complete — core app, security, performance, accessibility, cloud sync, production installer, sync hardening, keyboard-first UX, UX polish, Chrome extension, reading animation, TTS sync, stabilization
-- 522 tests passing across 24 test files
+- All sprints (1-22 + 18A + 18B + 25S + TD-1) complete — core app through stabilization, plus technical debt refactoring (foliate-js EPUB, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC decomposition)
+- 585 tests passing across 27+ test files
 - CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
 
 ### Tech Stack
 
 - Electron 41 + React 19 + Vite 6 + TypeScript 5.9
 - Vitest 4.1 for testing, electron-builder 26 for packaging
+- foliate-js for EPUB rendering (primary reader for EPUBs)
+- Kokoro TTS engine (28 voices, worker thread, q4 quantization)
 - Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log)
 
 ### Architecture
 
-- **Main process** — modularized into 11 files:
-  - `main.js` (1063 lines) — orchestrator, app lifecycle, context object
-  - `main/ipc-handlers.js` (918 lines) — all IPC registrations (incl. cloud sync channels)
-  - `main/file-parsers.js` (694 lines) — EPUB, MOBI, PDF, HTML, TXT format parsers
-  - `main/sync-engine.js` (~950 lines) — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
-  - `main/sync-queue.js` (229 lines) — offline operation queue with compaction and idempotent replay
-  - `main/auth.js` (421 lines) — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
-  - `main/url-extractor.js` (392 lines) — URL/article extraction, Readability, PDF export
-  - `main/cloud-google.js` (316 lines) — Google Drive appDataFolder, resumable uploads, retry
-  - `main/window-manager.js` (216 lines) — BrowserWindow, tray, menu, auto-updater
-  - `main/cloud-onedrive.js` (201 lines) — OneDrive App Folder via Microsoft Graph, chunked uploads
-  - `main/migrations.js` (137 lines) — schema migrations with backup
-  - `main/ws-server.js` (402 lines) — localhost WebSocket server for Chrome extension (port 48924, pairing token auth)
-  - `main/folder-watcher.js` (110 lines) — chokidar folder watching
-  - `main/cloud-storage.js` (18 lines) — provider factory (OneDrive/Google)
+- **Main process** — modularized with domain-split IPC:
+  - `main.js` — orchestrator, app lifecycle, context object
+  - `main/ipc/` — 8 domain-specific IPC handler files (replaces monolithic ipc-handlers.js)
+  - `main/epub-converter.js` — universal EPUB pipeline (all formats convert to EPUB on import)
+  - `main/legacy-parsers.js` — retained parsers for non-EPUB formats (PDF, TXT, MD, HTML)
+  - `main/sync-engine.js` — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
+  - `main/sync-queue.js` — offline operation queue with compaction and idempotent replay
+  - `main/auth.js` — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
+  - `main/url-extractor.js` — URL/article extraction, Readability, PDF export
+  - `main/cloud-google.js` — Google Drive appDataFolder, resumable uploads, retry
+  - `main/window-manager.js` — BrowserWindow, tray, menu, auto-updater
+  - `main/cloud-onedrive.js` — OneDrive App Folder via Microsoft Graph, chunked uploads
+  - `main/migrations.js` — schema migrations with backup
+  - `main/ws-server.js` — localhost WebSocket server for Chrome extension (port 48924, pairing token auth)
+  - `main/folder-watcher.js` — chokidar folder watching
+  - `main/cloud-storage.js` — provider factory (OneDrive/Google)
   - Context object pattern shares state (mainWindow, library, settings, paths) across modules
 - **Preload** (`preload.js`): Context bridge -> `window.electronAPI` (incl. cloud sync APIs)
 - **Renderer** (`src/`): React 19 SPA
   - `App.tsx` — Thin orchestrator (Sprint 11 refactor)
-  - `src/components/` — 39 UI components + 8 settings sub-pages
-    - Sprint 20 additions: `PageReaderView.tsx` (default paginated reader), `ReaderBottomBar.tsx` (unified controls), `CommandPalette.tsx`, `ShortcutsOverlay.tsx`, `GoToIndicator.tsx`, `SnoozePickerOverlay.tsx`, `TagPickerOverlay.tsx`, `HighlightsOverlay.tsx`, `QuickSettingsPopover.tsx`, `NotePopover.tsx`
-    - Sprint 21 addition: `HotkeyCoach.tsx` (mouse-click coaching toasts)
-    - Sprint 25S additions: `BacktrackPrompt.tsx` (high-water mark progress prompt), `ReturnToReadingPill.tsx` (floating narration return button)
+  - `src/components/` — UI components + 8 settings sub-pages
+    - `ReaderContainer.tsx` — decomposed into hooks: useReaderMode, useProgressTracker, useEinkController
+    - `ReaderBottomBar.tsx` — unified controls across all 4 reading modes
+  - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode.ts`, `NarrateMode.ts` + shared types and index
   - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
   - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
-  - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration
-  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts (Sprint 25S), getOverlayPosition.ts (Sprint 25S), FlowCursorController.ts
+  - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration, useReaderMode (TD-1), useProgressTracker (TD-1), useEinkController (TD-1)
+  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowCursorController.ts, constants.ts
+  - `src/types/` — types.ts, foliate.ts (TD-1), narration.ts (TD-1)
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
+  - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro)
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Tests** (`tests/`): 24 test files, 522 tests (Sprint 13 base + Sprint 19/20/21/25S additions)
+- **Tests** (`tests/`): 27+ test files, 585 tests (Sprint 13 base + Sprint 19/20/21/25S/TD-1 additions)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -184,70 +201,61 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| Page View (PageReaderView) | ✅ Built | DEFAULT reading view — paginated, word selection, note/define, launches Focus/Flow (Sprint 20U) |
-| Focus Mode (ReaderView) | ✅ Built | RSVP word-at-a-time, ORP highlighting, WPM control — sub-mode of Page (Sprint 20U) |
-| Flow Mode (ScrollReaderView) | ✅ Built | Scrolling text with word-level highlighting — sub-mode of Page (Sprint 20U) |
-| Unified Bottom Bar (ReaderBottomBar) | ✅ Built | Shared controls across Page/Focus/Flow — WPM, font, mode buttons, chapters (Sprint 20U) |
+| Four-Mode Reader | ✅ Built | Page (default), Focus (RSVP), Flow (scroll), Narrate — 4 mutually exclusive modes with mode verticals in `src/modes/` (TD-1) |
+| foliate-js EPUB Rendering | ✅ Built | Primary reader for EPUBs — native EPUB rendering replacing custom parser (TD-1) |
+| Universal EPUB Pipeline | ✅ Built | All formats (TXT, MD, PDF, MOBI/AZW3, HTML) convert to EPUB on import via `epub-converter.js` (TD-1) |
+| Kokoro TTS | ✅ Built | 28 voices, worker thread, q4 quantization, strategy pattern with Web Speech fallback (TD-1) |
+| ReaderContainer Decomposition | ✅ Built | useReaderMode + useProgressTracker + useEinkController hooks extracted from monolith (TD-1) |
+| IPC Domain Split | ✅ Built | 8 domain-specific handler files in `main/ipc/` replacing monolithic ipc-handlers.js (TD-1) |
+| Narration State Machine | ✅ Built | useReducer-based state machine with TTS strategy pattern (TD-1) |
+| Page View (PageReaderView) | ✅ Built | DEFAULT reading view — paginated, word selection, note/define, launches Focus/Flow/Narrate (Sprint 20U) |
+| Focus Mode (ReaderView) | ✅ Built | RSVP word-at-a-time, ORP highlighting, WPM control (Sprint 20U) |
+| Flow Mode (ScrollReaderView) | ✅ Built | Scrolling text with word-level highlighting (Sprint 20U) |
+| Unified Bottom Bar (ReaderBottomBar) | ✅ Built | Shared controls across all modes — WPM, font, mode buttons, chapters (Sprint 20U) |
 | Notes System | ✅ Built | Inline notes from Page view, exported to .docx with APA citations (Sprint 20V) |
 | Reading Log | ✅ Built | Session logging to .xlsx with dashboard KPIs (Sprint 20W) |
 | Library Management | ✅ Built | Grid/list view, search, favorites, archives, memoized computed state |
 | Folder Watching | ✅ Built | Chokidar (lazy-loaded), on-demand content loading, stale folder cleanup |
 | URL Article Import | ✅ Built | Readability + authenticated fetching (lazy-loaded) |
-| Multi-Format Support | ✅ Built | TXT, MD, PDF, EPUB, MOBI/AZW3, HTML |
+| Multi-Format Support | ✅ Built | TXT, MD, PDF, EPUB, MOBI/AZW3, HTML (all convert to EPUB on import) |
 | Chapter Navigation | ✅ Built | NCX/nav TOC, dropdown jump-to-chapter |
 | Settings System | ✅ Built | 8 sub-pages (theme, layout, speed, hotkeys, connectors, help, text size, cloud sync) |
 | Menu Flap | ✅ Built | Collapsible sidebar with settings access |
 | Reading Queue | ✅ Built | Queue management with progress tracking |
 | Highlights & Definitions | ✅ Built | Quick-menu with save and dictionary define |
-| TTS Narration | ✅ Built | E-ink theme + text-to-speech integration |
 | Themes | ✅ Built | Dark, light, system, e-ink, custom accent colors |
-| Windows Installer | ✅ Configured | NSIS with branding, shortcuts, directory selection |
+| Windows Installer | ✅ Production | Branded NSIS (x64+ARM64), delta updates, auto-updater, draft releases (Sprint 18A) |
 | Schema Migrations | ✅ Built | Versioned settings.json + library.json with backup |
 | Error Boundaries | ✅ Built | Wrapping Library and Reader views |
-| TypeScript | ✅ Migrated | .tsx/.ts in renderer, types.ts for shared types |
-| Unit Tests | ✅ 293 tests | Vitest — 14 test files incl. hooks, stress, chapters (Sprint 13) |
+| TypeScript | ✅ Migrated | .tsx/.ts in renderer, types.ts + foliate.ts + narration.ts for shared types |
+| Unit Tests | ✅ 585 tests | Vitest — 27+ test files (Sprint 13 base + subsequent sprints + TD-1) |
 | Auto-Updater | ✅ Built | check-for-updates IPC, Settings > Help UI (Sprint 6) |
 | Drag-and-Drop | ✅ Polished | Client-side extension filtering, rejection toasts, format hints (Sprint 6) |
-| Reader Exit Confirmation | ✅ Built | Double-Escape pattern in ScrollReaderView (Sprint 6) |
-| Recent Folders | ✅ Built | Stale folder cleanup on startup (Sprint 6) |
 | Reading Statistics | ✅ Built | history.json, StatsPanel, streaks, actual reading time, reset (Sprint 7/7b) |
 | CI/CD | ✅ Built | GitHub Actions: CI on push/PR, release on v* tags + workflow_dispatch (Sprint 8 + 18A) |
 | Security Hardening | ✅ Built | Image validation, atomic writes, CSP, error logging, pessimistic updates (Sprint 9) |
 | Memory & Scalability | ✅ Built | LRU caches, incremental index, PDF cleanup, login dedup (Sprint 10) |
-| Renderer Architecture | ✅ Built | App.tsx split into containers, component extraction, typed API (Sprint 11) |
-| Code Deduplication | ✅ Built | Shared metadata, countWords utility, named constants (Sprint 12) |
 | CSS & Theming | ✅ Built | Cross-theme consistency, CSS custom properties, responsive (Sprint 14) |
 | Accessibility | ✅ Built | WCAG 2.1 AA — ARIA, keyboard nav, screen reader, reduced motion (Sprint 15) |
 | E-Ink Display Optimization | ✅ Built | WPM ceiling, phrase grouping, paginated scroll, ghosting prevention, touch targets (Sprint 16) |
-| Cloud Sync — Auth | ✅ Built | OAuth2 Microsoft (MSAL/PKCE) + Google, encrypted token storage (Sprint 17) |
-| Cloud Sync — Engine | ✅ Built | Offline-first, hash-based change detection, field/doc/history merge (Sprint 17) |
-| Cloud Sync — UI | ✅ Built | CloudSyncSettings page, CloudSyncIndicator, first-time merge dialog (Sprint 17) |
-| Windows Installer | ✅ Production | Branded NSIS (x64+ARM64), delta updates, auto-updater, draft releases (Sprint 18A) |
-| Sync Hardening | ✅ Built | Revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation (Sprint 19) |
-| Article Provenance | ✅ Built | Author, source domain, pub date extraction from URLs; APA-format PDF headers; lead image cascade with magic-byte validation (Sprint 19) |
-| Keyboard-First UX | ✅ Built | Command palette, J/K nav, G-sequences, 30+ shortcuts, undo, snooze, tags, collections, filter shortcuts (Sprint 20) |
-| Three-Mode Reader | ✅ Built | Page (default) → Focus (RSVP) → Flow (scroll); unified ReaderBottomBar; position mapping (Sprint 20U) |
-| Notes System | ✅ Built | NotePopover → .docx with APA citations and TOC (Sprint 20V) |
-| Reading Log | ✅ Built | Session data → .xlsx with ReadLog table + Dashboard KPIs (Sprint 20W) |
-| UX Polish | ✅ Built | Sticky headers, magnifying glass search, file badges, thumbnails, coaching toasts, drag-drop anywhere (Sprint 21) |
+| Cloud Sync | ✅ Built | OAuth2 (Microsoft + Google), offline-first engine, revision counters, tombstones, full reconciliation (Sprint 17 + 19) |
+| Chrome Extension | ✅ Built | WebSocket bridge, pairing token auth (Sprint 18B) |
+| Keyboard-First UX | ✅ Built | Command palette, J/K nav, G-sequences, 30+ shortcuts, undo, snooze, tags, collections (Sprint 20) |
+| UX Polish | ✅ Built | Sticky headers, search, badges, thumbnails, coaching toasts, drag-drop anywhere (Sprint 21) |
 | Reading Intelligence | ✅ Built | Active-only session timer, AVG WPM fix, time-to-end displays (Sprint 21) |
-| Flow Highlight Animation | ✅ Built | GPU-accelerated translate3d() cursor glide, line-wrap snap, disabled >500 WPM, reduced motion (Sprint 22) |
-| Focus Word Transition | ✅ Built | CSS fade/slide on word advance, duration ≤15% of interval, disabled >500 WPM (Sprint 22) |
-| TTS Sync | ✅ Built | Cursor-driven TTS — 4-word chunk buffering, WPM-derived rate, word-boundary sync, auto-chain (Sprint 22) |
-| TTS Toggle + WPM Cap | ✅ Built | Narration button in bottom bar (Page view only), WPM capped at 400, N shortcut (Sprint 22) |
-| EPUB Overlay System | ✅ Built | Range-based overlays for Flow cursor, narration highlight, Focus centering on EPUBs — no DOM injection (Sprint 25S) |
-| Engagement-Gated Progress | ✅ Built | Progress only saved after deliberate interaction; backtrack prompt on close behind high-water mark (Sprint 25S) |
-| Word Tokenization | ✅ Built | Shared `segmentWords` utility via `Intl.Segmenter` — unified across extraction and click mapping (Sprint 25S) |
-| Stale Range Guards | ✅ Built | `safeRangeOp` + `isConnected` guards, word re-extraction on section change, iframe ref caching (Sprint 25S) |
-| TTS Rate Guard | ✅ Built | Generation ID pattern discards stale Kokoro IPC results on rate change (Sprint 25S) |
-| Return to Reading Pill | ✅ Built | Floating pill during paused narration when browsed away, Enter key shortcut (Sprint 25S) |
+| Flow Highlight Animation | ✅ Built | GPU-accelerated translate3d() cursor glide, line-wrap snap, reduced motion (Sprint 22) |
+| EPUB Overlay System | ✅ Built | Range-based overlays for Flow cursor, narration highlight, Focus centering (Sprint 25S) |
+| Engagement-Gated Progress | ✅ Built | Progress only saved after deliberate interaction; backtrack prompt (Sprint 25S) |
+| Constants Extraction | ✅ Built | Hardcoded values extracted to `constants.ts` (TD-1) |
+| Rhythm Utilities | ✅ Built | `calculateChunkBoundaryPause` extracted to `rhythm.ts` (TD-1) |
 
 ### What's NOT Done (Roadmap Forward)
 
-- ~~Sprint 18B: Chrome extension~~ — ✅ COMPLETED (merged to main)
-- ~~Sprint 22: Reading Animation + TTS Sync~~ — ✅ COMPLETED (merged to main)
-- ~~Sprint 25S: Stabilization~~ — ✅ COMPLETED (pending merge to main after smoke test)
-- **Sprint 23: V1 Hardening** — First-run onboarding, error recovery UX, constants extraction (AF-001), a11y audit on Sprint 20/21/25S components, performance baselines, auto-update E2E test
+- ~~Sprint 18B: Chrome extension~~ — ✅ COMPLETED
+- ~~Sprint 22: Reading Animation + TTS Sync~~ — ✅ COMPLETED
+- ~~Sprint 25S: Stabilization~~ — ✅ COMPLETED
+- ~~TD-1: Technical Debt~~ — ✅ COMPLETED (foliate-js, Kokoro TTS, universal EPUB, mode verticals, IPC split, hook extraction)
+- **Sprint 23: V1 Hardening** — First-run onboarding, error recovery UX, a11y audit on recent components, performance baselines, auto-update E2E test
 - **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release
 - **Sprint 25: RSS Library + Paywall Integration** — Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline (post-v1)
 - **Sprint 18C: Android app** — React Native port with cloud sync (post-v1)
@@ -267,6 +275,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 ✅ Sprint 18B (Chrome extension) — completed
 ✅ Sprint 22 (reading animation + TTS sync) — completed
 ✅ Sprint 25S (stabilization — 13 bug fixes, EPUB overlays, engagement-gated progress) — completed
+✅ TD-1 (technical debt — foliate-js, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC split) — completed
 **Sprint 23** (v1 hardening) → **Sprint 24** (external audit) → **v1.0.0 RELEASE**
 **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 

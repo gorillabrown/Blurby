@@ -72,7 +72,7 @@ Sprint TD-1 (technical debt) merged to main as v2.1.0. Four mode classes exist i
 6. `src/components/FoliatePageView.tsx` — `highlightWordByIndex`, `findFirstVisibleWordIndex`, `scrollToAnchor`, `wrapWordsInSpans` (BUG-091 + BUG-092 context)
 7. `src/hooks/useNarration.ts` — `startCursorDriven`, `adjustRate`, `pause`, `resume`, `stop` (matches NarrationInterface)
 8. `.github/workflows/release.yml` — current dual-job build workflow (S-02 fix target)
-9. `docs/project/LESSONS_LEARNED.md` — LL-035 (EPUB page auto-advance), PR-37 (Kokoro rhythm pauses) for context on foliate iframe challenges
+9. `docs/governance/LESSONS_LEARNED.md` — LL-035 (EPUB page auto-advance), PR-37 (Kokoro rhythm pauses) for context on foliate iframe challenges
 
 ### HOW (Agent Assignments)
 
@@ -248,7 +248,7 @@ Six parallel workstreams: (A) OnboardingOverlay component with public-domain sam
 ### WHERE (Read in This Order)
 1. `CLAUDE.md` — System state, constants separation rule, standing rules
 2. `.workflow/session-bootstrap.md` — Skill Gate, anti-rationalization
-3. `docs/project/LESSONS_LEARNED.md` — Guardrails
+3. `docs/governance/LESSONS_LEARNED.md` — Guardrails
 4. `ROADMAP.md` §Sprint 23 — Full spec (23A–23F), acceptance criteria
 5. `docs/project/AGENT_FINDINGS.md` — AF-001 (constants extraction) details
 6. `src/utils/text.ts` — Current constant locations (MIN_WPM, MAX_WPM, etc.)
@@ -348,7 +348,7 @@ Four parallel audit workstreams per `.workflow/skills/external-audit/SKILL.md`: 
 ### WHERE (Read in This Order)
 1. `.workflow/skills/external-audit/SKILL.md` — Full audit protocol
 2. `CLAUDE.md` — Standing rules to verify against
-3. `docs/project/LESSONS_LEARNED.md` — Known traps to check for regression
+3. `docs/governance/LESSONS_LEARNED.md` — Known traps to check for regression
 4. `ROADMAP.md` — Acceptance criteria to verify implementations against
 5. `src/types.ts` — Type definitions for correctness checks
 6. `package.json` — Dependencies for bundle/security review

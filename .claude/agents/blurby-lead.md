@@ -33,7 +33,7 @@ You are the lead orchestrator for Blurby sprint execution. You read the roadmap,
 
 1. `CLAUDE.md` — Current state, rules, known traps
 2. `.workflow/session-bootstrap.md` — Skill Gate Rule, anti-rationalization tables, priority hierarchy
-3. `docs/project/LESSONS_LEARNED.md` — Guardrails for the areas you're touching
+3. `docs/governance/LESSONS_LEARNED.md` — Guardrails for the areas you're touching
 4. `ROADMAP.md` — Current sprint spec and acceptance criteria
 5. `src/types.ts` — Shared type definitions
 6. Relevant source files per sprint scope
@@ -59,7 +59,7 @@ Required sections: KEY CONTEXT, PROBLEM, EVIDENCE OF PROBLEM, HYPOTHESIZED SOLUT
 
 Optional sections: EVIDENCE FOR HYPOTHESIS (omit only if fix is mechanically obvious), ADDITIONAL GUIDANCE (guardrails, failure modes, anti-patterns).
 
-**Sprint queue lives at:** `docs/project/sprint-queue.md` — always pull the top sprint. After completion: remove it, log it, check queue depth ≥ 3.
+**Sprint queue lives at:** `docs/governance/SPRINT_QUEUE.md` — always pull the top sprint. After completion: remove it, log it, check queue depth ≥ 3.
 
 ## Review Agent Output Contracts
 
