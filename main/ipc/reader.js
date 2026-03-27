@@ -63,7 +63,8 @@ function register(ctx) {
       await fsPromises.appendFile(highlightPath, entry);
       return { ok: true };
     } catch (err) {
-      return { error: err.message };
+      console.error("[reader] save-highlight failed:", err.message);
+      return { error: "Could not save highlight — check file permissions." };
     }
   });
 
@@ -103,7 +104,12 @@ function register(ctx) {
 
       return result;
     } catch (err) {
-      return { error: err.message };
+      console.error("[reader] define-word failed:", err.message);
+      const isNetwork = err.message && (
+        err.message.includes("ENOTFOUND") || err.message.includes("ECONNREFUSED") ||
+        err.message.includes("ETIMEDOUT") || err.message.includes("timed out")
+      );
+      return { error: isNetwork ? "Could not look up definition — check your connection." : "Definition lookup failed." };
     }
   });
 
@@ -238,7 +244,8 @@ function register(ctx) {
       await fsPromises.rename(tmp, docxPath);
       return { ok: true, path: docxPath, count: allNotes.length };
     } catch (err) {
-      return { error: err.message };
+      console.error("[reader] save-reading-note failed:", err.message);
+      return { error: "Could not save note — check file permissions." };
     }
   });
 

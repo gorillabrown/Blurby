@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { BlurbyDoc } from "../types";
-import { APPROX_WORDS_PER_PAGE, BACKTRACK_THRESHOLD_WORDS } from "../constants";
+import { APPROX_WORDS_PER_PAGE, BACKTRACK_THRESHOLD_WORDS, NON_FOLIATE_PROGRESS_SAVE_MS, MIN_ACTIVE_READING_MS } from "../constants";
 
 const api = window.electronAPI;
 
@@ -119,7 +119,7 @@ export function useProgressTracker({
       lastSavedPosRef.current = currentPos;
       api.updateDocProgress(activeDoc.id, currentPos);
       onUpdateProgress(activeDoc.id, currentPos);
-    }, 2000);
+    }, NON_FOLIATE_PROGRESS_SAVE_MS);
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
   }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
 
@@ -139,7 +139,7 @@ export function useProgressTracker({
     }
     const activeMs = activeReadingMsRef.current;
     const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
-    if (wordsRead > 0 && activeMs > 1000) {
+    if (wordsRead > 0 && activeMs > MIN_ACTIVE_READING_MS) {
       api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
       api.logReadingSession({
         docId: activeDoc.id,

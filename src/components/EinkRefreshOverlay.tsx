@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { EINK_REFRESH_PHASE_MS } from "../constants";
 
 /**
  * Full-screen black→white flash overlay for e-ink ghosting prevention.
@@ -8,7 +9,7 @@ export default function EinkRefreshOverlay() {
   const [phase, setPhase] = useState<"black" | "white">("black");
 
   useEffect(() => {
-    const timer = setTimeout(() => setPhase("white"), 100);
+    const timer = setTimeout(() => setPhase("white"), EINK_REFRESH_PHASE_MS);
     return () => clearTimeout(timer);
   }, []);
 

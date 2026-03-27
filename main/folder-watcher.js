@@ -3,6 +3,7 @@
 
 const path = require("path");
 const fsPromises = require("fs/promises");
+const { FOLDER_WATCHER_STABILITY_MS } = require("./constants");
 let _chokidar;
 function getChokidar() { if (!_chokidar) { _chokidar = require("chokidar"); } return _chokidar; }
 
@@ -81,7 +82,7 @@ function startWatcher(sourceFolder, callbacks) {
   const watcher = getChokidar().watch(sourceFolder, {
     ignoreInitial: true,
     ignored: [/(^|[\/\\])\../, savedArticlesDir],
-    awaitWriteFinish: { stabilityThreshold: 500 },
+    awaitWriteFinish: { stabilityThreshold: FOLDER_WATCHER_STABILITY_MS },
   });
 
   watcher.on("add", async (filepath) => {

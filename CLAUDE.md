@@ -143,13 +143,14 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ---
 
-## Current System State (v2.1.0 — Post-TD-1 Technical Debt Sprint)
+## Current System State (v2.1.6 — Post-Sprint 23 V1 Hardening)
 
-### Codebase (branch: `sprint/td1-tech-debt`)
+### Codebase (branch: `sprint/23-v1-hardening`)
 
-- All sprints (1-22 + 18A + 18B + 25S + TD-1) complete — core app through stabilization, plus technical debt refactoring (foliate-js EPUB, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC decomposition)
-- 585 tests passing across 27+ test files
+- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B) complete — core app through v1 hardening
+- 639 tests passing across 29 test files
 - CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
+- Performance baseline: 21 automated benchmarks via `npm run perf`
 
 ### Tech Stack
 
@@ -246,8 +247,13 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 | Flow Highlight Animation | ✅ Built | GPU-accelerated translate3d() cursor glide, line-wrap snap, reduced motion (Sprint 22) |
 | EPUB Overlay System | ✅ Built | Range-based overlays for Flow cursor, narration highlight, Focus centering (Sprint 25S) |
 | Engagement-Gated Progress | ✅ Built | Progress only saved after deliberate interaction; backtrack prompt (Sprint 25S) |
-| Constants Extraction | ✅ Built | Hardcoded values extracted to `constants.ts` (TD-1) |
+| Constants Extraction | ✅ Built | All behavioral constants in `src/constants.ts` + `main/constants.js` (TD-1 + Sprint 23) |
 | Rhythm Utilities | ✅ Built | `calculateChunkBoundaryPause` extracted to `rhythm.ts` (TD-1) |
+| First-Run Onboarding | ✅ Built | Welcome screen, sample doc (Meditations), 3-step tooltip tour, firstRunCompleted flag (Sprint 23) |
+| Error Recovery UX | ✅ Built | User-friendly error messages across all catch blocks, error logging coverage (Sprint 23) |
+| A11y Audit (Sprint 20/21) | ✅ Built | WCAG 2.1 AA audit on 12 components — ARIA, keyboard, focus trapping, reduced motion (Sprint 23) |
+| Performance Baselines | ✅ Built | 21 automated benchmarks via `npm run perf`, manual procedures documented (Sprint 23) |
+| Auto-Update E2E | ✅ Built | Test procedure documented in `docs/testing/auto-update-e2e.md` (Sprint 23) |
 
 ### What's NOT Done (Roadmap Forward)
 
@@ -255,7 +261,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 - ~~Sprint 22: Reading Animation + TTS Sync~~ — ✅ COMPLETED
 - ~~Sprint 25S: Stabilization~~ — ✅ COMPLETED
 - ~~TD-1: Technical Debt~~ — ✅ COMPLETED (foliate-js, Kokoro TTS, universal EPUB, mode verticals, IPC split, hook extraction)
-- **Sprint 23: V1 Hardening** — First-run onboarding, error recovery UX, a11y audit on recent components, performance baselines, auto-update E2E test
+- ~~Sprint 23: V1 Hardening~~ — ✅ COMPLETED (onboarding, error recovery, constants, a11y audit, perf baselines, auto-update E2E)
 - **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release
 - **Sprint 25: RSS Library + Paywall Integration** — Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline (post-v1)
 - **Sprint 18C: Android app** — React Native port with cloud sync (post-v1)
@@ -276,7 +282,8 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 ✅ Sprint 22 (reading animation + TTS sync) — completed
 ✅ Sprint 25S (stabilization — 13 bug fixes, EPUB overlays, engagement-gated progress) — completed
 ✅ TD-1 (technical debt — foliate-js, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC split) — completed
-**Sprint 23** (v1 hardening) → **Sprint 24** (external audit) → **v1.0.0 RELEASE**
+✅ Sprint 23 (v1 hardening — onboarding, error recovery, constants, a11y, perf baselines, auto-update E2E) — completed
+**Sprint 24** (external audit) → **v1.0.0 RELEASE**
 **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 
 ---

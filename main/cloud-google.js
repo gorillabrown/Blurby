@@ -3,11 +3,12 @@
 
 const { net } = require("electron");
 const { getAccessToken } = require("./auth");
+const { GOOGLE_CHUNK_SIZE, CLOUD_MAX_RETRIES, RETRY_BASE_DELAY_MS, RETRY_MAX_DELAY_MS } = require("./constants");
 
 const DRIVE_API = "https://www.googleapis.com/drive/v3";
 const UPLOAD_API = "https://www.googleapis.com/upload/drive/v3";
-const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_RETRIES = 5;
+const CHUNK_SIZE = GOOGLE_CHUNK_SIZE;
+const MAX_RETRIES = CLOUD_MAX_RETRIES;
 
 // ── Retry with exponential backoff ───────────────────────────────────────
 
@@ -20,7 +21,7 @@ async function withRetry(fn, retries = MAX_RETRIES) {
       lastError = err;
       const status = err.status || err.statusCode;
       if (status === 429 || status === 503 || status === 504) {
-        const delay = Math.min(1000 * Math.pow(2, attempt), 60000);
+        const delay = Math.min(RETRY_BASE_DELAY_MS * Math.pow(2, attempt), RETRY_MAX_DELAY_MS);
         await new Promise((r) => setTimeout(r, delay));
         continue;
       }

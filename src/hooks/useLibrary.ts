@@ -42,7 +42,8 @@ export default function useLibrary() {
         setLibrary((prev) => [doc, ...prev]);
       }
     } catch (err) {
-      showToast("Failed to save document");
+      showToast("Could not save document — please try again.");
+      window.electronAPI.logError?.(`addDoc error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
     }
@@ -53,7 +54,8 @@ export default function useLibrary() {
       await api.deleteDoc(id);
       setLibrary((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
-      showToast("Failed to delete document");
+      showToast("Could not delete document — please try again.");
+      window.electronAPI.logError?.(`deleteDoc error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
     }
@@ -64,7 +66,8 @@ export default function useLibrary() {
       await api.resetProgress(id);
       setLibrary((prev) => prev.map((d) => (d.id === id ? { ...d, position: 0 } : d)));
     } catch (err) {
-      showToast("Failed to reset progress");
+      showToast("Could not reset progress — please try again.");
+      window.electronAPI.logError?.(`resetProgress error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
     }
@@ -91,18 +94,34 @@ export default function useLibrary() {
 
   const loadDocContent = useCallback(async (docId: string) => {
     setLoadingContent(true);
-    try { return await api.loadDocContent(docId); } finally { setLoadingContent(false); }
-  }, []);
+    try {
+      const result = await api.loadDocContent(docId);
+      return result;
+    } catch (err) {
+      window.electronAPI.logError?.(`loadDocContent exception for doc ${docId}: ${err}`);
+      showToast("Could not load document — the file may have been moved or deleted.", 6000);
+      return null;
+    } finally { setLoadingContent(false); }
+  }, [showToast]);
 
   const addDocFromUrl = useCallback(async (url: string) => {
     setLoadingContent(true);
     try {
       const result = await api.addDocFromUrl(url);
-      if (result.error) return { error: result.error };
+      if (result.error) {
+        showToast(result.error, 8000);
+        window.electronAPI.logError?.(`addDocFromUrl error: ${result.error} — URL: ${url}`);
+        return { error: result.error };
+      }
       setLibrary((prev) => [result.doc!, ...prev]);
       return { doc: result.doc };
+    } catch (err) {
+      const msg = "Could not import from this URL — please try again.";
+      showToast(msg, 6000);
+      window.electronAPI.logError?.(`addDocFromUrl exception: ${err}`);
+      return { error: msg };
     } finally { setLoadingContent(false); }
-  }, []);
+  }, [showToast]);
 
   const importDroppedFiles = useCallback(async (filePaths: string[]) => {
     setLoadingContent(true);
@@ -117,6 +136,10 @@ export default function useLibrary() {
         showToast(`${result.rejected.length} unsupported file${result.rejected.length > 1 ? "s" : ""} skipped`);
       }
       return result;
+    } catch (err) {
+      window.electronAPI.logError?.(`importDroppedFiles exception: ${err}`);
+      showToast("Import failed — please try again.", 6000);
+      return { imported: [], rejected: [] };
     } finally { setLoadingContent(false); }
   }, [showToast]);
 
@@ -129,7 +152,8 @@ export default function useLibrary() {
       const result = await api.toggleFavorite(docId);
       setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, favorite: result } : d)));
     } catch (err) {
-      showToast("Failed to toggle favorite");
+      showToast("Could not update favorite — please try again.");
+      window.electronAPI.logError?.(`toggleFavorite error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
     }
@@ -141,7 +165,8 @@ export default function useLibrary() {
       setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: true, archivedAt: Date.now() } : d)));
       showToast("Document archived");
     } catch (err) {
-      showToast("Failed to archive document");
+      showToast("Could not archive document — please try again.");
+      window.electronAPI.logError?.(`archiveDoc error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
     }
@@ -152,7 +177,8 @@ export default function useLibrary() {
       await api.unarchiveDoc(docId);
       setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, archived: false, archivedAt: undefined } : d)));
     } catch (err) {
-      showToast("Failed to unarchive document");
+      showToast("Could not restore document — please try again.");
+      window.electronAPI.logError?.(`unarchiveDoc error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
     }

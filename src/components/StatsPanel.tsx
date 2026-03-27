@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { ReadingStats } from "../types";
+import { CONFIRM_RESET_DISMISS_MS } from "../constants";
 
 const api = window.electronAPI;
 
@@ -28,7 +29,7 @@ export default function StatsPanel({ wpm, onClose }: StatsPanelProps) {
   const handleReset = async () => {
     if (!confirmReset) {
       setConfirmReset(true);
-      setTimeout(() => setConfirmReset(false), 3000);
+      setTimeout(() => setConfirmReset(false), CONFIRM_RESET_DISMISS_MS);
       return;
     }
     await api.resetStats();

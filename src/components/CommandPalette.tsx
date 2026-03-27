@@ -329,7 +329,9 @@ export default function CommandPalette({
               ? "Search readings by title, author, source..."
               : "Search actions, settings, shortcuts..."
           }
+          role="combobox"
           aria-label="Command palette search"
+          aria-expanded={results.length > 0}
           aria-autocomplete="list"
           aria-controls="command-palette-results"
           aria-activedescendant={

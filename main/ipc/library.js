@@ -138,6 +138,7 @@ function register(ctx) {
       return buffer.buffer; // Return ArrayBuffer
     } catch (err) {
       console.error("read-file-buffer error:", err.message);
+      logToFile(`read-file-buffer error for "${filePath}": ${err.message}`, ctx.getErrorLogPath());
       return null;
     }
   });
@@ -382,7 +383,13 @@ function register(ctx) {
       return { count: synced.length };
     } catch (err) {
       console.error("Rescan failed:", err);
-      return { error: err.message };
+      logToFile(`Rescan failed: ${err.message}`, ctx.getErrorLogPath());
+      const isPermission = err.message && (
+        err.message.includes("EACCES") || err.message.includes("EPERM") || err.message.includes("permission")
+      );
+      return { error: isPermission
+        ? "Could not scan folder — check permissions."
+        : "Folder rescan failed — please try again." };
     }
   });
 
@@ -430,9 +437,14 @@ function register(ctx) {
         ctx.broadcastLibrary();
         return { added, total: data.library.length };
       }
-      return { error: "Invalid backup file format." };
+      return { error: "Invalid backup file — expected a Blurby backup JSON." };
     } catch (err) {
-      return { error: err.message };
+      console.error("Library import failed:", err.message);
+      logToFile(`Library import failed: ${err.message}`, ctx.getErrorLogPath());
+      const isJson = err instanceof SyntaxError;
+      return { error: isJson
+        ? "Could not read backup file — the file is not valid JSON."
+        : "Library import failed — please try again." };
     }
   });
 

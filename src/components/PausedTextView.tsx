@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import type { LayoutSpacing } from "../types";
+import { SCROLL_EDGE_THRESHOLD_PX } from "../constants";
 
 /** Sliced settings for RSVP reader pause view */
 interface RsvpSettings {
@@ -46,8 +47,8 @@ export default function PausedTextView({ paragraphs, paraStartIndices, wordIndex
     if (!el) return;
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = el;
-      const nearTop = scrollTop < 200;
-      const nearBottom = scrollHeight - scrollTop - clientHeight < 200;
+      const nearTop = scrollTop < SCROLL_EDGE_THRESHOLD_PX;
+      const nearBottom = scrollHeight - scrollTop - clientHeight < SCROLL_EDGE_THRESHOLD_PX;
       if ((nearTop && paraStart > 0) || (nearBottom && paraEnd < paragraphs.length)) {
         setExtraRange((prev) => Math.min(prev + 10, Math.ceil(paragraphs.length / 2)));
       }

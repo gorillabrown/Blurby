@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
-import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS } from "../constants";
+import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS, NEW_LIBRARY_DAYS, SEARCH_BLUR_DELAY_MS } from "../constants";
 import { BlurbyDoc, BlurbySettings, SyncStatusValue, ToastState } from "../types";
 import { useTheme } from "./ThemeProvider";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -52,7 +52,7 @@ export default function LibraryView({
 }: LibraryViewProps) {
   const { theme, setTheme } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
-  const NEW_DAYS = 7; // "new" filter: items added in the last N days
+  const NEW_DAYS = NEW_LIBRARY_DAYS;
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
   const [rescanning, setRescanning] = useState(false);
@@ -528,7 +528,7 @@ export default function LibraryView({
               placeholder="Search readings..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setSearchIndex(-1); }}
-              onBlur={() => setTimeout(() => { if (!searchQuery) setSearchFocused(false); }, 150)}
+              onBlur={() => setTimeout(() => { if (!searchQuery) setSearchFocused(false); }, SEARCH_BLUR_DELAY_MS)}
               onKeyDown={(e) => {
                 if (e.key === "Escape") {
                   setSearchQuery("");

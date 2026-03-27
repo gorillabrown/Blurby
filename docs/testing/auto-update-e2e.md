@@ -23,7 +23,7 @@ Verify the complete auto-update pipeline works from tag creation through CI buil
 - Main process sends `update-available` IPC event to the renderer with the new version string
 - Main process sends `update-downloaded` IPC event when the download completes
 
-The renderer can also trigger a manual check via the `check-for-updates` IPC handle, and trigger immediate install via `install-update` (calls `autoUpdater.quitAndInstall()`). These are the channels wired in `main/ipc-handlers.js` (lines 879–894).
+The renderer can also trigger a manual check via the `check-for-updates` IPC handle, and trigger immediate install via `install-update` (calls `autoUpdater.quitAndInstall()`). These are the channels wired in `main/ipc/misc.js` (lines 342–366).
 
 The publish provider is `github` (configured in `package.json` `build.publish`). Release assets are built to `release/` and include `.exe`, `.blockmap`, and `latest*.yml` files. Delta updates are supported via the `.blockmap` files.
 
@@ -47,9 +47,9 @@ User data lives in `%APPDATA%\blurby` (Electron's `app.getPath('userData')`). Da
    git tag v0.9.9-test
    git push origin v0.9.9-test
    ```
-5. Wait for the `Release` workflow to complete in GitHub Actions (both `Build (x64)` and `Build (arm64)` jobs, then the `Publish Release` job). Expected: approximately 10–15 minutes.
+5. Wait for the `Release` workflow to complete in GitHub Actions (single `Build (x64 + arm64)` job that builds both architectures and uploads assets). Expected: approximately 10–15 minutes.
 6. In GitHub, find the draft release created for `v0.9.9-test`. **Publish it** (remove draft status). The auto-updater checks published releases only.
-7. Download `Blurby-Setup-0.9.9-test.exe` (x64 or ARM64 to match your test machine) from the release assets.
+7. Download the installer matching your test machine from the release assets (e.g., `Blurby-Setup-0.9.9-test-x64.exe` or `Blurby-Setup-0.9.9-test-arm64.exe` — naming follows the `${productName}-Setup-${version}-${arch}.${ext}` pattern).
 8. Run the installer on the test machine. Accept defaults or choose a custom directory — NSIS allows directory selection (`allowToChangeInstallationDirectory: true`).
 9. Launch Blurby. Navigate to **Settings > Help**.
 10. Expected: version shown is `0.9.9-test`.
@@ -84,8 +84,8 @@ User data lives in `%APPDATA%\blurby` (Electron's `app.getPath('userData')`). Da
 ### Step 4: Verify Download and Apply
 
 1. Because `autoDownload = true`, the download begins automatically when the update is detected. Expected: a download progress indicator appears in the UI.
-2. When download completes, the main process sends `update-downloaded` to the renderer. Expected: a "Restart to update" button (or equivalent prompt) appears in Settings > Help.
-3. Click **Restart to update**. This calls the `install-update` IPC handle, which invokes `autoUpdater.quitAndInstall()`.
+2. When download completes, the main process sends `update-downloaded` to the renderer. Expected: an **Install & restart** button appears in Settings > Help.
+3. Click **Install & restart**. This calls the `install-update` IPC handle, which invokes `autoUpdater.quitAndInstall()`.
    - Alternatively, quit and relaunch the app — `autoInstallOnAppQuit = true` means the update applies on the next quit.
 4. Expected: the app closes and the NSIS installer runs silently to apply the update, then relaunches Blurby.
 
@@ -147,7 +147,7 @@ Use Add/Remove Programs or the uninstaller created by NSIS (Start Menu > Blurby 
 | 3 | Auto-update detection (within 15s of launch) | "Update available" notification for `0.9.10-test` | |
 | 3 | Manual check fallback | `check-for-updates` IPC returns `0.9.10-test` | |
 | 4 | Download progress | Progress indicator shown during download | |
-| 4 | Download complete | `update-downloaded` event triggers "Restart to update" prompt | |
+| 4 | Download complete | `update-downloaded` event triggers "Install & restart" button | |
 | 4 | Apply update | App quits and relaunches after `quitAndInstall()` | |
 | 5 | Post-update version | Settings > Help shows `0.9.10-test` | |
 | 5 | Library preserved | Books added before update still present | |
@@ -191,5 +191,5 @@ Use Add/Remove Programs or the uninstaller created by NSIS (Start Menu > Blurby 
 - This is a **manual** test procedure. The two-build requirement (one installed base, one live update) cannot be automated in a single CI run without a dedicated test environment.
 - Run this procedure before each major release (i.e., before tagging `v1.0.0` and before any `v1.x.y` release thereafter).
 - Use version numbers with a `-test` suffix (e.g., `0.9.9-test`, `0.9.10-test`) to avoid polluting the real release history. These will be treated as prerelease by `softprops/action-gh-release` only if they contain `-beta` or `-rc` — `-test` suffixes produce standard releases, so be sure to delete them promptly.
-- The release workflow runs tests (`npm test`) and typechecks (`npm run typecheck`) only on the x64 matrix job. Both matrix jobs must succeed before the publish job runs.
+- The release workflow runs tests (`npm test`) and typechecks (`npm run typecheck`) before building. It is a single job that produces both x64 and ARM64 installers, then uploads all assets and SHA-256 checksums to the GitHub release.
 - Estimated total time for one full run of this procedure: 45–60 minutes (dominated by two CI build cycles of ~15 minutes each).

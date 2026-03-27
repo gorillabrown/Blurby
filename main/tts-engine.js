@@ -4,6 +4,7 @@
 const { Worker } = require("worker_threads");
 const path = require("path");
 const fs = require("fs/promises");
+const { KOKORO_SAMPLE_RATE, TTS_IDLE_TIMEOUT_MS, TTS_MODEL_LOAD_TIMEOUT_MS } = require("./constants");
 
 let worker = null;
 let modelReady = false;
@@ -15,11 +16,11 @@ const pending = new Map(); // id → { resolve, reject }
 let onProgressCb = null;
 let onLoadingCb = null;
 
-const SAMPLE_RATE = 24000;
+const SAMPLE_RATE = KOKORO_SAMPLE_RATE;
 
-// Idle unload timer — terminate worker after 5 min of no use
+// Idle unload timer — terminate worker after inactivity
 let idleTimer = null;
-const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
+const IDLE_TIMEOUT_MS = TTS_IDLE_TIMEOUT_MS;
 
 function resetIdleTimer() {
   if (idleTimer) clearTimeout(idleTimer);
@@ -127,7 +128,7 @@ async function ensureReady(onProgress) {
       setTimeout(() => {
         w.off("message", handler);
         reject(new Error("Kokoro model load timed out"));
-      }, 120000);
+      }, TTS_MODEL_LOAD_TIMEOUT_MS);
     } catch (err) {
       loadingPromise = null;
       reject(err);

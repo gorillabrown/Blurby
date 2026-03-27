@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { DEFAULT_EINK_REFRESH_INTERVAL } from "../constants";
+import { DEFAULT_EINK_REFRESH_INTERVAL, EINK_REFRESH_FLASH_MS } from "../constants";
 import { BlurbySettings } from "../types";
 
 interface UseEinkControllerReturn {
@@ -22,7 +22,7 @@ export function useEinkController(settings: BlurbySettings): UseEinkControllerRe
   const triggerEinkRefresh = useCallback(() => {
     if (!isEink) return;
     setShowEinkRefresh(true);
-    setTimeout(() => setShowEinkRefresh(false), 200);
+    setTimeout(() => setShowEinkRefresh(false), EINK_REFRESH_FLASH_MS);
   }, [isEink]);
 
   const handleEinkPageTurn = useCallback(() => {

@@ -128,7 +128,10 @@ export default function LibraryContainer() {
         return;
       }
       content = (result as string | null) || undefined;
-      if (!content) return;
+      if (!content) {
+        showToast("Could not load this document — the file may be missing or empty.", 6000);
+        return;
+      }
     }
     const docWithContent: DocWithContent = { ...doc, content: content! };
     setActiveDoc(docWithContent);
