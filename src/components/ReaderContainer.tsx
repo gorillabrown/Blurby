@@ -4,6 +4,7 @@ import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCU
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
+import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
 import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
 import { BlurbyDoc, BlurbySettings } from "../types";
@@ -115,7 +116,8 @@ export default function ReaderContainer({
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
 
   // Track active reading time when in any active sub-mode
-  const isActivelyReading = (readingMode === "focus" && playing) || (readingMode === "flow" && flowPlaying) || readingMode === "narration";
+  // Focus: FocusMode class drives timing (not useReader's playing flag)
+  const isActivelyReading = readingMode === "focus" || (readingMode === "flow" && flowPlaying) || readingMode === "narration";
   useEffect(() => {
     if (isActivelyReading) {
       activeReadingStartRef.current = Date.now();
@@ -252,10 +254,28 @@ export default function ReaderContainer({
     }
   }, [useFoliate, wordsRef]);
 
+  // ── Mode class instances (bridge between mode classes and React state) ────
+  const modeInstanceHook = useReadingModeInstance({
+    readingMode,
+    wpm: effectiveWpm,
+    settings,
+    narration,
+    isFoliate: useFoliate,
+    jumpToWord,
+    foliateApiRef,
+    onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
+    onComplete: () => {
+      // Mode reached end of words — return to page mode
+      setReadingMode("page");
+    },
+    setFlowPlaying,
+  });
+
   // ── Mode transitions (extracted to useReaderMode hook) ──────────────
   const modeHook = useReaderMode({
     reader: { playing, wordIndex, wordsRef, togglePlay, jumpToWord },
     narration,
+    modeInstance: modeInstanceHook,
     foliateApiRef,
     foliateWordsRef,
     useFoliate,
@@ -678,7 +698,7 @@ export default function ReaderContainer({
                 wordIndex={wordIndex}
                 wpm={effectiveWpm}
                 focusTextSize={focusTextSize}
-                playing={playing}
+                playing={readingMode === "focus"}
                 escPending={escPending}
                 isMac={platform === "darwin"}
                 settings={rsvpSettings}
@@ -720,7 +740,7 @@ export default function ReaderContainer({
             onToggleFlap={toggleMenuFlap}
             pageNavRef={pageNavRef}
             flowNavRef={flowNavRef}
-            flowPlaying={true}
+            flowPlaying={flowPlaying}
             ttsActive={false}
           />
         );
@@ -732,7 +752,7 @@ export default function ReaderContainer({
             wordIndex={wordIndex}
             wpm={effectiveWpm}
             focusTextSize={focusTextSize}
-            playing={playing}
+            playing={readingMode === "focus"}
             escPending={escPending}
             isMac={platform === "darwin"}
             settings={rsvpSettings}

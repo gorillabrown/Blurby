@@ -18,7 +18,7 @@ export interface NarrationInterface {
   adjustRate: (rate: number) => void;
   setRhythmPauses: (pauses: any, breaks: Set<number>) => void;
   setPageEndWord: (idx: number | null) => void;
-  setEngine: (engine: string) => void;
+  setEngine: (engine: "web" | "kokoro") => void;
   speaking: boolean;
 }
 

@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef } from "react";
+import { useCallback, useRef } from "react";
 import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS, FOCUS_MODE_START_DELAY_MS } from "../constants";
 import { resolveFoliateStartWord } from "../utils/startWordIndex";
 import type { BlurbySettings } from "../types";
 import type { FoliateViewAPI, FoliateWord } from "../components/FoliatePageView";
+import type { UseReadingModeInstanceReturn } from "./useReadingModeInstance";
 
 type ReadingMode = "page" | "focus" | "flow" | "narration";
 
@@ -15,14 +16,13 @@ export interface UseReaderModeParams {
     togglePlay: () => void;
     jumpToWord: (idx: number) => void;
   };
-  /** useNarration hook return */
+  /** useNarration hook return (for direct cleanup on stopAllModes) */
   narration: {
     stop: () => void;
-    adjustRate: (rate: number) => void;
-    setRhythmPauses: (pauses: any, breaks: Set<number>) => void;
     setPageEndWord: (idx: number | null) => void;
-    startCursorDriven: (words: string[], startIdx: number, wpm: number, onAdvance: (idx: number) => void) => void;
   };
+  /** Mode instance from useReadingModeInstance */
+  modeInstance: UseReadingModeInstanceReturn;
   /** Foliate API ref (EPUB rendering) */
   foliateApiRef: React.MutableRefObject<FoliateViewAPI | null>;
   /** Extracted foliate words ref */
@@ -47,7 +47,7 @@ export interface UseReaderModeParams {
   setHighlightedWordIndex: React.Dispatch<React.SetStateAction<number>>;
   /** Engagement ref from progress tracker */
   hasEngagedRef: React.MutableRefObject<boolean>;
-  /** Flow playing state */
+  /** Flow playing state (still needed for non-EPUB FlowCursorController) */
   flowPlaying: boolean;
   setFlowPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   /** Browsed away state (NM page browsing) */
@@ -86,11 +86,14 @@ export interface UseReaderModeReturn {
  * Handles mode transitions, Space bar toggle, mode selection (click without start),
  * and the relationship between modes (mutually exclusive).
  *
- * Extracted from ReaderContainer to reduce its responsibility scope.
+ * Mode timing is delegated to mode class instances via useReadingModeInstance.
+ * This hook handles orchestration: WPM capping, foliate word extraction,
+ * engagement gating, settings persistence, and React state updates.
  */
 export function useReaderMode({
   reader,
   narration,
+  modeInstance,
   foliateApiRef,
   foliateWordsRef,
   useFoliate,
@@ -121,6 +124,9 @@ export function useReaderMode({
 
   // ── Stop all sub-modes ─────────────────────────────────────────────
   const stopAllModes = useCallback(() => {
+    // Stop mode instance (handles Focus timer, Flow state, NarrateMode TTS)
+    modeInstance.stopMode();
+    // Also stop legacy hooks as safety net during transition
     if (reader.playing) reader.togglePlay();
     if (flowPlaying) setFlowPlaying(false);
     narration.stop();
@@ -130,15 +136,24 @@ export function useReaderMode({
       preCapWpmRef.current = null;
     }
     setIsBrowsedAway(false);
-  }, [reader.playing, flowPlaying, reader, narration, setWpm, setFlowPlaying, setIsBrowsedAway]);
+  }, [modeInstance, reader.playing, flowPlaying, reader, narration, setWpm, setFlowPlaying, setIsBrowsedAway]);
 
   const handleStopTts = useCallback(() => {
+    modeInstance.stopMode();
     narration.stop();
     if (preCapWpmRef.current !== null) {
       setWpm(() => preCapWpmRef.current!);
       preCapWpmRef.current = null;
     }
-  }, [narration, setWpm]);
+  }, [modeInstance, narration, setWpm]);
+
+  // ── Get effective paragraph breaks ────────────────────────────────
+  const getEffectiveParagraphBreaks = useCallback((): Set<number> => {
+    if (useFoliate) {
+      return foliateApiRef.current?.getParagraphBreaks?.() ?? new Set<number>();
+    }
+    return paragraphBreaks;
+  }, [useFoliate, foliateApiRef, paragraphBreaks]);
 
   // ── Start Narration ────────────────────────────────────────────────
   const startNarration = useCallback(() => {
@@ -151,10 +166,6 @@ export function useReaderMode({
       preCapWpmRef.current = wpm;
       setWpm(() => TTS_WPM_CAP);
     }
-    const pBreaks = useFoliate
-      ? (foliateApiRef.current?.getParagraphBreaks?.() ?? new Set<number>())
-      : paragraphBreaks;
-    narration.setRhythmPauses(settings.rhythmPauses || null, pBreaks);
     let effectiveWords = getEffectiveWords();
     if (useFoliate && effectiveWords.length === 0 && foliateApiRef.current) {
       foliateApiRef.current.next();
@@ -171,54 +182,78 @@ export function useReaderMode({
       if (firstVisible > 0) startIdx = firstVisible;
     }
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
-    if (settings.ttsRate) narration.adjustRate(settings.ttsRate);
-    narration.startCursorDriven(effectiveWords, startIdx, effectiveWpm, (idx) => {
-      setHighlightedWordIndex(idx);
-      if (useFoliate && foliateApiRef.current) {
-        if (typeof foliateApiRef.current.highlightWordByIndex === "function") {
-          foliateApiRef.current.highlightWordByIndex(idx);
-        }
-      }
-    });
-  }, [stopAllModes, wpm, setWpm, narration, highlightedWordIndex, effectiveWpm, updateSettings, settings.ttsRate, settings.rhythmPauses, paragraphBreaks, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef]);
+    const pBreaks = getEffectiveParagraphBreaks();
+    // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
+    modeInstance.startMode(startIdx, effectiveWords, pBreaks);
+  }, [stopAllModes, wpm, setWpm, narration, highlightedWordIndex, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);
 
   // ── Start Focus ────────────────────────────────────────────────────
   const startFocus = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
     if (useFoliate) extractFoliateWords();
+    let effectiveWords = getEffectiveWords();
+    // If EPUB has no words yet (cover page, loading), trigger section load and retry
+    if (useFoliate && effectiveWords.length === 0 && foliateApiRef.current) {
+      foliateApiRef.current.next();
+      setTimeout(() => {
+        extractFoliateWords();
+        const words = getEffectiveWords();
+        if (words.length > 0) startFocus();
+      }, FOLIATE_SECTION_LOAD_WAIT_MS);
+      return;
+    }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndex, reader.wordsRef.current?.length || 0, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      ? resolveFoliateStartWord(highlightedWordIndex, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
       : highlightedWordIndex;
     if (useFoliate && startWord !== highlightedWordIndex) setHighlightedWordIndex(startWord);
-    reader.jumpToWord(startWord);
+    reader.jumpToWord(startWord); // Sync useReader's wordIndex for ReaderView display
     setReadingMode("focus");
     updateSettings({ readingMode: "focus", lastReadingMode: "focus" });
-    setTimeout(() => reader.togglePlay(), FOCUS_MODE_START_DELAY_MS);
-  }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef]);
+    const pBreaks = getEffectiveParagraphBreaks();
+    // FocusMode timer replaces reader.togglePlay() — drives word advancement via setTimeout chain
+    setTimeout(() => modeInstance.startMode(startWord, effectiveWords, pBreaks), FOCUS_MODE_START_DELAY_MS);
+  }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
 
   // ── Start Flow ─────────────────────────────────────────────────────
   const startFlow = useCallback(() => {
     stopAllModes();
     hasEngagedRef.current = true;
     if (useFoliate) extractFoliateWords();
+    let effectiveWords = getEffectiveWords();
+    // If EPUB has no words yet (cover page, loading), trigger section load and retry
+    if (useFoliate && effectiveWords.length === 0 && foliateApiRef.current) {
+      foliateApiRef.current.next();
+      setTimeout(() => {
+        extractFoliateWords();
+        const words = getEffectiveWords();
+        if (words.length > 0) startFlow();
+      }, FOLIATE_SECTION_LOAD_WAIT_MS);
+      return;
+    }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndex, reader.wordsRef.current?.length || 0, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      ? resolveFoliateStartWord(highlightedWordIndex, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
       : highlightedWordIndex;
     if (useFoliate && startWord !== highlightedWordIndex) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord);
     setReadingMode("flow");
-    setFlowPlaying(true);
     updateSettings({ readingMode: "flow", lastReadingMode: "flow" });
-  }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, setFlowPlaying, foliateApiRef]);
+    const pBreaks = getEffectiveParagraphBreaks();
+    // FlowMode: for EPUB uses internal timer; for non-EPUB delegates to FlowCursorController
+    modeInstance.startMode(startWord, effectiveWords, pBreaks);
+  }, [highlightedWordIndex, reader, updateSettings, stopAllModes, useFoliate, extractFoliateWords, hasEngagedRef, setHighlightedWordIndex, foliateApiRef, modeInstance, getEffectiveWords, getEffectiveParagraphBreaks]);
 
   // ── Pause → Page ───────────────────────────────────────────────────
   const handlePauseToPage = useCallback(() => {
-    if (readingMode === "focus") setHighlightedWordIndex(reader.wordIndex);
+    // Sync highlighted word from mode instance before stopping
+    const instance = modeInstance.modeRef.current;
+    if (instance && readingMode === "focus") {
+      setHighlightedWordIndex(instance.getCurrentWord());
+    }
     stopAllModes();
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
-  }, [readingMode, reader.wordIndex, updateSettings, stopAllModes, setHighlightedWordIndex]);
+  }, [readingMode, updateSettings, stopAllModes, setHighlightedWordIndex, modeInstance]);
 
   // ── Select mode (button click — no auto-start) ────────────────────
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
@@ -265,12 +300,15 @@ export function useReaderMode({
   // This hook provides the mode-level exit (stop modes, return to page).
   const handleExitReader = useCallback(() => {
     if (readingMode !== "page") {
-      if (readingMode === "focus") setHighlightedWordIndex(reader.wordIndex);
+      const instance = modeInstance.modeRef.current;
+      if (instance && readingMode === "focus") {
+        setHighlightedWordIndex(instance.getCurrentWord());
+      }
       stopAllModes();
       setReadingMode("page");
     }
     // Page-level exit (backtrack check + finishReading) handled by ReaderContainer
-  }, [readingMode, reader.wordIndex, stopAllModes, setHighlightedWordIndex]);
+  }, [readingMode, modeInstance, stopAllModes, setHighlightedWordIndex]);
 
   return {
     readingMode,

@@ -502,10 +502,13 @@ export default function FoliatePageView({
             },
             highlightWordByIndex: (wordIndex: number) => {
               const contents = view.renderer?.getContents?.() ?? [];
-              // Clear previous highlight
+              const isFlowMode = readingModeRef.current === "flow";
+              const highlightClass = isFlowMode ? "page-word--flow-cursor" : "page-word--highlighted";
+              // Clear previous highlight (both classes)
               for (const { doc: d } of contents) {
                 try {
                   d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
+                  d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
                 } catch { /* */ }
               }
               // Apply highlight to target word
@@ -515,7 +518,7 @@ export default function FoliatePageView({
                 try {
                   const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
                   if (span) {
-                    span.classList.add("page-word--highlighted");
+                    span.classList.add(highlightClass);
                     targetSpan = span;
                     targetDoc = d;
                     break;
@@ -546,7 +549,10 @@ export default function FoliatePageView({
               // Clear all highlights in foliate iframes
               const contents = view.renderer?.getContents?.() ?? [];
               for (const { doc: d } of contents) {
-                try { d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted"); } catch { /* */ }
+                try {
+                  d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
+                  d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
+                } catch { /* */ }
               }
             },
             getView: () => view,
@@ -857,6 +863,7 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
     .page-word { cursor: pointer; border-radius: 2px; transition: background 0.1s; }
     .page-word:hover { background: ${accent}22; }
     .page-word--highlighted { background: ${accent}4D; }
+    .page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
   `;
   doc.head.appendChild(style);
 }
