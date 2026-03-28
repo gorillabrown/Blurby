@@ -11,6 +11,13 @@ function trace<T>(method: string, args: unknown[], result: T): T {
   return result;
 }
 
+/** Trace + persist state to sessionStorage (use for mutating operations) */
+function traceMut<T>(method: string, args: unknown[], result: T): T {
+  console.debug("[stub]", method, args.length ? args : "", "→", result);
+  persistState();
+  return result;
+}
+
 // ── Event emitter system ────────────────────────────────────────────────────
 type EventCallback = (...args: any[]) => void;
 const eventListeners = new Map<string, Set<EventCallback>>();
@@ -69,10 +76,131 @@ const defaultSettings: BlurbySettings = {
   firstRunCompleted: false,
 };
 
+// ── sessionStorage persistence ──────────────────────────────────────────────
+const STUB_STORAGE_KEY = "blurbyStubState";
+
+interface PersistedState {
+  settings: BlurbySettings;
+  library: BlurbyDoc[];
+  highlights: Array<{ text: string; docTitle: string; docId: string; wordIndex: number; totalWords: number; date: string }>;
+  readingStats: ReadingStats;
+}
+
+function loadPersistedState(): PersistedState | null {
+  try {
+    const raw = sessionStorage.getItem(STUB_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedState;
+    console.debug("[stub] hydrated state from sessionStorage");
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function persistState(): void {
+  try {
+    const state: PersistedState = { settings, library, highlights, readingStats };
+    sessionStorage.setItem(STUB_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // sessionStorage full or unavailable — silently ignore
+  }
+}
+
+// ── Sample content for loadDocContent ───────────────────────────────────────
+const SAMPLE_CONTENT = `Book One: Debts and Lessons
+
+From the example of those who came before me, I gained a respect for honest conduct and the patient governance of strong feeling. My grandfather showed that serenity is not the absence of difficulty but a practiced response to it. He never raised his voice in anger, yet his quiet words carried the weight of deep conviction. My mother demonstrated that generosity begins in the mind before it reaches the hand. She taught me to refrain not merely from harmful action but from the indulgence of harmful thought. Every person who shaped my earliest years left an impression like a seal pressed into warm wax, and I carry those marks still. The debts we owe to others are not burdens but foundations. Without the patience of teachers, the correction of elders, and the example of the virtuous, we would each begin from nothing, repeating every error that has already been made and resolved a thousand times over. To acknowledge what we have received is the first act of wisdom.
+
+Book Two: On the River Gran, Among the Quadi
+
+Each morning I remind myself that I will encounter those who are meddlesome, ungrateful, and driven by appetites they do not examine. This is not cause for resentment but for preparation. The river does not complain when stones obstruct its path; it finds a way around them or wears them smooth with patient persistence. If another person acts from ignorance of what is genuinely good, my frustration serves no useful end. I cannot govern the choices of others, only my own response. The frontier teaches this lesson with brutal clarity. Here among unfamiliar peoples and hostile terrain, the only territory I truly command is the small province of my own intentions. When the cold wind cuts through the tent at night, I am reminded that comfort is a preference, not a necessity. The body endures what the mind permits. And the mind, when properly trained, permits a great deal more than we commonly suppose. What matters is not what happens to us but the quality of attention we bring to each occurrence.
+
+Book Three: In Carnuntum
+
+Consider that each day diminishes the portion of life remaining, and that the faculties of understanding may weaken before the body fails. A person may live long yet lose the capacity to reason clearly, to follow an argument, or to distinguish what is essential from what is merely urgent. Therefore the work of self-examination cannot be postponed. There is no future season better suited to reflection than this present moment. The walls of this garrison town are thick and old. Generations of soldiers have stood watch here, each believing their concerns to be of supreme importance. Yet the town endures while individual anxieties dissolve like morning frost. This perspective is not meant to diminish the significance of our struggles but to place them in their proper proportion. Act with full commitment, but hold outcomes loosely. The effort belongs to you; the result belongs to the larger pattern of events that no single person controls.
+
+Book Four: In Carnuntum Still
+
+The universe is transformation; life is opinion. If you are distressed by anything external, the pain is not due to the thing itself but to your estimation of it, and this you have the power to revoke at any moment. Consider how swiftly all things pass away — the body toward dissolution, memory toward complete obscurity. What then is worth pursuing? Only this: thoughts that are just, actions that serve the common good, speech that never deceives, and a disposition that welcomes each event as necessary and familiar. Everything material is already flowing, everything of the spirit is dream and vapor. Life is a brief campaign, and afterward our reputation falls to those who never knew us. Do not waste the remaining daylight on speculation about what others think. Return instead to the two or three principles that have proven reliable: that patience outlasts agitation, that kindness requires more courage than severity, and that the present moment is the only one in which you can act.
+
+Book Five: On the Danube
+
+At first light, when the reluctance to rise presses heavily, remind yourself: I am getting up to do the work of a human being. Why should I resent performing the function for which I was made? Was I created to lie beneath blankets and keep warm? The pleasant things in life were not given as ends in themselves but as accompaniments to purposeful effort. Even the vine and the bee accomplish their work without complaint. Observe nature's economy: nothing is wasted, nothing is performed for display alone. The river before me carries silt and stone toward the distant sea with absolute indifference to praise or blame. It does not pause to consider whether its labor is appreciated. This is not resignation but clarity. When we act from a clear understanding of what our role requires, the question of motivation dissolves. There is no gap between duty and desire when both are aligned with our fundamental nature. The difficulty is not in knowing this but in remembering it at the precise moment when comfort tempts us to forget.
+
+Book Six: Written at Night
+
+The lamp flickers as I write, and beyond the walls the camp is quiet except for the occasional challenge and countersign of the watch. In this stillness it is possible to see one's thoughts more clearly, as one sees the bottom of a pool only when the surface is undisturbed. Much of what occupies the mind during daylight hours is mere agitation — responses to stimuli that demand nothing more than patient waiting. The truly important decisions present themselves rarely, and when they do, they require not cleverness but character. I have observed that those who deliberate longest often act worst, not because reflection is harmful but because their deliberation is contaminated by fear. The wise person thinks carefully and then commits fully. There is a quality of attention that is neither hasty nor hesitant, and cultivating it is the central discipline of a well-ordered life. Tonight the stars are very clear, and their ancient light reminds me that urgency is largely a human invention.
+
+Book Seven: Among the Sarmatians
+
+Pain is neither unbearable nor unending, provided you keep its boundaries in view and do not enlarge it through anticipation. The body's signals are immediate and local; it is the imagination that makes suffering general and permanent. I have watched soldiers endure wounds that would seem impossible to bear, simply because the necessity of the moment left no room for elaboration. Their attention was occupied entirely by the next required action. This suggests that much of what we call suffering is actually commentary on suffering — a narrative we construct around a sensation. Strip away the narrative and what remains is manageable. This is not a technique for denying reality but for perceiving it accurately. The present difficulty is always smaller than the story we tell about it. When the Sarmatian wind howls across the plain and the cold seems to penetrate every layer of clothing, I find it useful to notice exactly what I feel rather than what I imagine I feel. The gap between the two is where unnecessary misery lives.
+
+Book Eight: At Aquincum
+
+Look at the course of the stars as though you traveled with them, and continually consider the changes of the elements into one another. These contemplations cleanse the mind of the dust that gathers from contact with earthly affairs. When you sit in judgment over disputes between citizens, when you read reports of border incidents, when you sign orders affecting thousands of lives, it is easy to believe that your perspective is the only valid one. But step outside for a moment and regard the sky. The same constellations that guided ships before any living person was born will continue their silent rotation long after every current controversy is forgotten. This is not nihilism. Rather, it is the recognition that our actions matter precisely because they are brief. The fact that nothing endures forever does not diminish its value — it concentrates it. Each kindness, each just decision, each moment of genuine attention is complete in itself and needs no permanence to justify its worth.
+
+Book Nine: On Returning to Rome
+
+The city presents temptations that the frontier does not. Here there are flatterers, entertainments, and the ceaseless noise of ambition. A person can lose entire days in activities that produce nothing of lasting value. The remedy is not withdrawal — for duties require our presence — but a cultivated awareness of how time is actually spent versus how we imagine it is spent. Keep a strict account, if only in your mind: how many hours today were devoted to essential work? How many to anxiety about work not yet begun? How many to conversations that served no purpose beyond the mutual reinforcement of complaint? The honest answers are often uncomfortable, but discomfort is the beginning of correction. Rome teaches an additional lesson: that proximity to power does not confer wisdom. I have met philosophers with deeper insight than any senator, and common laborers whose practical judgment exceeds that of trained advisors. Rank describes a social position, not the quality of a mind.
+
+Book Ten: On the Nature of the Whole
+
+Everything is interwoven, and the web is holy. Nothing is composed entirely of itself; each part exists in continuous relation to every other. The hand that writes these words depends on the arm that supports it, the heart that sustains circulation, the food that was grown in distant soil by workers whose names I will never learn. Pull any single thread and the whole fabric shifts. To understand this is to understand why justice matters: not as an abstract principle but as a practical recognition that my wellbeing cannot be separated from the wellbeing of others. The person who harms another for personal advantage is like a hand that attacks its own body — temporarily successful, perhaps, but fundamentally self-defeating. Nature has made us cooperative creatures, and every attempt to act as though we are isolated units produces a friction that eventually proves intolerable. Harmony is not an optional refinement of life; it is the condition under which life functions properly.
+
+Book Eleven: On Dealing with Others
+
+When another person offends you, consider first what relationship they bear to you and what obligations that relationship imposes. Then consider that they act according to their own understanding, which may be incomplete or mistaken. Then consider how often your own judgment has proven wrong, and how grateful you were when others responded to your errors with patience rather than punishment. Most offenses dissolve under this examination. What remains — the genuinely harmful, the deliberately cruel — still requires a measured response rather than an impulsive one. Anger may feel like strength, but it borrows energy from judgment and spends it on noise. The person who can hold a just position calmly has an advantage over the person who holds the same position while shouting. Others are not obstacles placed in your path to test you; they are fellow travelers navigating difficulties of their own. The most productive question is never how can I overcome this person but rather how can this situation produce the best outcome for everyone involved, including myself.
+
+Book Twelve: The Final Account
+
+Let this serve as a summary: you have a limited time remaining, and none of it should be spent in conflict with reality. Accept what cannot be changed, work steadily to improve what can be, and develop the wisdom to distinguish between the two. The opinions of others, the fluctuations of fortune, and the inevitable decay of the body are beyond your governance. But the quality of your character — the patience, honesty, courage, and fairness you bring to each encounter — these are entirely within your power, and they are enough. Do not wait for circumstances to be perfect before committing to right action. Circumstances will never be perfect. The draft leaks through every window, the provisions are never quite sufficient, and the reports from the frontier always contain unsettling news. Act anyway. Act because action aligned with virtue is its own justification. At the end, what will matter is not what happened to you but how you met it. And meeting it well is possible in every moment, under every condition, for anyone willing to pay attention.`;
+
+const SAMPLE_CONTENT_WORD_COUNT = SAMPLE_CONTENT.split(/\s+/).filter(Boolean).length;
+
+// ── Chapter metadata for Meditations (computed from content) ────────────────
+const MEDITATIONS_CHAPTER_TITLES = [
+  "Book One: Debts and Lessons",
+  "Book Two: On the River Gran, Among the Quadi",
+  "Book Three: In Carnuntum",
+  "Book Four: In Carnuntum Still",
+  "Book Five: On the Danube",
+  "Book Six: Written at Night",
+  "Book Seven: Among the Sarmatians",
+  "Book Eight: At Aquincum",
+  "Book Nine: On Returning to Rome",
+  "Book Ten: On the Nature of the Whole",
+  "Book Eleven: On Dealing with Others",
+  "Book Twelve: The Final Account",
+];
+
+const MEDITATIONS_CHAPTERS = MEDITATIONS_CHAPTER_TITLES.map((title) => ({
+  title,
+  charOffset: SAMPLE_CONTENT.indexOf(title),
+}));
+
+// ── Second seed document: sample article ────────────────────────────────────
+const SAMPLE_ARTICLE_CONTENT = `The Architecture of Attention
+
+In an age saturated with information, the scarcest resource is not data but the capacity to attend to it meaningfully. Every notification, headline, and algorithmically curated feed competes for a finite cognitive budget, and the result is a pervasive sense of fragmentation. We know more than any previous generation, yet understanding — the slow, deliberate integration of knowledge into judgment — seems harder to achieve than ever.
+
+The problem is not technology itself but the relationship we have established with it. Tools designed to save time have instead colonized the time they saved. The smartphone that was supposed to free us from the desk has instead ensured that the desk follows us everywhere. Meals, walks, conversations, and even sleep are punctuated by the reflexive check: what has changed in the thirty seconds since I last looked?
+
+Attention, like a muscle, responds to how it is used. When we repeatedly practice short bursts of shallow focus — scanning, swiping, skimming — we strengthen the neural pathways associated with rapid switching and weaken those associated with sustained concentration. The consequences extend beyond productivity. Deep reading, the kind that requires holding a complex argument in mind across many pages, is a fundamentally different cognitive act from browsing. It engages empathy, abstract reasoning, and the construction of internal models that shallow reading does not require. When we lose the capacity for deep reading, we lose access to a particular quality of thought.
+
+Reclaiming attention does not require abandoning modern tools. It requires designing our interaction with them more deliberately. Simple structural changes — designated reading periods without devices, physical books for material that deserves sustained engagement, intentional boundaries between work and rest — can rebuild the capacity for concentration that ambient distraction erodes. The goal is not to return to some imagined pre-digital simplicity but to become conscious architects of our own attention rather than passive tenants in an environment designed by others.
+
+The stakes are higher than personal productivity. A society of distracted citizens is a society poorly equipped for the demands of self-governance. Democratic participation requires the ability to evaluate competing claims, follow extended arguments, and resist the appeal of simplistic narratives. These are all capacities that depend on the quality of attention we bring to public life. What begins as a personal habit of scattered focus becomes, at scale, a collective vulnerability.
+
+The path forward is neither nostalgia nor resistance but intentional design. We can choose how we read, when we read, and what we allow to interrupt our reading. These small choices, repeated daily, shape the architecture of the mind itself.`;
+
+const SAMPLE_ARTICLE_WORD_COUNT = SAMPLE_ARTICLE_CONTENT.split(/\s+/).filter(Boolean).length;
+
+// ── Seed document definitions (must be after content constants) ─────────────
 const sampleMeditationsDoc: BlurbyDoc = {
   id: "sample-meditations",
   title: "Meditations",
-  wordCount: 47000,
+  wordCount: SAMPLE_CONTENT_WORD_COUNT,
   position: 0,
   created: Date.now() - 86400000, // "added yesterday"
   source: "sample",
@@ -87,10 +215,31 @@ const sampleMeditationsDoc: BlurbyDoc = {
   furthestPosition: 0,
 };
 
-let settings = { ...defaultSettings };
-let library: BlurbyDoc[] = [{ ...sampleMeditationsDoc }];
-let highlights: Array<{ text: string; docTitle: string; docId: string; wordIndex: number; totalWords: number; date: string }> = [];
-let readingStats: ReadingStats = {
+const sampleArticleDoc: BlurbyDoc = {
+  id: "sample-article",
+  title: "The Architecture of Attention",
+  wordCount: SAMPLE_ARTICLE_WORD_COUNT,
+  position: 0,
+  created: Date.now() - 43200000, // "added 12 hours ago"
+  source: "sample",
+  filepath: null,
+  author: "Blurby Editorial",
+  lastReadAt: null,
+  favorite: false,
+  archived: false,
+  unread: true,
+  tags: [],
+  collection: null,
+  furthestPosition: 0,
+};
+
+// ── In-memory state (hydrate from sessionStorage if available) ──────────────
+const persisted = loadPersistedState();
+
+let settings = persisted?.settings ?? { ...defaultSettings };
+let library: BlurbyDoc[] = persisted?.library ?? [{ ...sampleMeditationsDoc }, { ...sampleArticleDoc }];
+let highlights: PersistedState["highlights"] = persisted?.highlights ?? [];
+let readingStats: ReadingStats = persisted?.readingStats ?? {
   totalWordsRead: 0,
   totalReadingTimeMs: 0,
   docsCompleted: 0,
@@ -104,38 +253,6 @@ let launchAtLogin = false;
 function findDoc(docId: string): BlurbyDoc | undefined {
   return library.find((d) => d.id === docId);
 }
-
-// ── Sample content for loadDocContent ───────────────────────────────────────
-const SAMPLE_CONTENT = `Book One: Debts and Lessons
-
-From my grandfather Verus, I learned good morals and the government of my temper.
-From the reputation and remembrance of my father, modesty and a manly character.
-From my mother, piety and beneficence, and abstinence, not only from evil deeds, but even from evil thoughts.
-
-Book Two: On the River Gran, Among the Quadi
-
-Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, arrogant, deceitful, envious, unsocial.
-All these things happen to them by reason of their ignorance of what is good and evil.
-
-Book Three: In Carnuntum
-
-We ought to consider not only that our life is daily wasting away and a smaller part of it is left, but another thing also must be taken into the account, that if a man should live longer, it is quite uncertain whether the understanding will still continue sufficient for the comprehension of things.`;
-
-// ── Chapter metadata for Meditations ────────────────────────────────────────
-const MEDITATIONS_CHAPTERS = [
-  { title: "Book One: Debts and Lessons", charOffset: 0 },
-  { title: "Book Two: On the River Gran, Among the Quadi", charOffset: 500 },
-  { title: "Book Three: In Carnuntum", charOffset: 1100 },
-  { title: "Book Four", charOffset: 1800 },
-  { title: "Book Five", charOffset: 2500 },
-  { title: "Book Six", charOffset: 3200 },
-  { title: "Book Seven", charOffset: 3900 },
-  { title: "Book Eight", charOffset: 4600 },
-  { title: "Book Nine", charOffset: 5300 },
-  { title: "Book Ten", charOffset: 6000 },
-  { title: "Book Eleven", charOffset: 6700 },
-  { title: "Book Twelve", charOffset: 7400 },
-];
 
 // ── The stub API ────────────────────────────────────────────────────────────
 export const electronAPIStub: ElectronAPI = {
@@ -157,13 +274,13 @@ export const electronAPIStub: ElectronAPI = {
   // ── Settings ────────────────────────────────────────────────────────────
   saveSettings: async (newSettings: Partial<BlurbySettings>) => {
     Object.assign(settings, newSettings);
-    return trace("saveSettings", [newSettings], undefined);
+    return traceMut("saveSettings", [newSettings], undefined);
   },
 
   // ── Library CRUD ────────────────────────────────────────────────────────
   saveLibrary: async (newLibrary: BlurbyDoc[]) => {
     library = newLibrary;
-    return trace("saveLibrary", [`[${newLibrary.length} docs]`], undefined);
+    return traceMut("saveLibrary", [`[${newLibrary.length} docs]`], undefined);
   },
 
   addManualDoc: async (title: string, content: string) => {
@@ -178,12 +295,12 @@ export const electronAPIStub: ElectronAPI = {
       lastReadAt: null,
     };
     library.push(doc);
-    return trace("addManualDoc", [title, `[${content.length} chars]`], doc);
+    return traceMut("addManualDoc", [title, `[${content.length} chars]`], doc);
   },
 
   deleteDoc: async (docId: string) => {
     library = library.filter((d) => d.id !== docId);
-    return trace("deleteDoc", [docId], undefined);
+    return traceMut("deleteDoc", [docId], undefined);
   },
 
   updateDoc: async (docId: string, title: string, content: string) => {
@@ -193,13 +310,13 @@ export const electronAPIStub: ElectronAPI = {
       doc.content = content;
       doc.wordCount = content.split(/\s+/).filter(Boolean).length;
     }
-    return trace("updateDoc", [docId, title, `[${content.length} chars]`], undefined);
+    return traceMut("updateDoc", [docId, title, `[${content.length} chars]`], undefined);
   },
 
   resetProgress: async (docId: string) => {
     const doc = findDoc(docId);
     if (doc) { doc.position = 0; doc.cfi = undefined; doc.furthestPosition = 0; }
-    return trace("resetProgress", [docId], undefined);
+    return traceMut("resetProgress", [docId], undefined);
   },
 
   updateDocProgress: async (docId: string, position: number, cfi?: string) => {
@@ -210,13 +327,16 @@ export const electronAPIStub: ElectronAPI = {
       if (position > (doc.furthestPosition ?? 0)) doc.furthestPosition = position;
       doc.lastReadAt = Date.now();
     }
-    return trace("updateDocProgress", [docId, position, cfi], undefined);
+    return traceMut("updateDocProgress", [docId, position, cfi], undefined);
   },
 
   loadDocContent: async (docId: string) => {
-    // For the sample Meditations, return sample content
+    // For seed documents, return their content
     if (docId === "sample-meditations") {
       return trace("loadDocContent", [docId], SAMPLE_CONTENT);
+    }
+    if (docId === "sample-article") {
+      return trace("loadDocContent", [docId], SAMPLE_ARTICLE_CONTENT);
     }
     const doc = findDoc(docId);
     return trace("loadDocContent", [docId], doc?.content ?? null);
@@ -253,7 +373,7 @@ export const electronAPIStub: ElectronAPI = {
       totalWords: data.totalWords,
       date: new Date().toISOString(),
     });
-    return trace("saveHighlight", [data], { ok: true });
+    return traceMut("saveHighlight", [data], { ok: true });
   },
 
   defineWord: async (word: string) => {
@@ -292,7 +412,7 @@ export const electronAPIStub: ElectronAPI = {
       lastReadAt: null,
     };
     library.push(doc);
-    return trace("addDocFromUrl", [url], { doc, sourceUrl: url });
+    return traceMut("addDocFromUrl", [url], { doc, sourceUrl: url });
   },
 
   openUrlInBrowser: async (url: string) => trace("openUrlInBrowser", [url], { ok: true }),
@@ -323,7 +443,7 @@ export const electronAPIStub: ElectronAPI = {
         rejected.push(fp.split("/").pop() || fp);
       }
     }
-    return trace("importDroppedFiles", [filePaths], { imported, rejected });
+    return traceMut("importDroppedFiles", [filePaths], { imported, rejected });
   },
 
   // ── Reading statistics ──────────────────────────────────────────────────
@@ -331,19 +451,19 @@ export const electronAPIStub: ElectronAPI = {
     readingStats.totalWordsRead += wordsRead;
     readingStats.totalReadingTimeMs += durationMs;
     readingStats.sessions += 1;
-    return trace("recordReadingSession", [docTitle, wordsRead, durationMs, wpm], undefined);
+    return traceMut("recordReadingSession", [docTitle, wordsRead, durationMs, wpm], undefined);
   },
 
   markDocCompleted: async () => {
     readingStats.docsCompleted += 1;
-    return trace("markDocCompleted", [], undefined);
+    return traceMut("markDocCompleted", [], undefined);
   },
 
   getStats: async () => trace("getStats", [], { ...readingStats }),
 
   resetStats: async () => {
     readingStats = { totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, sessions: 0, streak: 0, longestStreak: 0 };
-    return trace("resetStats", [], { success: true });
+    return traceMut("resetStats", [], { success: true });
   },
 
   // ── Import/export ───────────────────────────────────────────────────────
@@ -362,20 +482,20 @@ export const electronAPIStub: ElectronAPI = {
   toggleFavorite: async (docId: string) => {
     const doc = findDoc(docId);
     if (doc) doc.favorite = !doc.favorite;
-    return trace("toggleFavorite", [docId], doc?.favorite ?? false);
+    return traceMut("toggleFavorite", [docId], doc?.favorite ?? false);
   },
 
   // ── Archive ─────────────────────────────────────────────────────────────
   archiveDoc: async (docId: string) => {
     const doc = findDoc(docId);
     if (doc) { doc.archived = true; doc.archivedAt = Date.now(); }
-    return trace("archiveDoc", [docId], undefined);
+    return traceMut("archiveDoc", [docId], undefined);
   },
 
   unarchiveDoc: async (docId: string) => {
     const doc = findDoc(docId);
     if (doc) { doc.archived = false; doc.archivedAt = undefined; }
-    return trace("unarchiveDoc", [docId], undefined);
+    return traceMut("unarchiveDoc", [docId], undefined);
   },
 
   // ── Multi-window reader ─────────────────────────────────────────────────
@@ -408,13 +528,13 @@ export const electronAPIStub: ElectronAPI = {
   snoozeDoc: async (docId: string, until: number) => {
     const doc = findDoc(docId);
     if (doc) doc.snoozedUntil = until;
-    return trace("snoozeDoc", [docId, until], undefined);
+    return traceMut("snoozeDoc", [docId, until], undefined);
   },
 
   unsnoozeDoc: async (docId: string) => {
     const doc = findDoc(docId);
     if (doc) doc.snoozedUntil = undefined;
-    return trace("unsnoozeDoc", [docId], undefined);
+    return traceMut("unsnoozeDoc", [docId], undefined);
   },
 
   saveReadingNote: async (data) => trace("saveReadingNote", [data], { ok: true, path: "/mock/notes/note.docx" }),
@@ -489,6 +609,8 @@ export interface BlurbyStubControl {
   reset: () => void;
   /** Manually set firstRunCompleted for testing different flows */
   setFirstRunCompleted: (value: boolean) => void;
+  /** Clear sessionStorage persistence and reset to defaults */
+  clearPersistence: () => void;
 }
 
 export const stubControl: BlurbyStubControl = {
@@ -497,15 +619,27 @@ export const stubControl: BlurbyStubControl = {
   getLibrary: () => [...library],
   reset: () => {
     settings = { ...defaultSettings };
-    library = [{ ...sampleMeditationsDoc }];
+    library = [{ ...sampleMeditationsDoc }, { ...sampleArticleDoc }];
     highlights = [];
     readingStats = { totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, sessions: 0, streak: 0, longestStreak: 0 };
     launchAtLogin = false;
+    persistState();
     console.debug("[stub] state reset to defaults");
   },
   setFirstRunCompleted: (value: boolean) => {
     settings.firstRunCompleted = value;
+    persistState();
     console.debug("[stub] firstRunCompleted set to", value);
+  },
+  clearPersistence: () => {
+    try { sessionStorage.removeItem(STUB_STORAGE_KEY); } catch { /* ignore */ }
+    // Also reset in-memory state
+    settings = { ...defaultSettings };
+    library = [{ ...sampleMeditationsDoc }, { ...sampleArticleDoc }];
+    highlights = [];
+    readingStats = { totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, sessions: 0, streak: 0, longestStreak: 0 };
+    launchAtLogin = false;
+    console.debug("[stub] persistence cleared and state reset");
   },
 };
 
