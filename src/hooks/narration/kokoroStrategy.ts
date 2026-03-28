@@ -59,6 +59,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy {
             deps.clearPreBuffer();
             const ipcResult = await api.kokoroGenerate!(text, deps.getVoiceId(), deps.getSpeed());
             if (ipcResult.error || !ipcResult.audio || !ipcResult.sampleRate) {
+              console.error("[kokoro] Generate failed:", ipcResult.error || "no audio returned");
               deps.onFallbackToWeb();
               return;
             }
