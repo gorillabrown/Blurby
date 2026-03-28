@@ -145,7 +145,7 @@ describe("useReaderMode orchestration logic", () => {
   describe("mode memory", () => {
     it("handleTogglePlay from page starts last used mode", () => {
       const readingMode = "page" as const;
-      const lastReadingMode = "flow" as const;
+      const lastReadingMode: string = "flow";
 
       // Simulate the toggle logic (lines 298-302)
       let chosen: string | null = null;
@@ -160,7 +160,7 @@ describe("useReaderMode orchestration logic", () => {
     });
 
     it("handleTogglePlay from active mode pauses it", () => {
-      const readingMode = "focus" as const;
+      const readingMode: string = "focus";
       const isBrowsedAway = false;
 
       // Simulate the toggle logic (lines 303-307)

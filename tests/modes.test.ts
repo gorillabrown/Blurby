@@ -144,7 +144,7 @@ describe("FocusMode", () => {
     mode.start(0);
     // start() immediately calls onWordAdvance(0) to show the starting word
     expect(callbacks.onWordAdvance).toHaveBeenCalledWith(0);
-    callbacks.onWordAdvance.mockClear();
+    (callbacks.onWordAdvance as ReturnType<typeof vi.fn>).mockClear();
     vi.advanceTimersByTime(50); // half a word interval
     mode.pause();
     expect(mode.getState().isPlaying).toBe(false);
@@ -199,7 +199,7 @@ describe("FocusMode", () => {
     mode.start(0);
     // start() immediately calls onWordAdvance(0) to show the starting word
     expect(callbacks.onWordAdvance).toHaveBeenCalledWith(0);
-    callbacks.onWordAdvance.mockClear();
+    (callbacks.onWordAdvance as ReturnType<typeof vi.fn>).mockClear();
     mode.destroy();
     vi.advanceTimersByTime(500);
     expect(callbacks.onWordAdvance).not.toHaveBeenCalled();
