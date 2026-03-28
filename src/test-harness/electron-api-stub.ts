@@ -222,7 +222,7 @@ const sampleArticleDoc: BlurbyDoc = {
   position: 0,
   created: Date.now() - 43200000, // "added 12 hours ago"
   source: "sample",
-  filepath: null,
+  filepath: undefined,
   author: "Blurby Editorial",
   lastReadAt: null,
   favorite: false,

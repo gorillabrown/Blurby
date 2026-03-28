@@ -18,6 +18,8 @@ jobs:
   build:
     runs-on: windows-latest
     name: Build (x64 + arm64)
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout

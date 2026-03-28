@@ -5,7 +5,7 @@
  * importing React or using renderHook. We recreate the exact callback wiring
  * that createInstance() performs, then verify behavior on real mode instances.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
 import { FocusMode } from "../src/modes/FocusMode";
 import { FlowMode } from "../src/modes/FlowMode";
 import { NarrateMode } from "../src/modes/NarrateMode";
@@ -69,8 +69,8 @@ function mockFoliateApi(highlightResult = true) {
 function wireCallbacks(
   config: ModeConfig,
   options: {
-    jumpToWord?: ReturnType<typeof vi.fn>;
-    onWordAdvance?: ReturnType<typeof vi.fn>;
+    jumpToWord?: Mock<(wordIndex: number) => void>;
+    onWordAdvance?: Mock<(wordIndex: number) => void>;
     foliateApi?: ReturnType<typeof mockFoliateApi> | null;
     modeRef?: { current: import("../src/modes/ModeInterface").ReadingMode | null };
     pendingResumeRef?: { current: { wordIndex: number; mode: "flow" | "narration" } | null };
@@ -393,7 +393,7 @@ describe("useReadingModeInstance bridge logic", () => {
       expect(mode.getState().isPlaying).toBe(true);
       // start() immediately calls onWordAdvance(0) to show the starting word
       expect(callbacks.onWordAdvance).toHaveBeenCalledWith(0);
-      callbacks.onWordAdvance.mockClear();
+      (callbacks.onWordAdvance as ReturnType<typeof vi.fn>).mockClear();
 
       // Simulate what the hook does: modeRef.current.stop(); modeRef.current = null;
       mode.stop();

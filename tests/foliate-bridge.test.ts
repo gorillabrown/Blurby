@@ -9,7 +9,7 @@
  * These tests recreate the callback wiring from useReadingModeInstance's
  * createInstance() without importing React — pure class + callback testing.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
 import { FocusMode } from "../src/modes/FocusMode";
 import { FlowMode } from "../src/modes/FlowMode";
 import { NarrateMode } from "../src/modes/NarrateMode";
@@ -116,7 +116,7 @@ function wireFlowFoliateBridge(
   foliateApi: MockFoliateAPI,
   modeRef: { current: ReadingMode | null },
   pendingResumeRef: { current: { wordIndex: number; mode: "flow" | "narration" } | null },
-  onWordAdvance: ReturnType<typeof vi.fn> = vi.fn(),
+  onWordAdvance: Mock<(wordIndex: number) => void> = vi.fn(),
 ): ModeConfig {
   config.callbacks.onWordAdvance = (idx: number) => {
     onWordAdvance(idx);
@@ -140,7 +140,7 @@ function wireNarrationFoliateBridge(
   config: ModeConfig,
   foliateApi: MockFoliateAPI,
   pendingResumeRef: { current: { wordIndex: number; mode: "flow" | "narration" } | null },
-  onWordAdvance: ReturnType<typeof vi.fn> = vi.fn(),
+  onWordAdvance: Mock<(wordIndex: number) => void> = vi.fn(),
 ): ModeConfig {
   config.callbacks.onWordAdvance = (idx: number) => {
     onWordAdvance(idx);
