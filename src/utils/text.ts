@@ -36,6 +36,54 @@ export function hasPunctuation(word: string): boolean {
   return /[.!?;:]["'»)\]]*$/.test(word);
 }
 
+/**
+ * Find the word index at a sentence boundary, scanning in the given direction.
+ * A "sentence start" is the word AFTER a word that ends with sentence-ending punctuation.
+ * Returns the target word index, clamped to [0, words.length - 1].
+ *
+ * - direction "backward": find the start of the current or previous sentence
+ * - direction "forward": find the start of the next sentence
+ */
+export function findSentenceBoundary(words: string[], currentIndex: number, direction: "forward" | "backward"): number {
+  if (words.length === 0) return 0;
+  const last = words.length - 1;
+
+  if (direction === "forward") {
+    // Scan forward from currentIndex to find a word with sentence-ending punctuation,
+    // then return the index of the word after it (the next sentence start).
+    for (let i = currentIndex; i < last; i++) {
+      if (hasPunctuation(words[i])) {
+        // Skip consecutive punctuation-ending words (e.g., "..." or "Mr." edge cases)
+        let j = i + 1;
+        while (j < last && hasPunctuation(words[j])) j++;
+        return Math.min(j, last);
+      }
+    }
+    // No sentence boundary found — go to end of doc
+    return last;
+  }
+
+  // direction === "backward"
+  // First, step back to find the sentence boundary before currentIndex.
+  // A sentence starts at (punctuation word index + 1). We want the start of the
+  // current sentence if we're mid-sentence, or the previous one if we're at a start.
+  let searchFrom = currentIndex - 1;
+  if (searchFrom < 0) return 0;
+
+  // Skip back past the current word and any consecutive punctuation
+  while (searchFrom > 0 && hasPunctuation(words[searchFrom])) searchFrom--;
+
+  // Now scan backward for the previous punctuation word
+  for (let i = searchFrom; i >= 0; i--) {
+    if (hasPunctuation(words[i])) {
+      // The sentence starts at i + 1
+      return i + 1;
+    }
+  }
+  // No punctuation found — go to start of doc
+  return 0;
+}
+
 // Title case minor words that should stay lowercase (unless first/last word)
 const MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",
