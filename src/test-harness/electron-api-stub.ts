@@ -611,6 +611,8 @@ export interface BlurbyStubControl {
   setFirstRunCompleted: (value: boolean) => void;
   /** Clear sessionStorage persistence and reset to defaults */
   clearPersistence: () => void;
+  /** Delete a document by ID (for ERR-01 testing — open a deleted doc) */
+  deleteDoc: (id: string) => boolean;
 }
 
 export const stubControl: BlurbyStubControl = {
@@ -640,6 +642,17 @@ export const stubControl: BlurbyStubControl = {
     readingStats = { totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, sessions: 0, streak: 0, longestStreak: 0 };
     launchAtLogin = false;
     console.debug("[stub] persistence cleared and state reset");
+  },
+  deleteDoc: (id: string) => {
+    const idx = library.findIndex((d) => d.id === id);
+    if (idx === -1) {
+      console.debug("[stub] deleteDoc: not found", id);
+      return false;
+    }
+    library.splice(idx, 1);
+    persistState();
+    console.debug("[stub] deleteDoc: removed", id);
+    return true;
   },
 };
 

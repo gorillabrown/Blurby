@@ -385,7 +385,7 @@ body {
   justify-content: center;
   align-items: baseline;
   width: 100%;
-  will-change: transform, opacity;
+  will-change: opacity;
 }
 .reader-word-layer--entering {
   animation: focus-word-enter var(--focus-transition-ms, 30ms) ease-out forwards;
@@ -396,12 +396,12 @@ body {
   animation: focus-word-exit var(--focus-transition-ms, 30ms) ease-in forwards;
 }
 @keyframes focus-word-enter {
-  from { opacity: 0; transform: translate3d(0, 8px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes focus-word-exit {
-  from { opacity: 1; transform: translate3d(0, 0, 0); }
-  to { opacity: 0; transform: translate3d(0, -8px, 0); }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .reader-word-layer--entering,

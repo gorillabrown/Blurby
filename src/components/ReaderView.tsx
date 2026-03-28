@@ -99,12 +99,12 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
         const interval = 60000 / currentWpm;
         const transitionMs = Math.min(30, Math.floor(interval * 0.15));
         container.style.setProperty("--focus-transition-ms", `${transitionMs}ms`);
-        // Toggle animation by incrementing a counter to force re-trigger
+        // Toggle animation by removing class, then re-adding on next frame
         animFrameRef.current++;
         container.classList.remove("reader-word-layer--entering");
-        // Force reflow to restart animation
-        void container.offsetWidth;
-        container.classList.add("reader-word-layer--entering");
+        requestAnimationFrame(() => {
+          container.classList.add("reader-word-layer--entering");
+        });
       }
 
       if (useFocusSpan && charContainerRef.current) {

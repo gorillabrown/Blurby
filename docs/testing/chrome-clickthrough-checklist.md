@@ -149,6 +149,10 @@ Each item: `[ID] Action | Expected | Screenshot? | Console check`
 
 ## 11. Keyboard Shortcuts (KB)
 
+> **Note:** G-sequences (KB-08 through KB-16) require sub-second key timing. Browser automation introduces delay between keypresses, causing false failures. Verify G-sequences manually in Electron or with deliberate fast typing in browser.
+
+> **Note:** `Ctrl+,` (KB-17) is intercepted by Chrome to open browser settings. This shortcut works in Electron but not in browser context. Marked SKIP for browser testing.
+
 | ID | Action | Expected | Screenshot? | Console |
 |----|--------|----------|-------------|---------|
 | KB-01 | Press `?` in library | Shortcuts overlay opens | Y | none |
@@ -157,18 +161,21 @@ Each item: `[ID] Action | Expected | Screenshot? | Console check`
 | KB-04 | Type a command in palette | Filtered results appear | N | none |
 | KB-05 | Press `Escape` to close palette | Palette closes | N | none |
 | KB-06 | Press `/` in library | Search field focuses | N | none |
-| KB-07 | Press `Tab` in library | Menu flap toggles | N | none |
+| KB-07 | Press `Tab` in library | Menu flap toggles (Reading Queue sidebar) | N | none |
 | KB-08 | G-sequence: `g` then `l` | Navigates to All library filter | N | none |
 | KB-09 | G-sequence: `g` then `f` | Navigates to Favorites filter | N | none |
 | KB-10 | G-sequence: `g` then `a` | Navigates to Archive filter | N | none |
 | KB-11 | G-sequence: `g` then `q` | Navigates to Queue filter | N | none |
 | KB-12 | G-sequence: `g` then `r` | Navigates to Recent filter | N | none |
-| KB-13 | G-sequence: `g` then `s` | Navigates to Stats | N | none |
+| KB-13 | G-sequence: `g` then `s` | Navigates to Stats view | N | none |
 | KB-14 | G-sequence: `g` then `h` | Navigates to Snoozed filter | N | none |
 | KB-15 | G-sequence: `g` then `c` | Navigates to Collections filter | N | none |
-| KB-16 | Press `Ctrl+,` in library | Opens settings | N | none |
-| KB-17 | Press `;` in library | Opens highlights overlay | N | none |
-| KB-18 | Press `F6` | Cycles focus zone (search → grid → sidebar) | N | none |
+| KB-16 | G-sequence: `g` then `m` | Toggles menu flap | N | none |
+| KB-17 | Press `Ctrl+,` in library | Opens settings (SKIP in browser — Chrome intercepts) | N | none |
+| KB-18 | Press `Ctrl+Shift+,` in library | Opens quick settings overlay | N | none |
+| KB-19 | Press `;` in library | Opens highlights overlay | N | none |
+| KB-20 | Press `F6` | Cycles focus zone (search → grid → sidebar) | N | none |
+| KB-21 | Press `Shift+F6` | Cycles focus zone in reverse | N | none |
 
 ## 12. Command Palette (CMD)
 
@@ -225,9 +232,9 @@ Each item: `[ID] Action | Expected | Screenshot? | Console check`
 | Narrate Mode | 9 |
 | Bottom Bar | 8 |
 | Settings | 16 |
-| Keyboard | 18 |
+| Keyboard | 21 |
 | Command Palette | 5 |
 | Drag & Drop | 3 |
 | Error States | 5 |
 | Mode Cycling | 6 |
-| **Total** | **121** |
+| **Total** | **124** |
