@@ -132,9 +132,22 @@ function register(ctx) {
   });
 
   // Read raw file buffer — used by foliate-js to load EPUBs in the renderer
+  // Security: validate path is within allowed directories to prevent arbitrary file reads
   ipcMain.handle("read-file-buffer", async (_, filePath) => {
     try {
-      const buffer = await fsPromises.readFile(filePath);
+      const resolved = path.resolve(filePath);
+      const settings = ctx.getSettings();
+      const allowedRoots = [
+        ctx.getDataPath(),
+        settings.sourceFolder,
+      ].filter(Boolean).map(r => path.resolve(r));
+      const allowed = allowedRoots.some(root => resolved.startsWith(root + path.sep) || resolved === root);
+      if (!allowed) {
+        console.error("read-file-buffer blocked — path outside allowed directories:", resolved);
+        logToFile(`read-file-buffer BLOCKED: "${resolved}" not within allowed roots`, ctx.getErrorLogPath());
+        return null;
+      }
+      const buffer = await fsPromises.readFile(resolved);
       return buffer.buffer; // Return ArrayBuffer
     } catch (err) {
       console.error("read-file-buffer error:", err.message);
