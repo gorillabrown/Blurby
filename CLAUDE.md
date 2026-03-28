@@ -147,8 +147,8 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ### Codebase (branch: `main`)
 
-- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals) complete
-- 688 tests passing across 32 test files
+- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1) complete
+- 764 tests passing across 37 test files
 - CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -194,7 +194,13 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro)
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Tests** (`tests/`): 27+ test files, 585 tests (Sprint 13 base + Sprint 19/20/21/25S/TD-1 additions)
+- **Test Harness** (`src/test-harness/`): Browser-based E2E testing stub (Sprint CT-1)
+    - `electron-api-stub.ts` — Complete `window.electronAPI` surface (73 methods + 10 event listeners) with in-memory state, Meditations seed data, console tracing
+    - `mock-kokoro.ts` — Synthetic PCM audio generation (440Hz sine wave) matching Kokoro TTS response shape
+    - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
+    - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
+    - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
+  - **Tests** (`tests/`): 37 test files, 764 tests (Sprint 13 base + subsequent sprints + TD-1 additions)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -229,7 +235,8 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 | Schema Migrations | ✅ Built | Versioned settings.json + library.json with backup |
 | Error Boundaries | ✅ Built | Wrapping Library and Reader views |
 | TypeScript | ✅ Migrated | .tsx/.ts in renderer, types.ts + foliate.ts + narration.ts for shared types |
-| Unit Tests | ✅ 585 tests | Vitest — 27+ test files (Sprint 13 base + subsequent sprints + TD-1) |
+| Unit Tests | ✅ 764 tests | Vitest — 37 test files (Sprint 13 base + subsequent sprints + TD-1) |
+| Chrome Test Harness | ✅ Built | electronAPI stub for browser-based E2E testing, 121-item click-through checklist (Sprint CT-1) |
 | Auto-Updater | ✅ Built | check-for-updates IPC, Settings > Help UI (Sprint 6) |
 | Drag-and-Drop | ✅ Polished | Client-side extension filtering, rejection toasts, format hints (Sprint 6) |
 | Reading Statistics | ✅ Built | history.json, StatsPanel, streaks, actual reading time, reset (Sprint 7/7b) |
@@ -265,6 +272,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 - ~~TD-1: Technical Debt~~ — ✅ COMPLETED (foliate-js, Kokoro TTS, universal EPUB, mode verticals, IPC split, hook extraction)
 - ~~Sprint 23: V1 Hardening~~ — ✅ COMPLETED (onboarding, error recovery, constants, a11y audit, perf baselines, auto-update E2E)
 - ~~Mode Hardening + Verticals~~ — ✅ COMPLETED (688 tests, legacy effect removal, Shift+Space cycling, Focus off-by-one fix)
+- ~~Sprint CT-1: Chrome Test Harness~~ — ✅ COMPLETED (electronAPI stub, mock Kokoro, 121-item click-through checklist, runner protocol)
 - **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release
 - **Sprint 25: RSS Library + Paywall Integration** — Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline (post-v1)
 - **Sprint 18C: Android app** — React Native port with cloud sync (post-v1)
@@ -287,6 +295,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 ✅ TD-1 (technical debt — foliate-js, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC split) — completed
 ✅ Sprint 23 (v1 hardening — onboarding, error recovery, constants, a11y, perf baselines, auto-update E2E) — completed
 ✅ Mode Hardening + Mode Verticals (688 tests, legacy effect removal, Shift+Space cycling, Focus off-by-one) — completed
+✅ Sprint CT-1 (Chrome test harness — electronAPI stub, mock Kokoro, 121-item checklist) — completed
 **Sprint 24** (external audit) → **v1.0.0 RELEASE**
 **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 
