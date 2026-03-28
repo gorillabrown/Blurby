@@ -417,3 +417,114 @@ describe("NarrateMode", () => {
     expect(callbacks.onWordAdvance).toHaveBeenCalledWith(5);
   });
 });
+
+// ── updateWords contract ────────────────────────────────────────────────
+
+describe("updateWords contract", () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("FlowMode: updateWords extends array, mode continues", () => {
+    const callbacks = makeCallbacks();
+    const short = ["a", "b", "c", "d", "e"];
+    const config = makeConfig({ wpm: 600, callbacks, words: short });
+    const mode = new FlowMode(config);
+    mode.start(2); // start at word 2 of 5
+
+    // Extend to 10 words before the timer chain reaches the end
+    const long = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    mode.updateWords(long);
+
+    // Advance through remaining original words — should NOT complete at index 4
+    vi.advanceTimersByTime(100); // -> word 3
+    vi.advanceTimersByTime(100); // -> word 4 (was last in short array)
+    vi.advanceTimersByTime(100); // -> word 5 (now valid thanks to updateWords)
+    expect(callbacks.onComplete).not.toHaveBeenCalled();
+    expect(mode.getState().isPlaying).toBe(true);
+    expect(mode.getCurrentWord()).toBe(5);
+  });
+
+  it("FocusMode: updateWords extends array, mode continues", () => {
+    const callbacks = makeCallbacks();
+    const short = ["a", "b", "c", "d", "e"];
+    const config = makeConfig({ wpm: 600, callbacks, words: short });
+    const mode = new FocusMode(config);
+    mode.start(2); // start at word 2 of 5
+
+    // Extend to 10 words before the timer chain reaches the end
+    const long = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    mode.updateWords(long);
+
+    // Advance through remaining original words — should NOT complete at index 4
+    vi.advanceTimersByTime(100); // -> word 3
+    vi.advanceTimersByTime(100); // -> word 4 (was last in short array)
+    vi.advanceTimersByTime(100); // -> word 5 (now valid thanks to updateWords)
+    expect(callbacks.onComplete).not.toHaveBeenCalled();
+    expect(mode.getState().isPlaying).toBe(true);
+    expect(mode.getCurrentWord()).toBe(5);
+  });
+
+  it("NarrateMode: updateWords updates config.words", () => {
+    const narration = makeNarration();
+    const original = ["one", "two", "three"];
+    const config = makeConfig({ words: original });
+    const mode = new NarrateMode(config, narration);
+    mode.start(0);
+
+    const extended = ["one", "two", "three", "four", "five", "six"];
+    mode.updateWords(extended);
+
+    // The narration engine receives words via startCursorDriven; updateWords
+    // updates config.words so the next startCursorDriven call (e.g. jumpTo)
+    // picks up the new array.
+    mode.jumpTo(4);
+    const lastCall = (narration.startCursorDriven as any).mock.calls.at(-1);
+    expect(lastCall[0]).toBe(extended);
+    expect(lastCall[1]).toBe(4);
+  });
+
+  it("PageMode: updateWords is no-op", () => {
+    const mode = new PageMode(makeConfig());
+    mode.start(3);
+    const before = mode.getCurrentWord();
+
+    // Should not throw and should not change state
+    mode.updateWords(["completely", "different", "words"]);
+
+    expect(mode.getCurrentWord()).toBe(before);
+    expect(mode.getState().type).toBe("page");
+    expect(mode.getState().isPlaying).toBe(false);
+  });
+
+  it("FlowMode: updateWords with shorter array stops mode", () => {
+    const callbacks = makeCallbacks();
+    const long = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    const config = makeConfig({ wpm: 600, callbacks, words: long });
+    const mode = new FlowMode(config);
+    mode.start(7); // start at word 7 of 10
+
+    // Shrink to 5 words — current position (7) is now past the end
+    mode.updateWords(["a", "b", "c", "d", "e"]);
+
+    // Next scheduleNext should see currentWord (8) >= words.length (5) and complete
+    vi.advanceTimersByTime(100); // triggers scheduleNext -> word 8 >= 5, complete
+    expect(callbacks.onComplete).toHaveBeenCalled();
+    expect(mode.getState().isPlaying).toBe(false);
+  });
+
+  it("FocusMode: updateWords with shorter array stops mode", () => {
+    const callbacks = makeCallbacks();
+    const long = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+    const config = makeConfig({ wpm: 600, callbacks, words: long });
+    const mode = new FocusMode(config);
+    mode.start(7); // start at word 7 of 10
+
+    // Shrink to 5 words — current position (7) is now past the end
+    mode.updateWords(["a", "b", "c", "d", "e"]);
+
+    // Next scheduleNext should see currentWord (8) >= words.length (5) and complete
+    vi.advanceTimersByTime(100); // triggers scheduleNext -> word 8 >= 5, complete
+    expect(callbacks.onComplete).toHaveBeenCalled();
+    expect(mode.getState().isPlaying).toBe(false);
+  });
+});

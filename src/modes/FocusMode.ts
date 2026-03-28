@@ -78,6 +78,10 @@ export class FocusMode implements ReadingMode {
     };
   }
 
+  updateWords(words: string[]): void {
+    this.config.words = words;
+  }
+
   destroy(): void {
     this.clearTimer();
     this.playing = false;
@@ -97,6 +101,9 @@ export class FocusMode implements ReadingMode {
 
   private scheduleNext(): void {
     if (!this.playing) return;
+    if (this.currentWord < 0) {
+      this.currentWord = 0;
+    }
     if (this.currentWord >= this.config.words.length - 1) {
       this.stop();
       this.config.callbacks.onComplete();

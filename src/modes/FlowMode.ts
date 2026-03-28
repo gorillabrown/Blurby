@@ -119,6 +119,9 @@ export class FlowMode implements ReadingMode {
 
   private scheduleNext(): void {
     if (!this.playing) return;
+    if (this.currentWord < 0) {
+      this.currentWord = 0;
+    }
     if (this.currentWord >= this.config.words.length - 1) {
       this.stop();
       this.config.callbacks.onComplete();

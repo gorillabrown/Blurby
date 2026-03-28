@@ -97,9 +97,9 @@ export interface ReadingMode {
   /**
    * Update the word array (e.g., when new EPUB sections load during reading).
    * The mode continues from its current position with the expanded array.
-   * Optional — modes that don't support dynamic word arrays can no-op.
+   * Modes that don't support dynamic words should provide a no-op implementation.
    */
-  updateWords?(words: string[]): void;
+  updateWords(words: string[]): void;
 
   /**
    * Clean up all resources. Called when the mode is being unmounted.
