@@ -22,6 +22,8 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
   const [kokoroDownloading, setKokoroDownloading] = useState(false);
   const [kokoroProgress, setKokoroProgress] = useState(0);
   const [kokoroVoices, setKokoroVoices] = useState<string[]>([]);
+  const [kokoroError, setKokoroError] = useState<string | null>(null);
+  const [kokoroStalled, setKokoroStalled] = useState(false);
 
   // Load Web Speech voices
   useEffect(() => {
@@ -46,32 +48,54 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
       }
     }).catch(() => {});
 
+    const cleanups: (() => void)[] = [];
     if (api.onKokoroDownloadProgress) {
-      const cleanup = api.onKokoroDownloadProgress((progress: number) => {
+      cleanups.push(api.onKokoroDownloadProgress((progress: number) => {
         setKokoroProgress(progress);
+        setKokoroStalled(false);
         if (progress >= 100) {
           setKokoroReady(true);
           setKokoroDownloading(false);
         }
-      });
-      return cleanup;
+      }));
     }
+    if (api.onKokoroDownloadError) {
+      cleanups.push(api.onKokoroDownloadError((error: string) => {
+        setKokoroError(error);
+        setKokoroDownloading(false);
+      }));
+    }
+    return () => cleanups.forEach((c) => c());
   }, []);
+
+  // Stall detection: if downloading and progress stays at 0% for 30s
+  useEffect(() => {
+    if (!kokoroDownloading || kokoroProgress > 0) {
+      setKokoroStalled(false);
+      return;
+    }
+    const timer = setTimeout(() => setKokoroStalled(true), 30000);
+    return () => clearTimeout(timer);
+  }, [kokoroDownloading, kokoroProgress]);
 
   const handleDownloadKokoro = async () => {
     if (!api?.kokoroDownload) return;
     setKokoroDownloading(true);
     setKokoroProgress(0);
+    setKokoroError(null);
+    setKokoroStalled(false);
     try {
       const result = await api.kokoroDownload();
-      if (!result.error) {
+      if (result.error) {
+        setKokoroError(result.error);
+      } else {
         setKokoroReady(true);
         if (api.kokoroVoices) {
           const vr = await api.kokoroVoices();
           if (vr.voices) setKokoroVoices(vr.voices);
         }
       }
-    } catch { /* handled by progress listener */ }
+    } catch { /* handled by error listener */ }
     setKokoroDownloading(false);
   };
 
@@ -355,6 +379,16 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
       {/* Kokoro download progress */}
       {engine === "kokoro" && !kokoroReady && (
         <div style={{ marginBottom: 12 }}>
+          {kokoroError && (
+            <div style={{ fontSize: 11, color: "var(--error, #c44)", marginBottom: 8 }}>
+              Download failed: {kokoroError}
+            </div>
+          )}
+          {kokoroStalled && !kokoroError && (
+            <div style={{ fontSize: 11, color: "var(--warning, #b80)", marginBottom: 8 }}>
+              Download may be blocked by your network or firewall. Check your connection and try again.
+            </div>
+          )}
           {kokoroDownloading ? (
             <>
               <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>
@@ -370,7 +404,7 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
               onClick={handleDownloadKokoro}
               style={{ padding: "6px 14px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 12 }}
             >
-              Download voice model (92 MB)
+              {kokoroError ? "Retry download (92 MB)" : "Download voice model (92 MB)"}
             </button>
           )}
         </div>

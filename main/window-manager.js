@@ -43,7 +43,7 @@ function installContentSecurityPolicy(isDev) {
     const csp = "default-src 'self' blob:; script-src 'self' blob: 'unsafe-inline'; " +
               "style-src 'self' 'unsafe-inline' blob:; " +
               "img-src 'self' data: file: blob:; font-src 'self' blob: data:; " +
-              "frame-src 'self' blob:; connect-src 'self'";
+              "frame-src 'self' blob:; connect-src 'self' https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co";
     callback({
       responseHeaders: {
         ...details.responseHeaders,

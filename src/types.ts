@@ -263,6 +263,7 @@ export interface ElectronAPI {
   kokoroGenerate?: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; error?: string }>;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
+  onKokoroDownloadError?: (callback: (error: string) => void) => () => void;
 }
 
 declare global {

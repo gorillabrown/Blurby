@@ -62,6 +62,14 @@ function getWorker(cacheDir) {
         console.error("[kokoro] Worker load failed:", msg.error);
         if (msg.stack) console.error("[kokoro] Stack:", msg.stack);
         loadingPromise = null;
+        // Forward error to renderer so UI can show it
+        {
+          const { BrowserWindow } = require("electron");
+          const win = BrowserWindow.getAllWindows()[0];
+          if (win && !win.isDestroyed()) {
+            win.webContents.send("tts-kokoro-download-error", msg.error);
+          }
+        }
         break;
       case "result": {
         const p = pending.get(msg.id);

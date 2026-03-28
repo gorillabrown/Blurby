@@ -128,6 +128,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("tts-kokoro-loading", handler);
     return () => ipcRenderer.removeListener("tts-kokoro-loading", handler);
   },
+  onKokoroDownloadError: (callback) => {
+    const handler = (_event, error) => callback(error);
+    ipcRenderer.on("tts-kokoro-download-error", handler);
+    return () => ipcRenderer.removeListener("tts-kokoro-download-error", handler);
+  },
 
   // Events from main
   onSyncProgress: (callback) => {

@@ -595,6 +595,7 @@ export const electronAPIStub: ElectronAPI = {
   onWatcherError: (cb: EventCallback) => addEventListener("watcher-error", cb),
   onKokoroDownloadProgress: (cb: EventCallback) => addEventListener("tts-kokoro-download-progress", cb),
   onKokoroLoading: (cb: EventCallback) => addEventListener("tts-kokoro-loading", cb),
+  onKokoroDownloadError: (cb: EventCallback) => addEventListener("tts-kokoro-download-error", cb),
 };
 
 // ── Public test control interface ───────────────────────────────────────────
