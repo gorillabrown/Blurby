@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -41,7 +41,8 @@
     "asarUnpack": [
       "node_modules/onnxruntime-node/**",
       "node_modules/kokoro-js/**",
-      "node_modules/@huggingface/transformers/**"
+      "node_modules/@huggingface/transformers/**",
+      "node_modules/@napi-rs/**"
     ],
     "directories": {
       "output": "release"

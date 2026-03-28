@@ -118,15 +118,11 @@ function register(ctx) {
         await workbook.xlsx.readFile(xlsxPath);
       } catch {
         // Copy from template — preserves all formatting, formulas, charts, and layout
-        const templatePath = path.join(__dirname, "..", "..", "docs", "project", "Reading_Log_Blurby_Template.xlsx");
-        try {
-          await fsPromises.copyFile(templatePath, xlsxPath);
-        } catch {
-          // Fallback: template may be in app resources (packaged build)
-          const { app } = require("electron");
-          const bundledTemplate = path.join(app.getAppPath(), "docs", "project", "Reading_Log_Blurby_Template.xlsx");
-          await fsPromises.copyFile(bundledTemplate, xlsxPath);
-        }
+        const { app } = require("electron");
+        const templatePath = app.isPackaged
+          ? path.join(process.resourcesPath, "resources", "Reading_Log_Blurby_Template.xlsx")
+          : path.join(__dirname, "..", "..", "resources", "Reading_Log_Blurby_Template.xlsx");
+        await fsPromises.copyFile(templatePath, xlsxPath);
         workbook = new ExcelJS.Workbook();
         await workbook.xlsx.readFile(xlsxPath);
         // Clear sample data rows from template, keeping header row
