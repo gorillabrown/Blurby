@@ -20,25 +20,31 @@ async function loadModel(cacheDir) {
   let kokoro, transformersEnv;
   if (workerData?.modulePath) {
     // Packaged app: require explicit CJS entry points from the unpacked directory.
-    // Three asar/unpacked boundary issues solved here:
+    // Asar/unpacked boundary issues solved here:
     // 1. ESM "exports" map — require() can't resolve across asar boundary, use .cjs paths
-    // 2. Optional deps — CJS bundles hard-require 'sharp', 'phonemizer', etc. at load time.
-    //    We stub any MODULE_NOT_FOUND via Module._resolveFilename hook.
-    // 3. import() hangs — Electron worker threads can't dynamic-import from unpacked asar
+    // 2. Required deps (phonemizer) — redirect to explicit CJS path in unpacked dir
+    // 3. Optional deps (sharp) — stub with empty module (not needed for TTS)
+    // 4. import() hangs — Electron worker threads can't dynamic-import from unpacked asar
+    const modulePath = workerData.modulePath;
     const origResolve = Module._resolveFilename;
     Module._resolveFilename = function(request, parent, isMain, options) {
+      // Redirect phonemizer to its explicit CJS entry (required by kokoro-js for TTS)
+      if (request === "phonemizer") {
+        return path.join(modulePath, "phonemizer", "dist", "phonemizer.cjs");
+      }
       try {
         return origResolve.call(this, request, parent, isMain, options);
       } catch (err) {
         if (err.code === "MODULE_NOT_FOUND") {
+          // Only truly optional deps (sharp, etc.) get stubbed
           return path.join(__dirname, "sharp-stub.js");
         }
         throw err;
       }
     };
 
-    kokoro = require(path.join(workerData.modulePath, "kokoro-js", "dist", "kokoro.cjs"));
-    const transformers = require(path.join(workerData.modulePath, "@huggingface", "transformers", "dist", "transformers.node.cjs"));
+    kokoro = require(path.join(modulePath, "kokoro-js", "dist", "kokoro.cjs"));
+    const transformers = require(path.join(modulePath, "@huggingface", "transformers", "dist", "transformers.node.cjs"));
     transformersEnv = transformers.env;
   } else {
     // Dev mode: normal ESM import
@@ -64,7 +70,10 @@ async function loadModel(cacheDir) {
   // Warm-up inference — primes ONNX session
   try {
     await ttsInstance.generate("Hello.", { voice: "af_bella", speed: 1.0 });
-  } catch { /* warm-up failure is non-fatal */ }
+  } catch (warmupErr) {
+    console.error("[kokoro] Warm-up inference failed:", warmupErr.message);
+    if (warmupErr.stack) console.error("[kokoro] Stack:", warmupErr.stack);
+  }
 
   parentPort.postMessage({ type: "warm-up-done" });
 }
