@@ -35,6 +35,7 @@ export interface KokoroStrategyDeps {
 export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy {
   return {
     speakChunk(text, words, _startIdx, speed, onWordAdvance, onEnd, onError) {
+      console.debug("[kokoro] speak — chars:", text?.length, "words:", words?.length, "inFlight:", deps.getInFlight());
       if (!api?.kokoroGenerate) {
         onError();
         return;
@@ -67,10 +68,13 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy {
             durationMs = (ipcResult as any).durationMs ?? (ipcResult.audio!.length / ipcResult.sampleRate!) * 1000;
           }
 
+          console.debug("[kokoro] IPC result — audio:", audio?.length, "samples @", sampleRate, "Hz,", durationMs, "ms, status:", deps.getStatus(), "genId ok:", genId === deps.getGenerationId());
           if (deps.getStatus() === "idle") return;
 
           // Discard stale IPC result if rate changed during generation
           if (genId !== deps.getGenerationId()) {
+            console.debug("[kokoro] stale genId — re-dispatching");
+            deps.setInFlight(false); // Clear BEFORE re-dispatch so speakNextChunk isn't blocked
             deps.onStaleGeneration();
             return;
           }

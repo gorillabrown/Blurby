@@ -143,12 +143,12 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ---
 
-## Current System State (v2.1.6 — Post-Sprint 23 V1 Hardening)
+## Current System State (v2.1.7 — Post-Mode Verticals)
 
-### Codebase (branch: `sprint/23-v1-hardening`)
+### Codebase (branch: `main`)
 
-- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B) complete — core app through v1 hardening
-- 639 tests passing across 29 test files
+- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals) complete
+- 688 tests passing across 32 test files
 - CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -254,6 +254,8 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 | A11y Audit (Sprint 20/21) | ✅ Built | WCAG 2.1 AA audit on 12 components — ARIA, keyboard, focus trapping, reduced motion (Sprint 23) |
 | Performance Baselines | ✅ Built | 21 automated benchmarks via `npm run perf`, manual procedures documented (Sprint 23) |
 | Auto-Update E2E | ✅ Built | Test procedure documented in `docs/testing/auto-update-e2e.md` (Sprint 23) |
+| Mode System Hardening | ✅ Built | 44 bridge/integration tests, TypeScript contract enforcement, MockFoliateAPI, runtime guards (Sprint MH) |
+| Mode Verticals + Hotfix | ✅ Built | Deleted legacy useEffect dual-drivers, fixed Focus off-by-one, Shift+Space cycles all 3 modes (Sprint MV) |
 
 ### What's NOT Done (Roadmap Forward)
 
@@ -262,6 +264,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 - ~~Sprint 25S: Stabilization~~ — ✅ COMPLETED
 - ~~TD-1: Technical Debt~~ — ✅ COMPLETED (foliate-js, Kokoro TTS, universal EPUB, mode verticals, IPC split, hook extraction)
 - ~~Sprint 23: V1 Hardening~~ — ✅ COMPLETED (onboarding, error recovery, constants, a11y audit, perf baselines, auto-update E2E)
+- ~~Mode Hardening + Verticals~~ — ✅ COMPLETED (688 tests, legacy effect removal, Shift+Space cycling, Focus off-by-one fix)
 - **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release
 - **Sprint 25: RSS Library + Paywall Integration** — Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline (post-v1)
 - **Sprint 18C: Android app** — React Native port with cloud sync (post-v1)
@@ -283,6 +286,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 ✅ Sprint 25S (stabilization — 13 bug fixes, EPUB overlays, engagement-gated progress) — completed
 ✅ TD-1 (technical debt — foliate-js, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC split) — completed
 ✅ Sprint 23 (v1 hardening — onboarding, error recovery, constants, a11y, perf baselines, auto-update E2E) — completed
+✅ Mode Hardening + Mode Verticals (688 tests, legacy effect removal, Shift+Space cycling, Focus off-by-one) — completed
 **Sprint 24** (external audit) → **v1.0.0 RELEASE**
 **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 

@@ -165,6 +165,7 @@ export function useReaderMode({
 
   // ── Start Narration ────────────────────────────────────────────────
   const startNarration = useCallback(() => {
+    console.debug("[narrate] start — foliate:", useFoliate);
     narration.stop();
     stopAllModes();
     hasEngagedRef.current = true;
@@ -174,12 +175,16 @@ export function useReaderMode({
       preCapWpmRef.current = wpm;
       setWpm(() => TTS_WPM_CAP);
     }
+    if (useFoliate) extractFoliateWords();
     let effectiveWords = getEffectiveWords();
+    console.debug("[narrate] words:", effectiveWords.length, "foliate API:", !!foliateApiRef.current);
     if (useFoliate && effectiveWords.length === 0 && foliateApiRef.current) {
+      console.debug("[narrate] no words — page turn + retry");
       foliateApiRef.current.next();
       setTimeout(() => {
         extractFoliateWords();
         const words = getEffectiveWords();
+        console.debug("[narrate] retry — words:", words.length);
         if (words.length > 0) startNarration();
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
@@ -191,6 +196,7 @@ export function useReaderMode({
     }
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
     const pBreaks = getEffectiveParagraphBreaks();
+    console.debug("[narrate] launching at word", startIdx, "/", effectiveWords.length, "pBreaks:", pBreaks.size);
     // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
     modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
   }, [stopAllModes, wpm, setWpm, narration, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);
@@ -270,20 +276,19 @@ export function useReaderMode({
     updateSettings({ readingMode: "page" });
   }, [readingMode, updateSettings, stopAllModes, setHighlightedWordIndex, modeInstance]);
 
-  // ── Select mode (button click — no auto-start) ────────────────────
+  // ── Select mode (button click — select AND start) ─────────────────
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {
     if (readingMode === mode) {
+      // Already in this mode — toggle off (pause to page)
       handlePauseToPage();
-    } else if (readingMode !== "page") {
-      stopAllModes();
-      setReadingMode("page");
-      updateSettings({ lastReadingMode: mode });
-    } else if (settings.lastReadingMode === mode) {
-      updateSettings({ lastReadingMode: "flow" });
     } else {
+      // Start the requested mode (each start function handles stopAllModes internally)
       updateSettings({ lastReadingMode: mode });
+      if (mode === "focus") startFocus();
+      else if (mode === "narration") startNarration();
+      else startFlow();
     }
-  }, [readingMode, settings.lastReadingMode, handlePauseToPage, stopAllModes, updateSettings]);
+  }, [readingMode, handlePauseToPage, updateSettings, startFocus, startNarration, startFlow]);
 
   const handleToggleTts = useCallback(() => handleSelectMode("narration"), [handleSelectMode]);
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);

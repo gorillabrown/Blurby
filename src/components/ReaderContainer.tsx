@@ -554,14 +554,18 @@ export default function ReaderContainer({
     />
   );
 
+  // Stable ref for narration.resyncToCursor (avoids unstable narration object in useCallback deps)
+  const resyncToCursorRef = useRef(narration.resyncToCursor);
+  resyncToCursorRef.current = narration.resyncToCursor;
+
   // Word change handler — resyncs TTS if in narration mode
   const handleHighlightedWordChange = useCallback((index: number) => {
     setHighlightedWordIndex(index);
     if (readingMode === "narration") {
       // Resync TTS to new position
-      narration.resyncToCursor(index, effectiveWpm);
+      resyncToCursorRef.current(index, effectiveWpm);
     }
-  }, [readingMode, narration, effectiveWpm]);
+  }, [readingMode, effectiveWpm]);
 
   // Determine current word index for bottom bar
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
@@ -667,7 +671,7 @@ export default function ReaderContainer({
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
       narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
-      onFlowWordAdvance={(idx) => setHighlightedWordIndex(idx)}
+      onFlowWordAdvance={setHighlightedWordIndex}
       onWordsReextracted={() => {
         // New EPUB section loaded — update the active mode's word array
         // so FlowMode/NarrateMode don't go out of bounds
@@ -816,7 +820,7 @@ export default function ReaderContainer({
             flowNavRef={flowNavRef}
             flowPlaying={false}
             ttsActive={true}
-            onPageEndWordChange={(endIdx) => narration.setPageEndWord(endIdx)}
+            onPageEndWordChange={narration.setPageEndWord}
             onUserBrowsed={handleUserBrowsed}
           />
         );

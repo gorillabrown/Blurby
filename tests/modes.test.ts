@@ -402,12 +402,15 @@ describe("NarrateMode", () => {
     expect(state.effectiveWpm).toBe(225); // 1.5 * 150
   });
 
-  it("destroy stops narration", () => {
+  it("destroy sets playing false but does NOT call narration.stop", () => {
+    // destroy() must NOT call narration.stop() — it races with new mode startup
+    // when called from useEffect cleanup (see LL-043). Narration cleanup is
+    // handled by stopAllModes() in useReaderMode before any new mode starts.
     const narration = makeNarration();
     const mode = new NarrateMode(makeConfig(), narration);
     mode.start(0);
     mode.destroy();
-    expect(narration.stop).toHaveBeenCalled();
+    expect(narration.stop).not.toHaveBeenCalled();
     expect(mode.getState().isPlaying).toBe(false);
   });
 

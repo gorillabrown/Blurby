@@ -731,3 +731,73 @@ Plus defensive guards: bounds checks in scheduleNext, Object.freeze on callbacks
 - PR-48: `updateWords` is now a required method on ModeInterface (not optional). All modes must implement it. This prevents future refactors from silently dropping dynamic word support.
 - PR-49: `Object.freeze(config.callbacks)` after mode creation prevents accidental callback mutation. If a future developer tries to overwrite a callback after mode instantiation, they'll get a TypeError instead of a silent bug.
 - PR-50: Bounds guards in `scheduleNext` should clamp (not throw). A negative word index clamps to 0. The timer chain must never crash — silent degradation beats a white screen.
+
+### [2026-03-27] LL-041: Legacy useEffect Chains vs. Mode Instance Callbacks — Pick One
+
+**Area:** architecture, rendering, modes
+**Status:** resolved
+**Priority:** critical
+
+**Context:** After HOTFIX-2B added `onWordAdvance` callbacks in `useReadingModeInstance` to drive word highlighting via the bridge pattern, the original `useEffect` chains in ReaderContainer.tsx were left in place as "safety nets." Both systems drove `highlightedWordIndex` and called `highlightWordByIndex`, creating a circular cascade: mode fires onWordAdvance → sets state → useEffect fires → calls highlightWordByIndex → triggers re-render → state changes → loop. Result: React "Maximum update depth exceeded" error, Narration completely blocked, Flow console-spamming.
+
+**Root Cause:** Two independent word-driving systems running simultaneously. The legacy `useEffect` watching `highlightedWordIndex` (L570-576) duplicated what the bridge's `onWordAdvance` callback already did. The legacy `setInterval` for Flow (L579-596) duplicated what `FlowMode.scheduleNext()` already did. Neither system was aware of the other.
+
+**Solution (Sprint Mode Verticals):** Deleted both legacy `useEffect` blocks entirely. The HOTFIX-2B bridge (`useReadingModeInstance`) is the sole owner of word advancement and highlighting. No legacy fallback, no dual paths.
+
+**Rules:**
+- PR-51: When a new system replaces a legacy system, DELETE the legacy code in the same PR. Leaving it as a "safety net" creates dual-driver bugs that are worse than having no fallback.
+- PR-52: There must be exactly ONE system driving word position for each mode. If two code paths can both call `setHighlightedWordIndex`, one of them is wrong. Audit for dual drivers after any refactor that adds a new highlighting path.
+- PR-53: `useEffect` chains that watch derived state and call imperative APIs are an anti-pattern for real-time word advancement. The correct pattern is: mode class timer → onWordAdvance callback → imperative highlight call. Effects watching state for highlighting create circular cascades.
+
+### [2026-03-28] LL-042: handleSelectMode Must Start Modes, Not Just Select
+
+**Area:** UX, modes, keyboard
+**Status:** resolved
+**Priority:** high
+
+**Context:** Mode Verticals refactor changed mode buttons (Focus, Flow, Narrate) to use `handleSelectMode` which only updated `lastReadingMode` in settings. Starting the mode required a separate Space key press. Users clicking "Narrate" expected narration to start immediately but got silence — `startNarration()` was never called.
+
+**Solution:** Changed `handleSelectMode` to both select AND start the mode. If already in the mode, clicking toggles it off. Each `startFocus`/`startNarration`/`startFlow` handles `stopAllModes` internally, so the transition is clean.
+
+**Rules:**
+- PR-54: Mode buttons must start the mode on click. Two-step "select then activate" UX is confusing. If a button says "Start narration," clicking it must start narration.
+
+### [2026-03-28] LL-043: useEffect Cleanup Races with Shared Hook State (NarrateMode.destroy)
+
+**Area:** architecture, React lifecycle, narration, race conditions
+**Status:** resolved
+**Priority:** critical
+
+**Context:** Clicking Narrate started the pipeline correctly — Kokoro generated audio (165k samples, ~7 seconds) — but by the time the IPC result returned (~200ms), `stateRef.current.status` had reverted to `"idle"` and the audio was discarded. No audio, no cursor movement, no error.
+
+**Root Cause:** Classic React effect cleanup race. When `startNarration` sets `readingMode` from "page" to "narration", React re-renders. During re-render, `useReadingModeInstance`'s `useEffect` cleanup fires, destroying the OLD mode instance. `NarrateMode.destroy()` called `this.narration.stop()` on the SHARED narration hook, dispatching STOP. This triggered a second re-render where `stateRef.current = state` (line 61 of useNarration) overwrote the manually-set `"speaking"` status with `"idle"` from the reducer. When the Kokoro IPC returned, it found status = "idle" and discarded valid audio.
+
+**Sequence:**
+1. Event handler: dispatch START_CURSOR_DRIVEN, manually set stateRef.status = "speaking"
+2. Async Kokoro IPC starts (~200ms)
+3. React re-render #1: reducer state = "speaking", stateRef = "speaking" ✓
+4. useEffect cleanup fires: old NarrateMode.destroy() → narration.stop() → dispatch STOP
+5. React re-render #2: reducer state = "idle", stateRef = "idle" ✗
+6. Kokoro IPC returns → status = "idle" → audio discarded
+
+**Solution:** Removed `this.narration.stop()` from `NarrateMode.destroy()`. The shared narration object is already stopped by `stopAllModes()` in `startNarration` before the new mode starts. The redundant stop in `destroy()` was the only code racing with the new mode's startup.
+
+**Rules:**
+- PR-55: Mode class `destroy()` must NOT call stop on shared hooks/singletons. The effect cleanup fires AFTER the new instance has started. Use `stopAllModes()` in the start sequence instead.
+- PR-56: When `stateRef.current = state` mirrors reducer state into a ref on every render, any dispatch between "manual ref set" and "IPC return" can corrupt the ref. Audit all async flows in hooks that use this pattern.
+- PR-57: Add permanent `console.debug` instrumentation to async TTS pipelines. These race conditions are invisible without telemetry — no errors, no warnings, just silent drops.
+
+### [2026-03-28] LL-044: Kokoro inFlight Guard Blocks Re-dispatch After Speed Change
+
+**Area:** narration, TTS, speed control
+**Status:** resolved
+**Priority:** medium
+
+**Context:** Changing narration speed (arrow up/down) during playback caused narration to stall permanently. Audio stopped, cursor froze, no error.
+
+**Root Cause:** Speed change increments `generationId` and triggers `speakNextChunk`. The current Kokoro IPC returns with a stale `genId`, triggering `onStaleGeneration()` which calls `speakNextChunk`. But `inFlight` was still `true` (the `finally` block hadn't executed yet), so the re-dispatch hit the guard `if (deps.getInFlight()) return` and silently dropped. The `finally` block then cleared `inFlight` — but nobody called `speakNextChunk` again.
+
+**Solution:** Call `deps.setInFlight(false)` BEFORE `deps.onStaleGeneration()` in the stale genId branch. The `finally` block still runs (harmless double-clear).
+
+**Rules:**
+- PR-58: When an async guard (`inFlight`) protects a resource, any code path that re-dispatches within the same async context must clear the guard first. The `finally` block runs too late for synchronous re-dispatch.

@@ -50,6 +50,7 @@ export class NarrateMode implements ReadingMode {
   }
 
   start(wordIndex: number): void {
+    console.debug("[NarrateMode] start word:", wordIndex, "/", this.config.words.length, "rate:", this.ttsRate);
     this.currentWord = wordIndex;
     this.playing = true;
 
@@ -128,7 +129,12 @@ export class NarrateMode implements ReadingMode {
   }
 
   destroy(): void {
-    this.narration.stop();
+    // NOTE: Do NOT call this.narration.stop() here.
+    // destroy() is called from useEffect cleanup, which fires AFTER the new mode
+    // instance has already been started. Calling stop() on the shared narration
+    // object would dispatch STOP, resetting status to "idle" and causing the
+    // Kokoro IPC result to be discarded. Narration cleanup is already handled
+    // by stopAllModes() in useReaderMode before any new mode starts.
     this.playing = false;
   }
 
