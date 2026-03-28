@@ -91,6 +91,22 @@ export default function LibraryContainer() {
     return cleanup;
   }, [showToast]);
 
+  // Update-available notification
+  useEffect(() => {
+    const cleanup = api.onUpdateAvailable?.((version: string) => {
+      showToast(`Update available: v${version}`, 10000, { label: "Install", onClick: () => api.installUpdate() });
+    });
+    return cleanup;
+  }, [showToast]);
+
+  // Cloud auth required notification
+  useEffect(() => {
+    const cleanup = api.onCloudAuthRequired?.((provider: string) => {
+      showToast(`${provider === "microsoft" ? "Microsoft" : "Google"} sign-in expired. Please re-authenticate in Cloud Sync settings.`, 8000);
+    });
+    return cleanup;
+  }, [showToast]);
+
   // Create context providers
   const settingsValue = useSettingsProvider(settings, setSettings);
   const toastValue = useToastProvider();

@@ -288,7 +288,7 @@ export function useGlobalKeys({ toggleFlap, openSettings, view, activeOverlay, s
       }
 
       // / opens library search overlay (any view — Sprint 20X)
-      if (e.key === "/" && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
+      if (e.key === "/" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement)?.closest?.("input, textarea, select")) {
         e.preventDefault();
         s.setActiveOverlay?.(s.activeOverlay === "librarySearch" ? null : "librarySearch");
         return;
@@ -443,7 +443,7 @@ export function useLibraryKeyboard(
       }
 
       // / opens library search overlay (Sprint 20X)
-      if (e.key === "/" && !e.ctrlKey) {
+      if (e.key === "/" && !e.shiftKey && !e.ctrlKey) {
         e.preventDefault();
         setActiveOverlay("librarySearch");
         return;

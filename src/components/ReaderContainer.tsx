@@ -133,7 +133,7 @@ export default function ReaderContainer({
 
   // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
   // Map 4-mode to legacy 3-mode for keyboard hooks. Narration uses "page" layout.
-  const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : "page";
+  const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : readingMode === "narration" ? "narration" : "page";
 
   const words = tokenized.words;
   // Only set wordsRef from tokenized content for non-foliate docs.
