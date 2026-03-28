@@ -391,6 +391,9 @@ describe("useReadingModeInstance bridge logic", () => {
       const mode = new FocusMode(config);
       mode.start(0);
       expect(mode.getState().isPlaying).toBe(true);
+      // start() immediately calls onWordAdvance(0) to show the starting word
+      expect(callbacks.onWordAdvance).toHaveBeenCalledWith(0);
+      callbacks.onWordAdvance.mockClear();
 
       // Simulate what the hook does: modeRef.current.stop(); modeRef.current = null;
       mode.stop();

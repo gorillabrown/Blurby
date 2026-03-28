@@ -71,6 +71,9 @@ interface ReaderKeysState {
   // Flow-mode line navigation
   flowPrevLine?: () => void;
   flowNextLine?: () => void;
+  // Mode cycling (Shift+Space)
+  cycleMode?: () => void;
+  cycleAndStart?: () => void;
 }
 
 // ── Library Keyboard Actions ──────────────────────────────────────────────
@@ -125,7 +128,9 @@ export function useReaderKeys(
   paragraphNext?: () => void,
   flowPrevLine?: () => void,
   flowNextLine?: () => void,
-  openChapterList?: () => void
+  openChapterList?: () => void,
+  cycleMode?: () => void,
+  cycleAndStart?: () => void
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
@@ -134,6 +139,7 @@ export function useReaderKeys(
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
+    cycleMode, cycleAndStart,
   });
 
   stateRef.current = {
@@ -143,6 +149,7 @@ export function useReaderKeys(
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
+    cycleMode, cycleAndStart,
   };
 
   useEffect(() => {
@@ -186,12 +193,10 @@ export function useReaderKeys(
 
       // ── Page-mode specific keys ────────────────────────────────────
       if (isPage) {
-        // N toggles narration in Page view
-        if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
-        // Space → enter Flow
+        // Space → enter last-used mode (Flow by default)
         if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); s.togglePlay(); return; }
-        // Shift+Space → enter Focus
-        if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.enterFocus?.(); return; }
+        // Shift+Space → cycle selected mode (flow → narration → focus → flow)
+        if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.cycleMode?.(); return; }
         // ←/→ flip pages
         if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevPage?.(); return; }
         if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextPage?.(); return; }
@@ -216,6 +221,8 @@ export function useReaderKeys(
       }
 
       // ── Focus/Flow mode keys ───────────────────────────────────────
+      // Shift+Space → cycle to next mode and start it
+      if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.cycleAndStart?.(); return; }
       // Space = pause → return to Page
       if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
       // ←/→ in Flow: jump lines; in Focus: seek words
