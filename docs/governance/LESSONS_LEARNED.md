@@ -817,3 +817,34 @@ Plus defensive guards: bounds checks in scheduleNext, Object.freeze on callbacks
 **Rules:**
 - PR-59: Any module that captures `window.*` at module scope (outside a function) will evaluate at import-graph resolution time, NOT at the point where it's "used." Static imports are eagerly evaluated by bundlers.
 - PR-60: When injecting globals that must exist before component modules evaluate, use dynamic `import()` for the app entry point. Static imports at the top of the entry file defeat async initialization sequences.
+
+### [2026-03-28] LL-046: Forced Reflow for Animation Re-trigger Is Unnecessary with rAF
+
+**Area:** CSS animation, performance, Focus mode
+**Status:** resolved
+**Priority:** medium
+
+**Context:** Focus mode used `void container.offsetWidth` to force a synchronous layout reflow every time a new word was displayed, in order to restart a CSS animation. This caused visual instability (jitter/bounce) especially at higher WPMs, and the 8px Y-translate in the `focus-word-enter` keyframes added unnecessary motion.
+
+**Root Cause:** The `void container.offsetWidth` pattern forces the browser to synchronously compute layout, which is expensive and causes frame drops. Combined with the `translate3d(0, 8px, 0)` animation, each word change produced a visible bounce. The Y-translate was originally added for a "slide up" effect but at reading speeds it becomes disorienting.
+
+**Solution:** (1) Replaced `void container.offsetWidth` with a `requestAnimationFrame` callback that re-adds the animation class on the next frame — eliminates forced reflow. (2) Changed `focus-word-enter`/`focus-word-exit` keyframes to opacity-only (removed all `transform` properties). (3) Removed `transform` from `will-change` on `.reader-word-layer`.
+
+**Rules:**
+- PR-61: Never use `void element.offsetWidth` to restart CSS animations. Use `requestAnimationFrame` to remove and re-add the animation class across frames.
+- PR-62: Reading mode word transitions should be opacity-only. Any positional animation (translate, scale) creates perceived motion that competes with reading focus.
+
+### [2026-03-28] LL-047: Chrome Intercepts Ctrl+, — Browser Context Shortcut Conflicts
+
+**Area:** keyboard shortcuts, browser testing, Chrome
+**Status:** active (known limitation)
+**Priority:** low
+
+**Context:** `Ctrl+,` is registered in `useGlobalKeys` to open settings. In Electron, this works because the app owns the keyboard. In Chrome browser context (test harness), Chrome intercepts `Ctrl+,` for its own settings page — the app handler never fires.
+
+**Root Cause:** Browser-level shortcuts take priority over web page `keydown` handlers for certain key combinations. `Ctrl+,` is one of Chrome's reserved shortcuts.
+
+**Solution:** Documented as a known browser-only limitation. `Ctrl+,` works in Electron (production). The click-through checklist marks KB-17 as SKIP for browser testing. Settings remain accessible via command palette (`Ctrl+K` → "Settings") and the menu flap.
+
+**Rules:**
+- PR-63: When testing keyboard shortcuts in browser context, expect conflicts with browser-reserved shortcuts (`Ctrl+,`, `Ctrl+Shift+I`, `Ctrl+L`, `F5`, etc.). These work in Electron but not in browser. Document conflicts rather than working around them.
