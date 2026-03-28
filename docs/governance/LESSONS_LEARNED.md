@@ -801,3 +801,19 @@ Plus defensive guards: bounds checks in scheduleNext, Object.freeze on callbacks
 
 **Rules:**
 - PR-58: When an async guard (`inFlight`) protects a resource, any code path that re-dispatches within the same async context must clear the guard first. The `finally` block runs too late for synchronous re-dispatch.
+
+### [2026-03-28] LL-045: Module-Scope `window.electronAPI` Capture Races with Async Stub Injection
+
+**Area:** test harness, module evaluation, Vite
+**Status:** resolved
+**Priority:** high
+
+**Context:** Sprint CT-1 built a browser-based test harness that injects a stub `window.electronAPI` before React mounts. The stub was installed via `await import("./test-harness/stub-loader")` in `main.tsx`'s async `boot()` function, which ran before `ReactDOM.createRoot`. But the app crashed with `Cannot read properties of undefined (reading 'getSiteLogins')`.
+
+**Root Cause:** `LibraryContainer.tsx` (and other components) capture `window.electronAPI` at **module scope**: `const api = window.electronAPI` (line 23). Vite evaluates the entire static import tree when it processes `main.tsx` — so `import App from "./App"` at the top of `main.tsx` causes every component module to evaluate BEFORE `boot()` runs. The module-scope `const api` captured `undefined` because the stub hadn't been installed yet.
+
+**Solution:** Changed `import App from "./App"` (static, top-level) to `const { default: App } = await import("./App")` (dynamic, inside `boot()` after stub installation). This defers the entire component tree's module evaluation until after the stub is on `window`.
+
+**Rules:**
+- PR-59: Any module that captures `window.*` at module scope (outside a function) will evaluate at import-graph resolution time, NOT at the point where it's "used." Static imports are eagerly evaluated by bundlers.
+- PR-60: When injecting globals that must exist before component modules evaluate, use dynamic `import()` for the app entry point. Static imports at the top of the entry file defeat async initialization sequences.
