@@ -336,21 +336,6 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
 
       <div className="settings-section-label" style={{ marginTop: 16 }}>Narration (Text-to-Speech)</div>
 
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Enable TTS</span>
-        <div
-          className={`settings-toggle${settings.ttsEnabled ? " active" : ""}`}
-          onClick={() => onSettingsChange({ ttsEnabled: !settings.ttsEnabled })}
-          role="switch"
-          tabIndex={0}
-          aria-checked={settings.ttsEnabled}
-          aria-label="Enable text-to-speech"
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSettingsChange({ ttsEnabled: !settings.ttsEnabled }); } }}
-        >
-          <div className="settings-toggle-thumb" />
-        </div>
-      </div>
-
       {/* Engine selector */}
       <div className="settings-toggle-row" style={{ marginTop: 8 }}>
         <span className="settings-toggle-label">Voice engine</span>
@@ -365,9 +350,8 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         <button
           className={`settings-mode-btn${engine === "kokoro" ? " active" : ""}`}
           onClick={() => {
-            if (kokoroReady) {
-              onSettingsChange({ ttsEngine: "kokoro", ttsVoiceName: "af_bella" });
-            } else if (!kokoroDownloading) {
+            onSettingsChange({ ttsEngine: "kokoro", ttsVoiceName: kokoroReady ? "af_bella" : null });
+            if (!kokoroReady && !kokoroDownloading) {
               handleDownloadKokoro();
             }
           }}

@@ -40,6 +40,7 @@
     ],
     "asarUnpack": [
       "node_modules/onnxruntime-node/**",
+      "node_modules/onnxruntime-common/**",
       "node_modules/kokoro-js/**",
       "node_modules/@huggingface/transformers/**",
       "node_modules/@napi-rs/**"

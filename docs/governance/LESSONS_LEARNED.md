@@ -818,33 +818,26 @@ Plus defensive guards: bounds checks in scheduleNext, Object.freeze on callbacks
 - PR-59: Any module that captures `window.*` at module scope (outside a function) will evaluate at import-graph resolution time, NOT at the point where it's "used." Static imports are eagerly evaluated by bundlers.
 - PR-60: When injecting globals that must exist before component modules evaluate, use dynamic `import()` for the app entry point. Static imports at the top of the entry file defeat async initialization sequences.
 
-### [2026-03-28] LL-046: Forced Reflow for Animation Re-trigger Is Unnecessary with rAF
+---
 
-**Area:** CSS animation, performance, Focus mode
-**Status:** resolved
-**Priority:** medium
+### PR-61: Electron asar/unpacked boundary breaks Node.js module resolution
 
-**Context:** Focus mode used `void container.offsetWidth` to force a synchronous layout reflow every time a new word was displayed, in order to restart a CSS animation. This caused visual instability (jitter/bounce) especially at higher WPMs, and the 8px Y-translate in the `focus-word-enter` keyframes added unnecessary motion.
+**Date:** 2026-03-28 | **Severity:** Critical | **Category:** Distribution/Packaging
 
-**Root Cause:** The `void container.offsetWidth` pattern forces the browser to synchronously compute layout, which is expensive and causes frame drops. Combined with the `translate3d(0, 8px, 0)` animation, each word change produced a visible bounce. The Y-translate was originally added for a "slide up" effect but at reading speeds it becomes disorienting.
+**Problem:** Kokoro TTS model download worked in dev mode but stalled silently at 0% in the packaged .exe. No error was shown to the user — the download appeared to hang forever.
 
-**Solution:** (1) Replaced `void container.offsetWidth` with a `requestAnimationFrame` callback that re-adds the animation class on the next frame — eliminates forced reflow. (2) Changed `focus-word-enter`/`focus-word-exit` keyframes to opacity-only (removed all `transform` properties). (3) Removed `transform` from `will-change` on `.reader-word-layer`.
+**Root cause:** Three layered module resolution failures when a worker thread inside `app.asar` tries to `require()` modules from `app.asar.unpacked`:
 
-**Rules:**
-- PR-61: Never use `void element.offsetWidth` to restart CSS animations. Use `requestAnimationFrame` to remove and re-add the animation class across frames.
-- PR-62: Reading mode word transitions should be opacity-only. Any positional animation (translate, scale) creates perceived motion that competes with reading focus.
+1. **ESM exports map** — `kokoro-js` and `@huggingface/transformers` are `"type": "module"` packages with no `"main"` field. They define entry points via the `"exports"` map. Node's `require()` across the asar/unpacked boundary cannot resolve this map. Fix: require the explicit CJS paths (`kokoro-js/dist/kokoro.cjs`, `@huggingface/transformers/dist/transformers.node.cjs`).
 
-### [2026-03-28] LL-047: Chrome Intercepts Ctrl+, — Browser Context Shortcut Conflicts
+2. **Peer dependency isolation** — `onnxruntime-node` (in asarUnpack) requires `onnxruntime-common`, which was in the asar but not unpacked. Unpacked modules can't resolve deps from inside the asar. Fix: add `onnxruntime-common` to `asarUnpack`.
 
-**Area:** keyboard shortcuts, browser testing, Chrome
-**Status:** active (known limitation)
-**Priority:** low
+3. **Optional dependency hard-requires** — CJS bundles of kokoro-js and transformers do `require('sharp')` and `require('phonemizer')` at module load time (not behind try/catch). These optional deps aren't installed. The ESM versions handle this gracefully with dynamic `import()` + catch, but CJS doesn't. Fix: monkey-patch `Module._resolveFilename` to catch `MODULE_NOT_FOUND` and return an empty stub module.
 
-**Context:** `Ctrl+,` is registered in `useGlobalKeys` to open settings. In Electron, this works because the app owns the keyboard. In Chrome browser context (test harness), Chrome intercepts `Ctrl+,` for its own settings page — the app handler never fires.
-
-**Root Cause:** Browser-level shortcuts take priority over web page `keydown` handlers for certain key combinations. `Ctrl+,` is one of Chrome's reserved shortcuts.
-
-**Solution:** Documented as a known browser-only limitation. `Ctrl+,` works in Electron (production). The click-through checklist marks KB-17 as SKIP for browser testing. Settings remain accessible via command palette (`Ctrl+K` → "Settings") and the menu flap.
+**Why this was hard to find:** The original hypothesis (CSP `connect-src 'self'` blocking fetch) was plausible because dev mode strips CSP entirely. But worker threads use Node.js networking, not Chromium's — CSP never applied. The real error was swallowed because the worker's `load-error` wasn't forwarded to the renderer (fixed in HOTFIX-2), so the UI just showed 0% forever.
 
 **Rules:**
-- PR-63: When testing keyboard shortcuts in browser context, expect conflicts with browser-reserved shortcuts (`Ctrl+,`, `Ctrl+Shift+I`, `Ctrl+L`, `F5`, etc.). These work in Electron but not in browser. Document conflicts rather than working around them.
+- PR-61a: When unpacking ESM-first packages (`"type": "module"`) for use in Electron worker threads, always require the explicit `.cjs` entry point by full path. Never rely on bare `require("package-name")` across asar boundaries.
+- PR-61b: If a package in `asarUnpack` has peer dependencies, those peers must ALSO be in `asarUnpack`. Unpacked modules cannot resolve deps from inside the asar.
+- PR-61c: For native/complex npm packages loaded in worker threads, stub missing optional dependencies via `Module._resolveFilename` hook rather than installing them. Use a catch-all approach (any `MODULE_NOT_FOUND` → stub) rather than whitelisting specific packages.
+- PR-61d: Always forward worker thread errors to the renderer. Silent failures in background workers are invisible to users and extremely hard to debug.

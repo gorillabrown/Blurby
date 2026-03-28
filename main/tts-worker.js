@@ -4,6 +4,7 @@
 
 const { parentPort, workerData } = require("worker_threads");
 const path = require("path");
+const Module = require("module");
 
 let KokoroTTS = null;
 let ttsInstance = null;
@@ -18,9 +19,26 @@ async function loadModel(cacheDir) {
 
   let kokoro, transformersEnv;
   if (workerData?.modulePath) {
-    // Packaged app: resolve from unpacked directory using require()
-    kokoro = require(path.join(workerData.modulePath, "kokoro-js"));
-    const transformers = require(path.join(workerData.modulePath, "@huggingface", "transformers"));
+    // Packaged app: require explicit CJS entry points from the unpacked directory.
+    // Three asar/unpacked boundary issues solved here:
+    // 1. ESM "exports" map — require() can't resolve across asar boundary, use .cjs paths
+    // 2. Optional deps — CJS bundles hard-require 'sharp', 'phonemizer', etc. at load time.
+    //    We stub any MODULE_NOT_FOUND via Module._resolveFilename hook.
+    // 3. import() hangs — Electron worker threads can't dynamic-import from unpacked asar
+    const origResolve = Module._resolveFilename;
+    Module._resolveFilename = function(request, parent, isMain, options) {
+      try {
+        return origResolve.call(this, request, parent, isMain, options);
+      } catch (err) {
+        if (err.code === "MODULE_NOT_FOUND") {
+          return path.join(__dirname, "sharp-stub.js");
+        }
+        throw err;
+      }
+    };
+
+    kokoro = require(path.join(workerData.modulePath, "kokoro-js", "dist", "kokoro.cjs"));
+    const transformers = require(path.join(workerData.modulePath, "@huggingface", "transformers", "dist", "transformers.node.cjs"));
     transformersEnv = transformers.env;
   } else {
     // Dev mode: normal ESM import
@@ -30,7 +48,6 @@ async function loadModel(cacheDir) {
   }
   KokoroTTS = kokoro.KokoroTTS;
   transformersEnv.cacheDir = cacheDir;
-
   ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
     dtype: DTYPE,
     device: "cpu",
