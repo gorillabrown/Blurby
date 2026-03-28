@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-03-28 — Sprint 24 audit complete (3 CRITICALs). Next: 24R + KB-1 (parallel) → v1.0.0.
+**Last updated**: 2026-03-28 — 24R + KB-1 + CT-3 complete. All CRITICALs resolved. v1.0.0 gate clear.
 **Current branch**: `main`
-**Current state**: All sprints through Sprint 24 complete. 776 tests, 38 files. Audit: 58 findings (3C/24H/21M/10L). Next: 24R (CRIT fixes) ‖ KB-1 (keyboard nav) → v1.0.0.
+**Current state**: All sprints through KB-1 complete. 791 tests, 39 files. Version: 0.10.0. v1.0.0 gate: CLEAR (0 CRITICALs remaining).
 
 > **Navigation:** Forward-looking sprints below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`.
 
@@ -10,18 +10,18 @@
 
 ## Sprint Status
 
-| Sprint | Status | Summary |
-|--------|--------|---------|
-| **TH-1: Narration Test Hardening** | ✅ DONE | 88 new tests (6 files + modes.test.ts expansion). 776 tests / 38 files total. |
-| **CT-2: Test Harness Hardening** | ✅ DONE | Fixed 33 SKIPs + 5 FAILs. Rich seed data, sessionStorage, 5 bug fixes. |
-| **Click-through re-run** | ✅ DONE | 121-item test: 101 PASS / 6 FAIL / 14 SKIP. Report: `docs/testing/test-run-CT3-2026-03-28.md` |
-| **CT-3: Click-through Repair** | ✅ DONE | KB checklist aligned (124 items), Ctrl+, documented as browser limitation, Focus stability (opacity-only animation, no forced reflow), deleteDoc stub. |
-| **Sprint 24: External Audit** | ✅ DONE | 58 findings (3C/24H/21M/10L). Findings: `docs/project/AGENT_FINDINGS.md`. |
-| **Sprint 24R: CRIT Remediation** | 🔶 NEXT | Fix CRIT-1 (path validation). CRIT-2 deferred. CRIT-3 dismissed (false positive). |
-| **Sprint KB-1: Keyboard Navigation Remap** | 🔶 NEXT | Swap Ctrl/Shift arrow bindings to OS-native. Add sentence nav. Parallel with 24R. |
-| **v1.0.0 RELEASE** | ⬜ GATE | Tag after 24R + KB-1 complete. Version 0.9.0 → 1.0.0. |
-| **Sprint 25: RSS Library** | 📋 POST-V1 | Feed aggregation from authenticated sites, RSS Library UI, cloud sync. |
-| **Sprint 18C: Android APK** | 📋 POST-V1 | React Native port with cloud sync. |
+| Sprint | Version | Status | Summary |
+|--------|---------|--------|---------|
+| **TH-1: Narration Test Hardening** | — | ✅ DONE | 88 new tests (6 files + modes.test.ts expansion). 776 tests / 38 files total. |
+| **CT-2: Test Harness Hardening** | — | ✅ DONE | Fixed 33 SKIPs + 5 FAILs. Rich seed data, sessionStorage, 5 bug fixes. |
+| **Click-through re-run** | — | ✅ DONE | 121-item test: 101 PASS / 6 FAIL / 14 SKIP. Report: `docs/testing/test-run-CT3-2026-03-28.md` |
+| **CT-3: Click-through Repair** | — | ✅ DONE | KB checklist aligned (124 items), Ctrl+, documented as browser limitation, Focus stability (opacity-only animation, no forced reflow), deleteDoc stub. |
+| **Sprint 24: External Audit** | — | ✅ DONE | 58 findings (3C/24H/21M/10L). Findings: `docs/project/AGENT_FINDINGS.md`. |
+| **Sprint 24R: CRIT Remediation** | v0.9.1 | ✅ DONE | CRIT-1 fixed (path validation on read-file-buffer). CRIT-2/3 dismissed. |
+| **Sprint KB-1: Keyboard Navigation Remap** | v0.10.0 | ✅ DONE | Ctrl=word/sentence, Shift=paragraph/chapter. 15 new tests. 791 total. |
+| **v1.0.0 RELEASE** | v1.0.0 | ⬜ READY | All gates passed. Bump package.json + tag. |
+| **Sprint 25: RSS Library** | v1.1.0 | 📋 POST-V1 | Feed aggregation from authenticated sites, RSS Library UI, cloud sync. |
+| **Sprint 18C: Android APK** | v1.2.0 | 📋 POST-V1 | React Native port with cloud sync. |
 
 **Legend:** 🔶 = fully spec'd, ready for dispatch | 📋 = spec'd, needs agent assignments | ⬜ = gate/milestone
 
@@ -86,7 +86,7 @@ Items migrated from BUG_REPORT.md — feature requests, enhancements, and archit
 
 ---
 
-## Sprint 24R: CRIT Remediation
+## Sprint 24R [v0.9.1]: CRIT Remediation
 
 **Goal:** Fix the 1 actionable CRITICAL from Sprint 24 audit. CRIT-2 (OAuth placeholder creds) deferred to v1.1.0. CRIT-3 dismissed — `.Workflow/` exists on Windows host, invisible to Linux VM audit agents.
 
@@ -163,16 +163,14 @@ Add path allowlist validation to `read-file-buffer`. Resolve the requested path,
 1. `read-file-buffer` rejects paths outside app data dir and source folder
 2. Path traversal attacks (e.g., `../../etc/passwd`) return null
 3. All other file-read IPC handlers validated (or confirmed already safe)
-4. Zero `.workflow/` path references remain in CLAUDE.md
-5. CLAUDE.md Rule 8 points to correct sprint dispatch template location
-6. Session Start Protocol preserved without dead file references
-7. All 776+ tests pass, 0 failures
-8. Clean `npm run build`
-9. Branch merged to main with `--no-ff`
+4. `package.json` version bumped to `0.9.1`
+5. All 776+ tests pass, 0 failures
+6. Clean `npm run build`
+7. Branch merged to main with `--no-ff`
 
 ---
 
-## Sprint KB-1: Keyboard Navigation Remap
+## Sprint KB-1 [v0.10.0]: Keyboard Navigation Remap
 
 **Goal:** Swap Ctrl+Arrow and Shift+Arrow bindings to match OS-native conventions. Ctrl = fine-grained word/sentence navigation. Shift = coarse structural paragraph/chapter jumps. All modes.
 
@@ -303,7 +301,8 @@ Remap all arrow modifier bindings in `useKeyboardShortcuts.ts` and extend to all
 8. Shortcuts overlay/help text reflects new bindings
 9. All 776+ tests pass, 0 failures
 10. Clean `npm run build`
-11. Branch `sprint/kb1-keyboard-nav` merged to main with `--no-ff`
+11. `package.json` version bumped to `0.10.0`
+12. Branch `sprint/kb1-keyboard-nav` merged to main with `--no-ff`
 
 ---
 

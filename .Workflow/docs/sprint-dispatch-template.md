@@ -7,7 +7,7 @@
 ---
 
 ```markdown
-## [SPRINT-ID] [WAVE] — [Short Description]
+## [SPRINT-ID] [VERSION] — [Short Description]
 
 ### KEY CONTEXT
 [REQUIRED. 2–4 sentences. Project state, what just happened, why this work matters now. Include any failed prior attempts and what was learned from them.]
@@ -102,8 +102,9 @@ Topics to consider:
 1. [Metric]: [operator] [threshold] (e.g., "Decision rate: ≥30%")
 2. [Artifact]: [exists/updated/committed] (e.g., "CLAUDE.md updated with new calibration baseline")
 3. [Test suite]: [pass count], [fail count] (e.g., "960+ pass, 0 fail")
-4. [Git]: [branch merged, pushed] (e.g., "Feature branch merged to main, main pushed")
-5. [Terminal output]: Summary printed with [specific items]
+4. [Version]: `package.json` version bumped to [VERSION] (e.g., "package.json version bumped to 0.9.1")
+5. [Git]: [branch merged, pushed] (e.g., "Feature branch merged to main, main pushed")
+6. [Terminal output]: Summary printed with [specific items]
 ```
 
 ---
@@ -118,6 +119,18 @@ Topics to consider:
 | Multi-step feature | All sections | ~60–80 lines |
 | Recovery / remediation | All sections (EVIDENCE FOR HYPOTHESIS critical) | ~80–100 lines |
 | Multi-agent parallel sprint | All sections (WHEN section most complex) | ~80–120 lines |
+
+### Version Convention
+
+Every sprint header includes a `[VERSION]` tag — the version `package.json` will be after the sprint merges. Agents must bump `package.json` as part of the git commit task.
+
+| Bump | When | Example |
+|------|------|---------|
+| **Patch** (0.9.x) | Bug fixes, test harness, docs, remediation — no user-facing behavior change | `0.9.0 → 0.9.1` |
+| **Minor** (0.x.0) | New features, keyboard remaps, UX changes — user notices something different | `0.9.1 → 0.10.0` |
+| **Major** (x.0.0) | Release gates only (v1.0.0, v2.0.0) | `0.10.0 → 1.0.0` |
+
+When parallel sprints dispatch, assign versions in merge order (first to merge gets lower version). If merge order is unknown at dispatch time, assign both and let the second sprint to merge read `package.json` for the current value before bumping.
 
 ### Common Mistakes
 
