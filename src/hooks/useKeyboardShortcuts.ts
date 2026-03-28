@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS, WPM_COARSE_STEP } from "../constants";
+import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS } from "../constants";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -74,6 +74,9 @@ interface ReaderKeysState {
   // Mode cycling (Shift+Space)
   cycleMode?: () => void;
   cycleAndStart?: () => void;
+  // Sentence navigation (Ctrl+Up/Down)
+  sentencePrev?: () => void;
+  sentenceNext?: () => void;
 }
 
 // ── Library Keyboard Actions ──────────────────────────────────────────────
@@ -130,7 +133,9 @@ export function useReaderKeys(
   flowNextLine?: () => void,
   openChapterList?: () => void,
   cycleMode?: () => void,
-  cycleAndStart?: () => void
+  cycleAndStart?: () => void,
+  sentencePrev?: () => void,
+  sentenceNext?: () => void
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
@@ -140,6 +145,7 @@ export function useReaderKeys(
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
     cycleMode, cycleAndStart,
+    sentencePrev, sentenceNext,
   });
 
   stateRef.current = {
@@ -150,6 +156,7 @@ export function useReaderKeys(
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
     cycleMode, cycleAndStart,
+    sentencePrev, sentenceNext,
   };
 
   useEffect(() => {
@@ -185,9 +192,18 @@ export function useReaderKeys(
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }
       if ((e.ctrlKey || e.metaKey) && (e.code === "Minus" || e.code === "NumpadSubtract")) { e.preventDefault(); s.adjustFocusTextSize(-FOCUS_TEXT_SIZE_STEP); return; }
       if ((e.ctrlKey || e.metaKey) && e.code === "Digit0") { e.preventDefault(); s.adjustFocusTextSize(-Infinity); return; }
-      // Ctrl+Up/Down jump to top/bottom
-      if (e.ctrlKey && e.code === "ArrowUp") { e.preventDefault(); s.seekWords(-Infinity); return; }
-      if (e.ctrlKey && e.code === "ArrowDown") { e.preventDefault(); s.seekWords(Infinity); return; }
+      // Ctrl+Left/Right seek ±1 word (OS-native: Ctrl = word-level)
+      if (e.ctrlKey && !e.shiftKey && e.code === "ArrowLeft") { e.preventDefault(); s.seekWords(-1); return; }
+      if (e.ctrlKey && !e.shiftKey && e.code === "ArrowRight") { e.preventDefault(); s.seekWords(1); return; }
+      // Ctrl+Up/Down sentence navigation
+      if (e.ctrlKey && !e.shiftKey && e.code === "ArrowUp") { e.preventDefault(); s.sentencePrev?.(); return; }
+      if (e.ctrlKey && !e.shiftKey && e.code === "ArrowDown") { e.preventDefault(); s.sentenceNext?.(); return; }
+      // Shift+Left/Right paragraph navigation (all modes)
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowLeft") { e.preventDefault(); s.paragraphPrev?.(); return; }
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowRight") { e.preventDefault(); s.paragraphNext?.(); return; }
+      // Shift+Up/Down chapter navigation (all modes)
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowUp") { e.preventDefault(); s.prevChapter?.(); return; }
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowDown") { e.preventDefault(); s.nextChapter?.(); return; }
       // Escape
       if (e.code === "Escape") { e.preventDefault(); s.exitReader(); return; }
 
@@ -200,16 +216,6 @@ export function useReaderKeys(
         // ←/→ flip pages
         if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevPage?.(); return; }
         if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextPage?.(); return; }
-        // Ctrl+←/→ jump paragraphs
-        if (e.ctrlKey && e.code === "ArrowLeft") { e.preventDefault(); s.paragraphPrev?.(); return; }
-        if (e.ctrlKey && e.code === "ArrowRight") { e.preventDefault(); s.paragraphNext?.(); return; }
-        // Shift+arrows move word selection
-        if (e.shiftKey && !e.ctrlKey) {
-          if (e.code === "ArrowLeft") { e.preventDefault(); s.moveWordSelection?.("left"); return; }
-          if (e.code === "ArrowRight") { e.preventDefault(); s.moveWordSelection?.("right"); return; }
-          if (e.code === "ArrowUp") { e.preventDefault(); s.moveWordSelection?.("up"); return; }
-          if (e.code === "ArrowDown") { e.preventDefault(); s.moveWordSelection?.("down"); return; }
-        }
         // Shift+D define
         if (e.code === "KeyD" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.defineWord?.(); return; }
         // Shift+N make note
@@ -241,9 +247,6 @@ export function useReaderKeys(
       // Up/Down WPM (or TTS rate when narration selected — handled by adjustWpm wrapper)
       if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
       if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
-      // Shift+Up/Down coarse WPM (Focus/Flow only)
-      if (e.code === "ArrowUp" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_COARSE_STEP); return; }
-      if (e.code === "ArrowDown" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_COARSE_STEP); return; }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);

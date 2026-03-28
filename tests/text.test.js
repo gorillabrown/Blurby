@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tokenize, tokenizeWithMeta, formatTime, focusChar, hasPunctuation, detectChapters, currentChapterIndex, calculateFocusOpacity, formatDisplayTitle } from "../src/utils/text";
+import { tokenize, tokenizeWithMeta, formatTime, focusChar, hasPunctuation, detectChapters, currentChapterIndex, calculateFocusOpacity, formatDisplayTitle, findSentenceBoundary } from "../src/utils/text";
 
 describe("tokenize", () => {
   it("returns empty array for empty string", () => {
@@ -243,5 +243,85 @@ describe("formatDisplayTitle", () => {
   it("capitalizes first letter", () => {
     const result = formatDisplayTitle("lowercase");
     expect(result[0]).toBe("L");
+  });
+});
+
+describe("findSentenceBoundary", () => {
+  const words = ["The", "cat", "sat.", "A", "dog", "ran.", "Then", "it", "stopped."];
+  // Sentence boundaries: after index 2 ("sat."), after index 5 ("ran."), after index 8 ("stopped.")
+  // Sentence starts: 0 ("The"), 3 ("A"), 6 ("Then")
+
+  describe("forward", () => {
+    it("finds next sentence start from beginning", () => {
+      expect(findSentenceBoundary(words, 0, "forward")).toBe(3);
+    });
+
+    it("finds next sentence from mid-sentence", () => {
+      expect(findSentenceBoundary(words, 1, "forward")).toBe(3);
+    });
+
+    it("finds third sentence from second sentence", () => {
+      expect(findSentenceBoundary(words, 3, "forward")).toBe(6);
+    });
+
+    it("returns last index at end of doc", () => {
+      expect(findSentenceBoundary(words, 8, "forward")).toBe(8);
+    });
+
+    it("returns last index when no more sentences", () => {
+      expect(findSentenceBoundary(words, 7, "forward")).toBe(8);
+    });
+  });
+
+  describe("backward", () => {
+    it("finds previous sentence start from mid-sentence", () => {
+      expect(findSentenceBoundary(words, 4, "backward")).toBe(3);
+    });
+
+    it("finds first sentence from second sentence start", () => {
+      expect(findSentenceBoundary(words, 3, "backward")).toBe(0);
+    });
+
+    it("returns 0 from first word", () => {
+      expect(findSentenceBoundary(words, 0, "backward")).toBe(0);
+    });
+
+    it("returns 0 from second word (no prior boundary)", () => {
+      expect(findSentenceBoundary(words, 1, "backward")).toBe(0);
+    });
+
+    it("finds start of current sentence from end", () => {
+      expect(findSentenceBoundary(words, 8, "backward")).toBe(6);
+    });
+  });
+
+  describe("edge cases", () => {
+    it("handles empty words array", () => {
+      expect(findSentenceBoundary([], 0, "forward")).toBe(0);
+      expect(findSentenceBoundary([], 0, "backward")).toBe(0);
+    });
+
+    it("handles text with no punctuation", () => {
+      const noPunct = ["hello", "world", "foo", "bar"];
+      expect(findSentenceBoundary(noPunct, 1, "forward")).toBe(3); // last index
+      expect(findSentenceBoundary(noPunct, 2, "backward")).toBe(0); // first index
+    });
+
+    it("handles single word", () => {
+      expect(findSentenceBoundary(["hello."], 0, "forward")).toBe(0);
+      expect(findSentenceBoundary(["hello."], 0, "backward")).toBe(0);
+    });
+
+    it("handles consecutive punctuation words", () => {
+      const consec = ["He", "said...", '"Sure."', "Then", "left."];
+      // "said..." at index 1 has punctuation, '"Sure."' at index 2 also has punctuation
+      // Forward from 0: finds "said..." at 1, skips '"Sure."' at 2, returns 3
+      expect(findSentenceBoundary(consec, 0, "forward")).toBe(3);
+    });
+
+    it("handles punctuation with quotes", () => {
+      const quoted = ["She", "asked,", '"Why?"', "He", "shrugged."];
+      expect(findSentenceBoundary(quoted, 0, "forward")).toBe(3);
+    });
   });
 });
