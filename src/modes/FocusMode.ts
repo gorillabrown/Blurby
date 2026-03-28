@@ -29,6 +29,7 @@ export class FocusMode implements ReadingMode {
   start(wordIndex: number): void {
     this.currentWord = wordIndex;
     this.playing = true;
+    this.config.callbacks.onWordAdvance(wordIndex); // Show starting word first
     this.scheduleNext();
   }
 

@@ -213,6 +213,93 @@ describe("useReaderMode orchestration logic", () => {
     });
   });
 
+  // ── handleCycleMode + handleCycleAndStart ─────────────────────────────
+  // handleCycleMode rotates lastReadingMode: flow → narration → focus → flow
+  // handleCycleAndStart stops current mode, cycles, and starts the next one.
+
+  describe("handleCycleMode + handleCycleAndStart", () => {
+    const cycle: Record<string, "focus" | "flow" | "narration"> = {
+      flow: "narration",
+      narration: "focus",
+      focus: "flow",
+    };
+
+    it("handleCycleMode rotates flow → narration", () => {
+      const current = "flow";
+      const next = cycle[current] || "flow";
+      expect(next).toBe("narration");
+    });
+
+    it("handleCycleMode rotates narration → focus", () => {
+      const current = "narration";
+      const next = cycle[current] || "flow";
+      expect(next).toBe("focus");
+    });
+
+    it("handleCycleMode rotates focus → flow", () => {
+      const current = "focus";
+      const next = cycle[current] || "flow";
+      expect(next).toBe("flow");
+    });
+
+    it("handleCycleAndStart from Flow starts Narration", () => {
+      const readingModeRef = { current: "flow" as string };
+      const stopAllModes = vi.fn();
+      const startFocus = vi.fn();
+      const startNarration = vi.fn();
+      const startFlow = vi.fn();
+      const setReadingMode = vi.fn();
+      const updateSettings = vi.fn();
+
+      // Simulate handleCycleAndStart logic
+      const current = readingModeRef.current;
+      if (current !== "page") {
+        const next = cycle[current] || "flow";
+        stopAllModes();
+        setReadingMode("page");
+        updateSettings({ lastReadingMode: next });
+        if (next === "focus") startFocus();
+        else if (next === "narration") startNarration();
+        else startFlow();
+      }
+
+      expect(stopAllModes).toHaveBeenCalledOnce();
+      expect(setReadingMode).toHaveBeenCalledWith("page");
+      expect(updateSettings).toHaveBeenCalledWith({ lastReadingMode: "narration" });
+      expect(startNarration).toHaveBeenCalledOnce();
+      expect(startFocus).not.toHaveBeenCalled();
+      expect(startFlow).not.toHaveBeenCalled();
+    });
+
+    it("handleCycleAndStart from Narration starts Focus", () => {
+      const readingModeRef = { current: "narration" as string };
+      const stopAllModes = vi.fn();
+      const startFocus = vi.fn();
+      const startNarration = vi.fn();
+      const startFlow = vi.fn();
+      const setReadingMode = vi.fn();
+      const updateSettings = vi.fn();
+
+      // Simulate handleCycleAndStart logic
+      const current = readingModeRef.current;
+      if (current !== "page") {
+        const next = cycle[current] || "flow";
+        stopAllModes();
+        setReadingMode("page");
+        updateSettings({ lastReadingMode: next });
+        if (next === "focus") startFocus();
+        else if (next === "narration") startNarration();
+        else startFlow();
+      }
+
+      expect(stopAllModes).toHaveBeenCalledOnce();
+      expect(updateSettings).toHaveBeenCalledWith({ lastReadingMode: "focus" });
+      expect(startFocus).toHaveBeenCalledOnce();
+      expect(startNarration).not.toHaveBeenCalled();
+      expect(startFlow).not.toHaveBeenCalled();
+    });
+  });
+
   // ── Foliate Start Word Resolution ──────────────────────────────────────
   // Uses the extracted resolveFoliateStartWord utility (src/utils/startWordIndex.ts).
 

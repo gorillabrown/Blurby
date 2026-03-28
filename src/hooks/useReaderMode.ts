@@ -77,6 +77,8 @@ export interface UseReaderModeReturn {
   handleEnterFlow: () => void;
   handleStopTts: () => void;
   handleReturnToReading: () => void;
+  handleCycleMode: () => void;
+  handleCycleAndStart: () => void;
   preCapWpmRef: React.MutableRefObject<number | null>;
 }
 
@@ -325,6 +327,36 @@ export function useReaderMode({
     // Page-level exit (backtrack check + finishReading) handled by ReaderContainer
   }, [readingMode, modeInstance, stopAllModes, setHighlightedWordIndex]);
 
+  // ── Cycle mode (Shift+Space from Page — rotate without starting) ───
+  const handleCycleMode = useCallback(() => {
+    const current = settings.lastReadingMode || "flow";
+    const cycle: Record<string, "focus" | "flow" | "narration"> = {
+      flow: "narration",
+      narration: "focus",
+      focus: "flow",
+    };
+    const next = cycle[current] || "flow";
+    updateSettings({ lastReadingMode: next });
+  }, [settings.lastReadingMode, updateSettings]);
+
+  // ── Cycle and start (Shift+Space from active mode — switch to next) ──
+  const handleCycleAndStart = useCallback(() => {
+    const current = readingModeRef.current;
+    if (current === "page") return;
+    const cycle: Record<string, "focus" | "flow" | "narration"> = {
+      flow: "narration",
+      narration: "focus",
+      focus: "flow",
+    };
+    const next = cycle[current] || "flow";
+    stopAllModes();
+    setReadingMode("page");
+    updateSettings({ lastReadingMode: next });
+    if (next === "focus") startFocus();
+    else if (next === "narration") startNarration();
+    else startFlow();
+  }, [stopAllModes, setReadingMode, updateSettings, startFocus, startNarration, startFlow]);
+
   return {
     readingMode,
     readingModeRef,
@@ -342,6 +374,8 @@ export function useReaderMode({
     handleEnterFlow,
     handleStopTts,
     handleReturnToReading,
+    handleCycleMode,
+    handleCycleAndStart,
     preCapWpmRef,
   };
 }

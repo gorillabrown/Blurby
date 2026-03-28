@@ -318,7 +318,8 @@ export default function ReaderContainer({
     stopAllModes, startFocus, startFlow, startNarration,
     handleTogglePlay, handleSelectMode, handlePauseToPage,
     handleToggleTts, handleEnterFocus, handleEnterFlow,
-    handleStopTts, handleReturnToReading, preCapWpmRef,
+    handleStopTts, handleReturnToReading, handleCycleMode, handleCycleAndStart,
+    preCapWpmRef,
   } = modeHook;
 
   // Exit reader — uses both mode hook and progress hook
@@ -505,7 +506,7 @@ export default function ReaderContainer({
   // Keyboard shortcuts — fully mode-aware
   const chapterListRef = useRef<{ toggle: () => void } | null>(null);
   const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
-  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList);
+  useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList, handleCycleMode, handleCycleAndStart);
 
   // Memoized settings slices
   const rsvpSettings = useMemo(() => ({
@@ -565,35 +566,8 @@ export default function ReaderContainer({
   // Determine current word index for bottom bar
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
 
-  // Foliate word highlighting — when highlightedWordIndex changes during Flow/Narration,
-  // highlight the corresponding word in the foliate DOM and auto-advance page if needed
-  useEffect(() => {
-    if (!useFoliate || readingMode === "page" || readingMode === "focus") return;
-    if (!foliateApiRef.current) return;
-    // Use highlightWordByIndex which queries data-word-index spans in the DOM
-    // and calls scrollToAnchor to auto-advance pages when the word is off-screen
-    foliateApiRef.current.highlightWordByIndex(highlightedWordIndex);
-  }, [highlightedWordIndex, readingMode, useFoliate]);
-
-  // Flow mode word advancement timer for foliate EPUBs
-  useEffect(() => {
-    if (!useFoliate || readingMode !== "flow" || !flowPlaying) return;
-    if (!foliateWordsRef.current.length) return;
-
-    const msPerWord = 60000 / effectiveWpm;
-    const timer = setInterval(() => {
-      setHighlightedWordIndex(prev => {
-        const next = prev + 1;
-        if (next >= foliateWordsRef.current.length) {
-          setFlowPlaying(false);
-          return prev;
-        }
-        return next;
-      });
-    }, msPerWord);
-
-    return () => clearInterval(timer);
-  }, [useFoliate, readingMode, flowPlaying, effectiveWpm]);
+  // Legacy useEffect blocks for foliate word highlighting and Flow word advancement
+  // have been removed — mode classes (FlowMode, NarrateMode) now drive these directly.
 
   // ── Render ─────────────────────────────────────────────────────────────
 
