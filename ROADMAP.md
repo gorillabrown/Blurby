@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-03-28 — TTS-1 + TTS-2 merged. 796 tests, 39 files. v1.0.0 shipped. All TTS audit work complete.
+**Last updated**: 2026-03-29 — NAR-1 merged. 841 tests, 41 files. PKG-1 in progress.
 **Current branch**: `main`
-**Current state**: All sprints through TTS-2 complete. 796 tests, 39 files. Version: v1.0.0+.
+**Current state**: All sprints through NAR-1 complete. 841 tests, 41 files. Version: v1.0.9+.
 
 > **Navigation:** Forward-looking sprints below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`.
 
@@ -22,7 +22,9 @@
 | **Sprint TTS-1: Narration Correctness** | v1.0.9 | ✅ DONE | 15 TTS fixes: dual-write rule, worker recovery, audioPlayer guards. 796 tests. |
 | **v1.0.0 RELEASE** | v1.0.0 | ✅ DONE | Tagged + shipped. CI release pipeline active. |
 | **Sprint TTS-2: TTS Documentation** | — | ✅ DONE | Privacy data-flow, SSML stance, safety posture, TTS glossary. ~560 words in TECHNICAL_REFERENCE.md. |
-| **Sprint 25: RSS Library** | v1.1.0 | 📋 POST-V1 | Feed aggregation from authenticated sites, RSS Library UI, cloud sync. |
+| **Sprint NAR-1: Narration Pipeline Overhaul** | — | ✅ DONE | Rolling audio queue, smart pause heuristics, 841 tests / 41 files. |
+| **Sprint PKG-1: Installer & Update Overhaul** | v1.1.0 | 🔶 RUNNING | Stub installer, silent in-app updates, split CI for ARM64 native binaries. |
+| **Sprint 25: RSS Library** | v1.2.0 | 📋 POST-V1 | Feed aggregation from authenticated sites, RSS Library UI, cloud sync. |
 | **Sprint 18C: Android APK** | v1.2.0 | 📋 POST-V1 | React Native port with cloud sync. |
 
 **Legend:** 🔶 = fully spec'd, ready for dispatch | 📋 = spec'd, needs agent assignments | ⬜ = gate/milestone

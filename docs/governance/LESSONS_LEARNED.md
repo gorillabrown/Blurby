@@ -868,3 +868,23 @@ Additionally, `preBufferRef.current` (the authoritative pre-buffer, bypassing Re
 - PR-62: **Dual-write rule.** Every dispatch in useNarration that mutates `status`, `cursorWordIndex`, `speed`, or `nextChunkBuffer` must also update `stateRef.current` immediately. The dispatch updates React; the stateRef update is for async callbacks that fire before the next render.
 - PR-63: **preBufferRef is authoritative.** The reducer's `nextChunkBuffer` is kept for React consumers (UI indicators). The ref is what TTS strategies read. Both must be cleared together when speed, position, or generation changes.
 - PR-64: **computeChunkPauseMs must read preBufferRef, not reducer state.** Rhythm pauses should only fire when the pre-buffer is actually ready (ref), not when the reducer last recorded a buffer (may be stale).
+
+---
+
+### [2026-03-29] LL-050: nsis-web + oneClick + Split CI = Correct Installer Behavior
+
+**Area:** distribution, CI/CD, packaging
+**Status:** active
+**Priority:** high
+
+**Context:** v1.0.9 shipped a 235MB fat NSIS installer. Three problems: (1) ARM64 installer shipped x64-only ONNX native binaries because CI ran `npm ci` on an x64 runner. (2) Full app payload bundled inside the `.exe`. (3) Updates popped an external NSIS wizard window.
+
+**Fix:** Three coordinated changes:
+1. **`nsis-web` target:** Creates a ~1MB stub installer that downloads the 234MB `.7z` payload from GitHub Releases on first install. Delta updates via blockmap still work.
+2. **`oneClick: true`:** Enables silent background installs during auto-update — no wizard window. `quitAndInstall(true, true)` for silent + forceRunAfter.
+3. **Split CI jobs:** Each architecture (x64, arm64) gets its own CI job running `npm ci` with the correct `npm_config_arch`, ensuring native binaries (onnxruntime-node) match the target platform.
+
+**Guardrail:**
+- PR-65: **Never revert to plain `nsis` target.** The `nsis-web` target is required for stub installer + silent updates.
+- PR-66: **Never set `oneClick: false`.** This breaks silent auto-updates and shows the NSIS wizard to users.
+- PR-67: **Each architecture must have its own CI job.** Cross-compiling JS works, but native `.node` binaries must be resolved by `npm ci` on the target arch. A single-job approach with `--x64 --arm64` produces wrong native modules for one arch.

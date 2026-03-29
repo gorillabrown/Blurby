@@ -360,7 +360,7 @@ function register(ctx) {
   });
 
   ipcMain.handle("install-update", () => {
-    try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(); } catch (err) {
+    try { const { autoUpdater } = require("electron-updater"); autoUpdater.quitAndInstall(true, true); } catch (err) {
       console.error("Failed to install update:", err.message);
     }
   });

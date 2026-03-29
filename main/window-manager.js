@@ -164,6 +164,7 @@ function setupAutoUpdater(mainWindow) {
     const { autoUpdater } = require("electron-updater");
     autoUpdater.autoDownload = true;
     autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.forceDevUpdateConfig = false;
 
     autoUpdater.on("update-available", (info) => {
       if (mainWindow && !mainWindow.isDestroyed()) {
