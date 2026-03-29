@@ -300,7 +300,7 @@ Sliding cursor underline across paginated text at WPM speed.
 TTS-driven reading with word highlight and auto page turn.
 
 - Delegates all timing to the narration engine (`useNarration` hook)
-- Word advancement driven by TTS word boundary events, not timers
+- Web Speech uses boundary events for word advancement; Kokoro uses estimated timers from audio duration / word count
 - Speed controlled by TTS rate (0.5-2.0x), not WPM
 - Effective WPM derived as: `ttsRate * TTS_RATE_BASELINE_WPM` (150)
 - Uses `NarrationInterface` to bridge with the React hook without importing React
@@ -420,7 +420,7 @@ The narration engine (`useNarration` hook) splits text into ~40-word chunks at s
 
 1. Generate audio for current chunk
 2. While current chunk plays, pre-generate next chunk (pre-buffering)
-3. At chunk boundary, apply rhythm pause (250/400/750ms depending on punctuation)
+3. At chunk boundary, apply rhythm pause (100/200/400ms depending on punctuation)
 4. Start next chunk playback
 
 ### Rhythm Pauses Between Chunks
@@ -429,15 +429,62 @@ Calculated by `calculateChunkBoundaryPause()` in `src/utils/rhythm.ts`:
 
 | Boundary Type | Duration | Condition |
 |---------------|----------|-----------|
-| Comma/colon/semicolon ending | 250ms | `rhythmPauses.commas` enabled |
-| Sentence ending (. ! ?) | 400ms | `rhythmPauses.sentences` enabled |
-| Paragraph boundary | 750ms | `rhythmPauses.paragraphs` enabled |
+| Comma/colon/semicolon ending | 100ms | `rhythmPauses.commas` enabled |
+| Sentence ending (. ! ?) | 200ms | `rhythmPauses.sentences` enabled |
+| Paragraph boundary | 400ms | `rhythmPauses.paragraphs` enabled |
 
 Pauses only apply when the pre-buffer is ready. If generation is still in progress, the generation time serves as a natural pause.
 
 ### Generation ID Pattern
 
 A generation ID (`generationIdRef`) guards against stale audio. When TTS rate changes mid-playback, the generation ID increments. Any IPC response with a mismatched generation ID is discarded, preventing old audio from playing at the wrong speed.
+
+### Dual-Write Pattern (stateRef + preBufferRef)
+
+The narration state machine uses React's `useReducer` for state (`dispatch()`), plus a `stateRef` ref for synchronous reads inside async callbacks. Because `dispatch()` is asynchronous (batched by React), callbacks that fire between renders (audio `onEnd`, Kokoro IPC results, pre-buffer completion) must read from `stateRef.current`, not from the reducer state.
+
+**Dual-write rule:** Every `dispatch()` that changes `status`, `cursorWordIndex`, `speed`, or `nextChunkBuffer` must also update `stateRef.current` on the same line. This applies to `pause()`, `resume()`, `stop()`, `updateWpm()`, `adjustRate()`, `resyncToCursor()`, and `CHUNK_COMPLETE` handlers.
+
+**preBufferRef lifecycle:** `preBufferRef.current` is the authoritative source for pre-buffered audio. The reducer's `nextChunkBuffer` is kept in sync for React consumers (e.g., UI indicators), but strategies read from the ref. Both must be cleared together when speed, position, or generation changes: `preBufferRef.current = null; dispatch({ type: "CLEAR_PRE_BUFFER" });`.
+
+**computeChunkPauseMs** reads `preBufferRef.current !== null` (not reducer state) to decide whether to add rhythm pauses. If the pre-buffer isn't ready, generation latency serves as the natural pause.
+
+### Worker Crash Recovery
+
+If the Kokoro worker thread crashes (uncaught exception, OOM), the `error` event handler in `tts-engine.js` rejects all pending requests and resets engine state (`worker = null; modelReady = false; loadingPromise = null`). The next `generate()` call transparently creates a fresh worker and re-loads the model. The renderer sees a loading signal (`tts-kokoro-loading` IPC) during re-warm.
+
+### Privacy & Data Flow
+
+Narrate mode has two TTS backends with different privacy characteristics:
+
+- **Kokoro (local):** All inference runs on-device in a worker thread. After the one-time model download from HuggingFace CDN (~50MB, cached under `userData/models/`), no network requests are made. Text is passed via IPC from renderer to main process to worker thread. No text is logged, cached, or transmitted externally.
+- **Web Speech API (platform):** Uses the operating system's speech synthesis service. On Windows, this is typically local (SAPI/OneCore voices). Some platforms may route text through cloud services for higher-quality voices — this is OS-dependent and outside Blurby's control. Blurby does not log or cache any text passed to Web Speech.
+- **No telemetry.** Blurby collects no usage data, analytics, or crash reports related to narration or any other feature.
+
+### SSML Stance
+
+Blurby sends plain text to both TTS engines. SSML is not supported and not planned. Kokoro handles prosody through its neural model. Web Speech API handles it through platform synthesis. Adding SSML preprocessing is unnecessary complexity for a reading application that processes existing prose.
+
+### Safety Posture
+
+Narrate mode reads user-provided text verbatim. No content filtering, generation, recommendation, or content sharing occurs. Voice personas are user-selected from Kokoro's 28-voice inventory. No voice cloning or custom voice upload is supported.
+
+### TTS Glossary
+
+| Term | Definition |
+|------|------------|
+| **Phonemizer** | Library that converts text to phoneme sequences before neural TTS synthesis. Used by Kokoro via `kokoro-js`. |
+| **Lexicon** | A pronunciation dictionary mapping words to phoneme sequences. Kokoro uses its built-in lexicon. |
+| **Prosody** | The rhythm, stress, and intonation of speech. Kokoro's neural model generates prosody from context. |
+| **SSML** | Speech Synthesis Markup Language — XML-based control of TTS output. Not used by Blurby. |
+| **Pre-buffer** | Generating the next chunk's audio while the current chunk plays, stored in `preBufferRef`. |
+| **Generation ID** | An incrementing counter that invalidates stale async TTS results after speed/position changes. |
+| **Chunk** | A ~40-word segment of text, aligned to sentence boundaries, sent to the TTS engine as one unit. |
+| **Sentence boundary** | The end of a sentence (`.`, `!`, `?` plus optional closing quotes). Chunks prefer to end here. |
+| **Dual-write rule** | Every `dispatch()` must also update `stateRef.current`. Prevents async callbacks from reading stale state. |
+| **stateRef** | A React ref mirroring reducer state for synchronous reads inside async TTS callbacks. |
+| **Rhythm pause** | Silence inserted between chunks at punctuation/paragraph boundaries (100/200/400ms). |
+| **Web Audio API AudioContext** | The browser API used to play Kokoro's raw PCM audio buffers. Supports suspend/resume for pause. |
 
 ---
 
