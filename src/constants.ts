@@ -197,8 +197,12 @@ export const TTS_RATE_RESTART_DEBOUNCE_MS = 500;
 export const FOLIATE_BASE_FONT_SIZE_PX = 18;
 /** Height margin subtracted from container when setting max-block-size on the EPUB renderer (px) */
 export const FOLIATE_RENDERER_HEIGHT_MARGIN_PX = 20;
-/** Viewport width at which the EPUB renderer switches to two-column layout (px) */
-export const FOLIATE_TWO_COLUMN_BREAKPOINT_PX = 1040;
+/** Minimum width for each column before the renderer falls back to single-column (px) */
+export const FOLIATE_MIN_COLUMN_WIDTH_PX = 400;
+/** Side margin for the EPUB renderer (px) */
+export const FOLIATE_MARGIN_PX = 24;
+/** Gap between columns in two-column layout (px) */
+export const FOLIATE_GAP_PX = 48;
 
 // ── Highlight / Toast (Reader) ──────────────────────────────────────────────
 /** Toast auto-dismiss after saving a highlight in ReaderView (ms) */
@@ -259,7 +263,7 @@ export const DEFAULT_SETTINGS = {
   sourceFolder: null as string | null,
   folderName: "My reading list",
   recentFolders: [] as string[],
-  theme: "dark" as const,
+  theme: "blurby" as const,
   launchAtLogin: false,
   focusTextSize: DEFAULT_FOCUS_TEXT_SIZE,
   accentColor: null as string | null,
@@ -286,4 +290,8 @@ export const DEFAULT_SETTINGS = {
   ttsEngine: "web" as const,
   ttsVoiceName: null as string | null,
   ttsRate: 1.0,
+  ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
+  ttsPauseSentenceMs: TTS_PAUSE_SENTENCE_MS,
+  ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
+  ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
 };

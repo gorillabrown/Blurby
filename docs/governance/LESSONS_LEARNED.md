@@ -935,3 +935,37 @@ Additionally, `preBufferRef.current` (the authoritative pre-buffer, bypassing Re
 - PR-65: **Never revert to plain `nsis` target.** The `nsis-web` target is required for stub installer + silent updates.
 - PR-66: **Never set `oneClick: false`.** This breaks silent auto-updates and shows the NSIS wizard to users.
 - PR-67: **Each architecture must have its own CI job.** Cross-compiling JS works, but native `.node` binaries must be resolved by `npm ci` on the target arch. A single-job approach with `--x64 --arm64` produces wrong native modules for one arch.
+
+### [2026-03-29] LL-024: OneDrive Reverts Uncommitted CLI Agent Work — Total Data Loss
+
+**Area:** infrastructure, workflow, git, OneDrive
+**Status:** active
+**Priority:** CRITICAL
+
+**Context:** Sprint UX-1 was executed by a Claude Code CLI agent. The agent completed all 7 tasks, created new files (TTSSettings.tsx), modified 10+ source files, and reported 841 tests passing. The changes were never committed to git. OneDrive sync silently reverted all modified source files to their pre-edit state. Only the new untracked file (TTSSettings.tsx) survived because OneDrive doesn't delete new files. The entire sprint's work was lost and had to be re-executed.
+
+**Root Cause:** OneDrive's sync engine treats modified files as conflicts and overwrites them with the cloud version. Git's working tree has no protection against external file overwrites. The CLI agent's work existed only in the working tree and staged area — both of which were destroyed when OneDrive re-synced.
+
+**Impact:** Complete loss of an entire sprint's implementation work. Wasted ~30 minutes of user + agent time. Shipped a v1.2.0 release that contained none of the advertised UX-1 features.
+
+**Guardrail:**
+- PR-68: **CLI agents MUST commit to a branch before exiting.** Every sprint dispatch must include explicit instructions: `git checkout -b sprint/<name> && git add -A && git commit` as the FINAL step. No exceptions.
+- PR-69: **Never leave work uncommitted on an OneDrive-synced repo.** If the CLI agent reports success but there's no merge commit in `git log`, the work is NOT saved.
+- PR-70: **Verify sprint completion with `git log`, not agent output.** The agent can report "all tasks complete" while OneDrive has already reverted the files. Trust `git log --oneline -5`, not agent summaries.
+- PR-71: **Merge immediately after CLI completion.** Don't do doc lifecycle, don't update ROADMAP — merge first, everything else second. The window between agent completion and OneDrive reversion can be seconds.
+
+### [2026-03-29] LL-025: CI Release Workflow — Race Condition Creates Duplicate Drafts
+
+**Area:** CI/CD, GitHub Actions
+**Status:** resolved
+**Priority:** high
+
+**Context:** The release workflow had two parallel jobs (build-x64, build-arm64) each running `gh release create --draft || true`. When both jobs hit this step near-simultaneously, both successfully created separate draft releases before either could detect the other's. Result: two or three duplicate draft releases per tag.
+
+**Root Cause:** `gh release create` is not atomic — two concurrent calls with `|| true` both succeed in a race window. The `2>/dev/null || true` pattern suppresses the "already exists" error, but only works if the first call completes before the second starts.
+
+**Fix:** Extracted release creation into a separate `create-release` job on `ubuntu-latest` that runs first. Both build jobs use `needs: create-release` and only upload artifacts via `gh release upload --clobber`. The release is created exactly once.
+
+**Guardrail:**
+- PR-72: **Release creation must be a separate, single job.** Build jobs only upload — never create releases.
+- PR-73: **Never use `gh release create` in parallel jobs.** Even with `|| true`, race conditions will create duplicates.

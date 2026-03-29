@@ -1552,37 +1552,7 @@ button:focus-visible {
  */
 
 /* ── Blurby Theme Overrides ──────────────────────────────────────────────── */
-[data-theme="blurby"] .page-reader-header {
-  border-bottom: none;
-  padding-bottom: 0;
-  margin-bottom: 0;
-  position: relative;
-}
-[data-theme="blurby"] .page-reader-header::after {
-  content: "";
-  display: block;
-  margin-top: 12px;
-  margin-bottom: 24px;
-  height: 3px;
-  background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
-  border-radius: 1px;
-}
-[data-theme="blurby"] .library-tabs {
-  border-bottom: none;
-  padding-bottom: 0;
-  margin-bottom: 0;
-}
-[data-theme="blurby"] .library-tabs-row {
-  margin-bottom: 0;
-}
-[data-theme="blurby"] .library-sticky-top::after {
-  content: "";
-  display: block;
-  height: 3px;
-  background: linear-gradient(to bottom, #8DC7FF 0%, #8DC7FF 33.3%, #2E73FF 33.3%, #2E73FF 66.6%, #E63946 66.6%, #E63946 100%);
-  border-radius: 1px;
-  margin-top: 0;
-}
+/* Pure white, minimal — accent is orange #D04716 via CSS variables only */
 
 [data-theme="eink"] {
   /* Override all CSS custom properties for pure B&W */

@@ -7,6 +7,7 @@ import { SpeedReadingSettings } from "./settings/SpeedReadingSettings";
 import { LayoutSettings } from "./settings/LayoutSettings";
 import { LibraryLayoutSettings } from "./settings/LibraryLayoutSettings";
 import { CloudSyncSettings } from "./settings/CloudSyncSettings";
+import { TTSSettings } from "./settings/TTSSettings";
 
 interface SettingsMenuProps {
   settings: BlurbySettings;
@@ -22,6 +23,7 @@ interface SettingsMenuProps {
 const CATEGORIES = [
   { id: "layout", label: "Reading Layout", icon: "📐" },
   { id: "speed-reading", label: "Speed Reading", icon: "⚡" },
+  { id: "tts", label: "Narration (TTS)", icon: "🔊" },
   { id: "theme", label: "Theme", icon: "🎨" },
   { id: "library-layout", label: "Library Layout", icon: "📚" },
   { id: "connectors", label: "Connectors", icon: "🔌" },
@@ -58,6 +60,9 @@ export function SettingsMenu({
         {activeSubPage === "hotkeys" && <HotkeyMapSettings />}
         {activeSubPage === "speed-reading" && (
           <SpeedReadingSettings settings={settings} onSettingsChange={onSettingsChange} />
+        )}
+        {activeSubPage === "tts" && (
+          <TTSSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
         {activeSubPage === "layout" && (
           <LayoutSettings settings={settings} onSettingsChange={onSettingsChange} />

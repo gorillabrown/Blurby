@@ -166,14 +166,12 @@ export default function LibraryContainer() {
     openDoc(updated);
   }, [library, openDoc, setLibrary]);
 
-  const handleExitReader = useCallback((finalPos: number) => {
-    // Save reading position before exiting
-    if (activeDoc) {
-      updateProgress(activeDoc.id, finalPos);
-    }
+  const handleExitReader = useCallback((_finalPos: number) => {
+    // Progress already saved by finishReading in useProgressTracker —
+    // just switch back to library view
     setActiveDoc(null);
     setView("library");
-  }, [activeDoc, updateProgress]);
+  }, []);
 
   const handleOpenSettings = useCallback((page?: string) => {
     setSettingsPage(page || null);
