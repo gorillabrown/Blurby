@@ -40,7 +40,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy {
         onError();
         return;
       }
-      if (deps.getInFlight()) return;
+      if (deps.getInFlight()) { onError(); return; }
 
       const genId = deps.getGenerationId();
       deps.setInFlight(true);
@@ -53,9 +53,11 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy {
           let durationMs: number;
           const buf = deps.getPreBuffer();
           if (buf && buf.text === text) {
+            console.debug("[kokoro] pre-buffer HIT — skipping generation");
             ({ audio, sampleRate, durationMs } = buf);
             deps.clearPreBuffer();
           } else {
+            console.debug("[kokoro] pre-buffer MISS — generating on demand", buf ? "(text mismatch)" : "(no buffer)");
             deps.clearPreBuffer();
             const ipcResult = await api.kokoroGenerate!(text, deps.getVoiceId(), deps.getSpeed());
             if (ipcResult.error || !ipcResult.audio || !ipcResult.sampleRate) {

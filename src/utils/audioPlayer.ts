@@ -7,11 +7,44 @@ let currentSource: AudioBufferSourceNode | null = null;
 let onEndCallback: (() => void) | null = null;
 let wordTimer: ReturnType<typeof setInterval> | null = null;
 
+// Pause/resume state — tracks word position across suspend/resume cycles
+let pausedWordOffset = 0;
+let currentWordCount = 0;
+let currentMsPerWord = 0;
+let currentOnWordAdvance: ((wordOffset: number) => void) | null = null;
+let playbackStartTime = 0; // AudioContext.currentTime when playback started
+let currentDurationSec = 0; // Total duration of current buffer in seconds
+
 function getAudioContext(): AudioContext {
   if (!audioCtx) {
     audioCtx = new AudioContext({ sampleRate: KOKORO_SAMPLE_RATE });
   }
   return audioCtx;
+}
+
+function clearWordTimer(): void {
+  if (wordTimer) {
+    clearInterval(wordTimer);
+    wordTimer = null;
+  }
+}
+
+/** Start or restart the word advance timer from a given offset. */
+function startWordTimer(fromOffset: number): void {
+  clearWordTimer();
+  if (!currentOnWordAdvance || currentWordCount <= 0 || currentMsPerWord <= 0) return;
+
+  pausedWordOffset = fromOffset;
+  wordTimer = setInterval(() => {
+    pausedWordOffset++;
+    if (pausedWordOffset < currentWordCount && currentOnWordAdvance) {
+      currentOnWordAdvance(pausedWordOffset);
+    }
+    // Stop the timer when we've reached the last word
+    if (pausedWordOffset >= currentWordCount - 1) {
+      clearWordTimer();
+    }
+  }, currentMsPerWord);
 }
 
 /**
@@ -43,21 +76,23 @@ export function playBuffer(
   currentSource = source;
   onEndCallback = onEnd || null;
 
-  // Time-based word advance estimation
+  // Store state for pause/resume
+  currentWordCount = wordCount;
+  currentMsPerWord = wordCount > 0 ? durationMs / wordCount : 0;
+  currentOnWordAdvance = onWordAdvance || null;
+  currentDurationSec = durationMs / 1000;
+  playbackStartTime = ctx.currentTime;
+  pausedWordOffset = 0;
+
+  // Start word advance timer
   if (onWordAdvance && wordCount > 0) {
-    const msPerWord = durationMs / wordCount;
-    let wordOffset = 0;
-    wordTimer = setInterval(() => {
-      wordOffset++;
-      if (wordOffset < wordCount && onWordAdvance) {
-        onWordAdvance(wordOffset);
-      }
-    }, msPerWord);
+    startWordTimer(0);
   }
 
   source.onended = () => {
     clearWordTimer();
     currentSource = null;
+    currentOnWordAdvance = null;
     if (onEndCallback) onEndCallback();
   };
 
@@ -67,6 +102,7 @@ export function playBuffer(
 /** Stop current playback */
 export function stop(): void {
   clearWordTimer();
+  currentOnWordAdvance = null;
   if (currentSource) {
     try { currentSource.stop(); } catch { /* already stopped */ }
     currentSource = null;
@@ -74,26 +110,45 @@ export function stop(): void {
   onEndCallback = null;
 }
 
-/** Pause audio playback */
+/** Pause audio playback — saves word position for accurate resume */
 export function pause(): void {
+  if (!audioCtx || !currentSource) return;
+  if (audioCtx.state === "suspended") return; // Already paused — avoid double-suspend drift
+
+  // Calculate current word offset from AudioContext time (more accurate than timer)
+  const elapsed = audioCtx.currentTime - playbackStartTime;
+  const progress = Math.min(elapsed / currentDurationSec, 1);
+  pausedWordOffset = Math.min(Math.floor(progress * currentWordCount), currentWordCount - 1);
+
   clearWordTimer();
-  audioCtx?.suspend();
+  audioCtx.suspend();
 }
 
-/** Resume audio playback */
+/** Resume audio playback — restarts word timer from saved position */
 export function resume(): void {
-  audioCtx?.resume();
-  // Note: word timer is not resumed — small sync drift is acceptable
+  if (!audioCtx) return;
+
+  // Update playback start time to account for the pause gap
+  // When we resume, AudioContext.currentTime continues from where it was suspended.
+  // We need to adjust so our elapsed-time calculation stays correct.
+  const ctx = audioCtx;
+  const suspendedAt = ctx.currentTime;
+
+  ctx.resume().then(() => {
+    if (!currentSource) return; // Source was stopped during resume — don't restart timer
+
+    // Recalculate start time: we know pausedWordOffset corresponds to suspendedAt
+    const elapsedBeforePause = (pausedWordOffset / currentWordCount) * currentDurationSec;
+    playbackStartTime = suspendedAt - elapsedBeforePause;
+
+    // Restart word timer from where we left off
+    if (currentOnWordAdvance && currentWordCount > 0) {
+      startWordTimer(pausedWordOffset);
+    }
+  });
 }
 
 /** Check if audio is currently playing */
 export function isPlaying(): boolean {
   return currentSource !== null && audioCtx?.state === "running";
-}
-
-function clearWordTimer(): void {
-  if (wordTimer) {
-    clearInterval(wordTimer);
-    wordTimer = null;
-  }
 }

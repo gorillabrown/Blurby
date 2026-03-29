@@ -72,50 +72,50 @@ export const TTS_RATE_BASELINE_WPM = 150;
 export const TTS_WPM_CAP = 400;
 /** Step size for TTS rate adjustment via Up/Down arrows */
 export const TTS_RATE_STEP = 0.1;
-/** Between-chunk rhythm pause: comma, colon, semicolon endings */
-export const TTS_PAUSE_COMMA_MS = 250;
+/** Between-chunk rhythm pause: comma, colon, semicolon endings.
+ *  Kokoro audio already includes ~50-100ms natural trailing silence,
+ *  so these values ADD to that — keep them short to avoid stacking. */
+export const TTS_PAUSE_COMMA_MS = 100;
 /** Between-chunk rhythm pause: sentence endings (. ! ?) */
-export const TTS_PAUSE_SENTENCE_MS = 400;
+export const TTS_PAUSE_SENTENCE_MS = 200;
 /** Between-chunk rhythm pause: paragraph boundaries */
-export const TTS_PAUSE_PARAGRAPH_MS = 750;
+export const TTS_PAUSE_PARAGRAPH_MS = 400;
 
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */
 export const KOKORO_MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
-/** Quantization level for Kokoro model (q8 = 92MB, good quality/size) */
-export const KOKORO_DTYPE = "q8";
 /** Kokoro output sample rate (Hz) */
 export const KOKORO_SAMPLE_RATE = 24000;
 /** Friendly names for Kokoro voices */
 export const KOKORO_VOICE_NAMES: Record<string, string> = {
-  af_heart: "Heart (American Female)",
-  af_alloy: "Alloy (American Female)",
-  af_aoede: "Aoede (American Female)",
-  af_bella: "Bella (American Female)",
-  af_jessica: "Jessica (American Female)",
-  af_kore: "Kore (American Female)",
-  af_nicole: "Nicole (American Female)",
-  af_nova: "Nova (American Female)",
-  af_river: "River (American Female)",
-  af_sarah: "Sarah (American Female)",
-  af_sky: "Sky (American Female)",
-  am_adam: "Adam (American Male)",
-  am_echo: "Echo (American Male)",
-  am_eric: "Eric (American Male)",
-  am_fenrir: "Fenrir (American Male)",
-  am_liam: "Liam (American Male)",
-  am_michael: "Michael (American Male)",
-  am_onyx: "Onyx (American Male)",
-  am_puck: "Puck (American Male)",
-  am_santa: "Santa (American Male)",
-  bf_alice: "Alice (British Female)",
-  bf_emma: "Emma (British Female)",
-  bf_isabella: "Isabella (British Female)",
-  bf_lily: "Lily (British Female)",
-  bm_daniel: "Daniel (British Male)",
-  bm_fable: "Fable (British Male)",
-  bm_george: "George (British Male)",
-  bm_lewis: "Lewis (British Male)",
+  af_heart: "Heart — American",
+  af_alloy: "Alloy — American",
+  af_aoede: "Aoede — American",
+  af_bella: "Bella — American",
+  af_jessica: "Jessica — American",
+  af_kore: "Kore — American",
+  af_nicole: "Nicole — American",
+  af_nova: "Nova — American",
+  af_river: "River — American",
+  af_sarah: "Sarah — American",
+  af_sky: "Sky — American",
+  am_adam: "Adam — American",
+  am_echo: "Echo — American",
+  am_eric: "Eric — American",
+  am_fenrir: "Fenrir — American",
+  am_liam: "Liam — American",
+  am_michael: "Michael — American",
+  am_onyx: "Onyx — American",
+  am_puck: "Puck — American",
+  am_santa: "Santa — American",
+  bf_alice: "Alice — British",
+  bf_emma: "Emma — British",
+  bf_isabella: "Isabella — British",
+  bf_lily: "Lily — British",
+  bm_daniel: "Daniel — British",
+  bm_fable: "Fable — British",
+  bm_george: "George — British",
+  bm_lewis: "Lewis — British",
 };
 
 // ── E-ink ─────────────────────────────────────────────────────────────────────

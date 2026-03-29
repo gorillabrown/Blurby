@@ -34,6 +34,18 @@ function resetIdleTimer() {
   }, IDLE_TIMEOUT_MS);
 }
 
+/** Notify renderer that Kokoro is loading (used after idle timeout re-warm). */
+function sendLoadingSignal(loading) {
+  if (onLoadingCb) onLoadingCb(loading);
+  try {
+    const { BrowserWindow } = require("electron");
+    const win = BrowserWindow.getAllWindows()[0];
+    if (win && !win.isDestroyed()) {
+      win.webContents.send("tts-kokoro-loading", loading);
+    }
+  } catch { /* non-fatal */ }
+}
+
 function getWorker(cacheDir) {
   if (worker) return worker;
   const { app } = require("electron");
@@ -97,6 +109,10 @@ function getWorker(cacheDir) {
       p.reject(err);
     }
     pending.clear();
+    // Reset engine state so next call creates a fresh worker
+    worker = null;
+    modelReady = false;
+    loadingPromise = null;
   });
 
   // Start loading model in the worker
@@ -115,42 +131,45 @@ async function ensureReady(onProgress) {
 
   onProgressCb = onProgress || null;
 
-  loadingPromise = new Promise(async (resolve, reject) => {
-    try {
-      const { app } = require("electron");
-      const cacheDir = path.join(app.getPath("userData"), "models");
-      await fs.mkdir(cacheDir, { recursive: true });
+  try {
+    const { app } = require("electron");
+    const cacheDir = path.join(app.getPath("userData"), "models");
+    await fs.mkdir(cacheDir, { recursive: true });
 
-      const w = getWorker(cacheDir);
+    const w = getWorker(cacheDir);
 
-      // Wait for model-ready message
-      const handler = (msg) => {
-        if (msg.type === "model-ready") {
-          w.off("message", handler);
-          resolve();
-        }
-      };
-      w.on("message", handler);
+    // Wait for model-ready message or timeout — whichever comes first
+    loadingPromise = Promise.race([
+      new Promise((resolve) => {
+        const handler = (msg) => {
+          if (msg.type === "model-ready") {
+            w.off("message", handler);
+            resolve();
+          }
+        };
+        w.on("message", handler);
+      }),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Kokoro model load timed out")), TTS_MODEL_LOAD_TIMEOUT_MS);
+      }),
+    ]);
 
-      // Timeout after 120s
-      setTimeout(() => {
-        w.off("message", handler);
-        reject(new Error("Kokoro model load timed out"));
-      }, TTS_MODEL_LOAD_TIMEOUT_MS);
-    } catch (err) {
-      loadingPromise = null;
-      reject(err);
-    }
-  });
-
-  return loadingPromise;
+    await loadingPromise;
+  } catch (err) {
+    loadingPromise = null;
+    throw err;
+  }
 }
 
 /**
  * Generate speech audio for text. Runs in worker thread — never blocks main.
  */
 async function generate(text, voice = "af_bella", speed = 1.0) {
-  if (!modelReady) await ensureReady();
+  if (!modelReady) {
+    sendLoadingSignal(true);
+    await ensureReady();
+    sendLoadingSignal(false);
+  }
   resetIdleTimer();
 
   const id = ++requestId;

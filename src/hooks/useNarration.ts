@@ -89,16 +89,21 @@ export default function useNarration() {
   const speakNextChunkWebRef = useRef<() => void>(() => {});
   const preBufferNextRef = useRef<(afterEndIdx: number) => void>(() => {});
 
+  // Direct ref for pre-buffer — bypasses React render cycle so speakChunk can see it immediately.
+  // The reducer's nextChunkBuffer is kept in sync for other consumers, but this ref is the
+  // authoritative source for the strategy's getPreBuffer().
+  const preBufferRef = useRef<{ text: string; audio: any; sampleRate: number; durationMs: number } | null>(null);
+
   const kokoroStrategy = useMemo(
     () => createKokoroStrategy({
       getVoiceId: () => kokoroVoiceRef.current,
       getGenerationId: () => stateRef.current.generationId,
       getInFlight: () => stateRef.current.kokoroInFlight,
-      getPreBuffer: () => stateRef.current.nextChunkBuffer,
+      getPreBuffer: () => preBufferRef.current,
       getStatus: () => stateRef.current.status,
       getSpeed: () => stateRef.current.speed,
       setInFlight: (inFlight) => dispatch({ type: "KOKORO_IN_FLIGHT", inFlight }),
-      clearPreBuffer: () => dispatch({ type: "CLEAR_PRE_BUFFER" }),
+      clearPreBuffer: () => { preBufferRef.current = null; dispatch({ type: "CLEAR_PRE_BUFFER" }); },
       preBufferNext: (afterEndIdx) => preBufferNextRef.current(afterEndIdx),
       onFallbackToWeb: () => {
         dispatch({ type: "SET_ENGINE", engine: "web" });
@@ -151,7 +156,10 @@ export default function useNarration() {
       const v = window.speechSynthesis?.getVoices() || [];
       if (v.length > 0) {
         setVoices(v);
-        const english = v.find((voice) => voice.lang.startsWith("en")) || v[0];
+        const english = v.find((voice) => voice.lang === "en-US")
+          || v.find((voice) => voice.lang === "en-GB")
+          || v.find((voice) => voice.lang.startsWith("en"))
+          || v[0];
         setCurrentVoice((prev) => prev || english);
       }
     };
@@ -212,7 +220,9 @@ export default function useNarration() {
       // Discard pre-buffer result if rate changed during generation
       if (!result.error && result.audio && result.sampleRate && stateRef.current.status !== "idle" && genId === stateRef.current.generationId) {
         const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
-        dispatch({ type: "SET_PRE_BUFFER", buffer: { audio: result.audio, sampleRate: result.sampleRate, durationMs, text } });
+        const buffer = { audio: result.audio, sampleRate: result.sampleRate, durationMs, text };
+        preBufferRef.current = buffer; // Immediately available — no render cycle needed
+        dispatch({ type: "SET_PRE_BUFFER", buffer });
       }
     } catch { /* pre-buffer failed, will generate on-demand */ }
   }, []);
@@ -222,7 +232,6 @@ export default function useNarration() {
 
   /** Compute rhythm pause duration at chunk boundaries (Kokoro only). */
   const computeChunkPauseMs = useCallback((chunkWords: string[], chunkStart: number): number => {
-    const currentState = stateRef.current;
     const lastWord = chunkWords[chunkWords.length - 1] || "";
     const lastWordGlobalIdx = chunkStart + chunkWords.length - 1;
     return calculateChunkBoundaryPause(
@@ -230,7 +239,7 @@ export default function useNarration() {
       lastWordGlobalIdx,
       paragraphBreaksRef.current,
       rhythmPausesRef.current,
-      currentState.nextChunkBuffer !== null,
+      preBufferRef.current !== null,
     );
   }, []);
 
@@ -262,6 +271,7 @@ export default function useNarration() {
       },
       () => {
         dispatch({ type: "CHUNK_COMPLETE", endIdx });
+        stateRef.current = { ...stateRef.current, cursorWordIndex: endIdx };
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
         const currentState = stateRef.current;
         if (currentState.status !== "idle" && currentState.status !== "holding") speakNextChunkWeb();
@@ -300,6 +310,7 @@ export default function useNarration() {
       },
       () => {
         dispatch({ type: "CHUNK_COMPLETE", endIdx });
+        stateRef.current = { ...stateRef.current, cursorWordIndex: endIdx };
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
         const currentState = stateRef.current;
         if (currentState.status !== "idle" && currentState.status !== "holding") {
@@ -378,6 +389,7 @@ export default function useNarration() {
 
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
+    preBufferRef.current = null; // Clear stale pre-buffer from previous narration
     const newSpeed = wpmToRate(wpm);
 
     dispatch({ type: "STOP" }); // Reset all state first
@@ -405,17 +417,21 @@ export default function useNarration() {
     if (s.status === "idle") return;
     webStrategy.stop();
     kokoroStrategy.stop();
+    preBufferRef.current = null;
     const newSpeed = wpmToRate(wpm);
     dispatch({ type: "WORD_ADVANCE", wordIndex });
     dispatch({ type: "SET_SPEED", speed: newSpeed });
+    dispatch({ type: "CLEAR_PRE_BUFFER" });
     // Update stateRef for immediate speakNextChunk
-    stateRef.current = { ...stateRef.current, cursorWordIndex: wordIndex, speed: newSpeed };
+    stateRef.current = { ...stateRef.current, cursorWordIndex: wordIndex, speed: newSpeed, nextChunkBuffer: null };
     speakNextChunk();
   }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
   const updateWpm = useCallback((wpm: number) => {
     const newRate = wpmToRate(wpm);
     dispatch({ type: "SET_SPEED", speed: newRate });
+    preBufferRef.current = null;
+    dispatch({ type: "CLEAR_PRE_BUFFER" });
     // Update stateRef for immediate reads
     stateRef.current = { ...stateRef.current, speed: newRate, generationId: stateRef.current.generationId + 1, nextChunkBuffer: null };
     const s = stateRef.current;
@@ -442,6 +458,7 @@ export default function useNarration() {
       webStrategy.pause();
     }
     dispatch({ type: "PAUSE" });
+    stateRef.current = { ...stateRef.current, status: "paused" };
   }, [webStrategy, kokoroStrategy]);
 
   const resume = useCallback(() => {
@@ -452,11 +469,13 @@ export default function useNarration() {
       webStrategy.resume();
     }
     dispatch({ type: "RESUME" });
+    stateRef.current = { ...stateRef.current, status: "speaking" };
   }, [webStrategy, kokoroStrategy]);
 
   const stop = useCallback(() => {
     webStrategy.stop();
     kokoroStrategy.stop();
+    preBufferRef.current = null;
     dispatch({ type: "STOP" });
     if (chunkPauseTimerRef.current) { clearTimeout(chunkPauseTimerRef.current); chunkPauseTimerRef.current = null; }
   }, [webStrategy, kokoroStrategy]);
@@ -480,6 +499,8 @@ export default function useNarration() {
   const adjustRate = useCallback((newRate: number) => {
     const clamped = Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate));
     dispatch({ type: "SET_SPEED", speed: clamped });
+    preBufferRef.current = null;
+    dispatch({ type: "CLEAR_PRE_BUFFER" });
     // Update stateRef for immediate reads
     stateRef.current = { ...stateRef.current, speed: clamped, generationId: stateRef.current.generationId + 1, nextChunkBuffer: null };
     // Debounce the restart so rapid slider adjustments settle before triggering re-generation
