@@ -101,8 +101,12 @@ export default function ReaderBottomBar({
   // Time remaining — use TTS-derived WPM when narration is selected
   const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration");
   const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
-  const wordsRemaining = Math.max(0, words.length - wordIndex);
-  const timeRemaining = formatTime(wordsRemaining, effectiveWpm);
+  // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
+  // instead of section words (which only covers the current chapter)
+  const docWordsRemaining = foliateFraction != null && activeDoc.wordCount > 0
+    ? Math.max(0, Math.round(activeDoc.wordCount * (1 - foliateFraction)))
+    : Math.max(0, words.length - wordIndex);
+  const timeRemaining = formatTime(docWordsRemaining, effectiveWpm);
 
   // Chapter info
   const chapterList = useMemo(() => {

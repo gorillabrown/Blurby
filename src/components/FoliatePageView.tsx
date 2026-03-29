@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords } from "../utils/segmentWords";
-import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX } from "../constants";
+import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MIN_COLUMN_WIDTH_PX, FOLIATE_MARGIN_PX, FOLIATE_GAP_PX } from "../constants";
 
 const api = window.electronAPI;
 
@@ -454,11 +454,11 @@ export default function FoliatePageView({
         const scale = (focusTextSize || 100) / 100;
         const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
         view.renderer.setAttribute("flow", "paginated");
-        view.renderer.setAttribute("margin", "40px");
-        view.renderer.setAttribute("gap", "5%");
-        view.renderer.setAttribute("max-inline-size", "720px");
+        view.renderer.setAttribute("margin", `${FOLIATE_MARGIN_PX}px`);
+        view.renderer.setAttribute("gap", `${FOLIATE_GAP_PX}px`);
         view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
-        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+        const availableWidth = container.clientWidth - (FOLIATE_MARGIN_PX * 2);
+        view.renderer.setAttribute("max-column-count", availableWidth >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
 
         // Provide TOC
         if (view.book?.toc) {
@@ -646,7 +646,8 @@ export default function FoliatePageView({
     const container = containerRef.current;
     if (!container) return;
 
-    view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+    const availW = container.clientWidth - (FOLIATE_MARGIN_PX * 2);
+    view.renderer.setAttribute("max-column-count", availW >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
     view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
 
     // Re-inject styles on settings change
@@ -665,7 +666,8 @@ export default function FoliatePageView({
       const h = container.clientHeight;
       const w = container.clientWidth;
       view.renderer.setAttribute("max-block-size", `${h - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
-      view.renderer.setAttribute("max-column-count", w >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+      const availResizeW = w - (FOLIATE_MARGIN_PX * 2);
+      view.renderer.setAttribute("max-column-count", availResizeW >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
     });
     observer.observe(container);
     return () => observer.disconnect();
