@@ -458,6 +458,7 @@ export default function FoliatePageView({
         view.renderer.setAttribute("gap", `${FOLIATE_GAP_PX}px`);
         view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
         const availableWidth = container.clientWidth - (FOLIATE_MARGIN_PX * 2);
+        view.renderer.setAttribute("max-inline-size", `${availableWidth}px`);
         view.renderer.setAttribute("max-column-count", availableWidth >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
 
         // Provide TOC
@@ -647,6 +648,7 @@ export default function FoliatePageView({
     if (!container) return;
 
     const availW = container.clientWidth - (FOLIATE_MARGIN_PX * 2);
+    view.renderer.setAttribute("max-inline-size", `${availW}px`);
     view.renderer.setAttribute("max-column-count", availW >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
     view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
 
@@ -667,6 +669,7 @@ export default function FoliatePageView({
       const w = container.clientWidth;
       view.renderer.setAttribute("max-block-size", `${h - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
       const availResizeW = w - (FOLIATE_MARGIN_PX * 2);
+      view.renderer.setAttribute("max-inline-size", `${availResizeW}px`);
       view.renderer.setAttribute("max-column-count", availResizeW >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
     });
     observer.observe(container);
