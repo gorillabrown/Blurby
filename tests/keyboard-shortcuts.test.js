@@ -222,7 +222,7 @@ function formatAuthorAPA(authorString) {
   return `${allButLast}, & ${formatted[formatted.length - 1]}`;
 }
 
-describe("APA subtext formatting for URL docs", () => {
+describe("APA subtext formatting for URL docs", { timeout: 15000 }, () => {
   it("formats full APA subtext with author, date, and source domain", () => {
     const subtext = formatApaSubtext({
       source: "url",

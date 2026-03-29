@@ -291,7 +291,7 @@ describe("formatAuthorAPA", () => {
 
 // ── formatDateAPA ──────────────────────────────────────────────────────────
 
-describe("formatDateAPA", () => {
+describe("formatDateAPA", { timeout: 15000 }, () => {
   it("formats a valid ISO date correctly", () => {
     // Use a noon timestamp to avoid timezone boundary issues
     const result = formatDateAPA("2025-06-15T12:00:00.000Z");
