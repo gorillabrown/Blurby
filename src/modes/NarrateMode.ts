@@ -27,12 +27,13 @@ export interface NarrationInterface {
  *
  * Unlike Focus/Flow which use setInterval-based timers, NarrateMode
  * delegates all timing to the narration engine (useNarration hook).
- * Word advancement is driven by TTS word boundary events, not timers.
+ * Web Speech uses boundary events for word advancement; Kokoro uses
+ * estimated timers derived from audio duration / word count.
  *
  * Speed is controlled by TTS rate (0.5–2.0x), not WPM. The effective
  * WPM is derived as: ttsRate × TTS_RATE_BASELINE_WPM (150).
  *
- * Rhythm pauses between chunks (250ms comma, 400ms sentence, 750ms
+ * Rhythm pauses between chunks (100ms comma, 200ms sentence, 400ms
  * paragraph) are handled by useNarration's chunk chaining logic.
  */
 export class NarrateMode implements ReadingMode {

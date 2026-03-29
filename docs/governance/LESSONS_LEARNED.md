@@ -844,3 +844,27 @@ Plus defensive guards: bounds checks in scheduleNext, Object.freeze on callbacks
 - PR-61c: **Do NOT use a catch-all `MODULE_NOT_FOUND` → stub approach.** Distinguish required deps (redirect to CJS path) from truly optional deps (stub). A catch-all masks real failures — phonemizer was silently stubbed, causing inference to fail with a cryptic `a.phonemize is not a function`.
 - PR-61d: Always forward worker thread errors to the renderer. Silent failures in background workers are invisible to users and extremely hard to debug.
 - PR-61e: Never silently swallow errors in warm-up/init code. A `catch {}` (empty) hides the exact error that would identify the root cause. Always log, even if the error is "non-fatal".
+
+---
+
+### [2026-03-28] LL-046: Dual-Write Rule for useReducer + stateRef in Async Callbacks
+
+**Area:** narration, React state, async patterns
+**Status:** active
+**Priority:** critical
+
+**Context:** Sprint TTS-1 found that narration playback had jumpy pauses, stale audio after speed changes, and inconsistent rhythm timing. All 8 "MUST FIX" items traced to one root cause: React's `useReducer` dispatch is async (batched), but `stateRef.current` (used by TTS callbacks firing between renders) must reflect the latest state immediately.
+
+**Root Cause:** `pause()`, `resume()`, `stop()`, `updateWpm()`, `adjustRate()`, `resyncToCursor()`, and `CHUNK_COMPLETE` handlers dispatched reducer actions but did NOT update `stateRef.current`. Async callbacks (audio `onEnd`, pre-buffer completion, Kokoro IPC results) read `stateRef.current` before React could commit the dispatch. They saw stale `status`, `cursorWordIndex`, and `speed` values.
+
+Additionally, `preBufferRef.current` (the authoritative pre-buffer, bypassing React render cycle) was not cleared during speed changes, rate adjustments, resync, or stop. Stale audio at the wrong speed/position would play on the next chunk.
+
+**Solution:** Established the **dual-write rule**: every `dispatch()` that changes `status`, `cursorWordIndex`, `speed`, or `nextChunkBuffer` must ALSO:
+1. Update `stateRef.current = { ...stateRef.current, [changed fields] }` on the same line
+2. Clear `preBufferRef.current = null` if the change invalidates buffered audio (speed/rate/position changes)
+3. Dispatch `CLEAR_PRE_BUFFER` to keep the reducer's `nextChunkBuffer` in sync
+
+**Rules:**
+- PR-62: **Dual-write rule.** Every dispatch in useNarration that mutates `status`, `cursorWordIndex`, `speed`, or `nextChunkBuffer` must also update `stateRef.current` immediately. The dispatch updates React; the stateRef update is for async callbacks that fire before the next render.
+- PR-63: **preBufferRef is authoritative.** The reducer's `nextChunkBuffer` is kept for React consumers (UI indicators). The ref is what TTS strategies read. Both must be cleared together when speed, position, or generation changes.
+- PR-64: **computeChunkPauseMs must read preBufferRef, not reducer state.** Rhythm pauses should only fire when the pre-buffer is actually ready (ref), not when the reducer last recorded a buffer (may be stale).
