@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -50,15 +50,12 @@
       "output": "release"
     },
     "win": {
-      "target": "nsis",
+      "target": "nsis-web",
       "icon": "assets/icon.ico",
-      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-Web-Setup-${version}-${arch}.${ext}"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerHeader": "assets/installer/installerHeader.bmp",
-      "installerSidebar": "assets/installer/installerSidebar.bmp",
+      "oneClick": true,
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
       "createDesktopShortcut": "always",

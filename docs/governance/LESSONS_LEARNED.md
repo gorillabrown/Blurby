@@ -915,3 +915,23 @@ Additionally, `preBufferRef.current` (the authoritative pre-buffer, bypassing Re
 **Context:** In narration of dialogue-heavy fiction, paragraph breaks between short exchanges (e.g., `"Danny said, '...'"` / `"Debbie replied, '...'"`) got full paragraph pauses that broke conversational flow. The sentence-count heuristic (≤2 sentences = dialogue, >2 = exposition) naturally distinguishes dialogue from expository paragraphs without parsing quote marks or speech tags.
 
 **Guardrail:** The threshold is stored as `TTS_DIALOGUE_SENTENCE_THRESHOLD = 2` in constants.ts. If users report dialogue pauses feeling wrong, this is the constant to tune.
+
+---
+
+### [2026-03-29] LL-050: nsis-web + oneClick + Split CI = Correct Installer Behavior
+
+**Area:** distribution, CI/CD, packaging
+**Status:** active
+**Priority:** high
+
+**Context:** v1.0.9 shipped a 235MB fat NSIS installer. Three problems: (1) ARM64 installer shipped x64-only ONNX native binaries because CI ran `npm ci` on an x64 runner. (2) Full app payload bundled inside the `.exe`. (3) Updates popped an external NSIS wizard window.
+
+**Fix:** Three coordinated changes:
+1. **`nsis-web` target:** Creates a ~1MB stub installer that downloads the 234MB `.7z` payload from GitHub Releases on first install. Delta updates via blockmap still work.
+2. **`oneClick: true`:** Enables silent background installs during auto-update — no wizard window. `quitAndInstall(true, true)` for silent + forceRunAfter.
+3. **Split CI jobs:** Each architecture (x64, arm64) gets its own CI job running `npm ci` with the correct `npm_config_arch`, ensuring native binaries (onnxruntime-node) match the target platform.
+
+**Guardrail:**
+- PR-65: **Never revert to plain `nsis` target.** The `nsis-web` target is required for stub installer + silent updates.
+- PR-66: **Never set `oneClick: false`.** This breaks silent auto-updates and shows the NSIS wizard to users.
+- PR-67: **Each architecture must have its own CI job.** Cross-compiling JS works, but native `.node` binaries must be resolved by `npm ci` on the target arch. A single-job approach with `--x64 --arm64` produces wrong native modules for one arch.

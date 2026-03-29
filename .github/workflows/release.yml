@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 1.0.1)'
+        description: 'Version to release (e.g., 1.1.0)'
         required: true
         type: string
 
@@ -15,9 +15,9 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  build-x64:
     runs-on: windows-latest
-    name: Build (x64 + arm64)
+    name: Build (x64)
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -43,32 +43,89 @@ jobs:
       - name: Build renderer
         run: npm run build
 
-      - name: Package Windows installers (x64 + arm64)
-        # electron-builder uploads assets directly to the GitHub draft release
-        # via GH_TOKEN — no need for a separate artifact upload/publish job.
-        run: npx electron-builder --win --x64 --arm64
+      - name: Package Windows installer (x64)
+        run: npx electron-builder --win --x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Verify latest.yml contains both architectures
+      - name: Verify x64 artifacts
         shell: bash
         run: |
-          grep -q "x64" release/latest.yml || (echo "ERROR: x64 missing from latest.yml" && exit 1)
-          grep -q "arm64" release/latest.yml || (echo "ERROR: arm64 missing from latest.yml" && exit 1)
-          echo "Both architectures verified in latest.yml"
-          cat release/latest.yml
+          echo "=== x64 release artifacts ==="
+          ls -lh release/nsis-web/*.exe release/nsis-web/*.7z 2>/dev/null || true
+          if ls release/nsis-web/*.exe 1>/dev/null 2>&1; then
+            echo "x64 stub installer found"
+          else
+            echo "ERROR: No x64 .exe found" && exit 1
+          fi
 
-      - name: Generate and upload SHA-256 checksums
+      - name: Generate and upload SHA-256 checksums (x64)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cd release
-          sha256sum *.exe *.blockmap > checksums.sha256
-          cat checksums.sha256
+          cd release/nsis-web
+          sha256sum *.exe *.7z 2>/dev/null > checksums-x64.sha256 || true
+          cat checksums-x64.sha256
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="v${{ github.event.inputs.version }}"
           else
             TAG="${{ github.ref_name }}"
           fi
-          gh release upload "$TAG" checksums.sha256 --clobber
+          gh release upload "$TAG" checksums-x64.sha256 --clobber
+
+  build-arm64:
+    runs-on: windows-latest
+    name: Build (arm64)
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      npm_config_arch: arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies (arm64 prebuilds)
+        run: npm ci
+        env:
+          npm_config_arch: arm64
+
+      - name: Build renderer
+        run: npm run build
+
+      - name: Package Windows installer (arm64)
+        run: npx electron-builder --win --arm64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify arm64 artifacts
+        shell: bash
+        run: |
+          echo "=== arm64 release artifacts ==="
+          ls -lh release/nsis-web/*.exe release/nsis-web/*.7z 2>/dev/null || true
+          if ls release/nsis-web/*.exe 1>/dev/null 2>&1; then
+            echo "arm64 stub installer found"
+          else
+            echo "ERROR: No arm64 .exe found" && exit 1
+          fi
+
+      - name: Generate and upload SHA-256 checksums (arm64)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd release/nsis-web
+          sha256sum *.exe *.7z 2>/dev/null > checksums-arm64.sha256 || true
+          cat checksums-arm64.sha256
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="v${{ github.event.inputs.version }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          gh release upload "$TAG" checksums-arm64.sha256 --clobber
