@@ -14,7 +14,7 @@ interface ReaderBottomBarProps {
   readingMode: "page" | "focus" | "flow" | "narration";
   playing: boolean;
   isEink: boolean;
-  chapters: Array<{ title: string; charOffset: number }>;
+  chapters: Array<{ title: string; charOffset: number; depth?: number }>;
   onSetWpm: (wpm: number) => void;
   onAdjustFocusTextSize: (delta: number) => void;
   onEnterFocus: () => void;
@@ -107,6 +107,11 @@ export default function ReaderBottomBar({
   // Chapter info
   const chapterList = useMemo(() => {
     if (chapters.length > 0) {
+      // Foliate EPUB chapters store proportional word indices in charOffset —
+      // use them directly instead of scanning through content string
+      if ((chapters[0] as any)?.href) {
+        return chapters.map(ch => ({ title: ch.title, wordIndex: ch.charOffset }));
+      }
       return chaptersFromCharOffsets(activeDoc.content, chapters);
     }
     return detectChapters(activeDoc.content, words);
@@ -298,6 +303,7 @@ export default function ReaderBottomBar({
                     role="option"
                     aria-selected={i === curChapterIdx}
                     className={`rbb-chapter-option ${i === curChapterIdx ? "rbb-chapter-option--active" : ""}`}
+                    style={{ paddingLeft: `${((chapters[i] as any)?.depth || 0) * 16 + 8}px` }}
                     onClick={() => {
                       onJumpToChapter?.(i);
                       setChapterDropdownOpen(false);

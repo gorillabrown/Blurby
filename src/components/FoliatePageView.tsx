@@ -199,7 +199,7 @@ interface FoliatePageViewProps {
   activeDoc: BlurbyDoc & { content?: string };
   settings: BlurbySettings;
   onRelocate?: (detail: { cfi: string; fraction: number; tocItem?: any; pageItem?: any }) => void;
-  onTocReady?: (toc: any[]) => void;
+  onTocReady?: (toc: any[], sectionCount: number) => void;
   onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number) => void;
   onLoad?: () => void;
   onWordsReextracted?: () => void;
@@ -462,7 +462,7 @@ export default function FoliatePageView({
 
         // Provide TOC
         if (view.book?.toc) {
-          onTocReady?.(view.book.toc);
+          onTocReady?.(view.book.toc, view.book.sections?.length ?? 0);
         }
 
         // Navigate to last position or start from the very beginning (cover page).
@@ -654,6 +654,22 @@ export default function FoliatePageView({
       injectStyles(doc, settings, focusTextSize);
     }
   }, [settings.theme, settings.fontFamily, focusTextSize, settings.layoutSpacing]);
+
+  // Reflow text when container resizes (window maximize/restore/drag)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => {
+      const view = viewRef.current;
+      if (!view?.renderer) return;
+      const h = container.clientHeight;
+      const w = container.clientWidth;
+      view.renderer.setAttribute("max-block-size", `${h - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
+      view.renderer.setAttribute("max-column-count", w >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   // Flow mode overlay cursor animation (EPUB-only, Range-based)
   useEffect(() => {
