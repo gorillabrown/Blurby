@@ -47,6 +47,23 @@ interface ReaderContainerProps {
   onClearSettingsPage?: () => void;
 }
 
+/** Recursively flatten foliate's TOC tree into a depth-annotated flat list. */
+function flattenToc(items: any[], depth = 0): Array<{ title: string; href: string; depth: number }> {
+  const result: Array<{ title: string; href: string; depth: number }> = [];
+  for (const item of items) {
+    const title = item.label || item.title || "";
+    const href = item.href || "";
+    const children = item.subitems || item.children || [];
+    if (href) {
+      result.push({ title, href, depth });
+    }
+    if (children.length > 0) {
+      result.push(...flattenToc(children, depth + 1));
+    }
+  }
+  return result;
+}
+
 export default function ReaderContainer({
   activeDoc,
   library,
@@ -87,7 +104,7 @@ export default function ReaderContainer({
   // E-ink ghosting prevention (extracted to useEinkController hook)
   const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
 
-  const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number }>>([]);
+  const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number; href?: string; depth?: number }>>([]);
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
 
@@ -619,12 +636,24 @@ export default function ReaderContainer({
           }, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS);
         }
       }}
-      onTocReady={(toc) => {
-        setDocChapters(toc.map((item: any, idx: number) => ({
-          title: item.label || item.title || `Chapter ${idx + 1}`,
-          charOffset: 0,
-          href: item.href,
-        })));
+      onTocReady={(toc, sectionCount) => {
+        const flat = flattenToc(toc);
+        // Resolve TOC hrefs to proportional word positions via section index
+        const totalWords = words.length || activeDoc.wordCount || 1;
+        const sections = sectionCount || 1;
+        setDocChapters(flat.map((item, idx) => {
+          // Extract section filename from href (strip fragment #...)
+          const hrefBase = item.href.split("#")[0];
+          // Estimate section index as position in TOC order (proportional fallback)
+          const sectionFraction = idx / Math.max(flat.length, 1);
+          const wordIndex = Math.floor(sectionFraction * totalWords);
+          return {
+            title: item.title || `Chapter ${idx + 1}`,
+            charOffset: wordIndex,
+            href: item.href,
+            depth: item.depth,
+          };
+        }));
       }}
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
