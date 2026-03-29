@@ -59,6 +59,18 @@ jobs:
             echo "ERROR: No x64 .exe found" && exit 1
           fi
 
+      - name: Ensure draft release exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="v${{ github.event.inputs.version }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          gh release create "$TAG" --draft --title "$TAG" --notes "Release $TAG" 2>/dev/null || true
+
       - name: Generate and upload SHA-256 checksums (x64)
         shell: bash
         env:
@@ -114,6 +126,18 @@ jobs:
           else
             echo "ERROR: No arm64 .exe found" && exit 1
           fi
+
+      - name: Ensure draft release exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="v${{ github.event.inputs.version }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          gh release create "$TAG" --draft --title "$TAG" --notes "Release $TAG" 2>/dev/null || true
 
       - name: Generate and upload SHA-256 checksums (arm64)
         shell: bash
