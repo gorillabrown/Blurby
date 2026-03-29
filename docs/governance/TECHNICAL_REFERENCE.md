@@ -414,40 +414,60 @@ Defined in `src/constants.ts` (`KOKORO_VOICE_NAMES`):
 | British Female | 4 | Alice, Emma, Isabella, Lily |
 | British Male | 4 | Daniel, Fable, George, Lewis |
 
-### Sentence-Aligned Chunking
+### Rolling Audio Queue (NAR-1)
 
-The narration engine (`useNarration` hook) splits text into ~40-word chunks at sentence boundaries. This avoids the choppy speech caused by small chunks (see LL-021). The chunk chain works:
+The narration engine uses a producer-consumer rolling audio queue (`src/utils/audioQueue.ts`) for Kokoro playback. This replaces the earlier pre-buffer bolt-on (see LL-047).
 
-1. Generate audio for current chunk
-2. While current chunk plays, pre-generate next chunk (pre-buffering)
-3. At chunk boundary, apply rhythm pause (100/200/400ms depending on punctuation)
-4. Start next chunk playback
+```
+Producer (background loop)           Consumer (playback)
+  │                                    │
+  ├─ Generate chunk 0 ─────────────┬──►│ Play chunk 0
+  ├─ Generate chunk 1 ─────────────┤   │   (word advance timer)
+  ├─ Generate chunk 2 ─────────────┤   │   │
+  │   (queue full, pause)          │   ├──►│ Pause (100/400/800ms)
+  │                                │   ├──►│ Play chunk 1
+  ├─ Generate chunk 3 ◄── slot freed  │   │   ...
+  └─ ...                           │   └──►│ onEnd
+```
 
-### Rhythm Pauses Between Chunks
+1. **Producer** continuously calls `kokoroGenerate()` IPC, slicing words into sentence-aligned chunks. Maintains a queue of `TTS_QUEUE_DEPTH` (3) pre-generated `AudioChunk` objects. Pauses when queue is full, resumes when consumer takes one.
+2. **Consumer** plays chunk from queue head via Web Audio API. Between chunks, inserts manual silence based on smart pause heuristics (see below). On chunk end, shifts queue, signals producer.
+3. **Startup:** Producer generates chunks 0, 1, 2. Playback starts when chunk 0 is ready.
+4. **Rate changes:** Queue is flushed, re-generated from current position at new rate.
+5. **Pause/resume:** `audioCtx.suspend()/resume()`. Producer can keep generating during pause.
+6. **Stop:** Clear queue, cancel in-flight IPC, reset producer.
 
-Calculated by `calculateChunkBoundaryPause()` in `src/utils/rhythm.ts`:
+### Smart Pause Heuristics (NAR-1)
 
-| Boundary Type | Duration | Condition |
-|---------------|----------|-----------|
-| Comma/colon/semicolon ending | 100ms | `rhythmPauses.commas` enabled |
-| Sentence ending (. ! ?) | 200ms | `rhythmPauses.sentences` enabled |
-| Paragraph boundary | 400ms | `rhythmPauses.paragraphs` enabled |
+Calculated by `src/utils/pauseDetection.ts`. Replaces the naive regex-only detection with a multi-step pipeline that handles abbreviations and dialogue paragraphs:
 
-Pauses only apply when the pre-buffer is ready. If generation is still in progress, the generation time serves as a natural pause.
+**Sentence-end detection (priority order):**
+1. Internal period (e.g. `J.P.`, `N.A.S.A.`) → acronym, no pause
+2. Known abbreviation set (22 entries: `dr.`, `mr.`, `etc.`, `i.e.`, ...) → no pause
+3. Next word starts with lowercase → not sentence end, no pause
+4. Otherwise → real sentence end, apply sentence pause
+5. `!` and `?` always trigger sentence pause
+
+**Paragraph-break detection (sentence-count heuristic):**
+- ≤2 sentences → dialogue paragraph → 0ms pause (sentence pause only if sentence-ending)
+- >2 sentences → expository paragraph → full 800ms pause
+
+| Boundary | Duration |
+|----------|----------|
+| Comma/semicolon/colon | 100ms |
+| Sentence end (. ! ?) | 400ms |
+| Paragraph (>2 sentences) | 800ms |
+| Dialogue paragraph (≤2 sentences) | 0ms (sentence pause if applicable) |
 
 ### Generation ID Pattern
 
-A generation ID (`generationIdRef`) guards against stale audio. When TTS rate changes mid-playback, the generation ID increments. Any IPC response with a mismatched generation ID is discarded, preventing old audio from playing at the wrong speed.
+A generation ID inside `audioQueue.ts` guards against stale audio. When TTS rate changes mid-playback, the generation ID increments. Any IPC response with a mismatched generation ID is discarded. The queue flushes all buffered chunks and re-generates from the current position.
 
-### Dual-Write Pattern (stateRef + preBufferRef)
+### Dual-Write Pattern (stateRef)
 
-The narration state machine uses React's `useReducer` for state (`dispatch()`), plus a `stateRef` ref for synchronous reads inside async callbacks. Because `dispatch()` is asynchronous (batched by React), callbacks that fire between renders (audio `onEnd`, Kokoro IPC results, pre-buffer completion) must read from `stateRef.current`, not from the reducer state.
+The narration state machine uses React's `useReducer` for state (`dispatch()`), plus a `stateRef` ref for synchronous reads inside async callbacks. Because `dispatch()` is asynchronous (batched by React), callbacks that fire between renders must read from `stateRef.current`, not from the reducer state.
 
-**Dual-write rule:** Every `dispatch()` that changes `status`, `cursorWordIndex`, `speed`, or `nextChunkBuffer` must also update `stateRef.current` on the same line. This applies to `pause()`, `resume()`, `stop()`, `updateWpm()`, `adjustRate()`, `resyncToCursor()`, and `CHUNK_COMPLETE` handlers.
-
-**preBufferRef lifecycle:** `preBufferRef.current` is the authoritative source for pre-buffered audio. The reducer's `nextChunkBuffer` is kept in sync for React consumers (e.g., UI indicators), but strategies read from the ref. Both must be cleared together when speed, position, or generation changes: `preBufferRef.current = null; dispatch({ type: "CLEAR_PRE_BUFFER" });`.
-
-**computeChunkPauseMs** reads `preBufferRef.current !== null` (not reducer state) to decide whether to add rhythm pauses. If the pre-buffer isn't ready, generation latency serves as the natural pause.
+**Dual-write rule:** Every `dispatch()` that changes `status`, `cursorWordIndex`, or `speed` must also update `stateRef.current` on the same line.
 
 ### Worker Crash Recovery
 

@@ -6,11 +6,9 @@ export interface NarrationState {
   chunkStart: number;
   chunkWords: string[];
   cursorWordIndex: number;
-  nextChunkBuffer: { text: string; audio: any; sampleRate: number; durationMs: number } | null;
   kokoroReady: boolean;
   kokoroDownloading: boolean;
   kokoroDownloadProgress: number;
-  kokoroInFlight: boolean;
   generationId: number;
   speed: number;
   pageEndWord: number | null;
@@ -28,11 +26,8 @@ export type NarrationAction =
   | { type: "SET_ENGINE"; engine: "web" | "kokoro" }
   | { type: "SET_SPEED"; speed: number }
   | { type: "INCREMENT_GENERATION_ID" }
-  | { type: "SET_PRE_BUFFER"; buffer: NarrationState["nextChunkBuffer"] }
-  | { type: "CLEAR_PRE_BUFFER" }
   | { type: "KOKORO_READY" }
   | { type: "KOKORO_DOWNLOAD_PROGRESS"; progress: number }
-  | { type: "KOKORO_IN_FLIGHT"; inFlight: boolean }
   | { type: "SET_PAGE_END"; endIdx: number | null }
   | { type: "ERROR"; message: string };
 
@@ -43,11 +38,9 @@ export function createInitialNarrationState(): NarrationState {
     chunkStart: 0,
     chunkWords: [],
     cursorWordIndex: 0,
-    nextChunkBuffer: null,
     kokoroReady: false,
     kokoroDownloading: false,
     kokoroDownloadProgress: 0,
-    kokoroInFlight: false,
     generationId: 0,
     speed: 1.0,
     pageEndWord: null,
@@ -67,7 +60,7 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
     case "RESUME":
       return (state.status === "paused" || state.status === "holding") ? { ...state, status: "speaking" } : state;
     case "STOP":
-      return { ...state, status: "idle", chunkStart: 0, chunkWords: [], nextChunkBuffer: null, kokoroInFlight: false };
+      return { ...state, status: "idle", chunkStart: 0, chunkWords: [] };
     case "HOLD":
       return state.status === "speaking" ? { ...state, status: "holding" } : state;
     case "RESUME_CHAINING":
@@ -75,19 +68,13 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
     case "SET_ENGINE":
       return { ...state, engine: action.engine };
     case "SET_SPEED":
-      return { ...state, speed: action.speed, generationId: state.generationId + 1, nextChunkBuffer: null };
+      return { ...state, speed: action.speed, generationId: state.generationId + 1 };
     case "INCREMENT_GENERATION_ID":
-      return { ...state, generationId: state.generationId + 1, nextChunkBuffer: null };
-    case "SET_PRE_BUFFER":
-      return { ...state, nextChunkBuffer: action.buffer };
-    case "CLEAR_PRE_BUFFER":
-      return { ...state, nextChunkBuffer: null };
+      return { ...state, generationId: state.generationId + 1 };
     case "KOKORO_READY":
       return { ...state, kokoroReady: true, kokoroDownloading: false };
     case "KOKORO_DOWNLOAD_PROGRESS":
       return { ...state, kokoroDownloading: true, kokoroDownloadProgress: action.progress };
-    case "KOKORO_IN_FLIGHT":
-      return { ...state, kokoroInFlight: action.inFlight };
     case "SET_PAGE_END":
       return { ...state, pageEndWord: action.endIdx };
     case "ERROR":

@@ -1,120 +1,82 @@
-// src/hooks/narration/kokoroStrategy.ts — Kokoro TTS strategy (IPC + Web Audio)
+// src/hooks/narration/kokoroStrategy.ts — Kokoro TTS strategy (delegates to audioQueue)
 import type { TtsStrategy } from "../../types/narration";
-import * as audioPlayer from "../../utils/audioPlayer";
+import { createAudioQueue } from "../../utils/audioQueue";
+import type { AudioQueue, AudioQueueCallbacks } from "../../utils/audioQueue";
+import { TTS_CHUNK_SIZE } from "../../constants";
 
 const api = window.electronAPI;
 
 export interface KokoroStrategyDeps {
   /** Get current Kokoro voice ID */
   getVoiceId: () => string;
-  /** Get current generation ID for stale-result detection */
-  getGenerationId: () => number;
-  /** Get whether a Kokoro IPC call is already in flight */
-  getInFlight: () => boolean;
-  /** Get current pre-buffer (if any) */
-  getPreBuffer: () => { text: string; audio: any; sampleRate: number; durationMs: number } | null;
+  /** Get current speed */
+  getSpeed: () => number;
   /** Get the current narration status */
   getStatus: () => string;
-  /** Get the current speed (may change during generation) */
-  getSpeed: () => number;
-  /** Set in-flight flag */
-  setInFlight: (inFlight: boolean) => void;
-  /** Clear the pre-buffer */
-  clearPreBuffer: () => void;
-  /** Kick off pre-buffering for the next chunk */
-  preBufferNext: (afterEndIdx: number) => void;
+  /** Get all words for narration */
+  getWords: () => string[];
+  /** Get paragraph break indices */
+  getParagraphBreaks: () => Set<number>;
+  /** Find sentence-aligned chunk end index */
+  findChunkEnd: (words: string[], startIdx: number) => number;
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
-  /** Called when generation ID is stale — caller should re-dispatch */
-  onStaleGeneration: () => void;
 }
 
 /**
- * Create a TtsStrategy backed by Kokoro (local neural TTS via IPC + Web Audio).
+ * Create a TtsStrategy backed by Kokoro via a rolling audio queue.
+ * The strategy is a thin wrapper — all buffering, playback, and pause logic
+ * lives in audioQueue.ts.
  */
-export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy {
+export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & { getQueue: () => AudioQueue } {
+  const queue = createAudioQueue({
+    generateFn: async (text, voiceId, speed) => {
+      if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
+      const result = await api.kokoroGenerate(text, voiceId, speed);
+      if (result.error || !result.audio || !result.sampleRate) {
+        return { error: result.error || "no audio returned" };
+      }
+      const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
+      return { audio: result.audio, sampleRate: result.sampleRate, durationMs };
+    },
+    getWords: deps.getWords,
+    getVoiceId: deps.getVoiceId,
+    getSpeed: deps.getSpeed,
+    findChunkEnd: deps.findChunkEnd,
+    getParagraphBreaks: deps.getParagraphBreaks,
+  });
+
   return {
-    speakChunk(text, words, _startIdx, speed, onWordAdvance, onEnd, onError) {
-      console.debug("[kokoro] speak — chars:", text?.length, "words:", words?.length, "inFlight:", deps.getInFlight());
+    speakChunk(_text, _words, startIdx, _speed, onWordAdvance, onEnd, onError) {
       if (!api?.kokoroGenerate) {
         onError();
         return;
       }
-      if (deps.getInFlight()) { onError(); return; }
 
-      const genId = deps.getGenerationId();
-      deps.setInFlight(true);
+      const callbacks: AudioQueueCallbacks = {
+        onWordAdvance,
+        onChunkBoundary: () => {},
+        onEnd,
+        onError: () => deps.onFallbackToWeb(),
+      };
 
-      (async () => {
-        try {
-          // Check pre-buffer first
-          let audio: any;
-          let sampleRate: number;
-          let durationMs: number;
-          const buf = deps.getPreBuffer();
-          if (buf && buf.text === text) {
-            console.debug("[kokoro] pre-buffer HIT — skipping generation");
-            ({ audio, sampleRate, durationMs } = buf);
-            deps.clearPreBuffer();
-          } else {
-            console.debug("[kokoro] pre-buffer MISS — generating on demand", buf ? "(text mismatch)" : "(no buffer)");
-            deps.clearPreBuffer();
-            const ipcResult = await api.kokoroGenerate!(text, deps.getVoiceId(), deps.getSpeed());
-            if (ipcResult.error || !ipcResult.audio || !ipcResult.sampleRate) {
-              console.error("[kokoro] Generate failed:", ipcResult.error || "no audio returned");
-              deps.onFallbackToWeb();
-              return;
-            }
-            audio = ipcResult.audio;
-            sampleRate = ipcResult.sampleRate;
-            // Estimate duration from sample count if not provided
-            durationMs = (ipcResult as any).durationMs ?? (ipcResult.audio!.length / ipcResult.sampleRate!) * 1000;
-          }
-
-          console.debug("[kokoro] IPC result — audio:", audio?.length, "samples @", sampleRate, "Hz,", durationMs, "ms, status:", deps.getStatus(), "genId ok:", genId === deps.getGenerationId());
-          if (deps.getStatus() === "idle") return;
-
-          // Discard stale IPC result if rate changed during generation
-          if (genId !== deps.getGenerationId()) {
-            console.debug("[kokoro] stale genId — re-dispatching");
-            deps.setInFlight(false); // Clear BEFORE re-dispatch so speakNextChunk isn't blocked
-            deps.onStaleGeneration();
-            return;
-          }
-
-          // Start pre-buffering next chunk while this one plays
-          deps.preBufferNext(_startIdx + words.length);
-
-          audioPlayer.playBuffer(
-            audio,
-            sampleRate,
-            durationMs,
-            words.length,
-            (wordOffset: number) => {
-              onWordAdvance(wordOffset);
-            },
-            () => {
-              onEnd();
-            },
-          );
-        } catch {
-          deps.onFallbackToWeb();
-        } finally {
-          deps.setInFlight(false);
-        }
-      })();
+      queue.start(startIdx, callbacks);
     },
 
     stop() {
-      audioPlayer.stop();
+      queue.stop();
     },
 
     pause() {
-      audioPlayer.pause();
+      queue.pause();
     },
 
     resume() {
-      audioPlayer.resume();
+      queue.resume();
+    },
+
+    getQueue() {
+      return queue;
     },
   };
 }
