@@ -1,9 +1,11 @@
 import type { RhythmPauses } from "../types";
 import { TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS } from "../constants";
+import { getChunkBoundaryPauseMs, countSentences } from "./pauseDetection";
 
 /**
  * Calculate extra pause duration for a word based on rhythm pause settings.
  * Returns extra milliseconds to add to the word's display time.
+ * Used by Focus and Flow modes (non-Kokoro rhythm).
  */
 export function calculatePauseMs(
   word: string,
@@ -48,27 +50,29 @@ export function calculatePauseMs(
 
 /**
  * Calculate the pause duration at a TTS chunk boundary.
- * Only returns a non-zero pause if the pre-buffer is ready —
- * when not ready, generation time IS the natural pause.
+ * Delegates to pauseDetection for smart abbreviation/dialogue-aware logic.
  */
 export function calculateChunkBoundaryPause(
   lastWord: string,
   lastWordGlobalIdx: number,
   paragraphBreaks: Set<number>,
   rhythmPauses: RhythmPauses | null,
-  hasPreBuffer: boolean
+  allWords: string[],
+  nextWord?: string,
 ): number {
-  if (!hasPreBuffer || !rhythmPauses) return 0;
+  if (!rhythmPauses) return 0;
 
   const isParagraphEnd = paragraphBreaks.has(lastWordGlobalIdx);
+
+  // Compute sentence count for the preceding paragraph if at a paragraph break
+  let sentenceCount = 1;
   if (isParagraphEnd && rhythmPauses.paragraphs) {
-    return TTS_PAUSE_PARAGRAPH_MS;
+    // Find paragraph start (previous break + 1, or 0)
+    const sortedBreaks = [...paragraphBreaks].filter(b => b < lastWordGlobalIdx).sort((a, b) => a - b);
+    const paraStart = sortedBreaks.length > 0 ? sortedBreaks[sortedBreaks.length - 1] + 1 : 0;
+    const paraWords = allWords.slice(paraStart, lastWordGlobalIdx + 1);
+    sentenceCount = countSentences(paraWords);
   }
-  if (/[.!?]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPauses.sentences) {
-    return TTS_PAUSE_SENTENCE_MS;
-  }
-  if (/[,;:]["'\u201D\u2019)]*$/.test(lastWord) && rhythmPauses.commas) {
-    return TTS_PAUSE_COMMA_MS;
-  }
-  return 0;
+
+  return getChunkBoundaryPauseMs(lastWord, nextWord, isParagraphEnd, sentenceCount);
 }

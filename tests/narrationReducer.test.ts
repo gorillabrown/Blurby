@@ -16,11 +16,9 @@ describe("narrationReducer", () => {
       chunkStart: 0,
       chunkWords: [],
       cursorWordIndex: 0,
-      nextChunkBuffer: null,
       kokoroReady: false,
       kokoroDownloading: false,
       kokoroDownloadProgress: 0,
-      kokoroInFlight: false,
       generationId: 0,
       speed: 1.0,
       pageEndWord: null,
@@ -110,22 +108,18 @@ describe("narrationReducer", () => {
 
   // --- STOP ---
 
-  it("STOP resets to idle, clears chunkStart, chunkWords, nextChunkBuffer, kokoroInFlight", () => {
+  it("STOP resets to idle, clears chunkStart, chunkWords", () => {
     const state: NarrationState = {
       ...createInitialNarrationState(),
       status: "speaking",
       chunkStart: 15,
       chunkWords: ["hello", "world"],
-      nextChunkBuffer: { text: "test", audio: new Float32Array(0), sampleRate: 22050, durationMs: 500 },
-      kokoroInFlight: true,
       cursorWordIndex: 20,
     };
     const next = narrationReducer(state, { type: "STOP" });
     expect(next.status).toBe("idle");
     expect(next.chunkStart).toBe(0);
     expect(next.chunkWords).toEqual([]);
-    expect(next.nextChunkBuffer).toBeNull();
-    expect(next.kokoroInFlight).toBe(false);
     // cursorWordIndex is NOT reset by STOP
     expect(next.cursorWordIndex).toBe(20);
   });
@@ -158,20 +152,18 @@ describe("narrationReducer", () => {
 
   // --- SET_SPEED ---
 
-  it("SET_SPEED updates speed, increments generationId, clears nextChunkBuffer", () => {
+  it("SET_SPEED updates speed and increments generationId", () => {
     const state: NarrationState = {
       ...createInitialNarrationState(),
       speed: 1.0,
       generationId: 3,
-      nextChunkBuffer: { text: "buffered", audio: null, sampleRate: 22050, durationMs: 100 },
     };
     const next = narrationReducer(state, { type: "SET_SPEED", speed: 2.0 });
     expect(next.speed).toBe(2.0);
     expect(next.generationId).toBe(4);
-    expect(next.nextChunkBuffer).toBeNull();
   });
 
-  // --- SET_ENGINE / KOKORO_READY / KOKORO_DOWNLOAD_PROGRESS / KOKORO_IN_FLIGHT ---
+  // --- SET_ENGINE / KOKORO_READY / KOKORO_DOWNLOAD_PROGRESS ---
 
   it("SET_ENGINE updates engine", () => {
     const state = createInitialNarrationState();
@@ -186,14 +178,6 @@ describe("narrationReducer", () => {
     expect(next.kokoroDownloading).toBe(false);
   });
 
-  it("KOKORO_IN_FLIGHT sets kokoroInFlight", () => {
-    const state = createInitialNarrationState();
-    const next = narrationReducer(state, { type: "KOKORO_IN_FLIGHT", inFlight: true });
-    expect(next.kokoroInFlight).toBe(true);
-    const next2 = narrationReducer(next, { type: "KOKORO_IN_FLIGHT", inFlight: false });
-    expect(next2.kokoroInFlight).toBe(false);
-  });
-
   // --- ERROR ---
 
   it("ERROR sets status to error", () => {
@@ -202,35 +186,15 @@ describe("narrationReducer", () => {
     expect(next.status).toBe("error");
   });
 
-  // --- SET_PRE_BUFFER / CLEAR_PRE_BUFFER ---
-
-  it("SET_PRE_BUFFER stores buffer", () => {
-    const state = createInitialNarrationState();
-    const buffer = { text: "chunk", audio: new Float32Array(10), sampleRate: 24000, durationMs: 300 };
-    const next = narrationReducer(state, { type: "SET_PRE_BUFFER", buffer });
-    expect(next.nextChunkBuffer).toBe(buffer);
-  });
-
-  it("CLEAR_PRE_BUFFER nulls buffer", () => {
-    const state: NarrationState = {
-      ...createInitialNarrationState(),
-      nextChunkBuffer: { text: "data", audio: null, sampleRate: 22050, durationMs: 100 },
-    };
-    const next = narrationReducer(state, { type: "CLEAR_PRE_BUFFER" });
-    expect(next.nextChunkBuffer).toBeNull();
-  });
-
   // --- INCREMENT_GENERATION_ID ---
 
-  it("INCREMENT_GENERATION_ID increments generationId and clears nextChunkBuffer", () => {
+  it("INCREMENT_GENERATION_ID increments generationId", () => {
     const state: NarrationState = {
       ...createInitialNarrationState(),
       generationId: 5,
-      nextChunkBuffer: { text: "old", audio: null, sampleRate: 22050, durationMs: 50 },
     };
     const next = narrationReducer(state, { type: "INCREMENT_GENERATION_ID" });
     expect(next.generationId).toBe(6);
-    expect(next.nextChunkBuffer).toBeNull();
   });
 
   // --- KOKORO_DOWNLOAD_PROGRESS ---

@@ -868,3 +868,50 @@ Additionally, `preBufferRef.current` (the authoritative pre-buffer, bypassing Re
 - PR-62: **Dual-write rule.** Every dispatch in useNarration that mutates `status`, `cursorWordIndex`, `speed`, or `nextChunkBuffer` must also update `stateRef.current` immediately. The dispatch updates React; the stateRef update is for async callbacks that fire before the next render.
 - PR-63: **preBufferRef is authoritative.** The reducer's `nextChunkBuffer` is kept for React consumers (UI indicators). The ref is what TTS strategies read. Both must be cleared together when speed, position, or generation changes.
 - PR-64: **computeChunkPauseMs must read preBufferRef, not reducer state.** Rhythm pauses should only fire when the pre-buffer is actually ready (ref), not when the reducer last recorded a buffer (may be stale).
+
+---
+
+### [2026-03-29] LL-047: Rolling Audio Queue Replaces Pre-Buffer Bolt-On
+
+**Area:** TTS architecture, audio pipeline
+**Status:** active
+**Priority:** high
+
+**Context:** The v1.0.9 Kokoro narration pipeline used a generate-one, play-one, pre-buffer-next-one approach. This caused `pre-buffer MISS (no buffer)` on every chunk because short first chunks (~7 words / 4.2s playback) didn't give Kokoro enough generation time (~3-8s). The cascade of on-demand generation created silence gaps between every chunk.
+
+**Fix:** Replaced with a producer-consumer rolling audio queue (`src/utils/audioQueue.ts`). The producer continuously generates into a 3-chunk buffer (`TTS_QUEUE_DEPTH`). The consumer plays from the queue head and inserts manual silence pauses at chunk boundaries. Playback starts when the first chunk is ready. By the time it finishes, subsequent chunks are already buffered.
+
+**Guardrail:** TTS audio pipeline should always use the producer-consumer queue pattern. The old pre-buffer approach (single look-ahead chunk) is insufficient when generation time exceeds playback time. The rolling queue decouples production from consumption entirely.
+
+**Supersedes:** PR-62 (dual-write for nextChunkBuffer), PR-63 (preBufferRef authoritative), PR-64 (computeChunkPauseMs reads preBufferRef). These rules no longer apply — the pre-buffer, preBufferRef, and nextChunkBuffer state have been removed. The audioQueue owns all buffering internally.
+
+---
+
+### [2026-03-29] LL-048: Smart Pause Heuristics — Abbreviation + Dialogue Detection
+
+**Area:** TTS, text analysis
+**Status:** active
+**Priority:** moderate
+
+**Context:** The naive regex `/[.!?]["'»)\]]*$/` for sentence-end detection triggered false pauses on abbreviations (Dr., Mr., etc.), acronyms (J.P., N.A.S.A., U.S.A.), and short dialogue paragraphs got full paragraph pauses that broke conversational flow.
+
+**Fix:** New `src/utils/pauseDetection.ts` module with a multi-step pipeline:
+1. Internal-period check (`/\.\w/`) catches all dotted acronyms
+2. Known abbreviation set (22 entries) catches common titles and Latin abbreviations
+3. Next-word-lowercase check catches remaining cases (e.g., `end. but`)
+4. `!` and `?` always trigger sentence pause (no false-positive risk)
+5. Sentence-count heuristic for paragraph breaks: ≤2 sentences = dialogue (0ms pause), >2 = exposition (800ms)
+
+**Guardrail:** When detecting sentence boundaries in TTS context, always use `isSentenceEnd()` from pauseDetection.ts. Never rely on a simple period-end regex alone.
+
+---
+
+### [2026-03-29] LL-049: Dialogue Sentence-Count Threshold
+
+**Area:** TTS, UX
+**Status:** active
+**Priority:** moderate
+
+**Context:** In narration of dialogue-heavy fiction, paragraph breaks between short exchanges (e.g., `"Danny said, '...'"` / `"Debbie replied, '...'"`) got full paragraph pauses that broke conversational flow. The sentence-count heuristic (≤2 sentences = dialogue, >2 = exposition) naturally distinguishes dialogue from expository paragraphs without parsing quote marks or speech tags.
+
+**Guardrail:** The threshold is stored as `TTS_DIALOGUE_SENTENCE_THRESHOLD = 2` in constants.ts. If users report dialogue pauses feeling wrong, this is the constant to tune.

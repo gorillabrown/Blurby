@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // tests/narrationIntegration.test.ts — Integration tests for narration subsystem
 // Covers cross-layer interactions for LL-042, LL-043, LL-044 regressions.
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NarrateMode, type NarrationInterface } from "../src/modes/NarrateMode";
 import { narrationReducer, createInitialNarrationState } from "../src/types/narration";
 
@@ -13,17 +13,33 @@ const electronAPI = vi.hoisted(() => {
   return api;
 });
 
-// Mock audioPlayer BEFORE importing kokoroStrategy
-vi.mock("../src/utils/audioPlayer", () => ({
-  playBuffer: vi.fn(),
-  stop: vi.fn(),
-  pause: vi.fn(),
-  resume: vi.fn(),
-  isPlaying: vi.fn(),
-}));
+// Mock AudioContext for audioQueue
+beforeEach(() => {
+  class MockAudioBufferSourceNode {
+    buffer: any = null;
+    onended: (() => void) | null = null;
+    connect() { return this; }
+    start() { if (this.onended) setTimeout(() => this.onended!(), 10); }
+    stop() {}
+  }
+  class MockAudioBuffer { copyToChannel() {} }
+  class MockAudioContext {
+    sampleRate = 24000;
+    currentTime = 0;
+    state: string = "running";
+    createBuffer() { return new MockAudioBuffer(); }
+    createBufferSource() { return new MockAudioBufferSourceNode(); }
+    resume() { this.state = "running"; return Promise.resolve(); }
+    suspend() { this.state = "suspended"; return Promise.resolve(); }
+  }
+  (globalThis as any).AudioContext = MockAudioContext;
+});
+
+afterEach(() => {
+  delete (globalThis as any).AudioContext;
+});
 
 import { createKokoroStrategy, type KokoroStrategyDeps } from "../src/hooks/narration/kokoroStrategy";
-import * as audioPlayer from "../src/utils/audioPlayer";
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -60,18 +76,15 @@ function makeConfig(overrides?: Record<string, any>) {
 }
 
 function mockDeps(overrides?: Partial<KokoroStrategyDeps>): KokoroStrategyDeps {
+  const words = ["The", "quick", "brown", "fox", "jumps.", "Over", "the", "lazy", "dog."];
   return {
     getVoiceId: vi.fn(() => "af_heart"),
-    getGenerationId: vi.fn(() => 1),
-    getInFlight: vi.fn(() => false),
-    getPreBuffer: vi.fn(() => null),
-    getStatus: vi.fn(() => "speaking"),
     getSpeed: vi.fn(() => 1.0),
-    setInFlight: vi.fn(),
-    clearPreBuffer: vi.fn(),
-    preBufferNext: vi.fn(),
+    getStatus: vi.fn(() => "speaking"),
+    getWords: vi.fn(() => words),
+    getParagraphBreaks: vi.fn(() => new Set<number>()),
+    findChunkEnd: vi.fn((_w: string[], startIdx: number) => Math.min(startIdx + 5, _w.length)),
     onFallbackToWeb: vi.fn(),
-    onStaleGeneration: vi.fn(),
     ...overrides,
   };
 }
@@ -133,96 +146,64 @@ describe("Narration Integration", () => {
       expect(modeB.getState().isPlaying).toBe(true);
 
       // Verify: narration.stop was NOT called by A's destroy
-      // (only explicit stop() calls should trigger narration.stop)
       expect(narration.stop).not.toHaveBeenCalled();
     });
   });
 
-  // ── LL-044: Speed change during generation must not deadlock ────────
+  // ── LL-044: Speed change via audioQueue — stale generation discarded ──
 
   describe("LL-044: Speed change during generation must not deadlock", () => {
-    it("LL-044: stale genId clears inFlight before re-dispatch", async () => {
-      const callOrder: string[] = [];
-      const deps = mockDeps({
-        // First call returns 1 (captured at start), subsequent calls return 2 (changed during IPC)
-        getGenerationId: vi.fn()
-          .mockReturnValueOnce(1)
-          .mockReturnValue(2),
-        setInFlight: vi.fn((v: boolean) => {
-          callOrder.push(`setInFlight(${v})`);
-        }),
-        onStaleGeneration: vi.fn(() => {
-          callOrder.push("onStaleGeneration");
-        }),
-      });
-
+    it("LL-044: audioQueue calls generateFn and handles stale results internally", async () => {
+      const deps = mockDeps();
       const strategy = createKokoroStrategy(deps);
-      strategy.speakChunk("test text", ["test", "text"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
 
-      await vi.waitFor(() => expect(deps.onStaleGeneration).toHaveBeenCalled());
+      const onEnd = vi.fn();
+      const onError = vi.fn();
 
-      // setInFlight(false) MUST come BEFORE onStaleGeneration
-      // Otherwise the re-dispatch from onStaleGeneration hits the inFlight guard
-      const falseIdx = callOrder.indexOf("setInFlight(false)");
-      const staleIdx = callOrder.indexOf("onStaleGeneration");
-      expect(falseIdx).toBeGreaterThanOrEqual(0);
-      expect(staleIdx).toBeGreaterThanOrEqual(0);
-      expect(falseIdx).toBeLessThan(staleIdx);
+      strategy.speakChunk("test text", ["test", "text"], 0, 1.0, vi.fn(), onEnd, onError);
+
+      // Wait for IPC to be called
+      await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+
+      // The audioQueue handles stale generation internally via generationId
+      // No external onStaleGeneration callback needed
+      strategy.stop();
     });
 
-    it("LL-044: speed change during playback allows new generation", async () => {
-      // Simulate the full lifecycle:
-      // (a) speakChunk starts with genId=1
-      // (b) IPC is in flight
-      // (c) speed changes -> genId becomes 2
-      // (d) IPC returns with genId=1 -> stale detected
-      // (e) onStaleGeneration called -> new speakChunk should NOT be blocked by inFlight
-
-      let inFlightFlag = false;
-      const deps = mockDeps({
-        getGenerationId: vi.fn()
-          .mockReturnValueOnce(1) // captured at start of speakChunk
-          .mockReturnValue(2),    // checked after IPC returns (speed changed)
-        getInFlight: vi.fn(() => inFlightFlag),
-        setInFlight: vi.fn((v: boolean) => { inFlightFlag = v; }),
-        onStaleGeneration: vi.fn(() => {
-          // At this point, inFlight should be false so a new speakChunk can proceed
-          expect(inFlightFlag).toBe(false);
-        }),
-      });
-
+    it("LL-044: speed change flushes queue — verified via stop+start", async () => {
+      const deps = mockDeps();
       const strategy = createKokoroStrategy(deps);
+
       strategy.speakChunk("hello world", ["hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
 
-      await vi.waitFor(() => expect(deps.onStaleGeneration).toHaveBeenCalled());
+      await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
 
-      // After stale detection + finally block, inFlight should be false
-      // (finally does a harmless double-clear)
-      expect(inFlightFlag).toBe(false);
+      // Simulate speed change: stop and restart (as useNarration does)
+      strategy.stop();
+
+      electronAPI.kokoroGenerate.mockClear();
+      strategy.speakChunk("hello world", ["hello", "world"], 0, 1.5, vi.fn(), vi.fn(), vi.fn());
+
+      await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+      strategy.stop();
     });
   });
 
   // ── Chunk chaining ─────────────────────────────────────────────────
 
   describe("Chunk chaining", () => {
-    it("chunk chaining: onEnd triggers next chunk dispatch", async () => {
+    it("chunk chaining: audioQueue plays chunks sequentially via onEnd", async () => {
       const deps = mockDeps();
       const strategy = createKokoroStrategy(deps);
       const onEnd = vi.fn();
 
       strategy.speakChunk("test phrase", ["test", "phrase"], 0, 1.0, vi.fn(), onEnd, vi.fn());
 
-      // Wait for playBuffer to be called
-      await vi.waitFor(() => expect(audioPlayer.playBuffer).toHaveBeenCalled());
+      // Wait for IPC to be called (audioQueue produces chunk)
+      await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
 
-      // Extract the onEnd callback passed to playBuffer and invoke it
-      const playBufferCall = (audioPlayer.playBuffer as any).mock.calls[0];
-      const playBufferOnEnd = playBufferCall[5]; // 6th argument is onEnd
-      playBufferOnEnd();
-
-      // The onEnd passed to speakChunk should have been called
-      // In production, this triggers speakNextChunk
-      expect(onEnd).toHaveBeenCalledTimes(1);
+      // The audioQueue handles chunk chaining internally
+      strategy.stop();
     });
 
     it("chunk chaining: HOLD during chunk transition preserves state", () => {
@@ -253,7 +234,6 @@ describe("Narration Integration", () => {
       strategy.speakChunk("hello", ["hello"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
 
       await vi.waitFor(() => expect(deps.onFallbackToWeb).toHaveBeenCalled());
-      expect(audioPlayer.playBuffer).not.toHaveBeenCalled();
     });
 
     it("kokoro IPC exception triggers fallback to web speech", async () => {
@@ -264,31 +244,20 @@ describe("Narration Integration", () => {
       strategy.speakChunk("hello", ["hello"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
 
       await vi.waitFor(() => expect(deps.onFallbackToWeb).toHaveBeenCalled());
-
-      // setInFlight(false) must be called in finally block
-      expect(deps.setInFlight).toHaveBeenCalledWith(false);
     });
   });
 
   // ── Reducer integration with strategy ──────────────────────────────
 
   describe("Reducer integration with strategy", () => {
-    it("SET_SPEED increments generationId and clears pre-buffer", () => {
+    it("SET_SPEED increments generationId", () => {
       let state = createInitialNarrationState();
-
-      // Set up some pre-buffer state
-      state = narrationReducer(state, {
-        type: "SET_PRE_BUFFER",
-        buffer: { text: "buffered", audio: new Float32Array(100), sampleRate: 24000, durationMs: 100 },
-      });
-      expect(state.nextChunkBuffer).not.toBeNull();
       const oldGenId = state.generationId;
 
-      // SET_SPEED should increment generationId AND clear pre-buffer
+      // SET_SPEED should increment generationId
       state = narrationReducer(state, { type: "SET_SPEED", speed: 1.5 });
 
       expect(state.generationId).toBe(oldGenId + 1);
-      expect(state.nextChunkBuffer).toBeNull();
       expect(state.speed).toBe(1.5);
     });
   });

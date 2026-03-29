@@ -77,9 +77,13 @@ export const TTS_RATE_STEP = 0.1;
  *  so these values ADD to that — keep them short to avoid stacking. */
 export const TTS_PAUSE_COMMA_MS = 100;
 /** Between-chunk rhythm pause: sentence endings (. ! ?) */
-export const TTS_PAUSE_SENTENCE_MS = 200;
-/** Between-chunk rhythm pause: paragraph boundaries */
-export const TTS_PAUSE_PARAGRAPH_MS = 400;
+export const TTS_PAUSE_SENTENCE_MS = 400;
+/** Between-chunk rhythm pause: paragraph boundaries (>2 sentences) */
+export const TTS_PAUSE_PARAGRAPH_MS = 800;
+/** Number of pre-generated audio chunks in the rolling queue */
+export const TTS_QUEUE_DEPTH = 3;
+/** Paragraphs with this many or fewer sentences are treated as dialogue (minimal pause) */
+export const TTS_DIALOGUE_SENTENCE_THRESHOLD = 2;
 
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */
