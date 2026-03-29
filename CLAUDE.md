@@ -182,12 +182,12 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ---
 
-## Current System State (v2.1.7 — Post-Mode Verticals)
+## Current System State (v1.0.0+ — Post-TTS-1)
 
 ### Codebase (branch: `main`)
 
-- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3) complete
-- 776 tests passing across 38 test files
+- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1) complete
+- 796 tests passing across 39 test files
 - CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -245,12 +245,10 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ### Feature Status
 
-Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices), universal EPUB pipeline, library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 776 tests across 38 files.
+Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices), universal EPUB pipeline, library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 796 tests across 39 files.
 
 ### What's Next
 
-- **Sprint 24: External Audit** — Full 6-step quality gate before v1.0.0 release.
-- **v1.0.0 RELEASE** — After Sprint 24 zero CRITICALs.
 - **Sprint 25: RSS Library + Paywall Integration** — post-v1
 - **Sprint 18C: Android app** — post-v1
 - **Code signing** — not doing (explicit decision)
@@ -275,7 +273,12 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 ✅ Sprint TH-1 (narration test hardening — 88 new tests, 776 total) — completed
 ✅ Sprint CT-2 (test harness hardening — rich seed data, sessionStorage, 5 bug fixes) — completed
 ✅ Sprint CT-3 (click-through repair — KB checklist alignment, Focus stability, stub improvements) — completed
-**Sprint 24** (external audit) → **v1.0.0 RELEASE**
+✅ Sprint 24 (external audit — 58 findings, 3C/24H/21M/10L) — completed
+✅ Sprint 24R (CRIT remediation — path validation) — completed
+✅ Sprint KB-1 (keyboard navigation remap — 791 tests) — completed
+✅ Sprint TTS-1 (narration correctness — 15 code fixes from TTS audit, 796 tests) — completed
+✅ v1.0.0 RELEASE — tagged + shipped
+✅ Sprint TTS-2 (TTS docs — privacy, SSML, safety, glossary, 12-term glossary) — completed
 **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
 
 ---

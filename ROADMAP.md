@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-03-28 — 24R + KB-1 + CT-3 complete. All CRITICALs resolved. v1.0.0 gate clear.
+**Last updated**: 2026-03-28 — TTS-1 + TTS-2 merged. 796 tests, 39 files. v1.0.0 shipped. All TTS audit work complete.
 **Current branch**: `main`
-**Current state**: All sprints through KB-1 complete. 791 tests, 39 files. Version: 0.10.0. v1.0.0 gate: CLEAR (0 CRITICALs remaining).
+**Current state**: All sprints through TTS-2 complete. 796 tests, 39 files. Version: v1.0.0+.
 
 > **Navigation:** Forward-looking sprints below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`.
 
@@ -19,7 +19,9 @@
 | **Sprint 24: External Audit** | — | ✅ DONE | 58 findings (3C/24H/21M/10L). Findings: `docs/project/AGENT_FINDINGS.md`. |
 | **Sprint 24R: CRIT Remediation** | v0.9.1 | ✅ DONE | CRIT-1 fixed (path validation on read-file-buffer). CRIT-2/3 dismissed. |
 | **Sprint KB-1: Keyboard Navigation Remap** | v0.10.0 | ✅ DONE | Ctrl=word/sentence, Shift=paragraph/chapter. 15 new tests. 791 total. |
-| **v1.0.0 RELEASE** | v1.0.0 | ⬜ READY | All gates passed. Bump package.json + tag. |
+| **Sprint TTS-1: Narration Correctness** | v1.0.9 | ✅ DONE | 15 TTS fixes: dual-write rule, worker recovery, audioPlayer guards. 796 tests. |
+| **v1.0.0 RELEASE** | v1.0.0 | ✅ DONE | Tagged + shipped. CI release pipeline active. |
+| **Sprint TTS-2: TTS Documentation** | — | ✅ DONE | Privacy data-flow, SSML stance, safety posture, TTS glossary. ~560 words in TECHNICAL_REFERENCE.md. |
 | **Sprint 25: RSS Library** | v1.1.0 | 📋 POST-V1 | Feed aggregation from authenticated sites, RSS Library UI, cloud sync. |
 | **Sprint 18C: Android APK** | v1.2.0 | 📋 POST-V1 | React Native port with cloud sync. |
 
@@ -698,4 +700,3 @@ Paywall Integration                (React Native)
 - iOS app (port Track C to iOS via React Native — same codebase)
 - Firefox extension (port Track B to Firefox Manifest V3)
 - Safari extension (port Track B via Safari Web Extensions API)
-                                     
