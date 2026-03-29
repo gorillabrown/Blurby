@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 1.1.0)'
+        description: 'Version to release (e.g., 1.2.0)'
         required: true
         type: string
 
@@ -44,9 +44,7 @@ jobs:
         run: npm run build
 
       - name: Package Windows installer (x64)
-        run: npx electron-builder --win --x64
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --publish never
 
       - name: Verify x64 artifacts
         shell: bash
@@ -59,19 +57,23 @@ jobs:
             echo "ERROR: No x64 .exe found" && exit 1
           fi
 
-      - name: Ensure draft release exists
+      - name: Determine tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=v${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "TAG=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft release (idempotent)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="v${{ github.event.inputs.version }}"
-          else
-            TAG="${{ github.ref_name }}"
-          fi
-          gh release create "$TAG" --draft --title "$TAG" --notes "Release $TAG" 2>/dev/null || true
+        run: gh release create "${{ steps.tag.outputs.TAG }}" --draft --title "${{ steps.tag.outputs.TAG }}" --notes "Release ${{ steps.tag.outputs.TAG }}" 2>/dev/null || true
 
-      - name: Generate and upload SHA-256 checksums (x64)
+      - name: Upload x64 artifacts to release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -79,12 +81,8 @@ jobs:
           cd release/nsis-web
           sha256sum *.exe *.7z 2>/dev/null > checksums-x64.sha256 || true
           cat checksums-x64.sha256
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="v${{ github.event.inputs.version }}"
-          else
-            TAG="${{ github.ref_name }}"
-          fi
-          gh release upload "$TAG" checksums-x64.sha256 --clobber
+          TAG="${{ steps.tag.outputs.TAG }}"
+          gh release upload "$TAG" *.exe *.7z checksums-x64.sha256 latest.yml --clobber 2>/dev/null || true
 
   build-arm64:
     runs-on: windows-latest
@@ -112,9 +110,7 @@ jobs:
         run: npm run build
 
       - name: Package Windows installer (arm64)
-        run: npx electron-builder --win --arm64
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --arm64 --publish never
 
       - name: Verify arm64 artifacts
         shell: bash
@@ -127,19 +123,23 @@ jobs:
             echo "ERROR: No arm64 .exe found" && exit 1
           fi
 
-      - name: Ensure draft release exists
+      - name: Determine tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=v${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "TAG=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft release (idempotent)
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="v${{ github.event.inputs.version }}"
-          else
-            TAG="${{ github.ref_name }}"
-          fi
-          gh release create "$TAG" --draft --title "$TAG" --notes "Release $TAG" 2>/dev/null || true
+        run: gh release create "${{ steps.tag.outputs.TAG }}" --draft --title "${{ steps.tag.outputs.TAG }}" --notes "Release ${{ steps.tag.outputs.TAG }}" 2>/dev/null || true
 
-      - name: Generate and upload SHA-256 checksums (arm64)
+      - name: Upload arm64 artifacts to release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -147,9 +147,5 @@ jobs:
           cd release/nsis-web
           sha256sum *.exe *.7z 2>/dev/null > checksums-arm64.sha256 || true
           cat checksums-arm64.sha256
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="v${{ github.event.inputs.version }}"
-          else
-            TAG="${{ github.ref_name }}"
-          fi
-          gh release upload "$TAG" checksums-arm64.sha256 --clobber
+          TAG="${{ steps.tag.outputs.TAG }}"
+          gh release upload "$TAG" *.exe *.7z checksums-arm64.sha256 --clobber 2>/dev/null || true
