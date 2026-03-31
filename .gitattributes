@@ -1,0 +1,7 @@
+# Auto detect text files and ensure LF line endings
+* text=auto eol=lf
+*.png binary
+*.zip binary
+*.exe binary
+*.woff2 binary
+*.onnx binary
