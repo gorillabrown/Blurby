@@ -17,6 +17,8 @@ import SnoozePickerOverlay from "./SnoozePickerOverlay";
 import TagPickerOverlay from "./TagPickerOverlay";
 import QuickSettingsPopover from "./QuickSettingsPopover";
 import OnboardingOverlay from "./OnboardingOverlay";
+import BugReportModal from "./BugReportModal";
+import { gatherAppState, type BugReportAppState } from "../utils/bugReportState";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
 
@@ -73,6 +75,13 @@ export default function LibraryContainer() {
   // Sprint 23: First-run onboarding
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Bug report state
+  const [bugReport, setBugReport] = useState<{
+    screenshotPath: string | null;
+    screenshotFile: string | null;
+    appState: BugReportAppState;
+  } | null>(null);
+
   // Smart import confirmation state
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
 
@@ -82,6 +91,40 @@ export default function LibraryContainer() {
     loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
     toggleFavorite, archiveDoc, unarchiveDoc, showToast,
   } = useLibrary();
+
+  const openBugReport = useCallback(async () => {
+    // Capture screenshot BEFORE showing modal (captures the buggy state)
+    let screenshotPath: string | null = null;
+    let screenshotFile: string | null = null;
+    try {
+      const result = await api.captureBugScreenshot();
+      if ("filename" in result) {
+        screenshotPath = result.filepath;
+        screenshotFile = result.filename;
+      }
+    } catch { /* screenshot not critical */ }
+
+    const appState = gatherAppState({
+      docId: activeDoc?.id,
+      docTitle: activeDoc?.title,
+      docSource: (activeDoc as any)?.source,
+      docExt: (activeDoc as any)?.ext,
+      wordCount: activeDoc?.wordCount,
+      position: activeDoc?.position,
+      furthestPosition: (activeDoc as any)?.furthestPosition,
+      cfi: (activeDoc as any)?.cfi,
+      readingMode: settings.readingMode,
+      ttsEngine: settings.ttsEngine,
+      ttsVoice: (settings as any).ttsVoice,
+      ttsSpeed: (settings as any).ttsSpeed,
+      wpm,
+      theme: settings.theme,
+      focusTextSize: (settings as any).focusTextSize,
+      platform,
+    });
+
+    setBugReport({ screenshotPath, screenshotFile, appState });
+  }, [activeDoc, settings, wpm, platform]);
 
   // Watcher error notifications (must be after useLibrary which provides showToast)
   useEffect(() => {
@@ -357,6 +400,7 @@ export default function LibraryContainer() {
   useGlobalKeys({
     toggleFlap: toggleMenuFlap,
     openSettings: handleOpenSettings,
+    openBugReport,
     view,
     activeOverlay: kbState.activeOverlay,
     setActiveOverlay: kbState.setActiveOverlay,
@@ -482,6 +526,14 @@ export default function LibraryContainer() {
               settings={settings as any}
               onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
               onClose={() => kbState.setActiveOverlay(null)}
+            />
+          )}
+          {bugReport && (
+            <BugReportModal
+              screenshotPath={bugReport.screenshotPath}
+              screenshotFile={bugReport.screenshotFile}
+              appState={bugReport.appState}
+              onClose={() => setBugReport(null)}
             />
           )}
         </ToastContext.Provider>
@@ -619,6 +671,14 @@ export default function LibraryContainer() {
         )}
         {showOnboarding && (
           <OnboardingOverlay onComplete={handleOnboardingComplete} />
+        )}
+        {bugReport && (
+          <BugReportModal
+            screenshotPath={bugReport.screenshotPath}
+            screenshotFile={bugReport.screenshotFile}
+            appState={bugReport.appState}
+            onClose={() => setBugReport(null)}
+          />
         )}
       </ToastContext.Provider>
     </SettingsContext.Provider>

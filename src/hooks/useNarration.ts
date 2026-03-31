@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
 import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
 import type { RhythmPauses } from "../types";
+import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/pauseDetection";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
@@ -26,23 +27,27 @@ function wpmToRate(wpm: number): number {
 }
 
 /** Find sentence boundary in word array, returns end index (exclusive).
+ *  Uses isSentenceEnd() for abbreviation-aware detection (Mr., Dr., etc.).
  *  Prefers shorter, sentence-aligned chunks so TTS speaks one sentence at a time
- *  with natural prosody at boundaries. Minimum 5 words to avoid tiny chunks.
+ *  with natural prosody at boundaries.
  *  If pageEnd is provided, never exceeds it (prevents reading across page boundaries). */
 function findSentenceBoundary(words: string[], startIdx: number, chunkSize: number, pageEnd?: number | null): number {
   const hardMax = pageEnd != null ? Math.min(pageEnd + 1, words.length) : words.length;
   const maxEnd = Math.min(startIdx + chunkSize, hardMax);
 
   // Find the FIRST sentence ending — one sentence per chunk for natural pauses
-  // Start scanning from word 1 (allow at least 1 word per chunk)
   for (let i = startIdx; i < maxEnd; i++) {
-    if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) return Math.min(i + 1, hardMax);
+    if (isSentenceEnd(words[i], i + 1 < words.length ? words[i + 1] : undefined)) {
+      return Math.min(i + 1, hardMax);
+    }
   }
   // No sentence ending within chunk — scan further (up to 2x) for one
   if (hardMax > maxEnd) {
     const extendedMax = Math.min(startIdx + chunkSize * 2, hardMax);
     for (let i = maxEnd; i < extendedMax; i++) {
-      if (/[.!?]["'\u201D\u2019)]*$/.test(words[i])) return Math.min(i + 1, hardMax);
+      if (isSentenceEnd(words[i], i + 1 < words.length ? words[i + 1] : undefined)) {
+        return Math.min(i + 1, hardMax);
+      }
     }
   }
   // Still no boundary — use the chunk size limit
@@ -74,6 +79,9 @@ export default function useNarration() {
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
   const paragraphBreaksRef = useRef<Set<number>>(new Set());
+  const pauseConfigRef = useRef<PauseConfig>(DEFAULT_PAUSE_CONFIG);
+  const onSectionEndRef = useRef<(() => void) | null>(null);
+  const bookIdRef = useRef<string>("");
 
   // ── TTS Strategy instances ──────────────────────────────────────────────
   const webStrategy = useMemo(
@@ -91,8 +99,7 @@ export default function useNarration() {
       getSpeed: () => stateRef.current.speed,
       getStatus: () => stateRef.current.status,
       getWords: () => allWordsRef.current,
-      getParagraphBreaks: () => paragraphBreaksRef.current,
-      findChunkEnd: (words, startIdx) => findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null),
+      getBookId: () => bookIdRef.current,
       onFallbackToWeb: () => {
         dispatch({ type: "SET_ENGINE", engine: "web" });
         speakNextChunkWebRef.current();
@@ -198,7 +205,11 @@ export default function useNarration() {
     const words = allWordsRef.current;
     const startIdx = s.cursorWordIndex;
     if (startIdx >= words.length) {
-      dispatch({ type: "STOP" });
+      if (onSectionEndRef.current) {
+        onSectionEndRef.current();
+      } else {
+        dispatch({ type: "STOP" });
+      }
       return;
     }
 
@@ -230,19 +241,23 @@ export default function useNarration() {
     );
   }, [webStrategy]);
 
-  /** Speak using the Kokoro strategy (delegates to audioQueue). */
+  /** Speak using the Kokoro strategy (delegates to NAR-2 pipeline + scheduler). */
   const speakNextChunkKokoro = useCallback(() => {
     const s = stateRef.current;
     if (s.status === "idle") return;
     const words = allWordsRef.current;
     const startIdx = s.cursorWordIndex;
     if (startIdx >= words.length) {
-      dispatch({ type: "STOP" });
+      if (onSectionEndRef.current) {
+        onSectionEndRef.current();
+      } else {
+        dispatch({ type: "STOP" });
+      }
       return;
     }
 
     kokoroStrategy.speakChunk(
-      "", // text not used — audioQueue slices its own chunks
+      "", // text not used — pipeline handles its own chunk sizing
       [],
       startIdx,
       s.speed,
@@ -251,7 +266,13 @@ export default function useNarration() {
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
       },
       () => {
-        dispatch({ type: "STOP" });
+        // All words exhausted — if section-end callback is set (foliate mode),
+        // fire it to advance to next section instead of stopping narration.
+        if (onSectionEndRef.current) {
+          onSectionEndRef.current();
+        } else {
+          dispatch({ type: "STOP" });
+        }
       },
       () => {
         dispatch({ type: "STOP" });
@@ -346,6 +367,19 @@ export default function useNarration() {
     speakNextChunk();
   }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
+  // HOTFIX-6: Replace word array and resync pipeline to a new global position
+  const updateWords = useCallback((words: string[], globalStartIdx: number) => {
+    allWordsRef.current = words;
+    const s = stateRef.current;
+    if (s.status === "idle") return;
+    // Stop current playback, update position, restart from global index
+    webStrategy.stop();
+    kokoroStrategy.stop();
+    dispatch({ type: "WORD_ADVANCE", wordIndex: globalStartIdx });
+    stateRef.current = { ...stateRef.current, cursorWordIndex: globalStartIdx, chunkStart: globalStartIdx };
+    speakNextChunk();
+  }, [speakNextChunk, webStrategy, kokoroStrategy]);
+
   const updateWpm = useCallback((wpm: number) => {
     const newRate = wpmToRate(wpm);
     dispatch({ type: "SET_SPEED", speed: newRate });
@@ -412,22 +446,21 @@ export default function useNarration() {
     dispatch({ type: "SET_SPEED", speed: clamped });
     // Update stateRef for immediate reads
     stateRef.current = { ...stateRef.current, speed: clamped, generationId: stateRef.current.generationId + 1 };
-    // Debounce the restart so rapid slider adjustments settle before triggering re-generation
-    if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
-    rateDebounceRef.current = setTimeout(() => {
-      rateDebounceRef.current = null;
-      const s = stateRef.current;
-      if (s.status !== "idle") {
-        if (s.engine === "web") {
-          webStrategy.stop();
-          speakNextChunk();
-        } else {
-          // Kokoro: flush queue and restart at new rate
+
+    const s = stateRef.current;
+    if (s.status !== "idle") {
+      // Debounced stop+restart for both engines (Kokoro regenerates at native speed)
+      if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
+      rateDebounceRef.current = setTimeout(() => {
+        rateDebounceRef.current = null;
+        if (s.engine === "kokoro") {
           kokoroStrategy.stop();
-          speakNextChunk();
+        } else {
+          webStrategy.stop();
         }
-      }
-    }, TTS_RATE_RESTART_DEBOUNCE_MS);
+        speakNextChunk();
+      }, TTS_RATE_RESTART_DEBOUNCE_MS);
+    }
   }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
   // Cleanup on unmount
@@ -451,6 +484,7 @@ export default function useNarration() {
     speak,
     startCursorDriven,
     resyncToCursor,
+    updateWords,
     updateWpm,
     pause,
     resume,
@@ -466,6 +500,18 @@ export default function useNarration() {
     setRhythmPauses: (pauses: RhythmPauses | null, paragraphBreaks?: Set<number>) => {
       rhythmPausesRef.current = pauses;
       if (paragraphBreaks) paragraphBreaksRef.current = paragraphBreaks;
+    },
+    setPauseConfig: (config: PauseConfig) => {
+      pauseConfigRef.current = config;
+    },
+    setOnSectionEnd: (cb: (() => void) | null) => {
+      onSectionEndRef.current = cb;
+    },
+    setBookId: (id: string) => {
+      bookIdRef.current = id;
+    },
+    warmUp: () => {
+      kokoroStrategy.warmUp();
     },
   };
 }

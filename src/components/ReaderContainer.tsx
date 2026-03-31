@@ -1,12 +1,14 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
 import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
 import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
+import { findSectionForWord, type BookWordArray } from "../types/narration";
+import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
 import { useReaderKeys } from "../hooks/useKeyboardShortcuts";
@@ -14,7 +16,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
-import FoliatePageView from "./FoliatePageView";
+import FoliatePageView, { wrapWordsInSpans, unwrapWordSpans } from "./FoliatePageView";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
@@ -237,6 +239,66 @@ export default function ReaderContainer({
   const ttsActive = readingMode === "narration"; // derived, not separate state
   // preCapWpmRef managed by useReaderMode hook
 
+  // NAR-2: Pre-warm Kokoro model + AudioContext on reader mount
+  useEffect(() => {
+    if (settings.ttsEngine === "kokoro") {
+      if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
+      // NAR-5: Preload marathon worker in parallel (background caching)
+      if (api?.kokoroPreloadMarathon) api.kokoroPreloadMarathon().catch(() => {});
+      // Warm up AudioContext so first play has zero audio driver latency
+      narration.warmUp();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only on mount
+
+  // NAR-5: Background cacher — marathon worker fills disk cache ahead of reading position
+  const backgroundCacherRef = useRef<BackgroundCacher | null>(null);
+  useEffect(() => {
+    if (settings.ttsEngine !== "kokoro" || settings.ttsCacheEnabled === false) return;
+    if (!api?.kokoroGenerateMarathon) return;
+
+    const cacher = createBackgroundCacher({
+      generateFn: async (text, voiceId, speed) => {
+        const result = await api.kokoroGenerateMarathon(text, voiceId, speed);
+        if (result.error || !result.audio || !result.sampleRate) {
+          return { error: result.error || "no audio returned" };
+        }
+        const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
+        return { audio: result.audio, sampleRate: result.sampleRate, durationMs };
+      },
+      getVoiceId: () => settings.kokoroVoice || "af_bella",
+      isCacheEnabled: () => settings.ttsCacheEnabled !== false,
+    });
+    backgroundCacherRef.current = cacher;
+    cacher.start();
+
+    return () => {
+      cacher.stop();
+      backgroundCacherRef.current = null;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.ttsEngine, settings.ttsCacheEnabled]);
+
+  // NAR-5: Set active book on the background cacher when text is available
+  useEffect(() => {
+    const cacher = backgroundCacherRef.current;
+    if (!cacher) return;
+    const words = wordsRef.current;
+    if (words.length > 0) {
+      cacher.setActiveBook({
+        id: activeDoc.id,
+        words,
+        position: activeDoc.position || 0,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDoc.id, wordsRef.current.length]);
+
+  // NAR-2: Sync book ID to narration hook for cache keying
+  useEffect(() => {
+    narration.setBookId(activeDoc.id);
+  }, [activeDoc.id, narration.setBookId]);
+
   // Sync TTS engine/voice/rate from settings → narration hook
   useEffect(() => {
     narration.setEngine(settings.ttsEngine || "web");
@@ -259,6 +321,135 @@ export default function ReaderContainer({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.ttsRate]);
+
+  // Sync TTS pause config from settings → narration hook
+  useEffect(() => {
+    narration.setPauseConfig({
+      commaMs: settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
+      clauseMs: settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
+      sentenceMs: settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS,
+      paragraphMs: settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS,
+      dialogueThreshold: settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD,
+    });
+  }, [settings.ttsPauseCommaMs, settings.ttsPauseClauseMs, settings.ttsPauseSentenceMs, settings.ttsPauseParagraphMs, settings.ttsDialogueSentenceThreshold, narration.setPauseConfig]);
+
+  // NAR-3: Full-book word array for seamless narration across sections
+  const bookWordsRef = useRef<BookWordArray | null>(null);
+  const bookWordsCompleteRef = useRef<boolean>(false);
+  const currentNarrationSectionRef = useRef<number>(-1);
+  const lastGoToSectionTimeRef = useRef<number>(0);
+
+  // HOTFIX-6: Extract full-book words via main-process IPC (no foliate navigation)
+  useEffect(() => {
+    if (!useFoliate || readingMode !== "narration") return;
+    // Already extracted for this book?
+    if (bookWordsRef.current && bookWordsRef.current.complete) return;
+    if (!api?.extractEpubWords) return;
+
+    let cancelled = false;
+
+    // Get current section-local highlightedWordIndex before extraction
+    const localIdxBeforeExtraction = highlightedWordIndex;
+    const currentSectionIdx = foliateApiRef.current?.getWords()?.[0]?.sectionIndex ?? 0;
+
+    api.extractEpubWords(activeDoc.id).then((result) => {
+      if (cancelled || !result.words || !result.sections) return;
+
+      const bookWords: BookWordArray = {
+        words: result.words,
+        sections: result.sections,
+        totalWords: result.totalWords ?? result.words.length,
+        complete: true,
+      };
+
+      bookWordsRef.current = bookWords;
+      bookWordsCompleteRef.current = true;
+      wordsRef.current = bookWords.words;
+
+      // HOTFIX-10: Re-stamp all loaded foliate sections with global indices
+      // Must happen BEFORE narration.updateWords so DOM has global indices when pipeline restarts
+      const contents = foliateApiRef.current?.getView()?.renderer?.getContents?.() ?? [];
+      for (const { doc: sectionDoc, index: sectionIndex } of contents) {
+        const sec = bookWords.sections.find(s => s.sectionIndex === sectionIndex);
+        if (sec && sectionDoc?.body) {
+          unwrapWordSpans(sectionDoc);
+          wrapWordsInSpans(sectionDoc, sectionIndex, sec.startWordIdx);
+        }
+      }
+
+      // Convert section-local highlightedWordIndex to global
+      const currentSection = bookWords.sections.find(s => s.sectionIndex === currentSectionIdx);
+      if (currentSection && localIdxBeforeExtraction >= 0) {
+        const globalIdx = currentSection.startWordIdx + localIdxBeforeExtraction;
+        // Update narration to use the global word array
+        narration.updateWords(bookWords.words, globalIdx);
+      }
+
+      console.debug(`[HOTFIX-6] main-process extraction complete: ${bookWords.totalWords} words, ${bookWords.sections.length} sections`);
+    }).catch((err) => {
+      console.warn("[HOTFIX-6] main-process extraction failed:", err);
+    });
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useFoliate, readingMode, activeDoc.id]);
+
+  // NAR-3: When narration word index crosses a section boundary, navigate foliate
+  useEffect(() => {
+    if (!useFoliate || readingMode !== "narration" || !bookWordsRef.current?.complete) return;
+
+    const bookWords = bookWordsRef.current;
+    const sec = findSectionForWord(bookWords.sections, highlightedWordIndex);
+    if (!sec) return;
+
+    // Only navigate if the section changed AND throttle to max once per 200ms
+    if (sec.sectionIndex !== currentNarrationSectionRef.current) {
+      const now = Date.now();
+      if (now - lastGoToSectionTimeRef.current < 200) return;
+      currentNarrationSectionRef.current = sec.sectionIndex;
+      lastGoToSectionTimeRef.current = now;
+      foliateApiRef.current?.goToSection(sec.sectionIndex).catch(() => {});
+    }
+  }, [useFoliate, readingMode, highlightedWordIndex]);
+
+  // NAR-3: Clear full-book extraction when book changes or narration stops
+  useEffect(() => {
+    return () => {
+      bookWordsRef.current = null;
+      currentNarrationSectionRef.current = -1;
+    };
+  }, [activeDoc.id]);
+
+  // Wire section-end callback for foliate EPUBs — fallback when full-book extraction not ready
+  useEffect(() => {
+    if (!useFoliate) {
+      narration.setOnSectionEnd(null);
+      return;
+    }
+    narration.setOnSectionEnd(() => {
+      // If full-book words are loaded, narration already has everything — stop, don't navigate.
+      if (bookWordsRef.current?.complete) {
+        narration.stop();
+        return;
+      }
+      // Fallback for when extraction is still in progress.
+      const api = foliateApiRef.current;
+      if (!api) return;
+      api.next();
+      const checkAndRestart = () => {
+        setTimeout(() => {
+          extractFoliateWords();
+          const newWords = wordsRef.current;
+          if (newWords.length > 0) {
+            narration.resyncToCursor(0, effectiveWpm);
+          }
+        }, 300);
+      };
+      checkAndRestart();
+    });
+    return () => narration.setOnSectionEnd(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useFoliate, narration.setOnSectionEnd]);
 
   // Page navigation ref (needed by useReaderMode for return-to-reading)
   const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void }>({
@@ -302,6 +493,7 @@ export default function ReaderContainer({
       setReadingMode("page");
     },
     setFlowPlaying,
+    bookWordsCompleteRef,
   });
 
   // ── Mode transitions (extracted to useReaderMode hook) ──────────────
@@ -684,9 +876,22 @@ export default function ReaderContainer({
           const mode = readingModeRef.current;
           if (mode !== "narration" && mode !== "flow") {
             extractFoliateWords();
-            // After extraction, sync highlightedWordIndex to the first visible word
-            // so pressing Space starts from the correct position (not stale approx index)
-            if (foliateApiRef.current) {
+            // Restore saved position state and highlight the closest visible word.
+            // savedPos is a global word index (e.g. 50000) but foliate only renders
+            // one section — DOM only has section-local word spans. Use CFI for navigation
+            // (already done by init) and findFirstVisibleWordIndex for DOM highlight.
+            const savedPos = activeDoc.position || 0;
+            if (savedPos >= FOLIATE_MIN_ENGAGEMENT_POSITION) {
+              // Set state to saved position (for narration/flow start point)
+              setHighlightedWordIndex(savedPos);
+              // Highlight the first visible word in the DOM (CFI already navigated here)
+              if (foliateApiRef.current) {
+                const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
+                if (firstVisible >= 0) {
+                  foliateApiRef.current.highlightWordByIndex(firstVisible);
+                }
+              }
+            } else if (foliateApiRef.current) {
               const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
               if (firstVisible >= 0) {
                 setHighlightedWordIndex(firstVisible);
@@ -711,6 +916,7 @@ export default function ReaderContainer({
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
       narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
+      bookWordSections={bookWordsRef.current?.sections}
       onFlowWordAdvance={setHighlightedWordIndex}
       onWordsReextracted={() => {
         // New EPUB section loaded — update the active mode's word array

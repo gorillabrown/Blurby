@@ -255,15 +255,16 @@ export function useReaderKeys(
 
 // ── useGlobalKeys (updated with Sprint 20) ────────────────────────────────
 
-export function useGlobalKeys({ toggleFlap, openSettings, view, activeOverlay, setActiveOverlay }: {
+export function useGlobalKeys({ toggleFlap, openSettings, openBugReport, view, activeOverlay, setActiveOverlay }: {
   toggleFlap: () => void;
   openSettings?: () => void;
+  openBugReport?: () => void;
   view: string;
   activeOverlay?: OverlayId;
   setActiveOverlay?: (overlay: OverlayId) => void;
 }) {
-  const stateRef = useRef({ toggleFlap, openSettings, view, activeOverlay, setActiveOverlay });
-  stateRef.current = { toggleFlap, openSettings, view, activeOverlay, setActiveOverlay };
+  const stateRef = useRef({ toggleFlap, openSettings, openBugReport, view, activeOverlay, setActiveOverlay });
+  stateRef.current = { toggleFlap, openSettings, openBugReport, view, activeOverlay, setActiveOverlay };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -287,6 +288,13 @@ export function useGlobalKeys({ toggleFlap, openSettings, view, activeOverlay, s
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === ",") {
         e.preventDefault();
         s.setActiveOverlay?.(s.activeOverlay === "quickSettings" ? null : "quickSettings");
+        return;
+      }
+
+      // Ctrl+Shift+B opens bug report
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === "KeyB") {
+        e.preventDefault();
+        s.openBugReport?.();
         return;
       }
 

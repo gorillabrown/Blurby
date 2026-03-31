@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.1.2",
+  "version": "1.4.7",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -91,6 +91,7 @@
   "dependencies": {
     "@azure/msal-node": "^3.8.10",
     "@mozilla/readability": "^0.6.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
     "adm-zip": "^0.5.16",
     "cheerio": "^1.2.0",
     "chokidar": "^4.0.3",
@@ -101,6 +102,7 @@
     "googleapis": "^171.4.0",
     "jsdom": "^24.1.0",
     "kokoro-js": "^1.2.1",
+    "opusscript": "^0.1.1",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.18.0",
     "react": "^19.0.0",

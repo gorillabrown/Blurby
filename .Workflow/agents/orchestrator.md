@@ -1,6 +1,6 @@
 # Orchestrator Agent
 
-**Model:** [CUSTOMIZE: most capable model — e.g., claude-opus]
+**Model:** claude-opus (or self-review in single-CLI mode)
 **Type:** Lead coordinator
 **Triggers:** Multi-step campaigns, phase implementations, QA sweeps, complex problem-solving
 

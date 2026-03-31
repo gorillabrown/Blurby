@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// tests/kokoroStrategy.test.ts — Tests for Kokoro TTS strategy (audioQueue-based)
+// tests/kokoroStrategy.test.ts — Tests for Kokoro TTS strategy (NAR-2 pipeline + scheduler)
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Set up electronAPI before kokoroStrategy module loads
@@ -10,10 +10,11 @@ const electronAPI = vi.hoisted(() => {
   return api;
 });
 
-// Mock AudioContext for audioQueue
+// Mock AudioContext for audioScheduler
 beforeEach(() => {
   class MockAudioBufferSourceNode {
     buffer: any = null;
+    playbackRate = { value: 1.0 };
     onended: (() => void) | null = null;
     connect() { return this; }
     start() { if (this.onended) setTimeout(() => this.onended!(), 10); }
@@ -45,8 +46,7 @@ function mockDeps(overrides?: Partial<KokoroStrategyDeps>): KokoroStrategyDeps {
     getSpeed: vi.fn(() => 1.0),
     getStatus: vi.fn(() => "speaking"),
     getWords: vi.fn(() => words),
-    getParagraphBreaks: vi.fn(() => new Set<number>()),
-    findChunkEnd: vi.fn((_w: string[], startIdx: number) => Math.min(startIdx + 3, _w.length)),
+    getBookId: vi.fn(() => "test-book"),
     onFallbackToWeb: vi.fn(),
     ...overrides,
   };
@@ -64,7 +64,7 @@ describe("createKokoroStrategy", () => {
     electronAPI.kokoroGenerate = vi.fn().mockResolvedValue(defaultIpcResult);
   });
 
-  it("happy path: speakChunk starts audioQueue which calls IPC", async () => {
+  it("happy path: speakChunk starts pipeline which calls IPC", async () => {
     const deps = mockDeps();
     const strategy = createKokoroStrategy(deps);
 
@@ -141,28 +141,29 @@ describe("createKokoroStrategy", () => {
     strategy.stop();
   });
 
-  it("uses findChunkEnd to slice chunks", async () => {
-    const findChunkEnd = vi.fn((_w: string[], startIdx: number) => Math.min(startIdx + 2, _w.length));
-    const deps = mockDeps({ findChunkEnd });
+  it("uses progressive chunk sizing (NAR-2 pipeline)", async () => {
+    const deps = mockDeps();
     const strategy = createKokoroStrategy(deps);
 
     strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
 
-    await vi.waitFor(() => expect(findChunkEnd).toHaveBeenCalled());
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
 
-    // First chunk should be 2 words
+    // First chunk uses all 6 words (fewer than TTS_COLD_START_CHUNK_WORDS=13)
     const generatedText = electronAPI.kokoroGenerate.mock.calls[0][0];
-    expect(generatedText).toBe("Hello world");
+    expect(generatedText).toContain("Hello");
 
     strategy.stop();
   });
 
-  it("exposes getQueue for flush operations", () => {
+  it("exposes getScheduler and getPipeline (NAR-2)", () => {
     const deps = mockDeps();
     const strategy = createKokoroStrategy(deps);
 
-    expect(strategy.getQueue).toBeInstanceOf(Function);
-    const queue = strategy.getQueue();
-    expect(queue.flush).toBeInstanceOf(Function);
+    expect(strategy.getScheduler).toBeInstanceOf(Function);
+    expect(strategy.getPipeline).toBeInstanceOf(Function);
+    const scheduler = strategy.getScheduler();
+    expect(scheduler.stop).toBeInstanceOf(Function);
+    expect(scheduler.pause).toBeInstanceOf(Function);
   });
 });

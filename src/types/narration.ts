@@ -1,3 +1,44 @@
+// ── Book word array types (moved from bookWordExtractor.ts in HOTFIX-6) ──────
+
+/** Section boundary in the book-wide word array */
+export interface SectionBoundary {
+  sectionIndex: number;
+  startWordIdx: number;  // first word of this section in the global array
+  endWordIdx: number;    // last word + 1
+  wordCount: number;
+}
+
+/** Result of full-book word extraction */
+export interface BookWordArray {
+  words: string[];
+  sections: SectionBoundary[];
+  totalWords: number;
+  complete: boolean;
+}
+
+/**
+ * Find which section a global word index belongs to.
+ */
+export function findSectionForWord(sections: SectionBoundary[], globalWordIdx: number): SectionBoundary | null {
+  for (const sec of sections) {
+    if (globalWordIdx >= sec.startWordIdx && globalWordIdx < sec.endWordIdx) {
+      return sec;
+    }
+  }
+  return null;
+}
+
+/**
+ * Convert a global word index to a section-local word index.
+ */
+export function globalToLocal(sections: SectionBoundary[], globalWordIdx: number): { sectionIndex: number; localIdx: number } | null {
+  const sec = findSectionForWord(sections, globalWordIdx);
+  if (!sec) return null;
+  return { sectionIndex: sec.sectionIndex, localIdx: globalWordIdx - sec.startWordIdx };
+}
+
+// ── Narration state machine types ────────────────────────────────────────────
+
 export type NarrationStatus = "idle" | "loading" | "speaking" | "paused" | "holding" | "error";
 
 export interface NarrationState {

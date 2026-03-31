@@ -9,8 +9,8 @@
 4. **Use plain language with codebase terms parenthetical** — e.g., focus reading (ReaderView), flow reading (ScrollReaderView), page reading (PageReaderView), bottom bar (ReaderBottomBar), word index (wordIndex), etc.
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
-7. **CLAUDE.md stays under ~20k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
-8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt using the **Sprint Dispatch Template** in `.claude/agents/blurby-lead.md`. Dispatches are POINTERS not PAYLOADS — reference the Roadmap section for full spec, don't duplicate it.
+7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
+8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt using the **Sprint Dispatch Template** in `.workflow/docs/sprint-dispatch-template.md`. Dispatches are POINTERS not PAYLOADS — reference the Roadmap section for full spec, don't duplicate it.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 
 ---
@@ -30,35 +30,88 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 
 ### Claude Code CLI — All Execution
 
-| Agent | Model | Role |
-|-------|-------|------|
-| `blurby-lead` | opus | Orchestrates multi-agent sprints, reads roadmap, dispatches sub-agents |
-| `ui-investigator` | opus | Deep root-cause analysis of rendering bugs, state issues, cross-component problems. Read-only. |
-| `electron-fixer` | sonnet | Main process fixes — IPC handlers, file I/O, data persistence, Electron APIs |
-| `renderer-fixer` | sonnet | React component fixes — state, props, hooks, CSS, rendering |
-| `perf-auditor` | sonnet | Performance profiling, React re-render analysis, bundle size, startup time |
-| `test-runner` | haiku | Vitest execution, regression detection, build verification |
-| `format-parser` | sonnet | File format integration — EPUB, MOBI, PDF, HTML parsing and extraction |
-| `ux-reviewer` | opus | Comprehensive UX audit on app screenshots/flows. Read-only. |
-| `code-reviewer` | sonnet | Architecture compliance, known-trap detection, code quality |
-| `spec-reviewer` | sonnet | Spec-compliance verification — does implementation match ROADMAP acceptance criteria exactly? |
-| `doc-keeper` | sonnet | Updates all documentation files |
+**IMPORTANT: This section is read by Claude Code CLI as its system prompt. Follow these instructions directly.**
+
+#### Mandatory Session-Start Protocol
+
+Before writing ANY code, you MUST read these files in this order. No exceptions. No shortcuts.
+
+1. **`CLAUDE.md`** (this file) — You're already reading it. Note the Standing Rules below.
+2. **`.workflow/session-bootstrap.md`** — Contains the Skill Gate Rule, anti-rationalization red flags, instruction priority hierarchy. Read the Red Flags table every session. If you're tempted to skip a skill, re-read it.
+3. **`docs/governance/LESSONS_LEARNED.md`** — Scan for entries tagged with the areas you're about to touch. These are hard-won guardrails. Violating them causes regressions.
+4. **`ROADMAP.md`** — Find the sprint/hotfix section for your current task. Read the full spec including HYPOTHESIZED SOLUTION, ADDITIONAL GUIDANCE, and SUCCESS CRITERIA.
+5. **Source files listed in the dispatch's WHERE section** — Read them in the listed order before making changes.
+
+If your dispatch references a LESSONS_LEARNED entry by number (e.g., "LL-051"), you MUST read that specific entry and follow its guardrail.
+
+**Skill Gate Rule (Quick Reference):** Before ANY task, check `.workflow/skills/` for an applicable skill. Even a 30% match → read the skill and follow its process. Priority order: brainstorming → planning → execution → verification → debugging → documentation. See `session-bootstrap.md` for the full catalog and anti-rationalization table.
+
+#### How Dispatches Work
+
+Sprint dispatches use an "agent roster" with names like `renderer-fixer`, `test-runner`, `electron-fixer`. These are **scope labels, not separate processes.** You (the single CLI session) do all the work. The agent names tell you:
+
+- **What domain each task touches** — so you stay in scope and don't make unrelated changes
+- **What model tier was intended** — opus for cross-system reasoning, sonnet for focused work, haiku for test execution (informational only; you run at whatever model you are)
+- **What order to execute** — the WHEN section shows dependencies and parallelism
+
+Execute the WHAT table sequentially (unless WHEN says tasks are parallel). After each code-change task, verify your changes match the spec before moving on.
+
+#### Agent Scope Labels (Reference)
+
+| Label | Scope | Files |
+|-------|-------|-------|
+| `electron-fixer` | Main process — IPC handlers, file I/O, data persistence, Electron APIs | `main/`, `main/ipc/`, `preload.js` |
+| `renderer-fixer` | React — state, props, hooks, CSS, rendering | `src/components/`, `src/hooks/`, `src/utils/`, `src/types/` |
+| `format-parser` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/legacy-parsers.js`, `main/epub-word-extractor.js` |
+| `test-runner` | Test execution and build verification | `tests/`, `package.json` scripts |
+| `code-reviewer` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
+| `doc-keeper` | Documentation updates | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
+
+#### Post-Completion Checklist
+
+Before committing, verify ALL of these (see `.workflow/skills/verification/SKILL.md` for the full protocol):
+
+- [ ] Every SUCCESS CRITERIA item from the dispatch is met
+- [ ] `npm test` passes (860+ tests, 0 failures)
+- [ ] `npm run build` succeeds (if UI changes were made)
+- [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
+- [ ] LESSONS_LEARNED guardrails were not violated
+- [ ] Changes are scoped to the files listed in the dispatch — no drive-by edits
+- [ ] Spec-compliance self-review passed (code matches dispatch spec line-by-line)
+- [ ] Quality self-review passed (architecture rules, known traps, code clarity)
+
+#### Mandatory Doc-Keeper Pass (After Every Sprint)
+
+After EVERY sprint completion — hotfixes included, no exceptions — run the doc-keeper pass:
+
+1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/project/ROADMAP_ARCHIVE.md`. Update Sprint Status table.
+2. **SPRINT_QUEUE.md** — Remove completed sprint from queue. Add to "Completed Sprints" table. Verify queue depth ≥ 3.
+3. **CLAUDE.md** — Update version, sprint list, dependency chain, test counts.
+4. **LESSONS_LEARNED.md** — Add entry if any non-trivial discovery was made.
+5. **feedback.log** — Append sprint outcome entry (`.claude/agents/feedback.log`).
+6. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
+7. **TECHNICAL_REFERENCE.md** — Update if architecture changed.
+
+See `.workflow/agents/doc-keeper.md` for the full protocol.
 
 ### Standing Rules
 
+- **READ BEFORE YOU WRITE.** Every CLI session MUST read `docs/governance/LESSONS_LEARNED.md` and the relevant ROADMAP section BEFORE making any code changes. This is non-negotiable. Skipping this step causes regressions.
 - **Branch-per-sprint.** One branch per sprint dispatch (`sprint/<N>-<name>`). Never commit directly to main. Merge with `--no-ff` after tests pass. Delete branch after merge.
 - **OneDrive-first development.** Working directory on OneDrive for cross-machine access. Push to GitHub when sprints complete.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
 - **All file I/O in main process modules must be async** (fs.promises). No synchronous reads/writes.
 - **preload.js is the security boundary.** Keep it minimal. All system access goes through IPC.
 - **LESSONS_LEARNED is a required engineering artifact.** Update immediately on non-trivial discovery.
-- **After any engine change → test-runner before proceeding.** `npm test` must pass.
+- **After any engine change → run tests before proceeding.** `npm test` must pass.
 - **After any UI change → build verification.** `npm run build` must succeed.
-- **Haiku for lightweight, Sonnet for focused, Opus only for cross-system reasoning.**
-- **Parallelize independent work. Sequence dependent work.**
 - **CSS custom properties for theming.** No inline styles. All styles in `src/styles/global.css`.
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
+- **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
+- **Skill Gate Rule.** Before ANY task that involves code changes, check `.workflow/skills/` for an applicable process skill. Even a 30% match → read the skill and follow its process. The most dangerous moment is when you're confident you already know how to do something. See `.workflow/session-bootstrap.md` for the full rule, skill catalog, and anti-rationalization red flags table.
+- **Verification gate is mandatory.** After completing any code-change task, run the verification skill (`.workflow/skills/verification/SKILL.md`) checklist: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
+- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). Use `.workflow/agents/spec-compliance-reviewer.md` and `.workflow/agents/quality-reviewer.md` as protocols. In single-CLI mode, self-review against both checklists sequentially.
 
 ### Pike's 5 Rules of Programming (Engineering Axioms)
 
@@ -101,6 +154,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 - **Workflow System**: `.workflow/WORKFLOW_ORIENTATION.md` (process discipline, session bootstrap)
 - **Session Bootstrap**: `.workflow/session-bootstrap.md` (Skill Gate Rule, anti-rationalization, priorities)
 - **Skill Library**: `.workflow/skills/` (brainstorming, planning, execution, verification, debugging, parallel-agents, etc.)
+- **Workflow Agent Templates**: `.workflow/agents/` (structured protocols for review, investigation, testing tasks)
 - **Feedback Log**: `.claude/agents/feedback.log` (sprint outcome memory — what worked, what didn't)
 - **Roadmap Archive**: `docs/project/ROADMAP_ARCHIVE.md` (completed sprint full specs — reference only)
 
@@ -140,7 +194,7 @@ When a sprint **completes**:
 - **Every sprint completion**: Run steps 1-7 above.
 - **Every 3rd sprint**: Review `docs/` for stale files. Archive anything from completed work.
 - **ROADMAP.md target**: <500 lines. If approaching, check for completed specs that weren't archived.
-- **CLAUDE.md target**: <20k chars. Archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
+- **CLAUDE.md target**: <35k chars. Archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
 
 ---
 
@@ -182,13 +236,13 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ---
 
-## Current System State (v1.0.0+ — Post-NAR-1)
+## Current System State (v1.4.7 — Post-NAR-5)
 
 ### Codebase (branch: `main`)
 
-- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1) complete
-- 841 tests passing across 41 test files
-- CI/CD active via GitHub Actions (single-job x64+ARM64 release build)
+- All sprints (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5) complete
+- 860 tests passing across 43 test files
+- CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
 ### Tech Stack
@@ -197,7 +251,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 - Vitest 4.1 for testing, electron-builder 26 for packaging
 - foliate-js for EPUB rendering (primary reader for EPUBs)
 - Kokoro TTS engine (28 voices, worker thread, q4 quantization)
-- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log)
+- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log), opusscript (Opus audio encoding/decoding)
 
 ### Architecture
 
@@ -215,6 +269,7 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
   - `main/cloud-onedrive.js` — OneDrive App Folder via Microsoft Graph, chunked uploads
   - `main/migrations.js` — schema migrations with backup
   - `main/ws-server.js` — localhost WebSocket server for Chrome extension (port 48924, pairing token auth)
+  - `main/epub-word-extractor.js` — main-process EPUB word extraction (AdmZip + cheerio + Intl.Segmenter, bypasses foliate)
   - `main/folder-watcher.js` — chokidar folder watching
   - `main/cloud-storage.js` — provider factory (OneDrive/Google)
   - Context object pattern shares state (mainWindow, library, settings, paths) across modules
@@ -245,11 +300,10 @@ Run `.workflow/skills/external-audit/SKILL.md` at regular intervals: after every
 
 ### Feature Status
 
-Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics), universal EPUB pipeline, library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 841 tests across 41 files.
+Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics, epoch-guarded gapless playback), universal EPUB pipeline, library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 860 tests across 43 files.
 
 ### What's Next
 
-- **Sprint PKG-1: Installer & Update Overhaul** — stub installer, silent updates, split CI (in progress)
 - **Sprint 25: RSS Library + Paywall Integration** — post-v1
 - **Sprint 18C: Android app** — post-v1
 - **Code signing** — not doing (explicit decision)
@@ -259,29 +313,12 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-✅ Sprints 1-8 (core) -> ✅ Sprint 9 (security) -> ✅ Sprint 10 (memory) -> ✅ Sprints 11+12 (refactor) -> ✅ Sprint 13 (tests) -> ✅ Sprint 14 (CSS) -> ✅ Sprint 15 (a11y) -> ✅ Sprint 17 (cloud sync) -> ✅ Sprint 18A (.exe production)
-✅ Sprint 16 (e-ink optimization) — independent track, completed
-✅ Sprint 19 (sync hardening + provenance) — completed
-✅ Sprint 20 (keyboard-first UX + three-mode reader) — completed
-✅ Sprint 21 (UX polish + reading intelligence) — completed
-✅ Sprint 18B (Chrome extension) — completed
-✅ Sprint 22 (reading animation + TTS sync) — completed
-✅ Sprint 25S (stabilization — 13 bug fixes, EPUB overlays, engagement-gated progress) — completed
-✅ TD-1 (technical debt — foliate-js, Kokoro TTS, universal EPUB pipeline, mode verticals, IPC split) — completed
-✅ Sprint 23 (v1 hardening — onboarding, error recovery, constants, a11y, perf baselines, auto-update E2E) — completed
-✅ Mode Hardening + Mode Verticals (688 tests, legacy effect removal, Shift+Space cycling, Focus off-by-one) — completed
-✅ Sprint CT-1 (Chrome test harness — electronAPI stub, mock Kokoro, 121-item checklist) — completed
-✅ Sprint TH-1 (narration test hardening — 88 new tests, 776 total) — completed
-✅ Sprint CT-2 (test harness hardening — rich seed data, sessionStorage, 5 bug fixes) — completed
-✅ Sprint CT-3 (click-through repair — KB checklist alignment, Focus stability, stub improvements) — completed
-✅ Sprint 24 (external audit — 58 findings, 3C/24H/21M/10L) — completed
-✅ Sprint 24R (CRIT remediation — path validation) — completed
-✅ Sprint KB-1 (keyboard navigation remap — 791 tests) — completed
-✅ Sprint TTS-1 (narration correctness — 15 code fixes from TTS audit, 796 tests) — completed
-✅ v1.0.0 RELEASE — tagged + shipped
-✅ Sprint TTS-2 (TTS docs — privacy, SSML, safety, glossary, 12-term glossary) — completed
-✅ Sprint NAR-1 (narration pipeline — rolling audio queue, smart pause heuristics, 841 tests) — completed
-**Sprint PKG-1** (installer overhaul) → **Sprint 25** (RSS Library) || **Sprint 18C** (Android) — post-v1
+All sprints through NAR-5 complete (v1.4.7). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+
+Recent chain (narration pipeline — COMPLETE):
+✅ NAR-2 (pipeline redesign) → ✅ NAR-3 (foliate inversion) → ✅ NAR-4 (library caching) → ✅ HOTFIX-5 (word timer race) → ✅ HOTFIX-6 (main-process extraction) → ✅ HOTFIX-7 (stale onended race) → ✅ HOTFIX-8 (pipeline-aware onEnd) → ✅ HOTFIX-9 (native speed generation) → ✅ HOTFIX-10 (global index alignment) → ✅ NAR-5 (dual-worker eager pre-gen)
+
+**Next:** Sprint 25 (RSS Library) || Sprint 18C (Android) — post-v1, independent tracks
 
 ---
 

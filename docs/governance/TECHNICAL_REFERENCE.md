@@ -1,8 +1,8 @@
 # Blurby Technical Reference
 
-**Version:** 2.1.0
-**Last updated:** 2026-03-27
-**Branch:** `sprint/td1-tech-debt` (current), `main` (stable)
+**Version:** 2.2.0
+**Last updated:** 2026-03-29
+**Branch:** `main` (v1.4.3)
 
 This document is the governing technical reference for Blurby. It covers architecture, data model, reading modes, rendering, TTS, build/release, and known technical debt. A new developer should be able to understand the entire system by reading this document and following the file path references.
 

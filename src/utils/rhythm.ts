@@ -1,6 +1,5 @@
 import type { RhythmPauses } from "../types";
-import { TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS } from "../constants";
-import { getChunkBoundaryPauseMs, countSentences } from "./pauseDetection";
+import { getChunkBoundaryPauseMs, countSentences, type PauseConfig } from "./pauseDetection";
 
 /**
  * Calculate extra pause duration for a word based on rhythm pause settings.
@@ -59,6 +58,7 @@ export function calculateChunkBoundaryPause(
   rhythmPauses: RhythmPauses | null,
   allWords: string[],
   nextWord?: string,
+  pauseConfig?: PauseConfig,
 ): number {
   if (!rhythmPauses) return 0;
 
@@ -74,5 +74,5 @@ export function calculateChunkBoundaryPause(
     sentenceCount = countSentences(paraWords);
   }
 
-  return getChunkBoundaryPauseMs(lastWord, nextWord, isParagraphEnd, sentenceCount);
+  return getChunkBoundaryPauseMs(lastWord, nextWord, isParagraphEnd, sentenceCount, pauseConfig);
 }

@@ -1,6 +1,6 @@
 # Spec-Compliance Reviewer Agent
 
-**Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
+**Model:** claude-sonnet (or self-review in single-CLI mode)
 **Type:** Specification verification
 **Triggers:** "Verify implementation matches spec," "Check spec compliance," "Did we build what was asked?"
 

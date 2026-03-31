@@ -5,10 +5,29 @@
 
 import {
   TTS_PAUSE_COMMA_MS,
+  TTS_PAUSE_CLAUSE_MS,
   TTS_PAUSE_SENTENCE_MS,
   TTS_PAUSE_PARAGRAPH_MS,
   TTS_DIALOGUE_SENTENCE_THRESHOLD,
 } from "../constants";
+
+/** Pause configuration — callers pass runtime settings values. */
+export interface PauseConfig {
+  commaMs: number;
+  clauseMs: number;
+  sentenceMs: number;
+  paragraphMs: number;
+  dialogueThreshold: number;
+}
+
+/** Default pause config from constants (used when no settings override). */
+export const DEFAULT_PAUSE_CONFIG: PauseConfig = {
+  commaMs: TTS_PAUSE_COMMA_MS,
+  clauseMs: TTS_PAUSE_CLAUSE_MS,
+  sentenceMs: TTS_PAUSE_SENTENCE_MS,
+  paragraphMs: TTS_PAUSE_PARAGRAPH_MS,
+  dialogueThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
+};
 
 /** Known abbreviations that end with a period but are NOT sentence endings. */
 const KNOWN_ABBREVIATIONS = new Set([
@@ -23,6 +42,14 @@ const KNOWN_ABBREVIATIONS = new Set([
  */
 function stripTrailingQuotes(word: string): string {
   return word.replace(/["'\u201D\u2019\u00BB)\]]+$/, "");
+}
+
+/**
+ * Strip trailing quotes but preserve closing parenthesis for clause detection.
+ * Only strips quote characters, not `)`.
+ */
+function stripQuotesOnly(word: string): string {
+  return word.replace(/["'\u201D\u2019\u00BB\]]+$/, "");
 }
 
 /**
@@ -64,9 +91,10 @@ export function isSentenceEnd(word: string, nextWord?: string): boolean {
  * Dialogue paragraphs (≤ threshold sentences) get 0ms.
  * Expository paragraphs (> threshold) get full paragraph pause.
  */
-export function getParagraphPauseMs(sentenceCount: number): number {
-  if (sentenceCount <= TTS_DIALOGUE_SENTENCE_THRESHOLD) return 0;
-  return TTS_PAUSE_PARAGRAPH_MS;
+export function getParagraphPauseMs(sentenceCount: number, config?: PauseConfig): number {
+  const cfg = config ?? DEFAULT_PAUSE_CONFIG;
+  if (sentenceCount <= cfg.dialogueThreshold) return 0;
+  return cfg.paragraphMs;
 }
 
 /**
@@ -89,26 +117,35 @@ export function countSentences(words: string[]): number {
  * @param nextWord - First word of the next chunk (if any)
  * @param isParagraphBreak - Whether a paragraph break occurs at this boundary
  * @param precedingParagraphSentenceCount - Sentence count of the paragraph ending here
+ * @param config - Runtime pause configuration (from settings)
  */
 export function getChunkBoundaryPauseMs(
   lastWord: string,
   nextWord: string | undefined,
   isParagraphBreak: boolean,
   precedingParagraphSentenceCount: number,
+  config?: PauseConfig,
 ): number {
+  const cfg = config ?? DEFAULT_PAUSE_CONFIG;
+
   // Paragraph boundary — use sentence-count heuristic
   if (isParagraphBreak) {
-    const paragraphPause = getParagraphPauseMs(precedingParagraphSentenceCount);
+    const paragraphPause = getParagraphPauseMs(precedingParagraphSentenceCount, cfg);
     if (paragraphPause > 0) return paragraphPause;
     // Dialogue paragraph: fall through to check for sentence-end punctuation
   }
 
   // Sentence ending
-  if (isSentenceEnd(lastWord, nextWord)) return TTS_PAUSE_SENTENCE_MS;
+  if (isSentenceEnd(lastWord, nextWord)) return cfg.sentenceMs;
 
-  // Comma/semicolon/colon
+  // Check for clause punctuation: colon and closing parenthesis
+  const quotesStripped = stripQuotesOnly(lastWord);
+  if (/\)$/.test(quotesStripped)) return cfg.clauseMs;
+  if (/:$/.test(quotesStripped)) return cfg.clauseMs;
+
+  // Comma/semicolon
   const stripped = stripTrailingQuotes(lastWord);
-  if (/[,;:]$/.test(stripped)) return TTS_PAUSE_COMMA_MS;
+  if (/[,;]$/.test(stripped)) return cfg.commaMs;
 
   return 0;
 }

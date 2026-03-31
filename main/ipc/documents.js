@@ -29,6 +29,7 @@ function register(ctx) {
     const doc = ctx.getDocById(docId);
     if (doc) {
       doc.position = 0;
+      delete doc.cfi;
       ctx.saveLibrary();
 
       // 19H: Enqueue reset-progress as a first-class sync operation

@@ -70,13 +70,15 @@ interface DocCardProps {
   selected?: boolean;
   selectionMode?: boolean;
   onToggleSelect?: (id: string) => void;
+  /** NAR-4: Whether this book's TTS audio is fully cached */
+  ttsCached?: boolean;
 }
 
-const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect }: DocCardProps) {
+const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect, ttsCached }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const rawPct = wordCount > 0 ? (pos / wordCount) * 100 : 0;
-  const progress = rawPct > 0 && rawPct < 1 ? 1 : Math.round(rawPct);
+  const progress = Math.round(rawPct);
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
   const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;
@@ -94,6 +96,8 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
         aria-label={`${doc.title}${doc.author ? ` by ${doc.author}` : ""}, ${wordCount} words, ${readTime}${isComplete ? ", completed" : pos > 0 ? `, ${progress}% read` : ""}${doc.favorite ? ", favorite" : ""}${doc.unread ? ", unread" : ""}`}
         data-doc-id={doc.id}
       >
+        {/* NAR-4: Cache indicator */}
+        {ttsCached && <span className="doc-card-cached-badge" title="Narration cached" aria-label="Narration cached">✓</span>}
         {/* Selection checkbox */}
         {selectionMode && onToggleSelect && (
           <div className="doc-card-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>

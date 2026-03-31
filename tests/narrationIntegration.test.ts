@@ -13,10 +13,11 @@ const electronAPI = vi.hoisted(() => {
   return api;
 });
 
-// Mock AudioContext for audioQueue
+// Mock AudioContext for pipeline
 beforeEach(() => {
   class MockAudioBufferSourceNode {
     buffer: any = null;
+    playbackRate = { value: 1.0 };
     onended: (() => void) | null = null;
     connect() { return this; }
     start() { if (this.onended) setTimeout(() => this.onended!(), 10); }
@@ -82,8 +83,7 @@ function mockDeps(overrides?: Partial<KokoroStrategyDeps>): KokoroStrategyDeps {
     getSpeed: vi.fn(() => 1.0),
     getStatus: vi.fn(() => "speaking"),
     getWords: vi.fn(() => words),
-    getParagraphBreaks: vi.fn(() => new Set<number>()),
-    findChunkEnd: vi.fn((_w: string[], startIdx: number) => Math.min(startIdx + 5, _w.length)),
+    getBookId: vi.fn(() => "test-book"),
     onFallbackToWeb: vi.fn(),
     ...overrides,
   };
@@ -150,10 +150,10 @@ describe("Narration Integration", () => {
     });
   });
 
-  // ── LL-044: Speed change via audioQueue — stale generation discarded ──
+  // ── LL-044: Speed change via pipeline — stale generation discarded ──
 
   describe("LL-044: Speed change during generation must not deadlock", () => {
-    it("LL-044: audioQueue calls generateFn and handles stale results internally", async () => {
+    it("LL-044: pipeline calls generateFn and handles stale results internally", async () => {
       const deps = mockDeps();
       const strategy = createKokoroStrategy(deps);
 
@@ -165,7 +165,7 @@ describe("Narration Integration", () => {
       // Wait for IPC to be called
       await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
 
-      // The audioQueue handles stale generation internally via generationId
+      // The pipeline handles stale generation internally via generationId
       // No external onStaleGeneration callback needed
       strategy.stop();
     });
@@ -192,17 +192,17 @@ describe("Narration Integration", () => {
   // ── Chunk chaining ─────────────────────────────────────────────────
 
   describe("Chunk chaining", () => {
-    it("chunk chaining: audioQueue plays chunks sequentially via onEnd", async () => {
+    it("chunk chaining: pipeline plays chunks sequentially via onEnd", async () => {
       const deps = mockDeps();
       const strategy = createKokoroStrategy(deps);
       const onEnd = vi.fn();
 
       strategy.speakChunk("test phrase", ["test", "phrase"], 0, 1.0, vi.fn(), onEnd, vi.fn());
 
-      // Wait for IPC to be called (audioQueue produces chunk)
+      // Wait for IPC to be called (pipeline produces chunk)
       await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
 
-      // The audioQueue handles chunk chaining internally
+      // The pipeline handles chunk chaining internally
       strategy.stop();
     });
 

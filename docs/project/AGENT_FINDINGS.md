@@ -19,7 +19,7 @@
 
 ---
 
-## CRITICAL FINDINGS (3) — Block v1.0.0
+## CRITICAL FINDINGS (3) — All Resolved/Dismissed (2026-03-29)
 
 ### CRIT-1: `read-file-buffer` IPC Has No Path Validation [24C]
 
@@ -28,6 +28,7 @@
 The handler accepts an arbitrary `filePath` from the renderer and reads it with zero validation. A compromised renderer (or XSS) can read any file on the filesystem — `~/.ssh/id_rsa`, auth tokens, etc.
 
 **Fix:** Add path validation — verify the path falls within the app data directory or source folder before reading.
+**Resolution:** ✅ Fixed in Sprint 24R (v0.9.1). Path allowlist validation added.
 
 ```js
 const allowedRoots = [ctx.getDataPath(), settings.sourceFolder].filter(Boolean);
@@ -43,6 +44,7 @@ if (!allowed) return null;
 OAuth client IDs are literal `"YOUR_AZURE_CLIENT_ID"` / `"YOUR_GOOGLE_CLIENT_ID"` / `"YOUR_GOOGLE_CLIENT_SECRET"` placeholder strings. Cloud sync is completely non-functional. If real credentials are substituted before shipping, they'd be hardcoded in the binary.
 
 **Fix:** Inject credentials at build time via environment variables with a CI check that fails if unset. Remove `GOOGLE_CLIENT_SECRET` — Google's PKCE flow for installed apps doesn't require it.
+**Resolution:** ⏸️ Deferred — app ships local-only. OAuth placeholders are by design until cloud sync goes live (v1.1.0+).
 
 ### CRIT-3: `.workflow/` Directory Referenced Everywhere But Doesn't Exist [24D]
 
@@ -51,6 +53,7 @@ OAuth client IDs are literal `"YOUR_AZURE_CLIENT_ID"` / `"YOUR_GOOGLE_CLIENT_ID"
 CLAUDE.md references `.workflow/WORKFLOW_ORIENTATION.md`, `.workflow/session-bootstrap.md`, `.workflow/skills/`, `.workflow/docs/sprint-dispatch-template.md` — none exist. Agents directed to read these for session bootstrap and skill gate rules hit dead links.
 
 **Fix:** Either create the `.workflow/` directory structure or strip all references from CLAUDE.md.
+**Resolution:** ❌ Dismissed — `.workflow/` exists on Windows host (`C:\Users\estra\OneDrive\Projects\Blurby\.workflow`). Linux VM audit agent couldn't see it due to FUSE mount limitations.
 
 ---
 
@@ -189,8 +192,8 @@ From 24B Test Coverage:
 **3 CRITICALs found. CRITICALs block v1.0.0 release per Sprint 24 acceptance criteria.**
 
 Required before release:
-1. Fix `read-file-buffer` path validation (CRIT-1)
-2. Resolve OAuth credential injection (CRIT-2)
-3. Fix or remove `.workflow/` dead references (CRIT-3)
+1. ~~Fix `read-file-buffer` path validation (CRIT-1)~~ ✅ Fixed (Sprint 24R)
+2. ~~Resolve OAuth credential injection (CRIT-2)~~ ⏸️ Deferred to v1.1.0
+3. ~~Fix or remove `.workflow/` dead references (CRIT-3)~~ ❌ Dismissed (false positive)
 
-**Recommendation:** CRIT-1 and CRIT-3 are fixable in a single sprint. CRIT-2 (OAuth credentials) is a deployment concern — the app works for local-only use without cloud sync. Consider: ship v1.0.0 with path validation fix + doc cleanup, defer cloud sync to v1.1.0 with proper credential injection.
+**Status (2026-03-29):** v1.0.0 shipped. All CRITs resolved or deferred.

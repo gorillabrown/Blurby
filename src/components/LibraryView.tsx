@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
-import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS, NEW_LIBRARY_DAYS, SEARCH_BLUR_DELAY_MS } from "../constants";
+import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS, NEW_LIBRARY_DAYS, SEARCH_BLUR_DELAY_MS, FOLIATE_MIN_ENGAGEMENT_POSITION } from "../constants";
 import { BlurbyDoc, BlurbySettings, SyncStatusValue, ToastState } from "../types";
 import { useTheme } from "./ThemeProvider";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -78,7 +78,7 @@ export default function LibraryView({
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchIndex, setSearchIndex] = useState(-1);
-  const [sortBy, setSortBy] = useState(settings.defaultSort || "progress"); // "progress" | "alpha" | "newest" | "oldest"
+  const [sortBy, setSortBy] = useState(settings.defaultSort || "author"); // "alpha" | "author" | "newest" | "oldest"
 
   // E-ink: debounce search to 500ms to reduce repaints
   const isEinkTheme = settings.theme === "eink";
@@ -136,36 +136,8 @@ export default function LibraryView({
     const effectiveSearch = isEinkTheme ? debouncedSearchQuery : searchQuery;
     if (effectiveSearch) docs = docs.filter((d) => d.title.toLowerCase().includes(effectiveSearch.toLowerCase()));
 
-    docs = [...docs];
-    if (sortBy === "progress") {
-      docs.sort((a, b) => {
-        const pctA = a.wordCount > 0 ? (a.position || 0) / a.wordCount : 0;
-        const pctB = b.wordCount > 0 ? (b.position || 0) / b.wordCount : 0;
-        if (pctB !== pctA) return pctB - pctA;
-        return a.title.localeCompare(b.title);
-      });
-    } else if (sortBy === "alpha") {
-      docs.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "newest") {
-      docs.sort((a, b) => (b.created || 0) - (a.created || 0));
-    } else if (sortBy === "oldest") {
-      docs.sort((a, b) => (a.created || 0) - (b.created || 0));
-    } else if (sortBy === "author") {
-      docs.sort((a, b) => {
-        const authorA = (a.author || a.authorFull || "").trim();
-        const authorB = (b.author || b.authorFull || "").trim();
-        // Extract last name: last whitespace-separated token
-        const lastA = authorA.split(/\s+/).pop() || "";
-        const lastB = authorB.split(/\s+/).pop() || "";
-        if (!lastA && !lastB) return a.title.localeCompare(b.title);
-        if (!lastA) return 1; // no author sorts last
-        if (!lastB) return -1;
-        const cmp = lastA.localeCompare(lastB, undefined, { sensitivity: "base" });
-        return cmp !== 0 ? cmp : a.title.localeCompare(b.title);
-      });
-    }
-    return docs;
-  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme, sortBy]);
+    return [...docs];
+  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme]);
 
   // BUG-067: IntersectionObserver to track "new" cards seen in viewport
   const seenDocIdsRef = useRef<Set<string>>(new Set());
@@ -235,10 +207,45 @@ export default function LibraryView({
   // formatDisplayTitle imported from utils/text
 
   // Split filtered docs into reading now vs not started
-  const { readingNow, notStarted } = useMemo(() => ({
-    readingNow: filteredLibrary.filter((d) => (d.position || 0) > 0 && (d.wordCount ? (d.position || 0) < d.wordCount : true)),
-    notStarted: filteredLibrary.filter((d) => (d.position || 0) === 0),
-  }), [filteredLibrary]);
+  // FOLIATE_MIN_ENGAGEMENT_POSITION filters out tiny rounding artifacts from initial EPUB onRelocate
+  const { readingNow, notStarted } = useMemo(() => {
+    // "Reading Now" always sorted by closest-to-finished (highest progress % first)
+    const rn = filteredLibrary
+      .filter((d) => (d.position || 0) >= FOLIATE_MIN_ENGAGEMENT_POSITION && (d.wordCount ? (d.position || 0) < d.wordCount : true))
+      .sort((a, b) => {
+        const pctA = a.wordCount > 0 ? (a.position || 0) / a.wordCount : 0;
+        const pctB = b.wordCount > 0 ? (b.position || 0) / b.wordCount : 0;
+        if (pctB !== pctA) return pctB - pctA;
+        return a.title.localeCompare(b.title);
+      });
+
+    // "Not Started" sorted by user's chosen sort
+    const ns = filteredLibrary
+      .filter((d) => (d.position || 0) < FOLIATE_MIN_ENGAGEMENT_POSITION);
+
+    // Apply sort to Not Started
+    if (sortBy === "alpha") {
+      ns.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === "newest") {
+      ns.sort((a, b) => (b.created || 0) - (a.created || 0));
+    } else if (sortBy === "oldest") {
+      ns.sort((a, b) => (a.created || 0) - (b.created || 0));
+    } else if (sortBy === "author") {
+      ns.sort((a, b) => {
+        const authorA = (a.author || a.authorFull || "").trim();
+        const authorB = (b.author || b.authorFull || "").trim();
+        const lastA = authorA.split(/\s+/).pop() || "";
+        const lastB = authorB.split(/\s+/).pop() || "";
+        if (!lastA && !lastB) return a.title.localeCompare(b.title);
+        if (!lastA) return 1;
+        if (!lastB) return -1;
+        const cmp = lastA.localeCompare(lastB, undefined, { sensitivity: "base" });
+        return cmp !== 0 ? cmp : a.title.localeCompare(b.title);
+      });
+    }
+
+    return { readingNow: rn, notStarted: ns };
+  }, [filteredLibrary, sortBy]);
 
   // Library layout CSS class modifiers
   const cardSize = settings.libraryCardSize || "medium";
@@ -500,21 +507,7 @@ export default function LibraryView({
             aria-selected={typeFilter === "pdfs"}
           >PDFs ({pdfCount})</button>
         </div>
-        {/* Sort dropdown pinned right, never scrolls with tabs */}
-        {library.length > 3 && (
-          <select
-            className="sort-select"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            aria-label="Sort order"
-          >
-            <option value="progress">closest to done</option>
-            <option value="alpha">A-Z by title</option>
-            <option value="author">A-Z by author</option>
-            <option value="newest">newest first</option>
-            <option value="oldest">oldest first</option>
-          </select>
-        )}
+        {/* Sort dropdown removed from tabs row — now inline with "Not Started" section label */}
         </div>{/* close library-tabs-row */}
         </div>{/* close library-sticky-top */}
 
@@ -650,7 +643,22 @@ export default function LibraryView({
             )}
             {notStarted.length > 0 && (
               <>
-                <div className="library-section-label">Not Started</div>
+                <div className="library-section-label" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span>Not Started</span>
+                  {notStarted.length > 1 && (
+                    <select
+                      className="sort-select"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      aria-label="Sort not started"
+                    >
+                      <option value="author">A-Z by author</option>
+                      <option value="alpha">A-Z by title</option>
+                      <option value="newest">newest first</option>
+                      <option value="oldest">oldest first</option>
+                    </select>
+                  )}
+                </div>
                 <div className={gridClassName} role="list">
                   {notStarted.map((doc) => (
                     <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
@@ -695,7 +703,22 @@ export default function LibraryView({
             )}
             {notStarted.length > 0 && (
               <>
-                <div className="library-section-label">Not Started</div>
+                <div className="library-section-label" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span>Not Started</span>
+                  {notStarted.length > 1 && (
+                    <select
+                      className="sort-select"
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      aria-label="Sort not started"
+                    >
+                      <option value="author">A-Z by author</option>
+                      <option value="alpha">A-Z by title</option>
+                      <option value="newest">newest first</option>
+                      <option value="oldest">oldest first</option>
+                    </select>
+                  )}
+                </div>
                 <div className={listClassName} role="list">
                   {notStarted.map((doc) => (
                     <DocCard

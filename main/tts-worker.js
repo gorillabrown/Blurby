@@ -89,10 +89,10 @@ async function generate(id, text, voice, speed) {
     const pcm = audioData.data || audioData;
     const sr = audioData.sampling_rate || SAMPLE_RATE;
     const durationMs = (pcm.length / sr) * 1000;
-    // Serialize PCM data as a plain array for structured clone transfer
-    parentPort.postMessage(
-      { type: "result", id, audio: Array.from(pcm), sampleRate: sr, durationMs },
-    );
+    // Transfer PCM as Float32Array via Transferable (zero-copy)
+    const f32 = pcm instanceof Float32Array ? pcm : new Float32Array(pcm);
+    const msg = { type: "result", id, audio: f32, sampleRate: sr, durationMs };
+    parentPort.postMessage(msg, [f32.buffer]);
   } catch (err) {
     parentPort.postMessage({ type: "result", id, error: err.message });
   }

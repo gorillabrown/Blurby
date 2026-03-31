@@ -232,18 +232,14 @@ Feature: Damage Realism Subsystem
 
 ## Project Test Commands
 
-[CUSTOMIZE: Insert project-specific test commands here]
-
 **Fast suite** (after every change, ~2-5 minutes):
 ```
-[PROJECT_TEST_FAST_COMMAND]
-Example: pytest -n auto -m "not slow" -q
+npm test
 ```
 
-**Full suite** (before merging, ~15-30 minutes):
+**Full suite** (before merging, ~2-3 minutes):
 ```
-[PROJECT_TEST_FULL_COMMAND]
-Example: pytest --runslow -q
+npm test && npm run build
 ```
 
 ---

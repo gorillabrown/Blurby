@@ -214,8 +214,10 @@ Ready for next work
 ```
 git push origin [BRANCH_NAME]
 
-[CUSTOMIZE: Platform-specific PR creation]
-Example (GitHub CLI): gh pr create --title "[TITLE]" --body "[DESCRIPTION]"
+Blurby uses local merge — no PRs. Merge to main locally:
+  git checkout main && git merge --no-ff sprint/<N>-<name>
+  git branch -d sprint/<N>-<name>
+  Then push to GitHub: git push origin main
 ```
 
 **Output:**

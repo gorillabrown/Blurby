@@ -22,7 +22,7 @@ Use this checklist for EVERY completion claim:
 
 **Verification command:**
 ```
-[PROJECT_TEST_FULL_COMMAND]
+npm test && npm run build
 Expected output: [N] passed, 0 failed
 ```
 
@@ -78,7 +78,7 @@ Verification:
 
 **Verification command:**
 ```
-[PROJECT_TEST_FAST_COMMAND]  (includes pre-existing tests)
+npm test  (includes pre-existing tests)
 Expected: All pre-existing tests pass
 ```
 
@@ -180,7 +180,7 @@ If your project has calibration targets or benchmarks:
 
 **Verification command:**
 ```
-[PROJECT_CALIBRATION_COMMAND]
+npm run perf (21 automated benchmarks)
 Example: pytest --runslow -q
 ```
 

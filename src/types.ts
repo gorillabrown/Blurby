@@ -97,6 +97,7 @@ export interface BlurbySettings {
   ttsRate: number; // 0.5-2.0, default 1.0
   // TTS pause timing (user-adjustable via settings)
   ttsPauseCommaMs?: number;
+  ttsPauseClauseMs?: number;
   ttsPauseSentenceMs?: number;
   ttsPauseParagraphMs?: number;
   ttsDialogueSentenceThreshold?: number;
@@ -114,6 +115,8 @@ export interface BlurbySettings {
   libraryCardSpacing?: "compact" | "cozy" | "roomy";
   // TD-02: Import pipeline
   useLegacyRenderer?: boolean;   // opt-in for legacy word-by-word renderer
+  // NAR-4: TTS cache settings
+  ttsCacheEnabled?: boolean;     // background caching of Reading Now books (default true)
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────
@@ -216,6 +219,8 @@ export interface ElectronAPI {
   openReaderWindow: (docId: string) => Promise<void>;
   checkForUpdates: () => Promise<{ status: string; version?: string | null; message?: string }>;
   installUpdate: () => Promise<void>;
+  captureBugScreenshot: () => Promise<{ filename: string; filepath: string } | { error: string }>;
+  saveBugReport: (data: { description: string; severity: string; appState: Record<string, unknown>; screenshotFile: string | null; timestamp: string }) => Promise<{ ok: boolean; filename: string }>;
   logError: (message: string) => Promise<void>;
   getSiteLogins: () => Promise<Array<{ domain: string; cookieCount: number }>>;
   siteLogin: (url: string) => Promise<{ success?: boolean; site?: string; cancelled?: boolean; error?: string }>;
@@ -260,6 +265,8 @@ export interface ElectronAPI {
   onCloudSyncStatusChanged?: (callback: (status: SyncStatusValue) => void) => () => void;
   onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
   onWatcherError?: (callback: (data: { message: string }) => void) => () => void;
+  // EPUB word extraction (HOTFIX-6)
+  extractEpubWords?: (bookId: string) => Promise<{ words?: string[]; sections?: Array<{ sectionIndex: number; startWordIdx: number; endWordIdx: number; wordCount: number }>; totalWords?: number; error?: string }>;
   // Kokoro TTS
   kokoroPreload?: () => Promise<void>;
   kokoroModelStatus: () => Promise<{ ready: boolean }>;

@@ -1,6 +1,6 @@
 # Quality Reviewer Agent
 
-**Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
+**Model:** claude-sonnet (or self-review in single-CLI mode)
 **Type:** Code quality and architecture compliance
 **Triggers:** "Check code quality," "Architecture review," "Is it well-built?", "Verify engineering standards"
 
@@ -24,8 +24,8 @@ This is NOT a spec compliance review. The spec reviewer answers "did we build wh
 
 Read and understand:
 1. Changed files (what code was modified)
-2. Architecture rules [CUSTOMIZE: project-specific]
-3. Known traps [CUSTOMIZE: lessons learned]
+2. Architecture rules (from CLAUDE.md Standing Rules)
+3. Known traps (from docs/governance/LESSONS_LEARNED.md)
 4. Test results (do tests pass? coverage?)
 
 ```
@@ -37,15 +37,19 @@ Files changed:
   - constants.toml (1 constant tuned)
 
 Architecture rules (from CLAUDE.md):
-  - All constants must be separated from main codebase
-  - Positional changes ONLY via FRO routing + DC-1 selection
-  - _v4_snapshot() = SOLE bridge between FightState and ExchangeResult
-  - Finish eligibility gates replicated across ALL code paths
+  - Electron main process stays CommonJS; renderer stays ESM/TypeScript
+  - All file I/O in main process must be async (fs.promises)
+  - preload.js is the security boundary — keep it minimal
+  - Never import Node.js modules in renderer code
+  - All system access through IPC via window.electronAPI
+  - CSS custom properties for theming — no inline styles
+  - Constants separated into constants.ts, not hardcoded
 
-Known traps (from LESSONS_LEARNED.md):
-  - LL-143: Engine modularized; do not add logic to monolithic engine.py
-  - LL-136: Counter is NOT a defensive category; only Block/Evade/Absorb
-  - LL-145: Risk Tolerance affects action utility ONLY, not damage
+Known traps (from LESSONS_LEARNED.md — scan for relevant entries):
+  - LL-051: NEVER navigate visible foliate for background work
+  - LL-053: Web Audio source.onended fires ASYNC after source.stop()
+  - LL-016/017/020: Ref-based callback patterns required
+  - Check all LL entries tagged to the areas being reviewed
 
 Test results:
   - 962/962 fast tests PASS ✓
@@ -123,7 +127,7 @@ Produce findings in standardized format.
 
 ## Architecture Compliance Checks
 
-### [CUSTOMIZE] Standard Checks
+### Blurby Standard Checks
 
 For the GoG project, verify:
 

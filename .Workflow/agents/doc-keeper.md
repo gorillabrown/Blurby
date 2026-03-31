@@ -1,6 +1,6 @@
 # Doc-Keeper Agent
 
-**Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
+**Model:** claude-sonnet (or self-review in single-CLI mode)
 **Type:** Documentation maintenance
 **Triggers:** "Update documentation," "Add to LESSONS_LEARNED," "Tag roadmap," "Sync docs after code change"
 
@@ -22,7 +22,7 @@ The doc-keeper maintains all living documentation. After code changes, discoveri
 
 ## Documents to Maintain
 
-[CUSTOMIZE: List all living documents in your project]
+Blurby living documents (see CLAUDE.md §Key References for full list):
 
 ### Priority 1 (Update on every code change)
 

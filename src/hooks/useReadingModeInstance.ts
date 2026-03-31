@@ -29,6 +29,8 @@ export interface UseReadingModeInstanceParams {
   onComplete: () => void;
   /** Flow playing state setter — for non-EPUB flow (FlowCursorController) */
   setFlowPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  /** Ref: whether full-book word extraction is complete (HOTFIX-10: skip miss handler .next()) */
+  bookWordsCompleteRef?: React.MutableRefObject<boolean>;
 }
 
 export interface UseReadingModeInstanceReturn {
@@ -78,6 +80,7 @@ export function useReadingModeInstance({
   onWordAdvance,
   onComplete,
   setFlowPlaying,
+  bookWordsCompleteRef,
 }: UseReadingModeInstanceParams): UseReadingModeInstanceReturn {
   const modeRef = useRef<ReadingMode | null>(null);
   const pendingResumeRef = useRef<{ wordIndex: number; mode: "flow" | "narration" } | null>(null);
@@ -161,6 +164,9 @@ export function useReadingModeInstance({
           if (isFoliate && foliateApiRefStable.current) {
             const found = foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
             if (!found) {
+              // HOTFIX-10: When extraction is complete, NAR-3 section-boundary effect handles
+              // page navigation. Skip .next() to prevent miss-handler storm.
+              if (bookWordsCompleteRef?.current) return;
               // Word not in loaded sections — turn page so highlights catch up
               pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
               foliateApiRefStable.current.next();

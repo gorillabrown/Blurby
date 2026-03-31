@@ -21,8 +21,6 @@ Use this skill BEFORE any execution begins.
 
 **Commands:**
 ```
-[CUSTOMIZE: your VCS — examples below for git]
-
 git status
   Expected: "On branch main" and "nothing to commit, working tree clean"
 
@@ -49,7 +47,7 @@ git pull origin main
 git checkout -b [BRANCH_NAME]
   Example: git checkout -b feature/damage-variance-v5
   Example: git checkout -b stab1-wave-a
-  Naming convention: [CUSTOMIZE: your project's convention]
+  Naming convention: sprint/<N>-<name> (e.g., sprint/25-rss-library, hotfix/7-stale-onended)
 ```
 
 **Option B: Git Worktree (Advanced)**
@@ -128,7 +126,8 @@ npm install
 
 **Example (Other):**
 ```
-[CUSTOMIZE: your project's dependency installation]
+cd [ISOLATED_WORKSPACE]
+npm install
 ```
 
 **Verification:**

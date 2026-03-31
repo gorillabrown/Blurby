@@ -72,6 +72,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
   installUpdate: () => ipcRenderer.invoke("install-update"),
 
+  // Bug reporting
+  captureBugScreenshot: () => ipcRenderer.invoke("capture-bug-screenshot"),
+  saveBugReport: (data) => ipcRenderer.invoke("save-bug-report", data),
+
   // Error logging
   logError: (message) => ipcRenderer.invoke("log-error", message),
 
@@ -112,9 +116,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cloudStartAutoSync: (intervalMs) => ipcRenderer.invoke("cloud-start-auto-sync", intervalMs),
   cloudStopAutoSync: () => ipcRenderer.invoke("cloud-stop-auto-sync"),
 
+  // EPUB word extraction (HOTFIX-6: main-process extraction, no foliate navigation)
+  extractEpubWords: (bookId) => ipcRenderer.invoke("extract-epub-words", bookId),
+
   // Kokoro TTS
   kokoroPreload: () => ipcRenderer.invoke("tts-kokoro-preload"),
   kokoroGenerate: (text, voice, speed) => ipcRenderer.invoke("tts-kokoro-generate", text, voice, speed),
+  kokoroPreloadMarathon: () => ipcRenderer.invoke("tts-kokoro-preload-marathon"),
+  kokoroGenerateMarathon: (text, voice, speed) => ipcRenderer.invoke("tts-kokoro-generate-marathon", text, voice, speed),
   kokoroVoices: () => ipcRenderer.invoke("tts-kokoro-voices"),
   kokoroModelStatus: () => ipcRenderer.invoke("tts-kokoro-model-status"),
   kokoroDownload: () => ipcRenderer.invoke("tts-kokoro-download"),
@@ -133,6 +142,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("tts-kokoro-download-error", handler);
     return () => ipcRenderer.removeListener("tts-kokoro-download-error", handler);
   },
+
+  // TTS Cache (NAR-2)
+  ttsCacheRead: (bookId, voiceId, startIdx) => ipcRenderer.invoke("tts-cache-read", bookId, voiceId, startIdx),
+  ttsCacheWrite: (bookId, voiceId, startIdx, audioArr, sampleRate, durationMs) =>
+    ipcRenderer.invoke("tts-cache-write", bookId, voiceId, startIdx, audioArr, sampleRate, durationMs),
+  ttsCacheHas: (bookId, voiceId, startIdx) => ipcRenderer.invoke("tts-cache-has", bookId, voiceId, startIdx),
+  ttsCacheChunks: (bookId, voiceId) => ipcRenderer.invoke("tts-cache-chunks", bookId, voiceId),
+  ttsCacheEvictBook: (bookId) => ipcRenderer.invoke("tts-cache-evict-book", bookId),
+  ttsCacheEvictVoice: (bookId, voiceId) => ipcRenderer.invoke("tts-cache-evict-voice", bookId, voiceId),
+  ttsCacheInfo: () => ipcRenderer.invoke("tts-cache-info"),
 
   // Events from main
   onSyncProgress: (callback) => {

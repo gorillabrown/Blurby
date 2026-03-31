@@ -2,7 +2,80 @@
 
 **Purpose:** Full specs for all completed sprints, extracted from `ROADMAP.md` to keep the roadmap forward-looking. Reference only — do not modify.
 
-**Last archived:** 2026-03-28
+**Last archived:** 2026-03-29
+
+---
+
+## NAR-5 [v1.4.7]: Dual-Worker Eager Pre-Generation & Ramp-Up Fix
+
+**Completed:** 2026-03-30 | **Branch:** `sprint/nar-5-eager-pregen` | **Tier:** Quick
+
+**Problem:** (1) ~1-1.5s cold start delay before first audio, (2) cursor freezes at chunk boundaries during ramp-up when single ONNX worker can't keep up at 1.5x, (3) single-worker contention between real-time playback and background caching, (4) cache alignment mismatch (pipeline requests 13/44-word chunks but cache has 148-word chunks), (5) backgroundCacher.ts was dead code since NAR-4.
+
+**Fix:** Dual ONNX worker architecture. Marathon worker (`tts-engine-marathon.js`) runs independently for background caching — no idle timeout, no loading UI, stays warm from book open. Sprint worker handles real-time playback. backgroundCacher wired in ReaderContainer with marathon IPC. Cache alignment: `produceChunk` returns actual consumed word count, pipeline skips ramp-up on cruise-sized cache hits. Doubling ramp-up: 13→26→52→104→148 (was geometric 13→44→148).
+
+**Files changed:** `main/tts-engine-marathon.js` (new), `main/ipc/tts.js`, `preload.js`, `src/components/ReaderContainer.tsx`, `src/utils/generationPipeline.ts`, `src/constants.ts`, `src/test-harness/electron-api-stub.ts`, `tests/generationPipeline.test.ts`, `package.json`
+
+**Tests:** 860 pass, 0 fail. Build: success.
+
+---
+
+## HOTFIX-10 [v1.4.6]: Global Index Alignment
+
+**Completed:** 2026-03-30 | **Branch:** `hotfix/10-global-index-alignment` | **Tier:** Quick
+
+**Problem:** After HOTFIX-6 extraction completes, narration pipeline uses book-wide global word indices but foliate DOM `<span data-word-index="N">` attributes still used section-local indices. Every `highlightWordByIndex(globalIdx)` query missed, freezing the cursor and triggering a miss-handler storm of `.next()` calls (~3/sec).
+
+**Fix:** (1) `wrapWordsInSpans` uses extraction's `startWordIdx` as `globalOffset` when `bookWordSections` available, (2) post-extraction re-stamp unwraps+rewraps all loaded foliate sections with global indices before `narration.updateWords()`, (3) miss handler skips `.next()` when extraction is complete (NAR-3 handles navigation). Added `unwrapWordSpans` helper and `bookWordsCompleteRef` to `useReadingModeInstance`.
+
+**Files changed:** `src/components/FoliatePageView.tsx` (new props, `unwrapWordSpans`, `wrapWordsInSpans` exported), `src/components/ReaderContainer.tsx` (re-stamp logic, `bookWordsCompleteRef`), `src/hooks/useReadingModeInstance.ts` (miss handler guard), `package.json`
+
+**Tests:** 860 pass, 0 fail. Build: success.
+
+---
+
+## HOTFIX-9 [v1.4.5]: Native Speed Generation + Cursor Fix + Overlap Fix
+
+**Completed:** 2026-03-30 | **Branch:** `sprint/hotfix9-native-speed` | **Tier:** Full
+
+**Problem:** Three bugs from NAR-2's decision to generate at 1.0x and use Web Audio `playbackRate` for speed: (1) cursor desync — `setSpeed()` boundary recalculation was a no-op, (2) audio overlap on `updateWords` restart — `source.stop()` doesn't immediately silence buffered audio, (3) pitch distortion — `playbackRate` changes both speed and pitch.
+
+**Fix:** Removed `playbackRate`-based speed changes entirely. Pipeline now generates at actual target speed via `config.getSpeed()`. Speed changes use debounced stop+restart (500ms). `source.disconnect()` before `source.stop()` prevents overlap. Cache reads/writes bypassed when speed !== 1.0.
+
+**Files changed:** `src/utils/audioScheduler.ts` (removed `setSpeed`, `playbackRate`, added disconnect), `src/utils/generationPipeline.ts` (added `getSpeed` to config), `src/hooks/narration/kokoroStrategy.ts` (wired `getSpeed`, cache bypass), `src/hooks/useNarration.ts` (debounced `adjustRate`), `tests/audioScheduler.test.ts`, `tests/generationPipeline.test.ts`, `package.json`
+
+**Tests:** 860 pass, 0 fail. Build: success.
+
+---
+
+## HOTFIX-8 [v1.4.4]: Pipeline-Aware Scheduler onEnd
+
+**Completed:** 2026-03-29 | **Branch:** `sprint/hotfix8-pipeline-onend` | **Tier:** Quick
+
+**Problem:** audioScheduler fired `callbacks.onEnd()` when `activeSources.length === 0`, which was met prematurely when the first ramp-up chunk (13 words) finished playing before the generationPipeline delivered chunk 2 via IPC. This caused cursor reset to 0 and narration replay from the beginning.
+
+**Fix:** Added `pipelineDone` flag to audioScheduler. The scheduler only fires `onEnd` when BOTH `activeSources.length === 0` AND `pipelineDone === true`. `markPipelineDone()` also checks if sources are already empty (fires immediately if so). Flag resets in both `stop()` and `play()`. Pipeline's `onEnd` callback wired to `scheduler.markPipelineDone()` in kokoroStrategy.ts.
+
+**Files changed:** `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`, `package.json`
+
+**Tests:** 860 pass, 0 fail.
+
+---
+
+## HOTFIX-7 [v1.4.3]: Stale onended Race Condition — Fix 15-Word Narration Loop
+
+**Completed:** 2026-03-29 | **Branch:** `sprint/hotfix7-stale-onended` | **Tier:** Quick | **Outcome:** PASS
+
+**Root cause:** `source.stop()` in Web Audio fires `onended` asynchronously. When `updateWords()` called `stop()` then `play()`, the stale `onended` fired with the new session's callbacks, triggering `onEnd()` → section-end navigation → cursor reset to 0 → infinite 15-word loop.
+
+**Fix (3 files, +12/-5 lines):**
+- `audioScheduler.ts`: Added `schedulerEpoch` counter — incremented on `stop()`, captured in `scheduleChunk()` closure, checked in `source.onended`. Stale callbacks silently exit.
+- `ReaderContainer.tsx`: Section-end callback checks `bookWordsRef.current?.complete` first — if full-book words loaded, calls `narration.stop()` instead of navigating foliate.
+- `package.json`: Version bump to 1.4.3.
+
+**Verification:** 860 tests pass, clean build, code review PASS (spec-compliant, no scope creep).
+
+**Related:** LL-053 (Web Audio onended async), LL-051 (no visible foliate navigation for background work)
 
 ---
 
@@ -2808,3 +2881,913 @@ Five test files targeting the five untested layers, plus integration tests for t
 12. Branch `sprint/th1-narration-tests` merged to main with `--no-ff`
 
 ---
+
+---
+
+## Archived 2026-03-29 — NAR-2 through HOTFIX-6
+
+## Sprint NAR-2 [v1.2.0]: TTS Pipeline Redesign — Zero-Latency Narration
+
+**Goal:** Replace the callback-chain audio pipeline with a pre-scheduled Web Audio pipeline. Geometric chunk ramp-up for ≤1s cold start, crossfade splicing for zero dead air, AudioContext.currentTime word timer for drift-free highlights, PCM disk cache for instant replay, hybrid speed via playbackRate (1.5x cap). Foliate-drives-narration unchanged (Phase 2 scope).
+
+**Design spec:** `docs/superpowers/specs/2026-03-29-tts-pipeline-redesign-design.md`
+**Branch:** `sprint/nar2-tts-pipeline` | **Tier:** Full (architecture change + new files)
+
+### KEY CONTEXT
+
+NAR-1 delivered rolling audio queue and smart pause heuristics (841 tests). HOTFIX-4/4B fixed pause slider disconnection, chunk splitting on abbreviations, highlight drift at >1x, and resume latency. Despite these fixes, the fundamental architecture has structural limits: `onended` callback-driven handover creates 5-20ms dead air at chunk boundaries, word highlighting uses setTimeout with cumulative drift at >1x, speed changes flush the entire queue and regenerate, and cold start is ~2-3s per chunk. This sprint replaces the audio pipeline while keeping the foliate integration unchanged.
+
+### PROBLEM
+
+1. **5-20ms dead air at chunk boundaries.** `onended` fires → create buffer → `source.start(0)` introduces callback latency. Audible as micro-gaps in continuous narration.
+2. **Cumulative word-highlight drift at >1x speed.** setTimeout-based timer accumulates error. At 1.3x over a 148-word chunk, highlight can lag by 200-400ms.
+3. **~2-3s cold start per chunk.** Fixed 40-word chunk size means every chunk takes the same generation time regardless of pipeline state.
+4. **Queue flush on speed change.** Changing speed discards all pre-generated audio and regenerates from scratch. 3-5s interruption.
+5. **No disk cache.** Returning to a previously-narrated book re-generates everything from the Kokoro worker.
+
+### EVIDENCE OF PROBLEM
+
+- `src/utils/audioQueue.ts` lines 185-195: `onended` → `consumeNext()` callback chain
+- `src/constants.ts` line 64: `TTS_CHUNK_SIZE = 40` (fixed, no ramp-up)
+- `src/constants.ts` line 66: `TTS_MAX_RATE = 2.0` (will be capped to 1.5)
+- `src/hooks/useNarration.ts`: setTimeout-based word timer with no self-correction
+- HOTFIX-4B user reports: "Still a significant pause between pause and resume", "Highlight is falling well behind narration at 1.3x speed"
+
+### HYPOTHESIZED SOLUTION
+
+Five workstreams aligned with the design spec sections:
+
+- **NAR-2A: Progressive chunk sizing** — Geometric ramp-up formula: `min(13 × (0.95 × R)^n, 148)`. Cold start chunk (13 words) generates in ≤1s. Cruise chunks (148 words) by iteration 3.
+- **NAR-2B: Pre-scheduled playback + crossfade** — Replace `onended` chain with `source.start(nextStartTime)`. 8ms linear crossfade at boundaries. `audioCtx.suspend()/resume()` for pause.
+- **NAR-2C: Self-correcting word timer** — AudioContext.currentTime-based timer. Pre-compute word boundaries as absolute times at schedule time. Single setTimeout loop self-corrects on each tick.
+- **NAR-2D: PCM disk cache** — Main process writes raw Float32Array to `userData/tts-cache/{bookId}/{voiceId}/chunk-{startIdx}.pcm`. Manifest tracks chunks per book. Cache hit skips Kokoro entirely.
+- **NAR-2E: Hybrid speed change + warm AudioContext** — Generate at 1.0x, apply `playbackRate` at playback time. Single cache per voice for all speeds. AudioContext created on book open (not first play). Predictive pre-gen on book open.
+
+### EVIDENCE FOR HYPOTHESIS
+
+- Web Audio `source.start(when)` is sample-accurate by spec — eliminates callback latency entirely
+- `AudioContext.currentTime` is monotonic and hardware-synced — no JS timer drift
+- Geometric ramp-up math verified in design spec §1: headroom grows each iteration, producer ahead permanently after chunk 3
+- `playbackRate` on AudioBufferSourceNode is instantaneous — no queue flush needed
+- `audioCtx.suspend()/resume()` freezes all scheduled nodes atomically — simpler than current multi-state pause logic
+
+### WHAT (Tasks to Complete)
+
+| Step | Task | Agent | Model |
+|------|------|-------|-------|
+| 1 | Create `src/utils/audioScheduler.ts` — pre-scheduled playback engine with crossfade, word timer, pause/resume via AudioContext suspend/resume | renderer-fixer | sonnet |
+| 2 | Create `src/utils/generationPipeline.ts` — producer with progressive chunk sizing, IPC queue pipelining, ramp-up sequence | renderer-fixer | sonnet |
+| 3 | Create `src/utils/ttsCache.ts` — renderer-side cache interface (request cached chunks from main, receive ArrayBuffers) | renderer-fixer | sonnet |
+| 4 | Create `main/tts-cache.js` — disk cache writer, manifest CRUD, chunk read/write, eviction, startup cleanup | electron-fixer | sonnet |
+| 5 | Update `main/tts-worker.js` — Transferable postMessage for PCM Float32Array (zero-copy) | electron-fixer | sonnet |
+| 6 | Update `main/tts-engine.js` — Transferable transfer from worker, forward ArrayBuffer to renderer | electron-fixer | sonnet |
+| 7 | Add cache IPC handlers to `main/ipc/tts.js` — `tts-cache-read`, `tts-cache-write`, `tts-cache-evict`, `tts-cache-manifest` | electron-fixer | sonnet |
+| 8 | Update `preload.js` — expose cache IPC channels via electronAPI | electron-fixer | sonnet |
+| 9 | Update `src/hooks/useNarration.ts` — wire to new generationPipeline + audioScheduler, remove old chunk dispatch and setTimeout timer | renderer-fixer | sonnet |
+| 10 | Update `src/hooks/narration/kokoroStrategy.ts` — adapt to new pipeline interface (progressive chunk requests) | renderer-fixer | sonnet |
+| 11 | Update `src/components/ReaderContainer.tsx` — AudioContext warm-up on book open, predictive pre-gen, cache-aware playback init | renderer-fixer | sonnet |
+| 12 | Update `src/constants.ts` — add NAR-2 constants (TTS_COLD_START_CHUNK_WORDS, TTS_CRUISE_CHUNK_WORDS, TTS_CROSSFADE_MS, etc.), update TTS_MAX_RATE to 1.5 | renderer-fixer | sonnet |
+| 13 | Update `main/constants.js` — add TTS_CACHE_SUBDIR, TTS_CACHE_MAX_MB, TTS_GENERATION_MAX_RETRIES | electron-fixer | sonnet |
+| 14 | Update `src/components/settings/TTSSettings.tsx` — cap speed slider max at 1.5x | renderer-fixer | sonnet |
+| 15 | Update `src/test-harness/electron-api-stub.ts` — add stubs for cache IPC channels | renderer-fixer | sonnet |
+| 16 | Retire or gut `src/utils/audioQueue.ts` — replaced by audioScheduler (keep file if referenced, remove internals) | renderer-fixer | sonnet |
+| 17 | Write unit tests: progressive chunk sizing formula at 1.0x/1.3x/1.5x, crossfade sample math, cache key format, word timer self-correction, hybrid speed recalculation | renderer-fixer | sonnet |
+| 18 | Write integration tests: cache lifecycle (write → read → verify), manifest consistency after simulated crash, voice change full eviction, Transferable transfer verification | electron-fixer | sonnet |
+| 19 | Run `npm test` — all 841+ tests pass, 0 failures | test-runner | haiku |
+| 20 | Run `npm run build` — clean build, no TypeScript errors | test-runner | haiku |
+| 21 | Update `docs/governance/LESSONS_LEARNED.md` with discoveries | doc-keeper | sonnet |
+| 22 | Update `CLAUDE.md` — architecture section (new files), feature status, test counts | doc-keeper | sonnet |
+| 23 | Bump `package.json` to `1.2.0` | blurby-lead | opus |
+| 24 | Git: commit on branch `sprint/nar2-tts-pipeline`, merge to main with `--no-ff` | blurby-lead | opus |
+| 25 | Print terminal summary: old pipeline vs new pipeline comparison, latency targets, test count, cache structure | blurby-lead | opus |
+
+### WHERE (Read in This Order)
+
+1. `CLAUDE.md` — Agent rules, standing rules, architecture overview, test policy
+2. `ROADMAP.md` §Sprint NAR-2 — This spec
+3. `docs/superpowers/specs/2026-03-29-tts-pipeline-redesign-design.md` — **Full design spec with all architecture details, data flows, formulas, and edge cases. This is the primary reference.**
+4. `docs/governance/LESSONS_LEARNED.md` — TTS-related anti-patterns, known traps
+5. `src/utils/audioQueue.ts` — Current audio pipeline (being replaced). Understand consumer/producer pattern, onended chain, pause/resume logic.
+6. `src/hooks/useNarration.ts` — Current narration hook. Understand state machine, chunk dispatch, word timer, mode transitions.
+7. `src/hooks/narration/kokoroStrategy.ts` — Kokoro TTS strategy interface. Understand how chunks are requested and audio returned.
+8. `src/components/ReaderContainer.tsx` — Narration wiring point. Understand how useNarration connects to reader modes.
+9. `main/tts-engine.js` — Main-process TTS engine. Understand worker communication, PCM handling.
+10. `main/tts-worker.js` — Kokoro worker thread. Understand generation pipeline, current postMessage serialization.
+11. `main/ipc/tts.js` — Current TTS IPC handlers.
+12. `preload.js` — Current electronAPI surface for TTS.
+13. `src/constants.ts` — All TTS constants (lines 64-88, 197, 241-243, 299-303).
+14. `main/constants.js` — Main process constants.
+
+### HOW (Agent Assignments)
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| blurby-lead | opus | Read spec + design doc, dispatch agents in sequence, verify each deliverable against design spec, git merge, terminal summary |
+| renderer-fixer | sonnet | New renderer files (audioScheduler, generationPipeline, ttsCache), update useNarration, kokoroStrategy, ReaderContainer, constants, TTSSettings, test harness stub, retire audioQueue, write renderer unit tests |
+| electron-fixer | sonnet | New main file (tts-cache.js), update tts-worker, tts-engine, ipc/tts, preload, main constants, write main-process integration tests |
+| test-runner | haiku | Run `npm test` + `npm run build` after all implementation |
+| doc-keeper | sonnet | LESSONS_LEARNED, CLAUDE.md updates |
+
+**Execution mode notes:**
+- All IPC and main-process work (steps 4-8, 13) can run in parallel with renderer work (steps 1-3) — no shared files.
+- Steps 9-11 (useNarration, kokoroStrategy, ReaderContainer) depend on steps 1-3 (new files they import) AND steps 7-8 (IPC surface they call). Must be sequential after both groups complete.
+- Long-running test suite — run directly in bash, not through sub-agents.
+
+### WHEN (Execution Order)
+
+```
+[1-3] PARALLEL (new renderer files, no shared deps):
+    ├─ [1] audioScheduler.ts (renderer-fixer)
+    ├─ [2] generationPipeline.ts (renderer-fixer)
+    └─ [3] ttsCache.ts (renderer-fixer)
+    ↓
+[4-8] PARALLEL (main-process files, independent of renderer internals):
+    ├─ [4] main/tts-cache.js (electron-fixer)
+    ├─ [5] tts-worker.js Transferable (electron-fixer)
+    ├─ [6] tts-engine.js Transferable (electron-fixer)
+    ├─ [7] ipc/tts.js cache handlers (electron-fixer)
+    └─ [8] preload.js cache surface (electron-fixer)
+    ↓ (1-3 AND 7-8 complete — renderer files exist + IPC surface ready)
+[9-11] SEQUENTIAL (wiring — imports new modules + calls new IPC):
+    [9] useNarration.ts (renderer-fixer)
+    ↓
+    [10] kokoroStrategy.ts (renderer-fixer)
+    ↓
+    [11] ReaderContainer.tsx (renderer-fixer)
+    ↓
+[12-16] PARALLEL (independent updates):
+    ├─ [12] constants.ts (renderer-fixer)
+    ├─ [13] main/constants.js (electron-fixer)
+    ├─ [14] TTSSettings.tsx speed cap (renderer-fixer)
+    ├─ [15] electron-api-stub.ts cache stubs (renderer-fixer)
+    └─ [16] Retire audioQueue.ts (renderer-fixer)
+    ↓ (all complete)
+[17-18] PARALLEL (tests):
+    ├─ [17] Renderer unit tests (renderer-fixer)
+    └─ [18] Main integration tests (electron-fixer)
+    ↓
+[19-20] SEQUENTIAL:
+    [19] npm test (test-runner)
+    ↓
+    [20] npm run build (test-runner)
+    ↓
+[21-22] PARALLEL (docs):
+    ├─ [21] LESSONS_LEARNED (doc-keeper)
+    └─ [22] CLAUDE.md (doc-keeper)
+    ↓
+[23-24] SEQUENTIAL:
+    [23] Bump package.json to 1.2.0 (blurby-lead)
+    ↓
+    [24] Git commit + merge (blurby-lead)
+    ↓
+[25] Terminal summary (blurby-lead)
+```
+
+### ADDITIONAL GUIDANCE
+
+- **Design spec is authoritative.** The full design doc at `docs/superpowers/specs/2026-03-29-tts-pipeline-redesign-design.md` has all formulas, data flows, constants, edge cases, and error handling. Read it completely before starting any implementation. This ROADMAP spec is the dispatch — the design doc is the payload.
+- **audioScheduler.ts is the hardest file.** Pre-scheduled playback with crossfade, word timer, and suspend/resume. Get this right first. Key invariant: `nextStartTime` must always be updated BEFORE scheduling, and crossfade overlap must be subtracted from each chunk's scheduled duration.
+- **Crossfade math:** At 24kHz, 8ms = 192 samples. Last 192 samples of chunk N ramp down (1.0→0.0 linear). First 192 samples of chunk N+1 ramp up (0.0→1.0). Additive overlap. Apply to the Float32Array BEFORE creating AudioBuffer.
+- **Transferable transfer is zero-copy.** After `postMessage(buffer, [buffer.buffer])`, the source ArrayBuffer is detached. Do NOT reference it after transfer. Workers and main process must handle detached buffers gracefully.
+- **Cache key uses section-local word index.** Phase 1 retains foliate section-scoped word arrays. Cache key is `{bookId}/{voiceId}/chunk-{startIdx}.pcm` where startIdx is into the current section. This means cache keys are section-dependent — if the user jumps to a different section, different cache keys apply.
+- **Manifest cleanup on startup.** Check for orphan .pcm files (exist on disk, not in manifest) and zero-byte files. Delete them. This handles app-quit-during-write scenarios.
+- **Web Speech fallback preserved.** If Kokoro generation fails after 1 retry, fall back to the existing Web Speech API path for that chunk range. The audioScheduler must handle mixed-quality audio gracefully.
+- **AudioContext warm-up timing.** Create AudioContext on book open, not on narration start. This eliminates ~50-200ms audio driver wake-up latency. On book close, close the AudioContext to free resources.
+- **Do NOT modify foliate integration.** Section loading, word extraction, page advance — all unchanged. Narration still receives words from foliate's per-section extraction. The foliate inversion is Phase 2 (NAR-3).
+- **Speed cap enforcement.** Update TTS_MAX_RATE from 2.0 to 1.5. Update the speed slider max in TTSSettings.tsx. Update any clamping logic in adjustRate().
+- **Branch:** `sprint/nar2-tts-pipeline`. Merge to main with `--no-ff`. Delete branch after merge.
+
+### SUCCESS CRITERIA
+
+1. Cold start (uncached book): audio plays within ≤1s of pressing play
+2. No audible gaps between chunks — crossfade splice eliminates dead air
+3. Word highlight stays within ±50ms of spoken word at 1.0x, 1.3x, and 1.5x over a 148-word chunk
+4. Speed change mid-playback: no interruption, no queue flush, playbackRate applied instantly
+5. Pause/resume: `audioCtx.suspend()/resume()` — instant, no state reset, no re-scheduling
+6. PCM disk cache: returning to a previously-narrated book plays audio instantly (no Kokoro generation)
+7. Cache invalidation: voice change evicts book cache; speed change does NOT invalidate cache
+8. Manifest tracks all cached chunks; startup cleanup removes orphan/zero-byte files
+9. `TTS_MAX_RATE` = 1.5 enforced in constants, slider, and adjustRate()
+10. Predictive pre-gen: opening a book pre-generates chunk 1 in background before play pressed
+11. AudioContext created on book open (warm), closed on book close
+12. Transferable transfer: PCM moves worker→main→renderer without Array.from() serialization
+13. Web Speech fallback fires on Kokoro failure after 1 retry (existing path preserved)
+14. `audioQueue.ts` internals removed or file deleted — no dead code
+15. Test harness stubs added for all new IPC channels
+16. ≥20 new tests covering: chunk sizing formula, crossfade math, cache key format, word timer, speed recalc, cache lifecycle, manifest cleanup, voice eviction
+17. All 860+ tests pass (841 existing + new), 0 failures
+18. Clean `npm run build`, no TypeScript errors
+19. `package.json` version bumped to `1.2.0`
+20. Branch `sprint/nar2-tts-pipeline` merged to main with `--no-ff`
+
+---
+
+## Sprint NAR-3 [v1.3.0]: Foliate Inversion — Narration-Drives-Display
+
+**Goal:** Decouple narration from foliate's section-by-section rendering. Build a full-book word stream via eager section loading, invert the control flow so narration drives page advancement, and eliminate the ~300ms section-transition pause.
+
+**Design spec:** `docs/superpowers/specs/2026-03-29-tts-pipeline-redesign-design.md` §Future Work — Phase 2
+**Prerequisite:** NAR-2 complete (new audio pipeline operational)
+**Branch:** `sprint/nar3-foliate-inversion` | **Tier:** Full (architecture change)
+
+### PROBLEM
+
+Phase 1 (NAR-2) retains foliate-drives-narration: narration waits for foliate to load each section before extracting words. This causes a ~300ms pause at every chapter/section boundary while foliate loads the next section. Additionally, cache keys are section-local (word indices reset per section), which complicates position tracking across the book.
+
+### SCOPE
+
+1. **Eager section loading** — On book open, request all foliate sections in sequence. Extract words from each as it loads. Build a complete book-wide word array with global indices.
+2. **Narration-drives-foliate** — Narration maintains a `currentGlobalWordIndex` into the book-wide array. Tells foliate which section/page to display based on the current narration position, rather than foliate telling narration what to read.
+3. **Seamless chapter-boundary advance** — No pause at section transitions. The audio pipeline has pre-generated audio spanning the boundary. foliate display catches up.
+4. **Global cache keys** — Cache keys use global word index (`chunk-{globalStartIdx}.pcm`) instead of section-local index. Migration path for existing NAR-2 caches.
+
+### KEY FILES (Estimated)
+
+- `src/hooks/useNarration.ts` — Invert control flow, global word index tracking
+- `src/components/FoliatePageView.tsx` — Eager section loading, narration-driven page advance
+- `src/utils/generationPipeline.ts` — Accept global word ranges, request words across section boundaries
+- `src/utils/ttsCache.ts` — Global cache key scheme
+- `main/tts-cache.js` — Cache key migration, global index manifest
+- New: `src/utils/bookWordStream.ts` — Book-wide word extraction and indexing
+
+### SUCCESS CRITERIA (Draft)
+
+1. Full-book word array built on book open (all sections extracted eagerly)
+2. Zero pause at chapter/section boundaries during narration
+3. Cache keys use global word indices
+4. Existing NAR-2 caches gracefully invalidated or migrated
+5. Narration position saved/restored using global word index
+6. foliate display follows narration position (not the other way around)
+7. All NAR-2 success criteria remain passing (no regressions)
+8. All tests pass, clean build
+9. `package.json` version bumped to `1.3.0`
+
+---
+
+## Sprint NAR-4 [v1.4.0]: Library-Wide Caching & Compression
+
+**Goal:** Compress cached audio with Opus (WASM encoder), extend caching to all Reading Now books via background generation, add cache progress indicators in the library UI, and implement LRU eviction across multiple books.
+
+**Design spec:** `docs/superpowers/specs/2026-03-29-tts-pipeline-redesign-design.md` §Future Work — Phase 3
+**Prerequisite:** NAR-3 complete (global word indices, full-book word stream)
+**Branch:** `sprint/nar4-library-caching` | **Tier:** Full (new feature + WASM integration)
+
+### PROBLEM
+
+NAR-2 caches raw PCM Float32Array — a 10-hour book at 24kHz mono float32 is ~2.8GB. Only the active book is cached. Users with multiple books in "Reading Now" must wait for cold-start generation each time they switch books. No visibility into cache state from the library.
+
+### SCOPE
+
+1. **Opus compression** — WASM-based Opus encoder in a worker thread. Encode PCM chunks to Opus on write, decode on read. Target: ~80-100KB per minute of audio (~50-60MB per 10-hour book vs ~2.8GB raw PCM).
+2. **Background caching** — 3-slot priority queue: active book (highest) > currently open book > all Reading Now books (round-robin). Background generation runs when app is idle. Pauses when user starts active narration.
+3. **Cache progress indicators** — Checkmark badge on DocCard/DocGridCard for fully cached books. Partial cache shows progress ring. "Cached for offline narration" tooltip.
+4. **Settings integration** — "Cache books for offline narration" toggle in TTS Settings (default on). "Clear cache" button showing total size. `ttsCacheEnabled` setting field.
+5. **LRU eviction** — When total cache exceeds `TTS_CACHE_MAX_MB`, evict least-recently-narrated books first. Never evict the currently-playing book. Eviction runs on startup and after each cache write.
+6. **Predictive pre-generation** — On book open, if no cache exists for the current position, fire chunk 1 generation in the background before the user presses play.
+
+### KEY FILES (Estimated)
+
+- New: `main/opus-encoder.js` — WASM Opus encoder worker
+- New: `src/components/CacheBadge.tsx` — Cache indicator for library cards
+- `main/tts-cache.js` — Opus encode/decode, LRU eviction, background generation queue
+- `src/utils/ttsCache.ts` — Opus decode on read, cache status queries
+- `src/components/DocCard.tsx` / `DocGridCard.tsx` — Cache badge integration
+- `src/components/settings/TTSSettings.tsx` — Cache toggle, clear button, size display
+- `src/constants.ts` — Cache-related constants
+- `main/constants.js` — Opus encoder config, LRU thresholds
+
+### SUCCESS CRITERIA (Draft)
+
+1. Opus-encoded cache: 10-hour book ≤ 100MB on disk (vs ~2.8GB raw PCM)
+2. Background caching generates audio for all Reading Now books when idle
+3. Cache badge visible on fully-cached books in library view
+4. "Cache books for offline narration" toggle works (on/off)
+5. "Clear cache" button shows total size, clears all cached audio
+6. LRU eviction triggers when total cache exceeds threshold
+7. Currently-playing book never evicted
+8. Predictive pre-gen: opening a cached book → instant play; opening uncached book → chunk 1 pre-generated before play
+9. All NAR-2 + NAR-3 success criteria remain passing
+10. All tests pass, clean build
+11. `package.json` version bumped to `1.4.0`
+
+
+## Sprint 24R [v0.9.1]: CRIT Remediation
+
+**Goal:** Fix the 1 actionable CRITICAL from Sprint 24 audit. CRIT-2 (OAuth placeholder creds) deferred to v1.1.0. CRIT-3 dismissed — `.Workflow/` exists on Windows host, invisible to Linux VM audit agents.
+
+**Branch:** `sprint/24r-crit-remediation` | **Tier:** Quick
+
+### KEY CONTEXT
+Sprint 24 external audit found 3 CRITICALs. CRIT-1 is a real security hole (arbitrary file read via IPC). CRIT-2 (placeholder OAuth creds) deferred to v1.1.0 — app ships local-only first. CRIT-3 is a false positive — `.Workflow/` exists at `C:\Users\estra\OneDrive\Projects\Blurby\.Workflow` on the Windows host; audit agents running in Linux VM couldn't see it.
+
+### PROBLEM
+**CRIT-1:** `read-file-buffer` IPC handler at `main/ipc/library.js:135-143` accepts arbitrary filesystem paths from the renderer with no validation. A compromised renderer could read `~/.ssh/id_rsa`, auth tokens, etc.
+
+### EVIDENCE OF PROBLEM
+- `docs/project/AGENT_FINDINGS.md` §CRIT-1 — Full finding with file path and line numbers
+
+### HYPOTHESIZED SOLUTION
+Add path allowlist validation to `read-file-buffer`. Resolve the requested path, verify it starts with either `ctx.getDataPath()` or `settings.sourceFolder`. Return null for disallowed paths. Also audit other file-read IPC handlers (`load-doc-content`, `read-file`) for the same pattern.
+
+### WHAT (Tasks to Complete)
+
+| Step | Task | Agent | Model |
+|------|------|-------|-------|
+| 1 | Audit all file-read IPC handlers for path validation gaps | code-reviewer | sonnet |
+| 2 | Add path allowlist to `read-file-buffer` + any other unvalidated handlers found in step 1 | electron-fixer | sonnet |
+| 3 | Write tests for path validation (allowed paths pass, disallowed paths return null, path traversal blocked) | electron-fixer | sonnet |
+| 4 | Run `npm test` — all tests pass | test-runner | haiku |
+| 5 | Run `npm run build` — clean build | test-runner | haiku |
+| 6 | Git: commit on branch, merge to main with `--no-ff` | blurby-lead | opus |
+| 7 | Print terminal summary: CRITs addressed, test count, what's deferred | blurby-lead | opus |
+
+### WHERE (Read in This Order)
+
+1. `CLAUDE.md` — Agent rules, standing rules
+2. `ROADMAP.md` §Sprint 24R — This spec
+3. `docs/project/AGENT_FINDINGS.md` — Full audit findings (CRIT-1 details)
+4. `main/ipc/library.js` — `read-file-buffer` handler (CRIT-1 target)
+5. `main/ipc/` — All 8 IPC handler files (audit for same pattern)
+6. `docs/governance/LESSONS_LEARNED.md` — Anti-patterns
+
+### HOW (Agent Assignments)
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| blurby-lead | opus | Read spec, dispatch, verify, git merge, summary |
+| code-reviewer | sonnet | Audit all IPC handlers for path validation gaps (step 1 only, read-only) |
+| electron-fixer | sonnet | Implement path validation + tests (steps 2-3) |
+| test-runner | haiku | Run tests + build (steps 4-5) |
+
+### WHEN (Execution Order)
+
+```
+[1] Audit IPC handlers (code-reviewer, read-only)
+    ↓
+[2-3] SEQUENTIAL:
+    [2] Add path validation (electron-fixer)
+    [3] Write path validation tests (electron-fixer)
+    ↓
+[4-5] SEQUENTIAL:
+    [4] npm test (test-runner)
+    [5] npm run build (test-runner)
+    ↓
+[6] Git commit + merge (blurby-lead)
+    ↓
+[7] Terminal summary (blurby-lead)
+```
+
+### ADDITIONAL GUIDANCE
+
+- **Path validation must cover traversal attacks.** `../../etc/passwd` resolved against an allowed root should still fail. Use `path.resolve()` then `startsWith()` on the resolved path vs resolved root.
+- **CRIT-2 and CRIT-3 are explicitly OUT OF SCOPE.** CRIT-2: don't touch `main/auth.js` OAuth credentials (deferred v1.1.0). CRIT-3: `.Workflow/` exists on Windows host — false positive, no action needed.
+- **Branch:** `sprint/24r-crit-remediation`. Merge to main with `--no-ff`. Delete branch after merge.
+
+### SUCCESS CRITERIA
+
+1. `read-file-buffer` rejects paths outside app data dir and source folder
+2. Path traversal attacks (e.g., `../../etc/passwd`) return null
+3. All other file-read IPC handlers validated (or confirmed already safe)
+4. `package.json` version bumped to `0.9.1`
+5. All 776+ tests pass, 0 failures
+6. Clean `npm run build`
+7. Branch merged to main with `--no-ff`
+
+---
+
+## Sprint KB-1 [v0.10.0]: Keyboard Navigation Remap
+
+**Goal:** Swap Ctrl+Arrow and Shift+Arrow bindings to match OS-native conventions. Ctrl = fine-grained word/sentence navigation. Shift = coarse structural paragraph/chapter jumps. All modes.
+
+**Branch:** `sprint/kb1-keyboard-nav` | **Tier:** Quick (single-component change + tests)
+
+### KEY CONTEXT
+Pre-v1.0.0 polish. Current keyboard bindings use Shift+Arrow for word-level movement (Page mode only) and Ctrl+Arrow for paragraph/document jumps. This is backwards from OS-native conventions (Word, Notepad, VS Code) where Ctrl+Arrow = word jump. Swapping to native conventions reduces learning curve for every new user. Also extends word-level navigation to Focus and Flow modes (currently Page-only) and adds sentence boundary navigation.
+
+### PROBLEM
+1. **Ctrl+Arrow is non-native.** Ctrl+Left/Right = paragraph jump, Ctrl+Up/Down = doc start/end. In every OS text editor, Ctrl+Arrow = word-level movement.
+2. **Shift+Arrow is Page-mode only.** Focus and Flow modes have no single-word seek binding.
+3. **No sentence navigation exists.** `hasPunctuation()` detects sentence boundaries but nothing uses it for navigation.
+4. **Shift+Up/Down coarse WPM (±50) is dropped.** Up/Down ±25 WPM is sufficient.
+
+### EVIDENCE OF PROBLEM
+- `src/hooks/useKeyboardShortcuts.ts` lines 189-212: Current Ctrl+Arrow and Shift+Arrow handlers
+- `src/hooks/useKeyboardShortcuts.ts` lines 229-246: Mode-specific arrow handling (Shift+Up/Down = ±50 WPM in Focus/Flow)
+- `src/components/ReaderContainer.tsx` lines 440-445: `handleMoveWordSelection` only called from Page mode path
+
+### HYPOTHESIZED SOLUTION
+Remap all arrow modifier bindings in `useKeyboardShortcuts.ts` and extend to all modes:
+
+**New Ctrl+Arrow (fine-grained, all modes):**
+- `Ctrl+Left`: Seek -1 word (`seekWords(-1)`)
+- `Ctrl+Right`: Seek +1 word (`seekWords(1)`)
+- `Ctrl+Up`: Seek to previous sentence start (scan backward for `hasPunctuation()`, jump to word after previous sentence-ending word)
+- `Ctrl+Down`: Seek to next sentence start (scan forward for `hasPunctuation()`, jump to word after next sentence-ending word)
+
+**New Shift+Arrow (coarse structural, all modes):**
+- `Shift+Left`: Paragraph prev (`paragraphPrev()`)
+- `Shift+Right`: Paragraph next (`paragraphNext()`)
+- `Shift+Up`: Chapter prev (`handlePrevChapter()`)
+- `Shift+Down`: Chapter next (`handleNextChapter()`)
+
+**Removed:**
+- Shift+Up/Down coarse WPM adjustment (±50) — dropped entirely
+
+**New utility needed:** `findSentenceBoundary(words, currentIndex, direction)` in `src/utils/text.ts` — scans words array using existing `hasPunctuation()` to find sentence starts.
+
+### WHAT (Tasks to Complete)
+
+| Step | Task | Agent | Model |
+|------|------|-------|-------|
+| 1 | Add `findSentenceBoundary(words, currentIndex, direction)` to `src/utils/text.ts` | renderer-fixer | sonnet |
+| 2 | Remap Ctrl+Arrow handlers in `useKeyboardShortcuts.ts`: Ctrl+Left/Right → seekWords(±1), Ctrl+Up/Down → sentence nav callbacks | renderer-fixer | sonnet |
+| 3 | Remap Shift+Arrow handlers in `useKeyboardShortcuts.ts`: Shift+Left/Right → paragraphPrev/Next (all modes), Shift+Up/Down → chapter prev/next (all modes) | renderer-fixer | sonnet |
+| 4 | Remove Shift+Up/Down coarse WPM (±50) from Focus/Flow mode handler | renderer-fixer | sonnet |
+| 5 | Wire `handleSentencePrev`/`handleSentenceNext` callbacks in `ReaderContainer.tsx`, pass to `useReaderKeys()` | renderer-fixer | sonnet |
+| 6 | Extend paragraph nav to Focus/Flow modes (currently Page-only gated) | renderer-fixer | sonnet |
+| 7 | Update shortcuts overlay data (help text) to reflect new bindings | renderer-fixer | sonnet |
+| 8 | Update `electron-api-stub.ts` keyboard shortcut help data if applicable | renderer-fixer | sonnet |
+| 9 | Write tests: sentence boundary scanning (edge cases: start of doc, end of doc, consecutive punctuation, no punctuation) | renderer-fixer | sonnet |
+| 10 | Run `npm test` — all 776+ tests pass | test-runner | haiku |
+| 11 | Run `npm run build` — clean build | test-runner | haiku |
+| 12 | Update `docs/governance/LESSONS_LEARNED.md` if any non-obvious discoveries | doc-keeper | sonnet |
+| 13 | Git: commit on branch `sprint/kb1-keyboard-nav`, merge to main with `--no-ff` | blurby-lead | opus |
+| 14 | Print terminal summary: old bindings → new bindings table, test count, build status | blurby-lead | opus |
+
+### WHERE (Read in This Order)
+
+1. `CLAUDE.md` — Agent rules, standing rules, test policy
+2. `ROADMAP.md` §Sprint KB-1 — This spec
+3. `src/hooks/useKeyboardShortcuts.ts` — Current key handlers (the main file being changed)
+4. `src/components/ReaderContainer.tsx` — Callback wiring, `handleMoveWordSelection`, paragraph nav handlers
+5. `src/utils/text.ts` — `hasPunctuation()`, `tokenizeWithMeta()`, paragraph breaks
+6. `src/modes/` — Mode interface, FocusMode, FlowMode, PageMode (understand `jumpTo()` and `seekWords()`)
+7. `src/utils/FlowCursorController.ts` — Line map, `prevLine()`/`nextLine()` (understand current Flow nav)
+8. `docs/governance/LESSONS_LEARNED.md` — Anti-patterns to avoid
+
+### HOW (Agent Assignments)
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| blurby-lead | opus | Read spec, dispatch renderer-fixer, verify results, git merge, terminal summary |
+| renderer-fixer | sonnet | All implementation: text.ts utility, useKeyboardShortcuts remap, ReaderContainer wiring, shortcuts overlay, tests |
+| test-runner | haiku | Run `npm test` + `npm run build` after implementation |
+| doc-keeper | sonnet | Update LESSONS_LEARNED if applicable |
+
+### WHEN (Execution Order)
+
+```
+[1] Add findSentenceBoundary to text.ts (renderer-fixer)
+    ↓
+[2-4] SEQUENTIAL (same file — useKeyboardShortcuts.ts):
+    [2] Remap Ctrl+Arrow handlers
+    [3] Remap Shift+Arrow handlers
+    [4] Remove coarse WPM
+    ↓
+[5-6] SEQUENTIAL (ReaderContainer.tsx):
+    [5] Wire sentence nav callbacks
+    [6] Extend paragraph nav to all modes
+    ↓
+[7-8] PARALLEL:
+    ├─ [7] Update shortcuts overlay (renderer-fixer)
+    └─ [8] Update stub help data (renderer-fixer)
+    ↓ (both complete)
+[9] Write sentence boundary tests (renderer-fixer)
+    ↓
+[10-11] SEQUENTIAL:
+    [10] npm test (test-runner)
+    [11] npm run build (test-runner)
+    ↓
+[12] Update LESSONS_LEARNED (doc-keeper)
+    ↓
+[13] Git commit + merge (blurby-lead)
+    ↓
+[14] Terminal summary (blurby-lead)
+```
+
+### ADDITIONAL GUIDANCE
+
+- **Sentence boundary edge cases:** First word of document has no "previous sentence." Last word of document has no "next sentence." Handle both by clamping to 0 / words.length-1. Consecutive punctuation words (e.g., `"...`) should be treated as one boundary — skip to the actual sentence start.
+- **Paragraph nav in Focus/Flow:** Currently gated behind `mode === "page"` in useKeyboardShortcuts. Remove the gate so Shift+Left/Right triggers `paragraphPrev()`/`paragraphNext()` regardless of mode. The underlying `setHighlightedWordIndex` / `seekWords` should work for all modes — verify by testing.
+- **Chapter nav already exists:** `handlePrevChapter` and `handleNextChapter` are already wired. Just map Shift+Up/Down to call them.
+- **Ctrl+Up/Down doc start/end is removed.** These bindings are not being relocated. Home/End could be added later but are not in scope.
+- **Do NOT change plain Arrow behavior.** Left/Right arrows (no modifier) in Focus/Flow modes keep their existing ±5 word rewind / line jump behavior. Up/Down arrows (no modifier) keep WPM ±25.
+- **Branch:** `sprint/kb1-keyboard-nav`. Merge to main with `--no-ff`. Delete branch after merge.
+
+### SUCCESS CRITERIA
+
+1. `Ctrl+Left`/`Ctrl+Right` seeks ±1 word in Page, Focus, and Flow modes
+2. `Ctrl+Up`/`Ctrl+Down` seeks to previous/next sentence start in all modes
+3. `Shift+Left`/`Shift+Right` jumps to paragraph boundaries in all modes
+4. `Shift+Up`/`Shift+Down` jumps to prev/next chapter in all modes
+5. Shift+Up/Down no longer adjusts WPM in any mode
+6. Plain arrow keys unchanged (Left/Right = page/rewind/line, Up/Down = WPM ±25)
+7. `findSentenceBoundary()` handles edge cases: doc start, doc end, consecutive punctuation, no punctuation in text
+8. Shortcuts overlay/help text reflects new bindings
+9. All 776+ tests pass, 0 failures
+10. Clean `npm run build`
+11. `package.json` version bumped to `0.10.0`
+12. Branch `sprint/kb1-keyboard-nav` merged to main with `--no-ff`
+
+---
+
+## Sprint CT-2: Test Harness Hardening + Bug Fixes
+
+**Goal:** Fix the 33 SKIPs and 5 of the 6 FAILs from the CT-1 click-through test run. Rich seed data, stub persistence, and 3 app bugs.
+
+**Branch:** `sprint/ct2-harness-hardening` | **Tier:** Full (modifies stub + production code)
+
+### KEY CONTEXT
+Sprint CT-1 delivered a working browser-based test harness. On 2026-03-28, a full click-through test run produced 82 PASS, 6 FAIL, 33 SKIP. The test report is at `docs/testing/test-run-2026-03-28.md`. The 33 SKIPs are dominated by a single root cause: the stub's Meditations seed data is only ~100 words across 3 tiny chapters, all fitting on one page. A secondary limitation is that stub state doesn't survive page reloads. Five bugs were also discovered.
+
+### PROBLEM
+Three gaps prevent the test harness from being useful for ongoing QA:
+
+1. **Short stub content (~100 words):** Blocks 15+ checklist items: page advance/back, chapter jump, extended playback in Focus/Flow, Narrate tracking, WPM adjustment verification, position preservation across mode switches.
+2. **No state persistence across reloads:** `electron-api-stub.ts` initializes fresh state on every page load. Any "change → reload → verify" test is impossible.
+3. **Five app bugs:**
+   - KB-01: `?` opens search palette instead of shortcuts overlay
+   - ERR-04: `update-available` event produces no visible notification
+   - ERR-05: `cloud-auth-required` event produces no visible response
+   - MODE-04: Shift+Space doesn't cycle Narrate → Focus (one-way cycle)
+   - Single seed doc prevents multi-doc testing (J/K nav, search filtering, delete-one)
+
+### EVIDENCE OF PROBLEM
+- `docs/testing/test-run-2026-03-28.md` — Full 121-item test report: 82 PASS, 6 FAIL, 33 SKIP
+- OB-05 FAIL: `setFirstRunCompleted(true)` + `location.reload()` → onboarding reappeared
+- READ-03/04 SKIP: "content fits on 1 page — stub data limitation"
+- MODE-04 FAIL: Shift+Space in Narrate mode → remained in Narrate
+- KB-01 FAIL: `?` key → search palette instead of ShortcutsOverlay
+
+### HYPOTHESIZED SOLUTION
+Five workstreams:
+- **CT-2A:** Rich seed data — expand Meditations to ~2,000 words / 12 chapters (original placeholder prose — philosophical reflections matching chapter titles, NOT verbatim public domain text, to avoid content filter blocks). Add second seed doc ("sample-article", ~500 words, also original).
+- **CT-2B:** sessionStorage persistence — hydrate stub state from sessionStorage on init, persist on every mutation. Add `clearPersistence()` method.
+- **CT-2C:** `?` shortcut fix — opens ShortcutsOverlay instead of search palette.
+- **CT-2D:** Event notification handlers — `update-available` and `cloud-auth-required` produce visible toasts.
+- **CT-2E:** Mode cycling fix — Shift+Space cycles Narrate → Focus, completing the circular cycle.
+
+### Workstreams
+
+| ID | Task | Agent | Model |
+|----|------|-------|-------|
+| CT-2A.1 | Expand Meditations seed content to ~2,000 words / 12 chapters in `electron-api-stub.ts` | `renderer-fixer` | sonnet |
+| CT-2A.2 | Add second seed document ("sample-article", ~500 words) to stub library | `renderer-fixer` | sonnet |
+| CT-2B | Implement sessionStorage persistence in `electron-api-stub.ts` | `renderer-fixer` | sonnet |
+| CT-2C | Fix `?` shortcut to open ShortcutsOverlay instead of search | `renderer-fixer` | sonnet |
+| CT-2D.1 | Add `update-available` toast handler in renderer | `renderer-fixer` | sonnet |
+| CT-2D.2 | Add `cloud-auth-required` toast handler in renderer | `renderer-fixer` | sonnet |
+| CT-2E | Fix Shift+Space mode cycling from Narrate → Focus | `ui-investigator` + `renderer-fixer` | opus + sonnet |
+
+### Agent Assignments
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| `renderer-fixer` | sonnet | All stub improvements (CT-2A, CT-2B), shortcut fix (CT-2C), event handlers (CT-2D), mode cycling fix implementation (CT-2E) |
+| `ui-investigator` | opus | Root-cause analysis for MODE-04 (Shift+Space in Narrate). Read-only investigation of key event flow through useReaderMode → NarrateMode → useKeyboardShortcuts. Output: exact diagnosis + fix spec. |
+| `test-runner` | haiku | Full test + build verification |
+| `doc-keeper` | sonnet | Post-sprint documentation updates |
+
+### Execution Order
+
+```
+[1–3] PARALLEL (independent stub modifications):
+    ├─ [1-2] Rich seed data — expand Meditations + add second doc (renderer-fixer)
+    └─ [3] sessionStorage persistence (renderer-fixer)
+    ↓ (all complete)
+[4–6] PARALLEL (independent bug fixes, no shared files):
+    ├─ [4] ? shortcut fix (renderer-fixer)
+    ├─ [5-6] Event notification handlers (renderer-fixer)
+    └─ [7a] Mode cycling investigation (ui-investigator) — read-only
+    ↓ (7a complete)
+[7b] Mode cycling fix implementation (renderer-fixer) — depends on 7a diagnosis
+    ↓ (all complete)
+[8] Test suite + build (test-runner)
+    ↓
+[9] Documentation update (doc-keeper)
+    ↓
+[10] Git commit + merge (blurby-lead)
+```
+
+### Read Order
+1. `CLAUDE.md` — System state, standing rules, test harness section
+2. `docs/testing/test-run-2026-03-28.md` — Full test report with all FAIL/SKIP details
+3. `docs/governance/LESSONS_LEARNED.md` — LL-042/043/044 for narration mode context
+4. `src/test-harness/electron-api-stub.ts` — Current stub (expand content, add persistence)
+5. `src/hooks/useKeyboardShortcuts.ts` — `?` key handler (CT-2C fix target)
+6. `src/components/ShortcutsOverlay.tsx` — Verify component exists and how it's triggered
+7. `src/hooks/useReaderMode.ts` — Mode cycling logic, Shift+Space handler (CT-2E target)
+8. `src/modes/NarrateMode.ts` — Narrate mode key handling (may intercept Shift+Space)
+9. `src/App.tsx` — IPC event listener wiring (CT-2D target)
+10. `src/contexts/ToastContext.tsx` — Toast API for event notifications
+
+### Additional Guidance
+- **Meditations text source:** DO NOT use verbatim public domain text (triggers API content filter on large outputs). Instead, write ORIGINAL placeholder prose — philosophical reflections that match the chapter titles ("Book One: Debts and Lessons", "Book Two: On the River Gran", etc.). Keep the philosophical tone of Meditations but use entirely original sentences. Books 1-12, ~150-200 words/chapter, ~2,000 total. Generate content in 2-3 chunks if needed to stay under output limits.
+- **Second seed doc:** Original short essay (~500 words, NOT copied from any source). Set `type: "article"`, `source: "sample"`, `id: "sample-article"`. Enables multi-doc J/K nav, search, delete-one, and "articles" type filter.
+- **Content filter workaround:** The API blocks large outputs of verbatim public domain text. All seed content must be ORIGINAL prose. If a single generation triggers the filter, split into smaller chunks (3-4 chapters at a time) and concatenate.
+- **sessionStorage key:** `'blurbyStubState'`. Serialize as JSON. Only persist 4 mutable stores: `settings`, `library`, `highlights`, `readingStats`.
+- **`clearPersistence()` method:** Add to `window.__blurbyStub` alongside `reset()`, `emit()`, etc. Calls `sessionStorage.removeItem('blurbyStubState')` + `reset()`.
+- **Mode cycling fix:** Key question: does `Shift+Space` in Narrate mode get intercepted by narration key handler (Space as pause) BEFORE reaching the cycle handler (Shift+Space as cycle)? If so, fix: check for Shift modifier in narration handler and let Shift+Space pass through.
+- **Event handlers:** Minimal — toast notification with optional action button. Don't build elaborate update management or re-auth UI.
+
+### Acceptance Criteria
+1. `SAMPLE_CONTENT` in `electron-api-stub.ts` contains ≥2,000 words across ≥10 chapters
+2. `MEDITATIONS_CHAPTERS` array has ≥10 entries with correct character offsets
+3. `sampleMeditationsDoc.wordCount` matches actual `SAMPLE_CONTENT` word count
+4. A second seed document ("sample-article") appears in the stub library on init
+5. `sessionStorage.getItem('blurbyStubState')` is populated after any mutating stub call
+6. Page reload preserves settings changes (theme switch survives reload)
+7. Page reload preserves library mutations (favorite toggle survives reload)
+8. `window.__blurbyStub.clearPersistence()` removes sessionStorage and resets to defaults
+9. Pressing `?` in library view opens ShortcutsOverlay (not search palette)
+10. `window.__blurbyStub.emit("update-available", "2.0.0")` produces a visible toast
+11. `window.__blurbyStub.emit("cloud-auth-required", "microsoft")` produces a visible toast
+12. Shift+Space in Narrate mode cycles to Focus mode (circular cycle complete)
+13. Shift+Space in Focus mode cycles to Flow mode (no regression)
+14. Shift+Space in Flow mode cycles to Narrate mode (no regression)
+15. `npm test` passes (all existing + no regressions), `npm run build` succeeds
+16. Branch `sprint/ct2-harness-hardening` merged to main with `--no-ff`
+
+---
+
+## Sprint CT-3: Click-Through Repair
+
+**Goal:** Fix all actionable bugs found during the post-CT-2 click-through re-run, align the checklist with the actual codebase, and address the Focus mode visual stability issue. This is the final code-change sprint before v1.0.0.
+
+**Prerequisite:** CT-2 complete + click-through re-run filed as `docs/testing/test-run-CT3-2026-03-28.md` (101 PASS / 6 FAIL / 14 SKIP).
+
+**Branch:** `sprint/ct3-click-repair` | **Tier:** Quick (targeted bug fixes + checklist update)
+
+### KEY CONTEXT
+
+Sprint CT-2 delivered a hardened test harness (rich seed data, sessionStorage persistence, 5 bug fixes). On 2026-03-28, a full 121-item click-through test was executed via Chrome automation (Cowork + Claude in Chrome MCP). Result: 101 PASS / 6 FAIL / 14 SKIP. All failures are in the Keyboard Shortcuts section. Additionally, a visual stability issue was identified in Focus mode (word flicker/bounce), and the checklist itself has drifted from the actual keyboard shortcut mappings.
+
+### PROBLEM
+
+Four categories of issues emerged from the test run:
+
+1. **Keyboard shortcut checklist drift (5 items):** The checklist maps G-sequences to `gf`=favorites, `gs`=stats, `gr`=recent, `gh`=snoozed, `gc`=collections. The actual app maps `G+S`=starred/favorites, `G+A`=archive, `G+I`=inbox, `G+Q`=queue, `G+G`=top. Several checklist items reference shortcuts that don't exist in the implementation.
+2. **Ctrl+, shortcut conflict (1 item):** KB-16 — `Ctrl+,` opens Reading Queue sidebar instead of settings. The keyboard overlay says `Ctrl+,` = "Open full settings" but the actual behavior differs.
+3. **Focus mode visual instability (observed):** Words flicker/bounce when advancing in Focus mode. Root cause: 8px Y-translate animation, forced reflow via `offsetWidth`, ORP marker position snapping, font-weight shift between normal and bold for the focus character.
+4. **Untestable items (14 SKIPs):** G-sequences (8 — automation timing), drag-and-drop (3 — native events), Kokoro audio (2 — hardware verification), ERR-01 (1 — stub manipulation).
+
+### EVIDENCE OF PROBLEM
+
+- `docs/testing/test-run-CT3-2026-03-28.md` — Full 121-item test report
+- KB-08/10/13: G-sequence shortcuts did not fire via browser automation. The hotkey overlay confirms mappings differ from checklist.
+- KB-16: `Ctrl+,` opened Reading Queue, not Settings. Screenshotted during test run.
+- Focus mode screenshots show word display with visible Y-translate animation and ORP marker jumping.
+- `src/styles/global.css` lines 382-410: `focus-word-enter` animation with `transform: translate3d(0, 8px, 0)`.
+- `src/components/ReaderView.tsx` lines 102-107: `void container.offsetWidth` forced reflow on every word.
+
+### HYPOTHESIZED SOLUTION
+
+Four workstreams:
+
+- **CT-3A: Checklist alignment** — Rewrite KB section of `chrome-clickthrough-checklist.md` to match actual `useKeyboardShortcuts.ts` mappings. Remove phantom shortcuts, add real ones.
+- **CT-3B: Ctrl+, shortcut fix** — Investigate why `Ctrl+,` doesn't open settings. Likely a handler ordering issue or Chrome browser-level interception. Fix in `useKeyboardShortcuts.ts`.
+- **CT-3C: Focus mode visual stability** — Reduce `focus-word-enter` Y-translate from 8px to 0-2px. Add CSS transition to focus marks. Consider `requestAnimationFrame` instead of forced reflow. Test at 300 WPM and 500+ WPM.
+- **CT-3D: Improve DD/ERR coverage** — Add file drop zone stub support to enable DD-01/02/03 testing. Add ERR-01 (delete doc + try to open) test path.
+
+### Workstreams
+
+| ID | Task | Agent | Model |
+|----|------|-------|-------|
+| CT-3A | Rewrite KB section of `chrome-clickthrough-checklist.md` to match actual keybindings from `useKeyboardShortcuts.ts` | `doc-keeper` | sonnet |
+| CT-3B.1 | Investigate Ctrl+, handler — trace key event from `useKeyboardShortcuts.ts` through to handler registration. Identify why it opens Reading Queue instead of Settings. | `ui-investigator` | opus |
+| CT-3B.2 | Fix Ctrl+, to open settings (based on CT-3B.1 diagnosis) | `renderer-fixer` | sonnet |
+| CT-3C.1 | Reduce Focus mode word animation: change Y-translate from 8px to 0-2px in `global.css`, add CSS transition to `.focus-mark` position, replace `void container.offsetWidth` with `requestAnimationFrame` in `ReaderView.tsx` | `renderer-fixer` | sonnet |
+| CT-3C.2 | Verify Focus mode at 300 and 600 WPM — words stable, no visible flicker | `spec-reviewer` | sonnet |
+| CT-3D.1 | Add `importDroppedFiles` handler to `electron-api-stub.ts` with drag-drop zone support | `renderer-fixer` | sonnet |
+| CT-3D.2 | Add ERR-01 test path: `deleteDoc` in stub, verify reader handles missing doc gracefully | `renderer-fixer` | sonnet |
+| CT-3E | `npm test` + `npm run build` | `test-runner` | haiku |
+| CT-3F | Update CLAUDE.md, ROADMAP.md, LESSONS_LEARNED.md | `doc-keeper` | sonnet |
+| CT-3G | Git commit + merge to main | `blurby-lead` | opus |
+
+### Agent Assignments
+
+| Agent | Model | Responsibility |
+|-------|-------|----------------|
+| `ui-investigator` | opus | Ctrl+, root-cause analysis (read-only). Output: exact diagnosis + fix location. |
+| `renderer-fixer` | sonnet | Ctrl+, fix (CT-3B.2), Focus stability (CT-3C.1), stub improvements (CT-3D) |
+| `spec-reviewer` | sonnet | Verify Focus mode visual stability at multiple WPMs (CT-3C.2) |
+| `doc-keeper` | sonnet | Checklist rewrite (CT-3A), post-sprint docs (CT-3F) |
+| `test-runner` | haiku | Full test + build verification (CT-3E) |
+| `blurby-lead` | opus | Git operations (CT-3G) |
+
+### Execution Order
+
+```
+[1-3] PARALLEL (independent workstreams):
+    ├─ [1] Checklist alignment (doc-keeper) — no code changes
+    ├─ [2] Ctrl+, investigation (ui-investigator) — read-only
+    └─ [3] Focus stability CSS + JS fix (renderer-fixer) — global.css + ReaderView.tsx
+    ↓ (2 complete)
+[4] Ctrl+, fix implementation (renderer-fixer) — depends on investigation
+    ↓ (3 complete)
+[5] Focus mode verification at 300/600 WPM (spec-reviewer) — depends on CSS fix
+    ↓ (1, 4, 5 complete)
+[6-7] PARALLEL:
+    ├─ [6] Stub improvements — drag-drop + ERR-01 (renderer-fixer)
+    └─ [7] Tests + build (test-runner)
+    ↓ (all complete)
+[8] Documentation update (doc-keeper)
+    ↓
+[9] Git commit + merge (blurby-lead)
+```
+
+### Read Order
+
+1. `docs/testing/test-run-CT3-2026-03-28.md` — Full test report (this is the evidence)
+2. `docs/testing/chrome-clickthrough-checklist.md` — Current checklist (to be rewritten KB section)
+3. `src/hooks/useKeyboardShortcuts.ts` — Actual keybinding definitions (source of truth for CT-3A + CT-3B)
+4. `src/styles/global.css` — Focus animation keyframes (CT-3C target, lines 382-439)
+5. `src/components/ReaderView.tsx` — Focus word rendering, forced reflow (CT-3C target, lines 95-147)
+6. `src/test-harness/electron-api-stub.ts` — Stub to extend for CT-3D
+7. `CLAUDE.md` — Standing rules, system state
+8. `docs/governance/LESSONS_LEARNED.md` — Any relevant prior discoveries
+
+### Additional Guidance
+
+- **Checklist alignment (CT-3A):** Read `useKeyboardShortcuts.ts` exhaustively. Map every registered handler to its shortcut key. Remove any checklist items that reference shortcuts not in the code. Add items for shortcuts that exist but aren't tested. Keep the same checklist format (table with ID, Action, Expected, Screenshot, Console).
+- **Ctrl+, (CT-3B):** Chrome intercepts `Ctrl+,` to open its own settings. The app handler may be getting swallowed. If this is an unresolvable browser conflict, document it as a known limitation and skip KB-16 in the checklist. The keyboard overlay should be updated to remove `Ctrl+,` if it can't work in browser context.
+- **Focus stability (CT-3C):** The goal is calm, stable word presentation with no perceived motion. Preferred approach: opacity-only animation (no Y-translate), smooth focus mark transitions, no forced reflow. Test with both short words ("a", "the") and long words ("understanding", "philosophical") since width shifts are more visible on short words.
+- **Stub improvements (CT-3D):** For drag-drop, implement a `handleDrop` event listener on the app root that intercepts `dragover`/`drop` events and routes to `importDroppedFiles`. For ERR-01, add a `deleteDoc(id)` method to `window.__blurbyStub` and verify the reader shows an error state when the doc is opened.
+- **Do NOT change the G-sequence implementation.** The G-sequences appear to work correctly — the automation timing was the issue. The checklist needs to be updated to match the actual mappings, not the other way around.
+
+### Acceptance Criteria
+
+1. `chrome-clickthrough-checklist.md` KB section matches actual `useKeyboardShortcuts.ts` keybindings exactly
+2. No phantom shortcuts in checklist (every listed shortcut has a corresponding handler in code)
+3. `Ctrl+,` either (a) opens settings panel or (b) is documented as browser-conflict limitation and removed from checklist
+4. Focus mode word display has no visible Y-translate bounce at 300 WPM
+5. Focus mode ORP markers transition smoothly (no position snapping)
+6. No forced reflow (`void container.offsetWidth`) in Focus word rendering path
+7. `electron-api-stub.ts` handles `importDroppedFiles` calls and `deleteDoc` + reader error state
+8. `npm test` passes (776+ tests, 0 failures), `npm run build` succeeds
+9. No regressions — all 101 previously-passing click-through items still PASS
+10. Branch `sprint/ct3-click-repair` merged to main with `--no-ff`
+
+> **Note:** CT-3 and Sprint 24 run in PARALLEL. CT-3 fixes bugs (code changes). Sprint 24 audits the codebase (read-only). No file conflicts — Sprint 24 only writes to `docs/project/AGENT_FINDINGS.md`. If the audit surfaces CRITICALs that overlap with CT-3 bugs, they're already being fixed. New CRITICALs from the audit get addressed in a remediation pass after both complete.
+
+---
+
+## Sprint 24: External Audit
+
+**Goal:** Run the full external audit pipeline per `.workflow/skills/external-audit/SKILL.md` before declaring v1. This is the quality gate — an independent, systematic review of the entire codebase.
+
+**Prerequisite:** Sprint CT-2 complete. Runs in PARALLEL with CT-3 (no file conflicts — audit writes only to `docs/project/AGENT_FINDINGS.md`).
+
+**Branch:** `sprint/24-external-audit` (read-only unless CRITICALs found) | **Tier:** None (audit only)
+
+### Spec
+
+**24A. Code quality audit**
+- Lint pass: identify dead code, unused imports, inconsistent naming, type safety gaps
+- Architecture compliance: verify all standing rules from CLAUDE.md
+- Known-trap regression: check for re-introduced patterns from LESSONS_LEARNED.md
+- Output: findings to `docs/project/AGENT_FINDINGS.md`
+
+**24B. Test coverage audit**
+- Map test files to features: identify any feature with zero test coverage
+- Priority gaps: IPC handler coverage, sync engine edge cases, TTS sync logic, onboarding
+- Recommend specific tests to add (log as findings, don't write in this sprint)
+
+**24C. Architecture review**
+- Module dependency graph: verify no circular dependencies
+- Bundle size analysis: flag anything > 100KB that could be lazy-loaded
+- Security surface: review all IPC channels, CSP headers, token storage
+- Cloud sync audit: verify revision counter logic, tombstone cleanup, merge correctness
+
+**24D. Documentation alignment**
+- CLAUDE.md accuracy: verify all file paths, feature statuses match reality
+- ROADMAP.md accuracy: verify acceptance criteria match implementations
+- LESSONS_LEARNED.md completeness: verify recent sprints have entries
+
+### Agent Assignments
+
+| Step | What | Agent | Depends On |
+|------|------|-------|------------|
+| 1 | Code quality audit (24A) | `code-reviewer` | — |
+| 2 | Test coverage audit (24B) | `code-reviewer` | — |
+| 3 | Architecture review (24C) | `ui-investigator` | — |
+| 4 | Documentation alignment (24D) | `doc-keeper` | — |
+| 5 | Findings consolidation | `blurby-lead` | Steps 1-4 |
+
+> Steps 1-4 are FULLY PARALLELIZABLE. Step 5 consolidates.
+
+### Acceptance Criteria
+- Zero known-trap regressions from LESSONS_LEARNED.md
+- All standing rules verified compliant
+- Dead code and unused imports flagged
+- Every feature set has at least one test file mapped
+- Coverage gaps logged with recommended test additions
+- No circular dependencies
+- Bundle analysis completed, largest modules identified
+- Security surface reviewed (IPC, CSP, tokens)
+- CLAUDE.md and ROADMAP.md accuracy verified
+- All findings in `docs/project/AGENT_FINDINGS.md` with severity ratings
+- **CRITICALs block v1.0.0 release**
+
+---
+
+
+## HOTFIX-6 [v1.4.2]: Main-Process EPUB Word Extraction — Fix NAR-3 Page Flipping
+
+**Goal:** Move full-book word extraction from renderer (foliate DOM navigation) to main process (AdmZip + cheerio + Intl.Segmenter). Eliminate the visible page flipping caused by `goToSection()` calls during extraction. Fix the global-vs-local word index mismatch.
+
+**Branch:** `sprint/hotfix6-epub-extraction` | **Tier:** Quick (targeted fix, no new features)
+
+### KEY CONTEXT
+
+NAR-3 built a full-book word array by navigating the visible foliate view through every EPUB section. This caused pages to flip uncontrollably on narration start — the user saw every chapter flash by. HOTFIX-5 fixed a secondary word-timer race condition but the primary bug persists. See LESSONS_LEARNED LL-051.
+
+### PROBLEM
+
+1. **Pages race forward through entire book on narration start.** `extractFullBookWords()` in `bookWordExtractor.ts` calls `foliateApi.goToSection(i)` for every section (line 119). Each call navigates the visible foliate view.
+2. **After extraction, view jumps to chapter 1.** `highlightedWordIndex` is section-local but `findSectionForWord()` interprets it as a global index.
+3. **Narration uses section-local words but global section boundaries.** `startCursorDriven` receives the current section's words but NAR-3 navigation expects global indices.
+
+### EVIDENCE OF PROBLEM
+
+- `bookWordExtractor.ts` line 119: `await foliateApi.goToSection(sectionIdx)` — visible navigation for each section
+- `ReaderContainer.tsx` line 322: `wordsRef.current = result.words` — replaces words but doesn't update narration hook's `allWordsRef`
+- `ReaderContainer.tsx` line 341: `findSectionForWord(bookWords.sections, highlightedWordIndex)` — section-local index misinterpreted as global
+- User report: "Pages still jumping" (post-HOTFIX-5)
+
+### HYPOTHESIZED SOLUTION
+
+**A. New main-process module `main/epub-word-extractor.js`:**
+- Opens EPUB via AdmZip (lazy-loaded, existing dependency)
+- Reads OPF spine for section order (same pattern as `file-parsers.js` lines 390-420)
+- For each section: load XHTML via cheerio, strip script/style, walk text nodes
+- Tokenize using `Intl.Segmenter({ granularity: "word" })` — identical to foliate's tokenizer (FoliatePageView line 27)
+- Include trailing punctuation with same regex: `/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/`
+- Return `{ words: string[], sections: SectionBoundary[], totalWords: number }`
+
+**B. New IPC handler `extract-epub-words`:**
+- Takes `bookId`, looks up doc's EPUB path from library
+- Calls extractor, returns word array + sections to renderer
+
+**C. Renderer integration:**
+- Replace `extractFullBookWords` useEffect with IPC call
+- On result: set bookWordsRef, update narration's word array, convert highlightedWordIndex to global
+- Delete `bookWordExtractor.ts`, preserve `SectionBoundary` and `findSectionForWord` types
+
+### TASKS
+
+| Step | Task | Agent | Model |
+|------|------|-------|-------|
+| 1 | Read CLAUDE.md, LESSONS_LEARNED.md (LL-051, LL-052) | blurby-lead | opus |
+| 2 | Create `main/epub-word-extractor.js` — AdmZip + cheerio + Intl.Segmenter word extraction | format-parser | sonnet |
+| 3 | Add IPC handler `extract-epub-words` in `main/ipc/tts.js` + preload.js + electronAPI | electron-fixer | sonnet |
+| 4 | Update ReaderContainer.tsx — replace extraction useEffect with IPC, fix index conversion | renderer-fixer | sonnet |
+| 5 | Update useNarration.ts — add `updateWords()` method for global word array resync | renderer-fixer | sonnet |
+| 6 | Delete `bookWordExtractor.ts`, move SectionBoundary/findSectionForWord to `types/narration.ts` | renderer-fixer | sonnet |
+| 7 | Update test harness `electron-api-stub.ts` — add `extractEpubWords` stub | renderer-fixer | sonnet |
+| 8 | `npm test` — 860+ pass, 0 fail | test-runner | haiku |
+| 9 | `npm run build` — clean build | test-runner | haiku |
+| 10 | Bump version to 1.4.2 | renderer-fixer | sonnet |
+| 11 | Git branch + commit + merge to main with `--no-ff` | blurby-lead | opus |
+| 12 | Print summary | blurby-lead | opus |
+
+### EXECUTION ORDER
+
+```
+[1] Read context (blurby-lead)
+    ↓
+[2] Create epub-word-extractor.js (format-parser)
+    ↓
+[3] Add IPC + preload (electron-fixer)
+    ↓
+[4-6] SEQUENTIAL (renderer-fixer):
+    [4] ReaderContainer.tsx → [5] useNarration.ts → [6] Delete bookWordExtractor.ts
+    ↓
+[7] Test harness stub (renderer-fixer)
+    ↓
+[8-9] PARALLEL: npm test ∥ npm run build
+    ↓
+[10] Version bump → [11] Git → [12] Summary
+```
+
+### ADDITIONAL GUIDANCE
+
+- **Tokenization must match exactly.** Same `Intl.Segmenter` constructor, same trailing-punctuation regex as FoliatePageView line 122.
+- **Section order from OPF spine `<itemref>`, NOT manifest.** Spine defines reading order.
+- **EPUB path is `doc.filepath` or `doc.convertedEpubPath` in library.**
+- **Lazy-load AdmZip and cheerio** (follow `file-parsers.js` pattern).
+- **Keep the section-end fallback** (ReaderContainer lines 362-378) as safety net.
+- **Global index conversion:** When IPC returns, `newGlobalIdx = section.startWordIdx + localHighlightedIdx`. Update both `highlightedWordIndex` state and narration pipeline.
+
+### SUCCESS CRITERIA
+
+1. No visible page flipping on narration start
+2. Narration audio matches displayed text, highlights advance in sync
+3. Chapter transitions work via `goToSection()` fired by global index crossing section boundary
+4. `highlightedWordIndex` is global after extraction completes
+5. `bookWordExtractor.ts` deleted — no foliate-navigation-based extraction remains
+6. 860+ tests pass, 0 fail
+7. Clean build
+8. Version 1.4.2
+9. Branch merged to main with `--no-ff`
+

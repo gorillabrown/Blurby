@@ -1,6 +1,6 @@
 # Test Runner Agent
 
-**Model:** [CUSTOMIZE: fastest/cheapest model — e.g., claude-haiku]
+**Model:** claude-haiku (or self-review in single-CLI mode)
 **Type:** Lightweight test execution
 **Triggers:** "Run tests," "Verify no regression," "Check test status," "Before/after validation"
 
@@ -20,12 +20,10 @@ The test runner executes the test suite and reports results. This is a **lightwe
 
 ## Test Commands
 
-[CUSTOMIZE: Fill in with project-specific test commands]
-
-### Quick Test Suite (fast, ~2–4 minutes)
+### Quick Test Suite (fast, ~30-60 seconds)
 
 ```bash
-pytest -n auto -m "not slow" -q
+npm test
 ```
 
 **What it runs:**

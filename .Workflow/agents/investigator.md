@@ -1,6 +1,6 @@
 # Investigator Agent
 
-**Model:** [CUSTOMIZE: most capable model — e.g., claude-opus]
+**Model:** claude-opus (or self-review in single-CLI mode)
 **Type:** Read-only root-cause analysis
 **Triggers:** "Diagnosis needed," "Root cause unknown," "Why is X broken?", "Trace the failure"
 

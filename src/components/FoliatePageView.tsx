@@ -12,7 +12,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords } from "../utils/segmentWords";
-import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MIN_COLUMN_WIDTH_PX, FOLIATE_MARGIN_PX, FOLIATE_GAP_PX } from "../constants";
+import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX } from "../constants";
 
 const api = window.electronAPI;
 
@@ -134,10 +134,24 @@ function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWo
 }
 
 
+/** Remove all .page-word wrapper spans and restore their text as plain text nodes.
+ *  Used by HOTFIX-10 to re-stamp sections with corrected global indices. */
+export function unwrapWordSpans(doc: Document): void {
+  const spans = doc.querySelectorAll("span.page-word");
+  for (const span of spans) {
+    const parent = span.parentNode;
+    if (!parent) continue;
+    const text = doc.createTextNode(span.textContent || "");
+    parent.replaceChild(text, span);
+  }
+  // Normalize adjacent text nodes (merge consecutive text nodes created by unwrapping)
+  doc.body.normalize();
+}
+
 /** Walk the EPUB section DOM and wrap each word in a <span class="page-word" data-word-index="N">.
  *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
  *  Returns the next available global index. */
-function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): number {
+export function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): number {
   const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
     acceptNode: (node: Node) => {
       const parent = node.parentElement;
@@ -223,6 +237,8 @@ interface FoliatePageViewProps {
   onFlowWordAdvance?: (idx: number) => void;
   /** Current word index being narrated (overlay highlight) */
   narrationWordIndex?: number;
+  /** Book-wide section boundaries from main-process extraction (HOTFIX-10: global index stamping) */
+  bookWordSections?: import("../types/narration").SectionBoundary[];
 }
 
 export interface FoliateViewAPI {
@@ -243,6 +259,12 @@ export interface FoliateViewAPI {
   isUserBrowsing: () => boolean;
   /** Clear the user browsing flag and scroll to current narration word */
   returnToNarration: () => void;
+  /** NAR-3: Get total number of sections in the EPUB */
+  getSectionCount: () => number;
+  /** NAR-3: Navigate to a specific section by index. Triggers a load event when ready. */
+  goToSection: (sectionIndex: number) => Promise<void>;
+  /** NAR-3: Extract words from a specific section's DOM (must be currently loaded) */
+  extractSectionWords: (sectionIndex: number) => FoliateWord[];
 }
 
 export default function FoliatePageView({
@@ -264,6 +286,7 @@ export default function FoliatePageView({
   wpm,
   onFlowWordAdvance,
   narrationWordIndex,
+  bookWordSections,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -356,10 +379,11 @@ export default function FoliatePageView({
             if (isActiveMode && foliateWordsRef.current.length > 0) {
               // Extract just this section's words and append/update in the existing array
               const sectionWords = extractWordsFromSection(doc, index);
-              // Find the insertion point: after the last word of the previous section
+              // HOTFIX-10: Use global offset from extraction data when available
+              const bookSection = bookWordSections?.find(s => s.sectionIndex === index);
               const existingEnd = foliateWordsRef.current.length;
-              const sectionStart = existingEnd; // Append at end
-              // Wrap this section's words with indices continuing from existing
+              const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
+              // Wrap this section's words with correct indices
               wrapWordsInSpans(doc, index, sectionStart);
               // Append to the word array
               foliateWordsRef.current = [...foliateWordsRef.current, ...sectionWords.map(w => ({ ...w, sectionIndex: index }))];
@@ -455,11 +479,11 @@ export default function FoliatePageView({
         const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
         view.renderer.setAttribute("flow", "paginated");
         view.renderer.setAttribute("margin", `${FOLIATE_MARGIN_PX}px`);
-        view.renderer.setAttribute("gap", `${FOLIATE_GAP_PX}px`);
+        // NOTE: Do NOT set "gap" — foliate-js interprets it as a percentage (default 7%).
+        // Setting "48px" causes parseFloat→48 /100→0.48, consuming ~92% of width as gap.
         view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
-        const availableWidth = container.clientWidth - (FOLIATE_MARGIN_PX * 2);
-        view.renderer.setAttribute("max-inline-size", `${availableWidth}px`);
-        view.renderer.setAttribute("max-column-count", availableWidth >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
+        view.renderer.setAttribute("max-inline-size", `${FOLIATE_MAX_INLINE_SIZE_PX}px`);
+        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
 
         // Provide TOC
         if (view.book?.toc) {
@@ -608,6 +632,32 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
             },
+            // NAR-3: Section navigation for full-book word extraction
+            getSectionCount: () => view.book?.sections?.length ?? 0,
+            goToSection: async (sectionIndex: number) => {
+              // Navigate foliate to display a specific section
+              const sections = view.book?.sections;
+              if (!sections || sectionIndex >= sections.length) return;
+              const section = sections[sectionIndex];
+              if (section?.id) {
+                await view.goTo(section.id);
+              } else if (section?.href) {
+                await view.goTo(section.href);
+              } else {
+                // Fallback: approximate via fraction
+                const frac = sectionIndex / Math.max(sections.length, 1);
+                await view.goToFraction(frac);
+              }
+            },
+            extractSectionWords: (sectionIndex: number) => {
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d, index } of contents) {
+                if (index === sectionIndex && d) {
+                  return extractWordsFromSection(d, sectionIndex);
+                }
+              }
+              return [];
+            },
           };
         }
 
@@ -647,9 +697,7 @@ export default function FoliatePageView({
     const container = containerRef.current;
     if (!container) return;
 
-    const availW = container.clientWidth - (FOLIATE_MARGIN_PX * 2);
-    view.renderer.setAttribute("max-inline-size", `${availW}px`);
-    view.renderer.setAttribute("max-column-count", availW >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
+    view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
     view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
 
     // Re-inject styles on settings change
@@ -668,9 +716,7 @@ export default function FoliatePageView({
       const h = container.clientHeight;
       const w = container.clientWidth;
       view.renderer.setAttribute("max-block-size", `${h - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
-      const availResizeW = w - (FOLIATE_MARGIN_PX * 2);
-      view.renderer.setAttribute("max-inline-size", `${availResizeW}px`);
-      view.renderer.setAttribute("max-column-count", availResizeW >= (FOLIATE_MIN_COLUMN_WIDTH_PX * 2 + FOLIATE_GAP_PX) ? "2" : "1");
+      view.renderer.setAttribute("max-column-count", w >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
     });
     observer.observe(container);
     return () => observer.disconnect();

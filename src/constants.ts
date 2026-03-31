@@ -62,8 +62,8 @@ export const DOUBLE_ESC_WINDOW_MS = 2000;
 // ── TTS (Text-to-Speech) ──────────────────────────────────────────────────────
 /** Number of words per TTS utterance chunk — larger = smoother speech, smaller = tighter cursor sync */
 export const TTS_CHUNK_SIZE = 40;
-/** Maximum TTS speech rate (Web Speech API rate, 0.5–3.0 scale) */
-export const TTS_MAX_RATE = 2.0;
+/** Maximum TTS speech rate — capped at 1.5x for narration pipeline (NAR-2) */
+export const TTS_MAX_RATE = 1.5;
 /** Minimum TTS speech rate */
 export const TTS_MIN_RATE = 0.5;
 /** Baseline WPM that corresponds to TTS rate 1.0 */
@@ -72,18 +72,30 @@ export const TTS_RATE_BASELINE_WPM = 150;
 export const TTS_WPM_CAP = 400;
 /** Step size for TTS rate adjustment via Up/Down arrows */
 export const TTS_RATE_STEP = 0.1;
-/** Between-chunk rhythm pause: comma, colon, semicolon endings.
+/** Between-chunk rhythm pause: comma, semicolon endings.
  *  Kokoro audio already includes ~50-100ms natural trailing silence,
  *  so these values ADD to that — keep them short to avoid stacking. */
 export const TTS_PAUSE_COMMA_MS = 100;
+/** Between-chunk rhythm pause: clause endings (colon, closing parenthesis) */
+export const TTS_PAUSE_CLAUSE_MS = 150;
 /** Between-chunk rhythm pause: sentence endings (. ! ?) */
 export const TTS_PAUSE_SENTENCE_MS = 400;
 /** Between-chunk rhythm pause: paragraph boundaries (>2 sentences) */
 export const TTS_PAUSE_PARAGRAPH_MS = 800;
 /** Number of pre-generated audio chunks in the rolling queue */
-export const TTS_QUEUE_DEPTH = 3;
+export const TTS_QUEUE_DEPTH = 5;
 /** Paragraphs with this many or fewer sentences are treated as dialogue (minimal pause) */
 export const TTS_DIALOGUE_SENTENCE_THRESHOLD = 2;
+
+// ── TTS Pipeline (NAR-2) ─────────────────────────────────────────────────────
+/** Chunk 1 word count — generates in ≤1s for fast cold start */
+export const TTS_COLD_START_CHUNK_WORDS = 13;
+/** Steady-state chunk size after ramp-up completes */
+export const TTS_CRUISE_CHUNK_WORDS = 148;
+/** Crossfade overlap at chunk boundaries — eliminates splice artifacts (ms) */
+export const TTS_CROSSFADE_MS = 8;
+/** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
+export const TTS_FORWARD_WORDS = 300;
 
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */
@@ -179,6 +191,8 @@ export const RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000;
 export const RSVP_PROGRESS_SAVE_WORD_DELTA = 50;
 /** Debounce for saving Foliate (EPUB) page position after a relocate event (ms) */
 export const FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS = 2000;
+/** Minimum word position to count as "started" — filters tiny rounding artifacts from initial EPUB onRelocate */
+export const FOLIATE_MIN_ENGAGEMENT_POSITION = 3;
 
 // ── Mode Transitions ─────────────────────────────────────────────────────────
 /** Delay before calling reader.togglePlay() after entering Focus mode (ms) — lets React commit */
@@ -197,12 +211,14 @@ export const TTS_RATE_RESTART_DEBOUNCE_MS = 500;
 export const FOLIATE_BASE_FONT_SIZE_PX = 18;
 /** Height margin subtracted from container when setting max-block-size on the EPUB renderer (px) */
 export const FOLIATE_RENDERER_HEIGHT_MARGIN_PX = 20;
-/** Minimum width for each column before the renderer falls back to single-column (px) */
-export const FOLIATE_MIN_COLUMN_WIDTH_PX = 400;
-/** Side margin for the EPUB renderer (px) */
+/** Side margin for the EPUB renderer — maps to foliate's vertical (top/bottom) grid rows (px) */
 export const FOLIATE_MARGIN_PX = 24;
-/** Gap between columns in two-column layout (px) */
-export const FOLIATE_GAP_PX = 48;
+/** Max width per column — foliate's --_max-inline-size (px) */
+export const FOLIATE_MAX_INLINE_SIZE_PX = 720;
+/** Viewport width threshold for switching to two-column layout (px) */
+export const FOLIATE_TWO_COLUMN_BREAKPOINT_PX = 1040;
+// NOTE: Do NOT add a gap constant — foliate-js interprets gap as a percentage (default 7%).
+// Setting a pixel value like "48px" causes catastrophic layout failure (parseFloat→48 /100→0.48 = 92% gap).
 
 // ── Highlight / Toast (Reader) ──────────────────────────────────────────────
 /** Toast auto-dismiss after saving a highlight in ReaderView (ms) */
@@ -287,10 +303,11 @@ export const DEFAULT_SETTINGS = {
   flowWordSpan: DEFAULT_FLOW_WORD_SPAN,
   lastReadingMode: "flow" as const,
   ttsEnabled: false,
-  ttsEngine: "web" as const,
+  ttsEngine: "kokoro" as const,
   ttsVoiceName: null as string | null,
   ttsRate: 1.0,
   ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
+  ttsPauseClauseMs: TTS_PAUSE_CLAUSE_MS,
   ttsPauseSentenceMs: TTS_PAUSE_SENTENCE_MS,
   ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
   ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,

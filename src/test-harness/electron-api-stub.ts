@@ -21,6 +21,7 @@ function traceMut<T>(method: string, args: unknown[], result: T): T {
 // ── Event emitter system ────────────────────────────────────────────────────
 type EventCallback = (...args: any[]) => void;
 const eventListeners = new Map<string, Set<EventCallback>>();
+const stubTtsCache = new Map<string, { audio: number[]; sampleRate: number; durationMs: number }>();
 
 function addEventListener(event: string, callback: EventCallback): () => void {
   if (!eventListeners.has(event)) eventListeners.set(event, new Set());
@@ -70,7 +71,7 @@ const defaultSettings: BlurbySettings = {
   flowCursorStyle: "underline",
   lastReadingMode: "flow",
   ttsEnabled: false,
-  ttsEngine: "web",
+  ttsEngine: "kokoro",
   ttsVoiceName: null,
   ttsRate: 1.0,
   firstRunCompleted: false,
@@ -511,6 +512,10 @@ export const electronAPIStub: ElectronAPI = {
     return undefined;
   },
 
+  // ── Bug report ──────────────────────────────────────────────────────────
+  captureBugScreenshot: async () => trace("captureBugScreenshot", [], { filename: "stub-screenshot.png", filepath: "/tmp/stub-screenshot.png" }),
+  saveBugReport: async (data: any) => { traceMut("saveBugReport", [data], undefined); return { ok: true, filename: "stub-report.json" }; },
+
   // ── Site logins ─────────────────────────────────────────────────────────
   getSiteLogins: async () => trace("getSiteLogins", [], []),
   siteLogin: async (url: string) => trace("siteLogin", [url], { success: false, cancelled: true }),
@@ -563,12 +568,27 @@ export const electronAPIStub: ElectronAPI = {
   cloudStartAutoSync: async (intervalMs: number) => trace("cloudStartAutoSync", [intervalMs], { ok: true }),
   cloudStopAutoSync: async () => trace("cloudStopAutoSync", [], { ok: true }),
 
+  // ── EPUB Word Extraction (HOTFIX-6) ─────────────────────────────────────
+  extractEpubWords: async (bookId: string) => {
+    // Return a mock word array for the seed book
+    const words = "The quick brown fox jumps over the lazy dog and continues to run through the forest".split(" ");
+    const sections = [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: words.length, wordCount: words.length }];
+    return trace("extractEpubWords", [bookId], { words, sections, totalWords: words.length });
+  },
+
   // ── Kokoro TTS ──────────────────────────────────────────────────────────
   kokoroPreload: async () => trace("kokoroPreload", [], undefined),
+  kokoroPreloadMarathon: async () => trace("kokoroPreloadMarathon", [], undefined),
 
   kokoroGenerate: async (text: string, voice: string, speed: number) => {
     const result = generateMockAudio(text, voice, speed);
     console.debug("[stub] kokoroGenerate", `[${text.length} chars]`, voice, speed, "→", result.audio.length, "samples,", result.durationMs.toFixed(0), "ms");
+    return result;
+  },
+
+  kokoroGenerateMarathon: async (text: string, voice: string, speed: number) => {
+    const result = generateMockAudio(text, voice, speed);
+    console.debug("[stub] kokoroGenerateMarathon", `[${text.length} chars]`, voice, speed, "→", result.audio.length, "samples,", result.durationMs.toFixed(0), "ms");
     return result;
   },
 
@@ -583,6 +603,41 @@ export const electronAPIStub: ElectronAPI = {
     setTimeout(() => emitEvent("tts-kokoro-download-progress", 0.75), 600);
     setTimeout(() => emitEvent("tts-kokoro-download-progress", 1.0), 800);
     return trace("kokoroDownload", [], { ok: true });
+  },
+
+  // ── TTS Cache (NAR-2) — in-memory for browser testing ────────────────
+  ttsCacheRead: async (bookId: string, voiceId: string, startIdx: number) => {
+    const key = `${bookId}:${voiceId}:${startIdx}`;
+    const entry = stubTtsCache.get(key);
+    if (entry) return trace("ttsCacheRead", [bookId, voiceId, startIdx], entry);
+    return trace("ttsCacheRead", [bookId, voiceId, startIdx], { miss: true });
+  },
+  ttsCacheWrite: async (bookId: string, voiceId: string, startIdx: number, audioArr: number[], sampleRate: number, durationMs: number) => {
+    const key = `${bookId}:${voiceId}:${startIdx}`;
+    stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs });
+    return trace("ttsCacheWrite", [bookId, voiceId, startIdx], { success: true });
+  },
+  ttsCacheHas: async (bookId: string, voiceId: string, startIdx: number) => {
+    const key = `${bookId}:${voiceId}:${startIdx}`;
+    return trace("ttsCacheHas", [bookId, voiceId, startIdx], stubTtsCache.has(key));
+  },
+  ttsCacheChunks: async (bookId: string, voiceId: string) => {
+    const prefix = `${bookId}:${voiceId}:`;
+    const indices = [...stubTtsCache.keys()].filter(k => k.startsWith(prefix)).map(k => parseInt(k.split(":")[2]));
+    return trace("ttsCacheChunks", [bookId, voiceId], indices);
+  },
+  ttsCacheEvictBook: async (bookId: string) => {
+    for (const key of [...stubTtsCache.keys()]) { if (key.startsWith(`${bookId}:`)) stubTtsCache.delete(key); }
+    return trace("ttsCacheEvictBook", [bookId], { success: true });
+  },
+  ttsCacheEvictVoice: async (bookId: string, voiceId: string) => {
+    const prefix = `${bookId}:${voiceId}:`;
+    for (const key of [...stubTtsCache.keys()]) { if (key.startsWith(prefix)) stubTtsCache.delete(key); }
+    return trace("ttsCacheEvictVoice", [bookId, voiceId], { success: true });
+  },
+  ttsCacheInfo: async () => {
+    const size = stubTtsCache.size;
+    return trace("ttsCacheInfo", [], { totalBytes: size * 1000, totalMB: Number((size * 1000 / 1048576).toFixed(2)), bookCount: new Set([...stubTtsCache.keys()].map(k => k.split(":")[0])).size });
   },
 
   // ── Event listeners ───────────────────────────────────────────────────

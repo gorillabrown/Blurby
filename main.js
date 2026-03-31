@@ -458,6 +458,12 @@ app.whenReady().then(async () => {
 
   registerIpcHandlers(ipcContext);
 
+  // Initialize TTS audio cache (NAR-2)
+  const ttsCache = require("./main/tts-cache");
+  ttsCache.init(app.getPath("userData")).catch((err) => {
+    console.error("[tts-cache] Init failed:", err.message);
+  });
+
   // Start WebSocket server for Chrome extension
   const wsServer = require("./main/ws-server");
   wsServer.startServer(ipcContext);

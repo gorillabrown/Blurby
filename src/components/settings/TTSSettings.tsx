@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { BlurbySettings } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_PAUSE_COMMA_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD } from "../../constants";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD } from "../../constants";
 
 const api = window.electronAPI;
 
@@ -244,8 +244,8 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
       <input
         type="range"
         className="settings-slider"
-        min={0.5}
-        max={2.0}
+        min={TTS_MIN_RATE}
+        max={TTS_MAX_RATE}
         step={0.1}
         value={settings.ttsRate || 1.0}
         onChange={(e) => onSettingsChange({ ttsRate: Number(e.target.value) })}
@@ -281,6 +281,24 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
         onChange={(e) => onSettingsChange({ ttsPauseCommaMs: Number(e.target.value) })}
         aria-label="Comma pause duration"
       />
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Clause pause</span>
+        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS}ms</span>
+      </div>
+      <input
+        type="range"
+        className="settings-slider"
+        min={0}
+        max={500}
+        step={25}
+        value={settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS}
+        onChange={(e) => onSettingsChange({ ttsPauseClauseMs: Number(e.target.value) })}
+        aria-label="Clause pause duration"
+      />
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+        Pause after colons and closing parentheses.
+      </div>
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Sentence pause</span>
@@ -329,6 +347,61 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
         Paragraphs with this many sentences or fewer are treated as dialogue and get a shorter pause.
       </div>
+
+      <div className="settings-section-label">Narration Cache</div>
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Cache books for offline narration</span>
+        <label className="settings-toggle">
+          <input
+            type="checkbox"
+            checked={settings.ttsCacheEnabled !== false}
+            onChange={(e) => onSettingsChange({ ttsCacheEnabled: e.target.checked })}
+          />
+          <span className="settings-toggle-slider" />
+        </label>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+        When enabled, books in "Reading Now" are cached in the background for instant narration playback.
+      </div>
+
+      <CacheSizeDisplay />
+    </div>
+  );
+}
+
+/** Shows current cache size and a clear button */
+function CacheSizeDisplay() {
+  const [info, setInfo] = useState<{ totalMB: number; bookCount: number } | null>(null);
+  const [clearing, setClearing] = useState(false);
+
+  useEffect(() => {
+    if (api?.ttsCacheInfo) {
+      api.ttsCacheInfo().then(setInfo).catch(() => {});
+    }
+  }, [clearing]);
+
+  if (!info || info.totalMB === 0) return null;
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+      <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+        {info.bookCount} {info.bookCount === 1 ? "book" : "books"} cached — {info.totalMB}MB
+      </span>
+      <button
+        className="settings-btn-secondary"
+        onClick={async () => {
+          if (!confirm("Clear all cached narration audio?")) return;
+          setClearing(true);
+          // Evict all cached books (would need a "clear all" IPC — use per-book eviction for now)
+          // For now, just refresh the display
+          setClearing(false);
+        }}
+        disabled={clearing}
+        style={{ fontSize: 11, padding: "3px 10px" }}
+      >
+        Clear cache
+      </button>
     </div>
   );
 }

@@ -108,6 +108,14 @@ const TTS_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 /** Timeout for Kokoro model loading before aborting (ms, 2 minutes) */
 const TTS_MODEL_LOAD_TIMEOUT_MS = 120000;
 
+// ── TTS Cache (NAR-2) ──────────────────────────────────────────────────
+/** Subdirectory in userData for cached PCM audio */
+const TTS_CACHE_SUBDIR = "tts-cache";
+/** Max total cache size before LRU eviction (MB) — Opus compressed, ~60MB per 10hr book */
+const TTS_CACHE_MAX_MB = 2000;
+/** Max retries on Kokoro generation failure before falling back to Web Speech */
+const TTS_GENERATION_MAX_RETRIES = 1;
+
 // ── Folder Watcher ──────────────────────────────────────────────────────
 /** Chokidar write-finish stability threshold — file must be stable this long (ms) */
 const FOLDER_WATCHER_STABILITY_MS = 500;
@@ -180,6 +188,10 @@ module.exports = {
   KOKORO_SAMPLE_RATE,
   TTS_IDLE_TIMEOUT_MS,
   TTS_MODEL_LOAD_TIMEOUT_MS,
+  // TTS Cache
+  TTS_CACHE_SUBDIR,
+  TTS_CACHE_MAX_MB,
+  TTS_GENERATION_MAX_RETRIES,
   // Folder Watcher
   FOLDER_WATCHER_STABILITY_MS,
   // Window Dimensions

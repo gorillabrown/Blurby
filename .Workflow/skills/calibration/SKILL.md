@@ -23,12 +23,10 @@ Not every change requires the same calibration level. Use tiers to match effort 
 
 **Run:**
 ```
-[CUSTOMIZE: Full calibration specification]
-
-Example:
-  N = 400 fights × 3 random seeds (seeds: 42, 99, 7)
-  Wall time: ~22–25 minutes
-  Command: pytest --runslow -q
+Blurby does not have a traditional calibration suite. Use the performance benchmarks:
+  Command: npm run perf
+  Wall time: ~2-3 minutes
+  21 automated benchmarks covering critical paths
 ```
 
 **Output:**
@@ -49,12 +47,10 @@ Example:
 
 **Run:**
 ```
-[CUSTOMIZE: Quick calibration specification]
-
-Example:
-  N = 200 fights × 1 seed (seed: 42)
-  Wall time: ~2–3 minutes
-  Command: pytest -n auto -m "not slow" -q
+Quick check — run test suite only:
+  Command: npm test
+  Wall time: ~30-60 seconds
+  860+ tests across 43 files
 ```
 
 **Output:**
@@ -75,11 +71,9 @@ Example:
 
 **Run:**
 ```
-[CUSTOMIZE: Fast test specification]
-
-Example:
-  Command: pytest -n auto -m "not slow" -q
-  Wall time: ~2–4 minutes
+Tests only — no calibration:
+  Command: npm test
+  Wall time: ~30-60 seconds
 ```
 
 **Output:**

@@ -2,18 +2,39 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-03-27
+**Last updated:** 2026-03-29
 
 ---
 
 ## Incomplete
 
-### BUG-090: EPUB narration does not auto-advance pages
-**Reported:** 2026-03-26
+### ~~BUG-090~~ ✅ Fixed — HOTFIX-7 (v1.4.3) + HOTFIX-8 (v1.4.4)
+**Reported:** 2026-03-26 | **Resolved:** 2026-03-29
+**Severity:** CRITICAL
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** Narration looped: cursor reset from mid-book (e.g., 1312) to 0, replaying from start. Two distinct failure modes:
+1. **Stale onended** (HOTFIX-7): Async `source.onended` from stopped source fired on new session's callbacks. Fixed with epoch counter.
+2. **Premature onended** (HOTFIX-8): Scheduler fired onEnd when `activeSources.length === 0` before pipeline delivered chunk 2 via IPC. First ramp-up chunk (13 words, ~3s) finished before async generation completed. Fixed with `pipelineDone` flag — scheduler only fires onEnd when both conditions met (no sources + pipeline done). Restores dual-condition logic from pre-NAR-2 audioQueue.
+**Root cause:** NAR-2 replaced audioQueue (which checked `endIdx >= words.length && queue.length === 0`) with audioScheduler (which only checked `activeSources.length === 0`). See LL-053, LL-054.
+**Status:** Fixed. Narration pipeline chain complete (NAR-2 → NAR-3 → NAR-4 → HOTFIX-5 → HOTFIX-6 → HOTFIX-7 → HOTFIX-8).
+
+### ~~BUG-093~~ ✅ Fixed — HOTFIX-9 (v1.4.5)
+**Reported:** 2026-03-30 | **Resolved:** 2026-03-30
 **Severity:** High
-**Location:** `src/components/FoliatePageView.tsx` (highlightWordByIndex, narration page-sync)
-**Description:** During Kokoro TTS narration on EPUBs, the page does not advance when narration reads past visible content. Audio continues correctly and word highlighting works within the visible page, but the foliate view stays on the same page. Multiple approaches attempted (CSS column visibility detection, span-not-found, fraction comparison) all failed due to foliate's CSS multi-column layout keeping all section words in DOM simultaneously. See LL-035 for full analysis.
-**Status:** Open. Root cause identified but no viable fix yet.
+**Location:** `src/utils/audioScheduler.ts`
+**Description:** Word highlight cursor desynced from narration audio. Root cause: `setSpeed()` boundary recalculation was a no-op (`remaining[i].time = now + (remaining[i].time - now)`). Fix: removed `playbackRate` entirely — generate at actual speed, word boundaries naturally match audio duration.
+
+### ~~BUG-094~~ ✅ Fixed — HOTFIX-9 (v1.4.5)
+**Reported:** 2026-03-30 | **Resolved:** 2026-03-30
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts` (stop)
+**Description:** Brief second voice overlap when extraction completes mid-narration. `source.stop()` doesn't instantly silence buffered audio. Fix: `source.disconnect()` before `source.stop()` prevents buffer drain overlap.
+
+### ~~BUG-095~~ ✅ Fixed — HOTFIX-9 (v1.4.5)
+**Reported:** 2026-03-30 | **Resolved:** 2026-03-30
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`
+**Description:** Speed changes via `playbackRate` caused pitch distortion (vinyl record effect). Fix: removed `playbackRate` entirely, pipeline generates at actual speed via `config.getSpeed()`, speed changes use debounced stop+restart.
 
 ### ~~BUG-092~~ ✅ Fixed — see Complete section
 

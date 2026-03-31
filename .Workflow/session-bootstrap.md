@@ -168,40 +168,38 @@ These are non-negotiable technical constraints. They apply to every session, eve
 
 ### Code and Constants
 
-- **All tunable constants are separated from main codebase.** They live in a constants file (e.g., `constants.toml`, `constants.py`). Main code reads them at startup. This enables rapid iteration without recompiling.
+- **All tunable constants are separated from main codebase.** They live in `src/utils/constants.ts`. No hardcoded magic numbers in source files.
 - **Every constant must have at least one consumer.** Dead constants are clutter. During code review, verify every constant is used.
-- **Never capture tunable values in module-level frozen dataclass instances.** Freeze only static values. This prevents constants from being "baked in" where they can't be changed.
+- **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
 
 ### Testing and Verification
 
 - **After any logic change, run tests before proceeding.** No exceptions. This is where 80% of bugs are caught.
-  - Logic change (algorithm, formula, gate) → `pytest -m "not slow" -q` (~2-3 min)
-  - Multi-system change or constant tuning → `pytest --runslow -q` (~20-30 min)
+  - Logic change → `npm test` (~30-60 sec)
+  - Multi-system change → `npm test && npm run build` (~2-3 min)
 - **If a test fails, fix the code, not the test.** The only exception: if the test itself is wrong (confirm with planning agent first).
 - **Flaky tests must be fixed, not disabled.** If a test is flaky, it's signaling a real problem (race condition, timing sensitivity, environmental dependency). Fix it.
 
-### Measurement and Calibration
+### Measurement and Verification
 
 - **No claims without evidence.** If you claim "this is better," show the data.
-- **Calibration is a gate, not a suggestion.** After any tuning, run calibration. If it's within tolerance, proceed. If not, either fix the code or adjust targets. Don't ignore the results.
-- **Tier your calibration based on the scope of change:**
+- **Tier your verification based on the scope of change:**
 
-| Scope | Calibration Tier | Command | Time |
+| Scope | Verification Tier | Command | Time |
 |-------|---|---|---|
-| Display-only, docs-only, data-only | None | Skip | 0 min |
-| Single-point fix (e.g., one constant ±5%) | Quick Check | `pytest -m "not slow" -q` | ~3 min |
-| Targeted multi-fix (e.g., 2-3 constants or one logic module) | Quick Check | `pytest -m "not slow" -q` | ~3 min |
-| New mechanics, major tuning, multi-system changes | Full Calibration | `pytest --runslow -q` | ~25 min |
+| Display-only, docs-only, CSS-only | None | Skip | 0 min |
+| Targeted bug fix, single-component change | Quick | `npm test` | ~1 min |
+| New features, architecture changes, format parsers | Full | `npm test && npm run build` + smoke test | ~3 min |
 
 ### Documentation
 
 - **LESSONS_LEARNED is updated immediately on non-trivial discovery.** Don't batch updates. Each entry (LL-###) captures one insight, one decision, one bug, or one question that surprised you. Future you will need this.
-- **CLAUDE.md (session state) stays under 30k characters.** When approaching the limit, archive completed sprint details to a new `CLAUDE_md_archive_session##.md` and keep only current state + forward plan in CLAUDE.md.
+- **CLAUDE.md stays under ~35k characters.** When approaching the limit, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
 - **PROJECT_CONSTITUTION is the source of truth for governing principles.** All other decisions flow from it. If it's not in the constitution, it can be debated. If it's in the constitution, it's not debatable.
 
 ### Sprint Queue
 
-- **The sprint queue (`docs/sprint-queue.md`) must contain at least 3 un-dispatched sprints at all times.** If the queue drops below 3 after a sprint completes, planning takes priority over execution — replenish before starting new work.
+- **The sprint queue (`docs/governance/SPRINT_QUEUE.md`) must contain at least 3 un-dispatched sprints at all times.** If the queue drops below 3 after a sprint completes, planning takes priority over execution — replenish before starting new work.
 - **One sprint in flight at a time.** Do not pull the next sprint until the current one is complete, verified, and removed from the queue.
 - **Sprint queue is FIFO.** Sprints execute top-to-bottom. No skipping unless a sprint is explicitly blocked.
 - **Doc-keeper removes completed sprints and checks queue depth after every completion.**
@@ -209,26 +207,22 @@ These are non-negotiable technical constraints. They apply to every session, eve
 ### Work and Parallelization
 
 - **Parallelize independent work. Sequence dependent work.**
-  - If tasks A and B don't depend on each other, dispatch both to separate agents in parallel.
+  - If tasks A and B don't depend on each other, dispatch both in parallel.
   - If task B depends on task A, sequence them. Task A completes, you verify, then dispatch task B.
-- **Use cheaper/faster models for mechanical tasks, most capable models for cross-system reasoning.**
-  - Haiku for: tests, simple refactors, mechanical fixes, small-scope verification
-  - Sonnet for: focused analysis, targeted rewrites, domain-specific expertise
-  - Opus for: cross-system reasoning, architecture decisions, complex debugging, calibration
+- **Agent scope labels** in dispatches tell you domain, not process. You (single CLI session) do all work.
 
 ### Git and Branching
 
 - **Never commit directly to main.** All work happens on feature branches.
-- **Branch per sprint dispatch.** Create `<sprint>-<wave>` branch (e.g., `stab1-wave-a`) at start. Don't reuse across dispatches.
+- **Branch per sprint dispatch.** Create `sprint/<N>-<name>` branch (e.g., `sprint/25-rss-library`). Don't reuse across dispatches.
 - **Stage specific files, never `git add .` or `git add -A`.** Accidents happen when you stage everything.
 - **Before merge, verify tests pass.** No exceptions. Main must always be green.
 - **Merge with `--no-ff` to preserve branch history.** This creates a merge commit and makes the branch visible in `git log`.
+- **Always merge locally.** No PRs. Merge to main, then push to GitHub.
 
 ---
 
 ## Skill Catalog
-
-[CUSTOMIZE: Replace this section with your project-specific skills.]
 
 These are the process disciplines available to you. Invoke them by name. Each skill contains:
 - When to apply it (triggers)
@@ -252,7 +246,11 @@ These are the process disciplines available to you. Invoke them by name. Each sk
 | **Documentation** | Recording decisions, lessons, architectural changes | 10-20 min | Sonnet |
 | **External Audit** | Conducting or responding to third-party review | 120-180 min | Opus |
 
-[CUSTOMIZE: Add project-specific skills. See `docs/skill-catalog.md` for full format.]
+Additional Blurby-specific skills:
+| **Code Review (Receiving)** | Responding to code review feedback | 10-20 min | Sonnet |
+| **Code Review (Requesting)** | Preparing code for review, creating review checklist | 10-20 min | Sonnet |
+| **Writing Skills** | Creating new workflow skills | 30-60 min | Opus |
+| **Parallel Agents** | Dispatching multiple independent agents | Varies | Opus |
 
 ---
 

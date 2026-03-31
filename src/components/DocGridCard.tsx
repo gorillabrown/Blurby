@@ -16,6 +16,8 @@ interface DocGridCardProps {
   selected?: boolean;
   selectionMode?: boolean;
   onToggleSelect?: (id: string) => void;
+  /** NAR-4: Whether this book's TTS audio is fully cached */
+  ttsCached?: boolean;
 }
 
 // Format APA subtext for URL-imported articles
@@ -37,7 +39,7 @@ function formatApaSubtext(doc: BlurbyDoc): string | null {
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, focused, selected, selectionMode, onToggleSelect }: DocGridCardProps) {
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, focused, selected, selectionMode, onToggleSelect, ttsCached }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -82,6 +84,8 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
       aria-label={`${doc.title}${doc.author ? `, by ${doc.author}` : ""}${isComplete ? ", completed" : progress > 0 ? `, ${progress}% read` : ""}${doc.unread ? ", unread" : ""}`}
       data-doc-id={doc.id}
     >
+      {/* NAR-4: Cache indicator */}
+      {ttsCached && <span className="doc-card-cached-badge" title="Narration cached" aria-label="Narration cached">✓</span>}
       {/* Context menu (right-click) */}
       {contextMenu && (
         <div
