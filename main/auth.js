@@ -28,6 +28,7 @@ const GOOGLE_SCOPES = [
 let authState = null; // { provider, email, name }
 let tokensPath = null;
 let authRequiredCallbacks = [];
+let pendingOAuthState = null; // CSRF protection: expected state value during OAuth flow
 
 // Lazy-loaded modules
 let _msal = null;
@@ -134,18 +135,21 @@ async function signInMicrosoft() {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
 
-  // Generate auth URL
+  // Generate auth URL with CSRF state parameter
+  const oauthState = crypto.randomBytes(16).toString("hex");
+  pendingOAuthState = oauthState;
   const authCodeUrlParams = {
     scopes: MICROSOFT_SCOPES,
     redirectUri: MICROSOFT_REDIRECT_URI,
     codeChallenge,
     codeChallengeMethod: "S256",
+    state: oauthState,
   };
 
   const authUrl = await msalApp.getAuthCodeUrl(authCodeUrlParams);
 
   // Open auth window
-  const authCode = await openAuthWindow(authUrl, MICROSOFT_REDIRECT_URI);
+  const authCode = await openAuthWindow(authUrl, MICROSOFT_REDIRECT_URI, oauthState);
   if (!authCode) throw new Error("Authentication was cancelled");
 
   // Exchange code for tokens
@@ -219,16 +223,19 @@ async function signInGoogle() {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
 
+  const oauthState = crypto.randomBytes(16).toString("hex");
+  pendingOAuthState = oauthState;
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: "offline",
     scope: GOOGLE_SCOPES,
     prompt: "consent",
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
+    state: oauthState,
   });
 
   // Open auth window
-  const authCode = await openAuthWindow(authUrl, GOOGLE_REDIRECT_URI);
+  const authCode = await openAuthWindow(authUrl, GOOGLE_REDIRECT_URI, oauthState);
   if (!authCode) throw new Error("Authentication was cancelled");
 
   // Exchange code for tokens
@@ -291,7 +298,7 @@ async function refreshGoogleToken() {
 
 // ── Auth Window ──────────────────────────────────────────────────────────
 
-function openAuthWindow(authUrl, redirectUri) {
+function openAuthWindow(authUrl, redirectUri, expectedState) {
   return new Promise((resolve, reject) => {
     const win = new BrowserWindow({
       width: AUTH_WINDOW_WIDTH,
@@ -305,42 +312,36 @@ function openAuthWindow(authUrl, redirectUri) {
 
     let resolved = false;
 
-    // Listen for redirect
-    win.webContents.on("will-redirect", (event, url) => {
-      if (url.startsWith(redirectUri)) {
-        event.preventDefault();
-        resolved = true;
-        const urlObj = new URL(url);
-        const code = urlObj.searchParams.get("code");
-        const error = urlObj.searchParams.get("error");
-        win.close();
-        if (error) {
-          reject(new Error(`Auth error: ${error}`));
-        } else {
-          resolve(code);
-        }
+    function handleRedirect(event, url) {
+      if (!url.startsWith(redirectUri) || resolved) return;
+      event.preventDefault();
+      resolved = true;
+      pendingOAuthState = null;
+      const urlObj = new URL(url);
+      const code = urlObj.searchParams.get("code");
+      const error = urlObj.searchParams.get("error");
+      const returnedState = urlObj.searchParams.get("state");
+      win.close();
+      if (error) {
+        reject(new Error(`Auth error: ${error}`));
+      } else if (expectedState && returnedState !== expectedState) {
+        reject(new Error("OAuth state mismatch — possible CSRF attack"));
+      } else {
+        resolve(code);
       }
-    });
+    }
+
+    // Listen for redirect
+    win.webContents.on("will-redirect", handleRedirect);
 
     // Also check navigation (some providers navigate instead of redirect)
-    win.webContents.on("will-navigate", (event, url) => {
-      if (url.startsWith(redirectUri) && !resolved) {
-        event.preventDefault();
-        resolved = true;
-        const urlObj = new URL(url);
-        const code = urlObj.searchParams.get("code");
-        const error = urlObj.searchParams.get("error");
-        win.close();
-        if (error) {
-          reject(new Error(`Auth error: ${error}`));
-        } else {
-          resolve(code);
-        }
-      }
-    });
+    win.webContents.on("will-navigate", handleRedirect);
 
     win.on("closed", () => {
-      if (!resolved) resolve(null); // User closed window
+      if (!resolved) {
+        pendingOAuthState = null;
+        resolve(null); // User closed window
+      }
     });
 
     win.loadURL(authUrl);

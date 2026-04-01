@@ -3,6 +3,7 @@
 
 const http = require("http");
 const crypto = require("crypto");
+const { safeStorage } = require("electron");
 const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS } = require("./constants");
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -265,7 +266,7 @@ async function handleAddArticle(client, article) {
           .replace(/[<>:"/\\|?*\x00-\x1f]/g, "-")
           .replace(/-{2,}/g, "-")
           .slice(0, 80);
-        const filepath = path.join(savedDir, `${safeTitle}.txt`);
+        const filepath = path.join(savedDir, path.basename(`${safeTitle}.txt`));
         const tmp = filepath + ".tmp";
         await fsPromises.writeFile(tmp, article.textContent, "utf-8");
         await fsPromises.rename(tmp, filepath);
@@ -298,13 +299,34 @@ function startServer(ctx) {
 
   _ctx = ctx;
 
-  // Generate or restore pairing token
+  // Generate or restore pairing token (encrypted via safeStorage)
   const settings = ctx.getSettings();
   if (settings._wsPairingToken) {
-    _pairingToken = settings._wsPairingToken;
+    try {
+      if (safeStorage.isEncryptionAvailable()) {
+        const buffer = Buffer.from(settings._wsPairingToken, "base64");
+        _pairingToken = safeStorage.decryptString(buffer);
+      } else {
+        _pairingToken = settings._wsPairingToken;
+      }
+    } catch {
+      // Decryption failed (corrupted or was stored in plaintext) — regenerate
+      console.warn("[ws-server] Pairing token decryption failed — regenerating");
+      _pairingToken = generatePairingToken();
+      if (safeStorage.isEncryptionAvailable()) {
+        settings._wsPairingToken = safeStorage.encryptString(_pairingToken).toString("base64");
+      } else {
+        settings._wsPairingToken = _pairingToken;
+      }
+      ctx.saveSettings();
+    }
   } else {
     _pairingToken = generatePairingToken();
-    settings._wsPairingToken = _pairingToken;
+    if (safeStorage.isEncryptionAvailable()) {
+      settings._wsPairingToken = safeStorage.encryptString(_pairingToken).toString("base64");
+    } else {
+      settings._wsPairingToken = _pairingToken;
+    }
     ctx.saveSettings();
   }
 
