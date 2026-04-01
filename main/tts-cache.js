@@ -95,7 +95,7 @@ async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durati
   manifest.totalBytes += chunkBytes;
 
   // Async manifest save — don't block caller
-  saveManifest().catch(() => {});
+  saveManifest().catch(err => console.error("[tts-cache] saveManifest failed:", err.message));
 
   // Check disk pressure
   await enforceMaxSize(key);
@@ -129,7 +129,7 @@ async function readChunk(bookId, voiceId, startIdx) {
     // File missing or corrupt — clean up manifest entry
     console.warn(`[tts-cache] Failed to read/decode chunk ${startIdx}:`, err.message);
     delete entry.chunks[startIdx];
-    saveManifest().catch(() => {});
+    saveManifest().catch(err => console.error("[tts-cache] saveManifest failed:", err.message));
     return null;
   }
 }

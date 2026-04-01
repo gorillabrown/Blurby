@@ -333,7 +333,8 @@ function startServer(ctx) {
     }
   });
 
-  // Heartbeat to detect stale connections
+  // Heartbeat to detect stale connections — clear any prior timer to prevent stacking
+  if (_heartbeatTimer) clearInterval(_heartbeatTimer);
   _heartbeatTimer = setInterval(() => {
     for (const client of _clients) {
       if (!client.alive) {
