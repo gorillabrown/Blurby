@@ -239,6 +239,12 @@ interface FoliatePageViewProps {
   narrationWordIndex?: number;
   /** Book-wide section boundaries from main-process extraction (HOTFIX-10: global index stamping) */
   bookWordSections?: import("../types/narration").SectionBoundary[];
+  /** FLOW-3A: When true, foliate uses flow="scrolled" for infinite scroll */
+  flowMode?: boolean;
+  /** FLOW-3A: Ref to expose the scrollable container element to FlowScrollEngine */
+  scrollContainerRef?: React.MutableRefObject<HTMLElement | null>;
+  /** FLOW-3A: Ref to expose the cursor element to FlowScrollEngine */
+  flowCursorRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export interface FoliateViewAPI {
@@ -265,6 +271,8 @@ export interface FoliateViewAPI {
   goToSection: (sectionIndex: number) => Promise<void>;
   /** NAR-3: Extract words from a specific section's DOM (must be currently loaded) */
   extractSectionWords: (sectionIndex: number) => FoliateWord[];
+  /** FLOW-3A: Get the scrollable container element for FlowScrollEngine */
+  getScrollContainer: () => HTMLElement | null;
 }
 
 export default function FoliatePageView({
@@ -287,6 +295,9 @@ export default function FoliatePageView({
   onFlowWordAdvance,
   narrationWordIndex,
   bookWordSections,
+  flowMode,
+  scrollContainerRef,
+  flowCursorRef,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -477,7 +488,7 @@ export default function FoliatePageView({
         // Set renderer attributes
         const scale = (focusTextSize || 100) / 100;
         const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
-        view.renderer.setAttribute("flow", "paginated");
+        view.renderer.setAttribute("flow", flowMode ? "scrolled" : "paginated");
         view.renderer.setAttribute("margin", `${FOLIATE_MARGIN_PX}px`);
         // NOTE: Do NOT set "gap" — foliate-js interprets it as a percentage (default 7%).
         // Setting "48px" causes parseFloat→48 /100→0.48, consuming ~92% of width as gap.
@@ -658,6 +669,14 @@ export default function FoliatePageView({
               }
               return [];
             },
+            getScrollContainer: () => {
+              const host = foliateHostRef.current;
+              if (!host) return null;
+              const foliateView = host.querySelector("foliate-view") as any;
+              return foliateView?.shadowRoot?.querySelector("[part~='body']")
+                ?? foliateView?.shadowRoot?.querySelector("div")
+                ?? host;
+            },
           };
         }
 
@@ -706,6 +725,40 @@ export default function FoliatePageView({
     }
   }, [settings.theme, settings.fontFamily, focusTextSize, settings.layoutSpacing]);
 
+  // FLOW-3A: Toggle flow="scrolled" vs "paginated" when flowMode changes
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view?.renderer) return;
+    view.renderer.setAttribute("flow", flowMode ? "scrolled" : "paginated");
+    // When switching to scrolled mode, disable column layout
+    if (flowMode) {
+      view.renderer.setAttribute("max-column-count", "1");
+    } else {
+      const container = containerRef.current;
+      if (container) {
+        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+      }
+    }
+    // Expose the scroll container for FlowScrollEngine
+    if (scrollContainerRef) {
+      if (flowMode) {
+        // foliate-js in scrolled mode: the scrollable element is inside the shadow DOM
+        // Find it via the host element's shadow root or fallback to the container
+        const host = foliateHostRef.current;
+        if (host) {
+          // foliate-view's scrollable container is the element with overflow
+          const foliateView = host.querySelector("foliate-view") as any;
+          const scrollEl = foliateView?.shadowRoot?.querySelector("[part~='body']")
+            ?? foliateView?.shadowRoot?.querySelector("div")
+            ?? host;
+          scrollContainerRef.current = scrollEl as HTMLElement;
+        }
+      } else {
+        scrollContainerRef.current = null;
+      }
+    }
+  }, [flowMode]);
+
   // Reflow text when container resizes (window maximize/restore/drag)
   useEffect(() => {
     const container = containerRef.current;
@@ -723,8 +776,9 @@ export default function FoliatePageView({
   }, []);
 
   // Flow mode overlay cursor animation (EPUB-only, Range-based)
+  // FLOW-3A: When flowMode is active, FlowScrollEngine handles cursor — skip this legacy cursor
   useEffect(() => {
-    if (readingMode !== "flow" || !flowPlaying) {
+    if (flowMode || readingMode !== "flow" || !flowPlaying) {
       if (cursorRef.current) cursorRef.current.style.display = "none";
       cancelAnimationFrame(flowRafRef.current);
       return;
@@ -845,11 +899,15 @@ export default function FoliatePageView({
   // Page advance is now handled by highlightWordByIndex's off-screen detection instead.
   // TODO: Re-implement once word index stability across sections is solved.
 
-  // Keyboard navigation
+  // Keyboard navigation (page turn — disabled in Flow Mode, which uses FlowScrollEngine)
+  const flowModeRef = useRef(flowMode);
+  flowModeRef.current = flowMode;
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const view = viewRef.current;
       if (!view?.renderer) return;
+      // FLOW-3A: In flow mode, don't page-turn — FlowScrollEngine handles scrolling
+      if (flowModeRef.current) return;
 
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
@@ -874,75 +932,4 @@ export default function FoliatePageView({
   const goToFraction = useCallback((frac: number) => viewRef.current?.goToFraction(frac), []);
 
   return (
-    <div className="foliate-page-view" ref={containerRef} style={{ flex: 1, overflow: "hidden", position: "relative" }}>
-      {/* Page turn buttons overlaid on left/right edges — z-index above foliate host */}
-      <button
-        className="page-nav-btn page-nav-btn--left"
-        onClick={goPrev}
-        aria-label="Previous page"
-        style={{ zIndex: 10 }}
-      >&#x2039;</button>
-      <button
-        className="page-nav-btn page-nav-btn--right"
-        onClick={goNext}
-        aria-label="Next page"
-        style={{ zIndex: 10 }}
-      >&#x203A;</button>
-      {/* Jump to reading position button — shown when reading mode is active */}
-      {isReading && onJumpToHighlight && (
-        <button
-          className="return-to-narration-btn"
-          onClick={onJumpToHighlight}
-          style={{ zIndex: 20 }}
-        >
-          ↩ Jump to reading position
-        </button>
-      )}
-      {loading && <div className="foliate-loading">Loading book...</div>}
-      {error && <div className="foliate-error">{error}</div>}
-      <div ref={cursorRef} className="foliate-flow-cursor" style={{ display: "none" }} />
-      <div ref={highlightRef} className="foliate-narration-highlight" style={{ display: "none" }} />
-    </div>
-  );
-}
-
-/** Inject Blurby theme CSS into an EPUB document (inside the foliate iframe). */
-function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: number) {
-  if (!doc?.head) return;
-
-  const existing = doc.getElementById("blurby-theme");
-  if (existing) existing.remove();
-
-  const scale = (focusTextSize || 100) / 100;
-  const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
-  const lineHeight = settings.layoutSpacing?.line || 1.8;
-  const fontFamily = settings.fontFamily || "Georgia, serif";
-
-  // Get computed CSS custom properties from the main document
-  const root = document.documentElement;
-  const bg = getComputedStyle(root).getPropertyValue("--bg").trim() || "#1a1a1a";
-  const fg = getComputedStyle(root).getPropertyValue("--text").trim() || "#e0e0e0";
-  const accent = getComputedStyle(root).getPropertyValue("--accent").trim() || "#D04716";
-
-  const style = doc.createElement("style");
-  style.id = "blurby-theme";
-  style.textContent = `
-    html, body {
-      background: ${bg} !important;
-      color: ${fg} !important;
-      font-family: ${fontFamily} !important;
-      font-size: ${fontSize}px !important;
-      line-height: ${lineHeight} !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    a { color: ${accent} !important; }
-    img { max-width: 100%; height: auto; }
-    ::selection { background: ${accent}33; }
-    .page-word { cursor: pointer; border-radius: 2px; transition: background 0.1s; }
-    .page-word:hover { background: ${accent}22; }
-    .page-word--highlighted { background: ${accent}4D; }
-    .page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
-  `;
-  doc.head.appendChild(style);
-}
+    <div className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}`} ref={containerRef} style={{ flex: 1, overflow: flowMode ? "auto" : "hidden", position: "relati

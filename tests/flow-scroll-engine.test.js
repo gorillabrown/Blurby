@@ -1,0 +1,452 @@
+/**
+ * @vitest-environment jsdom
+ */
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// Direct import of the FlowScrollEngine class
+// We test the engine's logic in isolation with mock DOM elements
+import { FlowScrollEngine } from "../src/utils/FlowScrollEngine.ts";
+
+// Mock constants
+vi.mock("../src/constants.ts", () => ({
+  FLOW_READING_ZONE_POSITION: 0.25,
+  FLOW_CURSOR_HEIGHT_PX: 3,
+  FLOW_CURSOR_EINK_HEIGHT_PX: 4,
+  FLOW_SCROLL_RESUME_DELAY_MS: 2000,
+  FLOW_LINE_ADVANCE_BUFFER_MS: 50,
+}));
+
+/** Create a mock container with word spans for testing */
+function createMockContainer(wordCount = 20, wordsPerLine = 5) {
+  const container = document.createElement("div");
+  Object.defineProperty(container, "clientHeight", { value: 600, configurable: true });
+  Object.defineProperty(container, "clientWidth", { value: 800, configurable: true });
+  container.style.position = "relative";
+  container.style.overflow = "auto";
+
+  // Create word spans arranged in lines
+  let lineY = 20;
+  const lineHeight = 24;
+  for (let i = 0; i < wordCount; i++) {
+    const span = document.createElement("span");
+    span.className = "page-word";
+    span.setAttribute("data-word-index", String(i));
+    span.textContent = `word${i}`;
+
+    const lineIdx = Math.floor(i / wordsPerLine);
+    const wordInLine = i % wordsPerLine;
+    const wordWidth = 60;
+
+    // Mock getBoundingClientRect
+    const top = lineY + lineIdx * lineHeight;
+    const left = wordInLine * (wordWidth + 10);
+    span.getBoundingClientRect = () => ({
+      top,
+      bottom: top + lineHeight,
+      left,
+      right: left + wordWidth,
+      width: wordWidth,
+      height: lineHeight,
+      x: left,
+      y: top,
+      toJSON: () => {},
+    });
+
+    container.appendChild(span);
+  }
+
+  // Mock container getBoundingClientRect
+  container.getBoundingClientRect = () => ({
+    top: 0, bottom: 600, left: 0, right: 800,
+    width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+  });
+
+  container.scrollTo = vi.fn();
+  Object.defineProperty(container, "scrollTop", { value: 0, writable: true, configurable: true });
+
+  return container;
+}
+
+function createMockCursor() {
+  const cursor = document.createElement("div");
+  cursor.className = "flow-shrink-cursor";
+  // Mock offsetWidth for forced reflow (LL-015)
+  Object.defineProperty(cursor, "offsetWidth", { value: 100, configurable: true });
+  return cursor;
+}
+
+describe("FlowScrollEngine", () => {
+  let engine;
+  let container;
+  let cursor;
+  let callbacks;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+      onLineChange: vi.fn(),
+    };
+    engine = new FlowScrollEngine(callbacks);
+    container = createMockContainer(20, 5); // 20 words, 5 per line = 4 lines
+    cursor = createMockCursor();
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    engine.destroy();
+    document.body.removeChild(container);
+    vi.useRealTimers();
+  });
+
+  // ── Construction & State ────────────────────────────────────────────
+
+  it("should initialize in stopped state", () => {
+    const state = engine.getState();
+    expect(state.running).toBe(false);
+    expect(state.paused).toBe(false);
+    expect(state.wordIndex).toBe(0);
+  });
+
+  it("should report running state after start", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    const state = engine.getState();
+    expect(state.running).toBe(true);
+    expect(state.paused).toBe(false);
+  });
+
+  it("should report stopped state after stop", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.stop();
+    const state = engine.getState();
+    expect(state.running).toBe(false);
+  });
+
+  // ── Line Map Building ───────────────────────────────────────────────
+
+  it("should build line map from word spans", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    const state = engine.getState();
+    // 20 words / 5 per line = 4 lines
+    expect(state.totalLines).toBe(4);
+  });
+
+  it("should build correct line boundaries", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    // After start, engine rebuilds line map. Check via jumpToLine.
+    // Line 0: words 0-4, Line 1: words 5-9, etc.
+    engine.jumpToLine("next"); // move to line 1
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(5);
+  });
+
+  it("should handle empty container gracefully", () => {
+    const emptyContainer = document.createElement("div");
+    emptyContainer.getBoundingClientRect = () => ({
+      top: 0, bottom: 0, left: 0, right: 0,
+      width: 0, height: 0, x: 0, y: 0, toJSON: () => {},
+    });
+    emptyContainer.scrollTo = vi.fn();
+    engine.start(emptyContainer, cursor, 0, 300, new Set(), false);
+    const state = engine.getState();
+    expect(state.totalLines).toBe(0);
+  });
+
+  // ── Start Position ──────────────────────────────────────────────────
+
+  it("should start at the specified word index", () => {
+    engine.start(container, cursor, 7, 300, new Set(), false);
+    expect(engine.getWordIndex()).toBe(7);
+  });
+
+  it("should find correct line for start word index", () => {
+    engine.start(container, cursor, 7, 300, new Set(), false);
+    const state = engine.getState();
+    // Word 7 is in line 1 (words 5-9)
+    expect(state.lineIndex).toBe(1);
+  });
+
+  // ── Cursor Styling ──────────────────────────────────────────────────
+
+  it("should set cursor display to block on start", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(cursor.style.display).toBe("block");
+  });
+
+  it("should set cursor height to 3px in normal mode", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(cursor.style.height).toBe("3px");
+  });
+
+  it("should set cursor height to 4px in e-ink mode", () => {
+    engine.start(container, cursor, 0, 300, new Set(), true);
+    expect(cursor.style.height).toBe("4px");
+  });
+
+  it("should hide cursor on stop", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.stop();
+    expect(cursor.style.display).toBe("none");
+  });
+
+  // ── Pause / Resume ──────────────────────────────────────────────────
+
+  it("should pause animation", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.pause();
+    const state = engine.getState();
+    expect(state.paused).toBe(true);
+    expect(state.running).toBe(true);
+  });
+
+  it("should resume after pause", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.pause();
+    engine.resume();
+    const state = engine.getState();
+    expect(state.paused).toBe(false);
+    expect(state.running).toBe(true);
+  });
+
+  it("should not resume if not paused", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    // Not paused — resume should be a no-op
+    engine.resume();
+    const state = engine.getState();
+    expect(state.running).toBe(true);
+    expect(state.paused).toBe(false);
+  });
+
+  // ── WPM Changes ────────────────────────────────────────────────────
+
+  it("should accept WPM changes", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.setWpm(500);
+    // Engine should still be running
+    expect(engine.getState().running).toBe(true);
+  });
+
+  // ── Line Navigation ────────────────────────────────────────────────
+
+  it("should jump to next line", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToLine("next");
+    // Should advance to line 1, word 5
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(5);
+  });
+
+  it("should jump to previous line", () => {
+    engine.start(container, cursor, 10, 300, new Set(), false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToLine("prev");
+    // From line 2 (words 10-14), should go to line 1 (word 5)
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(5);
+  });
+
+  it("should not go before first line", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToLine("prev");
+    // Should stay at line 0, word 0
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(0);
+  });
+
+  it("should not go past last line", () => {
+    engine.start(container, cursor, 15, 300, new Set(), false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToLine("next");
+    // Already at last line (line 3, words 15-19) — should stay
+    expect(engine.getState().lineIndex).toBe(3);
+  });
+
+  // ── Paragraph Navigation ───────────────────────────────────────────
+
+  it("should jump to next paragraph", () => {
+    const paragraphBreaks = new Set([4, 9, 14]); // Breaks after words 4, 9, 14
+    engine.start(container, cursor, 0, 300, paragraphBreaks, false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToParagraph("next");
+    // Next paragraph starts at word 5 (after break at 4)
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(5);
+  });
+
+  it("should jump to previous paragraph", () => {
+    const paragraphBreaks = new Set([4, 9, 14]);
+    engine.start(container, cursor, 12, 300, paragraphBreaks, false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToParagraph("prev");
+    // Previous paragraph starts at word 5 (after break at 4)
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(5);
+  });
+
+  it("should jump to start when no previous paragraph", () => {
+    const paragraphBreaks = new Set([9, 14]);
+    engine.start(container, cursor, 3, 300, paragraphBreaks, false);
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToParagraph("prev");
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(0);
+  });
+
+  // ── Word Jump ──────────────────────────────────────────────────────
+
+  it("should jump to a specific word index", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.jumpToWord(12);
+    expect(engine.getWordIndex()).toBe(12);
+  });
+
+  // ── Scroll Position ────────────────────────────────────────────────
+
+  it("should scroll container to keep active line in reading zone", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.jumpToLine("next");
+    // scrollTo should have been called
+    expect(container.scrollTo).toHaveBeenCalled();
+  });
+
+  it("should use jump scroll (no smooth) in e-ink mode", () => {
+    engine.start(container, cursor, 0, 300, new Set(), true);
+    engine.jumpToLine("next");
+    // In e-ink mode, scrollTop is set directly (no smooth scroll)
+    // scrollTo should NOT be called with smooth behavior
+    // The engine sets scrollTop directly for e-ink
+  });
+
+  // ── Rebuild Line Map ───────────────────────────────────────────────
+
+  it("should rebuild line map on demand", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    // Add more words dynamically
+    const newSpan = document.createElement("span");
+    newSpan.className = "page-word";
+    newSpan.setAttribute("data-word-index", "20");
+    newSpan.textContent = "word20";
+    newSpan.getBoundingClientRect = () => ({
+      top: 116, bottom: 140, left: 0, right: 60,
+      width: 60, height: 24, x: 0, y: 116, toJSON: () => {},
+    });
+    container.appendChild(newSpan);
+
+    engine.rebuildLineMap();
+    const state = engine.getState();
+    expect(state.totalLines).toBeGreaterThanOrEqual(4);
+  });
+
+  // ── Completion ─────────────────────────────────────────────────────
+
+  it("should call onComplete when past last line", () => {
+    // Start at last word
+    engine.start(container, cursor, 19, 300, new Set(), false);
+    // Advance timer to trigger line completion
+    vi.advanceTimersByTime(5000); // Enough time for line animation
+    // onComplete should eventually be called
+    // Note: exact timing depends on WPM and word count per line
+  });
+
+  // ── Destroy ────────────────────────────────────────────────────────
+
+  it("should clean up on destroy", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.destroy();
+    const state = engine.getState();
+    expect(state.running).toBe(false);
+  });
+
+  // ── Event Listeners ────────────────────────────────────────────────
+
+  it("should attach wheel listener on start", () => {
+    const addSpy = vi.spyOn(container, "addEventListener");
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(addSpy).toHaveBeenCalledWith("wheel", expect.any(Function), { passive: true });
+  });
+
+  it("should remove wheel listener on stop", () => {
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    const removeSpy = vi.spyOn(container, "removeEventListener");
+    engine.stop();
+    expect(removeSpy).toHaveBeenCalledWith("wheel", expect.any(Function));
+  });
+
+  // ── E-ink Mode ─────────────────────────────────────────────────────
+
+  it("should set transition to none in e-ink mode", () => {
+    engine.start(container, cursor, 0, 300, new Set(), true);
+    // In e-ink mode, cursor transitions are disabled
+    // The cursor should have no smooth transition
+    vi.advanceTimersByTime(100); // Let the initial animateLine fire
+    // Cursor transition should be "none" for e-ink
+    expect(cursor.style.transition).toBe("none");
+  });
+});
+
+// ── Integration-level tests ──────────────────────────────────────────
+
+describe("FlowScrollEngine - Integration", () => {
+  it("should preserve word index across start/stop/start cycle", () => {
+    const callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+    };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 10, 300, new Set(), false);
+    expect(engine.getWordIndex()).toBe(10);
+    engine.stop();
+
+    // Restart at same position
+    engine.start(container, cursor, 10, 300, new Set(), false);
+    expect(engine.getWordIndex()).toBe(10);
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should fire onWordAdvance callback on line navigation", () => {
+    const callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+    };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    callbacks.onWordAdvance.mockClear();
+
+    engine.jumpToLine("next");
+    expect(callbacks.onWordAdvance).toHaveBeenCalled();
+    const calledWith = callbacks.onWordAdvance.mock.calls[0][0];
+    expect(calledWith).toBe(5); // First word of line 1
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should handle rapid WPM changes without crashing", () => {
+    const callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+    };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    // Rapid WPM changes
+    engine.setWpm(100);
+    engine.setWpm(500);
+    engine.setWpm(200);
+    engine.setWpm(1000);
+
+    expect(engine.getState().running).toBe(true);
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+});

@@ -201,9 +201,9 @@ export function useReaderKeys(
       // Shift+Left/Right paragraph navigation (all modes)
       if (e.shiftKey && !e.ctrlKey && e.code === "ArrowLeft") { e.preventDefault(); s.paragraphPrev?.(); return; }
       if (e.shiftKey && !e.ctrlKey && e.code === "ArrowRight") { e.preventDefault(); s.paragraphNext?.(); return; }
-      // Shift+Up/Down chapter navigation (all modes)
-      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowUp") { e.preventDefault(); s.prevChapter?.(); return; }
-      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowDown") { e.preventDefault(); s.nextChapter?.(); return; }
+      // Shift+Up/Down chapter navigation (all modes except flow — flow uses these for paragraph jump)
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowUp" && s.readerMode !== "flow") { e.preventDefault(); s.prevChapter?.(); return; }
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowDown" && s.readerMode !== "flow") { e.preventDefault(); s.nextChapter?.(); return; }
       // Escape
       if (e.code === "Escape") { e.preventDefault(); s.exitReader(); return; }
 
@@ -231,19 +231,25 @@ export function useReaderKeys(
       if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.cycleAndStart?.(); return; }
       // Space = pause → return to Page
       if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
-      // ←/→ in Flow: jump lines; in Focus: seek words
-      if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) {
-        e.preventDefault();
-        if (s.readerMode === "flow" && s.flowPrevLine) s.flowPrevLine();
-        else s.seekWords(-REWIND_WORDS);
+
+      if (s.readerMode === "flow") {
+        // FLOW-3A: Flow scroll mode keyboard layout
+        // ↑/↓ = line jump (FlowScrollEngine)
+        if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.flowPrevLine?.(); return; }
+        if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.flowNextLine?.(); return; }
+        // Shift+↑/↓ = paragraph jump (FlowScrollEngine)
+        if (e.code === "ArrowUp" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.paragraphPrev?.(); return; }
+        if (e.code === "ArrowDown" && e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.paragraphNext?.(); return; }
+        // ←/→ = coarse WPM adjust (±25)
+        if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
+        if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
         return;
       }
-      if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) {
-        e.preventDefault();
-        if (s.readerMode === "flow" && s.flowNextLine) s.flowNextLine();
-        else s.seekWords(REWIND_WORDS);
-        return;
-      }
+
+      // ── Focus / Narration mode keys ────────────────────────────────
+      // ←/→ seek words
+      if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.seekWords(-REWIND_WORDS); return; }
+      if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.seekWords(REWIND_WORDS); return; }
       // Up/Down WPM (or TTS rate when narration selected — handled by adjustWpm wrapper)
       if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
       if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
@@ -602,35 +608,4 @@ export function useLibraryKeyboard(
   };
 }
 
-// ── useSmartImport (unchanged) ────────────────────────────────────────────
-
-export function useSmartImport(view: string, onImport: (content: string, isUrl: boolean) => void) {
-  const stateRef = useRef({ view, onImport });
-  stateRef.current = { view, onImport };
-
-  useEffect(() => {
-    const handler = async (e: KeyboardEvent) => {
-      if (!((e.altKey || e.metaKey) && e.code === "KeyV")) return;
-      const s = stateRef.current;
-      if (s.view !== "library") return;
-      e.preventDefault();
-
-      let text = "";
-      try {
-        text = await navigator.clipboard.readText();
-      } catch {
-        text = window.getSelection()?.toString() || "";
-      }
-      text = text.trim();
-      if (!text) {
-        text = window.getSelection()?.toString().trim() || "";
-      }
-      if (!text) return;
-
-      const isUrl = URL_REGEX.test(text);
-      s.onImport(text, isUrl);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
-}
+// ── useSmartImport (unchanged) ────────────────────────────────�

@@ -312,3 +312,15 @@ export const DEFAULT_SETTINGS = {
   ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
   ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
 };
+
+// ── Flow Scroll Mode (FLOW-3A) ─────────────────────────────────────────────
+/** Fraction of viewport height where the active line sits (reading zone) */
+export const FLOW_READING_ZONE_POSITION = 0.25;
+/** Default cursor height in pixels for flow scroll mode */
+export const FLOW_CURSOR_HEIGHT_PX = 3;
+/** Cursor height in pixels for e-ink mode (thicker for visibility) */
+export const FLOW_CURSOR_EINK_HEIGHT_PX = 4;
+/** Delay after manual scroll before auto-scroll resumes (ms) */
+export const FLOW_SCROLL_RESUME_DELAY_MS = 2000;
+/** Brief pause between lines for eye movement tracking (ms) */
+export const FLOW_LINE_ADVANCE_BUFFER_MS = 50;

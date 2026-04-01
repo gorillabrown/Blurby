@@ -228,7 +228,7 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 ### [2026-03-22] LL-013: Flow Mode Belongs in Page View, Not a Separate Component
 
 **Area:** architecture, reader
-**Status:** resolved
+**Status:** SUPERSEDED by LL-067 — FLOW-3A reverses this decision for infinite scroll
 **Priority:** high
 
 **Context:** The original spec described Flow mode as a "scrollable view with word-level highlight." The initial implementation used ScrollReaderView as a completely separate view for Flow mode, which was jarring — the user lost their paginated reading context when entering Flow. User clarification revealed the intent: Flow mode should advance the word highlight within the same paginated Page view, like a karaoke cursor walking through the text.
@@ -667,4 +667,4 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 
 **Guardrail:**
 - PR-112: Grep for `.catch(() => {})`, `.catch(() => { })`, `.catch(()=>{})`, and bare `catch { }` before every sprint. Zero tolerance in new code.
-- PR-113: Remaining instances in cloud storage cleanup are explicitly acceptable (file may already be gone). Document the rationale inline when a bare catch is intentional.
+- PR-113: Remaining instances in cloud storage cleanup are explicitly acceptable (file may already be gone
