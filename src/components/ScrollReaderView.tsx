@@ -106,7 +106,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       const next = Math.min(prev + 1, einkTotalPages - 1);
       if (next !== prev) onPageTurn?.();
       const pos = Math.round(((next + 1) / einkTotalPages) * words.length);
-      onProgressUpdate(Math.min(pos, words.length - 1));
+      onProgressUpdate(Math.min(pos, Math.max(0, words.length - 1)));
       return next;
     });
   }, [isEink, einkTotalPages, words.length, onProgressUpdate, onPageTurn]);
@@ -117,7 +117,7 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
       const next = Math.max(prev - 1, 0);
       if (next !== prev) onPageTurn?.();
       const pos = Math.round(((next + 1) / einkTotalPages) * words.length);
-      onProgressUpdate(Math.min(pos, words.length - 1));
+      onProgressUpdate(Math.min(pos, Math.max(0, words.length - 1)));
       return next;
     });
   }, [isEink, einkTotalPages, words.length, onProgressUpdate, onPageTurn]);

@@ -147,7 +147,7 @@ function createReaderWindow(docId, settings, isDev, readerWindows) {
 
 function createTray(mainWindow, createWindowFn) {
   let tray;
-  try { tray = new Tray(path.join(__dirname, "..", "assets", "tray-icon.png")); } catch { return null; /* Expected: tray icon may not exist */ }
+  try { tray = new Tray(path.join(__dirname, "..", "assets", "tray-icon.png")); } catch (err) { console.warn("[window-manager] Tray creation failed:", err.message); return null; }
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open Blurby", click: () => { if (mainWindow) mainWindow.show(); else createWindowFn(); } },
     { type: "separator" },

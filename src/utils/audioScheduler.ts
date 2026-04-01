@@ -178,7 +178,7 @@ export function createAudioScheduler(): AudioScheduler {
 
   function warmUp(): void {
     const ctx = getAudioContext();
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") ctx.resume().catch(() => { /* AudioContext resume may fail if already closing */ });
   }
 
   function scheduleChunk(chunk: ScheduledChunk): void {
@@ -249,7 +249,7 @@ export function createAudioScheduler(): AudioScheduler {
     stopped = false;
     pipelineDone = false;
     const ctx = getAudioContext();
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") ctx.resume().catch(() => { /* AudioContext resume may fail if already closing */ });
     // Word timer is started by scheduleChunk() on first chunk arrival — not here.
     // Starting it here with no chunks causes a burst when boundaries arrive backdated.
   }
