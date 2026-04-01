@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 
+// Extended timeout: this test does real jsdom + @mozilla/readability parsing
+vi.setConfig({ testTimeout: 30000 });
+
 // provenance.test.js — Sprint 19I-K
 //
 // Tests provenance extraction from HTML (extractArticleFromHtml) and APA
