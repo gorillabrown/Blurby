@@ -1,6 +1,6 @@
 import { useState, useCallback, ReactNode, DragEvent } from "react";
 
-const SUPPORTED_EXTENSIONS = new Set([".txt", ".md", ".pdf", ".epub", ".mobi", ".azw3", ".html"]);
+const SUPPORTED_EXTENSIONS = new Set([".txt", ".md", ".pdf", ".epub", ".mobi", ".azw3", ".html", ".docx"]);
 
 function getExtension(name: string): string {
   const dot = name.lastIndexOf(".");
@@ -91,7 +91,7 @@ export default function DropZone({ onFilesDropped, onReject, children }: DropZon
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             <span>Drop files to import</span>
-            <span className="drop-overlay-hint">.txt .md .pdf .epub .mobi .azw3 .html</span>
+            <span className="drop-overlay-hint">.txt .md .pdf .epub .mobi .azw3 .html .docx</span>
           </div>
         </div>
       )}

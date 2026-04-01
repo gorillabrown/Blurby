@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.4.14",
+  "version": "1.5.0",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -102,6 +102,7 @@
     "googleapis": "^171.4.0",
     "jsdom": "^24.1.0",
     "kokoro-js": "^1.2.1",
+    "mammoth": "^1.12.0",
     "opusscript": "^0.1.1",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.18.0",

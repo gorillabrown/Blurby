@@ -732,11 +732,101 @@ async function extractDocMetadata(filepath, docId, dataPath) {
   return { title: bookTitle, author: author || null, coverPath: coverPath || null };
 }
 
+/**
+ * Extract raw HTML from MOBI text records (preserves formatting tags).
+ * Returns the HTML string before tag-stripping, or null on failure.
+ */
+function parseMobiHtml(buffer) {
+  try {
+    if (buffer.length < 78) return null;
+    const numRecords = buffer.readUInt16BE(76);
+    if (numRecords < 2) return null;
+
+    const recordOffsets = [];
+    for (let i = 0; i < numRecords; i++) {
+      const offset = buffer.readUInt32BE(78 + i * 8);
+      recordOffsets.push(offset);
+    }
+
+    const rec0Start = recordOffsets[0];
+    if (rec0Start + 16 > buffer.length) return null;
+
+    const compression = buffer.readUInt16BE(rec0Start);
+    const textRecordCount = buffer.readUInt16BE(rec0Start + 8);
+    const encryption = buffer.readUInt16BE(rec0Start + 12);
+    if (encryption !== 0) return null;
+    if (compression === 17480) return null; // HUFF/CDIC
+
+    const textParts = [];
+    for (let i = 1; i <= textRecordCount && i < numRecords; i++) {
+      const start = recordOffsets[i];
+      const end = (i + 1 < numRecords) ? recordOffsets[i + 1] : buffer.length;
+      if (start >= buffer.length || end > buffer.length || start >= end) continue;
+      const recordData = buffer.slice(start, end);
+      if (compression === 2) {
+        textParts.push(palmDocDecompress(recordData));
+      } else {
+        textParts.push(recordData.toString("utf-8"));
+      }
+    }
+
+    const html = textParts.join("");
+    // Clean up but preserve formatting tags
+    const cleaned = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<head[^>]*>[\s\S]*?<\/head>/gi, "");
+    return cleaned || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract image records from MOBI binary.
+ * MOBI stores images in records after the text records.
+ * Returns array of { buffer, ext } objects.
+ */
+function extractMobiImages(buffer) {
+  const images = [];
+  try {
+    if (buffer.length < 78) return images;
+    const numRecords = buffer.readUInt16BE(76);
+    if (numRecords < 2) return images;
+
+    const recordOffsets = [];
+    for (let i = 0; i < numRecords; i++) {
+      const offset = buffer.readUInt32BE(78 + i * 8);
+      recordOffsets.push(offset);
+    }
+
+    const rec0Start = recordOffsets[0];
+    if (rec0Start + 16 > buffer.length) return images;
+    const textRecordCount = buffer.readUInt16BE(rec0Start + 8);
+
+    // Image records start after text records + 1 (record 0 is header)
+    const firstImageRecord = textRecordCount + 1;
+    for (let i = firstImageRecord; i < numRecords; i++) {
+      const start = recordOffsets[i];
+      const end = (i + 1 < numRecords) ? recordOffsets[i + 1] : buffer.length;
+      if (start >= buffer.length || end > buffer.length || start >= end) continue;
+      const data = buffer.slice(start, end);
+      const ext = validateImageMagicBytes(data);
+      if (ext) {
+        images.push({ buffer: data, ext });
+      }
+    }
+  } catch { /* best-effort */ }
+  return images;
+}
+
 module.exports = {
   palmDocDecompress,
   parseMobiContent,
+  parseMobiHtml,
   parseMobiMetadata,
   extractMobiCover,
+  extractMobiImages,
   parseCallibreOpf,
   extractContent,
   readFileContentAsync,
