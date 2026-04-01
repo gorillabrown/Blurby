@@ -324,16 +324,4 @@ All sprints through EPUB-2B complete (v1.5.1). Full history: `docs/project/ROADM
 Recent chain:
 ✅ AUDIT-FIX-1A–1F (stabilization) → ✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion)
 
-**Next:** FLOW-3A (Flow Mode redesign) → FLOW-3B (Flow Mode polish) → Phase 4
-
----
-
-## Brand
-
-- **Primary Orange**: #D04716
-- **Navy**: #050F32
-- **Gray**: #6D6F6D
-- **Off-white**: #F9F9F8
-- **Fonts**: Suisse Works (serif) / Suisse Int'l (sans) → Georgia / Calibri as system equivalents
-- **Style**: Bold section titles bottom-left, orange accent lines, clean white content areas
-                                      
+**Next:** FLOW-3A (Flow Mode redesign) → FLOW-3B (

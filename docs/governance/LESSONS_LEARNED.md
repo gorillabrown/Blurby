@@ -667,20 +667,4 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 
 **Guardrail:**
 - PR-112: Grep for `.catch(() => {})`, `.catch(() => { })`, `.catch(()=>{})`, and bare `catch { }` before every sprint. Zero tolerance in new code.
-- PR-113: Remaining instances in cloud storage cleanup are explicitly acceptable (file may already be gone). Document the rationale inline when a bare catch is intentional.
-
----
-
-### [2026-04-01] LL-067: Infinite Scroll Is Fundamentally Incompatible with Pagination
-
-**Area:** architecture, reader, flow mode
-**Status:** active
-**Priority:** high
-
-**Context:** FLOW-3A reverses LL-013 ("Flow Mode Belongs in Page View"). The original decision was correct for the word-highlight cursor that walks through paginated text. But the Phase 3 redesign requires infinite scroll with a shrinking underline cursor pacing through continuously flowing text — this is fundamentally incompatible with CSS multi-column pagination. Attempting to shoehorn infinite scroll into a paginated container would require fighting both foliate-js and the browser's column layout engine.
-
-**Resolution:** Flow Mode now gets its own scroll-based rendering path. FoliatePageView toggles `flow="scrolled"` (foliate-js native) when `flowMode=true`. A new imperative class `FlowScrollEngine` handles cursor animation, scroll positioning, and line mapping. Page Mode stays paginated. The modes are cleanly separated.
-
-**Guardrail:**
-- PR-114: When a mode requires fundamentally different layout (scroll vs paginated), give it its own rendering path. Don't force one layout paradigm into another.
-- PR-115: LL-013's guardrail ("sub-modes render within parent view") still applies to modes that share layout (e.g., Focus within Page). Only override when the layout model is incompatible.
+- PR-113: Remaining instances in cloud storage cleanup are explicitly acceptable (file may already be gone

@@ -4721,38 +4721,3 @@ button:focus-visible {
   justify-content: flex-end;
   gap: 8px;
 }
-
-/* ── Flow Scroll Mode (FLOW-3A) ────────────────────────────────────────── */
-
-/* Full-viewport scroll container for Flow Mode infinite scroll */
-.flow-scroll-container {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  position: relative;
-}
-
-/* Shrinking underline cursor — paces the reader line-by-line */
-.flow-shrink-cursor {
-  position: absolute;
-  height: 3px;
-  background: var(--accent);
-  pointer-events: none;
-  z-index: 10;
-  border-radius: 1.5px;
-  will-change: width, transform;
-}
-
-/* E-ink overrides: thicker cursor, no smooth scroll */
-[data-theme="eink"] .flow-scroll-container {
-  scroll-behavior: auto;
-}
-
-[data-theme="eink"] .flow-shrink-cursor {
-  height: 4px;
-  border-radius: 2px;
-}
-
-/* Dark theme: cursor already uses var(--accent) — no override needed */
-/* WCAG: --accent against all theme backgrounds meets 4.5:1 contrast ratio */

@@ -608,35 +608,4 @@ export function useLibraryKeyboard(
   };
 }
 
-// ── useSmartImport (unchanged) ────────────────────────────────────────────
-
-export function useSmartImport(view: string, onImport: (content: string, isUrl: boolean) => void) {
-  const stateRef = useRef({ view, onImport });
-  stateRef.current = { view, onImport };
-
-  useEffect(() => {
-    const handler = async (e: KeyboardEvent) => {
-      if (!((e.altKey || e.metaKey) && e.code === "KeyV")) return;
-      const s = stateRef.current;
-      if (s.view !== "library") return;
-      e.preventDefault();
-
-      let text = "";
-      try {
-        text = await navigator.clipboard.readText();
-      } catch {
-        text = window.getSelection()?.toString() || "";
-      }
-      text = text.trim();
-      if (!text) {
-        text = window.getSelection()?.toString().trim() || "";
-      }
-      if (!text) return;
-
-      const isUrl = URL_REGEX.test(text);
-      s.onImport(text, isUrl);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
-}
+// ── useSmartImport (unchanged) ────────────────────────────────�
