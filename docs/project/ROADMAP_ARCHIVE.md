@@ -6,6 +6,44 @@
 
 ---
 
+## FLOW-3A [v1.6.0]: Flow Mode Infinite Scroll ✅ COMPLETED (2026-04-01)
+
+**Version:** v1.6.0
+**Branch:** `sprint/flow-3a-redesign`
+**Tier:** Full (new feature + architecture change)
+**Baseline:** v1.5.1, 897 tests / 46 files
+**Result:** APPROVED — all 12 SUCCESS CRITERIA met. 35 new tests (932 total, 47 files). Build passes.
+
+**Goal:** Replace paginated cursor-on-pages Flow Mode with infinite-scroll reading. Text flows continuously, scrolls upward at WPM speed through a reading zone (upper third of viewport). Shrinking underline cursor paces the reader line-by-line. Works on foliate-rendered EPUBs via `flow="scrolled"`.
+
+**Architecture decision:** Reverses LL-013 — Flow Mode gets its own scroll-based rendering path (see LL-067). Page Mode stays paginated. FlowScrollEngine (imperative class per LL-014) replaces FlowCursorController.
+
+**Key deliverables:**
+- `src/utils/FlowScrollEngine.ts` — 339-line imperative class (line map, shrinking cursor, auto-scroll, pause/resume, manual scroll detection)
+- `src/components/FlowScrollView.tsx` — Non-EPUB fallback (all docs are EPUB since EPUB-2B)
+- `src/components/FoliatePageView.tsx` — `flowMode` prop toggles `flow="scrolled"`/`"paginated"`, hides pagination, exposes scroll container
+- `src/components/ReaderContainer.tsx` — FlowScrollEngine wiring, cursor in JSX, mode routing
+- `src/hooks/useKeyboardShortcuts.ts` — Flow keyboard: ↑/↓ lines, Shift+↑/↓ paragraphs, ←/→ WPM
+- `src/constants.ts` — FLOW_READING_ZONE_POSITION (0.25), FLOW_CURSOR_HEIGHT_PX (3), FLOW_CURSOR_EINK_HEIGHT_PX (4), FLOW_SCROLL_RESUME_DELAY_MS (2000), FLOW_LINE_ADVANCE_BUFFER_MS (50)
+- `src/styles/global.css` — .flow-scroll-container, .flow-shrink-cursor, e-ink overrides
+- `tests/flow-scroll-engine.test.js` — 35 tests
+
+**SUCCESS CRITERIA (all 12 met):**
+1. Infinite scroll renders (no page breaks)
+2. Auto-scroll at WPM (active line at ~25% viewport)
+3. Shrinking underline cursor (var(--accent), CSS transition)
+4. Reading zone (25% from top)
+5. EPUB foliate integration (flow="scrolled" toggle)
+6. Keyboard nav parity (↑/↓/Shift+↑/↓/←/→/Space/Escape)
+7. Pause/resume (Space + manual scroll 2s delay)
+8. Position preservation (Page↔Flow)
+9. Word index tracking
+10. Tests pass (35 new, 932 total)
+11. No regressions (897 existing pass)
+12. Theming (var(--accent), e-ink, WCAG AA)
+
+---
+
 ## EPUB-2B [v1.5.1]: Pipeline Completion — URL→EPUB, Legacy Removal
 
 **Completed:** 2026-04-01 | **Branch:** `sprint/epub-2b-pipeline` | **Tier:** Full

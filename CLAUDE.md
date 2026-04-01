@@ -311,7 +311,8 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 3: Flow Mode Redesign** — infinite scroll, reading zone, WPM timer cursor (FLOW-3A + FLOW-3B)
+- **Phase 3: Flow Mode Polish** — narration sync in scroll view, scroll performance optimization, edge cases (FLOW-3B)
+- **Phase 4: Blurby Readings** — reading queue, library cards, metadata (READINGS-4A)
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -319,9 +320,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through EPUB-2B complete (v1.5.1). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through FLOW-3A complete (v1.6.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ AUDIT-FIX-1A–1F (stabilization) → ✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion)
+✅ AUDIT-FIX-1A–1F (stabilization) → ✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll)
 
-**Next:** FLOW-3A (Flow Mode redesign) → FLOW-3B (
+**Next:** FLOW-3B (Flow Mode polish) → Phase 4 (

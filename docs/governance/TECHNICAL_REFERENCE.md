@@ -288,14 +288,19 @@ RSVP (Rapid Serial Visual Presentation). Displays one word at a time centered on
 - Rhythm pauses calculated by `src/utils/rhythm.ts` based on punctuation, paragraph breaks, numbers, and word length
 - Visual rendering (centered word, ORP highlight, focus marks) handled by `ReaderView.tsx`
 
-### Flow Mode (`src/modes/FlowMode.ts`)
+### Flow Mode (`src/modes/FlowMode.ts` + `src/utils/FlowScrollEngine.ts`)
 
-Sliding cursor underline across paginated text at WPM speed.
+Infinite-scroll reading with a shrinking underline cursor pacing the reader line-by-line.
 
-- Same `setTimeout` chain as Focus, but with half-duration rhythm pauses (visual-only)
-- Visual cursor rendering handled by `FlowCursorController` (non-EPUB) or foliate overlay (EPUB)
-- Operates on paginated word sets (never renders full document to DOM)
-- Auto-flips pages when the cursor reaches page boundary
+- **Architecture (FLOW-3A):** Timing engine (`FlowMode.ts`) drives word advancement via `setTimeout` chain with half-duration rhythm pauses. Visual rendering handled by `FlowScrollEngine` — an imperative TypeScript class (per LL-014) that owns the scroll container, cursor DOM element, animation timers, and line map.
+- **Rendering path:** FoliatePageView switches to `flow="scrolled"` (foliate-js native scrolled mode) when `flowMode=true`. All documents are EPUB (since EPUB-2B), so FlowScrollEngine always operates on foliate's scrollable container. `FlowScrollView.tsx` exists as a non-EPUB fallback but is effectively dead code.
+- **Shrinking underline cursor:** A `var(--accent)` underline spans the full width of the active line, then contracts from left-to-right via CSS `transition: width Xms linear` (duration derived from WPM and word count per line). When width reaches 0, the next line's underline appears at full width. Forced reflow (`offsetWidth`) used between `transition:none` and the new transition (per LL-015).
+- **Reading zone:** Active line auto-scrolled to ~25% from top of viewport (`FLOW_READING_ZONE_POSITION`). Upcoming text visible below, already-read text scrolls off top. E-ink mode uses jump-scroll instead of smooth scroll.
+- **Line map:** `buildLineMap()` scans all `[data-word-index]` spans in the scroll container, groups them into lines by vertical position (y-coordinate threshold = 0.5 * element height).
+- **Pause/resume:** Space pauses cursor animation (freezes current width via `getComputedStyle`). Mouse wheel triggers manual scroll pause with 2s auto-resume delay (`FLOW_SCROLL_RESUME_DELAY_MS`).
+- **Keyboard:** ↑/↓ = line jump, Shift+↑/↓ = paragraph jump, ←/→ = WPM adjust (±25), Space = pause/resume, Escape = exit.
+- **Constants:** `FLOW_READING_ZONE_POSITION` (0.25), `FLOW_CURSOR_HEIGHT_PX` (3), `FLOW_CURSOR_EINK_HEIGHT_PX` (4), `FLOW_SCROLL_RESUME_DELAY_MS` (2000), `FLOW_LINE_ADVANCE_BUFFER_MS` (50).
+- **Reverses LL-013** ("Flow belongs in Page View") — see LL-067. Infinite scroll is fundamentally incompatible with CSS multi-column pagination.
 
 ### Narrate Mode (`src/modes/NarrateMode.ts`)
 

@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-01 — Post-EPUB-2B. 897 tests, 46 files. v1.5.1.
+**Last updated**: 2026-04-01 — Post-FLOW-3A. 932 tests, 47 files. v1.6.0.
 **Current branch**: `main`
-**Current state**: Phase 2 complete. EPUB-2A (content fidelity) + EPUB-2B (pipeline completion) done. Phase 3 next (Flow Mode redesign).
+**Current state**: FLOW-3A complete (infinite scroll). Phase 3 in progress — FLOW-3B next (polish).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -24,7 +24,7 @@ EPUB Content Fidelity     Test Coverage
 (✅ EPUB-2A + EPUB-2B)   (parallel, non-blocking)
     │
     ▼
-Phase 3: Flow Mode Redesign
+Phase 3: Flow Mode Redesign (✅ FLOW-3A done)
     │
     ▼
 Phase 4: Blurby Readings
@@ -82,59 +82,9 @@ Phase 7: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint FLOW-3A: Flow Mode Infinite Scroll
+### Sprint FLOW-3A: Flow Mode Infinite Scroll ✅ COMPLETED (v1.6.0, 2026-04-01)
 
-**Version:** v1.6.0
-**Branch:** `sprint/flow-3a-redesign`
-**Tier:** Full (new feature + architecture change)
-**Baseline:** v1.5.1, 897 tests / 46 files
-
-#### WHERE (read in order before coding)
-
-1. `docs/governance/LESSONS_LEARNED.md` — LL-013 (Flow in Page View), LL-014 (imperative animation), LL-015 (forced reflow), LL-016 (state batching)
-2. `src/modes/FlowMode.ts` — Current timing engine (setTimeout chain, rhythm pauses)
-3. `src/utils/FlowCursorController.ts` — Current cursor renderer (line map, CSS transitions, page turn)
-4. `src/components/FoliatePageView.tsx` — Line ~480: `flow="paginated"` attribute, section-load hooks, style injection
-5. `src/components/ScrollReaderView.tsx` — Existing scroll-based reader (reference for scroll container patterns)
-6. `src/components/ReaderContainer.tsx` — Mode switching logic, reader view selection
-7. `src/hooks/useReaderMode.ts` — Mode lifecycle (start/stop/pause/resume)
-8. `src/hooks/useKeyboardShortcuts.ts` — Flow-mode keyboard bindings
-9. `src/utils/constants.ts` — Flow-related constants
-10. `src/styles/global.css` — Flow cursor CSS classes
-
-#### Tasks
-
-| # | Agent | Task | Model |
-|---|-------|------|-------|
-| 1 | renderer-fixer | **FlowScrollEngine class** — New imperative class (`src/utils/FlowScrollEngine.ts`) replacing FlowCursorController. Attaches to foliate's scrolled-mode container (all docs are EPUB post-EPUB-2B). Owns cursor DOM element, animation timers, and line map. Public API: `start(container, wordIndex, wpm)`, `stop()`, `pause()`, `resume()`, `setWpm(n)`, `jumpToWord(n)`, `jumpToLine(direction)`, `jumpToParagraph(direction)`, `getState()`, `destroy()`. Internal: `buildLineMap()` scans `[data-word-index]` spans to compute line positions. `animateLine()` renders the shrinking underline via CSS transition (`width` from 100% to 0 over line-duration ms). `advanceLine()` moves to next line, resets cursor. `scrollToLine(lineIdx)` smooth-scrolls the container so the active line sits at ~25% viewport height (reading zone). `requestAnimationFrame` loop for scroll synchronization. **Note:** No separate FlowScrollView component — since EPUB-2B, all documents are EPUB, so FlowScrollEngine operates exclusively on foliate's `flow="scrolled"` container. | opus |
-| 2 | renderer-fixer | **FoliatePageView flow integration** — Add `flowMode: boolean` prop to `FoliatePageView`. When `flowMode=true`: set `flow="scrolled"` (line ~480), disable pagination controls, expose the scrollable container ref to FlowScrollEngine. FlowScrollEngine attaches to foliate's scroll container and overlays the shrinking cursor. Word position mapping uses existing `[data-word-index]` spans injected by `onSectionLoad`. Section boundaries: hook foliate's `relocate` event to detect when scroll crosses into a new EPUB section and re-build line map. When `flowMode=false` (or on mode exit): restore `flow="paginated"`, re-enable pagination. | opus |
-| 3 | renderer-fixer | **ReaderContainer mode routing** — Update `ReaderContainer.tsx` to pass `flowMode={true}` to FoliatePageView when Flow Mode is active. Page Mode, Focus Mode, and Narrate Mode continue with `flow="paginated"` (unchanged). Mode switch from Flow → Page must restore paginated layout and correct page position. | sonnet |
-| 4 | renderer-fixer | **FlowMode.ts update** — Adapt the timing engine to work with FlowScrollEngine instead of FlowCursorController. The setTimeout chain still drives word advancement and rhythm pauses. New: `onLineComplete` callback triggers FlowScrollEngine's `advanceLine()`. `onWordAdvance` now also updates scroll position (FlowScrollEngine auto-scrolls to keep active line in reading zone). Remove page-turn logic (no pages in infinite scroll). Add `updateWords()` for dynamic word loading (EPUB section boundaries). | sonnet |
-| 5 | renderer-fixer | **Keyboard navigation** — Update `useKeyboardShortcuts.ts` for Flow Mode scroll context. ↑/↓ = jump to prev/next line (FlowScrollEngine.jumpToLine). Shift+↑/↓ = jump to prev/next paragraph (FlowScrollEngine.jumpToParagraph, using paragraphBreaks set). ←/→ = coarse WPM adjust (±25). Space = pause/resume. Escape = exit Flow Mode. Shift+←/→ = jump to paragraph boundaries (BUG-069). Mouse scroll wheel = manual scroll override that pauses auto-scroll, resumes after 2s idle (BUG-070 partial). | sonnet |
-| 6 | renderer-fixer | **CSS + theming** — New CSS classes in `global.css`: `.flow-scroll-container` (full viewport height, `overflow-y: auto`, smooth scroll behavior), `.flow-reading-zone` (visual indicator — subtle gradient or line at ~25% height, optional), `.flow-shrink-cursor` (position absolute, height 3px, background `var(--accent)`, transition `width Xms linear`), `.flow-shrink-cursor--reset` (transition: none for instant reset). E-ink mode: thicker cursor (4px), no smooth scroll (jump-scroll instead). Dark theme: cursor uses `var(--accent)` (already theme-aware). WCAG: cursor contrast ratio ≥ 4.5:1 against all theme backgrounds. | sonnet |
-| 7 | renderer-fixer | **Constants extraction** — Add to `src/utils/constants.ts`: `FLOW_READING_ZONE_POSITION = 0.25` (fraction of viewport height for active line), `FLOW_CURSOR_HEIGHT = 3` (px), `FLOW_CURSOR_EINK_HEIGHT = 4` (px), `FLOW_SCROLL_RESUME_DELAY = 2000` (ms after manual scroll to resume auto-scroll), `FLOW_LINE_ADVANCE_BUFFER = 50` (ms pause between lines for eye movement). Remove `FLOW_PAGE_TURN_PAUSE_MS` (no page turns in new model). | haiku |
-| 8 | test-runner | **Tests** — New test file `tests/flow-scroll-engine.test.js`. Unit tests for FlowScrollEngine: line map building, cursor position calculation, WPM-to-scroll-speed conversion, line advancement, paragraph jumping, reading zone positioning. Integration tests: mode switch Page→Flow→Page preserves position, EPUB flow="scrolled" attribute toggle, keyboard nav in flow context, pause/resume state machine, word index tracking across line boundaries. Target: ≥20 new tests. Run `npm test` + `npm run build`. | haiku |
-| 9 | spec-compliance-reviewer | **Spec compliance review** — Verify all 12 SUCCESS CRITERIA. | sonnet |
-| 10 | doc-keeper | **Documentation** — Update CLAUDE.md (v1.6.0, test count, architecture — FlowScrollEngine replaces FlowCursorController, foliate-only Flow rendering, LL-013 reversal note), SPRINT_QUEUE.md (remove FLOW-3A, add to completed), ROADMAP.md (mark FLOW-3A complete), LESSONS_LEARNED.md (new entries for any discoveries), TECHNICAL_REFERENCE.md (Flow Mode architecture section rewrite), BUG_REPORT.md (BUG-069 resolved, BUG-070 partial). | sonnet |
-
-#### SUCCESS CRITERIA
-
-1. **Infinite scroll renders** — Flow Mode displays all document text in a continuous scrollable container (no page breaks, no CSS columns). Non-EPUB and EPUB both render continuously.
-2. **Auto-scroll at WPM** — Container scrolls upward automatically so the active line stays at ~25% viewport height. Scroll speed derived from WPM setting. Changing WPM immediately adjusts scroll speed.
-3. **Shrinking underline cursor** — `var(--accent)` underline spans full line width, contracts left-to-right at WPM-derived speed. When width reaches 0, next line's underline appears at full width. Transition is smooth (CSS transition on `width`).
-4. **Reading zone** — Active line consistently positioned at ~25% from top of viewport (upper third). Upcoming text visible below. Already-read text scrolls off top.
-5. **EPUB foliate integration** — `FoliatePageView` uses `flow="scrolled"` when Flow Mode is active. FlowScrollEngine attaches to foliate's scroll container. Cursor overlay renders correctly over foliate content. Switching back to Page Mode restores `flow="paginated"`.
-6. **Keyboard nav parity** — ↑/↓ = line jump, Shift+↑/↓ = paragraph jump (BUG-069), ←/→ = WPM adjust, Space = pause/resume, Escape = exit. All work in both non-EPUB and EPUB.
-7. **Pause/resume** — Space pauses auto-scroll and cursor animation. Space again resumes from exact position. Manual scroll (mouse wheel) pauses auto-scroll, resumes after 2s idle.
-8. **Position preservation** — Switching Page→Flow→Page preserves reading position (word index or CFI for EPUBs). Exiting Flow Mode returns to the correct page.
-9. **Word index tracking** — `FlowMode.ts` wordIndex stays accurate throughout scroll. `onWordAdvance` fires for each word at correct WPM timing. Progress bar in bottom bar reflects true position.
-10. **Tests pass** — ≥20 new tests in `tests/flow-scroll-engine.test.js`. `npm test` passes (≥917 total). `npm run build` succeeds.
-11. **No regressions** — Page Mode, Focus Mode, and Narrate Mode unaffected. Existing keyboard shortcuts in non-Flow modes unchanged.
-12. **Theming** — Cursor uses `var(--accent)`. E-ink mode uses thicker cursor + jump-scroll. Dark/light themes render correctly. WCAG 2.1 AA contrast met.
-
-#### DONE WHEN
-
-All 12 SUCCESS CRITERIA pass spec-compliance review. `npm test` ≥ 917. `npm run build` PASS. No regressions in Page/Focus/Narrate modes.
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. All 12 SUCCESS CRITERIA met. 35 new tests (932 total, 47 files). FlowScrollEngine replaces FlowCursorController. LL-013 reversed (see LL-067).
 
 ---
 
@@ -155,6 +105,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| FLOW-3A | v1.6.0 | ✅ DONE | Flow Mode infinite scroll. FlowScrollEngine, shrinking underline cursor, reading zone. 35 new tests. |
 | EPUB-2B | v1.5.1 | ✅ DONE | URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path. 16 new tests. |
 | EPUB-2A | v1.5.0 | ✅ DONE | Content fidelity — formatting, images, DOCX support. 18 new tests. |
 | Phase 1 (AUDIT-FIX 1A-1F) | v1.4.9–v1.4.14 | ✅ DONE | 42 audit findings addressed. 7 CRITICAL, 8+ MAJOR, 6 MODERATE fixed. 9 MODERATE deferred. |
@@ -172,8 +123,8 @@ Items migrated from BUG_REPORT.md — feature requests, enhancements, and archit
 ### Phase 3: Flow Mode Redesign
 | ID | Feature | Description |
 |----|---------|-------------|
-| BUG-069 | Paragraph jump shortcuts | Shift+Left/Right jumps to paragraph boundaries |
-| BUG-070 | Scroll wheel word advance | Mouse wheel = word advance in reading modes |
+| ~~BUG-069~~ | ~~Paragraph jump shortcuts~~ | ✅ RESOLVED (FLOW-3A) — Shift+↑/↓ jumps paragraphs in Flow Mode |
+| BUG-070 | Scroll wheel word advance | Partially resolved (FLOW-3A) — mouse wheel pauses auto-scroll, resumes after 2s. Full word-advance deferred. |
 
 ### Phase 4: Blurby Readings
 | ID | Feature | Description |
