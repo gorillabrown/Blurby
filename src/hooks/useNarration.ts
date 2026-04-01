@@ -283,7 +283,7 @@ export default function useNarration() {
   /** Dispatch to the correct engine's chunk speaker */
   const speakNextChunk = useCallback(() => {
     const s = stateRef.current;
-    console.debug("[narrate] chunk — engine:", s.engine, "kokoro:", s.kokoroReady, "status:", s.status, "cursor:", s.cursorWordIndex);
+    if (import.meta.env.DEV) console.debug("[narrate] chunk — engine:", s.engine, "kokoro:", s.kokoroReady, "status:", s.status, "cursor:", s.cursorWordIndex);
     if (s.engine === "kokoro" && s.kokoroReady) {
       speakNextChunkKokoro();
     } else {
@@ -349,7 +349,7 @@ export default function useNarration() {
       chunkStart: startWordIndex,
       chunkWords: [],
     };
-    console.debug("[narrate] cursor-driven — words:", words.length, "start:", startWordIndex, "speed:", newSpeed, "engine:", stateRef.current.engine, "kokoro:", stateRef.current.kokoroReady);
+    if (import.meta.env.DEV) console.debug("[narrate] cursor-driven — words:", words.length, "start:", startWordIndex, "speed:", newSpeed, "engine:", stateRef.current.engine, "kokoro:", stateRef.current.kokoroReady);
 
     speakNextChunk();
   }, [speakNextChunk, webStrategy, kokoroStrategy]);

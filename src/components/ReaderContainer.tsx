@@ -393,7 +393,7 @@ export default function ReaderContainer({
         narration.updateWords(bookWords.words, globalIdx);
       }
 
-      console.debug(`[HOTFIX-6] main-process extraction complete: ${bookWords.totalWords} words, ${bookWords.sections.length} sections`);
+      if (import.meta.env.DEV) console.debug(`[HOTFIX-6] main-process extraction complete: ${bookWords.totalWords} words, ${bookWords.sections.length} sections`);
     }).catch((err) => {
       console.warn("[HOTFIX-6] main-process extraction failed:", err);
     });

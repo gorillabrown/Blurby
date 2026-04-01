@@ -51,7 +51,7 @@ export class NarrateMode implements ReadingMode {
   }
 
   start(wordIndex: number): void {
-    console.debug("[NarrateMode] start word:", wordIndex, "/", this.config.words.length, "rate:", this.ttsRate);
+    if (import.meta.env.DEV) console.debug("[NarrateMode] start word:", wordIndex, "/", this.config.words.length, "rate:", this.ttsRate);
     this.currentWord = wordIndex;
     this.playing = true;
 

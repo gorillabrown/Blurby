@@ -165,7 +165,7 @@ export function useReaderMode({
 
   // ── Start Narration ────────────────────────────────────────────────
   const startNarration = useCallback(() => {
-    console.debug("[narrate] start — foliate:", useFoliate);
+    if (import.meta.env.DEV) console.debug("[narrate] start — foliate:", useFoliate);
     narration.stop();
     stopAllModes();
     hasEngagedRef.current = true;
@@ -177,14 +177,14 @@ export function useReaderMode({
     }
     if (useFoliate) extractFoliateWords();
     let effectiveWords = getEffectiveWords();
-    console.debug("[narrate] words:", effectiveWords.length, "foliate API:", !!foliateApiRef.current);
+    if (import.meta.env.DEV) console.debug("[narrate] words:", effectiveWords.length, "foliate API:", !!foliateApiRef.current);
     if (useFoliate && effectiveWords.length === 0 && foliateApiRef.current) {
-      console.debug("[narrate] no words — page turn + retry");
+      if (import.meta.env.DEV) console.debug("[narrate] no words — page turn + retry");
       foliateApiRef.current.next();
       setTimeout(() => {
         extractFoliateWords();
         const words = getEffectiveWords();
-        console.debug("[narrate] retry — words:", words.length);
+        if (import.meta.env.DEV) console.debug("[narrate] retry — words:", words.length);
         if (words.length > 0) startNarration();
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
@@ -196,7 +196,7 @@ export function useReaderMode({
     }
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
     const pBreaks = getEffectiveParagraphBreaks();
-    console.debug("[narrate] launching at word", startIdx, "/", effectiveWords.length, "pBreaks:", pBreaks.size);
+    if (import.meta.env.DEV) console.debug("[narrate] launching at word", startIdx, "/", effectiveWords.length, "pBreaks:", pBreaks.size);
     // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
     modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
   }, [stopAllModes, wpm, setWpm, narration, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);

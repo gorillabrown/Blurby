@@ -62,7 +62,7 @@ export function playBuffer(
   stop(); // cancel any current playback
 
   const ctx = getAudioContext();
-  console.debug("[audio] play — samples:", pcmData?.length, "@", sampleRate, "Hz,", durationMs, "ms,", wordCount, "words, ctx:", ctx.state);
+  if (import.meta.env.DEV) console.debug("[audio] play — samples:", pcmData?.length, "@", sampleRate, "Hz,", durationMs, "ms,", wordCount, "words, ctx:", ctx.state);
   if (ctx.state === "suspended") ctx.resume();
 
   const float32 = pcmData instanceof Float32Array ? pcmData : new Float32Array(pcmData);
