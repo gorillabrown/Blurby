@@ -29,6 +29,12 @@ function getPdfParse() {
   return pdfParse;
 }
 
+let mammoth = null;
+function getMammoth() {
+  if (!mammoth) mammoth = require("mammoth");
+  return mammoth;
+}
+
 // ---------------------------------------------------------------------------
 // XML helpers
 // ---------------------------------------------------------------------------
@@ -45,6 +51,17 @@ function isoNow() {
   return new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
+/** Map file extension to EPUB media type */
+function imageMediaType(ext) {
+  switch (ext.toLowerCase()) {
+    case ".jpg": case ".jpeg": return "image/jpeg";
+    case ".png": return "image/png";
+    case ".gif": return "image/gif";
+    case ".svg": return "image/svg+xml";
+    default: return "image/jpeg";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // EPUB 3.0 packaging helper
 // ---------------------------------------------------------------------------
@@ -59,6 +76,7 @@ function isoNow() {
  * @param {string} [options.language]  - dc:language (default "en")
  * @param {Array<{title: string, xhtml: string}>} options.chapters
  * @param {Buffer} [options.coverImage] - optional JPEG cover
+ * @param {Array<{id: string, filename: string, buffer: Buffer, mediaType: string}>} [options.images] - embedded images
  * @returns {Promise<string>} outputPath
  */
 async function buildEpubZip(options) {
@@ -69,6 +87,7 @@ async function buildEpubZip(options) {
     language = "en",
     chapters,
     coverImage,
+    images = [],
   } = options;
 
   const Zip = getAdmZip();
@@ -122,6 +141,14 @@ async function buildEpubZip(options) {
       `    <item id="cover-image" href="Images/cover.jpg" media-type="image/jpeg" properties="cover-image"/>`
     );
     zip.addFile("OEBPS/Images/cover.jpg", coverImage);
+  }
+
+  // Embedded images
+  for (const img of images) {
+    manifestItems.push(
+      `    <item id="${escapeXml(img.id)}" href="Images/${escapeXml(img.filename)}" media-type="${img.mediaType}"/>`
+    );
+    zip.addFile(`OEBPS/Images/${img.filename}`, img.buffer);
   }
 
   // content.opf
@@ -184,6 +211,18 @@ function wrapChapterXhtml(title, bodyHtml) {
 <head><title>${escapeXml(title)}</title></head>
 <body>
 <h1>${escapeXml(title)}</h1>
+${bodyHtml}
+</body>
+</html>`;
+}
+
+/** Wrap body HTML without an auto-inserted <h1> (used when body already contains headings) */
+function wrapChapterXhtmlRaw(title, bodyHtml) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>${escapeXml(title)}</title></head>
+<body>
 ${bodyHtml}
 </body>
 </html>`;
@@ -270,6 +309,111 @@ function textToHtml(text) {
     .filter(Boolean)
     .map((p) => `<p>${escapeXml(p)}</p>`)
     .join("\n");
+}
+
+/**
+ * Structure-aware plain text → HTML conversion.
+ * Detects: headings (ALL CAPS short lines), bullet lists, numbered lists, paragraphs.
+ * Used for PDF text which has no markup but has typographic patterns.
+ */
+function structuredTextToHtml(text) {
+  const paragraphs = text.split(/\n\s*\n/);
+  let html = "";
+
+  for (const raw of paragraphs) {
+    const p = raw.trim();
+    if (!p) continue;
+
+    const lines = p.split("\n").map(l => l.trim()).filter(Boolean);
+
+    // Single short ALL-CAPS line → heading
+    if (lines.length === 1 && lines[0].length < 80 && /^[A-Z][A-Z\s.,!?:;-]{2,}$/.test(lines[0])) {
+      html += `<h2>${escapeXml(lines[0])}</h2>\n`;
+      continue;
+    }
+
+    // Check if all lines look like bullet list items
+    const bulletLines = lines.filter(l => /^[\u2022\u2023\u25E6•●○◦\-–—*]\s/.test(l));
+    if (bulletLines.length === lines.length && lines.length > 1) {
+      html += "<ul>\n";
+      for (const l of lines) {
+        html += `  <li>${escapeXml(l.replace(/^[\u2022\u2023\u25E6•●○◦\-–—*]\s*/, ""))}</li>\n`;
+      }
+      html += "</ul>\n";
+      continue;
+    }
+
+    // Check if all lines look like numbered list items
+    const numLines = lines.filter(l => /^\d+[.)]\s/.test(l));
+    if (numLines.length === lines.length && lines.length > 1) {
+      html += "<ol>\n";
+      for (const l of lines) {
+        html += `  <li>${escapeXml(l.replace(/^\d+[.)]\s*/, ""))}</li>\n`;
+      }
+      html += "</ol>\n";
+      continue;
+    }
+
+    // Regular paragraph
+    html += `<p>${escapeXml(p.replace(/\n/g, " "))}</p>\n`;
+  }
+
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// HTML sanitization helper
+// ---------------------------------------------------------------------------
+
+/** Allowed HTML tags for EPUB XHTML content */
+const ALLOWED_TAGS = new Set([
+  "p", "div", "span", "br", "hr",
+  "h1", "h2", "h3", "h4", "h5", "h6",
+  "strong", "b", "em", "i", "u", "s", "sub", "sup",
+  "ul", "ol", "li", "dl", "dt", "dd",
+  "blockquote", "pre", "code",
+  "table", "thead", "tbody", "tr", "th", "td",
+  "a", "img", "figure", "figcaption",
+  "section", "article",
+]);
+
+/**
+ * Sanitize HTML for EPUB — remove scripts, styles, and non-allowed tags.
+ * Preserves text and structural formatting.
+ * @param {string} html - raw HTML string
+ * @returns {{ html: string, images: Array<{src: string}> }} sanitized HTML + image references
+ */
+function sanitizeHtmlForEpub(html) {
+  const $ = getCheerio().load(html);
+  $("script, style, link, meta, iframe, object, embed, form, input, button, select, textarea").remove();
+
+  // Collect image references
+  const imageRefs = [];
+  $("img").each((_, el) => {
+    const src = $(el).attr("src");
+    if (src) imageRefs.push({ src });
+  });
+
+  // Remove disallowed tags but keep their content
+  $("*").each((_, el) => {
+    const tag = (el.tagName || "").toLowerCase();
+    if (tag && !ALLOWED_TAGS.has(tag) && tag !== "html" && tag !== "head" && tag !== "body" && tag !== "title") {
+      $(el).replaceWith($(el).html() || "");
+    }
+  });
+
+  // Remove all attributes except href (links) and src/alt (images)
+  $("*").each((_, el) => {
+    const attribs = el.attribs || {};
+    const tag = (el.tagName || "").toLowerCase();
+    for (const attr of Object.keys(attribs)) {
+      if (tag === "a" && attr === "href") continue;
+      if (tag === "img" && (attr === "src" || attr === "alt")) continue;
+      $(el).removeAttr(attr);
+    }
+  });
+
+  return { html: $("body").html() || "", images: imageRefs };
 }
 
 // ---------------------------------------------------------------------------
@@ -438,7 +582,7 @@ async function mdToEpub(inputPath, outputPath, meta = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// htmlToEpub
+// htmlToEpub — preserves formatting, extracts images
 // ---------------------------------------------------------------------------
 
 async function htmlToEpub(inputPath, outputPath, meta = {}) {
@@ -452,10 +596,71 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
     path.basename(inputPath, path.extname(inputPath));
   const author = meta.author || "Unknown";
 
-  // Strip unwanted elements
-  $("script, style, nav, header, footer, aside").remove();
+  // Strip unwanted elements but keep formatting
+  $("script, style, nav, header, footer, aside, link, meta, iframe, form").remove();
 
-  // Split at h1/h2 boundaries
+  // Extract and rewrite images
+  const images = [];
+  let imgIdx = 0;
+  $("img").each((_, el) => {
+    const src = $(el).attr("src");
+    if (!src) return;
+
+    // Handle base64 data URIs
+    const dataMatch = src.match(/^data:image\/(jpeg|png|gif|svg\+xml);base64,(.+)$/i);
+    if (dataMatch) {
+      const ext = dataMatch[1] === "svg+xml" ? ".svg" : `.${dataMatch[1]}`;
+      const filename = `img_${imgIdx}${ext}`;
+      const buffer = Buffer.from(dataMatch[2], "base64");
+      images.push({
+        id: `img_${imgIdx}`,
+        filename,
+        buffer,
+        mediaType: imageMediaType(ext),
+      });
+      $(el).attr("src", `../Images/${filename}`);
+      imgIdx++;
+    }
+    // For file:// or relative paths, try to load from disk
+    else if (!src.startsWith("http://") && !src.startsWith("https://")) {
+      try {
+        const imgPath = path.resolve(path.dirname(inputPath), src);
+        const ext = path.extname(imgPath).toLowerCase() || ".jpg";
+        const filename = `img_${imgIdx}${ext}`;
+        // Synchronous read — images are small and this runs in main process during import
+        const buffer = require("fs").readFileSync(imgPath);
+        images.push({
+          id: `img_${imgIdx}`,
+          filename,
+          buffer,
+          mediaType: imageMediaType(ext),
+        });
+        $(el).attr("src", `../Images/${filename}`);
+        imgIdx++;
+      } catch {
+        // Image not found — remove the broken img tag
+        $(el).remove();
+      }
+    } else {
+      // Remote URLs — remove (can't embed without downloading)
+      $(el).remove();
+    }
+  });
+
+  // Remove all non-content attributes except href, src, alt
+  $("*").each((_, el) => {
+    const attribs = el.attribs || {};
+    const tag = (el.tagName || "").toLowerCase();
+    for (const attr of Object.keys(attribs)) {
+      if (tag === "a" && attr === "href") continue;
+      if (tag === "img" && (attr === "src" || attr === "alt")) continue;
+      if (attr === "class" || attr === "id" || attr === "style") {
+        $(el).removeAttr(attr);
+      }
+    }
+  });
+
+  // Split at h1/h2 boundaries — preserving all inner HTML
   const chapters = [];
   const body = $("body");
   const children = body.children().toArray();
@@ -470,7 +675,7 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
       const bodyHtml = currentContent.join("\n");
       chapters.push({
         title: chTitle,
-        xhtml: wrapChapterXhtml(chTitle, bodyHtml),
+        xhtml: wrapChapterXhtmlRaw(chTitle, bodyHtml),
       });
       currentContent = [];
       currentTitle = null;
@@ -490,11 +695,11 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
   if (chapters.length === 0) {
     chapters.push({
       title: title,
-      xhtml: wrapChapterXhtml(title, body.html() || ""),
+      xhtml: wrapChapterXhtmlRaw(title, body.html() || ""),
     });
   }
 
-  await buildEpubZip({ outputPath, title, author, chapters });
+  await buildEpubZip({ outputPath, title, author, chapters, images });
 
   // Validate the generated EPUB
   const validation = await validateEpub(outputPath);
@@ -510,7 +715,7 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// pdfToEpub
+// pdfToEpub — structure-aware extraction
 // ---------------------------------------------------------------------------
 
 async function pdfToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
@@ -540,10 +745,11 @@ async function pdfToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
     throw err;
   }
 
+  // Use structure-aware conversion (detects headings, lists, paragraphs)
   const detected = detectChapters(text);
   const chapters = detected.map((ch) => ({
     title: ch.title,
-    xhtml: wrapChapterXhtml(ch.title, textToHtml(ch.text)),
+    xhtml: wrapChapterXhtml(ch.title, structuredTextToHtml(ch.text)),
   }));
 
   await buildEpubZip({ outputPath, title, author, chapters });
@@ -562,15 +768,22 @@ async function pdfToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
 }
 
 // ---------------------------------------------------------------------------
-// mobiToEpub
+// mobiToEpub — preserves MOBI internal HTML formatting
 // ---------------------------------------------------------------------------
 
 async function mobiToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
-  const { parseMobiContent, parseMobiMetadata, extractMobiCover } =
+  const { parseMobiContent, parseMobiHtml, parseMobiMetadata, extractMobiCover, extractMobiImages } =
     _deps.fileParsers || require("./file-parsers");
 
   const buffer = await fsPromises.readFile(inputPath);
-  const text = parseMobiContent(buffer);
+
+  // Try HTML-aware extraction first (preserves formatting)
+  let htmlContent = null;
+  if (parseMobiHtml) {
+    try { htmlContent = parseMobiHtml(buffer); } catch { /* fallback to text */ }
+  }
+
+  const text = htmlContent || parseMobiContent(buffer);
   if (!text) {
     const err = new Error("This MOBI file could not be read — it may be DRM-protected or corrupted.");
     err.userError = true;
@@ -581,7 +794,7 @@ async function mobiToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
   const title = meta.title || mobiMeta.title || path.basename(inputPath, path.extname(inputPath));
   const author = meta.author || mobiMeta.author || "Unknown";
 
-  // Extract cover image (best-effort, no userDataPath needed -- use temp dir)
+  // Extract cover image (best-effort)
   let coverImage = null;
   try {
     const os = require("os");
@@ -589,22 +802,167 @@ async function mobiToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
     const coverPath = await extractMobiCover(buffer, "temp-cover", tmpDir);
     if (coverPath) {
       coverImage = await fsPromises.readFile(coverPath);
-      // Clean up temp cover
       await fsPromises.unlink(coverPath).catch(() => {});
     }
   } catch {
     // Cover extraction is best-effort
   }
 
-  const detected = detectChapters(text);
-  const chapters = detected.map((ch) => ({
-    title: ch.title,
-    xhtml: wrapChapterXhtml(ch.title, textToHtml(ch.text)),
-  }));
+  // Extract inline images from MOBI records
+  const images = [];
+  if (extractMobiImages) {
+    try {
+      const mobiImages = extractMobiImages(buffer);
+      for (let i = 0; i < mobiImages.length; i++) {
+        const img = mobiImages[i];
+        images.push({
+          id: `mobi_img_${i}`,
+          filename: `mobi_img_${i}${img.ext || ".jpg"}`,
+          buffer: img.buffer,
+          mediaType: imageMediaType(img.ext || ".jpg"),
+        });
+      }
+    } catch { /* image extraction is best-effort */ }
+  }
 
-  await buildEpubZip({ outputPath, title, author, chapters, coverImage });
+  let chapters;
+  if (htmlContent) {
+    // Parse MOBI HTML and sanitize
+    const sanitized = sanitizeHtmlForEpub(htmlContent);
+    const $ = getCheerio().load(sanitized.html);
+
+    // Split on h1/h2 boundaries
+    const chapterList = [];
+    const topLevel = ($("body").length ? $("body") : $.root()).children().toArray();
+    let curTitle = null;
+    let curContent = [];
+
+    function flush() {
+      if (curContent.length > 0) {
+        const t = curTitle || `Chapter ${chapterList.length + 1}`;
+        chapterList.push({ title: t, xhtml: wrapChapterXhtmlRaw(t, curContent.join("\n")) });
+        curContent = [];
+        curTitle = null;
+      }
+    }
+
+    for (const el of topLevel) {
+      const tag = (el.tagName || "").toLowerCase();
+      if (tag === "h1" || tag === "h2") {
+        flush();
+        curTitle = $(el).text().trim();
+      }
+      curContent.push($.html(el));
+    }
+    flush();
+
+    if (chapterList.length === 0) {
+      chapterList.push({ title: title, xhtml: wrapChapterXhtmlRaw(title, sanitized.html) });
+    }
+    chapters = chapterList;
+  } else {
+    // Fallback: plain text with structure detection
+    const detected = detectChapters(text);
+    chapters = detected.map((ch) => ({
+      title: ch.title,
+      xhtml: wrapChapterXhtml(ch.title, structuredTextToHtml(ch.text)),
+    }));
+  }
+
+  await buildEpubZip({ outputPath, title, author, chapters, coverImage, images });
 
   // Validate the generated EPUB
+  const validation = await validateEpub(outputPath);
+
+  return {
+    epubPath: outputPath,
+    title,
+    author,
+    chapterCount: chapters.length,
+    valid: validation.valid,
+    errors: validation.errors,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// docxToEpub — via mammoth → HTML → EPUB
+// ---------------------------------------------------------------------------
+
+async function docxToEpub(inputPath, outputPath, meta = {}) {
+  const mam = getMammoth();
+  const buffer = await fsPromises.readFile(inputPath);
+
+  // Extract images from DOCX via mammoth's image handler
+  const images = [];
+  let imgIdx = 0;
+
+  const result = await mam.convertToHtml(
+    { buffer },
+    {
+      convertImage: mam.images.inline(async (image) => {
+        const imgBuf = await image.read();
+        const ext = image.contentType === "image/png" ? ".png"
+          : image.contentType === "image/gif" ? ".gif"
+          : ".jpg";
+        const filename = `docx_img_${imgIdx}${ext}`;
+        images.push({
+          id: `docx_img_${imgIdx}`,
+          filename,
+          buffer: Buffer.from(imgBuf),
+          mediaType: image.contentType || "image/jpeg",
+        });
+        imgIdx++;
+        return { src: `../Images/${filename}` };
+      }),
+    }
+  );
+
+  const htmlContent = result.value;
+
+  const title =
+    meta.title || path.basename(inputPath, path.extname(inputPath));
+  const author = meta.author || "Unknown";
+
+  // Parse the HTML and split into chapters at h1/h2
+  const $ = getCheerio().load(`<body>${htmlContent}</body>`);
+  const chapters = [];
+  const children = $("body").children().toArray();
+
+  let currentTitle = null;
+  let currentContent = [];
+
+  function flushChapter() {
+    if (currentContent.length > 0) {
+      const chTitle = currentTitle || `Chapter ${chapters.length + 1}`;
+      const bodyHtml = currentContent.join("\n");
+      chapters.push({
+        title: chTitle,
+        xhtml: wrapChapterXhtmlRaw(chTitle, bodyHtml),
+      });
+      currentContent = [];
+      currentTitle = null;
+    }
+  }
+
+  for (const el of children) {
+    const tagName = (el.tagName || "").toLowerCase();
+    if (tagName === "h1" || tagName === "h2") {
+      flushChapter();
+      currentTitle = $(el).text().trim();
+    }
+    currentContent.push($.html(el));
+  }
+  flushChapter();
+
+  if (chapters.length === 0) {
+    chapters.push({
+      title: title,
+      xhtml: wrapChapterXhtmlRaw(title, htmlContent),
+    });
+  }
+
+  await buildEpubZip({ outputPath, title, author, chapters, images });
+
   const validation = await validateEpub(outputPath);
 
   return {
@@ -650,6 +1008,9 @@ async function convertToEpub(inputPath, outputDir, docId, meta = {}) {
     case ".azw3":
     case ".azw":
       return mobiToEpub(inputPath, outputPath, meta);
+
+    case ".docx":
+      return docxToEpub(inputPath, outputPath, meta);
 
     case ".epub": {
       // Already EPUB -- copy to output directory
@@ -758,11 +1119,16 @@ module.exports = {
   htmlToEpub,
   pdfToEpub,
   mobiToEpub,
+  docxToEpub,
   convertToEpub,
   // Exported for testing
   escapeXml,
   detectChapters,
   textToHtml,
+  structuredTextToHtml,
+  sanitizeHtmlForEpub,
   wrapChapterXhtml,
+  wrapChapterXhtmlRaw,
   isChapterHeading,
+  imageMediaType,
 };
