@@ -644,3 +644,21 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 - PR-108: **`git pull origin main` is mandatory at session start.** Step 0 of session bootstrap, before reading CLAUDE.md.
 - PR-109: **Never run `git reset --hard` without first checking `git log --oneline origin/main..HEAD` for unpushed commits.** If unpushed commits exist, push first.
 - Full SOP: `docs/governance/DEVELOPMENT_SYNC.md`.
+
+---
+
+### [2026-04-01] LL-064: onnxruntime-node setImmediate Crashes Worker Threads in Electron
+
+**Area:** TTS, onnxruntime, Electron, worker threads
+**Status:** active
+**Priority:** high
+
+**Context:** onnxruntime-node (v1.21.0) wraps `inferenceSession.run()` and `createInferenceSessionHandler()` in `setImmediate()` inside `backend.js`. When called from a Node.js Worker thread in Electron, the N-API native call executes outside the V8 HandleScope, causing a fatal crash: `Cannot create a handle without a HandleScope`. The crash kills the entire Electron process instantly — no recovery possible.
+
+**Upstream:** microsoft/onnxruntime#20084, microsoft/onnxruntime#13086. Unfixed as of v1.21.0.
+
+**Fix:** Postinstall script (`scripts/patch-onnxruntime.js`) removes all `setImmediate` wrappers from `backend.js` after every `npm install`. Both `run()` and `createInferenceSessionHandler()` are patched to return directly. Safe because: (a) native `run()` is synchronous, (b) calling code already `await`s, (c) blocking a Worker thread is intentional.
+
+**Guardrail:**
+- PR-110: If onnxruntime-node is updated, verify the postinstall patch still applies. The patch logs a WARNING if the file structure changes.
+- PR-111: Never remove the postinstall script without first confirming the upstream issue is fixed in the installed version.

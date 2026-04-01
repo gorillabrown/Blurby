@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -13,7 +13,8 @@
     "package:linux": "electron-builder --linux",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "perf": "vitest run tests/perf-baseline.test.ts"
+    "perf": "vitest run tests/perf-baseline.test.ts",
+    "postinstall": "node scripts/patch-onnxruntime.js"
   },
   "build": {
     "appId": "com.blurby.app",
