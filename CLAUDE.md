@@ -37,11 +37,24 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 Before writing ANY code, you MUST read these files in this order. No exceptions. No shortcuts.
 
 1. **`CLAUDE.md`** (this file) — You're already reading it. Note the Standing Rules below.
-2. **`docs/governance/LESSONS_LEARNED.md`** — Scan for entries tagged with the areas you're about to touch. These are hard-won guardrails. Violating them causes regressions.
-3. **`ROADMAP.md`** — Find the sprint/hotfix section for your current task. Read the full spec including WHERE, Tasks, and SUCCESS CRITERIA.
-4. **Source files listed in the dispatch's WHERE section** — Read them in the listed order before making changes.
+2. **`.claude/agents/blurby-lead.md`** — The orchestrator protocol. Defines the mandatory sprint execution sequence (READ → IMPLEMENT → TEST → VERIFY → DOCUMENT → GIT → REPORT). Follow this sequence exactly.
+3. **`docs/governance/LESSONS_LEARNED.md`** — Scan for entries tagged with the areas you're about to touch. These are hard-won guardrails. Violating them causes regressions.
+4. **`ROADMAP.md`** — Find the sprint/hotfix section for your current task. Read the full spec including WHERE, Tasks, and SUCCESS CRITERIA.
+5. **Source files listed in the dispatch's WHERE section** — Read them in the listed order before making changes.
 
 If your dispatch references a LESSONS_LEARNED entry by number (e.g., "LL-051"), you MUST read that specific entry and follow its guardrail.
+
+#### Agent Definition Files
+
+Agent `.md` files in `.claude/agents/` define the scope, output contract, and strict rules for each agent role. When the sprint task table assigns a step to an agent, read that agent's definition file and follow its protocol.
+
+| File | Agent | Purpose |
+|------|-------|---------|
+| `blurby-lead.md` | Orchestrator | Sprint sequencing, mandatory phase enforcement, session summary |
+| `spec-compliance-reviewer.md` | spec-reviewer | Verify every SUCCESS CRITERIA item; produce APPROVED/REJECTED verdict |
+| `doc-keeper.md` | doc-keeper | Update all 6 governing docs after every sprint |
+| `test-runner.md` | test-runner | Execute tests, categorize failures, report pass/fail |
+| `quality-reviewer.md` | quality-reviewer | Architecture compliance, known-trap detection, code quality |
 
 #### How Dispatches Work
 
@@ -162,6 +175,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 ### Other References
 
 - **Project Constitution**: `docs/project/Blurby_Project_Constitution.md`
+- **Agent Definitions**: `.claude/agents/` (blurby-lead, spec-compliance-reviewer, doc-keeper, test-runner, quality-reviewer)
 - **Roadmap Archive**: `docs/project/ROADMAP_ARCHIVE.md` (completed sprint full specs — reference only)
 - **Development Sync SOP**: `docs/governance/DEVELOPMENT_SYNC.md` (local-first git workflow)
 
@@ -225,12 +239,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.5.0 — Post-EPUB-2A)
+## Current System State (v1.5.1 — Post-EPUB-2B)
 
 ### Codebase (branch: `main`)
 
-- All sprints through EPUB-2A complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A)
-- 881 tests passing across 45 test files
+- All sprints through EPUB-2B complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B)
+- 897 tests passing across 46 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -247,8 +261,8 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **Main process** — modularized with domain-split IPC:
   - `main.js` — orchestrator, app lifecycle, context object
   - `main/ipc/` — 8 domain-specific IPC handler files (replaces monolithic ipc-handlers.js)
-  - `main/epub-converter.js` — universal EPUB pipeline (all formats convert to EPUB on import, preserves formatting + images)
-  - `main/legacy-parsers.js` — retained parsers for non-EPUB formats (PDF, TXT, MD, HTML)
+  - `main/epub-converter.js` — universal EPUB pipeline (all formats convert to EPUB on import, preserves formatting + images). URL articles and Chrome extension articles also convert to EPUB.
+  - `main/legacy-parsers.js` — deprecated text extraction (word count only, not used for rendering)
   - `main/sync-engine.js` — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
   - `main/sync-queue.js` — offline operation queue with compaction and idempotent replay
   - `main/auth.js` — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
@@ -283,18 +297,17 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 45 test files, 881 tests
+  - **Tests** (`tests/`): 46 test files, 897 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
 ### Feature Status
 
-Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics, epoch-guarded gapless playback), universal EPUB pipeline (formatting-preserving conversion for PDF/MOBI/HTML/DOCX with image embedding), library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 881 tests across 45 files.
+Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics, epoch-guarded gapless playback), universal EPUB pipeline (all formats + URL articles + Chrome extension articles → EPUB, single rendering path via FoliatePageView), library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 897 tests across 46 files.
 
 ### What's Next
 
-- **Sprint EPUB-2B: Pipeline Completion** — URL→EPUB, Chrome ext→EPUB, legacy removal (Phase 2 final)
-- **Phase 3: Flow Mode Redesign** — infinite scroll, reading zone, WPM timer cursor
+- **Phase 3: Flow Mode Redesign** — infinite scroll, reading zone, WPM timer cursor (FLOW-3A + FLOW-3B)
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -302,12 +315,12 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through EPUB-2A complete (v1.5.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through EPUB-2B complete (v1.5.1). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ HOTFIX-11 (onnxruntime patch) → ✅ AUDIT-FIX-1A (correctness) → ✅ AUDIT-FIX-1B (lifecycle) → ✅ AUDIT-FIX-1C (races) → ✅ AUDIT-FIX-1D (security) → ✅ AUDIT-FIX-1E (CI) → ✅ AUDIT-FIX-1F (moderate) → ✅ EPUB-2A (content fidelity)
+✅ AUDIT-FIX-1A–1F (stabilization) → ✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion)
 
-**Next:** EPUB-2B (pipeline completion) → Phase 3 (Flow Mode redesign)
+**Next:** FLOW-3A (Flow Mode redesign) → FLOW-3B (Flow Mode polish) → Phase 4
 
 ---
 
@@ -319,3 +332,4 @@ Recent chain:
 - **Off-white**: #F9F9F8
 - **Fonts**: Suisse Works (serif) / Suisse Int'l (sans) → Georgia / Calibri as system equivalents
 - **Style**: Bold section titles bottom-left, orange accent lines, clean white content areas
+                                      

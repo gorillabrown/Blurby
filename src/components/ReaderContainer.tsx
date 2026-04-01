@@ -1013,97 +1013,21 @@ export default function ReaderContainer({
       return foliateView;
     }
 
-    switch (readingMode) {
-      case "flow":
-        // Flow mode (non-EPUB): silent cursor advancement at WPM speed
-        return (
-          <PageReaderView
-            activeDoc={activeDoc}
-            wpm={effectiveWpm}
-            focusTextSize={focusTextSize}
-            settings={pageSettings}
-            highlightedWordIndex={highlightedWordIndex}
-            onHighlightedWordChange={setHighlightedWordIndex}
-            onEnterFocus={handleEnterFocus}
-            onEnterFlow={handleEnterFlow}
-            onExit={(pos) => finishReading(pos)}
-            onToggleFlap={toggleMenuFlap}
-            pageNavRef={pageNavRef}
-            flowNavRef={flowNavRef}
-            flowPlaying={flowPlaying}
-            ttsActive={false}
-          />
-        );
-      case "focus":
-        return (
-          <ReaderView
-            activeDoc={activeDoc}
-            words={words}
-            wordIndex={wordIndex}
-            wpm={effectiveWpm}
-            focusTextSize={focusTextSize}
-            playing={readingMode === "focus"}
-            escPending={escPending}
-            isMac={platform === "darwin"}
-            settings={rsvpSettings}
-            externalChapters={docChapters.length > 0 ? docChapters : undefined}
-            onWordUpdateRef={onWordUpdateRef}
-            togglePlay={handleTogglePlay}
-            exitReader={handleExitReader}
-            onSetWpm={setWpm}
-            onAdjustFocusTextSize={adjustFocusTextSize}
-            onSwitchToScroll={handleEnterFlow}
-            onJumpToWord={jumpToWord}
-            onToggleFlap={toggleMenuFlap}
-            onPrevChapter={handlePrevChapter}
-            onNextChapter={handleNextChapter}
-            onEinkRefresh={triggerEinkRefresh}
-          />
-        );
-      case "narration":
-        // Narration mode: same PageReaderView layout, TTS drives word highlight
-        return (
-          <PageReaderView
-            activeDoc={activeDoc}
-            wpm={effectiveWpm}
-            focusTextSize={focusTextSize}
-            settings={pageSettings}
-            highlightedWordIndex={highlightedWordIndex}
-            onHighlightedWordChange={handleHighlightedWordChange}
-            onEnterFocus={handleEnterFocus}
-            onEnterFlow={handleEnterFlow}
-            onExit={(pos) => finishReading(pos)}
-            onToggleFlap={toggleMenuFlap}
-            pageNavRef={pageNavRef}
-            flowNavRef={flowNavRef}
-            flowPlaying={false}
-            ttsActive={true}
-            onPageEndWordChange={narration.setPageEndWord}
-            onUserBrowsed={handleUserBrowsed}
-          />
-        );
-      case "page":
-      default:
-        // Non-EPUB page mode (foliate EPUBs handled by top-level check above)
-        return (
-          <PageReaderView
-            activeDoc={activeDoc}
-            wpm={effectiveWpm}
-            focusTextSize={focusTextSize}
-            settings={pageSettings}
-            highlightedWordIndex={highlightedWordIndex}
-            onHighlightedWordChange={setHighlightedWordIndex}
-            onEnterFocus={handleEnterFocus}
-            onEnterFlow={handleEnterFlow}
-            onExit={(pos) => finishReading(pos)}
-            onToggleFlap={toggleMenuFlap}
-            pageNavRef={pageNavRef}
-            flowNavRef={flowNavRef}
-            flowPlaying={false}
-            ttsActive={false}
-          />
-        );
-    }
+    // Non-EPUB documents should not reach here — all docs go through FoliatePageView.
+    // If a document has no EPUB path, show an error message.
+    return (
+      <div className="reader-error" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "1rem", padding: "2rem", textAlign: "center" }}>
+        <p style={{ fontSize: "1.1rem", color: "var(--text-secondary, #888)" }}>
+          This document needs to be re-imported to be read in the current version of Blurby.
+        </p>
+        <button
+          onClick={() => finishReading(0)}
+          style={{ padding: "0.5rem 1.5rem", borderRadius: "6px", border: "1px solid var(--border-color, #444)", background: "var(--bg-secondary, #222)", color: "var(--text-primary, #fff)", cursor: "pointer" }}
+        >
+          Return to Library
+        </button>
+      </div>
+    );
   };
 
   return (

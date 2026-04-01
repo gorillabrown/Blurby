@@ -9,7 +9,7 @@ const fsPromises = require("fs/promises");
 const { net } = require("electron");
 const { countWords } = require("../file-parsers");
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
-        generateArticlePdf, openSiteLogin } = require("../url-extractor");
+        openSiteLogin } = require("../url-extractor");
 const { COVER_CACHE_MAX } = require("../constants");
 
 async function logToFile(message, errorLogPath) {
@@ -59,6 +59,7 @@ function register(ctx) {
 
       // ── Download and validate article cover image ────────────────────────
       let coverPath = null;
+      let coverImageBuffer = null; // Raw JPEG/PNG buffer for EPUB embedding
       if (result.imageUrl) {
         try {
           const imgUrl = result.imageUrl.startsWith("//") ? "https:" + result.imageUrl : result.imageUrl;
@@ -130,6 +131,8 @@ function register(ctx) {
                 await fsPromises.mkdir(coversDir, { recursive: true });
                 coverPath = path.join(coversDir, `${docId}${detectedExt}`);
                 await fsPromises.writeFile(coverPath, imgBuffer);
+                // Keep buffer for EPUB cover embedding (JPEG only; PNG also works with buildEpubZip)
+                coverImageBuffer = imgBuffer;
               } else {
                 console.log("[url] Skipped image smaller than 200x200");
               }
@@ -154,67 +157,43 @@ function register(ctx) {
       ctx.addDocToLibrary(newDoc);
       ctx.saveLibrary();
 
-      // Convert extracted HTML to EPUB
+      // Convert article to EPUB (primary format — no PDF fallback)
       try {
-        const { convertToEpub } = require("../epub-converter");
+        const { htmlToEpub } = require("../epub-converter");
         const { EPUB_CONVERTED_DIR } = require("../constants");
+        const articleHtml = result.contentHtml || result.content;
         const tempHtmlPath = path.join(os.tmpdir(), `blurby-url-${docId}.html`);
         await fsPromises.writeFile(
           tempHtmlPath,
-          `<html><head><title>${result.title}</title></head><body>${result.content}</body></html>`
+          `<html><head><title>${(result.title || "").replace(/</g, "&lt;")}</title></head><body>${articleHtml}</body></html>`,
+          "utf-8"
         );
         const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
-        const convResult = await convertToEpub(tempHtmlPath, convertedDir, docId, {
+        await fsPromises.mkdir(convertedDir, { recursive: true });
+        const epubOutputPath = path.join(convertedDir, `${docId}.epub`);
+        const convResult = await htmlToEpub(tempHtmlPath, epubOutputPath, {
           title: result.title,
-          author: result.author,
+          author: result.author || "Unknown",
+          date: result.publishedDate || undefined,
+          source: url,
+          coverImage: coverImageBuffer || undefined,
         });
         await fsPromises.unlink(tempHtmlPath).catch(() => {});
+
         newDoc.convertedEpubPath = convResult.epubPath;
         newDoc.filepath = convResult.epubPath;
         newDoc.ext = ".epub";
-        if (convResult && !convResult.valid) {
-          newDoc.legacyRenderer = true;
-        }
+        newDoc.originalSourceUrl = url;
+        // Remove inline content — EPUB is the canonical source
+        delete newDoc.content;
+
         const docsAfterConv = ctx.getLibrary();
         ctx.setLibrary(docsAfterConv.map((d) => (d.id === newDoc.id ? newDoc : d)));
         ctx.saveLibrary();
+        ctx.broadcastLibrary();
       } catch (convErr) {
         logToFile(`URL EPUB conversion failed: ${convErr.message}`, ctx.getErrorLogPath());
-        if (!convErr.userError) {
-          // Non-user errors: fall back to legacy text extraction
-          newDoc.legacyRenderer = true;
-        }
-        // Fall back to inline content (existing behavior)
-      }
-
-      // Generate PDF if source folder is set
-      if (settings.sourceFolder) {
-        try {
-          const pdfPath = await generateArticlePdf({
-            title: newDoc.title,
-            author: result.author || null,
-            content: result.content,
-            sourceUrl: url,
-            fetchDate: new Date(),
-            outputDir: settings.sourceFolder,
-            sourceDomain: result.sourceDomain || null,
-            publishedDate: result.publishedDate || null,
-          });
-
-          newDoc.source = "url";
-          newDoc.filepath = pdfPath;
-          newDoc.filename = path.basename(pdfPath);
-          newDoc.ext = ".pdf";
-
-          const docs = ctx.getLibrary();
-          ctx.setLibrary(docs.map((d) => (d.id === newDoc.id ? newDoc : d)));
-          ctx.saveLibrary();
-          ctx.broadcastLibrary();
-        } catch (err) {
-          console.error("PDF generation failed, keeping URL-sourced doc:", err);
-          console.error("PDF generation error stack:", err.stack);
-          logToFile(`PDF generation error for "${newDoc.title}": ${err.message}\n${err.stack}`, ctx.getErrorLogPath());
-        }
+        // Keep inline content as fallback — doc still readable via legacy path
       }
 
       return { doc: newDoc };

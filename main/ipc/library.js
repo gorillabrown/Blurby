@@ -9,7 +9,7 @@ const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover, extractMobiCover,
         parseMobiMetadata, parseCallibreOpf,
         clearChapterCache, epubChapterCache } = require("../file-parsers");
-const { generateArticlePdf } = require("../url-extractor");
+const { htmlToEpub } = require("../epub-converter");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -110,25 +110,45 @@ function register(ctx) {
   });
 
   ipcMain.handle("load-doc-content", async (_, docId) => {
-    const { extractContent: extractLegacyContent } = require("../legacy-parsers");
     const doc = ctx.getDocById(docId);
     if (!doc) return null;
-    if (doc.content) return doc.content;
+
+    // If doc already has an EPUB path, use it
     if (doc.convertedEpubPath) {
-      // EPUB path — renderer loads via foliate directly using read-file-buffer
-      // Return the converted EPUB filepath so FoliatePageView can load it
       return { filepath: doc.convertedEpubPath, ext: ".epub" };
     }
-    if (doc.filepath) {
-      const result = await extractLegacyContent(doc.filepath);
-      // extractLegacyContent returns { userError } for user-facing parse failures
-      if (result && typeof result === "object" && result.userError) {
-        logToFile(`load-doc-content error for doc "${doc.title}" (${doc.filepath}): ${result.userError}`, ctx.getErrorLogPath());
-        return { userError: result.userError };
-      }
-      return result;
+
+    // Native EPUB — return filepath directly
+    if (doc.filepath && doc.ext === ".epub") {
+      return { filepath: doc.filepath, ext: ".epub" };
     }
-    return null;
+
+    // On-demand lazy EPUB conversion for legacy docs with a source file
+    if (doc.filepath && doc.ext !== ".epub") {
+      try {
+        const { convertToEpub } = require("../epub-converter");
+        const { EPUB_CONVERTED_DIR } = require("../constants");
+        const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
+        const convResult = await convertToEpub(doc.filepath, convertedDir, doc.id, {
+          title: doc.title,
+          author: doc.author || "Unknown",
+        });
+        // Update doc record with EPUB path
+        doc.convertedEpubPath = convResult.epubPath;
+        doc.ext = ".epub";
+        if (doc.needsEpubConversion) delete doc.needsEpubConversion;
+        ctx.saveLibrary();
+        return { filepath: convResult.epubPath, ext: ".epub" };
+      } catch (convErr) {
+        logToFile(`load-doc-content EPUB conversion failed for "${doc.title}" (${doc.filepath}): ${convErr.message}`, ctx.getErrorLogPath());
+        return { userError: "This document needs to be re-imported. The original file could not be converted." };
+      }
+    }
+
+    // Inline content (legacy URL-imported docs without files)
+    if (doc.content) return doc.content;
+
+    return { userError: "This document needs to be re-imported." };
   });
 
   // Read raw file buffer — used by foliate-js to load EPUBs in the renderer
@@ -353,34 +373,43 @@ function register(ctx) {
         }
       }
 
-      // Preserve non-folder docs; convert URL docs to PDFs if they have content
+      // Preserve non-folder docs; convert URL docs to EPUB if they have content
       const savedArticlesPath = settings.sourceFolder
         ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
         : null;
       for (const doc of docs) {
-        if (doc.source === "url" && doc.content && settings.sourceFolder) {
+        if (doc.source === "url" && doc.content && !doc.convertedEpubPath) {
           try {
-            const pdfPath = await generateArticlePdf({
+            const os = require("os");
+            const { EPUB_CONVERTED_DIR } = require("../constants");
+            const tempHtmlPath = path.join(os.tmpdir(), `blurby-sync-${doc.id}.html`);
+            const articleHtml = doc.content.split(/\n\n+/).map(p => `<p>${p.trim()}</p>`).join("\n");
+            await fsPromises.writeFile(
+              tempHtmlPath,
+              `<html><head><title>${(doc.title || "").replace(/</g, "&lt;")}</title></head><body>${articleHtml}</body></html>`,
+              "utf-8"
+            );
+            const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
+            await fsPromises.mkdir(convertedDir, { recursive: true });
+            const epubOutputPath = path.join(convertedDir, `${doc.id}.epub`);
+            const convResult = await htmlToEpub(tempHtmlPath, epubOutputPath, {
               title: doc.title,
-              author: doc.authorFull || doc.author || null,
-              content: doc.content,
-              sourceUrl: doc.sourceUrl || "",
-              fetchDate: new Date(doc.created || Date.now()),
-              outputDir: settings.sourceFolder,
-              sourceDomain: doc.sourceDomain || null,
-              publishedDate: doc.publishedDate || null,
+              author: doc.authorFull || doc.author || "Unknown",
+              source: doc.sourceUrl || undefined,
+              date: doc.publishedDate || undefined,
             });
+            await fsPromises.unlink(tempHtmlPath).catch(() => {});
             synced.push({
               ...doc,
               source: "url",
-              filepath: pdfPath,
-              filename: path.basename(pdfPath),
-              ext: ".pdf",
+              filepath: convResult.epubPath,
+              convertedEpubPath: convResult.epubPath,
+              ext: ".epub",
               content: undefined,
             });
-            console.log(`Converted URL doc to PDF: ${doc.title}`);
+            console.log(`Converted URL doc to EPUB: ${doc.title}`);
           } catch (err) {
-            console.error(`Failed to convert URL doc "${doc.title}" to PDF:`, err.message);
+            console.error(`Failed to convert URL doc "${doc.title}" to EPUB:`, err.message);
             synced.push(doc);
           }
         } else if (doc.source !== "folder") {

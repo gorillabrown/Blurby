@@ -527,20 +527,15 @@ All format parsing lives in `main/file-parsers.js` (content extraction) and `mai
 | DOCX | `mammoth` | `docxToEpub` → HTML → EPUB | Bold, italic, headings, lists, images |
 | TXT/MD | Direct file read | `txtToEpub` / `mdToEpub` | Plain text / Markdown formatting |
 
-### Dual Renderer Architecture
+### Single Renderer Architecture (EPUB-2B)
 
-EPUBs are rendered by foliate-js (`FoliatePageView.tsx`) with full formatting. All other formats are converted to EPUB on import via `convertToEpub()` and then rendered through foliate-js. The legacy text renderer (`PageReaderView.tsx`) remains as a fallback for documents that fail conversion.
+All documents render through foliate-js (`FoliatePageView.tsx`). Every format is converted to EPUB on import via `convertToEpub()`. URL-imported articles and Chrome extension articles also produce EPUB (not PDF/TXT). Documents without an EPUB path show a "needs re-import" error. The legacy text rendering fallback has been removed — `legacy-parsers.js` is retained only for word count extraction during import.
 
-A user can opt into the legacy renderer for EPUBs via `BlurbyDoc.legacyRenderer` or `BlurbySettings.useLegacyRenderer`.
-
-### Future: Sprint 27 Vision
-
-Convert ALL formats to EPUB on intake so every document uses the foliate-js rendering path:
-
-- HTML/TXT/MD/DOCX/PDF/MOBI/AZW/FB2/RTF/KFX/PDB/DjVu input
-- Conversion to EPUB on import, stored at `userData/converted/<docId>.epub`
-- Single rendering path via foliate-js
-- Preserves formatting, chapters, metadata, images
+- All formats (HTML/TXT/MD/DOCX/PDF/MOBI/AZW) → EPUB on import
+- URL articles → `extractArticleFromHtml` → `htmlToEpub` (with metadata in OPF)
+- Chrome extension articles → `htmlToEpub` via ws-server
+- Lazy migration: legacy docs get on-demand EPUB conversion via `load-doc-content`
+- Stored at `userData/converted/<docId>.epub`
 
 ### Scanned PDF Detection
 

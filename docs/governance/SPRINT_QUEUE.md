@@ -11,8 +11,8 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 3
-Next sprint: EPUB-2B — Pipeline Completion (URL→EPUB, Legacy Removal)
-Health: GREEN — Phase 2 EPUB Pipeline. EPUB-2A complete.
+Next sprint: FLOW-3A — Flow Mode Redesign (Phase 3)
+Health: GREEN — Phase 2 complete. Phase 3 starting.
 ```
 
 ---
@@ -21,11 +21,11 @@ Health: GREEN — Phase 2 EPUB Pipeline. EPUB-2A complete.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | **EPUB-2B** | v1.5.1 | `sprint/epub-2b-pipeline` | Full | BUG-075, BUG-079 | URL articles → EPUB (not PDF). Chrome ext → EPUB. Legacy migration. Remove text renderer fallback. Single rendering path. ≥10 new tests. Doc-keeper updates all governance docs + Phase 2 exit gate. |
-| 2 | **FLOW-3A** | v1.6.0 | `sprint/flow-3a-redesign` | Full | — | Phase 3: Flow Mode infinite scroll redesign. Reading zone, WPM timer cursor, line transitions. Spec needed. |
-| 3 | **FLOW-3B** | v1.6.1 | `sprint/flow-3b-polish` | Full | — | Phase 3: Flow Mode polish — edge cases, keyboard nav, performance. Spec needed — placeholder for queue depth. |
+| 1 | **FLOW-3A** | v1.6.0 | `sprint/flow-3a-redesign` | Full | — | Phase 3: Flow Mode infinite scroll redesign. Reading zone, WPM timer cursor, line transitions. Spec needed. |
+| 2 | **FLOW-3B** | v1.6.1 | `sprint/flow-3b-polish` | Full | — | Phase 3: Flow Mode polish — edge cases, keyboard nav, performance. Spec needed — placeholder for queue depth. |
+| 3 | **READINGS-4A** | v1.7.0 | `sprint/readings-4a` | Full | — | Phase 4: Blurby Readings — reading queue, library cards, metadata. Spec needed — placeholder for queue depth. |
 
-**Note:** FLOW-3A and FLOW-3B are placeholders to maintain ≥3 queue depth. Full specs to be written after EPUB-2B completes, per ROADMAP_V2.md §Phase 3.
+**Note:** FLOW-3A, FLOW-3B, and READINGS-4A are placeholders to maintain ≥3 queue depth. Full specs to be written per ROADMAP_V2.md.
 
 ---
 
@@ -44,6 +44,7 @@ Health: GREEN — Phase 2 EPUB Pipeline. EPUB-2A complete.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| EPUB-2B | 2026-04-01 | PASS | URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path. 16 new tests. v1.5.1. Phase 2 complete. |
 | EPUB-2A | 2026-04-01 | PASS | Formatting-preserving EPUB conversion, image embedding, DOCX support. 18 new tests. v1.5.0. |
 | AUDIT-FIX-1F | 2026-04-01 | PASS | 6 moderate fixes, 9 deferred. v1.4.14. |
 | AUDIT-FIX-1E | 2026-04-01 | PASS | Test timeout, console.debug guards, npm audit in CI. v1.4.13. |

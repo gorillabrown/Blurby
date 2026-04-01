@@ -4,7 +4,7 @@
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
 const CURRENT_SETTINGS_SCHEMA = 7;
-const CURRENT_LIBRARY_SCHEMA = 5;
+const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
 function countWords(text) {
@@ -163,6 +163,24 @@ const libraryMigrations = [
       if (doc.collection === undefined) doc.collection = null;
     }
     return { schemaVersion: 5, docs };
+  },
+  // v5 → v6: Sprint EPUB-2B — mark legacy docs for EPUB re-conversion
+  // Actual re-conversion happens lazily in load-doc-content (on-demand)
+  // because convertToEpub requires file I/O that can't run synchronously in migration
+  (data) => {
+    const docs = Array.isArray(data) ? data : (data.docs || []);
+    for (const doc of docs) {
+      // Flag docs that need EPUB conversion:
+      // - Has legacyRenderer flag, OR
+      // - Has filepath but no convertedEpubPath and is not a native EPUB
+      if (doc.legacyRenderer) {
+        doc.needsEpubConversion = true;
+        delete doc.legacyRenderer;
+      } else if (doc.filepath && !doc.convertedEpubPath && doc.ext !== ".epub") {
+        doc.needsEpubConversion = true;
+      }
+    }
+    return { schemaVersion: 6, docs };
   },
 ];
 

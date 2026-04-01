@@ -389,6 +389,7 @@ function extractArticleFromHtml(html, url) {
 
   let title = null;
   let content = null;
+  let contentHtml = null; // Cleaned HTML for EPUB conversion
 
   // Provenance accumulators
   let author = null;
@@ -510,7 +511,7 @@ function extractArticleFromHtml(html, url) {
     }
   }
 
-  // 3. Try Readability (also captures byline)
+  // 3. Try Readability (also captures byline + HTML)
   let readabilityByline = null;
   if (!content) {
     // Clone the document since Readability mutates it
@@ -519,16 +520,18 @@ function extractArticleFromHtml(html, url) {
     const article = reader.parse();
     if (article?.textContent?.trim()) {
       content = article.textContent.trim();
+      if (article.content) contentHtml = article.content; // Readability cleaned HTML
       title = title || article.title;
     }
     if (article?.byline) readabilityByline = article.byline;
   } else {
-    // Still want Readability byline even if we got content elsewhere
+    // Still want Readability byline + HTML even if we got content elsewhere
     try {
       const readerDom = new (getJSDOM())(html, { url });
       const reader = new (getReadability())(readerDom.window.document);
       const article = reader.parse();
       if (article?.byline) readabilityByline = article.byline;
+      if (article?.content && !contentHtml) contentHtml = article.content;
     } catch { /* ignore */ }
   }
 
@@ -683,7 +686,12 @@ function extractArticleFromHtml(html, url) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
-  return { title, content, imageUrl, author: author || null, sourceDomain: sourceDomain || null, publishedDate: publishedDate || null };
+  // Build contentHtml fallback: wrap plain text in paragraphs if no Readability HTML
+  if (!contentHtml && content) {
+    contentHtml = content.split(/\n\n+/).map(p => `<p>${p.trim()}</p>`).join("\n");
+  }
+
+  return { title, content, contentHtml: contentHtml || null, imageUrl, author: author || null, sourceDomain: sourceDomain || null, publishedDate: publishedDate || null };
 }
 
 module.exports = {
