@@ -39,9 +39,11 @@ let _dataPath = null;
 function getDataPath() {
   if (!_dataPath) {
     _dataPath = path.join(app.getPath("userData"), "blurby-data");
-    fs.mkdirSync(_dataPath, { recursive: true }); // sync only on first call during startup
   }
   return _dataPath;
+}
+async function ensureDataDir() {
+  await fsPromises.mkdir(getDataPath(), { recursive: true });
 }
 function getSettingsPath() { return path.join(getDataPath(), "settings.json"); }
 function getLibraryPath() { return path.join(getDataPath(), "library.json"); }
@@ -180,6 +182,10 @@ async function loadState() {
   const rawLibrary = await readJSON(getLibraryPath(), []);
   if ((rawLibrary?.schemaVersion || 0) < CURRENT_LIBRARY_SCHEMA) await backupFile(getLibraryPath());
   libraryData = runMigrations(rawLibrary, libraryMigrations, CURRENT_LIBRARY_SCHEMA);
+  if (!Array.isArray(libraryData.docs)) {
+    console.error("[loadState] libraryData.docs is not an array after migration — resetting to empty array");
+    libraryData.docs = [];
+  }
   rebuildLibraryIndex();
   await saveLibraryNow();
 
@@ -257,7 +263,15 @@ async function syncLibraryWithFolder() {
     }
   }
 
-  if (syncCancelled) return;
+  if (syncCancelled) {
+    // Save partial progress so extracted docs aren't lost on cancellation
+    if (synced.length > 0) {
+      setLibrary(synced);
+      await saveLibraryNow();
+      broadcastLibrary();
+    }
+    return;
+  }
 
   const savedArticlesPath = settings.sourceFolder
     ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
@@ -415,6 +429,7 @@ const ipcContext = {
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
+  await ensureDataDir();
   await loadState();
 
   // Sprint 23: Insert sample document on first run

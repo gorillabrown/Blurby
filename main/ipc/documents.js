@@ -21,7 +21,7 @@ function register(ctx) {
       ctx.saveLibrary();
 
       // Enqueue update-progress for sync
-      syncQueue.enqueue("update-progress", { docId, value: position, revision }).catch(() => {});
+      syncQueue.enqueue("update-progress", { docId, value: position, revision }).catch(err => console.error("[sync-queue] update-progress enqueue failed:", err.message));
     }
   });
 
@@ -38,7 +38,7 @@ function register(ctx) {
       const syncQueue = require("../sync-queue");
       const syncStatus = syncEngine.getSyncStatus();
       const revision = syncStatus.revision || 0;
-      syncQueue.enqueue("reset-progress", { docId, value: 0, revision }).catch(() => {});
+      syncQueue.enqueue("reset-progress", { docId, value: 0, revision }).catch(err => console.error("[sync-queue] reset-progress enqueue failed:", err.message));
     }
   });
 
