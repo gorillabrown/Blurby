@@ -146,6 +146,12 @@ export function createAudioScheduler(): AudioScheduler {
           currentWordBoundaries[nextWordBoundaryIdx].time <= now) {
         callbacks.onWordAdvance(currentWordBoundaries[nextWordBoundaryIdx].wordIndex);
         nextWordBoundaryIdx++;
+
+        // Sliding window: prune consumed boundaries to prevent unbounded growth
+        if (nextWordBoundaryIdx >= 100) {
+          currentWordBoundaries = currentWordBoundaries.slice(nextWordBoundaryIdx);
+          nextWordBoundaryIdx = 0;
+        }
       }
 
       // Schedule next tick
@@ -267,8 +273,9 @@ export function createAudioScheduler(): AudioScheduler {
     schedulerEpoch++;
     clearWordTimer();
 
-    // Disconnect then stop all active sources (disconnect first prevents buffer drain overlap)
+    // Null onended, disconnect, then stop all active sources
     for (const s of activeSources) {
+      s.source.onended = null;
       try { s.source.disconnect(); } catch { /* already disconnected */ }
       try { s.source.stop(); } catch { /* already stopped */ }
     }

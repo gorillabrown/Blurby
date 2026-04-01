@@ -11,6 +11,9 @@ let modelReady = false;
 let loadingPromise = null;
 let requestId = 0;
 const pending = new Map(); // id → { resolve, reject }
+let crashCount = 0;
+const MAX_CRASH_RETRIES = 2;
+const CRASH_BACKOFF_MS = 1000;
 
 // Progress/status callbacks
 let onProgressCb = null;
@@ -65,6 +68,7 @@ function getWorker(cacheDir) {
         break;
       case "model-ready":
         modelReady = true;
+        crashCount = 0; // Reset crash counter on successful load
         if (onLoadingCb) onLoadingCb(false);
         break;
       case "warm-up-done":
@@ -104,15 +108,38 @@ function getWorker(cacheDir) {
   });
 
   worker.on("error", (err) => {
-    // Reject all pending requests
-    for (const [id, p] of pending) {
-      p.reject(err);
-    }
-    pending.clear();
+    console.error(`[kokoro] Worker crashed (attempt ${crashCount + 1}/${MAX_CRASH_RETRIES + 1}):`, err.message);
     // Reset engine state so next call creates a fresh worker
     worker = null;
     modelReady = false;
     loadingPromise = null;
+
+    if (crashCount < MAX_CRASH_RETRIES) {
+      crashCount++;
+      const backoff = CRASH_BACKOFF_MS * crashCount;
+      console.log(`[kokoro] Retrying worker in ${backoff}ms...`);
+      setTimeout(() => {
+        // Re-trigger ensureReady to spin up a fresh worker
+        ensureReady(onProgressCb).catch(retryErr => {
+          console.error("[kokoro] Retry failed:", retryErr.message);
+        });
+      }, backoff);
+    } else {
+      // Max retries exhausted — reject all pending and surface error to renderer
+      for (const [, p] of pending) {
+        p.reject(err);
+      }
+      pending.clear();
+      crashCount = 0;
+
+      try {
+        const { BrowserWindow } = require("electron");
+        const win = BrowserWindow.getAllWindows()[0];
+        if (win && !win.isDestroyed()) {
+          win.webContents.send("tts-kokoro-download-error", `TTS worker crashed after ${MAX_CRASH_RETRIES + 1} attempts: ${err.message}`);
+        }
+      } catch { /* non-fatal */ }
+    }
   });
 
   // Start loading model in the worker
@@ -139,20 +166,25 @@ async function ensureReady(onProgress) {
     const w = getWorker(cacheDir);
 
     // Wait for model-ready message or timeout — whichever comes first
-    loadingPromise = Promise.race([
-      new Promise((resolve) => {
-        const handler = (msg) => {
-          if (msg.type === "model-ready") {
-            w.off("message", handler);
-            resolve();
-          }
-        };
-        w.on("message", handler);
-      }),
-      new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Kokoro model load timed out")), TTS_MODEL_LOAD_TIMEOUT_MS);
-      }),
-    ]);
+    loadingPromise = new Promise((resolve, reject) => {
+      const handler = (msg) => {
+        if (msg.type === "model-ready") {
+          cleanup();
+          resolve();
+        }
+      };
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(new Error("Kokoro model load timed out"));
+      }, TTS_MODEL_LOAD_TIMEOUT_MS);
+
+      function cleanup() {
+        w.off("message", handler);
+        clearTimeout(timer);
+      }
+
+      w.on("message", handler);
+    });
 
     await loadingPromise;
   } catch (err) {
