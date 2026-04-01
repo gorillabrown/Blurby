@@ -521,7 +521,7 @@ All format parsing lives in `main/file-parsers.js` (content extraction) and `mai
 | Format | Parser | Conversion | Fidelity |
 |--------|--------|-----------|----------|
 | EPUB | `adm-zip` + `cheerio` | Native (copy) | Full — foliate-js rendering |
-| PDF | `pdf-parse` | `pdfToEpub` → `structuredTextToHtml` | Headings, lists, paragraphs detected |
+| PDF | `pdf-parse` | `pdfToEpub` → `structuredTextToHtml` | Headings, lists, paragraphs detected. No bold/italic or image extraction (pdf-parse limitation). |
 | MOBI/AZW3 | Custom PalmDoc + `parseMobiHtml` | `mobiToEpub` preserves HTML | Bold, italic, headings, lists, images |
 | HTML | `cheerio` | `htmlToEpub` sanitizes + preserves | Full HTML structure, embedded images |
 | DOCX | `mammoth` | `docxToEpub` → HTML → EPUB | Bold, italic, headings, lists, images |
