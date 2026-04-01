@@ -37,7 +37,7 @@ function register(ctx) {
     ctx.saveLibrary();
 
     // Enqueue add-doc for sync
-    syncQueue.enqueue("add-doc", { docId: doc.id, revision }).catch(() => {});
+    syncQueue.enqueue("add-doc", { docId: doc.id, revision }).catch(err => console.error("[sync-queue] add-doc enqueue failed:", err.message));
 
     return doc;
   });
@@ -90,7 +90,7 @@ function register(ctx) {
     ctx.saveLibrary();
 
     // Enqueue the delete-doc operation in the sync queue (19B)
-    syncQueue.enqueue("delete-doc", { docId, revision }).catch(() => {});
+    syncQueue.enqueue("delete-doc", { docId, revision }).catch(err => console.error("[sync-queue] delete-doc enqueue failed:", err.message));
   });
 
   ipcMain.handle("update-doc", (_, docId, title, content) => {

@@ -28,7 +28,7 @@ function register(ctx) {
     const syncQueue = require("../sync-queue");
     const syncStatus = syncEngine.getSyncStatus();
     const revision = syncStatus.revision || 0;
-    syncQueue.enqueue("update-settings", { revision }).catch(() => {});
+    syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message));
   });
 
   ipcMain.handle("get-launch-at-login", () => {

@@ -94,7 +94,7 @@ function register(ctx) {
 
   ipcMain.handle("extract-epub-words", async (_, bookId) => {
     try {
-      const doc = ctx.library?.find((d) => d.id === bookId);
+      const doc = ctx.getLibrary().find((d) => d.id === bookId);
       if (!doc) return { error: "Document not found" };
       const epubPath = doc.convertedEpubPath || doc.filepath;
       if (!epubPath || !epubPath.toLowerCase().endsWith(".epub")) {
