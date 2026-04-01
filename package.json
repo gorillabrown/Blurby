@@ -91,7 +91,6 @@
   "dependencies": {
     "@azure/msal-node": "^3.8.10",
     "@mozilla/readability": "^0.6.0",
-    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
     "adm-zip": "^0.5.16",
     "cheerio": "^1.2.0",
     "chokidar": "^4.0.3",
