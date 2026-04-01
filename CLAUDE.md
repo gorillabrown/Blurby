@@ -46,25 +46,27 @@ If your dispatch references a LESSONS_LEARNED entry by number (e.g., "LL-051"), 
 
 #### Agent Definition Files
 
-Agent `.md` files in `.claude/agents/` define the scope, output contract, and strict rules for each agent role. When the sprint task table assigns a step to an agent, read that agent's definition file and follow its protocol.
+Agent `.md` files in `.claude/agents/` define the scope, output contract, and strict rules for each agent role. Each file has YAML frontmatter that Claude Code uses for auto-discovery, model assignment, and tool permissions.
 
-| File | Agent | Purpose |
-|------|-------|---------|
-| `blurby-lead.md` | Orchestrator | Sprint sequencing, mandatory phase enforcement, session summary |
-| `spec-compliance-reviewer.md` | spec-reviewer | Verify every SUCCESS CRITERIA item; produce APPROVED/REJECTED verdict |
-| `doc-keeper.md` | doc-keeper | Update all 6 governing docs after every sprint |
-| `test-runner.md` | test-runner | Execute tests, categorize failures, report pass/fail |
-| `quality-reviewer.md` | quality-reviewer | Architecture compliance, known-trap detection, code quality |
+| File | Agent | Model | Purpose |
+|------|-------|-------|---------|
+| `blurby-lead.md` | Orchestrator | opus | Sprint sequencing, spawns sub-agents, enforces mandatory phases |
+| `spec-compliance-reviewer.md` | spec-reviewer | sonnet | Verify every SUCCESS CRITERIA item; produce APPROVED/REJECTED verdict |
+| `doc-keeper.md` | doc-keeper | sonnet | Update all 6 governing docs after every sprint |
+| `test-runner.md` | test-runner | haiku | Execute tests, categorize failures, report pass/fail |
+| `quality-reviewer.md` | quality-reviewer | sonnet | Architecture compliance, known-trap detection, code quality |
 
 #### How Dispatches Work
 
-Sprint dispatches use an "agent roster" with names like `renderer-fixer`, `test-runner`, `electron-fixer`. These are **scope labels, not separate processes.** You (the single CLI session) do all the work. The agent names tell you:
+Sprint dispatches go to `blurby-lead` (the orchestrator). blurby-lead reads the dispatch, loads the sprint spec from ROADMAP.md, and **spawns sub-agents** per the task table using the Agent tool. Each sub-agent runs in its own context with the tools and model defined in its `.md` file.
 
-- **What domain each task touches** — so you stay in scope and don't make unrelated changes
-- **What model tier was intended** — opus for cross-system reasoning, sonnet for focused work, haiku for test execution (informational only; you run at whatever model you are)
-- **What order to execute** — the WHEN section shows dependencies and parallelism
+The dispatch's Task table tells blurby-lead:
 
-Execute the WHAT table sequentially (unless WHEN says tasks are parallel). After each code-change task, verify your changes match the spec before moving on.
+- **Which agent to spawn** for each step (format-parser, test-runner, spec-compliance-reviewer, etc.)
+- **What model tier** — opus for cross-system reasoning, sonnet for focused work, haiku for lightweight execution
+- **What order** — sequential by default, parallel when explicitly marked
+
+Code agents (electron-fixer, renderer-fixer, format-parser) are **scope labels** — blurby-lead does the code work itself using those labels to stay in scope. Verification and documentation agents (spec-compliance-reviewer, doc-keeper, test-runner, quality-reviewer) are **spawned as sub-agents** with their own tool permissions and output contracts.
 
 #### Agent Scope Labels (Reference)
 
