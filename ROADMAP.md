@@ -54,54 +54,9 @@ Phase 7: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint EPUB-2A: Content Fidelity — Formatting, Images, DOCX ✅ COMPLETED
+### Sprint EPUB-2A: Content Fidelity ✅ COMPLETED (v1.5.0, 2026-04-01)
 
-**Version:** v1.5.0 | **Branch:** `sprint/epub-2a-fidelity` | **Tier:** Full (new capability + format changes) | **Status:** DONE — merged 2026-04-01
-
-**Goal:** Converted EPUBs preserve rich formatting (headings, bold, italic, lists, blockquotes) and images from source documents. DOCX→EPUB support added.
-
-**Findings addressed:** BUG-033, BUG-034, partial BUG-079 (DOCX support)
-
-#### Tasks
-
-| Step | Task | Agent | Model |
-|------|------|-------|-------|
-| 1 | **HTML preservation in PDF→EPUB** — Replace plain-text PDF extraction with structure-aware extraction. Detect headings (font size heuristics), bold/italic (font-weight/style metadata from pdf-parse), lists (leading bullet/number patterns), paragraphs. Output structured XHTML chapters instead of `<p>text</p>` blocks. | format-parser | opus |
-| 2 | **HTML preservation in MOBI/AZW→EPUB** — MOBI internal HTML already has `<b>`, `<i>`, `<h1>`-`<h6>`, `<ul>`, `<ol>`, `<blockquote>`. Current converter strips these to text. Preserve the HTML structure, sanitize (remove scripts/styles/proprietary tags), and pipe through chapter splitting. | format-parser | sonnet |
-| 3 | **HTML pass-through in HTML→EPUB** — Current HTML converter extracts text. Instead, sanitize the input HTML (remove scripts, styles, ads) and preserve structural elements. Use cheerio to clean while keeping formatting tags. Split on `<h1>`/`<h2>` boundaries. | format-parser | sonnet |
-| 4 | **Image extraction and embedding** — For each source format, extract embedded images and place in EPUB `OEBPS/Images/`. Update chapter XHTML with `<img>` references. Update content.opf manifest with image media types. Formats: PDF (extract page images via pdf-parse), MOBI (extract from MOBI binary image records), HTML (download referenced images or embed base64). | format-parser | opus |
-| 5 | **DOCX→EPUB support** — Add `mammoth` (already in package.json dependencies) to convert DOCX→HTML, then pipe through the existing HTML→EPUB converter. Extract DOCX images via mammoth's image handler. Add `.docx` to supported extensions in folder-watcher, DropZone, and import handler. | format-parser | sonnet |
-| 6 | **Update `buildEpubZip()`** — Ensure the EPUB builder handles image entries in the manifest, supports multiple media types (JPEG, PNG, GIF, SVG), and generates valid EPUB 3.0 with mixed content. | format-parser | sonnet |
-| 7 | **Conversion tests** — ≥15 new tests: roundtrip formatting preservation (bold, italic, heading, list) for each format, image embedding verification, DOCX conversion, EPUB validation post-conversion. Create test fixture files in `tests/fixtures/`. | test-runner | sonnet |
-| 8 | **Run `npm test` + `npm run build`** | test-runner | haiku |
-| 9 | **Spec-compliance review** — Verify every SUCCESS CRITERIA item below is met. Cross-reference dispatch spec line-by-line. Flag any drift, missing items, or partial implementations before proceeding. | spec-reviewer | sonnet |
-| 10 | **Doc-keeper pass** — Update CLAUDE.md (version→v1.5.0, test count, sprint history, dependency chain, tech stack if new deps). Update SPRINT_QUEUE.md (mark 2A complete, update queue status). Update ROADMAP.md (mark 2A done in Sprint Status). Update LESSONS_LEARNED.md if non-trivial discovery. Update BUG_REPORT.md (mark BUG-033/034 resolved). Update TECHNICAL_REFERENCE.md if architecture changed. | doc-keeper | sonnet |
-| 11 | **Git: branch, commit, merge, push** | blurby-lead | — |
-
-#### WHERE (Read in This Order)
-
-1. `CLAUDE.md` — standing rules, current state
-2. `docs/governance/LESSONS_LEARNED.md` — scan for EPUB-related entries
-3. `main/epub-converter.js` — full file (769 lines). Focus on `txtToEpub()`, `pdfToEpub()`, `mobiToEpub()`, `htmlToEpub()`, `buildEpubZip()`
-4. `main/legacy-parsers.js` — understand what formatting info is available from each format
-5. `main/ipc/library.js` — import handler, supported extensions, metadata extraction
-6. `main/folder-watcher.js` — SUPPORTED_EXT constant
-7. `src/components/DropZone.tsx` — UI file type hints
-8. `package.json` — verify mammoth is in dependencies (it is per CLAUDE.md tech stack)
-
-#### SUCCESS CRITERIA
-
-- [ ] PDF→EPUB preserves detectable headings, bold/italic, paragraph structure
-- [ ] MOBI→EPUB preserves embedded HTML formatting (headings, bold, italic, lists)
-- [ ] HTML→EPUB preserves structural elements while sanitizing scripts/styles
-- [ ] Images extracted from source formats and embedded in EPUB `OEBPS/Images/`
-- [ ] EPUB content.opf manifest includes image entries with correct media types
-- [ ] `.docx` files importable — converted to EPUB via mammoth→HTML→EPUB pipeline
-- [ ] `.docx` added to SUPPORTED_EXT in folder-watcher, DropZone hints
-- [ ] Converted EPUBs pass `validateEpub()` (existing validation)
-- [ ] ≥15 new tests, all passing
-- [ ] `npm test` passes (878+ tests), `npm run build` succeeds
-- [ ] Branch `sprint/epub-2a-fidelity` merged to main
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-033/034 resolved. 18 new tests. APPROVED_WITH_CONCERNS (PDF bold/italic and image extraction limited by pdf-parse).
 
 ---
 

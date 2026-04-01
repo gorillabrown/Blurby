@@ -2,7 +2,31 @@
 
 **Purpose:** Full specs for all completed sprints, extracted from `ROADMAP.md` to keep the roadmap forward-looking. Reference only — do not modify.
 
-**Last archived:** 2026-03-29
+**Last archived:** 2026-04-01
+
+---
+
+## EPUB-2A [v1.5.0]: Content Fidelity — Formatting, Images, DOCX
+
+**Completed:** 2026-04-01 | **Branch:** `sprint/epub-2a-fidelity` | **Tier:** Full
+
+**Goal:** Converted EPUBs preserve rich formatting (headings, bold, italic, lists, blockquotes) and images from source documents. DOCX→EPUB support added.
+
+**Findings addressed:** BUG-033, BUG-034, partial BUG-079 (DOCX support)
+
+**Implementation:**
+- PDF→EPUB: `structuredTextToHtml()` detects ALL-CAPS headings, bullet/numbered lists
+- MOBI→EPUB: `parseMobiHtml()` preserves HTML formatting; `extractMobiImages()` pulls image records
+- HTML→EPUB: Sanitizes while preserving formatting; extracts base64/local images
+- DOCX→EPUB: `docxToEpub()` via mammoth with image extraction handler
+- `buildEpubZip()` accepts `images[]` array, writes to `OEBPS/Images/`, adds to OPF manifest
+- `.docx` added to folder-watcher SUPPORTED_EXT and DropZone hints
+- 18 new tests in `tests/epub-fidelity.test.js`
+- mammoth added as dependency
+
+**Spec compliance:** APPROVED_WITH_CONCERNS (PDF bold/italic and PDF images limited by pdf-parse capabilities)
+
+**Key files changed:** `main/epub-converter.js`, `main/file-parsers.js`, `main/folder-watcher.js`, `src/components/DropZone.tsx`, `tests/epub-fidelity.test.js`, `package.json`
 
 ---
 
