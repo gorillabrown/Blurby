@@ -11,8 +11,8 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 3
-Next sprint: FLOW-3A — Flow Mode Redesign (Phase 3)
-Health: GREEN — Phase 2 complete. Phase 3 starting.
+Next sprint: FLOW-3A — Flow Mode Infinite Scroll (Phase 3)
+Health: GREEN — FLOW-3A fully spec'd. Ready to dispatch.
 ```
 
 ---
@@ -21,11 +21,11 @@ Health: GREEN — Phase 2 complete. Phase 3 starting.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | **FLOW-3A** | v1.6.0 | `sprint/flow-3a-redesign` | Full | — | Phase 3: Flow Mode infinite scroll redesign. Reading zone, WPM timer cursor, line transitions. Spec needed. |
-| 2 | **FLOW-3B** | v1.6.1 | `sprint/flow-3b-polish` | Full | — | Phase 3: Flow Mode polish — edge cases, keyboard nav, performance. Spec needed — placeholder for queue depth. |
+| 1 | **FLOW-3A** | v1.6.0 | `sprint/flow-3a-redesign` | Full | — | Phase 3: Infinite scroll Flow Mode. Shrinking underline cursor, reading zone (upper third), foliate scrolled mode for EPUBs. Full spec in ROADMAP.md §Phase 3. |
+| 2 | **FLOW-3B** | v1.6.1 | `sprint/flow-3b-polish` | Full | — | Phase 3: Flow Mode polish — narration sync in scroll view, scroll performance optimization, edge cases. Spec needed. |
 | 3 | **READINGS-4A** | v1.7.0 | `sprint/readings-4a` | Full | — | Phase 4: Blurby Readings — reading queue, library cards, metadata. Spec needed — placeholder for queue depth. |
 
-**Note:** FLOW-3A, FLOW-3B, and READINGS-4A are placeholders to maintain ≥3 queue depth. Full specs to be written per ROADMAP_V2.md.
+**Note:** FLOW-3A fully spec'd. FLOW-3B and READINGS-4A are placeholders to maintain ≥3 queue depth.
 
 ---
 

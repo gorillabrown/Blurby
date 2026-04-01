@@ -17,6 +17,8 @@ import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
 import FoliatePageView, { wrapWordsInSpans, unwrapWordSpans } from "./FoliatePageView";
+import FlowScrollView from "./FlowScrollView";
+import { FlowScrollEngine } from "../utils/FlowScrollEngine";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
@@ -126,6 +128,11 @@ export default function ReaderContainer({
   // State is synced for UI rendering only. Never read foliateFraction state for logic.
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
+
+  // FLOW-3A: FlowScrollEngine for infinite scroll mode
+  const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
+  const flowScrollCursorRef = useRef<HTMLDivElement | null>(null);
+  const flowScrollContainerRef = useRef<HTMLElement | null>(null);
 
   // Tokenize content (skip for foliate-rendered EPUBs in page mode — foliate handles its own rendering)
   const tokenized = useMemo(() => {
@@ -650,13 +657,25 @@ export default function ReaderContainer({
   const handlePrevPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.prevPage(); }, []);
   const handleNextPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.nextPage(); }, []);
 
-  // Flow line navigation ref (updated by PageReaderView)
+  // Flow line navigation ref (updated by PageReaderView for legacy, FlowScrollEngine for FLOW-3A)
   const flowNavRef = useRef<{ prevLine: () => void; nextLine: () => void }>({
     prevLine: () => {},
     nextLine: () => {},
   });
-  const handleFlowPrevLine = useCallback(() => flowNavRef.current.prevLine(), []);
-  const handleFlowNextLine = useCallback(() => flowNavRef.current.nextLine(), []);
+  const handleFlowPrevLine = useCallback(() => {
+    if (flowScrollEngineRef.current?.getState().running) {
+      flowScrollEngineRef.current.jumpToLine("prev");
+    } else {
+      flowNavRef.current.prevLine();
+    }
+  }, []);
+  const handleFlowNextLine = useCallback(() => {
+    if (flowScrollEngineRef.current?.getState().running) {
+      flowScrollEngineRef.current.jumpToLine("next");
+    } else {
+      flowNavRef.current.nextLine();
+    }
+  }, []);
 
   const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
     hasEngagedRef.current = true;
@@ -805,6 +824,68 @@ export default function ReaderContainer({
   // Legacy useEffect blocks for foliate word highlighting and Flow word advancement
   // have been removed — mode classes (FlowMode, NarrateMode) now drive these directly.
 
+  // FLOW-3A: FlowScrollEngine lifecycle — start/stop/pause based on reading mode
+  useEffect(() => {
+    if (readingMode !== "flow" || !flowPlaying) {
+      // Stop the engine when not in flow mode or paused
+      if (flowScrollEngineRef.current) {
+        flowScrollEngineRef.current.stop();
+      }
+      return;
+    }
+
+    // Get the scrollable container — from foliate in EPUB mode
+    let container: HTMLElement | null = null;
+    let cursor: HTMLDivElement | null = null;
+
+    if (useFoliate) {
+      container = flowScrollContainerRef.current
+        ?? foliateApiRef.current?.getScrollContainer?.() as HTMLElement
+        ?? null;
+      cursor = flowScrollCursorRef.current;
+    }
+
+    if (!container || !cursor) return;
+
+    // Create engine if needed
+    if (!flowScrollEngineRef.current) {
+      flowScrollEngineRef.current = new FlowScrollEngine({
+        onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
+        onComplete: () => {
+          setFlowPlaying(false);
+          setReadingMode("page");
+        },
+      });
+    }
+
+    const engine = flowScrollEngineRef.current;
+    engine.start(
+      container,
+      cursor,
+      highlightedWordIndex,
+      effectiveWpm,
+      tokenized.paragraphBreaks,
+      isEink,
+    );
+
+    return () => {
+      engine.stop();
+    };
+  }, [readingMode, flowPlaying, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // FLOW-3A: Sync WPM changes to running FlowScrollEngine
+  useEffect(() => {
+    flowScrollEngineRef.current?.setWpm(effectiveWpm);
+  }, [effectiveWpm]);
+
+  // FLOW-3A: Update flow nav ref to use FlowScrollEngine
+  const flowScrollNavRef = useRef({
+    prevLine: () => flowScrollEngineRef.current?.jumpToLine("prev"),
+    nextLine: () => flowScrollEngineRef.current?.jumpToLine("next"),
+    prevParagraph: () => flowScrollEngineRef.current?.jumpToParagraph("prev"),
+    nextParagraph: () => flowScrollEngineRef.current?.jumpToParagraph("next"),
+  });
+
   // ── Render ─────────────────────────────────────────────────────────────
 
   // Foliate EPUB view — always rendered for EPUBs, modes overlay on top
@@ -929,6 +1010,9 @@ export default function ReaderContainer({
       wpm={effectiveWpm}
       narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
       bookWordSections={bookWordsRef.current?.sections}
+      flowMode={readingMode === "flow"}
+      scrollContainerRef={flowScrollContainerRef}
+      flowCursorRef={flowScrollCursorRef}
       onFlowWordAdvance={setHighlightedWordIndex}
       onWordsReextracted={() => {
         // New EPUB section loaded — update the active mode's word array
@@ -1013,8 +1097,23 @@ export default function ReaderContainer({
       return foliateView;
     }
 
-    // Non-EPUB documents should not reach here — all docs go through FoliatePageView.
-    // If a document has no EPUB path, show an error message.
+    // Non-EPUB documents — fallback (all docs should be EPUB since EPUB-2B)
+    // FLOW-3A: If somehow in Flow Mode on a non-EPUB, use FlowScrollView
+    if (readingMode === "flow") {
+      return (
+        <FlowScrollView
+          activeDoc={activeDoc}
+          wpm={effectiveWpm}
+          isEink={isEink}
+          onWordAdvance={setHighlightedWordIndex}
+          onComplete={() => { setFlowPlaying(false); setReadingMode("page"); }}
+          startWordIndex={highlightedWordIndex}
+          playing={flowPlaying}
+        />
+      );
+    }
+
+    // Non-EPUB error fallback
     return (
       <div className="reader-error" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "1rem", padding: "2rem", textAlign: "center" }}>
         <p style={{ fontSize: "1.1rem", color: "var(--text-secondary, #888)" }}>
