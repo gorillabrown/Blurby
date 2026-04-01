@@ -1,8 +1,8 @@
 # Blurby Technical Reference
 
-**Version:** 2.2.0
-**Last updated:** 2026-03-29
-**Branch:** `main` (v1.4.3)
+**Version:** 2.3.0
+**Last updated:** 2026-04-01
+**Branch:** `main` (v1.5.0)
 
 This document is the governing technical reference for Blurby. It covers architecture, data model, reading modes, rendering, TTS, build/release, and known technical debt. A new developer should be able to understand the entire system by reading this document and following the file path references.
 
@@ -10,7 +10,7 @@ This document is the governing technical reference for Blurby. It covers archite
 
 ## 1. Product Vision
 
-Blurby is a desktop speed-reading and audiobook application for Windows. It lets users import documents in any common format (EPUB, PDF, MOBI, TXT, HTML, Markdown), read them with advanced speed-reading techniques, and listen via neural text-to-speech.
+Blurby is a desktop speed-reading and audiobook application for Windows. It lets users import documents in any common format (EPUB, PDF, MOBI, DOCX, TXT, HTML, Markdown), read them with advanced speed-reading techniques, and listen via neural text-to-speech.
 
 **Target users:** Avid readers, students, researchers, and professionals who consume large volumes of text and want to read faster or hands-free.
 
@@ -37,7 +37,8 @@ Blurby is an Electron application with a clear three-layer architecture.
 │                     Main Process (Node.js)                   │
 │  main.js ─── orchestrator, app lifecycle, context object     │
 │  main/ipc-handlers.js ─── all IPC channel registrations      │
-│  main/file-parsers.js ─── EPUB, MOBI, PDF, HTML, TXT        │
+│  main/file-parsers.js ─── EPUB, MOBI, PDF, HTML, TXT, DOCX  │
+│  main/epub-converter.js ── format→EPUB (formatting+images)  │
 │  main/sync-engine.js ─── offline-first cloud sync            │
 │  main/sync-queue.js ─── offline operation queue              │
 │  main/auth.js ─── OAuth2 (Microsoft MSAL + Google)           │
@@ -138,6 +139,7 @@ Main process event
 | `pdf-parse` | PDF text extraction (lazy-loaded) |
 | `pdfkit` | PDF export (article provenance headers) |
 | `adm-zip` | EPUB/MOBI ZIP extraction (lazy-loaded) |
+| `mammoth` | DOCX→HTML conversion with image extraction (lazy-loaded) |
 | `cheerio` | HTML parsing (lazy-loaded) |
 | `docx` | .docx export for reading notes (APA citations) |
 | `exceljs` | .xlsx export for reading log |
@@ -514,19 +516,20 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 
 ### Current Format Handling
 
-All format parsing lives in `main/file-parsers.js`:
+All format parsing lives in `main/file-parsers.js` (content extraction) and `main/epub-converter.js` (format→EPUB conversion):
 
-| Format | Parser | Output |
-|--------|--------|--------|
-| EPUB | `adm-zip` + `cheerio` | Native EPUB file (foliate-js rendering) |
-| PDF | `pdf-parse` | Plain text extraction |
-| MOBI/AZW3 | Custom PalmDoc decompressor | Plain text extraction |
-| HTML | `cheerio` | Plain text extraction |
-| TXT/MD | Direct file read | Raw text |
+| Format | Parser | Conversion | Fidelity |
+|--------|--------|-----------|----------|
+| EPUB | `adm-zip` + `cheerio` | Native (copy) | Full — foliate-js rendering |
+| PDF | `pdf-parse` | `pdfToEpub` → `structuredTextToHtml` | Headings, lists, paragraphs detected |
+| MOBI/AZW3 | Custom PalmDoc + `parseMobiHtml` | `mobiToEpub` preserves HTML | Bold, italic, headings, lists, images |
+| HTML | `cheerio` | `htmlToEpub` sanitizes + preserves | Full HTML structure, embedded images |
+| DOCX | `mammoth` | `docxToEpub` → HTML → EPUB | Bold, italic, headings, lists, images |
+| TXT/MD | Direct file read | `txtToEpub` / `mdToEpub` | Plain text / Markdown formatting |
 
 ### Dual Renderer Architecture
 
-EPUBs are rendered by foliate-js (`FoliatePageView.tsx`) with full formatting. All other formats fall back to the word-by-word renderer (`PageReaderView.tsx`) which tokenizes plain text into clickable word spans.
+EPUBs are rendered by foliate-js (`FoliatePageView.tsx`) with full formatting. All other formats are converted to EPUB on import via `convertToEpub()` and then rendered through foliate-js. The legacy text renderer (`PageReaderView.tsx`) remains as a fallback for documents that fail conversion.
 
 A user can opt into the legacy renderer for EPUBs via `BlurbyDoc.legacyRenderer` or `BlurbySettings.useLegacyRenderer`.
 
@@ -804,6 +807,7 @@ Vitest 4.1, configured to run with `npm test` (`vitest run`).
 | `provenance.test.js` | Article provenance extraction |
 | `notes-reading-log.test.js` | Notes and reading log export |
 | `epub-converter.test.js` | EPUB conversion |
+| `epub-fidelity.test.js` | EPUB formatting preservation, image embedding, DOCX→EPUB |
 | `useReader.test.ts` | Reader hook (timing, sync, edge cases) |
 | `useLibrary.test.ts` | Library hook (CRUD, failures, folders) |
 | `useKeyboardShortcuts.test.ts` | Keyboard routing matrix |

@@ -22,14 +22,14 @@ This document captures hard-won knowledge from Blurby development. Every entry r
 ### [2026-03-21] LL-001: OneDrive Mount Read Failures in Cowork VM
 
 **Area:** infrastructure, file access
-**Status:** active
-**Priority:** high
+**Status:** SUPERSEDED by LL-063 — project no longer uses OneDrive for development
+**Priority:** low (historical)
 
 **Context:** Cowork's Linux VM cannot read files from OneDrive-synced folders when files are "cloud-only" (not downloaded locally). All standard file operations (cat, python open, Read tool) fail with "Invalid argument" (EINVAL).
 
 **Root Cause:** OneDrive's on-demand sync keeps files as placeholders until accessed from Windows. The FUSE mount in the VM cannot trigger the download.
 
-**Guardrail:** When working with Blurby files in Cowork, either (a) ensure files are synced locally in OneDrive before mounting, or (b) access via GitHub browser when file reads fail. For Claude Code CLI running natively on Windows, this is not an issue.
+**Guardrail:** No longer applicable. Working directory moved to `C:\Users\estra\Projects\Blurby` (local, not cloud-synced) per LL-063. Cowork accesses files via the mounted local directory.
 
 ---
 
@@ -71,19 +71,17 @@ This document captures hard-won knowledge from Blurby development. Every entry r
 
 ---
 
-### [2026-03-21] LL-005: Workflow Reversal — OneDrive-First, Git to Publish
+### [2026-03-21] LL-005: Workflow Reversal — Local-First, Git to Sync
 
 **Area:** infrastructure, workflow
-**Status:** active
-**Priority:** high
+**Status:** SUPERSEDED by LL-063 — further revised to local-first + git push/pull
+**Priority:** low (historical)
 
-**Context:** Previously, Claude Code worked in its own context and pushed directly to GitHub. The user then pulled to OneDrive. This created a disconnected workflow where the working directory and the publication target were inverted.
+**Context:** Previously, Claude Code worked in its own context and pushed directly to GitHub. The user then pulled to OneDrive. This was reversed to OneDrive-first, but OneDrive + git proved incompatible (LL-063). Now fully local-first.
 
-**Decision:** Reverse the flow. OneDrive is the working directory (needed for cross-machine access). Claude Code CLI runs directly against the OneDrive path. Git push to GitHub happens when sprints or phases complete — GitHub is the publication/backup target, not the working source.
+**Decision (current):** Working directory at `C:\Users\estra\Projects\Blurby` (local, not cloud-synced). Git push/pull to GitHub syncs between machines. Push after every sprint, pull before every session.
 
-**Key distinction:** Cowork's Linux VM still can't read OneDrive files (LL-001), but Claude Code CLI runs natively on Windows and has no issues with OneDrive paths. Cowork accesses code via GitHub browser when needed.
-
-**Guardrail:** OneDrive is the source of truth for active work. GitHub reflects completed milestones. Don't push incomplete sprint work to GitHub — commit locally as you go, push when a sprint's acceptance criteria are met.
+**Guardrail:** `C:\Users\estra\Projects\Blurby` is the source of truth on each machine. GitHub is the sync hub. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
 
 ---
 
@@ -148,7 +146,7 @@ This document captures hard-won knowledge from Blurby development. Every entry r
 
 | Trap | Area | Mitigation |
 |------|------|------------|
-| OneDrive cloud-only files | Cowork VM | Check for EINVAL errors; fall back to GitHub browser |
+| Cloud-synced working directory | Git / File I/O | Never develop in OneDrive/GDrive/Dropbox (LL-063). Local dir only. |
 | Synchronous fs in main.js | Electron | Audit and convert all remaining sync calls |
 | React re-renders during playback | Reader | Use refs for word index during active playback |
 | IPC channel name typos | Full stack | Channel names must match across main.js, preload.js, renderer |
@@ -639,7 +637,7 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 **Root Cause:** Cloud sync services (OneDrive, Google Drive, Dropbox) and git are incompatible — both manage file state, and they conflict during branch operations, checkouts, and resets.
 
 **Guardrail:**
-- PR-106: **Working directory must be local, not cloud-synced.** Standard path: `C:\Projects\Blurby`. Never in OneDrive, Google Drive, or any synced folder.
+- PR-106: **Working directory must be local, not cloud-synced.** Standard path: `C:\Users\estra\Projects\Blurby`. Never in OneDrive, Google Drive, or any synced folder.
 - PR-107: **`git push origin main` is mandatory after every sprint.** Part of the doc-keeper pass. Sprint is not complete until push succeeds. Zero tolerance for unpushed commits.
 - PR-108: **`git pull origin main` is mandatory at session start.** Step 0 of session bootstrap, before reading CLAUDE.md.
 - PR-109: **Never run `git reset --hard` without first checking `git log --oneline origin/main..HEAD` for unpushed commits.** If unpushed commits exist, push first.
@@ -647,18 +645,26 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 
 ---
 
-### [2026-04-01] LL-064: onnxruntime-node setImmediate Crashes Worker Threads in Electron
+### [2026-04-01] LL-065: MOBI Files Contain Usable HTML — Don't Strip It
 
-**Area:** TTS, onnxruntime, Electron, worker threads
+**Area:** format conversion, EPUB pipeline
+**Status:** active
+**Priority:** medium
+
+**Context:** During EPUB-2A, discovered that MOBI text records contain actual HTML (`<h1>`, `<b>`, `<i>`, `<ul>`, `<ol>`, `<blockquote>`) — not just plain text. The original `parseMobiContent()` extracted the HTML and then aggressively stripped all tags via regex. This destroyed useful formatting that the MOBI author embedded. Adding `parseMobiHtml()` to return the raw HTML before stripping recovered formatting fidelity.
+
+**Guardrail:** When adding format converters, always check what structure the source format natively provides before applying text-only extraction. Stripping HTML should be a last resort, not the default.
+
+---
+
+### [2026-04-01] LL-066: Silent `.catch(() => {})` Is a Systemic Anti-Pattern
+
+**Area:** error handling, data integrity
 **Status:** active
 **Priority:** high
 
-**Context:** onnxruntime-node (v1.21.0) wraps `inferenceSession.run()` and `createInferenceSessionHandler()` in `setImmediate()` inside `backend.js`. When called from a Node.js Worker thread in Electron, the N-API native call executes outside the V8 HandleScope, causing a fatal crash: `Cannot create a handle without a HandleScope`. The crash kills the entire Electron process instantly — no recovery possible.
-
-**Upstream:** microsoft/onnxruntime#20084, microsoft/onnxruntime#13086. Unfixed as of v1.21.0.
-
-**Fix:** Postinstall script (`scripts/patch-onnxruntime.js`) removes all `setImmediate` wrappers from `backend.js` after every `npm install`. Both `run()` and `createInferenceSessionHandler()` are patched to return directly. Safe because: (a) native `run()` is synchronous, (b) calling code already `await`s, (c) blocking a Worker thread is intentional.
+**Context:** Both internal and 3rd-party audits independently flagged this pattern. It appears in TTS cache manifest saves, sync queue enqueues (5 sites), tray creation, and generation pipeline cache reads. Each instance masks a different failure mode (disk full, corruption, permission denied). All sync queue instances were fixed in AUDIT-FIX-1A, cache manifest instances in AUDIT-FIX-1B.
 
 **Guardrail:**
-- PR-110: If onnxruntime-node is updated, verify the postinstall patch still applies. The patch logs a WARNING if the file structure changes.
-- PR-111: Never remove the postinstall script without first confirming the upstream issue is fixed in the installed version.
+- PR-112: Grep for `.catch(() => {})`, `.catch(() => { })`, `.catch(()=>{})`, and bare `catch { }` before every sprint. Zero tolerance in new code.
+- PR-113: Remaining instances in cloud storage cleanup are explicitly acceptable (file may already be gone). Document the rationale inline when a bare catch is intentional.

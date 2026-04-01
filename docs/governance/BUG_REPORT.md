@@ -55,16 +55,16 @@
 ### BUG-033: Book formatting stripped too aggressively
 **Reported:** 2026-03-25
 **Severity:** Medium
-**Location:** `main/file-parsers.js`
+**Location:** `main/epub-converter.js`
 **Description:** All book formats (EPUB, MOBI, PDF, HTML) are parsed to plain text, stripping lists, headers, bold/italic, tables, and images. Lists appear concatenated on single lines. Parsers use `cheerio.text()` or regex strip which discards HTML structure.
-**Status:** Open. Planned fix in Wave 3 — parse to lightweight Markdown. See `.claude/plans/wave3-content-pipeline.md`.
+**Status:** RESOLVED (EPUB-2A, v1.5.0). PDF uses `structuredTextToHtml()` for heading/list detection. MOBI uses `parseMobiHtml()` to preserve HTML formatting. HTML preserves structural elements with sanitization. DOCX uses mammoth for rich HTML.
 
 ### BUG-034: Images in books stripped during import
 **Reported:** 2026-03-25
 **Severity:** Medium
-**Location:** `main/file-parsers.js`
+**Location:** `main/epub-converter.js`
 **Description:** Inline images within EPUB, MOBI, and HTML books are completely removed during content extraction. Only cover images are preserved. Same root cause as BUG-033 — text-only extraction pipeline.
-**Status:** Open. Planned fix in Wave 3 — extract EPUB images to `userData/images/<docId>/`.
+**Status:** RESOLVED (EPUB-2A, v1.5.0). `buildEpubZip()` accepts `images[]` array. HTML converter extracts base64/local images. MOBI converter extracts image records. DOCX converter uses mammoth image handler. All embedded in EPUB `OEBPS/Images/` with OPF manifest entries.
 
 ### BUG-039: Space bar should start last-used reading mode
 **Reported:** 2026-03-25
