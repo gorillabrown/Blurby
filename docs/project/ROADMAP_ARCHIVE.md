@@ -6,6 +6,30 @@
 
 ---
 
+## EPUB-2B [v1.5.1]: Pipeline Completion — URL→EPUB, Legacy Removal
+
+**Completed:** 2026-04-01 | **Branch:** `sprint/epub-2b-pipeline` | **Tier:** Full
+
+**Goal:** URL-imported articles produce EPUB (not PDF). Legacy text renderer eliminated. Every document renders through foliate-js via EPUB. Single canonical format, single rendering path.
+
+**Findings addressed:** BUG-075 (intake pipeline completion), BUG-079 (universal EPUB)
+
+**Implementation:**
+- URL→EPUB: `extractArticleFromHtml()` now returns `contentHtml` (cleaned HTML from Readability). `htmlToEpub()` converts to EPUB with article metadata (title, author, date, source URL) in OPF. Cover image (og:image) embedded when available. PDF generation removed.
+- Chrome extension→EPUB: `ws-server.js` `handleAddArticle()` converts to EPUB via `htmlToEpub()` instead of saving as `.txt`.
+- Legacy migration: Library schema v5→v6 flags docs with `needsEpubConversion`. Actual re-conversion is lazy (on-demand in `load-doc-content`).
+- `load-doc-content` IPC: Attempts on-demand EPUB conversion for docs without EPUB path. Returns EPUB filepath or error — no more plain text for rendering.
+- `ReaderContainer.tsx`: Removed non-foliate rendering path (PageReaderView/ReaderView switch). Non-EPUB docs show "needs re-import" error.
+- `buildEpubZip()` now supports `dc:date` and `dc:source` OPF metadata fields.
+- `url-extractor.js`: `extractArticleFromHtml()` returns `contentHtml` field with Readability cleaned HTML.
+- `library.js` sync-folder: URL docs converted to EPUB instead of PDF during folder sync.
+
+**Tests:** 16 new tests across URL→EPUB, metadata, cover embedding, legacy migration, lazy conversion, rendering logic. 897 total (46 files).
+
+**SUCCESS CRITERIA:** All met. URL articles → EPUB, Chrome ext → EPUB, legacy migration, single rendering path, ≥10 new tests, 897 tests pass, build succeeds.
+
+---
+
 ## EPUB-2A [v1.5.0]: Content Fidelity — Formatting, Images, DOCX
 
 **Completed:** 2026-04-01 | **Branch:** `sprint/epub-2a-fidelity` | **Tier:** Full

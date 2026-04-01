@@ -74,6 +74,8 @@ function imageMediaType(ext) {
  * @param {string} options.title       - dc:title
  * @param {string} options.author      - dc:creator
  * @param {string} [options.language]  - dc:language (default "en")
+ * @param {string} [options.date]      - dc:date (ISO string, e.g. "2024-03-15")
+ * @param {string} [options.source]    - dc:source (e.g. source URL)
  * @param {Array<{title: string, xhtml: string}>} options.chapters
  * @param {Buffer} [options.coverImage] - optional JPEG cover
  * @param {Array<{id: string, filename: string, buffer: Buffer, mediaType: string}>} [options.images] - embedded images
@@ -85,6 +87,8 @@ async function buildEpubZip(options) {
     title,
     author,
     language = "en",
+    date,
+    source,
     chapters,
     coverImage,
     images = [],
@@ -158,7 +162,7 @@ async function buildEpubZip(options) {
     <dc:identifier id="uid">urn:uuid:${uuid}</dc:identifier>
     <dc:title>${escapeXml(title)}</dc:title>
     <dc:creator>${escapeXml(author)}</dc:creator>
-    <dc:language>${escapeXml(language)}</dc:language>
+    <dc:language>${escapeXml(language)}</dc:language>${date ? `\n    <dc:date>${escapeXml(date)}</dc:date>` : ""}${source ? `\n    <dc:source>${escapeXml(source)}</dc:source>` : ""}
     <meta property="dcterms:modified">${isoNow()}</meta>
   </metadata>
   <manifest>
@@ -699,7 +703,11 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
     });
   }
 
-  await buildEpubZip({ outputPath, title, author, chapters, images });
+  await buildEpubZip({
+    outputPath, title, author, chapters, images,
+    date: meta.date, source: meta.source,
+    coverImage: meta.coverImage,
+  });
 
   // Validate the generated EPUB
   const validation = await validateEpub(outputPath);

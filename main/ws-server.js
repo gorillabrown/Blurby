@@ -230,13 +230,15 @@ async function handleAddArticle(client, article) {
   }
 
   try {
+    const fsPromises = require("fs/promises");
+    const path = require("path");
+    const os = require("os");
     const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
     const wordCount = article.textContent.trim().split(/\s+/).filter(Boolean).length;
 
     const doc = {
       id: docId,
       title: article.title || "Untitled Article",
-      content: article.textContent,
       wordCount: wordCount,
       position: 0,
       created: Date.now(),
@@ -252,34 +254,49 @@ async function handleAddArticle(client, article) {
 
     _ctx.addDocToLibrary(doc);
     _ctx.saveLibrary();
-    _ctx.broadcastLibrary();
 
-    // Save content to file if folder-based storage is configured
-    const settings = _ctx.getSettings();
-    if (settings.sourceFolder) {
-      const fsPromises = require("fs/promises");
-      const path = require("path");
-      const savedDir = path.join(settings.sourceFolder, "Saved Articles");
-      try {
-        await fsPromises.mkdir(savedDir, { recursive: true });
-        const safeTitle = (article.title || "untitled")
-          .replace(/[<>:"/\\|?*\x00-\x1f]/g, "-")
-          .replace(/-{2,}/g, "-")
-          .slice(0, 80);
-        const filepath = path.join(savedDir, path.basename(`${safeTitle}.txt`));
-        const tmp = filepath + ".tmp";
-        await fsPromises.writeFile(tmp, article.textContent, "utf-8");
-        await fsPromises.rename(tmp, filepath);
+    // Convert article to EPUB
+    try {
+      const { htmlToEpub } = require("./epub-converter");
+      const { EPUB_CONVERTED_DIR } = require("./constants");
 
-        // Update doc with filepath
-        doc.filepath = filepath;
-        doc.filename = `${safeTitle}.txt`;
-        doc.ext = ".txt";
-        _ctx.saveLibrary();
-      } catch (err) {
-        console.error("[ws-server] Failed to save article file:", err.message);
-      }
+      // Use HTML content if available, otherwise wrap plain text in paragraphs
+      const articleHtml = article.htmlContent || article.textContent.split(/\n\n+/).map(p => `<p>${p.trim()}</p>`).join("\n");
+      const tempHtmlPath = path.join(os.tmpdir(), `blurby-ext-${docId}.html`);
+      await fsPromises.writeFile(
+        tempHtmlPath,
+        `<html><head><title>${(doc.title || "").replace(/</g, "&lt;")}</title></head><body>${articleHtml}</body></html>`,
+        "utf-8"
+      );
+
+      const convertedDir = path.join(_ctx.getDataPath(), EPUB_CONVERTED_DIR);
+      await fsPromises.mkdir(convertedDir, { recursive: true });
+      const epubOutputPath = path.join(convertedDir, `${docId}.epub`);
+      const convResult = await htmlToEpub(tempHtmlPath, epubOutputPath, {
+        title: doc.title,
+        author: article.author || "Unknown",
+        date: article.publishedDate || undefined,
+        source: article.sourceUrl || undefined,
+      });
+      await fsPromises.unlink(tempHtmlPath).catch(() => {});
+
+      doc.convertedEpubPath = convResult.epubPath;
+      doc.filepath = convResult.epubPath;
+      doc.ext = ".epub";
+      doc.originalSourceUrl = article.sourceUrl || null;
+
+      // Update doc in library
+      const docs = _ctx.getLibrary();
+      _ctx.setLibrary(docs.map((d) => (d.id === doc.id ? doc : d)));
+      _ctx.saveLibrary();
+    } catch (convErr) {
+      console.error("[ws-server] EPUB conversion failed:", convErr.message);
+      // Keep doc without EPUB — will be converted on-demand by load-doc-content
+      doc.content = article.textContent;
+      _ctx.saveLibrary();
     }
+
+    _ctx.broadcastLibrary();
 
     sendJson(client.socket, { type: "ok", docId: docId });
     console.log(`[ws-server] Added article: "${doc.title}" (${wordCount} words)`);

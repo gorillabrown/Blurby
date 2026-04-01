@@ -14,9 +14,9 @@
 
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
-| 1 | Universal EPUB Pipeline | Convert all incoming formats (HTML, PDF, MOBI, DOCX, TXT, MD, RTF, FB2, KFX, PDB, DjVu) to EPUB on intake. Single rendering path via foliate-js. (BUG-079) | High | Large |
-| 2 | Rich Content Preservation | Parse books to lightweight Markdown instead of plain text. Preserve lists, headers, bold/italic, tables, inline images. (BUG-033/034) | High | Large |
-| 3 | Intake Pipeline + EPUB Normalization | Normalize all incoming formats to EPUB as internal canonical format. Preserves formatting, chapters, metadata, images. (BUG-075) | High | Large |
+| ~~1~~ | ~~Universal EPUB Pipeline~~ | ✅ Done (EPUB-2A + EPUB-2B, v1.5.1). Single rendering path via foliate-js. (BUG-079) | — | — |
+| ~~2~~ | ~~Rich Content Preservation~~ | ✅ Done (EPUB-2A, v1.5.0). Formatting preserved via EPUB conversion. (BUG-033/034) | — | — |
+| ~~3~~ | ~~Intake Pipeline + EPUB Normalization~~ | ✅ Done (EPUB-2B, v1.5.1). All formats + URL + Chrome ext → EPUB. (BUG-075) | — | — |
 | 4 | Chapter Detection for Non-EPUB | Heuristic pattern matching for chapter headings in PDF, MOBI, TXT, HTML. Currently only EPUB NCX/nav TOC works. (BUG-035) | Medium | Medium |
 | 5 | Auto-Generated TOC | Generate a TOC page at book start when no embedded TOC exists or when chapters are detected heuristically. (BUG-036) | Medium | Medium |
 | 6 | OCR for Scanned PDFs | Use OCR (Tesseract or similar) to extract text from image-based/scanned PDFs that pdf-parse cannot read. | Medium | Large |

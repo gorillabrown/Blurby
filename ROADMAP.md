@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-01 — Post-EPUB-2A. 881 tests, 45 files. v1.5.0.
+**Last updated**: 2026-04-01 — Post-EPUB-2B. 897 tests, 46 files. v1.5.1.
 **Current branch**: `main`
-**Current state**: Phase 2 in progress. EPUB-2A complete (content fidelity). EPUB-2B next (pipeline completion).
+**Current state**: Phase 2 complete. EPUB-2A (content fidelity) + EPUB-2B (pipeline completion) done. Phase 3 next (Flow Mode redesign).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -21,7 +21,7 @@ Phase 1 Exit Gate (Step 3 re-audit) ── PASS (2026-04-01)
     ▼                        ▼
 Phase 2:                  Phase 1.5:
 EPUB Content Fidelity     Test Coverage
-(✅ EPUB-2A → EPUB-2B)   (parallel, non-blocking)
+(✅ EPUB-2A + EPUB-2B)   (parallel, non-blocking)
     │
     ▼
 Phase 3: Flow Mode Redesign
@@ -60,54 +60,9 @@ Phase 7: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint EPUB-2B: Pipeline Completion — URL→EPUB, Legacy Removal
+### Sprint EPUB-2B: Pipeline Completion ✅ COMPLETED (v1.5.1, 2026-04-01)
 
-**Version:** v1.5.1 | **Branch:** `sprint/epub-2b-pipeline` | **Tier:** Full (architecture change)
-
-**Goal:** URL-imported articles produce EPUB (not PDF). Legacy text renderer eliminated. Every document in the library renders through foliate-js via EPUB. Single canonical format, single rendering path.
-
-**Findings addressed:** BUG-075 (intake pipeline completion), BUG-079 (universal EPUB)
-
-#### Tasks
-
-| Step | Task | Agent | Model |
-|------|------|-------|-------|
-| 1 | **URL→EPUB conversion** — Modify `main/url-extractor.js` to pipe extracted article HTML through `htmlToEpub()` instead of generating PDF via pdfkit. Article metadata (title, author, date, source URL) goes into EPUB OPF metadata. Cover image (og:image) embedded if available. | electron-fixer | sonnet |
-| 2 | **Chrome extension articles → EPUB** — Articles sent via WebSocket from Chrome extension now produce EPUB library items. Update `main/ws-server.js` article save handler to use `convertToEpub()` instead of writing `.txt`. | electron-fixer | sonnet |
-| 3 | **Legacy migration** — Add one-time migration in `main/migrations.js`: for each library doc with `legacyRenderer: true` or missing `convertedEpubPath` (and not a native EPUB), attempt re-conversion via `convertToEpub()`. Log failures but don't block. Clear `legacyRenderer` flag on success. | electron-fixer | opus |
-| 4 | **Deprecate legacy-parsers.js text path** — Update `load-doc-content` IPC handler: if doc has no EPUB path and no `convertedEpubPath`, attempt conversion on-demand (lazy migration). Remove the `extractContent()` text extraction path for rendering (keep only for word count calculation during import if needed). | electron-fixer | sonnet |
-| 5 | **Remove legacy text renderer fallback** — In `ReaderContainer.tsx`, remove the FlowText/plain-text rendering path. All documents go through `FoliatePageView`. If a document has no EPUB, show an error toast ("This document needs to be re-imported") instead of falling back to text rendering. | renderer-fixer | sonnet |
-| 6 | **Update URL import document record** — `source: "url"` documents get `ext: ".epub"`, `convertedEpubPath`, and `originalFilepath` (pointing to the source URL metadata). Remove `content` field (in-memory text) from URL imports. | electron-fixer | sonnet |
-| 7 | **Tests** — ≥10 new tests: URL article → EPUB conversion, Chrome extension article → EPUB, legacy migration, on-demand lazy conversion, FoliatePageView-only rendering verification. | test-runner | sonnet |
-| 8 | **Run `npm test` + `npm run build`** | test-runner | haiku |
-| 9 | **Spec-compliance review** — Verify every SUCCESS CRITERIA item below is met. Cross-reference dispatch spec line-by-line. Flag any drift, missing items, or partial implementations before proceeding. | spec-reviewer | sonnet |
-| 10 | **Doc-keeper pass** — Update CLAUDE.md (version→v1.5.1, test count, sprint history, remove legacy-parsers from architecture section, update feature status). Update SPRINT_QUEUE.md (mark 2B complete, update queue status, backfill ≥3 with Phase 3 specs). Update ROADMAP.md (mark 2B done, verify Phase 2 exit gate). Update LESSONS_LEARNED.md if non-trivial discovery. Update BUG_REPORT.md (mark BUG-075/079 resolved). Update TECHNICAL_REFERENCE.md (remove legacy text renderer from architecture). | doc-keeper | sonnet |
-| 11 | **Git: branch, commit, merge, push** | blurby-lead | — |
-
-#### WHERE (Read in This Order)
-
-1. `CLAUDE.md` — standing rules
-2. `docs/governance/LESSONS_LEARNED.md`
-3. `main/url-extractor.js` — full file (703 lines). Focus on `generateArticlePdf()`, `extractArticleFromHtml()`
-4. `main/ws-server.js` — article save handler (~lines 264-270)
-5. `main/ipc/documents.js` — `load-doc-content` handler
-6. `main/legacy-parsers.js` — understand what gets removed
-7. `main/migrations.js` — migration framework, existing patterns
-8. `src/components/ReaderContainer.tsx` — text rendering fallback path
-9. `main/epub-converter.js` — `htmlToEpub()` (reused for URL articles)
-
-#### SUCCESS CRITERIA
-
-- [ ] URL articles imported as EPUB (not PDF) — `doc.ext === ".epub"`, `doc.convertedEpubPath` set
-- [ ] Chrome extension "Send to Blurby" produces EPUB library items
-- [ ] Article metadata (title, author, date, source URL) in EPUB OPF
-- [ ] One-time migration converts legacy docs to EPUB where possible
-- [ ] `load-doc-content` no longer returns plain text for rendering — EPUB path or error
-- [ ] `ReaderContainer.tsx` has no FlowText/plain-text rendering path
-- [ ] All documents render through FoliatePageView
-- [ ] ≥10 new tests, all passing
-- [ ] `npm test` passes (888+ tests), `npm run build` succeeds
-- [ ] Branch `sprint/epub-2b-pipeline` merged to main
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-075/079 resolved. 16 new tests. APPROVED — all SUCCESS CRITERIA met. URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path.
 
 ---
 
@@ -128,6 +83,8 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| EPUB-2B | v1.5.1 | ✅ DONE | URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path. 16 new tests. |
+| EPUB-2A | v1.5.0 | ✅ DONE | Content fidelity — formatting, images, DOCX support. 18 new tests. |
 | Phase 1 (AUDIT-FIX 1A-1F) | v1.4.9–v1.4.14 | ✅ DONE | 42 audit findings addressed. 7 CRITICAL, 8+ MAJOR, 6 MODERATE fixed. 9 MODERATE deferred. |
 | HOTFIX-11 | v1.4.8 | ✅ DONE | ONNX worker thread crash patch. 863 tests / 44 files. |
 | NAR-5 + prior | v1.4.7 | ✅ DONE | Narration pipeline complete. See `docs/project/ROADMAP_ARCHIVE.md`. |
