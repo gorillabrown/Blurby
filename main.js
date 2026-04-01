@@ -253,6 +253,7 @@ async function syncLibraryWithFolder() {
     if (syncCancelled) break;
     const batch = newFiles.slice(i, i + BATCH_SIZE);
     const results = await Promise.all(batch.map(extractNewFileDoc));
+    if (syncCancelled) break; // Check after batch completes — don't process stale results
     for (const doc of results) {
       if (doc) synced.push(doc);
     }
@@ -432,39 +433,6 @@ app.whenReady().then(async () => {
   await ensureDataDir();
   await loadState();
 
-  // Sprint 23: Insert sample document on first run
-  if (!settings.firstRunCompleted && !getDocById("sample-meditations")) {
-    try {
-      const sampleEpubPath = path.join(
-        app.isPackaged ? process.resourcesPath : __dirname,
-        app.isPackaged ? "resources" : "resources",
-        "sample-meditations.epub"
-      );
-      const exists = await fsPromises.access(sampleEpubPath).then(() => true).catch(() => false);
-      if (exists) {
-        const content = await extractContent(sampleEpubPath);
-        if (content && typeof content === "string") {
-          const meta = await extractDocMetadata(sampleEpubPath, "sample-meditations", getDataPath());
-          addDocToLibrary({
-            id: "sample-meditations",
-            title: "Meditations",
-            filepath: sampleEpubPath,
-            wordCount: countWords(content),
-            position: 0,
-            created: Date.now(),
-            source: "sample",
-            author: "Marcus Aurelius",
-            coverPath: meta.coverPath || null,
-            lastReadAt: null,
-          });
-          await saveLibraryNow();
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load sample document:", e.message);
-    }
-  }
-
   // Initialize cloud sync modules
   const auth = require("./main/auth");
   const syncEngine = require("./main/sync-engine");
@@ -491,6 +459,42 @@ app.whenReady().then(async () => {
   });
   updateWindowTheme(mainWindow, settings);
   if (!isDev) setupAutoUpdater(mainWindow);
+
+  // Sprint 23: Insert sample document on first run (deferred to post-window-show)
+  if (!settings.firstRunCompleted && !getDocById("sample-meditations")) {
+    setImmediate(async () => {
+      try {
+        const sampleEpubPath = path.join(
+          app.isPackaged ? process.resourcesPath : __dirname,
+          app.isPackaged ? "resources" : "resources",
+          "sample-meditations.epub"
+        );
+        const exists = await fsPromises.access(sampleEpubPath).then(() => true).catch(() => false);
+        if (exists) {
+          const content = await extractContent(sampleEpubPath);
+          if (content && typeof content === "string") {
+            const meta = await extractDocMetadata(sampleEpubPath, "sample-meditations", getDataPath());
+            addDocToLibrary({
+              id: "sample-meditations",
+              title: "Meditations",
+              filepath: sampleEpubPath,
+              wordCount: countWords(content),
+              position: 0,
+              created: Date.now(),
+              source: "sample",
+              author: "Marcus Aurelius",
+              coverPath: meta.coverPath || null,
+              lastReadAt: null,
+            });
+            await saveLibraryNow();
+            broadcastLibrary();
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load sample document:", e.message);
+      }
+    });
+  }
 
   // Auto-download Kokoro TTS model if not already present (non-blocking)
   {

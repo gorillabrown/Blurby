@@ -108,7 +108,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
             return cached.words.length; // Actual consumed count (may be > chunkSize)
           }
         }
-      } catch { /* cache miss — generate normally */ }
+      } catch (err) { if (import.meta.env.DEV) console.warn("[pipeline] cache read failed:", err); }
     }
 
     if (!active || myGenId !== generationId) return;
