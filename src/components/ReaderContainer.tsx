@@ -99,6 +99,8 @@ export default function ReaderContainer({
 
   // Highlighted word in Page view — anchor for Focus/Flow entry
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
+  const highlightedWordIndexRef = useRef(highlightedWordIndex);
+  highlightedWordIndexRef.current = highlightedWordIndex;
 
   // Flow mode plays within Page view (word highlight advances at WPM)
   const [flowPlaying, setFlowPlaying] = useState(false);
@@ -120,7 +122,8 @@ export default function ReaderContainer({
   const foliateWordsRef = useRef<Array<{ word: string; range: Range | null; sectionIndex: number }>>([]);
   // State-backed foliate word strings for React rendering (refs don't trigger re-renders)
   const [foliateWordStrings, setFoliateWordStrings] = useState<string[]>([]);
-  // Foliate's book fraction (0.0–1.0) — the authoritative progress for EPUBs
+  // Foliate's book fraction (0.0–1.0) — ref is the SINGLE AUTHORITY for saves/calculations.
+  // State is synced for UI rendering only. Never read foliateFraction state for logic.
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
 
@@ -155,6 +158,12 @@ export default function ReaderContainer({
   const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : readingMode === "narration" ? "narration" : "page";
 
   const words = tokenized.words;
+  // Clear wordsRef on doc type switch (foliate ↔ legacy) to prevent stale word arrays
+  const prevUseFoliateRef = useRef(useFoliate);
+  if (prevUseFoliateRef.current !== useFoliate) {
+    wordsRef.current = [];
+    prevUseFoliateRef.current = useFoliate;
+  }
   // Only set wordsRef from tokenized content for non-foliate docs.
   // For foliate EPUBs, wordsRef is populated by extractFoliateWords() and must
   // not be overwritten with the empty tokenized array on re-render.
@@ -277,7 +286,7 @@ export default function ReaderContainer({
       backgroundCacherRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.ttsEngine, settings.ttsCacheEnabled]);
+  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.kokoroVoice]);
 
   // NAR-5: Set active book on the background cacher when text is available
   useEffect(() => {
@@ -348,8 +357,6 @@ export default function ReaderContainer({
 
     let cancelled = false;
 
-    // Get current section-local highlightedWordIndex before extraction
-    const localIdxBeforeExtraction = highlightedWordIndex;
     const currentSectionIdx = foliateApiRef.current?.getWords()?.[0]?.sectionIndex ?? 0;
 
     api.extractEpubWords(activeDoc.id).then((result) => {
@@ -377,10 +384,11 @@ export default function ReaderContainer({
         }
       }
 
-      // Convert section-local highlightedWordIndex to global
+      // Convert section-local highlightedWordIndex to global (use ref for current value, not stale closure)
       const currentSection = bookWords.sections.find(s => s.sectionIndex === currentSectionIdx);
-      if (currentSection && localIdxBeforeExtraction >= 0) {
-        const globalIdx = currentSection.startWordIdx + localIdxBeforeExtraction;
+      const currentLocalIdx = highlightedWordIndexRef.current;
+      if (currentSection && currentLocalIdx >= 0) {
+        const globalIdx = currentSection.startWordIdx + currentLocalIdx;
         // Update narration to use the global word array
         narration.updateWords(bookWords.words, globalIdx);
       }
@@ -438,10 +446,14 @@ export default function ReaderContainer({
       api.next();
       const checkAndRestart = () => {
         setTimeout(() => {
-          extractFoliateWords();
-          const newWords = wordsRef.current;
-          if (newWords.length > 0) {
-            narration.resyncToCursor(0, effectiveWpm);
+          try {
+            extractFoliateWords();
+            const newWords = wordsRef.current;
+            if (newWords.length > 0) {
+              narration.resyncToCursor(0, effectiveWpm);
+            }
+          } catch (err) {
+            console.error("[ReaderContainer] extractFoliateWords failed during section-end fallback:", err);
           }
         }, 300);
       };
