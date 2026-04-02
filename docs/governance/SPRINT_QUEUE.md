@@ -11,8 +11,8 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 3
-Next sprint: READINGS-4A — Blurby Readings (Phase 4)
-Health: YELLOW — READINGS-4A needs full spec. Placeholder only.
+Next sprint: READINGS-4A — Library Cards + Queue + New Dot
+Health: GREEN — READINGS-4A fully spec'd in ROADMAP.md. Ready to dispatch.
 ```
 
 ---
@@ -21,11 +21,11 @@ Health: YELLOW — READINGS-4A needs full spec. Placeholder only.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | **READINGS-4A** | v1.7.0 | `sprint/readings-4a` | Full | — | Phase 4: Blurby Readings — reading queue, library cards, metadata. Spec needed. |
-| 2 | **TBD** | — | — | — | — | Placeholder for queue depth ≥3. |
+| 1 | **READINGS-4A** | v1.7.0 | `sprint/readings-4a` | Full | — | Library cards format update, reading queue with drag-to-reorder, "New" dot auto-clear via IntersectionObserver. |
+| 2 | **READINGS-4B** | v1.8.0 | `sprint/readings-4b` | Full | — | Author normalization (BUG-074), Metadata Wizard (BUG-077), First-run folder picker (BUG-076). Spec needed. |
 | 3 | **TBD** | — | — | — | — | Placeholder for queue depth ≥3. |
 
-**Note:** Phase 3 complete. READINGS-4A needs full spec before dispatch.
+**Note:** Phase 3 complete. READINGS-4A spec'd — see ROADMAP.md §Phase 4.
 
 ---
 
