@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-01 — Post-FLOW-3A. 932 tests, 47 files. v1.6.0.
+**Last updated**: 2026-04-01 — Post-FLOW-3B. 940 tests, 47 files. v1.6.1.
 **Current branch**: `main`
-**Current state**: FLOW-3A complete (infinite scroll). Phase 3 in progress — FLOW-3B next (polish).
+**Current state**: Phase 3 complete (FLOW-3A + FLOW-3B). Phase 4 next (Blurby Readings).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -24,7 +24,7 @@ EPUB Content Fidelity     Test Coverage
 (✅ EPUB-2A + EPUB-2B)   (parallel, non-blocking)
     │
     ▼
-Phase 3: Flow Mode Redesign (✅ FLOW-3A done)
+Phase 3: Flow Mode Redesign (✅ FLOW-3A + FLOW-3B done)
     │
     ▼
 Phase 4: Blurby Readings
@@ -88,6 +88,12 @@ Phase 7: APK Wrapper (+2 modularization sprints)
 
 ---
 
+### Sprint FLOW-3B: Flow Mode Polish ✅ COMPLETED (v1.6.1, 2026-04-01)
+
+> Dead code removal (FlowScrollView, FlowCursorController, FLOW_PAGE_TURN_PAUSE_MS). Edge case hardening (empty doc, zero-width lines, font size rebuild). BUG-091/084 confirmed resolved by FLOW-3A. Bottom bar verified visible. Truncation fix for FoliatePageView.tsx + useKeyboardShortcuts.ts. 8 new tests (940 total).
+
+---
+
 ## Phase 2 Exit Gate
 
 Phase 2 is complete when:
@@ -105,6 +111,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| FLOW-3B | v1.6.1 | ✅ DONE | Flow Mode polish. Dead code removal, edge cases, truncation fix. 8 new tests. |
 | FLOW-3A | v1.6.0 | ✅ DONE | Flow Mode infinite scroll. FlowScrollEngine, shrinking underline cursor, reading zone. 35 new tests. |
 | EPUB-2B | v1.5.1 | ✅ DONE | URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path. 16 new tests. |
 | EPUB-2A | v1.5.0 | ✅ DONE | Content fidelity — formatting, images, DOCX support. 18 new tests. |

@@ -242,12 +242,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.6.0 — Post-FLOW-3A)
+## Current System State (v1.6.1 — Post-FLOW-3B)
 
 ### Codebase (branch: `main`)
 
-- All sprints through FLOW-3A complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B + FLOW-3A)
-- 932 tests passing across 47 test files
+- All sprints through FLOW-3B complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B + FLOW-3A + FLOW-3B)
+- 940 tests passing across 47 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -285,12 +285,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `src/components/` — UI components + 8 settings sub-pages
     - `ReaderContainer.tsx` — decomposed into hooks: useReaderMode, useProgressTracker, useEinkController
     - `ReaderBottomBar.tsx` — unified controls across all 4 reading modes
-    - `FlowScrollView.tsx` — non-EPUB fallback continuous scroll view for Flow Mode (EPUB uses foliate scrolled mode)
+    - ~~`FlowScrollView.tsx`~~ — removed in FLOW-3B (dead code since EPUB-2B)
   - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode.ts`, `NarrateMode.ts` + shared types and index
   - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
   - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration, useReaderMode (TD-1), useProgressTracker (TD-1), useEinkController (TD-1)
-  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts (replaces FlowCursorController.ts — imperative infinite-scroll engine for Flow Mode), constants.ts
+  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts (imperative infinite-scroll engine for Flow Mode, FLOW-3A), constants.ts
   - `src/types/` — types.ts, foliate.ts (TD-1), narration.ts (TD-1)
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro)
@@ -301,13 +301,13 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 47 test files, 932 tests (incl. `tests/flow-scroll-engine.test.js`)
+  - **Tests** (`tests/`): 47 test files, 940 tests (incl. `tests/flow-scroll-engine.test.js`)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
 ### Feature Status
 
-Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics, epoch-guarded gapless playback), universal EPUB pipeline (all formats + URL articles + Chrome extension articles → EPUB, single rendering path via FoliatePageView), Flow Mode infinite scroll (FlowScrollEngine, shrinking underline cursor, reading zone at 25% viewport, foliate scrolled mode), library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 932 tests across 47 files.
+Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics, epoch-guarded gapless playback), universal EPUB pipeline (all formats + URL articles + Chrome extension articles → EPUB, single rendering path via FoliatePageView), Flow Mode infinite scroll (FlowScrollEngine, shrinking underline cursor, reading zone at 25% viewport, foliate scrolled mode), library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 940 tests across 47 files.
 
 ### What's Next
 
@@ -320,9 +320,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through FLOW-3A complete (v1.6.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through FLOW-3B complete (v1.6.1). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ AUDIT-FIX-1A–1F (stabilization) → ✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll)
+✅ AUDIT-FIX-1A–1F (stabilization) → ✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll) → ✅ FLOW-3B (polish)
 
-**Next:** FLOW-3B (Flow Mode polish) → Phase 4 (
+**Next:** Phase 4: Blurby Readings (READINGS-4A) → Phase 5 (
