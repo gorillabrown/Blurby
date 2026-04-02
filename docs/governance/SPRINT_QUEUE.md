@@ -11,8 +11,8 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 3
-Next sprint: FLOW-3A — Flow Mode Infinite Scroll (Phase 3)
-Health: GREEN — FLOW-3A fully spec'd. Ready to dispatch.
+Next sprint: FLOW-3B — Flow Mode Polish (Phase 3)
+Health: GREEN — FLOW-3B fully spec'd. Ready to dispatch.
 ```
 
 ---
@@ -21,11 +21,11 @@ Health: GREEN — FLOW-3A fully spec'd. Ready to dispatch.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | **FLOW-3A** | v1.6.0 | `sprint/flow-3a-redesign` | Full | — | Phase 3: Infinite scroll Flow Mode. Shrinking underline cursor, reading zone (upper third), foliate scrolled mode for EPUBs. Full spec in ROADMAP.md §Phase 3. |
-| 2 | **FLOW-3B** | v1.6.1 | `sprint/flow-3b-polish` | Full | — | Phase 3: Flow Mode polish — narration sync in scroll view, scroll performance optimization, edge cases. Spec needed. |
-| 3 | **READINGS-4A** | v1.7.0 | `sprint/readings-4a` | Full | — | Phase 4: Blurby Readings — reading queue, library cards, metadata. Spec needed — placeholder for queue depth. |
+| 1 | **FLOW-3B** | v1.6.1 | `sprint/flow-3b-polish` | Quick | — | Phase 3: Flow Mode polish — scroll perf, BUG-031 bottom bar, dead code removal (FlowScrollView + FlowCursorController), edge case hardening. Full spec in ROADMAP.md §Phase 3. |
+| 2 | **READINGS-4A** | v1.7.0 | `sprint/readings-4a` | Full | — | Phase 4: Blurby Readings — reading queue, library cards, metadata. Spec needed — placeholder for queue depth. |
+| 3 | **TBD** | — | — | — | — | Placeholder for queue depth ≥3. Spec from IDEAS.md at next phase pause. |
 
-**Note:** FLOW-3A fully spec'd. FLOW-3B and READINGS-4A are placeholders to maintain ≥3 queue depth.
+**Note:** FLOW-3B fully spec'd and ready. READINGS-4A and slot 3 are placeholders.
 
 ---
 
@@ -44,6 +44,7 @@ Health: GREEN — FLOW-3A fully spec'd. Ready to dispatch.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| FLOW-3A | 2026-04-01 | PASS | Infinite scroll Flow Mode, shrinking underline cursor, foliate scrolled mode. 35 new tests. v1.6.0. |
 | EPUB-2B | 2026-04-01 | PASS | URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path. 16 new tests. v1.5.1. Phase 2 complete. |
 | EPUB-2A | 2026-04-01 | PASS | Formatting-preserving EPUB conversion, image embedding, DOCX support. 18 new tests. v1.5.0. |
 | AUDIT-FIX-1F | 2026-04-01 | PASS | 6 moderate fixes, 9 deferred. v1.4.14. |
