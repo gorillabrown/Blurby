@@ -18,6 +18,7 @@ interface SettingsMenuProps {
   onSiteLogout: (domain: string) => Promise<void>;
   activeSubPage?: string;
   isMac?: boolean;
+  onOpenMetadataWizard?: () => void;
 }
 
 const CATEGORIES = [
@@ -43,6 +44,7 @@ export function SettingsMenu({
   onSiteLogout,
   activeSubPage,
   isMac = false,
+  onOpenMetadataWizard,
 }: SettingsMenuProps) {
   if (activeSubPage) {
     return (
@@ -68,7 +70,7 @@ export function SettingsMenu({
           <LayoutSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
         {activeSubPage === "library-layout" && (
-          <LibraryLayoutSettings settings={settings} onSettingsChange={onSettingsChange} />
+          <LibraryLayoutSettings settings={settings} onSettingsChange={onSettingsChange} onOpenMetadataWizard={onOpenMetadataWizard} />
         )}
         {activeSubPage === "cloud-sync" && (
           <CloudSyncSettings settings={settings} onSettingsChange={onSettingsChange} />

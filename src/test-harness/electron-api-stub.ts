@@ -470,6 +470,10 @@ export const electronAPIStub: ElectronAPI = {
   // ── Author normalization ────────────────────────────────────────────────
   normalizeAllAuthors: async () => trace("normalizeAllAuthors", [], { updated: 0 }),
 
+  // ── Metadata wizard ────────────────────────────────────────────────────
+  scanLibraryMetadata: async () => trace("scanLibraryMetadata", [], []),
+  applyMetadataUpdates: async (updates: any) => trace("applyMetadataUpdates", [updates], { updated: 0 }),
+
   // ── Import/export ───────────────────────────────────────────────────────
   exportLibrary: async () => trace("exportLibrary", [], null),
   importLibrary: async () => trace("importLibrary", [], null),

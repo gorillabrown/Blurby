@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2
-Next sprint: READINGS-4C — Metadata Wizard
-Health: YELLOW — Queue depth below 3. Need to spec one more sprint.
+Queue depth: 1
+Next sprint: EXT-5A — Chrome Extension E2E + Queue Integration
+Health: RED — Queue depth below 3. Need to spec two more sprints.
 ```
 
 ---
@@ -21,10 +21,9 @@ Health: YELLOW — Queue depth below 3. Need to spec one more sprint.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | **READINGS-4C** | v1.9.0 | `sprint/readings-4c` | Full | — | Metadata Wizard — batch scan, filename parsing, local enrichment. |
-| 2 | **EXT-5A** | v1.10.0 | `sprint/ext-5a` | Full | — | Chrome extension E2E tests + queue integration. Phase 5 start. |
+| 1 | **EXT-5A** | v1.10.0 | `sprint/ext-5a` | Full | — | Chrome extension E2E tests + queue integration. Phase 5 start. |
 
-**Note:** Queue depth below 3. Backfill needed at next planning session.
+**Note:** Queue depth at 1. Backfill needed urgently — spec 2 more sprints.
 
 ---
 
@@ -43,6 +42,7 @@ Health: YELLOW — Queue depth below 3. Need to spec one more sprint.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| READINGS-4C | 2026-04-02 | PASS | Metadata Wizard — scan, filename parser, batch update, modal. 16 new tests. v1.9.0. Phase 4 complete. |
 | READINGS-4B | 2026-04-02 | PASS | Author normalization, first-run folder picker. 16 new tests. v1.8.0. |
 | READINGS-4A | 2026-04-01 | PASS | Library cards, reading queue, "New" dot auto-clear. 17 new tests. v1.7.0. Phase 4 start. |
 | FLOW-3B | 2026-04-01 | PASS | Dead code removal, edge case hardening, truncation fix. 8 new tests. v1.6.1. Phase 3 complete. |

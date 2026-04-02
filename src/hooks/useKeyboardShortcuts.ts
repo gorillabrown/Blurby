@@ -261,16 +261,17 @@ export function useReaderKeys(
 
 // ── useGlobalKeys (updated with Sprint 20) ────────────────────────────────
 
-export function useGlobalKeys({ toggleFlap, openSettings, openBugReport, view, activeOverlay, setActiveOverlay }: {
+export function useGlobalKeys({ toggleFlap, openSettings, openBugReport, openMetadataWizard, view, activeOverlay, setActiveOverlay }: {
   toggleFlap: () => void;
   openSettings?: () => void;
   openBugReport?: () => void;
+  openMetadataWizard?: () => void;
   view: string;
   activeOverlay?: OverlayId;
   setActiveOverlay?: (overlay: OverlayId) => void;
 }) {
-  const stateRef = useRef({ toggleFlap, openSettings, openBugReport, view, activeOverlay, setActiveOverlay });
-  stateRef.current = { toggleFlap, openSettings, openBugReport, view, activeOverlay, setActiveOverlay };
+  const stateRef = useRef({ toggleFlap, openSettings, openBugReport, openMetadataWizard, view, activeOverlay, setActiveOverlay });
+  stateRef.current = { toggleFlap, openSettings, openBugReport, openMetadataWizard, view, activeOverlay, setActiveOverlay };
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -301,6 +302,13 @@ export function useGlobalKeys({ toggleFlap, openSettings, openBugReport, view, a
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === "KeyB") {
         e.preventDefault();
         s.openBugReport?.();
+        return;
+      }
+
+      // Ctrl+Shift+M opens metadata wizard
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === "KeyM") {
+        e.preventDefault();
+        s.openMetadataWizard?.();
         return;
       }
 
