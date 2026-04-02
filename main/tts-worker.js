@@ -54,15 +54,38 @@ async function loadModel(cacheDir) {
   }
   KokoroTTS = kokoro.KokoroTTS;
   transformersEnv.cacheDir = cacheDir;
-  ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
-    dtype: DTYPE,
-    device: "cpu",
-    progress_callback: (progress) => {
-      if (progress.status === "progress") {
-        parentPort.postMessage({ type: "progress", value: Math.round(progress.progress || 0) });
-      }
-    },
-  });
+  // Suppress non-fatal cpuinfo warnings on ARM devices (e.g., Snapdragon X Elite).
+  // onnxruntime's cpuinfo library prints to stderr when it doesn't recognize the SoC,
+  // but inference still works via generic ARM64 kernels.
+  const origStderrWrite = process.stderr.write;
+  let cpuinfoWarning = null;
+  process.stderr.write = function(chunk, ...args) {
+    const str = typeof chunk === "string" ? chunk : chunk.toString();
+    if (str.includes("cpuinfo") || str.includes("arm/windows/init.c")) {
+      cpuinfoWarning = str.trim();
+      return true; // suppress
+    }
+    return origStderrWrite.call(this, chunk, ...args);
+  };
+
+  try {
+    ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
+      dtype: DTYPE,
+      device: "cpu",
+      progress_callback: (progress) => {
+        if (progress.status === "progress") {
+          parentPort.postMessage({ type: "progress", value: Math.round(progress.progress || 0) });
+        }
+      },
+    });
+  } finally {
+    process.stderr.write = origStderrWrite;
+  }
+
+  if (cpuinfoWarning) {
+    console.log("[kokoro] ARM device detected — cpuinfo chip not in database, using generic ARM64 kernels.");
+    parentPort.postMessage({ type: "arm-cpuinfo-warning", warning: cpuinfoWarning });
+  }
 
   modelReady = true;
   parentPort.postMessage({ type: "model-ready" });
@@ -73,6 +96,8 @@ async function loadModel(cacheDir) {
   } catch (warmupErr) {
     console.error("[kokoro] Warm-up inference failed:", warmupErr.message);
     if (warmupErr.stack) console.error("[kokoro] Stack:", warmupErr.stack);
+    // Surface warm-up failure explicitly — inference may not work on this platform
+    parentPort.postMessage({ type: "warm-up-failed", error: warmupErr.message });
   }
 
   parentPort.postMessage({ type: "warm-up-done" });

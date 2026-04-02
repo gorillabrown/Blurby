@@ -74,6 +74,21 @@ function getWorker(cacheDir) {
       case "warm-up-done":
         // Model fully primed
         break;
+      case "arm-cpuinfo-warning":
+        console.log("[kokoro] ARM cpuinfo warning (non-fatal):", msg.warning);
+        break;
+      case "warm-up-failed":
+        // Warm-up inference failed — model loaded but inference may not work.
+        // Surface to renderer so it can fall back to Web Speech proactively.
+        console.error("[kokoro] Warm-up inference failed:", msg.error);
+        {
+          const { BrowserWindow } = require("electron");
+          const win = BrowserWindow.getAllWindows()[0];
+          if (win && !win.isDestroyed()) {
+            win.webContents.send("tts-kokoro-download-error", `Kokoro TTS warm-up failed: ${msg.error}. Using system voice instead.`);
+          }
+        }
+        break;
       case "load-error":
         console.error("[kokoro] Worker load failed:", msg.error);
         if (msg.stack) console.error("[kokoro] Stack:", msg.stack);
