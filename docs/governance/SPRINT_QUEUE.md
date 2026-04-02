@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to ≥3.
 
-**Full specs:** `ROADMAP.md` §Phase 2
+**Full specs:** `ROADMAP.md` (see Phase 5 and Phase 6 sections)
 
 **Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 0
-Next sprint: TBD — needs planning session
-Health: RED — Queue empty. Need to spec ≥3 sprints.
+Queue depth: 2
+Next sprint: EINK-6A (E-ink Display Mode)
+Health: YELLOW — Queue depth below 3. Backfill 1 sprint.
 ```
 
 ---
@@ -21,9 +21,10 @@ Health: RED — Queue empty. Need to spec ≥3 sprints.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| — | Queue empty | — | — | — | — | Planning session needed to refill queue. |
+| 1 | EINK-6A | v1.12.0 | `sprint/eink-6a-display-mode` | Full | — | E-ink as independent display mode. Decouple from theme. `einkMode` boolean + `[data-eink]` CSS. |
+| 2 | GOALS-6B | v1.13.0 | `sprint/goals-6b-reading-goals` | Full | — | Daily/weekly reading goals. Progress ring in library header. Goal-met toast. |
 
-**Note:** Queue empty. Next planning session should spec Phase 5B, Phase 6, or backlog items.
+**Full specs:** `ROADMAP.md` §Phase 6 (EINK-6A, GOALS-6B).
 
 ---
 
@@ -42,6 +43,7 @@ Health: RED — Queue empty. Need to spec ≥3 sprints.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| EXT-5B | 2026-04-02 | PASS | Extension pairing UX — 6-digit short code, WS pair protocol, settings + popup UI. 10 new tests. v1.11.0. Phase 5 complete. |
 | EXT-5A | 2026-04-02 | PASS | Chrome ext E2E + queue integration. 33 new tests. v1.10.0. Phase 5A complete. |
 | READINGS-4C | 2026-04-02 | PASS | Metadata Wizard — scan, filename parser, batch update, modal. 16 new tests. v1.9.0. Phase 4 complete. |
 | READINGS-4B | 2026-04-02 | PASS | Author normalization, first-run folder picker. 16 new tests. v1.8.0. |

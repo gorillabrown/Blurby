@@ -39,6 +39,8 @@ const WS_PORT = 48924;
 const HEARTBEAT_INTERVAL_MS = 30000;
 /** WS server retry delay when port is in use (ms) */
 const WS_RETRY_DELAY_MS = 5000;
+/** Short pairing code time-to-live (ms) — 5 minutes */
+const SHORT_CODE_TTL_MS = 5 * 60 * 1000;
 
 // ── File Parsers ──────────────────────────────────────────────────────────────
 /** PDF parsing timeout (ms) */
@@ -154,6 +156,7 @@ module.exports = {
   WS_PORT,
   HEARTBEAT_INTERVAL_MS,
   WS_RETRY_DELAY_MS,
+  SHORT_CODE_TTL_MS,
   // File Parsers
   PDF_PARSE_TIMEOUT_MS,
   MIN_PRINTABLE_RATIO,

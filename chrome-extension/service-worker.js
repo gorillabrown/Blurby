@@ -11,6 +11,7 @@ let _authenticated = false;
 let _reconnectTimer = null;
 let _pendingMessages = [];
 let _sessionArticleCount = 0;
+let _pairCallback = null; // callback for pending pair request
 
 // ── WebSocket connection management ──────────────────────────────────────────
 
@@ -77,6 +78,20 @@ function handleServerMessage(msg) {
     case "auth-failed":
       _authenticated = false;
       console.warn("[blurby] Auth failed:", msg.message);
+      break;
+
+    case "pair-ok":
+      _authenticated = true;
+      // Store the long-lived token for future auto-reconnect
+      if (msg.token) {
+        chrome.storage.local.set({ pairingToken: msg.token });
+      }
+      updateBadge();
+      if (_pairCallback) { _pairCallback({ success: true }); _pairCallback = null; }
+      break;
+
+    case "pair-failed":
+      if (_pairCallback) { _pairCallback({ success: false, message: msg.message || "Invalid code" }); _pairCallback = null; }
       break;
 
     case "ok":
@@ -508,6 +523,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const result = await sendArticle(article);
       sendResponse(result);
     })();
+    return true; // Async response
+  }
+
+  if (message.type === "request-pair") {
+    if (!_ws || _ws.readyState !== WebSocket.OPEN) {
+      sendResponse({ success: false, message: "Not connected to Blurby desktop" });
+      return;
+    }
+    _pairCallback = sendResponse;
+    _ws.send(JSON.stringify({ type: "pair", code: message.code }));
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      if (_pairCallback === sendResponse) {
+        _pairCallback({ success: false, message: "Pairing timed out" });
+        _pairCallback = null;
+      }
+    }, 10000);
     return true; // Async response
   }
 

@@ -193,6 +193,49 @@
       font-style: italic;
     }
 
+    /* Pairing UI */
+    .pairing-section {
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .pairing-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .pairing-input {
+      width: 140px;
+      font-size: 20px;
+      font-family: monospace;
+      text-align: center;
+      letter-spacing: 0.3em;
+      padding: 8px 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      outline: none;
+    }
+    .pairing-input:focus { border-color: #D04716; }
+    .pair-btn {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px;
+      background: #D04716;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pair-btn:hover { background: #b83d12; }
+    .pair-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .pairing-error {
+      color: #cc3333;
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
     /* Footer */
     .footer {
       padding: 8px 14px;
@@ -217,6 +260,14 @@
       <span class="status-dot"></span>
       <span id="statusText">Checking...</span>
     </span>
+  </div>
+
+  <!-- Pairing (shown when disconnected) -->
+  <div class="pairing-section" id="pairingSection" style="display: none;">
+    <div class="pairing-label">Enter the 6-digit code from Blurby desktop</div>
+    <input class="pairing-input" id="pairingInput" type="text" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="000000" autocomplete="off">
+    <button class="pair-btn" id="pairBtn" disabled>Pair</button>
+    <div class="pairing-error" id="pairingError" style="display: none;"></div>
   </div>
 
   <!-- Preview -->

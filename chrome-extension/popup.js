@@ -6,6 +6,10 @@ let _selectedMode = "library";
 // ── DOM refs ─────────────────────────────────────────────────────────────────
 const statusBadge = document.getElementById("statusBadge");
 const statusText = document.getElementById("statusText");
+const pairingSection = document.getElementById("pairingSection");
+const pairingInput = document.getElementById("pairingInput");
+const pairBtn = document.getElementById("pairBtn");
+const pairingError = document.getElementById("pairingError");
 const previewLoading = document.getElementById("previewLoading");
 const previewContent = document.getElementById("previewContent");
 const previewError = document.getElementById("previewError");
@@ -39,15 +43,65 @@ function updateConnectionStatus() {
     if (chrome.runtime.lastError || !response) {
       statusBadge.className = "status-badge disconnected";
       statusText.textContent = "Offline";
+      showPairingUI(true);
       return;
     }
     if (response.connected && response.authenticated) {
       statusBadge.className = "status-badge connected";
       statusText.textContent = "Connected";
+      showPairingUI(false);
     } else {
       statusBadge.className = "status-badge disconnected";
       statusText.textContent = "Not running";
+      showPairingUI(true);
     }
+  });
+}
+
+function showPairingUI(show) {
+  if (pairingSection) pairingSection.style.display = show ? "" : "none";
+  const previewEl = document.getElementById("previewSection");
+  const modeSelector = document.querySelector(".mode-selector");
+  const sendSection = document.querySelector(".send-section");
+  if (previewEl) previewEl.style.display = show ? "none" : "";
+  if (modeSelector) modeSelector.style.display = show ? "none" : "";
+  if (sendSection) sendSection.style.display = show ? "none" : "";
+}
+
+// ── Pairing flow ────────────────────────────────────────────────────────────
+if (pairingInput) {
+  pairingInput.addEventListener("input", () => {
+    pairingInput.value = pairingInput.value.replace(/\D/g, "").slice(0, 6);
+    pairBtn.disabled = pairingInput.value.length !== 6;
+    if (pairingError) pairingError.style.display = "none";
+  });
+}
+
+if (pairBtn) {
+  pairBtn.addEventListener("click", () => {
+    const code = pairingInput.value.trim();
+    if (code.length !== 6) return;
+    pairBtn.disabled = true;
+    pairBtn.textContent = "Pairing...";
+    chrome.runtime.sendMessage({ type: "request-pair", code }, (response) => {
+      if (chrome.runtime.lastError || !response) {
+        pairingError.textContent = "Could not reach Blurby desktop";
+        pairingError.style.display = "";
+        pairBtn.disabled = false;
+        pairBtn.textContent = "Pair";
+        return;
+      }
+      if (response.success) {
+        // Paired — refresh status
+        updateConnectionStatus();
+        loadPreview();
+      } else {
+        pairingError.textContent = response.message || "Invalid code — check Blurby desktop";
+        pairingError.style.display = "";
+        pairBtn.disabled = false;
+        pairBtn.textContent = "Pair";
+      }
+    });
   });
 }
 

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+
+const api = (window as any).electronAPI;
 
 interface ConnectorsSettingsProps {
   siteLogins: Array<{ domain: string; cookieCount: number }>;
@@ -13,6 +15,54 @@ export function ConnectorsSettings({
 }: ConnectorsSettingsProps) {
   const [loginUrl, setLoginUrl] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // Chrome Extension pairing state
+  const [shortCode, setShortCode] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState(0);
+  const [connected, setConnected] = useState(false);
+  const [countdown, setCountdown] = useState("");
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Fetch short code on mount
+  useEffect(() => {
+    api.getWsShortCode().then((result: any) => {
+      if (result) {
+        setShortCode(result.code);
+        setExpiresAt(result.expiresAt);
+        setConnected(result.connected);
+      }
+    });
+  }, []);
+
+  // Countdown timer
+  useEffect(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      const remaining = Math.max(0, expiresAt - Date.now());
+      if (remaining <= 0) {
+        // Refresh code
+        api.getWsShortCode().then((result: any) => {
+          if (result) {
+            setShortCode(result.code);
+            setExpiresAt(result.expiresAt);
+            setConnected(result.connected);
+          }
+        });
+      }
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      setCountdown(`${mins}:${secs.toString().padStart(2, "0")}`);
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [expiresAt]);
+
+  async function handleRegenerate() {
+    const result = await api.regenerateWsShortCode();
+    if (result) {
+      setShortCode(result.code);
+      setExpiresAt(result.expiresAt);
+    }
+  }
 
   async function handleLogin() {
     const url = loginUrl.trim();
@@ -32,7 +82,40 @@ export function ConnectorsSettings({
 
   return (
     <div>
-      <div className="settings-section-label">Logged-in Sites</div>
+      {/* Chrome Extension Pairing */}
+      <div className="settings-section-label">Chrome Extension</div>
+      <div className="appearance-hint">
+        Pair the Blurby Chrome extension to send articles directly to your library.
+      </div>
+
+      <div className="ext-pairing-section">
+        <div className="ext-pairing-status">
+          <span className={`ext-status-dot ${connected ? "ext-status-connected" : "ext-status-disconnected"}`} />
+          <span>{connected ? "Connected" : "Not connected"}</span>
+        </div>
+
+        {!connected && shortCode && (
+          <>
+            <div className="ext-pairing-code">{shortCode}</div>
+            <div className="ext-pairing-hint">
+              Enter this code in the Chrome extension popup to pair.
+              Refreshes in {countdown}
+            </div>
+            <button className="settings-toggle-btn" onClick={handleRegenerate}>
+              New Code
+            </button>
+          </>
+        )}
+
+        {connected && (
+          <div className="ext-pairing-hint">
+            Extension is paired and connected.
+          </div>
+        )}
+      </div>
+
+      {/* Site Logins */}
+      <div className="settings-section-label" style={{ marginTop: 24 }}>Logged-in Sites</div>
       <div className="appearance-hint">
         Log in to paywalled sites so Blurby can extract articles behind a login wall.
       </div>

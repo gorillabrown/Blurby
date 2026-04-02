@@ -563,6 +563,8 @@ export const electronAPIStub: ElectronAPI = {
   getWsStatus: async () => trace("getWsStatus", [], { running: false, port: 48924, clients: 0, token: null }),
   getWsPairingToken: async () => trace("getWsPairingToken", [], "mock-token-12345"),
   regenerateWsPairingToken: async () => trace("regenerateWsPairingToken", [], { port: 48924, token: "mock-token-new-67890" }),
+  getWsShortCode: async () => trace("getWsShortCode", [], { code: "123456", expiresAt: Date.now() + 300000, connected: false }),
+  regenerateWsShortCode: async () => trace("regenerateWsShortCode", [], { code: "654321", expiresAt: Date.now() + 300000 }),
 
   // ── Cloud sync ──────────────────────────────────────────────────────────
   cloudSignIn: async (provider) => trace("cloudSignIn", [provider], { success: false, error: "Cloud auth not available in browser stub" }),

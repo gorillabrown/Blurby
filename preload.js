@@ -116,6 +116,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getWsStatus: () => ipcRenderer.invoke("get-ws-status"),
   getWsPairingToken: () => ipcRenderer.invoke("get-ws-pairing-token"),
   regenerateWsPairingToken: () => ipcRenderer.invoke("regenerate-ws-pairing-token"),
+  getWsShortCode: () => ipcRenderer.invoke("get-ws-short-code"),
+  regenerateWsShortCode: () => ipcRenderer.invoke("regenerate-ws-short-code"),
 
   // Cloud sync
   cloudSignIn: (provider) => ipcRenderer.invoke("cloud-sign-in", provider),

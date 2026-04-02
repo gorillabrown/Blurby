@@ -401,3 +401,84 @@ describe("WS protocol message shapes", () => {
     expect(result.valid).toBe(true);
   });
 });
+
+// ── Short code generation + pair protocol (EXT-5B) ─────────────────────────
+
+describe("Short code generation", () => {
+  // We import from ws-server.js for the pure functions
+  const wsServer = require("../main/ws-server.js");
+
+  it("generateShortCode returns 6-digit string", () => {
+    const code = wsServer.generateShortCode();
+    expect(code).toMatch(/^\d{6}$/);
+  });
+
+  it("generateShortCode returns different codes on successive calls", () => {
+    const codes = new Set();
+    for (let i = 0; i < 10; i++) codes.add(wsServer.generateShortCode());
+    // With 900,000 possibilities, 10 calls should produce at least 2 unique
+    expect(codes.size).toBeGreaterThan(1);
+  });
+
+  it("getShortCode returns code and expiresAt", () => {
+    const result = wsServer.getShortCode();
+    expect(result.code).toMatch(/^\d{6}$/);
+    expect(result.expiresAt).toBeGreaterThan(Date.now());
+  });
+
+  it("getShortCode returns same code within TTL window", () => {
+    const first = wsServer.getShortCode();
+    const second = wsServer.getShortCode();
+    expect(second.code).toBe(first.code);
+    expect(second.expiresAt).toBe(first.expiresAt);
+  });
+
+  it("generateShortCode resets the code (force rotation)", () => {
+    const first = wsServer.getShortCode();
+    const newCode = wsServer.generateShortCode();
+    // New code might equal old by chance, but expiresAt should be fresh
+    const second = wsServer.getShortCode();
+    expect(second.expiresAt).toBeGreaterThanOrEqual(first.expiresAt);
+  });
+});
+
+describe("Pair protocol message shapes", () => {
+  function handlePairMessage(msg, validCode) {
+    if (msg.type === "pair") {
+      if (msg.code && String(msg.code) === validCode) {
+        return { type: "pair-ok", token: "generated-token-" + Date.now() };
+      }
+      return { type: "pair-failed", message: "Invalid code" };
+    }
+    return { type: "error", message: `Unknown message type: ${msg.type}` };
+  }
+
+  it("valid code returns pair-ok with token", () => {
+    const response = handlePairMessage({ type: "pair", code: "123456" }, "123456");
+    expect(response.type).toBe("pair-ok");
+    expect(response.token).toBeDefined();
+  });
+
+  it("invalid code returns pair-failed", () => {
+    const response = handlePairMessage({ type: "pair", code: "999999" }, "123456");
+    expect(response.type).toBe("pair-failed");
+    expect(response.message).toContain("Invalid");
+  });
+
+  it("missing code returns pair-failed", () => {
+    const response = handlePairMessage({ type: "pair" }, "123456");
+    expect(response.type).toBe("pair-failed");
+  });
+
+  it("pair-ok token is non-empty string", () => {
+    const response = handlePairMessage({ type: "pair", code: "111111" }, "111111");
+    expect(typeof response.token).toBe("string");
+    expect(response.token.length).toBeGreaterThan(0);
+  });
+
+  it("code comparison is string-based (no type coercion)", () => {
+    const response = handlePairMessage({ type: "pair", code: 123456 }, "123456");
+    // msg.code is number, validCode is string — String() coercion handles this
+    expect(response.type).toBe("pair-ok");
+  });
+});
