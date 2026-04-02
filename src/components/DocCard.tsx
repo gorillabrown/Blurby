@@ -70,11 +70,13 @@ interface DocCardProps {
   selected?: boolean;
   selectionMode?: boolean;
   onToggleSelect?: (id: string) => void;
+  onAddToQueue?: (id: string) => void;
+  onRemoveFromQueue?: (id: string) => void;
   /** NAR-4: Whether this book's TTS audio is fully cached */
   ttsCached?: boolean;
 }
 
-const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect, ttsCached }: DocCardProps) {
+const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect, onAddToQueue, onRemoveFromQueue, ttsCached }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const rawPct = wordCount > 0 ? (pos / wordCount) * 100 : 0;
@@ -136,6 +138,29 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
         </div>
 
         <div className="doc-card-actions" onClick={(e) => e.stopPropagation()}>
+          {doc.queuePosition !== undefined ? (
+            onRemoveFromQueue && <button
+              className="icon-btn"
+              onClick={() => onRemoveFromQueue(doc.id)}
+              title="Remove from Queue"
+              aria-label="Remove from reading queue"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          ) : (
+            onAddToQueue && <button
+              className="icon-btn"
+              onClick={() => onAddToQueue(doc.id)}
+              title="Add to Queue"
+              aria-label="Add to reading queue"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          )}
           <button
             className={`icon-btn doc-fav-btn${doc.favorite ? " doc-fav-btn-active" : ""}`}
             onClick={() => { triggerCoachHint("favorite"); onToggleFavorite(doc.id); }}

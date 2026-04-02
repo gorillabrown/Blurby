@@ -490,6 +490,74 @@ function register(ctx) {
     }
   });
 
+
+  // READINGS-4A: Queue operations
+  ipcMain.handle("add-to-queue", (_, docId) => {
+    const library = ctx.getLibrary();
+    // Find the max queuePosition currently in use
+    let maxPos = -1;
+    for (const d of library) {
+      if (d.queuePosition !== undefined && d.queuePosition > maxPos) {
+        maxPos = d.queuePosition;
+      }
+    }
+    const updated = library.map((d) =>
+      d.id === docId ? { ...d, queuePosition: maxPos + 1 } : d
+    );
+    ctx.setLibrary(updated);
+    ctx.saveLibrary();
+    ctx.broadcastLibrary();
+  });
+
+  ipcMain.handle("remove-from-queue", (_, docId) => {
+    const library = ctx.getLibrary();
+    const removedDoc = library.find((d) => d.id === docId);
+    const removedPos = removedDoc?.queuePosition;
+    const updated = library.map((d) => {
+      if (d.id === docId) {
+        const { queuePosition, ...rest } = d;
+        return rest;
+      }
+      // Compact: shift down docs that were above the removed position
+      if (removedPos !== undefined && d.queuePosition !== undefined && d.queuePosition > removedPos) {
+        return { ...d, queuePosition: d.queuePosition - 1 };
+      }
+      return d;
+    });
+    ctx.setLibrary(updated);
+    ctx.saveLibrary();
+    ctx.broadcastLibrary();
+  });
+
+  ipcMain.handle("reorder-queue", (_, docId, newPosition) => {
+    const library = ctx.getLibrary();
+    const doc = library.find((d) => d.id === docId);
+    if (!doc || doc.queuePosition === undefined) return;
+    const oldPosition = doc.queuePosition;
+    if (oldPosition === newPosition) return;
+
+    const updated = library.map((d) => {
+      if (d.id === docId) return { ...d, queuePosition: newPosition };
+      if (d.queuePosition === undefined) return d;
+      // Shift items between old and new positions
+      if (oldPosition < newPosition) {
+        // Moving down: shift items in (old, new] up by 1
+        if (d.queuePosition > oldPosition && d.queuePosition <= newPosition) {
+          return { ...d, queuePosition: d.queuePosition - 1 };
+        }
+      } else {
+        // Moving up: shift items in [new, old) down by 1
+        if (d.queuePosition >= newPosition && d.queuePosition < oldPosition) {
+          return { ...d, queuePosition: d.queuePosition + 1 };
+        }
+      }
+      return d;
+    });
+    ctx.setLibrary(updated);
+    ctx.saveLibrary();
+    ctx.broadcastLibrary();
+  });
+
   ipcMain.handle("cancel-sync", () => {
     if (ctx.cancelSync) ctx.cancelSync();
     return { ok: true };

@@ -2352,6 +2352,28 @@ button:focus-visible {
   align-items: center;
 }
 
+
+/* READINGS-4A: Drag-to-reorder queue styles */
+.queue-item-dragging {
+  opacity: 0.4;
+}
+
+.queue-item-drag-over {
+  border-top: 2px solid var(--accent);
+}
+
+.queue-drag-handle {
+  cursor: grab;
+  color: var(--text-dimmer);
+  font-size: 16px;
+  margin-right: 6px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.queue-drag-handle:active {
+  cursor: grabbing;
+}
 /* Bubble progress bar */
 
 .bubble-progress {

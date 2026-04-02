@@ -36,6 +36,8 @@ export interface BlurbyDoc {
   collection?: string | null;
   // Sprint 25C: "New" dot tracking
   seenAt?: number;        // timestamp when card was seen in library view
+  // READINGS-4A: Reading queue position
+  queuePosition?: number;  // explicit queue order (0-based), undefined = not in queue
   // Sprint 25S: High-water mark for backtrack detection
   furthestPosition?: number; // Page number (non-EPUB) or fraction 0.0-1.0 (EPUB)
   // Sprint 26: EPUB CFI position tracking
@@ -257,6 +259,10 @@ export interface ElectronAPI {
   cloudForceSync: (direction: "upload" | "download" | "merge") => Promise<SyncResult>;
   cloudStartAutoSync: (intervalMs: number) => Promise<{ ok: boolean }>;
   cloudStopAutoSync: () => Promise<{ ok: boolean }>;
+  // READINGS-4A: Queue operations
+  addToQueue: (docId: string) => Promise<void>;
+  removeFromQueue: (docId: string) => Promise<void>;
+  reorderQueue: (docId: string, newPosition: number) => Promise<void>;
   // Events from main
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
   onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;

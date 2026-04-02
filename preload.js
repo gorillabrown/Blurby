@@ -65,6 +65,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   archiveDoc: (docId) => ipcRenderer.invoke("archive-doc", docId),
   unarchiveDoc: (docId) => ipcRenderer.invoke("unarchive-doc", docId),
 
+  // READINGS-4A: Queue operations
+  addToQueue: (docId) => ipcRenderer.invoke("add-to-queue", docId),
+  removeFromQueue: (docId) => ipcRenderer.invoke("remove-from-queue", docId),
+  reorderQueue: (docId, newPosition) => ipcRenderer.invoke("reorder-queue", docId, newPosition),
+
   // Multi-window reader
   openReaderWindow: (docId) => ipcRenderer.invoke("open-reader-window", docId),
 
