@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1
-Next sprint: EXT-5A — Chrome Extension E2E + Queue Integration
-Health: RED — Queue depth below 3. Need to spec two more sprints.
+Queue depth: 0
+Next sprint: TBD — needs planning session
+Health: RED — Queue empty. Need to spec ≥3 sprints.
 ```
 
 ---
@@ -21,9 +21,9 @@ Health: RED — Queue depth below 3. Need to spec two more sprints.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | **EXT-5A** | v1.10.0 | `sprint/ext-5a` | Full | — | Chrome extension E2E tests + queue integration. Phase 5 start. |
+| — | Queue empty | — | — | — | — | Planning session needed to refill queue. |
 
-**Note:** Queue depth at 1. Backfill needed urgently — spec 2 more sprints.
+**Note:** Queue empty. Next planning session should spec Phase 5B, Phase 6, or backlog items.
 
 ---
 
@@ -42,6 +42,7 @@ Health: RED — Queue depth below 3. Need to spec two more sprints.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| EXT-5A | 2026-04-02 | PASS | Chrome ext E2E + queue integration. 33 new tests. v1.10.0. Phase 5A complete. |
 | READINGS-4C | 2026-04-02 | PASS | Metadata Wizard — scan, filename parser, batch update, modal. 16 new tests. v1.9.0. Phase 4 complete. |
 | READINGS-4B | 2026-04-02 | PASS | Author normalization, first-run folder picker. 16 new tests. v1.8.0. |
 | READINGS-4A | 2026-04-01 | PASS | Library cards, reading queue, "New" dot auto-clear. 17 new tests. v1.7.0. Phase 4 start. |

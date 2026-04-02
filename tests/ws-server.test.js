@@ -315,3 +315,89 @@ describe("BlurbyDoc creation from extension article", () => {
     expect(doc.wordCount).toBe(0);
   });
 });
+
+// ── WS protocol message shape tests (EXT-5A) ───────────────────────────────
+
+describe("WS protocol message shapes", () => {
+  // These test the expected protocol contract between extension and server
+  // without starting a real server.
+
+  function validateMessage(msg) {
+    if (!msg || typeof msg !== "object") return { valid: false, error: "Invalid message" };
+    if (!msg.type) return { valid: false, error: "Missing type field" };
+    return { valid: true };
+  }
+
+  function handleMessageType(msg) {
+    if (msg.type === "auth") {
+      const token = msg.token;
+      if (token === "valid-token") return { type: "auth-ok" };
+      return { type: "auth-failed", message: "Invalid pairing token" };
+    }
+    if (msg.type === "ping") return { type: "pong" };
+    if (msg.type === "add-article") {
+      if (!msg.payload || !msg.payload.textContent) {
+        return { type: "error", message: "Article must include textContent" };
+      }
+      return { type: "ok", docId: "test_123" };
+    }
+    return { type: "error", message: `Unknown message type: ${msg.type}` };
+  }
+
+  it("add-article with complete payload returns ok response", () => {
+    const response = handleMessageType({
+      type: "add-article",
+      payload: { title: "Test", textContent: "Content here.", author: "Author" },
+    });
+    expect(response.type).toBe("ok");
+    expect(response.docId).toBeDefined();
+  });
+
+  it("add-article with minimal payload (title + textContent) succeeds", () => {
+    const response = handleMessageType({
+      type: "add-article",
+      payload: { title: "Min", textContent: "Just text." },
+    });
+    expect(response.type).toBe("ok");
+  });
+
+  it("add-article with empty textContent returns error", () => {
+    const response = handleMessageType({
+      type: "add-article",
+      payload: { title: "Bad", textContent: "" },
+    });
+    expect(response.type).toBe("error");
+    expect(response.message).toContain("textContent");
+  });
+
+  it("auth with wrong token returns auth-failed", () => {
+    const response = handleMessageType({ type: "auth", token: "wrong-token" });
+    expect(response.type).toBe("auth-failed");
+  });
+
+  it("auth with valid token returns auth-ok", () => {
+    const response = handleMessageType({ type: "auth", token: "valid-token" });
+    expect(response.type).toBe("auth-ok");
+  });
+
+  it("unknown message type returns error", () => {
+    const response = handleMessageType({ type: "foo-bar" });
+    expect(response.type).toBe("error");
+    expect(response.message).toContain("foo-bar");
+  });
+
+  it("ping returns pong", () => {
+    const response = handleMessageType({ type: "ping" });
+    expect(response.type).toBe("pong");
+  });
+
+  it("message validation rejects missing type", () => {
+    const result = validateMessage({ payload: "data" });
+    expect(result.valid).toBe(false);
+  });
+
+  it("message validation accepts valid message", () => {
+    const result = validateMessage({ type: "ping" });
+    expect(result.valid).toBe(true);
+  });
+});

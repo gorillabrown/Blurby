@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-02 — Post-READINGS-4C. 989 tests, 50 files. v1.9.0.
+**Last updated**: 2026-04-02 — Post-EXT-5A. 1,022 tests, 51 files. v1.10.0.
 **Current branch**: `main`
-**Current state**: Phase 4 complete (READINGS-4A + 4B + 4C). Phase 5 next (EXT-5A).
+**Current state**: Phase 5A complete (EXT-5A). Phase 5B or Phase 6 next.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -173,13 +173,9 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint EXT-5A: Chrome Extension E2E Tests + Queue Integration (v1.10.0)
+### Sprint EXT-5A: Chrome Extension E2E Tests + Queue Integration ✅ COMPLETED (v1.10.0, 2026-04-02)
 
-**Branch:** `sprint/ext-5a`
-**Tier:** Full (new test infrastructure, data model integration, IPC change)
-**Estimate:** ~35 tool uses (single dispatch)
-
-**Scope:** Two tracks: (1) E2E test suite covering the full article ingestion pipeline (article → WS message → EPUB conversion → library entry → queue position), (2) Wire extension-sourced articles into the reading queue automatically.
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 33 new tests (1,022 total, 51 files). Auto-queue extension articles (queuePosition), source domain badge, E2E pipeline tests, WS protocol tests. APPROVED.
 
 #### WHERE (Read Order)
 
@@ -254,7 +250,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
-| EXT-5A | v1.10.0 | 🔜 QUEUED | Chrome extension E2E tests + queue integration. Phase 5 start. |
+| EXT-5A | v1.10.0 | ✅ DONE | Chrome extension E2E + queue integration. 33 new tests. Phase 5A complete. |
 | READINGS-4C | v1.9.0 | ✅ DONE | Metadata Wizard — scan, filename parser, batch update, modal, Ctrl+Shift+M. 16 new tests. |
 | READINGS-4B | v1.8.0 | ✅ DONE | Author normalization + first-run folder picker. BUG-074/076 resolved. 16 new tests. |
 | HOTFIX-ARM | v1.7.0+ | ✅ DONE | ONNX ARM64 fix — onnxruntime-node 1.24.3 override, cpuinfo suppression. |
