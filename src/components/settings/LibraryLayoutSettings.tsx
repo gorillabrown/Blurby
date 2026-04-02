@@ -5,6 +5,7 @@ import { useToast } from "../../contexts/ToastContext";
 interface LibraryLayoutSettingsProps {
   settings: BlurbySettings;
   onSettingsChange: (updates: Partial<BlurbySettings>) => void;
+  onOpenMetadataWizard?: () => void;
 }
 
 const SORT_OPTIONS = [
@@ -27,7 +28,7 @@ const CARD_SPACINGS: Array<{ value: "compact" | "cozy" | "roomy"; label: string 
   { value: "roomy", label: "Roomy" },
 ];
 
-export function LibraryLayoutSettings({ settings, onSettingsChange }: LibraryLayoutSettingsProps) {
+export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetadataWizard }: LibraryLayoutSettingsProps) {
   const { showToast } = useToast();
   const [normalizing, setNormalizing] = useState(false);
   const currentSort = settings.defaultSort || "progress";
@@ -108,6 +109,15 @@ export function LibraryLayoutSettings({ settings, onSettingsChange }: LibraryLay
       >
         {normalizing ? "Normalizing..." : "Normalize Authors"}
       </button>
+      {onOpenMetadataWizard && (
+        <button
+          className="settings-toggle-btn"
+          onClick={onOpenMetadataWizard}
+          style={{ marginTop: 8 }}
+        >
+          Metadata Wizard
+        </button>
+      )}
     </div>
   );
 }

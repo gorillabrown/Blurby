@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-02 — Post-READINGS-4B. 973 tests, 49 files. v1.8.0.
+**Last updated**: 2026-04-02 — Post-READINGS-4C. 989 tests, 50 files. v1.9.0.
 **Current branch**: `main`
-**Current state**: Phase 4 in progress (READINGS-4A + READINGS-4B complete). READINGS-4C next.
+**Current state**: Phase 4 complete (READINGS-4A + 4B + 4C). Phase 5 next (EXT-5A).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -106,7 +106,7 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 **Phase 4 split:**
 - READINGS-4A ✅ (cards + queue + new dot) — v1.7.0
 - READINGS-4B = Author normalization + First-run folder picker
-- READINGS-4C = Metadata Wizard
+- READINGS-4C ✅ (metadata wizard) — v1.9.0
 
 ---
 
@@ -116,13 +116,9 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint READINGS-4C: Metadata Wizard (v1.9.0)
+### Sprint READINGS-4C: Metadata Wizard ✅ COMPLETED (v1.9.0, 2026-04-02)
 
-**Branch:** `sprint/readings-4c`
-**Tier:** Full (new feature, new UI component, IPC + data model)
-**Estimate:** ~35 tool uses (single dispatch)
-
-**Scope:** Batch metadata enrichment wizard. Scans library for docs with missing or incomplete metadata (no author, no cover, generic title). Offers auto-fill from EPUB/file metadata, filename parsing, and manual editing. No external API calls in 4C — local-only enrichment. API enrichment (Open Library, Google Books) deferred to future sprint.
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-077 resolved. 16 new tests (989 total, 50 files). Metadata scan IPC, filename parser, batch update IPC, MetadataWizard modal, Ctrl+Shift+M shortcut. APPROVED.
 
 #### WHERE (Read Order)
 
@@ -259,7 +255,7 @@ Phase 2 is complete when:
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
 | EXT-5A | v1.10.0 | 🔜 QUEUED | Chrome extension E2E tests + queue integration. Phase 5 start. |
-| READINGS-4C | v1.9.0 | 🔜 QUEUED | Metadata Wizard — batch scan, filename parsing, local enrichment. |
+| READINGS-4C | v1.9.0 | ✅ DONE | Metadata Wizard — scan, filename parser, batch update, modal, Ctrl+Shift+M. 16 new tests. |
 | READINGS-4B | v1.8.0 | ✅ DONE | Author normalization + first-run folder picker. BUG-074/076 resolved. 16 new tests. |
 | HOTFIX-ARM | v1.7.0+ | ✅ DONE | ONNX ARM64 fix — onnxruntime-node 1.24.3 override, cpuinfo suppression. |
 | READINGS-4A | v1.7.0 | ✅ DONE | Library cards, reading queue, "New" dot auto-clear. 17 new tests. |
@@ -293,7 +289,7 @@ Items migrated from BUG_REPORT.md — feature requests, enhancements, and archit
 | ~~BUG-067~~ | ~~"New" dot auto-clear~~ | ✅ 4A | IntersectionObserver + seenAt timestamp |
 | ~~BUG-074~~ | ~~Author name normalization~~ | ✅ 4B | Standardize to "Last, First" format |
 | ~~BUG-076~~ | ~~First-run library folder picker~~ | ✅ 4B | Mandatory onboarding step |
-| BUG-077 | Metadata Wizard | 4C | Batch metadata enrichment (local-only, no API) |
+| ~~BUG-077~~ | ~~Metadata Wizard~~ | ✅ 4C | Batch metadata enrichment (local-only, no API) |
 
 ### Phase 5: Read Later + Blurby News
 | ID | Feature | Description |

@@ -34,6 +34,7 @@ interface MenuFlapProps {
   onRemoveFromQueue?: (docId: string) => void;
   onReorderQueue?: (docId: string, newPosition: number) => void;
   targetView?: string | null;
+  onOpenMetadataWizard?: () => void;
 }
 
 export default function MenuFlap({
@@ -51,6 +52,7 @@ export default function MenuFlap({
   onRemoveFromQueue,
   onReorderQueue,
   targetView,
+  onOpenMetadataWizard,
 }: MenuFlapProps) {
   const [view, setView] = useState<FlapView>("queue");
 
@@ -221,6 +223,7 @@ export default function MenuFlap({
               onSiteLogout={onSiteLogout}
               activeSubPage={view !== "settings" ? view : undefined}
               isMac={isMac}
+              onOpenMetadataWizard={onOpenMetadataWizard}
             />
           )}
         </div>

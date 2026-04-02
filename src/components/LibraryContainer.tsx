@@ -18,6 +18,7 @@ import TagPickerOverlay from "./TagPickerOverlay";
 import QuickSettingsPopover from "./QuickSettingsPopover";
 import OnboardingOverlay from "./OnboardingOverlay";
 import BugReportModal from "./BugReportModal";
+import MetadataWizard from "./MetadataWizard";
 import { gatherAppState, type BugReportAppState } from "../utils/bugReportState";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
@@ -81,6 +82,9 @@ export default function LibraryContainer() {
     screenshotFile: string | null;
     appState: BugReportAppState;
   } | null>(null);
+
+  // Metadata wizard state
+  const [metadataWizardOpen, setMetadataWizardOpen] = useState(false);
 
   // Smart import confirmation state
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
@@ -416,6 +420,7 @@ export default function LibraryContainer() {
     toggleFlap: toggleMenuFlap,
     openSettings: handleOpenSettings,
     openBugReport,
+    openMetadataWizard: () => setMetadataWizardOpen(true),
     view,
     activeOverlay: kbState.activeOverlay,
     setActiveOverlay: kbState.setActiveOverlay,
@@ -551,6 +556,12 @@ export default function LibraryContainer() {
               onClose={() => setBugReport(null)}
             />
           )}
+          {metadataWizardOpen && (
+            <MetadataWizard
+              onClose={() => setMetadataWizardOpen(false)}
+              onApplied={() => {}}
+            />
+          )}
         </ToastContext.Provider>
       </SettingsContext.Provider>
     );
@@ -572,6 +583,7 @@ export default function LibraryContainer() {
       onRemoveFromQueue={handleRemoveFromQueue}
       onReorderQueue={handleReorderQueue}
       targetView={settingsPage}
+      onOpenMetadataWizard={() => setMetadataWizardOpen(true)}
     />
   );
 
@@ -696,6 +708,12 @@ export default function LibraryContainer() {
             screenshotFile={bugReport.screenshotFile}
             appState={bugReport.appState}
             onClose={() => setBugReport(null)}
+          />
+        )}
+        {metadataWizardOpen && (
+          <MetadataWizard
+            onClose={() => setMetadataWizardOpen(false)}
+            onApplied={() => {}}
           />
         )}
       </ToastContext.Provider>

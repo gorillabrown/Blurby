@@ -52,6 +52,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Author normalization
   normalizeAllAuthors: () => ipcRenderer.invoke("normalize-all-authors"),
 
+  // READINGS-4C: Metadata wizard
+  scanLibraryMetadata: () => ipcRenderer.invoke("scan-library-metadata"),
+  applyMetadataUpdates: (updates) => ipcRenderer.invoke("apply-metadata-updates", updates),
+
   // Import/export
   exportLibrary: () => ipcRenderer.invoke("export-library"),
   importLibrary: () => ipcRenderer.invoke("import-library"),

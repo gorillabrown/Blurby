@@ -587,6 +587,104 @@ function register(ctx) {
     // Utility for renderer to get a resolved path (passthrough)
     return filePath;
   });
+
+  // READINGS-4C: Metadata scan — reports docs with missing/incomplete metadata
+  ipcMain.handle("scan-library-metadata", async () => {
+    const { parseFilenameMetadata } = require("../metadata-utils");
+    const library = ctx.getLibrary();
+    const results = [];
+
+    for (const doc of library) {
+      if (doc.deleted) continue;
+
+      const issues = [];
+      const suggestions = {};
+
+      // Check for missing author
+      if (!doc.author || doc.author === "Unknown" || doc.author === "unknown") {
+        issues.push("no-author");
+      }
+
+      // Check for title that looks like a filename
+      const titleLooksLikeFilename = doc.filename &&
+        (doc.title === doc.filename ||
+         doc.title === path.basename(doc.filename, path.extname(doc.filename)));
+      if (titleLooksLikeFilename) {
+        issues.push("filename-title");
+      }
+
+      // Check for missing cover
+      if (!doc.coverPath) {
+        issues.push("no-cover");
+      }
+
+      // Skip docs with no issues
+      if (issues.length === 0) continue;
+
+      // Try to extract suggestions from filename
+      if (doc.filename || doc.filepath) {
+        const fname = doc.filename || path.basename(doc.filepath);
+        const parsed = parseFilenameMetadata(fname);
+        if (parsed.suggestedTitle) suggestions.title = parsed.suggestedTitle;
+        if (parsed.suggestedAuthor) suggestions.author = parsed.suggestedAuthor;
+      }
+
+      // Try to extract suggestions from EPUB metadata
+      const epubPath = doc.convertedEpubPath || (doc.ext === ".epub" ? doc.filepath : null);
+      if (epubPath) {
+        try {
+          const meta = await extractEpubMetadata(epubPath);
+          if (meta.title && !suggestions.title) suggestions.title = meta.title;
+          if (meta.author && !suggestions.author) suggestions.author = meta.author;
+        } catch { /* best-effort */ }
+      }
+
+      results.push({
+        docId: doc.id,
+        currentTitle: doc.title,
+        currentAuthor: doc.author || null,
+        currentCoverPath: doc.coverPath || null,
+        issues,
+        suggestions,
+      });
+    }
+
+    return results;
+  });
+
+  // READINGS-4C: Batch apply metadata updates
+  ipcMain.handle("apply-metadata-updates", async (_, updates) => {
+    if (!Array.isArray(updates)) return { updated: 0 };
+
+    const ALLOWED_FIELDS = new Set(["title", "author", "coverPath"]);
+    const library = ctx.getLibrary();
+    const updateMap = new Map();
+    for (const { docId, updates: fields } of updates) {
+      if (!docId || !fields || typeof fields !== "object") continue;
+      // Filter to allowed fields only
+      const clean = {};
+      for (const [key, value] of Object.entries(fields)) {
+        if (ALLOWED_FIELDS.has(key)) clean[key] = value;
+      }
+      if (Object.keys(clean).length > 0) updateMap.set(docId, clean);
+    }
+
+    if (updateMap.size === 0) return { updated: 0 };
+
+    let count = 0;
+    const updatedLibrary = library.map((doc) => {
+      const fields = updateMap.get(doc.id);
+      if (!fields) return doc;
+      count++;
+      return { ...doc, ...fields, modified: Date.now() };
+    });
+
+    ctx.setLibrary(updatedLibrary);
+    ctx.saveLibrary();
+    ctx.broadcastLibrary();
+    return { updated: count };
+  });
+
 }
 
 module.exports = { register };
