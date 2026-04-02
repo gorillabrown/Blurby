@@ -16,6 +16,8 @@ interface DocGridCardProps {
   selected?: boolean;
   selectionMode?: boolean;
   onToggleSelect?: (id: string) => void;
+  onAddToQueue?: (id: string) => void;
+  onRemoveFromQueue?: (id: string) => void;
   /** NAR-4: Whether this book's TTS audio is fully cached */
   ttsCached?: boolean;
 }
@@ -39,7 +41,7 @@ function formatApaSubtext(doc: BlurbyDoc): string | null {
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, focused, selected, selectionMode, onToggleSelect, ttsCached }: DocGridCardProps) {
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, focused, selected, selectionMode, onToggleSelect, onAddToQueue, onRemoveFromQueue, ttsCached }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -103,9 +105,15 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
               Edit Metadata
             </button>
           )}
-          <button onClick={() => { setContextMenu(null); /* TODO: Add to Queue — Sprint 29 */ }} className="doc-context-menu-disabled">
-            Add to Queue
-          </button>
+          {doc.queuePosition !== undefined ? (
+            <button onClick={() => { if (onRemoveFromQueue) onRemoveFromQueue(doc.id); setContextMenu(null); }}>
+              Remove from Queue
+            </button>
+          ) : (
+            <button onClick={() => { if (onAddToQueue) onAddToQueue(doc.id); setContextMenu(null); }}>
+              Add to Queue
+            </button>
+          )}
           <div className="doc-context-menu-divider" />
           {onDelete && !confirmDelete && (
             <button onClick={() => setConfirmDelete(true)} className="doc-context-menu-danger">

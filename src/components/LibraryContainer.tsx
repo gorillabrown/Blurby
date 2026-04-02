@@ -392,6 +392,21 @@ export default function LibraryContainer() {
     api.saveLibrary(updatedLibrary);
   }, [library, setLibrary]);
 
+
+  // READINGS-4A: Queue operations
+  const handleAddToQueue = useCallback(async (docId: string) => {
+    await api.addToQueue(docId);
+    showToast('Added to queue');
+  }, [showToast]);
+
+  const handleRemoveFromQueue = useCallback(async (docId: string) => {
+    await api.removeFromQueue(docId);
+    showToast('Removed from queue');
+  }, [showToast]);
+
+  const handleReorderQueue = useCallback(async (docId: string, newPosition: number) => {
+    await api.reorderQueue(docId, newPosition);
+  }, []);
   const handleOnboardingComplete = useCallback(() => {
     setShowOnboarding(false);
     setSettings((prev) => ({ ...prev, firstRunCompleted: true }));
@@ -553,6 +568,9 @@ export default function LibraryContainer() {
       siteLogins={siteLogins}
       onSiteLogin={handleSiteLogin}
       onSiteLogout={handleSiteLogout}
+      onAddToQueue={handleAddToQueue}
+      onRemoveFromQueue={handleRemoveFromQueue}
+      onReorderQueue={handleReorderQueue}
       targetView={settingsPage}
     />
   );

@@ -16,8 +16,8 @@ function formatTimeCompact(words: number): string {
 
 /**
  * Format the book data line for library cards.
- * - If reading (progress > 0%): `7% · 323p · 1.1h/6.2h`
- * - If not started: `323p · 6.2h`
+ * - If reading (progress > 0%): `"45% · 3h 12m left"`
+ * - If not started: `"323p · 6.2h"`
  */
 export function formatBookDataLine(wordCount: number, position: number): string {
   const pages = Math.max(1, Math.round(wordCount / WORDS_PER_PAGE));
@@ -26,10 +26,21 @@ export function formatBookDataLine(wordCount: number, position: number): string 
   if (position > 0) {
     const rawPct = (position / wordCount) * 100;
     const pct = rawPct > 0 && rawPct < 1 ? 1 : Math.round(rawPct);
-    const wordsRead = position;
-    const readTime = formatTimeCompact(wordsRead);
-    return `${pct}% \u00B7 ${pages}p \u00B7 ${readTime}/${totalTime}`;
+    const wordsRemaining = Math.max(0, wordCount - position);
+    const remainingTime = formatRemainingTime(wordsRemaining);
+    return `${pct}% · ${remainingTime} left`;
   }
 
-  return `${pages}p \u00B7 ${totalTime}`;
+  return `${pages}p · ${totalTime}`;
+}
+
+/** Format remaining time as "3h 12m" or "42m" for display. */
+function formatRemainingTime(wordsRemaining: number): string {
+  const totalMins = wordsRemaining / ESTIMATE_WPM;
+  if (totalMins < 1) return "1m";
+  const hours = Math.floor(totalMins / 60);
+  const mins = Math.round(totalMins % 60);
+  if (hours === 0) return `${Math.max(1, mins)}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}m`;
 }

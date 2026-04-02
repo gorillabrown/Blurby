@@ -30,6 +30,9 @@ interface MenuFlapProps {
   onSiteLogin: (url: string) => Promise<void>;
   onSiteLogout: (domain: string) => Promise<void>;
   isMac?: boolean;
+  onAddToQueue?: (docId: string) => void;
+  onRemoveFromQueue?: (docId: string) => void;
+  onReorderQueue?: (docId: string, newPosition: number) => void;
   targetView?: string | null;
 }
 
@@ -44,6 +47,9 @@ export default function MenuFlap({
   onSiteLogin,
   onSiteLogout,
   isMac = false,
+  onAddToQueue,
+  onRemoveFromQueue,
+  onReorderQueue,
   targetView,
 }: MenuFlapProps) {
   const [view, setView] = useState<FlapView>("queue");
@@ -201,6 +207,9 @@ export default function MenuFlap({
               docs={docs}
               compact={settings.compactMode}
               onDocClick={handleDocClick}
+              onAddToQueue={onAddToQueue}
+              onRemoveFromQueue={onRemoveFromQueue}
+              onReorderQueue={onReorderQueue}
             />
           ) : (
             <SettingsMenu

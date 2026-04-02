@@ -139,17 +139,35 @@ export default function LibraryView({
     return [...docs];
   }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme]);
 
-  // BUG-067: IntersectionObserver to track "new" cards seen in viewport
+  // BUG-067 + READINGS-4A: IntersectionObserver to track "new" cards seen in viewport
+  // Cards must be visible for >=1 second before marking as seen (debounce via setTimeout + Map)
   const seenDocIdsRef = useRef<Set<string>>(new Set());
+  const seenTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   useEffect(() => {
     const scrollContainer = document.querySelector(".library-scroll");
     if (!scrollContainer) return;
+    const timers = seenTimersRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
+          const docId = (entry.target as HTMLElement).dataset.docId;
+          if (!docId) continue;
           if (entry.isIntersecting) {
-            const docId = (entry.target as HTMLElement).dataset.docId;
-            if (docId) seenDocIdsRef.current.add(docId);
+            // Start 1s timer if not already running
+            if (!timers.has(docId)) {
+              const timer = setTimeout(() => {
+                seenDocIdsRef.current.add(docId);
+                timers.delete(docId);
+              }, 1000);
+              timers.set(docId, timer);
+            }
+          } else {
+            // Card scrolled out of view — cancel timer
+            const existing = timers.get(docId);
+            if (existing) {
+              clearTimeout(existing);
+              timers.delete(docId);
+            }
           }
         }
       },
@@ -158,7 +176,12 @@ export default function LibraryView({
     // Observe all unread cards
     const unreadCards = scrollContainer.querySelectorAll<HTMLElement>(".doc-grid-card-unread, .doc-card-unread");
     unreadCards.forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      // Clean up any pending timers
+      for (const timer of timers.values()) clearTimeout(timer);
+      timers.clear();
+    };
   }, [filteredLibrary]);
 
   // Flush seen docs when navigating away from library
