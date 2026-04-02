@@ -10,6 +10,7 @@ const { extractContent, extractDocMetadata, countWords,
         parseMobiMetadata, parseCallibreOpf,
         clearChapterCache, epubChapterCache } = require("../file-parsers");
 const { htmlToEpub } = require("../epub-converter");
+const { normalizeAuthor } = require("../author-normalize");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -218,7 +219,7 @@ function register(ctx) {
             id: docId, title: meta.title, filepath: destPath, filename: path.basename(destPath),
             ext, size: stat.size, modified: stat.mtimeMs,
             wordCount, position: 0, created: Date.now(), source: "folder",
-            author: meta.author, coverPath: meta.coverPath, lastReadAt: null,
+            author: normalizeAuthor(meta.author), coverPath: meta.coverPath, lastReadAt: null,
           };
 
           if (ext !== ".epub") {
@@ -228,7 +229,7 @@ function register(ctx) {
               const convertedDir = path.join(ctx.getDataPath(), EPUB_CONVERTED_DIR);
               const convResult = await convertToEpub(destPath, convertedDir, docId, {
                 title: meta.title || path.basename(destPath, ext),
-                author: meta.author,
+                author: normalizeAuthor(meta.author),
               });
               doc.convertedEpubPath = convResult.epubPath;
               doc.originalFilepath = destPath;
@@ -322,7 +323,7 @@ function register(ctx) {
           if (file.ext === ".epub") {
             if (!prev.coverPath || !prev.author || prev.title === path.basename(file.filename, file.ext)) {
               const meta = await extractEpubMetadata(file.filepath);
-              if (!prev.author && meta.author) updates.author = meta.author;
+              if (!prev.author && meta.author) updates.author = normalizeAuthor(meta.author);
               if (meta.title && prev.title === path.basename(file.filename, file.ext)) {
                 updates.title = meta.title;
               }
@@ -333,7 +334,7 @@ function register(ctx) {
           } else if ((file.ext === ".mobi" || file.ext === ".azw3" || file.ext === ".azw") && (!prev.coverPath || !prev.author)) {
             const opfMeta = await parseCallibreOpf(file.filepath);
             if (opfMeta) {
-              if (!prev.author && opfMeta.author) updates.author = opfMeta.author;
+              if (!prev.author && opfMeta.author) updates.author = normalizeAuthor(opfMeta.author);
               if (opfMeta.title && prev.title === path.basename(file.filename, file.ext)) updates.title = opfMeta.title;
               if (!prev.coverPath && opfMeta.coverPath) {
                 const coversDir = path.join(ctx.getUserDataPath(), "covers");
@@ -365,7 +366,7 @@ function register(ctx) {
               id: docId, title: meta.title, filepath: file.filepath, filename: file.filename,
               ext: file.ext, size: file.size, modified: file.modified,
               wordCount, position: 0, created: Date.now(), source: "folder",
-              author: meta.author, coverPath: meta.coverPath, lastReadAt: null,
+              author: normalizeAuthor(meta.author), coverPath: meta.coverPath, lastReadAt: null,
             });
           } else {
             ctx.addFailedExtraction(file.filepath);
@@ -435,6 +436,25 @@ function register(ctx) {
     }
   });
 
+
+  // READINGS-4B: Batch normalize all author names in library
+  ipcMain.handle("normalize-all-authors", async () => {
+    const library = ctx.getLibrary();
+    let updated = 0;
+    for (const doc of library) {
+      if (!doc.author || doc.deleted) continue;
+      const normalized = normalizeAuthor(doc.author);
+      if (normalized !== doc.author) {
+        doc.author = normalized;
+        updated++;
+      }
+    }
+    if (updated > 0) {
+      ctx.saveLibrary();
+      ctx.broadcastLibrary();
+    }
+    return { updated };
+  });
   ipcMain.handle("export-library", async () => {
     const mainWindow = ctx.getMainWindow();
     const settings = ctx.getSettings();

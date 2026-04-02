@@ -242,12 +242,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.7.0 — Post-READINGS-4A)
+## Current System State (v1.8.0 — Post-READINGS-4B)
 
 ### Codebase (branch: `main`)
 
-- All sprints through READINGS-4A complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B + FLOW-3A + FLOW-3B + READINGS-4A)
-- 957 tests passing across 48 test files
+- All sprints through READINGS-4B complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B + FLOW-3A + FLOW-3B + READINGS-4A + READINGS-4B)
+- 973 tests across 49 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -290,7 +290,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
   - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration, useReaderMode (TD-1), useProgressTracker (TD-1), useEinkController (TD-1)
-  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts (`sortReadingQueue` with `queuePosition` support), segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts (imperative infinite-scroll engine for Flow Mode, FLOW-3A), constants.ts
+  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts (`sortReadingQueue` with `queuePosition` support), segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts (imperative infinite-scroll engine for Flow Mode, FLOW-3A), constants.ts, authorNormalize.ts (author name normalization to "Last, First" format)
   - `src/types/` — types.ts (BlurbyDoc gains `queuePosition?: number`), foliate.ts (TD-1), narration.ts (TD-1)
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro)
@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 48 test files, 957 tests (incl. `tests/flow-scroll-engine.test.js`, `tests/reading-queue.test.js`)
+  - **Tests** (`tests/`): 49 test files, 973 tests (incl. `tests/flow-scroll-engine.test.js`, `tests/author-normalize.test.ts`)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -311,7 +311,7 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 4 continued: Blurby Readings** — Author normalization (BUG-074), Metadata Wizard (BUG-077), First-run folder picker (BUG-076) (READINGS-4B)
+- **Phase 4 continued: Blurby Readings** — Metadata Wizard (BUG-077) (READINGS-4C)
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -319,9 +319,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through READINGS-4A complete (v1.7.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through READINGS-4B complete (v1.8.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll) → ✅ FLOW-3B (polish) → ✅ READINGS-4A (library cards, queue, new dot)
+✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll) → ✅ FLOW-3B (polish) → ✅ READINGS-4A (library cards, queue, new dot) → ✅ READINGS-4B (author normalization, folder picker)
 
-**Next:** READINGS-4B (author normalization, metadata wizard, first-run picker) → Phase 5 (
+**Next:** READINGS-4C (metadata wizard) → Phase 5 (

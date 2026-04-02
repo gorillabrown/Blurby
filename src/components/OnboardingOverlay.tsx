@@ -29,7 +29,8 @@ const TOUR_STEPS = [
 ] as const;
 
 export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps) {
-  const [phase, setPhase] = useState<"welcome" | "tour">("welcome");
+  const [phase, setPhase] = useState<"welcome" | "folder" | "tour">("welcome");
+  const [folderSelected, setFolderSelected] = useState(false);
   const [step, setStep] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
   const firstFocusRef = useRef<HTMLButtonElement>(null);
@@ -58,6 +59,17 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
   }, [phase, step, handleSkip]);
 
   const handleStartTour = useCallback(() => {
+    setPhase("folder");
+  }, []);
+
+  const handleFolderPick = useCallback(async () => {
+    const result = await api.selectFolder();
+    if (result) {
+      setFolderSelected(true);
+    }
+  }, []);
+
+  const handleFolderNext = useCallback(() => {
     setPhase("tour");
     setStep(0);
   }, []);
@@ -78,7 +90,7 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
       className="onboarding-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label={phase === "welcome" ? "Welcome to Blurby" : `Onboarding step ${step + 1} of ${TOUR_STEPS.length}`}
+      aria-label={phase === "welcome" ? "Welcome to Blurby" : phase === "folder" ? "Choose library folder" : `Onboarding step ${step + 1} of ${TOUR_STEPS.length}`}
       ref={overlayRef}
     >
       {phase === "welcome" ? (
@@ -103,6 +115,32 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
             </button>
             <button className="onboarding-btn-skip" onClick={handleSkip}>
               Skip tour
+            </button>
+          </div>
+        </div>
+      ) : phase === "folder" ? (
+        <div className="onboarding-welcome">
+          <h1 className="onboarding-heading">Choose your library folder</h1>
+          <p className="onboarding-tagline">Select a folder where your books and documents are stored. Blurby will watch this folder for new files.</p>
+          <div className="onboarding-actions">
+            <button
+              ref={firstFocusRef}
+              className="onboarding-btn-primary"
+              onClick={handleFolderPick}
+              autoFocus
+            >
+              {folderSelected ? "Folder Selected" : "Choose Folder"}
+            </button>
+            <button
+              className="onboarding-btn-primary"
+              onClick={handleFolderNext}
+              disabled={!folderSelected}
+              style={!folderSelected ? { opacity: 0.5 } : undefined}
+            >
+              Next
+            </button>
+            <button className="onboarding-btn-skip" onClick={handleFolderNext}>
+              Skip
             </button>
           </div>
         </div>

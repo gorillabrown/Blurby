@@ -1,4 +1,6 @@
+import { useState } from "react";
 import type { BlurbySettings } from "../../types";
+import { useToast } from "../../contexts/ToastContext";
 
 interface LibraryLayoutSettingsProps {
   settings: BlurbySettings;
@@ -26,6 +28,8 @@ const CARD_SPACINGS: Array<{ value: "compact" | "cozy" | "roomy"; label: string 
 ];
 
 export function LibraryLayoutSettings({ settings, onSettingsChange }: LibraryLayoutSettingsProps) {
+  const { showToast } = useToast();
+  const [normalizing, setNormalizing] = useState(false);
   const currentSort = settings.defaultSort || "progress";
   const currentViewMode = settings.defaultViewMode || settings.viewMode || "list";
   const currentCardSize = settings.libraryCardSize || "medium";
@@ -82,6 +86,28 @@ export function LibraryLayoutSettings({ settings, onSettingsChange }: LibraryLay
           >{sp.label}</button>
         ))}
       </div>
+
+      {/* Author Normalization */}
+      <div className="settings-section-label" style={{ marginTop: 20 }}>Library Maintenance</div>
+      <button
+        className="settings-toggle-btn"
+        disabled={normalizing}
+        onClick={async () => {
+          setNormalizing(true);
+          try {
+            const result = await (window as any).electronAPI.normalizeAllAuthors();
+            if (showToast) {
+              showToast(result.updated > 0
+                ? `Normalized ${result.updated} author name${result.updated === 1 ? "" : "s"}`
+                : "All author names are already normalized");
+            }
+          } finally {
+            setNormalizing(false);
+          }
+        }}
+      >
+        {normalizing ? "Normalizing..." : "Normalize Authors"}
+      </button>
     </div>
   );
 }

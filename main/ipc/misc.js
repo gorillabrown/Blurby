@@ -11,6 +11,7 @@ const { countWords } = require("../file-parsers");
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
         openSiteLogin } = require("../url-extractor");
 const { COVER_CACHE_MAX } = require("../constants");
+const { normalizeAuthor } = require("../author-normalize");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -148,7 +149,7 @@ function register(ctx) {
         title: result.title, content: result.content,
         wordCount: countWords(result.content),
         sourceUrl: url, position: 0, created: Date.now(), source: "url",
-        author: result.author || null,
+        author: normalizeAuthor(result.author) || null,
         authorFull: result.author || null,
         sourceDomain: result.sourceDomain || null,
         publishedDate: result.publishedDate || null,
