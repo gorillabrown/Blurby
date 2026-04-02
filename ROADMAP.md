@@ -101,26 +101,6 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 
 ## Phase 4 — Blurby Readings
 
-<<<<<<< Updated upstream
-**Goal:** Transform the library and reading queue into a curated reading experience. Cards show richer metadata at a glance. The reading queue becomes an explicit, reorderable list with "Add to Queue" as a first-class action. New-import dots auto-clear when the user scrolls past them.
-
-**Baseline:** Library cards (DocGridCard 193 lines, DocCard 210 lines) already render 3 lines: Title / Author / book data (`formatBookDataLine`). ReadingQueue.tsx (110 lines) splits "Continue Reading" / "Unread" sections inside MenuFlap.tsx (224 lines, default view = "queue"). `sortReadingQueue()` in queue.ts sorts by `lastReadAt` (in-progress) then `created` (unread). `seenAt` field exists on BlurbyDoc but auto-clear via IntersectionObserver is not wired. DocGridCard has a disabled "Add to Queue" context menu button (line 106).
-
-**Gaps addressed:**
-- BUG-050: 3-line library cards — book data line needs format update to "45% · 3h 12m left"
-- BUG-078: Reading Queue — explicit `queuePosition` ordering with drag-to-reorder
-- BUG-067: "New" dot auto-clear — IntersectionObserver on library cards, passive `seenAt` stamping
-
-**Phase 4 split:** READINGS-4A = Cards + Queue + New dot (this sprint). READINGS-4B = Author normalization (BUG-074), Metadata Wizard (BUG-077), First-run folder picker (BUG-076).
-
----
-
-### Sprint READINGS-4A: Library Cards, Queue, New Dot (v1.7.0)
-
-**Branch:** `sprint/readings-4a`
-**Tier:** Full (new feature, multiple components, data model change)
-**Estimate:** ~35 tool uses (single dispatch)
-=======
 **Goal:** Transform the library into a curated reading experience. Richer card metadata, explicit reading queue, author normalization, metadata enrichment, and first-run onboarding.
 
 **Phase 4 split:**
@@ -137,25 +117,10 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 **Estimate:** ~25 tool uses (single dispatch)
 
 **Scope:** Two independent features: (1) normalize all author names to "Last, First" format during import and provide a one-time batch normalization for existing library, (2) add a folder picker step to the first-run onboarding flow so users select their library folder before seeing the empty library.
->>>>>>> Stashed changes
 
 #### WHERE (Read Order)
 
 1. `CLAUDE.md` — rules, agents, current state
-<<<<<<< Updated upstream
-2. `docs/governance/LESSONS_LEARNED.md` — scan for library, queue, card-related entries
-3. `ROADMAP.md` — this section (full spec)
-4. `src/types.ts` — BlurbyDoc interface (add `queuePosition`)
-5. `src/utils/bookData.ts` — `formatBookDataLine` (format update)
-6. `src/utils/queue.ts` — `sortReadingQueue` (queuePosition support)
-7. `src/components/ReadingQueue.tsx` — drag-to-reorder, queue sections
-8. `src/components/DocGridCard.tsx` — wire "Add to Queue" context menu
-9. `src/components/DocCard.tsx` — add "Add to Queue" context menu
-10. `src/components/MenuFlap.tsx` — pass queue callbacks
-11. `src/components/LibraryContainer.tsx` — IntersectionObserver for seenAt
-12. `main/ipc/library.js` — IPC handlers for queue operations
-13. `src/styles/global.css` — drag-to-reorder styles
-=======
 2. `docs/governance/LESSONS_LEARNED.md` — scan for library, import, onboarding entries
 3. `ROADMAP.md` — this section
 4. `src/types.ts` — BlurbyDoc interface (`author`, `authorFull`)
@@ -165,41 +130,11 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 8. `src/components/OnboardingOverlay.tsx` — current 3-step welcome tour (no folder picker)
 9. `main/ipc/state.js` — `select-folder` IPC handler
 10. `src/components/LibraryContainer.tsx` — `!settings.firstRunCompleted` guard
->>>>>>> Stashed changes
 
 #### Tasks
 
 | # | Agent | Task | Files |
 |---|-------|------|-------|
-<<<<<<< Updated upstream
-| 1 | renderer-fixer | **Book data line format** — Update `formatBookDataLine` to show `"45% · 3h 12m left"` for in-progress docs. Zero-progress docs show `"323p · 6.2h"` (keep current). "Left" means remaining time, not elapsed. Drop page count from in-progress format. | `src/utils/bookData.ts` |
-| 2 | renderer-fixer | **Add `queuePosition` to BlurbyDoc** — Optional `number`. `undefined` = not in queue. Integer starting at 0. Update `sortReadingQueue()`: if any doc has `queuePosition !== undefined`, sort queued docs by `queuePosition` first, then non-queued by current logic (lastReadAt / created). | `src/types.ts`, `src/utils/queue.ts` |
-| 3 | electron-fixer | **Queue IPC handlers** — `add-to-queue(docId)`: assigns next `queuePosition` (max + 1). `remove-from-queue(docId)`: clears `queuePosition`, compacts remaining positions. `reorder-queue(docId, newPosition)`: moves doc to `newPosition`, shifts others. All persist to `library.json`. | `main/ipc/library.js`, `preload.js` |
-| 4 | renderer-fixer | **Wire "Add to Queue" on cards** — DocGridCard: enable existing disabled button (line 106), call `window.electronAPI.addToQueue(doc.id)`. DocCard: add matching "Add to Queue" action button. Both: show "Remove from Queue" if `doc.queuePosition !== undefined`. | `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx` |
-| 5 | renderer-fixer | **Drag-to-reorder in ReadingQueue** — HTML5 drag-and-drop on queue items. `draggable="true"`, `onDragStart`/`onDragOver`/`onDrop`. Visual drag indicator (CSS class `queue-item-dragging`). On drop, call `window.electronAPI.reorderQueue(docId, newPosition)`. Only queued items are draggable. Keep "Continue Reading" / "Unread" section headers but render queued items at top in a "Queue" section. | `src/components/ReadingQueue.tsx`, `src/styles/global.css` |
-| 6 | renderer-fixer | **"New" dot auto-clear via IntersectionObserver** — In LibraryContainer or LibraryView, create a single IntersectionObserver (threshold 0.5). Observe every card's root element. When a card with `unread === true` intersects for ≥1 second, call existing `seenAt` logic to stamp `seenAt` and clear `unread`. Debounce via `setTimeout` + `Map<string, timeout>` to avoid flicker on fast scroll. Clean up observer on unmount. | `src/components/LibraryContainer.tsx` |
-| 7 | renderer-fixer | **Pass queue callbacks through MenuFlap** — MenuFlap needs to pass `onAddToQueue`, `onRemoveFromQueue`, `onReorderQueue` down to ReadingQueue. Add props to MenuFlapProps. Wire from LibraryContainer → MenuFlap → ReadingQueue. | `src/components/MenuFlap.tsx`, `src/components/LibraryContainer.tsx` |
-| 8 | test-runner | **Tests** — Unit tests for: `formatBookDataLine` new format (in-progress shows remaining time), `sortReadingQueue` with `queuePosition`, queue IPC handlers (add/remove/reorder/compact), IntersectionObserver auto-clear behavior. ≥15 new tests. | `tests/` |
-| 9 | test-runner | **`npm test` + `npm run build`** | — |
-| 10 | spec-reviewer | **Spec compliance review** | — |
-| 11 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 12 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### SUCCESS CRITERIA
-
-1. DocGridCard and DocCard show 3 lines: Title / Author / `"45% · 3h 12m left"` (in-progress) or `"323p · 6.2h"` (unread)
-2. `queuePosition` field on BlurbyDoc, persisted to library.json
-3. "Add to Queue" / "Remove from Queue" works from both card types (grid + list)
-4. ReadingQueue shows "Queue" section (ordered by `queuePosition`) above "Continue Reading" and "Unread"
-5. Drag-to-reorder works in ReadingQueue — positions update correctly and persist
-6. "New" dot (unread indicator) auto-clears when card is visible for ≥1 second via IntersectionObserver
-7. Queue operations round-trip through IPC: add, remove, reorder all persist
-8. `sortReadingQueue` respects `queuePosition` — queued items always sort first
-9. `npm test` passes (≥955 tests across ≥48 files)
-10. `npm run build` succeeds
-11. No regressions to library grid, list view, or MenuFlap navigation
-12. Existing reading queue behavior preserved for docs without `queuePosition` (backward compatible)
-=======
 | 1 | renderer-fixer | **Author normalization utility** — Create `src/utils/authorNormalize.ts`. Function `normalizeAuthor(raw: string): string` handles: single author ("John Smith" → "Smith, John"), already normalized ("Smith, John" → no-op), multi-word last names (heuristic: last word is last name unless known prefix like "de", "van", "von", "al-", "el-"), multiple authors (split on " and ", " & ", "; " → normalize each → join with "; "). Edge cases: single-word names (unchanged), empty/undefined (return as-is), `authorFull` (never normalize — display-only byline). | `src/utils/authorNormalize.ts` |
 | 2 | electron-fixer | **Apply normalization on import** — Call `normalizeAuthor()` in the import pipeline wherever `author` is first assigned from metadata extraction. Apply to file imports, URL imports, and rescan. Do NOT touch `authorFull`. | `main/ipc/library.js`, `main/epub-converter.js` |
 | 3 | electron-fixer | **Batch normalize IPC** — New `normalize-all-authors` IPC handler. Iterates library, applies `normalizeAuthor()` to every doc with an `author` field, persists changes. Returns `{ updated: number }`. Idempotent (already-normalized names pass through unchanged). | `main/ipc/library.js`, `preload.js` |
@@ -350,7 +285,6 @@ Phase 5A is complete when:
 3. All existing extension functionality preserved (no regressions)
 
 Phase 5B (RSS/News feeds) will be scoped after 5A ships.
->>>>>>> Stashed changes
 
 ---
 
@@ -371,15 +305,11 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
-<<<<<<< Updated upstream
-| READINGS-4A | v1.7.0 | 🔜 NEXT | Library cards, reading queue, "New" dot auto-clear. Phase 4 start. |
-=======
 | EXT-5A | v1.10.0 | 🔜 QUEUED | Chrome extension E2E tests + queue integration. Phase 5 start. |
 | READINGS-4C | v1.9.0 | 🔜 QUEUED | Metadata Wizard — batch scan, filename parsing, local enrichment. |
 | READINGS-4B | v1.8.0 | 🔜 NEXT | Author normalization + first-run folder picker. |
 | HOTFIX-ARM | v1.7.0+ | ✅ DONE | ONNX ARM64 fix — onnxruntime-node 1.24.3 override, cpuinfo suppression. |
 | READINGS-4A | v1.7.0 | ✅ DONE | Library cards, reading queue, "New" dot auto-clear. 17 new tests. |
->>>>>>> Stashed changes
 | FLOW-3B | v1.6.1 | ✅ DONE | Flow Mode polish. Dead code removal, edge cases, truncation fix. 8 new tests. |
 | FLOW-3A | v1.6.0 | ✅ DONE | Flow Mode infinite scroll. FlowScrollEngine, shrinking underline cursor, reading zone. 35 new tests. |
 | EPUB-2B | v1.5.1 | ✅ DONE | URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path. 16 new tests. |
