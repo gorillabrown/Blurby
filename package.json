@@ -89,6 +89,9 @@
     "vitest": "^4.1.0",
     "wait-on": "^8.0.3"
   },
+  "overrides": {
+    "onnxruntime-node": "1.24.3"
+  },
   "dependencies": {
     "@azure/msal-node": "^3.8.10",
     "@mozilla/readability": "^0.6.0",
