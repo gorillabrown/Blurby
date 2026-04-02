@@ -4908,3 +4908,43 @@ button:focus-visible {
 .metadata-wizard-btn-secondary:hover {
   background: var(--bg-hover);
 }
+
+/* ── Extension Pairing ────────────────────────────────────── */
+.ext-pairing-section {
+  margin: 12px 0;
+}
+.ext-pairing-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.ext-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ext-status-connected {
+  background: #2d7d2d;
+}
+.ext-status-disconnected {
+  background: #cc3333;
+}
+.ext-pairing-code {
+  font-family: var(--mono);
+  font-size: 2rem;
+  letter-spacing: 0.5em;
+  text-align: center;
+  color: var(--text);
+  padding: 12px 0;
+  user-select: all;
+}
+.ext-pairing-hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 8px;
+}

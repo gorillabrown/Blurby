@@ -165,12 +165,12 @@
     </div>
 
     <div class="form-group">
-      <label>Pairing Token</label>
-      <div class="token-display">
-        <input type="text" id="pairingToken" placeholder="Enter pairing token from Blurby">
-        <button class="btn btn-secondary" id="copyToken">Copy</button>
+      <label>Desktop Pairing</label>
+      <div id="pairingStatus">
+        <span id="pairingStatusText">Checking...</span>
       </div>
-      <div class="form-hint">Find this in Blurby desktop > Settings > Connectors. Paste it here to authorize the extension.</div>
+      <button class="btn btn-danger" id="unpairBtn" style="display: none; margin-top: 8px;">Unpair</button>
+      <div class="form-hint">Pair with Blurby desktop using the 6-digit code in the popup. The extension will auto-reconnect on restart.</div>
     </div>
   </div>
 

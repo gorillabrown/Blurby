@@ -1,8 +1,8 @@
 // options.js — Blurby Chrome extension options page logic
 
 const connectionModeEl = document.getElementById("connectionMode");
-const pairingTokenEl = document.getElementById("pairingToken");
-const copyTokenBtn = document.getElementById("copyToken");
+const pairingStatusText = document.getElementById("pairingStatusText");
+const unpairBtn = document.getElementById("unpairBtn");
 const defaultModeEl = document.getElementById("defaultMode");
 const cloudSignedIn = document.getElementById("cloudSignedIn");
 const cloudSignedOut = document.getElementById("cloudSignedOut");
@@ -19,8 +19,18 @@ function loadSettings() {
     ["connectionMode", "pairingToken", "defaultMode", "cloudProvider", "cloudToken", "cloudEmail"],
     (data) => {
       connectionModeEl.value = data.connectionMode || "auto";
-      pairingTokenEl.value = data.pairingToken || "";
       defaultModeEl.value = data.defaultMode || "library";
+
+      // Update pairing status
+      if (data.pairingToken) {
+        pairingStatusText.textContent = "✓ Paired";
+        pairingStatusText.style.color = "#2d7d2d";
+        unpairBtn.style.display = "";
+      } else {
+        pairingStatusText.textContent = "Not paired — use the 6-digit code in the popup";
+        pairingStatusText.style.color = "#666";
+        unpairBtn.style.display = "none";
+      }
 
       if (data.cloudProvider && data.cloudToken) {
         cloudSignedIn.style.display = "";
@@ -41,21 +51,19 @@ connectionModeEl.addEventListener("change", () => {
   chrome.storage.local.set({ connectionMode: connectionModeEl.value });
 });
 
-pairingTokenEl.addEventListener("input", () => {
-  chrome.storage.local.set({ pairingToken: pairingTokenEl.value.trim() });
-});
+// (pairing token is now managed by the popup pairing flow, not manually entered)
 
 defaultModeEl.addEventListener("change", () => {
   chrome.storage.local.set({ defaultMode: defaultModeEl.value });
 });
 
-// ── Copy token ───────────────────────────────────────────────────────────────
+// ── Unpair ──────────────────────────────────────────────────────────────────
 
-copyTokenBtn.addEventListener("click", () => {
-  pairingTokenEl.select();
-  navigator.clipboard.writeText(pairingTokenEl.value).then(() => {
-    copyTokenBtn.textContent = "Copied!";
-    setTimeout(() => { copyTokenBtn.textContent = "Copy"; }, 1500);
+unpairBtn.addEventListener("click", () => {
+  chrome.storage.local.remove("pairingToken", () => {
+    pairingStatusText.textContent = "Not paired — use the 6-digit code in the popup";
+    pairingStatusText.style.color = "#666";
+    unpairBtn.style.display = "none";
   });
 });
 

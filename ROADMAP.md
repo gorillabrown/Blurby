@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-02 — Post-EXT-5A. 1,022 tests, 51 files. v1.10.0.
+**Last updated**: 2026-04-02 — Post-EXT-5B. 1,032 tests, 51 files. v1.11.0.
 **Current branch**: `main`
-**Current state**: Phase 5A complete (EXT-5A). Phase 5B or Phase 6 next.
+**Current state**: Phase 5 complete (5A + 5B). Queue GREEN (EINK-6A → GOALS-6B).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -15,33 +15,32 @@
 Phase 1: Stabilization (AUDIT-FIX 1A–1F) ── COMPLETE (v1.4.14)
     │
     ▼
-Phase 1 Exit Gate (Step 3 re-audit) ── PASS (2026-04-01)
+Phase 2: EPUB Content Fidelity ── COMPLETE (v1.5.1)
+    │
+    ▼
+Phase 3: Flow Mode Redesign ── COMPLETE (v1.6.1)
+    │
+    ▼
+Phase 4: Blurby Readings ── COMPLETE (v1.9.0)
+    │
+    ▼
+Phase 5: Read Later + Chrome Extension
+  ├── 5A ✅ E2E + Queue (v1.10.0)
+  └── 5B → EXT-5B: Pairing UX ✅
+    │
+    ▼
+Phase 6: E-ink & App Polish
+  ├── EINK-6A: E-ink Display Mode (queued)
+  └── GOALS-6B: Reading Goals (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
-Phase 2:                  Phase 1.5:
-EPUB Content Fidelity     Test Coverage
-(✅ EPUB-2A + EPUB-2B)   (parallel, non-blocking)
-    │
-    ▼
-Phase 3: Flow Mode Redesign (✅ FLOW-3A + FLOW-3B done)
-    │
-    ▼
-Phase 4: Blurby Readings (4A ✅, 4B ✅, 4C queued)
-    │
-    ▼
-Phase 5: Read Later + Chrome Extension (5A queued)
-    │
-    ├────────────────────────┐
-    ▼                        ▼
-Phase 6:                  Phase 7:
-E-ink Display Mode        Cloud Sync Hardening
-(full phase — decouple
-from theme system)
+Phase 7:                  Phase 8:
+Cloud Sync Hardening      RSS/News Feeds
     │                        │
     └────────────┬───────────┘
                  ▼
-Phase 8: APK Wrapper (+2 modularization sprints)
+Phase 9: APK Wrapper (+2 modularization sprints)
 ```
 
 ---
@@ -105,7 +104,7 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 
 **Phase 4 split:**
 - READINGS-4A ✅ (cards + queue + new dot) — v1.7.0
-- READINGS-4B = Author normalization + First-run folder picker
+- READINGS-4B ✅ (author normalization + folder picker) — v1.8.0
 - READINGS-4C ✅ (metadata wizard) — v1.9.0
 
 ---
@@ -119,49 +118,6 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 ### Sprint READINGS-4C: Metadata Wizard ✅ COMPLETED (v1.9.0, 2026-04-02)
 
 > Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-077 resolved. 16 new tests (989 total, 50 files). Metadata scan IPC, filename parser, batch update IPC, MetadataWizard modal, Ctrl+Shift+M shortcut. APPROVED.
-
-#### WHERE (Read Order)
-
-1. `CLAUDE.md` — rules, agents, current state
-2. `docs/governance/LESSONS_LEARNED.md`
-3. `ROADMAP.md` — this section
-4. `src/types.ts` — BlurbyDoc interface
-5. `main/epub-converter.js` — `extractEpubMetadata()` function
-6. `main/ipc/library.js` — library read/write, existing metadata extraction
-7. `src/components/AddEditPanel.tsx` — current metadata editor (title + author only)
-8. `src/components/LibraryContainer.tsx` — modal/dialog patterns
-9. `src/styles/global.css` — wizard styling patterns
-
-#### Tasks
-
-| # | Agent | Task | Files |
-|---|-------|------|-------|
-| 1 | electron-fixer | **Metadata scan IPC** — New `scan-library-metadata` IPC handler. Returns `MetadataScanResult[]`: for each doc, reports which fields are missing or likely wrong (no author, title matches filename, no cover). Extracts embedded EPUB metadata via `extractEpubMetadata()` for docs that have `convertedEpubPath`. Returns both current values and suggested values. | `main/ipc/library.js`, `preload.js` |
-| 2 | electron-fixer | **Filename parser utility** — `parseFilenameMetadata(filename: string)`: extracts title, author from common filename patterns: `"Author - Title.epub"`, `"Title (Author).epub"`, `"Title.epub"`. Returns `{ suggestedTitle?, suggestedAuthor? }`. | `main/metadata-utils.js` |
-| 3 | electron-fixer | **Batch update IPC** — New `apply-metadata-updates` IPC handler. Takes `Array<{ docId, updates: Partial<BlurbyDoc> }>`, applies updates, persists. Only allowed fields: `title`, `author`, `coverPath`. | `main/ipc/library.js`, `preload.js` |
-| 4 | renderer-fixer | **MetadataWizard component** — New modal component. Steps: (a) scan results table showing docs with issues, (b) per-doc row with current vs suggested values, checkboxes to accept suggestions, (c) inline editing for manual override, (d) "Apply" button applies all accepted changes via batch update IPC. Accessible: focus trap, keyboard nav, escape to close. | `src/components/MetadataWizard.tsx`, `src/styles/global.css` |
-| 5 | renderer-fixer | **Wizard trigger** — "Metadata Wizard" button in Library Layout settings page. Opens MetadataWizard modal. Also accessible via Ctrl+Shift+M keyboard shortcut. | `src/components/settings/LibraryLayoutSettings.tsx`, `src/hooks/useKeyboardShortcuts.ts` |
-| 6 | renderer-fixer | **Wire wizard to LibraryContainer** — State management for wizard open/close, pass library docs and callbacks. Refresh library after wizard applies changes. | `src/components/LibraryContainer.tsx` |
-| 7 | test-runner | **Tests** — Unit tests for `parseFilenameMetadata()` (10+ patterns). Integration tests for scan and batch update IPCs. MetadataWizard component: renders, selects, applies. ≥15 new tests. | `tests/` |
-| 8 | test-runner | **`npm test` + `npm run build`** | — |
-| 9 | spec-reviewer | **Spec compliance** | — |
-| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 11 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### SUCCESS CRITERIA
-
-1. `scan-library-metadata` returns scan results for all docs with missing/incomplete metadata
-2. `parseFilenameMetadata("Author - Title.epub")` → `{ suggestedAuthor: "Author", suggestedTitle: "Title" }`
-3. `parseFilenameMetadata("Title.epub")` → `{ suggestedTitle: "Title" }`
-4. `apply-metadata-updates` batch-applies accepted suggestions, persists to library.json
-5. MetadataWizard modal shows scan results with current vs suggested values
-6. User can accept/reject individual suggestions and manually edit values
-7. "Apply" button updates all accepted changes in one batch
-8. Wizard accessible via settings button AND Ctrl+Shift+M
-9. Focus trap, keyboard nav, escape-to-close on wizard modal
-10. `npm test` passes (≥984 tests)
-11. `npm run build` succeeds
-12. No regressions to library, import pipeline, or existing metadata editing
 
 ---
 
@@ -177,59 +133,216 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 
 > Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 33 new tests (1,022 total, 51 files). Auto-queue extension articles (queuePosition), source domain badge, E2E pipeline tests, WS protocol tests. APPROVED.
 
+---
+
+### Sprint EXT-5B: Extension Pairing UX Hardening ✅ COMPLETED (v1.11.0, 2026-04-02)
+
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 10 new tests (1,032 total, 51 files). 6-digit short code pairing, WS `pair` protocol, ConnectorsSettings Chrome Extension section, popup pairing flow, options.html paired/unpair UI. Phase 5 complete. APPROVED.
+
+**Baseline:**
+- `main/ws-server.js` (450 lines) — `handleMessage()` at line 184 handles `auth` type. `generatePairingToken()` at line 320 generates 32-char hex. `_pairingToken` module var stores the long-lived token.
+- `main/ipc/misc.js` — `get-ws-pairing-token` and `regenerate-ws-pairing-token` IPC handlers (lines 305-312).
+- `src/components/settings/ConnectorsSettings.tsx` (85 lines) — Site logins only. No extension pairing UI.
+- `chrome-extension/service-worker.js` (561 lines) — WS auth at connect time, reads `pairingToken` from `chrome.storage.local`.
+- `chrome-extension/popup.js` (185 lines) — Connection status badge, no pairing UI.
+- `chrome-extension/options.html` (216 lines) — Manual pairing token text input field.
+
 #### WHERE (Read Order)
 
 1. `CLAUDE.md` — rules, agents, current state
 2. `docs/governance/LESSONS_LEARNED.md`
 3. `ROADMAP.md` — this section
-4. `main/ws-server.js` — `handleAddArticle()` (line 226) — the integration point
-5. `tests/ws-server.test.js` — existing WS tests (317 lines, 15 tests)
-6. `main/ipc/library.js` — queue IPC handlers (`add-to-queue`, `reorder-queue`)
-7. `src/utils/queue.ts` — `sortReadingQueue()` with `queuePosition`
-8. `main/epub-converter.js` — `htmlToEpub()` used by article ingestion
-9. `chrome-extension/service-worker.js` — message protocol reference
-10. `chrome-extension/content-script.js` — article extraction shape
+4. `main/ws-server.js` — `handleMessage()` (line 184), `generatePairingToken()` (line 320), `startServer()` (line 324)
+5. `main/ipc/misc.js` — `get-ws-pairing-token`, `regenerate-ws-pairing-token` (lines 305-312)
+6. `src/components/settings/ConnectorsSettings.tsx` — current site logins UI (85 lines)
+7. `src/components/SettingsMenu.tsx` — ConnectorsSettings wiring
+8. `chrome-extension/service-worker.js` — WS connect + auth flow
+9. `chrome-extension/popup.html` + `popup.js` — popup UI + connection status
+10. `chrome-extension/options.html` + `options.js` — manual token input
 
 #### Tasks
 
 | # | Agent | Task | Files |
 |---|-------|------|-------|
-| 1 | electron-fixer | **Auto-queue extension articles** — In `handleAddArticle()`, after doc creation: assign `queuePosition` = next available (max existing + 1). Extension articles always enter the reading queue. Set `unread: true` (already done). Set `seenAt: undefined` (ensures "New" dot appears). | `main/ws-server.js` |
-| 2 | electron-fixer | **Author normalization on extension articles** — If READINGS-4B has landed, call `normalizeAuthor()` on `article.author` before storing. If not yet landed, add a TODO comment with sprint reference. | `main/ws-server.js` |
-| 3 | test-runner | **E2E pipeline test module** — New `tests/extension-pipeline.test.js`. Tests the full article → doc flow WITHOUT starting a real WebSocket server (mock the WS layer, test the processing pipeline directly). Test cases: (a) valid article → doc created with correct fields, (b) article → EPUB conversion succeeds (mock `htmlToEpub` return), (c) doc gets `queuePosition` assigned, (d) doc has `unread: true` and `source: "url"`, (e) missing `textContent` → error response, (f) EPUB conversion failure → doc still created with text fallback, (g) article with `htmlContent` → used instead of plain text wrapping, (h) `authorFull` preserved alongside normalized `author`. | `tests/extension-pipeline.test.js` |
-| 4 | test-runner | **WS protocol round-trip tests** — Extend `tests/ws-server.test.js`. New tests: (a) `add-article` with complete payload → `ok` response shape, (b) `add-article` with minimal payload (title + textContent only) → succeeds, (c) `add-article` with empty textContent → error, (d) `auth` with wrong token → `auth-failed`, (e) unknown message type → error response, (f) ping → pong response. | `tests/ws-server.test.js` |
-| 5 | test-runner | **Queue integration tests** — In `tests/extension-pipeline.test.js`: (a) first article gets `queuePosition: 0`, (b) second article gets `queuePosition: 1`, (c) `sortReadingQueue` places queued extension articles in correct order, (d) extension article appears in "Queue" section of ReadingQueue (not just "Unread"). | `tests/extension-pipeline.test.js` |
-| 6 | renderer-fixer | **Source badge prominence for extension articles** — In DocGridCard and DocCard, ensure `source: "url"` articles show the "web" badge prominently. If `sourceDomain` exists, show domain name instead of generic "web". Verify existing badge logic handles this (may be a no-op if already working). | `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx` |
-| 7 | test-runner | **`npm test` + `npm run build`** | — |
-| 8 | spec-reviewer | **Spec compliance** | — |
-| 9 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 10 | blurby-lead | **Git: commit, merge, push** | — |
+| 1 | electron-fixer | **Short-code generation** — New `generateShortCode()` in ws-server.js: 6-digit numeric (`Math.floor(100000 + Math.random() * 900000)`). New module vars `_shortCode`, `_shortCodeExpiry`. Auto-rotates every 5 min (`SHORT_CODE_TTL_MS` in constants.js). `getShortCode()` export: returns `{code, expiresAt}`, regenerates if expired. | `main/ws-server.js`, `main/constants.js` |
+| 2 | electron-fixer | **WS `pair` message handler** — In `handleMessage()`, before the auth-required gate: accept `{type:"pair", code}` from unauthenticated clients. Validate `msg.code` against `_shortCode` (string comparison). On match: generate long-lived token via `generatePairingToken()`, encrypt+persist to settings (reuse existing pattern), set `client.authenticated = true`, send `{type:"pair-ok", token}`. On mismatch: send `{type:"pair-failed", message:"Invalid code"}`. On expired code: regenerate before comparing. | `main/ws-server.js` |
+| 3 | electron-fixer | **Short-code IPC** — New `get-ws-short-code` IPC handler: returns `{code, expiresAt, connected}` where `connected` = `_clients.size > 0 && [..._clients].some(c => c.authenticated)`. New `regenerate-ws-short-code` handler: force-rotates code, returns new `{code, expiresAt}`. Add to preload.js. | `main/ipc/misc.js`, `preload.js` |
+| 4 | renderer-fixer | **ConnectorsSettings: Chrome Extension section** — Add section above "Logged-in Sites": heading "Chrome Extension", connection status indicator (green dot + "Connected" / red dot + "Not connected"), 6-digit code in large monospace (`font-size: 2rem; letter-spacing: 0.5em`), "Refreshes in X:XX" countdown (useEffect interval), "New Code" button calls `regenerate-ws-short-code`. Hide code when connected. Use `get-ws-short-code` IPC to fetch. | `src/components/settings/ConnectorsSettings.tsx`, `src/styles/global.css` |
+| 5 | renderer-fixer | **Extension popup: pairing flow** — When `connectionStatus !== "connected"`: replace article preview area with pairing UI. Show "Enter the 6-digit code from Blurby desktop" label, 6-digit input (numeric, maxlength 6, large centered), "Pair" button. On submit: send `{type:"request-pair", code}` message to service worker. Service worker sends `{type:"pair", code}` over WS. On `pair-ok`: store received token in `chrome.storage.local` as `pairingToken`, update connection badge to green, switch to normal UI. On `pair-failed`: show inline error "Invalid code — check Blurby desktop". | `chrome-extension/popup.html`, `chrome-extension/popup.js`, `chrome-extension/service-worker.js` |
+| 6 | renderer-fixer | **Extension options: replace manual token field** — Remove the raw pairing token text input. Replace with: connection status display, "Paired" with green check when token exists, "Unpair" button (clears `pairingToken` from storage, disconnects WS). Keep existing cloud sync and connection mode settings. | `chrome-extension/options.html`, `chrome-extension/options.js` |
+| 7 | test-runner | **Tests** — (a) `generateShortCode()` returns 6-digit string, (b) short code rotates after TTL, (c) `pair` message with valid code → `pair-ok` with token, (d) `pair` message with invalid code → `pair-failed`, (e) `pair` message after expiry → new code generated + compared, (f) successful pair marks client authenticated, (g) IPC `get-ws-short-code` returns code + expiry, (h) IPC `regenerate-ws-short-code` returns new code. ≥10 new tests. | `tests/ws-server.test.js` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 
-1. Extension-sourced articles automatically get `queuePosition` (next available integer)
-2. Extension articles appear in ReadingQueue "Queue" section immediately after ingestion
-3. `unread: true` and `seenAt: undefined` set on extension articles (triggers "New" dot)
-4. E2E pipeline tests cover: valid article, missing fields, EPUB conversion success/failure, queue assignment
-5. WS protocol tests cover: auth success/failure, add-article success/failure, ping/pong, unknown type
-6. Queue integration tests verify `queuePosition` auto-increment and sort order
-7. ≥20 new tests in `tests/extension-pipeline.test.js`
-8. ≥6 new tests in `tests/ws-server.test.js`
-9. `npm test` passes (≥1,010 tests)
-10. `npm run build` succeeds
-11. Existing WS tests (15 tests) still pass — no regressions
-12. Source badge shows domain name for URL-sourced articles (e.g., "nytimes.com" not just "web")
+1. 6-digit numeric code displayed in Settings > Connectors under "Chrome Extension" section
+2. Code auto-rotates every 5 minutes with visible countdown
+3. "New Code" button regenerates immediately
+4. Extension popup shows pairing input when not connected
+5. Entering correct code in extension popup → `pair-ok` → token stored → auto-connected
+6. Entering wrong code → inline error message, no crash
+7. Extension reconnects automatically on restart using stored token (existing `auth` flow unchanged)
+8. ConnectorsSettings shows green "Connected" status when extension is paired
+9. Extension options.html no longer has raw token input field
+10. ≥10 new tests covering short code generation, pair protocol, IPC handlers
+11. `npm test` passes (≥1,032 tests)
+12. `npm run build` succeeds
+13. Existing WS tests and extension pipeline tests pass — no regressions
 
 ---
 
 ## Phase 5 Exit Gate
 
-Phase 5A is complete when:
-1. Extension articles auto-enter reading queue
-2. E2E test coverage exists for the full article ingestion pipeline
-3. All existing extension functionality preserved (no regressions)
+Phase 5A ✅ complete. Phase 5B = extension pairing UX (not RSS/News — that moved to Phase 8 backlog).
 
-Phase 5B (RSS/News feeds) will be scoped after 5A ships.
+Phase 5 is complete when:
+1. ✅ Extension articles auto-enter reading queue (5A)
+2. ✅ E2E test coverage exists for the full article ingestion pipeline (5A)
+3. Extension pairing is one-step (6-digit code, no manual token copy) (5B)
+4. All existing extension functionality preserved — no regressions
+
+---
+
+## Phase 6 — E-ink & App Polish
+
+**Goal:** Decouple e-ink display behavior from the visual theme system. Users can combine any color theme (dark, light, blurby) with e-ink display optimizations (no animations, phrase grouping, ghosting prevention, WPM ceiling). Then layer on user-facing reading goals.
+
+---
+
+### Sprint EINK-6A: E-ink as Independent Display Mode
+
+**Goal:** E-ink behavior (no animations, phrase grouping, WPM ceiling, ghosting refresh) becomes a toggle independent of the visual theme. Currently `theme: "eink"` is a theme — you lose dark/light theming to get e-ink behavior. After this sprint, any theme + e-ink mode works.
+
+**Problem:** E-ink is bundled as `theme: "eink"` in the theme selector. All e-ink CSS is under `[data-theme="eink"]`. The `useEinkController` hook checks `settings.theme === "eink"`. Users with actual e-ink displays want the behavioral optimizations (no CSS transitions, large touch targets, periodic refresh, phrase grouping, WPM ceiling) but also want to pick their preferred color scheme.
+
+**Design decisions:**
+- **New boolean setting `einkMode`** — Independent of `theme`. When true, activates all e-ink behavioral optimizations regardless of theme.
+- **CSS attribute `[data-eink="true"]`** — Applied to root alongside `[data-theme]`. E-ink behavioral styles (no transitions, large targets) move from `[data-theme="eink"]` to `[data-eink="true"]`. E-ink color palette stays as `[data-theme="eink"]` for users who want the visual look.
+- **Theme "eink" becomes "eink" color scheme only** — Sets e-ink colors (warm gray background). Automatically enables `einkMode` for backward compatibility. Other themes don't set einkMode by default.
+- **useEinkController** checks `settings.einkMode` instead of `settings.theme === "eink"`.
+- **Settings UI** — E-ink toggle in Theme settings, below theme selector. "E-ink Display Mode" on/off. When on, shows sub-settings (phrase grouping, WPM ceiling, refresh interval) regardless of theme. Moving these out of theme-conditional rendering.
+
+**Baseline:**
+- `src/types.ts` — `theme: "dark" | "light" | "blurby" | "eink" | "system"`, plus `einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping`
+- `src/hooks/useEinkController.ts` (42 lines) — Checks `settings.theme === "eink"`
+- `src/styles/global.css` — `[data-theme="eink"]` rules (~50 selectors)
+- `src/components/settings/ThemeSettings.tsx` — E-ink sub-settings only visible when theme="eink"
+- `main/window-manager.js` — `getThemeColors()` has eink case
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules, agents, current state
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — BlurbySettings interface (theme, eink* fields)
+5. `src/hooks/useEinkController.ts` — current eink check (42 lines)
+6. `src/styles/global.css` — `[data-theme="eink"]` selectors
+7. `src/components/settings/ThemeSettings.tsx` — theme selector, eink sub-settings
+8. `src/constants.ts` — DEFAULT_SETTINGS (eink defaults)
+9. `main/window-manager.js` — `getThemeColors()`, `updateWindowTheme()`
+10. `src/components/App.tsx` — `data-theme` attribute application
+
+#### Tasks
+
+| # | Agent | Task | Files |
+|---|-------|------|-------|
+| 1 | renderer-fixer | **Add `einkMode` setting** — New boolean field in BlurbySettings. Default: `false`. Add to DEFAULT_SETTINGS. Migration: if `theme === "eink"`, set `einkMode: true` on load. | `src/types.ts`, `src/constants.ts` |
+| 2 | renderer-fixer | **Split CSS: behavioral vs visual** — Audit all `[data-theme="eink"]` selectors in global.css. Move behavioral rules (no transitions, no animations, large touch targets, ghosting overlay) to `[data-eink="true"]`. Keep visual rules (colors, backgrounds, borders) under `[data-theme="eink"]`. | `src/styles/global.css` |
+| 3 | renderer-fixer | **Apply `data-eink` attribute** — In App.tsx (or wherever `data-theme` is set on the root), also set `data-eink={settings.einkMode ? "true" : "false"}`. | `src/components/App.tsx` |
+| 4 | renderer-fixer | **Update useEinkController** — Check `settings.einkMode` instead of `settings.theme === "eink"`. | `src/hooks/useEinkController.ts` |
+| 5 | renderer-fixer | **ThemeSettings: e-ink toggle** — Add "E-ink Display Mode" toggle below theme selector. Always visible regardless of theme. When toggled on, show sub-settings (phrase grouping, WPM ceiling, refresh interval). Remove conditional rendering that hid these when theme !== "eink". | `src/components/settings/ThemeSettings.tsx` |
+| 6 | renderer-fixer | **Backward compat: theme="eink" auto-enables** — When user selects "eink" theme, auto-set `einkMode: true`. When switching away from "eink" theme, keep `einkMode` as-is (user may want to keep it). | `src/components/settings/ThemeSettings.tsx` |
+| 7 | electron-fixer | **Window manager: einkMode awareness** — `updateWindowTheme()` should apply e-ink behavioral optimizations (disable hardware acceleration hints if applicable) based on `einkMode`, not theme. Color-only theming still uses `getThemeColors()`. | `main/window-manager.js` |
+| 8 | test-runner | **Tests** — (a) `einkMode: true` + `theme: "dark"` applies both dark colors AND eink behaviors, (b) `einkMode: false` + `theme: "eink"` auto-sets einkMode on migration, (c) useEinkController responds to `einkMode` not theme, (d) CSS `[data-eink="true"]` selectors exist in output, (e) ThemeSettings shows eink sub-settings regardless of theme when einkMode=true. ≥10 new tests. | `tests/` |
+| 9 | test-runner | **`npm test` + `npm run build`** | — |
+| 10 | spec-reviewer | **Spec compliance** | — |
+| 11 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 12 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. New `einkMode` boolean setting, default false
+2. `data-eink="true"` attribute on root element when einkMode enabled
+3. E-ink behavioral CSS (no transitions, large targets, refresh overlay) applies via `[data-eink="true"]`, not `[data-theme="eink"]`
+4. E-ink color CSS remains under `[data-theme="eink"]`
+5. User can select `theme: "dark"` + `einkMode: true` and get dark colors with e-ink behaviors
+6. useEinkController checks einkMode, not theme
+7. ThemeSettings shows e-ink toggle and sub-settings regardless of selected theme
+8. Selecting "eink" theme auto-enables einkMode (backward compat)
+9. Migration: existing `theme: "eink"` users get `einkMode: true` on upgrade
+10. ≥10 new tests
+11. `npm test` passes (≥1,042 tests)
+12. `npm run build` succeeds
+13. No regressions to any reading mode or theme
+
+---
+
+### Sprint GOALS-6B: Reading Goal Tracking
+
+**Goal:** Let users set daily and weekly reading goals (minutes or pages) with visual progress indicators in the library view. Build on existing reading stats infrastructure.
+
+**Problem:** Blurby tracks reading history (sessions, duration, pages) but doesn't surface this as goals or streaks. Users have no way to set a daily reading target or see how they're progressing toward it. Reading habit formation is one of the highest-impact features for a reading app.
+
+**Design decisions:**
+- **Two goal types:** Daily minutes and weekly books/chapters. Minutes is the primary metric because it works across all content types and reading modes.
+- **Goal progress widget** in LibraryContainer header area. Circular progress ring showing today's minutes vs goal. Secondary line: "3 of 5 days this week". Compact, non-intrusive.
+- **Settings page** — New "Reading Goals" section in a dedicated settings sub-page. Daily target (15/30/45/60/90 min, custom), weekly target (optional), notifications (optional — toast on goal hit).
+- **Stats from existing history.json** — Reading sessions already log start/end time and word counts. Derive minutes from session data. No new tracking infrastructure needed.
+- **IPC for goal progress** — `get-goal-progress` returns `{todayMinutes, dailyGoal, weekDays, weeklyGoal, streakDays}`. Computed from history.json on each call.
+
+**Baseline:**
+- `main/ipc/misc.js` — Stats IPC handlers (reading history queries)
+- `src/components/LibraryContainer.tsx` — Library header area
+- `src/types.ts` — BlurbySettings (no goal fields yet)
+- `src/constants.ts` — DEFAULT_SETTINGS
+- History data in `history.json` with session entries
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules, agents, current state
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — BlurbySettings, BlurbyDoc
+5. `main/ipc/misc.js` — existing stats/history IPC
+6. `src/components/LibraryContainer.tsx` — library header, layout
+7. `src/components/settings/` — existing settings sub-pages (pattern reference)
+8. `src/styles/global.css` — component styling patterns
+9. `src/constants.ts` — DEFAULT_SETTINGS
+
+#### Tasks
+
+| # | Agent | Task | Files |
+|---|-------|------|-------|
+| 1 | renderer-fixer | **Goal settings in BlurbySettings** — New fields: `dailyGoalMinutes: number` (default 30), `weeklyGoalDays: number` (default 5), `goalsEnabled: boolean` (default false). Add to types and DEFAULT_SETTINGS. | `src/types.ts`, `src/constants.ts` |
+| 2 | electron-fixer | **Goal progress IPC** — New `get-goal-progress` handler. Reads history.json, computes: `todayMinutes` (sum of session durations for today), `weekMinutes` (per-day array for current week), `streakDays` (consecutive days meeting goal, counting backward from yesterday), `dailyGoal` and `weeklyGoalDays` from settings. Returns `GoalProgress` object. | `main/ipc/misc.js`, `preload.js` |
+| 3 | renderer-fixer | **GoalProgressWidget component** — Compact widget for library header. Circular SVG progress ring (today's progress as fraction of daily goal). Text: "12 / 30 min today". Below: dots for week days (filled = goal met). Muted when goals disabled. Accessible: aria-valuenow, aria-valuemax. | `src/components/GoalProgressWidget.tsx`, `src/styles/global.css` |
+| 4 | renderer-fixer | **Wire widget to LibraryContainer** — Fetch goal progress on mount and on window focus (user may have been reading). Display in library header between title and sort controls. Only show when `settings.goalsEnabled`. | `src/components/LibraryContainer.tsx` |
+| 5 | renderer-fixer | **Reading Goals settings page** — New settings sub-page "Reading Goals": enable/disable toggle, daily minutes slider (15/30/45/60/90/custom), weekly days target (1-7), reset button. Add to SettingsMenu and CommandPalette. | `src/components/settings/ReadingGoalSettings.tsx`, `src/components/SettingsMenu.tsx`, `src/components/CommandPalette.tsx`, `src/components/MenuFlap.tsx` |
+| 6 | renderer-fixer | **Goal-met toast** — When reading session ends and today's total crosses the daily goal threshold, show a congratulatory toast. Check via `get-goal-progress` after session end. | `src/components/ReaderContainer.tsx` |
+| 7 | test-runner | **Tests** — (a) `get-goal-progress` returns correct todayMinutes from history data, (b) streak calculation counts consecutive goal-meeting days, (c) weekly dots array reflects correct days, (d) GoalProgressWidget renders ring and dots, (e) settings page toggles/sliders work, (f) goal-met toast fires at threshold, (g) goals disabled = widget hidden. ≥12 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. `goalsEnabled`, `dailyGoalMinutes`, `weeklyGoalDays` in BlurbySettings with defaults
+2. `get-goal-progress` IPC returns accurate progress from history.json
+3. GoalProgressWidget shows circular progress ring in library header
+4. Weekly dots show which days met the goal
+5. Streak counter tracks consecutive days
+6. Reading Goals settings page with enable toggle and minutes slider
+7. Goal-met toast fires once per day when threshold crossed
+8. Widget hidden when goals disabled
+9. Accessible: progress ring has aria attributes
+10. ≥12 new tests
+11. `npm test` passes (≥1,052 tests)
+12. `npm run build` succeeds
+13. No regressions to library, reading modes, or existing stats
 
 ---
 
@@ -295,7 +408,7 @@ Items migrated from BUG_REPORT.md — feature requests, enhancements, and archit
 ### Backlog (Unphased)
 | ID | Feature | Description |
 |----|---------|-------------|
-| BUG-037 | E-ink as display mode | Decouple from theme system |
+| ~~BUG-037~~ | ~~E-ink as display mode~~ | ✅ Queued as EINK-6A |
 | BUG-060–062 | Branding | Icon, theme, sample prefix |
 | BUG-070 | Scroll wheel word advance | Mouse wheel = word advance in reading modes |
 | BUG-038 | Hotkey coaching in reader | Keyboard shortcut suggestions on mouse click |
@@ -312,4 +425,3 @@ Items migrated from BUG_REPORT.md — feature requests, enhancements, and archit
 - Toast queue system
 - Version-pin critical dependencies
 - iOS app, Firefox extension, Safari extension
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         

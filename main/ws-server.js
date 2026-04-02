@@ -4,7 +4,7 @@
 const http = require("http");
 const crypto = require("crypto");
 const { safeStorage } = require("electron");
-const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS } = require("./constants");
+const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS } = require("./constants");
 const { normalizeAuthor } = require("./author-normalize");
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -16,6 +16,8 @@ let _heartbeatTimer = null;
 let _clients = new Set();
 let _pairingToken = null;
 let _ctx = null;
+let _shortCode = null;
+let _shortCodeExpiry = 0;
 
 // ── WebSocket frame helpers (minimal implementation) ─────────────────────────
 
@@ -181,12 +183,49 @@ function processFrames(client) {
   }
 }
 
+// ── Short pairing code ──────────────────────────────────────────────────────
+
+function generateShortCode() {
+  _shortCode = String(Math.floor(100000 + Math.random() * 900000));
+  _shortCodeExpiry = Date.now() + SHORT_CODE_TTL_MS;
+  return _shortCode;
+}
+
+function getShortCode() {
+  if (!_shortCode || Date.now() >= _shortCodeExpiry) {
+    generateShortCode();
+  }
+  return { code: _shortCode, expiresAt: _shortCodeExpiry };
+}
+
 async function handleMessage(client, text) {
   let msg;
   try {
     msg = JSON.parse(text);
   } catch {
     sendJson(client.socket, { type: "error", message: "Invalid JSON" });
+    return;
+  }
+
+  // Short-code pairing flow (pre-auth)
+  if (msg.type === "pair") {
+    const current = getShortCode();
+    if (msg.code && String(msg.code) === current.code) {
+      // Valid code — generate long-lived token
+      _pairingToken = generatePairingToken();
+      if (_ctx && safeStorage.isEncryptionAvailable()) {
+        try {
+          const encrypted = safeStorage.encryptString(_pairingToken).toString("base64");
+          const settings = _ctx.getSettings();
+          settings._wsPairingToken = encrypted;
+          _ctx.saveSettings();
+        } catch { /* best-effort persist */ }
+      }
+      client.authenticated = true;
+      sendJson(client.socket, { type: "pair-ok", token: _pairingToken });
+    } else {
+      sendJson(client.socket, { type: "pair-failed", message: "Invalid code" });
+    }
     return;
   }
 
@@ -448,4 +487,6 @@ module.exports = {
   decodeFrame,
   encodeFrame,
   generatePairingToken,
+  generateShortCode,
+  getShortCode,
 };

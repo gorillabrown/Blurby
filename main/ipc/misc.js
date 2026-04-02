@@ -307,6 +307,18 @@ function register(ctx) {
     return status.token || null;
   });
 
+  ipcMain.handle("get-ws-short-code", () => {
+    const { code, expiresAt } = wsServer.getShortCode();
+    const hasAuth = wsServer.getClientCount() > 0;
+    return { code, expiresAt, connected: hasAuth };
+  });
+
+  ipcMain.handle("regenerate-ws-short-code", () => {
+    wsServer.generateShortCode();
+    const { code, expiresAt } = wsServer.getShortCode();
+    return { code, expiresAt };
+  });
+
   ipcMain.handle("regenerate-ws-pairing-token", () => {
     const token = wsServer.generatePairingToken();
     const settings = ctx.getSettings();
