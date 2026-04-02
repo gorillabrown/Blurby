@@ -85,7 +85,12 @@ export class FlowScrollEngine {
     this.cursor.style.zIndex = "10";
 
     this.lines = this.buildLineMap();
-    if (this.lines.length === 0) return;
+    if (this.lines.length === 0) {
+      // Empty document or no word spans — stop gracefully
+      this.running = false;
+      this.cursor.style.display = "none";
+      return;
+    }
     this.lineIdx = this.findLineForWord(wordIndex);
     this.scrollToLine(this.lineIdx);
 
@@ -253,8 +258,8 @@ export class FlowScrollEngine {
     }
 
     const line = this.lines[this.lineIdx];
-    const lineWidth = line.right - line.left;
-    const duration = (line.wordCount / this.wpm) * 60000;
+    const lineWidth = Math.max(line.right - line.left, 1); // Guard against zero-width lines
+    const duration = Math.max((line.wordCount / this.wpm) * 60000, 50); // Minimum 50ms per line
 
     this.wordIndex = line.firstWord;
     this.callbacks.onWordAdvance(this.wordIndex);

@@ -17,7 +17,6 @@ import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
 import FoliatePageView, { wrapWordsInSpans, unwrapWordSpans } from "./FoliatePageView";
-import FlowScrollView from "./FlowScrollView";
 import { FlowScrollEngine } from "../utils/FlowScrollEngine";
 import ReaderBottomBar from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
@@ -878,6 +877,14 @@ export default function ReaderContainer({
     flowScrollEngineRef.current?.setWpm(effectiveWpm);
   }, [effectiveWpm]);
 
+  // FLOW-3B: Rebuild line map on font size change (lines shift when text reflows)
+  useEffect(() => {
+    if (readingMode === "flow" && flowScrollEngineRef.current?.getState().running) {
+      const timer = setTimeout(() => flowScrollEngineRef.current?.rebuildLineMap(), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [focusTextSize, readingMode]);
+
   // FLOW-3A: Update flow nav ref to use FlowScrollEngine
   const flowScrollNavRef = useRef({
     prevLine: () => flowScrollEngineRef.current?.jumpToLine("prev"),
@@ -1097,15 +1104,87 @@ export default function ReaderContainer({
       return foliateView;
     }
 
-    // Non-EPUB documents — fallback (all docs should be EPUB since EPUB-2B)
-    // FLOW-3A: If somehow in Flow Mode on a non-EPUB, use FlowScrollView
-    if (readingMode === "flow") {
-      return (
-        <FlowScrollView
+    // Non-EPUB error fallback (all docs should be EPUB since EPUB-2B)
+    return (
+      <div className="reader-error" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "1rem", padding: "2rem", textAlign: "center" }}>
+        <p style={{ fontSize: "1.1rem", color: "var(--text-secondary, #888)" }}>
+          This document needs to be re-imported to be read in the current version of Blurby.
+        </p>
+        <button
+          onClick={() => finishReading(0)}
+          style={{ padding: "0.5rem 1.5rem", borderRadius: "6px", border: "1px solid var(--border-color, #444)", background: "var(--bg-secondary, #222)", color: "var(--text-primary, #fff)", cursor: "pointer" }}
+        >
+          Return to Library
+        </button>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {/* Thin drag region at top for window dragging */}
+      <div className="reader-drag-handle" />
+      <div className="reader-layout">
+        <div className="reader-view-area">
+          <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
+            {renderView()}
+          </ErrorBoundary>
+          {/* Kokoro loading indicator */}
+          {narration.kokoroLoading && (
+            <div className="kokoro-loading-toast" role="status" aria-live="polite">
+              Loading voice model...
+            </div>
+          )}
+        </div>
+
+        {/* Unified bottom bar — rendered at container level */}
+        <ReaderBottomBar
           activeDoc={activeDoc}
+          words={words}
+          wordIndex={currentWordIndex}
           wpm={effectiveWpm}
+          focusTextSize={focusTextSize}
+          readingMode={readingMode}
+          playing={readingMode !== "page"}
           isEink={isEink}
-          onWordAdvance={setHighlightedWordIndex}
-          onComplete={() => { setFlowPlaying(false); setReadingMode("page"); }}
-          startWordIndex={highlightedWordIndex}
-          pla
+          chapters={docChapters}
+          ttsActive={ttsActive}
+          onToggleTts={handleToggleTts}
+          onSetWpm={setWpm}
+          onAdjustFocusTextSize={adjustFocusTextSize}
+          onEnterFocus={handleEnterFocus}
+          onEnterFlow={handleEnterFlow}
+          onPrevChapter={handlePrevChapter}
+          onNextChapter={handleNextChapter}
+          onJumpToChapter={handleJumpToChapter}
+          onEinkRefresh={triggerEinkRefresh}
+          onTogglePlay={handleTogglePlay}
+          chapterListRef={chapterListRef}
+          lastReadingMode={settings.lastReadingMode || "flow"}
+          ttsRate={settings.ttsRate || 1.0}
+          onSetTtsRate={(rate) => {
+            updateSettings({ ttsRate: rate });
+            narration.adjustRate(rate);
+          }}
+          foliateFraction={useFoliate ? foliateFraction : undefined}
+        />
+      </div>
+
+      {menuFlap}
+      <ReturnToReadingPill
+        visible={isBrowsedAway && readingMode === "narration" && !narration.speaking}
+        activeOverlay={menuFlapOpen || showBacktrackPrompt}
+        onReturn={handleReturnToReading}
+      />
+      {showEinkRefresh && <EinkRefreshOverlay />}
+      {showBacktrackPrompt && (
+        <BacktrackPrompt
+          currentPage={backtrackPages.current}
+          furthestPage={backtrackPages.furthest}
+          onSaveAtCurrent={handleSaveAtCurrent}
+          onKeepFurthest={handleKeepFurthest}
+        />
+      )}
+    </>
+  );
+}

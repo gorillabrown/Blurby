@@ -50,9 +50,6 @@ export const FLOW_STATE_SYNC_MS = 500;
 export const PAGE_FLOW_SENTENCE_PAUSE_MS = 400;
 /** Extra pause after mid-sentence punctuation (comma, semicolon, colon) in PageReaderView (ms) */
 export const PAGE_FLOW_CLAUSE_PAUSE_MS = 200;
-/** Pause duration at end of page before auto-turning in Flow mode (ms) */
-export const FLOW_PAGE_TURN_PAUSE_MS = 200;
-
 // ── Keyboard ──────────────────────────────────────────────────────────────────
 /** G-sequence timeout — how long to wait for second key in "gg", "gf", etc. (ms) */
 export const G_SEQUENCE_TIMEOUT_MS = 2000;

@@ -450,3 +450,154 @@ describe("FlowScrollEngine - Integration", () => {
     document.body.removeChild(container);
   });
 });
+
+// ── Edge case tests (FLOW-3B) ────────────────────────────────────────
+
+describe("FlowScrollEngine - Edge Cases", () => {
+  it("should handle empty word array gracefully", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = document.createElement("div");
+    container.getBoundingClientRect = () => ({
+      top: 0, bottom: 600, left: 0, right: 800,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+    });
+    container.scrollTo = vi.fn();
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    // No word spans in container — should stop gracefully
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(engine.getState().running).toBe(false);
+    expect(cursor.style.display).toBe("none");
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should handle single-line document", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(3, 3); // 3 words, 1 line
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(engine.getState().totalLines).toBe(1);
+    expect(engine.getState().running).toBe(true);
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should handle line map rebuild", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(engine.getState().totalLines).toBe(4);
+
+    // Simulate font size change — rebuild line map
+    engine.rebuildLineMap();
+    expect(engine.getState().totalLines).toBe(4); // Same structure
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should handle zero-width line gracefully", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    // Create container with a single word that has zero width
+    const container = document.createElement("div");
+    container.getBoundingClientRect = () => ({
+      top: 0, bottom: 600, left: 0, right: 800,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+    });
+    container.scrollTo = vi.fn();
+    const span = document.createElement("span");
+    span.setAttribute("data-word-index", "0");
+    span.getBoundingClientRect = () => ({
+      top: 20, bottom: 44, left: 100, right: 100, // zero width
+      width: 0, height: 24, x: 100, y: 20, toJSON: () => {},
+    });
+    container.appendChild(span);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    // Should not crash
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(engine.getState().running).toBe(true);
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should preserve position across stop/start cycle (mode switch)", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    // Start at word 12
+    engine.start(container, cursor, 12, 300, new Set(), false);
+    expect(engine.getWordIndex()).toBe(12);
+    expect(engine.getState().lineIndex).toBe(2); // Line 2: words 10-14
+
+    // Stop (simulate mode switch to Page)
+    engine.stop();
+
+    // Restart at same position (simulate return to Flow)
+    engine.start(container, cursor, 12, 300, new Set(), false);
+    expect(engine.getWordIndex()).toBe(12);
+    expect(engine.getState().lineIndex).toBe(2);
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should not crash when destroying before start", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    // Should not throw
+    engine.destroy();
+    expect(engine.getState().running).toBe(false);
+  });
+
+  it("should handle jumpToWord beyond last word", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    engine.jumpToWord(999); // Beyond word count
+    // Should clamp to last line
+    expect(engine.getState().lineIndex).toBe(3); // Last line
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+
+  it("should handle paragraph jump with empty paragraph breaks set", () => {
+    const callbacks = { onWordAdvance: vi.fn(), onComplete: vi.fn() };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.start(container, cursor, 10, 300, new Set(), false); // Empty paragraphBreaks
+    callbacks.onWordAdvance.mockClear();
+    engine.jumpToParagraph("next");
+    // With no paragraph breaks, should stay at current position
+    expect(engine.getWordIndex()).toBe(10);
+
+    engine.destroy();
+    document.body.removeChild(container);
+  });
+});
