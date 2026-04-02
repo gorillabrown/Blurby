@@ -49,6 +49,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getStats: () => ipcRenderer.invoke("get-stats"),
   resetStats: () => ipcRenderer.invoke("reset-stats"),
 
+  // Author normalization
+  normalizeAllAuthors: () => ipcRenderer.invoke("normalize-all-authors"),
+
   // Import/export
   exportLibrary: () => ipcRenderer.invoke("export-library"),
   importLibrary: () => ipcRenderer.invoke("import-library"),

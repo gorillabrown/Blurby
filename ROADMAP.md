@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-01 — Post-FLOW-3B. 940 tests, 47 files. v1.6.1.
+**Last updated**: 2026-04-02 — Post-READINGS-4B. 973 tests, 49 files. v1.8.0.
 **Current branch**: `main`
-**Current state**: Phase 3 complete (FLOW-3A + FLOW-3B). Phase 4 next (Blurby Readings).
+**Current state**: Phase 4 in progress (READINGS-4A + READINGS-4B complete). READINGS-4C next.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -27,7 +27,7 @@ EPUB Content Fidelity     Test Coverage
 Phase 3: Flow Mode Redesign (✅ FLOW-3A + FLOW-3B done)
     │
     ▼
-Phase 4: Blurby Readings (4A ✅, 4B next, 4C queued)
+Phase 4: Blurby Readings (4A ✅, 4B ✅, 4C queued)
     │
     ▼
 Phase 5: Read Later + Chrome Extension (5A queued)
@@ -110,56 +110,9 @@ Phase 8: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint READINGS-4B: Author Normalization + First-Run Folder Picker (v1.8.0)
+### Sprint READINGS-4B: Author Normalization + First-Run Folder Picker ✅ COMPLETED (v1.8.0, 2026-04-02)
 
-**Branch:** `sprint/readings-4b`
-**Tier:** Quick (targeted fixes, no architecture change)
-**Estimate:** ~25 tool uses (single dispatch)
-
-**Scope:** Two independent features: (1) normalize all author names to "Last, First" format during import and provide a one-time batch normalization for existing library, (2) add a folder picker step to the first-run onboarding flow so users select their library folder before seeing the empty library.
-
-#### WHERE (Read Order)
-
-1. `CLAUDE.md` — rules, agents, current state
-2. `docs/governance/LESSONS_LEARNED.md` — scan for library, import, onboarding entries
-3. `ROADMAP.md` — this section
-4. `src/types.ts` — BlurbyDoc interface (`author`, `authorFull`)
-5. `main/epub-converter.js` — where author metadata is extracted during import
-6. `main/ipc/library.js` — import pipeline, rescan logic, where author is first stored
-7. `src/components/AddEditPanel.tsx` — existing Last/First name split UI
-8. `src/components/OnboardingOverlay.tsx` — current 3-step welcome tour (no folder picker)
-9. `main/ipc/state.js` — `select-folder` IPC handler
-10. `src/components/LibraryContainer.tsx` — `!settings.firstRunCompleted` guard
-
-#### Tasks
-
-| # | Agent | Task | Files |
-|---|-------|------|-------|
-| 1 | renderer-fixer | **Author normalization utility** — Create `src/utils/authorNormalize.ts`. Function `normalizeAuthor(raw: string): string` handles: single author ("John Smith" → "Smith, John"), already normalized ("Smith, John" → no-op), multi-word last names (heuristic: last word is last name unless known prefix like "de", "van", "von", "al-", "el-"), multiple authors (split on " and ", " & ", "; " → normalize each → join with "; "). Edge cases: single-word names (unchanged), empty/undefined (return as-is), `authorFull` (never normalize — display-only byline). | `src/utils/authorNormalize.ts` |
-| 2 | electron-fixer | **Apply normalization on import** — Call `normalizeAuthor()` in the import pipeline wherever `author` is first assigned from metadata extraction. Apply to file imports, URL imports, and rescan. Do NOT touch `authorFull`. | `main/ipc/library.js`, `main/epub-converter.js` |
-| 3 | electron-fixer | **Batch normalize IPC** — New `normalize-all-authors` IPC handler. Iterates library, applies `normalizeAuthor()` to every doc with an `author` field, persists changes. Returns `{ updated: number }`. Idempotent (already-normalized names pass through unchanged). | `main/ipc/library.js`, `preload.js` |
-| 4 | renderer-fixer | **"Normalize Authors" button in Library Layout settings** — Add a button to LibraryLayoutSettings (or wherever library management lives) that calls `window.electronAPI.normalizeAllAuthors()` and shows a toast with count. One-time action, not automatic. | `src/components/settings/LibraryLayoutSettings.tsx` |
-| 5 | renderer-fixer | **First-run folder picker** — Add a folder picker step to OnboardingOverlay between "welcome" and the tour. New phase: `"folder"`. Shows "Choose your library folder" with a button that calls `window.electronAPI.selectFolder()`. "Skip" proceeds without folder (existing behavior). Disable "Next" until folder is selected or user skips. | `src/components/OnboardingOverlay.tsx` |
-| 6 | test-runner | **Tests** — Unit tests for `normalizeAuthor()`: single name, multi-word, prefixed ("de Souza"), multi-author, already normalized, empty, `authorFull` passthrough. Integration: batch normalize IPC. ≥12 new tests. | `tests/` |
-| 7 | test-runner | **`npm test`** | — |
-| 8 | spec-reviewer | **Spec compliance** | — |
-| 9 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 10 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### SUCCESS CRITERIA
-
-1. `normalizeAuthor("John Smith")` → `"Smith, John"`
-2. `normalizeAuthor("Smith, John")` → `"Smith, John"` (idempotent)
-3. `normalizeAuthor("João de Souza")` → `"de Souza, João"` (prefix handling)
-4. `normalizeAuthor("Alice Smith and Bob Jones")` → `"Smith, Alice; Jones, Bob"` (multi-author)
-5. Author normalization applied automatically on all new imports
-6. "Normalize Authors" button in settings normalizes existing library, shows toast with count
-7. `authorFull` field is never modified by normalization
-8. First-run onboarding includes folder picker step before tour
-9. Folder picker calls existing `select-folder` IPC — no new Electron dialog code
-10. Skipping folder picker proceeds to tour (existing behavior preserved)
-11. `npm test` passes (≥969 tests)
-12. No regressions to import pipeline, library display, or onboarding flow
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-074/076 resolved. 16 new tests (973 total, 49 files). Author normalization on all imports, batch normalize IPC, "Normalize Authors" button in settings, folder picker step in onboarding. APPROVED.
 
 ---
 
@@ -307,7 +260,7 @@ Phase 2 is complete when:
 |--------|---------|--------|---------|
 | EXT-5A | v1.10.0 | 🔜 QUEUED | Chrome extension E2E tests + queue integration. Phase 5 start. |
 | READINGS-4C | v1.9.0 | 🔜 QUEUED | Metadata Wizard — batch scan, filename parsing, local enrichment. |
-| READINGS-4B | v1.8.0 | 🔜 NEXT | Author normalization + first-run folder picker. |
+| READINGS-4B | v1.8.0 | ✅ DONE | Author normalization + first-run folder picker. BUG-074/076 resolved. 16 new tests. |
 | HOTFIX-ARM | v1.7.0+ | ✅ DONE | ONNX ARM64 fix — onnxruntime-node 1.24.3 override, cpuinfo suppression. |
 | READINGS-4A | v1.7.0 | ✅ DONE | Library cards, reading queue, "New" dot auto-clear. 17 new tests. |
 | FLOW-3B | v1.6.1 | ✅ DONE | Flow Mode polish. Dead code removal, edge cases, truncation fix. 8 new tests. |
@@ -338,8 +291,8 @@ Items migrated from BUG_REPORT.md — feature requests, enhancements, and archit
 | ~~BUG-078~~ | ~~Reading Queue~~ | ✅ 4A | Ordered reading list, drag-to-reorder |
 | ~~BUG-050~~ | ~~3-line library cards~~ | ✅ 4A | Title, Author, Book Data (progress %, pages, time) |
 | ~~BUG-067~~ | ~~"New" dot auto-clear~~ | ✅ 4A | IntersectionObserver + seenAt timestamp |
-| BUG-074 | Author name normalization | 4B | Standardize to "Last, First" format |
-| BUG-076 | First-run library folder picker | 4B | Mandatory onboarding step |
+| ~~BUG-074~~ | ~~Author name normalization~~ | ✅ 4B | Standardize to "Last, First" format |
+| ~~BUG-076~~ | ~~First-run library folder picker~~ | ✅ 4B | Mandatory onboarding step |
 | BUG-077 | Metadata Wizard | 4C | Batch metadata enrichment (local-only, no API) |
 
 ### Phase 5: Read Later + Blurby News

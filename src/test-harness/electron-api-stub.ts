@@ -467,6 +467,9 @@ export const electronAPIStub: ElectronAPI = {
     return traceMut("resetStats", [], { success: true });
   },
 
+  // ── Author normalization ────────────────────────────────────────────────
+  normalizeAllAuthors: async () => trace("normalizeAllAuthors", [], { updated: 0 }),
+
   // ── Import/export ───────────────────────────────────────────────────────
   exportLibrary: async () => trace("exportLibrary", [], null),
   importLibrary: async () => trace("importLibrary", [], null),

@@ -5,6 +5,7 @@ const http = require("http");
 const crypto = require("crypto");
 const { safeStorage } = require("electron");
 const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS } = require("./constants");
+const { normalizeAuthor } = require("./author-normalize");
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const WS_PATH = "/blurby";
@@ -244,7 +245,7 @@ async function handleAddArticle(client, article) {
       created: Date.now(),
       source: "url",
       sourceUrl: article.sourceUrl || null,
-      author: article.author || null,
+      author: normalizeAuthor(article.author) || null,
       sourceDomain: article.siteName || null,
       publishedDate: article.publishedDate || null,
       authorFull: article.author || null,
