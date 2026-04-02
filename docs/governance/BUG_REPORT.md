@@ -71,7 +71,7 @@
 **Severity:** Medium
 **Location:** `src/components/ReaderContainer.tsx` (handleTogglePlay)
 **Description:** When in Page view, Space always enters Flow mode. It should start whichever mode the user last used (Focus, Flow, or Narration), with the preference persisted across sessions via `settings.json`. First-ever use defaults to Flow.
-**Status:** Open.
+**Status:** ✅ RESOLVED — `useReaderMode.ts` persists `lastReadingMode` in settings. Space bar enters last-used mode. Implemented during TD-1 (Mode Verticals).
 
 ### BUG-040: Focus mode covers bottom bar — visible but not clickable
 **Reported:** 2026-03-25
@@ -99,7 +99,7 @@
 **Severity:** Low
 **Location:** `main/window-manager.js` (BrowserWindow config), `src/styles/global.css`
 **Description:** Minimize/maximize/close buttons use default Windows title bar color instead of matching the app's theme. Requires either `titleBarStyle: "hidden"` with custom CSS buttons, or `titleBarOverlay` with color matching.
-**Status:** Open.
+**Status:** ✅ RESOLVED — `window-manager.js` uses `titleBarOverlay` with per-theme colors from `getThemeColors()`. `updateWindowTheme()` calls `setTitleBarOverlay()` on theme change.
 
 ### BUG-063: Define word includes punctuation
 **Reported:** 2026-03-25
