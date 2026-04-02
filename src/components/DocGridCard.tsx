@@ -68,7 +68,7 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
     });
   }, [doc.coverPath]);
 
-  const ext = doc.ext ? doc.ext.slice(1).toUpperCase() : (doc.source === "url" ? "URL" : "TXT");
+  const ext = doc.ext ? doc.ext.slice(1).toUpperCase() : (doc.source === "url" ? (doc.sourceDomain || "WEB") : "TXT");
   const rawPct = doc.wordCount > 0 ? ((doc.position || 0) / doc.wordCount) * 100 : 0;
   const progress = rawPct > 0 && rawPct < 1 ? 1 : Math.round(rawPct);
   const isComplete = (doc.position || 0) >= doc.wordCount - 1 && doc.wordCount > 0;

@@ -242,12 +242,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.9.0 — Post-READINGS-4C)
+## Current System State (v1.10.0 — Post-EXT-5A)
 
 ### Codebase (branch: `main`)
 
-- All sprints through READINGS-4C complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B + FLOW-3A + FLOW-3B + READINGS-4A + READINGS-4B + READINGS-4C)
-- 989 tests across 50 test files
+- All sprints through EXT-5A complete (1-23 + 18A + 18B + 25S + TD-1 + TD-2 + HOTFIX-2B + Mode Hardening + Mode Verticals + CT-1 + TH-1 + CT-2 + CT-3 + 24 + 24R + KB-1 + TTS-1 + TTS-2 + NAR-1 + PKG-1 + HOTFIX-3 + UX-1 + HOTFIX-4 + HOTFIX-4B + BUG-BTN + NAR-2 + NAR-3 + NAR-4 + HOTFIX-5 + HOTFIX-6 + HOTFIX-7 + HOTFIX-8 + HOTFIX-9 + HOTFIX-10 + NAR-5 + HOTFIX-11 + AUDIT-FIX-1A through 1F + EPUB-2A + EPUB-2B + FLOW-3A + FLOW-3B + READINGS-4A + READINGS-4B + READINGS-4C + EXT-5A)
+- 1,022 tests across 51 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 50 test files, 989 tests (incl. `tests/flow-scroll-engine.test.js`, `tests/author-normalize.test.ts`, `tests/metadata-wizard.test.js`)
+  - **Tests** (`tests/`): 51 test files, 1,022 tests (incl. `tests/extension-pipeline.test.js`, `tests/ws-server.test.js`)
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -311,7 +311,7 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 5: Read Later + Chrome Extension** — E2E tests + queue integration (EXT-5A)
+- **Phase 5 continued or Phase 6** — 5B (RSS/News feeds) or E-ink display mode
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -319,9 +319,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through READINGS-4C complete (v1.9.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through EXT-5A complete (v1.10.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll) → ✅ FLOW-3B (polish) → ✅ READINGS-4A (library cards, queue, new dot) → ✅ READINGS-4B (author normalization, folder picker) → ✅ READINGS-4C (metadata wizard)
+✅ EPUB-2A (content fidelity) → ✅ EPUB-2B (pipeline completion) → ✅ FLOW-3A (infinite scroll) → ✅ FLOW-3B (polish) → ✅ READINGS-4A (library cards, queue, new dot) → ✅ READINGS-4B (author normalization, folder picker) → ✅ READINGS-4C (metadata wizard) → ✅ EXT-5A (Chrome ext E2E + queue)
 
-**Next:** EXT-5A (Chrome extension E2E + queue integration) → Phase 5 continued
+**Next:** Phase 5 continued (5B scope TBD) or Phase 6 (E-ink display mode)

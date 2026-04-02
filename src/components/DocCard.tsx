@@ -83,7 +83,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
   const progress = Math.round(rawPct);
   const isComplete = pos >= wordCount - 1 && wordCount > 0;
   const readTime = formatTime(wordCount, wpm);
-  const typeLabel = doc.source === "url" ? "url" : doc.ext ? doc.ext.slice(1) : doc.source;
+  const typeLabel = doc.source === "url" ? (doc.sourceDomain || "web") : doc.ext ? doc.ext.slice(1) : doc.source;
   const typeColor = TYPE_COLORS[typeLabel] || "#c4a882";
   const apaSubtext = formatApaSubtext(doc);
 

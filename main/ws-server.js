@@ -237,6 +237,13 @@ async function handleAddArticle(client, article) {
     const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
     const wordCount = article.textContent.trim().split(/\s+/).filter(Boolean).length;
 
+    // Auto-queue: assign next available queuePosition
+    const library = _ctx.getLibrary();
+    const maxQueuePos = library.reduce((max, d) => {
+      if (d.queuePosition !== undefined && d.queuePosition !== null && d.queuePosition > max) return d.queuePosition;
+      return max;
+    }, -1);
+
     const doc = {
       id: docId,
       title: article.title || "Untitled Article",
@@ -251,6 +258,8 @@ async function handleAddArticle(client, article) {
       authorFull: article.author || null,
       lastReadAt: null,
       unread: true,
+      seenAt: undefined,
+      queuePosition: maxQueuePos + 1,
     };
 
     _ctx.addDocToLibrary(doc);
