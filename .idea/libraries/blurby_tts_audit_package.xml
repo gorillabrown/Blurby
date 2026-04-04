@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="blurby-tts-audit-package">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/docs/governance/blurby-tts-audit-package.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
