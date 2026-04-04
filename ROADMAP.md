@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6F (Word Alignment & Narration Telemetry). 1,088 tests, 55 files. Latest tagged release: v1.17.0.
+**Last updated**: 2026-04-04 — Post-TTS-6G (Narration Controls & Accessibility Polish). 1,096 tests, 56 files. Latest tagged release: v1.18.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6F complete). Queue GREEN (TTS-6G → TTS-6I → TTS-6J; depth 3).
+**Current state**: Phase 6 in progress (TTS-6G complete). Queue GREEN (TTS-6I → TTS-6J → TTS-6K; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -34,9 +34,10 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6D: Kokoro Startup & Recovery Hardening ✅ (v1.15.0)
   ├── TTS-6E: Pronunciation Overrides Foundation ✅ (v1.16.0)
   ├── TTS-6F: Word Alignment & Narration Telemetry ✅ (v1.17.0)
-  ├── TTS-6G: Narration Experience Consolidation (queued)
+  ├── TTS-6G: Narration Controls & Accessibility Polish ✅ (v1.18.0)
   ├── TTS-6I: Per-Book Pronunciation Profiles (queued)
-  └── TTS-6J: Voice Selection & Persona Consistency (queued)
+  ├── TTS-6J: Voice Selection & Persona Consistency (queued)
+  └── TTS-6K: Narration Personalization & Quality Sweep (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -426,18 +427,19 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6G: Narration Experience Consolidation
+### Sprint TTS-6G: Narration Controls & Accessibility Polish ✅ COMPLETED (v1.18.0, 2026-04-04)
 
-**Goal:** Finish the remaining day-to-day Narrate mode polish in one larger pass so controls, accessibility, and living docs all line up with the now-shipped Kokoro behavior instead of being split across separate tiny follow-ups.
+> Implemented and merged to `main`. 8 new tests (1,096 total, 56 files). Added Kokoro bucket buttons in the bottom bar, resolved `BUG-053`, and tightened engine-aware aria labels / narration control semantics. This sprint completed the control/accessibility work only; the later docs-closure idea was not executed as a standalone sprint.
 
-**Problem:** The core Kokoro lane is now reliable, but the remaining work is scattered across three surfaces that users experience as one thing: controls, accessibility/discoverability, and documentation truth. `BUG-053` is still open: in Narration mode, keyboard speed controls should adjust TTS rate, not WPM. At the same time, the technical reference and lessons learned still trail the shipped product. There is no value in dispatching those as separate tiny sprints when they describe the same final Narrate mode surface.
+**Goal:** Finish the remaining day-to-day Narrate mode control polish so keyboard, bottom-bar controls, and settings all express the same engine-aware rate semantics and remain understandable while Kokoro/Web Speech differ underneath.
+
+**Problem:** The core Kokoro lane is now reliable, but the control surface still had one obvious gap and a few consistency risks. `BUG-053` was open: in Narration mode, keyboard speed controls adjusted WPM instead of TTS rate. More broadly, the reader bottom bar, keyboard shortcuts, and settings needed one shared control contract so Kokoro buckets and Web Speech continuous rate behave predictably and accessibly.
 
 **Design decisions:**
 - **Engine-aware control semantics:** In Narration mode, Kokoro steps among `1.0x`, `1.2x`, `1.5x`; Web Speech steps in `0.1` increments. Non-narration modes keep WPM behavior.
-- **Single rate-control path:** Keyboard shortcuts, reader controls, and settings should all route through the same engine-aware stepping/resolution helpers rather than re-implementing logic in multiple places.
-- **Readable affordances:** The active control should clearly communicate whether the user is adjusting WPM or TTS rate, and for Kokoro it should show the discrete bucket model instead of implying fine-grained values.
-- **Accessibility first:** Keyboard interactions, aria labels, and visible hints should make the engine-specific behavior discoverable without extra docs.
-- **Docs ship with behavior:** Any narration control change in this sprint must land with updated privacy/SSML/control documentation so the repo ends the sprint in a coherent state.
+- **Single rate-control path:** Keyboard shortcuts, reader controls, and settings route through the same engine-aware stepping/resolution helpers rather than re-implementing logic in multiple places.
+- **Readable affordances:** The active control clearly communicates whether the user is adjusting WPM or TTS rate, and for Kokoro it shows the discrete bucket model instead of implying fine-grained values.
+- **Accessibility first:** Keyboard interactions, aria labels, and visible hints make the engine-specific behavior discoverable without extra docs.
 
 **Baseline:**
 - `src/hooks/useKeyboardShortcuts.ts` — mode-aware arrow key handling
@@ -446,8 +448,6 @@ Phase 5 is complete when:
 - `src/components/settings/SpeedReadingSettings.tsx` — engine/rate controls in settings
 - `src/constants.ts` — Kokoro bucket helpers and Web Speech rate constants
 - `docs/governance/BUG_REPORT.md` — `BUG-053`
-- `docs/governance/TECHNICAL_REFERENCE.md` — Narrate mode privacy, glossary, control semantics
-- `docs/governance/LESSONS_LEARNED.md` — TTS guardrails
 
 #### WHERE (Read Order)
 
@@ -460,8 +460,6 @@ Phase 5 is complete when:
 7. `src/components/ReaderContainer.tsx`
 8. `src/components/ReaderBottomBar.tsx`
 9. `src/components/settings/SpeedReadingSettings.tsx`
-10. `docs/governance/TECHNICAL_REFERENCE.md`
-11. `docs/governance/TTS-AUDIT-REVIEW.md`
 
 #### Tasks
 
@@ -472,14 +470,12 @@ Phase 5 is complete when:
 | 3 | Primary CLI (renderer-fixer scope) | **Reader bottom bar clarity** — Make the bottom bar label/value/hint clearly reflect whether the control is WPM or TTS rate. For Kokoro, emphasize the three discrete buckets rather than implying continuous precision. | `src/components/ReaderBottomBar.tsx` |
 | 4 | Primary CLI (renderer-fixer scope) | **Settings consistency pass** — Ensure Narrate settings describe Kokoro bucket behavior versus Web Speech continuous rate in plain language and stay visually synchronized with in-reader changes. | `src/components/settings/SpeedReadingSettings.tsx` |
 | 5 | Primary CLI (renderer-fixer scope) | **Accessibility polish** — Add/update aria labels, keyboard hints, and any lightweight helper text needed so the narration control semantics are discoverable and testable. | `src/components/ReaderBottomBar.tsx`, `src/components/settings/SpeedReadingSettings.tsx` |
-| 6 | Primary CLI (governance-doc scope) | **Narrate mode docs closure** — Update privacy/data-flow, SSML stance, safety posture, glossary terms, and control semantics in the technical reference so it accurately describes the shipped post-`TTS-6F` narration model. | `docs/governance/TECHNICAL_REFERENCE.md` |
-| 7 | Primary CLI (governance-doc scope) | **Lessons learned codification** — Add/update guardrails for engine-aware controls, engine-status propagation, cache identity invalidation, and timing telemetry so future TTS work starts from the current reality. | `docs/governance/LESSONS_LEARNED.md` |
-| 8 | test-runner | **Tests** — Cover: narration-mode arrow keys affect rate not WPM, Kokoro keyboard stepping snaps between three buckets, Web Speech uses `0.1` increments, bottom bar label switches correctly between WPM/rate semantics, and settings/reader stay synchronized after keyboard changes. | `tests/` |
-| 9 | test-runner | **`npm test` + `npm run build`** | — |
-| 10 | spec-compliance-reviewer | **Spec compliance** | — |
-| 11 | quality-reviewer | **Architecture + code quality review** | — |
-| 12 | doc-keeper | **Documentation pass** — Mark `BUG-053` resolved if the new control behavior is fully shipped and ensure roadmap/queue/reference docs all reflect the consolidated sprint outcome. | `ROADMAP.md`, `docs/governance/BUG_REPORT.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/LESSONS_LEARNED.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
-| 13 | blurby-lead | **Git: commit, merge, push** | — |
+| 6 | test-runner | **Tests** — Cover: narration-mode arrow keys affect rate not WPM, Kokoro keyboard stepping snaps between three buckets, Web Speech uses `0.1` increments, bottom bar label switches correctly between WPM/rate semantics, and settings/reader stay synchronized after keyboard changes. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | quality-reviewer | **Architecture + code quality review** | — |
+| 10 | doc-keeper | **Documentation pass** — Mark `BUG-053` resolved if the new control behavior is fully shipped and update reference docs if control semantics changed materially. | `ROADMAP.md`, `docs/governance/BUG_REPORT.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 
@@ -490,11 +486,9 @@ Phase 5 is complete when:
 5. Reader bottom bar clearly communicates whether the active control is WPM or TTS rate
 6. Settings text and in-reader controls stay synchronized for both engines
 7. Control semantics are accessible via labels/hints and do not rely on hidden assumptions
-8. `TECHNICAL_REFERENCE.md` accurately documents privacy/data flow, SSML stance, safety posture, glossary terms, and current narration control semantics after this sprint
-9. `LESSONS_LEARNED.md` captures the key TTS guardrails reinforced by this consolidated pass
-10. New tests cover keyboard stepping and control-surface synchronization
-11. `npm test` passes
-12. `npm run build` succeeds
+8. New tests cover keyboard stepping and control-surface synchronization
+9. `npm test` passes
+10. `npm run build` succeeds
 
 ---
 
@@ -611,6 +605,62 @@ Phase 5 is complete when:
 3. Settings and docs describe voices using the same accent/persona terminology
 4. No stale gender-bucket language remains in the current voice-facing docs/UI
 5. New tests cover fallback voice-priority behavior
+6. `npm test` passes
+7. `npm run build` succeeds
+
+---
+
+### Sprint TTS-6K: Narration Personalization & Quality Sweep
+
+**Goal:** Deliver the next bigger TTS block by combining the remaining personalization polish and repo-truth cleanup into one substantial sprint instead of scattering them across tiny follow-ups.
+
+**Problem:** After `TTS-6J`, the TTS lane still has one class of work that matters to users and maintainers at the same time: personalization should feel coherent across controls, overrides, and voices, and the long-form docs should finally reflect the shipped Narrate mode reality. We do not need more tiny cleanup tickets; we need one deliberate pass that makes the feature feel finished.
+
+**Design decisions:**
+- **One personalization sweep:** Treat current-book overrides, voice consistency, and narration-facing docs as one “make this feel complete” block.
+- **Docs ride with product truth:** This sprint explicitly includes the remaining privacy/data-flow, SSML stance, safety posture, glossary, and lessons-learned updates if they are still stale after `TTS-6J`.
+- **No new speech markup system:** Stay with the existing plain-text override model and shipped control semantics. This is polish and coherence, not a new TTS substrate.
+- **Ship the user-facing story, not just the code paths:** The result should leave settings, reader controls, fallback behavior, and governance docs describing the same product.
+
+**Baseline:**
+- `TTS-6I` and `TTS-6J` outputs
+- `src/components/settings/SpeedReadingSettings.tsx`
+- `src/components/ReaderBottomBar.tsx`
+- `src/hooks/useNarration.ts`
+- `docs/governance/TECHNICAL_REFERENCE.md`
+- `docs/governance/LESSONS_LEARNED.md`
+- `docs/governance/BUG_REPORT.md`
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6I`, `TTS-6J`, and this section
+4. `docs/governance/TECHNICAL_REFERENCE.md`
+5. `docs/governance/TTS-AUDIT-REVIEW.md`
+6. active TTS UI / settings / narration files touched by `TTS-6I` and `TTS-6J`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Narration personalization consistency pass** — Ensure current-book overrides, voice selection, and narration controls present a coherent user-facing model in settings and reader surfaces. | TTS UI/settings/narration files as needed |
+| 2 | Primary CLI (governance-doc scope) | **Narrate mode reference closure** — Update technical reference sections for privacy/data flow, SSML stance, safety posture, glossary, override scoping, and voice-selection behavior so they describe the shipped system exactly. | `docs/governance/TECHNICAL_REFERENCE.md` |
+| 3 | Primary CLI (governance-doc scope) | **Lessons learned / bug closure sweep** — Capture the durable TTS guardrails and close or reword any remaining stale TTS bug/doc references. | `docs/governance/LESSONS_LEARNED.md`, `docs/governance/BUG_REPORT.md` |
+| 4 | test-runner | **Tests** — Add or extend tests only where the consolidation changes actual behavior or locks in a new user-facing contract. | `tests/` if needed |
+| 5 | test-runner | **`npm test` + `npm run build`** | — |
+| 6 | spec-compliance-reviewer | **Spec compliance** | — |
+| 7 | quality-reviewer | **Architecture + code quality review** | — |
+| 8 | doc-keeper | **Documentation pass** — Ensure roadmap, queue, CLAUDE, technical reference, bug report, and lessons learned are all aligned after the sweep. | governing docs |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narration settings/controls/voice surfaces describe one coherent personalization model
+2. Remaining Narrate-mode privacy/data-flow and SSML/safety docs are current
+3. TTS glossary/terminology in governance docs matches shipped behavior
+4. Stale TTS bug/doc references are removed or reworded accurately
+5. Any new user-facing behavior is covered by tests
 6. `npm test` passes
 7. `npm run build` succeeds
 
@@ -781,6 +831,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| TTS-6I | v1.19.0 | ✅ DONE | Per-book pronunciation profiles. Global + book layering, merge resolver, scoped editor, book-aware cache. 11 new tests. |
 | TTS-6G | v1.18.0 | ✅ DONE | Narration controls & accessibility polish. Kokoro bucket bottom-bar, BUG-053 resolved. 8 new tests. |
 | TTS-6F | v1.17.0 | ✅ DONE | Word alignment telemetry + improved timing heuristic. Punctuation-aware/token-length-aware word weighting, dev telemetry. 12 new tests. |
 | TTS-6E | v1.16.0 | ✅ DONE | Pronunciation overrides foundation. Global override list, settings editor, preview, cache-safe Kokoro generation. 15 new tests. |

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
 import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS, resolveKokoroBucket } from "../constants";
-import { applyPronunciationOverrides } from "../utils/pronunciationOverrides";
+import { applyPronunciationOverrides, mergeOverrides } from "../utils/pronunciationOverrides";
 import type { PronunciationOverride } from "../types";
 import type { RhythmPauses } from "../types";
 import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/pauseDetection";
@@ -84,7 +84,14 @@ export default function useNarration() {
   const pauseConfigRef = useRef<PauseConfig>(DEFAULT_PAUSE_CONFIG);
   const onSectionEndRef = useRef<(() => void) | null>(null);
   const bookIdRef = useRef<string>("");
+  const globalOverridesRef = useRef<PronunciationOverride[]>([]);
+  const bookOverridesRef = useRef<PronunciationOverride[]>([]);
+  /** Effective merged overrides (global + book) — recomputed on each setter call */
   const pronunciationOverridesRef = useRef<PronunciationOverride[]>([]);
+
+  const updateMergedOverrides = useCallback(() => {
+    pronunciationOverridesRef.current = mergeOverrides(globalOverridesRef.current, bookOverridesRef.current);
+  }, []);
 
   // ── TTS Strategy instances ──────────────────────────────────────────────
   const webStrategy = useMemo(
@@ -562,7 +569,12 @@ export default function useNarration() {
       bookIdRef.current = id;
     },
     setPronunciationOverrides: (overrides: PronunciationOverride[]) => {
-      pronunciationOverridesRef.current = overrides;
+      globalOverridesRef.current = overrides;
+      updateMergedOverrides();
+    },
+    setBookPronunciationOverrides: (overrides: PronunciationOverride[]) => {
+      bookOverridesRef.current = overrides;
+      updateMergedOverrides();
     },
     warmUp: () => {
       kokoroStrategy.warmUp();
