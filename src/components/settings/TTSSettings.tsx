@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import type { BlurbySettings } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD } from "../../constants";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket } from "../../constants";
 
 const api = window.electronAPI;
 
@@ -106,7 +106,7 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
         const result = await api.kokoroGenerate(
           "The quick brown fox jumps over the lazy dog.",
           voice,
-          settings.ttsRate || 1.0
+          resolveKokoroBucket(settings.ttsRate || 1.0)
         );
         if (!result.error && result.audio) {
           const { playBuffer } = await import("../../utils/audioPlayer");
@@ -241,16 +241,30 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
         <span className="settings-toggle-label">Speech rate</span>
         <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{(settings.ttsRate || 1.0).toFixed(1)}x</span>
       </div>
-      <input
-        type="range"
-        className="settings-slider"
-        min={TTS_MIN_RATE}
-        max={TTS_MAX_RATE}
-        step={0.1}
-        value={settings.ttsRate || 1.0}
-        onChange={(e) => onSettingsChange({ ttsRate: Number(e.target.value) })}
-        aria-label="TTS speech rate"
-      />
+      {engine === "kokoro" ? (
+        <div className="settings-mode-toggle" style={{ marginBottom: 4 }}>
+          {KOKORO_RATE_BUCKETS.map((bucket) => (
+            <button
+              key={bucket}
+              className={`settings-mode-btn${resolveKokoroBucket(settings.ttsRate || 1.0) === bucket ? " active" : ""}`}
+              onClick={() => onSettingsChange({ ttsRate: bucket })}
+            >
+              {bucket.toFixed(1)}x
+            </button>
+          ))}
+        </div>
+      ) : (
+        <input
+          type="range"
+          className="settings-slider"
+          min={TTS_MIN_RATE}
+          max={TTS_MAX_RATE}
+          step={0.1}
+          value={settings.ttsRate || 1.0}
+          onChange={(e) => onSettingsChange({ ttsRate: Number(e.target.value) })}
+          aria-label="TTS speech rate"
+        />
+      )}
 
       <button
         className="settings-btn-secondary"

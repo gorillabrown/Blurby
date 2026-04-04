@@ -8,7 +8,7 @@
 //
 // Respects the ttsCacheEnabled setting. When disabled, no background work runs.
 
-import { TTS_CRUISE_CHUNK_WORDS } from "../constants";
+import { TTS_CRUISE_CHUNK_WORDS, KOKORO_DEFAULT_RATE_BUCKET, type KokoroRateBucket } from "../constants";
 import * as ttsCache from "./ttsCache";
 
 const api = window.electronAPI;
@@ -25,6 +25,8 @@ export interface BackgroundCacherConfig {
   getVoiceId: () => string;
   /** Get whether caching is enabled */
   isCacheEnabled: () => boolean;
+  /** Get the active rate bucket — marathon warms only this bucket */
+  getRateBucket?: () => KokoroRateBucket;
 }
 
 export interface CacheableBook {
@@ -58,7 +60,9 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
    * Returns when the book is fully cached or aborted.
    */
   async function cacheBook(book: CacheableBook, signal: AbortSignal): Promise<void> {
-    const voiceId = config.getVoiceId();
+    const rawVoiceId = config.getVoiceId();
+    const bucket = config.getRateBucket ? config.getRateBucket() : KOKORO_DEFAULT_RATE_BUCKET;
+    const cacheVoiceId = `${rawVoiceId}/${bucket}`;
     const chunkSize = TTS_CRUISE_CHUNK_WORDS;
     const totalWords = book.words.length;
     if (totalWords === 0) return;
@@ -68,25 +72,24 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     while (idx < totalWords && !signal.aborted) {
       if (!config.isCacheEnabled()) return;
 
-      const isCached = await ttsCache.isCached(book.id, voiceId, idx);
+      const isCached = await ttsCache.isCached(book.id, cacheVoiceId, idx);
       if (!isCached) {
         const endIdx = Math.min(idx + chunkSize, totalWords);
         const chunkWords = book.words.slice(idx, endIdx);
         const text = chunkWords.join(" ");
 
         try {
-          const result = await config.generateFn(text, voiceId, 1.0);
+          const result = await config.generateFn(text, rawVoiceId, bucket);
           if (signal.aborted) return;
 
           if (result.audio && result.sampleRate) {
             const audio = result.audio instanceof Float32Array
               ? result.audio : new Float32Array(result.audio);
             const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
-            ttsCache.cacheChunk(book.id, voiceId, idx, audio, result.sampleRate, durationMs);
+            ttsCache.cacheChunk(book.id, cacheVoiceId, idx, audio, result.sampleRate, durationMs);
           }
         } catch {
           if (signal.aborted) return;
-          // Generation failed — skip this chunk, continue with next
         }
       }
       idx += chunkSize;
@@ -97,21 +100,21 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     while (idx < book.position && !signal.aborted) {
       if (!config.isCacheEnabled()) return;
 
-      const isCached = await ttsCache.isCached(book.id, voiceId, idx);
+      const isCached = await ttsCache.isCached(book.id, cacheVoiceId, idx);
       if (!isCached) {
         const endIdx = Math.min(idx + chunkSize, book.position);
         const chunkWords = book.words.slice(idx, endIdx);
         const text = chunkWords.join(" ");
 
         try {
-          const result = await config.generateFn(text, voiceId, 1.0);
+          const result = await config.generateFn(text, rawVoiceId, bucket);
           if (signal.aborted) return;
 
           if (result.audio && result.sampleRate) {
             const audio = result.audio instanceof Float32Array
               ? result.audio : new Float32Array(result.audio);
             const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
-            ttsCache.cacheChunk(book.id, voiceId, idx, audio, result.sampleRate, durationMs);
+            ttsCache.cacheChunk(book.id, cacheVoiceId, idx, audio, result.sampleRate, durationMs);
           }
         } catch {
           if (signal.aborted) return;
@@ -185,11 +188,12 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
   }
 
   async function isBookFullyCached(bookId: string): Promise<boolean> {
-    const voiceId = config.getVoiceId();
+    const bucket = config.getRateBucket ? config.getRateBucket() : KOKORO_DEFAULT_RATE_BUCKET;
+    const cacheVoiceId = `${config.getVoiceId()}/${bucket}`;
     const book = readingNowBooks.find(b => b.id === bookId) || (activeBook?.id === bookId ? activeBook : null);
     if (!book) return false;
 
-    const cachedChunks = await ttsCache.getCachedChunks(bookId, voiceId);
+    const cachedChunks = await ttsCache.getCachedChunks(bookId, cacheVoiceId);
     const chunkSize = TTS_CRUISE_CHUNK_WORDS;
     const expectedChunkCount = Math.ceil(book.words.length / chunkSize);
     return cachedChunks.length >= expectedChunkCount;

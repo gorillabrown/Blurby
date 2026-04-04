@@ -10,13 +10,14 @@ import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler } from "../../utils/audioScheduler";
 import * as ttsCache from "../../utils/ttsCache";
+import { resolveKokoroBucket } from "../../constants";
 
 const api = window.electronAPI;
 
 export interface KokoroStrategyDeps {
   /** Get current Kokoro voice ID */
   getVoiceId: () => string;
-  /** Get current speed (playbackRate, not generation speed) */
+  /** Get current speed (resolved to native-rate bucket for generation) */
   getSpeed: () => number;
   /** Get the current narration status */
   getStatus: () => string;
@@ -40,10 +41,18 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 } {
   const scheduler = createAudioScheduler();
 
+  /** Resolve current speed to a Kokoro native-rate bucket */
+  const getBucket = () => resolveKokoroBucket(deps.getSpeed());
+
+  /** Build the cache key voice segment: voiceId/rateBucket */
+  const getCacheVoice = () => `${deps.getVoiceId()}/${getBucket()}`;
+
   const pipeline = createGenerationPipeline({
     generateFn: async (text, voiceId, speed) => {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
-      const result = await api.kokoroGenerate(text, voiceId, speed);
+      // Generate at native bucket rate — no scheduler stretch needed
+      const bucket = resolveKokoroBucket(speed);
+      const result = await api.kokoroGenerate(text, voiceId, bucket);
       if (result.error || !result.audio || !result.sampleRate) {
         return { error: result.error || "no audio returned" };
       }
@@ -52,32 +61,28 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     },
     getWords: deps.getWords,
     getVoiceId: deps.getVoiceId,
-    getSpeed: deps.getSpeed,
+    getSpeed: () => getBucket(),
     onChunkReady: (chunk) => {
       scheduler.scheduleChunk(chunk);
     },
     onCacheChunk: (startIdx, audio, sampleRate, durationMs) => {
-      if (deps.getSpeed() !== 1.0) return; // Don't cache speed-specific audio
       const bookId = deps.getBookId?.() || "";
-      const voiceId = deps.getVoiceId();
+      const voiceId = getCacheVoice();
       if (bookId) {
         ttsCache.cacheChunk(bookId, voiceId, startIdx, audio, sampleRate, durationMs);
       }
     },
     isCached: async (startIdx) => {
-      if (deps.getSpeed() !== 1.0) return false; // Skip stale 1.0x cache at other speeds
       const bookId = deps.getBookId?.() || "";
-      const voiceId = deps.getVoiceId();
+      const voiceId = getCacheVoice();
       if (!bookId) return false;
       return ttsCache.isCached(bookId, voiceId, startIdx);
     },
     loadCached: async (startIdx) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = deps.getVoiceId();
+      const voiceId = getCacheVoice();
       if (!bookId) return null;
       const words = deps.getWords();
-      // Reconstruct chunk words from the word array
-      // (cached chunks don't store words, just audio)
       const chunkWords = words.slice(startIdx, startIdx + 148); // approximate — cruise size
       return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, chunkWords);
     },

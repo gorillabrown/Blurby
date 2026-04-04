@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
-import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS } from "../constants";
+import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS, resolveKokoroBucket } from "../constants";
 import type { RhythmPauses } from "../types";
 import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/pauseDetection";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
@@ -449,17 +449,20 @@ export default function useNarration() {
 
     const s = stateRef.current;
     if (s.status !== "idle") {
-      // Debounced stop+restart for both engines (Kokoro regenerates at native speed)
-      if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
-      rateDebounceRef.current = setTimeout(() => {
-        rateDebounceRef.current = null;
-        if (s.engine === "kokoro") {
-          kokoroStrategy.stop();
-        } else {
-          webStrategy.stop();
-        }
+      if (s.engine === "kokoro") {
+        // Kokoro: immediate stop + restart from current word at new native bucket — no debounce
+        if (rateDebounceRef.current) { clearTimeout(rateDebounceRef.current); rateDebounceRef.current = null; }
+        kokoroStrategy.stop();
         speakNextChunk();
-      }, TTS_RATE_RESTART_DEBOUNCE_MS);
+      } else {
+        // Web Speech: debounced restart (lets rapid slider adjustments settle)
+        if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
+        rateDebounceRef.current = setTimeout(() => {
+          rateDebounceRef.current = null;
+          webStrategy.stop();
+          speakNextChunk();
+        }, TTS_RATE_RESTART_DEBOUNCE_MS);
+      }
     }
   }, [speakNextChunk, webStrategy, kokoroStrategy]);
 

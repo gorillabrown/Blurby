@@ -94,6 +94,41 @@ export const TTS_CROSSFADE_MS = 8;
 /** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
 export const TTS_FORWARD_WORDS = 300;
 
+// ── Kokoro Rate Buckets (TTS-6C) ────────────────────────────────────────────
+/** Supported Kokoro native generation rates — no pitch-shift, no scheduler stretch */
+export const KOKORO_RATE_BUCKETS = [1.0, 1.2, 1.5] as const;
+export type KokoroRateBucket = (typeof KOKORO_RATE_BUCKETS)[number];
+/** Default Kokoro rate bucket */
+export const KOKORO_DEFAULT_RATE_BUCKET: KokoroRateBucket = 1.0;
+
+/**
+ * Resolve an arbitrary numeric rate to the nearest supported Kokoro bucket.
+ * Used by settings, keyboard shortcuts, and narration startup.
+ */
+export function resolveKokoroBucket(rate: number): KokoroRateBucket {
+  let closest = KOKORO_RATE_BUCKETS[0];
+  let minDist = Math.abs(rate - closest);
+  for (let i = 1; i < KOKORO_RATE_BUCKETS.length; i++) {
+    const dist = Math.abs(rate - KOKORO_RATE_BUCKETS[i]);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = KOKORO_RATE_BUCKETS[i];
+    }
+  }
+  return closest;
+}
+
+/**
+ * Step to the next/previous Kokoro bucket.
+ * Returns the next bucket up (delta > 0) or down (delta < 0), clamped to bounds.
+ */
+export function stepKokoroBucket(current: number, delta: number): KokoroRateBucket {
+  const resolved = resolveKokoroBucket(current);
+  const idx = KOKORO_RATE_BUCKETS.indexOf(resolved);
+  const nextIdx = Math.max(0, Math.min(KOKORO_RATE_BUCKETS.length - 1, idx + (delta > 0 ? 1 : -1)));
+  return KOKORO_RATE_BUCKETS[nextIdx];
+}
+
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */
 export const KOKORO_MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
