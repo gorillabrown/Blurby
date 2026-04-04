@@ -264,12 +264,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.21.0 — Post-TTS-6K)
+## Current System State (v1.22.0 — Post-TTS-6L)
 
 ### Codebase (branch: `main`)
 
-- All sprints through TTS-6K complete (+ TTS-6C through TTS-6K + GOV-6D)
-- 1,116 tests across 59 test files
+- All sprints through TTS-6L complete (+ TTS-6C through TTS-6L + GOV-6D)
+- 1,126 tests across 60 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -323,7 +323,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 59 test files, 1,116 tests
+  - **Tests** (`tests/`): 60 test files, 1,126 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -333,7 +333,7 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → TTS-6K → TTS-6L → TTS-6M
+- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K → TTS-6L → TTS-6M → TTS-6N
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -341,9 +341,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through TTS-6K complete (v1.21.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through TTS-6L complete (v1.22.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K (narration personalization & quality sweep)
+✅ TTS-6J → ✅ TTS-6K → ✅ TTS-6L (narration profiles & sharing foundations)
 
-**Next:** TTS-6L (narration profiles foundations) → TTS-6M (narration portability & reset safety)
+**Next:** TTS-6M (narration portability & reset safety) → TTS-6N (runtime stability & extraction sync)

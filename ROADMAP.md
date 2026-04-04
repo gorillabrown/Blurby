@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6K (Narration Personalization & Quality Sweep). 1,116 tests, 59 files. Latest tagged release: v1.21.0.
+**Last updated**: 2026-04-04 — Post-TTS-6L (Narration Profiles & Sharing Foundations). 1,126 tests, 60 files. Latest tagged release: v1.22.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6K complete). Queue YELLOW (TTS-6L → TTS-6M; depth 2 — backfill needed).
+**Current state**: Phase 6 in progress (TTS-6L complete). Queue YELLOW (TTS-6M → TTS-6N; depth 2 — backfill needed).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -38,8 +38,9 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6I: Per-Book Pronunciation Profiles ✅ (v1.19.0)
   ├── TTS-6J: Voice Selection & Persona Consistency ✅ (v1.20.0)
   ├── TTS-6K: Narration Personalization & Quality Sweep ✅ (v1.21.0)
-  ├── TTS-6L: Narration Profiles & Sharing Foundations (queued)
-  └── TTS-6M: Narration Portability & Reset Safety (queued)
+  ├── TTS-6L: Narration Profiles & Sharing Foundations ✅ (v1.22.0)
+  ├── TTS-6M: Narration Portability & Reset Safety (queued)
+  └── TTS-6N: Narration Runtime Stability & Extraction Sync (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -788,6 +789,65 @@ Phase 5 is complete when:
 
 ---
 
+### Sprint TTS-6N: Narration Runtime Stability & Extraction Sync
+
+**Goal:** Make Narrate mode stable under real interactive use by fixing hook-order crashes, eliminating mid-play extraction restarts, and reducing renderer-thread blocking during live Kokoro sessions.
+
+**Problem:** Post-`TTS-6K` manual testing shows Narrate is still fragile in ways that are more serious than polish. Three concrete issues are now confirmed. First, `useNarration.ts` can crash with `ReferenceError: Cannot access 'speakNextChunk' before initialization`, which points to a hook-order / temporal-dead-zone bug in the Kokoro auto-start path. Second, HOTFIX-6 full-book extraction can complete after narration has already started and then force `narration.updateWords(...)`, producing visible restart behavior and cursor jumps mid-play. Third, the renderer is still doing enough work during Narrate that DevTools reports repeated long `message`, `keydown`, `setTimeout`, and forced-reflow violations. This sprint is the runtime-hardening pass that should have Narrate feel dependable before more feature depth is added.
+
+**Design decisions:**
+- **Runtime correctness before more customization:** Stable playback, stable cursor position, and no hard crashes take precedence over additional Narrate features.
+- **No mid-play extraction restarts:** Once Narrate has started, late-arriving full-book extraction must not visibly reset playback unless an explicit handoff contract guarantees seamless continuation.
+- **Hook-order safety as a rule:** `useNarration` should not rely on callbacks before initialization; use refs or declaration order that is robust under React render/HMR behavior.
+- **Reduce live DOM churn:** Rewrapping/restamping large foliate sections during active narration should be minimized, deferred, or made non-disruptive.
+
+**Baseline:**
+- `src/hooks/useNarration.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/modes/NarrateMode.ts`
+- `src/utils/audioScheduler.ts`
+- HOTFIX-6 / HOTFIX-10 extraction and section-stamping paths
+- manual dev logs showing TDZ crash, restart at global index handoff, and repeated long main-thread violations
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6K` and this section
+4. `src/hooks/useNarration.ts`
+5. `src/components/ReaderContainer.tsx`
+6. `src/modes/NarrateMode.ts`
+7. `src/utils/audioScheduler.ts`
+8. HOTFIX-6 / HOTFIX-10 related tests and extraction helpers
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Fix `useNarration` initialization crash** — Remove the temporal-dead-zone / hook-order hazard around `speakNextChunk` and any similar callback dependencies so Narrate survives fresh render and HMR cycles. | `src/hooks/useNarration.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Stabilize full-book extraction handoff** — Rework HOTFIX-6 narration handoff so late extraction completion does not visibly restart or jump active narration from the user’s perspective. If a handoff is still needed, it must preserve effective position and avoid duplicate chunk starts. | `src/components/ReaderContainer.tsx`, narration handoff helpers |
+| 3 | Primary CLI (renderer-fixer scope) | **Clamp Kokoro runtime rate semantics at the mode boundary** — Ensure active Kokoro narration state is normalized to supported buckets before mode start / restart paths, so continuous-rate leakage does not survive in the runtime layer. | `src/modes/NarrateMode.ts`, related helpers |
+| 4 | Primary CLI (renderer-fixer scope) | **Reduce active narration renderer churn** — Audit section restamping, DOM rewrites, and any expensive sync work performed during live narration. Defer, batch, or guard it so the renderer stops stalling on ordinary Narrate use. | `src/components/ReaderContainer.tsx`, `src/utils/audioScheduler.ts`, related readers |
+| 5 | test-runner | **Tests** — Add coverage for: no TDZ crash on Kokoro warm/ready auto-start path, no visible playback restart when full-book extraction completes mid-session, Kokoro runtime rate normalization, and non-regression around section-boundary navigation. | `tests/` |
+| 6 | test-runner | **`npm test` + `npm run build`** | — |
+| 7 | spec-compliance-reviewer | **Spec compliance** | — |
+| 8 | quality-reviewer | **Architecture + code quality review** | — |
+| 9 | doc-keeper | **Documentation pass** — Record the runtime guardrails and any updated Narrate handoff model in roadmap, queue, technical reference, and lessons learned. | governing docs |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narrate no longer throws `Cannot access 'speakNextChunk' before initialization`
+2. Electron dev session remains alive through Narrate start and HMR retest
+3. HOTFIX-6 full-book extraction no longer causes a visible mid-play restart/jump
+4. Kokoro runtime state uses supported bucket semantics on active start/restart paths
+5. Main-thread violations during ordinary Narrate interaction are materially reduced
+6. New tests cover crash prevention and extraction-handoff stability
+7. `npm test` passes
+8. `npm run build` succeeds
+
+---
+
 ### Drafted Later Work (Not In Queue Yet)
 
 `EINK-6A` and `GOALS-6B` remain drafted below for later phases, but they are intentionally not the next dispatches while the TTS lane is still active.
@@ -953,6 +1013,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| TTS-6K | v1.21.0 | ✅ DONE | Narration personalization & quality sweep. Documentation/policy closure and user-facing Narrate coherence pass completed; follow-up runtime hardening explicitly queued as TTS-6N. |
 | TTS-6J | v1.20.0 | ✅ DONE | Voice selection & persona consistency. Shared preferred-voice selector, stable Web Speech fallback priority, and accent/persona terminology cleanup in docs. 1,115 total tests, 58 files. |
 | TTS-6I | v1.19.0 | ✅ DONE | Per-book pronunciation profiles. Global + book layering, merge resolver, scoped editor, book-aware cache. 11 new tests. |
 | TTS-6G | v1.18.0 | ✅ DONE | Narration controls & accessibility polish. Kokoro bucket bottom-bar, BUG-053 resolved. 8 new tests. |

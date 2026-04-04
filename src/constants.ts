@@ -1,5 +1,6 @@
 // src/constants.ts — All tunable behavioral constants for the renderer
 // Grouped by domain. CSS custom properties are exempt (they live in global.css).
+import type { NarrationProfile, BlurbySettings } from "./types";
 
 // ── Reader / WPM ──────────────────────────────────────────────────────────────
 /** Default reading speed (words per minute) */
@@ -97,6 +98,67 @@ export const TTS_FORWARD_WORDS = 300;
 // ── Pronunciation Overrides (TTS-6E) ────────────────────────────────────────
 /** Maximum number of pronunciation overrides a user can create */
 export const MAX_PRONUNCIATION_OVERRIDES = 100;
+
+// ── Narration Profiles (TTS-6L) ────────────────────────────────────────────
+/** Maximum number of narration profiles a user can create */
+export const MAX_NARRATION_PROFILES = 20;
+
+/** Create a new profile with current TTS defaults. */
+export function createDefaultNarrationProfile(name: string): NarrationProfile {
+  const now = Date.now();
+  return {
+    id: `np-${now}-${Math.random().toString(36).slice(2, 6)}`,
+    name,
+    ttsEngine: "kokoro",
+    ttsVoiceName: "af_bella",
+    ttsRate: 1.0,
+    ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
+    ttsPauseClauseMs: TTS_PAUSE_CLAUSE_MS,
+    ttsPauseSentenceMs: TTS_PAUSE_SENTENCE_MS,
+    ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
+    ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
+    pronunciationOverrides: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/** Create a profile from the user's current flat TTS settings. */
+export function profileFromSettings(name: string, settings: BlurbySettings): NarrationProfile {
+  const base = createDefaultNarrationProfile(name);
+  return {
+    ...base,
+    ttsEngine: settings.ttsEngine || "web",
+    ttsVoiceName: settings.ttsVoiceName || null,
+    ttsRate: settings.ttsRate || 1.0,
+    ttsPauseCommaMs: settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
+    ttsPauseClauseMs: settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
+    ttsPauseSentenceMs: settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS,
+    ttsPauseParagraphMs: settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS,
+    ttsDialogueSentenceThreshold: settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD,
+    pronunciationOverrides: settings.pronunciationOverrides ? [...settings.pronunciationOverrides] : [],
+  };
+}
+
+/** Get the effective profile for a book, resolving book > active > flat settings. */
+export function resolveNarrationProfile(
+  settings: BlurbySettings,
+  bookProfileId?: string | null,
+): NarrationProfile | null {
+  const profiles = settings.narrationProfiles || [];
+  // Book-level override takes priority
+  if (bookProfileId) {
+    const bookProfile = profiles.find(p => p.id === bookProfileId);
+    if (bookProfile) return bookProfile;
+  }
+  // Then active profile
+  if (settings.activeNarrationProfileId) {
+    const active = profiles.find(p => p.id === settings.activeNarrationProfileId);
+    if (active) return active;
+  }
+  // No profile — caller should use flat settings
+  return null;
+}
 
 // ── Kokoro Rate Buckets (TTS-6C) ────────────────────────────────────────────
 /** Supported Kokoro native generation rates — no pitch-shift, no scheduler stretch */

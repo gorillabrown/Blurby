@@ -6,6 +6,24 @@ export interface PronunciationOverride {
   enabled: boolean;
 }
 
+// ── Narration Profiles (TTS-6L) ─────────────────────────────────���───────────
+/** A named narration preset bundling voice, rate, pause timing, and overrides. */
+export interface NarrationProfile {
+  id: string;
+  name: string;
+  ttsEngine: "web" | "kokoro";
+  ttsVoiceName: string | null;
+  ttsRate: number;
+  ttsPauseCommaMs: number;
+  ttsPauseClauseMs: number;
+  ttsPauseSentenceMs: number;
+  ttsPauseParagraphMs: number;
+  ttsDialogueSentenceThreshold: number;
+  pronunciationOverrides: PronunciationOverride[];
+  createdAt: number;   // Date.now() — for sort/display
+  updatedAt: number;   // Date.now() — tracks last edit
+}
+
 export interface LoadedDocFilePayload {
   filepath: string;
   ext: string;
@@ -67,6 +85,8 @@ export interface BlurbyDoc {
   cfi?: string;           // EPUB Canonical Fragment Identifier — exact reading position
   // TTS-6I: Per-book pronunciation overrides
   pronunciationOverrides?: PronunciationOverride[];
+  // TTS-6L: Optional narration profile assignment
+  narrationProfileId?: string | null;  // profile to use when narrating this book
   // TD-02: Import pipeline
   convertedEpubPath?: string;    // path to converted EPUB in userData/converted/
   originalFilepath?: string;     // original file path before conversion
@@ -146,6 +166,9 @@ export interface BlurbySettings {
   ttsCacheEnabled?: boolean;     // background caching of Reading Now books (default true)
   // TTS-6E: Pronunciation overrides
   pronunciationOverrides?: PronunciationOverride[];
+  // TTS-6L: Narration profiles
+  narrationProfiles?: NarrationProfile[];
+  activeNarrationProfileId?: string | null;  // null = use flat settings (no profile)
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────
