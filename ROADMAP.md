@@ -673,7 +673,9 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6L: Narration Profiles & Sharing Foundations
+### Sprint TTS-6L: Narration Profiles & Sharing Foundations ✅ COMPLETED (v1.22.0, 2026-04-04)
+
+> Implemented and merged to `main`. 10 new tests (1,126 total). Added `NarrationProfile` data structures and utilities, profile manager UI for create/rename/delete/select flows, book-level profile assignment, and sync between named profiles and the flat narration settings surface. All 8 SUCCESS CRITERIA met.
 
 **Goal:** Turn the growing narration customization surface into a reusable profile system so voice, rate, and override choices can be saved as named listening setups instead of being managed as scattered individual settings.
 
@@ -733,7 +735,9 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6M: Narration Portability & Reset Safety
+### Sprint TTS-6M: Narration Portability & Reset Safety ✅ COMPLETED (v1.23.0, 2026-04-04)
+
+> Implemented and merged to `main`. 15 new tests (1,141 total). Added schema-versioned narration export/import payloads, validate-before-mutate import flows with merge/replace modes, granular reset actions, and explicit export/import/reset UI. All 8 SUCCESS CRITERIA met.
 
 **Goal:** Finish the next bigger narration block by making the growing profile and override system portable, recoverable, and safe to edit at scale.
 
@@ -845,6 +849,115 @@ Phase 5 is complete when:
 6. New tests cover crash prevention and extraction-handoff stability
 7. `npm test` passes
 8. `npm run build` succeeds
+
+---
+
+### Sprint TTS-6O: Narration Performance Budgets & Background Work Isolation
+
+**Goal:** Turn the runtime hardening from `TTS-6N` into measurable performance discipline by isolating heavy Narrate work off the critical interaction path and introducing explicit budgets for startup, handoff, and steady-state playback.
+
+**Problem:** Even after crash fixes and extraction-sync cleanup, Narrate can still regress quietly if expensive work drifts back onto the renderer thread. Word extraction, DOM restamping, scheduler prep, and profile/override resolution all compete with live playback. Right now the product has runtime fixes, but not yet a durable performance contract. This sprint makes Narrate performance something we can reason about and defend.
+
+**Design decisions:**
+- **Budgeted Narrate path:** Define explicit targets for narration start latency, restart latency, and steady-state renderer work so regressions have a concrete threshold.
+- **Background-first precomputation:** Push extraction, cache metadata prep, and any safe timing/preflight work off the immediate start path where possible.
+- **Instrumentation without noise:** Add DEV/test-visible counters and timings that can be asserted in tests without polluting normal user logs.
+- **Keep product behavior the same:** This sprint is about making shipped behavior consistently fast, not adding new user-facing TTS controls.
+
+**Baseline:**
+- `TTS-6N` runtime-stability output
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useNarration.ts`
+- `src/utils/audioScheduler.ts`
+- any extraction/cache prep helpers used before or during Narrate startup
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6N` and this section
+4. `src/components/ReaderContainer.tsx`
+5. `src/hooks/useNarration.ts`
+6. `src/utils/audioScheduler.ts`
+7. related extraction/cache prep surfaces and tests
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Narrate performance budget pass** — Define and enforce concrete startup/restart/steady-state targets for Narrate interactions in code comments, tests, and lightweight dev instrumentation. | narration runtime files + tests |
+| 2 | Primary CLI (renderer-fixer scope / electron-fixer scope if needed) | **Background work isolation** — Move safe extraction/precompute work off the immediate interaction path so live Narrate sessions do not pay large synchronous costs. | extraction/narration prep surfaces |
+| 3 | Primary CLI (renderer-fixer scope) | **Renderer hot-path cleanup** — Reduce unnecessary DOM work, repeated derivations, or sync layout-sensitive operations during active narration. | `src/components/ReaderContainer.tsx`, related readers |
+| 4 | test-runner | **Tests** — Add perf-contract tests or inspectable telemetry for startup latency, restart latency, and non-regression on renderer-heavy flows. | `tests/` |
+| 5 | test-runner | **`npm test` + `npm run build`** | — |
+| 6 | spec-compliance-reviewer | **Spec compliance** | — |
+| 7 | quality-reviewer | **Architecture + code quality review** | — |
+| 8 | doc-keeper | **Documentation pass** — Record the new Narrate performance guardrails and instrumentation surface. | governing docs |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narrate startup/restart performance budgets are explicitly defined
+2. Heavy precompute work no longer blocks ordinary live Narrate interaction
+3. Renderer hot-path work during steady-state narration is materially reduced
+4. DEV/test-visible instrumentation exists for the protected performance budgets
+5. New tests cover the perf guardrails or telemetry contracts
+6. `npm test` passes
+7. `npm run build` succeeds
+
+---
+
+### Sprint TTS-6P: Narration Session Continuity & Recovery
+
+**Goal:** Make Narrate feel resilient across reloads, pauses, book re-entry, and interrupted sessions by preserving the user’s effective narration context instead of forcing them to reconstruct it manually.
+
+**Problem:** By this point the app can support sophisticated narration state: engine choice, voice/profile selection, bucketed rate, override scopes, optional book profile assignment, and import/export-safe settings. But interruption recovery is still thin. If the app reloads, the user leaves and comes back, or a session gets interrupted, the product should restore the meaningful narration context cleanly. Without this, the TTS lane remains powerful but fragile in everyday use.
+
+**Design decisions:**
+- **Restore user intent, not just raw fields:** Recovery should preserve the effective narration setup that matters to the user, including selected profile or effective flat settings.
+- **Book-aware continuity:** Resume behavior should respect per-book profile/override context and not leak narration state between titles.
+- **Safe partial recovery:** If some saved narration state is stale or invalid, the app should degrade gracefully instead of failing to resume.
+- **No surprise autoplay:** Restoring context does not mean auto-speaking without an explicit product decision; default to ready-to-resume, not surprise audio.
+
+**Baseline:**
+- `TTS-6L` profile system
+- `TTS-6M` import/export/reset model
+- `TTS-6N` runtime stability output
+- reader/narration persistence surfaces already storing reading mode, position, and settings
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6L`, `TTS-6M`, `TTS-6N`, and this section
+4. narration/profile persistence surfaces
+5. `src/hooks/useNarration.ts`
+6. `src/components/ReaderContainer.tsx`
+7. settings/book metadata types
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Narration continuity model** — Define what narration context is persisted and restored for a book/session, including profile selection, effective rate, and override scope state. | persistence/type surfaces |
+| 2 | Primary CLI (renderer-fixer scope) | **Reader restore behavior** — Apply persisted narration context on reader reopen in a way that is visible, predictable, and non-surprising. | `src/components/ReaderContainer.tsx`, related readers |
+| 3 | Primary CLI (renderer-fixer scope) | **Graceful invalid-state fallback** — Handle missing profiles, stale imported state, or removed voices without breaking resume behavior. | narration/profile restore helpers |
+| 4 | test-runner | **Tests** — Cover continuity across reopen/reload, per-book isolation, and fallback behavior when restored narration state is no longer valid. | `tests/` |
+| 5 | test-runner | **`npm test` + `npm run build`** | — |
+| 6 | spec-compliance-reviewer | **Spec compliance** | — |
+| 7 | quality-reviewer | **Architecture + code quality review** | — |
+| 8 | doc-keeper | **Documentation pass** — Update roadmap/reference docs with the shipped narration continuity model and recovery semantics. | governing docs |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narration context restores consistently when reopening a book/session
+2. Per-book narration context does not leak between titles
+3. Missing or stale narration state degrades gracefully
+4. Recovery behavior is predictable and does not surprise-autoplay by default
+5. New tests cover continuity and invalid-state fallback
+6. `npm test` passes
+7. `npm run build` succeeds
 
 ---
 
@@ -1013,6 +1126,8 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| TTS-6M | v1.23.0 | ✅ DONE | Narration portability & reset safety. Schema-versioned export/import payloads, merge/replace import modes, granular reset actions, and export/import/reset UI. 15 new tests. |
+| TTS-6L | v1.22.0 | ✅ DONE | Narration profiles & sharing foundations. Named profile model, profile manager UI, book-level profile assignment, and profile-sync to flat settings. 10 new tests. |
 | TTS-6K | v1.21.0 | ✅ DONE | Narration personalization & quality sweep. Documentation/policy closure and user-facing Narrate coherence pass completed; follow-up runtime hardening explicitly queued as TTS-6N. |
 | TTS-6J | v1.20.0 | ✅ DONE | Voice selection & persona consistency. Shared preferred-voice selector, stable Web Speech fallback priority, and accent/persona terminology cleanup in docs. 1,115 total tests, 58 files. |
 | TTS-6I | v1.19.0 | ✅ DONE | Per-book pronunciation profiles. Global + book layering, merge resolver, scoped editor, book-aware cache. 11 new tests. |

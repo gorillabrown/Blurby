@@ -333,7 +333,7 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K → TTS-6L → TTS-6M → TTS-6N
+- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K → ✅ TTS-6L → ✅ TTS-6M → TTS-6N → TTS-6O → TTS-6P
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -346,4 +346,4 @@ All sprints through TTS-6M complete (v1.23.0). Full history: `docs/project/ROADM
 Recent chain:
 ✅ TTS-6K → ✅ TTS-6L → ✅ TTS-6M (narration portability & reset safety)
 
-**Next:** TTS-6N (runtime stability & extraction sync)
+**Next:** TTS-6N (runtime stability & extraction sync) → TTS-6O (performance budgets & background isolation) → TTS-6P (session continuity & recovery)

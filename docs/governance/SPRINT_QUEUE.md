@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 section for `TTS-6N`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6N`, `TTS-6O`, and `TTS-6P`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1
+Queue depth: 3
 Next sprint: TTS-6N (Narration Runtime Stability & Extraction Sync)
-Health: RED — Queue depth critically low. Backfill urgent.
+Health: GREEN — Queue depth healthy.
 ```
 
 ---
@@ -22,8 +22,10 @@ Health: RED — Queue depth critically low. Backfill urgent.
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
 | 1 | TTS-6N | v1.24.0 | `sprint/tts-6n-runtime-stability-extraction-sync` | Full | — | Fix Narrate runtime instability: HOTFIX-6 mid-play extraction restart and live renderer blocking during Kokoro sessions. |
+| 2 | TTS-6O | v1.25.0 | `sprint/tts-6o-performance-budgets-background-isolation` | Full | — | Add explicit Narrate performance budgets, isolate heavy precompute/background work from the live interaction path, and harden perf telemetry contracts. |
+| 3 | TTS-6P | v1.26.0 | `sprint/tts-6p-session-continuity-recovery` | Full | — | Make narration context resilient across reopen/reload/interruption with book-aware restore behavior and graceful invalid-state fallback. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6N`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6N`, `TTS-6O`, `TTS-6P`).
 
 **Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
