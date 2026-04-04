@@ -195,8 +195,11 @@ export default function ReaderContainer({
     sessionStartWordRef.current = activeDoc.position || 0;
     setReadingMode("page"); // Always start in Page view
     api.getDocChapters(activeDoc.id).then((ch) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
-    // Pre-load Kokoro model in background worker (non-blocking)
-    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) api.kokoroPreload().catch(() => {});
+    // Delayed prewarm: start Kokoro model load 2s after reader opens (never startup-blocking)
+    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) {
+      const timer = setTimeout(() => api.kokoroPreload().catch(() => {}), 2000);
+      return () => clearTimeout(timer);
+    }
   }, [activeDoc.id, initReader, settings.ttsEngine]);
 
   // Persist focusTextSize changes
@@ -1136,10 +1139,10 @@ export default function ReaderContainer({
           <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
             {renderView()}
           </ErrorBoundary>
-          {/* Kokoro loading indicator */}
-          {narration.kokoroLoading && (
+          {/* Kokoro warming/loading indicator */}
+          {(narration.warming || narration.kokoroLoading) && (
             <div className="kokoro-loading-toast" role="status" aria-live="polite">
-              Loading voice model...
+              {narration.warming ? "Starting Kokoro..." : "Loading voice model..."}
             </div>
           )}
         </div>

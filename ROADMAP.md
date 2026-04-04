@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-04-04 — Post-TTS-6C (Kokoro native-rate buckets). 1,050 tests, 52 files. Latest tagged release: v1.14.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6C complete). Queue GREEN (GOV-6D → EINK-6A → GOALS-6B; depth 3).
+**Current state**: Phase 6 in progress (TTS-6C complete). Queue GREEN (TTS-6D → TTS-6E → TTS-6F; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -29,10 +29,11 @@ Phase 5: Read Later + Chrome Extension
   └── 5B → EXT-5B: Pairing UX ✅
     │
     ▼
-Phase 6: E-ink & App Polish
-  ├── EINK-6A: E-ink Display Mode (queued)
-  ├── GOALS-6B: Reading Goals (queued)
-  └── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
+Phase 6: TTS Hardening & App Polish
+  ├── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
+  ├── TTS-6D: Kokoro Startup & Recovery Hardening (queued)
+  ├── TTS-6E: Pronunciation Overrides Foundation (queued)
+  └── TTS-6F: Word Alignment & Narration Telemetry (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -221,96 +222,204 @@ Phase 5 is complete when:
 
 ---
 
-## Cross-Cut Governance
+## Phase 6 — TTS Hardening & App Polish
 
-### Sprint GOV-6D: Claude CLI Agent Staging Alignment
+**Goal:** Finish the post-`TTS-6C` narration lane before dispatching the larger app-polish themes. Immediate priority is Kokoro startup/recovery hardening, then pronunciation control, then highlight/alignment quality. `EINK-6A` and `GOALS-6B` remain drafted below, but they are not the active dispatch lane yet.
 
-**Goal:** Align Blurby's living governance docs and project subagent files with the real Claude Code subagent model so the next queued sprints can be dispatched without agent-name drift or staging ambiguity.
+---
 
-**Problem:** The project already has valid project-level subagents in `.claude/agents/`, but the living docs are split across two models. `CLAUDE.md` correctly treats `electron-fixer`, `renderer-fixer`, and `format-parser` as scope labels, while `ROADMAP.md` upcoming work still assigns them like spawnable agents and still uses stale verification names like `spec-reviewer`. Upcoming queued work is therefore not cleanly dispatchable under the real Claude CLI subagent model.
+### Sprint TTS-6D: Kokoro Startup & Recovery Hardening
+
+**Goal:** Eliminate the remaining "hung" feeling around Kokoro first-use, idle re-warm, and worker recovery so narration always presents a visible, deterministic startup path instead of silent waiting.
+
+**Problem:** `TTS-6C` fixed rate quality, but the startup/recovery story is still only partially productized. `BUG-032` remains mitigated rather than resolved. The engine now emits `tts-kokoro-loading`, but cold start, idle unload, and worker-crash recovery still need one unified renderer-side state model, clearer reader UX, and test coverage that proves narration recovers cleanly.
 
 **Design decisions:**
-- **Quick-tier governance sprint:** This is execution-critical process work, but it does not change app/runtime behavior. Validation is agent-load + grep audit, not `npm test` / `npm run build`, unless implementation unexpectedly touches app code.
-- **Canonical callable roster stays at five project subagents:** `blurby-lead`, `spec-compliance-reviewer`, `quality-reviewer`, `doc-keeper`, and `test-runner`.
-- **Legacy code labels remain useful:** `electron-fixer`, `renderer-fixer`, and `format-parser` stay allowed in scope/reference tables, but not in living task tables as if they were callable subagents.
-- **Tier-aware review policy:** Full-tier sprints explicitly stage `test-runner` → `spec-compliance-reviewer` → `quality-reviewer` → `doc-keeper` → `blurby-lead`. Quick-tier sprints use `blurby-lead` self-review and escalate to `quality-reviewer` only if concerns are found.
-- **Living docs only:** Normalize `.claude/agents/`, `CLAUDE.md`, `ROADMAP.md`, and `SPRINT_QUEUE.md`. Historical dispatch docs and archives stay historical unless a note is needed to prevent current-state confusion.
+- **Single Kokoro engine-status surface:** Treat cold load, idle re-warm, and crash retry as the same product state machine (`idle`, `warming`, `ready`, `error`) instead of ad hoc loading booleans.
+- **Visible waiting, not silent stall:** When the user starts Kokoro before the model is ready, narration enters an explicit waiting state in the reader UI and resumes automatically when warm-up finishes.
+- **Delayed prewarm, never startup-blocking:** If Kokoro was last used or is the selected engine, the app may schedule a delayed background prewarm after startup/reader-open, but never on the synchronous app-critical path.
+- **Recovery is a first-class path:** Worker retry/recreate behavior must surface progress/error back to renderer and cleanly fall back only on terminal failure.
 
 **Baseline:**
-- `.claude/agents/*.md` already exists with valid YAML frontmatter and the correct project-level location for Claude Code subagents.
-- `blurby-lead.md` still describes nonexistent spawnable code agents in its body even though its frontmatter allowlist names only the real review/doc/test subagents.
-- `CLAUDE.md` correctly documents scope labels, but its live operational tables/checklists still use `spec-reviewer` and `code-reviewer`.
-- `ROADMAP.md` upcoming specs still mix old task-table agent labels with the newer `Primary CLI (... scope)` style and omit the `quality-reviewer` step from Full-tier upcoming work.
-- `SPRINT_QUEUE.md` is stale relative to `ROADMAP.md`: it still listed `TTS-6C` even though that sprint is already complete, and it does not yet queue the governance alignment work needed before the next product sprints.
+- `main/tts-engine.js` — worker lifecycle, idle timeout unload, crash retry, `sendLoadingSignal()`
+- `main/ipc/tts.js` — renderer-facing TTS IPC + loading event forwarding
+- `preload.js` — `onKokoroLoading` bridge
+- `src/hooks/useNarration.ts` — engine selection, Kokoro readiness, start/stop/restart behavior
+- `src/components/ReaderContainer.tsx` — narration start UX, loading/error affordances
+- `src/components/settings/SpeedReadingSettings.tsx` — engine selection context
+- `tests/` — current Kokoro engine, IPC, and narration integration coverage
 
 #### WHERE (Read Order)
 
-1. `https://code.claude.com/docs/en/sub-agents` — official subagent file format, callable-agent rules, supported frontmatter
-2. `CLAUDE.md` — agent definitions, scope labels, tier policy, checklist
-3. `.claude/agents/blurby-lead.md`
-4. `.claude/agents/spec-compliance-reviewer.md`
-5. `.claude/agents/quality-reviewer.md`
-6. `.claude/agents/doc-keeper.md`
-7. `.claude/agents/test-runner.md`
-8. `ROADMAP.md` — this section plus `EINK-6A` and `GOALS-6B`
-9. `docs/governance/SPRINT_QUEUE.md`
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-032`
+4. `ROADMAP.md` — this section
+5. `main/tts-engine.js`
+6. `main/ipc/tts.js`
+7. `preload.js`
+8. `src/hooks/useNarration.ts`
+9. `src/components/ReaderContainer.tsx`
+10. `src/components/settings/SpeedReadingSettings.tsx`
+11. existing TTS tests touching worker recovery/loading
 
 #### Tasks
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (agent-config scope) | **Normalize `blurby-lead` to the real subagent model** — Keep the frontmatter allowlist pointed only at real project subagents. Rewrite the body so spawned agents are only `spec-compliance-reviewer`, `quality-reviewer`, `doc-keeper`, and `test-runner`, while `electron-fixer` / `renderer-fixer` / `format-parser` are explicitly documented as scope labels. | `.claude/agents/blurby-lead.md` |
-| 2 | Primary CLI (agent-config scope) | **Align specialist agent wording** — Update any specialist agent body text that conflicts with the current model, especially the tier-aware use of `quality-reviewer` and the canonical `spec-compliance-reviewer` naming. Preserve valid YAML frontmatter. | `.claude/agents/spec-compliance-reviewer.md`, `.claude/agents/quality-reviewer.md`, `.claude/agents/doc-keeper.md`, `.claude/agents/test-runner.md` |
-| 3 | Primary CLI (governance-doc scope) | **Fix `CLAUDE.md` operational terminology** — Preserve the scope-label reference table, but rename stale live references (`spec-reviewer`, `code-reviewer`) to the real agent names, update the post-completion checklist, and codify the Quick-tier vs Full-tier review policy in one place. | `CLAUDE.md` |
-| 4 | Primary CLI (governance-doc scope) | **Normalize all live forward-looking specs** — Update this sprint plus `EINK-6A` and `GOALS-6B` so code work uses `Primary CLI (... scope)`, verification uses real subagent names, and all Full-tier specs include `quality-reviewer` after `spec-compliance-reviewer`. | `ROADMAP.md` |
-| 5 | Primary CLI (governance-doc scope) | **Queue alignment** — Add `GOV-6D` to the top of the queue, bump downstream queued versions, and clarify the queue's agent-staging expectations plus queued-vs-drafted wording. | `docs/governance/SPRINT_QUEUE.md` |
-| 6 | Primary CLI (validation scope) | **Validate callable agents + living-doc terminology** — Run `claude agents` to confirm the project subagents load without parse errors. Run a grep audit over living docs to confirm legacy labels appear only in allowed scope-reference tables or historical/archive docs. | `.claude/agents/`, `CLAUDE.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md` |
-| 7 | spec-compliance-reviewer | **Spec compliance** — Verify every success criterion below against the edited agent files and living docs. | — |
-| 8 | doc-keeper | **Documentation sanity pass** — Final cross-check of roadmap header/current state, queue depth, queue ordering, and any lingering cross-reference drift. | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md` |
-| 9 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### Execution Sequence
-
-```
-[1-3] SEQUENTIAL:
-    [1] blurby-lead orchestrator file
-    [2] specialist agent wording
-    [3] CLAUDE.md terminology + tier policy
-    ↓
-[4-5] SEQUENTIAL:
-    [4] ROADMAP.md live sprint normalization
-    [5] SPRINT_QUEUE.md reorder + version bump
-    ↓
-[6] Validation:
-    `claude agents` + living-doc grep audit
-    ↓
-[7] spec-compliance-reviewer
-    ↓
-[8] doc-keeper
-    ↓
-[9] blurby-lead git/report
-```
+| 1 | Primary CLI (electron-fixer scope) | **Normalize Kokoro engine lifecycle events** — Make `main/tts-engine.js` expose a single engine-status stream for warm-up start, warm-up complete, retrying, and terminal failure. Reuse the existing loading event path instead of inventing parallel signals. | `main/tts-engine.js`, `main/ipc/tts.js`, `preload.js` |
+| 2 | Primary CLI (electron-fixer scope) | **Delayed prewarm policy** — Add a delayed/background prewarm path when Kokoro is selected or was last used recently. It must never block app launch or reader open, and it must no-op when the worker is already ready. | `main/tts-engine.js`, `main/ipc/tts.js`, settings access point as needed |
+| 3 | Primary CLI (renderer-fixer scope) | **Narration waiting state** — In the narration hook, distinguish `warming` from `speaking`/`idle` so the reader can show "Loading Kokoro..." and auto-continue once ready. Starting narration during warm-up must not create duplicate pipeline starts. | `src/hooks/useNarration.ts`, `src/types/narration.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Reader UX for cold start and recovery** — Show a clear inline loading/error state in the reader when Kokoro is warming or failed. Keep Web Speech unchanged. Recovery after a successful re-warm should continue from the intended current word. | `src/components/ReaderContainer.tsx`, supporting styles if needed |
+| 5 | Primary CLI (renderer-fixer scope) | **Settings/UI consistency** — If Kokoro is selected in settings while it is still warming, expose that status there too so first-use does not feel invisible. Keep the control lightweight; no new wizard/modal. | `src/components/settings/SpeedReadingSettings.tsx` |
+| 6 | test-runner | **Tests** — Cover: cold-start waiting state, delayed prewarm not blocking startup path, idle re-warm status emission, worker crash retry surfacing status, auto-resume from intended word after warm-up, terminal failure surfacing readable error. Add integration coverage for the renderer event path. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | quality-reviewer | **Architecture + code quality review** | — |
+| 10 | doc-keeper | **Documentation pass** — Mark `BUG-032` resolved only if the startup/recovery path is genuinely deterministic and visible. | `ROADMAP.md`, `docs/governance/BUG_REPORT.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 
-1. `.claude/agents/` still exposes exactly the five callable project subagents: `blurby-lead`, `spec-compliance-reviewer`, `quality-reviewer`, `doc-keeper`, and `test-runner`
-2. All edited subagent files keep valid YAML frontmatter and remain loadable by Claude Code
-3. `blurby-lead.md` documents only real spawned subagents as callable agents
-4. `electron-fixer`, `renderer-fixer`, and `format-parser` remain allowed only as scope/reference labels, not as spawnable subagents in living task tables
-5. `CLAUDE.md` preserves the scope-label table but removes stale live operational labels like `spec-reviewer` and `code-reviewer`
-6. `ROADMAP.md` live forward-looking specs (`GOV-6D`, `EINK-6A`, `GOALS-6B`) use `Primary CLI (... scope)` for code tasks and real subagent names for review/docs/git
-7. Full-tier upcoming specs explicitly stage `quality-reviewer` after `spec-compliance-reviewer`
-8. `SPRINT_QUEUE.md` lists `GOV-6D` first and keeps a queue depth of 3
-9. Queued version numbers are sequential: `GOV-6D` v1.12.0, `EINK-6A` v1.13.0, `GOALS-6B` v1.14.0
-10. `claude agents` loads the project subagents without parse errors
-11. Living-doc grep audit shows legacy labels only in allowed scope-reference contexts or historical/archive docs
-12. No app/runtime source files outside governance docs and `.claude/agents/` are changed by this sprint
+1. Kokoro cold-start, idle re-warm, and crash-retry all use one renderer-visible engine-status path
+2. Starting Kokoro narration while the model is warming shows an explicit waiting state instead of silent dead air
+3. Successful warm-up automatically continues narration from the intended current word without duplicate starts
+4. Delayed/background prewarm never blocks app launch or reader-open
+5. Worker retry/failure state reaches the renderer with a readable user-facing error on terminal failure
+6. Web Speech startup behavior is unchanged
+7. `BUG-032` is either fully resolved or left open with explicit remaining scope documented
+8. New tests cover warm-up, idle re-warm, crash recovery, and auto-resume behavior
+9. `npm test` passes
+10. `npm run build` succeeds
 
 ---
 
-## Phase 6 — E-ink & App Polish
+### Sprint TTS-6E: Pronunciation Overrides Foundation
 
-**Goal:** Decouple e-ink display behavior from the visual theme system. Users can combine any color theme (dark, light, blurby) with e-ink display optimizations (no animations, phrase grouping, ghosting prevention, WPM ceiling). Then layer on user-facing reading goals.
+**Goal:** Give users a first real pronunciation-control layer for Narrate mode by letting them define simple text replacements before synthesis, without introducing SSML or phoneme editing.
+
+**Problem:** Proper names, acronyms, and domain-specific terms still get mispronounced unpredictably. The TTS audits correctly identified this as a product gap. Blurby does not need enterprise lexicons or phoneme editors yet, but it does need a simple user-owned override system that works with both Kokoro and Web Speech.
+
+**Design decisions:**
+- **Plain-text replacements, not SSML:** This sprint ships ordered phrase replacements (`from` -> `to`) only. No IPA, no phoneme editor, no markup language.
+- **Global foundation first:** Store one global override list in settings. Per-book/profile overrides can come later if this proves valuable.
+- **Apply before chunking/cache lookup:** Kokoro generation and cache identity must reflect override output so cached audio is never reused for pre-override text.
+- **Previewable and reversible:** Users can add/remove overrides in settings and test them on sample text without needing to start narration in a book.
+
+**Baseline:**
+- `src/components/settings/SpeedReadingSettings.tsx` — existing Narrate settings surface
+- `src/types.ts` / `src/constants.ts` — settings model/defaults
+- `src/hooks/useNarration.ts` — narration entry point
+- `src/hooks/narration/kokoroStrategy.ts` and generation pipeline/cache path — Kokoro synthesis + cache identity
+- `src/hooks/narration/webSpeechStrategy.ts` — fallback synthesis path
+- `src/utils/ttsCache.ts` — cache identity/storage behavior
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/TTS-AUDIT-REVIEW.md` — pronunciation exceptions disposition
+4. `ROADMAP.md` — this section
+5. `src/types.ts`
+6. `src/constants.ts`
+7. `src/components/settings/SpeedReadingSettings.tsx`
+8. `src/hooks/useNarration.ts`
+9. `src/hooks/narration/kokoroStrategy.ts`
+10. `src/hooks/narration/webSpeechStrategy.ts`
+11. `src/utils/ttsCache.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Settings model for pronunciation overrides** — Add a persisted global override list to settings with a compact shape such as `{ id, from, to, enabled }[]`. Define defaults, migration, and validation limits. | `src/types.ts`, `src/constants.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Settings UI** — Add a lightweight pronunciation editor to Narrate settings. Users must be able to add, edit, delete, enable/disable, and reorder overrides. Include a short sample-text preview/test action. | `src/components/settings/SpeedReadingSettings.tsx`, styles as needed |
+| 3 | Primary CLI (renderer-fixer scope) | **Shared text-normalization helper** — Create one helper that applies enabled overrides in order and can be used by both engines. Keep it deterministic and easy to test. | `src/utils/` and narration consumers as needed |
+| 4 | Primary CLI (renderer-fixer scope) | **Apply overrides to Web Speech** — Ensure the spoken utterance uses normalized text while word-position bookkeeping stays understandable and documented. | `src/hooks/useNarration.ts`, `src/hooks/narration/webSpeechStrategy.ts` as needed |
+| 5 | Primary CLI (renderer-fixer scope / electron-fixer scope if needed) | **Apply overrides to Kokoro cache/generation path** — Make Kokoro generation use normalized text and ensure cache identity changes when the active override set changes, so stale cached audio is never reused after an override edit. | `src/hooks/narration/kokoroStrategy.ts`, `src/utils/ttsCache.ts`, cache metadata helpers as needed |
+| 6 | test-runner | **Tests** — Cover ordered replacement behavior, enable/disable, preview action, Kokoro cache segregation when overrides change, and Web Speech normalized-text usage. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | quality-reviewer | **Architecture + code quality review** | — |
+| 10 | doc-keeper | **Documentation pass** — Update technical reference/privacy wording if override storage or cache identity changes meaningfully. | `ROADMAP.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Users can manage a persisted global pronunciation override list in settings
+2. Overrides can be enabled/disabled and reordered without restarting the app
+3. A sample preview/test action exists in settings
+4. Web Speech uses normalized text produced by the shared helper
+5. Kokoro generation uses normalized text before chunking/cache lookup
+6. Editing the override set cannot cause stale Kokoro cached audio to be reused
+7. The feature ships without adding SSML or phoneme-editing complexity
+8. New tests cover override application and cache behavior
+9. `npm test` passes
+10. `npm run build` succeeds
+
+---
+
+### Sprint TTS-6F: Word Alignment & Narration Telemetry
+
+**Goal:** Improve narration highlight fidelity by adding measurable alignment telemetry and a better per-word timing model, without depending on unsupported Kokoro alignment metadata.
+
+**Problem:** `TTS-6C` fixed the obvious rate/pitch problem, but highlight timing is still only as good as the scheduler's current chunk timing assumptions. We do not yet have lightweight instrumentation to understand drift, and future pronunciation work will make timing quality more visible. This sprint turns alignment from "looks okay" into something measurable and intentionally tuned.
+
+**Design decisions:**
+- **Measure before tuning:** Ship alignment telemetry and debug instrumentation first, then improve the timing heuristic in the same sprint using those measurements.
+- **Scheduler stays authoritative:** Do not replace the current scheduler architecture. Improve its word-boundary estimation inputs.
+- **Heuristic, not phoneme-level:** Use punctuation-aware and token-length-aware timing estimates rather than waiting for full model alignment output.
+- **Debuggable but quiet in production:** Telemetry should support tests/dev diagnostics without spamming normal-user logs.
+
+**Baseline:**
+- `src/utils/audioScheduler.ts` — current word/highlight timing
+- `src/utils/generationPipeline.ts` — chunk metadata assembly
+- `src/hooks/narration/kokoroStrategy.ts` — scheduler + pipeline wiring
+- `src/components/ReaderContainer.tsx` / narration highlight consumers
+- current narration tests covering timing/highlighting
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/TTS-AUDIT-REVIEW.md` — word alignment improvement + latency instrumentation items
+4. `ROADMAP.md` — this section
+5. `src/utils/audioScheduler.ts`
+6. `src/utils/generationPipeline.ts`
+7. `src/hooks/narration/kokoroStrategy.ts`
+8. narration highlight consumers/tests
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Alignment telemetry surface** — Add dev/test-safe instrumentation for chunk start latency, per-chunk highlight drift estimates, and scheduler boundary diagnostics. Keep it behind existing dev/test logging patterns or explicit debug flags. | `src/utils/audioScheduler.ts`, related helpers |
+| 2 | Primary CLI (renderer-fixer scope) | **Richer chunk timing metadata** — Extend generation/pipeline metadata so the scheduler receives enough information to estimate boundaries with more than flat even spacing. | `src/utils/generationPipeline.ts`, type surfaces as needed |
+| 3 | Primary CLI (renderer-fixer scope) | **Improved word timing heuristic** — Replace flat per-word distribution with a punctuation-aware/token-length-aware model that better matches natural speech timing while preserving current chunk-boundary behavior. | `src/utils/audioScheduler.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Non-regression integration** — Ensure the improved heuristic still works with native rate buckets, punctuation shaping, and section transitions. | scheduler/pipeline consumers as needed |
+| 5 | test-runner | **Tests** — Add focused tests for telemetry emission, heuristic timing output, punctuation weighting, and highlight stability across `1.0x`, `1.2x`, and `1.5x`. | `tests/` |
+| 6 | test-runner | **`npm test` + `npm run build`** | — |
+| 7 | spec-compliance-reviewer | **Spec compliance** | — |
+| 8 | quality-reviewer | **Architecture + code quality review** | — |
+| 9 | doc-keeper | **Documentation pass** — Record the new timing model and any debug/telemetry hooks in the technical reference and lessons learned if a new guardrail emerges. | `ROADMAP.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/LESSONS_LEARNED.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narration timing instrumentation exists for tests/dev diagnostics without noisy production logging
+2. Scheduler receives richer timing metadata than flat chunk duration alone
+3. Per-word highlight timing uses a punctuation-aware/token-length-aware heuristic
+4. Highlight timing remains stable across Kokoro `1.0x`, `1.2x`, and `1.5x`
+5. Existing punctuation shaping and section transitions do not regress
+6. New tests cover telemetry and timing heuristics
+7. `npm test` passes
+8. `npm run build` succeeds
+
+---
+
+### Drafted Later Work (Not In Queue Yet)
+
+`EINK-6A` and `GOALS-6B` remain drafted below for later phases, but they are intentionally not the next dispatches while the TTS lane is still active.
 
 ---
 
@@ -473,6 +582,8 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| GOV-6D | v1.15.0 | ✅ DONE | Claude CLI agent staging alignment. `blurby-lead` scope-label model normalized, live governance terminology corrected, and future sprint staging synced to the real callable subagents. |
+| TTS-6D | v1.15.0 | ✅ DONE | Kokoro startup/recovery hardening. Unified engine-status events, warming state, delayed prewarm, crash recovery UX. BUG-032 resolved. 11 new tests. |
 | TTS-6C | v1.14.0 | ✅ DONE | Kokoro native-rate buckets (1.0x/1.2x/1.5x). rateBucket cache identity, immediate restart on rate change, active-bucket warming. 18 new tests. |
 | EXT-5A | v1.10.0 | ✅ DONE | Chrome extension E2E + queue integration. 33 new tests. Phase 5A complete. |
 | READINGS-4C | v1.9.0 | ✅ DONE | Metadata Wizard — scan, filename parser, batch update, modal, Ctrl+Shift+M. 16 new tests. |

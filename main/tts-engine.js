@@ -37,9 +37,24 @@ function resetIdleTimer() {
   }, IDLE_TIMEOUT_MS);
 }
 
+/**
+ * Unified engine status: "warming" | "ready" | "retrying" | "error"
+ * Sent on every meaningful lifecycle transition so the renderer sees one event stream.
+ */
+function sendEngineStatus(status, detail) {
+  try {
+    const { BrowserWindow } = require("electron");
+    const win = BrowserWindow.getAllWindows()[0];
+    if (win && !win.isDestroyed()) {
+      win.webContents.send("tts-kokoro-engine-status", { status, detail: detail || null });
+    }
+  } catch { /* non-fatal */ }
+}
+
 /** Notify renderer that Kokoro is loading (used after idle timeout re-warm). */
 function sendLoadingSignal(loading) {
   if (onLoadingCb) onLoadingCb(loading);
+  sendEngineStatus(loading ? "warming" : "ready");
   try {
     const { BrowserWindow } = require("electron");
     const win = BrowserWindow.getAllWindows()[0];
@@ -70,6 +85,7 @@ function getWorker(cacheDir) {
         modelReady = true;
         crashCount = 0; // Reset crash counter on successful load
         if (onLoadingCb) onLoadingCb(false);
+        sendEngineStatus("ready");
         break;
       case "warm-up-done":
         // Model fully primed
@@ -93,6 +109,7 @@ function getWorker(cacheDir) {
         console.error("[kokoro] Worker load failed:", msg.error);
         if (msg.stack) console.error("[kokoro] Stack:", msg.stack);
         loadingPromise = null;
+        sendEngineStatus("error", msg.error);
         // Forward error to renderer so UI can show it
         {
           const { BrowserWindow } = require("electron");
@@ -133,8 +150,9 @@ function getWorker(cacheDir) {
       crashCount++;
       const backoff = CRASH_BACKOFF_MS * crashCount;
       console.log(`[kokoro] Retrying worker in ${backoff}ms...`);
+      sendEngineStatus("retrying", `Attempt ${crashCount + 1}/${MAX_CRASH_RETRIES + 1}`);
       setTimeout(() => {
-        // Re-trigger ensureReady to spin up a fresh worker
+        sendEngineStatus("warming");
         ensureReady(onProgressCb).catch(retryErr => {
           console.error("[kokoro] Retry failed:", retryErr.message);
         });
@@ -147,6 +165,7 @@ function getWorker(cacheDir) {
       pending.clear();
       crashCount = 0;
 
+      sendEngineStatus("error", `Worker crashed after ${MAX_CRASH_RETRIES + 1} attempts: ${err.message}`);
       try {
         const { BrowserWindow } = require("electron");
         const win = BrowserWindow.getAllWindows()[0];
@@ -178,6 +197,7 @@ async function ensureReady(onProgress) {
     const cacheDir = path.join(app.getPath("userData"), "models");
     await fs.mkdir(cacheDir, { recursive: true });
 
+    sendEngineStatus("warming");
     const w = getWorker(cacheDir);
 
     // Wait for model-ready message or timeout — whichever comes first

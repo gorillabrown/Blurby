@@ -2,7 +2,30 @@
 
 **Purpose:** Full specs for all completed sprints, extracted from `ROADMAP.md` to keep the roadmap forward-looking. Reference only — do not modify.
 
-**Last archived:** 2026-04-01
+**Last archived:** 2026-04-04
+
+---
+
+## GOV-6D [v1.15.0]: Claude CLI Agent Staging Alignment ✅ COMPLETED (2026-04-04)
+
+**Version:** v1.15.0
+**Branch:** `sprint/gov-6d-agent-staging-alignment`
+**Tier:** Quick (governance only, no app/runtime code)
+**Result:** APPROVED — all 12 SUCCESS CRITERIA met. Merged to `main` and pushed.
+
+**Goal:** Align Blurby's living governance docs and project subagent files with the real Claude Code subagent model so upcoming sprints dispatch cleanly.
+
+**Implementation:**
+- `.claude/agents/blurby-lead.md` rewritten so only the four real specialist subagents are callable, while `electron-fixer`, `renderer-fixer`, and `format-parser` remain documented as non-spawnable scope labels.
+- `CLAUDE.md` live operational terminology normalized to `spec-compliance-reviewer` and `quality-reviewer`, preserving the useful scope-label reference tables and tier-aware review policy.
+- `ROADMAP.md` forward-looking specs updated so code work uses `Primary CLI (... scope)` and verification/docs/git use the real callable subagent names.
+- `docs/governance/SPRINT_QUEUE.md` aligned to the real Claude CLI staging model before the next product sprints were queued.
+
+**SUCCESS CRITERIA:** All 12 met.
+- Five callable project subagents remain loadable with valid YAML frontmatter.
+- Legacy labels remain scope/reference labels only.
+- Full-tier future specs now stage `quality-reviewer` after `spec-compliance-reviewer`.
+- No app/runtime source files changed outside governance docs and `.claude/agents/`.
 
 ---
 
@@ -3876,4 +3899,3 @@ NAR-3 built a full-book word array by navigating the visible foliate view throug
 7. Clean build
 8. Version 1.4.2
 9. Branch merged to main with `--no-ff`
-

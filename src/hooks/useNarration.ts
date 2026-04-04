@@ -131,8 +131,32 @@ export default function useNarration() {
         if (!loading) dispatch({ type: "KOKORO_READY" });
       }));
     }
+    if (api.onKokoroEngineStatus) {
+      cleanups.push(api.onKokoroEngineStatus((data: { status: string; detail?: string | null }) => {
+        if (data.status === "warming") setKokoroLoading(true);
+        else if (data.status === "ready") {
+          setKokoroLoading(false);
+          dispatch({ type: "KOKORO_READY" });
+        } else if (data.status === "error") {
+          setKokoroLoading(false);
+          dispatch({ type: "ERROR", message: data.detail || "Kokoro engine error" });
+        }
+      }));
+    }
     return () => cleanups.forEach((c) => c());
   }, []);
+
+  // Auto-start narration when Kokoro becomes ready while in warming state
+  useEffect(() => {
+    if (!state.kokoroReady) return;
+    const s = stateRef.current;
+    if (s.status === "warming" && s.engine === "kokoro") {
+      if (import.meta.env.DEV) console.debug("[narrate] Kokoro ready — auto-starting from word:", s.cursorWordIndex);
+      dispatch({ type: "START_CURSOR_DRIVEN", startIdx: s.cursorWordIndex, speed: s.speed });
+      stateRef.current = { ...stateRef.current, status: "speaking" };
+      speakNextChunk();
+    }
+  }, [state.kokoroReady, speakNextChunk]);
 
   // Load Kokoro voices when ready
   useEffect(() => {
@@ -338,6 +362,25 @@ export default function useNarration() {
     const newSpeed = wpmToRate(wpm);
 
     dispatch({ type: "STOP" }); // Reset all state first
+
+    // If Kokoro is selected but not ready, enter warming state and wait
+    const isKokoro = stateRef.current.engine === "kokoro";
+    if (isKokoro && !stateRef.current.kokoroReady) {
+      dispatch({ type: "KOKORO_WARMING", startIdx: startWordIndex, speed: newSpeed });
+      stateRef.current = {
+        ...stateRef.current,
+        status: "warming",
+        cursorWordIndex: startWordIndex,
+        speed: newSpeed,
+        chunkStart: startWordIndex,
+        chunkWords: [],
+      };
+      if (import.meta.env.DEV) console.debug("[narrate] warming — waiting for Kokoro, will auto-start from word:", startWordIndex);
+      // Trigger prewarm if available
+      if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
+      return;
+    }
+
     dispatch({ type: "START_CURSOR_DRIVEN", startIdx: startWordIndex, speed: newSpeed });
 
     // speakNextChunk reads from stateRef, but dispatch is async — update stateRef manually
@@ -475,7 +518,8 @@ export default function useNarration() {
   }, [webStrategy, kokoroStrategy]);
 
   return {
-    speaking: state.status === "speaking" || state.status === "holding",
+    speaking: state.status === "speaking" || state.status === "holding" || state.status === "warming",
+    warming: state.status === "warming",
     voices,
     currentVoice,
     rate: state.speed,
