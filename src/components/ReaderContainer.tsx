@@ -391,24 +391,33 @@ export default function ReaderContainer({
       bookWordsCompleteRef.current = true;
       wordsRef.current = bookWords.words;
 
-      // HOTFIX-10: Re-stamp all loaded foliate sections with global indices
-      // Must happen BEFORE narration.updateWords so DOM has global indices when pipeline restarts
-      const contents = foliateApiRef.current?.getView()?.renderer?.getContents?.() ?? [];
-      for (const { doc: sectionDoc, index: sectionIndex } of contents) {
-        const sec = bookWords.sections.find(s => s.sectionIndex === sectionIndex);
-        if (sec && sectionDoc?.body) {
-          unwrapWordSpans(sectionDoc);
-          wrapWordsInSpans(sectionDoc, sectionIndex, sec.startWordIdx);
-        }
-      }
-
       // Convert section-local highlightedWordIndex to global (use ref for current value, not stale closure)
+      // Do this BEFORE DOM restamping — narration uses the word array, not DOM spans
       const currentSection = bookWords.sections.find(s => s.sectionIndex === currentSectionIdx);
       const currentLocalIdx = highlightedWordIndexRef.current;
       if (currentSection && currentLocalIdx >= 0) {
         const globalIdx = currentSection.startWordIdx + currentLocalIdx;
-        // Update narration to use the global word array
+        // Update narration to use the global word array (non-disruptive — no stop/restart)
         narration.updateWords(bookWords.words, globalIdx);
+      }
+
+      // HOTFIX-10: Re-stamp all loaded foliate sections with global indices.
+      // Deferred via requestIdleCallback to avoid blocking the renderer during active narration.
+      const restampSections = () => {
+        if (cancelled) return;
+        const contents = foliateApiRef.current?.getView()?.renderer?.getContents?.() ?? [];
+        for (const { doc: sectionDoc, index: sectionIndex } of contents) {
+          const sec = bookWords.sections.find(s => s.sectionIndex === sectionIndex);
+          if (sec && sectionDoc?.body) {
+            unwrapWordSpans(sectionDoc);
+            wrapWordsInSpans(sectionDoc, sectionIndex, sec.startWordIdx);
+          }
+        }
+      };
+      if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(restampSections, { timeout: 2000 });
+      } else {
+        setTimeout(restampSections, 0);
       }
 
       if (import.meta.env.DEV) console.debug(`[HOTFIX-6] main-process extraction complete: ${bookWords.totalWords} words, ${bookWords.sections.length} sections`);

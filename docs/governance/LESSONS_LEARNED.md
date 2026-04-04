@@ -304,6 +304,8 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 | Pronunciation override scope confusion | TTS, Settings | Global overrides in `settings.pronunciationOverrides`, per-book in `BlurbyDoc.pronunciationOverrides`. Merge at narration time with book-level priority. |
 | `-webkit-app-region: drag` on `body` cascades everywhere | CSS, Electron | Never put `drag` on body — apply only to `.library-titlebar`; `no-drag` on buttons is insufficient because intermediate divs with padding still absorb clicks |
 | DOM elements created by imperative code orphaned by React | Renderer | Render element in JSX, pass ref to controller; controller styles only |
+| Kokoro rate must be bucket-clamped at mode boundary | TTS, Modes | NarrateMode must resolve ttsRate to `resolveKokoroBucket()` when engine is kokoro — continuous-rate leakage causes mismatched generation/playback speed |
+| Heavy DOM work during active narration causes thread stalls | Renderer, TTS | Section restamping (unwrap/wrap word spans) must be deferred via `requestIdleCallback` during active narration — narration uses word array, not DOM spans |
 
 ---
 
