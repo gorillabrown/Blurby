@@ -1,3 +1,6 @@
+import type { NarrateDiagSnapshot, NarrateDiagEvent } from "./narrateDiagnostics";
+import type { ConsoleEntry } from "./consoleCapture";
+
 export interface BugReportAppState {
   timestamp: string;
   docId: string | null;
@@ -22,6 +25,10 @@ export interface BugReportAppState {
   electronVersion: string | null;
   appVersion: string | null;
   platform: string | null;
+  // HOTFIX-11: Narration diagnostics + console log
+  narrateDiagSnapshot?: NarrateDiagSnapshot | null;
+  narrateDiagEvents?: NarrateDiagEvent[];
+  consoleLog?: ConsoleEntry[];
 }
 
 interface GatherInput {
@@ -43,6 +50,10 @@ interface GatherInput {
   theme?: string | null;
   focusTextSize?: number | null;
   platform?: string | null;
+  // HOTFIX-11
+  narrateDiagSnapshot?: NarrateDiagSnapshot | null;
+  narrateDiagEvents?: NarrateDiagEvent[];
+  consoleLog?: ConsoleEntry[];
 }
 
 export function gatherAppState(input: GatherInput): BugReportAppState {
@@ -70,5 +81,8 @@ export function gatherAppState(input: GatherInput): BugReportAppState {
     electronVersion: navigator.userAgent.match(/Electron\/([\d.]+)/)?.[1] ?? null,
     appVersion: navigator.userAgent.match(/Blurby\/([\d.]+)/)?.[1] ?? null,
     platform: input.platform ?? null,
+    narrateDiagSnapshot: input.narrateDiagSnapshot ?? null,
+    narrateDiagEvents: input.narrateDiagEvents ?? [],
+    consoleLog: input.consoleLog ?? [],
   };
 }

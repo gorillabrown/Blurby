@@ -74,7 +74,15 @@ export default function BugReportModal({ screenshotPath, screenshotFile, appStat
     }
   }, [description, severity, appState, screenshotFile, saving, showToast, onClose]);
 
-  const stateEntries = Object.entries(appState).filter(([, v]) => v != null);
+  const [showDiag, setShowDiag] = useState(false);
+  const [showConsole, setShowConsole] = useState(false);
+
+  // Separate scalar state from array diagnostics for display
+  const scalarEntries = Object.entries(appState).filter(
+    ([k, v]) => v != null && k !== "narrateDiagSnapshot" && k !== "narrateDiagEvents" && k !== "consoleLog"
+  );
+  const hasDiag = appState.narrateDiagSnapshot || (appState.narrateDiagEvents && appState.narrateDiagEvents.length > 0);
+  const hasConsole = appState.consoleLog && appState.consoleLog.length > 0;
 
   return (
     <div className="bug-report-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Bug Report">
@@ -86,10 +94,46 @@ export default function BugReportModal({ screenshotPath, screenshotFile, appStat
         )}
 
         <div className="bug-report-state">
-          {stateEntries.map(([key, value]) => (
+          {scalarEntries.map(([key, value]) => (
             <div key={key}><strong>{key}:</strong> {String(value)}</div>
           ))}
         </div>
+
+        {/* Collapsible Narration Diagnostics */}
+        {hasDiag && (
+          <details open={showDiag} onToggle={(e) => setShowDiag((e.target as HTMLDetailsElement).open)}>
+            <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--text-dim)", marginBottom: 4, userSelect: "none" }}>
+              Narration Diagnostics ({appState.narrateDiagEvents?.length ?? 0} events)
+            </summary>
+            <div className="bug-report-state" style={{ maxHeight: 150, overflowY: "auto", fontSize: 11 }}>
+              {appState.narrateDiagSnapshot && (
+                <div style={{ marginBottom: 4 }}>
+                  <strong>Snapshot:</strong> engine={appState.narrateDiagSnapshot.engine} status={appState.narrateDiagSnapshot.status} cursor={appState.narrateDiagSnapshot.cursorWordIndex}/{appState.narrateDiagSnapshot.totalWords} rate={appState.narrateDiagSnapshot.rate}
+                  {appState.narrateDiagSnapshot.fellBack && <span style={{ color: "var(--warning, #b80)" }}> (fallback: {appState.narrateDiagSnapshot.fallbackReason})</span>}
+                </div>
+              )}
+              {appState.narrateDiagEvents?.map((e, i) => (
+                <div key={i}>[{new Date(e.timestamp).toISOString().slice(11, 23)}] {e.event}: {e.detail}</div>
+              ))}
+            </div>
+          </details>
+        )}
+
+        {/* Collapsible Console Log */}
+        {hasConsole && (
+          <details open={showConsole} onToggle={(e) => setShowConsole((e.target as HTMLDetailsElement).open)}>
+            <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--text-dim)", marginBottom: 4, userSelect: "none" }}>
+              Console Log ({appState.consoleLog!.length} entries)
+            </summary>
+            <pre className="bug-report-state" style={{ maxHeight: 200, overflowY: "auto", fontSize: 10, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+              {appState.consoleLog!.map((e, i) => (
+                <div key={i} style={{ color: e.level === "error" ? "var(--error, #c44)" : e.level === "warn" ? "var(--warning, #b80)" : "inherit" }}>
+                  [{new Date(e.timestamp).toISOString().slice(11, 23)}] {e.level.toUpperCase()}: {e.message}
+                </div>
+              ))}
+            </pre>
+          </details>
+        )}
 
         <textarea
           ref={textareaRef}
