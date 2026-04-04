@@ -39,7 +39,7 @@ export function globalToLocal(sections: SectionBoundary[], globalWordIdx: number
 
 // ── Narration state machine types ────────────────────────────────────────────
 
-export type NarrationStatus = "idle" | "loading" | "speaking" | "paused" | "holding" | "error";
+export type NarrationStatus = "idle" | "loading" | "speaking" | "paused" | "holding" | "error" | "warming";
 
 export interface NarrationState {
   status: NarrationStatus;
@@ -70,7 +70,8 @@ export type NarrationAction =
   | { type: "KOKORO_READY" }
   | { type: "KOKORO_DOWNLOAD_PROGRESS"; progress: number }
   | { type: "SET_PAGE_END"; endIdx: number | null }
-  | { type: "ERROR"; message: string };
+  | { type: "ERROR"; message: string }
+  | { type: "KOKORO_WARMING"; startIdx: number; speed: number };
 
 export function createInitialNarrationState(): NarrationState {
   return {
@@ -112,6 +113,8 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
       return { ...state, speed: action.speed, generationId: state.generationId + 1 };
     case "INCREMENT_GENERATION_ID":
       return { ...state, generationId: state.generationId + 1 };
+    case "KOKORO_WARMING":
+      return { ...state, status: "warming", cursorWordIndex: action.startIdx, speed: action.speed };
     case "KOKORO_READY":
       return { ...state, kokoroReady: true, kokoroDownloading: false };
     case "KOKORO_DOWNLOAD_PROGRESS":

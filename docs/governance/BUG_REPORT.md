@@ -45,12 +45,12 @@
 **Description:** When entering Focus mode (RSVP) or Flow mode (silent cursor), the unified bottom bar disappears. The `.reader-container` was `position: fixed; inset: 0` which covered everything. Changed to `flex: 1` with `.reader-view-area` wrapper, but user reports bar still missing.
 **Status:** Partially fixed. Wrapper added but bar still missing in FSM/FLM — needs verification.
 
-### BUG-032: Kokoro "App Not Responding" flash on first use
-**Reported:** 2026-03-25
+### ~~BUG-032~~ ✅ Fixed — TTS-6D (v1.15.0)
+**Reported:** 2026-03-25 | **Resolved:** 2026-04-04
 **Severity:** Medium
 **Location:** `main/tts-engine.js`, `main/tts-worker.js`
 **Description:** When Kokoro TTS is first activated, there is a brief "Not Responding" flash in the Windows title bar while the ONNX model initializes. The worker thread handles inference but the initial `import("kokoro-js")` and `KokoroTTS.from_pretrained()` still causes some main thread blocking during IPC setup.
-**Status:** Mitigated (worker thread, preloading, warm-up inference). Flash reduced but not eliminated.
+**Status:** Resolved. TTS-6D added unified engine-status events (`warming`/`ready`/`retrying`/`error`), explicit warming state in narration, delayed prewarm (2s after reader open), and visible "Starting Kokoro..." indicator. Cold start, idle re-warm, and crash recovery are now deterministic and user-visible.
 
 ### BUG-033: Book formatting stripped too aggressively
 **Reported:** 2026-03-25

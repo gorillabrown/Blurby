@@ -21,6 +21,7 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
   const [kokoroDownloading, setKokoroDownloading] = useState(false);
   const [kokoroProgress, setKokoroProgress] = useState(0);
   const [kokoroVoices, setKokoroVoices] = useState<string[]>([]);
+  const [kokoroWarming, setKokoroWarming] = useState(false);
   const [kokoroError, setKokoroError] = useState<string | null>(null);
   const [kokoroStalled, setKokoroStalled] = useState(false);
 
@@ -62,6 +63,12 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
       cleanups.push(api.onKokoroDownloadError((error: string) => {
         setKokoroError(error);
         setKokoroDownloading(false);
+      }));
+    }
+    if (api.onKokoroEngineStatus) {
+      cleanups.push(api.onKokoroEngineStatus((data: { status: string }) => {
+        setKokoroWarming(data.status === "warming");
+        if (data.status === "ready") { setKokoroReady(true); setKokoroWarming(false); }
       }));
     }
     return () => cleanups.forEach((c) => c());
@@ -276,7 +283,8 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
       </button>
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 6, marginBottom: 16 }}>
         Press N in the reader to toggle narration. WPM is capped at 400 when narration is active.
-        {engine === "kokoro" && kokoroReady && " Using Kokoro AI voices."}
+        {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using Kokoro AI voices."}
+        {engine === "kokoro" && kokoroWarming && " Kokoro is warming up..."}
       </div>
 
       <div className="settings-section-label">Pause Timing</div>

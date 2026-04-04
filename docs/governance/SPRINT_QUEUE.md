@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see `GOV-6D` plus the Phase 6 sections for `EINK-6A` and `GOALS-6B`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6D`, `TTS-6E`, and `TTS-6F`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: GOV-6D (Claude CLI Agent Staging Alignment)
-Health: GREEN — Queue depth at target.
+Queue depth: 2
+Next sprint: TTS-6E (Pronunciation Overrides)
+Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
 ---
@@ -21,13 +21,12 @@ Health: GREEN — Queue depth at target.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | GOV-6D | v1.15.0 | `sprint/gov-6d-agent-staging-alignment` | Quick | — | Align `.claude` agent files, `CLAUDE.md`, `ROADMAP.md`, and this queue to the real Claude CLI subagent model before the next product sprints. |
-| 2 | EINK-6A | v1.16.0 | `sprint/eink-6a-display-mode` | Full | — | E-ink as independent display mode. Decouple from theme. `einkMode` boolean + `[data-eink]` CSS. |
-| 3 | GOALS-6B | v1.17.0 | `sprint/goals-6b-reading-goals` | Full | — | Daily/weekly reading goals. Progress ring in library header. Goal-met toast. |
+| 1 | TTS-6E | v1.16.0 | `sprint/tts-6e-pronunciation-overrides` | Full | — | Add global pronunciation overrides with settings UI, shared text normalization, and cache-safe Kokoro generation. |
+| 2 | TTS-6F | v1.17.0 | `sprint/tts-6f-word-alignment-telemetry` | Full | — | Add narration timing telemetry and improve word-highlight alignment with richer scheduler timing heuristics. |
 
-**Full specs:** `ROADMAP.md` §Cross-Cut Governance (`GOV-6D`) and §Phase 6 (`EINK-6A`, `GOALS-6B`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6D`, `TTS-6E`, `TTS-6F`).
 
-**Agent staging rule:** `GOV-6D` is Quick-tier governance work; use `blurby-lead` self-review plus doc validation. `EINK-6A` and `GOALS-6B` are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
+**Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
 ---
 
@@ -46,6 +45,8 @@ Health: GREEN — Queue depth at target.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6D | 2026-04-04 | PASS | Kokoro startup/recovery hardening. Unified engine-status events, warming state, delayed prewarm, crash recovery UX. BUG-032 resolved. 11 new tests (1,061 total). v1.15.0. |
+| GOV-6D | 2026-04-04 | PASS | Claude CLI agent staging alignment. `blurby-lead` scope-label model clarified, live governance terminology normalized, and roadmap/queue staging synced. v1.15.0. |
 | TTS-6C | 2026-04-04 | PASS | Kokoro native-rate buckets (1.0x/1.2x/1.5x). Bucket resolver, cache identity, immediate restart, active-bucket warming. 18 new tests (1,050 total). v1.14.0. |
 | TTS-SMOOTH | 2026-04-04 | PASS (implemented on `main`, unreleased) | Kokoro TTS smoothness stabilization: first-chunk priming, cache `wordCount` + lazy migration, scheduler `playbackRate`, punctuation-aware scheduling, Reading Now background warming, type surface green. 6 new tests (1,038 total). |
 | EXT-5B | 2026-04-02 | PASS | Extension pairing UX — 6-digit short code, WS pair protocol, settings + popup UI. 10 new tests. v1.11.0. Phase 5 complete. |

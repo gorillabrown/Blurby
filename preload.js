@@ -156,6 +156,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("tts-kokoro-download-error", handler);
     return () => ipcRenderer.removeListener("tts-kokoro-download-error", handler);
   },
+  onKokoroEngineStatus: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("tts-kokoro-engine-status", handler);
+    return () => ipcRenderer.removeListener("tts-kokoro-engine-status", handler);
+  },
 
   // TTS Cache (NAR-2)
   ttsCacheRead: (bookId, voiceId, startIdx) => ipcRenderer.invoke("tts-cache-read", bookId, voiceId, startIdx),
