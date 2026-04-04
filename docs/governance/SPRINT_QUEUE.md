@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6M` and `TTS-6N`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 section for `TTS-6N`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2
-Next sprint: TTS-6M (Narration Portability & Reset Safety)
-Health: YELLOW — Queue depth below 3. Backfill needed.
+Queue depth: 1
+Next sprint: TTS-6N (Narration Runtime Stability & Extraction Sync)
+Health: RED — Queue depth critically low. Backfill urgent.
 ```
 
 ---
@@ -21,10 +21,9 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6M | v1.23.0 | `sprint/tts-6m-narration-portability-reset-safety` | Full | — | Add narration-only export/import plus granular reset safety so profiles and override data can be moved, recovered, and cleaned up safely. |
-| 2 | TTS-6N | v1.24.0 | `sprint/tts-6n-runtime-stability-extraction-sync` | Full | — | Fix Narrate runtime instability: HOTFIX-6 mid-play extraction restart and live renderer blocking during Kokoro sessions. |
+| 1 | TTS-6N | v1.24.0 | `sprint/tts-6n-runtime-stability-extraction-sync` | Full | — | Fix Narrate runtime instability: HOTFIX-6 mid-play extraction restart and live renderer blocking during Kokoro sessions. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6M`, `TTS-6N`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6N`).
 
 **Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
@@ -45,6 +44,7 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6M | 2026-04-04 | PASS | Narration portability & reset safety. NarrationExportPayload with schema versioning, export/import/validate/apply utilities, merge and replace import modes, granular reset (profiles/overrides/all), settings UI for export/import/reset. 15 new tests (1,141 total). v1.23.0. |
 | TTS-6L | 2026-04-04 | PASS | Narration profiles & sharing foundations. NarrationProfile type, createDefaultNarrationProfile/profileFromSettings/resolveNarrationProfile utilities, profile manager UI in TTSSettings, book-level profile assignment, profile-sync to flat settings, TDZ bugfix in useNarration Kokoro auto-start, non-disruptive updateWords for HOTFIX-6. 10 new tests (1,126 total). v1.22.0. |
 | TTS-6K | 2026-04-04 | PASS | Narration personalization & quality sweep. Updated tech ref settings cascade, pronunciation override scoping docs, TTS glossary fixes, bug report sweep, lessons learned TTS guardrails. 1 new test (1,116 total). v1.21.0. |
 | TTS-6J | 2026-04-04 | PASS | Voice selection & persona consistency. Extracted selectPreferredVoice utility (en-US > en-GB > en-*), updated tech ref voice table from gender-buckets to accent/persona, documented Web Speech fallback behavior. 8 new tests (1,115 total). v1.20.0. |
