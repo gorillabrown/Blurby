@@ -1,5 +1,5 @@
 import type { ReadingMode, ModeConfig, ModeState } from "./ModeInterface";
-import { TTS_RATE_BASELINE_WPM } from "../constants";
+import { TTS_RATE_BASELINE_WPM, resolveKokoroBucket } from "../constants";
 
 /**
  * NarrationInterface — subset of useNarration's return type needed by NarrateMode.
@@ -47,7 +47,11 @@ export class NarrateMode implements ReadingMode {
   constructor(config: ModeConfig, narration: NarrationInterface) {
     this.config = config;
     this.narration = narration;
-    this.ttsRate = config.settings.ttsRate || 1.0;
+    const rawRate = config.settings.ttsRate || 1.0;
+    // Normalize to Kokoro bucket when using Kokoro engine
+    this.ttsRate = config.settings.ttsEngine === "kokoro"
+      ? resolveKokoroBucket(rawRate)
+      : rawRate;
   }
 
   start(wordIndex: number): void {
@@ -97,7 +101,11 @@ export class NarrateMode implements ReadingMode {
   }
 
   setSpeed(rate: number): void {
-    this.ttsRate = Math.max(0.5, Math.min(2.0, rate));
+    const clamped = Math.max(0.5, Math.min(2.0, rate));
+    // Normalize to Kokoro bucket when using Kokoro engine
+    this.ttsRate = this.config.settings.ttsEngine === "kokoro"
+      ? resolveKokoroBucket(clamped)
+      : clamped;
     this.narration.adjustRate(this.ttsRate);
   }
 

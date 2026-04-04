@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6N`, `TTS-6O`, and `TTS-6P`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6O` and `TTS-6P`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: TTS-6N (Narration Runtime Stability & Extraction Sync)
-Health: GREEN — Queue depth healthy.
+Queue depth: 2
+Next sprint: TTS-6O (Performance Budgets & Background Work Isolation)
+Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
 ---
@@ -21,11 +21,10 @@ Health: GREEN — Queue depth healthy.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6N | v1.24.0 | `sprint/tts-6n-runtime-stability-extraction-sync` | Full | — | Fix Narrate runtime instability: HOTFIX-6 mid-play extraction restart and live renderer blocking during Kokoro sessions. |
-| 2 | TTS-6O | v1.25.0 | `sprint/tts-6o-performance-budgets-background-isolation` | Full | — | Add explicit Narrate performance budgets, isolate heavy precompute/background work from the live interaction path, and harden perf telemetry contracts. |
-| 3 | TTS-6P | v1.26.0 | `sprint/tts-6p-session-continuity-recovery` | Full | — | Make narration context resilient across reopen/reload/interruption with book-aware restore behavior and graceful invalid-state fallback. |
+| 1 | TTS-6O | v1.25.0 | `sprint/tts-6o-performance-budgets-background-isolation` | Full | — | Add explicit Narrate performance budgets, isolate heavy precompute/background work from the live interaction path, and harden perf telemetry contracts. |
+| 2 | TTS-6P | v1.26.0 | `sprint/tts-6p-session-continuity-recovery` | Full | — | Make narration context resilient across reopen/reload/interruption with book-aware restore behavior and graceful invalid-state fallback. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6N`, `TTS-6O`, `TTS-6P`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6O`, `TTS-6P`).
 
 **Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
@@ -46,6 +45,7 @@ Health: GREEN — Queue depth healthy.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6N | 2026-04-04 | PASS | Narration runtime stability & extraction sync. Kokoro rate clamped to buckets at NarrateMode boundary (constructor + setSpeed), HOTFIX-10 section restamping deferred via requestIdleCallback during active narration, extraction handoff reordered (word swap before DOM restamp). 12 new tests (1,153 total). v1.24.0. |
 | TTS-6M | 2026-04-04 | PASS | Narration portability & reset safety. NarrationExportPayload with schema versioning, export/import/validate/apply utilities, merge and replace import modes, granular reset (profiles/overrides/all), settings UI for export/import/reset. 15 new tests (1,141 total). v1.23.0. |
 | TTS-6L | 2026-04-04 | PASS | Narration profiles & sharing foundations. NarrationProfile type, createDefaultNarrationProfile/profileFromSettings/resolveNarrationProfile utilities, profile manager UI in TTSSettings, book-level profile assignment, profile-sync to flat settings, TDZ bugfix in useNarration Kokoro auto-start, non-disruptive updateWords for HOTFIX-6. 10 new tests (1,126 total). v1.22.0. |
 | TTS-6K | 2026-04-04 | PASS | Narration personalization & quality sweep. Updated tech ref settings cascade, pronunciation override scoping docs, TTS glossary fixes, bug report sweep, lessons learned TTS guardrails. 1 new test (1,116 total). v1.21.0. |
