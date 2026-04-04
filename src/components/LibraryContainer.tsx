@@ -20,6 +20,8 @@ import OnboardingOverlay from "./OnboardingOverlay";
 import BugReportModal from "./BugReportModal";
 import MetadataWizard from "./MetadataWizard";
 import { gatherAppState, type BugReportAppState } from "../utils/bugReportState";
+import { getLatestSnapshot, getDiagEvents } from "../utils/narrateDiagnostics";
+import { getConsoleBuffer } from "../utils/consoleCapture";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
 import { resolveLoadedDocResult } from "../utils/loadDocResult";
@@ -126,6 +128,10 @@ export default function LibraryContainer() {
       theme: settings.theme,
       focusTextSize: (settings as any).focusTextSize,
       platform,
+      // HOTFIX-11: Narration diagnostics + console log
+      narrateDiagSnapshot: getLatestSnapshot() ?? null,
+      narrateDiagEvents: getDiagEvents(),
+      consoleLog: getConsoleBuffer(),
     });
 
     setBugReport({ screenshotPath, screenshotFile, appState });

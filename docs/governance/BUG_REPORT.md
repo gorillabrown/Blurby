@@ -129,6 +129,44 @@
 **Description:** WPM slider thumb/track, selected mode button background, flow cursor underline, and narration word highlight should use `var(--accent)` — some currently use hardcoded colors.
 **Status:** Open.
 
+### BUG-096: Narration cursor desyncs from Kokoro voice
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`
+**Description:** During Kokoro narration on The Return of Sherlock Holmes (EPUB, 115k words), the word highlight cursor drifts ahead of or behind the spoken audio. Desync accumulates over time within a section. Observed at 1.2x rate bucket, position ~1499/115154, narration mode, foliate-backed EPUB. Likely cause: word boundary timing estimates in the scheduler diverge from actual Kokoro audio duration, especially across longer chunks. The TTS-6F punctuation-aware/token-length weighting may not fully compensate for Kokoro's variable prosody.
+**Repro:** Start Kokoro narration on a long EPUB. Let it run for several minutes without pausing. Observe cursor position vs. spoken word.
+**Status:** Open. Related to TTS-6N (runtime stability) and TTS-6P (cursor fidelity).
+
+### BUG-097: Narration pauses at wrong positions
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts`, `src/utils/rhythm.ts`
+**Description:** Kokoro narration produces long pauses and inappropriate pauses — gaps appear mid-sentence at non-punctuation boundaries, and natural pause points (periods, paragraph breaks) sometimes get insufficient pause. Observed during narration of The Return of Sherlock Holmes at 1.2x. Likely cause: the scheduler's punctuation-aware pause shaping (TTS-6F `computeWordWeights`) and the chunk boundary planning may not align well with how Kokoro actually realizes pauses in its audio output. The scheduler inserts silence based on text analysis, but Kokoro already bakes prosodic pauses into its generated audio — the two pause sources may stack or conflict.
+**Repro:** Start Kokoro narration. Listen for pauses that feel unnatural — either too long between phrases or appearing in the middle of a clause.
+**Status:** Open. Related to TTS-6P (cursor fidelity).
+
+### BUG-098: Narration audio gaps from cache/backlog starvation
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `main/tts-cache.js`
+**Description:** Audible gaps (silence) during Kokoro narration when the generation pipeline cannot keep up with playback. The scheduler runs out of pre-scheduled audio sources and the listener hears dead air until the next chunk arrives. Console log shows repeated identical chunk dispatches at the same cursor position (`chunk — engine: kokoro status: speaking cursor: 144` repeated 3 times), suggesting the pipeline is retrying or stalling. Observed on a short section (234 words, position 144). The progressive ramp (13→26→52→104→148 words) means early chunks are small and fast to generate, but cache misses on uncached content at the current rate bucket could still cause starvation if IPC round-trip + Kokoro inference exceeds the playback duration of the previous chunk.
+**Repro:** Navigate to a new section mid-book (no cache for this position). Start Kokoro narration. Listen for brief silence gaps between phrases.
+**Status:** Open. Related to TTS-6N (runtime stability) and TTS-6P (first-play latency).
+
+### ~~BUG-099~~ ✅ Fixed — HOTFIX-11 (v1.27.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Low (tooling)
+**Location:** `src/utils/bugReportState.ts`, `src/components/BugReportModal.tsx`
+**Description:** The bug report dialog captures a screenshot and basic app state but did not capture narration-specific diagnostics.
+**Status:** Resolved. HOTFIX-11 added `narrateDiagSnapshot` and `narrateDiagEvents` to `BugReportAppState`, wired from `narrateDiagnostics.ts`. Modal shows collapsible "Narration Diagnostics" section with snapshot + event log.
+
+### ~~BUG-100~~ ✅ Fixed — HOTFIX-11 (v1.27.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Low (tooling)
+**Location:** `src/utils/consoleCapture.ts`, `src/main.tsx`
+**Description:** Console output was not included in the bug report JSON.
+**Status:** Resolved. HOTFIX-11 added `consoleCapture.ts` ring buffer (200 entries), installed before React mount. `consoleLog` field added to `BugReportAppState`. Modal shows collapsible "Console Log" section with color-coded entries.
+
 ---
 
 ## Complete
@@ -455,10 +493,4 @@
 **Reported:** 2026-03-25 | **Fixed:** 2026-03-25
 **Location:** `src/components/ReaderBottomBar.tsx`
 **Problem:** Bottom bar had `opacity: 0.08` during Focus/Flow/Narration, making controls nearly invisible.
-**Solution:** Removed opacity fade — bar always fully opaque.
-
-### BUG-048: WPM slider should show TTS rate in Narration mode
-**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
-**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
-**Problem:** WPM slider showed in Narration mode where it was irrelevant.
-**Solution:** In narration mode, slider swaps to show rate (0.5-2.0) and updates narration engine directly.
+**Solution:** Remov

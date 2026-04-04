@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./styles/global.css";
+import { installConsoleCapture } from "./utils/consoleCapture";
+
+// Install console ring buffer before anything else (HOTFIX-11)
+installConsoleCapture();
 
 async function boot() {
   // In dev mode outside Electron, inject the electronAPI stub before React mounts.
