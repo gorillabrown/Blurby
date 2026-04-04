@@ -346,4 +346,4 @@ All sprints through TTS-6G complete (v1.18.0). Full history: `docs/project/ROADM
 Recent chain:
 ✅ TTS-6F → ✅ TTS-6G (narration controls polish)
 
-**Next:** TTS-6H (docs/policy closure)
+**Next:** TTS-6I (per-book pronunciation profiles) → TTS-6J (voice selection consistency)
