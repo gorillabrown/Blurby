@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6D (Kokoro startup & recovery hardening). 1,061 tests, 53 files. Latest tagged release: v1.15.0.
+**Last updated**: 2026-04-04 — Post-TTS-6E (Pronunciation Overrides Foundation). 1,076 tests, 54 files. Latest tagged release: v1.16.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6D complete). Queue GREEN (TTS-6E → TTS-6F → TTS-6G; depth 3).
+**Current state**: Phase 6 in progress (TTS-6E complete). Queue GREEN (TTS-6F → TTS-6G → TTS-6H; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -32,9 +32,10 @@ Phase 5: Read Later + Chrome Extension
 Phase 6: TTS Hardening & App Polish
   ├── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
   ├── TTS-6D: Kokoro Startup & Recovery Hardening ✅ (v1.15.0)
-  ├── TTS-6E: Pronunciation Overrides Foundation (queued)
+  ├── TTS-6E: Pronunciation Overrides Foundation ✅ (v1.16.0)
   ├── TTS-6F: Word Alignment & Narration Telemetry (queued)
-  └── TTS-6G: Narration Controls & Accessibility Polish (queued)
+  ├── TTS-6G: Narration Controls & Accessibility Polish (queued)
+  └── TTS-6H: Narration Documentation & Policy Closure (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -297,7 +298,9 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6E: Pronunciation Overrides Foundation
+### Sprint TTS-6E: Pronunciation Overrides Foundation ✅ COMPLETED (v1.16.0, 2026-04-04)
+
+> Implemented and merged to `main`. 15 new tests (1,076 total, 54 files). Added `PronunciationOverride` settings state, override editor with live preview, shared `applyPronunciationOverrides()` helper, Web Speech normalization, and Kokoro cache segregation via override-hash identity. Plain-text replacements only; no SSML or phoneme editor. All 10 SUCCESS CRITERIA met.
 
 **Goal:** Give users a first real pronunciation-control layer for Narrate mode by letting them define simple text replacements before synthesis, without introducing SSML or phoneme editing.
 
@@ -483,6 +486,59 @@ Phase 5 is complete when:
 
 ---
 
+### Sprint TTS-6H: Narration Documentation & Policy Closure
+
+**Goal:** Close the remaining TTS audit governance/documentation items so Narrate mode’s privacy, SSML stance, safety posture, and terminology are fully documented in the same level of detail as the now-shipped Kokoro feature set.
+
+**Problem:** The shipped TTS lane is increasingly mature, but the repo still carries a loose end from the audit review: product behavior is implemented faster than the long-form governance docs are updated. The remaining gap is not runtime code, it is repo truth. We need the technical reference and lessons learned to clearly explain how Narrate mode handles user text, caching, model downloads, override storage, SSML non-support, and the engineering patterns that made recent TTS work safe.
+
+**Design decisions:**
+- **Docs-only sprint:** This sprint changes no app/runtime code unless a referenced statement is demonstrably false and needs a tiny corrective patch.
+- **One canonical Narrate mode reference:** `TECHNICAL_REFERENCE.md` should become the single high-level explainer for engine behavior, privacy/data flow, cache behavior, controls, and feature boundaries.
+- **Policy by explicit stance:** We should document the deliberate non-goals too: no SSML, no content filtering, no voice cloning, no formal NIST-style governance layer for this local reading feature.
+- **Lessons learned as engineering guardrails:** Patterns like engine-status propagation, cache identity invalidation, and shared control semantics belong in `LESSONS_LEARNED.md`, not only in sprint specs.
+
+**Baseline:**
+- `docs/governance/TECHNICAL_REFERENCE.md` — current Narrate mode architecture, privacy, and glossary sections
+- `docs/governance/LESSONS_LEARNED.md` — TTS-related guardrails
+- `docs/governance/TTS-AUDIT-REVIEW.md` — remaining documentation/policy dispositions
+- `docs/governance/BUG_REPORT.md` — recent TTS bug resolutions for factual grounding
+- `ROADMAP.md` / `SPRINT_QUEUE.md` — current TTS completion history
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/TTS-AUDIT-REVIEW.md`
+4. `docs/governance/TECHNICAL_REFERENCE.md`
+5. `docs/governance/BUG_REPORT.md`
+6. `ROADMAP.md` — this section
+7. `docs/governance/SPRINT_QUEUE.md`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (governance-doc scope) | **Narrate mode privacy/data-flow refresh** — Document local Kokoro inference, model download endpoint/caching, renderer/main transit, Web Speech caveat, and override/cache retention behavior as shipped after `TTS-6E`. | `docs/governance/TECHNICAL_REFERENCE.md` |
+| 2 | Primary CLI (governance-doc scope) | **SSML and safety stance** — Make the repo’s stance explicit: plain text only, no SSML pipeline, no content filtering/generation/sharing, voice personas are user-selected. | `docs/governance/TECHNICAL_REFERENCE.md` |
+| 3 | Primary CLI (governance-doc scope) | **Narrate mode architecture refresh** — Update the technical reference so it describes the current Kokoro engine-status model, native rate buckets, pronunciation overrides, active-bucket warming, and current control semantics accurately. | `docs/governance/TECHNICAL_REFERENCE.md` |
+| 4 | Primary CLI (governance-doc scope) | **Glossary / terminology cleanup** — Add or update concise definitions for terms like prewarm, rate bucket, override hash, engine-status event, and alignment heuristic. | `docs/governance/TECHNICAL_REFERENCE.md` |
+| 5 | Primary CLI (governance-doc scope) | **Lessons learned codification** — Add/update guardrails for TTS cache identity invalidation, engine-status propagation, and shared engine-aware control semantics so future work doesn’t regress them. | `docs/governance/LESSONS_LEARNED.md` |
+| 6 | doc-keeper | **Roadmap/queue/doc consistency pass** — Make sure the TTS completion history and current queued lane are reflected consistently across roadmap, queue, and technical reference. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/LESSONS_LEARNED.md` |
+| 7 | blurby-lead | **Final verification** — Verify no runtime code needed changing, and if any tiny factual correction is required, keep it strictly scoped and documented. | — |
+
+#### SUCCESS CRITERIA
+
+1. `TECHNICAL_REFERENCE.md` accurately documents current Narrate mode architecture after `TTS-6E`
+2. Privacy/data-flow behavior for Kokoro, Web Speech, model download, and override/cache storage is explicitly documented
+3. SSML non-support and the product’s safety/content stance are explicitly documented
+4. TTS glossary/terminology reflects current shipped concepts rather than stale pre-`TTS-6C` language
+5. `LESSONS_LEARNED.md` captures the key TTS engineering guardrails that emerged from `TTS-6C` through `TTS-6G`
+6. `ROADMAP.md`, `SPRINT_QUEUE.md`, and `TECHNICAL_REFERENCE.md` agree on the current TTS lane
+7. Sprint remains docs-only unless a tiny factual correction is truly necessary
+
+---
+
 ### Drafted Later Work (Not In Queue Yet)
 
 `EINK-6A` and `GOALS-6B` remain drafted below for later phases, but they are intentionally not the next dispatches while the TTS lane is still active.
@@ -648,6 +704,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| TTS-6F | v1.17.0 | ✅ DONE | Word alignment telemetry + improved timing heuristic. Punctuation-aware/token-length-aware word weighting, dev telemetry. 12 new tests. |
 | TTS-6E | v1.16.0 | ✅ DONE | Pronunciation overrides foundation. Global override list, settings editor, preview, cache-safe Kokoro generation. 15 new tests. |
 | TTS-6D | v1.15.0 | ✅ DONE | Kokoro startup/recovery hardening. Unified engine-status events, warming state, delayed prewarm, crash recovery UX. BUG-032 resolved. 11 new tests. |
 | TTS-6C | v1.14.0 | ✅ DONE | Kokoro native-rate buckets (1.0x/1.2x/1.5x). rateBucket cache identity, immediate restart on rate change, active-bucket warming. 18 new tests. |
