@@ -264,12 +264,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.26.0 — Post-TTS-6P)
+## Current System State (v1.27.0 — Post-TTS-6Q)
 
 ### Codebase (branch: `main`)
 
-- All sprints through TTS-6P complete (+ TTS-6C through TTS-6P + GOV-6D)
-- 1,174 tests across 64 test files
+- All sprints through TTS-6Q complete (+ TTS-6C through TTS-6Q + GOV-6D)
+- 1,188 tests across 65 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -323,7 +323,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 64 test files, 1,174 tests
+  - **Tests** (`tests/`): 65 test files, 1,188 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -341,9 +341,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through TTS-6P complete (v1.26.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through TTS-6Q complete (v1.27.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ TTS-6N → ✅ TTS-6O → ✅ TTS-6P (session continuity & recovery)
+✅ TTS-6O → ✅ TTS-6P → ✅ TTS-6Q (diagnostics & regression shields)
 
-**Next:** TTS-6Q (diagnostics & regression shields)
+**Next:** Phase 6 TTS lane complete. Next: EINK-6A or GOALS-6B (see ROADMAP.md).

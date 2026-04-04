@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 section for `TTS-6Q`)
+**Full specs:** `ROADMAP.md`
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1
-Next sprint: TTS-6Q (Diagnostics & Regression Shields)
-Health: RED — Queue depth critically low. Backfill urgent.
+Queue depth: 0
+Next sprint: (empty — TTS lane complete, backfill with EINK-6A / GOALS-6B)
+Health: RED — Queue empty. Backfill required before next dispatch.
 ```
 
 ---
@@ -21,11 +21,7 @@ Health: RED — Queue depth critically low. Backfill urgent.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6Q | v1.27.0 | `sprint/tts-6q-diagnostics-regression-shields` | Full | — | Add structured Narrate diagnostics, invariant checks, and stronger regression shields around runtime stability, performance, and continuity contracts. |
-
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6Q`).
-
-**Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
+| — | — | — | — | — | — | Queue empty. Phase 6 TTS lane complete. |
 
 ---
 
@@ -45,6 +41,8 @@ Health: RED — Queue depth critically low. Backfill urgent.
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
 | TTS-6P | 2026-04-04 | PASS | Session continuity & recovery. resolveNarrationContext utility with book > active profile > flat settings cascade, voice validation, rate clamping, graceful fallback for stale/missing state. isBookNarrationValid checker. 12 new tests (1,174 total). v1.26.0. |
+| TTS-6Q | 2026-04-04 | PASS | Diagnostics & regression shields. NarrateDiagSnapshot/NarrateDiagEvent diagnostics surface, bucket/cursor/extraction invariant checks, 14 new regression-shield tests (1,188 total). v1.27.0. |
+| TTS-6P | 2026-04-04 | PASS | Session continuity & recovery. resolveNarrationContext utility, voice validation, rate clamping, graceful fallback, isBookNarrationValid checker. 12 new tests (1,174 total). v1.26.0. |
 | TTS-6O | 2026-04-04 | PASS | Performance budgets & background isolation. Explicit startup/restart/steady-state budget constants, narratePerf instrumentation utility, background pre-extraction on reader open (1s delay), 9 new tests (1,162 total). v1.25.0. |
 | TTS-6N | 2026-04-04 | PASS | Narration runtime stability & extraction sync. Kokoro rate clamped to buckets at NarrateMode boundary (constructor + setSpeed), HOTFIX-10 section restamping deferred via requestIdleCallback during active narration, extraction handoff reordered (word swap before DOM restamp). 12 new tests (1,153 total). v1.24.0. |
 | TTS-6M | 2026-04-04 | PASS | Narration portability & reset safety. NarrationExportPayload with schema versioning, export/import/validate/apply utilities, merge and replace import modes, granular reset (profiles/overrides/all), settings UI for export/import/reset. 15 new tests (1,141 total). v1.23.0. |

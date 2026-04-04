@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6P (Session Continuity & Recovery). 1,174 tests, 64 files. Latest tagged release: v1.26.0.
+**Last updated**: 2026-04-04 — Post-TTS-6Q (Diagnostics & Regression Shields). 1,188 tests, 65 files. Latest tagged release: v1.27.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6P complete). Queue RED (TTS-6Q only; depth 1).
+**Current state**: Phase 6 TTS lane complete (TTS-6Q). Queue EMPTY — backfill with EINK-6A / GOALS-6B.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -43,7 +43,7 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6N: Narration Runtime Stability & Extraction Sync ✅ (v1.24.0)
   ├── TTS-6O: Narration Performance Budgets & Background Work Isolation ✅ (v1.25.0)
   ├── TTS-6P: Session Continuity & Recovery ✅ (v1.26.0)
-  └── TTS-6Q: Narration Diagnostics & Regression Shields (queued)
+  └── TTS-6Q: Narration Diagnostics & Regression Shields ✅ (v1.27.0)
     │
     ├────────────────────────┐
     ▼                        ▼
