@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6J (Voice Selection & Persona Consistency). 1,115 tests, 58 files. Latest tagged release: v1.20.0.
+**Last updated**: 2026-04-04 — Post-TTS-6K (Narration Personalization & Quality Sweep). 1,116 tests, 59 files. Latest tagged release: v1.21.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6J complete). Queue YELLOW (TTS-6K → TTS-6L; depth 2 — backfill needed).
+**Current state**: Phase 6 in progress (TTS-6K complete). Queue YELLOW (TTS-6L → TTS-6M; depth 2 — backfill needed).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -37,8 +37,9 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6G: Narration Controls & Accessibility Polish ✅ (v1.18.0)
   ├── TTS-6I: Per-Book Pronunciation Profiles ✅ (v1.19.0)
   ├── TTS-6J: Voice Selection & Persona Consistency ✅ (v1.20.0)
-  ├── TTS-6K: Narration Personalization & Quality Sweep (queued)
-  └── TTS-6L: Narration Profiles & Sharing Foundations (queued)
+  ├── TTS-6K: Narration Personalization & Quality Sweep ✅ (v1.21.0)
+  ├── TTS-6L: Narration Profiles & Sharing Foundations (queued)
+  └── TTS-6M: Narration Portability & Reset Safety (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -557,7 +558,9 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6J: Voice Selection & Persona Consistency
+### Sprint TTS-6J: Voice Selection & Persona Consistency ✅ COMPLETED (v1.20.0, 2026-04-04)
+
+> Implemented and merged to `main`. 1,115 total tests across 58 files. Added `src/utils/voiceSelection.ts` with explicit `en-US` -> `en-GB` -> `en-*` -> first-voice fallback priority, refactored `useNarration.ts` to use the shared selector, updated technical reference voice tables from gender buckets to accent/persona terminology, and documented Web Speech fallback behavior. All 7 SUCCESS CRITERIA met.
 
 **Goal:** Finish the remaining voice-selection polish so Kokoro labels, Web Speech fallback choice, and voice-facing documentation all feel intentional and consistent instead of leftover defaults.
 
@@ -729,6 +732,62 @@ Phase 5 is complete when:
 
 ---
 
+### Sprint TTS-6M: Narration Portability & Reset Safety
+
+**Goal:** Finish the next bigger narration block by making the growing profile and override system portable, recoverable, and safe to edit at scale.
+
+**Problem:** After `TTS-6L`, Narrate mode will likely have named profiles, book-level assignments, global overrides, and book-specific overrides. That is enough user-authored state that people will eventually want clean backup, import, export, and reset flows. Without that layer, the system becomes powerful but fragile: users can customize deeply, but they cannot confidently move, restore, or selectively clean up their narration setup.
+
+**Design decisions:**
+- **Narration-only portability first:** Keep export/import scoped to narration data instead of trying to solve all-settings migration here.
+- **Granular resets, not scorched earth:** Users should be able to reset a profile, a book assignment, or override scopes without deleting unrelated narration work.
+- **Validate before mutate:** Imports should report conflicts, unsupported versions, or invalid entries before writing anything into active state.
+- **No silent destructive behavior:** Backup, restore, and reset flows must preview impact and require explicit confirmation in-product.
+
+**Baseline:**
+- `TTS-6E`, `TTS-6I`, and `TTS-6L` narration data structures
+- `src/components/settings/SpeedReadingSettings.tsx`
+- narration/profile persistence surfaces introduced by the earlier TTS sprints
+- `docs/governance/TECHNICAL_REFERENCE.md`
+- `docs/governance/LESSONS_LEARNED.md`
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6E`, `TTS-6I`, `TTS-6L`, and this section
+4. narration settings/profile persistence files
+5. `src/components/settings/SpeedReadingSettings.tsx`
+6. `docs/governance/TECHNICAL_REFERENCE.md`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Narration export/import model** — Define a stable narration-only payload covering profiles, global overrides, optional book-level override/profile assignments, and schema/version metadata. | persistence/type surfaces as needed |
+| 2 | Primary CLI (renderer-fixer scope / electron-fixer scope if needed) | **Settings import/export flow** — Add a user-facing narration export/import workflow with validation, preview, and safe application semantics. | settings + persistence surfaces |
+| 3 | Primary CLI (renderer-fixer scope) | **Granular reset actions** — Add explicit reset/clear actions for profile assignments and override scopes so users can recover from over-customization without wiping everything. | settings/narration surfaces |
+| 4 | Primary CLI (governance-doc scope) | **Portability policy/docs pass** — Document exactly what narration data is portable, what is not, and how reset/import semantics work. | `docs/governance/TECHNICAL_REFERENCE.md`, related docs |
+| 5 | test-runner | **Tests** — Cover payload validation, import conflict handling, reset safety, and non-destructive failure cases. | `tests/` |
+| 6 | test-runner | **`npm test` + `npm run build`** | — |
+| 7 | spec-compliance-reviewer | **Spec compliance** | — |
+| 8 | quality-reviewer | **Architecture + code quality review** | — |
+| 9 | doc-keeper | **Documentation pass** — Align roadmap, queue, CLAUDE, lessons learned, and technical reference with the shipped portability/reset model. | governing docs |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narration data can be exported/imported through an explicit user-facing workflow
+2. Imports validate payload shape/version before mutating active narration settings
+3. Users can reset targeted narration state without wiping unrelated preferences
+4. Failed imports or invalid payloads do not partially corrupt narration data
+5. Portability/reset behavior is documented clearly in governance/reference docs
+6. New tests cover import/export/reset safety
+7. `npm test` passes
+8. `npm run build` succeeds
+
+---
+
 ### Drafted Later Work (Not In Queue Yet)
 
 `EINK-6A` and `GOALS-6B` remain drafted below for later phases, but they are intentionally not the next dispatches while the TTS lane is still active.
@@ -894,6 +953,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| TTS-6J | v1.20.0 | ✅ DONE | Voice selection & persona consistency. Shared preferred-voice selector, stable Web Speech fallback priority, and accent/persona terminology cleanup in docs. 1,115 total tests, 58 files. |
 | TTS-6I | v1.19.0 | ✅ DONE | Per-book pronunciation profiles. Global + book layering, merge resolver, scoped editor, book-aware cache. 11 new tests. |
 | TTS-6G | v1.18.0 | ✅ DONE | Narration controls & accessibility polish. Kokoro bucket bottom-bar, BUG-053 resolved. 8 new tests. |
 | TTS-6F | v1.17.0 | ✅ DONE | Word alignment telemetry + improved timing heuristic. Punctuation-aware/token-length-aware word weighting, dev telemetry. 12 new tests. |

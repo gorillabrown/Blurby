@@ -300,6 +300,8 @@ The fix was more nuanced than just removing the gate: different modes need DIFFE
 | Small TTS chunk size causes choppy speech | TTS | Use ~40 words with sentence-boundary detection, not 4-word chunks |
 | TTS and flow cursor fight over word position | Reader, TTS | When TTS active, disable cursor controller; let TTS drive via onboundary |
 | TTS settings disconnected from narration engine | Settings, TTS | Bridge settings state to useNarration via useEffect syncs |
+| TTS stateRef/dispatch dual-write violation | TTS, React | Every `dispatch()` that changes status, cursor, speed, or buffer must also update `stateRef.current` — async callbacks read the ref, not reducer state |
+| Pronunciation override scope confusion | TTS, Settings | Global overrides in `settings.pronunciationOverrides`, per-book in `BlurbyDoc.pronunciationOverrides`. Merge at narration time with book-level priority. |
 | `-webkit-app-region: drag` on `body` cascades everywhere | CSS, Electron | Never put `drag` on body — apply only to `.library-titlebar`; `no-drag` on buttons is insufficient because intermediate divs with padding still absorb clicks |
 | DOM elements created by imperative code orphaned by React | Renderer | Render element in JSX, pass ref to controller; controller styles only |
 
@@ -701,3 +703,28 @@ These are significantly shorter than Focus mode's visual pauses (1000/1500/2000m
 - PR-116: After EVERY agent run that modifies files, run `npm run build` before committing. Tests alone are insufficient — they don't catch missing exports or truncated JSX.
 - PR-117: After any file write by an agent, verify file integrity with `git diff --stat` — any unexpected size DECREASE is a truncation signal. Check those files explicitly.
 - PR-118: Never reconstruct a file by concatenating line ranges. Use targeted `Edit` (old_string → new_string) for modifications. If the file needs major restructuring, restore from git and re-apply specific edits.
+
+---
+
+### [2026-04-04] LL-069: Normalize `load-doc-content` Results at the Renderer Boundary
+
+**Area:** renderer, IPC contracts, reader startup
+**Status:** active
+**Priority:** high
+
+**Context:** Opening a book in `npm run dev` could produce a blank screen immediately after the library-to-reader transition. The renderer log showed `Uncaught TypeError: text.split is not a function` from `src/utils/text.ts`, while the devtools also showed an unrelated `[Violation] 'click' handler took ... ms` warning. The warning was noise; the real crash was a data-shape mismatch.
+
+**Root Cause:** `main/ipc/library.js` returns three different `load-doc-content` payload shapes:
+- raw string content for inline/manual docs
+- `{ filepath, ext }` for EPUB-backed docs
+- `{ userError }` for user-facing failures
+
+The renderer open path treated any non-error result like raw text and wrote it into `activeDoc.content`. For EPUB-backed docs that meant `content` became an object, and the crash did not happen until `tokenize()` / `tokenizeWithMeta()` later called `.split(...)` on that object. The failure surfaced far away from the IPC boundary, which made the blank screen look like a rendering bug instead of a contract bug.
+
+**Fix:** Add one normalization step at the renderer boundary that converts `load-doc-content` results into a safe `activeDoc` shape before reader state is set. File-backed payloads must update `filepath` / `ext` (and `convertedEpubPath` when applicable) while keeping `content` a string. User errors must short-circuit before the reader mounts.
+
+**Guardrail:**
+- PR-119: Any IPC handler that returns a union of payload shapes must have a single renderer-side normalization function. Do not spread ad hoc shape checks across multiple components.
+- PR-120: Reader entry points (`LibraryContainer`, standalone reader windows, future deep-link readers) must validate/normalize load results before assigning `activeDoc`.
+- PR-121: Text utilities that may receive runtime-loaded content should fail safe on non-string input. This is a backstop, not a substitute for boundary normalization.
+- PR-122: Performance warnings like slow click handlers or ResizeObserver noise are not root-cause evidence by themselves. Check the app error log / uncaught exception first when a blank screen follows a state transition.

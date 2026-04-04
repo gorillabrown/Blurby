@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6J`, `TTS-6K`, and `TTS-6L`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6L` and `TTS-6M`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -11,7 +11,7 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 2
-Next sprint: TTS-6K (Narration Personalization & Quality Sweep)
+Next sprint: TTS-6L (Narration Profiles & Sharing Foundations)
 Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
@@ -21,10 +21,10 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6K | v1.21.0 | `sprint/tts-6k-narration-personalization-quality-sweep` | Full | — | Larger TTS finish pass: align personalization surfaces, close remaining Narrate-mode docs/policy gaps, and sweep stale TTS bug/reference drift. |
-| 2 | TTS-6L | v1.22.0 | `sprint/tts-6l-narration-profiles-sharing-foundations` | Full | — | Turn the narration customization stack into reusable named profiles with lightweight book assignment and export/import-ready foundations. |
+| 1 | TTS-6L | v1.22.0 | `sprint/tts-6l-narration-profiles-sharing-foundations` | Full | — | Turn the narration customization stack into reusable named profiles with lightweight book assignment and export/import-ready foundations. |
+| 2 | TTS-6M | v1.23.0 | `sprint/tts-6m-narration-portability-reset-safety` | Full | — | Add narration-only export/import plus granular reset safety so profiles and override data can be moved, recovered, and cleaned up safely. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6J`, `TTS-6K`, `TTS-6L`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6L`, `TTS-6M`).
 
 **Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
@@ -45,6 +45,7 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6K | 2026-04-04 | PASS | Narration personalization & quality sweep. Updated tech ref settings cascade, pronunciation override scoping docs, TTS glossary fixes, bug report sweep, lessons learned TTS guardrails. 1 new test (1,116 total). v1.21.0. |
 | TTS-6J | 2026-04-04 | PASS | Voice selection & persona consistency. Extracted selectPreferredVoice utility (en-US > en-GB > en-*), updated tech ref voice table from gender-buckets to accent/persona, documented Web Speech fallback behavior. 8 new tests (1,115 total). v1.20.0. |
 | TTS-6I | 2026-04-04 | PASS | Per-book pronunciation profiles. Global + book override layering, merge resolver, scoped editor with scope toggle, book-aware cache identity. 11 new tests (1,107 total). v1.19.0. |
 | TTS-6G | 2026-04-04 | PASS | Narration controls & accessibility polish. Kokoro bucket buttons in bottom bar, BUG-053 resolved, engine-aware aria labels. 8 new tests (1,096 total). v1.18.0. |
