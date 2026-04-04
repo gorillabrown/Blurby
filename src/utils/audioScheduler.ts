@@ -47,10 +47,10 @@ export function computeWordWeights(words: string[]): number[] {
   for (const word of words) {
     // Base weight: proportional to character count (clamped 2–20)
     let w = Math.min(20, Math.max(2, word.length));
-    // Sentence-ending words get 40% boost (TTS naturally pauses slightly before boundaries)
-    if (SENTENCE_END_RE.test(word)) w *= 1.4;
-    // Clause-ending words get 15% boost
-    else if (CLAUSE_END_RE.test(word)) w *= 1.15;
+    // TTS-6S: Reduced punctuation boosts — Kokoro already bakes prosodic pauses
+    // into generated audio. Previous 40%/15% boosts caused double-pausing.
+    if (SENTENCE_END_RE.test(word)) w *= 1.12;
+    else if (CLAUSE_END_RE.test(word)) w *= 1.05;
     raw.push(w);
   }
 
@@ -208,11 +208,17 @@ export function createAudioScheduler(): AudioScheduler {
         return;
       }
 
-      // Advance past all boundaries we've crossed — one at a time per tick
-      if (nextWordBoundaryIdx < currentWordBoundaries.length &&
-          currentWordBoundaries[nextWordBoundaryIdx].time <= now) {
-        callbacks.onWordAdvance(currentWordBoundaries[nextWordBoundaryIdx].wordIndex);
+      // Advance past ALL boundaries we've crossed in this tick (TTS-6S: cursor sync fix).
+      // Previously only advanced one per tick, causing drift when setTimeout fires late.
+      let lastAdvancedIdx = -1;
+      while (nextWordBoundaryIdx < currentWordBoundaries.length &&
+             currentWordBoundaries[nextWordBoundaryIdx].time <= now) {
+        lastAdvancedIdx = nextWordBoundaryIdx;
         nextWordBoundaryIdx++;
+      }
+      // Fire onWordAdvance once for the latest crossed boundary (skip intermediate)
+      if (lastAdvancedIdx >= 0) {
+        callbacks.onWordAdvance(currentWordBoundaries[lastAdvancedIdx].wordIndex);
 
         // Sliding window: prune consumed boundaries to prevent unbounded growth
         if (nextWordBoundaryIdx >= 100) {

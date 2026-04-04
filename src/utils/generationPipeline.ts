@@ -82,6 +82,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   let generationId = 0;
   let nextProduceIdx = 0;
   let chunkIndex = 0; // tracks position in ramp-up sequence
+  let lastEmittedStartIdx = -1; // TTS-6S: duplicate chunk guard
 
   /** Produce a chunk starting at startIdx. Returns actual words consumed (may differ from chunkSize on cache hit). */
   async function produceChunk(startIdx: number, chunkSize: number, myGenId: number): Promise<number> {
@@ -138,6 +139,13 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       };
 
       if (active && myGenId === generationId) {
+        // TTS-6S: Skip duplicate chunk at same startIdx (prevents stall/spin)
+        if (startIdx === lastEmittedStartIdx) {
+          if (import.meta.env.DEV) console.warn("[pipeline] skipping duplicate chunk at idx", startIdx);
+          return chunkWords.length;
+        }
+        lastEmittedStartIdx = startIdx;
+
         config.onChunkReady(chunk);
 
         // Cache to disk (fire-and-forget)
@@ -169,12 +177,32 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       return;
     }
 
-    // ── Ramp-up phase: sequential with cache-alignment ──
+    // ── Ramp-up phase: parallel prefetch for first 2 chunks (TTS-6S backlog fix) ──
+    // Fire chunks 0 and 1 in parallel so chunk 1 is generating while chunk 0 plays.
     let rampDone = false;
+    const firstSize = getChunkSize(0);
+    const secondSize = getChunkSize(1);
+    if (firstSize < TTS_CRUISE_CHUNK_WORDS && secondSize < TTS_CRUISE_CHUNK_WORDS && nextProduceIdx < words.length) {
+      const idx0 = nextProduceIdx;
+      const idx1 = Math.min(idx0 + firstSize, words.length);
+      // Fire both requests concurrently
+      const [consumed0, consumed1] = await Promise.all([
+        produceChunk(idx0, firstSize, myGenId),
+        idx1 < words.length ? produceChunk(idx1, secondSize, myGenId) : Promise.resolve(0),
+      ]);
+      if (!active || myGenId !== generationId) return;
+      // Advance past both chunks
+      const totalConsumed = (consumed0 || firstSize) + (consumed1 || 0);
+      nextProduceIdx = Math.min(idx0 + totalConsumed, words.length);
+      chunkIndex = 2;
+      if (totalConsumed >= TTS_CRUISE_CHUNK_WORDS) rampDone = true;
+    }
+
+    // Continue sequential ramp-up for remaining ramp chunks
     while (!rampDone && active && myGenId === generationId && nextProduceIdx < words.length) {
       const size = getChunkSize(chunkIndex);
       if (size >= TTS_CRUISE_CHUNK_WORDS) {
-        rampDone = true; // Reached cruise size, switch to cruise loop
+        rampDone = true;
         break;
       }
 
@@ -185,10 +213,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       nextProduceIdx = Math.min(idx + consumed, words.length);
       chunkIndex++;
 
-      // Cache hit returned cruise-sized chunk — skip remaining ramp-up
-      if (consumed >= TTS_CRUISE_CHUNK_WORDS) {
-        rampDone = true;
-      }
+      if (consumed >= TTS_CRUISE_CHUNK_WORDS) rampDone = true;
     }
 
     if (!active || myGenId !== generationId) return;
@@ -220,6 +245,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   function stop(): void {
     active = false;
     generationId++;
+    lastEmittedStartIdx = -1;
   }
 
   function flush(resumeFromIdx: number): void {
