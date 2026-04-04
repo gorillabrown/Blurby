@@ -164,8 +164,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // TTS Cache (NAR-2)
   ttsCacheRead: (bookId, voiceId, startIdx) => ipcRenderer.invoke("tts-cache-read", bookId, voiceId, startIdx),
-  ttsCacheWrite: (bookId, voiceId, startIdx, audioArr, sampleRate, durationMs) =>
-    ipcRenderer.invoke("tts-cache-write", bookId, voiceId, startIdx, audioArr, sampleRate, durationMs),
+  ttsCacheWrite: (bookId, voiceId, startIdx, audioArr, sampleRate, durationMs, wordCount) =>
+    ipcRenderer.invoke("tts-cache-write", bookId, voiceId, startIdx, audioArr, sampleRate, durationMs, wordCount),
   ttsCacheHas: (bookId, voiceId, startIdx) => ipcRenderer.invoke("tts-cache-has", bookId, voiceId, startIdx),
   ttsCacheChunks: (bookId, voiceId) => ipcRenderer.invoke("tts-cache-chunks", bookId, voiceId),
   ttsCacheEvictBook: (bookId) => ipcRenderer.invoke("tts-cache-evict-book", bookId),

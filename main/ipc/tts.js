@@ -116,16 +116,16 @@ function register(ctx) {
       if (!result) return { miss: true };
       // Transfer audio as ArrayBuffer
       const arr = result.audio instanceof Float32Array ? result.audio : new Float32Array(result.audio);
-      return { audio: Array.from(arr), sampleRate: result.sampleRate, durationMs: result.durationMs };
+      return { audio: Array.from(arr), sampleRate: result.sampleRate, durationMs: result.durationMs, wordCount: result.wordCount ?? null };
     } catch (err) {
       return { error: err.message };
     }
   });
 
-  ipcMain.handle("tts-cache-write", async (_, bookId, voiceId, startIdx, audioArr, sampleRate, durationMs) => {
+  ipcMain.handle("tts-cache-write", async (_, bookId, voiceId, startIdx, audioArr, sampleRate, durationMs, wordCount) => {
     try {
       const pcm = new Float32Array(audioArr);
-      await ttsCache.writeChunk(bookId, voiceId, startIdx, pcm, sampleRate, durationMs);
+      await ttsCache.writeChunk(bookId, voiceId, startIdx, pcm, sampleRate, durationMs, wordCount);
       return { success: true };
     } catch (err) {
       return { error: err.message };

@@ -18,13 +18,15 @@ export async function isCached(bookId: string, voiceId: string, startIdx: number
 
 /**
  * Load a cached chunk from disk and return it as a ScheduledChunk.
+ * Uses the real word count stored at cache-write time (TTS-7A) to slice
+ * the correct number of words instead of guessing.
  * Returns null on cache miss or error.
  */
 export async function loadCachedChunk(
   bookId: string,
   voiceId: string,
   startIdx: number,
-  words: string[],
+  allWords: string[],
 ): Promise<ScheduledChunk | null> {
   if (!api?.ttsCacheRead) return null;
 
@@ -35,17 +37,23 @@ export async function loadCachedChunk(
     ? result.audio
     : new Float32Array(result.audio);
 
+  // TTS-7A: Use real word count from cache entry when available.
+  // Fall back to allWords.length for legacy entries without wordCount.
+  const wordCount = result.wordCount ?? allWords.length;
+  const chunkWords = allWords.slice(0, wordCount);
+
   return {
     audio,
     sampleRate: result.sampleRate,
     durationMs: result.durationMs,
-    words,
+    words: chunkWords,
     startIdx,
   };
 }
 
 /**
  * Write a generated chunk to the disk cache (fire-and-forget).
+ * TTS-7A: stores real wordCount so cache hits return correct metadata.
  */
 export function cacheChunk(
   bookId: string,
@@ -54,10 +62,11 @@ export function cacheChunk(
   audio: Float32Array,
   sampleRate: number,
   durationMs: number,
+  wordCount?: number,
 ): void {
   if (!api?.ttsCacheWrite) return;
   // Convert to plain array for IPC (structured clone doesn't always preserve Float32Array)
-  api.ttsCacheWrite(bookId, voiceId, startIdx, Array.from(audio), sampleRate, durationMs).catch(() => {});
+  api.ttsCacheWrite(bookId, voiceId, startIdx, Array.from(audio), sampleRate, durationMs, wordCount ?? null).catch(() => {});
 }
 
 /**

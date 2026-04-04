@@ -8,6 +8,7 @@ import { NarrationState as ReducerState, NarrationAction, narrationReducer, crea
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
+import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
 
 export interface NarrationState {
   speaking: boolean;
@@ -92,6 +93,24 @@ export default function useNarration() {
 
   const updateMergedOverrides = useCallback(() => {
     pronunciationOverridesRef.current = mergeOverrides(globalOverridesRef.current, bookOverridesRef.current);
+  }, []);
+
+  /** TTS-7A: Capture a diagnostics snapshot of current narration state */
+  const captureDiagSnapshot = useCallback(() => {
+    const s = stateRef.current;
+    recordSnapshot({
+      engine: s.engine as "web" | "kokoro" | null,
+      status: s.status,
+      cursorWordIndex: s.cursorWordIndex,
+      totalWords: allWordsRef.current.length,
+      rate: s.speed,
+      rateBucket: s.engine === "kokoro" ? resolveKokoroBucket(s.speed) : null,
+      profileId: null,
+      bookId: bookIdRef.current || null,
+      extractionComplete: allWordsRef.current.length > 0,
+      fellBack: false,
+      fallbackReason: null,
+    });
   }, []);
 
   // ── TTS Strategy instances ──────────────────────────────────────────────
@@ -265,6 +284,8 @@ export default function useNarration() {
         dispatch({ type: "CHUNK_COMPLETE", endIdx });
         stateRef.current = { ...stateRef.current, cursorWordIndex: endIdx };
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
+        // TTS-7A: Snapshot on chunk delivery
+        captureDiagSnapshot();
         const currentState = stateRef.current;
         if (currentState.status !== "idle" && currentState.status !== "holding") speakNextChunkWeb();
       },
@@ -272,7 +293,7 @@ export default function useNarration() {
         dispatch({ type: "STOP" });
       },
     );
-  }, [webStrategy]);
+  }, [webStrategy, captureDiagSnapshot]);
 
   /** Speak using the Kokoro strategy (delegates to NAR-2 pipeline + scheduler). */
   const speakNextChunkKokoro = useCallback(() => {
@@ -299,6 +320,8 @@ export default function useNarration() {
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
       },
       () => {
+        // TTS-7A: Snapshot on Kokoro narration end (all chunks delivered)
+        captureDiagSnapshot();
         // All words exhausted — if section-end callback is set (foliate mode),
         // fire it to advance to next section instead of stopping narration.
         if (onSectionEndRef.current) {
@@ -311,7 +334,7 @@ export default function useNarration() {
         dispatch({ type: "STOP" });
       },
     );
-  }, [kokoroStrategy]);
+  }, [kokoroStrategy, captureDiagSnapshot]);
 
   /** Dispatch to the correct engine's chunk speaker */
   const speakNextChunk = useCallback(() => {
@@ -403,8 +426,12 @@ export default function useNarration() {
     };
     if (import.meta.env.DEV) console.debug("[narrate] cursor-driven — words:", words.length, "start:", startWordIndex, "speed:", newSpeed, "engine:", stateRef.current.engine, "kokoro:", stateRef.current.kokoroReady);
 
+    // TTS-7A: Diagnostics
+    recordDiagEvent("start", `engine=${stateRef.current.engine} cursor=${startWordIndex} words=${words.length}`);
+    captureDiagSnapshot();
+
     speakNextChunk();
-  }, [speakNextChunk, webStrategy, kokoroStrategy]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy, captureDiagSnapshot]);
 
   const resyncToCursor = useCallback((wordIndex: number, wpm: number) => {
     const s = stateRef.current;
@@ -459,7 +486,10 @@ export default function useNarration() {
     }
     dispatch({ type: "PAUSE" });
     stateRef.current = { ...stateRef.current, status: "paused" };
-  }, [webStrategy, kokoroStrategy]);
+    // TTS-7A: Diagnostics
+    recordDiagEvent("pause", `cursor=${s.cursorWordIndex}`);
+    captureDiagSnapshot();
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
 
   const resume = useCallback(() => {
     const s = stateRef.current;
@@ -470,13 +500,19 @@ export default function useNarration() {
     }
     dispatch({ type: "RESUME" });
     stateRef.current = { ...stateRef.current, status: "speaking" };
-  }, [webStrategy, kokoroStrategy]);
+    // TTS-7A: Diagnostics
+    recordDiagEvent("resume", `cursor=${s.cursorWordIndex}`);
+    captureDiagSnapshot();
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
 
   const stop = useCallback(() => {
+    // TTS-7A: Diagnostics
+    recordDiagEvent("stop", `cursor=${stateRef.current.cursorWordIndex}`);
+    captureDiagSnapshot();
     webStrategy.stop();
     kokoroStrategy.stop();
     dispatch({ type: "STOP" });
-  }, [webStrategy, kokoroStrategy]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
 
   const hold = useCallback(() => { dispatch({ type: "HOLD" }); }, []);
 
