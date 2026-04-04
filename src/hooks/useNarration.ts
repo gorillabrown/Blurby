@@ -166,9 +166,9 @@ export default function useNarration() {
       if (import.meta.env.DEV) console.debug("[narrate] Kokoro ready — auto-starting from word:", s.cursorWordIndex);
       dispatch({ type: "START_CURSOR_DRIVEN", startIdx: s.cursorWordIndex, speed: s.speed });
       stateRef.current = { ...stateRef.current, status: "speaking" };
-      speakNextChunk();
+      speakNextChunkRef.current();
     }
-  }, [state.kokoroReady, speakNextChunk]);
+  }, [state.kokoroReady]);
 
   // Load Kokoro voices when ready
   useEffect(() => {
@@ -419,18 +419,18 @@ export default function useNarration() {
     speakNextChunk();
   }, [speakNextChunk, webStrategy, kokoroStrategy]);
 
-  // HOTFIX-6: Replace word array and resync pipeline to a new global position
+  // HOTFIX-6: Replace word array and resync cursor to a global position.
+  // If narration is actively speaking, swap the array silently without interrupting
+  // the current chunk — the next chunk will use the new array automatically.
   const updateWords = useCallback((words: string[], globalStartIdx: number) => {
     allWordsRef.current = words;
     const s = stateRef.current;
     if (s.status === "idle") return;
-    // Stop current playback, update position, restart from global index
-    webStrategy.stop();
-    kokoroStrategy.stop();
+    // Update cursor position to the global index without stopping playback
     dispatch({ type: "WORD_ADVANCE", wordIndex: globalStartIdx });
     stateRef.current = { ...stateRef.current, cursorWordIndex: globalStartIdx, chunkStart: globalStartIdx };
-    speakNextChunk();
-  }, [speakNextChunk, webStrategy, kokoroStrategy]);
+    if (import.meta.env.DEV) console.debug("[narrate] updateWords — swapped to", words.length, "words at global idx", globalStartIdx, "(no restart)");
+  }, []);
 
   const updateWpm = useCallback((wpm: number) => {
     const newRate = wpmToRate(wpm);

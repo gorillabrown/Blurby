@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import type { BlurbySettings, PronunciationOverride } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES } from "../../constants";
+import type { BlurbySettings, PronunciationOverride, NarrationProfile } from "../../types";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES, MAX_NARRATION_PROFILES, createDefaultNarrationProfile, profileFromSettings } from "../../constants";
 import { applyPronunciationOverrides } from "../../utils/pronunciationOverrides";
 
 const api = window.electronAPI;
@@ -14,9 +14,13 @@ interface TTSSettingsProps {
   onBookOverridesChange?: (overrides: PronunciationOverride[]) => void;
   /** Title of the currently open book (for display) */
   activeBookTitle?: string;
+  /** Per-book narration profile ID */
+  bookNarrationProfileId?: string | null;
+  /** Called when user assigns/clears a profile for the active book */
+  onBookNarrationProfileChange?: (profileId: string | null) => void;
 }
 
-export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle }: TTSSettingsProps) {
+export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange }: TTSSettingsProps) {
   const engine = settings.ttsEngine || "web";
 
   // Web Speech API voices
@@ -152,22 +156,197 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     }
   };
 
+  // ── Profile management ──────────────────────────────────────────────────
+  const profiles = settings.narrationProfiles || [];
+  const activeProfileId = settings.activeNarrationProfileId || null;
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const handleCreateProfile = useCallback(() => {
+    if (profiles.length >= MAX_NARRATION_PROFILES) return;
+    const profile = profileFromSettings(`Profile ${profiles.length + 1}`, settings);
+    onSettingsChange({
+      narrationProfiles: [...profiles, profile],
+      activeNarrationProfileId: profile.id,
+    });
+  }, [profiles, settings, onSettingsChange]);
+
+  const handleSelectProfile = useCallback((id: string | null) => {
+    if (id === null) {
+      onSettingsChange({ activeNarrationProfileId: null });
+      return;
+    }
+    const profile = profiles.find(p => p.id === id);
+    if (!profile) return;
+    // Apply profile settings to flat settings for immediate effect
+    onSettingsChange({
+      activeNarrationProfileId: id,
+      ttsEngine: profile.ttsEngine,
+      ttsVoiceName: profile.ttsVoiceName,
+      ttsRate: profile.ttsRate,
+      ttsPauseCommaMs: profile.ttsPauseCommaMs,
+      ttsPauseClauseMs: profile.ttsPauseClauseMs,
+      ttsPauseSentenceMs: profile.ttsPauseSentenceMs,
+      ttsPauseParagraphMs: profile.ttsPauseParagraphMs,
+      ttsDialogueSentenceThreshold: profile.ttsDialogueSentenceThreshold,
+      pronunciationOverrides: profile.pronunciationOverrides,
+    });
+  }, [profiles, onSettingsChange]);
+
+  const handleDeleteProfile = useCallback((id: string) => {
+    const next = profiles.filter(p => p.id !== id);
+    const updates: Partial<BlurbySettings> = { narrationProfiles: next };
+    if (activeProfileId === id) updates.activeNarrationProfileId = null;
+    onSettingsChange(updates);
+  }, [profiles, activeProfileId, onSettingsChange]);
+
+  const handleRenameProfile = useCallback((id: string, newName: string) => {
+    if (!newName.trim()) return;
+    onSettingsChange({
+      narrationProfiles: profiles.map(p =>
+        p.id === id ? { ...p, name: newName.trim(), updatedAt: Date.now() } : p
+      ),
+    });
+    setRenamingId(null);
+  }, [profiles, onSettingsChange]);
+
+  // Sync changes back to the active profile when user adjusts flat TTS settings
+  const syncToActiveProfile = useCallback((updates: Partial<BlurbySettings>) => {
+    onSettingsChange(updates);
+    if (!activeProfileId) return;
+    // Mirror TTS-related changes into the active profile
+    const ttsKeys: (keyof BlurbySettings)[] = [
+      "ttsEngine", "ttsVoiceName", "ttsRate",
+      "ttsPauseCommaMs", "ttsPauseClauseMs", "ttsPauseSentenceMs",
+      "ttsPauseParagraphMs", "ttsDialogueSentenceThreshold", "pronunciationOverrides",
+    ];
+    const hasTtsChange = ttsKeys.some(k => k in updates);
+    if (hasTtsChange) {
+      const merged = { ...settings, ...updates };
+      onSettingsChange({
+        narrationProfiles: profiles.map(p =>
+          p.id === activeProfileId ? {
+            ...p,
+            ttsEngine: merged.ttsEngine || "web",
+            ttsVoiceName: merged.ttsVoiceName || null,
+            ttsRate: merged.ttsRate || 1.0,
+            ttsPauseCommaMs: merged.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
+            ttsPauseClauseMs: merged.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
+            ttsPauseSentenceMs: merged.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS,
+            ttsPauseParagraphMs: merged.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS,
+            ttsDialogueSentenceThreshold: merged.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD,
+            pronunciationOverrides: merged.pronunciationOverrides ? [...merged.pronunciationOverrides] : [],
+            updatedAt: Date.now(),
+          } : p
+        ),
+      });
+    }
+  }, [activeProfileId, settings, profiles, onSettingsChange]);
+
+  // Use syncToActiveProfile instead of raw onSettingsChange for TTS controls
+  const handleTtsChange = activeProfileId ? syncToActiveProfile : onSettingsChange;
+
   return (
     <div>
+      {/* Narration Profiles (TTS-6L) */}
+      <div className="settings-section-label">Narration Profile</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+        <select
+          className="settings-select"
+          value={activeProfileId || ""}
+          onChange={(e) => handleSelectProfile(e.target.value || null)}
+          aria-label="Narration profile"
+          style={{ flex: 1, padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
+        >
+          <option value="">No profile (flat settings)</option>
+          {profiles.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+        {profiles.length < MAX_NARRATION_PROFILES && (
+          <button
+            onClick={handleCreateProfile}
+            style={{ padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 12, whiteSpace: "nowrap" }}
+            aria-label="Create narration profile"
+          >+ New</button>
+        )}
+      </div>
+      {activeProfileId && profiles.find(p => p.id === activeProfileId) && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+          {renamingId === activeProfileId ? (
+            <>
+              <input
+                type="text"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleRenameProfile(activeProfileId, renameValue); if (e.key === "Escape") setRenamingId(null); }}
+                autoFocus
+                style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+                aria-label="Profile name"
+              />
+              <button
+                onClick={() => handleRenameProfile(activeProfileId, renameValue)}
+                style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+              >Save</button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => { setRenamingId(activeProfileId); setRenameValue(profiles.find(p => p.id === activeProfileId)?.name || ""); }}
+                style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+                aria-label="Rename profile"
+              >Rename</button>
+              <button
+                onClick={() => { if (confirm(`Delete profile "${profiles.find(p => p.id === activeProfileId)?.name}"?`)) handleDeleteProfile(activeProfileId); }}
+                style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--error, #c44)", cursor: "pointer", fontSize: 11 }}
+                aria-label="Delete profile"
+              >Delete</button>
+            </>
+          )}
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+        {activeProfileId ? "Changes below are saved to this profile." : "Save your voice and timing settings as a named profile for quick switching."}
+      </div>
+
+      {/* Book-level profile assignment */}
+      {activeBookTitle && onBookNarrationProfileChange && profiles.length > 0 && (
+        <>
+          <div className="settings-toggle-row" style={{ marginBottom: 8 }}>
+            <span className="settings-toggle-label" style={{ fontSize: 12 }}>Profile for this book</span>
+            <select
+              className="settings-select"
+              value={bookNarrationProfileId || ""}
+              onChange={(e) => onBookNarrationProfileChange(e.target.value || null)}
+              aria-label="Book narration profile"
+              style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+            >
+              <option value="">Use default</option>
+              {profiles.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+            Override the default profile when narrating "{activeBookTitle}".
+          </div>
+        </>
+      )}
+
       <div className="settings-section-label">Voice Engine</div>
 
       {/* Engine selector */}
       <div className="settings-mode-toggle" style={{ marginBottom: 12 }}>
         <button
           className={`settings-mode-btn${engine === "web" ? " active" : ""}`}
-          onClick={() => onSettingsChange({ ttsEngine: "web", ttsVoiceName: null })}
+          onClick={() => handleTtsChange({ ttsEngine: "web", ttsVoiceName: null })}
         >
           System
         </button>
         <button
           className={`settings-mode-btn${engine === "kokoro" ? " active" : ""}`}
           onClick={() => {
-            onSettingsChange({ ttsEngine: "kokoro", ttsVoiceName: kokoroReady ? "af_bella" : null });
+            handleTtsChange({ ttsEngine: "kokoro", ttsVoiceName: kokoroReady ? "af_bella" : null });
             if (!kokoroReady && !kokoroDownloading) {
               handleDownloadKokoro();
             }
@@ -218,7 +397,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           <select
             className="settings-select"
             value={settings.ttsVoiceName || "af_bella"}
-            onChange={(e) => onSettingsChange({ ttsVoiceName: e.target.value })}
+            onChange={(e) => handleTtsChange({ ttsVoiceName: e.target.value })}
             aria-label="Kokoro voice"
             style={{ width: "100%", padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
           >
@@ -237,7 +416,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           <select
             className="settings-select"
             value={settings.ttsVoiceName || ""}
-            onChange={(e) => onSettingsChange({ ttsVoiceName: e.target.value || null })}
+            onChange={(e) => handleTtsChange({ ttsVoiceName: e.target.value || null })}
             aria-label="TTS voice"
             style={{ width: "100%", padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
           >
@@ -261,7 +440,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
             <button
               key={bucket}
               className={`settings-mode-btn${resolveKokoroBucket(settings.ttsRate || 1.0) === bucket ? " active" : ""}`}
-              onClick={() => onSettingsChange({ ttsRate: bucket })}
+              onClick={() => handleTtsChange({ ttsRate: bucket })}
             >
               {bucket.toFixed(1)}x
             </button>
@@ -275,7 +454,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           max={TTS_MAX_RATE}
           step={0.1}
           value={settings.ttsRate || 1.0}
-          onChange={(e) => onSettingsChange({ ttsRate: Number(e.target.value) })}
+          onChange={(e) => handleTtsChange({ ttsRate: Number(e.target.value) })}
           aria-label="TTS speech rate"
         />
       )}
@@ -307,7 +486,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         max={500}
         step={25}
         value={settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS}
-        onChange={(e) => onSettingsChange({ ttsPauseCommaMs: Number(e.target.value) })}
+        onChange={(e) => handleTtsChange({ ttsPauseCommaMs: Number(e.target.value) })}
         aria-label="Comma pause duration"
       />
 
@@ -322,7 +501,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         max={500}
         step={25}
         value={settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS}
-        onChange={(e) => onSettingsChange({ ttsPauseClauseMs: Number(e.target.value) })}
+        onChange={(e) => handleTtsChange({ ttsPauseClauseMs: Number(e.target.value) })}
         aria-label="Clause pause duration"
       />
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
@@ -340,7 +519,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         max={1500}
         step={50}
         value={settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS}
-        onChange={(e) => onSettingsChange({ ttsPauseSentenceMs: Number(e.target.value) })}
+        onChange={(e) => handleTtsChange({ ttsPauseSentenceMs: Number(e.target.value) })}
         aria-label="Sentence pause duration"
       />
 
@@ -355,7 +534,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         max={2000}
         step={50}
         value={settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS}
-        onChange={(e) => onSettingsChange({ ttsPauseParagraphMs: Number(e.target.value) })}
+        onChange={(e) => handleTtsChange({ ttsPauseParagraphMs: Number(e.target.value) })}
         aria-label="Paragraph pause duration"
       />
 
@@ -370,7 +549,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         max={5}
         step={1}
         value={settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD}
-        onChange={(e) => onSettingsChange({ ttsDialogueSentenceThreshold: Number(e.target.value) })}
+        onChange={(e) => handleTtsChange({ ttsDialogueSentenceThreshold: Number(e.target.value) })}
         aria-label="Dialogue sentence threshold"
       />
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
@@ -379,7 +558,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       <PronunciationOverridesEditor
         globalOverrides={settings.pronunciationOverrides || []}
-        onGlobalChange={(overrides) => onSettingsChange({ pronunciationOverrides: overrides })}
+        onGlobalChange={(overrides) => handleTtsChange({ pronunciationOverrides: overrides })}
         bookOverrides={bookOverrides}
         onBookChange={onBookOverridesChange}
         activeBookTitle={activeBookTitle}
