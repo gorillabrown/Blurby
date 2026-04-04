@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6I`, `TTS-6J`, and `TTS-6K`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6J`, `TTS-6K`, and `TTS-6L`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2
+Queue depth: 3
 Next sprint: TTS-6J (Voice Selection & Persona Consistency)
-Health: YELLOW — Queue depth below 3. Backfill needed.
+Health: GREEN — Queue depth healthy.
 ```
 
 ---
@@ -23,8 +23,9 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 |---|-----------|---------|--------|------|----------|---------|
 | 1 | TTS-6J | v1.20.0 | `sprint/tts-6j-voice-selection-consistency` | Full | — | Polish the voice surface: Web Speech fallback priority, voice/persona terminology, and consistency between settings and technical docs. |
 | 2 | TTS-6K | v1.21.0 | `sprint/tts-6k-narration-personalization-quality-sweep` | Full | — | Larger TTS finish pass: align personalization surfaces, close remaining Narrate-mode docs/policy gaps, and sweep stale TTS bug/reference drift. |
+| 3 | TTS-6L | v1.22.0 | `sprint/tts-6l-narration-profiles-sharing-foundations` | Full | — | Turn the narration customization stack into reusable named profiles with lightweight book assignment and export/import-ready foundations. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6I`, `TTS-6J`, `TTS-6K`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6J`, `TTS-6K`, `TTS-6L`).
 
 **Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 

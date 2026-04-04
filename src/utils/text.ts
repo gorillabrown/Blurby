@@ -123,8 +123,9 @@ export function formatDisplayTitle(s: string): string {
   return t;
 }
 
-export function tokenize(text: string | null | undefined): string[] {
-  return (text || "").split(/\s+/).filter(Boolean);
+export function tokenize(text: unknown): string[] {
+  if (typeof text !== "string") return [];
+  return text.split(/\s+/).filter(Boolean);
 }
 
 export interface TokenizedContent {
@@ -133,8 +134,8 @@ export interface TokenizedContent {
 }
 
 /** Like tokenize() but also tracks which words end a paragraph (double newline). */
-export function tokenizeWithMeta(text: string | null | undefined): TokenizedContent {
-  if (!text) return { words: [], paragraphBreaks: new Set() };
+export function tokenizeWithMeta(text: unknown): TokenizedContent {
+  if (typeof text !== "string" || !text) return { words: [], paragraphBreaks: new Set() };
   const paragraphs = text.split(/\n{2,}/);
   const words: string[] = [];
   const paragraphBreaks = new Set<number>();

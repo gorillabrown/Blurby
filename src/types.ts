@@ -6,6 +6,21 @@ export interface PronunciationOverride {
   enabled: boolean;
 }
 
+export interface LoadedDocFilePayload {
+  filepath: string;
+  ext: string;
+}
+
+export interface LoadDocUserError {
+  userError: string;
+}
+
+export type LoadDocContentResult =
+  | string
+  | LoadedDocFilePayload
+  | LoadDocUserError
+  | null;
+
 // ── Document schema ──────────────────────────────────────────────────────────
 export interface BlurbyDoc {
   id: string;
@@ -211,7 +226,7 @@ export interface ElectronAPI {
   updateDoc: (docId: string, title: string, content: string) => Promise<void>;
   resetProgress: (docId: string) => Promise<void>;
   updateDocProgress: (docId: string, position: number, cfi?: string) => Promise<void>;
-  loadDocContent: (docId: string) => Promise<string | { userError: string } | null>;
+  loadDocContent: (docId: string) => Promise<LoadDocContentResult>;
   getDocChapters: (docId: string) => Promise<Array<{ title: string; charOffset: number }>>;
   saveHighlight: (data: { docTitle: string; text: string; wordIndex: number; totalWords: number }) => Promise<{ ok?: boolean; error?: string }>;
   defineWord: (word: string) => Promise<{ word: string; phonetic?: string; partOfSpeech?: string; definition?: string; example?: string; synonyms?: string[] } | { error: string }>;

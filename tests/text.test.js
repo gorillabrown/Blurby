@@ -11,6 +11,10 @@ describe("tokenize", () => {
     expect(tokenize(undefined)).toEqual([]);
   });
 
+  it("returns empty array for non-string payloads", () => {
+    expect(tokenize({ filepath: "/tmp/book.epub" })).toEqual([]);
+  });
+
   it("returns single word", () => {
     expect(tokenize("hello")).toEqual(["hello"]);
   });
@@ -198,6 +202,12 @@ describe("tokenizeWithMeta", () => {
   it("handles null/undefined", () => {
     expect(tokenizeWithMeta(null).words).toEqual([]);
     expect(tokenizeWithMeta(undefined).words).toEqual([]);
+  });
+
+  it("ignores non-string payloads", () => {
+    const result = tokenizeWithMeta({ filepath: "/tmp/book.epub" });
+    expect(result.words).toEqual([]);
+    expect(result.paragraphBreaks.size).toBe(0);
   });
 });
 

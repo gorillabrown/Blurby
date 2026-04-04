@@ -22,6 +22,7 @@ import MetadataWizard from "./MetadataWizard";
 import { gatherAppState, type BugReportAppState } from "../utils/bugReportState";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
+import { resolveLoadedDocResult } from "../utils/loadDocResult";
 
 const api = window.electronAPI;
 
@@ -182,26 +183,31 @@ export default function LibraryContainer() {
   }, [wpm, folderName, loaded, didInit]);
 
   const openDoc = useCallback(async (doc: BlurbyDoc) => {
-    let content = doc.content;
-    if (!content) {
-      const result = await loadDocContent(doc.id);
-      // Handle user-facing parse errors (PDF encrypted/corrupted, EPUB invalid, etc.)
-      if (result && typeof result === "object" && "userError" in result) {
-        showToast(result.userError, 8000, { label: "Remove", onClick: () => deleteDoc(doc.id) });
-        return;
-      }
-      content = (result as string | null) || undefined;
-      if (!content) {
-        showToast("Could not load this document — the file may be missing or empty.", 6000);
-        return;
-      }
+    const resolved = typeof doc.content === "string"
+      ? { activeDoc: { ...doc, content: doc.content } }
+      : resolveLoadedDocResult(doc, await loadDocContent(doc.id));
+
+    if (!resolved) {
+      showToast("Could not load this document — the file may be missing or empty.", 6000);
+      return;
     }
-    const docWithContent: DocWithContent = { ...doc, content: content! };
-    setActiveDoc(docWithContent);
+
+    if ("userError" in resolved) {
+      showToast(resolved.userError, 8000, { label: "Remove", onClick: () => deleteDoc(doc.id) });
+      return;
+    }
+
+    if (resolved.libraryUpdates) {
+      setLibrary((prev) => prev.map((entry) =>
+        entry.id === doc.id ? { ...entry, ...resolved.libraryUpdates } : entry
+      ));
+    }
+
+    setActiveDoc(resolved.activeDoc as DocWithContent);
     // Always open in Page view (Sprint 20U: Page is default parent)
     settingsValue.updateSettings({ readingMode: "page" });
     setView("reader");
-  }, [loadDocContent, settingsValue, showToast]);
+  }, [deleteDoc, loadDocContent, setLibrary, settingsValue, showToast]);
 
   const handleOpenDocById = useCallback(async (docId: string) => {
     const doc = library.find((d) => d.id === docId);

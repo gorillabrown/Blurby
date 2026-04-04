@@ -9,6 +9,7 @@ import ReaderView from "./components/ReaderView";
 import { ThemeProvider } from "./components/ThemeProvider";
 import LibraryContainer from "./components/LibraryContainer";
 import HotkeyCoach from "./components/HotkeyCoach";
+import { resolveLoadedDocResult } from "./utils/loadDocResult";
 
 const api = window.electronAPI;
 
@@ -48,19 +49,18 @@ function StandaloneReader() {
       if (state.settings.punctuationPauseMs != null) setPunctPauseMs(state.settings.punctuationPauseMs);
       const doc = state.library.find((d) => d.id === docId);
       if (!doc) return;
-      let content = doc.content;
-      if (!content) {
-        const result = await api.loadDocContent(docId);
-        if (result && typeof result === "object" && "userError" in result) {
-          // User-facing error — can't display the document
-          console.error("Could not load document content:", result.userError);
-          return;
-        }
-        content = (result as string | null) || undefined;
+      const resolved = typeof doc.content === "string"
+        ? { activeDoc: { ...doc, content: doc.content } }
+        : resolveLoadedDocResult(doc, await api.loadDocContent(docId));
+
+      if (!resolved) return;
+      if ("userError" in resolved) {
+        // User-facing error — can't display the document
+        console.error("Could not load document content:", resolved.userError);
+        return;
       }
-      if (!content) return;
-      const docWithContent: DocWithContent = { ...doc, content };
-      setActiveDoc(docWithContent);
+
+      setActiveDoc(resolved.activeDoc);
       initReader(doc.position || 0);
       sessionStartRef.current = Date.now();
       sessionStartWordRef.current = doc.position || 0;

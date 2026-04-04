@@ -346,4 +346,4 @@ All sprints through TTS-6I complete (v1.19.0). Full history: `docs/project/ROADM
 Recent chain:
 ✅ TTS-6G → ✅ TTS-6I (per-book pronunciation profiles)
 
-**Next:** TTS-6J (voice selection consistency) → TTS-6K (narration personalization quality sweep)
+**Next:** TTS-6J (voice selection consistency) → TTS-6K (narration personalization quality sweep) → TTS-6L (narration profiles foundations)

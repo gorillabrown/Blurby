@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6G (Narration Controls & Accessibility Polish). 1,096 tests, 56 files. Latest tagged release: v1.18.0.
+**Last updated**: 2026-04-04 — Post-TTS-6I (Per-Book Pronunciation Profiles). 1,107 tests, 57 files. Latest tagged release: v1.19.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6G complete). Queue GREEN (TTS-6I → TTS-6J → TTS-6K; depth 3).
+**Current state**: Phase 6 in progress (TTS-6I complete). Queue GREEN (TTS-6J → TTS-6K → TTS-6L; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -35,9 +35,10 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6E: Pronunciation Overrides Foundation ✅ (v1.16.0)
   ├── TTS-6F: Word Alignment & Narration Telemetry ✅ (v1.17.0)
   ├── TTS-6G: Narration Controls & Accessibility Polish ✅ (v1.18.0)
-  ├── TTS-6I: Per-Book Pronunciation Profiles (queued)
+  ├── TTS-6I: Per-Book Pronunciation Profiles ✅ (v1.19.0)
   ├── TTS-6J: Voice Selection & Persona Consistency (queued)
-  └── TTS-6K: Narration Personalization & Quality Sweep (queued)
+  ├── TTS-6K: Narration Personalization & Quality Sweep (queued)
+  └── TTS-6L: Narration Profiles & Sharing Foundations (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -492,7 +493,9 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6I: Per-Book Pronunciation Profiles
+### Sprint TTS-6I: Per-Book Pronunciation Profiles ✅ COMPLETED (v1.19.0, 2026-04-04)
+
+> Implemented and merged to `main`. 11 new tests (1,107 total, 57 files). Added per-book `pronunciationOverrides` storage on `BlurbyDoc`, layered merge resolution, global/this-book editing scope toggle, separate narration hook setters, effective merged preview behavior, and book-aware override-hash cache identity. All 9 SUCCESS CRITERIA met.
 
 **Goal:** Extend the global pronunciation override system so users can keep book-specific name/term pronunciations without polluting every other title in the library.
 
@@ -663,6 +666,66 @@ Phase 5 is complete when:
 5. Any new user-facing behavior is covered by tests
 6. `npm test` passes
 7. `npm run build` succeeds
+
+---
+
+### Sprint TTS-6L: Narration Profiles & Sharing Foundations
+
+**Goal:** Turn the growing narration customization surface into a reusable profile system so voice, rate, and override choices can be saved as named listening setups instead of being managed as scattered individual settings.
+
+**Problem:** By the time `TTS-6K` lands, Narrate mode will have native rate buckets, global overrides, book-specific overrides, fallback voice behavior, and polished controls. That is enough power that users will start wanting reusable combinations. Right now the system is expressive but not portable: there is no clean way to save “Technical Book Voice,” “Fiction Voice,” or “Fast Review” as named presets. This is the next bigger block that builds naturally on the personalization lane.
+
+**Design decisions:**
+- **Named narration profiles:** Profiles are user-created presets that bundle the narrator-facing settings we already support, rather than introducing a new speech engine capability.
+- **Profiles reference current primitives:** Reuse existing voice IDs, rate values, and override structures instead of inventing another config layer.
+- **Book assignment stays lightweight:** A book may optionally point to a preferred narration profile, but global/default behavior must still work when no profile is chosen.
+- **Future-sharing friendly:** The data model should be export/import-ready, even if explicit cross-device sync or marketplace sharing is not part of this sprint.
+
+**Baseline:**
+- `TTS-6E` / `TTS-6I` pronunciation override systems
+- `TTS-6J` voice selection consistency output
+- `src/types.ts` / `src/constants.ts`
+- `src/components/settings/SpeedReadingSettings.tsx`
+- `src/hooks/useNarration.ts`
+- any persisted book-level narration metadata already present
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6E`, `TTS-6I`, `TTS-6J`, `TTS-6K`, and this section
+4. `src/types.ts`
+5. `src/constants.ts`
+6. `src/components/settings/SpeedReadingSettings.tsx`
+7. `src/hooks/useNarration.ts`
+8. book/settings persistence surfaces touched by narration preferences
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Narration profile data model** — Add named profile storage for narration settings, including sane defaults/migration and a clear active/default profile concept. | `src/types.ts`, `src/constants.ts`, persistence surface as needed |
+| 2 | Primary CLI (renderer-fixer scope) | **Settings profile manager** — Add create/rename/delete/select flows for narration profiles in settings without making the TTS settings page unwieldy. | `src/components/settings/SpeedReadingSettings.tsx`, supporting components/styles as needed |
+| 3 | Primary CLI (renderer-fixer scope) | **Profile application path** — Make narration startup apply the effective selected profile cleanly, including voice/rate/override-related settings that are already part of the shipped system. | `src/hooks/useNarration.ts`, related narration consumers |
+| 4 | Primary CLI (renderer-fixer scope / electron-fixer scope if needed) | **Optional book profile assignment** — Allow a book to remember a preferred narration profile without breaking current behavior for books with no assignment. | book metadata / persistence surfaces as needed |
+| 5 | Primary CLI (renderer-fixer scope) | **Export/import-ready structure** — Ensure the profile shape is explicit and stable enough for future export/import, and if low-cost, add a minimal local export/import path. | settings/profile surfaces as needed |
+| 6 | test-runner | **Tests** — Cover profile creation, selection, application, deletion safety, and optional book assignment behavior. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | quality-reviewer | **Architecture + code quality review** | — |
+| 10 | doc-keeper | **Documentation pass** — Update roadmap/reference docs if the narration settings model materially changes. | governing docs |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Users can create, rename, delete, and select named narration profiles
+2. Narration startup applies the selected profile consistently
+3. Existing users retain sensible defaults without needing to create profiles
+4. Optional book-level profile assignment works without leaking settings between books
+5. Profile storage is explicit and future export/import friendly
+6. New tests cover profile lifecycle and application behavior
+7. `npm test` passes
+8. `npm run build` succeeds
 
 ---
 
