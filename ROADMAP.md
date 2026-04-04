@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6N (Runtime Stability & Extraction Sync). 1,153 tests, 62 files. Latest tagged release: v1.24.0.
+**Last updated**: 2026-04-04 — Post-TTS-6O (Performance Budgets & Background Isolation). 1,162 tests, 63 files. Latest tagged release: v1.25.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6N complete). Queue RED (TTS-6O + TTS-6P; depth 2 — backfill needed).
+**Current state**: Phase 6 in progress (TTS-6O complete). Queue YELLOW (TTS-6P → TTS-6Q; depth 2).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -41,8 +41,9 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6L: Narration Profiles & Sharing Foundations ✅ (v1.22.0)
   ├── TTS-6M: Narration Portability & Reset Safety ✅ (v1.23.0)
   ├── TTS-6N: Narration Runtime Stability & Extraction Sync ✅ (v1.24.0)
-  ├── TTS-6O: Narration Performance Budgets & Background Work Isolation (queued)
-  └── TTS-6P: Session Continuity & Recovery (queued)
+  ├── TTS-6O: Narration Performance Budgets & Background Work Isolation ✅ (v1.25.0)
+  ├── TTS-6P: Session Continuity & Recovery (queued)
+  └── TTS-6Q: Narration Diagnostics & Regression Shields (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -960,6 +961,62 @@ Phase 5 is complete when:
 5. New tests cover continuity and invalid-state fallback
 6. `npm test` passes
 7. `npm run build` succeeds
+
+---
+
+### Sprint TTS-6Q: Narration Diagnostics & Regression Shields
+
+**Goal:** Make the TTS lane easier to maintain by turning the new Narrate complexity into observable, testable contracts with purpose-built diagnostics and regression shields.
+
+**Problem:** By the time `TTS-6P` lands, Narrate will have rate buckets, pronunciation layers, named profiles, portability/reset semantics, runtime extraction handoff rules, performance budgets, and continuity behavior. That is a mature system, but also one that can regress in subtle ways. Today, many failures only become obvious through manual dev runs and console logs. We need a sprint that makes Narrate failures easier to detect, easier to explain, and harder to reintroduce.
+
+**Design decisions:**
+- **Observable Narrate state:** Expose a small, inspectable diagnostics surface for key runtime state, handoff events, and recovery outcomes in DEV/test contexts.
+- **Regression shields over ad hoc logging:** Favor structured telemetry/test helpers and invariant checks instead of more scattered console debugging.
+- **Protect the cross-sprint contracts:** The most important guardrails are the ones introduced in `TTS-6N`, `TTS-6O`, and `TTS-6P` around stability, performance, and continuity.
+- **No user-facing debug clutter:** Diagnostics should support engineering and QA without polluting ordinary reader UX.
+
+**Baseline:**
+- `TTS-6N` runtime-stability contracts
+- `TTS-6O` performance budget instrumentation
+- `TTS-6P` continuity/recovery behavior
+- `src/hooks/useNarration.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/audioScheduler.ts`
+- Narration-related tests and any existing DEV-only telemetry surfaces
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — `TTS-6N`, `TTS-6O`, `TTS-6P`, and this section
+4. `src/hooks/useNarration.ts`
+5. `src/components/ReaderContainer.tsx`
+6. `src/utils/audioScheduler.ts`
+7. narration-focused tests/telemetry helpers
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Structured Narrate diagnostics surface** — Add a DEV/test-safe snapshot surface for current engine/runtime state, extraction handoff state, and recovery decisions so failures can be inspected without scraping console text. | narration runtime files |
+| 2 | Primary CLI (renderer-fixer scope) | **Invariant and guardrail checks** — Add targeted assertions/guards around bucket normalization, extraction handoff expectations, and continuity restoration assumptions where silent drift would be costly. | narration runtime files |
+| 3 | Primary CLI (renderer-fixer scope) | **Regression-shield test pass** — Expand focused tests around the highest-risk Narrate contracts introduced in the recent TTS sprints. | `tests/` |
+| 4 | Primary CLI (governance-doc scope) | **QA and diagnostics documentation** — Document how Narrate diagnostics are meant to be used during manual validation and what contracts they are protecting. | governance docs |
+| 5 | test-runner | **`npm test` + `npm run build`** | — |
+| 6 | spec-compliance-reviewer | **Spec compliance** | — |
+| 7 | quality-reviewer | **Architecture + code quality review** | — |
+| 8 | doc-keeper | **Documentation pass** — Keep roadmap, queue, CLAUDE, and lessons learned aligned with the shipped diagnostics model. | governing docs |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. DEV/test-visible Narrate diagnostics exist for the key runtime/recovery contracts
+2. Silent drift in bucket normalization, extraction handoff, or continuity restore is harder to reintroduce
+3. Narration regression coverage is materially stronger in the highest-risk areas
+4. Diagnostics usage and protected contracts are documented clearly
+5. `npm test` passes
+6. `npm run build` succeeds
 
 ---
 

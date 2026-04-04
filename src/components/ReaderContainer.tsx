@@ -366,6 +366,31 @@ export default function ReaderContainer({
   const currentNarrationSectionRef = useRef<number>(-1);
   const lastGoToSectionTimeRef = useRef<number>(0);
 
+  // TTS-6O: Background pre-extraction — extract full-book words ahead of narration start
+  useEffect(() => {
+    if (!useFoliate || !api?.extractEpubWords) return;
+    if (bookWordsRef.current && bookWordsRef.current.complete) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (cancelled) return;
+      api.extractEpubWords(activeDoc.id).then((result) => {
+        if (cancelled || !result.words || !result.sections) return;
+        // Only store if narration hasn't already extracted (avoid overwrite race)
+        if (bookWordsRef.current && bookWordsRef.current.complete) return;
+        bookWordsRef.current = {
+          words: result.words,
+          sections: result.sections,
+          totalWords: result.totalWords ?? result.words.length,
+          complete: true,
+        };
+        bookWordsCompleteRef.current = true;
+        if (import.meta.env.DEV) console.debug(`[TTS-6O] background pre-extraction complete: ${result.words.length} words`);
+      }).catch(() => {});
+    }, 1000); // NARRATE_BG_EXTRACT_DELAY_MS
+    return () => { cancelled = true; clearTimeout(timer); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useFoliate, activeDoc.id]);
+
   // HOTFIX-6: Extract full-book words via main-process IPC (no foliate navigation)
   useEffect(() => {
     if (!useFoliate || readingMode !== "narration") return;
