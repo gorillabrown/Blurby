@@ -508,13 +508,14 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 | **Lexicon** | A pronunciation dictionary mapping words to phoneme sequences. Kokoro uses its built-in lexicon. |
 | **Prosody** | The rhythm, stress, and intonation of speech. Kokoro's neural model generates prosody from context. |
 | **SSML** | Speech Synthesis Markup Language — XML-based control of TTS output. Not used by Blurby. |
-| **Pre-buffer** | Generating the next chunk's audio while the current chunk plays, stored in `preBufferRef`. |
+| **Rolling audio queue** | Producer-consumer queue that pre-generates `TTS_QUEUE_DEPTH` chunks ahead of playback. Replaces the earlier pre-buffer system. |
+| **Pronunciation override** | A user-defined text substitution applied before TTS speaks. Global overrides apply to all books; per-book overrides apply to one book. Managed in `TTSSettings.tsx`. |
 | **Generation ID** | An incrementing counter that invalidates stale async TTS results after speed/position changes. |
 | **Chunk** | A ~40-word segment of text, aligned to sentence boundaries, sent to the TTS engine as one unit. |
 | **Sentence boundary** | The end of a sentence (`.`, `!`, `?` plus optional closing quotes). Chunks prefer to end here. |
 | **Dual-write rule** | Every `dispatch()` must also update `stateRef.current`. Prevents async callbacks from reading stale state. |
 | **stateRef** | A React ref mirroring reducer state for synchronous reads inside async TTS callbacks. |
-| **Rhythm pause** | Silence inserted between chunks at punctuation/paragraph boundaries (100/200/400ms). |
+| **Rhythm pause** | Silence inserted between chunks at punctuation/paragraph boundaries (100/150/400/800ms). |
 | **Web Audio API AudioContext** | The browser API used to play Kokoro's raw PCM audio buffers. Supports suspend/resume for pause. |
 
 ---
@@ -618,17 +619,18 @@ Eight settings sub-pages in `src/components/settings/`:
 | Cloud Sync | Provider sign-in, sync frequency, manual sync |
 | Help | Version info, auto-updater, error logs |
 
-### 3-Tier Cascade Vision (Sprint 28)
-
-Planned but not yet implemented:
+### Settings Cascade
 
 ```
 Global settings (default for all books)
   → Per-book overrides (stored on BlurbyDoc)
-    → Per-view overrides (active only during session)
 ```
 
-Currently only global settings exist. Per-book settings will add fields like `bookWpm`, `bookTheme`, `bookFontFamily` to `BlurbyDoc`.
+Pronunciation overrides use a two-tier model (TTS-6E + TTS-6I):
+- **Global overrides** — stored in `settings.pronunciationOverrides`. Apply to all books.
+- **Per-book overrides** — stored in `BlurbyDoc.pronunciationOverrides`. Apply only to that book. Merged with global overrides at narration time (book overrides take priority for conflicting patterns).
+
+The settings UI (`TTSSettings.tsx`) shows a scope toggle (Global / This Book) when a book is open. Preview applies the effective merged set. Per-book overrides are persisted to `library.json` alongside other book metadata.
 
 ### Command Palette Integration
 
