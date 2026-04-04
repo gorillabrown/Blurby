@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-02 — Post-EXT-5B. 1,032 tests, 51 files. v1.11.0.
+**Last updated**: 2026-04-04 — Post-TTS-6C (Kokoro native-rate buckets). 1,050 tests, 52 files. Latest tagged release: v1.14.0.
 **Current branch**: `main`
-**Current state**: Phase 5 complete (5A + 5B). Queue GREEN (EINK-6A → GOALS-6B).
+**Current state**: Phase 6 in progress (TTS-6C complete). Queue WARN — depth below 3, backfill needed.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -31,7 +31,8 @@ Phase 5: Read Later + Chrome Extension
     ▼
 Phase 6: E-ink & App Polish
   ├── EINK-6A: E-ink Display Mode (queued)
-  └── GOALS-6B: Reading Goals (queued)
+  ├── GOALS-6B: Reading Goals (queued)
+  └── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -138,6 +139,20 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 ### Sprint EXT-5B: Extension Pairing UX Hardening ✅ COMPLETED (v1.11.0, 2026-04-02)
 
 > Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 10 new tests (1,032 total, 51 files). 6-digit short code pairing, WS `pair` protocol, ConnectorsSettings Chrome Extension section, popup pairing flow, options.html paired/unpair UI. Phase 5 complete. APPROVED.
+
+### Post-Phase 5 Implementation Note: TTS Smoothness Stabilization ✅ IMPLEMENTED ON `main` (2026-04-04, unreleased)
+
+> Kokoro narration path upgraded in-place on `main`. 6 new tests (1,038 total, 51 files). This was implementation work rather than a queued release sprint, so it is recorded here as an engineering milestone rather than a tagged version.
+
+**Delivered:**
+- Predictive first-chunk priming for warm-model starts
+- Cache `wordCount` metadata with lazy migration for legacy entries
+- Scheduler-owned `playbackRate` for Kokoro speed changes (no restart churn)
+- Boundary-aware chunk planning with schedule-time punctuation pauses
+- Reading Now background cache wiring
+- TTS/preload/runtime type surface restored to green (`npm run typecheck`)
+
+**Queued follow-up:** `TTS-6C` replaces the unreleased Kokoro `playbackRate` speed path with native `1.0x` / `1.2x` / `1.5x` generation buckets before release. Smoothness remains the startup/cache/chunking foundation; `TTS-6C` owns Kokoro rate control.
 
 **Baseline:**
 - `main/ws-server.js` (450 lines) — `handleMessage()` at line 184 handles `auth` type. `generatePairingToken()` at line 320 generates 32-char hex. `_pairingToken` module var stores the long-lived token.
@@ -346,6 +361,12 @@ Phase 5 is complete when:
 
 ---
 
+### Sprint TTS-6C: Kokoro Native-Rate Buckets ✅ COMPLETED (v1.14.0, 2026-04-04)
+
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 18 new tests (1,050 total, 52 files). Kokoro rate control replaced with 3 native buckets (1.0x/1.2x/1.5x). Cache identity includes `rateBucket`. Immediate stop/restart on Kokoro rate change. Background cacher warms active bucket only. TTSSettings shows 3-button bucket selector for Kokoro; Web Speech keeps continuous slider. All 13 SUCCESS CRITERIA met. APPROVED.
+
+---
+
 ## Phase 2 Exit Gate
 
 Phase 2 is complete when:
@@ -363,6 +384,8 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
+| TTS-6C | v1.14.0 | ✅ DONE | Kokoro native-rate buckets (1.0x/1.2x/1.5x). Bucket resolver, cache identity, immediate restart, active-bucket warming. 18 new tests. |
+| TTS-6C | v1.14.0 | ✅ DONE | Kokoro native-rate buckets (1.0x/1.2x/1.5x). rateBucket cache identity, immediate restart on rate change, active-bucket warming. 18 new tests. |
 | EXT-5A | v1.10.0 | ✅ DONE | Chrome extension E2E + queue integration. 33 new tests. Phase 5A complete. |
 | READINGS-4C | v1.9.0 | ✅ DONE | Metadata Wizard — scan, filename parser, batch update, modal, Ctrl+Shift+M. 16 new tests. |
 | READINGS-4B | v1.8.0 | ✅ DONE | Author normalization + first-run folder picker. BUG-074/076 resolved. 16 new tests. |

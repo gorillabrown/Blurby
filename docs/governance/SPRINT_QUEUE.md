@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to ≥3.
 
-**Full specs:** `ROADMAP.md` (see Phase 5 and Phase 6 sections)
+**Full specs:** `ROADMAP.md` (see Phase 6 sections for EINK-6A, GOALS-6B, and TTS-6C)
 
 **Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained.
 
@@ -12,7 +12,7 @@
 SPRINT QUEUE STATUS:
 Queue depth: 2
 Next sprint: EINK-6A (E-ink Display Mode)
-Health: YELLOW — Queue depth below 3. Backfill 1 sprint.
+Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
 ---
@@ -24,7 +24,7 @@ Health: YELLOW — Queue depth below 3. Backfill 1 sprint.
 | 1 | EINK-6A | v1.12.0 | `sprint/eink-6a-display-mode` | Full | — | E-ink as independent display mode. Decouple from theme. `einkMode` boolean + `[data-eink]` CSS. |
 | 2 | GOALS-6B | v1.13.0 | `sprint/goals-6b-reading-goals` | Full | — | Daily/weekly reading goals. Progress ring in library header. Goal-met toast. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (EINK-6A, GOALS-6B).
+**Full specs:** `ROADMAP.md` §Phase 6 (EINK-6A, GOALS-6B, TTS-6C).
 
 ---
 
@@ -43,6 +43,8 @@ Health: YELLOW — Queue depth below 3. Backfill 1 sprint.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6C | 2026-04-04 | PASS | Kokoro native-rate buckets (1.0x/1.2x/1.5x). Bucket resolver, cache identity, immediate restart, active-bucket warming. 18 new tests (1,050 total). v1.14.0. |
+| TTS-SMOOTH | 2026-04-04 | PASS (implemented on `main`, unreleased) | Kokoro TTS smoothness stabilization: first-chunk priming, cache `wordCount` + lazy migration, scheduler `playbackRate`, punctuation-aware scheduling, Reading Now background warming, type surface green. 6 new tests (1,038 total). |
 | EXT-5B | 2026-04-02 | PASS | Extension pairing UX — 6-digit short code, WS pair protocol, settings + popup UI. 10 new tests. v1.11.0. Phase 5 complete. |
 | EXT-5A | 2026-04-02 | PASS | Chrome ext E2E + queue integration. 33 new tests. v1.10.0. Phase 5A complete. |
 | READINGS-4C | 2026-04-02 | PASS | Metadata Wizard — scan, filename parser, batch update, modal. 16 new tests. v1.9.0. Phase 4 complete. |

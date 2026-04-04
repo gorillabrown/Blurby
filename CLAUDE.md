@@ -8,10 +8,12 @@
 3. After completion of codebase work by Claude Code, tag each completed item with inline `✅ COMPLETED` markers in ROADMAP.md.
 4. **Use plain language with codebase terms parenthetical** — e.g., focus reading (ReaderView), flow reading (ScrollReaderView), page reading (PageReaderView), bottom bar (ReaderBottomBar), word index (wordIndex), etc.
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
+5a. **Queue depth below 3 is a stop signal.** If `docs/governance/SPRINT_QUEUE.md` has fewer than three queued sprints, pause implementation work and switch to brainstorming/spec development until the queue is back to at least three.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
 8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt. Dispatches are POINTERS not PAYLOADS — reference the Sprint Queue (which points to ROADMAP.md for the full spec), don't duplicate it. Format: sprint ID, branch, baseline state, link to Sprint Queue.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
+10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
 
 ---
 
@@ -27,6 +29,25 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 4. **Maintain documentation** — Keep CLAUDE.md, ROADMAP.md, and LESSONS_LEARNED.md current (or direct doc-keeper to do it).
 5. **Interpret test results** — Analyze test output, decide next steps for failures.
 6. **Triage findings** — Review AGENT_FINDINGS.md, group issues, set priorities.
+
+#### Planning Contract
+
+This repo uses a strict two-layer planning system:
+
+1. **`ROADMAP.md` holds the full spec** for every active sprint. Each sprint section must be execution-ready for Claude Code CLI and include:
+   - Goal / problem / design decisions
+   - Baseline
+   - WHERE (read order)
+   - Tasks
+   - Execution Sequence
+   - SUCCESS CRITERIA
+2. **`docs/governance/SPRINT_QUEUE.md` holds the abbreviated dispatch pointers** only. Queue entries are short FIFO summaries that point Claude Code CLI to the full spec in `ROADMAP.md`; they are not the full payload.
+3. **Cowork's primary job is plan quality.** Pressure-test scope, sequencing, edge cases, cache/UX implications, spec clarity, and documentation drift so Claude Code can execute with minimal ambiguity.
+4. **Execution is selective.** Cowork only performs direct coding or file edits when:
+   - the user explicitly asks for implementation, or
+   - the work is especially delicate/complex and the user wants Cowork to handle it directly.
+5. **Default output for implementation planning work:** update the full `ROADMAP.md` spec first, then update the abbreviated `SPRINT_QUEUE.md` pointer second.
+6. **Minimum queue depth is mandatory.** `docs/governance/SPRINT_QUEUE.md` must always keep at least three queued sprints so we can see what is immediately next and what follows after that. If the queue drops below three, stop building and backfill the roadmap/queue before resuming execution work.
 
 ### Claude Code CLI — All Execution
 
@@ -125,6 +146,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the d
 ### Standing Rules
 
 - **READ BEFORE YOU WRITE.** Every CLI session MUST read `docs/governance/LESSONS_LEARNED.md` and the relevant ROADMAP section BEFORE making any code changes. This is non-negotiable. Skipping this step causes regressions.
+- **Do not clean away local work.** Never run destructive cleanup flows like `git reset --hard`, `git clean`, or equivalent workspace-wiping actions unless the user explicitly requests that exact outcome for this repo.
 - **Branch-per-sprint.** One branch per sprint dispatch (`sprint/<N>-<name>`). Never commit directly to main. Merge with `--no-ff` after tests pass. Delete branch after merge.
 - **Local-first development.** Working directory at `C:\Users\estra\Projects\Blurby`. Push to GitHub after every sprint. Pull before every session. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
@@ -228,9 +250,9 @@ When a sprint **completes**:
 
 1. Read `CLAUDE.md` (this file) — rules, agents, current system state
 2. Read `docs/governance/LESSONS_LEARNED.md` (if session may change codebase)
-3. Read `ROADMAP.md` (if session involves planned work)
+3. Read `ROADMAP.md` (full active sprint specs)
 4. Read `docs/governance/BUG_REPORT.md` (if session involves bug fixes)
-5. Read `docs/governance/SPRINT_QUEUE.md` (if dispatching work to CLI)
+5. Read `docs/governance/SPRINT_QUEUE.md` (abbreviated dispatch pointers to ROADMAP specs)
 
 ### Constants Separation Rule
 
@@ -242,12 +264,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.11.0 — Post-EXT-5B)
+## Current System State (v1.14.0 — Post-TTS-6C)
 
 ### Codebase (branch: `main`)
 
-- All sprints through EXT-5B complete (+ READINGS-4A–4C + EXT-5A + EXT-5B)
-- 1,032 tests across 51 test files
+- All sprints through TTS-6C complete (+ READINGS-4A–4C + EXT-5A + EXT-5B + TTS-6C)
+- 1,050 tests across 52 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -293,7 +315,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts, constants.ts, authorNormalize.ts
   - `src/types/` — types.ts (BlurbyDoc gains `queuePosition?: number`), foliate.ts (TD-1), narration.ts (TD-1)
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
-  - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro)
+  - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro). Kokoro uses 3 native-rate buckets (1.0x/1.2x/1.5x) — no scheduler pitch-shift.
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
 - **Test Harness** (`src/test-harness/`): Browser-based E2E testing stub (Sprint CT-1)
     - `electron-api-stub.ts` — Complete `window.electronAPI` surface (73 methods + 10 event listeners) with in-memory state, Meditations seed data, console tracing
@@ -301,7 +323,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 51 test files, 1,032 tests
+  - **Tests** (`tests/`): 52 test files, 1,050 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -311,7 +333,7 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 6** — EINK-6A (e-ink display mode), GOALS-6B (reading goals)
+- **Phase 6** — ✅ TTS-6C (native-rate buckets) → EINK-6A (e-ink display mode) → GOALS-6B (reading goals)
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -319,9 +341,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through EXT-5B complete (v1.11.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through TTS-6C complete (v1.14.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ READINGS-4A–4C → ✅ EXT-5A (E2E + queue) → ✅ EXT-5B (pairing UX)
+✅ EXT-5A → ✅ EXT-5B → ✅ TTS-6C (native-rate buckets)
 
 **Next:** EINK-6A (e-ink display mode) → GOALS-6B (reading goals)

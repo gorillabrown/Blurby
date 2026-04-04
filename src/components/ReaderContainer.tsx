@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, stepKokoroBucket, resolveKokoroBucket } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
@@ -283,6 +283,7 @@ export default function ReaderContainer({
       },
       getVoiceId: () => settings.kokoroVoice || "af_bella",
       isCacheEnabled: () => settings.ttsCacheEnabled !== false,
+      getRateBucket: () => resolveKokoroBucket(settings.ttsRate || 1.0),
     });
     backgroundCacherRef.current = cacher;
     cacher.start();
@@ -292,7 +293,7 @@ export default function ReaderContainer({
       backgroundCacherRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.kokoroVoice]);
+  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.kokoroVoice, settings.ttsRate]);
 
   // NAR-5: Set active book on the background cacher when text is available
   useEffect(() => {
@@ -699,14 +700,20 @@ export default function ReaderContainer({
   const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && settings.lastReadingMode === "narration");
   const adjustSpeed = useCallback((delta: number) => {
     if (isNarrationSelected) {
-      const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
-      const newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;
+      const isKokoro = settings.ttsEngine === "kokoro";
+      let newRate: number;
+      if (isKokoro) {
+        newRate = stepKokoroBucket(settings.ttsRate || 1.0, delta);
+      } else {
+        const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
+        newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;
+      }
       updateSettings({ ttsRate: newRate });
       narration.adjustRate(newRate);
     } else {
       adjustWpm(delta);
     }
-  }, [isNarrationSelected, settings.ttsRate, updateSettings, narration, adjustWpm]);
+  }, [isNarrationSelected, settings.ttsRate, settings.ttsEngine, updateSettings, narration, adjustWpm]);
 
   // Paragraph navigation — jump to first word of prev/next paragraph
   const paragraphBreaksArray = useMemo(() => {

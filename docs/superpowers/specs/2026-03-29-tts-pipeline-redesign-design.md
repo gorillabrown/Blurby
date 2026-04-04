@@ -28,6 +28,19 @@ The current narration pipeline has multiple latency points: ~2-3s cold start per
 
 This spec details **Phase 1 only.** Phases 2 and 3 are outlined in the Future Work section.
 
+### Implementation Notes (2026-04-04)
+
+The live code now reflects the core Phase 1 direction, with a few clarifications that supersede older wording in this document:
+
+- Kokoro generation is now cached and generated at **1.0x only**. Runtime narration speed is applied in the scheduler via `playbackRate`.
+- Startup now supports **predictive first-chunk priming** for the active book/voice/start position, with a short wait for in-flight primes before falling back to normal generation.
+- Cached chunks now persist **`wordCount`** so ramp-up chunks replay with the correct word span instead of assuming cruise-sized chunks.
+- Legacy cache entries without `wordCount` are handled with **lazy migration when exact inference is possible** and soft-miss behavior when it is not.
+- Chunk planning is now **boundary-aware** within bounded lookahead windows, and punctuation pauses are applied at **schedule time** rather than being baked into generated audio.
+- **Shipping split with Smoothness:** the smoothness sprint now owns priming, cache correctness, boundary-aware chunking, punctuation shaping, and background warming. Kokoro rate control is explicitly split to the companion governance plan [`docs/governance/2026-04-04-kokoro-native-rate-buckets.md`](../../governance/2026-04-04-kokoro-native-rate-buckets.md). Any `playbackRate`-based Kokoro speed control described later in this spec should be treated as historical design context, not the agreed shipping direction.
+
+This keeps the architecture aligned with the TTS smoothness sprint while preserving the original producer/scheduler split described below.
+
 ---
 
 ## Architecture Overview
@@ -194,25 +207,17 @@ Used for cache validation on startup and disk pressure eviction.
 
 ---
 
-## Section 5: Hybrid Speed Change
+## Section 5: Hybrid Speed Change (Historical, Superseded)
 
-Speed changes are instant with no queue flush or regeneration.
+This section captured the earlier `playbackRate` approach. It is superseded by the companion governance plan [`docs/governance/2026-04-04-kokoro-native-rate-buckets.md`](../../governance/2026-04-04-kokoro-native-rate-buckets.md), which is now the agreed shipping direction for Kokoro speed control.
 
-### Mechanism
+The current plan decision is:
 
-1. **Immediate:** Set `playbackRate` on the currently-playing `AudioBufferSourceNode` and all pre-scheduled sources. Audio pitch shifts slightly but speed changes instantly — zero lag.
-
-2. **Background:** The producer continues generating at base speed (1.0x). All cached audio is stored at 1.0x. Speed is purely a playback-time parameter.
-
-3. **Cache stays valid.** A single cache per voice works for all speeds. No invalidation on speed change.
-
-**Note:** If testing reveals Kokoro's prosody at native 1.3x is notably better than 1.0x pitched to 1.3x, we can revisit and generate at native speed. Initial implementation uses 1.0x-only generation for maximum cache efficiency.
-
-**Speed cap:** 1.5x maximum, enforced in the UI slider and `adjustRate()`.
-
-### Word Timer Adjustment
-
-When speed changes, recalculate all future word boundary times based on the new `playbackRate`. The self-correcting timer picks up the new boundaries on its next tick.
+1. Kokoro generates natively at the selected rate bucket (`1.0x`, `1.2x`, `1.5x`).
+2. Scheduler-managed `playbackRate` is no longer the normal Kokoro rate-control mechanism.
+3. Mid-playback Kokoro rate changes stop the current pipeline, discard scheduled-but-unplayed chunks, and restart from the current word index at the new bucket.
+4. Web Speech keeps its existing continuous rate control; the bucket model is Kokoro-only.
+5. `1.5x` is the current ceiling, not a permanent ceiling.
 
 ---
 
