@@ -72,22 +72,22 @@ Agent `.md` files in `.claude/agents/` define the scope, output contract, and st
 | File | Agent | Model | Purpose |
 |------|-------|-------|---------|
 | `blurby-lead.md` | Orchestrator | opus | Sprint sequencing, spawns sub-agents, enforces mandatory phases |
-| `spec-compliance-reviewer.md` | spec-reviewer | sonnet | Verify every SUCCESS CRITERIA item; produce APPROVED/REJECTED verdict |
+| `spec-compliance-reviewer.md` | spec-compliance-reviewer | sonnet | Verify every SUCCESS CRITERIA item; produce APPROVED/REJECTED verdict |
 | `doc-keeper.md` | doc-keeper | sonnet | Update all 6 governing docs after every sprint |
 | `test-runner.md` | test-runner | haiku | Execute tests, categorize failures, report pass/fail |
 | `quality-reviewer.md` | quality-reviewer | sonnet | Architecture compliance, known-trap detection, code quality |
 
 #### How Dispatches Work
 
-Sprint dispatches go to `blurby-lead` (the orchestrator). blurby-lead reads the dispatch, loads the sprint spec from ROADMAP.md, and **spawns sub-agents** per the task table using the Agent tool. Each sub-agent runs in its own context with the tools and model defined in its `.md` file.
+Sprint dispatches go to `blurby-lead` (the orchestrator). blurby-lead reads the dispatch, loads the sprint spec from ROADMAP.md, and executes the work.
+
+**blurby-lead does all code work itself**, scoped by labels (`electron-fixer`, `renderer-fixer`, `format-parser`) that indicate which files to touch. It **spawns four subagents** for verification and documentation: `test-runner`, `spec-compliance-reviewer`, `quality-reviewer`, and `doc-keeper`.
 
 The dispatch's Task table tells blurby-lead:
 
-- **Which agent to spawn** for each step (format-parser, test-runner, spec-compliance-reviewer, etc.)
-- **What model tier** — opus for cross-system reasoning, sonnet for focused work, haiku for lightweight execution
+- **Which scope** to work in (e.g., `Primary CLI (renderer-fixer scope)`)
+- **Which subagents to spawn** for verification steps (test-runner, spec-compliance-reviewer, etc.)
 - **What order** — sequential by default, parallel when explicitly marked
-
-Code agents (electron-fixer, renderer-fixer, format-parser) are **scope labels** — blurby-lead does the code work itself using those labels to stay in scope. Verification and documentation agents (spec-compliance-reviewer, doc-keeper, test-runner, quality-reviewer) are **spawned as sub-agents** with their own tool permissions and output contracts.
 
 #### Agent Scope Labels (Reference)
 
@@ -99,13 +99,13 @@ Code agents (electron-fixer, renderer-fixer, format-parser) are **scope labels**
 | `renderer-fixer` | React — state, props, hooks, CSS, rendering | `src/components/`, `src/hooks/`, `src/utils/`, `src/types/` |
 | `format-parser` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/legacy-parsers.js`, `main/epub-word-extractor.js` |
 
-**Verification agents** (read-only review):
+**Verification subagents** (read-only review, spawned by blurby-lead):
 
-| Label | Scope | Files |
-|-------|-------|-------|
+| Subagent | Scope | Files |
+|----------|-------|-------|
 | `test-runner` | Test execution and build verification | `tests/`, `package.json` scripts |
-| `code-reviewer` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
-| `spec-reviewer` | Verify every SUCCESS CRITERIA item from the dispatch is met | Read-only, cross-references dispatch spec |
+| `quality-reviewer` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
+| `spec-compliance-reviewer` | Verify every SUCCESS CRITERIA item from the dispatch is met | Read-only, cross-references dispatch spec |
 
 **Documentation agents:**
 
@@ -123,7 +123,7 @@ Code agents (electron-fixer, renderer-fixer, format-parser) are **scope labels**
 
 Before committing, verify ALL of these:
 
-- [ ] Every SUCCESS CRITERIA item from the dispatch is met (spec-reviewer pass)
+- [ ] Every SUCCESS CRITERIA item from the dispatch is met (spec-compliance-reviewer pass)
 - [ ] `npm test` passes (860+ tests, 0 failures)
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
@@ -161,7 +161,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the d
 - **Dispatch sizing: 40 tool-use ceiling.** A single blurby-lead dispatch must stay under ~40 tool uses. Sprints exceeding this must be split into waves (e.g., Wave A = implement + test, Wave B = verify + docs + git). Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
 - **Verification gate is mandatory.** After completing any code-change task, verify: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
-- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). The spec-reviewer agent scope label marks this step in every sprint. In single-CLI mode, self-review against both checklists sequentially.
+- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). The `spec-compliance-reviewer` subagent performs this step. Full-tier sprints then spawn `quality-reviewer`. Quick-tier sprints use blurby-lead self-review.
 
 ### Pike's 5 Rules of Programming (Engineering Axioms)
 

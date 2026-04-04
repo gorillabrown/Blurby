@@ -1,18 +1,18 @@
 # Sprint Queue
 
-**Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to ≥3.
+**Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see Phase 6 sections for EINK-6A, GOALS-6B, and TTS-6C)
+**Full specs:** `ROADMAP.md` (see `GOV-6D` plus the Phase 6 sections for `EINK-6A` and `GOALS-6B`)
 
-**Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained.
+**Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
 ---
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2
-Next sprint: EINK-6A (E-ink Display Mode)
-Health: YELLOW — Queue depth below 3. Backfill needed.
+Queue depth: 3
+Next sprint: GOV-6D (Claude CLI Agent Staging Alignment)
+Health: GREEN — Queue depth at target.
 ```
 
 ---
@@ -21,10 +21,13 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | EINK-6A | v1.12.0 | `sprint/eink-6a-display-mode` | Full | — | E-ink as independent display mode. Decouple from theme. `einkMode` boolean + `[data-eink]` CSS. |
-| 2 | GOALS-6B | v1.13.0 | `sprint/goals-6b-reading-goals` | Full | — | Daily/weekly reading goals. Progress ring in library header. Goal-met toast. |
+| 1 | GOV-6D | v1.15.0 | `sprint/gov-6d-agent-staging-alignment` | Quick | — | Align `.claude` agent files, `CLAUDE.md`, `ROADMAP.md`, and this queue to the real Claude CLI subagent model before the next product sprints. |
+| 2 | EINK-6A | v1.16.0 | `sprint/eink-6a-display-mode` | Full | — | E-ink as independent display mode. Decouple from theme. `einkMode` boolean + `[data-eink]` CSS. |
+| 3 | GOALS-6B | v1.17.0 | `sprint/goals-6b-reading-goals` | Full | — | Daily/weekly reading goals. Progress ring in library header. Goal-met toast. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (EINK-6A, GOALS-6B, TTS-6C).
+**Full specs:** `ROADMAP.md` §Cross-Cut Governance (`GOV-6D`) and §Phase 6 (`EINK-6A`, `GOALS-6B`).
+
+**Agent staging rule:** `GOV-6D` is Quick-tier governance work; use `blurby-lead` self-review plus doc validation. `EINK-6A` and `GOALS-6B` are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
 ---
 
