@@ -7,6 +7,58 @@
 
 import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS } from "../constants";
 
+// ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
+
+/** Per-chunk timing diagnostics — dev/test only, not emitted in production */
+export interface ChunkTimingTelemetry {
+  chunkStartIdx: number;
+  wordCount: number;
+  durationMs: number;
+  /** Scheduled start time relative to AudioContext epoch */
+  scheduledAtSec: number;
+  /** Per-word timing weights (normalized, sum to 1.0) */
+  wordWeights: number[];
+}
+
+/** Accumulated telemetry for the current session — read by tests via getTimingTelemetry() */
+let _telemetry: ChunkTimingTelemetry[] = [];
+
+/** Get accumulated telemetry (tests/dev only) */
+export function getTimingTelemetry(): ChunkTimingTelemetry[] { return _telemetry; }
+/** Clear accumulated telemetry */
+export function clearTimingTelemetry(): void { _telemetry = []; }
+
+// ── Word Timing Heuristic (TTS-6F) ─────────────────────────────────────────
+
+/** Punctuation that typically adds a trailing micro-pause in TTS prosody */
+const SENTENCE_END_RE = /[.!?]$/;
+const CLAUSE_END_RE = /[,;:)]$/;
+
+/**
+ * Compute per-word timing weights based on token length and punctuation.
+ * Longer words and words ending with punctuation get proportionally more time.
+ * Returns normalized weights that sum to 1.0.
+ */
+export function computeWordWeights(words: string[]): number[] {
+  if (words.length === 0) return [];
+  if (words.length === 1) return [1.0];
+
+  const raw: number[] = [];
+  for (const word of words) {
+    // Base weight: proportional to character count (clamped 2–20)
+    let w = Math.min(20, Math.max(2, word.length));
+    // Sentence-ending words get 40% boost (TTS naturally pauses slightly before boundaries)
+    if (SENTENCE_END_RE.test(word)) w *= 1.4;
+    // Clause-ending words get 15% boost
+    else if (CLAUSE_END_RE.test(word)) w *= 1.15;
+    raw.push(w);
+  }
+
+  // Normalize so weights sum to 1.0
+  const total = raw.reduce((a, b) => a + b, 0);
+  return raw.map(w => w / total);
+}
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export interface ScheduledChunk {
@@ -105,20 +157,35 @@ export function createAudioScheduler(): AudioScheduler {
   }
 
   /**
-   * Pre-compute word boundary times for a chunk, accounting for playback rate.
+   * Pre-compute word boundary times using punctuation-aware/token-length-aware weights (TTS-6F).
+   * Words are distributed across the chunk duration proportionally to their timing weight.
    */
   function computeWordBoundaries(chunk: ScheduledChunk, chunkStartTime: number): { time: number; wordIndex: number }[] {
     const wordCount = chunk.words.length;
     if (wordCount <= 0) return [];
     const chunkDurSec = chunk.durationMs / 1000;
-    const msPerWord = chunkDurSec / wordCount;
+    const weights = computeWordWeights(chunk.words);
     const boundaries: { time: number; wordIndex: number }[] = [];
+    let cumulativeWeight = 0;
     for (let i = 0; i < wordCount; i++) {
       boundaries.push({
-        time: chunkStartTime + i * msPerWord,
+        time: chunkStartTime + cumulativeWeight * chunkDurSec,
         wordIndex: chunk.startIdx + i,
       });
+      cumulativeWeight += weights[i];
     }
+
+    // Emit telemetry in dev mode
+    if (import.meta.env.DEV) {
+      _telemetry.push({
+        chunkStartIdx: chunk.startIdx,
+        wordCount,
+        durationMs: chunk.durationMs,
+        scheduledAtSec: chunkStartTime,
+        wordWeights: weights,
+      });
+    }
+
     return boundaries;
   }
 

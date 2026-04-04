@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6E`, `TTS-6F`, and `TTS-6G`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6F`, `TTS-6G`, and `TTS-6H`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -11,7 +11,7 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 2
-Next sprint: TTS-6F (Word Alignment & Telemetry)
+Next sprint: TTS-6G (Narration Controls & Accessibility Polish)
 Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
@@ -21,12 +21,12 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6F | v1.17.0 | `sprint/tts-6f-word-alignment-telemetry` | Full | — | Add narration timing telemetry and improve word-highlight alignment with richer scheduler timing heuristics. |
-| 2 | TTS-6G | v1.18.0 | `sprint/tts-6g-narration-controls-polish` | Full | — | Finish narration control polish: fix BUG-053, unify engine-aware rate stepping, and align keyboard, bottom bar, and settings semantics. |
+| 1 | TTS-6G | v1.18.0 | `sprint/tts-6g-narration-controls-polish` | Full | — | Finish narration control polish: fix BUG-053, unify engine-aware rate stepping, and align keyboard, bottom bar, and settings semantics. |
+| 2 | TTS-6H | v1.19.0 | `sprint/tts-6h-docs-policy-closure` | None | — | Close remaining Narrate-mode governance work: privacy/data flow, SSML stance, safety posture, glossary, and TTS lessons learned. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6E`, `TTS-6F`, `TTS-6G`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6F`, `TTS-6G`, `TTS-6H`).
 
-**Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
+**Agent staging rule:** `TTS-6F` and `TTS-6G` are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`. `TTS-6H` is docs-only and should use a docs/governance validation pass rather than runtime test/build work unless a tiny factual code correction is required.
 
 ---
 
@@ -45,6 +45,7 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6F | 2026-04-04 | PASS | Word alignment telemetry + improved timing heuristic. Punctuation-aware/token-length-aware word weighting, dev telemetry surface. 12 new tests (1,088 total). v1.17.0. |
 | TTS-6E | 2026-04-04 | PASS | Pronunciation overrides foundation. Global override list, settings editor, preview, cache-safe Kokoro generation. 15 new tests (1,076 total). v1.16.0. |
 | TTS-6D | 2026-04-04 | PASS | Kokoro startup/recovery hardening. Unified engine-status events, warming state, delayed prewarm, crash recovery UX. BUG-032 resolved. 11 new tests (1,061 total). v1.15.0. |
 | GOV-6D | 2026-04-04 | PASS | Claude CLI agent staging alignment. `blurby-lead` scope-label model clarified, live governance terminology normalized, and roadmap/queue staging synced. v1.15.0. |
