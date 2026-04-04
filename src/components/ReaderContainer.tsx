@@ -1181,6 +1181,7 @@ export default function ReaderContainer({
             updateSettings({ ttsRate: rate });
             narration.adjustRate(rate);
           }}
+          ttsEngine={settings.ttsEngine || "web"}
           foliateFraction={useFoliate ? foliateFraction : undefined}
         />
       </div>

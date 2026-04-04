@@ -80,12 +80,12 @@
 **Description:** In all reading sub-modes, the bottom bar is visible underneath the reader overlay but cannot be clicked. The `.reader-container` uses `position: fixed` which intercepts pointer events above the bar. Fix needed: give the bottom bar `z-index: 20` (above overlay's z-index: 10).
 **Status:** Open. Root cause and fix identified but not applied.
 
-### BUG-053: Arrow keys should adjust NM speed by 0.1 increments
-**Reported:** 2026-03-25
+### ~~BUG-053~~ ✅ Fixed — TTS-6C + TTS-6G (v1.18.0)
+**Reported:** 2026-03-25 | **Resolved:** 2026-04-04
 **Severity:** Medium
 **Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderContainer.tsx`
 **Description:** During Narration mode, Up/Down arrow keys adjust WPM (irrelevant in NM). They should adjust TTS speech rate by 0.1 increments (0.5-2.0 range), immediately applied to slider and audio.
-**Status:** Open.
+**Status:** Resolved. TTS-6C wired `adjustSpeed` (engine-aware: Kokoro steps buckets 1.0x/1.2x/1.5x, Web Speech uses 0.1 increments). TTS-6G added Kokoro bucket buttons to bottom bar and accessibility polish.
 
 ### BUG-054: Small/misaligned click areas in menu flap buttons
 **Reported:** 2026-03-25

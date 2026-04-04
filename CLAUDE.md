@@ -264,12 +264,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.17.0 — Post-TTS-6F)
+## Current System State (v1.18.0 — Post-TTS-6G)
 
 ### Codebase (branch: `main`)
 
-- All sprints through TTS-6F complete (+ TTS-6C + GOV-6D + TTS-6D + TTS-6E + TTS-6F)
-- 1,088 tests across 55 test files
+- All sprints through TTS-6G complete (+ TTS-6C through TTS-6G + GOV-6D)
+- 1,096 tests across 56 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -323,7 +323,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 55 test files, 1,088 tests
+  - **Tests** (`tests/`): 56 test files, 1,096 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -341,9 +341,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through TTS-6F complete (v1.17.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through TTS-6G complete (v1.18.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ TTS-6E → ✅ TTS-6F (word alignment telemetry)
+✅ TTS-6F → ✅ TTS-6G (narration controls polish)
 
-**Next:** TTS-6G (narration controls polish)
+**Next:** TTS-6H (docs/policy closure)
