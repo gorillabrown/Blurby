@@ -17,3 +17,6 @@ Example book/
 .Backup/
 .claude/worktrees/
 Example App/
+
+# JetBrains project files are intentionally tracked
+!.idea/
