@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="4.4.2026">
+      <changelist_data name="Evan Brown" email="estrattbrown@gmail.com" automatic="false" />
+      <change afterPath="$PROJECT_DIR$/tests/narrationProfiles.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ROADMAP.md" beforeDir="false" afterPath="$PROJECT_DIR$/ROADMAP.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/LibraryContainer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/LibraryContainer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/settings/TTSSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/settings/TTSSettings.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useNarration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNarration.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/utils/text.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/text.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/perf-baseline-results.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/perf-baseline-results.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/text.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/text.test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,7 +19,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Evan Brown &lt;estrattbrown@gmail.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SIGN_OFF_COMMIT" value="true" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -49,7 +55,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "sprint/tts-6l-narration-profiles-sharing-foundations",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/estra/Projects/Blurby",
     "nodejs_package_manager_path": "npm",
@@ -66,6 +72,15 @@
       <updated>1775317594290</updated>
       <workItem from="1775317596140" duration="184000" />
     </task>
+    <task id="LOCAL-00001" summary="4.4.2026">
+      <option name="closed" value="true" />
+      <created>1775335453317</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1775335453317</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
