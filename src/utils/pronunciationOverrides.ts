@@ -34,6 +34,22 @@ export function applyPronunciationOverrides(
 }
 
 /**
+ * Merge global and per-book overrides into one effective list.
+ * Global overrides apply first, then book-specific overrides layer on top.
+ * This ensures book overrides can refine or override global rules.
+ */
+export function mergeOverrides(
+  globalOverrides: PronunciationOverride[] | undefined,
+  bookOverrides: PronunciationOverride[] | undefined,
+): PronunciationOverride[] {
+  const global = globalOverrides || [];
+  const book = bookOverrides || [];
+  if (book.length === 0) return global;
+  if (global.length === 0) return book;
+  return [...global, ...book];
+}
+
+/**
  * Compute a stable hash of the active override set for cache identity.
  * Returns empty string when no overrides are active.
  */

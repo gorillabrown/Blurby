@@ -8,9 +8,15 @@ const api = window.electronAPI;
 interface TTSSettingsProps {
   settings: BlurbySettings;
   onSettingsChange: (updates: Partial<BlurbySettings>) => void;
+  /** Per-book pronunciation overrides for the currently open book (if any) */
+  bookOverrides?: PronunciationOverride[];
+  /** Called when user edits per-book overrides */
+  onBookOverridesChange?: (overrides: PronunciationOverride[]) => void;
+  /** Title of the currently open book (for display) */
+  activeBookTitle?: string;
 }
 
-export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
+export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle }: TTSSettingsProps) {
   const engine = settings.ttsEngine || "web";
 
   // Web Speech API voices
@@ -372,8 +378,11 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
       </div>
 
       <PronunciationOverridesEditor
-        overrides={settings.pronunciationOverrides || []}
-        onChange={(overrides) => onSettingsChange({ pronunciationOverrides: overrides })}
+        globalOverrides={settings.pronunciationOverrides || []}
+        onGlobalChange={(overrides) => onSettingsChange({ pronunciationOverrides: overrides })}
+        bookOverrides={bookOverrides}
+        onBookChange={onBookOverridesChange}
+        activeBookTitle={activeBookTitle}
       />
 
       <div className="settings-section-label">Narration Cache</div>
@@ -434,14 +443,25 @@ function CacheSizeDisplay() {
   );
 }
 
-/** Pronunciation overrides editor */
+/** Pronunciation overrides editor with Global / This Book scope toggle (TTS-6I) */
 function PronunciationOverridesEditor({
-  overrides,
-  onChange,
+  globalOverrides,
+  onGlobalChange,
+  bookOverrides,
+  onBookChange,
+  activeBookTitle,
 }: {
-  overrides: PronunciationOverride[];
-  onChange: (overrides: PronunciationOverride[]) => void;
+  globalOverrides: PronunciationOverride[];
+  onGlobalChange: (overrides: PronunciationOverride[]) => void;
+  bookOverrides?: PronunciationOverride[];
+  onBookChange?: (overrides: PronunciationOverride[]) => void;
+  activeBookTitle?: string;
 }) {
+  const hasBookScope = !!onBookChange;
+  const [scope, setScope] = useState<"global" | "book">("global");
+  const overrides = scope === "book" && bookOverrides ? bookOverrides : globalOverrides;
+  const onChange = scope === "book" && onBookChange ? onBookChange : onGlobalChange;
+
   const [newFrom, setNewFrom] = useState("");
   const [newTo, setNewTo] = useState("");
   const [previewText, setPreviewText] = useState("The CEO of NASA gave a TED talk.");
@@ -470,16 +490,40 @@ function PronunciationOverridesEditor({
     onChange(next);
   }, [overrides, onChange]);
 
+  // Preview uses the effective merged set (global + book)
+  const effectiveOverrides = hasBookScope && bookOverrides
+    ? [...globalOverrides, ...bookOverrides]
+    : globalOverrides;
+
   const handlePreview = useCallback(() => {
-    setPreviewResult(applyPronunciationOverrides(previewText, overrides));
-  }, [previewText, overrides]);
+    setPreviewResult(applyPronunciationOverrides(previewText, effectiveOverrides));
+  }, [previewText, effectiveOverrides]);
 
   return (
     <>
       <div className="settings-section-label">Pronunciation Overrides</div>
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
-        Replace words before TTS speaks them. Useful for names, acronyms, and technical terms.
+        Replace words before TTS speaks them. Global overrides apply to all books. Book overrides apply only to the current book.
       </div>
+
+      {/* Scope toggle */}
+      {hasBookScope && (
+        <div className="settings-mode-toggle" style={{ marginBottom: 8 }}>
+          <button
+            className={`settings-mode-btn${scope === "global" ? " active" : ""}`}
+            onClick={() => setScope("global")}
+          >Global</button>
+          <button
+            className={`settings-mode-btn${scope === "book" ? " active" : ""}`}
+            onClick={() => setScope("book")}
+          >{activeBookTitle ? `This Book` : "Book"}</button>
+        </div>
+      )}
+      {scope === "book" && activeBookTitle && (
+        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 6, fontStyle: "italic" }}>
+          Overrides for: {activeBookTitle}
+        </div>
+      )}
 
       {overrides.map((o, idx) => (
         <div key={o.id} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontSize: 12 }}>
@@ -507,6 +551,12 @@ function PronunciationOverridesEditor({
           >×</button>
         </div>
       ))}
+
+      {overrides.length === 0 && (
+        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8, fontStyle: "italic" }}>
+          No {scope === "book" ? "book-specific" : "global"} overrides yet.
+        </div>
+      )}
 
       {overrides.length < MAX_PRONUNCIATION_OVERRIDES && (
         <div style={{ display: "flex", gap: 6, marginTop: 6, marginBottom: 8 }}>
@@ -536,7 +586,7 @@ function PronunciationOverridesEditor({
         </div>
       )}
 
-      {/* Preview */}
+      {/* Preview uses effective merged overrides */}
       <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
         <input
           type="text"

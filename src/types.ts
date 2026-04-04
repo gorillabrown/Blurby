@@ -50,6 +50,8 @@ export interface BlurbyDoc {
   furthestPosition?: number; // Page number (non-EPUB) or fraction 0.0-1.0 (EPUB)
   // Sprint 26: EPUB CFI position tracking
   cfi?: string;           // EPUB Canonical Fragment Identifier — exact reading position
+  // TTS-6I: Per-book pronunciation overrides
+  pronunciationOverrides?: PronunciationOverride[];
   // TD-02: Import pipeline
   convertedEpubPath?: string;    // path to converted EPUB in userData/converted/
   originalFilepath?: string;     // original file path before conversion

@@ -318,10 +318,13 @@ export default function ReaderContainer({
     narration.setBookId(activeDoc.id);
   }, [activeDoc.id, narration.setBookId]);
 
-  // TTS-6E: Sync pronunciation overrides from settings → narration hook
+  // TTS-6E/6I: Sync pronunciation overrides (global + per-book) → narration hook
   useEffect(() => {
     narration.setPronunciationOverrides(settings.pronunciationOverrides || []);
   }, [settings.pronunciationOverrides]);
+  useEffect(() => {
+    narration.setBookPronunciationOverrides(activeDoc.pronunciationOverrides || []);
+  }, [activeDoc.pronunciationOverrides, activeDoc.id]);
 
   // Sync TTS engine/voice/rate from settings → narration hook
   useEffect(() => {

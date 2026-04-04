@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6G`, `TTS-6I`, and `TTS-6J`)
+**Full specs:** `ROADMAP.md` (see the Phase 6 sections for `TTS-6I`, `TTS-6J`, and `TTS-6K`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -11,7 +11,7 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 2
-Next sprint: TTS-6I (Per-Book Pronunciation Profiles)
+Next sprint: TTS-6J (Voice Selection & Persona Consistency)
 Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
@@ -21,10 +21,10 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6I | v1.19.0 | `sprint/tts-6i-per-book-pronunciation-profiles` | Full | — | Extend pronunciation overrides to optional per-book profiles layered on top of the global list, with book-aware cache identity. |
-| 2 | TTS-6J | v1.20.0 | `sprint/tts-6j-voice-selection-consistency` | Full | — | Polish the voice surface: Web Speech fallback priority, voice/persona terminology, and consistency between settings and technical docs. |
+| 1 | TTS-6J | v1.20.0 | `sprint/tts-6j-voice-selection-consistency` | Full | — | Polish the voice surface: Web Speech fallback priority, voice/persona terminology, and consistency between settings and technical docs. |
+| 2 | TTS-6K | v1.21.0 | `sprint/tts-6k-narration-personalization-quality-sweep` | Full | — | Larger TTS finish pass: align personalization surfaces, close remaining Narrate-mode docs/policy gaps, and sweep stale TTS bug/reference drift. |
 
-**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6G`, `TTS-6I`, `TTS-6J`).
+**Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6I`, `TTS-6J`, `TTS-6K`).
 
 **Agent staging rule:** All queued TTS sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
 
@@ -45,6 +45,7 @@ Health: YELLOW — Queue depth below 3. Backfill needed.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6I | 2026-04-04 | PASS | Per-book pronunciation profiles. Global + book override layering, merge resolver, scoped editor with scope toggle, book-aware cache identity. 11 new tests (1,107 total). v1.19.0. |
 | TTS-6G | 2026-04-04 | PASS | Narration controls & accessibility polish. Kokoro bucket buttons in bottom bar, BUG-053 resolved, engine-aware aria labels. 8 new tests (1,096 total). v1.18.0. |
 | TTS-6F | 2026-04-04 | PASS | Word alignment telemetry + improved timing heuristic. Punctuation-aware/token-length-aware word weighting, dev telemetry surface. 12 new tests (1,088 total). v1.17.0. |
 | TTS-6E | 2026-04-04 | PASS | Pronunciation overrides foundation. Global override list, settings editor, preview, cache-safe Kokoro generation. 15 new tests (1,076 total). v1.16.0. |
