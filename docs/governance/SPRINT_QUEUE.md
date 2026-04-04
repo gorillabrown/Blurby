@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: TTS-6J (Voice Selection & Persona Consistency)
-Health: GREEN — Queue depth healthy.
+Queue depth: 2
+Next sprint: TTS-6K (Narration Personalization & Quality Sweep)
+Health: YELLOW — Queue depth below 3. Backfill needed.
 ```
 
 ---
@@ -21,9 +21,8 @@ Health: GREEN — Queue depth healthy.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-6J | v1.20.0 | `sprint/tts-6j-voice-selection-consistency` | Full | — | Polish the voice surface: Web Speech fallback priority, voice/persona terminology, and consistency between settings and technical docs. |
-| 2 | TTS-6K | v1.21.0 | `sprint/tts-6k-narration-personalization-quality-sweep` | Full | — | Larger TTS finish pass: align personalization surfaces, close remaining Narrate-mode docs/policy gaps, and sweep stale TTS bug/reference drift. |
-| 3 | TTS-6L | v1.22.0 | `sprint/tts-6l-narration-profiles-sharing-foundations` | Full | — | Turn the narration customization stack into reusable named profiles with lightweight book assignment and export/import-ready foundations. |
+| 1 | TTS-6K | v1.21.0 | `sprint/tts-6k-narration-personalization-quality-sweep` | Full | — | Larger TTS finish pass: align personalization surfaces, close remaining Narrate-mode docs/policy gaps, and sweep stale TTS bug/reference drift. |
+| 2 | TTS-6L | v1.22.0 | `sprint/tts-6l-narration-profiles-sharing-foundations` | Full | — | Turn the narration customization stack into reusable named profiles with lightweight book assignment and export/import-ready foundations. |
 
 **Full specs:** `ROADMAP.md` §Phase 6 (`TTS-6J`, `TTS-6K`, `TTS-6L`).
 
@@ -46,6 +45,7 @@ Health: GREEN — Queue depth healthy.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-6J | 2026-04-04 | PASS | Voice selection & persona consistency. Extracted selectPreferredVoice utility (en-US > en-GB > en-*), updated tech ref voice table from gender-buckets to accent/persona, documented Web Speech fallback behavior. 8 new tests (1,115 total). v1.20.0. |
 | TTS-6I | 2026-04-04 | PASS | Per-book pronunciation profiles. Global + book override layering, merge resolver, scoped editor with scope toggle, book-aware cache identity. 11 new tests (1,107 total). v1.19.0. |
 | TTS-6G | 2026-04-04 | PASS | Narration controls & accessibility polish. Kokoro bucket buttons in bottom bar, BUG-053 resolved, engine-aware aria labels. 8 new tests (1,096 total). v1.18.0. |
 | TTS-6F | 2026-04-04 | PASS | Word alignment telemetry + improved timing heuristic. Punctuation-aware/token-length-aware word weighting, dev telemetry surface. 12 new tests (1,088 total). v1.17.0. |

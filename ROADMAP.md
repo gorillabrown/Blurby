@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6I (Per-Book Pronunciation Profiles). 1,107 tests, 57 files. Latest tagged release: v1.19.0.
+**Last updated**: 2026-04-04 — Post-TTS-6J (Voice Selection & Persona Consistency). 1,115 tests, 58 files. Latest tagged release: v1.20.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6I complete). Queue GREEN (TTS-6J → TTS-6K → TTS-6L; depth 3).
+**Current state**: Phase 6 in progress (TTS-6J complete). Queue YELLOW (TTS-6K → TTS-6L; depth 2 — backfill needed).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -36,7 +36,7 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6F: Word Alignment & Narration Telemetry ✅ (v1.17.0)
   ├── TTS-6G: Narration Controls & Accessibility Polish ✅ (v1.18.0)
   ├── TTS-6I: Per-Book Pronunciation Profiles ✅ (v1.19.0)
-  ├── TTS-6J: Voice Selection & Persona Consistency (queued)
+  ├── TTS-6J: Voice Selection & Persona Consistency ✅ (v1.20.0)
   ├── TTS-6K: Narration Personalization & Quality Sweep (queued)
   └── TTS-6L: Narration Profiles & Sharing Foundations (queued)
     │

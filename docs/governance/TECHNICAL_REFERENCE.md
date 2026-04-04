@@ -414,12 +414,12 @@ Renderer (useNarration hook)
 
 Defined in `src/constants.ts` (`KOKORO_VOICE_NAMES`):
 
-| Category | Count | Examples |
-|----------|-------|---------|
-| American Female | 11 | Heart, Alloy, Bella, Jessica, Nova, Sarah |
-| American Male | 9 | Adam, Echo, Eric, Liam, Michael, Puck |
-| British Female | 4 | Alice, Emma, Isabella, Lily |
-| British Male | 4 | Daniel, Fable, George, Lewis |
+| Accent | Count | Voices |
+|--------|-------|--------|
+| American | 20 | Heart, Alloy, Aoede, Bella, Jessica, Kore, Nicole, Nova, River, Sarah, Sky, Adam, Echo, Eric, Fenrir, Liam, Michael, Onyx, Puck, Santa |
+| British | 8 | Alice, Emma, Isabella, Lily, Daniel, Fable, George, Lewis |
+
+Voice labels use the format "Name — Accent" (e.g., "Bella — American", "Daniel — British"). No gender prefix.
 
 ### Rolling Audio Queue (NAR-1)
 
@@ -487,6 +487,10 @@ Narrate mode has two TTS backends with different privacy characteristics:
 - **Kokoro (local):** All inference runs on-device in a worker thread. After the one-time model download from HuggingFace CDN (~50MB, cached under `userData/models/`), no network requests are made. Text is passed via IPC from renderer to main process to worker thread. No text is logged, cached, or transmitted externally.
 - **Web Speech API (platform):** Uses the operating system's speech synthesis service. On Windows, this is typically local (SAPI/OneCore voices). Some platforms may route text through cloud services for higher-quality voices — this is OS-dependent and outside Blurby's control. Blurby does not log or cache any text passed to Web Speech.
 - **No telemetry.** Blurby collects no usage data, analytics, or crash reports related to narration or any other feature.
+
+### Web Speech Voice Fallback
+
+When no user-selected voice is stored, the default Web Speech voice is chosen by locale priority: `en-US` first, then `en-GB`, then any `en-*` variant, then the first available voice. Voices may load asynchronously via the `voiceschanged` event — the selection runs again when new voices appear, but never overrides a user's prior choice. The logic lives in `src/utils/voiceSelection.ts` (`selectPreferredVoice`).
 
 ### SSML Stance
 
