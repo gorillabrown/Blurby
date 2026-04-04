@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS } from "../constants";
+import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS, KOKORO_RATE_BUCKETS, resolveKokoroBucket } from "../constants";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -30,6 +30,7 @@ interface ReaderBottomBarProps {
   lastReadingMode?: "focus" | "flow" | "narration";
   ttsRate?: number;
   onSetTtsRate?: (rate: number) => void;
+  ttsEngine?: "web" | "kokoro";
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
 }
@@ -66,6 +67,7 @@ export default function ReaderBottomBar({
   lastReadingMode = "flow",
   ttsRate = 1.0,
   onSetTtsRate,
+  ttsEngine = "web",
   foliateFraction,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
@@ -168,21 +170,38 @@ export default function ReaderBottomBar({
         {/* WPM or TTS Rate — show TTS rate when narration is selected (active or paused) */}
         {(readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration")) && onSetTtsRate ? (
           <div className="rbb-wpm-group">
-            <span className="rbb-wpm-label">{ttsRate.toFixed(1)}x</span>
-            <input
-              type="range"
-              className="rbb-wpm-slider"
-              min={0.5}
-              max={2.0}
-              step={0.1}
-              value={ttsRate}
-              onChange={(e) => handleSetTtsRate(Number(e.target.value))}
-              aria-label="Speech rate"
-              aria-valuemin={0.5}
-              aria-valuemax={2.0}
-              aria-valuenow={ttsRate}
-              aria-valuetext={`${ttsRate.toFixed(1)}x speed`}
-            />
+            <span className="rbb-wpm-label" aria-label={ttsEngine === "kokoro" ? "Kokoro rate" : "Speech rate"}>
+              {ttsRate.toFixed(1)}x
+            </span>
+            {ttsEngine === "kokoro" ? (
+              <div style={{ display: "flex", gap: 2 }} role="radiogroup" aria-label="Kokoro narration speed">
+                {KOKORO_RATE_BUCKETS.map((bucket) => (
+                  <button
+                    key={bucket}
+                    onClick={() => handleSetTtsRate(bucket)}
+                    className={`rbb-bucket-btn${resolveKokoroBucket(ttsRate) === bucket ? " active" : ""}`}
+                    aria-checked={resolveKokoroBucket(ttsRate) === bucket}
+                    role="radio"
+                    aria-label={`${bucket.toFixed(1)}x speed`}
+                  >{bucket.toFixed(1)}x</button>
+                ))}
+              </div>
+            ) : (
+              <input
+                type="range"
+                className="rbb-wpm-slider"
+                min={0.5}
+                max={2.0}
+                step={0.1}
+                value={ttsRate}
+                onChange={(e) => handleSetTtsRate(Number(e.target.value))}
+                aria-label="Speech rate"
+                aria-valuemin={0.5}
+                aria-valuemax={2.0}
+                aria-valuenow={ttsRate}
+                aria-valuetext={`${ttsRate.toFixed(1)}x speed`}
+              />
+            )}
             {rateStatus !== "idle" && (
               <span className={`rbb-rate-status ${rateStatus === "set" ? "rbb-rate-status--set" : ""}`} role="status" aria-live="polite">
                 {rateStatus === "confirming" ? "CONFIRMED" : "SET"}

@@ -3936,6 +3936,22 @@ button:focus-visible {
   accent-color: var(--accent);
 }
 
+.rbb-bucket-btn {
+  padding: 2px 8px;
+  border: 1px solid var(--border, #444);
+  border-radius: 3px;
+  background: var(--bg-card, #222);
+  color: var(--text-dim, #888);
+  font-size: 11px;
+  font-family: var(--mono, monospace);
+  cursor: pointer;
+}
+.rbb-bucket-btn.active {
+  background: var(--accent, #4488ff);
+  color: #fff;
+  border-color: var(--accent, #4488ff);
+}
+
 .rbb-rate-status {
   position: absolute;
   top: -28px;
