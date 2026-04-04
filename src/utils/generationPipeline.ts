@@ -31,8 +31,8 @@ export interface PipelineConfig {
   getSpeed: () => number;
   /** Called when a chunk is ready for scheduling */
   onChunkReady: (chunk: ScheduledChunk) => void;
-  /** Called when a chunk should be cached to disk */
-  onCacheChunk?: (startIdx: number, audio: Float32Array, sampleRate: number, durationMs: number) => void;
+  /** Called when a chunk should be cached to disk (TTS-7A: includes wordCount) */
+  onCacheChunk?: (startIdx: number, audio: Float32Array, sampleRate: number, durationMs: number, wordCount: number) => void;
   /** Check if a chunk is already cached */
   isCached?: (startIdx: number) => Promise<boolean>;
   /** Load a cached chunk */
@@ -148,9 +148,9 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
 
         config.onChunkReady(chunk);
 
-        // Cache to disk (fire-and-forget)
+        // Cache to disk (fire-and-forget) — TTS-7A: store actual word count
         if (config.onCacheChunk) {
-          config.onCacheChunk(startIdx, audio, result.sampleRate, durationMs);
+          config.onCacheChunk(startIdx, audio, result.sampleRate, durationMs, chunkWords.length);
         }
       }
       return chunkWords.length;

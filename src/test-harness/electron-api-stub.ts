@@ -621,9 +621,9 @@ export const electronAPIStub: ElectronAPI = {
     if (entry) return trace("ttsCacheRead", [bookId, voiceId, startIdx], entry);
     return trace("ttsCacheRead", [bookId, voiceId, startIdx], { miss: true });
   },
-  ttsCacheWrite: async (bookId: string, voiceId: string, startIdx: number, audioArr: number[], sampleRate: number, durationMs: number) => {
+  ttsCacheWrite: async (bookId: string, voiceId: string, startIdx: number, audioArr: number[], sampleRate: number, durationMs: number, wordCount?: number | null) => {
     const key = `${bookId}:${voiceId}:${startIdx}`;
-    stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs });
+    stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs, wordCount: wordCount ?? null });
     return trace("ttsCacheWrite", [bookId, voiceId, startIdx], { success: true });
   },
   ttsCacheHas: async (bookId: string, voiceId: string, startIdx: number) => {

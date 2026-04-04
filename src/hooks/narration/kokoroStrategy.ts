@@ -75,11 +75,11 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     onChunkReady: (chunk) => {
       scheduler.scheduleChunk(chunk);
     },
-    onCacheChunk: (startIdx, audio, sampleRate, durationMs) => {
+    onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount) => {
       const bookId = deps.getBookId?.() || "";
       const voiceId = getCacheVoice();
       if (bookId) {
-        ttsCache.cacheChunk(bookId, voiceId, startIdx, audio, sampleRate, durationMs);
+        ttsCache.cacheChunk(bookId, voiceId, startIdx, audio, sampleRate, durationMs, wordCount);
       }
     },
     isCached: async (startIdx) => {
@@ -93,8 +93,10 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
       const voiceId = getCacheVoice();
       if (!bookId) return null;
       const words = deps.getWords();
-      const chunkWords = words.slice(startIdx, startIdx + 148); // approximate — cruise size
-      return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, chunkWords);
+      // TTS-7A: Pass remaining words from startIdx — loadCachedChunk uses
+      // the real wordCount stored at cache-write time to slice correctly.
+      const remainingWords = words.slice(startIdx);
+      return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, remainingWords);
     },
     onError: () => deps.onFallbackToWeb(),
     onEnd: () => {

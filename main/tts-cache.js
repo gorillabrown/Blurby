@@ -59,8 +59,9 @@ async function saveManifest() {
  * @param {Float32Array|number[]} pcmData — raw PCM samples
  * @param {number} sampleRate
  * @param {number} durationMs
+ * @param {number} [wordCount] — actual number of words in this chunk (TTS-7A)
  */
-async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durationMs) {
+async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durationMs, wordCount) {
   if (!cacheRoot) return;
 
   const bookDir = path.join(cacheRoot, bookId, voiceId);
@@ -89,7 +90,7 @@ async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durati
     manifest.totalBytes -= oldBytes;
   }
 
-  entry.chunks[startIdx] = { bytes: chunkBytes, sampleRate, durationMs };
+  entry.chunks[startIdx] = { bytes: chunkBytes, sampleRate, durationMs, ...(wordCount != null ? { wordCount } : {}) };
   entry.totalBytes += chunkBytes;
   entry.lastNarrated = Date.now();
   manifest.totalBytes += chunkBytes;
@@ -124,7 +125,7 @@ async function readChunk(bookId, voiceId, startIdx) {
     const decoded = ttsOpus.decode(buffer);
     const meta = entry.chunks[startIdx];
     entry.lastNarrated = Date.now();
-    return { audio: decoded.audio, sampleRate: decoded.sampleRate, durationMs: meta.durationMs };
+    return { audio: decoded.audio, sampleRate: decoded.sampleRate, durationMs: meta.durationMs, wordCount: meta.wordCount ?? null };
   } catch (err) {
     // File missing or corrupt — clean up manifest entry
     console.warn(`[tts-cache] Failed to read/decode chunk ${startIdx}:`, err.message);

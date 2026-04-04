@@ -129,6 +129,111 @@
 **Description:** WPM slider thumb/track, selected mode button background, flow cursor underline, and narration word highlight should use `var(--accent)` — some currently use hardcoded colors.
 **Status:** Open.
 
+### BUG-101: Narration start/restart click handlers block main thread 200ms–1,400ms
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx` (narration start path), `src/hooks/useNarration.ts`
+**Description:** Play/stop/rate-change click handlers consistently exceed the 50ms long-task threshold (observed 203ms to 1,436ms). Keydown handler (same codepath via keyboard shortcut) hit 610ms. Caused by synchronous word extraction, chunk generation, and Kokoro IPC setup all running in one task before yielding to the event loop. Fix: break narration start path into microtasks (extraction check → yield → chunk gen → yield → IPC dispatch).
+**Status:** Open. Sprint: TTS-7C.
+
+### ~~BUG-102~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** CRITICAL
+**Location:** `src/hooks/narration/kokoroStrategy.ts`, `src/utils/ttsCache.ts`, `main/tts-cache.js`
+**Description:** `kokoroStrategy.ts` sliced 148 words for any cache hit. Fix: store actual `wordCount` in cache entry at write time (manifest + IPC), read it back on cache hit. `loadCachedChunk` uses real word count to slice correctly.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-103~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Background cacher used `settings.kokoroVoice`. Fix: changed to `settings.ttsVoiceName` (the actual settings field).
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-104~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`
+**Description:** Background cacher omitted override hash from cache key. Fix: added `overrideHash()` to `cacheBook()` and `isBookFullyCached()`, matching kokoroStrategy identity.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-105~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Background cacher seeded from persisted position. Fix: added `updateCursorPosition()` method, wired to `onWordAdvance` in ReaderContainer. When narration is active, warms ahead of live cursor; falls back to persisted position otherwise.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-106~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`
+**Description:** File header claimed 3-slot priority system, but runLoop was serial. Fix: removed misleading comment, documented actual serial behavior. Kept serial design (sufficient for use case).
+**Status:** Resolved. Sprint: TTS-7A.
+
+### BUG-107: EPUB word clicks during narration move highlight but don't retarget TTS
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx:1002` (foliate click), `src/components/ReaderContainer.tsx:863` (resync path)
+**Description:** Clicking a word in foliate EPUB during active narration calls `setHighlightedWordIndex(globalWordIndex)` directly, but does not route through the live TTS resync path at line 863. Page view uses the resync path; foliate does not. Cursor moves visually but audio continues from old position.
+**Status:** Open. Sprint: TTS-7B.
+
+### BUG-108: Pause + browse-away doesn't reconcile narration restart position
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/PageReaderView.tsx:257`, `src/components/FoliatePageView.tsx:915`, `src/hooks/useReaderMode.ts:266`
+**Description:** Page view and foliate view intentionally let the user browse away from narration position without moving TTS cursor. When narration pauses back to page mode, `useReaderMode.ts:266` does not reconcile narration position vs browsed position. Restart source stays stale — user expects to resume from where they browsed, but audio resumes from where it paused.
+**Status:** Open. Sprint: TTS-7B.
+
+### BUG-109: Kokoro fallback starts Web Speech without tearing down Kokoro session
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useNarration.ts:115`
+**Description:** Fallback dispatches `engine=web` and immediately starts Web Speech without stopping the Kokoro pipeline/scheduler first. Risks overlap, stale callbacks, and double ownership of the cursor.
+**Status:** Open. Sprint: TTS-7B.
+
+### BUG-110: Pause settings (rhythm.ts, pauseDetection.ts) are dead code for Kokoro
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx:355`, `src/hooks/useNarration.ts:560`, `src/utils/rhythm.ts`, `src/utils/pauseDetection.ts`
+**Description:** App exposes pause-tuning controls that push config into narration, but no live Kokoro call path consumes `rhythm.ts` or `pauseDetection.ts`. Controls are misleading — they shape nothing during Kokoro playback. Fix: remove pause-tuning UI when Kokoro is active (Kokoro handles prosody natively).
+**Status:** Open. Sprint: TTS-7C.
+
+### BUG-111: Kokoro "pause" is audio suspend only, not a retargetable paused session
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/hooks/useNarration.ts:453`, `src/hooks/narration/kokoroStrategy.ts:133`, `src/utils/generationPipeline.ts:46`
+**Description:** Pause delegates to strategy, which only suspends/resumes the scheduler. The generation pipeline has no `pause()` API — only `start/stop/flush`. This undermines the "paused cursor = restart source" model. Fix: add `pause()` to pipeline (freeze chunk emission, keep state). Kokoro pause = suspend scheduler + freeze pipeline.
+**Status:** Open. Sprint: TTS-7B.
+
+### BUG-112: Duplicate full-book extraction can run concurrently
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx:376` (background pre-extraction), `src/components/ReaderContainer.tsx:405` (narration-start extraction)
+**Description:** Background pre-extraction and narration-start extraction have no in-flight dedupe. Both can run simultaneously, doubling IPC and CPU cost. Fix: if extraction is in-flight, return existing promise.
+**Status:** Open. Sprint: TTS-7C.
+
+### BUG-113: Cache IPC is copy-heavy (Array.from round-trips)
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/ttsCache.ts:60`, `main/ipc/tts.js:118`
+**Description:** PCM audio converts to `Array.from()` on cache write and back to plain arrays on cache read. Adds avoidable allocation/copy overhead exactly where cache hits should eliminate pauses. Fix: use `SharedArrayBuffer` or transferable for PCM data.
+**Status:** Open. Sprint: TTS-7C.
+
+### ~~BUG-114~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/LibraryContainer.tsx`, `src/hooks/useNarration.ts`
+**Description:** Bug reporter read wrong field names and had no live diagnostics call sites. Fix: corrected `ttsVoice`→`ttsVoiceName`, `ttsSpeed`→`ttsRate`. Added `recordSnapshot()` at narration start, chunk delivery (web + kokoro), and stop. Added `recordDiagEvent()` at start/stop/pause/resume.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### BUG-115: No queue-depth/backpressure enforcement in generation pipeline
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/constants.ts` (`TTS_QUEUE_DEPTH`)
+**Description:** `TTS_QUEUE_DEPTH` constant exists but has no runtime consumer. Pipeline keeps producing regardless of scheduler buffer state. Can cause starvation when generation is slow and overproduction/memory pressure when cache hits are fast. Fix: pause chunk emission when scheduler has ≥N buffered chunks, resume on drain.
+**Status:** Open. Sprint: TTS-7C.
+
 ### ~~BUG-096~~ ✅ Fixed — TTS-6S (v1.28.0)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
@@ -491,3 +596,4 @@
 **Location:** `src/components/ReaderBottomBar.tsx`
 **Problem:** Bottom bar had `opacity: 0.08` during Focus/Flow/Narration, making controls nearly invisible.
 **Solution:** Remov
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

@@ -9,6 +9,7 @@ import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIn
 import useNarration from "../hooks/useNarration";
 import { findSectionForWord, type BookWordArray } from "../types/narration";
 import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
+import { mergeOverrides } from "../utils/pronunciationOverrides";
 import { BlurbyDoc, BlurbySettings } from "../types";
 import useReader from "../hooks/useReader";
 import { useReaderKeys } from "../hooks/useKeyboardShortcuts";
@@ -284,9 +285,10 @@ export default function ReaderContainer({
         const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
         return { audio: result.audio, sampleRate: result.sampleRate, durationMs };
       },
-      getVoiceId: () => settings.kokoroVoice || "af_bella",
+      getVoiceId: () => settings.ttsVoiceName || "af_bella",
       isCacheEnabled: () => settings.ttsCacheEnabled !== false,
       getRateBucket: () => resolveKokoroBucket(settings.ttsRate || 1.0),
+      getPronunciationOverrides: () => mergeOverrides(settings.pronunciationOverrides || [], activeDoc.pronunciationOverrides || []),
     });
     backgroundCacherRef.current = cacher;
     cacher.start();
@@ -296,7 +298,7 @@ export default function ReaderContainer({
       backgroundCacherRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.kokoroVoice, settings.ttsRate]);
+  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.ttsVoiceName, settings.ttsRate]);
 
   // NAR-5: Set active book on the background cacher when text is available
   useEffect(() => {
@@ -546,6 +548,8 @@ export default function ReaderContainer({
     foliateApiRef,
     onWordAdvance: (idx: number) => {
       setHighlightedWordIndex(idx);
+      // TTS-7A: Update background cacher with live cursor position
+      backgroundCacherRef.current?.updateCursorPosition(idx);
       // Also fire the RAF-based DOM update for ReaderView's focus span rendering
       // (ReaderView uses direct DOM manipulation when focusSpan < 1, bypassing React)
       if (onWordUpdateRef.current && wordsRef.current[idx]) {
