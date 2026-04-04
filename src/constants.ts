@@ -95,6 +95,16 @@ export const TTS_CROSSFADE_MS = 8;
 /** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
 export const TTS_FORWARD_WORDS = 300;
 
+// ── Narrate Performance Budgets (TTS-6O) ────────────────────────────────────
+/** Max ms from user click to first audio chunk playing */
+export const NARRATE_STARTUP_BUDGET_MS = 3000;
+/** Max ms for a rate-change restart to produce audible playback */
+export const NARRATE_RESTART_BUDGET_MS = 1500;
+/** Max ms any single synchronous operation should block during active narration */
+export const NARRATE_STEADY_STATE_BLOCK_MS = 50;
+/** Delay before pre-extracting full-book words in background (ms after reader open) */
+export const NARRATE_BG_EXTRACT_DELAY_MS = 1000;
+
 // ── Pronunciation Overrides (TTS-6E) ────────────────────────────────────────
 /** Maximum number of pronunciation overrides a user can create */
 export const MAX_PRONUNCIATION_OVERRIDES = 100;

@@ -264,12 +264,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.24.0 — Post-TTS-6N)
+## Current System State (v1.25.0 — Post-TTS-6O)
 
 ### Codebase (branch: `main`)
 
-- All sprints through TTS-6N complete (+ TTS-6C through TTS-6N + GOV-6D)
-- 1,153 tests across 62 test files
+- All sprints through TTS-6O complete (+ TTS-6C through TTS-6O + GOV-6D)
+- 1,162 tests across 63 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -323,7 +323,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 62 test files, 1,153 tests
+  - **Tests** (`tests/`): 63 test files, 1,162 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -333,7 +333,7 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ### What's Next
 
-- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K → ✅ TTS-6L → ✅ TTS-6M → TTS-6N → TTS-6O → TTS-6P
+- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K → ✅ TTS-6L → ✅ TTS-6M → ✅ TTS-6N → TTS-6O → TTS-6P → TTS-6Q
 - **Code signing** — not doing (explicit decision)
 - **Multi-window support** — someday backlog
 
@@ -341,9 +341,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through TTS-6N complete (v1.24.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through TTS-6O complete (v1.25.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ TTS-6L → ✅ TTS-6M → ✅ TTS-6N (runtime stability & extraction sync)
+✅ TTS-6M → ✅ TTS-6N → ✅ TTS-6O (performance budgets & background isolation)
 
-**Next:** TTS-6O (performance budgets & background isolation) → TTS-6P (session continuity & recovery)
+**Next:** TTS-6P (session continuity & recovery) → TTS-6Q (diagnostics & regression shields)
