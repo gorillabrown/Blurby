@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
-import type { BlurbySettings } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket } from "../../constants";
+import { useState, useEffect, useCallback } from "react";
+import type { BlurbySettings, PronunciationOverride } from "../../types";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES } from "../../constants";
+import { applyPronunciationOverrides } from "../../utils/pronunciationOverrides";
 
 const api = window.electronAPI;
 
@@ -370,6 +371,11 @@ export function TTSSettings({ settings, onSettingsChange }: TTSSettingsProps) {
         Paragraphs with this many sentences or fewer are treated as dialogue and get a shorter pause.
       </div>
 
+      <PronunciationOverridesEditor
+        overrides={settings.pronunciationOverrides || []}
+        onChange={(overrides) => onSettingsChange({ pronunciationOverrides: overrides })}
+      />
+
       <div className="settings-section-label">Narration Cache</div>
 
       <div className="settings-toggle-row">
@@ -425,5 +431,130 @@ function CacheSizeDisplay() {
         Clear cache
       </button>
     </div>
+  );
+}
+
+/** Pronunciation overrides editor */
+function PronunciationOverridesEditor({
+  overrides,
+  onChange,
+}: {
+  overrides: PronunciationOverride[];
+  onChange: (overrides: PronunciationOverride[]) => void;
+}) {
+  const [newFrom, setNewFrom] = useState("");
+  const [newTo, setNewTo] = useState("");
+  const [previewText, setPreviewText] = useState("The CEO of NASA gave a TED talk.");
+  const [previewResult, setPreviewResult] = useState<string | null>(null);
+
+  const handleAdd = useCallback(() => {
+    if (!newFrom.trim() || overrides.length >= MAX_PRONUNCIATION_OVERRIDES) return;
+    const id = `po-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    onChange([...overrides, { id, from: newFrom.trim(), to: newTo.trim(), enabled: true }]);
+    setNewFrom("");
+    setNewTo("");
+  }, [newFrom, newTo, overrides, onChange]);
+
+  const handleRemove = useCallback((id: string) => {
+    onChange(overrides.filter(o => o.id !== id));
+  }, [overrides, onChange]);
+
+  const handleToggle = useCallback((id: string) => {
+    onChange(overrides.map(o => o.id === id ? { ...o, enabled: !o.enabled } : o));
+  }, [overrides, onChange]);
+
+  const handleMoveUp = useCallback((idx: number) => {
+    if (idx <= 0) return;
+    const next = [...overrides];
+    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+    onChange(next);
+  }, [overrides, onChange]);
+
+  const handlePreview = useCallback(() => {
+    setPreviewResult(applyPronunciationOverrides(previewText, overrides));
+  }, [previewText, overrides]);
+
+  return (
+    <>
+      <div className="settings-section-label">Pronunciation Overrides</div>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+        Replace words before TTS speaks them. Useful for names, acronyms, and technical terms.
+      </div>
+
+      {overrides.map((o, idx) => (
+        <div key={o.id} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontSize: 12 }}>
+          <button
+            onClick={() => handleToggle(o.id)}
+            style={{ width: 20, height: 20, border: "1px solid var(--border)", borderRadius: 3, background: o.enabled ? "var(--accent)" : "var(--bg-card)", color: o.enabled ? "#fff" : "var(--text-dim)", cursor: "pointer", fontSize: 10, padding: 0 }}
+            title={o.enabled ? "Disable" : "Enable"}
+            aria-label={o.enabled ? "Disable override" : "Enable override"}
+          >{o.enabled ? "✓" : ""}</button>
+          <span style={{ color: o.enabled ? "var(--text)" : "var(--text-dim)", textDecoration: o.enabled ? "none" : "line-through" }}>
+            {o.from} → {o.to || "(remove)"}
+          </span>
+          <button
+            onClick={() => handleMoveUp(idx)}
+            disabled={idx === 0}
+            style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-dim)", cursor: idx > 0 ? "pointer" : "default", fontSize: 10, padding: "2px 4px" }}
+            title="Move up"
+            aria-label="Move up"
+          >↑</button>
+          <button
+            onClick={() => handleRemove(o.id)}
+            style={{ background: "none", border: "none", color: "var(--text-dim)", cursor: "pointer", fontSize: 10, padding: "2px 4px" }}
+            title="Remove"
+            aria-label="Remove override"
+          >×</button>
+        </div>
+      ))}
+
+      {overrides.length < MAX_PRONUNCIATION_OVERRIDES && (
+        <div style={{ display: "flex", gap: 6, marginTop: 6, marginBottom: 8 }}>
+          <input
+            type="text"
+            placeholder="From"
+            value={newFrom}
+            onChange={(e) => setNewFrom(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
+            style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+            aria-label="Word to replace"
+          />
+          <input
+            type="text"
+            placeholder="Speak as"
+            value={newTo}
+            onChange={(e) => setNewTo(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
+            style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+            aria-label="Replacement pronunciation"
+          />
+          <button
+            onClick={handleAdd}
+            disabled={!newFrom.trim()}
+            style={{ padding: "4px 10px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: newFrom.trim() ? "pointer" : "default", fontSize: 11 }}
+          >Add</button>
+        </div>
+      )}
+
+      {/* Preview */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        <input
+          type="text"
+          value={previewText}
+          onChange={(e) => { setPreviewText(e.target.value); setPreviewResult(null); }}
+          style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+          aria-label="Preview text"
+        />
+        <button
+          onClick={handlePreview}
+          style={{ padding: "4px 10px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+        >Preview</button>
+      </div>
+      {previewResult !== null && (
+        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12, fontStyle: "italic" }}>
+          TTS will read: "{previewResult}"
+        </div>
+      )}
+    </>
   );
 }

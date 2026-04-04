@@ -94,6 +94,10 @@ export const TTS_CROSSFADE_MS = 8;
 /** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
 export const TTS_FORWARD_WORDS = 300;
 
+// ── Pronunciation Overrides (TTS-6E) ────────────────────────────────────────
+/** Maximum number of pronunciation overrides a user can create */
+export const MAX_PRONUNCIATION_OVERRIDES = 100;
+
 // ── Kokoro Rate Buckets (TTS-6C) ────────────────────────────────────────────
 /** Supported Kokoro native generation rates — no pitch-shift, no scheduler stretch */
 export const KOKORO_RATE_BUCKETS = [1.0, 1.2, 1.5] as const;
@@ -343,6 +347,7 @@ export const DEFAULT_SETTINGS = {
   ttsPauseSentenceMs: TTS_PAUSE_SENTENCE_MS,
   ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
   ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
+  pronunciationOverrides: [] as import("./types").PronunciationOverride[],
 };
 
 // ── Flow Scroll Mode (FLOW-3A) ─────────────────────────────────────────────
