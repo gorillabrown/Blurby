@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6L (Narration Profiles & Sharing Foundations). 1,126 tests, 60 files. Latest tagged release: v1.22.0.
+**Last updated**: 2026-04-04 — Post-TTS-6M (Narration Portability & Reset Safety). 1,141 tests, 61 files. Latest tagged release: v1.23.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6L complete). Queue YELLOW (TTS-6M → TTS-6N; depth 2 — backfill needed).
+**Current state**: Phase 6 in progress (TTS-6M complete). Queue RED (TTS-6N only; depth 1 — backfill urgent).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -39,7 +39,7 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6J: Voice Selection & Persona Consistency ✅ (v1.20.0)
   ├── TTS-6K: Narration Personalization & Quality Sweep ✅ (v1.21.0)
   ├── TTS-6L: Narration Profiles & Sharing Foundations ✅ (v1.22.0)
-  ├── TTS-6M: Narration Portability & Reset Safety (queued)
+  ├── TTS-6M: Narration Portability & Reset Safety ✅ (v1.23.0)
   └── TTS-6N: Narration Runtime Stability & Extraction Sync (queued)
     │
     ├────────────────────────┐

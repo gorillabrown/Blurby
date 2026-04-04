@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { BlurbySettings, PronunciationOverride, NarrationProfile } from "../../types";
 import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES, MAX_NARRATION_PROFILES, createDefaultNarrationProfile, profileFromSettings } from "../../constants";
 import { applyPronunciationOverrides } from "../../utils/pronunciationOverrides";
+import { exportNarrationData, validateNarrationImport, applyNarrationImport, resetNarrationData } from "../../utils/narrationPortability";
 
 const api = window.electronAPI;
 
@@ -582,6 +583,73 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       </div>
 
       <CacheSizeDisplay />
+
+      {/* Export / Import / Reset (TTS-6M) */}
+      <div className="settings-section-label">Narration Data</div>
+      <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+        <button
+          className="settings-btn-secondary"
+          onClick={() => {
+            const payload = exportNarrationData(settings);
+            const json = JSON.stringify(payload, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `blurby-narration-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          style={{ padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+        >Export</button>
+        <button
+          className="settings-btn-secondary"
+          onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".json";
+            input.onchange = async () => {
+              const file = input.files?.[0];
+              if (!file) return;
+              try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                const validation = validateNarrationImport(data, settings);
+                if (!validation.valid) {
+                  alert("Import failed:\n" + validation.errors.join("\n"));
+                  return;
+                }
+                const msg = `Import ${validation.profileCount} profile(s) and ${validation.overrideCount} override(s)?`
+                  + (validation.warnings.length > 0 ? "\n\n" + validation.warnings.join("\n") : "");
+                if (!confirm(msg)) return;
+                const updates = applyNarrationImport(data, settings, "merge");
+                onSettingsChange(updates);
+              } catch {
+                alert("Import failed: invalid JSON file.");
+              }
+            };
+            input.click();
+          }}
+          style={{ padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+        >Import</button>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+        Export or import narration profiles and pronunciation overrides as JSON.
+      </div>
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        {profiles.length > 0 && (
+          <button
+            onClick={() => { if (confirm("Delete all narration profiles? This cannot be undone.")) onSettingsChange(resetNarrationData("profiles")); }}
+            style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--error, #c44)", cursor: "pointer", fontSize: 11 }}
+          >Reset profiles</button>
+        )}
+        {(settings.pronunciationOverrides?.length ?? 0) > 0 && (
+          <button
+            onClick={() => { if (confirm("Clear all global pronunciation overrides? This cannot be undone.")) onSettingsChange(resetNarrationData("overrides")); }}
+            style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--error, #c44)", cursor: "pointer", fontSize: 11 }}
+          >Reset overrides</button>
+        )}
+      </div>
     </div>
   );
 }

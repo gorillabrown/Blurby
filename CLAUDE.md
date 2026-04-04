@@ -264,12 +264,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.22.0 — Post-TTS-6L)
+## Current System State (v1.23.0 — Post-TTS-6M)
 
 ### Codebase (branch: `main`)
 
-- All sprints through TTS-6L complete (+ TTS-6C through TTS-6L + GOV-6D)
-- 1,126 tests across 60 test files
+- All sprints through TTS-6M complete (+ TTS-6C through TTS-6M + GOV-6D)
+- 1,141 tests across 61 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -323,7 +323,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 60 test files, 1,126 tests
+  - **Tests** (`tests/`): 61 test files, 1,141 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
 - **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
 
@@ -341,9 +341,9 @@ Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all c
 
 ## Dependency Chain
 
-All sprints through TTS-6L complete (v1.22.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
+All sprints through TTS-6M complete (v1.23.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
 
 Recent chain:
-✅ TTS-6J → ✅ TTS-6K → ✅ TTS-6L (narration profiles & sharing foundations)
+✅ TTS-6K → ✅ TTS-6L → ✅ TTS-6M (narration portability & reset safety)
 
-**Next:** TTS-6M (narration portability & reset safety) → TTS-6N (runtime stability & extraction sync)
+**Next:** TTS-6N (runtime stability & extraction sync)
