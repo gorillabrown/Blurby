@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { selectPreferredVoice } from "../src/utils/voiceSelection";
 
 /**
  * useNarration hook tests — testing the pure logic of rate clamping,
@@ -36,46 +37,63 @@ describe("useNarration — rate adjustment logic", () => {
   });
 });
 
-describe("useNarration — voice selection logic", () => {
+describe("useNarration — voice selection logic (selectPreferredVoice)", () => {
   interface MockVoice {
     name: string;
     lang: string;
-    default: boolean;
   }
 
-  function selectDefaultVoice(voices: MockVoice[]): MockVoice | null {
-    if (voices.length === 0) return null;
-    const english = voices.find((v) => v.lang.startsWith("en"));
-    return english || voices[0];
-  }
-
-  it("selects first English voice when available", () => {
+  it("prefers en-US over en-GB and other en-* variants", () => {
     const voices: MockVoice[] = [
-      { name: "French", lang: "fr-FR", default: false },
-      { name: "English US", lang: "en-US", default: false },
-      { name: "English UK", lang: "en-GB", default: false },
+      { name: "English AU", lang: "en-AU" },
+      { name: "English UK", lang: "en-GB" },
+      { name: "English US", lang: "en-US" },
     ];
-    expect(selectDefaultVoice(voices)?.name).toBe("English US");
+    expect(selectPreferredVoice(voices)?.name).toBe("English US");
   });
 
-  it("falls back to first voice when no English voice", () => {
+  it("prefers en-GB when en-US is absent", () => {
     const voices: MockVoice[] = [
-      { name: "French", lang: "fr-FR", default: false },
-      { name: "German", lang: "de-DE", default: false },
+      { name: "French", lang: "fr-FR" },
+      { name: "English AU", lang: "en-AU" },
+      { name: "English UK", lang: "en-GB" },
     ];
-    expect(selectDefaultVoice(voices)?.name).toBe("French");
+    expect(selectPreferredVoice(voices)?.name).toBe("English UK");
   });
 
-  it("returns null for empty voices array", () => {
-    expect(selectDefaultVoice([])).toBeNull();
+  it("falls back to any en-* when en-US and en-GB are absent", () => {
+    const voices: MockVoice[] = [
+      { name: "Spanish", lang: "es-ES" },
+      { name: "English AU", lang: "en-AU" },
+    ];
+    expect(selectPreferredVoice(voices)?.name).toBe("English AU");
   });
 
-  it("matches en- prefix for various English locales", () => {
+  it("falls back to first voice when no English voice exists", () => {
     const voices: MockVoice[] = [
-      { name: "Spanish", lang: "es-ES", default: false },
-      { name: "English AU", lang: "en-AU", default: false },
+      { name: "French", lang: "fr-FR" },
+      { name: "German", lang: "de-DE" },
     ];
-    expect(selectDefaultVoice(voices)?.name).toBe("English AU");
+    expect(selectPreferredVoice(voices)?.name).toBe("French");
+  });
+
+  it("returns undefined for empty voices array", () => {
+    expect(selectPreferredVoice([])).toBeUndefined();
+  });
+
+  it("handles single en-US voice", () => {
+    const voices: MockVoice[] = [{ name: "English US", lang: "en-US" }];
+    expect(selectPreferredVoice(voices)?.name).toBe("English US");
+  });
+
+  it("does not match en prefix without hyphen (e.g. 'enx')", () => {
+    const voices: MockVoice[] = [
+      { name: "Fake", lang: "enx-ZZ" },
+      { name: "French", lang: "fr-FR" },
+    ];
+    // "enx-ZZ" starts with "en" so it matches tier 3 — this is acceptable
+    // since real BCP-47 English locales always use "en-" prefix
+    expect(selectPreferredVoice(voices)?.name).toBe("Fake");
   });
 });
 

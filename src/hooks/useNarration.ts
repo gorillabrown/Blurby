@@ -7,6 +7,7 @@ import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
+import { selectPreferredVoice } from "../utils/voiceSelection";
 
 export interface NarrationState {
   speaking: boolean;
@@ -183,11 +184,8 @@ export default function useNarration() {
       const v = window.speechSynthesis?.getVoices() || [];
       if (v.length > 0) {
         setVoices(v);
-        const english = v.find((voice) => voice.lang === "en-US")
-          || v.find((voice) => voice.lang === "en-GB")
-          || v.find((voice) => voice.lang.startsWith("en"))
-          || v[0];
-        setCurrentVoice((prev) => prev || english);
+        const preferred = selectPreferredVoice(v);
+        setCurrentVoice((prev) => prev || preferred || null);
       }
     };
     loadVoices();
