@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6C (Kokoro native-rate buckets). 1,050 tests, 52 files. Latest tagged release: v1.14.0.
+**Last updated**: 2026-04-04 — Post-TTS-6D (Kokoro startup & recovery hardening). 1,061 tests, 53 files. Latest tagged release: v1.15.0.
 **Current branch**: `main`
-**Current state**: Phase 6 in progress (TTS-6C complete). Queue GREEN (TTS-6D → TTS-6E → TTS-6F; depth 3).
+**Current state**: Phase 6 in progress (TTS-6D complete). Queue GREEN (TTS-6E → TTS-6F → TTS-6G; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -31,9 +31,10 @@ Phase 5: Read Later + Chrome Extension
     ▼
 Phase 6: TTS Hardening & App Polish
   ├── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
-  ├── TTS-6D: Kokoro Startup & Recovery Hardening (queued)
+  ├── TTS-6D: Kokoro Startup & Recovery Hardening ✅ (v1.15.0)
   ├── TTS-6E: Pronunciation Overrides Foundation (queued)
-  └── TTS-6F: Word Alignment & Narration Telemetry (queued)
+  ├── TTS-6F: Word Alignment & Narration Telemetry (queued)
+  └── TTS-6G: Narration Controls & Accessibility Polish (queued)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -228,7 +229,9 @@ Phase 5 is complete when:
 
 ---
 
-### Sprint TTS-6D: Kokoro Startup & Recovery Hardening
+### Sprint TTS-6D: Kokoro Startup & Recovery Hardening ✅ COMPLETED (v1.15.0, 2026-04-04)
+
+> Implemented and merged to `main`. 11 new tests (1,061 total, 53 files). Unified `tts-kokoro-engine-status` events (`warming` / `ready` / `retrying` / `error`), explicit narration warming state, 2-second delayed prewarm, reader/settings warm-up affordances, and visible crash-retry UX. `BUG-032` resolved. All 10 SUCCESS CRITERIA met.
 
 **Goal:** Eliminate the remaining "hung" feeling around Kokoro first-use, idle re-warm, and worker recovery so narration always presents a visible, deterministic startup path instead of silent waiting.
 
@@ -417,6 +420,69 @@ Phase 5 is complete when:
 
 ---
 
+### Sprint TTS-6G: Narration Controls & Accessibility Polish
+
+**Goal:** Finish the remaining day-to-day Narrate mode control polish so keyboard, bottom-bar controls, and settings all express the same engine-aware rate semantics and remain understandable while Kokoro/Web Speech differ underneath.
+
+**Problem:** The core Kokoro lane is now reliable, but the control surface still has one obvious gap and a few consistency risks. `BUG-053` is still open: in Narration mode, keyboard speed controls should adjust TTS rate, not WPM. More broadly, the reader bottom bar, keyboard shortcuts, and settings need one shared control contract so Kokoro buckets and Web Speech continuous rate behave predictably and accessibly.
+
+**Design decisions:**
+- **Engine-aware control semantics:** In Narration mode, Kokoro steps among `1.0x`, `1.2x`, `1.5x`; Web Speech steps in `0.1` increments. Non-narration modes keep WPM behavior.
+- **Single rate-control path:** Keyboard shortcuts, reader controls, and settings should all route through the same engine-aware stepping/resolution helpers rather than re-implementing logic in multiple places.
+- **Readable affordances:** The active control should clearly communicate whether the user is adjusting WPM or TTS rate, and for Kokoro it should show the discrete bucket model instead of implying fine-grained values.
+- **Accessibility first:** Keyboard interactions, aria labels, and visible hints should make the engine-specific behavior discoverable without extra docs.
+
+**Baseline:**
+- `src/hooks/useKeyboardShortcuts.ts` — mode-aware arrow key handling
+- `src/components/ReaderContainer.tsx` — narration rate updates + keyboard wiring
+- `src/components/ReaderBottomBar.tsx` — mode-specific slider/label behavior
+- `src/components/settings/SpeedReadingSettings.tsx` — engine/rate controls in settings
+- `src/constants.ts` — Kokoro bucket helpers and Web Speech rate constants
+- `docs/governance/BUG_REPORT.md` — `BUG-053`
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-053`
+4. `ROADMAP.md` — this section
+5. `src/constants.ts`
+6. `src/hooks/useKeyboardShortcuts.ts`
+7. `src/components/ReaderContainer.tsx`
+8. `src/components/ReaderBottomBar.tsx`
+9. `src/components/settings/SpeedReadingSettings.tsx`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Unify narration-rate stepping helpers** — Make one engine-aware helper path for rate step up/down and display resolution so keyboard, bottom bar, and settings share the same behavior. Reuse existing Kokoro bucket helpers where appropriate. | `src/constants.ts`, shared helper location as needed |
+| 2 | Primary CLI (renderer-fixer scope) | **Fix `BUG-053` keyboard behavior** — In Narration mode, Up/Down arrows adjust TTS rate instead of WPM. Kokoro snaps bucket-to-bucket; Web Speech uses `0.1` increments. Non-narration modes keep current WPM semantics. | `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderContainer.tsx` |
+| 3 | Primary CLI (renderer-fixer scope) | **Reader bottom bar clarity** — Make the bottom bar label/value/hint clearly reflect whether the control is WPM or TTS rate. For Kokoro, emphasize the three discrete buckets rather than implying continuous precision. | `src/components/ReaderBottomBar.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **Settings consistency pass** — Ensure Narrate settings describe Kokoro bucket behavior versus Web Speech continuous rate in plain language and stay visually synchronized with in-reader changes. | `src/components/settings/SpeedReadingSettings.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Accessibility polish** — Add/update aria labels, keyboard hints, and any lightweight helper text needed so the narration control semantics are discoverable and testable. | `src/components/ReaderBottomBar.tsx`, `src/components/settings/SpeedReadingSettings.tsx` |
+| 6 | test-runner | **Tests** — Cover: narration-mode arrow keys affect rate not WPM, Kokoro keyboard stepping snaps between three buckets, Web Speech uses `0.1` increments, bottom bar label switches correctly between WPM/rate semantics, and settings/reader stay synchronized after keyboard changes. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | quality-reviewer | **Architecture + code quality review** | — |
+| 10 | doc-keeper | **Documentation pass** — Mark `BUG-053` resolved if the new control behavior is fully shipped and update reference docs if control semantics changed materially. | `ROADMAP.md`, `docs/governance/BUG_REPORT.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. `BUG-053` is resolved: Narration-mode arrow keys adjust TTS rate instead of WPM
+2. Kokoro keyboard stepping moves only among `1.0x`, `1.2x`, and `1.5x`
+3. Web Speech keyboard stepping uses `0.1` increments and keeps its existing continuous model
+4. Non-narration reading modes keep current WPM keyboard behavior
+5. Reader bottom bar clearly communicates whether the active control is WPM or TTS rate
+6. Settings text and in-reader controls stay synchronized for both engines
+7. Control semantics are accessible via labels/hints and do not rely on hidden assumptions
+8. New tests cover keyboard stepping and control-surface synchronization
+9. `npm test` passes
+10. `npm run build` succeeds
+
+---
+
 ### Drafted Later Work (Not In Queue Yet)
 
 `EINK-6A` and `GOALS-6B` remain drafted below for later phases, but they are intentionally not the next dispatches while the TTS lane is still active.
@@ -582,7 +648,7 @@ Phase 2 is complete when:
 
 | Sprint | Version | Status | Summary |
 |--------|---------|--------|---------|
-| GOV-6D | v1.15.0 | ✅ DONE | Claude CLI agent staging alignment. `blurby-lead` scope-label model normalized, live governance terminology corrected, and future sprint staging synced to the real callable subagents. |
+| TTS-6E | v1.16.0 | ✅ DONE | Pronunciation overrides foundation. Global override list, settings editor, preview, cache-safe Kokoro generation. 15 new tests. |
 | TTS-6D | v1.15.0 | ✅ DONE | Kokoro startup/recovery hardening. Unified engine-status events, warming state, delayed prewarm, crash recovery UX. BUG-032 resolved. 11 new tests. |
 | TTS-6C | v1.14.0 | ✅ DONE | Kokoro native-rate buckets (1.0x/1.2x/1.5x). rateBucket cache identity, immediate restart on rate change, active-bucket warming. 18 new tests. |
 | EXT-5A | v1.10.0 | ✅ DONE | Chrome extension E2E + queue integration. 33 new tests. Phase 5A complete. |

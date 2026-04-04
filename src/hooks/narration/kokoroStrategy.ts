@@ -11,6 +11,8 @@ import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler } from "../../utils/audioScheduler";
 import * as ttsCache from "../../utils/ttsCache";
 import { resolveKokoroBucket } from "../../constants";
+import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
+import type { PronunciationOverride } from "../../types";
 
 const api = window.electronAPI;
 
@@ -25,6 +27,8 @@ export interface KokoroStrategyDeps {
   getWords: () => string[];
   /** Get the active book ID (for caching) */
   getBookId?: () => string;
+  /** Get current pronunciation overrides for text normalization + cache identity */
+  getPronunciationOverrides?: () => PronunciationOverride[];
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
 }
@@ -44,15 +48,21 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
   /** Resolve current speed to a Kokoro native-rate bucket */
   const getBucket = () => resolveKokoroBucket(deps.getSpeed());
 
-  /** Build the cache key voice segment: voiceId/rateBucket */
-  const getCacheVoice = () => `${deps.getVoiceId()}/${getBucket()}`;
+  /** Build the cache key voice segment: voiceId/rateBucket[/overrideHash] */
+  const getCacheVoice = () => {
+    const base = `${deps.getVoiceId()}/${getBucket()}`;
+    const oh = overrideHash(deps.getPronunciationOverrides?.());
+    return oh ? `${base}/${oh}` : base;
+  };
 
   const pipeline = createGenerationPipeline({
     generateFn: async (text, voiceId, speed) => {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
+      // Apply pronunciation overrides before generation
+      const normalizedText = applyPronunciationOverrides(text, deps.getPronunciationOverrides?.());
       // Generate at native bucket rate — no scheduler stretch needed
       const bucket = resolveKokoroBucket(speed);
-      const result = await api.kokoroGenerate(text, voiceId, bucket);
+      const result = await api.kokoroGenerate(normalizedText, voiceId, bucket);
       if (result.error || !result.audio || !result.sampleRate) {
         return { error: result.error || "no audio returned" };
       }

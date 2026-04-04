@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
 import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS, resolveKokoroBucket } from "../constants";
+import { applyPronunciationOverrides } from "../utils/pronunciationOverrides";
+import type { PronunciationOverride } from "../types";
 import type { RhythmPauses } from "../types";
 import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/pauseDetection";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
@@ -82,6 +84,7 @@ export default function useNarration() {
   const pauseConfigRef = useRef<PauseConfig>(DEFAULT_PAUSE_CONFIG);
   const onSectionEndRef = useRef<(() => void) | null>(null);
   const bookIdRef = useRef<string>("");
+  const pronunciationOverridesRef = useRef<PronunciationOverride[]>([]);
 
   // ── TTS Strategy instances ──────────────────────────────────────────────
   const webStrategy = useMemo(
@@ -100,6 +103,7 @@ export default function useNarration() {
       getStatus: () => stateRef.current.status,
       getWords: () => allWordsRef.current,
       getBookId: () => bookIdRef.current,
+      getPronunciationOverrides: () => pronunciationOverridesRef.current,
       onFallbackToWeb: () => {
         dispatch({ type: "SET_ENGINE", engine: "web" });
         speakNextChunkWebRef.current();
@@ -239,7 +243,7 @@ export default function useNarration() {
 
     const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
     const chunkWords = words.slice(startIdx, endIdx);
-    const chunkText = chunkWords.join(" ");
+    const chunkText = applyPronunciationOverrides(chunkWords.join(" "), pronunciationOverridesRef.current);
     const chunkStart = startIdx;
 
     webStrategy.speakChunk(
@@ -556,6 +560,9 @@ export default function useNarration() {
     },
     setBookId: (id: string) => {
       bookIdRef.current = id;
+    },
+    setPronunciationOverrides: (overrides: PronunciationOverride[]) => {
+      pronunciationOverridesRef.current = overrides;
     },
     warmUp: () => {
       kokoroStrategy.warmUp();

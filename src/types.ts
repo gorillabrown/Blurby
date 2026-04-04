@@ -1,3 +1,11 @@
+// ── Pronunciation Overrides (TTS-6E) ────────────────────────────────────────
+export interface PronunciationOverride {
+  id: string;
+  from: string;  // text to find (case-insensitive)
+  to: string;    // replacement text for TTS
+  enabled: boolean;
+}
+
 // ── Document schema ──────────────────────────────────────────────────────────
 export interface BlurbyDoc {
   id: string;
@@ -119,6 +127,8 @@ export interface BlurbySettings {
   useLegacyRenderer?: boolean;   // opt-in for legacy word-by-word renderer
   // NAR-4: TTS cache settings
   ttsCacheEnabled?: boolean;     // background caching of Reading Now books (default true)
+  // TTS-6E: Pronunciation overrides
+  pronunciationOverrides?: PronunciationOverride[];
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────
