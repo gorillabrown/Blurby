@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (`TTS-7Q`, `EINK-6A`, `EINK-6B`, `GOALS-6B`)
+**Full specs:** `ROADMAP.md` (`EINK-6A`, `EINK-6B`, `GOALS-6B`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: TTS-7Q (True Glide & Audio-Aligned Narration Cursor)
-Health: GREEN — queue at minimum depth 3. TTS-7P complete; TTS-7Q is the dedicated silky-cursor pass. EINK-6A and EINK-6B follow.
+Queue depth: 2
+Next sprint: EINK-6A (E-Ink Foundation & Greyscale Runtime)
+Health: YELLOW — queue below minimum depth 3. TTS-7Q complete; EINK-6A and EINK-6B remain. Backfill required before dispatching EINK-6A.
 ```
 
 ---
@@ -21,13 +21,12 @@ Health: GREEN — queue at minimum depth 3. TTS-7P complete; TTS-7Q is the dedic
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | TTS-7Q | v1.36.1 | `sprint/tts-7q-true-glide-cursor` | Full | BUG-143, BUG-144 | **FULLY SPEC'D.** Dedicated follow-up for a true glide / audio-aligned narration cursor. Current cursor behavior is stable enough to keep; this sprint is specifically for upgrading that stable stepped follow into audio-time-driven motion without risking anchor correctness. 11 tasks, 12 success criteria. Depends on TTS-7P (now complete). |
-| 2 | EINK-6A | v1.37.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
-| 3 | EINK-6B | v1.38.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Reading ergonomics and mode strategy for e-ink: refresh cadence, motion/flash policy, mode-specific defaults, and UX polish on top of EINK-6A. |
+| 1 | EINK-6A | v1.37.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
+| 2 | EINK-6B | v1.38.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Reading ergonomics and mode strategy for e-ink: refresh cadence, motion/flash policy, mode-specific defaults, and UX polish on top of EINK-6A. |
 
 **Agent staging rule:** TTS, EINK, and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
-**Dispatch status:** TTS-7Q is dispatch-ready now. EINK-6A and EINK-6B remain queued behind TTS-7Q.
+**Dispatch status:** EINK-6A is next. Queue depth is 2 — STOP: backfill a third sprint before dispatching.
 
 ---
 
@@ -46,6 +45,7 @@ Health: GREEN — queue at minimum depth 3. TTS-7P complete; TTS-7Q is the dedic
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-7Q | 2026-04-05 | PASS | True glide & audio-aligned narration cursor. BUG-143/144 resolved — canonical `AudioProgressReport` type + `getAudioProgress()` on scheduler; `onChunkHandoff` callback wired through kokoroStrategy and exposed on `useNarration`; RAF-based glide loop in `FoliatePageView.tsx` drives the narration band from audio-time progress, not DOM chasing; chunk handoff is continuity-safe. New `src/utils/narrateDiagnostics.ts` + new test file `tests/audioGlide.test.ts`. 25 new tests (1,504 total). v1.36.1. |
 | TTS-7P | 2026-04-05 | PASS | Rolling pause-boundary planner. BUG-140 resolved — new `narrationPlanner.ts` builds local boundary plans for the active text window; `generationPipeline.ts` and `kokoroStrategy.ts` updated to consult the plan; silence injection, resume, retarget, and dialogue handling all use one consistent structure. 33 new tests (1,479 total). v1.36.0. |
 | EXT-5C | 2026-04-05 | PASS | Rich article capture & hero image cards. BUG-141/142 resolved — cleaned article HTML preserved, inline images downloaded/re-written into EPUB for offline reading, shared image pipeline used by URL and extension imports, and hero image promoted to reading cards. 24 new tests (1,442 total). v1.35.0. |
 | TTS-7O | 2026-04-05 | PASS | Audible pause injection & smooth narration cursor. BUG-138/139 resolved — classifyChunkBoundary + silence injection at chunk edges, 3-word narration window, CSS transitions for smooth cursor, truth-sync every 12 words. 27 new tests (1,418 total). v1.34.0. |

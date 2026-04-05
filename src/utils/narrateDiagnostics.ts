@@ -23,7 +23,7 @@ export interface NarrateDiagSnapshot {
 /** Event log for handoff/recovery diagnostics. */
 export interface NarrateDiagEvent {
   timestamp: number;
-  event: "start" | "stop" | "pause" | "resume" | "extraction-handoff" | "context-restore" | "fallback" | "rate-clamp" | "coverage-check" | "cruise-warm" | "section-sync" | "word-source-refresh" | "word-source-growth-warning" | "source-promoted" | "selection-validated" | "page-mode-isolated";
+  event: "start" | "stop" | "pause" | "resume" | "extraction-handoff" | "context-restore" | "fallback" | "rate-clamp" | "coverage-check" | "cruise-warm" | "section-sync" | "word-source-refresh" | "word-source-growth-warning" | "source-promoted" | "selection-validated" | "page-mode-isolated" | "chunk-handoff" | "audio-visual-drift" | "truth-sync-correction";
   detail: string;
 }
 
@@ -66,6 +66,27 @@ export function getDiagEvents(): NarrateDiagEvent[] {
 export function clearDiagnostics(): void {
   _snapshots = [];
   _events = [];
+}
+
+// ── TTS-7Q: Glide diagnostics ────────────────────────────────────────────────
+
+/** TTS-7Q: Summary of audio-visual cursor alignment for test inspection. */
+export interface GlideDiagSummary {
+  /** Number of truth-sync corrections recorded (visual jumped by > 3 words) */
+  truthSyncCorrectionCount: number;
+  /** Number of audio/visual drift events (audio cursor moved ahead of visual by > 2 words) */
+  audioVisualDriftCount: number;
+  /** Number of chunk handoff carry-over events */
+  chunkHandoffCount: number;
+}
+
+/** Compute a summary of TTS-7Q glide diagnostics from the event log. */
+export function getGlideDiagSummary(): GlideDiagSummary {
+  return {
+    truthSyncCorrectionCount: _events.filter(e => e.event === "truth-sync-correction").length,
+    audioVisualDriftCount: _events.filter(e => e.event === "audio-visual-drift").length,
+    chunkHandoffCount: _events.filter(e => e.event === "chunk-handoff").length,
+  };
 }
 
 // ── Invariant checks ─────────────────────────────────────────────────────────

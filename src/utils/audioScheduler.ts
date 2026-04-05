@@ -94,6 +94,21 @@ export interface SchedulerCallbacks {
   onError: () => void;
   /** TTS-7O: Periodic truth-sync — fires every N words and on chunk boundaries */
   onTruthSync?: (wordIndex: number) => void;
+  /** TTS-7Q: Chunk handoff carry-over — fires at chunk boundary with the last
+   *  audio-confirmed word so the visual band can continue from that position. */
+  onChunkHandoff?: (lastConfirmedWordIndex: number) => void;
+}
+
+/** TTS-7Q: Continuous audio-progress report — fractional position within the current word span. */
+export interface AudioProgressReport {
+  /** The word index that audio has most recently reached (scheduler-authoritative). */
+  wordIndex: number;
+  /** Fractional progress within the interval [wordIndex, wordIndex+1) based on audio clock.
+   *  0.0 = just started the word, 1.0 = reached the next word.
+   *  Used by the visual overlay to interpolate between word positions. */
+  fraction: number;
+  /** AudioContext.currentTime at the time of this report. Monotonic, audio-clock-only. */
+  audioTime: number;
 }
 
 export interface AudioScheduler {
@@ -117,6 +132,13 @@ export interface AudioScheduler {
   markPipelineDone: () => void;
   /** Get the AudioContext (for time-based calculations) */
   getContext: () => AudioContext | null;
+  /**
+   * TTS-7Q: Get continuous audio progress — fractional position within the current word span.
+   * Returns null if not playing or no boundaries are scheduled.
+   * Callers should poll this in a RAF loop to drive smooth visual interpolation.
+   * IMPORTANT: The returned wordIndex is the canonical audio cursor — not the visual band.
+   */
+  getAudioProgress: () => AudioProgressReport | null;
 }
 
 // ── Implementation ───────────────────────────────────────────────────────────
@@ -345,7 +367,11 @@ export function createAudioScheduler(): AudioScheduler {
       callbacks.onChunkBoundary(endIdx);
       // TTS-7O: Truth-sync on chunk boundary
       truthSyncCounter = 0;
-      callbacks.onTruthSync?.(endIdx - 1 >= chunk.startIdx ? endIdx - 1 : chunk.startIdx);
+      const lastConfirmedWordIdx = endIdx - 1 >= chunk.startIdx ? endIdx - 1 : chunk.startIdx;
+      callbacks.onTruthSync?.(lastConfirmedWordIdx);
+      // TTS-7Q: Chunk handoff carry-over — notify visual layer of the last audio-confirmed word
+      // so it can continue the band from that position, not from a stale visual interpolation.
+      callbacks.onChunkHandoff?.(lastConfirmedWordIdx);
       pruneFinishedSources();
 
       // Check if this was the last source AND pipeline has finished generating
@@ -426,6 +452,56 @@ export function createAudioScheduler(): AudioScheduler {
     return audioCtx;
   }
 
+  /**
+   * TTS-7Q: Compute continuous audio progress from AudioContext.currentTime.
+   *
+   * Looks up the current and next word boundaries in the pre-computed timeline to
+   * produce a fractional position [0.0, 1.0) within the current word interval.
+   * This gives callers a continuous progress rail without any new DOM work or state.
+   *
+   * Returns null when:
+   * - Not playing / no AudioContext
+   * - No word boundaries have been scheduled yet
+   * - Audio hasn't started (before playbackStartTime)
+   *
+   * The returned wordIndex is the CANONICAL audio cursor (scheduler-authoritative).
+   * Visual band code must never write this back to pause/resume/save anchors.
+   */
+  function getAudioProgress(): AudioProgressReport | null {
+    if (stopped || !audioCtx || currentWordBoundaries.length === 0) return null;
+    if (playbackStartTime !== null && audioCtx.currentTime < playbackStartTime) return null;
+
+    const now = audioCtx.currentTime;
+    const boundaries = currentWordBoundaries;
+    const total = boundaries.length;
+    if (total === 0) return null;
+
+    // Find the most recently crossed boundary (the word audio is currently speaking).
+    // nextWordBoundaryIdx tracks the NEXT boundary not yet fired; so the current word
+    // is at index (nextWordBoundaryIdx - 1), clamped to [0, total-1].
+    const currentIdx = Math.max(0, Math.min(nextWordBoundaryIdx - 1, total - 1));
+    const current = boundaries[currentIdx];
+
+    // Compute fraction from current boundary start to next boundary start.
+    const nextBoundary = currentIdx + 1 < total ? boundaries[currentIdx + 1] : null;
+    let fraction = 0;
+    if (nextBoundary) {
+      const intervalSec = nextBoundary.time - current.time;
+      if (intervalSec > 0) {
+        fraction = Math.min(1, Math.max(0, (now - current.time) / intervalSec));
+      }
+    } else {
+      // Last boundary — hold at 0 (no next word to interpolate toward)
+      fraction = 0;
+    }
+
+    return {
+      wordIndex: current.wordIndex,
+      fraction,
+      audioTime: now,
+    };
+  }
+
   return {
     warmUp,
     scheduleChunk,
@@ -437,5 +513,6 @@ export function createAudioScheduler(): AudioScheduler {
     setCallbacks,
     markPipelineDone,
     getContext,
+    getAudioProgress,
   };
 }

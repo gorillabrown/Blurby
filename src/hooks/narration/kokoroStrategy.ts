@@ -8,12 +8,13 @@ import type { TtsStrategy } from "../../types/narration";
 import { createGenerationPipeline } from "../../utils/generationPipeline";
 import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
-import type { AudioScheduler } from "../../utils/audioScheduler";
+import type { AudioScheduler, AudioProgressReport } from "../../utils/audioScheduler";
 import * as ttsCache from "../../utils/ttsCache";
 import { resolveKokoroBucket } from "../../constants";
 import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
 import type { PronunciationOverride } from "../../types";
 import { perfStart, perfEnd } from "../../utils/narratePerf";
+import { recordDiagEvent } from "../../utils/narrateDiagnostics";
 
 const api = window.electronAPI;
 
@@ -53,6 +54,8 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
   getScheduler: () => AudioScheduler;
   getPipeline: () => GenerationPipeline;
   warmUp: () => void;
+  /** TTS-7Q: Continuous audio-progress report for smooth visual overlay. */
+  getAudioProgress: () => AudioProgressReport | null;
 } {
   const scheduler = createAudioScheduler();
 
@@ -169,6 +172,15 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
         onError: () => deps.onFallbackToWeb(),
         // TTS-7O: Truth-sync forces highlight to re-snap to scheduler's authoritative position
         onTruthSync: (wordIndex: number) => onWordAdvance(wordIndex),
+        // TTS-7Q: Chunk handoff — forward last audio-confirmed word to the word-advance callback
+        // so useNarration updates the canonical cursor position at each chunk boundary.
+        onChunkHandoff: (lastConfirmedWordIndex: number) => {
+          recordDiagEvent("chunk-handoff", `lastConfirmedWordIndex=${lastConfirmedWordIndex}`);
+          if (import.meta.env.DEV) {
+            console.debug("[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex =", lastConfirmedWordIndex);
+          }
+          onWordAdvance(lastConfirmedWordIndex);
+        },
       });
 
       // Start pipeline FIRST so chunks begin generating before timer could start.
@@ -204,6 +216,10 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 
     warmUp() {
       scheduler.warmUp();
+    },
+
+    getAudioProgress() {
+      return scheduler.getAudioProgress();
     },
   };
 }

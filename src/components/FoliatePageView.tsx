@@ -265,6 +265,11 @@ export function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffs
   return globalIndex;
 }
 
+/** TTS-7Q: Audio progress callback type — mirrors AudioProgressReport from audioScheduler */
+export interface FoliateAudioProgressFn {
+  (): { wordIndex: number; fraction: number; audioTime: number } | null;
+}
+
 interface FoliatePageViewProps {
   activeDoc: BlurbyDoc & { content?: string };
   settings: BlurbySettings;
@@ -293,6 +298,14 @@ interface FoliatePageViewProps {
   onFlowWordAdvance?: (idx: number) => void;
   /** Current word index being narrated (overlay highlight) */
   narrationWordIndex?: number;
+  /**
+   * TTS-7Q: Continuous audio-progress sampler for smooth overlay gliding.
+   * When provided, the narration overlay uses audio-clock interpolation between
+   * word positions instead of wall-clock-estimated lerp. This drives the band from
+   * a continuous fractional audio position, not from discrete DOM chasing.
+   * Pass null/undefined to fall back to the original estimate-based glide.
+   */
+  getAudioProgress?: FoliateAudioProgressFn | null;
   /** Book-wide section boundaries from main-process extraction (HOTFIX-10: global index stamping) */
   bookWordSections?: import("../types/narration").SectionBoundary[];
   /** FLOW-3A: When true, foliate uses flow="scrolled" for infinite scroll */
@@ -363,6 +376,7 @@ export default function FoliatePageView({
   flowMode,
   scrollContainerRef,
   flowCursorRef,
+  getAudioProgress,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -398,6 +412,31 @@ export default function FoliatePageView({
   const narrationOverlaySegmentDurationRef = useRef<number>(180);
   const narrationOverlayLastAdvanceRef = useRef<number>(0);
   const narrationOverlayAverageDurationRef = useRef<number>(180);
+
+  // TTS-7Q: Audio-progress glide state.
+  // Tracks the two word positions (current and next) used for audio-clock interpolation.
+  // The band glides between narrationGlideFromRef and narrationGlideToRef based on the
+  // fractional audio progress, not on wall-clock timing estimates.
+  const narrationGlideFromRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  const narrationGlideToRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  // The word index that narrationGlideFromRef was measured from (to detect word changes)
+  const narrationGlideWordRef = useRef<number>(-1);
+  // TTS-7Q: Audio-progress RAF loop handle (separate from the wall-clock lerp loop)
+  const narrationAudioProgressRafRef = useRef<number>(0);
+  // TTS-7Q: getAudioProgress ref — keeps the callback stable inside the RAF loop
+  const getAudioProgressRef = useRef<FoliateAudioProgressFn | null | undefined>(getAudioProgress);
+  getAudioProgressRef.current = getAudioProgress;
+
+  // TTS-7Q: measureNarrationWindow ref — breaks the forward-reference issue so
+  // ensureAudioProgressGlideLoop (defined before measureNarrationWindow in the file)
+  // can call it without a temporal dependency on its useCallback initialization.
+  const measureNarrationWindowRef = useRef<typeof measureNarrationWindow | null>(null);
+
+  // TTS-7Q: Diagnostics — track audio cursor vs visual band divergence
+  const narrationDiagLastAudioWordRef = useRef<number>(-1);
+  const narrationDiagLastVisualWordRef = useRef<number>(-1);
+  const narrationDiagTruthSyncCountRef = useRef<number>(0);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -424,11 +463,20 @@ export default function FoliatePageView({
       cancelAnimationFrame(narrationOverlayRafRef.current);
       narrationOverlayRafRef.current = 0;
     }
+    // TTS-7Q: Also cancel the audio-progress glide loop
+    if (narrationAudioProgressRafRef.current) {
+      cancelAnimationFrame(narrationAudioProgressRafRef.current);
+      narrationAudioProgressRafRef.current = 0;
+    }
     narrationOverlayTargetRef.current.active = false;
     narrationOverlayCurrentRef.current.ready = false;
     narrationOverlaySegmentStartRef.current = 0;
     narrationOverlayLastAdvanceRef.current = 0;
     narrationOverlayAverageDurationRef.current = 180;
+    // TTS-7Q: Reset glide state
+    narrationGlideFromRef.current = null;
+    narrationGlideToRef.current = null;
+    narrationGlideWordRef.current = -1;
     if (highlightRef.current) {
       highlightRef.current.style.display = "none";
       highlightRef.current.style.opacity = "0";
@@ -483,6 +531,135 @@ export default function FoliatePageView({
 
     narrationOverlayRafRef.current = requestAnimationFrame(tick);
   }, []);
+
+  /**
+   * TTS-7Q: Audio-progress-driven overlay glide loop.
+   *
+   * When getAudioProgress is available, this loop runs at animation-frame rate
+   * and continuously samples the audio clock to place the overlay band at the
+   * fractionally correct position between the current and next word's measured
+   * DOM positions. This replaces the wall-clock estimate lerp for Kokoro playback.
+   *
+   * Design decisions:
+   * - Only re-measures DOM positions when the canonical word index changes
+   *   (avoids heavy DOM work every frame)
+   * - Uses stable line rail: if the next word is on a different line, the band
+   *   stays on the current line instead of diagonal-jumping
+   * - Falls back to the estimate-based loop (ensureNarrationOverlayLoop) when
+   *   getAudioProgress returns null (paused, Web Speech, or not playing)
+   * - The overlay position is purely visual — never written back to any anchor ref
+   */
+  const ensureAudioProgressGlideLoop = useCallback(() => {
+    if (narrationAudioProgressRafRef.current) return;
+
+    const tick = () => {
+      const overlay = highlightRef.current;
+      const getProgress = getAudioProgressRef.current;
+
+      // If no audio progress source, stop the loop — fall back to estimate loop
+      if (!overlay || !getProgress) {
+        narrationAudioProgressRafRef.current = 0;
+        return;
+      }
+
+      const report = getProgress();
+      if (!report) {
+        // Not playing (paused, ended, or Web Speech) — let the loop die naturally.
+        // The estimate-based loop will hold the band at its last position.
+        narrationAudioProgressRafRef.current = 0;
+        return;
+      }
+
+      const { wordIndex, fraction } = report;
+
+      // Only re-measure DOM positions when the word changes (not every frame).
+      if (wordIndex !== narrationGlideWordRef.current) {
+        const view = viewRef.current;
+        if (!view?.renderer) {
+          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
+        // Find the document containing the current word
+        const contents: Array<{ doc: Document; index: number }> = view.renderer.getContents?.() ?? [];
+        let foundDoc: Document | null = null;
+        for (const { doc: d } of contents) {
+          try {
+            if (d?.querySelector?.(`[data-word-index="${wordIndex}"]`)) {
+              foundDoc = d;
+              break;
+            }
+          } catch { /* */ }
+        }
+
+        if (!foundDoc) {
+          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
+        const measureFn = measureNarrationWindowRef.current;
+        if (!measureFn) {
+          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+        const fromWindow = measureFn(foundDoc, wordIndex);
+        if (!fromWindow) {
+          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+          return;
+        }
+
+        // Measure next word position — only use it if it stays on the same line
+        const nextWindow = measureFn(foundDoc, wordIndex + 1);
+        const sameLineTolerance = Math.max(8, fromWindow.height * 0.6);
+        const staysOnSameLine = nextWindow != null && Math.abs(nextWindow.y - fromWindow.y) <= sameLineTolerance;
+        const movesForward = nextWindow != null && nextWindow.x >= fromWindow.x - 4;
+        const usableNextWindow = (staysOnSameLine && movesForward) ? nextWindow : null;
+
+        narrationGlideFromRef.current = { ...fromWindow };
+        narrationGlideToRef.current = usableNextWindow
+          ? { x: usableNextWindow.x, y: fromWindow.y, width: fromWindow.width, height: fromWindow.height }
+          : { ...fromWindow };
+        narrationGlideWordRef.current = wordIndex;
+
+        // TTS-7Q: Diagnostics — log when audio cursor diverges from visual word
+        if (import.meta.env.DEV) {
+          const prevVisual = narrationDiagLastVisualWordRef.current;
+          const prevAudio = narrationDiagLastAudioWordRef.current;
+          if (prevVisual >= 0 && prevAudio >= 0 && Math.abs(wordIndex - prevVisual) > 2) {
+            console.debug(
+              `[TTS-7Q] audio/visual drift: audio=${wordIndex} visual=${prevVisual} delta=${wordIndex - prevVisual}`
+            );
+          }
+          narrationDiagLastAudioWordRef.current = wordIndex;
+          narrationDiagLastVisualWordRef.current = wordIndex;
+        }
+      }
+
+      // Interpolate overlay position from audio fraction
+      const from = narrationGlideFromRef.current;
+      const to = narrationGlideToRef.current;
+      if (!from || !to) {
+        narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+        return;
+      }
+
+      const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+      const x = lerp(from.x, to.x, fraction);
+      const y = lerp(from.y, to.y, fraction);
+      const width = Math.max(16, lerp(from.width, to.width, fraction));
+      const height = Math.max(12, lerp(from.height, to.height, fraction));
+
+      overlay.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      overlay.style.width = `${width}px`;
+      overlay.style.height = `${height}px`;
+      overlay.style.opacity = "1";
+      overlay.style.display = "block";
+
+      narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+    };
+
+    narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+  }, []); // No deps — uses refs only (measureNarrationWindowRef, getAudioProgressRef, etc.)
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -545,6 +722,8 @@ export default function FoliatePageView({
       height: Math.max(12, maxBottom - minTop + verticalPad * 2),
     };
   }, []);
+  // TTS-7Q: Keep the forward-ref in sync so the audio-progress loop can call it
+  measureNarrationWindowRef.current = measureNarrationWindow;
 
   const positionNarrationOverlay = useCallback((doc: Document | null, wordIndex: number) => {
     const overlay = highlightRef.current;
@@ -559,6 +738,39 @@ export default function FoliatePageView({
       return;
     }
 
+    // TTS-7Q: Diagnostics — track truth-sync corrections
+    if (import.meta.env.DEV) {
+      const prevVisual = narrationDiagLastVisualWordRef.current;
+      if (prevVisual >= 0 && Math.abs(wordIndex - prevVisual) > 3) {
+        narrationDiagTruthSyncCountRef.current++;
+        console.debug(
+          `[TTS-7Q] truth-sync correction #${narrationDiagTruthSyncCountRef.current}: ` +
+          `visual jumped from ${prevVisual} to ${wordIndex} (delta=${wordIndex - prevVisual})`
+        );
+      }
+      narrationDiagLastVisualWordRef.current = wordIndex;
+    }
+
+    // TTS-7Q: If audio-progress is available, start the audio-clock glide loop.
+    // This loop continuously samples audio fraction and places the band between
+    // the current and next word's positions, producing silky motion between word
+    // advances instead of wall-clock-estimated lerp.
+    if (getAudioProgressRef.current) {
+      // Seed the glide state for this word so the audio loop starts from the right position
+      narrationGlideWordRef.current = -1; // Force re-measure on next audio tick
+      overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
+      overlay.style.width = `${currentWindow.width}px`;
+      overlay.style.height = `${currentWindow.height}px`;
+      overlay.style.opacity = "1";
+      overlay.style.display = "block";
+      // Also update the context-word highlights (3-word window) via the estimate-loop target
+      // so truth-sync keeps them accurate even when the audio loop drives the band.
+      narrationOverlayTargetRef.current = { ...currentWindow, active: true };
+      ensureAudioProgressGlideLoop();
+      return;
+    }
+
+    // Fallback (no audio progress — Web Speech or paused): wall-clock estimate loop
     let nextWindow = measureNarrationWindow(doc, wordIndex + 1) || currentWindow;
     const sameLineTolerance = Math.max(8, currentWindow.height * 0.6);
     const staysOnSameLine = Math.abs(nextWindow.y - currentWindow.y) <= sameLineTolerance;
@@ -601,7 +813,7 @@ export default function FoliatePageView({
     overlay.style.width = `${currentWindow.width}px`;
     overlay.style.height = `${currentWindow.height}px`;
     ensureNarrationOverlayLoop();
-  }, [ensureNarrationOverlayLoop, hideNarrationOverlay, measureNarrationWindow]);
+  }, [ensureNarrationOverlayLoop, ensureAudioProgressGlideLoop, hideNarrationOverlay, measureNarrationWindow]);
 
   const applyVisualHighlightByIndex = useCallback((
     wordIndex: number,
