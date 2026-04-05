@@ -30,6 +30,8 @@ export interface KokoroStrategyDeps {
   getBookId?: () => string;
   /** Get current pronunciation overrides for text normalization + cache identity */
   getPronunciationOverrides?: () => PronunciationOverride[];
+  /** TTS-7N: Get word-weight config derived from pause settings */
+  getWeightConfig?: () => import("../../utils/audioScheduler").WordWeightConfig | undefined;
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
 }
@@ -76,6 +78,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getWords: deps.getWords,
     getVoiceId: deps.getVoiceId,
     getSpeed: () => getBucket(),
+    getWeightConfig: deps.getWeightConfig,
     onChunkReady: (chunk) => {
       // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
       const isFirst = !firstChunkReceived;

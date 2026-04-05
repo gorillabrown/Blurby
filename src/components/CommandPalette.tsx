@@ -108,7 +108,7 @@ export default function CommandPalette({
       { type: "setting", label: "Focus Mode Options", sublabel: "Focus marks, reading ruler, focus span", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Flow Mode Options", sublabel: "Words per highlight, cursor style", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Rhythm Pauses", sublabel: "Commas, sentences, paragraphs, numbers", onSelect: act(() => onOpenSettings("speed-reading")) },
-      { type: "setting", label: "Narration (TTS)", sublabel: "Enable TTS, voice engine, Kokoro AI", onSelect: act(() => onOpenSettings("speed-reading")) },
+      { type: "setting", label: "Narration (TTS)", sublabel: "Enable TTS, voice engine, Kokoro AI", onSelect: act(() => onOpenSettings("tts")) },
       // Sub-sections within Theme
       { type: "setting", label: "Accent Color", sublabel: "Change app accent color", onSelect: act(() => onOpenSettings("theme")) },
       { type: "setting", label: "Font", sublabel: "Change reading font family", onSelect: act(() => onOpenSettings("theme")) },
@@ -140,10 +140,11 @@ export default function CommandPalette({
       { type: "setting", label: "Paragraph Pauses", sublabel: "Pause at paragraph breaks", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Number Pauses", sublabel: "Pause on numbers", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Long Word Pauses", sublabel: "Pause on words longer than 8 chars", onSelect: act(() => onOpenSettings("speed-reading")) },
-      { type: "setting", label: "Enable TTS", sublabel: "Turn text-to-speech on/off", onSelect: act(() => onOpenSettings("speed-reading")) },
-      { type: "setting", label: "Voice Engine", sublabel: "System or Kokoro AI voices", onSelect: act(() => onOpenSettings("speed-reading")) },
-      { type: "setting", label: "TTS Voice", sublabel: "Choose narration voice", onSelect: act(() => onOpenSettings("speed-reading")) },
-      { type: "setting", label: "Speech Rate", sublabel: "Adjust TTS playback speed", onSelect: act(() => onOpenSettings("speed-reading")) },
+      // TTS-7N (BUG-137): TTS entries route to dedicated "tts" page, not "speed-reading"
+      { type: "setting", label: "Enable TTS", sublabel: "Turn text-to-speech on/off", onSelect: act(() => onOpenSettings("tts")) },
+      { type: "setting", label: "Voice Engine", sublabel: "System or Kokoro AI voices", onSelect: act(() => onOpenSettings("tts")) },
+      { type: "setting", label: "TTS Voice", sublabel: "Choose narration voice", onSelect: act(() => onOpenSettings("tts")) },
+      { type: "setting", label: "Speech Rate", sublabel: "Adjust TTS playback speed", onSelect: act(() => onOpenSettings("tts")) },
       // Sub-sections within Cloud Sync
       { type: "setting", label: "Sync Interval", sublabel: "How often to sync (1/5/15/30 min, manual)", onSelect: act(() => onOpenSettings("cloud-sync")) },
       { type: "setting", label: "Microsoft Account", sublabel: "Connect OneDrive for sync", onSelect: act(() => onOpenSettings("cloud-sync")) },

@@ -13,6 +13,7 @@ import {
   TTS_QUEUE_DEPTH,
 } from "../constants";
 import type { ScheduledChunk } from "./audioScheduler";
+import { isSentenceEnd } from "./pauseDetection";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,6 +31,8 @@ export interface PipelineConfig {
   getVoiceId: () => string;
   /** Get current playback speed (e.g. 1.0, 1.5) */
   getSpeed: () => number;
+  /** TTS-7N: Optional word-weight config from pause settings (attached to each chunk) */
+  getWeightConfig?: () => import("./audioScheduler").WordWeightConfig | undefined;
   /** Called when a chunk is ready for scheduling */
   onChunkReady: (chunk: ScheduledChunk) => void;
   /** Called when a chunk should be cached to disk (TTS-7A: includes wordCount) */
@@ -82,20 +85,93 @@ export function getChunkSize(chunkIndex: number): number {
   return TTS_CRUISE_CHUNK_WORDS;
 }
 
+/**
+ * TTS-7N (BUG-136): Snap a chunk boundary to the nearest sentence ending.
+ * Searches backward from the target end index, then forward, within a tolerance
+ * window. Prevents mid-sentence chunks that produce awkward pauses.
+ *
+ * @param words Full word array
+ * @param startIdx Chunk start index
+ * @param targetEndIdx Ideal chunk end index (startIdx + chunkSize)
+ * @param tolerance Max words to search in each direction (default 15)
+ * @returns Adjusted end index snapped to a sentence boundary, or targetEndIdx if none found
+ */
+export function snapToSentenceBoundary(
+  words: string[],
+  startIdx: number,
+  targetEndIdx: number,
+  tolerance = 15,
+): number {
+  const maxIdx = words.length;
+  const clampedEnd = Math.min(targetEndIdx, maxIdx);
+  // Don't snap very small chunks (ramp-up) — they're too short for sentence detection to help
+  if (clampedEnd - startIdx <= 20) return clampedEnd;
+
+  // Search backward first (prefer shorter chunk at sentence boundary)
+  for (let i = clampedEnd - 1; i >= Math.max(startIdx + 10, clampedEnd - tolerance); i--) {
+    const next = i + 1 < maxIdx ? words[i + 1] : undefined;
+    if (isSentenceEnd(words[i], next)) return i + 1; // End AFTER the sentence-ending word
+  }
+  // Search forward (extend slightly to reach next sentence boundary)
+  for (let i = clampedEnd; i < Math.min(maxIdx, clampedEnd + tolerance); i++) {
+    const next = i + 1 < maxIdx ? words[i + 1] : undefined;
+    if (isSentenceEnd(words[i], next)) return i + 1;
+  }
+  // No sentence boundary found — use original
+  return clampedEnd;
+}
+
 // ── Implementation ───────────────────────────────────────────────────────────
 
 export function createGenerationPipeline(config: PipelineConfig): GenerationPipeline {
   let active = false;
   let generationId = 0;
   let nextProduceIdx = 0;
+  let nextEmitIdx = 0;
   let chunkIndex = 0; // tracks position in ramp-up sequence
   let lastEmittedStartIdx = -1; // TTS-6S: duplicate chunk guard
   // TTS-7B: Pause state — buffers chunks instead of emitting
   let paused = false;
   let pauseBuffer: ScheduledChunk[] = [];
+  let reorderBuffer = new Map<number, ScheduledChunk>();
   // TTS-7C: Backpressure — hold emission when scheduler has too many buffered chunks (BUG-115)
   let pendingChunks = 0;
   let backpressureResolve: (() => void) | null = null;
+
+  async function flushOrderedChunks(myGenId: number): Promise<void> {
+    while (active && myGenId === generationId) {
+      const chunk = reorderBuffer.get(nextEmitIdx);
+      if (!chunk) break;
+      reorderBuffer.delete(nextEmitIdx);
+
+      // TTS-6S: Skip duplicate chunk at same startIdx (prevents stall/spin)
+      if (chunk.startIdx === lastEmittedStartIdx) {
+        if (import.meta.env.DEV) console.warn("[pipeline] skipping duplicate chunk at idx", chunk.startIdx);
+        nextEmitIdx = chunk.startIdx + chunk.words.length;
+        continue;
+      }
+      lastEmittedStartIdx = chunk.startIdx;
+      nextEmitIdx = chunk.startIdx + chunk.words.length;
+
+      if (paused) {
+        pauseBuffer.push(chunk);
+        continue;
+      }
+
+      if (pendingChunks >= TTS_QUEUE_DEPTH) {
+        await new Promise<void>(resolve => { backpressureResolve = resolve; });
+        if (!active || myGenId !== generationId) return;
+      }
+      pendingChunks++;
+      config.onChunkReady(chunk);
+    }
+  }
+
+  async function queueChunkForEmission(chunk: ScheduledChunk, myGenId: number): Promise<void> {
+    if (!active || myGenId !== generationId) return;
+    reorderBuffer.set(chunk.startIdx, chunk);
+    await flushOrderedChunks(myGenId);
+  }
 
   /** Produce a chunk starting at startIdx. Returns actual words consumed (may differ from chunkSize on cache hit). */
   async function produceChunk(startIdx: number, chunkSize: number, myGenId: number): Promise<number> {
@@ -107,7 +183,10 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       return chunkSize;
     }
 
-    const endIdx = Math.min(startIdx + chunkSize, words.length);
+    // TTS-7N (BUG-136): Snap chunk boundary to nearest sentence ending.
+    // Prevents mid-sentence chunks that cause awkward pauses.
+    const rawEndIdx = Math.min(startIdx + chunkSize, words.length);
+    const endIdx = snapToSentenceBoundary(words, startIdx, rawEndIdx);
     const chunkWords = words.slice(startIdx, endIdx);
     const text = chunkWords.join(" ");
 
@@ -118,18 +197,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         if (isCached && myGenId === generationId) {
           const cached = await config.loadCached(startIdx);
           if (cached && myGenId === generationId) {
-            // TTS-7B: Gate emission through pause buffer
-            if (paused) {
-              pauseBuffer.push(cached);
-            } else {
-              // TTS-7C: Backpressure for cache hits too
-              if (pendingChunks >= TTS_QUEUE_DEPTH) {
-                await new Promise<void>(resolve => { backpressureResolve = resolve; });
-                if (!active || myGenId !== generationId) return cached.words.length;
-              }
-              pendingChunks++;
-              config.onChunkReady(cached);
-            }
+            await queueChunkForEmission(cached, myGenId);
             return cached.words.length; // Actual consumed count (may be > chunkSize)
           }
         }
@@ -160,28 +228,11 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         durationMs,
         words: chunkWords,
         startIdx,
+        weightConfig: config.getWeightConfig?.(),
       };
 
       if (active && myGenId === generationId) {
-        // TTS-6S: Skip duplicate chunk at same startIdx (prevents stall/spin)
-        if (startIdx === lastEmittedStartIdx) {
-          if (import.meta.env.DEV) console.warn("[pipeline] skipping duplicate chunk at idx", startIdx);
-          return chunkWords.length;
-        }
-        lastEmittedStartIdx = startIdx;
-
-        // TTS-7B: If paused, buffer instead of emitting
-        if (paused) {
-          pauseBuffer.push(chunk);
-        } else {
-          // TTS-7C: Backpressure — wait if too many pending chunks (BUG-115)
-          if (pendingChunks >= TTS_QUEUE_DEPTH) {
-            await new Promise<void>(resolve => { backpressureResolve = resolve; });
-            if (!active || myGenId !== generationId) return chunkWords.length;
-          }
-          pendingChunks++;
-          config.onChunkReady(chunk);
-        }
+        await queueChunkForEmission(chunk, myGenId);
 
         // Cache to disk (fire-and-forget) — TTS-7A: store actual word count
         // Always cache regardless of pause state
@@ -205,6 +256,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
    */
   async function runPipeline(startIdx: number, myGenId: number): Promise<void> {
     nextProduceIdx = startIdx;
+    nextEmitIdx = startIdx;
     chunkIndex = 0;
 
     const words = config.getWords();
@@ -282,8 +334,10 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     active = false;
     generationId++;
     lastEmittedStartIdx = -1;
+    nextEmitIdx = 0;
     paused = false;
     pauseBuffer = [];
+    reorderBuffer = new Map();
     pendingChunks = 0;
     if (backpressureResolve) { backpressureResolve(); backpressureResolve = null; }
   }
@@ -308,7 +362,9 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     // Flush buffered chunks in order
     const buffered = pauseBuffer.splice(0);
     for (const chunk of buffered) {
-      if (active) config.onChunkReady(chunk);
+      if (!active) break;
+      pendingChunks++;
+      config.onChunkReady(chunk);
     }
   }
 

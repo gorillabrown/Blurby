@@ -797,3 +797,20 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Guardrail:**
 - PR-130: Resume-anchor ownership must be explicit and persistent. Never use time-limited suppression for state that must survive until the next user action. The anchor is cleared ONLY by: mode start (consumed) or explicit user selection (replaced).
 - PR-131: Passive page events (`onLoad`, `onRelocate`, first-visible) are VISUAL-ONLY when an authoritative anchor exists. They may update DOM highlights but must not mutate `highlightedWordIndex` or trigger progress saves.
+
+### [2026-04-05] LL-074: UI Controls Must Materially Affect the Engine Path They Claim to Control
+
+**Area:** TTS settings, Kokoro narration, UI truthfulness
+**Status:** active
+**Priority:** high
+
+**Context:** TTS settings showed 5 pause sliders (comma, clause, sentence, paragraph, dialogue threshold) that implied deep control over Kokoro narration prosody. In reality, `pauseConfigRef` was stored in `useNarration.ts` but **never read** by any Kokoro code path. The generation pipeline used fixed chunk sizes. The audio scheduler used hardcoded punctuation weights. All 5 controls were placebo.
+
+**Root Cause:** The pause pipeline was originally built for Web Speech / Focus/Flow modes (`rhythm.ts` → `pauseDetection.ts`). When Kokoro was added, it got its own generation path (`generationPipeline.ts` → `audioScheduler.ts`) that bypassed the pause system entirely. The UI was never updated to reflect this disconnect.
+
+**Fix:** (1) `generationPipeline` now snaps chunk boundaries to sentence endings via `snapToSentenceBoundary`. (2) `audioScheduler.computeWordWeights` accepts `WordWeightConfig` with configurable factors. (3) `useNarration` derives weight factors from `pauseConfigRef` and passes through the Kokoro strategy chain.
+
+**Guardrail:**
+- PR-132: Every UI control must have a traceable code path to a behavioral effect in the engine it claims to control. If a setting is stored but never read by the active engine, it is a placebo — either wire it or remove/relabel it.
+- PR-133: When adding a new TTS engine, audit ALL existing TTS settings against the new engine's code path. Settings that worked for the old engine are not automatically honored by the new one.
+- PR-131: Passive page events (`onLoad`, `onRelocate`, first-visible) are VISUAL-ONLY when an authoritative anchor exists. They may update DOM highlights but must not mutate `highlightedWordIndex` or trigger progress saves.

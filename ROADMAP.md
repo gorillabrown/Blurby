@@ -1,6 +1,6 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7M complete. Persistent resume anchor & reopen authority. 1,372 tests, 79 files. Latest tagged release: v1.33.8.
+**Last updated**: 2026-04-05 — TTS-7N complete. Kokoro pause semantics & settings link repair. 1,391 tests, 80 files. Latest tagged release: v1.33.9.
 **Current branch**: `main`
 **Current state**: Phase 6 TTS hotfix lane narrowly reopened. `TTS-7N` is next (pause semantics + settings links). Queue GREEN (`TTS-7N` → `EINK-6A` → `EINK-6B` ��� `GOALS-6B`; depth 4).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
@@ -63,7 +63,7 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ (v1.33.6)
   ├── TTS-7L: Exact Foliate Text-Selection Mapping ✅ (v1.33.7)
   ├── TTS-7M: Persistent Resume Anchor & Reopen Authority ✅ (v1.33.8)
-  ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair (next)
+  ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair ✅ (v1.33.9)
   │
   │  Feature work
   ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)

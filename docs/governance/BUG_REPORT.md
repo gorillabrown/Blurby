@@ -8,23 +8,21 @@
 
 ## Incomplete
 
-### BUG-136: Kokoro pause controls and dialogue threshold do not meaningfully shape narration
-**Reported:** 2026-04-05
+### ~~BUG-136~~ ✅ Fixed — TTS-7N (v1.33.9)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** High
-**Location:** `src/components/settings/TTSSettings.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`
-**Description:** Users can change comma/clause/sentence/paragraph pause sliders and dialogue threshold in the TTS settings UI, but Kokoro narration still often sounds unchanged: punctuation is blown through, pauses land mid-sentence, and dialogue becomes hard to follow. The code indicates the likely cause: pause settings are synced into `setPauseConfig(...)`, but the active Kokoro chunking/prosody path does not clearly consume that config in a way that materially affects playback.
-**Root cause:** TTS settings and Kokoro playback semantics are partially decoupled. The UI implies configurable pause shaping, but the chunking/scheduling path still behaves largely as a fixed heuristic.
-**Target fix:** Audit the full Kokoro pause pipeline, make pause config and dialogue threshold materially affect chunk boundary and pause timing, and remove/relabel any controls that cannot actually be honored.
-**Status:** Open. Sprint: TTS-7N.
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** Kokoro pause sliders were inert — `pauseConfigRef` was stored but never read. Chunk boundaries used fixed sizes with no sentence awareness.
+**Root cause:** `pauseConfigRef` in useNarration was a dead-end ref. generationPipeline used fixed chunk sizes. audioScheduler used hardcoded 1.12x/1.05x punctuation weights.
+**Fix:** (1) generationPipeline snaps chunk boundaries to nearest sentence ending via `snapToSentenceBoundary`. (2) audioScheduler `computeWordWeights` accepts `WordWeightConfig` with configurable sentence/clause factors. (3) useNarration derives weight factors from pauseConfig and passes through kokoroStrategy → pipeline → scheduler.
 
-### BUG-137: Ctrl+K TTS settings links still route to the legacy Speed Reading page
-**Reported:** 2026-04-05
+### ~~BUG-137~~ ✅ Fixed — TTS-7N (v1.33.9)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Medium
 **Location:** `src/components/CommandPalette.tsx`
-**Description:** TTS-related Command Palette items such as `TTS Voice` still open `speed-reading` instead of the dedicated `tts` settings page. This is stale routing from when narration controls lived under Speed Reading.
-**Root cause:** Command Palette entries were never updated after `tts` became a first-class settings page.
-**Target fix:** Remap all TTS-related Command Palette items to `tts`, keep speed-reading items on `speed-reading`, and add routing tests so the menu cannot drift again.
-**Status:** Open. Sprint: TTS-7N.
+**Description:** 5 TTS-related Command Palette entries routed to `speed-reading` instead of `tts`.
+**Root cause:** Stale routing from before TTS had its own settings page.
+**Fix:** Remapped Narration (TTS), Enable TTS, Voice Engine, TTS Voice, Speech Rate to `"tts"`. Speed-reading entries unchanged.
 
 ### ~~BUG-135~~ ✅ Fixed — TTS-7M (v1.33.8)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05
