@@ -82,6 +82,8 @@ export const TTS_PAUSE_SENTENCE_MS = 400;
 export const TTS_PAUSE_PARAGRAPH_MS = 800;
 /** Number of pre-generated audio chunks in the rolling queue */
 export const TTS_QUEUE_DEPTH = 5;
+/** TTS-7F: Target opening cache coverage in milliseconds (5 minutes of narration) */
+export const ENTRY_COVERAGE_TARGET_MS = 300_000;
 /** Paragraphs with this many or fewer sentences are treated as dialogue (minimal pause) */
 export const TTS_DIALOGUE_SENTENCE_THRESHOLD = 2;
 

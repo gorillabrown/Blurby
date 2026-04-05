@@ -127,11 +127,15 @@ export function useReaderMode({
 
   const preCapWpmRef = useRef<number | null>(null);
   const pendingFocusStartRef = useRef<symbol | null>(null);
+  /** TTS-7F: Single-launch token — prevents duplicate/reentrant narration starts */
+  const narrationLaunchRef = useRef(false);
 
   // ── Stop all sub-modes ─────────────────────────────────────────────
   const stopAllModes = useCallback(() => {
     // Cancel any pending startFocus setTimeout
     pendingFocusStartRef.current = null;
+    // TTS-7F: Clear single-launch token
+    narrationLaunchRef.current = false;
     // Stop mode instance (handles Focus timer, Flow state, NarrateMode TTS)
     modeInstance.stopMode();
     // Also stop legacy hooks as safety net during transition
@@ -199,10 +203,17 @@ export function useReaderMode({
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
     const pBreaks = getEffectiveParagraphBreaks();
 
-    // TTS-7E (Task 1): Render-readiness gate for foliate EPUBs.
-    // Wait for the target word to appear in DOM before starting narration.
-    // This prevents highlightWordByIndex misses on cold-start books (BUG-116).
-    if (useFoliate && foliateApiRef.current?.highlightWordByIndex) {
+    // TTS-7F: Render-readiness gate for foliate EPUBs (replaces TTS-7E gate).
+    // Uses pure read-only isWordInDom probe — no UI mutation during gate check.
+    // Single-launch token prevents duplicate/reentrant starts (BUG-118).
+    if (useFoliate && foliateApiRef.current) {
+      // Single-launch guard: skip if a gate is already in progress
+      if (narrationLaunchRef.current) {
+        if (import.meta.env.DEV) console.debug("[narrate] skipping — launch already in progress");
+        return;
+      }
+      narrationLaunchRef.current = true;
+
       if (import.meta.env.DEV) performance.mark("narrate:render-gate-start");
       const gateStart = Date.now();
       const RENDER_WAIT_MS = 3000; // NARRATION_RENDER_WAIT_MS
@@ -210,11 +221,16 @@ export function useReaderMode({
 
       const checkReady = () => {
         // Check if we've been cancelled (mode changed away from narration)
-        if (readingModeRef.current !== "narration") return;
+        if (readingModeRef.current !== "narration") {
+          narrationLaunchRef.current = false;
+          return;
+        }
 
-        const inDom = foliateApiRef.current?.highlightWordByIndex?.(startIdx, "narration");
+        // TTS-7F: Pure read-only DOM probe — no highlight, no scroll
+        const inDom = foliateApiRef.current?.isWordInDom?.(startIdx)
+          ?? foliateApiRef.current?.highlightWordByIndex?.(startIdx, "narration"); // fallback
         if (inDom) {
-          // Word is in DOM — start narration
+          narrationLaunchRef.current = false;
           if (import.meta.env.DEV) {
             performance.mark("narrate:render-gate-end");
             try { performance.measure("narrate:render-gate", "narrate:render-gate-start", "narrate:render-gate-end"); } catch {}
@@ -230,8 +246,8 @@ export function useReaderMode({
             navigated = true;
             if (import.meta.env.DEV) console.debug("[narrate] render gate timeout — navigating to word", startIdx);
             foliateApiRef.current?.goTo?.(startIdx);
-            // Wait one more rAF cycle after navigation
             requestAnimationFrame(() => {
+              narrationLaunchRef.current = false;
               if (readingModeRef.current !== "narration") return;
               if (import.meta.env.DEV) {
                 performance.mark("narrate:render-gate-end");

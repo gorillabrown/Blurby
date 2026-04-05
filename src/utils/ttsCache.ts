@@ -101,3 +101,13 @@ export async function getCacheInfo(): Promise<{ totalBytes: number; totalMB: num
   if (!api?.ttsCacheInfo) return { totalBytes: 0, totalMB: 0, bookCount: 0 };
   return api.ttsCacheInfo();
 }
+
+/**
+ * TTS-7F: Get opening cache coverage in milliseconds for a book+voice context.
+ * Manifest-only — no PCM loads. Returns 0 if no cache exists.
+ */
+export async function getOpeningCoverageMs(bookId: string, voiceId: string): Promise<number> {
+  if (!(api as any)?.ttsCacheOpeningCoverage) return 0;
+  const result = await (api as any).ttsCacheOpeningCoverage(bookId, voiceId);
+  return result?.coverageMs ?? 0;
+}

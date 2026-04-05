@@ -238,9 +238,9 @@
 **Reported:** 2026-04-04
 **Severity:** High
 **Location:** `src/hooks/useReaderMode.ts` (startNarration, line 167–202), `src/components/FoliatePageView.tsx` (highlightWordByIndex, line 540–594), `src/hooks/useReadingModeInstance.ts` (onWordAdvance callback, line 158–176)
-**Description:** On a freshly opened book, starting narration produces `[foliate] highlightWordByIndex miss: word N not in DOM` for consecutive words (3, 8, 11, 15). Root cause: `startNarration()` calls `modeInstance.startMode()` immediately without waiting for foliate to render the target page. `highlightWordByIndex` returns `false` on miss with no retry. Audio plays but cursor can't land, causing visible jumps when a word finally appears in DOM. The only wait gate (`FOLIATE_SECTION_LOAD_WAIT_MS = 300ms`) only triggers if `getEffectiveWords()` returns 0 — if extraction returns words but DOM isn't ready, narration starts anyway.
+**Description:** On a freshly opened book, starting narration produces `[foliate] highlightWordByIndex miss: word N not in DOM` for consecutive words (3, 8, 11, 15). Root cause: `startNarration()` calls `modeInstance.startMode()` immediately without waiting for Foliate to render the target page DOM. `highlightWordByIndex` returns `false` on miss with no retry, and the narration bridge is too tightly coupled to Foliate's live page DOM. Audio plays but cursor can't land, causing visible jumps when a word finally appears in DOM. The only wait gate (`FOLIATE_SECTION_LOAD_WAIT_MS = 300ms`) only triggers if `getEffectiveWords()` returns 0 — if extraction returns words but DOM isn't ready, narration starts anyway.
 **Reproduction:** Open a new EPUB book (not previously opened). Start narration immediately. First 3–5 words will log highlight misses. Cursor snaps to first found word.
-**Status:** Open. Assigned to TTS-7E.
+**Status:** Open. `TTS-7E` partially improved the startup path, but live testing still shows cold-start misses/page motion. Assigned to TTS-7F.
 
 ### BUG-117: 910ms IPC message handler long task on first narration chunk
 **Reported:** 2026-04-04
@@ -248,7 +248,35 @@
 **Location:** `message` handler (likely renderer IPC response path for `tts-generate` or `tts-cache-write`)
 **Description:** `[Violation] 'message' handler took 910ms` logged on first narration start of a new book. TTS-7C broke the narration *start* path into microtasks (<50ms each), but the *response* handler — where the renderer receives the first generated Kokoro audio chunk back from main process — runs as a single synchronous block. On cold starts (no cache, first inference), this handler deserializes the audio payload + word boundaries and fires `onChunkReady` + `scheduler.scheduleChunk()` in one task, exceeding the 50ms long-task threshold by 18x. User-visible as a brief app freeze.
 **Reproduction:** Open a new EPUB book (no cached chunks). Start narration. Observe brief freeze (~1s) before audio begins.
-**Status:** Open. Assigned to TTS-7E.
+**Status:** Open pending re-verification. `TTS-7E` attempted to reduce the response-path block, but cold-start narration is still not considered stable until TTS-7F completes and re-tests the full launch path.
+
+### ~~BUG-118~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Readiness gate caused page jump + duplicate launch. Fix: replaced `highlightWordByIndex` (UI-mutating) with pure `isWordInDom` probe (read-only DOM query). Added `narrationLaunchRef` single-launch token to prevent reentrant starts.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Cold-start ramp had long pauses. Fix: proactive entry-coverage system caches first 5 minutes of narration audio for every non-archived reading. Opening a book queues entry-coverage job immediately. Playback starts from cached audio instead of reactive ramp-up.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-120~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`, `src/components/ReaderContainer.tsx`, `main/tts-cache.js`
+**Description:** No guaranteed opening narration coverage. Fix: `ENTRY_COVERAGE_TARGET_MS` (300000ms / 5 min) constant. `getOpeningCoverageMs()` manifest inspector. Background cacher `queueEntryCoverage()` method stops at 5-minute target. Entry-coverage jobs run at highest priority in the cacher loop.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-121~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`, `src/utils/backgroundCacher.ts`
+**Description:** Opening a reading didn’t start cruise cache warming. Fix: ReaderContainer queues entry-coverage job on reader mount when Kokoro + cache enabled. Active book set as priority-1 for full cruise warming via existing setActiveBook path.
+**Status:** Resolved. Sprint: TTS-7F.
 
 ### ~~BUG-096~~ ✅ Fixed — TTS-6S (v1.28.0)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
@@ -284,20 +312,6 @@
 **Location:** `src/utils/consoleCapture.ts`, `src/main.tsx`
 **Description:** Console output was not included in the bug report JSON.
 **Status:** Resolved. HOTFIX-11 added `consoleCapture.ts` ring buffer (200 entries), installed before React mount. `consoleLog` field added to `BugReportAppState`. Modal shows collapsible "Console Log" section with color-coded entries.
-
-### ~~BUG-116~~ ✅ Fixed — TTS-7E (v1.33.0)
-**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
-**Severity:** High
-**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
-**Description:** Cold-start narration raced ahead of foliate rendering — `highlightWordByIndex` missed because target words weren't in DOM yet. Fix: render-readiness gate polls DOM via `requestAnimationFrame` before starting narration. 3-second timeout with page navigation fallback.
-**Status:** Resolved. Sprint: TTS-7E.
-
-### ~~BUG-117~~ ✅ Fixed — TTS-7E (v1.33.0)
-**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
-**Severity:** Medium
-**Location:** `src/hooks/narration/kokoroStrategy.ts`
-**Description:** First Kokoro IPC response handler blocked main thread ~910ms. Fix: `pipeline.acknowledgeChunk()` deferred via `queueMicrotask` — keeps scheduler synchronous but breaks the post-schedule work out of the message handler.
-**Status:** Resolved. Sprint: TTS-7E.
 
 ---
 

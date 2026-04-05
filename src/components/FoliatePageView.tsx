@@ -273,6 +273,8 @@ export interface FoliateViewAPI {
   extractSectionWords: (sectionIndex: number) => FoliateWord[];
   /** FLOW-3A: Get the scrollable container element for FlowScrollEngine */
   getScrollContainer: () => HTMLElement | null;
+  /** TTS-7F: Pure read-only DOM check — is a word span present? No UI mutation. */
+  isWordInDom: (wordIndex: number) => boolean;
 }
 
 export default function FoliatePageView({
@@ -604,6 +606,16 @@ export default function FoliatePageView({
               }
             },
             getView: () => view,
+            // TTS-7F: Pure read-only DOM probe — no highlight, no scroll, no side effects
+            isWordInDom: (wordIndex: number): boolean => {
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d } of contents) {
+                try {
+                  if (d?.querySelector?.(`[data-word-index="${wordIndex}"]`)) return true;
+                } catch { /* */ }
+              }
+              return false;
+            },
             findFirstVisibleWordIndex: () => {
               // Walk all loaded sections to find the first word span that's visible
               const contents = view.renderer?.getContents?.() ?? [];
