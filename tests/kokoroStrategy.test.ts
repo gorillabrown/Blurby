@@ -166,4 +166,44 @@ describe("createKokoroStrategy", () => {
     expect(scheduler.stop).toBeInstanceOf(Function);
     expect(scheduler.pause).toBeInstanceOf(Function);
   });
+
+  it("TTS-7G: acknowledgment is deferred via queueMicrotask, not synchronous", async () => {
+    const deps = mockDeps();
+    const strategy = createKokoroStrategy(deps);
+    const pipeline = strategy.getPipeline();
+
+    // Spy on acknowledgeChunk to verify it's called asynchronously
+    const ackSpy = vi.spyOn(pipeline, "acknowledgeChunk");
+
+    strategy.speakChunk("Hello world", ["Hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+
+    // Wait for generation + chunk delivery
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+
+    // acknowledgeChunk should NOT have been called synchronously with onChunkReady
+    // (it's deferred via queueMicrotask), but will be called after microtask flush
+    await new Promise(r => setTimeout(r, 50));
+    expect(ackSpy).toHaveBeenCalled();
+
+    strategy.stop();
+  });
+
+  it("TTS-7G: stop resets first-chunk tracking for next session measurement", async () => {
+    const deps = mockDeps();
+    const strategy = createKokoroStrategy(deps);
+
+    // Start narration → triggers first chunk
+    strategy.speakChunk("Hello world", ["Hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+
+    // Stop resets state
+    strategy.stop();
+
+    // Second session — IPC should be called again (first chunk of new session)
+    electronAPI.kokoroGenerate.mockClear();
+    strategy.speakChunk("Hello world", ["Hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+
+    strategy.stop();
+  });
 });

@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — Post-TTS-6S (Cursor Sync, Pause Shaping & Backlog Fill). 1,209 tests, 67 files. Latest tagged release: v1.28.0.
+**Last updated**: 2026-04-04 — TTS stabilization lane CLOSED (BUG-117 verified resolved). Feature work resumes. 1,279 tests, 73 files. Latest tagged release: v1.33.2.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS lane complete through TTS-6S. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS stabilization COMPLETE — all TTS bugs (BUG-101–121) resolved and verified. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -29,7 +29,7 @@ Phase 5: Read Later + Chrome Extension
   └── 5B → EXT-5B: Pairing UX ✅
     │
     ▼
-Phase 6: TTS Hardening & App Polish
+Phase 6: TTS Hardening & Stabilization
   ├── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
   ├── TTS-6D: Kokoro Startup & Recovery Hardening ✅ (v1.15.0)
   ├── TTS-6E: Pronunciation Overrides Foundation ✅ (v1.16.0)
@@ -45,10 +45,23 @@ Phase 6: TTS Hardening & App Polish
   ├── TTS-6P: Session Continuity & Recovery ✅ (v1.26.0)
   ├── TTS-6Q: Narration Diagnostics & Regression Shields ✅ (v1.27.0)
   ├── TTS-6S: Cursor Sync, Pause Shaping & Backlog Fill Hotfix ✅ (v1.28.0)
-  ├── HOTFIX-11: Bug Reporter Narration Diagnostics & Console Capture (queued)
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)
+  ├── HOTFIX-11: Bug Reporter Narration Diagnostics & Console Capture ✅ (v1.27.1)
+  │
+  │  TTS Stabilization (audit-driven) ── COMPLETE (v1.32.0)
+  ├── TTS-7A: Cache Correctness ✅ (v1.29.0)
+  ├── TTS-7B: Cursor Contract ✅ (v1.30.0)
+  ├── TTS-7C: Throughput & Dead Code ✅ (v1.31.0)
+  ├── TTS-7D: Integration Verification ✅ (v1.32.0)
+  │
+  │  TTS hotfix follow-up
+  ├── TTS-7E: Cold-Start Narration Fix (partial attempt; reopened)
+  ├── TTS-7F: Proactive Entry Cache Coverage & Cruise Warm ✅ (v1.33.1)
+  ├── TTS-7G: First-Chunk IPC Verification ✅ (v1.33.2) — BUG-117 verified resolved
+  │
+  │  Feature work
+  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued — next)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
-  └── GOALS-6B: Reading Goal Tracking (queued)
+  └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
     │
     ├────────────────────────┐
     ▼                        ▼
@@ -62,533 +75,431 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 ---
 
-## Phase 2 — EPUB Content Fidelity
+## Phases 2–5 — COMPLETE
 
-**Goal:** The existing EPUB converter preserves formatting, images, and structure from all source formats. EPUB becomes the true single canonical internal format with no legacy text fallback.
+> All Phase 2–5 sprint specs archived to `docs/project/ROADMAP_ARCHIVE.md`. Summary below.
 
-**Baseline:** `main/epub-converter.js` (769 lines) already converts TXT, MD, HTML, PDF, MOBI/AZW → EPUB. The import pipeline (`main/ipc/library.js`) routes all non-EPUB files through `convertToEpub()`. Foliate renders EPUBs. Legacy text fallback path (`main/legacy-parsers.js`) remains as dead-end for failed conversions.
-
-**Gaps addressed:**
-- BUG-033: Book formatting stripped too aggressively (bold, italic, lists, headings lost)
-- BUG-034: Images in books stripped during import (not extracted or embedded)
-- BUG-075/079: EPUB pipeline completion (DOCX support, URL→EPUB, single rendering path)
-
----
-
-### Sprint EPUB-2A: Content Fidelity ✅ COMPLETED (v1.5.0, 2026-04-01)
-
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-033/034 resolved. 18 new tests. APPROVED_WITH_CONCERNS (PDF bold/italic and image extraction limited by pdf-parse).
+| Phase | Sprints | Final Version | Key Deliverables |
+|-------|---------|---------------|------------------|
+| 2: EPUB Fidelity | EPUB-2A, EPUB-2B | v1.5.1 | Format preservation, image extraction, DOCX/URL→EPUB, single rendering path |
+| 3: Flow Mode | FLOW-3A, FLOW-3B | v1.6.1 | Infinite scroll, FlowScrollEngine, dead code removal |
+| 4: Readings | READINGS-4A, 4B, 4C | v1.9.0 | Card metadata, queue, author normalization, metadata wizard |
+| 5: Chrome Extension | EXT-5A, EXT-5B + TTS Smoothness | v1.11.0 | E2E pipeline tests, 6-digit pairing, background cache wiring |
 
 ---
 
-### Sprint EPUB-2B: Pipeline Completion ✅ COMPLETED (v1.5.1, 2026-04-01)
+## Phase 6 — TTS Hardening & Stabilization + Follow-On Hotfixes
 
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-075/079 resolved. 16 new tests. APPROVED — all SUCCESS CRITERIA met. URL→EPUB, Chrome ext→EPUB, legacy migration, single rendering path.
+> All TTS-6 and TTS-7 sprint specs archived to `docs/project/ROADMAP_ARCHIVE.md`. Summary below.
 
----
+| Lane | Sprints | Versions | Key Deliverables |
+|------|---------|----------|------------------|
+| TTS-6 | TTS-6C→6S + HOTFIX-11 | v1.14.0–v1.28.0 | Native-rate buckets, startup hardening, pronunciation overrides, word alignment, accessibility, profiles, portability, runtime stability, performance budgets, session continuity, diagnostics, cursor sync |
+| TTS-7 (stabilization + hotfix) | TTS-7A→7G | v1.29.0–v1.33.2 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification. All TTS bugs (BUG-101–121) resolved and verified. |
 
-## Phase 3 — Flow Mode Redesign
+**Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Goal:** Replace the current paginated cursor-on-pages Flow Mode with an infinite-scroll reading experience. Text flows continuously and scrolls upward at WPM speed through a reading zone in the upper third of the viewport. A shrinking underline cursor paces the reader line-by-line. Works for both plain text/HTML docs and foliate-rendered EPUBs.
-
-**Baseline:** `FlowMode.ts` (163 lines) drives word-by-word timing via setTimeout chain. `FlowCursorController.ts` (240 lines) slides a CSS-transitioned bar across paginated lines. Both operate within PageReaderView. `FoliatePageView.tsx` hardcodes `flow="paginated"` — foliate-js supports `flow="scrolled"` natively but Blurby has never used it.
-
-**Architecture decision:** Flow Mode gets its own scroll-based rendering path. This reverses LL-013 ("Flow belongs in Page View") — infinite scroll is fundamentally incompatible with pagination. Page Mode stays paginated. Flow Mode switches to continuous scroll. This is a clean separation: the mode vertical (`FlowMode.ts`) drives timing, a new `FlowScrollEngine` manages the scroll container and cursor rendering.
-
-**Key design decisions:**
-- **Reading zone:** Upper third of viewport. Active line ~25% from top. Upcoming text fills the bottom 75%. Already-read text scrolls off the top.
-- **Shrinking underline cursor:** Full-width `var(--accent)` underline appears under the active line, contracts from left-to-right at WPM speed. When it reaches zero width → next line begins with fresh full-width underline. The cursor IS the pacer — no separate scroll speed control.
-- **EPUB support via foliate scrolled mode:** `flow="scrolled"` gives us a native scrollable container. Cursor overlays on top. Narration sync deferred to FLOW-3B.
-- **LL-014 still applies:** Cursor animation is imperative (class-based, not React effects). New `FlowScrollEngine` class replaces `FlowCursorController`.
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed that gap with proactive entry-cache coverage, reading-open cruise warming, and pure DOM readiness probing that no longer uses UI-mutating Foliate helpers. `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work: TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), and TTS-7E (deferred ack). Code-level analysis confirmed the synchronous response path is < 2ms. DEV instrumentation and 6 regression tests added. **TTS stabilization lane is now CLOSED — all bugs verified resolved.**
 
 ---
 
-### Sprint FLOW-3A: Flow Mode Infinite Scroll ✅ COMPLETED (v1.6.0, 2026-04-01)
+### Sprint TTS-7E: Cold-Start Narration Fix (Hotfix)
 
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. All 12 SUCCESS CRITERIA met. 35 new tests (932 total, 47 files). FlowScrollEngine replaces FlowCursorController. LL-013 reversed (see LL-067).
+> Historical note: this was the first cold-start repair attempt. Keep it for traceability, but `TTS-7F` is now the active corrective sprint because live testing showed `TTS-7E` did not fully solve launch ownership or ramp continuity.
 
----
+**Goal:** Fix the two bugs that make "open a new book → hit play" choppy and freezy: narration races ahead of foliate rendering (BUG-116) and the first IPC response handler blocks the main thread for ~910ms (BUG-117). After this sprint, narration on a cold-open book should start smoothly with no highlight misses and no visible freeze. User's design input: add a brief settling delay (~3s) after book open before narration action begins, and start narration from the user's current selection/position, not a stale default.
 
-### Sprint FLOW-3B: Flow Mode Polish ✅ COMPLETED (v1.6.1, 2026-04-01)
+**Problem:** Two distinct issues compound on freshly opened books:
 
-> Dead code removal (FlowScrollView, FlowCursorController, FLOW_PAGE_TURN_PAUSE_MS). Edge case hardening (empty doc, zero-width lines, font size rebuild). BUG-091/084 confirmed resolved by FLOW-3A. Bottom bar verified visible. Truncation fix for FoliatePageView.tsx + useKeyboardShortcuts.ts. 8 new tests (940 total).
+1. **Render race (BUG-116).** `startNarration()` (useReaderMode.ts:167–202) calls `modeInstance.startMode()` immediately without verifying foliate has rendered the target words in DOM. `highlightWordByIndex` (FoliatePageView.tsx:540–594) returns `false` on miss with no retry. Console shows `word 3 not in DOM`, `word 8 not in DOM`, etc. Audio plays but cursor can't land — user sees choppy jumps.
 
----
-
-## Phase 4 — Blurby Readings
-
-**Goal:** Transform the library into a curated reading experience. Richer card metadata, explicit reading queue, author normalization, metadata enrichment, and first-run onboarding.
-
-**Phase 4 split:**
-- READINGS-4A ✅ (cards + queue + new dot) — v1.7.0
-- READINGS-4B ✅ (author normalization + folder picker) — v1.8.0
-- READINGS-4C ✅ (metadata wizard) — v1.9.0
-
----
-
-### Sprint READINGS-4B: Author Normalization + First-Run Folder Picker ✅ COMPLETED (v1.8.0, 2026-04-02)
-
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-074/076 resolved. 16 new tests (973 total, 49 files). Author normalization on all imports, batch normalize IPC, "Normalize Authors" button in settings, folder picker step in onboarding. APPROVED.
-
----
-
-### Sprint READINGS-4C: Metadata Wizard ✅ COMPLETED (v1.9.0, 2026-04-02)
-
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-077 resolved. 16 new tests (989 total, 50 files). Metadata scan IPC, filename parser, batch update IPC, MetadataWizard modal, Ctrl+Shift+M shortcut. APPROVED.
-
----
-
-## Phase 5 — Read Later + Chrome Extension
-
-**Goal:** Harden the Chrome extension → desktop pipeline with automated E2E tests. Integrate extension-sourced articles with the reading queue (READINGS-4A). Articles sent from the extension auto-join the queue and display with clear "web" source attribution.
-
-**Baseline:** Chrome extension (7 files, ~1,700 lines) already sends articles via WebSocket to `main/ws-server.js` (441 lines). Articles are extracted via Readability.js, converted to EPUB, and added to library with `source: "url"`, `unread: true`. Existing WS test file (`tests/ws-server.test.js`, 317 lines) covers frame encoding and message shapes but has no integration tests. `handleAddArticle()` (ws-server.js line 226) does NOT set `queuePosition` — articles land in library but not in the reading queue.
-
----
-
-### Sprint EXT-5A: Chrome Extension E2E Tests + Queue Integration ✅ COMPLETED (v1.10.0, 2026-04-02)
-
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 33 new tests (1,022 total, 51 files). Auto-queue extension articles (queuePosition), source domain badge, E2E pipeline tests, WS protocol tests. APPROVED.
-
----
-
-### Sprint EXT-5B: Extension Pairing UX Hardening ✅ COMPLETED (v1.11.0, 2026-04-02)
-
-> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. 10 new tests (1,032 total, 51 files). 6-digit short code pairing, WS `pair` protocol, ConnectorsSettings Chrome Extension section, popup pairing flow, options.html paired/unpair UI. Phase 5 complete. APPROVED.
-
-### Post-Phase 5 Implementation Note: TTS Smoothness Stabilization ✅ IMPLEMENTED ON `main` (2026-04-04, unreleased)
-
-> Kokoro narration path upgraded in-place on `main`. 6 new tests (1,038 total, 51 files). This was implementation work rather than a queued release sprint, so it is recorded here as an engineering milestone rather than a tagged version.
-
-**Delivered:**
-- Predictive first-chunk priming for warm-model starts
-- Cache `wordCount` metadata with lazy migration for legacy entries
-- Scheduler-owned `playbackRate` for Kokoro speed changes (no restart churn)
-- Boundary-aware chunk planning with schedule-time punctuation pauses
-- Reading Now background cache wiring
-- TTS/preload/runtime type surface restored to green (`npm run typecheck`)
-
-**Queued follow-up:** `TTS-6C` replaces the unreleased Kokoro `playbackRate` speed path with native `1.0x` / `1.2x` / `1.5x` generation buckets before release. Smoothness remains the startup/cache/chunking foundation; `TTS-6C` owns Kokoro rate control.
-
-**Baseline:**
-- `main/ws-server.js` (450 lines) — `handleMessage()` at line 184 handles `auth` type. `generatePairingToken()` at line 320 generates 32-char hex. `_pairingToken` module var stores the long-lived token.
-- `main/ipc/misc.js` — `get-ws-pairing-token` and `regenerate-ws-pairing-token` IPC handlers (lines 305-312).
-- `src/components/settings/ConnectorsSettings.tsx` (85 lines) — Site logins only. No extension pairing UI.
-- `chrome-extension/service-worker.js` (561 lines) — WS auth at connect time, reads `pairingToken` from `chrome.storage.local`.
-- `chrome-extension/popup.js` (185 lines) — Connection status badge, no pairing UI.
-- `chrome-extension/options.html` (216 lines) — Manual pairing token text input field.
-
-#### WHERE (Read Order)
-
-1. `CLAUDE.md` — rules, agents, current state
-2. `docs/governance/LESSONS_LEARNED.md`
-3. `ROADMAP.md` — this section
-4. `main/ws-server.js` — `handleMessage()` (line 184), `generatePairingToken()` (line 320), `startServer()` (line 324)
-5. `main/ipc/misc.js` — `get-ws-pairing-token`, `regenerate-ws-pairing-token` (lines 305-312)
-6. `src/components/settings/ConnectorsSettings.tsx` — current site logins UI (85 lines)
-7. `src/components/SettingsMenu.tsx` — ConnectorsSettings wiring
-8. `chrome-extension/service-worker.js` — WS connect + auth flow
-9. `chrome-extension/popup.html` + `popup.js` — popup UI + connection status
-10. `chrome-extension/options.html` + `options.js` — manual token input
-
-#### Tasks
-
-| # | Agent | Task | Files |
-|---|-------|------|-------|
-| 1 | electron-fixer | **Short-code generation** — New `generateShortCode()` in ws-server.js: 6-digit numeric (`Math.floor(100000 + Math.random() * 900000)`). New module vars `_shortCode`, `_shortCodeExpiry`. Auto-rotates every 5 min (`SHORT_CODE_TTL_MS` in constants.js). `getShortCode()` export: returns `{code, expiresAt}`, regenerates if expired. | `main/ws-server.js`, `main/constants.js` |
-| 2 | electron-fixer | **WS `pair` message handler** — In `handleMessage()`, before the auth-required gate: accept `{type:"pair", code}` from unauthenticated clients. Validate `msg.code` against `_shortCode` (string comparison). On match: generate long-lived token via `generatePairingToken()`, encrypt+persist to settings (reuse existing pattern), set `client.authenticated = true`, send `{type:"pair-ok", token}`. On mismatch: send `{type:"pair-failed", message:"Invalid code"}`. On expired code: regenerate before comparing. | `main/ws-server.js` |
-| 3 | electron-fixer | **Short-code IPC** — New `get-ws-short-code` IPC handler: returns `{code, expiresAt, connected}` where `connected` = `_clients.size > 0 && [..._clients].some(c => c.authenticated)`. New `regenerate-ws-short-code` handler: force-rotates code, returns new `{code, expiresAt}`. Add to preload.js. | `main/ipc/misc.js`, `preload.js` |
-| 4 | renderer-fixer | **ConnectorsSettings: Chrome Extension section** — Add section above "Logged-in Sites": heading "Chrome Extension", connection status indicator (green dot + "Connected" / red dot + "Not connected"), 6-digit code in large monospace (`font-size: 2rem; letter-spacing: 0.5em`), "Refreshes in X:XX" countdown (useEffect interval), "New Code" button calls `regenerate-ws-short-code`. Hide code when connected. Use `get-ws-short-code` IPC to fetch. | `src/components/settings/ConnectorsSettings.tsx`, `src/styles/global.css` |
-| 5 | renderer-fixer | **Extension popup: pairing flow** — When `connectionStatus !== "connected"`: replace article preview area with pairing UI. Show "Enter the 6-digit code from Blurby desktop" label, 6-digit input (numeric, maxlength 6, large centered), "Pair" button. On submit: send `{type:"request-pair", code}` message to service worker. Service worker sends `{type:"pair", code}` over WS. On `pair-ok`: store received token in `chrome.storage.local` as `pairingToken`, update connection badge to green, switch to normal UI. On `pair-failed`: show inline error "Invalid code — check Blurby desktop". | `chrome-extension/popup.html`, `chrome-extension/popup.js`, `chrome-extension/service-worker.js` |
-| 6 | renderer-fixer | **Extension options: replace manual token field** — Remove the raw pairing token text input. Replace with: connection status display, "Paired" with green check when token exists, "Unpair" button (clears `pairingToken` from storage, disconnects WS). Keep existing cloud sync and connection mode settings. | `chrome-extension/options.html`, `chrome-extension/options.js` |
-| 7 | test-runner | **Tests** — (a) `generateShortCode()` returns 6-digit string, (b) short code rotates after TTL, (c) `pair` message with valid code → `pair-ok` with token, (d) `pair` message with invalid code → `pair-failed`, (e) `pair` message after expiry → new code generated + compared, (f) successful pair marks client authenticated, (g) IPC `get-ws-short-code` returns code + expiry, (h) IPC `regenerate-ws-short-code` returns new code. ≥10 new tests. | `tests/ws-server.test.js` |
-| 8 | test-runner | **`npm test` + `npm run build`** | — |
-| 9 | spec-reviewer | **Spec compliance** | — |
-| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 11 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### SUCCESS CRITERIA
-
-1. 6-digit numeric code displayed in Settings > Connectors under "Chrome Extension" section
-2. Code auto-rotates every 5 minutes with visible countdown
-3. "New Code" button regenerates immediately
-4. Extension popup shows pairing input when not connected
-5. Entering correct code in extension popup → `pair-ok` → token stored → auto-connected
-6. Entering wrong code → inline error message, no crash
-7. Extension reconnects automatically on restart using stored token (existing `auth` flow unchanged)
-8. ConnectorsSettings shows green "Connected" status when extension is paired
-9. Extension options.html no longer has raw token input field
-10. ≥10 new tests covering short code generation, pair protocol, IPC handlers
-11. `npm test` passes (≥1,032 tests)
-12. `npm run build` succeeds
-13. Existing WS tests and extension pipeline tests pass — no regressions
-
----
-
-## Phase 5 Exit Gate
-
-Phase 5A ✅ complete. Phase 5B = extension pairing UX (not RSS/News — that moved to Phase 8 backlog).
-
-Phase 5 is complete when:
-1. ✅ Extension articles auto-enter reading queue (5A)
-2. ✅ E2E test coverage exists for the full article ingestion pipeline (5A)
-3. Extension pairing is one-step (6-digit code, no manual token copy) (5B)
-4. All existing extension functionality preserved — no regressions
-
----
-
-## Phase 6 — TTS Hardening & App Polish
-
-**Goal:** Preserve the completed Kokoro/narration hardening lane, but keep room for urgent user-confirmed hotfixes before resuming broader app-polish themes. `TTS-6S` is now active because saved in-app bug reports show real runtime regressions in sync, pause quality, and backlog fill.
-
----
-
-### Sprint TTS-6S: Cursor Sync, Pause Shaping & Backlog Fill Hotfix
-
-**Goal:** Stabilize live Kokoro narration quality by fixing the three user-reported failures now reproduced in the field: cursor/highlight drift from spoken audio, long or awkward pauses at the wrong boundaries, and audible silence when backlog/cache fill cannot keep pace with playback. Resolves BUG-096, BUG-097, and BUG-098.
-
-**Problem:** The Phase 6 TTS lane shipped strong infrastructure, but live reports from `Ctrl+Shift+B` bug captures show Narrate is still not reliable enough in real use. On *The Return of Sherlock Holmes* (EPUB, ~115k words), users report the cursor stops following the voice, Kokoro pauses mid-clause or over-pauses in the wrong places, and the next chunk is not ready in time, producing dead air. The app now has better diagnostics from `TTS-6Q`, but the product issue is runtime quality, not observability alone. We need one focused hotfix sprint that tightens scheduler/runtime behavior before more feature work.
+2. **IPC long task (BUG-117).** `[Violation] 'message' handler took 910ms`. The renderer's IPC response handler for the first Kokoro chunk deserializes audio payload + schedules it in one synchronous block. TTS-7C broke the *request* side into microtasks, but the *response* path was untouched.
 
 **Design decisions:**
-- **Bug-report-driven scope:** This sprint is anchored to saved app-data bug reports plus `BUG-096`, `BUG-097`, and `BUG-098`, not speculative cleanup.
-- **Keep Kokoro native-rate architecture:** Do not reintroduce `playbackRate` stretching or bypass the native-rate bucket system. Fix timing/backlog behavior inside the existing architecture.
-- **Prefer runtime truth over textual guesses:** Where possible, use actual rendered chunk duration, queue depth, and scheduler diagnostics to drive behavior instead of static assumptions.
-- **Backlog first, then cosmetics:** Eliminating audible dead air and obvious cursor drift is higher priority than perfect highlight smoothness.
-- **No hidden resets:** Fixes must avoid stop/restart behavior that would make narration feel “better” only because playback keeps jumping.
+
+- **Render-readiness gate before narration starts.** Before calling `modeInstance.startMode()`, poll `highlightWordByIndex(startIdx)` with a `requestAnimationFrame` loop (or short interval). If the target word isn't in DOM after a reasonable timeout (3 seconds per user spec), navigate to the correct page first, then retry. Only start chunk generation once the first word is confirmed in DOM. This ensures audio and cursor are synchronized from the first syllable.
+
+- **Start from selection, not default.** If the user has a text selection or has clicked a word, use that position as the narration start point rather than `activeDoc.position` or word 0. `highlightedWordIndexRef.current` already tracks the user's last click — respect it as the source of truth for narration start. For a genuinely new book with no interaction, word 0 is fine, but the gate still waits for DOM readiness.
+
+- **Break IPC response handler into microtasks.** The `onChunkReady` callback path that handles the first Kokoro response should yield between: (a) deserialize/validate payload, (b) schedule chunk to audio, (c) update cursor state. Use the same `await setTimeout(0)` pattern from TTS-7C's narration-start breakup. Each phase should stay under 50ms.
+
+- **Measure the fix.** Add `performance.mark/measure` around the new gate and around the IPC response handler. Log via `narratePerf`. Acceptance threshold: no single task exceeds 50ms; total time from "user hits play" to "first word highlights + audio begins" under 3.5 seconds on cold start (model already loaded, just no cache for this book).
+
+**Tier:** Quick (targeted bug fix, single-component change path)
 
 **Baseline:**
-- Saved bug reports in app data: `C:\Users\estra\AppData\Roaming\blurby\blurby-data\bug-reports\bug-2026-04-04T21-53-21Z.json` and `bug-2026-04-04T21-56-59Z.json`
-- `docs/governance/BUG_REPORT.md` — `BUG-096`, `BUG-097`, `BUG-098`
-- `src/hooks/useNarration.ts` — Narrate orchestration, queue handoff, cursor updates
-- `src/utils/audioScheduler.ts` — source scheduling, highlight timing, pause shaping
-- `src/utils/generationPipeline.ts` — chunk sizing, backlog preparation, request pacing
-- `src/hooks/narration/kokoroStrategy.ts` — Kokoro strategy/runtime integration
-- `src/components/ReaderContainer.tsx` — extraction handoff + narration runtime integration
-- `src/utils/narrateDiagnostics.ts` and perf surfaces from `TTS-6O` / `TTS-6Q`
+- `src/hooks/useReaderMode.ts` (387 lines) — `startNarration` (line 167–202), no render gate
+- `src/components/FoliatePageView.tsx` (1,012 lines) — `highlightWordByIndex` (line 540–594), returns false on miss
+- `src/hooks/useReadingModeInstance.ts` — `onWordAdvance` callback (line 158–176), page-turn on miss
+- `src/hooks/narration/kokoroStrategy.ts` (156 lines) — `onChunkReady` callback (line 75–78)
+- `src/utils/generationPipeline.ts` — chunk emission path
+- `src/hooks/useNarration.ts` — `startCursorDriven` (line 389–441), `speakNextChunk` call
 
 #### WHERE (Read Order)
 
 1. `CLAUDE.md`
 2. `docs/governance/LESSONS_LEARNED.md`
-3. `docs/governance/BUG_REPORT.md` — `BUG-096`, `BUG-097`, `BUG-098`
-4. Saved app-data bug reports in `C:\Users\estra\AppData\Roaming\blurby\blurby-data\bug-reports\`
-5. `ROADMAP.md` — this section
-6. `src/hooks/useNarration.ts`
-7. `src/utils/audioScheduler.ts`
-8. `src/utils/generationPipeline.ts`
-9. `src/hooks/narration/kokoroStrategy.ts`
-10. `src/components/ReaderContainer.tsx`
-11. `src/utils/narrateDiagnostics.ts`
-12. runtime tests touching scheduler, backlog, and extraction handoff
+3. `docs/governance/BUG_REPORT.md` — BUG-116, BUG-117
+4. `ROADMAP.md` — this section
+5. `src/hooks/useReaderMode.ts` — `startNarration` (line 167), `FOLIATE_SECTION_LOAD_WAIT_MS`
+6. `src/components/FoliatePageView.tsx` — `highlightWordByIndex` (line 540), miss path (line 570)
+7. `src/hooks/useReadingModeInstance.ts` — narration `onWordAdvance` callback (line 158)
+8. `src/hooks/useNarration.ts` — `startCursorDriven` (line 389), `speakNextChunk`
+9. `src/hooks/narration/kokoroStrategy.ts` — `onChunkReady` (line 75), `speakChunk` (line 110)
+10. `src/utils/generationPipeline.ts` — chunk emission path
 
 #### Tasks
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **Cursor/voice sync correction** — Audit how cursor advancement is derived from scheduled source timing vs actual playback progress. Tighten the scheduler/highlight handoff so the word cursor remains aligned with Kokoro audio across longer chunks and section handoffs. Use existing diagnostics/invariants rather than adding a parallel timing model. | `src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`, related tests |
-| 2 | Primary CLI (renderer-fixer scope) | **Pause-shaping correction** — Rebalance or suppress scheduler-added pauses where Kokoro audio already contains natural prosodic pause, especially around clause boundaries, sentence boundaries, and chunk joins. Mid-clause pauses should materially reduce. | `src/utils/audioScheduler.ts`, `src/utils/rhythm.ts` or related pause helpers, tests |
-| 3 | Primary CLI (renderer-fixer scope / electron-fixer scope if needed) | **Backlog/cache starvation fix** — Ensure the next chunk is requested, generated, and queued early enough to avoid dead air on cache misses. Revisit chunk ramp, prebuffer threshold, and request pacing so backlog fill stays ahead of playback without duplicating chunk requests. | `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`, cache/preload surfaces as needed |
-| 4 | Primary CLI (renderer-fixer scope) | **Duplicate/stall guardrails** — Eliminate repeated identical chunk dispatches at the same cursor unless they are explicit retries with visible telemetry. Narration must not silently spin on one position while audio drains. | scheduler/pipeline integration surfaces, diagnostics/tests |
-| 5 | test-runner | **Tests** — Add focused regression coverage for cursor alignment stability, pause placement at punctuation/clause joins, backlog continuity under uncached starts, and duplicate-chunk suppression. Include at least one integration-style case for a new uncached section start. | `tests/` |
+| 1 | Primary CLI (renderer-fixer scope) | **Render-readiness gate** — In `startNarration()` (useReaderMode.ts), after setting reading mode to "narration" and calling `extractFoliateWords()`, add a render-readiness loop: poll `foliateApiRef.current.highlightWordByIndex(startIdx)` via `requestAnimationFrame`. If miss, retry up to 3 seconds (configurable: `NARRATION_RENDER_WAIT_MS = 3000` in constants.ts). If still missing after timeout, call `foliateApiRef.current.goTo(startIdx)` to navigate to the correct page, then wait one more rAF cycle. Only call `modeInstance.startMode()` after the target word is confirmed in DOM. | `src/hooks/useReaderMode.ts`, `src/utils/constants.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Start from selection** — In `startNarration()`, before the render gate, check `highlightedWordIndexRef.current`. If it's > 0 (user has clicked/selected a word), use that as `startIdx`. If it's 0 and the book has a saved `activeDoc.position`, use that. Only fall back to word 0 for genuinely new books with no interaction. This ensures "narration starts where the user is looking." | `src/hooks/useReaderMode.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Break IPC response handler** — In `kokoroStrategy.ts`, refactor the `onChunkReady` callback to yield between phases: (a) validate chunk payload → `await setTimeout(0)` → (b) `scheduler.scheduleChunk(chunk)` → `await setTimeout(0)` → (c) `pipeline.acknowledgeChunk()` + cursor update. If the callback must remain synchronous (scheduler contract), wrap the post-schedule work in `queueMicrotask`. Goal: no single synchronous block exceeds 50ms. | `src/hooks/narration/kokoroStrategy.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Performance instrumentation** — Add `performance.mark('narrate-render-gate-start')` / `performance.mark('narrate-render-gate-end')` around the new readiness gate. Add `performance.mark('narrate-ipc-response-start')` / `performance.mark('narrate-ipc-response-end')` around the chunk response handler. Log via `narratePerf`. | `src/hooks/useReaderMode.ts`, `src/hooks/narration/kokoroStrategy.ts` |
+| 5 | test-runner | **Tests** — (a) Render gate: mock foliate miss → verify narration waits, then starts after DOM ready. (b) Render gate timeout: mock persistent miss → verify narration navigates to page, then retries. (c) Start from selection: set `highlightedWordIndex` to 500 → start narration → verify startIdx is 500. (d) Start from default: new book, no selection → verify startIdx is 0 or saved position. (e) IPC response: mock chunk delivery → verify no synchronous block exceeds 50ms. ≥8 new tests. | `tests/` |
 | 6 | test-runner | **`npm test` + `npm run build`** | — |
 | 7 | spec-compliance-reviewer | **Spec compliance** | — |
-| 8 | quality-reviewer | **Runtime quality review** — Verify the fix addresses user-visible symptoms, not just internal metrics. | — |
-| 9 | doc-keeper | **Documentation pass** — Mark `BUG-096`, `BUG-097`, and `BUG-098` resolved only if the symptoms are materially fixed in real narration runs. Update sprint queue and dependency chain. | `ROADMAP.md`, `docs/governance/BUG_REPORT.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
-| 10 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### Execution Sequence
-
-```
-1. Primary CLI: Tasks 1-4 (sequential; keep runtime behavior coherent)
-2. test-runner: Task 5
-3. test-runner: Task 6
-4. spec-compliance-reviewer: Task 7
-5. quality-reviewer: Task 8
-6. doc-keeper: Task 9
-7. blurby-lead: Task 10
-```
-
-#### SUCCESS CRITERIA
-
-1. Kokoro cursor/highlight stays materially aligned with spoken audio during normal long-form narration
-2. Mid-clause and other inappropriate long pauses are materially reduced
-3. Narration no longer produces audible dead air at ordinary uncached section starts because backlog/cache fill stays ahead of playback
-4. Scheduler/pipeline no longer silently repeat identical chunk dispatches at one cursor position without forward progress
-5. Fixes preserve native-rate buckets and do not reintroduce scheduler `playbackRate` stretching
-6. New tests cover sync, pause placement, and backlog continuity regressions
-7. `npm test` passes
-8. `npm run build` succeeds
-
----
-
-### Sprint HOTFIX-11: Bug Reporter Narration Diagnostics & Console Capture
-
-**Goal:** Make bug reports filed during Narrate mode actionable by wiring the TTS-6Q diagnostics surface and recent console output into the bug report JSON. Resolves BUG-099 and BUG-100.
-
-**Problem:** The bug reporter captures a screenshot and basic app state (docId, title, position, reading mode, engine, voice, speed) but nothing about what the narration subsystem was actually doing. TTS-6Q shipped `narrateDiagnostics.ts` with `NarrateDiagSnapshot` (engine, status, cursor, rate, rateBucket, extraction state, fallback info) and `NarrateDiagEvent` (start/stop/pause/resume/extraction-handoff/context-restore/fallback/rate-clamp), but neither is wired to the bug reporter. Console output with `[narrate]`, `[NarrateMode]`, `[TTS-6O]` tagged diagnostic lines is only visible in DevTools and lost when the user files a report.
-
-**Design decisions:**
-- **Renderer-side console ring buffer:** Intercept `console.log`/`console.warn`/`console.error` early in app startup, store last 200 entries in a ring buffer. Original console methods still fire normally (no suppression). Buffer is an in-memory array, not persisted.
-- **Diagnostics snapshot at report time:** When the bug report dialog opens, call `getLatestSnapshot()` and `getDiagEvents()` from `narrateDiagnostics.ts` and include them in the `appState` payload alongside the existing fields.
-- **No new IPC:** All data is renderer-side. `bugReportState.ts` already runs in the renderer. The diagnostics module is also renderer-side. Console buffer is renderer-side. Nothing needs to cross the preload bridge.
-- **Backward-compatible JSON shape:** Extend `BugReportAppState` with optional fields so existing report consumers are unaffected.
-
-**Baseline:**
-- `src/utils/bugReportState.ts` (74 lines) — `BugReportAppState` interface + `gatherAppState()`. Has basic narration fields (`narrationStatus`, `ttsEngine`, `ttsVoice`, `ttsSpeed`).
-- `src/utils/narrateDiagnostics.ts` (112 lines) — `NarrateDiagSnapshot`, `NarrateDiagEvent`, `getLatestSnapshot()`, `getDiagEvents()`, invariant checkers. Ring buffers: 10 snapshots, 50 events.
-- `src/components/BugReportModal.tsx` — Modal UI. Receives `appState` as prop, displays key-value pairs, calls `api.saveBugReport()`.
-- `src/components/LibraryContainer.tsx` — `openBugReport()` callback: captures screenshot, calls `gatherAppState()`, sets modal state.
-- `main/ipc/bug-report.js` (54 lines) — `save-bug-report` IPC handler. Writes JSON to `{dataPath}/bug-reports/`.
-
-#### WHERE (Read Order)
-
-1. `CLAUDE.md` — rules, agents, current state
-2. `docs/governance/LESSONS_LEARNED.md`
-3. `ROADMAP.md` — this section
-4. `src/utils/narrateDiagnostics.ts` — TTS-6Q diagnostics surface (NarrateDiagSnapshot, NarrateDiagEvent, getLatestSnapshot, getDiagEvents)
-5. `src/utils/bugReportState.ts` — BugReportAppState interface, gatherAppState()
-6. `src/components/BugReportModal.tsx` — modal UI, state display
-7. `src/components/LibraryContainer.tsx` — openBugReport() callback (line ~100)
-8. `main/ipc/bug-report.js` — save-bug-report IPC handler
-
-#### Tasks
-
-| # | Owner | Task | Files |
-|---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **Console ring buffer** — Create `src/utils/consoleCapture.ts`. On import, monkey-patch `console.log`, `console.warn`, `console.error` to also push `{timestamp, level, args: serialized}` into a ring buffer (max 200 entries). Export `getConsoleBuffer(): ConsoleEntry[]` and `clearConsoleBuffer(): void`. Serialize args with `JSON.stringify` try/catch (fallback to `String(arg)`). Truncate individual entries to 500 chars. Import this module early in `src/main.tsx` (before React mount) so it captures startup logs. | `src/utils/consoleCapture.ts`, `src/main.tsx` |
-| 2 | Primary CLI (renderer-fixer scope) | **Extend BugReportAppState** — Add optional fields to the interface: `narrateDiagSnapshot?: NarrateDiagSnapshot`, `narrateDiagEvents?: NarrateDiagEvent[]`, `consoleLog?: ConsoleEntry[]`. Update `gatherAppState()` to accept these and pass them through. | `src/utils/bugReportState.ts` |
-| 3 | Primary CLI (renderer-fixer scope) | **Wire diagnostics into openBugReport** — In `LibraryContainer.tsx` `openBugReport()`, after capturing screenshot: import and call `getLatestSnapshot()` and `getDiagEvents()` from `narrateDiagnostics.ts`, import and call `getConsoleBuffer()` from `consoleCapture.ts`. Pass all three into `gatherAppState()`. | `src/components/LibraryContainer.tsx` |
-| 4 | Primary CLI (renderer-fixer scope) | **Display diagnostics in modal** — In `BugReportModal.tsx`, if `appState.narrateDiagSnapshot` exists, render a collapsible "Narration Diagnostics" section showing: engine, status, rateBucket, cursorWordIndex/totalWords, extractionComplete, fellBack. If `appState.consoleLog` exists, render a collapsible "Console Log" section with the last 50 entries (most recent first), each showing timestamp + level + message. Use `<pre>` with `max-height: 200px; overflow-y: auto` for the console section. | `src/components/BugReportModal.tsx`, `src/styles/global.css` |
-| 5 | test-runner | **Tests** — (a) `consoleCapture` captures log/warn/error and respects ring buffer limit, (b) `consoleCapture` truncates long entries, (c) `gatherAppState` includes diagnostics fields when provided, (d) `gatherAppState` omits diagnostics fields when not provided (backward compat), (e) `BugReportAppState` with diagnostics serializes to valid JSON. >=8 new tests. | `tests/` |
-| 6 | test-runner | **`npm test` + `npm run build`** | — |
-| 7 | spec-compliance-reviewer | **Spec compliance** | — |
-| 8 | doc-keeper | **Documentation pass** — Mark BUG-099 and BUG-100 as resolved. Update TECHNICAL_REFERENCE if bug report schema is documented there. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 8 | doc-keeper | **Documentation pass** — Update BUG-116/117 status. Update sprint queue. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
 | 9 | blurby-lead | **Git: commit, merge, push** | — |
 
 #### Execution Sequence
 
 ```
-1. Primary CLI (renderer-fixer scope): Tasks 1-4 (sequential — 1 before 2, 2 before 3, 3 before 4)
-2. test-runner: Task 5 (tests)
-3. test-runner: Task 6 (npm test + npm run build)
-4. spec-compliance-reviewer: Task 7
-5. doc-keeper: Task 8
-6. blurby-lead: Task 9 (git)
+1. Primary CLI: Task 2 (start from selection — small, establishes correct startIdx)
+2. Primary CLI: Task 1 (render-readiness gate — depends on correct startIdx from Task 2)
+3. Primary CLI: Task 3 (IPC response breakup — independent of Tasks 1-2)
+4. Primary CLI: Task 4 (instrumentation — after Tasks 1-3 complete)
+    ↓
+5. test-runner: Task 5
+6. test-runner: Task 6
+7. spec-compliance-reviewer: Task 7
+8. doc-keeper: Task 8
+9. blurby-lead: Task 9
 ```
 
 #### SUCCESS CRITERIA
 
-1. New `src/utils/consoleCapture.ts` intercepts console.log/warn/error into a 200-entry ring buffer
-2. Console capture is initialized before React mount in `src/main.tsx`
-3. `BugReportAppState` includes optional `narrateDiagSnapshot`, `narrateDiagEvents`, and `consoleLog` fields
-4. `openBugReport()` in LibraryContainer populates diagnostics from `narrateDiagnostics.ts` and console from `consoleCapture.ts`
-5. Bug report JSON saved to disk includes narration diagnostics when narration is/was active
-6. Bug report JSON saved to disk includes recent console output
-7. BugReportModal displays narration diagnostics section when data exists
-8. BugReportModal displays console log section when data exists
-9. Existing bug reports without diagnostics fields still load/display correctly (backward compat)
-10. Original console methods still fire normally (no suppression of DevTools output)
-11. >=8 new tests
-12. `npm test` passes
-13. `npm run build` succeeds
-
----
-
-### Sprint TTS-6D: Kokoro Startup & Recovery Hardening ✅ COMPLETED (v1.15.0, 2026-04-04)
-
-> Implemented and merged to `main`. 11 new tests (1,061 total, 53 files). Unified `tts-kokoro-engine-status` events (`warming` / `ready` / `retrying` / `error`), explicit narration warming state, 2-second delayed prewarm, reader/settings warm-up affordances, and visible crash-retry UX. `BUG-032` resolved. All 10 SUCCESS CRITERIA met.
-
-**Goal:** Eliminate the remaining "hung" feeling around Kokoro first-use, idle re-warm, and worker recovery so narration always presents a visible, deterministic startup path instead of silent waiting.
-
-**Problem:** `TTS-6C` fixed rate quality, but the startup/recovery story is still only partially productized. `BUG-032` remains mitigated rather than resolved. The engine now emits `tts-kokoro-loading`, but cold start, idle unload, and worker-crash recovery still need one unified renderer-side state model, clearer reader UX, and test coverage that proves narration recovers cleanly.
-
-**Design decisions:**
-- **Single Kokoro engine-status surface:** Treat cold load, idle re-warm, and crash retry as the same product state machine (`idle`, `warming`, `ready`, `error`) instead of ad hoc loading booleans.
-- **Visible waiting, not silent stall:** When the user starts Kokoro before the model is ready, narration enters an explicit waiting state in the reader UI and resumes automatically when warm-up finishes.
-- **Delayed prewarm, never startup-blocking:** If Kokoro was last used or is the selected engine, the app may schedule a delayed background prewarm after startup/reader-open, but never on the synchronous app-critical path.
-- **Recovery is a first-class path:** Worker retry/recreate behavior must surface progress/error back to renderer and cleanly fall back only on terminal failure.
-
-**Baseline:**
-- `main/tts-engine.js` — worker lifecycle, idle timeout unload, crash retry, `sendLoadingSignal()`
-- `main/ipc/tts.js` — renderer-facing TTS IPC + loading event forwarding
-- `preload.js` — `onKokoroLoading` bridge
-- `src/hooks/useNarration.ts` — engine selection, Kokoro readiness, start/stop/restart behavior
-- `src/components/ReaderContainer.tsx` — narration start UX, loading/error affordances
-- `src/components/settings/SpeedReadingSettings.tsx` — engine selection context
-- `tests/` — current Kokoro engine, IPC, and narration integration coverage
-
-#### WHERE (Read Order)
-
-1. `CLAUDE.md`
-2. `docs/governance/LESSONS_LEARNED.md`
-3. `docs/governance/BUG_REPORT.md` — `BUG-032`
-4. `ROADMAP.md` — this section
-5. `main/tts-engine.js`
-6. `main/ipc/tts.js`
-7. `preload.js`
-8. `src/hooks/useNarration.ts`
-9. `src/components/ReaderContainer.tsx`
-10. `src/components/settings/SpeedReadingSettings.tsx`
-11. existing TTS tests touching worker recovery/loading
-
-#### Tasks
-
-| # | Owner | Task | Files |
-|---|-------|------|-------|
-| 1 | Primary CLI (electron-fixer scope) | **Normalize Kokoro engine lifecycle events** — Make `main/tts-engine.js` expose a single engine-status stream for warm-up start, warm-up complete, retrying, and terminal failure. Reuse the existing loading event path instead of inventing parallel signals. | `main/tts-engine.js`, `main/ipc/tts.js`, `preload.js` |
-| 2 | Primary CLI (electron-fixer scope) | **Delayed prewarm policy** — Add a delayed/background prewarm path when Kokoro is selected or was last used recently. It must never block app launch or reader open, and it must no-op when the worker is already ready. | `main/tts-engine.js`, `main/ipc/tts.js`, settings access point as needed |
-| 3 | Primary CLI (renderer-fixer scope) | **Narration waiting state** — In the narration hook, distinguish `warming` from `speaking`/`idle` so the reader can show "Loading Kokoro..." and auto-continue once ready. Starting narration during warm-up must not create duplicate pipeline starts. | `src/hooks/useNarration.ts`, `src/types/narration.ts` |
-| 4 | Primary CLI (renderer-fixer scope) | **Reader UX for cold start and recovery** — Show a clear inline loading/error state in the reader when Kokoro is warming or failed. Keep Web Speech unchanged. Recovery after a successful re-warm should continue from the intended current word. | `src/components/ReaderContainer.tsx`, supporting styles if needed |
-| 5 | Primary CLI (renderer-fixer scope) | **Settings/UI consistency** — If Kokoro is selected in settings while it is still warming, expose that status there too so first-use does not feel invisible. Keep the control lightweight; no new wizard/modal. | `src/components/settings/SpeedReadingSettings.tsx` |
-| 6 | test-runner | **Tests** — Cover: cold-start waiting state, delayed prewarm not blocking startup path, idle re-warm status emission, worker crash retry surfacing status, auto-resume from intended word after warm-up, terminal failure surfacing readable error. Add integration coverage for the renderer event path. | `tests/` |
-| 7 | test-runner | **`npm test` + `npm run build`** | — |
-| 8 | spec-compliance-reviewer | **Spec compliance** | — |
-| 9 | quality-reviewer | **Architecture + code quality review** | — |
-| 10 | doc-keeper | **Documentation pass** — Mark `BUG-032` resolved only if the startup/recovery path is genuinely deterministic and visible. | `ROADMAP.md`, `docs/governance/BUG_REPORT.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
-| 11 | blurby-lead | **Git: commit, merge, push** | — |
-
-#### SUCCESS CRITERIA
-
-1. Kokoro cold-start, idle re-warm, and crash-retry all use one renderer-visible engine-status path
-2. Starting Kokoro narration while the model is warming shows an explicit waiting state instead of silent dead air
-3. Successful warm-up automatically continues narration from the intended current word without duplicate starts
-4. Delayed/background prewarm never blocks app launch or reader-open
-5. Worker retry/failure state reaches the renderer with a readable user-facing error on terminal failure
-6. Web Speech startup behavior is unchanged
-7. `BUG-032` is either fully resolved or left open with explicit remaining scope documented
-8. New tests cover warm-up, idle re-warm, crash recovery, and auto-resume behavior
+1. No `highlightWordByIndex miss` logs on cold-start narration of a new EPUB book
+2. Narration waits for DOM readiness before starting audio (render gate active)
+3. Render gate times out gracefully at 3 seconds and navigates to correct page
+4. Narration starts from user's last clicked word position when available
+5. Narration starts from saved position for returning books, word 0 for genuinely new books
+6. No `[Violation] 'message' handler` exceeding 50ms in IPC response path
+7. Total cold-start narration latency (play button → first word highlighted + audio) under 3.5 seconds
+8. ≥8 new tests
 9. `npm test` passes
 10. `npm run build` succeeds
 
+**Depends on:** TTS-7D (builds on stabilized narration pipeline)
+
 ---
 
-### Sprint TTS-6E: Pronunciation Overrides Foundation ✅ COMPLETED (v1.16.0, 2026-04-04)
+### Sprint TTS-7F: Proactive Entry Cache Coverage & Cruise Warm (Hotfix)
 
-> Implemented and merged to `main`. 15 new tests (1,076 total, 54 files). Added `PronunciationOverride` settings state, override editor with live preview, shared `applyPronunciationOverrides()` helper, Web Speech normalization, and Kokoro cache segregation via override-hash identity. Plain-text replacements only; no SSML or phoneme editor. All 10 SUCCESS CRITERIA met.
+**Goal:** Stop relying on reactive ramp-up to save the first narration experience. Every non-archived reading should always have at least the first 5 minutes of Kokoro narration cached at the effective default narration context, startup should quickly verify and repair that coverage, opening a reading should begin full-book cruise caching in the background, and play-start should still launch cleanly without page jumps or duplicate starts.
 
-**Goal:** Give users a first real pronunciation-control layer for Narrate mode by letting them define simple text replacements before synthesis, without introducing SSML or phoneme editing.
+**Problem:** Live verification after `TTS-7E` still shows three concrete failures:
 
-**Problem:** Proper names, acronyms, and domain-specific terms still get mispronounced unpredictably. The TTS audits correctly identified this as a product gap. Blurby does not need enterprise lexicons or phoneme editors yet, but it does need a simple user-owned override system that works with both Kokoro and Web Speech.
+1. **Page jump during readiness gate.** Narration is currently coupled to Foliate's live page DOM, and the current gate probes DOM readiness by calling `highlightWordByIndex(startIdx)`. That helper is not a pure read; it clears/applies highlight and can scroll. So the narration bridge is using a UI-mutating page API to discover DOM state, and the readiness check itself can therefore move the user's page.
+2. **Duplicate/reentrant launch.** Console shows the full cold-start sequence twice (`[narrate] start`, `[NarrateMode] start`, `[narrate] chunk`) for one play action. There is no launch token guarding against a second in-flight start attempt winning the race.
+3. **Reactive ramp-up still leaves dead air.** Even with first-two-chunk overlap, the app still treats startup as an on-demand race. New books often begin with zero entry coverage, so the first play still depends on live chunk generation keeping ahead of audio. That is exactly where the long opening pause and the post-chunk-1 pause are coming from.
 
 **Design decisions:**
-- **Plain-text replacements, not SSML:** This sprint ships ordered phrase replacements (`from` -> `to`) only. No IPA, no phoneme editor, no markup language.
-- **Global foundation first:** Store one global override list in settings. Per-book/profile overrides can come later if this proves valuable.
-- **Apply before chunking/cache lookup:** Kokoro generation and cache identity must reflect override output so cached audio is never reused for pre-override text.
-- **Previewable and reversible:** Users can add/remove overrides in settings and test them on sample text without needing to start narration in a book.
+
+- **Guaranteed entry coverage for all non-archived readings.** When a reading is added to the library, unarchived, or discovered missing coverage during startup repair, Blurby should cache enough Kokoro audio to cover the first 5 minutes of narration. Coverage is measured by generated `durationMs`, not guessed word count.
+- **Coverage is tied to the effective default narration context.** Use the narration context that would actually apply if the user hit play now: book profile > active profile > flat settings, then normalize to Kokoro voice + rate bucket + effective override hash. Old contexts stay on disk until LRU eviction; they are not proactively deleted.
+- **Startup performs a quick coverage-repair scan.** On app launch (or first library hydrate), inspect cache manifests for all non-archived readings and queue repair jobs only for books missing the first-5-minute target at the effective default narration context. This check must be manifest-driven and fast; no full audio loads.
+- **Opening a reading starts cruise warming for that book.** When a reading opens, start a low-priority marathon/cruise cache pass that continues from the current cursor to the end of the book, then backfills earlier portions if needed. This is separate from playback and should continue whether or not narration starts immediately.
+- **Play-start cleanup remains in scope.** Proactive caching solves the pause problem, but not the visible page jump or duplicate launch. `TTS-7F` keeps the pure DOM probe and single-launch ownership fixes so new-book play is both cached and orderly. The architectural rule here is explicit: narration may read Foliate DOM readiness, but it must not use UI-mutating highlight/navigation helpers as state probes.
+- **Archived docs are excluded.** Archived readings are ignored by both the entry-coverage guarantee and startup repair. Unarchiving a reading re-enters it into the coverage system.
+
+**Tier:** Full (crosses library lifecycle, startup repair, background cache orchestration, and reader launch)
 
 **Baseline:**
-- `src/components/settings/SpeedReadingSettings.tsx` — existing Narrate settings surface
-- `src/types.ts` / `src/constants.ts` — settings model/defaults
-- `src/hooks/useNarration.ts` — narration entry point
-- `src/hooks/narration/kokoroStrategy.ts` and generation pipeline/cache path — Kokoro synthesis + cache identity
-- `src/hooks/narration/webSpeechStrategy.ts` — fallback synthesis path
-- `src/utils/ttsCache.ts` — cache identity/storage behavior
+- `src/utils/backgroundCacher.ts` — current book-at-a-time cacher, active book first, then Reading Now, cruise-sized chunks only
+- `src/components/ReaderContainer.tsx` — background cacher startup, active-book wiring, reading-open lifecycle
+- `src/hooks/useReaderMode.ts` — narration launch path, render gate, timeout fallback
+- `src/components/FoliatePageView.tsx` — `highlightWordByIndex`, foliate word lookup, section ownership helpers
+- `src/hooks/useReadingModeInstance.ts` — mode start / narration launch path
+- `src/utils/ttsCache.ts` and `main/tts-cache.js` — cache manifest metadata and chunk inspection
+- `src/utils/narratePerf.ts` and `src/utils/narrateDiagnostics.ts` — timing and bug-report visibility
+- settings/profile resolution surfaces introduced in TTS-6L / TTS-6P
 
 #### WHERE (Read Order)
 
 1. `CLAUDE.md`
 2. `docs/governance/LESSONS_LEARNED.md`
-3. `docs/governance/TTS-AUDIT-REVIEW.md` — pronunciation exceptions disposition
+3. `docs/governance/BUG_REPORT.md` — BUG-116, BUG-118, BUG-119, BUG-120, BUG-121
 4. `ROADMAP.md` — this section
-5. `src/types.ts`
-6. `src/constants.ts`
-7. `src/components/settings/SpeedReadingSettings.tsx`
-8. `src/hooks/useNarration.ts`
-9. `src/hooks/narration/kokoroStrategy.ts`
-10. `src/hooks/narration/webSpeechStrategy.ts`
-11. `src/utils/ttsCache.ts`
+5. `src/utils/backgroundCacher.ts`
+6. `src/components/ReaderContainer.tsx` — background cacher bootstrap + reader open lifecycle
+7. `src/hooks/useReaderMode.ts` — `startNarration`, timeout path, render gate
+8. `src/components/FoliatePageView.tsx` — `highlightWordByIndex`, word lookup, page/section helpers
+9. `src/hooks/useReadingModeInstance.ts`
+10. `src/utils/ttsCache.ts`
+11. `main/tts-cache.js`
+12. `src/utils/narratePerf.ts`
+13. `src/utils/narrateDiagnostics.ts`
 
 #### Tasks
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **Settings model for pronunciation overrides** — Add a persisted global override list to settings with a compact shape such as `{ id, from, to, enabled }[]`. Define defaults, migration, and validation limits. | `src/types.ts`, `src/constants.ts` |
-| 2 | Primary CLI (renderer-fixer scope) | **Settings UI** — Add a lightweight pronunciation editor to Narrate settings. Users must be able to add, edit, delete, enable/disable, and reorder overrides. Include a short sample-text preview/test action. | `src/components/settings/SpeedReadingSettings.tsx`, styles as needed |
-| 3 | Primary CLI (renderer-fixer scope) | **Shared text-normalization helper** — Create one helper that applies enabled overrides in order and can be used by both engines. Keep it deterministic and easy to test. | `src/utils/` and narration consumers as needed |
-| 4 | Primary CLI (renderer-fixer scope) | **Apply overrides to Web Speech** — Ensure the spoken utterance uses normalized text while word-position bookkeeping stays understandable and documented. | `src/hooks/useNarration.ts`, `src/hooks/narration/webSpeechStrategy.ts` as needed |
-| 5 | Primary CLI (renderer-fixer scope / electron-fixer scope if needed) | **Apply overrides to Kokoro cache/generation path** — Make Kokoro generation use normalized text and ensure cache identity changes when the active override set changes, so stale cached audio is never reused after an override edit. | `src/hooks/narration/kokoroStrategy.ts`, `src/utils/ttsCache.ts`, cache metadata helpers as needed |
-| 6 | test-runner | **Tests** — Cover ordered replacement behavior, enable/disable, preview action, Kokoro cache segregation when overrides change, and Web Speech normalized-text usage. | `tests/` |
-| 7 | test-runner | **`npm test` + `npm run build`** | — |
-| 8 | spec-compliance-reviewer | **Spec compliance** | — |
-| 9 | quality-reviewer | **Architecture + code quality review** | — |
-| 10 | doc-keeper | **Documentation pass** — Update technical reference/privacy wording if override storage or cache identity changes meaningfully. | `ROADMAP.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
-| 11 | blurby-lead | **Git: commit, merge, push** | — |
+| 1 | Primary CLI (renderer-fixer scope) | **Add entry-coverage target + manifest inspection helpers** — Define a 5-minute narration coverage target (`300000ms`) and add helpers that can answer “how much opening audio is cached for this book/context?” from manifest metadata without loading PCM. Coverage must be keyed by effective voice/rate bucket/override hash. | `src/utils/ttsCache.ts`, `main/tts-cache.js`, `src/constants.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Reshape background cacher for two job types** — Extend the cacher to support (a) entry-coverage jobs that stop once 5-minute opening coverage is satisfied, and (b) cruise jobs that continue through the full book for the currently opened reading. Entry coverage should use startup-focused chunk sizing; cruise can keep steady-state chunk sizing. | `src/utils/backgroundCacher.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Library add / unarchive / startup repair wiring** — Whenever a reading is added or restored from archive, enqueue an entry-coverage job. On startup, quickly scan all non-archived docs and enqueue only missing/insufficient coverage repairs. This must not block app boot or library rendering. | `src/components/LibraryContainer.tsx`, `src/hooks/useLibrary.ts`, `src/components/ReaderContainer.tsx`, related startup/library hydration surfaces |
+| 4 | Primary CLI (renderer-fixer scope) | **Reading-open cruise warm** — When a reading opens, begin a background cruise-warm pass for that book at the effective default narration context. It should prioritize from the current cursor forward, then optionally backfill, and it must yield to active narration/user work instead of fighting playback. | `src/components/ReaderContainer.tsx`, `src/utils/backgroundCacher.ts` |
+| 5 | Primary CLI (renderer-fixer scope) | **Keep clean play-start semantics** — Add the pure DOM readiness probe, single-launch token, and correct timeout recovery navigation so proactive caching does not mask the still-open page-jump / duplicate-start bugs. Separate "read Foliate DOM state" from "change Foliate page state" so narration never moves the page while merely checking readiness. | `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/ReaderContainer.tsx` |
+| 6 | Primary CLI (renderer-fixer scope) | **Diagnostics + visibility** — Record entry-coverage status, startup repair decisions, and cruise-warm state in diagnostics/perf logs so bug reports can answer whether a book was actually covered before play. | `src/utils/narratePerf.ts`, `src/utils/narrateDiagnostics.ts`, bug-report state surfaces if needed |
+| 7 | test-runner | **Tests** — Cover: entry coverage manifest math, startup repair queueing, archived-doc exclusion, unarchive re-entry, reading-open cruise job start, one-play-one-launch behavior, and the no-page-jump DOM probe path. Include at least one regression test showing an uncovered book becomes covered without opening narration. ≥12 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-compliance-reviewer | **Spec compliance** | — |
+| 10 | quality-reviewer | **Quality review** — verify the new cacher model does not create runaway background work or block library startup. | — |
+| 11 | doc-keeper | **Documentation pass** — Update the bug assignments, TTS cache architecture notes, and queue state. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md`, `docs/governance/TECHNICAL_REFERENCE.md` |
+| 12 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Primary CLI: Task 1 (coverage helper + target)
+2. Primary CLI: Task 2 (background cacher job model)
+3. Primary CLI: Task 3 (startup/library repair wiring)
+4. Primary CLI: Task 4 (reading-open cruise warm)
+5. Primary CLI: Task 5 (clean play-start semantics)
+6. Primary CLI: Task 6 (diagnostics)
+    ↓
+7. test-runner: Task 7
+8. test-runner: Task 8
+9. spec-compliance-reviewer: Task 9
+10. quality-reviewer: Task 10
+11. doc-keeper: Task 11
+12. blurby-lead: Task 12
+```
 
 #### SUCCESS CRITERIA
 
-1. Users can manage a persisted global pronunciation override list in settings
-2. Overrides can be enabled/disabled and reordered without restarting the app
-3. A sample preview/test action exists in settings
-4. Web Speech uses normalized text produced by the shared helper
-5. Kokoro generation uses normalized text before chunking/cache lookup
-6. Editing the override set cannot cause stale Kokoro cached audio to be reused
-7. The feature ships without adding SSML or phoneme-editing complexity
-8. New tests cover override application and cache behavior
-9. `npm test` passes
-10. `npm run build` succeeds
+1. Every non-archived reading can maintain at least 5 minutes of opening Kokoro cache coverage at the effective default narration context
+2. Adding a reading to the library queues entry-coverage caching automatically
+3. Unarchiving a reading re-enters it into the entry-coverage system
+4. App startup performs a quick manifest-based repair check without blocking library usability
+5. Opening a reading starts a background cruise cache warm for that book
+6. Archived readings are excluded from entry-coverage and startup repair work
+7. Starting narration on a freshly opened EPUB no longer causes a visible page jump during readiness gating
+8. Narration no longer uses UI-mutating Foliate highlight/navigation helpers as DOM readiness probes
+9. One user play action produces one narration launch sequence on cold start
+10. First-play on a newly added/non-archived book no longer depends on chunk-1/chunk-2 reactive luck to avoid audible dead air
+11. Coverage/cruise state is visible in diagnostics/perf logs
+12. ≥12 new regression tests
+13. `npm test` passes
+14. `npm run build` succeeds
+
+**Depends on:** TTS-7E (corrective follow-up; replaces the reactive ramp-only fix with proactive cache coverage)
 
 ---
 
-### Sprint TTS-6F: Word Alignment & Narration Telemetry ✅ COMPLETED (v1.17.0, 2026-04-04)
+### Sprint TTS-7G: First-Chunk IPC Verification ✅ COMPLETED (v1.33.2)
 
-> Implemented and merged to `main`. 12 new tests (1,088 total, 55 files). Added `computeWordWeights()` token-length weighting with punctuation boosts, scheduler weighted boundary distribution, and DEV-gated/test-inspectable chunk timing telemetry. All 8 SUCCESS CRITERIA met.
+> Archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-117 verified resolved — response path < 2ms. 6 new tests (1,279 total). TTS stabilization lane CLOSED.
 
-**Goal:** Improve narration highlight fidelity by adding measurable alignment telemetry and a better per-word timing model, without depending on unsupported Kokoro alignment metadata.
+---
 
-**Problem:** `TTS-6C` fixed the obvious rate/pitch problem, but highlight timing is still only as good as the scheduler's current chunk timing assumptions. We do not yet have lightweight instrumentation to understand drift, and future pronunciation work will make timing quality more visible. This sprint turns alignment from "looks okay" into something measurable and intentionally tuned.
+## Phase 6 Continued — E-Ink & Goals
+
+---
+
+### Sprint EINK-6A: E-Ink Foundation & Greyscale Runtime
+
+**Goal:** Decouple e-ink display behavior from the theme system so users can pair e-ink optimizations (no animations, large targets, refresh timing) with any color theme. Currently, e-ink is a theme — selecting it forces greyscale colors. After this sprint, e-ink is an independent display mode toggle that layers on top of any theme.
+
+**Problem:** E-ink support exists as a `[data-theme="eink"]` CSS block (200+ lines in global.css) with dedicated settings (`einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping`). But it's coupled to the theme selector in ThemeSettings.tsx — you can't use dark theme with e-ink optimizations, or light theme with e-ink refresh overlay. This forces users with e-ink devices to accept the greyscale palette even when their device supports limited color (Kaleido e-ink screens). It also means non-e-ink users can't benefit from e-ink ergonomic features (reduced animation, larger targets) without losing their preferred theme.
 
 **Design decisions:**
-- **Measure before tuning:** Ship alignment telemetry and debug instrumentation first, then improve the timing heuristic in the same sprint using those measurements.
-- **Scheduler stays authoritative:** Do not replace the current scheduler architecture. Improve its word-boundary estimation inputs.
-- **Heuristic, not phoneme-level:** Use punctuation-aware and token-length-aware timing estimates rather than waiting for full model alignment output.
-- **Debuggable but quiet in production:** Telemetry should support tests/dev diagnostics without spamming normal-user logs.
+- **New `einkMode: boolean` setting.** Independent of `theme`. When true, applies e-ink behavioral CSS overrides (no transitions, larger targets, no hover) on top of the active theme. The existing `[data-theme="eink"]` color palette becomes an optional "E-Ink Greyscale" theme choice that users can select or skip.
+- **Refactor CSS into two layers.** Split the current `[data-theme="eink"]` block into: (a) `[data-eink="true"]` — behavioral overrides (transition:none, no hover, larger targets), applied when einkMode is on regardless of theme, and (b) `[data-theme="eink"]` — color palette only (pure black/white/grey), optional theme choice. This is a CSS-only refactor with no JS behavior changes.
+- **ThemeSettings restructure.** Move e-ink from theme grid to a separate toggle section: "E-Ink Display Mode" toggle above the theme selector. When on, show the existing e-ink sub-settings (WPM ceiling, refresh interval, phrase grouping). Theme selector remains independent below.
+- **EinkRefreshOverlay remains as-is.** The existing `useEinkController` hook and `EinkRefreshOverlay` component work correctly — they just need to check `einkMode` instead of `theme === 'eink'`.
 
 **Baseline:**
-- `src/utils/audioScheduler.ts` — current word/highlight timing
-- `src/utils/generationPipeline.ts` — chunk metadata assembly
-- `src/hooks/narration/kokoroStrategy.ts` — scheduler + pipeline wiring
-- `src/components/ReaderContainer.tsx` / narration highlight consumers
-- current narration tests covering timing/highlighting
+- `src/types.ts` — settings schema: `einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping` (lines 136–139). No `einkMode` field yet.
+- `src/components/settings/ThemeSettings.tsx` (150 lines) — e-ink as theme option (line 30), e-ink sub-settings panel (lines 100–147)
+- `src/styles/global.css` — `[data-theme="eink"]` block (~200 lines, starts ~line 1543)
+- `src/hooks/useEinkController.ts` (47 lines) — page-turn counter, refresh overlay trigger
+- `src/components/EinkRefreshOverlay.tsx` (24 lines) — black/white flash overlay
+- `src/components/ReaderContainer.tsx` — e-ink integration: WPM cap (line 144), eink controller (line 92), overlay render
+- `src/constants.ts` — `DEFAULT_EINK_WPM_CEILING`, `DEFAULT_EINK_REFRESH_INTERVAL`, `EINK_REFRESH_FLASH_MS`, etc.
 
 #### WHERE (Read Order)
 
 1. `CLAUDE.md`
 2. `docs/governance/LESSONS_LEARNED.md`
-3. `docs/governance/TTS-AUDIT-REVIEW.md` — word alignment improvement + latency instrumentation items
-4. `ROADMAP.md` — this section
-5. `src/utils/audioScheduler.ts`
-6. `src/utils/generationPipeline.ts`
-7. `src/hooks/narration/kokoroStrategy.ts`
-8. narration highlight consumers/tests
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — settings schema, eink fields
+5. `src/components/settings/ThemeSettings.tsx` — current e-ink theme coupling
+6. `src/styles/global.css` — `[data-theme="eink"]` block (find boundaries)
+7. `src/hooks/useEinkController.ts` — refresh controller logic
+8. `src/components/EinkRefreshOverlay.tsx` — overlay component
+9. `src/components/ReaderContainer.tsx` — e-ink integration points
+10. `src/constants.ts` — e-ink constants
 
 #### Tasks
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **Alignment telemetry surface** — Add dev/test-safe instrumentation for chunk start latency, per-chunk highlight drift estimates, and scheduler boundary diagnostics. Keep it behind existing dev/test logging patterns or explicit debug flags. | `src/utils/audioScheduler.ts`, related helpers |
-| 2 | Primary CLI (renderer-fixer scope) | **Richer chunk timing metadata** — Extend generation/pipeline metadata so the scheduler receives enough information to estimate boundaries with more than flat even spacing. | `src/utils/generationPipeline.ts`, type surfaces as needed |
-| 3 | Primary CLI (renderer-fixer scope) | **Improved word timing heuristic** — Replace flat per-word distribution with a punctuation-aware/token-length-aware model that better matches natural speech timing while preserving current chunk-boundary behavior. | `src/utils/audioScheduler.ts` |
-| 4 | Primary CLI (renderer-fixer scope) | **Non-regression integration** — Ensure the improved heuristic still works with native rate buckets, punctuation shaping, and section transitions. | scheduler/pipeline consumers as needed |
-| 5 | test-runner | **Tests** — Add focused tests for telemetry emission, heuristic timing output, punctuation weighting, and highlight stability across `1.0x`, `1.2x`, and `1.5x`. | `tests/` |
-| 6 | test-runner | **`npm test` + `npm run build`** | — |
-| 7 | spec-compliance-reviewer | **Spec compliance** | — |
-| 8 | quality-reviewer | **Architecture + code quality review** | — |
-| 9 | doc-keeper | **Documentation pass** — Record the new timing model and any debug/telemetry hooks in the technical reference and lessons learned if a new guardrail emerges. | `ROADMAP.md`, `docs/governance/TECHNICAL_REFERENCE.md`, `docs/governance/LESSONS_LEARNED.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 1 | Primary CLI (renderer-fixer scope) | **Add `einkMode` setting** — Add `einkMode: boolean` (default false) to settings schema in types.ts. Add default to constants.ts. Wire through SettingsContext. | `src/types.ts`, `src/constants.ts`, `src/contexts/SettingsContext.tsx` |
+| 2 | Primary CLI (renderer-fixer scope) | **Split CSS into behavioral and color layers** — Extract all non-color properties from `[data-theme="eink"]` into new `[data-eink="true"]` selector. Leave only color properties (`--bg`, `--fg`, `--accent`, etc.) in `[data-theme="eink"]`. Verify no visual regression when both are applied simultaneously. | `src/styles/global.css` |
+| 3 | Primary CLI (renderer-fixer scope) | **Apply `data-eink` attribute** — In the root element (App.tsx or equivalent), set `data-eink="true"` when `settings.einkMode === true`, independent of `data-theme`. | `src/App.tsx` or equivalent root |
+| 4 | Primary CLI (renderer-fixer scope) | **Restructure ThemeSettings** — Move e-ink out of theme grid. Add "E-Ink Display Mode" toggle above themes. When toggled on, show WPM ceiling / refresh interval / phrase grouping sliders. Theme grid remains below, all themes selectable regardless of einkMode. | `src/components/settings/ThemeSettings.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Update eink controller** — Change `useEinkController.ts` to check `settings.einkMode` instead of `theme === 'eink'`. Update ReaderContainer.tsx integration points (WPM cap, overlay render) to use `einkMode`. | `src/hooks/useEinkController.ts`, `src/components/ReaderContainer.tsx` |
+| 6 | test-runner | **Tests** — (a) `einkMode` toggle applies `data-eink` attribute. (b) `data-eink="true"` + `data-theme="dark"` doesn't conflict. (c) E-ink behavioral CSS (transition:none) applies independently of theme. (d) WPM cap respects `einkMode`, not theme. (e) Refresh overlay fires when `einkMode` is on regardless of theme. ≥8 new tests. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | doc-keeper | **Documentation pass** | All 6 governing docs |
 | 10 | blurby-lead | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 
-1. Narration timing instrumentation exists for tests/dev diagnostics without noisy production logging
-2. Scheduler receives richer timing metadata than flat chunk duration alone
-3. Per-word highlight timing uses a punctuation-aware/token-length-aware heuristic
-4. Highlight timing remains stable across Kokoro `1.0x`, `1.2x`, and `1.5x`
-5. Existing punctuation shaping and section transitions do not regress
-6. New tests cover telemetry and timing heuristics
-7. `npm test` passes
-8. `npm run build` succeeds
+1. `einkMode` setting exists, persists, and toggles independently of theme
+2. `data-eink="true"` attribute applied to root when einkMode is on
+3. E-ink behavioral CSS (no transitions, larger targets, no hover) applies on any theme when einkMode is on
+4. E-ink greyscale color palette applies only when `data-theme="eink"` is selected
+5. WPM ceiling enforced by einkMode, not by theme
+6. Refresh overlay fires based on einkMode, not theme
+7. ThemeSettings shows independent einkMode toggle with sub-settings
+8. ≥8 new tests
+9. `npm test` passes
+10. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** TTS-7D (TTS stabilization complete)
 
 ---
 
-### Sprint TTS-6G: Narration Controls & Accessibility Polish ✅ COMPLETED (v1.18.0, 2026-04-04)
+### Sprint EINK-6B: E-Ink Reading Ergonomics & Mode Strategy
 
-> Implemented and merged to `main`. 8 new tests (1,096 tot
+**Goal:** Add e-ink-aware reading mode variants that respect the physical constraints of e-ink displays: slow refresh (120–450ms), coarse pixel density, touch-only input, and ghosting artifacts. Stepped flow (chunk-based page advance) and burst focus (multi-word grouping with tuned timing) give e-ink users reading modes that feel native to their hardware instead of fighting it.
+
+**Problem:** All four reading modes (Page, Focus, Flow, Narration) assume a fast LCD/OLED display. Flow mode's smooth per-line scroll causes severe ghosting on e-ink. Focus mode's rapid single-word RSVP flashes cause incomplete refresh cycles. Page mode works acceptably but page turns are slow. Users on e-ink devices get a degraded experience in every mode except Page, and even Page could be better with larger paragraph-level navigation.
+
+**Design decisions:**
+- **Stepped Flow mode.** When `einkMode` is on and Flow mode is active, replace per-line smooth scroll with chunk-based page advance: display N lines (configurable, default `EINK_LINES_PER_PAGE = 20`), pause for reading time based on WPM, then full-page advance to next N lines. No animation — instant replace. Cursor behavior: shrinking underline still paces within the visible chunk, but page transitions are instant.
+- **Burst Focus mode.** When `einkMode` is on and Focus mode is active, group words into 2–3 word phrases (using existing `einkPhraseGrouping` setting). Display each group for the duration that single words would take at current WPM. This reduces the number of screen redraws per minute by 2–3x, making focus mode usable on e-ink.
+- **Adaptive refresh heuristic.** Replace the fixed-interval refresh counter with a content-change-aware heuristic: track cumulative pixel change area across page turns (estimate from word count delta). Trigger refresh when estimated ghosting exceeds a threshold. Keep manual interval as fallback/override. New constants: `EINK_GHOSTING_THRESHOLD`, `EINK_ADAPTIVE_REFRESH_ENABLED`.
+- **No changes to Narration or Page modes.** Narration is audio-driven (e-ink display updates are sparse). Page mode already works well with the behavioral CSS from EINK-6A.
+
+**Baseline:**
+- `src/modes/FlowMode.ts` — word-by-word timing, `FlowScrollEngine` integration
+- `src/modes/FocusMode.ts` — single-word RSVP timing
+- `src/hooks/useEinkController.ts` — fixed-interval refresh counter (from EINK-6A: now einkMode-aware)
+- `src/utils/FlowScrollEngine.ts` — scroll container, cursor rendering
+- `src/constants.ts` — `EINK_LINES_PER_PAGE = 20`, phrase grouping defaults
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section + EINK-6A spec
+4. `src/modes/FlowMode.ts` — current word-by-word advance logic
+5. `src/modes/FocusMode.ts` — current RSVP logic
+6. `src/utils/FlowScrollEngine.ts` — scroll engine internals
+7. `src/hooks/useEinkController.ts` — refresh controller (post-EINK-6A)
+8. `src/constants.ts` — e-ink constants
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Stepped Flow mode** — In FlowMode.ts: when `einkMode` is on, switch from per-line scroll to chunk-based advance. Display `EINK_LINES_PER_PAGE` lines, pause for calculated reading time, then instant-replace with next chunk. Cursor behavior: shrinking underline paces within visible chunk. Page transitions have no animation (`transition: none` already in eink behavioral CSS). | `src/modes/FlowMode.ts`, `src/utils/FlowScrollEngine.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Burst Focus mode** — In FocusMode.ts: when `einkMode` is on and `einkPhraseGrouping` is true, group words into 2–3 word phrases. Display each phrase for the combined word duration at current WPM. Use the existing segmentation (whitespace-based) with configurable max group size (new constant `EINK_BURST_GROUP_SIZE = 3`). | `src/modes/FocusMode.ts`, `src/constants.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Adaptive refresh heuristic** — Extend `useEinkController.ts`: track cumulative word count across page turns since last refresh. When cumulative words exceed `EINK_GHOSTING_THRESHOLD` (new constant, default 500), trigger refresh. Existing manual interval remains as override (refresh at whichever threshold triggers first). Add `EINK_ADAPTIVE_REFRESH_ENABLED` constant (default true). | `src/hooks/useEinkController.ts`, `src/constants.ts` |
+| 4 | test-runner | **Tests** — (a) Stepped flow: einkMode on → chunk-based advance with correct timing. (b) Stepped flow: einkMode off → normal per-line scroll (no regression). (c) Burst focus: 2–3 word grouping with combined timing. (d) Burst focus: single-word fallback when phrase grouping off. (e) Adaptive refresh: triggers at word threshold. (f) Adaptive refresh: manual interval still works as override. ≥10 new tests. | `tests/` |
+| 5 | test-runner | **`npm test` + `npm run build`** | — |
+| 6 | spec-compliance-reviewer | **Spec compliance** | — |
+| 7 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 8 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Flow mode in einkMode uses chunk-based page advance (no smooth scroll)
+2. Chunk size configurable via `EINK_LINES_PER_PAGE`
+3. Focus mode in einkMode groups words into 2–3 word phrases when phrase grouping is on
+4. Phrase display timing equals combined single-word duration at current WPM
+5. Adaptive refresh triggers based on cumulative word count, not just fixed interval
+6. Manual refresh interval still works as override
+7. Non-eink behavior in Flow and Focus modes unchanged (no regression)
+8. ≥10 new tests
+9. `npm test` passes
+10. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** EINK-6A
+
+---
+
+### Sprint GOALS-6B: Reading Goal Tracking
+
+**Goal:** Add a lightweight reading goal system — set daily/weekly/monthly targets, track progress, and see visual feedback. Goals are optional, local-first, and non-intrusive. They surface progress without blocking reading.
+
+**Problem:** Blurby tracks reading activity implicitly (time spent, pages turned, books in library) but gives users no way to set targets or see whether they're meeting them. Users who want to build a reading habit have no feedback loop. The reading queue (READINGS-4A) tells you what to read next; goals tell you how much to read.
+
+**Design decisions:**
+- **Three goal types.** Daily pages, daily minutes, weekly books. Each is independently configurable. Users can set zero, one, or all three. Stored in settings as a `goals` array of `ReadingGoal` objects.
+- **Progress tracking via existing signals.** Pages: increment on page turn or word advance (1 page = `WORDS_PER_PAGE` words, consistent with existing pagination). Minutes: increment via `requestAnimationFrame` tick while any reading mode is active (Page, Focus, Flow, or Narration). Books: increment on book completion (existing `markComplete` action). No new data collection — we derive everything from existing events.
+- **Library widget.** Compact progress bar(s) below the library header showing today's/this week's progress. Clicking opens the Goals detail view. Optionally collapsed to just an icon when goals are met.
+- **Settings sub-page.** New `ReadingGoalsSettings.tsx` under Settings. Create/edit/delete goals. See current streaks. Reset daily at midnight local time; reset weekly on Monday.
+- **Streak counter.** Track consecutive days meeting daily goal (or consecutive weeks meeting weekly goal). Display in settings and optionally on library widget. Stored as `currentStreak: number` and `lastStreakDate: string` in goal object.
+- **No notifications in v1.** Gentle progress display only — no push notifications, no toasts, no modals. Keep it pull-based (user checks when they want to).
+- **Local-first.** Goal data stored in settings JSON alongside other preferences. No cloud sync in this sprint (Phase 7 can add sync later). No IPC needed — goals are renderer-side state, computed from existing reading events.
+
+**Baseline:**
+- `src/types.ts` — settings schema (no goals fields yet)
+- `src/contexts/SettingsContext.tsx` — settings propagation
+- `src/components/LibraryContainer.tsx` — library header area where widget would live
+- `src/components/settings/` — existing settings sub-pages (model for new GoalsSettings)
+- `src/hooks/useReader.ts` — reading activity events (page turns, word advance)
+- `src/components/ReaderContainer.tsx` — reading mode lifecycle
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — settings schema (where ReadingGoal type will live)
+5. `src/contexts/SettingsContext.tsx` — settings context pattern
+6. `src/components/LibraryContainer.tsx` — library header for widget placement
+7. `src/components/settings/SpeedReadingSettings.tsx` — model settings sub-page structure
+8. `src/hooks/useReader.ts` — reading activity events
+9. `src/components/ReaderContainer.tsx` — reading mode lifecycle
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **ReadingGoal type + settings schema** — Add `ReadingGoal` interface to types.ts: `{ id: string, type: 'daily-pages' | 'daily-minutes' | 'weekly-books', target: number, currentStreak: number, lastStreakDate: string }`. Add `goals: ReadingGoal[]` to settings (default empty array). Add `goalProgress: { todayPages: number, todayMinutes: number, weekBooks: number, lastResetDate: string }` to settings for tracking state. | `src/types.ts`, `src/constants.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **useReadingGoals hook** — New hook that: reads goals + progress from settings, provides `incrementPages(count)`, `incrementMinutes(delta)`, `incrementBooks()` methods, auto-resets daily counters at midnight (check `lastResetDate` on each read), auto-resets weekly counters on Monday, updates streak on daily reset (met yesterday's goal → streak+1, else reset to 0). | `src/hooks/useReadingGoals.ts` (new) |
+| 3 | Primary CLI (renderer-fixer scope) | **Wire progress tracking** — In ReaderContainer.tsx: call `incrementPages` on page turn events, call `incrementMinutes` from a 1-minute interval while any reading mode is active, call `incrementBooks` when book is marked complete. All calls go through the `useReadingGoals` hook. | `src/components/ReaderContainer.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **GoalProgressWidget** — Compact component for library header: one progress bar per active goal (thin, accent color, percentage fill). Show "3/10 pages today" or "45/60 min today" labels. When all goals met, collapse to checkmark icon. Click navigates to goals settings. | `src/components/GoalProgressWidget.tsx` (new), `src/styles/global.css` |
+| 5 | Primary CLI (renderer-fixer scope) | **ReadingGoalsSettings** — New settings sub-page. List active goals with edit/delete. "Add Goal" button → inline form (type selector, target number). Show current streak per goal. | `src/components/settings/ReadingGoalsSettings.tsx` (new), `src/components/SettingsMenu.tsx` |
+| 6 | Primary CLI (renderer-fixer scope) | **Wire widget into library** — Add `GoalProgressWidget` to LibraryContainer header area. Only render when `settings.goals.length > 0`. | `src/components/LibraryContainer.tsx` |
+| 7 | test-runner | **Tests** — (a) Goal creation persists to settings. (b) Daily reset clears page/minute counters at midnight. (c) Weekly reset clears book counter on Monday. (d) Streak increments when daily goal met before reset. (e) Streak resets when daily goal not met. (f) Progress widget renders correct fill percentage. (g) Widget hidden when no goals set. (h) incrementPages/incrementMinutes/incrementBooks update correctly. ≥10 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-compliance-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Users can create daily-pages, daily-minutes, and weekly-books goals in settings
+2. Goals persist in settings and survive app restart
+3. Page turns during any reading mode increment today's page count
+4. Active reading time (any mode) increments today's minutes count
+5. Book completion increments weekly book count
+6. Daily counters reset at midnight local time
+7. Weekly counters reset on Monday
+8. Streak tracks consecutive days meeting daily goal
+9. GoalProgressWidget shows in library header when goals exist
+10. Widget shows correct progress bars with labels
+11. Widget collapses to checkmark when all goals met
+12. No goals → no widget (clean library header)
+13. ≥10 new tests
+14. `npm test` passes
+15. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** TTS-7D (independent of EINK-6A/6B — can run in parallel)

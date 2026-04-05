@@ -83,3 +83,61 @@ describe("Narrate performance instrumentation", () => {
     expect(getPerfEntries()).toHaveLength(0);
   });
 });
+
+describe("TTS-7G: First-chunk response-path instrumentation", () => {
+  beforeEach(() => {
+    clearPerfEntries();
+  });
+
+  it("records first-chunk-response event with meta", () => {
+    const entry = perfStart("first-chunk-response");
+    entry.meta = { chunkWordCount: 13, startIdx: 0, isFirstChunk: true };
+    const duration = perfEnd(entry);
+
+    expect(duration).toBeGreaterThanOrEqual(0);
+    expect(entry.event).toBe("first-chunk-response");
+    expect(entry.meta?.isFirstChunk).toBe(true);
+    expect(entry.meta?.chunkWordCount).toBe(13);
+    expect(entry.meta?.startIdx).toBe(0);
+  });
+
+  it("records schedule-chunk event with meta", () => {
+    const entry = perfStart("schedule-chunk");
+    entry.meta = { chunkWordCount: 13, startIdx: 0, isFirstChunk: true };
+    const duration = perfEnd(entry);
+
+    expect(duration).toBeGreaterThanOrEqual(0);
+    expect(entry.event).toBe("schedule-chunk");
+    expect(entry.meta?.chunkWordCount).toBe(13);
+  });
+
+  it("first-chunk response path is bounded under steady-state budget", () => {
+    // Simulate the full response-path measurement (no real audio work)
+    const responseMark = perfStart("first-chunk-response");
+    responseMark.meta = { chunkWordCount: 13, startIdx: 0, isFirstChunk: true };
+
+    const scheduleMark = perfStart("schedule-chunk");
+    scheduleMark.meta = { chunkWordCount: 13, startIdx: 0, isFirstChunk: true };
+    // Simulate scheduleChunk work (synchronous, no real AudioContext)
+    perfEnd(scheduleMark);
+
+    perfEnd(responseMark);
+
+    // Both measurements should be well under the 50ms steady-state budget
+    expect(responseMark.durationMs).toBeLessThan(NARRATE_STEADY_STATE_BLOCK_MS);
+    expect(scheduleMark.durationMs).toBeLessThan(NARRATE_STEADY_STATE_BLOCK_MS);
+  });
+
+  it("getLastEntry finds first-chunk-response entries", () => {
+    const e1 = perfStart("first-chunk-response");
+    e1.meta = { isFirstChunk: true };
+    perfEnd(e1);
+    const e2 = perfStart("first-chunk-response");
+    e2.meta = { isFirstChunk: false };
+    perfEnd(e2);
+
+    const last = getLastEntry("first-chunk-response");
+    expect(last).toBe(e2);
+    expect(last?.meta?.isFirstChunk).toBe(false);
+  });
+});

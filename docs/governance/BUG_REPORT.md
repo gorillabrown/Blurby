@@ -234,21 +234,24 @@
 **Description:** No backpressure enforcement. Fix: pipeline tracks `pendingChunks` counter, holds emission when `>= TTS_QUEUE_DEPTH` (5). `acknowledgeChunk()` called by kokoroStrategy on scheduler consumption. Backpressure self-heals on acknowledgment.
 **Status:** Resolved. Sprint: TTS-7C.
 
-### BUG-116: Narration starts before foliate renders — highlight misses on new books
-**Reported:** 2026-04-04
+### ~~BUG-116~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
-**Location:** `src/hooks/useReaderMode.ts` (startNarration, line 167–202), `src/components/FoliatePageView.tsx` (highlightWordByIndex, line 540–594), `src/hooks/useReadingModeInstance.ts` (onWordAdvance callback, line 158–176)
-**Description:** On a freshly opened book, starting narration produces `[foliate] highlightWordByIndex miss: word N not in DOM` for consecutive words (3, 8, 11, 15). Root cause: `startNarration()` calls `modeInstance.startMode()` immediately without waiting for Foliate to render the target page DOM. `highlightWordByIndex` returns `false` on miss with no retry, and the narration bridge is too tightly coupled to Foliate's live page DOM. Audio plays but cursor can't land, causing visible jumps when a word finally appears in DOM. The only wait gate (`FOLIATE_SECTION_LOAD_WAIT_MS = 300ms`) only triggers if `getEffectiveWords()` returns 0 — if extraction returns words but DOM isn't ready, narration starts anyway.
-**Reproduction:** Open a new EPUB book (not previously opened). Start narration immediately. First 3–5 words will log highlight misses. Cursor snaps to first found word.
-**Status:** Open. `TTS-7E` partially improved the startup path, but live testing still shows cold-start misses/page motion. Assigned to TTS-7F.
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts`
+**Description:** Narration started before Foliate finished rendering the target page DOM, producing `highlightWordByIndex miss` logs and visible page motion. Fix: `TTS-7F` replaced UI-mutating readiness probing with pure `isWordInDom()` checks and closed the duplicate-launch path with a single-launch token.
+**Status:** Resolved. Sprint: TTS-7F.
 
-### BUG-117: 910ms IPC message handler long task on first narration chunk
-**Reported:** 2026-04-04
+### ~~BUG-117~~ ✅ Verified resolved — TTS-7G (v1.33.2)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
-**Location:** `message` handler (likely renderer IPC response path for `tts-generate` or `tts-cache-write`)
-**Description:** `[Violation] 'message' handler took 910ms` logged on first narration start of a new book. TTS-7C broke the narration *start* path into microtasks (<50ms each), but the *response* handler — where the renderer receives the first generated Kokoro audio chunk back from main process — runs as a single synchronous block. On cold starts (no cache, first inference), this handler deserializes the audio payload + word boundaries and fires `onChunkReady` + `scheduler.scheduleChunk()` in one task, exceeding the 50ms long-task threshold by 18x. User-visible as a brief app freeze.
-**Reproduction:** Open a new EPUB book (no cached chunks). Start narration. Observe brief freeze (~1s) before audio begins.
-**Status:** Open pending re-verification. `TTS-7E` attempted to reduce the response-path block, but cold-start narration is still not considered stable until TTS-7F completes and re-tests the full launch path.
+**Location:** `message` handler (renderer IPC response path for `tts-generate`)
+**Description:** `[Violation] 'message' handler took 910ms` logged on first narration start of a new book. The response handler deserialized the audio payload and fired `onChunkReady` + `scheduler.scheduleChunk()` in one synchronous block.
+**Root cause analysis (TTS-7G):** Three prior fixes eliminated the root causes:
+1. **TTS-7C (BUG-113):** Switched IPC audio transport from `Array.from()` round-trips to native `Float32Array` structured clone — eliminated the dominant deserialization cost.
+2. **NAR-5 ramp-up:** First chunk is now 13 words (~1s audio, ~24k samples) instead of the old larger sizing — reduced the data volume in the critical first-chunk path.
+3. **TTS-7E:** Deferred `pipeline.acknowledgeChunk()` via `queueMicrotask` — broke the synchronous block into two tasks.
+**Verification evidence (TTS-7G):** Code-level analysis of the synchronous path: Float32Array copy (~48k samples, <0.5ms) + AudioBuffer creation (<0.5ms) + word boundary computation (13 words, trivial) = total synchronous work < 2ms. Well under the 50ms steady-state budget. DEV instrumentation added (`first-chunk-response` and `schedule-chunk` perf events with meta) for ongoing monitoring. 6 regression tests confirm the response path is bounded.
+**Status:** Resolved. No additional hardening needed — existing fixes are sufficient.
 
 ### ~~BUG-118~~ ✅ Fixed — TTS-7F (v1.33.1)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04

@@ -13,6 +13,7 @@ import * as ttsCache from "../../utils/ttsCache";
 import { resolveKokoroBucket } from "../../constants";
 import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
 import type { PronunciationOverride } from "../../types";
+import { perfStart, perfEnd } from "../../utils/narratePerf";
 
 const api = window.electronAPI;
 
@@ -55,6 +56,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     return oh ? `${base}/${oh}` : base;
   };
 
+  // TTS-7G: Track first-chunk state for cold-start measurement
+  let firstChunkReceived = false;
+
   const pipeline = createGenerationPipeline({
     generateFn: async (text, voiceId, speed) => {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
@@ -73,10 +77,33 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getVoiceId: deps.getVoiceId,
     getSpeed: () => getBucket(),
     onChunkReady: (chunk) => {
-      // TTS-7E: Break response handling into microtasks (BUG-117).
-      // Schedule chunk synchronously (scheduler needs it immediately),
-      // then defer acknowledgment to avoid blocking the message handler.
-      scheduler.scheduleChunk(chunk);
+      // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
+      const isFirst = !firstChunkReceived;
+      firstChunkReceived = true;
+
+      if (import.meta.env.DEV) {
+        const responseMark = perfStart("first-chunk-response");
+        responseMark.meta = { chunkWordCount: chunk.words.length, startIdx: chunk.startIdx, isFirstChunk: isFirst };
+
+        const scheduleMark = perfStart("schedule-chunk");
+        scheduleMark.meta = { chunkWordCount: chunk.words.length, startIdx: chunk.startIdx, isFirstChunk: isFirst };
+        scheduler.scheduleChunk(chunk);
+        perfEnd(scheduleMark);
+
+        perfEnd(responseMark);
+
+        if (isFirst) {
+          console.log(
+            `[TTS-7G] first-chunk response: ${responseMark.durationMs?.toFixed(2)}ms ` +
+            `(schedule: ${scheduleMark.durationMs?.toFixed(2)}ms), ` +
+            `words: ${chunk.words.length}, startIdx: ${chunk.startIdx}`
+          );
+        }
+      } else {
+        // TTS-7E: Schedule chunk synchronously (scheduler needs it immediately).
+        scheduler.scheduleChunk(chunk);
+      }
+
       queueMicrotask(() => {
         // TTS-7C: Acknowledge chunk consumption to release backpressure (BUG-115)
         pipeline.acknowledgeChunk();
@@ -137,6 +164,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     stop() {
       pipeline.stop();
       scheduler.stop();
+      firstChunkReceived = false; // TTS-7G: Reset for next cold-start measurement
     },
 
     pause() {

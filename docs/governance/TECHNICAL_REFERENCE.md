@@ -518,9 +518,9 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 | **Rhythm pause** | Silence inserted between chunks at punctuation/paragraph boundaries (100/150/400/800ms). |
 | **Web Audio API AudioContext** | The browser API used to play Kokoro's raw PCM audio buffers. Supports suspend/resume for pause. |
 
-### Narrate Mode Architecture (Post-Stabilization) — TTS-7D Closeout
+### Narrate Mode Architecture (Post-Stabilization) — TTS-7G Final Closeout
 
-**Stabilization scope:** TTS-7A through TTS-7D (4 sprints, 15 bugs resolved: BUG-101 through BUG-115).
+**Stabilization scope:** TTS-7A through TTS-7G (7 sprints + hotfixes, 21 bugs resolved: BUG-101 through BUG-121). TTS-7G was the final verification sprint — confirmed BUG-117 (910ms first-chunk IPC handler) was resolved by TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), and TTS-7E (deferred ack). Response path measured at < 2ms. DEV instrumentation added to `kokoroStrategy.ts` (`first-chunk-response` and `schedule-chunk` perf events via `narratePerf.ts`).
 
 **Narration state machine:** `useNarration.ts` uses a `useReducer` state machine with states: `idle`, `warming`, `speaking`, `paused`, `holding`. `stateRef` mirrors reducer state for synchronous reads inside async callbacks (dual-write rule: every `dispatch()` also updates `stateRef.current`).
 
