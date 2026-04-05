@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2
+Queue depth: 3
 Next sprint: EINK-6A (E-Ink Foundation & Greyscale Runtime)
-Health: YELLOW — queue below minimum depth 3. TTS-7Q complete; EINK-6A and EINK-6B remain. Backfill required before dispatching EINK-6A.
+Health: GREEN — queue at minimum depth. EINK-6A → EINK-6B → GOALS-6B.
 ```
 
 ---
@@ -23,10 +23,11 @@ Health: YELLOW — queue below minimum depth 3. TTS-7Q complete; EINK-6A and EIN
 |---|-----------|---------|--------|------|----------|---------|
 | 1 | EINK-6A | v1.37.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
 | 2 | EINK-6B | v1.38.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Reading ergonomics and mode strategy for e-ink: refresh cadence, motion/flash policy, mode-specific defaults, and UX polish on top of EINK-6A. |
+| 3 | GOALS-6B | v1.39.0 | `sprint/goals-6b-reading-goals` | Full | — | **FULLY SPEC'D.** Lightweight reading goal system — daily pages, daily minutes, weekly books. Progress widget in library header, streak tracking, settings sub-page. 11 tasks, 15 success criteria. Independent of EINK — can run in parallel with EINK-6B. |
 
 **Agent staging rule:** TTS, EINK, and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
-**Dispatch status:** EINK-6A is next. Queue depth is 2 — STOP: backfill a third sprint before dispatching.
+**Dispatch status:** EINK-6A is next. Queue depth is 3 — GREEN.
 
 ---
 

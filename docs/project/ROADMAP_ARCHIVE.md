@@ -2,7 +2,7 @@
 
 **Purpose:** Full specs for all completed sprints, extracted from `ROADMAP.md` to keep the roadmap forward-looking. Reference only — do not modify.
 
-**Last archived:** 2026-04-04
+**Last archived:** 2026-04-05
 
 ---
 
@@ -3943,5 +3943,440 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04 during TTS Stab
 ## TTS-7G [v1.33.2]: First-Chunk IPC Verification & Response-Path Hardening ✅ COMPLETED (2026-04-04)
 
 > Verification-first sprint for BUG-117 (910ms IPC message handler long task on first narration chunk). Code-level analysis confirmed the synchronous response path is < 2ms after prior fixes: TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), TTS-7E (deferred ack). No additional hardening needed. DEV instrumentation added (`first-chunk-response` and `schedule-chunk` perf events with meta in narratePerf.ts). 6 new tests (1,279 total). BUG-117 closed with explicit evidence. TTS stabilization lane CLOSED — all bugs (BUG-101–121) verified resolved.
+
+---
+
+## TTS-7E: Cold-Start Narration Fix (Hotfix) — SUPERSEDED by TTS-7F
+
+> Historical note: this was the first cold-start repair attempt. TTS-7E did not fully solve launch ownership or ramp continuity — live testing after TTS-7E still showed failures. TTS-7F is the authoritative corrective sprint. Spec preserved here for traceability only. Archived 2026-04-05.
+
+**Goal:** Fix the two bugs that make "open a new book → hit play" choppy and freezy: narration races ahead of foliate rendering (BUG-116) and the first IPC response handler blocks the main thread for ~910ms (BUG-117).
+
+**Design decisions:**
+- Render-readiness gate before narration starts: poll `highlightWordByIndex(startIdx)` via `requestAnimationFrame` loop; if target word isn't in DOM after 3s, navigate to correct page first.
+- Start from selection, not default: if user has a text selection or clicked a word, use that position as narration start point.
+- Break IPC response handler into microtasks: yield between (a) deserialize/validate payload, (b) schedule chunk to audio, (c) update cursor state.
+- Performance instrumentation via `performance.mark/measure` and `narratePerf`.
+
+**Outcome:** Partially implemented. Live testing showed TTS-7E did not fully resolve BUG-116/117. TTS-7F reopened the work with a more complete approach.
+
+**Depends on:** TTS-7D
+
+---
+
+## TTS-7F [v1.33.1]: Proactive Entry Cache Coverage & Cruise Warm ✅ COMPLETED (2026-04-04)
+
+> BUG-116/118/119/120/121 resolved. Proactive entry cache coverage (5-minute opening narration cached per non-archived reading), startup coverage-repair scan, reading-open cruise warm pass, clean play-start semantics (pure DOM readiness probe, single-launch token), and diagnostics/perf log coverage. Archived 2026-04-05.
+
+**Goal:** Stop relying on reactive ramp-up to save the first narration experience. Every non-archived reading should always have at least the first 5 minutes of Kokoro narration cached at the effective default narration context.
+
+**Problem:** Three concrete failures after TTS-7E: (1) page jump during readiness gate — `highlightWordByIndex` is UI-mutating, not a pure read; (2) duplicate/reentrant launch — full cold-start sequence fires twice; (3) reactive ramp-up still leaves dead air on new books.
+
+**Design decisions:**
+- Guaranteed entry coverage for all non-archived readings (5-minute target, manifest-driven).
+- Coverage keyed by effective voice + rate bucket + override hash.
+- Startup performs a quick manifest-based coverage-repair scan without blocking boot.
+- Opening a reading starts cruise warming (low-priority background pass from cursor forward).
+- Play-start cleanup: separate "read Foliate DOM state" from "change Foliate page state."
+- Archived docs excluded from entry-coverage and startup repair.
+
+**Key files:** `src/utils/backgroundCacher.ts`, `src/utils/ttsCache.ts`, `main/tts-cache.js`, `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+
+**SUCCESS CRITERIA (14 met):**
+1. Every non-archived reading maintains ≥5 min opening Kokoro cache at effective default context
+2. Adding a reading queues entry-coverage caching automatically
+3. Unarchiving re-enters reading into entry-coverage system
+4. App startup performs quick manifest-based repair without blocking library usability
+5. Opening a reading starts background cruise cache warm
+6. Archived readings excluded from entry-coverage and startup repair
+7. No visible page jump during readiness gating
+8. Narration does not use UI-mutating Foliate helpers as DOM readiness probes
+9. One user play action = one narration launch sequence
+10. First-play on newly added book no longer depends on reactive chunk luck for dead-air prevention
+11. Coverage/cruise state visible in diagnostics/perf logs
+12. ≥12 new regression tests
+13. `npm test` passes
+14. `npm run build` succeeds
+
+**Depends on:** TTS-7E (corrective follow-up)
+
+---
+
+## TTS-7H [v1.33.3]: Visible-Word Readiness & Stable Launch Index ✅ COMPLETED (2026-04-04)
+
+> BUG-122/123 resolved. Stronger visible-word readiness gate (not just DOM presence), frozen launch index per play action, section/page-based fallback navigation replacing raw `goTo(startIdx)`. 8 new tests (1,287 total, partial — follow-up required for remaining startup issues). Archived 2026-04-05.
+
+**Goal:** Eliminate remaining page-jump / false-start behavior on EPUB narration startup. Narration must only launch when the chosen start word is actually visible and highlightable in the active Foliate page context.
+
+**Problem:** After TTS-7G: (1) false-positive readiness — gate logs success but next call logs miss; (2) unstable launch index — bounces among 82/68/80/0/9004 across cold-start attempts; (3) bad fallback navigation — raw global word index used as Foliate navigation target.
+
+**Design decisions:**
+- Visible-word readiness, not mere DOM presence: confirm launch word is in active rendered viewport and highlightable.
+- Freeze launch index once chosen: stored in stable launch token, retries/rerenders cannot switch it.
+- Navigation by section/page ownership only: remove raw `goTo(startIdx)` fallback.
+- Gate success must be truthful: "Render gate passed" only logged when exact launch word is immediately highlightable.
+
+**Key files:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/ReaderContainer.tsx`
+
+**SUCCESS CRITERIA (8 met):**
+1. "Render gate passed" only logged when exact launch word is immediately highlightable without miss
+2. No `highlightWordByIndex miss` for chosen launch word right after gate success
+3. Single play action uses one frozen start index throughout startup
+4. Timeout recovery no longer uses raw `goTo(startIdx)`
+5. Fresh EPUB no longer visibly jumps page during startup
+6. ≥6 new regression tests
+7. `npm test` passes
+8. `npm run build` succeeds
+
+**Depends on:** TTS-7G
+
+---
+
+## TTS-7I [v1.33.4]: Foliate Follow-Scroll Unification & Exact Miss Recovery ✅ COMPLETED (2026-04-04)
+
+> BUG-124/125/126/127 addressed. Unified render-state lookup (gate and live highlighter share same helper), removed duplicate React `narrationWordIndex` scroll-follow path, split highlight from page motion, exact miss recovery after full-book extraction (replaces `bookWordsCompleteRef.current => return`), return-to-narration restores visible cursor. Follow-up still required for core source-of-truth problem. Archived 2026-04-05.
+
+**Goal:** Eliminate remaining Foliate page-jump behavior during narration startup and mid-play follow. One truthful readiness/highlight contract, one owner for page-follow motion, one exact recovery path when spoken word leaves currently rendered Foliate DOM.
+
+**Problem:** After TTS-7H: (1) gate/highlight contract mismatch — gate passes but highlighter misses same word; (2) duplicate follow-scroll owners — both imperative bridge and React `narrationWordIndex` effect move the page; (3) miss recovery suppressed after full-book extraction (silent ignore); (4) return-to-narration can restore scroll without restoring cursor.
+
+**Design decisions:**
+- One source of truth for render readiness and highlightability via shared Foliate helper.
+- One owner for narration follow motion: remove duplicate React narrationWordIndex scroll-follow path.
+- Highlight and motion are separate responsibilities: highlight without automatic motion; motion only when word is off-page.
+- Exact recovery, not ignore-or-next: section-aware recovery with single in-flight token/cooldown.
+- Return-to-narration must restore both position and visible cursor.
+
+**Key files:** `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts`, `src/components/ReaderContainer.tsx`, `src/utils/narrateDiagnostics.ts`
+
+**SUCCESS CRITERIA (12 met):**
+1. `render gate passed` never immediately followed by `highlightWordByIndex miss` for same launch word
+2. Foliate narration has exactly one follow-scroll owner during playback
+3. No React `narrationWordIndex` effect independently scrolling Foliate page during narration
+4. Fresh EPUB no longer visibly jumps page before cursor can follow
+5. Mid-play narration no longer jumps backward from duplicate follow-scroll logic
+6. Narration highlight misses after full-book extraction trigger exact recovery instead of silent ignore
+7. Cursor stays coupled to TTS across section/page transitions
+8. Returning to narration after browsing restores visible cursor/highlight, not just page position
+9. Cached/entry-covered start remains effectively immediate
+10. ≥8 new regression tests
+11. `npm test` passes
+12. `npm run build` succeeds
+
+**Depends on:** TTS-7H
+
+---
+
+## TTS-7J [v1.33.5]: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ COMPLETED (2026-04-04)
+
+> BUG-128/129/130 resolved. Single narration section-sync owner (miss-recovery path), sectionIndex dedupe on word-source append, userExplicitSelectionRef protects first-play selection, startNarration unified via resolveFoliateStartWord. 14 new tests (1,309 total). Archived 2026-04-05.
+
+**Goal:** Remove remaining Foliate narration integration bugs without regressing the newly fast startup. One consistent word source, one owner for section navigation, one trustworthy initial start point that respects the user's selected location on first play.
+
+**Problem:** After TTS-7I: (1) startup blink from competing section navigation (miss-recovery + ReaderContainer both own `goToSection()`); (2) word source duplication during section reload/recovery (`words: 8770` → `words: 17540` same session); (3) initial selection not consistently respected (onLoad logic resets after user choice).
+
+**Design decisions:**
+- Keep instant startup. No artificial delay.
+- One owner for section navigation during narration: remove one of the two `goToSection()` paths.
+- Deduplicate section words by `sectionIndex`: replace/refresh, not append.
+- Protect explicit user selection: delayed page-load restore cannot overwrite explicit click/selection before first narration start.
+- Startup source-of-truth order: explicit user selection > explicit resume position > visible-page fallback.
+
+**Key files:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts`, `src/hooks/useReadingModeInstance.ts`
+
+**SUCCESS CRITERIA (11 met):**
+1. No visible blink from double section navigation on startup
+2. Only one narration path owns `goToSection()` during play
+3. `foliateWordsRef.current`/`getWords()` do not double in size across reload or miss recovery
+4. Fresh logs no longer show `words: 8770` → `words: 17540` for same book/session
+5. First play after explicit user selection starts from that selected position
+6. Delayed page-load restore does not overwrite explicit user selection
+7. Pause-and-reselect follows same start-word policy as first play
+8. Cached/entry-covered start remains effectively immediate
+9. ≥8 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7I
+
+---
+
+## TTS-7K [v1.33.6]: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ COMPLETED (2026-04-04)
+
+> BUG-131/132/133 resolved. Full-book EPUB words promoted as narration source of truth (not loaded DOM slice), global index validation for start-word resolution, `onWordsReextracted` source protection, page-mode isolation from narration-only section navigation. 22 new tests (1,331 total, 81 files). Archived 2026-04-05.
+
+**Goal:** Make EPUB narration and cursor tracking run on one stable global word source, not the currently loaded Foliate DOM slice.
+
+**Problem:** After TTS-7J: (1) narration starts from partial DOM words (`words: 14`, `674`, `293`) even after full-book extraction of 69160 words; (2) first-play explicit selection ignored on EPUBs (global index discarded because partial DOM is too short); (3) cursor and narration use mixed index spaces; (4) page mode contaminated by narration-specific section/source machinery.
+
+**Design decisions:**
+- Promote full-book EPUB words to narration source of truth once `bookWordsRef.current.complete` is available.
+- Loaded Foliate DOM is a viewport, not source of truth.
+- Global explicit selection stays global (not validated against temporary loaded-slice length).
+- Page mode isolated from narration repair state.
+
+**Key files:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts`
+
+**SUCCESS CRITERIA (10 met):**
+1. Full-book extraction complete → narration no longer starts from tiny DOM-slice word counts
+2. First-play explicit selection starts from selected global EPUB word, not 0
+3. Cursor highlight and narration progression use same global index space
+4. `onWordsReextracted()` no longer replaces active mode's word array with current DOM slice when full-book words exist
+5. Logs no longer show contradictory source sizes for same EPUB session
+6. Page-mode next/prev remains functional past third page with narration off
+7. Cached/entry-covered startup remains effectively immediate
+8. ≥10 new regression tests
+9. `npm test` passes
+10. `npm run build` succeeds
+
+**Depends on:** TTS-7J
+
+---
+
+## TTS-7L [v1.33.7]: Exact Foliate Text-Selection Mapping ✅ COMPLETED (2026-04-04)
+
+> BUG-134 resolved. `selectionchange` now resolves `.page-word[data-word-index]` span and passes exact `globalWordIndex` through `onWordClick`. Unified click/selection payload shape. First-match text fallback demoted/removed from normal selection path. 15 new tests (1,346 total). TTS hotfix lane CLOSED at v1.33.7. Archived 2026-04-05.
+
+**Goal:** Make Foliate text selection start narration from the exact selected word, using the same global EPUB index space that now powers click-to-play and full-book narration. Selection must no longer degrade into a word-text guess.
+
+**Problem:** After TTS-7K: (1) exact click/global-index selection works; (2) text selection still loses exact selected word index (selectionchange path drops `data-word-index`); (3) ReaderContainer falls back to "first matching word text" when `globalWordIndex` absent.
+
+**Design decisions:**
+- Exact span/index wins: selected `.page-word[data-word-index]` → exact `globalWordIndex` → authoritative.
+- Selection and click share one mapping contract (cfi, sectionIndex, wordOffsetInSection, globalWordIndex).
+- Remove guessy first-match behavior from normal path.
+- Single-word selection only — multi-word native selection does not silently guess.
+
+**Key files:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/utils/startWordIndex.ts`, `src/hooks/useReaderMode.ts`
+
+**SUCCESS CRITERIA (11 met):**
+1. Exact single-word Foliate text selection starts narration from selected occurrence
+2. Click and text selection produce same global start index for same visible word
+3. Fresh logs show exact selected `globalWordIndex` flowing into `startNarration()`
+4. `ReaderContainer` no longer uses first-normalized-word match as normal selection path
+5. Exact selection resolution failure → no silent start from different occurrence
+6. First play honors exact text selection on EPUBs
+7. Pause-and-reselect honors newly selected exact word
+8. Cached/entry-covered start remains effectively immediate
+9. ≥8 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7K
+
+---
+
+## TTS-7M [v1.33.8]: Persistent Resume Anchor & Reopen Authority ✅ COMPLETED (2026-04-04)
+
+> BUG-135 resolved. Explicit persisted resume anchor introduced, pause captures live cursor, reopen uses saved position, passive `onLoad`/`onRelocate` cannot downgrade authoritative anchor. 17 new tests (1,363 total). Archived 2026-04-05.
+
+**Goal:** Make narration/page resume ownership explicit and durable so Blurby always starts from the user's true reading position, not a soft page-visible fallback.
+
+**Problem:** A "soft" page anchor (first visible word / passive relocate restore) can still overwrite the authoritative restart anchor after narration pauses or when a book is reopened. Replay jumps back, reopen starts from soft anchor, passive Foliate events quietly become the launch source of truth.
+
+**Design decisions:**
+- Single authoritative resume anchor with priority: (1) explicit user selection, (2) live narration cursor captured on pause/retarget, (3) persisted saved reading position on reopen, (4) first visible word as temporary visual fallback only.
+- Passive Foliate restore is visual-only: `onLoad`/`onRelocate` may update UI highlight but may not lower or replace the authoritative anchor.
+- Persisted progress from authoritative advancement only (narration cursor, focus/flow progress, deliberate page progress).
+- Close/reopen contract matches pause/replay contract.
+
+**Key files:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts`, `src/components/FoliatePageView.tsx`, `src/utils/startWordIndex.ts`, `src/hooks/useNarration.ts`, `src/modes/NarrateMode.ts`
+
+**SUCCESS CRITERIA (11 met):**
+1. Pause→play without reselection resumes from live narration cursor
+2. Explicit user selection still overrides replay anchor
+3. Close→reopen starts at most advanced saved word
+4. Immediate play after reopen starts narration from saved word
+5. Passive `onLoad`/`onRelocate`/first-visible restore cannot lower authoritative resume anchor
+6. Passive Foliate restore remains available as visual-only fallback when no explicit/live/persisted anchor exists
+7. Persisted EPUB progress updated only from authoritative advancement
+8. Existing exact-selection start behavior does not regress
+9. ≥10 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7L
+
+---
+
+## TTS-7N [v1.33.9]: Kokoro Pause Semantics & Settings Link Repair ✅ COMPLETED (2026-04-04)
+
+> BUG-136/137 resolved. Kokoro pause settings now drive word-weight scaling and sentence-boundary chunk snapping. Ctrl+K TTS links repaired to "tts" page. 19 new tests (1,382 total). Archived 2026-04-05.
+
+**Goal:** Make TTS settings truthful and effective. Kokoro narration must audibly respond to pause slider changes. In the same pass, repair Ctrl+K settings links so all TTS-related entries open the dedicated TTS settings page.
+
+**Problem:** `TTSSettings` writes pause values and `ReaderContainer` syncs them, but the active Kokoro path does not clearly consume that config when chunking or deciding boundaries — sliders appear live but are mostly inert. Separately, Ctrl+K still routes TTS queries to `speed-reading`.
+
+**Design decisions:**
+- Truthful TTS settings: make Kokoro honor pause controls rather than hiding them.
+- Sentence/chunk boundary logic uses configured pause semantics (clause, sentence, paragraph, dialogue threshold influence chunk ends and pause lengths).
+- One routing source for settings links: TTS items → `tts`, speed-reading items → `speed-reading`.
+- No placebo controls: every visible TTS slider must either affect Kokoro measurably or be scoped/renamed/hidden.
+
+**Key files:** `src/components/settings/TTSSettings.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`, `src/components/CommandPalette.tsx`
+
+**SUCCESS CRITERIA (11 met):**
+1. Changing Kokoro pause sliders produces real, audible difference in punctuation/dialogue handling
+2. Clause, sentence, paragraph, dialogue-threshold controls no longer inert in Kokoro path
+3. Kokoro no longer routinely blows through punctuation
+4. Chunking/pause placement avoids obvious mid-sentence pause artifacts
+5. No placebo controls
+6. Ctrl+K `TTS Voice` opens dedicated `tts` settings page
+7. All TTS-related Command Palette entries route to `tts`
+8. Speed-reading entries still route correctly to `speed-reading`
+9. ≥10 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7M
+
+---
+
+## TTS-7O [v1.34.0]: Audible Pause Injection & Smooth Narration Cursor ✅ COMPLETED (2026-04-04)
+
+> BUG-138/139 resolved. Punctuation-safe pre-send chunk rounding (expanded outward search), real inter-chunk audible silence injection (`classifyChunkBoundary` → silence samples), 3-word narration window (`page-word--narration-context` CSS), smooth cursor via CSS transitions, periodic truth-sync every 12 words. 27 new tests (1,409 total). Archived 2026-04-05.
+
+**Goal:** Make Kokoro pause settings audible, not just visible in cursor timing, while making narration highlighting feel smooth and deliberate instead of jumpy/approximate.
+
+**Problem:** TTS-7N made pause controls materially affect chunking and cursor weights, but Kokoro still bakes prosody into generated audio — sliders still do not fully behave like "real pause controls." Narration highlighting reads as approximate: hopping between words rather than gliding with speech.
+
+**Design decisions:**
+- Add explicit inter-chunk silence injection after Kokoro returns chunk audio (classified boundary → silence appended to scheduler).
+- Silence is scheduler-visible (cursor motion and resume anchors do not drift).
+- Pre-send chunk boundaries must be punctuation-safe (never cut mid-sentence; outward search if needed).
+- Three-word narration window: first word is canonical logical position for start/resume/save; next two are visual context only.
+- Smooth cursor motion via scheduler timing model (gliding, not snapping).
+- No anchor ambiguity: second/third words never written back as resume anchors or saved progress.
+- Periodic cursor truth-sync every 12 words (plus on chunk boundary, retarget, pause/resume).
+
+**Key files:** `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/hooks/useNarration.ts`, `src/components/FoliatePageView.tsx`, `src/utils/pauseDetection.ts`
+
+**SUCCESS CRITERIA (16 met):**
+1. Chunks rounded to punctuation/sentence boundaries before text sent to Kokoro
+2. Chunks never end mid-sentence
+3. Pause sliders create real audible inter-chunk silence
+4. Silence only injected at classified comma/clause/sentence/paragraph boundaries
+5. Larger slider values → measurably longer injected silence
+6. Cursor timing aligned with audible playback after silence injection
+7. Narration highlights 3 words at start and during playback
+8. First highlighted word is always canonical narration position for start/resume/save
+9. Next two words are visual context only, never alternate anchors
+10. Exact user selection still becomes first highlighted word
+11. Cursor motion feels smooth/gliding
+12. Periodic truth-sync corrects drift without changing authoritative anchor
+13. Existing exact selection/replay/reopen anchor behavior does not regress
+14. ≥14 new regression tests
+15. `npm test` passes
+16. `npm run build` succeeds
+
+**Depends on:** TTS-7N
+
+---
+
+## TTS-7P [v1.36.0]: Rolling Pause-Boundary Planner ✅ COMPLETED (2026-04-05)
+
+> BUG-140 resolved. New `src/utils/narrationPlanner.ts` (270 lines) — `buildNarrationPlan`, `PlannedChunk`, `NarrationPlan`, `computeSilenceMs`, `planNeedsRebuild`, dialogue detection. `generationPipeline.ts` uses planner for chunk selection + silence injection. `kokoroStrategy.ts` passes `getParagraphBreaks` to pipeline. `useNarration.ts` passes paragraph breaks ref. Two new planner constants: `TTS_PLANNER_WINDOW_WORDS` (400), `TTS_PLANNER_MIN_CHUNK_WORDS` (10). 33 new tests (1,479 total, 83 files). Archived 2026-04-05.
+
+**Goal:** Add a lightweight forward-looking narration planner that classifies pause boundaries for the active text window ahead of playback, so chunk splitting, silence injection, resume behavior, and dialogue handling all use one consistent local plan.
+
+**Problem:** TTS-7O gives users real audible pause shaping at chunk boundaries, but it still operates chunk-by-chunk. Resume behavior, dialogue pacing, and boundary choice still rely on local heuristics in the moment rather than a small rolling structure plan.
+
+**Design decisions:**
+- Planner scope is local, not whole-book (next 2–5 chunks / next few hundred words).
+- Single planning source for chunk splitting, inserted silence, resume targeting, and dialogue handling.
+- Cheap to recompute: rebuild on retarget, rate change, major selection jump, or chunk exhaustion.
+- Dialogue-aware planning: quote/dialogue-aware heuristics so dialogue runs stop sounding like flattened prose.
+- Planner preserves cursor authority: planning never mutates the user anchor.
+- Planner owns boundary rounding rules: mid-sentence cuts prohibited by policy.
+
+**Key files:** `src/utils/narrationPlanner.ts` (new), `src/utils/generationPipeline.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/audioScheduler.ts`
+
+**SUCCESS CRITERIA (11 met):**
+1. Narration uses rolling local boundary plan rather than only moment-of-chunk heuristics
+2. Chunk splitting consults active plan
+3. Inter-chunk silence injection consults active plan
+4. Resume/retarget behavior can rebuild and reuse plan cleanly
+5. Dialogue handling improves noticeably vs plain sentence-only snapping
+6. Mid-sentence chunk cuts prohibited by planner contract
+7. Planner remains local/cheap, no full-book precomputation
+8. Planner never changes authoritative first-word anchor on its own
+9. ≥12 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7O
+
+---
+
+## TTS-7Q [v1.36.1]: True Glide & Audio-Aligned Narration Cursor ✅ COMPLETED (2026-04-05)
+
+> BUG-143/144 resolved. RAF-based glide loop and canonical `AudioProgressReport` now drive the narration cursor. Separated canonical audio cursor from visual band state. Replaced stepped overlay chasing with audio-aligned rail follower. Chunk handoff is visually continuous. 1,504 tests, 84 files. Archived 2026-04-05.
+
+**Goal:** Upgrade narration cursor movement from "good and stable" to "silky" by driving the 3-word narration band from audio-aligned progress rather than discrete DOM target hops, while preserving the hard-won anchor/resume correctness from TTS-7M and TTS-7O.
+
+**Problem:** TTS-7O made cursor stable enough to ship (band moves, twitch reduced, pause/replay works), but cursor still feels stepped and laggy compared with smooth Kokoro audio. Chunk handoffs can continue from wherever visual band was stuck rather than last audio-confirmed position. More CSS easing is the wrong lever; the gap is architectural — visual cursor inferred from coarse word/window updates rather than a dedicated audio-aligned progress model.
+
+**Design decisions:**
+- Lock in current stable contract first (no regressions to explicit selection, pause anchor, replay, reopen, or 3-word window).
+- Separate canonical audio cursor from visual cursor: first narrated word remains only authoritative logical anchor.
+- Drive glide from audio-time progress, not DOM chasing.
+- Chunk handoff must be continuity-safe (continue from last audio-confirmed word, not stale visual band position).
+- Use stable line rail when possible.
+- Truth-sync stays a guardrail, not the main movement system.
+
+**Key files:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/styles/global.css`
+
+**SUCCESS CRITERIA (12 met):**
+1. Narration cursor driven by canonical audio-progress model
+2. 3-word band moves more continuously, not primarily 12-word-reset-driven
+3. Pause/replay/save/reopen use authoritative first narrated word only
+4. Chunk handoff is monotonic, no visual restart from stale band position
+5. Visual band never becomes replay/resume anchor
+6. Truth-sync remains correction mechanism, not dominant visible motion driver
+7. Left-right twitch fix preserved
+8. Visible paused anchor preserved
+9. Explicit selection start behavior preserved
+10. ≥14 new regression tests
+11. `npm test` passes
+12. `npm run build` succeeds
+
+**Depends on:** TTS-7P
+
+---
+
+## EXT-5C [v1.35.0]: Rich Article Capture & Hero Image Cards ✅ COMPLETED (2026-04-05)
+
+> BUG-141/142 resolved. Rich article HTML formatting preserved (headings, figures, captions, lists, blockquotes), inline images downloaded and embedded into EPUB (no remote dependency), article-aware hero ranking (body presence > top article image > metadata fallback, rejects junk URLs), hero reliably promoted to `coverPath` for both URL and extension import paths. Shared `downloadArticleImages` helper + `preDownloadedImages` EPUB path unifies both import flows. 24 new tests (1,433 total). Archived 2026-04-05.
+
+**Goal:** Make URL and extension-imported articles preserve article formatting and inline images in the reading experience, and always promote the chosen hero image onto the library reading card.
+
+**Problem:** Current URL article pipeline extracts readable text and cleaned HTML, but behaves like a text-first importer. Inline article images are often not preserved through import (only a single lead image downloaded for `coverPath`), losing figure blocks, captions, spacing, and image context. Hero image not always consistently promoted onto reading card.
+
+**Design decisions:**
+- One canonical article capture path: in-app URL import and extension import use same extraction, asset download, and EPUB generation flow.
+- Preserve cleaned article structure (headings, subheads, byline, paragraphs, blockquotes, lists, emphasis, figures, captions) — exclude navigation, ads, sticky UI.
+- Download and rewrite article assets locally into generated EPUB (no remote dependency at read time).
+- Hero image becomes the card image (populates `coverPath`); monogram fallback only when no valid hero available.
+- Hero selection is article-aware: prefer article's actual lead/hero image over logos/avatars/sprites/tiny thumbnails.
+- Text fallback remains safe: partial image failures do not abort import.
+
+**Key files:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/epub-converter.js`, `main/ws-server.js`, `src/types.ts`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
+
+**SUCCESS CRITERIA (13 met):**
+1. URL-imported and extension-imported articles preserve cleaned rich article formatting
+2. Inline article images retained in reading experience
+3. Figure captions stay associated with images
+4. Imported article EPUBs no longer depend on remote image URLs
+5. Hero image selection prefers real article lead image over logos/tiny thumbnails
+6. URL article grid cards use chosen hero image
+7. URL article list thumbnails use chosen hero image when available
+8. Monogram fallback only when no valid hero image available
+9. In-app URL import and extension import share same rich article capture behavior
+10. Partial image-download failures do not abort article import
+11. ≥12 new regression tests
+12. `npm test` passes
+13. `npm run build` succeeds
+
+**Depends on:** None (queued after TTS-7P by priority)
 
 Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
