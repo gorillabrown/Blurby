@@ -14,7 +14,7 @@ export interface NarrationInterface {
   ) => void;
   stop: () => void;
   pause: () => void;
-  resume: () => void;
+  resume: (currentWordIndex?: number) => void;
   adjustRate: (rate: number) => void;
   setRhythmPauses: (pauses: any, breaks: Set<number>) => void;
   setPageEndWord: (idx: number | null) => void;
@@ -88,7 +88,8 @@ export class NarrateMode implements ReadingMode {
 
   resume(): void {
     this.playing = true;
-    this.narration.resume();
+    // TTS-7B: Pass current word index so resume can resync if user moved cursor during pause
+    this.narration.resume(this.currentWord);
   }
 
   stop(): void {

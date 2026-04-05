@@ -134,9 +134,11 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 
     pause() {
       scheduler.pause();
+      pipeline.pause(); // TTS-7B: Also pause chunk emission
     },
 
     resume() {
+      pipeline.resume(); // TTS-7B: Flush buffered chunks first
       scheduler.resume();
     },
 

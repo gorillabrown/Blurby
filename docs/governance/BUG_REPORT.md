@@ -171,26 +171,26 @@
 **Description:** File header claimed 3-slot priority system, but runLoop was serial. Fix: removed misleading comment, documented actual serial behavior. Kept serial design (sufficient for use case).
 **Status:** Resolved. Sprint: TTS-7A.
 
-### BUG-107: EPUB word clicks during narration move highlight but don't retarget TTS
-**Reported:** 2026-04-04
+### ~~BUG-107~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
-**Location:** `src/components/ReaderContainer.tsx:1002` (foliate click), `src/components/ReaderContainer.tsx:863` (resync path)
-**Description:** Clicking a word in foliate EPUB during active narration calls `setHighlightedWordIndex(globalWordIndex)` directly, but does not route through the live TTS resync path at line 863. Page view uses the resync path; foliate does not. Cursor moves visually but audio continues from old position.
-**Status:** Open. Sprint: TTS-7B.
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** EPUB word clicks bypassed TTS resync path. Fix: foliate `onWordClick` now routes through `handleHighlightedWordChange` instead of raw `setHighlightedWordIndex`. Handler only resyncs when `narration.speaking` (not when paused), implementing the dual cursor contract.
+**Status:** Resolved. Sprint: TTS-7B.
 
-### BUG-108: Pause + browse-away doesn't reconcile narration restart position
-**Reported:** 2026-04-04
+### ~~BUG-108~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
-**Location:** `src/components/PageReaderView.tsx:257`, `src/components/FoliatePageView.tsx:915`, `src/hooks/useReaderMode.ts:266`
-**Description:** Page view and foliate view intentionally let the user browse away from narration position without moving TTS cursor. When narration pauses back to page mode, `useReaderMode.ts:266` does not reconcile narration position vs browsed position. Restart source stays stale — user expects to resume from where they browsed, but audio resumes from where it paused.
-**Status:** Open. Sprint: TTS-7B.
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/PageReaderView.tsx`
+**Description:** Pause after browse-away didn't reconcile cursor. Fix: `handlePauseToPage` now reads the current page's start word via `getCurrentPageStart()` when `isBrowsedAway` is true, updating `highlightedWordIndex` before stopping narration. Next resume plays from the browsed-to position.
+**Status:** Resolved. Sprint: TTS-7B.
 
-### BUG-109: Kokoro fallback starts Web Speech without tearing down Kokoro session
-**Reported:** 2026-04-04
+### ~~BUG-109~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
-**Location:** `src/hooks/useNarration.ts:115`
-**Description:** Fallback dispatches `engine=web` and immediately starts Web Speech without stopping the Kokoro pipeline/scheduler first. Risks overlap, stale callbacks, and double ownership of the cursor.
-**Status:** Open. Sprint: TTS-7B.
+**Location:** `src/hooks/useNarration.ts`
+**Description:** Kokoro fallback started Web Speech without stopping Kokoro first. Fix: `onFallbackToWeb` now calls `kokoroStrategy.stop()` before switching engine, with a `setTimeout(0)` yield before starting Web Speech. Diagnostics event recorded.
+**Status:** Resolved. Sprint: TTS-7B.
 
 ### BUG-110: Pause settings (rhythm.ts, pauseDetection.ts) are dead code for Kokoro
 **Reported:** 2026-04-04
@@ -199,12 +199,12 @@
 **Description:** App exposes pause-tuning controls that push config into narration, but no live Kokoro call path consumes `rhythm.ts` or `pauseDetection.ts`. Controls are misleading — they shape nothing during Kokoro playback. Fix: remove pause-tuning UI when Kokoro is active (Kokoro handles prosody natively).
 **Status:** Open. Sprint: TTS-7C.
 
-### BUG-111: Kokoro "pause" is audio suspend only, not a retargetable paused session
-**Reported:** 2026-04-04
+### ~~BUG-111~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** Medium
-**Location:** `src/hooks/useNarration.ts:453`, `src/hooks/narration/kokoroStrategy.ts:133`, `src/utils/generationPipeline.ts:46`
-**Description:** Pause delegates to strategy, which only suspends/resumes the scheduler. The generation pipeline has no `pause()` API — only `start/stop/flush`. This undermines the "paused cursor = restart source" model. Fix: add `pause()` to pipeline (freeze chunk emission, keep state). Kokoro pause = suspend scheduler + freeze pipeline.
-**Status:** Open. Sprint: TTS-7B.
+**Location:** `src/utils/generationPipeline.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/hooks/useNarration.ts`
+**Description:** Kokoro pause only suspended audio, not chunk emission. Fix: added `pause()`/`resume()` to GenerationPipeline (buffers chunks internally when paused, flushes on resume). Kokoro strategy wires both scheduler + pipeline pause/resume. `useNarration.resume()` accepts optional `currentWordIndex` for cursor-moved-during-pause resync.
+**Status:** Resolved. Sprint: TTS-7B.
 
 ### BUG-112: Duplicate full-book extraction can run concurrently
 **Reported:** 2026-04-04

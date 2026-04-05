@@ -52,6 +52,10 @@ export interface GenerationPipeline {
   flush: (resumeFromIdx: number) => void;
   /** Check if the pipeline is active */
   isActive: () => boolean;
+  /** TTS-7B: Pause chunk emission (buffers internally, generation continues) */
+  pause: () => void;
+  /** TTS-7B: Resume chunk emission (flushes buffered chunks, then continues) */
+  resume: () => void;
 }
 
 // ── Chunk Sizing ─────────────────────────────────────────────────────────────
@@ -83,6 +87,9 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   let nextProduceIdx = 0;
   let chunkIndex = 0; // tracks position in ramp-up sequence
   let lastEmittedStartIdx = -1; // TTS-6S: duplicate chunk guard
+  // TTS-7B: Pause state — buffers chunks instead of emitting
+  let paused = false;
+  let pauseBuffer: ScheduledChunk[] = [];
 
   /** Produce a chunk starting at startIdx. Returns actual words consumed (may differ from chunkSize on cache hit). */
   async function produceChunk(startIdx: number, chunkSize: number, myGenId: number): Promise<number> {
@@ -105,7 +112,12 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         if (isCached && myGenId === generationId) {
           const cached = await config.loadCached(startIdx);
           if (cached && myGenId === generationId) {
-            config.onChunkReady(cached);
+            // TTS-7B: Gate emission through pause buffer
+            if (paused) {
+              pauseBuffer.push(cached);
+            } else {
+              config.onChunkReady(cached);
+            }
             return cached.words.length; // Actual consumed count (may be > chunkSize)
           }
         }
@@ -146,9 +158,15 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         }
         lastEmittedStartIdx = startIdx;
 
-        config.onChunkReady(chunk);
+        // TTS-7B: If paused, buffer instead of emitting
+        if (paused) {
+          pauseBuffer.push(chunk);
+        } else {
+          config.onChunkReady(chunk);
+        }
 
         // Cache to disk (fire-and-forget) — TTS-7A: store actual word count
+        // Always cache regardless of pause state
         if (config.onCacheChunk) {
           config.onCacheChunk(startIdx, audio, result.sampleRate, durationMs, chunkWords.length);
         }
@@ -246,6 +264,8 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     active = false;
     generationId++;
     lastEmittedStartIdx = -1;
+    paused = false;
+    pauseBuffer = [];
   }
 
   function flush(resumeFromIdx: number): void {
@@ -257,5 +277,20 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     return active;
   }
 
-  return { start, stop, flush, isActive };
+  /** TTS-7B: Pause chunk emission — generation continues, chunks buffer internally */
+  function pipelinePause(): void {
+    paused = true;
+  }
+
+  /** TTS-7B: Resume chunk emission — flush buffered chunks, then continue */
+  function pipelineResume(): void {
+    paused = false;
+    // Flush buffered chunks in order
+    const buffered = pauseBuffer.splice(0);
+    for (const chunk of buffered) {
+      if (active) config.onChunkReady(chunk);
+    }
+  }
+
+  return { start, stop, flush, isActive, pause: pipelinePause, resume: pipelineResume };
 }

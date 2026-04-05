@@ -518,7 +518,7 @@ export default function ReaderContainer({
   }, [useFoliate, narration.setOnSectionEnd]);
 
   // Page navigation ref (needed by useReaderMode for return-to-reading)
-  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void }>({
+  const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void; getCurrentPageStart?: () => number }>({
     prevPage: () => {},
     nextPage: () => {},
     goToPage: () => {},
@@ -864,14 +864,16 @@ export default function ReaderContainer({
   const resyncToCursorRef = useRef(narration.resyncToCursor);
   resyncToCursorRef.current = narration.resyncToCursor;
 
-  // Word change handler — resyncs TTS if in narration mode
+  // Word change handler — resyncs TTS if narration is actively speaking.
+  // TTS-7B: Only resync during active playback. During pause, silently set
+  // highlightedWordIndex as the restart point (paused cursor contract).
   const handleHighlightedWordChange = useCallback((index: number) => {
     setHighlightedWordIndex(index);
-    if (readingMode === "narration") {
-      // Resync TTS to new position
+    if (readingMode === "narration" && narration.speaking && !narration.warming) {
+      // Resync TTS to new position (active playback)
       resyncToCursorRef.current(index, effectiveWpm);
     }
-  }, [readingMode, effectiveWpm]);
+  }, [readingMode, effectiveWpm, narration.speaking, narration.warming]);
 
   // Determine current word index for bottom bar
   const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
@@ -1006,9 +1008,12 @@ export default function ReaderContainer({
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
         activeDoc.cfi = cfi;
-        // Use global word index directly when available (from data-word-index span)
+        // TTS-7B: Route through handleHighlightedWordChange so narration
+        // resyncToCursor fires during active playback (BUG-107 fix).
+        // During pause, this silently sets the restart position.
+        // During non-narration modes, handleHighlightedWordChange just sets state.
         if (globalWordIndex !== undefined && globalWordIndex >= 0) {
-          setHighlightedWordIndex(globalWordIndex);
+          handleHighlightedWordChange(globalWordIndex);
           return;
         }
         // Fallback: text search in foliate word array (less precise)
@@ -1017,7 +1022,7 @@ export default function ReaderContainer({
           const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
           for (let i = 0; i < fWords.length; i++) {
             if (fWords[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
-              setHighlightedWordIndex(i);
+              handleHighlightedWordChange(i);
               return;
             }
           }
