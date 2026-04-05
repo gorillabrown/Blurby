@@ -8,6 +8,32 @@
 
 ## Incomplete
 
+### BUG-136: Kokoro pause controls and dialogue threshold do not meaningfully shape narration
+**Reported:** 2026-04-05
+**Severity:** High
+**Location:** `src/components/settings/TTSSettings.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`
+**Description:** Users can change comma/clause/sentence/paragraph pause sliders and dialogue threshold in the TTS settings UI, but Kokoro narration still often sounds unchanged: punctuation is blown through, pauses land mid-sentence, and dialogue becomes hard to follow. The code indicates the likely cause: pause settings are synced into `setPauseConfig(...)`, but the active Kokoro chunking/prosody path does not clearly consume that config in a way that materially affects playback.
+**Root cause:** TTS settings and Kokoro playback semantics are partially decoupled. The UI implies configurable pause shaping, but the chunking/scheduling path still behaves largely as a fixed heuristic.
+**Target fix:** Audit the full Kokoro pause pipeline, make pause config and dialogue threshold materially affect chunk boundary and pause timing, and remove/relabel any controls that cannot actually be honored.
+**Status:** Open. Sprint: TTS-7N.
+
+### BUG-137: Ctrl+K TTS settings links still route to the legacy Speed Reading page
+**Reported:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/CommandPalette.tsx`
+**Description:** TTS-related Command Palette items such as `TTS Voice` still open `speed-reading` instead of the dedicated `tts` settings page. This is stale routing from when narration controls lived under Speed Reading.
+**Root cause:** Command Palette entries were never updated after `tts` became a first-class settings page.
+**Target fix:** Remap all TTS-related Command Palette items to `tts`, keep speed-reading items on `speed-reading`, and add routing tests so the menu cannot drift again.
+**Status:** Open. Sprint: TTS-7N.
+
+### ~~BUG-135~~ ✅ Fixed — TTS-7M (v1.33.8)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Passive Foliate `onLoad`/`onRelocate` restore logic could replace the authoritative restart anchor with an early soft page word after narration pause or book reopen. Replay or reopen jumped back to first visible word instead of the true last read position.
+**Root cause:** No persistent resume-anchor ownership. Time-limited `preservePlaybackAnchorUntilRef` expired before next play, and reopen had no anchor at all.
+**Fix:** Replaced time-limited ref with persistent `resumeAnchorRef`. Set from: narration cursor on pause, saved position on reopen. Consumed on mode start, cleared on explicit selection. `onLoad`/`onRelocate` gated when anchor active. Progress saves also gated behind engagement + no-anchor.
+
 ### ~~BUG-134~~ ✅ Fixed — TTS-7L (v1.33.7)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Medium
