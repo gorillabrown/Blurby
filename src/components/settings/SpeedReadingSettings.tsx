@@ -126,6 +126,15 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         </select>
       </div>
 
+      {/* TTS-7C: Hide rhythm pause controls when Kokoro is active (BUG-110).
+          Kokoro handles prosody natively — these toggles only affect Web Speech
+          and non-narration reading modes (Focus, Flow). */}
+      {settings.ttsEngine === "kokoro" ? (
+        <div className="settings-note" style={{ marginTop: 16, opacity: 0.6, fontSize: "0.85em" }}>
+          Kokoro handles prosody natively. Rhythm pause controls are available when using Web Speech.
+        </div>
+      ) : (
+      <>
       <div className="settings-section-label" style={{ marginTop: 16 }}>Rhythm Pauses</div>
 
       <div className="settings-toggle-row">
@@ -202,6 +211,8 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           <div className="settings-toggle-thumb" />
         </div>
       </div>
+      </>
+      )}
 
     </div>
   );

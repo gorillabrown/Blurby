@@ -65,8 +65,9 @@ export function cacheChunk(
   wordCount?: number,
 ): void {
   if (!api?.ttsCacheWrite) return;
-  // Convert to plain array for IPC (structured clone doesn't always preserve Float32Array)
-  api.ttsCacheWrite(bookId, voiceId, startIdx, Array.from(audio), sampleRate, durationMs, wordCount ?? null).catch(() => {});
+  // TTS-7C: Pass Float32Array directly — Electron structured clone preserves typed arrays.
+  // Previous Array.from() added ~2x allocation overhead on every cache write (BUG-113).
+  api.ttsCacheWrite(bookId, voiceId, startIdx, audio, sampleRate, durationMs, wordCount ?? null).catch(() => {});
 }
 
 /**

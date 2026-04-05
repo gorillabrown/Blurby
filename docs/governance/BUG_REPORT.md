@@ -129,12 +129,12 @@
 **Description:** WPM slider thumb/track, selected mode button background, flow cursor underline, and narration word highlight should use `var(--accent)` — some currently use hardcoded colors.
 **Status:** Open.
 
-### BUG-101: Narration start/restart click handlers block main thread 200ms–1,400ms
-**Reported:** 2026-04-04
+### ~~BUG-101~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** Medium
-**Location:** `src/components/ReaderContainer.tsx` (narration start path), `src/hooks/useNarration.ts`
-**Description:** Play/stop/rate-change click handlers consistently exceed the 50ms long-task threshold (observed 203ms to 1,436ms). Keydown handler (same codepath via keyboard shortcut) hit 610ms. Caused by synchronous word extraction, chunk generation, and Kokoro IPC setup all running in one task before yielding to the event loop. Fix: break narration start path into microtasks (extraction check → yield → chunk gen → yield → IPC dispatch).
-**Status:** Open. Sprint: TTS-7C.
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Narration start blocked main thread 200ms–1,400ms. Fix: added `setTimeout(0)` yield between extraction result processing and ref updates. DOM restamp already deferred via `requestIdleCallback`.
+**Status:** Resolved. Sprint: TTS-7C.
 
 ### ~~BUG-102~~ ✅ Fixed — TTS-7A (v1.29.0)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
@@ -192,12 +192,12 @@
 **Description:** Kokoro fallback started Web Speech without stopping Kokoro first. Fix: `onFallbackToWeb` now calls `kokoroStrategy.stop()` before switching engine, with a `setTimeout(0)` yield before starting Web Speech. Diagnostics event recorded.
 **Status:** Resolved. Sprint: TTS-7B.
 
-### BUG-110: Pause settings (rhythm.ts, pauseDetection.ts) are dead code for Kokoro
-**Reported:** 2026-04-04
+### ~~BUG-110~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
-**Location:** `src/components/ReaderContainer.tsx:355`, `src/hooks/useNarration.ts:560`, `src/utils/rhythm.ts`, `src/utils/pauseDetection.ts`
-**Description:** App exposes pause-tuning controls that push config into narration, but no live Kokoro call path consumes `rhythm.ts` or `pauseDetection.ts`. Controls are misleading — they shape nothing during Kokoro playback. Fix: remove pause-tuning UI when Kokoro is active (Kokoro handles prosody natively).
-**Status:** Open. Sprint: TTS-7C.
+**Location:** `src/components/settings/SpeedReadingSettings.tsx`
+**Description:** Rhythm pause controls visible but non-functional for Kokoro. Fix: conditionally hide rhythm pause toggles when `ttsEngine === "kokoro"`, show explanatory note instead. Controls remain for Web Speech engine.
+**Status:** Resolved. Sprint: TTS-7C.
 
 ### ~~BUG-111~~ ✅ Fixed — TTS-7B (v1.30.0)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
@@ -206,19 +206,19 @@
 **Description:** Kokoro pause only suspended audio, not chunk emission. Fix: added `pause()`/`resume()` to GenerationPipeline (buffers chunks internally when paused, flushes on resume). Kokoro strategy wires both scheduler + pipeline pause/resume. `useNarration.resume()` accepts optional `currentWordIndex` for cursor-moved-during-pause resync.
 **Status:** Resolved. Sprint: TTS-7B.
 
-### BUG-112: Duplicate full-book extraction can run concurrently
-**Reported:** 2026-04-04
+### ~~BUG-112~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** Medium
-**Location:** `src/components/ReaderContainer.tsx:376` (background pre-extraction), `src/components/ReaderContainer.tsx:405` (narration-start extraction)
-**Description:** Background pre-extraction and narration-start extraction have no in-flight dedupe. Both can run simultaneously, doubling IPC and CPU cost. Fix: if extraction is in-flight, return existing promise.
-**Status:** Open. Sprint: TTS-7C.
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Duplicate concurrent extraction. Fix: module-level `dedupeExtractWords()` returns existing promise for same book ID. Both extraction paths (background + narration-start) use the dedupe wrapper.
+**Status:** Resolved. Sprint: TTS-7C.
 
-### BUG-113: Cache IPC is copy-heavy (Array.from round-trips)
-**Reported:** 2026-04-04
+### ~~BUG-113~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** Medium
-**Location:** `src/utils/ttsCache.ts:60`, `main/ipc/tts.js:118`
-**Description:** PCM audio converts to `Array.from()` on cache write and back to plain arrays on cache read. Adds avoidable allocation/copy overhead exactly where cache hits should eliminate pauses. Fix: use `SharedArrayBuffer` or transferable for PCM data.
-**Status:** Open. Sprint: TTS-7C.
+**Location:** `src/utils/ttsCache.ts`, `main/ipc/tts.js`
+**Description:** Cache IPC used `Array.from()` round-trips. Fix: pass `Float32Array` directly — Electron structured clone preserves typed arrays. IPC handler accepts both Float32Array and plain array for backward compat.
+**Status:** Resolved. Sprint: TTS-7C.
 
 ### ~~BUG-114~~ ✅ Fixed — TTS-7A (v1.29.0)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
@@ -227,12 +227,12 @@
 **Description:** Bug reporter read wrong field names and had no live diagnostics call sites. Fix: corrected `ttsVoice`→`ttsVoiceName`, `ttsSpeed`→`ttsRate`. Added `recordSnapshot()` at narration start, chunk delivery (web + kokoro), and stop. Added `recordDiagEvent()` at start/stop/pause/resume.
 **Status:** Resolved. Sprint: TTS-7A.
 
-### BUG-115: No queue-depth/backpressure enforcement in generation pipeline
-**Reported:** 2026-04-04
+### ~~BUG-115~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** Medium
-**Location:** `src/utils/generationPipeline.ts`, `src/utils/constants.ts` (`TTS_QUEUE_DEPTH`)
-**Description:** `TTS_QUEUE_DEPTH` constant exists but has no runtime consumer. Pipeline keeps producing regardless of scheduler buffer state. Can cause starvation when generation is slow and overproduction/memory pressure when cache hits are fast. Fix: pause chunk emission when scheduler has ≥N buffered chunks, resume on drain.
-**Status:** Open. Sprint: TTS-7C.
+**Location:** `src/utils/generationPipeline.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** No backpressure enforcement. Fix: pipeline tracks `pendingChunks` counter, holds emission when `>= TTS_QUEUE_DEPTH` (5). `acknowledgeChunk()` called by kokoroStrategy on scheduler consumption. Backpressure self-heals on acknowledgment.
+**Status:** Resolved. Sprint: TTS-7C.
 
 ### ~~BUG-096~~ ✅ Fixed — TTS-6S (v1.28.0)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04

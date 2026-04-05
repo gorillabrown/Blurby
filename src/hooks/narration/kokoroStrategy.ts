@@ -74,6 +74,8 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getSpeed: () => getBucket(),
     onChunkReady: (chunk) => {
       scheduler.scheduleChunk(chunk);
+      // TTS-7C: Acknowledge chunk consumption to release backpressure (BUG-115)
+      pipeline.acknowledgeChunk();
     },
     onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount) => {
       const bookId = deps.getBookId?.() || "";

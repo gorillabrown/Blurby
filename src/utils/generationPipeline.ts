@@ -10,6 +10,7 @@
 import {
   TTS_COLD_START_CHUNK_WORDS,
   TTS_CRUISE_CHUNK_WORDS,
+  TTS_QUEUE_DEPTH,
 } from "../constants";
 import type { ScheduledChunk } from "./audioScheduler";
 
@@ -56,6 +57,8 @@ export interface GenerationPipeline {
   pause: () => void;
   /** TTS-7B: Resume chunk emission (flushes buffered chunks, then continues) */
   resume: () => void;
+  /** TTS-7C: Acknowledge a consumed chunk (decrements backpressure counter) */
+  acknowledgeChunk: () => void;
 }
 
 // ── Chunk Sizing ─────────────────────────────────────────────────────────────
@@ -90,6 +93,9 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   // TTS-7B: Pause state — buffers chunks instead of emitting
   let paused = false;
   let pauseBuffer: ScheduledChunk[] = [];
+  // TTS-7C: Backpressure — hold emission when scheduler has too many buffered chunks (BUG-115)
+  let pendingChunks = 0;
+  let backpressureResolve: (() => void) | null = null;
 
   /** Produce a chunk starting at startIdx. Returns actual words consumed (may differ from chunkSize on cache hit). */
   async function produceChunk(startIdx: number, chunkSize: number, myGenId: number): Promise<number> {
@@ -116,6 +122,12 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
             if (paused) {
               pauseBuffer.push(cached);
             } else {
+              // TTS-7C: Backpressure for cache hits too
+              if (pendingChunks >= TTS_QUEUE_DEPTH) {
+                await new Promise<void>(resolve => { backpressureResolve = resolve; });
+                if (!active || myGenId !== generationId) return cached.words.length;
+              }
+              pendingChunks++;
               config.onChunkReady(cached);
             }
             return cached.words.length; // Actual consumed count (may be > chunkSize)
@@ -162,6 +174,12 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         if (paused) {
           pauseBuffer.push(chunk);
         } else {
+          // TTS-7C: Backpressure — wait if too many pending chunks (BUG-115)
+          if (pendingChunks >= TTS_QUEUE_DEPTH) {
+            await new Promise<void>(resolve => { backpressureResolve = resolve; });
+            if (!active || myGenId !== generationId) return chunkWords.length;
+          }
+          pendingChunks++;
           config.onChunkReady(chunk);
         }
 
@@ -266,6 +284,8 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     lastEmittedStartIdx = -1;
     paused = false;
     pauseBuffer = [];
+    pendingChunks = 0;
+    if (backpressureResolve) { backpressureResolve(); backpressureResolve = null; }
   }
 
   function flush(resumeFromIdx: number): void {
@@ -292,5 +312,14 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     }
   }
 
-  return { start, stop, flush, isActive, pause: pipelinePause, resume: pipelineResume };
+  /** TTS-7C: Acknowledge a consumed chunk — releases backpressure if needed */
+  function acknowledgeChunk(): void {
+    if (pendingChunks > 0) pendingChunks--;
+    if (pendingChunks < TTS_QUEUE_DEPTH && backpressureResolve) {
+      backpressureResolve();
+      backpressureResolve = null;
+    }
+  }
+
+  return { start, stop, flush, isActive, pause: pipelinePause, resume: pipelineResume, acknowledgeChunk };
 }

@@ -114,17 +114,18 @@ function register(ctx) {
     try {
       const result = await ttsCache.readChunk(bookId, voiceId, startIdx);
       if (!result) return { miss: true };
-      // Transfer audio as ArrayBuffer
+      // TTS-7C: Return Float32Array directly — structured clone preserves typed arrays (BUG-113)
       const arr = result.audio instanceof Float32Array ? result.audio : new Float32Array(result.audio);
-      return { audio: Array.from(arr), sampleRate: result.sampleRate, durationMs: result.durationMs, wordCount: result.wordCount ?? null };
+      return { audio: arr, sampleRate: result.sampleRate, durationMs: result.durationMs, wordCount: result.wordCount ?? null };
     } catch (err) {
       return { error: err.message };
     }
   });
 
-  ipcMain.handle("tts-cache-write", async (_, bookId, voiceId, startIdx, audioArr, sampleRate, durationMs, wordCount) => {
+  ipcMain.handle("tts-cache-write", async (_, bookId, voiceId, startIdx, audioData, sampleRate, durationMs, wordCount) => {
     try {
-      const pcm = new Float32Array(audioArr);
+      // TTS-7C: Accept Float32Array directly (or plain array for backward compat)
+      const pcm = audioData instanceof Float32Array ? audioData : new Float32Array(audioData);
       await ttsCache.writeChunk(bookId, voiceId, startIdx, pcm, sampleRate, durationMs, wordCount);
       return { success: true };
     } catch (err) {
