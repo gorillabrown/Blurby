@@ -112,6 +112,40 @@ describe("createGenerationPipeline", () => {
     pipeline.stop();
   });
 
+  it("emits startup chunks in word order even if chunk 2 resolves before chunk 1", async () => {
+    const resolvers: Array<(value: { audio: Float32Array; sampleRate: number; durationMs: number }) => void> = [];
+    const generateFn = vi.fn().mockImplementation(() => new Promise(resolve => {
+      resolvers.push(resolve);
+    }));
+    const onChunkReady = vi.fn();
+    const config = makeConfig({ generateFn, onChunkReady });
+    const pipeline = createGenerationPipeline(config);
+
+    pipeline.start(0);
+    await vi.waitFor(() => expect(generateFn).toHaveBeenCalledTimes(2));
+
+    // Resolve the second startup chunk first — it should buffer until chunk 0 arrives.
+    resolvers[1]({
+      audio: new Float32Array(24000),
+      sampleRate: 24000,
+      durationMs: 1000,
+    });
+    await new Promise(r => setTimeout(r, 0));
+    expect(onChunkReady).not.toHaveBeenCalled();
+
+    resolvers[0]({
+      audio: new Float32Array(24000),
+      sampleRate: 24000,
+      durationMs: 1000,
+    });
+
+    await vi.waitFor(() => expect(onChunkReady).toHaveBeenCalledTimes(2));
+    expect(onChunkReady.mock.calls[0][0].startIdx).toBe(0);
+    expect(onChunkReady.mock.calls[1][0].startIdx).toBe(TTS_COLD_START_CHUNK_WORDS);
+
+    pipeline.stop();
+  });
+
   it("stop cancels generation (no more onChunkReady after stop)", async () => {
     const onChunkReady = vi.fn();
     const config = makeConfig({ onChunkReady });

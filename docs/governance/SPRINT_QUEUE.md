@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (`EINK-6A`, `EINK-6B`, `GOALS-6B`)
+**Full specs:** `ROADMAP.md` (`TTS-7O`, `TTS-7P`, `EINK-6A`, `EINK-6B`, `GOALS-6B`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: EINK-6A (E-Ink Foundation & Greyscale Runtime)
-Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully spec'd.
+Queue depth: 2
+Next sprint: TTS-7P (Rolling Pause-Boundary Planner)
+Health: YELLOW — depth below 3. Backfill needed before resuming execution.
 ```
 
 ---
@@ -21,13 +21,12 @@ Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully sp
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | EINK-6A | v1.34.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
-| 2 | EINK-6B | v1.35.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Stepped flow (chunk advance for e-ink), burst focus (phrase grouping), adaptive refresh heuristic. 8 tasks, 10 success criteria. Depends on EINK-6A. |
-| 3 | GOALS-6B | v1.36.0 | `sprint/goals-6b-tracking` | Full | — | **FULLY SPEC'D.** Reading goal system — daily pages/minutes, weekly books, streak tracking, library progress widget, goals settings page. 11 tasks, 15 success criteria. Can run parallel with EINK-6B. |
+| 1 | TTS-7P | v1.35.0 | `sprint/tts-7p-rolling-pause-planner` | Full | BUG-140 | **FULLY SPEC'D.** Rolling pause-boundary planner for the active text window. Planner becomes the single authority for chunk endings and drives silence insertion, resume/retarget behavior, and dialogue handling without whole-book precomputation. 9 tasks, 11 success criteria. Depends on TTS-7O (now complete). |
+| 2 | EINK-6A | v1.36.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
 
-**Agent staging rule:** EINK and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
+**Agent staging rule:** TTS, EINK, and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
-**Dispatch status:** EINK-6A is dispatch-ready now. EINK-6B waits for EINK-6A. GOALS-6B can run parallel with EINK-6B after EINK-6A completes.
+**Dispatch status:** TTS-7P is dispatch-ready now. EINK-6A resumes after TTS-7P.
 
 ---
 
@@ -46,6 +45,7 @@ Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully sp
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-7O | 2026-04-05 | PASS | Audible pause injection & smooth narration cursor. BUG-138/139 resolved — classifyChunkBoundary + silence injection at chunk edges, 3-word narration window, CSS transitions for smooth cursor, truth-sync every 12 words. 27 new tests (1,418 total). v1.34.0. |
 | TTS-7N | 2026-04-05 | PASS | Kokoro pause semantics & settings link repair. BUG-136/137 resolved — pause config drives word-weight scaling and sentence-boundary chunk snapping, Ctrl+K TTS links repaired to "tts" page. 19 new tests (1,391 total). v1.33.9. **TTS stabilization lane FULLY CLOSED.** |
 | TTS-7M | 2026-04-05 | PASS | Persistent resume-anchor & reopen authority. BUG-135 resolved — resumeAnchorRef replaces time-limited preservePlaybackAnchorUntilRef, captures live cursor on pause, saved position on reopen, consumed on mode start, cleared on explicit selection. Passive onLoad/onRelocate gated. 17 new tests (1,372 total). v1.33.8. |
 | TTS-7N | — | READY | Kokoro pause semantics & settings link repair. BUG-136/137 open — TTS pause sliders/dialogue threshold must materially affect Kokoro narration, and Ctrl+K TTS settings links must route to `tts`. |

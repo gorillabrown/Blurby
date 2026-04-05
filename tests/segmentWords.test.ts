@@ -7,8 +7,8 @@ describe("segmentWords", () => {
   });
   it("handles punctuation-attached words", () => {
     const words = segmentWords("Hello, world! How's it going?");
-    expect(words).toContain("Hello");
-    expect(words).toContain("world");
+    expect(words).toContain("Hello,");
+    expect(words).toContain("world!");
   });
   it("handles multiple spaces and newlines", () => {
     expect(segmentWords("a  b\n\nc")).toEqual(["a", "b", "c"]);

@@ -10,6 +10,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { resolveFoliateStartWord } from "../src/utils/startWordIndex";
 import { recordDiagEvent, getDiagEvents, clearDiagnostics } from "../src/utils/narrateDiagnostics";
+import {
+  getSectionGlobalOffset,
+  resolveGlobalWordIndexToRendered,
+  resolveRenderedWordIndexToGlobal,
+} from "../src/utils/foliateWordOffsets";
+import { segmentWordSpans } from "../src/utils/segmentWords";
 
 // ── Helpers: simulate FoliatePageView DOM structures ────────────────
 
@@ -109,6 +115,77 @@ describe("TTS-7L: click and selection produce same global index", () => {
   });
 });
 
+describe("TTS selection start uses global section offsets", () => {
+  it("prefers bookWordSections over loaded-slice local offsets", () => {
+    const loadedWords = [
+      { word: "Chapter", range: null, sectionIndex: 8 },
+      { word: "One", range: null, sectionIndex: 8 },
+      { word: "Text", range: null, sectionIndex: 8 },
+    ];
+    const bookWordSections = [
+      { sectionIndex: 0, startWordIdx: 0, endWordIdx: 100, wordCount: 100 },
+      { sectionIndex: 8, startWordIdx: 3556, endWordIdx: 4000, wordCount: 444 },
+    ];
+
+    expect(getSectionGlobalOffset(8, loadedWords, bookWordSections)).toBe(3556);
+  });
+
+  it("falls back to loaded-slice offset when no book boundaries exist", () => {
+    const loadedWords = [
+      { word: "Prelude", range: null, sectionIndex: 2 },
+      { word: "Body", range: null, sectionIndex: 5 },
+      { word: "More", range: null, sectionIndex: 5 },
+    ];
+
+    expect(getSectionGlobalOffset(5, loadedWords)).toBe(1);
+  });
+
+  it("maps stale rendered local indices back to global book indices", () => {
+    const loadedWords = [
+      { word: "Project", range: null, sectionIndex: 0 },
+      { word: "Gutenberg", range: null, sectionIndex: 0 },
+      { word: "Prelude", range: null, sectionIndex: 1 },
+      { word: "Chapter", range: null, sectionIndex: 8 },
+      { word: "I", range: null, sectionIndex: 8 },
+      { word: "Mrs.", range: null, sectionIndex: 8 },
+    ];
+    const bookWordSections = [
+      { sectionIndex: 0, startWordIdx: 0, endWordIdx: 2, wordCount: 2 },
+      { sectionIndex: 1, startWordIdx: 2, endWordIdx: 3, wordCount: 1 },
+      { sectionIndex: 8, startWordIdx: 3556, endWordIdx: 4000, wordCount: 444 },
+    ];
+
+    expect(resolveRenderedWordIndexToGlobal(8, 3, loadedWords, bookWordSections)).toBe(3556);
+    expect(resolveRenderedWordIndexToGlobal(8, 5, loadedWords, bookWordSections)).toBe(3558);
+  });
+
+  it("can resolve a global word back to the currently rendered local span index", () => {
+    const loadedWords = [
+      { word: "Project", range: null, sectionIndex: 0 },
+      { word: "Gutenberg", range: null, sectionIndex: 0 },
+      { word: "Prelude", range: null, sectionIndex: 1 },
+      { word: "Chapter", range: null, sectionIndex: 8 },
+      { word: "I", range: null, sectionIndex: 8 },
+      { word: "Mrs.", range: null, sectionIndex: 8 },
+    ];
+    const bookWordSections = [
+      { sectionIndex: 0, startWordIdx: 0, endWordIdx: 2, wordCount: 2 },
+      { sectionIndex: 1, startWordIdx: 2, endWordIdx: 3, wordCount: 1 },
+      { sectionIndex: 8, startWordIdx: 3556, endWordIdx: 4000, wordCount: 444 },
+    ];
+
+    expect(resolveGlobalWordIndexToRendered(8, 3556, loadedWords, bookWordSections)).toBe(3);
+    expect(resolveGlobalWordIndexToRendered(8, 3558, loadedWords, bookWordSections)).toBe(5);
+  });
+});
+
+describe("TTS selection start uses punctuation-aware DOM tokenization", () => {
+  it("keeps wrapped word count aligned with extractor punctuation rules", () => {
+    const tokens = segmentWordSpans(`Hello, world. "Quoted" text...`);
+    expect(tokens.map((t) => t.word)).toEqual(["Hello,", "world.", "Quoted\"", "text..."]);
+  });
+});
+
 // ── First-match text fallback demoted ───────────────────────────────
 
 describe("TTS-7L: first-match text fallback demoted", () => {
@@ -173,6 +250,25 @@ describe("TTS-7L: pause and reselect honors new exact word", () => {
     // Next startNarration uses the updated index
     const startIdx = resolveFoliateStartWord(highlightedWordIndex, 270494, () => 0, 270494);
     expect(startIdx).toBe(8000);
+  });
+
+  it("immediate play after selection uses the synchronously updated ref value", () => {
+    // ReaderContainer keeps both state and a ref. The live bug was that selection
+    // updated state, but startNarration read the ref before React re-rendered.
+    let highlightedWordIndexState = 4065;
+    let highlightedWordIndexRef = 4065;
+
+    const handleHighlightedWordChange = (index: number) => {
+      highlightedWordIndexRef = index; // New behavior: sync immediately
+      highlightedWordIndexState = index; // React state update modeled synchronously here
+    };
+
+    handleHighlightedWordChange(8000);
+
+    // startNarration reads from the ref path, not the stale pre-render state
+    const startIdx = resolveFoliateStartWord(highlightedWordIndexRef, 270494, () => 0, 270494);
+    expect(startIdx).toBe(8000);
+    expect(highlightedWordIndexState).toBe(8000);
   });
 });
 

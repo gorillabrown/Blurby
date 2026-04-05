@@ -14,31 +14,40 @@
 | **2** | **EPUB Conversion Pipeline** | Single canonical format, single rendering path | Phase 1 | 2–3 |
 | **3** | **Flow Mode Redesign** | Infinite scroll reader with reading zone + WPM timer cursor | Phase 2 | 2 |
 | **4** | **Blurby Readings** | Library evolution — TTS cache opt-in, reading queue, EPUB intake | Phases 2, 3 | 2–3 |
-| **5** | **Read Later + Blurby News** | Chrome extension clip-to-library, RSS feeds (~12 sources), Read Now / Read Later | Phase 4 | 3–4 |
-| **6** | **Cloud Sync Hardening** | Cross-device sync for settings, progress, queue, RSS state | Phase 4 | 2 |
-| **7** | **APK Wrapper** | React Native shell with cloud sync bridge | Phase 6 | 4–6 |
+| **5** | **Read Later + Chrome Extension** | Chrome extension clip-to-library, pairing UX | Phase 4 | 2 |
+| **6** | **TTS Hardening & Stabilization** | Kokoro narration infrastructure, cache correctness, cursor contract, throughput | Phase 5 | 20+ (TTS-6C–6S, TTS-7A–7D) |
+| **7** | **Cloud Sync Hardening** | Cross-device sync for settings, progress, queue, RSS state | Phase 6 | 2 |
+| **8** | **RSS/News Feeds** | RSS sources, Read Now / Read Later | Phase 7 | 2–3 |
+| **9** | **APK Wrapper** | React Native shell with cloud sync bridge | Phase 7 | 4–6 |
 
 ```
-Phase 1: Stabilization
+Phase 1: Stabilization ── COMPLETE (v1.4.14)
     │
     ▼
-Phase 2: EPUB Pipeline ──────────── foundation for all downstream
+Phase 2: EPUB Pipeline ── COMPLETE (v1.5.1)
     │
     ├────────────────┐
     ▼                ▼
 Phase 3:         Phase 4:
 Flow Mode        Blurby Readings
-Redesign         (queue, cache, intake)
+── COMPLETE      ── COMPLETE
     │                │
     └───────┬────────┘
             ▼
-    Phase 5: Read Later + News
+    Phase 5: Read Later + Chrome Extension ── COMPLETE
             │
             ▼
-    Phase 6: Cloud Sync Hardening
+    Phase 6: TTS Hardening & Stabilization ── IN PROGRESS (TTS-7 lane)
+      ├── E-ink, Goals deferred post-stabilization
             │
-            ▼
-    Phase 7: APK Wrapper
+            ├────────────────────────┐
+            ▼                        ▼
+    Phase 7:                  Phase 8:
+    Cloud Sync Hardening      RSS/News Feeds
+            │                        │
+            └────────────┬───────────┘
+                         ▼
+            Phase 9: APK Wrapper (+modularization)
 ```
 
 ---
@@ -224,7 +233,7 @@ Redesign         (queue, cache, intake)
 
 ---
 
-## Phase 6 — Cloud Sync Hardening (Path A)
+## Phase 7 — Cloud Sync Hardening (Path A)
 
 **Goal:** Cross-device sync covers all state introduced in Phases 1–5, using existing OneDrive/Google Drive infrastructure.
 
@@ -255,7 +264,7 @@ Redesign         (queue, cache, intake)
 
 ---
 
-## Phase 7 — APK Wrapper
+## Phase 9 — APK Wrapper
 
 > **Prerequisite — Modularization (3P audit finding):** The current implementation is deeply coupled to Electron main-process facilities. The Kokoro worker uses Node-specific module resolution hacks (`main/tts-worker.js` L5–L37). Auth depends on Electron's BrowserWindow (`main/auth.js` L294–L304). Sync is main-process-driven. Without an explicit modularization sub-phase to extract a platform-independent core, the "shared" column below is aspirational. **Estimate: +2 sprints for modularization before APK wrapper work begins.** This phase should be treated as a separate productization program, not "the next step after sync hardening."
 

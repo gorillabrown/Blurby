@@ -3719,6 +3719,18 @@ button:focus-visible {
   color: inherit;
   padding: 1px 2px;
   border-radius: 2px;
+  /* TTS-7O: Smooth glide transition for narration cursor motion */
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+/* TTS-7O: 3-word narration context window — subtler highlight for words N+1 and N+2 */
+.page-word--narration-context {
+  background: var(--accent-faded);
+  color: inherit;
+  padding: 1px 2px;
+  border-radius: 2px;
+  opacity: 0.6;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
 }
 
 /* Flow mode cursor for EPUB words (foliate shadow DOM) — underline on word spans */

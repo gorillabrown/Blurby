@@ -94,6 +94,8 @@ export const TTS_COLD_START_CHUNK_WORDS = 13;
 export const TTS_CRUISE_CHUNK_WORDS = 148;
 /** Crossfade overlap at chunk boundaries — eliminates splice artifacts (ms) */
 export const TTS_CROSSFADE_MS = 8;
+/** TTS-7O: Cursor truth-sync interval — re-snap visual cursor to scheduler position every N words */
+export const TTS_CURSOR_TRUTH_SYNC_INTERVAL = 12;
 /** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
 export const TTS_FORWARD_WORDS = 300;
 

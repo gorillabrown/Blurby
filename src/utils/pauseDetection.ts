@@ -149,3 +149,42 @@ export function getChunkBoundaryPauseMs(
 
   return 0;
 }
+
+/** TTS-7O: Boundary classification type for chunk edges */
+export type ChunkBoundaryType = "comma" | "clause" | "sentence" | "paragraph" | "none";
+
+/**
+ * TTS-7O: Classify the type of boundary at a given chunk end index.
+ * Used by the generation pipeline to determine how much silence to inject
+ * between Kokoro audio chunks.
+ *
+ * @param words Full word array
+ * @param endIdx Index of the last word in the chunk (inclusive)
+ * @returns Classification of the boundary type
+ */
+export function classifyChunkBoundary(words: string[], endIdx: number): ChunkBoundaryType {
+  if (endIdx < 0 || endIdx >= words.length) return "none";
+
+  const word = words[endIdx];
+  const nextWord = endIdx + 1 < words.length ? words[endIdx + 1] : undefined;
+
+  // Check for paragraph break — next word starts a new paragraph (heuristic:
+  // sentence ending followed by a word that starts with uppercase after whitespace)
+  // For now, classify as sentence if it's a sentence end; paragraph detection
+  // requires paragraph break data which the pipeline doesn't carry per-word.
+  // Callers with paragraph break info can override.
+
+  // Sentence ending (. ! ?)
+  if (isSentenceEnd(word, nextWord)) return "sentence";
+
+  // Clause punctuation (colon, closing parenthesis)
+  const quotesStripped = stripQuotesOnly(word);
+  if (/\)$/.test(quotesStripped)) return "clause";
+  if (/:$/.test(quotesStripped)) return "clause";
+
+  // Comma/semicolon
+  const stripped = stripTrailingQuotes(word);
+  if (/[,;]$/.test(stripped)) return "comma";
+
+  return "none";
+}

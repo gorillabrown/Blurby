@@ -147,6 +147,8 @@ export default function useNarration() {
           clauseWeightFactor: cfg.clauseMs > 0 ? 1 + (BASE_CLAUSE - 1) * (cfg.clauseMs / DEFAULT_CLAUSE_MS) : 1.0,
         };
       },
+      // TTS-7O: Pass pause config for silence injection at chunk boundaries
+      getPauseConfig: () => pauseConfigRef.current,
       onFallbackToWeb: () => {
         // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
         kokoroStrategyRef.current?.stop();

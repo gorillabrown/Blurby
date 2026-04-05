@@ -32,6 +32,8 @@ export interface KokoroStrategyDeps {
   getPronunciationOverrides?: () => PronunciationOverride[];
   /** TTS-7N: Get word-weight config derived from pause settings */
   getWeightConfig?: () => import("../../utils/audioScheduler").WordWeightConfig | undefined;
+  /** TTS-7O: Get current pause config for silence injection at chunk boundaries */
+  getPauseConfig?: () => import("../../utils/pauseDetection").PauseConfig | undefined;
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
 }
@@ -79,6 +81,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getVoiceId: deps.getVoiceId,
     getSpeed: () => getBucket(),
     getWeightConfig: deps.getWeightConfig,
+    getPauseConfig: deps.getPauseConfig,
     onChunkReady: (chunk) => {
       // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
       const isFirst = !firstChunkReceived;
@@ -155,6 +158,8 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
         onChunkBoundary: () => {},
         onEnd,
         onError: () => deps.onFallbackToWeb(),
+        // TTS-7O: Truth-sync forces highlight to re-snap to scheduler's authoritative position
+        onTruthSync: (wordIndex: number) => onWordAdvance(wordIndex),
       });
 
       // Start pipeline FIRST so chunks begin generating before timer could start.

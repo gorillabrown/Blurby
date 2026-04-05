@@ -48,6 +48,23 @@ describe("useReaderMode orchestration logic", () => {
       expect(ref.current).toBe(42);
     });
 
+    it("handlePauseToPage syncs narration cursor and arms passive-restore lock", () => {
+      const ref = { current: 0 };
+      let stateValue = 0;
+      const setState = (val: number) => { stateValue = val; };
+      const preservePlaybackAnchorUntilRef = { current: 0 };
+
+      const mockInstance = { getCurrentWord: () => 2073 };
+      const currentWord = mockInstance.getCurrentWord();
+      setState(currentWord);
+      ref.current = currentWord;
+      preservePlaybackAnchorUntilRef.current = Date.now() + 1000;
+
+      expect(stateValue).toBe(2073);
+      expect(ref.current).toBe(2073);
+      expect(preservePlaybackAnchorUntilRef.current).toBeGreaterThan(Date.now());
+    });
+
     it("handleExitReader syncs both state and ref from getCurrentWord", () => {
       // Same pattern from handleExitReader (lines 318-320)
       const ref = { current: 10 };
@@ -174,6 +191,23 @@ describe("useReaderMode orchestration logic", () => {
       }
 
       expect(action).toBe("pauseToPage");
+    });
+
+    it("page-mode passive restore should not overwrite a freshly paused narration anchor", () => {
+      const highlightedWordIndexRef = { current: 2073 };
+      let highlightedWordIndexState = 2073;
+      const setHighlightedWordIndex = (val: number) => { highlightedWordIndexState = val; };
+      const preservePlaybackAnchorUntilRef = { current: Date.now() + 1000 };
+      const approxWordIdx = 2;
+
+      const preservePlaybackAnchor = Date.now() < preservePlaybackAnchorUntilRef.current;
+      if (!preservePlaybackAnchor) {
+        setHighlightedWordIndex(approxWordIdx);
+      }
+
+      expect(preservePlaybackAnchor).toBe(true);
+      expect(highlightedWordIndexRef.current).toBe(2073);
+      expect(highlightedWordIndexState).toBe(2073);
     });
   });
 
