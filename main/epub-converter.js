@@ -604,35 +604,22 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
   $("script, style, nav, header, footer, aside, link, meta, iframe, form").remove();
 
   // Extract and rewrite images
-  const images = [];
-  let imgIdx = 0;
-  $("img").each((_, el) => {
-    const src = $(el).attr("src");
-    if (!src) return;
+  // When preDownloadedImages are supplied (article import path), use them directly
+  // and skip the standard img-processing loop
+  const images = meta.preDownloadedImages || [];
+  let imgIdx = images.length;
 
-    // Handle base64 data URIs
-    const dataMatch = src.match(/^data:image\/(jpeg|png|gif|svg\+xml);base64,(.+)$/i);
-    if (dataMatch) {
-      const ext = dataMatch[1] === "svg+xml" ? ".svg" : `.${dataMatch[1]}`;
-      const filename = `img_${imgIdx}${ext}`;
-      const buffer = Buffer.from(dataMatch[2], "base64");
-      images.push({
-        id: `img_${imgIdx}`,
-        filename,
-        buffer,
-        mediaType: imageMediaType(ext),
-      });
-      $(el).attr("src", `../Images/${filename}`);
-      imgIdx++;
-    }
-    // For file:// or relative paths, try to load from disk
-    else if (!src.startsWith("http://") && !src.startsWith("https://")) {
-      try {
-        const imgPath = path.resolve(path.dirname(inputPath), src);
-        const ext = path.extname(imgPath).toLowerCase() || ".jpg";
+  if (!meta.preDownloadedImages) {
+    $("img").each((_, el) => {
+      const src = $(el).attr("src");
+      if (!src) return;
+
+      // Handle base64 data URIs
+      const dataMatch = src.match(/^data:image\/(jpeg|png|gif|svg\+xml);base64,(.+)$/i);
+      if (dataMatch) {
+        const ext = dataMatch[1] === "svg+xml" ? ".svg" : `.${dataMatch[1]}`;
         const filename = `img_${imgIdx}${ext}`;
-        // Synchronous read — images are small and this runs in main process during import
-        const buffer = require("fs").readFileSync(imgPath);
+        const buffer = Buffer.from(dataMatch[2], "base64");
         images.push({
           id: `img_${imgIdx}`,
           filename,
@@ -641,15 +628,33 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
         });
         $(el).attr("src", `../Images/${filename}`);
         imgIdx++;
-      } catch {
-        // Image not found — remove the broken img tag
+      }
+      // For file:// or relative paths, try to load from disk
+      else if (!src.startsWith("http://") && !src.startsWith("https://")) {
+        try {
+          const imgPath = path.resolve(path.dirname(inputPath), src);
+          const ext = path.extname(imgPath).toLowerCase() || ".jpg";
+          const filename = `img_${imgIdx}${ext}`;
+          // Synchronous read — images are small and this runs in main process during import
+          const buffer = require("fs").readFileSync(imgPath);
+          images.push({
+            id: `img_${imgIdx}`,
+            filename,
+            buffer,
+            mediaType: imageMediaType(ext),
+          });
+          $(el).attr("src", `../Images/${filename}`);
+          imgIdx++;
+        } catch {
+          // Image not found — remove the broken img tag
+          $(el).remove();
+        }
+      } else {
+        // Remote URLs — remove (cannot embed without downloading)
         $(el).remove();
       }
-    } else {
-      // Remote URLs — remove (can't embed without downloading)
-      $(el).remove();
-    }
-  });
+    });
+  }
 
   // Remove all non-content attributes except href, src, alt
   $("*").each((_, el) => {

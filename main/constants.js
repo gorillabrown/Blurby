@@ -136,6 +136,16 @@ const MAIN_WINDOW_MIN_HEIGHT = 500;
 /** Words per page estimate for reading log export */
 const READING_LOG_WORDS_PER_PAGE = 250;
 
+// ── Article Image Capture ──────────────────────────────────────────────
+/** Maximum number of inline images to download per article import */
+const ARTICLE_MAX_INLINE_IMAGES = 20;
+/** Timeout for each individual article image download (ms) */
+const ARTICLE_IMAGE_TIMEOUT_MS = 10000;
+/** Minimum image dimensions to accept as meaningful content (px) */
+const ARTICLE_IMAGE_MIN_SIZE = 200;
+/** URL path patterns that indicate junk images (logos, icons, etc.) */
+const ARTICLE_JUNK_IMAGE_PATTERNS = ["logo", "avatar", "icon", "sprite", "badge", "button", "tracking", "pixel", "spacer", "blank", "1x1"];
+
 module.exports = {
   // Sync
   TOMBSTONE_TTL_MS,
@@ -204,4 +214,9 @@ module.exports = {
   MAIN_WINDOW_MIN_HEIGHT,
   // Reading Log
   READING_LOG_WORDS_PER_PAGE,
+  // Article Image Capture
+  ARTICLE_MAX_INLINE_IMAGES,
+  ARTICLE_IMAGE_TIMEOUT_MS,
+  ARTICLE_IMAGE_MIN_SIZE,
+  ARTICLE_JUNK_IMAGE_PATTERNS,
 };

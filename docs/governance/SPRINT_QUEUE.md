@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (`TTS-7O`, `TTS-7P`, `EINK-6A`, `EINK-6B`, `GOALS-6B`)
+**Full specs:** `ROADMAP.md` (`TTS-7O`, `TTS-7P`, `EXT-5C`, `EINK-6A`, `EINK-6B`, `GOALS-6B`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2
+Queue depth: 3
 Next sprint: TTS-7P (Rolling Pause-Boundary Planner)
-Health: YELLOW — depth below 3. Backfill needed before resuming execution.
+Health: GREEN — queue backfilled to 3. TTS follow-up remains active, article fidelity sprint queued next.
 ```
 
 ---
@@ -22,11 +22,12 @@ Health: YELLOW — depth below 3. Backfill needed before resuming execution.
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
 | 1 | TTS-7P | v1.35.0 | `sprint/tts-7p-rolling-pause-planner` | Full | BUG-140 | **FULLY SPEC'D.** Rolling pause-boundary planner for the active text window. Planner becomes the single authority for chunk endings and drives silence insertion, resume/retarget behavior, and dialogue handling without whole-book precomputation. 9 tasks, 11 success criteria. Depends on TTS-7O (now complete). |
-| 2 | EINK-6A | v1.36.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
+| 2 | EXT-5C | v1.36.0 | `sprint/ext-5c-rich-article-capture` | Full | BUG-141/142 | **FULLY SPEC'D.** Preserve rich article formatting and inline images for URL/extension imports, download/rewrite article assets into EPUB, and promote the hero image onto reading cards. 10 tasks, 13 success criteria. |
+| 3 | EINK-6A | v1.37.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
 
 **Agent staging rule:** TTS, EINK, and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
-**Dispatch status:** TTS-7P is dispatch-ready now. EINK-6A resumes after TTS-7P.
+**Dispatch status:** TTS-7P is dispatch-ready now. EXT-5C follows TTS-7P. EINK-6A resumes after EXT-5C.
 
 ---
 
@@ -48,7 +49,6 @@ Health: YELLOW — depth below 3. Backfill needed before resuming execution.
 | TTS-7O | 2026-04-05 | PASS | Audible pause injection & smooth narration cursor. BUG-138/139 resolved — classifyChunkBoundary + silence injection at chunk edges, 3-word narration window, CSS transitions for smooth cursor, truth-sync every 12 words. 27 new tests (1,418 total). v1.34.0. |
 | TTS-7N | 2026-04-05 | PASS | Kokoro pause semantics & settings link repair. BUG-136/137 resolved — pause config drives word-weight scaling and sentence-boundary chunk snapping, Ctrl+K TTS links repaired to "tts" page. 19 new tests (1,391 total). v1.33.9. **TTS stabilization lane FULLY CLOSED.** |
 | TTS-7M | 2026-04-05 | PASS | Persistent resume-anchor & reopen authority. BUG-135 resolved — resumeAnchorRef replaces time-limited preservePlaybackAnchorUntilRef, captures live cursor on pause, saved position on reopen, consumed on mode start, cleared on explicit selection. Passive onLoad/onRelocate gated. 17 new tests (1,372 total). v1.33.8. |
-| TTS-7N | — | READY | Kokoro pause semantics & settings link repair. BUG-136/137 open — TTS pause sliders/dialogue threshold must materially affect Kokoro narration, and Ctrl+K TTS settings links must route to `tts`. |
 | TTS-7L | 2026-04-05 | PASS | Exact Foliate text-selection mapping. BUG-134 resolved — selectionchange resolves exact .page-word span with data-word-index, unified click/selection payload, first-match text fallback demoted. 15 new tests (1,343 total). v1.33.7. **TTS stabilization lane FULLY CLOSED.** |
 | TTS-7K | 2026-04-05 | PASS* | EPUB global word-source promotion & page-mode isolation. BUG-131/132/133 resolved — full-book words promoted as source of truth, global index validation for start-word, onWordsReextracted source protection, page-mode isolated from section-boundary effect. 22 new tests (1,331 total). v1.33.6. Follow-up required via TTS-7L for exact Foliate text-selection mapping. |
 | TTS-7J | 2026-04-04 | PASS* | Foliate section-sync ownership, word-source dedupe & initial selection protection. BUG-128/129/130 resolved — single narration section-sync owner (miss-recovery only), sectionIndex-based word dedupe, userExplicitSelectionRef guards onLoad restore, unified start-word policy via resolveFoliateStartWord. Follow-up required via TTS-7K for full-book word-source promotion and page-mode isolation. 14 new tests (1,309 total). v1.33.5. |

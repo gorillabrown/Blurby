@@ -2,6 +2,7 @@
 // CommonJS only — Electron main process
 
 const { BrowserWindow, session } = require("electron");
+const { ARTICLE_MAX_INLINE_IMAGES, ARTICLE_IMAGE_MIN_SIZE, ARTICLE_JUNK_IMAGE_PATTERNS } = require("./constants");
 const fsPromises = require("fs/promises");
 const path = require("path");
 
@@ -10,6 +11,9 @@ let _Readability, _JSDOM, _PDFDocument;
 function getReadability() { if (!_Readability) { _Readability = require("@mozilla/readability").Readability; } return _Readability; }
 function getJSDOM() { if (!_JSDOM) { _JSDOM = require("jsdom").JSDOM; } return _JSDOM; }
 function getPDFDocument() { if (!_PDFDocument) { _PDFDocument = require("pdfkit"); } return _PDFDocument; }
+
+let _cheerio;
+function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
 
 function sanitizeFilenameForPdf(name) {
   return (name || "")
@@ -373,6 +377,119 @@ function titleCaseHostname(hostname) {
     .join(".");
 }
 
+/**
+ * Check if an image URL matches common junk patterns (logos, icons, tracking pixels, etc.)
+ */
+function isJunkImageUrl(urlStr) {
+  if (!urlStr) return true;
+  const lower = urlStr.toLowerCase();
+  return ARTICLE_JUNK_IMAGE_PATTERNS.some((pat) => lower.includes(pat));
+}
+
+/**
+ * Collect article asset manifest from cleaned article HTML.
+ * Finds all <img> elements, resolves URLs, dedupes, and associates captions.
+ *
+ * @param {string} contentHtml - Cleaned article HTML from Readability
+ * @param {string} baseUrl - Base URL for resolving relative image paths
+ * @returns {{ images: Array<{src: string, alt: string, caption: string|null, resolvedUrl: string}> }}
+ */
+function collectArticleAssets(contentHtml, baseUrl) {
+  if (!contentHtml) return { images: [] };
+  const $ = getCheerio().load(contentHtml);
+  const seen = new Set();
+  const images = [];
+
+  $("img").each((_, el) => {
+    const src = $(el).attr("src");
+    if (!src) return;
+
+    let resolvedUrl;
+    try {
+      resolvedUrl = new URL(src, baseUrl).href;
+    } catch {
+      resolvedUrl = src;
+    }
+
+    // Skip data URIs (already embedded) and duplicates
+    if (resolvedUrl.startsWith("data:")) return;
+    if (seen.has(resolvedUrl)) return;
+    seen.add(resolvedUrl);
+
+    // Check for caption from parent <figure>
+    let caption = null;
+    const parent = $(el).closest("figure");
+    if (parent.length) {
+      const figcaption = parent.find("figcaption").first();
+      if (figcaption.length) {
+        caption = figcaption.text().trim() || null;
+      }
+    }
+
+    images.push({
+      src,
+      alt: $(el).attr("alt") || "",
+      caption,
+      resolvedUrl,
+    });
+  });
+
+  return { images: images.slice(0, ARTICLE_MAX_INLINE_IMAGES) };
+}
+
+/**
+ * Rank hero image candidates with article-aware heuristics.
+ * Prefers real article lead images over logos/tiny thumbnails.
+ *
+ * @param {string|null} metadataImageUrl - og:image or similar from metadata
+ * @param {Array<{resolvedUrl: string}>} articleImages - from collectArticleAssets
+ * @param {object} parsedDoc - JSDOM document for fallback queries
+ * @param {string} url - page URL for resolving relative paths
+ * @returns {string|null} Best hero image URL
+ */
+function rankHeroImage(metadataImageUrl, articleImages, parsedDoc, url) {
+  // Filter article images: reject junk URLs
+  const validArticleImages = (articleImages || []).filter(
+    (img) => !isJunkImageUrl(img.resolvedUrl)
+  );
+
+  // Strategy 1: If metadata image is also in the article body, it is a strong hero
+  if (metadataImageUrl && !isJunkImageUrl(metadataImageUrl)) {
+    const metaNorm = metadataImageUrl.toLowerCase();
+    const inBody = validArticleImages.some(
+      (img) => img.resolvedUrl.toLowerCase() === metaNorm
+    );
+    if (inBody) return metadataImageUrl;
+  }
+
+  // Strategy 2: First non-junk article image near the top (first 3)
+  const topImages = validArticleImages.slice(0, 3);
+  if (topImages.length > 0) {
+    return topImages[0].resolvedUrl;
+  }
+
+  // Strategy 3: Metadata image as fallback (even if not in body)
+  if (metadataImageUrl && !isJunkImageUrl(metadataImageUrl)) {
+    return metadataImageUrl;
+  }
+
+  // Strategy 4: First large <img> in article body from DOM
+  const articleEl = parsedDoc.querySelector("article, [role='main'], .article-body, [data-testid='article-body']");
+  if (articleEl) {
+    for (const img of articleEl.querySelectorAll("img[src]")) {
+      const w = parseInt(img.getAttribute("width") || "0", 10);
+      const naturalW = parseInt(img.getAttribute("naturalWidth") || "0", 10);
+      if ((w >= 400 || naturalW >= 400) && img.getAttribute("src")) {
+        let src = img.getAttribute("src");
+        try { src = new URL(src, url).href; } catch { /* keep as-is */ }
+        if (!isJunkImageUrl(src)) return src;
+      }
+    }
+  }
+
+  return null;
+}
+
 function extractArticleFromHtml(html, url) {
   const dom = new (getJSDOM())(html, { url });
   const parsedDoc = dom.window.document;
@@ -638,41 +755,27 @@ function extractArticleFromHtml(html, url) {
     title = ogTitle?.getAttribute("content") || metaTitle?.textContent || new URL(url).hostname;
   }
 
-  // ── Lead image cascade ────────────────────────────────────────────────────
-  // og:image (highest priority for social sharing contexts)
-  if (!imageUrl) {
+  // ── Collect article assets ──────────────────────────────────────────────
+  const articleAssets = collectArticleAssets(contentHtml, url);
+
+  // ── Lead image cascade (improved with article-aware hero ranking) ──────
+  // Gather metadata image candidates
+  let metadataImageUrl = imageUrl; // from JSON-LD / preloadedData
+  if (!metadataImageUrl) {
     const ogImage = parsedDoc.querySelector('meta[property="og:image"]');
-    if (ogImage?.getAttribute("content")) imageUrl = ogImage.getAttribute("content");
+    if (ogImage?.getAttribute("content")) metadataImageUrl = ogImage.getAttribute("content");
   }
-  // og:image:secure_url
-  if (!imageUrl) {
+  if (!metadataImageUrl) {
     const ogSecure = parsedDoc.querySelector('meta[property="og:image:secure_url"]');
-    if (ogSecure?.getAttribute("content")) imageUrl = ogSecure.getAttribute("content");
+    if (ogSecure?.getAttribute("content")) metadataImageUrl = ogSecure.getAttribute("content");
   }
-  // twitter:image
-  if (!imageUrl) {
+  if (!metadataImageUrl) {
     const twitterImage = parsedDoc.querySelector('meta[name="twitter:image"]');
-    if (twitterImage?.getAttribute("content")) imageUrl = twitterImage.getAttribute("content");
+    if (twitterImage?.getAttribute("content")) metadataImageUrl = twitterImage.getAttribute("content");
   }
-  // JSON-LD image already handled above
-  // preloadedData image already handled above
-  // First <img> in article body with width >= 400px (attribute-based, no decode needed)
-  if (!imageUrl) {
-    const articleEl = parsedDoc.querySelector("article, [role='main'], .article-body, [data-testid='article-body']");
-    if (articleEl) {
-      for (const img of articleEl.querySelectorAll("img[src]")) {
-        const w = parseInt(img.getAttribute("width") || "0", 10);
-        const naturalW = parseInt(img.getAttribute("naturalWidth") || "0", 10);
-        if ((w >= 400 || naturalW >= 400) && img.getAttribute("src")) {
-          let src = img.getAttribute("src");
-          // Resolve relative URLs
-          try { src = new URL(src, url).href; } catch { /* keep as-is */ }
-          imageUrl = src;
-          break;
-        }
-      }
-    }
-  }
+
+  // Use article-aware hero ranking
+  imageUrl = rankHeroImage(metadataImageUrl, articleAssets.images, parsedDoc, url);
 
   // Clean up common noise
   content = content
@@ -691,7 +794,7 @@ function extractArticleFromHtml(html, url) {
     contentHtml = content.split(/\n\n+/).map(p => `<p>${p.trim()}</p>`).join("\n");
   }
 
-  return { title, content, contentHtml: contentHtml || null, imageUrl, author: author || null, sourceDomain: sourceDomain || null, publishedDate: publishedDate || null };
+  return { title, content, contentHtml: contentHtml || null, imageUrl, articleImages: articleAssets.images, author: author || null, sourceDomain: sourceDomain || null, publishedDate: publishedDate || null };
 }
 
 module.exports = {
@@ -707,4 +810,7 @@ module.exports = {
   fetchWithCookies,
   fetchWithBrowser,
   extractArticleFromHtml,
+  collectArticleAssets,
+  isJunkImageUrl,
+  rankHeroImage,
 };
