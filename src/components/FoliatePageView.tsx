@@ -471,19 +471,50 @@ export default function FoliatePageView({
           });
 
           // Also detect double-click word selection (native browser behavior)
+          // TTS-7L (BUG-134): Resolve exact .page-word[data-word-index] span from
+          // the selection, matching the click handler's exact-index contract.
           doc.addEventListener("selectionchange", () => {
             const sel = doc.getSelection();
             if (!sel || sel.isCollapsed || !sel.rangeCount) return;
             const range = sel.getRangeAt(0);
             const word = sel.toString().trim();
             if (!word || word.includes(" ")) return; // Only single words
+
+            // TTS-7L: Find the .page-word span overlapping the selection.
+            // The selection's anchorNode is inside (or is) the word span.
+            const anchorEl = sel.anchorNode?.nodeType === Node.TEXT_NODE
+              ? sel.anchorNode.parentElement
+              : sel.anchorNode as Element | null;
+            const wordSpan = anchorEl?.closest?.("[data-word-index]") as HTMLElement | null;
+
             const v = viewRef.current;
             if (v) {
               const contents = v.renderer.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match) {
                 const cfi = v.getCFI(match.index, range);
-                onWordClick?.(cfi, word);
+
+                if (wordSpan) {
+                  // Exact span found — extract global index, same payload as click
+                  const idx = parseInt(wordSpan.getAttribute("data-word-index") || "", 10);
+                  if (!isNaN(idx)) {
+                    // Highlight the selected span (match click behavior)
+                    doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
+                      el.classList.remove("page-word--highlighted")
+                    );
+                    wordSpan.classList.add("page-word--highlighted");
+
+                    const sectionBase = foliateWordsRef.current.findIndex(w => w.sectionIndex === match.index);
+                    const wordOffsetInSection = sectionBase >= 0 ? idx - sectionBase : 0;
+                    if (import.meta.env.DEV) console.debug("[foliate] selection: exact span found — globalWordIndex:", idx, "word:", word);
+                    onWordClick?.(cfi, word, match.index, wordOffsetInSection, idx);
+                    return;
+                  }
+                }
+
+                // No exact span — selection is on unwrapped text (rare: images, captions).
+                // TTS-7L: Do NOT fall back to raw text. Log and skip.
+                if (import.meta.env.DEV) console.debug("[foliate] selection: no .page-word span found for word:", word, "— skipping (no guessy fallback)");
               }
             }
           });

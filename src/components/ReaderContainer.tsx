@@ -1081,20 +1081,17 @@ export default function ReaderContainer({
         // During pause, this silently sets the restart position.
         // During non-narration modes, handleHighlightedWordChange just sets state.
         if (globalWordIndex !== undefined && globalWordIndex >= 0) {
+          if (import.meta.env.DEV) console.debug("[TTS-7L] onWordClick: exact globalWordIndex:", globalWordIndex, "word:", word);
           handleHighlightedWordChange(globalWordIndex);
           return;
         }
-        // Fallback: text search in foliate word array (less precise)
-        const fWords = foliateWordsRef.current;
-        if (fWords.length > 0) {
-          const cleanWord = word.replace(/[^\w]/g, "").toLowerCase();
-          for (let i = 0; i < fWords.length; i++) {
-            if (fWords[i]?.word?.replace(/[^\w]/g, "").toLowerCase() === cleanWord) {
-              handleHighlightedWordChange(i);
-              return;
-            }
-          }
-        }
+        // TTS-7L (BUG-134): Demoted first-text-match fallback. The old path scanned
+        // foliateWordsRef for the first normalized text match, which picked the wrong
+        // occurrence for common/repeated words. Now both click and selection provide
+        // exact globalWordIndex, so this path should rarely fire. Log and skip instead
+        // of silently starting narration from a different word.
+        if (import.meta.env.DEV) console.warn("[TTS-7L] onWordClick: no globalWordIndex for word:", word, "— skipping (no guessy text-match fallback)");
+        recordDiagEvent("selection-validated", `no exact index for "${word}" — fallback refused`);
       }}
       onLoad={() => {
         // Extract words from DOM after each section loads
