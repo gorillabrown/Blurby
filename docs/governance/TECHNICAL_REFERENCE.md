@@ -518,6 +518,30 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 | **Rhythm pause** | Silence inserted between chunks at punctuation/paragraph boundaries (100/150/400/800ms). |
 | **Web Audio API AudioContext** | The browser API used to play Kokoro's raw PCM audio buffers. Supports suspend/resume for pause. |
 
+### Narrate Mode Architecture (Post-Stabilization) — TTS-7D Closeout
+
+**Stabilization scope:** TTS-7A through TTS-7D (4 sprints, 15 bugs resolved: BUG-101 through BUG-115).
+
+**Narration state machine:** `useNarration.ts` uses a `useReducer` state machine with states: `idle`, `warming`, `speaking`, `paused`, `holding`. `stateRef` mirrors reducer state for synchronous reads inside async callbacks (dual-write rule: every `dispatch()` also updates `stateRef.current`).
+
+**Cache identity contract (TTS-7A):** Cache keys are `{bookId}/{voiceId}/{rateBucket}[/{overrideHash}]`. `voiceId` = `settings.ttsVoiceName` (not the deprecated `kokoroVoice`). `overrideHash` included when pronunciation overrides are active. `wordCount` stored in cache manifest at write time — no hardcoded assumptions about chunk size. Background cacher uses identical identity.
+
+**Cursor ownership rules (TTS-7B):**
+- **Playing:** TTS owns the cursor. Every word click (EPUB + non-EPUB) retargets audio via `resyncToCursor()`. `handleHighlightedWordChange` only resyncs when `narration.speaking && !narration.warming`.
+- **Paused:** User owns the cursor. Clicks set `highlightedWordIndex` silently (restart point). `resume()` accepts optional `currentWordIndex` — if it differs from `cursorWordIndex`, resync fires. NarrateMode passes `this.currentWord` on resume.
+- **Browse-away:** `handlePauseToPage` reads `getCurrentPageStart()` when `isBrowsedAway` is true, updating cursor before stopping narration.
+
+**Fallback teardown (TTS-7B):** `onFallbackToWeb` calls `kokoroStrategy.stop()` before switching engine, with a `setTimeout(0)` yield before starting Web Speech. Prevents audio overlap and stale callbacks.
+
+**Pipeline lifecycle (TTS-7B+7C):** `GenerationPipeline` exposes `start/stop/flush/pause/resume/acknowledgeChunk/isActive`. Pause buffers chunks internally (generation continues). Resume flushes buffer. Stop clears all state including backpressure.
+
+**Backpressure model (TTS-7C):** `pendingChunks` counter incremented on `onChunkReady` emission, decremented by `acknowledgeChunk()` (called by kokoroStrategy on scheduler consumption). Pipeline holds emission when `pendingChunks >= TTS_QUEUE_DEPTH` (5). Self-heals when counter drops below threshold.
+
+**Known limitations:**
+- Web Speech rhythm pause controls (commas, sentences, paragraphs, numbers, longer words) do not affect Kokoro playback. UI hidden when Kokoro is active engine.
+- Opus encoding for cache is lossy — audio fidelity is acceptable for TTS but not bit-exact.
+- `Array.from()` removed from cache IPC (Float32Array passed directly), but Electron structured clone behavior may vary across versions.
+
 ---
 
 ## 8. Universal EPUB Pipeline
