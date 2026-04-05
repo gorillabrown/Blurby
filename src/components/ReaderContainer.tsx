@@ -313,6 +313,21 @@ export default function ReaderContainer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.ttsVoiceName, settings.ttsRate]);
 
+  // TTS-7F: Queue entry-coverage for the opened book on reader mount (cruise warm)
+  useEffect(() => {
+    const cacher = backgroundCacherRef.current;
+    if (!cacher) return;
+    const words = wordsRef.current;
+    if (words.length > 0 && settings.ttsEngine === "kokoro" && settings.ttsCacheEnabled !== false) {
+      cacher.queueEntryCoverage({
+        id: activeDoc.id,
+        words,
+        position: activeDoc.position || 0,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDoc.id, settings.ttsEngine]);
+
   // NAR-5: Set active book on the background cacher when text is available
   useEffect(() => {
     const cacher = backgroundCacherRef.current;

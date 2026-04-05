@@ -154,6 +154,25 @@ function getCachedChunks(bookId, voiceId) {
   return Object.keys(entry.chunks).map(Number).sort((a, b) => a - b);
 }
 
+/**
+ * TTS-7F: Get total opening coverage in milliseconds for a book+voice.
+ * Sums durationMs of all chunks starting from index 0 onward in order.
+ * Manifest-only — no PCM loads.
+ */
+function getOpeningCoverageMs(bookId, voiceId) {
+  const key = `${bookId}/${voiceId}`;
+  const entry = manifest.books[key];
+  if (!entry) return 0;
+  // Sum durationMs of all chunks, sorted by startIdx ascending
+  const sortedIndices = Object.keys(entry.chunks).map(Number).sort((a, b) => a - b);
+  let totalMs = 0;
+  for (const idx of sortedIndices) {
+    const chunk = entry.chunks[idx];
+    if (chunk.durationMs) totalMs += chunk.durationMs;
+  }
+  return totalMs;
+}
+
 // ── Eviction ─────────────────────────────────────────────────────────────────
 
 /**
@@ -295,4 +314,5 @@ module.exports = {
   evictBook,
   evictBookVoice,
   getCacheInfo,
+  getOpeningCoverageMs,
 };

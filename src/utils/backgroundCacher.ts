@@ -11,7 +11,7 @@
 //
 // Respects the ttsCacheEnabled setting. When disabled, no background work runs.
 
-import { TTS_CRUISE_CHUNK_WORDS, KOKORO_DEFAULT_RATE_BUCKET, type KokoroRateBucket } from "../constants";
+import { TTS_CRUISE_CHUNK_WORDS, KOKORO_DEFAULT_RATE_BUCKET, ENTRY_COVERAGE_TARGET_MS, type KokoroRateBucket } from "../constants";
 import * as ttsCache from "./ttsCache";
 import { overrideHash } from "./pronunciationOverrides";
 import type { PronunciationOverride } from "../types";
@@ -42,6 +42,9 @@ export interface CacheableBook {
   position: number; // saved word position
 }
 
+/** TTS-7F: Job type for background caching */
+export type CacheJobType = "entry-coverage" | "cruise";
+
 export interface BackgroundCacher {
   /** Set the active book (gets priority 1) */
   setActiveBook: (book: CacheableBook | null) => void;
@@ -49,6 +52,8 @@ export interface BackgroundCacher {
   setReadingNowBooks: (books: CacheableBook[]) => void;
   /** TTS-7A: Update live narration cursor — warm ahead of this position */
   updateCursorPosition: (wordIndex: number) => void;
+  /** TTS-7F: Queue an entry-coverage job (stops at 5-minute target) */
+  queueEntryCoverage: (book: CacheableBook) => void;
   /** Start background caching */
   start: () => void;
   /** Stop all background work */
@@ -65,12 +70,18 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
   let abortController: AbortController | null = null;
   /** TTS-7A: Live narration cursor position (null = not narrating, use persisted) */
   let liveCursorPosition: number | null = null;
+  /** TTS-7F: Entry-coverage job queue (books needing opening 5-min cache) */
+  let entryCoverageQueue: CacheableBook[] = [];
 
   /**
    * Cache a single book from a start position forward, then backfill.
    * Returns when the book is fully cached or aborted.
    */
-  async function cacheBook(book: CacheableBook, signal: AbortSignal): Promise<void> {
+  /**
+   * Cache a single book. If maxDurationMs is provided (entry-coverage job),
+   * stop once that much audio has been generated from the start position.
+   */
+  async function cacheBook(book: CacheableBook, signal: AbortSignal, maxDurationMs?: number): Promise<void> {
     const rawVoiceId = config.getVoiceId();
     const bucket = config.getRateBucket ? config.getRateBucket() : KOKORO_DEFAULT_RATE_BUCKET;
     // TTS-7A: Include pronunciation override hash in cache key (matches kokoroStrategy identity)
@@ -87,8 +98,11 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
 
     // Phase 1: Forward from start position
     let idx = startPosition;
+    let accumulatedDurationMs = 0; // TTS-7F: Track duration for entry-coverage cap
     while (idx < totalWords && !signal.aborted) {
       if (!config.isCacheEnabled()) return;
+      // TTS-7F: Stop entry-coverage jobs once target is reached
+      if (maxDurationMs != null && accumulatedDurationMs >= maxDurationMs) break;
 
       const isCached = await ttsCache.isCached(book.id, cacheVoiceId, idx);
       if (!isCached) {
@@ -105,6 +119,7 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
               ? result.audio : new Float32Array(result.audio);
             const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
             ttsCache.cacheChunk(book.id, cacheVoiceId, idx, audio, result.sampleRate, durationMs, chunkWords.length);
+            accumulatedDurationMs += durationMs;
           }
         } catch {
           if (signal.aborted) return;
@@ -112,6 +127,8 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
       }
       idx += chunkSize;
     }
+    // TTS-7F: Entry-coverage jobs don't backfill — only need opening audio
+    if (maxDurationMs != null) return;
 
     // Phase 2: Backfill from beginning to start position
     idx = 0;
@@ -157,7 +174,13 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
       abortController = abort;
 
       try {
-        // Priority 1: Active book
+        // TTS-7F Priority 0: Entry-coverage jobs (stop at 5-minute target)
+        while (entryCoverageQueue.length > 0 && !abort.signal.aborted) {
+          const job = entryCoverageQueue.shift()!;
+          await cacheBook(job, abort.signal, ENTRY_COVERAGE_TARGET_MS);
+        }
+
+        // Priority 1: Active book (full cruise)
         if (activeBook && !abort.signal.aborted) {
           await cacheBook(activeBook, abort.signal);
         }
@@ -196,6 +219,15 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     liveCursorPosition = wordIndex;
   }
 
+  /** TTS-7F: Queue an entry-coverage job (stops at 5-minute target) */
+  function queueEntryCoverage(book: CacheableBook): void {
+    // Avoid duplicates
+    if (entryCoverageQueue.some(b => b.id === book.id)) return;
+    entryCoverageQueue.push(book);
+    // Preempt current work to process entry jobs first
+    if (abortController) abortController.abort();
+  }
+
   function setReadingNowBooks(books: CacheableBook[]): void {
     readingNowBooks = books;
   }
@@ -224,5 +256,5 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     return cachedChunks.length >= expectedChunkCount;
   }
 
-  return { setActiveBook, setReadingNowBooks, updateCursorPosition, start, stop, isBookFullyCached };
+  return { setActiveBook, setReadingNowBooks, updateCursorPosition, queueEntryCoverage, start, stop, isBookFullyCached };
 }

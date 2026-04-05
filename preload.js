@@ -171,6 +171,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ttsCacheEvictBook: (bookId) => ipcRenderer.invoke("tts-cache-evict-book", bookId),
   ttsCacheEvictVoice: (bookId, voiceId) => ipcRenderer.invoke("tts-cache-evict-voice", bookId, voiceId),
   ttsCacheInfo: () => ipcRenderer.invoke("tts-cache-info"),
+  // TTS-7F: Opening coverage inspection
+  ttsCacheOpeningCoverage: (bookId, voiceId) => ipcRenderer.invoke("tts-cache-opening-coverage", bookId, voiceId),
 
   // Events from main
   onSyncProgress: (callback) => {

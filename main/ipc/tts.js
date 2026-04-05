@@ -154,6 +154,11 @@ function register(ctx) {
   ipcMain.handle("tts-cache-info", () => {
     return ttsCache.getCacheInfo();
   });
+
+  // TTS-7F: Opening coverage inspection (manifest-only, no PCM loads)
+  ipcMain.handle("tts-cache-opening-coverage", (_, bookId, voiceId) => {
+    return { coverageMs: ttsCache.getOpeningCoverageMs(bookId, voiceId) };
+  });
 }
 
 module.exports = { register };
