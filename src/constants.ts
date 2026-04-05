@@ -307,6 +307,8 @@ export const FOLIATE_MIN_ENGAGEMENT_POSITION = 3;
 export const FOCUS_MODE_START_DELAY_MS = 50;
 /** Wait time for an EPUB section to load before retrying narration start (ms) */
 export const FOLIATE_SECTION_LOAD_WAIT_MS = 500;
+/** TTS-7E: Max wait for DOM readiness before narration starts (ms). User spec: ~3s settling delay. */
+export const NARRATION_RENDER_WAIT_MS = 3000;
 /** Interval for polling whether user is browsing away during narration mode (ms) */
 export const FOLIATE_BROWSING_CHECK_INTERVAL_MS = 500;
 

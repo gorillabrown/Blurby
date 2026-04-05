@@ -73,9 +73,14 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getVoiceId: deps.getVoiceId,
     getSpeed: () => getBucket(),
     onChunkReady: (chunk) => {
+      // TTS-7E: Break response handling into microtasks (BUG-117).
+      // Schedule chunk synchronously (scheduler needs it immediately),
+      // then defer acknowledgment to avoid blocking the message handler.
       scheduler.scheduleChunk(chunk);
-      // TTS-7C: Acknowledge chunk consumption to release backpressure (BUG-115)
-      pipeline.acknowledgeChunk();
+      queueMicrotask(() => {
+        // TTS-7C: Acknowledge chunk consumption to release backpressure (BUG-115)
+        pipeline.acknowledgeChunk();
+      });
     },
     onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount) => {
       const bookId = deps.getBookId?.() || "";

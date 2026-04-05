@@ -189,6 +189,8 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
+    // TTS-7E (Task 2): Start from user's last clicked position when available.
+    // highlightedWordIndexRef tracks the user's last click/selection.
     let startIdx = highlightedWordIndexRef.current;
     if (useFoliate && startIdx === 0) {
       const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
@@ -196,6 +198,59 @@ export function useReaderMode({
     }
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
     const pBreaks = getEffectiveParagraphBreaks();
+
+    // TTS-7E (Task 1): Render-readiness gate for foliate EPUBs.
+    // Wait for the target word to appear in DOM before starting narration.
+    // This prevents highlightWordByIndex misses on cold-start books (BUG-116).
+    if (useFoliate && foliateApiRef.current?.highlightWordByIndex) {
+      if (import.meta.env.DEV) performance.mark("narrate:render-gate-start");
+      const gateStart = Date.now();
+      const RENDER_WAIT_MS = 3000; // NARRATION_RENDER_WAIT_MS
+      let navigated = false;
+
+      const checkReady = () => {
+        // Check if we've been cancelled (mode changed away from narration)
+        if (readingModeRef.current !== "narration") return;
+
+        const inDom = foliateApiRef.current?.highlightWordByIndex?.(startIdx, "narration");
+        if (inDom) {
+          // Word is in DOM — start narration
+          if (import.meta.env.DEV) {
+            performance.mark("narrate:render-gate-end");
+            try { performance.measure("narrate:render-gate", "narrate:render-gate-start", "narrate:render-gate-end"); } catch {}
+            console.debug("[narrate] render gate passed — launching at word", startIdx);
+          }
+          modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
+          return;
+        }
+
+        // Timeout — navigate to the correct page and retry once
+        if (Date.now() - gateStart > RENDER_WAIT_MS) {
+          if (!navigated) {
+            navigated = true;
+            if (import.meta.env.DEV) console.debug("[narrate] render gate timeout — navigating to word", startIdx);
+            foliateApiRef.current?.goTo?.(startIdx);
+            // Wait one more rAF cycle after navigation
+            requestAnimationFrame(() => {
+              if (readingModeRef.current !== "narration") return;
+              if (import.meta.env.DEV) {
+                performance.mark("narrate:render-gate-end");
+                try { performance.measure("narrate:render-gate", "narrate:render-gate-start", "narrate:render-gate-end"); } catch {}
+              }
+              modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
+            });
+          }
+          return;
+        }
+
+        // Not ready yet — poll next frame
+        requestAnimationFrame(checkReady);
+      };
+
+      requestAnimationFrame(checkReady);
+      return; // Async — startMode called from within the gate
+    }
+
     if (import.meta.env.DEV) console.debug("[narrate] launching at word", startIdx, "/", effectiveWords.length, "pBreaks:", pBreaks.size);
     // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
     modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
