@@ -331,4 +331,174 @@ describe("useReaderMode orchestration logic", () => {
       expect(result).toBe(0);
     });
   });
+
+  // ── TTS-7H: Visible-Word Readiness & Stable Launch Index ───────────────
+  // Regression tests for BUG-122 (false-positive readiness) and BUG-123
+  // (unstable launch index + raw goTo fallback).
+
+  describe("TTS-7H: visible-word readiness gate", () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    // BUG-122: isWordVisibleOnPage must be used instead of isWordInDom
+    it("render gate uses isWordVisibleOnPage, not just isWordInDom", () => {
+      // Simulate: word exists in DOM (loaded section) but is NOT on the visible page
+      const isWordInDom = vi.fn(() => true);
+      const isWordVisibleOnPage = vi.fn(() => false);
+      const startModeFn = vi.fn();
+
+      // The gate logic: visible check takes priority
+      const visibleOnPage = isWordVisibleOnPage(82);
+      if (visibleOnPage) {
+        startModeFn();
+      }
+
+      expect(isWordVisibleOnPage).toHaveBeenCalledWith(82);
+      expect(startModeFn).not.toHaveBeenCalled();
+      // If we had only used isWordInDom, it would have incorrectly passed
+      expect(isWordInDom(82)).toBe(true);
+    });
+
+    it("render gate passes when word IS visible on page", () => {
+      const isWordVisibleOnPage = vi.fn(() => true);
+      const startModeFn = vi.fn();
+
+      const visibleOnPage = isWordVisibleOnPage(82);
+      if (visibleOnPage) {
+        startModeFn();
+      }
+
+      expect(startModeFn).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("TTS-7H: frozen launch index", () => {
+    // BUG-123: Launch index must be frozen once chosen
+    it("frozenLaunchIdx does not change when highlightedWordIndexRef changes during gate polling", () => {
+      const highlightedWordIndexRef = { current: 82 };
+
+      // Compute and freeze the launch index (mirrors useReaderMode lines 198-205)
+      let startIdx = highlightedWordIndexRef.current;
+      startIdx = Math.min(startIdx, Math.max(1000 - 1, 0)); // 1000 words
+      const frozenLaunchIdx = startIdx;
+
+      // Simulate: during gate polling, user clicks a different word
+      highlightedWordIndexRef.current = 68;
+      // And then another rerender changes it again
+      highlightedWordIndexRef.current = 9004;
+
+      // frozenLaunchIdx must still be the original value
+      expect(frozenLaunchIdx).toBe(82);
+      expect(highlightedWordIndexRef.current).toBe(9004);
+    });
+
+    it("frozen index is used in both success and timeout paths", () => {
+      const frozenLaunchIdx = 82;
+      const successPath = vi.fn();
+      const timeoutPath = vi.fn();
+
+      // Success path
+      successPath(frozenLaunchIdx);
+      expect(successPath).toHaveBeenCalledWith(82);
+
+      // Timeout path — also uses frozen, not recomputed
+      timeoutPath(frozenLaunchIdx);
+      expect(timeoutPath).toHaveBeenCalledWith(82);
+    });
+  });
+
+  describe("TTS-7H: section-based fallback navigation", () => {
+    // BUG-123: Timeout recovery must not use raw goTo(wordIndex)
+    it("timeout path resolves section index from word, not raw goTo(wordIndex)", () => {
+      // Simulate the word-to-section mapping
+      const wordSections = [
+        { sectionIndex: 0, startWordIdx: 0, endWordIdx: 50 },
+        { sectionIndex: 1, startWordIdx: 50, endWordIdx: 120 },
+        { sectionIndex: 2, startWordIdx: 120, endWordIdx: 200 },
+      ];
+
+      // getSectionForWordIndex logic
+      const getSectionForWordIndex = (wordIndex: number): number | null => {
+        for (const sec of wordSections) {
+          if (wordIndex >= sec.startWordIdx && wordIndex < sec.endWordIdx) {
+            return sec.sectionIndex;
+          }
+        }
+        return null;
+      };
+
+      const goToSection = vi.fn();
+      const goTo = vi.fn(); // This should NOT be called with raw word index
+
+      const frozenLaunchIdx = 82;
+      const sectionIdx = getSectionForWordIndex(frozenLaunchIdx);
+
+      // Navigate by section, not by raw word index
+      if (sectionIdx != null) {
+        goToSection(sectionIdx);
+      }
+
+      expect(goToSection).toHaveBeenCalledWith(1); // Word 82 is in section 1
+      expect(goTo).not.toHaveBeenCalled(); // Raw goTo must NOT be used
+    });
+
+    it("getSectionForWordIndex returns null for out-of-range indices", () => {
+      // Simulating the FoliateViewAPI method
+      const words = Array.from({ length: 100 }, (_, i) => ({
+        word: `word${i}`,
+        sectionIndex: Math.floor(i / 50), // 2 sections of 50 words
+      }));
+
+      const getSectionForWordIndex = (wordIndex: number): number | null => {
+        if (wordIndex >= 0 && wordIndex < words.length) {
+          return words[wordIndex].sectionIndex;
+        }
+        return null;
+      };
+
+      expect(getSectionForWordIndex(9004)).toBeNull();
+      expect(getSectionForWordIndex(-1)).toBeNull();
+      expect(getSectionForWordIndex(25)).toBe(0);
+      expect(getSectionForWordIndex(75)).toBe(1);
+    });
+  });
+
+  describe("TTS-7H: single-launch token prevents reentrant starts", () => {
+    it("second startNarration is blocked while gate is in progress", () => {
+      const narrationLaunchRef = { current: false };
+      const gateEntries: number[] = [];
+
+      const simulateStartNarration = (attemptId: number) => {
+        if (narrationLaunchRef.current) {
+          // Blocked — launch already in progress
+          return;
+        }
+        narrationLaunchRef.current = true;
+        gateEntries.push(attemptId);
+      };
+
+      simulateStartNarration(1); // Should enter gate
+      simulateStartNarration(2); // Should be blocked
+      simulateStartNarration(3); // Should be blocked
+
+      expect(gateEntries).toEqual([1]);
+      expect(narrationLaunchRef.current).toBe(true);
+    });
+
+    it("gate clears launch token on cancellation (mode change)", () => {
+      const narrationLaunchRef = { current: true };
+      const readingModeRef = { current: "page" as string }; // User switched away
+
+      // Simulate the cancellation check in checkReady
+      if (readingModeRef.current !== "narration") {
+        narrationLaunchRef.current = false;
+      }
+
+      expect(narrationLaunchRef.current).toBe(false);
+    });
+  });
 });

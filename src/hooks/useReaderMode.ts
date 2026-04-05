@@ -193,19 +193,22 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    // TTS-7E (Task 2): Start from user's last clicked position when available.
-    // highlightedWordIndexRef tracks the user's last click/selection.
+    // TTS-7H: Compute launch word ONCE, then freeze it for this entire play action.
+    // Priority: user's last click > first visible word on page > 0.
     let startIdx = highlightedWordIndexRef.current;
     if (useFoliate && startIdx === 0) {
       const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
       if (firstVisible > 0) startIdx = firstVisible;
     }
     startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
+    // TTS-7H (BUG-123): Freeze — this value never changes for this play action.
+    const frozenLaunchIdx = startIdx;
     const pBreaks = getEffectiveParagraphBreaks();
 
-    // TTS-7F: Render-readiness gate for foliate EPUBs (replaces TTS-7E gate).
-    // Uses pure read-only isWordInDom probe — no UI mutation during gate check.
+    // TTS-7H: Render-readiness gate for foliate EPUBs.
+    // Uses visible-page check (not just DOM presence) to eliminate false-positive gate passes.
     // Single-launch token prevents duplicate/reentrant starts (BUG-118).
+    // Frozen launch index prevents drift across retries/polls (BUG-123).
     if (useFoliate && foliateApiRef.current) {
       // Single-launch guard: skip if a gate is already in progress
       if (narrationLaunchRef.current) {
@@ -214,7 +217,10 @@ export function useReaderMode({
       }
       narrationLaunchRef.current = true;
 
-      if (import.meta.env.DEV) performance.mark("narrate:render-gate-start");
+      if (import.meta.env.DEV) {
+        performance.mark("narrate:render-gate-start");
+        console.debug("[narrate] gate start — frozen launch word:", frozenLaunchIdx);
+      }
       const gateStart = Date.now();
       const RENDER_WAIT_MS = 3000; // NARRATION_RENDER_WAIT_MS
       let navigated = false;
@@ -226,35 +232,40 @@ export function useReaderMode({
           return;
         }
 
-        // TTS-7F: Pure read-only DOM probe — no highlight, no scroll
-        const inDom = foliateApiRef.current?.isWordInDom?.(startIdx)
-          ?? foliateApiRef.current?.highlightWordByIndex?.(startIdx, "narration"); // fallback
-        if (inDom) {
+        // TTS-7H (BUG-122): Visible-word readiness — word must be on active visible page
+        const visibleOnPage = foliateApiRef.current?.isWordVisibleOnPage?.(frozenLaunchIdx) ?? false;
+        if (visibleOnPage) {
           narrationLaunchRef.current = false;
           if (import.meta.env.DEV) {
             performance.mark("narrate:render-gate-end");
             try { performance.measure("narrate:render-gate", "narrate:render-gate-start", "narrate:render-gate-end"); } catch {}
-            console.debug("[narrate] render gate passed — launching at word", startIdx);
+            console.debug("[narrate] render gate passed — word", frozenLaunchIdx, "visible on page");
           }
-          modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
+          modeInstance.startMode("narration", frozenLaunchIdx, effectiveWords, pBreaks);
           return;
         }
 
-        // Timeout — navigate to the correct page and retry once
+        // Timeout — navigate to the correct section/page and retry once
         if (Date.now() - gateStart > RENDER_WAIT_MS) {
           if (!navigated) {
             navigated = true;
-            if (import.meta.env.DEV) console.debug("[narrate] render gate timeout — navigating to word", startIdx);
-            foliateApiRef.current?.goTo?.(startIdx);
-            requestAnimationFrame(() => {
+            // TTS-7H (BUG-123): Navigate by section ownership, not raw word index.
+            const sectionIdx = foliateApiRef.current?.getSectionForWordIndex?.(frozenLaunchIdx);
+            if (import.meta.env.DEV) console.debug("[narrate] render gate timeout — navigating to section", sectionIdx, "for word", frozenLaunchIdx);
+            if (sectionIdx != null) {
+              foliateApiRef.current?.goToSection?.(sectionIdx);
+            }
+            // Give Foliate time to render the section, then launch with frozen index
+            setTimeout(() => {
               narrationLaunchRef.current = false;
               if (readingModeRef.current !== "narration") return;
               if (import.meta.env.DEV) {
                 performance.mark("narrate:render-gate-end");
                 try { performance.measure("narrate:render-gate", "narrate:render-gate-start", "narrate:render-gate-end"); } catch {}
+                console.debug("[narrate] launching after section navigation — word", frozenLaunchIdx);
               }
-              modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
-            });
+              modeInstance.startMode("narration", frozenLaunchIdx, effectiveWords, pBreaks);
+            }, FOLIATE_SECTION_LOAD_WAIT_MS);
           }
           return;
         }
@@ -267,9 +278,9 @@ export function useReaderMode({
       return; // Async — startMode called from within the gate
     }
 
-    if (import.meta.env.DEV) console.debug("[narrate] launching at word", startIdx, "/", effectiveWords.length, "pBreaks:", pBreaks.size);
+    if (import.meta.env.DEV) console.debug("[narrate] launching at word", frozenLaunchIdx, "/", effectiveWords.length, "pBreaks:", pBreaks.size);
     // NarrateMode handles: rhythm pauses, rate adjustment, startCursorDriven
-    modeInstance.startMode("narration", startIdx, effectiveWords, pBreaks);
+    modeInstance.startMode("narration", frozenLaunchIdx, effectiveWords, pBreaks);
   }, [stopAllModes, wpm, setWpm, narration, updateSettings, getEffectiveWords, useFoliate, extractFoliateWords, hasEngagedRef, foliateApiRef, modeInstance, getEffectiveParagraphBreaks]);
 
   // ── Start Focus ────────────────────────────────────────────────────

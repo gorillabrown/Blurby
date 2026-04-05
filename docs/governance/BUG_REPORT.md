@@ -260,6 +260,22 @@
 **Description:** Readiness gate caused page jump + duplicate launch. Fix: replaced `highlightWordByIndex` (UI-mutating) with pure `isWordInDom` probe (read-only DOM query). Added `narrationLaunchRef` single-launch token to prevent reentrant starts.
 **Status:** Resolved. Sprint: TTS-7F.
 
+### ~~BUG-122~~ ✅ Fixed — TTS-7H (v1.33.3)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Fresh logs show `render gate passed — launching at word N`, immediately followed by `highlightWordByIndex miss: word N not in DOM`. The current readiness contract was false-positive: `isWordInDom()` proved only that a word exists somewhere in loaded contents, not that it is on the active visible page.
+**Fix:** Replaced `isWordInDom()` gate with `isWordVisibleOnPage()` — new API method that checks viewport visibility (bounding rect within iframe viewport), not just DOM presence. Gate success now truthfully means the word is highlightable.
+**Status:** Resolved. Sprint: TTS-7H.
+
+### ~~BUG-123~~ ✅ Fixed — TTS-7H (v1.33.3)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Repeated cold-start attempts bounced among different launch words (`82`, `68`, `80`, `0`, `9004`), indicating the chosen start index was not frozen per play action. On timeout, startup fell back to `goTo(startIdx)` which treated a raw global word index as a Foliate navigation target.
+**Fix:** Two changes: (1) Launch index frozen as `const frozenLaunchIdx` immediately after computation — used throughout gate polling, success path, and timeout path. (2) Timeout fallback replaced `goTo(startIdx)` with `getSectionForWordIndex()` → `goToSection()`, navigating by section ownership instead of raw word index.
+**Status:** Resolved. Sprint: TTS-7H.
+
 ### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High

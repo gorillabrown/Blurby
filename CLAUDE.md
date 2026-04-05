@@ -264,15 +264,16 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.33.2 — TTS Stabilization Lane CLOSED)
+## Current System State (v1.33.3 — TTS-7H Visible-Word Readiness)
 
 ### Codebase (branch: `main`)
 
 - TTS-7 stabilization lane COMPLETE: TTS-7A (v1.29.0) + TTS-7B (v1.30.0) + TTS-7C (v1.31.0) + TTS-7D (v1.32.0). All 15 TTS bugs (BUG-101–115) resolved and verified. Closeout doc in TECHNICAL_REFERENCE.md.
 - **TTS-7F hotfix complete** — proactive entry cache coverage + cruise warm, plus clean launch ownership. BUG-116/118/119/120/121 resolved.
-- **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added. TTS stabilization lane CLOSED — all bugs (BUG-101–121) verified resolved.
+- **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added.
+- **TTS-7H complete** — BUG-122/123 resolved. Visible-word readiness (`isWordVisibleOnPage`), frozen launch index, section-based fallback navigation.
 - Active queue: EINK-6A → EINK-6B → GOALS-6B (depth 3).
-- 1,279 tests across 73 test files
+- 1,287 tests across 73 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
