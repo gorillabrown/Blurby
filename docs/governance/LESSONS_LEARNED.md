@@ -814,3 +814,38 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 - PR-132: Every UI control must have a traceable code path to a behavioral effect in the engine it claims to control. If a setting is stored but never read by the active engine, it is a placebo — either wire it or remove/relabel it.
 - PR-133: When adding a new TTS engine, audit ALL existing TTS settings against the new engine's code path. Settings that worked for the old engine are not automatically honored by the new one.
 - PR-131: Passive page events (`onLoad`, `onRelocate`, first-visible) are VISUAL-ONLY when an authoritative anchor exists. They may update DOM highlights but must not mutate `highlightedWordIndex` or trigger progress saves.
+
+### [2026-04-05] LL-075: A Silky Narration Cursor Requires Canonical Audio Progress, Not More Visual Easing
+
+**Area:** renderer, narration, audio scheduling, cursor UX
+**Status:** active
+**Priority:** high
+
+**Context:** After `TTS-7O`, a long series of live cursor fixes improved narration substantially: the 3-word band moves, the old left-right twitch is largely gone, pause leaves a visible anchor, and replay resumes from that anchor instead of the first page. But the cursor still felt stepped, laggy, and chunk-boundary-sensitive. Multiple renderer-side attempts helped a little — CSS transitions, requestAnimationFrame follower loops, line guards, aggressive follow rates, throttled React updates, and reduced DOM work — yet all hit the same ceiling. The narration audio stayed smooth while the visual band still behaved like a follower chasing delayed word targets.
+
+**Root Cause:** The visual band is still inferred from coarse word/window updates after scheduling rather than being driven by a canonical audio-progress model. As long as the renderer is trying to animate toward intermittently updated DOM targets, it will feel stepped or laggy no matter how much easing is applied. This also risks chunk handoff ambiguity, where the next chunk appears to continue from a stale visual position instead of the last audio-confirmed narration word.
+
+**Fix direction:** Lock in the current stable cursor behavior as “good enough to ship,” then treat the remaining work as a distinct architecture sprint. `TTS-7Q` introduces explicit separation between canonical audio cursor authority and the visual narration band, with chunk handoff continuity and audio-time-driven glide as first-class requirements.
+
+**Guardrail:**
+- PR-134: Narration has two different cursor concepts: the canonical audio cursor and the visual band. Start, pause, resume, save, reopen, and chunk carry-over must read/write the canonical audio cursor only. The visual band must never become the anchor.
+- PR-135: Once the cursor is “stable but stepped,” stop iterating with CSS-only or renderer-only smoothing. Open a dedicated architecture sprint for audio-aligned progress instead of piling more UI easing onto a timing-model problem.
+
+---
+
+### [2026-04-05] LL-076: Rolling Planner Must Own All Chunk-Boundary Decisions
+
+**Area:** TTS, narration, generationPipeline, narrationPlanner
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-7O added audible silence injection and sentence-boundary snapping, but each concern (chunk splitting, silence sizing, resume targeting, dialogue detection) still made decisions independently in the moment. This meant that a chunk ending made by the pipeline could produce a silence value from the scheduler that didn't match the boundary class, and dialogue runs could get split mid-speech.
+
+**Root Cause:** Without a shared plan structure, chunk-selection code and silence-injection code could see different boundary classifications for the same word offset. Each call had its own local heuristics and could drift from each other.
+
+**Fix:** Introduced `src/utils/narrationPlanner.ts` with `buildNarrationPlan` that classifies all boundary types (sentence, clause, paragraph, dialogue) across the active forward text window once. The resulting `NarrationPlan` is passed to both chunk selection and silence injection. `planNeedsRebuild` guards against unnecessary recomputes.
+
+**Guardrail:**
+- PR-136: The rolling planner must be the single source of truth for where a chunk may legally end. Code that selects chunk boundaries and code that computes silence for those boundaries must both read from the same plan — never recompute boundary classification independently.
+- PR-137: Planner scope is local and cheap — only the active forward window (~400 words), not the full book. If a planner scope ever becomes whole-book, re-evaluate for memory and latency budget before shipping.
+- PR-136: Truth-sync remains a guardrail, not a movement engine. Periodic resync may correct drift, but if users can perceive it as the main source of motion, the system is architecturally wrong.

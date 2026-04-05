@@ -264,7 +264,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.35.0 — EXT-5C complete, TTS-7P next, EINK-6A queued)
+## Current System State (v1.36.0 — TTS-7P complete, TTS-7Q next, EINK staged)
 
 ### Codebase (branch: `main`)
 
@@ -277,11 +277,14 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7K complete** — BUG-131/132/133 resolved. Full-book EPUB words promoted as narration source of truth, global index validation for start-word resolution, onWordsReextracted source protection, page-mode isolation from narration-only section navigation. 22 new tests. v1.33.6.
 - **TTS-7L complete** — BUG-134 resolved. Exact Foliate text-selection mapping — selectionchange now resolves .page-word span with data-word-index, unified click/selection payload, first-match text fallback demoted. 15 new tests. v1.33.7.
 - **TTS-7M complete** — BUG-135 resolved. Persistent resume-anchor — pause captures live cursor, reopen uses saved position, passive onLoad/onRelocate cannot downgrade. 17 new tests. v1.33.8.
-- **TTS-7N complete** — BUG-136/137 resolved. Kokoro pause settings now drive word-weight scaling and sentence-boundary chunk snapping. Ctrl+K TTS links repaired to "tts" page. 19 new tests. v1.33.9.
+- **TTS-7N complete** — BUG-136/137 resolved. Kokoro pause settings now drive word-weight scaling and sentence-boundary chunk snapping. Ctrl+K TTS links repaired to “tts” page. 19 new tests. v1.33.9.
 - **TTS-7O complete** — BUG-138/139 resolved. Punctuation-safe pre-send chunk rounding (expanded outward search), real inter-chunk audible silence injection (classifyChunkBoundary → silence samples), 3-word narration window (page-word--narration-context CSS), smooth cursor via CSS transitions, periodic truth-sync every 12 words. 27 new tests. v1.34.0.
 - **EXT-5C complete** — BUG-141/142 resolved. Rich article HTML formatting preserved (headings, figures, captions, lists, blockquotes), inline images downloaded and embedded into EPUB (no remote dependency), article-aware hero ranking (body presence > top article image > metadata fallback, rejects junk URLs), hero reliably promoted to coverPath for both URL and extension import paths. Shared downloadArticleImages helper + preDownloadedImages EPUB path unifies both import flows. 24 new tests. v1.35.0.
-- Active queue: TTS-7P → EINK-6A (depth 2 — WARN: below 3, backfill needed).
-- 1,442 tests across 82 test files
+- **TTS-7P complete** — BUG-140 resolved. Rolling pause-boundary planner (`src/utils/narrationPlanner.ts`) builds local boundary plans for the active text window (next ~400 words). Planner is now the single authority for where chunks may legally end; `generationPipeline.ts` uses planner for chunk selection and silence injection; `kokoroStrategy.ts` passes `getParagraphBreaks`; `useNarration.ts` passes paragraph breaks ref. Dialogue detection included. Two new constants: `TTS_PLANNER_WINDOW_WORDS` (400), `TTS_PLANNER_MIN_CHUNK_WORDS` (10). 33 new tests. v1.36.0.
+- **Current live TTS cursor state** — stable enough to keep: narration band moves, left-right twitch is largely removed, and pause/replay anchor behavior is preserved. Remaining gap is “silky audio-aligned glide,” not basic correctness.
+- **TTS-7Q staged** — dedicated follow-up for a true glide / audio-aligned narration cursor. Purposefully separates canonical audio cursor authority from the visual 3-word band so the current stable cursor can later be upgraded from stepped-follow to silky motion without risking pause/replay correctness.
+- Active queue: TTS-7Q → EINK-6A → EINK-6B (depth 3 — GREEN).
+- 1,479 tests across 83 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -324,7 +327,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
   - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
   - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration, useReaderMode (TD-1), useProgressTracker (TD-1), useEinkController (TD-1)
-  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts, constants.ts, authorNormalize.ts
+  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts, constants.ts, authorNormalize.ts, narrationPlanner.ts (TTS-7P — rolling pause-boundary planner for the active text window)
   - `src/types/` — types.ts (BlurbyDoc gains `queuePosition?: number`), foliate.ts (TD-1), narration.ts (TD-1)
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro). Kokoro uses 3 native-rate buckets (1.0x/1.2x/1.5x) — no scheduler pitch-shift.

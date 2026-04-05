@@ -207,4 +207,46 @@ describe("createGenerationPipeline", () => {
 
     pipeline.stop();
   });
+
+  it("injects immediate footnote text into generated chunk text when mode is read", async () => {
+    const generateFn = vi.fn().mockResolvedValue({
+      audio: new Float32Array(24000),
+      sampleRate: 24000,
+      durationMs: 1000,
+    });
+    const config = makeConfig({
+      generateFn,
+      getWords: () => ["The", "title", "grows", "richer."],
+      getFootnoteMode: () => "read" as const,
+      getFootnoteCues: () => [{ afterWordIdx: 1, text: "Footnote. Added context." }],
+    });
+    const pipeline = createGenerationPipeline(config);
+
+    pipeline.start(0);
+    await vi.waitFor(() => expect(generateFn).toHaveBeenCalled());
+
+    expect(generateFn.mock.calls[0][0]).toContain("The title Footnote. Added context. grows richer.");
+    pipeline.stop();
+  });
+
+  it("does not inject footnote text when mode is skip", async () => {
+    const generateFn = vi.fn().mockResolvedValue({
+      audio: new Float32Array(24000),
+      sampleRate: 24000,
+      durationMs: 1000,
+    });
+    const config = makeConfig({
+      generateFn,
+      getWords: () => ["The", "title", "grows", "richer."],
+      getFootnoteMode: () => "skip" as const,
+      getFootnoteCues: () => [{ afterWordIdx: 1, text: "Footnote. Added context." }],
+    });
+    const pipeline = createGenerationPipeline(config);
+
+    pipeline.start(0);
+    await vi.waitFor(() => expect(generateFn).toHaveBeenCalled());
+
+    expect(generateFn.mock.calls[0][0]).toBe("The title grows richer.");
+    pipeline.stop();
+  });
 });

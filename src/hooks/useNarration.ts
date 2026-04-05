@@ -10,6 +10,11 @@ import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
 
+export interface FootnoteCue {
+  afterWordIdx: number;
+  text: string;
+}
+
 export interface NarrationState {
   speaking: boolean;
   voices: SpeechSynthesisVoice[];
@@ -84,6 +89,8 @@ export default function useNarration() {
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
   const paragraphBreaksRef = useRef<Set<number>>(new Set());
   const pauseConfigRef = useRef<PauseConfig>(DEFAULT_PAUSE_CONFIG);
+  const footnoteModeRef = useRef<"skip" | "read">("skip");
+  const footnoteCuesRef = useRef<FootnoteCue[]>([]);
   const onSectionEndRef = useRef<(() => void) | null>(null);
   const bookIdRef = useRef<string>("");
   const globalOverridesRef = useRef<PronunciationOverride[]>([]);
@@ -149,6 +156,10 @@ export default function useNarration() {
       },
       // TTS-7O: Pass pause config for silence injection at chunk boundaries
       getPauseConfig: () => pauseConfigRef.current,
+      // TTS-7P: Pass paragraph breaks for planner-aware silence injection
+      getParagraphBreaks: () => paragraphBreaksRef.current,
+      getFootnoteMode: () => footnoteModeRef.current,
+      getFootnoteCues: () => footnoteCuesRef.current,
       onFallbackToWeb: () => {
         // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
         kokoroStrategyRef.current?.stop();
@@ -642,6 +653,12 @@ export default function useNarration() {
     },
     setPauseConfig: (config: PauseConfig) => {
       pauseConfigRef.current = config;
+    },
+    setFootnoteMode: (mode: "skip" | "read") => {
+      footnoteModeRef.current = mode;
+    },
+    setFootnoteCues: (cues: FootnoteCue[]) => {
+      footnoteCuesRef.current = cues;
     },
     setOnSectionEnd: (cb: (() => void) | null) => {
       onSectionEndRef.current = cb;

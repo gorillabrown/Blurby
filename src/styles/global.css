@@ -3856,12 +3856,24 @@ button:focus-visible {
 
 /* Overlay highlight for EPUB narration — positioned over current spoken word */
 .foliate-narration-highlight {
-  position: fixed;
-  background: var(--accent-highlighted);
-  border-radius: 2px;
+  position: absolute;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 10%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 18%, transparent) 12%,
+    color-mix(in srgb, var(--accent) 24%, transparent) 50%,
+    color-mix(in srgb, var(--accent) 16%, transparent) 88%,
+    color-mix(in srgb, var(--accent) 10%, transparent) 100%
+  );
+  border-bottom: 3px solid color-mix(in srgb, var(--accent) 92%, white);
+  border-radius: 8px;
   pointer-events: none;
   z-index: 100;
-  will-change: transform;
+  will-change: transform, width, height, opacity;
+  transition: opacity 80ms ease;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+  opacity: 0;
+  transform-origin: left center;
 }
 
 .return-to-reading-pill {

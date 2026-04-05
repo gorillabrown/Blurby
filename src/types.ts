@@ -148,6 +148,7 @@ export interface BlurbySettings {
   ttsPauseSentenceMs?: number;
   ttsPauseParagraphMs?: number;
   ttsDialogueSentenceThreshold?: number;
+  ttsFootnoteMode?: "skip" | "read";
   // Last-used reading mode (Space bar starts this mode from Page view)
   lastReadingMode: "focus" | "flow" | "narration";
   // Cloud sync settings
@@ -322,7 +323,13 @@ export interface ElectronAPI {
   onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
   onWatcherError?: (callback: (data: { message: string }) => void) => () => void;
   // EPUB word extraction (HOTFIX-6)
-  extractEpubWords?: (bookId: string) => Promise<{ words?: string[]; sections?: Array<{ sectionIndex: number; startWordIdx: number; endWordIdx: number; wordCount: number }>; totalWords?: number; error?: string }>;
+  extractEpubWords?: (bookId: string) => Promise<{
+    words?: string[];
+    sections?: Array<{ sectionIndex: number; startWordIdx: number; endWordIdx: number; wordCount: number }>;
+    footnoteCues?: Array<{ afterWordIdx: number; text: string }>;
+    totalWords?: number;
+    error?: string;
+  }>;
   // Kokoro TTS
   kokoroPreload?: () => Promise<void>;
   kokoroModelStatus: () => Promise<{ ready: boolean }>;

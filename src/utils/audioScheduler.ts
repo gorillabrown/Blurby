@@ -138,6 +138,7 @@ export function createAudioScheduler(): AudioScheduler {
 
   // Word timer state
   let wordTimerHandle: ReturnType<typeof setTimeout> | null = null;
+  let wordRafHandle: number | null = null;
   let currentWordBoundaries: { time: number; wordIndex: number }[] = [];
   let nextWordBoundaryIdx = 0;
   let playbackStartTime: number | null = null; // Set on first scheduleChunk — gates tick()
@@ -155,6 +156,7 @@ export function createAudioScheduler(): AudioScheduler {
 
   function clearWordTimer(): void {
     if (wordTimerHandle) { clearTimeout(wordTimerHandle); wordTimerHandle = null; }
+    if (wordRafHandle != null) { cancelAnimationFrame(wordRafHandle); wordRafHandle = null; }
   }
 
   /**
@@ -228,31 +230,30 @@ export function createAudioScheduler(): AudioScheduler {
 
       // Don't process boundaries until audio has actually started playing
       if (playbackStartTime !== null && now < playbackStartTime) {
-        const delay = Math.max(5, (playbackStartTime - now) * 1000);
-        wordTimerHandle = setTimeout(tick, delay);
+        wordRafHandle = requestAnimationFrame(tick);
         return;
       }
 
-      // Advance past ALL boundaries we've crossed in this tick (TTS-6S: cursor sync fix).
-      // Previously only advanced one per tick, causing drift when setTimeout fires late.
-      let lastAdvancedIdx = -1;
+      // Advance past ALL boundaries we've crossed in this tick.
+      // TTS-7O follow smoothing: emit every crossed word boundary in order instead
+      // of collapsing to the latest one. The old collapse behavior kept truth-sync
+      // accurate enough for coarse correction, but it starved the Foliate narration
+      // follower of the intermediate positions needed for a continuous glide.
+      let advancedAny = false;
       while (nextWordBoundaryIdx < currentWordBoundaries.length &&
              currentWordBoundaries[nextWordBoundaryIdx].time <= now) {
-        lastAdvancedIdx = nextWordBoundaryIdx;
-        nextWordBoundaryIdx++;
-      }
-      // Fire onWordAdvance once for the latest crossed boundary (skip intermediate)
-      if (lastAdvancedIdx >= 0) {
-        const advancedWordIndex = currentWordBoundaries[lastAdvancedIdx].wordIndex;
+        const advancedWordIndex = currentWordBoundaries[nextWordBoundaryIdx].wordIndex;
         callbacks.onWordAdvance(advancedWordIndex);
+        advancedAny = true;
+        nextWordBoundaryIdx++;
 
-        // TTS-7O: Truth-sync — fire every TTS_CURSOR_TRUTH_SYNC_INTERVAL words
         truthSyncCounter++;
         if (truthSyncCounter >= truthSyncInterval) {
           truthSyncCounter = 0;
           callbacks.onTruthSync?.(advancedWordIndex);
         }
-
+      }
+      if (advancedAny) {
         // Sliding window: prune consumed boundaries to prevent unbounded growth
         if (nextWordBoundaryIdx >= 100) {
           currentWordBoundaries = currentWordBoundaries.slice(nextWordBoundaryIdx);
@@ -260,15 +261,15 @@ export function createAudioScheduler(): AudioScheduler {
         }
       }
 
-      // Schedule next tick
+      // Keep polling on animation frames while boundaries remain. This is
+      // smoother under renderer load than setTimeout-based wakeups and lets
+      // AudioContext.currentTime remain the single source of truth.
       if (nextWordBoundaryIdx < currentWordBoundaries.length) {
-        const nextTime = currentWordBoundaries[nextWordBoundaryIdx].time;
-        const delay = Math.max(5, (nextTime - now) * 1000);
-        wordTimerHandle = setTimeout(tick, delay);
+        wordRafHandle = requestAnimationFrame(tick);
       }
     }
 
-    tick();
+    wordRafHandle = requestAnimationFrame(tick);
   }
 
   /**

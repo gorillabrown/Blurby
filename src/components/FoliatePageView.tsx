@@ -33,6 +33,50 @@ export interface FoliateWord {
  *  Returns word strings and their DOM Ranges for highlighting. */
 const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
 
+function hasToken(value: string | null | undefined, token: string): boolean {
+  return String(value || "").toLowerCase().split(/\s+/).includes(token.toLowerCase());
+}
+
+function isFootnoteRefElement(el: Element | null): boolean {
+  if (!el) return false;
+  const tag = el.tagName.toLowerCase();
+  const href = el.getAttribute("href") || "";
+  const epubType = el.getAttribute("epub:type") || "";
+  const role = el.getAttribute("role") || "";
+  const cls = `${el.getAttribute("class") || ""} ${el.id || ""}`.toLowerCase();
+
+  if (hasToken(epubType, "noteref") || hasToken(role, "doc-noteref")) return true;
+  if (tag === "a" && href.startsWith("#") && /note|footnote|endnote|fn|ref/.test(cls)) return true;
+  if (tag === "a" && href.startsWith("#") && el.parentElement?.tagName.toLowerCase() === "sup") return true;
+  if (tag === "sup" && /note|footnote|endnote|fn|ref/.test(cls)) return true;
+  return false;
+}
+
+function isFootnoteBodyElement(el: Element | null): boolean {
+  if (!el) return false;
+  const tag = el.tagName.toLowerCase();
+  const epubType = el.getAttribute("epub:type") || "";
+  const role = el.getAttribute("role") || "";
+  const cls = `${el.getAttribute("class") || ""} ${el.id || ""}`.toLowerCase();
+
+  if (hasToken(epubType, "footnote") || hasToken(epubType, "endnote") || hasToken(role, "doc-footnote") || hasToken(role, "doc-endnote")) {
+    return true;
+  }
+  if ((tag === "aside" || tag === "section" || tag === "li" || tag === "div" || tag === "p") && /footnote|endnote|notes?\b|fn\d+/.test(cls)) {
+    return true;
+  }
+  return false;
+}
+
+function isSuppressedNarrationTextNode(node: Node): boolean {
+  let el = node.parentElement;
+  while (el) {
+    if (isFootnoteRefElement(el) || isFootnoteBodyElement(el)) return true;
+    el = el.parentElement;
+  }
+  return false;
+}
+
 function getBlockParent(node: Node): Element | null {
   let el = node.parentElement;
   while (el && !BLOCK_TAGS.has(el.tagName)) el = el.parentElement;
@@ -42,11 +86,12 @@ function getBlockParent(node: Node): Element | null {
 function collectBlockTextNodes(root: ParentNode): Array<{ block: Element; nodes: Text[] }> {
   const groups = new Map<Element, Text[]>();
   const order: Element[] = [];
-  const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
+      const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
     acceptNode: (node: Node) => {
       const parent = node.parentElement;
       if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
       if (!node.textContent) return NodeFilter.FILTER_REJECT;
+      if (isSuppressedNarrationTextNode(node)) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
   });
@@ -328,6 +373,31 @@ export default function FoliatePageView({
   const cursorRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const flowRafRef = useRef<number>(0);
+  const narrationOverlayRafRef = useRef<number>(0);
+  const narrationOverlayCurrentRef = useRef<{ x: number; y: number; width: number; height: number; ready: boolean }>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    ready: false,
+  });
+  const narrationOverlayTargetRef = useRef<{ x: number; y: number; width: number; height: number; active: boolean }>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    active: false,
+  });
+  const narrationOverlaySegmentFromRef = useRef<{ x: number; y: number; width: number; height: number }>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const narrationOverlaySegmentStartRef = useRef<number>(0);
+  const narrationOverlaySegmentDurationRef = useRef<number>(180);
+  const narrationOverlayLastAdvanceRef = useRef<number>(0);
+  const narrationOverlayAverageDurationRef = useRef<number>(180);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -348,6 +418,250 @@ export default function FoliatePageView({
   // Track when user has manually browsed away during narration — suppresses scrollToAnchor
   const userBrowsingRef = useRef(false);
   readingModeRef.current = readingMode;
+
+  const hideNarrationOverlay = useCallback(() => {
+    if (narrationOverlayRafRef.current) {
+      cancelAnimationFrame(narrationOverlayRafRef.current);
+      narrationOverlayRafRef.current = 0;
+    }
+    narrationOverlayTargetRef.current.active = false;
+    narrationOverlayCurrentRef.current.ready = false;
+    narrationOverlaySegmentStartRef.current = 0;
+    narrationOverlayLastAdvanceRef.current = 0;
+    narrationOverlayAverageDurationRef.current = 180;
+    if (highlightRef.current) {
+      highlightRef.current.style.display = "none";
+      highlightRef.current.style.opacity = "0";
+    }
+  }, []);
+
+  const ensureNarrationOverlayLoop = useCallback(() => {
+    if (narrationOverlayRafRef.current) return;
+
+    const tick = (ts: number) => {
+      const overlay = highlightRef.current;
+      const target = narrationOverlayTargetRef.current;
+      const current = narrationOverlayCurrentRef.current;
+      if (!overlay || !target.active) {
+        narrationOverlayRafRef.current = 0;
+        return;
+      }
+      const from = narrationOverlaySegmentFromRef.current;
+      const duration = Math.max(1, narrationOverlaySegmentDurationRef.current);
+      const progress = Math.min(1, (ts - narrationOverlaySegmentStartRef.current) / duration);
+
+      if (!current.ready) {
+        current.x = from.x;
+        current.y = from.y;
+        current.width = from.width;
+        current.height = from.height;
+        current.ready = true;
+      }
+
+      const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
+      current.x = lerp(from.x, target.x);
+      current.y = lerp(from.y, target.y);
+      current.width = lerp(from.width, target.width);
+      current.height = lerp(from.height, target.height);
+
+      overlay.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
+      overlay.style.width = `${Math.max(16, current.width)}px`;
+      overlay.style.height = `${Math.max(12, current.height)}px`;
+      overlay.style.opacity = "1";
+      overlay.style.display = "block";
+
+      if (progress < 1) {
+        narrationOverlayRafRef.current = requestAnimationFrame(tick);
+      } else {
+        current.x = target.x;
+        current.y = target.y;
+        current.width = target.width;
+        current.height = target.height;
+        narrationOverlayRafRef.current = 0;
+      }
+    };
+
+    narrationOverlayRafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
+    for (const { doc: d } of contents) {
+      try {
+        d?.querySelectorAll?.(".page-word--highlighted")?.forEach((el: Element) => {
+          el.classList.remove("page-word--highlighted");
+        });
+        d?.querySelectorAll?.(".page-word--flow-cursor")?.forEach((el: Element) => {
+          el.classList.remove("page-word--flow-cursor");
+        });
+        d?.querySelectorAll?.(".page-word--narration-context")?.forEach((el: Element) => {
+          el.classList.remove("page-word--narration-context");
+        });
+      } catch {
+        // Safe to ignore for detached/partial docs.
+      }
+    }
+  }, []);
+
+  const measureNarrationWindow = useCallback((doc: Document | null, wordIndex: number) => {
+    const container = containerRef.current;
+    if (!container || !doc) return null;
+    const frame = doc.defaultView?.frameElement as HTMLElement | null;
+    if (!frame) return null;
+
+    const containerRect = container.getBoundingClientRect();
+    const frameRect = frame.getBoundingClientRect();
+    const primaryEls = Array.from(doc.querySelectorAll(`[data-word-index="${wordIndex}"]`)) as HTMLElement[];
+    if (primaryEls.length === 0) return null;
+
+    const primaryRects = primaryEls
+      .map((el) => el.getBoundingClientRect())
+      .filter((rect) => rect.width > 0 && rect.height > 0);
+    const primaryTop = primaryRects[0]?.top;
+    if (primaryRects.length === 0 || primaryTop == null) return null;
+
+    const lineTolerance = Math.max(primaryRects[0].height * 0.65, 10);
+    const allRects: DOMRect[] = [];
+    for (let offset = 0; offset <= 2; offset++) {
+      const els = Array.from(doc.querySelectorAll(`[data-word-index="${wordIndex + offset}"]`)) as HTMLElement[];
+      for (const el of els) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+        if (Math.abs(rect.top - primaryTop) > lineTolerance) continue;
+        allRects.push(rect);
+      }
+    }
+    if (allRects.length === 0) return null;
+
+    const minLeft = Math.min(...allRects.map((rect) => rect.left));
+    const minTop = Math.min(...allRects.map((rect) => rect.top));
+    const maxRight = Math.max(...allRects.map((rect) => rect.right));
+    const maxBottom = Math.max(...allRects.map((rect) => rect.bottom));
+    const horizontalPad = 8;
+    const verticalPad = 2;
+    return {
+      x: frameRect.left + minLeft - containerRect.left - horizontalPad,
+      y: frameRect.top + minTop - containerRect.top - verticalPad,
+      width: Math.max(16, maxRight - minLeft + horizontalPad * 2),
+      height: Math.max(12, maxBottom - minTop + verticalPad * 2),
+    };
+  }, []);
+
+  const positionNarrationOverlay = useCallback((doc: Document | null, wordIndex: number) => {
+    const overlay = highlightRef.current;
+    if (!overlay || !doc) {
+      hideNarrationOverlay();
+      return;
+    }
+
+    const currentWindow = measureNarrationWindow(doc, wordIndex);
+    if (!currentWindow) {
+      hideNarrationOverlay();
+      return;
+    }
+
+    let nextWindow = measureNarrationWindow(doc, wordIndex + 1) || currentWindow;
+    const sameLineTolerance = Math.max(8, currentWindow.height * 0.6);
+    const staysOnSameLine = Math.abs(nextWindow.y - currentWindow.y) <= sameLineTolerance;
+    const movesForward = nextWindow.x >= currentWindow.x - 4;
+    if (!staysOnSameLine || !movesForward) {
+      // Avoid diagonal/sideways jitter when the next spoken word wraps lines,
+      // changes columns, or otherwise measures "behind" the current band.
+      // In those cases hold the band on the current window and let the next
+      // word advance establish the new segment cleanly.
+      nextWindow = currentWindow;
+    } else {
+      // Within a stable line, keep the band shape steady and glide mostly
+      // horizontally. Re-sizing/re-centering every word makes the cursor feel
+      // twitchy even when timing is close.
+      nextWindow = {
+        x: nextWindow.x,
+        y: currentWindow.y,
+        width: currentWindow.width,
+        height: currentWindow.height,
+      };
+    }
+    const now = performance.now();
+    const previousAdvance = narrationOverlayLastAdvanceRef.current;
+    const observedInterval = previousAdvance > 0 ? Math.max(70, Math.min(now - previousAdvance, 420)) : 180;
+    const smoothedInterval = previousAdvance > 0
+      ? narrationOverlayAverageDurationRef.current * 0.65 + observedInterval * 0.35
+      : observedInterval;
+    narrationOverlayAverageDurationRef.current = smoothedInterval;
+    narrationOverlayLastAdvanceRef.current = now;
+
+    narrationOverlayCurrentRef.current = { ...currentWindow, ready: true };
+    narrationOverlaySegmentFromRef.current = { ...currentWindow };
+    narrationOverlayTargetRef.current = { ...nextWindow, active: true };
+    narrationOverlaySegmentStartRef.current = now;
+    narrationOverlaySegmentDurationRef.current = smoothedInterval;
+
+    overlay.style.display = "block";
+    overlay.style.opacity = "1";
+    overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
+    overlay.style.width = `${currentWindow.width}px`;
+    overlay.style.height = `${currentWindow.height}px`;
+    ensureNarrationOverlayLoop();
+  }, [ensureNarrationOverlayLoop, hideNarrationOverlay, measureNarrationWindow]);
+
+  const applyVisualHighlightByIndex = useCallback((
+    wordIndex: number,
+    styleHint?: "flow" | "narration",
+    allowMotion = true,
+  ): boolean => {
+    const view = viewRef.current;
+    if (!view?.renderer || !viewApiRef?.current) return false;
+
+    const state = viewApiRef.current.resolveWordState(wordIndex);
+    const contents = view.renderer?.getContents?.() ?? [];
+    const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
+    const isNarrationMode = styleHint === "narration" || readingModeRef.current === "narration";
+    const highlightClass = isFlowMode ? "page-word--flow-cursor" : "page-word--highlighted";
+
+    if (!isNarrationMode) {
+      clearVisualWordClasses(contents);
+      hideNarrationOverlay();
+    }
+
+    if (!state.found || !state.span) {
+      if (process.env.NODE_ENV !== "production") {
+        console.debug(`[foliate] highlightWordByIndex miss: word ${wordIndex} not in DOM`);
+      }
+      return false;
+    }
+
+    if (isNarrationMode) {
+      // For narration we want one contiguous gliding overlay rather than
+      // three separately highlighted word boxes. The canonical anchor is still
+      // the first word, but the visible treatment is overlay-only.
+      for (let offset = 1; offset <= 2; offset++) {
+        const contextIdx = wordIndex + offset;
+        state.doc?.querySelectorAll?.(`[data-word-index="${contextIdx}"]`)?.forEach((el: Element) => {
+          el.classList.add("page-word--narration-context");
+        });
+      }
+      positionNarrationOverlay(state.doc, wordIndex);
+    } else {
+      state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
+        el.classList.add(highlightClass);
+      });
+    }
+
+    if (allowMotion && state.doc && !userBrowsingRef.current && !state.visible) {
+      try {
+        const range = state.doc.createRange();
+        range.selectNodeContents(state.span);
+        view.renderer.scrollToAnchor?.(range);
+      } catch {
+        // Safe to ignore.
+      }
+    }
+
+    if (userBrowsingRef.current && state.visible) {
+      userBrowsingRef.current = false;
+    }
+
+    return true;
+  }, [clearVisualWordClasses, hideNarrationOverlay, positionNarrationOverlay, viewApiRef]);
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -654,82 +968,13 @@ export default function FoliatePageView({
               // back as resume anchors or saved progress. See handlePauseToPage() in useReaderMode.ts
               // and resumeAnchorRef usage — both correctly read getCurrentWord() which returns
               // only this first highlighted word.
-              // TTS-7I: Use shared resolver for consistent gate/highlight truth (BUG-124)
-              const state = viewApiRef!.current!.resolveWordState(wordIndex);
-
-              const contents = view.renderer?.getContents?.() ?? [];
-              // Use explicit style hint from caller (avoids stale readingModeRef during state transitions)
-              const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
-              const highlightClass = isFlowMode ? "page-word--flow-cursor" : "page-word--highlighted";
-              // Clear previous highlight (all highlight classes including narration context)
-              for (const { doc: d } of contents) {
-                try {
-                  d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
-                  d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
-                  // TTS-7O: Clear 3-word narration context classes
-                  d?.querySelectorAll?.(".page-word--narration-context")?.forEach((el: Element) => {
-                    el.classList.remove("page-word--narration-context");
-                  });
-                } catch { /* */ }
-              }
-
-              // Word not found in loaded sections — caller decides what to do
-              if (!state.found || !state.span) {
-                if (process.env.NODE_ENV !== 'production') {
-                  console.debug(`[foliate] highlightWordByIndex miss: word ${wordIndex} not in DOM`);
-                }
-                return false;
-              }
-
-              // Apply highlight CSS class (cheap, no page motion)
-              state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
-                el.classList.add(highlightClass);
-              });
-
-              // TTS-7O: Apply 3-word narration context window.
-              // The primary word (wordIndex) is the canonical anchor — context words are visual-only.
-              // Context words (wordIndex+1, wordIndex+2) get a subtler highlight class.
-              if (styleHint === "narration") {
-                for (let offset = 1; offset <= 2; offset++) {
-                  const contextIdx = wordIndex + offset;
-                  for (const { doc: cd } of contents) {
-                    try {
-                      cd?.querySelectorAll?.(`[data-word-index="${contextIdx}"]`)?.forEach((el: Element) => {
-                        el.classList.add("page-word--narration-context");
-                      });
-                    } catch { /* */ }
-                  }
-                }
-              }
-
-              // TTS-7I (BUG-125): Split highlight from motion — only scroll when word is
-              // NOT already visible on page. Skip if user has browsed away.
-              if (state.doc && !userBrowsingRef.current && !state.visible) {
-                try {
-                  const range = state.doc.createRange();
-                  range.selectNodeContents(state.span);
-                  view.renderer.scrollToAnchor?.(range);
-                } catch { /* safe to ignore */ }
-              }
-              // If user was browsing and the word is now visible, auto-clear browsing flag
-              if (userBrowsingRef.current && state.visible) {
-                userBrowsingRef.current = false; // Narration caught up to where user browsed
-              }
-              return true;
+              return applyVisualHighlightByIndex(wordIndex, styleHint, true);
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
               const contents = view.renderer?.getContents?.() ?? [];
-              for (const { doc: d } of contents) {
-                try {
-                  d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
-                  d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
-                  // TTS-7O: Clear narration context classes
-                  d?.querySelectorAll?.(".page-word--narration-context")?.forEach((el: Element) => {
-                    el.classList.remove("page-word--narration-context");
-                  });
-                } catch { /* */ }
-              }
+              clearVisualWordClasses(contents);
+              hideNarrationOverlay();
             },
             getView: () => view,
             // TTS-7I: Shared render-state resolver — single source of truth for gate + highlight + recovery.
@@ -922,6 +1167,15 @@ export default function FoliatePageView({
   }, [activeDoc.filepath, activeDoc.id]);
 
   useEffect(() => {
+    return () => {
+      if (narrationOverlayRafRef.current) {
+        cancelAnimationFrame(narrationOverlayRafRef.current);
+        narrationOverlayRafRef.current = 0;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!bookWordSections || bookWordSections.length === 0) return;
     const view = viewRef.current;
     const contents = view?.renderer?.getContents?.() ?? [];
@@ -1073,6 +1327,36 @@ export default function FoliatePageView({
   // (highlightWordByIndex called from useReadingModeInstance's onWordAdvance).
   // The old React effect was a second scroll owner that competed with the bridge,
   // causing mid-narration paragraph jumps. See BUG-125 for full context.
+  //
+  // TTS-7O visual bridge: keep a visual-only narration effect tied to the
+  // canonical narrationWordIndex prop. This does NOT own scrolling/navigation.
+  // It simply reapplies the 3-word window and overlay so normal word-by-word
+  // motion remains visible between the 12-word truth-sync corrections.
+  useEffect(() => {
+    if (readingMode !== "narration" || narrationWordIndex == null) {
+      hideNarrationOverlay();
+      return;
+    }
+    // The live narration cursor is owned by the imperative Foliate bridge
+    // (useReadingModeInstance -> highlightWordByIndex on every word advance).
+    // Only use this React effect for initial entry / recovery when the overlay
+    // is not already active, otherwise we create a second visual owner that can
+    // reapply slightly stale positions and cause left/right jitter.
+    if (!narrationOverlayTargetRef.current.active) {
+      applyVisualHighlightByIndex(narrationWordIndex, "narration", false);
+    }
+  }, [applyVisualHighlightByIndex, hideNarrationOverlay, narrationWordIndex, readingMode]);
+
+  useEffect(() => {
+    if (readingMode !== "narration") return;
+    const contents = viewRef.current?.renderer?.getContents?.() ?? [];
+    clearVisualWordClasses(contents);
+  }, [clearVisualWordClasses, readingMode]);
+
+  useEffect(() => {
+    if (readingMode !== "page" || highlightedWordIndex == null) return;
+    applyVisualHighlightByIndex(highlightedWordIndex, undefined, false);
+  }, [applyVisualHighlightByIndex, highlightedWordIndex, readingMode]);
 
   // Narration page-sync — advance page when narration reads past current view
   // Tracks foliate's reported fraction vs narration's progress fraction
@@ -1196,9 +1480,10 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
-    .page-word { cursor: pointer; border-radius: 2px; transition: background 0.1s; }
+    .page-word { cursor: pointer; border-radius: 4px; transition: background-color 120ms linear, box-shadow 120ms linear, color 120ms linear; }
     .page-word:hover { background: ${accent}22; }
-    .page-word--highlighted { background: ${accent}4D; }
+    .page-word--highlighted { background: ${accent}4D; box-shadow: inset 0 -0.26em 0 ${accent}55; }
+    .page-word--narration-context { background: transparent; box-shadow: none; }
     .page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
   `;
   doc.head.appendChild(style);

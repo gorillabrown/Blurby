@@ -86,6 +86,8 @@ export const TTS_QUEUE_DEPTH = 5;
 export const ENTRY_COVERAGE_TARGET_MS = 300_000;
 /** Paragraphs with this many or fewer sentences are treated as dialogue (minimal pause) */
 export const TTS_DIALOGUE_SENTENCE_THRESHOLD = 2;
+/** Footnote narration behavior */
+export const TTS_FOOTNOTE_MODE = "skip" as const;
 
 // ── TTS Pipeline (NAR-2) ─────────────────────────────────────────────────────
 /** Chunk 1 word count — generates in ≤1s for fast cold start */
@@ -98,6 +100,10 @@ export const TTS_CROSSFADE_MS = 8;
 export const TTS_CURSOR_TRUTH_SYNC_INTERVAL = 12;
 /** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
 export const TTS_FORWARD_WORDS = 300;
+/** TTS-7P: Rolling pause planner — words ahead of the current cursor to plan */
+export const TTS_PLANNER_WINDOW_WORDS = 400;
+/** TTS-7P: Rolling pause planner — minimum words per planned chunk (prohibits tiny fragments) */
+export const TTS_PLANNER_MIN_CHUNK_WORDS = 10;
 
 // ── Narrate Performance Budgets (TTS-6O) ────────────────────────────────────
 /** Max ms from user click to first audio chunk playing */
@@ -131,6 +137,7 @@ export function createDefaultNarrationProfile(name: string): NarrationProfile {
     ttsPauseSentenceMs: TTS_PAUSE_SENTENCE_MS,
     ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
     ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
+    ttsFootnoteMode: TTS_FOOTNOTE_MODE,
     pronunciationOverrides: [],
     createdAt: now,
     updatedAt: now,
@@ -150,6 +157,7 @@ export function profileFromSettings(name: string, settings: BlurbySettings): Nar
     ttsPauseSentenceMs: settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS,
     ttsPauseParagraphMs: settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS,
     ttsDialogueSentenceThreshold: settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD,
+    ttsFootnoteMode: settings.ttsFootnoteMode ?? TTS_FOOTNOTE_MODE,
     pronunciationOverrides: settings.pronunciationOverrides ? [...settings.pronunciationOverrides] : [],
   };
 }
@@ -425,6 +433,7 @@ export const DEFAULT_SETTINGS = {
   ttsPauseSentenceMs: TTS_PAUSE_SENTENCE_MS,
   ttsPauseParagraphMs: TTS_PAUSE_PARAGRAPH_MS,
   ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
+  ttsFootnoteMode: TTS_FOOTNOTE_MODE,
   pronunciationOverrides: [] as import("./types").PronunciationOverride[],
 };
 

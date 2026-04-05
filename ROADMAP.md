@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — EXT-5C complete (v1.35.0). TTS-7P queued next, EINK-6A follows. 1,442 tests, 82 files. Latest tagged release: v1.35.0.
+**Last updated**: 2026-04-05 — TTS-7P complete (v1.36.0). Rolling pause-boundary planner added. TTS-7Q next; EINK-6A and EINK-6B follow. 1,479 tests, 83 files. Latest tagged release: v1.36.0.
 **Current branch**: `main`
-**Current state**: Phase 6 feature work active. EXT-5C complete. Queue WARN — depth 2 (`TTS-7P` → `EINK-6A`), backfill needed.
+**Current state**: Phase 6 feature work active. TTS-7P complete. Rolling planner now drives chunk selection and silence injection. TTS-7Q (true glide cursor) is next. Queue GREEN — depth 3 (`TTS-7Q` → `EINK-6A` → `EINK-6B`).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -66,10 +66,11 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair ✅ (v1.33.9)
   ├── TTS-7O: Audible Pause Injection & Smooth Narration Cursor ✅ (v1.34.0)
   ├── EXT-5C: Rich Article Capture & Hero Image Cards ✅ (v1.35.0)
-  ├── TTS-7P: Rolling Pause-Boundary Planner (queued)
+  ├── TTS-7P: Rolling Pause-Boundary Planner ✅ (v1.36.0)
+  ├── TTS-7Q: True Glide & Audio-Aligned Narration Cursor (queued after TTS-7P)
   │
   │  Feature work
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued after TTS-7P)
+  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued after TTS-7Q)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
     │
@@ -977,7 +978,9 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint TTS-7P: Rolling Pause-Boundary Planner
+### Sprint TTS-7P: Rolling Pause-Boundary Planner ✅ COMPLETED (v1.36.0)
+
+> BUG-140 resolved. New `src/utils/narrationPlanner.ts` (270 lines) — `buildNarrationPlan`, `PlannedChunk`, `NarrationPlan`, `computeSilenceMs`, `planNeedsRebuild`, dialogue detection. `generationPipeline.ts` uses planner for chunk selection + silence injection. `kokoroStrategy.ts` passes `getParagraphBreaks` to pipeline. `useNarration.ts` passes paragraph breaks ref. Two new planner constants: `TTS_PLANNER_WINDOW_WORDS` (400), `TTS_PLANNER_MIN_CHUNK_WORDS` (10). 33 new tests (1,479 total, 83 files).
 
 **Goal:** Add a lightweight forward-looking narration planner that classifies pause boundaries for the active text window ahead of playback, so chunk splitting, silence injection, resume behavior, and dialogue handling all use one consistent local plan.
 
@@ -1041,6 +1044,78 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 11. `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** TTS-7O
+
+---
+
+### Sprint TTS-7Q: True Glide & Audio-Aligned Narration Cursor
+
+**Goal:** Upgrade narration cursor movement from “good and stable” to “silky” by driving the 3-word narration band from audio-aligned progress rather than discrete DOM target hops, while preserving the hard-won anchor/resume correctness from `TTS-7M` and `TTS-7O`.
+
+**Problem:** `TTS-7O` made the narration cursor stable enough to ship: the band moves, left-right twitch is reduced, and pause/replay can keep an anchor. But live testing shows the cursor still feels stepped and laggy compared with smooth Kokoro audio, and chunk handoffs can appear to continue from wherever the visual band was stuck instead of the last audio-confirmed narration position. At this point, more CSS easing is the wrong lever; the remaining gap is architectural. The visual cursor is still being inferred from coarse word/window updates rather than a dedicated audio-aligned progress model.
+
+**Design decisions:**
+- **Lock in the current stable contract first.** No regressions to explicit selection start, pause anchor visibility, replay-from-anchor, reopen authority, or the 3-word narration window.
+- **Separate canonical audio cursor from visual cursor.** The first narrated word remains the only authoritative logical anchor for start, pause, resume, save, and reopen. The moving band is visual only.
+- **Drive glide from audio-time progress, not DOM chasing.** The narration band should follow a continuous progress rail derived from scheduled audio timing within the active chunk instead of trying to animate toward each newly highlighted DOM word.
+- **Chunk handoff must be continuity-safe.** When one chunk ends and the next begins, the canonical cursor must continue from the last audio-confirmed word, never from a stale visual band position.
+- **Use a stable line rail when possible.** Prefer a simpler, more stable line-aware glide model over aggressive word-rect remeasurement if that produces smoother perceived motion.
+- **Truth-sync stays a guardrail, not the main movement system.** The 12-word truth-sync remains in place, but only as correction for drift; it must not be the primary visible driver of cursor advancement.
+
+**Baseline:**
+- `src/utils/audioScheduler.ts`
+- `src/hooks/useNarration.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/components/FoliatePageView.tsx`
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useReaderMode.ts`
+- `src/styles/global.css`
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-143`, `BUG-144`
+4. `ROADMAP.md` — this section
+5. `src/utils/audioScheduler.ts`
+6. `src/hooks/useNarration.ts`
+7. `src/hooks/narration/kokoroStrategy.ts`
+8. `src/components/FoliatePageView.tsx`
+9. `src/components/ReaderContainer.tsx`
+10. `src/hooks/useReaderMode.ts`
+11. `src/styles/global.css`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Introduce canonical audio-progress state** — Expose a continuous chunk-progress model from the scheduler based on actual audio clock / scheduled word spans so the renderer has something smoother than per-word target snaps. | `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Separate audio anchor from visual band state** — Audit narration state so pause/resume/save/reopen/chunk handoff read the canonical audio cursor only, never the visual band’s interpolated position. | `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Replace stepped overlay chasing with an audio-aligned rail follower** — Rework the Foliate narration band so it follows a stable line/word rail derived from canonical audio progress, not just the latest measured DOM window. | `src/components/FoliatePageView.tsx`, `src/styles/global.css` |
+| 4 | Primary CLI (renderer-fixer scope) | **Make chunk handoff visually continuous** — Ensure the next chunk begins from the last audio-confirmed position and the band does not visibly restart, stall, or leap ahead at chunk boundaries. | `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/FoliatePageView.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Preserve stable pause/replay behavior** — Keep the visible paused anchor and replay-from-anchor contract intact under the new progress model. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx` |
+| 6 | Primary CLI (renderer-fixer scope) | **Add drift/jank diagnostics** — Instrument audio cursor vs visual band position, chunk-boundary carry-over, and truth-sync corrections so regressions are measurable in live logs. | `src/utils/narrateDiagnostics.ts`, `src/utils/narratePerf.ts`, related call sites |
+| 7 | test-runner | **Regression tests** — Add coverage for: (a) canonical audio cursor survives chunk handoff, (b) visual band never becomes the replay anchor, (c) truth-sync corrects drift without becoming the main movement source, (d) pause/replay still resumes from canonical cursor, (e) chunk-boundary carry-over stays monotonic. ≥14 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-compliance-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narration cursor is driven by a canonical audio-progress model rather than DOM target chasing alone
+2. The 3-word band moves more continuously and no longer feels primarily 12-word-reset-driven
+3. Pause/replay/save/reopen continue to use the authoritative first narrated word only
+4. Chunk handoff is monotonic and does not visually restart from a stale band position
+5. The visual band never becomes the replay/resume anchor
+6. Truth-sync remains a correction mechanism, not the dominant visible motion driver
+7. The left-right twitch fix is preserved
+8. Visible paused anchor is preserved
+9. Explicit selection start behavior is preserved
+10. ≥14 new regression tests
+11. `npm test` passes
+12. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** TTS-7P
 
 ---
 

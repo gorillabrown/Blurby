@@ -34,6 +34,12 @@ export interface KokoroStrategyDeps {
   getWeightConfig?: () => import("../../utils/audioScheduler").WordWeightConfig | undefined;
   /** TTS-7O: Get current pause config for silence injection at chunk boundaries */
   getPauseConfig?: () => import("../../utils/pauseDetection").PauseConfig | undefined;
+  /** TTS-7P: Get paragraph break set for planner-aware silence injection */
+  getParagraphBreaks?: () => Set<number>;
+  /** Footnote behavior for narration */
+  getFootnoteMode?: () => "skip" | "read";
+  /** Footnote cue insertion points */
+  getFootnoteCues?: () => Array<{ afterWordIdx: number; text: string }>;
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
 }
@@ -82,6 +88,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getSpeed: () => getBucket(),
     getWeightConfig: deps.getWeightConfig,
     getPauseConfig: deps.getPauseConfig,
+    getParagraphBreaks: deps.getParagraphBreaks,
+    getFootnoteMode: deps.getFootnoteMode,
+    getFootnoteCues: deps.getFootnoteCues,
     onChunkReady: (chunk) => {
       // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
       const isFirst = !firstChunkReceived;

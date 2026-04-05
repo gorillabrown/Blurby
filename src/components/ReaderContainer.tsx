@@ -20,7 +20,7 @@ import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
 import FoliatePageView, { wrapWordsInSpans, unwrapWordSpans } from "./FoliatePageView";
 import { FlowScrollEngine } from "../utils/FlowScrollEngine";
-import ReaderBottomBar from "./ReaderBottomBar";
+import ReaderBottomBar, { ChapterListHandle } from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
 import ReturnToReadingPill from "./ReturnToReadingPill";
@@ -133,6 +133,8 @@ export default function ReaderContainer({
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
+  const narrationStateFlushRafRef = useRef<number | null>(null);
+  const narrationStatePendingIdxRef = useRef<number | null>(null);
 
   // Flow mode plays within Page view (word highlight advances at WPM)
   const [flowPlaying, setFlowPlaying] = useState(false);
@@ -390,10 +392,11 @@ export default function ReaderContainer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeDoc.id, wordsRef.current.length]);
 
-  // NAR-2: Sync book ID to narration hook for cache keying
+  // NAR-2: Sync book ID to narration hook for cache keying.
+  // Footnote mode affects generated audio text, so it must partition cache identity.
   useEffect(() => {
-    narration.setBookId(activeDoc.id);
-  }, [activeDoc.id, narration.setBookId]);
+    narration.setBookId(`${activeDoc.id}::fn:${settings.ttsFootnoteMode || "skip"}`);
+  }, [activeDoc.id, settings.ttsFootnoteMode, narration.setBookId]);
 
   // TTS-6E/6I: Sync pronunciation overrides (global + per-book) → narration hook
   useEffect(() => {
@@ -439,6 +442,7 @@ export default function ReaderContainer({
 
   // NAR-3: Full-book word array for seamless narration across sections
   const bookWordsRef = useRef<BookWordArray | null>(null);
+  const footnoteCuesRef = useRef<Array<{ afterWordIdx: number; text: string }>>([]);
   const bookWordsCompleteRef = useRef<boolean>(false);
   const [bookWordMeta, setBookWordMeta] = useState<{ sections: BookWordArray["sections"]; totalWords: number } | null>(null);
   const currentNarrationSectionRef = useRef<number>(-1);
@@ -446,7 +450,16 @@ export default function ReaderContainer({
 
   useEffect(() => {
     setBookWordMeta(null);
+    footnoteCuesRef.current = [];
   }, [activeDoc.id]);
+
+  useEffect(() => {
+    narration.setFootnoteMode(settings.ttsFootnoteMode || "skip");
+  }, [settings.ttsFootnoteMode, narration]);
+
+  useEffect(() => {
+    narration.setFootnoteCues(footnoteCuesRef.current);
+  }, [narration, activeDoc.id, bookWordMeta?.totalWords]);
 
   useEffect(() => {
     if (!useFoliate || !bookWordMeta?.sections?.length) return;
@@ -473,6 +486,7 @@ export default function ReaderContainer({
           totalWords: result.totalWords ?? result.words.length,
           complete: true,
         };
+        footnoteCuesRef.current = result.footnoteCues || [];
         bookWordsCompleteRef.current = true;
         setBookWordMeta({
           sections: result.sections,
@@ -506,6 +520,7 @@ export default function ReaderContainer({
         totalWords: result.totalWords ?? result.words.length,
         complete: true,
       };
+      footnoteCuesRef.current = result.footnoteCues || [];
 
       // TTS-7C: Yield between extraction result processing and ref updates
       await new Promise(r => setTimeout(r, 0));
@@ -662,12 +677,24 @@ export default function ReaderContainer({
     jumpToWord,
     foliateApiRef,
     onWordAdvance: (idx: number) => {
-      setHighlightedWordIndex(idx);
+      highlightedWordIndexRef.current = idx;
+      if (readingModeRef.current === "narration") {
+        narrationStatePendingIdxRef.current = idx;
+        if (narrationStateFlushRafRef.current == null) {
+          narrationStateFlushRafRef.current = requestAnimationFrame(() => {
+            narrationStateFlushRafRef.current = null;
+            if (narrationStatePendingIdxRef.current != null) {
+              setHighlightedWordIndex(narrationStatePendingIdxRef.current);
+            }
+          });
+        }
+      } else {
+        setHighlightedWordIndex(idx);
+      }
       // TTS-7A: Update background cacher with live cursor position
       backgroundCacherRef.current?.updateCursorPosition(idx);
-      // Also fire the RAF-based DOM update for ReaderView's focus span rendering
-      // (ReaderView uses direct DOM manipulation when focusSpan < 1, bypassing React)
-      if (onWordUpdateRef.current && wordsRef.current[idx]) {
+      // ReaderView DOM updates are only relevant for non-narration modes.
+      if (readingModeRef.current !== "narration" && onWordUpdateRef.current && wordsRef.current[idx]) {
         onWordUpdateRef.current(wordsRef.current[idx], idx);
       }
     },
@@ -678,6 +705,24 @@ export default function ReaderContainer({
     setFlowPlaying,
     bookWordsCompleteRef,
   });
+
+  useEffect(() => {
+    return () => {
+      if (narrationStateFlushRafRef.current != null) {
+        cancelAnimationFrame(narrationStateFlushRafRef.current);
+        narrationStateFlushRafRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (readingMode === "narration") return;
+    if (narrationStateFlushRafRef.current != null) {
+      cancelAnimationFrame(narrationStateFlushRafRef.current);
+      narrationStateFlushRafRef.current = null;
+    }
+    narrationStatePendingIdxRef.current = null;
+  }, [readingMode]);
 
   // ── Mode transitions (extracted to useReaderMode hook) ──────────────
   const modeHook = useReaderMode({
@@ -927,7 +972,7 @@ export default function ReaderContainer({
   }, [words, highlightedWordIndex]);
 
   // Keyboard shortcuts — fully mode-aware
-  const chapterListRef = useRef<{ toggle: () => void } | null>(null);
+  const chapterListRef = useRef<ChapterListHandle | null>(null);
   const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
   useReaderKeys("reader", legacyReaderMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList, handleCycleMode, handleCycleAndStart, handleSentencePrev, handleSentenceNext);
 
@@ -998,7 +1043,13 @@ export default function ReaderContainer({
   }, [readingMode, effectiveWpm, narration.speaking, narration.warming]);
 
   // Determine current word index for bottom bar
-  const currentWordIndex = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+  const currentWordIndex = useMemo(() => {
+    if (readingMode === "focus") return wordIndex;
+    if (useFoliate && readingMode === "page" && foliateFraction >= 0 && (activeDoc.wordCount || 0) > 0) {
+      return Math.max(0, Math.floor(foliateFraction * (activeDoc.wordCount || 0)));
+    }
+    return highlightedWordIndex;
+  }, [readingMode, wordIndex, useFoliate, foliateFraction, activeDoc.wordCount, highlightedWordIndex]);
 
   // Legacy useEffect blocks for foliate word highlighting and Flow word advancement
   // have been removed — mode classes (FlowMode, NarrateMode) now drive these directly.
