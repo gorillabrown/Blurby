@@ -537,6 +537,8 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 
 **Backpressure model (TTS-7C):** `pendingChunks` counter incremented on `onChunkReady` emission, decremented by `acknowledgeChunk()` (called by kokoroStrategy on scheduler consumption). Pipeline holds emission when `pendingChunks >= TTS_QUEUE_DEPTH` (5). Self-heals when counter drops below threshold.
 
+**Rolling pause-boundary planner (TTS-7P):** `src/utils/narrationPlanner.ts` introduces a local plan structure for the active forward text window (configurable via `TTS_PLANNER_WINDOW_WORDS`, default 400 words). `buildNarrationPlan(words, startIdx, options)` classifies all sentence/clause/paragraph/dialogue boundaries across the window and returns a `NarrationPlan` containing a `PlannedChunk[]` array. `computeSilenceMs(chunkIndex, plan, pauseConfig)` derives silence duration from the same classification. `planNeedsRebuild(plan, currentIdx, words)` gates recomputation. The plan is passed to both `generationPipeline.ts` (chunk selection) and the silence injection path, making the planner the single authority that forbids mid-sentence chunk endings. `kokoroStrategy.ts` passes `getParagraphBreaks` to the pipeline; `useNarration.ts` holds the paragraph breaks ref.
+
 **Known limitations:**
 - Web Speech rhythm pause controls (commas, sentences, paragraphs, numbers, longer words) do not affect Kokoro playback. UI hidden when Kokoro is active engine.
 - Opus encoding for cache is lossy — audio fidelity is acceptable for TTS but not bit-exact.

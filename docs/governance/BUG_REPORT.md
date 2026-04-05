@@ -8,21 +8,37 @@
 
 ## Incomplete
 
-### BUG-141: URL and extension article imports lose article formatting and inline images
-**Reported:** 2026-04-05
-**Severity:** High
-**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/epub-converter.js`
-**Description:** Articles imported via in-app URL import or the Chrome extension do not preserve enough of the source article experience. The imported reading content can flatten article structure and commonly drops inline article images/figures, even when the original article clearly contains hero and body images.
-**Root cause:** The article import flow extracts cleaned HTML but still behaves as a text-first pipeline. It downloads only one lead image for `coverPath` and does not consistently collect, download, rewrite, and embed the rest of the article’s inline assets into the generated EPUB.
-**Fix plan:** `EXT-5C` — preserve cleaned rich article HTML, collect an article asset manifest, download/rewrite inline images and captions into the generated EPUB, and keep in-app URL import and extension import on the same fidelity path.
-
-### BUG-142: URL article hero image is not consistently promoted onto the reading card
+### BUG-143: Narration cursor is stable but still not truly audio-aligned
 **Reported:** 2026-04-05
 **Severity:** Medium
-**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
-**Description:** Imported article cards often fall back to a monogram or a weak image choice even when the source article has a strong hero image. The reading card should use the article’s real hero/lead image whenever a valid one exists.
-**Root cause:** Hero selection is too shallow and card promotion is too fragile. The importer picks or validates only a single lead image path, often via metadata, without enough article-aware ranking or guaranteed `coverPath` promotion for URL docs.
-**Fix plan:** `EXT-5C` — improve hero-image selection (prefer real lead figure over logos/tiny thumbs when appropriate) and ensure the chosen hero always becomes `coverPath` for URL docs so existing card components render it.
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/FoliatePageView.tsx`
+**Description:** After `TTS-7O` and follow-on live fixes, the narration cursor now moves, pause/replay preserves an anchor, and the left-right twitch is largely gone. This is stable enough to keep. But the visual band still feels stepped and laggy compared with smooth Kokoro audio. Users perceive the 3-word cursor as “better, but not silky.”
+**Root cause:** The visual band is still being driven from coarse word/window target updates and renderer-side interpolation, not a dedicated audio-aligned progress model tied to the actual scheduled playback clock.
+**Fix plan:** `TTS-7Q` — introduce canonical audio-progress state and rework the 3-word narration band to follow an audio-time-derived rail instead of DOM target chasing alone.
+
+### BUG-144: Chunk handoff can continue from stale visual cursor position
+**Reported:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
+**Description:** At chunk boundaries, narration can appear to pick up from wherever the visual band was stuck or ahead, rather than the last audio-confirmed narrated word. Users notice that pause/replay or next-chunk continuation can start where the cursor sat instead of where speech truly left off.
+**Root cause:** Canonical narration progress and visual interpolation are not fully separated. Some handoff/resume paths still allow visual state to influence the perceived or resumed start position.
+**Fix plan:** `TTS-7Q` — make the canonical audio cursor the only authority for chunk carry-over, pause/replay, and resume. The visual band becomes a pure follower and can never become the anchor.
+
+### ~~BUG-141~~ ✅ Fixed — EXT-5C (v1.35.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/epub-converter.js`, `main/ws-server.js`
+**Description:** Articles imported via in-app URL import or the Chrome extension lost too much of the source article experience. Imported reading content flattened structure and commonly dropped inline article images/figures, even when the original article clearly contained hero and body images.
+**Root cause:** The article import flow extracted cleaned HTML but still behaved as a text-first pipeline. It downloaded only one lead image for `coverPath` and did not consistently collect, download, rewrite, and embed the rest of the article’s inline assets into the generated EPUB.
+**Fix:** Added a full article asset pipeline: `collectArticleAssets`, parallel `downloadArticleImages` with graceful partial failure, rewritten `contentHtml` to local EPUB asset paths, and shared the same logic across in-app URL imports and extension imports.
+
+### ~~BUG-142~~ ✅ Fixed — EXT-5C (v1.35.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/ws-server.js`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
+**Description:** Imported article cards often fell back to a monogram or a weak image choice even when the source article had a strong hero image. The reading card should use the article’s real hero/lead image whenever a valid one exists.
+**Root cause:** Hero selection was too shallow and card promotion too fragile. The importer picked or validated only a single lead image path, often via metadata, without enough article-aware ranking or guaranteed `coverPath` promotion for URL docs.
+**Fix:** Replaced the flat hero cascade with article-aware `rankHeroImage`, filtered junk image URLs, and ensured the winning hero is promoted to `coverPath` for both URL and extension article imports so existing card components render it.
 
 ### ~~BUG-138~~ ✅ Fixed — TTS-7O (v1.34.0)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05
@@ -40,13 +56,13 @@
 **Root cause:** The current narration highlight is still fundamentally word-step based. There is no explicit three-word visual window and no dedicated glide layer that preserves a single authoritative first-word anchor.
 **Fix:** 3-word narration window (`page-word--narration-context` for words N+1, N+2). CSS transitions for smooth glide (0.15s ease). Periodic truth-sync every 12 words + on chunk boundary + on resume via `onTruthSync` callback. First word remains canonical anchor.
 
-### BUG-140: Narration pause handling still lacks a forward-looking local boundary plan
-**Reported:** 2026-04-05
+### ~~BUG-140~~ ✅ Fixed — TTS-7P (v1.36.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Medium
 **Location:** `src/utils/generationPipeline.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`, `src/hooks/useNarration.ts`
-**Description:** Chunk splitting, silence insertion, resume targeting, and dialogue handling still rely on local heuristics at the moment of playback. Even with sentence snapping and future audible silence injection, long-form narration quality is still constrained by having no rolling structure plan for the active text window.
-**Root cause:** The Kokoro path has no local pause-boundary planner that looks ahead across the next few chunks. Each concern makes boundary decisions independently instead of sharing one active planning structure.
-**Fix plan:** `TTS-7P` — add a rolling pause-boundary planner for the active text window and make chunking, silence injection, resume/retarget, and dialogue handling consult the same plan. The planner becomes the single authority that forbids mid-sentence chunk endings.
+**Description:** Chunk splitting, silence insertion, resume targeting, and dialogue handling still relied on local heuristics at the moment of playback. Even with sentence snapping and audible silence injection, long-form narration quality was constrained by having no rolling structure plan for the active text window.
+**Root cause:** The Kokoro path had no local pause-boundary planner that looked ahead across the next few chunks. Each concern made boundary decisions independently instead of sharing one active planning structure.
+**Fix:** Added `src/utils/narrationPlanner.ts` (270 lines) — `buildNarrationPlan` builds a rolling boundary plan for the active text window (~400 words ahead). `PlannedChunk`, `NarrationPlan`, `computeSilenceMs`, `planNeedsRebuild`, and dialogue detection are exported. `generationPipeline.ts` now consults the plan for chunk selection and silence injection. `kokoroStrategy.ts` passes `getParagraphBreaks` to the pipeline; `useNarration.ts` passes paragraph breaks ref. Two new planner constants: `TTS_PLANNER_WINDOW_WORDS` (400), `TTS_PLANNER_MIN_CHUNK_WORDS` (10). The planner is now the single authority that forbids mid-sentence chunk endings. 33 new tests.
 
 ### ~~BUG-136~~ ✅ Fixed — TTS-7N (v1.33.9)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05

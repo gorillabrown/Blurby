@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import type { BlurbySettings, PronunciationOverride, NarrationProfile } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES, MAX_NARRATION_PROFILES, createDefaultNarrationProfile, profileFromSettings } from "../../constants";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, TTS_FOOTNOTE_MODE, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES, MAX_NARRATION_PROFILES, createDefaultNarrationProfile, profileFromSettings } from "../../constants";
 import { applyPronunciationOverrides } from "../../utils/pronunciationOverrides";
 import { exportNarrationData, validateNarrationImport, applyNarrationImport, resetNarrationData } from "../../utils/narrationPortability";
 
@@ -555,6 +555,23 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       />
       <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
         Paragraphs with this many sentences or fewer are treated as dialogue and get a shorter pause.
+      </div>
+
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">Footnotes</span>
+        <select
+          className="settings-select"
+          value={settings.ttsFootnoteMode ?? TTS_FOOTNOTE_MODE}
+          onChange={(e) => handleTtsChange({ ttsFootnoteMode: e.target.value as "skip" | "read" })}
+          aria-label="Footnote narration behavior"
+          style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+        >
+          <option value="skip">Skip markers and footnotes</option>
+          <option value="read">Read footnote immediately</option>
+        </select>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+        Default is skip. “Read immediately” inserts the note into narration when the reference is reached.
       </div>
 
       <PronunciationOverridesEditor

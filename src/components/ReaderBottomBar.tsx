@@ -5,6 +5,13 @@ import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
 
+export interface ChapterListHandle {
+  toggle: () => void;
+  open: () => void;
+  close: () => void;
+  isOpen: () => boolean;
+}
+
 interface ReaderBottomBarProps {
   activeDoc: BlurbyDoc & { content: string };
   words: string[];
@@ -26,7 +33,7 @@ interface ReaderBottomBarProps {
   onJumpToChapter?: (chapterIndex: number) => void;
   onEinkRefresh?: () => void;
   onTogglePlay?: () => void;
-  chapterListRef?: React.MutableRefObject<{ toggle: () => void } | null>;
+  chapterListRef?: React.MutableRefObject<ChapterListHandle | null>;
   lastReadingMode?: "focus" | "flow" | "narration";
   ttsRate?: number;
   onSetTtsRate?: (rate: number) => void;
@@ -71,8 +78,10 @@ export default function ReaderBottomBar({
   foliateFraction,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
+  const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
   const [rateStatus, setRateStatus] = useState<"idle" | "confirming" | "set">("idle");
   const rateStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const chapterGroupRef = useRef<HTMLDivElement | null>(null);
 
   // Show CONFIRMED → SET sequence when TTS rate changes
   const handleSetTtsRate = useCallback((newRate: number) => {
@@ -91,9 +100,14 @@ export default function ReaderBottomBar({
   // Expose toggle to parent via ref (for C hotkey)
   useEffect(() => {
     if (chapterListRef) {
-      chapterListRef.current = { toggle: () => setChapterDropdownOpen((p) => !p) };
+      chapterListRef.current = {
+        toggle: () => setChapterDropdownOpen((p) => !p),
+        open: () => setChapterDropdownOpen(true),
+        close: () => setChapterDropdownOpen(false),
+        isOpen: () => chapterDropdownOpen,
+      };
     }
-  }, [chapterListRef]);
+  }, [chapterListRef, chapterDropdownOpen]);
 
   // Progress — for foliate EPUBs use the authoritative fraction, else word-based
   const progress = foliateFraction != null && foliateFraction >= 0
@@ -128,6 +142,63 @@ export default function ReaderBottomBar({
     [chapterList, wordIndex]
   );
   const currentChapter = chapterList[curChapterIdx];
+
+  useEffect(() => {
+    setFocusedChapterIdx(curChapterIdx >= 0 ? curChapterIdx : 0);
+  }, [curChapterIdx]);
+
+  useEffect(() => {
+    if (!chapterDropdownOpen) return;
+
+    const closeMenu = () => setChapterDropdownOpen(false);
+    const selectChapter = (idx: number) => {
+      if (idx < 0 || idx >= chapterList.length) return;
+      onJumpToChapter?.(idx);
+      setChapterDropdownOpen(false);
+    };
+
+    const handlePointerDown = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (!chapterGroupRef.current?.contains(target)) {
+        closeMenu();
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!chapterDropdownOpen) return;
+      if (e.code === "ArrowDown" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        setFocusedChapterIdx((prev) => Math.min(prev + 1, chapterList.length - 1));
+        return;
+      }
+      if (e.code === "ArrowUp" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        setFocusedChapterIdx((prev) => Math.max(prev - 1, 0));
+        return;
+      }
+      if (e.code === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        selectChapter(focusedChapterIdx);
+        return;
+      }
+      if (e.code === "Space" || e.code === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMenu();
+      }
+    };
+
+    window.addEventListener("mousedown", handlePointerDown, true);
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown, true);
+      window.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [chapterDropdownOpen, chapterList.length, focusedChapterIdx, onJumpToChapter]);
 
   // Chapter time remaining
   const chapterTimeRemaining = useMemo(() => {
@@ -292,7 +363,7 @@ export default function ReaderBottomBar({
 
         {/* Chapter nav */}
         {chapterList.length > 1 && (
-          <div className="rbb-chapter-group">
+          <div className="rbb-chapter-group" ref={chapterGroupRef}>
             <button
               className="rbb-chapter-arrow"
               onClick={() => { triggerCoachHint("prevChapter"); onPrevChapter?.(); }}
@@ -324,9 +395,10 @@ export default function ReaderBottomBar({
                   <li
                     key={i}
                     role="option"
-                    aria-selected={i === curChapterIdx}
-                    className={`rbb-chapter-option ${i === curChapterIdx ? "rbb-chapter-option--active" : ""}`}
+                    aria-selected={i === focusedChapterIdx}
+                    className={`rbb-chapter-option ${i === focusedChapterIdx ? "rbb-chapter-option--active" : ""}`}
                     style={{ paddingLeft: `${((chapters[i] as any)?.depth || 0) * 16 + 8}px` }}
+                    onMouseEnter={() => setFocusedChapterIdx(i)}
                     onClick={() => {
                       onJumpToChapter?.(i);
                       setChapterDropdownOpen(false);

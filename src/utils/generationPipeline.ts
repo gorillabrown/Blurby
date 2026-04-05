@@ -11,9 +11,16 @@ import {
   TTS_COLD_START_CHUNK_WORDS,
   TTS_CRUISE_CHUNK_WORDS,
   TTS_QUEUE_DEPTH,
+  TTS_PLANNER_WINDOW_WORDS,
 } from "../constants";
 import type { ScheduledChunk } from "./audioScheduler";
 import { isSentenceEnd, classifyChunkBoundary } from "./pauseDetection";
+import {
+  buildNarrationPlan,
+  findPlannedChunk,
+  planNeedsRebuild,
+  type NarrationPlan,
+} from "./narrationPlanner";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -35,6 +42,12 @@ export interface PipelineConfig {
   getWeightConfig?: () => import("./audioScheduler").WordWeightConfig | undefined;
   /** TTS-7O: Get current pause config for silence injection at chunk boundaries */
   getPauseConfig?: () => import("./pauseDetection").PauseConfig | undefined;
+  /** TTS-7P: Get paragraph break set for planner-aware silence injection */
+  getParagraphBreaks?: () => Set<number>;
+  /** Footnote narration behavior */
+  getFootnoteMode?: () => "skip" | "read";
+  /** Footnote cue insertion points */
+  getFootnoteCues?: () => Array<{ afterWordIdx: number; text: string }>;
   /** Called when a chunk is ready for scheduling */
   onChunkReady: (chunk: ScheduledChunk) => void;
   /** Called when a chunk should be cached to disk (TTS-7A: includes wordCount) */
@@ -64,6 +77,8 @@ export interface GenerationPipeline {
   resume: () => void;
   /** TTS-7C: Acknowledge a consumed chunk (decrements backpressure counter) */
   acknowledgeChunk: () => void;
+  /** TTS-7P: Get the current active narration plan (for testing/inspection) */
+  getActivePlan: () => import("./narrationPlanner").NarrationPlan | null;
 }
 
 // ── Chunk Sizing ─────────────────────────────────────────────────────────────
@@ -151,6 +166,33 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   // TTS-7C: Backpressure — hold emission when scheduler has too many buffered chunks (BUG-115)
   let pendingChunks = 0;
   let backpressureResolve: (() => void) | null = null;
+  // TTS-7P: Rolling narration plan — single authority for chunk boundary decisions
+  let activePlan: NarrationPlan | null = null;
+
+  function buildChunkText(chunkWords: string[], startIdx: number, wordCount: number): string {
+    if (config.getFootnoteMode?.() !== "read") return chunkWords.join(" ");
+    const cues = config.getFootnoteCues?.() || [];
+    if (cues.length === 0) return chunkWords.join(" ");
+
+    const cueMap = new Map<number, string[]>();
+    for (const cue of cues) {
+      if (cue.afterWordIdx < startIdx - 1 || cue.afterWordIdx >= startIdx + wordCount) continue;
+      const arr = cueMap.get(cue.afterWordIdx) || [];
+      arr.push(cue.text);
+      cueMap.set(cue.afterWordIdx, arr);
+    }
+
+    const parts: string[] = [];
+    const prelude = cueMap.get(startIdx - 1);
+    if (prelude) parts.push(...prelude);
+    for (let i = 0; i < chunkWords.length; i++) {
+      const globalIdx = startIdx + i;
+      parts.push(chunkWords[i]);
+      const cueTexts = cueMap.get(globalIdx);
+      if (cueTexts) parts.push(...cueTexts);
+    }
+    return parts.join(" ");
+  }
 
   async function flushOrderedChunks(myGenId: number): Promise<void> {
     while (active && myGenId === generationId) {
@@ -187,6 +229,65 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     await flushOrderedChunks(myGenId);
   }
 
+  /**
+   * TTS-7P: Rebuild the rolling narration plan when needed.
+   * The plan covers the forward window from `anchorIdx` and is the single
+   * authority for chunk boundary positions and silence durations.
+   */
+  function refreshPlanIfNeeded(anchorIdx: number, words: string[]): void {
+    if (!planNeedsRebuild(activePlan, anchorIdx)) return;
+    const pauseConfig = config.getPauseConfig?.();
+    const paragraphBreaks = config.getParagraphBreaks?.() ?? new Set<number>();
+    activePlan = buildNarrationPlan(
+      words,
+      anchorIdx,
+      TTS_CRUISE_CHUNK_WORDS,
+      paragraphBreaks,
+      pauseConfig,
+      TTS_PLANNER_WINDOW_WORDS,
+    );
+    if (import.meta.env.DEV) {
+      console.debug(`[pipeline] plan rebuilt at anchor=${anchorIdx}, chunks=${activePlan.chunks.length}, windowEnd=${activePlan.windowEnd}`);
+    }
+  }
+
+  /**
+   * TTS-7P: Resolve chunk end index using the active plan.
+   *
+   * The planner operates at cruise-chunk granularity. Ramp-up chunks (smaller than
+   * TTS_CRUISE_CHUNK_WORDS) bypass the planner — they use the original sentence-snapping
+   * logic to preserve exact cold-start sizing (13 → 26 → 52 → 104 words).
+   *
+   * For cruise chunks the plan is authoritative: its pre-computed boundary and
+   * silence value are used directly, avoiding per-chunk re-classification.
+   */
+  function resolveChunkEnd(
+    words: string[],
+    startIdx: number,
+    chunkSize: number,
+  ): { endIdx: number; plannedSilenceMs: number; isDialogue: boolean } {
+    // Ramp-up chunks: bypass planner, use sentence-snapping as before
+    if (chunkSize < TTS_CRUISE_CHUNK_WORDS) {
+      const rawEndIdx = Math.min(startIdx + chunkSize, words.length);
+      const endIdx = snapToSentenceBoundary(words, startIdx, rawEndIdx);
+      return { endIdx, plannedSilenceMs: -1, isDialogue: false }; // -1 = derive from classifyChunkBoundary
+    }
+
+    // Cruise phase: planner is authoritative
+    const planned = activePlan ? findPlannedChunk(activePlan, startIdx) : undefined;
+    if (planned) {
+      return {
+        endIdx: planned.endIdx,
+        plannedSilenceMs: planned.silenceMs,
+        isDialogue: planned.isDialogue,
+      };
+    }
+    // Planner miss — use the original sentence snapping as fallback
+    const rawEndIdx = Math.min(startIdx + chunkSize, words.length);
+    const endIdx = snapToSentenceBoundary(words, startIdx, rawEndIdx);
+    return { endIdx, plannedSilenceMs: -1, isDialogue: false }; // -1 = derive from classifyChunkBoundary
+  }
+
   /** Produce a chunk starting at startIdx. Returns actual words consumed (may differ from chunkSize on cache hit). */
   async function produceChunk(startIdx: number, chunkSize: number, myGenId: number): Promise<number> {
     if (!active || myGenId !== generationId) return chunkSize;
@@ -197,12 +298,17 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       return chunkSize;
     }
 
-    // TTS-7N (BUG-136): Snap chunk boundary to nearest sentence ending.
-    // Prevents mid-sentence chunks that cause awkward pauses.
-    const rawEndIdx = Math.min(startIdx + chunkSize, words.length);
-    const endIdx = snapToSentenceBoundary(words, startIdx, rawEndIdx);
+    // TTS-7P: Refresh the rolling plan for cruise-phase chunks (cheap if already current).
+    // Ramp-up chunks (< cruise size) bypass the planner entirely.
+    if (chunkSize >= TTS_CRUISE_CHUNK_WORDS) {
+      refreshPlanIfNeeded(startIdx, words);
+    }
+
+    // TTS-7P: Resolve chunk end from plan (single boundary authority for cruise chunks).
+    // Ramp-up chunks fall back to sentence-snapping to preserve cold-start sizing.
+    const { endIdx, plannedSilenceMs, isDialogue } = resolveChunkEnd(words, startIdx, chunkSize);
     const chunkWords = words.slice(startIdx, endIdx);
-    const text = chunkWords.join(" ");
+    const text = buildChunkText(chunkWords, startIdx, chunkWords.length);
 
     // Check cache first — cached chunk may be larger than requested (e.g. cruise-sized)
     if (config.isCached && config.loadCached) {
@@ -236,29 +342,40 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         : new Float32Array(result.audio);
       const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
 
-      // TTS-7O: Classify the boundary at the chunk edge for silence injection
+      // TTS-7P: Boundary type from planner (or fallback to classifyChunkBoundary)
       const boundaryType = classifyChunkBoundary(words, endIdx - 1);
 
-      // TTS-7O: Inject silence based on boundary classification
+      // TTS-7P: Silence injection — planner is the single authority.
+      // plannedSilenceMs === -1 means planner miss; derive from classifyChunkBoundary as before.
       let finalAudio = audio;
       let finalDurationMs = durationMs;
       let silenceMs = 0;
       const pauseConfig = config.getPauseConfig?.();
-      if (pauseConfig && boundaryType !== "none") {
-        const pauseMs =
+
+      let resolvedSilenceMs = 0;
+      if (plannedSilenceMs >= 0) {
+        // Planner provided a definitive value
+        resolvedSilenceMs = plannedSilenceMs;
+      } else if (pauseConfig && boundaryType !== "none") {
+        // Fallback: derive from boundary classification (TTS-7O behavior)
+        resolvedSilenceMs =
           boundaryType === "paragraph" ? pauseConfig.paragraphMs :
           boundaryType === "sentence" ? pauseConfig.sentenceMs :
           boundaryType === "clause" ? pauseConfig.clauseMs :
           boundaryType === "comma" ? pauseConfig.commaMs : 0;
-        if (pauseMs > 0) {
-          silenceMs = pauseMs;
-          const silenceSamples = Math.round((pauseMs / 1000) * result.sampleRate);
-          const withSilence = new Float32Array(audio.length + silenceSamples);
-          withSilence.set(audio, 0);
-          // Silence samples default to 0.0 (silence)
-          finalAudio = withSilence;
-          finalDurationMs = durationMs + pauseMs;
-        }
+      }
+
+      if (resolvedSilenceMs > 0) {
+        silenceMs = resolvedSilenceMs;
+        const silenceSamples = Math.round((resolvedSilenceMs / 1000) * result.sampleRate);
+        const withSilence = new Float32Array(audio.length + silenceSamples);
+        withSilence.set(audio, 0);
+        finalAudio = withSilence;
+        finalDurationMs = durationMs + resolvedSilenceMs;
+      }
+
+      if (import.meta.env.DEV && isDialogue && silenceMs > 0) {
+        console.debug(`[pipeline] dialogue chunk at ${startIdx}: silence reduced to ${silenceMs}ms`);
       }
 
       const chunk: ScheduledChunk = {
@@ -381,6 +498,8 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     reorderBuffer = new Map();
     pendingChunks = 0;
     if (backpressureResolve) { backpressureResolve(); backpressureResolve = null; }
+    // TTS-7P: Reset rolling plan on stop so retarget/flush starts with a fresh plan
+    activePlan = null;
   }
 
   function flush(resumeFromIdx: number): void {
@@ -418,5 +537,5 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     }
   }
 
-  return { start, stop, flush, isActive, pause: pipelinePause, resume: pipelineResume, acknowledgeChunk };
+  return { start, stop, flush, isActive, pause: pipelinePause, resume: pipelineResume, acknowledgeChunk, getActivePlan: () => activePlan };
 }
