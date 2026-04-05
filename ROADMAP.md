@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7K complete. EPUB global word-source promotion & page-mode isolation. 1,331 tests, 75 files. Latest tagged release: v1.33.6.
+**Last updated**: 2026-04-05 — TTS-7L complete. Exact Foliate text-selection mapping. 1,343 tests, 76 files. Latest tagged release: v1.33.7.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS hotfix lane CLOSED. `TTS-7K` complete (v1.33.6). Feature work resumes: `EINK-6A` is next. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS hotfix lane CLOSED. `TTS-7L` complete (v1.33.7). Feature work resumes: `EINK-6A` is next. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -61,8 +61,9 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery ✅ (v1.33.4; follow-up required)
   ├── TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ (v1.33.5)
   ├── TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ (v1.33.6)
+  ├── TTS-7L: Exact Foliate Text-Selection Mapping ✅ (v1.33.7)
   │
-  │  Feature work (TTS hotfix lane CLOSED at v1.33.6)
+  │  Feature work
   ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (next)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
@@ -103,7 +104,7 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 **Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, `TTS-7I` unified follow-scroll ownership and exact miss recovery, and `TTS-7J` resolved section-sync blink, word-source duplication, and initial-selection overwrite. Fresh post-`7J` logs, however, show one deeper issue remains: EPUB narration is still starting from the currently loaded Foliate DOM word source (`14`, `674`, `293`) instead of the full-book extracted source (`69160`), which breaks first-play selection, cursor/TTS sync, and likely ordinary page-mode navigation. `TTS-7K` is the focused corrective sprint for that source-of-truth mismatch while preserving instant start.
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, `TTS-7I` unified follow-scroll ownership and exact miss recovery, `TTS-7J` resolved section-sync blink, word-source duplication, and initial-selection overwrite, and `TTS-7K` promoted full-book EPUB words as the active source of truth. Fresh testing on 2026-04-05 shows one narrow bug remains: exact word click/global-index selection starts correctly, but text selection still routes through a weak fallback path that matches on word text instead of exact selected span/index. `TTS-7L` is the focused corrective sprint for that final selection-path mismatch.
 
 ---
 
@@ -661,6 +662,93 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 10. `npm run build` succeeds
 
 **Depends on:** TTS-7J
+
+---
+
+### Sprint TTS-7L: Exact Foliate Text-Selection Mapping
+
+**Goal:** Make Foliate text selection start narration from the exact selected word, using the same global EPUB index space that now powers click-to-play and full-book narration. Selection must no longer degrade into a word-text guess.
+
+**Problem:** Fresh live testing after `TTS-7K` shows the EPUB source-of-truth work held, but one narrow selection-path bug remains:
+
+1. **Exact click/global-index selection now works.** Logs show `frozenLaunchIdx = 4065` with `effectiveWords: 270494`, so the new global-word-source path is healthy and should be preserved.
+2. **Text selection still loses the exact selected word index.** In `FoliatePageView`, click events pass `globalWordIndex`, but the `selectionchange` path still only calls `onWordClick(cfi, word)` with raw text. That discards the precise `data-word-index` attached to the selected span.
+3. **`ReaderContainer` still falls back to “first matching word text.”** When `globalWordIndex` is missing, `onWordClick` scans `foliateWordsRef.current` for the first normalized text match. For repeated/common words, narration can start at the wrong occurrence even though the user selected a specific visible word.
+4. **The remaining bug is narrow and should stay narrow.** Do not reopen global EPUB word-source, startup speed, or page-mode isolation work. The fix is to preserve exact selection identity from Foliate DOM → parent callback → highlighted word state → narration start.
+
+**Design decisions:**
+
+- **Exact span/index wins.** If the selected word can be resolved to a `.page-word[data-word-index]`, that global index is authoritative and must be passed through end-to-end.
+- **Selection and click must share one mapping contract.** `selectionchange` and click should produce the same style of payload: `cfi`, `sectionIndex`, optional `wordOffsetInSection`, and exact `globalWordIndex`.
+- **Remove guessy first-match behavior from the normal path.** The “scan for the first matching normalized word text” fallback should no longer be the default selection path. Keep any residual fallback only as a last-resort diagnostic path when no exact span/index can be resolved.
+- **Single-word selection only.** Support exact single-word selection start. If the native selection spans multiple words or cannot be tied to one wrapped word span, do not silently guess a different global word.
+- **Preserve the fast startup win.** Cached/entry-covered narration start should stay effectively immediate. This sprint fixes selection identity, not startup latency.
+
+**Tier:** Quick (tight Foliate selection-path hotfix)
+
+**Baseline:**
+- `src/components/FoliatePageView.tsx` — click path already passes `globalWordIndex`; `selectionchange` currently drops it
+- `src/components/ReaderContainer.tsx` — `onWordClick` still falls back to first normalized text match when `globalWordIndex` is absent
+- `src/utils/startWordIndex.ts` — current global-aware start-word policy from `TTS-7K`
+- `src/hooks/useReaderMode.ts` — startup now respects exact highlighted global indices when they are supplied correctly
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — BUG-134
+4. `ROADMAP.md` — this section
+5. `src/components/FoliatePageView.tsx`
+6. `src/components/ReaderContainer.tsx`
+7. `src/utils/startWordIndex.ts`
+8. `src/hooks/useReaderMode.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Resolve exact selected word index from Foliate selection** — Update the `selectionchange` path so single-word text selection resolves the selected `.page-word[data-word-index]` (or equivalent exact wrapped span) and passes that `globalWordIndex` through `onWordClick`, matching the click path contract. | `src/components/FoliatePageView.tsx` |
+| 2 | Primary CLI (renderer-fixer scope) | **Unify click + selection payload shape** — Ensure both click and text selection send consistent selection metadata (`cfi`, `sectionIndex`, `wordOffsetInSection`, `globalWordIndex`) so the parent never has to guess which occurrence the user meant. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` |
+| 3 | Primary CLI (renderer-fixer scope) | **Demote/remove first-match text fallback** — Refactor `ReaderContainer` so play-on-selection does not normally scan for the first normalized text match. If no exact index can be resolved, fail safely and log diagnostics instead of starting from a possibly different occurrence. | `src/components/ReaderContainer.tsx`, `src/utils/narrateDiagnostics.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Preserve exact selected start into narration launch** — Verify the selected global word index becomes the highlighted cursor and survives into `startNarration()` unchanged on first play and on pause/reselect. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts` |
+| 5 | Primary CLI (renderer-fixer scope) | **Diagnostics** — Add targeted logs for selection resolution: exact span/index found, fallback refused, and launch index used. Make it obvious whether a user action was click-based or selection-based. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/utils/narrateDiagnostics.ts` |
+| 6 | test-runner | **Tests** — Add regression coverage for: exact single-word text selection on repeated/common words, click and selection producing the same global start index, first play honoring the selected global word, pause/reselect honoring the new selected word, and no first-match text fallback starting narration from the wrong occurrence. ≥8 new tests. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | doc-keeper | **Documentation pass** — Update BUG-134 and queue/roadmap state based on the outcome. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Primary CLI: Task 1 (exact selection index resolution)
+2. Primary CLI: Task 2 (unify payload shape)
+3. Primary CLI: Task 3 (remove guessy fallback path)
+4. Primary CLI: Task 4 (preserve exact selected start into launch)
+5. Primary CLI: Task 5 (diagnostics)
+    ↓
+6. test-runner: Task 6
+7. test-runner: Task 7
+8. spec-compliance-reviewer: Task 8
+9. doc-keeper: Task 9
+10. blurby-lead: Task 10
+```
+
+#### SUCCESS CRITERIA
+
+1. Exact single-word Foliate text selection starts narration from the selected occurrence, not the first matching word elsewhere in the book
+2. Click and text selection produce the same global start index when targeting the same visible word
+3. Fresh logs clearly show an exact selected `globalWordIndex` flowing into `startNarration()`
+4. `ReaderContainer` no longer uses first-normalized-word match as the normal selection path
+5. If exact selection resolution fails, the app does not silently start narration from a different occurrence
+6. First play honors exact text selection on EPUBs
+7. Pause-and-reselect also honors the newly selected exact word
+8. Cached/entry-covered narration start remains effectively immediate
+9. ≥8 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7K
 
 ---
 

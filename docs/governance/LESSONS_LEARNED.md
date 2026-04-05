@@ -765,3 +765,19 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 - PR-125: For EPUB modes, the Foliate DOM-loaded words are a VIEWPORT, not the source of truth. Once `bookWordsRef.current.complete` is true, all word-array consumers (mode startup, cursor tracking, chunk scheduling) must use the global array. DOM words are only for rendering/highlighting/navigation.
 - PR-126: Any function that validates word indices must accept a global word count parameter when the index may be global. Never validate a global index against a DOM-slice length.
 - PR-127: Page-mode navigation must not depend on or be blocked by mode-specific section/source machinery. Section-boundary effects should be gated to only the modes that need them.
+
+### [2026-04-05] LL-072: All User Selection Paths Must Preserve Exact Word Identity
+
+**Area:** renderer, foliate bridge, selection mapping
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-7K fixed the global word-source and click-to-play, but text selection (double-click/drag) still lost the exact word identity. The `selectionchange` handler in FoliatePageView sent only `(cfi, word)` — no `globalWordIndex`. ReaderContainer then fell back to scanning for the first normalized text match, which picked the wrong occurrence for common words like "the".
+
+**Root Cause:** The `selectionchange` handler was written before word spans had `data-word-index` attributes. It was never updated when click handling gained exact-index support.
+
+**Fix:** `selectionchange` now resolves the `.page-word[data-word-index]` span via `anchorNode.parentElement.closest("[data-word-index]")` and sends the full payload matching click. First-match text fallback demoted to diagnostic-only.
+
+**Guardrail:**
+- PR-128: Every user selection path (click, double-click, drag-select, keyboard-select) must resolve to an exact `data-word-index` when available. Never fall back to text-based word matching as the normal path — that discards occurrence identity.
+- PR-129: When adding a new selection mechanism, verify it sends the same payload shape as click: `(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex)`. The parent must never need to guess.

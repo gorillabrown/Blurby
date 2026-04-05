@@ -2,11 +2,19 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-04-04
+**Last updated:** 2026-04-05
 
 ---
 
 ## Incomplete
+
+### ~~BUG-134~~ ✅ Fixed — TTS-7L (v1.33.7)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** After `TTS-7K`, EPUB narration now starts from the correct global source and exact click/global-index selection works. But the native text-selection path still drops the exact selected `globalWordIndex`: `selectionchange` reports only `(cfi, word)`, and `ReaderContainer` falls back to scanning for the first normalized text match. On repeated/common words, narrate can start from a different occurrence than the one the user selected.
+**Root cause:** `selectionchange` does not preserve the selected `.page-word[data-word-index]` identity, so the parent loses exact occurrence information and guesses by word text.
+**Fix:** `selectionchange` now resolves exact `.page-word` span via `anchorNode.parentElement.closest("[data-word-index]")`, sends full unified payload matching click. First-match text fallback in ReaderContainer demoted to diagnostic log + no-op.
 
 ### ~~BUG-131~~ ✅ Fixed — TTS-7K (v1.33.6)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-05
