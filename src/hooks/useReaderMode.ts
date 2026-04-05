@@ -232,14 +232,15 @@ export function useReaderMode({
           return;
         }
 
-        // TTS-7H (BUG-122): Visible-word readiness — word must be on active visible page
-        const visibleOnPage = foliateApiRef.current?.isWordVisibleOnPage?.(frozenLaunchIdx) ?? false;
-        if (visibleOnPage) {
+        // TTS-7I (BUG-124): Use shared resolveWordState — same truth source as live highlight.
+        // This eliminates the gate/highlight mismatch where gate said "visible" but highlight missed.
+        const wordState = foliateApiRef.current?.resolveWordState?.(frozenLaunchIdx);
+        if (wordState?.visible) {
           narrationLaunchRef.current = false;
           if (import.meta.env.DEV) {
             performance.mark("narrate:render-gate-end");
             try { performance.measure("narrate:render-gate", "narrate:render-gate-start", "narrate:render-gate-end"); } catch {}
-            console.debug("[narrate] render gate passed — word", frozenLaunchIdx, "visible on page");
+            console.debug("[narrate] render gate passed (resolveWordState) — word", frozenLaunchIdx, "visible on page");
           }
           modeInstance.startMode("narration", frozenLaunchIdx, effectiveWords, pBreaks);
           return;

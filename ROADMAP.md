@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — TTS-7H complete. Visible-word readiness & stable launch index. 1,287 tests, 73 files. Latest tagged release: v1.33.3.
+**Last updated**: 2026-04-04 — TTS-7I complete. Foliate follow-scroll unification & exact miss recovery. 1,295 tests, 73 files. Latest tagged release: v1.33.4.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS stabilization COMPLETE (TTS-7A through TTS-7H). Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS stabilization COMPLETE (TTS-7A through TTS-7I). Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -57,7 +57,8 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7E: Cold-Start Narration Fix (partial attempt; reopened)
   ├── TTS-7F: Proactive Entry Cache Coverage & Cruise Warm ✅ (v1.33.1)
   ├── TTS-7G: First-Chunk IPC Verification ✅ (v1.33.2) — BUG-117 verified resolved
-  ├── TTS-7H: Visible-Word Readiness & Stable Launch Index (queued — next)
+  ├── TTS-7H: Visible-Word Readiness & Stable Launch Index ✅ (v1.33.3; partial, follow-up required)
+  ├── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery (queued — next)
   │
   │  Feature work
   ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)
@@ -96,11 +97,11 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 | Lane | Sprints | Versions | Key Deliverables |
 |------|---------|----------|------------------|
 | TTS-6 | TTS-6C→6S + HOTFIX-11 | v1.14.0–v1.28.0 | Native-rate buckets, startup hardening, pronunciation overrides, word alignment, accessibility, profiles, portability, runtime stability, performance budgets, session continuity, diagnostics, cursor sync |
-| TTS-7 (stabilization + hotfix) | TTS-7A→7G | v1.29.0–v1.33.2 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification. `TTS-7H` is now queued as a live-regression follow-up for false-positive Foliate readiness and unstable launch index behavior. |
+| TTS-7 (stabilization + hotfix) | TTS-7A→7H | v1.29.0–v1.33.3 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification, and the first visible-word/startup fix pass. `TTS-7I` is now queued as the remaining Foliate follow-scroll and miss-recovery hotfix. |
 
 **Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. However, fresh logs still show Foliate startup launching against words that are “in DOM” but not actually visible/highlightable, plus unstable launch-word selection and bad fallback navigation. `TTS-7H` is the focused corrective sprint for that remaining startup contract.
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, but fresh post-`7H` logs still show a broken Foliate follow contract: the render gate can claim success immediately before highlight miss, and Foliate still owns two competing narration-follow scroll paths. `TTS-7I` is the focused corrective sprint for that remaining startup/mid-play page-jump contract.
 
 ---
 
@@ -383,6 +384,101 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 8. `npm run build` succeeds
 
 **Depends on:** TTS-7G
+
+---
+
+### Sprint TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery
+
+**Goal:** Eliminate the remaining Foliate page-jump behavior during narration startup and mid-play follow. Narration must use one truthful readiness/highlight contract, one owner for page-follow motion, and one exact recovery path when the spoken word leaves the currently rendered Foliate DOM.
+
+**Problem:** Fresh live logs after `TTS-7H` prove the Foliate narration bridge is still structurally split:
+
+1. **Gate/highlight contract mismatch.** Startup now logs `gate start — frozen launch word: 0` and `render gate passed — word 0 visible on page`, but the very next call logs `highlightWordByIndex miss: word 0 not in DOM`. That means the gate and the live highlighter are still not checking the same thing.
+2. **Duplicate follow-scroll owners.** Foliate narration currently has two page-follow mechanisms: the imperative bridge (`highlightWordByIndex()` + `scrollToAnchor`) and a second React effect keyed off `narrationWordIndex` that directly calls `scrollIntoView({ behavior: "smooth" })`. Either path can move the page, and together they can yank the page backward mid narration.
+3. **Miss recovery is suppressed after full-book extraction.** In `useReadingModeInstance.ts`, narration highlight misses return early when `bookWordsCompleteRef.current` is true. That prevents the old `next()` storm, but it also means the system can keep speaking while the cursor is no longer being recovered onto the active page. The result is a miss storm followed by delayed, surprising page/paragraph movement.
+4. **Return-to-narration can restore scroll without restoring cursor.** `returnToNarration()` currently clears `userBrowsingRef` and scrolls to the current word, but it does not guarantee that the narration highlight/cursor is reapplied. After a page jump, the user can navigate back and still land on a page with no visible narration cursor.
+
+**Design decisions:**
+
+- **One source of truth for render readiness and highlightability.** Introduce a shared Foliate helper that resolves the exact target span/render state for a global word index. The startup gate and the live highlighter must use that same helper, not parallel logic.
+- **One owner for narration follow motion.** Remove the duplicate React `narrationWordIndex` scroll-follow path for Foliate narration. Page-follow should be owned by the imperative narration bridge only.
+- **Highlight and motion are separate responsibilities.** `highlightWordByIndex()` should not blindly scroll on every narrated word. Highlight application should be cheap and local. Page/section motion should happen only when the target word is not already visible and narration truly needs to catch up.
+- **Exact recovery, not ignore-or-next.** When narration advances to a word outside the rendered page/section, recover to the exact owning section/page for that word. Do not silently ignore misses once extraction is complete, and do not blindly call `next()` without knowing the target section.
+- **Startup success must be verified through the same code path playback uses.** “Render gate passed” should only be logged once the exact launch word can be resolved by the same helper the narration-follow bridge will use on word 0.
+- **Do not sacrifice the new fast start.** Live testing shows playback now begins immediately, which is correct and must be preserved. `TTS-7I` is not allowed to reintroduce fixed startup delays or hold audio just to hide the Foliate bug; the fix is to correct page-follow behavior while keeping cached/startup playback effectively instant.
+- **Return-to-narration must restore both position and visible cursor.** Navigating back to the live narration position should re-enter a fully visible narration-follow state, not just scroll near the right paragraph.
+
+**Tier:** Quick (focused Foliate narration follow-contract hotfix)
+
+**Baseline:**
+- `src/components/FoliatePageView.tsx` — `highlightWordByIndex()`, `isWordVisibleOnPage()`, `findFirstVisibleWordIndex()`, `goToSection()`, React `narrationWordIndex` effect
+- `src/hooks/useReaderMode.ts` — startup gate, frozen launch index, timeout recovery
+- `src/hooks/useReadingModeInstance.ts` — narration `onWordAdvance` miss handling, `pendingResumeRef`
+- `src/components/ReaderContainer.tsx` — `narrationWordIndex` prop wiring, `onWordsReextracted` recovery handoff
+- `src/utils/narrateDiagnostics.ts` / `src/utils/narratePerf.ts` — startup and miss telemetry
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — BUG-124, BUG-125, BUG-126
+4. `ROADMAP.md` — this section
+5. `src/components/FoliatePageView.tsx`
+6. `src/hooks/useReaderMode.ts`
+7. `src/hooks/useReadingModeInstance.ts`
+8. `src/components/ReaderContainer.tsx`
+9. `src/utils/narrateDiagnostics.ts`
+10. `src/utils/narratePerf.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Unify render-state lookup** — Refactor Foliate word lookup into one shared helper/API that answers: is the word loaded, is it visible on the active page, and can it be highlighted now. Make both the startup gate and the live narration-follow path consume that shared result instead of separate DOM queries. | `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Remove duplicate narration scroll owner** — Delete or disable the separate React `narrationWordIndex` effect for Foliate narration. Keep one owner for narration highlight/follow behavior and ensure it does not call `scrollIntoView({ behavior: "smooth" })` on every word. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` |
+| 3 | Primary CLI (renderer-fixer scope) | **Split highlight from motion** — Make `highlightWordByIndex()` (or its replacement) apply highlight without automatic page motion when the target is already visible. Add a separate exact follow/navigation path that only moves the page when the narrated word is off-page or in another section. | `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Exact miss recovery after extraction** — Replace the current `bookWordsCompleteRef.current => return` narration miss behavior with section-aware recovery. Use target-section ownership and a single in-flight recovery token/cooldown so narration can catch the cursor back up without page-turn storms. | `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Restore cursor on return-to-narration** — Update the Foliate “jump back to narration” path so it re-applies the live narration highlight/cursor through the same unified follow/highlight contract, not just a scroll. If the current narrated word is off-page, it must perform exact recovery before claiming success. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts` |
+| 6 | Primary CLI (renderer-fixer scope) | **Tighten startup/miss diagnostics** — Log when gate success is based on the shared render-state helper, when exact recovery is requested, when return-to-narration restores cursor successfully, and when page motion is intentionally triggered versus suppressed. | `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts`, `src/utils/narrateDiagnostics.ts`, `src/utils/narratePerf.ts` |
+| 7 | test-runner | **Tests** — Add regression coverage for: gate success and first highlight sharing the same resolver, no duplicate Foliate narration scroll path, exact miss recovery after book extraction, return-to-narration restoring visible cursor, and no mid-play paragraph jump from the removed React scroll effect. ≥8 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-compliance-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** — Update BUG-124/125/126/127 and queue/roadmap state based on the outcome. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Primary CLI: Task 1 (shared render-state resolver)
+2. Primary CLI: Task 2 (remove duplicate narration scroll owner)
+3. Primary CLI: Task 3 (split highlight from page motion)
+4. Primary CLI: Task 4 (exact miss recovery)
+5. Primary CLI: Task 5 (return-to-narration cursor restore)
+6. Primary CLI: Task 6 (diagnostics)
+    ↓
+7. test-runner: Task 7
+8. test-runner: Task 8
+9. spec-compliance-reviewer: Task 9
+10. doc-keeper: Task 10
+11. blurby-lead: Task 11
+```
+
+#### SUCCESS CRITERIA
+
+1. `render gate passed` is never followed immediately by `highlightWordByIndex miss` for the same launch word
+2. Foliate narration has exactly one follow-scroll owner during playback
+3. No React `narrationWordIndex` effect is independently scrolling the Foliate page during narration
+4. Starting narration on a fresh EPUB no longer visibly jumps the page before the cursor can follow
+5. Mid-play narration no longer jumps backward a paragraph from duplicate follow-scroll logic
+6. Narration highlight misses after full-book extraction trigger exact recovery instead of silent ignore
+7. Cursor stays meaningfully coupled to TTS across section/page transitions during play
+8. Returning to narration after browsing away restores a visible cursor/highlight, not just page position
+9. Cached or entry-covered narration start remains effectively immediate; no new artificial startup delay is introduced
+10. ≥8 new regression tests
+11. `npm test` passes
+12. `npm run build` succeeds
+
+**Depends on:** TTS-7H
 
 ---
 

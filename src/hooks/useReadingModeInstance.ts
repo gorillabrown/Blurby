@@ -29,7 +29,7 @@ export interface UseReadingModeInstanceParams {
   onComplete: () => void;
   /** Flow playing state setter — for non-EPUB flow (FlowCursorController) */
   setFlowPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  /** Ref: whether full-book word extraction is complete (HOTFIX-10: skip miss handler .next()) */
+  /** @deprecated TTS-7I removed usage — exact miss recovery replaces the old skip-on-complete guard */
   bookWordsCompleteRef?: React.MutableRefObject<boolean>;
 }
 
@@ -155,27 +155,42 @@ export function useReadingModeInstance({
         instance = new FlowMode(config);
         break;
 
-      case "narration":
+      case "narration": {
         // NarrateMode's onWordAdvance: highlight in foliate + page-turn-on-miss bridge
         // Note: Narration does NOT pause on miss — TTS keeps speaking to avoid audible stutter.
         // Only the visual highlight is lost temporarily until the page turns.
+        // TTS-7I: Exact miss recovery with cooldown token replaces both the old
+        // .next() storm and the silent-ignore-after-extraction (BUG-126).
+        let missRecoveryCooldownUntil = 0;
+        const MISS_RECOVERY_COOLDOWN_MS = 800; // Prevent recovery storms
         config.callbacks.onWordAdvance = (idx: number) => {
           onWordAdvanceRef.current(idx);
           if (isFoliate && foliateApiRefStable.current) {
             const found = foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
             if (!found) {
-              // HOTFIX-10: When extraction is complete, NAR-3 section-boundary effect handles
-              // page navigation. Skip .next() to prevent miss-handler storm.
-              if (bookWordsCompleteRef?.current) return;
-              // Word not in loaded sections — turn page so highlights catch up
-              pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
-              foliateApiRefStable.current.next();
+              // TTS-7I (BUG-126): Exact section-aware recovery instead of silent ignore.
+              // Cooldown prevents recovery storms when many consecutive words miss.
+              const now = Date.now();
+              if (now < missRecoveryCooldownUntil) return; // Still cooling down from last recovery
+              missRecoveryCooldownUntil = now + MISS_RECOVERY_COOLDOWN_MS;
+
+              const sectionIdx = foliateApiRefStable.current.getSectionForWordIndex?.(idx);
+              if (sectionIdx != null) {
+                if (import.meta.env.DEV) console.debug("[narrate] miss recovery — word", idx, "→ section", sectionIdx);
+                pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
+                foliateApiRefStable.current.goToSection(sectionIdx);
+              } else {
+                // Section unknown — fallback to .next() (pre-extraction path)
+                pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
+                foliateApiRefStable.current.next();
+              }
               // onWordsReextracted will re-apply the highlight
             }
           }
         };
         instance = new NarrateMode(config, narration);
         break;
+      }
 
       case "page":
       default:
