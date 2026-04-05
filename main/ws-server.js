@@ -273,6 +273,8 @@ async function handleAddArticle(client, article) {
     const fsPromises = require("fs/promises");
     const path = require("path");
     const os = require("os");
+    const { downloadArticleImages } = require("./ipc/misc");
+    const { collectArticleAssets } = require("./url-extractor");
     const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
     const wordCount = article.textContent.trim().split(/\s+/).filter(Boolean).length;
 
@@ -282,6 +284,39 @@ async function handleAddArticle(client, article) {
       if (d.queuePosition !== undefined && d.queuePosition !== null && d.queuePosition > max) return d.queuePosition;
       return max;
     }, -1);
+
+    // Use HTML content if available, otherwise wrap plain text in paragraphs
+    let articleHtml = article.htmlContent || article.textContent.split(/\n\n+/).map(p => `<p>${p.trim()}</p>`).join("\n");
+
+    // ── Download article images (shared path with URL import) ────────────
+    let coverPath = null;
+    let coverImageBuffer = null;
+    let preDownloadedImages = [];
+
+    try {
+      const baseUrl = article.sourceUrl || "";
+      const articleAssets = collectArticleAssets(articleHtml, baseUrl);
+      const heroImageUrl = article.heroImageUrl || (articleAssets.images.length > 0 ? articleAssets.images[0].resolvedUrl : null);
+
+      const downloaded = await downloadArticleImages({
+        contentHtml: articleHtml,
+        articleImages: articleAssets.images,
+        heroImageUrl,
+      });
+      preDownloadedImages = downloaded.images;
+      articleHtml = downloaded.contentHtml;
+
+      // Save hero image as cover
+      if (downloaded.heroBuffer && downloaded.heroExt) {
+        coverImageBuffer = downloaded.heroBuffer;
+        const coversDir = path.join(_ctx.getDataPath(), "covers");
+        await fsPromises.mkdir(coversDir, { recursive: true });
+        coverPath = path.join(coversDir, `${docId}${downloaded.heroExt}`);
+        await fsPromises.writeFile(coverPath, downloaded.heroBuffer);
+      }
+    } catch (err) {
+      console.log("[ws-server] Article image download failed (non-fatal):", err.message);
+    }
 
     const doc = {
       id: docId,
@@ -299,6 +334,7 @@ async function handleAddArticle(client, article) {
       unread: true,
       seenAt: undefined,
       queuePosition: maxQueuePos + 1,
+      coverPath,
     };
 
     _ctx.addDocToLibrary(doc);
@@ -309,8 +345,6 @@ async function handleAddArticle(client, article) {
       const { htmlToEpub } = require("./epub-converter");
       const { EPUB_CONVERTED_DIR } = require("./constants");
 
-      // Use HTML content if available, otherwise wrap plain text in paragraphs
-      const articleHtml = article.htmlContent || article.textContent.split(/\n\n+/).map(p => `<p>${p.trim()}</p>`).join("\n");
       const tempHtmlPath = path.join(os.tmpdir(), `blurby-ext-${docId}.html`);
       await fsPromises.writeFile(
         tempHtmlPath,
@@ -326,6 +360,8 @@ async function handleAddArticle(client, article) {
         author: article.author || "Unknown",
         date: article.publishedDate || undefined,
         source: article.sourceUrl || undefined,
+        coverImage: coverImageBuffer || undefined,
+        preDownloadedImages,
       });
       await fsPromises.unlink(tempHtmlPath).catch(() => {});
 

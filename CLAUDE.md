@@ -264,7 +264,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.34.0 — TTS-7O complete, TTS-7P next)
+## Current System State (v1.35.0 — EXT-5C complete, TTS-7P next, EINK-6A queued)
 
 ### Codebase (branch: `main`)
 
@@ -279,8 +279,9 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7M complete** — BUG-135 resolved. Persistent resume-anchor — pause captures live cursor, reopen uses saved position, passive onLoad/onRelocate cannot downgrade. 17 new tests. v1.33.8.
 - **TTS-7N complete** — BUG-136/137 resolved. Kokoro pause settings now drive word-weight scaling and sentence-boundary chunk snapping. Ctrl+K TTS links repaired to "tts" page. 19 new tests. v1.33.9.
 - **TTS-7O complete** — BUG-138/139 resolved. Punctuation-safe pre-send chunk rounding (expanded outward search), real inter-chunk audible silence injection (classifyChunkBoundary → silence samples), 3-word narration window (page-word--narration-context CSS), smooth cursor via CSS transitions, periodic truth-sync every 12 words. 27 new tests. v1.34.0.
-- Active queue: TTS-7P → EINK-6A (depth 2 — below threshold, backfill needed).
-- 1,418 tests across 81 test files
+- **EXT-5C complete** — BUG-141/142 resolved. Rich article HTML formatting preserved (headings, figures, captions, lists, blockquotes), inline images downloaded and embedded into EPUB (no remote dependency), article-aware hero ranking (body presence > top article image > metadata fallback, rejects junk URLs), hero reliably promoted to coverPath for both URL and extension import paths. Shared downloadArticleImages helper + preDownloadedImages EPUB path unifies both import flows. 24 new tests. v1.35.0.
+- Active queue: TTS-7P → EINK-6A (depth 2 — WARN: below 3, backfill needed).
+- 1,442 tests across 82 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -302,7 +303,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `main/sync-engine.js` — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
   - `main/sync-queue.js` — offline operation queue with compaction and idempotent replay
   - `main/auth.js` — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
-  - `main/url-extractor.js` — URL/article extraction, Readability, PDF export
+  - `main/url-extractor.js` — URL/article extraction, Readability, PDF export, collectArticleAssets, rankHeroImage, isJunkImageUrl
   - `main/cloud-google.js` — Google Drive appDataFolder, resumable uploads, retry
   - `main/window-manager.js` — BrowserWindow, tray, menu, auto-updater
   - `main/cloud-onedrive.js` — OneDrive App Folder via Microsoft Graph, chunked uploads

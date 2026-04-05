@@ -10,14 +10,140 @@ const { net } = require("electron");
 const { countWords } = require("../file-parsers");
 const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
         openSiteLogin } = require("../url-extractor");
-const { COVER_CACHE_MAX } = require("../constants");
+const { COVER_CACHE_MAX, ARTICLE_IMAGE_TIMEOUT_MS, ARTICLE_IMAGE_MIN_SIZE } = require("../constants");
 const { normalizeAuthor } = require("../author-normalize");
+const { imageMediaType } = require("../epub-converter");
 
 async function logToFile(message, errorLogPath) {
   try {
     const timestamp = new Date().toISOString();
     await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
   } catch { /* Intentional: error logging should never crash the app */ }
+}
+
+/**
+ * Detect image format from magic bytes. Returns extension or null if not a recognized image.
+ */
+function detectImageExt(buffer) {
+  if (!buffer || buffer.length < 4) return null;
+  const b = buffer;
+  if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return ".jpg";
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return ".png";
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) return ".gif";
+  if (b.length >= 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return ".webp";
+  // Reject HTML error pages masquerading as images
+  const snippet = b.slice(0, 20).toString("ascii").toLowerCase();
+  if (b[0] === 0x3C || snippet.includes("<!doctype") || snippet.includes("<html")) return null;
+  return null;
+}
+
+/**
+ * Check if an image buffer is too small based on header dimensions.
+ */
+function isImageTooSmall(buffer, ext) {
+  try {
+    if (ext === ".png" && buffer.length >= 24) {
+      const w = buffer.readUInt32BE(16);
+      const h = buffer.readUInt32BE(20);
+      if (w < ARTICLE_IMAGE_MIN_SIZE || h < ARTICLE_IMAGE_MIN_SIZE) return true;
+    } else if (ext === ".jpg") {
+      let i = 2;
+      while (i < buffer.length - 8) {
+        if (buffer[i] === 0xFF) {
+          const marker = buffer[i + 1];
+          if (marker === 0xC0 || marker === 0xC2 || marker === 0xC1 || marker === 0xC3) {
+            const h = buffer.readUInt16BE(i + 5);
+            const w = buffer.readUInt16BE(i + 7);
+            if (w < ARTICLE_IMAGE_MIN_SIZE || h < ARTICLE_IMAGE_MIN_SIZE) return true;
+            break;
+          }
+          const segLen = buffer.readUInt16BE(i + 2);
+          i += 2 + segLen;
+        } else {
+          i++;
+        }
+      }
+    }
+  } catch { /* dimension check failed; allow the image */ }
+  return false;
+}
+
+/**
+ * Download and validate article images for EPUB embedding.
+ * Returns { images, heroBuffer, heroExt, contentHtml } where images is buildEpubZip-compatible,
+ * heroBuffer/heroExt are for the cover image, and contentHtml has rewritten src paths.
+ *
+ * @param {object} opts
+ * @param {string} opts.contentHtml - Cleaned article HTML with remote img URLs
+ * @param {Array<{src: string, resolvedUrl: string}>} opts.articleImages - from collectArticleAssets
+ * @param {string|null} opts.heroImageUrl - chosen hero image URL
+ * @returns {Promise<{images: Array, heroBuffer: Buffer|null, heroExt: string|null, contentHtml: string}>}
+ */
+async function downloadArticleImages({ contentHtml, articleImages, heroImageUrl }) {
+  const images = [];
+  let heroBuffer = null;
+  let heroExt = null;
+  const urlToLocal = new Map(); // resolvedUrl -> ../Images/filename
+
+  // Download all article images (hero + inline) in parallel with individual timeouts
+  const allUrls = new Set();
+  if (heroImageUrl) allUrls.add(heroImageUrl);
+  for (const img of (articleImages || [])) {
+    allUrls.add(img.resolvedUrl);
+  }
+
+  const downloads = await Promise.allSettled(
+    [...allUrls].map(async (imgUrl) => {
+      const fetchUrl = imgUrl.startsWith("//") ? "https:" + imgUrl : imgUrl;
+      const response = await net.fetch(fetchUrl, { signal: AbortSignal.timeout(ARTICLE_IMAGE_TIMEOUT_MS) });
+      if (!response.ok) return null;
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const ext = detectImageExt(buffer);
+      if (!ext) return null;
+      if (isImageTooSmall(buffer, ext)) return null;
+      return { url: imgUrl, buffer, ext };
+    })
+  );
+
+  let imgIdx = 0;
+  for (const result of downloads) {
+    if (result.status !== "fulfilled" || !result.value) continue;
+    const { url, buffer, ext } = result.value;
+
+    // Track hero image
+    if (url === heroImageUrl) {
+      heroBuffer = buffer;
+      heroExt = ext;
+    }
+
+    // Build EPUB image entry
+    const filename = `img_${imgIdx}${ext}`;
+    images.push({
+      id: `img_${imgIdx}`,
+      filename,
+      buffer,
+      mediaType: imageMediaType(ext),
+    });
+    urlToLocal.set(url, `../Images/${filename}`);
+    imgIdx++;
+  }
+
+  // Rewrite contentHtml to point at local EPUB paths
+  let rewrittenHtml = contentHtml || "";
+  for (const [remoteUrl, localPath] of urlToLocal) {
+    // Replace all occurrences of the remote URL in src attributes
+    rewrittenHtml = rewrittenHtml.split(remoteUrl).join(localPath);
+  }
+  // Also replace protocol-relative variants
+  for (const [remoteUrl, localPath] of urlToLocal) {
+    if (remoteUrl.startsWith("https:")) {
+      const protoRelative = remoteUrl.replace("https:", "");
+      rewrittenHtml = rewrittenHtml.split(protoRelative).join(localPath);
+    }
+  }
+
+  return { images, heroBuffer, heroExt, contentHtml: rewrittenHtml };
 }
 
 function register(ctx) {
@@ -58,90 +184,31 @@ function register(ctx) {
 
       const docId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
 
-      // ── Download and validate article cover image ────────────────────────
+      // ── Download article images (hero + inline) ─────────────────────────
       let coverPath = null;
-      let coverImageBuffer = null; // Raw JPEG/PNG buffer for EPUB embedding
-      if (result.imageUrl) {
-        try {
-          const imgUrl = result.imageUrl.startsWith("//") ? "https:" + result.imageUrl : result.imageUrl;
-          const imgResponse = await net.fetch(imgUrl);
-          if (imgResponse.ok) {
-            const imgBuffer = Buffer.from(await imgResponse.arrayBuffer());
+      let coverImageBuffer = null;
+      let articleHtml = result.contentHtml || result.content;
+      let preDownloadedImages = [];
 
-            // Magic byte validation — reject HTML error pages and unknown formats
-            let detectedExt = null;
-            if (imgBuffer.length >= 4) {
-              const b = imgBuffer;
-              if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) {
-                detectedExt = ".jpg";
-              } else if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) {
-                detectedExt = ".png";
-              } else if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) {
-                detectedExt = ".gif";
-              } else if (
-                b.length >= 12 &&
-                b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
-                b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50
-              ) {
-                detectedExt = ".webp";
-              }
-              // Reject HTML responses masquerading as images
-              const firstChar = b[0];
-              const snippet = b.slice(0, 20).toString("ascii").toLowerCase();
-              if (firstChar === 0x3C || snippet.includes("<!doctype") || snippet.includes("<html")) {
-                detectedExt = null; // reject
-                console.log("[url] Rejected HTML error page served as image");
-              }
-            }
+      try {
+        const downloaded = await downloadArticleImages({
+          contentHtml: articleHtml,
+          articleImages: result.articleImages,
+          heroImageUrl: result.imageUrl,
+        });
+        preDownloadedImages = downloaded.images;
+        articleHtml = downloaded.contentHtml;
 
-            if (detectedExt) {
-              // Dimension check: reject images smaller than 200x200
-              let tooSmall = false;
-              try {
-                if (detectedExt === ".png") {
-                  // PNG IHDR: bytes 16-23 = width (4 bytes) + height (4 bytes)
-                  if (imgBuffer.length >= 24) {
-                    const w = imgBuffer.readUInt32BE(16);
-                    const h = imgBuffer.readUInt32BE(20);
-                    if (w < 200 || h < 200) tooSmall = true;
-                  }
-                } else if (detectedExt === ".jpg") {
-                  // Scan JPEG SOF markers (0xFF 0xC0/0xC2) for dimensions
-                  let i = 2;
-                  while (i < imgBuffer.length - 8) {
-                    if (imgBuffer[i] === 0xFF) {
-                      const marker = imgBuffer[i + 1];
-                      if (marker === 0xC0 || marker === 0xC2 || marker === 0xC1 || marker === 0xC3) {
-                        const h = imgBuffer.readUInt16BE(i + 5);
-                        const w = imgBuffer.readUInt16BE(i + 7);
-                        if (w < 200 || h < 200) tooSmall = true;
-                        break;
-                      }
-                      const segLen = imgBuffer.readUInt16BE(i + 2);
-                      i += 2 + segLen;
-                    } else {
-                      i++;
-                    }
-                  }
-                }
-                // For GIF and WebP, skip dimension check (rare, acceptable)
-              } catch { /* dimension check failed; allow the image */ }
-
-              if (!tooSmall) {
-                const coversDir = path.join(ctx.getDataPath(), "covers");
-                await fsPromises.mkdir(coversDir, { recursive: true });
-                coverPath = path.join(coversDir, `${docId}${detectedExt}`);
-                await fsPromises.writeFile(coverPath, imgBuffer);
-                // Keep buffer for EPUB cover embedding (JPEG only; PNG also works with buildEpubZip)
-                coverImageBuffer = imgBuffer;
-              } else {
-                console.log("[url] Skipped image smaller than 200x200");
-              }
-            }
-          }
-        } catch (err) {
-          console.log("[url] Failed to download article image:", err.message);
+        // Save hero image as cover
+        if (downloaded.heroBuffer && downloaded.heroExt) {
+          coverImageBuffer = downloaded.heroBuffer;
+          const coversDir = path.join(ctx.getDataPath(), "covers");
+          await fsPromises.mkdir(coversDir, { recursive: true });
+          coverPath = path.join(coversDir, `${docId}${downloaded.heroExt}`);
+          await fsPromises.writeFile(coverPath, downloaded.heroBuffer);
         }
+      } catch (err) {
+        console.log("[url] Article image download failed (non-fatal):", err.message);
       }
 
       const newDoc = {
@@ -162,7 +229,6 @@ function register(ctx) {
       try {
         const { htmlToEpub } = require("../epub-converter");
         const { EPUB_CONVERTED_DIR } = require("../constants");
-        const articleHtml = result.contentHtml || result.content;
         const tempHtmlPath = path.join(os.tmpdir(), `blurby-url-${docId}.html`);
         await fsPromises.writeFile(
           tempHtmlPath,
@@ -178,6 +244,7 @@ function register(ctx) {
           date: result.publishedDate || undefined,
           source: url,
           coverImage: coverImageBuffer || undefined,
+          preDownloadedImages,
         });
         await fsPromises.unlink(tempHtmlPath).catch(() => {});
 
@@ -358,4 +425,4 @@ function register(ctx) {
   });
 }
 
-module.exports = { register };
+module.exports = { register, downloadArticleImages, detectImageExt, isImageTooSmall };

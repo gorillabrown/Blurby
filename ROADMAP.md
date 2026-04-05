@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7O complete (v1.34.0). Audible pause injection, smooth narration cursor done. TTS-7P queued next. 1,418 tests, 81 files. Latest tagged release: v1.34.0.
+**Last updated**: 2026-04-05 — EXT-5C complete (v1.35.0). TTS-7P queued next, EINK-6A follows. 1,442 tests, 82 files. Latest tagged release: v1.35.0.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS follow-up lane active. TTS-7O complete. Queue WARN — depth 2 (`TTS-7P` → `EINK-6A`); needs backfill to ≥3.
+**Current state**: Phase 6 feature work active. EXT-5C complete. Queue WARN — depth 2 (`TTS-7P` → `EINK-6A`), backfill needed.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -65,6 +65,7 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7M: Persistent Resume Anchor & Reopen Authority ✅ (v1.33.8)
   ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair ✅ (v1.33.9)
   ├── TTS-7O: Audible Pause Injection & Smooth Narration Cursor ✅ (v1.34.0)
+  ├── EXT-5C: Rich Article Capture & Hero Image Cards ✅ (v1.35.0)
   ├── TTS-7P: Rolling Pause-Boundary Planner (queued)
   │
   │  Feature work
@@ -1040,6 +1041,78 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 11. `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** TTS-7O
+
+---
+
+### Sprint EXT-5C: Rich Article Capture & Hero Image Cards
+
+**Goal:** Make URL and extension-imported articles preserve article formatting and inline images in the reading experience, and always promote the chosen hero image onto the library reading card.
+
+**Problem:** The current URL article pipeline extracts readable text and cleaned HTML, but it still behaves like a text-first importer. Readability HTML survives, yet inline article images are often not preserved through import because the pipeline only downloads a single lead image for `coverPath` while leaving the rest of the article HTML pointing at remote assets. As a result, imported articles can lose figure blocks, captions, spacing, and image context compared with the original source. On top of that, even when a strong hero image exists, it is not always promoted consistently onto the reading card, so article cards fall back to a monogram instead of using the article’s real lead image. This affects both in-app URL imports and Chrome extension imports because they share the same main-process extraction path.
+
+**Design decisions:**
+- **One canonical article capture path.** In-app URL import and extension import must both use the same article extraction, asset download, and EPUB generation flow. No separate “extension-lite” article path.
+- **Preserve cleaned article structure, not raw page chrome.** Keep the article body in sanitized rich HTML form: headings, subheads/deks, byline blocks, paragraphs, blockquotes, lists, emphasis, figures, captions, section separators, and inline images. Navigation, ads, sticky UI, and unrelated page chrome remain excluded.
+- **Download and rewrite article assets locally.** Inline article images and the chosen hero image must be fetched during import, stored locally / embedded into the generated EPUB, and rewritten into the article HTML so the reader does not depend on the live source site later.
+- **Hero image becomes the card image.** The final chosen hero image must populate `coverPath` for URL docs so existing card surfaces (`DocGridCard`, list card thumbnail) automatically show it. Monogram fallback only applies when no valid hero image is available.
+- **Hero selection is article-aware.** Prefer the article’s actual lead/hero image: social metadata image when it matches article content, otherwise the strongest lead figure near the top of the article body, otherwise the best qualifying inline image. Avoid logos, avatars, sprites, or tiny thumbnails.
+- **Text fallback remains safe.** If some images fail to download, article import should still succeed with preserved cleaned HTML and whatever assets were successfully fetched. This sprint improves fidelity; it must not make URL import brittle.
+
+**Baseline:**
+- `main/url-extractor.js` — article extraction, Readability HTML, lead image cascade
+- `main/ipc/misc.js` — URL import orchestration, image download, library doc creation
+- `main/epub-converter.js` — HTML → EPUB conversion, embedded cover/image handling
+- `main/ws-server.js` — extension delivery path (shared URL import entry)
+- `src/types.ts` — URL doc metadata schema
+- `src/components/DocGridCard.tsx` — article card hero display
+- `src/components/DocCard.tsx` — list-view thumbnail
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-141`, `BUG-142`
+4. `ROADMAP.md` — this section
+5. `main/ipc/misc.js`
+6. `main/url-extractor.js`
+7. `main/epub-converter.js`
+8. `main/ws-server.js`
+9. `src/types.ts`
+10. `src/components/DocGridCard.tsx`
+11. `src/components/DocCard.tsx`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Preserve rich article HTML structure** — Harden the URL extractor so the canonical article payload retains cleaned rich HTML for real article structure: headings, dek/subhead, blockquotes, lists, figures, captions, emphasis, and section breaks. Avoid flattening article body into plain paragraphs when rich HTML is available. | `main/url-extractor.js`, `main/ipc/misc.js` |
+| 2 | Primary CLI (renderer-fixer scope) | **Collect article asset manifest** — During URL extraction/import, identify the chosen hero image plus inline article images/figures that belong to the article body. Resolve relative URLs, dedupe repeated assets, and keep caption associations where present. | `main/url-extractor.js`, `main/ipc/misc.js` |
+| 3 | Primary CLI (renderer-fixer scope) | **Download and rewrite article images for offline reading** — Fetch hero + inline article images through the same network/session-aware path used for import, store them locally / embed them into the EPUB, and rewrite the cleaned article HTML to point at local packaged assets instead of remote source URLs. | `main/ipc/misc.js`, `main/epub-converter.js` |
+| 4 | Primary CLI (renderer-fixer scope) | **Promote hero image onto reading cards** — Ensure the final chosen hero image becomes `coverPath` for URL docs so grid/list cards render it consistently. Keep monogram fallback only when no valid hero survives validation. | `main/ipc/misc.js`, `src/types.ts`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Article-aware hero ranking** — Improve hero selection to avoid logos, icons, avatars, tiny thumbs, and unrelated sprites. Prefer article lead figures near the top of the body when better than generic social metadata. | `main/url-extractor.js`, `main/ipc/misc.js` |
+| 6 | test-runner | **Regression tests** — Add coverage for: (a) Readability/article HTML preserved as rich structure, (b) inline article images are collected and rewritten into EPUB assets, (c) captions remain attached to the right images, (d) hero image selection prefers real lead figure over junk metadata when appropriate, (e) URL docs use hero image on grid/list cards, (f) extension-imported URLs use the same fidelity path, (g) import still succeeds when some assets fail. ≥12 new tests. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. URL-imported and extension-imported articles preserve cleaned rich article formatting rather than degrading to plain text blocks
+2. Inline article images are retained in the reading experience, not stripped from the imported article
+3. Figure captions stay associated with their images when present
+4. Imported article EPUBs no longer depend on remote image URLs for the retained article images
+5. Hero image selection prefers the real article lead image over logos/tiny thumbnails when available
+6. URL article cards use the chosen hero image on the grid card
+7. URL article list thumbnails use the chosen hero image when available
+8. Monogram fallback appears only when no valid hero image is available
+9. In-app URL import and extension import share the same rich article capture behavior
+10. Partial image-download failures do not abort the whole article import
+11. ≥12 new regression tests
+12. `npm test` passes
+13. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** None (queued after TTS-7P by priority)
 
 ---
 

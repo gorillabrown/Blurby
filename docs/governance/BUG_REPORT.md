@@ -8,6 +8,22 @@
 
 ## Incomplete
 
+### BUG-141: URL and extension article imports lose article formatting and inline images
+**Reported:** 2026-04-05
+**Severity:** High
+**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/epub-converter.js`
+**Description:** Articles imported via in-app URL import or the Chrome extension do not preserve enough of the source article experience. The imported reading content can flatten article structure and commonly drops inline article images/figures, even when the original article clearly contains hero and body images.
+**Root cause:** The article import flow extracts cleaned HTML but still behaves as a text-first pipeline. It downloads only one lead image for `coverPath` and does not consistently collect, download, rewrite, and embed the rest of the article’s inline assets into the generated EPUB.
+**Fix plan:** `EXT-5C` — preserve cleaned rich article HTML, collect an article asset manifest, download/rewrite inline images and captions into the generated EPUB, and keep in-app URL import and extension import on the same fidelity path.
+
+### BUG-142: URL article hero image is not consistently promoted onto the reading card
+**Reported:** 2026-04-05
+**Severity:** Medium
+**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
+**Description:** Imported article cards often fall back to a monogram or a weak image choice even when the source article has a strong hero image. The reading card should use the article’s real hero/lead image whenever a valid one exists.
+**Root cause:** Hero selection is too shallow and card promotion is too fragile. The importer picks or validates only a single lead image path, often via metadata, without enough article-aware ranking or guaranteed `coverPath` promotion for URL docs.
+**Fix plan:** `EXT-5C` — improve hero-image selection (prefer real lead figure over logos/tiny thumbs when appropriate) and ensure the chosen hero always becomes `coverPath` for URL docs so existing card components render it.
+
 ### ~~BUG-138~~ ✅ Fixed — TTS-7O (v1.34.0)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** High
