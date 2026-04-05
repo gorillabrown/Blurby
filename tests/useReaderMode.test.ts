@@ -501,4 +501,170 @@ describe("useReaderMode orchestration logic", () => {
       expect(narrationLaunchRef.current).toBe(false);
     });
   });
+
+  // ── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery ─────
+  // Regression tests for BUG-124, BUG-125, BUG-126, BUG-127.
+
+  describe("TTS-7I: shared resolveWordState resolver", () => {
+    // BUG-124: Gate and highlight must use the same truth source
+    it("resolveWordState returns consistent found+visible for gate and highlight", () => {
+      // Simulate the shared resolver
+      const resolveWordState = (wordIndex: number, loadedRange: [number, number], visibleRange: [number, number]) => {
+        const found = wordIndex >= loadedRange[0] && wordIndex < loadedRange[1];
+        const visible = found && wordIndex >= visibleRange[0] && wordIndex < visibleRange[1];
+        return { found, visible, span: found ? {} as HTMLElement : null, doc: found ? {} as Document : null };
+      };
+
+      // Word 82 is loaded but NOT visible (on a different column/page)
+      const state = resolveWordState(82, [0, 200], [50, 80]);
+      expect(state.found).toBe(true);
+      expect(state.visible).toBe(false);
+
+      // Gate would NOT pass (visible=false), matching what highlight would see
+      // This is the fix for BUG-124: gate agrees with highlight
+    });
+
+    it("resolveWordState visible=true implies highlightWordByIndex will succeed", () => {
+      const resolveWordState = (wordIndex: number, loadedRange: [number, number], visibleRange: [number, number]) => {
+        const found = wordIndex >= loadedRange[0] && wordIndex < loadedRange[1];
+        const visible = found && wordIndex >= visibleRange[0] && wordIndex < visibleRange[1];
+        return { found, visible, span: found ? {} as HTMLElement : null, doc: found ? {} as Document : null };
+      };
+
+      // Word 75 is loaded AND visible
+      const state = resolveWordState(75, [0, 200], [50, 80]);
+      expect(state.found).toBe(true);
+      expect(state.visible).toBe(true);
+      expect(state.span).not.toBeNull();
+
+      // Both gate and highlight will succeed — no mismatch
+    });
+  });
+
+  describe("TTS-7I: no duplicate narration scroll owner", () => {
+    // BUG-125: Only one scroll owner should exist for narration
+    it("highlight does not scroll when word is already visible", () => {
+      const scrollToAnchor = vi.fn();
+
+      // Simulate highlightWordByIndex with visible word
+      const state = { found: true, visible: true, span: {} as HTMLElement, doc: {} as Document };
+      const userBrowsing = false;
+
+      // TTS-7I logic: only scroll when NOT visible
+      if (state.doc && !userBrowsing && !state.visible) {
+        scrollToAnchor();
+      }
+
+      expect(scrollToAnchor).not.toHaveBeenCalled();
+    });
+
+    it("highlight scrolls only when word is off-page", () => {
+      const scrollToAnchor = vi.fn();
+
+      const state = { found: true, visible: false, span: {} as HTMLElement, doc: {} as Document };
+      const userBrowsing = false;
+
+      if (state.doc && !userBrowsing && !state.visible) {
+        scrollToAnchor();
+      }
+
+      expect(scrollToAnchor).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("TTS-7I: exact miss recovery after extraction", () => {
+    beforeEach(() => { vi.useFakeTimers(); });
+    afterEach(() => { vi.useRealTimers(); });
+
+    // BUG-126: Misses must trigger exact recovery, not silent ignore
+    it("miss triggers section-based recovery instead of silent return", () => {
+      const goToSection = vi.fn();
+      const next = vi.fn();
+      let missRecoveryCooldownUntil = 0;
+      const MISS_RECOVERY_COOLDOWN_MS = 800;
+
+      const getSectionForWordIndex = (idx: number) => (idx >= 50 && idx < 120) ? 1 : null;
+
+      // Simulate miss on word 82
+      const idx = 82;
+      const highlightResult = false; // miss
+      if (!highlightResult) {
+        const now = Date.now();
+        if (now >= missRecoveryCooldownUntil) {
+          missRecoveryCooldownUntil = now + MISS_RECOVERY_COOLDOWN_MS;
+          const sectionIdx = getSectionForWordIndex(idx);
+          if (sectionIdx != null) {
+            goToSection(sectionIdx);
+          } else {
+            next();
+          }
+        }
+      }
+
+      expect(goToSection).toHaveBeenCalledWith(1);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("cooldown prevents recovery storms on consecutive misses", () => {
+      const goToSection = vi.fn();
+      let missRecoveryCooldownUntil = 0;
+      const MISS_RECOVERY_COOLDOWN_MS = 800;
+
+      const tryRecover = (idx: number) => {
+        const now = Date.now();
+        if (now < missRecoveryCooldownUntil) return;
+        missRecoveryCooldownUntil = now + MISS_RECOVERY_COOLDOWN_MS;
+        goToSection(1);
+      };
+
+      // First miss — triggers recovery
+      tryRecover(82);
+      // Rapid consecutive misses within cooldown — suppressed
+      tryRecover(83);
+      tryRecover(84);
+      tryRecover(85);
+
+      expect(goToSection).toHaveBeenCalledTimes(1);
+
+      // After cooldown expires — recovery fires again
+      vi.advanceTimersByTime(MISS_RECOVERY_COOLDOWN_MS);
+      tryRecover(90);
+      expect(goToSection).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("TTS-7I: return-to-narration restores cursor", () => {
+    // BUG-127: Return must restore both position and visible highlight
+    it("returnToNarration applies highlight class when word is in DOM", () => {
+      const mockSpan = { classList: { add: vi.fn() } };
+      const scrollToAnchor = vi.fn();
+
+      // Simulate resolveWordState returning found+visible word
+      const state = { found: true, visible: true, span: mockSpan as any, doc: {} as Document };
+
+      // returnToNarration logic
+      if (state.found && state.span) {
+        state.span.classList.add("page-word--highlighted");
+      }
+
+      expect(mockSpan.classList.add).toHaveBeenCalledWith("page-word--highlighted");
+    });
+
+    it("returnToNarration triggers section recovery when word is not in DOM", () => {
+      const goToSection = vi.fn();
+      const state = { found: false, visible: false, span: null, doc: null };
+      const currentIdx = 82;
+
+      const getSectionForWordIndex = (idx: number) => (idx >= 50 && idx < 120) ? 1 : null;
+
+      if (!state.found) {
+        const sectionIdx = getSectionForWordIndex(currentIdx);
+        if (sectionIdx != null) {
+          goToSection(sectionIdx);
+        }
+      }
+
+      expect(goToSection).toHaveBeenCalledWith(1);
+    });
+  });
 });

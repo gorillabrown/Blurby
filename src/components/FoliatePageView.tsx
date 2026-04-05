@@ -279,6 +279,9 @@ export interface FoliateViewAPI {
   isWordVisibleOnPage: (wordIndex: number) => boolean;
   /** TTS-7H: Resolve section index for a given global word index (for fallback navigation). */
   getSectionForWordIndex: (wordIndex: number) => number | null;
+  /** TTS-7I: Shared render-state resolver — single source of truth for gate + highlight.
+   *  Returns whether the word span exists, is visible on the active page, and the DOM refs. */
+  resolveWordState: (wordIndex: number) => { found: boolean; visible: boolean; span: HTMLElement | null; doc: Document | null };
 }
 
 export default function FoliatePageView({
@@ -544,6 +547,9 @@ export default function FoliatePageView({
               // No-op: use highlightWordByIndex instead
             },
             highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration"): boolean => {
+              // TTS-7I: Use shared resolver for consistent gate/highlight truth (BUG-124)
+              const state = viewApiRef!.current!.resolveWordState(wordIndex);
+
               const contents = view.renderer?.getContents?.() ?? [];
               // Use explicit style hint from caller (avoids stale readingModeRef during state transitions)
               const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
@@ -555,47 +561,30 @@ export default function FoliatePageView({
                   d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
                 } catch { /* */ }
               }
-              // Apply highlight to target word
-              let targetSpan: HTMLElement | null = null;
-              let targetDoc: Document | null = null;
-              for (const { doc: d } of contents) {
-                try {
-                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
-                  if (span) {
-                    span.classList.add(highlightClass);
-                    targetSpan = span;
-                    targetDoc = d;
-                    break;
-                  }
-                } catch { /* */ }
-              }
 
               // Word not found in loaded sections — caller decides what to do
-              if (!targetSpan) {
+              if (!state.found || !state.span) {
                 if (process.env.NODE_ENV !== 'production') {
                   console.debug(`[foliate] highlightWordByIndex miss: word ${wordIndex} not in DOM`);
                 }
                 return false;
               }
 
-              // Page auto-advance: scroll to keep the highlighted word visible
-              // Skip if user has manually browsed away during narration
-              if (targetDoc && !userBrowsingRef.current) {
+              // Apply highlight CSS class (cheap, no page motion)
+              state.span.classList.add(highlightClass);
+
+              // TTS-7I (BUG-125): Split highlight from motion — only scroll when word is
+              // NOT already visible on page. Skip if user has browsed away.
+              if (state.doc && !userBrowsingRef.current && !state.visible) {
                 try {
-                  const range = targetDoc.createRange();
-                  range.selectNodeContents(targetSpan);
+                  const range = state.doc.createRange();
+                  range.selectNodeContents(state.span);
                   view.renderer.scrollToAnchor?.(range);
                 } catch { /* safe to ignore */ }
               }
               // If user was browsing and the word is now visible, auto-clear browsing flag
-              if (userBrowsingRef.current) {
-                try {
-                  const rect = targetSpan.getBoundingClientRect();
-                  const iframeWin = targetDoc?.defaultView;
-                  if (iframeWin && rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth) {
-                    userBrowsingRef.current = false; // Narration caught up to where user browsed
-                  }
-                } catch { /* */ }
+              if (userBrowsingRef.current && state.visible) {
+                userBrowsingRef.current = false; // Narration caught up to where user browsed
               }
               return true;
             },
@@ -610,18 +599,10 @@ export default function FoliatePageView({
               }
             },
             getView: () => view,
-            // TTS-7F: Pure read-only DOM probe — no highlight, no scroll, no side effects
-            isWordInDom: (wordIndex: number): boolean => {
-              const contents = view.renderer?.getContents?.() ?? [];
-              for (const { doc: d } of contents) {
-                try {
-                  if (d?.querySelector?.(`[data-word-index="${wordIndex}"]`)) return true;
-                } catch { /* */ }
-              }
-              return false;
-            },
-            // TTS-7H: Visible-word readiness — word is in DOM AND on the active visible page
-            isWordVisibleOnPage: (wordIndex: number): boolean => {
+            // TTS-7I: Shared render-state resolver — single source of truth for gate + highlight + recovery.
+            // Both startup gate (useReaderMode) and live narration follow (useReadingModeInstance)
+            // consume this same function, eliminating the gate/highlight disagreement (BUG-124).
+            resolveWordState: (wordIndex: number): { found: boolean; visible: boolean; span: HTMLElement | null; doc: Document | null } => {
               const contents = view.renderer?.getContents?.() ?? [];
               for (const { doc: d } of contents) {
                 try {
@@ -629,15 +610,21 @@ export default function FoliatePageView({
                   if (!span) continue;
                   const rect = span.getBoundingClientRect();
                   const iframeWin = d.defaultView;
-                  if (!iframeWin) continue;
-                  // Same viewport check as findFirstVisibleWordIndex
-                  if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
-                      rect.top >= 0 && rect.top < iframeWin.innerHeight) {
-                    return true;
-                  }
+                  const visible = !!(iframeWin && rect.width > 0 &&
+                    rect.left >= 0 && rect.left < iframeWin.innerWidth &&
+                    rect.top >= 0 && rect.top < iframeWin.innerHeight);
+                  return { found: true, visible, span, doc: d };
                 } catch { /* */ }
               }
-              return false;
+              return { found: false, visible: false, span: null, doc: null };
+            },
+            // TTS-7F: Pure read-only DOM check — delegates to resolveWordState
+            isWordInDom: (wordIndex: number): boolean => {
+              return viewApiRef!.current!.resolveWordState(wordIndex).found;
+            },
+            // TTS-7H: Visible-word readiness — delegates to resolveWordState
+            isWordVisibleOnPage: (wordIndex: number): boolean => {
+              return viewApiRef!.current!.resolveWordState(wordIndex).visible;
             },
             // TTS-7H: Resolve section index for a global word index (for fallback navigation)
             getSectionForWordIndex: (wordIndex: number): number | null => {
@@ -671,19 +658,29 @@ export default function FoliatePageView({
             isUserBrowsing: () => userBrowsingRef.current,
             returnToNarration: () => {
               userBrowsingRef.current = false;
-              // Re-highlight and scroll to current narration word
-              const contents = view.renderer?.getContents?.() ?? [];
               const currentIdx = highlightedWordIndexRef.current;
-              for (const { doc: d } of contents) {
-                try {
-                  const span = d?.querySelector?.(`[data-word-index="${currentIdx}"]`) as HTMLElement;
-                  if (span) {
-                    const range = d.createRange();
-                    range.selectNodeContents(span);
+              // TTS-7I (BUG-127): Restore both position AND visible cursor through
+              // the same unified path that live narration uses.
+              const state = viewApiRef!.current!.resolveWordState(currentIdx);
+              if (state.found && state.span) {
+                // Apply narration highlight class
+                state.span.classList.add("page-word--highlighted");
+                // Scroll to the word if it's off the visible page
+                if (!state.visible && state.doc) {
+                  try {
+                    const range = state.doc.createRange();
+                    range.selectNodeContents(state.span);
                     view.renderer.scrollToAnchor?.(range);
-                    break;
-                  }
-                } catch { /* */ }
+                  } catch { /* */ }
+                }
+                if (import.meta.env.DEV) console.debug("[foliate] returnToNarration — cursor restored at word", currentIdx, "visible:", state.visible);
+              } else {
+                // Word not in loaded DOM — trigger exact section recovery
+                const sectionIdx = viewApiRef!.current!.getSectionForWordIndex(currentIdx);
+                if (sectionIdx != null) {
+                  if (import.meta.env.DEV) console.debug("[foliate] returnToNarration — word", currentIdx, "not in DOM, recovering to section", sectionIdx);
+                  viewApiRef!.current!.goToSection(sectionIdx);
+                }
               }
             },
             // NAR-3: Section navigation for full-book word extraction
@@ -884,45 +881,11 @@ export default function FoliatePageView({
     return () => cancelAnimationFrame(flowRafRef.current);
   }, [readingMode, flowPlaying, wpm]);
 
-  // Narration highlight — toggle CSS class on word spans inside iframe (same as click highlight)
-  const prevNarrationRef = useRef<{ iframe: Document; idx: number } | null>(null);
-  useEffect(() => {
-    if (narrationWordIndex == null || narrationWordIndex < 0) {
-      // Clear previous highlight
-      if (prevNarrationRef.current) {
-        const prev = prevNarrationRef.current.iframe.querySelector(`[data-word-index="${prevNarrationRef.current.idx}"]`);
-        prev?.classList.remove("page-word--highlighted");
-        prevNarrationRef.current = null;
-      }
-      return;
-    }
-
-    const host = containerRef.current;
-    if (!host) return;
-    const iframes = host.querySelectorAll("iframe");
-
-    // Clear previous highlight
-    if (prevNarrationRef.current) {
-      const prev = prevNarrationRef.current.iframe.querySelector(`[data-word-index="${prevNarrationRef.current.idx}"]`);
-      prev?.classList.remove("page-word--highlighted");
-    }
-
-    // Apply highlight to current word
-    for (const iframe of iframes) {
-      try {
-        const iframeDoc = iframe.contentDocument;
-        if (!iframeDoc) continue;
-        const span = iframeDoc.querySelector(`[data-word-index="${narrationWordIndex}"]`);
-        if (span) {
-          span.classList.add("page-word--highlighted");
-          prevNarrationRef.current = { iframe: iframeDoc, idx: narrationWordIndex };
-          // Scroll span into view if needed
-          span.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
-          break;
-        }
-      } catch { /* cross-origin */ }
-    }
-  }, [narrationWordIndex]);
+  // TTS-7I (BUG-125): Removed duplicate React narrationWordIndex scroll effect.
+  // Narration highlight + follow is now owned entirely by the imperative bridge
+  // (highlightWordByIndex called from useReadingModeInstance's onWordAdvance).
+  // The old React effect was a second scroll owner that competed with the bridge,
+  // causing mid-narration paragraph jumps. See BUG-125 for full context.
 
   // Narration page-sync — advance page when narration reads past current view
   // Tracks foliate's reported fraction vs narration's progress fraction

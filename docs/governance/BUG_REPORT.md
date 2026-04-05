@@ -266,7 +266,7 @@
 **Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
 **Description:** Fresh logs show `render gate passed — launching at word N`, immediately followed by `highlightWordByIndex miss: word N not in DOM`. The current readiness contract was false-positive: `isWordInDom()` proved only that a word exists somewhere in loaded contents, not that it is on the active visible page.
 **Fix:** Replaced `isWordInDom()` gate with `isWordVisibleOnPage()` — new API method that checks viewport visibility (bounding rect within iframe viewport), not just DOM presence. Gate success now truthfully means the word is highlightable.
-**Status:** Resolved. Sprint: TTS-7H.
+**Status:** Resolved as a first-pass fix. Residual follow-on behavior still exists; see BUG-124 and BUG-126.
 
 ### ~~BUG-123~~ ✅ Fixed — TTS-7H (v1.33.3)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
@@ -274,7 +274,39 @@
 **Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
 **Description:** Repeated cold-start attempts bounced among different launch words (`82`, `68`, `80`, `0`, `9004`), indicating the chosen start index was not frozen per play action. On timeout, startup fell back to `goTo(startIdx)` which treated a raw global word index as a Foliate navigation target.
 **Fix:** Two changes: (1) Launch index frozen as `const frozenLaunchIdx` immediately after computation — used throughout gate polling, success path, and timeout path. (2) Timeout fallback replaced `goTo(startIdx)` with `getSectionForWordIndex()` → `goToSection()`, navigating by section ownership instead of raw word index.
-**Status:** Resolved. Sprint: TTS-7H.
+**Status:** Resolved as a first-pass fix. Residual follow-on behavior still exists; see BUG-124, BUG-125, and BUG-126.
+
+### ~~BUG-124~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Startup gate and live highlight disagreed — gate said “visible” but highlight immediately missed.
+**Fix:** Introduced `resolveWordState()` as the single truth source for both startup gate and live highlight. Both now resolve the exact same span/visibility through one shared function.
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-125~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** Two competing narration follow-scroll owners caused mid-narration paragraph jumps.
+**Fix:** Removed the duplicate React `narrationWordIndex` effect that called `scrollIntoView({ behavior: "smooth" })`. Imperative bridge (`highlightWordByIndex` via `onWordAdvance`) is now the sole scroll owner. Additionally, `highlightWordByIndex` now only scrolls when the target word is off-page (not on every word advance).
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-126~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Narration highlight misses were silently ignored after full-book extraction, leaving voice moving without cursor recovery.
+**Fix:** Replaced `bookWordsCompleteRef.current => return` guard with section-aware exact recovery: `getSectionForWordIndex()` → `goToSection()` with 800ms cooldown token to prevent recovery storms. Misses now always attempt recovery regardless of extraction state.
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-127~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`
+**Description:** Return-to-narration scrolled to the right area but did not restore the visible narration cursor/highlight.
+**Fix:** `returnToNarration()` now uses `resolveWordState()` to re-apply the highlight class through the same unified path that live narration uses. If the word is off-page, it triggers exact section recovery via `goToSection()` before claiming success.
+**Status:** Resolved. Sprint: TTS-7I.
 
 ### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
