@@ -8,6 +8,30 @@
 
 ## Incomplete
 
+### ~~BUG-131~~ ✅ Fixed — TTS-7K (v1.33.6)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-05
+**Severity:** Critical
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Narration started from tiny DOM-slice word counts (14, 674, 293) instead of full-book extraction (69160 words). `getEffectiveWords()` always used `foliateApiRef.current.getWords()` (DOM viewport) even when `bookWordsRef.current.words` was available. `extractFoliateWords()` and `onWordsReextracted` unconditionally replaced `wordsRef.current` with the DOM slice.
+**Root cause:** No full-book word-source awareness in `getEffectiveWords()`, `extractFoliateWords()`, or `onWordsReextracted`.
+**Fix:** `getEffectiveWords()` returns `bookWordsRef.current.words` when complete. Both other functions skip `wordsRef` replacement when full-book source exists.
+
+### ~~BUG-132~~ ✅ Fixed — TTS-7K (v1.33.6)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/startWordIndex.ts`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** First-play explicit selection ignored on EPUBs. User selected word 1603 but narration started at word 0. `resolveFoliateStartWord` validated against 14-word DOM slice, discarding the valid global index. `getSectionForWordIndex` also failed for global indices.
+**Root cause:** No global word count parameter in start-word validation. Section lookup only used DOM-local array.
+**Fix:** Added `globalWordsLength` parameter to `resolveFoliateStartWord`. `getSectionForWordIndex` uses `bookWordSections` for global lookup.
+
+### ~~BUG-133~~ ✅ Fixed — TTS-7K (v1.33.6)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Page-mode navigation blocked past third page even without narration. Section-boundary `goToSection()` effect fired in page mode, interfering with foliate's native page turning.
+**Root cause:** Section-boundary effect only guarded for narration (TTS-7J), not page mode.
+**Fix:** Effect now only fires for `focus` and `flow` modes. Page and narration fully isolated.
+
 ### ~~BUG-128~~ ✅ Fixed — TTS-7J (v1.33.5)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
@@ -332,26 +356,50 @@
 **Fix:** `returnToNarration()` now uses `resolveWordState()` to re-apply the highlight class through the same unified path that live narration uses. If the word is off-page, it triggers exact section recovery via `goToSection()` before claiming success.
 **Status:** Resolved. Sprint: TTS-7I.
 
-### BUG-128: Narration section sync still blinks from competing `goToSection()` owners
-**Reported:** 2026-04-04
+### ~~BUG-128~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
 **Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx`
 **Description:** Fresh post-`TTS-7I` logs still show immediate miss recovery (`word 13 → section 2`) right after fast startup, while `ReaderContainer` also retains its own narration section-boundary `goToSection()` effect. These competing section movers can still blink the page and destabilize visible cursor ownership.
-**Status:** Open. Sprint: TTS-7J.
+**Fix:** Guarded the `ReaderContainer` section-boundary effect so narration no longer owns a second `goToSection()` path. Miss recovery is now the sole section-sync owner during narration.
+**Status:** Resolved. Sprint: TTS-7J.
 
-### BUG-129: Foliate word source duplicates across section reload/recovery
-**Reported:** 2026-04-04
+### ~~BUG-129~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** High
 **Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
 **Description:** In one session, narrate starts reported `words: 8770`, then later `words: 17540` for the same book. Active-mode section load handling currently appends section words into `foliateWordsRef.current` without dedupe by `sectionIndex`, so recovery/reload can duplicate slices and corrupt cursor mapping.
-**Status:** Open. Sprint: TTS-7J.
+**Fix:** Active-mode section loads now dedupe by `sectionIndex` before appending/replacing word slices, keeping `foliateWordsRef.current` and `getWords()` stable across recovery and reload.
+**Status:** Resolved. Sprint: TTS-7J.
 
-### BUG-130: First-play selection/start point is overwritten by passive restore logic
-**Reported:** 2026-04-04
+### ~~BUG-130~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
 **Severity:** Medium
 **Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
 **Description:** User testing shows first-play narration does not reliably start at the chosen selected word, while pause-and-reselect usually does. The likely cause is delayed onLoad/page-restore logic resetting `highlightedWordIndex` back to saved/visible defaults after the user has already chosen a start point.
-**Status:** Open. Sprint: TTS-7J.
+**Fix:** Added explicit user-selection protection so delayed onLoad restore cannot overwrite a chosen start point, and unified start-word resolution across modes via `resolveFoliateStartWord`.
+**Status:** Resolved. Sprint: TTS-7J.
+
+### BUG-131: EPUB narration still starts from loaded DOM slice instead of full-book words
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts`
+**Description:** Even after full-book extraction completes (for example `69160` words), narrate start still uses tiny loaded DOM word counts like `14`, `674`, or `293`. Active EPUB modes are still sourcing words from `foliateApiRef.current.getWords()` rather than the global extracted book word source, so narration is built on a moving partial viewport instead of the full book.
+**Status:** Open. Sprint: TTS-7K.
+
+### BUG-132: Cursor and narration are using mixed EPUB index spaces
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
+**Description:** Logs show explicit global selections like `1603`, but narrate still freezes launch at `0` because the start-word resolver validates against the small currently loaded DOM word array. Cursor/highlight/progress are tracking global EPUB indices while narration/chunk generation still runs on partial local slices, causing visible desync.
+**Status:** Open. Sprint: TTS-7K.
+
+### BUG-133: Page mode is still coupled to narration-only EPUB repair state
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
+**Description:** User could not advance past the third page even without narration on. Page-mode behavior is still likely being influenced by mutable narration-specific word-source refresh and/or section-repair state, so ordinary page turning is not isolated from the EPUB narration machinery.
+**Status:** Open. Sprint: TTS-7K.
 
 ### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04

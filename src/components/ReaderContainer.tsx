@@ -8,6 +8,7 @@ import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
 import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
 import { findSectionForWord, type BookWordArray } from "../types/narration";
+import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
 import { mergeOverrides } from "../utils/pronunciationOverrides";
 import { BlurbyDoc, BlurbySettings } from "../types";
@@ -195,12 +196,25 @@ export default function ReaderContainer({
     wordsRef.current = words;
   }
 
-  /** Get the effective words array — from foliate DOM for EPUBs, from text extraction otherwise */
+  /** Get the effective words array for active reading modes.
+   *  TTS-7K (BUG-131): When full-book EPUB extraction is complete, return the
+   *  global word array — NOT the small DOM-loaded slice. The DOM slice is a
+   *  rendering viewport only; the global array is the source of truth for
+   *  narration/focus/flow word scheduling, cursor tracking, and chunk boundaries. */
   const getEffectiveWords = useCallback((): string[] => {
-    if (useFoliate && foliateApiRef.current) {
-      const foliateWords = foliateApiRef.current.getWords();
-      foliateWordsRef.current = foliateWords;
-      return foliateWords.map(w => w.word);
+    if (useFoliate) {
+      // Prefer full-book global words when available
+      if (bookWordsRef.current?.complete) {
+        if (import.meta.env.DEV) console.debug("[TTS-7K] getEffectiveWords: using full-book source:", bookWordsRef.current.words.length, "words");
+        recordDiagEvent("source-promoted", `full-book: ${bookWordsRef.current.words.length} words`);
+        return bookWordsRef.current.words;
+      }
+      // Fallback: DOM-loaded slice (pre-extraction or non-EPUB)
+      if (foliateApiRef.current) {
+        const foliateWords = foliateApiRef.current.getWords();
+        foliateWordsRef.current = foliateWords;
+        return foliateWords.map(w => w.word);
+      }
     }
     return words;
   }, [useFoliate, words]);
@@ -495,16 +509,16 @@ export default function ReaderContainer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useFoliate, readingMode, activeDoc.id]);
 
-  // NAR-3: When narration word index crosses a section boundary, navigate foliate.
-  // TTS-7J (BUG-128): DISABLED during narration. During narration, miss-recovery
-  // in useReadingModeInstance owns section navigation (exact word → section lookup
-  // with cooldown). This effect was a second goToSection() owner that competed with
-  // miss-recovery, causing page blinks and cursor destabilization.
-  // This effect still fires for non-narration modes that use bookWords (future-proof).
+  // NAR-3: When word index crosses a section boundary, navigate foliate.
+  // TTS-7J (BUG-128): DISABLED during narration — miss-recovery owns section nav.
+  // TTS-7K (BUG-133): DISABLED during page mode — page turning is owned by foliate's
+  // next()/prev(). This effect's goToSection() calls interfered with manual page
+  // navigation, preventing users from advancing past the third page.
+  // Only active for focus and flow modes which need section tracking.
   useEffect(() => {
     if (!useFoliate || !bookWordsRef.current?.complete) return;
-    // TTS-7J: Narration section-sync is owned by miss-recovery — skip here
-    if (readingMode === "narration") return;
+    // TTS-7K: Only focus/flow modes need this section-sync effect
+    if (readingMode !== "focus" && readingMode !== "flow") return;
 
     const bookWords = bookWordsRef.current;
     const sec = findSectionForWord(bookWords.sections, highlightedWordIndex);
@@ -572,13 +586,19 @@ export default function ReaderContainer({
   });
 
   // Extract words from foliate DOM (needed by useReaderMode)
+  // TTS-7K: When full-book words exist, still update foliateWordsRef (for DOM
+  // highlighting) but do NOT overwrite wordsRef (the active mode's word source).
   const extractFoliateWords = useCallback(() => {
     if (!useFoliate || !foliateApiRef.current) return;
     const extracted = foliateApiRef.current.getWords();
     if (extracted.length > 0) {
       foliateWordsRef.current = extracted;
       const wordStrings = extracted.map(w => w.word);
-      wordsRef.current = wordStrings;
+      // Only overwrite wordsRef when full-book source is NOT available.
+      // When bookWords exist, wordsRef already holds the global array.
+      if (!bookWordsRef.current?.complete) {
+        wordsRef.current = wordStrings;
+      }
       setFoliateWordStrings(wordStrings);
     }
   }, [useFoliate, wordsRef]);
@@ -636,6 +656,7 @@ export default function ReaderContainer({
     pageNavRef,
     readingMode,
     setReadingMode,
+    bookWordsTotalWords: bookWordsRef.current?.complete ? bookWordsRef.current.totalWords : undefined,
   });
   const {
     stopAllModes, startFocus, startFlow, startNarration,
@@ -1137,14 +1158,25 @@ export default function ReaderContainer({
       flowCursorRef={flowScrollCursorRef}
       onFlowWordAdvance={setHighlightedWordIndex}
       onWordsReextracted={() => {
-        // New EPUB section loaded — update the active mode's word array
-        // so FlowMode/NarrateMode don't go out of bounds
+        // New EPUB section loaded — may need to update DOM highlight state.
+        // TTS-7K (BUG-131): When full-book words exist, do NOT replace the
+        // active mode's word array with the tiny DOM-loaded slice. The global
+        // array is already the mode's source of truth. Only update DOM-slice
+        // state (foliateWordStrings) for rendering and pending highlight resume.
         const newWords = foliateApiRef.current?.getWords?.() ?? [];
         if (newWords.length > 0) {
           const wordStrings = newWords.map((w: { word: string }) => w.word);
-          wordsRef.current = wordStrings;
           setFoliateWordStrings(wordStrings);
-          modeInstanceHook.updateModeWords(wordStrings);
+
+          if (bookWordsRef.current?.complete) {
+            // Full-book source exists — don't clobber wordsRef or mode words.
+            // wordsRef already holds the global array from extraction handoff.
+            if (import.meta.env.DEV) console.debug("[TTS-7K] onWordsReextracted: full-book source exists, skipping mode word replacement. DOM slice:", wordStrings.length, "global:", bookWordsRef.current.words.length);
+          } else {
+            // No full-book source yet — use DOM slice as fallback (pre-extraction)
+            wordsRef.current = wordStrings;
+            modeInstanceHook.updateModeWords(wordStrings);
+          }
 
           // Resume a paused mode after section load (Flow/Narration bridge)
           const pending = modeInstanceHook.pendingResumeRef.current;

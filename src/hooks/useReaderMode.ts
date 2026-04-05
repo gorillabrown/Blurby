@@ -58,6 +58,8 @@ export interface UseReaderModeParams {
   /** Reading mode state (owned by ReaderContainer, shared with this hook) */
   readingMode: "page" | "focus" | "flow" | "narration";
   setReadingMode: React.Dispatch<React.SetStateAction<"page" | "focus" | "flow" | "narration">>;
+  /** TTS-7K: Full-book EPUB word count for global index validation */
+  bookWordsTotalWords?: number;
 }
 
 export interface UseReaderModeReturn {
@@ -117,6 +119,7 @@ export function useReaderMode({
   pageNavRef,
   readingMode,
   setReadingMode,
+  bookWordsTotalWords,
 }: UseReaderModeParams): UseReaderModeReturn {
 
   const readingModeRef = useRef<ReadingMode>(readingMode);
@@ -198,8 +201,9 @@ export function useReaderMode({
     // resolveFoliateStartWord handles all three tiers consistently.
     // TTS-7H (BUG-123): Freeze — this value never changes for this play action.
     const frozenLaunchIdx = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
       : Math.max(0, Math.min(highlightedWordIndexRef.current, Math.max(effectiveWords.length - 1, 0)));
+    if (import.meta.env.DEV) console.debug("[TTS-7K] startNarration: frozenLaunchIdx =", frozenLaunchIdx, "effectiveWords:", effectiveWords.length, "globalTotal:", bookWordsTotalWords);
     const pBreaks = getEffectiveParagraphBreaks();
 
     // TTS-7H: Render-readiness gate for foliate EPUBs.
@@ -298,7 +302,7 @@ export function useReaderMode({
       return;
     }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
       : highlightedWordIndexRef.current;
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord); // Sync useReader's wordIndex for ReaderView display
@@ -331,7 +335,7 @@ export function useReaderMode({
       return;
     }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
       : highlightedWordIndexRef.current;
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord);

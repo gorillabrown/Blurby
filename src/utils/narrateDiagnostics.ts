@@ -23,7 +23,7 @@ export interface NarrateDiagSnapshot {
 /** Event log for handoff/recovery diagnostics. */
 export interface NarrateDiagEvent {
   timestamp: number;
-  event: "start" | "stop" | "pause" | "resume" | "extraction-handoff" | "context-restore" | "fallback" | "rate-clamp" | "coverage-check" | "cruise-warm" | "section-sync" | "word-source-refresh" | "word-source-growth-warning";
+  event: "start" | "stop" | "pause" | "resume" | "extraction-handoff" | "context-restore" | "fallback" | "rate-clamp" | "coverage-check" | "cruise-warm" | "section-sync" | "word-source-refresh" | "word-source-growth-warning" | "source-promoted" | "selection-validated" | "page-mode-isolated";
   detail: string;
 }
 
