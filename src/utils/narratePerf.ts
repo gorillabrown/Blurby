@@ -44,3 +44,8 @@ export function getLastEntry(event: NarratePerfEntry["event"]): NarratePerfEntry
   }
   return undefined;
 }
+
+/** TTS-7C: Yield to the event loop (microtask break for long-task prevention). */
+export function yieldToEventLoop(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}

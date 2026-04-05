@@ -28,6 +28,19 @@ import { useSettings } from "../contexts/SettingsContext";
 
 const api = window.electronAPI;
 
+// TTS-7C: In-flight extraction dedupe — prevent concurrent duplicate IPC calls (BUG-112)
+let _extractionPromise: Promise<any> | null = null;
+let _extractionBookId: string | null = null;
+
+function dedupeExtractWords(bookId: string): Promise<any> {
+  if (_extractionPromise && _extractionBookId === bookId) return _extractionPromise;
+  _extractionBookId = bookId;
+  _extractionPromise = api.extractEpubWords(bookId).finally(() => {
+    if (_extractionBookId === bookId) { _extractionPromise = null; _extractionBookId = null; }
+  });
+  return _extractionPromise;
+}
+
 type DocWithContent = BlurbyDoc & { content: string };
 
 interface ReaderContainerProps {
@@ -375,7 +388,7 @@ export default function ReaderContainer({
     let cancelled = false;
     const timer = setTimeout(() => {
       if (cancelled) return;
-      api.extractEpubWords(activeDoc.id).then((result) => {
+      dedupeExtractWords(activeDoc.id).then((result) => {
         if (cancelled || !result.words || !result.sections) return;
         // Only store if narration hasn't already extracted (avoid overwrite race)
         if (bookWordsRef.current && bookWordsRef.current.complete) return;
@@ -404,9 +417,10 @@ export default function ReaderContainer({
 
     const currentSectionIdx = foliateApiRef.current?.getWords()?.[0]?.sectionIndex ?? 0;
 
-    api.extractEpubWords(activeDoc.id).then((result) => {
+    api.extractEpubWords(activeDoc.id).then(async (result) => {
       if (cancelled || !result.words || !result.sections) return;
 
+      // TTS-7C: Phase 1 — Build bookWords object
       const bookWords: BookWordArray = {
         words: result.words,
         sections: result.sections,
@@ -414,6 +428,11 @@ export default function ReaderContainer({
         complete: true,
       };
 
+      // TTS-7C: Yield between extraction result processing and ref updates
+      await new Promise(r => setTimeout(r, 0));
+      if (cancelled) return;
+
+      // TTS-7C: Phase 2 — Update refs and narration state
       bookWordsRef.current = bookWords;
       bookWordsCompleteRef.current = true;
       wordsRef.current = bookWords.words;
