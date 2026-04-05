@@ -60,6 +60,8 @@ export interface UseReaderModeParams {
   setReadingMode: React.Dispatch<React.SetStateAction<"page" | "focus" | "flow" | "narration">>;
   /** TTS-7K: Full-book EPUB word count for global index validation */
   bookWordsTotalWords?: number;
+  /** TTS-7M: Persistent resume anchor — when set, this is the authoritative start point */
+  resumeAnchorRef: React.MutableRefObject<number | null>;
 }
 
 export interface UseReaderModeReturn {
@@ -120,6 +122,7 @@ export function useReaderMode({
   readingMode,
   setReadingMode,
   bookWordsTotalWords,
+  resumeAnchorRef,
 }: UseReaderModeParams): UseReaderModeReturn {
 
   const readingModeRef = useRef<ReadingMode>(readingMode);
@@ -196,14 +199,22 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
+    // TTS-7M (BUG-135): Consume resume anchor if set — it takes priority over
+    // the potentially-degraded highlightedWordIndex. This ensures pause→play
+    // resumes from the live cursor, and reopen→play starts from saved position.
+    let startWordSource = highlightedWordIndexRef.current;
+    if (resumeAnchorRef.current != null) {
+      startWordSource = resumeAnchorRef.current;
+      if (import.meta.env.DEV) console.debug("[TTS-7M] startNarration: using resume anchor:", startWordSource);
+      resumeAnchorRef.current = null; // Consumed
+    }
     // TTS-7J: Unified start-word policy — same as startFocus/startFlow.
-    // Priority: explicit user selection (highlightedWordIndex) > first visible word > 0.
-    // resolveFoliateStartWord handles all three tiers consistently.
+    // Priority: explicit user selection (highlightedWordIndex) > resume anchor > first visible > 0.
     // TTS-7H (BUG-123): Freeze — this value never changes for this play action.
     const frozenLaunchIdx = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
-      : Math.max(0, Math.min(highlightedWordIndexRef.current, Math.max(effectiveWords.length - 1, 0)));
-    if (import.meta.env.DEV) console.debug("[TTS-7K] startNarration: frozenLaunchIdx =", frozenLaunchIdx, "effectiveWords:", effectiveWords.length, "globalTotal:", bookWordsTotalWords);
+      ? resolveFoliateStartWord(startWordSource, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
+      : Math.max(0, Math.min(startWordSource, Math.max(effectiveWords.length - 1, 0)));
+    if (import.meta.env.DEV) console.debug("[TTS-7M] startNarration: frozenLaunchIdx =", frozenLaunchIdx, "source:", startWordSource, "effectiveWords:", effectiveWords.length);
     const pBreaks = getEffectiveParagraphBreaks();
 
     // TTS-7H: Render-readiness gate for foliate EPUBs.
@@ -301,9 +312,12 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
+    // TTS-7M: Consume resume anchor if set
+    let focusStartSource = highlightedWordIndexRef.current;
+    if (resumeAnchorRef.current != null) { focusStartSource = resumeAnchorRef.current; resumeAnchorRef.current = null; }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
-      : highlightedWordIndexRef.current;
+      ? resolveFoliateStartWord(focusStartSource, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
+      : focusStartSource;
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord); // Sync useReader's wordIndex for ReaderView display
     setReadingMode("focus");
@@ -334,9 +348,12 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
+    // TTS-7M: Consume resume anchor if set
+    let flowStartSource = highlightedWordIndexRef.current;
+    if (resumeAnchorRef.current != null) { flowStartSource = resumeAnchorRef.current; resumeAnchorRef.current = null; }
     const startWord = useFoliate
-      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
-      : highlightedWordIndexRef.current;
+      ? resolveFoliateStartWord(flowStartSource, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
+      : flowStartSource;
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord);
     setReadingMode("flow");
@@ -355,6 +372,16 @@ export function useReaderMode({
       setHighlightedWordIndex(currentWord);
       highlightedWordIndexRef.current = currentWord; // Sync ref immediately
     }
+    if (instance && readingMode === "narration") {
+      const currentWord = instance.getCurrentWord();
+      setHighlightedWordIndex(currentWord);
+      highlightedWordIndexRef.current = currentWord; // Sync ref immediately
+      // TTS-7M (BUG-135): Set persistent resume anchor from live narration cursor.
+      // This survives any passive Foliate relocate/load events until the user
+      // explicitly selects a new word or starts a mode (which consumes the anchor).
+      resumeAnchorRef.current = currentWord;
+      if (import.meta.env.DEV) console.debug("[TTS-7M] pause: resume anchor set from narration cursor:", currentWord);
+    }
     // TTS-7B: Browse-away reconciliation (BUG-108)
     // When user browsed away during narration, update cursor to the browsed-to
     // page's start word so that the next resume plays from where the user was viewing.
@@ -363,13 +390,14 @@ export function useReaderMode({
       if (pageStart != null) {
         setHighlightedWordIndex(pageStart);
         highlightedWordIndexRef.current = pageStart;
+        resumeAnchorRef.current = pageStart;
       }
       setIsBrowsedAway(false);
     }
     stopAllModes();
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
-  }, [readingMode, updateSettings, stopAllModes, setHighlightedWordIndex, modeInstance, isBrowsedAway, setIsBrowsedAway, pageNavRef]);
+  }, [readingMode, updateSettings, stopAllModes, setHighlightedWordIndex, modeInstance, isBrowsedAway, setIsBrowsedAway, pageNavRef, resumeAnchorRef]);
 
   // ── Select mode (button click — select AND start) ─────────────────
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {

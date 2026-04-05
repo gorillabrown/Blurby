@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7L complete. Exact Foliate text-selection mapping. 1,343 tests, 76 files. Latest tagged release: v1.33.7.
+**Last updated**: 2026-04-05 — TTS-7M complete. Persistent resume anchor & reopen authority. 1,372 tests, 79 files. Latest tagged release: v1.33.8.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS hotfix lane CLOSED. `TTS-7L` complete (v1.33.7). Feature work resumes: `EINK-6A` is next. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS hotfix lane narrowly reopened. `TTS-7N` is next (pause semantics + settings links). Queue GREEN (`TTS-7N` → `EINK-6A` → `EINK-6B` ��� `GOALS-6B`; depth 4).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -62,9 +62,11 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ (v1.33.5)
   ├── TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ (v1.33.6)
   ├── TTS-7L: Exact Foliate Text-Selection Mapping ✅ (v1.33.7)
+  ├── TTS-7M: Persistent Resume Anchor & Reopen Authority ✅ (v1.33.8)
+  ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair (next)
   │
   │  Feature work
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (next)
+  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
     │
@@ -100,11 +102,11 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 | Lane | Sprints | Versions | Key Deliverables |
 |------|---------|----------|------------------|
 | TTS-6 | TTS-6C→6S + HOTFIX-11 | v1.14.0–v1.28.0 | Native-rate buckets, startup hardening, pronunciation overrides, word alignment, accessibility, profiles, portability, runtime stability, performance budgets, session continuity, diagnostics, cursor sync |
-| TTS-7 (stabilization + hotfix) | TTS-7A→7J | v1.29.0–v1.33.5 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification, visible-word/startup fixes, Foliate follow-scroll unification + exact miss recovery, and final Foliate section-sync / word-source dedupe / initial-selection protection. TTS hotfix lane CLOSED at v1.33.5. |
+| TTS-7 (stabilization + hotfix) | TTS-7A→7L | v1.29.0–v1.33.7 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification, visible-word/startup fixes, Foliate follow-scroll unification + exact miss recovery, final Foliate section-sync / word-source dedupe / initial-selection protection, EPUB global word-source promotion, and exact text-selection mapping. TTS hotfix lane CLOSED at v1.33.7. |
 
 **Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, `TTS-7I` unified follow-scroll ownership and exact miss recovery, `TTS-7J` resolved section-sync blink, word-source duplication, and initial-selection overwrite, and `TTS-7K` promoted full-book EPUB words as the active source of truth. Fresh testing on 2026-04-05 shows one narrow bug remains: exact word click/global-index selection starts correctly, but text selection still routes through a weak fallback path that matches on word text instead of exact selected span/index. `TTS-7L` is the focused corrective sprint for that final selection-path mismatch.
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, `TTS-7I` unified follow-scroll ownership and exact miss recovery, `TTS-7J` resolved section-sync blink, word-source duplication, and initial-selection overwrite, `TTS-7K` promoted full-book EPUB words as the active source of truth, and `TTS-7L` closed the final selection-path gap by preserving exact word identity across click and native text selection. Phase 6 TTS is now fully stabilized and closed at `v1.33.7`.
 
 ---
 
@@ -749,6 +751,143 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 11. `npm run build` succeeds
 
 **Depends on:** TTS-7K
+
+---
+
+### Sprint TTS-7M: Persistent Resume Anchor & Reopen Authority
+
+**Goal:** Make narration/page resume ownership explicit and durable so Blurby always starts from the user’s true reading position, not a soft page-visible fallback. This sprint hardens three paths together: pause→play without reselection, book close→reopen, and passive Foliate load/relocate behavior.
+
+**Problem:** Recent TTS fixes restored exact hard selection and replay speed, but a structural ownership bug remains: a “soft” page anchor (first visible word / passive relocate restore) can still overwrite the authoritative restart anchor after narration pauses or when a book is reopened. The result is the same user-visible failure in different forms: replay jumps back to the first trackable word in the book, reopen starts from a soft page anchor instead of the most advanced word read, and passive Foliate page events quietly become the launch source of truth. This is not a Kokoro problem; it is a resume-authority problem.
+
+**Design decisions:**
+- **Single authoritative resume anchor.** Introduce an explicit persisted resume anchor for EPUB/TTS paths. Priority order must be: (1) explicit user selection for the current launch, (2) live narration cursor captured on pause/retarget, (3) persisted saved reading position on reopen, (4) first visible word only as a temporary visual fallback when none of the above exist. Passive page state must never outrank a captured or persisted anchor.
+- **Passive Foliate restore is visual-only.** `onLoad`, `onRelocate`, and similar Foliate page events may help restore a visible highlight, but they may not lower or replace the authoritative resume anchor. They can update UI highlight; they cannot silently become the next play source.
+- **Persisted progress comes only from authoritative advancement.** Saved position for EPUBs must be updated only from real reading advancement (narration cursor, focus/flow progress, deliberate page reading progress), not from passive load/relocate noise. On close and reopen, the saved most-advanced word is the hard starting point unless the user explicitly selects a different word in the new session.
+- **Close/reopen contract matches pause/replay contract.** The same anchor logic should govern both within-session replay and cross-session reopen so there is no separate “resume brain” for TTS vs reader progress.
+
+**Baseline:**
+- `src/hooks/useReaderMode.ts` — `startNarration()`, `handlePauseToPage()`, replay/start ownership
+- `src/components/ReaderContainer.tsx` — Foliate `onLoad`, `onRelocate`, progress save, highlighted word state
+- `src/hooks/useProgressTracker.ts` — persisted progress / furthest position logic
+- `src/components/FoliatePageView.tsx` — `findFirstVisibleWordIndex()`, visible-word restore helpers
+- `src/utils/startWordIndex.ts` — Foliate start-word resolution utility
+- `src/hooks/useNarration.ts` and `src/modes/NarrateMode.ts` — current narration cursor ownership / pause-resume handoff
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-135`
+4. `ROADMAP.md` — this section
+5. `src/hooks/useReaderMode.ts`
+6. `src/components/ReaderContainer.tsx`
+7. `src/hooks/useProgressTracker.ts`
+8. `src/utils/startWordIndex.ts`
+9. `src/components/FoliatePageView.tsx`
+10. `src/modes/NarrateMode.ts`
+11. `src/hooks/useNarration.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Introduce explicit resume-anchor ownership** — Add a dedicated authoritative replay/reopen anchor (ref + persisted path as needed). It must distinguish: explicit selection, live narration cursor, persisted saved position, and passive visible fallback. Remove any remaining paths where `highlightedWordIndex` alone ambiguously serves all four roles. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Pause/replay uses live narration cursor** — On narration pause or toggle back to page mode, capture the current narration cursor as the next restart anchor. Replay without a new click must resume from that cursor, not from first visible word or page start. | `src/hooks/useReaderMode.ts`, `src/modes/NarrateMode.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Close/reopen prefers saved progress absolutely** — Reopen a book at the most advanced authoritative saved word. Passive Foliate `onLoad`/`onRelocate` may restore a visible highlight near that position but may not replace the saved resume anchor with a soft first-visible word. | `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts`, `src/components/FoliatePageView.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **Passive Foliate restore becomes visual-only** — Audit every `onLoad`, `onRelocate`, first-visible, and approximate-fraction path. These may update DOM highlight when helpful, but they must never silently lower the authoritative launch anchor or persisted progress. | `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Persisted progress guardrails** — Ensure EPUB progress save logic records authoritative advancement only. If a passive page load happens before user engagement or during anchor-preservation windows, it must not overwrite saved progress or future restart points. | `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts` |
+| 6 | test-runner | **Regression tests** — Add coverage for: (a) pause→play without reselection resumes from live narration cursor, (b) explicit reselection still overrides resume anchor, (c) close→reopen starts at saved most-advanced word, (d) passive onLoad/onRelocate cannot downgrade saved progress, (e) first-visible fallback only applies when no authoritative anchor exists, (f) reopen + immediate play starts from persisted resume position. ≥10 new tests. | `tests/useReaderMode.test.ts`, `tests/useProgressTracker.test.ts`, `tests/tts7l-exact-selection-mapping.test.ts`, new targeted tests as needed |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Pause→play without a new hard selection resumes from the live narration cursor, not the first visible/trackable word
+2. Explicit user selection still overrides the replay anchor for the next launch
+3. Close→reopen starts at the most advanced saved word read for the book
+4. Immediate play after reopen starts narration from that saved word
+5. Passive `onLoad` / `onRelocate` / first-visible restore cannot lower or replace the authoritative resume anchor
+6. Passive Foliate restore remains available as a visual-only fallback when no explicit/live/persisted anchor exists
+7. Persisted EPUB progress is updated only from authoritative advancement, not passive page-load noise
+8. Existing exact-selection start behavior does not regress
+9. ≥10 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Tier:** Quick | **Depends on:** TTS-7L
+
+---
+
+### Sprint TTS-7N: Kokoro Pause Semantics & Settings Link Repair
+
+**Goal:** Make TTS settings truthful and effective. When users change narration pause sliders and dialogue threshold, Kokoro narration must audibly respond in a predictable way. In the same pass, repair the Ctrl+K settings links so all TTS-related entries open the dedicated TTS settings page rather than the legacy Speed Reading page.
+
+**Problem:** The current TTS UI implies deep control over pause and dialogue shaping, but listening behavior suggests otherwise: Kokoro often blows through punctuation, pauses mid-sentence, and produces dialogue that is hard to follow. The code confirms the likely reason: `TTSSettings` writes pause values, `ReaderContainer` syncs them into `narration.setPauseConfig(...)`, but the active Kokoro path does not clearly consume that config when chunking, scheduling, or deciding sentence/dialogue boundaries. In other words, the sliders look live but the Kokoro prosody path still behaves as if they are mostly inert. Separately, Ctrl+K settings links still send TTS queries like “TTS Voice” to `speed-reading`, a stale route from before TTS had its own settings page.
+
+**Design decisions:**
+- **Truthful TTS settings.** Either the Kokoro path must honor the pause controls, or the UI must be narrowed to only the controls that actually affect Kokoro. This sprint assumes the preferred fix is to make Kokoro honor them rather than hiding them.
+- **Sentence/chunk boundary logic uses configured pause semantics.** Chunk sizing and chunk-boundary pause timing should be driven by the same configurable pause model. Clause, sentence, paragraph, and dialogue threshold should influence where chunks end and how long pauses last.
+- **One routing source for settings links.** Ctrl+K action items must open the actual owning settings page. TTS items should route to `tts`; speed-reading items should remain under `speed-reading`. Remove stale legacy mappings.
+- **No placebo controls.** At the end of the sprint, every visible TTS slider must either (a) affect Kokoro playback measurably, or (b) be explicitly scoped/renamed/hidden so the UI does not overpromise.
+
+**Baseline:**
+- `src/components/settings/TTSSettings.tsx` — TTS controls and labels
+- `src/components/ReaderContainer.tsx` — settings → narration sync via `setPauseConfig(...)`
+- `src/hooks/useNarration.ts` — chunk boundary logic, `pauseConfigRef`, Web/Kokoro dispatch
+- `src/hooks/narration/kokoroStrategy.ts` — Kokoro scheduling path
+- `src/utils/pauseDetection.ts` — pause heuristics and dialogue threshold logic
+- `src/utils/rhythm.ts` — chunk-boundary pause timing helpers
+- `src/components/CommandPalette.tsx` — stale `speed-reading` routes for TTS items
+- `src/components/SettingsMenu.tsx` / `src/components/MenuFlap.tsx` — actual settings page routing
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-136`, `BUG-137`
+4. `ROADMAP.md` — this section
+5. `src/components/settings/TTSSettings.tsx`
+6. `src/components/ReaderContainer.tsx`
+7. `src/hooks/useNarration.ts`
+8. `src/hooks/narration/kokoroStrategy.ts`
+9. `src/utils/pauseDetection.ts`
+10. `src/utils/rhythm.ts`
+11. `src/components/CommandPalette.tsx`
+12. `src/components/SettingsMenu.tsx`
+13. `src/components/MenuFlap.tsx`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Audit the real Kokoro pause path** — Trace the full settings flow from `TTSSettings` → `ReaderContainer` → `useNarration` → Kokoro generation/scheduler. Identify exactly which pause controls are currently inert, partially honored, or overridden by fixed chunking behavior. | `src/components/settings/TTSSettings.tsx`, `src/components/ReaderContainer.tsx`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Make Kokoro honor pause semantics** — Wire pause config and dialogue threshold into the Kokoro chunk boundary path so punctuation/dialogue controls produce audible, user-perceptible changes. Chunking should stop producing run-on sentences and mid-sentence pause placement that contradict the configured controls. | `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Make the UI truthful** — If any TTS control still cannot be meaningfully honored for Kokoro, narrow or relabel the UI so it matches real engine behavior. No placebo sliders. | `src/components/settings/TTSSettings.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **Repair Ctrl+K settings routing** — Remap all TTS-related Command Palette entries (`TTS Voice`, `Speech Rate`, `Voice Engine`, `Narration (TTS)`, etc.) to the dedicated `tts` settings page. Keep speed-reading entries routed to `speed-reading`. | `src/components/CommandPalette.tsx`, `src/components/SettingsMenu.tsx`, `src/components/MenuFlap.tsx` |
+| 5 | test-runner | **Regression tests** — Add coverage for: (a) Kokoro pause config changes affect chunk-boundary pause calculation, (b) dialogue threshold changes affect dialogue pause classification, (c) sentence/clause/paragraph pause paths are not dead, (d) Ctrl+K “TTS Voice” opens `tts`, not `speed-reading`, (e) all TTS-related palette items route to the correct settings page. ≥10 new tests. | `tests/`, especially `pauseDetection.test.ts`, `narration*`, `CommandPalette`/settings routing tests |
+| 6 | test-runner | **`npm test` + `npm run build`** | — |
+| 7 | spec-compliance-reviewer | **Spec compliance** | — |
+| 8 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Changing Kokoro pause sliders produces a real, audible difference in punctuation/dialogue handling
+2. Clause, sentence, paragraph, and dialogue-threshold controls are no longer inert in the Kokoro path
+3. Kokoro no longer routinely blows through punctuation as if pause settings are ignored
+4. Chunking/pause placement avoids obvious mid-sentence pause artifacts caused by stale fixed boundary logic
+5. Any remaining engine limitations are reflected honestly in the UI (no placebo controls)
+6. Ctrl+K `TTS Voice` opens the dedicated `tts` settings page
+7. All other TTS-related Command Palette entries route to `tts`, not `speed-reading`
+8. Existing speed-reading-related entries still route correctly to `speed-reading`
+9. ≥10 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Tier:** Quick | **Depends on:** TTS-7M
 
 ---
 

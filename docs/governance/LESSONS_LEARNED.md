@@ -781,3 +781,19 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Guardrail:**
 - PR-128: Every user selection path (click, double-click, drag-select, keyboard-select) must resolve to an exact `data-word-index` when available. Never fall back to text-based word matching as the normal path — that discards occurrence identity.
 - PR-129: When adding a new selection mechanism, verify it sends the same payload shape as click: `(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex)`. The parent must never need to guess.
+
+### [2026-04-05] LL-073: Resume Anchor Must Be Persistent, Not Time-Limited
+
+**Area:** renderer, reader state, narration, progress tracking
+**Status:** active
+**Priority:** high
+
+**Context:** After TTS-7L fixed exact selection mapping, pause→play and close→reopen still jumped to the first visible word. A time-limited `preservePlaybackAnchorUntilRef` was added as a stopgap, but it expired after ~1 second and passive Foliate `onLoad`/`onRelocate` events would then overwrite `highlightedWordIndex` with an approximate fraction-based word or first-visible fallback.
+
+**Root Cause:** Time-limited anchor suppression is fundamentally wrong for pause→play (user may wait minutes before replaying) and impossible for close→reopen (the window expires before the book is even reopened). The anchor must be persistent until explicitly consumed or replaced.
+
+**Fix:** Replaced `preservePlaybackAnchorUntilRef` (timestamp) with `resumeAnchorRef` (nullable number). Set from: narration cursor on pause, saved position on reopen. Consumed on mode start, cleared on explicit user selection. Passive `onLoad`/`onRelocate` check `resumeAnchorRef != null` and skip state mutation when active.
+
+**Guardrail:**
+- PR-130: Resume-anchor ownership must be explicit and persistent. Never use time-limited suppression for state that must survive until the next user action. The anchor is cleared ONLY by: mode start (consumed) or explicit user selection (replaced).
+- PR-131: Passive page events (`onLoad`, `onRelocate`, first-visible) are VISUAL-ONLY when an authoritative anchor exists. They may update DOM highlights but must not mutate `highlightedWordIndex` or trigger progress saves.

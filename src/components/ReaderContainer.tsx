@@ -66,20 +66,36 @@ interface ReaderContainerProps {
 }
 
 /** Recursively flatten foliate's TOC tree into a depth-annotated flat list. */
-function flattenToc(items: any[], depth = 0): Array<{ title: string; href: string; depth: number }> {
-  const result: Array<{ title: string; href: string; depth: number }> = [];
+function flattenToc(items: any[], depth = 0): Array<{ title: string; href: string; depth: number; sectionIndex?: number }> {
+  const result: Array<{ title: string; href: string; depth: number; sectionIndex?: number }> = [];
   for (const item of items) {
     const title = item.label || item.title || "";
     const href = item.href || "";
+    const sectionIndex = typeof item.sectionIndex === "number" ? item.sectionIndex : undefined;
     const children = item.subitems || item.children || [];
     if (href) {
-      result.push({ title, href, depth });
+      result.push({ title, href, depth, sectionIndex });
     }
     if (children.length > 0) {
       result.push(...flattenToc(children, depth + 1));
     }
   }
   return result;
+}
+
+function resolveTocWordIndex(
+  item: { sectionIndex?: number },
+  idx: number,
+  totalWords: number,
+  flatLength: number,
+  sections?: BookWordArray["sections"],
+): number {
+  if (item.sectionIndex != null && sections?.length) {
+    const match = sections.find((section) => section.sectionIndex === item.sectionIndex);
+    if (match) return match.startWordIdx;
+  }
+  const sectionFraction = idx / Math.max(flatLength, 1);
+  return Math.floor(sectionFraction * Math.max(totalWords, 1));
 }
 
 export default function ReaderContainer({
@@ -124,7 +140,7 @@ export default function ReaderContainer({
   // E-ink ghosting prevention (extracted to useEinkController hook)
   const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
 
-  const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number; href?: string; depth?: number }>>([]);
+  const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number; href?: string; depth?: number; sectionIndex?: number }>>([]);
   const sessionStartRef = useRef<number | null>(null);
   const sessionStartWordRef = useRef(0);
 
@@ -135,6 +151,15 @@ export default function ReaderContainer({
   // TTS-7J (BUG-130): Tracks whether user has explicitly clicked/selected a word.
   // When true, delayed onLoad restore logic must not overwrite the user's choice.
   const userExplicitSelectionRef = useRef(false);
+  // TTS-7M (BUG-135): Persistent resume anchor. When set (non-null), this is
+  // the authoritative start point for the next mode start. Passive Foliate
+  // onLoad/onRelocate events may NOT lower or replace highlightedWordIndex
+  // while an anchor is active. The anchor is:
+  //   - SET on: narration pause (live cursor), book reopen (saved position),
+  //             focus/flow pause (live cursor)
+  //   - CLEARED on: mode start (consumed), explicit user selection (replaced)
+  // Priority: explicit selection > resumeAnchor > visible fallback
+  const resumeAnchorRef = useRef<number | null>(null);
 
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
@@ -223,6 +248,9 @@ export default function ReaderContainer({
   useEffect(() => {
     initReader(activeDoc.position || 0);
     setHighlightedWordIndex(activeDoc.position || 0);
+    // TTS-7M (BUG-135): Set resume anchor from saved position on reopen.
+    // This prevents passive onLoad/onRelocate from downgrading the start point.
+    resumeAnchorRef.current = (activeDoc.position || 0) > 0 ? activeDoc.position! : null;
     userExplicitSelectionRef.current = false; // TTS-7J: Reset on doc change
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = activeDoc.position || 0;
@@ -412,8 +440,21 @@ export default function ReaderContainer({
   // NAR-3: Full-book word array for seamless narration across sections
   const bookWordsRef = useRef<BookWordArray | null>(null);
   const bookWordsCompleteRef = useRef<boolean>(false);
+  const [bookWordMeta, setBookWordMeta] = useState<{ sections: BookWordArray["sections"]; totalWords: number } | null>(null);
   const currentNarrationSectionRef = useRef<number>(-1);
   const lastGoToSectionTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    setBookWordMeta(null);
+  }, [activeDoc.id]);
+
+  useEffect(() => {
+    if (!useFoliate || !bookWordMeta?.sections?.length) return;
+    setDocChapters((prev) => prev.map((chapter, idx, all) => ({
+      ...chapter,
+      charOffset: resolveTocWordIndex(chapter, idx, bookWordMeta.totalWords || activeDoc.wordCount || 1, all.length, bookWordMeta.sections),
+    })));
+  }, [useFoliate, bookWordMeta, activeDoc.wordCount]);
 
   // TTS-6O: Background pre-extraction — extract full-book words ahead of narration start
   useEffect(() => {
@@ -433,6 +474,10 @@ export default function ReaderContainer({
           complete: true,
         };
         bookWordsCompleteRef.current = true;
+        setBookWordMeta({
+          sections: result.sections,
+          totalWords: result.totalWords ?? result.words.length,
+        });
         if (import.meta.env.DEV) console.debug(`[TTS-6O] background pre-extraction complete: ${result.words.length} words`);
       }).catch(() => {});
     }, 1000); // NARRATE_BG_EXTRACT_DELAY_MS
@@ -469,6 +514,10 @@ export default function ReaderContainer({
       // TTS-7C: Phase 2 — Update refs and narration state
       bookWordsRef.current = bookWords;
       bookWordsCompleteRef.current = true;
+      setBookWordMeta({
+        sections: bookWords.sections,
+        totalWords: bookWords.totalWords,
+      });
       wordsRef.current = bookWords.words;
 
       // Convert section-local highlightedWordIndex to global (use ref for current value, not stale closure)
@@ -656,7 +705,8 @@ export default function ReaderContainer({
     pageNavRef,
     readingMode,
     setReadingMode,
-    bookWordsTotalWords: bookWordsRef.current?.complete ? bookWordsRef.current.totalWords : undefined,
+    bookWordsTotalWords: bookWordMeta?.totalWords,
+    resumeAnchorRef,
   });
   const {
     stopAllModes, startFocus, startFlow, startNarration,
@@ -935,6 +985,11 @@ export default function ReaderContainer({
   // TTS-7B: Only resync during active playback. During pause, silently set
   // highlightedWordIndex as the restart point (paused cursor contract).
   const handleHighlightedWordChange = useCallback((index: number) => {
+    // TTS selection/start bug: startNarration reads highlightedWordIndexRef.current.
+    // When the user selects a word and immediately presses play, React state may not
+    // have re-rendered yet. Update the ref synchronously so the next launch uses the
+    // newly selected word even within the same event loop.
+    highlightedWordIndexRef.current = index;
     setHighlightedWordIndex(index);
     if (readingMode === "narration" && narration.speaking && !narration.warming) {
       // Resync TTS to new position (active playback)
@@ -1039,11 +1094,17 @@ export default function ReaderContainer({
           // don't overwrite with approximate fraction-based index from onRelocate.
           // Uses ref (not closure state) to avoid stale value bug.
           const mode = readingModeRef.current;
-          if (mode !== "narration" && mode !== "flow") {
+          // TTS-7M (BUG-135): When a resume anchor is active, passive onRelocate
+          // must not lower highlightedWordIndex. The anchor is the authority.
+          const hasResumeAnchor = resumeAnchorRef.current != null;
+          if (mode !== "narration" && mode !== "flow" && !hasResumeAnchor) {
             setHighlightedWordIndex(approxWordIdx);
+          } else if (import.meta.env.DEV && hasResumeAnchor) {
+            console.debug("[TTS-7M] onRelocate: resume anchor active at", resumeAnchorRef.current, "— skipping approx", approxWordIdx);
           }
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
-          if (!hasEngagedRef.current && mode === "page") return;
+          // TTS-7M: Also skip progress save when resume anchor is active (passive event noise)
+          if (!hasEngagedRef.current || hasResumeAnchor) return;
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
@@ -1056,25 +1117,22 @@ export default function ReaderContainer({
       onTocReady={(toc, sectionCount) => {
         const flat = flattenToc(toc);
         // Resolve TOC hrefs to proportional word positions via section index
-        const totalWords = words.length || activeDoc.wordCount || 1;
-        const sections = sectionCount || 1;
+        const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || words.length || 1;
         setDocChapters(flat.map((item, idx) => {
-          // Extract section filename from href (strip fragment #...)
-          const hrefBase = item.href.split("#")[0];
-          // Estimate section index as position in TOC order (proportional fallback)
-          const sectionFraction = idx / Math.max(flat.length, 1);
-          const wordIndex = Math.floor(sectionFraction * totalWords);
+          const wordIndex = resolveTocWordIndex(item, idx, totalWords, flat.length, bookWordMeta?.sections);
           return {
             title: item.title || `Chapter ${idx + 1}`,
             charOffset: wordIndex,
             href: item.href,
             depth: item.depth,
+            sectionIndex: item.sectionIndex,
           };
         }));
       }}
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
         userExplicitSelectionRef.current = true; // TTS-7J (BUG-130): Mark explicit user choice
+        resumeAnchorRef.current = null; // TTS-7M: Explicit selection replaces any resume anchor
         activeDoc.cfi = cfi;
         // TTS-7B: Route through handleHighlightedWordChange so narration
         // resyncToCursor fires during active playback (BUG-107 fix).
@@ -1102,6 +1160,14 @@ export default function ReaderContainer({
           const mode = readingModeRef.current;
           if (mode !== "narration" && mode !== "flow") {
             extractFoliateWords();
+            // TTS-7M (BUG-135): When a resume anchor is active, passive onLoad
+            // must not replace the authoritative start point.
+            if (resumeAnchorRef.current != null) {
+              if (import.meta.env.DEV) {
+                console.debug("[TTS-7M] onLoad: resume anchor active at", resumeAnchorRef.current, "— skipping restore");
+              }
+              return;
+            }
             // TTS-7J (BUG-130): If user already explicitly selected a word (click),
             // do NOT overwrite with saved position or first-visible fallback.
             // The user's choice takes priority over passive restore.
@@ -1149,7 +1215,7 @@ export default function ReaderContainer({
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
       narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
-      bookWordSections={bookWordsRef.current?.sections}
+      bookWordSections={bookWordMeta?.sections}
       flowMode={readingMode === "flow"}
       scrollContainerRef={flowScrollContainerRef}
       flowCursorRef={flowScrollCursorRef}

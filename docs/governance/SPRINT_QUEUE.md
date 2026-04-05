@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (`EINK-6A`, `EINK-6B`, `GOALS-6B`)
+**Full specs:** `ROADMAP.md` (`TTS-7N`, `EINK-6A`, `EINK-6B`, `GOALS-6B`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: EINK-6A (E-Ink Foundation & Greyscale Runtime)
-Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully spec'd.
+Queue depth: 4
+Next sprint: TTS-7N (Kokoro Pause Semantics & Settings Link Repair)
+Health: GREEN — one targeted TTS hotfix before feature work. 4 queued sprints fully spec'd.
 ```
 
 ---
@@ -21,13 +21,14 @@ Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully sp
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | EINK-6A | v1.34.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
-| 2 | EINK-6B | v1.35.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Stepped flow (chunk advance for e-ink), burst focus (phrase grouping), adaptive refresh heuristic. 8 tasks, 10 success criteria. Depends on EINK-6A. |
-| 3 | GOALS-6B | v1.36.0 | `sprint/goals-6b-tracking` | Full | — | **FULLY SPEC'D.** Reading goal system — daily pages/minutes, weekly books, streak tracking, library progress widget, goals settings page. 11 tasks, 15 success criteria. Can run parallel with EINK-6B. |
+| 1 | TTS-7N | v1.33.9 | `hotfix/tts-7n-pause-semantics-settings-links` | Quick | BUG-136, BUG-137 | **FULLY SPEC'D.** Make Kokoro pause sliders and dialogue threshold materially affect narration, and repair all Ctrl+K TTS settings links to open the dedicated `tts` page instead of stale `speed-reading` routes. |
+| 2 | EINK-6A | v1.34.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
+| 3 | EINK-6B | v1.35.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Stepped flow (chunk advance for e-ink), burst focus (phrase grouping), adaptive refresh heuristic. 8 tasks, 10 success criteria. Depends on EINK-6A. |
+| 4 | GOALS-6B | v1.36.0 | `sprint/goals-6b-tracking` | Full | — | **FULLY SPEC'D.** Reading goal system — daily pages/minutes, weekly books, streak tracking, library progress widget, goals settings page. 11 tasks, 15 success criteria. Can run parallel with EINK-6B. |
 
-**Agent staging rule:** EINK and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
+**Agent staging rule:** `TTS-7N` is Quick-tier. EINK and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
-**Dispatch status:** EINK-6A is dispatch-ready now. EINK-6B waits for EINK-6A. GOALS-6B can run parallel with EINK-6B after EINK-6A completes.
+**Dispatch status:** `TTS-7N` is dispatch-ready now. `EINK-6A` waits until the TTS hotfix clears. `EINK-6B` waits for `EINK-6A`. `GOALS-6B` can run parallel with EINK-6B after EINK-6A completes.
 
 ---
 
@@ -46,6 +47,8 @@ Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully sp
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-7M | 2026-04-05 | PASS | Persistent resume-anchor & reopen authority. BUG-135 resolved — resumeAnchorRef replaces time-limited preservePlaybackAnchorUntilRef, captures live cursor on pause, saved position on reopen, consumed on mode start, cleared on explicit selection. Passive onLoad/onRelocate gated. 17 new tests (1,372 total). v1.33.8. |
+| TTS-7N | — | READY | Kokoro pause semantics & settings link repair. BUG-136/137 open — TTS pause sliders/dialogue threshold must materially affect Kokoro narration, and Ctrl+K TTS settings links must route to `tts`. |
 | TTS-7L | 2026-04-05 | PASS | Exact Foliate text-selection mapping. BUG-134 resolved — selectionchange resolves exact .page-word span with data-word-index, unified click/selection payload, first-match text fallback demoted. 15 new tests (1,343 total). v1.33.7. **TTS stabilization lane FULLY CLOSED.** |
 | TTS-7K | 2026-04-05 | PASS* | EPUB global word-source promotion & page-mode isolation. BUG-131/132/133 resolved — full-book words promoted as source of truth, global index validation for start-word, onWordsReextracted source protection, page-mode isolated from section-boundary effect. 22 new tests (1,331 total). v1.33.6. Follow-up required via TTS-7L for exact Foliate text-selection mapping. |
 | TTS-7J | 2026-04-04 | PASS* | Foliate section-sync ownership, word-source dedupe & initial selection protection. BUG-128/129/130 resolved — single narration section-sync owner (miss-recovery only), sectionIndex-based word dedupe, userExplicitSelectionRef guards onLoad restore, unified start-word policy via resolveFoliateStartWord. Follow-up required via TTS-7K for full-book word-source promotion and page-mode isolation. 14 new tests (1,309 total). v1.33.5. |
