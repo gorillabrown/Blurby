@@ -133,6 +133,20 @@ export default function useNarration() {
       getWords: () => allWordsRef.current,
       getBookId: () => bookIdRef.current,
       getPronunciationOverrides: () => pronunciationOverridesRef.current,
+      // TTS-7N (BUG-136): Derive word-weight config from pause settings.
+      // Higher sentenceMs → bigger sentence weight → cursor dwells longer on sentence endings.
+      // Scale relative to defaults: 500ms sentence pause → 1.12x, 1000ms → ~1.24x, 0ms → 1.0x.
+      getWeightConfig: () => {
+        const cfg = pauseConfigRef.current;
+        const DEFAULT_SENTENCE_MS = 500;
+        const DEFAULT_CLAUSE_MS = 150;
+        const BASE_SENTENCE = 1.12;
+        const BASE_CLAUSE = 1.05;
+        return {
+          sentenceWeightFactor: cfg.sentenceMs > 0 ? 1 + (BASE_SENTENCE - 1) * (cfg.sentenceMs / DEFAULT_SENTENCE_MS) : 1.0,
+          clauseWeightFactor: cfg.clauseMs > 0 ? 1 + (BASE_CLAUSE - 1) * (cfg.clauseMs / DEFAULT_CLAUSE_MS) : 1.0,
+        };
+      },
       onFallbackToWeb: () => {
         // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
         kokoroStrategyRef.current?.stop();

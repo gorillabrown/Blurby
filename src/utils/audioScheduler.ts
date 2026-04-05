@@ -34,23 +34,35 @@ export function clearTimingTelemetry(): void { _telemetry = []; }
 const SENTENCE_END_RE = /[.!?]$/;
 const CLAUSE_END_RE = /[,;:)]$/;
 
+/** TTS-7N (BUG-136): Configurable punctuation weight factors.
+ * When pauseConfig is provided, scale punctuation weights relative to defaults.
+ * Higher sentence pause → larger sentence weight → cursor dwells longer on sentence endings. */
+export interface WordWeightConfig {
+  sentenceWeightFactor?: number; // default 1.12
+  clauseWeightFactor?: number;   // default 1.05
+}
+
 /**
  * Compute per-word timing weights based on token length and punctuation.
  * Longer words and words ending with punctuation get proportionally more time.
  * Returns normalized weights that sum to 1.0.
+ *
+ * TTS-7N: When weightConfig is provided, punctuation weights scale with user
+ * pause settings so cursor dwell time matches Kokoro's natural prosody.
  */
-export function computeWordWeights(words: string[]): number[] {
+export function computeWordWeights(words: string[], weightConfig?: WordWeightConfig): number[] {
   if (words.length === 0) return [];
   if (words.length === 1) return [1.0];
+
+  const sentenceFactor = weightConfig?.sentenceWeightFactor ?? 1.12;
+  const clauseFactor = weightConfig?.clauseWeightFactor ?? 1.05;
 
   const raw: number[] = [];
   for (const word of words) {
     // Base weight: proportional to character count (clamped 2–20)
     let w = Math.min(20, Math.max(2, word.length));
-    // TTS-6S: Reduced punctuation boosts — Kokoro already bakes prosodic pauses
-    // into generated audio. Previous 40%/15% boosts caused double-pausing.
-    if (SENTENCE_END_RE.test(word)) w *= 1.12;
-    else if (CLAUSE_END_RE.test(word)) w *= 1.05;
+    if (SENTENCE_END_RE.test(word)) w *= sentenceFactor;
+    else if (CLAUSE_END_RE.test(word)) w *= clauseFactor;
     raw.push(w);
   }
 
@@ -67,6 +79,8 @@ export interface ScheduledChunk {
   durationMs: number;
   words: string[];
   startIdx: number;
+  /** TTS-7N: Optional pause-derived weight config for cursor timing */
+  weightConfig?: WordWeightConfig;
 }
 
 export interface SchedulerCallbacks {
@@ -164,7 +178,7 @@ export function createAudioScheduler(): AudioScheduler {
     const wordCount = chunk.words.length;
     if (wordCount <= 0) return [];
     const chunkDurSec = chunk.durationMs / 1000;
-    const weights = computeWordWeights(chunk.words);
+    const weights = computeWordWeights(chunk.words, chunk.weightConfig);
     const boundaries: { time: number; wordIndex: number }[] = [];
     let cumulativeWeight = 0;
     for (let i = 0; i < wordCount; i++) {

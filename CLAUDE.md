@@ -264,7 +264,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.33.8 — TTS-7M complete, TTS-7N next)
+## Current System State (v1.33.9 — TTS-7N complete, EINK-6A next)
 
 ### Codebase (branch: `main`)
 
@@ -277,9 +277,9 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7K complete** — BUG-131/132/133 resolved. Full-book EPUB words promoted as narration source of truth, global index validation for start-word resolution, onWordsReextracted source protection, page-mode isolation from narration-only section navigation. 22 new tests. v1.33.6.
 - **TTS-7L complete** — BUG-134 resolved. Exact Foliate text-selection mapping — selectionchange now resolves .page-word span with data-word-index, unified click/selection payload, first-match text fallback demoted. 15 new tests. v1.33.7.
 - **TTS-7M complete** — BUG-135 resolved. Persistent resume-anchor — pause captures live cursor, reopen uses saved position, passive onLoad/onRelocate cannot downgrade. 17 new tests. v1.33.8.
-- **TTS-7N queued** — BUG-136/137 open. Kokoro pause sliders/dialogue threshold must materially affect narration semantics, and Ctrl+K TTS settings links must route to the dedicated `tts` page instead of stale `speed-reading` routes.
-- Active queue: TTS-7N → EINK-6A → EINK-6B → GOALS-6B (depth 4).
-- 1,372 tests across 79 test files
+- **TTS-7N complete** — BUG-136/137 resolved. Kokoro pause settings now drive word-weight scaling and sentence-boundary chunk snapping. Ctrl+K TTS links repaired to "tts" page. 19 new tests. v1.33.9. **TTS stabilization lane FULLY CLOSED.**
+- Active queue: EINK-6A → EINK-6B → GOALS-6B (depth 3).
+- 1,391 tests across 80 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -333,5 +333,5 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 79 test files, 1,372 tests
+  - **Tests** (`tests/`): 80 test files, 1,391 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, d
