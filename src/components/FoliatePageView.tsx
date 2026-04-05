@@ -13,6 +13,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import { segmentWords } from "../utils/segmentWords";
 import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX } from "../constants";
+import { recordDiagEvent } from "../utils/narrateDiagnostics";
 
 const api = window.electronAPI;
 
@@ -401,12 +402,28 @@ export default function FoliatePageView({
               const sectionWords = extractWordsFromSection(doc, index);
               // HOTFIX-10: Use global offset from extraction data when available
               const bookSection = bookWordSections?.find(s => s.sectionIndex === index);
-              const existingEnd = foliateWordsRef.current.length;
+              // TTS-7J (BUG-129): Deduplicate — remove any existing words for this
+              // sectionIndex before appending. Recovery/reload of the same section
+              // previously doubled the word array (e.g. 8770 → 17540).
+              const existingWithoutSection = foliateWordsRef.current.filter(w => w.sectionIndex !== index);
+              const existingEnd = existingWithoutSection.length;
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
               // Wrap this section's words with correct indices
               wrapWordsInSpans(doc, index, sectionStart);
-              // Append to the word array
-              foliateWordsRef.current = [...foliateWordsRef.current, ...sectionWords.map(w => ({ ...w, sectionIndex: index }))];
+              // Replace (not append) — deduped base + fresh section words
+              const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
+              const prevTotal = foliateWordsRef.current.length;
+              foliateWordsRef.current = [...existingWithoutSection, ...newSectionWords];
+              const newTotal = foliateWordsRef.current.length;
+              // TTS-7J: Diagnostic — track section word refresh and detect unexpected growth
+              recordDiagEvent("word-source-refresh", `section ${index}: ${newSectionWords.length} words, total ${prevTotal} → ${newTotal}`);
+              if (newTotal > prevTotal * 1.5 && prevTotal > 100) {
+                recordDiagEvent("word-source-growth-warning", `unexpected growth: ${prevTotal} → ${newTotal} (${Math.round(newTotal / prevTotal * 100)}%)`);
+                if (import.meta.env.DEV) console.warn(`[foliate] TTS-7J WARNING: word source grew unexpectedly: ${prevTotal} → ${newTotal}`);
+              }
+              if (import.meta.env.DEV) {
+                console.debug(`[foliate] section ${index} words refreshed: ${newSectionWords.length} words, total now ${newTotal}`);
+              }
               onWordsReextracted?.();
             } else {
               // Full re-extraction (Page mode or first load)

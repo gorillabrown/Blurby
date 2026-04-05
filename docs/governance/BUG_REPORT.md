@@ -8,6 +8,30 @@
 
 ## Incomplete
 
+### ~~BUG-128~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`
+**Description:** Narration startup on EPUB blinked from double section navigation. Two independent `goToSection()` paths: (1) miss-recovery in useReadingModeInstance (exact word → section lookup with cooldown) and (2) section-boundary effect in ReaderContainer (watches highlightedWordIndex, fires on every section change). Both fired during narration, causing competing page navigations and cursor destabilization.
+**Root cause:** TTS-7I added miss-recovery but didn't remove the older ReaderContainer section-boundary effect for narration. Both owned section navigation independently.
+**Fix:** Guard the ReaderContainer section-boundary effect to skip when `readingMode === "narration"`. Miss-recovery is the sole section-sync owner during narration.
+
+### ~~BUG-129~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`
+**Description:** Word source duplicated during section reload/recovery. Logs showed `words: 8770` followed by `words: 17540` for the same book. The active-mode `onSectionLoad` handler appended section words to `foliateWordsRef.current` without checking if that `sectionIndex` already existed, so recovery/reload of the same section doubled the array.
+**Root cause:** Blind append in `onSectionLoad` — `foliateWordsRef.current = [...existing, ...newSectionWords]` with no sectionIndex filter.
+**Fix:** Filter out existing words with the same `sectionIndex` before appending (dedupe by identity). Added diagnostic events for word-source-refresh and word-source-growth-warning.
+
+### ~~BUG-130~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** First-start narration did not reliably begin from the user's chosen location. User would click a word, then press play, but narration started from the saved/default position instead. The `onLoad` callback ran `setHighlightedWordIndex(savedPos)` after a 200ms delay, overwriting the user's explicit click before first narration start.
+**Root cause:** Delayed `onLoad` restore logic had no way to know the user had already explicitly selected a start point.
+**Fix:** Added `userExplicitSelectionRef` — set `true` on `onWordClick`, checked in `onLoad` to skip restore. Also unified startNarration to use `resolveFoliateStartWord` (same policy as startFocus/startFlow).
+
 ### ~~BUG-090~~ ✅ Fixed — HOTFIX-7 (v1.4.3) + HOTFIX-8 (v1.4.4)
 **Reported:** 2026-03-26 | **Resolved:** 2026-03-29
 **Severity:** CRITICAL
@@ -307,6 +331,27 @@
 **Description:** Return-to-narration scrolled to the right area but did not restore the visible narration cursor/highlight.
 **Fix:** `returnToNarration()` now uses `resolveWordState()` to re-apply the highlight class through the same unified path that live narration uses. If the word is off-page, it triggers exact section recovery via `goToSection()` before claiming success.
 **Status:** Resolved. Sprint: TTS-7I.
+
+### BUG-128: Narration section sync still blinks from competing `goToSection()` owners
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Fresh post-`TTS-7I` logs still show immediate miss recovery (`word 13 → section 2`) right after fast startup, while `ReaderContainer` also retains its own narration section-boundary `goToSection()` effect. These competing section movers can still blink the page and destabilize visible cursor ownership.
+**Status:** Open. Sprint: TTS-7J.
+
+### BUG-129: Foliate word source duplicates across section reload/recovery
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** In one session, narrate starts reported `words: 8770`, then later `words: 17540` for the same book. Active-mode section load handling currently appends section words into `foliateWordsRef.current` without dedupe by `sectionIndex`, so recovery/reload can duplicate slices and corrupt cursor mapping.
+**Status:** Open. Sprint: TTS-7J.
+
+### BUG-130: First-play selection/start point is overwritten by passive restore logic
+**Reported:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** User testing shows first-play narration does not reliably start at the chosen selected word, while pause-and-reselect usually does. The likely cause is delayed onLoad/page-restore logic resetting `highlightedWordIndex` back to saved/visible defaults after the user has already chosen a start point.
+**Status:** Open. Sprint: TTS-7J.
 
 ### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04

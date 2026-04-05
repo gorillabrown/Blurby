@@ -730,3 +730,21 @@ The renderer open path treated any non-error result like raw text and wrote it i
 - PR-120: Reader entry points (`LibraryContainer`, standalone reader windows, future deep-link readers) must validate/normalize load results before assigning `activeDoc`.
 - PR-121: Text utilities that may receive runtime-loaded content should fail safe on non-string input. This is a backstop, not a substitute for boundary normalization.
 - PR-122: Performance warnings like slow click handlers or ResizeObserver noise are not root-cause evidence by themselves. Check the app error log / uncaught exception first when a blank screen follows a state transition.
+
+### [2026-04-04] LL-070: Single Ownership for Section Navigation During Narration
+
+**Area:** renderer, foliate bridge, narration
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-7I added exact miss-recovery (`goToSection()` from `useReadingModeInstance`) to handle narration words not yet in the DOM. But the older section-boundary effect in `ReaderContainer` (which also called `goToSection()` when `highlightedWordIndex` crossed a section boundary) was still active during narration. Both paths fired independently, causing visible page blinks and cursor destabilization on narration startup.
+
+Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended section words to `foliateWordsRef.current` without checking if that `sectionIndex` already existed, so section reload/recovery doubled the word array (e.g., 8770 → 17540).
+
+**Root Cause:** Two independent owners for the same operation (section navigation during narration), and no identity check on word-source accumulation.
+
+**Fix:** (1) Guard the ReaderContainer section-boundary effect to skip during `readingMode === "narration"`. Miss-recovery is the sole section-sync owner during narration. (2) Filter out existing words by `sectionIndex` before appending in `onSectionLoad` (dedupe by identity, not blind append).
+
+**Guardrail:**
+- PR-123: During narration, exactly ONE path may call `goToSection()`. If a new section-navigation mechanism is added, disable or remove the old one. Never allow two independent section-sync owners.
+- PR-124: When accumulating EPUB section words into a shared array, always deduplicate by `sectionIndex`. Filter-then-append, not blind append. Log total word count before and after to detect unexpected growth.

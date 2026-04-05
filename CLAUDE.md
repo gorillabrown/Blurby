@@ -264,7 +264,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.33.4 — TTS-7I Foliate Follow-Scroll Complete)
+## Current System State (v1.33.5 — TTS-7J complete, EINK-6A next)
 
 ### Codebase (branch: `main`)
 
@@ -272,9 +272,10 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7F hotfix complete** — proactive entry cache coverage + cruise warm, plus clean launch ownership. BUG-116/118/119/120/121 resolved.
 - **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added.
 - **TTS-7H complete** — BUG-122/123 resolved. Visible-word readiness, frozen launch index.
-- **TTS-7I complete** — BUG-124/125/126/127 resolved. Shared `resolveWordState()` truth source, single scroll owner, exact section-based miss recovery with cooldown, return-to-narration cursor restore.
+- **TTS-7I complete as a first pass** — BUG-124/125/126/127 addressed, but live testing still shows final Foliate integration issues: competing section-sync owners, duplicated word-source growth, and first-play selection clobbering.
+- **TTS-7J complete** — BUG-128/129/130 resolved. Single narration section-sync owner (miss-recovery only), word-source dedupe by sectionIndex, explicit user selection protection via userExplicitSelectionRef, unified start-word policy across all modes. 14 new tests. v1.33.5.
 - Active queue: EINK-6A → EINK-6B → GOALS-6B (depth 3).
-- 1,295 tests across 73 test files
+- 1,309 tests across 74 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -328,5 +329,5 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 73 test files, 1,279 tests
+  - **Tests** (`tests/`): 74 test files, 1,309 tests
 - **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, d
