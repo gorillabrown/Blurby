@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7N complete. Kokoro pause semantics & settings link repair. 1,391 tests, 80 files. Latest tagged release: v1.33.9.
+**Last updated**: 2026-04-05 — TTS-7O complete (v1.34.0). Audible pause injection, smooth narration cursor done. TTS-7P queued next. 1,418 tests, 81 files. Latest tagged release: v1.34.0.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS hotfix lane narrowly reopened. `TTS-7N` is next (pause semantics + settings links). Queue GREEN (`TTS-7N` → `EINK-6A` → `EINK-6B` ��� `GOALS-6B`; depth 4).
+**Current state**: Phase 6 TTS follow-up lane active. TTS-7O complete. Queue WARN — depth 2 (`TTS-7P` → `EINK-6A`); needs backfill to ≥3.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -64,9 +64,11 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7L: Exact Foliate Text-Selection Mapping ✅ (v1.33.7)
   ├── TTS-7M: Persistent Resume Anchor & Reopen Authority ✅ (v1.33.8)
   ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair ✅ (v1.33.9)
+  ├── TTS-7O: Audible Pause Injection & Smooth Narration Cursor ✅ (v1.34.0)
+  ├── TTS-7P: Rolling Pause-Boundary Planner (queued)
   │
   │  Feature work
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)
+  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued after TTS-7P)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
     │
@@ -888,6 +890,156 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 11. `npm run build` succeeds
 
 **Tier:** Quick | **Depends on:** TTS-7M
+
+---
+
+### Sprint TTS-7O: Audible Pause Injection & Smooth Narration Cursor
+
+**Goal:** Make Kokoro pause settings audible, not just visible in cursor timing, while making narration highlighting feel smooth and deliberate instead of jumpy/approximate.
+
+**Problem:** `TTS-7N` made pause controls materially affect chunking and cursor weights, but Kokoro still mostly bakes prosody into generated audio. That means the sliders still do not fully behave like “real pause controls” from a listener’s perspective. At the same time, narration highlighting still reads as approximate: the UI often feels like it is hopping between words rather than gliding with speech, even though the actual logical start word is now correct. Users need two things together: real inter-chunk audible pauses at configured boundaries, and a narration cursor that is stable, readable, and graceful. The contract must stay explicit: three words may be highlighted for readability, but the first word is always the authoritative narration location for selection, replay, memory, resume, and persistence.
+
+**Design decisions:**
+- **Add explicit inter-chunk silence injection.** After Kokoro returns chunk audio, optionally append synthetic silence based on the classified boundary at the chunk edge: comma, clause, sentence, or paragraph. Only inject when the chunk ends on a classified boundary. This is the first layer that makes pause sliders audibly real.
+- **Silence is scheduler-visible.** Injected silence must be represented in scheduler timing/diagnostics so cursor motion and resume anchors do not drift from what the listener hears.
+- **Pre-send chunk boundaries must be punctuation-safe.** Before any text is sent to Kokoro, chunk boundaries must be rounded to the nearest acceptable punctuation ending. Chunks must never be cut in the middle of a sentence. If no acceptable punctuation boundary exists in the search window, the planner must expand the search rather than emit a mid-sentence cut.
+- **Do not redesign the whole pipeline yet.** Use existing sentence-aware chunking from `TTS-7N` as the base, but harden it into a pre-send guarantee. Silence injection happens at chunk boundaries only; no whole-book pause map yet.
+- **Three-word narration window.** Narration highlight should render as a smooth 3-word reading window at start and during playback. The first word of that window is the authoritative logical narration position for start, replay, and saved progress. The next two words are visual context, not alternative anchors.
+- **Smooth cursor motion.** The narration highlight should glide across words/spaces using the scheduler’s timing model rather than snapping harshly word-to-word. The gliding layer is visual only; the logical current word remains the first highlighted word.
+- **No anchor ambiguity.** Even with 3 highlighted words, the first word remains the canonical start/replay/save anchor everywhere in code. The second and third words must never be written back as resume anchors or saved progress.
+- **Exact selection start still wins.** If a user selects a word and presses play, the first word in the 3-word window must be that exact selected word. The two trailing words are derived context only.
+- **Graceful motion includes spaces.** The cursor/glide path should animate across both word boxes and inter-word gaps so narration feels like a continuous sweep rather than a stepped underline.
+- **Periodic cursor truth-sync.** Default resync interval is **every 12 words** (word-count based, not time based). At that cadence, compare the visual cursor position against the live narration/logical position and snap back to the authoritative narration word if drift exceeds tolerance. Also force an immediate truth-sync on chunk boundary, explicit retarget, pause/resume, and any detected drift beyond tolerance. This is a corrective guardrail, not the primary timing mechanism.
+
+**Baseline:**
+- `src/utils/generationPipeline.ts` — current sentence-snapped Kokoro chunk planning
+- `src/utils/audioScheduler.ts` — scheduled playback, word timing, chunk handling
+- `src/hooks/narration/kokoroStrategy.ts` — Kokoro chunk scheduling path
+- `src/hooks/useNarration.ts` — pause config propagation and playback orchestration
+- `src/components/FoliatePageView.tsx` — narration highlight classes / DOM updates
+- `src/components/ReaderContainer.tsx` — narration cursor wiring
+- `src/utils/pauseDetection.ts` / `src/utils/rhythm.ts` — boundary classification and pause semantics
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-138`, `BUG-139`
+4. `ROADMAP.md` — this section
+5. `src/hooks/useNarration.ts`
+6. `src/hooks/narration/kokoroStrategy.ts`
+7. `src/utils/generationPipeline.ts`
+8. `src/utils/audioScheduler.ts`
+9. `src/utils/pauseDetection.ts`
+10. `src/utils/rhythm.ts`
+11. `src/components/FoliatePageView.tsx`
+12. `src/components/ReaderContainer.tsx`
+13. `src/hooks/useReaderMode.ts`
+14. `src/utils/startWordIndex.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Enforce punctuation-safe pre-send chunk planning** — Before text is sent to Kokoro, round chunk ends to the nearest acceptable punctuation/sentence boundary. Chunks must never be cut mid-sentence. Search outward if the nearest nominal size lands inside a sentence. | `src/utils/generationPipeline.ts`, `src/utils/pauseDetection.ts`, `src/hooks/narration/kokoroStrategy.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Inject real audible pauses between Kokoro chunks** — Classify each finalized chunk boundary as comma/clause/sentence/paragraph and append configurable silence to the scheduled audio only for those boundary types. Respect the existing user pause sliders. | `src/utils/generationPipeline.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/audioScheduler.ts`, `src/utils/pauseDetection.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Preserve truthful pause semantics** — Ensure injected silence, chunk-end classification, and existing cursor-weight timing stay aligned so the highlight does not drift away from actual audible pauses. Add diagnostics for audible pause length vs scheduler pause length. | `src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/narrateDiagnostics.ts`, `src/utils/narratePerf.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Implement a 3-word narration window** — Narration should highlight three words at start and during playback. The first word is always the canonical logical narration position for start/resume/save; the next two words are visual context only. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Smooth/glide cursor motion + periodic truth-sync** — Replace abrupt narration word snapping with a smoother animated progression across words and inter-word space, driven by scheduler timing. Every 12 words, compare the visual cursor position to the authoritative narration word and reset if drift exceeds tolerance. Also truth-sync on chunk boundary, explicit retarget, and pause/resume. | `src/components/FoliatePageView.tsx`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts` |
+| 6 | Primary CLI (renderer-fixer scope) | **Protect anchor authority under the 3-word window** — Audit resume, selection, reopen, and saved-progress code paths so they always read/write the first highlighted word only. No soft trailing-word takeover. | `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/utils/startWordIndex.ts`, `src/hooks/useNarration.ts` |
+| 7 | test-runner | **Regression tests** — Add coverage for: (a) pre-send chunk ends always land on punctuation/sentence boundaries, (b) outward search prevents mid-sentence cuts, (c) inter-chunk silence injection by boundary type, (d) no silence added when boundary classification says none, (e) pause slider values materially change injected silence length, (f) narration start highlights 3 words, (g) first highlighted word remains the canonical logical anchor, (h) replay/save logic still uses the first word only, (i) periodic cursor resync corrects drift without changing the anchor, (j) exact selection still becomes the first highlighted word of the 3-word window. ≥14 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-compliance-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Chunks are rounded to punctuation/sentence boundaries before text is sent to Kokoro
+2. Chunks never end in the middle of a sentence
+3. Kokoro pause sliders now create real audible inter-chunk silence where appropriate
+4. Silence is only injected at classified comma/clause/sentence/paragraph boundaries
+5. Larger pause slider values produce measurably longer injected silence
+6. Cursor timing remains aligned with audible playback after silence injection
+7. Narration highlights 3 words at start and during playback
+8. The first highlighted word is always the canonical narration position for start/resume/save
+9. The next two highlighted words are visual context only and never become alternate anchors
+10. Exact user selection still becomes the first highlighted word when narration starts
+11. Cursor motion feels smooth/gliding rather than harshly snapping word-to-word
+12. Periodic cursor truth-sync corrects drift without changing the authoritative anchor
+13. Existing exact selection / replay / reopen anchor behavior does not regress
+14. ≥14 new regression tests
+15. `npm test` passes
+16. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** TTS-7N (recommended after TTS-7M)
+
+---
+
+### Sprint TTS-7P: Rolling Pause-Boundary Planner
+
+**Goal:** Add a lightweight forward-looking narration planner that classifies pause boundaries for the active text window ahead of playback, so chunk splitting, silence injection, resume behavior, and dialogue handling all use one consistent local plan.
+
+**Problem:** `TTS-7O` gives users real audible pause shaping at chunk boundaries, but it still operates chunk-by-chunk. That is enough for immediate quality gains, but not enough to make long-form narration feel fully planned. Resume behavior, dialogue pacing, and boundary choice still rely on local heuristics in the moment rather than a small rolling structure plan.
+
+**Design decisions:**
+- **Planner scope is local, not whole-book.** Build a pause-boundary plan only for the active text window ahead of playback (for example, next 2–5 chunks or the next few hundred words), not the full book.
+- **Single planning source.** Chunk splitting, inserted silence, resume targeting, and dialogue handling should all consult the same active plan.
+- **Cheap to recompute.** Rebuild the planner on retarget, rate change, major selection jump, or chunk exhaustion. No persisted whole-book boundary database in this sprint.
+- **Dialogue-aware planning.** Use quote/dialogue-aware heuristics so dialogue runs stop sounding like flattened prose.
+- **Planner preserves cursor authority.** Even when the planner looks ahead multiple chunks, the authoritative current/resume word remains the first word in the active narration window. Planning must never mutate the user anchor by itself.
+- **Planner owns boundary rounding rules.** The rolling plan becomes the single place that decides where chunks may legally end. Mid-sentence cuts are prohibited by policy, not just discouraged by heuristics.
+
+**Baseline:**
+- `src/utils/generationPipeline.ts`
+- `src/utils/pauseDetection.ts`
+- `src/utils/rhythm.ts`
+- `src/hooks/useNarration.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/utils/audioScheduler.ts`
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — `BUG-140`
+4. `ROADMAP.md` — this section
+5. `src/utils/generationPipeline.ts`
+6. `src/utils/pauseDetection.ts`
+7. `src/utils/rhythm.ts`
+8. `src/hooks/useNarration.ts`
+9. `src/hooks/narration/kokoroStrategy.ts`
+10. `src/utils/audioScheduler.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Build rolling pause-boundary planner** — For the active forward text window, classify sentence/clause/paragraph/dialogue boundaries and expose a local plan structure. | `src/utils/pauseDetection.ts`, new planner utility as needed |
+| 2 | Primary CLI (renderer-fixer scope) | **Drive chunking from the planner** — Make Kokoro chunk selection consult the active plan rather than only local nearest-boundary heuristics. The planner becomes the single legal authority for where chunks may end. | `src/utils/generationPipeline.ts`, `src/hooks/narration/kokoroStrategy.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Drive silence injection and resume from the planner** — Reuse the same plan for inter-chunk silence, resume-after-pause, and retarget behavior so narration structure stays consistent. The first word of the active narration window remains the only resume/save anchor. | `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts` |
+| 4 | Primary CLI (renderer-fixer scope) | **Improve dialogue handling** — Use the planner to avoid flattening multi-sentence dialogue blocks into prose-like runs. | `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`, planner utility |
+| 5 | test-runner | **Regression tests** — Add coverage for rolling-plan generation, plan rebuild on retarget, planner-driven chunk selection, planner-driven silence insertion, and dialogue-aware planning. ≥12 new tests. | `tests/` |
+| 6 | test-runner | **`npm test` + `npm run build`** | — |
+| 7 | spec-compliance-reviewer | **Spec compliance** | — |
+| 8 | doc-keeper | **Documentation pass** | All 6 governing docs |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### SUCCESS CRITERIA
+
+1. Narration uses a rolling local boundary plan rather than only moment-of-chunk heuristics
+2. Chunk splitting consults the active plan
+3. Inter-chunk silence injection consults the active plan
+4. Resume/retarget behavior can rebuild and reuse the plan cleanly
+5. Dialogue handling improves noticeably compared with plain sentence-only snapping
+6. Mid-sentence chunk cuts are prohibited by the planner contract
+7. Planner remains local/cheap and does not require full-book precomputation
+8. Planner never changes the authoritative first-word anchor on its own
+9. ≥12 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** TTS-7O
 
 ---
 

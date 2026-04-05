@@ -8,6 +8,30 @@
 
 ## Incomplete
 
+### ~~BUG-138~~ ✅ Fixed — TTS-7O (v1.34.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** `TTS-7N` made pause settings affect chunk snapping and cursor timing, but the Kokoro path still does not produce sufficiently literal audible pause differences from the listener’s perspective. Punctuation handling still relies too much on baked model prosody. Users need real pause slider effects in playback, not just better cursor weighting.
+**Root cause:** Pause config reaches chunk planning and scheduler weights, but the pipeline still does not inject real audio silence at classified chunk boundaries. The scheduler influences cursor pacing more than the waveform heard by the user.
+**Fix:** `classifyChunkBoundary()` classifies chunk edges as comma/clause/sentence/paragraph. Pipeline injects silence samples proportional to user pause config. `snapToSentenceBoundary()` expanded to search full word range — chunks never end mid-sentence. `silenceMs` tracked on `ScheduledChunk` so word timing excludes silence tail.
+
+### ~~BUG-139~~ ✅ Fixed — TTS-7O (v1.34.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/utils/audioScheduler.ts`
+**Description:** Even when narration starts from the correct selected word, the visual cursor still feels jumpy and approximate. Users need a readable 3-word narration window where the first word is the real anchor and the cursor glides smoothly across words/spaces rather than snapping harshly.
+**Root cause:** The current narration highlight is still fundamentally word-step based. There is no explicit three-word visual window and no dedicated glide layer that preserves a single authoritative first-word anchor.
+**Fix:** 3-word narration window (`page-word--narration-context` for words N+1, N+2). CSS transitions for smooth glide (0.15s ease). Periodic truth-sync every 12 words + on chunk boundary + on resume via `onTruthSync` callback. First word remains canonical anchor.
+
+### BUG-140: Narration pause handling still lacks a forward-looking local boundary plan
+**Reported:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`, `src/hooks/useNarration.ts`
+**Description:** Chunk splitting, silence insertion, resume targeting, and dialogue handling still rely on local heuristics at the moment of playback. Even with sentence snapping and future audible silence injection, long-form narration quality is still constrained by having no rolling structure plan for the active text window.
+**Root cause:** The Kokoro path has no local pause-boundary planner that looks ahead across the next few chunks. Each concern makes boundary decisions independently instead of sharing one active planning structure.
+**Fix plan:** `TTS-7P` — add a rolling pause-boundary planner for the active text window and make chunking, silence injection, resume/retarget, and dialogue handling consult the same plan. The planner becomes the single authority that forbids mid-sentence chunk endings.
+
 ### ~~BUG-136~~ ✅ Fixed — TTS-7N (v1.33.9)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** High

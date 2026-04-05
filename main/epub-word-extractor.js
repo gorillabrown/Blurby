@@ -15,6 +15,7 @@ function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _a
 
 /** Trailing punctuation regex — must match FoliatePageView.tsx line 72 exactly */
 const TRAILING_PUNCT_RE = /^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/;
+const BLOCK_TAGS = new Set(["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "li", "td", "section", "article"]);
 
 /**
  * Extract all words from an EPUB file, ordered by spine reading order.
@@ -91,27 +92,29 @@ async function extractWords(epubPath) {
 
     const startWordIdx = allWords.length;
 
-    // Walk all text nodes under <body>, matching FoliatePageView's TreeWalker logic
-    const bodyText = extractTextNodes($, $("body"));
-    const segments = Array.from(segmenter.segment(bodyText));
+    // Walk text by block so inline drop-caps like <span>W</span>hat's preserve
+    // adjacency while paragraph-level word boundaries still remain stable.
+    const blocks = extractBlockTexts($, $("body"));
+    for (const blockText of blocks) {
+      const segments = Array.from(segmenter.segment(blockText));
+      for (let si = 0; si < segments.length; si++) {
+        const { segment, isWordLike } = segments[si];
+        if (!isWordLike) continue;
 
-    for (let si = 0; si < segments.length; si++) {
-      const { segment, isWordLike } = segments[si];
-      if (!isWordLike) continue;
-
-      // Include trailing punctuation — matches FoliatePageView lines 66-78
-      let wordWithPunct = segment;
-      for (let pi = si + 1; pi < segments.length; pi++) {
-        const next = segments[pi];
-        if (next.isWordLike) break;
-        if (TRAILING_PUNCT_RE.test(next.segment)) {
-          wordWithPunct += next.segment;
-        } else {
-          break;
+        // Include trailing punctuation — matches FoliatePageView lines 66-78
+        let wordWithPunct = segment;
+        for (let pi = si + 1; pi < segments.length; pi++) {
+          const next = segments[pi];
+          if (next.isWordLike) break;
+          if (TRAILING_PUNCT_RE.test(next.segment)) {
+            wordWithPunct += next.segment;
+          } else {
+            break;
+          }
         }
-      }
 
-      allWords.push(wordWithPunct);
+        allWords.push(wordWithPunct);
+      }
     }
 
     const endWordIdx = allWords.length;
@@ -133,33 +136,50 @@ async function extractWords(epubPath) {
 }
 
 /**
- * Extract text from all text nodes under a cheerio element,
- * preserving word boundaries. Matches the TreeWalker SHOW_TEXT
- * behavior in FoliatePageView — skips script/style (already removed),
- * concatenates text nodes with space separators.
+ * Extract text block-by-block from a cheerio element. Inline text nodes within
+ * the same block are concatenated without injected spaces so split drop-caps
+ * like `<span>W</span>hat's` remain one lexical word. Distinct block elements
+ * become distinct strings so paragraph boundaries still separate naturally.
  */
-function extractTextNodes($, $root) {
+function extractBlockTexts($, $root) {
   const texts = [];
 
+  function collectText(node) {
+    if (!node) return "";
+    if (node.type === "text") return node.data || "";
+    if (node.type !== "tag") return "";
+
+    const children = node.children || [];
+    let combined = "";
+    for (const child of children) {
+      combined += collectText(child);
+    }
+    return combined;
+  }
+
   function walk(node) {
-    if (!node) return;
-    // node is a cheerio wrapped set or raw node
+    if (!node || node.type !== "tag") return;
+    const tagName = (node.name || "").toLowerCase();
+
+    if (BLOCK_TAGS.has(tagName)) {
+      const text = collectText(node);
+      if (text.trim()) texts.push(text);
+      return;
+    }
+
     const children = node.children || [];
     for (const child of children) {
       if (child.type === "text") {
         const text = child.data || "";
-        if (text.trim()) {
-          texts.push(text);
-        }
+        if (text.trim()) texts.push(text);
       } else if (child.type === "tag") {
         walk(child);
       }
     }
   }
 
-  // $root is a cheerio selection; iterate its raw nodes
   $root.each((_, el) => walk(el));
-  return texts.join(" ");
+  return texts;
 }
 
-module.exports = { extractWords };
+module.exports = { extractWords, extractBlockTexts };

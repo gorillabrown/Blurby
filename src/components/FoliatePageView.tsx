@@ -11,7 +11,12 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
-import { segmentWords } from "../utils/segmentWords";
+import { segmentWordSpans, type SegmentedWordSpan } from "../utils/segmentWords";
+import {
+  getSectionGlobalOffset,
+  resolveGlobalWordIndexToRendered,
+  resolveRenderedWordIndexToGlobal,
+} from "../utils/foliateWordOffsets";
 import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 
@@ -24,9 +29,6 @@ export interface FoliateWord {
   sectionIndex: number;
 }
 
-/** Intl.Segmenter instance shared within this module for inline word detection. */
-const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
-
 /** Extract all words from a foliate view's currently loaded sections.
  *  Returns word strings and their DOM Ranges for highlighting. */
 const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
@@ -37,59 +39,120 @@ function getBlockParent(node: Node): Element | null {
   return el;
 }
 
+function collectBlockTextNodes(root: ParentNode): Array<{ block: Element; nodes: Text[] }> {
+  const groups = new Map<Element, Text[]>();
+  const order: Element[] = [];
+  const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node: Node) => {
+      const parent = node.parentElement;
+      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
+      if (!node.textContent) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+  if (!walker) return [];
+
+  let node: Text | null;
+  while ((node = walker.nextNode() as Text | null)) {
+    const block = getBlockParent(node) || (root instanceof Element ? root : root.ownerDocument?.body);
+    if (!block) continue;
+    if (!groups.has(block)) {
+      groups.set(block, []);
+      order.push(block);
+    }
+    groups.get(block)!.push(node);
+  }
+
+  return order.map((block) => ({ block, nodes: groups.get(block) || [] }));
+}
+
+function locateTextOffset(nodes: Text[], absoluteOffset: number): { node: Text; offset: number } | null {
+  let cursor = 0;
+  for (const node of nodes) {
+    const text = node.textContent || "";
+    const next = cursor + text.length;
+    if (absoluteOffset < next) {
+      return { node, offset: absoluteOffset - cursor };
+    }
+    if (absoluteOffset === next) {
+      return { node, offset: text.length };
+    }
+    cursor = next;
+  }
+  const last = nodes[nodes.length - 1];
+  if (!last) return null;
+  return { node: last, offset: (last.textContent || "").length };
+}
+
+function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number): FoliateWord[] {
+  if (nodes.length === 0) return [];
+  const combined = nodes.map((node) => node.textContent || "").join("");
+  const wordSpans = segmentWordSpans(combined);
+  const words: FoliateWord[] = [];
+
+  for (const { word, start, end } of wordSpans) {
+    const startPos = locateTextOffset(nodes, start);
+    const endPos = locateTextOffset(nodes, end);
+    if (!startPos || !endPos) continue;
+    const doc = startPos.node.ownerDocument;
+    const range = doc.createRange();
+    range.setStart(startPos.node, startPos.offset);
+    range.setEnd(endPos.node, endPos.offset);
+    words.push({ word, range, sectionIndex });
+  }
+
+  return words;
+}
+
+function buildWrappedFragmentForNode(
+  doc: Document,
+  text: string,
+  nodeStart: number,
+  wordSpans: Array<SegmentedWordSpan & { globalIndex: number }>,
+): DocumentFragment | null {
+  const nodeEnd = nodeStart + text.length;
+  const overlaps = wordSpans.filter((span) => span.end > nodeStart && span.start < nodeEnd);
+  if (overlaps.length === 0) return null;
+
+  const frag = doc.createDocumentFragment();
+  let cursor = nodeStart;
+  for (const span of overlaps) {
+    const overlapStart = Math.max(nodeStart, span.start);
+    const overlapEnd = Math.min(nodeEnd, span.end);
+    if (overlapStart > cursor) {
+      frag.appendChild(doc.createTextNode(text.slice(cursor - nodeStart, overlapStart - nodeStart)));
+    }
+
+    const wrappedText = text.slice(overlapStart - nodeStart, overlapEnd - nodeStart);
+    const el = doc.createElement("span");
+    el.className = "page-word";
+    el.setAttribute("data-word-index", String(span.globalIndex));
+    el.setAttribute("data-word-full", span.word);
+    el.textContent = wrappedText;
+    frag.appendChild(el);
+
+    cursor = overlapEnd;
+  }
+
+  if (cursor < nodeEnd) {
+    frag.appendChild(doc.createTextNode(text.slice(cursor - nodeStart)));
+  }
+  return frag;
+}
+
 function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreaks: Set<number> } {
   const words: FoliateWord[] = [];
   const paragraphBreaks = new Set<number>();
   if (!view?.renderer?.getContents) return { words, paragraphBreaks };
 
-  let prevBlock: Element | null = null;
-
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
-    const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
-      acceptNode: (node: Node) => {
-        const parent = node.parentElement;
-        if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
-        return NodeFilter.FILTER_ACCEPT;
-      },
-    });
 
-    let node: Text | null;
-    while ((node = walker.nextNode() as Text | null)) {
-      const text = node.textContent || "";
-      const block = getBlockParent(node);
-      const segments = Array.from(wordSegmenter.segment(text));
-      for (let si = 0; si < segments.length; si++) {
-        const { segment, isWordLike, index: segIdx } = segments[si];
-        if (!isWordLike) continue;
-        // Include trailing punctuation (e.g., "world" + "." → "world.")
-        // Intl.Segmenter separates punctuation, but TTS rhythm needs it attached
-        let wordWithPunct = segment;
-        let endOffset = segIdx + segment.length;
-        // Scan forward for trailing punctuation segments
-        for (let pi = si + 1; pi < segments.length; pi++) {
-          const next = segments[pi];
-          if (next.isWordLike) break; // Hit next word — stop
-          if (/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/.test(next.segment)) {
-            wordWithPunct += next.segment;
-            endOffset = next.index + next.segment.length;
-          } else {
-            break; // Whitespace or other — stop
-          }
-        }
-        // Detect paragraph boundary: block parent changed from previous word
-        if (prevBlock && block && block !== prevBlock && words.length > 0) {
-          paragraphBreaks.add(words.length - 1); // Last word of previous block
-        }
-        prevBlock = block;
-        const range = doc.createRange();
-        range.setStart(node, segIdx);
-        range.setEnd(node, endOffset);
-        words.push({ word: wordWithPunct, range, sectionIndex: index });
-      }
-    }
-    // Section boundary = paragraph break
-    if (words.length > 0) {
+    const blockGroups = collectBlockTextNodes(doc.body);
+    for (const { nodes } of blockGroups) {
+      const blockWords = buildWordsFromTextNodes(nodes, index);
+      if (blockWords.length === 0) continue;
+      words.push(...blockWords);
       paragraphBreaks.add(words.length - 1);
     }
   }
@@ -100,36 +163,9 @@ function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreak
 function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWord[] {
   const words: FoliateWord[] = [];
   if (!doc?.body) return words;
-  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node: Node) => {
-      const parent = node.parentElement;
-      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-  let node: Text | null;
-  while ((node = walker.nextNode() as Text | null)) {
-    const text = node.textContent || "";
-    const segments = Array.from(wordSegmenter.segment(text));
-    for (let si = 0; si < segments.length; si++) {
-      const { segment, isWordLike, index: segIdx } = segments[si];
-      if (!isWordLike) continue;
-      // Include trailing punctuation (same as extractWordsFromView)
-      let wordWithPunct = segment;
-      let endOffset = segIdx + segment.length;
-      for (let pi = si + 1; pi < segments.length; pi++) {
-        const next = segments[pi];
-        if (next.isWordLike) break;
-        if (/^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/.test(next.segment)) {
-          wordWithPunct += next.segment;
-          endOffset = next.index + next.segment.length;
-        } else break;
-      }
-      const range = doc.createRange();
-      range.setStart(node, segIdx);
-      range.setEnd(node, endOffset);
-      words.push({ word: wordWithPunct, range, sectionIndex });
-    }
+  const groups = collectBlockTextNodes(doc.body);
+  for (const { nodes } of groups) {
+    words.push(...buildWordsFromTextNodes(nodes, sectionIndex));
   }
   return words;
 }
@@ -153,58 +189,32 @@ export function unwrapWordSpans(doc: Document): void {
  *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
  *  Returns the next available global index. */
 export function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): number {
-  const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node: Node) => {
-      const parent = node.parentElement;
-      if (!parent) return NodeFilter.FILTER_REJECT;
-      const tag = parent.tagName?.toUpperCase();
-      if (tag === "SCRIPT" || tag === "STYLE") return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-
   let globalIndex = globalOffset;
-  const textNodes: Text[] = [];
-  let tn: Text | null;
-  while ((tn = walker.nextNode() as Text | null)) {
-    textNodes.push(tn);
-  }
+  const groups = collectBlockTextNodes(doc.body);
 
-  for (const textNode of textNodes) {
-    const text = textNode.textContent || "";
-    const words = segmentWords(text);
-    if (words.length === 0) continue;
+  for (const { nodes } of groups) {
+    const combined = nodes.map((node) => node.textContent || "").join("");
+    const wordSpans = segmentWordSpans(combined).map((span, idx) => ({
+      ...span,
+      globalIndex: globalIndex + idx,
+    }));
+    globalIndex += wordSpans.length;
 
-    const parent = textNode.parentNode;
-    if (!parent) continue;
-
-    // Build a document fragment with word spans + whitespace preserved
-    const frag = doc.createDocumentFragment();
-    let remaining = text;
-
-    for (const word of words) {
-      const wordStart = remaining.indexOf(word);
-      if (wordStart > 0) {
-        // Preserve whitespace/punctuation before the word
-        frag.appendChild(doc.createTextNode(remaining.slice(0, wordStart)));
+    let nodeStart = 0;
+    for (const textNode of nodes) {
+      const text = textNode.textContent || "";
+      const parent = textNode.parentNode;
+      if (!parent) {
+        nodeStart += text.length;
+        continue;
       }
 
-      const span = doc.createElement("span");
-      span.className = "page-word";
-      span.setAttribute("data-word-index", String(globalIndex));
-      span.textContent = word;
-      frag.appendChild(span);
-
-      remaining = remaining.slice(wordStart + word.length);
-      globalIndex++;
+      const frag = buildWrappedFragmentForNode(doc, text, nodeStart, wordSpans);
+      if (frag) {
+        parent.replaceChild(frag, textNode);
+      }
+      nodeStart += text.length;
     }
-
-    // Append any trailing whitespace/punctuation
-    if (remaining) {
-      frag.appendChild(doc.createTextNode(remaining));
-    }
-
-    parent.replaceChild(frag, textNode);
   }
 
   return globalIndex;
@@ -324,6 +334,14 @@ export default function FoliatePageView({
   // Store flow-mode callback in a ref to avoid re-render loops
   const onFlowWordAdvanceRef = useRef(onFlowWordAdvance);
   onFlowWordAdvanceRef.current = onFlowWordAdvance;
+  const onWordClickRef = useRef(onWordClick);
+  onWordClickRef.current = onWordClick;
+  const onLoadRef = useRef(onLoad);
+  onLoadRef.current = onLoad;
+  const onWordsReextractedRef = useRef(onWordsReextracted);
+  onWordsReextractedRef.current = onWordsReextracted;
+  const bookWordSectionsRef = useRef(bookWordSections);
+  bookWordSectionsRef.current = bookWordSections;
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
   const readingModeRef = useRef(readingMode);
@@ -396,12 +414,13 @@ export default function FoliatePageView({
             // During narration/flow, only wrap the new section without re-extracting everything
             // (re-extraction shifts indices, breaking the narration's word array mapping)
             const isActiveMode = readingModeRef.current === "narration" || readingModeRef.current === "flow";
+            const liveSections = bookWordSectionsRef.current;
 
             if (isActiveMode && foliateWordsRef.current.length > 0) {
               // Extract just this section's words and append/update in the existing array
               const sectionWords = extractWordsFromSection(doc, index);
               // HOTFIX-10: Use global offset from extraction data when available
-              const bookSection = bookWordSections?.find(s => s.sectionIndex === index);
+              const bookSection = liveSections?.find(s => s.sectionIndex === index);
               // TTS-7J (BUG-129): Deduplicate — remove any existing words for this
               // sectionIndex before appending. Recovery/reload of the same section
               // previously doubled the word array (e.g. 8770 → 17540).
@@ -424,15 +443,18 @@ export default function FoliatePageView({
               if (import.meta.env.DEV) {
                 console.debug(`[foliate] section ${index} words refreshed: ${newSectionWords.length} words, total now ${newTotal}`);
               }
-              onWordsReextracted?.();
+              onWordsReextractedRef.current?.();
             } else {
               // Full re-extraction (Page mode or first load)
               const extracted = extractWordsFromView(v2);
               foliateWordsRef.current = extracted.words;
               foliateParagraphBreaksRef.current = extracted.paragraphBreaks;
-              onWordsReextracted?.();
-              // Wrap this section's words
-              const sectionStart = extracted.words.findIndex(w => w.sectionIndex === index);
+              onWordsReextractedRef.current?.();
+              // TTS selection-start fix: when full-book extraction boundaries exist,
+              // stamp DOM spans with the global section offset, not the local loaded-slice
+              // offset. Otherwise click/selection can report `0` for the first visible word
+              // of a later section, causing narration to restart from the book beginning.
+              const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections);
               if (sectionStart >= 0) {
                 wrapWordsInSpans(doc, index, sectionStart);
               }
@@ -447,12 +469,15 @@ export default function FoliatePageView({
 
             const idx = parseInt(target.getAttribute("data-word-index") || "", 10);
             if (isNaN(idx)) return;
+            const canonicalWord = target.getAttribute("data-word-full") || target.textContent || "";
 
             // Highlight via CSS class (same as PageReaderView)
             doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
               el.classList.remove("page-word--highlighted")
             );
-            (target as HTMLElement).classList.add("page-word--highlighted");
+            doc.querySelectorAll(`[data-word-index="${idx}"]`).forEach((el: Element) =>
+              el.classList.add("page-word--highlighted")
+            );
 
             // Report click to parent
             const v = viewRef.current;
@@ -463,9 +488,11 @@ export default function FoliatePageView({
                 const range = doc.createRange();
                 range.selectNodeContents(target);
                 const cfi = v.getCFI(match.index, range);
-                const sectionBase = foliateWordsRef.current.findIndex(w => w.sectionIndex === match.index);
-                const wordOffsetInSection = sectionBase >= 0 ? idx - sectionBase : 0;
-                onWordClick?.(cfi, target.textContent || "", match.index, wordOffsetInSection, idx);
+                const liveSections = bookWordSectionsRef.current;
+                const exactIdx = resolveRenderedWordIndexToGlobal(match.index, idx, foliateWordsRef.current, liveSections);
+                const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
+                const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                onWordClickRef.current?.(cfi, canonicalWord, match.index, wordOffsetInSection, exactIdx);
               }
             }
           });
@@ -502,12 +529,17 @@ export default function FoliatePageView({
                     doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
                       el.classList.remove("page-word--highlighted")
                     );
-                    wordSpan.classList.add("page-word--highlighted");
+                    doc.querySelectorAll(`[data-word-index="${idx}"]`).forEach((el: Element) =>
+                      el.classList.add("page-word--highlighted")
+                    );
 
-                    const sectionBase = foliateWordsRef.current.findIndex(w => w.sectionIndex === match.index);
-                    const wordOffsetInSection = sectionBase >= 0 ? idx - sectionBase : 0;
-                    if (import.meta.env.DEV) console.debug("[foliate] selection: exact span found — globalWordIndex:", idx, "word:", word);
-                    onWordClick?.(cfi, word, match.index, wordOffsetInSection, idx);
+                    const liveSections = bookWordSectionsRef.current;
+                    const exactIdx = resolveRenderedWordIndexToGlobal(match.index, idx, foliateWordsRef.current, liveSections);
+                    const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
+                    const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                    const canonicalWord = wordSpan.getAttribute("data-word-full") || word;
+                    if (import.meta.env.DEV) console.debug("[foliate] selection: exact span found — globalWordIndex:", exactIdx, "word:", canonicalWord);
+                    onWordClickRef.current?.(cfi, canonicalWord, match.index, wordOffsetInSection, exactIdx);
                     return;
                   }
                 }
@@ -527,7 +559,7 @@ export default function FoliatePageView({
               bubbles: true, cancelable: true,
             }));
           });
-          onLoad?.();
+          onLoadRef.current?.();
         };
         view.addEventListener("load", onSectionLoad);
 
@@ -555,7 +587,28 @@ export default function FoliatePageView({
 
         // Provide TOC
         if (view.book?.toc) {
-          onTocReady?.(view.book.toc, view.book.sections?.length ?? 0);
+          const sections = view.book.sections ?? [];
+          const normalizeHref = (value: string | undefined | null) => (value || "").split("#")[0].replace(/^\.?\//, "");
+          const attachSectionIndices = (items: any[]): any[] => items.map((item) => {
+            const hrefBase = normalizeHref(item.href || item.src || item.path);
+            const section = sections.find((candidate: any) => {
+              const candidateHref = normalizeHref(candidate?.href || candidate?.id || candidate?.src || candidate?.path);
+              return candidateHref && candidateHref === hrefBase;
+            });
+            const children = item.subitems || item.children || [];
+            return {
+              ...item,
+              sectionIndex: section
+                ? typeof section.linearIndex === "number"
+                  ? section.linearIndex
+                  : typeof section.index === "number"
+                    ? section.index
+                    : sections.indexOf(section)
+                : undefined,
+              subitems: children.length > 0 ? attachSectionIndices(children) : children,
+            };
+          });
+          onTocReady?.(attachSectionIndices(view.book.toc), sections.length ?? 0);
         }
 
         // Navigate to last position or start from the very beginning (cover page).
@@ -595,6 +648,12 @@ export default function FoliatePageView({
               // No-op: use highlightWordByIndex instead
             },
             highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narration"): boolean => {
+              // TTS-7O ANCHOR CONTRACT: The wordIndex parameter is the CANONICAL narration
+              // position for start, resume, save, and replay. Context words (N+1, N+2) applied
+              // below in the narration 3-word window are VISUAL ONLY and must never be written
+              // back as resume anchors or saved progress. See handlePauseToPage() in useReaderMode.ts
+              // and resumeAnchorRef usage — both correctly read getCurrentWord() which returns
+              // only this first highlighted word.
               // TTS-7I: Use shared resolver for consistent gate/highlight truth (BUG-124)
               const state = viewApiRef!.current!.resolveWordState(wordIndex);
 
@@ -602,11 +661,15 @@ export default function FoliatePageView({
               // Use explicit style hint from caller (avoids stale readingModeRef during state transitions)
               const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
               const highlightClass = isFlowMode ? "page-word--flow-cursor" : "page-word--highlighted";
-              // Clear previous highlight (both classes)
+              // Clear previous highlight (all highlight classes including narration context)
               for (const { doc: d } of contents) {
                 try {
                   d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
                   d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
+                  // TTS-7O: Clear 3-word narration context classes
+                  d?.querySelectorAll?.(".page-word--narration-context")?.forEach((el: Element) => {
+                    el.classList.remove("page-word--narration-context");
+                  });
                 } catch { /* */ }
               }
 
@@ -619,7 +682,25 @@ export default function FoliatePageView({
               }
 
               // Apply highlight CSS class (cheap, no page motion)
-              state.span.classList.add(highlightClass);
+              state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
+                el.classList.add(highlightClass);
+              });
+
+              // TTS-7O: Apply 3-word narration context window.
+              // The primary word (wordIndex) is the canonical anchor — context words are visual-only.
+              // Context words (wordIndex+1, wordIndex+2) get a subtler highlight class.
+              if (styleHint === "narration") {
+                for (let offset = 1; offset <= 2; offset++) {
+                  const contextIdx = wordIndex + offset;
+                  for (const { doc: cd } of contents) {
+                    try {
+                      cd?.querySelectorAll?.(`[data-word-index="${contextIdx}"]`)?.forEach((el: Element) => {
+                        el.classList.add("page-word--narration-context");
+                      });
+                    } catch { /* */ }
+                  }
+                }
+              }
 
               // TTS-7I (BUG-125): Split highlight from motion — only scroll when word is
               // NOT already visible on page. Skip if user has browsed away.
@@ -643,6 +724,10 @@ export default function FoliatePageView({
                 try {
                   d?.querySelector?.(".page-word--highlighted")?.classList.remove("page-word--highlighted");
                   d?.querySelector?.(".page-word--flow-cursor")?.classList.remove("page-word--flow-cursor");
+                  // TTS-7O: Clear narration context classes
+                  d?.querySelectorAll?.(".page-word--narration-context")?.forEach((el: Element) => {
+                    el.classList.remove("page-word--narration-context");
+                  });
                 } catch { /* */ }
               }
             },
@@ -664,6 +749,31 @@ export default function FoliatePageView({
                   return { found: true, visible, span, doc: d };
                 } catch { /* */ }
               }
+              const liveSections = bookWordSectionsRef.current;
+              if (liveSections && liveSections.length > 0) {
+                const sectionIdx = viewApiRef!.current!.getSectionForWordIndex(wordIndex);
+                if (sectionIdx != null) {
+                  const renderedWordIndex = resolveGlobalWordIndexToRendered(
+                    sectionIdx,
+                    wordIndex,
+                    foliateWordsRef.current,
+                    liveSections,
+                  );
+                  for (const { doc: d, index } of contents) {
+                    if (index !== sectionIdx) continue;
+                    try {
+                      const span = d?.querySelector?.(`[data-word-index="${renderedWordIndex}"]`) as HTMLElement;
+                      if (!span) continue;
+                      const rect = span.getBoundingClientRect();
+                      const iframeWin = d.defaultView;
+                      const visible = !!(iframeWin && rect.width > 0 &&
+                        rect.left >= 0 && rect.left < iframeWin.innerWidth &&
+                        rect.top >= 0 && rect.top < iframeWin.innerHeight);
+                      return { found: true, visible, span, doc: d };
+                    } catch { /* */ }
+                  }
+                }
+              }
               return { found: false, visible: false, span: null, doc: null };
             },
             // TTS-7F: Pure read-only DOM check — delegates to resolveWordState
@@ -680,13 +790,14 @@ export default function FoliatePageView({
             // tiny slice and would fail for global indices like 5000.
             getSectionForWordIndex: (wordIndex: number): number | null => {
               // Prefer global section boundaries when available
-              if (bookWordSections && bookWordSections.length > 0) {
-                for (let i = bookWordSections.length - 1; i >= 0; i--) {
-                  if (wordIndex >= bookWordSections[i].startWordIdx) {
-                    return bookWordSections[i].sectionIndex;
+              const liveSections = bookWordSectionsRef.current;
+              if (liveSections && liveSections.length > 0) {
+                for (let i = liveSections.length - 1; i >= 0; i--) {
+                  if (wordIndex >= liveSections[i].startWordIdx) {
+                    return liveSections[i].sectionIndex;
                   }
                 }
-                return bookWordSections[0]?.sectionIndex ?? null;
+                return liveSections[0]?.sectionIndex ?? null;
               }
               // Fallback: DOM-local lookup
               const words = foliateWordsRef.current;
@@ -698,7 +809,7 @@ export default function FoliatePageView({
             findFirstVisibleWordIndex: () => {
               // Walk all loaded sections to find the first word span that's visible
               const contents = view.renderer?.getContents?.() ?? [];
-              for (const { doc: d } of contents) {
+              for (const { doc: d, index } of contents) {
                 try {
                   const spans = d.querySelectorAll("[data-word-index]");
                   for (const span of spans) {
@@ -708,8 +819,10 @@ export default function FoliatePageView({
                     // Check if the span is within the visible viewport of the iframe
                     if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
                         rect.top >= 0 && rect.top < iframeWin.innerHeight) {
-                      const idx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
-                      if (idx >= 0) return idx;
+                      const renderedIdx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
+                      if (renderedIdx >= 0) {
+                        return resolveRenderedWordIndexToGlobal(index, renderedIdx, foliateWordsRef.current, bookWordSectionsRef.current);
+                      }
                     }
                   }
                 } catch { /* safe to ignore */ }
@@ -807,6 +920,19 @@ export default function FoliatePageView({
       if (foliateHostRef.current) foliateHostRef.current.innerHTML = "";
     };
   }, [activeDoc.filepath, activeDoc.id]);
+
+  useEffect(() => {
+    if (!bookWordSections || bookWordSections.length === 0) return;
+    const view = viewRef.current;
+    const contents = view?.renderer?.getContents?.() ?? [];
+    for (const { doc, index } of contents) {
+      if (!doc?.body) continue;
+      const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections);
+      if (sectionStart < 0) continue;
+      unwrapWordSpans(doc);
+      wrapWordsInSpans(doc, index, sectionStart);
+    }
+  }, [bookWordSections]);
 
   // Update renderer on settings changes
   useEffect(() => {

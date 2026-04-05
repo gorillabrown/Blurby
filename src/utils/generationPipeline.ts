@@ -13,7 +13,7 @@ import {
   TTS_QUEUE_DEPTH,
 } from "../constants";
 import type { ScheduledChunk } from "./audioScheduler";
-import { isSentenceEnd } from "./pauseDetection";
+import { isSentenceEnd, classifyChunkBoundary } from "./pauseDetection";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,8 @@ export interface PipelineConfig {
   getSpeed: () => number;
   /** TTS-7N: Optional word-weight config from pause settings (attached to each chunk) */
   getWeightConfig?: () => import("./audioScheduler").WordWeightConfig | undefined;
+  /** TTS-7O: Get current pause config for silence injection at chunk boundaries */
+  getPauseConfig?: () => import("./pauseDetection").PauseConfig | undefined;
   /** Called when a chunk is ready for scheduling */
   onChunkReady: (chunk: ScheduledChunk) => void;
   /** Called when a chunk should be cached to disk (TTS-7A: includes wordCount) */
@@ -112,12 +114,24 @@ export function snapToSentenceBoundary(
     const next = i + 1 < maxIdx ? words[i + 1] : undefined;
     if (isSentenceEnd(words[i], next)) return i + 1; // End AFTER the sentence-ending word
   }
-  // Search forward (extend slightly to reach next sentence boundary)
+  // Search forward within tolerance
   for (let i = clampedEnd; i < Math.min(maxIdx, clampedEnd + tolerance); i++) {
     const next = i + 1 < maxIdx ? words[i + 1] : undefined;
     if (isSentenceEnd(words[i], next)) return i + 1;
   }
-  // No sentence boundary found — use original
+  // TTS-7O: No boundary in tolerance window — expand search outward to prevent
+  // mid-sentence chunk cuts. A chunk must NEVER end mid-sentence.
+  // Search backward from tolerance limit to start
+  for (let i = Math.max(startIdx + 10, clampedEnd - tolerance) - 1; i >= startIdx + 5; i--) {
+    const next = i + 1 < maxIdx ? words[i + 1] : undefined;
+    if (isSentenceEnd(words[i], next)) return i + 1;
+  }
+  // Search forward from tolerance limit to end of words
+  for (let i = Math.min(maxIdx, clampedEnd + tolerance); i < maxIdx; i++) {
+    const next = i + 1 < maxIdx ? words[i + 1] : undefined;
+    if (isSentenceEnd(words[i], next)) return i + 1;
+  }
+  // Truly no sentence boundary in entire remaining text — use original (end of book)
   return clampedEnd;
 }
 
@@ -222,13 +236,40 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         : new Float32Array(result.audio);
       const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
 
+      // TTS-7O: Classify the boundary at the chunk edge for silence injection
+      const boundaryType = classifyChunkBoundary(words, endIdx - 1);
+
+      // TTS-7O: Inject silence based on boundary classification
+      let finalAudio = audio;
+      let finalDurationMs = durationMs;
+      let silenceMs = 0;
+      const pauseConfig = config.getPauseConfig?.();
+      if (pauseConfig && boundaryType !== "none") {
+        const pauseMs =
+          boundaryType === "paragraph" ? pauseConfig.paragraphMs :
+          boundaryType === "sentence" ? pauseConfig.sentenceMs :
+          boundaryType === "clause" ? pauseConfig.clauseMs :
+          boundaryType === "comma" ? pauseConfig.commaMs : 0;
+        if (pauseMs > 0) {
+          silenceMs = pauseMs;
+          const silenceSamples = Math.round((pauseMs / 1000) * result.sampleRate);
+          const withSilence = new Float32Array(audio.length + silenceSamples);
+          withSilence.set(audio, 0);
+          // Silence samples default to 0.0 (silence)
+          finalAudio = withSilence;
+          finalDurationMs = durationMs + pauseMs;
+        }
+      }
+
       const chunk: ScheduledChunk = {
-        audio,
+        audio: finalAudio,
         sampleRate: result.sampleRate,
-        durationMs,
+        durationMs: finalDurationMs,
         words: chunkWords,
         startIdx,
         weightConfig: config.getWeightConfig?.(),
+        boundaryType,
+        silenceMs,
       };
 
       if (active && myGenId === generationId) {

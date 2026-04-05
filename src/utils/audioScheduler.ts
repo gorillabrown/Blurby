@@ -5,7 +5,7 @@
 // eliminating the 5-20ms gap from the onended→consumeNext handover.
 // Crossfade at chunk boundaries prevents splice artifacts.
 
-import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS } from "../constants";
+import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL } from "../constants";
 
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
@@ -81,6 +81,10 @@ export interface ScheduledChunk {
   startIdx: number;
   /** TTS-7N: Optional pause-derived weight config for cursor timing */
   weightConfig?: WordWeightConfig;
+  /** TTS-7O: Boundary classification at chunk end (for silence injection) */
+  boundaryType?: "comma" | "clause" | "sentence" | "paragraph" | "none";
+  /** TTS-7O: Duration of injected silence at chunk end (ms) */
+  silenceMs?: number;
 }
 
 export interface SchedulerCallbacks {
@@ -88,6 +92,8 @@ export interface SchedulerCallbacks {
   onChunkBoundary: (endIdx: number) => void;
   onEnd: () => void;
   onError: () => void;
+  /** TTS-7O: Periodic truth-sync — fires every N words and on chunk boundaries */
+  onTruthSync?: (wordIndex: number) => void;
 }
 
 export interface AudioScheduler {
@@ -136,6 +142,10 @@ export function createAudioScheduler(): AudioScheduler {
   let nextWordBoundaryIdx = 0;
   let playbackStartTime: number | null = null; // Set on first scheduleChunk — gates tick()
 
+  // TTS-7O: Truth-sync state — fires onTruthSync every N words
+  let truthSyncCounter = 0;
+  const truthSyncInterval = TTS_CURSOR_TRUTH_SYNC_INTERVAL;
+
   function getAudioContext(): AudioContext {
     if (!audioCtx) {
       audioCtx = new AudioContext({ sampleRate: KOKORO_SAMPLE_RATE });
@@ -177,7 +187,8 @@ export function createAudioScheduler(): AudioScheduler {
   function computeWordBoundaries(chunk: ScheduledChunk, chunkStartTime: number): { time: number; wordIndex: number }[] {
     const wordCount = chunk.words.length;
     if (wordCount <= 0) return [];
-    const chunkDurSec = chunk.durationMs / 1000;
+    // TTS-7O: Distribute word timing across SPEECH portion only, excluding injected silence tail
+    const chunkDurSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
     const weights = computeWordWeights(chunk.words, chunk.weightConfig);
     const boundaries: { time: number; wordIndex: number }[] = [];
     let cumulativeWeight = 0;
@@ -232,7 +243,15 @@ export function createAudioScheduler(): AudioScheduler {
       }
       // Fire onWordAdvance once for the latest crossed boundary (skip intermediate)
       if (lastAdvancedIdx >= 0) {
-        callbacks.onWordAdvance(currentWordBoundaries[lastAdvancedIdx].wordIndex);
+        const advancedWordIndex = currentWordBoundaries[lastAdvancedIdx].wordIndex;
+        callbacks.onWordAdvance(advancedWordIndex);
+
+        // TTS-7O: Truth-sync — fire every TTS_CURSOR_TRUTH_SYNC_INTERVAL words
+        truthSyncCounter++;
+        if (truthSyncCounter >= truthSyncInterval) {
+          truthSyncCounter = 0;
+          callbacks.onTruthSync?.(advancedWordIndex);
+        }
 
         // Sliding window: prune consumed boundaries to prevent unbounded growth
         if (nextWordBoundaryIdx >= 100) {
@@ -323,6 +342,9 @@ export function createAudioScheduler(): AudioScheduler {
       if (myEpoch !== schedulerEpoch || stopped || !callbacks) return;
       const endIdx = chunk.startIdx + chunk.words.length;
       callbacks.onChunkBoundary(endIdx);
+      // TTS-7O: Truth-sync on chunk boundary
+      truthSyncCounter = 0;
+      callbacks.onTruthSync?.(endIdx - 1 >= chunk.startIdx ? endIdx - 1 : chunk.startIdx);
       pruneFinishedSources();
 
       // Check if this was the last source AND pipeline has finished generating
@@ -350,7 +372,14 @@ export function createAudioScheduler(): AudioScheduler {
   function resume(): void {
     if (!audioCtx) return;
     audioCtx.resume().then(() => {
-      if (!stopped) startWordTimer();
+      if (!stopped) {
+        startWordTimer();
+        // TTS-7O: Truth-sync on resume — re-snap cursor position
+        if (callbacks?.onTruthSync && nextWordBoundaryIdx > 0 && currentWordBoundaries.length > 0) {
+          const lastIdx = Math.min(nextWordBoundaryIdx - 1, currentWordBoundaries.length - 1);
+          if (lastIdx >= 0) callbacks.onTruthSync(currentWordBoundaries[lastIdx].wordIndex);
+        }
+      }
     });
   }
 
@@ -371,6 +400,7 @@ export function createAudioScheduler(): AudioScheduler {
     nextWordBoundaryIdx = 0;
     nextStartTime = 0;
     playbackStartTime = null;
+    truthSyncCounter = 0;
     callbacks = null;
   }
 
