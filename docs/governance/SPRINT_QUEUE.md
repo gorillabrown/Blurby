@@ -25,7 +25,7 @@ Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully sp
 | 2 | EINK-6B | v1.35.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Stepped flow (chunk advance for e-ink), burst focus (phrase grouping), adaptive refresh heuristic. 8 tasks, 10 success criteria. Depends on EINK-6A. |
 | 3 | GOALS-6B | v1.36.0 | `sprint/goals-6b-tracking` | Full | — | **FULLY SPEC'D.** Reading goal system — daily pages/minutes, weekly books, streak tracking, library progress widget, goals settings page. 11 tasks, 15 success criteria. Can run parallel with EINK-6B. |
 
-**Agent staging rule:** EINK/GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
+**Agent staging rule:** EINK and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
 **Dispatch status:** EINK-6A is dispatch-ready now. EINK-6B waits for EINK-6A. GOALS-6B can run parallel with EINK-6B after EINK-6A completes.
 
@@ -46,7 +46,8 @@ Health: GREEN — TTS stabilization lane fully closed. 3 queued sprints fully sp
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
-| TTS-7J | 2026-04-04 | PASS | Foliate section-sync ownership, word-source dedupe & initial selection protection. BUG-128/129/130 resolved — single narration section-sync owner (miss-recovery only), sectionIndex-based word dedupe, userExplicitSelectionRef guards onLoad restore, unified start-word policy via resolveFoliateStartWord. 14 new tests (1,309 total). v1.33.5. **TTS stabilization lane FULLY CLOSED.** |
+| TTS-7K | 2026-04-05 | PASS | EPUB global word-source promotion & page-mode isolation. BUG-131/132/133 resolved — full-book words promoted as source of truth, global index validation for start-word, onWordsReextracted source protection, page-mode isolated from section-boundary effect. 22 new tests (1,331 total). v1.33.6. **TTS stabilization lane FULLY CLOSED.** |
+| TTS-7J | 2026-04-04 | PASS* | Foliate section-sync ownership, word-source dedupe & initial selection protection. BUG-128/129/130 resolved — single narration section-sync owner (miss-recovery only), sectionIndex-based word dedupe, userExplicitSelectionRef guards onLoad restore, unified start-word policy via resolveFoliateStartWord. Follow-up required via TTS-7K for full-book word-source promotion and page-mode isolation. 14 new tests (1,309 total). v1.33.5. |
 | TTS-7I | 2026-04-04 | PASS* | Foliate follow-scroll unification & exact miss recovery. BUG-124/125/126/127 resolved — shared `resolveWordState()` truth source, single scroll owner, exact section-based miss recovery with cooldown, return-to-narration cursor restore. Follow-up required via TTS-7J for section-sync ownership, word-source dedupe, and first-play selection protection. 8 new tests (1,295 total). v1.33.4. |
 | TTS-7H | 2026-04-04 | PASS | Visible-word readiness & stable launch index. BUG-122/123 — `isWordVisibleOnPage()` replaces false-positive `isWordInDom()`, frozen launch index prevents drift, section-based fallback. 8 new tests (1,287 total). v1.33.3. |
 | TTS-7G | 2026-04-04 | PASS | First-chunk IPC verification. BUG-117 verified resolved — response path < 2ms (root causes fixed by TTS-7C/NAR-5/TTS-7E). DEV instrumentation added. 6 new tests (1,279 total). v1.33.2. **TTS stabilization lane CLOSED.** |

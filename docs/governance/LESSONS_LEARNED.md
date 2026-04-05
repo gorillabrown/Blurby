@@ -748,3 +748,20 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Guardrail:**
 - PR-123: During narration, exactly ONE path may call `goToSection()`. If a new section-navigation mechanism is added, disable or remove the old one. Never allow two independent section-sync owners.
 - PR-124: When accumulating EPUB section words into a shared array, always deduplicate by `sectionIndex`. Filter-then-append, not blind append. Log total word count before and after to detect unexpected growth.
+
+### [2026-04-05] LL-071: EPUB Modes Must Use Global Word Source, Not DOM Viewport
+
+**Area:** renderer, foliate bridge, narration, EPUB modes
+**Status:** active
+**Priority:** critical
+
+**Context:** TTS-7J fixed section-sync ownership and word-source dedupe, but narration still started from tiny DOM-slice word counts (14, 674, 293) instead of the full-book extraction (69160 words). The root cause was deeper: `getEffectiveWords()` always returned DOM-loaded words even when full-book extraction was complete. Additionally, `extractFoliateWords()` and `onWordsReextracted` unconditionally replaced `wordsRef.current` with the small DOM slice, clobbering the global word array. Start-word resolution also validated against the DOM-slice length, so a valid global index like 1603 was discarded because the slice had only 14 words. Finally, the section-boundary `goToSection()` effect fired in page mode, interfering with manual page turning.
+
+**Root Cause:** The Foliate DOM-loaded words were treated as THE word source for all modes. In reality, they are a rendering viewport — the full-book extraction is the source of truth for word scheduling, cursor tracking, and chunk boundaries once available.
+
+**Fix:** (1) `getEffectiveWords()` returns `bookWordsRef.current.words` when complete. (2) `extractFoliateWords()` and `onWordsReextracted` skip `wordsRef` replacement when full-book source exists. (3) `resolveFoliateStartWord` accepts optional `globalWordsLength` for validation. (4) `getSectionForWordIndex` uses `bookWordSections` for global lookup. (5) Section-boundary effect only fires for focus/flow modes.
+
+**Guardrail:**
+- PR-125: For EPUB modes, the Foliate DOM-loaded words are a VIEWPORT, not the source of truth. Once `bookWordsRef.current.complete` is true, all word-array consumers (mode startup, cursor tracking, chunk scheduling) must use the global array. DOM words are only for rendering/highlighting/navigation.
+- PR-126: Any function that validates word indices must accept a global word count parameter when the index may be global. Never validate a global index against a DOM-slice length.
+- PR-127: Page-mode navigation must not depend on or be blocked by mode-specific section/source machinery. Section-boundary effects should be gated to only the modes that need them.

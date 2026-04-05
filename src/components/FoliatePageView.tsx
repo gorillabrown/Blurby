@@ -644,7 +644,20 @@ export default function FoliatePageView({
               return viewApiRef!.current!.resolveWordState(wordIndex).visible;
             },
             // TTS-7H: Resolve section index for a global word index (for fallback navigation)
+            // TTS-7K (BUG-132): When bookWordSections exist, use the global section
+            // boundaries for lookup. The DOM-local foliateWordsRef may only cover a
+            // tiny slice and would fail for global indices like 5000.
             getSectionForWordIndex: (wordIndex: number): number | null => {
+              // Prefer global section boundaries when available
+              if (bookWordSections && bookWordSections.length > 0) {
+                for (let i = bookWordSections.length - 1; i >= 0; i--) {
+                  if (wordIndex >= bookWordSections[i].startWordIdx) {
+                    return bookWordSections[i].sectionIndex;
+                  }
+                }
+                return bookWordSections[0]?.sectionIndex ?? null;
+              }
+              // Fallback: DOM-local lookup
               const words = foliateWordsRef.current;
               if (wordIndex >= 0 && wordIndex < words.length) {
                 return words[wordIndex].sectionIndex;

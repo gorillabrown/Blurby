@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — TTS-7J complete. Foliate section-sync ownership, word-source dedupe & initial-selection protection resolved. 1,309 tests, 74 files. Latest tagged release: v1.33.5.
+**Last updated**: 2026-04-05 — TTS-7K complete. EPUB global word-source promotion & page-mode isolation. 1,331 tests, 75 files. Latest tagged release: v1.33.6.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS hotfix lane CLOSED. `TTS-7J` complete (v1.33.5). Feature work resumes: `EINK-6A` is next. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS hotfix lane CLOSED. `TTS-7K` complete (v1.33.6). Feature work resumes: `EINK-6A` is next. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -60,8 +60,9 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7H: Visible-Word Readiness & Stable Launch Index ✅ (v1.33.3; partial, follow-up required)
   ├── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery ✅ (v1.33.4; follow-up required)
   ├── TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ (v1.33.5)
+  ├── TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ (v1.33.6)
   │
-  │  Feature work (TTS hotfix lane CLOSED at v1.33.5)
+  │  Feature work (TTS hotfix lane CLOSED at v1.33.6)
   ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (next)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
@@ -102,7 +103,7 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 **Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, and `TTS-7I` unified follow-scroll ownership and exact miss recovery. `TTS-7J` (v1.33.5) resolved the final three Foliate integration issues: section-sync blink from competing `goToSection()` owners (BUG-128), word-source duplication `8770 → 17540` from blind section append (BUG-129), and initial page-load restoration overwriting user's explicit selection (BUG-130). TTS hotfix lane is now CLOSED. Feature work resumes with `EINK-6A`.
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, `TTS-7I` unified follow-scroll ownership and exact miss recovery, and `TTS-7J` resolved section-sync blink, word-source duplication, and initial-selection overwrite. Fresh post-`7J` logs, however, show one deeper issue remains: EPUB narration is still starting from the currently loaded Foliate DOM word source (`14`, `674`, `293`) instead of the full-book extracted source (`69160`), which breaks first-play selection, cursor/TTS sync, and likely ordinary page-mode navigation. `TTS-7K` is the focused corrective sprint for that source-of-truth mismatch while preserving instant start.
 
 ---
 
@@ -570,6 +571,96 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 11. `npm run build` succeeds
 
 **Depends on:** TTS-7I
+
+---
+
+### Sprint TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation
+
+**Goal:** Make EPUB narration and cursor tracking run on one stable global word source, not the currently loaded Foliate DOM slice. First-play selection must be honored, cursor and voice must stay in the same index space, and ordinary page-mode navigation must not be coupled to narration-only section/source state.
+
+**Problem:** Fresh live logs after `TTS-7J` show the core source-of-truth problem is still unresolved:
+
+1. **Narration still starts from partial DOM words, not full-book words.** Even after `[TTS-6O] background pre-extraction complete: 69160 words`, narration start logs `words: 14`, later `words: 674`, then `words: 293`. `useReaderMode.startNarration()` still calls `getEffectiveWords()`, and `getEffectiveWords()` still uses `foliateApiRef.current.getWords()` (currently loaded DOM words) instead of `bookWordsRef.current.words` when full-book extraction exists.
+2. **First-play selection is still ignored on EPUBs.** Logs repeatedly show `onLoad: skipping restore — user has explicit selection at word 1603`, yet narration still starts with `frozen launch word: 0`. The explicit selected index is global, but start-word resolution validates against the small partial DOM word array, so a perfectly valid global selection is being discarded on first play.
+3. **Cursor and narrate are still not synced because they are using mixed index spaces.** Narration starts on a tiny local word array while the reader highlight/selection/progress system is tracking global indices. That makes `startIdx`, chunk boundaries, and page-follow logic disagree.
+4. **Page mode is still contaminated by narration-specific section/source machinery.** The user could not advance past the third page even without narration on. The likely culprits are page-mode code still depending on the mutable Foliate word-source refresh path and/or narration-only section/source behavior leaking into ordinary page navigation.
+
+**Design decisions:**
+
+- **Promote full-book EPUB words to the narration source of truth.** Once `bookWordsRef.current.complete` is available, narration/focus/flow start logic must use that global word array, not `foliateApiRef.current.getWords()`.
+- **Loaded Foliate DOM is a viewport, not the source of truth.** The DOM slice is only for rendering/highlighting/navigation. It must not redefine the active mode’s word array once the full-book source exists.
+- **Global explicit selection must stay global.** A selected word like `1603` remains valid even if the currently loaded DOM slice has length `14`. Start-word resolution must distinguish global indices from the temporary loaded-slice length.
+- **Page mode must be isolated from narration repair state.** Manual page turning in page mode must not depend on or be blocked by narration-only word-source refresh, section recovery, or explicit-selection latches.
+- **Keep instant startup.** Do not reintroduce a startup wait just to hide the bug. The fast start is correct; the source alignment must be fixed underneath it.
+
+**Tier:** Full (crosses EPUB source-of-truth, mode startup, cursor sync, and page-mode isolation)
+
+**Baseline:**
+- `src/components/ReaderContainer.tsx` — `getEffectiveWords()`, `bookWordsRef`, `bookWordsCompleteRef`, `onWordsReextracted`, page-mode load/restore, `userExplicitSelectionRef`
+- `src/hooks/useReaderMode.ts` — `startNarration`, `startFocus`, `startFlow`, start-word resolution
+- `src/utils/startWordIndex.ts` — Foliate start-word helpers
+- `src/components/FoliatePageView.tsx` — loaded DOM word refresh, `getWords()`, click/selection mapping
+- `src/hooks/useReadingModeInstance.ts` — active mode word updates / cursor advance assumptions
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — BUG-131, BUG-132, BUG-133
+4. `ROADMAP.md` — this section
+5. `src/components/ReaderContainer.tsx`
+6. `src/hooks/useReaderMode.ts`
+7. `src/utils/startWordIndex.ts`
+8. `src/components/FoliatePageView.tsx`
+9. `src/hooks/useReadingModeInstance.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Promote full-book words for active EPUB modes** — Change the effective word-source contract so narration/focus/flow use `bookWordsRef.current.words` whenever full-book extraction is complete. The current DOM-loaded Foliate words remain a rendering slice only. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Stop `onWordsReextracted()` from clobbering active-mode source words** — When full-book EPUB words exist, section reload/recovery may refresh DOM/highlight state but must not replace the active mode’s word array with the current loaded slice. | `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts` |
+| 3 | Primary CLI (renderer-fixer scope) | **Fix first-play start-word resolution for global EPUB indices** — Update `resolveFoliateStartWord` and the mode-start callers so an explicit global selection (for example `1603`) is not invalidated just because the currently loaded slice has length `14`. | `src/utils/startWordIndex.ts`, `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **Realign cursor + narration on one index space** — Ensure highlighted cursor, narration start index, chunk scheduling boundaries, and section lookup all use the same global EPUB index source when bookWords are complete. | `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx` |
+| 5 | Primary CLI (renderer-fixer scope) | **Isolate page mode from narration-only repair state** — Remove or gate any narration-only section/source behavior that can interfere with ordinary page turning when narration is off. | `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx` |
+| 6 | Primary CLI (renderer-fixer scope) | **Diagnostics** — Add targeted logs that clearly show when active modes are using full-book vs DOM-slice sources, and warn if a global selected word is being downgraded or if page mode triggers narration-only recovery code. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/utils/narrateDiagnostics.ts`, `src/utils/narratePerf.ts` |
+| 7 | test-runner | **Tests** — Add regression coverage for: full-book words chosen when available, first-play explicit selection honored with global EPUB indices, `onWordsReextracted` not shrinking/swapping active narration words, cursor/narration staying aligned, and page-mode next/prev continuing past third-page behavior. ≥10 new tests. | `tests/` |
+| 8 | test-runner | **`npm test` + `npm run build`** | — |
+| 9 | spec-compliance-reviewer | **Spec compliance** | — |
+| 10 | doc-keeper | **Documentation pass** — Update BUG-131/132/133 and queue/roadmap state based on the outcome. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md`, `docs/governance/LESSONS_LEARNED.md` |
+| 11 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Primary CLI: Task 1 (promote full-book source)
+2. Primary CLI: Task 2 (stop active-mode source clobbering)
+3. Primary CLI: Task 3 (fix global selection start-word policy)
+4. Primary CLI: Task 4 (realign cursor + narration on one index space)
+5. Primary CLI: Task 5 (page-mode isolation)
+6. Primary CLI: Task 6 (diagnostics)
+    ↓
+7. test-runner: Task 7
+8. test-runner: Task 8
+9. spec-compliance-reviewer: Task 9
+10. doc-keeper: Task 10
+11. blurby-lead: Task 11
+```
+
+#### SUCCESS CRITERIA
+
+1. When full-book EPUB extraction is complete, narration/focus/flow no longer start from tiny DOM-slice word counts like `14`, `674`, or `293`
+2. First-play explicit selection starts from the selected global EPUB word, not `0`
+3. Cursor highlight and narration progression use the same global index space during EPUB narration
+4. `onWordsReextracted()` no longer replaces the active mode’s word array with the current DOM slice when full-book words exist
+5. Logs no longer show contradictory source sizes for the same EPUB session
+6. Page-mode next/prev remains functional past the third page with narration off
+7. Cached/entry-covered startup remains effectively immediate
+8. ≥10 new regression tests
+9. `npm test` passes
+10. `npm run build` succeeds
+
+**Depends on:** TTS-7J
 
 ---
 
