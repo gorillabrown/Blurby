@@ -193,16 +193,13 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    // TTS-7H: Compute launch word ONCE, then freeze it for this entire play action.
-    // Priority: user's last click > first visible word on page > 0.
-    let startIdx = highlightedWordIndexRef.current;
-    if (useFoliate && startIdx === 0) {
-      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
-      if (firstVisible > 0) startIdx = firstVisible;
-    }
-    startIdx = Math.min(startIdx, Math.max(effectiveWords.length - 1, 0));
+    // TTS-7J: Unified start-word policy — same as startFocus/startFlow.
+    // Priority: explicit user selection (highlightedWordIndex) > first visible word > 0.
+    // resolveFoliateStartWord handles all three tiers consistently.
     // TTS-7H (BUG-123): Freeze — this value never changes for this play action.
-    const frozenLaunchIdx = startIdx;
+    const frozenLaunchIdx = useFoliate
+      ? resolveFoliateStartWord(highlightedWordIndexRef.current, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1)
+      : Math.max(0, Math.min(highlightedWordIndexRef.current, Math.max(effectiveWords.length - 1, 0)));
     const pBreaks = getEffectiveParagraphBreaks();
 
     // TTS-7H: Render-readiness gate for foliate EPUBs.

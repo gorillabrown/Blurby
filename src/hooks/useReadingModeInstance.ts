@@ -7,6 +7,7 @@ import { FocusMode } from "../modes/FocusMode";
 import { FlowMode } from "../modes/FlowMode";
 import { NarrateMode } from "../modes/NarrateMode";
 import type { BlurbySettings } from "../types";
+import { recordDiagEvent } from "../utils/narrateDiagnostics";
 
 export interface UseReadingModeInstanceParams {
   /** Current reading mode */
@@ -177,6 +178,7 @@ export function useReadingModeInstance({
               const sectionIdx = foliateApiRefStable.current.getSectionForWordIndex?.(idx);
               if (sectionIdx != null) {
                 if (import.meta.env.DEV) console.debug("[narrate] miss recovery — word", idx, "→ section", sectionIdx);
+                recordDiagEvent("section-sync", `miss-recovery owns nav: word ${idx} → section ${sectionIdx}`);
                 pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
                 foliateApiRefStable.current.goToSection(sectionIdx);
               } else {

@@ -131,6 +131,10 @@ export default function ReaderContainer({
   const activeReadingMsRef = useRef(0);
   const activeReadingStartRef = useRef<number | null>(null);
 
+  // TTS-7J (BUG-130): Tracks whether user has explicitly clicked/selected a word.
+  // When true, delayed onLoad restore logic must not overwrite the user's choice.
+  const userExplicitSelectionRef = useRef(false);
+
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
@@ -205,6 +209,7 @@ export default function ReaderContainer({
   useEffect(() => {
     initReader(activeDoc.position || 0);
     setHighlightedWordIndex(activeDoc.position || 0);
+    userExplicitSelectionRef.current = false; // TTS-7J: Reset on doc change
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = activeDoc.position || 0;
     setReadingMode("page"); // Always start in Page view
@@ -490,9 +495,16 @@ export default function ReaderContainer({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useFoliate, readingMode, activeDoc.id]);
 
-  // NAR-3: When narration word index crosses a section boundary, navigate foliate
+  // NAR-3: When narration word index crosses a section boundary, navigate foliate.
+  // TTS-7J (BUG-128): DISABLED during narration. During narration, miss-recovery
+  // in useReadingModeInstance owns section navigation (exact word → section lookup
+  // with cooldown). This effect was a second goToSection() owner that competed with
+  // miss-recovery, causing page blinks and cursor destabilization.
+  // This effect still fires for non-narration modes that use bookWords (future-proof).
   useEffect(() => {
-    if (!useFoliate || readingMode !== "narration" || !bookWordsRef.current?.complete) return;
+    if (!useFoliate || !bookWordsRef.current?.complete) return;
+    // TTS-7J: Narration section-sync is owned by miss-recovery — skip here
+    if (readingMode === "narration") return;
 
     const bookWords = bookWordsRef.current;
     const sec = findSectionForWord(bookWords.sections, highlightedWordIndex);
@@ -1041,6 +1053,7 @@ export default function ReaderContainer({
       }}
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
+        userExplicitSelectionRef.current = true; // TTS-7J (BUG-130): Mark explicit user choice
         activeDoc.cfi = cfi;
         // TTS-7B: Route through handleHighlightedWordChange so narration
         // resyncToCursor fires during active playback (BUG-107 fix).
@@ -1071,6 +1084,13 @@ export default function ReaderContainer({
           const mode = readingModeRef.current;
           if (mode !== "narration" && mode !== "flow") {
             extractFoliateWords();
+            // TTS-7J (BUG-130): If user already explicitly selected a word (click),
+            // do NOT overwrite with saved position or first-visible fallback.
+            // The user's choice takes priority over passive restore.
+            if (userExplicitSelectionRef.current) {
+              if (import.meta.env.DEV) console.debug("[foliate] onLoad: skipping restore — user has explicit selection at word", highlightedWordIndexRef.current);
+              return;
+            }
             // Restore saved position state and highlight the closest visible word.
             // savedPos is a global word index (e.g. 50000) but foliate only renders
             // one section — DOM only has section-local word spans. Use CFI for navigation

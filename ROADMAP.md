@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — TTS-7I complete. Foliate follow-scroll unification & exact miss recovery. 1,295 tests, 73 files. Latest tagged release: v1.33.4.
+**Last updated**: 2026-04-04 — TTS-7J complete. Foliate section-sync ownership, word-source dedupe & initial-selection protection resolved. 1,309 tests, 74 files. Latest tagged release: v1.33.5.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS stabilization COMPLETE (TTS-7A through TTS-7I). Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS hotfix lane CLOSED. `TTS-7J` complete (v1.33.5). Feature work resumes: `EINK-6A` is next. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -58,10 +58,11 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7F: Proactive Entry Cache Coverage & Cruise Warm ✅ (v1.33.1)
   ├── TTS-7G: First-Chunk IPC Verification ✅ (v1.33.2) — BUG-117 verified resolved
   ├── TTS-7H: Visible-Word Readiness & Stable Launch Index ✅ (v1.33.3; partial, follow-up required)
-  ├── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery (queued — next)
+  ├── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery ✅ (v1.33.4; follow-up required)
+  ├── TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ (v1.33.5)
   │
-  │  Feature work
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)
+  │  Feature work (TTS hotfix lane CLOSED at v1.33.5)
+  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (next)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
     │
@@ -97,11 +98,11 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 | Lane | Sprints | Versions | Key Deliverables |
 |------|---------|----------|------------------|
 | TTS-6 | TTS-6C→6S + HOTFIX-11 | v1.14.0–v1.28.0 | Native-rate buckets, startup hardening, pronunciation overrides, word alignment, accessibility, profiles, portability, runtime stability, performance budgets, session continuity, diagnostics, cursor sync |
-| TTS-7 (stabilization + hotfix) | TTS-7A→7H | v1.29.0–v1.33.3 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification, and the first visible-word/startup fix pass. `TTS-7I` is now queued as the remaining Foliate follow-scroll and miss-recovery hotfix. |
+| TTS-7 (stabilization + hotfix) | TTS-7A→7J | v1.29.0–v1.33.5 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification, visible-word/startup fixes, Foliate follow-scroll unification + exact miss recovery, and final Foliate section-sync / word-source dedupe / initial-selection protection. TTS hotfix lane CLOSED at v1.33.5. |
 
 **Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, but fresh post-`7H` logs still show a broken Foliate follow contract: the render gate can claim success immediately before highlight miss, and Foliate still owns two competing narration-follow scroll paths. `TTS-7I` is the focused corrective sprint for that remaining startup/mid-play page-jump contract.
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, and `TTS-7I` unified follow-scroll ownership and exact miss recovery. `TTS-7J` (v1.33.5) resolved the final three Foliate integration issues: section-sync blink from competing `goToSection()` owners (BUG-128), word-source duplication `8770 → 17540` from blind section append (BUG-129), and initial page-load restoration overwriting user's explicit selection (BUG-130). TTS hotfix lane is now CLOSED. Feature work resumes with `EINK-6A`.
 
 ---
 
@@ -479,6 +480,96 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 12. `npm run build` succeeds
 
 **Depends on:** TTS-7H
+
+---
+
+### Sprint TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ COMPLETED (v1.33.5)
+
+> Completed 2026-04-04. BUG-128/129/130 resolved. Single section-sync owner (miss-recovery path), sectionIndex dedupe on word-source append, userExplicitSelectionRef protects first-play selection, startNarration unified via resolveFoliateStartWord. 14 new tests (1,309 total). Full spec preserved below for traceability; archive on next sprint completion.
+
+**Goal:** Remove the remaining Foliate narration integration bugs without regressing the newly fast startup. Narration must keep one consistent word source, one owner for section navigation, and one trustworthy initial start point that respects the user's selected location on first play.
+
+**Problem:** Fresh live logs after `TTS-7I` show the Foliate bridge still has three structural faults:
+
+1. **Immediate startup blink from competing section navigation.** Startup now begins quickly, which is good, but narration hits `highlightWordByIndex miss: word 13 not in DOM` almost immediately and triggers section recovery (`miss recovery — word 13 → section 2`). At the same time, `ReaderContainer` still owns a separate section-boundary `goToSection()` effect keyed on `highlightedWordIndex`. Those two section movers can still blink the page and destabilize cursor ownership.
+2. **Word source duplication during section reload/recovery.** The same session logs one narrate start with `words: 8770`, then a later start with `words: 17540`. `FoliatePageView` currently appends section words into `foliateWordsRef.current` during active-mode loads with no dedupe by `sectionIndex`, so recovery/reload can duplicate sections and corrupt the effective word source.
+3. **Initial selection/start point is not consistently respected.** User testing shows first-start narration does not reliably begin from the user's chosen location, while pause-and-reselect does. The likely culprit is first-load restoration/onLoad logic resetting `highlightedWordIndex` back to saved/visible defaults after the user has already chosen a start point.
+
+**Design decisions:**
+
+- **Keep instant startup.** Do not add artificial startup delay. Cached/entry-covered play should remain effectively immediate.
+- **One owner for section navigation during narration.** Decide whether narration page/section motion is owned by miss recovery or by the section-boundary effect, then remove the other. Foliate must not have two independent `goToSection()` paths for narration.
+- **Deduplicate section words by identity.** Section reload/recovery must replace or refresh words for a given `sectionIndex`, not append duplicate copies. `getWords()` must remain stable across recovery.
+- **Protect explicit user selection over passive restore.** Once the user clicks/selects a word or explicitly chooses a new narration start point, delayed page-load restore logic must not overwrite it.
+- **Startup source-of-truth must distinguish user choice from passive page state.** “First visible word” and “saved position” are fallbacks only. Explicit user selection wins, especially on first play after opening a book.
+
+**Tier:** Quick (focused Foliate narration integration hotfix)
+
+**Baseline:**
+- `src/components/FoliatePageView.tsx` — active-mode `onSectionLoad`, `foliateWordsRef.current`, click/selection reporting, `getWords()`
+- `src/components/ReaderContainer.tsx` — section-boundary narration `goToSection()` effect, `onLoad` restore logic, `onWordsReextracted`, highlighted-word ownership
+- `src/hooks/useReaderMode.ts` — initial narration start-word selection
+- `src/utils/startWordIndex.ts` — start-word helpers / fallback policy
+- `src/hooks/useReadingModeInstance.ts` — narration miss recovery path
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — BUG-128, BUG-129, BUG-130
+4. `ROADMAP.md` — this section
+5. `src/components/FoliatePageView.tsx`
+6. `src/components/ReaderContainer.tsx`
+7. `src/hooks/useReaderMode.ts`
+8. `src/utils/startWordIndex.ts`
+9. `src/hooks/useReadingModeInstance.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Choose a single narration section-sync owner** — Remove one of the two narration `goToSection()` paths. The remaining path must own section transitions cleanly without blink loops or double navigation. | `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx` |
+| 2 | Primary CLI (renderer-fixer scope) | **Deduplicate Foliate section words** — Refactor active-mode section load handling so a given `sectionIndex` replaces/refreshes its word slice instead of blindly appending. `foliateWordsRef.current` and `getWords()` must remain stable across reloads/recovery. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` |
+| 3 | Primary CLI (renderer-fixer scope) | **Protect explicit user start selection** — Introduce a small “user explicitly chose start word” contract/ref so delayed onLoad restore logic cannot overwrite an explicit click/selection before first narration start. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **Tighten initial start-word policy** — Use explicit selected word first, then explicit resume position, then visible-page fallback. Make the first-play path and pause/reselect path follow the same source-of-truth rules. | `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts` |
+| 5 | Primary CLI (renderer-fixer scope) | **Add diagnostics for section owner and word-source size** — Log which section-sync path is active, when a section word slice is refreshed vs reused, and detect unexpected total-word growth. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/utils/narrateDiagnostics.ts`, `src/utils/narratePerf.ts` |
+| 6 | test-runner | **Tests** — Add regression coverage for: no duplicate section-word growth, no double `goToSection()` ownership, initial explicit selection surviving first-load restore, first play starting from selected word, and instant start preserved. ≥8 new tests. | `tests/` |
+| 7 | test-runner | **`npm test` + `npm run build`** | — |
+| 8 | spec-compliance-reviewer | **Spec compliance** | — |
+| 9 | doc-keeper | **Documentation pass** — Update BUG-128/129/130 and queue/roadmap state based on the outcome. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 10 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Primary CLI: Task 1 (single section-sync owner)
+2. Primary CLI: Task 2 (dedupe word source)
+3. Primary CLI: Task 3 (protect explicit selection)
+4. Primary CLI: Task 4 (tighten start-word policy)
+5. Primary CLI: Task 5 (diagnostics)
+    ↓
+6. test-runner: Task 6
+7. test-runner: Task 7
+8. spec-compliance-reviewer: Task 8
+9. doc-keeper: Task 9
+10. blurby-lead: Task 10
+```
+
+#### SUCCESS CRITERIA
+
+1. Narration startup on EPUB no longer visibly blinks from double section navigation
+2. Only one narration path owns `goToSection()` during play
+3. `foliateWordsRef.current` / `getWords()` do not double in size across section reload or miss recovery
+4. Fresh logs no longer show `words: 8770` followed by `words: 17540` for the same book/session
+5. First play after explicit user selection starts from that selected position
+6. Delayed page-load restore logic does not overwrite explicit user selection
+7. Pause-and-reselect follows the same start-word policy as first play
+8. Cached/entry-covered narration start remains effectively immediate
+9. ≥8 new regression tests
+10. `npm test` passes
+11. `npm run build` succeeds
+
+**Depends on:** TTS-7I
 
 ---
 
