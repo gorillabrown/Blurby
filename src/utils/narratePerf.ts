@@ -5,10 +5,12 @@
  */
 
 export interface NarratePerfEntry {
-  event: "startup" | "restart" | "extraction" | "restamp";
+  event: "startup" | "restart" | "extraction" | "restamp" | "first-chunk-response" | "schedule-chunk";
   startMs: number;
   endMs?: number;
   durationMs?: number;
+  /** TTS-7G: Additional context for first-chunk measurements */
+  meta?: { chunkWordCount?: number; startIdx?: number; isFirstChunk?: boolean };
 }
 
 let _entries: NarratePerfEntry[] = [];

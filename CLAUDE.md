@@ -264,12 +264,15 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.28.0 — Post-TTS-6S)
+## Current System State (v1.33.2 — TTS Stabilization Lane CLOSED)
 
 ### Codebase (branch: `main`)
 
-- All sprints through TTS-6S complete (TTS-6C→TTS-6Q + HOTFIX-11 + TTS-6S)
-- 1,209 tests across 67 test files
+- TTS-7 stabilization lane COMPLETE: TTS-7A (v1.29.0) + TTS-7B (v1.30.0) + TTS-7C (v1.31.0) + TTS-7D (v1.32.0). All 15 TTS bugs (BUG-101–115) resolved and verified. Closeout doc in TECHNICAL_REFERENCE.md.
+- **TTS-7F hotfix complete** — proactive entry cache coverage + cruise warm, plus clean launch ownership. BUG-116/118/119/120/121 resolved.
+- **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added. TTS stabilization lane CLOSED — all bugs (BUG-101–121) verified resolved.
+- Active queue: EINK-6A → EINK-6B → GOALS-6B (depth 3).
+- 1,279 tests across 73 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -323,27 +326,5 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
     - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
     - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 67 test files, 1,209 tests
-- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, draft releases, delta updates)
-- **Data**: JSON files in user data dir (settings.json, library.json, history.json) with schema versioning + migration framework + cloud sync
-
-### Feature Status
-
-Full feature inventory: `docs/governance/TECHNICAL_REFERENCE.md`. Summary: all core features built — 4-mode reader (Page/Focus/Flow/Narrate), foliate-js EPUB, Kokoro TTS (28 voices, rolling audio queue, smart pause heuristics, epoch-guarded gapless playback), universal EPUB pipeline (all formats + URL articles + Chrome extension articles → EPUB, single rendering path via FoliatePageView), Flow Mode infinite scroll (FlowScrollEngine, shrinking underline cursor, reading zone at 25% viewport, foliate scrolled mode), library cards with rich book data ("45% · 3h 12m left" / "323p · 6.2h"), reading queue with drag-to-reorder (queuePosition, HTML5 DnD), "New" dot auto-clear via IntersectionObserver, library management, cloud sync (OneDrive/GDrive), Chrome extension, keyboard-first UX (30+ shortcuts), WCAG 2.1 AA accessibility, Windows installer (x64+ARM64), CI/CD, 957 tests across 48 files.
-
-### What's Next
-
-- **Phase 6** — ✅ TTS-6C → ✅ TTS-6D → ✅ TTS-6E → ✅ TTS-6F → ✅ TTS-6G → ✅ TTS-6I → ✅ TTS-6J → ✅ TTS-6K → ✅ TTS-6L → ✅ TTS-6M → ✅ TTS-6N → ✅ TTS-6O → ✅ TTS-6P → ✅ TTS-6Q → TTS-6S → HOTFIX-11 → EINK-6A → EINK-6B → GOALS-6B
-- **Code signing** — not doing (explicit decision)
-- **Multi-window support** — someday backlog
-
----
-
-## Dependency Chain
-
-All sprints through TTS-6S complete (v1.28.0). Full history: `docs/project/ROADMAP_ARCHIVE.md`.
-
-Recent chain:
-✅ TTS-6Q → ✅ HOTFIX-11 → ✅ TTS-6S (cursor sync, pause shaping & backlog fill)
-
-**Next:** Phase 6 TTS lane complete. Next phase: EINK-6A or GOALS-6B.
+  - **Tests** (`tests/`): 73 test files, 1,279 tests
+- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, d

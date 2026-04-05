@@ -2,7 +2,7 @@
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
 
-**Full specs:** `ROADMAP.md` (Phase 6 section for `EINK-6A`, `EINK-6B`, `GOALS-6B`)
+**Full specs:** `ROADMAP.md` (`EINK-6A`, `EINK-6B`, `GOALS-6B`)
 
 **Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
 
@@ -11,8 +11,8 @@
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 3
-Next sprint: EINK-6A (E-ink Greyscale Runtime)
-Health: GREEN — Queue depth healthy.
+Next sprint: EINK-6A (E-Ink Foundation & Greyscale Runtime)
+Health: GREEN — TTS stabilization lane CLOSED. Feature work resumes. All 3 queued sprints fully spec'd.
 ```
 
 ---
@@ -21,23 +21,23 @@ Health: GREEN — Queue depth healthy.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | EINK-6A | v1.29.0 | `sprint/eink-6a-greyscale-runtime` | Full | — | Decouple e-ink behavior from theme choice, add `einkMode`, audit consumers, and make the app greyscale whenever e-ink mode is active. |
-| 2 | EINK-6B | v1.30.0 | `sprint/eink-6b-reading-ergonomics` | Full | — | Add e-ink-specific Focus/Flow behavior with burst focus, stepped flow, reload-gap tuning, and chunk-safe reader ergonomics. |
-| 3 | GOALS-6B | v1.31.0 | `sprint/goals-6b-reading-goals` | Full | — | Add daily/weekly reading goals, library progress widget, goal settings, and goal-hit feedback. |
+| 1 | EINK-6A | v1.34.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
+| 2 | EINK-6B | v1.35.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Stepped flow (chunk advance for e-ink), burst focus (phrase grouping), adaptive refresh heuristic. 8 tasks, 10 success criteria. Depends on EINK-6A. |
+| 3 | GOALS-6B | v1.36.0 | `sprint/goals-6b-tracking` | Full | — | **FULLY SPEC'D.** Reading goal system — daily pages/minutes, weekly books, streak tracking, library progress widget, goals settings page. 11 tasks, 15 success criteria. Can run parallel with EINK-6B. |
 
-**Full specs:** `ROADMAP.md` (Phase 6 section for `EINK-6A`, `EINK-6B`, `GOALS-6B`).
+**Agent staging rule:** EINK/GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
 
-**Agent staging rule:** All queued sprints are Full-tier and must explicitly stage `test-runner` -> `spec-compliance-reviewer` -> `quality-reviewer` -> `doc-keeper` -> `blurby-lead`.
+**Dispatch status:** EINK-6A is dispatch-ready now. EINK-6B waits for EINK-6A. GOALS-6B can run parallel with EINK-6B after EINK-6A completes.
 
 ---
 
-## Deferred Sprints (Phase 1 supersedes)
+## Deferred Sprints
 
 | Sprint ID | Disposition |
 |-----------|-------------|
-| TD-2 | Deferred. Mode wiring is feature work. Specs stale. Re-triage post-Phase 2. |
-| HOTFIX-1 | Deferred. Grid bugs may fold into Phase 1.5 or later. |
-| Sprint 23 | Partially absorbed by Phase 1. Remainder re-triage post-Phase 2. |
+| TD-2 | Deferred. Mode wiring is feature work. Specs stale. Re-triage post-EINK/GOALS. |
+| HOTFIX-1 | Deferred. Grid bugs may fold into a UI-FIX sprint later. |
+| Sprint 23 | Partially absorbed by Phase 1. Remainder re-triage post-EINK/GOALS. |
 | Sprint 25 | Deferred to Phase 5 (ROADMAP_V2). |
 
 ---
@@ -46,11 +46,11 @@ Health: GREEN — Queue depth healthy.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
-| TTS-6S | 2026-04-04 | PASS | Cursor sync, pause shaping & backlog fill hotfix. Tick advances all crossed boundaries (BUG-096), reduced punctuation weight boosts 1.4→1.12/1.15→1.05 (BUG-097), parallel prefetch for first 2 ramp chunks + duplicate-chunk guard (BUG-098). 13 new tests (1,209 total). v1.28.0. |
-| HOTFIX-11 | 2026-04-04 | PASS | Bug reporter diagnostics. Wired NarrateDiagSnapshot + console ring buffer into bug reporter. Collapsible diagnostics/console sections in modal. Backward-compatible JSON. BUG-099/BUG-100 resolved. 8 new tests (1,196 total). v1.27.1. |
-| TTS-6Q | 2026-04-04 | PASS | Diagnostics & regression shields. NarrateDiagSnapshot/NarrateDiagEvent diagnostics surface, bucket/cursor/extraction invariant checks, 14 new regression-shield tests (1,188 total). v1.27.0. |
-| TTS-6P | 2026-04-04 | PASS | Session continuity & recovery. resolveNarrationContext utility with book > active profile > flat settings cascade, voice validation, rate clamping, graceful fallback for stale/missing state. `isBookNarrationValid` checker. 12 new tests (1,174 total). v1.26.0. |
-| TTS-6O | 2026-04-04 | PASS | Performance budgets & background isolation. Explicit startup/restart/steady-state budget constants, narratePerf instrumentation utility, background pre-extraction on reader open (1s delay), 9 new tests (1,162 total). v1.25.0. |
-| TTS-6N | 2026-04-04 | PASS | Narration runtime stability & extraction sync. Kokoro rate clamped to buckets at NarrateMode boundary (constructor + setSpeed), HOTFIX-10 section restamping deferred via requestIdleCallback during active narration, extraction handoff reordered (word swap before DOM restamp). 12 new tests (1,153 total). v1.24.0. |
-| TTS-6M | 2026-04-04 | PASS | Narration portability & reset safety. NarrationExportPayload with schema versioning, export/import/validate/apply utilities, merge and replace import modes, granular reset (profiles/overrides/all), settings UI for export/import/reset. 15 new tests (1,141 total). v1.23.0. |
-| TTS-6L | 2026-04-04 | PASS | Narration profiles & sharing foundations. NarrationProfile type, createDefaultNarrationProfile/profileFromSettings/resolveNarrationProfile utilities, profile manager UI in TTSSettings, book-level profile assignment, profile-sync to flat settings, TDZ bugfix in useNarration 
+| TTS-7G | 2026-04-04 | PASS | First-chunk IPC verification. BUG-117 verified resolved — response path < 2ms (root causes fixed by TTS-7C/NAR-5/TTS-7E). DEV instrumentation added. 6 new tests (1,279 total). v1.33.2. **TTS stabilization lane CLOSED.** |
+| TTS-7F | 2026-04-04 | PASS | Proactive entry cache coverage + cruise warm. First-5-minute opening narration coverage for non-archived readings, startup repair checks, reading-open queueing, pure `isWordInDom()` probe, and single-launch token. BUG-116/118/119/120/121 resolved. 11 new tests (1,273 total). v1.33.1. |
+| TTS-7D | 2026-04-04 | PASS | Integration verification. 8 integration tests, 12-cell smoke test matrix, all 15 TTS bugs verified resolved, stabilization closeout doc in TECHNICAL_REFERENCE.md. 8 new tests (1,254 total). v1.32.0. TTS stabilization lane COMPLETE. |
+| TTS-7C | 2026-04-04 | PASS | Throughput & dead code. Narration start microtasks (<50ms), pause UI hidden for Kokoro, extraction dedupe, Float32Array IPC (no Array.from), pipeline backpressure. BUG-101/110/112/113/115 resolved. 12 new tests (1,246 total). v1.31.0. |
+| TTS-7B | 2026-04-04 | PASS | Cursor contract. EPUB click retarget, browse-away reconciliation, Kokoro fallback teardown, pipeline pause/resume, resume-from-cursor. BUG-107/108/109/111 resolved. 13 new tests (1,234 total). v1.30.0. |
+| TTS-7A | 2026-04-04 | PASS | Cache correctness. Real cached word counts (no hardcoded 148), background cacher voice key fix, override-hash identity, live cursor tracking, diagnostics fix. BUG-102/103/104/105/106/114 resolved. 12 new tests (1,221 total). v1.29.0. |
+| TTS-6S | 2026-04-04 | PASS | Cursor sync, pause shaping & backlog fill hotfix. BUG-096/097/098. 13 new tests (1,209 total). v1.28.0. |
+| HOTFIX-11 | 2026-04-04 | PASS | Bug reporter diagnostics. BUG-099/100. 8 new tests (1,196 total). v1.27.1. |

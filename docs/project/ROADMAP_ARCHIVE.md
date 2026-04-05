@@ -3899,3 +3899,49 @@ NAR-3 built a full-book word array by navigating the visible foliate view throug
 7. Clean build
 8. Version 1.4.2
 9. Branch merged to main with `--no-ff`
+or.ts` (blurby-lead, sonnet)
+    ↓
+[3–9] Implementation, testing, build, version bump (sequential)
+    ↓
+[10–12] Git, summary
+```
+
+---
+
+## TTS-6S [v1.28.0]: Cursor Sync, Pause Shaping & Backlog Fill Hotfix ✅ COMPLETED (2026-04-04)
+
+> Implemented and merged to `main`. 13 new tests (1,209 total). Tick advances all crossed word boundaries in one pass (BUG-096), reduced punctuation weight boosts 1.4→1.12/1.15→1.05 (BUG-097), parallel prefetch for first 2 ramp chunks + duplicate-chunk guard (BUG-098). All 8 SUCCESS CRITERIA met.
+
+Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04 during TTS Stabilization lane setup.
+
+---
+
+## HOTFIX-11 [v1.27.1]: Bug Reporter Narration Diagnostics & Console Capture ✅ COMPLETED (2026-04-04)
+
+> Implemented and merged to `main`. 8 new tests (1,196 total). Console ring buffer (200 entries), BugReportAppState extended with narrateDiagSnapshot/narrateDiagEvents/consoleLog, collapsible modal sections, backward-compatible JSON. BUG-099/BUG-100 resolved. All 13 SUCCESS CRITERIA met.
+
+Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04 during TTS Stabilization lane setup.
+
+---
+
+## TTS-6D [v1.15.0]: Kokoro Startup & Recovery Hardening ✅ COMPLETED (2026-04-04)
+
+> Implemented and merged to `main`. 11 new tests (1,061 total, 53 files). Unified `tts-kokoro-engine-status` events, explicit narration warming state, 2-second delayed prewarm, reader/settings warm-up affordances, visible crash-retry UX. BUG-032 resolved. All 10 SUCCESS CRITERIA met.
+
+Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04 during TTS Stabilization lane setup.
+
+---
+
+## TTS-6E [v1.16.0]: Pronunciation Overrides Foundation ✅ COMPLETED (2026-04-04)
+
+> Implemented and merged to `main`. 15 new tests (1,076 total, 54 files). PronunciationOverride settings, override editor with live preview, shared applyPronunciationOverrides() helper, Web Speech normalization, Kokoro cache segregation via override-hash identity. All 10 SUCCESS CRITERIA met.
+
+Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04 during TTS Stabilization lane setup.
+
+---
+
+## TTS-7G [v1.33.2]: First-Chunk IPC Verification & Response-Path Hardening ✅ COMPLETED (2026-04-04)
+
+> Verification-first sprint for BUG-117 (910ms IPC message handler long task on first narration chunk). Code-level analysis confirmed the synchronous response path is < 2ms after prior fixes: TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), TTS-7E (deferred ack). No additional hardening needed. DEV instrumentation added (`first-chunk-response` and `schedule-chunk` perf events with meta in narratePerf.ts). 6 new tests (1,279 total). BUG-117 closed with explicit evidence. TTS stabilization lane CLOSED — all bugs (BUG-101–121) verified resolved.
+
+Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
