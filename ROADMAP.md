@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-04 — TTS stabilization lane CLOSED (BUG-117 verified resolved). Feature work resumes. 1,279 tests, 73 files. Latest tagged release: v1.33.2.
+**Last updated**: 2026-04-04 — TTS-7H complete. Visible-word readiness & stable launch index. 1,287 tests, 73 files. Latest tagged release: v1.33.3.
 **Current branch**: `main`
-**Current state**: Phase 6 TTS stabilization COMPLETE — all TTS bugs (BUG-101–121) resolved and verified. Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
+**Current state**: Phase 6 TTS stabilization COMPLETE (TTS-7A through TTS-7H). Queue GREEN (`EINK-6A` → `EINK-6B` → `GOALS-6B`; depth 3).
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -57,9 +57,10 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7E: Cold-Start Narration Fix (partial attempt; reopened)
   ├── TTS-7F: Proactive Entry Cache Coverage & Cruise Warm ✅ (v1.33.1)
   ├── TTS-7G: First-Chunk IPC Verification ✅ (v1.33.2) — BUG-117 verified resolved
+  ├── TTS-7H: Visible-Word Readiness & Stable Launch Index (queued — next)
   │
   │  Feature work
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued — next)
+  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued)
   ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
     │
@@ -95,11 +96,11 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 | Lane | Sprints | Versions | Key Deliverables |
 |------|---------|----------|------------------|
 | TTS-6 | TTS-6C→6S + HOTFIX-11 | v1.14.0–v1.28.0 | Native-rate buckets, startup hardening, pronunciation overrides, word alignment, accessibility, profiles, portability, runtime stability, performance budgets, session continuity, diagnostics, cursor sync |
-| TTS-7 (stabilization + hotfix) | TTS-7A→7G | v1.29.0–v1.33.2 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification. All TTS bugs (BUG-101–121) resolved and verified. |
+| TTS-7 (stabilization + hotfix) | TTS-7A→7G | v1.29.0–v1.33.2 | Cache correctness, cursor contract (dual ownership), throughput/backpressure, integration verification, proactive entry-cache coverage + cruise warm, clean Foliate DOM probing, first-chunk IPC verification. `TTS-7H` is now queued as a live-regression follow-up for false-positive Foliate readiness and unstable launch index behavior. |
 
 **Architecture post-stabilization:** Narration state machine, cache identity contract (voice + override hash + word count), cursor ownership (playing = TTS owns, paused = user owns), pipeline pause/resume (emission gating), backpressure (TTS_QUEUE_DEPTH), narration start <50ms per microtask. Documented in TECHNICAL_REFERENCE.md § "Narrate Mode Architecture."
 
-**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed that gap with proactive entry-cache coverage, reading-open cruise warming, and pure DOM readiness probing that no longer uses UI-mutating Foliate helpers. `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work: TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), and TTS-7E (deferred ack). Code-level analysis confirmed the synchronous response path is < 2ms. DEV instrumentation and 6 regression tests added. **TTS stabilization lane is now CLOSED — all bugs verified resolved.**
+**Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. However, fresh logs still show Foliate startup launching against words that are “in DOM” but not actually visible/highlightable, plus unstable launch-word selection and bad fallback navigation. `TTS-7H` is the focused corrective sprint for that remaining startup contract.
 
 ---
 
@@ -300,6 +301,88 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 ### Sprint TTS-7G: First-Chunk IPC Verification ✅ COMPLETED (v1.33.2)
 
 > Archived to `docs/project/ROADMAP_ARCHIVE.md`. BUG-117 verified resolved — response path < 2ms. 6 new tests (1,279 total). TTS stabilization lane CLOSED.
+
+---
+
+### Sprint TTS-7H: Visible-Word Readiness & Stable Launch Index
+
+**Goal:** Eliminate the remaining page-jump / false-start behavior on EPUB narration startup. Narration must only launch when the chosen start word is actually visible and highlightable in the active Foliate page context, the chosen start index must not drift during startup, and fallback navigation must never misuse a raw global word index as a Foliate navigation target.
+
+**Problem:** Fresh live logs after `TTS-7G` show the startup contract is still broken even though the first-chunk response path is healthy:
+
+1. **False-positive readiness.** The gate logs `render gate passed — launching at word 82`, then Foliate immediately logs `highlightWordByIndex miss: word 82 not in DOM`. The current readiness probe is still too weak. `isWordInDom()` only proves that a word span exists somewhere in loaded contents, not that the word is on the active visible page and highlightable right now.
+2. **Unstable launch index.** Repeated cold-start attempts in the same session bounce among launch words like `82`, `68`, `80`, `0`, and `9004`. The start-word source of truth is still shifting during startup instead of being frozen once selected.
+3. **Bad fallback navigation.** `useReaderMode.ts` still falls back to `foliateApiRef.current?.goTo?.(startIdx)` on timeout. A raw global word index is not a trustworthy Foliate navigation target and can itself cause page jumps or land on the wrong content.
+
+**Design decisions:**
+
+- **Visible-word readiness, not mere DOM presence.** Replace `isWordInDom()` gating with a stronger readiness check that confirms the launch word is in the active rendered viewport context and is highlightable without miss. Existence in any loaded iframe is not sufficient.
+- **Freeze launch index once chosen.** Startup may derive a launch word from highlighted cursor, visible word, or saved position, but once that choice is made for a play action it must not be recomputed during retries, polling, or rerenders.
+- **Navigation by section/page ownership only.** Remove raw `goTo(startIdx)` fallback. Resolve the correct Foliate section/page target from the chosen launch word and navigate with the appropriate Foliate primitive.
+- **Gate success must be truthful.** “Render gate passed” should only be logged when the exact launch word can be highlighted immediately without a miss.
+- **Keep TTS work scoped.** This sprint is specifically about the Foliate startup contract. Do not reopen first-chunk IPC work or proactive cache coverage unless needed for a regression introduced by this fix.
+
+**Tier:** Quick (focused Foliate/TTS startup contract fix)
+
+**Baseline:**
+- `src/hooks/useReaderMode.ts` — current narrate startup gate, `narrationLaunchRef`, timeout fallback, start-word selection
+- `src/components/FoliatePageView.tsx` — `isWordInDom()`, `highlightWordByIndex()`, `findFirstVisibleWordIndex()`, `goToSection()`
+- `src/hooks/useReadingModeInstance.ts` — narration mode launch
+- `src/components/ReaderContainer.tsx` — highlighted-word ownership / startup wiring
+- `docs/governance/BUG_REPORT.md` — BUG-122, BUG-123
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — BUG-122, BUG-123
+4. `ROADMAP.md` — this section
+5. `src/hooks/useReaderMode.ts`
+6. `src/components/FoliatePageView.tsx`
+7. `src/hooks/useReadingModeInstance.ts`
+8. `src/components/ReaderContainer.tsx`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Primary CLI (renderer-fixer scope) | **Strengthen readiness probe** — Replace the current “word exists somewhere in DOM” gate with a visible/highlightable readiness check for the exact launch word. Gate success must match what `highlightWordByIndex()` can actually do immediately after launch. | `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts` |
+| 2 | Primary CLI (renderer-fixer scope) | **Freeze launch word per play action** — Once `startNarration()` resolves the chosen start word, store it in a stable launch token/state object so retries, polling, and rerenders cannot silently switch from 82 → 68 → 80 or similar. | `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx` |
+| 3 | Primary CLI (renderer-fixer scope) | **Replace bad fallback navigation** — Remove raw `goTo(startIdx)` usage. Resolve section/page ownership from the chosen launch word and use the proper Foliate navigation primitive instead. | `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx` |
+| 4 | Primary CLI (renderer-fixer scope) | **Tighten logging/diagnostics** — Log the frozen launch index, readiness result, and fallback target so future bug reports make startup drift obvious. | `src/hooks/useReaderMode.ts`, `src/utils/narrateDiagnostics.ts` if needed |
+| 5 | test-runner | **Tests** — Add regression coverage for: false-positive readiness no longer passing, stable launch index across retries, and section/page fallback navigation that does not use raw global word indices. ≥6 new tests. | `tests/` |
+| 6 | test-runner | **`npm test` + `npm run build`** | — |
+| 7 | spec-compliance-reviewer | **Spec compliance** | — |
+| 8 | doc-keeper | **Documentation pass** — Update BUG-122/123 and the queue/roadmap state based on the outcome. | `docs/governance/BUG_REPORT.md`, `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md` |
+| 9 | blurby-lead | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Primary CLI: Task 1 (stronger readiness)
+2. Primary CLI: Task 2 (freeze launch index)
+3. Primary CLI: Task 3 (fallback navigation)
+4. Primary CLI: Task 4 (diagnostics)
+    ↓
+5. test-runner: Task 5
+6. test-runner: Task 6
+7. spec-compliance-reviewer: Task 7
+8. doc-keeper: Task 8
+9. blurby-lead: Task 9
+```
+
+#### SUCCESS CRITERIA
+
+1. “Render gate passed” is only logged when the exact launch word is immediately highlightable without miss
+2. Narration startup no longer produces `highlightWordByIndex miss` for the chosen launch word right after gate success
+3. A single play action uses one frozen start index throughout startup
+4. Timeout recovery no longer uses raw `goTo(startIdx)` navigation
+5. Starting narration on a fresh EPUB no longer visibly jumps the page during startup
+6. ≥6 new regression tests
+7. `npm test` passes
+8. `npm run build` succeeds
+
+**Depends on:** TTS-7G
 
 ---
 

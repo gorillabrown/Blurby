@@ -275,6 +275,10 @@ export interface FoliateViewAPI {
   getScrollContainer: () => HTMLElement | null;
   /** TTS-7F: Pure read-only DOM check — is a word span present? No UI mutation. */
   isWordInDom: (wordIndex: number) => boolean;
+  /** TTS-7H: Visible-word readiness — word is in DOM AND visible on the active page viewport. */
+  isWordVisibleOnPage: (wordIndex: number) => boolean;
+  /** TTS-7H: Resolve section index for a given global word index (for fallback navigation). */
+  getSectionForWordIndex: (wordIndex: number) => number | null;
 }
 
 export default function FoliatePageView({
@@ -615,6 +619,33 @@ export default function FoliatePageView({
                 } catch { /* */ }
               }
               return false;
+            },
+            // TTS-7H: Visible-word readiness — word is in DOM AND on the active visible page
+            isWordVisibleOnPage: (wordIndex: number): boolean => {
+              const contents = view.renderer?.getContents?.() ?? [];
+              for (const { doc: d } of contents) {
+                try {
+                  const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`) as HTMLElement;
+                  if (!span) continue;
+                  const rect = span.getBoundingClientRect();
+                  const iframeWin = d.defaultView;
+                  if (!iframeWin) continue;
+                  // Same viewport check as findFirstVisibleWordIndex
+                  if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
+                      rect.top >= 0 && rect.top < iframeWin.innerHeight) {
+                    return true;
+                  }
+                } catch { /* */ }
+              }
+              return false;
+            },
+            // TTS-7H: Resolve section index for a global word index (for fallback navigation)
+            getSectionForWordIndex: (wordIndex: number): number | null => {
+              const words = foliateWordsRef.current;
+              if (wordIndex >= 0 && wordIndex < words.length) {
+                return words[wordIndex].sectionIndex;
+              }
+              return null;
             },
             findFirstVisibleWordIndex: () => {
               // Walk all loaded sections to find the first word span that's visible
