@@ -9,6 +9,7 @@ import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
+import type { AudioProgressReport } from "../utils/audioScheduler";
 
 export interface FootnoteCue {
   afterWordIdx: number;
@@ -676,6 +677,19 @@ export default function useNarration() {
     },
     warmUp: () => {
       kokoroStrategy.warmUp();
+    },
+    /**
+     * TTS-7Q: Get continuous audio progress for Kokoro playback.
+     * Returns null for Web Speech (no audio-clock model) or when not playing.
+     * Visual overlay code should poll this in its RAF loop to drive smooth interpolation.
+     * IMPORTANT: The returned wordIndex is the canonical audio cursor.
+     * Do NOT write it back to pause anchors or saved progress — use the narration
+     * state's cursorWordIndex for those operations.
+     */
+    getAudioProgress: (): AudioProgressReport | null => {
+      const s = stateRef.current;
+      if (s.engine !== "kokoro" || s.status !== "speaking") return null;
+      return kokoroStrategyRef.current?.getAudioProgress?.() ?? null;
     },
   };
 }

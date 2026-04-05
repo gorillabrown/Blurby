@@ -1266,6 +1266,7 @@ export default function ReaderContainer({
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
       narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
+      getAudioProgress={readingMode === "narration" ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
       flowMode={readingMode === "flow"}
       scrollContainerRef={flowScrollContainerRef}

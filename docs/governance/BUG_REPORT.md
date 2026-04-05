@@ -8,21 +8,21 @@
 
 ## Incomplete
 
-### BUG-143: Narration cursor is stable but still not truly audio-aligned
-**Reported:** 2026-04-05
+### ~~BUG-143~~ ✅ Fixed — TTS-7Q (v1.36.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Medium
 **Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/FoliatePageView.tsx`
 **Description:** After `TTS-7O` and follow-on live fixes, the narration cursor now moves, pause/replay preserves an anchor, and the left-right twitch is largely gone. This is stable enough to keep. But the visual band still feels stepped and laggy compared with smooth Kokoro audio. Users perceive the 3-word cursor as “better, but not silky.”
 **Root cause:** The visual band is still being driven from coarse word/window target updates and renderer-side interpolation, not a dedicated audio-aligned progress model tied to the actual scheduled playback clock.
-**Fix plan:** `TTS-7Q` — introduce canonical audio-progress state and rework the 3-word narration band to follow an audio-time-derived rail instead of DOM target chasing alone.
+**Fix:** Introduced `AudioProgressReport` type and `getAudioProgress()` on `audioScheduler.ts`. RAF-based glide loop in `FoliatePageView.tsx` reads exclusively from `getAudioProgress()` to drive the 3-word narration band from audio-time progress instead of DOM target chasing.
 
-### BUG-144: Chunk handoff can continue from stale visual cursor position
-**Reported:** 2026-04-05
+### ~~BUG-144~~ ✅ Fixed — TTS-7Q (v1.36.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** High
 **Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
 **Description:** At chunk boundaries, narration can appear to pick up from wherever the visual band was stuck or ahead, rather than the last audio-confirmed narrated word. Users notice that pause/replay or next-chunk continuation can start where the cursor sat instead of where speech truly left off.
 **Root cause:** Canonical narration progress and visual interpolation are not fully separated. Some handoff/resume paths still allow visual state to influence the perceived or resumed start position.
-**Fix plan:** `TTS-7Q` — make the canonical audio cursor the only authority for chunk carry-over, pause/replay, and resume. The visual band becomes a pure follower and can never become the anchor.
+**Fix:** `onChunkHandoff` callback wired through `kokoroStrategy.ts` → `useNarration.ts` → `FoliatePageView.tsx`. On every chunk boundary, the scheduler's chunk context is synchronized before the next RAF frame. The visual band is a pure follower of `AudioProgressReport` and has no write path to any anchor or resume position. `getAudioProgress()` exposed on `useNarration` hook return via `ReaderContainer.tsx` → `FoliatePageView.tsx` prop.
 
 ### ~~BUG-141~~ ✅ Fixed — EXT-5C (v1.35.0)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05

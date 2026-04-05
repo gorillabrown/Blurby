@@ -849,3 +849,22 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 - PR-136: The rolling planner must be the single source of truth for where a chunk may legally end. Code that selects chunk boundaries and code that computes silence for those boundaries must both read from the same plan — never recompute boundary classification independently.
 - PR-137: Planner scope is local and cheap — only the active forward window (~400 words), not the full book. If a planner scope ever becomes whole-book, re-evaluate for memory and latency budget before shipping.
 - PR-136: Truth-sync remains a guardrail, not a movement engine. Periodic resync may correct drift, but if users can perceive it as the main source of motion, the system is architecturally wrong.
+
+---
+
+### [2026-04-05] LL-077: RAF Glide Loop Must Read From a Single Canonical Progress Source
+
+**Area:** renderer, narration, audioScheduler, FoliatePageView, cursor UX
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-7Q introduced a RAF-based glide loop in `FoliatePageView.tsx` that drives the 3-word narration band from `getAudioProgress()` rather than DOM target chasing. The key architectural step was adding `AudioProgressReport` (position fraction within the current chunk, current chunk word range, and estimated audio clock) to `audioScheduler.ts` and wiring `onChunkHandoff` through `kokoroStrategy.ts` → `useNarration.ts` → `FoliatePageView.tsx`. This separated the visual follower from the canonical anchor.
+
+**Root Cause (of prior stepped motion):** The glide loop was indirectly reading visual cursor state to decide where to move next, which meant chunk handoffs could carry forward stale visual positions instead of audio-confirmed positions. Once the loop read from `getAudioProgress()` (owned entirely by the scheduler), the visual band became a pure follower with no authority over resume or handoff.
+
+**Fix:** `AudioProgressReport` is the sole input to the glide loop. The canonical audio cursor (last confirmed word, chunk start index) is owned by the scheduler and written only by audio playback events. `onChunkHandoff` fires on every chunk boundary to synchronize the scheduler's chunk context before the next RAF frame. The visual band is derived from this report and has no write path to any anchor.
+
+**Guardrail:**
+- PR-138: The RAF glide loop in `FoliatePageView.tsx` must read cursor position exclusively from `getAudioProgress()`. It must not read from any React state, ref, or DOM element that is also used as a resume anchor or handoff carry-over value.
+- PR-139: `onChunkHandoff` must fire on every chunk transition so the scheduler's `AudioProgressReport` reflects the new chunk before the next animation frame. A stale chunk context in `AudioProgressReport` will cause the visual band to jump on chunk boundaries.
+- PR-140: `narrateDiagnostics.ts` provides `getGlideDiagSummary()` — use it during debugging, not as a performance-path data source. Diagnostic capture must be conditional on a debug flag and excluded from production-path RAF callbacks.

@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7P complete (v1.36.0). Rolling pause-boundary planner added. TTS-7Q next; EINK-6A and EINK-6B follow. 1,479 tests, 83 files. Latest tagged release: v1.36.0.
+**Last updated**: 2026-04-05 — TTS-7Q complete (v1.36.1). Audio-aligned glide cursor added. EINK-6A next; EINK-6B follows. 1,504 tests, 84 files. Latest tagged release: v1.36.1.
 **Current branch**: `main`
-**Current state**: Phase 6 feature work active. TTS-7P complete. Rolling planner now drives chunk selection and silence injection. TTS-7Q (true glide cursor) is next. Queue GREEN — depth 3 (`TTS-7Q` → `EINK-6A` → `EINK-6B`).
+**Current state**: Phase 6 feature work active. TTS-7Q complete. RAF-based glide loop and canonical `AudioProgressReport` now drive the narration cursor. EINK-6A is next. Queue YELLOW — depth 2 (`EINK-6A` → `EINK-6B`). Backfill required before next dispatch.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -67,7 +67,7 @@ Phase 6: TTS Hardening & Stabilization
   ├── TTS-7O: Audible Pause Injection & Smooth Narration Cursor ✅ (v1.34.0)
   ├── EXT-5C: Rich Article Capture & Hero Image Cards ✅ (v1.35.0)
   ├── TTS-7P: Rolling Pause-Boundary Planner ✅ (v1.36.0)
-  ├── TTS-7Q: True Glide & Audio-Aligned Narration Cursor (queued after TTS-7P)
+  ├── TTS-7Q: True Glide & Audio-Aligned Narration Cursor ✅ (v1.36.1)
   │
   │  Feature work
   ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued after TTS-7Q)
@@ -1047,7 +1047,7 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 ---
 
-### Sprint TTS-7Q: True Glide & Audio-Aligned Narration Cursor
+### Sprint TTS-7Q: True Glide & Audio-Aligned Narration Cursor ✅ COMPLETED (v1.36.1)
 
 **Goal:** Upgrade narration cursor movement from “good and stable” to “silky” by driving the 3-word narration band from audio-aligned progress rather than discrete DOM target hops, while preserving the hard-won anchor/resume correctness from `TTS-7M` and `TTS-7O`.
 
