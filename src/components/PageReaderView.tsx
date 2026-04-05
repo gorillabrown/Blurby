@@ -30,7 +30,7 @@ interface PageReaderViewProps {
   onExit: (position: number) => void;
   onToggleFlap?: () => void;
   notes?: Map<number, string>; // wordIndex → note preview
-  pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void }>;
+  pageNavRef?: React.MutableRefObject<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void; getCurrentPageStart: () => number }>;
   flowNavRef?: React.MutableRefObject<{ prevLine: () => void; nextLine: () => void }>;
   flowPlaying: boolean; // Flow mode: word highlight advances at WPM within page view
   ttsActive?: boolean; // When true, TTS drives cursor — skip RAF advancement
@@ -287,7 +287,11 @@ export default function PageReaderView({
   // Register page nav callbacks for keyboard hook
   useEffect(() => {
     if (pageNavRef) {
-      pageNavRef.current = { prevPage, nextPage, goToPage, returnToHighlight };
+      pageNavRef.current = {
+        prevPage, nextPage, goToPage, returnToHighlight,
+        // TTS-7B: Expose current page's start word for browse-away reconciliation
+        getCurrentPageStart: () => pages[currentPageRef.current]?.start ?? 0,
+      };
     }
   }, [pageNavRef, prevPage, nextPage, goToPage, returnToHighlight]);
 

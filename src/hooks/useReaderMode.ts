@@ -54,7 +54,7 @@ export interface UseReaderModeParams {
   isBrowsedAway: boolean;
   setIsBrowsedAway: React.Dispatch<React.SetStateAction<boolean>>;
   /** Page navigation ref */
-  pageNavRef: React.MutableRefObject<{ returnToHighlight: () => void }>;
+  pageNavRef: React.MutableRefObject<{ returnToHighlight: () => void; getCurrentPageStart?: () => number }>;
   /** Reading mode state (owned by ReaderContainer, shared with this hook) */
   readingMode: "page" | "focus" | "flow" | "narration";
   setReadingMode: React.Dispatch<React.SetStateAction<"page" | "focus" | "flow" | "narration">>;
@@ -271,10 +271,21 @@ export function useReaderMode({
       setHighlightedWordIndex(currentWord);
       highlightedWordIndexRef.current = currentWord; // Sync ref immediately
     }
+    // TTS-7B: Browse-away reconciliation (BUG-108)
+    // When user browsed away during narration, update cursor to the browsed-to
+    // page's start word so that the next resume plays from where the user was viewing.
+    if (isBrowsedAway && readingMode === "narration") {
+      const pageStart = pageNavRef.current.getCurrentPageStart?.();
+      if (pageStart != null) {
+        setHighlightedWordIndex(pageStart);
+        highlightedWordIndexRef.current = pageStart;
+      }
+      setIsBrowsedAway(false);
+    }
     stopAllModes();
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
-  }, [readingMode, updateSettings, stopAllModes, setHighlightedWordIndex, modeInstance]);
+  }, [readingMode, updateSettings, stopAllModes, setHighlightedWordIndex, modeInstance, isBrowsedAway, setIsBrowsedAway, pageNavRef]);
 
   // ── Select mode (button click — select AND start) ─────────────────
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narration") => {

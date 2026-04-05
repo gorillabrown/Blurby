@@ -122,6 +122,8 @@ export default function useNarration() {
   // Stable refs to break circular dependency (strategy → speakNextChunk → strategy).
   const speakNextChunkRef = useRef<() => void>(() => {});
   const speakNextChunkWebRef = useRef<() => void>(() => {});
+  // TTS-7B: Ref to kokoroStrategy for fallback teardown (callback needs to call .stop())
+  const kokoroStrategyRef = useRef<ReturnType<typeof createKokoroStrategy> | null>(null);
 
   const kokoroStrategy = useMemo(
     () => createKokoroStrategy({
@@ -132,12 +134,17 @@ export default function useNarration() {
       getBookId: () => bookIdRef.current,
       getPronunciationOverrides: () => pronunciationOverridesRef.current,
       onFallbackToWeb: () => {
+        // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
+        kokoroStrategyRef.current?.stop();
+        recordDiagEvent("fallback", "kokoro→web: stopped pipeline before Web Speech start");
         dispatch({ type: "SET_ENGINE", engine: "web" });
-        speakNextChunkWebRef.current();
+        // Yield a tick to let cleanup flush before starting Web Speech
+        setTimeout(() => speakNextChunkWebRef.current(), 0);
       },
     }),
     [], // stable — all deps accessed via refs/getters
   );
+  kokoroStrategyRef.current = kokoroStrategy;
 
   // Check Kokoro model status on mount
   useEffect(() => {
@@ -491,8 +498,32 @@ export default function useNarration() {
     captureDiagSnapshot();
   }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
 
-  const resume = useCallback(() => {
+  const resume = useCallback((currentWordIndex?: number) => {
     const s = stateRef.current;
+
+    // TTS-7B: If caller provides a cursor position that differs from where
+    // we paused, the user moved the cursor during pause — resync instead of bare resume.
+    if (currentWordIndex != null && currentWordIndex !== s.cursorWordIndex) {
+      // Stop current strategies, resync to new position
+      webStrategy.stop();
+      kokoroStrategy.stop();
+      const newSpeed = s.speed;
+      dispatch({ type: "START_CURSOR_DRIVEN", startIdx: currentWordIndex, speed: newSpeed });
+      stateRef.current = {
+        ...stateRef.current,
+        status: "speaking",
+        cursorWordIndex: currentWordIndex,
+        speed: newSpeed,
+        chunkStart: currentWordIndex,
+        chunkWords: [],
+      };
+      recordDiagEvent("resume", `resync cursor=${currentWordIndex} (was ${s.cursorWordIndex})`);
+      captureDiagSnapshot();
+      speakNextChunkRef.current();
+      return;
+    }
+
+    // Bare resume from pause point
     if (s.engine === "kokoro") {
       kokoroStrategy.resume();
     } else {
