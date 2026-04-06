@@ -1,31 +1,47 @@
+BLURBY
+
 # Sprint Queue
 
-**Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top sprint, paste into CLI, execute. After completion, remove it, log it, backfill to >=3.
+**Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top pointer, read the referenced Roadmap section, then execute from the full spec. After completion, remove it, log it, backfill to ≥3.
 
-**Full specs:** `ROADMAP.md` (`EINK-6A`, `EINK-6B`, `GOALS-6B`)
+**Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained at all times. If depth drops below 3 after completion: Cluade Code investigates bottlenecks and issues; Cowork brainstorms and drafts specs (if next work is known) or stops to discuss (if not); Claude CLI performs work/receives dispatches. 
 
-**Queue rules:** FIFO — top sprint executes next. >=3 depth maintained.
+No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and no code-changing pointer is dispatch-ready unless its referenced spec names explicit edit-site coordinates.
+
+**How to use:**
+1. Pull the top pointer block
+2. Open the Roadmap section listed on the `Read:` line — that's the full dispatch spec
+3. Confirm the full spec includes explicit edit-site coordinates for every planned code change: file, function/method, approximate live anchor, and exact modification type. If any code-changing step lacks coordinates, stop and harden the spec before dispatch.
+4. Execute from the Roadmap spec under `gog-lead` orchestration with the named sub-agent roster
+5. After completion: doc-keeper marks the Roadmap section COMPLETED, removes the pointer, logs to completed table
+6. Cowork prints the next pointer and checks queue depth
+
 
 ---
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 0 — RED (below minimum 3). Backfill needed.
-Next sprint: None queued — spec new sprints from IDEAS.md or Someday Backlog.
-Health: RED — HOTFIX-12 complete. EINK/GOALS parked. Need 3 sprints for GREEN.
+Queue depth: 6 — GREEN
+Next sprint: HOTFIX-13 (reader core fixes — narration band, focus mode, word selection, flow layout)
+Health: GREEN — Two hotfixes then three priority tracks queued.
 ```
 
 ---
 
 ## Queue
 
-| # | Sprint ID | Version | Branch | Tier | Findings | Summary |
-|---|-----------|---------|--------|------|----------|---------|
-| — | *(empty)* | — | — | — | — | Queue depleted. Backfill required before next dispatch. |
+| # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
+|---|-----------|---------|--------|------|-----------|---------|
+| 1 | HOTFIX-13 | v1.37.2 | `hotfix/13-reader-core` | Quick | **PARTIAL** | BUG-151/152 CLI-ready. BUG-153 needs design spec. BUG-154 needs live verification. |
+| 2 | HOTFIX-14 | v1.37.3 | `hotfix/14-import-connection` | Quick | **PARTIAL** | BUG-157/158 CLI-ready. BUG-155/156 need Cowork investigation. |
+| 3 | FLOW-INF-A | v1.38.0 | `sprint/flow-inf-a-reading-zone` | Full | **NO** | Cowork: reading zone overlay prototyping (shadow DOM feasibility) |
+| 4 | EXT-ENR-A | v1.39.0 | `sprint/ext-enr-a-resilient` | Quick | **NO** | Cowork: locate extension source, trace client lifecycle in ws-server |
+| 5 | FLOW-INF-B | v1.40.0 | `sprint/flow-inf-b-timer-cursor` | Full | **NO** | Blocked on FLOW-INF-A results |
+| 6 | EXT-ENR-B | v1.41.0 | `sprint/ext-enr-b-auto-discovery` | Full | **NO** | Blocked on EXT-ENR-A results |
 
-**Dispatch status:** Queue depth 0 — RED. Spec 3 new sprints from IDEAS.md before resuming implementation work.
+**Dispatch status:** Queue depth 6 — GREEN. HOTFIX-13 is partially CLI-ready (BUG-151 + BUG-152 have confirmed root causes and exact fix specs). Can dispatch as a 2-bug fix now, or wait for BUG-153 design spec to bundle all four.
 
-**Watch item:** EINK-6A/6B and GOALS-6B are parked (fully spec'd in ROADMAP.md, ready to re-queue when TTS/extension focus concludes).
+**Next Cowork action:** Design spec for BUG-153 (word selection contract), then live verification for BUG-154.
 
 ---
 
@@ -33,13 +49,12 @@ Health: RED — HOTFIX-12 complete. EINK/GOALS parked. Need 3 sprints for GREEN.
 
 | Sprint ID | Disposition |
 |-----------|-------------|
-| EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when TTS/extension focus concludes. |
+| EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when e-ink becomes priority. |
 | EINK-6B | Parked. Fully spec'd in ROADMAP.md. Depends on EINK-6A. |
-| GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent of EINK — can run in parallel. |
-| TD-2 | Deferred. Mode wiring is feature work. Specs stale. Re-triage post-EINK/GOALS. |
-| HOTFIX-1 | Deferred. Grid bugs may fold into a UI-FIX sprint later. |
-| Sprint 23 | Partially absorbed by Phase 1. Remainder re-triage post-EINK/GOALS. |
-| Sprint 25 | Deferred to Phase 5 (ROADMAP_V2). |
+| GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent — can run anytime. |
+| EXT-ENR-C | Documented but deferred. In-browser reader is lower priority than connection fixes. |
+| APK-0 | Roadmapped, not yet execution-ready. Needs detailed WHERE/Tasks/SUCCESS CRITERIA. |
+| APK-1–4 | Roadmapped, not yet execution-ready. Depend on APK-0. |
 
 ---
 
@@ -47,24 +62,8 @@ Health: RED — HOTFIX-12 complete. EINK/GOALS parked. Need 3 sprints for GREEN.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
-| HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes. BUG-146/147/148/149/150 resolved — chapter dropdown narration tracking, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined + Ctrl+Enter in bug reporter. 17 new tests (1,546 total). v1.37.1. |
-| TTS-7R | 2026-04-05 | PASS | Calm narration band & cursor ownership fix. BUG-145a/b/c resolved — `lastConfirmedAudioWordRef` separates canonical audio cursor from visual cursor; `SIMPLE_NARRATION_GLIDE` removed (audio-progress glide active); fixed-size overlay band (measure-once line-height); truth-sync visual-only; per-word context CSS removed. 25 new tests (`tests/calmNarrationBand.test.ts`, 1,529 total). v1.37.0. |
-| TTS-7Q | 2026-04-05 | PASS* | True glide & audio-aligned narration cursor. BUG-143/144 resolved — canonical `AudioProgressReport` type + `getAudioProgress()` on scheduler; `onChunkHandoff` callback wired through kokoroStrategy and exposed on `useNarration`; RAF-based glide loop in `FoliatePageView.tsx` drives the narration band from audio-time progress, not DOM chasing; chunk handoff is continuity-safe. New `src/utils/narrateDiagnostics.ts` + new test file `tests/audioGlide.test.ts`. 25 new tests (1,504 total). v1.36.1. Follow-on live issue tracked separately as BUG-145 (visual band still laggy / over-corrected). |
-| TTS-7P | 2026-04-05 | PASS | Rolling pause-boundary planner. BUG-140 resolved — new `narrationPlanner.ts` builds local boundary plans for the active text window; `generationPipeline.ts` and `kokoroStrategy.ts` updated to consult the plan; silence injection, resume, retarget, and dialogue handling all use one consistent structure. 33 new tests (1,479 total). v1.36.0. |
-| EXT-5C | 2026-04-05 | PASS | Rich article capture & hero image cards. BUG-141/142 resolved — cleaned article HTML preserved, inline images downloaded/re-written into EPUB for offline reading, shared image pipeline used by URL and extension imports, and hero image promoted to reading cards. 24 new tests (1,442 total). v1.35.0. |
-| TTS-7O | 2026-04-05 | PASS | Audible pause injection & smooth narration cursor. BUG-138/139 resolved — classifyChunkBoundary + silence injection at chunk edges, 3-word narration window, CSS transitions for smooth cursor, truth-sync every 12 words. 27 new tests (1,418 total). v1.34.0. |
-| TTS-7N | 2026-04-05 | PASS | Kokoro pause semantics & settings link repair. BUG-136/137 resolved — pause config drives word-weight scaling and sentence-boundary chunk snapping, Ctrl+K TTS links repaired to "tts" page. 19 new tests (1,391 total). v1.33.9. **TTS stabilization lane FULLY CLOSED.** |
-| TTS-7M | 2026-04-05 | PASS | Persistent resume-anchor & reopen authority. BUG-135 resolved — resumeAnchorRef replaces time-limited preservePlaybackAnchorUntilRef, captures live cursor on pause, saved position on reopen, consumed on mode start, cleared on explicit selection. Passive onLoad/onRelocate gated. 17 new tests (1,372 total). v1.33.8. |
-| TTS-7L | 2026-04-05 | PASS | Exact Foliate text-selection mapping. BUG-134 resolved — selectionchange resolves exact .page-word span with data-word-index, unified click/selection payload, first-match text fallback demoted. 15 new tests (1,343 total). v1.33.7. **TTS stabilization lane FULLY CLOSED.** |
-| TTS-7K | 2026-04-05 | PASS* | EPUB global word-source promotion & page-mode isolation. BUG-131/132/133 resolved — full-book words promoted as source of truth, global index validation for start-word, onWordsReextracted source protection, page-mode isolated from section-boundary effect. 22 new tests (1,331 total). v1.33.6. Follow-up required via TTS-7L for exact Foliate text-selection mapping. |
-| TTS-7J | 2026-04-04 | PASS* | Foliate section-sync ownership, word-source dedupe & initial selection protection. BUG-128/129/130 resolved — single narration section-sync owner (miss-recovery only), sectionIndex-based word dedupe, userExplicitSelectionRef guards onLoad restore, unified start-word policy via resolveFoliateStartWord. Follow-up required via TTS-7K for full-book word-source promotion and page-mode isolation. 14 new tests (1,309 total). v1.33.5. |
-| TTS-7I | 2026-04-04 | PASS* | Foliate follow-scroll unification & exact miss recovery. BUG-124/125/126/127 resolved — shared `resolveWordState()` truth source, single scroll owner, exact section-based miss recovery with cooldown, return-to-narration cursor restore. Follow-up required via TTS-7J for section-sync ownership, word-source dedupe, and first-play selection protection. 8 new tests (1,295 total). v1.33.4. |
-| TTS-7H | 2026-04-04 | PASS | Visible-word readiness & stable launch index. BUG-122/123 — `isWordVisibleOnPage()` replaces false-positive `isWordInDom()`, frozen launch index prevents drift, section-based fallback. 8 new tests (1,287 total). v1.33.3. |
-| TTS-7G | 2026-04-04 | PASS | First-chunk IPC verification. BUG-117 verified resolved — response path < 2ms (root causes fixed by TTS-7C/NAR-5/TTS-7E). DEV instrumentation added. 6 new tests (1,279 total). v1.33.2. **TTS stabilization lane CLOSED.** |
-| TTS-7F | 2026-04-04 | PASS | Proactive entry cache coverage + cruise warm. First-5-minute opening narration coverage for non-archived readings, startup repair checks, reading-open queueing, pure `isWordInDom()` probe, and single-launch token. BUG-116/118/119/120/121 resolved. 11 new tests (1,273 total). v1.33.1. |
-| TTS-7D | 2026-04-04 | PASS | Integration verification. 8 integration tests, 12-cell smoke test matrix, all 15 TTS bugs verified resolved, stabilization closeout doc in TECHNICAL_REFERENCE.md. 8 new tests (1,254 total). v1.32.0. TTS stabilization lane COMPLETE. |
-| TTS-7C | 2026-04-04 | PASS | Throughput & dead code. Narration start microtasks (<50ms), pause UI hidden for Kokoro, extraction dedupe, Float32Array IPC (no Array.from), pipeline backpressure. BUG-101/110/112/113/115 resolved. 12 new tests (1,246 total). v1.31.0. |
-| TTS-7B | 2026-04-04 | PASS | Cursor contract. EPUB click retarget, browse-away reconciliation, Kokoro fallback teardown, pipeline pause/resume, resume-from-cursor. BUG-107/108/109/111 resolved. 13 new tests (1,234 total). v1.30.0. |
-| TTS-7A | 2026-04-04 | PASS | Cache correctness. Real cached word counts (no hardcoded 148), background cacher voice key fix, override-hash identity, live cursor tracking, diagnostics fix. BUG-102/103/104/105/106/114 resolved. 12 new tests (1,221 total). v1.29.0. |
-| TTS-6S | 2026-04-04 | PASS | Cursor sync, pause shaping & backlog fill hotfix. BUG-096/097/098. 13 new tests (1,209 total). v1.28.0. |
-| HOTFIX-11 | 2026-04-04 | PASS | Bug reporter diagnostics. BUG-099/100. 8 new tests (1,196 total). v1.27.1. |
+| HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes. BUG-146/147/148/149/150 resolved. 17 new tests (1,546 total). v1.37.1. |
+| TTS-7R | 2026-04-05 | PASS | Calm narration band & cursor ownership fix. BUG-145a/b/c resolved. 25 new tests. v1.37.0. |
+| TTS-7Q | 2026-04-05 | PASS* | True glide & audio-aligned narration cursor. BUG-143/144 resolved. 25 new tests. v1.36.1. |
+| TTS-7P | 2026-04-05 | PASS | Rolling pause-boundary planner. BUG-140 resolved. 33 new tests. v1.36.0. |
+| EXT-5C | 2026-04-05 | PASS | Rich article capture & hero image cards. BUG-141/142 resolved. 24 new tests. v1.35.0. |

@@ -10,6 +10,7 @@
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
 5a. **Queue depth below 3 is a stop signal.** If `docs/governance/SPRINT_QUEUE.md` has fewer than three queued sprints, pause implementation work and switch to brainstorming/spec development until the queue is back to at least three.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
+6a. **CLI executes, it does not investigate.** Every sprint dispatched to Claude Code CLI must be fully investigated and spec'd beforehand. CLI receives exact directions — file paths, line numbers, what to change, why. All ambiguity is resolved by Cowork before dispatch. If a bug's root cause is unknown, Cowork investigates first (live debug, code tracing, hypothesis testing). If a feature's design is unresolved, Cowork specs it first. CLI never explores or diagnoses — it builds to spec. A sprint is not dispatch-ready until its investigation gate is cleared.
 7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
 8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt. Dispatches are POINTERS not PAYLOADS — reference the Sprint Queue (which points to ROADMAP.md for the full spec), don't duplicate it. Format: sprint ID, branch, baseline state, link to Sprint Queue.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
@@ -252,6 +253,8 @@ When a sprint **completes**:
 | Completed governance sprint files | `docs/project/.Archive/` | Move on completion. |
 | Current system state + agent config | `CLAUDE.md` | Keep under ~20k chars. Archive old sprint details. |
 | Bugs (active) | `docs/governance/BUG_REPORT.md` | Remove when fixed + verified. |
+| Bug reports (raw, unprocessed) | `docs/bug-reports/` | In-app submissions. Triage → file in BUG_REPORT.md → archive to `.Archive/`. |
+| Bug reports (processed) | `docs/bug-reports/.Archive/` | Archived after triage. Reference only. |
 | Feature requests (unroadmapped) | `docs/governance/IDEAS.md` | Reviewed at phase pauses. |
 | Engineering discoveries | `docs/governance/LESSONS_LEARNED.md` | Append immediately on discovery. |
 | Architecture + data model | `docs/governance/TECHNICAL_REFERENCE.md` | Update when architecture changes. |
@@ -275,6 +278,17 @@ When a sprint **completes**:
 4. Read `docs/governance/BUG_REPORT.md` (if session involves bug fixes)
 5. Read `docs/governance/SPRINT_QUEUE.md` (abbreviated dispatch pointers to ROADMAP specs)
 
+### Bug Report Triage Workflow
+
+When `docs/bug-reports/` contains unprocessed `.json` + `.png` files:
+
+1. **Read** all JSON reports and view all screenshots.
+2. **Group** reports by root cause or feature area — deduplicate related reports.
+3. **File** each unique bug in `docs/governance/BUG_REPORT.md` with next BUG-NNN number. Include: description, severity, location, probable cause, screenshots, fix approach.
+4. **Group into hotfix sprints** — batch related bugs into HOTFIX-NN entries in ROADMAP.md. Add to SPRINT_QUEUE.md.
+5. **Archive** processed reports: move all `.json` + `.png` files to `docs/bug-reports/.Archive/`.
+6. **Report** findings to user with grouped summary and proposed hotfix sprint structure.
+
 ### Constants Separation Rule
 
 All tunable behavioral constants must be extracted into a dedicated constants file — not hardcoded in source. This includes default WPM, default word count per flow page, snooze intervals, toast durations, coaching limits, LRU cache sizes, sync intervals, tombstone TTL, reconciliation period, and similar values currently scattered across main process and renderer code. CSS custom properties for theming are exempt (they already live in `global.css`).
@@ -285,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.37.1 — queue empty RED, EINK/GOALS parked, backfill needed)
+## Current System State (v1.37.1 — queue GREEN, 3 priority tracks roadmapped, 8 open bugs)
 
 ### Codebase (branch: `main`)
 
@@ -305,7 +319,10 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7Q shipped** — BUG-143/144 resolved. Canonical `AudioProgressReport` type + `getAudioProgress()` added to scheduler; `onChunkHandoff` callback wired through `kokoroStrategy.ts` and exposed on `useNarration` hook return; RAF-based glide loop in `FoliatePageView.tsx` drives the 3-word narration band from audio-time progress instead of DOM target chasing; chunk handoff is continuity-safe (visual band can never become the canonical anchor). New `src/utils/narrateDiagnostics.ts` exports diagnostic event types and `getGlideDiagSummary()`. 25 new tests (`tests/audioGlide.test.ts`). v1.36.1.
 - **TTS-7R complete** — BUG-145a/b/c resolved. Separated canonical audio cursor from visual cursor (`lastConfirmedAudioWordRef`), enabled audio-progress glide (removed `SIMPLE_NARRATION_GLIDE`), fixed-size overlay band (measure-once line-height), truth-sync visual-only pathway, removed per-word context CSS. 25 new tests (`tests/calmNarrationBand.test.ts`). v1.37.0.
 - **HOTFIX-12 complete** — BUG-146/147/148/149/150 resolved. Chapter dropdown tracks narration cursor, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined (Escape-only for inputs) + Ctrl+Enter submit in bug reporter. 17 new tests. v1.37.1.
-- Active queue: empty (depth 0 — RED, EINK/GOALS parked). Backfill 3 sprints before next dispatch.
+- Active queue: depth 6 — GREEN. HOTFIX-13 → HOTFIX-14 → FLOW-INF-A → EXT-ENR-A → FLOW-INF-B → EXT-ENR-B.
+- 8 open bugs: BUG-151 through BUG-158. EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
+- ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
+- IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
 - 1,546 tests across 86 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`

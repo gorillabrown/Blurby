@@ -2,11 +2,107 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-04-05
+**Last updated:** 2026-04-06
 
 ---
 
 ## Incomplete
+
+### BUG-151 — Narration band spans full page height instead of single line
+**Reported:** 2026-04-06
+**Severity:** High (visual regression)
+**Status:** ROOT CAUSE CONFIRMED — CLI-ready fix spec below
+**Location:** `src/components/FoliatePageView.tsx` (lines 571, 692, 860)
+**Description:** After TTS-7R (v1.37.0), the narration overlay band renders as a page-tall rectangle instead of the intended single-line-height 3-word gliding cursor.
+**Root cause (confirmed by code analysis 2026-04-06):** Three fallback paths in FoliatePageView.tsx use uncapped height values when `narrationBandLineHeightRef.current === 0`:
+- Line 571: `const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);`
+- Line 692: same pattern with `fromWindow.height`
+- Line 860: `... : currentWindow.height;`
+When the user navigates away from the narrated section, `measureNarrationBandDimensions()` (called only at narration start) becomes stale. The fallback uses `currentWindow.height` or `from.height` from `measureNarrationWindow()`, which can be hundreds of pixels if the 3-word window spans across lines or sections.
+**Fix spec (CLI-ready):**
+1. Cap all three fallback heights to `Math.min(value, 40)` (~2 line-heights, safe maximum):
+   - Line 571: `Math.max(12, from.height)` → `Math.min(Math.max(12, from.height), 40)`
+   - Line 692: `fromWindow.height` → `Math.min(fromWindow.height, 40)`
+   - Line 860: `currentWindow.height` → `Math.min(currentWindow.height, 40)`
+2. Re-run `measureNarrationBandDimensions()` on Foliate section change (onLoad/onRelocate), not just at narration start. Add call in the `onRelocate` handler when `readingMode === "narration"`.
+
+### BUG-152 — Focus mode blank screen
+**Reported:** 2026-04-06
+**Severity:** High (feature broken)
+**Status:** ROOT CAUSE CONFIRMED — CLI-ready fix spec below
+**Location:** `src/components/ReaderContainer.tsx` (line 1362)
+**Description:** Clicking Focus shows a blank white screen with only tiny up/down arrow icons (▼/▲) in the center — no word text visible. The RSVP display renders but shows empty text.
+**Screenshot:** `docs/bug-reports/.Archive/bug-2026-04-06T13-48-57Z.png` — blank white screen with centered arrows.
+**Root cause (confirmed by code analysis 2026-04-06):** Data-flow split between the mode timer and the display component.
+- `ReaderContainer.tsx:1362` passes `words={foliateWordStrings}` to ReaderView — this is a DOM-section slice (~1000 words from the currently visible Foliate section).
+- The FocusMode timer uses `getEffectiveWords()` which returns `bookWordsRef.current.words` (173,727 words from full-book extraction) when available.
+- The mode timer advances `wordIndex` through the full 173,727-word index space (e.g., wordIndex=5114).
+- But `foliateWordStrings[5114]` is `undefined` because the array only has ~1000 entries from the current DOM section.
+- `ReaderView.tsx:216` computes `currentWord = words[wordIndex] || ""` → empty string → blank display.
+- The focus-mark arrows (▼/▲) at `ReaderView.tsx:340,358` render regardless of word content, producing the "blank screen with arrows" appearance.
+**Fix spec (CLI-ready):**
+1. `ReaderContainer.tsx:1362` — Change `words={foliateWordStrings}` to:
+   `words={bookWordsRef.current?.complete ? bookWordsRef.current.words : foliateWordStrings}`
+   This ensures ReaderView receives the same word source that the mode timer uses.
+2. Apply the same fix at any other location where `foliateWordStrings` is passed to a component that uses the global `wordIndex` (grep for `words={foliateWordStrings}` in ReaderContainer).
+
+### BUG-153 — No word selection contract (soft/hard selection missing)
+**Reported:** 2026-04-06
+**Severity:** High (design gap affecting all reading modes)
+**Location:** `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
+**Description:** When navigating to any page, no word is highlighted. Reading modes (Focus, Flow, Narrate) don't know where to start because there's no persistent "current word" anchor. Users reported: "If no word is selected, where does each reading mode start?" and "there must always be a word selected."
+**Screenshots:** `docs/bug-reports/bug-2026-04-06T13-49-14Z.png`, `bug-2026-04-06T13-50-16Z.png`, `bug-2026-04-06T13-50-34Z.png`
+**Design contract needed:**
+- **Soft selection** — First visible word on every page is always lightly highlighted (subtle underline or dot). Updates automatically on page turn or scroll. This is the default start word for any reading mode.
+- **Hard selection** — User clicks a word → it becomes the anchor (distinct highlight style). Persists across page turns. All reading modes start from this word.
+- **Off-page anchor** — If the hard-selected word is on a different page/section, show a "Jump to selection" button (similar to existing "Return to narration" pill from HOTFIX-12).
+**Fix approach:** Add `softSelectedWordIndex` (first visible word, auto-updated) and `hardSelectedWordIndex` (user click, persisted) to reader state. Reading mode start-word resolution: hard selection > soft selection > word 0.
+
+### BUG-154 — Flow mode should switch to scrolled layout on click, not on play
+**Reported:** 2026-04-06
+**Severity:** Medium
+**Status:** LIKELY NOT A BUG — code already switches on click. Needs live verification.
+**Location:** `src/components/FoliatePageView.tsx` (line 1527), `src/components/ReaderContainer.tsx` (line 1293)
+**Description:** User reports clicking "Flow" doesn't switch to scrolled layout until play starts.
+**Screenshot:** `docs/bug-reports/.Archive/bug-2026-04-06T13-47-33Z.png`
+**Code analysis (2026-04-06):** The code already handles this correctly:
+- `ReaderContainer.tsx:1293` sets `flowMode={readingMode === "flow"}` — updates immediately on button click.
+- `FoliatePageView.tsx:1527` applies `view.renderer.setAttribute("flow", flowMode ? "scrolled" : "paginated")` via a useEffect with `[flowMode]` dependency — fires when prop changes.
+- The layout switch SHOULD happen on click, before play.
+**Probable explanation:** The Foliate renderer may take a noticeable moment to reflow from paginated to scrolled mode (especially on large documents like 171k words), perceived as "doesn't switch." Or the user was in narration mode where the visual difference between paginated and scrolled is subtle.
+**Next step:** Live verification — click Flow, watch for reflow timing. If it works but is slow, this is a UX polish item (add loading indicator), not a bug.
+
+### BUG-155 — URL extraction broken
+**Reported:** 2026-04-06
+**Severity:** High
+**Location:** `main/url-extractor.js`, `main/ipc/library.js`
+**Description:** URL extraction fails with "Could not extract article from this URL. Try opening it in your browser instead." Tested with `https://www.ebsco.com/research-starters/history/simonides`. May be site-specific (EBSCO may require auth/cookies) or a broader Readability regression.
+**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-51-56Z.png` — library view showing error message.
+**Investigation needed:** (1) Test with other URLs to determine if site-specific or general. (2) Check url-extractor.js error handling — is it swallowing the actual error? (3) Verify jsdom + Readability pipeline is functioning.
+
+### BUG-156 — False "Connected" status for Chrome extension
+**Reported:** 2026-04-06
+**Severity:** Medium
+**Location:** `main/ws-server.js`, `src/components/settings/ConnectorsSettings.tsx`
+**Description:** Connectors settings page shows "Extension is paired and connected" with green indicator when no Chrome extension is actually connected. The WebSocket server may be reporting "listening" (server running) as "connected" (client attached).
+**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-52-39Z.png`
+**Fix approach:** Distinguish between server-listening and client-connected states. Only show "Connected" when an authenticated WebSocket client is actively connected with heartbeat.
+
+### BUG-157 — No disconnect/reconnect button for Chrome extension
+**Reported:** 2026-04-06
+**Severity:** Medium (enhancement)
+**Location:** `src/components/settings/ConnectorsSettings.tsx`
+**Description:** No way to disconnect or reset the Chrome extension connection from within Blurby. Users need a button to force-disconnect and regenerate pairing token.
+**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-53-06Z.png`
+**Fix approach:** Add "Disconnect" button that clears pairing token and drops any active WebSocket connection. Add "Reconnect" button that generates a new pairing code.
+
+### BUG-158 — Library flap shows too many categories
+**Reported:** 2026-04-06
+**Severity:** Low (UX simplification)
+**Location:** `src/components/ReadingQueueFlap.tsx` or equivalent flap component
+**Description:** Reading queue flap shows many categories. User requests simplification: only show "Now Reading" and "Queue" in that order. Remove "unread" and other categories.
+**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-53-40Z.png`
+**Fix approach:** Filter flap sections to only "Now Reading" and "Queue". Remove or hide other categories.
 
 ### ~~BUG-145~~ ✅ Fixed — TTS-7R (v1.37.0)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05

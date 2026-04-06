@@ -922,3 +922,53 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Fix:** Early-return at the top of the keydown handler if `e.target` is a `<textarea>`, `<input>`, or has a `contenteditable` attribute. No `preventDefault`. This single guard protects all current and future text inputs app-wide.
 
 **Guardrail:** The global keyboard handler in `useKeyboardShortcuts.ts` must always have an early-return guard that checks `e.target` for `<textarea>`, `<input>`, or `contenteditable` before processing any shortcut. Never gate this check on modal-specific state — that approach doesn't scale and will regress as new modals are added.
+
+---
+
+### [2026-04-06] LL-081: Full-Book Words and DOM-Slice Words Are Two Different Data Sources — Never Mix Indices
+
+**Area:** renderer, narration, focus mode, FoliatePageView, ReaderContainer, data integrity
+**Status:** active
+**Priority:** critical
+
+**Context:** BUG-152 (focus mode blank screen) and BUG-151 (page-tall narration band) both stem from the same architectural pattern: the app has two word sources that use different index spaces, and components that mix them produce silent failures.
+
+**Two word sources in Blurby:**
+1. **Full-book words** (`bookWordsRef.current.words`) — 173,727 words extracted from the entire EPUB spine via `epub-word-extractor.js`. Global indices: 0–173,726. Used by `getEffectiveWords()` when `bookWordsRef.current?.complete === true`.
+2. **DOM-slice words** (`foliateWordStrings` / `foliateApiRef.current.getWords()`) — ~1,000 words from the currently visible Foliate section. Indices are section-local but map to global indices via `data-word-index` attributes in the DOM.
+
+**The bug pattern:** A component receives DOM-slice words (short array) but indexes into it using a full-book global index (large number). `words[5114]` is `undefined` when the array only has 1,000 entries. The component renders blank instead of crashing, making the failure silent.
+
+**Where this bit us:**
+- `ReaderContainer.tsx:1362` — `ReaderView` received `words={foliateWordStrings}` (DOM-slice) but `wordIndex` came from the full-book timer. Fix: pass `bookWordsRef.current.words` when available.
+- `FoliatePageView.tsx:860` — Narration overlay fallback used `currentWindow.height` from `measureNarrationWindow()` which measures DOM positions of words that may not exist in the current section, producing page-tall bands. Fix: cap fallback height.
+
+**Root Cause:** TTS-7K (v1.33.6) promoted full-book words as the narration source of truth (`getEffectiveWords` returns global words when available), but display components (`ReaderView`, `positionNarrationOverlay`) were never updated to use the same source. The index spaces diverged silently.
+
+**Guardrail:** Any component that uses `wordIndex` (the global reading position) MUST receive words from the same source that `getEffectiveWords()` returns. When `bookWordsRef.current?.complete`, the word source is the full-book array — not the DOM-slice `foliateWordStrings`. Grep for `words={foliateWordStrings}` and verify each consumer is index-compatible. When adding new word-consuming components, always check: "Which index space does my `wordIndex` come from, and does my `words` array match?"
+
+---
+
+### [2026-04-06] LL-082: Fallback Values Must Be Capped to Prevent Proportional Blowup
+
+**Area:** renderer, narration, CSS, visual safety
+**Status:** active
+**Priority:** moderate
+
+**Context:** BUG-151's page-tall narration band was caused by an uncapped fallback in the band height calculation. The code pattern `ref > 0 ? ref : measuredValue` is safe when `measuredValue` is always reasonable. But when `measuredValue` comes from DOM measurement of a multi-line span or a cross-section word window, it can be hundreds of pixels — producing a band that covers the entire page.
+
+**The pattern that fails:**
+```typescript
+const fixedHeight = narrationBandLineHeightRef.current > 0
+  ? narrationBandLineHeightRef.current
+  : currentWindow.height; // ← UNCAPPED — can be 800px
+```
+
+**The safe pattern:**
+```typescript
+const fixedHeight = narrationBandLineHeightRef.current > 0
+  ? narrationBandLineHeightRef.current
+  : Math.min(currentWindow.height, MAX_FALLBACK_HEIGHT); // ← CAPPED
+```
+
+**Guardrail:** Every fallback value derived from DOM measurement must have a reasonable upper bound. For visual elements with expected line-height dimensions, cap to ~2x expected size (e.g., 40px for a line-height band). Never pass raw `getBoundingClientRect()` results directly into visual sizing without a ceiling. This applies to width as well — `bodyRect.width` is safe for single-column but may be wrong for two-column layouts.

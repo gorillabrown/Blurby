@@ -1,87 +1,138 @@
 # Blurby — Ideas & Future Concepts
 
-**Purpose:** A living document for ideas not yet roadmapped. Reviewed at sprint and phase pauses to decide what to include in the roadmap.
+**Purpose:** A living document for ideas not yet roadmapped. Reviewed at sprint and phase pauses to decide what to include in the roadmap. Ideas grouped by theme — each group maps to a potential future phase or sprint cluster.
 
-**Format:** Each idea has a title, brief description, potential impact (High/Medium/Low), and estimated effort (Small/Medium/Large).
-
-**Last updated:** 2026-03-27
+**Last updated:** 2026-04-06
 
 ---
 
-## Ideas
+## Completed Ideas
 
-### [Category: Content & Formats]
+| # | Idea | Completed In |
+|---|------|-------------|
+| ~~1~~ | ~~Universal EPUB Pipeline~~ | EPUB-2A + EPUB-2B (v1.5.1) |
+| ~~2~~ | ~~Rich Content Preservation~~ | EPUB-2A (v1.5.0) |
+| ~~3~~ | ~~Intake Pipeline + EPUB Normalization~~ | EPUB-2B (v1.5.1) |
 
-| # | Idea | Description | Impact | Effort |
-|---|------|-------------|--------|--------|
-| ~~1~~ | ~~Universal EPUB Pipeline~~ | ✅ Done (EPUB-2A + EPUB-2B, v1.5.1). Single rendering path via foliate-js. (BUG-079) | — | — |
-| ~~2~~ | ~~Rich Content Preservation~~ | ✅ Done (EPUB-2A, v1.5.0). Formatting preserved via EPUB conversion. (BUG-033/034) | — | — |
-| ~~3~~ | ~~Intake Pipeline + EPUB Normalization~~ | ✅ Done (EPUB-2B, v1.5.1). All formats + URL + Chrome ext → EPUB. (BUG-075) | — | — |
-| 4 | Chapter Detection for Non-EPUB | Heuristic pattern matching for chapter headings in PDF, MOBI, TXT, HTML. Currently only EPUB NCX/nav TOC works. (BUG-035) | Medium | Medium |
-| 5 | Auto-Generated TOC | Generate a TOC page at book start when no embedded TOC exists or when chapters are detected heuristically. (BUG-036) | Medium | Medium |
-| 6 | OCR for Scanned PDFs | Use OCR (Tesseract or similar) to extract text from image-based/scanned PDFs that pdf-parse cannot read. | Medium | Large |
-| 7 | RSS Library & Paywall Integration | Feed aggregation from authenticated sites, RSS Library UI, "Add to Blurby" import pipeline. (Sprint 25 roadmap) | High | Large |
+---
 
-### [Category: Reading Experience]
+## Active Ideas (Grouped by Theme)
 
-| # | Idea | Description | Impact | Effort |
-|---|------|-------------|--------|--------|
-| 8 | Space Bar Last-Used Mode | Space starts whichever reading mode the user last used (Focus, Flow, or Narration), persisted across sessions. (BUG-039) | Medium | Small |
-| 9 | Arrow Key NM Speed Adjust | Up/Down arrows adjust TTS speech rate by 0.1 increments during Narration mode instead of WPM. (BUG-053) | Low | Small |
-| 10 | Paragraph Jump Shortcuts | Shift+Left/Right jumps to paragraph boundaries in all reading modes. Requires paragraph detection in words array. (BUG-069) | Medium | Medium |
-| 11 | Scroll Wheel Word Advance | Mouse scroll wheel advances/retreats one word at a time in reading modes instead of page scrolling. (BUG-070) | Low | Small |
-| 12 | E-Ink as Independent Display Mode | Decouple e-ink from theme system. Users can use dark/light themes while keeping e-ink behavior (no animations, large touch targets, ghosting prevention). (BUG-037) | Medium | Medium |
-| 13 | Voice Cloning for TTS | Allow users to clone their own voice or select from celebrity/author voices for a more personal narration experience. | Medium | Large |
-| 14 | Reading Goal Tracking | Set daily/weekly/monthly reading goals (pages, minutes, books) with visual progress and notifications. | Medium | Medium |
-| 15 | Daily Reading Streaks Gamification | Streak counters, badges, milestones, and gentle nudges to build a consistent reading habit. Integrate with existing stats. | Medium | Medium |
-| 16 | Vocabulary Builder from Defined Words | Collect all words the user has looked up via "Define" into a vocabulary list with definitions, source context, and spaced repetition review. | Medium | Medium |
-| 17 | Multi-Device Position Sync | Sync current reading position across devices in real-time via cloud sync so users can seamlessly switch between desktop and mobile. | High | Medium |
+### Theme A: Infinite Reader (Flow Mode Evolution)
 
-### [Category: Library & UX]
+> **Roadmap alignment:** New priority track — see ROADMAP.md "FLOW-INF" sprints.
 
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
-| 18 | 3-Line Library Cards | Cards show Title, Author, and Book Data line (progress %, pages, time read/remaining). (BUG-050) | Medium | Small |
-| 19 | "New" Dot Auto-Clear | New-item dot clears after card scrolls into viewport and user navigates away. IntersectionObserver + seenAt timestamp. (BUG-067) | Low | Small |
-| 20 | Hotkey Coaching in Reader | Expand HotkeyCoach to show keyboard shortcut suggestions when users click reader buttons with the mouse. (BUG-038) | Low | Small |
-| 21 | Metadata Wizard | Batch scan library to auto-derive Author, Title, Year from file metadata, filename parsing, and optional API enrichment. (BUG-077) | Medium | Medium |
-| 22 | Reading Queue | Ordered reading list separate from library sort. Right-click "Add to Queue". (BUG-078) | Medium | Small |
-| 23 | Author Name Normalization | Standardize all author names to "Last, First" format during import. Handle multi-word names, multiple authors. (BUG-074) | Low | Small |
-| 24 | First-Run Library Folder Picker | Mandatory onboarding step where user selects library storage folder. Default suggestion, validation, migration for existing users. (BUG-076) | Medium | Small |
-| 25 | Reading Speed Analytics Dashboard | Detailed charts showing WPM trends over time, reading speed by genre/format, session duration patterns, and improvement tracking. | Medium | Medium |
-| 26 | Annotation Export to Notion/Obsidian | Export highlights, notes, and definitions to Notion, Obsidian, or other note-taking apps via their APIs or Markdown file format. | High | Medium |
-| 27 | Reading Clubs / Social Features | Share reading lists, compare progress with friends, group discussions on chapters, social reading challenges. | Medium | Large |
-| 28 | AI-Powered Book Recommendations | Suggest books based on reading history, genres, reading speed patterns, and content similarity using LLM or collaborative filtering. | Medium | Large |
+| A1 | Reading Zone Enhancement | Visually distinct 5-line reading zone (lighter/darker band) with de-emphasized content above/below. Timer-bar cursor depletes left-to-right per line at WPM. | High | Medium |
+| A2 | Cross-Book Continuous Reading | Finishing a book auto-loads next from reading queue — seamless transition, no return to library. | High | Medium |
+| A3 | Paragraph Jump Shortcuts | Shift+Left/Right jumps to paragraph boundaries in all reading modes. Requires paragraph detection in words array. (BUG-069) | Medium | Medium |
+| A4 | Scroll Wheel Word Advance | Mouse scroll wheel advances/retreats one word at a time in reading modes instead of page scrolling. (BUG-070) | Low | Small |
 
-### [Category: Settings & Command Palette]
+### Theme B: Chrome Extension & Web Capture
+
+> **Roadmap alignment:** New priority track — see ROADMAP.md "EXT-ENR" sprints.
 
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
-| 29 | Combine Settings into "Reading Layout" | Merge Text Size + Layout into single "Reading Layout" settings page. (BUG-055) | Low | Small |
-| 30 | Library Layout Settings Page | Default sort, default view mode, card/list size (S/M/L), spacing (compact/cozy/roomy), list columns. (BUG-056/057) | Medium | Medium |
-| 31 | Settings Pages in Ctrl+K | Add Library Layout and Reading Layout entries plus sub-entries to command palette. (BUG-058) | Low | Small |
-| 32 | All Individual Settings in Ctrl+K | Every toggle, slider, dropdown across all settings pages searchable in command palette. (BUG-059) | Medium | Medium |
+| B1 | Auto-Discovery Connection | Extension auto-discovers running Blurby app — no manual pairing code entry. App senses incoming connection attempt and surfaces pairing UI in library. | High | Medium |
+| B2 | Resilient Connection | Connection survives sleep/wake, network changes, app restarts. Auto-reconnect with backoff. Health indicator in extension popup. | High | Medium |
+| B3 | In-Browser RSVP Reader | Standalone speed-reader popup in Chrome extension (400x500px) with play/pause, WPM slider, reading queue. (Phase 9 spec §9.3) | Medium | Medium |
+| B4 | RSS Library & Paywall Integration | Feed aggregation, RSS Library UI, "Add to Blurby" import pipeline. (Sprint 25 roadmap) | High | Large |
 
-### [Category: Branding]
+### Theme C: Android & Mobile
 
-| # | Idea | Description | Impact | Effort |
-|---|------|-------------|--------|--------|
-| 33 | Remove "[Sample]" Prefix | Onboarding book title should be "Meditations" not "[Sample] Meditations — Marcus Aurelius". (BUG-060) | Low | Small |
-| 34 | Blurby Icon Replaces Hamburger | Replace hamburger menu icon with Blurby brand icon (~24px, theme-aware). (BUG-061) | Low | Small |
-| 35 | Blurby Brand Theme | New theme: white background, Highlight Blue (#CAE4FE) chrome, Accent Red (#E63946), Core Blue (#2E73FF) dividers. (BUG-062) | Low | Medium |
-
-### [Category: Platform & Distribution]
+> **Roadmap alignment:** New priority track — see ROADMAP.md "APK" sprints.
 
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
-| 36 | Android App | React Native port with cloud sync. (Sprint 18C roadmap) | High | Large |
-| 37 | Window Control Theme Matching | Minimize/maximize/close buttons adopt theme background color. Requires `titleBarStyle: "hidden"` or `titleBarOverlay` with color matching. (BUG-049) | Low | Small |
-| 40 | Chromecast Integration | Cast narration audio and/or reading display to Chromecast devices. Play TTS through TV/speaker, show current text on screen. | Medium | Large |
-| 41 | APK Wrapper | Package Blurby as an Android APK (e.g., via Capacitor, TWA, or WebView wrapper) for lightweight mobile distribution without a full React Native rewrite. | High | Medium |
+| C1 | APK Wrapper (Sideload) | Package Blurby for Android sideloading — WebView/Capacitor approach, all reading modes, local library. | High | Medium |
+| C2 | Bidirectional Position Sync | Current reading position syncs between desktop and mobile in real-time via cloud. (Idea #17) | High | Medium |
+| C3 | Mobile Reading Addition | Add new readings from mobile — share sheet, file picker, in-app URL import. | High | Medium |
+| C4 | Play Store Distribution | Full Play Store listing with AAB, auto-update, privacy policy. | Medium | Medium |
+| C5 | Chromecast Integration | Cast narration audio and/or reading display to Chromecast devices. | Medium | Large |
 
-### [Category: AI & Intelligence]
+### Theme D: Reading Intelligence & Goals
+
+> **Roadmap alignment:** Parked — GOALS-6B spec'd in ROADMAP.md. Other items backlog.
 
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
-| 38 | AI Summary Generation | Generate chapter or book summaries on demand using local or cloud LLM. | Medium | Large |
-| 39 | Smart Reading Schedule | AI analyzes reading patterns and suggests optimal times and durations for reading sessions. | Low | Medium |
+| D1 | Reading Goal Tracking | Set daily/weekly/monthly reading goals (pages, minutes, books) with visual progress. (GOALS-6B — fully spec'd) | Medium | Medium |
+| D2 | Daily Reading Streaks Gamification | Streak counters, badges, milestones, gentle nudges to build consistent habit. | Medium | Medium |
+| D3 | Reading Speed Analytics Dashboard | WPM trends over time, reading speed by genre/format, session duration patterns. | Medium | Medium |
+| D4 | AI-Powered Book Recommendations | Suggest books based on reading history, genres, speed patterns using LLM or collaborative filtering. | Medium | Large |
+| D5 | Smart Reading Schedule | AI analyzes reading patterns and suggests optimal times/durations for sessions. | Low | Medium |
+
+### Theme E: Content & Formats
+
+> **Roadmap alignment:** Backlog — potential Phase 10+ work.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| E1 | Chapter Detection for Non-EPUB | Heuristic pattern matching for chapter headings in PDF, MOBI, TXT, HTML. (BUG-035) | Medium | Medium |
+| E2 | Auto-Generated TOC | Generate TOC page at book start when no embedded TOC exists. (BUG-036) | Medium | Medium |
+| E3 | OCR for Scanned PDFs | Tesseract or similar for image-based/scanned PDFs that pdf-parse cannot read. | Medium | Large |
+
+### Theme F: Library & UX Polish
+
+> **Roadmap alignment:** Backlog — incremental improvements, can be folded into any sprint.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| F1 | 3-Line Library Cards | Title, Author, Book Data line (progress %, pages, time). (BUG-050) | Medium | Small |
+| F2 | "New" Dot Auto-Clear | Dot clears after card scrolls into viewport. IntersectionObserver + seenAt. (BUG-067) | Low | Small |
+| F3 | Hotkey Coaching in Reader | HotkeyCoach shows shortcut suggestions on mouse clicks. (BUG-038) | Low | Small |
+| F4 | Library Layout Settings Page | Default sort, view mode, card/list size, spacing, columns. (BUG-056/057) | Medium | Medium |
+| F5 | Vocabulary Builder from Defined Words | Collect looked-up words into vocabulary list with definitions, context, spaced repetition. | Medium | Medium |
+| F6 | Annotation Export to Notion/Obsidian | Export highlights, notes, definitions to external note-taking apps. | High | Medium |
+
+### Theme G: Settings & Command Palette
+
+> **Roadmap alignment:** Backlog — small incremental wins.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| G1 | Combine into "Reading Layout" | Merge Text Size + Layout into single settings page. (BUG-055) | Low | Small |
+| G2 | Library Layout Settings Page | Default sort, view mode, size, spacing. (BUG-056/057) | Medium | Medium |
+| G3 | Settings Pages in Ctrl+K | Add Library Layout and Reading Layout entries to command palette. (BUG-058) | Low | Small |
+| G4 | All Individual Settings in Ctrl+K | Every toggle, slider, dropdown searchable in command palette. (BUG-059) | Medium | Medium |
+
+### Theme H: Reading Experience Tweaks
+
+> **Roadmap alignment:** Backlog — small improvements, can be bundled.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| H1 | Space Bar Last-Used Mode | Space starts whichever reading mode user last used, persisted across sessions. (BUG-039) | Medium | Small |
+| H2 | Arrow Key NM Speed Adjust | Up/Down arrows adjust TTS rate by 0.1 increments during narration. (BUG-053) | Low | Small |
+| H3 | Voice Cloning for TTS | Clone user's voice or select celebrity/author voices for personalized narration. | Medium | Large |
+| H4 | AI Summary Generation | Generate chapter or book summaries on demand using local or cloud LLM. | Medium | Large |
+
+### Theme I: Branding & Visual Identity
+
+> **Roadmap alignment:** Backlog — cosmetic, can ship anytime.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| I1 | Remove "[Sample]" Prefix | Onboarding book should be "Meditations" not "[Sample] Meditations". (BUG-060) | Low | Small |
+| I2 | Blurby Icon Replaces Hamburger | Replace hamburger with Blurby brand icon (~24px, theme-aware). (BUG-061) | Low | Small |
+| I3 | Blurby Brand Theme | White bg, Highlight Blue (#CAE4FE) chrome, Accent Red (#E63946). (BUG-062) | Low | Medium |
+| I4 | Window Control Theme Matching | Min/max/close buttons adopt theme background color. (BUG-049) | Low | Small |
+
+### Theme J: Social & Collaboration
+
+> **Roadmap alignment:** Someday — requires server infrastructure.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| J1 | Reading Clubs / Social Features | Share reading lists, compare progress, group discussions, social challenges. | Medium | Large |
+
+### Theme K: E-Ink Support
+
+> **Roadmap alignment:** Parked — EINK-6A/6B fully spec'd in ROADMAP.md.
+
+| # | Idea | Description | Impact | Effort |
+|---|------|-------------|--------|--------|
+| K1 | E-Ink as Independent Display Mode | Decouple e-ink from theme system. (EINK-6A — fully spec'd) | Medium | Medium |
+| K2 | E-Ink Reading Ergonomics | Stepped flow, burst focus, adaptive refresh. (EINK-6B — fully spec'd) | Medium | Medium |

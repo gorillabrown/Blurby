@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — HOTFIX-12 complete (v1.37.1). BUG-146–150 resolved. 1,546 tests, 86 files. Latest tagged release: v1.37.1.
+**Last updated**: 2026-04-06 — Roadmap finalized with investigation gates and responsibility assignments. Every item has: what we know, what we don't, what Cowork investigates before CLI executes.
 **Current branch**: `main`
-**Current state**: Phase 6 feature work active. HOTFIX-12 resolved five triage bugs: chapter dropdown narration tracking, return-to-narration button, position restore toast, chunked EPUB extraction, and keyboard guard. Queue depth 0 — RED. Backfill needed. EINK/GOALS parked.
-**Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
+**Current state**: v1.37.1 stable. Queue depth 6 (GREEN). All items need Cowork investigation before CLI dispatch. BUG-157/158 are the only CLI-ready items today.
+**Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
 
@@ -29,61 +29,41 @@ Phase 5: Read Later + Chrome Extension
   └── 5B → EXT-5B: Pairing UX ✅
     │
     ▼
-Phase 6: TTS Hardening & Stabilization
-  ├── TTS-6C: Kokoro Native-Rate Buckets ✅ (v1.14.0)
-  ├── TTS-6D: Kokoro Startup & Recovery Hardening ✅ (v1.15.0)
-  ├── TTS-6E: Pronunciation Overrides Foundation ✅ (v1.16.0)
-  ├── TTS-6F: Word Alignment & Narration Telemetry ✅ (v1.17.0)
-  ├── TTS-6G: Narration Controls & Accessibility Polish ✅ (v1.18.0)
-  ├── TTS-6I: Per-Book Pronunciation Profiles ✅ (v1.19.0)
-  ├── TTS-6J: Voice Selection & Persona Consistency ✅ (v1.20.0)
-  ├── TTS-6K: Narration Personalization & Quality Sweep ✅ (v1.21.0)
-  ├── TTS-6L: Narration Profiles & Sharing Foundations ✅ (v1.22.0)
-  ├── TTS-6M: Narration Portability & Reset Safety ✅ (v1.23.0)
-  ├── TTS-6N: Narration Runtime Stability & Extraction Sync ✅ (v1.24.0)
-  ├── TTS-6O: Narration Performance Budgets & Background Work Isolation ✅ (v1.25.0)
-  ├── TTS-6P: Session Continuity & Recovery ✅ (v1.26.0)
-  ├── TTS-6Q: Narration Diagnostics & Regression Shields ✅ (v1.27.0)
-  ├── TTS-6S: Cursor Sync, Pause Shaping & Backlog Fill Hotfix ✅ (v1.28.0)
-  ├── HOTFIX-11: Bug Reporter Narration Diagnostics & Console Capture ✅ (v1.27.1)
+Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
+  ├── TTS-6C→6S + HOTFIX-11 ✅ (v1.14.0–v1.28.0)
+  ├── TTS-7A→7R + EXT-5C + HOTFIX-12 ✅ (v1.29.0–v1.37.1)
   │
-  │  TTS Stabilization (audit-driven) ── COMPLETE (v1.32.0)
-  ├── TTS-7A: Cache Correctness ✅ (v1.29.0)
-  ├── TTS-7B: Cursor Contract ✅ (v1.30.0)
-  ├── TTS-7C: Throughput & Dead Code ✅ (v1.31.0)
-  ├── TTS-7D: Integration Verification ✅ (v1.32.0)
-  │
-  │  TTS hotfix follow-up
-  ├── TTS-7E: Cold-Start Narration Fix (partial attempt; reopened)
-  ├── TTS-7F: Proactive Entry Cache Coverage & Cruise Warm ✅ (v1.33.1)
-  ├── TTS-7G: First-Chunk IPC Verification ✅ (v1.33.2) — BUG-117 verified resolved
-  ├── TTS-7H: Visible-Word Readiness & Stable Launch Index ✅ (v1.33.3; partial, follow-up required)
-  ├── TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery ✅ (v1.33.4; follow-up required)
-  ├── TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ (v1.33.5)
-  ├── TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ (v1.33.6)
-  ├── TTS-7L: Exact Foliate Text-Selection Mapping ✅ (v1.33.7)
-  ├── TTS-7M: Persistent Resume Anchor & Reopen Authority ✅ (v1.33.8)
-  ├── TTS-7N: Kokoro Pause Semantics & Settings Link Repair ✅ (v1.33.9)
-  ├── TTS-7O: Audible Pause Injection & Smooth Narration Cursor ✅ (v1.34.0)
-  ├── EXT-5C: Rich Article Capture & Hero Image Cards ✅ (v1.35.0)
-  ├── TTS-7P: Rolling Pause-Boundary Planner ✅ (v1.36.0)
-  ├── TTS-7Q: True Glide & Audio-Aligned Narration Cursor ✅ (v1.36.1)
-  ├── TTS-7R: Calm Narration Band & Cursor Ownership Fix ✅ (v1.37.0)
-  ├── HOTFIX-12: Bug Report Triage Fixes ✅ (v1.37.1)
-  │
-  │  Feature work
-  ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued after TTS-7Q)
-  ├── EINK-6B: E-Ink Reading Ergonomics & Mode Strategy (queued)
-  └── GOALS-6B: Reading Goal Tracking (queued, parallel with EINK-6B)
+  │  Parked feature work (fully spec'd, not priority)
+  ├── EINK-6A: E-Ink Foundation (parked)
+  ├── EINK-6B: E-Ink Reading Ergonomics (parked)
+  └── GOALS-6B: Reading Goal Tracking (parked)
     │
-    ├────────────────────────┐
-    ▼                        ▼
-Phase 7:                  Phase 8:
-Cloud Sync Hardening      RSS/News Feeds
-    │                        │
-    └────────────┬───────────┘
-                 ▼
-Phase 9: APK Wrapper (+2 modularization sprints)
+    ▼
+HOTFIX-13: Reader Core Fixes (BUG-151/152/153/154)
+    │
+HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158)
+    │
+    ├───────────────────────────────────┐
+    ▼                                   ▼
+Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
+  ├── FLOW-INF-A: Reading Zone     ├── EXT-ENR-A: Resilient Connection
+  ├── FLOW-INF-B: Timer Cursor     ├── EXT-ENR-B: Auto-Discovery Pairing
+  └── FLOW-INF-C: Cross-Book       └── EXT-ENR-C: In-Browser Reader (optional)
+    │                                   │
+    └──────────────┬────────────────────┘
+                   ▼
+        Track C: Android APK
+          ├── APK-0: Modularization (prerequisite)
+          ├── APK-1: WebView Shell + Local Library
+          ├── APK-2: All Reading Modes
+          ├── APK-3: Bidirectional Sync
+          └── APK-4: Mobile-Native Features
+                   │
+                   ▼
+        Phase 7: Cloud Sync Hardening (parallel with APK-3)
+                   │
+                   ▼
+        Phase 8: RSS/News Feeds
 ```
 
 ---
@@ -114,77 +94,383 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 **Closeout note:** Live testing on 2026-04-04 showed that cold-start narration on freshly opened EPUBs still had page-jump and ramp-up continuity regressions after `TTS-7E`. `TTS-7F` closed the reactive-cache side of that gap, and `TTS-7G` verified that `BUG-117` (910ms first-chunk IPC handler) was already resolved by prior work. `TTS-7H` fixed the frozen-start-index and section-fallback pieces, `TTS-7I` unified follow-scroll ownership and exact miss recovery, `TTS-7J` resolved section-sync blink, word-source duplication, and initial-selection overwrite, `TTS-7K` promoted full-book EPUB words as the active source of truth, and `TTS-7L` closed the final selection-path gap by preserving exact word identity across click and native text selection. Phase 6 TTS is now fully stabilized and closed at `v1.33.7`.
 
----
-
-### Sprint TTS-7E: Cold-Start Narration Fix (Hotfix) — archived to ROADMAP_ARCHIVE.md
-
-> SUPERSEDED by TTS-7F. First cold-start repair attempt; did not fully solve launch ownership or ramp continuity. Preserved for traceability.
+> All TTS-7E through TTS-7R, EXT-5C, and HOTFIX-12 sprint specs archived to `docs/project/ROADMAP_ARCHIVE.md`.
 
 ---
 
-### Sprint TTS-7F: Proactive Entry Cache Coverage & Cruise Warm ✅ (v1.33.1) — archived to ROADMAP_ARCHIVE.md
+## HOTFIX-13: Reader Core Fixes (BUG-151/152/153/154)
+
+**Goal:** Fix the three broken reading modes and establish the word selection contract.
+
+**Bugs:**
+
+| ID | Description | Severity | Scope |
+|----|-------------|----------|-------|
+| BUG-151 | Narration band spans full page height instead of single-line | High | `FoliatePageView.tsx` (measurement fallback) |
+| BUG-152 | Focus mode blank screen — no RSVP display | High | `useReaderMode.ts`, `ReaderContainer.tsx` |
+| BUG-153 | No word selection contract (soft/hard) — modes don't know where to start | High | `FoliatePageView.tsx`, `useReaderMode.ts`, `ReaderContainer.tsx` |
+| BUG-154 | Flow should switch to scrolled layout on click, not on play | Medium | `FoliatePageView.tsx`, `useReaderMode.ts` |
+
+### Investigation Gate (Cowork — before CLI dispatch)
+
+| Bug | What We Know | What We Don't Know | Investigation Action |
+|-----|-------------|-------------------|---------------------|
+| BUG-151 | Three fallback paths (lines 571, 692, 860) use uncapped `from.height` or `currentWindow.height` when `narrationBandLineHeightRef` is 0. If user navigates away from narrated section, measurement becomes stale or fails, and the fallback produces a page-tall band. | **ROOT CAUSE CONFIRMED.** Fallback height is uncapped. When `narrationBandLineHeightRef.current === 0`, the fallback uses `currentWindow.height` (potentially hundreds of px). | **CLI-READY.** Cap all three fallback heights to 40px (~2 line-heights). Re-run `measureNarrationBandDimensions()` on section change, not just narration start. See fix spec below. |
+| BUG-152 | `ReaderView` at `ReaderContainer.tsx:1362` receives `words={foliateWordStrings}` (a DOM-section slice of ~1000 words). But `wordIndex` comes from the full-book global index (e.g., 5114 from `getEffectiveWords()` which returns 173,727 words). `words[5114]` is `undefined` → `currentWord=""` → blank RSVP, only ▼/▲ arrows visible. | **ROOT CAUSE CONFIRMED.** Data-flow split: mode timer uses full-book words, but ReaderView receives DOM-slice words. Index into the wrong array → empty word. | **CLI-READY.** Change `ReaderContainer.tsx:1362` from `words={foliateWordStrings}` to `words={bookWordsRef.current?.complete ? bookWordsRef.current.words : foliateWordStrings}`. See fix spec below. |
+| BUG-153 | Design contract defined (soft/hard selection, resolution order). No implementation exists today — words are only highlighted when a reading mode is active. | **Exact state shape, event wiring, and visual treatment.** How does `onLoad`/`onRelocate` determine first visible word? What CSS class for soft highlight? How does `startWord` resolution in each mode hook integrate? | **Cowork: Design spec needed.** Define: (a) state variables, (b) update events, (c) CSS classes, (d) integration points. Produce full WHERE/Tasks/SUCCESS CRITERIA for CLI. |
+| BUG-154 | Code already switches layout on click: `ReaderContainer.tsx:1293` sets `flowMode={readingMode === "flow"}`, `FoliatePageView.tsx:1527` sets `flow="scrolled"`. | **Likely not a bug.** The Foliate renderer may take a moment to reflow, perceived as "doesn't switch." Or user was in narration mode where the visual difference is subtle. | **Needs live verification only.** If switch works but is slow, add loading indicator. If genuinely broken, trace `setAttribute("flow")` timing. Defer to live testing session. |
+
+**Dispatch readiness:** BUG-151 and BUG-152 are **CLI-READY** with exact fix specs. BUG-153 needs Cowork design spec. BUG-154 needs live verification (may be non-bug).
+
+**Design contract for BUG-153 (preliminary — to be refined during investigation):**
+- **Soft selection** — First visible word on every page is always lightly highlighted. Auto-updates on page turn/scroll. Default start word for any reading mode.
+- **Hard selection** — User clicks a word → distinct highlight, persists across page turns. All modes start from this word.
+- **Off-page anchor** — If hard selection is on a different page, show "Jump to selection" button.
+- **Resolution order:** hard selection > soft selection > word 0.
+
+**Tier:** Quick | **Depends on:** Investigation gate cleared by Cowork
 
 ---
 
-### Sprint TTS-7G: First-Chunk IPC Verification ✅ (v1.33.2) — archived to ROADMAP_ARCHIVE.md
+## HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158)
 
-> BUG-117 verified resolved — response path < 2ms. 6 new tests (1,279 total). TTS stabilization lane CLOSED.
+**Goal:** Fix URL extraction, false Chrome extension connection status, add disconnect/reconnect, and simplify library flap.
 
----
+**Bugs:**
 
-### Sprint TTS-7H: Visible-Word Readiness & Stable Launch Index ✅ (v1.33.3) — archived to ROADMAP_ARCHIVE.md
+| ID | Description | Severity | Scope |
+|----|-------------|----------|-------|
+| BUG-155 | URL extraction broken — "Could not extract article" error | High | `main/url-extractor.js` |
+| BUG-156 | False "Connected" status when extension not connected | Medium | `main/ws-server.js`, `ConnectorsSettings.tsx` |
+| BUG-157 | No disconnect/reconnect button for Chrome extension | Medium | `ConnectorsSettings.tsx` |
+| BUG-158 | Library flap shows too many categories — simplify to "Now Reading" + "Queue" | Low | `ReadingQueue.tsx` |
 
----
+### Investigation Gate (Cowork — before CLI dispatch)
 
-### Sprint TTS-7I: Foliate Follow-Scroll Unification & Exact Miss Recovery ✅ (v1.33.4) — archived to ROADMAP_ARCHIVE.md
+| Bug | What We Know | What We Don't Know | Investigation Action |
+|-----|-------------|-------------------|---------------------|
+| BUG-155 | Error flow mapped: `extractArticleFromHtml()` in `url-extractor.js:493-798` tries __preloadedData, JSON-LD, Readability, DOM selectors. Returns `{ error }` at line 748. IPC handler in `ipc/misc.js:152-282` wraps with user-friendly message. Technical error logged to file. | **Is this site-specific or general?** Does the fetch itself fail (network/CORS)? Or does Readability parse but return empty? The tested URL (ebsco.com) likely requires auth. | **Cowork: Live test.** Test 3-5 URLs (Wikipedia article, NYT, Medium, a simple blog, EBSCO). Check error log for technical details. Determine if general regression or site-specific. Produce fix spec or mark as expected behavior. |
+| BUG-156 | `ConnectorsSettings.tsx:32` sets `connected` from `api.getWsShortCode()`. IPC handler at `ipc/misc.js:379` checks `wsServer.getClientCount() > 0`. `_clients` Set in ws-server.js tracks authenticated clients. | **Why `getClientCount()` returns >0 with no client.** Is `_clients` not cleaned up on disconnect? Is a stale/dead client remaining in the set? Is the heartbeat check failing to remove timed-out clients? | **Cowork: Code trace.** Read ws-server.js client lifecycle: (a) where clients are added to `_clients`, (b) where they're removed (disconnect, heartbeat timeout, error), (c) whether the heartbeat sweep correctly cleans stale entries. Produce exact fix spec. |
+| BUG-157 | `ConnectorsSettings.tsx` has no disconnect button. `ipc/misc.js:389-397` has `regenerate-ws-pairing-token` handler already wired. | **Nothing — this is a straightforward UI addition.** | **CLI-READY.** Add "Disconnect" button that calls `regenerate-ws-pairing-token` (clears token, drops connections). Add "Generate New Code" button for re-pairing. Exact placement: below the status indicator in ConnectorsSettings. |
+| BUG-158 | `ReadingQueue.tsx` has three sections at lines 146-162: "Queue" (draggable), "Continue Reading" (position > 0), "Unread" (position === 0). User wants only "Now Reading" + "Queue". | **Nothing — this is a straightforward filter change.** | **CLI-READY.** Remove "Unread" section (line 160). Rename "Continue Reading" → "Now Reading". Keep "Queue" as-is. Two-line change. |
 
----
+**Dispatch readiness:** PARTIALLY READY. BUG-157 and BUG-158 are CLI-ready now. BUG-155 and BUG-156 need Cowork investigation first.
 
-### Sprint TTS-7J: Foliate Section-Sync Ownership, Word-Source Dedupe & Initial Selection Protection ✅ (v1.33.5) — archived to ROADMAP_ARCHIVE.md
-
----
-
-### Sprint TTS-7K: EPUB Global Word-Source Promotion & Page-Mode Isolation ✅ (v1.33.6) — archived to ROADMAP_ARCHIVE.md
-
----
-
-### Sprint TTS-7L: Exact Foliate Text-Selection Mapping ✅ (v1.33.7) — archived to ROADMAP_ARCHIVE.md
-
----
-
-### Sprint TTS-7M: Persistent Resume Anchor & Reopen Authority ✅ (v1.33.8) — archived to ROADMAP_ARCHIVE.md
+**Tier:** Quick | **Depends on:** Investigation gate cleared for BUG-155/156; BUG-157/158 can ship immediately
 
 ---
 
-### Sprint TTS-7N: Kokoro Pause Semantics & Settings Link Repair ✅ (v1.33.9) — archived to ROADMAP_ARCHIVE.md
+## Track A: Flow Infinite Reader (FLOW-INF)
+
+> **Vision:** Flow mode evolves from "auto-scrolling EPUB reader" into a true infinite reading experience — a visually distinct reading zone guides the eye, a timer-bar cursor shows pacing, and finishing one book seamlessly loads the next from the reading queue.
+
+### Current State (v1.37.1)
+
+Flow mode today:
+- **FlowMode.ts** — Timing-only class. `setTimeout` chain at WPM, emits `onWordAdvance`. Supports pause/resume, rhythm pauses (half of Focus mode duration).
+- **FlowScrollEngine.ts** — Imperative class. Builds `LineInfo[]` from DOM word spans. Animates per-line: underline cursor shrinks from full width to 0px. Scrolls target line to 25% of viewport (`FLOW_READING_ZONE_POSITION`). Manual scroll detection pauses auto-advance for 2s.
+- **CSS** — `.foliate-flow-cursor`: 3px accent-colored underline, `transition: transform 0.08s linear, width 0.08s linear`. No reading zone band. No de-emphasis. No timer bar.
+- **Foliate integration** — `flow="scrolled"` disables pagination, single-column layout, scroll container exposed to engine.
+
+### What's Missing
+
+| Feature | Current | Target |
+|---------|---------|--------|
+| Reading zone band | Implicit (scroll position only) | Visually distinct 3-5 line band, content above/below de-emphasized |
+| Timer/depletion cursor | Line width shrinks (internal) | Visible timer bar depleting left→right per line, user-facing progress |
+| Cross-book reading | Stops at book end | Auto-loads next from queue, seamless transition |
+| Zone position | Hardcoded 25% | User-configurable (top third, center, bottom third) |
+| Progress feedback | None during flow | Persistent progress indicator (% through book, chapter) |
+
+### Investigation Gate — Track A (Cowork — before any FLOW-INF dispatch)
+
+| Area | What We Know | What We Don't Know | Investigation Action |
+|------|-------------|-------------------|---------------------|
+| FlowScrollEngine internals | Line-based animation, `LineInfo[]` built from DOM, cursor shrinks per line, reading zone at 25% viewport. 339-line class fully read. | **How to overlay a visual zone without breaking scroll.** Does Foliate's shadow DOM allow overlay elements? Can we use a CSS gradient on the scroll container, or do we need a separate positioned div? | **Cowork: Prototype.** In running app, inject a CSS gradient or overlay div at the reading zone position. Test: (a) does it scroll with content or stay fixed? (b) does it work inside Foliate's shadow DOM? Determine feasible approach. |
+| De-emphasis rendering | No de-emphasis exists today. Text above/below reading zone is equally visible. | **Performance of opacity changes on large documents.** Can we apply opacity to content sections without repainting the entire Foliate view? Is a CSS-only approach possible, or does it require DOM manipulation inside shadow DOM? | **Cowork: Test.** Try `mask-image` gradient on the Foliate scroll container. Measure repaint cost. If too expensive, try a fixed overlay with gradient transparency. |
+| Settings integration | `FLOW_READING_ZONE_POSITION = 0.25` is a constant. No user-facing setting exists. | **Where in settings UI.** Does it go in Reading Layout? A new Flow sub-page? Inline in the reading zone itself? | **Cowork: Design decision.** Recommend placement and spec the settings UI. |
+
+**Dispatch readiness:** NOT READY. Needs Cowork prototyping of reading zone overlay approach before CLI can build.
+
+### Sprint FLOW-INF-A: Reading Zone & Visual Pacing
+
+**Goal:** Add a visually distinct reading zone to flow mode — a 3-5 line band where the active text lives, with de-emphasized content above and below.
+
+**Responsibility:** Cowork specs → CLI executes.
+
+**Deliverables:**
+1. CSS reading zone overlay — background gradient or opacity layer marking the active 3-5 line region
+2. Text de-emphasis — content above and below the reading zone rendered at reduced opacity (e.g., 40%)
+3. Configurable zone position — `FLOW_READING_ZONE_POSITION` becomes a user setting (top third / center / bottom third)
+4. Zone size setting — number of visible lines in the reading zone (default 5, range 3-8)
+5. Smooth zone tracking — reading zone follows the active line with CSS transitions, no jarring jumps
+
+**Key files:** `src/utils/FlowScrollEngine.ts`, `src/styles/global.css`, `src/constants.ts`, `src/components/FoliatePageView.tsx`
+
+**Tier:** Full | **Depends on:** HOTFIX-13 + investigation gate cleared
 
 ---
 
-### Sprint TTS-7O: Audible Pause Injection & Smooth Narration Cursor ✅ (v1.34.0) — archived to ROADMAP_ARCHIVE.md
+### Sprint FLOW-INF-B: Timer Cursor & Pacing Feedback
+
+**Goal:** Replace the invisible width-shrink animation with a visible timer bar that depletes left-to-right as each line is read.
+
+**Responsibility:** Cowork specs (after FLOW-INF-A ships and UX is validated) → CLI executes.
+
+**Deliverables:**
+1. Timer bar element — visible accent-colored bar below (or overlaying) the active line
+2. Left-to-right depletion animation — linear, duration = line word count / WPM
+3. Line completion transition — when bar reaches right edge, smooth scroll to next line, bar resets
+4. Progress indicator — subtle overlay showing % through current chapter and book
+5. WPM feedback — current WPM displayed in bottom bar or reading zone margin
+
+**Investigation gate:** Depends on FLOW-INF-A implementation. Timer bar design must respond to how the reading zone actually renders (overlay vs gradient vs DOM manipulation). Cowork specs after seeing FLOW-INF-A results.
+
+**Key files:** `src/utils/FlowScrollEngine.ts`, `src/styles/global.css`, `src/components/ReaderBottomBar.tsx`
+
+**Tier:** Full | **Depends on:** FLOW-INF-A
 
 ---
 
-### Sprint EXT-5C: Rich Article Capture & Hero Image Cards ✅ (v1.35.0) — archived to ROADMAP_ARCHIVE.md
+### Sprint FLOW-INF-C: Cross-Book Continuous Reading
+
+**Goal:** Finishing a book in flow mode auto-loads the next from the reading queue.
+
+**Responsibility:** Cowork specs (after FLOW-INF-B) → CLI executes.
+
+**Deliverables:**
+1. Queue-aware flow completion — when `onComplete` fires, check reading queue for next item
+2. Transition UX — brief "Finished [Book A]. Starting [Book B]..." overlay (2-3s), then new book opens
+3. Session continuity — reading time, page counts, and goals track across book boundaries
+4. Skip/exit option — Escape or click to return to library instead of auto-advancing
+5. Empty queue handling — "Reading complete" with return-to-library option
+
+**Investigation gate:** Needs Cowork to spec: (a) how ReaderContainer handles book switching (does it unmount/remount?), (b) queue state management (who owns next-book resolution), (c) transition overlay design. These depend on how FLOW-INF-A/B land.
+
+**Key files:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useLibrary.ts`
+
+**Tier:** Full | **Depends on:** FLOW-INF-B
 
 ---
 
-### Sprint TTS-7P: Rolling Pause-Boundary Planner ✅ (v1.36.0) — archived to ROADMAP_ARCHIVE.md
+## Track B: Chrome Extension Enrichment (EXT-ENR)
+
+> **Vision:** The Chrome extension connection becomes effortless and resilient. No manual code entry on reconnect, no dropped connections on sleep/wake, and the app actively invites pairing when it senses an incoming connection attempt.
+
+### Current State (v1.37.1)
+
+- **WebSocket server** (`main/ws-server.js`) — localhost port 48924, RFC 6455, pairing token auth via `safeStorage`
+- **Pairing flow** — 6-digit short code with TTL, user manually enters in extension
+- **Article import** — `add-article` message type, HTML→EPUB conversion, hero image extraction, auto-queue
+- **Known pain points:** Connection times out or drops on sleep/wake. Reconnect requires re-pairing. No app-side awareness of incoming connection attempts.
+
+### Investigation Gate — Track B (Cowork — before any EXT-ENR dispatch)
+
+| Area | What We Know | What We Don't Know | Investigation Action |
+|------|-------------|-------------------|---------------------|
+| WebSocket lifecycle | ws-server.js: clients added to `_clients` Set on auth, heartbeat ping/pong interval, `getClientCount()` used for status. IPC handlers in `ipc/misc.js:359-397`. | **Exact client cleanup paths.** When does a client get removed from `_clients`? On socket close? On heartbeat timeout? On error? Is there a race where a disconnected client stays in the set? | **Cowork: Code trace.** Read ws-server.js client removal logic. Map all paths from connected → removed. Identify gaps. This also resolves BUG-156. |
+| Extension source code | Extension was built for Phase 5 (EXT-5A/5B). Pairing flow, article import working. | **Where is the extension code?** Is it in this repo, a separate repo, or unpublished? What reconnection logic exists today? What does the popup UI look like? | **Cowork: Locate and read.** Find the Chrome extension source. Read its WebSocket client code. Determine what reconnect logic exists. This gates EXT-ENR-A spec. |
+| IPC event emission | ws-server.js doesn't proactively push state to renderer — renderer polls via `getWsShortCode()` every 1s. | **How to emit unauthenticated connection events to renderer.** Need a new IPC channel? `mainWindow.webContents.send("ws-connection-attempt")`? | **Cowork: Design.** Spec the IPC event shape and renderer handler. This gates EXT-ENR-B spec. |
+
+**Dispatch readiness:** NOT READY. Extension source code location needed. Client lifecycle trace needed.
+
+### Sprint EXT-ENR-A: Resilient Connection
+
+**Goal:** The WebSocket connection survives sleep/wake, network changes, and app restarts without re-pairing.
+
+**Responsibility:** Cowork specs (after investigation gate) → CLI executes both server-side and extension-side changes.
+
+**Deliverables:**
+1. Auto-reconnect with exponential backoff — extension retries on disconnect (1s, 2s, 4s, 8s... cap at 30s)
+2. Token persistence — valid pairing token survives app restart
+3. Heartbeat tuning — reduce ping interval, add grace period for missed pongs
+4. Connection state machine — extension tracks: `disconnected → connecting → authenticating → connected`
+5. App-side connection status — accurate "Connected" indicator (fixes BUG-156)
+6. Disconnect/reconnect button (BUG-157 — CLI-ready, can ship ahead of investigation)
+
+**Key files:** `main/ws-server.js`, `src/components/settings/ConnectorsSettings.tsx`, Chrome extension source
+
+**Tier:** Quick | **Depends on:** Investigation gate cleared
 
 ---
 
-### Sprint TTS-7Q: True Glide & Audio-Aligned Narration Cursor ✅ (v1.36.1) — archived to ROADMAP_ARCHIVE.md
+### Sprint EXT-ENR-B: Auto-Discovery Pairing
+
+**Goal:** When the extension tries to connect, Blurby surfaces the pairing code in the library screen.
+
+**Responsibility:** Cowork specs (after EXT-ENR-A ships) → CLI executes.
+
+**Deliverables:**
+1. Incoming connection notification — ws-server emits event on unauthenticated connection attempt
+2. Library-screen pairing prompt — floating card: "Chrome Extension wants to connect. Code: 123456"
+3. Auto-dismiss — prompt disappears on pairing success or code expiry
+4. Settings shortcut — "Pair Chrome Extension" button in library header
+5. First-run experience — setup prompt on fresh install when extension detected
+
+**Investigation gate:** Depends on EXT-ENR-A implementation. IPC event design must be validated before renderer UI can be spec'd. Cowork specs after EXT-ENR-A ships.
+
+**Key files:** `main/ws-server.js`, `preload.js`, `src/components/LibraryContainer.tsx`, `src/styles/global.css`
+
+**Tier:** Full | **Depends on:** EXT-ENR-A
 
 ---
 
-### Sprint TTS-7R: Calm Narration Band & Cursor Ownership Fix ✅ (v1.37.0) — archived to ROADMAP_ARCHIVE.md
+### Sprint EXT-ENR-C: In-Browser Reader (Optional/Future)
 
-> BUG-145a/b/c resolved. Separated canonical audio cursor (`lastConfirmedAudioWordRef`) from visual cursor, enabled audio-progress glide (removed `SIMPLE_NARRATION_GLIDE`), fixed-size overlay band (measure-once line-height), truth-sync visual-only pathway, removed per-word context CSS. 25 new tests (`tests/calmNarrationBand.test.ts`). v1.37.0.
+**Goal:** Standalone RSVP speed-reader in the Chrome extension popup — read articles without Blurby app running.
+
+**Deliverables:**
+1. Popup RSVP view (400x500px) — play/pause, WPM slider (100-1200), progress bar
+2. Readability extraction in extension — extract article text from current tab
+3. Reading queue in extension — `chrome.storage.local`, 50 articles max, 5MB limit
+4. Sync with desktop — when Blurby is running, sync queue bidirectionally
+
+**Note:** This is a lower priority enhancement. EXT-ENR-A and EXT-ENR-B address the core pain points. This sprint is documented for completeness but can be deferred.
+
+**Key files:** Chrome extension source (separate repo/directory)
+
+**Tier:** Full | **Depends on:** EXT-ENR-B
 
 ---
 
-### Sprint HOTFIX-12: Bug Report Triage Fixes ✅ (v1.37.1) — archived to ROADMAP_ARCHIVE.md
+## Track C: Android APK (APK)
 
-> BUG-146/147/148/149/150 resolved. Chapter dropdown tracks narration cursor, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined (Escape-only for inputs) + Ctrl+Enter submit in bug reporter. 17 new tests (`tests/hotfix12.test.ts`). v1.37.1.
+> **Vision:** Blurby on Android — sideloaded APK first, Play Store later. All readings available, reading position synced bidirectionally, new readings addable from mobile, all four reading modes working.
+
+### Prerequisites & Architecture Decision
+
+**Framework decision needed:** Two specs exist:
+- `docs/superpowers/specs/.Archive/2026-03-27-android-app-design.md` — React Native + Expo monorepo (better native feel, larger effort)
+- `docs/superpowers/specs/.Archive/phase-10-android-app.md` — Capacitor wrapper (max code reuse, faster to ship)
+
+**Recommendation:** Capacitor for sideload MVP. Reasons: (1) reuses existing React code directly, (2) foliate-js already runs in WebView, (3) faster path to testable APK, (4) can always migrate to React Native later if WebView performance is insufficient.
+
+**Mandatory prerequisite:** Modularization — extract platform-independent core from Electron coupling. See APK-0 below.
+
+### Investigation Gate — Track C (Cowork — before any APK dispatch)
+
+| Area | What We Know | What We Don't Know | Investigation Action |
+|------|-------------|-------------------|---------------------|
+| Framework decision | Two specs exist (RN vs Capacitor). Recommendation: Capacitor. | **User hasn't confirmed.** Also: has Capacitor been tested with foliate-js in a WebView? Does the EPUB rendering actually work? | **Cowork: Decision + POC.** Get user confirmation on Capacitor. Then scaffold minimal Capacitor project, load foliate-js in WebView, open an EPUB. If it works → proceed. If not → re-evaluate. |
+| Coupling audit | 5 problem areas identified at high level (TTS worker, auth, sync, file I/O, IPC). | **Exact coupling depth.** How many `require('electron')` calls exist? How many `fs.` calls? Which renderer code accidentally imports Node modules? What's the true scope of modularization? | **Cowork: Deep audit.** Grep for all Electron-specific imports across the codebase. Map every coupling point with file:line. Estimate LOC per abstraction layer. Produce a scoped modularization plan that CLI can execute module-by-module. |
+| Mobile TTS | Kokoro uses Node worker with ONNX. Model is ~80MB. | **Does ONNX Runtime work in Capacitor WebView?** Can we use WebAssembly ONNX runtime instead of Node? What's the performance on ARM? | **Cowork: Research.** Check ONNX Runtime Web (WASM) compatibility. Test if Kokoro model loads in browser context. If not, TTS on mobile may need a different approach (Web Speech API fallback, or native ONNX via Capacitor plugin). |
+| Cloud sync on mobile | Sync engine is `main/sync-engine.js`, main-process-driven with `fs.promises`. | **Can the sync protocol run in a WebView?** The transport (OneDrive/Google Drive HTTP APIs) could work from browser context, but the file storage layer assumes Node `fs`. | **Cowork: Map sync dependencies.** Identify which sync-engine functions are pure logic (portable) vs platform-bound (Node fs). Estimate extraction effort. |
+
+**Dispatch readiness:** NOT READY. Framework POC, coupling audit, and TTS feasibility all needed before APK-0 can be spec'd to CLI-ready detail.
+
+### Sprint APK-0: Modularization (Prerequisite)
+
+**Goal:** Extract a platform-independent core from the Electron-coupled codebase.
+
+**Responsibility:** Cowork audits and specs each abstraction layer → CLI executes module-by-module extraction.
+
+**Problem areas identified by 3rd-party audit:**
+1. **Kokoro TTS worker** (`main/tts-worker.js` L5-L37) — Node-specific module resolution hacks
+2. **Auth** (`main/auth.js` L294-L304) — depends on Electron `BrowserWindow` for OAuth popup
+3. **Sync engine** (`main/sync-engine.js`) — main-process-driven, uses `fs.promises` directly
+4. **File I/O** — all via Node `fs`, no abstraction layer
+5. **IPC** — tight coupling between `preload.js` bridge and main-process handlers
+
+**Deliverables (pending investigation gate):**
+1. Storage abstraction — interface for file read/write/list/delete
+2. Auth abstraction — interface for OAuth flows
+3. TTS abstraction — interface for Kokoro model loading and inference
+4. Sync transport abstraction — decouple sync logic from Node fs
+5. Shared types and constants — extract to `shared/` directory
+
+**Estimated effort:** 2-3 sprints (each sub-module is a separate CLI dispatch)
+
+**Tier:** Full | **Depends on:** Investigation gate cleared
+
+---
+
+### Sprint APK-1: WebView Shell + Local Library
+
+**Goal:** Sideloadable APK that opens Blurby's React UI in a WebView.
+
+**Responsibility:** Cowork specs (after APK-0 modularization lands) → CLI executes scaffolding and integration.
+
+**Investigation gate:** Blocked on APK-0 completion + Capacitor POC from Track C investigation gate.
+
+**Deliverables:**
+1. Capacitor project scaffolding — Android project, WebView configuration, build pipeline
+2. Local library storage — SQLite or JSON file via Capacitor Filesystem
+3. EPUB rendering — foliate-js in WebView (validated by POC)
+4. File import — Android file picker + share sheet
+5. APK build — signed debug APK for sideloading
+
+**Tier:** Full | **Depends on:** APK-0
+
+---
+
+### Sprint APK-2: All Reading Modes
+
+**Responsibility:** Cowork specs (after APK-1, with mobile gesture design) → CLI executes.
+
+**Investigation gate:** Blocked on APK-1. Touch gesture mapping needs design decisions after seeing the WebView shell.
+
+**Deliverables:**
+1. Touch gesture mapping — swipe for page turn, tap zones for mode controls
+2. Focus mode — RSVP display adapted for mobile viewport
+3. Flow mode — infinite scroll with touch scroll detection
+4. Narrate mode — Kokoro TTS via approach determined in investigation gate
+5. Bottom bar adaptation — mobile-friendly control layout
+
+**Tier:** Full | **Depends on:** APK-1
+
+---
+
+### Sprint APK-3: Bidirectional Sync
+
+**Responsibility:** Cowork specs (sync protocol design, informed by Phase 7 if available) → CLI executes.
+
+**Investigation gate:** Blocked on APK-2. Sync protocol depends on modularization outcome from APK-0.
+
+**Deliverables:**
+1. Cloud sync integration — OneDrive/Google Drive via Capacitor HTTP + OAuth
+2. Bidirectional position sync — CFI-based with last-write-wins timestamps
+3. Library sync — three-tier storage (metadata local, content on-demand, user-pinned)
+4. Settings sync — theme, WPM, voice preferences
+5. Conflict resolution — per-field last-write-wins
+
+**Tier:** Full | **Depends on:** APK-2
+
+---
+
+### Sprint APK-4: Mobile-Native Features
+
+**Responsibility:** Cowork specs → CLI executes.
+
+**Investigation gate:** Blocked on APK-3. Native features depend on what the platform supports after integration.
+
+**Deliverables:**
+1. Share sheet integration — "Share to Blurby" from Chrome, other apps
+2. Notification for reading goals/streaks (if GOALS-6B is implemented)
+3. Background TTS playback — audio continues when backgrounded
+4. Deep links — `blurby://open/{docId}`
+5. Offline-first — graceful degradation when no network
+
+**Tier:** Full | **Depends on:** APK-3
+
+---
+
+## Idea Themes (Roadmap Placeholders)
+
+> Ideas grouped by theme in `docs/governance/IDEAS.md`. Each theme maps to potential future sprints. Not yet spec'd — reviewed at phase pauses.
+
+| Theme | Key Ideas | Roadmap Alignment |
+|-------|-----------|-------------------|
+| **A: Infinite Reader** | Reading zone, cross-book flow, paragraph jumps | → Track A (FLOW-INF) above |
+| **B: Chrome Extension** | Auto-discovery, resilient connection, in-browser reader, RSS | → Track B (EXT-ENR) above |
+| **C: Android & Mobile** | APK wrapper, position sync, share sheet, Chromecast | → Track C (APK) above |
+| **D: Reading Intelligence** | Goals, streaks, analytics, AI recommendations | GOALS-6B parked; rest backlog |
+| **E: Content & Formats** | Chapter detection, auto TOC, OCR PDFs | Backlog (Phase 10+) |
+| **F: Library & UX Polish** | 3-line cards, auto-clear dots, vocab builder, annotation export | Backlog (fold into any sprint) |
+| **G: Settings & Ctrl+K** | Combine settings pages, all settings searchable | Backlog (small wins) |
+| **H: Reading Tweaks** | Space bar mode, arrow speed, voice cloning, AI summaries | Backlog (bundleable) |
+| **I: Branding** | Remove [Sample], Blurby icon, brand theme, window controls | Backlog (cosmetic, anytime) |
+| **J: Social** | Reading clubs, shared lists, group discussions | Someday (needs server) |
+| **K: E-Ink** | Display mode decoupling, e-ink reading ergonomics | Parked (EINK-6A/6B spec'd) |
 
 ---
 
