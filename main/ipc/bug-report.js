@@ -10,7 +10,11 @@ function formatTimestamp() {
 }
 
 function register(ctx) {
-  const bugReportsDir = path.join(ctx.getDataPath(), "bug-reports");
+  // In dev mode, write bug reports into the project repo for easy access.
+  // In production (packaged), fall back to the standard AppData location.
+  const bugReportsDir = ctx.isDev
+    ? path.join(ctx.getProjectRoot(), "docs", "bug-reports")
+    : path.join(ctx.getDataPath(), "bug-reports");
 
   ipcMain.handle("capture-bug-screenshot", async () => {
     const win = ctx.getMainWindow();

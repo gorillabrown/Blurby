@@ -426,6 +426,7 @@ const ipcContext = {
   hasFailedExtraction: (fp) => failedExtractions.has(fp),
   readerWindows,
   isDev,
+  getProjectRoot: () => __dirname,
 };
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
