@@ -507,10 +507,11 @@ export default function FoliatePageView({
       }
     }
 
-    // Get content area width from the iframe body bounding rect
-    const body = doc.body;
-    const bodyRect = body?.getBoundingClientRect?.();
-    const contentWidth = bodyRect && bodyRect.width > 0 ? bodyRect.width : 600;
+    // Get content area width from the container (visible reading area), NOT the iframe
+    // body which returns the full paginated content width in Foliate's column layout.
+    const container = containerRef.current;
+    const containerRect = container?.getBoundingClientRect?.();
+    const contentWidth = containerRect && containerRect.width > 0 ? containerRect.width : 600;
 
     narrationBandLineHeightRef.current = lineHeight + 4; // small vertical padding
     narrationBandWidthRef.current = contentWidth;
@@ -571,19 +572,16 @@ export default function FoliatePageView({
         current.ready = true;
       }
 
-      // TTS-7R (BUG-145a): Fixed-size band — only lerp Y for line transitions.
-      // X, width, and height are constant; only the vertical position changes.
-      const fixedWidth = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : Math.max(16, from.width);
+      // BUG-151: Use per-word x/width from the 3-word measurement window.
       const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
-      const fixedX = 0;
       const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
-      current.x = fixedX;
+      current.x = lerp(from.x, target.x);
       current.y = lerp(from.y, target.y);
-      current.width = fixedWidth;
+      current.width = lerp(from.width, target.width);
       current.height = fixedHeight;
 
       overlay.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
-      overlay.style.width = `${fixedWidth}px`;
+      overlay.style.width = `${current.width}px`;
       overlay.style.height = `${fixedHeight}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
@@ -591,10 +589,10 @@ export default function FoliatePageView({
       if (progress < 1) {
         narrationOverlayRafRef.current = requestAnimationFrame(tick);
       } else {
-        // TTS-7R: On completion, snap Y to target; keep X/width/height fixed.
-        current.x = fixedX;
+        // Snap to target on completion
+        current.x = target.x;
         current.y = target.y;
-        current.width = fixedWidth;
+        current.width = target.width;
         current.height = fixedHeight;
         narrationOverlayRafRef.current = 0;
       }
@@ -692,34 +690,32 @@ export default function FoliatePageView({
           Math.abs(rail.y - fromWindow.y) <= sameLineTolerance;
 
         // TTS-7R (BUG-145a): Use fixed band dimensions — width and height are constant.
-        // The band is a line highlight: X is always 0 (left edge), width spans the content
-        // area, height is one line-height. Only Y changes as narration moves between lines.
-        const fixedWidth = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : fromWindow.width;
+        // BUG-151: Column-aware — band spans one column, not both.
+        // BUG-151: Use per-word 3-word measurement window for x, width.
         const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(fromWindow.height, 40);
-        const fixedX = 0;
         const stableY = sameRailLine ? rail.y : fromWindow.y;
 
         const stableFrom = {
-          x: fixedX,
+          x: fromWindow.x,
           y: stableY,
-          width: fixedWidth,
+          width: fromWindow.width,
           height: fixedHeight,
         };
 
-        // stableTo only differs from stableFrom in Y (on a line change).
-        // X, width, and height are always the fixed values — no word-to-word X glide.
         const toY = usableNextWindow ? (Math.abs(usableNextWindow.y - fromWindow.y) <= sameLineTolerance ? stableY : usableNextWindow.y) : stableY;
+        const toX = usableNextWindow ? usableNextWindow.x : fromWindow.x;
+        const toWidth = usableNextWindow ? usableNextWindow.width : fromWindow.width;
         const stableTo = {
-          x: fixedX,
+          x: toX,
           y: toY,
-          width: fixedWidth,
+          width: toWidth,
           height: fixedHeight,
         };
 
         narrationLineRailRef.current = {
           y: stableY,
           height: fixedHeight,
-          width: fixedWidth,
+          width: fromWindow.width,
           avgStep: sameRailLine ? rail.avgStep : 0,
           active: true,
         };
@@ -752,9 +748,10 @@ export default function FoliatePageView({
       }
 
       const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-      const x = 0;
+      // BUG-151: Use per-word x/width from measurement window
+      const x = lerp(from.x, to.x, fraction);
       const y = lerp(from.y, to.y, fraction);
-      const width = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : Math.max(16, from.width);
+      const width = lerp(from.width, to.width, fraction);
       const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
 
       narrationOverlayCurrentRef.current = { x, y, width, height, ready: true };
@@ -896,23 +893,17 @@ export default function FoliatePageView({
       narrationDiagLastVisualWordRef.current = wordIndex;
     }
 
-    // TTS-7R (BUG-145a): Compute fixed band dimensions.
-    // Width spans the full content area; height = one line-height.
-    // X is always 0. Only Y changes as the narration line changes.
-    const fixedWidth = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : currentWindow.width;
+    // BUG-151: Use the 3-word measurement window directly for band position and width.
+    // measureNarrationWindow already measures the current word + next 2 words on the same line.
     const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, 40);
-    const seedWindow = { x: 0, y: currentWindow.y, width: fixedWidth, height: fixedHeight };
+    const seedWindow = { x: currentWindow.x, y: currentWindow.y, width: currentWindow.width, height: fixedHeight };
 
     // TTS-7Q: If audio-progress is available, start the audio-clock glide loop.
-    // This loop continuously samples audio fraction and places the band between
-    // the current and next word's positions, producing silky motion between word
-    // advances instead of wall-clock-estimated lerp.
     if (getAudioProgressRef.current) {
-      // Seed the glide state for this word so the audio loop starts from the right position
-      narrationGlideWordRef.current = -1; // Force re-measure on next audio tick
+      narrationGlideWordRef.current = -1;
       narrationOverlayCurrentRef.current = { ...seedWindow, ready: true };
-      overlay.style.transform = `translate3d(0px, ${currentWindow.y}px, 0)`;
-      overlay.style.width = `${fixedWidth}px`;
+      overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
+      overlay.style.width = `${currentWindow.width}px`;
       overlay.style.height = `${fixedHeight}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
@@ -924,13 +915,13 @@ export default function FoliatePageView({
     }
 
     // Fallback (no audio progress — Web Speech or paused): wall-clock estimate loop.
-    // TTS-7R: Band is fixed-width/fixed-height. Only Y changes for line transitions.
     const nextWindow = measureNarrationWindow(doc, wordIndex + 1) || currentWindow;
     const sameLineTolerance = Math.max(8, currentWindow.height * 0.6);
     const staysOnSameLine = Math.abs(nextWindow.y - currentWindow.y) <= sameLineTolerance;
-    // Target Y: stay on current line if next word wraps or moves backward.
     const targetY = staysOnSameLine ? currentWindow.y : nextWindow.y;
-    const targetWindow = { x: 0, y: targetY, width: fixedWidth, height: fixedHeight };
+    const targetX = staysOnSameLine ? currentWindow.x : nextWindow.x;
+    const targetWidth = staysOnSameLine ? currentWindow.width : nextWindow.width;
+    const targetWindow = { x: targetX, y: targetY, width: targetWidth, height: fixedHeight };
 
     const now = performance.now();
     const previousAdvance = narrationOverlayLastAdvanceRef.current;
@@ -949,8 +940,8 @@ export default function FoliatePageView({
 
     overlay.style.display = "block";
     overlay.style.opacity = "1";
-    overlay.style.transform = `translate3d(0px, ${currentWindow.y}px, 0)`;
-    overlay.style.width = `${fixedWidth}px`;
+    overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
+    overlay.style.width = `${currentWindow.width}px`;
     overlay.style.height = `${fixedHeight}px`;
     ensureNarrationOverlayLoop();
   }, [ensureNarrationOverlayLoop, ensureAudioProgressGlideLoop, hideNarrationOverlay, measureNarrationWindow]);
