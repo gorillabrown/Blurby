@@ -91,21 +91,21 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 **Screenshot:** `docs/bug-reports/bug-2026-04-06T13-52-39Z.png`
 **Fix approach:** Distinguish between server-listening and client-connected states. Only show "Connected" when an authenticated WebSocket client is actively connected with heartbeat.
 
-### BUG-157 — No disconnect/reconnect button for Chrome extension
-**Reported:** 2026-04-06
+### ~~BUG-157~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
 **Severity:** Medium (enhancement)
 **Location:** `src/components/settings/ConnectorsSettings.tsx`
 **Description:** No way to disconnect or reset the Chrome extension connection from within Blurby. Users need a button to force-disconnect and regenerate pairing token.
 **Screenshot:** `docs/bug-reports/bug-2026-04-06T13-53-06Z.png`
-**Fix approach:** Add "Disconnect" button that clears pairing token and drops any active WebSocket connection. Add "Reconnect" button that generates a new pairing code.
+**Fix:** Added "Disconnect" button that clears pairing token and drops any active WebSocket connection. Added "Reconnect" button that generates a new pairing code.
 
-### BUG-158 — Library flap shows too many categories
-**Reported:** 2026-04-06
+### ~~BUG-158~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
 **Severity:** Low (UX simplification)
 **Location:** `src/components/ReadingQueueFlap.tsx` or equivalent flap component
-**Description:** Reading queue flap shows many categories. User requests simplification: only show "Now Reading" and "Queue" in that order. Remove "unread" and other categories.
+**Description:** Reading queue flap showed many categories. User requested simplification: only show "Now Reading" and "Queue" in that order.
 **Screenshot:** `docs/bug-reports/bug-2026-04-06T13-53-40Z.png`
-**Fix approach:** Filter flap sections to only "Now Reading" and "Queue". Remove or hide other categories.
+**Fix:** Filtered flap sections to only "Now Reading" and "Queue". Removed other categories.
 
 ### ~~BUG-145~~ ✅ Fixed — TTS-7R (v1.37.0)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05
