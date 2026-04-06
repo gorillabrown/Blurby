@@ -26,7 +26,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 1. **Brainstorm and design** — Collaborate with the user on features, architecture, UX, and priorities.
 2. **Plan work for Claude Code** — Write fully articulated implementation specs with step-by-step directions, agent assignments, and acceptance criteria. Place these in `ROADMAP.md`.
 3. **Review results** — After Claude Code agents run, verify every change against spec. Identify drift, gaps, regressions.
-4. **Maintain documentation** — Keep CLAUDE.md, ROADMAP.md, and LESSONS_LEARNED.md current (or direct doc-keeper to do it).
+4. **Maintain documentation** — Keep CLAUDE.md, ROADMAP.md, and LESSONS_LEARNED.md current (or direct Herodotus to do it).
 5. **Interpret test results** — Analyze test output, decide next steps for failures.
 6. **Triage findings** — Review AGENT_FINDINGS.md, group issues, set priorities.
 
@@ -58,7 +58,7 @@ This repo uses a strict two-layer planning system:
 Before writing ANY code, you MUST read these files in this order. No exceptions. No shortcuts.
 
 1. **`CLAUDE.md`** (this file) — You're already reading it. Note the Standing Rules below.
-2. **`.claude/agents/blurby-lead.md`** — The orchestrator protocol. Defines the mandatory sprint execution sequence (READ → IMPLEMENT → TEST → VERIFY → DOCUMENT → GIT → REPORT). Follow this sequence exactly.
+2. **`.claude/agents/zeus.md`** — The orchestrator protocol. Defines the mandatory sprint execution sequence (READ → PLAN → IMPLEMENT → TEST → VERIFY → DOCUMENT → GIT → REPORT). Follow this sequence exactly. Zeus never writes code — all implementation is delegated to doer agents.
 3. **`docs/governance/LESSONS_LEARNED.md`** — Scan for entries tagged with the areas you're about to touch. These are hard-won guardrails. Violating them causes regressions.
 4. **`ROADMAP.md`** — Find the sprint/hotfix section for your current task. Read the full spec including WHERE, Tasks, and SUCCESS CRITERIA.
 5. **Source files listed in the dispatch's WHERE section** — Read them in the listed order before making changes.
@@ -69,62 +69,83 @@ If your dispatch references a LESSONS_LEARNED entry by number (e.g., "LL-051"), 
 
 Agent `.md` files in `.claude/agents/` define the scope, output contract, and strict rules for each agent role. Each file has YAML frontmatter that Claude Code uses for auto-discovery, model assignment, and tool permissions.
 
+**Orchestrator:**
+
 | File | Agent | Model | Purpose |
 |------|-------|-------|---------|
-| `blurby-lead.md` | Orchestrator | opus | Sprint sequencing, spawns sub-agents, enforces mandatory phases |
-| `spec-compliance-reviewer.md` | spec-compliance-reviewer | sonnet | Verify every SUCCESS CRITERIA item; produce APPROVED/REJECTED verdict |
-| `doc-keeper.md` | doc-keeper | sonnet | Update all 6 governing docs after every sprint |
-| `test-runner.md` | test-runner | haiku | Execute tests, categorize failures, report pass/fail |
-| `quality-reviewer.md` | quality-reviewer | sonnet | Architecture compliance, known-trap detection, code quality |
+| `zeus.md` | Zeus | opus | Sprint orchestrator — decomposes tasks, dispatches doer agents, spawns specialists. **Never writes code.** |
+
+**Doer agents** (implementation — Zeus selects cheapest tier that can handle each task):
+
+| File | Agent | Model | Purpose |
+|------|-------|-------|---------|
+| `hermes.md` | Hermes | haiku | Mechanical execution — prescribed diffs, config edits, version bumps, git ops |
+| `hephaestus.md` | Hephaestus | sonnet | Single-domain implementation — bounded judgment within one module |
+| `athena.md` | Athena | opus | Cross-system implementation — architectural judgment, multi-module changes |
+
+**Specialist agents** (verification & support — take priority over doers when task matches):
+
+| File | Agent | Model | Purpose |
+|------|-------|-------|---------|
+| `hippocrates.md` | Hippocrates | haiku | Test execution — run suites, categorize failures, report pass/fail |
+| `solon.md` | Solon | sonnet | Spec compliance — verify implementation matches every SUCCESS CRITERIA item |
+| `plato.md` | Plato | sonnet | Code quality — architecture compliance, known-trap detection |
+| `herodotus.md` | Herodotus | sonnet | Documentation — update all governing docs after every sprint |
+| `aristotle.md` | Aristotle | opus | Root-cause diagnosis — read-only trace, produces fix specs |
+| `simonides.md` | Simonides | sonnet | Memory guide — shared memory system, findings queue, cross-agent continuity |
 
 #### How Dispatches Work
 
-Sprint dispatches go to `blurby-lead` (the orchestrator). blurby-lead reads the dispatch, loads the sprint spec from ROADMAP.md, and executes the work.
+Sprint dispatches go to `Zeus` (the orchestrator). Zeus reads the dispatch, loads the sprint spec from ROADMAP.md, and delegates all work.
 
-**blurby-lead does all code work itself**, scoped by labels (`electron-fixer`, `renderer-fixer`, `format-parser`) that indicate which files to touch. It **spawns four subagents** for verification and documentation: `test-runner`, `spec-compliance-reviewer`, `quality-reviewer`, and `doc-keeper`.
+**Zeus never writes code.** It decomposes tasks, routes each one to the cheapest appropriate doer agent (Hermes → Hephaestus → Athena, escalating only as needed), then spawns specialist agents for verification and documentation.
 
-The dispatch's Task table tells blurby-lead:
+**Task routing decision tree** (from zeus.md):
+1. Does a specialist match? (e.g., tests → Hippocrates, diagnosis → Aristotle) → assign specialist
+2. Is the change fully prescribed (exact diff known)? → Hermes (haiku)
+3. Does the task stay within one module? → Hephaestus (sonnet)
+4. Does it cross module boundaries? → Athena (opus)
+5. Fallback → Hephaestus (can self-escalate)
 
-- **Which scope** to work in (e.g., `Primary CLI (renderer-fixer scope)`)
-- **Which subagents to spawn** for verification steps (test-runner, spec-compliance-reviewer, etc.)
+The dispatch's Task table tells Zeus:
+
+- **Which doer tier** to use for each implementation task
+- **Which specialists to spawn** for verification steps
 - **What order** — sequential by default, parallel when explicitly marked
 
 #### Agent Scope Labels (Reference)
 
-**Code agents** (make changes):
+**Code scope labels** (applied to doer agent tasks):
 
 | Label | Scope | Files |
 |-------|-------|-------|
-| `electron-fixer` | Main process — IPC handlers, file I/O, data persistence, Electron APIs | `main/`, `main/ipc/`, `preload.js` |
-| `renderer-fixer` | React — state, props, hooks, CSS, rendering | `src/components/`, `src/hooks/`, `src/utils/`, `src/types/` |
-| `format-parser` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/legacy-parsers.js`, `main/epub-word-extractor.js` |
+| `electron-scope` | Main process — IPC handlers, file I/O, data persistence, Electron APIs | `main/`, `main/ipc/`, `preload.js` |
+| `renderer-scope` | React — state, props, hooks, CSS, rendering | `src/components/`, `src/hooks/`, `src/utils/`, `src/types/` |
+| `format-scope` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/legacy-parsers.js`, `main/epub-word-extractor.js` |
 
-**Verification subagents** (read-only review, spawned by blurby-lead):
+**Specialist agents** (spawned by Zeus for verification and support):
 
-| Subagent | Scope | Files |
-|----------|-------|-------|
-| `test-runner` | Test execution and build verification | `tests/`, `package.json` scripts |
-| `quality-reviewer` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
-| `spec-compliance-reviewer` | Verify every SUCCESS CRITERIA item from the dispatch is met | Read-only, cross-references dispatch spec |
-
-**Documentation agents:**
-
-| Label | Scope | Files |
+| Agent | Scope | Files |
 |-------|-------|-------|
-| `doc-keeper` | Documentation updates (mandatory penultimate step in every sprint) | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
+| `Hippocrates` | Test execution and build verification | `tests/`, `package.json` scripts |
+| `Solon` | Verify every SUCCESS CRITERIA item from the dispatch is met | Read-only, cross-references dispatch spec |
+| `Plato` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
+| `Herodotus` | Documentation updates (mandatory penultimate step in every sprint) | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
+| `Aristotle` | Root-cause analysis when investigation is needed | Read-only diagnosis + fix spec |
+| `Simonides` | Cross-agent memory, findings queue, continuity | `.claude/agents/memory/` |
 
 **Orchestration:**
 
-| Label | Scope | Files |
+| Agent | Scope | Files |
 |-------|-------|-------|
-| `blurby-lead` | Sprint orchestrator — sequencing, git operations, summary output | All (read), git commands |
+| `Zeus` | Sprint orchestrator — task decomposition, agent dispatch, progress tracking | All (read), delegates all writes |
 
 #### Post-Completion Checklist
 
 Before committing, verify ALL of these:
 
-- [ ] Every SUCCESS CRITERIA item from the dispatch is met (spec-compliance-reviewer pass)
-- [ ] `npm test` passes (860+ tests, 0 failures)
+- [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
+- [ ] `npm test` passes (1,504+ tests, 0 failures)
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
 - [ ] LESSONS_LEARNED guardrails were not violated
@@ -132,9 +153,9 @@ Before committing, verify ALL of these:
 - [ ] Spec-compliance self-review passed (code matches dispatch spec line-by-line)
 - [ ] Quality self-review passed (architecture rules, known traps, code clarity)
 
-#### Mandatory Doc-Keeper Pass (After Every Sprint)
+#### Mandatory Herodotus Pass (After Every Sprint)
 
-After EVERY sprint completion — hotfixes included, no exceptions — run the doc-keeper pass:
+After EVERY sprint completion — hotfixes included, no exceptions — run the Herodotus pass:
 
 1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/project/ROADMAP_ARCHIVE.md`. Update Sprint Status table.
 2. **SPRINT_QUEUE.md** — Remove completed sprint from queue. Add to "Completed Sprints" table. Verify queue depth ≥ 3.
@@ -158,10 +179,10 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the d
 - **CSS custom properties for theming.** No inline styles. All styles in `src/styles/global.css`.
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
-- **Dispatch sizing: 40 tool-use ceiling.** A single blurby-lead dispatch must stay under ~40 tool uses. Sprints exceeding this must be split into waves (e.g., Wave A = implement + test, Wave B = verify + docs + git). Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
+- **Dispatch sizing: 40 tool-use ceiling.** A single Zeus dispatch must stay under ~40 tool uses. Sprints exceeding this must be split into waves (e.g., Wave A = implement + test, Wave B = verify + docs + git). Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
 - **Verification gate is mandatory.** After completing any code-change task, verify: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
-- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). The `spec-compliance-reviewer` subagent performs this step. Full-tier sprints then spawn `quality-reviewer`. Quick-tier sprints use blurby-lead self-review.
+- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). `Solon` performs this step. Full-tier sprints then spawn `Plato`. Quick-tier sprints use Zeus self-review.
 
 ### Pike's 5 Rules of Programming (Engineering Axioms)
 
@@ -200,7 +221,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 ### Other References
 
 - **Project Constitution**: `docs/project/Blurby_Project_Constitution.md`
-- **Agent Definitions**: `.claude/agents/` (blurby-lead, spec-compliance-reviewer, doc-keeper, test-runner, quality-reviewer)
+- **Agent Definitions**: `.claude/agents/` (Zeus, Hermes, Hephaestus, Athena, Aristotle, Hippocrates, Solon, Plato, Herodotus, Simonides)
 - **Roadmap Archive**: `docs/project/ROADMAP_ARCHIVE.md` (completed sprint full specs — reference only)
 - **Development Sync SOP**: `docs/governance/DEVELOPMENT_SYNC.md` (local-first git workflow)
 
@@ -264,7 +285,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.36.1 — TTS-7Q complete, EINK-6A next, queue GREEN)
+## Current System State (v1.37.0 — HOTFIX-12 next, BUG-146–150 open, EINK/GOALS parked, queue RED)
 
 ### Codebase (branch: `main`)
 
@@ -281,9 +302,11 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7O complete** — BUG-138/139 resolved. Punctuation-safe pre-send chunk rounding (expanded outward search), real inter-chunk audible silence injection (classifyChunkBoundary → silence samples), 3-word narration window (page-word--narration-context CSS), smooth cursor via CSS transitions, periodic truth-sync every 12 words. 27 new tests. v1.34.0.
 - **EXT-5C complete** — BUG-141/142 resolved. Rich article HTML formatting preserved (headings, figures, captions, lists, blockquotes), inline images downloaded and embedded into EPUB (no remote dependency), article-aware hero ranking (body presence > top article image > metadata fallback, rejects junk URLs), hero reliably promoted to coverPath for both URL and extension import paths. Shared downloadArticleImages helper + preDownloadedImages EPUB path unifies both import flows. 24 new tests. v1.35.0.
 - **TTS-7P complete** — BUG-140 resolved. Rolling pause-boundary planner (`src/utils/narrationPlanner.ts`) builds local boundary plans for the active text window (next ~400 words). Planner is now the single authority for where chunks may legally end; `generationPipeline.ts` uses planner for chunk selection and silence injection; `kokoroStrategy.ts` passes `getParagraphBreaks`; `useNarration.ts` passes paragraph breaks ref. Dialogue detection included. Two new constants: `TTS_PLANNER_WINDOW_WORDS` (400), `TTS_PLANNER_MIN_CHUNK_WORDS` (10). 33 new tests. v1.36.0.
-- **TTS-7Q complete** — BUG-143/144 resolved. Canonical `AudioProgressReport` type + `getAudioProgress()` added to scheduler; `onChunkHandoff` callback wired through `kokoroStrategy.ts` and exposed on `useNarration` hook return; RAF-based glide loop in `FoliatePageView.tsx` drives the 3-word narration band from audio-time progress instead of DOM target chasing; chunk handoff is continuity-safe (visual band can never become the canonical anchor). New `src/utils/narrateDiagnostics.ts` exports diagnostic event types and `getGlideDiagSummary()`. 25 new tests (`tests/audioGlide.test.ts`). v1.36.1.
-- Active queue: EINK-6A → EINK-6B → GOALS-6B (depth 3 — GREEN).
-- 1,504 tests across 84 test files
+- **TTS-7Q shipped** — BUG-143/144 resolved. Canonical `AudioProgressReport` type + `getAudioProgress()` added to scheduler; `onChunkHandoff` callback wired through `kokoroStrategy.ts` and exposed on `useNarration` hook return; RAF-based glide loop in `FoliatePageView.tsx` drives the 3-word narration band from audio-time progress instead of DOM target chasing; chunk handoff is continuity-safe (visual band can never become the canonical anchor). New `src/utils/narrateDiagnostics.ts` exports diagnostic event types and `getGlideDiagSummary()`. 25 new tests (`tests/audioGlide.test.ts`). v1.36.1.
+- **TTS-7R complete** — BUG-145a/b/c resolved. Separated canonical audio cursor from visual cursor (`lastConfirmedAudioWordRef`), enabled audio-progress glide (removed `SIMPLE_NARRATION_GLIDE`), fixed-size overlay band (measure-once line-height), truth-sync visual-only pathway, removed per-word context CSS. 25 new tests (`tests/calmNarrationBand.test.ts`). v1.37.0.
+- **HOTFIX-12 queued** — BUG-146 (chapter dropdown), BUG-147 (return-to-narration button), BUG-148 (position restore toast), BUG-149 (chunked extraction), BUG-150 (bug reporter keyboard). 10 tasks, 14 success criteria.
+- Active queue: HOTFIX-12 (depth 1 — RED, EINK/GOALS parked). Need 2 more for GREEN.
+- 1,529 tests across 85 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -332,10 +355,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro). Kokoro uses 3 native-rate buckets (1.0x/1.2x/1.5x) — no scheduler pitch-shift.
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
 - **Test Harness** (`src/test-harness/`): Browser-based E2E testing stub (Sprint CT-1)
-    - `electron-api-stub.ts` — Complete `window.electronAPI` surface (73 methods + 10 event listeners) with in-memory state, Meditations seed data, console tracing
-    - `mock-kokoro.ts` — Synthetic PCM audio generation (440Hz sine wave) matching Kokoro TTS response shape
-    - `stub-loader.ts` — Dynamic import, dev-only injection when `window.electronAPI` is absent
-    - `window.__blurbyStub.emit(event, data)` — Manual event triggering for test scripts
-    - Auto-injected in `main.tsx` via `import.meta.env.DEV` guard, tree-shaken from production builds
-  - **Tests** (`tests/`): 84 test files, 1,504 tests
-- **CI/CD** (`.github/workflows/`): ci.yml (push/PR, win+linux matrix), release.yml (v* tags + workflow_dispatch, single-job x64+ARM64 NSIS, d
+    - `electron-api-stub.ts` — Complete `window.electronAPI` surface (73 methods + 10 event listeners) with in-mem

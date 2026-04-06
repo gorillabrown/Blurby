@@ -43,6 +43,13 @@ export interface KokoroStrategyDeps {
   getFootnoteCues?: () => Array<{ afterWordIdx: number; text: string }>;
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
+  /**
+   * TTS-7R: Visual-only truth-sync callback. Called every ~12 words by the scheduler
+   * to re-snap the visual overlay to the authoritative audio position.
+   * This must NOT update narration state (cursorWordIndex, lastConfirmedAudioWordRef).
+   * If not provided, falls back to onWordAdvance (legacy behavior).
+   */
+  onTruthSync?: (wordIndex: number) => void;
 }
 
 /**
@@ -170,8 +177,16 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
         onChunkBoundary: () => {},
         onEnd,
         onError: () => deps.onFallbackToWeb(),
-        // TTS-7O: Truth-sync forces highlight to re-snap to scheduler's authoritative position
-        onTruthSync: (wordIndex: number) => onWordAdvance(wordIndex),
+        // TTS-7R: Truth-sync is visual-only — re-snap overlay to scheduler's authoritative position
+        // without updating narration state. Route through dedicated deps.onTruthSync if provided;
+        // fall back to onWordAdvance only when no visual-only handler is wired (legacy path).
+        onTruthSync: (wordIndex: number) => {
+          if (deps.onTruthSync) {
+            deps.onTruthSync(wordIndex);
+          } else {
+            onWordAdvance(wordIndex);
+          }
+        },
         // TTS-7Q: Chunk handoff — forward last audio-confirmed word to the word-advance callback
         // so useNarration updates the canonical cursor position at each chunk boundary.
         onChunkHandoff: (lastConfirmedWordIndex: number) => {

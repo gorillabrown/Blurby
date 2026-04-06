@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-05 — TTS-7Q complete (v1.36.1). Audio-aligned glide cursor added. EINK-6A next; EINK-6B follows. 1,504 tests, 84 files. Latest tagged release: v1.36.1.
+**Last updated**: 2026-04-05 — TTS-7R complete (v1.37.0). BUG-145a/b/c resolved. HOTFIX-12 next. 1,529 tests, 85 files. Latest tagged release: v1.37.0.
 **Current branch**: `main`
-**Current state**: Phase 6 feature work active. TTS-7Q complete. RAF-based glide loop and canonical `AudioProgressReport` now drive the narration cursor. EINK-6A is next. Queue GREEN — depth 3 (`EINK-6A` → `EINK-6B` → `GOALS-6B`).
+**Current state**: Phase 6 feature work active. TTS-7R resolved the three remaining narration band problems: resize jitter, band outruns audio, and chunk restart from visual position. Canonical audio cursor separated from visual cursor. HOTFIX-12 is next. Queue depth 1 — RED. EINK/GOALS parked.
 **Governing roadmap**: `docs/project/ROADMAP_V2.md` (7-phase product roadmap)
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -68,6 +68,7 @@ Phase 6: TTS Hardening & Stabilization
   ├── EXT-5C: Rich Article Capture & Hero Image Cards ✅ (v1.35.0)
   ├── TTS-7P: Rolling Pause-Boundary Planner ✅ (v1.36.0)
   ├── TTS-7Q: True Glide & Audio-Aligned Narration Cursor ✅ (v1.36.1)
+  ├── TTS-7R: Calm Narration Band & Cursor Ownership Fix ✅ (v1.37.0)
   │
   │  Feature work
   ├── EINK-6A: E-Ink Foundation & Greyscale Runtime (queued after TTS-7Q)
@@ -174,7 +175,114 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 ---
 
-## Phase 6 Continued — E-Ink & Goals
+### Sprint TTS-7R: Calm Narration Band & Cursor Ownership Fix ✅ (v1.37.0) — archived to ROADMAP_ARCHIVE.md
+
+> BUG-145a/b/c resolved. Separated canonical audio cursor (`lastConfirmedAudioWordRef`) from visual cursor, enabled audio-progress glide (removed `SIMPLE_NARRATION_GLIDE`), fixed-size overlay band (measure-once line-height), truth-sync visual-only pathway, removed per-word context CSS. 25 new tests (`tests/calmNarrationBand.test.ts`). v1.37.0.
+
+---
+
+### Sprint HOTFIX-12: Bug Report Triage Fixes (BUG-146–150)
+
+**Goal:** Fix five bugs surfaced during the April 5 bug report review session. These are a mix of UX gaps, keyboard handling, and performance issues — none require deep narration engine changes. Quick-tier sprint: targeted fixes, no new features.
+
+**Problem:** Bug report review of 12 user-filed reports (April 4–5) identified 5 new issues outside the TTS-7R narration band scope:
+1. Chapter dropdown doesn't update during narration (BUG-146)
+2. No "return to narration" button when user pages away (BUG-147)
+3. No visual feedback on position restore after reopen (BUG-148)
+4. Large EPUB extraction blocks UI on book open (BUG-149)
+5. Bug reporter modal swallows keyboard shortcuts (BUG-150)
+
+**Design decisions:**
+
+- **BUG-146 (chapter dropdown):** When narration is active, derive the chapter dropdown label from the narration cursor word index instead of the reading `wordIndex`. Add a `narrationWordIndex` prop to ReaderBottomBar, sourced from `cursorWordIndex` in narration state. Use it as input to `currentChapterIndex()` when `narrationStatus === "speaking"`.
+
+- **BUG-147 (return to narration):** Add a floating "Return to narration" pill button that appears when the visible page range does not contain the narration cursor word index. On click, navigate to the narration position. Auto-dismiss when the narration range becomes visible again. Render inside FoliatePageView, above the overlay. Only visible when narration is active + user has paged away.
+
+- **BUG-148 (position restore feedback):** Show a brief toast ("Restored to your last position") on book open when the resume anchor system navigates to a saved position. Trigger from the `onLoad` callback in FoliatePageView when the position is > 0 and was restored from persistence. Toast auto-dismisses after 2 seconds.
+
+- **BUG-149 (extraction blocks UI):** Chunk the main-process EPUB word extraction in `main/epub-word-extractor.js` so it yields between chapters/sections using `setImmediate()`. This keeps the main-process event loop responsive during extraction without requiring a worker thread. Additionally, increase the renderer delay from 1s to 2s for books > 100k words to give Foliate more time to settle.
+
+- **BUG-150 (bug reporter keyboard):** Two changes: (a) In the global keyboard handler (`useKeyboardShortcuts.ts`), early-return if `e.target` is a `<textarea>`, `<input>`, or `[contenteditable]` element. This is a universal fix that also helps future modals/dialogs. (b) In `BugReportModal.tsx`, add a `keydown` handler that calls `handleSave()` on Ctrl+Enter.
+
+**Tier:** Quick (targeted bug fixes, no new features)
+
+**Baseline:**
+- `src/components/ReaderBottomBar.tsx` (~420 lines) — chapter dropdown at lines 140–144, `currentChapterIndex` computed from `wordIndex`
+- `src/components/ReaderContainer.tsx` (~1,400 lines) — narration state available, book word extraction at lines 472–500
+- `src/components/FoliatePageView.tsx` (~1,750 lines) — overlay rendering, narration position
+- `src/components/BugReportModal.tsx` (~170 lines) — Escape handler at line 47, no Ctrl+Enter
+- `src/hooks/useKeyboardShortcuts.ts` (~450 lines) — global Ctrl+Left/Right at lines 196–197, no input element guard
+- `main/epub-word-extractor.js` — synchronous full-book extraction
+- `src/styles/global.css` — bug report and narration overlay styles
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/governance/BUG_REPORT.md` — BUG-146 through BUG-150
+4. `ROADMAP.md` — this section
+5. `src/components/ReaderBottomBar.tsx` — chapter dropdown (lines 140–144)
+6. `src/components/ReaderContainer.tsx` — narration state, word extraction (lines 472–500)
+7. `src/components/FoliatePageView.tsx` — overlay rendering, position callbacks
+8. `src/components/BugReportModal.tsx` — keyboard handling, save action
+9. `src/hooks/useKeyboardShortcuts.ts` — global handler (lines 196–197)
+10. `main/epub-word-extractor.js` — extraction pipeline
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Hermes (renderer-scope) | **BUG-150: Bug reporter keyboard fix** — (a) In `useKeyboardShortcuts.ts`, add early-return guard at the top of the keydown handler: if `e.target` is a `<textarea>`, `<input>`, or has `contenteditable`, return immediately (don't `preventDefault`). (b) In `BugReportModal.tsx`, add a `keydown` listener (or onKeyDown on the dialog div) that calls `handleSave()` when `e.ctrlKey && e.key === "Enter"`. | `src/hooks/useKeyboardShortcuts.ts`, `src/components/BugReportModal.tsx` |
+| 2 | Hephaestus (renderer-scope) | **BUG-146: Chapter dropdown tracks narration cursor** — Add `narrationWordIndex` prop (number \| null) to ReaderBottomBar. In ReaderContainer, pass `narrationStatus === "speaking" ? cursorWordIndex : null`. In ReaderBottomBar, change `currentChapterIndex(chapterList, wordIndex)` (line 141) to use `narrationWordIndex ?? wordIndex` as the position input. | `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx` |
+| 3 | Hephaestus (renderer-scope) | **BUG-147: "Return to narration" floating button** — In FoliatePageView (or ReaderContainer, depending on where the visible word range is easiest to check), add a conditionally-rendered pill button: visible when narration is active AND the narration `cursorWordIndex` is outside the currently-visible word range. On click, navigate the reader (via Foliate API or wordIndex prop update) to the narration cursor position. Style: small floating pill, bottom-right above bottom bar, z-index above reader but below modals. Auto-hide when narration range comes back into view or narration stops. | `src/components/FoliatePageView.tsx` or `src/components/ReaderContainer.tsx`, `src/styles/global.css` |
+| 4 | Hephaestus (renderer-scope) | **BUG-148: Position restore toast** — In the book-open / `onLoad` callback path (FoliatePageView or ReaderContainer), detect when the resume anchor system restores a position > 0. Show a brief toast via `showToast()`: "Restored to your last position". Auto-dismiss 2 seconds. Only trigger on initial load, not on every `onRelocate` event. Gate with a `hasShownRestoreToast` ref to prevent re-showing. | `src/components/ReaderContainer.tsx` or `src/components/FoliatePageView.tsx` |
+| 5 | Hephaestus (electron-scope) | **BUG-149: Chunked EPUB extraction** — In `main/epub-word-extractor.js`, refactor the extraction loop to yield between sections/chapters using `await new Promise(r => setImmediate(r))`. Process one section at a time, accumulate results, yield. This keeps the main-process event loop responsive. Also: in `ReaderContainer.tsx` line 497, increase the extraction delay from 1000ms to 2000ms for books with `wordCount > 100000`. | `main/epub-word-extractor.js`, `src/components/ReaderContainer.tsx` |
+| 6 | Hippocrates | **Tests** — (a) BUG-150: keyboard shortcuts don't fire when a textarea/input is focused. (b) BUG-150: Ctrl+Enter in bug reporter triggers save. (c) BUG-146: chapter dropdown reflects narrationWordIndex when narration is active. (d) BUG-149: extraction yields between sections (check that setImmediate is called). ≥8 new tests. | `tests/` |
+| 7 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 8 | Solon | **Spec compliance** | — |
+| 9 | Herodotus | **Documentation pass** — Update BUG-146–150 status in BUG_REPORT.md. Update CLAUDE.md. Update sprint queue. Add LESSONS_LEARNED entry if non-trivial discovery. | All governing docs |
+| 10 | Hermes | **Git: commit, merge, push** | — |
+
+#### Execution Sequence
+
+```
+1. Hermes: Task 1 (BUG-150 keyboard fix — simplest, unblocks future modal testing)
+2. Hephaestus: Task 2 (BUG-146 chapter dropdown — small prop threading)
+3. Hephaestus: Task 3 (BUG-147 return-to-narration button — new UI element)
+4. Hephaestus: Task 4 (BUG-148 position restore toast — small, independent)
+5. Hephaestus: Task 5 (BUG-149 chunked extraction — main process, independent)
+    ↓
+6. Hippocrates: Task 6
+7. Hippocrates: Task 7
+8. Solon: Task 8
+9. Herodotus: Task 9
+10. Hermes: Task 10
+```
+
+#### SUCCESS CRITERIA
+
+1. Ctrl+Left/Right, Ctrl+Backspace, and other standard text-editing shortcuts work inside the bug reporter textarea (BUG-150)
+2. Ctrl+Enter submits the bug report from the modal (BUG-150)
+3. Global keyboard shortcuts still work when no text input is focused (no regression)
+4. Chapter dropdown label updates to reflect the narration cursor position during active narration (BUG-146)
+5. Chapter dropdown falls back to reading `wordIndex` when narration is not active (no regression)
+6. "Return to narration" button appears when user pages away from narration position (BUG-147)
+7. "Return to narration" button navigates to narration cursor on click (BUG-147)
+8. "Return to narration" button auto-hides when narration range becomes visible or narration stops (BUG-147)
+9. Brief toast appears on book reopen when position is restored (BUG-148)
+10. Toast does not appear on first open (position = 0) or on every page turn (BUG-148)
+11. UI remains responsive (selectable, clickable) during background extraction of large EPUBs (BUG-149)
+12. ≥8 new tests
+13. `npm test` passes
+14. `npm run build` succeeds
+
+**Depends on:** Independent of TTS-7R (can run before, after, or in parallel)
+
+---
+
+## Phase 6 Continued — E-Ink & Goals (PARKED)
+
+> EINK-6A, EINK-6B, and GOALS-6B are fully spec'd but parked while TTS cursor polish completes. Specs remain valid — resume after TTS-7R.
 
 ---
 
@@ -216,16 +324,16 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **Add `einkMode` setting** — Add `einkMode: boolean` (default false) to settings schema in types.ts. Add default to constants.ts. Wire through SettingsContext. | `src/types.ts`, `src/constants.ts`, `src/contexts/SettingsContext.tsx` |
-| 2 | Primary CLI (renderer-fixer scope) | **Split CSS into behavioral and color layers** — Extract all non-color properties from `[data-theme="eink"]` into new `[data-eink="true"]` selector. Leave only color properties (`--bg`, `--fg`, `--accent`, etc.) in `[data-theme="eink"]`. Verify no visual regression when both are applied simultaneously. | `src/styles/global.css` |
-| 3 | Primary CLI (renderer-fixer scope) | **Apply `data-eink` attribute** — In the root element (App.tsx or equivalent), set `data-eink="true"` when `settings.einkMode === true`, independent of `data-theme`. | `src/App.tsx` or equivalent root |
-| 4 | Primary CLI (renderer-fixer scope) | **Restructure ThemeSettings** — Move e-ink out of theme grid. Add "E-Ink Display Mode" toggle above themes. When toggled on, show WPM ceiling / refresh interval / phrase grouping sliders. Theme grid remains below, all themes selectable regardless of einkMode. | `src/components/settings/ThemeSettings.tsx` |
-| 5 | Primary CLI (renderer-fixer scope) | **Update eink controller** — Change `useEinkController.ts` to check `settings.einkMode` instead of `theme === 'eink'`. Update ReaderContainer.tsx integration points (WPM cap, overlay render) to use `einkMode`. | `src/hooks/useEinkController.ts`, `src/components/ReaderContainer.tsx` |
-| 6 | test-runner | **Tests** — (a) `einkMode` toggle applies `data-eink` attribute. (b) `data-eink="true"` + `data-theme="dark"` doesn't conflict. (c) E-ink behavioral CSS (transition:none) applies independently of theme. (d) WPM cap respects `einkMode`, not theme. (e) Refresh overlay fires when `einkMode` is on regardless of theme. ≥8 new tests. | `tests/` |
-| 7 | test-runner | **`npm test` + `npm run build`** | — |
-| 8 | spec-compliance-reviewer | **Spec compliance** | — |
-| 9 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 10 | blurby-lead | **Git: commit, merge, push** | — |
+| 1 | Hephaestus (renderer-scope) | **Add `einkMode` setting** — Add `einkMode: boolean` (default false) to settings schema in types.ts. Add default to constants.ts. Wire through SettingsContext. | `src/types.ts`, `src/constants.ts`, `src/contexts/SettingsContext.tsx` |
+| 2 | Hephaestus (renderer-scope) | **Split CSS into behavioral and color layers** — Extract all non-color properties from `[data-theme="eink"]` into new `[data-eink="true"]` selector. Leave only color properties (`--bg`, `--fg`, `--accent`, etc.) in `[data-theme="eink"]`. Verify no visual regression when both are applied simultaneously. | `src/styles/global.css` |
+| 3 | Hephaestus (renderer-scope) | **Apply `data-eink` attribute** — In the root element (App.tsx or equivalent), set `data-eink="true"` when `settings.einkMode === true`, independent of `data-theme`. | `src/App.tsx` or equivalent root |
+| 4 | Hephaestus (renderer-scope) | **Restructure ThemeSettings** — Move e-ink out of theme grid. Add "E-Ink Display Mode" toggle above themes. When toggled on, show WPM ceiling / refresh interval / phrase grouping sliders. Theme grid remains below, all themes selectable regardless of einkMode. | `src/components/settings/ThemeSettings.tsx` |
+| 5 | Hephaestus (renderer-scope) | **Update eink controller** — Change `useEinkController.ts` to check `settings.einkMode` instead of `theme === 'eink'`. Update ReaderContainer.tsx integration points (WPM cap, overlay render) to use `einkMode`. | `src/hooks/useEinkController.ts`, `src/components/ReaderContainer.tsx` |
+| 6 | Hippocrates | **Tests** — (a) `einkMode` toggle applies `data-eink` attribute. (b) `data-eink="true"` + `data-theme="dark"` doesn't conflict. (c) E-ink behavioral CSS (transition:none) applies independently of theme. (d) WPM cap respects `einkMode`, not theme. (e) Refresh overlay fires when `einkMode` is on regardless of theme. ≥8 new tests. | `tests/` |
+| 7 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 8 | Solon | **Spec compliance** | — |
+| 9 | Herodotus | **Documentation pass** | All 6 governing docs |
+| 10 | Hermes | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 
@@ -278,14 +386,14 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **Stepped Flow mode** — In FlowMode.ts: when `einkMode` is on, switch from per-line scroll to chunk-based advance. Display `EINK_LINES_PER_PAGE` lines, pause for calculated reading time, then instant-replace with next chunk. Cursor behavior: shrinking underline paces within visible chunk. Page transitions have no animation (`transition: none` already in eink behavioral CSS). | `src/modes/FlowMode.ts`, `src/utils/FlowScrollEngine.ts` |
-| 2 | Primary CLI (renderer-fixer scope) | **Burst Focus mode** — In FocusMode.ts: when `einkMode` is on and `einkPhraseGrouping` is true, group words into 2–3 word phrases. Display each phrase for the combined word duration at current WPM. Use the existing segmentation (whitespace-based) with configurable max group size (new constant `EINK_BURST_GROUP_SIZE = 3`). | `src/modes/FocusMode.ts`, `src/constants.ts` |
-| 3 | Primary CLI (renderer-fixer scope) | **Adaptive refresh heuristic** — Extend `useEinkController.ts`: track cumulative word count across page turns since last refresh. When cumulative words exceed `EINK_GHOSTING_THRESHOLD` (new constant, default 500), trigger refresh. Existing manual interval remains as override (refresh at whichever threshold triggers first). Add `EINK_ADAPTIVE_REFRESH_ENABLED` constant (default true). | `src/hooks/useEinkController.ts`, `src/constants.ts` |
-| 4 | test-runner | **Tests** — (a) Stepped flow: einkMode on → chunk-based advance with correct timing. (b) Stepped flow: einkMode off → normal per-line scroll (no regression). (c) Burst focus: 2–3 word grouping with combined timing. (d) Burst focus: single-word fallback when phrase grouping off. (e) Adaptive refresh: triggers at word threshold. (f) Adaptive refresh: manual interval still works as override. ≥10 new tests. | `tests/` |
-| 5 | test-runner | **`npm test` + `npm run build`** | — |
-| 6 | spec-compliance-reviewer | **Spec compliance** | — |
-| 7 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 8 | blurby-lead | **Git: commit, merge, push** | — |
+| 1 | Hephaestus (renderer-scope) | **Stepped Flow mode** — In FlowMode.ts: when `einkMode` is on, switch from per-line scroll to chunk-based advance. Display `EINK_LINES_PER_PAGE` lines, pause for calculated reading time, then instant-replace with next chunk. Cursor behavior: shrinking underline paces within visible chunk. Page transitions have no animation (`transition: none` already in eink behavioral CSS). | `src/modes/FlowMode.ts`, `src/utils/FlowScrollEngine.ts` |
+| 2 | Hephaestus (renderer-scope) | **Burst Focus mode** — In FocusMode.ts: when `einkMode` is on and `einkPhraseGrouping` is true, group words into 2–3 word phrases. Display each phrase for the combined word duration at current WPM. Use the existing segmentation (whitespace-based) with configurable max group size (new constant `EINK_BURST_GROUP_SIZE = 3`). | `src/modes/FocusMode.ts`, `src/constants.ts` |
+| 3 | Hephaestus (renderer-scope) | **Adaptive refresh heuristic** — Extend `useEinkController.ts`: track cumulative word count across page turns since last refresh. When cumulative words exceed `EINK_GHOSTING_THRESHOLD` (new constant, default 500), trigger refresh. Existing manual interval remains as override (refresh at whichever threshold triggers first). Add `EINK_ADAPTIVE_REFRESH_ENABLED` constant (default true). | `src/hooks/useEinkController.ts`, `src/constants.ts` |
+| 4 | Hippocrates | **Tests** — (a) Stepped flow: einkMode on → chunk-based advance with correct timing. (b) Stepped flow: einkMode off → normal per-line scroll (no regression). (c) Burst focus: 2–3 word grouping with combined timing. (d) Burst focus: single-word fallback when phrase grouping off. (e) Adaptive refresh: triggers at word threshold. (f) Adaptive refresh: manual interval still works as override. ≥10 new tests. | `tests/` |
+| 5 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 6 | Solon | **Spec compliance** | — |
+| 7 | Herodotus | **Documentation pass** | All 6 governing docs |
+| 8 | Hermes | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 
@@ -343,17 +451,17 @@ Phase 9: APK Wrapper (+2 modularization sprints)
 
 | # | Owner | Task | Files |
 |---|-------|------|-------|
-| 1 | Primary CLI (renderer-fixer scope) | **ReadingGoal type + settings schema** — Add `ReadingGoal` interface to types.ts: `{ id: string, type: 'daily-pages' | 'daily-minutes' | 'weekly-books', target: number, currentStreak: number, lastStreakDate: string }`. Add `goals: ReadingGoal[]` to settings (default empty array). Add `goalProgress: { todayPages: number, todayMinutes: number, weekBooks: number, lastResetDate: string }` to settings for tracking state. | `src/types.ts`, `src/constants.ts` |
-| 2 | Primary CLI (renderer-fixer scope) | **useReadingGoals hook** — New hook that: reads goals + progress from settings, provides `incrementPages(count)`, `incrementMinutes(delta)`, `incrementBooks()` methods, auto-resets daily counters at midnight (check `lastResetDate` on each read), auto-resets weekly counters on Monday, updates streak on daily reset (met yesterday's goal → streak+1, else reset to 0). | `src/hooks/useReadingGoals.ts` (new) |
-| 3 | Primary CLI (renderer-fixer scope) | **Wire progress tracking** — In ReaderContainer.tsx: call `incrementPages` on page turn events, call `incrementMinutes` from a 1-minute interval while any reading mode is active, call `incrementBooks` when book is marked complete. All calls go through the `useReadingGoals` hook. | `src/components/ReaderContainer.tsx` |
-| 4 | Primary CLI (renderer-fixer scope) | **GoalProgressWidget** — Compact component for library header: one progress bar per active goal (thin, accent color, percentage fill). Show "3/10 pages today" or "45/60 min today" labels. When all goals met, collapse to checkmark icon. Click navigates to goals settings. | `src/components/GoalProgressWidget.tsx` (new), `src/styles/global.css` |
-| 5 | Primary CLI (renderer-fixer scope) | **ReadingGoalsSettings** — New settings sub-page. List active goals with edit/delete. "Add Goal" button → inline form (type selector, target number). Show current streak per goal. | `src/components/settings/ReadingGoalsSettings.tsx` (new), `src/components/SettingsMenu.tsx` |
-| 6 | Primary CLI (renderer-fixer scope) | **Wire widget into library** — Add `GoalProgressWidget` to LibraryContainer header area. Only render when `settings.goals.length > 0`. | `src/components/LibraryContainer.tsx` |
-| 7 | test-runner | **Tests** — (a) Goal creation persists to settings. (b) Daily reset clears page/minute counters at midnight. (c) Weekly reset clears book counter on Monday. (d) Streak increments when daily goal met before reset. (e) Streak resets when daily goal not met. (f) Progress widget renders correct fill percentage. (g) Widget hidden when no goals set. (h) incrementPages/incrementMinutes/incrementBooks update correctly. ≥10 new tests. | `tests/` |
-| 8 | test-runner | **`npm test` + `npm run build`** | — |
-| 9 | spec-compliance-reviewer | **Spec compliance** | — |
-| 10 | doc-keeper | **Documentation pass** | All 6 governing docs |
-| 11 | blurby-lead | **Git: commit, merge, push** | — |
+| 1 | Hephaestus (renderer-scope) | **ReadingGoal type + settings schema** — Add `ReadingGoal` interface to types.ts: `{ id: string, type: 'daily-pages' | 'daily-minutes' | 'weekly-books', target: number, currentStreak: number, lastStreakDate: string }`. Add `goals: ReadingGoal[]` to settings (default empty array). Add `goalProgress: { todayPages: number, todayMinutes: number, weekBooks: number, lastResetDate: string }` to settings for tracking state. | `src/types.ts`, `src/constants.ts` |
+| 2 | Hephaestus (renderer-scope) | **useReadingGoals hook** — New hook that: reads goals + progress from settings, provides `incrementPages(count)`, `incrementMinutes(delta)`, `incrementBooks()` methods, auto-resets daily counters at midnight (check `lastResetDate` on each read), auto-resets weekly counters on Monday, updates streak on daily reset (met yesterday's goal → streak+1, else reset to 0). | `src/hooks/useReadingGoals.ts` (new) |
+| 3 | Hephaestus (renderer-scope) | **Wire progress tracking** — In ReaderContainer.tsx: call `incrementPages` on page turn events, call `incrementMinutes` from a 1-minute interval while any reading mode is active, call `incrementBooks` when book is marked complete. All calls go through the `useReadingGoals` hook. | `src/components/ReaderContainer.tsx` |
+| 4 | Hephaestus (renderer-scope) | **GoalProgressWidget** — Compact component for library header: one progress bar per active goal (thin, accent color, percentage fill). Show "3/10 pages today" or "45/60 min today" labels. When all goals met, collapse to checkmark icon. Click navigates to goals settings. | `src/components/GoalProgressWidget.tsx` (new), `src/styles/global.css` |
+| 5 | Hephaestus (renderer-scope) | **ReadingGoalsSettings** — New settings sub-page. List active goals with edit/delete. "Add Goal" button → inline form (type selector, target number). Show current streak per goal. | `src/components/settings/ReadingGoalsSettings.tsx` (new), `src/components/SettingsMenu.tsx` |
+| 6 | Hephaestus (renderer-scope) | **Wire widget into library** — Add `GoalProgressWidget` to LibraryContainer header area. Only render when `settings.goals.length > 0`. | `src/components/LibraryContainer.tsx` |
+| 7 | Hippocrates | **Tests** — (a) Goal creation persists to settings. (b) Daily reset clears page/minute counters at midnight. (c) Weekly reset clears book counter on Monday. (d) Streak increments when daily goal met before reset. (e) Streak resets when daily goal not met. (f) Progress widget renders correct fill percentage. (g) Widget hidden when no goals set. (h) incrementPages/incrementMinutes/incrementBooks update correctly. ≥10 new tests. | `tests/` |
+| 8 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 9 | Solon | **Spec compliance** | — |
+| 10 | Herodotus | **Documentation pass** | All 6 governing docs |
+| 11 | Hermes | **Git: commit, merge, push** | — |
 
 #### SUCCESS CRITERIA
 

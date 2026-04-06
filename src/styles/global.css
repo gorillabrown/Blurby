@@ -3723,16 +3723,6 @@ button:focus-visible {
   transition: background-color 0.15s ease, opacity 0.15s ease;
 }
 
-/* TTS-7O: 3-word narration context window — subtler highlight for words N+1 and N+2 */
-.page-word--narration-context {
-  background: var(--accent-faded);
-  color: inherit;
-  padding: 1px 2px;
-  border-radius: 2px;
-  opacity: 0.6;
-  transition: background-color 0.15s ease, opacity 0.15s ease;
-}
-
 /* Flow mode cursor for EPUB words (foliate shadow DOM) — underline on word spans */
 .page-word--flow-cursor {
   border-bottom: 3px solid var(--accent);
@@ -3854,7 +3844,9 @@ button:focus-visible {
   box-shadow: 0 0 4px var(--accent);
 }
 
-/* Overlay highlight for EPUB narration — positioned over current spoken word */
+/* Overlay highlight for EPUB narration — fixed-size line highlight.
+   TTS-7R (BUG-145a): Width and height are measured once at narration start and set
+   via JS; they never change per-word. Only transform (Y position) and opacity animate. */
 .foliate-narration-highlight {
   position: absolute;
   background: linear-gradient(
@@ -3869,11 +3861,11 @@ button:focus-visible {
   border-radius: 8px;
   pointer-events: none;
   z-index: 100;
-  will-change: transform, width, height, opacity;
-  transition: opacity 80ms ease;
+  will-change: transform, opacity;
+  transition: transform 80ms ease, opacity 80ms ease;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
   opacity: 0;
-  transform-origin: left center;
+  transform-origin: left top;
 }
 
 .return-to-reading-pill {
