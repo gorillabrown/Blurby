@@ -4420,3 +4420,41 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 12. `npm run build` succeeds
 
 **Depends on:** TTS-7Q
+
+---
+
+### Sprint HOTFIX-12: Bug Report Triage Fixes (BUG-146–150) ✅ (v1.37.1)
+
+**Archived:** 2026-04-05
+
+**Goal:** Fix five bugs surfaced during the April 5 bug report review session — a mix of UX gaps, keyboard handling, and performance issues.
+
+**Bugs resolved:** BUG-146 (chapter dropdown doesn't track narration cursor), BUG-147 (no return-to-narration affordance), BUG-148 (no position restore feedback), BUG-149 (large EPUB extraction blocks UI), BUG-150 (bug reporter swallows keyboard shortcuts).
+
+**Changes:**
+- `src/hooks/useKeyboardShortcuts.ts` — Keyboard guard refined: early-return if `e.target` is a `<textarea>`, `<input>`, or `[contenteditable]`. Simpler and more robust than modal-whitelisting.
+- `src/components/BugReportModal.tsx` — Ctrl+Enter keydown handler calls `handleSave()`.
+- `src/components/ReaderBottomBar.tsx` — Added `narrationWordIndex` prop; chapter dropdown uses it (instead of `wordIndex`) when narration is active.
+- `src/components/ReaderContainer.tsx` — Passes `narrationWordIndex` to ReaderBottomBar; floating "Return to narration" pill button renders when user pages away from narration cursor; position restore toast shown on initial book open with saved position.
+- `main/epub-word-extractor.js` — Extraction loop yields between sections via `await new Promise(r => setImmediate(r))`; extraction delay increased from 1s to 2s for books > 100k words.
+- `src/styles/global.css` — Styles for floating return-to-narration pill button.
+
+**Tests:** 17 new tests in `tests/hotfix12.test.ts`. Total: 1,546 tests across 86 test files.
+
+**SUCCESS CRITERIA (all 14 met):**
+1. Ctrl+Left/Right, Ctrl+Backspace work inside bug reporter textarea
+2. Ctrl+Enter submits bug report from modal
+3. Global keyboard shortcuts still work when no text input is focused
+4. Chapter dropdown label updates to reflect narration cursor during active narration
+5. Chapter dropdown falls back to reading wordIndex when narration is not active
+6. "Return to narration" button appears when user pages away from narration position
+7. "Return to narration" button navigates to narration cursor on click
+8. "Return to narration" button auto-hides when narration range becomes visible or narration stops
+9. Brief toast appears on book reopen when position is restored
+10. Toast does not appear on first open (position = 0) or on every page turn
+11. UI remains responsive during background extraction of large EPUBs
+12. ≥8 new tests (17 delivered)
+13. `npm test` passes (1,546 tests, 0 failures)
+14. `npm run build` succeeds
+
+**Depends on:** Independent of TTS-7R

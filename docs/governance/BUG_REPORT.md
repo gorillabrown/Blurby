@@ -19,45 +19,40 @@
 - **BUG-145c:** Added `lastConfirmedAudioWordRef` to `useNarration.ts`; `speakNextChunkKokoro` reads from it instead of `cursorWordIndex`; truth-sync corrects visual overlay position only, does not write narration state.
 - Removed `.page-word--narration-context` per-word highlight CSS.
 
-### BUG-146: Chapter dropdown doesn't track current section during narration
-**Reported:** 2026-04-05
+### ~~BUG-146~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Cosmetic
-**Location:** `src/components/ReaderBottomBar.tsx` (lines 140–144), `src/components/ReaderContainer.tsx`
-**Description:** The chapter dropdown in the bottom bar (ReaderBottomBar) doesn't update to reflect the current section while narration is playing. The dropdown uses `wordIndex` to compute `currentChapterIndex`, but `wordIndex` tracks the reading/page position — not the narration cursor position. During narration, the user may be hearing chapter 5 while the dropdown still shows the chapter from where they last manually navigated.
-**Root cause:** `curChapterIdx` is derived from `wordIndex` (ReaderBottomBar.tsx:141), which reflects reading position, not narration cursor position. When narration crosses a chapter boundary, the reading position `wordIndex` doesn't update — only the narration cursor does.
-**Recommended fix:** When narration is active, derive `curChapterIdx` from the narration cursor word index (passed as a prop from ReaderContainer's narration state) instead of the reading `wordIndex`. Add a `narrationWordIndex` prop to ReaderBottomBar, and use it as the input to `currentChapterIndex()` when narration status is `speaking`.
+**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** Chapter dropdown didn't update to reflect current section during narration — used `wordIndex` (reading position) instead of narration cursor position.
+**Fix:** Added `narrationWordIndex` prop to ReaderBottomBar. ReaderContainer passes `cursorWordIndex` when `narrationStatus === “speaking”`, null otherwise. `currentChapterIndex()` uses `narrationWordIndex ?? wordIndex`.
 
-### BUG-147: No “return to narration position” affordance
-**Reported:** 2026-04-05
+### ~~BUG-147~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Minor (enhancement)
-**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/FoliatePageView.tsx`
-**Description:** When narration is playing and the user pages away from the currently-narrated section, there is no visible button or affordance to jump back to where narration is happening. The user reported: “Jump back to live page button is non-existent.” Audiobook apps and PDF readers universally provide a “return to playback position” button that appears when the user scrolls away from the active narration point.
-**Root cause:** Feature gap — the UI was never built. The narration system knows the current word index, and the reader knows the visible word range, so detecting “user is away from narration” is straightforward.
-**Recommended fix:** Add a floating “return to narration” button (or bottom bar indicator) that appears when the visible page range does not contain the current narration word index. On click, navigate the reader to the narration cursor position. Show only when narration is active and user has paged away. Dismiss automatically when the user returns to the narration range.
+**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+**Description:** No visible affordance to jump back to narration position when user pages away from currently-narrated section.
+**Fix:** Floating “Return to narration” pill button added to ReaderContainer. Appears when narration is active and `cursorWordIndex` is outside the currently-visible word range. Navigates to narration cursor on click. Auto-hides when narration range becomes visible again or narration stops.
 
-### BUG-148: No visual feedback on position restore after app reopen
-**Reported:** 2026-04-05
+### ~~BUG-148~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Minor
-**Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
-**Description:** After closing and reopening the app, the reading position IS correctly restored (CFI and word position are preserved via the resume anchor system), but there is no visible indication that position was restored. The user perceives this as “my place is not maintained” because the page loads without any highlight, toast, or momentary indicator showing where they left off. The console confirms the TTS-7M resume anchor system is working correctly — the page navigates to the saved position, but the experience feels like starting fresh.
-**Root cause:** The resume anchor system (TTS-7M) correctly restores position but provides no visual feedback. The saved position is used to navigate Foliate, and the `onRelocate` guard prevents passive overwrite, but neither the reading UI nor the bottom bar signals “you've been returned to your last position.”
-**Recommended fix:** Show a brief, dismissable toast or position indicator on book open when restoring a saved position. Something like “Restored to page X” or a momentary highlight on the first visible line. Keep it subtle — no modal, no blocking UI. Alternatively, show a faint scroll-position marker in the progress bar that fades after 2 seconds.
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** No visual feedback when reading position is restored after app reopen — users perceived the correct restore as “starting fresh.”
+**Fix:** Brief toast “Restored to your last position” shown on initial book open when resume anchor restores a position > 0. Gated by `hasShownRestoreToast` ref to prevent re-showing on subsequent page turns. Auto-dismisses after 2 seconds.
 
-### BUG-149: Large EPUB word extraction blocks UI on book open
-**Reported:** 2026-04-05
+### ~~BUG-149~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Broken
-**Location:** `src/components/ReaderContainer.tsx` (lines 472–500), `main/epub-word-extractor.js`
-**Description:** Opening a 264k-word EPUB (“Capital in the Twenty-First Century”) causes the UI to be unresponsive — “nothing is selectable” — for several seconds. The console shows the TTS-6O background pre-extraction eventually completing with 270,494 words, but during extraction the renderer is unresponsive. The extraction runs via IPC to the main process (`extractEpubWords`), which does synchronous-looking AdmZip + cheerio parsing.
-**Root cause:** The `extractEpubWords` IPC handler in `main/epub-word-extractor.js` likely processes the entire EPUB in a single synchronous pass. While the IPC call itself is async from the renderer's perspective, the main process is blocked during extraction, which blocks ALL IPC handlers — including Foliate navigation, selection, and click handling. The 1-second delay timer (line 497) only defers the start; it doesn't prevent the main-thread block once extraction begins.
-**Recommended fix:** Two options, not mutually exclusive: (1) **Chunk the extraction** — process sections/chapters incrementally, yielding back to the event loop between chapters (e.g., `setImmediate` between sections). This prevents the main process from blocking for the entire extraction duration. (2) **Move extraction to a worker thread** — run the AdmZip + cheerio pass in a Node.js worker thread so the main process event loop stays responsive. Option 1 is simpler and probably sufficient. Additionally, consider deferring extraction entirely until narration is actually started (lazy extraction), rather than eagerly extracting on every book open.
+**Location:** `main/epub-word-extractor.js`, `src/components/ReaderContainer.tsx`
+**Description:** Opening a large EPUB (264k words) blocked the UI — nothing was selectable for several seconds during extraction.
+**Fix:** Extraction loop now yields between sections via `await new Promise(r => setImmediate(r))`, keeping the main-process event loop responsive. Renderer extraction delay increased from 1s to 2s for books > 100k words.
 
-### BUG-150: Bug reporter modal doesn't suppress app keyboard shortcuts
-**Reported:** 2026-04-05
+### ~~BUG-150~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
 **Severity:** Broken
-**Location:** `src/components/BugReportModal.tsx`, `src/hooks/useKeyboardShortcuts.ts`
-**Description:** When the bug report dialog is open (Ctrl+Shift+B), standard text editing shortcuts like Ctrl+Left/Right (word-jump) are intercepted by the app's global keyboard handler (`useKeyboardShortcuts.ts` lines 196–197) which calls `e.preventDefault()` and routes them to narration seek. This makes it impossible to navigate text in the bug description textarea using standard keyboard shortcuts. Additionally, there is no Ctrl+Enter shortcut to submit the report — the user must click the Save button.
-**Root cause:** The global keydown handler in `useKeyboardShortcuts.ts` listens on `window` and fires before the modal's own handlers can process the event. The handler doesn't check whether focus is inside a text input, textarea, or modal overlay. The bug reporter's Escape handler (BugReportModal.tsx:47) uses `capture: true` which works, but the global handler also uses capture phase or fires early enough to steal Ctrl+arrows.
-**Recommended fix:** Two changes: (1) **Guard the global handler** — in `useKeyboardShortcuts.ts`, early-return if `e.target` is a `<textarea>`, `<input>`, or `[contenteditable]` element, OR if a bug report modal is open (check for `.bug-report-overlay` in DOM or use a context/ref flag). (2) **Add Ctrl+Enter submit** — in `BugReportModal.tsx`, add a keydown handler on the textarea (or the dialog) that calls `handleSave()` on Ctrl+Enter.
+**Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/BugReportModal.tsx`
+**Description:** Global keyboard shortcuts (Ctrl+Left/Right) were intercepted inside the bug reporter textarea, preventing standard text navigation. No Ctrl+Enter shortcut existed to submit.
+**Fix:** (1) `useKeyboardShortcuts.ts` early-returns if `e.target` is `<textarea>`, `<input>`, or `[contenteditable]`. (2) `BugReportModal.tsx` calls `handleSave()` on Ctrl+Enter keydown.
 
 ### ~~BUG-143~~ ✅ Fixed — TTS-7Q (v1.36.1)
 **Reported:** 2026-04-05 | **Resolved:** 2026-04-05

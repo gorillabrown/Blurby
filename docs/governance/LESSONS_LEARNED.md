@@ -906,3 +906,19 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 - PR-145: `lastConfirmedAudioWordRef` must be written ONLY by audio scheduler confirmed boundary events. No visual advance callback, truth-sync, or reducer dispatch should update it.
 - PR-146: `speakNextChunkKokoro` (and any future chunk-generation entry point) must read chunk start from `lastConfirmedAudioWordRef`, never from `cursorWordIndex` or any field that the visual follower can write.
 - PR-147: Truth-sync is a visual correction guardrail only. If truth-sync needs to snap the overlay to a different line, it updates the overlay element's transform directly — it must not write any state that the chunk-generation pipeline could read.
+
+---
+
+### [2026-04-05] LL-080: Global Keyboard Guard Must Check Input Target, Not Modal State
+
+**Area:** renderer, keyboard, useKeyboardShortcuts, accessibility
+**Status:** active
+**Priority:** moderate
+
+**Context:** `HOTFIX-12` found that the global `window` keydown handler in `useKeyboardShortcuts.ts` was stealing Ctrl+Left/Right from the bug reporter textarea, and would do the same to any future modal or inline input. The initial spec considered two approaches: (a) check for a modal-open flag or CSS class in the DOM, or (b) check `e.target` element type directly.
+
+**Root Cause:** Approach (a) couples the keyboard guard to specific modal state — it must be updated whenever a new modal is added. Approach (b) is a universal rule: inputs deserve their native shortcuts everywhere, unconditionally.
+
+**Fix:** Early-return at the top of the keydown handler if `e.target` is a `<textarea>`, `<input>`, or has a `contenteditable` attribute. No `preventDefault`. This single guard protects all current and future text inputs app-wide.
+
+**Guardrail:** The global keyboard handler in `useKeyboardShortcuts.ts` must always have an early-return guard that checks `e.target` for `<textarea>`, `<input>`, or `contenteditable` before processing any shortcut. Never gate this check on modal-specific state — that approach doesn't scale and will regress as new modals are added.

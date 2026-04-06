@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED (below minimum 3). Backfill needed.
-Next sprint: HOTFIX-12 (Bug Report Triage Fixes)
-Health: RED — TTS-7R complete. HOTFIX-12 queued. EINK/GOALS parked. Need 2 more for GREEN.
+Queue depth: 0 — RED (below minimum 3). Backfill needed.
+Next sprint: None queued — spec new sprints from IDEAS.md or Someday Backlog.
+Health: RED — HOTFIX-12 complete. EINK/GOALS parked. Need 3 sprints for GREEN.
 ```
 
 ---
@@ -21,11 +21,9 @@ Health: RED — TTS-7R complete. HOTFIX-12 queued. EINK/GOALS parked. Need 2 mor
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | HOTFIX-12 | v1.37.1 | `sprint/hotfix-12-triage` | Quick | — | **FULLY SPEC'D.** Bug report triage fixes. BUG-146 (chapter dropdown), BUG-147 (return-to-narration button), BUG-148 (position restore toast), BUG-149 (chunked extraction), BUG-150 (bug reporter keyboard). 10 tasks, 14 success criteria. Independent of TTS-7R. |
+| — | *(empty)* | — | — | — | — | Queue depleted. Backfill required before next dispatch. |
 
-**Agent staging rule:** HOTFIX-12 is Quick-tier (Hippocrates → Solon → Herodotus → Hermes). Zeus orchestrates; doer agents (Hermes/Hephaestus/Athena) handle implementation.
-
-**Dispatch status:** HOTFIX-12 is next. Queue depth is 1 — RED. Need 2 more sprints for GREEN.
+**Dispatch status:** Queue depth 0 — RED. Spec 3 new sprints from IDEAS.md before resuming implementation work.
 
 **Watch item:** EINK-6A/6B and GOALS-6B are parked (fully spec'd in ROADMAP.md, ready to re-queue when TTS/extension focus concludes).
 
@@ -49,6 +47,7 @@ Health: RED — TTS-7R complete. HOTFIX-12 queued. EINK/GOALS parked. Need 2 mor
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes. BUG-146/147/148/149/150 resolved — chapter dropdown narration tracking, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined + Ctrl+Enter in bug reporter. 17 new tests (1,546 total). v1.37.1. |
 | TTS-7R | 2026-04-05 | PASS | Calm narration band & cursor ownership fix. BUG-145a/b/c resolved — `lastConfirmedAudioWordRef` separates canonical audio cursor from visual cursor; `SIMPLE_NARRATION_GLIDE` removed (audio-progress glide active); fixed-size overlay band (measure-once line-height); truth-sync visual-only; per-word context CSS removed. 25 new tests (`tests/calmNarrationBand.test.ts`, 1,529 total). v1.37.0. |
 | TTS-7Q | 2026-04-05 | PASS* | True glide & audio-aligned narration cursor. BUG-143/144 resolved — canonical `AudioProgressReport` type + `getAudioProgress()` on scheduler; `onChunkHandoff` callback wired through kokoroStrategy and exposed on `useNarration`; RAF-based glide loop in `FoliatePageView.tsx` drives the narration band from audio-time progress, not DOM chasing; chunk handoff is continuity-safe. New `src/utils/narrateDiagnostics.ts` + new test file `tests/audioGlide.test.ts`. 25 new tests (1,504 total). v1.36.1. Follow-on live issue tracked separately as BUG-145 (visual band still laggy / over-corrected). |
 | TTS-7P | 2026-04-05 | PASS | Rolling pause-boundary planner. BUG-140 resolved — new `narrationPlanner.ts` builds local boundary plans for the active text window; `generationPipeline.ts` and `kokoroStrategy.ts` updated to consult the plan; silence injection, resume, retarget, and dialogue handling all use one consistent structure. 33 new tests (1,479 total). v1.36.0. |

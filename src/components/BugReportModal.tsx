@@ -42,19 +42,6 @@ export default function BugReportModal({ screenshotPath, screenshotFile, appStat
     textareaRef.current?.focus();
   }, []);
 
-  // Escape to close
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handler, true);
-    return () => window.removeEventListener("keydown", handler, true);
-  }, [onClose]);
-
   const handleSave = useCallback(async () => {
     if (saving) return;
     setSaving(true);
@@ -73,6 +60,24 @@ export default function BugReportModal({ screenshotPath, screenshotFile, appStat
       setSaving(false);
     }
   }, [description, severity, appState, screenshotFile, saving, showToast, onClose]);
+
+  // Escape to close, Ctrl+Enter to submit
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleSave();
+      }
+    };
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
+  }, [onClose, handleSave]);
 
   const [showDiag, setShowDiag] = useState(false);
   const [showConsole, setShowConsole] = useState(false);
