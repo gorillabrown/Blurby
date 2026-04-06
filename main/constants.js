@@ -36,7 +36,7 @@ const COVER_CACHE_MAX = 100;
 /** Local WebSocket port for Chrome extension communication */
 const WS_PORT = 48924;
 /** WebSocket heartbeat interval — detects stale connections (ms) */
-const HEARTBEAT_INTERVAL_MS = 30000;
+const HEARTBEAT_INTERVAL_MS = 15000;
 /** WS server retry delay when port is in use (ms) */
 const WS_RETRY_DELAY_MS = 5000;
 /** Short pairing code time-to-live (ms) — 5 minutes */

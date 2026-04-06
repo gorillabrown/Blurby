@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — SELECTION-1 complete (v1.38.0). Word anchor contract shipped. BUG-151/152/153 resolved.
+**Last updated**: 2026-04-06 — HOTFIX-14 complete (v1.38.2). BUG-155/156/157/158 all resolved. Queue depth 4 (GREEN).
 **Current branch**: `main`
-**Current state**: v1.38.0 stable. Queue depth 5 (GREEN). HOTFIX-14 is next (BUG-157/158 CLI-ready, BUG-155/156 need investigation).
+**Current state**: v1.38.2 stable. Queue depth 4 (GREEN). Next: EXT-ENR-A (investigation done, needs spec hardening).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -39,9 +39,9 @@ Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
   └── GOALS-6B: Reading Goal Tracking (parked)
     │
     ▼
-SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed)
+SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed) ✅
     │
-HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158)
+HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅
     │
     ├───────────────────────────────────┐
     ▼                                   ▼
@@ -225,31 +225,83 @@ Task 15 (Git)
 
 ---
 
-## HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158)
+## HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅ COMPLETED
 
-**Goal:** Fix URL extraction, false Chrome extension connection status, add disconnect/reconnect, and simplify library flap.
+**Goal:** Fix URL extraction fallback, false Chrome extension connection status, add disconnect/reconnect, and simplify library flap.
+
+**Partial shipment (v1.38.1):** BUG-157 (disconnect button) and BUG-158 (library flap) shipped 2026-04-06. Remaining: BUG-155 + BUG-156.
+
+**Investigation report:** `docs/investigations/HOTFIX-14-investigation.md` — URL test results (5/5 pass with Node fetch), full `_clients` Set state diagram, three compounding root causes for false connected status.
 
 **Bugs:**
 
-| ID | Description | Severity | Scope |
-|----|-------------|----------|-------|
-| BUG-155 | URL extraction broken — "Could not extract article" error | High | `main/url-extractor.js` |
-| BUG-156 | False "Connected" status when extension not connected | Medium | `main/ws-server.js`, `ConnectorsSettings.tsx` |
-| BUG-157 | No disconnect/reconnect button for Chrome extension | Medium | `ConnectorsSettings.tsx` |
-| BUG-158 | Library flap shows too many categories — simplify to "Now Reading" + "Queue" | Low | `ReadingQueue.tsx` |
+| ID | Description | Severity | Status |
+|----|-------------|----------|--------|
+| ~~BUG-157~~ | ~~No disconnect/reconnect button~~ | ~~Medium~~ | ✅ Shipped v1.38.1 |
+| ~~BUG-158~~ | ~~Library flap too many categories~~ | ~~Low~~ | ✅ Shipped v1.38.1 |
+| BUG-155 | URL extraction fails on WAF-protected sites — missing `fetchWithBrowser` fallback | High | **CLI-READY** |
+| BUG-156 | False "Connected" status — unauth clients counted + stale detection + infrequent poll | Medium | **CLI-READY** |
 
-### Investigation Gate (Cowork — before CLI dispatch)
+### Investigation Gate — CLEARED
 
-| Bug | What We Know | What We Don't Know | Investigation Action |
-|-----|-------------|-------------------|---------------------|
-| BUG-155 | Error flow mapped: `extractArticleFromHtml()` in `url-extractor.js:493-798` tries __preloadedData, JSON-LD, Readability, DOM selectors. Returns `{ error }` at line 748. IPC handler in `ipc/misc.js:152-282` wraps with user-friendly message. Technical error logged to file. | **Is this site-specific or general?** Does the fetch itself fail (network/CORS)? Or does Readability parse but return empty? The tested URL (ebsco.com) likely requires auth. | **Cowork: Live test.** Test 3-5 URLs (Wikipedia article, NYT, Medium, a simple blog, EBSCO). Check error log for technical details. Determine if general regression or site-specific. Produce fix spec or mark as expected behavior. |
-| BUG-156 | `ConnectorsSettings.tsx:32` sets `connected` from `api.getWsShortCode()`. IPC handler at `ipc/misc.js:379` checks `wsServer.getClientCount() > 0`. `_clients` Set in ws-server.js tracks authenticated clients. | **Why `getClientCount()` returns >0 with no client.** Is `_clients` not cleaned up on disconnect? Is a stale/dead client remaining in the set? Is the heartbeat check failing to remove timed-out clients? | **Cowork: Code trace.** Read ws-server.js client lifecycle: (a) where clients are added to `_clients`, (b) where they're removed (disconnect, heartbeat timeout, error), (c) whether the heartbeat sweep correctly cleans stale entries. Produce exact fix spec. |
-| BUG-157 | `ConnectorsSettings.tsx` has no disconnect button. `ipc/misc.js:389-397` has `regenerate-ws-pairing-token` handler already wired. | **Nothing — this is a straightforward UI addition.** | **CLI-READY.** Add "Disconnect" button that calls `regenerate-ws-pairing-token` (clears token, drops connections). Add "Generate New Code" button for re-pairing. Exact placement: below the status indicator in ConnectorsSettings. |
-| BUG-158 | `ReadingQueue.tsx` has three sections at lines 146-162: "Queue" (draggable), "Continue Reading" (position > 0), "Unread" (position === 0). User wants only "Now Reading" + "Queue". | **Nothing — this is a straightforward filter change.** | **CLI-READY.** Remove "Unread" section (line 160). Rename "Continue Reading" → "Now Reading". Keep "Queue" as-is. Two-line change. |
+Both BUG-155 and BUG-156 root causes confirmed. Full investigation at `docs/investigations/HOTFIX-14-investigation.md`.
 
-**Dispatch readiness:** PARTIALLY READY. BUG-157 and BUG-158 are CLI-ready now. BUG-155 and BUG-156 need Cowork investigation first.
+**BUG-155 root cause:** Electron's built-in `fetch()` triggers WAF rejection on sites like EBSCO (HTTP 400 — Chromium TLS fingerprint detected as bot). The `fetchWithBrowser` fallback (hidden BrowserWindow with full session) only exists in the `hasLogin` branch of `misc.js:164-173`. The `else` branch at lines 174-177 has no fallback — error propagates directly to user-facing toast.
 
-**Tier:** Quick | **Depends on:** Investigation gate cleared for BUG-155/156; BUG-157/158 can ship immediately
+**BUG-156 root cause (triple):** (1) `getClientCount()` at `ws-server.js:511` counts ALL clients including unauthenticated — a WebSocket that connected but never sent auth registers as "connected." (2) Dead client detection takes up to 60 seconds (two heartbeat cycles at 30s each). (3) ConnectorsSettings only polls on mount and on short-code expiry (5-minute gap) — stale state persists in UI.
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for URL extraction, WebSocket, extension entries
+3. `docs/investigations/HOTFIX-14-investigation.md` — MUST READ — full root cause analysis, state diagrams, fix specs
+4. `ROADMAP.md` — this section
+5. `main/ipc/misc.js` — URL extraction IPC handler (lines 152-282), WS status handler (lines 377-381)
+6. `main/ws-server.js` — `getClientCount()` (line 511), `_clients` lifecycle (add at 144, delete at 152/157/174/465/473)
+7. `src/components/settings/ConnectorsSettings.tsx` — connection status polling (lines 27-57)
+8. `main/constants.js` — `HEARTBEAT_INTERVAL_MS` (line 39)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes (electron-scope) | **Fix BUG-155 — Add `fetchWithBrowser` fallback to no-login branch.** Wrap the `else` block at `misc.js:174-177` in try/catch, add `fetchWithBrowser` fallback after catch, mirroring the `hasLogin` branch at lines 164-173. See investigation report §A Fix Spec for exact before/after code. | `main/ipc/misc.js` | Lines 174-177. Replace 3 lines with ~8 lines (try/catch + fallback). |
+| 2 | Hermes (electron-scope) | **Fix BUG-156a — Filter `getClientCount()` to authenticated clients only.** Replace `return _clients.size` with a loop that counts only `client.authenticated === true`. See investigation report §B Fix 1 for exact code. | `main/ws-server.js` | Lines 511-513. Replace function body (~3 lines → ~5 lines). |
+| 3 | Hermes (renderer-scope) | **Fix BUG-156b — Add periodic status polling in ConnectorsSettings.** Add a `useEffect` with a 5-second `setInterval` that calls `api.getWsShortCode()` and updates `connected` state. Clean up on unmount. See investigation report §B Fix 2 for exact code. | `src/components/settings/ConnectorsSettings.tsx` | Insert after mount useEffect (~line 35). ~8 lines. |
+| 4 | Hermes (electron-scope) | **Fix BUG-156c (optional) — Reduce heartbeat interval.** Change `HEARTBEAT_INTERVAL_MS` from 30000 to 15000. Cuts dead-client detection from 60s to 30s. | `main/constants.js` | Line 39. Single value change. |
+| 5 | Hippocrates | **Tests** — ≥6 new tests: (a) `getClientCount()` returns 0 when only unauthenticated clients connected, (b) `getClientCount()` returns 1 when one authenticated client connected, (c) URL extraction IPC handler falls through to `fetchWithBrowser` when `fetchWithCookies` throws, (d) URL extraction IPC handler returns result from `fetchWithBrowser` fallback, (e) ConnectorsSettings polls connection status on interval, (f) heartbeat removes dead clients. | `tests/` | New or existing test files. |
+| 6 | Hippocrates | **`npm test` + `npm run build`** | — | — |
+| 7 | Solon | **Spec compliance** — Verify all 10 SUCCESS CRITERIA items met. | — | — |
+| 8 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, test count), ROADMAP.md (mark HOTFIX-14 complete), SPRINT_QUEUE.md (remove, log to completed), BUG_REPORT.md (mark BUG-155/156 resolved). | All 6 governing docs | — |
+| 9 | Hermes | **Git: commit, merge, push** | — | Branch: `hotfix/14-import-connection` (reuse existing branch) |
+
+### Execution Sequence
+
+```
+Tasks 1-4 (all fixes)    — parallel, independent edit sites
+    ↓
+Task 5 (tests)            — after all fixes
+Task 6 (npm test + build) — after tests written
+    ↓
+Task 7 (Solon)
+Task 8 (Herodotus)
+Task 9 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. URL extraction succeeds for EBSCO URL (or any WAF-protected site) via `fetchWithBrowser` fallback
+2. URL extraction still succeeds for standard URLs (Wikipedia, Paul Graham, MDN) via primary `fetchWithCookies` path — no regression
+3. `getClientCount()` returns 0 when no authenticated clients are connected
+4. `getClientCount()` returns correct count with mix of authenticated and unauthenticated clients
+5. ConnectorsSettings shows "Disconnected" within 10 seconds of extension disconnect (5s poll + 5s buffer)
+6. ConnectorsSettings shows "Connected" only when an authenticated client is present
+7. Heartbeat interval reduced to 15 seconds (dead-client window ≤30s)
+8. ≥6 new tests
+9. `npm test` passes, `npm run build` succeeds
+10. BUG-157/158 remain working (no regression from partial shipment)
+
+**Tier:** Quick | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
 
 ---
 
@@ -769,3 +821,4 @@ Flow mode today:
 15. `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** TTS-7D (independent of EINK-6A/6B — can run in parallel)
+                                                                                                               

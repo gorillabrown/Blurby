@@ -172,8 +172,15 @@ function register(ctx) {
           result = extractArticleFromHtml(html, url);
         }
       } else {
-        html = await fetchWithCookies(url);
-        result = extractArticleFromHtml(html, url);
+        try {
+          html = await fetchWithCookies(url);
+          result = extractArticleFromHtml(html, url);
+        } catch { /* fall through to browser fetch */ }
+
+        if (!result || result.error) {
+          html = await fetchWithBrowser(url);
+          result = extractArticleFromHtml(html, url);
+        }
       }
 
       if (!result || result.error) {

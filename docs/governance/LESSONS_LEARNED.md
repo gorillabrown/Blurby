@@ -997,3 +997,17 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** Never use `useState` for visual-only word indicators in FoliatePageView or ReaderContainer. Use refs + shadow DOM class manipulation. This is the same pattern used for narration band position, highlighted word overlay, and flow cursor. Mixing state-driven and ref-driven visual indicators on the same DOM element causes flicker and ordering bugs.
 
 **Guardrail:** Every fallback value derived from DOM measurement must have a reasonable upper bound. For visual elements with expected line-height dimensions, cap to ~2x expected size (e.g., 40px for a line-height band). Never pass raw `getBoundingClientRect()` results directly into visual sizing without a ceiling. This applies to width as well — `bodyRect.width` is safe for single-column but may be wrong for two-column layouts.
+
+---
+
+### [2026-04-06] LL-084: Electron fetch() Is Rejected by WAF-Protected Sites — Always Provide fetchWithBrowser Fallback
+
+**Area:** main process, URL extraction, url-extractor.js, misc.js
+**Status:** active
+**Priority:** high
+
+**Context:** BUG-155 — HOTFIX-14. URL extraction for EBSCO and Cloudflare-protected sites returned HTTP 400 silently, causing a user-facing "Could not extract article" error. The `fetchWithBrowser` fallback (hidden BrowserWindow with full Chromium session) existed in the `hasLogin` branch of `misc.js` but was absent from the `else` (no-login) branch.
+
+**Root cause:** Electron's built-in `fetch()` uses Chromium's network stack with identifiable TLS fingerprints and `Sec-Ch-Ua` headers that WAF systems (EBSCO, Cloudflare) detect as a bot/automated client and reject with HTTP 400 or 403. A hidden `BrowserWindow` with a real session bypasses this because it presents as a normal browser navigation.
+
+**Guardrail:** The no-login branch of URL extraction (`misc.js` — the `else` branch after the `hasLogin` check) must always include `fetchWithBrowser` as a fallback when the primary Node `fetch()` returns a 4xx status. Never assume Node fetch is sufficient for all sites. The pattern: try Node fetch → if status 4xx → retry with `fetchWithBrowser` hidden window → surface error only if both fail.

@@ -146,7 +146,7 @@ The dispatch's Task table tells Zeus:
 Before committing, verify ALL of these:
 
 - [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
-- [ ] `npm test` passes (1,563+ tests, 0 failures)
+- [ ] `npm test` passes (1,575+ tests, 0 failures)
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
 - [ ] LESSONS_LEARNED guardrails were not violated
@@ -299,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.38.0 — queue GREEN, 3 priority tracks roadmapped, 3 open bugs)
+## Current System State (v1.38.2 — queue GREEN, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -320,11 +320,13 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7R complete** — BUG-145a/b/c resolved. Separated canonical audio cursor from visual cursor (`lastConfirmedAudioWordRef`), enabled audio-progress glide (removed `SIMPLE_NARRATION_GLIDE`), fixed-size overlay band (measure-once line-height), truth-sync visual-only pathway, removed per-word context CSS. 25 new tests (`tests/calmNarrationBand.test.ts`). v1.37.0.
 - **HOTFIX-12 complete** — BUG-146/147/148/149/150 resolved. Chapter dropdown tracks narration cursor, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined (Escape-only for inputs) + Ctrl+Enter submit in bug reporter. 17 new tests. v1.37.1.
 - **SELECTION-1 complete** — Word anchor contract: soft/hard selection tiers, mode start resolution chain, BUG-151/152/153 resolved. 17 new tests. v1.38.0.
-- Active queue: depth 5 — GREEN. HOTFIX-14 → EXT-ENR-A → FLOW-INF-A → FLOW-INF-B → EXT-ENR-B. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
-- 3 open bugs: BUG-154 (parked), BUG-155, BUG-156. BUG-157/158 resolved (HOTFIX-14 partial). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
+- **HOTFIX-14 partial complete** — BUG-157 (disconnect button) + BUG-158 (library flap) shipped v1.38.1. BUG-155/156 investigation complete, fix specs CLI-ready.
+- **HOTFIX-14 complete** — URL extraction fetchWithBrowser fallback (BUG-155), authenticated-only client count + 5s status polling + 15s heartbeat (BUG-156). 12 new tests (1,575 total across 88 files). v1.38.2.
+- Active queue: depth 4 — GREEN. EXT-ENR-A → FLOW-INF-A → FLOW-INF-B → EXT-ENR-B. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). BUG-155/156/157/158 resolved (HOTFIX-14). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,563 tests across 87 test files
+- 1,575 tests across 88 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -372,5 +374,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro). Kokoro uses 3 native-rate buckets (1.0x/1.2x/1.5x) — no scheduler pitch-shift.
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Test Harness** (`src/test-harness/`): Browser-based E2E testing stub (Sprint CT-1)
-    - `electron-api-stub.ts` — Complete `window.electronAPI` surface (73 methods + 10 event listeners) with in-mem
+- **Test
