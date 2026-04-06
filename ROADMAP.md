@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-04-06 — HOTFIX-14 complete (v1.38.2). BUG-155/156/157/158 all resolved. Queue depth 4 (GREEN).
 **Current branch**: `main`
-**Current state**: v1.38.2 stable. Queue depth 4 (GREEN). Next: EXT-ENR-A (investigation done, needs spec hardening).
+**Current state**: v1.38.2 stable. Queue depth 4 (GREEN). Next: EXT-ENR-A (CLI-READY — fully spec'd with edit-site coordinates).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -402,40 +402,73 @@ Flow mode today:
 
 > **Vision:** The Chrome extension connection becomes effortless and resilient. No manual code entry on reconnect, no dropped connections on sleep/wake, and the app actively invites pairing when it senses an incoming connection attempt.
 
-### Current State (v1.37.1)
+### Current State (v1.38.2)
 
-- **WebSocket server** (`main/ws-server.js`) — localhost port 48924, RFC 6455, pairing token auth via `safeStorage`
-- **Pairing flow** — 6-digit short code with TTL, user manually enters in extension
-- **Article import** — `add-article` message type, HTML→EPUB conversion, hero image extraction, auto-queue
-- **Known pain points:** Connection times out or drops on sleep/wake. Reconnect requires re-pairing. No app-side awareness of incoming connection attempts.
+- **WebSocket server** (`main/ws-server.js`, 529 lines) — localhost port 48924, custom RFC 6455, pairing token auth via `safeStorage`. HOTFIX-14: auth-filtered `getClientCount()`, 15s heartbeat, 5s UI polling.
+- **Chrome extension** (`chrome-extension/`, in-repo) — service-worker.js (592 lines), popup.js (238 lines), popup.html, manifest.json. Flat 5s reconnect, fire-and-forget article send, no pending persistence.
+- **Pairing flow** — 6-digit short code with 5min TTL, long-lived token stored in safeStorage (server) + chrome.storage.local (extension). Token survives app restart.
+- **Article import** — `add-article` message type, HTML→EPUB conversion, hero image extraction, auto-queue. No delivery confirmation.
+- **Known pain points (post-HOTFIX-14):** Flat 5s reconnect (no backoff), pending articles lost on service worker kill, no delivery confirmation, unbounded EADDRINUSE retry, no auth timeout, binary connected/disconnected UI.
 
-### Investigation Gate — Track B (Cowork — before any EXT-ENR dispatch)
+### Investigation Gate — Track B: ✅ CLEARED
 
-| Area | What We Know | What We Don't Know | Investigation Action |
-|------|-------------|-------------------|---------------------|
-| WebSocket lifecycle | ws-server.js: clients added to `_clients` Set on auth, heartbeat ping/pong interval, `getClientCount()` used for status. IPC handlers in `ipc/misc.js:359-397`. | **Exact client cleanup paths.** When does a client get removed from `_clients`? On socket close? On heartbeat timeout? On error? Is there a race where a disconnected client stays in the set? | **Cowork: Code trace.** Read ws-server.js client removal logic. Map all paths from connected → removed. Identify gaps. This also resolves BUG-156. |
-| Extension source code | Extension was built for Phase 5 (EXT-5A/5B). Pairing flow, article import working. | **Where is the extension code?** Is it in this repo, a separate repo, or unpublished? What reconnection logic exists today? What does the popup UI look like? | **Cowork: Locate and read.** Find the Chrome extension source. Read its WebSocket client code. Determine what reconnect logic exists. This gates EXT-ENR-A spec. |
-| IPC event emission | ws-server.js doesn't proactively push state to renderer — renderer polls via `getWsShortCode()` every 1s. | **How to emit unauthenticated connection events to renderer.** Need a new IPC channel? `mainWindow.webContents.send("ws-connection-attempt")`? | **Cowork: Design.** Spec the IPC event shape and renderer handler. This gates EXT-ENR-B spec. |
+All three investigation areas resolved:
+- **WebSocket lifecycle:** Fully traced. `_clients` Set: add at line 144 (pre-auth), delete on socket close (152), error (157), WS close frame (174), heartbeat fail (466), heartbeat error (473). `getClientCount()` now auth-filtered (HOTFIX-14).
+- **Extension source code:** Located at `chrome-extension/` in-repo. Full reconnect logic, state vars, message flow traced.
+- **IPC event emission:** Renderer polls via `get-ws-short-code` IPC (misc.js:384-388) every 5s (HOTFIX-14). Push events deferred to EXT-ENR-B (auto-discovery pairing).
 
-**Dispatch readiness:** NOT READY. Extension source code location needed. Client lifecycle trace needed.
+### Sprint EXT-ENR-A: Resilient Extension Connection
 
-### Sprint EXT-ENR-A: Resilient Connection
+**Goal:** The WebSocket connection survives sleep/wake, network changes, and Chrome service worker restarts without re-pairing. Articles sent while disconnected are delivered when connection resumes.
 
-**Goal:** The WebSocket connection survives sleep/wake, network changes, and app restarts without re-pairing.
+**Version:** v1.39.0 | **Branch:** `sprint/ext-enr-a-resilient` | **Tier:** Quick
 
-**Responsibility:** Cowork specs (after investigation gate) → CLI executes both server-side and extension-side changes.
+**Baseline (v1.38.2):** HOTFIX-14 shipped auth-filtered `getClientCount()`, 5s UI polling, 15s heartbeat, disconnect button, and fetchWithBrowser fallback. Token persistence already works (safeStorage encrypt on pair, `chrome.storage.local` on extension side). Remaining gaps: flat 5s reconnect (no backoff), no message delivery confirmation, no chrome.storage.local persistence for pending article queue, unbounded EADDRINUSE retry, no auth timeout on server, no three-state connection indicator.
 
-**Deliverables:**
-1. Auto-reconnect with exponential backoff — extension retries on disconnect (1s, 2s, 4s, 8s... cap at 30s)
-2. Token persistence — valid pairing token survives app restart
-3. Heartbeat tuning — reduce ping interval, add grace period for missed pongs
-4. Connection state machine — extension tracks: `disconnected → connecting → authenticating → connected`
-5. App-side connection status — accurate "Connected" indicator (fixes BUG-156)
-6. Disconnect/reconnect button (BUG-157 — CLI-ready, can ship ahead of investigation)
+**WHERE (read order):**
+1. `chrome-extension/service-worker.js` (592 lines) — WebSocket client, reconnect logic, pending message queue, article send
+2. `main/ws-server.js` (529 lines) — WebSocket server, client lifecycle, heartbeat, EADDRINUSE retry
+3. `main/constants.js` — WS constants (lines 35-43)
+4. `src/components/settings/ConnectorsSettings.tsx` — Connection status UI, polling
+5. `main/ipc/misc.js` (lines 362-400) — WS IPC handlers (`get-ws-short-code`, `get-ws-status`)
+6. `preload.js` — electronAPI bridge (verify WS-related entries)
 
-**Key files:** `main/ws-server.js`, `src/components/settings/ConnectorsSettings.tsx`, Chrome extension source
+**Tasks:**
 
-**Tier:** Quick | **Depends on:** Investigation gate cleared
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Exponential backoff reconnect** — Replace flat 5s `RECONNECT_DELAY_MS` with exponential backoff: 1s → 2s → 4s → 8s → 16s → cap at 30s. Add jitter (±20%). Reset delay to 1s on successful auth. | Hephaestus | `chrome-extension/service-worker.js` | `scheduleReconnect()` at lines 59-65. Replace `RECONNECT_DELAY_MS` constant (line 5) with `RECONNECT_BASE_MS = 1000` and `RECONNECT_MAX_MS = 30000`. Add `_reconnectDelay` state var near line 11. In `scheduleReconnect()`: use `_reconnectDelay` with jitter, double after each call, cap at MAX. In `handleServerMessage` case `"auth-ok"` (line 70): reset `_reconnectDelay = RECONNECT_BASE_MS`. |
+| 2 | **Pending article persistence** — Persist `_pendingMessages` to `chrome.storage.local` so articles survive service worker termination. On startup, load from storage. On auth-ok flush, clear storage. | Hephaestus | `chrome-extension/service-worker.js` | `_pendingMessages` declared at line 12 (currently `[]`). Three edit sites: (a) Add `loadPendingMessages()` async function that reads from `chrome.storage.local.get("pendingMessages")` and populates `_pendingMessages`. Call it at module top-level (after line 14). (b) In `sendArticle()` at line 137: after pushing to `_pendingMessages`, also write to `chrome.storage.local.set({ pendingMessages: _pendingMessages })`. (c) In `handleServerMessage` case `"auth-ok"` (lines 70-75): after flushing, `chrome.storage.local.remove("pendingMessages")`. |
+| 3 | **Article delivery confirmation (article-ack)** — Server sends `{type: "article-ack", docId}` after successful EPUB conversion + library insert. Extension waits for ack before removing from pending queue. Timeout after 30s → keep in pending for next session. | Hephaestus | `main/ws-server.js` + `chrome-extension/service-worker.js` | Server side: In `handleAddArticle()` (called from `handleMessage` at line 258), after the article is processed and added to library, `sendJson(client.socket, { type: "article-ack", docId: <generated-id> })`. Extension side: In `handleServerMessage()` at line 67, add case `"article-ack"`: remove the matching message from `_pendingMessages` by docId, update `chrome.storage.local`. In `sendArticle()` (line 136): instead of fire-and-forget `_ws.send()`, push to pending first, then send, let ack remove it. |
+| 4 | **Cap EADDRINUSE retries** — Add `WS_MAX_RETRY_COUNT = 10` to constants. Track retry count. After 10 failures, stop retrying and log error. Reset count on successful listen. | Hermes | `main/ws-server.js` + `main/constants.js` | constants.js: Add `WS_MAX_RETRY_COUNT = 10` after line 41. ws-server.js: Add `let _retryCount = 0;` near line 20. In EADDRINUSE handler (lines 451-457): increment `_retryCount`, check `if (_retryCount >= WS_MAX_RETRY_COUNT)` → log and return without retry. In `_server.listen` callback (line 445): reset `_retryCount = 0`. |
+| 5 | **Server-side auth timeout** — If a client connects but doesn't authenticate within 5s, disconnect it. Prevents unauthenticated clients from accumulating in `_clients`. | Hermes | `main/ws-server.js` + `main/constants.js` | constants.js: Add `WS_AUTH_TIMEOUT_MS = 5000` after the new MAX_RETRY_COUNT. ws-server.js: In `handleConnection()` after `_clients.add(client)` (line 144), add `client.authTimer = setTimeout(() => { if (!client.authenticated) { client.socket.destroy(); _clients.delete(client); } }, WS_AUTH_TIMEOUT_MS)`. In `handleMessage()` where `client.authenticated = true` is set (lines 224 and 239): add `if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }`. Also clear in socket close/error handlers (lines 151-158). |
+| 6 | **Three-state connection indicator** — Replace boolean `connected` in ConnectorsSettings with three states: "Connected", "Connecting" (server running, no auth client), "Disconnected" (server not running). Update IPC to return `{ status: "connected" | "connecting" | "disconnected" }`. | Hephaestus | `main/ipc/misc.js` + `src/components/settings/ConnectorsSettings.tsx` | IPC: In `get-ws-short-code` handler (misc.js lines 384-388): replace `connected: hasAuth` with `status: hasAuth ? "connected" : wsServer.getStatus().running ? "connecting" : "disconnected"`. Renderer: ConnectorsSettings.tsx line 22: change `const [connected, setConnected] = useState(false)` → `const [connectionStatus, setConnectionStatus] = useState<"connected" \| "connecting" \| "disconnected">("disconnected")`. Update all `result.connected` references (lines 32, 41, 58) to use `result.status`. Update JSX to show three-state indicator with distinct colors/labels. |
+| 7 | **Service worker lifecycle resilience** — Add `chrome.runtime.onStartup` and `chrome.runtime.onInstalled` listeners to call `connectWebSocket()`. Ensure connection attempt on every service worker wake. | Hermes | `chrome-extension/service-worker.js` | After the existing `connectWebSocket()` call at end of file (find the initial invocation). Add: `chrome.runtime.onStartup.addListener(() => { connectWebSocket(); });` and `chrome.runtime.onInstalled.addListener(() => { connectWebSocket(); });`. These ensure the WebSocket reconnects after Chrome restarts or extension updates. |
+| 8 | **Tests** — Add tests for: exponential backoff logic, article-ack flow, EADDRINUSE retry cap, auth timeout cleanup, three-state status derivation. Target: 10+ new tests. | Hippocrates | `tests/` | New test file: `tests/extensionResilience.test.ts`. Test backoff calculation (1→2→4→8→16→30 cap, jitter bounds, reset on auth). Test EADDRINUSE retry count (stops at 10). Test auth timeout (client removed after 5s without auth). Test three-state derivation logic (connected/connecting/disconnected). Test article-ack removes from pending queue. |
+
+**Execution Sequence:**
+1. **Read phase** — Read all WHERE files in order
+2. **Implement Tasks 4, 5, 7** (Hermes, parallel) — mechanical, prescribed diffs
+3. **Implement Task 1** (Hephaestus) — backoff logic, depends on nothing
+4. **Implement Task 2** (Hephaestus) — pending persistence, depends on nothing
+5. **Implement Task 3** (Hephaestus) — article-ack, touches both server + extension
+6. **Implement Task 6** (Hephaestus) — three-state UI, depends on server changes from Tasks 4/5
+7. **Test (Task 8)** (Hippocrates) — after all implementation
+8. **Solon** — spec compliance (all 10 criteria)
+9. **Herodotus** — doc updates (ROADMAP, SPRINT_QUEUE, CLAUDE.md, LESSONS_LEARNED if needed)
+10. **Git** — commit, merge to main, push
+
+**SUCCESS CRITERIA:**
+1. Extension reconnects with exponential backoff (1s base, 30s cap, ±20% jitter) — no more flat 5s delay
+2. Backoff resets to 1s on successful authentication
+3. Pending articles persist in `chrome.storage.local` and survive service worker termination
+4. Server sends `article-ack` after successful article processing; extension removes from pending only on ack
+5. EADDRINUSE retry stops after 10 attempts with clear error log
+6. Unauthenticated clients are disconnected after 5s
+7. ConnectorsSettings shows three states: Connected (green), Connecting (amber), Disconnected (gray)
+8. `chrome.runtime.onStartup` and `chrome.runtime.onInstalled` both trigger `connectWebSocket()`
+9. All existing tests pass (`npm test`, 1,575+ tests, 0 failures)
+10. 10+ new tests covering backoff, ack, retry cap, auth timeout, and three-state logic
 
 ---
 
@@ -821,4 +854,4 @@ Flow mode today:
 15. `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** TTS-7D (independent of EINK-6A/6B — can run in parallel)
-                                                                                                               
+                                                                                                                                                                        

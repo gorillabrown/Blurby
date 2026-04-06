@@ -19,7 +19,7 @@ export function ConnectorsSettings({
   // Chrome Extension pairing state
   const [shortCode, setShortCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState(0);
-  const [connected, setConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<"connected" | "connecting" | "disconnected">("disconnected");
   const [countdown, setCountdown] = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -29,7 +29,7 @@ export function ConnectorsSettings({
       if (result) {
         setShortCode(result.code);
         setExpiresAt(result.expiresAt);
-        setConnected(result.connected);
+        setConnectionStatus(result.status || (result.connected ? "connected" : "disconnected"));
       }
     });
   }, []);
@@ -38,7 +38,7 @@ export function ConnectorsSettings({
   useEffect(() => {
     const poll = setInterval(() => {
       api.getWsShortCode().then((result: any) => {
-        if (result) setConnected(result.connected);
+        if (result) setConnectionStatus(result.status || (result.connected ? "connected" : "disconnected"));
       });
     }, 5000);
     return () => clearInterval(poll);
@@ -55,7 +55,7 @@ export function ConnectorsSettings({
           if (result) {
             setShortCode(result.code);
             setExpiresAt(result.expiresAt);
-            setConnected(result.connected);
+            setConnectionStatus(result.status || (result.connected ? "connected" : "disconnected"));
           }
         });
       }
@@ -81,7 +81,7 @@ export function ConnectorsSettings({
     if (result) {
       setShortCode(result.code);
       setExpiresAt(result.expiresAt);
-      setConnected(result.connected);
+      setConnectionStatus(result.status || (result.connected ? "connected" : "disconnected"));
     }
   }
 
@@ -111,11 +111,19 @@ export function ConnectorsSettings({
 
       <div className="ext-pairing-section">
         <div className="ext-pairing-status">
-          <span className={`ext-status-dot ${connected ? "ext-status-connected" : "ext-status-disconnected"}`} />
-          <span>{connected ? "Connected" : "Not connected"}</span>
+          <span className={`ext-status-dot ${
+            connectionStatus === "connected" ? "ext-status-connected" :
+            connectionStatus === "connecting" ? "ext-status-connecting" :
+            "ext-status-disconnected"
+          }`} />
+          <span>{
+            connectionStatus === "connected" ? "Connected" :
+            connectionStatus === "connecting" ? "Connecting" :
+            "Disconnected"
+          }</span>
         </div>
 
-        {!connected && shortCode && (
+        {connectionStatus !== "connected" && shortCode && (
           <>
             <div className="ext-pairing-code">{shortCode}</div>
             <div className="ext-pairing-hint">
@@ -128,7 +136,7 @@ export function ConnectorsSettings({
           </>
         )}
 
-        {connected && (
+        {connectionStatus === "connected" && (
           <>
             <div className="ext-pairing-hint">
               Extension is paired and connected.

@@ -2,16 +2,28 @@
 // Manages WebSocket connection to desktop app and cloud sync fallback.
 
 const WS_URL = "ws://127.0.0.1:48924/blurby";
-const RECONNECT_DELAY_MS = 5000;
+const RECONNECT_BASE_MS = 1000;
+const RECONNECT_MAX_MS = 30000;
 const MAX_RECENT_SENDS = 5;
 
 let _ws = null;
 let _connected = false;
 let _authenticated = false;
 let _reconnectTimer = null;
+let _reconnectDelay = RECONNECT_BASE_MS;
 let _pendingMessages = [];
 let _sessionArticleCount = 0;
 let _pairCallback = null; // callback for pending pair request
+
+// Load persisted pending messages from chrome.storage.local
+(async function loadPendingMessages() {
+  try {
+    const { pendingMessages } = await chrome.storage.local.get("pendingMessages");
+    if (Array.isArray(pendingMessages) && pendingMessages.length > 0) {
+      _pendingMessages = pendingMessages;
+    }
+  } catch { /* ignore — storage may not be available */ }
+})();
 
 // ── WebSocket connection management ──────────────────────────────────────────
 
@@ -58,21 +70,28 @@ function connectWebSocket() {
 
 function scheduleReconnect() {
   if (_reconnectTimer) return;
+  // Apply ±20% jitter
+  const jitter = 1 + (Math.random() * 0.4 - 0.2);
+  const delay = Math.round(_reconnectDelay * jitter);
   _reconnectTimer = setTimeout(() => {
     _reconnectTimer = null;
     connectWebSocket();
-  }, RECONNECT_DELAY_MS);
+  }, delay);
+  // Exponential backoff for next attempt
+  _reconnectDelay = Math.min(_reconnectDelay * 2, RECONNECT_MAX_MS);
 }
 
 function handleServerMessage(msg) {
   switch (msg.type) {
     case "auth-ok":
       _authenticated = true;
+      _reconnectDelay = RECONNECT_BASE_MS;
       // Flush pending messages
       for (const pending of _pendingMessages) {
         _ws.send(JSON.stringify(pending));
       }
       _pendingMessages = [];
+      chrome.storage.local.remove("pendingMessages");
       break;
 
     case "auth-failed":
@@ -82,6 +101,7 @@ function handleServerMessage(msg) {
 
     case "pair-ok":
       _authenticated = true;
+      _reconnectDelay = RECONNECT_BASE_MS;
       // Store the long-lived token for future auto-reconnect
       if (msg.token) {
         chrome.storage.local.set({ pairingToken: msg.token });
@@ -92,6 +112,15 @@ function handleServerMessage(msg) {
 
     case "pair-failed":
       if (_pairCallback) { _pairCallback({ success: false, message: msg.message || "Invalid code" }); _pairCallback = null; }
+      break;
+
+    case "article-ack":
+      // Server confirmed article was processed — remove from pending queue
+      _pendingMessages = _pendingMessages.filter(m => m.messageId !== msg.messageId);
+      chrome.storage.local.set({ pendingMessages: _pendingMessages });
+      _sessionArticleCount++;
+      updateBadge();
+      notifyPopup({ type: "send-success", docId: msg.docId });
       break;
 
     case "ok":
@@ -132,19 +161,32 @@ async function sendArticle(article) {
   // Save to recent sends
   await saveRecentSend(article);
 
+  // Generate a client-side ID for ack tracking
+  const messageId = Date.now().toString() + Math.random().toString(36).slice(2, 8);
+  const message = { type: "add-article", payload: article, messageId };
+
+  // Always add to pending queue (removed on article-ack or timeout)
+  _pendingMessages.push(message);
+  chrome.storage.local.set({ pendingMessages: _pendingMessages });
+
   // Try local WebSocket first
   if (_connected && _authenticated && _ws && _ws.readyState === WebSocket.OPEN) {
-    _ws.send(JSON.stringify({ type: "add-article", payload: article }));
+    _ws.send(JSON.stringify(message));
     return { method: "local", status: "sent" };
   }
 
   // Try cloud fallback
   const { connectionMode } = await chrome.storage.local.get("connectionMode");
   if (connectionMode === "local-only") {
-    return { method: "none", status: "error", message: "Blurby desktop app is not running." };
+    return { method: "none", status: "queued", message: "Blurby desktop app is not running. Article queued for delivery." };
   }
 
   const cloudResult = await sendViaCloud(article);
+  // If cloud send succeeded, remove from pending
+  if (cloudResult.status === "sent") {
+    _pendingMessages = _pendingMessages.filter(m => m.messageId !== messageId);
+    chrome.storage.local.set({ pendingMessages: _pendingMessages });
+  }
   return cloudResult;
 }
 
@@ -590,3 +632,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // ── Startup ──────────────────────────────────────────────────────────────────
 
 connectWebSocket();
+
+// Ensure reconnection on Chrome restart or extension update
+chrome.runtime.onStartup.addListener(() => {
+  connectWebSocket();
+});
+
+chrome.runtime.onInstalled.addListener(() => {
+  connectWebSocket();
+});

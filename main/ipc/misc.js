@@ -384,7 +384,9 @@ function register(ctx) {
   ipcMain.handle("get-ws-short-code", () => {
     const { code, expiresAt } = wsServer.getShortCode();
     const hasAuth = wsServer.getClientCount() > 0;
-    return { code, expiresAt, connected: hasAuth };
+    const serverStatus = wsServer.getStatus();
+    const status = hasAuth ? "connected" : serverStatus.running ? "connecting" : "disconnected";
+    return { code, expiresAt, connected: hasAuth, status };
   });
 
   ipcMain.handle("regenerate-ws-short-code", () => {
