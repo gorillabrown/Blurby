@@ -755,7 +755,7 @@ export default function FoliatePageView({
       const x = 0;
       const y = lerp(from.y, to.y, fraction);
       const width = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : Math.max(16, from.width);
-      const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
+      const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
 
       narrationOverlayCurrentRef.current = { x, y, width, height, ready: true };
 
