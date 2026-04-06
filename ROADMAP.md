@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — HOTFIX-14 complete (v1.38.2). BUG-155/156/157/158 all resolved. Queue depth 4 (GREEN).
+**Last updated**: 2026-04-06 — EXT-ENR-A complete (v1.39.0). Resilient extension connection shipped. Queue depth 3 (GREEN).
 **Current branch**: `main`
-**Current state**: v1.38.2 stable. Queue depth 4 (GREEN). Next: EXT-ENR-A (CLI-READY — fully spec'd with edit-site coordinates).
+**Current state**: v1.39.0 stable. Queue depth 3 (GREEN). Next: FLOW-INF-A (needs Cowork spec).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -46,7 +46,7 @@ HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅
     ├───────────────────────────────────┐
     ▼                                   ▼
 Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
-  ├── FLOW-INF-A: Reading Zone     ├── EXT-ENR-A: Resilient Connection
+  ├── FLOW-INF-A: Reading Zone     ├── EXT-ENR-A: Resilient Connection ✅
   ├── FLOW-INF-B: Timer Cursor     ├── EXT-ENR-B: Auto-Discovery Pairing
   └── FLOW-INF-C: Cross-Book       └── EXT-ENR-C: In-Browser Reader (optional)
     │                                   │
@@ -417,11 +417,11 @@ All three investigation areas resolved:
 - **Extension source code:** Located at `chrome-extension/` in-repo. Full reconnect logic, state vars, message flow traced.
 - **IPC event emission:** Renderer polls via `get-ws-short-code` IPC (misc.js:384-388) every 5s (HOTFIX-14). Push events deferred to EXT-ENR-B (auto-discovery pairing).
 
-### Sprint EXT-ENR-A: Resilient Extension Connection
+### Sprint EXT-ENR-A: Resilient Extension Connection ✅ COMPLETED
 
 **Goal:** The WebSocket connection survives sleep/wake, network changes, and Chrome service worker restarts without re-pairing. Articles sent while disconnected are delivered when connection resumes.
 
-**Version:** v1.39.0 | **Branch:** `sprint/ext-enr-a-resilient` | **Tier:** Quick
+**Version:** v1.39.0 | **Branch:** `sprint/ext-enr-a-resilient` | **Tier:** Quick | **Status:** COMPLETED 2026-04-06
 
 **Baseline (v1.38.2):** HOTFIX-14 shipped auth-filtered `getClientCount()`, 5s UI polling, 15s heartbeat, disconnect button, and fetchWithBrowser fallback. Token persistence already works (safeStorage encrypt on pair, `chrome.storage.local` on extension side). Remaining gaps: flat 5s reconnect (no backoff), no message delivery confirmation, no chrome.storage.local persistence for pending article queue, unbounded EADDRINUSE retry, no auth timeout on server, no three-state connection indicator.
 
