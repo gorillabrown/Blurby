@@ -512,7 +512,7 @@ export default function FoliatePageView({
     const bodyRect = body?.getBoundingClientRect?.();
     const contentWidth = bodyRect && bodyRect.width > 0 ? bodyRect.width : 600;
 
-    narrationBandLineHeightRef.current = Math.min(lineHeight + 4, 60); // small vertical padding, hard cap
+    narrationBandLineHeightRef.current = lineHeight + 4; // small vertical padding
     narrationBandWidthRef.current = contentWidth;
   }, []);
 
