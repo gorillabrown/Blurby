@@ -575,8 +575,8 @@ export default function FoliatePageView({
       // BUG-151: Use per-word x/width from the 3-word measurement window.
       const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
       const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
-      // BUG-151: X and width snap to current word. Only Y lerps for line transitions.
-      current.x = from.x;
+      // BUG-151: Silky glide — lerp X and Y. Width stays fixed at 300px.
+      current.x = lerp(from.x, target.x);
       current.y = lerp(from.y, target.y);
       current.width = from.width;
       current.height = fixedHeight;
@@ -747,9 +747,9 @@ export default function FoliatePageView({
       }
 
       const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-      // BUG-151: X and width snap to current word (no interpolation — stays in sync with audio).
-      // Only Y lerps for smooth line transitions.
-      const x = from.x;
+      // BUG-151: Silky glide — lerp both X and Y. The 350ms lag ceiling in
+      // audioScheduler ensures fraction never outpaces the spoken word.
+      const x = lerp(from.x, to.x, fraction);
       const y = lerp(from.y, to.y, fraction);
       const width = from.width;
       const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
