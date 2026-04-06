@@ -127,6 +127,7 @@ export interface BlurbySettings {
   flowTextSize: number;
   rhythmPauses: RhythmPauses;
   layoutSpacing: LayoutSpacing;
+  justifiedText: boolean;     // force text-align: justify in EPUB reader (default true)
   initialPauseMs: number;     // pause before first word advances (default 3000)
   punctuationPauseMs: number; // extra dwell on punctuation words (default 1000)
   viewMode: "list" | "grid";

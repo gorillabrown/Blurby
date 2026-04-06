@@ -85,6 +85,19 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
         onChange={(e) => onSettingsChange({ layoutSpacing: { ...sp, word: Number(e.target.value) } })}
         aria-label="Word spacing"
       />
+
+      {/* Text Alignment */}
+      <div className="settings-section-label" style={{ marginTop: 20 }}>Alignment</div>
+      <label className="settings-toggle-row">
+        <span className="settings-toggle-label">Justified text</span>
+        <input
+          type="checkbox"
+          className="settings-checkbox"
+          checked={settings.justifiedText !== false}
+          onChange={(e) => onSettingsChange({ justifiedText: e.target.checked })}
+          aria-label="Justified text"
+        />
+      </label>
     </div>
   );
 }

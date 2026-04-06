@@ -421,6 +421,7 @@ export const DEFAULT_SETTINGS = {
   flowTextSize: DEFAULT_FOCUS_TEXT_SIZE,
   rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
   layoutSpacing: { line: 1.5, character: 0, word: 0 },
+  justifiedText: true,
   initialPauseMs: INITIAL_PAUSE_MS,
   punctuationPauseMs: PUNCTUATION_PAUSE_MS,
   viewMode: "list" as const,

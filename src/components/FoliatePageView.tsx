@@ -1821,7 +1821,7 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
       margin: 0 !important;
       padding: 0 !important;
     }
-    p, div, li, blockquote, dd, dt, figcaption { text-align: justify !important; }
+    ${settings.justifiedText !== false ? "p, div, li, blockquote, dd, dt, figcaption { text-align: justify !important; }" : ""}
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
