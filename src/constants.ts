@@ -104,6 +104,8 @@ export const TTS_FORWARD_WORDS = 300;
 export const TTS_PLANNER_WINDOW_WORDS = 400;
 /** TTS-7P: Rolling pause planner — minimum words per planned chunk (prohibits tiny fragments) */
 export const TTS_PLANNER_MIN_CHUNK_WORDS = 10;
+/** BUG-151: Extra padding added to word width for the narration overlay band */
+export const NARRATION_BAND_PAD_PX = 200;
 
 // ── Narrate Performance Budgets (TTS-6O) ────────────────────────────────────
 /** Max ms from user click to first audio chunk playing */
