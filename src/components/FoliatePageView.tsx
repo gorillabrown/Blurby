@@ -456,6 +456,16 @@ export default function FoliatePageView({
   // These are NEVER updated per-word — the band is a line highlight, not a word highlight.
   const narrationBandLineHeightRef = useRef<number>(0);
   const narrationBandWidthRef = useRef<number>(0);
+  // BUG-151 line-scanner: column geometry measured once at narration start
+  const narrationColLeftXRef = useRef<number>(0);
+  const narrationColWidthRef = useRef<number>(0);
+  const narrationFontSizeRef = useRef<number>(18);
+  // Line-scanner animation state
+  const narrationScanXRef = useRef<number>(0);
+  const narrationScanYRef = useRef<number>(0);
+  const narrationScanRafRef = useRef<number>(0);
+  const narrationScanLastTsRef = useRef<number>(0);
+  const narrationScanSpeedRef = useRef<number>(0); // px/ms
 
   // TTS-7Q: Diagnostics — track audio cursor vs visual band divergence
   const narrationDiagLastAudioWordRef = useRef<number>(-1);
@@ -483,10 +493,8 @@ export default function FoliatePageView({
   const userBrowsingRef = useRef(false);
   readingModeRef.current = readingMode;
 
-  // TTS-7R (BUG-145a): Measure-once band dimensions.
-  // Called at narration start (and on font-size change if applicable).
-  // Reads line-height from a representative text element and content area width
-  // from the iframe body. Stores results in refs — not re-run per word advance.
+  // BUG-151 line-scanner: Measure column geometry once at narration start.
+  // Reads line-height, font-size, and column boundaries from the iframe content.
   const measureNarrationBandDimensions = useCallback(() => {
     const view = viewRef.current;
     if (!view?.renderer) return;
@@ -494,279 +502,127 @@ export default function FoliatePageView({
     if (contents.length === 0) return;
     const doc = contents[0].doc;
     if (!doc) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    // Get line-height from the first paragraph or word span available
+    // Get line-height and font-size from a representative text element
     const textEl = (doc.querySelector("p, span[data-word-index]")) as HTMLElement | null;
-    let lineHeight = 24; // safe fallback
+    let lineHeight = 24;
+    let fontSize = 18;
     if (textEl) {
       const computed = doc.defaultView?.getComputedStyle(textEl);
       if (computed) {
         const lhRaw = parseFloat(computed.lineHeight);
         const fsRaw = parseFloat(computed.fontSize);
-        lineHeight = isNaN(lhRaw) ? (isNaN(fsRaw) ? 24 : fsRaw * 1.5) : lhRaw;
+        fontSize = isNaN(fsRaw) ? 18 : fsRaw;
+        lineHeight = isNaN(lhRaw) ? fontSize * 1.5 : lhRaw;
       }
     }
 
-    // Get content area width from the container (visible reading area), NOT the iframe
-    // body which returns the full paginated content width in Foliate's column layout.
-    const container = containerRef.current;
-    const containerRect = container?.getBoundingClientRect?.();
-    const contentWidth = containerRect && containerRect.width > 0 ? containerRect.width : 600;
+    // Measure column geometry from the first paragraph's bounding rect.
+    // In Foliate's CSS-column layout, this gives the actual visible column width
+    // and left edge — NOT the full paginated content width.
+    const containerRect = container.getBoundingClientRect();
+    const frame = doc.defaultView?.frameElement as HTMLElement | null;
+    const frameRect = frame?.getBoundingClientRect();
 
-    narrationBandLineHeightRef.current = lineHeight + 4; // small vertical padding
-    narrationBandWidthRef.current = contentWidth;
+    // Find the first paragraph to get actual text column bounds
+    const firstP = doc.querySelector("p") as HTMLElement | null;
+    if (firstP && frameRect) {
+      const pRect = firstP.getBoundingClientRect();
+      narrationColLeftXRef.current = frameRect.left + pRect.left - containerRect.left;
+      narrationColWidthRef.current = pRect.width;
+    } else {
+      // Fallback: use container width / 2 for two-column, full for single
+      const cw = containerRect.width;
+      narrationColLeftXRef.current = 0;
+      narrationColWidthRef.current = cw >= 1040 ? cw / 2 - 40 : cw - 48;
+    }
+
+    narrationBandLineHeightRef.current = lineHeight + 4;
+    narrationBandWidthRef.current = narrationColWidthRef.current;
+    narrationFontSizeRef.current = fontSize;
   }, []);
 
   const hideNarrationOverlay = useCallback(() => {
+    // Cancel all animation loops
     if (narrationOverlayRafRef.current) {
       cancelAnimationFrame(narrationOverlayRafRef.current);
       narrationOverlayRafRef.current = 0;
     }
-    // TTS-7Q: Also cancel the audio-progress glide loop
     if (narrationAudioProgressRafRef.current) {
       cancelAnimationFrame(narrationAudioProgressRafRef.current);
       narrationAudioProgressRafRef.current = 0;
     }
+    // Cancel line-scanner loop
+    if (narrationScanRafRef.current) {
+      cancelAnimationFrame(narrationScanRafRef.current);
+      narrationScanRafRef.current = 0;
+    }
     narrationOverlayTargetRef.current.active = false;
     narrationOverlayCurrentRef.current.ready = false;
-    narrationOverlaySegmentStartRef.current = 0;
-    narrationOverlayLastAdvanceRef.current = 0;
-    narrationOverlayAverageDurationRef.current = 180;
-    // TTS-7Q: Reset glide state
+    narrationScanSpeedRef.current = 0;
+    narrationScanLastTsRef.current = 0;
+    // Reset glide state
     narrationGlideFromRef.current = null;
     narrationGlideToRef.current = null;
     narrationGlideWordRef.current = -1;
-    narrationLineRailRef.current = {
-      y: 0,
-      height: 0,
-      width: 0,
-      avgStep: 0,
-      active: false,
-    };
+    narrationLineRailRef.current = { y: 0, height: 0, width: 0, avgStep: 0, active: false };
     if (highlightRef.current) {
       highlightRef.current.style.display = "none";
       highlightRef.current.style.opacity = "0";
     }
   }, []);
 
-  const ensureNarrationOverlayLoop = useCallback(() => {
-    if (narrationOverlayRafRef.current) return;
+  // BUG-151 line-scanner: constant-speed horizontal slide across each justified line.
+  // Speed is derived from the narration WPM. No per-word DOM measurement during playback.
+  const ensureNarrationScanLoop = useCallback(() => {
+    if (narrationScanRafRef.current) return;
 
     const tick = (ts: number) => {
       const overlay = highlightRef.current;
-      const target = narrationOverlayTargetRef.current;
-      const current = narrationOverlayCurrentRef.current;
-      if (!overlay || !target.active) {
-        narrationOverlayRafRef.current = 0;
-        return;
-      }
-      const from = narrationOverlaySegmentFromRef.current;
-      const duration = Math.max(1, narrationOverlaySegmentDurationRef.current);
-      const progress = Math.min(1, (ts - narrationOverlaySegmentStartRef.current) / duration);
-
-      if (!current.ready) {
-        current.x = from.x;
-        current.y = from.y;
-        current.width = from.width;
-        current.height = from.height;
-        current.ready = true;
-      }
-
-      // BUG-151: Use per-word x/width from the 3-word measurement window.
-      const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
-      const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
-      // BUG-151: Silky glide — lerp X and Y. Width stays fixed at 300px.
-      current.x = lerp(from.x, target.x);
-      current.y = lerp(from.y, target.y);
-      current.width = from.width;
-      current.height = fixedHeight;
-
-      overlay.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
-      overlay.style.width = `${current.width}px`;
-      overlay.style.height = `${fixedHeight}px`;
-      overlay.style.opacity = "1";
-      overlay.style.display = "block";
-
-      if (progress < 1) {
-        narrationOverlayRafRef.current = requestAnimationFrame(tick);
-      } else {
-        // Snap to target on completion
-        current.x = target.x;
-        current.y = target.y;
-        current.width = target.width;
-        current.height = fixedHeight;
-        narrationOverlayRafRef.current = 0;
-      }
-    };
-
-    narrationOverlayRafRef.current = requestAnimationFrame(tick);
-  }, []);
-
-  /**
-   * TTS-7Q: Audio-progress-driven overlay glide loop.
-   *
-   * When getAudioProgress is available, this loop runs at animation-frame rate
-   * and continuously samples the audio clock to place the overlay band at the
-   * fractionally correct position between the current and next word's measured
-   * DOM positions. This replaces the wall-clock estimate lerp for Kokoro playback.
-   *
-   * Design decisions:
-   * - Only re-measures DOM positions when the canonical word index changes
-   *   (avoids heavy DOM work every frame)
-   * - Uses stable line rail: if the next word is on a different line, the band
-   *   stays on the current line instead of diagonal-jumping
-   * - Falls back to the estimate-based loop (ensureNarrationOverlayLoop) when
-   *   getAudioProgress returns null (paused, Web Speech, or not playing)
-   * - The overlay position is purely visual — never written back to any anchor ref
-   */
-  const ensureAudioProgressGlideLoop = useCallback(() => {
-    if (narrationAudioProgressRafRef.current) return;
-
-    const tick = () => {
-      const overlay = highlightRef.current;
-      const getProgress = getAudioProgressRef.current;
-
-      // If no audio progress source, stop the loop — fall back to estimate loop
-      if (!overlay || !getProgress) {
-        narrationAudioProgressRafRef.current = 0;
+      if (!overlay || narrationScanSpeedRef.current <= 0) {
+        narrationScanRafRef.current = 0;
         return;
       }
 
-      const report = getProgress();
-      if (!report) {
-        // Not playing (paused, ended, or Web Speech) — let the loop die naturally.
-        // The estimate-based loop will hold the band at its last position.
-        narrationAudioProgressRafRef.current = 0;
-        return;
+      // Compute dt since last frame
+      const lastTs = narrationScanLastTsRef.current;
+      const dt = lastTs > 0 ? Math.min(ts - lastTs, 50) : 0; // cap at 50ms to avoid huge jumps
+      narrationScanLastTsRef.current = ts;
+
+      // Advance X by speed * dt
+      const colLeft = narrationColLeftXRef.current;
+      const colWidth = narrationColWidthRef.current;
+      const colRight = colLeft + colWidth;
+      const lineH = narrationBandLineHeightRef.current || 28;
+
+      let x = narrationScanXRef.current + narrationScanSpeedRef.current * dt;
+      let y = narrationScanYRef.current;
+
+      // Line wrap: when band right edge exceeds column right edge, snap to next line
+      if (x + NARRATION_BAND_PAD_PX > colRight) {
+        x = colLeft;
+        y += lineH;
       }
 
-      const { wordIndex, fraction } = report;
-
-      // Only re-measure DOM positions when the word changes (not every frame).
-      if (wordIndex !== narrationGlideWordRef.current) {
-        const view = viewRef.current;
-        if (!view?.renderer) {
-          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-
-        // Find the document containing the current word
-        const contents: Array<{ doc: Document; index: number }> = view.renderer.getContents?.() ?? [];
-        let foundDoc: Document | null = null;
-        for (const { doc: d } of contents) {
-          try {
-            if (d?.querySelector?.(`[data-word-index="${wordIndex}"]`)) {
-              foundDoc = d;
-              break;
-            }
-          } catch { /* */ }
-        }
-
-        if (!foundDoc) {
-          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-
-        const measureFn = measureNarrationWindowRef.current;
-        if (!measureFn) {
-          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-        const fromWindow = measureFn(foundDoc, wordIndex);
-        if (!fromWindow) {
-          narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
-          return;
-        }
-
-        // Measure next word position — only used for Y-position line detection
-        const nextWindow = measureFn(foundDoc, wordIndex + 1);
-        const sameLineTolerance = Math.max(8, fromWindow.height * 0.6);
-        const staysOnSameLine = nextWindow != null && Math.abs(nextWindow.y - fromWindow.y) <= sameLineTolerance;
-        const movesForward = nextWindow != null && nextWindow.x >= fromWindow.x - 4;
-        const usableNextWindow = (staysOnSameLine && movesForward) ? nextWindow : null;
-        const rail = narrationLineRailRef.current;
-
-        const sameRailLine =
-          rail.active &&
-          Math.abs(rail.y - fromWindow.y) <= sameLineTolerance;
-
-        // TTS-7R (BUG-145a): Use fixed band dimensions — width and height are constant.
-        // BUG-151: Fixed 300px band, word at left edge. Width never changes.
-        const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(fromWindow.height, 40);
-        const stableY = sameRailLine ? rail.y : fromWindow.y;
-
-        const stableFrom = {
-          x: fromWindow.x,
-          y: stableY,
-          width: NARRATION_BAND_PAD_PX,
-          height: fixedHeight,
-        };
-
-        const toY = usableNextWindow ? (Math.abs(usableNextWindow.y - fromWindow.y) <= sameLineTolerance ? stableY : usableNextWindow.y) : stableY;
-        const toX = usableNextWindow ? usableNextWindow.x : fromWindow.x;
-        const stableTo = {
-          x: toX,
-          y: toY,
-          width: NARRATION_BAND_PAD_PX,
-          height: fixedHeight,
-        };
-
-        narrationLineRailRef.current = {
-          y: stableY,
-          height: fixedHeight,
-          width: NARRATION_BAND_PAD_PX,
-          avgStep: sameRailLine ? rail.avgStep : 0,
-          active: true,
-        };
-
-        narrationGlideFromRef.current = stableFrom;
-        narrationGlideToRef.current = stableTo;
-        narrationGlideWordRef.current = wordIndex;
-
-        // TTS-7Q: Diagnostics — log when audio cursor diverges from visual word
-        if (import.meta.env.DEV) {
-          const prevVisual = narrationDiagLastVisualWordRef.current;
-          const prevAudio = narrationDiagLastAudioWordRef.current;
-          if (prevVisual >= 0 && prevAudio >= 0 && Math.abs(wordIndex - prevVisual) > 2) {
-            console.debug(
-              `[TTS-7Q] audio/visual drift: audio=${wordIndex} visual=${prevVisual} delta=${wordIndex - prevVisual}`
-            );
-          }
-          narrationDiagLastAudioWordRef.current = wordIndex;
-          narrationDiagLastVisualWordRef.current = wordIndex;
-        }
-      }
-
-      // TTS-7R (BUG-145a): Fixed-size band — only lerp Y for line transitions.
-      // X is always 0, width and height are always the fixed measured values.
-      const from = narrationGlideFromRef.current;
-      const to = narrationGlideToRef.current;
-      if (!from || !to) {
-        narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
-        return;
-      }
-
-      const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-      // BUG-151: Silky glide — lerp both X and Y. The 350ms lag ceiling in
-      // audioScheduler ensures fraction never outpaces the spoken word.
-      const x = lerp(from.x, to.x, fraction);
-      const y = lerp(from.y, to.y, fraction);
-      const width = from.width;
-      const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
-
-      narrationOverlayCurrentRef.current = { x, y, width, height, ready: true };
+      narrationScanXRef.current = x;
+      narrationScanYRef.current = y;
 
       overlay.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      overlay.style.width = `${width}px`;
-      overlay.style.height = `${height}px`;
+      overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
+      overlay.style.height = `${lineH}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
 
-      narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
+      narrationScanRafRef.current = requestAnimationFrame(tick);
     };
 
-    narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
-  }, []); // No deps — uses refs only (measureNarrationWindowRef, getAudioProgressRef, etc.)
+    narrationScanRafRef.current = requestAnimationFrame(tick);
+  }, []);
+
+  // No-op — line scanner (ensureNarrationScanLoop) is the sole animation driver now.
+  const ensureAudioProgressGlideLoop = useCallback(() => {}, []);
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -870,6 +726,18 @@ export default function FoliatePageView({
   // TTS-7Q: Keep the forward-ref in sync so the audio-progress loop can call it
   measureNarrationWindowRef.current = measureNarrationWindow;
 
+  // BUG-151 line-scanner: Compute scan speed from WPM and column geometry.
+  const computeScanSpeed = useCallback(() => {
+    const colW = narrationColWidthRef.current;
+    const fs = narrationFontSizeRef.current || 18;
+    if (colW <= 0) return 0;
+    // Estimate words per line: columnWidth / (fontSize * ~3 chars avg word+space)
+    const wordsPerLine = Math.max(4, colW / (fs * 3));
+    const effectiveWpm = wpm || DEFAULT_WPM;
+    const msPerLine = (wordsPerLine / effectiveWpm) * 60000;
+    return colW / msPerLine; // px per ms
+  }, [wpm]);
+
   const positionNarrationOverlay = useCallback((doc: Document | null, wordIndex: number) => {
     const overlay = highlightRef.current;
     if (!overlay || !doc) {
@@ -877,76 +745,33 @@ export default function FoliatePageView({
       return;
     }
 
+    // Measure the anchor word's position to seed the scanner
     const currentWindow = measureNarrationWindow(doc, wordIndex);
     if (!currentWindow) {
       hideNarrationOverlay();
       return;
     }
 
-    // TTS-7Q: Diagnostics — track truth-sync corrections
-    if (import.meta.env.DEV) {
-      const prevVisual = narrationDiagLastVisualWordRef.current;
-      if (prevVisual >= 0 && Math.abs(wordIndex - prevVisual) > 3) {
-        narrationDiagTruthSyncCountRef.current++;
-        console.debug(
-          `[TTS-7Q] truth-sync correction #${narrationDiagTruthSyncCountRef.current}: ` +
-          `visual jumped from ${prevVisual} to ${wordIndex} (delta=${wordIndex - prevVisual})`
-        );
-      }
-      narrationDiagLastVisualWordRef.current = wordIndex;
-    }
+    const lineH = narrationBandLineHeightRef.current || Math.min(currentWindow.height, 40);
 
-    // BUG-151: Fixed 300px band, focus word at the left edge.
-    const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, 40);
-    const bandX = currentWindow.x;
-    const seedWindow = { x: bandX, y: currentWindow.y, width: NARRATION_BAND_PAD_PX, height: fixedHeight };
+    // Seed the line scanner at the anchor word's position
+    narrationScanXRef.current = currentWindow.x;
+    narrationScanYRef.current = currentWindow.y;
+    narrationScanSpeedRef.current = computeScanSpeed();
+    narrationScanLastTsRef.current = 0; // reset — first frame computes dt=0
 
-    // TTS-7Q: If audio-progress is available, start the audio-clock glide loop.
-    if (getAudioProgressRef.current) {
-      narrationGlideWordRef.current = -1;
-      narrationOverlayCurrentRef.current = { ...seedWindow, ready: true };
-      overlay.style.transform = `translate3d(${bandX}px, ${currentWindow.y}px, 0)`;
-      overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
-      overlay.style.height = `${fixedHeight}px`;
-      overlay.style.opacity = "1";
-      overlay.style.display = "block";
-      // Also update the context-word highlights (3-word window) via the estimate-loop target
-      // so truth-sync keeps them accurate even when the audio loop drives the band.
-      narrationOverlayTargetRef.current = { ...seedWindow, active: true };
-      ensureAudioProgressGlideLoop();
-      return;
-    }
-
-    // Fallback (no audio progress — Web Speech or paused): wall-clock estimate loop.
-    const nextWindow = measureNarrationWindow(doc, wordIndex + 1) || currentWindow;
-    const sameLineTolerance = Math.max(8, currentWindow.height * 0.6);
-    const staysOnSameLine = Math.abs(nextWindow.y - currentWindow.y) <= sameLineTolerance;
-    const targetY = staysOnSameLine ? currentWindow.y : nextWindow.y;
-    const targetX = staysOnSameLine ? bandX : nextWindow.x;
-    const targetWindow = { x: targetX, y: targetY, width: NARRATION_BAND_PAD_PX, height: fixedHeight };
-
-    const now = performance.now();
-    const previousAdvance = narrationOverlayLastAdvanceRef.current;
-    const observedInterval = previousAdvance > 0 ? Math.max(70, Math.min(now - previousAdvance, 420)) : 180;
-    const smoothedInterval = previousAdvance > 0
-      ? narrationOverlayAverageDurationRef.current * 0.65 + observedInterval * 0.35
-      : observedInterval;
-    narrationOverlayAverageDurationRef.current = smoothedInterval;
-    narrationOverlayLastAdvanceRef.current = now;
-
-    narrationOverlayCurrentRef.current = { ...seedWindow, ready: true };
-    narrationOverlaySegmentFromRef.current = { ...seedWindow };
-    narrationOverlayTargetRef.current = { ...targetWindow, active: true };
-    narrationOverlaySegmentStartRef.current = now;
-    narrationOverlaySegmentDurationRef.current = smoothedInterval;
-
-    overlay.style.display = "block";
-    overlay.style.opacity = "1";
-    overlay.style.transform = `translate3d(${bandX}px, ${currentWindow.y}px, 0)`;
+    // Show the overlay at the seed position
+    overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
     overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
-    overlay.style.height = `${fixedHeight}px`;
-    ensureNarrationOverlayLoop();
-  }, [ensureNarrationOverlayLoop, ensureAudioProgressGlideLoop, hideNarrationOverlay, measureNarrationWindow]);
+    overlay.style.height = `${lineH}px`;
+    overlay.style.opacity = "1";
+    overlay.style.display = "block";
+
+    narrationOverlayTargetRef.current.active = true;
+
+    // Start the constant-speed scan loop
+    ensureNarrationScanLoop();
+  }, [ensureNarrationScanLoop, hideNarrationOverlay, measureNarrationWindow, computeScanSpeed]);
 
   const applyVisualHighlightByIndex = useCallback((
     wordIndex: number,
@@ -975,8 +800,27 @@ export default function FoliatePageView({
     }
 
     if (isNarrationMode) {
-      // Fixed-size overlay band covers the full line — no per-word context classes needed (TTS-7R).
-      positionNarrationOverlay(state.doc, wordIndex);
+      // BUG-151 line-scanner: Only seed the scanner on first call (when not yet running).
+      // Subsequent word advances do truth-sync: snap scanner Y to the spoken word's line
+      // if the scanner has drifted to a different line.
+      if (narrationScanSpeedRef.current <= 0) {
+        positionNarrationOverlay(state.doc, wordIndex);
+      } else {
+        // Truth-sync: measure the spoken word's Y and snap if needed
+        const wordWindow = measureNarrationWindow(state.doc, wordIndex);
+        if (wordWindow) {
+          const scanY = narrationScanYRef.current;
+          const lineH = narrationBandLineHeightRef.current || 28;
+          // If scanner Y differs from spoken word's Y by more than half a line, snap
+          if (Math.abs(scanY - wordWindow.y) > lineH * 0.6) {
+            narrationScanYRef.current = wordWindow.y;
+            // Also snap X to the word's x on line changes
+            narrationScanXRef.current = wordWindow.x;
+          }
+          // Update speed in case WPM changed
+          narrationScanSpeedRef.current = computeScanSpeed();
+        }
+      }
     } else {
       state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
         el.classList.add(highlightClass);
@@ -998,7 +842,7 @@ export default function FoliatePageView({
     }
 
     return true;
-  }, [clearVisualWordClasses, hideNarrationOverlay, positionNarrationOverlay, viewApiRef]);
+  }, [clearVisualWordClasses, hideNarrationOverlay, positionNarrationOverlay, measureNarrationWindow, computeScanSpeed, viewApiRef]);
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -1821,6 +1665,7 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
       margin: 0 !important;
       padding: 0 !important;
     }
+    p, div, li, blockquote, dd, dt, figcaption { text-align: justify !important; }
     a { color: ${accent} !important; }
     img { max-width: 100%; height: auto; }
     ::selection { background: ${accent}33; }
