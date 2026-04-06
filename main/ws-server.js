@@ -4,7 +4,7 @@
 const http = require("http");
 const crypto = require("crypto");
 const { safeStorage } = require("electron");
-const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS } = require("./constants");
+const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS } = require("./constants");
 const { normalizeAuthor } = require("./author-normalize");
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ let _pairingToken = null;
 let _ctx = null;
 let _shortCode = null;
 let _shortCodeExpiry = 0;
+let _retryCount = 0;
 
 // ── WebSocket frame helpers (minimal implementation) ─────────────────────────
 
@@ -143,17 +144,28 @@ function handleConnection(socket, request) {
   };
   _clients.add(client);
 
+  // Auth timeout — disconnect if client doesn't authenticate within WS_AUTH_TIMEOUT_MS
+  client.authTimer = setTimeout(() => {
+    if (!client.authenticated) {
+      console.log("[ws-server] Auth timeout — disconnecting unauthenticated client");
+      client.socket.destroy();
+      _clients.delete(client);
+    }
+  }, WS_AUTH_TIMEOUT_MS);
+
   socket.on("data", (data) => {
     client.buffer = Buffer.concat([client.buffer, data]);
     processFrames(client);
   });
 
   socket.on("close", () => {
+    if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
     _clients.delete(client);
   });
 
   socket.on("error", (err) => {
     console.error("[ws-server] Socket error:", err.message);
+    if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
     _clients.delete(client);
   });
 }
@@ -222,6 +234,7 @@ async function handleMessage(client, text) {
         } catch { /* best-effort persist */ }
       }
       client.authenticated = true;
+      if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
       sendJson(client.socket, { type: "pair-ok", token: _pairingToken });
     } else {
       sendJson(client.socket, { type: "pair-failed", message: "Invalid code" });
@@ -237,6 +250,7 @@ async function handleMessage(client, text) {
     }
     if (msg.token === _pairingToken) {
       client.authenticated = true;
+      if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
       sendJson(client.socket, { type: "auth-ok" });
     } else {
       sendJson(client.socket, { type: "auth-failed", message: "Invalid pairing token" });
@@ -256,14 +270,14 @@ async function handleMessage(client, text) {
   }
 
   if (msg.type === "add-article") {
-    await handleAddArticle(client, msg.payload);
+    await handleAddArticle(client, msg.payload, msg.messageId);
     return;
   }
 
   sendJson(client.socket, { type: "error", message: `Unknown message type: ${msg.type}` });
 }
 
-async function handleAddArticle(client, article) {
+async function handleAddArticle(client, article, messageId) {
   if (!article || !article.textContent) {
     sendJson(client.socket, { type: "error", message: "Article must include textContent" });
     return;
@@ -383,7 +397,7 @@ async function handleAddArticle(client, article) {
 
     _ctx.broadcastLibrary();
 
-    sendJson(client.socket, { type: "ok", docId: docId });
+    sendJson(client.socket, { type: "article-ack", docId: docId, messageId: messageId || null });
     console.log(`[ws-server] Added article: "${doc.title}" (${wordCount} words)`);
   } catch (err) {
     sendJson(client.socket, { type: "error", message: "Failed to add article: " + err.message });
@@ -443,13 +457,20 @@ function startServer(ctx) {
   });
 
   _server.listen(WS_PORT, "127.0.0.1", () => {
+    _retryCount = 0;
     console.log(`[ws-server] Listening on ws://127.0.0.1:${WS_PORT}${WS_PATH}`);
   });
 
   _server.on("error", (err) => {
     console.error("[ws-server] Server error:", err.message);
     if (err.code === "EADDRINUSE") {
-      console.error(`[ws-server] Port ${WS_PORT} is in use. Will retry in ${WS_RETRY_DELAY_MS}ms.`);
+      _retryCount++;
+      if (_retryCount >= WS_MAX_RETRY_COUNT) {
+        console.error(`[ws-server] Port ${WS_PORT} still in use after ${WS_MAX_RETRY_COUNT} retries — giving up.`);
+        _server = null;
+        return;
+      }
+      console.error(`[ws-server] Port ${WS_PORT} is in use. Retry ${_retryCount}/${WS_MAX_RETRY_COUNT} in ${WS_RETRY_DELAY_MS}ms.`);
       setTimeout(() => {
         _server = null;
         startServer(ctx);

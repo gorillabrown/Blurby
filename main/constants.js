@@ -41,6 +41,10 @@ const HEARTBEAT_INTERVAL_MS = 15000;
 const WS_RETRY_DELAY_MS = 5000;
 /** Short pairing code time-to-live (ms) — 5 minutes */
 const SHORT_CODE_TTL_MS = 5 * 60 * 1000;
+/** Maximum EADDRINUSE retry attempts before giving up */
+const WS_MAX_RETRY_COUNT = 10;
+/** Auth timeout — disconnect clients that don't authenticate within this window (ms) */
+const WS_AUTH_TIMEOUT_MS = 5000;
 
 // ── File Parsers ──────────────────────────────────────────────────────────────
 /** PDF parsing timeout (ms) */
@@ -167,6 +171,8 @@ module.exports = {
   HEARTBEAT_INTERVAL_MS,
   WS_RETRY_DELAY_MS,
   SHORT_CODE_TTL_MS,
+  WS_MAX_RETRY_COUNT,
+  WS_AUTH_TIMEOUT_MS,
   // File Parsers
   PDF_PARSE_TIMEOUT_MS,
   MIN_PRINTABLE_RATIO,
