@@ -85,6 +85,14 @@ export default function useNarration() {
   const onWordRef = useRef<((charIndex: number) => void) | null>(null);
   const allWordsRef = useRef<string[]>([]);
   const onWordAdvanceRef = useRef<((wordIndex: number) => void) | null>(null);
+  /** TTS-7R: Visual-only truth-sync callback — highlights the word at the scheduler's
+   *  authoritative position without updating narration state (no cursorWordIndex write,
+   *  no lastConfirmedAudioWordRef update). Set by useReadingModeInstance for Foliate mode. */
+  const onTruthSyncRef = useRef<((wordIndex: number) => void) | null>(null);
+  /** TTS-7R (BUG-145c): Canonical audio word position — updated only by the scheduler's
+   *  confirmed boundary crossings. Used as the authoritative start index for chunk generation
+   *  so that visual-advance callbacks cannot contaminate the pipeline's read head. */
+  const lastConfirmedAudioWordRef = useRef<number>(0);
   const kokoroVoiceRef = useRef("af_bella");
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
@@ -161,6 +169,10 @@ export default function useNarration() {
       getParagraphBreaks: () => paragraphBreaksRef.current,
       getFootnoteMode: () => footnoteModeRef.current,
       getFootnoteCues: () => footnoteCuesRef.current,
+      // TTS-7R: Route truth-sync through dedicated visual-only callback (no state writes)
+      onTruthSync: (wordIndex: number) => {
+        if (onTruthSyncRef.current) onTruthSyncRef.current(wordIndex);
+      },
       onFallbackToWeb: () => {
         // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
         kokoroStrategyRef.current?.stop();
@@ -335,7 +347,10 @@ export default function useNarration() {
     const s = stateRef.current;
     if (s.status === "idle") return;
     const words = allWordsRef.current;
-    const startIdx = s.cursorWordIndex;
+    // TTS-7R (BUG-145c): Read from audio-confirmed ref, NOT cursorWordIndex.
+    // cursorWordIndex can be advanced by wall-clock visual callbacks; using it here
+    // would cause the pipeline to restart from the wrong word after a stall.
+    const startIdx = lastConfirmedAudioWordRef.current;
     if (startIdx >= words.length) {
       if (onSectionEndRef.current) {
         onSectionEndRef.current();
@@ -351,8 +366,18 @@ export default function useNarration() {
       startIdx,
       s.speed,
       (wordIndex) => {
+        // TTS-7R (BUG-145c): Update canonical audio position on every scheduler
+        // boundary crossing. This must happen before the dispatch so stateRef reads
+        // are always behind or equal to the confirmed audio word.
+        lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
+        if (import.meta.env.DEV) {
+          const visualIdx = stateRef.current.cursorWordIndex;
+          if (Math.abs(wordIndex - visualIdx) > 5) {
+            console.warn(`[TTS-7R] cursor divergence: audio=${wordIndex} visual=${visualIdx} delta=${wordIndex - visualIdx}`);
+          }
+        }
       },
       () => {
         // TTS-7A: Snapshot on Kokoro narration end (all chunks delivered)
@@ -443,6 +468,9 @@ export default function useNarration() {
         chunkWords: [],
       };
       if (import.meta.env.DEV) console.debug("[narrate] warming — waiting for Kokoro, will auto-start from word:", startWordIndex);
+      // TTS-7R (BUG-145c): Seed canonical audio ref in warming path too — the
+      // auto-start effect reads lastConfirmedAudioWordRef via speakNextChunkKokoro.
+      lastConfirmedAudioWordRef.current = startWordIndex;
       // Trigger prewarm if available
       if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
       return;
@@ -460,6 +488,10 @@ export default function useNarration() {
       chunkWords: [],
     };
     if (import.meta.env.DEV) console.debug("[narrate] cursor-driven — words:", words.length, "start:", startWordIndex, "speed:", newSpeed, "engine:", stateRef.current.engine, "kokoro:", stateRef.current.kokoroReady);
+
+    // TTS-7R (BUG-145c): Seed the canonical audio ref so the first Kokoro chunk
+    // reads from the correct starting word rather than whatever the ref held before.
+    lastConfirmedAudioWordRef.current = startWordIndex;
 
     // TTS-7A: Diagnostics
     recordDiagEvent("start", `engine=${stateRef.current.engine} cursor=${startWordIndex} words=${words.length}`);
@@ -674,6 +706,15 @@ export default function useNarration() {
     setBookPronunciationOverrides: (overrides: PronunciationOverride[]) => {
       bookOverridesRef.current = overrides;
       updateMergedOverrides();
+    },
+    /**
+     * TTS-7R: Register a visual-only truth-sync callback. Called every ~12 words by the
+     * audio scheduler to re-snap the narration overlay to the authoritative audio position.
+     * The callback must ONLY update visual state — it must NOT write to cursorWordIndex
+     * or any narration anchor used by chunk generation.
+     */
+    setOnTruthSync: (cb: ((wordIndex: number) => void) | null) => {
+      onTruthSyncRef.current = cb;
     },
     warmUp: () => {
       kokoroStrategy.warmUp();

@@ -4380,3 +4380,43 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04 during TTS Stab
 **Depends on:** None (queued after TTS-7P by priority)
 
 Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
+
+---
+
+## Sprint TTS-7R: Calm Narration Band & Cursor Ownership Fix ✅ (v1.37.0)
+
+**Version:** v1.37.0
+**Branch:** `sprint/tts-7r-calm-band`
+**Tier:** Quick (targeted bug fix, no new features)
+**Archived:** 2026-04-05
+**Result:** PASS — all 12 SUCCESS CRITERIA met. Merged to `main` and pushed.
+
+**Goal:** Fix the three remaining narration band problems: constant resize jitter (BUG-145a), band outruns audio (BUG-145b), and chunk restart from visual position instead of audio position (BUG-145c). After this sprint, the narration overlay is a calm, fixed-size, line-stable highlight that tracks actual audio playback — never outrunning it, never feeding its position back into chunk generation.
+
+**Bugs resolved:** BUG-145a (resize jitter), BUG-145b (band outruns audio), BUG-145c (chunk restart from visual position). Parent BUG-145 resolved (all sub-issues closed).
+
+**Changes:**
+- `useNarration.ts` — Added `lastConfirmedAudioWordRef`; `speakNextChunkKokoro` reads from it instead of `cursorWordIndex`; divergence diagnostic logs when audio and visual cursors differ by > 5 words.
+- `FoliatePageView.tsx` — Set `SIMPLE_NARRATION_GLIDE = false`; audio-progress glide loop active for Kokoro; wall-clock fallback gated to Web Speech only; `measureNarrationWindow` removed from hot path; fixed-size overlay band (height = 1× line-height measured once at narration start, width = content-area width); truth-sync corrects visual overlay position only, does not write narration state.
+- `kokoroStrategy.ts` — `onChunkHandoff` wiring confirmed; no chunk-generation path reads visual cursor position.
+- `useReadingModeInstance.ts` — `onWordAdvance` callback verified wired to canonical scheduler event only.
+- `NarrateMode.ts` — Minor updates for canonical cursor separation.
+- `global.css` — Removed `.page-word--narration-context` per-word context highlight; removed width/height transitions on overlay; retained opacity transition only.
+
+**Tests:** 25 new tests in `tests/calmNarrationBand.test.ts`. Total: 1,529 tests across 85 test files.
+
+**SUCCESS CRITERIA (all 12 met):**
+1. Overlay band maintains fixed width and height during narration (no per-word resize jitter)
+2. Band Y-position steps on line change only (with brief transition), no mid-line corrections
+3. Audio-progress glide loop active for Kokoro (reads `getAudioProgress()` exclusively)
+4. Wall-clock estimate fallback active only for Web Speech engine
+5. Band never advances ahead of audio scheduler's reported `wordIndex`
+6. `lastConfirmedAudioWordRef` exists and is only written by scheduler's confirmed boundary events
+7. `speakNextChunkKokoro` reads chunk start from `lastConfirmedAudioWordRef`, not `cursorWordIndex`
+8. Truth-sync corrects visual overlay only, does not write narration state
+9. Divergence diagnostic logs when audio and visual cursors differ by > 5 words
+10. ≥10 new tests (25 delivered)
+11. `npm test` passes
+12. `npm run build` succeeds
+
+**Depends on:** TTS-7Q

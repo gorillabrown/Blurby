@@ -830,6 +830,7 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Guardrail:**
 - PR-134: Narration has two different cursor concepts: the canonical audio cursor and the visual band. Start, pause, resume, save, reopen, and chunk carry-over must read/write the canonical audio cursor only. The visual band must never become the anchor.
 - PR-135: Once the cursor is “stable but stepped,” stop iterating with CSS-only or renderer-only smoothing. Open a dedicated architecture sprint for audio-aligned progress instead of piling more UI easing onto a timing-model problem.
+- PR-136: Truth-sync remains a guardrail, not a movement engine. Periodic resync may correct drift, but if users can perceive it as the main source of motion, the system is architecturally wrong.
 
 ---
 
@@ -846,9 +847,8 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Fix:** Introduced `src/utils/narrationPlanner.ts` with `buildNarrationPlan` that classifies all boundary types (sentence, clause, paragraph, dialogue) across the active forward text window once. The resulting `NarrationPlan` is passed to both chunk selection and silence injection. `planNeedsRebuild` guards against unnecessary recomputes.
 
 **Guardrail:**
-- PR-136: The rolling planner must be the single source of truth for where a chunk may legally end. Code that selects chunk boundaries and code that computes silence for those boundaries must both read from the same plan — never recompute boundary classification independently.
-- PR-137: Planner scope is local and cheap — only the active forward window (~400 words), not the full book. If a planner scope ever becomes whole-book, re-evaluate for memory and latency budget before shipping.
-- PR-136: Truth-sync remains a guardrail, not a movement engine. Periodic resync may correct drift, but if users can perceive it as the main source of motion, the system is architecturally wrong.
+- PR-137: The rolling planner must be the single source of truth for where a chunk may legally end. Code that selects chunk boundaries and code that computes silence for those boundaries must both read from the same plan — never recompute boundary classification independently.
+- PR-138: Planner scope is local and cheap — only the active forward window (~400 words), not the full book. If a planner scope ever becomes whole-book, re-evaluate for memory and latency budget before shipping.
 
 ---
 
@@ -865,6 +865,44 @@ Separately, `FoliatePageView`'s active-mode `onSectionLoad` handler appended sec
 **Fix:** `AudioProgressReport` is the sole input to the glide loop. The canonical audio cursor (last confirmed word, chunk start index) is owned by the scheduler and written only by audio playback events. `onChunkHandoff` fires on every chunk boundary to synchronize the scheduler's chunk context before the next RAF frame. The visual band is derived from this report and has no write path to any anchor.
 
 **Guardrail:**
-- PR-138: The RAF glide loop in `FoliatePageView.tsx` must read cursor position exclusively from `getAudioProgress()`. It must not read from any React state, ref, or DOM element that is also used as a resume anchor or handoff carry-over value.
-- PR-139: `onChunkHandoff` must fire on every chunk transition so the scheduler's `AudioProgressReport` reflects the new chunk before the next animation frame. A stale chunk context in `AudioProgressReport` will cause the visual band to jump on chunk boundaries.
-- PR-140: `narrateDiagnostics.ts` provides `getGlideDiagSummary()` — use it during debugging, not as a performance-path data source. Diagnostic capture must be conditional on a debug flag and excluded from production-path RAF callbacks.
+- PR-139: The RAF glide loop in `FoliatePageView.tsx` must read cursor position exclusively from `getAudioProgress()`. It must not read from any React state, ref, or DOM element that is also used as a resume anchor or handoff carry-over value.
+- PR-140: `onChunkHandoff` must fire on every chunk transition so the scheduler's `AudioProgressReport` reflects the new chunk before the next animation frame. A stale chunk context in `AudioProgressReport` will cause the visual band to jump on chunk boundaries.
+- PR-141: `narrateDiagnostics.ts` provides `getGlideDiagSummary()` — use it during debugging, not as a performance-path data source. Diagnostic capture must be conditional on a debug flag and excluded from production-path RAF callbacks.
+
+---
+
+### [2026-04-05] LL-078: A Visually Calm Narration Cursor Beats a Theoretically Precise One
+
+**Area:** renderer, cursor UX, FoliatePageView, narration
+**Status:** active
+**Priority:** high
+
+**Context:** After `TTS-7Q`, the architecture was largely correct: canonical audio progress came from `audioScheduler.ts`, pause/replay anchors were preserved, and chunk handoffs no longer allowed the visual band to become the resume authority. But live testing still described the cursor as laggy, jumpy, and distracting. The problem was not that the system lacked more timing data; it was that the visual follower kept trying to reacquire exact word/window geometry. Multiple post-ship experiments improved stability without making the band feel calm: live-visual segment handoff, fixed-size overlay passes, same-line guards, smoothed rail steps, and fallback from audio-progress mode toward simpler word-to-word glide.
+
+**Root Cause:** The visual band was still over-correcting. Even when canonical audio progress is available, a renderer that keeps nudging toward freshly measured DOM boxes can feel worse than a simpler approximation. Human perception prefers a calm, line-stable motion over a mathematically “more exact” cursor that is always arriving slightly late.
+
+**Fix direction:** Keep the canonical audio cursor and resume/handoff ownership exactly as they are, but reduce the visual follower’s ambition. The visible band should be low-authority, line-stable, fixed-shape where possible, and only corrected on meaningful events (line change, truth-sync, chunk boundary, explicit retarget). If a visual cursor becomes distracting, simplify it rather than adding more geometry work.
+
+**Guardrail:**
+- PR-142: The visual narration band is a readability aid, not an exact alignment instrument. Prefer calm motion over hyper-precise box chasing.
+- PR-143: Do not spend additional render-frame work to reacquire tiny per-word geometry changes unless the user can clearly perceive a benefit. If the correction is subtle but the jitter is noticeable, the correction is not worth it.
+- PR-144: When the visual follower and canonical audio progress disagree on what feels best, canonical progress keeps ownership of pause/resume/save state, but the visible follower may intentionally simplify presentation for legibility.
+
+---
+
+### [2026-04-05] LL-079: Separate the Canonical Cursor Ref from Reducer State to Break Visual Contamination
+
+**Area:** renderer, narration, useNarration, cursor ownership
+**Status:** active
+**Priority:** high
+
+**Context:** `TTS-7R` identified a cursor-contamination loop that persisted through TTS-7Q: the visual advance callback dispatched `WORD_ADVANCE` to the narration reducer, which updated `cursorWordIndex`. `speakNextChunkKokoro` then read `cursorWordIndex` to determine the chunk start position. If the visual band had drifted ahead of actual audio, the next chunk would start from the wrong word.
+
+**Root Cause:** There was no separation between "where audio confirmed it last played" and "where the visual band currently is." Both wrote to the same reducer field (`cursorWordIndex`), making it impossible to use visual cursor position for display while keeping chunk generation anchored to confirmed audio events.
+
+**Fix:** Introduce `lastConfirmedAudioWordRef = useRef(0)` alongside the reducer. This ref is updated **only** by the audio scheduler's `onWordAdvance` callback — which fires on confirmed audio boundary crossings, not visual advances. `speakNextChunkKokoro` reads from `lastConfirmedAudioWordRef.current`; `cursorWordIndex` in the reducer continues to serve UI purposes (highlight, scroll-follow). Truth-sync corrects the visual overlay position only — it does not write to `lastConfirmedAudioWordRef` or `cursorWordIndex`.
+
+**Guardrail:**
+- PR-145: `lastConfirmedAudioWordRef` must be written ONLY by audio scheduler confirmed boundary events. No visual advance callback, truth-sync, or reducer dispatch should update it.
+- PR-146: `speakNextChunkKokoro` (and any future chunk-generation entry point) must read chunk start from `lastConfirmedAudioWordRef`, never from `cursorWordIndex` or any field that the visual follower can write.
+- PR-147: Truth-sync is a visual correction guardrail only. If truth-sync needs to snap the overlay to a different line, it updates the overlay element's transform directly — it must not write any state that the chunk-generation pipeline could read.

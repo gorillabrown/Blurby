@@ -20,6 +20,11 @@ export interface NarrationInterface {
   setPageEndWord: (idx: number | null) => void;
   setEngine: (engine: "web" | "kokoro") => void;
   speaking: boolean;
+  /**
+   * TTS-7R: Register a visual-only truth-sync callback that re-snaps the narration
+   * overlay without writing to narration state. Optional — not all callers need it.
+   */
+  setOnTruthSync?: (cb: ((wordIndex: number) => void) | null) => void;
 }
 
 /**

@@ -126,6 +126,13 @@ export function useReadingModeInstance({
   const createInstance = useCallback((mode: ModeType, words: string[], paragraphBreaks: Set<number>): ReadingMode => {
     const config = buildConfig(words, paragraphBreaks);
     let instance: ReadingMode;
+
+    // TTS-7R: Clear any stale truth-sync callback before creating the new instance.
+    // Non-narration modes must not fire a truth-sync intended for the overlay.
+    if (mode !== "narration" && narration.setOnTruthSync) {
+      narration.setOnTruthSync(null);
+    }
+
     switch (mode) {
       case "focus":
         // FocusMode's onWordAdvance also syncs useReader's wordIndex for ReaderView display
@@ -190,6 +197,20 @@ export function useReadingModeInstance({
             }
           }
         };
+
+        // TTS-7R: Register a visual-only truth-sync callback with the narration engine.
+        // Truth-sync fires every ~12 words to re-snap the overlay to the scheduler's
+        // authoritative audio position. It must ONLY update visual state — it must NOT
+        // call onWordAdvanceRef (which writes to narration state and contaminates the
+        // pipeline's read head via lastConfirmedAudioWordRef).
+        if (narration.setOnTruthSync) {
+          narration.setOnTruthSync((idx: number) => {
+            if (isFoliate && foliateApiRefStable.current) {
+              foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
+            }
+          });
+        }
+
         instance = new NarrateMode(config, narration);
         break;
       }

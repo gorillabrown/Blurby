@@ -10,9 +10,9 @@
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3
-Next sprint: EINK-6A (E-Ink Foundation & Greyscale Runtime)
-Health: GREEN — queue at minimum depth. EINK-6A → EINK-6B → GOALS-6B.
+Queue depth: 1 — RED (below minimum 3). Backfill needed.
+Next sprint: HOTFIX-12 (Bug Report Triage Fixes)
+Health: RED — TTS-7R complete. HOTFIX-12 queued. EINK/GOALS parked. Need 2 more for GREEN.
 ```
 
 ---
@@ -21,13 +21,13 @@ Health: GREEN — queue at minimum depth. EINK-6A → EINK-6B → GOALS-6B.
 
 | # | Sprint ID | Version | Branch | Tier | Findings | Summary |
 |---|-----------|---------|--------|------|----------|---------|
-| 1 | EINK-6A | v1.37.0 | `sprint/eink-6a-foundation` | Full | — | **FULLY SPEC'D.** Decouple e-ink from theme → independent display mode toggle. New `einkMode` setting, CSS split (behavioral vs color), ThemeSettings restructure, eink controller update. 10 tasks, 10 success criteria. |
-| 2 | EINK-6B | v1.38.0 | `sprint/eink-6b-ergonomics` | Full | — | **FULLY SPEC'D.** Reading ergonomics and mode strategy for e-ink: refresh cadence, motion/flash policy, mode-specific defaults, and UX polish on top of EINK-6A. |
-| 3 | GOALS-6B | v1.39.0 | `sprint/goals-6b-reading-goals` | Full | — | **FULLY SPEC'D.** Lightweight reading goal system — daily pages, daily minutes, weekly books. Progress widget in library header, streak tracking, settings sub-page. 11 tasks, 15 success criteria. Independent of EINK — can run in parallel with EINK-6B. |
+| 1 | HOTFIX-12 | v1.37.1 | `sprint/hotfix-12-triage` | Quick | — | **FULLY SPEC'D.** Bug report triage fixes. BUG-146 (chapter dropdown), BUG-147 (return-to-narration button), BUG-148 (position restore toast), BUG-149 (chunked extraction), BUG-150 (bug reporter keyboard). 10 tasks, 14 success criteria. Independent of TTS-7R. |
 
-**Agent staging rule:** TTS, EINK, and GOALS are Full-tier (test-runner → spec-compliance-reviewer → quality-reviewer → doc-keeper → blurby-lead).
+**Agent staging rule:** HOTFIX-12 is Quick-tier (Hippocrates → Solon → Herodotus → Hermes). Zeus orchestrates; doer agents (Hermes/Hephaestus/Athena) handle implementation.
 
-**Dispatch status:** EINK-6A is next. Queue depth is 3 — GREEN.
+**Dispatch status:** HOTFIX-12 is next. Queue depth is 1 — RED. Need 2 more sprints for GREEN.
+
+**Watch item:** EINK-6A/6B and GOALS-6B are parked (fully spec'd in ROADMAP.md, ready to re-queue when TTS/extension focus concludes).
 
 ---
 
@@ -35,6 +35,9 @@ Health: GREEN — queue at minimum depth. EINK-6A → EINK-6B → GOALS-6B.
 
 | Sprint ID | Disposition |
 |-----------|-------------|
+| EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when TTS/extension focus concludes. |
+| EINK-6B | Parked. Fully spec'd in ROADMAP.md. Depends on EINK-6A. |
+| GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent of EINK — can run in parallel. |
 | TD-2 | Deferred. Mode wiring is feature work. Specs stale. Re-triage post-EINK/GOALS. |
 | HOTFIX-1 | Deferred. Grid bugs may fold into a UI-FIX sprint later. |
 | Sprint 23 | Partially absorbed by Phase 1. Remainder re-triage post-EINK/GOALS. |
@@ -46,7 +49,8 @@ Health: GREEN — queue at minimum depth. EINK-6A → EINK-6B → GOALS-6B.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
-| TTS-7Q | 2026-04-05 | PASS | True glide & audio-aligned narration cursor. BUG-143/144 resolved — canonical `AudioProgressReport` type + `getAudioProgress()` on scheduler; `onChunkHandoff` callback wired through kokoroStrategy and exposed on `useNarration`; RAF-based glide loop in `FoliatePageView.tsx` drives the narration band from audio-time progress, not DOM chasing; chunk handoff is continuity-safe. New `src/utils/narrateDiagnostics.ts` + new test file `tests/audioGlide.test.ts`. 25 new tests (1,504 total). v1.36.1. |
+| TTS-7R | 2026-04-05 | PASS | Calm narration band & cursor ownership fix. BUG-145a/b/c resolved — `lastConfirmedAudioWordRef` separates canonical audio cursor from visual cursor; `SIMPLE_NARRATION_GLIDE` removed (audio-progress glide active); fixed-size overlay band (measure-once line-height); truth-sync visual-only; per-word context CSS removed. 25 new tests (`tests/calmNarrationBand.test.ts`, 1,529 total). v1.37.0. |
+| TTS-7Q | 2026-04-05 | PASS* | True glide & audio-aligned narration cursor. BUG-143/144 resolved — canonical `AudioProgressReport` type + `getAudioProgress()` on scheduler; `onChunkHandoff` callback wired through kokoroStrategy and exposed on `useNarration`; RAF-based glide loop in `FoliatePageView.tsx` drives the narration band from audio-time progress, not DOM chasing; chunk handoff is continuity-safe. New `src/utils/narrateDiagnostics.ts` + new test file `tests/audioGlide.test.ts`. 25 new tests (1,504 total). v1.36.1. Follow-on live issue tracked separately as BUG-145 (visual band still laggy / over-corrected). |
 | TTS-7P | 2026-04-05 | PASS | Rolling pause-boundary planner. BUG-140 resolved — new `narrationPlanner.ts` builds local boundary plans for the active text window; `generationPipeline.ts` and `kokoroStrategy.ts` updated to consult the plan; silence injection, resume, retarget, and dialogue handling all use one consistent structure. 33 new tests (1,479 total). v1.36.0. |
 | EXT-5C | 2026-04-05 | PASS | Rich article capture & hero image cards. BUG-141/142 resolved — cleaned article HTML preserved, inline images downloaded/re-written into EPUB for offline reading, shared image pipeline used by URL and extension imports, and hero image promoted to reading cards. 24 new tests (1,442 total). v1.35.0. |
 | TTS-7O | 2026-04-05 | PASS | Audible pause injection & smooth narration cursor. BUG-138/139 resolved — classifyChunkBoundary + silence injection at chunk edges, 3-word narration window, CSS transitions for smooth cursor, truth-sync every 12 words. 27 new tests (1,418 total). v1.34.0. |
