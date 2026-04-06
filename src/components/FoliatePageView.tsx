@@ -575,9 +575,10 @@ export default function FoliatePageView({
       // BUG-151: Use per-word x/width from the 3-word measurement window.
       const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
       const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
-      current.x = lerp(from.x, target.x);
+      // BUG-151: X and width snap to current word. Only Y lerps for line transitions.
+      current.x = from.x;
       current.y = lerp(from.y, target.y);
-      current.width = lerp(from.width, target.width);
+      current.width = from.width;
       current.height = fixedHeight;
 
       overlay.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
@@ -753,10 +754,11 @@ export default function FoliatePageView({
       }
 
       const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-      // BUG-151: Use per-word x/width from measurement window
-      const x = lerp(from.x, to.x, fraction);
+      // BUG-151: X and width snap to current word (no interpolation — stays in sync with audio).
+      // Only Y lerps for smooth line transitions.
+      const x = from.x;
       const y = lerp(from.y, to.y, fraction);
-      const width = lerp(from.width, to.width, fraction);
+      const width = from.width;
       const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
 
       narrationOverlayCurrentRef.current = { x, y, width, height, ready: true };
