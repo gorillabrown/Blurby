@@ -274,6 +274,12 @@ async function extractWords(epubPath) {
         wordCount: endWordIdx - startWordIdx,
       });
     }
+
+    // BUG-149: Yield between sections so the main-process event loop stays responsive.
+    // setImmediate lets pending IPC callbacks run before the next section is processed.
+    if (sectionIndex < spineIds.length - 1) {
+      await new Promise((resolve) => setImmediate(resolve));
+    }
   }
 
   return {

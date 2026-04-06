@@ -40,6 +40,9 @@ interface ReaderBottomBarProps {
   ttsEngine?: "web" | "kokoro";
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
+  /** When narration is active, the narration cursor word index — used to track current chapter.
+   *  null when narration is not speaking (falls back to wordIndex). */
+  narrationWordIndex?: number | null;
 }
 
 const HINT_TEXT: Record<string, string> = {
@@ -76,6 +79,7 @@ export default function ReaderBottomBar({
   onSetTtsRate,
   ttsEngine = "web",
   foliateFraction,
+  narrationWordIndex = null,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
@@ -137,9 +141,10 @@ export default function ReaderBottomBar({
     return detectChapters(activeDoc.content, words);
   }, [activeDoc.content, chapters, words]);
 
+  // Use narration cursor position when narration is speaking; fall back to reading position
   const curChapterIdx = useMemo(
-    () => currentChapterIndex(chapterList, wordIndex),
-    [chapterList, wordIndex]
+    () => currentChapterIndex(chapterList, narrationWordIndex ?? wordIndex),
+    [chapterList, narrationWordIndex, wordIndex]
   );
   const currentChapter = chapterList[curChapterIdx];
 

@@ -26,6 +26,7 @@ import BacktrackPrompt from "./BacktrackPrompt";
 import ReturnToReadingPill from "./ReturnToReadingPill";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
+import { useToast } from "../contexts/ToastContext";
 
 const api = window.electronAPI;
 
@@ -119,6 +120,7 @@ export default function ReaderContainer({
   onClearSettingsPage,
 }: ReaderContainerProps) {
   const { settings, updateSettings } = useSettings();
+  const { showToast } = useToast();
   const isEink = settings.theme === "eink";
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
@@ -153,6 +155,9 @@ export default function ReaderContainer({
   // TTS-7J (BUG-130): Tracks whether user has explicitly clicked/selected a word.
   // When true, delayed onLoad restore logic must not overwrite the user's choice.
   const userExplicitSelectionRef = useRef(false);
+  // BUG-148: One-shot gate — prevents the "Restored to last position" toast from
+  // firing more than once per book open (e.g. across multiple onLoad section events).
+  const hasShownRestoreToastRef = useRef(false);
   // TTS-7M (BUG-135): Persistent resume anchor. When set (non-null), this is
   // the authoritative start point for the next mode start. Passive Foliate
   // onLoad/onRelocate events may NOT lower or replace highlightedWordIndex
@@ -254,15 +259,32 @@ export default function ReaderContainer({
     // This prevents passive onLoad/onRelocate from downgrading the start point.
     resumeAnchorRef.current = (activeDoc.position || 0) > 0 ? activeDoc.position! : null;
     userExplicitSelectionRef.current = false; // TTS-7J: Reset on doc change
+    hasShownRestoreToastRef.current = false; // BUG-148: Reset toast gate on doc change
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = activeDoc.position || 0;
     setReadingMode("page"); // Always start in Page view
     api.getDocChapters(activeDoc.id).then((ch) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
-    // Delayed prewarm: start Kokoro model load 2s after reader opens (never startup-blocking)
-    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) {
-      const timer = setTimeout(() => api.kokoroPreload().catch(() => {}), 2000);
-      return () => clearTimeout(timer);
+    // BUG-148: Inform the user their reading position was restored. Fire once per book open,
+    // only when position > 0 (not a fresh start). Timer is cancelled on doc change so a rapid
+    // book switch cannot fire the toast for the old book.
+    let restoreTimer: ReturnType<typeof setTimeout> | undefined;
+    if ((activeDoc.position || 0) > 0) {
+      restoreTimer = setTimeout(() => {
+        if (!hasShownRestoreToastRef.current) {
+          hasShownRestoreToastRef.current = true;
+          showToast("Restored to your last position", 2000);
+        }
+      }, 500);
     }
+    // Delayed prewarm: start Kokoro model load 2s after reader opens (never startup-blocking)
+    let prewarmTimer: ReturnType<typeof setTimeout> | undefined;
+    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) {
+      prewarmTimer = setTimeout(() => api.kokoroPreload().catch(() => {}), 2000);
+    }
+    return () => {
+      clearTimeout(restoreTimer);
+      clearTimeout(prewarmTimer);
+    };
   }, [activeDoc.id, initReader, settings.ttsEngine]);
 
   // Persist focusTextSize changes
@@ -494,7 +516,7 @@ export default function ReaderContainer({
         });
         if (import.meta.env.DEV) console.debug(`[TTS-6O] background pre-extraction complete: ${result.words.length} words`);
       }).catch(() => {});
-    }, 1000); // NARRATE_BG_EXTRACT_DELAY_MS
+    }, activeDoc.wordCount > 100000 ? 2000 : 1000); // BUG-149: larger delay for big EPUBs
     return () => { cancelled = true; clearTimeout(timer); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useFoliate, activeDoc.id]);
@@ -1430,6 +1452,7 @@ export default function ReaderContainer({
           }}
           ttsEngine={settings.ttsEngine || "web"}
           foliateFraction={useFoliate ? foliateFraction : undefined}
+          narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
         />
       </div>
 
@@ -1439,6 +1462,16 @@ export default function ReaderContainer({
         activeOverlay={menuFlapOpen || showBacktrackPrompt}
         onReturn={handleReturnToReading}
       />
+      {/* BUG-147: Return to narration position when actively speaking but user has paged away */}
+      {isBrowsedAway && readingMode === "narration" && narration.speaking && (
+        <button
+          className="return-to-narration-btn"
+          onClick={handleReturnToReading}
+          title="Return to narration position"
+        >
+          ↩ Return to narration
+        </button>
+      )}
       {showEinkRefresh && <EinkRefreshOverlay />}
       {showBacktrackPrompt && (
         <BacktrackPrompt
