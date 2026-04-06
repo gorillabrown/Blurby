@@ -509,7 +509,11 @@ function getStatus() {
 }
 
 function getClientCount() {
-  return _clients.size;
+  let count = 0;
+  for (const client of _clients) {
+    if (client.authenticated) count++;
+  }
+  return count;
 }
 
 module.exports = {

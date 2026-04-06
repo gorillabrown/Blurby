@@ -75,21 +75,21 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 **Probable explanation:** The Foliate renderer may take a noticeable moment to reflow from paginated to scrolled mode (especially on large documents like 171k words), perceived as "doesn't switch." Or the user was in narration mode where the visual difference between paginated and scrolled is subtle.
 **Next step:** Live verification — click Flow, watch for reflow timing. If it works but is slow, this is a UX polish item (add loading indicator), not a bug.
 
-### BUG-155 — URL extraction broken
-**Reported:** 2026-04-06
+### ~~BUG-155~~ ✅ Fixed — HOTFIX-14 (v1.38.2, 2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
 **Severity:** High
 **Location:** `main/url-extractor.js`, `main/ipc/library.js`
 **Description:** URL extraction fails with "Could not extract article from this URL. Try opening it in your browser instead." Tested with `https://www.ebsco.com/research-starters/history/simonides`. May be site-specific (EBSCO may require auth/cookies) or a broader Readability regression.
 **Screenshot:** `docs/bug-reports/bug-2026-04-06T13-51-56Z.png` — library view showing error message.
-**Investigation needed:** (1) Test with other URLs to determine if site-specific or general. (2) Check url-extractor.js error handling — is it swallowing the actual error? (3) Verify jsdom + Readability pipeline is functioning.
+**Fix:** Added `fetchWithBrowser` fallback to the no-login branch of `main/ipc/misc.js`. Electron's built-in `fetch()` triggers WAF rejection on EBSCO and Cloudflare-protected sites (HTTP 400 — Chromium TLS fingerprint detected as bot). The fallback uses a hidden BrowserWindow with full session cookies, bypassing WAF detection.
 
-### BUG-156 — False "Connected" status for Chrome extension
-**Reported:** 2026-04-06
+### ~~BUG-156~~ ✅ Fixed — HOTFIX-14 (v1.38.2, 2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
 **Severity:** Medium
 **Location:** `main/ws-server.js`, `src/components/settings/ConnectorsSettings.tsx`
-**Description:** Connectors settings page shows "Extension is paired and connected" with green indicator when no Chrome extension is actually connected. The WebSocket server may be reporting "listening" (server running) as "connected" (client attached).
+**Description:** Connectors settings page shows "Extension is paired and connected" with green indicator when no Chrome extension is actually connected. The WebSocket server was reporting "listening" (server running) as "connected" (client attached).
 **Screenshot:** `docs/bug-reports/bug-2026-04-06T13-52-39Z.png`
-**Fix approach:** Distinguish between server-listening and client-connected states. Only show "Connected" when an authenticated WebSocket client is actively connected with heartbeat.
+**Fix:** `getClientCount()` now filters to authenticated clients only. `ConnectorsSettings.tsx` polls status every 5 seconds. WebSocket heartbeat interval reduced from 30s to 15s for faster stale-connection detection.
 
 ### ~~BUG-157~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
 **Reported:** 2026-04-06 | **Resolved:** 2026-04-06

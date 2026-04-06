@@ -34,6 +34,16 @@ export function ConnectorsSettings({
     });
   }, []);
 
+  // BUG-156: Poll connection status every 5 seconds so UI stays current
+  useEffect(() => {
+    const poll = setInterval(() => {
+      api.getWsShortCode().then((result: any) => {
+        if (result) setConnected(result.connected);
+      });
+    }, 5000);
+    return () => clearInterval(poll);
+  }, []);
+
   // Countdown timer
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
