@@ -64,6 +64,17 @@ export function ConnectorsSettings({
     }
   }
 
+  async function handleDisconnect() {
+    await api.regenerateWsPairingToken();
+    // Refresh status — server restarted with new token, all clients disconnected
+    const result = await api.getWsShortCode();
+    if (result) {
+      setShortCode(result.code);
+      setExpiresAt(result.expiresAt);
+      setConnected(result.connected);
+    }
+  }
+
   async function handleLogin() {
     const url = loginUrl.trim();
     if (!url) return;
@@ -108,9 +119,18 @@ export function ConnectorsSettings({
         )}
 
         {connected && (
-          <div className="ext-pairing-hint">
-            Extension is paired and connected.
-          </div>
+          <>
+            <div className="ext-pairing-hint">
+              Extension is paired and connected.
+            </div>
+            <button
+              className="settings-toggle-btn"
+              onClick={handleDisconnect}
+              style={{ marginTop: 8 }}
+            >
+              Disconnect
+            </button>
+          </>
         )}
       </div>
 

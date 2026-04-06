@@ -22,8 +22,8 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 5 — GREEN
-Next sprint: HOTFIX-14 (import & connection fixes — BUG-155/156/157/158)
-Health: GREEN — SELECTION-1 complete. HOTFIX-14 is next; BUG-157/158 CLI-ready, BUG-155/156 need investigation.
+Next sprint: HOTFIX-14 (import & connection fixes — BUG-155/156 remaining; BUG-157/158 resolved)
+Health: GREEN — SELECTION-1 complete. HOTFIX-14 partial done (BUG-157/158 resolved 2026-04-06). BUG-155/156 need investigation before full dispatch.
 ```
 
 ---
@@ -32,13 +32,13 @@ Health: GREEN — SELECTION-1 complete. HOTFIX-14 is next; BUG-157/158 CLI-ready
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | HOTFIX-14 | v1.38.1 | `hotfix/14-import-connection` | Quick | **PARTIAL** | BUG-157/158 CLI-ready. BUG-155/156 need Cowork investigation. |
+| 1 | HOTFIX-14 | v1.38.1 | `hotfix/14-import-connection` | Quick | **PARTIAL** | BUG-157/158 resolved (2026-04-06). BUG-155/156 need Cowork investigation before dispatch. |
 | 2 | EXT-ENR-A | v1.39.0 | `sprint/ext-enr-a-resilient` | Quick | **INVESTIGATION DONE** | Cowork has full analysis (ws-server.js + service-worker.js traced). Needs spec hardening with edit-site coordinates. |
 | 3 | FLOW-INF-A | v1.40.0 | `sprint/flow-inf-a-reading-zone` | Full | **NO** | Cowork: reading zone overlay prototyping (shadow DOM feasibility). SELECTION-1 anchor contract now available. |
 | 4 | FLOW-INF-B | v1.41.0 | `sprint/flow-inf-b-timer-cursor` | Full | **NO** | Blocked on FLOW-INF-A results |
 | 5 | EXT-ENR-B | v1.42.0 | `sprint/ext-enr-b-auto-discovery` | Full | **NO** | Blocked on EXT-ENR-A results |
 
-**Dispatch status:** Queue depth 5 — GREEN. **HOTFIX-14 is next.** BUG-157/158 specs in ROADMAP.md. BUG-155/156 need Cowork investigation before full dispatch.
+**Dispatch status:** Queue depth 5 — GREEN. **HOTFIX-14 is next.** BUG-157/158 resolved. BUG-155/156 need Cowork investigation before full HOTFIX-14 dispatch.
 
 **Next Cowork actions:**
 1. Live-test BUG-155 (URL extraction — 5 min)

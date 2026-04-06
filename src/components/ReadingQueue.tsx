@@ -51,7 +51,6 @@ export default function ReadingQueue({ docs, compact, onDocClick, onAddToQueue, 
 
   const queued = sorted.filter((doc) => doc.queuePosition !== undefined);
   const inProgress = sorted.filter((doc) => doc.queuePosition === undefined && doc.position > 0);
-  const unread = sorted.filter((doc) => doc.queuePosition === undefined && doc.position === 0);
 
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [dragSourceId, setDragSourceId] = useState<string | null>(null);
@@ -149,15 +148,9 @@ export default function ReadingQueue({ docs, compact, onDocClick, onAddToQueue, 
         </div>
       )}
       {inProgress.length > 0 && (
-        <div role="group" aria-label="Continue Reading">
-          <div className="queue-section-label">Continue Reading</div>
+        <div role="group" aria-label="Now Reading">
+          <div className="queue-section-label">Now Reading</div>
           {inProgress.map((doc) => renderDoc(doc))}
-        </div>
-      )}
-      {unread.length > 0 && (
-        <div role="group" aria-label="Unread">
-          <div className="queue-section-label">Unread</div>
-          {unread.map((doc) => renderDoc(doc))}
         </div>
       )}
     </div>

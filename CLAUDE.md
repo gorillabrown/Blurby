@@ -299,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.38.0 — queue GREEN, 3 priority tracks roadmapped, 5 open bugs)
+## Current System State (v1.38.0 — queue GREEN, 3 priority tracks roadmapped, 3 open bugs)
 
 ### Codebase (branch: `main`)
 
@@ -321,7 +321,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **HOTFIX-12 complete** — BUG-146/147/148/149/150 resolved. Chapter dropdown tracks narration cursor, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined (Escape-only for inputs) + Ctrl+Enter submit in bug reporter. 17 new tests. v1.37.1.
 - **SELECTION-1 complete** — Word anchor contract: soft/hard selection tiers, mode start resolution chain, BUG-151/152/153 resolved. 17 new tests. v1.38.0.
 - Active queue: depth 5 — GREEN. HOTFIX-14 → EXT-ENR-A → FLOW-INF-A → FLOW-INF-B → EXT-ENR-B. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
-- 5 open bugs: BUG-154 through BUG-158. EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
+- 3 open bugs: BUG-154 (parked), BUG-155, BUG-156. BUG-157/158 resolved (HOTFIX-14 partial). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
 - 1,563 tests across 87 test files
