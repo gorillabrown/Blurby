@@ -754,14 +754,41 @@ export default function FoliatePageView({
 
     const lineH = narrationBandLineHeightRef.current || Math.min(currentWindow.height, 40);
 
-    // Seed the line scanner at the anchor word's position
-    narrationScanXRef.current = currentWindow.x;
-    narrationScanYRef.current = currentWindow.y;
+    // If column width wasn't measured yet, derive it from the anchor word's line.
+    // The word's x position relative to the column left gives us the column width bounds.
+    if (narrationColWidthRef.current <= 0) {
+      const container = containerRef.current;
+      if (container) {
+        const cw = container.clientWidth;
+        const isTwoCol = cw >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX;
+        // Estimate column width from container
+        narrationColWidthRef.current = isTwoCol ? (cw - 48) / 2 - 20 : cw - 48;
+        narrationColLeftXRef.current = currentWindow.x < cw / 2 ? 0 : cw / 2;
+      }
+    }
+
+    // Seed the line scanner — clamp to visible column bounds.
+    // measureNarrationWindow can return paginated coordinates outside the visible area.
+    const colLeft = narrationColLeftXRef.current;
+    const colRight = colLeft + narrationColWidthRef.current;
+    const container = containerRef.current;
+    const containerH = container ? container.clientHeight : 800;
+
+    let seedX = currentWindow.x;
+    let seedY = currentWindow.y;
+    // Clamp into visible column
+    if (seedX < colLeft || seedX > colRight || seedY < 0 || seedY > containerH) {
+      seedX = colLeft;
+      seedY = lineH; // start near top of visible area
+    }
+
+    narrationScanXRef.current = seedX;
+    narrationScanYRef.current = seedY;
     narrationScanSpeedRef.current = computeScanSpeed();
-    narrationScanLastTsRef.current = 0; // reset — first frame computes dt=0
+    narrationScanLastTsRef.current = 0;
 
     // Show the overlay at the seed position
-    overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
+    overlay.style.transform = `translate3d(${seedX}px, ${seedY}px, 0)`;
     overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
     overlay.style.height = `${lineH}px`;
     overlay.style.opacity = "1";
@@ -801,21 +828,23 @@ export default function FoliatePageView({
 
     if (isNarrationMode) {
       // BUG-151 line-scanner: Only seed the scanner on first call (when not yet running).
-      // Subsequent word advances do truth-sync: snap scanner Y to the spoken word's line
-      // if the scanner has drifted to a different line.
       if (narrationScanSpeedRef.current <= 0) {
         positionNarrationOverlay(state.doc, wordIndex);
       } else {
         // Truth-sync: measure the spoken word's Y and snap if needed
         const wordWindow = measureNarrationWindow(state.doc, wordIndex);
         if (wordWindow) {
-          const scanY = narrationScanYRef.current;
-          const lineH = narrationBandLineHeightRef.current || 28;
-          // If scanner Y differs from spoken word's Y by more than half a line, snap
-          if (Math.abs(scanY - wordWindow.y) > lineH * 0.6) {
-            narrationScanYRef.current = wordWindow.y;
-            // Also snap X to the word's x on line changes
-            narrationScanXRef.current = wordWindow.x;
+          const colL = narrationColLeftXRef.current;
+          const colR = colL + narrationColWidthRef.current;
+          const cH = containerRef.current?.clientHeight || 800;
+          const inBounds = wordWindow.x >= colL && wordWindow.x <= colR && wordWindow.y >= 0 && wordWindow.y <= cH;
+          if (inBounds) {
+            const scanY = narrationScanYRef.current;
+            const lineH = narrationBandLineHeightRef.current || 28;
+            if (Math.abs(scanY - wordWindow.y) > lineH * 0.6) {
+              narrationScanYRef.current = wordWindow.y;
+              narrationScanXRef.current = wordWindow.x;
+            }
           }
           // Update speed in case WPM changed
           narrationScanSpeedRef.current = computeScanSpeed();
