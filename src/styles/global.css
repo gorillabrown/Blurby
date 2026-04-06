@@ -3831,6 +3831,7 @@ button:focus-visible {
    via JS; they never change per-word. Only transform (Y position) and opacity animate. */
 .foliate-narration-highlight {
   position: absolute;
+  max-height: 60px; /* BUG-151 safety net — no narration band taller than ~2 lines */
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--accent) 10%, transparent) 0%,
@@ -3847,6 +3848,7 @@ button:focus-visible {
   transition: transform 80ms ease, opacity 80ms ease;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
   opacity: 0;
+  overflow: hidden;
   transform-origin: left top;
 }
 
