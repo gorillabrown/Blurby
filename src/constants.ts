@@ -104,8 +104,8 @@ export const TTS_FORWARD_WORDS = 300;
 export const TTS_PLANNER_WINDOW_WORDS = 400;
 /** TTS-7P: Rolling pause planner — minimum words per planned chunk (prohibits tiny fragments) */
 export const TTS_PLANNER_MIN_CHUNK_WORDS = 10;
-/** BUG-151: Extra padding added to word width for the narration overlay band */
-export const NARRATION_BAND_PAD_PX = 200;
+/** BUG-151: Fixed narration overlay band width in pixels */
+export const NARRATION_BAND_PAD_PX = 300;
 /** BUG-151: Cursor lag behind audio clock (ms). Compensates for heuristic word
  *  boundary timing — ensures the visual cursor never outpaces spoken audio.
  *  The word timer and getAudioProgress both use (audioTime - lag) as the

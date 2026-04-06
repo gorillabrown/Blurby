@@ -691,37 +691,30 @@ export default function FoliatePageView({
           Math.abs(rail.y - fromWindow.y) <= sameLineTolerance;
 
         // TTS-7R (BUG-145a): Use fixed band dimensions — width and height are constant.
-        // BUG-151: Band centered on spoken word. Width = wordWidth + pad.
+        // BUG-151: Fixed 300px band, word at left edge. Width never changes.
         const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(fromWindow.height, 40);
-        const fww = fromWindow.wordWidth ?? fromWindow.width;
-        const fromBandW = fww + NARRATION_BAND_PAD_PX;
-        const fromWordCenter = fromWindow.x + fww / 2;
-        const fromBandX = Math.max(0, fromWordCenter - fromBandW / 2);
         const stableY = sameRailLine ? rail.y : fromWindow.y;
 
         const stableFrom = {
-          x: fromBandX,
+          x: fromWindow.x,
           y: stableY,
-          width: fromBandW,
+          width: NARRATION_BAND_PAD_PX,
           height: fixedHeight,
         };
 
         const toY = usableNextWindow ? (Math.abs(usableNextWindow.y - fromWindow.y) <= sameLineTolerance ? stableY : usableNextWindow.y) : stableY;
-        const tww = usableNextWindow ? (usableNextWindow.wordWidth ?? usableNextWindow.width) : fww;
-        const toBandW = tww + NARRATION_BAND_PAD_PX;
-        const toWordCenter = usableNextWindow ? usableNextWindow.x + tww / 2 : fromWordCenter;
-        const toX = Math.max(0, toWordCenter - toBandW / 2);
+        const toX = usableNextWindow ? usableNextWindow.x : fromWindow.x;
         const stableTo = {
           x: toX,
           y: toY,
-          width: toBandW,
+          width: NARRATION_BAND_PAD_PX,
           height: fixedHeight,
         };
 
         narrationLineRailRef.current = {
           y: stableY,
           height: fixedHeight,
-          width: fromBandW,
+          width: NARRATION_BAND_PAD_PX,
           avgStep: sameRailLine ? rail.avgStep : 0,
           active: true,
         };
@@ -903,20 +896,17 @@ export default function FoliatePageView({
       narrationDiagLastVisualWordRef.current = wordIndex;
     }
 
-    // BUG-151: Band centered on the spoken word. Width = wordWidth + padding.
+    // BUG-151: Fixed 300px band, focus word at the left edge.
     const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, 40);
-    const ww = currentWindow.wordWidth ?? currentWindow.width;
-    const bandWidth = ww + NARRATION_BAND_PAD_PX;
-    const wordCenter = currentWindow.x + ww / 2;
-    const bandX = Math.max(0, wordCenter - bandWidth / 2);
-    const seedWindow = { x: bandX, y: currentWindow.y, width: bandWidth, height: fixedHeight };
+    const bandX = currentWindow.x;
+    const seedWindow = { x: bandX, y: currentWindow.y, width: NARRATION_BAND_PAD_PX, height: fixedHeight };
 
     // TTS-7Q: If audio-progress is available, start the audio-clock glide loop.
     if (getAudioProgressRef.current) {
       narrationGlideWordRef.current = -1;
       narrationOverlayCurrentRef.current = { ...seedWindow, ready: true };
       overlay.style.transform = `translate3d(${bandX}px, ${currentWindow.y}px, 0)`;
-      overlay.style.width = `${bandWidth}px`;
+      overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
       overlay.style.height = `${fixedHeight}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
@@ -932,13 +922,8 @@ export default function FoliatePageView({
     const sameLineTolerance = Math.max(8, currentWindow.height * 0.6);
     const staysOnSameLine = Math.abs(nextWindow.y - currentWindow.y) <= sameLineTolerance;
     const targetY = staysOnSameLine ? currentWindow.y : nextWindow.y;
-    const nww = nextWindow.wordWidth ?? nextWindow.width;
-    const nextBandWidth = nww + NARRATION_BAND_PAD_PX;
-    const nextWordCenter = nextWindow.x + nww / 2;
-    const nextBandX = Math.max(0, nextWordCenter - nextBandWidth / 2);
-    const targetX = staysOnSameLine ? bandX : nextBandX;
-    const targetWidth = staysOnSameLine ? bandWidth : nextBandWidth;
-    const targetWindow = { x: targetX, y: targetY, width: targetWidth, height: fixedHeight };
+    const targetX = staysOnSameLine ? bandX : nextWindow.x;
+    const targetWindow = { x: targetX, y: targetY, width: NARRATION_BAND_PAD_PX, height: fixedHeight };
 
     const now = performance.now();
     const previousAdvance = narrationOverlayLastAdvanceRef.current;
@@ -957,8 +942,8 @@ export default function FoliatePageView({
 
     overlay.style.display = "block";
     overlay.style.opacity = "1";
-    overlay.style.transform = `translate3d(${currentWindow.x}px, ${currentWindow.y}px, 0)`;
-    overlay.style.width = `${bandWidth}px`;
+    overlay.style.transform = `translate3d(${bandX}px, ${currentWindow.y}px, 0)`;
+    overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
     overlay.style.height = `${fixedHeight}px`;
     ensureNarrationOverlayLoop();
   }, [ensureNarrationOverlayLoop, ensureAudioProgressGlideLoop, hideNarrationOverlay, measureNarrationWindow]);
