@@ -106,6 +106,11 @@ export const TTS_PLANNER_WINDOW_WORDS = 400;
 export const TTS_PLANNER_MIN_CHUNK_WORDS = 10;
 /** BUG-151: Extra padding added to word width for the narration overlay band */
 export const NARRATION_BAND_PAD_PX = 200;
+/** BUG-151: Cursor lag behind audio clock (ms). Compensates for heuristic word
+ *  boundary timing — ensures the visual cursor never outpaces spoken audio.
+ *  The word timer and getAudioProgress both use (audioTime - lag) as the
+ *  effective clock, creating a hard ceiling the cursor cannot exceed. */
+export const NARRATION_CURSOR_LAG_MS = 350;
 
 // ── Narrate Performance Budgets (TTS-6O) ────────────────────────────────────
 /** Max ms from user click to first audio chunk playing */

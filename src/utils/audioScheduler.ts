@@ -5,7 +5,7 @@
 // eliminating the 5-20ms gap from the onended→consumeNext handover.
 // Crossfade at chunk boundaries prevents splice artifacts.
 
-import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL } from "../constants";
+import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL, NARRATION_CURSOR_LAG_MS } from "../constants";
 
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
@@ -246,6 +246,10 @@ export function createAudioScheduler(): AudioScheduler {
     clearWordTimer();
     if (!callbacks || !audioCtx || currentWordBoundaries.length === 0) return;
 
+    // BUG-151: Lag offset — the cursor clock runs behind the audio clock by this
+    // amount so the visual cursor never outpaces the actual spoken word.
+    const cursorLagSec = NARRATION_CURSOR_LAG_MS / 1000;
+
     function tick(): void {
       if (stopped || !callbacks || !audioCtx) return;
       const now = audioCtx.currentTime;
@@ -256,14 +260,14 @@ export function createAudioScheduler(): AudioScheduler {
         return;
       }
 
+      // BUG-151: Use lagged time for boundary comparison — cursor must not
+      // exceed audioTime - cursorLagSec. This is the hard ceiling.
+      const cursorNow = now - cursorLagSec;
+
       // Advance past ALL boundaries we've crossed in this tick.
-      // TTS-7O follow smoothing: emit every crossed word boundary in order instead
-      // of collapsing to the latest one. The old collapse behavior kept truth-sync
-      // accurate enough for coarse correction, but it starved the Foliate narration
-      // follower of the intermediate positions needed for a continuous glide.
       let advancedAny = false;
       while (nextWordBoundaryIdx < currentWordBoundaries.length &&
-             currentWordBoundaries[nextWordBoundaryIdx].time <= now) {
+             currentWordBoundaries[nextWordBoundaryIdx].time <= cursorNow) {
         const advancedWordIndex = currentWordBoundaries[nextWordBoundaryIdx].wordIndex;
         callbacks.onWordAdvance(advancedWordIndex);
         advancedAny = true;
@@ -471,7 +475,11 @@ export function createAudioScheduler(): AudioScheduler {
     if (stopped || !audioCtx || currentWordBoundaries.length === 0) return null;
     if (playbackStartTime !== null && audioCtx.currentTime < playbackStartTime) return null;
 
-    const now = audioCtx.currentTime;
+    // BUG-151: Use lagged time — cursor must not exceed audioTime - lag.
+    const cursorLagSec = NARRATION_CURSOR_LAG_MS / 1000;
+    const now = Math.max(0, audioCtx.currentTime - cursorLagSec);
+    // If lag pushes us before the first boundary, no progress to report yet
+    if (currentWordBoundaries.length > 0 && now < currentWordBoundaries[0].time) return null;
     const boundaries = currentWordBoundaries;
     const total = boundaries.length;
     if (total === 0) return null;

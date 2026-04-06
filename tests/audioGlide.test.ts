@@ -365,8 +365,8 @@ describe("getAudioProgress()", () => {
     scheduler.play();
     scheduler.scheduleChunk(makeChunk(0, 5, 1000));
 
-    // Advance time past the first word boundary
-    setAudioTime(0.3);
+    // Advance time past the first word boundary + cursor lag (NARRATION_CURSOR_LAG_MS = 350ms)
+    setAudioTime(0.8);
 
     // Wait for at least one word advance
     await vi.waitFor(() => expect(wordAdvanceArgs.length).toBeGreaterThan(0), { timeout: 500 });
