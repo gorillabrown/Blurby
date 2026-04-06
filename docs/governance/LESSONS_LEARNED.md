@@ -971,4 +971,29 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
   : Math.min(currentWindow.height, MAX_FALLBACK_HEIGHT); // ← CAPPED
 ```
 
+---
+
+### [2026-04-06] LL-083: Soft Selection Uses Refs + Direct Shadow DOM Mutation, Not State
+
+**Area:** renderer, page mode, word selection, FoliatePageView
+**Status:** active
+**Priority:** high
+
+**Context:** SELECTION-1 added a passive "soft selection" indicator — a `.page-word--soft-selected` CSS class on the first visible word on every page turn. The design decision was to use a ref (`softWordIndexRef`) and direct DOM class mutation via `renderer.getContents()` rather than React state.
+
+**Why not state:** Setting React state on every page turn (every `onRelocate` / `onLoad` event) would trigger a re-render of the entire reader component tree. At 60fps page-turn animations this causes visible jank. The soft indicator is purely visual — no downstream logic depends on it being in the render cycle.
+
+**The established pattern for all Foliate visual indicators:**
+1. Store the value in a `useRef` (never `useState`) to avoid re-renders.
+2. Apply the CSS class directly in shadow DOM via `renderer.getContents()` iteration:
+   ```typescript
+   view.renderer.getContents().forEach(({ doc }) => {
+     doc.querySelector(`[data-word-index="${idx}"]`)?.classList.add('page-word--soft-selected');
+   });
+   ```
+3. Clear the previous indicator explicitly before applying the new one (store the previous index in a ref).
+4. Hard selections and mode-active states always visually override soft selection (higher-specificity CSS or explicit clear before mode start).
+
+**Guardrail:** Never use `useState` for visual-only word indicators in FoliatePageView or ReaderContainer. Use refs + shadow DOM class manipulation. This is the same pattern used for narration band position, highlighted word overlay, and flow cursor. Mixing state-driven and ref-driven visual indicators on the same DOM element causes flicker and ordering bugs.
+
 **Guardrail:** Every fallback value derived from DOM measurement must have a reasonable upper bound. For visual elements with expected line-height dimensions, cap to ~2x expected size (e.g., 40px for a line-height band). Never pass raw `getBoundingClientRect()` results directly into visual sizing without a ceiling. This applies to width as well — `bodyRect.width` is safe for single-column but may be wrong for two-column layouts.

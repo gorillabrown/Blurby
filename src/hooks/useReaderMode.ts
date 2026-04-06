@@ -62,6 +62,8 @@ export interface UseReaderModeParams {
   bookWordsTotalWords?: number;
   /** TTS-7M: Persistent resume anchor — when set, this is the authoritative start point */
   resumeAnchorRef: React.MutableRefObject<number | null>;
+  /** Soft word index (first visible word on current page) — fallback when no explicit selection */
+  softWordIndexRef: React.MutableRefObject<number>;
 }
 
 export interface UseReaderModeReturn {
@@ -123,6 +125,7 @@ export function useReaderMode({
   setReadingMode,
   bookWordsTotalWords,
   resumeAnchorRef,
+  softWordIndexRef,
 }: UseReaderModeParams): UseReaderModeReturn {
 
   const readingModeRef = useRef<ReadingMode>(readingMode);
@@ -178,6 +181,7 @@ export function useReaderMode({
     if (import.meta.env.DEV) console.debug("[narrate] start — foliate:", useFoliate);
     narration.stop();
     stopAllModes();
+    foliateApiRef.current?.clearSoftHighlight?.();
     hasEngagedRef.current = true;
     setReadingMode("narration");
     updateSettings({ readingMode: "narration", lastReadingMode: "narration" });
@@ -202,7 +206,7 @@ export function useReaderMode({
     // TTS-7M (BUG-135): Consume resume anchor if set — it takes priority over
     // the potentially-degraded highlightedWordIndex. This ensures pause→play
     // resumes from the live cursor, and reopen→play starts from saved position.
-    let startWordSource = highlightedWordIndexRef.current;
+    let startWordSource = highlightedWordIndexRef.current || softWordIndexRef.current;
     if (resumeAnchorRef.current != null) {
       startWordSource = resumeAnchorRef.current;
       if (import.meta.env.DEV) console.debug("[TTS-7M] startNarration: using resume anchor:", startWordSource);
@@ -299,6 +303,7 @@ export function useReaderMode({
   // ── Start Focus ────────────────────────────────────────────────────
   const startFocus = useCallback(() => {
     stopAllModes();
+    foliateApiRef.current?.clearSoftHighlight?.();
     hasEngagedRef.current = true;
     if (useFoliate) extractFoliateWords();
     let effectiveWords = getEffectiveWords();
@@ -313,7 +318,7 @@ export function useReaderMode({
       return;
     }
     // TTS-7M: Consume resume anchor if set
-    let focusStartSource = highlightedWordIndexRef.current;
+    let focusStartSource = highlightedWordIndexRef.current || softWordIndexRef.current;
     if (resumeAnchorRef.current != null) { focusStartSource = resumeAnchorRef.current; resumeAnchorRef.current = null; }
     const startWord = useFoliate
       ? resolveFoliateStartWord(focusStartSource, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)
@@ -335,6 +340,7 @@ export function useReaderMode({
   // ── Start Flow ─────────────────────────────────────────────────────
   const startFlow = useCallback(() => {
     stopAllModes();
+    foliateApiRef.current?.clearSoftHighlight?.();
     hasEngagedRef.current = true;
     if (useFoliate) extractFoliateWords();
     let effectiveWords = getEffectiveWords();
@@ -349,7 +355,7 @@ export function useReaderMode({
       return;
     }
     // TTS-7M: Consume resume anchor if set
-    let flowStartSource = highlightedWordIndexRef.current;
+    let flowStartSource = highlightedWordIndexRef.current || softWordIndexRef.current;
     if (resumeAnchorRef.current != null) { flowStartSource = resumeAnchorRef.current; resumeAnchorRef.current = null; }
     const startWord = useFoliate
       ? resolveFoliateStartWord(flowStartSource, effectiveWords.length, () => foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1, bookWordsTotalWords)

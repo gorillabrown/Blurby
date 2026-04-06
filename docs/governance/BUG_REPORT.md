@@ -11,7 +11,7 @@
 ### BUG-151 — Narration band spans full page height instead of single line
 **Reported:** 2026-04-06
 **Severity:** High (visual regression)
-**Status:** ROOT CAUSE CONFIRMED — CLI-ready fix spec below
+**Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
 **Location:** `src/components/FoliatePageView.tsx` (lines 571, 692, 860)
 **Description:** After TTS-7R (v1.37.0), the narration overlay band renders as a page-tall rectangle instead of the intended single-line-height 3-word gliding cursor.
 **Root cause (confirmed by code analysis 2026-04-06):** Three fallback paths in FoliatePageView.tsx use uncapped height values when `narrationBandLineHeightRef.current === 0`:
@@ -29,7 +29,7 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 ### BUG-152 — Focus mode blank screen
 **Reported:** 2026-04-06
 **Severity:** High (feature broken)
-**Status:** ROOT CAUSE CONFIRMED — CLI-ready fix spec below
+**Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
 **Location:** `src/components/ReaderContainer.tsx` (line 1362)
 **Description:** Clicking Focus shows a blank white screen with only tiny up/down arrow icons (▼/▲) in the center — no word text visible. The RSVP display renders but shows empty text.
 **Screenshot:** `docs/bug-reports/.Archive/bug-2026-04-06T13-48-57Z.png` — blank white screen with centered arrows.
@@ -49,19 +49,22 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 ### BUG-153 — No word selection contract (soft/hard selection missing)
 **Reported:** 2026-04-06
 **Severity:** High (design gap affecting all reading modes)
+**Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
 **Location:** `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
 **Description:** When navigating to any page, no word is highlighted. Reading modes (Focus, Flow, Narrate) don't know where to start because there's no persistent "current word" anchor. Users reported: "If no word is selected, where does each reading mode start?" and "there must always be a word selected."
 **Screenshots:** `docs/bug-reports/bug-2026-04-06T13-49-14Z.png`, `bug-2026-04-06T13-50-16Z.png`, `bug-2026-04-06T13-50-34Z.png`
-**Design contract needed:**
-- **Soft selection** — First visible word on every page is always lightly highlighted (subtle underline or dot). Updates automatically on page turn or scroll. This is the default start word for any reading mode.
-- **Hard selection** — User clicks a word → it becomes the anchor (distinct highlight style). Persists across page turns. All reading modes start from this word.
-- **Off-page anchor** — If the hard-selected word is on a different page/section, show a "Jump to selection" button (similar to existing "Return to narration" pill from HOTFIX-12).
-**Fix approach:** Add `softSelectedWordIndex` (first visible word, auto-updated) and `hardSelectedWordIndex` (user click, persisted) to reader state. Reading mode start-word resolution: hard selection > soft selection > word 0.
+**Investigation:** Full investigation report at `docs/investigations/SELECTION-1-investigation.md`. 4 word lists mapped, per-mode start resolution traced, 6 gaps identified, position data flow diagrammed.
+**Design (Cowork 2026-04-06):** Three-tier word anchor contract:
+- **Soft selection** (`softWordIndexRef`) — First visible word on every page, auto-updated via `findFirstVisibleWordIndex()` on `onRelocate`/`onLoad`. Visual: `.page-word--soft-selected` (2px left-border accent). Only visible in page mode.
+- **Hard selection** (`highlightedWordIndex`, existing) — User clicks a word → distinct highlight, persists across page turns. Takes visual priority over soft.
+- **Resume anchor** (`resumeAnchorRef`, existing) — Internal ref, consumed on mode start.
+- **Resolution order:** `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
+**Sprint:** SELECTION-1 in ROADMAP.md — 15 tasks, 15 success criteria, Quick tier. Also absorbs BUG-151 and BUG-152.
 
 ### BUG-154 — Flow mode should switch to scrolled layout on click, not on play
 **Reported:** 2026-04-06
 **Severity:** Medium
-**Status:** LIKELY NOT A BUG — code already switches on click. Needs live verification.
+**Status:** PARKED — code already switches on click. Needs live verification. Not included in SELECTION-1.
 **Location:** `src/components/FoliatePageView.tsx` (line 1527), `src/components/ReaderContainer.tsx` (line 1293)
 **Description:** User reports clicking "Flow" doesn't switch to scrolled layout until play starts.
 **Screenshot:** `docs/bug-reports/.Archive/bug-2026-04-06T13-47-33Z.png`

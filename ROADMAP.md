@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — Roadmap finalized with investigation gates and responsibility assignments. Every item has: what we know, what we don't, what Cowork investigates before CLI executes.
+**Last updated**: 2026-04-06 — SELECTION-1 complete (v1.38.0). Word anchor contract shipped. BUG-151/152/153 resolved.
 **Current branch**: `main`
-**Current state**: v1.37.1 stable. Queue depth 6 (GREEN). All items need Cowork investigation before CLI dispatch. BUG-157/158 are the only CLI-ready items today.
+**Current state**: v1.38.0 stable. Queue depth 5 (GREEN). HOTFIX-14 is next (BUG-157/158 CLI-ready, BUG-155/156 need investigation).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -39,7 +39,7 @@ Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
   └── GOALS-6B: Reading Goal Tracking (parked)
     │
     ▼
-HOTFIX-13: Reader Core Fixes (BUG-151/152/153/154)
+SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed)
     │
 HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158)
     │
@@ -98,37 +98,130 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
 
 ---
 
-## HOTFIX-13: Reader Core Fixes (BUG-151/152/153/154)
+## SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed) ✅ COMPLETED
 
-**Goal:** Fix the three broken reading modes and establish the word selection contract.
+**Goal:** Establish a single, unambiguous answer to "where is the user in the book?" that all reading modes, progress tracking, and UI elements can depend on. Add passive word tracking in page mode so there is always a visible anchor, and fix the mode-start resolution chain so every mode inherits position correctly.
 
-**Bugs:**
+**Problem:** Today, `highlightedWordIndex` is the de facto position anchor, but it only updates via fraction-based estimates on page turn (no DOM truth) and is never visually highlighted during page-mode browsing. Reading modes ask "where do I start?" and the answer depends on which code path was hit. There's no "you are here" marker when passively reading. This gap causes BUG-152 (focus mode gets wrong words), BUG-151 (narration band measurement goes stale without a stable anchor), and the broader BUG-153 (no word selection contract).
 
-| ID | Description | Severity | Scope |
-|----|-------------|----------|-------|
-| BUG-151 | Narration band spans full page height instead of single-line | High | `FoliatePageView.tsx` (measurement fallback) |
-| BUG-152 | Focus mode blank screen — no RSVP display | High | `useReaderMode.ts`, `ReaderContainer.tsx` |
-| BUG-153 | No word selection contract (soft/hard) — modes don't know where to start | High | `FoliatePageView.tsx`, `useReaderMode.ts`, `ReaderContainer.tsx` |
-| BUG-154 | Flow should switch to scrolled layout on click, not on play | Medium | `FoliatePageView.tsx`, `useReaderMode.ts` |
+**Investigation report:** `docs/investigations/SELECTION-1-investigation.md` — full trace of all 4 word lists, per-mode start resolution, navigation events, persistence, and 6 identified gaps.
 
-### Investigation Gate (Cowork — before CLI dispatch)
+### Design Decisions
 
-| Bug | What We Know | What We Don't Know | Investigation Action |
-|-----|-------------|-------------------|---------------------|
-| BUG-151 | Three fallback paths (lines 571, 692, 860) use uncapped `from.height` or `currentWindow.height` when `narrationBandLineHeightRef` is 0. If user navigates away from narrated section, measurement becomes stale or fails, and the fallback produces a page-tall band. | **ROOT CAUSE CONFIRMED.** Fallback height is uncapped. When `narrationBandLineHeightRef.current === 0`, the fallback uses `currentWindow.height` (potentially hundreds of px). | **CLI-READY.** Cap all three fallback heights to 40px (~2 line-heights). Re-run `measureNarrationBandDimensions()` on section change, not just narration start. See fix spec below. |
-| BUG-152 | `ReaderView` at `ReaderContainer.tsx:1362` receives `words={foliateWordStrings}` (a DOM-section slice of ~1000 words). But `wordIndex` comes from the full-book global index (e.g., 5114 from `getEffectiveWords()` which returns 173,727 words). `words[5114]` is `undefined` → `currentWord=""` → blank RSVP, only ▼/▲ arrows visible. | **ROOT CAUSE CONFIRMED.** Data-flow split: mode timer uses full-book words, but ReaderView receives DOM-slice words. Index into the wrong array → empty word. | **CLI-READY.** Change `ReaderContainer.tsx:1362` from `words={foliateWordStrings}` to `words={bookWordsRef.current?.complete ? bookWordsRef.current.words : foliateWordStrings}`. See fix spec below. |
-| BUG-153 | Design contract defined (soft/hard selection, resolution order). No implementation exists today — words are only highlighted when a reading mode is active. | **Exact state shape, event wiring, and visual treatment.** How does `onLoad`/`onRelocate` determine first visible word? What CSS class for soft highlight? How does `startWord` resolution in each mode hook integrate? | **Cowork: Design spec needed.** Define: (a) state variables, (b) update events, (c) CSS classes, (d) integration points. Produce full WHERE/Tasks/SUCCESS CRITERIA for CLI. |
-| BUG-154 | Code already switches layout on click: `ReaderContainer.tsx:1293` sets `flowMode={readingMode === "flow"}`, `FoliatePageView.tsx:1527` sets `flow="scrolled"`. | **Likely not a bug.** The Foliate renderer may take a moment to reflow, perceived as "doesn't switch." Or user was in narration mode where the visual difference is subtle. | **Needs live verification only.** If switch works but is slow, add loading indicator. If genuinely broken, trace `setAttribute("flow")` timing. Defer to live testing session. |
+**Three selection tiers, one resolution order:**
 
-**Dispatch readiness:** BUG-151 and BUG-152 are **CLI-READY** with exact fix specs. BUG-153 needs Cowork design spec. BUG-154 needs live verification (may be non-bug).
+| Tier | Variable | Set By | Visual | Persists Across Page Turn |
+|------|----------|--------|--------|---------------------------|
+| **Soft selection** | `softWordIndexRef` (new ref) | `findFirstVisibleWordIndex()` on every `onRelocate` + `onLoad` in page mode | `.page-word--soft-selected`: 2px left-border accent, `var(--accent-faded)` | No — auto-updates to first visible word |
+| **Hard selection** | `highlightedWordIndex` (existing state) | User word click via `onWordClick` handler | `.page-word--highlighted` (existing): accent background | Yes — persists until user clicks another word or starts a mode |
+| **Resume anchor** | `resumeAnchorRef` (existing ref) | Narration pause, book reopen | None (internal ref) | N/A — consumed on mode start |
 
-**Design contract for BUG-153 (preliminary — to be refined during investigation):**
-- **Soft selection** — First visible word on every page is always lightly highlighted. Auto-updates on page turn/scroll. Default start word for any reading mode.
-- **Hard selection** — User clicks a word → distinct highlight, persists across page turns. All modes start from this word.
-- **Off-page anchor** — If hard selection is on a different page, show "Jump to selection" button.
-- **Resolution order:** hard selection > soft selection > word 0.
+**Resolution order for mode starts:**
+```
+resumeAnchorRef > highlightedWordIndex > softWordIndexRef > 0
+```
 
-**Tier:** Quick | **Depends on:** Investigation gate cleared by Cowork
+**Key behavioral rules:**
+- Soft selection is **only visible in page mode** (no reading mode active). When any mode starts, soft highlight is removed.
+- Hard selection **replaces** soft selection visually (only one word highlighted at a time). `userExplicitSelectionRef = true` suppresses soft updates until next page turn.
+- Soft selection updates on **every page turn** via `onRelocate`, not just on section load. This is the main new behavior.
+- `onRelocate` calls `findFirstVisibleWordIndex()` only in page mode, only when no resume anchor is active, and only when no user explicit selection exists on the current page.
+
+**BUG-151 absorbed:** Cap narration band fallback heights to 40px in FoliatePageView.tsx (3 edit sites: lines 571, 692, 860). Add `measureNarrationBandDimensions()` call on section change when narration is active.
+
+**BUG-152 absorbed:** Fix `ReaderContainer.tsx:1362` — change `words={foliateWordStrings}` to `words={getEffectiveWords()}` so ReaderView receives the same word source the mode timer uses.
+
+**BUG-154 deferred:** Code analysis shows layout switch already fires on click. Likely a perceived-latency issue during Foliate reflow, not a code bug. Parked for live verification.
+
+### Baseline
+
+Existing infrastructure (from investigation report):
+- `highlightedWordIndex` state + `highlightedWordIndexRef` ref — shared position anchor (ReaderContainer.tsx:135)
+- `resumeAnchorRef` — protected position ref (ReaderContainer.tsx:169)
+- `userExplicitSelectionRef` — click guard (ReaderContainer.tsx:173)
+- `findFirstVisibleWordIndex()` — DOM query for first visible `.page-word` span (FoliatePageView.tsx:1355-1374)
+- `onWordClick` handler — already sets `userExplicitSelectionRef=true`, nulls resume anchor, updates `highlightedWordIndex` (ReaderContainer.tsx:1205-1226)
+- `.page-word--highlighted` CSS class — existing click highlight (global.css:3717-3723)
+- `onRelocate` handler — fraction-based `highlightedWordIndex` update with mode/anchor guards (ReaderContainer.tsx:1158-1189)
+- `onLoad` handler — section-load position restore with `findFirstVisibleWordIndex()` (ReaderContainer.tsx:1227-1274)
+- Mode start functions — all follow `resumeAnchorRef > highlightedWordIndex` pattern (useReaderMode.ts:177-400)
+- `getEffectiveWords()` — word source resolution (ReaderContainer.tsx:236-252)
+- `resolveFoliateStartWord()` — EPUB start word validation (startWordIndex.ts:45-66)
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for word index, selection, anchor entries
+3. `docs/investigations/SELECTION-1-investigation.md` — full investigation report (MUST READ — contains all position flow diagrams and gap analysis)
+4. `ROADMAP.md` — this section
+5. `src/components/ReaderContainer.tsx` — `highlightedWordIndex` (line 135), `resumeAnchorRef` (169), `userExplicitSelectionRef` (173), `getEffectiveWords()` (236-252), book open init (254-288), onRelocate handler (1158-1189), onWordClick (1205-1226), onLoad (1227-1274), ReaderView words prop (1362)
+6. `src/hooks/useReaderMode.ts` — mode start functions: startNarration (177-297), startFocus (300-333), startFlow (336-364), handlePauseToPage (367-400)
+7. `src/components/FoliatePageView.tsx` — `findFirstVisibleWordIndex()` (1355-1374), click handler (1080-1112), narration band fallback heights (571, 692, 860), `highlightWordByIndex()`, `applyVisualHighlightByIndex()`
+8. `src/utils/startWordIndex.ts` — `resolveFoliateStartWord()` (45-66), `getStartWordIndex()` (1-43)
+9. `src/styles/global.css` — `.page-word` classes (3706-3730)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Add `softWordIndexRef`** — New `useRef<number>(0)` in ReaderContainer, alongside existing `highlightedWordIndexRef`. No React state needed (soft selection is visual-only, no re-renders). | `src/components/ReaderContainer.tsx` | After `highlightedWordIndexRef` declaration (~line 136). Single line addition. |
+| 2 | Hephaestus (renderer-scope) | **Add `.page-word--soft-selected` CSS class** — Subtle left-border indicator: `border-left: 2px solid var(--accent-faded); padding-left: 2px; border-radius: 1px;`. Must not conflict with `.page-word--highlighted` (hard selection takes visual priority). | `src/styles/global.css` | After `.page-word--highlighted` block (~line 3723). ~5 lines. |
+| 3 | Hephaestus (renderer-scope) | **Wire soft selection into `onRelocate` handler** — After existing `setHighlightedWordIndex(approxWordIdx)` call, add: when `readingMode === "page"` and `!resumeAnchorRef.current` and `!userExplicitSelectionRef.current`, call `foliateApiRef.current.findFirstVisibleWordIndex()`, store in `softWordIndexRef.current`, and call `foliateApiRef.current.applySoftHighlight(softWordIndexRef.current)`. Clear previous soft highlight. | `src/components/ReaderContainer.tsx` | Inside `onRelocate` handler (lines 1158-1189), after the existing `setHighlightedWordIndex` block (~line 1180). ~12 lines. |
+| 4 | Hephaestus (renderer-scope) | **Wire soft selection into `onLoad` handler** — After existing `findFirstVisibleWordIndex()` + `highlightWordByIndex()` block, also set `softWordIndexRef.current` and apply `.page-word--soft-selected` CSS. Only when `readingMode === "page"` and no explicit selection. | `src/components/ReaderContainer.tsx` | Inside `onLoad` handler (lines 1227-1274), after the `highlightWordByIndex()` call (~line 1267). ~8 lines. |
+| 5 | Hephaestus (renderer-scope) | **Add `applySoftHighlight()` / `clearSoftHighlight()` to FoliatePageView API** — Two functions exposed via `foliateApiRef`: `applySoftHighlight(wordIndex)` adds `.page-word--soft-selected` to the target span (removing from previous), `clearSoftHighlight()` removes from any span. Must query inside Foliate's shadow DOM `doc.body`. Pattern: same as existing `highlightWordByIndex()` but with different CSS class. | `src/components/FoliatePageView.tsx` | Near `highlightWordByIndex()` function. Add two small functions + expose via `useImperativeHandle`. ~15 lines. |
+| 6 | Hephaestus (renderer-scope) | **Clear soft highlight on mode start** — In `useReaderMode.ts`, add `foliateApiRef.current?.clearSoftHighlight()` at the top of `startFocus()`, `startFlow()`, and `startNarration()`, after `stopAllModes()`. Soft highlight is only visible in page mode. | `src/hooks/useReaderMode.ts` | After `stopAllModes()` in each of: `startFocus` (~line 302), `startFlow` (~line 338), `startNarration` (~line 179). Single line each, 3 edit sites. |
+| 7 | Hephaestus (renderer-scope) | **Update mode start resolution to include `softWordIndexRef`** — In `startFocus()`, `startFlow()`, and `startNarration()`, add `softWordIndexRef.current` as final fallback before 0 in start-word resolution: `resumeAnchorRef.current ?? highlightedWordIndexRef.current ?? softWordIndexRef.current ?? 0`. Currently these functions use `highlightedWordIndexRef.current` as the fallback before `resolveFoliateStartWord()`. Add soft as an intermediate. | `src/hooks/useReaderMode.ts` | In `startFocus` (~line 308, `focusStartSource`), `startFlow` (~line 344), `startNarration` (~line 196, `startWordSource`). Modify the fallback expression at each site. |
+| 8 | Hermes (renderer-scope) | **Fix BUG-152 — ReaderView word source** — Change `words={foliateWordStrings}` to `words={getEffectiveWords()}` at ReaderContainer.tsx:1362 so ReaderView receives the same word array that mode timers use. | `src/components/ReaderContainer.tsx` | Line 1362 (the `words=` prop on `<ReaderView>`). Single-line change. |
+| 9 | Hermes (renderer-scope) | **Fix BUG-151 — Narration band height cap** — Cap all three fallback height paths to `Math.min(value, 40)`: (a) Line 571: `Math.max(12, from.height)` → `Math.min(Math.max(12, from.height), 40)`, (b) Line 692: `fromWindow.height` → `Math.min(fromWindow.height, 40)`, (c) Line 860: `currentWindow.height` → `Math.min(currentWindow.height, 40)`. Also: add `measureNarrationBandDimensions()` call in the `onRelocate` handler when `readingMode === "narration"`. | `src/components/FoliatePageView.tsx` | Lines 571, 692, 860 (height expressions). Plus ~2 lines in `onRelocate` handler for re-measurement call. |
+| 10 | Hephaestus (renderer-scope) | **Suppress soft selection on hard click** — In the existing `onWordClick` handler, add `foliateApiRef.current?.clearSoftHighlight()` after the `userExplicitSelectionRef = true` line. When user clicks a word, the soft indicator disappears and only the hard highlight shows. Reset `userExplicitSelectionRef = false` at the top of the `onRelocate` handler when a new page turn occurs (so soft selection resumes on the next page). | `src/components/ReaderContainer.tsx` | In `onWordClick` (~line 1212, after `userExplicitSelectionRef.current = true`). In `onRelocate` (~line 1160, add reset). ~3 lines total. |
+| 11 | Hippocrates | **Tests** — ≥12 new tests covering: (a) `softWordIndexRef` updates on `onRelocate` in page mode, (b) soft selection NOT updated during narration/flow, (c) soft selection cleared on mode start, (d) soft selection cleared on word click (hard selection takes over), (e) mode start resolution order: resume > hard > soft > 0, (f) `getEffectiveWords()` returns full-book words when extraction complete (BUG-152 regression), (g) narration band fallback height capped at 40px (BUG-151 regression), (h) `applySoftHighlight` adds correct CSS class, (i) `clearSoftHighlight` removes CSS class, (j) soft selection resumes after page turn following hard click. | `tests/` | New test file `tests/wordAnchor.test.ts`. |
+| 12 | Hippocrates | **`npm test` + `npm run build`** | — | — |
+| 13 | Solon | **Spec compliance** — Verify all 15 SUCCESS CRITERIA items met. Cross-reference investigation report gaps (6A-6D) to confirm none were worsened. | — | — |
+| 14 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list), ROADMAP.md (mark SELECTION-1 complete), SPRINT_QUEUE.md (remove entry, log to completed), BUG_REPORT.md (mark BUG-151/152/153 resolved), LESSONS_LEARNED.md (if non-trivial discovery). | All 6 governing docs | — |
+| 15 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/selection-1-word-anchor` |
+
+### Execution Sequence
+
+```
+Tasks 1-2 (state + CSS)           — parallel, no dependencies
+    ↓
+Task 5 (FoliatePageView API)      — needs Task 2 CSS class name
+    ↓
+Tasks 3-4 (wire into handlers)    — needs Tasks 1 + 5
+Tasks 8-9 (BUG-151/152 fixes)    — parallel with Tasks 3-4, independent
+Task 6 (clear on mode start)      — needs Task 5
+Task 7 (resolution chain update)  — needs Task 1
+Task 10 (suppress on hard click)  — needs Task 5
+    ↓
+Task 11 (tests)                   — after all implementation
+Task 12 (npm test + build)        — after tests written
+    ↓
+Task 13 (Solon spec compliance)
+Task 14 (Herodotus docs)
+Task 15 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. In page mode, a soft highlight (`.page-word--soft-selected`) is visible on the first visible word after every page turn
+2. Soft highlight auto-updates when the user turns pages (not just on section load)
+3. Soft highlight is NOT visible during any active reading mode (Focus, Flow, Narration)
+4. Soft highlight disappears when user clicks a word (hard selection takes visual priority)
+5. Hard selection (`.page-word--highlighted`) persists across page turns within the same section
+6. After a hard click, soft selection resumes on the NEXT page turn (not the current page)
+7. Mode start resolution order is: `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
+8. Focus mode displays correct word text from `getEffectiveWords()` — no blank screen (BUG-152 resolved)
+9. Narration band fallback height never exceeds 40px (BUG-151 resolved)
+10. Narration band re-measures on section change during active narration
+11. `softWordIndexRef` is not updated during narration or flow mode (mode callbacks own position)
+12. `softWordIndexRef` is not updated when `resumeAnchorRef` is active
+13. Existing word click behavior unchanged — `onWordClick` still sets `userExplicitSelectionRef`, clears `resumeAnchorRef`, updates `highlightedWordIndex`
+14. ≥12 new tests in `tests/wordAnchor.test.ts`
+15. `npm test` passes, `npm run build` succeeds
+
+**BUG-154 disposition:** Parked. Code analysis shows layout switch fires on click. Needs live verification to determine if this is a perceived-latency issue. Not included in this sprint.
+
+**Tier:** Quick | **Depends on:** None — this is the new first sprint in the queue.
 
 ---
 
@@ -207,7 +300,7 @@ Flow mode today:
 
 **Key files:** `src/utils/FlowScrollEngine.ts`, `src/styles/global.css`, `src/constants.ts`, `src/components/FoliatePageView.tsx`
 
-**Tier:** Full | **Depends on:** HOTFIX-13 + investigation gate cleared
+**Tier:** Full | **Depends on:** SELECTION-1 + investigation gate cleared
 
 ---
 

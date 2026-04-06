@@ -146,7 +146,7 @@ The dispatch's Task table tells Zeus:
 Before committing, verify ALL of these:
 
 - [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
-- [ ] `npm test` passes (1,504+ tests, 0 failures)
+- [ ] `npm test` passes (1,563+ tests, 0 failures)
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
 - [ ] LESSONS_LEARNED guardrails were not violated
@@ -299,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.37.1 — queue GREEN, 3 priority tracks roadmapped, 8 open bugs)
+## Current System State (v1.38.0 — queue GREEN, 3 priority tracks roadmapped, 5 open bugs)
 
 ### Codebase (branch: `main`)
 
@@ -319,11 +319,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-7Q shipped** — BUG-143/144 resolved. Canonical `AudioProgressReport` type + `getAudioProgress()` added to scheduler; `onChunkHandoff` callback wired through `kokoroStrategy.ts` and exposed on `useNarration` hook return; RAF-based glide loop in `FoliatePageView.tsx` drives the 3-word narration band from audio-time progress instead of DOM target chasing; chunk handoff is continuity-safe (visual band can never become the canonical anchor). New `src/utils/narrateDiagnostics.ts` exports diagnostic event types and `getGlideDiagSummary()`. 25 new tests (`tests/audioGlide.test.ts`). v1.36.1.
 - **TTS-7R complete** — BUG-145a/b/c resolved. Separated canonical audio cursor from visual cursor (`lastConfirmedAudioWordRef`), enabled audio-progress glide (removed `SIMPLE_NARRATION_GLIDE`), fixed-size overlay band (measure-once line-height), truth-sync visual-only pathway, removed per-word context CSS. 25 new tests (`tests/calmNarrationBand.test.ts`). v1.37.0.
 - **HOTFIX-12 complete** — BUG-146/147/148/149/150 resolved. Chapter dropdown tracks narration cursor, floating return-to-narration button, position restore toast, chunked EPUB extraction (setImmediate yield), keyboard guard refined (Escape-only for inputs) + Ctrl+Enter submit in bug reporter. 17 new tests. v1.37.1.
-- Active queue: depth 6 — GREEN. HOTFIX-13 → HOTFIX-14 → FLOW-INF-A → EXT-ENR-A → FLOW-INF-B → EXT-ENR-B.
-- 8 open bugs: BUG-151 through BUG-158. EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
+- **SELECTION-1 complete** — Word anchor contract: soft/hard selection tiers, mode start resolution chain, BUG-151/152/153 resolved. 17 new tests. v1.38.0.
+- Active queue: depth 5 — GREEN. HOTFIX-14 → EXT-ENR-A → FLOW-INF-A → FLOW-INF-B → EXT-ENR-B. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- 5 open bugs: BUG-154 through BUG-158. EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,546 tests across 86 test files
+- 1,563 tests across 87 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
