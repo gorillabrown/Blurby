@@ -279,6 +279,20 @@ The default mode. No auto-advance. User reads at their own pace with paginated t
 - `start()` / `pause()` / `resume()` / `stop()` are no-ops
 - `jumpTo()` updates the word index and notifies via callback
 
+### Word Anchor Contract (SELECTION-1, v1.38.0)
+
+Three-tier system that guarantees a definite starting word for every reading mode:
+
+| Tier | Ref | Set by | Visual | Priority |
+|------|-----|--------|--------|----------|
+| **Soft selection** | `softWordIndexRef` | Auto — `findFirstVisibleWordIndex()` on every `onRelocate`/`onLoad` | `.page-word--soft-selected` (2px left-border accent). Page mode only — cleared on mode start. | Lowest |
+| **Hard selection** | `highlightedWordIndex` | User clicks a word | Distinct highlight. Persists across page turns. | Middle |
+| **Resume anchor** | `resumeAnchorRef` | Mode pause/reopen (captures live cursor) | None (internal) | Highest |
+
+**Mode start resolution order:** `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
+
+Soft selection uses refs + direct shadow DOM class mutation (not React state) to avoid re-renders on every page turn. See LL-083.
+
 ### Focus Mode (`src/modes/FocusMode.ts`)
 
 RSVP (Rapid Serial Visual Presentation). Displays one word at a time centered on screen.

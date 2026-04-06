@@ -135,6 +135,7 @@ export default function ReaderContainer({
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
+  const softWordIndexRef = useRef(0);
   const narrationStateFlushRafRef = useRef<number | null>(null);
   const narrationStatePendingIdxRef = useRef<number | null>(null);
 
@@ -774,6 +775,7 @@ export default function ReaderContainer({
     setReadingMode,
     bookWordsTotalWords: bookWordMeta?.totalWords,
     resumeAnchorRef,
+    softWordIndexRef,
   });
   const {
     stopAllModes, startFocus, startFlow, startNarration,
@@ -1175,6 +1177,23 @@ export default function ReaderContainer({
           } else if (import.meta.env.DEV && hasResumeAnchor) {
             console.debug("[TTS-7M] onRelocate: resume anchor active at", resumeAnchorRef.current, "— skipping approx", approxWordIdx);
           }
+          // SELECTION-1: Update soft selection on page turn in page mode.
+          // Soft selection = first visible word, auto-updates every page turn.
+          // Only when: page mode, no resume anchor, no explicit user selection.
+          if (mode === "page" && !hasResumeAnchor && !userExplicitSelectionRef.current) {
+            const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+            if (firstVisible >= 0) {
+              softWordIndexRef.current = firstVisible;
+              foliateApiRef.current?.applySoftHighlight?.(firstVisible);
+            }
+          } else if (mode === "page" && !hasResumeAnchor && userExplicitSelectionRef.current) {
+            // User clicked a word — reset explicit flag on page turn so soft resumes next page
+            userExplicitSelectionRef.current = false;
+          }
+          // BUG-151: Re-measure narration band on section change during active narration
+          if (mode === "narration") {
+            foliateApiRef.current?.measureNarrationBandDimensions?.();
+          }
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
           // TTS-7M: Also skip progress save when resume anchor is active (passive event noise)
           if (!hasEngagedRef.current || hasResumeAnchor) return;
@@ -1205,6 +1224,7 @@ export default function ReaderContainer({
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
         userExplicitSelectionRef.current = true; // TTS-7J (BUG-130): Mark explicit user choice
+        foliateApiRef.current?.clearSoftHighlight?.(); // SELECTION-1: Hard click clears soft highlight
         resumeAnchorRef.current = null; // TTS-7M: Explicit selection replaces any resume anchor
         activeDoc.cfi = cfi;
         // TTS-7B: Route through handleHighlightedWordChange so narration
@@ -1261,12 +1281,18 @@ export default function ReaderContainer({
                 const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
                 if (firstVisible >= 0) {
                   foliateApiRef.current.highlightWordByIndex(firstVisible);
+                  // SELECTION-1: Also set soft selection to first visible word
+                  softWordIndexRef.current = firstVisible;
+                  foliateApiRef.current.applySoftHighlight(firstVisible);
                 }
               }
             } else if (foliateApiRef.current) {
               const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
               if (firstVisible >= 0) {
                 setHighlightedWordIndex(firstVisible);
+                // SELECTION-1: Also set soft selection
+                softWordIndexRef.current = firstVisible;
+                foliateApiRef.current.applySoftHighlight(firstVisible);
               }
             }
           }
@@ -1359,7 +1385,7 @@ export default function ReaderContainer({
             <div className="focus-overlay">
               <ReaderView
                 activeDoc={activeDoc}
-                words={foliateWordStrings}
+                words={getEffectiveWords()}
                 wordIndex={wordIndex}
                 wpm={effectiveWpm}
                 focusTextSize={focusTextSize}

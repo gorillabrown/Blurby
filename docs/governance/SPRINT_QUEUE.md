@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 6 — GREEN
-Next sprint: HOTFIX-13 (reader core fixes — narration band, focus mode, word selection, flow layout)
-Health: GREEN — Two hotfixes then three priority tracks queued.
+Queue depth: 5 — GREEN
+Next sprint: HOTFIX-14 (import & connection fixes — BUG-155/156/157/158)
+Health: GREEN — SELECTION-1 complete. HOTFIX-14 is next; BUG-157/158 CLI-ready, BUG-155/156 need investigation.
 ```
 
 ---
@@ -32,16 +32,19 @@ Health: GREEN — Two hotfixes then three priority tracks queued.
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | HOTFIX-13 | v1.37.2 | `hotfix/13-reader-core` | Quick | **PARTIAL** | BUG-151/152 CLI-ready. BUG-153 needs design spec. BUG-154 needs live verification. |
-| 2 | HOTFIX-14 | v1.37.3 | `hotfix/14-import-connection` | Quick | **PARTIAL** | BUG-157/158 CLI-ready. BUG-155/156 need Cowork investigation. |
-| 3 | FLOW-INF-A | v1.38.0 | `sprint/flow-inf-a-reading-zone` | Full | **NO** | Cowork: reading zone overlay prototyping (shadow DOM feasibility) |
-| 4 | EXT-ENR-A | v1.39.0 | `sprint/ext-enr-a-resilient` | Quick | **NO** | Cowork: locate extension source, trace client lifecycle in ws-server |
-| 5 | FLOW-INF-B | v1.40.0 | `sprint/flow-inf-b-timer-cursor` | Full | **NO** | Blocked on FLOW-INF-A results |
-| 6 | EXT-ENR-B | v1.41.0 | `sprint/ext-enr-b-auto-discovery` | Full | **NO** | Blocked on EXT-ENR-A results |
+| 1 | HOTFIX-14 | v1.38.1 | `hotfix/14-import-connection` | Quick | **PARTIAL** | BUG-157/158 CLI-ready. BUG-155/156 need Cowork investigation. |
+| 2 | EXT-ENR-A | v1.39.0 | `sprint/ext-enr-a-resilient` | Quick | **INVESTIGATION DONE** | Cowork has full analysis (ws-server.js + service-worker.js traced). Needs spec hardening with edit-site coordinates. |
+| 3 | FLOW-INF-A | v1.40.0 | `sprint/flow-inf-a-reading-zone` | Full | **NO** | Cowork: reading zone overlay prototyping (shadow DOM feasibility). SELECTION-1 anchor contract now available. |
+| 4 | FLOW-INF-B | v1.41.0 | `sprint/flow-inf-b-timer-cursor` | Full | **NO** | Blocked on FLOW-INF-A results |
+| 5 | EXT-ENR-B | v1.42.0 | `sprint/ext-enr-b-auto-discovery` | Full | **NO** | Blocked on EXT-ENR-A results |
 
-**Dispatch status:** Queue depth 6 — GREEN. HOTFIX-13 is partially CLI-ready (BUG-151 + BUG-152 have confirmed root causes and exact fix specs). Can dispatch as a 2-bug fix now, or wait for BUG-153 design spec to bundle all four.
+**Dispatch status:** Queue depth 5 — GREEN. **HOTFIX-14 is next.** BUG-157/158 specs in ROADMAP.md. BUG-155/156 need Cowork investigation before full dispatch.
 
-**Next Cowork action:** Design spec for BUG-153 (word selection contract), then live verification for BUG-154.
+**Next Cowork actions:**
+1. Live-test BUG-155 (URL extraction — 5 min)
+2. Code-trace BUG-156 (false connected status — already analyzed, write fix spec)
+3. Write full EXT-ENR-A spec (investigation already done — convert analysis to edit-site coordinates)
+4. FLOW-INF-A prototype (shadow DOM overlay feasibility)
 
 ---
 
@@ -49,6 +52,7 @@ Health: GREEN — Two hotfixes then three priority tracks queued.
 
 | Sprint ID | Disposition |
 |-----------|-------------|
+| HOTFIX-13 | **Dissolved.** BUG-151/152/153 absorbed into SELECTION-1. BUG-154 parked (likely not a bug — needs live verification). |
 | EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when e-ink becomes priority. |
 | EINK-6B | Parked. Fully spec'd in ROADMAP.md. Depends on EINK-6A. |
 | GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent — can run anytime. |
@@ -62,6 +66,7 @@ Health: GREEN — Two hotfixes then three priority tracks queued.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| SELECTION-1 | 2026-04-06 | PASS | Word anchor contract: soft/hard/resume tiers, mode start resolution chain. BUG-151/152/153 resolved. 17 new tests (1,563 total). v1.38.0. |
 | HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes. BUG-146/147/148/149/150 resolved. 17 new tests (1,546 total). v1.37.1. |
 | TTS-7R | 2026-04-05 | PASS | Calm narration band & cursor ownership fix. BUG-145a/b/c resolved. 25 new tests. v1.37.0. |
 | TTS-7Q | 2026-04-05 | PASS* | True glide & audio-aligned narration cursor. BUG-143/144 resolved. 25 new tests. v1.36.1. |

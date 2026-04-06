@@ -351,6 +351,12 @@ export interface FoliateViewAPI {
   /** TTS-7I: Shared render-state resolver — single source of truth for gate + highlight.
    *  Returns whether the word span exists, is visible on the active page, and the DOM refs. */
   resolveWordState: (wordIndex: number) => { found: boolean; visible: boolean; span: HTMLElement | null; doc: Document | null };
+  /** SELECTION-1: Apply soft-selected highlight to a word (passive page-mode indicator) */
+  applySoftHighlight: (wordIndex: number) => boolean;
+  /** SELECTION-1: Remove soft-selected highlight from all words */
+  clearSoftHighlight: () => void;
+  /** SELECTION-1: Re-measure narration band dimensions (call on section change during narration) */
+  measureNarrationBandDimensions: () => void;
 }
 
 export default function FoliatePageView({
@@ -568,7 +574,7 @@ export default function FoliatePageView({
       // TTS-7R (BUG-145a): Fixed-size band — only lerp Y for line transitions.
       // X, width, and height are constant; only the vertical position changes.
       const fixedWidth = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : Math.max(16, from.width);
-      const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
+      const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
       const fixedX = 0;
       const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
       current.x = fixedX;
@@ -689,7 +695,7 @@ export default function FoliatePageView({
         // The band is a line highlight: X is always 0 (left edge), width spans the content
         // area, height is one line-height. Only Y changes as narration moves between lines.
         const fixedWidth = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : fromWindow.width;
-        const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : fromWindow.height;
+        const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(fromWindow.height, 40);
         const fixedX = 0;
         const stableY = sameRailLine ? rail.y : fromWindow.y;
 
@@ -774,12 +780,49 @@ export default function FoliatePageView({
         d?.querySelectorAll?.(".page-word--flow-cursor")?.forEach((el: Element) => {
           el.classList.remove("page-word--flow-cursor");
         });
+        d?.querySelectorAll?.(".page-word--soft-selected")?.forEach((el: Element) => {
+          el.classList.remove("page-word--soft-selected");
+        });
         // page-word--narration-context removed in TTS-7R — fixed-size overlay band replaces per-word context highlighting
       } catch {
         // Safe to ignore for detached/partial docs.
       }
     }
   }, []);
+
+  const clearSoftHighlight = useCallback(() => {
+    const view = viewRef.current;
+    if (!view?.renderer) return;
+    const contents: Array<{ doc: Document }> = view.renderer.getContents?.() ?? [];
+    for (const { doc: d } of contents) {
+      try {
+        d?.querySelectorAll?.(".page-word--soft-selected")?.forEach((el: Element) => {
+          el.classList.remove("page-word--soft-selected");
+        });
+      } catch {
+        // Safe to ignore for detached/partial docs.
+      }
+    }
+  }, []);
+
+  const applySoftHighlight = useCallback((wordIndex: number): boolean => {
+    const view = viewRef.current;
+    if (!view?.renderer) return false;
+    clearSoftHighlight();
+    const contents: Array<{ doc: Document }> = view.renderer.getContents?.() ?? [];
+    for (const { doc: d } of contents) {
+      try {
+        const span = d?.querySelector?.(`[data-word-index="${wordIndex}"]`);
+        if (span) {
+          span.classList.add("page-word--soft-selected");
+          return true;
+        }
+      } catch {
+        // Safe to ignore for detached/partial docs.
+      }
+    }
+    return false;
+  }, [clearSoftHighlight]);
 
   const measureNarrationWindow = useCallback((doc: Document | null, wordIndex: number) => {
     const container = containerRef.current;
@@ -857,7 +900,7 @@ export default function FoliatePageView({
     // Width spans the full content area; height = one line-height.
     // X is always 0. Only Y changes as the narration line changes.
     const fixedWidth = narrationBandWidthRef.current > 0 ? narrationBandWidthRef.current : currentWindow.width;
-    const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : currentWindow.height;
+    const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, 40);
     const seedWindow = { x: 0, y: currentWindow.y, width: fixedWidth, height: fixedHeight };
 
     // TTS-7Q: If audio-progress is available, start the audio-clock glide loop.
@@ -1437,6 +1480,10 @@ export default function FoliatePageView({
                 ?? foliateView?.shadowRoot?.querySelector("div")
                 ?? host;
             },
+            // SELECTION-1: Passive soft-selected highlight (page-mode anchor indicator)
+            applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
+            clearSoftHighlight: () => clearSoftHighlight(),
+            measureNarrationBandDimensions: () => measureNarrationBandDimensions(),
           };
         }
 
