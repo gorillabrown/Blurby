@@ -1120,6 +1120,7 @@ export default function ReaderContainer({
       effectiveWpm,
       tokenized.paragraphBreaks,
       isEink,
+      settings.flowZonePosition,
     );
 
     return () => {
@@ -1131,6 +1132,11 @@ export default function ReaderContainer({
   useEffect(() => {
     flowScrollEngineRef.current?.setWpm(effectiveWpm);
   }, [effectiveWpm]);
+
+  // FLOW-INF-A: Sync zone position changes to running FlowScrollEngine
+  useEffect(() => {
+    flowScrollEngineRef.current?.setZonePosition(settings.flowZonePosition);
+  }, [settings.flowZonePosition]);
 
   // FLOW-3B: Rebuild line map on font size change (lines shift when text reflows)
   useEffect(() => {
@@ -1479,6 +1485,10 @@ export default function ReaderContainer({
           ttsEngine={settings.ttsEngine || "web"}
           foliateFraction={useFoliate ? foliateFraction : undefined}
           narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
+          flowZonePosition={settings.flowZonePosition}
+          flowZoneLines={settings.flowZoneLines}
+          onSetFlowZonePosition={(pos) => updateSettings({ flowZonePosition: pos })}
+          onSetFlowZoneLines={(lines) => updateSettings({ flowZoneLines: lines })}
         />
       </div>
 

@@ -134,6 +134,8 @@ export interface BlurbySettings {
   // Flow mode settings
   flowWordSpan: number; // how many words to highlight at once in Flow mode (3-5, default 3)
   flowCursorStyle: "underline" | "highlight"; // flow cursor visual style (default: underline)
+  flowZonePosition: number;  // fraction of viewport for zone top (0.15 | 0.25 | 0.35 | 0.55, default 0.25)
+  flowZoneLines: number;     // lines visible in reading zone (3-8, default 5)
   // E-ink display optimization settings
   einkWpmCeiling: number;
   einkRefreshInterval: number;

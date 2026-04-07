@@ -17,7 +17,7 @@ import {
   resolveGlobalWordIndexToRendered,
   resolveRenderedWordIndexToGlobal,
 } from "../utils/foliateWordOffsets";
-import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX, NARRATION_BAND_MIN_WIDTH_PX } from "../constants";
+import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX, NARRATION_BAND_MIN_WIDTH_PX, FLOW_READING_ZONE_POSITION, FLOW_ZONE_LINES_DEFAULT } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 
 const api = window.electronAPI;
@@ -1621,6 +1621,41 @@ export default function FoliatePageView({
       }
     }
   }, [flowMode]);
+
+  // FLOW-INF-A: Compute --flow-zone-top and --flow-zone-bottom CSS custom properties
+  // when flow mode is active. Uses settings.flowZonePosition and settings.flowZoneLines
+  // to express the reading zone as fractional viewport positions on the container.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const applyZoneProperties = () => {
+      if (!flowMode) {
+        container.style.removeProperty("--flow-zone-top");
+        container.style.removeProperty("--flow-zone-bottom");
+        return;
+      }
+      const lineHeight = parseFloat(getComputedStyle(container).lineHeight) || 24;
+      const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
+      const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+      const containerHeight = container.clientHeight;
+      const zoneHeightFrac = (lineHeight * zoneLines) / containerHeight;
+      const zoneTop = zonePosition;
+      const zoneBottom = Math.min(zonePosition + zoneHeightFrac, 0.95);
+      container.style.setProperty("--flow-zone-top", `${zoneTop * 100}%`);
+      container.style.setProperty("--flow-zone-bottom", `${zoneBottom * 100}%`);
+    };
+
+    applyZoneProperties();
+
+    const observer = new ResizeObserver(applyZoneProperties);
+    observer.observe(container);
+    return () => {
+      observer.disconnect();
+      container.style.removeProperty("--flow-zone-top");
+      container.style.removeProperty("--flow-zone-bottom");
+    };
+  }, [flowMode, settings.flowZonePosition, settings.flowZoneLines]);
 
   // Reflow text when container resizes (window maximize/restore/drag)
   useEffect(() => {

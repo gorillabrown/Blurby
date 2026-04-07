@@ -54,6 +54,7 @@ export class FlowScrollEngine {
   private manualScrollPaused = false;
   private callbacks: FlowScrollEngineCallbacks;
   private paragraphBreaks: Set<number> = new Set();
+  private zonePosition: number = FLOW_READING_ZONE_POSITION;
 
   constructor(callbacks: FlowScrollEngineCallbacks) {
     this.callbacks = callbacks;
@@ -65,7 +66,8 @@ export class FlowScrollEngine {
     wordIndex: number,
     wpm: number,
     paragraphBreaks: Set<number> = new Set(),
-    isEink = false
+    isEink = false,
+    zonePosition?: number
   ): void {
     this.stop();
     this.container = container;
@@ -74,6 +76,7 @@ export class FlowScrollEngine {
     this.wpm = wpm;
     this.paragraphBreaks = paragraphBreaks;
     this.isEink = isEink;
+    if (zonePosition !== undefined) this.zonePosition = zonePosition;
     this.running = true;
     this.paused = false;
     this.manualScrollPaused = false;
@@ -100,6 +103,10 @@ export class FlowScrollEngine {
 
     this.container.addEventListener("wheel", this.handleWheel, { passive: true });
     this.container.addEventListener("touchmove", this.handleWheel, { passive: true });
+  }
+
+  setZonePosition(pos: number): void {
+    this.zonePosition = pos;
   }
 
   stop(): void {
@@ -308,7 +315,7 @@ export class FlowScrollEngine {
     if (!this.container || lineIdx >= this.lines.length) return;
     const line = this.lines[lineIdx];
     const containerHeight = this.container.clientHeight;
-    const targetScrollTop = line.y - (containerHeight * FLOW_READING_ZONE_POSITION);
+    const targetScrollTop = line.y - (containerHeight * this.zonePosition);
 
     if (this.isEink) {
       this.container.scrollTop = Math.max(0, targetScrollTop);
