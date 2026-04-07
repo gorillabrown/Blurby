@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — FLOW-INF-B complete (v1.42.0). Queue depth 3 (GREEN). Next: EXT-ENR-B.
+**Last updated**: 2026-04-07 — EXT-ENR-B complete (v1.43.0). Queue depth 2 (YELLOW — needs backfill). Next: NARR-TIMING.
 **Current branch**: `main`
-**Current state**: v1.42.0 stable. Queue depth 3 (GREEN). Next: EXT-ENR-B → NARR-TIMING → FLOW-INF-C.
+**Current state**: v1.43.0 stable. Queue depth 2 (YELLOW). Next: NARR-TIMING → FLOW-INF-C. Backfill required before next dispatch.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -47,7 +47,7 @@ HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅
     ▼                                   ▼
 Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
   ├── FLOW-INF-A: Reading Zone ✅   ├── EXT-ENR-A: Resilient Connection ✅
-  ├── FLOW-INF-B: Timer Cursor ✅  ├── EXT-ENR-B: Auto-Discovery Pairing
+  ├── FLOW-INF-B: Timer Cursor ✅  ├── EXT-ENR-B: Auto-Discovery Pairing ✅
   └── FLOW-INF-C: Cross-Book       └── EXT-ENR-C: In-Browser Reader (optional)
     │                                   │
     └──────────────┬────────────────────┘
@@ -802,7 +802,7 @@ Task 14 (Git)
 All three investigation areas resolved:
 - **WebSocket lifecycle:** Fully traced. `_clients` Set: add at line 144 (pre-auth), delete on socket close (152), error (157), WS close frame (174), heartbeat fail (466), heartbeat error (473). `getClientCount()` now auth-filtered (HOTFIX-14).
 - **Extension source code:** Located at `chrome-extension/` in-repo. Full reconnect logic, state vars, message flow traced.
-- **IPC event emission:** Renderer polls via `get-ws-short-code` IPC (misc.js:384-388) every 5s (HOTFIX-14). Push events deferred to EXT-ENR-B (auto-discovery pairing).
+- **IPC event emission:** Renderer polled via `get-ws-short-code` IPC every 15s (ConnectorsSettings). Push events `ws-connection-attempt` / `ws-pairing-success` now emitted by server (EXT-ENR-B, v1.43.0) — renderer subscribes via `onWsConnectionAttempt` / `onWsPairingSuccess` preload listeners.
 
 ### Sprint EXT-ENR-A: Resilient Extension Connection ✅ COMPLETED
 
@@ -859,11 +859,11 @@ All three investigation areas resolved:
 
 ---
 
-### Sprint EXT-ENR-B: Auto-Discovery Pairing
+### Sprint EXT-ENR-B: Auto-Discovery Pairing ✅ COMPLETED
 
 **Goal:** When the extension tries to connect, Blurby surfaces the pairing code in the library screen — no need to navigate to Settings. The pairing experience should feel like AirDrop: the app notices the extension and invites pairing.
 
-**Version:** v1.43.0 | **Branch:** `sprint/ext-enr-b-auto-discovery` | **Tier:** Full
+**Version:** v1.43.0 | **Branch:** `sprint/ext-enr-b-auto-discovery` | **Tier:** Full | **Status:** COMPLETED 2026-04-07
 
 **Baseline (post-EXT-ENR-A, v1.39.0):** WebSocket server has auth timeout (5s), three-state connection indicator, exponential backoff reconnect, article-ack delivery confirmation. Server emits no push events to renderer — status is polled every 5s via `get-ws-short-code` IPC. Pairing code is only visible in Settings > Connectors. Established push event pattern exists in `ipc/cloud.js` (lines 91-96: `mainWindow.webContents.send()`) and `preload.js` (lines 178-217: `onXxx` listener pattern with cleanup).
 

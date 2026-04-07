@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3 — GREEN (all CLI-READY)
-Next sprint: EXT-ENR-B (Auto-Discovery Pairing)
-Health: GREEN — All 3 queued sprints fully spec'd with edit-site coordinates.
+Queue depth: 2 — YELLOW (below minimum of 3 — backfill required)
+Next sprint: NARR-TIMING (Real Word Timestamps)
+Health: YELLOW — EXT-ENR-B completed. Queue has 2 sprints; Cowork must spec a third before next dispatch.
 ```
 
 ---
@@ -32,17 +32,17 @@ Health: GREEN — All 3 queued sprints fully spec'd with edit-site coordinates.
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | EXT-ENR-B | v1.43.0 | `sprint/ext-enr-b-auto-discovery` | Full | **YES** | Full spec: 14 tasks, 12 success criteria, push events + pairing banner in library. Depends on EXT-ENR-A. |
-| 2 | NARR-TIMING | v1.44.0 | `sprint/narr-timing` | Full | **YES** | Full spec: 12 tasks, 16 success criteria, kokoro-js fork + 4-layer validation + scheduler integration. Independent — parallel with Tracks A/B. |
-| 3 | FLOW-INF-C | v1.45.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
+| 1 | NARR-TIMING | v1.44.0 | `sprint/narr-timing` | Full | **YES** | Full spec: 12 tasks, 16 success criteria, kokoro-js fork + 4-layer validation + scheduler integration. Independent — parallel with Tracks A/B. |
+| 2 | FLOW-INF-C | v1.45.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
 
-**Dispatch status:** Queue depth 3 — GREEN. All 3 sprints CLI-READY. EXT-ENR-B → NARR-TIMING → FLOW-INF-C all fully spec'd with edit-site coordinates.
+**Dispatch status:** Queue depth 2 — YELLOW. Cowork must spec a third sprint before dispatching NARR-TIMING. NARR-TIMING → FLOW-INF-C both fully spec'd with edit-site coordinates.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
 2. ~~Dispatch FLOW-INF-B to CLI~~ — COMPLETE (v1.42.0)
 3. ~~Backfill queue to ≥3~~ — DONE (FLOW-INF-C spec'd)
-4. Dispatch EXT-ENR-B to CLI
+4. ~~Dispatch EXT-ENR-B to CLI~~ — COMPLETE (v1.43.0)
+5. **Backfill queue to ≥3** — spec a third sprint (EXT-ENR-C, APK-0, or new Track C entry) before dispatching NARR-TIMING.
 
 ---
 
@@ -64,6 +64,7 @@ Health: GREEN — All 3 queued sprints fully spec'd with edit-site coordinates.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| EXT-ENR-B | 2026-04-07 | PASS | Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` / `ws-pairing-success` events. `PairingBanner` in library screen shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced 5s→15s. 29 new tests (1,683 total across 93 files). v1.43.0. |
 | FLOW-INF-B | 2026-04-06 | PASS | Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash), FlowProgress computation with chapter/book percentage + estimated time remaining, ReaderBottomBar progress display. 18 new tests (1,654 total across 92 files). v1.42.0. |
 | FLOW-INF-A | 2026-04-06 | PASS | CSS mask-image reading zone with configurable position/size, FlowScrollEngine dynamic zone position, ReaderBottomBar zone controls, ResizeObserver recomputation. 27 new tests (1,636 total across 91 files). v1.41.0. |
 | NARR-CURSOR-1 | 2026-04-06 | PASS | Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances with narration, width derived per tick. CSS simplified to 2-stop gradient. NARRATION_BAND_PAD_PX removed. 16 new tests (1,609 total across 90 files). v1.40.0. |

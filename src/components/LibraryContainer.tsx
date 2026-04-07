@@ -19,6 +19,7 @@ import QuickSettingsPopover from "./QuickSettingsPopover";
 import OnboardingOverlay from "./OnboardingOverlay";
 import BugReportModal from "./BugReportModal";
 import MetadataWizard from "./MetadataWizard";
+import PairingBanner from "./PairingBanner";
 import { gatherAppState, type BugReportAppState } from "../utils/bugReportState";
 import { getLatestSnapshot, getDiagEvents } from "../utils/narrateDiagnostics";
 import { getConsoleBuffer } from "../utils/consoleCapture";
@@ -88,6 +89,12 @@ export default function LibraryContainer() {
 
   // Metadata wizard state
   const [metadataWizardOpen, setMetadataWizardOpen] = useState(false);
+
+  // Pairing banner state
+  const [showPairingBanner, setShowPairingBanner] = useState(false);
+  const [pairingCode, setPairingCode] = useState("");
+  const [pairingExpiresAt, setPairingExpiresAt] = useState(0);
+  const pairingCooldownRef = useRef(0); // timestamp when cooldown expires
 
   // Smart import confirmation state
   const [importPending, setImportPending] = useState<{ content: string; isUrl: boolean } | null>(null);
@@ -160,6 +167,31 @@ export default function LibraryContainer() {
     });
     return cleanup;
   }, [showToast]);
+
+  // WebSocket pairing banner push events
+  useEffect(() => {
+    const unsubAttempt = api.onWsConnectionAttempt(async () => {
+      // Suppress during cooldown
+      if (Date.now() < pairingCooldownRef.current) return;
+      // Check connection status — suppress if already connected (re-auth, not new pairing)
+      try {
+        const result = await api.getWsShortCode();
+        if (!result || result.status === "connected") return;
+        setPairingCode(result.code);
+        setPairingExpiresAt(result.expiresAt);
+        setShowPairingBanner(true);
+      } catch { /* ignore */ }
+    });
+
+    const unsubSuccess = api.onWsPairingSuccess(() => {
+      setShowPairingBanner(false);
+    });
+
+    return () => {
+      unsubAttempt();
+      unsubSuccess();
+    };
+  }, []);
 
   // Create context providers
   const settingsValue = useSettingsProvider(settings, setSettings);
@@ -428,6 +460,11 @@ export default function LibraryContainer() {
     setSettings((prev) => ({ ...prev, firstRunCompleted: true }));
   }, [setSettings]);
 
+  const handlePairingDismiss = useCallback(() => {
+    setShowPairingBanner(false);
+    pairingCooldownRef.current = Date.now() + 60000; // 60s cooldown
+  }, []);
+
   useGlobalKeys({
     toggleFlap: toggleMenuFlap,
     openSettings: handleOpenSettings,
@@ -604,6 +641,12 @@ export default function LibraryContainer() {
       <ToastContext.Provider value={toastValue}>
         <ErrorBoundary onReset={() => setView("library")}>
           <DropZone onFilesDropped={handleFilesDropped} onReject={handleDropReject}>
+            <PairingBanner
+              visible={showPairingBanner}
+              code={pairingCode}
+              expiresAt={pairingExpiresAt}
+              onDismiss={handlePairingDismiss}
+            />
             <LibraryView
               library={library}
               settings={settings}

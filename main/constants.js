@@ -45,6 +45,10 @@ const SHORT_CODE_TTL_MS = 5 * 60 * 1000;
 const WS_MAX_RETRY_COUNT = 10;
 /** Auth timeout — disconnect clients that don't authenticate within this window (ms) */
 const WS_AUTH_TIMEOUT_MS = 5000;
+/** IPC channel: server notifies renderer of unauthenticated client connection */
+const WS_CONNECTION_ATTEMPT_CHANNEL = "ws-connection-attempt";
+/** IPC channel: server notifies renderer of successful pairing or auth */
+const WS_PAIRING_SUCCESS_CHANNEL = "ws-pairing-success";
 
 // ── File Parsers ──────────────────────────────────────────────────────────────
 /** PDF parsing timeout (ms) */
@@ -173,6 +177,8 @@ module.exports = {
   SHORT_CODE_TTL_MS,
   WS_MAX_RETRY_COUNT,
   WS_AUTH_TIMEOUT_MS,
+  WS_CONNECTION_ATTEMPT_CHANNEL,
+  WS_PAIRING_SUCCESS_CHANNEL,
   // File Parsers
   PDF_PARSE_TIMEOUT_MS,
   MIN_PRINTABLE_RATIO,

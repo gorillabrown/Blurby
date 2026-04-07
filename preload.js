@@ -215,4 +215,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("watcher-error", handler);
     return () => ipcRenderer.removeListener("watcher-error", handler);
   },
+  onWsConnectionAttempt: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("ws-connection-attempt", handler);
+    return () => ipcRenderer.removeListener("ws-connection-attempt", handler);
+  },
+  onWsPairingSuccess: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("ws-pairing-success", handler);
+    return () => ipcRenderer.removeListener("ws-pairing-success", handler);
+  },
 });

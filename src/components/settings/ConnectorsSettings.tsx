@@ -34,14 +34,22 @@ export function ConnectorsSettings({
     });
   }, []);
 
-  // BUG-156: Poll connection status every 5 seconds so UI stays current
+  // BUG-156: Poll connection status every 15 seconds so UI stays current
   useEffect(() => {
     const poll = setInterval(() => {
       api.getWsShortCode().then((result: any) => {
         if (result) setConnectionStatus(result.status || (result.connected ? "connected" : "disconnected"));
       });
-    }, 5000);
+    }, 15000);
     return () => clearInterval(poll);
+  }, []);
+
+  // EXT-ENR-B: Instant pairing status via push event
+  useEffect(() => {
+    const unsub = api.onWsPairingSuccess?.(() => {
+      setConnectionStatus("connected");
+    });
+    return () => unsub?.();
   }, []);
 
   // Countdown timer
