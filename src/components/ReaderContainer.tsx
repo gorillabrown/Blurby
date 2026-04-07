@@ -1,26 +1,26 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, stepKokoroBucket, resolveKokoroBucket, CROSS_BOOK_TRANSITION_MS, CROSS_BOOK_FLOW_RESUME_DELAY_MS } from "../constants";
-import { getNextQueuedBook } from "../utils/queue";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, stepKokoroBucket } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
 import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
 import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
-import { findSectionForWord, type BookWordArray } from "../types/narration";
+import { type BookWordArray } from "../types/narration";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
-import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
-import { mergeOverrides } from "../utils/pronunciationOverrides";
 import { BlurbyDoc, BlurbySettings } from "../types";
+import { useNarrationCaching } from "../hooks/useNarrationCaching";
+import { useNarrationSync } from "../hooks/useNarrationSync";
+import { useFoliateSync } from "../hooks/useFoliateSync";
 import useReader from "../hooks/useReader";
 import { useReaderKeys } from "../hooks/useKeyboardShortcuts";
 import ErrorBoundary from "./ErrorBoundary";
 import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
-import FoliatePageView, { wrapWordsInSpans, unwrapWordSpans } from "./FoliatePageView";
-import { FlowScrollEngine, type FlowProgress } from "../utils/FlowScrollEngine";
+import FoliatePageView from "./FoliatePageView";
+import { type FlowProgress } from "../utils/FlowScrollEngine";
 import ReaderBottomBar, { ChapterListHandle } from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
@@ -28,21 +28,10 @@ import ReturnToReadingPill from "./ReturnToReadingPill";
 import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
 import { useToast } from "../contexts/ToastContext";
+import { useDocumentLifecycle } from "../hooks/useDocumentLifecycle";
+import { useFlowScrollSync } from "../hooks/useFlowScrollSync";
 
 const api = window.electronAPI;
-
-// TTS-7C: In-flight extraction dedupe — prevent concurrent duplicate IPC calls (BUG-112)
-let _extractionPromise: Promise<any> | null = null;
-let _extractionBookId: string | null = null;
-
-function dedupeExtractWords(bookId: string): Promise<any> {
-  if (_extractionPromise && _extractionBookId === bookId) return _extractionPromise;
-  _extractionBookId = bookId;
-  _extractionPromise = api.extractEpubWords(bookId).finally(() => {
-    if (_extractionBookId === bookId) { _extractionPromise = null; _extractionBookId = null; }
-  });
-  return _extractionPromise;
-}
 
 type DocWithContent = BlurbyDoc & { content: string };
 
@@ -138,39 +127,31 @@ export default function ReaderContainer({
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
   const softWordIndexRef = useRef(0);
-  const narrationStateFlushRafRef = useRef<number | null>(null);
-  const narrationStatePendingIdxRef = useRef<number | null>(null);
+  // narrationStateFlushRafRef and narrationStatePendingIdxRef are initialized
+  // in useDocumentLifecycle and returned to the component — see below.
 
   // Flow mode plays within Page view (word highlight advances at WPM)
   const [flowPlaying, setFlowPlaying] = useState(false);
   const [flowProgress, setFlowProgress] = useState<FlowProgress | null>(null);
 
+  // FLOW-INF-C: Cross-book continuous reading state
+  const [crossBookTransition, setCrossBookTransition] = useState<{
+    finishedTitle: string;
+    nextTitle: string;
+    nextDocId: string;
+    timeoutId: ReturnType<typeof setTimeout>;
+  } | null>(null);
+  const pendingFlowResumeRef = useRef(false);
+
   // E-ink ghosting prevention (extracted to useEinkController hook)
   const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
 
   const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number; href?: string; depth?: number; sectionIndex?: number }>>([]);
-  const sessionStartRef = useRef<number | null>(null);
-  const sessionStartWordRef = useRef(0);
 
   // 21N: Active reading session timer (Focus/Flow only, not Page)
+  // These refs are passed into useDocumentLifecycle for accumulation.
   const activeReadingMsRef = useRef(0);
   const activeReadingStartRef = useRef<number | null>(null);
-
-  // TTS-7J (BUG-130): Tracks whether user has explicitly clicked/selected a word.
-  // When true, delayed onLoad restore logic must not overwrite the user's choice.
-  const userExplicitSelectionRef = useRef(false);
-  // BUG-148: One-shot gate — prevents the "Restored to last position" toast from
-  // firing more than once per book open (e.g. across multiple onLoad section events).
-  const hasShownRestoreToastRef = useRef(false);
-  // TTS-7M (BUG-135): Persistent resume anchor. When set (non-null), this is
-  // the authoritative start point for the next mode start. Passive Foliate
-  // onLoad/onRelocate events may NOT lower or replace highlightedWordIndex
-  // while an anchor is active. The anchor is:
-  //   - SET on: narration pause (live cursor), book reopen (saved position),
-  //             focus/flow pause (live cursor)
-  //   - CLEARED on: mode start (consumed), explicit user selection (replaced)
-  // Priority: explicit selection > resumeAnchor > visible fallback
-  const resumeAnchorRef = useRef<number | null>(null);
 
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
@@ -183,25 +164,10 @@ export default function ReaderContainer({
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
 
-  // FLOW-INF-C: Cross-book continuous reading state
-  const [crossBookTransition, setCrossBookTransition] = useState<{
-    finishedTitle: string;
-    nextTitle: string;
-    nextDocId: string;
-    timeoutId: ReturnType<typeof setTimeout>;
-  } | null>(null);
-  const pendingFlowResumeRef = useRef(false);
   // FLOW-INF-C: Refs to avoid stale closures in FlowScrollEngine onComplete
-  const activeDocRef = useRef(activeDoc);
-  activeDocRef.current = activeDoc;
-  const libraryRef = useRef(library);
-  libraryRef.current = library;
   const finishReadingWithoutExitRef = useRef<(idx: number) => void>(() => {});
   const onOpenDocByIdRef = useRef(onOpenDocById);
   onOpenDocByIdRef.current = onOpenDocById;
-
-  // FLOW-3A: FlowScrollEngine for infinite scroll mode
-  const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
   const flowScrollCursorRef = useRef<HTMLDivElement | null>(null);
   const flowScrollContainerRef = useRef<HTMLElement | null>(null);
 
@@ -220,16 +186,6 @@ export default function ReaderContainer({
   // Track active reading time when in any active sub-mode
   // Focus: FocusMode class drives timing (not useReader's playing flag)
   const isActivelyReading = readingMode === "focus" || (readingMode === "flow" && flowPlaying) || readingMode === "narration";
-  useEffect(() => {
-    if (isActivelyReading) {
-      activeReadingStartRef.current = Date.now();
-    } else {
-      if (activeReadingStartRef.current) {
-        activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
-        activeReadingStartRef.current = null;
-      }
-    }
-  }, [isActivelyReading]);
 
   // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
   // Map 4-mode to legacy 3-mode for keyboard hooks. Narration uses "page" layout.
@@ -272,50 +228,33 @@ export default function ReaderContainer({
     return words;
   }, [useFoliate, words]);
 
-  // Init reader on mount / doc change
-  useEffect(() => {
-    initReader(activeDoc.position || 0);
-    setHighlightedWordIndex(activeDoc.position || 0);
-    // TTS-7M (BUG-135): Set resume anchor from saved position on reopen.
-    // This prevents passive onLoad/onRelocate from downgrading the start point.
-    resumeAnchorRef.current = (activeDoc.position || 0) > 0 ? activeDoc.position! : null;
-    userExplicitSelectionRef.current = false; // TTS-7J: Reset on doc change
-    hasShownRestoreToastRef.current = false; // BUG-148: Reset toast gate on doc change
-    sessionStartRef.current = Date.now();
-    sessionStartWordRef.current = activeDoc.position || 0;
-    setReadingMode("page"); // Always start in Page view
-    api.getDocChapters(activeDoc.id).then((ch) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
-    // BUG-148: Inform the user their reading position was restored. Fire once per book open,
-    // only when position > 0 (not a fresh start). Timer is cancelled on doc change so a rapid
-    // book switch cannot fire the toast for the old book.
-    let restoreTimer: ReturnType<typeof setTimeout> | undefined;
-    if ((activeDoc.position || 0) > 0) {
-      restoreTimer = setTimeout(() => {
-        if (!hasShownRestoreToastRef.current) {
-          hasShownRestoreToastRef.current = true;
-          showToast("Restored to your last position", 2000);
-        }
-      }, 500);
-    }
-    // Delayed prewarm: start Kokoro model load 2s after reader opens (never startup-blocking)
-    let prewarmTimer: ReturnType<typeof setTimeout> | undefined;
-    if (settings.ttsEngine === "kokoro" && api.kokoroPreload) {
-      prewarmTimer = setTimeout(() => api.kokoroPreload().catch(() => {}), 2000);
-    }
-    return () => {
-      clearTimeout(restoreTimer);
-      clearTimeout(prewarmTimer);
-    };
-  }, [activeDoc.id, initReader, settings.ttsEngine]);
-
-  // Persist focusTextSize changes
-  const prevFocusTextSizeRef = useRef(focusTextSize);
-  useEffect(() => {
-    if (prevFocusTextSizeRef.current !== focusTextSize) {
-      prevFocusTextSizeRef.current = focusTextSize;
-      api.saveSettings({ focusTextSize });
-    }
-  }, [focusTextSize]);
+  // ── Document lifecycle (init, session tracking, RAF cleanup, focusTextSize persist) ──
+  const {
+    resumeAnchorRef,
+    userExplicitSelectionRef,
+    hasShownRestoreToastRef,
+    sessionStartRef,
+    sessionStartWordRef,
+    narrationStateFlushRafRef,
+    narrationStatePendingIdxRef,
+  } = useDocumentLifecycle({
+    activeDoc,
+    readingMode,
+    settings,
+    focusTextSize,
+    initReader,
+    setHighlightedWordIndex,
+    setReadingMode,
+    setDocChapters,
+    showToast,
+    isActivelyReading,
+    crossBookTransition,
+    activeReadingMsRef,
+    activeReadingStartRef,
+    playing,
+    wordIndex,
+    onUpdateProgress,
+  });
 
   // ── Progress tracking (extracted to useProgressTracker hook) ─────────
   const progress = useProgressTracker({
@@ -340,23 +279,6 @@ export default function ReaderContainer({
 
   // Backtrack prompt state — managed by useProgressTracker
 
-  // NM page browsing — tracks when user has browsed away from highlight position during narration
-  const [isBrowsedAway, setIsBrowsedAway] = useState(false);
-
-  // Sync isBrowsedAway with foliate's userBrowsing state (checked on relocate events)
-  useEffect(() => {
-    if (!useFoliate || readingMode !== "narration") {
-      if (isBrowsedAway) setIsBrowsedAway(false);
-      return;
-    }
-    const checkBrowsing = () => {
-      const browsing = foliateApiRef.current?.isUserBrowsing?.() ?? false;
-      setIsBrowsedAway(browsing);
-    };
-    const timer = setInterval(checkBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [useFoliate, readingMode]);
-
   // Progress save effect + finishReading — managed by useProgressTracker hook
 
   // ── TTS (Narration) — now a discrete mode, not a layer ─────────────────
@@ -364,336 +286,39 @@ export default function ReaderContainer({
   const ttsActive = readingMode === "narration"; // derived, not separate state
   // preCapWpmRef managed by useReaderMode hook
 
-  // NAR-2: Pre-warm Kokoro model + AudioContext on reader mount
-  useEffect(() => {
-    if (settings.ttsEngine === "kokoro") {
-      if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
-      // NAR-5: Preload marathon worker in parallel (background caching)
-      if (api?.kokoroPreloadMarathon) api.kokoroPreloadMarathon().catch(() => {});
-      // Warm up AudioContext so first play has zero audio driver latency
-      narration.warmUp();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only on mount
-
-  // NAR-5: Background cacher — marathon worker fills disk cache ahead of reading position
-  const backgroundCacherRef = useRef<BackgroundCacher | null>(null);
-  useEffect(() => {
-    if (settings.ttsEngine !== "kokoro" || settings.ttsCacheEnabled === false) return;
-    if (!api?.kokoroGenerateMarathon) return;
-
-    const cacher = createBackgroundCacher({
-      generateFn: async (text, voiceId, speed) => {
-        const result = await api.kokoroGenerateMarathon(text, voiceId, speed);
-        if (result.error || !result.audio || !result.sampleRate) {
-          return { error: result.error || "no audio returned" };
-        }
-        const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
-        return { audio: result.audio, sampleRate: result.sampleRate, durationMs };
-      },
-      getVoiceId: () => settings.ttsVoiceName || "af_bella",
-      isCacheEnabled: () => settings.ttsCacheEnabled !== false,
-      getRateBucket: () => resolveKokoroBucket(settings.ttsRate || 1.0),
-      getPronunciationOverrides: () => mergeOverrides(settings.pronunciationOverrides || [], activeDoc.pronunciationOverrides || []),
-    });
-    backgroundCacherRef.current = cacher;
-    cacher.start();
-
-    return () => {
-      cacher.stop();
-      backgroundCacherRef.current = null;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.ttsVoiceName, settings.ttsRate]);
-
-  // TTS-7F: Queue entry-coverage for the opened book on reader mount (cruise warm)
-  useEffect(() => {
-    const cacher = backgroundCacherRef.current;
-    if (!cacher) return;
-    const words = wordsRef.current;
-    if (words.length > 0 && settings.ttsEngine === "kokoro" && settings.ttsCacheEnabled !== false) {
-      cacher.queueEntryCoverage({
-        id: activeDoc.id,
-        words,
-        position: activeDoc.position || 0,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, settings.ttsEngine]);
-
-  // NAR-5: Set active book on the background cacher when text is available
-  useEffect(() => {
-    const cacher = backgroundCacherRef.current;
-    if (!cacher) return;
-    const words = wordsRef.current;
-    if (words.length > 0) {
-      cacher.setActiveBook({
-        id: activeDoc.id,
-        words,
-        position: activeDoc.position || 0,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, wordsRef.current.length]);
-
-  // NAR-2: Sync book ID to narration hook for cache keying.
-  // Footnote mode affects generated audio text, so it must partition cache identity.
-  useEffect(() => {
-    narration.setBookId(`${activeDoc.id}::fn:${settings.ttsFootnoteMode || "skip"}`);
-  }, [activeDoc.id, settings.ttsFootnoteMode, narration.setBookId]);
-
-  // TTS-6E/6I: Sync pronunciation overrides (global + per-book) → narration hook
-  useEffect(() => {
-    narration.setPronunciationOverrides(settings.pronunciationOverrides || []);
-  }, [settings.pronunciationOverrides]);
-  useEffect(() => {
-    narration.setBookPronunciationOverrides(activeDoc.pronunciationOverrides || []);
-  }, [activeDoc.pronunciationOverrides, activeDoc.id]);
-
-  // Sync TTS engine/voice/rate from settings → narration hook
-  useEffect(() => {
-    narration.setEngine(settings.ttsEngine || "web");
-  }, [settings.ttsEngine, narration.setEngine]);
-
-  // Refs for narration values read by the voice sync effect but shouldn't trigger re-runs.
-  const narrationVoicesRef = useRef(narration.voices);
-  narrationVoicesRef.current = narration.voices;
-  const narrationCurrentVoiceRef = useRef(narration.currentVoice);
-  narrationCurrentVoiceRef.current = narration.currentVoice;
-  const narrationSelectVoiceRef = useRef(narration.selectVoice);
-  narrationSelectVoiceRef.current = narration.selectVoice;
-  const narrationSetKokoroVoiceRef = useRef(narration.setKokoroVoice);
-  narrationSetKokoroVoiceRef.current = narration.setKokoroVoice;
-
-  useEffect(() => {
-    if (settings.ttsEngine === "kokoro" && settings.ttsVoiceName) {
-      narrationSetKokoroVoiceRef.current(settings.ttsVoiceName);
-    } else if (settings.ttsVoiceName && narrationVoicesRef.current.length > 0) {
-      const voice = narrationVoicesRef.current.find((v) => v.name === settings.ttsVoiceName);
-      if (voice && voice.name !== narrationCurrentVoiceRef.current?.name) {
-        narrationSelectVoiceRef.current(voice);
-      }
-    }
-  }, [settings.ttsEngine, settings.ttsVoiceName]);
-
-  useEffect(() => {
-    if (settings.ttsRate && settings.ttsRate !== narration.rate) {
-      narration.adjustRate(settings.ttsRate);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.ttsRate]);
-
-  // Sync TTS pause config from settings → narration hook
-  useEffect(() => {
-    narration.setPauseConfig({
-      commaMs: settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
-      clauseMs: settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
-      sentenceMs: settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS,
-      paragraphMs: settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS,
-      dialogueThreshold: settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD,
-    });
-  }, [settings.ttsPauseCommaMs, settings.ttsPauseClauseMs, settings.ttsPauseSentenceMs, settings.ttsPauseParagraphMs, settings.ttsDialogueSentenceThreshold, narration.setPauseConfig]);
-
+  // ── Narration-to-settings sync (10 effects extracted to useNarrationSync) ──
   // NAR-3: Full-book word array for seamless narration across sections
   const bookWordsRef = useRef<BookWordArray | null>(null);
   const footnoteCuesRef = useRef<Array<{ afterWordIdx: number; text: string }>>([]);
   const bookWordsCompleteRef = useRef<boolean>(false);
-  const [bookWordMeta, setBookWordMeta] = useState<{ sections: BookWordArray["sections"]; totalWords: number } | null>(null);
-  const currentNarrationSectionRef = useRef<number>(-1);
   const lastGoToSectionTimeRef = useRef<number>(0);
 
-  useEffect(() => {
-    setBookWordMeta(null);
-    footnoteCuesRef.current = [];
-  }, [activeDoc.id]);
+  const { bookWordMeta, setBookWordMeta, currentNarrationSectionRef } = useNarrationSync({
+    activeDoc,
+    settings,
+    narration,
+    footnoteCuesRef,
+  });
 
-  useEffect(() => {
-    narration.setFootnoteMode(settings.ttsFootnoteMode || "skip");
-  }, [settings.ttsFootnoteMode, narration]);
+  // NAR-2/NAR-5/TTS-7F: TTS caching — preload, background cacher, entry coverage, active book sync
+  // Also owns TTS-6O background pre-extraction and HOTFIX-6 narration-mode extraction.
+  const backgroundCacherRef = useNarrationCaching({
+    activeDoc,
+    settings,
+    wordsRef,
+    narrationWarmUp: narration.warmUp,
+    useFoliate,
+    readingMode,
+    bookWordsRef,
+    footnoteCuesRef,
+    bookWordsCompleteRef,
+    setBookWordMeta,
+    highlightedWordIndexRef,
+    foliateApiRef,
+    narration,
+  });
 
-  useEffect(() => {
-    narration.setFootnoteCues(footnoteCuesRef.current);
-  }, [narration, activeDoc.id, bookWordMeta?.totalWords]);
-
-  useEffect(() => {
-    if (!useFoliate || !bookWordMeta?.sections?.length) return;
-    setDocChapters((prev) => prev.map((chapter, idx, all) => ({
-      ...chapter,
-      charOffset: resolveTocWordIndex(chapter, idx, bookWordMeta.totalWords || activeDoc.wordCount || 1, all.length, bookWordMeta.sections),
-    })));
-  }, [useFoliate, bookWordMeta, activeDoc.wordCount]);
-
-  // TTS-6O: Background pre-extraction — extract full-book words ahead of narration start
-  useEffect(() => {
-    if (!useFoliate || !api?.extractEpubWords) return;
-    if (bookWordsRef.current && bookWordsRef.current.complete) return;
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      if (cancelled) return;
-      dedupeExtractWords(activeDoc.id).then((result) => {
-        if (cancelled || !result.words || !result.sections) return;
-        // Only store if narration hasn't already extracted (avoid overwrite race)
-        if (bookWordsRef.current && bookWordsRef.current.complete) return;
-        bookWordsRef.current = {
-          words: result.words,
-          sections: result.sections,
-          totalWords: result.totalWords ?? result.words.length,
-          complete: true,
-        };
-        footnoteCuesRef.current = result.footnoteCues || [];
-        bookWordsCompleteRef.current = true;
-        setBookWordMeta({
-          sections: result.sections,
-          totalWords: result.totalWords ?? result.words.length,
-        });
-        if (import.meta.env.DEV) console.debug(`[TTS-6O] background pre-extraction complete: ${result.words.length} words`);
-      }).catch(() => {});
-    }, activeDoc.wordCount > 100000 ? 2000 : 1000); // BUG-149: larger delay for big EPUBs
-    return () => { cancelled = true; clearTimeout(timer); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useFoliate, activeDoc.id]);
-
-  // HOTFIX-6: Extract full-book words via main-process IPC (no foliate navigation)
-  useEffect(() => {
-    if (!useFoliate || readingMode !== "narration") return;
-    // Already extracted for this book?
-    if (bookWordsRef.current && bookWordsRef.current.complete) return;
-    if (!api?.extractEpubWords) return;
-
-    let cancelled = false;
-
-    const currentSectionIdx = foliateApiRef.current?.getWords()?.[0]?.sectionIndex ?? 0;
-
-    api.extractEpubWords(activeDoc.id).then(async (result) => {
-      if (cancelled || !result.words || !result.sections) return;
-
-      // TTS-7C: Phase 1 — Build bookWords object
-      const bookWords: BookWordArray = {
-        words: result.words,
-        sections: result.sections,
-        totalWords: result.totalWords ?? result.words.length,
-        complete: true,
-      };
-      footnoteCuesRef.current = result.footnoteCues || [];
-
-      // TTS-7C: Yield between extraction result processing and ref updates
-      await new Promise(r => setTimeout(r, 0));
-      if (cancelled) return;
-
-      // TTS-7C: Phase 2 — Update refs and narration state
-      bookWordsRef.current = bookWords;
-      bookWordsCompleteRef.current = true;
-      setBookWordMeta({
-        sections: bookWords.sections,
-        totalWords: bookWords.totalWords,
-      });
-      wordsRef.current = bookWords.words;
-
-      // Convert section-local highlightedWordIndex to global (use ref for current value, not stale closure)
-      // Do this BEFORE DOM restamping — narration uses the word array, not DOM spans
-      const currentSection = bookWords.sections.find(s => s.sectionIndex === currentSectionIdx);
-      const currentLocalIdx = highlightedWordIndexRef.current;
-      if (currentSection && currentLocalIdx >= 0) {
-        const globalIdx = currentSection.startWordIdx + currentLocalIdx;
-        // Update narration to use the global word array (non-disruptive — no stop/restart)
-        narration.updateWords(bookWords.words, globalIdx);
-      }
-
-      // HOTFIX-10: Re-stamp all loaded foliate sections with global indices.
-      // Deferred via requestIdleCallback to avoid blocking the renderer during active narration.
-      const restampSections = () => {
-        if (cancelled) return;
-        const contents = foliateApiRef.current?.getView()?.renderer?.getContents?.() ?? [];
-        for (const { doc: sectionDoc, index: sectionIndex } of contents) {
-          const sec = bookWords.sections.find(s => s.sectionIndex === sectionIndex);
-          if (sec && sectionDoc?.body) {
-            unwrapWordSpans(sectionDoc);
-            wrapWordsInSpans(sectionDoc, sectionIndex, sec.startWordIdx);
-          }
-        }
-      };
-      if (typeof requestIdleCallback === "function") {
-        requestIdleCallback(restampSections, { timeout: 2000 });
-      } else {
-        setTimeout(restampSections, 0);
-      }
-
-      if (import.meta.env.DEV) console.debug(`[HOTFIX-6] main-process extraction complete: ${bookWords.totalWords} words, ${bookWords.sections.length} sections`);
-    }).catch((err) => {
-      console.warn("[HOTFIX-6] main-process extraction failed:", err);
-    });
-
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useFoliate, readingMode, activeDoc.id]);
-
-  // NAR-3: When word index crosses a section boundary, navigate foliate.
-  // TTS-7J (BUG-128): DISABLED during narration — miss-recovery owns section nav.
-  // TTS-7K (BUG-133): DISABLED during page mode — page turning is owned by foliate's
-  // next()/prev(). This effect's goToSection() calls interfered with manual page
-  // navigation, preventing users from advancing past the third page.
-  // Only active for focus and flow modes which need section tracking.
-  useEffect(() => {
-    if (!useFoliate || !bookWordsRef.current?.complete) return;
-    // TTS-7K: Only focus/flow modes need this section-sync effect
-    if (readingMode !== "focus" && readingMode !== "flow") return;
-
-    const bookWords = bookWordsRef.current;
-    const sec = findSectionForWord(bookWords.sections, highlightedWordIndex);
-    if (!sec) return;
-
-    // Only navigate if the section changed AND throttle to max once per 200ms
-    if (sec.sectionIndex !== currentNarrationSectionRef.current) {
-      const now = Date.now();
-      if (now - lastGoToSectionTimeRef.current < 200) return;
-      currentNarrationSectionRef.current = sec.sectionIndex;
-      lastGoToSectionTimeRef.current = now;
-      foliateApiRef.current?.goToSection(sec.sectionIndex).catch(() => {});
-    }
-  }, [useFoliate, readingMode, highlightedWordIndex]);
-
-  // NAR-3: Clear full-book extraction when book changes or narration stops
-  useEffect(() => {
-    return () => {
-      bookWordsRef.current = null;
-      currentNarrationSectionRef.current = -1;
-    };
-  }, [activeDoc.id]);
-
-  // Wire section-end callback for foliate EPUBs — fallback when full-book extraction not ready
-  useEffect(() => {
-    if (!useFoliate) {
-      narration.setOnSectionEnd(null);
-      return;
-    }
-    narration.setOnSectionEnd(() => {
-      // If full-book words are loaded, narration already has everything — stop, don't navigate.
-      if (bookWordsRef.current?.complete) {
-        narration.stop();
-        return;
-      }
-      // Fallback for when extraction is still in progress.
-      const api = foliateApiRef.current;
-      if (!api) return;
-      api.next();
-      const checkAndRestart = () => {
-        setTimeout(() => {
-          try {
-            extractFoliateWords();
-            const newWords = wordsRef.current;
-            if (newWords.length > 0) {
-              narration.resyncToCursor(0, effectiveWpm);
-            }
-          } catch (err) {
-            console.error("[ReaderContainer] extractFoliateWords failed during section-end fallback:", err);
-          }
-        }, 300);
-      };
-      checkAndRestart();
-    });
-    return () => narration.setOnSectionEnd(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useFoliate, narration.setOnSectionEnd]);
+  // TTS-6O + HOTFIX-6: Full-book word extraction effects now live in useNarrationCaching hook.
 
   // Page navigation ref (needed by useReaderMode for return-to-reading)
   const pageNavRef = useRef<{ prevPage: () => void; nextPage: () => void; goToPage: (page: number) => void; returnToHighlight: () => void; getCurrentPageStart?: () => number }>({
@@ -720,6 +345,26 @@ export default function ReaderContainer({
       setFoliateWordStrings(wordStrings);
     }
   }, [useFoliate, wordsRef]);
+
+  // ── Foliate sync effects (extracted to useFoliateSync hook) ──────────────
+  // Owns: browse-away detection, chapter charOffset sync, section navigation
+  // (focus/flow), and section-end callback wiring.
+  const { isBrowsedAway, setIsBrowsedAway } = useFoliateSync({
+    useFoliate,
+    readingMode,
+    highlightedWordIndex,
+    bookWordMeta,
+    narration,
+    foliateApiRef,
+    bookWordsRef,
+    wordsRef,
+    currentNarrationSectionRef,
+    lastGoToSectionTimeRef,
+    setDocChapters,
+    extractFoliateWords,
+    effectiveWpm,
+    activeDocWordCount: activeDoc.wordCount,
+  });
 
   // ── Mode class instances (bridge between mode classes and React state) ────
   const modeInstanceHook = useReadingModeInstance({
@@ -760,23 +405,7 @@ export default function ReaderContainer({
     bookWordsCompleteRef,
   });
 
-  useEffect(() => {
-    return () => {
-      if (narrationStateFlushRafRef.current != null) {
-        cancelAnimationFrame(narrationStateFlushRafRef.current);
-        narrationStateFlushRafRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (readingMode === "narration") return;
-    if (narrationStateFlushRafRef.current != null) {
-      cancelAnimationFrame(narrationStateFlushRafRef.current);
-      narrationStateFlushRafRef.current = null;
-    }
-    narrationStatePendingIdxRef.current = null;
-  }, [readingMode]);
+  // narrationStateFlushRaf cleanup and cancel-on-mode-exit handled by useDocumentLifecycle
 
   // ── Mode transitions (extracted to useReaderMode hook) ──────────────
   const modeHook = useReaderMode({
@@ -816,6 +445,39 @@ export default function ReaderContainer({
     preCapWpmRef,
   } = modeHook;
 
+  // ── Flow scroll sync (5 effects extracted to useFlowScrollSync) ────────
+  const startFlowRef = useRef(startFlow);
+  startFlowRef.current = startFlow;
+  const {
+    flowScrollEngineRef,
+  } = useFlowScrollSync({
+    readingMode,
+    effectiveWpm,
+    settings,
+    useFoliate,
+    activeDoc,
+    library,
+    startFlowRef,
+    flowPlaying,
+    setFlowPlaying,
+    setFlowProgress,
+    setCrossBookTransition,
+    pendingFlowResumeRef,
+    setHighlightedWordIndex,
+    setReadingMode,
+    highlightedWordIndexRef,
+    foliateApiRef,
+    flowScrollContainerRef,
+    flowScrollCursorRef,
+    wordsRef,
+    bookWordMeta,
+    paragraphBreaks: tokenized.paragraphBreaks,
+    isEink,
+    focusTextSize,
+    finishReadingWithoutExitRef,
+    onOpenDocByIdRef,
+  });
+
   // Exit reader — uses both mode hook and progress hook
   const handleExitReader = useCallback(() => {
     // FLOW-INF-C: Cancel cross-book transition and exit
@@ -854,20 +516,7 @@ export default function ReaderContainer({
     onUpdateProgress(activeDoc.id, pos);
   }, [activeDoc, onUpdateProgress]);
 
-  // Throttled RSVP progress save
-  const rsvpLastSaveRef = useRef({ time: 0, wordIndex: 0 });
-  useEffect(() => {
-    if (!playing || readingMode !== "focus") return;
-    const now = Date.now();
-    const last = rsvpLastSaveRef.current;
-    const timeDelta = now - last.time;
-    const wordDelta = Math.abs(wordIndex - last.wordIndex);
-    if (timeDelta >= RSVP_PROGRESS_SAVE_INTERVAL_MS || wordDelta >= RSVP_PROGRESS_SAVE_WORD_DELTA) {
-      rsvpLastSaveRef.current = { time: now, wordIndex };
-      api.updateDocProgress(activeDoc.id, wordIndex);
-      onUpdateProgress(activeDoc.id, wordIndex);
-    }
-  }, [playing, wordIndex, activeDoc, readingMode, onUpdateProgress]);
+  // Throttled RSVP progress save — now in useDocumentLifecycle hook.
 
   // extractFoliateWords moved above useReaderMode hook call
 
@@ -1117,113 +766,8 @@ export default function ReaderContainer({
   // Legacy useEffect blocks for foliate word highlighting and Flow word advancement
   // have been removed — mode classes (FlowMode, NarrateMode) now drive these directly.
 
-  // FLOW-3A: FlowScrollEngine lifecycle — start/stop/pause based on reading mode
-  useEffect(() => {
-    if (readingMode !== "flow" || !flowPlaying) {
-      // Stop the engine when not in flow mode or paused
-      if (flowScrollEngineRef.current) {
-        flowScrollEngineRef.current.stop();
-      }
-      return;
-    }
-
-    // Get the scrollable container — from foliate in EPUB mode
-    let container: HTMLElement | null = null;
-    let cursor: HTMLDivElement | null = null;
-
-    if (useFoliate) {
-      container = flowScrollContainerRef.current
-        ?? foliateApiRef.current?.getScrollContainer?.() as HTMLElement
-        ?? null;
-      cursor = flowScrollCursorRef.current;
-    }
-
-    if (!container || !cursor) return;
-
-    // Create engine if needed
-    if (!flowScrollEngineRef.current) {
-      flowScrollEngineRef.current = new FlowScrollEngine({
-        onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
-        onComplete: () => {
-          const doc = activeDocRef.current;
-          const nextDoc = getNextQueuedBook(doc.id, libraryRef.current);
-          if (!nextDoc) {
-            setFlowPlaying(false);
-            setReadingMode("page");
-            return;
-          }
-          setFlowPlaying(false);
-          const tid = setTimeout(() => {
-            finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
-            api.removeFromQueue(doc.id);
-            pendingFlowResumeRef.current = true;
-            onOpenDocByIdRef.current(nextDoc.id);
-            setCrossBookTransition(null);
-          }, CROSS_BOOK_TRANSITION_MS);
-          setCrossBookTransition({
-            finishedTitle: doc.title || "Untitled",
-            nextTitle: nextDoc.title || "Untitled",
-            nextDocId: nextDoc.id,
-            timeoutId: tid,
-          });
-        },
-        onProgressUpdate: (progress: FlowProgress) => setFlowProgress(progress),
-      });
-    }
-
-    const engine = flowScrollEngineRef.current;
-    // FLOW-INF-B: Provide total word count so progress percentages are accurate
-    const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
-    if (totalWords > 0) engine.setTotalWords(totalWords);
-    engine.start(
-      container,
-      cursor,
-      highlightedWordIndex,
-      effectiveWpm,
-      tokenized.paragraphBreaks,
-      isEink,
-      settings.flowZonePosition,
-    );
-
-    return () => {
-      engine.stop();
-    };
-  }, [readingMode, flowPlaying, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // FLOW-INF-C: Auto-resume flow after cross-book transition
-  useEffect(() => {
-    if (!pendingFlowResumeRef.current || readingMode !== "page") return;
-    pendingFlowResumeRef.current = false;
-    const timer = setTimeout(() => {
-      startFlow();
-    }, CROSS_BOOK_FLOW_RESUME_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [activeDoc.id, readingMode, startFlow]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // FLOW-INF-C: Cleanup cross-book transition timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (crossBookTransition) clearTimeout(crossBookTransition.timeoutId);
-    };
-  }, [crossBookTransition]);
-
-  // FLOW-3A: Sync WPM changes to running FlowScrollEngine
-  useEffect(() => {
-    flowScrollEngineRef.current?.setWpm(effectiveWpm);
-  }, [effectiveWpm]);
-
-  // FLOW-INF-A: Sync zone position changes to running FlowScrollEngine
-  useEffect(() => {
-    flowScrollEngineRef.current?.setZonePosition(settings.flowZonePosition);
-  }, [settings.flowZonePosition]);
-
-  // FLOW-3B: Rebuild line map on font size change (lines shift when text reflows)
-  useEffect(() => {
-    if (readingMode === "flow" && flowScrollEngineRef.current?.getState().running) {
-      const timer = setTimeout(() => flowScrollEngineRef.current?.rebuildLineMap(), 200);
-      return () => clearTimeout(timer);
-    }
-  }, [focusTextSize, readingMode]);
+  // FLOW-3A effects (engine lifecycle, WPM sync, zone sync, line map rebuild,
+  // cross-book auto-resume) extracted to useFlowScrollSync hook above.
 
   // FLOW-3A: Update flow nav ref to use FlowScrollEngine
   const flowScrollNavRef = useRef({

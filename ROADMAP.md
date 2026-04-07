@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-07 — PERF-1 complete (v1.47.0). Queue depth 0 (RED). Backfill needed.
+**Last updated**: 2026-04-07 — REFACTOR-1A complete (v1.48.0). Queue depth 2 (YELLOW). Next: REFACTOR-1B.
 **Current branch**: `main`
-**Current state**: v1.47.0 stable. Queue depth 0 (RED). Critical backfill needed.
+**Current state**: v1.48.0 stable. Queue depth 2 (YELLOW). Next: REFACTOR-1B → TEST-COV-1. Backfill needed.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -59,6 +59,12 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     STAB-1A: Startup & Flow Stabilization ✅ (v1.45.0)
                    │
     PERF-1: Full Performance Audit & Remediation ✅ (v1.47.0)
+                   │
+    REFACTOR-1A: ReaderContainer Decomposition ✅ (v1.48.0)
+                   │
+    REFACTOR-1B: Component & Style Cleanup ← NEXT
+                   │
+    TEST-COV-1: Critical Path Test Coverage + Security
                    │
                    ▼
         Track C: Android APK
@@ -760,6 +766,291 @@ Cleanup + verify:
 18. Startup-to-window time measurably improved (target: window visible < 500ms after app.whenReady)
 
 **Tier:** Full | **Depends on:** None — investigation gate cleared by Cowork analysis. All remediation targets have confirmed code-level coordinates.
+
+---
+
+## REFACTOR-1A: ReaderContainer Decomposition ✅ COMPLETED (2026-04-07)
+
+**Goal:** Extract 33 useEffect hooks from ReaderContainer.tsx (1,623 lines) into 5 domain-specific custom hooks. This is the single highest-risk maintainability item identified by the post-PERF-1 technical debt audit (finding C-1). Also addresses fileHashes unbounded growth (H-3) and main.js hardcoded constants (M-2) as quick-fix ride-alongs.
+
+**Problem:** ReaderContainer.tsx has 33 useEffect hooks, 11 useState declarations, and 27+ useRef declarations. Effect ordering is impossible to reason about. Re-render cost is high because effects trigger cascading updates. The file is the most complex single component in the codebase and the #1 maintainability risk.
+
+**Approach:** Pure refactoring — no behavior changes. Extract effects into custom hooks by logical domain. Each hook receives props/refs and returns the state it manages. ReaderContainer becomes a thin orchestrator that composes hooks. All existing tests must continue to pass unchanged.
+
+**Investigation gate:** Cleared. Cowork investigation mapped all 33 useEffects to 5 hook groupings with exact line numbers, state variables, and dependency arrays.
+
+### Baseline
+
+- `src/components/ReaderContainer.tsx` — 1,623 lines, 33 useEffects, 11 useState, 27+ useRef
+- `main/sync-engine.js` line 39 — `fileHashes: {}` grows unbounded (entries only removed during weekly reconciliation)
+- `main.js` lines 24-34 — 11 hardcoded constants (LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, etc.)
+- `src/constants.ts` — 488 lines, well-organized by domain, ready to accept new constants
+- No `main/constants.js` exists yet for main-process constants
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for ReaderContainer, useEffect, refactoring entries
+3. `ROADMAP.md` — this section
+4. `src/components/ReaderContainer.tsx` — read ENTIRE file, map all useEffect/useState/useRef declarations
+5. `src/hooks/` — read existing custom hooks to follow project patterns
+6. `main/sync-engine.js` — `fileHashes` (line 39), addition sites (lines 526, 539, 540, 578, 607, 633, 1043), removal sites (lines 707, 722-723)
+7. `main.js` — hardcoded constants (lines 24-34)
+8. `src/constants.ts` — existing structure for reference
+9. `main/ipc/documents.js` — library delete handler (check if fileHashes entries are cleaned up)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (renderer-scope) | **Extract `useNarrationSync` hook.** Move 12 narration-to-settings sync effects (lines 441, 446, 449, 454, 468, 479, 487, 505, 510, 514, 518, 664) into `src/hooks/useNarrationSync.ts`. Hook receives `activeDoc`, `settings`, `narration`, `useFoliate`, and refs. Returns `bookWordMeta`, `setBookWordMeta`, `currentNarrationSectionRef`. Estimated ~150 lines. | `src/hooks/useNarrationSync.ts` (new), `src/components/ReaderContainer.tsx` | Remove 12 useEffects + related state from ReaderContainer. Add hook call at ~line 130 area. |
+| 2 | Athena (renderer-scope) | **Extract `useNarrationCaching` hook.** Move 4 TTS caching effects (lines 368, 381, 410, 425) into `src/hooks/useNarrationCaching.ts`. Hook receives `activeDoc`, `settings`, `wordsRef`. Returns `backgroundCacherRef`. Estimated ~100 lines. | `src/hooks/useNarrationCaching.ts` (new), `src/components/ReaderContainer.tsx` | Remove 4 useEffects + backgroundCacherRef from ReaderContainer. |
+| 3 | Athena (renderer-scope) | **Extract `useFlowScrollSync` hook.** Move 6 flow/cross-book effects (lines 1121, 1194, 1204, 1211, 1216, 1221) into `src/hooks/useFlowScrollSync.ts`. Hook receives `readingMode`, `effectiveWpm`, `settings`, `useFoliate`, `activeDoc`, `library`, `startFlow`. Returns `flowScrollEngineRef`, `flowPlaying`, `setFlowPlaying`, `flowProgress`, `crossBookTransition`, `setCrossBookTransition`, `pendingFlowResumeRef`. Estimated ~180 lines. | `src/hooks/useFlowScrollSync.ts` (new), `src/components/ReaderContainer.tsx` | Remove 6 useEffects + flow state from ReaderContainer. Lines 1121-1230 area. |
+| 4 | Hephaestus (renderer-scope) | **Extract `useFoliateSync` hook.** Move 4 foliate sync effects (lines 347, 518, 636, 664) into `src/hooks/useFoliateSync.ts`. Hook receives `useFoliate`, `readingMode`, `highlightedWordIndex`, `bookWordMeta`, `narration`. Returns `isBrowsedAway`. Estimated ~110 lines. | `src/hooks/useFoliateSync.ts` (new), `src/components/ReaderContainer.tsx` | Remove 4 useEffects + isBrowsedAway state from ReaderContainer. |
+| 5 | Hephaestus (renderer-scope) | **Extract `useDocumentLifecycle` hook.** Move 7 lifecycle/cleanup effects (lines 223, 276, 313, 656, 763, 772, 1204) into `src/hooks/useDocumentLifecycle.ts`. Hook receives `activeDoc`, `readingMode`, `settings`, `focusTextSize`, `initReader`. Returns `resumeAnchorRef`, session tracking refs. Estimated ~90 lines. | `src/hooks/useDocumentLifecycle.ts` (new), `src/components/ReaderContainer.tsx` | Remove 7 useEffects + lifecycle refs from ReaderContainer. |
+| 6 | Hermes (electron-scope) | **Fix H-3: Add fileHashes cleanup on document delete.** In the library delete handler (ipc/documents.js), after removing a document from library.json, also delete its fileHashes entries: `doc:{docId}:contentHash` and `documents/{docId}.json` and its `:cloudHash` suffix. This prevents unbounded growth between weekly reconciliations. | `main/ipc/documents.js`, `main/sync-engine.js` | In delete handler: add `syncEngine.clearDocHashes(docId)`. In sync-engine.js: add exported `clearDocHashes(docId)` function (~10 lines). |
+| 7 | Hermes (electron-scope) | **Fix M-2: Extract main.js constants to `main/constants.js`.** Create `main/constants.js` (CommonJS) with 11 constants from main.js lines 24-34: LIBRARY_SAVE_DEBOUNCE_MS (500), BROADCAST_DEBOUNCE_MS (200), FOLDER_SYNC_DEBOUNCE_MS (1000), FOLDER_SYNC_BATCH_SIZE (4), MAX_RECENT_FOLDERS (5), MAX_HISTORY_SESSIONS (1000), MS_PER_DAY (86400000), AUTO_UPDATE_DELAY_MS (5000), BROWSER_FETCH_TIMEOUT_MS (20000), BROWSER_CONTENT_SETTLE_MS (3000), URL_FETCH_TIMEOUT_MS (15000). Update main.js imports. | `main/constants.js` (new), `main.js` | Lines 24-34: replace inline values with `require('./main/constants')`. |
+| 8 | Hippocrates | **Tests** — ≥20 new tests: (a) Each custom hook renders in isolation and produces expected return values, (b) useNarrationSync syncs all 12 settings → narration properties, (c) useNarrationCaching initializes backgroundCacher on mount, (d) useFlowScrollSync creates/destroys engine on mode change, (e) useFlowScrollSync cancels cross-book transition on Escape, (f) useFoliateSync detects browsed-away state, (g) useDocumentLifecycle initializes reader on doc change, (h) ReaderContainer still composes correctly with all hooks, (i) fileHashes entries are cleaned up on document delete, (j) clearDocHashes removes both plain and :cloudHash entries, (k) main/constants.js exports all 11 values with correct types, (l) main.js uses imported constants (not inline values). | `tests/readerDecomposition.test.ts` (new), `tests/fileHashesCleanup.test.ts` (new) | ≥20 tests across 2 new files. |
+| 9 | Hippocrates | **`npm test` + `npm run build`** — all existing tests pass (no regressions from refactoring), build succeeds. | — | — |
+| 10 | Solon | **Spec compliance** — verify all 16 SUCCESS CRITERIA items met. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, architecture note re: custom hooks), ROADMAP.md (mark REFACTOR-1A complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (if non-trivial discovery), TECHNICAL_REFERENCE.md (update ReaderContainer architecture section). Pre-composed diffs preferred. | All governing docs | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/refactor-1a-reader-decomp` |
+
+### Execution Sequence
+
+```
+Wave A (implement):
+  Task 1 (useNarrationSync)      ─┐
+  Task 2 (useNarrationCaching)   ─┤
+  Task 4 (useFoliateSync)        ─┤ parallel hooks — all extract from different line ranges
+  Task 5 (useDocumentLifecycle)  ─┘
+      ↓
+  Task 3 (useFlowScrollSync)      ← after Tasks 4-5 (shares some state with lifecycle)
+      ↓
+  Task 6 (fileHashes cleanup)    ─┐
+  Task 7 (constants extraction)  ─┘ parallel — independent modules
+      ↓
+  Task 8 (tests)
+  Task 9 (npm test + build)
+
+Wave B (verify + docs):
+  Task 10 (Solon spec compliance)
+  Task 11 (Herodotus docs)
+  Task 12 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. ReaderContainer.tsx reduced to <700 lines (from 1,623)
+2. 5 new custom hooks created in `src/hooks/`: useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle
+3. All 33 useEffect hooks moved from ReaderContainer to custom hooks — zero useEffects remain in ReaderContainer except hook composition
+4. Each custom hook has a clear single-domain responsibility
+5. ReaderContainer composes all 5 hooks and passes their returns to child components
+6. All existing tests pass unchanged (pure refactoring, no behavior change)
+7. fileHashes entries are cleaned up immediately when a document is deleted (not deferred to weekly reconciliation)
+8. `clearDocHashes(docId)` exported from sync-engine.js removes both `doc:{docId}:contentHash` and `documents/{docId}.json` entries (plus `:cloudHash` suffixes)
+9. `main/constants.js` exists with all 11 constants from main.js lines 24-34
+10. main.js imports from `main/constants.js` (no inline magic numbers)
+11. Narration mode works identically before and after refactoring (no regression in word tracking, TTS sync, section navigation)
+12. Flow mode works identically (cross-book transitions, engine lifecycle, WPM sync)
+13. Page mode works identically (foliate sync, progress saving, keyboard navigation)
+14. ≥20 new tests across hook isolation + integration + fileHashes + constants
+15. `npm test` passes, `npm run build` succeeds
+16. No files accidentally truncated (git diff --stat check)
+
+**Tier:** Full | **Depends on:** None — investigation gate cleared. All 33 useEffects mapped to hook groupings with exact line numbers.
+
+---
+
+## REFACTOR-1B: Component & Style Cleanup
+
+**Goal:** Address three interrelated style/component debt items from the technical debt audit: FoliatePageView helper extraction (H-2, 1,947 lines), inline style → CSS migration starting with TTSSettings (H-1, 179 inline styles across the codebase, 66 in TTSSettings alone), and global.css domain splitting (M-1, 5,220 lines in a single file). Also split TTSSettings.tsx into sub-components (M-4, 874 lines).
+
+**Problem:** (1) FoliatePageView.tsx at 1,947 lines mixes rendering, word extraction, style injection, and event handling — second-biggest complexity risk after ReaderContainer. (2) 179 inline styles violate PR-7 (CSS custom properties for theming), with TTSSettings alone accounting for 66. (3) global.css at 5,220 lines is a single monolithic file with 40+ logical sections — impossible to navigate and prone to conflicts.
+
+**Approach:** Pure refactoring — no behavior changes. Extract pure functions from FoliatePageView to helpers. Move inline styles to CSS classes. Split global.css along domain boundaries. All existing tests must continue to pass unchanged.
+
+**Investigation gate:** Cleared. Cowork investigation mapped FoliatePageView sections (word extraction lines 36-220, style injection lines 1908-1947), all 66 TTSSettings inline style line numbers, and global.css into 10 domain-based sections with line ranges.
+
+### Baseline
+
+- `src/components/FoliatePageView.tsx` — 1,947 lines. Word extraction (lines 36-220, ~185 lines of pure utilities), style injection (lines 1908-1947, ~40 lines). Main component (lines 376-1907).
+- `src/components/settings/TTSSettings.tsx` — 874 lines, 66 inline styles. Sub-component candidates: KokoroStatus (lines 241-390), VoiceSelection (lines 250-340), RateControls (lines 436-469), PauseSettings (lines 471-544), CacheSizeDisplay (lines 675-710), PronunciationOverridesEditor (lines 711-874).
+- `src/styles/global.css` — 5,220 lines. Major domains: CSS variables (1-43), reader (296-742), library (744-1062), doc-grid (1910-2667), themes (1231-1792), keyboard (3062-3600), page-reader (3602-4130), onboarding (4540-4803).
+- Inline style counts by file: TTSSettings (66), LibraryView (17), SpeedReadingSettings (8), LayoutSettings (7), BugReportModal (7), ReaderView (6), HelpSettings (6) = top 7 files account for 117/179.
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture (especially PR-7: CSS custom properties for theming, no inline styles)
+2. `docs/governance/LESSONS_LEARNED.md` — scan for CSS, style, refactoring entries
+3. `ROADMAP.md` — this section
+4. `src/components/FoliatePageView.tsx` — focus on:
+   - Footnote helpers (lines 36-78)
+   - DOM utilities (lines 80-111)
+   - Word extraction (lines 114-220)
+   - `injectStyles()` (lines 1908-1947)
+   - Import statements (line 1-34) — what's used where
+5. `src/components/settings/TTSSettings.tsx` — full read, identify sub-component boundaries
+6. `src/styles/global.css` — scan section headers/comments for domain boundaries
+7. `vite.config.js` — verify CSS import handling (code splitting may affect CSS)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Extract `foliateHelpers.ts`.** Move pure utility functions from FoliatePageView to `src/utils/foliateHelpers.ts`: `hasToken()` (line 36), `isFootnoteRefElement()` (line 42), `isFootnoteBodyElement()` (line 55), `isSuppressedNarrationTextNode()` (line 68), `getBlockParent()` (line 80), `collectBlockTextNodes()` (line 94), `locateTextOffset()` (line 114), `buildWordsFromTextNodes()` (line 131), `buildWrappedFragmentForNode()` (line 163), `extractWordsFromView()` (line 188), `extractWordsFromSection()` (line 206). ~185 lines. Update FoliatePageView imports. | `src/utils/foliateHelpers.ts` (new), `src/components/FoliatePageView.tsx` | Lines 36-220 → new file. Replace with imports. Also move BLOCK_TAGS constant (line 34). |
+| 2 | Hephaestus (renderer-scope) | **Extract `foliateStyles.ts`.** Move `injectStyles()` function from FoliatePageView to `src/utils/foliateStyles.ts`. ~40 lines. Update FoliatePageView imports. | `src/utils/foliateStyles.ts` (new), `src/components/FoliatePageView.tsx` | Lines 1908-1947 → new file. |
+| 3 | Hephaestus (renderer-scope) | **Split TTSSettings into sub-components.** Extract from TTSSettings.tsx: (a) `KokoroStatusSection` (lines 241-390) → `src/components/settings/KokoroStatusSection.tsx`, (b) `PauseSettingsSection` (lines 471-544) → `src/components/settings/PauseSettingsSection.tsx`, (c) `PronunciationOverridesEditor` (lines 711-874) → `src/components/settings/PronunciationOverridesEditor.tsx`. TTSSettings becomes a thin layout wrapper (~300 lines). | `src/components/settings/KokoroStatusSection.tsx` (new), `src/components/settings/PauseSettingsSection.tsx` (new), `src/components/settings/PronunciationOverridesEditor.tsx` (new), `src/components/settings/TTSSettings.tsx` | Extract 3 sub-components, replace inline with imports. |
+| 4 | Hephaestus (renderer-scope) | **Migrate TTSSettings inline styles to CSS.** Convert all 66 inline `style={{}}` blocks in TTSSettings (and its new sub-components) to CSS classes in a new `src/styles/tts-settings.css`. Use semantic class names (`.tts-voice-select`, `.tts-rate-slider`, `.tts-pause-control`, etc.). Import the CSS file in TTSSettings. | `src/styles/tts-settings.css` (new), `src/components/settings/TTSSettings.tsx`, sub-components | All 66 `style={{` locations. Replace each with `className=`. |
+| 5 | Hephaestus (renderer-scope) | **Migrate top-7 component inline styles to CSS.** Convert inline styles in: LibraryView (17), SpeedReadingSettings (8), LayoutSettings (7), BugReportModal (7), ReaderView (6), HelpSettings (6). Add classes to global.css or component-scoped CSS files. Target: reduce remaining inline styles from 179 to <30. | `src/components/LibraryView.tsx`, `src/components/settings/SpeedReadingSettings.tsx`, `src/components/settings/LayoutSettings.tsx`, `src/components/BugReportModal.tsx`, `src/components/ReaderView.tsx`, `src/components/settings/HelpSettings.tsx`, `src/styles/global.css` or new CSS files | All `style={{` locations in these 6 files. |
+| 6 | Athena (renderer-scope) | **Split global.css into domain files.** Break global.css (5,220 lines) into 8 domain files: (a) `base.css` (lines 1-150 — variables, reset, scrollbar, buttons, badges, progress), (b) `reader.css` (lines 296-742 — reader view, highlights, definitions, ruler, pause), (c) `library.css` (lines 744-1062 + 1235-1289 + 1910-2667 — library, cards, grid, tabs), (d) `flow.css` (lines 1486-1506 + 5162-5220 — flow mode, cross-book), (e) `themes.css` (lines 1231-1233 + 1541-1792 + 1794-1847 — light/dark/eink/blurby themes), (f) `keyboard.css` (lines 3062-3600 — keyboard UX focus rings), (g) `page-reader.css` (lines 3602-4130 + 3978-4130 — page reader + bottom bar), (h) `onboarding.css` (lines 4540-4803 + 4880-5220 — onboarding, metadata, extension, pairing, cross-book). Create `src/styles/index.css` that imports all 8 + tts-settings.css in correct order. Update `main.tsx` (or equivalent entry) to import `index.css` instead of `global.css`. | `src/styles/base.css` (new), `src/styles/reader.css` (new), `src/styles/library.css` (new), `src/styles/flow.css` (new), `src/styles/themes.css` (new), `src/styles/keyboard.css` (new), `src/styles/page-reader.css` (new), `src/styles/onboarding.css` (new), `src/styles/index.css` (new), `src/styles/global.css` (deleted or emptied) | Split all 5,220 lines across 8 files. |
+| 7 | Hermes (renderer-scope) | **Fix M-7: Add descriptive comments to 6 empty catch blocks.** In FoliatePageView.tsx, find the 6 `catch { /* */ }` blocks and add brief comments explaining why the error is intentionally swallowed (e.g., "// Foliate may throw on unmounted view — safe to ignore"). | `src/components/FoliatePageView.tsx` | Grep for `catch.*\/\*` — 6 locations. |
+| 8 | Hippocrates | **Tests** — ≥15 new tests: (a) foliateHelpers.ts functions produce identical output to pre-extraction (extractWordsFromView, wrapWordsInSpans, footnote detection), (b) foliateStyles.ts injectStyles applies all expected CSS properties, (c) TTSSettings renders with all sub-components composed, (d) KokoroStatusSection renders model status correctly, (e) PauseSettingsSection renders all pause sliders, (f) PronunciationOverridesEditor renders override table, (g) CSS domain files load without errors (no broken imports), (h) index.css imports all domain files in correct order, (i) inline style count in codebase < 30 (down from 179), (j) FoliatePageView imports from foliateHelpers (not inline), (k) build produces CSS with all domain styles merged. | `tests/componentStyleCleanup.test.ts` (new) | ≥15 tests. |
+| 9 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. Verify CSS is correctly bundled (no missing styles in build output). | — | — |
+| 10 | Solon | **Spec compliance** — verify all 18 SUCCESS CRITERIA items met. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md, ROADMAP.md, SPRINT_QUEUE.md, LESSONS_LEARNED.md, TECHNICAL_REFERENCE.md (update file structure). Pre-composed diffs preferred. | All governing docs | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/refactor-1b-style-cleanup` |
+
+### Execution Sequence
+
+```
+Wave A (implement):
+  Task 1 (foliateHelpers extraction)   ─┐
+  Task 2 (foliateStyles extraction)    ─┤ parallel — different line ranges of same file
+  Task 7 (empty catch comments)        ─┘
+      ↓
+  Task 3 (TTSSettings sub-components)    ← after FoliatePageView done (avoid merge conflicts)
+  Task 4 (TTSSettings inline → CSS)      ← after sub-components extracted
+      ↓
+  Task 5 (other component inline → CSS)  ← after TTSSettings pattern established
+  Task 6 (global.css split)              ← after all CSS migrations done (clean split)
+      ↓
+  Task 8 (tests)
+  Task 9 (npm test + build)
+
+Wave B (verify + docs):
+  Task 10 (Solon spec compliance)
+  Task 11 (Herodotus docs)
+  Task 12 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. FoliatePageView.tsx reduced to <1,750 lines (from 1,947) — helpers and styles extracted
+2. `src/utils/foliateHelpers.ts` exists with all word extraction + footnote detection functions (~185 lines)
+3. `src/utils/foliateStyles.ts` exists with `injectStyles()` function (~40 lines)
+4. TTSSettings.tsx reduced to <350 lines (from 874) — 3 sub-components extracted
+5. `KokoroStatusSection.tsx`, `PauseSettingsSection.tsx`, `PronunciationOverridesEditor.tsx` exist in `src/components/settings/`
+6. Inline style count across entire `src/components/` directory < 30 (from 179)
+7. TTSSettings has 0 inline styles (from 66)
+8. `src/styles/tts-settings.css` exists with all TTSSettings styles as CSS classes
+9. `global.css` is replaced by 8 domain-specific CSS files imported via `src/styles/index.css`
+10. No missing styles in built application — all visual elements render identically to pre-refactoring
+11. CSS specificity order preserved (import order in index.css matches original declaration order in global.css)
+12. All 6 empty catch blocks in FoliatePageView have descriptive comments
+13. ≥15 new tests in `tests/componentStyleCleanup.test.ts`
+14. `npm test` passes, `npm run build` succeeds
+15. No files accidentally truncated (git diff --stat check)
+16. Build output CSS is correctly bundled (single or chunked CSS, no missing imports)
+17. All reading modes render identically (page, focus, flow, narration) — no visual regressions
+18. Theme switching (light/dark/eink/blurby) works correctly with split CSS files
+
+**Tier:** Full | **Depends on:** REFACTOR-1A (ReaderContainer must be decomposed first — avoids merge conflicts in shared files). Investigation gate cleared.
+
+---
+
+## TEST-COV-1: Critical Path Test Coverage + Security Hardening
+
+**Goal:** Add test coverage for the most critical untested paths in the codebase (auth, cloud sync, foliateWordOffsets, ErrorBoundary, queue utilities) and harden URL validation against dangerous schemes. Addresses audit findings H-4, H-5, H-6 (partial), M-5, and M-6.
+
+**Problem:** (1) Auth module (424 lines) and cloud storage modules (478 + 431 lines) have zero tests — these are the most complex untested paths handling token refresh, OAuth flows, retry logic, and conditional writes. (2) foliateWordOffsets.ts (104 lines) has no dedicated tests despite being critical to narration cursor accuracy. (3) ErrorBoundary.tsx and queue.ts have no tests. (4) `addDocFromUrl` IPC handler accepts unvalidated URLs — file://, javascript:, and data: schemes pass through to fetch without rejection.
+
+**Investigation gate:** Cleared. Cowork investigation mapped all exported functions, critical paths, edge cases, and the exact security gap (misc.js line 159 — no scheme validation before fetch).
+
+### Baseline
+
+- `main/auth.js` — 424 lines, 6 exports, 0 tests. Token refresh (lines 186-216, 273-297), PKCE (lines 301-349), encryption (lines 75-111).
+- `main/cloud-google.js` — 478 lines. `withRetry()` (line 15), `driveFetch()` (line 42), `getFileId()` (line 72), `readFile()` (line 110), `writeFileConditional()` (line >150).
+- `main/cloud-onedrive.js` — 431 lines. `withRetry()` (line 15), `graphFetch()` (line 45), `readFile()` (line 72), `writeFileConditional()` (line 104, 412 conflict detection at line 127).
+- `src/utils/foliateWordOffsets.ts` — 104 lines, 3 exports: `getSectionGlobalOffset` (line 30), `resolveRenderedWordIndexToGlobal` (line 47), `resolveGlobalWordIndexToRendered` (line 84).
+- `src/components/ErrorBoundary.tsx` — 54 lines. Class component with getDerivedStateFromError + componentDidCatch.
+- `src/utils/queue.ts` — 56 lines, 3 exports: `bubbleCount` (line 10), `sortReadingQueue` (line 14), `getNextQueuedBook` (line 43).
+- `main/ipc/misc.js` — `addDocFromUrl` handler at line 152. First URL use at line 159 (`getSiteKey(url)`) with no scheme validation. `open-url-in-browser` (line 291) correctly validates http/https at line 295-296.
+- Existing sync test coverage: `sync-hardening.test.js` (merge logic), `sync-queue.test.js` (operation queue) — auth/cloud mocked, not tested.
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for auth, cloud, security entries
+3. `ROADMAP.md` — this section
+4. `main/auth.js` — full read (424 lines)
+5. `main/cloud-google.js` — focus on `withRetry()` (line 15), `writeFileConditional()` (line >150)
+6. `main/cloud-onedrive.js` — focus on `withRetry()` (line 15), `writeFileConditional()` (line 104)
+7. `main/cloud-storage.js` — factory pattern (30 lines)
+8. `src/utils/foliateWordOffsets.ts` — full read (104 lines)
+9. `src/components/ErrorBoundary.tsx` — full read (54 lines)
+10. `src/utils/queue.ts` — full read (56 lines)
+11. `main/ipc/misc.js` — `addDocFromUrl` (line 152), `siteLogin` (line 340), `open-url-in-browser` (line 291)
+12. `tests/sync-hardening.test.js` — understand existing mock patterns for auth/cloud
+13. `main/url-extractor.js` — check if siteLogin path validates URLs
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (electron-scope) | **Fix M-6: Add URL scheme validation to `addDocFromUrl`.** Before line 159, validate that the URL scheme is http or https. Reject file://, javascript:, data:, and other non-http schemes with a descriptive error. Apply the same pattern used in `open-url-in-browser` (line 295-296). Also check `siteLogin` handler (line 340) — add validation if missing. | `main/ipc/misc.js` | Line 152-159 area: add scheme check before `getSiteKey(url)`. Line 340 area: add scheme check before `openSiteLogin(url, ...)`. ~10 lines each. |
+| 2 | Hephaestus (electron-scope) | **Write auth.js tests.** Test the 6 exported functions via mocked dependencies. Mock `@azure/msal-node`, `googleapis`, `electron.safeStorage`, `fs.promises`. Cover: (a) `initAuth` restores state from encrypted file, (b) `initAuth` handles missing/corrupted token file, (c) `signIn` routes to correct provider, (d) `signOut` clears tokens and state, (e) `getAccessToken` returns cached token when valid, (f) `getAccessToken` refreshes expired token (Microsoft silent acquire), (g) `getAccessToken` refreshes expired token (Google rotation), (h) `getAccessToken` fires authRequired callback on refresh failure, (i) `getAuthState` returns provider/email/name, (j) token encryption/decryption roundtrip. | `tests/auth.test.js` (new) | ≥10 tests. Mock external deps at module level. |
+| 3 | Hephaestus (electron-scope) | **Write cloud-google.js tests.** Mock `driveFetch` internals. Cover: (a) `withRetry` retries on 429/503/504, (b) `withRetry` refreshes token on 401 then retries, (c) `withRetry` throws immediately on non-retryable 4xx, (d) `withRetry` respects max retry count, (e) `readFile` returns buffer, (f) `writeFile` routes to large upload above threshold, (g) `writeFileConditional` includes generation header, (h) `getFileId` caches result for same filename. | `tests/cloudGoogle.test.js` (new) | ≥8 tests. |
+| 4 | Hephaestus (electron-scope) | **Write cloud-onedrive.js tests.** Mock `graphFetch` internals. Cover: (a) `withRetry` retries on 429/503/504, (b) `withRetry` refreshes token on 401, (c) `readFile` fetches from approot, (d) `writeFile` routes to large upload above threshold, (e) `writeFileConditional` sets If-Match header when etag provided, (f) `writeFileConditional` returns `{ ok: false, conflict: true }` on 412, (g) `writeFileConditional` falls back to unconditional for large files. | `tests/cloudOnedrive.test.js` (new) | ≥7 tests. |
+| 5 | Hephaestus (renderer-scope) | **Write foliateWordOffsets.ts tests.** Cover: (a) `getSectionGlobalOffset` returns correct offset with bookWordSections, (b) `getSectionGlobalOffset` falls back when bookWordSections missing, (c) `resolveRenderedWordIndexToGlobal` maps local→global correctly, (d) `resolveRenderedWordIndexToGlobal` falls back without bookWordSections, (e) `resolveGlobalWordIndexToRendered` maps global→local correctly, (f) boundary: empty loadedWords array, (g) boundary: sectionIndex beyond range, (h) boundary: renderedWordIndex at section boundary, (i) off-by-one: first word of section, (j) off-by-one: last word of section. | `tests/foliateWordOffsets.test.ts` (new) | ≥10 tests. Import functions directly. |
+| 6 | Hephaestus (renderer-scope) | **Write ErrorBoundary.tsx tests.** Cover: (a) renders children when no error, (b) catches child error and shows error UI, (c) calls componentDidCatch with error info, (d) calls window.electronAPI.logError if available, (e) handles missing window.electronAPI gracefully, (f) reset button clears error and re-renders children, (g) fires onReset callback on reset. | `tests/errorBoundary.test.tsx` (new) | ≥7 tests. Render with React Testing Library. |
+| 7 | Hephaestus (renderer-scope) | **Write queue.ts tests.** Cover: (a) `bubbleCount` returns floor(percent/10), (b) `sortReadingQueue` filters completed docs, (c) `sortReadingQueue` sorts queued by queuePosition, (d) `sortReadingQueue` sorts inProgress by lastReadAt desc, (e) `getNextQueuedBook` returns next in queue excluding current, (f) `getNextQueuedBook` returns null when queue empty, (g) `getNextQueuedBook` skips completed books, (h) boundary: empty docs array, (i) boundary: null queuePosition values, (j) boundary: all docs completed. | `tests/queue.test.ts` (new) | ≥10 tests. |
+| 8 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+| 9 | Solon | **Spec compliance** — verify all 16 SUCCESS CRITERIA items met. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, test counts, security note), ROADMAP.md (mark TEST-COV-1 complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (URL validation pattern), BUG_REPORT.md (if M-6 warrants a bug entry). Pre-composed diffs preferred. | All governing docs | — |
+| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/test-cov-1-critical-paths` |
+
+### Execution Sequence
+
+```
+Wave A (implement + test):
+  Task 1 (URL scheme validation)        ← security fix first
+      ↓
+  Task 2 (auth tests)                  ─┐
+  Task 3 (cloud-google tests)          ─┤
+  Task 4 (cloud-onedrive tests)        ─┤ parallel — all independent test files
+  Task 5 (foliateWordOffsets tests)    ─┤
+  Task 6 (ErrorBoundary tests)         ─┤
+  Task 7 (queue tests)                 ─┘
+      ↓
+  Task 8 (npm test + build)
+
+Wave B (verify + docs):
+  Task 9 (Solon spec compliance)
+  Task 10 (Herodotus docs)
+  Task 11 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. `addDocFromUrl` rejects file://, javascript:, data:, and other non-http(s) schemes with descriptive error
+2. `siteLogin` validates URL scheme before processing (http/https only)
+3. ≥10 auth.js tests covering all 6 exported functions + token refresh + encryption
+4. ≥8 cloud-google.js tests covering retry logic + conditional writes + file ID caching
+5. ≥7 cloud-onedrive.js tests covering retry logic + 412 conflict + If-Match header
+6. ≥10 foliateWordOffsets.ts tests covering all 3 exports + boundary conditions + off-by-one
+7. ≥7 ErrorBoundary.tsx tests covering error catching + reset + logging
+8. ≥10 queue.ts tests covering all 3 exports + edge cases
+9. Total new test count ≥52 across 6 new test files
+10. All existing tests pass (no regressions)
+11. `npm test` passes, `npm run build` succeeds
+12. Auth mock patterns are reusable for future cloud/sync tests
+13. URL scheme validation follows same pattern as `open-url-in-browser` (consistency)
+14. No files accidentally truncated (git diff --stat check)
+15. Test files follow existing project test patterns (vitest, describe/it blocks)
+16. Security fix is backward-compatible — valid http/https URLs continue to work
+
+**Tier:** Full | **Depends on:** None — all targets are independent modules with no shared state. Can run in parallel with REFACTOR-1A/1B. Investigation gate cleared.
 
 ---
 

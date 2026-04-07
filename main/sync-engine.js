@@ -1108,6 +1108,18 @@ async function forceSync(direction) {
   }
 }
 
+/**
+ * Clear all fileHashes entries associated with a document.
+ * Removes entries matching: doc:{docId}:contentHash, documents/{docId}.json, and any :{docId}:cloudHash
+ */
+function clearDocHashes(docId) {
+  for (const key of Object.keys(syncState.fileHashes)) {
+    if (key.includes(docId)) {
+      delete syncState.fileHashes[key];
+    }
+  }
+}
+
 module.exports = {
   startSync,
   stopAutoSync,
@@ -1120,6 +1132,7 @@ module.exports = {
   downloadDocContent,
   fullReconciliation,
   applyTombstone,
+  clearDocHashes,
   // Export merge functions for tests
   mergeLibrary,
   mergeSettings,
