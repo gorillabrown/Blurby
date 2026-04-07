@@ -34,7 +34,7 @@ import { FlowScrollEngine } from "../src/utils/FlowScrollEngine";
 
 // ── CSS helpers ───────────────────────────────────────────────────────────────
 
-const CSS_PATH = path.resolve(__dirname, "../src/styles/global.css");
+const CSS_PATH = path.resolve(__dirname, "../src/styles/flow.css");
 
 /**
  * Extract the rule block for a given CSS selector from the stylesheet.

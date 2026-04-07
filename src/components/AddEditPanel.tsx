@@ -38,8 +38,8 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
       />
       {metaMode ? (
         <>
-          <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-            <div style={{ flex: 1 }}>
+          <div className="add-edit-name-row">
+            <div className="add-edit-name-col">
               <label className="add-edit-label">Last Name</label>
               <input
                 placeholder="Last name"
@@ -49,7 +49,7 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
                 aria-label="Author last name"
               />
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="add-edit-name-col">
               <label className="add-edit-label">First Name</label>
               <input
                 placeholder="First name"
@@ -63,7 +63,7 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
         </>
       ) : (
         <>
-          <label className="add-edit-label" style={{ marginTop: 8 }}>Content</label>
+          <label className="add-edit-label add-edit-label--mt">Content</label>
           <textarea
             placeholder="Paste your reading material here..."
             value={newText}

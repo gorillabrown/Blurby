@@ -268,8 +268,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
       ref={containerRef}
       tabIndex={0}
       id="main-content"
-      className="reader-container"
-      style={{ paddingTop: isMac ? 36 : 16 }}
+      className={`reader-container ${isMac ? "reader-container--mac" : ""}`}
       onClick={playing ? togglePlay : undefined}
       onKeyDown={(e) => {
         if (e.key === "Tab") { e.preventDefault(); e.stopPropagation(); onToggleFlap?.(); }
@@ -292,13 +291,12 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
 
       {/* Top bar — hidden during e-ink playback to reduce refreshes */}
       <div
-        className={`reader-top-bar${settings?.isEink && playing ? " eink-toolbar-hidden" : ""}`}
-        style={{ paddingTop: isMac ? 36 : 16, opacity: playing && !settings?.isEink ? 0.12 : settings?.isEink ? 1 : 0.55 }}
+        className={`reader-top-bar${settings?.isEink && playing ? " eink-toolbar-hidden" : ""}${isMac ? " reader-top-bar--mac" : ""}${playing && !settings?.isEink ? " reader-top-bar--playing" : settings?.isEink ? " reader-top-bar--eink" : " reader-top-bar--paused"}`}
       >
         <div className="reader-top-left">
           {onToggleFlap && (
             <button className="hamburger-btn" onClick={(e) => { e.stopPropagation(); onToggleFlap(); }} aria-label="Open menu" title="Menu (Tab)">
-              <img src={blurbyIcon} alt="" width="48" height="48" style={{ borderRadius: 8, display: "block" }} aria-hidden="true" />
+              <img src={blurbyIcon} alt="" width="48" height="48" className="reader-hamburger-icon" aria-hidden="true" />
             </button>
           )}
           <button
@@ -335,9 +333,9 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
           const orpPercent = currentWord.length > 0 ? ((pivotIndex + 0.5) / currentWord.length) * 100 : 50;
           const useFocusSpan = settings?.focusSpan != null && settings.focusSpan < 1;
           return (
-            <div className="reader-word-area" style={{ transform: `scale(${scale})` }}>
+            <div className="reader-word-area" style={{ '--word-area-scale': scale } as React.CSSProperties}>
               <div className="reader-guide-line reader-guide-top" aria-hidden="true">
-                {settings?.focusMarks && <span ref={focusMarkTopRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25BC;</span>}
+                {settings?.focusMarks && <span ref={focusMarkTopRef} className="focus-mark" style={{ '--focus-mark-left': `${orpPercent}%` } as React.CSSProperties}>&#x25BC;</span>}
               </div>
               <div ref={wordDisplayRef} className="reader-word-display reader-word-layer" aria-live="off" aria-atomic="true">
                 {useFocusSpan ? (
@@ -355,7 +353,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
                 )}
               </div>
               <div className="reader-guide-line reader-guide-bottom" aria-hidden="true">
-                {settings?.focusMarks && <span ref={focusMarkBottomRef} className="focus-mark" style={{ left: `${orpPercent}%` }}>&#x25B2;</span>}
+                {settings?.focusMarks && <span ref={focusMarkBottomRef} className="focus-mark" style={{ '--focus-mark-left': `${orpPercent}%` } as React.CSSProperties}>&#x25B2;</span>}
               </div>
             </div>
           );

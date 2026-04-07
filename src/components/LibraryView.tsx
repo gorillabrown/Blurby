@@ -344,7 +344,7 @@ export default function LibraryView({
 
   return (
     <div className="library-container" id="main-content" role="main" aria-label="Library">
-      <div className="library-titlebar" style={{ height: isMac ? 48 : 32 }} />
+      <div className={`library-titlebar ${isMac ? "library-titlebar--mac" : "library-titlebar--win"}`} />
 
       {loadingContent && (
         <div className="library-loading" role="status">
@@ -366,7 +366,7 @@ export default function LibraryView({
       {updateReady && (
         <div className="update-banner" role="alert">
           <span>Blurby {updateReady} ready to install</span>
-          <button onClick={() => api.installUpdate()} className="btn-fill" style={{ padding: "4px 12px", fontSize: 10 }}>restart</button>
+          <button onClick={() => api.installUpdate()} className="btn-fill update-banner-restart-btn">restart</button>
         </div>
       )}
 
@@ -374,9 +374,9 @@ export default function LibraryView({
         {/* Sticky top section: header + filter tabs + divider line */}
         <div className="library-sticky-top">
         <div className="library-header">
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <button className="hamburger-btn" onClick={handleToggleFlapWithSeen} aria-label="Open menu" title="Menu (Tab)" style={{ marginTop: 6 }}>
-              <img src={blurbyIcon} alt="" width="48" height="48" style={{ borderRadius: 8, display: "block" }} aria-hidden="true" />
+          <div className="library-header-left">
+            <button className="hamburger-btn library-hamburger-btn" onClick={handleToggleFlapWithSeen} aria-label="Open menu" title="Menu (Tab)">
+              <img src={blurbyIcon} alt="" width="48" height="48" className="library-hamburger-icon" aria-hidden="true" />
             </button>
             <div>
               {editFolder ? (
@@ -436,13 +436,13 @@ export default function LibraryView({
               )}
             </button>
             <button onClick={() => setShowStats(!showStats)} className="btn" title="Reading stats" aria-label="Show reading statistics" aria-expanded={showStats}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: -1 }} aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="library-stats-icon" aria-hidden="true">
                 <path d="M18 20V10" /><path d="M12 20V4" /><path d="M6 20v-6" />
               </svg>
             </button>
-            <div style={{ position: "relative" }}>
+            <div className="library-folder-btn-wrap">
               <button onClick={() => setShowRecent(!showRecent)} className="btn" aria-label="Select folder" aria-expanded={showRecent}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }} aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="library-icon-btn-svg" aria-hidden="true">
                   <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                 </svg>
                 folder
@@ -467,7 +467,7 @@ export default function LibraryView({
               {rescanning ? "..." : "⟳"}
             </button>
             <button onClick={() => { setShowUrl(true); setUrlInput(""); setUrlError(""); }} className="btn" aria-label="Add from URL">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6, verticalAlign: -1 }} aria-hidden="true">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="library-icon-btn-svg" aria-hidden="true">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                 <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
               </svg>
@@ -606,8 +606,8 @@ export default function LibraryView({
               <button
                 onClick={handleAddFromUrl}
                 disabled={!urlInput.trim() || loadingContent}
-                className="btn-fill"
-                style={{ opacity: urlInput.trim() && !loadingContent ? 1 : 0.3, whiteSpace: "nowrap" }}
+                className="btn-fill url-fetch-btn"
+                style={{ '--url-fetch-opacity': urlInput.trim() && !loadingContent ? 1 : 0.3 } as React.CSSProperties}
               >{loadingContent ? "fetching..." : "fetch"}</button>
               <button onClick={() => { setShowUrl(false); setUrlError(""); }} className="btn">cancel</button>
             </div>
@@ -632,15 +632,15 @@ export default function LibraryView({
           <div className="library-empty">
             {tab === "all" && (
               <>
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" style={{ opacity: 0.2, marginBottom: 16 }} aria-hidden="true">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="library-empty-icon" aria-hidden="true">
                   <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
-                <p style={{ fontSize: 16, marginBottom: 6 }}>Your library is empty</p>
-                <p style={{ fontSize: 13 }}>Pick a source folder, drop files, or add text manually</p>
+                <p className="library-empty-title">Your library is empty</p>
+                <p className="library-empty-subtitle">Pick a source folder, drop files, or add text manually</p>
               </>
             )}
-            {tab === "favorites" && <p style={{ fontSize: 14, color: "var(--text-dim)" }}>No favorites yet — star documents to see them here</p>}
-            {tab === "archived" && <p style={{ fontSize: 14, color: "var(--text-dim)" }}>No archived documents — completed readings auto-archive here</p>}
+            {tab === "favorites" && <p className="library-empty-hint">No favorites yet — star documents to see them here</p>}
+            {tab === "archived" && <p className="library-empty-hint">No archived documents — completed readings auto-archive here</p>}
           </div>
         )}
 
@@ -666,7 +666,7 @@ export default function LibraryView({
             )}
             {notStarted.length > 0 && (
               <>
-                <div className="library-section-label" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div className="library-section-label library-section-label--flex">
                   <span>Not Started</span>
                   {notStarted.length > 1 && (
                     <select
@@ -726,7 +726,7 @@ export default function LibraryView({
             )}
             {notStarted.length > 0 && (
               <>
-                <div className="library-section-label" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div className="library-section-label library-section-label--flex">
                   <span>Not Started</span>
                   {notStarted.length > 1 && (
                     <select

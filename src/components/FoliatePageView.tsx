@@ -11,7 +11,7 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
-import { segmentWordSpans, type SegmentedWordSpan } from "../utils/segmentWords";
+import { segmentWordSpans } from "../utils/segmentWords";
 import {
   getSectionGlobalOffset,
   resolveGlobalWordIndexToRendered,
@@ -19,202 +19,24 @@ import {
 } from "../utils/foliateWordOffsets";
 import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX, NARRATION_BAND_MIN_WIDTH_PX, FLOW_READING_ZONE_POSITION, FLOW_ZONE_LINES_DEFAULT } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
+import { injectStyles } from "../utils/foliateStyles";
+import {
+  BLOCK_TAGS,
+  hasToken,
+  isFootnoteRefElement,
+  isFootnoteBodyElement,
+  isSuppressedNarrationTextNode,
+  getBlockParent,
+  collectBlockTextNodes,
+  locateTextOffset,
+  buildWordsFromTextNodes,
+  buildWrappedFragmentForNode,
+  extractWordsFromView,
+  extractWordsFromSection,
+} from "../utils/foliateHelpers";
+export type { FoliateWord } from "../utils/foliateHelpers";
 
 const api = window.electronAPI;
-
-/** Word entry with optional Range — Range is null when the section is unloaded. */
-export interface FoliateWord {
-  word: string;
-  range: Range | null;
-  sectionIndex: number;
-}
-
-/** Extract all words from a foliate view's currently loaded sections.
- *  Returns word strings and their DOM Ranges for highlighting. */
-const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
-
-function hasToken(value: string | null | undefined, token: string): boolean {
-  return String(value || "").toLowerCase().split(/\s+/).includes(token.toLowerCase());
-}
-
-function isFootnoteRefElement(el: Element | null): boolean {
-  if (!el) return false;
-  const tag = el.tagName.toLowerCase();
-  const href = el.getAttribute("href") || "";
-  const epubType = el.getAttribute("epub:type") || "";
-  const role = el.getAttribute("role") || "";
-  const cls = `${el.getAttribute("class") || ""} ${el.id || ""}`.toLowerCase();
-
-  if (hasToken(epubType, "noteref") || hasToken(role, "doc-noteref")) return true;
-  if (tag === "a" && href.startsWith("#") && /note|footnote|endnote|fn|ref/.test(cls)) return true;
-  if (tag === "a" && href.startsWith("#") && el.parentElement?.tagName.toLowerCase() === "sup") return true;
-  if (tag === "sup" && /note|footnote|endnote|fn|ref/.test(cls)) return true;
-  return false;
-}
-
-function isFootnoteBodyElement(el: Element | null): boolean {
-  if (!el) return false;
-  const tag = el.tagName.toLowerCase();
-  const epubType = el.getAttribute("epub:type") || "";
-  const role = el.getAttribute("role") || "";
-  const cls = `${el.getAttribute("class") || ""} ${el.id || ""}`.toLowerCase();
-
-  if (hasToken(epubType, "footnote") || hasToken(epubType, "endnote") || hasToken(role, "doc-footnote") || hasToken(role, "doc-endnote")) {
-    return true;
-  }
-  if ((tag === "aside" || tag === "section" || tag === "li" || tag === "div" || tag === "p") && /footnote|endnote|notes?\b|fn\d+/.test(cls)) {
-    return true;
-  }
-  return false;
-}
-
-function isSuppressedNarrationTextNode(node: Node): boolean {
-  let el = node.parentElement;
-  while (el) {
-    if (isFootnoteRefElement(el) || isFootnoteBodyElement(el)) return true;
-    el = el.parentElement;
-  }
-  return false;
-}
-
-function getBlockParent(node: Node): Element | null {
-  let el = node.parentElement;
-  while (el && !BLOCK_TAGS.has(el.tagName)) el = el.parentElement;
-  return el;
-}
-
-function collectBlockTextNodes(root: ParentNode): Array<{ block: Element; nodes: Text[] }> {
-  const groups = new Map<Element, Text[]>();
-  const order: Element[] = [];
-      const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node: Node) => {
-      const parent = node.parentElement;
-      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
-      if (!node.textContent) return NodeFilter.FILTER_REJECT;
-      if (isSuppressedNarrationTextNode(node)) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-  if (!walker) return [];
-
-  let node: Text | null;
-  while ((node = walker.nextNode() as Text | null)) {
-    const block = getBlockParent(node) || (root instanceof Element ? root : root.ownerDocument?.body);
-    if (!block) continue;
-    if (!groups.has(block)) {
-      groups.set(block, []);
-      order.push(block);
-    }
-    groups.get(block)!.push(node);
-  }
-
-  return order.map((block) => ({ block, nodes: groups.get(block) || [] }));
-}
-
-function locateTextOffset(nodes: Text[], absoluteOffset: number): { node: Text; offset: number } | null {
-  let cursor = 0;
-  for (const node of nodes) {
-    const text = node.textContent || "";
-    const next = cursor + text.length;
-    if (absoluteOffset < next) {
-      return { node, offset: absoluteOffset - cursor };
-    }
-    if (absoluteOffset === next) {
-      return { node, offset: text.length };
-    }
-    cursor = next;
-  }
-  const last = nodes[nodes.length - 1];
-  if (!last) return null;
-  return { node: last, offset: (last.textContent || "").length };
-}
-
-function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number): FoliateWord[] {
-  if (nodes.length === 0) return [];
-  const combined = nodes.map((node) => node.textContent || "").join("");
-  const wordSpans = segmentWordSpans(combined);
-  const words: FoliateWord[] = [];
-
-  for (const { word, start, end } of wordSpans) {
-    const startPos = locateTextOffset(nodes, start);
-    const endPos = locateTextOffset(nodes, end);
-    if (!startPos || !endPos) continue;
-    const doc = startPos.node.ownerDocument;
-    const range = doc.createRange();
-    range.setStart(startPos.node, startPos.offset);
-    range.setEnd(endPos.node, endPos.offset);
-    words.push({ word, range, sectionIndex });
-  }
-
-  return words;
-}
-
-function buildWrappedFragmentForNode(
-  doc: Document,
-  text: string,
-  nodeStart: number,
-  wordSpans: Array<SegmentedWordSpan & { globalIndex: number }>,
-): DocumentFragment | null {
-  const nodeEnd = nodeStart + text.length;
-  const overlaps = wordSpans.filter((span) => span.end > nodeStart && span.start < nodeEnd);
-  if (overlaps.length === 0) return null;
-
-  const frag = doc.createDocumentFragment();
-  let cursor = nodeStart;
-  for (const span of overlaps) {
-    const overlapStart = Math.max(nodeStart, span.start);
-    const overlapEnd = Math.min(nodeEnd, span.end);
-    if (overlapStart > cursor) {
-      frag.appendChild(doc.createTextNode(text.slice(cursor - nodeStart, overlapStart - nodeStart)));
-    }
-
-    const wrappedText = text.slice(overlapStart - nodeStart, overlapEnd - nodeStart);
-    const el = doc.createElement("span");
-    el.className = "page-word";
-    el.setAttribute("data-word-index", String(span.globalIndex));
-    el.setAttribute("data-word-full", span.word);
-    el.textContent = wrappedText;
-    frag.appendChild(el);
-
-    cursor = overlapEnd;
-  }
-
-  if (cursor < nodeEnd) {
-    frag.appendChild(doc.createTextNode(text.slice(cursor - nodeStart)));
-  }
-  return frag;
-}
-
-function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreaks: Set<number> } {
-  const words: FoliateWord[] = [];
-  const paragraphBreaks = new Set<number>();
-  if (!view?.renderer?.getContents) return { words, paragraphBreaks };
-
-  for (const { doc, index } of view.renderer.getContents()) {
-    if (!doc?.body) continue;
-
-    const blockGroups = collectBlockTextNodes(doc.body);
-    for (const { nodes } of blockGroups) {
-      const blockWords = buildWordsFromTextNodes(nodes, index);
-      if (blockWords.length === 0) continue;
-      words.push(...blockWords);
-      paragraphBreaks.add(words.length - 1);
-    }
-  }
-  return { words, paragraphBreaks };
-}
-
-/** Extract words from a single section's document (for incremental updates during narration) */
-function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWord[] {
-  const words: FoliateWord[] = [];
-  if (!doc?.body) return words;
-  const groups = collectBlockTextNodes(doc.body);
-  for (const { nodes } of groups) {
-    words.push(...buildWordsFromTextNodes(nodes, sectionIndex));
-  }
-  return words;
-}
-
 
 /** Remove all .page-word wrapper spans and restore their text as plain text nodes.
  *  Used by HOTFIX-10 to re-stamp sections with corrected global indices. */
@@ -679,7 +501,7 @@ export default function FoliatePageView({
               foundDoc = d;
               break;
             }
-          } catch { /* */ }
+          } catch { /* Detached or partial document — skip and continue search */ }
         }
 
         if (!foundDoc) {
@@ -1407,7 +1229,7 @@ export default function FoliatePageView({
                     rect.left >= 0 && rect.left < iframeWin.innerWidth &&
                     rect.top >= 0 && rect.top < iframeWin.innerHeight);
                   return { found: true, visible, span, doc: d };
-                } catch { /* */ }
+                } catch { /* Word may be in detached section — try next content source */ }
               }
               const liveSections = bookWordSectionsRef.current;
               if (liveSections && liveSections.length > 0) {
@@ -1430,7 +1252,7 @@ export default function FoliatePageView({
                         rect.left >= 0 && rect.left < iframeWin.innerWidth &&
                         rect.top >= 0 && rect.top < iframeWin.innerHeight);
                       return { found: true, visible, span, doc: d };
-                    } catch { /* */ }
+                    } catch { /* Rendered word index may not exist in this section — try next */ }
                   }
                 }
               }
@@ -1485,7 +1307,7 @@ export default function FoliatePageView({
                       }
                     }
                   }
-                } catch { /* safe to ignore */ }
+                } catch { /* Section may be unloading — skip to next content source */ }
               }
               return -1; // No visible words (e.g., cover page with only images)
             },
@@ -1505,7 +1327,7 @@ export default function FoliatePageView({
                     const range = state.doc.createRange();
                     range.selectNodeContents(state.span);
                     view.renderer.scrollToAnchor?.(range);
-                  } catch { /* */ }
+                  } catch { /* Document may be closing during navigation — non-critical */ }
                 }
                 if (import.meta.env.DEV) console.debug("[foliate] returnToNarration — cursor restored at word", currentIdx, "visible:", state.visible);
               } else {
@@ -1767,7 +1589,7 @@ export default function FoliatePageView({
             }
             break;
           }
-        } catch { /* */ }
+        } catch { /* Content may have been unloaded during flow — skip iteration */ }
       }
       if (!found) cursor.style.display = "none";
       flowRafRef.current = requestAnimationFrame(tick);
@@ -1866,7 +1688,7 @@ export default function FoliatePageView({
   const goToFraction = useCallback((frac: number) => viewRef.current?.goToFraction(frac), []);
 
   return (
-    <div className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}`} ref={containerRef} style={{ flex: 1, overflow: flowMode ? "auto" : "hidden", position: "relative" }}>
+    <div className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}`} ref={containerRef} style={{ overflow: flowMode ? "auto" : "hidden" }}>
       {/* Page turn buttons — hidden in Flow Mode (no pagination) */}
       {!flowMode && (
         <>
@@ -1874,13 +1696,11 @@ export default function FoliatePageView({
             className="page-nav-btn page-nav-btn--left"
             onClick={goPrev}
             aria-label="Previous page"
-            style={{ zIndex: 10 }}
           >&#x2039;</button>
           <button
             className="page-nav-btn page-nav-btn--right"
             onClick={goNext}
             aria-label="Next page"
-            style={{ zIndex: 10 }}
           >&#x203A;</button>
         </>
       )}
@@ -1889,59 +1709,16 @@ export default function FoliatePageView({
         <button
           className="return-to-narration-btn"
           onClick={onJumpToHighlight}
-          style={{ zIndex: 20 }}
         >
           ↩ Jump to reading position
         </button>
       )}
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
-      <div ref={cursorRef} className="foliate-flow-cursor" style={{ display: "none" }} />
-      <div ref={highlightRef} className="foliate-narration-highlight" style={{ display: "none" }} />
+      <div ref={cursorRef} className="foliate-flow-cursor" />
+      <div ref={highlightRef} className="foliate-narration-highlight" />
       {/* FLOW-3A: Shrinking underline cursor for FlowScrollEngine (rendered in JSX per LL-014 known trap) */}
-      {flowMode && <div ref={flowCursorRef} className="flow-shrink-cursor" style={{ display: "none" }} />}
+      {flowMode && <div ref={flowCursorRef} className="flow-shrink-cursor" />}
     </div>
   );
-}
-
-/** Inject Blurby theme CSS into an EPUB document (inside the foliate iframe). */
-function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: number) {
-  if (!doc?.head) return;
-
-  const existing = doc.getElementById("blurby-theme");
-  if (existing) existing.remove();
-
-  const scale = (focusTextSize || 100) / 100;
-  const fontSize = Math.round(FOLIATE_BASE_FONT_SIZE_PX * scale);
-  const lineHeight = settings.layoutSpacing?.line || 1.8;
-  const fontFamily = settings.fontFamily || "Georgia, serif";
-
-  // Get computed CSS custom properties from the main document (single call to avoid layout thrashing)
-  const rootStyles = getComputedStyle(document.documentElement);
-  const bg = rootStyles.getPropertyValue("--bg").trim() || "#1a1a1a";
-  const fg = rootStyles.getPropertyValue("--text").trim() || "#e0e0e0";
-  const accent = rootStyles.getPropertyValue("--accent").trim() || "#D04716";
-
-  const style = doc.createElement("style");
-  style.id = "blurby-theme";
-  style.textContent = `
-    html, body {
-      background: ${bg} !important;
-      color: ${fg} !important;
-      font-family: ${fontFamily} !important;
-      font-size: ${fontSize}px !important;
-      line-height: ${lineHeight} !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-    ${settings.justifiedText !== false ? "p, div, li, blockquote, dd, dt, figcaption { text-align: justify !important; }" : ""}
-    a { color: ${accent} !important; }
-    img { max-width: 100%; height: auto; }
-    ::selection { background: ${accent}33; }
-    .page-word { cursor: pointer; border-radius: 4px; transition: background-color 120ms linear, box-shadow 120ms linear, color 120ms linear; }
-    .page-word:hover { background: ${accent}22; }
-    .page-word--highlighted { background: ${accent}4D; box-shadow: inset 0 -0.26em 0 ${accent}55; }
-.page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
-  `;
-  doc.head.appendChild(style);
 }

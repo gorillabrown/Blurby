@@ -241,7 +241,7 @@ export function CloudSyncSettings({ settings, onSettingsChange }: CloudSyncSetti
       </div>
 
       {/* Sync frequency */}
-      <div className="settings-section-label" style={{ marginTop: 16 }}>Sync Frequency</div>
+      <div className="settings-section-label settings-section-label--mt">Sync Frequency</div>
       <div className="cloud-sync-frequency">
         {SYNC_INTERVALS.map((opt) => (
           <label key={opt.value} className="cloud-sync-freq-option">
@@ -270,7 +270,7 @@ export function CloudSyncSettings({ settings, onSettingsChange }: CloudSyncSetti
       </div>
 
       {/* Full Reconciliation (Sprint 19F) */}
-      <div className="settings-section-label" style={{ marginTop: 16 }}>Data Integrity</div>
+      <div className="settings-section-label settings-section-label--mt">Data Integrity</div>
       <div className="cloud-sync-controls">
         <button
           className="btn"

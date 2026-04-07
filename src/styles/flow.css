@@ -1,0 +1,166 @@
+/* ── FLOW MODE ── */
+.flow-text {
+  line-height: 1.8;
+}
+.flow-word-active {
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 2px;
+  padding: 1px 3px;
+  margin: 0 -3px;
+}
+
+/* FLOW-INF-A: Reading zone mask — de-emphasizes content outside active zone */
+.foliate-page-view--flow {
+  --flow-zone-top: 20%;
+  --flow-zone-bottom: 45%;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
+/* FLOW-INF-B: Timer bar cursor for flow mode — prominent depleting bar */
+.flow-shrink-cursor {
+  position: absolute;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 2px 0 var(--accent);
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 100ms ease;
+  display: none; /* shown via JS: cursorRef.current.style.display = "block" */
+}
+
+/* Overlay cursor for EPUB Flow mode — Range-based, GPU-accelerated */
+.foliate-flow-cursor {
+  position: fixed;
+  height: 3px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 100;
+  transition: transform 0.08s linear, width 0.08s linear;
+  will-change: transform;
+  border-radius: 1px;
+  box-shadow: 0 0 4px var(--accent);
+  display: none; /* shown via JS */
+}
+/* FLOW-INF-A: Flow zone controls */
+.rbb-flow-zone-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+.rbb-flow-zone-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.rbb-flow-zone-select {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+.rbb-flow-zone-slider {
+  width: 60px;
+  accent-color: var(--accent);
+}
+.rbb-flow-zone-value {
+  min-width: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+/* FLOW-INF-B: Flow progress display */
+.rbb-flow-progress {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+.rbb-flow-progress-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Cross-Book Transition Overlay (FLOW-INF-C) ─────────────────────────── */
+.cross-book-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  animation: cross-book-fade-in 200ms ease forwards;
+}
+
+@keyframes cross-book-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cross-book-overlay__card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 400px;
+  text-align: center;
+  color: var(--text);
+}
+
+.cross-book-overlay__finished {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.cross-book-overlay__next {
+  font-size: 1.25rem;
+  margin-bottom: 20px;
+}
+
+.cross-book-overlay__progress {
+  height: 3px;
+  background: var(--surface-alt, rgba(255,255,255,0.15));
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.cross-book-overlay__bar {
+  height: 100%;
+  background: var(--accent);
+  animation: cross-book-progress 2500ms linear forwards;
+}
+
+@keyframes cross-book-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.cross-book-overlay__hint {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+

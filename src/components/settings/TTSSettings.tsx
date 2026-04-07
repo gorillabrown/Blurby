@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import type { BlurbySettings, PronunciationOverride, NarrationProfile } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, TTS_FOOTNOTE_MODE, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_PRONUNCIATION_OVERRIDES, MAX_NARRATION_PROFILES, createDefaultNarrationProfile, profileFromSettings } from "../../constants";
-import { applyPronunciationOverrides } from "../../utils/pronunciationOverrides";
+import type { BlurbySettings, PronunciationOverride } from "../../types";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
 import { exportNarrationData, validateNarrationImport, applyNarrationImport, resetNarrationData } from "../../utils/narrationPortability";
+import { KokoroStatusSection } from "./KokoroStatusSection";
+import { PauseSettingsSection } from "./PauseSettingsSection";
+import { PronunciationOverridesEditor } from "./PronunciationOverridesEditor";
+import "../../styles/tts-settings.css";
 
 const api = window.electronAPI;
 
@@ -251,13 +254,12 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     <div>
       {/* Narration Profiles (TTS-6L) */}
       <div className="settings-section-label">Narration Profile</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+      <div className="tts-profile-row">
         <select
-          className="settings-select"
+          className="settings-select tts-profile-select"
           value={activeProfileId || ""}
           onChange={(e) => handleSelectProfile(e.target.value || null)}
           aria-label="Narration profile"
-          style={{ flex: 1, padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
         >
           <option value="">No profile (flat settings)</option>
           {profiles.map(p => (
@@ -267,13 +269,13 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         {profiles.length < MAX_NARRATION_PROFILES && (
           <button
             onClick={handleCreateProfile}
-            style={{ padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 12, whiteSpace: "nowrap" }}
+            className="tts-profile-new-btn"
             aria-label="Create narration profile"
           >+ New</button>
         )}
       </div>
       {activeProfileId && profiles.find(p => p.id === activeProfileId) && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+        <div className="tts-profile-actions-row">
           {renamingId === activeProfileId ? (
             <>
               <input
@@ -282,45 +284,44 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
                 onChange={(e) => setRenameValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleRenameProfile(activeProfileId, renameValue); if (e.key === "Escape") setRenamingId(null); }}
                 autoFocus
-                style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
+                className="tts-profile-rename-input"
                 aria-label="Profile name"
               />
               <button
                 onClick={() => handleRenameProfile(activeProfileId, renameValue)}
-                style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+                className="tts-profile-action-btn"
               >Save</button>
             </>
           ) : (
             <>
               <button
                 onClick={() => { setRenamingId(activeProfileId); setRenameValue(profiles.find(p => p.id === activeProfileId)?.name || ""); }}
-                style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
+                className="tts-profile-action-btn"
                 aria-label="Rename profile"
               >Rename</button>
               <button
                 onClick={() => { if (confirm(`Delete profile "${profiles.find(p => p.id === activeProfileId)?.name}"?`)) handleDeleteProfile(activeProfileId); }}
-                style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--error, #c44)", cursor: "pointer", fontSize: 11 }}
+                className="tts-profile-action-btn tts-profile-action-btn--danger"
                 aria-label="Delete profile"
               >Delete</button>
             </>
           )}
         </div>
       )}
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+      <div className="tts-profile-hint">
         {activeProfileId ? "Changes below are saved to this profile." : "Save your voice and timing settings as a named profile for quick switching."}
       </div>
 
       {/* Book-level profile assignment */}
       {activeBookTitle && onBookNarrationProfileChange && profiles.length > 0 && (
         <>
-          <div className="settings-toggle-row" style={{ marginBottom: 8 }}>
-            <span className="settings-toggle-label" style={{ fontSize: 12 }}>Profile for this book</span>
+          <div className="settings-toggle-row tts-book-profile-row">
+            <span className="settings-toggle-label tts-book-profile-label">Profile for this book</span>
             <select
-              className="settings-select"
+              className="settings-select tts-book-profile-select"
               value={bookNarrationProfileId || ""}
               onChange={(e) => onBookNarrationProfileChange(e.target.value || null)}
               aria-label="Book narration profile"
-              style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
             >
               <option value="">Use default</option>
               {profiles.map(p => (
@@ -328,7 +329,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
               ))}
             </select>
           </div>
-          <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+          <div className="tts-book-profile-hint">
             Override the default profile when narrating "{activeBookTitle}".
           </div>
         </>
@@ -337,7 +338,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       <div className="settings-section-label">Voice Engine</div>
 
       {/* Engine selector */}
-      <div className="settings-mode-toggle" style={{ marginBottom: 12 }}>
+      <div className="settings-mode-toggle tts-engine-toggle">
         <button
           className={`settings-mode-btn${engine === "web" ? " active" : ""}`}
           onClick={() => handleTtsChange({ ttsEngine: "web", ttsVoiceName: null })}
@@ -359,48 +360,24 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       {/* Kokoro download progress */}
       {engine === "kokoro" && !kokoroReady && (
-        <div style={{ marginBottom: 12 }}>
-          {kokoroError && (
-            <div style={{ fontSize: 11, color: "var(--error, #c44)", marginBottom: 8 }}>
-              Download failed: {kokoroError}
-            </div>
-          )}
-          {kokoroStalled && !kokoroError && (
-            <div style={{ fontSize: 11, color: "var(--warning, #b80)", marginBottom: 8 }}>
-              Download may be blocked by your network or firewall. Check your connection and try again.
-            </div>
-          )}
-          {kokoroDownloading ? (
-            <>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>
-                Downloading voice model... {kokoroProgress}%
-              </div>
-              <div style={{ height: 4, borderRadius: 2, background: "var(--bg-raised)", overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${kokoroProgress}%`, background: "var(--accent)", transition: "width 0.3s" }} />
-              </div>
-            </>
-          ) : (
-            <button
-              className="settings-btn-secondary"
-              onClick={handleDownloadKokoro}
-              style={{ padding: "6px 14px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 12 }}
-            >
-              {kokoroError ? "Retry download (92 MB)" : "Download voice model (92 MB)"}
-            </button>
-          )}
-        </div>
+        <KokoroStatusSection
+          kokoroDownloading={kokoroDownloading}
+          kokoroProgress={kokoroProgress}
+          kokoroError={kokoroError}
+          kokoroStalled={kokoroStalled}
+          onDownload={handleDownloadKokoro}
+        />
       )}
 
       {/* Voice picker — changes based on engine */}
       {engine === "kokoro" && kokoroReady && (
-        <div className="settings-toggle-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 6 }}>
+        <div className="settings-toggle-row tts-voice-picker-row">
           <span className="settings-toggle-label">Voice</span>
           <select
-            className="settings-select"
+            className="settings-select tts-voice-select"
             value={settings.ttsVoiceName || "af_bella"}
             onChange={(e) => handleTtsChange({ ttsVoiceName: e.target.value })}
             aria-label="Kokoro voice"
-            style={{ width: "100%", padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
           >
             {(kokoroVoices.length > 0 ? kokoroVoices : Object.keys(KOKORO_VOICE_NAMES)).map((id) => (
               <option key={id} value={id}>
@@ -412,14 +389,13 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       )}
 
       {engine === "web" && voices.length > 0 && (
-        <div className="settings-toggle-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 6 }}>
+        <div className="settings-toggle-row tts-voice-picker-row">
           <span className="settings-toggle-label">Voice</span>
           <select
-            className="settings-select"
+            className="settings-select tts-voice-select"
             value={settings.ttsVoiceName || ""}
             onChange={(e) => handleTtsChange({ ttsVoiceName: e.target.value || null })}
             aria-label="TTS voice"
-            style={{ width: "100%", padding: "6px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 12 }}
           >
             <option value="">System default</option>
             {voices.map((v) => (
@@ -433,10 +409,10 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Speech rate</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{(settings.ttsRate || 1.0).toFixed(1)}x</span>
+        <span className="tts-rate-value">{(settings.ttsRate || 1.0).toFixed(1)}x</span>
       </div>
       {engine === "kokoro" ? (
-        <div className="settings-mode-toggle" style={{ marginBottom: 4 }}>
+        <div className="settings-mode-toggle tts-rate-bucket-toggle">
           {KOKORO_RATE_BUCKETS.map((bucket) => (
             <button
               key={bucket}
@@ -461,118 +437,19 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       )}
 
       <button
-        className="settings-btn-secondary"
+        className="settings-btn-secondary tts-test-btn"
         onClick={handleTestVoice}
         disabled={testPlaying}
-        style={{ marginTop: 8, padding: "6px 14px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 12 }}
       >
         {testPlaying ? "Playing..." : "Test voice"}
       </button>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 6, marginBottom: 16 }}>
+      <div className="tts-test-hint">
         Press N in the reader to toggle narration. WPM is capped at 400 when narration is active.
         {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using Kokoro AI voices."}
         {engine === "kokoro" && kokoroWarming && " Kokoro is warming up..."}
       </div>
 
-      <div className="settings-section-label">Pause Timing</div>
-
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Comma pause</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS}ms</span>
-      </div>
-      <input
-        type="range"
-        className="settings-slider"
-        min={0}
-        max={500}
-        step={25}
-        value={settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS}
-        onChange={(e) => handleTtsChange({ ttsPauseCommaMs: Number(e.target.value) })}
-        aria-label="Comma pause duration"
-      />
-
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Clause pause</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS}ms</span>
-      </div>
-      <input
-        type="range"
-        className="settings-slider"
-        min={0}
-        max={500}
-        step={25}
-        value={settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS}
-        onChange={(e) => handleTtsChange({ ttsPauseClauseMs: Number(e.target.value) })}
-        aria-label="Clause pause duration"
-      />
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
-        Pause after colons and closing parentheses.
-      </div>
-
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Sentence pause</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS}ms</span>
-      </div>
-      <input
-        type="range"
-        className="settings-slider"
-        min={0}
-        max={1500}
-        step={50}
-        value={settings.ttsPauseSentenceMs ?? TTS_PAUSE_SENTENCE_MS}
-        onChange={(e) => handleTtsChange({ ttsPauseSentenceMs: Number(e.target.value) })}
-        aria-label="Sentence pause duration"
-      />
-
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Paragraph pause</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS}ms</span>
-      </div>
-      <input
-        type="range"
-        className="settings-slider"
-        min={0}
-        max={2000}
-        step={50}
-        value={settings.ttsPauseParagraphMs ?? TTS_PAUSE_PARAGRAPH_MS}
-        onChange={(e) => handleTtsChange({ ttsPauseParagraphMs: Number(e.target.value) })}
-        aria-label="Paragraph pause duration"
-      />
-
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Dialogue threshold</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD} sentences</span>
-      </div>
-      <input
-        type="range"
-        className="settings-slider"
-        min={1}
-        max={5}
-        step={1}
-        value={settings.ttsDialogueSentenceThreshold ?? TTS_DIALOGUE_SENTENCE_THRESHOLD}
-        onChange={(e) => handleTtsChange({ ttsDialogueSentenceThreshold: Number(e.target.value) })}
-        aria-label="Dialogue sentence threshold"
-      />
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
-        Paragraphs with this many sentences or fewer are treated as dialogue and get a shorter pause.
-      </div>
-
-      <div className="settings-toggle-row">
-        <span className="settings-toggle-label">Footnotes</span>
-        <select
-          className="settings-select"
-          value={settings.ttsFootnoteMode ?? TTS_FOOTNOTE_MODE}
-          onChange={(e) => handleTtsChange({ ttsFootnoteMode: e.target.value as "skip" | "read" })}
-          aria-label="Footnote narration behavior"
-          style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
-        >
-          <option value="skip">Skip markers and footnotes</option>
-          <option value="read">Read footnote immediately</option>
-        </select>
-      </div>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
-        Default is skip. “Read immediately” inserts the note into narration when the reference is reached.
-      </div>
+      <PauseSettingsSection settings={settings} onTtsChange={handleTtsChange} />
 
       <PronunciationOverridesEditor
         globalOverrides={settings.pronunciationOverrides || []}
@@ -595,7 +472,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           <span className="settings-toggle-slider" />
         </label>
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+      <div className="tts-cache-hint">
         When enabled, books in "Reading Now" are cached in the background for instant narration playback.
       </div>
 
@@ -603,9 +480,9 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       {/* Export / Import / Reset (TTS-6M) */}
       <div className="settings-section-label">Narration Data</div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+      <div className="tts-data-action-row">
         <button
-          className="settings-btn-secondary"
+          className="settings-btn-secondary tts-data-action-btn"
           onClick={() => {
             const payload = exportNarrationData(settings);
             const json = JSON.stringify(payload, null, 2);
@@ -617,10 +494,9 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
             a.click();
             URL.revokeObjectURL(url);
           }}
-          style={{ padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
         >Export</button>
         <button
-          className="settings-btn-secondary"
+          className="settings-btn-secondary tts-data-action-btn"
           onClick={() => {
             const input = document.createElement("input");
             input.type = "file";
@@ -647,23 +523,22 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
             };
             input.click();
           }}
-          style={{ padding: "4px 10px", borderRadius: 4, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
         >Import</button>
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+      <div className="tts-data-hint">
         Export or import narration profiles and pronunciation overrides as JSON.
       </div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+      <div className="tts-data-reset-row">
         {profiles.length > 0 && (
           <button
             onClick={() => { if (confirm("Delete all narration profiles? This cannot be undone.")) onSettingsChange(resetNarrationData("profiles")); }}
-            style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--error, #c44)", cursor: "pointer", fontSize: 11 }}
+            className="tts-data-reset-btn"
           >Reset profiles</button>
         )}
         {(settings.pronunciationOverrides?.length ?? 0) > 0 && (
           <button
             onClick={() => { if (confirm("Clear all global pronunciation overrides? This cannot be undone.")) onSettingsChange(resetNarrationData("overrides")); }}
-            style={{ padding: "3px 8px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--error, #c44)", cursor: "pointer", fontSize: 11 }}
+            className="tts-data-reset-btn"
           >Reset overrides</button>
         )}
       </div>
@@ -685,12 +560,12 @@ function CacheSizeDisplay() {
   if (!info || info.totalMB === 0) return null;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-      <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+    <div className="tts-cache-size-row">
+      <span className="tts-cache-size-label">
         {info.bookCount} {info.bookCount === 1 ? "book" : "books"} cached — {info.totalMB}MB
       </span>
       <button
-        className="settings-btn-secondary"
+        className="settings-btn-secondary tts-cache-clear-btn"
         onClick={async () => {
           if (!confirm("Clear all cached narration audio?")) return;
           setClearing(true);
@@ -699,7 +574,6 @@ function CacheSizeDisplay() {
           setClearing(false);
         }}
         disabled={clearing}
-        style={{ fontSize: 11, padding: "3px 10px" }}
       >
         Clear cache
       </button>
@@ -707,168 +581,3 @@ function CacheSizeDisplay() {
   );
 }
 
-/** Pronunciation overrides editor with Global / This Book scope toggle (TTS-6I) */
-function PronunciationOverridesEditor({
-  globalOverrides,
-  onGlobalChange,
-  bookOverrides,
-  onBookChange,
-  activeBookTitle,
-}: {
-  globalOverrides: PronunciationOverride[];
-  onGlobalChange: (overrides: PronunciationOverride[]) => void;
-  bookOverrides?: PronunciationOverride[];
-  onBookChange?: (overrides: PronunciationOverride[]) => void;
-  activeBookTitle?: string;
-}) {
-  const hasBookScope = !!onBookChange;
-  const [scope, setScope] = useState<"global" | "book">("global");
-  const overrides = scope === "book" && bookOverrides ? bookOverrides : globalOverrides;
-  const onChange = scope === "book" && onBookChange ? onBookChange : onGlobalChange;
-
-  const [newFrom, setNewFrom] = useState("");
-  const [newTo, setNewTo] = useState("");
-  const [previewText, setPreviewText] = useState("The CEO of NASA gave a TED talk.");
-  const [previewResult, setPreviewResult] = useState<string | null>(null);
-
-  const handleAdd = useCallback(() => {
-    if (!newFrom.trim() || overrides.length >= MAX_PRONUNCIATION_OVERRIDES) return;
-    const id = `po-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    onChange([...overrides, { id, from: newFrom.trim(), to: newTo.trim(), enabled: true }]);
-    setNewFrom("");
-    setNewTo("");
-  }, [newFrom, newTo, overrides, onChange]);
-
-  const handleRemove = useCallback((id: string) => {
-    onChange(overrides.filter(o => o.id !== id));
-  }, [overrides, onChange]);
-
-  const handleToggle = useCallback((id: string) => {
-    onChange(overrides.map(o => o.id === id ? { ...o, enabled: !o.enabled } : o));
-  }, [overrides, onChange]);
-
-  const handleMoveUp = useCallback((idx: number) => {
-    if (idx <= 0) return;
-    const next = [...overrides];
-    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-    onChange(next);
-  }, [overrides, onChange]);
-
-  // Preview uses the effective merged set (global + book)
-  const effectiveOverrides = hasBookScope && bookOverrides
-    ? [...globalOverrides, ...bookOverrides]
-    : globalOverrides;
-
-  const handlePreview = useCallback(() => {
-    setPreviewResult(applyPronunciationOverrides(previewText, effectiveOverrides));
-  }, [previewText, effectiveOverrides]);
-
-  return (
-    <>
-      <div className="settings-section-label">Pronunciation Overrides</div>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
-        Replace words before TTS speaks them. Global overrides apply to all books. Book overrides apply only to the current book.
-      </div>
-
-      {/* Scope toggle */}
-      {hasBookScope && (
-        <div className="settings-mode-toggle" style={{ marginBottom: 8 }}>
-          <button
-            className={`settings-mode-btn${scope === "global" ? " active" : ""}`}
-            onClick={() => setScope("global")}
-          >Global</button>
-          <button
-            className={`settings-mode-btn${scope === "book" ? " active" : ""}`}
-            onClick={() => setScope("book")}
-          >{activeBookTitle ? `This Book` : "Book"}</button>
-        </div>
-      )}
-      {scope === "book" && activeBookTitle && (
-        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 6, fontStyle: "italic" }}>
-          Overrides for: {activeBookTitle}
-        </div>
-      )}
-
-      {overrides.map((o, idx) => (
-        <div key={o.id} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontSize: 12 }}>
-          <button
-            onClick={() => handleToggle(o.id)}
-            style={{ width: 20, height: 20, border: "1px solid var(--border)", borderRadius: 3, background: o.enabled ? "var(--accent)" : "var(--bg-card)", color: o.enabled ? "#fff" : "var(--text-dim)", cursor: "pointer", fontSize: 10, padding: 0 }}
-            title={o.enabled ? "Disable" : "Enable"}
-            aria-label={o.enabled ? "Disable override" : "Enable override"}
-          >{o.enabled ? "✓" : ""}</button>
-          <span style={{ color: o.enabled ? "var(--text)" : "var(--text-dim)", textDecoration: o.enabled ? "none" : "line-through" }}>
-            {o.from} → {o.to || "(remove)"}
-          </span>
-          <button
-            onClick={() => handleMoveUp(idx)}
-            disabled={idx === 0}
-            style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--text-dim)", cursor: idx > 0 ? "pointer" : "default", fontSize: 10, padding: "2px 4px" }}
-            title="Move up"
-            aria-label="Move up"
-          >↑</button>
-          <button
-            onClick={() => handleRemove(o.id)}
-            style={{ background: "none", border: "none", color: "var(--text-dim)", cursor: "pointer", fontSize: 10, padding: "2px 4px" }}
-            title="Remove"
-            aria-label="Remove override"
-          >×</button>
-        </div>
-      ))}
-
-      {overrides.length === 0 && (
-        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8, fontStyle: "italic" }}>
-          No {scope === "book" ? "book-specific" : "global"} overrides yet.
-        </div>
-      )}
-
-      {overrides.length < MAX_PRONUNCIATION_OVERRIDES && (
-        <div style={{ display: "flex", gap: 6, marginTop: 6, marginBottom: 8 }}>
-          <input
-            type="text"
-            placeholder="From"
-            value={newFrom}
-            onChange={(e) => setNewFrom(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
-            style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
-            aria-label="Word to replace"
-          />
-          <input
-            type="text"
-            placeholder="Speak as"
-            value={newTo}
-            onChange={(e) => setNewTo(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
-            style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
-            aria-label="Replacement pronunciation"
-          />
-          <button
-            onClick={handleAdd}
-            disabled={!newFrom.trim()}
-            style={{ padding: "4px 10px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: newFrom.trim() ? "pointer" : "default", fontSize: 11 }}
-          >Add</button>
-        </div>
-      )}
-
-      {/* Preview uses effective merged overrides */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-        <input
-          type="text"
-          value={previewText}
-          onChange={(e) => { setPreviewText(e.target.value); setPreviewResult(null); }}
-          style={{ flex: 1, padding: "4px 6px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", fontSize: 11 }}
-          aria-label="Preview text"
-        />
-        <button
-          onClick={handlePreview}
-          style={{ padding: "4px 10px", borderRadius: 3, border: "1px solid var(--border)", background: "var(--bg-card)", color: "var(--text)", cursor: "pointer", fontSize: 11 }}
-        >Preview</button>
-      </div>
-      {previewResult !== null && (
-        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12, fontStyle: "italic" }}>
-          TTS will read: "{previewResult}"
-        </div>
-      )}
-    </>
-  );
-}

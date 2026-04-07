@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-07 — REFACTOR-1A complete (v1.48.0). Queue depth 2 (YELLOW). Next: REFACTOR-1B.
+**Last updated**: 2026-04-07 — REFACTOR-1B complete (v1.49.0). Queue depth 1 (RED). Next: TEST-COV-1.
 **Current branch**: `main`
-**Current state**: v1.48.0 stable. Queue depth 2 (YELLOW). Next: REFACTOR-1B → TEST-COV-1. Backfill needed.
+**Current state**: v1.49.0 stable. Queue depth 1 (RED). Next: TEST-COV-1. Backfill needed to restore GREEN (≥3).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -62,7 +62,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     REFACTOR-1A: ReaderContainer Decomposition ✅ (v1.48.0)
                    │
-    REFACTOR-1B: Component & Style Cleanup ← NEXT
+    REFACTOR-1B: Component & Style Cleanup ✅ (v1.49.0)
                    │
     TEST-COV-1: Critical Path Test Coverage + Security
                    │
@@ -862,7 +862,7 @@ Wave B (verify + docs):
 
 ---
 
-## REFACTOR-1B: Component & Style Cleanup
+## REFACTOR-1B: Component & Style Cleanup ✅ COMPLETED
 
 **Goal:** Address three interrelated style/component debt items from the technical debt audit: FoliatePageView helper extraction (H-2, 1,947 lines), inline style → CSS migration starting with TTSSettings (H-1, 179 inline styles across the codebase, 66 in TTSSettings alone), and global.css domain splitting (M-1, 5,220 lines in a single file). Also split TTSSettings.tsx into sub-components (M-4, 874 lines).
 

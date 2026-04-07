@@ -26,7 +26,7 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         </button>
       </div>
 
-      <div className="settings-section-label" style={{ marginTop: 16 }}>EPUB Renderer</div>
+      <div className="settings-section-label settings-section-label--mt">EPUB Renderer</div>
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Use legacy renderer</span>
@@ -42,7 +42,7 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           <div className="settings-toggle-thumb" />
         </div>
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+      <div className="settings-hint">
         Fall back to word-by-word text rendering instead of the EPUB reader.
       </div>
 
@@ -80,7 +80,7 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Focus Span</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{Math.round(settings.focusSpan * 100)}%</span>
+        <span className="settings-value-label">{Math.round(settings.focusSpan * 100)}%</span>
       </div>
       <input
         type="range"
@@ -93,11 +93,11 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         aria-label="Focus span"
       />
 
-      <div className="settings-section-label" style={{ marginTop: 16 }}>Flow Mode Options</div>
+      <div className="settings-section-label settings-section-label--mt">Flow Mode Options</div>
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Words per highlight</span>
-        <span style={{ fontSize: 11, color: "var(--text-dim)" }}>{Math.max(3, settings.flowWordSpan || 3)} words</span>
+        <span className="settings-value-label">{Math.max(3, settings.flowWordSpan || 3)} words</span>
       </div>
       <input
         type="range"
@@ -109,7 +109,7 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
         onChange={(e) => onSettingsChange({ flowWordSpan: Number(e.target.value) })}
         aria-label="Flow mode words per highlight"
       />
-      <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 12 }}>
+      <div className="settings-hint">
         How many words the sliding cursor spans. The highlight advances one word at a time.
       </div>
 
@@ -130,12 +130,12 @@ export function SpeedReadingSettings({ settings, onSettingsChange }: SpeedReadin
           Kokoro handles prosody natively — these toggles only affect Web Speech
           and non-narration reading modes (Focus, Flow). */}
       {settings.ttsEngine === "kokoro" ? (
-        <div className="settings-note" style={{ marginTop: 16, opacity: 0.6, fontSize: "0.85em" }}>
+        <div className="settings-note settings-note--kokoro">
           Kokoro handles prosody natively. Rhythm pause controls are available when using Web Speech.
         </div>
       ) : (
       <>
-      <div className="settings-section-label" style={{ marginTop: 16 }}>Rhythm Pauses</div>
+      <div className="settings-section-label settings-section-label--mt">Rhythm Pauses</div>
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Commas, colons, semicolons</span>

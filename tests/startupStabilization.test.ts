@@ -24,12 +24,12 @@ describe("BUG-162a: .foliate-loading CSS", () => {
 
   beforeEach(() => {
     cssContent = fs.readFileSync(
-      path.resolve(__dirname, "../src/styles/global.css"),
+      path.resolve(__dirname, "../src/styles/page-reader.css"),
       "utf-8"
     );
   });
 
-  it("has a .foliate-loading rule in global.css", () => {
+  it("has a .foliate-loading rule in page-reader.css", () => {
     expect(cssContent).toContain(".foliate-loading");
   });
 

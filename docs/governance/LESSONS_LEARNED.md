@@ -1122,6 +1122,32 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 
 **Related:** STAB-1A closeout, CLAUDE.md dispatch sizing rule
 
+### [2026-04-07] LL-092: Sprint Specs Must Verify Target File Existence Before "Create" Tasks
+
+**Area:** sprint planning, spec quality, investigation gate
+**Status:** active
+**Priority:** high
+
+**Context:** REFACTOR-1A Task 7 said "Create `main/constants.js`" but the file already existed (created in PERF-1 sprint). The agent overwrote the existing file, destroying PERF-1's constants. A fix cycle was needed to restore the lost content and merge both sets of constants.
+
+**Guardrail (PR-092):** Every "Create [file]" task in a sprint spec must include a pre-check: does the file already exist? If it might, the task description must say "Create or extend" and include instructions to read the existing file first. The investigation phase should grep for the filename to confirm whether it's new or existing.
+
+**Pattern — safe constant extraction:** When extracting hardcoded values into a constants file, always: (a) read the target file first, (b) append new constants rather than overwriting, (c) verify no naming collisions with existing exports.
+
+**Related:** REFACTOR-1A closeout, PERF-1 (created main/constants.js)
+
+### [2026-04-07] LL-093: Effect Extraction Reduces useEffect Count but Not Total Line Count
+
+**Area:** refactoring, sprint planning, success criteria
+**Status:** active
+**Priority:** moderate
+
+**Context:** REFACTOR-1A spec targeted ReaderContainer.tsx < 700 lines (from 1,623) by extracting 33 useEffects into custom hooks. Result: 1,167 lines. The remaining lines are callbacks, JSX, imports, hook composition, and ref declarations — none of which were targeted by the extraction. The <700 target was aspirational and based on the assumption that useEffects constituted most of the file's bulk.
+
+**Guardrail (PR-093):** When estimating post-refactoring line counts, account for: (a) the code that stays (callbacks, JSX, types, imports), (b) the new code added (hook imports, hook calls, prop destructuring), and (c) the code that moves (only the useEffect bodies + their local variables). A realistic formula: `remaining = total - (effect_lines × 0.85)` where the 0.85 factor accounts for shared state/refs that stay in the parent.
+
+**Related:** REFACTOR-1A closeout, SC-1 partial pass
+
 ---
 
 ### [2026-04-07] LL-092: Performance Remediation Patterns for Electron + React
@@ -1149,3 +1175,19 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail (PR-092):** Before adding any new cache (Map), persistence handler, or useEffect with >3 deps, check: (a) Does the cache need eviction? (b) Is the save handler debounced? (c) Can the effect deps be reduced with refs? Answer these before writing the code, not after.
 
 **Related:** PERF-1 sprint, `tests/perfAudit.test.ts`, `main.js` startup sequence, `main/ipc/state.js`, `main/file-parsers.js`, `src/components/ReaderContainer.tsx`, `vite.config.js`
+
+---
+
+### [2026-04-07] LL-094: Component Decomposition Removes ~30–40% of Lines, Not 60%
+
+**Area:** refactoring, sprint planning, success criteria
+**Status:** active
+**Priority:** moderate
+
+**Context:** REFACTOR-1B targeted TTSSettings.tsx < 350 lines (from 874) and had an implicit goal of FoliatePageView < 700 lines (from 1,947). Actual results: TTSSettings 583 lines, FoliatePageView 1,724 lines — reductions of ~33% and ~11% respectively. Extracting sub-components and helper utilities moves the extracted code out of the file, but the remaining parent retains all the glue: prop declarations, imports of the new components, hook calls, prop threading to child components, conditional logic, and container JSX. None of that moves.
+
+**Root cause:** Sprint specs set aspirational targets based on the volume of code being extracted, without accounting for (a) the new code that replaces it (imports, prop passing, composition), (b) the structural code that stays (container JSX, top-level state, event handlers), and (c) the fact that sub-component extraction typically removes only the render body, not the orchestration layer.
+
+**Guardrail (PR-094):** When setting post-refactoring line count targets for component decomposition, use 60% of original as the floor, not the aspirational minimum. For a 874-line file, a realistic target after splitting 3 sub-components is ~525 lines (60%), not <350 (40%). If the goal is true size reduction, plan for additional passes (dead code removal, logic consolidation) after the structural extraction. Do not treat extraction and slimming as the same operation.
+
+**Related:** REFACTOR-1B closeout, REFACTOR-1A closeout, LL-093 (effect extraction line count reality)

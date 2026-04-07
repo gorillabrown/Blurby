@@ -42,7 +42,7 @@ verifying outputs, tracking progress, and reporting results.
 ```
 CLI (orchestrate only — zero implementation)
   ├── Hermes  — mechanical execution, prescribed changes
-  ├── Hephaestus — single-domain implementation, bounded judgment
+  ├── Hercules — single-domain implementation, bounded judgment
   ├── Athena   — cross-system implementation, architectural decisions
   ├── Aristotle — read-only diagnosis, produces fix specs
   ├── Hippocrates  — executes tests, reports facts
@@ -63,7 +63,7 @@ CLI selects the cheapest doer tier that can handle each task.
 | Agent | Model | Trigger | Output Contract |
 |-------|-------|---------|-----------------|
 | **hermes** | haiku | Mechanical change; exact diff known; config edits, git ops | COMPLETE / FAILED with output |
-| **hephaestus** | sonnet | Single-domain implementation; judgment within one module | COMPLETE with decisions documented / BLOCKED |
+| **hercules** | sonnet | Single-domain implementation; judgment within one module | COMPLETE with decisions documented / BLOCKED |
 | **athena** | opus | Cross-system work; architectural judgment needed | COMPLETE with interaction map / BLOCKED |
 
 ### Specialist Agents (Verification & Support)
@@ -115,7 +115,7 @@ Examples: write a new function in an existing module, fix a bug where root cause
 
 **Test:** Will the doer need to understand only ONE area of the codebase to complete the task? Can they ignore everything outside that module?
 
-| If yes | → **hephaestus** |
+| If yes | → **hercules** |
 |--------|---------------------|
 | If no | → continue to step 4 |
 
@@ -131,7 +131,7 @@ Examples: refactor that changes an interface consumed by multiple modules, imple
 ### 5. Fallback — when in doubt
 
 If you genuinely can't decide between tiers:
-- **Default to hephaestus.** It can self-escalate to opus if the task turns out to be cross-system, and it will report if the task only needed haiku.
+- **Default to hercules.** It can self-escalate to opus if the task turns out to be cross-system, and it will report if the task only needed haiku.
 - **CLI never takes implementation tasks as a fallback.** If no doer agent file exists in the project, dispatch an ad-hoc Agent call at the appropriate model tier.
 
 ### Routing examples from a real sprint
@@ -143,7 +143,7 @@ Task: "Update DEFAULT_TIMEOUT from 30 to 45 in config/settings.yaml"
 Task: "Write regression tests for the new discount module (≥12 tests)"
   → Step 1: no specialist match (hippocrates runs tests, doesn't write them)
   → Step 2: not a prescribed diff (judgment needed on what to test)
-  → Step 3: stays within one test file → hephaestus
+  → Step 3: stays within one test file → hercules
 
 Task: "Download and rewrite article images for offline reading"
   → Step 1: no specialist match

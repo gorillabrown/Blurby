@@ -1045,13 +1045,13 @@ export default function ReaderContainer({
 
     // Non-EPUB error fallback (all docs should be EPUB since EPUB-2B)
     return (
-      <div className="reader-error" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "1rem", padding: "2rem", textAlign: "center" }}>
-        <p style={{ fontSize: "1.1rem", color: "var(--text-secondary, #888)" }}>
+      <div className="reader-error reader-error-inner">
+        <p className="reader-error-msg">
           This document needs to be re-imported to be read in the current version of Blurby.
         </p>
         <button
           onClick={() => finishReading(0)}
-          style={{ padding: "0.5rem 1.5rem", borderRadius: "6px", border: "1px solid var(--border-color, #444)", background: "var(--bg-secondary, #222)", color: "var(--text-primary, #fff)", cursor: "pointer" }}
+          className="reader-error-btn"
         >
           Return to Library
         </button>
