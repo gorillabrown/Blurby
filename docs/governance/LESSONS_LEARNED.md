@@ -1043,3 +1043,19 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern:** Measure all geometry (bounding rects, column right edges, line heights) from the `foundDoc` already located by the word-finding loop. Pass `foundDoc` into `positionNarrationOverlay` as the measurement document. Never reuse a cached reference to `contents[0]` for geometry.
 
 **Guardrail (PR-146):** In any Foliate geometry measurement — whether for narration overlay, cursor positioning, or scroll anchoring — always derive the measurement document from `foundDoc` (the doc containing the target word). Never use `contents[0]` or any cached singleton document reference. This applies to `FoliatePageView.tsx` and any future Foliate integration code.
+
+---
+
+### [2026-04-06] LL-087: Module-Scope Constants Must Be Declared Before Use — TDZ Is Silent in Test Environments
+
+**Area:** renderer, constants.ts, test setup, TypeScript module scope
+**Status:** active
+**Priority:** high
+
+**Context:** FLOW-INF-A — Reading Zone & Visual Pacing. New flow zone constants (`FLOW_ZONE_DEFAULT_POSITION`, `FLOW_ZONE_DEFAULT_SIZE`) were appended to the bottom of `src/utils/constants.ts`. The `DEFAULT_SETTINGS` object at the top of the same file referenced these constants directly in its initializer. This caused a Temporal Dead Zone (TDZ) error at module load time: `DEFAULT_SETTINGS` was evaluated before the zone constants were defined.
+
+**Root cause:** JavaScript/TypeScript `const` declarations are hoisted but not initialized — they exist in a "temporal dead zone" from the start of the enclosing scope until the declaration is reached. In the same module, reading a `const` before its declaration line throws `ReferenceError: Cannot access 'X' before initialization`. The TDZ error surfaced in the test suite (`flowReadingZone.test.ts`) as a module initialization failure, not as a clear "constant not found" message.
+
+**Pattern:** In any constants file, always declare leaf constants (primitives with no dependencies) before composite constants or objects that reference them. The correct order is: (1) primitive constants, (2) derived constants, (3) composite objects (like `DEFAULT_SETTINGS`). Never append new constants after a composite object that already references them.
+
+**Guardrail (PR-147):** When adding constants to `src/utils/constants.ts` or any module that exports a composite object (e.g., `DEFAULT_SETTINGS`), place new primitive constants above the first composite that will reference them. Run `npm test` after adding constants — a TDZ error will surface immediately as a module initialization failure in any test that imports the affected module.

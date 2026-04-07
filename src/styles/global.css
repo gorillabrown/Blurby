@@ -3813,6 +3813,30 @@ button:focus-visible {
 .page-nav-btn--left { left: 8px; }
 .page-nav-btn--right { right: 8px; }
 
+/* FLOW-INF-A: Reading zone mask — de-emphasizes content outside active zone */
+.foliate-page-view--flow {
+  --flow-zone-top: 20%;
+  --flow-zone-bottom: 45%;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
 /* Overlay cursor for EPUB Flow mode — Range-based, GPU-accelerated */
 .foliate-flow-cursor {
   position: fixed;
@@ -4229,6 +4253,39 @@ button:focus-visible {
   border-radius: 4px;
   padding: 2px 8px;
   cursor: pointer;
+}
+
+/* FLOW-INF-A: Flow zone controls */
+.rbb-flow-zone-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+}
+.rbb-flow-zone-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.rbb-flow-zone-select {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+}
+.rbb-flow-zone-slider {
+  width: 60px;
+  accent-color: var(--accent);
+}
+.rbb-flow-zone-value {
+  min-width: 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-primary);
 }
 
 .reader-bottom-bar-info {

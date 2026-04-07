@@ -399,6 +399,28 @@ export const NON_FOLIATE_PROGRESS_SAVE_MS = 2000;
 /** Minimum active reading time before a session is recorded (ms) */
 export const MIN_ACTIVE_READING_MS = 1000;
 
+// ── Flow Scroll Mode (FLOW-3A) ─────────────────────────────────────────────
+/** Fraction of viewport height where the active line sits (reading zone) */
+export const FLOW_READING_ZONE_POSITION = 0.25;
+/** Default cursor height in pixels for flow scroll mode */
+export const FLOW_CURSOR_HEIGHT_PX = 3;
+/** Cursor height in pixels for e-ink mode (thicker for visibility) */
+export const FLOW_CURSOR_EINK_HEIGHT_PX = 4;
+/** Delay after manual scroll before auto-scroll resumes (ms) */
+export const FLOW_SCROLL_RESUME_DELAY_MS = 2000;
+/** Brief pause between lines for eye movement tracking (ms) */
+export const FLOW_LINE_ADVANCE_BUFFER_MS = 50;
+/** Default number of lines visible in the flow reading zone */
+export const FLOW_ZONE_LINES_DEFAULT = 5;
+/** Minimum lines for flow reading zone */
+export const FLOW_ZONE_LINES_MIN = 3;
+/** Maximum lines for flow reading zone */
+export const FLOW_ZONE_LINES_MAX = 8;
+/** Opacity for de-emphasized content outside reading zone (0-1) */
+export const FLOW_ZONE_OPACITY = 0.35;
+/** Soft edge transition width as percentage of container */
+export const FLOW_ZONE_EDGE_PCT = 2;
+
 // ── Default Settings ─────────────────────────────────────────────────────────
 /** Single source of truth for BlurbySettings defaults.
  *  Import in SettingsContext and useLibrary instead of duplicating. */
@@ -431,6 +453,8 @@ export const DEFAULT_SETTINGS = {
   syncIntervalMinutes: DEFAULT_SYNC_INTERVAL_MINUTES,
   syncOnMeteredConnection: false,
   flowWordSpan: DEFAULT_FLOW_WORD_SPAN,
+  flowZonePosition: FLOW_READING_ZONE_POSITION,
+  flowZoneLines: FLOW_ZONE_LINES_DEFAULT,
   lastReadingMode: "flow" as const,
   ttsEnabled: false,
   ttsEngine: "kokoro" as const,
@@ -444,15 +468,3 @@ export const DEFAULT_SETTINGS = {
   ttsFootnoteMode: TTS_FOOTNOTE_MODE,
   pronunciationOverrides: [] as import("./types").PronunciationOverride[],
 };
-
-// ── Flow Scroll Mode (FLOW-3A) ─────────────────────────────────────────────
-/** Fraction of viewport height where the active line sits (reading zone) */
-export const FLOW_READING_ZONE_POSITION = 0.25;
-/** Default cursor height in pixels for flow scroll mode */
-export const FLOW_CURSOR_HEIGHT_PX = 3;
-/** Cursor height in pixels for e-ink mode (thicker for visibility) */
-export const FLOW_CURSOR_EINK_HEIGHT_PX = 4;
-/** Delay after manual scroll before auto-scroll resumes (ms) */
-export const FLOW_SCROLL_RESUME_DELAY_MS = 2000;
-/** Brief pause between lines for eye movement tracking (ms) */
-export const FLOW_LINE_ADVANCE_BUFFER_MS = 50;

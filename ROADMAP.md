@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — NARR-CURSOR-1 complete (v1.40.0). Queue depth 3 (GREEN). Next: FLOW-INF-A.
+**Last updated**: 2026-04-06 — FLOW-INF-A complete (v1.41.0). Queue depth 3 (GREEN). Next: FLOW-INF-B.
 **Current branch**: `main`
-**Current state**: v1.40.0 stable. Queue depth 3 (GREEN). Next: FLOW-INF-A → FLOW-INF-B → EXT-ENR-B.
+**Current state**: v1.41.0 stable. Queue depth 3 (GREEN). Next: FLOW-INF-B → EXT-ENR-B → NARR-TIMING.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -46,11 +46,14 @@ HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅
     ├───────────────────────────────────┐
     ▼                                   ▼
 Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
-  ├── FLOW-INF-A: Reading Zone     ├── EXT-ENR-A: Resilient Connection ✅
+  ├── FLOW-INF-A: Reading Zone ✅   ├── EXT-ENR-A: Resilient Connection ✅
   ├── FLOW-INF-B: Timer Cursor     ├── EXT-ENR-B: Auto-Discovery Pairing
   └── FLOW-INF-C: Cross-Book       └── EXT-ENR-C: In-Browser Reader (optional)
     │                                   │
     └──────────────┬────────────────────┘
+                   │
+    NARR-TIMING: Real Word Timestamps (parallel — independent of Tracks A/B)
+                   │
                    ▼
         Track C: Android APK
           ├── APK-0: Modularization (prerequisite)
@@ -463,7 +466,7 @@ All three investigation areas resolved by Cowork (2026-04-06):
 - **De-emphasis rendering:** `mask-image` with alpha gradient. `rgba(0,0,0,0.35)` outside zone = 35% visible (gentle de-emphasis). `rgba(0,0,0,1.0)` inside zone = fully visible. Soft 2% transition band at edges prevents hard cutoff. No DOM manipulation inside shadow DOM needed.
 - **Settings integration:** Zone position and zone size settings added to `flowSettings` in BlurbySettings. Exposed in ReaderBottomBar as flow-mode-only controls (quick access during reading). No new settings sub-page needed.
 
-### Sprint FLOW-INF-A: Reading Zone & Visual Pacing
+### Sprint FLOW-INF-A: Reading Zone & Visual Pacing ✅ COMPLETED
 
 **Goal:** Add a visually distinct reading zone to flow mode — a 3-5 line band where the active text lives, with de-emphasized content above and below. Users should feel like they're reading through a focused window.
 
@@ -801,6 +804,121 @@ Library Screen (extension detected):
 12. ≥10 new tests in `tests/autoDiscoveryPairing.test.ts`
 
 **Tier:** Full | **Depends on:** EXT-ENR-A
+
+---
+
+## NARR-TIMING: Real Word-Level Timestamps from Kokoro TTS
+
+**Goal:** Replace the character-count heuristic (`computeWordWeights`) with real per-word timestamps derived from Kokoro's duration tensor. The narration cursor consistently runs ahead of the audio because the heuristic treats word duration as proportional to character count. Kokoro's ONNX text encoder already computes per-phoneme durations during inference — the kokoro-js wrapper just discards them. A ~60-line fork surfaces this data, aligns it to words, and feeds validated timestamps into the audio scheduler.
+
+**Version:** v1.44.0 | **Branch:** `sprint/narr-timing` | **Tier:** Full (npm test + npm run build — touches scheduler, pipeline, and worker)
+
+**Problem:** `computeWordWeights` distributes chunk duration across words proportionally to character length (clamped 2–20, with 1.12x sentence-end and 1.05x clause-end multipliers). Short function words get over-allocated, long content words get under-allocated, and the error accumulates across every chunk. The heuristic also has zero knowledge of Kokoro's natural inter-word silence — the cursor advances through pauses that should be visible holds.
+
+**Plan document:** `NARR-TIMING-PLAN/NARR-TIMING_Plan.md` — comprehensive technical plan with explicit code for all changes, revised through two independent audit rounds (15 findings, all incorporated). **CLI MUST read this plan before implementation.** The plan contains the exact fork code, validation logic, and edge case handling.
+
+### Design Decisions (from plan + 2 audit rounds)
+
+1. **RawAudio return type preserved** — Fork attaches `_durations` (on `generate_from_ids`) and `wordTimestamps` (on `generate`) as non-enumerable properties via `Object.defineProperty`. No API breakage for `stream()` or existing callers.
+2. **4-layer validation** — Layer 1: token count check (gross phonemization divergence). Layer 2: waveform drift with split accumulator (EOS/tail included). Layer 2b: fail-closed token walk (throws on underrun). Layer 3: scheduler acceptance (monotonicity, bounds, word correspondence, scaled tolerance).
+3. **Split accumulator** — `sampleOffset` tracks word timestamps (stops at last aligned word). `totalPredictedSamples` walks all remaining tokens including EOS for drift validation. Resolves the "endTime excludes trailing pause" vs "predicted duration should match waveform" contradiction.
+4. **Fail-closed token walk** — Token accumulation and separator consumption throw immediately when the tensor can't provide expected tokens, instead of silently clipping.
+5. **Scaled tolerances** — `min(40ms, 5% of speech duration)` instead of fixed 100ms. Short chunks get strict validation.
+6. **Graceful fallback** — Any alignment failure (fork error, validation failure, edge case) falls back to existing `computeWordWeights` heuristic. Narration never breaks.
+7. **patch-package fork** — Targets built `dist/` artifacts (both CJS `dist/kokoro.cjs` and ESM `dist/kokoro.js`). Must cover both packaged-app and dev-mode import paths.
+8. **`endTime` contract** — End of voiced portion, excluding trailing inter-word pause. Gap between `word[i].endTime` and `word[i+1].startTime` is silence. Currently only `startTime` is used for scheduling; `endTime` preserved for future silence-aware cursor hold (IDEAS.md H6).
+
+### Baseline
+
+Existing infrastructure:
+- `computeWordWeights()` in `audioScheduler.ts` (lines 53-72) — the heuristic being replaced (retained as fallback)
+- `computeWordBoundaries()` in `audioScheduler.ts` (lines 211-239) — distributes timing using heuristic weights
+- `ScheduledChunk` interface in `audioScheduler.ts` (lines 76-88) — chunk data structure (gains `wordTimestamps` field)
+- `generate()` in `main/tts-worker.js` (lines 106-124) — TTS worker function
+- Message handler in `main/tts-worker.js` (lines 140-156) — dispatches to `generate()`
+- `PipelineConfig.generateFn` in `generationPipeline.ts` (lines 29-34) — IPC wrapper type
+- `produceChunk()` in `generationPipeline.ts` (line 292) — builds chunks and calls `generateFn`
+- `generateFn` call site in `generationPipeline.ts` (line 330) — `config.generateFn(text, voiceId, speed)`
+- kokoro-js `generate_from_ids()` — discards durations at `const { waveform: o } = await this.model(inputs)`
+- kokoro-js `generate()` — calls `generate_from_ids`, returns `RawAudio` with no timestamps
+- `@huggingface/transformers` `generate_speech()` — already returns `{ waveform, durations }` (no change needed)
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for TTS, narration, timestamp, scheduler entries
+3. **`NARR-TIMING-PLAN/NARR-TIMING_Plan.md`** — **MUST READ IN FULL** — contains all fork code, alignment logic, validation functions, edge case handling, and audit resolutions. This is the authoritative implementation reference.
+4. `ROADMAP.md` — this section
+5. `main/tts-worker.js` — `generate()` function (lines 106-124), message handler (lines 140-156), `loadModel()` CJS/ESM import paths (lines 21-54)
+6. `src/utils/audioScheduler.ts` — `computeWordWeights()` (lines 53-72), `ScheduledChunk` interface (lines 76-88), `computeWordBoundaries()` (lines 211-239)
+7. `src/utils/generationPipeline.ts` — `PipelineConfig` interface (lines 27-63), `produceChunk()` (lines 292-390), `generateFn` call (line 330)
+8. `node_modules/kokoro-js/dist/kokoro.cjs` — locate `generate_from_ids` and `generate` methods (the discard point)
+9. `node_modules/kokoro-js/dist/kokoro.js` — ESM variant of the same
+10. `NARR-TIMING-PLAN/reference/transformers_generate_speech.js` — shows that `@huggingface/transformers` already returns `{ waveform, durations }`
+11. `NARR-TIMING-PLAN/reference/kokoro_js_discard_point.js` — shows the exact discard: `const { waveform: o } = await this.model(inputs)`
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (electron-scope + format-scope) | **Fork kokoro-js: Surface duration tensor.** Apply the fork diff from plan §4.2. Three changes to kokoro-js source: (a) `generate_from_ids` — destructure both `waveform` and `durations` from `this.model()`, attach `_durations` as non-enumerable property on `RawAudio`. (b) `generate` — accept optional `words` param, call `_alignWordsToTimestamps()` when words + durations available, attach `wordTimestamps` as non-enumerable property on `RawAudio`. (c) Add `_alignWordsToTimestamps()` method and `computeWordTimestamps()` function — the full alignment + validation logic from plan §4.2. **Must patch both `dist/kokoro.cjs` AND `dist/kokoro.js`.** Use `patch-package` to create persistent patch. See plan §4.5 for CJS/ESM procedure. | `node_modules/kokoro-js/dist/kokoro.cjs`, `node_modules/kokoro-js/dist/kokoro.js`, `patches/kokoro-js+VERSION.patch` (new) | In both dist files: find `generate_from_ids` method (search for `{ waveform: o }` or `waveform:o`), find `generate` method (search for `async generate(text`). Add `computeWordTimestamps` and `_alignWordsToTimestamps` as new functions/methods. |
+| 2 | Hermes (electron-scope) | **Update tts-worker.js: Pass words, relay timestamps.** (a) Add `words` parameter to `generate()` function signature (line 106). (b) Pass `words` to `ttsInstance.generate()` call (line 112): change to `ttsInstance.generate(text, { voice, speed, words: words \|\| null })`. (c) Add `wordTimestamps: result.wordTimestamps \|\| null` to the result message (line 119). (d) Update message handler case `"generate"` (line 150) to pass `msg.words`. See plan §5.1 for exact code. | `main/tts-worker.js` | Line 106: add `words` param. Line 112: add `words` to options. Line 119: add `wordTimestamps` to msg. Line 150: add `msg.words`. |
+| 3 | Hephaestus (renderer-scope) | **Update generationPipeline.ts: Pass words into TTS call.** (a) Add `words?: string[]` parameter to `PipelineConfig.generateFn` type (line 29). (b) Add `wordTimestamps` to the generateFn return type (line 30-34). (c) In `produceChunk()` at line 330, change `config.generateFn(text, config.getVoiceId(), config.getSpeed())` to also pass `chunkWords`. (d) Add `wordTimestamps: result.wordTimestamps \|\| null` to the `ScheduledChunk` construction (~line 360). See plan §5.2 for exact code. | `src/utils/generationPipeline.ts` | Lines 29-34: update `generateFn` type signature + return type. Line 330: add `chunkWords` argument. ~Line 360: add `wordTimestamps` to chunk object. |
+| 4 | Hephaestus (renderer-scope) | **Update audioScheduler.ts: Accept real timestamps, bypass heuristic.** (a) Add `wordTimestamps?: { word: string; startTime: number; endTime: number }[] \| null` to `ScheduledChunk` interface (after line 87). (b) Add `validateWordTimestamps()` function — exact code in plan §5.3. Checks: length match, finite/non-negative, endTime >= startTime, monotone startTimes, word correspondence, scaled overshoot tolerance, zero-duration count. (c) Rewrite `computeWordBoundaries()` (lines 211-239): check `chunk.wordTimestamps` first → validate → use real timestamps for boundaries if valid → fall through to existing heuristic on failure. Include silenceMs-aware speech duration calculation. Update dev telemetry to record `timestampSource` and `realTimestamps`. See plan §5.3 for exact code. | `src/utils/audioScheduler.ts` | Line 87: add `wordTimestamps` to `ScheduledChunk`. Before line 211: add `validateWordTimestamps()` (~35 lines). Lines 211-239: rewrite `computeWordBoundaries()` body (~75 lines replacing ~28 lines). |
+| 5 | Hephaestus (renderer-scope) | **Wire generateFn caller to pass words.** In `src/hooks/useNarration.ts` (or wherever `generateFn` is constructed as an IPC wrapper), ensure the `words` parameter is forwarded through the IPC `generate` message to the worker. The IPC call site that posts `{ type: "generate", id, text, voice, speed }` must add `words` to the message. Find this by tracing from `PipelineConfig.generateFn` back to the IPC call. | `src/hooks/useNarration.ts` or `src/utils/kokoroStrategy.ts` | Trace from `generateFn` in pipeline config. Find the IPC `postMessage` or `invoke` call. Add `words` field. |
+| 6 | Hermes | **Install patch-package** (if not already present). Add `"postinstall": "patch-package"` to `package.json` scripts. Verify `patches/` directory is tracked by git. | `package.json` | Scripts section. |
+| 7 | Hippocrates | **Tests** — ≥15 new tests covering: (a) `computeWordTimestamps` produces correct timestamps for a known duration tensor, (b) token walk throws on underrun (fail-closed), (c) drift check throws when predicted vs actual exceeds scaled tolerance, (d) monotonicity check throws on non-monotone timestamps, (e) zero-token punctuation words get zero-duration entries, (f) `validateWordTimestamps` accepts valid timestamps, (g) `validateWordTimestamps` rejects length mismatch, (h) `validateWordTimestamps` rejects non-monotone startTimes, (i) `validateWordTimestamps` rejects word string mismatch, (j) `validateWordTimestamps` rejects overshoot beyond scaled tolerance, (k) `computeWordBoundaries` uses real timestamps when valid, (l) `computeWordBoundaries` falls back to heuristic when timestamps null, (m) `computeWordBoundaries` falls back when validation fails, (n) silenceMs correctly excluded from speech duration in validation, (o) existing `computeWordWeights` heuristic unchanged (regression). | `tests/` | New test file: `tests/narrTiming.test.ts` |
+| 8 | Hippocrates | **CJS/ESM parity check** — Verify both import paths resolve to patched code. Create a minimal test script that `require()`s the CJS path and dynamically `import()`s the ESM path, calls `generate()` with `words`, and asserts `wordTimestamps` exists on the result. This can be a test or a standalone verification script. | `tests/` or `scripts/` | New file. |
+| 9 | Hippocrates | **`npm test` + `npm run build`** — Full tier. All 1,609+ tests pass, build succeeds. | — | — |
+| 10 | Solon | **Spec compliance** — Verify all 16 SUCCESS CRITERIA items. Cross-reference plan §11 (audit findings table) to confirm all 15 audit resolutions are implemented. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, architecture note re: real timestamps), ROADMAP.md (mark NARR-TIMING complete), SPRINT_QUEUE.md (remove entry, log to completed), LESSONS_LEARNED.md (LL entry for fork maintenance pattern and patch-package workflow). Update TECHNICAL_REFERENCE.md § "Narrate Mode Architecture" to document real-timestamp pipeline. | All 6 governing docs + TECHNICAL_REFERENCE.md | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/narr-timing` |
+
+### Execution Sequence
+
+```
+READ PHASE (mandatory):
+  Read all WHERE files in order. NARR-TIMING_Plan.md is the primary reference.
+    ↓
+Task 6 (patch-package setup)         — prerequisite for fork
+    ↓
+Task 1 (kokoro-js fork)              — Athena (cross-system: fork + patch both CJS/ESM)
+    ↓
+Task 2 (tts-worker.js)               — Hermes (mechanical: add param, relay field)
+    ↓
+Task 5 (wire IPC caller)             — Hephaestus (trace generateFn to IPC call)
+Task 3 (generationPipeline.ts)       — Hephaestus (parallel with Task 5 if different files)
+    ↓
+Task 4 (audioScheduler.ts)           — Hephaestus (depends on Task 3 types)
+    ↓
+Tasks 7-8 (tests + parity check)    — after all implementation
+Task 9 (npm test + build)            — after tests written
+    ↓
+Task 10 (Solon spec compliance)
+Task 11 (Herodotus docs)
+Task 12 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. kokoro-js fork captures `durations` from `this.model()` return (no longer discarded)
+2. `generate_from_ids` returns `RawAudio` with `_durations` attached as non-enumerable property
+3. `generate` returns `RawAudio` with `wordTimestamps` attached as non-enumerable property (when `words` provided)
+4. `stream()` and all other kokoro-js internal callers continue to work unchanged (RawAudio type preserved)
+5. `tts-worker.js` accepts `words` in generate message and relays `wordTimestamps` in result
+6. `generationPipeline.ts` passes chunk words through to `generateFn` and attaches `wordTimestamps` to `ScheduledChunk`
+7. `audioScheduler.ts` uses real timestamps when present and valid; falls back to `computeWordWeights` heuristic otherwise
+8. `validateWordTimestamps` checks: length, finite/non-negative, endTime >= startTime, monotone startTimes, word correspondence, scaled overshoot tolerance (`min(40ms, 5% of speech duration)`), zero-duration count
+9. Token walk is fail-closed — throws on tensor underrun (not silent clip)
+10. Drift validation uses split accumulator (`totalPredictedSamples` includes EOS/tail; `sampleOffset` does not)
+11. Durations are rounded and clamped per-token before accumulation (mirrors model's `round().clamp_()`)
+12. `silenceMs` correctly excluded from speech duration in scheduler validation (timestamps validated against speech portion only)
+13. `patch-package` patch file exists in `patches/` and is applied on `npm install`
+14. Both CJS and ESM import paths resolve to patched kokoro-js code (parity check passes)
+15. ≥15 new tests in `tests/narrTiming.test.ts`
+16. `npm test` passes (1,609+ tests), `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** None — independent of FLOW-INF and EXT-ENR tracks. Can run in parallel with Track A/B.
 
 ---
 
