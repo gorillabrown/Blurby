@@ -108,6 +108,8 @@
 | H2 | Arrow Key NM Speed Adjust | Up/Down arrows adjust TTS rate by 0.1 increments during narration. (BUG-053) | Low | Small |
 | H3 | Voice Cloning for TTS | Clone user's voice or select celebrity/author voices for personalized narration. | Medium | Large |
 | H4 | AI Summary Generation | Generate chapter or book summaries on demand using local or cloud LLM. | Medium | Large |
+| H5 | Spoken/Display Word Separation | Separate `spokenWords` from `displayWords` in the narration pipeline. Exclude punctuation-only display tokens from phoneme alignment input entirely; reconstruct cursor positions from a mapping layer. Cleaner than teaching the Kokoro alignment layer about zero-length display tokens. Revisit if NARR-TIMING sees frequent heuristic fallback from punctuation-heavy text. (Audit finding #5 from NARR-TIMING review.) | Medium | Medium |
+| H6 | Silence-Aware Cursor Hold | Use `endTime` from NARR-TIMING word timestamps to detect inter-word pauses. Hold cursor visually still during silence gaps (between `word[i].endTime` and `word[i+1].startTime`) instead of interpolating through silence. Requires NARR-TIMING to ship first. Builds on the `endTime` contract defined in NARR-TIMING §5.3. (Audit finding #6 — scoped as future enhancement.) | High | Medium |
 
 ### Theme I: Branding & Visual Identity
 

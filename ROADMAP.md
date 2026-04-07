@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — FLOW-INF-B complete (v1.42.0). Queue depth 2 (YELLOW — backfill needed). Next: EXT-ENR-B.
+**Last updated**: 2026-04-06 — FLOW-INF-B complete (v1.42.0). Queue depth 3 (GREEN). Next: EXT-ENR-B.
 **Current branch**: `main`
-**Current state**: v1.42.0 stable. Queue depth 2 (YELLOW). Next: EXT-ENR-B → NARR-TIMING.
+**Current state**: v1.42.0 stable. Queue depth 3 (GREEN). Next: EXT-ENR-B → NARR-TIMING → FLOW-INF-C.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -628,20 +628,158 @@ Progress overlay: Persistent display in ReaderBottomBar showing: current chapter
 
 ### Sprint FLOW-INF-C: Cross-Book Continuous Reading
 
-**Goal:** Finishing a book in flow mode auto-loads the next from the reading queue.
+**Goal:** Finishing a book in flow mode auto-loads the next from the reading queue — no return to library, no modal, just a brief "Finished [Book A]. Starting [Book B]..." transition overlay, then the next book begins flowing.
 
-**Responsibility:** Cowork specs (after FLOW-INF-B) → CLI executes.
+**Version:** v1.45.0 | **Branch:** `sprint/flow-inf-c-cross-book` | **Tier:** Full
 
-**Deliverables:**
-1. Queue-aware flow completion — when `onComplete` fires, check reading queue for next item
-2. Transition UX — brief "Finished [Book A]. Starting [Book B]..." overlay (2-3s), then new book opens
-3. Session continuity — reading time, page counts, and goals track across book boundaries
-4. Skip/exit option — Escape or click to return to library instead of auto-advancing
-5. Empty queue handling — "Reading complete" with return-to-library option
+**Problem:** When flow mode exhausts all words, it silently switches back to page mode (`setFlowPlaying(false); setReadingMode("page")` at `ReaderContainer.tsx:1109-1112`). The user must manually return to the library, find the next book, and restart flow mode. For continuous reading sessions (e.g., a series queue), this friction breaks the reading flow.
 
-**Investigation gate:** Needs Cowork to spec: (a) how ReaderContainer handles book switching (does it unmount/remount?), (b) queue state management (who owns next-book resolution), (c) transition overlay design. These depend on how FLOW-INF-A/B land.
+**Investigation gate: ✅ CLEARED.** Three questions resolved:
 
-**Key files:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useLibrary.ts`
+1. **Book switching:** ReaderContainer stays mounted across book changes. `activeDoc.id` change triggers a `useEffect` (line 257-290) that resets all state: word index, reading mode → "page", session timers, resume anchor. LibraryContainer's `openDoc()` sets new `activeDoc` + `view`. For cross-book, we call `onOpenDocById(nextDocId)` from within ReaderContainer — this triggers `handleOpenDocById()` in LibraryContainer (line 218-226), which updates `lastReadAt`, resolves content, and swaps `activeDoc`. ReaderContainer's `[activeDoc.id]` effect then fires, reinitializing everything.
+
+2. **Queue state:** Reading queue exists via `queuePosition?: number` on `BlurbyDoc`. Three IPC handlers manage it (`add-to-queue`, `remove-from-queue`, `reorder-queue` in `main/ipc/library.js:514-579`). `sortReadingQueue()` in `src/utils/queue.ts` sorts by queue position. **No `getNextQueuedBook()` getter exists — must be built.** ReaderContainer already receives `library` prop (full doc array), so the next-book lookup can happen renderer-side without new IPC.
+
+3. **Transition overlay:** A 2.5s overlay shown inside the reader container (not a modal). Displays book completion + next book title. Escape or click to cancel → returns to library. After timeout, calls `onOpenDocById(nextDocId)`. Once the `[activeDoc.id]` effect fires, it resets `readingMode` to "page" — a second effect (new) detects `pendingFlowResumeRef` and auto-starts flow mode.
+
+### Design
+
+```
+Flow mode reaches end of book:
+    ↓
+FlowScrollEngine.onComplete() fires
+    ↓
+Check reading queue: getNextQueuedBook(activeDoc.id, library)
+    ↓
+┌─ Queue empty ──────────────────────────────────┐
+│  Show "Reading complete" toast                  │
+│  setFlowPlaying(false), setReadingMode("page") │
+│  (existing behavior — no change)                │
+└─────────────────────────────────────────────────┘
+    ↓ Queue has next book
+┌─ Show transition overlay (2.5s) ───────────────┐
+│  ┌──────────────────────────────────────────┐   │
+│  │  ✓ Finished "The Great Gatsby"           │   │
+│  │  Next: "Tender Is the Night"             │   │
+│  │                                          │   │
+│  │  [━━━━━━━━━━━━━━━━░░░░] 2s              │   │
+│  │                                          │   │
+│  │  Press Escape or click to return          │   │
+│  │  to library instead                       │   │
+│  └──────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────┘
+    ↓ Timer expires (or user waits)
+finishReading(currentPos)       ← saves progress, archives book, logs session
+removeFromQueue(currentDocId)   ← remove finished book from queue
+onOpenDocById(nextDocId)        ← swaps activeDoc (triggers [activeDoc.id] effect)
+pendingFlowResumeRef = true     ← flag: auto-start flow after init
+    ↓
+[activeDoc.id] effect fires → resets to page mode (existing)
+    ↓
+New effect: if pendingFlowResumeRef → startFlow() after brief delay (300ms for DOM)
+```
+
+**Key design decisions:**
+
+1. **No new component for the overlay.** The transition overlay is a conditional JSX block inside ReaderContainer, gated by `crossBookTransition` state (object with `{ finishedTitle, nextTitle, nextDocId, timeoutId }`). Simpler than a modal or separate component.
+
+2. **`finishReading` called before book switch.** This ensures the current book's progress is persisted, reading session logged, and book archived (since `finalPos >= wordsLength - 1`). The existing `onExitReader` call inside `finishReading` (line 156) fires but LibraryContainer's handler just sets `activeDoc = null` — immediately overridden by the `onOpenDocById` call that follows.
+
+3. **Actually: override `onExitReader` path.** The problem is `finishReading` calls `onExitReader(finalPos)` which sets `activeDoc = null` and `view = "library"`, momentarily unmounting ReaderContainer before `onOpenDocById` remounts it. Instead, we add a new `finishReadingWithoutExit()` that does everything `finishReading` does EXCEPT calling `onExitReader`. Then the cross-book path calls: `finishReadingWithoutExit(pos)` → `removeFromQueue(docId)` → `onOpenDocById(nextDocId)`. This keeps ReaderContainer mounted throughout the transition.
+
+4. **`pendingFlowResumeRef` flag pattern.** After `onOpenDocById` swaps `activeDoc`, the `[activeDoc.id]` effect resets `readingMode` to "page" and initializes everything. A separate `useEffect` watches for `pendingFlowResumeRef.current === true` and, after a 300ms delay (for Foliate DOM render), calls `startFlow()`. The flag is consumed (set to false) after use.
+
+5. **Escape cancels transition.** During the 2.5s overlay, pressing Escape clears `crossBookTransition`, cancels the timeout, and calls the normal `handleExitReader()` path (returns to library).
+
+6. **Queue removal is automatic.** The finished book is removed from the queue via `api.removeFromQueue(docId)` during the transition. The next book advances to queue position 0.
+
+### Baseline (post-FLOW-INF-B, v1.42.0)
+
+- FlowScrollEngine `onComplete` callback at `ReaderContainer.tsx:1109-1112` — current handler: `setFlowPlaying(false); setReadingMode("page")`
+- `library` prop on ReaderContainer (line 497) — full doc array with `queuePosition` fields
+- `onOpenDocById` prop on ReaderContainer (line 511) — opens another book by ID
+- `[activeDoc.id]` initialization effect at `ReaderContainer.tsx:257-290` — resets all state on book change
+- `finishReading()` in `useProgressTracker.ts:127-157` — persists progress, logs session, archives if complete, calls `onExitReader`
+- `sortReadingQueue()` in `src/utils/queue.ts:14-36` — sorts docs by queue priority
+- `api.removeFromQueue(docId)` — IPC handler at `main/ipc/library.js:532`
+- `handleExitReader()` in `ReaderContainer.tsx:790-801` — stops modes, saves progress, exits
+- `handleExitReader()` in `LibraryContainer.tsx:228-233` — sets `activeDoc = null`, `view = "library"`
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for flow mode, book switching, queue entries
+3. `ROADMAP.md` — this section
+4. `src/components/ReaderContainer.tsx` — FlowScrollEngine `onComplete` handler (line 1109-1112), `[activeDoc.id]` effect (lines 257-290), `handleExitReader` (lines 790-801), ReaderContainer props (lines 496-514), `readingMode` state, `flowScrollEngineRef`
+5. `src/hooks/useProgressTracker.ts` — `finishReading()` (lines 127-157), return value object (lines 190-205)
+6. `src/hooks/useReaderMode.ts` — `startFlow()` (lines 341-370), `stopAllModes()` (lines 143-160)
+7. `src/utils/queue.ts` — `sortReadingQueue()` (lines 14-36), `QueueDoc` interface (lines 1-8)
+8. `src/components/LibraryContainer.tsx` — `handleOpenDocById` (lines 218-226), `handleExitReader` (lines 228-233), ReaderContainer props (lines 495-514)
+9. `main/ipc/library.js` — `remove-from-queue` handler (line 532)
+10. `src/styles/global.css` — existing overlay/toast styles for reference
+11. `src/constants.ts` — add cross-book transition constants
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes | **Add cross-book constants** — `CROSS_BOOK_TRANSITION_MS = 2500` (overlay display time), `CROSS_BOOK_FLOW_RESUME_DELAY_MS = 300` (DOM settle time before auto-starting flow). | `src/constants.ts` | After flow constants section (~line 460). 2 lines. |
+| 2 | Hephaestus (renderer-scope) | **Add `getNextQueuedBook()` utility** — New exported function in `queue.ts`. Given `currentDocId` and a doc array, filters docs with `queuePosition !== undefined` (excluding current doc and completed docs where `position >= wordCount`), sorts by `queuePosition`, returns first or `null`. | `src/utils/queue.ts` | After `sortReadingQueue` (line 36). ~12 lines. |
+| 3 | Hephaestus (renderer-scope) | **Add `finishReadingWithoutExit()` to useProgressTracker** — New function that does everything `finishReading` does (persist progress, log session, archive if complete) but does NOT call `onExitReader(finalPos)`. Extract the shared logic into an internal `_persistAndLog(finalPos)` helper called by both `finishReading` and `finishReadingWithoutExit`. Add to return value. | `src/hooks/useProgressTracker.ts` | Refactor `finishReading` (lines 127-157). Extract lines 128-155 into `_persistAndLog`. `finishReading` = `_persistAndLog(pos); onExitReader(pos)`. `finishReadingWithoutExit` = `_persistAndLog(pos)` only. Add to return object (~line 199). |
+| 4 | Hephaestus (renderer-scope) | **Add cross-book transition state and overlay JSX to ReaderContainer** — (a) Add state: `crossBookTransition: { finishedTitle: string, nextTitle: string, nextDocId: string, timeoutId: ReturnType<typeof setTimeout> } | null`. (b) Add `pendingFlowResumeRef = useRef(false)`. (c) Add JSX overlay: conditional block rendered when `crossBookTransition !== null`. Centered card with completion message, next book title, progress bar (CSS animation 2.5s), "Press Escape to return to library" hint. CSS class: `.cross-book-overlay`. (d) Cleanup: clear timeout on unmount. | `src/components/ReaderContainer.tsx` | State near other state declarations (~line 130). Ref near other refs (~line 170). JSX inside the main return, before the reader content (or as a portal). Cleanup in existing unmount effect. |
+| 5 | Hephaestus (renderer-scope) | **Rewrite FlowScrollEngine `onComplete` handler for cross-book** — Replace the handler at lines 1109-1112. New logic: (a) Call `getNextQueuedBook(activeDoc.id, library)`. (b) If no next book: existing behavior (`setFlowPlaying(false); setReadingMode("page")`; optionally show "Reading complete" toast). (c) If next book found: `setFlowPlaying(false)`, set `crossBookTransition` state with titles + timeout. The timeout (after `CROSS_BOOK_TRANSITION_MS`) calls: `finishReadingWithoutExit(highlightedWordIndex)` → `api.removeFromQueue(activeDoc.id)` → `pendingFlowResumeRef.current = true` → `onOpenDocById(nextDocId)` → clear `crossBookTransition`. | `src/components/ReaderContainer.tsx` | Lines 1109-1112 (onComplete callback). Replace ~4 lines with ~25 lines. Also need access to `library` prop, `activeDoc`, `highlightedWordIndex`, `finishReadingWithoutExit`, and `onOpenDocById` — all already in scope. |
+| 6 | Hephaestus (renderer-scope) | **Add `pendingFlowResumeRef` effect** — New `useEffect` that watches `[activeDoc.id, readingMode]`. When `pendingFlowResumeRef.current === true` and `readingMode === "page"` (meaning the `[activeDoc.id]` init effect has run and reset to page): set `pendingFlowResumeRef.current = false`, then after `CROSS_BOOK_FLOW_RESUME_DELAY_MS` (300ms), call `startFlow()`. The delay allows Foliate to render the new book's DOM before FlowScrollEngine builds its line map. | `src/components/ReaderContainer.tsx` | After the `[activeDoc.id]` effect (after line 290). New `useEffect` block, ~12 lines. |
+| 7 | Hephaestus (renderer-scope) | **Escape key cancels transition** — In the existing keyboard handler (via `useKeyboardShortcuts` or inline), when `crossBookTransition !== null` and Escape is pressed: clear the timeout, set `crossBookTransition = null`, call `handleExitReader()` (normal exit to library). | `src/components/ReaderContainer.tsx` | Inside the keyboard handling logic. Find existing Escape handler — add guard at top: `if (crossBookTransition) { ... return; }`. |
+| 8 | Hephaestus (renderer-scope) | **Click-to-cancel on overlay** — The overlay JSX from Task 4 gets an `onClick` handler that behaves identically to Escape: clears transition, cancels timeout, calls `handleExitReader()`. Overlay covers full viewport with semi-transparent backdrop so the click target is large. | `src/components/ReaderContainer.tsx` | In the overlay JSX from Task 4. Add `onClick` handler to the backdrop div. |
+| 9 | Hermes (renderer-scope) | **Add `.cross-book-overlay` CSS** — Full-viewport overlay: `position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6)`. Inner card: `background: var(--surface); border-radius: 12px; padding: 32px; max-width: 400px; text-align: center`. Progress bar: `height: 3px; background: var(--accent); animation: cross-book-progress CROSS_BOOK_TRANSITION_MS linear forwards`. Animate: `@keyframes cross-book-progress { from { width: 100% } to { width: 0 } }`. Fade-in entrance: `opacity: 0 → 1, 200ms ease`. | `src/styles/global.css` | After existing overlay styles. ~25 lines. |
+| 10 | Hippocrates | **Tests** — ≥12 new tests: (a) `getNextQueuedBook` returns next queued doc, (b) `getNextQueuedBook` excludes current doc, (c) `getNextQueuedBook` excludes completed docs, (d) `getNextQueuedBook` returns null for empty queue, (e) `getNextQueuedBook` sorts by `queuePosition`, (f) `finishReadingWithoutExit` persists progress but does NOT call `onExitReader`, (g) `finishReadingWithoutExit` archives completed book, (h) onComplete with queue: triggers transition state, (i) onComplete without queue: falls through to page mode, (j) Escape during transition cancels and exits, (k) transition timeout triggers `onOpenDocById`, (l) `pendingFlowResumeRef` triggers `startFlow` after delay. | `tests/` | New test file: `tests/crossBookFlow.test.ts` |
+| 11 | Hippocrates | **`npm test` + `npm run build`** — Full tier. | — | — |
+| 12 | Solon | **Spec compliance** — Verify all 14 SUCCESS CRITERIA items. | — | — |
+| 13 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, architecture note re: cross-book flow), ROADMAP.md (mark FLOW-INF-C complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (if non-trivial discovery). Update TECHNICAL_REFERENCE.md if architecture changed. | All 6 governing docs | — |
+| 14 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/flow-inf-c-cross-book` |
+
+### Execution Sequence
+
+```
+READ PHASE — all WHERE files in order
+    ↓
+Task 1 (constants)                        — Hermes, unblocks everything
+Task 2 (getNextQueuedBook utility)        — Hephaestus, parallel with Task 1
+    ↓
+Task 3 (finishReadingWithoutExit)         — Hephaestus, after Task 1
+    ↓
+Task 4 (transition state + overlay JSX)   — Hephaestus, after Task 1
+Task 9 (CSS)                              — Hermes, parallel with Task 4
+    ↓
+Task 5 (rewrite onComplete handler)       — Hephaestus, after Tasks 2+3+4
+Task 6 (pendingFlowResumeRef effect)      — Hephaestus, after Task 4
+    ↓
+Task 7 (Escape cancels)                   — Hephaestus, after Task 5
+Task 8 (click-to-cancel)                  — Hephaestus, after Task 4
+    ↓
+Tasks 10-11 (tests + build)              — after all implementation
+    ↓
+Task 12 (Solon spec compliance)
+Task 13 (Herodotus docs)
+Task 14 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Finishing a book in flow mode with a non-empty queue shows the transition overlay (not an immediate return to page mode)
+2. Transition overlay displays: finished book title, next book title, countdown progress bar, escape hint
+3. After `CROSS_BOOK_TRANSITION_MS` (2.5s), the next book opens and flow mode auto-starts
+4. Flow mode resumes at the next book's saved position (or 0 if new) with the same WPM settings
+5. Finished book's progress is persisted, session is logged, and book is archived (via `finishReadingWithoutExit`)
+6. Finished book is removed from the reading queue (via `api.removeFromQueue`)
+7. `getNextQueuedBook()` correctly returns the next queued book by `queuePosition`, excluding current doc and completed docs
+8. Pressing Escape during transition cancels and returns to library (via `handleExitReader`)
+9. Clicking the overlay backdrop cancels and returns to library
+10. When the reading queue is empty on flow completion, existing behavior is preserved (page mode, no overlay)
+11. ReaderContainer stays mounted throughout the transition (no unmount/remount flash)
+12. `pendingFlowResumeRef` is consumed (set to false) after triggering `startFlow()` — no repeated auto-starts
+13. ≥12 new tests in `tests/crossBookFlow.test.ts`
+14. `npm test` passes, `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** FLOW-INF-B
 
@@ -1283,4 +1421,4 @@ Task 12 (Git)
 15. `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** TTS-7D (independent of EINK-6A/6B — can run in parallel)
-                                                                                                                                                                        
+                                                                                                                                                     
