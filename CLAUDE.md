@@ -165,6 +165,8 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the H
 5. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
 6. **TECHNICAL_REFERENCE.md** — Update if architecture changed.
 
+**Herodotus efficiency rule:** Zeus SHOULD pre-compose exact old_string/new_string edit diffs for doc updates and include them in the Herodotus dispatch. This lets Herodotus apply edits directly without re-reading each file to discover what changed. When provided, pre-composed diffs cut Herodotus tool calls by ~50%. When not feasible (e.g., complex multi-section updates), Herodotus falls back to standard read-then-edit.
+
 ### Standing Rules
 
 - **READ BEFORE YOU WRITE.** Every CLI session MUST read `docs/governance/LESSONS_LEARNED.md` and the relevant ROADMAP section BEFORE making any code changes. This is non-negotiable. Skipping this step causes regressions.
@@ -299,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.43.0 — queue YELLOW depth 2, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.43.1 — queue GREEN depth 3, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -327,11 +329,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **FLOW-INF-A complete** — CSS mask-image reading zone with configurable position/size. FlowScrollEngine computes dynamic zone position from `--flow-zone-top` / `--flow-zone-size` CSS custom properties. ReaderBottomBar exposes zone controls (position slider, size slider) in flow mode. ResizeObserver triggers zone recomputation on container resize. 27 new tests. v1.41.0.
 - **FLOW-INF-B complete** — Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash). FlowProgress computation with chapter/book percentage + estimated time remaining. ReaderBottomBar progress display. 18 new tests. v1.42.0.
 - **EXT-ENR-B complete** — Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` and `ws-pairing-success` push events. `PairingBanner` component appears in library screen when extension tries to connect — shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced from 5s to 15s. 29 new tests (`tests/autoDiscoveryPairing.test.ts`). v1.43.0.
-- Active queue: depth 2 — YELLOW (below minimum of 3). NARR-TIMING → FLOW-INF-C. **Cowork must backfill queue to ≥3 before next dispatch.** HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **HOTFIX-15 complete** — BUG-159/160/161 resolved. colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% container cap) + null guard. Proportional band height (`lineHeight * 1.08`) + dynamic re-measurement on word change (>2px threshold). Truth-sync interval halved from 12→6 words. 16 new tests (`tests/narrationCursorPolish.test.ts`, 2 updated). v1.43.1.
+- Active queue: depth 3 — GREEN. NARR-TIMING → FLOW-INF-C → (next backfill needed). HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,683 tests across 93 test files
+- 1,699 tests across 94 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -370,13 +373,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `ReaderContainer.tsx` — decomposed into hooks: useReaderMode, useProgressTracker, useEinkController
     - `ReaderBottomBar.tsx` — unified controls across all 4 reading modes
     - ~~`FlowScrollView.tsx`~~ — removed in FLOW-3B (dead code since EPUB-2B)
-  - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode.ts`, `NarrateMode.ts` + shared types and index
-  - `src/components/settings/` — 8 sub-pages incl. `CloudSyncSettings.tsx` (Sprint 17), `ThemeSettings.tsx` (e-ink controls)
-  - `src/contexts/` — SettingsContext.tsx, ToastContext.tsx
-  - `src/hooks/` — useReader, useLibrary, useKeyboardShortcuts, useNarration, useReaderMode (TD-1), useProgressTracker (TD-1), useEinkController (TD-1)
-  - `src/utils/` — text.ts, pdf.ts, rhythm.ts, queue.ts, segmentWords.ts, getOverlayPosition.ts, FlowScrollEngine.ts, constants.ts, authorNormalize.ts, narrationPlanner.ts (TTS-7P — rolling pause-boundary planner for the active text window), narrateDiagnostics.ts (TTS-7Q — glide diagnostic event types and `getGlideDiagSummary()`)
-  - `src/types/` — types.ts (BlurbyDoc gains `queuePosition?: number`), foliate.ts (TD-1), narration.ts (TD-1)
-  - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
-  - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro). Kokoro uses 3 native-rate buckets (1.0x/1.2x/1.5x) — no scheduler pitch-shift.
-  - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Test count**: 1,683 tests across 93 test files
+  - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode

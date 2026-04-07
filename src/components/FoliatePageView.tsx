@@ -515,7 +515,7 @@ export default function FoliatePageView({
     const containerRect = container?.getBoundingClientRect?.();
     const contentWidth = containerRect && containerRect.width > 0 ? containerRect.width : 600;
 
-    narrationBandLineHeightRef.current = lineHeight + 4; // small vertical padding
+    narrationBandLineHeightRef.current = Math.ceil(lineHeight * 1.08); // proportional padding
     narrationBandWidthRef.current = contentWidth;
   }, []);
 
@@ -696,17 +696,35 @@ export default function FoliatePageView({
           rail.active &&
           Math.abs(rail.y - fromWindow.y) <= sameLineTolerance;
 
-        // NARR-CURSOR-1: Compute column right edge from <p> ancestor of current word
+        // NARR-CURSOR-1 + BUG-159: Compute column right edge from tightened ancestor of current word
         const wordEl = foundDoc.querySelector(`[data-word-index="${wordIndex}"]`);
-        const pEl = wordEl?.closest("p") || wordEl?.parentElement;
-        const container = containerRef.current;
-        if (pEl && container) {
-          const frame = foundDoc.defaultView?.frameElement as HTMLElement | null;
-          if (frame) {
-            const containerRect = container.getBoundingClientRect();
-            const frameRect = frame.getBoundingClientRect();
-            const pRight = pEl.getBoundingClientRect().right;
-            narrationColRightRef.current = frameRect.left + pRight - containerRect.left;
+        if (!wordEl) { /* word not in DOM — skip measurement tick */ }
+        else {
+          const pEl = wordEl.closest("p, blockquote, li, figcaption") || wordEl.parentElement;
+          const container = containerRef.current;
+          if (pEl && container) {
+            const frame = foundDoc.defaultView?.frameElement as HTMLElement | null;
+            if (frame) {
+              const containerRect = container.getBoundingClientRect();
+              const frameRect = frame.getBoundingClientRect();
+              const pRect = pEl.getBoundingClientRect();
+              // Width guard: if resolved element is wider than 95% of container, fall back to container edge
+              const colRight = pRect.width > containerRect.width * 0.95
+                ? containerRect.width - 16
+                : frameRect.left + pRect.right - containerRect.left;
+              narrationColRightRef.current = colRight;
+            }
+          }
+        }
+
+        // BUG-160b: Re-measure band height when word's line height differs significantly
+        if (wordEl) {
+          const wordLhRaw = parseFloat(foundDoc.defaultView?.getComputedStyle(wordEl)?.lineHeight || "0");
+          if (wordLhRaw > 0) {
+            const newHeight = Math.ceil(wordLhRaw * 1.08);
+            if (Math.abs(newHeight - narrationBandLineHeightRef.current) > 2) {
+              narrationBandLineHeightRef.current = newHeight;
+            }
           }
         }
 
@@ -922,19 +940,24 @@ export default function FoliatePageView({
       narrationDiagLastVisualWordRef.current = wordIndex;
     }
 
-    // NARR-CURSOR-1: Compute colRight from <p> ancestor of anchor word
+    // NARR-CURSOR-1 + BUG-159: Compute colRight from tightened ancestor of anchor word
     const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, 40);
     const bandX = currentWindow.x;
     const wordEl = doc.querySelector(`[data-word-index="${wordIndex}"]`);
-    const pEl = wordEl?.closest("p") || wordEl?.parentElement;
-    const container = containerRef.current;
-    if (pEl && container) {
-      const frame = doc.defaultView?.frameElement as HTMLElement | null;
-      if (frame) {
-        const cRect = container.getBoundingClientRect();
-        const fRect = frame.getBoundingClientRect();
-        const pRight = pEl.getBoundingClientRect().right;
-        narrationColRightRef.current = fRect.left + pRight - cRect.left;
+    if (wordEl) {
+      const pEl = wordEl.closest("p, blockquote, li, figcaption") || wordEl.parentElement;
+      const container = containerRef.current;
+      if (pEl && container) {
+        const frame = doc.defaultView?.frameElement as HTMLElement | null;
+        if (frame) {
+          const cRect = container.getBoundingClientRect();
+          const fRect = frame.getBoundingClientRect();
+          const pRect = pEl.getBoundingClientRect();
+          const colRight = pRect.width > cRect.width * 0.95
+            ? cRect.width - 16
+            : fRect.left + pRect.right - cRect.left;
+          narrationColRightRef.current = colRight;
+        }
       }
     }
     const colRight = narrationColRightRef.current;

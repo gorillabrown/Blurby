@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-07 — EXT-ENR-B complete (v1.43.0). Queue depth 2 (YELLOW — needs backfill). Next: NARR-TIMING.
+**Last updated**: 2026-04-07 — HOTFIX-15 complete (v1.43.1, BUG-159/160/161 resolved). Queue depth 3 (GREEN). Next: NARR-TIMING → FLOW-INF-C.
 **Current branch**: `main`
-**Current state**: v1.43.0 stable. Queue depth 2 (YELLOW). Next: NARR-TIMING → FLOW-INF-C. Backfill required before next dispatch.
+**Current state**: v1.43.1 stable. Queue depth 3 (GREEN). Next: NARR-TIMING → FLOW-INF-C → (backfill).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -42,6 +42,8 @@ Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
 SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed) ✅
     │
 HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅
+    │
+HOTFIX-15: Narration Cursor Polish (BUG-159/160/161) ✅
     │
     ├───────────────────────────────────┐
     ▼                                   ▼
@@ -434,6 +436,87 @@ Task 11 (Git)
 16. `npm test` passes
 
 **Tier:** Quick | **Depends on:** None — fully spec'd, CLI-ready.
+
+---
+
+## HOTFIX-15: Narration Cursor Polish (BUG-159/160/161) ✅ COMPLETED (v1.43.1, 2026-04-07)
+
+**Goal:** Fix three narration cursor issues discovered during extended listening: cursor stretching to full page width (BUG-159), band height too tall and not dynamically scaling (BUG-160), and cursor drifting ahead of audio between truth-syncs (BUG-161 partial mitigation).
+
+**Problem:** After NARR-CURSOR-1 (v1.40.0) shipped the collapsing cursor, extended listening sessions revealed three issues: (1) the cursor occasionally stretches to the full page width when `closest("p")` falls through to a wide container, (2) the band height uses a fixed `+4px` padding that's visually too generous and never re-measures after narration starts, and (3) the character-count heuristic in `computeWordWeights()` causes cumulative cursor drift that becomes visible within a few sentences.
+
+**Relationship to NARR-TIMING:** BUG-161's full fix is NARR-TIMING (real word timestamps replace the heuristic entirely). This hotfix applies a partial mitigation — halving the truth-sync interval from 12→6 words — to limit visible drift until NARR-TIMING ships.
+
+### Baseline
+
+From NARR-CURSOR-1 (v1.40.0):
+- `narrationColRightRef` — per-word right-edge measurement from `<p>` ancestor (FoliatePageView.tsx:701, 929)
+- `narrationBandLineHeightRef` — measured once at narration start: `lineHeight + 4` (FoliatePageView.tsx:518)
+- `measureNarrationBandDimensions()` — called once at narration start (FoliatePageView.tsx:492-520)
+- `ensureAudioProgressGlideLoop` — primary RAF loop (FoliatePageView.tsx:628-795)
+- `positionNarrationOverlay` — seed function (FoliatePageView.tsx:873-970)
+- `computeWordWeights()` — character-count heuristic (audioScheduler.ts:53-72)
+- `TTS_CURSOR_TRUTH_SYNC_INTERVAL = 12` — re-anchor frequency (constants.ts:100)
+- `.foliate-narration-highlight` — CSS gradient overlay (global.css:3867-3881)
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration band, cursor sync, colRight entries
+3. `ROADMAP.md` — this section
+4. `src/constants.ts` — `NARRATION_BAND_MIN_WIDTH_PX` (~line 108), `TTS_CURSOR_TRUTH_SYNC_INTERVAL` (line 100)
+5. `src/components/FoliatePageView.tsx` — Read in order:
+   - `measureNarrationBandDimensions()` (lines 492-520) — height measurement
+   - `ensureAudioProgressGlideLoop` (lines 628-795) — primary RAF loop, colRight computation at 699-711
+   - `positionNarrationOverlay` (lines 873-970) — seed function, colRight at 927-937
+6. `src/utils/audioScheduler.ts` — `computeWordWeights()` (lines 53-72), truth-sync interval usage (line 170, 277)
+7. `src/styles/global.css` — `.foliate-narration-highlight` (lines 3867-3881)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Fix BUG-159 — Tighten `colRight` ancestor resolution.** In `ensureAudioProgressGlideLoop` (line 701) and `positionNarrationOverlay` (line 929), replace `wordEl?.closest("p") \|\| wordEl?.parentElement` with a safer resolution: `wordEl?.closest("p, blockquote, li, figcaption") \|\| wordEl?.parentElement`. Then add a width guard: if the resolved element's `getBoundingClientRect().width` exceeds the scroll container width × 0.95, fall back to the scroll container's right edge minus a 16px margin. Also add a null guard: if `wordEl` is null (word not in DOM), skip the measurement tick entirely — do not update `narrationColRightRef.current`. | `src/components/FoliatePageView.tsx` | Line 701 (glide loop): replace `closest("p")` expression + add width guard (~6 lines). Line 929 (seed): same pattern (~6 lines). Add null-guard `if (!wordEl) return;` before the pEl line at both sites. |
+| 2 | Hephaestus (renderer-scope) | **Fix BUG-160a — Proportional band height.** In `measureNarrationBandDimensions()` (line 518), replace `narrationBandLineHeightRef.current = lineHeight + 4` with `narrationBandLineHeightRef.current = Math.ceil(lineHeight * 1.08)`. This scales the padding proportionally rather than fixed-pixel. | `src/components/FoliatePageView.tsx` | Line 518. Single expression change. |
+| 3 | Hephaestus (renderer-scope) | **Fix BUG-160b — Dynamic height re-measurement.** In `ensureAudioProgressGlideLoop`, inside the word-change block (after colRight computation, ~line 712), add: measure the current word's computed `lineHeight` via `window.getComputedStyle(wordEl).lineHeight`. If it differs from `narrationBandLineHeightRef.current` by more than 2px, update `narrationBandLineHeightRef.current = Math.ceil(newLineHeight * 1.08)`. This handles mixed font sizes (headings, blockquotes) within the EPUB. | `src/components/FoliatePageView.tsx` | Inside `ensureAudioProgressGlideLoop`, after the colRight block (~line 712). ~6 lines insertion. |
+| 4 | Hermes (renderer-scope) | **Fix BUG-161 partial — Halve truth-sync interval.** In `src/constants.ts` line 100, change `TTS_CURSOR_TRUTH_SYNC_INTERVAL = 12` to `TTS_CURSOR_TRUTH_SYNC_INTERVAL = 6`. This doubles the re-anchor frequency, limiting maximum visible drift to ~6 words instead of ~12. | `src/constants.ts` | Line 100. Single value change: `12` → `6`. |
+| 5 | Hippocrates | **Tests** — ≥10 new tests: (a) colRight ancestor resolution prefers `<p>` when available, (b) colRight falls back to `<blockquote>`, `<li>`, `<figcaption>` when no `<p>` ancestor, (c) colRight width guard caps to container width when resolved element is too wide, (d) null `wordEl` skips measurement tick (colRight unchanged), (e) band height uses proportional `lineHeight * 1.08` not fixed `+4`, (f) band height re-measures on word change when line height differs by >2px, (g) band height does NOT re-measure when line height difference ≤2px (stability), (h) truth-sync interval is 6 (not 12), (i) end-of-line snap still works after colRight fix (regression), (j) seed function (`positionNarrationOverlay`) uses same tightened ancestor resolution. | `tests/` | New test file `tests/narrationCursorPolish.test.ts`. |
+| 6 | Hippocrates | **`npm test`** — all tests pass. | — | — |
+| 7 | Solon | **Spec compliance** — verify all 12 SUCCESS CRITERIA items met. | — | — |
+| 8 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, bug count, sprint list), ROADMAP.md (mark HOTFIX-15 complete), SPRINT_QUEUE.md (remove, log to completed), BUG_REPORT.md (mark BUG-159/160/161 resolved), LESSONS_LEARNED.md (if non-trivial discovery). | All 6 governing docs | — |
+| 9 | Hermes | **Git: commit, merge, push** | — | Branch: `hotfix/15-narration-cursor-polish` |
+
+### Execution Sequence
+
+```
+Tasks 1-4 (all fixes)         — parallel, independent edit sites
+    ↓
+Task 5 (tests)                — after all fixes
+Task 6 (npm test)             — after tests written
+    ↓
+Task 7 (Solon spec compliance)
+Task 8 (Herodotus docs)
+Task 9 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Narration cursor right edge never exceeds the current text column width (no full-page stretch)
+2. `colRight` ancestor resolution checks `p, blockquote, li, figcaption` before falling back to `parentElement`
+3. When resolved ancestor is wider than 95% of scroll container, colRight falls back to container edge minus 16px
+4. Null `wordEl` (word not in DOM) skips measurement tick — no garbage values applied to `narrationColRightRef`
+5. Band height uses proportional padding (`lineHeight * 1.08`) not fixed `+4px`
+6. Band height re-measures on word change when the current word's line height differs by >2px
+7. Band height does NOT jitter on same-size words (≤2px tolerance prevents unnecessary updates)
+8. `TTS_CURSOR_TRUTH_SYNC_INTERVAL` reduced from 12 to 6 (partial BUG-161 mitigation)
+9. Existing collapsing cursor behavior preserved — end-of-line snap, line rail stability, min-width clamp
+10. `positionNarrationOverlay` (seed) uses the same tightened ancestor resolution as the glide loop
+11. ≥10 new tests in `tests/narrationCursorPolish.test.ts`
+12. `npm test` passes
+
+**BUG-161 full fix disposition:** Deferred to NARR-TIMING. Real word-level timestamps eliminate the character-count heuristic entirely. Truth-sync interval reduction is a stopgap.
+
+**Tier:** Quick | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
 
 ---
 
@@ -1420,5 +1503,4 @@ Task 12 (Git)
 14. `npm test` passes
 15. `npm run build` succeeds
 
-**Tier:** Full | **Depends on:** TTS-7D (independent of EINK-6A/6B — can run in parallel)
-                                                                                                                                                     
+**Tier:** F
