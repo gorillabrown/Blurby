@@ -432,6 +432,12 @@ export const FLOW_TIMER_BAR_EINK_HEIGHT_PX = 6;
 export const FLOW_TIMER_GLOW_PX = 2;
 // Note: FLOW_LINE_COMPLETE_FLASH_MS (100ms) is declared above in the FLOW-3A section.
 
+// ── Cross-Book Continuous Reading (FLOW-INF-C) ──────────────────────────────
+/** Duration in ms that the "Finished / Next" transition overlay is displayed */
+export const CROSS_BOOK_TRANSITION_MS = 2500;
+/** Delay in ms after book switch before auto-starting flow (DOM settle time) */
+export const CROSS_BOOK_FLOW_RESUME_DELAY_MS = 300;
+
 // ── Default Settings ─────────────────────────────────────────────────────────
 /** Single source of truth for BlurbySettings defaults.
  *  Import in SettingsContext and useLibrary instead of duplicating. */

@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — YELLOW (backfill needed)
-Next sprint: FLOW-INF-C (Cross-Book Continuous Reading)
-Health: YELLOW — STAB-1A complete (v1.45.0). FLOW-INF-C → PERF-1 queued. One more sprint needed for GREEN.
+Queue depth: 1 — RED (backfill needed)
+Next sprint: PERF-1 (Performance Audit)
+Health: RED — FLOW-INF-C complete (v1.46.0). PERF-1 queued. Two more sprints needed for GREEN.
 ```
 
 ---
@@ -32,10 +32,9 @@ Health: YELLOW — STAB-1A complete (v1.45.0). FLOW-INF-C → PERF-1 queued. One
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | FLOW-INF-C | v1.46.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
-| 2 | PERF-1 | v1.47.0 | `sprint/perf-1-audit` | Full | **YES** | Full spec: 18 tasks (2-phase: measure then remediate), 18 success criteria. Startup parallelization, renderer de-thrash, data layer debounce/LRU, Vite code splitting. |
+| 1 | PERF-1 | v1.47.0 | `sprint/perf-1-audit` | Full | **YES** | Full spec: 18 tasks (2-phase: measure then remediate), 18 success criteria. Startup parallelization, renderer de-thrash, data layer debounce/LRU, Vite code splitting. |
 
-**Dispatch status:** Queue depth 2 — YELLOW. One more sprint needed for GREEN. FLOW-INF-C → PERF-1 fully spec'd.
+**Dispatch status:** Queue depth 1 — RED. Two more sprints needed for GREEN. PERF-1 fully spec'd.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -48,7 +47,8 @@ Health: YELLOW — STAB-1A complete (v1.45.0). FLOW-INF-C → PERF-1 queued. One
 8. ~~Backfill queue~~ — STAB-1A spec'd (queue YELLOW, depth 2)
 9. ~~Backfill queue to ≥3~~ — DONE (PERF-1 spec'd, queue GREEN depth 3)
 10. ~~Dispatch STAB-1A to CLI~~ — COMPLETE (v1.45.0)
-11. **Backfill queue to ≥3** — spec one more sprint to restore GREEN before dispatching FLOW-INF-C.
+11. ~~Dispatch FLOW-INF-C to CLI~~ — COMPLETE (v1.46.0)
+12. **Backfill queue to ≥3** — spec two more sprints to restore GREEN before dispatching PERF-1.
 
 ---
 
@@ -70,6 +70,7 @@ Health: YELLOW — STAB-1A complete (v1.45.0). FLOW-INF-C → PERF-1 queued. One
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| FLOW-INF-C | 2026-04-07 | PASS | Cross-book continuous reading: transition overlay (2.5s countdown), auto-open next queued book + resume flow, `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching, Escape/click-to-cancel. 21 new tests (1,754 total across 97 files). v1.46.0. |
 | STAB-1A | 2026-04-07 | PASS | Startup & flow stabilization: `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. BUG-162/163/164/165 resolved. 19 new tests (1,736 total across 96 files). v1.45.0. |
 | NARR-TIMING | 2026-04-07 | PASS | Real word-level timestamps from Kokoro duration tensor. kokoro-js fork (patch-package), 4-layer validation, scheduler integration with heuristic fallback. BUG-161 fully resolved. 18 new tests (1,717 total across 95 files). v1.44.0. |
 | HOTFIX-15 | 2026-04-07 | PASS | Narration cursor polish: colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% cap) + null guard (BUG-159). Proportional band height `lineHeight * 1.08` + dynamic re-measurement on word change >2px threshold (BUG-160). Truth-sync interval halved 12→6 words (BUG-161 partial). 16 new tests (1,699 total across 94 files). v1.43.1. |

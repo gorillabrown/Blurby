@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, stepKokoroBucket, resolveKokoroBucket } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, FOCUS_TEXT_SIZE_STEP, TTS_WPM_CAP, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_BROWSING_CHECK_INTERVAL_MS, FOLIATE_SECTION_LOAD_WAIT_MS, RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA, FOCUS_MODE_START_DELAY_MS, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, stepKokoroBucket, resolveKokoroBucket, CROSS_BOOK_TRANSITION_MS, CROSS_BOOK_FLOW_RESUME_DELAY_MS } from "../constants";
+import { getNextQueuedBook } from "../utils/queue";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
@@ -181,6 +182,23 @@ export default function ReaderContainer({
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
 
+  // FLOW-INF-C: Cross-book continuous reading state
+  const [crossBookTransition, setCrossBookTransition] = useState<{
+    finishedTitle: string;
+    nextTitle: string;
+    nextDocId: string;
+    timeoutId: ReturnType<typeof setTimeout>;
+  } | null>(null);
+  const pendingFlowResumeRef = useRef(false);
+  // FLOW-INF-C: Refs to avoid stale closures in FlowScrollEngine onComplete
+  const activeDocRef = useRef(activeDoc);
+  activeDocRef.current = activeDoc;
+  const libraryRef = useRef(library);
+  libraryRef.current = library;
+  const finishReadingWithoutExitRef = useRef<(idx: number) => void>(() => {});
+  const onOpenDocByIdRef = useRef(onOpenDocById);
+  onOpenDocByIdRef.current = onOpenDocById;
+
   // FLOW-3A: FlowScrollEngine for infinite scroll mode
   const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
   const flowScrollCursorRef = useRef<HTMLDivElement | null>(null);
@@ -316,7 +334,8 @@ export default function ReaderContainer({
     onExitReader,
   });
   const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef } = progress;
-  const { finishReading, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
+  const { finishReading, finishReadingWithoutExit, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
+  finishReadingWithoutExitRef.current = finishReadingWithoutExit;
 
   // Backtrack prompt state — managed by useProgressTracker
 
@@ -788,6 +807,14 @@ export default function ReaderContainer({
 
   // Exit reader — uses both mode hook and progress hook
   const handleExitReader = useCallback(() => {
+    // FLOW-INF-C: Cancel cross-book transition and exit
+    if (crossBookTransition) {
+      clearTimeout(crossBookTransition.timeoutId);
+      setCrossBookTransition(null);
+      stopAllModes();
+      finishReading(highlightedWordIndex);
+      return;
+    }
     if (readingMode === "page") {
       const totalWords = activeDoc.wordCount || words.length || 1;
       if (checkBacktrack(highlightedWordIndex, totalWords, useFoliate)) return;
@@ -798,7 +825,7 @@ export default function ReaderContainer({
       stopAllModes();
       setReadingMode("page");
     }
-  }, [readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex, activeDoc.wordCount, words.length, useFoliate, checkBacktrack, setReadingMode, setHighlightedWordIndex]);
+  }, [crossBookTransition, readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex, activeDoc.wordCount, words.length, useFoliate, checkBacktrack, setReadingMode, setHighlightedWordIndex]);
 
   const { handleSaveAtCurrent, handleKeepFurthest } = progress;
 
@@ -1107,8 +1134,27 @@ export default function ReaderContainer({
       flowScrollEngineRef.current = new FlowScrollEngine({
         onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
         onComplete: () => {
+          const doc = activeDocRef.current;
+          const nextDoc = getNextQueuedBook(doc.id, libraryRef.current);
+          if (!nextDoc) {
+            setFlowPlaying(false);
+            setReadingMode("page");
+            return;
+          }
           setFlowPlaying(false);
-          setReadingMode("page");
+          const tid = setTimeout(() => {
+            finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
+            api.removeFromQueue(doc.id);
+            pendingFlowResumeRef.current = true;
+            onOpenDocByIdRef.current(nextDoc.id);
+            setCrossBookTransition(null);
+          }, CROSS_BOOK_TRANSITION_MS);
+          setCrossBookTransition({
+            finishedTitle: doc.title || "Untitled",
+            nextTitle: nextDoc.title || "Untitled",
+            nextDocId: nextDoc.id,
+            timeoutId: tid,
+          });
         },
         onProgressUpdate: (progress: FlowProgress) => setFlowProgress(progress),
       });
@@ -1132,6 +1178,23 @@ export default function ReaderContainer({
       engine.stop();
     };
   }, [readingMode, flowPlaying, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // FLOW-INF-C: Auto-resume flow after cross-book transition
+  useEffect(() => {
+    if (!pendingFlowResumeRef.current || readingMode !== "page") return;
+    pendingFlowResumeRef.current = false;
+    const timer = setTimeout(() => {
+      startFlow();
+    }, CROSS_BOOK_FLOW_RESUME_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [activeDoc.id, readingMode, startFlow]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // FLOW-INF-C: Cleanup cross-book transition timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (crossBookTransition) clearTimeout(crossBookTransition.timeoutId);
+    };
+  }, [crossBookTransition]);
 
   // FLOW-3A: Sync WPM changes to running FlowScrollEngine
   useEffect(() => {
@@ -1527,6 +1590,22 @@ export default function ReaderContainer({
           onSaveAtCurrent={handleSaveAtCurrent}
           onKeepFurthest={handleKeepFurthest}
         />
+      )}
+      {crossBookTransition && (
+        <div className="cross-book-overlay" onClick={() => {
+          clearTimeout(crossBookTransition.timeoutId);
+          setCrossBookTransition(null);
+          handleExitReader();
+        }}>
+          <div className="cross-book-overlay__card" onClick={e => e.stopPropagation()}>
+            <p className="cross-book-overlay__finished">Finished <strong>{crossBookTransition.finishedTitle}</strong></p>
+            <p className="cross-book-overlay__next">Up next: <strong>{crossBookTransition.nextTitle}</strong></p>
+            <div className="cross-book-overlay__progress">
+              <div className="cross-book-overlay__bar" />
+            </div>
+            <p className="cross-book-overlay__hint">Press Escape to cancel</p>
+          </div>
+        </div>
       )}
     </>
   );

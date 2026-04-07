@@ -40,6 +40,8 @@ export interface UseProgressTrackerReturn {
   handleKeepFurthest: () => void;
   /** Finish reading session — flush saves, log session, handle completion */
   finishReading: (finalPos: number) => void;
+  /** Finish reading without exiting — persists progress, logs session, archives if complete, but does NOT call onExitReader */
+  finishReadingWithoutExit: (finalPos: number) => void;
   /** The debounced save timer ref (for cleanup) */
   pageSaveTimerRef: React.MutableRefObject<ReturnType<typeof setTimeout> | null>;
   /** Last saved position ref (for dedup) */
@@ -123,8 +125,8 @@ export function useProgressTracker({
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
   }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
 
-  // Finish reading — flush saves, log session, handle completion
-  const finishReading = useCallback((finalPos: number) => {
+  // Internal helper: persist progress, log session, archive if complete (shared by both finish variants)
+  const _persistAndLog = useCallback((finalPos: number) => {
     if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
     const savePos = useFoliate
       ? Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0))
@@ -153,8 +155,18 @@ export function useProgressTracker({
       api.markDocCompleted();
       onArchiveDoc(activeDoc.id);
     }
+  }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, wordsLength, useFoliate, readingMode]);
+
+  // Finish reading — persist, log, archive, then exit reader
+  const finishReading = useCallback((finalPos: number) => {
+    _persistAndLog(finalPos);
     onExitReader(finalPos);
-  }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, onExitReader, wordsLength, useFoliate, readingMode]);
+  }, [_persistAndLog, onExitReader]);
+
+  // Finish reading without exiting — persist, log, archive, but stay in reader (for cross-book transitions)
+  const finishReadingWithoutExit = useCallback((finalPos: number) => {
+    _persistAndLog(finalPos);
+  }, [_persistAndLog]);
 
   /** Check if user has backtracked significantly and should see the prompt.
    * Returns true if prompt was shown (caller should NOT exit). */
@@ -197,6 +209,7 @@ export function useProgressTracker({
     handleSaveAtCurrent,
     handleKeepFurthest,
     finishReading,
+    finishReadingWithoutExit,
     pageSaveTimerRef,
     lastSavedPosRef,
     hasEngagedRef,

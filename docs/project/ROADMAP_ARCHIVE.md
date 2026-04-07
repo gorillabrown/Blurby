@@ -4503,3 +4503,44 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 16. `npm test` passes (1,717 tests), `npm run build` succeeds
 
 **Depends on:** None — independent of FLOW-INF and EXT-ENR tracks.
+
+---
+
+### Sprint FLOW-INF-C: Cross-Book Continuous Reading (v1.46.0)
+
+**Completed:** 2026-04-07
+
+**Goal:** Finishing a book in flow mode auto-loads the next from the reading queue — no return to library, no modal, just a brief "Finished [Book A]. Starting [Book B]..." transition overlay, then the next book begins flowing.
+
+**Key Implementation:**
+- `CROSS_BOOK_TRANSITION_MS` (2500ms) and `CROSS_BOOK_FLOW_RESUME_DELAY_MS` (300ms) constants
+- `getNextQueuedBook()` utility in `src/utils/queue.ts` — filters by queuePosition, excludes current + completed docs
+- `finishReadingWithoutExit()` in `useProgressTracker.ts` — persists progress without unmounting ReaderContainer
+- Cross-book transition overlay in `ReaderContainer.tsx` — shows finished/next titles, countdown progress bar, escape hint
+- FlowScrollEngine `onComplete` rewritten for cross-book: checks queue, shows overlay, transitions after 2.5s
+- `pendingFlowResumeRef` effect auto-starts flow after new book loads (300ms DOM settle delay)
+- Escape key and backdrop click cancel transition and return to library
+- `.cross-book-overlay` CSS in `global.css`
+
+**Files Changed:** `src/constants.ts`, `src/utils/queue.ts`, `src/hooks/useProgressTracker.ts`, `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+
+**Tests:** 21 new tests in `tests/crossBookFlow.test.ts` (1,754 total across 97 files)
+
+### SUCCESS CRITERIA (all 14 met)
+
+1. Finishing a book in flow mode with a non-empty queue shows the transition overlay
+2. Transition overlay displays: finished book title, next book title, countdown progress bar, escape hint
+3. After `CROSS_BOOK_TRANSITION_MS` (2.5s), the next book opens and flow mode auto-starts
+4. Flow mode resumes at the next book's saved position (or 0 if new) with the same WPM settings
+5. Finished book's progress is persisted, session is logged, and book is archived
+6. Finished book is removed from the reading queue
+7. `getNextQueuedBook()` correctly returns the next queued book by `queuePosition`, excluding current doc and completed docs
+8. Pressing Escape during transition cancels and returns to library
+9. Clicking the overlay backdrop cancels and returns to library
+10. When the reading queue is empty on flow completion, existing behavior is preserved
+11. ReaderContainer stays mounted throughout the transition
+12. `pendingFlowResumeRef` is consumed after triggering `startFlow()`
+13. ≥12 new tests in `tests/crossBookFlow.test.ts` (21 delivered)
+14. `npm test` passes (1,754 tests), `npm run build` succeeds
+
+**Depends on:** FLOW-INF-B

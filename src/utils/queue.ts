@@ -34,3 +34,23 @@ export function sortReadingQueue<T extends QueueDoc>(docs: T[]): T[] {
 
   return [...queued, ...inProgress, ...unread];
 }
+
+/**
+ * Returns the next book in the reading queue after the current one.
+ * Excludes the current doc and any completed docs (position >= wordCount).
+ * Returns null if no queued books remain.
+ */
+export function getNextQueuedBook<T extends QueueDoc>(
+  currentDocId: string,
+  docs: T[]
+): T | null {
+  const candidates = docs.filter(
+    (doc) =>
+      doc.id !== currentDocId &&
+      doc.queuePosition !== undefined &&
+      (doc.wordCount <= 0 || doc.position < doc.wordCount)
+  );
+  if (candidates.length === 0) return null;
+  candidates.sort((a, b) => (a.queuePosition ?? 0) - (b.queuePosition ?? 0));
+  return candidates[0];
+}
