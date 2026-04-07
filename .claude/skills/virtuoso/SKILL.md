@@ -148,7 +148,7 @@ before any work begins.
 ```
 CLI (orchestrate only — zero implementation)
   ├── Hermes  — mechanical execution, known-correct changes       [haiku]
-  ├── Hephaestus — single-domain implementation, bounded judgment [sonnet]
+  ├── Hercules — single-domain implementation, bounded judgment [sonnet]
   ├── Athena   — cross-system implementation, architectural       [opus]
   └── Specialists — bounded job descriptions
         ├── Hippocrates — test execution                          [haiku]
@@ -187,7 +187,7 @@ Print the roster:
 ## Agent Roster
 Doers:
 - hermes [haiku] — mechanical execution, prescribed changes
-- hephaestus [sonnet] — single-domain implementation with judgment
+- hercules [sonnet] — single-domain implementation with judgment
 - athena [opus] — cross-system implementation, architectural
 
 Specialists:
@@ -227,7 +227,7 @@ Can you write the precise file + old text + new text right now, with zero judgme
 Does the doer only need to understand ONE area of the codebase?
 (Write a function, fix a known bug, implement a scoped feature, apply a fix spec,
 write tests for one module)
-→ **hephaestus**
+→ **hercules**
 
 **4. Cross-system / architectural?**
 Does the doer need to hold multiple subsystems in mind? Could a change in file A
@@ -235,7 +235,7 @@ break file B? (Multi-module refactors, interface changes, pipeline integration,
 data flow redesigns)
 → **athena**
 
-**5. When in doubt:** Default to **hephaestus** — it can self-escalate to opus
+**5. When in doubt:** Default to **hercules** — it can self-escalate to opus
 or report that the task only needed haiku.
 
 **CLI does NOT take implementation tasks as a fallback.** If no doer agent
@@ -249,7 +249,7 @@ final plan that governs execution.
 ```
 ## Task Plan (delegating — 7 agents available)
 ✓ 1. cli: Load spec, build plan, assign agents                         [opus]
-□ 2. hephaestus: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
+□ 2. hercules: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
 □ 3. hermes: Update constants.toml default                              [haiku]
 □ 4. hippocrates: Run fast test suite — all shards pass                 [haiku]
 □ 5. hippocrates: Run calibration N=1,200×3 seeds                      [haiku]
@@ -277,7 +277,7 @@ CLI dispatches, receives results, and coordinates.
 ### Why delegation works
 
 Each sub-agent spawned via `Agent()` runs in its own tool-use budget with full
-filesystem access. When CLI delegates Task #2 to Hephaestus, Hephaestus gets a
+filesystem access. When CLI delegates Task #2 to Hercules, Hercules gets a
 fresh context with its own budget for reading files, editing code, and running
 commands. CLI's tool budget is spent only on coordination: spawning agents,
 receiving results, reprinting the plan, and narrating progress.
@@ -330,7 +330,7 @@ execution time, mark the task ✗ (blocked) and report it — don't silently tak
 Print what you're about to do. Use a consistent prefix so the human can scan the log:
 
 ```
-> Delegating: hephaestus — task #2, modify calc_defense_effectiveness()
+> Delegating: hercules — task #2, modify calc_defense_effectiveness()
 > Delegating: hermes — task #3, update constants.toml default
 > Delegating: hippocrates — task #4, run fast test suite
 > Delegating: athena — task #6, interpret calibration results
@@ -375,7 +375,7 @@ of them is wrong.
 ```
 ## Task Plan — [30% complete] Fast tests running, code changes landed.
 ✓ 1. cli: Load spec, build plan, assign agents                         [opus]
-✓ 2. hephaestus: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
+✓ 2. hercules: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
 ✓ 3. hermes: Update constants.toml default                              [haiku]
 ■ 4. hippocrates: Run fast test suite — all shards pass                 [haiku]
 □ 5. hippocrates: Run calibration N=1,200×3 seeds                      [haiku]
@@ -447,7 +447,7 @@ After all tasks show ✓, print the close-out in this exact order:
    |---------------------------|------------------|-----------|------------|---------|
    | cli (coordination)        | #1               | 0m 45s    | 8          | 3,200   |
    | hermes                    | #3, #10          | 1m 27s    | 9          | 4,400   |
-   | hephaestus                | #2               | 1m 05s    | 6          | 12,800  |
+   | hercules                | #2               | 1m 05s    | 6          | 12,800  |
    | athena                    | #6, #8           | 4m 10s    | 12         | 46,600  |
    | hippocrates               | #4, #5, #7       | 2m 40s    | 9          | 8,200   |
    | herodotus                 | #9               | 0m 45s    | 3          | 5,100   |
@@ -464,7 +464,7 @@ After all tasks show ✓, print the close-out in this exact order:
    | #  | Agent               | Task                                    | Duration | Tools | Tokens |
    |----|---------------------|-----------------------------------------|----------|-------|--------|
    | 1  | cli                 | Load spec, plan, assign agents          | 0m 45s   | 8     | 3,200  |
-   | 2  | hephaestus          | Modify calc_defense_effectiveness()     | 1m 05s   | 6     | 12,800 |
+   | 2  | hercules          | Modify calc_defense_effectiveness()     | 1m 05s   | 6     | 12,800 |
    | 3  | hermes              | Update constants.toml default           | 0m 15s   | 2     | 1,200  |
    | 4  | hippocrates         | Run fast test suite                     | 0m 50s   | 3     | 2,800  |
    | 5  | hippocrates         | Run calibration N=1,200×3 seeds         | 1m 20s   | 4     | 3,600  |

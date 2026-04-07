@@ -58,7 +58,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
       {settings.theme !== "blurby" && (
         <>
           <div className="settings-section-label">Accent Color</div>
-          <div className="appearance-row" style={{ marginBottom: 16 }}>
+          <div className="appearance-row settings-appearance-row--mb">
             {ACCENT_PRESETS.map((preset) => (
               <button
                 key={preset.value}
@@ -100,7 +100,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
       {/* E-ink specific settings — only visible when e-ink theme is selected */}
       {settings.theme === "eink" && (
         <>
-          <div className="settings-section-label" style={{ marginTop: 20 }}>E-Ink Display</div>
+          <div className="settings-section-label settings-section-label--mt-lg">E-Ink Display</div>
 
           <div className="settings-toggle-row">
             <span className="settings-toggle-label">Phrase grouping (2-3 words per tick)</span>
@@ -116,7 +116,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
 
           <div className="settings-toggle-row">
             <span className="settings-toggle-label">WPM ceiling</span>
-            <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-dim)" }}>{settings.einkWpmCeiling ?? 250} wpm</span>
+            <span className="settings-eink-value">{settings.einkWpmCeiling ?? 250} wpm</span>
           </div>
           <input
             type="range"
@@ -131,7 +131,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
 
           <div className="settings-toggle-row">
             <span className="settings-toggle-label">Screen refresh interval (page turns)</span>
-            <span style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-dim)" }}>{settings.einkRefreshInterval ?? 20}</span>
+            <span className="settings-eink-value">{settings.einkRefreshInterval ?? 20}</span>
           </div>
           <input
             type="range"

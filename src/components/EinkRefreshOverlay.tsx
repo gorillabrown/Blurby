@@ -15,8 +15,7 @@ export default function EinkRefreshOverlay() {
 
   return (
     <div
-      className="eink-refresh-overlay"
-      style={{ background: phase === "black" ? "#000000" : "#ffffff" }}
+      className={`eink-refresh-overlay eink-refresh-overlay--${phase}`}
       aria-hidden="true"
     />
   );

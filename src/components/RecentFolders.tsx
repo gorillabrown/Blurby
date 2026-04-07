@@ -23,7 +23,7 @@ export default function RecentFolders({ recentFolders, currentFolder, onSwitch, 
           {folder === currentFolder && <span className="recent-folder-current">current</span>}
         </button>
       ))}
-      <div style={{ borderTop: "1px solid var(--border)", margin: "4px 0" }} aria-hidden="true" />
+      <div className="recent-folder-divider" aria-hidden="true" />
       <button
         className="recent-folder-item"
         onClick={() => { onBrowse(); onClose(); }}

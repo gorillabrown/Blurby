@@ -532,7 +532,6 @@ export default function PageReaderView({
         <div
           ref={flowCursorRef}
           className="flow-highlight-cursor"
-          style={{ display: "none" }}
           aria-hidden="true"
         />
         {renderedParagraphs.map((para, pIdx) => (

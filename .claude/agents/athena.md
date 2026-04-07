@@ -19,7 +19,7 @@ The opus doer handles implementation tasks that span multiple subsystems, requir
 
 **Boundary:** This agent does implementation work that crosses system boundaries. It does NOT orchestrate other agents (that's the lead's job). It does NOT investigate unknown bugs (that's the aristotle). It receives a task, applies deep cross-system reasoning, and delivers the implementation.
 
-**Cost awareness:** Opus tokens are expensive. This tier should only be used when the task genuinely requires cross-system reasoning. If the task can be decomposed into independent single-domain pieces, the lead should split it across multiple hephaestus instances instead.
+**Cost awareness:** Opus tokens are expensive. This tier should only be used when the task genuinely requires cross-system reasoning. If the task can be decomposed into independent single-domain pieces, the lead should split it across multiple hercules instances instead.
 
 ---
 
@@ -45,7 +45,7 @@ The opus doer handles implementation tasks that span multiple subsystems, requir
 - Review code (→ plato / solon)
 - Update governing documents (→ herodotus)
 - Execute fully prescribed changes with no judgment (→ hermes)
-- Work within a single module that doesn't touch boundaries (→ hephaestus)
+- Work within a single module that doesn't touch boundaries (→ hercules)
 
 ---
 
@@ -134,7 +134,7 @@ Recommendation: [alternative approach / need user input / need aristotle analysi
 | A change in module A requires a cascade of changes in B, C, D | Map the full cascade before starting. Implement in dependency order. |
 | The "right" architectural choice is unclear | Document both options with tradeoffs. If the decision is reversible, pick the simpler option and note it. If irreversible, escalate to zeus/user. |
 | A fix specification from the aristotle is incomplete for cross-system work | Report what's missing. Don't guess at cross-system interactions. |
-| The task could be split into independent single-domain pieces | Report this to the lead — it may be cheaper as multiple hephaestus tasks |
+| The task could be split into independent single-domain pieces | Report this to the lead — it may be cheaper as multiple hercules tasks |
 | Performance target requires a fundamentally different approach | Propose the alternative with evidence. Don't silently change the architecture. |
 
 ---

@@ -150,9 +150,8 @@ export function ConnectorsSettings({
               Extension is paired and connected.
             </div>
             <button
-              className="settings-toggle-btn"
+              className="settings-toggle-btn settings-toggle-btn--mt"
               onClick={handleDisconnect}
-              style={{ marginTop: 8 }}
             >
               Disconnect
             </button>
@@ -161,13 +160,13 @@ export function ConnectorsSettings({
       </div>
 
       {/* Site Logins */}
-      <div className="settings-section-label" style={{ marginTop: 24 }}>Logged-in Sites</div>
+      <div className="settings-section-label settings-section-label--mt-24">Logged-in Sites</div>
       <div className="appearance-hint">
         Log in to paywalled sites so Blurby can extract articles behind a login wall.
       </div>
 
       {siteLogins.length === 0 ? (
-        <div className="appearance-hint" style={{ marginBottom: 12 }}>
+        <div className="appearance-hint settings-hint--mb">
           No sites connected yet.
         </div>
       ) : (
@@ -175,7 +174,7 @@ export function ConnectorsSettings({
           {siteLogins.map((site) => (
             <div key={site.domain} className="site-login-item">
               <span className="site-login-domain">{site.domain}</span>
-              <span style={{ fontSize: 10, color: "var(--text-muted, #888)", marginLeft: 8 }}>
+              <span className="settings-label-small">
                 {site.cookieCount} cookies
               </span>
               <button
@@ -190,7 +189,7 @@ export function ConnectorsSettings({
         </div>
       )}
 
-      <div className="settings-section-label" style={{ marginTop: 16 }}>Add Site</div>
+      <div className="settings-section-label settings-section-label--mt">Add Site</div>
       <div className="site-login-add">
         <input
           className="url-input"

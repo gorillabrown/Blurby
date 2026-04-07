@@ -13,7 +13,7 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
       {/* Text Size (merged from TextSizeSettings) */}
       <div className="settings-section-label">Text Size</div>
 
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+      <div className="settings-slider-label">
         Focus Reader: {settings.focusTextSize}%
       </div>
       <input
@@ -27,7 +27,7 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
         aria-label="Focus text size"
       />
 
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4, marginTop: 12 }}>
+      <div className="settings-slider-label--gap">
         Flow Reader: {settings.flowTextSize}%
       </div>
       <input
@@ -42,9 +42,9 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
       />
 
       {/* Spacing */}
-      <div className="settings-section-label" style={{ marginTop: 20 }}>Spacing</div>
+      <div className="settings-section-label settings-section-label--mt-lg">Spacing</div>
 
-      <div className="settings-toggle-label" style={{ fontSize: 12, marginBottom: 4 }}>
+      <div className="settings-toggle-label settings-spacing-label">
         Line Spacing: {sp.line.toFixed(1)}
       </div>
       <input
@@ -58,7 +58,7 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
         aria-label="Line spacing"
       />
 
-      <div className="settings-toggle-label" style={{ fontSize: 12, marginBottom: 4, marginTop: 12 }}>
+      <div className="settings-toggle-label settings-spacing-label--gap">
         Character Spacing: {sp.character.toFixed(1)}px
       </div>
       <input
@@ -72,7 +72,7 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
         aria-label="Character spacing"
       />
 
-      <div className="settings-toggle-label" style={{ fontSize: 12, marginBottom: 4, marginTop: 12 }}>
+      <div className="settings-toggle-label settings-spacing-label--gap">
         Word Spacing: {sp.word.toFixed(1)}px
       </div>
       <input
@@ -87,7 +87,7 @@ export function LayoutSettings({ settings, onSettingsChange }: LayoutSettingsPro
       />
 
       {/* Text Alignment */}
-      <div className="settings-section-label" style={{ marginTop: 20 }}>Alignment</div>
+      <div className="settings-section-label settings-section-label--mt-lg">Alignment</div>
       <label className="settings-toggle-row">
         <span className="settings-toggle-label">Justified text</span>
         <input

@@ -52,7 +52,7 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
       </select>
 
       {/* Default Layout */}
-      <div className="settings-section-label" style={{ marginTop: 20 }}>Default Layout</div>
+      <div className="settings-section-label settings-section-label--mt-lg">Default Layout</div>
       <div className="settings-toggle-row">
         <button
           className={`settings-toggle-btn${currentViewMode === "grid" ? " settings-toggle-btn-active" : ""}`}
@@ -65,7 +65,7 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
       </div>
 
       {/* Card Size */}
-      <div className="settings-section-label" style={{ marginTop: 20 }}>Card Size</div>
+      <div className="settings-section-label settings-section-label--mt-lg">Card Size</div>
       <div className="settings-toggle-row">
         {CARD_SIZES.map((size) => (
           <button
@@ -77,7 +77,7 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
       </div>
 
       {/* Card Spacing */}
-      <div className="settings-section-label" style={{ marginTop: 20 }}>Card Spacing</div>
+      <div className="settings-section-label settings-section-label--mt-lg">Card Spacing</div>
       <div className="settings-toggle-row">
         {CARD_SPACINGS.map((sp) => (
           <button
@@ -89,7 +89,7 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
       </div>
 
       {/* Author Normalization */}
-      <div className="settings-section-label" style={{ marginTop: 20 }}>Library Maintenance</div>
+      <div className="settings-section-label settings-section-label--mt-lg">Library Maintenance</div>
       <button
         className="settings-toggle-btn"
         disabled={normalizing}
@@ -111,9 +111,8 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
       </button>
       {onOpenMetadataWizard && (
         <button
-          className="settings-toggle-btn"
+          className="settings-toggle-btn settings-toggle-btn--mt"
           onClick={onOpenMetadataWizard}
-          style={{ marginTop: 8 }}
         >
           Metadata Wizard
         </button>

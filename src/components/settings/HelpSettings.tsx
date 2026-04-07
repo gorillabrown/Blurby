@@ -41,20 +41,20 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
   return (
     <div>
       <div className="settings-section-label">Adding Content</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
-        <p style={{ margin: "0 0 8px" }}>
+      <div className="help-adding-content-desc">
+        <p>
           <b>Folder:</b> Pick a directory to auto-import .txt, .md, .epub, .pdf, .html files.
         </p>
-        <p style={{ margin: "0 0 8px" }}>
+        <p>
           <b>URL:</b> Paste a web article link to extract readable text.
         </p>
-        <p style={{ margin: 0 }}>
+        <p>
           <b>Drop:</b> Drag files onto the window to import.
         </p>
       </div>
 
       <div className="settings-section-label">Updates</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>
+      <div className="help-version-label">
         Version {appVersion}
       </div>
       <div className="help-update-row">
@@ -68,9 +68,8 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
         {updateStatus && <span className="help-update-status">{updateStatus}</span>}
         {canInstall && (
           <button
-            className="btn"
+            className="btn help-install-btn"
             onClick={handleInstallUpdate}
-            style={{ marginLeft: 8 }}
           >
             Install &amp; restart
           </button>

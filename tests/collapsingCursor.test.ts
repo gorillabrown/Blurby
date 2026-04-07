@@ -70,7 +70,7 @@ function computeBorderColor(width: number): string {
 
 // ── CSS file path ─────────────────────────────────────────────────────────────
 
-const CSS_PATH = path.resolve(__dirname, "../src/styles/global.css");
+const CSS_PATH = path.resolve(__dirname, "../src/styles/page-reader.css");
 
 /**
  * Extract the rule block for a given CSS selector from the stylesheet.

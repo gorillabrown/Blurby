@@ -308,7 +308,7 @@ describe("injectStyles getComputedStyle cache (PERF-1)", () => {
     // Verify via source inspection that the getComputedStyle call is extracted
     // once and reused for --bg, --text, --accent properties.
     const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/FoliatePageView.tsx"),
+      path.resolve(__dirname, "../src/utils/foliateStyles.ts"),
       "utf-8"
     );
 
@@ -329,7 +329,7 @@ describe("injectStyles getComputedStyle cache (PERF-1)", () => {
 
   it("d: rootStyles is queried once and getPropertyValue is called on the cached object", () => {
     const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/FoliatePageView.tsx"),
+      path.resolve(__dirname, "../src/utils/foliateStyles.ts"),
       "utf-8"
     );
 

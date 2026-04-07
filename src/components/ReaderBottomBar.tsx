@@ -265,7 +265,7 @@ export default function ReaderBottomBar({
               {ttsRate.toFixed(1)}x
             </span>
             {ttsEngine === "kokoro" ? (
-              <div style={{ display: "flex", gap: 2 }} role="radiogroup" aria-label="Kokoro narration speed">
+              <div className="rbb-rate-buttons" role="radiogroup" aria-label="Kokoro narration speed">
                 {KOKORO_RATE_BUCKETS.map((bucket) => (
                   <button
                     key={bucket}

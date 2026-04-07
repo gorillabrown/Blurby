@@ -9,7 +9,7 @@ export function TextSizeSettings({ settings, onSettingsChange }: TextSizeSetting
   return (
     <div>
       <div className="settings-section-label">Focus Reader</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+      <div className="settings-slider-label">
         Text size: {settings.focusTextSize}%
       </div>
       <input
@@ -24,7 +24,7 @@ export function TextSizeSettings({ settings, onSettingsChange }: TextSizeSetting
       />
 
       <div className="settings-section-label">Flow Reader</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+      <div className="settings-slider-label">
         Text size: {settings.flowTextSize}%
       </div>
       <input

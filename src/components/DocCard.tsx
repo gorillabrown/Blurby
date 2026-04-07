@@ -88,7 +88,7 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
   const apaSubtext = formatApaSubtext(doc);
 
   return (
-    <div style={{ position: "relative" }} role="listitem">
+    <div className="doc-card-wrapper" role="listitem">
       <div
         onClick={() => onOpen(doc)}
         className={`doc-card${doc.archived ? " doc-card-archived" : ""}${focused ? " doc-card-focused" : ""}${selected ? " doc-card-selected" : ""}${doc.unread ? " doc-card-unread" : ""}`}

@@ -1,0 +1,366 @@
+
+/* ── Light theme overrides ────────────────────────────────────────────────── */
+/* Note: Most light theme values are set via CSS custom properties in ThemeProvider.
+   Scrollbar colors auto-update via var(--border) and var(--text-muted). */
+
+/* ── E-ink theme overrides ────────────────────────────────────────────────── */
+/*
+ * Optimized for e-ink displays (Kindle, Kobo, reMarkable, Boox, Dasung monitors).
+ * Design principles from e-ink research:
+ * - Pure black (#000) on white (#fff) — maximum contrast, no grays for text
+ * - No animations or transitions — e-ink refresh (120-450ms) makes motion disruptive
+ * - Borders over background fills — minimizes repaint area on partial refresh
+ * - System fonts only — avoids FOUT and full-page repaints from webfont loading
+ * - No gradients, shadows, or transparency — prevents ghosting artifacts
+ * - No hover effects — many e-ink devices are touch-only
+ * - Larger default sizes — e-ink pixels are less dense than LCD
+ */
+
+/* ── Blurby Theme Overrides ──────────────────────────────────────────────── */
+/* Pure white, minimal — accent is orange #D04716 via CSS variables only */
+
+[data-theme="eink"] {
+  /* Override all CSS custom properties for pure B&W */
+  --bg: #ffffff;
+  --fg: #000000;
+  --text-primary: #000000;
+  --text-dim: #000000;
+  --text-dimmer: #333333;
+  --text-muted: #555555;
+  --accent: #000000;
+  --border: #000000;
+  --surface: #f0f0f0;
+  --reader-bg: #ffffff;
+  --mono: "Courier New", monospace; /* System monospace, no web fonts */
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --reader-font: Georgia, "Times New Roman", serif;
+}
+
+/* Kill ALL animations and transitions globally */
+[data-theme="eink"] *,
+[data-theme="eink"] *::before,
+[data-theme="eink"] *::after {
+  animation: none !important;
+  animation-duration: 0s !important;
+  transition: none !important;
+  transition-duration: 0s !important;
+}
+
+[data-theme="eink"] body {
+  background: #ffffff;
+  color: #000000;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+/* Reader: pure B&W, no colored ORP, use bold instead */
+[data-theme="eink"] .reader-container {
+  background: #ffffff;
+}
+[data-theme="eink"] .reader-word-before,
+[data-theme="eink"] .reader-word-after {
+  color: #000000;
+}
+[data-theme="eink"] .reader-word-focus {
+  color: #000000;
+  font-weight: 900;
+  text-shadow: none;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+/* Focus marks: use black, no color */
+[data-theme="eink"] .focus-mark {
+  color: #000000;
+}
+
+/* Flow mode highlight: bold + underline instead of background color */
+[data-theme="eink"] .flow-word-active {
+  background: none;
+  color: #000000;
+  font-weight: 900;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* Reading ruler: thicker, solid black for e-ink visibility */
+[data-theme="eink"] .reading-ruler {
+  height: 3px;
+  background: #000000;
+  opacity: 0.6;
+}
+
+/* Guide lines: solid black borders */
+[data-theme="eink"] .reader-guide-line {
+  border-color: #000000;
+}
+
+/* Progress bar: border-based instead of fill */
+[data-theme="eink"] .progress-bar {
+  border: 1px solid #000000;
+  background: #ffffff;
+}
+[data-theme="eink"] .progress-bar-fill {
+  background: #000000;
+}
+
+/* Buttons: border-based, no fills, no shadows */
+[data-theme="eink"] .btn,
+[data-theme="eink"] .btn-fill,
+[data-theme="eink"] .reader-esc-btn,
+[data-theme="eink"] .reader-font-btn,
+[data-theme="eink"] .reader-mode-btn,
+[data-theme="eink"] .chapter-nav-btn {
+  background: #ffffff;
+  border: 1px solid #000000;
+  color: #000000;
+  box-shadow: none;
+}
+
+/* Highlight menu: borders, no shadows */
+[data-theme="eink"] .highlight-menu {
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: none;
+  border-radius: 4px;
+}
+[data-theme="eink"] .highlight-menu-btn { color: #000000; border-radius: 2px; }
+[data-theme="eink"] .highlight-menu-caret { border-top-color: #000000; }
+[data-theme="eink"] .definition-popup {
+  background: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: none;
+  border-radius: 4px;
+}
+[data-theme="eink"] .definition-word { color: #000000; font-weight: 700; text-decoration: underline; }
+[data-theme="eink"] .highlight-toast {
+  background: #000000;
+  color: #ffffff;
+  border-radius: 4px;
+  animation: none;
+  opacity: 1;
+}
+
+/* Scrollbar: simple, high contrast — uses CSS custom properties, auto-updates */
+
+/* No hover effects — e-ink devices are often touch-only */
+[data-theme="eink"] *:hover {
+  background-color: inherit;
+}
+
+/* Menu flap: no slide animation, instant show/hide */
+[data-theme="eink"] .menu-flap {
+  transition: none !important;
+}
+[data-theme="eink"] .menu-flap-backdrop {
+  transition: none !important;
+  background: rgba(0, 0, 0, 0.3); /* Simple overlay, no blur */
+}
+
+/* Doc cards: border-based, no hover effects */
+[data-theme="eink"] .doc-grid-card {
+  border: 1px solid #000000;
+  background: #ffffff;
+}
+[data-theme="eink"] .doc-grid-actions {
+  background: #ffffff;
+  border-top: 1px solid #000;
+  opacity: 1; /* Always visible on e-ink (no hover) */
+}
+
+/* Settings toggles: border-based */
+[data-theme="eink"] .settings-toggle {
+  border: 2px solid #000000;
+  background: #ffffff;
+}
+[data-theme="eink"] .settings-toggle.active {
+  background: #000000;
+}
+[data-theme="eink"] .settings-toggle.active .settings-toggle-thumb {
+  background: #ffffff;
+}
+
+/* ── E-ink: Toolbar auto-hide during playback (16C) ─────────────────────── */
+[data-theme="eink"] .eink-toolbar-hidden {
+  display: none !important;
+}
+
+/* ── E-ink: Touch-optimized layout (16E) ─────────────────────────────────── */
+[data-theme="eink"] button {
+  min-height: 48px;
+  min-width: 48px;
+}
+[data-theme="eink"] .reader-esc-btn,
+[data-theme="eink"] .reader-font-btn,
+[data-theme="eink"] .reader-mode-btn,
+[data-theme="eink"] .reader-mode-switch,
+[data-theme="eink"] .chapter-nav-btn,
+[data-theme="eink"] .chapter-label-btn {
+  padding: 12px 16px;
+  font-size: 13px;
+}
+[data-theme="eink"] .icon-btn {
+  padding: 12px;
+}
+[data-theme="eink"] .hamburger-btn {
+  padding: 12px;
+}
+
+/* ── E-ink: Static feedback — no animations (16F) ───────────────────────── */
+/* Replace highlight animations with border toggles */
+[data-theme="eink"] .flow-word-active {
+  border: 2px solid #000000;
+  text-decoration: none;
+}
+/* Toast: instant appear/disappear, no slide */
+[data-theme="eink"] .highlight-toast {
+  animation: none !important;
+  opacity: 1;
+}
+/* Loading: text-only, no spinner */
+[data-theme="eink"] .loading-screen {
+  font-size: 16px;
+}
+
+/* ── E-ink: Ghosting prevention overlay (16D) ────────────────────────────── */
+.eink-refresh-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+}
+.eink-refresh-overlay--black { background: #000000; }
+.eink-refresh-overlay--white { background: #ffffff; }
+/* Refresh screen button */
+[data-theme="eink"] .eink-refresh-btn {
+  border: 2px solid #000000;
+  font-weight: 700;
+}
+
+/* ── E-ink: Paginated scroll reader (16B) ────────────────────────────────── */
+.eink-paginated {
+  overflow: hidden !important;
+  position: relative;
+}
+.eink-page-indicator {
+  position: absolute;
+  bottom: 8px;
+  right: 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+/* ── E-ink: Progress bar throttled updates (16C) ─────────────────────────── */
+[data-theme="eink"] .progress-bar-fill {
+  transition: none !important;
+}
+/* Light theme overrides */
+[data-theme="light"] .cloud-sign-in-microsoft {
+  background: #fff;
+  color: #333;
+  border-color: #ccc;
+}
+[data-theme="light"] .cloud-sign-in-microsoft:hover:not(:disabled) {
+  background: #0078d4;
+  color: #fff;
+}
+[data-theme="light"] .cloud-sign-in-google {
+  background: #fff;
+  color: #333;
+  border-color: #ccc;
+}
+[data-theme="light"] .cloud-sign-in-google:hover:not(:disabled) {
+  background: #4285f4;
+  color: #fff;
+}
+
+/* E-ink mode overrides for overlays */
+[data-theme="eink"] .command-palette-container,
+[data-theme="eink"] .shortcuts-container,
+[data-theme="eink"] .highlights-container,
+[data-theme="eink"] .snooze-picker-container,
+[data-theme="eink"] .tag-picker-container,
+[data-theme="eink"] .quick-settings-popover {
+  border-width: 2px;
+  border-style: solid;
+  box-shadow: none;
+}
+[data-theme="eink"] .command-palette-overlay,
+[data-theme="eink"] .shortcuts-overlay,
+[data-theme="eink"] .highlights-overlay,
+[data-theme="eink"] .snooze-picker-overlay,
+[data-theme="eink"] .tag-picker-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+
+[data-theme="eink"] .note-popover,
+[data-theme="eink"] .hotkey-coach {
+  box-shadow: none;
+  border-width: 2px;
+  border-style: solid;
+}
+
+/* ── Dark theme: keep cards light for contrast ── */
+
+[data-theme="dark"] .onboarding-welcome,
+[data-theme="dark"] .onboarding-tooltip {
+  background: #F9F9F8;
+  color: #050F32;
+}
+
+[data-theme="dark"] .onboarding-btn-skip {
+  color: #050F32;
+}
+
+/* ── E-ink theme adjustments ── */
+
+[data-theme="eink"] .onboarding-welcome,
+[data-theme="eink"] .onboarding-tooltip {
+  background: #fff;
+  color: #000;
+  box-shadow: none;
+  border: 2px solid #000;
+}
+
+[data-theme="eink"] .onboarding-overlay {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="eink"] .onboarding-btn-primary {
+  background: #000;
+  color: #fff;
+}
+
+[data-theme="eink"] .onboarding-btn-primary:hover {
+  background: #333;
+}
+
+[data-theme="eink"] .onboarding-heading,
+[data-theme="eink"] .onboarding-tagline,
+[data-theme="eink"] .onboarding-sub,
+[data-theme="eink"] .onboarding-tooltip-title,
+[data-theme="eink"] .onboarding-tooltip-body,
+[data-theme="eink"] .onboarding-btn-skip {
+  color: #000;
+}
+
+[data-theme="eink"] .onboarding-tooltip--bottom::after {
+  border-top-color: #fff;
+}
+
+[data-theme="eink"] .onboarding-tooltip--top::after {
+  border-bottom-color: #fff;
+}
+
+/* ── Reduced motion ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-welcome,
+  .onboarding-tooltip {
+    animation: none;
+  }
+}

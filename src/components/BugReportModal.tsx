@@ -107,14 +107,14 @@ export default function BugReportModal({ screenshotPath, screenshotFile, appStat
         {/* Collapsible Narration Diagnostics */}
         {hasDiag && (
           <details open={showDiag} onToggle={(e) => setShowDiag((e.target as HTMLDetailsElement).open)}>
-            <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--text-dim)", marginBottom: 4, userSelect: "none" }}>
+            <summary className="bug-diag-summary">
               Narration Diagnostics ({appState.narrateDiagEvents?.length ?? 0} events)
             </summary>
-            <div className="bug-report-state" style={{ maxHeight: 150, overflowY: "auto", fontSize: 11 }}>
+            <div className="bug-report-state bug-diag-scroll">
               {appState.narrateDiagSnapshot && (
-                <div style={{ marginBottom: 4 }}>
+                <div className="bug-diag-snapshot">
                   <strong>Snapshot:</strong> engine={appState.narrateDiagSnapshot.engine} status={appState.narrateDiagSnapshot.status} cursor={appState.narrateDiagSnapshot.cursorWordIndex}/{appState.narrateDiagSnapshot.totalWords} rate={appState.narrateDiagSnapshot.rate}
-                  {appState.narrateDiagSnapshot.fellBack && <span style={{ color: "var(--warning, #b80)" }}> (fallback: {appState.narrateDiagSnapshot.fallbackReason})</span>}
+                  {appState.narrateDiagSnapshot.fellBack && <span className="bug-diag-fallback"> (fallback: {appState.narrateDiagSnapshot.fallbackReason})</span>}
                 </div>
               )}
               {appState.narrateDiagEvents?.map((e, i) => (
@@ -127,12 +127,12 @@ export default function BugReportModal({ screenshotPath, screenshotFile, appStat
         {/* Collapsible Console Log */}
         {hasConsole && (
           <details open={showConsole} onToggle={(e) => setShowConsole((e.target as HTMLDetailsElement).open)}>
-            <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--text-dim)", marginBottom: 4, userSelect: "none" }}>
+            <summary className="bug-diag-summary">
               Console Log ({appState.consoleLog!.length} entries)
             </summary>
-            <pre className="bug-report-state" style={{ maxHeight: 200, overflowY: "auto", fontSize: 10, whiteSpace: "pre-wrap", wordBreak: "break-all" }}>
+            <pre className="bug-report-state bug-console-scroll">
               {appState.consoleLog!.map((e, i) => (
-                <div key={i} style={{ color: e.level === "error" ? "var(--error, #c44)" : e.level === "warn" ? "var(--warning, #b80)" : "inherit" }}>
+                <div key={i} className={e.level === "error" ? "bug-console-error" : e.level === "warn" ? "bug-console-warn" : ""}>
                   [{new Date(e.timestamp).toISOString().slice(11, 23)}] {e.level.toUpperCase()}: {e.message}
                 </div>
               ))}

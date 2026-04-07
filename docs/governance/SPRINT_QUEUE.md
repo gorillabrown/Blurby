@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — YELLOW
-Next sprint: REFACTOR-1B (Component & Style Cleanup)
-Health: YELLOW — REFACTOR-1B → TEST-COV-1 spec'd. Backfill needed to restore GREEN (≥3).
+Queue depth: 1 — RED
+Next sprint: TEST-COV-1 (Critical Path Test Coverage + Security)
+Health: RED — Only TEST-COV-1 queued. Backfill 2 more sprints to restore GREEN (≥3).
 ```
 
 ---
@@ -32,10 +32,9 @@ Health: YELLOW — REFACTOR-1B → TEST-COV-1 spec'd. Backfill needed to restore
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | REFACTOR-1B | v1.49.0 | `sprint/refactor-1b-style-cleanup` | Full | **YES** | Full spec: 12 tasks (2 waves), 18 success criteria. FoliatePageView helper extraction, TTSSettings sub-components, inline style→CSS migration (179→<30), global.css split into 8 domain files. Audit findings H-1, H-2, M-1, M-4, M-7. Depends on REFACTOR-1A (complete). |
-| 2 | TEST-COV-1 | v1.50.0 | `sprint/test-cov-1-critical-paths` | Full | **YES** | Full spec: 11 tasks (2 waves), 16 success criteria. Auth/cloud/queue/ErrorBoundary/foliateWordOffsets tests (≥52 new), URL scheme validation security fix. Audit findings H-4, H-5, M-5, M-6. Independent — can parallel. |
+| 1 | TEST-COV-1 | v1.50.0 | `sprint/test-cov-1-critical-paths` | Full | **YES** | Full spec: 11 tasks (2 waves), 16 success criteria. Auth/cloud/queue/ErrorBoundary/foliateWordOffsets tests (≥52 new), URL scheme validation security fix. Audit findings H-4, H-5, M-5, M-6. Independent — can parallel. |
 
-**Dispatch status:** Queue depth 2 — YELLOW. REFACTOR-1B → TEST-COV-1 fully spec'd. Backfill sprint 3 before next dispatch.
+**Dispatch status:** Queue depth 1 — RED. TEST-COV-1 ready. STOP — backfill 2 sprints before next dispatch.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -53,7 +52,8 @@ Health: YELLOW — REFACTOR-1B → TEST-COV-1 spec'd. Backfill needed to restore
 13. ~~Backfill queue to ≥3~~ — DONE (REFACTOR-1A/1B + TEST-COV-1 spec'd from Aristotle audit, queue GREEN depth 3)
 14. ~~Dispatch REFACTOR-1A to CLI~~ — COMPLETE (v1.48.0)
 15. **Backfill queue to ≥3** — YELLOW, depth 2. Spec a third sprint before dispatching REFACTOR-1B.
-16. **Dispatch REFACTOR-1B to CLI** — after backfill.
+16. ~~Dispatch REFACTOR-1B to CLI~~ — COMPLETE (v1.49.0)
+17. **Backfill queue to ≥3** — RED, depth 1. Spec 2 more sprints before dispatching TEST-COV-1.
 
 ---
 
@@ -75,6 +75,7 @@ Health: YELLOW — REFACTOR-1B → TEST-COV-1 spec'd. Backfill needed to restore
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| REFACTOR-1B | 2026-04-07 | PASS (17/18 — criterion 4 aspirational) | FoliatePageView helpers extracted to `foliateHelpers.ts` + `foliateStyles.ts` (1,947→1,724 lines), TTSSettings split into 3 sub-components (874→583 lines), 179→27 inline styles, global.css (5,406 lines) split into 8 domain files + `src/styles/index.css`, new `src/styles/tts-settings.css` (418 lines), 6 empty catch blocks annotated, 3 build warnings fixed. 32 new tests (1,892 total across 101 files). v1.49.0. |
 | REFACTOR-1A | 2026-04-07 | PASS | ReaderContainer decomposition: 33 useEffects → 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle), fileHashes cleanup on document delete, main.js constants extracted to main/constants.js. 74 new tests (1,860 total across 100 files). v1.48.0. |
 | PERF-1 | 2026-04-07 | PASS | Full performance audit & remediation: startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`), folder watcher before sync, `getComputedStyle` cached (3→1 call), settings saves debounced 500ms, WPM persistence debounced 300ms, EPUB chapter cache LRU 50-cap, snoozed doc Set index, voice sync deps 7→2, Vite code splitting (vendor/tts/settings, 16 chunks), `rebuildLibraryIndex` debounced 100ms. 32 new tests (1,786 total across 98 files). v1.47.0. |
 | FLOW-INF-C | 2026-04-07 | PASS | Cross-book continuous reading: transition overlay (2.5s countdown), auto-open next queued book + resume flow, `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching, Escape/click-to-cancel. 21 new tests (1,754 total across 97 files). v1.46.0. |

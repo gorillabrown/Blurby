@@ -32,7 +32,7 @@ import { FlowScrollEngine, FlowProgress } from "../src/utils/FlowScrollEngine";
 
 // ── CSS helpers ───────────────────────────────────────────────────────────────
 
-const CSS_PATH = path.resolve(__dirname, "../src/styles/global.css");
+const CSS_PATH = path.resolve(__dirname, "../src/styles/flow.css");
 
 function extractCssBlock(css: string, selector: string): string {
   const selectorIdx = css.indexOf(selector);

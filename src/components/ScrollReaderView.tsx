@@ -313,14 +313,14 @@ export default function ScrollReaderView({ activeDoc, wpm, focusTextSize, isMac,
   const isFlowActive = flowPlaying || flowWordIndex > 0;
 
   return (
-    <div ref={containerRef} id="main-content" className="scroll-reader" role="region" aria-label="Scroll reader" style={{ paddingTop: isMac ? 48 : 32, position: "relative" }}>
+    <div ref={containerRef} id="main-content" className={`scroll-reader${isMac ? " scroll-reader--mac" : ""}`} role="region" aria-label="Scroll reader">
       {escPending && (
         <div className="esc-confirm" role="alert">
           Press Esc again to exit
         </div>
       )}
       {/* Top bar */}
-      <div className="scroll-reader-top" style={{ paddingTop: isMac ? 36 : 16 }}>
+      <div className={`scroll-reader-top${isMac ? " scroll-reader-top--mac" : ""}`}>
         <div className="reader-top-left">
           <button onClick={() => onExit(clampedPosition)} className="reader-esc-btn" aria-label="Exit reader">ESC</button>
           <span className="reader-doc-title">{formatDisplayTitle(activeDoc.title)}</span>

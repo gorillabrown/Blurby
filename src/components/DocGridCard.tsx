@@ -123,7 +123,7 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
           {onDelete && confirmDelete && (
             <div className="doc-context-menu-confirm">
               <span>Delete this book and its file?</span>
-              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <div className="doc-grid-confirm-btns">
                 <button onClick={() => { onDelete(doc.id); setContextMenu(null); setConfirmDelete(false); }} className="doc-context-menu-danger">
                   Yes, delete
                 </button>
