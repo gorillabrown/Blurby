@@ -17,7 +17,7 @@ import {
   resolveGlobalWordIndexToRendered,
   resolveRenderedWordIndexToGlobal,
 } from "../utils/foliateWordOffsets";
-import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX, NARRATION_BAND_PAD_PX } from "../constants";
+import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX, NARRATION_BAND_MIN_WIDTH_PX } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 
 const api = window.electronAPI;
@@ -423,8 +423,9 @@ export default function FoliatePageView({
   // Tracks the two word positions (current and next) used for audio-clock interpolation.
   // The band glides between narrationGlideFromRef and narrationGlideToRef based on the
   // fractional audio progress, not on wall-clock timing estimates.
-  const narrationGlideFromRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
-  const narrationGlideToRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  // NARR-CURSOR-1: width removed — derived from colRight - leftEdge each tick
+  const narrationGlideFromRef = useRef<{ x: number; y: number; width?: number; height: number } | null>(null);
+  const narrationGlideToRef = useRef<{ x: number; y: number; width?: number; height: number } | null>(null);
   // The word index that narrationGlideFromRef was measured from (to detect word changes)
   const narrationGlideWordRef = useRef<number>(-1);
   const narrationLineRailRef = useRef<{
@@ -456,6 +457,7 @@ export default function FoliatePageView({
   // These are NEVER updated per-word — the band is a line highlight, not a word highlight.
   const narrationBandLineHeightRef = useRef<number>(0);
   const narrationBandWidthRef = useRef<number>(0);
+  const narrationColRightRef = useRef<number>(0);
 
   // TTS-7Q: Diagnostics — track audio cursor vs visual band divergence
   const narrationDiagLastAudioWordRef = useRef<number>(-1);
@@ -527,6 +529,7 @@ export default function FoliatePageView({
       cancelAnimationFrame(narrationAudioProgressRafRef.current);
       narrationAudioProgressRafRef.current = 0;
     }
+    narrationColRightRef.current = 0;
     narrationOverlayTargetRef.current.active = false;
     narrationOverlayCurrentRef.current.ready = false;
     narrationOverlaySegmentStartRef.current = 0;
@@ -567,25 +570,29 @@ export default function FoliatePageView({
       if (!current.ready) {
         current.x = from.x;
         current.y = from.y;
-        current.width = from.width;
         current.height = from.height;
         current.ready = true;
       }
 
-      // BUG-151: Use per-word x/width from the 3-word measurement window.
+      // NARR-CURSOR-1: Derived width — colRight minus left edge each tick
       const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(Math.max(12, from.height), 40);
       const lerp = (fromValue: number, toValue: number) => fromValue + (toValue - fromValue) * progress;
-      // BUG-151: Silky glide — lerp X and Y. Width stays fixed at 300px.
-      current.x = lerp(from.x, target.x);
+      const leftEdge = lerp(from.x, target.x);
+      current.x = leftEdge;
       current.y = lerp(from.y, target.y);
-      current.width = from.width;
+      const colRight = narrationColRightRef.current;
+      const width = Math.max(NARRATION_BAND_MIN_WIDTH_PX, colRight - leftEdge);
+      current.width = width;
       current.height = fixedHeight;
 
-      overlay.style.transform = `translate3d(${current.x}px, ${current.y}px, 0)`;
-      overlay.style.width = `${current.width}px`;
+      overlay.style.transform = `translate3d(${leftEdge}px, ${current.y}px, 0)`;
+      overlay.style.width = `${width}px`;
       overlay.style.height = `${fixedHeight}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
+
+      // NARR-CURSOR-1: Suppress border-bottom at small widths
+      overlay.style.borderBottomColor = width < 40 ? 'transparent' : '';
 
       if (progress < 1) {
         narrationOverlayRafRef.current = requestAnimationFrame(tick);
@@ -593,7 +600,6 @@ export default function FoliatePageView({
         // Snap to target on completion
         current.x = target.x;
         current.y = target.y;
-        current.width = target.width;
         current.height = fixedHeight;
         narrationOverlayRafRef.current = 0;
       }
@@ -690,31 +696,43 @@ export default function FoliatePageView({
           rail.active &&
           Math.abs(rail.y - fromWindow.y) <= sameLineTolerance;
 
-        // TTS-7R (BUG-145a): Use fixed band dimensions — width and height are constant.
-        // BUG-151: Fixed 300px band, word at left edge. Width never changes.
+        // NARR-CURSOR-1: Compute column right edge from <p> ancestor of current word
+        const wordEl = foundDoc.querySelector(`[data-word-index="${wordIndex}"]`);
+        const pEl = wordEl?.closest("p") || wordEl?.parentElement;
+        const container = containerRef.current;
+        if (pEl && container) {
+          const frame = foundDoc.defaultView?.frameElement as HTMLElement | null;
+          if (frame) {
+            const containerRect = container.getBoundingClientRect();
+            const frameRect = frame.getBoundingClientRect();
+            const pRight = pEl.getBoundingClientRect().right;
+            narrationColRightRef.current = frameRect.left + pRight - containerRect.left;
+          }
+        }
+
         const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(fromWindow.height, 40);
         const stableY = sameRailLine ? rail.y : fromWindow.y;
 
         const stableFrom = {
           x: fromWindow.x,
           y: stableY,
-          width: NARRATION_BAND_PAD_PX,
           height: fixedHeight,
         };
 
+        // NARR-CURSOR-1: Segment type determines where left edge lerps TO
+        const colRight = narrationColRightRef.current;
         const toY = usableNextWindow ? (Math.abs(usableNextWindow.y - fromWindow.y) <= sameLineTolerance ? stableY : usableNextWindow.y) : stableY;
-        const toX = usableNextWindow ? usableNextWindow.x : fromWindow.x;
+        const toX = usableNextWindow ? usableNextWindow.x : colRight; // end-of-line: lerp toward right edge
         const stableTo = {
           x: toX,
           y: toY,
-          width: NARRATION_BAND_PAD_PX,
           height: fixedHeight,
         };
 
         narrationLineRailRef.current = {
           y: stableY,
           height: fixedHeight,
-          width: NARRATION_BAND_PAD_PX,
+          width: 0, // width no longer used from rail, keep field for type compat
           avgStep: sameRailLine ? rail.avgStep : 0,
           active: true,
         };
@@ -737,8 +755,6 @@ export default function FoliatePageView({
         }
       }
 
-      // TTS-7R (BUG-145a): Fixed-size band — only lerp Y for line transitions.
-      // X is always 0, width and height are always the fixed measured values.
       const from = narrationGlideFromRef.current;
       const to = narrationGlideToRef.current;
       if (!from || !to) {
@@ -747,20 +763,30 @@ export default function FoliatePageView({
       }
 
       const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-      // BUG-151: Silky glide — lerp both X and Y. The 350ms lag ceiling in
-      // audioScheduler ensures fraction never outpaces the spoken word.
-      const x = lerp(from.x, to.x, fraction);
+      // NARR-CURSOR-1: Left edge advances rightward, width derived from colRight
+      const leftEdge = lerp(from.x, to.x, fraction);
       const y = lerp(from.y, to.y, fraction);
-      const width = from.width;
+      const colRight = narrationColRightRef.current;
+      const width = Math.max(NARRATION_BAND_MIN_WIDTH_PX, colRight - leftEdge);
       const height = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);
 
-      narrationOverlayCurrentRef.current = { x, y, width, height, ready: true };
+      narrationOverlayCurrentRef.current = { x: leftEdge, y, width, height, ready: true };
 
-      overlay.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      overlay.style.transform = `translate3d(${leftEdge}px, ${y}px, 0)`;
       overlay.style.width = `${width}px`;
       overlay.style.height = `${height}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
+
+      // NARR-CURSOR-1: Suppress border-bottom at small widths to prevent cramped visual
+      overlay.style.borderBottomColor = width < 40 ? 'transparent' : '';
+
+      // NARR-CURSOR-1: End-of-line snap — when width hits minimum on an end-of-line segment,
+      // force re-measure on next tick so the band snaps to the next line at full width
+      const isEndOfLine = to.x === colRight && colRight > 0;
+      if (isEndOfLine && width <= NARRATION_BAND_MIN_WIDTH_PX) {
+        narrationGlideWordRef.current = -1; // force re-measure next tick
+      }
 
       narrationAudioProgressRafRef.current = requestAnimationFrame(tick);
     };
@@ -857,7 +883,7 @@ export default function FoliatePageView({
     const maxBottom = Math.max(...allRects.map((rect) => rect.bottom));
     const horizontalPad = 8;
     const verticalPad = 2;
-    // BUG-151: wordWidth = primary word only (for band = wordWidth + NARRATION_BAND_PAD_PX)
+    // wordWidth = primary word only (used by callers for positioning)
     const primaryWidth = primaryRects[0].right - primaryRects[0].left;
     return {
       x: frameRect.left + minLeft - containerRect.left - horizontalPad,
@@ -896,17 +922,31 @@ export default function FoliatePageView({
       narrationDiagLastVisualWordRef.current = wordIndex;
     }
 
-    // BUG-151: Fixed 300px band, focus word at the left edge.
+    // NARR-CURSOR-1: Compute colRight from <p> ancestor of anchor word
     const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, 40);
     const bandX = currentWindow.x;
-    const seedWindow = { x: bandX, y: currentWindow.y, width: NARRATION_BAND_PAD_PX, height: fixedHeight };
+    const wordEl = doc.querySelector(`[data-word-index="${wordIndex}"]`);
+    const pEl = wordEl?.closest("p") || wordEl?.parentElement;
+    const container = containerRef.current;
+    if (pEl && container) {
+      const frame = doc.defaultView?.frameElement as HTMLElement | null;
+      if (frame) {
+        const cRect = container.getBoundingClientRect();
+        const fRect = frame.getBoundingClientRect();
+        const pRight = pEl.getBoundingClientRect().right;
+        narrationColRightRef.current = fRect.left + pRight - cRect.left;
+      }
+    }
+    const colRight = narrationColRightRef.current;
+    const seedWidth = Math.max(NARRATION_BAND_MIN_WIDTH_PX, colRight - bandX);
+    const seedWindow = { x: bandX, y: currentWindow.y, width: seedWidth, height: fixedHeight };
 
     // TTS-7Q: If audio-progress is available, start the audio-clock glide loop.
     if (getAudioProgressRef.current) {
       narrationGlideWordRef.current = -1;
       narrationOverlayCurrentRef.current = { ...seedWindow, ready: true };
       overlay.style.transform = `translate3d(${bandX}px, ${currentWindow.y}px, 0)`;
-      overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
+      overlay.style.width = `${seedWidth}px`;
       overlay.style.height = `${fixedHeight}px`;
       overlay.style.opacity = "1";
       overlay.style.display = "block";
@@ -922,8 +962,9 @@ export default function FoliatePageView({
     const sameLineTolerance = Math.max(8, currentWindow.height * 0.6);
     const staysOnSameLine = Math.abs(nextWindow.y - currentWindow.y) <= sameLineTolerance;
     const targetY = staysOnSameLine ? currentWindow.y : nextWindow.y;
-    const targetX = staysOnSameLine ? bandX : nextWindow.x;
-    const targetWindow = { x: targetX, y: targetY, width: NARRATION_BAND_PAD_PX, height: fixedHeight };
+    const targetX = staysOnSameLine ? nextWindow.x : nextWindow.x;
+    const targetWidth = Math.max(NARRATION_BAND_MIN_WIDTH_PX, colRight - targetX);
+    const targetWindow = { x: targetX, y: targetY, width: targetWidth, height: fixedHeight };
 
     const now = performance.now();
     const previousAdvance = narrationOverlayLastAdvanceRef.current;
@@ -943,7 +984,7 @@ export default function FoliatePageView({
     overlay.style.display = "block";
     overlay.style.opacity = "1";
     overlay.style.transform = `translate3d(${bandX}px, ${currentWindow.y}px, 0)`;
-    overlay.style.width = `${NARRATION_BAND_PAD_PX}px`;
+    overlay.style.width = `${seedWidth}px`;
     overlay.style.height = `${fixedHeight}px`;
     ensureNarrationOverlayLoop();
   }, [ensureNarrationOverlayLoop, ensureAudioProgressGlideLoop, hideNarrationOverlay, measureNarrationWindow]);

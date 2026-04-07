@@ -1011,3 +1011,35 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Root cause:** Electron's built-in `fetch()` uses Chromium's network stack with identifiable TLS fingerprints and `Sec-Ch-Ua` headers that WAF systems (EBSCO, Cloudflare) detect as a bot/automated client and reject with HTTP 400 or 403. A hidden `BrowserWindow` with a real session bypasses this because it presents as a normal browser navigation.
 
 **Guardrail:** The no-login branch of URL extraction (`misc.js` — the `else` branch after the `hasLogin` check) must always include `fetchWithBrowser` as a fallback when the primary Node `fetch()` returns a 4xx status. Never assume Node fetch is sufficient for all sites. The pattern: try Node fetch → if status 4xx → retry with `fetchWithBrowser` hidden window → surface error only if both fail.
+
+---
+
+### [2026-04-06] LL-085: Derive Layout Values Per-Tick — Never Store Width in Animation Ref Structs
+
+**Area:** renderer, FoliatePageView.tsx, narration overlay, animation loops
+**Status:** active
+**Priority:** high
+
+**Context:** NARR-CURSOR-1 — Collapsing narration cursor. The fixed-width narration band (TTS-7R) stored a `width` field in the animation ref struct. When `colRight` (the paragraph right edge) was updated independently — e.g., on column layout recalculation — the stored `width` became stale and the overlay drifted visually.
+
+**Root cause:** Intermediate values that can be computed from invariants (e.g., `width = colRight - leftEdge`) should never be stored alongside those invariants. If the invariant updates but the derived field does not, the struct silently diverges and produces wrong layout. The drift is invisible at the call site.
+
+**Pattern:** When an animation state struct drives per-frame rendering, compute derived values fresh each tick from the invariants that are already in scope. For the narration cursor: `colRight` is the invariant (set once per anchor), `leftEdge` advances each tick, and `width` is always `colRight - leftEdge` — never stored.
+
+**Guardrail (PR-145):** Never store derived layout values (width, height, offset) in animation ref structs when the source invariant (`colRight`, `lineHeight`) is available at render time. Compute fresh each tick. This applies to any RAF loop in `FoliatePageView.tsx` or similar DOM-driven animation.
+
+---
+
+### [2026-04-06] LL-086: In Foliate, Always Measure Geometry from `foundDoc` — Not `contents[0]`
+
+**Area:** renderer, FoliatePageView.tsx, Foliate multi-document architecture
+**Status:** active
+**Priority:** high
+
+**Context:** NARR-CURSOR-1 — Collapsing narration cursor. The `positionNarrationOverlay` function seeded `colRight` from `contents[0]` — the first section's document. For multi-section EPUBs, each section is a separate `Document` rendered in its own iframe. When narration advanced into section 2+, `contents[0]` produced the geometry of section 1, placing the overlay at the wrong horizontal position.
+
+**Root cause:** Foliate's `renderer.getContents()` returns an array of `{ doc, ... }` objects — one per loaded section. The word-finding loop already identifies `foundDoc` (the document containing the current word). Seeding geometry from any document other than `foundDoc` produces wrong results for all sections after the first.
+
+**Pattern:** Measure all geometry (bounding rects, column right edges, line heights) from the `foundDoc` already located by the word-finding loop. Pass `foundDoc` into `positionNarrationOverlay` as the measurement document. Never reuse a cached reference to `contents[0]` for geometry.
+
+**Guardrail (PR-146):** In any Foliate geometry measurement — whether for narration overlay, cursor positioning, or scroll anchoring — always derive the measurement document from `foundDoc` (the doc containing the target word). Never use `contents[0]` or any cached singleton document reference. This applies to `FoliatePageView.tsx` and any future Foliate integration code.
