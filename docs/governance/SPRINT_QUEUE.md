@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — YELLOW (backfill needed)
-Next sprint: NARR-TIMING (Real Word Timestamps)
-Health: YELLOW — HOTFIX-15 complete (v1.43.1). Queue dropped to 2. Cowork must spec next sprint to restore ≥3.
+Queue depth: 1 — RED (backfill critical)
+Next sprint: FLOW-INF-C (Cross-Book Continuous Reading)
+Health: RED — NARR-TIMING complete (v1.44.0). Queue dropped to 1. Cowork must spec 2 more sprints to restore ≥3 before dispatching FLOW-INF-C.
 ```
 
 ---
@@ -32,10 +32,9 @@ Health: YELLOW — HOTFIX-15 complete (v1.43.1). Queue dropped to 2. Cowork must
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | NARR-TIMING | v1.44.0 | `sprint/narr-timing` | Full | **YES** | Full spec: 12 tasks, 16 success criteria, kokoro-js fork + 4-layer validation + scheduler integration. Independent — parallel with Tracks A/B. |
-| 2 | FLOW-INF-C | v1.45.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
+| 1 | FLOW-INF-C | v1.45.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
 
-**Dispatch status:** Queue depth 2 — YELLOW. Backfill required before dispatching NARR-TIMING. Cowork must spec next sprint from IDEAS.md to restore ≥3.
+**Dispatch status:** Queue depth 1 — RED. Backfill critical. Cowork must spec 2 more sprints from IDEAS.md to restore ≥3 before FLOW-INF-C dispatch.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -44,7 +43,8 @@ Health: YELLOW — HOTFIX-15 complete (v1.43.1). Queue dropped to 2. Cowork must
 4. ~~Dispatch EXT-ENR-B to CLI~~ — COMPLETE (v1.43.0)
 5. ~~Backfill queue to ≥3~~ — DONE (HOTFIX-15 spec'd, queue GREEN)
 6. ~~Dispatch HOTFIX-15 to CLI~~ — COMPLETE (v1.43.1)
-7. **Backfill queue to ≥3** — REQUIRED before dispatching NARR-TIMING.
+7. ~~Dispatch NARR-TIMING to CLI~~ — COMPLETE (v1.44.0)
+8. **Backfill queue to ≥3** — REQUIRED before dispatching FLOW-INF-C.
 
 ---
 
@@ -66,6 +66,7 @@ Health: YELLOW — HOTFIX-15 complete (v1.43.1). Queue dropped to 2. Cowork must
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| NARR-TIMING | 2026-04-07 | PASS | Real word-level timestamps from Kokoro duration tensor. kokoro-js fork (patch-package), 4-layer validation, scheduler integration with heuristic fallback. BUG-161 fully resolved. 18 new tests (1,717 total across 95 files). v1.44.0. |
 | HOTFIX-15 | 2026-04-07 | PASS | Narration cursor polish: colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% cap) + null guard (BUG-159). Proportional band height `lineHeight * 1.08` + dynamic re-measurement on word change >2px threshold (BUG-160). Truth-sync interval halved 12→6 words (BUG-161 partial). 16 new tests (1,699 total across 94 files). v1.43.1. |
 | EXT-ENR-B | 2026-04-07 | PASS | Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` / `ws-pairing-success` events. `PairingBanner` in library screen shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced 5s→15s. 29 new tests (1,683 total across 93 files). v1.43.0. |
 | FLOW-INF-B | 2026-04-06 | PASS | Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash), FlowProgress computation with chapter/book percentage + estimated time remaining, ReaderBottomBar progress display. 18 new tests (1,654 total across 92 files). v1.42.0. |

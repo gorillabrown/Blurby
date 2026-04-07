@@ -72,11 +72,12 @@ describe("createKokoroStrategy", () => {
 
     await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
 
-    // Verify IPC was called with correct voice and speed
+    // Verify IPC was called with correct voice, speed, and full words array from deps
     expect(electronAPI.kokoroGenerate).toHaveBeenCalledWith(
       expect.any(String),
       "af_heart",
       1.0,
+      ["Hello", "world", "test.", "More", "words", "here."],
     );
 
     strategy.stop();

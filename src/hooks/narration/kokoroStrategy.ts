@@ -80,18 +80,18 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
   let firstChunkReceived = false;
 
   const pipeline = createGenerationPipeline({
-    generateFn: async (text, voiceId, speed) => {
+    generateFn: async (text, voiceId, speed, words) => {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
       // Apply pronunciation overrides before generation
       const normalizedText = applyPronunciationOverrides(text, deps.getPronunciationOverrides?.());
       // Generate at native bucket rate — no scheduler stretch needed
       const bucket = resolveKokoroBucket(speed);
-      const result = await api.kokoroGenerate(normalizedText, voiceId, bucket);
+      const result = await api.kokoroGenerate(normalizedText, voiceId, bucket, words);
       if (result.error || !result.audio || !result.sampleRate) {
         return { error: result.error || "no audio returned" };
       }
       const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
-      return { audio: result.audio, sampleRate: result.sampleRate, durationMs };
+      return { audio: result.audio, sampleRate: result.sampleRate, durationMs, wordTimestamps: result.wordTimestamps || null };
     },
     getWords: deps.getWords,
     getVoiceId: deps.getVoiceId,

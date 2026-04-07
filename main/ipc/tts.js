@@ -14,14 +14,15 @@ function register(ctx) {
     }
   });
 
-  ipcMain.handle("tts-kokoro-generate", async (_, text, voice, speed) => {
+  ipcMain.handle("tts-kokoro-generate", async (_, text, voice, speed, words) => {
     try {
-      const result = await ttsEngine.generate(text, voice, speed);
+      const result = await ttsEngine.generate(text, voice, speed, words);
       // audio is already an Array from the worker
       return {
         audio: result.audio,
         sampleRate: result.sampleRate,
         durationMs: result.durationMs,
+        wordTimestamps: result.wordTimestamps || null,
       };
     } catch (err) {
       return { error: err.message };

@@ -338,7 +338,7 @@ export interface ElectronAPI {
   kokoroModelStatus: () => Promise<{ ready: boolean }>;
   kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
   kokoroDownload?: () => Promise<{ ok?: boolean; error?: string }>;
-  kokoroGenerate?: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; error?: string }>;
+  kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null; error?: string }>;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
   onKokoroDownloadError?: (callback: (error: string) => void) => () => void;

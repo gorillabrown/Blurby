@@ -124,7 +124,7 @@ function getWorker(cacheDir) {
         if (p) {
           pending.delete(msg.id);
           if (msg.error) p.reject(new Error(msg.error));
-          else p.resolve({ audio: msg.audio, sampleRate: msg.sampleRate, durationMs: msg.durationMs });
+          else p.resolve({ audio: msg.audio, sampleRate: msg.sampleRate, durationMs: msg.durationMs, wordTimestamps: msg.wordTimestamps || null });
         }
         break;
       }
@@ -231,7 +231,7 @@ async function ensureReady(onProgress) {
 /**
  * Generate speech audio for text. Runs in worker thread — never blocks main.
  */
-async function generate(text, voice = "af_bella", speed = 1.0) {
+async function generate(text, voice = "af_bella", speed = 1.0, words = null) {
   if (!modelReady) {
     sendLoadingSignal(true);
     await ensureReady();
@@ -242,7 +242,7 @@ async function generate(text, voice = "af_bella", speed = 1.0) {
   const id = ++requestId;
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    worker.postMessage({ type: "generate", id, text, voice, speed });
+    worker.postMessage({ type: "generate", id, text, voice, speed, words });
   });
 }
 

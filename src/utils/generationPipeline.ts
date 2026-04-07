@@ -26,10 +26,11 @@ import {
 
 export interface PipelineConfig {
   /** IPC wrapper: generate audio for text at given speed */
-  generateFn: (text: string, voiceId: string, speed: number) => Promise<{
+  generateFn: (text: string, voiceId: string, speed: number, words?: string[]) => Promise<{
     audio?: Float32Array | number[];
     sampleRate?: number;
     durationMs?: number;
+    wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
     error?: string;
   }>;
   /** Get all words for narration */
@@ -327,7 +328,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     if (!active || myGenId !== generationId) return;
 
     try {
-      const result = await config.generateFn(text, config.getVoiceId(), config.getSpeed());
+      const result = await config.generateFn(text, config.getVoiceId(), config.getSpeed(), chunkWords);
 
       if (!active || myGenId !== generationId) return;
 
@@ -387,6 +388,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         weightConfig: config.getWeightConfig?.(),
         boundaryType,
         silenceMs,
+        wordTimestamps: result.wordTimestamps || null,
       };
 
       if (active && myGenId === generationId) {

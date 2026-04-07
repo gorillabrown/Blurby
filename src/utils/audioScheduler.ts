@@ -85,6 +85,12 @@ export interface ScheduledChunk {
   boundaryType?: "comma" | "clause" | "sentence" | "paragraph" | "none";
   /** TTS-7O: Duration of injected silence at chunk end (ms) */
   silenceMs?: number;
+  /** NARR-TIMING: Real word timestamps from Kokoro duration tensor (null = use heuristic).
+   *  startTime/endTime in seconds from chunk audio start. endTime = end of voiced portion
+   *  (excludes trailing inter-word pause). Gap between word[i].endTime and word[i+1].startTime
+   *  is silence. Currently only startTime is used for scheduling; endTime preserved for future
+   *  silence-aware cursor hold (IDEAS.md H6). */
+  wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
 }
 
 export interface SchedulerCallbacks {
@@ -205,13 +211,86 @@ export function createAudioScheduler(): AudioScheduler {
   }
 
   /**
+   * NARR-TIMING: Validate real timestamps before accepting them.
+   * Returns true if timestamps pass all checks; false triggers heuristic fallback.
+   * Checks: length, finite/non-negative, endTime >= startTime, monotone startTimes,
+   * word correspondence, scaled overshoot tolerance, zero-duration count.
+   */
+  function validateWordTimestamps(
+    timestamps: { word: string; startTime: number; endTime: number }[],
+    words: string[],
+    chunkDurationSec: number,
+  ): boolean {
+    if (timestamps.length !== words.length) return false;
+
+    for (let i = 0; i < timestamps.length; i++) {
+      const ts = timestamps[i];
+      if (!isFinite(ts.startTime) || !isFinite(ts.endTime)) return false;
+      if (ts.startTime < 0 || ts.endTime < 0) return false;
+      if (ts.endTime < ts.startTime) return false;
+      if (i > 0 && ts.startTime < timestamps[i - 1].startTime) return false;
+      if (ts.word !== words[i]) return false;
+    }
+
+    // Scaled overshoot tolerance: min(40ms, 5% of speech duration)
+    const lastEnd = timestamps[timestamps.length - 1].endTime;
+    const overshootToleranceSec = Math.min(0.040, chunkDurationSec * 0.05);
+    if (lastEnd > chunkDurationSec + overshootToleranceSec) return false;
+
+    // Too many zero-duration words suggests bad alignment
+    const zeroDur = timestamps.filter(t => t.endTime === t.startTime).length;
+    if (zeroDur > 2 && zeroDur > timestamps.length * 0.2) return false;
+
+    return true;
+  }
+
+  /**
    * Pre-compute word boundary times using punctuation-aware/token-length-aware weights (TTS-6F).
    * Words are distributed across the chunk duration proportionally to their timing weight.
    */
   function computeWordBoundaries(chunk: ScheduledChunk, chunkStartTime: number): { time: number; wordIndex: number }[] {
     const wordCount = chunk.words.length;
     if (wordCount <= 0) return [];
-    // TTS-7O: Distribute word timing across SPEECH portion only, excluding injected silence tail
+
+    // ── NARR-TIMING: Use real timestamps if available and valid ────────────
+    if (chunk.wordTimestamps) {
+      // Real timestamps describe the speech portion only.
+      // If chunk has appended silence (silenceMs), validate against speech duration.
+      const speechDurationSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
+
+      if (validateWordTimestamps(chunk.wordTimestamps, chunk.words, speechDurationSec)) {
+        const boundaries: { time: number; wordIndex: number }[] = [];
+        for (let i = 0; i < wordCount; i++) {
+          boundaries.push({
+            time: chunkStartTime + chunk.wordTimestamps[i].startTime,
+            wordIndex: chunk.startIdx + i,
+          });
+        }
+
+        if (import.meta.env.DEV) {
+          _telemetry.push({
+            chunkStartIdx: chunk.startIdx,
+            wordCount,
+            durationMs: chunk.durationMs,
+            scheduledAtSec: chunkStartTime,
+            wordWeights: null,
+            realTimestamps: chunk.wordTimestamps,
+            timestampSource: "kokoro-duration-tensor",
+          } as any);
+        }
+
+        return boundaries;
+      }
+
+      // Validation failed — log and fall through to heuristic
+      if (import.meta.env.DEV) {
+        console.warn(
+          `[audioScheduler] Real timestamps failed validation for chunk at word ${chunk.startIdx}, falling back to heuristic`
+        );
+      }
+    }
+
+    // ── FALLBACK: Existing heuristic (unchanged) ──────────────────────────
     const chunkDurSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
     const weights = computeWordWeights(chunk.words, chunk.weightConfig);
     const boundaries: { time: number; wordIndex: number }[] = [];
@@ -224,7 +303,6 @@ export function createAudioScheduler(): AudioScheduler {
       cumulativeWeight += weights[i];
     }
 
-    // Emit telemetry in dev mode
     if (import.meta.env.DEV) {
       _telemetry.push({
         chunkStartIdx: chunk.startIdx,
@@ -232,7 +310,8 @@ export function createAudioScheduler(): AudioScheduler {
         durationMs: chunk.durationMs,
         scheduledAtSec: chunkStartTime,
         wordWeights: weights,
-      });
+        timestampSource: "heuristic",
+      } as any);
     }
 
     return boundaries;

@@ -83,10 +83,10 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 2. **Measure-once-never-update:** Height is never re-measured after narration starts. If the EPUB has mixed font sizes (headings, blockquotes) or the user changes text size mid-narration, the band stays at the original height.
 **Fix:** `measureNarrationBandDimensions()` now uses `Math.ceil(lineHeight * 1.08)` (proportional) instead of `lineHeight + 4` (fixed). Re-measurement added inside `ensureAudioProgressGlideLoop` word-change block: if new word's computed `lineHeight` differs from stored value by >2px, `narrationBandLineHeightRef` is updated.
 
-### ~~BUG-161~~ ✅ Partially Fixed — HOTFIX-15 (v1.43.1, 2026-04-07) | Full fix: NARR-TIMING
-**Reported:** 2026-04-07 | **Partially resolved:** 2026-04-07
+### ~~BUG-161~~ ✅ FULLY RESOLVED — HOTFIX-15 (partial, v1.43.1) + NARR-TIMING (full, v1.44.0, 2026-04-07)
+**Reported:** 2026-04-07 | **Fully resolved:** 2026-04-07
 **Severity:** Medium (core UX regression)
-**Status:** PARTIAL FIX — HOTFIX-15 halved truth-sync interval (12→6 words). Full fix deferred to NARR-TIMING.
+**Status:** RESOLVED — NARR-TIMING (v1.44.0) replaced `computeWordWeights` heuristic with real per-word timestamps from Kokoro's duration tensor, eliminating drift entirely. HOTFIX-15 partial fix (truth-sync interval 12→6 words) subsumed.
 **Location:** `src/utils/audioScheduler.ts` (lines 53-72, 211-239), `src/constants.ts` (line 100)
 **Description:** After narrating through several sentences, the cursor visibly outpaces the audio — it runs ahead by 1-3 words. On pause and resume, the cursor snaps back to the correct audio position, confirming the audio position is accurate but the visual interpolation drifts.
 **Root cause (Cowork analysis 2026-04-07):** `computeWordWeights()` distributes chunk duration proportionally to `clamp(word.length, 2, 20)`. Short function words ("the", "of", "is", "a") get weight 2 but in speech take almost no time. Long content words get weight 10-20 but take proportionally less time than their character count suggests. The cumulative effect: during passages with many short function words (most English prose), the cursor burns through its time budget faster than the audio speaks, then hits long words where the budget runs short. Drift compounds across words within a chunk.
