@@ -230,14 +230,23 @@ export function unwrapWordSpans(doc: Document): void {
   doc.body.normalize();
 }
 
+/** STAB-1A (BUG-162b): Batch size for async wrapWordsInSpans — number of block groups
+ *  processed before yielding to the event loop via setTimeout(0). */
+const WRAP_BATCH_SIZE = 50;
+
 /** Walk the EPUB section DOM and wrap each word in a <span class="page-word" data-word-index="N">.
  *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
- *  Returns the next available global index. */
-export function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): number {
+ *  Returns the next available global index.
+ *
+ *  STAB-1A (BUG-162b): Now async — processes block groups in batches of WRAP_BATCH_SIZE,
+ *  yielding to the event loop between batches so the loading indicator can render and the
+ *  UI stays responsive during word wrapping. */
+export async function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): Promise<number> {
   let globalIndex = globalOffset;
   const groups = collectBlockTextNodes(doc.body);
 
-  for (const { nodes } of groups) {
+  for (let i = 0; i < groups.length; i++) {
+    const { nodes } = groups[i];
     const combined = nodes.map((node) => node.textContent || "").join("");
     const wordSpans = segmentWordSpans(combined).map((span, idx) => ({
       ...span,
@@ -259,6 +268,11 @@ export function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffs
         parent.replaceChild(frag, textNode);
       }
       nodeStart += text.length;
+    }
+
+    // Yield to event loop every WRAP_BATCH_SIZE groups so UI stays responsive
+    if ((i + 1) % WRAP_BATCH_SIZE === 0 && i + 1 < groups.length) {
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
     }
   }
 
@@ -1108,7 +1122,7 @@ export default function FoliatePageView({
         viewRef.current = view;
 
         // Attach load listener BEFORE open() — events may fire during init
-        const onSectionLoad = (e: any) => {
+        const onSectionLoad = async (e: any) => {
           const { doc, index } = e.detail;
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
@@ -1142,8 +1156,8 @@ export default function FoliatePageView({
               const existingWithoutSection = foliateWordsRef.current.filter(w => w.sectionIndex !== index);
               const existingEnd = existingWithoutSection.length;
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
-              // Wrap this section's words with correct indices
-              wrapWordsInSpans(doc, index, sectionStart);
+              // Wrap this section's words with correct indices (STAB-1A: now async)
+              await wrapWordsInSpans(doc, index, sectionStart);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -1171,7 +1185,7 @@ export default function FoliatePageView({
               // of a later section, causing narration to restart from the book beginning.
               const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections);
               if (sectionStart >= 0) {
-                wrapWordsInSpans(doc, index, sectionStart);
+                await wrapWordsInSpans(doc, index, sectionStart);
               }
             }
           }

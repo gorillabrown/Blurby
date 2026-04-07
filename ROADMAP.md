@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-07 — NARR-TIMING complete (v1.44.0, real word-level timestamps from Kokoro). Queue depth 1 (RED — backfill critical). Next: FLOW-INF-C.
+**Last updated**: 2026-04-07 — STAB-1A complete (v1.45.0). Queue depth 2 (YELLOW). Next: FLOW-INF-C.
 **Current branch**: `main`
-**Current state**: v1.44.0 stable. Queue depth 1 (RED). Next: FLOW-INF-C. Backfill critical before next dispatch.
+**Current state**: v1.45.0 stable. Queue depth 2 (YELLOW). Next: FLOW-INF-C → PERF-1.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -55,6 +55,10 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     └──────────────┬────────────────────┘
                    │
     NARR-TIMING: Real Word Timestamps ✅ (v1.44.0)
+                   │
+    STAB-1A: Startup & Flow Stabilization ✅ (v1.45.0)
+                   │
+    PERF-1: Full Performance Audit & Remediation
                    │
                    ▼
         Track C: Android APK
@@ -517,6 +521,245 @@ Task 9 (Git)
 **BUG-161 full fix disposition:** Deferred to NARR-TIMING. Real word-level timestamps eliminate the character-count heuristic entirely. Truth-sync interval reduction is a stopgap.
 
 **Tier:** Quick | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
+
+---
+
+## STAB-1A: Startup & Flow Stabilization (BUG-162/163/164/165) ✅ COMPLETED
+
+**Goal:** Fix four user-facing issues discovered during extended testing: book-open freeze with no loading feedback, TTS cold-start latency, TTS chunk-boundary sentence-snap misses, and flow mode scroll/offset failure. All fixes are targeted (Approach A) — minimal refactoring, well-understood root causes.
+
+**Problem:** (1) Opening a book freezes the UI for ~5s while `extractWordsFromView` + `wrapWordsInSpans` run synchronously on the main thread. A `.foliate-loading` div exists in JSX but has no CSS — invisible loading indicator. (2) TTS model loads lazily on first `generate()` call. An existing `tts-kokoro-preload` IPC handler exists but isn't called on book open. (3) Sentence-snap tolerance is ±15 words — too narrow for some paragraph structures, causing mid-sentence chunk boundaries. (4) Flow mode's `buildLineMap()` silently returns an empty array when DOM word spans aren't rendered yet, causing a zombie engine state where scroll, auto-advance, and initial offset all fail.
+
+**Relationship to STAB-1B (deferred):** Ramp-up chunks bypassing the planner, silence stacking at transitions, and flow cursor unification are deferred to STAB-1B pending further investigation. Issue 5 from the original report (collapsing cursor in flow mode) moved to IDEAS.md — it's a feature, not a bug.
+
+### Baseline
+
+- `onSectionLoad` handler (FoliatePageView.tsx:1111-1277) — synchronous extraction + wrapping
+- `extractWordsFromView` (FoliatePageView.tsx:188-205) — synchronous DOM walk of all sections
+- `wrapWordsInSpans` (FoliatePageView.tsx:236-266) — synchronous DOM mutation, single pass
+- `.foliate-loading` div (FoliatePageView.tsx:1883) — rendered conditionally but no CSS
+- `loading` state (FoliatePageView.tsx:467) — set true on load, false at line 1547
+- `tts-kokoro-preload` IPC handler (main/ipc/tts.js:59-66) — existing preload, not called on book open
+- `ttsEngine.preload()` (main/tts-engine.js:270-272) — fire-and-forget model pre-warm
+- `ttsEngine.ensureReady()` (main/tts-engine.js:189-229) — lazy load on first generate()
+- `snapToSentenceBoundary()` (generationPipeline.ts:117-152) — ±15 word tolerance (line 114)
+- `FlowScrollEngine.start()` (FlowScrollEngine.ts:78-117) — calls `buildLineMap()` synchronously
+- `buildLineMap()` (FlowScrollEngine.ts:259-286) — queries `[data-word-index]`, returns [] if no spans
+- `scrollToLine()` (FlowScrollEngine.ts:364-375) — initial scroll to reading zone position
+- `FLOW_LINE_ADVANCE_BUFFER_MS` (constants.ts:412) — 50ms delay before first `animateLine()`
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for book loading, TTS startup, flow mode entries
+3. `ROADMAP.md` — this section
+4. `src/components/FoliatePageView.tsx` — Read in order:
+   - `loading` state (line 467)
+   - `extractWordsFromView` (lines 188-205)
+   - `wrapWordsInSpans` (lines 236-266)
+   - `onSectionLoad` handler (lines 1111-1277) — both Path A (active mode, line 1134) and Path B (page mode, line 1162)
+   - `.foliate-loading` JSX (line 1883)
+   - `setLoading(false)` (line 1547)
+5. `src/styles/global.css` — verify no `.foliate-loading` CSS exists (~line 3880 area)
+6. `main/tts-engine.js` — `preload()` (line 270-272), `ensureReady()` (lines 189-229), `generate()` (lines 234-246)
+7. `main/ipc/tts.js` — `tts-kokoro-preload` handler (lines 59-66)
+8. `src/utils/generationPipeline.ts` — `snapToSentenceBoundary()` (lines 117-152), tolerance constant (line 114)
+9. `src/utils/FlowScrollEngine.ts` — `start()` (lines 78-117), `buildLineMap()` (lines 259-286), `scrollToLine()` (lines 364-375), `animateLine()` (lines 296-362)
+10. `src/components/ReaderContainer.tsx` — FlowScrollEngine lifecycle effect (lines 1082-1134)
+11. `src/constants.ts` — `TTS_COLD_START_CHUNK_WORDS` (line 94), `FLOW_LINE_ADVANCE_BUFFER_MS` (line 412)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes (renderer-scope) | **Fix BUG-162a — Add `.foliate-loading` CSS.** Add styling for `.foliate-loading` in global.css: centered text, semi-transparent backdrop, spinner animation or pulsing opacity, `z-index: 200` above content. Should be visible and informative during the synchronous freeze. | `src/styles/global.css` | After `.foliate-narration-highlight` block (~line 3881). ~15 lines CSS. |
+| 2 | Hephaestus (renderer-scope) | **Fix BUG-162b — Chunk `wrapWordsInSpans` with `setTimeout` yields.** Refactor `wrapWordsInSpans` (FoliatePageView.tsx:236-266) to process block groups in batches, yielding to the event loop between batches via `setTimeout(resolve, 0)`. Each batch wraps N block groups (e.g., 50), then yields. The function signature changes from sync to `async` — callers in `onSectionLoad` (lines 1146, 1174) must `await` it. This breaks the single synchronous freeze into smaller chunks, allowing the loading indicator to render and the UI to remain responsive. | `src/components/FoliatePageView.tsx` | Lines 236-266 (function body rewrite to async + batched). Lines 1146, 1174 (add `await`). Line 1111 (`onSectionLoad` becomes async). |
+| 3 | Hermes (electron-scope) | **Fix BUG-163 — Wire TTS preload into book open.** In the book-open IPC handler (or the renderer's book-open path), call `window.electronAPI.ttsKokoroPreload()` (or equivalent IPC) when a book is opened. This triggers the existing `ttsEngine.preload()` fire-and-forget so the model is warm by the time the user presses play. Verify the IPC channel `tts-kokoro-preload` exists in preload.js; if not, add it. | `src/components/ReaderContainer.tsx` or `src/components/LibraryContainer.tsx` | In the book-open flow — after `activeDoc` is set. Single line: `window.electronAPI.ttsKokoroPreload?.()`. Verify `preload.js` exposes the channel. |
+| 4 | Hermes (renderer-scope) | **Fix BUG-164 — Widen sentence-snap tolerance to ±25 words.** In `generationPipeline.ts` line 114, change the default tolerance from 15 to 25. This gives `snapToSentenceBoundary()` a wider search window for ramp-up chunks, reducing mid-sentence chunk boundaries. | `src/utils/generationPipeline.ts` | Line 114. Single value change: `15` → `25`. |
+| 5 | Hephaestus (renderer-scope) | **Fix BUG-165 — Add retry/wait on `buildLineMap()` in FlowScrollEngine.** In `FlowScrollEngine.start()` (lines 105-117), if `buildLineMap()` returns an empty array, schedule a retry after a short delay (100ms) up to 5 attempts. This handles the race condition where word spans haven't been rendered yet when the engine starts. On final failure, log a warning and remain in stopped state. Also: after successful `buildLineMap()`, ensure `scrollToLine()` uses `behavior: "instant"` for the initial scroll (not smooth) so the reading zone offset is immediate. | `src/utils/FlowScrollEngine.ts` | Lines 78-117 (`start()` method). Wrap `buildLineMap()` call in retry loop. Line 373: change initial scroll behavior to `"instant"`. ~15 lines modified. |
+| 6 | Hippocrates | **Tests** — ≥12 new tests: (a) `.foliate-loading` CSS exists and has `z-index` > content, (b) `wrapWordsInSpans` yields to event loop between batches (verify async behavior), (c) `wrapWordsInSpans` produces identical DOM output to the old sync version (no word-wrapping regression), (d) TTS preload IPC is called during book open, (e) `ttsEngine.preload()` calls `ensureReady()` without blocking, (f) sentence-snap tolerance is 25 (not 15), (g) `snapToSentenceBoundary` finds boundaries within ±25 words, (h) `buildLineMap()` retry succeeds on 2nd attempt when spans appear after delay, (i) `buildLineMap()` retry gives up after 5 attempts, (j) initial scroll uses instant behavior (not smooth), (k) FlowScrollEngine enters running state after successful retry, (l) FlowScrollEngine does not enter zombie state on empty `buildLineMap()`. | `tests/` | New test file `tests/startupStabilization.test.ts`. |
+| 7 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+| 8 | Solon | **Spec compliance** — verify all 14 SUCCESS CRITERIA items met. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, bug count, sprint list), ROADMAP.md (mark STAB-1A complete), SPRINT_QUEUE.md (remove, log to completed), BUG_REPORT.md (mark BUG-162/163/164/165 resolved), LESSONS_LEARNED.md (if non-trivial discovery). Pre-composed diffs preferred. | All 6 governing docs | — |
+| 10 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/stab-1a-startup-flow` |
+
+### Execution Sequence
+
+```
+Task 1 (CSS)                      — independent, no code deps
+Task 2 (wrapWordsInSpans async)   — independent, FoliatePageView only
+Task 3 (TTS preload wiring)      — independent, different files
+Task 4 (sentence-snap tolerance)  — independent, single constant
+Task 5 (buildLineMap retry)       — independent, FlowScrollEngine only
+    ↓ (all 5 parallel — zero dependencies between them)
+Task 6 (tests)                    — after all implementation
+Task 7 (npm test + build)         — after tests written
+    ↓
+Task 8 (Solon spec compliance)
+Task 9 (Herodotus docs)
+Task 10 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. `.foliate-loading` has visible CSS styling (centered, semi-transparent backdrop, animated feedback)
+2. `wrapWordsInSpans` is async and yields to the event loop between batches — UI remains responsive during word wrapping
+3. `wrapWordsInSpans` produces identical DOM output to the previous sync version (no word index regressions)
+4. Book open triggers `tts-kokoro-preload` IPC call (fire-and-forget, non-blocking)
+5. `ttsEngine.preload()` begins model loading without waiting for user to press play
+6. Sentence-snap tolerance widened from ±15 to ±25 words
+7. `snapToSentenceBoundary()` successfully finds boundaries within the wider tolerance
+8. `buildLineMap()` retries up to 5 times with 100ms delay when it returns empty array
+9. FlowScrollEngine does not enter zombie state (running=true, lines=[]) — retries or stops cleanly
+10. Initial flow scroll uses instant behavior (no smooth animation delay on start)
+11. Flow auto-scroll works after retry succeeds (cursor depletes, lines advance, scroll follows)
+12. ≥12 new tests in `tests/startupStabilization.test.ts`
+13. `npm test` passes, `npm run build` succeeds
+14. No regressions in narration mode (word wrapping async change must not break narration startup)
+
+**STAB-1B disposition:** Deferred. Ramp-up planner integration needs investigation (why TTS-7P excluded it). Silence stacking needs live audio analysis. Flow cursor unification moved to IDEAS.md (feature, not bug).
+
+**Tier:** Full | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
+
+---
+
+## PERF-1: Full Performance Audit & Remediation
+
+**Goal:** Investigate every performance hotspot across the entire application — main process startup, renderer rendering/re-render cycles, and data-layer I/O — then remediate confirmed findings. Two-phase sprint: Phase A establishes baselines and confirms findings via measurement; Phase B remediates prioritized issues.
+
+**Problem:** Extended development across 44+ sprints has accumulated performance debt in three areas:
+1. **Main process startup:** Window creation is blocked by sequential `loadState()` → `initAuth()` → `initSyncEngine()` calls. Folder sync blocks watcher startup (1–60s for new users). Four `require()` calls in `app.whenReady` callback delay module loading.
+2. **Renderer re-render churn:** ReaderContainer.tsx has 30+ useEffect hooks and oversized dependency arrays. FoliatePageView `injectStyles` calls `getComputedStyle` 3× per section load (layout thrashing). LibraryContainer keyboard handler rebuilds on 11-dependency array. Voice sync effect fires on every Web Speech voice change (7-item dependency array). WPM input saves on every keystroke (no debounce). No code splitting — entire app in single Vite bundle.
+3. **Data layer inefficiency:** EPUB chapter cache is unbounded (no LRU eviction). Settings saves have no debounce. Snoozed doc check every 60s iterates entire library. `fileHashes` in sync-engine accumulates forever. Library index rebuilt on every mutation.
+
+**Investigation gate:** Pre-cleared. Cowork investigation identified 35 issues across 3 domains (3 critical/high in main, 10 high in renderer, 5 high in data layer). Remediation specs below are based on confirmed code-level findings.
+
+### Baseline
+
+**Main process:**
+- `main.js` lines 433-455 — `app.whenReady` callback: `loadState()` → `initAuth()` → `initSyncEngine()` all awaited before `createWindow()`
+- `main.js` line 435 — `loadState()` reads 4 JSON files sequentially (library.json, settings.json, readingStats.json, syncState.json)
+- `main.js` lines 440-441 — `auth.initAuth()` + `syncEngine.initSyncEngine()` awaited sequentially
+- `main.js` line 535 — folder sync completes before watcher starts
+- `main.js` lines 438-452 — 4 `require()` calls in `app.whenReady` (url-extractor, ws-server, folder-watcher, cloud-storage)
+
+**Renderer:**
+- `src/components/FoliatePageView.tsx` lines 1894-1933 — `injectStyles`: 3× `getComputedStyle` per section load
+- `src/components/ReaderContainer.tsx` — 1,533 lines, 30+ `useEffect` hooks
+- `src/components/ReaderContainer.tsx` lines 438-447 — voice sync effect, 7-item dependency array
+- `src/components/LibraryContainer.tsx` line 390 — `kbActions` useMemo with 11-item dependency array
+- `src/components/LibraryContainer.tsx` lines 218-221 — WPM persistence on every keystroke, no debounce
+- `vite.config.js` — no `manualChunks` or code splitting configured
+- `src/styles/global.css` — 5,138 lines, single file
+
+**Data layer:**
+- `main/file-parsers.js` — EPUB chapter cache (`chapterCache` Map), no eviction
+- `main/ipc/state.js` lines 20-24 — `save-settings` handler, no debounce
+- `main/ipc/documents.js` line 150 — snoozed doc check every 60s, iterates full library array
+- `main/sync-engine.js` line 39 — `fileHashes` Map, no cleanup/eviction
+- `main.js` line 120 — `rebuildLibraryIndex()` called on every library mutation
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for performance-related entries
+3. `ROADMAP.md` — this section
+4. `main.js` — focus on `app.whenReady` (lines 430-460), `loadState` (line 435), folder sync/watcher (line 535), `rebuildLibraryIndex` (line 120)
+5. `main/ipc/state.js` — `save-settings` handler (lines 20-24)
+6. `main/ipc/documents.js` — snoozed doc timer (line 150)
+7. `main/file-parsers.js` — `chapterCache` (top-level Map declaration + usage)
+8. `main/sync-engine.js` — `fileHashes` (line 39), cleanup patterns
+9. `src/components/FoliatePageView.tsx` — `injectStyles` (lines 1894-1933)
+10. `src/components/ReaderContainer.tsx` — voice sync effect (lines 438-447), all useEffect hooks
+11. `src/components/LibraryContainer.tsx` — `kbActions` (line 390), WPM persistence (lines 218-221)
+12. `vite.config.js` — current build config
+13. `src/constants.ts` — check for existing perf-related constants
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| **Phase A — Measure & Confirm** | | | | |
+| 1 | Hephaestus (electron-scope) | **Baseline main process startup.** Add `performance.now()` markers around each step in `app.whenReady` callback: `loadState`, `initAuth`, `initSyncEngine`, `createWindow`, folder sync, watcher start. Log all timings to console. Run app and record baseline. Capture actual ms per step. | `main.js` | Lines 433-455 (wrap each `await` with timing), line 535 (sync/watcher timing). Temporary instrumentation — removed in Phase B. |
+| 2 | Hephaestus (renderer-scope) | **Baseline renderer performance.** Add `console.time`/`console.timeEnd` instrumentation to: `injectStyles` (FoliatePageView), `kbActions` recomputation (LibraryContainer), voice sync effect (ReaderContainer). Count re-render frequency for ReaderContainer and LibraryContainer using a render-count ref. Log results. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/LibraryContainer.tsx` | `injectStyles` (lines 1894-1933), voice sync (lines 438-447), `kbActions` (line 390). Temporary instrumentation. |
+| **Phase B — Remediate** | | | | |
+| 3 | Athena (electron-scope) | **CRITICAL: Parallelize startup sequence.** Restructure `app.whenReady` to: (a) call `createWindow()` first (or concurrently with non-blocking init), (b) run `initAuth()` and `initSyncEngine()` in parallel via `Promise.all`, (c) defer folder sync to after window is visible. `loadState()` must still complete before `createWindow()` (window needs settings), but auth and sync can run in background. Target: window visible within 200ms of `app.whenReady`. | `main.js` | Lines 433-455. Reorder: `loadState()` → `createWindow()` → `Promise.all([initAuth(), initSyncEngine()])` → folder sync (non-blocking). |
+| 4 | Hephaestus (electron-scope) | **Start folder watcher before sync.** Move watcher initialization to before `folderSync()` so new files are detected immediately. Sync can run in background — watcher should not wait for it. | `main.js` | Line 535 area. Swap order: `startWatcher()` before `syncFolder()`. |
+| 5 | Hephaestus (renderer-scope) | **Cache root computed styles in `injectStyles`.** Call `getComputedStyle(rootEl)` once at the top of `injectStyles` and read all needed properties from that single snapshot. Eliminates 2 redundant layout thrashes per section load. | `src/components/FoliatePageView.tsx` | Lines 1894-1933. Extract single `const rootStyles = getComputedStyle(document.documentElement)` at top, replace all 3 calls. |
+| 6 | Hephaestus (renderer-scope) | **Debounce settings saves.** Add 500ms debounce to `save-settings` IPC handler so rapid changes (WPM slider, toggles) batch into a single write. Use a simple `setTimeout`/`clearTimeout` pattern — no new dependencies. | `main/ipc/state.js` | Lines 20-24. Wrap handler body in debounced writer. Add `let saveTimeout = null` at module level. |
+| 7 | Hephaestus (renderer-scope) | **Debounce WPM persistence.** Wrap the WPM `onChange` persistence call in LibraryContainer with a 300ms debounce so keystrokes don't trigger individual saves. | `src/components/LibraryContainer.tsx` | Lines 218-221. Add `useRef` for timeout, clear on each keystroke, save after 300ms idle. |
+| 8 | Hephaestus (electron-scope) | **Add LRU eviction to EPUB chapter cache.** Convert `chapterCache` from unbounded Map to LRU with 50-entry cap. On cache set, evict oldest entry if at capacity. Simple implementation — no new dependencies. | `main/file-parsers.js` | `chapterCache` declaration (near top of file) + all `.set()` calls. Replace Map with small LRU class (~15 lines). |
+| 9 | Hephaestus (electron-scope) | **Index snoozed doc check.** Replace the 60s full-library scan with a pre-built snoozed-doc index (a Set of doc IDs with active snooze timers). Update the Set on snooze/unsnooze. Timer callback checks only the Set, not the full library. | `main/ipc/documents.js` | Line 150 area. Add `snoozedDocIds` Set, populate on snooze mutation, check Set in timer callback. |
+| 10 | Hephaestus (renderer-scope) | **Tighten voice sync dependency array.** The voice sync effect (ReaderContainer lines 438-447) should depend only on `selectedVoiceId` and `ttsEnabled`, not all 7 current deps. Extract the stable values into refs. | `src/components/ReaderContainer.tsx` | Lines 438-447. Move non-trigger deps to refs. Reduce dependency array to 2-3 items. |
+| 11 | Hephaestus (renderer-scope) | **Add Vite code splitting.** Configure `manualChunks` in vite.config.js to split: (a) vendor libs (react, foliate-js) into a `vendor` chunk, (b) TTS-related code into a `tts` chunk (lazy-loaded), (c) settings/preferences into a `settings` chunk. | `vite.config.js` | `build.rollupOptions.output.manualChunks` — new config block. |
+| 12 | Hephaestus (electron-scope) | **Debounce `rebuildLibraryIndex`.** Wrap the library index rebuild in a 100ms debounce so batch mutations (import of multiple books) trigger only one rebuild. | `main.js` | Line 120 area. Add debounce wrapper around `rebuildLibraryIndex()` calls. |
+| 13 | Hermes (electron-scope) | **Remove Phase A instrumentation.** Strip all `performance.now()` markers and `console.time` calls added in Tasks 1-2. | `main.js`, `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/LibraryContainer.tsx` | All locations touched in Tasks 1-2. |
+| 14 | Hippocrates | **Tests** — ≥16 new tests: (a) startup sequence calls `createWindow` before or concurrent with auth/sync init, (b) `initAuth` and `initSyncEngine` run in parallel (Promise.all), (c) folder watcher starts before sync completes, (d) `injectStyles` calls `getComputedStyle` exactly once, (e) settings save is debounced (rapid calls produce single write), (f) WPM persistence is debounced, (g) chapter cache evicts oldest entry at capacity (50), (h) chapter cache size never exceeds 50, (i) snoozed doc check uses index (not full library scan), (j) snoozed doc Set updates on snooze/unsnooze, (k) voice sync effect depends on ≤3 items, (l) Vite config has `manualChunks` with vendor/tts/settings chunks, (m) `rebuildLibraryIndex` is debounced (batch mutations = single rebuild), (n) startup window appears before auth completes, (o) LRU cache returns cached value for recent entry, (p) LRU cache misses evicted entry. | `tests/` | New test file `tests/perfAudit.test.ts`. |
+| 15 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. Verify new chunks appear in build output. | — | — |
+| 16 | Solon | **Spec compliance** — verify all 18 SUCCESS CRITERIA items met. | — | — |
+| 17 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, perf baseline notes), ROADMAP.md (mark PERF-1 complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (perf findings as LL entry). Pre-composed diffs preferred. | All governing docs | — |
+| 18 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/perf-1-audit` |
+
+### Execution Sequence
+
+```
+Phase A (measure):
+  Task 1 (main process instrumentation)  ─┐
+  Task 2 (renderer instrumentation)       ─┤ parallel
+                                           ─┘
+    ↓ (review measurements, confirm findings)
+
+Phase B (remediate — main process):
+  Task 3 (parallelize startup)  ─┐
+  Task 4 (watcher before sync)  ─┤ sequential (Task 3 restructures the code Task 4 touches)
+                                 ─┘
+    ↓
+Phase B (remediate — renderer):
+  Task 5 (cache getComputedStyle)  ─┐
+  Task 7 (debounce WPM)           ─┤
+  Task 10 (voice sync deps)       ─┤ parallel (independent files/functions)
+  Task 11 (Vite code splitting)   ─┤
+                                   ─┘
+    ↓
+Phase B (remediate — data layer):
+  Task 6 (debounce settings save)  ─┐
+  Task 8 (LRU chapter cache)      ─┤
+  Task 9 (snoozed doc index)      ─┤ parallel (independent modules)
+  Task 12 (debounce index rebuild) ─┘
+    ↓
+Cleanup + verify:
+  Task 13 (remove instrumentation)
+    ↓
+  Task 14 (tests)
+  Task 15 (npm test + build)
+    ↓
+  Task 16 (Solon spec compliance)
+  Task 17 (Herodotus docs)
+  Task 18 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Window is visible before `initAuth()` and `initSyncEngine()` complete
+2. `initAuth()` and `initSyncEngine()` run in parallel (not sequential)
+3. Folder watcher starts before folder sync completes
+4. `injectStyles` calls `getComputedStyle` exactly once per invocation (not 3×)
+5. Settings saves are debounced — 10 rapid calls within 500ms produce ≤2 file writes
+6. WPM input persistence is debounced — typing does not trigger per-keystroke saves
+7. EPUB chapter cache has LRU eviction with 50-entry cap
+8. Chapter cache size never exceeds cap (no unbounded growth)
+9. Snoozed doc check uses a pre-built index — does not iterate full library
+10. Voice sync useEffect dependency array has ≤3 items (down from 7)
+11. Vite build produces separate chunks for vendor, TTS, and settings
+12. `rebuildLibraryIndex` is debounced — batch mutations trigger single rebuild
+13. No Phase A instrumentation remains in committed code
+14. ≥16 new tests in `tests/perfAudit.test.ts`
+15. `npm test` passes, `npm run build` succeeds
+16. No regressions in narration, flow mode, or library operations
+17. Build output shows multiple chunks (not single bundle)
+18. Startup-to-window time measurably improved (target: window visible < 500ms after app.whenReady)
+
+**Tier:** Full | **Depends on:** None — investigation gate cleared by Cowork analysis. All remediation targets have confirmed code-level coordinates.
 
 ---
 
@@ -1499,10 +1742,4 @@ Task 12 (Git)
 8. Streak tracks consecutive days meeting daily goal
 9. GoalProgressWidget shows in library header when goals exist
 10. Widget shows correct progress bars with labels
-11. Widget collapses to checkmark when all goals met
-12. No goals → no widget (clean library header)
-13. ≥10 new tests
-14. `npm test` passes
-15. `npm run build` succeeds
-
-**Tier:** F
+11. Wi

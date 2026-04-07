@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.44.0 — queue RED depth 1 backfill critical, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.45.0 — queue GREEN depth 2, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -331,11 +331,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **EXT-ENR-B complete** — Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` and `ws-pairing-success` push events. `PairingBanner` component appears in library screen when extension tries to connect — shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced from 5s to 15s. 29 new tests (`tests/autoDiscoveryPairing.test.ts`). v1.43.0.
 - **HOTFIX-15 complete** — BUG-159/160/161 resolved. colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% container cap) + null guard. Proportional band height (`lineHeight * 1.08`) + dynamic re-measurement on word change (>2px threshold). Truth-sync interval halved from 12→6 words. 16 new tests (`tests/narrationCursorPolish.test.ts`, 2 updated). v1.43.1.
 - **NARR-TIMING complete** — Real word-level timestamps from Kokoro TTS. kokoro-js fork surfaces duration tensor via patch-package. 4-layer validation: token-count check, fail-closed token walk, waveform drift (split accumulator), scheduler acceptance (monotonicity, bounds, scaled tolerance). `computeWordBoundaries` prefers real timestamps, falls back to `computeWordWeights` heuristic. Full IPC chain wired (types.ts, preload.js, ipc/tts.js, tts-engine.js, tts-worker.js, kokoroStrategy.ts, generationPipeline.ts, audioScheduler.ts). BUG-161 fully resolved. 18 new tests (`tests/narrTiming.test.ts`). v1.44.0.
-- Active queue: depth 1 — RED (backfill critical). FLOW-INF-C next. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **STAB-1A complete** — BUG-162/163/164/165 resolved. `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired on book open, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. 19 new tests (`tests/startupStabilization.test.ts`). v1.45.0.
+- Active queue: depth 2 — YELLOW (backfill needed). FLOW-INF-C → PERF-1. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,717 tests across 95 test files
+- 1,736 tests across 96 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -374,4 +375,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
     - `ReaderContainer.tsx` — decomposed into hooks: useReaderMode, useProgressTracker, useEinkController
     - `ReaderBottomBar.tsx` — unified controls across all 4 reading modes
     - ~~`FlowScrollView.tsx`~~ — removed in FLOW-3B (dead code since EPUB-2B)
-  - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode
+  - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode.ts`

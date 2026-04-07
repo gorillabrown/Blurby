@@ -223,11 +223,9 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     engine.start(container, cursor as HTMLDivElement, 0, 200, new Set(), false, 0.35);
     engine.stop();
 
-    // Verify scrollTo was called (meaning setZonePosition 0.35 was used)
-    expect(container.scrollTo).toHaveBeenCalled();
-    const callArgs = (container.scrollTo as ReturnType<typeof vi.fn>).mock.calls[0][0] as ScrollToOptions;
+    // STAB-1A: initial scroll uses instant behavior (scrollTop assignment, not scrollTo)
     // targetScrollTop = line.y - (containerHeight * 0.35) = 100 - (800 * 0.35) = 100 - 280 = -180 → clamped to 0
-    expect(callArgs.top).toBe(0);
+    expect(container.scrollTop).toBe(0);
   });
 
   // (l) FlowScrollEngine scrollToLine uses zonePosition in targetScrollTop calculation
@@ -260,9 +258,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     engine.start(container, cursor as HTMLDivElement, 0, 200, new Set(), false, 0.25);
     engine.stop();
 
-    expect(container.scrollTo).toHaveBeenCalled();
-    const callArgs = (container.scrollTo as ReturnType<typeof vi.fn>).mock.calls[0][0] as ScrollToOptions;
-    expect(callArgs.top).toBe(200);
+    // STAB-1A: initial scroll uses instant behavior (scrollTop assignment, not scrollTo)
+    expect(container.scrollTop).toBe(200);
   });
 
   // (m) FlowScrollEngine.start() accepts optional zonePosition parameter
@@ -294,9 +291,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     engine.start(container, cursor as HTMLDivElement, 0, 200, new Set(), false, 0.15);
     engine.stop();
 
-    expect(container.scrollTo).toHaveBeenCalled();
-    const callArgs = (container.scrollTo as ReturnType<typeof vi.fn>).mock.calls[0][0] as ScrollToOptions;
-    expect(callArgs.top).toBe(380);
+    // STAB-1A: initial scroll uses instant behavior (scrollTop assignment, not scrollTo)
+    expect(container.scrollTop).toBe(380);
   });
 
   // (n) FLOW_ZONE_LINES_MIN and FLOW_ZONE_LINES_MAX define valid clamp range
