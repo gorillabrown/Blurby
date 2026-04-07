@@ -2,7 +2,7 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-04-06
+**Last updated:** 2026-04-07
 
 ---
 
@@ -60,6 +60,38 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 - **Resume anchor** (`resumeAnchorRef`, existing) — Internal ref, consumed on mode start.
 - **Resolution order:** `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
 **Sprint:** SELECTION-1 in ROADMAP.md — 15 tasks, 15 success criteria, Quick tier. Also absorbs BUG-151 and BUG-152.
+
+### ~~BUG-159~~ ✅ Fixed — HOTFIX-15 (v1.43.1, 2026-04-07)
+**Reported:** 2026-04-07 | **Resolved:** 2026-04-07
+**Severity:** Medium (visual regression)
+**Status:** RESOLVED — HOTFIX-15 (v1.43.1)
+**Location:** `src/components/FoliatePageView.tsx` (lines 701, 929)
+**Description:** During narration, the collapsing cursor band occasionally stretches to the full page width instead of staying within the current text column. Occurs after narrating through several pages — not immediate.
+**Root cause (Cowork analysis 2026-04-07):** The `colRight` measurement resolves the current word's container via `wordEl?.closest("p") || wordEl?.parentElement` (line 701 in `ensureAudioProgressGlideLoop`, line 929 in `positionNarrationOverlay`). Two failure modes:
+1. **Missing `<p>` ancestor:** Some EPUB structures place text directly inside `<div>` or `<section>`. The fallback `|| wordEl?.parentElement` picks up a full-width container, causing `colRight` to jump to the page edge.
+2. **Null `wordEl`:** If the querySelector for `data-word-index` returns null (word scrolled out of view, Foliate re-rendered the page), `pEl` becomes undefined and the coordinate transform produces garbage — `colRight` retains a stale or invalid value.
+**Fix:** Ancestor resolution tightened to `closest("p, blockquote, li, figcaption")`. Width guard added: if resolved element exceeds 95% of scroll container width, falls back to container edge minus 16px margin. Null guard added: if `wordEl` is null, measurement tick is skipped entirely.
+
+### ~~BUG-160~~ ✅ Fixed — HOTFIX-15 (v1.43.1, 2026-04-07)
+**Reported:** 2026-04-07 | **Resolved:** 2026-04-07
+**Severity:** Low (visual polish)
+**Status:** RESOLVED — HOTFIX-15 (v1.43.1)
+**Location:** `src/components/FoliatePageView.tsx` (line 518), `src/styles/global.css` (line 3867)
+**Description:** The narration cursor band is approximately 1/3 too tall. The gradient fade height should be tighter and should scale with text size changes.
+**Root cause (Cowork analysis 2026-04-07):** Band height is set once at narration start via `measureNarrationBandDimensions()` (line 518): `narrationBandLineHeightRef.current = lineHeight + 4`. Two problems:
+1. **Fixed `+ 4` padding:** 4px is generous at normal text sizes. At the user's current font size the band visually overshoots. Should be proportional (e.g., `lineHeight * 1.08`) rather than fixed-pixel.
+2. **Measure-once-never-update:** Height is never re-measured after narration starts. If the EPUB has mixed font sizes (headings, blockquotes) or the user changes text size mid-narration, the band stays at the original height.
+**Fix:** `measureNarrationBandDimensions()` now uses `Math.ceil(lineHeight * 1.08)` (proportional) instead of `lineHeight + 4` (fixed). Re-measurement added inside `ensureAudioProgressGlideLoop` word-change block: if new word's computed `lineHeight` differs from stored value by >2px, `narrationBandLineHeightRef` is updated.
+
+### ~~BUG-161~~ ✅ Partially Fixed — HOTFIX-15 (v1.43.1, 2026-04-07) | Full fix: NARR-TIMING
+**Reported:** 2026-04-07 | **Partially resolved:** 2026-04-07
+**Severity:** Medium (core UX regression)
+**Status:** PARTIAL FIX — HOTFIX-15 halved truth-sync interval (12→6 words). Full fix deferred to NARR-TIMING.
+**Location:** `src/utils/audioScheduler.ts` (lines 53-72, 211-239), `src/constants.ts` (line 100)
+**Description:** After narrating through several sentences, the cursor visibly outpaces the audio — it runs ahead by 1-3 words. On pause and resume, the cursor snaps back to the correct audio position, confirming the audio position is accurate but the visual interpolation drifts.
+**Root cause (Cowork analysis 2026-04-07):** `computeWordWeights()` distributes chunk duration proportionally to `clamp(word.length, 2, 20)`. Short function words ("the", "of", "is", "a") get weight 2 but in speech take almost no time. Long content words get weight 10-20 but take proportionally less time than their character count suggests. The cumulative effect: during passages with many short function words (most English prose), the cursor burns through its time budget faster than the audio speaks, then hits long words where the budget runs short. Drift compounds across words within a chunk.
+On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back to the real audio word index — confirming the audio scheduler is authoritative but the visual interpolation heuristic is wrong.
+**Fix (partial — HOTFIX-15):** `TTS_CURSOR_TRUTH_SYNC_INTERVAL` reduced from 12 to 6 words, doubling re-anchor frequency to limit maximum visible drift to ~6 words. **Full fix:** NARR-TIMING sprint replaces the character-count heuristic with real word-level timestamps from Kokoro's duration tensor, eliminating the drift entirely.
 
 ### BUG-154 — Flow mode should switch to scrolled layout on click, not on play
 **Reported:** 2026-04-06

@@ -227,11 +227,11 @@ describe("TTS-7O: word timing excludes silence tail", () => {
 // ── 5. Truth-Sync Interval ──────────────────────────────────────────────────
 
 describe("TTS-7O: periodic cursor truth-sync", () => {
-  it("TTS_CURSOR_TRUTH_SYNC_INTERVAL constant is 12", () => {
-    expect(TTS_CURSOR_TRUTH_SYNC_INTERVAL).toBe(12);
+  it("TTS_CURSOR_TRUTH_SYNC_INTERVAL constant is 6", () => {
+    expect(TTS_CURSOR_TRUTH_SYNC_INTERVAL).toBe(6);
   });
 
-  it("truth-sync fires after every 12 word advances (simulated counter)", () => {
+  it("truth-sync fires after every 6 word advances (simulated counter)", () => {
     // Simulate the scheduler's truth-sync counter logic
     let counter = 0;
     let syncFired = 0;
@@ -244,8 +244,8 @@ describe("TTS-7O: periodic cursor truth-sync", () => {
         syncFired++;
       }
     }
-    // 50 words / 12 interval = 4 syncs (at words 12, 24, 36, 48)
-    expect(syncFired).toBe(4);
+    // 50 words / 6 interval = 8 syncs (at words 6, 12, 18, 24, 30, 36, 42, 48)
+    expect(syncFired).toBe(8);
   });
 
   it("truth-sync resets counter on chunk boundary", () => {

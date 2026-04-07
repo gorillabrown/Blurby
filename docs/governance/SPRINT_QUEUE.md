@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — YELLOW (below minimum of 3 — backfill required)
+Queue depth: 2 — YELLOW (backfill needed)
 Next sprint: NARR-TIMING (Real Word Timestamps)
-Health: YELLOW — EXT-ENR-B completed. Queue has 2 sprints; Cowork must spec a third before next dispatch.
+Health: YELLOW — HOTFIX-15 complete (v1.43.1). Queue dropped to 2. Cowork must spec next sprint to restore ≥3.
 ```
 
 ---
@@ -35,14 +35,16 @@ Health: YELLOW — EXT-ENR-B completed. Queue has 2 sprints; Cowork must spec a 
 | 1 | NARR-TIMING | v1.44.0 | `sprint/narr-timing` | Full | **YES** | Full spec: 12 tasks, 16 success criteria, kokoro-js fork + 4-layer validation + scheduler integration. Independent — parallel with Tracks A/B. |
 | 2 | FLOW-INF-C | v1.45.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
 
-**Dispatch status:** Queue depth 2 — YELLOW. Cowork must spec a third sprint before dispatching NARR-TIMING. NARR-TIMING → FLOW-INF-C both fully spec'd with edit-site coordinates.
+**Dispatch status:** Queue depth 2 — YELLOW. Backfill required before dispatching NARR-TIMING. Cowork must spec next sprint from IDEAS.md to restore ≥3.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
 2. ~~Dispatch FLOW-INF-B to CLI~~ — COMPLETE (v1.42.0)
 3. ~~Backfill queue to ≥3~~ — DONE (FLOW-INF-C spec'd)
 4. ~~Dispatch EXT-ENR-B to CLI~~ — COMPLETE (v1.43.0)
-5. **Backfill queue to ≥3** — spec a third sprint (EXT-ENR-C, APK-0, or new Track C entry) before dispatching NARR-TIMING.
+5. ~~Backfill queue to ≥3~~ — DONE (HOTFIX-15 spec'd, queue GREEN)
+6. ~~Dispatch HOTFIX-15 to CLI~~ — COMPLETE (v1.43.1)
+7. **Backfill queue to ≥3** — REQUIRED before dispatching NARR-TIMING.
 
 ---
 
@@ -64,6 +66,7 @@ Health: YELLOW — EXT-ENR-B completed. Queue has 2 sprints; Cowork must spec a 
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| HOTFIX-15 | 2026-04-07 | PASS | Narration cursor polish: colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% cap) + null guard (BUG-159). Proportional band height `lineHeight * 1.08` + dynamic re-measurement on word change >2px threshold (BUG-160). Truth-sync interval halved 12→6 words (BUG-161 partial). 16 new tests (1,699 total across 94 files). v1.43.1. |
 | EXT-ENR-B | 2026-04-07 | PASS | Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` / `ws-pairing-success` events. `PairingBanner` in library screen shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced 5s→15s. 29 new tests (1,683 total across 93 files). v1.43.0. |
 | FLOW-INF-B | 2026-04-06 | PASS | Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash), FlowProgress computation with chapter/book percentage + estimated time remaining, ReaderBottomBar progress display. 18 new tests (1,654 total across 92 files). v1.42.0. |
 | FLOW-INF-A | 2026-04-06 | PASS | CSS mask-image reading zone with configurable position/size, FlowScrollEngine dynamic zone position, ReaderBottomBar zone controls, ResizeObserver recomputation. 27 new tests (1,636 total across 91 files). v1.41.0. |
@@ -71,8 +74,4 @@ Health: YELLOW — EXT-ENR-B completed. Queue has 2 sprints; Cowork must spec a 
 | EXT-ENR-A | 2026-04-06 | PASS | Resilient extension connection: exponential backoff, pending article persistence, article-ack, EADDRINUSE retry cap, auth timeout, three-state UI, lifecycle hooks. 18 new tests (1,593 total across 89 files). v1.39.0. |
 | HOTFIX-14 | 2026-04-06 | PASS | URL extraction fetchWithBrowser fallback (BUG-155), authenticated-only client count + 5s polling + 15s heartbeat (BUG-156). 12 new tests (1,575 total across 88 files). v1.38.2. |
 | SELECTION-1 | 2026-04-06 | PASS | Word anchor contract: soft/hard/resume tiers, mode start resolution chain. BUG-151/152/153 resolved. 17 new tests (1,563 total). v1.38.0. |
-| HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes. BUG-146/147/148/149/150 resolved. 17 new tests (1,546 total). v1.37.1. |
-| TTS-7R | 2026-04-05 | PASS | Calm narration band & cursor ownership fix. BUG-145a/b/c resolved. 25 new tests. v1.37.0. |
-| TTS-7Q | 2026-04-05 | PASS* | True glide & audio-aligned narration cursor. BUG-143/144 resolved. 25 new tests. v1.36.1. |
-| TTS-7P | 2026-04-05 | PASS | Rolling pause-boundary planner. BUG-140 resolved. 33 new tests. v1.36.0. |
-| EXT-5C | 2026-04-05 | PASS | Rich 
+| HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes

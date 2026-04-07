@@ -304,6 +304,7 @@ The herodotus MUST:
 6. **Always update dependencies.** If A changes, check if B/C also need updates.
 7. **Always maintain index.** LL-NNN numbers are sequential; no gaps.
 8. **Never leave stale entries.** Mark deprecated with [ARCHIVED REASON].
+9. **Prefer pre-composed edit diffs when provided.** When Zeus or the dispatch includes exact old_string/new_string pairs for doc updates, apply them directly via Edit tool — do NOT re-read the file to discover what to change. This eliminates redundant reads and can cut tool calls by 50%+. When no pre-composed diffs are provided, fall back to the standard read-then-edit workflow.
 
 ---
 
