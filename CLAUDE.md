@@ -299,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.41.0 — queue GREEN, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.42.0 — queue YELLOW depth 2 backfill needed, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -325,11 +325,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **EXT-ENR-A complete** — Resilient extension connection: exponential backoff with jitter (1s→30s cap), pending article persistence in chrome.storage.local, article-ack delivery confirmation, EADDRINUSE retry cap (10 attempts), server-side auth timeout (5s), three-state connection indicator (connected/connecting/disconnected), service worker lifecycle hooks (onStartup/onInstalled). 18 new tests. v1.39.0.
 - **NARR-CURSOR-1 complete** — Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances rightward with narration, width derived per tick as `colRight - leftEdge`. CSS simplified (2-stop gradient, no transform transition). NARRATION_BAND_PAD_PX removed. 16 new tests. v1.40.0.
 - **FLOW-INF-A complete** — CSS mask-image reading zone with configurable position/size. FlowScrollEngine computes dynamic zone position from `--flow-zone-top` / `--flow-zone-size` CSS custom properties. ReaderBottomBar exposes zone controls (position slider, size slider) in flow mode. ResizeObserver triggers zone recomputation on container resize. 27 new tests. v1.41.0.
-- Active queue: depth 3 — GREEN. FLOW-INF-B → EXT-ENR-B → NARR-TIMING. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **FLOW-INF-B complete** — Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash). FlowProgress computation with chapter/book percentage + estimated time remaining. ReaderBottomBar progress display. 18 new tests. v1.42.0.
+- Active queue: depth 2 — YELLOW (backfill needed). EXT-ENR-B → NARR-TIMING. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,636 tests across 91 test files
+- 1,654 tests across 92 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 

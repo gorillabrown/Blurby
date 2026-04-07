@@ -14,6 +14,11 @@ vi.mock("../src/constants.ts", () => ({
   FLOW_CURSOR_EINK_HEIGHT_PX: 4,
   FLOW_SCROLL_RESUME_DELAY_MS: 2000,
   FLOW_LINE_ADVANCE_BUFFER_MS: 50,
+  // FLOW-INF-B timer bar constants
+  FLOW_TIMER_BAR_HEIGHT_PX: 5,
+  FLOW_TIMER_BAR_EINK_HEIGHT_PX: 6,
+  FLOW_TIMER_GLOW_PX: 2,
+  FLOW_LINE_COMPLETE_FLASH_MS: 100,
 }));
 
 /** Create a mock container with word spans for testing */
@@ -173,14 +178,14 @@ describe("FlowScrollEngine", () => {
     expect(cursor.style.display).toBe("block");
   });
 
-  it("should set cursor height to 3px in normal mode", () => {
+  it("should set cursor height to 5px in normal mode (FLOW-INF-B timer bar)", () => {
     engine.start(container, cursor, 0, 300, new Set(), false);
-    expect(cursor.style.height).toBe("3px");
+    expect(cursor.style.height).toBe("5px");
   });
 
-  it("should set cursor height to 4px in e-ink mode", () => {
+  it("should set cursor height to 6px in e-ink mode (FLOW-INF-B timer bar)", () => {
     engine.start(container, cursor, 0, 300, new Set(), true);
-    expect(cursor.style.height).toBe("4px");
+    expect(cursor.style.height).toBe("6px");
   });
 
   it("should hide cursor on stop", () => {

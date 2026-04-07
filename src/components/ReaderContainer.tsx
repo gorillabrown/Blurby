@@ -19,7 +19,7 @@ import ReaderView from "./ReaderView";
 import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
 import FoliatePageView, { wrapWordsInSpans, unwrapWordSpans } from "./FoliatePageView";
-import { FlowScrollEngine } from "../utils/FlowScrollEngine";
+import { FlowScrollEngine, type FlowProgress } from "../utils/FlowScrollEngine";
 import ReaderBottomBar, { ChapterListHandle } from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
@@ -141,6 +141,7 @@ export default function ReaderContainer({
 
   // Flow mode plays within Page view (word highlight advances at WPM)
   const [flowPlaying, setFlowPlaying] = useState(false);
+  const [flowProgress, setFlowProgress] = useState<FlowProgress | null>(null);
 
   // E-ink ghosting prevention (extracted to useEinkController hook)
   const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
@@ -1109,10 +1110,14 @@ export default function ReaderContainer({
           setFlowPlaying(false);
           setReadingMode("page");
         },
+        onProgressUpdate: (progress: FlowProgress) => setFlowProgress(progress),
       });
     }
 
     const engine = flowScrollEngineRef.current;
+    // FLOW-INF-B: Provide total word count so progress percentages are accurate
+    const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
+    if (totalWords > 0) engine.setTotalWords(totalWords);
     engine.start(
       container,
       cursor,
@@ -1467,6 +1472,12 @@ export default function ReaderContainer({
           ttsActive={ttsActive}
           onToggleTts={handleToggleTts}
           onSetWpm={setWpm}
+          flowProgress={readingMode === "flow" ? flowProgress ?? undefined : undefined}
+          currentChapterName={(() => {
+            if (readingMode !== "flow" || docChapters.length === 0) return undefined;
+            const idx = getCurChIdx(chaptersFromCharOffsets(activeDoc.content, docChapters), currentWordIndex);
+            return docChapters[idx]?.title;
+          })()}
           onAdjustFocusTextSize={adjustFocusTextSize}
           onEnterFocus={handleEnterFocus}
           onEnterFlow={handleEnterFlow}

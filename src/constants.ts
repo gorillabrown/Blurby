@@ -410,6 +410,8 @@ export const FLOW_CURSOR_EINK_HEIGHT_PX = 4;
 export const FLOW_SCROLL_RESUME_DELAY_MS = 2000;
 /** Brief pause between lines for eye movement tracking (ms) */
 export const FLOW_LINE_ADVANCE_BUFFER_MS = 50;
+/** Duration of opacity flash at line completion for visual rhythm (ms) */
+export const FLOW_LINE_COMPLETE_FLASH_MS = 100;
 /** Default number of lines visible in the flow reading zone */
 export const FLOW_ZONE_LINES_DEFAULT = 5;
 /** Minimum lines for flow reading zone */
@@ -420,6 +422,15 @@ export const FLOW_ZONE_LINES_MAX = 8;
 export const FLOW_ZONE_OPACITY = 0.35;
 /** Soft edge transition width as percentage of container */
 export const FLOW_ZONE_EDGE_PCT = 2;
+
+// ── Flow Timer Bar (FLOW-INF-B) ──────────────────────────────────────────────
+/** Timer bar height in pixels (replaces thin underline) */
+export const FLOW_TIMER_BAR_HEIGHT_PX = 5;
+/** Timer bar height for e-ink mode (thicker for visibility) */
+export const FLOW_TIMER_BAR_EINK_HEIGHT_PX = 6;
+/** Glow spread in pixels at leading edge of timer bar */
+export const FLOW_TIMER_GLOW_PX = 2;
+// Note: FLOW_LINE_COMPLETE_FLASH_MS (100ms) is declared above in the FLOW-3A section.
 
 // ── Default Settings ─────────────────────────────────────────────────────────
 /** Single source of truth for BlurbySettings defaults.

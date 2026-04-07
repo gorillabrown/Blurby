@@ -47,6 +47,11 @@ interface ReaderBottomBarProps {
   flowZoneLines?: number;
   onSetFlowZonePosition?: (pos: number) => void;
   onSetFlowZoneLines?: (lines: number) => void;
+  flowProgress?: {
+    bookPct: number;
+    estimatedMinutesLeft: number;
+  } | null;
+  currentChapterName?: string;
 }
 
 const HINT_TEXT: Record<string, string> = {
@@ -88,6 +93,8 @@ export default function ReaderBottomBar({
   flowZoneLines,
   onSetFlowZonePosition,
   onSetFlowZoneLines,
+  flowProgress,
+  currentChapterName,
 }: ReaderBottomBarProps) {
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
@@ -374,36 +381,45 @@ export default function ReaderBottomBar({
           )}
         </div>
 
-        {/* Flow zone controls — visible in flow mode only */}
+        {/* Flow zone controls and progress — visible in flow mode only */}
         {readingMode === "flow" && (
-          <div className="rbb-flow-zone-controls">
-            <label className="rbb-flow-zone-label">
-              Zone
-              <select
-                className="rbb-flow-zone-select"
-                value={flowZonePosition ?? 0.25}
-                onChange={(e) => onSetFlowZonePosition?.(parseFloat(e.target.value))}
-              >
-                <option value={0.15}>Top</option>
-                <option value={0.25}>Upper</option>
-                <option value={0.35}>Center</option>
-                <option value={0.55}>Bottom</option>
-              </select>
-            </label>
-            <label className="rbb-flow-zone-label">
-              Lines
-              <input
-                type="range"
-                className="rbb-flow-zone-slider"
-                min={3}
-                max={8}
-                step={1}
-                value={flowZoneLines ?? 5}
-                onChange={(e) => onSetFlowZoneLines?.(parseInt(e.target.value, 10))}
-              />
-              <span className="rbb-flow-zone-value">{flowZoneLines ?? 5}</span>
-            </label>
-          </div>
+          <>
+            <div className="rbb-flow-zone-controls">
+              <label className="rbb-flow-zone-label">
+                Zone
+                <select
+                  className="rbb-flow-zone-select"
+                  value={flowZonePosition ?? 0.25}
+                  onChange={(e) => onSetFlowZonePosition?.(parseFloat(e.target.value))}
+                >
+                  <option value={0.15}>Top</option>
+                  <option value={0.25}>Upper</option>
+                  <option value={0.35}>Center</option>
+                  <option value={0.55}>Bottom</option>
+                </select>
+              </label>
+              <label className="rbb-flow-zone-label">
+                Lines
+                <input
+                  type="range"
+                  className="rbb-flow-zone-slider"
+                  min={3}
+                  max={8}
+                  step={1}
+                  value={flowZoneLines ?? 5}
+                  onChange={(e) => onSetFlowZoneLines?.(parseInt(e.target.value, 10))}
+                />
+                <span className="rbb-flow-zone-value">{flowZoneLines ?? 5}</span>
+              </label>
+            </div>
+            {flowProgress && (
+              <div className="rbb-flow-progress">
+                <span className="rbb-flow-progress-text">
+                  {currentChapterName ? `${currentChapterName} · ` : ""}{Math.round(flowProgress.bookPct * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
+                </span>
+              </div>
+            )}
+          </>
         )}
 
         {/* Chapter nav */}
