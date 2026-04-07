@@ -299,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.39.0 — queue GREEN, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.40.0 — queue GREEN, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -323,11 +323,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **HOTFIX-14 partial complete** — BUG-157 (disconnect button) + BUG-158 (library flap) shipped v1.38.1. BUG-155/156 investigation complete, fix specs CLI-ready.
 - **HOTFIX-14 complete** — URL extraction fetchWithBrowser fallback (BUG-155), authenticated-only client count + 5s status polling + 15s heartbeat (BUG-156). 12 new tests (1,575 total across 88 files). v1.38.2.
 - **EXT-ENR-A complete** — Resilient extension connection: exponential backoff with jitter (1s→30s cap), pending article persistence in chrome.storage.local, article-ack delivery confirmation, EADDRINUSE retry cap (10 attempts), server-side auth timeout (5s), three-state connection indicator (connected/connecting/disconnected), service worker lifecycle hooks (onStartup/onInstalled). 18 new tests. v1.39.0.
+- **NARR-CURSOR-1 complete** — Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances rightward with narration, width derived per tick as `colRight - leftEdge`. CSS simplified (2-stop gradient, no transform transition). NARRATION_BAND_PAD_PX removed. 16 new tests. v1.40.0.
 - Active queue: depth 3 — GREEN. FLOW-INF-A → FLOW-INF-B → EXT-ENR-B. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,593 tests across 89 test files
+- 1,609 tests across 90 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 

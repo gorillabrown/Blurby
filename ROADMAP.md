@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — EXT-ENR-A complete (v1.39.0). Resilient extension connection shipped. Queue depth 3 (GREEN).
+**Last updated**: 2026-04-06 — NARR-CURSOR-1 complete (v1.40.0). Queue depth 3 (GREEN). Next: FLOW-INF-A.
 **Current branch**: `main`
-**Current state**: v1.39.0 stable. Queue depth 3 (GREEN). Next: FLOW-INF-A (needs Cowork spec).
+**Current state**: v1.40.0 stable. Queue depth 3 (GREEN). Next: FLOW-INF-A → FLOW-INF-B → EXT-ENR-B.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -305,6 +305,135 @@ Task 9 (Git)
 
 ---
 
+## NARR-CURSOR-1: Collapsing Narration Cursor ✅ COMPLETED (v1.40.0)
+
+**Goal:** Replace the fixed-width narration band with a collapsing cursor — a band anchored to the right edge of the current text line whose left edge advances rightward with narration. The band visually communicates "remaining text on this line," shrinking to zero at line end then snapping to full width on the next line.
+
+**Problem:** The current 300px fixed-width band lerps between word positions. Despite the 350ms audio lag ceiling, it feels disconnected — it's a floating rectangle that doesn't visually communicate reading progress within a line. Multiple iterations of per-word tracking (centering, X interpolation, line-scanning) failed to produce a satisfying result.
+
+**Third-party audit:** `docs/reviews/collapsing-cursor-review.zip` + `C:\Users\estra\Downloads\deep-research-report.md`. Audit identified 5 critical issues in the original proposal: singleton measurement fragility, internally inconsistent line-end detection, state model coupling, CSS transition conflicts, and missing clamping policy. All incorporated into this spec.
+
+**Plan file:** `C:\Users\estra\.claude\plans\bright-dazzling-gadget.md` — full corrected architecture.
+
+### Design
+
+**Visual behavior:**
+```
+Line start:  [████████████████████████████████████████] full column width
+Mid-line:                    [██████████████████████████] ~60% remaining
+Near end:                                    [██████████] ~20% remaining
+Line done → snap:  [████████████████████████████████████████] next line, full width
+```
+
+- **Right edge:** Always fixed at the right edge of the current text column (measured per-document from `<p>` ancestor of the current word)
+- **Left edge:** Tracks the currently-spoken word's X position (smooth lerp between words via audio-progress fraction)
+- **Width:** Derived every tick as `max(8, colRight - leftEdge)` — NEVER stored in state
+- **Line completion:** When `width < NARRATION_BAND_MIN_WIDTH_PX` (8px) AND segment type is end-of-line, snap to next line at full width
+- **Height:** One line height (existing `narrationBandLineHeightRef`, measured once at narration start)
+- **Scope:** Foliate renderer only. Legacy renderer falls back to CSS word highlight.
+
+### Architecture (audit-corrected)
+
+**1. Column right edge: per-document, not singleton.**
+Compute `colRight` inside `ensureAudioProgressGlideLoop` at word-change time, using the same `foundDoc` and `frameRect`/`containerRect` already available. Find the `<p>` ancestor of the current word span and use its `.getBoundingClientRect().right`. Store in `narrationColRightRef` (updated per word change, not globally).
+
+**2. Line-end state machine: use `usableNextWindow` gating.**
+The existing loop already computes `usableNextWindow` — when the next word is on a different line, it's null. Two segment types:
+- **Mid-line** (`usableNextWindow` exists): `to.x` = next word's X. Normal lerp. Width = `colRight - leftEdge`.
+- **End-of-line** (`usableNextWindow` is null): `to.x` = `colRight`. Left edge lerps toward right edge. Width collapses toward zero. When width < 8px → snap to next line.
+
+**3. State model: width is derived, never stored.**
+Remove `width` from `stableFrom`, `stableTo`, `narrationGlideFromRef`, `narrationGlideToRef`, `narrationLineRailRef`. Store `colRight` as the invariant. Each tick: `width = max(8, colRight - leftEdge)`. Remove `NARRATION_BAND_PAD_PX` constant entirely.
+
+**4. CSS: remove transform transition, simplify gradient.**
+Remove `transition: transform 80ms ease` (JS RAF handles all motion). Simplify gradient to 2-stop (`accent/30% → transparent`). Add `will-change: width`. When width < 40px, suppress `border-bottom` via JS.
+
+### Baseline
+
+Existing code to preserve:
+- `audioScheduler.ts` — untouched. 350ms lag ceiling (`NARRATION_CURSOR_LAG_MS`) intact
+- `measureNarrationWindow` — untouched. Per-word position measurement
+- `narrationBandLineHeightRef` — measured once for band height
+- `getAudioProgress` — polled by audio glide loop for smooth fraction-based interpolation
+- `onWordAdvance` callback chain — fires per word, drives overlay updates
+- `hideNarrationOverlay` — resets all animation state
+- Justified text injection in `injectStyles`
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration band, cursor sync entries
+3. `C:\Users\estra\.claude\plans\bright-dazzling-gadget.md` — full corrected architecture
+4. `ROADMAP.md` — this section
+5. `src/constants.ts` — `NARRATION_BAND_PAD_PX` (~line 108, to be removed), `NARRATION_CURSOR_LAG_MS` (~line 113, keep), `NARRATION_BAND_MIN_WIDTH_PX` (~line 108, already added)
+6. `src/components/FoliatePageView.tsx` — Read these sections in order:
+   - Refs (~line 457): `narrationBandLineHeightRef`, `narrationBandWidthRef`
+   - `measureNarrationBandDimensions` (~line 490)
+   - `hideNarrationOverlay` (~line 520)
+   - `ensureNarrationOverlayLoop` (~line 552) — fallback estimate loop
+   - `ensureAudioProgressGlideLoop` (~line 622) — **primary target for rewrite**
+   - `measureNarrationWindow` (~line 824) — DO NOT MODIFY
+   - `positionNarrationOverlay` (~line 873)
+   - `applyVisualHighlightByIndex` narration path (~line 808)
+7. `src/styles/global.css` — `.foliate-narration-highlight` (~line 3832)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes | **Remove `NARRATION_BAND_PAD_PX`** from constants. Verify `NARRATION_BAND_MIN_WIDTH_PX = 8` already exists at ~line 108. Fix all imports referencing the removed constant. | `src/constants.ts`, `src/components/FoliatePageView.tsx` (import line ~20) | Remove constant definition. Remove from import statement. |
+| 2 | Hephaestus (renderer-scope) | **Add `narrationColRightRef`** — New `useRef<number>(0)` near the narration refs (~line 458). Add reset in `hideNarrationOverlay` (~line 520). | `src/components/FoliatePageView.tsx` | After `narrationBandWidthRef` (~line 458). Reset in `hideNarrationOverlay` (~line 540). |
+| 3 | Hephaestus (renderer-scope) | **Rewrite `ensureAudioProgressGlideLoop`** (~line 622) — This is the primary change. On word change: (a) compute `colRight` from `<p>` ancestor of current word using `foundDoc`/`frameRect`/`containerRect` already in scope; (b) determine segment type: if `usableNextWindow !== null` → `to.x = usableNextWindow.x` (mid-line), if null → `to.x = colRight` (end-of-line); (c) remove `width` field from `stableFrom`, `stableTo`, `narrationLineRailRef` structs. Per-tick: `leftEdge = lerp(from.x, to.x, fraction)`, `width = max(NARRATION_BAND_MIN_WIDTH_PX, colRight - leftEdge)`. Set `translate3d(leftEdge, y, 0)`, `width = computed`. When width < 40px: `overlay.style.borderBottomColor = 'transparent'`; else restore. When width ≤ 8px AND end-of-line segment: force `narrationGlideWordRef.current = -1` to re-measure (snaps to next line). | `src/components/FoliatePageView.tsx` | Lines ~622-769. Full function body rewrite. |
+| 4 | Hephaestus (renderer-scope) | **Update `ensureNarrationOverlayLoop`** (~line 552) — Same derived-width pattern: `width = max(8, colRight - current.x)` each tick. Remove `width` from segment from/target structs. Apply same border suppression at small widths. | `src/components/FoliatePageView.tsx` | Lines ~552-603. |
+| 5 | Hephaestus (renderer-scope) | **Update `positionNarrationOverlay`** (~line 873) — On seed: compute `colRight` from anchor word's `<p>` ancestor (same pattern as Task 3). Store in `narrationColRightRef`. Set initial `width = colRight - wordX`. Pass to animation state WITHOUT storing width in structs. | `src/components/FoliatePageView.tsx` | Lines ~873-949. |
+| 6 | Hermes (renderer-scope) | **Update CSS `.foliate-narration-highlight`** (~line 3832) — Replace multi-stop gradient with 2-stop: `linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 100%)`. Remove `transition: transform 80ms ease` (keep `transition: opacity 80ms ease`). Change `will-change` to `transform, width, opacity`. Remove `transform-origin`. | `src/styles/global.css` | Lines ~3832-3851. |
+| 7 | Hippocrates | **Tests** — ≥8 new tests: (a) `colRight` measurement from `<p>` ancestor produces valid container-relative coordinate, (b) end-of-line segment sets `to.x = colRight` when `usableNextWindow` is null, (c) mid-line segment sets `to.x = next word X` when `usableNextWindow` exists, (d) width is derived as `colRight - leftEdge` and never stored in glide refs, (e) width clamped to ≥ NARRATION_BAND_MIN_WIDTH_PX, (f) overlay snaps to next line when width reaches min at end-of-line, (g) border-bottom suppressed when width < 40px, (h) `NARRATION_BAND_PAD_PX` constant fully removed (zero references). | `tests/` | New test file `tests/collapsingCursor.test.ts`. |
+| 8 | Hippocrates | **`npm test`** — all tests pass (Quick tier, no `npm run build` needed). | — | — |
+| 9 | Solon | **Spec compliance** — verify all SUCCESS CRITERIA met. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list), ROADMAP.md (mark complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (LL entry for "width derived not stored" pattern and "per-doc measurement" pattern). | All 6 governing docs | — |
+| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/narr-cursor-1-collapsing` |
+
+### Execution Sequence
+
+```
+Task 1 (constants cleanup)                — first, unblocks compilation
+    ↓
+Task 2 (refs)                             — needs clean compilation
+    ↓
+Tasks 3-5 (loop rewrites + seed)         — sequential: audio loop → fallback loop → seed
+    ↓
+Task 6 (CSS)                              — parallel with tasks 3-5 (independent)
+    ↓
+Task 7-8 (tests)                          — after all implementation
+    ↓
+Task 9 (Solon spec compliance)
+Task 10 (Herodotus docs)
+Task 11 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Overlay right edge aligns to the right edge of the current text column (measured from `<p>` ancestor of the spoken word)
+2. Overlay left edge advances rightward smoothly as narration progresses through a line
+3. Overlay width decreases continuously during narration (derived as `colRight - leftEdge`)
+4. Width is NEVER stored in animation state structs — always derived per tick
+5. At end of line, overlay collapses to ≤8px then snaps to full-width on the next line
+6. Line-end detection uses `usableNextWindow === null` (existing gating), not Y-position comparison
+7. `colRight` is computed per-document from the `<p>` ancestor of the current word, not cached globally
+8. No CSS `transition: transform` on `.foliate-narration-highlight` — JS RAF handles all motion
+9. Gradient is 2-stop (`accent/30% → transparent`) — degrades gracefully at small widths
+10. `border-bottom` suppressed (transparent) when width < 40px
+11. `NARRATION_BAND_PAD_PX` constant fully removed (zero references in codebase)
+12. `audioScheduler.ts` untouched — 350ms lag ceiling preserved
+13. `measureNarrationWindow` untouched
+14. Two-column layout: overlay stays within the correct column
+15. ≥8 new tests in `tests/collapsingCursor.test.ts`
+16. `npm test` passes
+
+**Tier:** Quick | **Depends on:** None — fully spec'd, CLI-ready.
+
+---
+
 ## Track A: Flow Infinite Reader (FLOW-INF)
 
 > **Vision:** Flow mode evolves from "auto-scrolling EPUB reader" into a true infinite reading experience — a visually distinct reading zone guides the eye, a timer-bar cursor shows pacing, and finishing one book seamlessly loads the next from the reading queue.
@@ -327,51 +456,168 @@ Flow mode today:
 | Zone position | Hardcoded 25% | User-configurable (top third, center, bottom third) |
 | Progress feedback | None during flow | Persistent progress indicator (% through book, chapter) |
 
-### Investigation Gate — Track A (Cowork — before any FLOW-INF dispatch)
+### Investigation Gate — Track A: ✅ CLEARED
 
-| Area | What We Know | What We Don't Know | Investigation Action |
-|------|-------------|-------------------|---------------------|
-| FlowScrollEngine internals | Line-based animation, `LineInfo[]` built from DOM, cursor shrinks per line, reading zone at 25% viewport. 339-line class fully read. | **How to overlay a visual zone without breaking scroll.** Does Foliate's shadow DOM allow overlay elements? Can we use a CSS gradient on the scroll container, or do we need a separate positioned div? | **Cowork: Prototype.** In running app, inject a CSS gradient or overlay div at the reading zone position. Test: (a) does it scroll with content or stay fixed? (b) does it work inside Foliate's shadow DOM? Determine feasible approach. |
-| De-emphasis rendering | No de-emphasis exists today. Text above/below reading zone is equally visible. | **Performance of opacity changes on large documents.** Can we apply opacity to content sections without repainting the entire Foliate view? Is a CSS-only approach possible, or does it require DOM manipulation inside shadow DOM? | **Cowork: Test.** Try `mask-image` gradient on the Foliate scroll container. Measure repaint cost. If too expensive, try a fixed overlay with gradient transparency. |
-| Settings integration | `FLOW_READING_ZONE_POSITION = 0.25` is a constant. No user-facing setting exists. | **Where in settings UI.** Does it go in Reading Layout? A new Flow sub-page? Inline in the reading zone itself? | **Cowork: Design decision.** Recommend placement and spec the settings UI. |
-
-**Dispatch readiness:** NOT READY. Needs Cowork prototyping of reading zone overlay approach before CLI can build.
+All three investigation areas resolved by Cowork (2026-04-06):
+- **Overlay approach:** CSS `mask-image` gradient on `.foliate-page-view--flow`. Applies to the scroll container's visual output — content outside the reading zone becomes semi-transparent. Zero extra DOM elements, no Foliate shadow DOM access, no pointer-events issues. Chromium 131+ (Electron 41) fully supports unprefixed `mask-image`. GPU-composited — one gradient mask on a single element, no per-frame repaints.
+- **De-emphasis rendering:** `mask-image` with alpha gradient. `rgba(0,0,0,0.35)` outside zone = 35% visible (gentle de-emphasis). `rgba(0,0,0,1.0)` inside zone = fully visible. Soft 2% transition band at edges prevents hard cutoff. No DOM manipulation inside shadow DOM needed.
+- **Settings integration:** Zone position and zone size settings added to `flowSettings` in BlurbySettings. Exposed in ReaderBottomBar as flow-mode-only controls (quick access during reading). No new settings sub-page needed.
 
 ### Sprint FLOW-INF-A: Reading Zone & Visual Pacing
 
-**Goal:** Add a visually distinct reading zone to flow mode — a 3-5 line band where the active text lives, with de-emphasized content above and below.
+**Goal:** Add a visually distinct reading zone to flow mode — a 3-5 line band where the active text lives, with de-emphasized content above and below. Users should feel like they're reading through a focused window.
 
-**Responsibility:** Cowork specs → CLI executes.
+**Version:** v1.41.0 | **Branch:** `sprint/flow-inf-a-reading-zone` | **Tier:** Full
 
-**Deliverables:**
-1. CSS reading zone overlay — background gradient or opacity layer marking the active 3-5 line region
-2. Text de-emphasis — content above and below the reading zone rendered at reduced opacity (e.g., 40%)
-3. Configurable zone position — `FLOW_READING_ZONE_POSITION` becomes a user setting (top third / center / bottom third)
-4. Zone size setting — number of visible lines in the reading zone (default 5, range 3-8)
-5. Smooth zone tracking — reading zone follows the active line with CSS transitions, no jarring jumps
+**Baseline (post-NARR-CURSOR-1):** Flow mode uses `FlowScrollEngine.ts` (345 lines) — `LineInfo[]` built from DOM, cursor shrinks per line, reading zone at 25% viewport via `FLOW_READING_ZONE_POSITION`. No visual zone overlay, no de-emphasis, no configurable zone position. Container div at FoliatePageView.tsx:1779 becomes scroll container in flow mode (`overflow: auto`).
 
-**Key files:** `src/utils/FlowScrollEngine.ts`, `src/styles/global.css`, `src/constants.ts`, `src/components/FoliatePageView.tsx`
+**Design:**
+```
+┌──────────────────────────────────┐
+│  De-emphasized (35% visible)     │  ← mask-image alpha = 0.35
+│  ...previous text...             │
+│                                  │
+│══════════════════════════════════│  ← soft edge (2% gradient transition)
+│  READING ZONE (fully visible)    │  ← mask-image alpha = 1.0
+│  Active text — current line      │
+│  here, cursor shrinks below      │
+│══════════════════════════════════│  ← soft edge
+│                                  │
+│  De-emphasized (35% visible)     │  ← mask-image alpha = 0.35
+│  ...upcoming text...             │
+└──────────────────────────────────┘
+```
 
-**Tier:** Full | **Depends on:** SELECTION-1 + investigation gate cleared
+CSS `mask-image` gradient on `.foliate-page-view--flow` with dynamic CSS custom properties:
+- `--flow-zone-top`: percentage from top of container to zone start (default: 20%)
+- `--flow-zone-bottom`: percentage from top of container to zone end (default: 45%)
+- Computed from: `zonePosition × 100%` for top, `(zonePosition + zoneHeight) × 100%` for bottom
+- `zoneHeight` = (lineHeight × zoneLines) / containerHeight
+
+**WHERE (read order):**
+1. `src/utils/FlowScrollEngine.ts` — full engine (345 lines). Key: `scrollToLine()` at line 307, `LineInfo` interface at line 18, `FLOW_READING_ZONE_POSITION` usage at line 311
+2. `src/components/FoliatePageView.tsx` — flow mode sections: container div at line 1779, flow cursor at line 1812, flow activation effect at line 1552-1584, scroll container ref setup at line 1567-1583
+3. `src/constants.ts` — `FLOW_READING_ZONE_POSITION = 0.25` at line 450, `FLOW_CURSOR_HEIGHT_PX = 3` at line 452
+4. `src/styles/global.css` — `.foliate-flow-cursor` class, `.foliate-page-view--flow` class
+5. `src/components/ReaderBottomBar.tsx` — bottom bar controls, existing mode-specific sections
+6. `src/types/types.ts` — `BlurbySettings` interface, `flowSettings` sub-object (if exists, else add)
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Add flow zone constants** — `FLOW_ZONE_LINES_DEFAULT = 5`, `FLOW_ZONE_LINES_MIN = 3`, `FLOW_ZONE_LINES_MAX = 8`, `FLOW_ZONE_OPACITY = 0.35` (de-emphasis level), `FLOW_ZONE_EDGE_PCT = 2` (soft edge transition width in %). Remove or deprecate `FLOW_READING_ZONE_POSITION` constant (now user-configurable). | Hermes | `src/constants.ts` | After line 458 (after `FLOW_LINE_ADVANCE_BUFFER_MS`). Also update `DEFAULT_SETTINGS` if `flowSettings` sub-object is added. |
+| 2 | **Add flow zone settings to BlurbySettings** — Add `flowZonePosition: number` (0.15 \| 0.35 \| 0.55, default 0.25) and `flowZoneLines: number` (3-8, default 5) to BlurbySettings type. Wire through settings load/save. | Hephaestus | `src/types/types.ts`, `src/constants.ts` | In `BlurbySettings` interface — add fields. In `DEFAULT_SETTINGS` — add defaults. |
+| 3 | **Add CSS mask-image to `.foliate-page-view--flow`** — When flow zone is active, apply `mask-image: linear-gradient(to bottom, rgba(0,0,0,OPACITY) 0%, rgba(0,0,0,OPACITY) calc(var(--flow-zone-top) - EDGE%), rgba(0,0,0,1) var(--flow-zone-top), rgba(0,0,0,1) var(--flow-zone-bottom), rgba(0,0,0,OPACITY) calc(var(--flow-zone-bottom) + EDGE%), rgba(0,0,0,OPACITY) 100%)`. Use both `-webkit-mask-image` and `mask-image` for safety. Add CSS custom properties `--flow-zone-top` and `--flow-zone-bottom` with default values. | Hephaestus | `src/styles/global.css` | Find `.foliate-page-view--flow` class. Add mask-image rule. If class doesn't exist, create it. |
+| 4 | **Compute zone CSS custom properties in FoliatePageView** — In the flow mode activation effect (line 1552-1584), after scroll container is set up: compute `--flow-zone-top` and `--flow-zone-bottom` from `settings.flowZonePosition`, `settings.flowZoneLines`, and measured line height. Set via `containerRef.current.style.setProperty()`. Re-compute on container resize (add ResizeObserver). | Hephaestus | `src/components/FoliatePageView.tsx` | Lines 1552-1584 (flow mode useEffect). Add computation after line 1583 (after scroll container ref is set). Add ResizeObserver for the container to recompute on resize. |
+| 5 | **Update FlowScrollEngine to accept dynamic zone position** — Replace hardcoded `FLOW_READING_ZONE_POSITION` in `scrollToLine()` (line 311) with a `zonePosition` property set via a new `setZonePosition(pos: number)` method. Constructor or `start()` accepts initial value from settings. | Hephaestus | `src/utils/FlowScrollEngine.ts` | Line 311: replace `FLOW_READING_ZONE_POSITION` with `this.zonePosition`. Add property (line ~42) and setter method. Update `start()` (line 62) to accept `zonePosition` param. |
+| 6 | **Add zone controls to ReaderBottomBar** — Flow-mode-only controls: zone position dropdown (Top / Center / Bottom, maps to 0.15/0.35/0.55) and zone lines slider (3-8). Only visible when `readingMode === "flow"`. Update settings on change. | Hephaestus | `src/components/ReaderBottomBar.tsx` | Find the flow-mode section of the bottom bar. Add controls after existing flow-specific UI elements. Wire to settings via `onSettingsChange` prop. |
+| 7 | **Wire zone position to FlowScrollEngine on settings change** — In FoliatePageView, when `settings.flowZonePosition` or `settings.flowZoneLines` changes, call `engine.setZonePosition()` and recompute CSS custom properties. | Hephaestus | `src/components/FoliatePageView.tsx` | In the flow mode useEffect (lines 1552-1584) or a new useEffect that depends on `[settings.flowZonePosition, settings.flowZoneLines]`. |
+| 8 | **Tests** — ≥10 new tests: (a) mask-image CSS applied when flow mode active, (b) mask-image removed when flow mode deactivated, (c) `--flow-zone-top` and `--flow-zone-bottom` computed correctly from settings, (d) zone position values map correctly (0.15/0.35/0.55), (e) zone lines clamped to 3-8 range, (f) FlowScrollEngine.setZonePosition updates scroll target, (g) ResizeObserver triggers zone recomputation, (h) default settings applied on fresh start, (i) settings round-trip (save/load), (j) CSS custom properties update on settings change. | Hippocrates | `tests/` | New test file: `tests/flowReadingZone.test.ts` |
+| 9 | **`npm test` + `npm run build`** — Full tier. | Hippocrates | — | — |
+| 10 | **Solon** — Spec compliance. | Solon | — | — |
+| 11 | **Herodotus** — Doc updates. | Herodotus | All 6 governing docs | — |
+| 12 | **Git** | Hermes | — | Branch: `sprint/flow-inf-a-reading-zone` |
+
+**Execution Sequence:**
+1. Read phase — all WHERE files
+2. Task 1 (constants) + Task 2 (types) — parallel, unblock compilation
+3. Task 3 (CSS mask) — after constants exist
+4. Task 5 (FlowScrollEngine update) — after constants exist
+5. Task 4 (zone computation in FoliatePageView) — after CSS + engine updates
+6. Task 6 (bottom bar controls) — after settings types exist
+7. Task 7 (wiring) — after all above
+8. Tasks 8-9 (tests + build) — after all implementation
+9. Task 10-12 (verify + docs + git)
+
+**SUCCESS CRITERIA:**
+1. Flow mode applies CSS `mask-image` gradient — content outside reading zone visually de-emphasized (35% visible)
+2. Reading zone is a fully-visible band spanning `flowZoneLines` lines (default 5)
+3. Soft gradient edges (2% transition) — no hard cutoff
+4. Zone position configurable: Top (0.15), Center (0.35), Bottom (0.55) via ReaderBottomBar dropdown
+5. Zone lines configurable: 3-8 via ReaderBottomBar slider
+6. `FlowScrollEngine.scrollToLine()` uses dynamic zone position from settings, not hardcoded constant
+7. Zone recomputes on container resize (ResizeObserver)
+8. Mask removed when exiting flow mode (no visual artifacts)
+9. All existing tests pass, `npm run build` succeeds
+10. ≥10 new tests in `tests/flowReadingZone.test.ts`
+
+**Tier:** Full | **Depends on:** NARR-CURSOR-1
 
 ---
 
 ### Sprint FLOW-INF-B: Timer Cursor & Pacing Feedback
 
-**Goal:** Replace the invisible width-shrink animation with a visible timer bar that depletes left-to-right as each line is read.
+**Goal:** Replace the barely-visible shrinking underline with a prominent timer bar that depletes left-to-right as each line is read. Add reading progress overlay so users always know where they are.
 
-**Responsibility:** Cowork specs (after FLOW-INF-A ships and UX is validated) → CLI executes.
+**Version:** v1.42.0 | **Branch:** `sprint/flow-inf-b-timer-cursor` | **Tier:** Full
 
-**Deliverables:**
-1. Timer bar element — visible accent-colored bar below (or overlaying) the active line
-2. Left-to-right depletion animation — linear, duration = line word count / WPM
-3. Line completion transition — when bar reaches right edge, smooth scroll to next line, bar resets
-4. Progress indicator — subtle overlay showing % through current chapter and book
-5. WPM feedback — current WPM displayed in bottom bar or reading zone margin
+**Baseline (post-FLOW-INF-A):** Flow mode has CSS mask reading zone, configurable zone position/size, FlowScrollEngine with dynamic zone position. Cursor is `.flow-shrink-cursor` — a 3px accent underline that shrinks from full line width to 0px via CSS transition (`width {duration}ms linear`). Duration = `(wordCount / wpm) × 60000 ms`. Cursor positioned absolutely at `line.left, line.bottom` in FlowScrollEngine `animateLine()` (line 268-286). Manual scroll pauses animation for 2s.
 
-**Investigation gate:** Depends on FLOW-INF-A implementation. Timer bar design must respond to how the reading zone actually renders (overlay vs gradient vs DOM manipulation). Cowork specs after seeing FLOW-INF-A results.
+**Design:**
+```
+Reading Zone:
+  ...previous lines (de-emphasized)...
 
-**Key files:** `src/utils/FlowScrollEngine.ts`, `src/styles/global.css`, `src/components/ReaderBottomBar.tsx`
+  The quick brown fox jumps over the      ← active line
+  [████████████░░░░░░░░░░░░░░░░░░░░]      ← timer bar (40% depleted)
+
+  ...upcoming lines (de-emphasized)...
+
+Bottom Bar:
+  ◀ ▶  |  Flow  |  287 WPM  |  Ch 3 · 34% · ~12 min left  |  ⚙
+```
+
+Timer bar: 4-6px accent-colored bar below active line. Depletes left → right (width shrinks). Subtle glow at leading edge. On line completion: brief accent flash (100ms pulse), then snap to next line at full width.
+
+Progress overlay: Persistent display in ReaderBottomBar showing: current chapter name, book percentage, estimated time remaining (from word count and WPM).
+
+**WHERE (read order):**
+1. `src/utils/FlowScrollEngine.ts` — `animateLine()` lines 252-305 (cursor positioning and shrink), `start()` line 62 (initialization), cursor styling lines 81-85
+2. `src/components/FoliatePageView.tsx` — flow cursor JSX at line 1812, flow cursor ref at line 313-316
+3. `src/styles/global.css` — `.flow-shrink-cursor` class, `.foliate-page-view--flow`
+4. `src/components/ReaderBottomBar.tsx` — existing bottom bar structure, mode-specific sections
+5. `src/constants.ts` — `FLOW_CURSOR_HEIGHT_PX = 3` at line 452, `FLOW_CURSOR_EINK_HEIGHT_PX = 4` at line 454
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Add timer bar constants** — `FLOW_TIMER_BAR_HEIGHT_PX = 5`, `FLOW_TIMER_BAR_EINK_HEIGHT_PX = 6`, `FLOW_TIMER_GLOW_PX = 2` (glow spread), `FLOW_LINE_COMPLETE_FLASH_MS = 100` (completion pulse duration). Keep existing `FLOW_CURSOR_HEIGHT_PX` for backward compat but mark deprecated. | Hermes | `src/constants.ts` | After existing flow constants (~line 458). |
+| 2 | **Restyle `.flow-shrink-cursor` as timer bar** — Height from 3px to `FLOW_TIMER_BAR_HEIGHT_PX`. Add `border-radius: 2px`. Background: accent color with subtle left-edge glow via `box-shadow: 0 0 GLOW_PX 0 var(--accent)`. Add `transition: opacity 100ms ease` for completion flash. Remove any `border-bottom` styling. | Hephaestus | `src/styles/global.css`, `src/utils/FlowScrollEngine.ts` | CSS: find `.flow-shrink-cursor` rules. FlowScrollEngine: lines 81-85 (inline cursor styling in `start()`). Update height assignment to use new constant. |
+| 3 | **Add line-completion flash animation** — In FlowScrollEngine `animateLine()`, when line timer expires (line 288-304): (a) set cursor opacity to 0.4 (flash), (b) after `FLOW_LINE_COMPLETE_FLASH_MS` delay, reset opacity to 1.0 and advance to next line with full width. The flash provides visual rhythm feedback. | Hephaestus | `src/utils/FlowScrollEngine.ts` | Lines 288-304 (the setTimeout that fires after line duration completes). Insert flash sequence before the `this.animateLine()` recursive call. |
+| 4 | **Add progress computation to FlowScrollEngine** — New `getProgress()` method returning `{ lineIndex, totalLines, wordIndex, totalWords, chapterPct, bookPct, estimatedMinutesLeft }`. `chapterPct` = wordIndex / totalWordsInChapter. `bookPct` = provided externally via `setBookProgress(pct)`. `estimatedMinutesLeft` = (totalWords - wordIndex) / wpm. Expose via `onLineChange` callback enhancement. | Hephaestus | `src/utils/FlowScrollEngine.ts` | After `getWordIndex()` (line 204). New method + expand `FlowScrollEngineCallbacks` interface (line 29) to include `onProgressUpdate?: (progress) => void`. Fire on every line change in `animateLine()`. |
+| 5 | **Add progress display to ReaderBottomBar** — Flow-mode section shows: current WPM (from settings), chapter name (from reader props), book percentage (from progress), estimated time remaining. Format: `"Ch 3 · 34% · ~12 min left"`. Update on every `onProgressUpdate` callback. | Hephaestus | `src/components/ReaderBottomBar.tsx` | Find flow-mode section (added in FLOW-INF-A Task 6). Add progress display elements. Wire to progress state passed down from ReaderContainer. |
+| 6 | **Wire progress from FlowScrollEngine to ReaderBottomBar** — In FoliatePageView or ReaderContainer, subscribe to `onProgressUpdate` from FlowScrollEngine. Pass progress state up via callback prop or context. Connect to ReaderBottomBar's new progress display. | Hephaestus | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` | FoliatePageView: where FlowScrollEngine callbacks are wired (near line 1605). Add `onProgressUpdate` handler that sets state. ReaderContainer: pass progress to ReaderBottomBar props. |
+| 7 | **E-ink mode: instant transitions** — When `isEink`, skip the CSS shrink transition (already handled) and skip the flash animation. Timer bar height uses `FLOW_TIMER_BAR_EINK_HEIGHT_PX`. Ensure no CSS transitions applied in e-ink mode. | Hermes | `src/utils/FlowScrollEngine.ts` | Lines 278-282 (e-ink transition conditional). Update height assignment (line 83). Add conditional around flash in Task 3 code. |
+| 8 | **Tests** — ≥8 new tests: (a) timer bar height matches constant, (b) line completion flash fires (opacity change), (c) flash duration matches constant, (d) `getProgress()` returns correct percentages, (e) estimated time remaining calculation correct, (f) progress callback fires on line change, (g) e-ink mode skips flash, (h) e-ink timer bar uses taller height. | Hippocrates | `tests/` | New test file: `tests/flowTimerCursor.test.ts` |
+| 9 | **`npm test` + `npm run build`** — Full tier. | Hippocrates | — | — |
+| 10 | **Solon** — Spec compliance. | Solon | — | — |
+| 11 | **Herodotus** — Doc updates. | Herodotus | All 6 governing docs | — |
+| 12 | **Git** | Hermes | — | Branch: `sprint/flow-inf-b-timer-cursor` |
+
+**Execution Sequence:**
+1. Read phase — all WHERE files
+2. Task 1 (constants) — unblocks compilation
+3. Task 2 (restyle cursor) — after constants
+4. Task 3 (flash animation) — after restyle
+5. Task 4 (progress computation) — parallel with Tasks 2-3
+6. Task 5 (bottom bar progress) + Task 6 (wiring) — after Task 4
+7. Task 7 (e-ink) — after Tasks 2-3
+8. Tasks 8-9 (tests + build)
+9. Tasks 10-12 (verify + docs + git)
+
+**SUCCESS CRITERIA:**
+1. Timer bar is 5px tall (6px e-ink) with accent color and border-radius — visually prominent, not a thin underline
+2. Timer bar depletes left → right linearly over line duration (wordCount / wpm × 60s)
+3. Line completion triggers a 100ms opacity flash before snapping to next line
+4. `getProgress()` returns accurate chapter percentage and estimated time remaining
+5. ReaderBottomBar shows WPM, chapter progress, and estimated time remaining during flow mode
+6. Progress updates on every line change (not just word advance)
+7. E-ink mode: no CSS transitions, no flash, uses taller bar height
+8. Manual scroll pause (2s) still works — timer bar freezes at current width
+9. All existing tests pass, `npm run build` succeeds
+10. ≥8 new tests in `tests/flowTimerCursor.test.ts`
 
 **Tier:** Full | **Depends on:** FLOW-INF-A
 
@@ -474,20 +720,85 @@ All three investigation areas resolved:
 
 ### Sprint EXT-ENR-B: Auto-Discovery Pairing
 
-**Goal:** When the extension tries to connect, Blurby surfaces the pairing code in the library screen.
+**Goal:** When the extension tries to connect, Blurby surfaces the pairing code in the library screen — no need to navigate to Settings. The pairing experience should feel like AirDrop: the app notices the extension and invites pairing.
 
-**Responsibility:** Cowork specs (after EXT-ENR-A ships) → CLI executes.
+**Version:** v1.43.0 | **Branch:** `sprint/ext-enr-b-auto-discovery` | **Tier:** Full
 
-**Deliverables:**
-1. Incoming connection notification — ws-server emits event on unauthenticated connection attempt
-2. Library-screen pairing prompt — floating card: "Chrome Extension wants to connect. Code: 123456"
-3. Auto-dismiss — prompt disappears on pairing success or code expiry
-4. Settings shortcut — "Pair Chrome Extension" button in library header
-5. First-run experience — setup prompt on fresh install when extension detected
+**Baseline (post-EXT-ENR-A, v1.39.0):** WebSocket server has auth timeout (5s), three-state connection indicator, exponential backoff reconnect, article-ack delivery confirmation. Server emits no push events to renderer — status is polled every 5s via `get-ws-short-code` IPC. Pairing code is only visible in Settings > Connectors. Established push event pattern exists in `ipc/cloud.js` (lines 91-96: `mainWindow.webContents.send()`) and `preload.js` (lines 178-217: `onXxx` listener pattern with cleanup).
 
-**Investigation gate:** Depends on EXT-ENR-A implementation. IPC event design must be validated before renderer UI can be spec'd. Cowork specs after EXT-ENR-A ships.
+**Design:**
+```
+Library Screen (normal):
+┌────────────────────────────────────────┐
+│  📚 My Library                    ⚙    │
+│  ┌──────┐ ┌──────┐ ┌──────┐           │
+│  │Book 1│ │Book 2│ │Book 3│           │
+│  └──────┘ └──────┘ └──────┘           │
 
-**Key files:** `main/ws-server.js`, `preload.js`, `src/components/LibraryContainer.tsx`, `src/styles/global.css`
+Library Screen (extension detected):
+┌────────────────────────────────────────┐
+│  📚 My Library                    ⚙    │
+│ ┌────────────────────────────────────┐ │
+│ │ 🔗 Chrome Extension wants to      │ │
+│ │    connect. Enter code: 847291     │ │
+│ │    [Expires in 4:32]    [Dismiss]  │ │
+│ └────────────────────────────────────┘ │
+│  ┌──────┐ ┌──────┐ ┌──────┐           │
+│  │Book 1│ │Book 2│ │Book 3│           │
+│  └──────┘ └──────┘ └──────┘           │
+```
+
+**WHERE (read order):**
+1. `main/ws-server.js` — `handleConnection()` lines 105-159 (client connect, pre-auth). `_ctx` at line 18, assigned at line 416. `handleMessage()` for auth/pair flows at lines 201-259.
+2. `main/ipc/cloud.js` — Push event pattern at lines 91-96 (`mainWindow.webContents.send`). Follow this exact pattern.
+3. `preload.js` — WS-related entries at lines 113-120. Push event listener pattern at lines 178-217 (`onSyncProgress`, `onLibraryUpdated`, `onCloudSyncStatusChanged`). New listener goes after line 217.
+4. `src/hooks/useLibrary.ts` — Push event subscription pattern at lines 17-28 (`onLibraryUpdated` with cleanup). Follow this pattern.
+5. `src/components/LibraryContainer.tsx` — Library screen layout, where pairing banner will be injected.
+6. `src/components/settings/ConnectorsSettings.tsx` — Existing pairing UI (lines 106-153), three-state status. Code display at lines 126-137.
+7. `main/constants.js` — WS constants. Add new constants here.
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Add push event constants** — `WS_CONNECTION_ATTEMPT_CHANNEL = "ws-connection-attempt"`, `WS_PAIRING_SUCCESS_CHANNEL = "ws-pairing-success"`. | Hermes | `main/constants.js` | After existing WS constants (line ~43). |
+| 2 | **Server emits connection-attempt event** — In `handleConnection()`, after `_clients.add(client)` (line 145), emit push event: `const mw = _ctx?.getMainWindow?.(); if (mw && !mw.isDestroyed()) mw.webContents.send("ws-connection-attempt", { timestamp: Date.now() })`. Only emit if client is NOT already authenticated (which it never is at this point — `authenticated: false` is set at line 141). | Hermes | `main/ws-server.js` | After line 145 (`_clients.add(client)`). Import constants if needed. |
+| 3 | **Server emits pairing-success event** — In `handleMessage()`, after successful pairing (line 224-225, where `client.authenticated = true` and `pair-ok` is sent) AND after successful auth (line 239, where `client.authenticated = true` and `auth-ok` is sent): emit `mw.webContents.send("ws-pairing-success", { timestamp: Date.now() })`. | Hermes | `main/ws-server.js` | Lines 224-225 (pair success) and line 239-240 (auth success). Same mainWindow pattern as Task 2. |
+| 4 | **Expose push listeners in preload** — Add `onWsConnectionAttempt` and `onWsPairingSuccess` listeners following the exact pattern at lines 178-217 (ipcRenderer.on with cleanup return). | Hermes | `preload.js` | After line 217 (after last `onXxx` listener). Two new entries in the contextBridge `electronAPI` object. |
+| 5 | **Create PairingBanner component** — New component `src/components/PairingBanner.tsx`. Shows when connection attempt detected, displays pairing code with countdown timer, dismiss button. Auto-dismisses on pairing success or code expiry. Props: `visible: boolean`, `code: string`, `expiresAt: number`, `onDismiss: () => void`. Styled as a floating card with accent border, positioned at top of parent with margin. | Hephaestus | `src/components/PairingBanner.tsx` (new file) | New component. CSS in `src/styles/global.css` — add `.pairing-banner` class with styles. |
+| 6 | **Wire push events in LibraryContainer** — Subscribe to `onWsConnectionAttempt` and `onWsPairingSuccess` via `window.electronAPI`. On connection-attempt: fetch short code via `getWsShortCode()`, show PairingBanner with code + expiry. On pairing-success: hide banner. On dismiss: hide banner, set 60s cooldown (don't show again for the same session within 60s). Follow the useEffect cleanup pattern from `useLibrary.ts` lines 17-28. | Hephaestus | `src/components/LibraryContainer.tsx` | Near existing useEffect hooks. Add state for `showPairingBanner`, `pairingCode`, `pairingExpiresAt`. Render `<PairingBanner>` at top of library content area. |
+| 7 | **Suppress banner when already paired** — Before showing banner on connection-attempt, check current connection status via `getWsShortCode()`. If `status === "connected"`, suppress (this is a re-auth, not a new pairing). Only show banner when status is `"disconnected"` or `"connecting"`. | Hermes | `src/components/LibraryContainer.tsx` | Inside the `onWsConnectionAttempt` handler from Task 6. Add status check before `setShowPairingBanner(true)`. |
+| 8 | **Reduce polling in ConnectorsSettings** — With push events available, the 5s polling in ConnectorsSettings (lines 37-45) can be supplemented: subscribe to `onWsPairingSuccess` to instantly update status on pairing, reducing reliance on polling. Keep polling as fallback but increase interval to 15s. | Hermes | `src/components/settings/ConnectorsSettings.tsx` | Lines 37-45: change `5000` to `15000`. Add `onWsPairingSuccess` subscription that calls `setConnectionStatus("connected")` immediately. |
+| 9 | **CSS for PairingBanner** — `.pairing-banner`: background `var(--surface)`, `border: 2px solid var(--accent)`, `border-radius: 8px`, `padding: 16px`, `margin: 12px`, `display: flex`, `align-items: center`, `gap: 12px`. Code display: `font-family: monospace`, `font-size: 1.4em`, `letter-spacing: 0.15em`, `color: var(--accent)`. Dismiss button: ghost style. Countdown: `color: var(--text-secondary)`. Entrance animation: `translateY(-8px) → 0` with `opacity: 0 → 1`, 200ms ease. | Hermes | `src/styles/global.css` | Add after existing `.connectors-` styles or at end of components section. |
+| 10 | **Tests** — ≥10 new tests: (a) connection-attempt event emitted when unauthenticated client connects, (b) pairing-success event emitted on pair-ok, (c) pairing-success event emitted on auth-ok, (d) banner shows on connection-attempt when status is disconnected, (e) banner suppressed when already connected, (f) banner dismisses on pairing-success, (g) banner dismisses on user click, (h) 60s cooldown suppresses repeat banner, (i) preload listeners return cleanup functions, (j) polling interval is 15s not 5s. | Hippocrates | `tests/` | New test file: `tests/autoDiscoveryPairing.test.ts` |
+| 11 | **`npm test` + `npm run build`** — Full tier. | Hippocrates | — | — |
+| 12 | **Solon** — Spec compliance. | Solon | — | — |
+| 13 | **Herodotus** — Doc updates. | Herodotus | All 6 governing docs | — |
+| 14 | **Git** | Hermes | — | Branch: `sprint/ext-enr-b-auto-discovery` |
+
+**Execution Sequence:**
+1. Read phase — all WHERE files
+2. Tasks 1-4 (constants, server events, preload) — sequential (each builds on prior)
+3. Task 5 (PairingBanner component) + Task 9 (CSS) — parallel with Tasks 2-4
+4. Task 6 (LibraryContainer wiring) — after Tasks 4 + 5
+5. Task 7 (suppress when paired) — after Task 6
+6. Task 8 (reduce polling) — after Task 4
+7. Tasks 10-11 (tests + build)
+8. Tasks 12-14 (verify + docs + git)
+
+**SUCCESS CRITERIA:**
+1. Server emits `"ws-connection-attempt"` event when unauthenticated client connects
+2. Server emits `"ws-pairing-success"` event on successful pair or auth
+3. Preload exposes `onWsConnectionAttempt` and `onWsPairingSuccess` with cleanup returns
+4. PairingBanner appears in library screen when extension connection detected
+5. Banner shows current pairing code with countdown timer
+6. Banner auto-dismisses on successful pairing
+7. Banner suppressed when already connected (no false prompts on re-auth)
+8. 60s cooldown prevents banner re-appearing immediately after dismiss
+9. ConnectorsSettings polling reduced to 15s (push events handle instant updates)
+10. Entrance animation on banner (slide down + fade in, 200ms)
+11. All existing tests pass, `npm run build` succeeds
+12. ≥10 new tests in `tests/autoDiscoveryPairing.test.ts`
 
 **Tier:** Full | **Depends on:** EXT-ENR-A
 
