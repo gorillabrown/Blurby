@@ -272,7 +272,7 @@ export async function wrapWordsInSpans(doc: Document, sectionIndex: number, glob
 
     // Yield to event loop every WRAP_BATCH_SIZE groups so UI stays responsive
     if ((i + 1) % WRAP_BATCH_SIZE === 0 && i + 1 < groups.length) {
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
     }
   }
 
@@ -1916,11 +1916,11 @@ function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: n
   const lineHeight = settings.layoutSpacing?.line || 1.8;
   const fontFamily = settings.fontFamily || "Georgia, serif";
 
-  // Get computed CSS custom properties from the main document
-  const root = document.documentElement;
-  const bg = getComputedStyle(root).getPropertyValue("--bg").trim() || "#1a1a1a";
-  const fg = getComputedStyle(root).getPropertyValue("--text").trim() || "#e0e0e0";
-  const accent = getComputedStyle(root).getPropertyValue("--accent").trim() || "#D04716";
+  // Get computed CSS custom properties from the main document (single call to avoid layout thrashing)
+  const rootStyles = getComputedStyle(document.documentElement);
+  const bg = rootStyles.getPropertyValue("--bg").trim() || "#1a1a1a";
+  const fg = rootStyles.getPropertyValue("--text").trim() || "#e0e0e0";
+  const accent = rootStyles.getPropertyValue("--accent").trim() || "#D04716";
 
   const style = doc.createElement("style");
   style.id = "blurby-theme";

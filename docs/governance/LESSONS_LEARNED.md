@@ -1093,3 +1093,59 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern — CJS/ESM dual-target patching:** kokoro-js ships both `dist/kokoro.cjs` (CommonJS, used in packaged Electron) and `dist/kokoro.js` (ESM, used in Vite dev). Both files must be patched identically. After applying changes to `node_modules/kokoro-js/dist/`, run `npx patch-package kokoro-js` to generate/update `patches/kokoro-js+VERSION.patch`. The patch file covers both files in one diff.
 
 **Related:** NARR-TIMING sprint, `patches/kokoro-js+1.2.1.patch`, LL-057 (kokoro-js import path split)
+
+### [2026-04-07] LL-090: Verify Bug Reports Against Current Codebase Before Filing
+
+**Area:** bug triage, investigation gate, sprint planning
+**Status:** active
+**Priority:** moderate
+
+**Context:** STAB-1A included BUG-163 (TTS cold-start latency — model loads on play, not on book open). During implementation, Zeus discovered the fix was already in place: `ReaderContainer.tsx:283-284` already calls `ttsKokoroPreload()` on book open. The bug report was filed from a code analysis that missed the existing wiring. Zeus correctly wrote a confirmation test instead of duplicate code, but the sprint still carried the unnecessary task overhead.
+
+**Guardrail (PR-090):** Before filing a bug or including a fix task in a sprint spec, verify the current state of the code at the exact location. Read the actual source file — don't rely on descriptions of behavior that may be outdated. For IPC wiring specifically: trace the full chain (renderer call → preload.js → IPC handler → main process function) to confirm whether it's actually wired or truly missing.
+
+**Pattern — false positive avoidance:** When investigating "feature X isn't wired up" bugs, grep for the IPC channel name across the codebase before filing. If the channel exists in both `preload.js` and at least one renderer call site, it's wired — the bug is elsewhere (or doesn't exist).
+
+**Related:** STAB-1A sprint, BUG-163
+
+### [2026-04-07] LL-091: Pre-Split Sprints With 5+ Implementation Tasks Into Waves
+
+**Area:** dispatch sizing, agent orchestration, tool budget
+**Status:** active
+**Priority:** high
+
+**Context:** STAB-1A had 5 implementation tasks + tests + docs + git = 10 total tasks. Zeus hit the 40-tool ceiling twice, requiring 3 separate dispatches (~121 total tool calls). The runtime ceiling hits waste context and cause mid-task interruptions. The wave pattern was already documented but treated as a fallback — sprints were dispatched as single units and split only when the ceiling was hit during execution.
+
+**Guardrail (PR-091):** Any sprint with 5+ implementation tasks (not counting tests, verification, docs, git) MUST be pre-split into waves at dispatch time. Standard split: Wave A = all implementation tasks + test writing + npm test/build. Wave B = spec compliance (Solon) + docs (Herodotus) + git (Hermes). This is a planning-time decision, not a runtime recovery. The dispatch prompt should explicitly name the wave.
+
+**Pattern — tool budget estimation:** Implementation tasks average 8-12 tool calls each (read files + edit + verify). Tests average 10-15 (read existing patterns + write + run). Docs average 10-15 (read 6 files + edit 4-6). Git averages 5. A 5-task sprint therefore needs ~70-100 tool calls — well above the 40-tool single-dispatch budget.
+
+**Related:** STAB-1A closeout, CLAUDE.md dispatch sizing rule
+
+---
+
+### [2026-04-07] LL-092: Performance Remediation Patterns for Electron + React
+
+**Area:** performance, startup, renderer, data layer, build
+**Status:** active
+**Priority:** high
+
+**Context:** PERF-1 audited 44+ sprints of accumulated performance debt across main process startup, renderer re-render churn, and data-layer I/O. All 10 remediations shipped successfully (18 success criteria, 32 new tests). Key patterns emerged that apply broadly to the codebase going forward.
+
+**Pattern 1 — Startup parallelization:** Electron startup should follow: `loadState()` (blocking — window needs settings) → `createWindow()` (as early as possible) → `Promise.all([initAuth(), initSyncEngine()])` (parallel background) → deferred folder sync. Auth and sync never need to block the window. Any sequential `await` in `app.whenReady` that doesn't feed the next step is a candidate for parallelization.
+
+**Pattern 2 — Debounce-everywhere for I/O:** Any UI handler that can fire repeatedly (keystrokes, sliders, toggles) must debounce its persistence write. 300–500ms is the right range for user-input-triggered saves. Use `setTimeout`/`clearTimeout` at module or hook level — no new dependencies needed. File writes triggered by UI events should NEVER be unbounced.
+
+**Pattern 3 — LRU-by-default for caches:** Any `Map` used as a cache must have an eviction policy. Unbounded maps grow forever in long sessions (library with hundreds of EPUBs). 50-entry LRU is the right default for EPUB chapter caches. Implement as a small class (~15 lines) — no external LRU library needed. The pattern: track insertion order, evict oldest entry when `size > cap` on every `.set()`.
+
+**Pattern 4 — Index hot-path lookups:** If a timer or frequent callback scans a full array to find matching items, replace it with a pre-built Set or Map index. Update the index on mutations. For snoozed docs: a `snoozedDocIds` Set replaces a full `library.json` scan every 60 seconds.
+
+**Pattern 5 — useRef escape-hatch for stable dependencies:** When a `useEffect` depends on values that change frequently but the effect should only re-run on one or two of them, move the non-trigger values to refs (`useRef`). The effect only lists the trigger deps. This reduced the voice sync effect from 7 deps to 2 (only `selectedVoiceId` and `ttsEnabled` should trigger re-sync).
+
+**Pattern 6 — Vite `manualChunks` for Electron renderers:** Single-bundle Vite output loads everything synchronously on startup. Splitting into vendor/tts/settings chunks reduces initial parse time and enables lazy-loading of heavy modules (Kokoro TTS, settings sub-pages). The `manualChunks` config in `vite.config.js` is the right hook — no dynamic `import()` refactoring needed for build-time splitting. The build went from 1 chunk to 16 JS chunks.
+
+**Pattern 7 — Batch `getComputedStyle` calls:** `getComputedStyle()` forces a style recalculation. Multiple calls in the same function (e.g., 3× in `injectStyles`) all trigger layout. Collect all needed properties from a single `const rootStyles = getComputedStyle(el)` call at the top of the function. This is one of the cheapest renderer optimizations available.
+
+**Guardrail (PR-092):** Before adding any new cache (Map), persistence handler, or useEffect with >3 deps, check: (a) Does the cache need eviction? (b) Is the save handler debounced? (c) Can the effect deps be reduced with refs? Answer these before writing the code, not after.
+
+**Related:** PERF-1 sprint, `tests/perfAudit.test.ts`, `main.js` startup sequence, `main/ipc/state.js`, `main/file-parsers.js`, `src/components/ReaderContainer.tsx`, `vite.config.js`

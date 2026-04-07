@@ -119,9 +119,14 @@ let libraryIndex = new Map();
 function rebuildLibraryIndex() {
   libraryIndex = new Map(libraryData.docs.map((d) => [d.id, d]));
 }
+let _rebuildIndexTimer = null;
+function debouncedRebuildLibraryIndex() {
+  if (_rebuildIndexTimer) clearTimeout(_rebuildIndexTimer);
+  _rebuildIndexTimer = setTimeout(() => { _rebuildIndexTimer = null; rebuildLibraryIndex(); }, 100);
+}
 function getDocById(id) { return libraryIndex.get(id); }
 function getLibrary() { return libraryData.docs; }
-function setLibrary(docs) { libraryData.docs = docs; rebuildLibraryIndex(); }
+function setLibrary(docs) { libraryData.docs = docs; debouncedRebuildLibraryIndex(); }
 function addDocToLibrary(doc) { libraryData.docs.unshift(doc); libraryIndex.set(doc.id, doc); }
 function removeDocFromLibrary(id) {
   libraryData.docs = libraryData.docs.filter((d) => d.id !== id);
@@ -432,17 +437,18 @@ const ipcContext = {
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   await ensureDataDir();
+
+  // ── Phase 1: Load state (window needs settings) ──────────────────────────
   await loadState();
 
-  // Initialize cloud sync modules
+  // Require cloud modules (just require, not init — fast)
   const auth = require("./main/auth");
   const syncEngine = require("./main/sync-engine");
-  await auth.initAuth(getDataPath());
-  await syncEngine.initSyncEngine(ipcContext);
 
+  // Register IPC handlers before window opens (renderer needs them on load)
   registerIpcHandlers(ipcContext);
 
-  // Initialize TTS audio cache (NAR-2)
+  // Initialize TTS audio cache (NAR-2) — fire-and-forget
   const ttsCache = require("./main/tts-cache");
   ttsCache.init(app.getPath("userData")).catch((err) => {
     console.error("[tts-cache] Init failed:", err.message);
@@ -452,6 +458,7 @@ app.whenReady().then(async () => {
   const wsServer = require("./main/ws-server");
   wsServer.startServer(ipcContext);
 
+  // ── Phase 2: Show window immediately ─────────────────────────────────────
   mainWindow = createMainWindow(settings, isDev);
   mainWindow.on("closed", () => { mainWindow = null; });
   tray = createTray(mainWindow, () => {
@@ -460,6 +467,16 @@ app.whenReady().then(async () => {
   });
   updateWindowTheme(mainWindow, settings);
   if (!isDev) setupAutoUpdater(mainWindow);
+
+  // ── Phase 3: Auth + sync init in parallel (window already visible) ───────
+  await Promise.all([
+    auth.initAuth(getDataPath()),
+    syncEngine.initSyncEngine(ipcContext),
+  ]).catch((err) => {
+    console.error('[startup] Auth/sync init failed (window still usable):', err.message);
+  });
+
+  // ── Phase 4: Deferred work (non-blocking) ────────────────────────────────
 
   // Sprint 23: Insert sample document on first run (deferred to post-window-show)
   if (!settings.firstRunCompleted && !getDocById("sample-meditations")) {
@@ -519,23 +536,27 @@ app.whenReady().then(async () => {
     if (settings.theme === "system") updateWindowTheme(mainWindow, settings);
   });
 
-  // Clean stale entries from recent folders (non-blocking)
+  // Clean stale entries from recent folders (non-blocking, fire-and-forget)
   if (settings.recentFolders && settings.recentFolders.length > 0) {
-    const valid = [];
-    for (const folder of settings.recentFolders) {
-      try { await fsPromises.access(folder); valid.push(folder); } catch { /* stale, remove */ }
-    }
-    if (valid.length !== settings.recentFolders.length) {
-      settings.recentFolders = valid;
-      saveSettingsFn();
-    }
+    (async () => {
+      const valid = [];
+      for (const folder of settings.recentFolders) {
+        try { await fsPromises.access(folder); valid.push(folder); } catch { /* stale, remove */ }
+      }
+      if (valid.length !== settings.recentFolders.length) {
+        settings.recentFolders = valid;
+        saveSettingsFn();
+      }
+    })();
   }
 
+  // Folder watcher + sync — non-blocking (fire-and-forget, watcher starts first)
   if (settings.sourceFolder) {
-    syncLibraryWithFolder().then(() => startWatcherFn());
+    startWatcherFn();
+    syncLibraryWithFolder();
   }
 
-  // Start cloud sync if signed in
+  // Start cloud sync if signed in (auth is initialized by now)
   if (auth.getAuthState()) {
     syncEngine.startSync().catch((err) => console.log("[cloud] Startup sync failed:", err.message));
     const intervalMs = (settings.syncIntervalMinutes || 5) * 60 * 1000;

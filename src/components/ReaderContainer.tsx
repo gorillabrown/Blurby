@@ -123,6 +123,7 @@ export default function ReaderContainer({
   const { settings, updateSettings } = useSettings();
   const { showToast } = useToast();
   const isEink = settings.theme === "eink";
+
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
   );
@@ -454,16 +455,26 @@ export default function ReaderContainer({
     narration.setEngine(settings.ttsEngine || "web");
   }, [settings.ttsEngine, narration.setEngine]);
 
+  // Refs for narration values read by the voice sync effect but shouldn't trigger re-runs.
+  const narrationVoicesRef = useRef(narration.voices);
+  narrationVoicesRef.current = narration.voices;
+  const narrationCurrentVoiceRef = useRef(narration.currentVoice);
+  narrationCurrentVoiceRef.current = narration.currentVoice;
+  const narrationSelectVoiceRef = useRef(narration.selectVoice);
+  narrationSelectVoiceRef.current = narration.selectVoice;
+  const narrationSetKokoroVoiceRef = useRef(narration.setKokoroVoice);
+  narrationSetKokoroVoiceRef.current = narration.setKokoroVoice;
+
   useEffect(() => {
     if (settings.ttsEngine === "kokoro" && settings.ttsVoiceName) {
-      narration.setKokoroVoice(settings.ttsVoiceName);
-    } else if (settings.ttsVoiceName && narration.voices.length > 0) {
-      const voice = narration.voices.find((v) => v.name === settings.ttsVoiceName);
-      if (voice && voice.name !== narration.currentVoice?.name) {
-        narration.selectVoice(voice);
+      narrationSetKokoroVoiceRef.current(settings.ttsVoiceName);
+    } else if (settings.ttsVoiceName && narrationVoicesRef.current.length > 0) {
+      const voice = narrationVoicesRef.current.find((v) => v.name === settings.ttsVoiceName);
+      if (voice && voice.name !== narrationCurrentVoiceRef.current?.name) {
+        narrationSelectVoiceRef.current(voice);
       }
     }
-  }, [settings.ttsEngine, settings.ttsVoiceName, narration.voices, narration.currentVoice, narration.selectVoice, narration.setKokoroVoice]);
+  }, [settings.ttsEngine, settings.ttsVoiceName]);
 
   useEffect(() => {
     if (settings.ttsRate && settings.ttsRate !== narration.rate) {

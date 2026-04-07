@@ -214,11 +214,24 @@ export default function LibraryContainer() {
     }
   }, [loaded, didInit, settings.wpm, settings.folderName]);
 
-  // Persist wpm/folderName on change
+  // Persist wpm/folderName on change — WPM save is debounced 300ms so rapid keystrokes
+  // don't flood disk writes; folderName changes are infrequent and included in the same call.
+  const wpmSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!loaded || !didInit) return;
-    api.saveSettings({ wpm, folderName });
+    clearTimeout(wpmSaveTimeoutRef.current ?? undefined);
+    wpmSaveTimeoutRef.current = setTimeout(() => {
+      api.saveSettings({ wpm, folderName });
+    }, 300);
   }, [wpm, folderName, loaded, didInit]);
+  // Clean up pending debounced save on unmount
+  useEffect(() => {
+    return () => {
+      if (wpmSaveTimeoutRef.current !== null) {
+        clearTimeout(wpmSaveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const openDoc = useCallback(async (doc: BlurbyDoc) => {
     const resolved = typeof doc.content === "string"

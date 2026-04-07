@@ -8,7 +8,7 @@ const fsPromises = require("fs/promises");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover, extractMobiCover,
         parseMobiMetadata, parseCallibreOpf,
-        clearChapterCache, epubChapterCache } = require("../file-parsers");
+        clearChapterCache, epubChapterCache, epubChapterCacheGet } = require("../file-parsers");
 const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
 
@@ -181,11 +181,11 @@ function register(ctx) {
     const doc = ctx.getDocById(docId);
     if (!doc) return [];
     if (doc.filepath && epubChapterCache.has(doc.filepath)) {
-      return epubChapterCache.get(doc.filepath);
+      return epubChapterCacheGet(doc.filepath);
     }
     if (doc.filepath && path.extname(doc.filepath).toLowerCase() === ".epub") {
       await extractContent(doc.filepath);
-      return epubChapterCache.get(doc.filepath) || [];
+      return epubChapterCacheGet(doc.filepath) || [];
     }
     return [];
   });

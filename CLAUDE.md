@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.46.0 — queue RED depth 1, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.47.0 — queue RED depth 0, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -333,11 +333,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **NARR-TIMING complete** — Real word-level timestamps from Kokoro TTS. kokoro-js fork surfaces duration tensor via patch-package. 4-layer validation: token-count check, fail-closed token walk, waveform drift (split accumulator), scheduler acceptance (monotonicity, bounds, scaled tolerance). `computeWordBoundaries` prefers real timestamps, falls back to `computeWordWeights` heuristic. Full IPC chain wired (types.ts, preload.js, ipc/tts.js, tts-engine.js, tts-worker.js, kokoroStrategy.ts, generationPipeline.ts, audioScheduler.ts). BUG-161 fully resolved. 18 new tests (`tests/narrTiming.test.ts`). v1.44.0.
 - **STAB-1A complete** — BUG-162/163/164/165 resolved. `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired on book open, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. 19 new tests (`tests/startupStabilization.test.ts`). v1.45.0.
 - **FLOW-INF-C complete** — Cross-book continuous reading. Finishing a book in flow mode with a non-empty queue shows transition overlay (2.5s countdown), then auto-opens next book and resumes flow. `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching without unmounting ReaderContainer, Escape/click-to-cancel. 21 new tests (`tests/crossBookFlow.test.ts`). v1.46.0.
-- Active queue: depth 1 — RED. PERF-1 only. Backfill needed. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **PERF-1 complete** — Full performance audit & remediation. Startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`→deferred folder sync), folder watcher starts before sync, `getComputedStyle` cached in `injectStyles` (3→1 call), settings saves debounced (500ms), WPM persistence debounced (300ms), EPUB chapter cache LRU eviction (50-cap), snoozed doc check indexed via Set, voice sync effect deps reduced (7→2), Vite code splitting (vendor/tts/settings chunks, 16 JS chunks), `rebuildLibraryIndex` debounced (100ms). 32 new tests (`tests/perfAudit.test.ts`). v1.47.0.
+- Active queue: depth 0 — RED (critical backfill needed). HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,754 tests across 97 test files
+- 1,786 tests across 98 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 

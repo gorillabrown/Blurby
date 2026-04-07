@@ -21,20 +21,18 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED (backfill needed)
-Next sprint: PERF-1 (Performance Audit)
-Health: RED — FLOW-INF-C complete (v1.46.0). PERF-1 queued. Two more sprints needed for GREEN.
+Queue depth: 0 — RED (critical backfill needed)
+Next sprint: none — queue empty
+Health: RED — PERF-1 complete (v1.47.0). Queue empty. Three sprints needed for GREEN.
 ```
 
 ---
 
 ## Queue
 
-| # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
-|---|-----------|---------|--------|------|-----------|---------|
-| 1 | PERF-1 | v1.47.0 | `sprint/perf-1-audit` | Full | **YES** | Full spec: 18 tasks (2-phase: measure then remediate), 18 success criteria. Startup parallelization, renderer de-thrash, data layer debounce/LRU, Vite code splitting. |
+*(empty — backfill required)*
 
-**Dispatch status:** Queue depth 1 — RED. Two more sprints needed for GREEN. PERF-1 fully spec'd.
+**Dispatch status:** Queue depth 0 — RED. Three sprints must be spec'd and queued before next dispatch.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -48,7 +46,8 @@ Health: RED — FLOW-INF-C complete (v1.46.0). PERF-1 queued. Two more sprints n
 9. ~~Backfill queue to ≥3~~ — DONE (PERF-1 spec'd, queue GREEN depth 3)
 10. ~~Dispatch STAB-1A to CLI~~ — COMPLETE (v1.45.0)
 11. ~~Dispatch FLOW-INF-C to CLI~~ — COMPLETE (v1.46.0)
-12. **Backfill queue to ≥3** — spec two more sprints to restore GREEN before dispatching PERF-1.
+12. ~~Dispatch PERF-1 to CLI~~ — COMPLETE (v1.47.0)
+13. **Backfill queue to ≥3** — spec three sprints (e.g., APK-0, EXT-ENR-C, or next hotfix) to restore GREEN.
 
 ---
 
@@ -70,6 +69,7 @@ Health: RED — FLOW-INF-C complete (v1.46.0). PERF-1 queued. Two more sprints n
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| PERF-1 | 2026-04-07 | PASS | Full performance audit & remediation: startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`), folder watcher before sync, `getComputedStyle` cached (3→1 call), settings saves debounced 500ms, WPM persistence debounced 300ms, EPUB chapter cache LRU 50-cap, snoozed doc Set index, voice sync deps 7→2, Vite code splitting (vendor/tts/settings, 16 chunks), `rebuildLibraryIndex` debounced 100ms. 32 new tests (1,786 total across 98 files). v1.47.0. |
 | FLOW-INF-C | 2026-04-07 | PASS | Cross-book continuous reading: transition overlay (2.5s countdown), auto-open next queued book + resume flow, `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching, Escape/click-to-cancel. 21 new tests (1,754 total across 97 files). v1.46.0. |
 | STAB-1A | 2026-04-07 | PASS | Startup & flow stabilization: `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. BUG-162/163/164/165 resolved. 19 new tests (1,736 total across 96 files). v1.45.0. |
 | NARR-TIMING | 2026-04-07 | PASS | Real word-level timestamps from Kokoro duration tensor. kokoro-js fork (patch-package), 4-layer validation, scheduler integration with heuristic fallback. BUG-161 fully resolved. 18 new tests (1,717 total across 95 files). v1.44.0. |
