@@ -5,6 +5,11 @@ const { ipcMain } = require("electron");
 const { SNOOZE_CHECK_INTERVAL_MS } = require("../constants");
 const { createReaderWindow } = require("../window-manager");
 
+// Index of doc IDs that currently have an active snooze. Seeded from persisted
+// library on registration, then kept in sync by snooze/unsnooze handlers and
+// the expiry loop. O(snoozed) checks instead of O(library) on every tick.
+const snoozedDocIds = new Set();
+
 function register(ctx) {
   ipcMain.handle("update-doc-progress", (_, docId, position, cfi) => {
     const doc = ctx.getDocById(docId);
@@ -75,6 +80,7 @@ function register(ctx) {
     const doc = library.find((d) => d.id === docId);
     if (doc) {
       doc.snoozedUntil = until;
+      snoozedDocIds.add(docId);
       ctx.saveLibrary();
       ctx.broadcastLibrary();
     }
@@ -85,6 +91,7 @@ function register(ctx) {
     const doc = library.find((d) => d.id === docId);
     if (doc) {
       doc.snoozedUntil = null;
+      snoozedDocIds.delete(docId);
       ctx.saveLibrary();
       ctx.broadcastLibrary();
     }
@@ -115,15 +122,31 @@ function register(ctx) {
     ctx.saveHistory();
   });
 
-  // Check for snoozed docs that should reappear
+  // Seed the index from persisted library so docs snoozed in a prior session
+  // are covered before the first IPC snooze/unsnooze call arrives.
+  for (const doc of ctx.getLibrary()) {
+    if (doc.snoozedUntil) snoozedDocIds.add(doc.id);
+  }
+
+  // Check for snoozed docs that should reappear.
+  // Only iterates snoozedDocIds (O(snoozed)) instead of the full library.
   function checkSnoozedDocs() {
-    const library = ctx.getLibrary();
+    if (snoozedDocIds.size === 0) return;
+
     const now = Date.now();
     let changed = false;
+    const expired = [];
 
-    for (const doc of library) {
-      if (doc.snoozedUntil && doc.snoozedUntil <= now) {
+    for (const docId of snoozedDocIds) {
+      const doc = ctx.getDocById(docId);
+      if (!doc || !doc.snoozedUntil) {
+        // Stale entry — doc was deleted or manually cleared outside IPC
+        expired.push(docId);
+        continue;
+      }
+      if (doc.snoozedUntil <= now) {
         doc.snoozedUntil = null;
+        expired.push(docId);
         changed = true;
 
         // Show system notification
@@ -138,6 +161,8 @@ function register(ctx) {
         }
       }
     }
+
+    for (const docId of expired) snoozedDocIds.delete(docId);
 
     if (changed) {
       ctx.saveLibrary();

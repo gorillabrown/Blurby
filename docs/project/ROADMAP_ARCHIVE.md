@@ -4544,3 +4544,59 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 14. `npm test` passes (1,754 tests), `npm run build` succeeds
 
 **Depends on:** FLOW-INF-B
+
+---
+
+## PERF-1: Full Performance Audit & Remediation ✅ COMPLETED (v1.47.0, 2026-04-07)
+
+**Goal:** Investigate every performance hotspot across the entire application — main process startup, renderer rendering/re-render cycles, and data-layer I/O — then remediate confirmed findings. Two-phase sprint: Phase A establishes baselines and confirms findings via measurement; Phase B remediates prioritized issues.
+
+**Branch:** `sprint/perf-1-audit` | **Tier:** Full | **Tests:** 32 new in `tests/perfAudit.test.ts` (1,786 total across 98 files)
+
+### What Was Done
+
+1. Startup parallelized: `loadState()` → `createWindow()` → `Promise.all([initAuth(), initSyncEngine()])` → deferred folder sync
+2. Folder watcher starts before sync
+3. `getComputedStyle` cached in `injectStyles` (3→1 call)
+4. Settings saves debounced (500ms) in `main/ipc/state.js`
+5. WPM persistence debounced (300ms) in `LibraryContainer.tsx`
+6. EPUB chapter cache LRU eviction (50-entry cap) in `main/file-parsers.js`
+7. Snoozed doc check indexed via Set in `main/ipc/documents.js`
+8. Voice sync effect deps reduced (7→2) in `ReaderContainer.tsx`
+9. Vite code splitting: vendor/tts/settings chunks (16 JS chunks total) in `vite.config.js`
+10. `rebuildLibraryIndex` debounced (100ms) in `main.js`
+
+### Files Changed
+
+- `main.js` — startup parallelization, watcher/sync reorder, rebuildLibraryIndex debounce
+- `main/ipc/state.js` — settings save debounce
+- `main/ipc/documents.js` — snoozed doc Set index
+- `main/file-parsers.js` — EPUB chapter cache LRU (50-cap)
+- `src/components/FoliatePageView.tsx` — `injectStyles` getComputedStyle cache
+- `src/components/ReaderContainer.tsx` — voice sync dep array reduction
+- `src/components/LibraryContainer.tsx` — WPM persistence debounce
+- `vite.config.js` — manualChunks code splitting
+- `tests/perfAudit.test.ts` — 32 new perf audit tests
+
+### SUCCESS CRITERIA (all 18 met)
+
+1. Window is visible before `initAuth()` and `initSyncEngine()` complete
+2. `initAuth()` and `initSyncEngine()` run in parallel (not sequential)
+3. Folder watcher starts before folder sync completes
+4. `injectStyles` calls `getComputedStyle` exactly once per invocation (not 3×)
+5. Settings saves are debounced — 10 rapid calls within 500ms produce ≤2 file writes
+6. WPM input persistence is debounced — typing does not trigger per-keystroke saves
+7. EPUB chapter cache has LRU eviction with 50-entry cap
+8. Chapter cache size never exceeds cap (no unbounded growth)
+9. Snoozed doc check uses a pre-built index — does not iterate full library
+10. Voice sync useEffect dependency array has ≤3 items (down from 7)
+11. Vite build produces separate chunks for vendor, TTS, and settings
+12. `rebuildLibraryIndex` is debounced — batch mutations trigger single rebuild
+13. No Phase A instrumentation remains in committed code
+14. ≥16 new tests in `tests/perfAudit.test.ts` (32 delivered)
+15. `npm test` passes, `npm run build` succeeds
+16. No regressions in narration, flow mode, or library operations
+17. Build output shows multiple chunks (not single bundle)
+18. Startup-to-window time measurably improved (target: window visible < 500ms after app.whenReady)
+
+**Depends on:** None — investigation gate cleared by Cowork analysis.

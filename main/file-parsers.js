@@ -313,6 +313,15 @@ function epubChapterCacheSet(key, value) {
   }
 }
 
+function epubChapterCacheGet(key) {
+  if (!epubChapterCache.has(key)) return undefined;
+  // Promote to most recently used by delete-and-reinsert
+  const value = epubChapterCache.get(key);
+  epubChapterCache.delete(key);
+  epubChapterCache.set(key, value);
+  return value;
+}
+
 function clearChapterCache(docId) {
   // docId could be a filepath key; also search by value if needed
   if (epubChapterCache.has(docId)) {
@@ -837,6 +846,7 @@ module.exports = {
   extractDocMetadata,
   countWords,
   epubChapterCache,
+  epubChapterCacheGet,
   validateImageMagicBytes,
   clearChapterCache,
 };

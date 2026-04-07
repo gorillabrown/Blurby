@@ -8,6 +8,8 @@ const {
 } = require("../constants");
 const fsPromises = require("fs/promises");
 
+let saveSettingsTimeout = null;
+
 function register(ctx) {
   ipcMain.handle("get-state", () => ({
     settings: ctx.getSettings(),
@@ -19,16 +21,22 @@ function register(ctx) {
 
   ipcMain.handle("save-settings", (_, newSettings) => {
     const settings = ctx.getSettings();
+    // Update in-memory state immediately so all readers see the new value
     Object.assign(settings, newSettings);
-    ctx.saveSettings();
     if (newSettings.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
 
-    // Enqueue update-settings for sync
-    const syncEngine = require("../sync-engine");
-    const syncQueue = require("../sync-queue");
-    const syncStatus = syncEngine.getSyncStatus();
-    const revision = syncStatus.revision || 0;
-    syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message));
+    // Debounce the file write and sync enqueue — rapid toggles/sliders batch into one write
+    clearTimeout(saveSettingsTimeout);
+    saveSettingsTimeout = setTimeout(() => {
+      ctx.saveSettings();
+
+      // Enqueue update-settings for sync
+      const syncEngine = require("../sync-engine");
+      const syncQueue = require("../sync-queue");
+      const syncStatus = syncEngine.getSyncStatus();
+      const revision = syncStatus.revision || 0;
+      syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message));
+    }, 500);
   });
 
   ipcMain.handle("get-launch-at-login", () => {
