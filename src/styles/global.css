@@ -5158,3 +5158,63 @@ button:focus-visible {
   background: var(--hover);
   color: var(--text);
 }
+
+/* ── Cross-Book Transition Overlay (FLOW-INF-C) ─────────────────────────── */
+.cross-book-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  animation: cross-book-fade-in 200ms ease forwards;
+}
+
+@keyframes cross-book-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cross-book-overlay__card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 400px;
+  text-align: center;
+  color: var(--text);
+}
+
+.cross-book-overlay__finished {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.cross-book-overlay__next {
+  font-size: 1.25rem;
+  margin-bottom: 20px;
+}
+
+.cross-book-overlay__progress {
+  height: 3px;
+  background: var(--surface-alt, rgba(255,255,255,0.15));
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.cross-book-overlay__bar {
+  height: 100%;
+  background: var(--accent);
+  animation: cross-book-progress 2500ms linear forwards;
+}
+
+@keyframes cross-book-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.cross-book-overlay__hint {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}

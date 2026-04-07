@@ -182,7 +182,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the H
 - **CSS custom properties for theming.** No inline styles. All styles in `src/styles/global.css`.
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
-- **Dispatch sizing: 40 tool-use ceiling.** A single Zeus dispatch must stay under ~40 tool uses. Sprints exceeding this must be split into waves (e.g., Wave A = implement + test, Wave B = verify + docs + git). Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
+- **Dispatch sizing: 40 tool-use ceiling per wave.** A single Zeus dispatch must stay under ~40 tool uses. **Sprints with 5+ implementation tasks MUST be pre-split into waves at dispatch time** (don't wait for a runtime ceiling hit). Standard wave split: Wave A = implement + test, Wave B = verify + docs + git. Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
 - **Verification gate is mandatory.** After completing any code-change task, verify: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
 - **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). `Solon` performs this step. Full-tier sprints then spawn `Plato`. Quick-tier sprints use Zeus self-review.
@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.45.0 — queue GREEN depth 2, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.46.0 — queue RED depth 1, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -332,11 +332,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **HOTFIX-15 complete** — BUG-159/160/161 resolved. colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% container cap) + null guard. Proportional band height (`lineHeight * 1.08`) + dynamic re-measurement on word change (>2px threshold). Truth-sync interval halved from 12→6 words. 16 new tests (`tests/narrationCursorPolish.test.ts`, 2 updated). v1.43.1.
 - **NARR-TIMING complete** — Real word-level timestamps from Kokoro TTS. kokoro-js fork surfaces duration tensor via patch-package. 4-layer validation: token-count check, fail-closed token walk, waveform drift (split accumulator), scheduler acceptance (monotonicity, bounds, scaled tolerance). `computeWordBoundaries` prefers real timestamps, falls back to `computeWordWeights` heuristic. Full IPC chain wired (types.ts, preload.js, ipc/tts.js, tts-engine.js, tts-worker.js, kokoroStrategy.ts, generationPipeline.ts, audioScheduler.ts). BUG-161 fully resolved. 18 new tests (`tests/narrTiming.test.ts`). v1.44.0.
 - **STAB-1A complete** — BUG-162/163/164/165 resolved. `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired on book open, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. 19 new tests (`tests/startupStabilization.test.ts`). v1.45.0.
-- Active queue: depth 2 — YELLOW (backfill needed). FLOW-INF-C → PERF-1. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **FLOW-INF-C complete** — Cross-book continuous reading. Finishing a book in flow mode with a non-empty queue shows transition overlay (2.5s countdown), then auto-opens next book and resumes flow. `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching without unmounting ReaderContainer, Escape/click-to-cancel. 21 new tests (`tests/crossBookFlow.test.ts`). v1.46.0.
+- Active queue: depth 1 — RED. PERF-1 only. Backfill needed. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,736 tests across 96 test files
+- 1,754 tests across 97 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -363,16 +364,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `main/window-manager.js` — BrowserWindow, tray, menu, auto-updater
   - `main/cloud-onedrive.js` — OneDrive App Folder via Microsoft Graph, chunked uploads
   - `main/migrations.js` — schema migrations with backup
-  - `main/ws-server.js` — localhost WebSocket server for Chrome extension (port 48924, pairing token auth)
-  - `main/epub-word-extractor.js` — main-process EPUB word extraction (AdmZip + cheerio + Intl.Segmenter, bypasses foliate)
-  - `main/folder-watcher.js` — chokidar folder watching
-  - `main/cloud-storage.js` — provider factory (OneDrive/Google)
-  - Context object pattern shares state (mainWindow, library, settings, paths) across modules
-- **Preload** (`preload.js`): Context bridge -> `window.electronAPI` (incl. cloud sync APIs)
-- **Renderer** (`src/`): React 19 SPA
-  - `App.tsx` — Thin orchestrator (Sprint 11 refactor)
-  - `src/components/` — UI components + 8 settings sub-pages
-    - `ReaderContainer.tsx` — decomposed into hooks: useReaderMode, useProgressTracker, useEinkController
-    - `ReaderBottomBar.tsx` — unified controls across all 4 reading modes
-    - ~~`FlowScrollView.tsx`~~ — removed in FLOW-3B (dead code since EPUB-2B)
-  - `src/modes/` — Mode verticals (TD-1): `PageMode.ts`, `FocusMode.ts`, `FlowMode.ts`
+  - `main/ws-server.js` — localhost WebSocket server for Chrome extension (port 48924, pair
