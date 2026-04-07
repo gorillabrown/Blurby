@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED (backfill critical)
+Queue depth: 2 — YELLOW (backfill needed)
 Next sprint: FLOW-INF-C (Cross-Book Continuous Reading)
-Health: RED — NARR-TIMING complete (v1.44.0). Queue dropped to 1. Cowork must spec 2 more sprints to restore ≥3 before dispatching FLOW-INF-C.
+Health: YELLOW — STAB-1A complete (v1.45.0). FLOW-INF-C → PERF-1 queued. One more sprint needed for GREEN.
 ```
 
 ---
@@ -32,9 +32,10 @@ Health: RED — NARR-TIMING complete (v1.44.0). Queue dropped to 1. Cowork must 
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | FLOW-INF-C | v1.45.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
+| 1 | FLOW-INF-C | v1.46.0 | `sprint/flow-inf-c-cross-book` | Full | **YES** | Full spec: 14 tasks, 14 success criteria, cross-book continuous reading with transition overlay + queue auto-advance. Depends on FLOW-INF-B. |
+| 2 | PERF-1 | v1.47.0 | `sprint/perf-1-audit` | Full | **YES** | Full spec: 18 tasks (2-phase: measure then remediate), 18 success criteria. Startup parallelization, renderer de-thrash, data layer debounce/LRU, Vite code splitting. |
 
-**Dispatch status:** Queue depth 1 — RED. Backfill critical. Cowork must spec 2 more sprints from IDEAS.md to restore ≥3 before FLOW-INF-C dispatch.
+**Dispatch status:** Queue depth 2 — YELLOW. One more sprint needed for GREEN. FLOW-INF-C → PERF-1 fully spec'd.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -44,7 +45,10 @@ Health: RED — NARR-TIMING complete (v1.44.0). Queue dropped to 1. Cowork must 
 5. ~~Backfill queue to ≥3~~ — DONE (HOTFIX-15 spec'd, queue GREEN)
 6. ~~Dispatch HOTFIX-15 to CLI~~ — COMPLETE (v1.43.1)
 7. ~~Dispatch NARR-TIMING to CLI~~ — COMPLETE (v1.44.0)
-8. **Backfill queue to ≥3** — REQUIRED before dispatching FLOW-INF-C.
+8. ~~Backfill queue~~ — STAB-1A spec'd (queue YELLOW, depth 2)
+9. ~~Backfill queue to ≥3~~ — DONE (PERF-1 spec'd, queue GREEN depth 3)
+10. ~~Dispatch STAB-1A to CLI~~ — COMPLETE (v1.45.0)
+11. **Backfill queue to ≥3** — spec one more sprint to restore GREEN before dispatching FLOW-INF-C.
 
 ---
 
@@ -66,6 +70,7 @@ Health: RED — NARR-TIMING complete (v1.44.0). Queue dropped to 1. Cowork must 
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| STAB-1A | 2026-04-07 | PASS | Startup & flow stabilization: `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. BUG-162/163/164/165 resolved. 19 new tests (1,736 total across 96 files). v1.45.0. |
 | NARR-TIMING | 2026-04-07 | PASS | Real word-level timestamps from Kokoro duration tensor. kokoro-js fork (patch-package), 4-layer validation, scheduler integration with heuristic fallback. BUG-161 fully resolved. 18 new tests (1,717 total across 95 files). v1.44.0. |
 | HOTFIX-15 | 2026-04-07 | PASS | Narration cursor polish: colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% cap) + null guard (BUG-159). Proportional band height `lineHeight * 1.08` + dynamic re-measurement on word change >2px threshold (BUG-160). Truth-sync interval halved 12→6 words (BUG-161 partial). 16 new tests (1,699 total across 94 files). v1.43.1. |
 | EXT-ENR-B | 2026-04-07 | PASS | Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` / `ws-pairing-success` events. `PairingBanner` in library screen shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced 5s→15s. 29 new tests (1,683 total across 93 files). v1.43.0. |
@@ -74,5 +79,4 @@ Health: RED — NARR-TIMING complete (v1.44.0). Queue dropped to 1. Cowork must 
 | NARR-CURSOR-1 | 2026-04-06 | PASS | Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances with narration, width derived per tick. CSS simplified to 2-stop gradient. NARRATION_BAND_PAD_PX removed. 16 new tests (1,609 total across 90 files). v1.40.0. |
 | EXT-ENR-A | 2026-04-06 | PASS | Resilient extension connection: exponential backoff, pending article persistence, article-ack, EADDRINUSE retry cap, auth timeout, three-state UI, lifecycle hooks. 18 new tests (1,593 total across 89 files). v1.39.0. |
 | HOTFIX-14 | 2026-04-06 | PASS | URL extraction fetchWithBrowser fallback (BUG-155), authenticated-only client count + 5s polling + 15s heartbeat (BUG-156). 12 new tests (1,575 total across 88 files). v1.38.2. |
-| SELECTION-1 | 2026-04-06 | PASS | Word anchor contract: soft/hard/resume tiers, mode start resolution chain. BUG-151/152/153 resolved. 17 new tests (1,563 total). v1.38.0. |
-| HOTFIX-12 | 2026-04-05 | PASS | Bug report triage fixes
+| SELECTION-1 | 2026-04-06 | PASS | Word anchor contract: soft/hard/resume tiers, mode s

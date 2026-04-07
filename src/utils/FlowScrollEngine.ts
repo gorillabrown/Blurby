@@ -103,14 +103,39 @@ export class FlowScrollEngine {
     }
 
     this.lines = this.buildLineMap();
+
+    // STAB-1A (BUG-165): If buildLineMap returns empty (word spans not rendered yet),
+    // retry up to 5 times with 100ms delay. Prevents zombie engine state.
     if (this.lines.length === 0) {
-      // Empty document or no word spans — stop gracefully
-      this.running = false;
-      this.cursor.style.display = "none";
+      let retries = 0;
+      const retryBuild = () => {
+        retries++;
+        this.lines = this.buildLineMap();
+        if (this.lines.length > 0) {
+          this.lineIdx = this.findLineForWord(wordIndex);
+          this.scrollToLine(this.lineIdx, true);
+          setTimeout(() => {
+            if (this.running && !this.paused) this.animateLine();
+          }, FLOW_LINE_ADVANCE_BUFFER_MS);
+          this.container!.addEventListener("wheel", this.handleWheel, { passive: true });
+          this.container!.addEventListener("touchmove", this.handleWheel, { passive: true });
+          return;
+        }
+        if (retries < 5) {
+          setTimeout(retryBuild, 100);
+        } else {
+          // Final failure — stop cleanly, do not leave running=true with empty lines
+          if (import.meta.env.DEV) console.warn("[FlowScrollEngine] buildLineMap empty after 5 retries — stopping");
+          this.running = false;
+          this.cursor!.style.display = "none";
+        }
+      };
+      setTimeout(retryBuild, 100);
       return;
     }
+
     this.lineIdx = this.findLineForWord(wordIndex);
-    this.scrollToLine(this.lineIdx);
+    this.scrollToLine(this.lineIdx, true);
 
     setTimeout(() => {
       if (this.running && !this.paused) this.animateLine();
@@ -361,13 +386,14 @@ export class FlowScrollEngine {
     }, duration);
   }
 
-  private scrollToLine(lineIdx: number): void {
+  private scrollToLine(lineIdx: number, instant = false): void {
     if (!this.container || lineIdx >= this.lines.length) return;
     const line = this.lines[lineIdx];
     const containerHeight = this.container.clientHeight;
     const targetScrollTop = line.y - (containerHeight * this.zonePosition);
 
-    if (this.isEink) {
+    if (this.isEink || instant) {
+      // STAB-1A (BUG-165): Initial scroll uses instant behavior — no smooth animation delay
       this.container.scrollTop = Math.max(0, targetScrollTop);
     } else {
       this.container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: "smooth" });

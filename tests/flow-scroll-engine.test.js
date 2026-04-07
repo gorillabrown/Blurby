@@ -471,11 +471,16 @@ describe("FlowScrollEngine - Edge Cases", () => {
     const cursor = createMockCursor();
     document.body.appendChild(container);
 
-    // No word spans in container — should stop gracefully
+    // No word spans in container — STAB-1A retry logic keeps running=true
+    // while retrying buildLineMap. After 5 retries (5 × 100ms), it stops.
+    vi.useFakeTimers();
     engine.start(container, cursor, 0, 300, new Set(), false);
+    // Advance past all 5 retries (5 × 100ms = 500ms, use 600ms for safety)
+    vi.advanceTimersByTime(600);
     expect(engine.getState().running).toBe(false);
     expect(cursor.style.display).toBe("none");
 
+    vi.useRealTimers();
     engine.destroy();
     document.body.removeChild(container);
   });

@@ -111,14 +111,14 @@ export function getChunkSize(chunkIndex: number): number {
  * @param words Full word array
  * @param startIdx Chunk start index
  * @param targetEndIdx Ideal chunk end index (startIdx + chunkSize)
- * @param tolerance Max words to search in each direction (default 15)
+ * @param tolerance Max words to search in each direction (default 25)
  * @returns Adjusted end index snapped to a sentence boundary, or targetEndIdx if none found
  */
 export function snapToSentenceBoundary(
   words: string[],
   startIdx: number,
   targetEndIdx: number,
-  tolerance = 15,
+  tolerance = 25,
 ): number {
   const maxIdx = words.length;
   const clampedEnd = Math.min(targetEndIdx, maxIdx);
