@@ -644,6 +644,23 @@ Cards show three lines:
 
 Library supports grid and list view modes, search, favorites, archives, tags, collections, and snooze.
 
+### Chrome Extension Integration (`main/ws-server.js`)
+
+Blurby hosts a localhost WebSocket server on port 48924 for the Chrome extension.
+
+**Pairing flow:** 6-digit short code with 5-minute TTL. Long-lived token stored in safeStorage (server) and `chrome.storage.local` (extension). Token survives app restart. Extension reconnects with exponential backoff (1s→30s, ±25% jitter). Pending articles persisted in `chrome.storage.local` and replayed on reconnect with delivery confirmation (article-ack).
+
+**Push event channels (EXT-ENR-B, v1.43.0):** Server emits two push events to the renderer via `mainWindow.webContents.send()`:
+
+| Channel | When | Payload |
+|---------|------|---------|
+| `ws-connection-attempt` | Unauthenticated client connects | `{ timestamp }` |
+| `ws-pairing-success` | Client successfully authenticates (pair-ok or auth-ok) | `{ timestamp }` |
+
+These are exposed in `preload.js` as `onWsConnectionAttempt` / `onWsPairingSuccess` (cleanup-returning listener pattern). `LibraryContainer.tsx` subscribes and shows a `PairingBanner` when a connection attempt is detected and the user is not already connected. Banner displays the pairing code with countdown, auto-dismisses on success, and has a 60s cooldown on manual dismiss. `ConnectorsSettings.tsx` polling interval is 15s (reduced from 5s; push events provide instant status updates).
+
+**Three-state UI:** `connected` / `connecting` / `disconnected` indicator in the Connectors settings page.
+
 ---
 
 ## 10. Settings System

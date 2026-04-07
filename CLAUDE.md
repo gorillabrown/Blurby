@@ -299,7 +299,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.42.0 — queue GREEN depth 3, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.43.0 — queue YELLOW depth 2, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -326,11 +326,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **NARR-CURSOR-1 complete** — Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances rightward with narration, width derived per tick as `colRight - leftEdge`. CSS simplified (2-stop gradient, no transform transition). NARRATION_BAND_PAD_PX removed. 16 new tests. v1.40.0.
 - **FLOW-INF-A complete** — CSS mask-image reading zone with configurable position/size. FlowScrollEngine computes dynamic zone position from `--flow-zone-top` / `--flow-zone-size` CSS custom properties. ReaderBottomBar exposes zone controls (position slider, size slider) in flow mode. ResizeObserver triggers zone recomputation on container resize. 27 new tests. v1.41.0.
 - **FLOW-INF-B complete** — Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash). FlowProgress computation with chapter/book percentage + estimated time remaining. ReaderBottomBar progress display. 18 new tests. v1.42.0.
-- Active queue: depth 3 — GREEN. EXT-ENR-B → NARR-TIMING → FLOW-INF-C. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **EXT-ENR-B complete** — Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` and `ws-pairing-success` push events. `PairingBanner` component appears in library screen when extension tries to connect — shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced from 5s to 15s. 29 new tests (`tests/autoDiscoveryPairing.test.ts`). v1.43.0.
+- Active queue: depth 2 — YELLOW (below minimum of 3). NARR-TIMING → FLOW-INF-C. **Cowork must backfill queue to ≥3 before next dispatch.** HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,654 tests across 92 test files
+- 1,683 tests across 93 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -378,4 +379,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `src/styles/global.css` — All styles with CSS custom properties, WCAG 2.1 AA compliant
   - Narration uses useReducer state machine with TTS strategy pattern (Web Speech + Kokoro). Kokoro uses 3 native-rate buckets (1.0x/1.2x/1.5x) — no scheduler pitch-shift.
   - Performance: useMemo/useCallback throughout, ref-based DOM updates in readers
-- **Test count**: 1,654 tests across 92 test files
+- **Test count**: 1,683 tests across 93 test files

@@ -4,7 +4,7 @@
 const http = require("http");
 const crypto = require("crypto");
 const { safeStorage } = require("electron");
-const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS } = require("./constants");
+const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS, WS_CONNECTION_ATTEMPT_CHANNEL, WS_PAIRING_SUCCESS_CHANNEL } = require("./constants");
 const { normalizeAuthor } = require("./author-normalize");
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -144,6 +144,12 @@ function handleConnection(socket, request) {
   };
   _clients.add(client);
 
+  // Push event: notify renderer of connection attempt (for auto-discovery pairing banner)
+  const mw = _ctx?.getMainWindow?.();
+  if (mw && !mw.isDestroyed()) {
+    mw.webContents.send(WS_CONNECTION_ATTEMPT_CHANNEL, { timestamp: Date.now() });
+  }
+
   // Auth timeout — disconnect if client doesn't authenticate within WS_AUTH_TIMEOUT_MS
   client.authTimer = setTimeout(() => {
     if (!client.authenticated) {
@@ -236,6 +242,11 @@ async function handleMessage(client, text) {
       client.authenticated = true;
       if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
       sendJson(client.socket, { type: "pair-ok", token: _pairingToken });
+      // Push event: notify renderer of successful pairing
+      const mw = _ctx?.getMainWindow?.();
+      if (mw && !mw.isDestroyed()) {
+        mw.webContents.send(WS_PAIRING_SUCCESS_CHANNEL, { timestamp: Date.now() });
+      }
     } else {
       sendJson(client.socket, { type: "pair-failed", message: "Invalid code" });
     }
@@ -252,6 +263,11 @@ async function handleMessage(client, text) {
       client.authenticated = true;
       if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
       sendJson(client.socket, { type: "auth-ok" });
+      // Push event: notify renderer of successful auth
+      const mw2 = _ctx?.getMainWindow?.();
+      if (mw2 && !mw2.isDestroyed()) {
+        mw2.webContents.send(WS_PAIRING_SUCCESS_CHANNEL, { timestamp: Date.now() });
+      }
     } else {
       sendJson(client.socket, { type: "auth-failed", message: "Invalid pairing token" });
     }

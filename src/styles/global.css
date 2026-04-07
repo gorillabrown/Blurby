@@ -5062,3 +5062,77 @@ button:focus-visible {
   text-align: center;
   margin-bottom: 8px;
 }
+
+/* ── Pairing Banner (EXT-ENR-B) ──────────────────────────────────────────── */
+.pairing-banner {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: pairing-banner-enter 200ms ease both;
+}
+
+@keyframes pairing-banner-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pairing-banner__icon {
+  font-size: 1.5em;
+  flex-shrink: 0;
+}
+
+.pairing-banner__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pairing-banner__title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.pairing-banner__details {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pairing-banner__code {
+  font-family: monospace;
+  font-size: 1.4em;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.pairing-banner__countdown {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+}
+
+.pairing-banner__dismiss {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.pairing-banner__dismiss:hover {
+  background: var(--hover);
+  color: var(--text);
+}
