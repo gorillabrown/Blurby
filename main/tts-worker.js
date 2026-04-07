@@ -103,20 +103,20 @@ async function loadModel(cacheDir) {
   parentPort.postMessage({ type: "warm-up-done" });
 }
 
-async function generate(id, text, voice, speed) {
+async function generate(id, text, voice, speed, words) {
   try {
     if (!ttsInstance || !modelReady) {
       parentPort.postMessage({ type: "result", id, error: "Model not loaded" });
       return;
     }
-    const result = await ttsInstance.generate(text, { voice, speed });
+    const result = await ttsInstance.generate(text, { voice, speed, words: words || null });
     const audioData = result.audio || result;
     const pcm = audioData.data || audioData;
     const sr = audioData.sampling_rate || SAMPLE_RATE;
     const durationMs = (pcm.length / sr) * 1000;
     // Transfer PCM as Float32Array via Transferable (zero-copy)
     const f32 = pcm instanceof Float32Array ? pcm : new Float32Array(pcm);
-    const msg = { type: "result", id, audio: f32, sampleRate: sr, durationMs };
+    const msg = { type: "result", id, audio: f32, sampleRate: sr, durationMs, wordTimestamps: result.wordTimestamps || null };
     parentPort.postMessage(msg, [f32.buffer]);
   } catch (err) {
     parentPort.postMessage({ type: "result", id, error: err.message });
@@ -147,7 +147,7 @@ parentPort.on("message", async (msg) => {
       }
       break;
     case "generate":
-      await generate(msg.id, msg.text, msg.voice, msg.speed);
+      await generate(msg.id, msg.text, msg.voice, msg.speed, msg.words);
       break;
     case "list-voices":
       await listVoices(msg.id);

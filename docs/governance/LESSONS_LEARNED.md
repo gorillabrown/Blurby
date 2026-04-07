@@ -1075,3 +1075,21 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern:** Before dispatching two or more parallel tasks to the same file, Zeus (or the sprint spec) must explicitly enumerate which exports belong to which task. If both tasks legitimately need the same constant, assign ownership to exactly one task and mark the other as a consumer. Alternatively, sequence tasks that share a file — the performance loss is usually smaller than the cost of diagnosing a duplicate-export collision after the fact.
 
 **Guardrail (PR-148):** For any sprint with parallel doer tasks that write to the same file: (1) diff the export names in each task's spec — flag any overlap before dispatch, (2) assign each new export to exactly one task, (3) if a second task needs the export, it reads it as an existing value rather than redeclaring it. Zeus must enforce this at plan time, not at merge time.
+
+---
+
+### [2026-04-07] LL-089: patch-package Fork Maintenance Pattern for Node Dependencies
+
+**Area:** TTS, dependencies, fork maintenance
+**Status:** active
+**Priority:** moderate
+
+**Context:** NARR-TIMING required forking kokoro-js to surface the duration tensor that the library discards. The fork targets built `dist/` artifacts (both CJS and ESM) rather than source files, because the Electron packaged app loads `dist/kokoro.cjs` directly and dev mode loads `dist/kokoro.js`.
+
+**Decision:** Use `patch-package` to create a persistent patch file (`patches/kokoro-js+1.2.1.patch`) applied automatically on `npm install`. The patch is version-pinned — updating kokoro-js requires regenerating the patch.
+
+**Guardrail (PR-089):** When updating kokoro-js (or any patch-package-managed dependency), the patch must be regenerated and both CJS/ESM parity verified. The fork includes 4-layer runtime validation that detects semantic changes — if upstream changes duration tensor behavior, the validation fails closed and the heuristic fallback activates. But structural changes (renamed methods, changed class hierarchy) will cause patch application to fail at `npm install` time.
+
+**Pattern — CJS/ESM dual-target patching:** kokoro-js ships both `dist/kokoro.cjs` (CommonJS, used in packaged Electron) and `dist/kokoro.js` (ESM, used in Vite dev). Both files must be patched identically. After applying changes to `node_modules/kokoro-js/dist/`, run `npx patch-package kokoro-js` to generate/update `patches/kokoro-js+VERSION.patch`. The patch file covers both files in one diff.
+
+**Related:** NARR-TIMING sprint, `patches/kokoro-js+1.2.1.patch`, LL-057 (kokoro-js import path split)

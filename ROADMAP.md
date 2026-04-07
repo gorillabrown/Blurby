@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-07 — HOTFIX-15 complete (v1.43.1, BUG-159/160/161 resolved). Queue depth 3 (GREEN). Next: NARR-TIMING → FLOW-INF-C.
+**Last updated**: 2026-04-07 — NARR-TIMING complete (v1.44.0, real word-level timestamps from Kokoro). Queue depth 1 (RED — backfill critical). Next: FLOW-INF-C.
 **Current branch**: `main`
-**Current state**: v1.43.1 stable. Queue depth 3 (GREEN). Next: NARR-TIMING → FLOW-INF-C → (backfill).
+**Current state**: v1.44.0 stable. Queue depth 1 (RED). Next: FLOW-INF-C. Backfill critical before next dispatch.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -54,7 +54,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     │                                   │
     └──────────────┬────────────────────┘
                    │
-    NARR-TIMING: Real Word Timestamps (parallel — independent of Tracks A/B)
+    NARR-TIMING: Real Word Timestamps ✅ (v1.44.0)
                    │
                    ▼
         Track C: Android APK
@@ -1028,7 +1028,9 @@ Library Screen (extension detected):
 
 ---
 
-## NARR-TIMING: Real Word-Level Timestamps from Kokoro TTS
+## NARR-TIMING: Real Word-Level Timestamps from Kokoro TTS ✅ COMPLETED
+
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. **Result:** All 16 success criteria met, 1,717 tests passing (18 new in `tests/narrTiming.test.ts`), build succeeds. v1.44.0. 2026-04-07.
 
 **Goal:** Replace the character-count heuristic (`computeWordWeights`) with real per-word timestamps derived from Kokoro's duration tensor. The narration cursor consistently runs ahead of the audio because the heuristic treats word duration as proportional to character count. Kokoro's ONNX text encoder already computes per-phoneme durations during inference — the kokoro-js wrapper just discards them. A ~60-line fork surfaces this data, aligns it to words, and feeds validated timestamps into the audio scheduler.
 

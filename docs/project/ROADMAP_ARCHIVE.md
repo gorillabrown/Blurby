@@ -4458,3 +4458,48 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 14. `npm run build` succeeds
 
 **Depends on:** Independent of TTS-7R
+
+---
+
+## NARR-TIMING: Real Word-Level Timestamps from Kokoro TTS ✅ COMPLETED (2026-04-07)
+
+**Version:** v1.44.0 | **Branch:** `sprint/narr-timing` | **Tier:** Full
+**Result:** All 16 SUCCESS CRITERIA met. 18 new tests in `tests/narrTiming.test.ts` (1,717 total across 95 files). Build succeeds.
+
+**Goal:** Replace the character-count heuristic (`computeWordWeights`) with real per-word timestamps derived from Kokoro's duration tensor. The narration cursor consistently runs ahead of the audio because the heuristic treats word duration as proportional to character count. Kokoro's ONNX text encoder already computes per-phoneme durations during inference — the kokoro-js wrapper just discards them. A ~60-line fork surfaces this data, aligns it to words, and feeds validated timestamps into the audio scheduler.
+
+**Problem:** `computeWordWeights` distributes chunk duration across words proportionally to character length (clamped 2–20, with 1.12x sentence-end and 1.05x clause-end multipliers). Short function words get over-allocated, long content words get under-allocated, and the error accumulates across every chunk. The heuristic also has zero knowledge of Kokoro's natural inter-word silence — the cursor advances through pauses that should be visible holds.
+
+**Plan document:** `NARR-TIMING-PLAN/NARR-TIMING_Plan.md` — comprehensive technical plan revised through two independent audit rounds (15 findings, all incorporated).
+
+### Design Decisions (from plan + 2 audit rounds)
+
+1. **RawAudio return type preserved** — Fork attaches `_durations` (on `generate_from_ids`) and `wordTimestamps` (on `generate`) as non-enumerable properties via `Object.defineProperty`. No API breakage for `stream()` or existing callers.
+2. **4-layer validation** — Layer 1: token count check (gross phonemization divergence). Layer 2: waveform drift with split accumulator (EOS/tail included). Layer 2b: fail-closed token walk (throws on underrun). Layer 3: scheduler acceptance (monotonicity, bounds, word correspondence, scaled tolerance).
+3. **Split accumulator** — `sampleOffset` tracks word timestamps (stops at last aligned word). `totalPredictedSamples` walks all remaining tokens including EOS for drift validation. Resolves the "endTime excludes trailing pause" vs "predicted duration should match waveform" contradiction.
+4. **Fail-closed token walk** — Token accumulation and separator consumption throw immediately when the tensor can't provide expected tokens, instead of silently clipping.
+5. **Scaled tolerances** — `min(40ms, 5% of speech duration)` instead of fixed 100ms. Short chunks get strict validation.
+6. **Graceful fallback** — Any alignment failure (fork error, validation failure, edge case) falls back to existing `computeWordWeights` heuristic. Narration never breaks.
+7. **patch-package fork** — Targets built `dist/` artifacts (both CJS `dist/kokoro.cjs` and ESM `dist/kokoro.js`). Must cover both packaged-app and dev-mode import paths.
+8. **`endTime` contract** — End of voiced portion, excluding trailing inter-word pause. Gap between `word[i].endTime` and `word[i+1].startTime` is silence. Currently only `startTime` is used for scheduling; `endTime` preserved for future silence-aware cursor hold (IDEAS.md H6).
+
+### SUCCESS CRITERIA (all met)
+
+1. kokoro-js fork captures `durations` from `this.model()` return (no longer discarded)
+2. `generate_from_ids` returns `RawAudio` with `_durations` attached as non-enumerable property
+3. `generate` returns `RawAudio` with `wordTimestamps` attached as non-enumerable property (when `words` provided)
+4. `stream()` and all other kokoro-js internal callers continue to work unchanged (RawAudio type preserved)
+5. `tts-worker.js` accepts `words` in generate message and relays `wordTimestamps` in result
+6. `generationPipeline.ts` passes chunk words through to `generateFn` and attaches `wordTimestamps` to `ScheduledChunk`
+7. `audioScheduler.ts` uses real timestamps when present and valid; falls back to `computeWordWeights` heuristic otherwise
+8. `validateWordTimestamps` checks: length, finite/non-negative, endTime >= startTime, monotone startTimes, word correspondence, scaled overshoot tolerance (`min(40ms, 5% of speech duration)`), zero-duration count
+9. Token walk is fail-closed — throws on tensor underrun (not silent clip)
+10. Drift validation uses split accumulator (`totalPredictedSamples` includes EOS/tail; `sampleOffset` does not)
+11. Durations are rounded and clamped per-token before accumulation (mirrors model's `round().clamp_()`)
+12. `silenceMs` correctly excluded from speech duration in scheduler validation (timestamps validated against speech portion only)
+13. `patch-package` patch file exists in `patches/` and is applied on `npm install`
+14. Both CJS and ESM import paths resolve to patched kokoro-js code (parity check passes)
+15. ≥15 new tests in `tests/narrTiming.test.ts` (18 delivered)
+16. `npm test` passes (1,717 tests), `npm run build` succeeds
+
+**Depends on:** None — independent of FLOW-INF and EXT-ENR tracks.

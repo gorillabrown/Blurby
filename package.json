@@ -14,7 +14,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "perf": "vitest run tests/perf-baseline.test.ts",
-    "postinstall": "node scripts/patch-onnxruntime.js"
+    "postinstall": "patch-package && node scripts/patch-onnxruntime.js"
   },
   "build": {
     "appId": "com.blurby.app",
@@ -84,6 +84,7 @@
     "concurrently": "^9.1.2",
     "electron": "^41.1.0",
     "electron-builder": "^26.8.1",
+    "patch-package": "^8.0.1",
     "typescript": "^5.9.3",
     "vite": "^6.1.0",
     "vitest": "^4.1.0",
