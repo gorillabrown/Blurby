@@ -599,9 +599,9 @@ describe("snoozed doc index (Set-based check)", () => {
 
 describe("voice sync useEffect dependency array", () => {
 
-  it("k: ReaderContainer.tsx voice sync effect depends on ≤ 3 items", () => {
+  it("k: useNarrationSync voice sync effect depends on ≤ 3 items", () => {
     const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/ReaderContainer.tsx"),
+      path.resolve(__dirname, "../src/hooks/useNarrationSync.ts"),
       "utf-8"
     );
 
@@ -625,7 +625,7 @@ describe("voice sync useEffect dependency array", () => {
 
   it("k: voice sync effect includes settings.ttsEngine and settings.ttsVoiceName as deps", () => {
     const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/ReaderContainer.tsx"),
+      path.resolve(__dirname, "../src/hooks/useNarrationSync.ts"),
       "utf-8"
     );
 

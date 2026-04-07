@@ -22,17 +22,10 @@ const { extractContent, extractDocMetadata, countWords,
 const isDev = !app.isPackaged;
 
 // ── Constants ────────────────────────────────────────────────────────────────
-const LIBRARY_SAVE_DEBOUNCE_MS = 500;
-const BROADCAST_DEBOUNCE_MS = 200;
-const FOLDER_SYNC_DEBOUNCE_MS = 1000;
-const FOLDER_SYNC_BATCH_SIZE = 4;
-const MAX_RECENT_FOLDERS = 5;
-const MAX_HISTORY_SESSIONS = 1000;
-const MS_PER_DAY = 86400000;
-const AUTO_UPDATE_DELAY_MS = 5000;
-const BROWSER_FETCH_TIMEOUT_MS = 20000;
-const BROWSER_CONTENT_SETTLE_MS = 3000;
-const URL_FETCH_TIMEOUT_MS = 15000;
+const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, FOLDER_SYNC_DEBOUNCE_MS,
+        FOLDER_SYNC_BATCH_SIZE, MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
+        MS_PER_DAY, AUTO_UPDATE_DELAY_MS, BROWSER_FETCH_TIMEOUT_MS,
+        BROWSER_CONTENT_SETTLE_MS, URL_FETCH_TIMEOUT_MS } = require('./main/constants');
 
 // ── Paths (initialized once at startup) ────────────────────────────────────
 let _dataPath = null;

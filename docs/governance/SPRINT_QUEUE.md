@@ -21,18 +21,21 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 0 — RED (critical backfill needed)
-Next sprint: none — queue empty
-Health: RED — PERF-1 complete (v1.47.0). Queue empty. Three sprints needed for GREEN.
+Queue depth: 2 — YELLOW
+Next sprint: REFACTOR-1B (Component & Style Cleanup)
+Health: YELLOW — REFACTOR-1B → TEST-COV-1 spec'd. Backfill needed to restore GREEN (≥3).
 ```
 
 ---
 
 ## Queue
 
-*(empty — backfill required)*
+| # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
+|---|-----------|---------|--------|------|-----------|---------|
+| 1 | REFACTOR-1B | v1.49.0 | `sprint/refactor-1b-style-cleanup` | Full | **YES** | Full spec: 12 tasks (2 waves), 18 success criteria. FoliatePageView helper extraction, TTSSettings sub-components, inline style→CSS migration (179→<30), global.css split into 8 domain files. Audit findings H-1, H-2, M-1, M-4, M-7. Depends on REFACTOR-1A (complete). |
+| 2 | TEST-COV-1 | v1.50.0 | `sprint/test-cov-1-critical-paths` | Full | **YES** | Full spec: 11 tasks (2 waves), 16 success criteria. Auth/cloud/queue/ErrorBoundary/foliateWordOffsets tests (≥52 new), URL scheme validation security fix. Audit findings H-4, H-5, M-5, M-6. Independent — can parallel. |
 
-**Dispatch status:** Queue depth 0 — RED. Three sprints must be spec'd and queued before next dispatch.
+**Dispatch status:** Queue depth 2 — YELLOW. REFACTOR-1B → TEST-COV-1 fully spec'd. Backfill sprint 3 before next dispatch.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -47,7 +50,10 @@ Health: RED — PERF-1 complete (v1.47.0). Queue empty. Three sprints needed for
 10. ~~Dispatch STAB-1A to CLI~~ — COMPLETE (v1.45.0)
 11. ~~Dispatch FLOW-INF-C to CLI~~ — COMPLETE (v1.46.0)
 12. ~~Dispatch PERF-1 to CLI~~ — COMPLETE (v1.47.0)
-13. **Backfill queue to ≥3** — spec three sprints (e.g., APK-0, EXT-ENR-C, or next hotfix) to restore GREEN.
+13. ~~Backfill queue to ≥3~~ — DONE (REFACTOR-1A/1B + TEST-COV-1 spec'd from Aristotle audit, queue GREEN depth 3)
+14. ~~Dispatch REFACTOR-1A to CLI~~ — COMPLETE (v1.48.0)
+15. **Backfill queue to ≥3** — YELLOW, depth 2. Spec a third sprint before dispatching REFACTOR-1B.
+16. **Dispatch REFACTOR-1B to CLI** — after backfill.
 
 ---
 
@@ -69,6 +75,7 @@ Health: RED — PERF-1 complete (v1.47.0). Queue empty. Three sprints needed for
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| REFACTOR-1A | 2026-04-07 | PASS | ReaderContainer decomposition: 33 useEffects → 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle), fileHashes cleanup on document delete, main.js constants extracted to main/constants.js. 74 new tests (1,860 total across 100 files). v1.48.0. |
 | PERF-1 | 2026-04-07 | PASS | Full performance audit & remediation: startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`), folder watcher before sync, `getComputedStyle` cached (3→1 call), settings saves debounced 500ms, WPM persistence debounced 300ms, EPUB chapter cache LRU 50-cap, snoozed doc Set index, voice sync deps 7→2, Vite code splitting (vendor/tts/settings, 16 chunks), `rebuildLibraryIndex` debounced 100ms. 32 new tests (1,786 total across 98 files). v1.47.0. |
 | FLOW-INF-C | 2026-04-07 | PASS | Cross-book continuous reading: transition overlay (2.5s countdown), auto-open next queued book + resume flow, `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching, Escape/click-to-cancel. 21 new tests (1,754 total across 97 files). v1.46.0. |
 | STAB-1A | 2026-04-07 | PASS | Startup & flow stabilization: `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. BUG-162/163/164/165 resolved. 19 new tests (1,736 total across 96 files). v1.45.0. |

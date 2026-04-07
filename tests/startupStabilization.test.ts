@@ -121,9 +121,9 @@ describe("BUG-163: TTS preload IPC", () => {
     expect(preloadSrc).toContain("kokoroPreload");
   });
 
-  it("ReaderContainer calls kokoroPreload on book open", () => {
+  it("useDocumentLifecycle calls kokoroPreload on book open", () => {
     const readerSrc = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/ReaderContainer.tsx"),
+      path.resolve(__dirname, "../src/hooks/useDocumentLifecycle.ts"),
       "utf-8"
     );
     expect(readerSrc).toContain("kokoroPreload");

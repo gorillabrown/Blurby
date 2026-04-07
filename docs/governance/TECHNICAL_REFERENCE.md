@@ -272,6 +272,16 @@ create(config) → start(wordIdx) → [advance / pause / resume / setSpeed] → 
 
 `ReaderContainer` orchestrates transitions between modes. When switching modes, the current mode is `stop()`'d and `destroy()`'d, and the new mode is created and `start()`'d.
 
+**ReaderContainer decomposition (REFACTOR-1A, v1.48.0):** The 33 useEffect hooks that previously lived in `ReaderContainer.tsx` were extracted into 5 domain-specific custom hooks to reduce re-render cost and improve maintainability. `ReaderContainer` is now a thin orchestrator that composes these hooks:
+
+| Hook | File | Effects | Domain |
+|------|------|---------|--------|
+| `useNarrationSync` | `src/hooks/useNarrationSync.ts` | 12 | TTS cursor sync, narration state, audio glide wiring |
+| `useNarrationCaching` | `src/hooks/useNarrationCaching.ts` | 4 | TTS preload, cache invalidation, voice change |
+| `useFlowScrollSync` | `src/hooks/useFlowScrollSync.ts` | 6 | Flow scroll position, line map, zone sync |
+| `useFoliateSync` | `src/hooks/useFoliateSync.ts` | 4 | Foliate renderer events, CFI/word index sync |
+| `useDocumentLifecycle` | `src/hooks/useDocumentLifecycle.ts` | 7 | Book open/close, fileHashes cleanup, history |
+
 ### Page Mode (`src/modes/PageMode.ts`)
 
 The default mode. No auto-advance. User reads at their own pace with paginated text, word click selection, notes, and dictionary lookup. All other modes are sub-modes that return to Page when paused.

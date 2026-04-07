@@ -126,6 +126,24 @@ const TTS_CACHE_MAX_MB = 2000;
 /** Max retries on Kokoro generation failure before falling back to Web Speech */
 const TTS_GENERATION_MAX_RETRIES = 1;
 
+// ── Main Process Lifecycle ───────────────────────────────────────────────────
+/** Debounce delay for saving library.json to disk (ms) */
+const LIBRARY_SAVE_DEBOUNCE_MS = 500;
+/** Debounce delay for broadcasting library updates to renderer (ms) */
+const BROADCAST_DEBOUNCE_MS = 200;
+/** Debounce delay for triggering folder sync after watcher events (ms) */
+const FOLDER_SYNC_DEBOUNCE_MS = 1000;
+/** Maximum files processed per folder sync batch */
+const FOLDER_SYNC_BATCH_SIZE = 4;
+/** Delay before starting auto-updater check at launch (ms) */
+const AUTO_UPDATE_DELAY_MS = 5000;
+/** Timeout for browser-based URL fetch via BrowserWindow (ms) */
+const BROWSER_FETCH_TIMEOUT_MS = 20000;
+/** Settle time after browser navigation before extracting content (ms) */
+const BROWSER_CONTENT_SETTLE_MS = 3000;
+/** Timeout for basic URL fetch (non-browser) (ms) */
+const URL_FETCH_TIMEOUT_MS = 15000;
+
 // ── Folder Watcher ──────────────────────────────────────────────────────
 /** Chokidar write-finish stability threshold — file must be stable this long (ms) */
 const FOLDER_WATCHER_STABILITY_MS = 500;
@@ -217,6 +235,15 @@ module.exports = {
   TTS_CACHE_SUBDIR,
   TTS_CACHE_MAX_MB,
   TTS_GENERATION_MAX_RETRIES,
+  // Main Process Lifecycle
+  LIBRARY_SAVE_DEBOUNCE_MS,
+  BROADCAST_DEBOUNCE_MS,
+  FOLDER_SYNC_DEBOUNCE_MS,
+  FOLDER_SYNC_BATCH_SIZE,
+  AUTO_UPDATE_DELAY_MS,
+  BROWSER_FETCH_TIMEOUT_MS,
+  BROWSER_CONTENT_SETTLE_MS,
+  URL_FETCH_TIMEOUT_MS,
   // Folder Watcher
   FOLDER_WATCHER_STABILITY_MS,
   // Window Dimensions

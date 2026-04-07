@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.47.0 — queue RED depth 0, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.48.0 — queue YELLOW depth 2, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -334,11 +334,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **STAB-1A complete** — BUG-162/163/164/165 resolved. `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired on book open, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. 19 new tests (`tests/startupStabilization.test.ts`). v1.45.0.
 - **FLOW-INF-C complete** — Cross-book continuous reading. Finishing a book in flow mode with a non-empty queue shows transition overlay (2.5s countdown), then auto-opens next book and resumes flow. `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching without unmounting ReaderContainer, Escape/click-to-cancel. 21 new tests (`tests/crossBookFlow.test.ts`). v1.46.0.
 - **PERF-1 complete** — Full performance audit & remediation. Startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`→deferred folder sync), folder watcher starts before sync, `getComputedStyle` cached in `injectStyles` (3→1 call), settings saves debounced (500ms), WPM persistence debounced (300ms), EPUB chapter cache LRU eviction (50-cap), snoozed doc check indexed via Set, voice sync effect deps reduced (7→2), Vite code splitting (vendor/tts/settings chunks, 16 JS chunks), `rebuildLibraryIndex` debounced (100ms). 32 new tests (`tests/perfAudit.test.ts`). v1.47.0.
-- Active queue: depth 0 — RED (critical backfill needed). HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **REFACTOR-1A complete** — ReaderContainer decomposition: 33 useEffects extracted into 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle). fileHashes cleanup on document delete. main.js constants extracted to main/constants.js. 74 new tests. v1.48.0.
+- Active queue: depth 2 — YELLOW. REFACTOR-1B → TEST-COV-1. Backfill needed to restore GREEN depth 3. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,786 tests across 98 test files
+- 1,860 tests across 100 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -359,10 +360,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `main/legacy-parsers.js` — deprecated text extraction (word count only, not used for rendering)
   - `main/sync-engine.js` — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
   - `main/sync-queue.js` — offline operation queue with compaction and idempotent replay
-  - `main/auth.js` — OAuth2 (Microsoft MSAL + Google), PKCE, token encryption via safeStorage
-  - `main/url-extractor.js` — URL/article extraction, Readability, PDF export, collectArticleAssets, rankHeroImage, isJunkImageUrl
-  - `main/cloud-google.js` — Google Drive appDataFolder, resumable uploads, retry
-  - `main/window-manager.js` — BrowserWindow, tray, menu, auto-updater
-  - `main/cloud-onedrive.js` — OneDrive App Folder via Microsoft Graph, chunked uploads
-  - `main/migrations.js` — schema migrations with backup
-  - `main/ws-server.js` — localhost WebSocket server for Chrome extension (port 48924, pair
+  - `main/aut

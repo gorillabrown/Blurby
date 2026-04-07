@@ -90,6 +90,9 @@ function register(ctx) {
 
     ctx.saveLibrary();
 
+    // Clear fileHashes entries for deleted document
+    syncEngine.clearDocHashes(docId);
+
     // Enqueue the delete-doc operation in the sync queue (19B)
     syncQueue.enqueue("delete-doc", { docId, revision }).catch(err => console.error("[sync-queue] delete-doc enqueue failed:", err.message));
   });
