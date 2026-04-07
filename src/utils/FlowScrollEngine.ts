@@ -11,8 +11,11 @@ import {
   FLOW_READING_ZONE_POSITION,
   FLOW_CURSOR_HEIGHT_PX,
   FLOW_CURSOR_EINK_HEIGHT_PX,
+  FLOW_TIMER_BAR_HEIGHT_PX,
+  FLOW_TIMER_BAR_EINK_HEIGHT_PX,
   FLOW_SCROLL_RESUME_DELAY_MS,
   FLOW_LINE_ADVANCE_BUFFER_MS,
+  FLOW_LINE_COMPLETE_FLASH_MS,
 } from "../constants";
 
 export interface LineInfo {
@@ -33,10 +36,20 @@ export interface FlowScrollEngineState {
   totalLines: number;
 }
 
+export interface FlowProgress {
+  lineIndex: number;
+  totalLines: number;
+  wordIndex: number;
+  totalWords: number;
+  estimatedMinutesLeft: number;
+  bookPct: number;
+}
+
 export interface FlowScrollEngineCallbacks {
   onWordAdvance: (wordIndex: number) => void;
   onComplete: () => void;
   onLineChange?: (lineIndex: number, lineInfo: LineInfo) => void;
+  onProgressUpdate?: (progress: FlowProgress) => void;
 }
 
 export class FlowScrollEngine {
@@ -55,6 +68,8 @@ export class FlowScrollEngine {
   private callbacks: FlowScrollEngineCallbacks;
   private paragraphBreaks: Set<number> = new Set();
   private zonePosition: number = FLOW_READING_ZONE_POSITION;
+  private totalWords = 0;
+  private bookPct = 0;
 
   constructor(callbacks: FlowScrollEngineCallbacks) {
     this.callbacks = callbacks;
@@ -82,10 +97,10 @@ export class FlowScrollEngine {
     this.manualScrollPaused = false;
 
     this.cursor.style.display = "block";
-    this.cursor.style.position = "absolute";
-    this.cursor.style.height = (isEink ? FLOW_CURSOR_EINK_HEIGHT_PX : FLOW_CURSOR_HEIGHT_PX) + "px";
-    this.cursor.style.pointerEvents = "none";
-    this.cursor.style.zIndex = "10";
+    this.cursor.style.height = (isEink ? FLOW_TIMER_BAR_EINK_HEIGHT_PX : FLOW_TIMER_BAR_HEIGHT_PX) + "px";
+    if (isEink) {
+      this.cursor.style.transition = "none";
+    }
 
     this.lines = this.buildLineMap();
     if (this.lines.length === 0) {
@@ -107,6 +122,14 @@ export class FlowScrollEngine {
 
   setZonePosition(pos: number): void {
     this.zonePosition = pos;
+  }
+
+  setTotalWords(total: number): void {
+    this.totalWords = total;
+  }
+
+  setBookProgress(pct: number): void {
+    this.bookPct = pct;
   }
 
   stop(): void {
@@ -210,6 +233,20 @@ export class FlowScrollEngine {
 
   getWordIndex(): number { return this.wordIndex; }
 
+  getProgress(): FlowProgress {
+    const totalWords = this.totalWords || (this.lines.length > 0 ? this.lines[this.lines.length - 1].lastWord + 1 : 0);
+    const wordsLeft = Math.max(0, totalWords - this.wordIndex);
+    const estimatedMinutesLeft = this.wpm > 0 ? wordsLeft / this.wpm : 0;
+    return {
+      lineIndex: this.lineIdx,
+      totalLines: this.lines.length,
+      wordIndex: this.wordIndex,
+      totalWords,
+      estimatedMinutesLeft,
+      bookPct: this.bookPct,
+    };
+  }
+
   rebuildLineMap(): void {
     this.lines = this.buildLineMap();
     if (this.lines.length > 0) this.lineIdx = this.findLineForWord(this.wordIndex);
@@ -271,6 +308,7 @@ export class FlowScrollEngine {
     this.wordIndex = line.firstWord;
     this.callbacks.onWordAdvance(this.wordIndex);
     this.callbacks.onLineChange?.(this.lineIdx, line);
+    this.callbacks.onProgressUpdate?.(this.getProgress());
 
     // Position cursor at full width under the line, instantly
     this.cursor.style.transition = "none";
@@ -304,10 +342,22 @@ export class FlowScrollEngine {
         return;
       }
 
-      this.scrollToLine(this.lineIdx);
-      setTimeout(() => {
-        if (this.running && !this.paused) this.animateLine();
-      }, FLOW_LINE_ADVANCE_BUFFER_MS);
+      // FLOW-INF-B: Line-completion flash — brief opacity pulse for visual rhythm
+      if (!this.isEink && this.cursor) {
+        this.cursor.style.opacity = "0.4";
+        setTimeout(() => {
+          if (this.cursor) this.cursor.style.opacity = "1";
+          this.scrollToLine(this.lineIdx);
+          setTimeout(() => {
+            if (this.running && !this.paused) this.animateLine();
+          }, FLOW_LINE_ADVANCE_BUFFER_MS);
+        }, FLOW_LINE_COMPLETE_FLASH_MS);
+      } else {
+        this.scrollToLine(this.lineIdx);
+        setTimeout(() => {
+          if (this.running && !this.paused) this.animateLine();
+        }, FLOW_LINE_ADVANCE_BUFFER_MS);
+      }
     }, duration);
   }
 

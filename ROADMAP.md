@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-06 — FLOW-INF-A complete (v1.41.0). Queue depth 3 (GREEN). Next: FLOW-INF-B.
+**Last updated**: 2026-04-06 — FLOW-INF-B complete (v1.42.0). Queue depth 2 (YELLOW — backfill needed). Next: EXT-ENR-B.
 **Current branch**: `main`
-**Current state**: v1.41.0 stable. Queue depth 3 (GREEN). Next: FLOW-INF-B → EXT-ENR-B → NARR-TIMING.
+**Current state**: v1.42.0 stable. Queue depth 2 (YELLOW). Next: EXT-ENR-B → NARR-TIMING.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -47,7 +47,7 @@ HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅
     ▼                                   ▼
 Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
   ├── FLOW-INF-A: Reading Zone ✅   ├── EXT-ENR-A: Resilient Connection ✅
-  ├── FLOW-INF-B: Timer Cursor     ├── EXT-ENR-B: Auto-Discovery Pairing
+  ├── FLOW-INF-B: Timer Cursor ✅  ├── EXT-ENR-B: Auto-Discovery Pairing
   └── FLOW-INF-C: Cross-Book       └── EXT-ENR-C: In-Browser Reader (optional)
     │                                   │
     └──────────────┬────────────────────┘
@@ -549,7 +549,7 @@ CSS `mask-image` gradient on `.foliate-page-view--flow` with dynamic CSS custom 
 
 ---
 
-### Sprint FLOW-INF-B: Timer Cursor & Pacing Feedback
+### Sprint FLOW-INF-B: Timer Cursor & Pacing Feedback ✅ COMPLETED
 
 **Goal:** Replace the barely-visible shrinking underline with a prominent timer bar that depletes left-to-right as each line is read. Add reading progress overlay so users always know where they are.
 

@@ -1059,3 +1059,19 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern:** In any constants file, always declare leaf constants (primitives with no dependencies) before composite constants or objects that reference them. The correct order is: (1) primitive constants, (2) derived constants, (3) composite objects (like `DEFAULT_SETTINGS`). Never append new constants after a composite object that already references them.
 
 **Guardrail (PR-147):** When adding constants to `src/utils/constants.ts` or any module that exports a composite object (e.g., `DEFAULT_SETTINGS`), place new primitive constants above the first composite that will reference them. Run `npm test` after adding constants — a TDZ error will surface immediately as a module initialization failure in any test that imports the affected module.
+
+---
+
+### [2026-04-06] LL-088: Parallel Doer Agents Can Produce Duplicate Exports — Verify Unique Identifiers Before Dispatch
+
+**Area:** renderer, constants.ts, multi-agent sprints, parallel task execution
+**Status:** active
+**Priority:** medium
+
+**Context:** FLOW-INF-B — Timer Cursor & Pacing Feedback. Two parallel doer tasks (Task #2: timer bar constants, Task #4: line-completion flash) both added constants to `src/utils/constants.ts`. Task #4's agent independently added `FLOW_LINE_COMPLETE_FLASH_MS` — a constant that Task #2's agent had already exported. The result was a duplicate `export const FLOW_LINE_COMPLETE_FLASH_MS` in the same file, causing a TypeScript compile error.
+
+**Root cause:** When Zeus dispatches parallel implementation tasks that touch the same shared file, each doer reads the file at dispatch time but neither sees the other's in-flight writes. If both task specs describe adding an export with the same name, both agents add it. The duplicate is invisible until TypeScript or a bundler rejects the file.
+
+**Pattern:** Before dispatching two or more parallel tasks to the same file, Zeus (or the sprint spec) must explicitly enumerate which exports belong to which task. If both tasks legitimately need the same constant, assign ownership to exactly one task and mark the other as a consumer. Alternatively, sequence tasks that share a file — the performance loss is usually smaller than the cost of diagnosing a duplicate-export collision after the fact.
+
+**Guardrail (PR-148):** For any sprint with parallel doer tasks that write to the same file: (1) diff the export names in each task's spec — flag any overlap before dispatch, (2) assign each new export to exactly one task, (3) if a second task needs the export, it reads it as an existing value rather than redeclaring it. Zeus must enforce this at plan time, not at merge time.
