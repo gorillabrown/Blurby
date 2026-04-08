@@ -88,7 +88,12 @@ export function SettingsMenu({
           onClick={() => onNavigate(cat.id)}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onNavigate(cat.id)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onNavigate(cat.id);
+            }
+          }}
         >
           <span>
             <span className="settings-menu-item-icon" aria-hidden="true">{cat.icon}</span>
@@ -107,7 +112,12 @@ export function SettingsMenu({
           onClick={() => onNavigate(cat.id)}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onNavigate(cat.id)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onNavigate(cat.id);
+            }
+          }}
         >
           <span>
             <span className="settings-menu-item-icon" aria-hidden="true">{cat.icon}</span>
