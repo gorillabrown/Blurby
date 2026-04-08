@@ -20,8 +20,11 @@ const path = require("path");
 function parseFilenameMetadata(filename) {
   if (!filename || typeof filename !== "string") return {};
 
+  // Normalize path separators to forward slashes to ensure consistent parsing on all platforms
+  const normalizedFilename = filename.replace(/\\/g, '/');
+
   // Strip directory and extension
-  const base = path.basename(filename, path.extname(filename));
+  const base = path.basename(normalizedFilename, path.extname(normalizedFilename));
   if (!base.trim()) return {};
 
   // Pattern 1: "Author - Title" (most common ebook convention)
