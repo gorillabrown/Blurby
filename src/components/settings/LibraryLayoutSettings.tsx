@@ -57,10 +57,12 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
         <button
           className={`settings-toggle-btn${currentViewMode === "grid" ? " settings-toggle-btn-active" : ""}`}
           onClick={() => onSettingsChange({ defaultViewMode: "grid", viewMode: "grid" })}
+          aria-pressed={currentViewMode === "grid"}
         >Grid View</button>
         <button
           className={`settings-toggle-btn${currentViewMode === "list" ? " settings-toggle-btn-active" : ""}`}
           onClick={() => onSettingsChange({ defaultViewMode: "list", viewMode: "list" })}
+          aria-pressed={currentViewMode === "list"}
         >List View</button>
       </div>
 
@@ -72,6 +74,7 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
             key={size.value}
             className={`settings-toggle-btn${currentCardSize === size.value ? " settings-toggle-btn-active" : ""}`}
             onClick={() => onSettingsChange({ libraryCardSize: size.value })}
+            aria-pressed={currentCardSize === size.value}
           >{size.label}</button>
         ))}
       </div>
@@ -84,6 +87,7 @@ export function LibraryLayoutSettings({ settings, onSettingsChange, onOpenMetada
             key={sp.value}
             className={`settings-toggle-btn${currentSpacing === sp.value ? " settings-toggle-btn-active" : ""}`}
             onClick={() => onSettingsChange({ libraryCardSpacing: sp.value })}
+            aria-pressed={currentSpacing === sp.value}
           >{sp.label}</button>
         ))}
       </div>

@@ -49,6 +49,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
             key={t}
             className={`settings-mode-btn${settings.theme === t ? " active" : ""}`}
             onClick={() => onSettingsChange({ theme: t })}
+            aria-pressed={settings.theme === t}
           >
             {t}
           </button>
@@ -67,6 +68,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
                 title={preset.label}
                 onClick={() => handleSettingsChange({ accentColor: preset.value })}
                 aria-label={`Accent color: ${preset.label}`}
+                aria-pressed={settings.accentColor === preset.value}
               />
             ))}
             <label className="accent-custom" title="Custom color">
@@ -89,6 +91,7 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
                 className={`font-preset${settings.fontFamily === preset.value ? " font-preset-active" : ""}`}
                 style={preset.value ? { fontFamily: preset.value } : undefined}
                 onClick={() => handleSettingsChange({ fontFamily: preset.value })}
+                aria-pressed={settings.fontFamily === preset.value}
               >
                 {preset.label}
               </button>
