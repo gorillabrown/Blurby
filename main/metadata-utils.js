@@ -20,8 +20,9 @@ const path = require("path");
 function parseFilenameMetadata(filename) {
   if (!filename || typeof filename !== "string") return {};
 
-  // Strip directory and extension
-  const base = path.basename(filename, path.extname(filename));
+  // Strip directory and extension (using backslash and forward slash to support cross-platform path parsing in tests)
+  const normPath = filename.replace(/\\/g, '/');
+  const base = path.basename(normPath, path.extname(normPath));
   if (!base.trim()) return {};
 
   // Pattern 1: "Author - Title" (most common ebook convention)

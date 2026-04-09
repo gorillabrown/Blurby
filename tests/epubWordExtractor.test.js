@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 
-const { extractBlockTexts, extractBlockPlans } = require("../main/epub-word-extractor.js");
-const { segmentWords } = require("../src/utils/segmentWords.ts");
-const cheerio = require("cheerio");
+import { extractBlockTexts, extractBlockPlans } from "../main/epub-word-extractor.js";
+import { segmentWords } from "../src/utils/segmentWords.ts";
+import * as cheerio from "cheerio";
 
 describe("epub-word-extractor block text extraction", () => {
   it("preserves inline adjacency for drop-cap opening words", () => {
