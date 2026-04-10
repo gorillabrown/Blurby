@@ -81,7 +81,6 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
           disabled={!canSave}
           className="btn-fill"
           style={{ opacity: canSave ? 1 : 0.3 }}
-          title={!canSave ? (metaMode ? "Title is required" : "Title and content are required") : undefined}
         >{editingId ? "save" : "add"}</button>
       </div>
     </div>
