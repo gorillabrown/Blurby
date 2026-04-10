@@ -462,7 +462,7 @@ export default function LibraryView({
               disabled={!settings.sourceFolder || rescanning}
               className="btn"
               aria-label="Rescan folder"
-              title="Rescan folder for new items and covers"
+              title={!settings.sourceFolder ? "Select a folder first to rescan" : "Rescan folder for new items and covers"}
             >
               {rescanning ? "..." : "⟳"}
             </button>
@@ -608,6 +608,7 @@ export default function LibraryView({
                 disabled={!urlInput.trim() || loadingContent}
                 className="btn-fill url-fetch-btn"
                 style={{ '--url-fetch-opacity': urlInput.trim() && !loadingContent ? 1 : 0.3 } as React.CSSProperties}
+                title={!urlInput.trim() ? "Enter a URL to fetch" : (loadingContent ? "Fetching..." : "Fetch article")}
               >{loadingContent ? "fetching..." : "fetch"}</button>
               <button onClick={() => { setShowUrl(false); setUrlError(""); }} className="btn">cancel</button>
             </div>
