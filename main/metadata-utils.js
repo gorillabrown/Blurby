@@ -21,7 +21,9 @@ function parseFilenameMetadata(filename) {
   if (!filename || typeof filename !== "string") return {};
 
   // Strip directory and extension
-  const base = path.basename(filename, path.extname(filename));
+  // Handle both Windows and POSIX paths properly in tests across environments
+  const normalizedFilename = filename.replace(/\\/g, "/");
+  const base = path.basename(normalizedFilename, path.extname(normalizedFilename));
   if (!base.trim()) return {};
 
   // Pattern 1: "Author - Title" (most common ebook convention)

@@ -136,14 +136,48 @@ export interface TokenizedContent {
 /** Like tokenize() but also tracks which words end a paragraph (double newline). */
 export function tokenizeWithMeta(text: unknown): TokenizedContent {
   if (typeof text !== "string" || !text) return { words: [], paragraphBreaks: new Set() };
-  const paragraphs = text.split(/\n{2,}/);
+
   const words: string[] = [];
   const paragraphBreaks = new Set<number>();
 
-  for (const para of paragraphs) {
-    const paraWords = para.split(/\s+/).filter(Boolean);
-    if (paraWords.length === 0) continue;
-    words.push(...paraWords);
+  let wordStart = -1;
+  let newlineCount = 0;
+
+  const len = text.length;
+  for (let i = 0; i < len; i++) {
+    const charCode = text.charCodeAt(i);
+
+    let isSpace = false;
+    if (charCode <= 32) {
+      isSpace = charCode === 32 || charCode === 10 || charCode === 9 || charCode === 13 || charCode === 12 || charCode === 11;
+    } else if (charCode > 127) {
+      isSpace = /\s/.test(String.fromCharCode(charCode));
+    }
+
+    if (isSpace) {
+      if (wordStart !== -1) {
+        words.push(text.substring(wordStart, i));
+        wordStart = -1;
+      }
+      if (charCode === 10) { // '\n'
+        newlineCount++;
+      }
+    } else {
+      if (newlineCount >= 2 && words.length > 0) {
+        paragraphBreaks.add(words.length - 1);
+      }
+      if (wordStart === -1) {
+        wordStart = i;
+      }
+      newlineCount = 0;
+    }
+  }
+
+  if (wordStart !== -1) {
+    words.push(text.substring(wordStart, len));
+  }
+
+  if (words.length > 0) {
     paragraphBreaks.add(words.length - 1);
   }
 
