@@ -20,8 +20,11 @@ const path = require("path");
 function parseFilenameMetadata(filename) {
   if (!filename || typeof filename !== "string") return {};
 
-  // Strip directory and extension
-  const base = path.basename(filename, path.extname(filename));
+  // Strip directory and extension. We normalize to posix first so that Windows paths
+  // with backslashes are parsed correctly on non-Windows platforms (like Linux CI runners).
+  // E.g. "C:\Books\Author - Title.epub" -> "Author - Title"
+  let normalizedFilename = filename.replace(/^[a-zA-Z]:[\\\/]/, '').replace(/\\/g, '/');
+  const base = path.posix.basename(normalizedFilename, path.posix.extname(normalizedFilename));
   if (!base.trim()) return {};
 
   // Pattern 1: "Author - Title" (most common ebook convention)
