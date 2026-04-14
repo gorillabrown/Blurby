@@ -218,6 +218,7 @@ export default function MetadataWizard({ onClose, onApplied }: MetadataWizardPro
                   className="metadata-wizard-btn-primary"
                   onClick={handleApply}
                   disabled={applying || acceptedCount === 0}
+                  aria-busy={applying}
                 >
                   {applying ? "Applying..." : `Apply ${acceptedCount} Change${acceptedCount !== 1 ? "s" : ""}`}
                 </button>
