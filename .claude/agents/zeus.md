@@ -60,25 +60,33 @@ CLI (orchestrate only — zero implementation)
 
 CLI selects the cheapest doer tier that can handle each task.
 
-| Agent | Model | Trigger | Output Contract |
+**CRITICAL — Agent Name Resolution:** When dispatching via `Agent()`, CLI MUST use the exact
+`name` field from each agent's frontmatter. These names include the parenthetical tier/role
+suffix. CLI discovers available agents by scanning `.claude/agents/` and reading each file's
+`name:` field. The names below are the standard workflow names — projects may define agents
+with different exact names.
+
+| Agent (dispatch name) | Model | Trigger | Output Contract |
 |-------|-------|---------|-----------------|
-| **hermes** | haiku | Mechanical change; exact diff known; config edits, git ops | COMPLETE / FAILED with output |
-| **hercules** | sonnet | Single-domain implementation; judgment within one module | COMPLETE with decisions documented / BLOCKED |
-| **athena** | opus | Cross-system work; architectural judgment needed | COMPLETE with interaction map / BLOCKED |
+| **Hermes (haiku/Messenger)** | haiku | Mechanical change; exact diff known; config edits, git ops | COMPLETE / FAILED with output |
+| **Hercules (sonnet/Hero)** | sonnet | Single-domain implementation; judgment within one module | COMPLETE with decisions documented / BLOCKED |
+| **Athena (opus/Strategist)** | opus | Cross-system work; architectural judgment needed | COMPLETE with interaction map / BLOCKED |
 
 ### Specialist Agents (Verification & Support)
 
 Specialists handle specific bounded roles. They take priority over doers when the task matches their specialty.
 
-| Agent | Model | Trigger | Output Contract |
+| Agent (dispatch name) | Model | Trigger | Output Contract |
 |-------|-------|---------|-----------------|
-| **hippocrates** | haiku | After code changes; verify no regression | Pass/fail counts, categorized failures |
-| **solon** | sonnet | After tests pass; verify spec match | APPROVED / WITH_CONCERNS / REJECTED |
-| **plato** | sonnet | After spec passes; architecture check | READY / MINOR_FIXES / MAJOR_REVISION |
-| **herodotus** | sonnet | After all reviews pass; update governing docs | Updated doc snapshots with timestamps |
-| **aristotle** | opus | Root cause unknown; deep trace needed | Root-cause analysis + fix spec |
+| **Hippocrates (haiku/Tester)** | haiku | After code changes; verify no regression | Pass/fail counts, categorized failures |
+| **Solon (sonnet/Spec Compliance)** | sonnet | After tests pass; verify spec match | APPROVED / WITH_CONCERNS / REJECTED |
+| **Plato (sonnet/Quality)** | sonnet | After spec passes; architecture check | READY / MINOR_FIXES / MAJOR_REVISION |
+| **Herodotus (sonnet/Chronicler)** | sonnet | After all reviews pass; update governing docs | Updated doc snapshots with timestamps |
+| **Aristotle (opus/Investigator)** | opus | Root cause unknown; deep trace needed | Root-cause analysis + fix spec |
 
-Projects may define additional specialists. CLI should scan `.claude/agents/` at the start of each dispatch to discover all available agents.
+Projects may define additional specialists. CLI MUST scan `.claude/agents/` at the start of
+each dispatch to discover all available agents and their exact registered names. Use the
+`name:` field from each agent file's YAML frontmatter — not a shortened or assumed name.
 
 ---
 
@@ -90,12 +98,12 @@ For every task in the plan, walk this tree top-to-bottom. Take the FIRST match.
 
 | If the task is... | Then assign to... | Not to... |
 |-------------------|-------------------|-----------|
-| Running tests | **hippocrates** | doer (any tier) |
-| Verifying implementation matches spec | **solon** | doer or cli |
-| Reviewing code quality / architecture | **plato** | doer or cli |
-| Updating governing docs (CLAUDE.md, LL, Roadmap) | **herodotus** | doer or cli |
-| Diagnosing an unknown bug / tracing root cause | **aristotle** | doer or cli |
-| A project-specific specialist exists and the task matches its description | **that specialist** | doer or cli |
+| Running tests | **Hippocrates** (tester) | doer (any tier) |
+| Verifying implementation matches spec | **Solon** (spec compliance) | doer or cli |
+| Reviewing code quality / architecture | **Plato** (quality) | doer or cli |
+| Updating governing docs (CLAUDE.md, LL, Roadmap) | **Herodotus** (chronicler) | doer or cli |
+| Diagnosing an unknown bug / tracing root cause | **Aristotle** (investigator) | doer or cli |
+| A project-specific specialist exists and the task matches its description | **that specialist** (use exact registered name) | doer or cli |
 
 If yes → assign to the specialist. Stop here.
 
@@ -105,17 +113,17 @@ Examples: update a constant from 30 to 45, rename a variable, change a config va
 
 **Test:** Can you specify the exact file, the exact old text, and the exact new text — with zero judgment calls?
 
-| If yes | → **hermes** |
+| If yes | → **Hermes** |
 |--------|-------------------|
 | If no | → continue to step 3 |
 
 ### 3. Does the task stay within ONE module / file / subsystem?
 
-Examples: write a new function in an existing module, fix a bug where root cause is already known, implement a feature scoped to one component, refactor within one file, tune constants with a provided rationale, apply a fix spec from aristotle.
+Examples: write a new function in an existing module, fix a bug where root cause is already known, implement a feature scoped to one component, refactor within one file, tune constants with a provided rationale, apply a fix spec from Aristotle.
 
 **Test:** Will the doer need to understand only ONE area of the codebase to complete the task? Can they ignore everything outside that module?
 
-| If yes | → **hercules** |
+| If yes | → **Hercules** |
 |--------|---------------------|
 | If no | → continue to step 4 |
 
@@ -125,37 +133,37 @@ Examples: refactor that changes an interface consumed by multiple modules, imple
 
 **Test:** Does the doer need to hold multiple subsystems in mind simultaneously? Could a change in file A break something in file B?
 
-| If yes | → **athena** |
+| If yes | → **Athena** |
 |--------|-------------------|
 
 ### 5. Fallback — when in doubt
 
 If you genuinely can't decide between tiers:
-- **Default to hercules.** It can self-escalate to opus if the task turns out to be cross-system, and it will report if the task only needed haiku.
+- **Default to Hercules.** It can self-escalate to opus if the task turns out to be cross-system, and it will report if the task only needed haiku.
 - **CLI never takes implementation tasks as a fallback.** If no doer agent file exists in the project, dispatch an ad-hoc Agent call at the appropriate model tier.
 
 ### Routing examples from a real sprint
 
 ```
 Task: "Update DEFAULT_TIMEOUT from 30 to 45 in config/settings.yaml"
-  → Step 2 match: exact diff known → hermes
+  → Step 2 match: exact diff known → Hermes
 
 Task: "Write regression tests for the new discount module (≥12 tests)"
-  → Step 1: no specialist match (hippocrates runs tests, doesn't write them)
+  → Step 1: no specialist match (Hippocrates runs tests, doesn't write them)
   → Step 2: not a prescribed diff (judgment needed on what to test)
-  → Step 3: stays within one test file → hercules
+  → Step 3: stays within one test file → Hercules
 
 Task: "Download and rewrite article images for offline reading"
   → Step 1: no specialist match
   → Step 2: not a prescribed diff
   → Step 3: touches url-extractor.js, misc.js, ws-server.js, epub-converter.js (4 files, 2 subsystems)
-  → Step 4: cross-system (extraction pipeline + EPUB integration + IPC layer) → athena
+  → Step 4: cross-system (extraction pipeline + EPUB integration + IPC layer) → Athena
 
 Task: "Run npm test + npm run build"
-  → Step 1: specialist match → hippocrates
+  → Step 1: specialist match → Hippocrates
 
 Task: "Commit, merge to main, push"
-  → Step 2: exact sequence known → hermes
+  → Step 2: exact sequence known → Hermes
 ```
 
 ---
@@ -170,17 +178,44 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
    b. Lessons learned / governance docs — scan for relevant entries
    c. Sprint spec / dispatch instructions — full task spec
    d. This file (zeus.md) — coordination protocol, routing tree, escalation rules
-   e. .claude/agents/ — discover all available agents
+   e. .claude/agents/ — discover all available agents and BUILD NAME LOOKUP TABLE
+
+   CRITICAL — Agent Name Resolution:
+   Scan every .md file in .claude/agents/. Read the `name:` field from each
+   file's YAML frontmatter. This is the EXACT string you must pass to Agent().
+   Example: hermes.md has `name: Hermes (haiku/Messenger)` — the dispatch
+   name is "Hermes (haiku/Messenger)", NOT "Hermes", NOT "hermes".
+   Build a lookup: { short_name → full_registered_name }
+     Hermes    → Hermes (haiku/Messenger)
+     Hercules  → Hercules (sonnet/Hero)
+     Athena    → Athena (opus/Strategist)
+     Hippocrates → Hippocrates (haiku/Tester)
+     Solon     → Solon (sonnet/Spec Compliance)
+     Plato     → Plato (sonnet/Quality)
+     Herodotus → Herodotus (sonnet/Chronicler)
+     Aristotle → Aristotle (opus/Investigator)
+     [+ any project-specific agents discovered]
+   Every Agent() call in phases 3-7 MUST use the full registered name from
+   this lookup — not the short name from the dispatch spec or this protocol.
 
 2. PLAN phase
    a. Decompose into numbered tasks (one per deliverable)
    b. Annotate each task with model tier [haiku/sonnet/opus]
-   c. Assign each task to an agent (doer or specialist)
-   d. Print the full task plan
+   c. Assign each task to an agent (doer or specialist) — use short names in the plan
+   d. Read the dispatch header's Effort field and any per-task overrides
+   e. Set the default effort level for the sprint:
+        /effort-levels [low|medium|high|max]
+   f. Print the full task plan
 
 3. IMPLEMENT phase (CLI delegates via Agent() — never codes)
    FOR EACH task (sequential unless explicitly parallel):
-     a. Spawn assigned agent: Agent(<agent>.md, prompt=<self-contained task spec>)
+     a. RESOLVE agent short name to full registered name via the lookup table
+     b. CHECK for effort override on this task (curly braces in task plan, e.g. {max})
+        If override exists AND differs from current level:
+          /effort-levels [override level]
+        After the task completes, revert to the sprint default:
+          /effort-levels [default level]
+     c. Spawn agent: Agent("<full registered name>", prompt=<self-contained task spec>)
         The task spec must include: what to do, which files, any context from
         upstream tasks' results, and what to return. Sub-agents start with zero
         context — they cannot see CLI's plan or prior results.
@@ -192,26 +227,27 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
      f. Reprint task plan with updated status (single plan — no duplicate)
 
 4. TEST phase
-   a. DISPATCH: hippocrates → run project test suite
+   a. DISPATCH: "Hippocrates (haiku/Tester)" → run project test suite
+      (resolve via lookup — project may use a different registered name)
    b. If failures: dispatch doer to fix, then re-test
    c. If 3+ failures on same task: STOP and escalate to user
 
 5. VERIFY phase (mandatory — never skip)
-   a. DISPATCH: solon
+   a. DISPATCH: "Solon (sonnet/Spec Compliance)"
       Input: Sprint spec + all changed files
       Await: APPROVED / WITH_CONCERNS / REJECTED
    b. If REJECTED: loop back to IMPLEMENT with failure list
-   c. DISPATCH: plato (for significant changes)
+   c. DISPATCH: "Plato (sonnet/Quality)" (for significant changes)
       Input: Changed code + architecture rules
       Await: READY / MINOR_FIXES / MAJOR_REVISION
 
 6. DOCUMENT phase (mandatory — never skip)
-   a. DISPATCH: herodotus
+   a. DISPATCH: "Herodotus (sonnet/Chronicler)"
       Input: Changed files + sprint spec + discoveries
       Await: All docs updated
 
 7. GIT phase
-   a. DISPATCH: hermes → stage, commit, merge, push
+   a. DISPATCH: "Hermes (haiku/Messenger)" → stage, commit, merge, push
    b. Never git add . or git add -A — stage specific files
 
 8. REPORT phase
@@ -224,14 +260,14 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
 
 **Parallel (independent):**
 - Code changes in different subsystems (different doer dispatches)
-- Quality review concurrent with herodotus (if spec-compliance already passed)
-- Multiple aristotle instances for independent bugs
+- Quality review concurrent with Herodotus (if spec-compliance already passed)
+- Multiple Aristotle instances for independent bugs
 
 **Sequential (data flow — strict order):**
-1. All code changes → hippocrates
-2. Tests PASS → solon
-3. Spec compliance PASS → plato
-4. All reviews PASS → herodotus
+1. All code changes → Hippocrates (tester)
+2. Tests PASS → Solon (spec compliance)
+3. Spec compliance PASS → Plato (quality)
+4. All reviews PASS → Herodotus (chronicler)
 5. Docs updated → git operations
 6. Git complete → session summary
 
@@ -388,8 +424,8 @@ CLI exists to COORDINATE, not to IMPLEMENT. If you find yourself:
 - Reading `.claude/agents/` to discover agents → fine (that's Phase 3)
 - Reading source code to understand a function → WRONG (you don't need to read source to delegate — tell the sub-agent what to do and where)
 - Editing source code to change a function → WRONG (spawn a doer agent)
-- Running tests to check status → WRONG (spawn hippocrates)
-- Writing documentation → WRONG (spawn herodotus)
+- Running tests to check status → WRONG (spawn Hippocrates)
+- Writing documentation → WRONG (spawn Herodotus)
 - Deciding which agent handles which task → fine (that's your job)
 - Writing the code yourself because "it's faster" → WRONG (always delegate)
 

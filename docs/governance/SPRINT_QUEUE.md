@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED
+Queue depth: 3 — GREEN
 Next sprint: TEST-COV-1 (Critical Path Test Coverage + Security)
-Health: RED — Only TEST-COV-1 queued. Backfill 2 more sprints to restore GREEN (≥3).
+Health: GREEN — Queue restored. TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B.
 ```
 
 ---
@@ -33,8 +33,10 @@ Health: RED — Only TEST-COV-1 queued. Backfill 2 more sprints to restore GREEN
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
 | 1 | TEST-COV-1 | v1.50.0 | `sprint/test-cov-1-critical-paths` | Full | **YES** | Full spec: 11 tasks (2 waves), 16 success criteria. Auth/cloud/queue/ErrorBoundary/foliateWordOffsets tests (≥52 new), URL scheme validation security fix. Audit findings H-4, H-5, M-5, M-6. Independent — can parallel. |
+| 2 | NARR-LAYER-1A | v1.51.0 | `sprint/narr-layer-1a-foundation` | Full | **YES** | Full spec: 11 tasks (2 waves), 17 success criteria. FlowScrollEngine follower mode, isNarrating state, wire narration→flow, keyboard toggle (N key), suppress narration band, bottom bar TTS controls, cross-book integration. ≥18 new tests. |
+| 3 | NARR-LAYER-1B | v1.52.0 | `sprint/narr-layer-1b-consolidation` | Full | **YES** | Full spec: 12 tasks (3 waves), 17 success criteria. Remove "narration" from ReadingMode type, delete NarrateMode.ts, remove 50+ branch points, remove narration overlay code (~250 lines from FoliatePageView), settings migration, CSS cleanup. ≥20 new tests. Depends on NARR-LAYER-1A. |
 
-**Dispatch status:** Queue depth 1 — RED. TEST-COV-1 ready. STOP — backfill 2 sprints before next dispatch.
+**Dispatch status:** Queue depth 3 — GREEN. TEST-COV-1 dispatch-ready.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -53,7 +55,8 @@ Health: RED — Only TEST-COV-1 queued. Backfill 2 more sprints to restore GREEN
 14. ~~Dispatch REFACTOR-1A to CLI~~ — COMPLETE (v1.48.0)
 15. **Backfill queue to ≥3** — YELLOW, depth 2. Spec a third sprint before dispatching REFACTOR-1B.
 16. ~~Dispatch REFACTOR-1B to CLI~~ — COMPLETE (v1.49.0)
-17. **Backfill queue to ≥3** — RED, depth 1. Spec 2 more sprints before dispatching TEST-COV-1.
+17. ~~Backfill queue to ≥3~~ — DONE (NARR-LAYER-1A + NARR-LAYER-1B spec'd from narration-as-layer investigation, queue GREEN depth 3)
+18. **Dispatch TEST-COV-1 to CLI** — Queue GREEN, dispatch-ready.
 
 ---
 

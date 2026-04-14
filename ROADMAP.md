@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-07 — REFACTOR-1B complete (v1.49.0). Queue depth 1 (RED). Next: TEST-COV-1.
+**Last updated**: 2026-04-09 — NARR-LAYER-1A/1B spec'd. Queue depth 3 (GREEN). Next: TEST-COV-1.
 **Current branch**: `main`
-**Current state**: v1.49.0 stable. Queue depth 1 (RED). Next: TEST-COV-1. Backfill needed to restore GREEN (≥3).
+**Current state**: v1.49.0 stable. Queue depth 3 (GREEN). Next: TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -65,6 +65,10 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     REFACTOR-1B: Component & Style Cleanup ✅ (v1.49.0)
                    │
     TEST-COV-1: Critical Path Test Coverage + Security
+                   │
+    NARR-LAYER-1A: Narration as Flow Layer — Foundation
+                   │
+    NARR-LAYER-1B: Narration as Flow Layer — Consolidation
                    │
                    ▼
         Track C: Android APK
@@ -1051,6 +1055,236 @@ Wave B (verify + docs):
 16. Security fix is backward-compatible — valid http/https URLs continue to work
 
 **Tier:** Full | **Depends on:** None — all targets are independent modules with no shared state. Can run in parallel with REFACTOR-1A/1B. Investigation gate cleared.
+
+---
+
+## NARR-LAYER-1A: Narration as Flow Layer — Foundation
+
+**Goal:** Make narration a layer within flow mode rather than a separate reading mode. When the user activates narration while in flow mode, TTS audio drives word advancement and FlowScrollEngine follows — scrolling and animating the flow timer cursor based on audio progress. The narration band overlay is suppressed; only the flow cursor is visible. This is the MVP: narration is available only in flow mode.
+
+**Problem:** Narration and flow are currently separate, mutually exclusive reading modes. The narration word engine and flow word engine are disconnected — switching from flow to narration loses flow's scroll context, and narration's collapsing cursor overlay (NARR-CURSOR-1) has persistent bugs (BUG-159/160/161 mitigated but not eliminated). The user wants narration to feel like an enhancement to flow mode, not a mode switch.
+
+**Design decisions (from user, 2026-04-07):**
+- **MVP scope:** Narration available ONLY in flow mode. Page and focus modes cannot narrate.
+- **Keep flow cursor, drop narration band.** The flow timer bar cursor provides visual pacing; the collapsing narration overlay is removed.
+- **Scale narration to flow WPM.** Narration's implicit WPM (from TTS rate × ~150 base) can inform flow's scroll pacing.
+- **Core insight:** "The issue is the continual disconnect between the word engine and narrate engine, where they're largely disconnected. We have to improve this experience overall."
+
+**Architecture:**
+
+```
+BEFORE (v1.49.0):                    AFTER (NARR-LAYER-1A):
+                                     
+readingMode = "narration"            readingMode = "flow" + isNarrating = true
+  ↓                                    ↓
+NarrateMode.ts owns word timing      useNarration hook owns word timing (audio)
+Narration overlay (collapsing band)      ↓
+  ↓                                  onWordAdvance(idx) → FlowScrollEngine.followWord(idx)
+Separate scroll system                   ↓
+                                     FlowScrollEngine owns scroll + cursor (follower mode)
+                                     Timer bar cursor reflects narration's line position
+```
+
+**Key integration seam:** FlowScrollEngine already has `jumpToWord(wordIndex)` (line 204). Narration already delegates scroll via callbacks. Both systems operate on the same global word index space. The change: when narrating, narration's `onWordAdvance` calls a new `followWord()` method on FlowScrollEngine that scrolls and animates the cursor without restarting the internal timer.
+
+**Investigation gate:** ✅ CLEARED. Three parallel investigations mapped: (1) FlowScrollEngine's complete API and lifecycle (427 lines, pure TypeScript), (2) useNarration's pipeline (audio → scheduler → word boundaries → onWordAdvance), (3) all 50+ readingMode branch points across the codebase. The seam is clean — narration doesn't own scroll, flow doesn't own audio.
+
+### Baseline
+
+- `src/utils/FlowScrollEngine.ts` — 427 lines. `jumpToWord()` (line 204), `pause()` (line 177), `resume()` (line 189), `animateLine()` (line 321), private fields (lines 56-72). No follower mode concept yet.
+- `src/hooks/useFlowScrollSync.ts` — 5 effects. Lifecycle effect creates/destroys engine based on `readingMode === "flow"` and `flowPlaying`. Cross-book transition logic in `onComplete` callback.
+- `src/hooks/useNarration.ts` — Narration hook. `startCursorDriven(words, startIdx, wpm, onWordAdvance)`, `pause()`, `resume()`, `stop()`, `getAudioProgress()`. Fires `onWordAdvance(wordIndex)` per word.
+- `src/hooks/useNarrationSync.ts` — 10 effects syncing settings → narration.
+- `src/hooks/useReaderMode.ts` — `startNarration()` (line 180), `startFlow()` (line 341), `handleSelectMode()` (line 409). Mode cycling at line 465.
+- `src/hooks/useReadingModeInstance.ts` — Factory. `case "narration"` at line 166.
+- `src/components/ReaderContainer.tsx` — `readingMode` state (line 121). `ttsActive` derived (line 286). Word advance batching differs for narration (lines 380-396).
+- `src/components/FoliatePageView.tsx` — Narration overlay: `narrationBandLineHeightRef` (line 294), `narrationColRightRef` (line 296), `hideNarrationOverlay` (line 358), `ensureAudioProgressGlideLoop` (line 464), `positionNarrationOverlay` (line 753).
+- `src/components/ReaderBottomBar.tsx` — `isNarrationSelected` flag (line 137), TTS rate vs WPM controls.
+- `src/types.ts` — `readingMode: "focus" | "flow" | "narration" | "page"` (line 123).
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration, flow, cursor entries
+3. `ROADMAP.md` — this section
+4. `src/utils/FlowScrollEngine.ts` — FULL READ (427 lines). Key: class definition (line 55), private fields (56-72), `start()` (78-146), `pause()` (177), `resume()` (189), `jumpToWord()` (204-213), `animateLine()` (321-387), `findLineForWord()` (313-318), `scrollToLine()` (389-401)
+5. `src/hooks/useFlowScrollSync.ts` — FULL READ. Effect 1 (lifecycle), Effects 3-5 (WPM/zone/lineMap sync)
+6. `src/hooks/useNarration.ts` — FULL READ. Focus on: `startCursorDriven`, `onWordAdvance` callback chain, `getAudioProgress()`, `pause()`/`resume()`/`stop()`
+7. `src/hooks/useReaderMode.ts` — `startNarration()` (line 180-300), `startFlow()` (line 341-370), `handleSelectMode()` (line 409-420), `handleCycleMode()` (line 465-492)
+8. `src/hooks/useReadingModeInstance.ts` — `case "narration"` (line 166-211)
+9. `src/components/ReaderContainer.tsx` — `readingMode` state (line 121), `ttsActive` (line 286), word advance batching (lines 380-396), cross-book transition (lines 480-512)
+10. `src/components/FoliatePageView.tsx` — narration overlay: `hideNarrationOverlay` (line 358), `ensureAudioProgressGlideLoop` (line 464), `positionNarrationOverlay` (line 753)
+11. `src/components/ReaderBottomBar.tsx` — `isNarrationSelected` (line 137), mode-specific controls
+12. `src/constants.ts` — flow constants (FLOW_* prefix), narration constants (TTS_* prefix)
+13. `src/types.ts` — `readingMode` type (line 123), `lastReadingMode` (line 156)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Add `followerMode` to FlowScrollEngine.** Add private field `private followerMode = false` (after line 67). Add `setFollowerMode(enabled: boolean)`: when enabled, pause internal timer (`clearTimers()`), set `this.followerMode = true`; when disabled, set `this.followerMode = false`, resume `animateLine()` if running. Add `followWord(wordIndex: number)`: if not running or not followerMode, return. Find line for word, scroll to it. Compute fractional position within line: `fraction = (wordIndex - line.firstWord) / Math.max(1, line.lastWord - line.firstWord)`. Set cursor width = `Math.max(1, lineWidth * (1 - fraction))` with no transition (instant). Fire `onWordAdvance(wordIndex)`. Update `this.wordIndex` and `this.lineIdx`. | `src/utils/FlowScrollEngine.ts` | Add field after line 67. Add `setFollowerMode()` method after `setWpm()` (line 202). Add `followWord()` method after `jumpToWord()` (line 213). ~30 lines total. |
+| 2 | Hephaestus (renderer-scope) | **Export `FlowScrollEngineState.followerMode`.** Add `followerMode: boolean` to `FlowScrollEngineState` interface (line 31-37). Update `getState()` to include it. | `src/utils/FlowScrollEngine.ts` | Line 36 (add field to interface), and inside `getState()` method. 2 single-line additions. |
+| 3 | Hephaestus (renderer-scope) | **Add `isNarrating` state to ReaderContainer.** Add `const [isNarrating, setIsNarrating] = useState(false)` after the `readingMode` state (line 121). Add `const isNarratingRef = useRef(false)` and keep synced. Pass to child hooks and components. | `src/components/ReaderContainer.tsx` | After line 121. ~3 lines. Also pass as prop to useFlowScrollSync, useReaderMode, ReaderBottomBar. |
+| 4 | Athena (renderer-scope) | **Wire narration→flow in useFlowScrollSync.** Add a 6th effect: when `isNarrating && readingMode === "flow" && flowPlaying`, put engine in follower mode (`engine.setFollowerMode(true)`). Register `narration.onWordAdvance` to call `engine.followWord(idx)`. On cleanup or when `!isNarrating`: take engine out of follower mode, unregister narration callback. Also suppress the engine's own `onComplete` callback during narration — narration's `onSectionEnd` handles section transitions. | `src/hooks/useFlowScrollSync.ts` | New Effect 6 after existing effects. Hook must receive `isNarrating`, `narration` as additional params. ~35 lines. |
+| 5 | Hephaestus (renderer-scope) | **Add narration toggle in useReaderMode.** Add `toggleNarrationInFlow()` function: if `readingMode !== "flow"`, ignore. If `!isNarrating`: set `isNarrating(true)`, call `narration.startCursorDriven(words, currentWordIndex, effectiveWpm, onWordAdvance)` using the same word source and start position as flow. If `isNarrating`: set `isNarrating(false)`, call `narration.stop()`. Wire to keyboard handler: `N` key in flow mode triggers `toggleNarrationInFlow()`. Also update `handlePauseToPage()` to stop narration if `isNarrating` before pausing flow. | `src/hooks/useReaderMode.ts` | New function after `startFlow()` (~line 370). Wire into keyboard map. Update `handlePauseToPage()` (~line 373). ~30 lines. |
+| 6 | Hephaestus (renderer-scope) | **Suppress narration band overlay when flow+narrating.** In FoliatePageView, modify `applyVisualHighlightByIndex` (the narration branch, ~line 879): if `readingMode === "flow"`, call `hideNarrationOverlay()` instead of `positionNarrationOverlay()`. The flow cursor handles visual feedback. Also: in `ensureAudioProgressGlideLoop` (line 464) and `ensureNarrationOverlayLoop`, add early return if `readingMode === "flow"` — prevent overlay from activating during flow+narrating. | `src/components/FoliatePageView.tsx` | Line 879 area: add `readingMode === "flow"` guard. Line 464 area: add early return. ~6 lines added across 3 sites. |
+| 7 | Hephaestus (renderer-scope) | **Update ReaderBottomBar for flow+narrating.** When `readingMode === "flow" && isNarrating`, show TTS rate controls (same as current narration mode) instead of WPM slider. Show a combined status: "Narrating · X% · ~Nmin left". Add a small narration indicator icon or label to the flow controls area. | `src/components/ReaderBottomBar.tsx` | Modify `isNarrationSelected` logic (line 137): `readingMode === "narration" || (readingMode === "flow" && isNarrating)`. Update flow controls section (~lines 384-418) to conditionally show TTS rate. ~15 lines. |
+| 8 | Hephaestus (renderer-scope) | **Handle pause/resume for flow+narrating.** In `useReaderMode.handlePauseToPage()` (line 373-405): when `isNarrating`, stop narration AND flow engine. On `handleTogglePlay()` (line 433-444): if `lastReadingMode` restores to flow and narration was active, resume both. Store `wasNarrating` in a ref alongside `lastReadingMode` for resume. | `src/hooks/useReaderMode.ts` | Line 373-405 area (handlePauseToPage). Line 433-444 area (handleTogglePlay). ~15 lines modified. |
+| 9 | Hephaestus (renderer-scope) | **Handle cross-book transition for flow+narrating.** In `useFlowScrollSync`, the `onComplete` callback currently handles cross-book transitions. When `isNarrating`, narration's `onSectionEnd` fires instead of the engine's timer completing. Wire `narration.setOnSectionEnd()` to: advance to next section (existing foliate sync behavior), call `narration.updateWords()` with new section's words, let narration continue driving flow. At book end, delegate to the existing cross-book overlay mechanism but also stop narration, then restart on new book. | `src/hooks/useFlowScrollSync.ts` | Inside Effect 6 (from Task 4), wire `narration.setOnSectionEnd`. In cross-book callback (existing `onComplete`), add narration stop/restart. ~20 lines. |
+| 10 | Hippocrates | **Tests** — ≥18 new tests: (a) `setFollowerMode(true)` pauses internal timer, (b) `setFollowerMode(false)` resumes timer, (c) `followWord(idx)` scrolls to correct line, (d) `followWord(idx)` sets cursor width based on word fraction within line, (e) `followWord` does nothing when not in follower mode, (f) `isNarrating` state toggles with N key in flow mode, (g) N key ignored outside flow mode, (h) narration starts at current flow word index when toggled on, (i) narration stops and flow resumes own timer when toggled off, (j) narration band overlay suppressed during flow+narrating, (k) flow cursor visible during flow+narrating, (l) bottom bar shows TTS rate controls when flow+narrating, (m) pause/resume affects both narration and flow, (n) cross-book transition works with narration active, (o) `FlowScrollEngineState.followerMode` returns correct value, (p) `followWord` calls `onWordAdvance` callback, (q) `followWord` updates `getState().wordIndex`, (r) follower mode cursor width is `(1-fraction) * lineWidth`. | `tests/narrationLayer.test.ts` (new) | ≥18 tests. |
+| 11 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+
+### Execution Sequence
+
+```
+Wave A (implement):
+  Task 1-2 (FlowScrollEngine follower mode)  ← foundation, no deps
+      ↓
+  Task 3 (isNarrating state)                  ← needs Task 1-2 API
+      ↓
+  Task 4 (wire narration→flow)     ─┐
+  Task 5 (toggle + keyboard)       ─┤ parallel — different hooks
+  Task 6 (suppress overlay)        ─┘
+      ↓
+  Task 7 (bottom bar UI)          ─┐
+  Task 8 (pause/resume)           ─┤ parallel — different files
+  Task 9 (cross-book transition)  ─┘
+      ↓
+  Task 10-11 (tests + verify)
+
+Wave B (verify + docs + git):
+  Solon spec compliance
+  Herodotus documentation pass
+  Git: commit, merge, push
+```
+
+### SUCCESS CRITERIA
+
+1. FlowScrollEngine has `setFollowerMode(enabled)` — when true, internal WPM timer pauses
+2. FlowScrollEngine has `followWord(wordIndex)` — scrolls to word's line and sets cursor width to reflect position within line
+3. `followWord` cursor width formula: `(1 - fraction) * lineWidth` where `fraction = (wordIndex - firstWord) / (lastWord - firstWord)`
+4. `isNarrating` boolean state added to ReaderContainer, toggled via N key in flow mode
+5. N key activates narration (TTS) within flow mode — audio plays, flow cursor tracks narration's word position
+6. N key deactivates narration — audio stops, flow resumes its own WPM-driven timer
+7. N key is ignored when not in flow mode
+8. Narration band overlay (collapsing cursor from NARR-CURSOR-1) is NOT visible during flow+narrating
+9. Flow timer bar cursor IS visible and reflects narration's line position during flow+narrating
+10. Bottom bar shows TTS rate controls (not WPM slider) when flow+narrating
+11. Space bar pauses BOTH narration and flow; resuming restores both
+12. Cross-book continuous reading works with narration active (transition → new book → narration restarts)
+13. All existing flow-only behavior unchanged (no isNarrating = same as before)
+14. All existing narration-only behavior unchanged (starting narration from page mode still works — for backward compat, kept until NARR-LAYER-1B removes it)
+15. ≥18 new tests in `tests/narrationLayer.test.ts`
+16. `npm test` passes, `npm run build` succeeds
+17. No regressions in flow mode, narration mode, or page mode
+
+**Tier:** Full | **Depends on:** TEST-COV-1 (test coverage improves confidence for this architectural change). Investigation gate cleared.
+
+---
+
+## NARR-LAYER-1B: Narration as Flow Layer — Consolidation
+
+**Goal:** Remove "narration" as a standalone reading mode now that NARR-LAYER-1A makes narration a layer within flow mode. Eliminate the mode value, the NarrateMode class, the narration overlay code, and all branch points that check `readingMode === "narration"`. Reduce the reading mode type from 4 values to 3: `"page" | "focus" | "flow"`.
+
+**Problem:** After NARR-LAYER-1A, two parallel narration paths exist: the new flow+narrating path AND the legacy standalone narration mode. This duplication increases maintenance burden, testing surface, and user confusion (two ways to do the same thing). NARR-LAYER-1B removes the legacy path and consolidates all narration into the flow layer.
+
+**Key change:** `readingMode` type goes from `"focus" | "flow" | "narration" | "page"` to `"focus" | "flow" | "page"`. Every location that checks for `"narration"` must be updated. The mode cycling changes from `flow → narration → focus → flow` to `flow → focus → flow` (2-mode cycle, page is always the base state).
+
+**Investigation gate:** ✅ CLEARED. Mode branch map identified 50+ locations across ~15 files that reference `"narration"` as a mode value.
+
+### Baseline
+
+Post-NARR-LAYER-1A state:
+- `src/types.ts` — `readingMode: "focus" | "flow" | "narration" | "page"` (line 123), `lastReadingMode: "focus" | "flow" | "narration"` (line 156)
+- `src/hooks/useReaderMode.ts` — `startNarration()` (line 180-300), `handleSelectMode` takes `"narration"` (line 409), cycle includes narration (line 465-492)
+- `src/hooks/useReadingModeInstance.ts` — `case "narration"` factory (line 166-211)
+- `src/modes/NarrateMode.ts` — Standalone narration mode class
+- `src/components/FoliatePageView.tsx` — Narration overlay code: `narrationBandLineHeightRef` (line 294), `narrationColRightRef` (line 296), `hideNarrationOverlay` (line 358), `ensureAudioProgressGlideLoop` (line 464), `positionNarrationOverlay` (line 753), `ensureNarrationOverlayLoop` (~line 390)
+- 50+ branch points across ReaderContainer, ReaderBottomBar, useFlowScrollSync, useFoliateSync, useDocumentLifecycle, useNarrationCaching, useProgressTracker, keyboard hooks
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration mode entries
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — `readingMode` (line 123), `lastReadingMode` (line 156)
+5. `src/hooks/useReaderMode.ts` — `startNarration` (line 180), `handleSelectMode` (line 409), `handleCycleMode` (line 465), `handleToggleTts` (line 422)
+6. `src/hooks/useReadingModeInstance.ts` — `case "narration"` (line 166-211), `pendingResumeRef` type (line 56, 87)
+7. `src/modes/NarrateMode.ts` — FULL READ, then delete
+8. `src/modes/ModeInterface.ts` — `ModeType` includes `"narration"` (line 18)
+9. `src/components/ReaderContainer.tsx` — grep for `"narration"` and `ttsActive` — every hit is a branch to update
+10. `src/components/FoliatePageView.tsx` — grep for `narration` — overlay code to remove, `applyVisualHighlightByIndex` narration branch
+11. `src/components/ReaderBottomBar.tsx` — `isNarrationSelected` (line 137), hotkey hints, mode-specific UI
+12. `src/hooks/useFoliateSync.ts` — `readingMode !== "narration"` guard
+13. `src/hooks/useDocumentLifecycle.ts` — `readingMode === "narration"` guard
+14. `src/hooks/useNarrationCaching.ts` — `readingMode !== "narration"` guard
+15. `src/hooks/useProgressTracker.ts` — mode logging
+16. `src/styles/global.css` (or domain files) — `.foliate-narration-highlight` CSS
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (renderer-scope) | **Remove "narration" from type system.** Change `readingMode` type from `"focus" \| "flow" \| "narration" \| "page"` to `"focus" \| "flow" \| "page"` (types.ts:123). Change `lastReadingMode` to `"focus" \| "flow"` (types.ts:156). Update `ModeType` in ModeInterface.ts (line 18). Update `handleSelectMode` parameter type (useReaderMode.ts:409). Add `isNarrating` to `BlurbySettings` (types.ts) for persistence. | `src/types.ts`, `src/modes/ModeInterface.ts`, `src/hooks/useReaderMode.ts` | types.ts:123, types.ts:156, ModeInterface.ts:18, useReaderMode.ts:409, types.ts (add `isNarrating: boolean` to BlurbySettings). ~8 lines changed. |
+| 2 | Athena (renderer-scope) | **Remove `startNarration()` and narration from mode routing.** Delete `startNarration` function body (useReaderMode.ts:180-300). Remove from `handleSelectMode` (line 417). Remove from `handleTogglePlay` restore (line 437). Update `handleCycleMode` to 2-mode cycle: `flow → focus → flow` (line 465-492). Remove `handleToggleTts` (line 422). Remove from exports and dependency arrays. | `src/hooks/useReaderMode.ts` | Lines 180-300 (delete), 409-420 (remove narration branch), 422 (delete), 436-438 (remove narration branch), 465-492 (simplify cycle). |
+| 3 | Hephaestus (renderer-scope) | **Remove `case "narration"` from mode instance factory.** Delete the narration case block (useReadingModeInstance.ts:166-211). Update `pendingResumeRef` type to remove `"narration"` (lines 56, 87). Remove truth-sync cleanup guard (line 132). | `src/hooks/useReadingModeInstance.ts` | Lines 166-211 (delete case), 56 (update type), 87 (update type), 132 (remove guard). |
+| 4 | Hermes (renderer-scope) | **Delete NarrateMode.ts.** Remove the file entirely. Remove its import from useReadingModeInstance.ts. | `src/modes/NarrateMode.ts` (delete), `src/hooks/useReadingModeInstance.ts` | Delete file. Remove import line. |
+| 5 | Athena (renderer-scope) | **Update all ReaderContainer narration branches.** Grep for `"narration"` and `ttsActive` in ReaderContainer.tsx. For each: (a) `ttsActive` (line 286): change to `isNarrating` (already available from state), (b) word advance batching (line 380): condition on `isNarrating` not `readingMode === "narration"`, (c) `isActivelyReading` (line 188): replace `readingMode === "narration"` with `isNarrating`, (d) legacy mode map (line 192): remove narration entry, (e) all other `"narration"` checks: replace with `isNarrating` or remove. ~15 edit sites. | `src/components/ReaderContainer.tsx` | Lines 188, 192, 286, 380, 396, 499, 623, 751, 800, 823, 883, 979, 1126, 1130. Each: replace `readingMode === "narration"` with `isNarrating` or equivalent. |
+| 6 | Hephaestus (renderer-scope) | **Remove narration overlay code from FoliatePageView.** Delete: `narrationBandLineHeightRef` (line 294), `narrationColRightRef` (line 296), `hideNarrationOverlay` function (line 358+), `ensureNarrationOverlayLoop` (~line 390), `ensureAudioProgressGlideLoop` (line 464+), `positionNarrationOverlay` (line 753+), `measureNarrationBandDimensions` (~line 340). Remove all narration-specific branches in `applyVisualHighlightByIndex`. Remove calls to `hideNarrationOverlay` throughout (lines 1214, 1613, etc.). ~250 lines of overlay code removed. | `src/components/FoliatePageView.tsx` | Lines 294-296 (refs), 340-370 (measure+hide), 390-470 (fallback loop), 464-650 (glide loop), 753-850 (position overlay). Remove all. |
+| 7 | Hephaestus (renderer-scope) | **Update auxiliary hooks.** (a) `useFoliateSync.ts`: change `readingMode !== "narration"` guard to `!isNarrating`. (b) `useDocumentLifecycle.ts`: change `readingMode === "narration"` guard to `isNarrating`. (c) `useNarrationCaching.ts`: change `readingMode !== "narration"` guard to `!isNarrating`. (d) `useProgressTracker.ts`: log `isNarrating` flag instead of mode string. Each hook must receive `isNarrating` as parameter. | `src/hooks/useFoliateSync.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/hooks/useNarrationCaching.ts`, `src/hooks/useProgressTracker.ts` | One guard expression change per file + parameter addition. ~4 lines each. |
+| 8 | Hephaestus (renderer-scope) | **Update ReaderBottomBar.** Remove narration-specific hotkey hints (line 59: `"narration"` case). Update `isNarrationSelected` to use only `isNarrating` (remove `readingMode === "narration"` check). Remove narration-specific UI sections that duplicate flow+narrating UI. Mode selector buttons: remove narration button, keep flow and focus. | `src/components/ReaderBottomBar.tsx` | Lines 57-62 (hotkey hints), 137 (isNarrationSelected), mode buttons section. ~15 lines changed. |
+| 9 | Hermes (renderer-scope) | **Remove `.foliate-narration-highlight` CSS.** Delete the CSS class and all narration overlay styling from the domain CSS files. Also remove any narration-band-specific CSS custom properties. | `src/styles/reader.css` or appropriate domain file | Grep for `narration-highlight` — delete the block (~20 lines). |
+| 10 | Hephaestus (renderer-scope) | **Settings migration.** On app startup, if `settings.readingMode === "narration"`, migrate to `"flow"` with `isNarrating: true`. If `settings.lastReadingMode === "narration"`, migrate to `"flow"`. Add migration in the settings load path. | `main/ipc/state.js` or settings initialization | In settings load handler, after reading JSON. ~10 lines. |
+| 11 | Hippocrates | **Tests** — ≥20 new tests: (a) `readingMode` type no longer accepts `"narration"`, (b) mode cycling is flow→focus→flow (no narration), (c) N key in flow mode toggles narration (preserved from 1A), (d) `startNarration()` no longer exists on useReaderMode, (e) NarrateMode.ts file does not exist, (f) FoliatePageView has no narration overlay refs, (g) `ensureAudioProgressGlideLoop` does not exist, (h) `positionNarrationOverlay` does not exist, (i) `.foliate-narration-highlight` CSS class does not exist, (j) settings with `readingMode: "narration"` migrate to `"flow"` + `isNarrating: true`, (k) `isNarrating` is persisted to settings, (l) `ttsActive` replaced by `isNarrating` in ReaderContainer, (m) useFoliateSync uses `isNarrating` guard, (n) useDocumentLifecycle uses `isNarrating` guard, (o) useNarrationCaching uses `isNarrating` guard, (p) bottom bar mode selector has no narration button, (q) bottom bar shows TTS controls when `isNarrating`, (r) existing flow tests pass unchanged, (s) existing focus tests pass unchanged, (t) keyboard shortcut map has no narration-mode-specific entries. | `tests/narrationLayerConsolidation.test.ts` (new) | ≥20 tests. |
+| 12 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+
+### Execution Sequence
+
+```
+Wave A (type system + mode routing):
+  Task 1 (remove from type system)          ← must be first, everything depends on types
+      ↓
+  Task 2 (remove startNarration + routing)  ─┐
+  Task 3 (remove mode instance case)        ─┤ parallel — different files
+  Task 4 (delete NarrateMode.ts)            ─┘
+      ↓
+Wave B (branch cleanup):
+  Task 5 (ReaderContainer branches)          ← biggest change, ~15 sites
+  Task 6 (FoliatePageView overlay removal)   ← largest deletion (~250 lines)
+  Task 7 (auxiliary hooks)                   ─┐
+  Task 8 (bottom bar)                        ─┤ parallel — different files
+  Task 9 (CSS removal)                       ─┤
+  Task 10 (settings migration)              ─┘
+      ↓
+Wave C (verify):
+  Task 11-12 (tests + build)
+      ↓
+  Solon spec compliance
+  Herodotus documentation pass
+  Git: commit, merge, push
+```
+
+### SUCCESS CRITERIA
+
+1. `readingMode` type is `"focus" | "flow" | "page"` — no `"narration"` value
+2. `lastReadingMode` type is `"focus" | "flow"` — no `"narration"` value
+3. `NarrateMode.ts` file deleted
+4. `startNarration()` function removed from `useReaderMode`
+5. Mode cycling is `flow → focus → flow` (2-mode cycle)
+6. Zero references to `readingMode === "narration"` in codebase (grep returns 0 hits)
+7. Zero references to `"narration"` as a mode string in `src/` (except comments/docs)
+8. FoliatePageView has no narration overlay code (no `ensureAudioProgressGlideLoop`, `positionNarrationOverlay`, `hideNarrationOverlay`, `narrationColRightRef`, `narrationBandLineHeightRef`)
+9. `.foliate-narration-highlight` CSS class removed
+10. Settings migration: existing users with `readingMode: "narration"` auto-migrate to `"flow"` + `isNarrating: true`
+11. `isNarrating` flag persists in settings and restores on app restart
+12. All reading modes work: page (browse), focus (RSVP), flow (auto-scroll), flow+narrating (TTS-driven scroll)
+13. No narration overlay visible in any mode (flow cursor only)
+14. FoliatePageView reduced by ~250 lines (overlay code removed)
+15. ≥20 new tests in `tests/narrationLayerConsolidation.test.ts`
+16. `npm test` passes, `npm run build` succeeds
+17. No regressions in flow mode, focus mode, or page mode
+
+**Tier:** Full | **Depends on:** NARR-LAYER-1A (foundation must ship first — backward compat path needed for migration).
 
 ---
 

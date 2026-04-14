@@ -301,7 +301,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.49.0 — queue RED depth 1, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.49.0 — queue GREEN depth 3, 3 priority tracks roadmapped, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -336,7 +336,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **PERF-1 complete** — Full performance audit & remediation. Startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`→deferred folder sync), folder watcher starts before sync, `getComputedStyle` cached in `injectStyles` (3→1 call), settings saves debounced (500ms), WPM persistence debounced (300ms), EPUB chapter cache LRU eviction (50-cap), snoozed doc check indexed via Set, voice sync effect deps reduced (7→2), Vite code splitting (vendor/tts/settings chunks, 16 JS chunks), `rebuildLibraryIndex` debounced (100ms). 32 new tests (`tests/perfAudit.test.ts`). v1.47.0.
 - **REFACTOR-1A complete** — ReaderContainer decomposition: 33 useEffects extracted into 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle). fileHashes cleanup on document delete. main.js constants extracted to main/constants.js. 74 new tests. v1.48.0.
 - **REFACTOR-1B complete** — FoliatePageView helpers extracted to `src/utils/foliateHelpers.ts` + `foliateStyles.ts` (1,947→1,724 lines), TTSSettings split into 3 sub-components (874→583 lines), 179→27 inline styles, global.css (5,406 lines) split into 8 domain files + `src/styles/index.css`, new `src/styles/tts-settings.css` (418 lines), 6 empty catch blocks annotated. 32 new tests (`tests/componentStyleCleanup.test.ts`). v1.49.0.
-- Active queue: depth 1 — RED. TEST-COV-1 next. Backfill 2 sprints needed to restore GREEN depth 3. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- Active queue: depth 3 — GREEN. TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.

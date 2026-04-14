@@ -40,6 +40,43 @@ CLI never crosses into implementation. Sub-agents never cross into coordination.
 
 ---
 
+## Effort Levels
+
+Every dispatch declares a **default effort level** that controls how deeply sub-agents
+reason. Effort is set by Cowork when authoring the spec — CLI and sub-agents respect it,
+they don't choose it. The full decision framework, cost implications, and task-type
+reference live in `WORKFLOW_REFERENCE.md` §4. This section covers only what CLI needs
+to know during execution.
+
+### The Four Levels
+
+| Level | Thinking Budget | Behavior |
+|-------|----------------|----------|
+| **low** | Minimal | Pattern-match from trained knowledge. Answer from memory, don't work through it. |
+| **medium** | Moderate | Meaningful reasoning within capacity. Handles majority of standard tasks. |
+| **high** | Substantial | Traces complex logic, considers multiple approaches, backtracks when needed. |
+| **max** | Full available | Reasons as extensively as context allows. Slowest, most expensive, highest quality. |
+
+### How CLI Uses Effort Levels
+
+1. **Read the sprint's declared effort** from the dispatch header (e.g., `Effort: Medium`).
+2. **Check for task-level overrides** — individual tasks may annotate `{high}` or `{max}`
+   to override the sprint default.
+3. **Pass effort through to sub-agents** — include the effort level in the Agent() dispatch
+   prompt so the sub-agent knows how deeply to reason.
+4. **Effort ↔ model tier defaults** — when effort is not explicitly annotated on a task,
+   it inherits from the model tier: haiku→low, sonnet→medium, opus→high.
+5. **Only annotate effort when it differs from the default.** A `[sonnet]` task is implicitly
+   `{medium}`. Write `[sonnet] {high}` only when overriding.
+
+### Close-out: Effort Mismatches
+
+In Phase 6 (Close Out), flag any task where the declared effort didn't match actual
+complexity. "Task #3 was spec'd as {low} but required 3 retries — recommend {medium}
+for similar tasks." This feedback helps Cowork calibrate future dispatches.
+
+---
+
 ## Phase 1: Load and Understand
 
 Before touching any file or running any command:
@@ -72,8 +109,12 @@ Use these markers consistently throughout:
 
 ### Task format
 
-Every task line follows this format: `□ N. agent-name: Task description [model]`
+Every task line follows this format: `□ N. agent-name: Task description [model] {effort}`
 
+- **Model tier** in square brackets: `[haiku]`, `[sonnet]`, or `[opus]`.
+- **Effort level** in curly braces: `{low}`, `{medium}`, `{high}`, or `{max}`.
+  Effort is optional when it matches the model-tier default (haiku→low, sonnet→medium,
+  opus→high). Only annotate effort when overriding the default.
 - **Task #1 is always `cli: Load spec, build plan, assign agents [opus]`.** Non-negotiable.
   This represents Phases 1–3 combined. Task #1 is marked ✓ only after CLI has:
   1. Read and understood the full dispatch spec (Phase 1)
@@ -83,7 +124,7 @@ Every task line follows this format: `□ N. agent-name: Task description [model
   Task #1 is CLI's own coordination work. Everything after Task #1 is delegated.
 - Every subsequent task starts with `unassigned:` as a placeholder — Phase 3 replaces
   these with real agent names.
-- Each task gets a model annotation in brackets at the end: `[haiku]`, `[sonnet]`, or `[opus]`.
+- The sprint's declared effort level is the default. Task-level annotations override it.
 
 ### Model tiers
 
@@ -105,18 +146,23 @@ files, calibration interpretation, resolving conflicting requirements.
 ### Example (Phase 2 output — tasks enumerated, agents not yet assigned)
 
 ```
-## Task Plan
+## Task Plan — Effort: Medium | Override: tasks #6, #8 → High
 □ 1. cli: Load spec, build plan, assign agents                         [opus]
 □ 2. unassigned: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
 □ 3. unassigned: Update constants.toml default                          [haiku]
 □ 4. unassigned: Run fast test suite — all shards pass                  [haiku]
 □ 5. unassigned: Run calibration N=1,200×3 seeds                       [haiku]
-□ 6. unassigned: Interpret cal results + decide if tuning needed        [opus]
+□ 6. unassigned: Interpret cal results + decide if tuning needed        [opus] {max}
 □ 7. unassigned: Generate profiler snapshot with pathway metrics        [haiku]
-□ 8. unassigned: Analyze profiler — does freed space flow to both?      [opus]
+□ 8. unassigned: Analyze profiler — does freed space flow to both?      [opus] {max}
 □ 9. unassigned: Update CLAUDE.md with constants and cal results        [sonnet]
 □ 10. unassigned: Commit, merge to main, push                          [haiku]
 ```
+
+Note: Tasks #6 and #8 override to `{max}` because interpreting calibration results
+and analyzing profiler output across subsystems are genuinely hard analytical problems
+where getting it wrong has real downstream consequences. All other tasks use their
+model-tier defaults (haiku→low, sonnet→medium, opus→high).
 
 Also create a TodoWrite to track the same tasks programmatically. The printed plan is for
 human readability; TodoWrite is for persistent tracking.
@@ -163,7 +209,7 @@ CLI NEVER does implementation work — not even trivial config edits.
 Every implementation task goes to a sub-agent via `Agent()`. CLI's reasoning
 tokens are spent on coordination, not on writing code.
 
-### Step 1: Scan for available agents
+### Step 1: Scan for available agents and build name lookup
 
 Search the project directory for agent definitions. Look in:
 - `.claude/agents/` — project agent definitions
@@ -172,6 +218,25 @@ Search the project directory for agent definitions. Look in:
 
 Build a complete inventory. Don't just check what the spec mentions — discover
 everything that's available.
+
+**CRITICAL — Agent Name Resolution:** For every agent file discovered, read its YAML
+frontmatter `name:` field. This is the EXACT string you must pass to `Agent()`.
+Agent names include a parenthetical suffix — e.g., `Hermes (haiku/Messenger)`,
+`Socrates (sonnet/Calibration)`. Passing just `Hermes` or `Socrates` will FAIL.
+
+Build a name lookup table during this step:
+```
+Name Lookup:
+  Hermes      → "Hermes (haiku/Messenger)"
+  Hercules    → "Hercules (sonnet/Hero)"
+  Athena      → "Athena (opus/Strategist)"
+  Hippocrates → "Hippocrates (haiku/Tester)"
+  [... all discovered agents]
+```
+
+Throughout Phases 2–4, the task plan uses short names for readability. At dispatch
+time (Phase 4), ALWAYS resolve the short name through this lookup before calling
+`Agent()`. The plan says `hercules` — the `Agent()` call says `"Hercules (sonnet/Hero)"`.
 
 ### Step 2: Analyze each agent's intent and model
 
@@ -292,14 +357,29 @@ sub-agent at the files; it reads them itself.
 
 Tasks are dispatched individually via `Agent()`. CLI:
 1. Takes the next task from the plan
-2. **Spawns the assigned agent** via `Agent(<agent>.md, prompt=<task spec>)`
-3. The sub-agent executes in its own context with its own tool budget and returns a result
-4. CLI receives the result and verifies it meets the task spec
-5. If the result includes information needed by downstream tasks, CLI extracts
+2. **Set effort level** — if this task has an effort override (e.g., `{max}`),
+   run `/effort-levels [level]` BEFORE spawning the agent. After the task
+   completes, revert: `/effort-levels [sprint default]`
+3. **Resolve agent name** — look up the full registered name from the Phase 1 lookup table
+4. **Spawn the assigned agent** via `Agent("<full registered name>", prompt=<task spec>)`
+5. The sub-agent executes in its own context with its own tool budget and returns a result
+6. CLI receives the result and verifies it meets the task spec
+7. If the result includes information needed by downstream tasks, CLI extracts
    and holds it for inclusion in those tasks' dispatch prompts
-6. Marks the task ✓ or ✗
-7. Reprints the plan
-8. Moves to the next task
+8. Marks the task ✓ or ✗
+9. Reprints the plan
+10. Moves to the next task
+
+**Effort level management:** The `/effort-levels` command controls how deeply sub-agents
+reason. CLI must set the sprint's default effort at the start of Phase 4 (read from the
+dispatch header's `Effort:` field), then switch before/after any task with a `{curly brace}`
+override. The four levels are: `low`, `medium`, `high`, `max`.
+```
+/effort-levels medium          ← set sprint default at start of Phase 4
+/effort-levels max             ← before a {max} override task
+  [spawn agent, await result]
+/effort-levels medium          ← revert after override task completes
+```
 
 **Dispatch prompts should be concise, not exhaustive.** Because sub-agents have full
 filesystem access, the prompt specifies WHAT to do and WHERE — not HOW. Example:
@@ -330,10 +410,10 @@ execution time, mark the task ✗ (blocked) and report it — don't silently tak
 Print what you're about to do. Use a consistent prefix so the human can scan the log:
 
 ```
-> Delegating: hercules — task #2, modify calc_defense_effectiveness()
-> Delegating: hermes — task #3, update constants.toml default
-> Delegating: hippocrates — task #4, run fast test suite
-> Delegating: athena — task #6, interpret calibration results
+> Delegating: "Hercules (sonnet/Hero)" — task #2, modify calc_defense_effectiveness()
+> Delegating: "Hermes (haiku/Messenger)" — task #3, update constants.toml default
+> Delegating: "Hippocrates (haiku/Tester)" — task #4, run fast test suite
+> Delegating: "Athena (opus/Strategist)" — task #6, interpret calibration results
 ```
 
 The prefix tells the human three things: what agent, what task number, and what it does.
@@ -513,7 +593,7 @@ Before skipping narration, skipping a reprint, or taking a shortcut, check this 
 | "I'll fix this unrelated thing while I'm here" | Scope creep. Note it, finish the plan, then address it. |
 | "This blocker is minor, I can work around it" | Minor blockers become major regressions. Stop and report. |
 | "The human can see what I'm doing from the tool calls" | Tool calls show WHAT. Narration shows WHY. Both matter. |
-| "I'll just do this quick task myself, not worth spawning an agent" | If it's implementation, delegate it — even trivial config edits go to hermes via Agent(). Your tokens are for coordination. |
+| "I'll just do this quick task myself, not worth spawning an agent" | If it's implementation, delegate it — even trivial config edits go to Hermes via Agent("Hermes (haiku/Messenger)", ...). Your tokens are for coordination. |
 | "This task needs my full attention to be safe" | Does it? Or does it just need correct inputs and a known procedure? Match agent to actual complexity, not anxiety. |
 | "The sub-agent failed, I'll just do it myself" | Mark it blocked, report it, get direction. Don't silently absorb work. |
 | "There's no doer agent defined, so I'll do the code work" | Dispatch an ad-hoc Agent call at the appropriate model tier. CLI never writes code, even as a fallback. |
