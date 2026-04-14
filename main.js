@@ -515,10 +515,8 @@ app.whenReady().then(async () => {
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.webContents.send("tts-kokoro-download-progress", progress);
         }
-      }).then(() => {
-        console.log("[kokoro] Model auto-download complete");
       }).catch((err) => {
-        console.log("[kokoro] Auto-download failed (will retry on demand):", err.message);
+        console.error("[kokoro] Auto-download failed (will retry on demand):", err.message);
       });
     }
   }
@@ -551,7 +549,7 @@ app.whenReady().then(async () => {
 
   // Start cloud sync if signed in (auth is initialized by now)
   if (auth.getAuthState()) {
-    syncEngine.startSync().catch((err) => console.log("[cloud] Startup sync failed:", err.message));
+    syncEngine.startSync().catch((err) => console.error("[cloud] Startup sync failed:", err.message));
     const intervalMs = (settings.syncIntervalMinutes || 5) * 60 * 1000;
     if (intervalMs > 0) syncEngine.startAutoSync(intervalMs);
   }
@@ -582,7 +580,7 @@ app.on("will-quit", async () => {
       await syncEngine.startSync();
     }
   } catch (err) {
-    console.log("[cloud] Quit sync failed:", err.message);
+    console.error("[cloud] Quit sync failed:", err.message);
   }
 });
 

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 const { extractBlockTexts, extractBlockPlans } = require("../main/epub-word-extractor.js");
-const { segmentWords } = require("../src/utils/segmentWords.ts");
+import { segmentWords } from "../src/utils/segmentWords";
 const cheerio = require("cheerio");
 
 describe("epub-word-extractor block text extraction", () => {
