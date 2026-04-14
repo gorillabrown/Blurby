@@ -92,12 +92,13 @@ const MINOR_WORDS = new Set([
 ]);
 
 function toTitleCase(s: string): string {
-  const words = s.split(/\s+/);
-  return words.map((w, i) => {
-    if (i === 0 || i === words.length - 1) return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-    if (MINOR_WORDS.has(w.toLowerCase())) return w.toLowerCase();
-    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-  }).join(" ");
+  return s.replace(/\S+/g, (w, offset) => {
+    const lower = w.toLowerCase();
+    if (offset !== 0 && offset + w.length !== s.length && MINOR_WORDS.has(lower)) {
+      return lower;
+    }
+    return w.charAt(0).toUpperCase() + lower.substring(1);
+  });
 }
 
 export function formatDisplayTitle(s: string): string {
