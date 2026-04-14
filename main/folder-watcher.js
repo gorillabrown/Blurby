@@ -52,7 +52,7 @@ async function scanFolderAsync(folderPath) {
         }
       }
     } catch (err) {
-      console.log("Skipping inaccessible directory:", dir, err.message);
+      // Silently ignore inaccessible directories
     }
   }
 

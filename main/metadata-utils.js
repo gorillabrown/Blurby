@@ -20,8 +20,8 @@ const path = require("path");
 function parseFilenameMetadata(filename) {
   if (!filename || typeof filename !== "string") return {};
 
-  // Strip directory and extension
-  const base = path.basename(filename, path.extname(filename));
+  // Strip directory and extension. Using path.win32 handles both forwards and backward slashes on all platforms.
+  const base = path.win32.basename(filename, path.win32.extname(filename));
   if (!base.trim()) return {};
 
   // Pattern 1: "Author - Title" (most common ebook convention)
