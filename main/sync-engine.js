@@ -171,10 +171,12 @@ async function stagingUpload(storage, files) {
   }
 
   // Phase 2: Promote staging → live by moving each file
-  for (const { name } of files) {
-    const stagingPath = `${STAGING_DIR}/${name}`;
-    await storage.moveFile(stagingPath, name);
-  }
+  await Promise.all(
+    files.map(({ name }) => {
+      const stagingPath = `${STAGING_DIR}/${name}`;
+      return storage.moveFile(stagingPath, name);
+    })
+  );
 
   // Clean up staging manifest
   await storage.deleteFile(STAGING_MANIFEST).catch(() => {});
