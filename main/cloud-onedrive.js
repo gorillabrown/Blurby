@@ -26,9 +26,9 @@ async function withRetry(fn, retries = MAX_RETRIES) {
         continue;
       }
       if (status === 401) {
-        // Force token refresh on next getAccessToken call
+        // Force a refresh immediately so the retry does not reuse a cached token.
         try {
-          await getAccessToken("microsoft");
+          await getAccessToken("microsoft", { forceRefresh: true });
         } catch {
           // If refresh fails, throw original error
         }

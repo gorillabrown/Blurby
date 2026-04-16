@@ -21,9 +21,9 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3 — GREEN
-Next sprint: TEST-COV-1 (Critical Path Test Coverage + Security)
-Health: GREEN — Queue restored. TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B.
+Queue depth: 2 — YELLOW
+Next sprint: NARR-LAYER-1A (Narration as Flow Layer — Foundation)
+Health: YELLOW — TEST-COV-1 completed. Queue now NARR-LAYER-1A → NARR-LAYER-1B and needs backfill to restore GREEN.
 ```
 
 ---
@@ -32,11 +32,10 @@ Health: GREEN — Queue restored. TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | TEST-COV-1 | v1.50.0 | `sprint/test-cov-1-critical-paths` | Full | **YES** | Full spec: 11 tasks (2 waves), 16 success criteria. Auth/cloud/queue/ErrorBoundary/foliateWordOffsets tests (≥52 new), URL scheme validation security fix. Audit findings H-4, H-5, M-5, M-6. Independent — can parallel. |
-| 2 | NARR-LAYER-1A | v1.51.0 | `sprint/narr-layer-1a-foundation` | Full | **YES** | Full spec: 11 tasks (2 waves), 17 success criteria. FlowScrollEngine follower mode, isNarrating state, wire narration→flow, keyboard toggle (N key), suppress narration band, bottom bar TTS controls, cross-book integration. ≥18 new tests. |
-| 3 | NARR-LAYER-1B | v1.52.0 | `sprint/narr-layer-1b-consolidation` | Full | **YES** | Full spec: 12 tasks (3 waves), 17 success criteria. Remove "narration" from ReadingMode type, delete NarrateMode.ts, remove 50+ branch points, remove narration overlay code (~250 lines from FoliatePageView), settings migration, CSS cleanup. ≥20 new tests. Depends on NARR-LAYER-1A. |
+| 1 | NARR-LAYER-1A | v1.51.0 | `sprint/narr-layer-1a-foundation` | Full | **YES** | Full spec: 11 tasks (2 waves), 17 success criteria. FlowScrollEngine follower mode, isNarrating state, wire narration→flow, keyboard toggle (N key), suppress narration band, bottom bar TTS controls, cross-book integration. ≥18 new tests. |
+| 2 | NARR-LAYER-1B | v1.52.0 | `sprint/narr-layer-1b-consolidation` | Full | **YES** | Full spec: 12 tasks (3 waves), 17 success criteria. Remove "narration" from ReadingMode type, delete NarrateMode.ts, remove 50+ branch points, remove narration overlay code (~250 lines from FoliatePageView), settings migration, CSS cleanup. ≥20 new tests. Depends on NARR-LAYER-1A. |
 
-**Dispatch status:** Queue depth 3 — GREEN. TEST-COV-1 dispatch-ready.
+**Dispatch status:** Queue depth 2 — YELLOW. TEST-COV-1 completed; backfill required before queue returns to GREEN.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -56,7 +55,7 @@ Health: GREEN — Queue restored. TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B
 15. **Backfill queue to ≥3** — YELLOW, depth 2. Spec a third sprint before dispatching REFACTOR-1B.
 16. ~~Dispatch REFACTOR-1B to CLI~~ — COMPLETE (v1.49.0)
 17. ~~Backfill queue to ≥3~~ — DONE (NARR-LAYER-1A + NARR-LAYER-1B spec'd from narration-as-layer investigation, queue GREEN depth 3)
-18. **Dispatch TEST-COV-1 to CLI** — Queue GREEN, dispatch-ready.
+18. ~~Dispatch TEST-COV-1 to CLI~~ — COMPLETE (v1.50.0)
 
 ---
 
@@ -78,6 +77,7 @@ Health: GREEN — Queue restored. TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TEST-COV-1 | 2026-04-16 | PASS | Critical path coverage + security hardening: URL scheme validation for `addDocFromUrl`, `site-login`, and `open-url-in-browser`; explicit force-refresh on 401 for Google and Microsoft cloud retries; 75 new tests across auth/cloud/queue/ErrorBoundary/foliateWordOffsets + URL regression. 1,967 tests across 108 files. `npm test` and `npm run build` passed; existing Vite circular-chunk warning remains. v1.50.0. |
 | REFACTOR-1B | 2026-04-07 | PASS (17/18 — criterion 4 aspirational) | FoliatePageView helpers extracted to `foliateHelpers.ts` + `foliateStyles.ts` (1,947→1,724 lines), TTSSettings split into 3 sub-components (874→583 lines), 179→27 inline styles, global.css (5,406 lines) split into 8 domain files + `src/styles/index.css`, new `src/styles/tts-settings.css` (418 lines), 6 empty catch blocks annotated, 3 build warnings fixed. 32 new tests (1,892 total across 101 files). v1.49.0. |
 | REFACTOR-1A | 2026-04-07 | PASS | ReaderContainer decomposition: 33 useEffects → 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle), fileHashes cleanup on document delete, main.js constants extracted to main/constants.js. 74 new tests (1,860 total across 100 files). v1.48.0. |
 | PERF-1 | 2026-04-07 | PASS | Full performance audit & remediation: startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`), folder watcher before sync, `getComputedStyle` cached (3→1 call), settings saves debounced 500ms, WPM persistence debounced 300ms, EPUB chapter cache LRU 50-cap, snoozed doc Set index, voice sync deps 7→2, Vite code splitting (vendor/tts/settings, 16 chunks), `rebuildLibraryIndex` debounced 100ms. 32 new tests (1,786 total across 98 files). v1.47.0. |

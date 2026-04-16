@@ -21,6 +21,18 @@ async function logToFile(message, errorLogPath) {
   } catch { /* Intentional: error logging should never crash the app */ }
 }
 
+function validateHttpHttpsUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return { error: "Only http/https URLs are allowed." };
+    }
+    return { parsed };
+  } catch {
+    return { error: "Only http/https URLs are allowed." };
+  }
+}
+
 /**
  * Detect image format from magic bytes. Returns extension or null if not a recognized image.
  */
@@ -155,6 +167,11 @@ function register(ctx) {
       return { error: "A source folder must be selected before importing from URLs." };
     }
     try {
+      const validation = validateHttpHttpsUrl(url);
+      if (validation.error) {
+        return validation;
+      }
+
       const siteCookies = ctx.getSiteCookies();
       const siteKey = getSiteKey(url);
       const hasLogin = siteKey && siteCookies[siteKey] && siteCookies[siteKey].length > 0;
@@ -292,8 +309,8 @@ function register(ctx) {
     try {
       const { shell } = require("electron");
       // Only allow http/https URLs for security
-      const parsed = new URL(url);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      const validation = validateHttpHttpsUrl(url);
+      if (validation.error) {
         return { error: "Only http/https URLs can be opened." };
       }
       await shell.openExternal(url);
@@ -338,6 +355,10 @@ function register(ctx) {
   });
 
   ipcMain.handle("site-login", async (_, url) => {
+    const validation = validateHttpHttpsUrl(url);
+    if (validation.error) {
+      return validation;
+    }
     return await openSiteLogin(url, ctx.getMainWindow(), ctx.getSiteCookies(), ctx.saveSiteCookies);
   });
 

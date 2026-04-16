@@ -373,18 +373,19 @@ async function signOut(provider) {
   }
 }
 
-async function getAccessToken(provider) {
+async function getAccessToken(provider, options = {}) {
   const tokens = await loadTokens();
   const data = tokens[provider];
   if (!data) throw new Error(`Not signed in to ${provider}`);
+  const forceRefresh = options.forceRefresh === true;
 
   // Check if token is still valid (with 5 minute buffer)
   const bufferMs = TOKEN_REFRESH_BUFFER_MS;
-  if (data.accessToken && data.expiresOn && Date.now() < data.expiresOn - bufferMs) {
+  if (!forceRefresh && data.accessToken && data.expiresOn && Date.now() < data.expiresOn - bufferMs) {
     return data.accessToken;
   }
 
-  // Token expired, refresh
+  // Token expired or explicitly bypassed, refresh
   if (provider === "microsoft") return await refreshMicrosoftToken();
   if (provider === "google") return await refreshGoogleToken();
   throw new Error(`Cannot refresh token for ${provider}`);

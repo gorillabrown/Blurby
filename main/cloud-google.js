@@ -27,7 +27,7 @@ async function withRetry(fn, retries = MAX_RETRIES) {
       }
       if (status === 401) {
         try {
-          await getAccessToken("google");
+          await getAccessToken("google", { forceRefresh: true });
         } catch { /* ignore */ }
         if (attempt === 0) continue;
       }

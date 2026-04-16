@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-09 — NARR-LAYER-1A/1B spec'd. Queue depth 3 (GREEN). Next: TEST-COV-1.
+**Last updated**: 2026-04-16 — TEST-COV-1 complete. Queue depth 2 (YELLOW). Next: NARR-LAYER-1A.
 **Current branch**: `main`
-**Current state**: v1.49.0 stable. Queue depth 3 (GREEN). Next: TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B.
+**Current state**: v1.50.0 stable. Queue depth 2 (YELLOW). Next: NARR-LAYER-1A → NARR-LAYER-1B.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -64,7 +64,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     REFACTOR-1B: Component & Style Cleanup ✅ (v1.49.0)
                    │
-    TEST-COV-1: Critical Path Test Coverage + Security
+    TEST-COV-1: Critical Path Test Coverage + Security ✅ (v1.50.0)
                    │
     NARR-LAYER-1A: Narration as Flow Layer — Foundation
                    │
@@ -963,11 +963,11 @@ Wave B (verify + docs):
 
 ---
 
-## TEST-COV-1: Critical Path Test Coverage + Security Hardening
+## TEST-COV-1: Critical Path Test Coverage + Security Hardening ✅ COMPLETED (v1.50.0, 2026-04-16)
 
-**Goal:** Add test coverage for the most critical untested paths in the codebase (auth, cloud sync, foliateWordOffsets, ErrorBoundary, queue utilities) and harden URL validation against dangerous schemes. Addresses audit findings H-4, H-5, H-6 (partial), M-5, and M-6.
+**Goal:** Add test coverage for the most critical untested paths in the codebase (auth, cloud sync, foliateWordOffsets, ErrorBoundary, queue utilities) and harden URL validation against dangerous schemes. Also fix 401 retry paths so Google and Microsoft cloud requests force a token refresh instead of reusing cached tokens. Addresses audit findings H-4, H-5, H-6 (partial), M-5, and M-6.
 
-**Problem:** (1) Auth module (424 lines) and cloud storage modules (478 + 431 lines) have zero tests — these are the most complex untested paths handling token refresh, OAuth flows, retry logic, and conditional writes. (2) foliateWordOffsets.ts (104 lines) has no dedicated tests despite being critical to narration cursor accuracy. (3) ErrorBoundary.tsx and queue.ts have no tests. (4) `addDocFromUrl` IPC handler accepts unvalidated URLs — file://, javascript:, and data: schemes pass through to fetch without rejection.
+**Problem:** (1) Auth module (424 lines) and cloud storage modules (478 + 431 lines) have zero tests — these are the most complex untested paths handling token refresh, OAuth flows, retry logic, and conditional writes. (2) foliateWordOffsets.ts (104 lines) has no dedicated tests despite being critical to narration cursor accuracy. (3) ErrorBoundary.tsx and queue.ts have no tests. (4) `addDocFromUrl` IPC handler accepts unvalidated URLs — file://, javascript:, and data: schemes pass through to fetch without rejection. (5) 401 retries in the Google and Microsoft cloud paths can replay a still-cached token unless the refresh path is explicit.
 
 **Investigation gate:** Cleared. Cowork investigation mapped all exported functions, critical paths, edge cases, and the exact security gap (misc.js line 159 — no scheme validation before fetch).
 
@@ -1053,6 +1053,8 @@ Wave B (verify + docs):
 14. No files accidentally truncated (git diff --stat check)
 15. Test files follow existing project test patterns (vitest, describe/it blocks)
 16. Security fix is backward-compatible — valid http/https URLs continue to work
+
+**Completion note:** Completed on 2026-04-16. The new tests landed in `tests/auth.test.js` (13), `tests/cloudGoogle.test.js` (10), `tests/cloudOnedrive.test.js` (9), `tests/foliateWordOffsets.test.ts` (15), `tests/errorBoundary.test.tsx` (7), `tests/queue.test.ts` (15), and `tests/url-scheme-validation.test.ts` (6), for 75 new tests total. The suite now reports 1,967 tests across 108 files. Verification passed with `npm test` and `npm run build`; the existing Vite warning `Circular chunk: settings -> tts -> settings` remains.
 
 **Tier:** Full | **Depends on:** None — all targets are independent modules with no shared state. Can run in parallel with REFACTOR-1A/1B. Investigation gate cleared.
 

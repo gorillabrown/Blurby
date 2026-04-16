@@ -1191,3 +1191,17 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail (PR-094):** When setting post-refactoring line count targets for component decomposition, use 60% of original as the floor, not the aspirational minimum. For a 874-line file, a realistic target after splitting 3 sub-components is ~525 lines (60%), not <350 (40%). If the goal is true size reduction, plan for additional passes (dead code removal, logic consolidation) after the structural extraction. Do not treat extraction and slimming as the same operation.
 
 **Related:** REFACTOR-1B closeout, REFACTOR-1A closeout, LL-093 (effect extraction line count reality)
+
+---
+
+### [2026-04-16] LL-095: Centralize URL Scheme Validation and Force Refresh on 401
+
+**Area:** main process, security, auth, cloud sync, URL handling
+**Status:** active
+**Priority:** high
+
+**Context:** TEST-COV-1 hardened the main-process URL entry points and the cloud retry path at the same time. `addDocFromUrl`, `site-login`, and `open-url-in-browser` now share a single HTTP/HTTPS-only validation helper, so dangerous schemes are rejected before any URL-dependent work. The Google and Microsoft cloud paths also learned a separate lesson: a plain `getAccessToken()` call after a 401 can hand back the same cached token, so retries must explicitly force refresh.
+
+**Guardrail:** Use one shared `validateHttpHttpsUrl()`-style helper for every user-supplied URL before domain parsing or network access. On 401 retry paths, call the explicit refresh form (`forceRefresh: true` or equivalent) before retrying once. Never assume a cached-token lookup will refresh itself after an auth rejection.
+
+**Related:** TEST-COV-1 sprint, `main/ipc/misc.js`, `main/auth.js`, `main/cloud-google.js`, `main/cloud-onedrive.js`
