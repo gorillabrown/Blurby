@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-09 — NARR-LAYER-1A/1B spec'd. Queue depth 3 (GREEN). Next: TEST-COV-1.
+**Last updated**: 2026-04-16 — NARR-LAYER-1A complete. Queue depth 2 (YELLOW). Next: NARR-LAYER-1B.
 **Current branch**: `main`
-**Current state**: v1.49.0 stable. Queue depth 3 (GREEN). Next: TEST-COV-1 → NARR-LAYER-1A → NARR-LAYER-1B.
+**Current state**: v1.51.0 stable. Queue depth 2 (YELLOW). Next: NARR-LAYER-1B → TTS-EVAL-1.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -64,11 +64,13 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     REFACTOR-1B: Component & Style Cleanup ✅ (v1.49.0)
                    │
-    TEST-COV-1: Critical Path Test Coverage + Security
+    TEST-COV-1: Critical Path Test Coverage + Security ✅ (v1.50.0)
                    │
-    NARR-LAYER-1A: Narration as Flow Layer — Foundation
+    NARR-LAYER-1A: Narration as Flow Layer — Foundation ✅ (v1.51.0)
                    │
     NARR-LAYER-1B: Narration as Flow Layer — Consolidation
+                   │
+    TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness
                    │
                    ▼
         Track C: Android APK
@@ -1058,7 +1060,7 @@ Wave B (verify + docs):
 
 ---
 
-## NARR-LAYER-1A: Narration as Flow Layer — Foundation
+## NARR-LAYER-1A: Narration as Flow Layer — Foundation ✅ COMPLETED
 
 **Goal:** Make narration a layer within flow mode rather than a separate reading mode. When the user activates narration while in flow mode, TTS audio drives word advancement and FlowScrollEngine follows — scrolling and animating the flow timer cursor based on audio progress. The narration band overlay is suppressed; only the flow cursor is visible. This is the MVP: narration is available only in flow mode.
 
@@ -1180,6 +1182,8 @@ Wave B (verify + docs + git):
 
 **Tier:** Full | **Depends on:** TEST-COV-1 (test coverage improves confidence for this architectural change). Investigation gate cleared.
 
+**Completion note:** Completed on 2026-04-16. Flow mode now supports narration as a first-class layer via `FlowScrollEngine` follower mode, `isNarrating` state in ReaderContainer, flow-sync wiring from highlighted words into flow cursor updates, flow-specific narration toggling, suppression of the standalone narration band while flow narration is active, and bottom-bar/keyboard control updates. Verification passed with targeted narration-layer tests, full `npm test`, and `npm run build`. The existing Vite circular chunk warning `settings -> tts -> settings` remains deferred follow-up work.
+
 ---
 
 ## NARR-LAYER-1B: Narration as Flow Layer — Consolidation
@@ -1285,6 +1289,111 @@ Wave C (verify):
 17. No regressions in flow mode, focus mode, or page mode
 
 **Tier:** Full | **Depends on:** NARR-LAYER-1A (foundation must ship first — backward compat path needed for migration).
+
+---
+
+## TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness
+
+**Goal:** Create a repeatable evaluation harness for Blurby narration quality so future TTS and flow-layer work can be judged with evidence instead of feel. The harness should measure start latency, flow cursor vs narration alignment, highlighted word vs narration alignment, pause/resume correctness, section/chapter/book handoff correctness, and provide durable review artifacts for subjective audio-quality assessment.
+
+**Problem:** Blurby can currently tell when TTS or flow-sync "feels off," but there is no durable before/after evaluation path. After `NARR-LAYER-1A`, narration and flow are finally coupled in the intended architecture, which makes an eval harness more important: future work now needs a reliable way to distinguish audio drift, cursor drift, handoff bugs, and start-latency regressions instead of collapsing them all into anecdotal discomfort.
+
+**Design decisions:**
+- Build a fixture-driven harness, not a product feature.
+- Measure both objective runtime traces and human-review artifacts.
+- Keep the first version desktop/Electron only.
+- Do not build MOS-style automatic speech scoring in this sprint.
+- Prefer deterministic JSON traces plus optional media capture over brittle full end-to-end UI automation.
+- Center the harness on the current architecture: Flow is the visual layer, narration is the audio layer, and the harness evaluates their relationship.
+
+### Baseline
+
+- `src/hooks/useNarration.ts` — narration lifecycle, word-advance callbacks, pause/resume/stop, and startup timing seam
+- `src/hooks/useFlowScrollSync.ts` — flow/narration coupling and section/book handoff seam
+- `src/utils/FlowScrollEngine.ts` — flow cursor and line/block progression surface
+- `src/components/ReaderContainer.tsx` — top-level reading state and narration/flow control plumbing
+- No existing durable trace schema for flow+narration evaluation
+- No small, reusable fixture corpus for narration review
+- No baseline review template for comparing branches or post-sprint output
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and execution model
+2. `ROADMAP.md` — this section
+3. `docs/governance/SPRINT_QUEUE.md` — queue pointer context
+4. `src/hooks/useNarration.ts` — narration lifecycle, startup, callbacks, pause/resume
+5. `src/hooks/useFlowScrollSync.ts` — flow-follow and handoff behavior
+6. `src/utils/FlowScrollEngine.ts` — flow cursor/line state and follower seam
+7. `src/components/ReaderContainer.tsx` — top-level state routing and mode/narration plumbing
+8. `src/types.ts` — evaluation trace types if added
+9. `tests/` — existing test conventions
+10. `scripts/` — runner location and existing script patterns
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (renderer-scope) | **Define the trace schema.** Add explicit evaluation-trace types for fixture metadata, lifecycle events, word/highlight/flow position events, and transition events. Keep the schema JSON-serializable and deterministic. | `src/types.ts` or `src/types/eval.ts` | Add new trace interfaces near existing narration/reader state types, or create `src/types/eval.ts` and export from the central types barrel. |
+| 2 | Hephaestus (test-scope) | **Add fixture corpus.** Create a small evaluation set under `tests/fixtures/narration/` covering prose, dialogue, long sentences, punctuation-dense text, section transition, chapter transition, queued handoff, and pause/resume. | `tests/fixtures/narration/` | New fixture files + one index/manifest file describing ids, source type, and intended coverage. |
+| 3 | Athena (renderer-scope) | **Add internal trace instrumentation hooks.** Log narration lifecycle events, first-audio timing, highlighted-word changes, flow cursor/block movement, section/chapter/book transitions, and pause/resume/stop. The trace layer must be off by default and enabled only for harness runs. | `src/hooks/useNarration.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts` | Add optional trace sink params near existing lifecycle callbacks; do not inline console logging. Keep instrumentation behind an explicit `evalTrace`/`debugTrace` option. |
+| 4 | Hephaestus (renderer-scope) | **Capture first-audio timing.** Record play request time and first audible output event so start latency can be computed directly from the trace. | `src/hooks/useNarration.ts` | Instrument the narration start path and the earliest audio-ready / playback-start callback boundary used by the scheduler. |
+| 5 | Hephaestus (test-scope) | **Add trace integrity tests.** Cover schema validity, event ordering, and the required minimum event set for a valid run. | `tests/ttsEvalTrace.test.ts` (new) | New test file covering event ordering (`start` before `first-audio`, pause before resume, etc.) and JSON-shape integrity. |
+| 6 | Athena (tooling-scope) | **Add harness runner script.** Create a runner that executes fixture sessions, enables tracing, and writes one JSON trace file plus a short summary per run. | `scripts/tts_eval_runner.*` | New script under `scripts/`; accept fixture id(s), output dir, and basic mode/rate options. |
+| 7 | Hephaestus (tooling-scope) | **Add metrics summarization.** Compute start latency, cursor/highlight drift summary, pause/resume integrity, and transition accounting from the raw trace output. | `scripts/tts_eval_runner.*` or `scripts/tts_eval_metrics.*` | Add summary generation adjacent to runner output; write machine-readable summary JSON and concise human-readable text. |
+| 8 | Hippocrates | **Add lifecycle and handoff tests.** Cover pause/resume, section transition, chapter transition, and cross-book continuation accounting at the trace level. | `tests/ttsEvalLifecycle.test.ts` (new) | New trace-driven tests proving section/chapter/book boundaries are represented and no transition class is silently dropped. |
+| 9 | Hephaestus (docs-scope) | **Add review artifacts.** Create a reviewer score template for subjective audio/visual evaluation and a runbook for how to compare branches using the harness. | `docs/` or `docs/governance/` | Add one review template doc and one harness runbook doc in the existing docs structure. |
+| 10 | Hippocrates | **Run verification.** Execute targeted harness tests, at least one fixture harness run on the current branch, `npm test`, and `npm run build`. | — | Capture command results and artifact paths in the sprint summary. |
+| 11 | Solon | **Spec compliance pass.** Verify all success criteria and confirm the harness distinguishes start latency, drift, handoff, and pause/resume failure classes. | — | Review after implementation and test execution. |
+| 12 | Plato | **Quality review.** Review whether the harness actually measures the intended failure modes rather than only logging noise. | — | Focus on evaluation value, not just code style. |
+| 13 | Herodotus | **Governance/docs update.** Update roadmap and sprint queue if this becomes the standard TTS evaluation path; log baseline harness usage notes. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, related governance docs | Documentation pass after verification and review. |
+
+### Execution Sequence
+
+```
+Wave A (fixtures + schema + trace plumbing):
+  Task 1 (schema)
+      ↓
+  Task 2 (fixtures)
+  Task 3 (trace instrumentation)
+  Task 4 (first-audio timing)
+      ↓
+  Task 5 (trace integrity tests)
+
+Wave B (runner + metrics):
+  Task 6 (runner script)
+      ↓
+  Task 7 (summary metrics)
+  Task 8 (lifecycle/handoff tests)
+
+Wave C (review + docs):
+  Task 9 (review template + runbook)
+  Task 10 (verification runs)
+  Task 11 (spec compliance)
+  Task 12 (quality review)
+  Task 13 (docs/governance)
+```
+
+### SUCCESS CRITERIA
+
+1. A reusable narration evaluation fixture corpus exists under `tests/fixtures/narration/`
+2. Harness runs emit one structured JSON trace per fixture run
+3. Start latency is captured directly from the trace
+4. Flow-position and highlighted-word progression are captured
+5. Pause/resume and stop events are captured
+6. Section/chapter/book transitions are captured
+7. A runner script can execute evaluation sessions reproducibly
+8. The harness can distinguish at least these failure classes:
+   - start latency
+   - cursor/highlight drift
+   - handoff error
+   - pause/resume error
+9. Baseline run outputs are readable without hidden internal context
+10. A human reviewer can score audio/visual coherence using the provided template
+11. Tests cover trace integrity and key lifecycle ordering
+12. At least one fixture harness run is executed successfully on the branch
+13. `npm test` passes and `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** NARR-LAYER-1A (flow-layer narration foundation in place). Recommended after NARR-LAYER-1B unless a TTS quality investigation needs it sooner.
 
 ---
 
