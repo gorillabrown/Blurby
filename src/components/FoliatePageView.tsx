@@ -389,6 +389,10 @@ export default function FoliatePageView({
   }, []);
 
   const ensureNarrationOverlayLoop = useCallback(() => {
+    if (readingModeRef.current === "flow") {
+      hideNarrationOverlay();
+      return;
+    }
     if (narrationOverlayRafRef.current) return;
 
     const tick = (ts: number) => {
@@ -462,6 +466,10 @@ export default function FoliatePageView({
    * - The overlay position is purely visual — never written back to any anchor ref
    */
   const ensureAudioProgressGlideLoop = useCallback(() => {
+    if (readingModeRef.current === "flow") {
+      hideNarrationOverlay();
+      return;
+    }
     if (narrationAudioProgressRafRef.current) return;
 
     const tick = () => {
@@ -874,7 +882,9 @@ export default function FoliatePageView({
       return false;
     }
 
-    if (isNarrationMode) {
+    if (isNarrationMode && readingModeRef.current === "flow") {
+      hideNarrationOverlay();
+    } else if (isNarrationMode) {
       // Fixed-size overlay band covers the full line — no per-word context classes needed (TTS-7R).
       positionNarrationOverlay(state.doc, wordIndex);
     } else {
