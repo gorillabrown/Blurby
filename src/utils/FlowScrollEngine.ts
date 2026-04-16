@@ -31,6 +31,7 @@ export interface LineInfo {
 export interface FlowScrollEngineState {
   running: boolean;
   paused: boolean;
+  followerMode: boolean;
   lineIndex: number;
   wordIndex: number;
   totalLines: number;
@@ -65,6 +66,7 @@ export class FlowScrollEngine {
   private lineTimer: ReturnType<typeof setTimeout> | null = null;
   private scrollResumeTimer: ReturnType<typeof setTimeout> | null = null;
   private manualScrollPaused = false;
+  private followerMode = false;
   private callbacks: FlowScrollEngineCallbacks;
   private paragraphBreaks: Set<number> = new Set();
   private zonePosition: number = FLOW_READING_ZONE_POSITION;
@@ -95,6 +97,7 @@ export class FlowScrollEngine {
     this.running = true;
     this.paused = false;
     this.manualScrollPaused = false;
+    this.followerMode = false;
 
     this.cursor.style.display = "block";
     this.cursor.style.height = (isEink ? FLOW_TIMER_BAR_EINK_HEIGHT_PX : FLOW_TIMER_BAR_HEIGHT_PX) + "px";
@@ -160,6 +163,7 @@ export class FlowScrollEngine {
   stop(): void {
     this.running = false;
     this.paused = false;
+    this.followerMode = false;
     this.clearTimers();
     if (this.cursor) {
       this.cursor.style.display = "none";
@@ -190,13 +194,35 @@ export class FlowScrollEngine {
     if (!this.running || !this.paused) return;
     this.paused = false;
     this.manualScrollPaused = false;
+    if (this.followerMode) return;
     this.animateLine();
   }
 
   setWpm(wpm: number): void {
     this.wpm = wpm;
-    if (this.running && !this.paused) {
+    if (this.running && !this.paused && !this.followerMode) {
       this.clearTimers();
+      this.animateLine();
+    }
+  }
+
+  setFollowerMode(enabled: boolean): void {
+    if (!this.running) {
+      this.followerMode = enabled;
+      return;
+    }
+    if (enabled) {
+      this.clearTimers();
+      this.manualScrollPaused = false;
+      this.followerMode = true;
+      if (this.cursor) {
+        this.cursor.style.transition = "none";
+      }
+      return;
+    }
+    const wasFollower = this.followerMode;
+    this.followerMode = false;
+    if (wasFollower && !this.paused) {
       this.animateLine();
     }
   }
@@ -204,12 +230,48 @@ export class FlowScrollEngine {
   jumpToWord(wordIndex: number): void {
     this.wordIndex = wordIndex;
     if (!this.running) return;
+    if (this.followerMode) {
+      this.followWord(wordIndex);
+      return;
+    }
     this.clearTimers();
     this.lineIdx = this.findLineForWord(wordIndex);
     this.scrollToLine(this.lineIdx);
     if (!this.paused) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
+  }
+
+  followWord(wordIndex: number): void {
+    if (!this.running || !this.followerMode || !this.cursor) return;
+
+    const lineIdx = this.findLineForWord(wordIndex);
+    const line = this.lines[lineIdx];
+    if (!line) return;
+
+    const lineChanged = lineIdx !== this.lineIdx;
+    this.lineIdx = lineIdx;
+    this.wordIndex = wordIndex;
+    this.scrollToLine(lineIdx, true);
+
+    const lineWidth = Math.max(line.right - line.left, 1);
+    const fraction = Math.max(
+      0,
+      Math.min(1, (wordIndex - line.firstWord) / Math.max(1, line.lastWord - line.firstWord))
+    );
+    const width = Math.max(1, lineWidth * (1 - fraction));
+
+    this.cursor.style.transition = "none";
+    this.cursor.style.left = line.left + "px";
+    this.cursor.style.top = line.bottom + "px";
+    this.cursor.style.width = width + "px";
+    this.cursor.style.display = "block";
+
+    this.callbacks.onWordAdvance(wordIndex);
+    if (lineChanged) {
+      this.callbacks.onLineChange?.(lineIdx, line);
+    }
+    this.callbacks.onProgressUpdate?.(this.getProgress());
   }
 
   jumpToLine(direction: "prev" | "next"): void {
@@ -253,7 +315,14 @@ export class FlowScrollEngine {
   }
 
   getState(): FlowScrollEngineState {
-    return { running: this.running, paused: this.paused, lineIndex: this.lineIdx, wordIndex: this.wordIndex, totalLines: this.lines.length };
+    return {
+      running: this.running,
+      paused: this.paused,
+      followerMode: this.followerMode,
+      lineIndex: this.lineIdx,
+      wordIndex: this.wordIndex,
+      totalLines: this.lines.length,
+    };
   }
 
   getWordIndex(): number { return this.wordIndex; }
@@ -319,7 +388,7 @@ export class FlowScrollEngine {
   }
 
   private animateLine(): void {
-    if (!this.running || this.paused || !this.cursor || !this.container) return;
+    if (!this.running || this.paused || this.followerMode || !this.cursor || !this.container) return;
     if (this.lineIdx >= this.lines.length) {
       this.running = false;
       this.callbacks.onComplete();
@@ -401,7 +470,7 @@ export class FlowScrollEngine {
   }
 
   private handleWheel = (): void => {
-    if (!this.running || this.paused) return;
+    if (!this.running || this.paused || this.followerMode) return;
     if (!this.manualScrollPaused) {
       this.manualScrollPaused = true;
       this.clearTimers();

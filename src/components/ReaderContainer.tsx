@@ -121,6 +121,10 @@ export default function ReaderContainer({
   const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow" | "narration">("page");
   const readingModeRef = useRef(readingMode);
   readingModeRef.current = readingMode;
+  const [isNarrating, setIsNarrating] = useState(false);
+  const isNarratingRef = useRef(isNarrating);
+  isNarratingRef.current = isNarrating;
+  const pendingNarrationResumeRef = useRef(false);
 
   // Highlighted word in Page view — anchor for Focus/Flow entry
   const [highlightedWordIndex, setHighlightedWordIndex] = useState(activeDoc.position || 0);
@@ -185,7 +189,10 @@ export default function ReaderContainer({
 
   // Track active reading time when in any active sub-mode
   // Focus: FocusMode class drives timing (not useReader's playing flag)
-  const isActivelyReading = readingMode === "focus" || (readingMode === "flow" && flowPlaying) || readingMode === "narration";
+  const isActivelyReading =
+    readingMode === "focus"
+    || (readingMode === "flow" && (flowPlaying || isNarrating))
+    || readingMode === "narration";
 
   // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
   // Map 4-mode to legacy 3-mode for keyboard hooks. Narration uses "page" layout.
@@ -283,7 +290,7 @@ export default function ReaderContainer({
 
   // ── TTS (Narration) — now a discrete mode, not a layer ─────────────────
   const narration = useNarration();
-  const ttsActive = readingMode === "narration"; // derived, not separate state
+  const ttsActive = readingMode === "narration" || isNarrating; // derived, not separate state
   // preCapWpmRef managed by useReaderMode hook
 
   // ── Narration-to-settings sync (10 effects extracted to useNarrationSync) ──
@@ -433,12 +440,15 @@ export default function ReaderContainer({
     pageNavRef,
     readingMode,
     setReadingMode,
+    isNarrating,
+    setIsNarrating,
+    pendingNarrationResumeRef,
     bookWordsTotalWords: bookWordMeta?.totalWords,
     resumeAnchorRef,
     softWordIndexRef,
   });
   const {
-    stopAllModes, startFocus, startFlow, startNarration,
+    stopAllModes, startFocus, startFlow, startNarration, toggleNarrationInFlow,
     handleTogglePlay, handleSelectMode, handlePauseToPage,
     handleToggleTts, handleEnterFocus, handleEnterFlow,
     handleStopTts, handleReturnToReading, handleCycleMode, handleCycleAndStart,
@@ -452,6 +462,7 @@ export default function ReaderContainer({
     flowScrollEngineRef,
   } = useFlowScrollSync({
     readingMode,
+    isNarrating,
     effectiveWpm,
     settings,
     useFoliate,
@@ -460,12 +471,16 @@ export default function ReaderContainer({
     startFlowRef,
     flowPlaying,
     setFlowPlaying,
+    setIsNarrating,
     setFlowProgress,
     setCrossBookTransition,
     pendingFlowResumeRef,
+    pendingNarrationResumeRef,
     setHighlightedWordIndex,
     setReadingMode,
     highlightedWordIndexRef,
+    highlightedWordIndex,
+    narration,
     foliateApiRef,
     flowScrollContainerRef,
     flowScrollCursorRef,
@@ -529,10 +544,14 @@ export default function ReaderContainer({
     onToggleFavorite(activeDoc.id);
   }, [activeDoc, onToggleFavorite]);
 
-  // Legacy toggle for keyboard shortcut (N key)
+  // Flow-layer narration toggle for keyboard shortcut (N key in flow mode)
   const handleToggleNarration = useCallback(() => {
+    if (readingModeRef.current === "flow") {
+      toggleNarrationInFlow();
+      return;
+    }
     handleToggleTts();
-  }, [handleToggleTts]);
+  }, [handleToggleTts, toggleNarrationInFlow]);
 
   // Chapter navigation
   const handlePrevChapter = useCallback(() => {
@@ -620,7 +639,10 @@ export default function ReaderContainer({
   }, [highlightedWordIndex]);
 
   // Wrap adjustWpm: when narration is selected (active or paused), Up/Down adjusts TTS rate
-  const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && settings.lastReadingMode === "narration");
+  const isNarrationSelected =
+    readingMode === "narration"
+    || (readingMode === "flow" && isNarrating)
+    || (readingMode === "page" && settings.lastReadingMode === "narration");
   const adjustSpeed = useCallback((delta: number) => {
     if (isNarrationSelected) {
       const isKokoro = settings.ttsEngine === "kokoro";
@@ -1084,6 +1106,7 @@ export default function ReaderContainer({
           wpm={effectiveWpm}
           focusTextSize={focusTextSize}
           readingMode={readingMode}
+          isNarrating={isNarrating}
           playing={readingMode !== "page"}
           isEink={isEink}
           chapters={docChapters}

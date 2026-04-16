@@ -19,6 +19,7 @@ interface ReaderBottomBarProps {
   wpm: number;
   focusTextSize: number;
   readingMode: "page" | "focus" | "flow" | "narration";
+  isNarrating?: boolean;
   playing: boolean;
   isEink: boolean;
   chapters: Array<{ title: string; charOffset: number; depth?: number }>;
@@ -58,7 +59,7 @@ const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space flow  ⇧space focus  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space pause  M menu",
   narration: "← → page  ↑ ↓ speed  space pause  N narration  M menu",
-  flow: "← → seek  ↑ ↓ speed  space pause  M menu",
+  flow: "← → speed  ↑ ↓ line  N narration  space pause  M menu",
 };
 
 export default function ReaderBottomBar({
@@ -68,6 +69,7 @@ export default function ReaderBottomBar({
   wpm,
   focusTextSize,
   readingMode,
+  isNarrating = false,
   playing,
   isEink,
   chapters,
@@ -134,7 +136,10 @@ export default function ReaderBottomBar({
     : words.length > 0 ? (wordIndex / words.length) * 100 : 0;
 
   // Time remaining — use TTS-derived WPM when narration is selected
-  const isNarrationSelected = readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration");
+  const isNarrationSelected =
+    readingMode === "narration"
+    || (readingMode === "flow" && isNarrating)
+    || (readingMode === "page" && lastReadingMode === "narration");
   const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
   // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
   // instead of section words (which only covers the current chapter)
@@ -259,7 +264,7 @@ export default function ReaderBottomBar({
       {/* Row 2: Controls */}
       <div className="reader-bottom-bar-controls">
         {/* WPM or TTS Rate — show TTS rate when narration is selected (active or paused) */}
-        {(readingMode === "narration" || (readingMode === "page" && lastReadingMode === "narration")) && onSetTtsRate ? (
+        {isNarrationSelected && onSetTtsRate ? (
           <div className="rbb-wpm-group">
             <span className="rbb-wpm-label" aria-label={ttsEngine === "kokoro" ? "Kokoro rate" : "Speech rate"}>
               {ttsRate.toFixed(1)}x
@@ -370,10 +375,10 @@ export default function ReaderBottomBar({
           </button>
           {onToggleTts && (
             <button
-              className={`rbb-mode-btn ${readingMode === "narration" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narration" ? " rbb-mode-btn--last" : ""}`}
+              className={`rbb-mode-btn ${(readingMode === "narration" || (readingMode === "flow" && isNarrating)) ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narration" ? " rbb-mode-btn--last" : ""}`}
               onClick={() => { triggerCoachHint("narration"); onToggleTts(); }}
-              aria-label={readingMode === "narration" ? "Stop narration" : "Start narration"}
-              aria-pressed={readingMode === "narration"}
+              aria-label={(readingMode === "narration" || (readingMode === "flow" && isNarrating)) ? "Stop narration" : "Start narration"}
+              aria-pressed={readingMode === "narration" || (readingMode === "flow" && isNarrating)}
               title="Narration (N)"
             >
               Narrate
@@ -385,6 +390,9 @@ export default function ReaderBottomBar({
         {readingMode === "flow" && (
           <>
             <div className="rbb-flow-zone-controls">
+              {isNarrating && (
+                <span className="rbb-flow-progress-text">Narrating</span>
+              )}
               <label className="rbb-flow-zone-label">
                 Zone
                 <select
@@ -415,7 +423,7 @@ export default function ReaderBottomBar({
             {flowProgress && (
               <div className="rbb-flow-progress">
                 <span className="rbb-flow-progress-text">
-                  {currentChapterName ? `${currentChapterName} · ` : ""}{Math.round(flowProgress.bookPct * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
+                  {isNarrating ? "Narrating · " : ""}{currentChapterName ? `${currentChapterName} · ` : ""}{Math.round(flowProgress.bookPct * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
                 </span>
               </div>
             )}

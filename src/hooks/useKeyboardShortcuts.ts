@@ -178,7 +178,7 @@ export function useReaderKeys(
       if (e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
       // Tab toggles menu flap
       if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
-      // T toggles narration
+      // T toggles narration (legacy/standalone path)
       if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
       // C opens chapter list
       if (e.code === "KeyC" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.openChapterList?.(); return; }
@@ -187,7 +187,7 @@ export function useReaderKeys(
       // [ ] N P chapter navigation (N/P not in page mode — conflict with Shift+N note)
       if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevChapter?.(); return; }
       if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextChapter?.(); return; }
-      if (!isPage && e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.nextChapter?.(); return; }
+      if (!isPage && s.readerMode !== "flow" && e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.nextChapter?.(); return; }
       if (!isPage && e.code === "KeyP" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.prevChapter?.(); return; }
       // Ctrl font size
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }
@@ -234,6 +234,8 @@ export function useReaderKeys(
       if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
 
       if (s.readerMode === "flow") {
+        // NARR-LAYER-1A: N toggles narration inside flow mode only
+        if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
         // FLOW-3A: Flow scroll mode keyboard layout
         // ↑/↓ = line jump (FlowScrollEngine)
         if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.flowPrevLine?.(); return; }
