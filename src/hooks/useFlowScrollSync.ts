@@ -11,6 +11,12 @@ const api = window.electronAPI;
 
 type ReadingMode = "page" | "focus" | "flow" | "narration";
 
+interface NarrationFlowBridge {
+  stop: () => void;
+  updateWords: (words: string[], globalStartIdx: number) => void;
+  setOnSectionEnd: (cb: (() => void) | null) => void;
+}
+
 interface CrossBookTransition {
   finishedTitle: string;
   nextTitle: string;
@@ -20,28 +26,35 @@ interface CrossBookTransition {
 
 export interface UseFlowScrollSyncParams {
   readingMode: ReadingMode;
+  isNarrating: boolean;
   effectiveWpm: number;
   settings: BlurbySettings;
   useFoliate: boolean;
   activeDoc: BlurbyDoc & { content?: string; wordCount?: number };
   library: BlurbyDoc[];
   /** Ref to startFlow — set after useReaderMode returns (breaks circular dep). */
-  startFlowRef: React.MutableRefObject<() => void>;
+  startFlowRef: React.MutableRefObject<(options?: { resumeNarration?: boolean }) => void>;
   /** Flow playing state (owned by parent, shared with useReaderMode). */
   flowPlaying: boolean;
   setFlowPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsNarrating: React.Dispatch<React.SetStateAction<boolean>>;
   /** Flow progress state (owned by parent for bottom bar). */
   setFlowProgress: React.Dispatch<React.SetStateAction<FlowProgress | null>>;
   /** Cross-book transition state (owned by parent for useDocumentLifecycle cleanup). */
   setCrossBookTransition: React.Dispatch<React.SetStateAction<CrossBookTransition | null>>;
   /** Pending flow resume ref (owned by parent — survives hook re-creation). */
   pendingFlowResumeRef: React.MutableRefObject<boolean>;
+  /** Pending narration resume ref for flow+narrating cross-book transitions. */
+  pendingNarrationResumeRef: React.MutableRefObject<boolean>;
   /** State setter for the highlighted word index (shared with parent). */
   setHighlightedWordIndex: React.Dispatch<React.SetStateAction<number>>;
   /** Reading mode setter (shared with parent). */
   setReadingMode: React.Dispatch<React.SetStateAction<ReadingMode>>;
   /** Ref to current highlighted word index (avoids stale closures). */
   highlightedWordIndexRef: React.MutableRefObject<number>;
+  highlightedWordIndex: number;
+  /** Narration hook bridge for flow+narrating mode. */
+  narration: NarrationFlowBridge;
   /** Foliate API ref — for scroll container access. */
   foliateApiRef: React.MutableRefObject<any>;
   /** Scroll container ref from FoliatePageView. */
@@ -81,6 +94,7 @@ export interface UseFlowScrollSyncReturn {
  */
 export function useFlowScrollSync({
   readingMode,
+  isNarrating,
   effectiveWpm,
   settings,
   useFoliate,
@@ -89,12 +103,16 @@ export function useFlowScrollSync({
   startFlowRef,
   flowPlaying,
   setFlowPlaying,
+  setIsNarrating,
   setFlowProgress,
   setCrossBookTransition,
   pendingFlowResumeRef,
+  pendingNarrationResumeRef,
   setHighlightedWordIndex,
   setReadingMode,
   highlightedWordIndexRef,
+  highlightedWordIndex,
+  narration,
   foliateApiRef,
   flowScrollContainerRef,
   flowScrollCursorRef,
@@ -113,6 +131,8 @@ export function useFlowScrollSync({
   activeDocRef.current = activeDoc;
   const libraryRef = useRef(library);
   libraryRef.current = library;
+  const isNarratingRef = useRef(isNarrating);
+  isNarratingRef.current = isNarrating;
 
   // ── Effect 1: FlowScrollEngine lifecycle — start/stop/pause ───────────
   useEffect(() => {
@@ -142,6 +162,7 @@ export function useFlowScrollSync({
       flowScrollEngineRef.current = new FlowScrollEngine({
         onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
         onComplete: () => {
+          if (isNarratingRef.current) return;
           const doc = activeDocRef.current;
           const nextDoc = getNextQueuedBook(doc.id, libraryRef.current);
           if (!nextDoc) {
@@ -192,7 +213,7 @@ export function useFlowScrollSync({
     if (!pendingFlowResumeRef.current || readingMode !== "page") return;
     pendingFlowResumeRef.current = false;
     const timer = setTimeout(() => {
-      startFlowRef.current();
+      startFlowRef.current({ resumeNarration: pendingNarrationResumeRef.current });
     }, CROSS_BOOK_FLOW_RESUME_DELAY_MS);
     return () => clearTimeout(timer);
   }, [activeDoc.id, readingMode, startFlowRef]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -214,6 +235,88 @@ export function useFlowScrollSync({
       return () => clearTimeout(timer);
     }
   }, [focusTextSize, readingMode]);
+
+  // ── Effect 6: Narration drives FlowScrollEngine follower mode ──────────
+  useEffect(() => {
+    const engine = flowScrollEngineRef.current;
+    if (!engine) return;
+
+    if (readingMode !== "flow" || !flowPlaying || !isNarrating) {
+      engine.setFollowerMode(false);
+      narration.setOnSectionEnd(null);
+      return;
+    }
+
+    engine.setFollowerMode(true);
+    engine.followWord(highlightedWordIndex);
+
+    narration.setOnSectionEnd(() => {
+      const currentWord = highlightedWordIndexRef.current;
+      const totalWords = bookWordMeta?.totalWords || activeDocRef.current.wordCount || wordsRef.current.length;
+      const nextSection = bookWordMeta?.sections?.find((section) => section.startWordIdx > currentWord);
+
+      if (nextSection && currentWord < totalWords - 1) {
+        const sectionPromise = foliateApiRef.current?.goToSection?.(nextSection.sectionIndex);
+        sectionPromise?.then(() => {
+            setTimeout(() => {
+              narration.updateWords(wordsRef.current, nextSection.startWordIdx);
+            }, 300);
+          })
+          .catch(() => {});
+        return;
+      }
+
+      const doc = activeDocRef.current;
+      const nextDoc = getNextQueuedBook(doc.id, libraryRef.current);
+      narration.stop();
+      setIsNarrating(false);
+
+      if (!nextDoc) {
+        pendingNarrationResumeRef.current = false;
+        setFlowPlaying(false);
+        setReadingMode("page");
+        return;
+      }
+
+      pendingNarrationResumeRef.current = true;
+      setFlowPlaying(false);
+      const tid = setTimeout(() => {
+        finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
+        api.removeFromQueue(doc.id);
+        pendingFlowResumeRef.current = true;
+        onOpenDocByIdRef.current(nextDoc.id);
+        setCrossBookTransition(null);
+      }, CROSS_BOOK_TRANSITION_MS);
+      setCrossBookTransition({
+        finishedTitle: doc.title || "Untitled",
+        nextTitle: nextDoc.title || "Untitled",
+        nextDocId: nextDoc.id,
+        timeoutId: tid,
+      });
+    });
+
+    return () => {
+      engine.setFollowerMode(false);
+      narration.setOnSectionEnd(null);
+    };
+  }, [
+    readingMode,
+    flowPlaying,
+    isNarrating,
+    highlightedWordIndex,
+    narration,
+    setFlowPlaying,
+    setIsNarrating,
+    setReadingMode,
+    setCrossBookTransition,
+    pendingFlowResumeRef,
+    foliateApiRef,
+    wordsRef,
+    bookWordMeta,
+    finishReadingWithoutExitRef,
+    onOpenDocByIdRef,
+    highlightedWordIndexRef,
+  ]);
 
   return {
     flowScrollEngineRef,
