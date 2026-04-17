@@ -45,6 +45,7 @@ export interface TtsEvalTransitionEvent extends TtsEvalTraceBaseEvent {
   from?: string | number;
   to?: string | number;
   context?: string;
+  latencyMs?: number;
 }
 
 export type TtsEvalTraceEvent =
@@ -82,6 +83,8 @@ export interface TtsEvalMetricsSummary {
     book: number;
     handoff: number;
   };
+  sectionHandoffLatencyMs: number | null;
+  crossBookResumeLatencyMs: number | null;
   failureClasses: Array<"start-latency" | "cursor-highlight-drift" | "handoff-error" | "pause-resume-error">;
 }
 

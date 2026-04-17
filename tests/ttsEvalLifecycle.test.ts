@@ -62,6 +62,35 @@ describe("tts eval lifecycle and handoff accounting", () => {
     expect(summary.transitionCounts.handoff).toBe(1);
   });
 
+  it("records section and cross-book handoff latency when transition events include latency metrics", () => {
+    const trace = makeLifecycleTrace([
+      { ts: 1, kind: "lifecycle", state: "start" },
+      { ts: 2, kind: "lifecycle", state: "first-audio", latencyMs: 220 },
+      {
+        ts: 3,
+        kind: "transition",
+        transition: "section",
+        from: 0,
+        to: 1,
+        context: "flow-narration-section-handoff",
+        latencyMs: 120,
+      } as any,
+      {
+        ts: 4,
+        kind: "transition",
+        transition: "handoff",
+        from: "book-a",
+        to: "book-b",
+        context: "cross-book-flow-narration",
+        latencyMs: 480,
+      } as any,
+      { ts: 5, kind: "lifecycle", state: "stop" },
+    ]);
+    const summary = summarizeTtsEvalTrace(trace);
+    expect((summary as any).sectionHandoffLatencyMs).toBe(120);
+    expect((summary as any).crossBookResumeLatencyMs).toBe(480);
+  });
+
   it("flags handoff error when book transition has no handoff", () => {
     const trace = makeLifecycleTrace([
       { ts: 1, kind: "lifecycle", state: "start" },
@@ -132,4 +161,3 @@ describe("tts eval lifecycle and handoff accounting", () => {
     });
   });
 });
-

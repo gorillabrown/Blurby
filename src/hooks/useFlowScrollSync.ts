@@ -2,8 +2,7 @@ import { useEffect, useRef } from "react";
 import { FlowScrollEngine, type FlowProgress } from "../utils/FlowScrollEngine";
 import { getNextQueuedBook } from "../utils/queue";
 import {
-  CROSS_BOOK_TRANSITION_MS,
-  CROSS_BOOK_FLOW_RESUME_DELAY_MS,
+  CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS,
 } from "../constants";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import type { TtsEvalTraceSink } from "../types/eval";
@@ -20,6 +19,11 @@ interface NarrationFlowBridge {
     options?: { mode?: "passive" | "handoff" },
   ) => void;
   setOnSectionEnd: (cb: (() => void) | null) => void;
+}
+
+interface FoliateReadinessBridge {
+  goToSection?: (sectionIndex: number) => Promise<void>;
+  waitForSectionReady?: (sectionIndex?: number | null, timeoutMs?: number) => Promise<number | null>;
 }
 
 interface CrossBookTransition {
@@ -61,7 +65,7 @@ export interface UseFlowScrollSyncParams {
   /** Narration hook bridge for flow+narrating mode. */
   narration: NarrationFlowBridge;
   /** Foliate API ref — for scroll container access. */
-  foliateApiRef: React.MutableRefObject<any>;
+  foliateApiRef: React.MutableRefObject<FoliateReadinessBridge & any>;
   /** Scroll container ref from FoliatePageView. */
   flowScrollContainerRef: React.MutableRefObject<HTMLElement | null>;
   /** Flow cursor ref from FoliatePageView. */
@@ -186,18 +190,18 @@ export function useFlowScrollSync({
           }
           setFlowPlaying(false);
           const tid = setTimeout(() => {
-            finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
-            api.removeFromQueue(doc.id);
-            pendingFlowResumeRef.current = true;
-            onOpenDocByIdRef.current(nextDoc.id);
             setCrossBookTransition(null);
-          }, CROSS_BOOK_TRANSITION_MS);
+          }, CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS);
           setCrossBookTransition({
             finishedTitle: doc.title || "Untitled",
             nextTitle: nextDoc.title || "Untitled",
             nextDocId: nextDoc.id,
             timeoutId: tid,
           });
+          finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
+          api.removeFromQueue(doc.id);
+          pendingFlowResumeRef.current = true;
+          onOpenDocByIdRef.current(nextDoc.id);
         },
         onProgressUpdate: (progress: FlowProgress) => {
           setFlowProgress(progress);
@@ -238,10 +242,33 @@ export function useFlowScrollSync({
   useEffect(() => {
     if (!pendingFlowResumeRef.current || readingMode !== "page") return;
     pendingFlowResumeRef.current = false;
-    const timer = setTimeout(() => {
-      startFlowRef.current({ resumeNarration: pendingNarrationResumeRef.current });
-    }, CROSS_BOOK_FLOW_RESUME_DELAY_MS);
-    return () => clearTimeout(timer);
+    let cancelled = false;
+
+    const resumeWhenReady = async () => {
+      const resumeNarration = pendingNarrationResumeRef.current;
+      const resumeStartTs = resumeNarration && evalTrace?.enabled ? Date.now() : null;
+      if (useFoliate) {
+        await foliateApiRef.current?.waitForSectionReady?.();
+      }
+      if (cancelled) return;
+      if (resumeNarration && resumeStartTs != null) {
+        evalTrace.record({
+          kind: "transition",
+          transition: "handoff",
+          from: activeDoc.id,
+          to: activeDoc.id,
+          context: "cross-book-flow-narration",
+          latencyMs: Math.max(0, Date.now() - resumeStartTs),
+        });
+      }
+      startFlowRef.current({ resumeNarration });
+      setCrossBookTransition(null);
+    };
+
+    void resumeWhenReady();
+    return () => {
+      cancelled = true;
+    };
   }, [activeDoc.id, readingMode, startFlowRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Effect 3: Sync WPM changes to running FlowScrollEngine ───────────
@@ -297,11 +324,22 @@ export function useFlowScrollSync({
             context: "flow-narration-section-handoff",
           });
         }
+        const handoffStartTs = evalTrace?.enabled ? Date.now() : null;
         const sectionPromise = foliateApiRef.current?.goToSection?.(nextSection.sectionIndex);
-        sectionPromise?.then(() => {
-            setTimeout(() => {
-              narration.updateWords(wordsRef.current, nextSection.startWordIdx, { mode: "handoff" });
-            }, 300);
+        Promise.resolve(sectionPromise)
+          .then(() => foliateApiRef.current?.waitForSectionReady?.(nextSection.sectionIndex))
+          .then(() => {
+            if (handoffStartTs != null) {
+              evalTrace.record({
+                kind: "transition",
+                transition: "section",
+                from: currentWord,
+                to: nextSection.sectionIndex,
+                context: "flow-narration-section-handoff",
+                latencyMs: Math.max(0, Date.now() - handoffStartTs),
+              });
+            }
+            narration.updateWords(wordsRef.current, nextSection.startWordIdx, { mode: "handoff" });
           })
           .catch(() => {});
         return;
@@ -340,18 +378,18 @@ export function useFlowScrollSync({
       pendingNarrationResumeRef.current = true;
       setFlowPlaying(false);
       const tid = setTimeout(() => {
-        finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
-        api.removeFromQueue(doc.id);
-        pendingFlowResumeRef.current = true;
-        onOpenDocByIdRef.current(nextDoc.id);
         setCrossBookTransition(null);
-      }, CROSS_BOOK_TRANSITION_MS);
+      }, CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS);
       setCrossBookTransition({
         finishedTitle: doc.title || "Untitled",
         nextTitle: nextDoc.title || "Untitled",
         nextDocId: nextDoc.id,
         timeoutId: tid,
       });
+      finishReadingWithoutExitRef.current(highlightedWordIndexRef.current);
+      api.removeFromQueue(doc.id);
+      pendingFlowResumeRef.current = true;
+      onOpenDocByIdRef.current(nextDoc.id);
     });
 
     return () => {
