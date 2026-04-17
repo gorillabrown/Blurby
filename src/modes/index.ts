@@ -2,5 +2,3 @@ export type { ReadingMode, ModeConfig, ModeCallbacks, ModeState, ModeType } from
 export { PageMode } from "./PageMode";
 export { FocusMode } from "./FocusMode";
 export { FlowMode } from "./FlowMode";
-export { NarrateMode } from "./NarrateMode";
-export type { NarrationInterface } from "./NarrateMode";

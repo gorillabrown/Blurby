@@ -48,7 +48,7 @@ beforeEach(() => {
 describe("TTS-7E: Render-readiness gate", () => {
   it("gate concept: polls DOM until word is present", async () => {
     let domReady = false;
-    const highlightWordByIndex = vi.fn(() => domReady);
+    const highlightWordByIndex = vi.fn((_idx: number) => domReady);
 
     // Simulate polling loop
     let attempts = 0;
@@ -72,7 +72,7 @@ describe("TTS-7E: Render-readiness gate", () => {
   });
 
   it("gate timeout: navigates to page after 3s equivalent", async () => {
-    const highlightWordByIndex = vi.fn(() => false); // Always miss
+    const highlightWordByIndex = vi.fn((_idx: number) => false); // Always miss
     const goTo = vi.fn();
     let navigated = false;
 

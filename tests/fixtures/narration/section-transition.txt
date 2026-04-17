@@ -1,0 +1,4 @@
+Section one establishes context and anchors the first cursor region.
+
+Section two starts after a hard boundary and must preserve continuity without rewinding.
+

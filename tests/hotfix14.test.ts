@@ -109,7 +109,7 @@ describe("BUG-155 — URL extraction fallback (no-login branch)", () => {
     const fetchWithBrowserSpy = vi.fn(async () => "");
 
     // Directly test the guard condition: if result and no error, browser fetch is skipped
-    const result = { content: "Good content" };
+    const result: { content?: string; error?: string } = { content: "Good content" };
     const shouldFallback = !result || result.error !== undefined;
     expect(shouldFallback).toBe(false);
 

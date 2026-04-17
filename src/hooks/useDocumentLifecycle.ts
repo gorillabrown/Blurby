@@ -4,7 +4,7 @@ import type { BlurbyDoc, BlurbySettings } from "../types";
 
 const api = window.electronAPI;
 
-type ReadingMode = "page" | "focus" | "flow" | "narration";
+type ReadingMode = "page" | "focus" | "flow";
 
 // Chapter shape used in ReaderContainer docChapters state
 interface DocChapter {
@@ -23,6 +23,8 @@ export interface UseDocumentLifecycleParams {
   readingMode: ReadingMode;
   /** App settings (ttsEngine for Kokoro preload) */
   settings: BlurbySettings;
+  /** Flow-layer narration state */
+  isNarrating: boolean;
   /** Current focus text size — persisted to settings on change */
   focusTextSize: number;
   /** Callback that resets the internal reader word position (from useReader) */
@@ -109,6 +111,7 @@ export function useDocumentLifecycle({
   activeDoc,
   readingMode,
   settings,
+  isNarrating,
   focusTextSize,
   initReader,
   setHighlightedWordIndex,
@@ -211,17 +214,17 @@ export function useDocumentLifecycle({
     };
   }, []);
 
-  // ── 5. Cancel RAF when mode exits narration ──────────────────────────────
-  // When transitioning away from narration mode, cancel any queued RAF flush
+  // ── 5. Cancel RAF when narration is inactive ─────────────────────────────
+  // When transitioning out of active narration, cancel any queued RAF flush
   // and clear the pending index so stale state cannot be committed.
   useEffect(() => {
-    if (readingMode === "narration") return;
+    if (isNarrating) return;
     if (narrationStateFlushRafRef.current != null) {
       cancelAnimationFrame(narrationStateFlushRafRef.current);
       narrationStateFlushRafRef.current = null;
     }
     narrationStatePendingIdxRef.current = null;
-  }, [readingMode]);
+  }, [isNarrating]);
 
   // ── 6. Throttled RSVP progress save (focus-mode progress tracking) ──────
   // Persists reading position during active focus mode, throttled by time and word delta.

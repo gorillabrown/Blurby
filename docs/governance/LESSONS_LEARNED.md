@@ -1205,3 +1205,45 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** Use one shared `validateHttpHttpsUrl()`-style helper for every user-supplied URL before domain parsing or network access. On 401 retry paths, call the explicit refresh form (`forceRefresh: true` or equivalent) before retrying once. Never assume a cached-token lookup will refresh itself after an auth rejection.
 
 **Related:** TEST-COV-1 sprint, `main/ipc/misc.js`, `main/auth.js`, `main/cloud-google.js`, `main/cloud-onedrive.js`
+
+---
+
+### [2026-04-16] LL-096: Evaluation Tracing Must Be Explicitly Opt-In and Sink-Driven
+
+**Area:** renderer, narration, flow sync, tooling, observability
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-EVAL-1 introduced durable trace capture for narration/flow quality analysis. Direct inline logging would have polluted runtime behavior and made traces non-deterministic across sessions. The reliable approach was to route events through an optional trace sink and keep the entire path disabled by default.
+
+**Guardrail:** Evaluation instrumentation should be sink-driven (`record(event)`) and off unless an explicit harness flag enables it. Runtime hooks can emit lifecycle/word/flow/transition events only through that sink; no inline console logging or always-on tracing in production paths.
+
+**Related:** TTS-EVAL-1 sprint, `src/utils/ttsEvalTrace.ts`, `src/hooks/useNarration.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`
+
+---
+
+### [2026-04-16] LL-097: Evaluation Artifact Names Must Be Deterministic for Cross-Branch Diffs
+
+**Area:** tooling, evaluation harness, release workflow
+**Status:** active
+**Priority:** high
+
+**Context:** In TTS-EVAL-2, timestamp-based artifact names made matrix/soak comparisons noisy and hard to diff across branches. Even when behavior matched, output paths changed every run, forcing manual matching.
+
+**Guardrail:** Harness artifact names should be deterministic from run metadata (`run-id`, `scenario id`, `iteration`) and written atomically. Use checkpoints for long runs and treat interruption as a first-class state so partial runs remain reviewable.
+
+**Related:** TTS-EVAL-2 sprint, `scripts/tts_eval_runner.mjs`, `scripts/tts_eval_metrics.mjs`, `tests/ttsEvalMatrixRunner.test.ts`
+
+---
+
+### [2026-04-16] LL-098: Quality Gates Must Fail Fast but Still Persist Review Artifacts
+
+**Area:** tooling, release quality, evaluation governance
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-EVAL-3 introduced enforceable pass/fail quality gates on matrix aggregates. A key reliability requirement emerged: gate checks must be strict enough to block release on hard failures, but they must still write complete gate artifacts (`gate-report.json` and `.txt`) before exiting non-zero so reviewers can diagnose quickly.
+
+**Guardrail:** Any release gate command must follow this order: compute aggregate → evaluate gates → write structured + human-readable reports atomically → return exit code (`0` pass, non-zero fail). Never short-circuit before artifacts are written; failed runs must remain reviewable.
+
+**Related:** TTS-EVAL-3 sprint, `scripts/tts_eval_gate.mjs`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_BASELINE_POLICY.md`

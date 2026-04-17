@@ -1,0 +1,19 @@
+{
+  "fixtureId": "chapter-transition",
+  "runId": "chapter-transition-1776382372190",
+  "startLatencyMs": 395,
+  "wordEventCount": 25,
+  "flowEventCount": 9,
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 1,
+    "book": 0,
+    "handoff": 0
+  },
+  "failureClasses": []
+}

@@ -49,6 +49,38 @@ This repo uses a strict two-layer planning system:
    - the work is especially delicate/complex and the user wants Cowork to handle it directly.
 5. **Default output for implementation planning work:** update the full `ROADMAP.md` spec first, then update the abbreviated `SPRINT_QUEUE.md` pointer second.
 6. **Minimum queue depth is mandatory.** `docs/governance/SPRINT_QUEUE.md` must always keep at least three queued sprints so we can see what is immediately next and what follows after that. If the queue drops below three, stop building and backfill the roadmap/queue before resuming execution work.
+7. **Parallel sprinting requires lane ownership + shared-core freeze.** We only run code-changing sprints in parallel when each sprint declares an owned lane and avoids the shared-core freeze set unless explicitly scheduled for an integration window.
+
+#### Parallel Sprint Policy (Lane Ownership)
+
+When proposing parallel execution, classify each sprint into one or more lanes:
+
+- **Lane A: Runtime Core** — narration/flow state machine and synchronization behavior
+- **Lane B: Evaluation Harness** — fixtures, trace schema, runners, scoring artifacts
+- **Lane C: UI Surfaces** — controls, settings UI, display-only reader chrome
+- **Lane D: Platform/Main Process** — `main/`, preload, IPC contracts, auth/cloud/import
+- **Lane E: Governance/Planning** — roadmap, sprint queue, close-out/reporting docs
+
+#### Shared-Core Freeze Set
+
+Only one active sprint may edit this set at a time unless a planned integration window is explicitly declared in ROADMAP:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- `src/types.ts`
+
+#### Dispatch Requirements for Parallel Sprints
+
+Every parallel-ready sprint spec in `ROADMAP.md` must include:
+
+1. `Lane Ownership` section (which lanes it owns)
+2. `Forbidden During Parallel Run` section (files/areas it must not touch)
+3. `Shared-Core Touches` section (empty or explicitly scheduled integration window)
+4. `Merge Order` section (which sprint lands first if both are active)
+
+If any of these are missing, the sprint is NOT parallel-dispatch-ready.
 
 ### Claude Code CLI — All Execution
 
@@ -183,6 +215,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the H
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
 - **Dispatch sizing: 40 tool-use ceiling per wave.** A single Zeus dispatch must stay under ~40 tool uses. **Sprints with 5+ implementation tasks MUST be pre-split into waves at dispatch time** (don't wait for a runtime ceiling hit). Standard wave split: Wave A = implement + test, Wave B = verify + docs + git. Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
+- **Parallel-safe execution beats queue speed theater.** Do not dispatch two sprints in parallel if both touch the shared-core freeze set. Run them sequentially or split one sprint so only non-core scaffolding runs in parallel.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
 - **Verification gate is mandatory.** After completing any code-change task, verify: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
 - **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). `Solon` performs this step. Full-tier sprints then spawn `Plato`. Quick-tier sprints use Zeus self-review.
@@ -337,11 +370,15 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **REFACTOR-1A complete** — ReaderContainer decomposition: 33 useEffects extracted into 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle). fileHashes cleanup on document delete. main.js constants extracted to main/constants.js. 74 new tests. v1.48.0.
 - **REFACTOR-1B complete** — FoliatePageView helpers extracted to `src/utils/foliateHelpers.ts` + `foliateStyles.ts` (1,947→1,724 lines), TTSSettings split into 3 sub-components (874→583 lines), 179→27 inline styles, global.css (5,406 lines) split into 8 domain files + `src/styles/index.css`, new `src/styles/tts-settings.css` (418 lines), 6 empty catch blocks annotated. 32 new tests (`tests/componentStyleCleanup.test.ts`). v1.49.0.
 - **TEST-COV-1 complete** — critical path coverage + security hardening landed: URL scheme validation shared across `addDocFromUrl`, `site-login`, and `open-url-in-browser`; Google and Microsoft 401 retries now force token refresh instead of replaying cached tokens. 75 new tests. v1.50.0.
-- Active queue: depth 2 — YELLOW. NARR-LAYER-1A → NARR-LAYER-1B. TEST-COV-1 completed on 2026-04-16; backfill needed before queue returns to GREEN. HOTFIX-13 dissolved (BUG-151/152/153 absorbed into SELECTION-1, BUG-154 parked).
+- **NARR-LAYER-1A complete** — narration-as-flow foundation shipped (`isNarrating`, follower mode, flow+narration handoff). v1.51.0.
+- **NARR-LAYER-1B complete** — narration mode removed from core contracts, settings migration to flow-layer narration, overlay removal and consolidation. v1.52.0.
+- **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
+- **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
+- Active queue: depth 1 — RED. Next: TTS-EVAL-3; backfill at least two sprints to return queue depth to GREEN (≥3). HOTFIX-13 remains dissolved (BUG-151/152/153 absorbed, BUG-154 parked).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 1,967 tests across 108 test files
+- 1,972 tests across 113 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 

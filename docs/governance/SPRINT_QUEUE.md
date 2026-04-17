@@ -8,6 +8,8 @@ BLURBY
 
 No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and no code-changing pointer is dispatch-ready unless its referenced spec names explicit edit-site coordinates.
 
+Parallel dispatch rule: code-changing sprints may run in parallel only when lane ownership is explicit and shared-core freeze files are not edited by both sprints at the same time.
+
 **How to use:**
 1. Pull the top pointer block
 2. Open the Roadmap section listed on the `Read:` line — that's the full dispatch spec
@@ -22,8 +24,8 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 2 — YELLOW
-Next sprint: NARR-LAYER-1B (Narration as Flow Layer — Consolidation)
-Health: YELLOW — NARR-LAYER-1A completed. Queue now NARR-LAYER-1B → TTS-EVAL-1 and needs backfill to restore GREEN.
+Next sprint: TTS-RATE-1 (Pitch-Preserving Tempo)
+Health: YELLOW — TTS-EVAL-3 completed. Backfill one additional sprint to restore depth to GREEN.
 ```
 
 ---
@@ -32,10 +34,29 @@ Health: YELLOW — NARR-LAYER-1A completed. Queue now NARR-LAYER-1B → TTS-EVAL
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | NARR-LAYER-1B | v1.52.0 | `sprint/narr-layer-1b-consolidation` | Full | **YES** | Full spec: 12 tasks (3 waves), 17 success criteria. Remove "narration" from ReadingMode type, delete NarrateMode.ts, remove 50+ branch points, remove narration overlay code (~250 lines from FoliatePageView), settings migration, CSS cleanup. ≥20 new tests. Depends on NARR-LAYER-1A. |
-| 2 | TTS-EVAL-1 | v1.53.0 | `sprint/tts-eval-1-quality-harness` | Full | **YES** | Full spec: 13 tasks (3 waves), 13 success criteria. Fixture corpus, trace schema, flow/narration instrumentation, harness runner, metrics summaries, lifecycle/handoff coverage, reviewer score template, baseline fixture run. Depends on NARR-LAYER-1A. |
+| 1 | TTS-RATE-1 | v1.56.0 | `sprint/tts-rate-1-pitch-preserving-tempo` | Full | **YES** | Full spec: 12 tasks (3 waves), 11 success criteria. 0.1-step speed UX (1.0–1.5), fixed generation buckets (1.0/1.2/1.5), pitch-preserving tempo shaping, in-bucket no-restart behavior, multi-rate matrix verification. Depends on TTS-EVAL-3. |
+| 2 | EPUB-TOKEN-1 | v1.57.0 | `sprint/epub-token-1-dropcap-stitching` | Full | **YES** | Full spec: 11 tasks (3 waves), 9 success criteria. Dropcap/split-token lexical stitching, stable global word identity across fragments, click/selection/narration alignment regressions covered. Depends on TTS-RATE-1. |
 
-**Dispatch status:** Queue depth 2 — YELLOW. NARR-LAYER-1A completed; backfill required before queue returns to GREEN.
+**Dispatch status:** Queue depth 2 — YELLOW. Dispatch order is `TTS-RATE-1` → `EPUB-TOKEN-1`; backfill one more sprint before dispatch if strict GREEN depth is required.
+
+### Parallel Dispatch Guardrails
+
+Before dispatching two queued sprints in parallel, verify all of these are true:
+
+1. Both ROADMAP sprint specs include:
+   - `Lane Ownership`
+   - `Forbidden During Parallel Run`
+   - `Shared-Core Touches`
+   - `Merge Order`
+2. The two sprints do not both edit the shared-core freeze set in the same execution window:
+   - `src/hooks/useNarration.ts`
+   - `src/hooks/useFlowScrollSync.ts`
+   - `src/components/ReaderContainer.tsx`
+   - `src/utils/FlowScrollEngine.ts`
+   - `src/types.ts`
+3. If one sprint needs shared-core integration, it runs as a second phase after the first sprint merges.
+
+If any guardrail fails, run the sprints sequentially.
 
 **Next Cowork actions:**
 1. ~~Dispatch FLOW-INF-A to CLI~~ — COMPLETE (v1.41.0)
@@ -58,6 +79,14 @@ Health: YELLOW — NARR-LAYER-1A completed. Queue now NARR-LAYER-1B → TTS-EVAL
 18. ~~Dispatch TEST-COV-1 to CLI~~ — COMPLETE (v1.50.0)
 19. ~~Dispatch NARR-LAYER-1A to CLI~~ — COMPLETE (v1.51.0)
 20. ~~Backfill queue~~ — DONE (`TTS-EVAL-1` spec'd; queue remains YELLOW depth 2 until a third active sprint is added)
+21. ~~Dispatch NARR-LAYER-1B to CLI~~ — COMPLETE (v1.52.0)
+22. ~~Backfill queue to ≥3~~ — COMPLETE. TTS-EVAL-2 and TTS-EVAL-3 added; queue depth restored to 3 (GREEN).
+23. ~~Dispatch TTS-EVAL-1 to CLI~~ — COMPLETE (v1.53.0)
+24. **Backfill queue to ≥3** — YELLOW, depth 2. Add one additional sprint before next dispatch beyond TTS-EVAL-2.
+25. ~~Dispatch TTS-EVAL-2 to CLI~~ — COMPLETE (v1.54.0)
+26. ~~Backfill queue to ≥3~~ — COMPLETE. Added `TTS-RATE-1` and `EPUB-TOKEN-1`; queue depth restored to 3 (GREEN).
+27. ~~Dispatch TTS-EVAL-3 to CLI~~ — COMPLETE (v1.55.0)
+28. **Backfill queue to ≥3** — YELLOW, depth 2. Add one active sprint before dispatch beyond TTS-RATE-1.
 
 ---
 
@@ -79,6 +108,10 @@ Health: YELLOW — NARR-LAYER-1A completed. Queue now NARR-LAYER-1B → TTS-EVAL
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-EVAL-3 | 2026-04-16 | PASS | Quality gate release workflow shipped: versioned threshold config (`docs/testing/tts_quality_gates.v1.json`), gate evaluator (`scripts/tts_eval_gate.mjs`), in-runner gate enforcement via `--gates` (`scripts/tts_eval_runner.mjs`), baseline policy + snapshot (`docs/testing/TTS_EVAL_BASELINE_POLICY.md`, `docs/testing/tts_eval_baseline_v1.json`), release checklist (`docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`), and new gate coverage in `tests/ttsEvalGate.test.ts`. Verification passed: gated matrix run (`artifacts/tts-eval/baseline-v1`), targeted TTS eval suites (32 tests), full `npm test` (114 files, 1977 tests), and `npm run build`; existing circular-chunk warning unchanged. v1.55.0. |
+| TTS-EVAL-2 | 2026-04-16 | PASS | Matrix + soak evaluation tooling shipped: scenario manifest (`tests/fixtures/narration/matrix.manifest.json`), deterministic soak profiles (`scripts/tts_eval_profiles.mjs`), runner matrix/soak modes with deterministic artifact naming + checkpoints + interrupt-safe writes (`scripts/tts_eval_runner.mjs`), aggregate metrics reducer (`scripts/tts_eval_metrics.mjs`) with startup p50/p95 and drift summaries, and new coverage in `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with smoke matrix + short soak artifact runs and full `npm test` (113 files, 1972 tests) + `npm run build`; existing circular-chunk warning unchanged. v1.54.0. |
+| TTS-EVAL-1 | 2026-04-16 | PASS | Flow/narration evaluation harness shipped: trace schema (`src/types/eval.ts`), fixture corpus (`tests/fixtures/narration/`), opt-in trace sink wiring in narration/flow hooks, first-audio timing capture, runner + metrics (`scripts/tts_eval_runner.mjs`), lifecycle/trace tests (`tests/ttsEvalTrace.test.ts`, `tests/ttsEvalLifecycle.test.ts`), review artifacts (`TTS_EVAL_REVIEW_TEMPLATE.md`, `TTS_EVAL_RUNBOOK.md`), and baseline outputs (`tests/fixtures/narration/baseline/`). Verification passed: targeted trace suites, baseline fixture run, `npm test` (112 files, 1967 tests), and `npm run build` (existing circular chunk warning unchanged). v1.53.0. |
+| NARR-LAYER-1B | 2026-04-16 | PASS | Narration-layer consolidation complete: removed standalone narration mode from core contracts and orchestration, deleted `src/modes/NarrateMode.ts`, migrated settings (`schema 7 -> 8`) from narration-mode state to flow + `isNarrating`, removed Foliate narration overlay machinery and associated CSS, and consolidated runtime behavior to flow-layer narration. Added `tests/narrLayer1bConsolidation.test.ts` with 25 targeted checks. Verification passed: `npm test` (110 files, 1945 tests) and `npm run build` green; existing Vite circular chunk warning remains. v1.52.0. |
 | TEST-COV-1 | 2026-04-16 | PASS | Critical path coverage + security hardening: URL scheme validation for `addDocFromUrl`, `site-login`, and `open-url-in-browser`; explicit force-refresh on 401 for Google and Microsoft cloud retries; 75 new tests across auth/cloud/queue/ErrorBoundary/foliateWordOffsets + URL regression. 1,967 tests across 108 files. `npm test` and `npm run build` passed; existing Vite circular-chunk warning remains. v1.50.0. |
 | NARR-LAYER-1A | 2026-04-16 | PASS | Narration-as-flow foundation: FlowScrollEngine follower mode, `isNarrating` state, narration→flow sync wiring, flow-specific `N` toggle, narration band suppression during flow narration, bottom-bar flow+narration state, section/cross-book handoff support. 18 new tests in `tests/narrationLayer.test.ts`. Full suite green at 1,985 tests; `npm run build` passed; existing Vite circular-chunk warning remains. v1.51.0. |
 | REFACTOR-1B | 2026-04-07 | PASS (17/18 — criterion 4 aspirational) | FoliatePageView helpers extracted to `foliateHelpers.ts` + `foliateStyles.ts` (1,947→1,724 lines), TTSSettings split into 3 sub-components (874→583 lines), 179→27 inline styles, global.css (5,406 lines) split into 8 domain files + `src/styles/index.css`, new `src/styles/tts-settings.css` (418 lines), 6 empty catch blocks annotated, 3 build warnings fixed. 32 new tests (1,892 total across 101 files). v1.49.0. |

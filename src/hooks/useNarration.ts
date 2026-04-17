@@ -10,6 +10,7 @@ import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
 import type { AudioProgressReport } from "../utils/audioScheduler";
+import type { TtsEvalTraceSink } from "../types/eval";
 
 export interface FootnoteCue {
   afterWordIdx: number;
@@ -66,7 +67,11 @@ function findSentenceBoundary(words: string[], startIdx: number, chunkSize: numb
 
 const api = window.electronAPI;
 
-export default function useNarration() {
+interface UseNarrationOptions {
+  evalTrace?: TtsEvalTraceSink | null;
+}
+
+export default function useNarration(options: UseNarrationOptions = {}) {
   // ── Reducer state machine ──────────────────────────────────────────────
   const [state, dispatch] = useReducer(narrationReducer, undefined, createInitialNarrationState);
 
@@ -106,6 +111,15 @@ export default function useNarration() {
   const bookOverridesRef = useRef<PronunciationOverride[]>([]);
   /** Effective merged overrides (global + book) — recomputed on each setter call */
   const pronunciationOverridesRef = useRef<PronunciationOverride[]>([]);
+  const evalTraceRef = useRef<TtsEvalTraceSink | null>(options.evalTrace ?? null);
+  const evalStartTimeRef = useRef<number | null>(null);
+  const evalFirstAudioCapturedRef = useRef(false);
+  evalTraceRef.current = options.evalTrace ?? null;
+
+  const emitEvalTrace = useCallback((event: Parameters<NonNullable<TtsEvalTraceSink>["record"]>[0]) => {
+    if (!evalTraceRef.current?.enabled) return;
+    evalTraceRef.current.record(event);
+  }, []);
 
   const updateMergedOverrides = useCallback(() => {
     pronunciationOverridesRef.current = mergeOverrides(globalOverridesRef.current, bookOverridesRef.current);
@@ -324,6 +338,16 @@ export default function useNarration() {
       s.speed,
       (wordOffset) => {
         const globalIdx = chunkStart + wordOffset;
+        if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
+          evalFirstAudioCapturedRef.current = true;
+          emitEvalTrace({
+            kind: "lifecycle",
+            state: "first-audio",
+            wordIndex: globalIdx,
+            latencyMs: Math.max(0, Date.now() - evalStartTimeRef.current),
+          });
+        }
+        emitEvalTrace({ kind: "word", source: "audio", wordIndex: globalIdx });
         dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
       },
@@ -340,7 +364,7 @@ export default function useNarration() {
         dispatch({ type: "STOP" });
       },
     );
-  }, [webStrategy, captureDiagSnapshot]);
+  }, [webStrategy, captureDiagSnapshot, emitEvalTrace]);
 
   /** Speak using the Kokoro strategy (delegates to NAR-2 pipeline + scheduler). */
   const speakNextChunkKokoro = useCallback(() => {
@@ -366,6 +390,16 @@ export default function useNarration() {
       startIdx,
       s.speed,
       (wordIndex) => {
+        if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
+          evalFirstAudioCapturedRef.current = true;
+          emitEvalTrace({
+            kind: "lifecycle",
+            state: "first-audio",
+            wordIndex,
+            latencyMs: Math.max(0, Date.now() - evalStartTimeRef.current),
+          });
+        }
+        emitEvalTrace({ kind: "word", source: "audio", wordIndex });
         // TTS-7R (BUG-145c): Update canonical audio position on every scheduler
         // boundary crossing. This must happen before the dispatch so stateRef reads
         // are always behind or equal to the confirmed audio word.
@@ -394,7 +428,7 @@ export default function useNarration() {
         dispatch({ type: "STOP" });
       },
     );
-  }, [kokoroStrategy, captureDiagSnapshot]);
+  }, [kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
 
   /** Dispatch to the correct engine's chunk speaker */
   const speakNextChunk = useCallback(() => {
@@ -452,12 +486,19 @@ export default function useNarration() {
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
     const newSpeed = wpmToRate(wpm);
+    evalStartTimeRef.current = Date.now();
+    evalFirstAudioCapturedRef.current = false;
 
     dispatch({ type: "STOP" }); // Reset all state first
 
     // If Kokoro is selected but not ready, enter warming state and wait
     const isKokoro = stateRef.current.engine === "kokoro";
     if (isKokoro && !stateRef.current.kokoroReady) {
+      emitEvalTrace({
+        kind: "lifecycle",
+        state: "start",
+        wordIndex: startWordIndex,
+      });
       dispatch({ type: "KOKORO_WARMING", startIdx: startWordIndex, speed: newSpeed });
       stateRef.current = {
         ...stateRef.current,
@@ -477,6 +518,11 @@ export default function useNarration() {
     }
 
     dispatch({ type: "START_CURSOR_DRIVEN", startIdx: startWordIndex, speed: newSpeed });
+    emitEvalTrace({
+      kind: "lifecycle",
+      state: "start",
+      wordIndex: startWordIndex,
+    });
 
     // speakNextChunk reads from stateRef, but dispatch is async — update stateRef manually
     stateRef.current = {
@@ -498,7 +544,7 @@ export default function useNarration() {
     captureDiagSnapshot();
 
     speakNextChunk();
-  }, [speakNextChunk, webStrategy, kokoroStrategy, captureDiagSnapshot]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
 
   const resyncToCursor = useCallback((wordIndex: number, wpm: number) => {
     const s = stateRef.current;
@@ -553,10 +599,15 @@ export default function useNarration() {
     }
     dispatch({ type: "PAUSE" });
     stateRef.current = { ...stateRef.current, status: "paused" };
+    emitEvalTrace({
+      kind: "lifecycle",
+      state: "pause",
+      wordIndex: s.cursorWordIndex,
+    });
     // TTS-7A: Diagnostics
     recordDiagEvent("pause", `cursor=${s.cursorWordIndex}`);
     captureDiagSnapshot();
-  }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
 
   const resume = useCallback((currentWordIndex?: number) => {
     const s = stateRef.current;
@@ -579,6 +630,11 @@ export default function useNarration() {
       };
       recordDiagEvent("resume", `resync cursor=${currentWordIndex} (was ${s.cursorWordIndex})`);
       captureDiagSnapshot();
+      emitEvalTrace({
+        kind: "lifecycle",
+        state: "resume",
+        wordIndex: currentWordIndex,
+      });
       speakNextChunkRef.current();
       return;
     }
@@ -591,19 +647,29 @@ export default function useNarration() {
     }
     dispatch({ type: "RESUME" });
     stateRef.current = { ...stateRef.current, status: "speaking" };
+    emitEvalTrace({
+      kind: "lifecycle",
+      state: "resume",
+      wordIndex: s.cursorWordIndex,
+    });
     // TTS-7A: Diagnostics
     recordDiagEvent("resume", `cursor=${s.cursorWordIndex}`);
     captureDiagSnapshot();
-  }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
 
   const stop = useCallback(() => {
     // TTS-7A: Diagnostics
     recordDiagEvent("stop", `cursor=${stateRef.current.cursorWordIndex}`);
     captureDiagSnapshot();
+    emitEvalTrace({
+      kind: "lifecycle",
+      state: "stop",
+      wordIndex: stateRef.current.cursorWordIndex,
+    });
     webStrategy.stop();
     kokoroStrategy.stop();
     dispatch({ type: "STOP" });
-  }, [webStrategy, kokoroStrategy, captureDiagSnapshot]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
 
   const hold = useCallback(() => { dispatch({ type: "HOLD" }); }, []);
 
@@ -656,6 +722,7 @@ export default function useNarration() {
   return {
     speaking: state.status === "speaking" || state.status === "holding" || state.status === "warming",
     warming: state.status === "warming",
+    cursorWordIndex: state.cursorWordIndex,
     voices,
     currentVoice,
     rate: state.speed,

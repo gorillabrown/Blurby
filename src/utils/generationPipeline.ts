@@ -325,23 +325,29 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       } catch (err) { if (import.meta.env.DEV) console.warn("[pipeline] cache read failed:", err); }
     }
 
-    if (!active || myGenId !== generationId) return;
+    if (!active || myGenId !== generationId) return chunkSize;
 
     try {
       const result = await config.generateFn(text, config.getVoiceId(), config.getSpeed(), chunkWords);
 
-      if (!active || myGenId !== generationId) return;
+      if (!active || myGenId !== generationId) return chunkSize;
 
       if (result.error || !result.audio || !result.sampleRate) {
         console.error("[pipeline] generation failed:", result.error || "no audio");
         config.onError();
-        return;
+        return chunkSize;
       }
 
       const audio = result.audio instanceof Float32Array
         ? result.audio
         : new Float32Array(result.audio);
-      const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
+      const sampleRate = result.sampleRate;
+      if (typeof sampleRate !== "number" || sampleRate <= 0) {
+        console.error("[pipeline] generation failed: invalid sampleRate");
+        config.onError();
+        return chunkSize;
+      }
+      const durationMs = result.durationMs ?? (audio.length / sampleRate) * 1000;
 
       // TTS-7P: Boundary type from planner (or fallback to classifyChunkBoundary)
       const boundaryType = classifyChunkBoundary(words, endIdx - 1);
@@ -368,7 +374,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
 
       if (resolvedSilenceMs > 0) {
         silenceMs = resolvedSilenceMs;
-        const silenceSamples = Math.round((resolvedSilenceMs / 1000) * result.sampleRate);
+        const silenceSamples = Math.round((resolvedSilenceMs / 1000) * sampleRate);
         const withSilence = new Float32Array(audio.length + silenceSamples);
         withSilence.set(audio, 0);
         finalAudio = withSilence;
@@ -381,7 +387,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
 
       const chunk: ScheduledChunk = {
         audio: finalAudio,
-        sampleRate: result.sampleRate,
+        sampleRate,
         durationMs: finalDurationMs,
         words: chunkWords,
         startIdx,
@@ -397,7 +403,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         // Cache to disk (fire-and-forget) — TTS-7A: store actual word count
         // Always cache regardless of pause state
         if (config.onCacheChunk) {
-          config.onCacheChunk(startIdx, audio, result.sampleRate, durationMs, chunkWords.length);
+          config.onCacheChunk(startIdx, audio, sampleRate, durationMs, chunkWords.length);
         }
       }
       return chunkWords.length;

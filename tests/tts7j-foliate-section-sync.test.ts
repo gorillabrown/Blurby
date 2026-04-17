@@ -17,7 +17,7 @@ import { recordDiagEvent, getDiagEvents, clearDiagnostics, type NarrateDiagEvent
 
 /** Simulates foliateWordsRef.current — an array of FoliateWord-like objects. */
 function makeSectionWords(sectionIndex: number, count: number, startWord = 0) {
-  return Array.from({ length: count }, (_, i) => ({
+  return Array.from({ length: count }, (_, i): { word: string; range: Range | null; sectionIndex: number } => ({
     word: `word${startWord + i}`,
     range: null,
     sectionIndex,

@@ -14,6 +14,7 @@ let _extractionPromise: Promise<any> | null = null;
 let _extractionBookId: string | null = null;
 
 function dedupeExtractWords(bookId: string): Promise<any> {
+  if (!api.extractEpubWords) return Promise.resolve({ error: "extractEpubWords not available" });
   if (_extractionPromise && _extractionBookId === bookId) return _extractionPromise;
   _extractionBookId = bookId;
   _extractionPromise = api.extractEpubWords(bookId).finally(() => {
@@ -22,7 +23,7 @@ function dedupeExtractWords(bookId: string): Promise<any> {
   return _extractionPromise;
 }
 
-type ReadingMode = "page" | "focus" | "flow" | "narration";
+type ReadingMode = "page" | "focus" | "flow";
 
 interface NarrationUpdateWords {
   updateWords: (words: string[], cursorIdx: number) => void;
@@ -37,6 +38,8 @@ interface UseNarrationCachingParams {
   useFoliate: boolean;
   /** Current reading mode — effect 2 only fires during narration */
   readingMode: ReadingMode;
+  /** Flow-layer narration state */
+  isNarrating: boolean;
   /** Ref to full-book word array (shared mutable, written by effects 1 & 2) */
   bookWordsRef: React.MutableRefObject<BookWordArray | null>;
   /** Ref to footnote cues (shared mutable, written by effects 1 & 2) */
@@ -66,6 +69,7 @@ export function useNarrationCaching({
   narrationWarmUp,
   useFoliate,
   readingMode,
+  isNarrating,
   bookWordsRef,
   footnoteCuesRef,
   bookWordsCompleteRef,
@@ -179,7 +183,7 @@ export function useNarrationCaching({
 
   // ── HOTFIX-6: Extract full-book words via main-process IPC (no foliate navigation) ──
   useEffect(() => {
-    if (!useFoliate || readingMode !== "narration") return;
+    if (!useFoliate || !isNarrating) return;
     // Already extracted for this book?
     if (bookWordsRef.current && bookWordsRef.current.complete) return;
     if (!api?.extractEpubWords) return;
@@ -249,7 +253,7 @@ export function useNarrationCaching({
 
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useFoliate, readingMode, activeDoc.id]);
+  }, [useFoliate, isNarrating, activeDoc.id]);
 
   return backgroundCacherRef;
 }

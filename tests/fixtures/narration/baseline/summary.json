@@ -1,0 +1,158 @@
+{
+  "generatedAt": "2026-04-16T23:32:52.191Z",
+  "fixtureCount": 8,
+  "summaries": [
+    {
+      "fixtureId": "prose-basic",
+      "runId": "prose-basic-1776382372177",
+      "startLatencyMs": 486,
+      "wordEventCount": 38,
+      "flowEventCount": 13,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "dialogue-switches",
+      "runId": "dialogue-switches-1776382372179",
+      "startLatencyMs": 465,
+      "wordEventCount": 35,
+      "flowEventCount": 12,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "long-sentence",
+      "runId": "long-sentence-1776382372187",
+      "startLatencyMs": 507,
+      "wordEventCount": 41,
+      "flowEventCount": 14,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "punctuation-dense",
+      "runId": "punctuation-dense-1776382372188",
+      "startLatencyMs": 402,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "section-transition",
+      "runId": "section-transition-1776382372189",
+      "startLatencyMs": 381,
+      "wordEventCount": 23,
+      "flowEventCount": 8,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 1,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "chapter-transition",
+      "runId": "chapter-transition-1776382372190",
+      "startLatencyMs": 395,
+      "wordEventCount": 25,
+      "flowEventCount": 9,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 1,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "queued-handoff",
+      "runId": "queued-handoff-1776382372190",
+      "startLatencyMs": 402,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 1,
+        "handoff": 1
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "pause-resume",
+      "runId": "pause-resume-1776382372191",
+      "startLatencyMs": 402,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
+      "pauseResumeIntegrity": {
+        "pauses": 1,
+        "resumes": 1,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "failureClasses": []
+    }
+  ]
+}

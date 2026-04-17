@@ -12,10 +12,9 @@
  *   - PageMode:    Paginated reading, word click selection, no auto-advance
  *   - FocusMode:   RSVP word-at-a-time display at center screen
  *   - FlowMode:    Sliding cursor underline across text at WPM speed
- *   - NarrateMode: TTS-driven reading with word highlight + auto page turn
  */
 
-export type ModeType = "page" | "focus" | "flow" | "narration";
+export type ModeType = "page" | "focus" | "flow";
 
 export interface ModeState {
   /** Current mode type */
@@ -47,7 +46,6 @@ export interface ReadingMode {
    * Start the mode from a specific word index.
    * For Focus: begins RSVP display.
    * For Flow: starts cursor sliding.
-   * For Narrate: begins TTS playback.
    * For Page: no-op (page mode is always "started").
    */
   start(wordIndex: number): void;
@@ -55,7 +53,6 @@ export interface ReadingMode {
   /**
    * Pause the mode without losing position.
    * For Focus/Flow: stops word advancement timer.
-   * For Narrate: pauses TTS playback.
    * For Page: no-op.
    */
   pause(): void;
@@ -79,7 +76,6 @@ export interface ReadingMode {
   /**
    * Change the reading speed.
    * For Focus/Flow: sets WPM.
-   * For Narrate: sets TTS rate (0.5–2.0).
    */
   setSpeed(value: number): void;
 

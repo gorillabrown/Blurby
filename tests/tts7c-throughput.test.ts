@@ -118,13 +118,13 @@ describe("TTS-7C: Pipeline backpressure (BUG-115)", () => {
 
 describe("TTS-7C: Pause UI hiding (BUG-110)", () => {
   it("rhythm pauses should be hidden when engine is kokoro", () => {
-    const engine = "kokoro";
+    const engine: "web" | "kokoro" = "kokoro";
     const shouldHide = engine === "kokoro";
     expect(shouldHide).toBe(true);
   });
 
   it("rhythm pauses should be visible when engine is web", () => {
-    const engine = "web";
+    const engine = "web" as "web" | "kokoro";
     const shouldHide = engine === "kokoro";
     expect(shouldHide).toBe(false);
   });
@@ -139,7 +139,7 @@ describe("TTS-7C: Extraction dedupe (BUG-112)", () => {
     let inflightId: string | null = null;
     const mockExtract = vi.fn().mockResolvedValue({ words: ["a", "b"], sections: [] });
 
-    function dedupeExtract(bookId: string): Promise<any> {
+    function dedupeExtract(bookId: string): Promise<any> | null {
       if (inflight && inflightId === bookId) return inflight;
       inflightId = bookId;
       inflight = mockExtract(bookId).finally(() => { inflight = null; inflightId = null; });
@@ -157,7 +157,7 @@ describe("TTS-7C: Extraction dedupe (BUG-112)", () => {
     let inflightId: string | null = null;
     const mockExtract = vi.fn().mockResolvedValue({ words: ["a"], sections: [] });
 
-    function dedupeExtract(bookId: string): Promise<any> {
+    function dedupeExtract(bookId: string): Promise<any> | null {
       if (inflight && inflightId === bookId) return inflight;
       inflightId = bookId;
       inflight = mockExtract(bookId).finally(() => { inflight = null; inflightId = null; });

@@ -15,6 +15,13 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Applies to:** Architectural migration sprints that replace a legacy runtime path
 **Status:** Observation
 
+### SRL-008 — Deletion-heavy consolidation sprints need dedicated migration + contract tests (NARR-LAYER-1B, 2026-04-16)
+**Verdict:** The consolidation was stable because migration and contract coverage were treated as first-class work, not post-cleanup extras.
+**Evidence:** `NARR-LAYER-1B` removed narration mode surfaces and `NarrateMode.ts`, added a schema migration (`7 -> 8`) for narration-mode settings, and introduced `tests/narrLayer1bConsolidation.test.ts` with 25 targeted checks while preserving green full-suite/build verification.
+**Recommendation:** For deletion-heavy architecture consolidations, require an explicit migration task and a dedicated contract/regression test file in the same sprint.
+**Applies to:** Runtime consolidation sprints that remove mode values, branches, or legacy classes
+**Status:** Observation
+
 ## Agent Routing
 
 ### SRL-001 — Quality review pays for itself in coverage sprints (TEST-COV-1, 2026-04-16)
@@ -29,6 +36,13 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Evidence:** The new `tests/narrationLayer.test.ts` covered FlowScrollEngine follower mode, flow-sync wiring, ReaderContainer state plumbing, bottom-bar behavior, overlay suppression, and keyboard handling, while the full suite and build remained green.
 **Recommendation:** For UI/runtime architecture sprints, default to one focused cross-layer regression file that combines engine assertions, state wiring checks, and visible control-surface behavior instead of scattering all new coverage into isolated micro-suites.
 **Applies to:** UI architecture and state-machine migration sprints
+**Status:** Observation
+
+### SRL-009 — Keep mode-removal work and evaluation harness work sequenced, not fully concurrent (NARR-LAYER-1B, 2026-04-16)
+**Verdict:** Consolidating the mode architecture first reduces measurement noise for later evaluation work.
+**Evidence:** `NARR-LAYER-1B` removed the standalone narration path and normalized runtime ownership before `TTS-EVAL-1` instrumentation begins, reducing the chance that harness data is polluted by dual-path behavior.
+**Recommendation:** When a sprint removes legacy runtime paths and the next sprint adds evaluation instrumentation, sequence consolidation first and run harness integration after merge; parallelize only fixture/docs/scaffolding.
+**Applies to:** Back-to-back runtime consolidation + evaluation-harness sprint pairs
 **Status:** Observation
 
 ## Dispatch Precision

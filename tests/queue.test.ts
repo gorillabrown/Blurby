@@ -12,7 +12,6 @@ type TestDoc = {
 
 function makeDoc(overrides: Partial<TestDoc> & { id: string }): TestDoc {
   return {
-    id: overrides.id,
     position: 0,
     wordCount: 100,
     created: 0,

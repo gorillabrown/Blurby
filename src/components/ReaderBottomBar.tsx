@@ -18,7 +18,7 @@ interface ReaderBottomBarProps {
   wordIndex: number;
   wpm: number;
   focusTextSize: number;
-  readingMode: "page" | "focus" | "flow" | "narration";
+  readingMode: "page" | "focus" | "flow";
   isNarrating?: boolean;
   playing: boolean;
   isEink: boolean;
@@ -27,15 +27,13 @@ interface ReaderBottomBarProps {
   onAdjustFocusTextSize: (delta: number) => void;
   onEnterFocus: () => void;
   onEnterFlow: () => void;
-  ttsActive?: boolean;
-  onToggleTts?: () => void;
   onPrevChapter?: () => void;
   onNextChapter?: () => void;
   onJumpToChapter?: (chapterIndex: number) => void;
   onEinkRefresh?: () => void;
   onTogglePlay?: () => void;
   chapterListRef?: React.MutableRefObject<ChapterListHandle | null>;
-  lastReadingMode?: "focus" | "flow" | "narration";
+  lastReadingMode?: "focus" | "flow";
   ttsRate?: number;
   onSetTtsRate?: (rate: number) => void;
   ttsEngine?: "web" | "kokoro";
@@ -58,7 +56,6 @@ interface ReaderBottomBarProps {
 const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space flow  ⇧space focus  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space pause  M menu",
-  narration: "← → page  ↑ ↓ speed  space pause  N narration  M menu",
   flow: "← → speed  ↑ ↓ line  N narration  space pause  M menu",
 };
 
@@ -77,8 +74,6 @@ export default function ReaderBottomBar({
   onAdjustFocusTextSize,
   onEnterFocus,
   onEnterFlow,
-  ttsActive,
-  onToggleTts,
   onPrevChapter,
   onNextChapter,
   onJumpToChapter,
@@ -136,10 +131,7 @@ export default function ReaderBottomBar({
     : words.length > 0 ? (wordIndex / words.length) * 100 : 0;
 
   // Time remaining — use TTS-derived WPM when narration is selected
-  const isNarrationSelected =
-    readingMode === "narration"
-    || (readingMode === "flow" && isNarrating)
-    || (readingMode === "page" && lastReadingMode === "narration");
+  const isNarrationSelected = readingMode === "flow" && isNarrating;
   const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
   // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
   // instead of section words (which only covers the current chapter)
@@ -355,7 +347,7 @@ export default function ReaderBottomBar({
           </button>
         )}
 
-        {/* Mode buttons — all four modes in one group */}
+        {/* Mode buttons */}
         <div className="rbb-mode-group" role="group" aria-label="Reading modes">
           <button
             className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "focus" ? " rbb-mode-btn--last" : ""}`}
@@ -373,17 +365,6 @@ export default function ReaderBottomBar({
           >
             Flow
           </button>
-          {onToggleTts && (
-            <button
-              className={`rbb-mode-btn ${(readingMode === "narration" || (readingMode === "flow" && isNarrating)) ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narration" ? " rbb-mode-btn--last" : ""}`}
-              onClick={() => { triggerCoachHint("narration"); onToggleTts(); }}
-              aria-label={(readingMode === "narration" || (readingMode === "flow" && isNarrating)) ? "Stop narration" : "Start narration"}
-              aria-pressed={readingMode === "narration" || (readingMode === "flow" && isNarrating)}
-              title="Narration (N)"
-            >
-              Narrate
-            </button>
-          )}
         </div>
 
         {/* Flow zone controls and progress — visible in flow mode only */}

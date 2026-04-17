@@ -19,6 +19,7 @@ export interface NarrationProfile {
   ttsPauseSentenceMs: number;
   ttsPauseParagraphMs: number;
   ttsDialogueSentenceThreshold: number;
+  ttsFootnoteMode?: "skip" | "read";
   pronunciationOverrides: PronunciationOverride[];
   createdAt: number;   // Date.now() — for sort/display
   updatedAt: number;   // Date.now() — tracks last edit
@@ -120,7 +121,7 @@ export interface BlurbySettings {
   accentColor: string | null;
   fontFamily: string | null;
   compactMode: boolean;
-  readingMode: "focus" | "flow" | "narration" | "page";
+  readingMode: "focus" | "flow" | "page";
   focusMarks: boolean;
   readingRuler: boolean;
   focusSpan: number;
@@ -153,7 +154,9 @@ export interface BlurbySettings {
   ttsDialogueSentenceThreshold?: number;
   ttsFootnoteMode?: "skip" | "read";
   // Last-used reading mode (Space bar starts this mode from Page view)
-  lastReadingMode: "focus" | "flow" | "narration";
+  lastReadingMode: "focus" | "flow";
+  // Flow-layer narration state (NARR-LAYER-1B)
+  isNarrating: boolean;
   // Cloud sync settings
   syncIntervalMinutes: number;
   syncOnMeteredConnection: boolean;
@@ -297,12 +300,17 @@ export interface ElectronAPI {
   logReadingSession: (data: { docId: string; duration: number; wordsRead: number; finalWpm: number; mode: string; chapter?: string }) => Promise<{ ok?: boolean; path?: string; error?: string }>;
   openReadingLog: () => Promise<{ ok?: boolean; error?: string }>;
   openReadingNotes: (docId?: string) => Promise<{ ok?: boolean; error?: string }>;
+  normalizeAllAuthors?: () => Promise<{ updated?: number; error?: string }>;
+  scanLibraryMetadata?: () => Promise<any[]>;
+  applyMetadataUpdates?: (updates: any) => Promise<{ updated?: number; error?: string }>;
   // WebSocket server (Chrome extension)
   startWsServer: () => Promise<{ port: number; token: string }>;
   stopWsServer: () => Promise<{ ok: boolean }>;
   getWsStatus: () => Promise<{ running: boolean; port: number; clients: number; token: string | null }>;
   getWsPairingToken: () => Promise<string | null>;
   regenerateWsPairingToken: () => Promise<{ port: number; token: string }>;
+  getWsShortCode: () => Promise<{ code: string; expiresAt: number; status?: "connected" | "pending"; connected?: boolean }>;
+  regenerateWsShortCode: () => Promise<{ code: string; expiresAt: number }>;
   // Cloud sync
   cloudSignIn: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string; email?: string; name?: string; provider?: string }>;
   cloudSignOut: (provider: "microsoft" | "google") => Promise<{ success?: boolean; error?: string }>;
@@ -319,6 +327,8 @@ export interface ElectronAPI {
   reorderQueue: (docId: string, newPosition: number) => Promise<void>;
   // Events from main
   onLibraryUpdated: (callback: (library: BlurbyDoc[]) => void) => () => void;
+  onWsConnectionAttempt: (callback: () => void) => () => void;
+  onWsPairingSuccess: (callback: () => void) => () => void;
   onSystemThemeChanged?: (callback: (theme: "dark" | "light") => void) => () => void;
   onUpdateAvailable?: (callback: (version: string) => void) => () => void;
   onUpdateDownloaded?: (callback: (version: string) => void) => () => void;
@@ -335,13 +345,24 @@ export interface ElectronAPI {
   }>;
   // Kokoro TTS
   kokoroPreload?: () => Promise<void>;
+  kokoroPreloadMarathon: () => Promise<void>;
   kokoroModelStatus: () => Promise<{ ready: boolean }>;
   kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
   kokoroDownload?: () => Promise<{ ok?: boolean; error?: string }>;
   kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null; error?: string }>;
+  kokoroGenerateMarathon: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; error?: string }>;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
+  onKokoroEngineStatus: (callback: (data: { status: string; detail?: string | null }) => void) => () => void;
   onKokoroDownloadError?: (callback: (error: string) => void) => () => void;
+  // TTS cache APIs
+  ttsCacheRead: (bookId: string, voiceId: string, startIdx: number) => Promise<{ audio?: number[]; sampleRate?: number; durationMs?: number; wordCount?: number; miss?: boolean; error?: string }>;
+  ttsCacheWrite: (bookId: string, voiceId: string, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => Promise<{ success?: boolean; error?: string }>;
+  ttsCacheHas: (bookId: string, voiceId: string, startIdx: number) => Promise<boolean>;
+  ttsCacheChunks: (bookId: string, voiceId: string) => Promise<number[]>;
+  ttsCacheEvictBook: (bookId: string) => Promise<{ success?: boolean; error?: string }>;
+  ttsCacheEvictVoice: (bookId: string, voiceId: string) => Promise<{ success?: boolean; error?: string }>;
+  ttsCacheInfo: () => Promise<{ totalBytes: number; totalMB: number; bookCount: number }>;
 }
 
 declare global {

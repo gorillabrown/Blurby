@@ -1,0 +1,9 @@
+TTS eval run complete (8 fixtures)
+- prose-basic: latency=486ms words=38 flow=13 failures=none
+- dialogue-switches: latency=465ms words=35 flow=12 failures=none
+- long-sentence: latency=507ms words=41 flow=14 failures=none
+- punctuation-dense: latency=402ms words=26 flow=9 failures=none
+- section-transition: latency=381ms words=23 flow=8 failures=none
+- chapter-transition: latency=395ms words=25 flow=9 failures=none
+- queued-handoff: latency=402ms words=26 flow=9 failures=none
+- pause-resume: latency=402ms words=26 flow=9 failures=none

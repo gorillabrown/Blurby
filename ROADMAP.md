@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-16 — NARR-LAYER-1A complete. Queue depth 2 (YELLOW). Next: NARR-LAYER-1B.
+**Last updated**: 2026-04-16 — TTS-EVAL-3 complete. Quality gates + release baseline workflow shipped.
 **Current branch**: `main`
-**Current state**: v1.51.0 stable. Queue depth 2 (YELLOW). Next: NARR-LAYER-1B → TTS-EVAL-1.
+**Current state**: v1.55.0 stable. Queue depth 2 (YELLOW). Next: TTS-RATE-1 → EPUB-TOKEN-1.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -68,9 +68,17 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     NARR-LAYER-1A: Narration as Flow Layer — Foundation ✅ (v1.51.0)
                    │
-    NARR-LAYER-1B: Narration as Flow Layer — Consolidation
+    NARR-LAYER-1B: Narration as Flow Layer — Consolidation ✅ (v1.52.0)
                    │
-    TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness
+    TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness ✅ (v1.53.0)
+                   │
+    TTS-EVAL-2: TTS Evaluation Matrix & Soak Runner ✅ (v1.54.0)
+                   │
+    TTS-EVAL-3: TTS Quality Gates & Release Baseline ✅ (v1.55.0)
+                   │
+    TTS-RATE-1: Pitch-Preserving Tempo for Kokoro
+                   │
+    EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching
                    │
                    ▼
         Track C: Android APK
@@ -1294,7 +1302,7 @@ Wave C (verify):
 
 ---
 
-## TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness
+## TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness ✅ COMPLETED
 
 **Goal:** Create a repeatable evaluation harness for Blurby narration quality so future TTS and flow-layer work can be judged with evidence instead of feel. The harness should measure start latency, flow cursor vs narration alignment, highlighted word vs narration alignment, pause/resume correctness, section/chapter/book handoff correctness, and provide durable review artifacts for subjective audio-quality assessment.
 
@@ -1307,6 +1315,51 @@ Wave C (verify):
 - Do not build MOS-style automatic speech scoring in this sprint.
 - Prefer deterministic JSON traces plus optional media capture over brittle full end-to-end UI automation.
 - Center the harness on the current architecture: Flow is the visual layer, narration is the audio layer, and the harness evaluates their relationship.
+
+### Lane Ownership
+
+- **Primary lane:** Lane B (Evaluation Harness)
+- **Secondary lanes:** Lane E (Governance/Planning), limited Lane C (UI Surfaces for review templates only)
+- **Not primary:** Lane A (Runtime Core) during parallel windows
+
+### Forbidden During Parallel Run
+
+When `NARR-LAYER-1B` is active, `TTS-EVAL-1` must NOT change:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- `src/types.ts` (except additive, non-breaking trace types that do not modify existing contracts)
+- Any mode-consolidation surfaces owned by `NARR-LAYER-1B` (`useReaderMode`, `useReadingModeInstance`, `ModeInterface`, `FoliatePageView` narration-mode removal paths)
+
+Parallel-safe work while `NARR-LAYER-1B` is running:
+
+- fixtures under `tests/fixtures/narration/`
+- harness runner scripts under `scripts/`
+- trace schema draft files that do not alter existing runtime behavior
+- reviewer template + runbook docs
+- test scaffolding that does not require runtime hook integration yet
+
+### Shared-Core Touches
+
+`TTS-EVAL-1` includes shared-core trace instrumentation in Tasks 3-4. Those touches are serialized as an **integration window** and must run only after `NARR-LAYER-1B` merges, unless explicitly approved for a coordinated dual-branch integration.
+
+Integration-window tasks:
+
+- Task 3 (internal trace instrumentation hooks)
+- Task 4 (first-audio timing capture)
+
+All other tasks are parallel-safe scaffolding and may proceed earlier.
+
+### Merge Order
+
+1. `NARR-LAYER-1B` merges first (runtime consolidation source of truth)
+2. `TTS-EVAL-1` rebases onto merged `main`
+3. `TTS-EVAL-1` runs integration-window shared-core tasks
+4. `TTS-EVAL-1` completes verification and merges
+
+If `TTS-EVAL-1` runtime hooks are implemented before `NARR-LAYER-1B` lands, they must be treated as provisional and revalidated after rebase.
 
 ### Baseline
 
@@ -1396,6 +1449,479 @@ Wave C (review + docs):
 13. `npm test` passes and `npm run build` succeeds
 
 **Tier:** Full | **Depends on:** NARR-LAYER-1A (flow-layer narration foundation in place). Recommended after NARR-LAYER-1B unless a TTS quality investigation needs it sooner.
+
+### Completion Notes ✅ COMPLETED
+
+- Added trace schema types at `src/types/eval.ts` ✅ COMPLETED
+- Added fixture corpus and manifest under `tests/fixtures/narration/` ✅ COMPLETED
+- Added opt-in trace instrumentation in `useNarration`, `useFlowScrollSync`, and `ReaderContainer` via `createWindowEvalTraceSink()` ✅ COMPLETED
+- Captured first-audio timing from start request to first audio word event ✅ COMPLETED
+- Added `tests/ttsEvalTrace.test.ts` and `tests/ttsEvalLifecycle.test.ts` (22 tests) ✅ COMPLETED
+- Added harness runner `scripts/tts_eval_runner.mjs` + `npm run tts:eval` with JSON + text summaries ✅ COMPLETED
+- Added baseline fixture run artifacts in `tests/fixtures/narration/baseline/` ✅ COMPLETED
+- Added reviewer template and runbook:
+  - `docs/governance/TTS_EVAL_REVIEW_TEMPLATE.md`
+  - `docs/governance/TTS_EVAL_RUNBOOK.md` ✅ COMPLETED
+- Verification:
+  - `npm test -- --run tests/ttsEvalTrace.test.ts tests/ttsEvalLifecycle.test.ts` ✅
+  - `node scripts/tts_eval_runner.mjs --out tests/fixtures/narration/baseline` ✅
+  - `npm test` (112 files, 1967 tests passed) ✅
+  - `npm run build` ✅ (existing circular chunk warning unchanged)
+
+---
+
+## TTS-EVAL-2: TTS Evaluation Matrix & Soak Runner ✅ COMPLETED
+
+**Goal:** Expand the quality harness into a durable matrix + soak system that can stress narration/flow synchronization across voices, rates, fixture classes, and long-running sessions without manual babysitting.
+
+**Problem:** `TTS-EVAL-1` establishes traces and baseline fixture runs, but regressions can still hide in combinations (voice × rate × punctuation density × session length). We need reproducible matrix runs and soak sessions that detect drift, restart churn, and timing degradation over time.
+
+**Design decisions:**
+- Keep the matrix data-driven (manifest + scenarios), not hardcoded in scripts.
+- Keep runs deterministic and local-first (CLI), with optional CI handoff.
+- Capture both per-scenario metrics and aggregate summaries.
+- Treat this sprint as evaluation tooling, not runtime behavior change.
+- Persist artifacts in a stable folder layout for comparison across branches.
+
+### Lane Ownership
+
+- **Primary lane:** Lane B (Evaluation Harness)
+- **Secondary lane:** Lane E (Governance/Planning)
+- **Restricted:** Lane A runtime core edits allowed only for additive, non-breaking trace hooks
+
+### Forbidden During Parallel Run
+
+When another code-changing sprint is active, `TTS-EVAL-2` must not modify:
+
+- `src/hooks/useNarration.ts` except additive trace hook wiring
+- `src/hooks/useFlowScrollSync.ts` except additive trace hook wiring
+- `src/components/ReaderContainer.tsx` except additive trace hook wiring
+- `src/utils/FlowScrollEngine.ts` behavior logic
+- `src/types.ts` existing contracts (additive eval types only)
+
+Parallel-safe work:
+
+- matrix/manifest files under `tests/fixtures/narration/`
+- runner/profile/metrics scripts under `scripts/`
+- docs/runbooks and test files under `docs/` and `tests/`
+
+### Shared-Core Touches
+
+Potential shared-core touch window:
+
+- Task 3 and Task 4 if additive runtime trace hooks are required for matrix/soak coverage
+
+All other tasks are tooling/docs/test surfaces and can run independently.
+
+### Merge Order
+
+1. `TTS-EVAL-1` merges first
+2. `TTS-EVAL-2` rebases on current `main`
+3. Any shared-core additive hook edits (Tasks 3-4) run in a short serialized window
+4. `TTS-EVAL-2` verification + merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — execution rules and sprint standards
+2. `ROADMAP.md` — this section + `TTS-EVAL-1`
+3. `docs/governance/SPRINT_QUEUE.md` — queue and dispatch order
+4. `scripts/tts_eval_runner.*` — runner entrypoints from `TTS-EVAL-1`
+5. `tests/fixtures/narration/` — fixture corpus and manifest
+6. `src/hooks/useNarration.ts` — instrumentation seam (read-only unless additive hook needed)
+7. `src/hooks/useFlowScrollSync.ts` — transition/handoff trace seam
+8. `src/components/ReaderContainer.tsx` — top-level lifecycle event seam
+9. `tests/` — test patterns for script and trace validation
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (tooling-scope) | **Add matrix manifest format.** Define scenario schema for fixture id, voice id, requested rate, duration class, and run tags. | `tests/fixtures/narration/matrix.manifest.json` (new) + optional schema file | New file under `tests/fixtures/narration/`; include at least smoke, punctuation-heavy, and long-form scenarios. |
+| 2 | Hephaestus (tooling-scope) | **Add soak profiles.** Define canned soak profiles (`short`, `standard`, `overnight`) controlling scenario count and iteration depth. | `scripts/tts_eval_profiles.*` (new) | New profile module consumed by runner; keep defaults deterministic. |
+| 3 | Hephaestus (tooling-scope) | **Extend runner for matrix execution.** Add `--matrix` mode to iterate scenarios and emit per-scenario trace/summary bundles. | `scripts/tts_eval_runner.*` | Add matrix branch near runner argument parser and session loop. |
+| 4 | Hephaestus (tooling-scope) | **Add soak mode.** Add `--soak-profile` execution that repeats scenarios for long duration and writes checkpoint summaries every N runs. | `scripts/tts_eval_runner.*` | Add soak loop with periodic flush + interrupt-safe artifact write. |
+| 5 | Hermes (tooling-scope) | **Add aggregate metrics pass.** Build a reducer that computes p50/p95 startup latency, drift maxima, pause/resume failure count, and handoff failure count across matrix runs. | `scripts/tts_eval_metrics.*` | Add aggregate function and write `aggregate-summary.json` + concise text summary. |
+| 6 | Hippocrates | **Add runner tests.** Validate matrix selection, soak profile behavior, deterministic artifact naming, and aggregate metric calculation on synthetic traces. | `tests/ttsEvalMatrixRunner.test.ts` (new) | New test file; include edge cases for empty matrix and interrupted runs. |
+| 7 | Hephaestus (docs-scope) | **Add matrix/soak runbook.** Document commands, expected artifacts, and interpretation rules. | `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` (new) | New doc with command examples for smoke, standard, and overnight runs. |
+| 8 | Hippocrates | **Verification runs.** Execute one matrix smoke run and one short soak run; capture artifact paths in sprint summary. | — | Run after Tasks 1–7 with local fixture set. |
+| 9 | Solon | **Spec compliance.** Verify criteria and confirm matrix/soak outputs are reproducible from a clean checkout. | — | Post-verification review. |
+| 10 | Plato | **Quality review.** Confirm metrics are decision-useful and not redundant with raw trace noise. | — | Review output usability for dispatch closeout. |
+| 11 | Herodotus | **Governance update.** Wire matrix/soak flow into roadmap/queue and lessons learned if notable constraints appear. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, optional `docs/governance/LESSONS_LEARNED.md` | Documentation pass after verification. |
+
+### Execution Sequence
+
+```
+Wave A (data model + runner expansion):
+  Task 1 (matrix manifest)
+  Task 2 (soak profiles)
+      ↓
+  Task 3 (matrix execution)
+  Task 4 (soak execution)
+      ↓
+Wave B (metrics + tests):
+  Task 5 (aggregate metrics)
+  Task 6 (runner tests)
+      ↓
+Wave C (docs + verification):
+  Task 7 (runbook)
+  Task 8 (verification runs)
+  Task 9 (spec compliance)
+  Task 10 (quality review)
+  Task 11 (governance update)
+```
+
+### SUCCESS CRITERIA
+
+1. Matrix manifest exists and supports scenario-driven execution
+2. Runner supports `--matrix` mode and emits per-scenario artifacts
+3. Runner supports `--soak-profile` mode for repeated long-run evaluation
+4. Aggregate summary emits p50/p95 startup latency and drift stats
+5. Handoff and pause/resume failures are counted in aggregate output
+6. Artifact naming is deterministic and reproducible
+7. A smoke matrix run completes successfully
+8. A short soak run completes successfully
+9. Runner tests cover matrix, soak, and aggregate paths
+10. `npm test` passes and `npm run build` succeeds
+11. Runbook documents commands and interpretation rules
+12. Outputs are usable for cross-branch comparison without manual log digging
+
+**Tier:** Full | **Depends on:** TTS-EVAL-1.
+
+### Completion Notes ✅ COMPLETED
+
+- Added matrix scenario manifest: `tests/fixtures/narration/matrix.manifest.json` ✅ COMPLETED
+- Added soak profiles module: `scripts/tts_eval_profiles.mjs` (`short`, `standard`, `overnight`) ✅ COMPLETED
+- Extended runner with:
+  - `--matrix` scenario execution
+  - `--soak-profile` repeated runs
+  - deterministic artifact naming
+  - checkpoint summaries and interrupt-safe writes ✅ COMPLETED
+- Added aggregate reducer: `scripts/tts_eval_metrics.mjs` (startup p50/p95, drift p50/p95/max, pause-resume and handoff failure counts) ✅ COMPLETED
+- Added runner test suite: `tests/ttsEvalMatrixRunner.test.ts` ✅ COMPLETED
+- Added matrix/soak runbook: `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` ✅ COMPLETED
+- Verification runs:
+  - Smoke matrix: `npm run tts:eval:matrix -- --run-id smoke --tag smoke --out artifacts/tts-eval/matrix-smoke` ✅
+  - Short soak: `npm run tts:eval:soak:short -- --run-id soak-short --out artifacts/tts-eval/soak-short` ✅
+  - `npm test` (113 files, 1972 tests) ✅
+  - `npm run build` ✅ (existing circular chunk warning unchanged)
+
+---
+
+## TTS-EVAL-3: TTS Quality Gates & Release Baseline ✅ COMPLETED
+
+**Goal:** Convert evaluation outputs into explicit quality gates and a maintained baseline so narration/flow quality regressions are blocked early and sprint closeout has objective pass/fail criteria.
+
+**Problem:** Even with harness + matrix runs, teams can still ship regressions if there is no agreed threshold contract. We need release-quality gates tied to measurable values and a documented baseline update process.
+
+**Design decisions:**
+- Keep gates configurable via a versioned threshold file.
+- Fail fast when hard limits are breached; warn-only for exploratory metrics.
+- Separate baseline snapshots from code logic.
+- Keep subjective reviewer scoring in the loop for voice quality decisions.
+
+### Lane Ownership
+
+- **Primary lane:** Lane E (Governance + Release Quality)
+- **Secondary lane:** Lane B (Evaluation Harness)
+- **No runtime refactors:** Runtime core files are out of scope except additive trace field wiring if required
+
+### Forbidden During Parallel Run
+
+`TTS-EVAL-3` must not alter runtime playback logic:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- reading-mode orchestration files
+
+Parallel-safe work:
+
+- gate config/policy/checklist files under `docs/testing/`
+- gate evaluation scripts under `scripts/`
+- gate tests under `tests/`
+
+### Shared-Core Touches
+
+- None expected by default
+- If additive trace fields become necessary, they must be reviewed as a scoped exception after `TTS-EVAL-2` merge
+
+### Merge Order
+
+1. `TTS-EVAL-2` merges first
+2. `TTS-EVAL-3` rebases and runs gate/baseline work
+3. `TTS-EVAL-3` verification + merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — sprint closeout and governance rules
+2. `ROADMAP.md` — `TTS-EVAL-1`, `TTS-EVAL-2`, and this section
+3. `docs/governance/SPRINT_QUEUE.md` — queue ordering and dispatch state
+4. `scripts/tts_eval_runner.*`, `scripts/tts_eval_metrics.*` — existing harness outputs
+5. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` — operational run guidance
+6. `docs/` reviewer template artifacts from `TTS-EVAL-1`
+7. `tests/` — harness and runner test patterns
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (governance-scope) | **Define gate thresholds.** Add versioned threshold config for startup latency, drift limits, pause/resume failures, and handoff failures. | `docs/testing/tts_quality_gates.v1.json` (new) | New versioned threshold file with hard-fail and warn-only sections. |
+| 2 | Hephaestus (tooling-scope) | **Add gate evaluator script.** Consume aggregate output + threshold config and emit pass/fail plus reasons. | `scripts/tts_eval_gate.*` (new) | New script in `scripts/`; CLI input: aggregate summary path + gate file path. |
+| 3 | Hephaestus (tooling-scope) | **Integrate gate check into runner outputs.** Optional `--gates` flag evaluates latest aggregate summary and writes `gate-report.json` + text. | `scripts/tts_eval_runner.*` | Add post-run gate invocation path after aggregate generation. |
+| 4 | Hermes (docs-scope) | **Create baseline policy doc.** Define how/when to refresh baselines, who approves, and how diffs are reviewed. | `docs/testing/TTS_EVAL_BASELINE_POLICY.md` (new) | New doc with baseline ownership and update checklist. |
+| 5 | Hephaestus (docs-scope) | **Add current baseline snapshot.** Check in one baseline summary from mainline matrix run with version stamp and fixture manifest hash. | `docs/testing/tts_eval_baseline_v1.json` (new) | Store baseline summary + metadata (git sha, fixture hash, date). |
+| 6 | Hippocrates | **Add gate tests.** Validate pass/fail behavior, threshold parsing, and deterministic report output. | `tests/ttsEvalGate.test.ts` (new) | New test file covering hard-fail and warn-only scenarios. |
+| 7 | Hephaestus (docs-scope) | **Add release review template.** Standardize how sprint closeout reports gate status and subjective reviewer score. | `docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md` (new) | New checklist used in sprint closeouts touching narration/flow. |
+| 8 | Hippocrates | **Verification runs.** Execute matrix + gate evaluation on branch; capture pass/fail report and artifact paths. | — | Run after Tasks 1–7 and include outputs in sprint summary. |
+| 9 | Solon | **Spec compliance.** Confirm each success criterion and verify gates are enforceable from clean checkout. | — | Post-verification pass. |
+| 10 | Plato | **Quality review.** Confirm gate thresholds are neither too lax nor unrealistically strict for current baseline quality. | — | Review with emphasis on release utility. |
+| 11 | Herodotus | **Governance update.** Update roadmap/queue and lessons learned with the new release-gate workflow. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md` | Documentation pass after implementation and verification. |
+
+### Execution Sequence
+
+```
+Wave A (gate foundations):
+  Task 1 (threshold config)
+  Task 2 (gate evaluator)
+      ↓
+Wave B (integration + policy):
+  Task 3 (runner gate integration)
+  Task 4 (baseline policy)
+  Task 5 (baseline snapshot)
+      ↓
+Wave C (verification + release docs):
+  Task 6 (gate tests)
+  Task 7 (release checklist)
+  Task 8 (verification runs)
+  Task 9 (spec compliance)
+  Task 10 (quality review)
+  Task 11 (governance update)
+```
+
+### SUCCESS CRITERIA
+
+1. Versioned gate threshold config exists in docs/testing
+2. Gate evaluator script consumes aggregate summaries and emits pass/fail
+3. Runner can optionally execute gate evaluation in-line
+4. Gate report includes explicit failure reasons and breached metrics
+5. Baseline policy defines ownership and update protocol
+6. Baseline snapshot is checked in with metadata (sha/date/fixture hash)
+7. Gate tests cover pass, fail, and warn-only cases
+8. Release checklist exists for narration/flow quality closeout
+9. At least one branch run produces a full gate report artifact
+10. `npm test` passes and `npm run build` succeeds
+11. Governance docs reflect gate-driven release evaluation flow
+
+**Tier:** Full | **Depends on:** TTS-EVAL-2.
+
+**Completion notes (2026-04-16):**
+- Shipped versioned gates config (`docs/testing/tts_quality_gates.v1.json`), evaluator (`scripts/tts_eval_gate.mjs`), and runner gate integration (`--gates` in `scripts/tts_eval_runner.mjs`) with enforceable non-zero exit on hard-fail breach.
+- Added baseline governance artifacts: `TTS_EVAL_BASELINE_POLICY.md`, `tts_eval_baseline_v1.json`, and `TTS_EVAL_RELEASE_CHECKLIST.md`.
+- Added gate coverage in `tests/ttsEvalGate.test.ts` (pass/fail/warn-only + deterministic report output + runner integration).
+- Baseline verification run: `npm run tts:eval:matrix:gated -- --run-id baseline-v1 --out artifacts/tts-eval/baseline-v1` → PASS, artifacts include `aggregate-summary.json`, `gate-report.json`, `gate-report.txt`.
+- Validation: `npm test -- --run tests/ttsEvalTrace.test.ts tests/ttsEvalLifecycle.test.ts tests/ttsEvalMatrixRunner.test.ts tests/ttsEvalGate.test.ts` (32 tests, 4 files) ✅; `npm test` (114 files, 1977 tests) ✅; `npm run build` ✅ (existing circular chunk warning unchanged).
+
+---
+
+## TTS-RATE-1: Pitch-Preserving Tempo for Kokoro
+
+**Goal:** Deliver speed control that does not chipmunk Kokoro voices by decoupling generation/cache rate buckets from playback tempo shaping.
+
+**Problem:** Current speed changes in Kokoro path force stop/regenerate churn and/or pitch-shifting behavior. Users hear degraded voice quality above/below 1.0x and lose smooth continuity.
+
+**Product decisions (locked):**
+- User speed precision is **0.1 steps**.
+- User range is **1.0 to 1.5** (hard ceiling 1.5).
+- Generation/cache buckets remain **`1.0`, `1.2`, `1.5`**.
+- Runtime chooses nearest generation bucket, then applies **pitch-preserving tempo shaping** to reach exact selected speed.
+- No Bluetooth/device routing work in this sprint.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A (Runtime Core — narration/audio scheduler)
+- **Secondary lane:** Lane B (Evaluation harness checks for rate quality)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+When another shared-core sprint is active, do not edit these files concurrently:
+
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/types.ts` (existing contracts)
+
+Allowed concurrent surfaces:
+
+- `scripts/tts_eval_*` artifacts and docs
+- isolated tests for rate mapping/tempo shaping
+
+### Shared-Core Touches
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/utils/audioScheduler.ts`
+- `src/constants.ts`
+- `src/types/narration.ts` (additive rate metadata only)
+
+### Merge Order
+
+1. `TTS-EVAL-3` merges first (quality gate baseline)
+2. `TTS-RATE-1` rebases on latest `main`
+3. Shared-core implementation + tests
+4. Evaluation matrix spot-check rerun for speed scenarios
+5. Merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — `TTS-EVAL-1/2/3` + this section
+3. `src/constants.ts` — rate limits and Kokoro buckets (`KOKORO_RATE_BUCKETS`, `TTS_MAX_RATE`, `TTS_RATE_STEP`)
+4. `src/hooks/useNarration.ts` — `updateWpm`, `startCursorDriven`, state speed handling
+5. `src/hooks/narration/kokoroStrategy.ts` — bucket resolution and scheduler handoff
+6. `src/utils/audioScheduler.ts` — chunk scheduling and boundary timing
+7. `tests/` + `scripts/tts_eval_runner.mjs` — verification lane
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define rate contract.** Add explicit `KOKORO_UI_RATE_MIN`, `KOKORO_UI_RATE_MAX`, `KOKORO_UI_RATE_STEP` constants and keep generation buckets fixed (`1.0/1.2/1.5`). | `src/constants.ts` | Near existing TTS/Kokoro rate constants (around `KOKORO_RATE_BUCKETS`, `TTS_MAX_RATE`). |
+| 2 | Hephaestus | **Add nearest-bucket + tempo-offset resolver.** Introduce utility returning `{generationBucket, tempoFactor}` for a selected UI speed. | `src/utils/kokoroRatePlan.ts` (new) + exports | New module; consumed by narration + scheduler. |
+| 3 | Athena | **Stop full-restart on in-bucket speed edits.** Update `useNarration.updateWpm` so Kokoro path only restarts generation when bucket changes; otherwise apply tempo update live. | `src/hooks/useNarration.ts` | `updateWpm` callback and Kokoro branch (around existing `kokoroStrategy.stop(); speakNextChunk();`). |
+| 4 | Athena | **Pass rate plan metadata to scheduler path.** Extend Kokoro strategy pipeline handoff to include effective tempo factor for each scheduled chunk. | `src/hooks/narration/kokoroStrategy.ts`, `src/types/narration.ts` | `createKokoroStrategy` `speakChunk`/`scheduleChunk` handoff; add additive metadata type. |
+| 5 | Hephaestus | **Implement pitch-preserving tempo shaping stage.** Add tempo processor path in scheduler (time-stretch, not playbackRate) and apply before buffer scheduling. | `src/utils/audioScheduler.ts`, `src/utils/audio/tempoStretch.ts` (new) | `scheduleChunk` path before `createBuffer`; keep existing crossfade + boundary contracts. |
+| 6 | Hermes | **Keep highlight sync accurate with tempo shaping.** Ensure boundary timings use effective post-tempo speech duration and remain stable on mid-play speed updates. | `src/utils/audioScheduler.ts` | `computeWordBoundaries` and schedule-time boundary append logic. |
+| 7 | Hippocrates | **Rate plan unit tests.** Verify nearest-bucket mapping and tempo factor for all 0.1 steps from 1.0→1.5. | `tests/kokoroRatePlan.test.ts` (new) | New test file for mapping table and edge clamps. |
+| 8 | Hippocrates | **Scheduler tempo tests.** Verify no `playbackRate` mutation for Kokoro path, boundary sync stays monotonic, and no restart when speed changes inside same bucket. | `tests/audioSchedulerTempo.test.ts` (new), `tests/useNarrationRateUpdate.test.ts` (new or existing) | Add focused tests around `scheduleChunk` and `updateWpm`. |
+| 9 | Hippocrates | **Harness verification.** Run matrix smoke including multi-rate scenarios (`1.0`, `1.1`, `1.2`, `1.3`, `1.4`, `1.5`). | `scripts/tts_eval_runner.mjs` artifacts | Use `tts:eval:matrix` with rate-tagged scenario set. |
+| 10 | Solon | **Spec compliance pass.** Verify all success criteria and check no forbidden playbackRate pitch path remains in Kokoro lane. | — | Post-implementation review. |
+| 11 | Plato | **Quality review.** Validate audible quality improvement and continuity during live speed changes. | — | Review against chipmunk/choppiness failure classes. |
+| 12 | Herodotus | **Governance/docs update.** Update roadmap, sprint queue, lessons, and runbook notes for new speed behavior. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Closeout documentation pass. |
+
+### Execution Sequence
+
+```
+Wave A (contract + mapping):
+  Tasks 1-2
+      ↓
+Wave B (runtime implementation):
+  Tasks 3-6
+      ↓
+Wave C (verification + governance):
+  Tasks 7-9
+  Tasks 10-12
+```
+
+### SUCCESS CRITERIA
+
+1. UI speed supports only 1.0–1.5 in 0.1 increments
+2. Generation/cache buckets remain fixed at 1.0/1.2/1.5
+3. Kokoro in-bucket speed changes do not restart generation pipeline
+4. Kokoro path does not rely on pitch-shifting `playbackRate` edits for tempo control
+5. Tempo shaping is applied as a pitch-preserving stage before playback
+6. Word-highlight timing remains synced during rate changes
+7. Boundary timings stay monotonic and gapless
+8. Unit tests cover full rate mapping table
+9. Scheduler/narration tests cover live speed-change continuity
+10. Matrix smoke run passes with multi-rate scenarios
+11. `npm test` and `npm run build` pass
+
+**Depends on:** `TTS-EVAL-3`.
+
+---
+
+## EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching
+
+**Goal:** Ensure styled split words (drop caps, inline styling splits, mixed-node words) are treated as one logical word for selection, cursoring, and narration.
+
+**Problem:** EPUB styling can split a single lexical word into multiple DOM fragments (`T` + `his`). Current interaction surfaces may treat these as separate words, causing cursor jumps and narration mismatch.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A/C (Reader extraction + view interaction)
+- **Secondary lane:** Lane B (regression tests and eval fixture checks)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+Do not run in parallel with any sprint editing the shared-core freeze set:
+
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/utils/FlowScrollEngine.ts`
+- `src/types.ts`
+
+### Shared-Core Touches
+
+- `src/utils/segmentWords.ts`
+- `src/utils/foliateHelpers.ts`
+- `src/components/FoliatePageView.tsx`
+- `src/utils/foliateWordOffsets.ts`
+- targeted reader selection tests
+
+### Merge Order
+
+1. `TTS-RATE-1` merges first
+2. `EPUB-TOKEN-1` rebases on latest `main`
+3. Extraction/token stitching implementation
+4. Selection + narration regression tests
+5. Merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — this section
+3. `src/utils/segmentWords.ts` — segmentation contract
+4. `src/utils/foliateHelpers.ts` — `buildWordsFromTextNodes`, `buildWrappedFragmentForNode`, extraction flow
+5. `src/components/FoliatePageView.tsx` — `wrapWordsInSpans`, click/selection handlers, word-index mapping
+6. `src/utils/foliateWordOffsets.ts` — rendered↔global mapping helpers
+7. `tests/foliateWordOffsets.test.ts`, selection/narration regression suites
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define stitch rules.** Add explicit “no-whitespace contiguous fragments = one lexical token” rules, including dropcap-first-letter cases. | `src/utils/segmentWords.ts` | Near segmentation utilities and exported token/span contracts. |
+| 2 | Hephaestus | **Preserve lexical token identity across node boundaries.** Extend extraction spans so a multi-node word keeps one logical token id and stable global index. | `src/utils/foliateHelpers.ts` | `buildWordsFromTextNodes` and `buildWrappedFragmentForNode`. |
+| 3 | Hermes | **Annotate wrapped spans with token part metadata.** Add `data-token-id` / `data-token-part` attributes for multi-node words while preserving existing `data-word-index`. | `src/components/FoliatePageView.tsx`, `src/utils/foliateHelpers.ts` | `wrapWordsInSpans` path + wrapped fragment builder. |
+| 4 | Athena | **Update click/selection resolution to collapse token parts.** Ensure selecting any part of a stitched token resolves to the same global word index and full word text. | `src/components/FoliatePageView.tsx`, `src/utils/foliateWordOffsets.ts` | delegated click handler and selection overlap resolver around `resolveRenderedWordIndexToGlobal`. |
+| 5 | Hermes | **Guard narration/anchor consumers.** Ensure stitched-token selections propagate as a single word anchor in mode starts and resume paths. | `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts` | start-index resolution + selection-origin mapping touchpoints. |
+| 6 | Hippocrates | **Add extraction/token tests.** Cover dropcap (`T` + `his`), inline-emphasis split words, and punctuation-adjacent split fragments. | `tests/foliateTokenStitching.test.ts` (new), `tests/foliateWordOffsets.test.ts` | Add both positive and regression cases. |
+| 7 | Hippocrates | **Add interaction tests.** Verify click on any fragment maps to same word index; selection + narration start uses stitched token index. | `tests/selectionWordIdentity.test.ts` (new or existing) | Add tests for click/selection entry paths. |
+| 8 | Hippocrates | **Run verification.** Targeted tests + full `npm test` + `npm run build`. | — | Record command outputs and totals in closeout. |
+| 9 | Solon | **Spec compliance pass.** Validate all success criteria, especially one-token behavior across selection/cursor/narration. | — | Post-verification review. |
+| 10 | Plato | **Quality review.** Verify no regressions in normal tokenization and no false stitching across actual spaces. | — | Focus on correctness and false-positive risk. |
+| 11 | Herodotus | **Governance/docs update.** Update roadmap, queue, and lessons with stitch contract and known limits. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md` | Closeout documentation pass. |
+
+### Execution Sequence
+
+```
+Wave A (token contract):
+  Task 1
+      ↓
+Wave B (extraction + interaction):
+  Tasks 2-5
+      ↓
+Wave C (tests + review):
+  Tasks 6-8
+  Tasks 9-11
+```
+
+### SUCCESS CRITERIA
+
+1. Dropcap/split lexical words resolve to one logical token
+2. No-whitespace contiguous fragments share one global word index
+3. Clicking any fragment of a stitched token yields same selected word index
+4. Selection-driven narration start uses stitched token index
+5. Cursor/highlight paths no longer jump between split fragments
+6. `resolveRenderedWordIndexToGlobal` remains correct for stitched tokens
+7. Token stitching does not merge across real whitespace boundaries
+8. Extraction + selection regression tests cover dropcap and inline split cases
+9. `npm test` and `npm run build` pass
+
+**Depends on:** `TTS-RATE-1`.
 
 ---
 

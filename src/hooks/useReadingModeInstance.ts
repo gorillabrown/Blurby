@@ -1,13 +1,10 @@
 import { useRef, useCallback, useEffect } from "react";
 import type { ReadingMode, ModeConfig, ModeType } from "../modes/ModeInterface";
-import type { NarrationInterface } from "../modes/NarrateMode";
 import type { FoliateViewAPI } from "../components/FoliatePageView";
 import { PageMode } from "../modes/PageMode";
 import { FocusMode } from "../modes/FocusMode";
 import { FlowMode } from "../modes/FlowMode";
-import { NarrateMode } from "../modes/NarrateMode";
 import type { BlurbySettings } from "../types";
-import { recordDiagEvent } from "../utils/narrateDiagnostics";
 
 export interface UseReadingModeInstanceParams {
   /** Current reading mode */
@@ -16,8 +13,10 @@ export interface UseReadingModeInstanceParams {
   wpm: number;
   /** User settings */
   settings: BlurbySettings;
-  /** Narration hook interface (for NarrateMode) */
-  narration: NarrationInterface;
+  /** Narration hook interface (for flow-layer cursor-driven narration) */
+  narration: {
+    setOnTruthSync?: (cb: ((idx: number) => void) | null) => void;
+  };
   /** Whether this is a foliate-rendered EPUB */
   isFoliate: boolean;
   /** useReader's jumpToWord — syncs Focus mode display in ReaderView */
@@ -52,8 +51,8 @@ export interface UseReadingModeInstanceReturn {
   jumpToWordInMode: (wordIdx: number) => void;
   /** Update the active mode's word array (when new EPUB sections load) */
   updateModeWords: (words: string[]) => void;
-  /** Pending resume after section load (Flow/Narration pause-on-miss bridge) */
-  pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: "flow" | "narration" } | null>;
+  /** Pending resume after section load (Flow pause-on-miss bridge) */
+  pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: "flow" } | null>;
 }
 
 /**
@@ -84,7 +83,7 @@ export function useReadingModeInstance({
   bookWordsCompleteRef,
 }: UseReadingModeInstanceParams): UseReadingModeInstanceReturn {
   const modeRef = useRef<ReadingMode | null>(null);
-  const pendingResumeRef = useRef<{ wordIndex: number; mode: "flow" | "narration" } | null>(null);
+  const pendingResumeRef = useRef<{ wordIndex: number; mode: "flow" } | null>(null);
 
   // Stable callback refs (avoid stale closures in mode instances)
   const onWordAdvanceRef = useRef(onWordAdvance);
@@ -127,9 +126,8 @@ export function useReadingModeInstance({
     const config = buildConfig(words, paragraphBreaks);
     let instance: ReadingMode;
 
-    // TTS-7R: Clear any stale truth-sync callback before creating the new instance.
-    // Non-narration modes must not fire a truth-sync intended for the overlay.
-    if (mode !== "narration" && narration.setOnTruthSync) {
+    // Clear any stale truth-sync callback whenever we create a visual reading mode.
+    if (narration.setOnTruthSync) {
       narration.setOnTruthSync(null);
     }
 
@@ -162,58 +160,6 @@ export function useReadingModeInstance({
         }
         instance = new FlowMode(config);
         break;
-
-      case "narration": {
-        // NarrateMode's onWordAdvance: highlight in foliate + page-turn-on-miss bridge
-        // Note: Narration does NOT pause on miss — TTS keeps speaking to avoid audible stutter.
-        // Only the visual highlight is lost temporarily until the page turns.
-        // TTS-7I: Exact miss recovery with cooldown token replaces both the old
-        // .next() storm and the silent-ignore-after-extraction (BUG-126).
-        let missRecoveryCooldownUntil = 0;
-        const MISS_RECOVERY_COOLDOWN_MS = 800; // Prevent recovery storms
-        config.callbacks.onWordAdvance = (idx: number) => {
-          onWordAdvanceRef.current(idx);
-          if (isFoliate && foliateApiRefStable.current) {
-            const found = foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
-            if (!found) {
-              // TTS-7I (BUG-126): Exact section-aware recovery instead of silent ignore.
-              // Cooldown prevents recovery storms when many consecutive words miss.
-              const now = Date.now();
-              if (now < missRecoveryCooldownUntil) return; // Still cooling down from last recovery
-              missRecoveryCooldownUntil = now + MISS_RECOVERY_COOLDOWN_MS;
-
-              const sectionIdx = foliateApiRefStable.current.getSectionForWordIndex?.(idx);
-              if (sectionIdx != null) {
-                if (import.meta.env.DEV) console.debug("[narrate] miss recovery — word", idx, "→ section", sectionIdx);
-                recordDiagEvent("section-sync", `miss-recovery owns nav: word ${idx} → section ${sectionIdx}`);
-                pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
-                foliateApiRefStable.current.goToSection(sectionIdx);
-              } else {
-                // Section unknown — fallback to .next() (pre-extraction path)
-                pendingResumeRef.current = { wordIndex: idx, mode: "narration" };
-                foliateApiRefStable.current.next();
-              }
-              // onWordsReextracted will re-apply the highlight
-            }
-          }
-        };
-
-        // TTS-7R: Register a visual-only truth-sync callback with the narration engine.
-        // Truth-sync fires every ~12 words to re-snap the overlay to the scheduler's
-        // authoritative audio position. It must ONLY update visual state — it must NOT
-        // call onWordAdvanceRef (which writes to narration state and contaminates the
-        // pipeline's read head via lastConfirmedAudioWordRef).
-        if (narration.setOnTruthSync) {
-          narration.setOnTruthSync((idx: number) => {
-            if (isFoliate && foliateApiRefStable.current) {
-              foliateApiRefStable.current.highlightWordByIndex(idx, "narration");
-            }
-          });
-        }
-
-        instance = new NarrateMode(config, narration);
-        break;
-      }
 
       case "page":
       default:

@@ -381,8 +381,8 @@ describe("useReaderMode orchestration logic", () => {
     // BUG-122: isWordVisibleOnPage must be used instead of isWordInDom
     it("render gate uses isWordVisibleOnPage, not just isWordInDom", () => {
       // Simulate: word exists in DOM (loaded section) but is NOT on the visible page
-      const isWordInDom = vi.fn(() => true);
-      const isWordVisibleOnPage = vi.fn(() => false);
+      const isWordInDom = vi.fn((_idx: number) => true);
+      const isWordVisibleOnPage = vi.fn((_idx: number) => false);
       const startModeFn = vi.fn();
 
       // The gate logic: visible check takes priority
@@ -398,7 +398,7 @@ describe("useReaderMode orchestration logic", () => {
     });
 
     it("render gate passes when word IS visible on page", () => {
-      const isWordVisibleOnPage = vi.fn(() => true);
+      const isWordVisibleOnPage = vi.fn((_idx: number) => true);
       const startModeFn = vi.fn();
 
       const visibleOnPage = isWordVisibleOnPage(82);

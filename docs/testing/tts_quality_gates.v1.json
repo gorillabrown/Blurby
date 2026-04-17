@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "gateVersion": "v1",
+  "description": "Release quality gates for TTS evaluation aggregates.",
+  "hardFail": [
+    {
+      "id": "startup-p50-max",
+      "metric": "startupLatency.p50",
+      "op": "<=",
+      "value": 470,
+      "unit": "ms",
+      "reason": "Median startup latency must stay responsive."
+    },
+    {
+      "id": "startup-p95-max",
+      "metric": "startupLatency.p95",
+      "op": "<=",
+      "value": 510,
+      "unit": "ms",
+      "reason": "Tail startup latency must remain within release baseline tolerance."
+    },
+    {
+      "id": "drift-p95-max",
+      "metric": "drift.p95",
+      "op": "<=",
+      "value": 2,
+      "unit": "words",
+      "reason": "Cursor/highlight drift should remain fully aligned in baseline matrix runs."
+    },
+    {
+      "id": "pause-resume-failures-max",
+      "metric": "failureCounts.pauseResumeFailures",
+      "op": "<=",
+      "value": 0,
+      "unit": "count",
+      "reason": "Pause/resume integrity failures block release."
+    },
+    {
+      "id": "handoff-failures-max",
+      "metric": "failureCounts.handoffFailures",
+      "op": "<=",
+      "value": 0,
+      "unit": "count",
+      "reason": "Cross-book handoff failures block release."
+    }
+  ],
+  "warnOnly": [
+    {
+      "id": "startup-max-warning",
+      "metric": "startupLatency.max",
+      "op": "<=",
+      "value": 550,
+      "unit": "ms",
+      "reason": "Single-run startup spikes require reviewer acknowledgement."
+    },
+    {
+      "id": "drift-max-warning",
+      "metric": "drift.max",
+      "op": "<=",
+      "value": 2,
+      "unit": "words",
+      "reason": "Any max drift above baseline should be reviewed before release."
+    }
+  ]
+}

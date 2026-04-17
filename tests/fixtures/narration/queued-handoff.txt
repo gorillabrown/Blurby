@@ -1,0 +1,3 @@
+Book A reaches the final line. The queue immediately promotes Book B.
+The handoff should preserve mode intent and emit both book and handoff trace events.
+

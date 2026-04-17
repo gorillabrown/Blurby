@@ -201,7 +201,7 @@ export const KOKORO_DEFAULT_RATE_BUCKET: KokoroRateBucket = 1.0;
  * Used by settings, keyboard shortcuts, and narration startup.
  */
 export function resolveKokoroBucket(rate: number): KokoroRateBucket {
-  let closest = KOKORO_RATE_BUCKETS[0];
+  let closest: KokoroRateBucket = KOKORO_RATE_BUCKETS[0];
   let minDist = Math.abs(rate - closest);
   for (let i = 1; i < KOKORO_RATE_BUCKETS.length; i++) {
     const dist = Math.abs(rate - KOKORO_RATE_BUCKETS[i]);
@@ -473,6 +473,7 @@ export const DEFAULT_SETTINGS = {
   flowZonePosition: FLOW_READING_ZONE_POSITION,
   flowZoneLines: FLOW_ZONE_LINES_DEFAULT,
   lastReadingMode: "flow" as const,
+  isNarrating: false,
   ttsEnabled: false,
   ttsEngine: "kokoro" as const,
   ttsVoiceName: null as string | null,

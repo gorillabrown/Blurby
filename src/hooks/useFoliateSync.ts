@@ -24,7 +24,9 @@ export interface UseFoliateSyncParams {
   /** Whether the active doc uses the foliate EPUB renderer */
   useFoliate: boolean;
   /** Current reading mode */
-  readingMode: "page" | "focus" | "flow" | "narration";
+  readingMode: "page" | "focus" | "flow";
+  /** Flow-layer narration state */
+  isNarrating: boolean;
   /** Currently highlighted word index (Page/Flow/Narration position) */
   highlightedWordIndex: number;
   /** Full-book word metadata (sections + totalWords), null until extraction completes */
@@ -101,6 +103,7 @@ function resolveTocWordIndex(
 export function useFoliateSync({
   useFoliate,
   readingMode,
+  isNarrating,
   highlightedWordIndex,
   bookWordMeta,
   narration,
@@ -115,13 +118,13 @@ export function useFoliateSync({
   activeDocWordCount,
 }: UseFoliateSyncParams): UseFoliateSyncReturn {
   // ── 1. Browse-away detection ─────────────────────────────────────────────
-  // Polls foliateApiRef.isUserBrowsing on an interval while in narration mode.
-  // When the mode changes away from narration (or useFoliate is false) the flag
+  // Polls foliateApiRef.isUserBrowsing on an interval while narration is active.
+  // When narration is inactive (or useFoliate is false) the flag
   // is reset to false immediately.
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
 
   useEffect(() => {
-    if (!useFoliate || readingMode !== "narration") {
+    if (!useFoliate || !isNarrating) {
       if (isBrowsedAway) setIsBrowsedAway(false);
       return;
     }
@@ -131,7 +134,7 @@ export function useFoliateSync({
     };
     const timer = setInterval(checkBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [useFoliate, readingMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [useFoliate, isNarrating]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── 2. Chapter charOffset sync ───────────────────────────────────────────
   // Once bookWordMeta arrives, replace each chapter's charOffset with the

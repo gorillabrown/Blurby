@@ -228,24 +228,16 @@ describe("NARR-CURSOR-1: Collapsing narration cursor", () => {
     expect(NARRATION_CURSOR_LAG_MS).toBe(350);
   });
 
-  // (l) CSS: no `transition: transform` inside .foliate-narration-highlight rule
-  it("CSS: .foliate-narration-highlight rule does not contain transition: transform", () => {
+  // (l) NARR-LAYER-1B removes the overlay CSS rule entirely
+  it("CSS: .foliate-narration-highlight rule is removed", () => {
     const css = fs.readFileSync(CSS_PATH, "utf-8");
     const block = extractCssBlock(css, ".foliate-narration-highlight");
-    expect(block.length).toBeGreaterThan(0); // rule exists
-    // Must not have a standalone transform transition property
-    expect(block).not.toMatch(/transition\s*:[^;]*\btransform\b/);
+    expect(block.length).toBe(0);
   });
 
-  // (m) CSS: gradient uses 2-stop pattern with accent 30% and transparent 100%
-  it("CSS: .foliate-narration-highlight gradient is 2-stop (accent 30% -> transparent 100%)", () => {
+  // (m) Ensure removed selector does not linger in stylesheet text
+  it("CSS: stylesheet no longer contains foliate-narration-highlight selector", () => {
     const css = fs.readFileSync(CSS_PATH, "utf-8");
-    const block = extractCssBlock(css, ".foliate-narration-highlight");
-    expect(block.length).toBeGreaterThan(0);
-    // Both stops must appear in the gradient
-    expect(block).toMatch(/30%/);
-    expect(block).toMatch(/transparent\s+100%/);
-    // The gradient must be a linear-gradient (2 stops, no radial)
-    expect(block).toMatch(/linear-gradient/);
+    expect(css).not.toContain(".foliate-narration-highlight");
   });
 });

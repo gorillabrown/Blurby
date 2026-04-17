@@ -6,10 +6,11 @@ import {
   CROSS_BOOK_FLOW_RESUME_DELAY_MS,
 } from "../constants";
 import type { BlurbyDoc, BlurbySettings } from "../types";
+import type { TtsEvalTraceSink } from "../types/eval";
 
 const api = window.electronAPI;
 
-type ReadingMode = "page" | "focus" | "flow" | "narration";
+type ReadingMode = "page" | "focus" | "flow";
 
 interface NarrationFlowBridge {
   stop: () => void;
@@ -75,6 +76,8 @@ export interface UseFlowScrollSyncParams {
   finishReadingWithoutExitRef: React.MutableRefObject<(idx: number) => void>;
   /** Open doc by ID (for cross-book). */
   onOpenDocByIdRef: React.MutableRefObject<(docId: string) => void>;
+  /** Optional eval-trace sink (off by default). */
+  evalTrace?: TtsEvalTraceSink | null;
 }
 
 export interface UseFlowScrollSyncReturn {
@@ -123,6 +126,7 @@ export function useFlowScrollSync({
   focusTextSize,
   finishReadingWithoutExitRef,
   onOpenDocByIdRef,
+  evalTrace = null,
 }: UseFlowScrollSyncParams): UseFlowScrollSyncReturn {
   const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
 
@@ -160,7 +164,12 @@ export function useFlowScrollSync({
     // Create engine if needed
     if (!flowScrollEngineRef.current) {
       flowScrollEngineRef.current = new FlowScrollEngine({
-        onWordAdvance: (idx: number) => setHighlightedWordIndex(idx),
+        onWordAdvance: (idx: number) => {
+          setHighlightedWordIndex(idx);
+          if (evalTrace?.enabled) {
+            evalTrace.record({ kind: "word", source: "flow", wordIndex: idx });
+          }
+        },
         onComplete: () => {
           if (isNarratingRef.current) return;
           const doc = activeDocRef.current;
@@ -185,7 +194,19 @@ export function useFlowScrollSync({
             timeoutId: tid,
           });
         },
-        onProgressUpdate: (progress: FlowProgress) => setFlowProgress(progress),
+        onProgressUpdate: (progress: FlowProgress) => {
+          setFlowProgress(progress);
+          if (evalTrace?.enabled) {
+            evalTrace.record({
+              kind: "flow-position",
+              lineIndex: progress.lineIndex,
+              totalLines: progress.totalLines,
+              wordIndex: progress.wordIndex,
+              totalWords: progress.totalWords,
+              bookPct: progress.bookPct,
+            });
+          }
+        },
       });
     }
 
@@ -256,6 +277,15 @@ export function useFlowScrollSync({
       const nextSection = bookWordMeta?.sections?.find((section) => section.startWordIdx > currentWord);
 
       if (nextSection && currentWord < totalWords - 1) {
+        if (evalTrace?.enabled) {
+          evalTrace.record({
+            kind: "transition",
+            transition: "section",
+            from: currentWord,
+            to: nextSection.sectionIndex,
+            context: "flow-narration-section-handoff",
+          });
+        }
         const sectionPromise = foliateApiRef.current?.goToSection?.(nextSection.sectionIndex);
         sectionPromise?.then(() => {
             setTimeout(() => {
@@ -272,12 +302,30 @@ export function useFlowScrollSync({
       setIsNarrating(false);
 
       if (!nextDoc) {
+        if (evalTrace?.enabled) {
+          evalTrace.record({
+            kind: "transition",
+            transition: "book",
+            from: doc.id,
+            to: "none",
+            context: "queue-exhausted",
+          });
+        }
         pendingNarrationResumeRef.current = false;
         setFlowPlaying(false);
         setReadingMode("page");
         return;
       }
 
+      if (evalTrace?.enabled) {
+        evalTrace.record({
+          kind: "transition",
+          transition: "handoff",
+          from: doc.id,
+          to: nextDoc.id,
+          context: "cross-book-flow-narration",
+        });
+      }
       pendingNarrationResumeRef.current = true;
       setFlowPlaying(false);
       const tid = setTimeout(() => {

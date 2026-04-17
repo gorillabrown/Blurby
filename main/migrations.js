@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 7;
+const CURRENT_SETTINGS_SCHEMA = 8;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -87,6 +87,19 @@ const settingsMigrations = [
   (data) => {
     if (data.flowWordSpan === undefined) data.flowWordSpan = 1;
     data.schemaVersion = 7;
+    return data;
+  },
+  // v7 → v8: NARR-LAYER-1B consolidate narration into flow + isNarrating flag
+  (data) => {
+    if (data.readingMode === "narration") {
+      data.readingMode = "flow";
+      data.isNarrating = true;
+    }
+    if (data.lastReadingMode === "narration") {
+      data.lastReadingMode = "flow";
+    }
+    if (data.isNarrating === undefined) data.isNarrating = false;
+    data.schemaVersion = 8;
     return data;
   },
 ];

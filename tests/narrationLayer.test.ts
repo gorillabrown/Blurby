@@ -179,15 +179,15 @@ describe("NARR-LAYER-1A — source contracts", () => {
     expect(src).toContain("pendingFlowResumeRef.current = true;");
   });
 
-  it("FoliatePageView suppresses the narration overlay while flow mode is active", () => {
+  it("FoliatePageView removes the narration overlay and uses flow highlight path", () => {
     const src = read("src/components/FoliatePageView.tsx");
-    expect(src).toContain('if (readingModeRef.current === "flow") {');
-    expect(src).toContain("hideNarrationOverlay();");
+    expect(src).not.toContain("foliate-narration-highlight");
+    expect(src).toContain('applyVisualHighlightByIndex(narrationWordIndex, "flow", false);');
   });
 
   it("ReaderBottomBar treats flow+narrating as narration-selected for TTS controls", () => {
     const src = read("src/components/ReaderBottomBar.tsx");
-    expect(src).toContain('(readingMode === "flow" && isNarrating)');
+    expect(src).toContain('const isNarrationSelected = readingMode === "flow" && isNarrating;');
     expect(src).toContain("Narrating · ");
   });
 

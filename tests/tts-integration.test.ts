@@ -238,7 +238,7 @@ describe("TTS-7D Integration: Extraction dedupe", () => {
     // Simulate dedupe logic (same as ReaderContainer's dedupeExtractWords)
     let inflight: Promise<any> | null = null;
     let inflightId: string | null = null;
-    function dedupeExtract(bookId: string): Promise<any> {
+    function dedupeExtract(bookId: string): Promise<any> | null {
       if (inflight && inflightId === bookId) return inflight;
       inflightId = bookId;
       inflight = mockExtract(bookId).finally(() => {

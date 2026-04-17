@@ -21,7 +21,7 @@ function traceMut<T>(method: string, args: unknown[], result: T): T {
 // ── Event emitter system ────────────────────────────────────────────────────
 type EventCallback = (...args: any[]) => void;
 const eventListeners = new Map<string, Set<EventCallback>>();
-const stubTtsCache = new Map<string, { audio: number[]; sampleRate: number; durationMs: number }>();
+const stubTtsCache = new Map<string, { audio: number[]; sampleRate: number; durationMs: number; wordCount?: number }>();
 
 function addEventListener(event: string, callback: EventCallback): () => void {
   if (!eventListeners.has(event)) eventListeners.set(event, new Set());
@@ -59,6 +59,7 @@ const defaultSettings: BlurbySettings = {
   flowTextSize: 110,
   rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
   layoutSpacing: { line: 1.5, character: 0, word: 0 },
+  justifiedText: true,
   initialPauseMs: 3000,
   punctuationPauseMs: 1000,
   viewMode: "list",
@@ -69,7 +70,10 @@ const defaultSettings: BlurbySettings = {
   syncOnMeteredConnection: false,
   flowWordSpan: 3,
   flowCursorStyle: "underline",
+  flowZonePosition: 0.25,
+  flowZoneLines: 5,
   lastReadingMode: "flow",
+  isNarrating: false,
   ttsEnabled: false,
   ttsEngine: "kokoro",
   ttsVoiceName: null,
@@ -566,6 +570,29 @@ export const electronAPIStub: ElectronAPI = {
   getWsShortCode: async () => trace("getWsShortCode", [], { code: "123456", expiresAt: Date.now() + 300000, connected: false }),
   regenerateWsShortCode: async () => trace("regenerateWsShortCode", [], { code: "654321", expiresAt: Date.now() + 300000 }),
 
+  // ── Queue operations ────────────────────────────────────────────────────
+  addToQueue: async (docId: string) => {
+    const maxPos = Math.max(-1, ...library.map((d) => d.queuePosition ?? -1));
+    const doc = findDoc(docId);
+    if (doc) doc.queuePosition = maxPos + 1;
+    return traceMut("addToQueue", [docId], undefined);
+  },
+  removeFromQueue: async (docId: string) => {
+    const doc = findDoc(docId);
+    if (doc) doc.queuePosition = undefined;
+    return traceMut("removeFromQueue", [docId], undefined);
+  },
+  reorderQueue: async (docId: string, newPosition: number) => {
+    const queued = library.filter((d) => typeof d.queuePosition === "number").sort((a, b) => (a.queuePosition ?? 0) - (b.queuePosition ?? 0));
+    const moving = queued.find((d) => d.id === docId);
+    if (!moving) return traceMut("reorderQueue", [docId, newPosition], undefined);
+    const remaining = queued.filter((d) => d.id !== docId);
+    const clamped = Math.max(0, Math.min(remaining.length, newPosition));
+    remaining.splice(clamped, 0, moving);
+    remaining.forEach((d, idx) => { d.queuePosition = idx; });
+    return traceMut("reorderQueue", [docId, newPosition], undefined);
+  },
+
   // ── Cloud sync ──────────────────────────────────────────────────────────
   cloudSignIn: async (provider) => trace("cloudSignIn", [provider], { success: false, error: "Cloud auth not available in browser stub" }),
   cloudSignOut: async (provider) => trace("cloudSignOut", [provider], { success: true }),
@@ -621,9 +648,9 @@ export const electronAPIStub: ElectronAPI = {
     if (entry) return trace("ttsCacheRead", [bookId, voiceId, startIdx], entry);
     return trace("ttsCacheRead", [bookId, voiceId, startIdx], { miss: true });
   },
-  ttsCacheWrite: async (bookId: string, voiceId: string, startIdx: number, audioArr: number[], sampleRate: number, durationMs: number, wordCount?: number | null) => {
+  ttsCacheWrite: async (bookId: string, voiceId: string, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => {
     const key = `${bookId}:${voiceId}:${startIdx}`;
-    stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs, wordCount: wordCount ?? null });
+    stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs, wordCount: wordCount ?? undefined });
     return trace("ttsCacheWrite", [bookId, voiceId, startIdx], { success: true });
   },
   ttsCacheHas: async (bookId: string, voiceId: string, startIdx: number) => {
@@ -659,7 +686,10 @@ export const electronAPIStub: ElectronAPI = {
   onWatcherError: (cb: EventCallback) => addEventListener("watcher-error", cb),
   onKokoroDownloadProgress: (cb: EventCallback) => addEventListener("tts-kokoro-download-progress", cb),
   onKokoroLoading: (cb: EventCallback) => addEventListener("tts-kokoro-loading", cb),
+  onKokoroEngineStatus: (cb: EventCallback) => addEventListener("tts-kokoro-engine-status", cb),
   onKokoroDownloadError: (cb: EventCallback) => addEventListener("tts-kokoro-download-error", cb),
+  onWsConnectionAttempt: (cb: EventCallback) => addEventListener("ws-connection-attempt", cb),
+  onWsPairingSuccess: (cb: EventCallback) => addEventListener("ws-pairing-success", cb),
 };
 
 // ── Public test control interface ───────────────────────────────────────────

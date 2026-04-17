@@ -221,26 +221,6 @@
 .page-nav-btn--right { right: 8px; z-index: 10; }
 
 
-/* Overlay highlight for EPUB narration — fixed-size line highlight.
-   TTS-7R (BUG-145a): Width and height are measured once at narration start and set
-   via JS; they never change per-word. Only transform (Y position) and opacity animate. */
-.foliate-narration-highlight {
-  position: absolute;
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--accent) 30%, transparent) 0%,
-    transparent 100%
-  );
-  border-bottom: 3px solid color-mix(in srgb, var(--accent) 92%, white);
-  border-radius: 8px;
-  pointer-events: none;
-  z-index: 100;
-  will-change: transform, width, opacity;
-  transition: opacity 80ms ease;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
-  opacity: 0;
-  display: none; /* shown via JS: highlightRef.current.style.display = "block" */
-}
-
 /* STAB-1A (BUG-162a): Loading indicator shown while EPUB word-wrapping runs */
 .foliate-loading {
   position: absolute;
@@ -772,4 +752,3 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-

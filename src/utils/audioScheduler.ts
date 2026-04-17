@@ -404,7 +404,7 @@ export function createAudioScheduler(): AudioScheduler {
 
     // Create AudioBuffer
     const buffer = ctx.createBuffer(1, processed.length, chunk.sampleRate);
-    buffer.copyToChannel(processed, 0);
+    buffer.copyToChannel(new Float32Array(processed), 0);
 
     // Create source
     const source = ctx.createBufferSource();

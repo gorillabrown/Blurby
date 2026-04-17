@@ -111,25 +111,25 @@ describe("TTS-7K: onWordsReextracted source protection (BUG-131)", () => {
 describe("TTS-7K: page mode isolation (BUG-133)", () => {
   it("section-boundary effect should skip for page mode", () => {
     // Simulate the guard logic
-    const readingMode = "page";
+    const readingMode: string = "page";
     const shouldRun = readingMode === "focus" || readingMode === "flow";
     expect(shouldRun).toBe(false);
   });
 
   it("section-boundary effect should run for focus mode", () => {
-    const readingMode = "focus";
+    const readingMode: string = "focus";
     const shouldRun = readingMode === "focus" || readingMode === "flow";
     expect(shouldRun).toBe(true);
   });
 
   it("section-boundary effect should run for flow mode", () => {
-    const readingMode = "flow";
+    const readingMode: string = "flow";
     const shouldRun = readingMode === "focus" || readingMode === "flow";
     expect(shouldRun).toBe(true);
   });
 
   it("section-boundary effect should skip for narration mode", () => {
-    const readingMode = "narration";
+    const readingMode: string = "narration";
     const shouldRun = readingMode === "focus" || readingMode === "flow";
     expect(shouldRun).toBe(false);
   });

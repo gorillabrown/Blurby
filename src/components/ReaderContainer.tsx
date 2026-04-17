@@ -30,6 +30,7 @@ import { useSettings } from "../contexts/SettingsContext";
 import { useToast } from "../contexts/ToastContext";
 import { useDocumentLifecycle } from "../hooks/useDocumentLifecycle";
 import { useFlowScrollSync } from "../hooks/useFlowScrollSync";
+import { createWindowEvalTraceSink } from "../utils/ttsEvalTrace";
 
 const api = window.electronAPI;
 
@@ -116,9 +117,10 @@ export default function ReaderContainer({
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
   );
+  const evalTraceSink = useMemo(() => createWindowEvalTraceSink(), []);
 
   // ── Four-mode state (mutually exclusive) ────────────────────────────────
-  const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow" | "narration">("page");
+  const [readingMode, setReadingMode] = useState<"page" | "focus" | "flow">("page");
   const readingModeRef = useRef(readingMode);
   readingModeRef.current = readingMode;
   const [isNarrating, setIsNarrating] = useState(false);
@@ -191,12 +193,10 @@ export default function ReaderContainer({
   // Focus: FocusMode class drives timing (not useReader's playing flag)
   const isActivelyReading =
     readingMode === "focus"
-    || (readingMode === "flow" && (flowPlaying || isNarrating))
-    || readingMode === "narration";
+    || (readingMode === "flow" && (flowPlaying || isNarrating));
 
-  // For the old useReaderKeys compatibility — map three-mode to legacy mode strings
-  // Map 4-mode to legacy 3-mode for keyboard hooks. Narration uses "page" layout.
-  const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : readingMode === "narration" ? "narration" : "page";
+  // For the old useReaderKeys compatibility — map three-mode to legacy mode strings.
+  const legacyReaderMode = readingMode === "flow" ? "scroll" : readingMode === "focus" ? "speed" : "page";
 
   const words = tokenized.words;
   // Clear wordsRef on doc type switch (foliate ↔ legacy) to prevent stale word arrays
@@ -248,6 +248,7 @@ export default function ReaderContainer({
     activeDoc,
     readingMode,
     settings,
+    isNarrating,
     focusTextSize,
     initReader,
     setHighlightedWordIndex,
@@ -288,9 +289,9 @@ export default function ReaderContainer({
 
   // Progress save effect + finishReading — managed by useProgressTracker hook
 
-  // ── TTS (Narration) — now a discrete mode, not a layer ─────────────────
-  const narration = useNarration();
-  const ttsActive = readingMode === "narration" || isNarrating; // derived, not separate state
+  // ── TTS (Narration) — flow-layer state ──────────────────────────────────
+  const narration = useNarration({ evalTrace: evalTraceSink });
+  const ttsActive = isNarrating;
   // preCapWpmRef managed by useReaderMode hook
 
   // ── Narration-to-settings sync (10 effects extracted to useNarrationSync) ──
@@ -316,6 +317,7 @@ export default function ReaderContainer({
     narrationWarmUp: narration.warmUp,
     useFoliate,
     readingMode,
+    isNarrating,
     bookWordsRef,
     footnoteCuesRef,
     bookWordsCompleteRef,
@@ -359,6 +361,7 @@ export default function ReaderContainer({
   const { isBrowsedAway, setIsBrowsedAway } = useFoliateSync({
     useFoliate,
     readingMode,
+    isNarrating,
     highlightedWordIndex,
     bookWordMeta,
     narration,
@@ -384,7 +387,7 @@ export default function ReaderContainer({
     foliateApiRef,
     onWordAdvance: (idx: number) => {
       highlightedWordIndexRef.current = idx;
-      if (readingModeRef.current === "narration") {
+      if (isNarratingRef.current) {
         narrationStatePendingIdxRef.current = idx;
         if (narrationStateFlushRafRef.current == null) {
           narrationStateFlushRafRef.current = requestAnimationFrame(() => {
@@ -399,8 +402,8 @@ export default function ReaderContainer({
       }
       // TTS-7A: Update background cacher with live cursor position
       backgroundCacherRef.current?.updateCursorPosition(idx);
-      // ReaderView DOM updates are only relevant for non-narration modes.
-      if (readingModeRef.current !== "narration" && onWordUpdateRef.current && wordsRef.current[idx]) {
+      // ReaderView DOM updates are only relevant when narration is not active.
+      if (!isNarratingRef.current && onWordUpdateRef.current && wordsRef.current[idx]) {
         onWordUpdateRef.current(wordsRef.current[idx], idx);
       }
     },
@@ -448,9 +451,9 @@ export default function ReaderContainer({
     softWordIndexRef,
   });
   const {
-    stopAllModes, startFocus, startFlow, startNarration, toggleNarrationInFlow,
+    stopAllModes, startFocus, startFlow, toggleNarrationInFlow,
     handleTogglePlay, handleSelectMode, handlePauseToPage,
-    handleToggleTts, handleEnterFocus, handleEnterFlow,
+    handleEnterFocus, handleEnterFlow,
     handleStopTts, handleReturnToReading, handleCycleMode, handleCycleAndStart,
     preCapWpmRef,
   } = modeHook;
@@ -491,6 +494,7 @@ export default function ReaderContainer({
     focusTextSize,
     finishReadingWithoutExitRef,
     onOpenDocByIdRef,
+    evalTrace: evalTraceSink,
   });
 
   // Exit reader — uses both mode hook and progress hook
@@ -548,10 +552,8 @@ export default function ReaderContainer({
   const handleToggleNarration = useCallback(() => {
     if (readingModeRef.current === "flow") {
       toggleNarrationInFlow();
-      return;
     }
-    handleToggleTts();
-  }, [handleToggleTts, toggleNarrationInFlow]);
+  }, [toggleNarrationInFlow]);
 
   // Chapter navigation
   const handlePrevChapter = useCallback(() => {
@@ -640,9 +642,8 @@ export default function ReaderContainer({
 
   // Wrap adjustWpm: when narration is selected (active or paused), Up/Down adjusts TTS rate
   const isNarrationSelected =
-    readingMode === "narration"
-    || (readingMode === "flow" && isNarrating)
-    || (readingMode === "page" && settings.lastReadingMode === "narration");
+    (readingMode === "flow" && isNarrating)
+    || (readingMode === "page" && settings.isNarrating === true);
   const adjustSpeed = useCallback((delta: number) => {
     if (isNarrationSelected) {
       const isKokoro = settings.ttsEngine === "kokoro";
@@ -770,11 +771,11 @@ export default function ReaderContainer({
     // newly selected word even within the same event loop.
     highlightedWordIndexRef.current = index;
     setHighlightedWordIndex(index);
-    if (readingMode === "narration" && narration.speaking && !narration.warming) {
+    if (isNarrating && narration.speaking && !narration.warming) {
       // Resync TTS to new position (active playback)
       resyncToCursorRef.current(index, effectiveWpm);
     }
-  }, [readingMode, effectiveWpm, narration.speaking, narration.warming]);
+  }, [effectiveWpm, isNarrating, narration.speaking, narration.warming]);
 
   // Determine current word index for bottom bar
   const currentWordIndex = useMemo(() => {
@@ -823,7 +824,7 @@ export default function ReaderContainer({
           // TTS-7M (BUG-135): When a resume anchor is active, passive onRelocate
           // must not lower highlightedWordIndex. The anchor is the authority.
           const hasResumeAnchor = resumeAnchorRef.current != null;
-          if (mode !== "narration" && mode !== "flow" && !hasResumeAnchor) {
+          if (mode !== "flow" && !hasResumeAnchor) {
             setHighlightedWordIndex(approxWordIdx);
           } else if (import.meta.env.DEV && hasResumeAnchor) {
             console.debug("[TTS-7M] onRelocate: resume anchor active at", resumeAnchorRef.current, "— skipping approx", approxWordIdx);
@@ -840,10 +841,6 @@ export default function ReaderContainer({
           } else if (mode === "page" && !hasResumeAnchor && userExplicitSelectionRef.current) {
             // User clicked a word — reset explicit flag on page turn so soft resumes next page
             userExplicitSelectionRef.current = false;
-          }
-          // BUG-151: Re-measure narration band on section change during active narration
-          if (mode === "narration") {
-            foliateApiRef.current?.measureNarrationBandDimensions?.();
           }
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
           // TTS-7M: Also skip progress save when resume anchor is active (passive event noise)
@@ -902,7 +899,7 @@ export default function ReaderContainer({
         // Uses ref (not state) because this callback is captured in a closure at render time.
         setTimeout(() => {
           const mode = readingModeRef.current;
-          if (mode !== "narration" && mode !== "flow") {
+          if (mode !== "flow") {
             extractFoliateWords();
             // TTS-7M (BUG-135): When a resume anchor is active, passive onLoad
             // must not replace the authoritative start point.
@@ -950,7 +947,7 @@ export default function ReaderContainer({
         }, 200); // Slightly longer delay to ensure foliate has finished rendering
       }}
       viewApiRef={foliateApiRef}
-      isReading={isBrowsedAway && (readingMode === "flow" || readingMode === "narration")}
+      isReading={isBrowsedAway && (readingMode === "flow" || isNarrating)}
       onJumpToHighlight={() => {
         // Use the foliate API's returnToNarration which clears browsing flag + scrolls
         if (foliateApiRef.current?.returnToNarration) {
@@ -964,8 +961,8 @@ export default function ReaderContainer({
       flowPlaying={flowPlaying}
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
-      narrationWordIndex={readingMode === "narration" ? highlightedWordIndex : undefined}
-      getAudioProgress={readingMode === "narration" ? narration.getAudioProgress : null}
+      narrationWordIndex={isNarrating ? highlightedWordIndex : undefined}
+      getAudioProgress={isNarrating ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
       flowMode={readingMode === "flow"}
       scrollContainerRef={flowScrollContainerRef}
@@ -998,23 +995,18 @@ export default function ReaderContainer({
             modeInstanceHook.pendingResumeRef.current = null;
             // Allow DOM to settle after word extraction + span wrapping
             requestAnimationFrame(() => {
-              if (pending.mode === "narration") {
-                // Narration doesn't pause — just re-apply the highlight
-                foliateApiRef.current?.highlightWordByIndex(pending.wordIndex, "narration");
-              } else {
-                // Flow: try highlighting the pending word in the new section
-                const instance = modeInstanceHook.modeRef.current;
-                if (instance && instance.type === pending.mode) {
-                  const found = foliateApiRef.current?.highlightWordByIndex(
-                    pending.wordIndex, pending.mode
-                  );
-                  if (found) {
-                    instance.resume();
-                  } else {
-                    // Still not found — word may be further ahead. Turn another page.
-                    modeInstanceHook.pendingResumeRef.current = pending;
-                    foliateApiRef.current?.next();
-                  }
+              // Flow: try highlighting the pending word in the new section
+              const instance = modeInstanceHook.modeRef.current;
+              if (instance && instance.type === pending.mode) {
+                const found = foliateApiRef.current?.highlightWordByIndex(
+                  pending.wordIndex, pending.mode
+                );
+                if (found) {
+                  instance.resume();
+                } else {
+                  // Still not found — word may be further ahead. Turn another page.
+                  modeInstanceHook.pendingResumeRef.current = pending;
+                  foliateApiRef.current?.next();
                 }
               }
             });
@@ -1025,7 +1017,7 @@ export default function ReaderContainer({
   ) : null;
 
   const renderView = () => {
-    // For foliate EPUBs in Page/Flow/Narration: show foliate view
+    // For foliate EPUBs in Page/Flow: show foliate view
     // Focus mode overlays ReaderView on top of foliate
     if (useFoliate) {
       if (readingMode === "focus") {
@@ -1110,8 +1102,6 @@ export default function ReaderContainer({
           playing={readingMode !== "page"}
           isEink={isEink}
           chapters={docChapters}
-          ttsActive={ttsActive}
-          onToggleTts={handleToggleTts}
           onSetWpm={setWpm}
           flowProgress={readingMode === "flow" ? flowProgress ?? undefined : undefined}
           currentChapterName={(() => {
@@ -1146,12 +1136,12 @@ export default function ReaderContainer({
 
       {menuFlap}
       <ReturnToReadingPill
-        visible={isBrowsedAway && readingMode === "narration" && !narration.speaking}
+        visible={isBrowsedAway && readingMode === "flow" && isNarrating && !narration.speaking}
         activeOverlay={menuFlapOpen || showBacktrackPrompt}
         onReturn={handleReturnToReading}
       />
       {/* BUG-147: Return to narration position when actively speaking but user has paged away */}
-      {isBrowsedAway && readingMode === "narration" && narration.speaking && (
+      {isBrowsedAway && readingMode === "flow" && isNarrating && narration.speaking && (
         <button
           className="return-to-narration-btn"
           onClick={handleReturnToReading}

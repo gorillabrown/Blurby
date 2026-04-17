@@ -32,6 +32,7 @@ export async function loadCachedChunk(
 
   const result = await api.ttsCacheRead(bookId, voiceId, startIdx);
   if (!result || result.miss || result.error) return null;
+  if (!result.audio || !result.sampleRate || !result.durationMs) return null;
 
   const audio = result.audio instanceof Float32Array
     ? result.audio

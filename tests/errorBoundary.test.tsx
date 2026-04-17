@@ -9,7 +9,7 @@ function SafeChild() {
   return <div data-testid="safe-child">Safe child</div>;
 }
 
-function ThrowingChild({ message = "Boom" }: { message?: string }) {
+function ThrowingChild({ message = "Boom" }: { message?: string }): ReactElement {
   throw new Error(message);
 }
 
@@ -105,7 +105,7 @@ describe("ErrorBoundary", () => {
     );
 
     expect(consoleErrorSpy).toHaveBeenCalled();
-    const boundaryCall = consoleErrorSpy.mock.calls.find(([firstArg]) => firstArg === "ErrorBoundary caught:");
+    const boundaryCall = consoleErrorSpy.mock.calls.find(([firstArg]: unknown[]) => firstArg === "ErrorBoundary caught:");
     expect(boundaryCall).toBeDefined();
     expect(boundaryCall?.[1]).toBeInstanceOf(Error);
     expect((boundaryCall?.[1] as Error).message).toBe("Captured by boundary");

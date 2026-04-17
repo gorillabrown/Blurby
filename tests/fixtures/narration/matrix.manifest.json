@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "generatedFor": "TTS-EVAL-2",
+  "scenarios": [
+    {
+      "id": "smoke-prose-default",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "short",
+      "tags": ["smoke", "baseline"]
+    },
+    {
+      "id": "smoke-dialogue-fast",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.15,
+      "durationClass": "short",
+      "tags": ["smoke", "dialogue"]
+    },
+    {
+      "id": "punctuation-heavy-mid",
+      "fixtureId": "punctuation-dense",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["punctuation", "drift"]
+    },
+    {
+      "id": "long-form-stability",
+      "fixtureId": "long-sentence",
+      "voiceId": "af_bella",
+      "requestedRate": 0.95,
+      "durationClass": "long",
+      "tags": ["long-form", "stability"]
+    },
+    {
+      "id": "handoff-queue",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["handoff", "transition"]
+    }
+  ]
+}
+
