@@ -9,6 +9,7 @@ export interface FoliateWord {
   word: string;
   range: Range | null;
   sectionIndex: number;
+  tokenId?: string;
 }
 
 export const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
@@ -109,7 +110,11 @@ export function locateTextOffset(nodes: Text[], absoluteOffset: number): { node:
   return { node: last, offset: (last.textContent || "").length };
 }
 
-export function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number): FoliateWord[] {
+export function makeFoliateTokenId(sectionIndex: number, tokenIndex: number): string {
+  return `${sectionIndex}:${tokenIndex}`;
+}
+
+export function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number, tokenOffset = 0): FoliateWord[] {
   if (nodes.length === 0) return [];
   const combined = nodes.map((node) => node.textContent || "").join("");
   const wordSpans = segmentWordSpans(combined);
@@ -123,17 +128,23 @@ export function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number): Fo
     const range = doc.createRange();
     range.setStart(startPos.node, startPos.offset);
     range.setEnd(endPos.node, endPos.offset);
-    words.push({ word, range, sectionIndex });
+    words.push({ word, range, sectionIndex, tokenId: makeFoliateTokenId(sectionIndex, tokenOffset + words.length) });
   }
 
   return words;
 }
 
+type WrappedWordSpan = SegmentedWordSpan & {
+  globalIndex: number;
+  tokenId: string;
+};
+
 export function buildWrappedFragmentForNode(
   doc: Document,
   text: string,
   nodeStart: number,
-  wordSpans: Array<SegmentedWordSpan & { globalIndex: number }>,
+  wordSpans: WrappedWordSpan[],
+  tokenPartById: Map<string, number>,
 ): DocumentFragment | null {
   const nodeEnd = nodeStart + text.length;
   const overlaps = wordSpans.filter((span) => span.end > nodeStart && span.start < nodeEnd);
@@ -152,6 +163,11 @@ export function buildWrappedFragmentForNode(
     const el = doc.createElement("span");
     el.className = "page-word";
     el.setAttribute("data-word-index", String(span.globalIndex));
+    const tokenId = span.tokenId || String(span.globalIndex);
+    const tokenPart = tokenPartById.get(tokenId) ?? 0;
+    tokenPartById.set(tokenId, tokenPart + 1);
+    el.setAttribute("data-token-id", tokenId);
+    el.setAttribute("data-token-part", String(tokenPart));
     el.setAttribute("data-word-full", span.word);
     el.textContent = wrappedText;
     frag.appendChild(el);
@@ -169,15 +185,18 @@ export function extractWordsFromView(view: any): { words: FoliateWord[]; paragra
   const words: FoliateWord[] = [];
   const paragraphBreaks = new Set<number>();
   if (!view?.renderer?.getContents) return { words, paragraphBreaks };
+  const sectionTokenOffsets = new Map<number, number>();
 
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
 
     const blockGroups = collectBlockTextNodes(doc.body);
     for (const { nodes } of blockGroups) {
-      const blockWords = buildWordsFromTextNodes(nodes, index);
+      const tokenOffset = sectionTokenOffsets.get(index) || 0;
+      const blockWords = buildWordsFromTextNodes(nodes, index, tokenOffset);
       if (blockWords.length === 0) continue;
       words.push(...blockWords);
+      sectionTokenOffsets.set(index, tokenOffset + blockWords.length);
       paragraphBreaks.add(words.length - 1);
     }
   }
@@ -189,8 +208,11 @@ export function extractWordsFromSection(doc: Document, sectionIndex: number): Fo
   const words: FoliateWord[] = [];
   if (!doc?.body) return words;
   const groups = collectBlockTextNodes(doc.body);
+  let tokenOffset = 0;
   for (const { nodes } of groups) {
-    words.push(...buildWordsFromTextNodes(nodes, sectionIndex));
+    const blockWords = buildWordsFromTextNodes(nodes, sectionIndex, tokenOffset);
+    words.push(...blockWords);
+    tokenOffset += blockWords.length;
   }
   return words;
 }

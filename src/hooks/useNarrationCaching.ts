@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
 import { mergeOverrides } from "../utils/pronunciationOverrides";
-import { resolveKokoroBucket } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
+import { resolveKokoroRatePlan } from "../utils/kokoroRatePlan";
 import { wrapWordsInSpans, unwrapWordSpans } from "../components/FoliatePageView";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import type { BookWordArray } from "../types/narration";
@@ -108,7 +108,7 @@ export function useNarrationCaching({
       },
       getVoiceId: () => settings.ttsVoiceName || "af_bella",
       isCacheEnabled: () => settings.ttsCacheEnabled !== false,
-      getRateBucket: () => resolveKokoroBucket(settings.ttsRate || 1.0),
+      getRateBucket: () => resolveKokoroRatePlan(settings.ttsRate || 1.0).generationBucket,
       getPronunciationOverrides: () => mergeOverrides(settings.pronunciationOverrides || [], activeDoc.pronunciationOverrides || []),
     });
     backgroundCacherRef.current = cacher;
@@ -192,7 +192,7 @@ export function useNarrationCaching({
 
     const currentSectionIdx = foliateApiRef.current?.getWords()?.[0]?.sectionIndex ?? 0;
 
-    api.extractEpubWords(activeDoc.id).then(async (result: any) => {
+    dedupeExtractWords(activeDoc.id).then(async (result: any) => {
       if (cancelled || !result.words || !result.sections) return;
 
       // TTS-7C: Phase 1 — Build bookWords object

@@ -1,22 +1,29 @@
 // tests/narrationControlsPolish.test.ts — Tests for TTS-6G narration controls & accessibility
 import { describe, it, expect } from "vitest";
-import { stepKokoroBucket, resolveKokoroBucket, KOKORO_RATE_BUCKETS, TTS_RATE_STEP } from "../src/constants";
+import { resolveKokoroBucket, KOKORO_RATE_BUCKETS, TTS_RATE_STEP } from "../src/constants";
+import { KOKORO_UI_SPEEDS, stepKokoroUiSpeed } from "../src/utils/kokoroRatePlan";
 
 // ── Keyboard Stepping Behavior ──────────────────────────────────────────────
 
 describe("narration keyboard stepping", () => {
-  it("Kokoro step-up cycles through exactly three buckets", () => {
+  it("Kokoro step-up walks the full 1.0-1.5 UI ladder", () => {
     let rate = 1.0;
-    rate = stepKokoroBucket(rate, 1); expect(rate).toBe(1.2);
-    rate = stepKokoroBucket(rate, 1); expect(rate).toBe(1.5);
-    rate = stepKokoroBucket(rate, 1); expect(rate).toBe(1.5); // clamp
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.1);
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.2);
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.3);
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.4);
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.5);
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.5); // clamp
   });
 
-  it("Kokoro step-down cycles through exactly three buckets", () => {
+  it("Kokoro step-down walks the full 1.5-1.0 UI ladder", () => {
     let rate = 1.5;
-    rate = stepKokoroBucket(rate, -1); expect(rate).toBe(1.2);
-    rate = stepKokoroBucket(rate, -1); expect(rate).toBe(1.0);
-    rate = stepKokoroBucket(rate, -1); expect(rate).toBe(1.0); // clamp
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.4);
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.3);
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.2);
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.1);
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.0);
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.0); // clamp
   });
 
   it("Web Speech uses 0.1 increment steps", () => {
@@ -39,6 +46,10 @@ describe("narration keyboard stepping", () => {
 // ── Control Surface Semantics ───────────────────────────────────────────────
 
 describe("control surface consistency", () => {
+  it("Kokoro UI exposes the six sprint-contract speeds", () => {
+    expect(KOKORO_UI_SPEEDS).toEqual([1.0, 1.1, 1.2, 1.3, 1.4, 1.5]);
+  });
+
   it("Kokoro bucket resolver maps any rate to one of three values", () => {
     for (let r = 0.0; r <= 3.0; r += 0.1) {
       const bucket = resolveKokoroBucket(r);
@@ -46,14 +57,13 @@ describe("control surface consistency", () => {
     }
   });
 
-  it("bottom bar and settings use same bucket values", () => {
-    // Both TTSSettings and ReaderBottomBar reference KOKORO_RATE_BUCKETS
-    expect(KOKORO_RATE_BUCKETS).toEqual([1.0, 1.2, 1.5]);
+  it("UI speeds still resolve onto the fixed generation buckets", () => {
+    expect(KOKORO_UI_SPEEDS.map((speed) => resolveKokoroBucket(speed))).toEqual([1.0, 1.2, 1.2, 1.2, 1.5, 1.5]);
   });
 
   it("rate display format is consistent (1 decimal place)", () => {
-    for (const bucket of KOKORO_RATE_BUCKETS) {
-      const display = bucket.toFixed(1);
+    for (const speed of KOKORO_UI_SPEEDS) {
+      const display = speed.toFixed(1);
       expect(display).toMatch(/^\d\.\d$/);
     }
   });

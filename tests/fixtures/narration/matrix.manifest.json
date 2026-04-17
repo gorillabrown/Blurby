@@ -14,7 +14,7 @@
       "id": "smoke-dialogue-fast",
       "fixtureId": "dialogue-switches",
       "voiceId": "af_bella",
-      "requestedRate": 1.15,
+      "requestedRate": 1.1,
       "durationClass": "short",
       "tags": ["smoke", "dialogue"]
     },
@@ -22,7 +22,7 @@
       "id": "punctuation-heavy-mid",
       "fixtureId": "punctuation-dense",
       "voiceId": "af_bella",
-      "requestedRate": 1.0,
+      "requestedRate": 1.2,
       "durationClass": "medium",
       "tags": ["punctuation", "drift"]
     },
@@ -30,7 +30,7 @@
       "id": "long-form-stability",
       "fixtureId": "long-sentence",
       "voiceId": "af_bella",
-      "requestedRate": 0.95,
+      "requestedRate": 1.3,
       "durationClass": "long",
       "tags": ["long-form", "stability"]
     },
@@ -38,10 +38,17 @@
       "id": "handoff-queue",
       "fixtureId": "queued-handoff",
       "voiceId": "af_bella",
-      "requestedRate": 1.0,
+      "requestedRate": 1.4,
       "durationClass": "medium",
       "tags": ["handoff", "transition"]
+    },
+    {
+      "id": "chapter-transition",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.5,
+      "durationClass": "medium",
+      "tags": ["transition", "chapter"]
     }
   ]
 }
-

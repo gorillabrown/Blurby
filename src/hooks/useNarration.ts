@@ -18,6 +18,7 @@ import {
   snapshotFromKokoroErrorResponse,
   snapshotFromLegacyKokoroDownloadError,
 } from "../utils/kokoroStatus";
+import { resolveKokoroRatePlan } from "../utils/kokoroRatePlan";
 
 export interface FootnoteCue {
   afterWordIdx: number;
@@ -44,6 +45,17 @@ type TtsEngine = "web" | "kokoro";
 function wpmToRate(wpm: number): number {
   const rate = wpm / TTS_RATE_BASELINE_WPM;
   return Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, rate));
+}
+
+function normalizeNarrationRate(rate: number, engine: TtsEngine): number {
+  if (engine === "kokoro") {
+    return resolveKokoroRatePlan(rate).selectedSpeed;
+  }
+  return Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, rate));
+}
+
+function kokoroBucketChanged(previousRate: number, nextRate: number): boolean {
+  return resolveKokoroRatePlan(previousRate).generationBucket !== resolveKokoroRatePlan(nextRate).generationBucket;
 }
 
 /** Find sentence boundary in word array, returns end index (exclusive).
@@ -80,6 +92,10 @@ interface UseNarrationOptions {
   evalTrace?: TtsEvalTraceSink | null;
 }
 
+export interface NarrationWordUpdateOptions {
+  mode?: "passive" | "handoff";
+}
+
 export default function useNarration(options: UseNarrationOptions = {}) {
   // ── Reducer state machine ──────────────────────────────────────────────
   const [state, dispatch] = useReducer(narrationReducer, undefined, createInitialNarrationState);
@@ -109,6 +125,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
    *  confirmed boundary crossings. Used as the authoritative start index for chunk generation
    *  so that visual-advance callbacks cannot contaminate the pipeline's read head. */
   const lastConfirmedAudioWordRef = useRef<number>(0);
+  /** Handoff marker — set when the next chunk chain must start fresh from a new global anchor. */
+  const handoffPendingRef = useRef(false);
   const kokoroVoiceRef = useRef("af_bella");
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
@@ -173,6 +191,26 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       fellBack: false,
       fallbackReason: null,
     });
+  }, []);
+
+  /**
+   * Synchronize the canonical narration cursor with a new global word index.
+   * Optionally re-anchor the audio-confirmed cursor when this is an authoritative handoff.
+   */
+  const syncNarrationCursor = useCallback((wordIndex: number, options: { syncConfirmedAudioAnchor?: boolean } = {}) => {
+    const s = stateRef.current;
+    if (s.status === "idle") return s;
+    if (options.syncConfirmedAudioAnchor) {
+      lastConfirmedAudioWordRef.current = wordIndex;
+    }
+    dispatch({ type: "WORD_ADVANCE", wordIndex });
+    stateRef.current = {
+      ...stateRef.current,
+      cursorWordIndex: wordIndex,
+      chunkStart: wordIndex,
+      chunkWords: [],
+    };
+    return s;
   }, []);
 
   // ── TTS Strategy instances ──────────────────────────────────────────────
@@ -457,6 +495,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const speakNextChunk = useCallback(() => {
     const s = stateRef.current;
     if (import.meta.env.DEV) console.debug("[narrate] chunk — engine:", s.engine, "kokoro:", s.kokoroReady, "status:", s.status, "cursor:", s.cursorWordIndex);
+    handoffPendingRef.current = false;
     if (s.engine === "kokoro" && s.kokoroReady) {
       speakNextChunkKokoro();
     } else {
@@ -471,6 +510,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   // ── Legacy speak (full text, independent TTS) ────────────────────────
   const speak = useCallback((text: string, startCharOffset = 0, onWord?: (charIndex: number) => void) => {
     if (!window.speechSynthesis) return;
+    handoffPendingRef.current = false;
     dispatch({ type: "STOP" });
     window.speechSynthesis.cancel();
 
@@ -505,6 +545,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // Stop any existing playback
     webStrategy.stop();
     kokoroStrategy.stop();
+    handoffPendingRef.current = false;
 
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
@@ -574,44 +615,123 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (s.status === "idle") return;
     webStrategy.stop();
     kokoroStrategy.stop();
+    handoffPendingRef.current = false;
     const newSpeed = wpmToRate(wpm);
-    dispatch({ type: "WORD_ADVANCE", wordIndex });
+    syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
     dispatch({ type: "SET_SPEED", speed: newSpeed });
     // Update stateRef for immediate speakNextChunk
-    stateRef.current = { ...stateRef.current, cursorWordIndex: wordIndex, speed: newSpeed };
+    stateRef.current = { ...stateRef.current, speed: newSpeed, generationId: stateRef.current.generationId + 1 };
     speakNextChunk();
-  }, [speakNextChunk, webStrategy, kokoroStrategy]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy, syncNarrationCursor]);
 
   // HOTFIX-6: Replace word array and resync cursor to a global position.
-  // If narration is actively speaking, swap the array silently without interrupting
-  // the current chunk — the next chunk will use the new array automatically.
-  const updateWords = useCallback((words: string[], globalStartIdx: number) => {
+  // Default "passive" mode preserves the existing non-disruptive behavior for cache syncs.
+  // "handoff" mode is authoritative: it also re-anchors the confirmed-audio cursor and,
+  // when narration is still active, starts a fresh chunk chain from the new global index.
+  const updateWords = useCallback((
+    words: string[],
+    globalStartIdx: number,
+    options: NarrationWordUpdateOptions = {},
+  ) => {
     allWordsRef.current = words;
-    const s = stateRef.current;
+    const isHandoff = options.mode === "handoff";
+    const s = syncNarrationCursor(globalStartIdx, { syncConfirmedAudioAnchor: isHandoff });
     if (s.status === "idle") return;
-    // Update cursor position to the global index without stopping playback
-    dispatch({ type: "WORD_ADVANCE", wordIndex: globalStartIdx });
-    stateRef.current = { ...stateRef.current, cursorWordIndex: globalStartIdx, chunkStart: globalStartIdx };
-    if (import.meta.env.DEV) console.debug("[narrate] updateWords — swapped to", words.length, "words at global idx", globalStartIdx, "(no restart)");
-  }, []);
+    if (!isHandoff) {
+      if (import.meta.env.DEV) console.debug("[narrate] updateWords — swapped to", words.length, "words at global idx", globalStartIdx, "(no restart)");
+      return;
+    }
 
-  const updateWpm = useCallback((wpm: number) => {
-    const newRate = wpmToRate(wpm);
-    dispatch({ type: "SET_SPEED", speed: newRate });
-    // Update stateRef for immediate reads
-    stateRef.current = { ...stateRef.current, speed: newRate, generationId: stateRef.current.generationId + 1 };
-    const s = stateRef.current;
-    if (s.status !== "idle") {
-      if (s.engine === "web") {
-        webStrategy.stop();
-        speakNextChunk();
-      } else {
-        // Kokoro: flush the queue and re-generate at new rate
+    handoffPendingRef.current = true;
+    if (s.status === "speaking" || s.status === "paused") {
+      webStrategy.stop();
+      kokoroStrategy.stop();
+    }
+    if (s.status === "speaking") {
+      queueMicrotask(() => {
+        const current = stateRef.current;
+        if (current.status !== "speaking") return;
+        if (current.cursorWordIndex !== globalStartIdx) return;
+        if (lastConfirmedAudioWordRef.current !== globalStartIdx) return;
+        speakNextChunkRef.current();
+      });
+    }
+
+    if (import.meta.env.DEV) {
+      console.debug(
+        "[narrate] updateWords — handoff to",
+        words.length,
+        "words at global idx",
+        globalStartIdx,
+        `(restart=${s.status === "speaking"})`,
+      );
+    }
+  }, [syncNarrationCursor, webStrategy, kokoroStrategy]);
+
+  const applyRateChange = useCallback((requestedRate: number, options: { debounceWeb: boolean }) => {
+    const current = stateRef.current;
+    const nextRate = normalizeNarrationRate(requestedRate, current.engine);
+    if (nextRate === current.speed) return;
+
+    const restartKokoroGeneration =
+      current.engine === "kokoro" && kokoroBucketChanged(current.speed, nextRate);
+
+    dispatch({ type: "SET_SPEED", speed: nextRate });
+    // Mirror reducer speed changes synchronously for strategy getters and restart paths.
+    stateRef.current = {
+      ...stateRef.current,
+      speed: nextRate,
+      generationId: stateRef.current.generationId + 1,
+    };
+
+    const updated = stateRef.current;
+    if (updated.status === "idle") return;
+
+    if (updated.engine === "kokoro") {
+      if (rateDebounceRef.current) {
+        clearTimeout(rateDebounceRef.current);
+        rateDebounceRef.current = null;
+      }
+
+      if (restartKokoroGeneration) {
         kokoroStrategy.stop();
         speakNextChunk();
+        return;
       }
+
+      if (import.meta.env.DEV) {
+        const ratePlan = resolveKokoroRatePlan(nextRate);
+        console.debug(
+          "[narrate] Kokoro rate update — live tempo",
+          "speed:",
+          ratePlan.selectedSpeed,
+          "bucket:",
+          ratePlan.generationBucket,
+          "tempo:",
+          ratePlan.tempoFactor,
+        );
+      }
+      kokoroStrategy.refreshBufferedTempo();
+      return;
     }
+
+    if (!options.debounceWeb) {
+      webStrategy.stop();
+      speakNextChunk();
+      return;
+    }
+
+    if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
+    rateDebounceRef.current = setTimeout(() => {
+      rateDebounceRef.current = null;
+      webStrategy.stop();
+      speakNextChunk();
+    }, TTS_RATE_RESTART_DEBOUNCE_MS);
   }, [speakNextChunk, webStrategy, kokoroStrategy]);
+
+  const updateWpm = useCallback((wpm: number) => {
+    applyRateChange(wpmToRate(wpm), { debounceWeb: false });
+  }, [applyRateChange]);
 
   const pause = useCallback(() => {
     const s = stateRef.current;
@@ -641,6 +761,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       // Stop current strategies, resync to new position
       webStrategy.stop();
       kokoroStrategy.stop();
+      handoffPendingRef.current = false;
       const newSpeed = s.speed;
       dispatch({ type: "START_CURSOR_DRIVEN", startIdx: currentWordIndex, speed: newSpeed });
       stateRef.current = {
@@ -658,6 +779,24 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         state: "resume",
         wordIndex: currentWordIndex,
       });
+      lastConfirmedAudioWordRef.current = currentWordIndex;
+      speakNextChunkRef.current();
+      return;
+    }
+
+    if (handoffPendingRef.current) {
+      webStrategy.stop();
+      kokoroStrategy.stop();
+      lastConfirmedAudioWordRef.current = s.cursorWordIndex;
+      dispatch({ type: "RESUME" });
+      stateRef.current = { ...stateRef.current, status: "speaking" };
+      emitEvalTrace({
+        kind: "lifecycle",
+        state: "resume",
+        wordIndex: s.cursorWordIndex,
+      });
+      recordDiagEvent("resume", `handoff cursor=${s.cursorWordIndex}`);
+      captureDiagSnapshot();
       speakNextChunkRef.current();
       return;
     }
@@ -691,6 +830,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     });
     webStrategy.stop();
     kokoroStrategy.stop();
+    handoffPendingRef.current = false;
     dispatch({ type: "STOP" });
   }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
 
@@ -710,29 +850,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   }, []);
 
   const adjustRate = useCallback((newRate: number) => {
-    const clamped = Math.max(TTS_MIN_RATE, Math.min(TTS_MAX_RATE, newRate));
-    dispatch({ type: "SET_SPEED", speed: clamped });
-    // Update stateRef for immediate reads
-    stateRef.current = { ...stateRef.current, speed: clamped, generationId: stateRef.current.generationId + 1 };
-
-    const s = stateRef.current;
-    if (s.status !== "idle") {
-      if (s.engine === "kokoro") {
-        // Kokoro: immediate stop + restart from current word at new native bucket — no debounce
-        if (rateDebounceRef.current) { clearTimeout(rateDebounceRef.current); rateDebounceRef.current = null; }
-        kokoroStrategy.stop();
-        speakNextChunk();
-      } else {
-        // Web Speech: debounced restart (lets rapid slider adjustments settle)
-        if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
-        rateDebounceRef.current = setTimeout(() => {
-          rateDebounceRef.current = null;
-          webStrategy.stop();
-          speakNextChunk();
-        }, TTS_RATE_RESTART_DEBOUNCE_MS);
-      }
-    }
-  }, [speakNextChunk, webStrategy, kokoroStrategy]);
+    applyRateChange(newRate, { debounceWeb: true });
+  }, [applyRateChange]);
 
   // Cleanup on unmount
   useEffect(() => {

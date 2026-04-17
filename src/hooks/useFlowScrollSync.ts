@@ -14,7 +14,11 @@ type ReadingMode = "page" | "focus" | "flow";
 
 interface NarrationFlowBridge {
   stop: () => void;
-  updateWords: (words: string[], globalStartIdx: number) => void;
+  updateWords: (
+    words: string[],
+    globalStartIdx: number,
+    options?: { mode?: "passive" | "handoff" },
+  ) => void;
   setOnSectionEnd: (cb: (() => void) | null) => void;
 }
 
@@ -129,6 +133,7 @@ export function useFlowScrollSync({
   evalTrace = null,
 }: UseFlowScrollSyncParams): UseFlowScrollSyncReturn {
   const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
+  const ownsSectionEndCallbackRef = useRef(false);
 
   // Stable refs to avoid stale closures in FlowScrollEngine onComplete
   const activeDocRef = useRef(activeDoc);
@@ -260,17 +265,23 @@ export function useFlowScrollSync({
   // ── Effect 6: Narration drives FlowScrollEngine follower mode ──────────
   useEffect(() => {
     const engine = flowScrollEngineRef.current;
-    if (!engine) return;
+    const flowNarrationOwnsSectionEnd = Boolean(
+      engine && readingMode === "flow" && flowPlaying && isNarrating,
+    );
 
-    if (readingMode !== "flow" || !flowPlaying || !isNarrating) {
-      engine.setFollowerMode(false);
-      narration.setOnSectionEnd(null);
+    if (!flowNarrationOwnsSectionEnd) {
+      engine?.setFollowerMode(false);
+      if (ownsSectionEndCallbackRef.current) {
+        narration.setOnSectionEnd(null);
+        ownsSectionEndCallbackRef.current = false;
+      }
       return;
     }
 
     engine.setFollowerMode(true);
     engine.followWord(highlightedWordIndex);
 
+    ownsSectionEndCallbackRef.current = true;
     narration.setOnSectionEnd(() => {
       const currentWord = highlightedWordIndexRef.current;
       const totalWords = bookWordMeta?.totalWords || activeDocRef.current.wordCount || wordsRef.current.length;
@@ -289,7 +300,7 @@ export function useFlowScrollSync({
         const sectionPromise = foliateApiRef.current?.goToSection?.(nextSection.sectionIndex);
         sectionPromise?.then(() => {
             setTimeout(() => {
-              narration.updateWords(wordsRef.current, nextSection.startWordIdx);
+              narration.updateWords(wordsRef.current, nextSection.startWordIdx, { mode: "handoff" });
             }, 300);
           })
           .catch(() => {});
@@ -345,7 +356,10 @@ export function useFlowScrollSync({
 
     return () => {
       engine.setFollowerMode(false);
-      narration.setOnSectionEnd(null);
+      if (ownsSectionEndCallbackRef.current) {
+        narration.setOnSectionEnd(null);
+        ownsSectionEndCallbackRef.current = false;
+      }
     };
   }, [
     readingMode,

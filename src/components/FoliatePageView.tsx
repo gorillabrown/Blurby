@@ -29,6 +29,7 @@ import {
   getBlockParent,
   collectBlockTextNodes,
   locateTextOffset,
+  makeFoliateTokenId,
   buildWordsFromTextNodes,
   buildWrappedFragmentForNode,
   extractWordsFromView,
@@ -64,17 +65,30 @@ const WRAP_BATCH_SIZE = 50;
  *  STAB-1A (BUG-162b): Now async — processes block groups in batches of WRAP_BATCH_SIZE,
  *  yielding to the event loop between batches so the loading indicator can render and the
  *  UI stays responsive during word wrapping. */
-export async function wrapWordsInSpans(doc: Document, sectionIndex: number, globalOffset: number): Promise<number> {
+export async function wrapWordsInSpans(
+  doc: Document,
+  sectionIndex: number,
+  globalOffset: number,
+  sectionWords: FoliateWord[] = [],
+): Promise<number> {
   let globalIndex = globalOffset;
   const groups = collectBlockTextNodes(doc.body);
+  const tokenPartById = new Map<string, number>();
+  let sectionWordCursor = 0;
 
   for (let i = 0; i < groups.length; i++) {
     const { nodes } = groups[i];
     const combined = nodes.map((node) => node.textContent || "").join("");
-    const wordSpans = segmentWordSpans(combined).map((span, idx) => ({
-      ...span,
-      globalIndex: globalIndex + idx,
-    }));
+    const logicalSpans = segmentWordSpans(combined);
+    const wordSpans = logicalSpans.map((span, idx) => {
+      const sourceWord = sectionWords[sectionWordCursor + idx];
+      return {
+        ...span,
+        globalIndex: globalIndex + idx,
+        tokenId: sourceWord?.tokenId || makeFoliateTokenId(sectionIndex, sectionWordCursor + idx),
+      };
+    });
+    sectionWordCursor += logicalSpans.length;
     globalIndex += wordSpans.length;
 
     let nodeStart = 0;
@@ -86,7 +100,7 @@ export async function wrapWordsInSpans(doc: Document, sectionIndex: number, glob
         continue;
       }
 
-      const frag = buildWrappedFragmentForNode(doc, text, nodeStart, wordSpans);
+      const frag = buildWrappedFragmentForNode(doc, text, nodeStart, wordSpans, tokenPartById);
       if (frag) {
         parent.replaceChild(frag, textNode);
       }
@@ -100,6 +114,159 @@ export async function wrapWordsInSpans(doc: Document, sectionIndex: number, glob
   }
 
   return globalIndex;
+}
+
+interface RenderedTokenResolution {
+  renderedWordIndex: number;
+  renderedWordIndexes: number[];
+  canonicalWord: string;
+  tokenId: string | null;
+  spans: HTMLElement[];
+}
+
+function getTokenSpans(root: ParentNode, tokenId: string): HTMLElement[] {
+  return Array
+    .from(root.querySelectorAll<HTMLElement>("[data-token-id]"))
+    .filter((el) => el.getAttribute("data-token-id") === tokenId)
+    .sort((a, b) => {
+      const partA = Number.parseInt(a.getAttribute("data-token-part") || "", 10);
+      const partB = Number.parseInt(b.getAttribute("data-token-part") || "", 10);
+      if (!Number.isNaN(partA) && !Number.isNaN(partB) && partA !== partB) {
+        return partA - partB;
+      }
+      return 0;
+    });
+}
+
+function resolveRenderedToken(
+  root: ParentNode,
+  target: Element | null,
+): RenderedTokenResolution | null {
+  const wordSpan = target?.closest?.("[data-word-index]") as HTMLElement | null;
+  if (!wordSpan) return null;
+
+  const fallbackRenderedWordIndex = Number.parseInt(
+    wordSpan.getAttribute("data-word-index") || "",
+    10,
+  );
+  if (Number.isNaN(fallbackRenderedWordIndex)) return null;
+
+  const tokenId = wordSpan.getAttribute("data-token-id");
+  const spans = tokenId ? getTokenSpans(root, tokenId) : [wordSpan];
+  const renderedWordIndexes = spans
+    .map((span) => Number.parseInt(span.getAttribute("data-word-index") || "", 10))
+    .filter((value) => !Number.isNaN(value));
+  const renderedWordIndex = renderedWordIndexes.length > 0
+    ? Math.min(...renderedWordIndexes)
+    : fallbackRenderedWordIndex;
+  const canonicalWord = spans
+    .map((span) => span.getAttribute("data-word-full") || "")
+    .find(Boolean)
+    || spans.map((span) => span.textContent || "").join("")
+    || wordSpan.textContent
+    || "";
+
+  return {
+    renderedWordIndex,
+    renderedWordIndexes,
+    canonicalWord,
+    tokenId,
+    spans: spans.length > 0 ? spans : [wordSpan],
+  };
+}
+
+function sameRenderedToken(
+  a: RenderedTokenResolution | null,
+  b: RenderedTokenResolution | null,
+): boolean {
+  if (!a || !b) return false;
+  if (a.tokenId && b.tokenId) return a.tokenId === b.tokenId;
+  return a.renderedWordIndex === b.renderedWordIndex;
+}
+
+function resolveSelectionToken(
+  doc: Document,
+  range: Range,
+  selection: Selection,
+): RenderedTokenResolution | null {
+  const overlaps = Array
+    .from(doc.querySelectorAll<HTMLElement>("[data-word-index]"))
+    .filter((span) => {
+      try {
+        return range.intersectsNode(span);
+      } catch {
+        return false;
+      }
+    });
+
+  if (overlaps.length > 0) {
+    const matches = new Map<string, RenderedTokenResolution>();
+    for (const span of overlaps) {
+      const resolved = resolveRenderedToken(doc.body, span);
+      if (!resolved) continue;
+      const key = resolved.tokenId
+        ? `token:${resolved.tokenId}`
+        : `index:${resolved.renderedWordIndex}`;
+      matches.set(key, resolved);
+    }
+    if (matches.size === 1) {
+      return Array.from(matches.values())[0];
+    }
+  }
+
+  const anchorEl = selection.anchorNode?.nodeType === Node.TEXT_NODE
+    ? selection.anchorNode.parentElement
+    : selection.anchorNode as Element | null;
+  const focusEl = selection.focusNode?.nodeType === Node.TEXT_NODE
+    ? selection.focusNode.parentElement
+    : selection.focusNode as Element | null;
+  const anchorToken = resolveRenderedToken(doc.body, anchorEl);
+  const focusToken = resolveRenderedToken(doc.body, focusEl);
+
+  if (sameRenderedToken(anchorToken, focusToken)) {
+    return anchorToken;
+  }
+
+  return null;
+}
+
+function getResolvedTokenHighlightSpans(
+  doc: Document,
+  resolution: RenderedTokenResolution,
+): HTMLElement[] {
+  if (resolution.tokenId && resolution.spans.length > 0) {
+    return resolution.spans;
+  }
+
+  return Array.from(
+    doc.querySelectorAll<HTMLElement>(`[data-word-index="${resolution.renderedWordIndex}"]`),
+  );
+}
+
+function buildResolvedTokenRange(
+  doc: Document,
+  resolution: RenderedTokenResolution,
+): Range | null {
+  const spans = getResolvedTokenHighlightSpans(doc, resolution);
+  const first = spans[0];
+  const last = spans[spans.length - 1];
+  if (!first || !last) return null;
+
+  const range = doc.createRange();
+  const firstNode = first.firstChild;
+  const lastNode = last.lastChild;
+  if (
+    firstNode?.nodeType === Node.TEXT_NODE &&
+    lastNode?.nodeType === Node.TEXT_NODE
+  ) {
+    range.setStart(firstNode, 0);
+    range.setEnd(lastNode, lastNode.textContent?.length ?? 0);
+    return range;
+  }
+
+  range.setStartBefore(first);
+  range.setEndAfter(last);
+  return range;
 }
 
 /** TTS-7Q: Audio progress callback type — mirrors AudioProgressReport from audioScheduler */
@@ -418,7 +585,7 @@ export default function FoliatePageView({
               const existingEnd = existingWithoutSection.length;
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
               // Wrap this section's words with correct indices (STAB-1A: now async)
-              await wrapWordsInSpans(doc, index, sectionStart);
+              await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -446,7 +613,8 @@ export default function FoliatePageView({
               // of a later section, causing narration to restart from the book beginning.
               const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections);
               if (sectionStart >= 0) {
-                await wrapWordsInSpans(doc, index, sectionStart);
+                const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
+                await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
               }
             }
           }
@@ -457,39 +625,47 @@ export default function FoliatePageView({
             if (!target) return;
             if ((e.target as HTMLElement)?.closest?.("a[href]")) return;
 
-            const idx = parseInt(target.getAttribute("data-word-index") || "", 10);
-            if (isNaN(idx)) return;
-            const canonicalWord = target.getAttribute("data-word-full") || target.textContent || "";
+            const resolvedToken = resolveRenderedToken(doc.body, target);
+            if (!resolvedToken) return;
 
-            // Highlight via CSS class (same as PageReaderView)
             doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
               el.classList.remove("page-word--highlighted")
             );
-            doc.querySelectorAll(`[data-word-index="${idx}"]`).forEach((el: Element) =>
+            getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
               el.classList.add("page-word--highlighted")
             );
 
-            // Report click to parent
             const v = viewRef.current;
             if (v) {
               const contents = v.renderer?.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match) {
-                const range = doc.createRange();
-                range.selectNodeContents(target);
-                const cfi = v.getCFI(match.index, range);
+                const tokenRange = buildResolvedTokenRange(doc, resolvedToken);
+                const fallbackRange = doc.createRange();
+                fallbackRange.selectNodeContents(target);
+                const cfi = v.getCFI(match.index, tokenRange ?? fallbackRange);
                 const liveSections = bookWordSectionsRef.current;
-                const exactIdx = resolveRenderedWordIndexToGlobal(match.index, idx, foliateWordsRef.current, liveSections);
+                const exactIdx = resolveRenderedWordIndexToGlobal(
+                  match.index,
+                  resolvedToken.renderedWordIndex,
+                  foliateWordsRef.current,
+                  liveSections,
+                  resolvedToken.renderedWordIndexes,
+                );
                 const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
                 const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
-                onWordClickRef.current?.(cfi, canonicalWord, match.index, wordOffsetInSection, exactIdx);
+                onWordClickRef.current?.(
+                  cfi,
+                  resolvedToken.canonicalWord,
+                  match.index,
+                  wordOffsetInSection,
+                  exactIdx,
+                );
               }
             }
           });
 
           // Also detect double-click word selection (native browser behavior)
-          // TTS-7L (BUG-134): Resolve exact .page-word[data-word-index] span from
-          // the selection, matching the click handler's exact-index contract.
           doc.addEventListener("selectionchange", () => {
             const sel = doc.getSelection();
             if (!sel || sel.isCollapsed || !sel.rangeCount) return;
@@ -497,45 +673,52 @@ export default function FoliatePageView({
             const word = sel.toString().trim();
             if (!word || word.includes(" ")) return; // Only single words
 
-            // TTS-7L: Find the .page-word span overlapping the selection.
-            // The selection's anchorNode is inside (or is) the word span.
-            const anchorEl = sel.anchorNode?.nodeType === Node.TEXT_NODE
-              ? sel.anchorNode.parentElement
-              : sel.anchorNode as Element | null;
-            const wordSpan = anchorEl?.closest?.("[data-word-index]") as HTMLElement | null;
+            const resolvedToken = resolveSelectionToken(doc, range, sel);
 
             const v = viewRef.current;
             if (v) {
               const contents = v.renderer.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match) {
-                const cfi = v.getCFI(match.index, range);
+                if (resolvedToken) {
+                  doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
+                    el.classList.remove("page-word--highlighted")
+                  );
+                  getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
+                    el.classList.add("page-word--highlighted")
+                  );
 
-                if (wordSpan) {
-                  // Exact span found — extract global index, same payload as click
-                  const idx = parseInt(wordSpan.getAttribute("data-word-index") || "", 10);
-                  if (!isNaN(idx)) {
-                    // Highlight the selected span (match click behavior)
-                    doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
-                      el.classList.remove("page-word--highlighted")
+                  const tokenRange = buildResolvedTokenRange(doc, resolvedToken);
+                  const cfi = v.getCFI(match.index, tokenRange ?? range);
+                  const liveSections = bookWordSectionsRef.current;
+                  const exactIdx = resolveRenderedWordIndexToGlobal(
+                    match.index,
+                    resolvedToken.renderedWordIndex,
+                    foliateWordsRef.current,
+                    liveSections,
+                    resolvedToken.renderedWordIndexes,
+                  );
+                  const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
+                  const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                  const canonicalWord = resolvedToken.canonicalWord || word;
+                  if (import.meta.env.DEV) {
+                    console.debug(
+                      "[foliate] selection: exact span found — globalWordIndex:",
+                      exactIdx,
+                      "word:",
+                      canonicalWord,
                     );
-                    doc.querySelectorAll(`[data-word-index="${idx}"]`).forEach((el: Element) =>
-                      el.classList.add("page-word--highlighted")
-                    );
-
-                    const liveSections = bookWordSectionsRef.current;
-                    const exactIdx = resolveRenderedWordIndexToGlobal(match.index, idx, foliateWordsRef.current, liveSections);
-                    const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
-                    const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
-                    const canonicalWord = wordSpan.getAttribute("data-word-full") || word;
-                    if (import.meta.env.DEV) console.debug("[foliate] selection: exact span found — globalWordIndex:", exactIdx, "word:", canonicalWord);
-                    onWordClickRef.current?.(cfi, canonicalWord, match.index, wordOffsetInSection, exactIdx);
-                    return;
                   }
+                  onWordClickRef.current?.(
+                    cfi,
+                    canonicalWord,
+                    match.index,
+                    wordOffsetInSection,
+                    exactIdx,
+                  );
+                  return;
                 }
 
-                // No exact span — selection is on unwrapped text (rare: images, captions).
-                // TTS-7L: Do NOT fall back to raw text. Log and skip.
                 if (import.meta.env.DEV) console.debug("[foliate] selection: no .page-word span found for word:", word, "— skipping (no guessy fallback)");
               }
             }
@@ -854,7 +1037,8 @@ export default function FoliatePageView({
       const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections);
       if (sectionStart < 0) continue;
       unwrapWordSpans(doc);
-      wrapWordsInSpans(doc, index, sectionStart);
+      const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
+      wrapWordsInSpans(doc, index, sectionStart, sectionWords);
     }
   }, [bookWordSections]);
 

@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS, FOCUS_MODE_START_DELAY_MS } from "../constants";
-import { resolveFoliateStartWord } from "../utils/startWordIndex";
+import { resolveFoliateStartWord, resolveModeStartWordIndex } from "../utils/startWordIndex";
 import type { BlurbySettings } from "../types";
 import type { FoliateViewAPI, FoliateWord } from "../components/FoliatePageView";
 import type { UseReadingModeInstanceReturn } from "./useReadingModeInstance";
@@ -161,9 +161,12 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    let focusStartSource = highlightedWordIndexRef.current || softWordIndexRef.current;
+    const focusStartSource = resolveModeStartWordIndex(
+      resumeAnchorRef.current,
+      highlightedWordIndexRef.current,
+      softWordIndexRef.current,
+    );
     if (resumeAnchorRef.current != null) {
-      focusStartSource = resumeAnchorRef.current;
       resumeAnchorRef.current = null;
     }
     const startWord = useFoliate
@@ -218,9 +221,12 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    let flowStartSource = highlightedWordIndexRef.current || softWordIndexRef.current;
+    const flowStartSource = resolveModeStartWordIndex(
+      resumeAnchorRef.current,
+      highlightedWordIndexRef.current,
+      softWordIndexRef.current,
+    );
     if (resumeAnchorRef.current != null) {
-      flowStartSource = resumeAnchorRef.current;
       resumeAnchorRef.current = null;
     }
     const startWord = useFoliate

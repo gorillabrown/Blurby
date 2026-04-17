@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { BlurbySettings, KokoroStatusSnapshot, PronunciationOverride } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
+import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
 import { KokoroStatusSection } from "./KokoroStatusSection";
 import { NarrationDataSection } from "./NarrationDataSection";
 import { PauseSettingsSection } from "./PauseSettingsSection";
@@ -12,6 +12,8 @@ import {
   snapshotFromKokoroErrorResponse,
   snapshotFromLegacyKokoroDownloadError,
 } from "../../utils/kokoroStatus";
+import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed, resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
+import { applyKokoroTempoStretch } from "../../utils/audio/tempoStretch";
 import "../../styles/tts-settings.css";
 
 const api = window.electronAPI;
@@ -169,17 +171,25 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       setTestPlaying(true);
       try {
         const voice = settings.ttsVoiceName || "af_bella";
+        const ratePlan = resolveKokoroRatePlan(settings.ttsRate || 1.0);
         const result = await api.kokoroGenerate(
           "The quick brown fox jumps over the lazy dog.",
           voice,
-          resolveKokoroBucket(settings.ttsRate || 1.0)
+          ratePlan.generationBucket
         );
         if (!result.error && result.audio) {
           const { playBuffer } = await import("../../utils/audioPlayer");
+          const playback = applyKokoroTempoStretch({
+            audio: result.audio,
+            sampleRate: result.sampleRate ?? 24000,
+            durationMs: result.durationMs ?? 0,
+            wordTimestamps: result.wordTimestamps,
+            kokoroRatePlan: ratePlan,
+          });
           playBuffer(
-            result.audio,
+            playback.audio,
             result.sampleRate ?? 24000,
-            result.durationMs ?? 0,
+            playback.durationMs,
             9, // word count of test sentence
             undefined,
             () => setTestPlaying(false),
@@ -458,13 +468,13 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       </div>
       {engine === "kokoro" ? (
         <div className="settings-mode-toggle tts-rate-bucket-toggle">
-          {KOKORO_RATE_BUCKETS.map((bucket) => (
+          {KOKORO_UI_SPEEDS.map((speed) => (
             <button
-              key={bucket}
-              className={`settings-mode-btn${resolveKokoroBucket(settings.ttsRate || 1.0) === bucket ? " active" : ""}`}
-              onClick={() => handleTtsChange({ ttsRate: bucket })}
+              key={speed}
+              className={`settings-mode-btn${normalizeKokoroUiSpeed(settings.ttsRate || 1.0) === speed ? " active" : ""}`}
+              onClick={() => handleTtsChange({ ttsRate: speed })}
             >
-              {bucket.toFixed(1)}x
+              {speed.toFixed(1)}x
             </button>
           ))}
         </div>

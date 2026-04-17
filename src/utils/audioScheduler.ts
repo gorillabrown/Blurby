@@ -6,6 +6,8 @@
 // Crossfade at chunk boundaries prevents splice artifacts.
 
 import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL, NARRATION_CURSOR_LAG_MS } from "../constants";
+import { applyKokoroTempoStretch } from "./audio/tempoStretch";
+import type { KokoroRatePlan } from "./kokoroRatePlan";
 
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
@@ -79,6 +81,12 @@ export interface ScheduledChunk {
   durationMs: number;
   words: string[];
   startIdx: number;
+  /** Optional Kokoro rate metadata for pre-playback tempo shaping. */
+  kokoroRatePlan?: {
+    selectedSpeed: number;
+    generationBucket: number;
+    tempoFactor: number;
+  };
   /** TTS-7N: Optional pause-derived weight config for cursor timing */
   weightConfig?: WordWeightConfig;
   /** TTS-7O: Boundary classification at chunk end (for silence injection) */
@@ -92,6 +100,8 @@ export interface ScheduledChunk {
    *  silence-aware cursor hold (IDEAS.md H6). */
   wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
 }
+
+type KokoroTempoAwareChunk = ScheduledChunk;
 
 export interface SchedulerCallbacks {
   onWordAdvance: (wordIndex: number) => void;
@@ -128,6 +138,8 @@ export interface AudioScheduler {
   pause: () => void;
   /** Resume from pause */
   resume: () => void;
+  /** Re-time buffered Kokoro chunks that have been scheduled but have not started yet. */
+  refreshBufferedTempo: (kokoroRatePlan: KokoroRatePlan) => void;
   /** Stop all playback, clear scheduled sources */
   stop: () => void;
   /** Get current playback state */
@@ -161,8 +173,17 @@ export function createAudioScheduler(): AudioScheduler {
   const crossfadeSec = TTS_CROSSFADE_MS / 1000;
   const crossfadeSamples = Math.round((TTS_CROSSFADE_MS / 1000) * KOKORO_SAMPLE_RATE);
 
-  // Active sources for speed changes and cleanup
-  let activeSources: { source: AudioBufferSourceNode; endTime: number; chunk: ScheduledChunk }[] = [];
+  // Active sources for speed changes, boundary callbacks, and cleanup
+  let activeSources: {
+    source: AudioBufferSourceNode;
+    startTime: number;
+    endTime: number;
+    boundaryTime: number;
+    boundaryFired: boolean;
+    originalChunk: KokoroTempoAwareChunk;
+    chunk: ScheduledChunk;
+    boundaries: { time: number; wordIndex: number }[];
+  }[] = [];
 
   // Word timer state
   let wordTimerHandle: ReturnType<typeof setTimeout> | null = null;
@@ -185,6 +206,22 @@ export function createAudioScheduler(): AudioScheduler {
   function clearWordTimer(): void {
     if (wordTimerHandle) { clearTimeout(wordTimerHandle); wordTimerHandle = null; }
     if (wordRafHandle != null) { cancelAnimationFrame(wordRafHandle); wordRafHandle = null; }
+  }
+
+  function hasPendingBoundaryDelivery(): boolean {
+    return activeSources.some(s => !s.boundaryFired);
+  }
+
+  function deliverChunkBoundary(s: typeof activeSources[number]): void {
+    if (!callbacks || s.boundaryFired) return;
+
+    const endIdx = s.chunk.startIdx + s.chunk.words.length;
+    callbacks.onChunkBoundary(endIdx);
+    truthSyncCounter = 0;
+    const lastConfirmedWordIdx = endIdx - 1 >= s.chunk.startIdx ? endIdx - 1 : s.chunk.startIdx;
+    callbacks.onTruthSync?.(lastConfirmedWordIdx);
+    callbacks.onChunkHandoff?.(lastConfirmedWordIdx);
+    s.boundaryFired = true;
   }
 
   /**
@@ -323,7 +360,8 @@ export function createAudioScheduler(): AudioScheduler {
    */
   function startWordTimer(): void {
     clearWordTimer();
-    if (!callbacks || !audioCtx || currentWordBoundaries.length === 0) return;
+    if (!callbacks || !audioCtx) return;
+    if (currentWordBoundaries.length === 0 && !hasPendingBoundaryDelivery()) return;
 
     // BUG-151: Lag offset — the cursor clock runs behind the audio clock by this
     // amount so the visual cursor never outpaces the actual spoken word.
@@ -366,10 +404,12 @@ export function createAudioScheduler(): AudioScheduler {
         }
       }
 
+      flushDueChunkBoundaries(now);
+
       // Keep polling on animation frames while boundaries remain. This is
       // smoother under renderer load than setTimeout-based wakeups and lets
       // AudioContext.currentTime remain the single source of truth.
-      if (nextWordBoundaryIdx < currentWordBoundaries.length) {
+      if (nextWordBoundaryIdx < currentWordBoundaries.length || hasPendingBoundaryDelivery()) {
         wordRafHandle = requestAnimationFrame(tick);
       }
     }
@@ -386,6 +426,25 @@ export function createAudioScheduler(): AudioScheduler {
     activeSources = activeSources.filter(s => s.endTime > now);
   }
 
+  /**
+   * Fire chunk boundary / handoff callbacks once the effective post-stretch
+   * transition point has been reached on the audio clock.
+   */
+  function flushDueChunkBoundaries(now: number): void {
+    if (!callbacks || !audioCtx) return;
+
+    for (const s of activeSources) {
+      if (s.boundaryFired || now < s.boundaryTime) continue;
+      deliverChunkBoundary(s);
+    }
+  }
+
+  function stopSource(source: AudioBufferSourceNode): void {
+    source.onended = null;
+    try { source.disconnect(); } catch { /* already disconnected */ }
+    try { source.stop(); } catch { /* already stopped */ }
+  }
+
   // ── Public API ────────────────────────────────────────────────────────────
 
   function warmUp(): void {
@@ -397,13 +456,19 @@ export function createAudioScheduler(): AudioScheduler {
     const ctx = getAudioContext();
 
     const isFirstChunk = activeSources.length === 0 && nextStartTime === 0;
-    const pcm = chunk.audio instanceof Float32Array ? chunk.audio : new Float32Array(chunk.audio);
+    const originalChunk: KokoroTempoAwareChunk = {
+      ...(chunk as KokoroTempoAwareChunk),
+      audio: chunk.audio instanceof Float32Array ? chunk.audio : new Float32Array(chunk.audio),
+    };
+    const playbackChunk = applyTempoStretchIfNeeded({
+      ...originalChunk,
+    });
 
     // Apply crossfade (fade-in on all but first chunk, fade-out on all chunks)
-    const processed = applyCrossfade(pcm, !isFirstChunk, true);
+    const processed = applyCrossfade(playbackChunk.audio, !isFirstChunk, true);
 
     // Create AudioBuffer
-    const buffer = ctx.createBuffer(1, processed.length, chunk.sampleRate);
+    const buffer = ctx.createBuffer(1, processed.length, playbackChunk.sampleRate);
     buffer.copyToChannel(new Float32Array(processed), 0);
 
     // Create source
@@ -417,7 +482,8 @@ export function createAudioScheduler(): AudioScheduler {
     }
 
     const chunkStartTime = nextStartTime;
-    const chunkDurationSec = chunk.durationMs / 1000;
+    const chunkDurationSec = playbackChunk.durationMs / 1000;
+    const boundaries = computeWordBoundaries(playbackChunk, chunkStartTime);
 
     // Track when audio actually starts (gates word timer)
     if (playbackStartTime === null) {
@@ -428,14 +494,26 @@ export function createAudioScheduler(): AudioScheduler {
     source.start(chunkStartTime);
 
     const endTime = chunkStartTime + chunkDurationSec;
-    activeSources.push({ source, endTime, chunk });
+    const boundaryTime = Math.max(chunkStartTime, endTime - crossfadeSec);
+    activeSources.push({
+      source,
+      startTime: chunkStartTime,
+      endTime,
+      boundaryTime,
+      boundaryFired: false,
+      originalChunk,
+      chunk: playbackChunk,
+      boundaries,
+    });
 
-    // Update next start time (overlap by crossfade duration)
-    nextStartTime = endTime - crossfadeSec;
+    // Update next start time to the effective post-stretch transition point.
+    nextStartTime = boundaryTime;
 
     // Compute word boundaries and extend the timeline
-    const boundaries = computeWordBoundaries(chunk, chunkStartTime);
     currentWordBoundaries.push(...boundaries);
+
+    // If the transition point is already due, fire the boundary immediately.
+    flushDueChunkBoundaries(ctx.currentTime);
 
     // If word timer isn't running, start it
     if (!wordTimerHandle && !stopped) {
@@ -446,21 +524,70 @@ export function createAudioScheduler(): AudioScheduler {
     const myEpoch = schedulerEpoch;
     source.onended = () => {
       if (myEpoch !== schedulerEpoch || stopped || !callbacks) return;
-      const endIdx = chunk.startIdx + chunk.words.length;
-      callbacks.onChunkBoundary(endIdx);
-      // TTS-7O: Truth-sync on chunk boundary
-      truthSyncCounter = 0;
-      const lastConfirmedWordIdx = endIdx - 1 >= chunk.startIdx ? endIdx - 1 : chunk.startIdx;
-      callbacks.onTruthSync?.(lastConfirmedWordIdx);
-      // TTS-7Q: Chunk handoff carry-over — notify visual layer of the last audio-confirmed word
-      // so it can continue the band from that position, not from a stale visual interpolation.
-      callbacks.onChunkHandoff?.(lastConfirmedWordIdx);
+      const activeSource = activeSources.find(s => s.source === source);
+      if (activeSource) {
+        deliverChunkBoundary(activeSource);
+      }
       pruneFinishedSources();
 
       // Check if this was the last source AND pipeline has finished generating
       if (activeSources.length === 0 && pipelineDone) {
         callbacks.onEnd();
       }
+    };
+  }
+
+  function refreshBufferedTempo(kokoroRatePlan: KokoroRatePlan): void {
+    if (!audioCtx || activeSources.length === 0) return;
+
+    pruneFinishedSources();
+    const now = audioCtx.currentTime;
+    const consumedBoundaries = currentWordBoundaries.slice(0, nextWordBoundaryIdx);
+    const consumedBoundaryKeys = new Set(consumedBoundaries.map((boundary) => `${boundary.time}:${boundary.wordIndex}`));
+
+    const preservedSources = activeSources.filter((scheduled) => scheduled.startTime <= now);
+    const futureSources = activeSources.filter((scheduled) => scheduled.startTime > now);
+    if (futureSources.length === 0) return;
+
+    for (const scheduled of futureSources) {
+      stopSource(scheduled.source);
+    }
+
+    activeSources = preservedSources;
+    currentWordBoundaries = [
+      ...consumedBoundaries,
+      ...preservedSources.flatMap((scheduled) =>
+        scheduled.boundaries.filter((boundary) => !consumedBoundaryKeys.has(`${boundary.time}:${boundary.wordIndex}`)),
+      ),
+    ];
+    nextWordBoundaryIdx = consumedBoundaries.length;
+    nextStartTime = preservedSources.length > 0 ? preservedSources[preservedSources.length - 1].boundaryTime : 0;
+
+    for (const scheduled of futureSources) {
+      scheduleChunk({
+        ...scheduled.originalChunk,
+        kokoroRatePlan,
+      });
+    }
+  }
+
+  function applyTempoStretchIfNeeded(chunk: KokoroTempoAwareChunk): ScheduledChunk {
+    const stretched = applyKokoroTempoStretch({
+      audio: chunk.audio,
+      sampleRate: chunk.sampleRate,
+      durationMs: chunk.durationMs,
+      silenceMs: chunk.silenceMs,
+      wordTimestamps: chunk.wordTimestamps,
+      kokoroRatePlan: chunk.kokoroRatePlan as KokoroRatePlan | undefined,
+    });
+
+    if (!stretched.applied) return chunk;
+
+    return {
+      ...chunk,
+      audio: stretched.audio,
+      durationMs: stretched.durationMs,
+      wordTimestamps: stretched.wordTimestamps,
     };
   }
 
@@ -501,9 +628,7 @@ export function createAudioScheduler(): AudioScheduler {
 
     // Null onended, disconnect, then stop all active sources
     for (const s of activeSources) {
-      s.source.onended = null;
-      try { s.source.disconnect(); } catch { /* already disconnected */ }
-      try { s.source.stop(); } catch { /* already stopped */ }
+      stopSource(s.source);
     }
     activeSources = [];
     currentWordBoundaries = [];
@@ -595,6 +720,7 @@ export function createAudioScheduler(): AudioScheduler {
     play,
     pause,
     resume,
+    refreshBufferedTempo,
     stop,
     isPlaying,
     setCallbacks,

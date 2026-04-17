@@ -100,6 +100,12 @@ describe("NARR-LAYER-1B consolidation", () => {
     expect(src).toContain("isNarrating: boolean;");
   });
 
+  it("NarrationCaching resolves Kokoro cache buckets through the shared rate plan", () => {
+    const src = read("src/hooks/useNarrationCaching.ts");
+    expect(src).toContain("resolveKokoroRatePlan(settings.ttsRate || 1.0).generationBucket");
+    expect(src).not.toContain("resolveKokoroBucket(settings.ttsRate || 1.0)");
+  });
+
   it("removes narration overlay CSS selector", () => {
     const css = read("src/styles/page-reader.css");
     expect(css).not.toContain(".foliate-narration-highlight");

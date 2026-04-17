@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS, KOKORO_RATE_BUCKETS, resolveKokoroBucket } from "../constants";
+import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS } from "../constants";
+import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../utils/kokoroRatePlan";
 import { BlurbyDoc } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -263,15 +264,15 @@ export default function ReaderBottomBar({
             </span>
             {ttsEngine === "kokoro" ? (
               <div className="rbb-rate-buttons" role="radiogroup" aria-label="Kokoro narration speed">
-                {KOKORO_RATE_BUCKETS.map((bucket) => (
+                {KOKORO_UI_SPEEDS.map((speed) => (
                   <button
-                    key={bucket}
-                    onClick={() => handleSetTtsRate(bucket)}
-                    className={`rbb-bucket-btn${resolveKokoroBucket(ttsRate) === bucket ? " active" : ""}`}
-                    aria-checked={resolveKokoroBucket(ttsRate) === bucket}
+                    key={speed}
+                    onClick={() => handleSetTtsRate(speed)}
+                    className={`rbb-bucket-btn${normalizeKokoroUiSpeed(ttsRate) === speed ? " active" : ""}`}
+                    aria-checked={normalizeKokoroUiSpeed(ttsRate) === speed}
                     role="radio"
-                    aria-label={`${bucket.toFixed(1)}x speed`}
-                  >{bucket.toFixed(1)}x</button>
+                    aria-label={`${speed.toFixed(1)}x speed`}
+                  >{speed.toFixed(1)}x</button>
                 ))}
               </div>
             ) : (

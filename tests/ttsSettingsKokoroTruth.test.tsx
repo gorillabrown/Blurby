@@ -4,7 +4,24 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS } from "../src/constants";
+import { KOKORO_UI_SPEEDS } from "../src/utils/kokoroRatePlan";
 import type { BlurbySettings } from "../src/types";
+
+const playBufferMock = vi.hoisted(() => vi.fn());
+const applyKokoroTempoStretchMock = vi.hoisted(() => vi.fn((input) => ({
+  audio: input.audio,
+  durationMs: 1234,
+  wordTimestamps: input.wordTimestamps,
+  applied: true,
+})));
+
+vi.mock("../src/utils/audioPlayer", () => ({
+  playBuffer: playBufferMock,
+}));
+
+vi.mock("../src/utils/audio/tempoStretch", () => ({
+  applyKokoroTempoStretch: applyKokoroTempoStretchMock,
+}));
 
 function flushPromises() {
   return Promise.resolve().then(() => Promise.resolve()).then(() => Promise.resolve());
@@ -78,6 +95,9 @@ describe("TTSSettings Kokoro truth wiring", () => {
         resume: () => {},
       },
     });
+
+    playBufferMock.mockClear();
+    applyKokoroTempoStretchMock.mockClear();
   });
 
   afterEach(async () => {
@@ -137,6 +157,87 @@ describe("TTSSettings Kokoro truth wiring", () => {
 
     expect(container.querySelector('[aria-label="Kokoro voice"]')).not.toBeNull();
     expect(container.textContent).toContain("Using Kokoro AI voices.");
+  });
+
+  it("shows the full Kokoro speed ladder once the engine is ready", async () => {
+    await renderSettings({
+      ...(DEFAULT_SETTINGS as BlurbySettings),
+      ttsEngine: "kokoro",
+      ttsVoiceName: "af_bella",
+      ttsRate: 1.3,
+    });
+
+    await act(async () => {
+      await electronApiMock.emit("tts-kokoro-engine-status", {
+        status: "ready",
+        detail: null,
+        reason: null,
+        ready: true,
+        loading: false,
+        recoverable: false,
+      });
+    });
+
+    const speedButtons = Array.from(container.querySelectorAll(".tts-rate-bucket-toggle button"));
+    expect(speedButtons.map((button) => button.textContent?.trim())).toEqual(
+      KOKORO_UI_SPEEDS.map((speed) => `${speed.toFixed(1)}x`),
+    );
+    expect(speedButtons.find((button) => button.className.includes("active"))?.textContent?.trim()).toBe("1.3x");
+  });
+
+  it("routes Kokoro test preview through the rate plan so exact UI speed survives bucketed generation", async () => {
+    await renderSettings({
+      ...(DEFAULT_SETTINGS as BlurbySettings),
+      ttsEngine: "kokoro",
+      ttsVoiceName: "af_bella",
+      ttsRate: 1.3,
+    });
+
+    await act(async () => {
+      await electronApiMock.emit("tts-kokoro-engine-status", {
+        status: "ready",
+        detail: null,
+        reason: null,
+        ready: true,
+        loading: false,
+        recoverable: false,
+      });
+    });
+
+    const testVoiceButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.includes("Test voice"),
+    );
+    expect(testVoiceButton).toBeDefined();
+
+    await act(async () => {
+      testVoiceButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await flushPromises();
+    });
+
+    expect(electronApiMock.api.kokoroGenerate).toHaveBeenCalledWith(
+      "The quick brown fox jumps over the lazy dog.",
+      "af_bella",
+      1.2,
+    );
+    expect(applyKokoroTempoStretchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        durationMs: 10,
+        sampleRate: 24000,
+        kokoroRatePlan: expect.objectContaining({
+          selectedSpeed: 1.3,
+          generationBucket: 1.2,
+          tempoFactor: 1.3 / 1.2,
+        }),
+      }),
+    );
+    expect(playBufferMock).toHaveBeenCalledWith(
+      expect.any(Float32Array),
+      24000,
+      1234,
+      9,
+      undefined,
+      expect.any(Function),
+    );
   });
 
   it("keeps direct Kokoro setup retries in a loading state when the IPC result is recoverable", async () => {

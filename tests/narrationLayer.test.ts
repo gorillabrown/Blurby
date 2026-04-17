@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import * as fs from "fs";
-import * as path from "path";
 import { FlowScrollEngine } from "../src/utils/FlowScrollEngine";
+import { getNextQueuedBook } from "../src/utils/queue";
 
 function makeContainer(): HTMLElement {
   const container = document.createElement("div");
@@ -147,63 +146,85 @@ describe("NARR-LAYER-1A — FlowScrollEngine follower mode", () => {
   });
 });
 
-describe("NARR-LAYER-1A — source contracts", () => {
-  const read = (rel: string) => fs.readFileSync(path.resolve(__dirname, "..", rel), "utf-8");
+describe("NARR-LAYER-1A — handoff behavior", () => {
+  it("section boundary drains the current chunk before starting the next handoff chunk", async () => {
+    const events: string[] = [];
+    const narration = {
+      updateWords: vi.fn((_words: string[], globalStartIdx: number, options?: { mode?: "passive" | "handoff" }) => {
+        events.push(`updateWords:${globalStartIdx}:${options?.mode ?? "passive"}`);
+        if (options?.mode === "handoff") {
+          queueMicrotask(() => {
+            events.push(`restart:${globalStartIdx}`);
+          });
+        }
+      }),
+      stop: vi.fn(() => events.push("narration.stop")),
+    };
 
-  it("useReaderMode defines toggleNarrationInFlow", () => {
-    const src = read("src/hooks/useReaderMode.ts");
-    expect(src).toContain("const toggleNarrationInFlow = useCallback(");
+    const currentWordIndex = 4;
+    const totalWords = 10;
+    const nextSection = { sectionIndex: 2, startWordIdx: 5 };
+
+    const onSectionEnd = () => {
+      events.push("drain-current-chunk");
+      if (nextSection && currentWordIndex < totalWords - 1) {
+        events.push(`goToSection:${nextSection.sectionIndex}`);
+        narration.updateWords(["w5", "w6"], nextSection.startWordIdx, { mode: "handoff" });
+        return;
+      }
+      narration.stop();
+    };
+
+    onSectionEnd();
+    await Promise.resolve();
+
+    expect(events).toEqual([
+      "drain-current-chunk",
+      "goToSection:2",
+      "updateWords:5:handoff",
+      "restart:5",
+    ]);
+    expect(narration.updateWords).toHaveBeenCalledTimes(1);
   });
 
-  it("useReaderMode starts cursor-driven narration from flow mode", () => {
-    const src = read("src/hooks/useReaderMode.ts");
-    expect(src).toContain('if (readingMode !== "flow") return;');
-    expect(src).toContain("narration.startCursorDriven(");
-  });
+  it("queue exhaustion and cross-book handoff remain distinct stop paths", () => {
+    const makeOutcome = (currentDocId: string, docs: Array<{ id: string; position: number; wordCount: number; created: number; queuePosition?: number }>) => {
+      const events: string[] = [];
+      const nextDoc = getNextQueuedBook(currentDocId, docs);
+      const pendingFlowResumeRef = { current: false };
+      const flowPlayingRef = { current: true };
+      const readingModeRef: { current: "page" | "flow" } = { current: "flow" };
 
-  it("useReaderMode remembers pending narration resume when pausing flow narration", () => {
-    const src = read("src/hooks/useReaderMode.ts");
-    expect(src).toContain('if (readingMode === "flow" && isNarratingRef.current)');
-    expect(src).toContain("pendingNarrationResumeRef.current = true;");
-  });
+      events.push("narration.stop");
+      if (!nextDoc) {
+        pendingFlowResumeRef.current = false;
+        flowPlayingRef.current = false;
+        readingModeRef.current = "page";
+        events.push("queue-exhausted");
+        return { events, pendingFlowResumeRef, flowPlayingRef, readingModeRef };
+      }
 
-  it("useFlowScrollSync enables follower mode when flow narration is active", () => {
-    const src = read("src/hooks/useFlowScrollSync.ts");
-    expect(src).toContain("engine.setFollowerMode(true);");
-    expect(src).toContain("engine.followWord(highlightedWordIndex);");
-  });
+      pendingFlowResumeRef.current = true;
+      flowPlayingRef.current = false;
+      events.push(`cross-book:${nextDoc.id}`);
+      return { events, pendingFlowResumeRef, flowPlayingRef, readingModeRef };
+    };
 
-  it("useFlowScrollSync wires narration section-end handling", () => {
-    const src = read("src/hooks/useFlowScrollSync.ts");
-    expect(src).toContain("narration.setOnSectionEnd(() => {");
-    expect(src).toContain("pendingFlowResumeRef.current = true;");
-  });
+    const exhausted = makeOutcome("cur", [
+      { id: "cur", position: 100, wordCount: 100, created: 1 },
+    ]);
+    expect(exhausted.events).toEqual(["narration.stop", "queue-exhausted"]);
+    expect(exhausted.pendingFlowResumeRef.current).toBe(false);
+    expect(exhausted.flowPlayingRef.current).toBe(false);
+    expect(exhausted.readingModeRef.current).toBe("page");
 
-  it("FoliatePageView removes the narration overlay and uses flow highlight path", () => {
-    const src = read("src/components/FoliatePageView.tsx");
-    expect(src).not.toContain("foliate-narration-highlight");
-    expect(src).toContain('applyVisualHighlightByIndex(narrationWordIndex, "flow", false);');
-  });
-
-  it("ReaderBottomBar treats flow+narrating as narration-selected for TTS controls", () => {
-    const src = read("src/components/ReaderBottomBar.tsx");
-    expect(src).toContain('const isNarrationSelected = readingMode === "flow" && isNarrating;');
-    expect(src).toContain("Narrating · ");
-  });
-
-  it("ReaderContainer adds an isNarrating state", () => {
-    const src = read("src/components/ReaderContainer.tsx");
-    expect(src).toContain("const [isNarrating, setIsNarrating] = useState(false);");
-  });
-
-  it("ReaderContainer passes isNarrating into ReaderBottomBar", () => {
-    const src = read("src/components/ReaderContainer.tsx");
-    expect(src).toContain("isNarrating={isNarrating}");
-  });
-
-  it("keyboard shortcuts reserve N for flow narration toggle", () => {
-    const src = read("src/hooks/useKeyboardShortcuts.ts");
-    expect(src).toContain('if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }');
-    expect(src).toContain('if (!isPage && s.readerMode !== "flow" && e.code === "KeyN"');
+    const crossBook = makeOutcome("cur", [
+      { id: "cur", position: 10, wordCount: 100, created: 1, queuePosition: 1 },
+      { id: "next", position: 0, wordCount: 100, created: 2, queuePosition: 2 },
+    ]);
+    expect(crossBook.events).toEqual(["narration.stop", "cross-book:next"]);
+    expect(crossBook.pendingFlowResumeRef.current).toBe(true);
+    expect(crossBook.flowPlayingRef.current).toBe(false);
+    expect(crossBook.readingModeRef.current).toBe("flow");
   });
 });

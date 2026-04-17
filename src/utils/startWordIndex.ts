@@ -9,25 +9,41 @@
  * @param useFoliate - Whether the EPUB foliate renderer is active
  * @returns Clamped, valid word index to start from
  */
+function normalizeWordIndex(wordIndex: number | null | undefined): number | null {
+  if (typeof wordIndex !== "number" || !Number.isFinite(wordIndex)) return null;
+  return Math.max(0, Math.trunc(wordIndex));
+}
+
+export function resolveModeStartWordIndex(
+  ...candidates: Array<number | null | undefined>
+): number {
+  for (const candidate of candidates) {
+    const normalized = normalizeWordIndex(candidate);
+    if (normalized != null) return normalized;
+  }
+  return 0;
+}
+
 export function getStartWordIndex(
   highlightedWordIndex: number,
   effectiveWordsLength: number,
   useFoliate: boolean
 ): number {
+  const normalizedHighlightedWordIndex = normalizeWordIndex(highlightedWordIndex) ?? 0;
   // For foliate EPUBs, the word array only covers visible sections.
   // If the index exceeds the loaded words, fall back to 0 (first loaded word).
-  if (useFoliate && highlightedWordIndex >= effectiveWordsLength) {
+  if (useFoliate && normalizedHighlightedWordIndex >= effectiveWordsLength) {
     return 0;
   }
   // Clamp to valid range [0, length-1]
-  return Math.max(0, Math.min(highlightedWordIndex, Math.max(effectiveWordsLength - 1, 0)));
+  return Math.max(0, Math.min(normalizedHighlightedWordIndex, Math.max(effectiveWordsLength - 1, 0)));
 }
 
 /**
  * Resolves the best starting word for a mode on a foliate EPUB.
  *
  * Priority:
- * 1. If highlightedWordIndex is valid and > 0, use it (user clicked a word)
+ * 1. If highlightedWordIndex is valid, use it (user clicked a word)
  * 2. Otherwise, find the first visible word on the current page
  * 3. Fall back to 0
  *
@@ -48,14 +64,15 @@ export function resolveFoliateStartWord(
   findFirstVisibleWordIndex: () => number,
   globalWordsLength?: number
 ): number {
+  const normalizedHighlightedWordIndex = normalizeWordIndex(highlightedWordIndex);
   // TTS-7K: Validate against the larger of wordsLength and globalWordsLength.
   // This ensures a global index like 1603 is not discarded just because the
   // DOM slice only has 14 words.
   const validationLength = globalWordsLength != null ? Math.max(wordsLength, globalWordsLength) : wordsLength;
 
   // If user has a valid position (clicked a word or resumed from saved progress), use it
-  const isValid = highlightedWordIndex >= 0 && highlightedWordIndex < validationLength;
-  if (isValid) return highlightedWordIndex;
+  const isValid = normalizedHighlightedWordIndex != null && normalizedHighlightedWordIndex < validationLength;
+  if (isValid) return normalizedHighlightedWordIndex;
 
   // Find first visible word on current page
   const firstVisible = findFirstVisibleWordIndex();

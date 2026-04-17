@@ -1,10 +1,23 @@
 const segmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 const TRAILING_PUNCT_RE = /^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/;
+const REAL_WHITESPACE_RE = /\s/;
+const STITCHABLE_GAP_RE = /^[\u200B\u200C\u200D\uFEFF]*$/;
 
 export interface SegmentedWordSpan {
   word: string;
   start: number;
   end: number;
+}
+
+export function hasRealWhitespaceBoundary(text: string, start: number, end: number): boolean {
+  return REAL_WHITESPACE_RE.test(text.slice(start, end));
+}
+
+export function shouldStitchWithoutWhitespace(text: string, start: number, end: number): boolean {
+  const gap = text.slice(start, end);
+  if (gap.length === 0) return true;
+  if (REAL_WHITESPACE_RE.test(gap)) return false;
+  return STITCHABLE_GAP_RE.test(gap);
 }
 
 /**
@@ -21,18 +34,30 @@ export function segmentWordSpans(text: string): SegmentedWordSpan[] {
 
     let wordWithPunct = segment;
     let endOffset = index + segment.length;
+    let lastConsumedIndex = si;
     for (let pi = si + 1; pi < segments.length; pi++) {
       const next = segments[pi];
-      if (next.isWordLike) break;
-      if (TRAILING_PUNCT_RE.test(next.segment)) {
-        wordWithPunct += next.segment;
+      const gap = text.slice(endOffset, next.index);
+
+      if (next.isWordLike) {
+        if (!shouldStitchWithoutWhitespace(text, endOffset, next.index)) break;
+        wordWithPunct += gap + next.segment;
         endOffset = next.index + next.segment.length;
+        lastConsumedIndex = pi;
+        continue;
+      }
+
+      if (!hasRealWhitespaceBoundary(text, endOffset, next.index) && TRAILING_PUNCT_RE.test(next.segment)) {
+        wordWithPunct += gap + next.segment;
+        endOffset = next.index + next.segment.length;
+        lastConsumedIndex = pi;
       } else {
         break;
       }
     }
 
     words.push({ word: wordWithPunct, start: index, end: endOffset });
+    si = lastConsumedIndex;
   }
 
   return words;
@@ -51,9 +76,5 @@ export function segmentWords(text: string): string[] {
  * Named differently from text.ts countWords to avoid confusion.
  */
 export function countWordsSegmenter(text: string): number {
-  let count = 0;
-  for (const s of segmenter.segment(text)) {
-    if (s.isWordLike) count++;
-  }
-  return count;
+  return segmentWordSpans(text).length;
 }

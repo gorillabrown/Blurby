@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../constants";
 import { findSectionForWord, type BookWordArray } from "../types/narration";
 import type { FoliateViewAPI } from "../components/FoliatePageView";
@@ -117,6 +117,9 @@ export function useFoliateSync({
   effectiveWpm,
   activeDocWordCount,
 }: UseFoliateSyncParams): UseFoliateSyncReturn {
+  const ownsSectionEndCallbackRef = useRef(false);
+  const hasFullBookWordMeta = Boolean(bookWordMeta?.sections?.length);
+
   // ── 1. Browse-away detection ─────────────────────────────────────────────
   // Polls foliateApiRef.isUserBrowsing on an interval while narration is active.
   // When narration is inactive (or useFoliate is false) the flag
@@ -182,16 +185,30 @@ export function useFoliateSync({
   }, [useFoliate, readingMode, highlightedWordIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── 4. Section-end callback wiring ──────────────────────────────────────
-  // Wire section-end callback for foliate EPUBs — fallback when full-book extraction not ready.
+  // Foliate only owns section-end handling outside active flow narration.
+  // In flow+narration, useFlowScrollSync is the sole runtime owner.
   useEffect(() => {
-    if (!useFoliate) {
-      narration.setOnSectionEnd(null);
+    // bookWordsRef.current is a mutable ref, so React won't rerun this effect when
+    // extraction completes unless we also key off the React-owned metadata signal.
+    const flowNarrationOwnsSectionEnd = readingMode === "flow" && isNarrating;
+    const foliateOnlyOwnsFallbackSectionEnd =
+      useFoliate
+      && !flowNarrationOwnsSectionEnd
+      && !hasFullBookWordMeta
+      && !bookWordsRef.current?.complete;
+
+    if (!foliateOnlyOwnsFallbackSectionEnd) {
+      if (ownsSectionEndCallbackRef.current) {
+        narration.setOnSectionEnd(null);
+        ownsSectionEndCallbackRef.current = false;
+      }
       return;
     }
+
+    ownsSectionEndCallbackRef.current = true;
     narration.setOnSectionEnd(() => {
-      // If full-book words are loaded, narration already has everything — stop, don't navigate.
+      // If full-book words are loaded, foliate must stay passive and leave narration alone.
       if (bookWordsRef.current?.complete) {
-        narration.stop();
         return;
       }
       // Fallback for when extraction is still in progress.
@@ -213,9 +230,14 @@ export function useFoliateSync({
       };
       checkAndRestart();
     });
-    return () => narration.setOnSectionEnd(null);
+    return () => {
+      if (ownsSectionEndCallbackRef.current) {
+        narration.setOnSectionEnd(null);
+        ownsSectionEndCallbackRef.current = false;
+      }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useFoliate, narration.setOnSectionEnd]);
+  }, [useFoliate, readingMode, isNarrating, narration, effectiveWpm, hasFullBookWordMeta]);
 
   return { isBrowsedAway, setIsBrowsedAway };
 }

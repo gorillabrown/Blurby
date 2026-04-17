@@ -1,4 +1,5 @@
 import type { KokoroStatusSnapshot } from "../types";
+import type { KokoroRatePlan } from "../utils/kokoroRatePlan";
 
 // ── Book word array types (moved from bookWordExtractor.ts in HOTFIX-6) ──────
 
@@ -173,4 +174,14 @@ export interface TtsStrategy {
   stop(): void;
   pause(): void;
   resume(): void;
+}
+
+/**
+ * Wave A Kokoro tempo-shaping contract.
+ * The scheduler path receives this metadata so it can perform a
+ * pitch-preserving pre-playback tempo stage after bucketed generation/cache.
+ * Do not treat this as playbackRate guidance.
+ */
+export interface KokoroSchedulerRatePlanMetadata {
+  kokoroRatePlan?: KokoroRatePlan;
 }

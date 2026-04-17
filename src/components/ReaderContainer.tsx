@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
-import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, stepKokoroBucket } from "../constants";
+import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
@@ -31,6 +31,7 @@ import { useToast } from "../contexts/ToastContext";
 import { useDocumentLifecycle } from "../hooks/useDocumentLifecycle";
 import { useFlowScrollSync } from "../hooks/useFlowScrollSync";
 import { createWindowEvalTraceSink } from "../utils/ttsEvalTrace";
+import { stepKokoroUiSpeed } from "../utils/kokoroRatePlan";
 
 const api = window.electronAPI;
 
@@ -649,7 +650,7 @@ export default function ReaderContainer({
       const isKokoro = settings.ttsEngine === "kokoro";
       let newRate: number;
       if (isKokoro) {
-        newRate = stepKokoroBucket(settings.ttsRate || 1.0, delta);
+        newRate = stepKokoroUiSpeed(settings.ttsRate || 1.0, delta);
       } else {
         const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
         newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;

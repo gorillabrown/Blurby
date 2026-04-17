@@ -168,4 +168,32 @@ describe("foliateWordOffsets", () => {
       expect(resolveGlobalWordIndexToRendered(7, 200, loadedWords)).toBe(200);
     });
   });
+
+  describe("stitched rendered word indexes", () => {
+    it("collapses stitched fragments to the first rendered index when mapping to global", () => {
+      const loadedWords = [...makeLoadedWords(4, 3)];
+      const bookWordSections = makeSections({
+        sectionIndex: 4,
+        startWordIdx: 100,
+        endWordIdx: 103,
+        wordCount: 3,
+      });
+
+      expect(
+        resolveRenderedWordIndexToGlobal(4, 101, loadedWords, bookWordSections, [100, 101]),
+      ).toBe(100);
+    });
+
+    it("leaves ordinary rendered indexes unchanged when no stitched fragment list is provided", () => {
+      const loadedWords = [...makeLoadedWords(4, 3)];
+      const bookWordSections = makeSections({
+        sectionIndex: 4,
+        startWordIdx: 100,
+        endWordIdx: 103,
+        wordCount: 3,
+      });
+
+      expect(resolveRenderedWordIndexToGlobal(4, 101, loadedWords, bookWordSections)).toBe(101);
+    });
+  });
 });

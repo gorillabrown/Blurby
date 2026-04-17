@@ -6,7 +6,7 @@ import { KOKORO_SAMPLE_RATE } from "../src/constants";
 // ── MockAudioContext (same pattern as audioScheduler.test.ts) ─────────────────
 
 let mockCurrentTime = 0;
-let startedSources: { startTime: number; playbackRate: number }[] = [];
+let startedSources: { startTime: number; playbackRate: number; bufferLength: number }[] = [];
 
 beforeEach(() => {
   mockCurrentTime = 0;
@@ -18,7 +18,11 @@ beforeEach(() => {
     onended: (() => void) | null = null;
     connect() { return this; }
     start(when?: number) {
-      startedSources.push({ startTime: when || 0, playbackRate: this.playbackRate.value });
+      startedSources.push({
+        startTime: when || 0,
+        playbackRate: this.playbackRate.value,
+        bufferLength: this.buffer?.length ?? 0,
+      });
       const self = this;
       setTimeout(() => { if (self.onended) self.onended(); }, 30);
     }
@@ -436,6 +440,38 @@ describe("computeWordBoundaries — boundary times (via scheduler)", () => {
     expect(entry.realTimestamps[0].startTime).toBeCloseTo(0.0, 6);
     expect(entry.realTimestamps[1].word).toBe("beta");
     expect(entry.realTimestamps[1].startTime).toBeCloseTo(0.30, 6);
+
+    scheduler.stop();
+  });
+
+  it("scales real timestamps when Kokoro tempo shaping is applied", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    const words = ["alpha", "beta", "gamma"];
+    const timestamps = [
+      { word: "alpha", startTime: 0.0, endTime: 0.30 },
+      { word: "beta", startTime: 0.30, endTime: 0.65 },
+      { word: "gamma", startTime: 0.65, endTime: 0.95 },
+    ];
+    const chunk = {
+      ...makeChunkWithTimestamps(0, words, timestamps, { durationMs: 1000 }),
+      kokoroRatePlan: {
+        selectedSpeed: 1.5,
+        generationBucket: 1.2,
+        tempoFactor: 1.25,
+      },
+    };
+
+    scheduler.scheduleChunk(chunk);
+
+    const telemetry = getTimingTelemetry();
+    expect(telemetry.length).toBe(1);
+    const entry = telemetry[0] as any;
+    expect(entry.timestampSource).toBe("kokoro-duration-tensor");
+    expect(entry.realTimestamps[1].startTime).toBeCloseTo(0.24, 3);
+    expect(entry.realTimestamps[2].endTime).toBeCloseTo(0.76, 3);
 
     scheduler.stop();
   });

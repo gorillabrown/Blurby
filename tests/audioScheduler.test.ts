@@ -5,7 +5,7 @@ import { TTS_CROSSFADE_MS, KOKORO_SAMPLE_RATE } from "../src/constants";
 
 // Mock AudioContext
 let mockCurrentTime = 0;
-let startedSources: { startTime: number; playbackRate: number }[] = [];
+let startedSources: { startTime: number; playbackRate: number; bufferLength: number }[] = [];
 
 beforeEach(() => {
   mockCurrentTime = 0;
@@ -17,7 +17,11 @@ beforeEach(() => {
     onended: (() => void) | null = null;
     connect() { return this; }
     start(when?: number) {
-      startedSources.push({ startTime: when || 0, playbackRate: this.playbackRate.value });
+      startedSources.push({
+        startTime: when || 0,
+        playbackRate: this.playbackRate.value,
+        bufferLength: this.buffer?.length ?? 0,
+      });
       // Fire onended after a delay — use arrow fn to capture `this` so onended is read at fire time
       const self = this;
       setTimeout(() => { if (self.onended) self.onended(); }, 30);
@@ -108,6 +112,69 @@ describe("createAudioScheduler", () => {
     const gap = startedSources[1].startTime - startedSources[0].startTime;
     // Gap should be chunkDuration - crossfade (1.0 - 0.008 = 0.992 at 1x speed)
     expect(gap).toBeCloseTo(1.0 - crossfadeSec, 2);
+    scheduler.stop();
+  });
+
+  it("applies Kokoro tempo shaping before scheduling without changing playbackRate", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    const kokoroChunk = {
+      ...makeChunk(0, 10),
+      kokoroRatePlan: {
+        selectedSpeed: 1.1,
+        generationBucket: 1.0,
+        tempoFactor: 1.1,
+      },
+    };
+
+    scheduler.scheduleChunk(kokoroChunk);
+    scheduler.scheduleChunk({ ...kokoroChunk, startIdx: 10 });
+
+    const crossfadeSec = TTS_CROSSFADE_MS / 1000;
+    const gap = startedSources[1].startTime - startedSources[0].startTime;
+
+    expect(startedSources[0].playbackRate).toBe(1);
+    expect(startedSources[1].playbackRate).toBe(1);
+    expect(startedSources[0].bufferLength).toBeGreaterThan(21000);
+    expect(startedSources[0].bufferLength).toBeLessThan(22500);
+    expect(gap).toBeCloseTo((1 / 1.1) - crossfadeSec, 2);
+
+    scheduler.stop();
+  });
+
+  it("preserves injected silence after Kokoro tempo shaping", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    const voicedSamples = KOKORO_SAMPLE_RATE;
+    const silenceSamples = KOKORO_SAMPLE_RATE / 2;
+    const chunk = {
+      audio: new Float32Array(voicedSamples + silenceSamples),
+      sampleRate: KOKORO_SAMPLE_RATE,
+      durationMs: 1500,
+      words: ["one", "two", "three"],
+      startIdx: 0,
+      silenceMs: 500,
+      kokoroRatePlan: {
+        selectedSpeed: 1.5,
+        generationBucket: 1.2,
+        tempoFactor: 1.25,
+      },
+    };
+
+    scheduler.scheduleChunk(chunk);
+    scheduler.scheduleChunk({ ...chunk, startIdx: 3 });
+
+    const crossfadeSec = TTS_CROSSFADE_MS / 1000;
+    const gap = startedSources[1].startTime - startedSources[0].startTime;
+
+    expect(startedSources[0].bufferLength).toBeGreaterThan(30000);
+    expect(startedSources[0].bufferLength).toBeLessThan(32000);
+    expect(gap).toBeCloseTo(1.3 - crossfadeSec, 2);
+
     scheduler.stop();
   });
 

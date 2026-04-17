@@ -40,6 +40,33 @@ Behavior:
 - Exit code `0` when hard-fail gates pass
 - Exit code `2` when one or more hard-fail gates are breached
 
+## TTS-RATE-1 Release Pattern
+
+For Kokoro rate validation after `TTS-RATE-1`, treat the matrix as a six-rate release gate, not a spot check. The current matrix manifest covers the full supported UI ladder:
+
+- `1.0x` — `smoke-prose-default`
+- `1.1x` — `smoke-dialogue-fast`
+- `1.2x` — `punctuation-heavy-mid`
+- `1.3x` — `long-form-stability`
+- `1.4x` — `handoff-queue`
+- `1.5x` — `chapter-transition`
+
+Release expectation:
+
+- All six runs complete and produce `aggregate-summary.json`, `summary.txt`, `gate-report.json`, and `gate-report.txt`
+- Exact-speed UI behavior remains aligned to the requested rate even when generation uses the backing `1.0` / `1.2` / `1.5` Kokoro buckets
+- In-bucket speed edits stay restart-free; any regression here should show up as continuity drift or failure-class movement in the gated matrix outputs
+
+Reference PASS evidence from `TTS-RATE-1` closeout:
+
+- Artifact set: `artifacts/tts-eval/final-gate-22`
+- Aggregate runs: `6`
+- Startup latency p50/p95: `433.5 / 501.75 ms`
+- Drift p50/p95/max: `2 / 2 / 2`
+- Pause/resume failures: `0`
+- Handoff failures: `0`
+- Gate result: `PASS` (`0/5` hard failures, `0/2` warnings)
+
 ## Short Soak Run
 
 ```bash

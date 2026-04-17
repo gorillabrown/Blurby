@@ -4,17 +4,17 @@
 // and audioScheduler for pre-scheduled gapless playback with crossfade.
 // Replaces the old audioQueue-based approach.
 
-import type { TtsStrategy } from "../../types/narration";
+import type { KokoroSchedulerRatePlanMetadata, TtsStrategy } from "../../types/narration";
 import { createGenerationPipeline } from "../../utils/generationPipeline";
 import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler, AudioProgressReport } from "../../utils/audioScheduler";
 import * as ttsCache from "../../utils/ttsCache";
-import { resolveKokoroBucket } from "../../constants";
 import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
 import type { PronunciationOverride } from "../../types";
 import { perfStart, perfEnd } from "../../utils/narratePerf";
 import { recordDiagEvent } from "../../utils/narrateDiagnostics";
+import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
 
 const api = window.electronAPI;
 
@@ -60,18 +60,23 @@ export interface KokoroStrategyDeps {
 export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
   getScheduler: () => AudioScheduler;
   getPipeline: () => GenerationPipeline;
+  refreshBufferedTempo: () => void;
   warmUp: () => void;
   /** TTS-7Q: Continuous audio-progress report for smooth visual overlay. */
   getAudioProgress: () => AudioProgressReport | null;
 } {
   const scheduler = createAudioScheduler();
 
-  /** Resolve current speed to a Kokoro native-rate bucket */
-  const getBucket = () => resolveKokoroBucket(deps.getSpeed());
+  /**
+   * Resolve Kokoro rate metadata from the live narration speed.
+   * Same-bucket edits should flow into future chunk generation/scheduling
+   * without forcing a restart; cross-bucket edits restart upstream.
+   */
+  const getRatePlan = () => resolveKokoroRatePlan(deps.getSpeed());
 
   /** Build the cache key voice segment: voiceId/rateBucket[/overrideHash] */
   const getCacheVoice = () => {
-    const base = `${deps.getVoiceId()}/${getBucket()}`;
+    const base = `${deps.getVoiceId()}/${getRatePlan().generationBucket}`;
     const oh = overrideHash(deps.getPronunciationOverrides?.());
     return oh ? `${base}/${oh}` : base;
   };
@@ -84,9 +89,8 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
       // Apply pronunciation overrides before generation
       const normalizedText = applyPronunciationOverrides(text, deps.getPronunciationOverrides?.());
-      // Generate at native bucket rate — no scheduler stretch needed
-      const bucket = resolveKokoroBucket(speed);
-      const result = await api.kokoroGenerate(normalizedText, voiceId, bucket, words);
+      const ratePlan = resolveKokoroRatePlan(speed);
+      const result = await api.kokoroGenerate(normalizedText, voiceId, ratePlan.generationBucket, words);
       if (result.error || !result.audio || !result.sampleRate) {
         return { error: result.error || "no audio returned" };
       }
@@ -95,13 +99,20 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     },
     getWords: deps.getWords,
     getVoiceId: deps.getVoiceId,
-    getSpeed: () => getBucket(),
+    getSpeed: () => getRatePlan().selectedSpeed,
     getWeightConfig: deps.getWeightConfig,
     getPauseConfig: deps.getPauseConfig,
     getParagraphBreaks: deps.getParagraphBreaks,
     getFootnoteMode: deps.getFootnoteMode,
     getFootnoteCues: deps.getFootnoteCues,
     onChunkReady: (chunk) => {
+      const schedulerChunk: typeof chunk & KokoroSchedulerRatePlanMetadata = {
+        ...chunk,
+        // Wave A: keep generation/cache on the snapped bucket and expose
+        // exact UI speed recovery via pre-playback pitch-preserving tempo shaping.
+        kokoroRatePlan: getRatePlan(),
+      };
+
       // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
       const isFirst = !firstChunkReceived;
       firstChunkReceived = true;
@@ -112,7 +123,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 
         const scheduleMark = perfStart("schedule-chunk");
         scheduleMark.meta = { chunkWordCount: chunk.words.length, startIdx: chunk.startIdx, isFirstChunk: isFirst };
-        scheduler.scheduleChunk(chunk);
+        scheduler.scheduleChunk(schedulerChunk);
         perfEnd(scheduleMark);
 
         perfEnd(responseMark);
@@ -126,7 +137,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
         }
       } else {
         // TTS-7E: Schedule chunk synchronously (scheduler needs it immediately).
-        scheduler.scheduleChunk(chunk);
+        scheduler.scheduleChunk(schedulerChunk);
       }
 
       queueMicrotask(() => {
@@ -227,6 +238,10 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 
     getPipeline() {
       return pipeline;
+    },
+
+    refreshBufferedTempo() {
+      scheduler.refreshBufferedTempo(getRatePlan());
     },
 
     warmUp() {

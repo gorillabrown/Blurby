@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3 — GREEN
-Next sprint: TTS-HARDEN-2 (Narration Handoff Integrity & Extraction Dedupe)
-Health: GREEN — TTS-HARDEN-1 landed cleanly, so the hardening lane can advance to handoff/extraction integrity.
+Queue depth: 1 — YELLOW
+Next queue item: EINK-6A (E-Ink Foundation)
+Health: YELLOW — EPUB-TOKEN-1 completed at v1.59.0 and the active pointer advances to EINK-6A, but the queue is now down to one ready sprint and needs two backfill items before the next dispatch under the ≥3-depth rule.
 ```
 
 ---
@@ -34,11 +34,9 @@ Health: GREEN — TTS-HARDEN-1 landed cleanly, so the hardening lane can advance
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | TTS-HARDEN-2 | v1.57.0 | `sprint/tts-harden-2-handoff-integrity` | Full | **YES** | Full spec: 12 tasks, 9 success criteria. Section/chapter handoff ownership cleanup, extraction dedupe on active narration start, and stale orchestration test realignment. Depends on TTS-HARDEN-1. |
-| 2 | TTS-RATE-1 | v1.58.0 | `sprint/tts-rate-1-pitch-preserving-tempo` | Full | **YES** | Full spec: 12 tasks (3 waves), 11 success criteria. 0.1-step speed UX (1.0–1.5), fixed generation buckets (1.0/1.2/1.5), pitch-preserving tempo shaping, in-bucket no-restart behavior, multi-rate matrix verification. Depends on TTS-HARDEN-2. |
-| 3 | EPUB-TOKEN-1 | v1.59.0 | `sprint/epub-token-1-dropcap-stitching` | Full | **YES** | Full spec: 11 tasks (3 waves), 9 success criteria. Dropcap/split-token lexical stitching, stable global word identity across fragments, click/selection/narration alignment regressions covered. Depends on TTS-RATE-1. |
+| 1 | EINK-6A | TBD | TBD | Full | **YES** | Full spec: 10 tasks, 10 success criteria. Parked-but-spec'd fallback pointer; lower priority than the active EPUB/token lane and should dispatch only after the higher-priority queue work or an explicit reprioritization. Depends on TTS-7D (already satisfied). |
 
-**Dispatch status:** Queue depth 3 — GREEN. Dispatch order is `TTS-HARDEN-2` → `TTS-RATE-1` → `EPUB-TOKEN-1`.
+**Dispatch status:** Queue depth 1 — YELLOW. Current pointer order is `EINK-6A`; backfill two additional ready sprints before the next code-changing dispatch.
 
 ### Parallel Dispatch Guardrails
 
@@ -89,7 +87,10 @@ If any guardrail fails, run the sprints sequentially.
 27. ~~Dispatch TTS-EVAL-3 to CLI~~ — COMPLETE (v1.55.0)
 28. ~~Backfill queue to ≥3~~ — COMPLETE. Added `TTS-HARDEN-1` and `TTS-HARDEN-2`; queue depth restored to 4 (GREEN).
 29. ~~Dispatch TTS-HARDEN-1 to CLI~~ — COMPLETE (v1.56.0). Truthful Kokoro readiness now flows end-to-end from engine snapshot to renderer consumers; crash/load/warm-up failures fail closed and recover cleanly.
-30. **Dispatch TTS-HARDEN-2 to CLI** — NEXT. Handoff ownership and extraction dedupe now build on the hardened engine/status contract.
+30. ~~Dispatch TTS-HARDEN-2 to CLI~~ — COMPLETE (v1.57.0). Section-end continuation now has one active owner, handoff uses the stronger narration core contract, foliate fallback releases ownership once full-book metadata arrives, and active extraction follows the shared dedupe path.
+31. ~~Backfill queue to ≥3~~ — COMPLETE. Re-promoted `EINK-6A` as a parked but fully spec'd fallback pointer so queue depth remains 3 (GREEN) while TTS/token work stays first.
+32. ~~Dispatch TTS-RATE-1 to CLI~~ — COMPLETE (v1.58.0). Kokoro now offers exact `1.0x`–`1.5x` UI speeds in `0.1x` steps over fixed generation buckets (`1.0` / `1.2` / `1.5`), uses pitch-preserving tempo shaping instead of pitch-shifting playbackRate changes, keeps in-bucket speed edits restart-free via live buffered retiming, and passed the gated six-rate matrix release evidence (`artifacts/tts-eval/final-gate-22`). Existing Vite circular chunk warning unchanged.
+33. **Backfill queue to ≥3** — NEXT. `EINK-6A` is now the top queue item, but two additional ready pointers are required before dispatch under queue policy.
 
 ---
 
@@ -111,6 +112,9 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| EPUB-TOKEN-1 | 2026-04-17 | PASS | Dropcap/split-token lexical stitching shipped at v1.59.0: no-whitespace contiguous styled fragments now resolve to one logical word across extraction, rendering, click/selection, and narration start paths; rendered spans carry token metadata; stitched-fragment interactions collapse to one stable global word index. Verification passed: focused slice `5/5` files and `43/43` tests, full suite `122/122` files and `1964/1964` tests, and `npm run build` with the existing non-blocking `settings -> tts -> settings` warning. Solon APPROVED. Plato READY with no findings. |
+| TTS-RATE-1 | 2026-04-17 | PASS | Pitch-preserving Kokoro tempo shipped at v1.58.0: UI speed now moves in exact `0.1x` steps from `1.0x` to `1.5x`, generation/cache buckets stay fixed at `1.0` / `1.2` / `1.5`, exact-speed preview/status stays aligned to the selected speed, and in-bucket edits retime buffered playback live without restarting generation. Final verification passed with targeted tempo/rate suites, full release validation, and the gated six-rate matrix (`artifacts/tts-eval/final-gate-22`) covering `1.0` through `1.5` with PASS gate artifacts, drift max `2`, and zero pause/resume or handoff failures; existing circular-chunk warning unchanged. |
+| TTS-HARDEN-2 | 2026-04-17 | PASS | Narration handoff and extraction integrity hardened: single active flow owner for section-end continuation, stronger narration core handoff contract for section/global-word swaps, foliate fallback ownership released once full-book metadata arrives, and active narration extraction moved onto the same dedupe path as background pre-extraction. Verification passed: targeted post-fix slice (`4` files, `28` tests), full `npm test` (`116` files, `1912` tests), and `npm run build`; existing circular-chunk warning unchanged. v1.57.0. |
 | TTS-HARDEN-1 | 2026-04-16 | PASS | Kokoro bootstrap and recovery hardened end-to-end: authoritative readiness/status snapshot (`status/reason/recoverable`) from engine to renderer, fail-fast load/warm-up errors, packaged import shim allowlist + resolver restoration, sprint/marathon worker crash recovery with future-only retries, shutdown cleanup for retry timers/pending work, renderer truth wiring via normalized status helpers, and regression coverage across engine/worker/settings/hooks. Verification passed: focused Kokoro slice (`7` files, `75` tests), full `npm test` (`116` files, `2001` tests), and `npm run build`; existing circular-chunk warning unchanged. v1.56.0. |
 | TTS-EVAL-3 | 2026-04-16 | PASS | Quality gate release workflow shipped: versioned threshold config (`docs/testing/tts_quality_gates.v1.json`), gate evaluator (`scripts/tts_eval_gate.mjs`), in-runner gate enforcement via `--gates` (`scripts/tts_eval_runner.mjs`), baseline policy + snapshot (`docs/testing/TTS_EVAL_BASELINE_POLICY.md`, `docs/testing/tts_eval_baseline_v1.json`), release checklist (`docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`), and new gate coverage in `tests/ttsEvalGate.test.ts`. Verification passed: gated matrix run (`artifacts/tts-eval/baseline-v1`), targeted TTS eval suites (32 tests), full `npm test` (114 files, 1977 tests), and `npm run build`; existing circular-chunk warning unchanged. v1.55.0. |
 | TTS-EVAL-2 | 2026-04-16 | PASS | Matrix + soak evaluation tooling shipped: scenario manifest (`tests/fixtures/narration/matrix.manifest.json`), deterministic soak profiles (`scripts/tts_eval_profiles.mjs`), runner matrix/soak modes with deterministic artifact naming + checkpoints + interrupt-safe writes (`scripts/tts_eval_runner.mjs`), aggregate metrics reducer (`scripts/tts_eval_metrics.mjs`) with startup p50/p95 and drift summaries, and new coverage in `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with smoke matrix + short soak artifact runs and full `npm test` (113 files, 1972 tests) + `npm run build`; existing circular-chunk warning unchanged. v1.54.0. |

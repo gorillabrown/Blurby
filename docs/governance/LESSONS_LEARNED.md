@@ -1261,3 +1261,47 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** Readiness, loading, retryability, and terminal reason must come from one normalized status snapshot (`status`, `detail`, `reason`, `ready`, `loading`, `recoverable`). Progress events are supplemental only; they must never flip readiness on their own. Legacy error channels may fill missing detail, but they must not overwrite an already-structured terminal snapshot. When worker retries or shutdowns are possible, retry timers and pending/loading promises must be owned by the worker/lifecycle that created them so stale callbacks cannot reintroduce false state later.
 
 **Related:** TTS-HARDEN-1 sprint, `main/tts-engine.js`, `main/tts-engine-marathon.js`, `main/ipc/tts.js`, `src/utils/kokoroStatus.ts`, `src/hooks/useNarration.ts`, `src/components/settings/TTSSettings.tsx`
+
+---
+
+### [2026-04-17] LL-100: Fallback Ownership Cleanup Must Key Off React-Visible Extraction State
+
+**Area:** TTS, foliate fallback, React lifecycle, callback ownership
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-HARDEN-2 exposed a subtle ownership bug in the fallback section-end path. The foliate fallback callback needed to stop owning section continuation as soon as full-book EPUB metadata/extraction became available, but that completion was being tracked only through mutable refs. The refs were truthful when read imperatively, yet the callback lifecycle itself never re-ran at the right time, so stale fallback ownership could survive longer than intended.
+
+**Guardrail:** When an async milestone must add, remove, or re-scope a registered callback (`setOnSectionEnd`, listener wiring, ownership guards), the milestone must be reflected in React-visible state or an effect dependency that actually re-runs lifecycle cleanup. Mutable refs are fine for hot-path reads inside the callback, but refs alone are not sufficient to retire or replace callback ownership after extraction/full-book promotion completes.
+
+**Related:** TTS-HARDEN-2 sprint, `src/hooks/useFoliateSync.ts`, `src/hooks/useNarrationCaching.ts`, `src/hooks/useFlowScrollSync.ts`
+
+---
+
+### [2026-04-17] LL-101: Exact-Speed UX Can Sit Above Fixed Kokoro Generation Buckets
+
+**Area:** TTS, Kokoro, audio scheduling, release verification
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-RATE-1 needed to improve Kokoro speed control without reintroducing chipmunking or restart churn. The shipped design kept synthesis/cache generation on a small fixed bucket set (`1.0`, `1.2`, `1.5`) while exposing exact user-facing speeds in `0.1x` steps from `1.0x` to `1.5x`.
+
+**Guardrail:** Treat the selected UI speed and the generation bucket as separate truths. The UI, preview, and persisted selection must stay aligned to the exact chosen speed, while the runtime resolves the nearest generation bucket and applies a pitch-preserving pre-playback tempo stage to close the gap. If the user changes speed within the same bucket, retime buffered audio and boundary timing live; do not restart generation just to reflect the new exact speed.
+
+**Pattern:** Verification for bucketed-speed systems must prove both layers at once: unit coverage for the full UI-speed ladder, continuity coverage for in-bucket live edits, and a gated release matrix that exercises every supported UI rate (`1.0`, `1.1`, `1.2`, `1.3`, `1.4`, `1.5`). For TTS-RATE-1, the gated six-rate matrix (`artifacts/tts-eval/final-gate-22`) confirmed PASS with zero pause/resume failures, zero handoff failures, and drift held at the baseline ceiling.
+
+**Related:** TTS-RATE-1 sprint, `src/utils/kokoroRatePlan.ts`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+---
+
+### [2026-04-17] LL-102: Contiguous Styled Fragments Must Collapse to One Logical Word
+
+**Area:** EPUB extraction, renderer, selection mapping, narration
+**Status:** active
+**Priority:** high
+
+**Context:** EPUB drop caps and inline emphasis can split one lexical word across multiple DOM nodes without any intervening whitespace. If extraction assigns one index per fragment, the same word acquires multiple identities and downstream consumers disagree about where the user is in the book.
+
+**Guardrail:** Treat no-whitespace contiguous fragments as one logical token at extraction time. Preserve one stable token id and global word index across node boundaries, emit token-part metadata for rendering, and collapse click/selection/narration starts back to the stitched token's shared index before any consumer reads it. Only real whitespace should create a new word identity.
+
+**Related:** EPUB-TOKEN-1 sprint, `src/utils/segmentWords.ts`, `src/utils/foliateHelpers.ts`, `src/components/FoliatePageView.tsx`, `src/utils/foliateWordOffsets.ts`

@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-16 — TTS-HARDEN-1 completed. Queue remains GREEN.
+**Last updated**: 2026-04-17 — EPUB-TOKEN-1 completed. Queue now points to EINK-6A.
 **Current branch**: `main`
-**Current state**: v1.56.0 stable. Queue depth 3 (GREEN). Next: TTS-HARDEN-2 → TTS-RATE-1 → EPUB-TOKEN-1.
+**Current state**: v1.59.0 stable. Queue depth 1 (YELLOW). Next queue item: EINK-6A.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -78,11 +78,11 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     TTS-HARDEN-1: Kokoro Bootstrap & Engine Recovery ✅ (v1.56.0)
                    │
-    TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe
+    TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe ✅ (v1.57.0)
                    │
-    TTS-RATE-1: Pitch-Preserving Tempo for Kokoro
+    TTS-RATE-1: Pitch-Preserving Tempo for Kokoro ✅ (v1.58.0)
                    │
-    EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching
+    EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching ✅ (v1.59.0)
                    │
                    ▼
         Track C: Android APK
@@ -1830,7 +1830,11 @@ Wave C (tests + governance):
 
 ---
 
-## TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe
+## TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe ✅ COMPLETED (v1.57.0, 2026-04-17)
+
+**Outcome:** `TTS-HARDEN-2` completed on top of `TTS-HARDEN-1` and tightened the flow-layer narration contract where handoffs had still been split across fallback/runtime paths. Section-end continuation now has one active flow owner, narration handoff promotes the stronger core word/cursor contract instead of a bare array swap, foliate fallback releases ownership once full-book metadata arrives, and active narration extraction now uses the same dedupe path as background pre-extraction.
+
+**Verification:** Targeted post-fix validation passed `4` files / `28` tests. Full `npm test` passed `116` files / `1912` tests, and `npm run build` passed. The existing circular chunk warning `settings -> tts -> settings` remains non-blocking.
 
 **Goal:** Make section/chapter narration handoffs, global-word promotion, and extraction concurrency behave as a single coherent runtime path.
 
@@ -1932,7 +1936,7 @@ Wave C (tests + governance):
 
 ---
 
-## TTS-RATE-1: Pitch-Preserving Tempo for Kokoro
+## TTS-RATE-1: Pitch-Preserving Tempo for Kokoro ✅ COMPLETED (v1.58.0, 2026-04-17)
 
 **Goal:** Deliver speed control that does not chipmunk Kokoro voices by decoupling generation/cache rate buckets from playback tempo shaping.
 
@@ -2040,15 +2044,23 @@ Wave C (verification + governance):
 
 **Depends on:** `TTS-HARDEN-2`.
 
+**Completion note:** Completed on 2026-04-17. Kokoro speed control now exposes exact 0.1-step UI speeds from `1.0x` through `1.5x` while keeping generation/cache on the fixed `1.0` / `1.2` / `1.5` bucket set. The runtime resolves each UI speed to the nearest generation bucket, applies pitch-preserving tempo shaping to reach the exact selected speed, keeps preview/status aligned to the exact user speed rather than the backing bucket, and avoids restart churn for in-bucket speed edits by live-retiming buffered audio instead.
+
+**Verification:** Targeted tempo/rate coverage landed across the rate-plan, scheduler, Kokoro strategy, narration update, settings truth, and timing suites. Final release evidence includes the gated six-rate matrix at `artifacts/tts-eval/final-gate-22`, covering `1.0`, `1.1`, `1.2`, `1.3`, `1.4`, and `1.5` with PASS gate artifacts, startup latency p50/p95 `433.5 / 501.75 ms`, drift p50/p95/max `2 / 2 / 2`, and zero pause/resume or handoff failures. `npm run build` still reports the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`), unchanged from prior releases.
+
 ---
 
-## EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching
+## EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching ✅ COMPLETED (v1.59.0, 2026-04-17)
 
 **Goal:** Ensure styled split words (drop caps, inline styling splits, mixed-node words) are treated as one logical word for selection, cursoring, and narration.
 
 **Version:** v1.59.0 | **Branch:** `sprint/epub-token-1-dropcap-stitching`
 
 **Problem:** EPUB styling can split a single lexical word into multiple DOM fragments (`T` + `his`). Current interaction surfaces may treat these as separate words, causing cursor jumps and narration mismatch.
+
+**Verification:** Focused slice passed 5/5 files and 43/43 tests. Full suite passed 122/122 files and 1964/1964 tests. `npm run build` passed with the existing non-blocking warning `settings -> tts -> settings`. Solon APPROVED. Plato READY with no findings, with the noted residual risk that click/selection coherence is still mostly covered by utility-level tests rather than a full DOM-event integration test through `FoliatePageView`.
+
+**Closeout:** No-whitespace contiguous styled fragments now resolve to one logical word across extraction, rendering, click/selection, and narration start paths. Rendered spans carry token metadata, and stitched-fragment interactions collapse to one stable global word index.
 
 ### Lane Ownership
 

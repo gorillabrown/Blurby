@@ -4,6 +4,19 @@ export interface SectionIndexedWordLike {
   sectionIndex: number;
 }
 
+function collapseRenderedWordIndexes(
+  renderedWordIndex: number,
+  stitchedRenderedWordIndexes?: number[],
+): number {
+  const collapsed = [
+    renderedWordIndex,
+    ...(stitchedRenderedWordIndexes ?? []),
+  ].filter((value) => Number.isFinite(value));
+
+  if (collapsed.length === 0) return renderedWordIndex;
+  return Math.min(...collapsed);
+}
+
 function getLoadedSectionStart(
   sectionIndex: number,
   loadedWords: SectionIndexedWordLike[],
@@ -49,30 +62,42 @@ export function resolveRenderedWordIndexToGlobal(
   renderedWordIndex: number,
   loadedWords: SectionIndexedWordLike[],
   bookWordSections?: SectionBoundary[],
+  stitchedRenderedWordIndexes?: number[],
 ): number {
+  const collapsedRenderedWordIndex = collapseRenderedWordIndexes(
+    renderedWordIndex,
+    stitchedRenderedWordIndexes,
+  );
   const bookSection = bookWordSections?.find((s) => s.sectionIndex === sectionIndex);
-  if (!bookSection) return renderedWordIndex;
+  if (!bookSection) return collapsedRenderedWordIndex;
 
   if (
-    renderedWordIndex >= bookSection.startWordIdx &&
-    renderedWordIndex < bookSection.endWordIdx
+    collapsedRenderedWordIndex >= bookSection.startWordIdx &&
+    collapsedRenderedWordIndex < bookSection.endWordIdx
   ) {
-    return renderedWordIndex;
+    return collapsedRenderedWordIndex;
   }
 
   const localStart = getLoadedSectionStart(sectionIndex, loadedWords);
   const localCount = getLoadedSectionWordCount(sectionIndex, loadedWords);
   if (localStart >= 0 && localCount > 0) {
     const localEnd = localStart + localCount;
-    if (renderedWordIndex >= localStart && renderedWordIndex < localEnd) {
-      return bookSection.startWordIdx + (renderedWordIndex - localStart);
+    if (
+      collapsedRenderedWordIndex >= localStart &&
+      collapsedRenderedWordIndex < localEnd
+    ) {
+      return bookSection.startWordIdx + (collapsedRenderedWordIndex - localStart);
     }
-    if (localStart === 0 && renderedWordIndex >= 0 && renderedWordIndex < localCount) {
-      return bookSection.startWordIdx + renderedWordIndex;
+    if (
+      localStart === 0 &&
+      collapsedRenderedWordIndex >= 0 &&
+      collapsedRenderedWordIndex < localCount
+    ) {
+      return bookSection.startWordIdx + collapsedRenderedWordIndex;
     }
   }
 
-  return renderedWordIndex;
+  return collapsedRenderedWordIndex;
 }
 
 /**

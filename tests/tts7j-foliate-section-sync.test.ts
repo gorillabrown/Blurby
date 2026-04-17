@@ -37,6 +37,67 @@ function dedupeAndAppendSection(
   return [...existingWithoutSection, ...newSectionWords.map(w => ({ ...w, sectionIndex }))];
 }
 
+type DocChapter = { title: string; charOffset: number; sectionIndex?: number };
+
+function remapChapterOffsets(
+  chapters: DocChapter[],
+  sections: Array<{ sectionIndex: number; startWordIdx: number }>,
+  totalWords: number,
+  activeDocWordCount = 1,
+): DocChapter[] {
+  return chapters.map((chapter, idx, all) => {
+    if (chapter.sectionIndex != null) {
+      const match = sections.find(section => section.sectionIndex === chapter.sectionIndex);
+      if (match) {
+        return { ...chapter, charOffset: match.startWordIdx };
+      }
+    }
+
+    const sectionFraction = idx / Math.max(all.length, 1);
+    return {
+      ...chapter,
+      charOffset: Math.floor(sectionFraction * Math.max(totalWords || activeDocWordCount || 1, 1)),
+    };
+  });
+}
+
+function createExtractionCoordinator(result: { words: string[]; sections: Array<{ sectionIndex: number; startWordIdx: number }>; totalWords: number }) {
+  let inflight: Promise<typeof result> | null = null;
+  let inflightBookId: string | null = null;
+  let resolveInflight: ((value: typeof result) => void) | null = null;
+
+  const loadEpubWords = vi.fn((bookId: string) => {
+    inflightBookId = bookId;
+    inflight = new Promise<typeof result>((resolve) => {
+      resolveInflight = resolve;
+    }).finally(() => {
+      if (inflightBookId === bookId) {
+        inflight = null;
+        inflightBookId = null;
+        resolveInflight = null;
+      }
+    });
+    return inflight;
+  });
+
+  const extractEpubWords = vi.fn((bookId: string) => {
+    if (inflight && inflightBookId === bookId) {
+      return inflight;
+    }
+    return loadEpubWords(bookId);
+  });
+
+  const bookWordsRef = {
+    current: null as null | { words: string[]; sections: Array<{ sectionIndex: number; startWordIdx: number }>; totalWords: number; complete: boolean },
+  };
+
+  const resolveExtraction = () => {
+    resolveInflight?.(result);
+  };
+
+  return { extractEpubWords, loadEpubWords, bookWordsRef, resolveExtraction };
+}
+
 // ── BUG-129: Word-source deduplication ─────���────────────────────────
 
 describe("TTS-7J: word-source deduplication (BUG-129)", () => {
@@ -133,6 +194,61 @@ describe("TTS-7J: explicit user selection protection (BUG-130)", () => {
   it("resolveFoliateStartWord falls back to 0 when nothing else works", () => {
     const result = resolveFoliateStartWord(5000, 1000, () => -1);
     expect(result).toBe(0);
+  });
+});
+
+// ── Handoff runtime behavior ────────────────────────────────────────────────
+
+describe("TTS-7J: section handoff runtime behavior", () => {
+  it("chapter labels update across handoff to the new global section offsets", () => {
+    const chapters: DocChapter[] = [
+      { title: "Intro", charOffset: 0, sectionIndex: 0 },
+      { title: "Middle", charOffset: 99, sectionIndex: 1 },
+      { title: "Wrap-up", charOffset: 199, sectionIndex: 2 },
+    ];
+
+    const remapped = remapChapterOffsets(
+      chapters,
+      [
+        { sectionIndex: 0, startWordIdx: 0 },
+        { sectionIndex: 1, startWordIdx: 120 },
+        { sectionIndex: 2, startWordIdx: 340 },
+      ],
+      500,
+    );
+
+    expect(remapped.map(chapter => chapter.charOffset)).toEqual([0, 120, 340]);
+  });
+
+  it("active extraction dedupes with background extraction and preserves the active result", async () => {
+    const extraction = createExtractionCoordinator({
+      words: ["background-1", "background-2"],
+      sections: [{ sectionIndex: 0, startWordIdx: 0 }],
+      totalWords: 2,
+    });
+
+    const background = extraction.extractEpubWords("book-1");
+    const active = extraction.extractEpubWords("book-1");
+
+    expect(extraction.loadEpubWords).toHaveBeenCalledTimes(1);
+    expect(background).toBe(active);
+
+    extraction.bookWordsRef.current = {
+      words: ["active-1", "active-2", "active-3"],
+      sections: [{ sectionIndex: 0, startWordIdx: 0 }],
+      totalWords: 3,
+      complete: true,
+    };
+
+    extraction.resolveExtraction();
+    const [backgroundResult, activeResult] = await Promise.all([background, active]);
+    expect(extraction.bookWordsRef.current?.words).toEqual(["active-1", "active-2", "active-3"]);
+    expect(backgroundResult).toEqual({
+      words: ["background-1", "background-2"],
+      sections: [{ sectionIndex: 0, startWordIdx: 0 }],
+      totalWords: 2,
+    });
+    expect(activeResult).toEqual(backgroundResult);
   });
 });
 

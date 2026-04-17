@@ -190,6 +190,12 @@ export function resolveNarrationProfile(
 }
 
 // ── Kokoro Rate Buckets (TTS-6C) ────────────────────────────────────────────
+/** Kokoro UI rate slider minimum — generation/cache still snaps to fixed buckets */
+export const KOKORO_UI_RATE_MIN = 1.0;
+/** Kokoro UI rate slider maximum — generation/cache still snaps to fixed buckets */
+export const KOKORO_UI_RATE_MAX = 1.5;
+/** Kokoro UI rate slider step size */
+export const KOKORO_UI_RATE_STEP = 0.1;
 /** Supported Kokoro native generation rates — no pitch-shift, no scheduler stretch */
 export const KOKORO_RATE_BUCKETS = [1.0, 1.2, 1.5] as const;
 export type KokoroRateBucket = (typeof KOKORO_RATE_BUCKETS)[number];
