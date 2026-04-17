@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-17 — EPUB-TOKEN-1 completed. Queue now points to EINK-6A.
+**Last updated**: 2026-04-17 — Closed out TTS-CONT-1 and advanced the follow-on lane to TTS-RATE-2.
 **Current branch**: `main`
-**Current state**: v1.59.0 stable. Queue depth 1 (YELLOW). Next queue item: EINK-6A.
+**Current state**: v1.60.0 stable. Queue depth 3 (GREEN). Next queue item: TTS-RATE-2.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -83,6 +83,12 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     TTS-RATE-1: Pitch-Preserving Tempo for Kokoro ✅ (v1.58.0)
                    │
     EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching ✅ (v1.59.0)
+                   │
+    TTS-CONT-1: Readiness-Driven Continuity ✅ (v1.60.0)
+                   │
+    TTS-RATE-2: Segmented Live Rate Response
+                   │
+    TTS-START-1: Startup Parity & Opening Cache Contract
                    │
                    ▼
         Track C: Android APK
@@ -2778,6 +2784,300 @@ Task 12 (Git)
 ## Phase 6 Continued — E-Ink & Goals (PARKED)
 
 > EINK-6A, EINK-6B, and GOALS-6B are fully spec'd but parked. Specs remain valid — resume after TTS/hotfix lane concludes.
+
+---
+
+## Phase 6 Follow-On — TTS Continuity & Startup Quality
+
+> `TTS-CONT-1` closed out on 2026-04-17 and established readiness-driven continuity as the new handoff baseline. The remaining follow-up lane order is fixed: `TTS-RATE-2` → `TTS-START-1`. These sprints continue closing the remaining wait-time and responsiveness gaps without reopening the already-fixed bootstrap/truth contracts.
+
+---
+
+### Sprint TTS-CONT-1: Readiness-Driven Section & Cross-Book Continuity ✅ COMPLETED (v1.60.0, 2026-04-17)
+
+**Goal:** Remove fixed timer waits from narration handoffs so section transitions and cross-book continuation resume as soon as the next reading surface is actually ready, not when an arbitrary sleep expires.
+
+**Version:** v1.60.0 | **Branch:** `sprint/tts-cont-1-readiness-continuity` | **Tier:** Full
+
+**Problem:** The core TTS stack is now structurally correct, but continuity still carries artificial delay floors. Same-book flow narration still waits a fixed `300ms` after `goToSection()` before calling `narration.updateWords(...)`, and foliate fallback still waits a fixed `300ms` before extraction + `resyncToCursor(0, effectiveWpm)`. Cross-book flow+narration still holds a blocking overlay for `2500ms` plus an additional `300ms` resume delay even when the next book is ready sooner. These waits are now the biggest avoidable contributors to perceived interruption.
+
+**Design decisions:**
+- **Section handoff becomes readiness-driven.** Add an explicit foliate readiness promise instead of sleeping `300ms`. Handoff resumes when the target section has loaded, its spans are stamped, and the view API can resolve the target section as active.
+- **Fallback section ownership stays passive but truthful.** `useFoliateSync` should only restart narration after the next section actually exposes words, not after a guessed delay.
+- **Cross-book overlay becomes non-blocking.** Keep the visual transition affordance, but do not block opening the next book or resuming narration behind a fixed `2500ms + 300ms` wall. Start the next open immediately, resume when the next reader is ready, and cap the overlay with a fallback timeout rather than a minimum dwell.
+- **Handoff latency becomes a measured release metric.** Extend the TTS eval schema and runner so section/book handoff latency is recorded, summarized, and can become a gate later.
+
+**Baseline:**
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts): same-book handoff timer after `goToSection()`; cross-book timeout ownership.
+- [useFoliateSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFoliateSync.ts): fallback `setOnSectionEnd` flow with `api.next()` + `setTimeout(300)`.
+- [FoliatePageView.tsx](C:/Users/estra/Projects/Blurby/src/components/FoliatePageView.tsx): current `goToSection()` API but no explicit readiness resolver for handoff consumers.
+- [constants.ts](C:/Users/estra/Projects/Blurby/src/constants.ts): `CROSS_BOOK_TRANSITION_MS = 2500`, `CROSS_BOOK_FLOW_RESUME_DELAY_MS = 300`.
+- [types/eval.ts](C:/Users/estra/Projects/Blurby/src/types/eval.ts) and [scripts/tts_eval_runner.mjs](C:/Users/estra/Projects/Blurby/scripts/tts_eval_runner.mjs): handoff failure accounting exists, but no explicit section/book handoff latency measurement.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** flow/narration continuity, foliate readiness, transition timing, eval latency accounting
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useFoliateSync.ts`
+  - `src/components/ReaderContainer.tsx`
+  - `src/components/FoliatePageView.tsx`
+  - `src/types/eval.ts`
+
+#### Shared-Core Touches
+
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useFoliateSync.ts`
+- `src/components/FoliatePageView.tsx`
+- `src/constants.ts`
+- `src/types/eval.ts`
+- `scripts/tts_eval_runner.mjs`
+
+#### Merge Order
+
+- Merge before `TTS-RATE-2` and `TTS-START-1`. This sprint establishes the continuity timing baseline those sprints should measure against.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/hooks/useFlowScrollSync.ts` — active same-book and cross-book narration handoffs
+5. `src/hooks/useFoliateSync.ts` — fallback section-end ownership
+6. `src/components/FoliatePageView.tsx` — `FoliateViewAPI`, `goToSection()`, section load flow
+7. `src/components/ReaderContainer.tsx` — reader-level cross-book / foliate integration
+8. `src/constants.ts` — cross-book transition constants
+9. `src/types/eval.ts` — handoff-related lifecycle metrics
+10. `scripts/tts_eval_runner.mjs` and `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Add explicit foliate section-readiness contract** — Extend `FoliateViewAPI` with a readiness method such as `waitForSectionReady(sectionIndex, timeoutMs?)`. Resolve only after the requested section is active, spans are stamped, and the view can safely serve word queries for that section. | `src/components/FoliatePageView.tsx` | `FoliateViewAPI` interface near `goToSection` (~lines 330-350), imperative API block near `goToSection: async (sectionIndex)` (~lines 966-980), section load handler where docs are wrapped/stamped (~lines 560-740). |
+| 2 | worker-sonnet | **Replace same-book flow handoff sleep with readiness-driven continuation** — In `useFlowScrollSync`, await the new foliate readiness contract after `goToSection(nextSection.sectionIndex)` and call `narration.updateWords(..., { mode: "handoff" })` immediately when ready. Remove the fixed `setTimeout(..., 300)` path. | `src/hooks/useFlowScrollSync.ts` | Same-book handoff block around `goToSection` and `setTimeout` (~lines 294-305). |
+| 3 | worker-sonnet | **Replace foliate fallback sleep with readiness-driven extraction/resync** — In `useFoliateSync`, keep fallback ownership only while extraction is incomplete, but remove the fixed `300ms` timer. Restart only after the next section is actually available and `extractFoliateWords()` returns non-empty words. | `src/hooks/useFoliateSync.ts` | Fallback `setOnSectionEnd` block around `api.next()` / `setTimeout` / `narration.resyncToCursor(0, effectiveWpm)` (~lines 214-225). |
+| 4 | Athena | **Make cross-book continuation non-blocking** — Replace the current blocking `CROSS_BOOK_TRANSITION_MS + CROSS_BOOK_FLOW_RESUME_DELAY_MS` chain with immediate next-book open plus readiness-driven resume. Keep the overlay, but convert it from minimum dwell to max fallback timeout. Add new constants for fallback timeout and overlay fade if needed. | `src/hooks/useFlowScrollSync.ts`, `src/constants.ts`, `src/components/ReaderContainer.tsx` | `CROSS_BOOK_TRANSITION_MS` / `CROSS_BOOK_FLOW_RESUME_DELAY_MS` constants (~lines 443-445), cross-book timeout scheduling in `useFlowScrollSync` (~lines 188-199 and 342-353), any reader-level transition state plumbing in `ReaderContainer`. |
+| 5 | worker-sonnet | **Add handoff-latency instrumentation and gate surfaces** — Extend eval trace schema and runner summaries to record section-handoff latency and cross-book resume latency. Update matrix/runbook docs to include acceptable continuity budgets. | `src/types/eval.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Add latency fields near lifecycle summary types in `src/types/eval.ts`; aggregate and report in `scripts/tts_eval_runner.mjs`; update the runbook’s rate/continuity release pattern section. |
+| 6 | Hippocrates | **Tests** — Add focused tests for: (a) same-book flow handoff waits on readiness signal instead of fixed sleep, (b) fallback section-end ownership restarts only after words exist, (c) cross-book resume can occur before the old 2.8s floor when the next reader is ready, (d) overlay fallback timeout still prevents deadlock, (e) eval runner captures section/book handoff latency. Target ≥12 new or expanded tests. | `tests/` | Extend `tests/narrationLayer.test.ts`, `tests/readerDecomposition.test.ts`, `tests/ttsEvalLifecycle.test.ts`, plus add any new continuity-focused file as needed. |
+| 7 | Hippocrates | **Verification** — Run focused continuity suites, gated matrix smoke covering handoff scenarios, full `npm test`, and `npm run build`. | — | — |
+| 8 | Solon | **Spec compliance** — Verify all success criteria and confirm no new fixed waits remain on the active handoff path. | — | — |
+| 9 | Plato | **Quality review** — Review continuity behavior, readiness truth, and fallback timeout policy for regressions or hidden deadlocks. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` closeout notes when complete. | Governing docs + runbook | — |
+| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/tts-cont-1-readiness-continuity` |
+
+#### SUCCESS CRITERIA
+
+1. Same-book flow narration handoff no longer depends on a fixed `300ms` timer.
+2. Foliate fallback section-end restart no longer depends on a fixed `300ms` timer.
+3. Handoff resumes only after the target section is actually ready to serve word data.
+4. Cross-book narration open starts immediately after finish bookkeeping; no fixed `2500ms + 300ms` minimum dwell remains in the hot path.
+5. Cross-book overlay remains visible as UX affordance but never blocks continuation past a configurable fallback timeout.
+6. Section-hand-off latency is recorded in eval artifacts.
+7. Cross-book-resume latency is recorded in eval artifacts.
+8. Existing handoff failure accounting remains correct.
+9. ≥12 new or expanded continuity tests land.
+10. `npm test` passes.
+11. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-HARDEN-2, TTS-RATE-1
+
+**Completion note:** Completed on 2026-04-17. Same-book and cross-book narration handoffs now resume from actual foliate/read-surface readiness instead of sleeping on fixed `300ms` and `2500ms + 300ms` timer floors. `FoliatePageView` exposes an explicit section-readiness wait contract, `useFoliateSync` and `useFlowScrollSync` consume that truth for fallback and active handoff paths, and the cross-book overlay is now fallback-only rather than a blocking minimum dwell.
+
+**Verification:** Continuity coverage expanded with `tests/ttsContinuityReadiness.test.ts` plus updates in `tests/readerDecomposition.test.ts`, `tests/ttsEvalLifecycle.test.ts`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with `npm test` (`123` files, `1976` tests), `npm run build`, a gated handoff matrix with non-null cross-book latency, and a section fixture run that emitted non-null section-handoff latency. The existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint TTS-RATE-2: Segmented Live Kokoro Rate Response
+
+**Goal:** Make same-bucket Kokoro speed changes feel materially more live by bounding response lag to a short playback segment instead of the full currently playing chunk, while preserving pitch and avoiding restart behavior.
+
+**Version:** v1.61.0 | **Branch:** `sprint/tts-rate-2-segmented-live-response` | **Tier:** Full
+
+**Problem:** `TTS-RATE-1` fixed pitch-shift and full-restart behavior, but same-bucket edits still only affect future buffered chunks. The currently playing source keeps its old tempo until that chunk ends. On long chunks, that can leave rate response feeling late even though the architecture is technically continuity-safe.
+
+**Design decisions:**
+- **Keep generation/cache buckets unchanged.** This sprint does not redesign `1.0 / 1.2 / 1.5` generation buckets.
+- **Split playback into short scheduler segments.** Generated chunks stay cached/generated as they are, but Kokoro playback is subdivided into short scheduler-ready segments using real word timestamps when available. This bounds live rate-response lag without requiring a full real-time worklet rewrite.
+- **Rate authority remains centralized.** `resolveKokoroRatePlan(...)` stays the only speed authority. Segment sizing must not create a new rate path.
+- **Bounded lag, not impossible zero-lag.** The target is that same-bucket edits take effect by the next short segment boundary, not midway through an already-started source.
+- **Measure response latency explicitly.** Add matrix/test coverage that records how long it takes for a speed edit to become audible.
+
+**Baseline:**
+- [useNarration.ts](C:/Users/estra/Projects/Blurby/src/hooks/useNarration.ts): same-bucket edits call `kokoroStrategy.refreshBufferedTempo()`.
+- [audioScheduler.ts](C:/Users/estra/Projects/Blurby/src/utils/audioScheduler.ts): `refreshBufferedTempo()` preserves already-started sources and only rebuilds future ones.
+- [kokoroStrategy.ts](C:/Users/estra/Projects/Blurby/src/hooks/narration/kokoroStrategy.ts): chunk-level scheduling and rate metadata propagation.
+- [audio/tempoStretch.ts](C:/Users/estra/Projects/Blurby/src/utils/audio/tempoStretch.ts): existing pitch-preserving stretch used before scheduling.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** Kokoro rate continuity, scheduler segmentation, rate-response measurement
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/hooks/useNarration.ts`
+  - `src/hooks/narration/kokoroStrategy.ts`
+  - `src/utils/audioScheduler.ts`
+  - `src/utils/audio/tempoStretch.ts`
+  - `src/constants.ts`
+
+#### Shared-Core Touches
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/utils/audioScheduler.ts`
+- `src/utils/audio/tempoStretch.ts`
+- `src/constants.ts`
+- `src/types/eval.ts`
+
+#### Merge Order
+
+- Merge after `TTS-CONT-1` and before `TTS-START-1`.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/hooks/useNarration.ts`
+5. `src/hooks/narration/kokoroStrategy.ts`
+6. `src/utils/audioScheduler.ts`
+7. `src/utils/audio/tempoStretch.ts`
+8. `src/utils/generationPipeline.ts`
+9. `tests/audioSchedulerTempo.test.ts`
+10. `tests/kokoroStrategyRateContinuity.test.ts`
+11. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define bounded live-rate segment contract** — Add constants and types for maximum live-rate segment duration and any min/max word constraints so the rate-response budget is explicit and shared. | `src/constants.ts`, `src/types/narration.ts` or adjacent rate metadata types | Add new live-rate constants near existing TTS/rate constants; add segment metadata type near Kokoro scheduler metadata definitions. |
+| 2 | worker-sonnet | **Add Kokoro playback-segmentation helper** — Introduce a helper that slices generated chunk audio plus word timestamps into short scheduler-ready segments while preserving parent chunk identity and exact global word indices. Prefer real timestamps; fall back conservatively when unavailable. | `src/utils/audio/segmentKokoroChunk.ts` (new), `src/utils/audio/tempoStretch.ts` if needed | New helper file; call sites wired from Kokoro strategy/scheduler boundary where full chunks currently enter scheduling. |
+| 3 | Athena | **Update Kokoro strategy to schedule segments instead of whole chunks** — Keep generation/cache output unchanged, but expand live playback into short segments with inherited rate-plan metadata and parent-chunk linkage. | `src/hooks/narration/kokoroStrategy.ts` | `onChunkReady` handling near scheduler chunk creation (~lines 108-146), cached-chunk path near `loadCached()` (~lines 161-170), any related strategy types. |
+| 4 | worker-sonnet | **Teach audioScheduler to retime segmented future playback** — Preserve currently started segment, but allow same-bucket rate edits to rebuild the unscheduled remainder of the current parent chunk plus future segments. Ensure response lag is bounded by the current segment, not the whole generated chunk. | `src/utils/audioScheduler.ts` | `ScheduledChunk` type near top, `scheduleChunk()` pipeline (~lines 467-536), `refreshBufferedTempo()` (~lines 540-569), and any source bookkeeping structures. |
+| 5 | Hermes | **Keep cursor/highlight timing aligned to segmented playback** — Ensure truth-sync and chunk-handoff semantics remain correct when one generated chunk becomes multiple scheduler segments. | `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts` | `deliverChunkBoundary()` and truth-sync counters near lines 212-223; `onWordAdvance`/handoff handling in `useNarration.ts` around Kokoro callback wiring (~lines 448-486). |
+| 6 | worker-sonnet | **Add rate-response instrumentation and matrix coverage** — Record same-bucket rate-change response latency and update the matrix/runbook so live rate responsiveness is measured, not inferred. | `src/types/eval.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Add latency field(s) beside existing lifecycle/rate metrics; update runner summary and runbook release criteria. |
+| 7 | Hippocrates | **Tests** — Add focused tests for: (a) segmentation preserves word order and timestamps, (b) same-bucket rate edits affect the current parent chunk’s unscheduled remainder, (c) no full restart occurs, (d) response lag is bounded by the configured max segment duration, (e) cursor/highlight truth remains monotonic. Target ≥14 new or expanded tests. | `tests/` | Extend `tests/audioSchedulerTempo.test.ts`, `tests/kokoroStrategyRateContinuity.test.ts`, `tests/useNarrationRateUpdate.test.tsx`, plus any new segment-helper test file. |
+| 8 | Hippocrates | **Verification** — Run focused rate suites, gated six-rate matrix, full `npm test`, and `npm run build`. | — | — |
+| 9 | Solon | **Spec compliance** — Verify the bounded-lag contract and confirm no same-bucket restart path reappears. | — | — |
+| 10 | Plato | **Quality review** — Review audible continuity assumptions, segment sizing, and response-latency tradeoffs. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and matrix runbook after closeout. | Governing docs + runbook | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/tts-rate-2-segmented-live-response` |
+
+#### SUCCESS CRITERIA
+
+1. Same-bucket Kokoro rate edits no longer wait for the full currently playing chunk to finish.
+2. Same-bucket rate edits still avoid full restart behavior.
+3. Pitch-preserving tempo shaping remains the only playback-shaping path for Kokoro.
+4. Response lag is bounded by the configured live-rate segment budget.
+5. Cursor/highlight truth remains monotonic across segmented playback.
+6. Cached and generated Kokoro chunks both enter the same segmented playback path.
+7. Rate-response latency is recorded in eval artifacts.
+8. The six-rate matrix remains PASS-capable with the new live response path.
+9. ≥14 new or expanded rate/continuity tests land.
+10. `npm test` passes.
+11. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-RATE-1, TTS-CONT-1
+
+---
+
+### Sprint TTS-START-1: Startup Parity & Opening Cache Contract
+
+**Goal:** Make cached and uncached starts behave like the same product by warming and replaying the opening ramp with the same chunk-shape contract, while also hardening the renderer cache helper so exact replay does not depend on caller trivia.
+
+**Version:** v1.62.0 | **Branch:** `sprint/tts-start-1-startup-parity` | **Tier:** Full
+
+**Problem:** Live playback ramps `13 -> 26 -> 52 -> 104 -> 148`, but entry-coverage background caching still warms only cruise-sized chunks. Cached starts therefore begin from a different shape than uncached starts, which changes startup feel, pause cadence, and rate-response lag. Separately, `loadCachedChunk()` still has a misleading contract that only stays correct because the live caller passes a tail-sliced word array.
+
+**Design decisions:**
+- **One opening-ramp planner for live and cache paths.** Background entry coverage must warm the same opening ramp that live playback uses before continuing into cruise coverage.
+- **Cached and uncached starts should share the same first-chunk experience.** That includes first few chunk sizes, boundary shaping, and early same-bucket rate responsiveness.
+- **Make the renderer cache helper explicit and exact.** `loadCachedChunk()` should reconstruct from full-word context plus `startIdx`, not by relying on a tail-sliced array contract hidden in the caller.
+- **Measure startup parity directly.** Extend eval artifacts so cached-vs-uncached startup and opening-ramp shape can be compared.
+
+**Baseline:**
+- [generationPipeline.ts](C:/Users/estra/Projects/Blurby/src/utils/generationPipeline.ts): live opening ramp `13 -> 26 -> 52 -> 104 -> 148`.
+- [backgroundCacher.ts](C:/Users/estra/Projects/Blurby/src/utils/backgroundCacher.ts): entry coverage uses `TTS_CRUISE_CHUNK_WORDS` immediately.
+- [ttsCache.ts](C:/Users/estra/Projects/Blurby/src/utils/ttsCache.ts): cached replay slices `allWords.slice(0, wordCount)`.
+- [kokoroStrategy.ts](C:/Users/estra/Projects/Blurby/src/hooks/narration/kokoroStrategy.ts): current cache load path passes `words.slice(startIdx)`.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** startup latency parity, cache replay contract, opening coverage planner
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/utils/generationPipeline.ts`
+  - `src/utils/backgroundCacher.ts`
+  - `src/utils/ttsCache.ts`
+  - `src/hooks/narration/kokoroStrategy.ts`
+  - `src/constants.ts`
+
+#### Shared-Core Touches
+
+- `src/utils/generationPipeline.ts`
+- `src/utils/backgroundCacher.ts`
+- `src/utils/ttsCache.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/constants.ts`
+- `src/types/eval.ts`
+
+#### Merge Order
+
+- Merge after `TTS-CONT-1` and `TTS-RATE-2`. This sprint should build on the stabilized continuity and rate-response lane.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/utils/generationPipeline.ts`
+5. `src/utils/backgroundCacher.ts`
+6. `src/utils/ttsCache.ts`
+7. `src/hooks/narration/kokoroStrategy.ts`
+8. `src/hooks/useNarrationCaching.ts`
+9. `tests/tts7a-cacheCorrectness.test.ts`
+10. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define shared opening-ramp planner contract** — Extract or formalize an opening-ramp plan API so live generation and entry-coverage caching both consume the same chunk-shape sequence from the current start position. | `src/utils/generationPipeline.ts`, `src/constants.ts` | Opening ramp definitions near `RAMP_SEQUENCE` / `getChunkSize()` (~lines 87-103); add any shared planner helpers/constants nearby or in a new helper file. |
+| 2 | worker-sonnet | **Make background entry coverage warm the opening ramp first** — Update `queueEntryCoverage` / `cacheBook()` so opening coverage uses the shared ramp sequence from the active start before switching to cruise chunks for the remaining coverage target. | `src/utils/backgroundCacher.ts` | Entry-coverage path in `cacheBook()` around `chunkSize = TTS_CRUISE_CHUNK_WORDS` and the `maxDurationMs` loop (~lines 90-126); any queueing logic around `queueEntryCoverage()` (~line 223). |
+| 3 | worker-sonnet | **Align useNarrationCaching with the new opening-ramp cache contract** — Ensure the reader’s entry-coverage queueing and active-book sync continue to pass the correct start position and rate bucket under the new opening planner. | `src/hooks/useNarrationCaching.ts`, `src/components/ReaderContainer.tsx` | Entry-coverage queueing in `useNarrationCaching` (~lines 121-136), live cursor updates in `ReaderContainer` around `backgroundCacherRef.current?.updateCursorPosition(idx)` (~line 405). |
+| 4 | Athena | **Fix `loadCachedChunk()` to reconstruct exact words from full context** — Replace the hidden tail-sliced-array contract with an exact signature using full words plus `startIdx`, so nonzero-start replay is self-defending. | `src/utils/ttsCache.ts`, `src/hooks/narration/kokoroStrategy.ts` | `loadCachedChunk()` signature and slice logic (~lines 21-45); cache-load call site in `kokoroStrategy.loadCached()` (~lines 161-170). |
+| 5 | worker-sonnet | **Expand startup-parity evaluation and docs** — Record cached-vs-uncached first-audio latency and opening-ramp shape in eval artifacts/runbook so parity is measured over time. | `src/types/eval.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Add startup-parity metrics beside existing start latency fields; update runner summary and runbook release guidance. |
+| 6 | Hippocrates | **Tests** — Add focused tests for: (a) entry coverage uses the opening ramp before cruise, (b) cached start reconstructs exact nonzero-start word spans from full word arrays, (c) cached and uncached opening shapes match for the first ramp chunks, (d) startup-parity metrics are emitted. Target ≥12 new or expanded tests. | `tests/` | Extend `tests/tts7a-cacheCorrectness.test.ts`, add/extend background cacher and startup-parity suites as needed. |
+| 7 | Hippocrates | **Verification** — Run focused cache/startup suites, startup-parity eval run, full `npm test`, and `npm run build`. | — | — |
+| 8 | Solon | **Spec compliance** — Verify opening-ramp parity and exact cached replay on nonzero-start inputs. | — | — |
+| 9 | Plato | **Quality review** — Review startup consistency, cache contract clarity, and any remaining divergence between cached and uncached starts. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and matrix runbook after closeout. | Governing docs + runbook | — |
+| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/tts-start-1-startup-parity` |
+
+#### SUCCESS CRITERIA
+
+1. Entry coverage warms the same opening ramp shape that live playback uses before cruise coverage continues.
+2. Cached starts and uncached starts share the same opening chunk sequence for the first ramp chunks.
+3. `loadCachedChunk()` reconstructs exact nonzero-start word spans from full-word context.
+4. The live Kokoro caller no longer depends on a hidden tail-sliced-array cache contract.
+5. Cached-vs-uncached startup parity is recorded in eval artifacts.
+6. Opening coverage remains rate-bucket-aware and respects pronunciation-override identity.
+7. ≥12 new or expanded cache/startup tests land.
+8. `npm test` passes.
+9. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-RATE-1, TTS-RATE-2
 
 ---
 
