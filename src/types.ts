@@ -34,6 +34,24 @@ export interface LoadDocUserError {
   userError: string;
 }
 
+export type KokoroEngineStatus = "idle" | "warming" | "retrying" | "ready" | "error";
+
+export interface KokoroStatusSnapshot {
+  status: KokoroEngineStatus;
+  detail?: string | null;
+  reason?: string | null;
+  ready: boolean;
+  loading: boolean;
+  recoverable?: boolean;
+}
+
+export interface KokoroErrorResponse {
+  error: string;
+  reason?: string | null;
+  status?: KokoroEngineStatus | null;
+  recoverable?: boolean;
+}
+
 export type LoadDocContentResult =
   | string
   | LoadedDocFilePayload
@@ -344,16 +362,16 @@ export interface ElectronAPI {
     error?: string;
   }>;
   // Kokoro TTS
-  kokoroPreload?: () => Promise<void>;
-  kokoroPreloadMarathon: () => Promise<void>;
-  kokoroModelStatus: () => Promise<{ ready: boolean }>;
+  kokoroPreload?: () => Promise<{ success?: boolean } & Partial<KokoroErrorResponse>>;
+  kokoroPreloadMarathon: () => Promise<{ success?: boolean } & Partial<KokoroErrorResponse>>;
+  kokoroModelStatus: () => Promise<KokoroStatusSnapshot>;
   kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
-  kokoroDownload?: () => Promise<{ ok?: boolean; error?: string }>;
-  kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null; error?: string }>;
-  kokoroGenerateMarathon: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; error?: string }>;
+  kokoroDownload?: () => Promise<{ ok?: boolean } & Partial<KokoroErrorResponse>>;
+  kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null } & Partial<KokoroErrorResponse>>;
+  kokoroGenerateMarathon: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number } & Partial<KokoroErrorResponse>>;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
-  onKokoroEngineStatus: (callback: (data: { status: string; detail?: string | null }) => void) => () => void;
+  onKokoroEngineStatus: (callback: (data: KokoroStatusSnapshot) => void) => () => void;
   onKokoroDownloadError?: (callback: (error: string) => void) => () => void;
   // TTS cache APIs
   ttsCacheRead: (bookId: string, voiceId: string, startIdx: number) => Promise<{ audio?: number[]; sampleRate?: number; durationMs?: number; wordCount?: number; miss?: boolean; error?: string }>;

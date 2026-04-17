@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useReducer, useMemo } from "react";
 import { TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_RATE_BASELINE_WPM, TTS_RATE_RESTART_DEBOUNCE_MS, resolveKokoroBucket } from "../constants";
 import { applyPronunciationOverrides, mergeOverrides } from "../utils/pronunciationOverrides";
-import type { PronunciationOverride } from "../types";
+import type { KokoroStatusSnapshot, PronunciationOverride } from "../types";
 import type { RhythmPauses } from "../types";
 import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/pauseDetection";
 import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
@@ -11,6 +11,13 @@ import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
 import type { AudioProgressReport } from "../utils/audioScheduler";
 import type { TtsEvalTraceSink } from "../types/eval";
+import {
+  DEFAULT_KOKORO_STATUS_SNAPSHOT,
+  getKokoroStatusError,
+  normalizeKokoroStatusSnapshot,
+  snapshotFromKokoroErrorResponse,
+  snapshotFromLegacyKokoroDownloadError,
+} from "../utils/kokoroStatus";
 
 export interface FootnoteCue {
   afterWordIdx: number;
@@ -27,6 +34,8 @@ export interface NarrationState {
   kokoroDownloadProgress: number;
   kokoroVoices: string[];
   kokoroLoading: boolean;
+  kokoroStatus: KokoroStatusSnapshot;
+  kokoroError: string | null;
 }
 
 type TtsEngine = "web" | "kokoro";
@@ -83,7 +92,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [currentVoice, setCurrentVoice] = useState<SpeechSynthesisVoice | null>(null);
   const [kokoroVoices, setKokoroVoices] = useState<string[]>([]);
-  const [kokoroLoading, setKokoroLoading] = useState(false);
+  const [kokoroStatus, setKokoroStatus] = useState<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
+  const [kokoroError, setKokoroError] = useState<string | null>(null);
+  const kokoroStatusRef = useRef<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
 
   // ── Refs that need synchronous access ──────────────────────────────────
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -123,6 +134,27 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
   const updateMergedOverrides = useCallback(() => {
     pronunciationOverridesRef.current = mergeOverrides(globalOverridesRef.current, bookOverridesRef.current);
+  }, []);
+
+  const applyKokoroStatusSnapshot = useCallback((snapshotLike?: Partial<KokoroStatusSnapshot> | null) => {
+    const snapshot = normalizeKokoroStatusSnapshot(snapshotLike);
+    kokoroStatusRef.current = snapshot;
+    setKokoroStatus(snapshot);
+    dispatch({ type: "SYNC_KOKORO_STATUS", snapshot });
+
+    const error = getKokoroStatusError(snapshot);
+    if (error) {
+      setKokoroError(error);
+      dispatch({ type: "ERROR", message: error });
+      return;
+    }
+
+    if (stateRef.current.status === "error") {
+      dispatch({ type: "STOP" });
+    }
+    if (snapshot.ready || snapshot.loading || snapshot.status === "idle") {
+      setKokoroError(null);
+    }
   }, []);
 
   /** TTS-7A: Capture a diagnostics snapshot of current narration state */
@@ -203,8 +235,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   // Check Kokoro model status on mount
   useEffect(() => {
     if (!api?.kokoroModelStatus) return;
-    api.kokoroModelStatus().then((result: { ready: boolean }) => {
-      if (result.ready) dispatch({ type: "KOKORO_READY" });
+    api.kokoroModelStatus().then((result) => {
+      applyKokoroStatusSnapshot(result);
     }).catch(() => {});
 
     // Listen for download progress and loading state
@@ -212,31 +244,22 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (api.onKokoroDownloadProgress) {
       cleanups.push(api.onKokoroDownloadProgress((progress: number) => {
         dispatch({ type: "KOKORO_DOWNLOAD_PROGRESS", progress });
-        if (progress >= 100) {
-          dispatch({ type: "KOKORO_READY" });
-        }
-      }));
-    }
-    if (api.onKokoroLoading) {
-      cleanups.push(api.onKokoroLoading((loading: boolean) => {
-        setKokoroLoading(loading);
-        if (!loading) dispatch({ type: "KOKORO_READY" });
       }));
     }
     if (api.onKokoroEngineStatus) {
-      cleanups.push(api.onKokoroEngineStatus((data: { status: string; detail?: string | null }) => {
-        if (data.status === "warming") setKokoroLoading(true);
-        else if (data.status === "ready") {
-          setKokoroLoading(false);
-          dispatch({ type: "KOKORO_READY" });
-        } else if (data.status === "error") {
-          setKokoroLoading(false);
-          dispatch({ type: "ERROR", message: data.detail || "Kokoro engine error" });
-        }
+      cleanups.push(api.onKokoroEngineStatus((data) => {
+        applyKokoroStatusSnapshot(data);
+      }));
+    }
+    if (api.onKokoroDownloadError) {
+      cleanups.push(api.onKokoroDownloadError((error: string) => {
+        applyKokoroStatusSnapshot(
+          snapshotFromLegacyKokoroDownloadError(kokoroStatusRef.current, error),
+        );
       }));
     }
     return () => cleanups.forEach((c) => c());
-  }, []);
+  }, [applyKokoroStatusSnapshot]);
 
   // Auto-start narration when Kokoro becomes ready while in warming state
   useEffect(() => {
@@ -292,22 +315,22 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const downloadKokoroModel = useCallback(async () => {
     if (!api?.kokoroDownload) return;
     dispatch({ type: "KOKORO_DOWNLOAD_PROGRESS", progress: 0 });
+    setKokoroError(null);
     try {
       const result = await api.kokoroDownload();
       if (result.error) {
-        dispatch({ type: "ERROR", message: result.error });
-      } else {
-        dispatch({ type: "KOKORO_READY" });
-        // Load voices after download
-        if (api.kokoroVoices) {
-          const vResult = await api.kokoroVoices();
-          if (vResult.voices) setKokoroVoices(vResult.voices);
-        }
+        applyKokoroStatusSnapshot(snapshotFromKokoroErrorResponse(result));
+        return;
+      }
+
+      if (api.kokoroModelStatus) {
+        const snapshot = await api.kokoroModelStatus();
+        applyKokoroStatusSnapshot(snapshot);
       }
     } catch {
-      dispatch({ type: "ERROR", message: "Download failed" });
+      applyKokoroStatusSnapshot(snapshotFromKokoroErrorResponse({}, "Download failed"));
     }
-  }, []);
+  }, [applyKokoroStatusSnapshot]);
 
   // ── Strategy-based chunk dispatch ─────────────────────────────────────
 
@@ -730,7 +753,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     kokoroDownloading: state.kokoroDownloading,
     kokoroDownloadProgress: state.kokoroDownloadProgress,
     kokoroVoices,
-    kokoroLoading,
+    kokoroLoading: kokoroStatus.loading,
+    kokoroStatus,
+    kokoroError,
     speak,
     startCursorDriven,
     resyncToCursor,

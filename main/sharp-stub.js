@@ -1,5 +1,4 @@
-// Stub for 'sharp' — optional dependency of @huggingface/transformers
-// used for image processing. Not needed for Kokoro TTS (text-to-speech only).
-// This stub prevents "Cannot find module 'sharp'" when loading the CJS bundle
-// in the packaged Electron app's worker thread.
+// Stub for the exact optional 'sharp' package import used by
+// @huggingface/transformers for image processing. Kokoro TTS does not need it,
+// so packaged bootstrap can safely substitute this module for that one request.
 module.exports = {};

@@ -1,5 +1,6 @@
 interface KokoroStatusSectionProps {
-  kokoroDownloading: boolean;
+  kokoroBusy: boolean;
+  kokoroBusyLabel: string;
   kokoroProgress: number;
   kokoroError: string | null;
   kokoroStalled: boolean;
@@ -8,7 +9,8 @@ interface KokoroStatusSectionProps {
 
 /** Kokoro model download progress / status block shown when Kokoro engine is selected but not yet ready */
 export function KokoroStatusSection({
-  kokoroDownloading,
+  kokoroBusy,
+  kokoroBusyLabel,
   kokoroProgress,
   kokoroError,
   kokoroStalled,
@@ -18,7 +20,7 @@ export function KokoroStatusSection({
     <div className="tts-kokoro-wrapper">
       {kokoroError && (
         <div className="tts-kokoro-error">
-          Download failed: {kokoroError}
+          Kokoro unavailable: {kokoroError}
         </div>
       )}
       {kokoroStalled && !kokoroError && (
@@ -26,10 +28,10 @@ export function KokoroStatusSection({
           Download may be blocked by your network or firewall. Check your connection and try again.
         </div>
       )}
-      {kokoroDownloading ? (
+      {kokoroBusy ? (
         <>
           <div className="tts-kokoro-progress-label">
-            Downloading voice model... {kokoroProgress}%
+            {kokoroBusyLabel}
           </div>
           <div className="tts-kokoro-progress-track">
             <div className="tts-kokoro-progress-bar" style={{ width: `${kokoroProgress}%` }} />
@@ -40,7 +42,7 @@ export function KokoroStatusSection({
           className="settings-btn-secondary tts-kokoro-download-btn"
           onClick={onDownload}
         >
-          {kokoroError ? "Retry download (92 MB)" : "Download voice model (92 MB)"}
+          {kokoroError ? "Retry Kokoro setup (92 MB)" : "Download voice model (92 MB)"}
         </button>
       )}
     </div>

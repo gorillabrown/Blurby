@@ -19,6 +19,14 @@ describe("narrationReducer", () => {
       kokoroReady: false,
       kokoroDownloading: false,
       kokoroDownloadProgress: 0,
+      kokoroStatus: {
+        status: "idle",
+        detail: null,
+        reason: null,
+        ready: false,
+        loading: false,
+        recoverable: false,
+      },
       generationId: 0,
       speed: 1.0,
       pageEndWord: null,
@@ -176,6 +184,56 @@ describe("narrationReducer", () => {
     const next = narrationReducer(state, { type: "KOKORO_READY" });
     expect(next.kokoroReady).toBe(true);
     expect(next.kokoroDownloading).toBe(false);
+  });
+
+  it("SYNC_KOKORO_STATUS follows the authoritative snapshot and clears stale ready state on error", () => {
+    const readyState: NarrationState = narrationReducer(createInitialNarrationState(), { type: "KOKORO_READY" });
+    expect(readyState.kokoroReady).toBe(true);
+
+    const next = narrationReducer(readyState, {
+      type: "SYNC_KOKORO_STATUS",
+      snapshot: {
+        status: "error",
+        detail: "Warm-up failed",
+        reason: "warm-up-failed",
+        ready: false,
+        loading: false,
+        recoverable: false,
+      },
+    });
+
+    expect(next.kokoroReady).toBe(false);
+    expect(next.kokoroDownloading).toBe(false);
+    expect(next.kokoroStatus).toMatchObject({
+      status: "error",
+      reason: "warm-up-failed",
+      ready: false,
+      loading: false,
+      recoverable: false,
+    });
+  });
+
+  it("SYNC_KOKORO_STATUS resets ready state back to idle without leaving stale readiness behind", () => {
+    const readyState: NarrationState = narrationReducer(createInitialNarrationState(), { type: "KOKORO_READY" });
+    const next = narrationReducer(readyState, {
+      type: "SYNC_KOKORO_STATUS",
+      snapshot: {
+        status: "idle",
+        detail: null,
+        reason: null,
+        ready: false,
+        loading: false,
+        recoverable: false,
+      },
+    });
+
+    expect(next.kokoroReady).toBe(false);
+    expect(next.kokoroStatus).toMatchObject({
+      status: "idle",
+      ready: false,
+      loading: false,
+      recoverable: false,
+    });
   });
 
   // --- ERROR ---

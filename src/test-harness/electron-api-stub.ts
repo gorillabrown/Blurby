@@ -613,8 +613,8 @@ export const electronAPIStub: ElectronAPI = {
   },
 
   // ── Kokoro TTS ──────────────────────────────────────────────────────────
-  kokoroPreload: async () => trace("kokoroPreload", [], undefined),
-  kokoroPreloadMarathon: async () => trace("kokoroPreloadMarathon", [], undefined),
+  kokoroPreload: async () => trace("kokoroPreload", [], { success: true }),
+  kokoroPreloadMarathon: async () => trace("kokoroPreloadMarathon", [], { success: true }),
 
   kokoroGenerate: async (text: string, voice: string, speed: number) => {
     const result = generateMockAudio(text, voice, speed);

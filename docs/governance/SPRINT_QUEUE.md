@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — YELLOW
-Next sprint: TTS-RATE-1 (Pitch-Preserving Tempo)
-Health: YELLOW — TTS-EVAL-3 completed. Backfill one additional sprint to restore depth to GREEN.
+Queue depth: 3 — GREEN
+Next sprint: TTS-HARDEN-2 (Narration Handoff Integrity & Extraction Dedupe)
+Health: GREEN — TTS-HARDEN-1 landed cleanly, so the hardening lane can advance to handoff/extraction integrity.
 ```
 
 ---
@@ -34,10 +34,11 @@ Health: YELLOW — TTS-EVAL-3 completed. Backfill one additional sprint to resto
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | TTS-RATE-1 | v1.56.0 | `sprint/tts-rate-1-pitch-preserving-tempo` | Full | **YES** | Full spec: 12 tasks (3 waves), 11 success criteria. 0.1-step speed UX (1.0–1.5), fixed generation buckets (1.0/1.2/1.5), pitch-preserving tempo shaping, in-bucket no-restart behavior, multi-rate matrix verification. Depends on TTS-EVAL-3. |
-| 2 | EPUB-TOKEN-1 | v1.57.0 | `sprint/epub-token-1-dropcap-stitching` | Full | **YES** | Full spec: 11 tasks (3 waves), 9 success criteria. Dropcap/split-token lexical stitching, stable global word identity across fragments, click/selection/narration alignment regressions covered. Depends on TTS-RATE-1. |
+| 1 | TTS-HARDEN-2 | v1.57.0 | `sprint/tts-harden-2-handoff-integrity` | Full | **YES** | Full spec: 12 tasks, 9 success criteria. Section/chapter handoff ownership cleanup, extraction dedupe on active narration start, and stale orchestration test realignment. Depends on TTS-HARDEN-1. |
+| 2 | TTS-RATE-1 | v1.58.0 | `sprint/tts-rate-1-pitch-preserving-tempo` | Full | **YES** | Full spec: 12 tasks (3 waves), 11 success criteria. 0.1-step speed UX (1.0–1.5), fixed generation buckets (1.0/1.2/1.5), pitch-preserving tempo shaping, in-bucket no-restart behavior, multi-rate matrix verification. Depends on TTS-HARDEN-2. |
+| 3 | EPUB-TOKEN-1 | v1.59.0 | `sprint/epub-token-1-dropcap-stitching` | Full | **YES** | Full spec: 11 tasks (3 waves), 9 success criteria. Dropcap/split-token lexical stitching, stable global word identity across fragments, click/selection/narration alignment regressions covered. Depends on TTS-RATE-1. |
 
-**Dispatch status:** Queue depth 2 — YELLOW. Dispatch order is `TTS-RATE-1` → `EPUB-TOKEN-1`; backfill one more sprint before dispatch if strict GREEN depth is required.
+**Dispatch status:** Queue depth 3 — GREEN. Dispatch order is `TTS-HARDEN-2` → `TTS-RATE-1` → `EPUB-TOKEN-1`.
 
 ### Parallel Dispatch Guardrails
 
@@ -86,7 +87,9 @@ If any guardrail fails, run the sprints sequentially.
 25. ~~Dispatch TTS-EVAL-2 to CLI~~ — COMPLETE (v1.54.0)
 26. ~~Backfill queue to ≥3~~ — COMPLETE. Added `TTS-RATE-1` and `EPUB-TOKEN-1`; queue depth restored to 3 (GREEN).
 27. ~~Dispatch TTS-EVAL-3 to CLI~~ — COMPLETE (v1.55.0)
-28. **Backfill queue to ≥3** — YELLOW, depth 2. Add one active sprint before dispatch beyond TTS-RATE-1.
+28. ~~Backfill queue to ≥3~~ — COMPLETE. Added `TTS-HARDEN-1` and `TTS-HARDEN-2`; queue depth restored to 4 (GREEN).
+29. ~~Dispatch TTS-HARDEN-1 to CLI~~ — COMPLETE (v1.56.0). Truthful Kokoro readiness now flows end-to-end from engine snapshot to renderer consumers; crash/load/warm-up failures fail closed and recover cleanly.
+30. **Dispatch TTS-HARDEN-2 to CLI** — NEXT. Handoff ownership and extraction dedupe now build on the hardened engine/status contract.
 
 ---
 
@@ -108,6 +111,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-HARDEN-1 | 2026-04-16 | PASS | Kokoro bootstrap and recovery hardened end-to-end: authoritative readiness/status snapshot (`status/reason/recoverable`) from engine to renderer, fail-fast load/warm-up errors, packaged import shim allowlist + resolver restoration, sprint/marathon worker crash recovery with future-only retries, shutdown cleanup for retry timers/pending work, renderer truth wiring via normalized status helpers, and regression coverage across engine/worker/settings/hooks. Verification passed: focused Kokoro slice (`7` files, `75` tests), full `npm test` (`116` files, `2001` tests), and `npm run build`; existing circular-chunk warning unchanged. v1.56.0. |
 | TTS-EVAL-3 | 2026-04-16 | PASS | Quality gate release workflow shipped: versioned threshold config (`docs/testing/tts_quality_gates.v1.json`), gate evaluator (`scripts/tts_eval_gate.mjs`), in-runner gate enforcement via `--gates` (`scripts/tts_eval_runner.mjs`), baseline policy + snapshot (`docs/testing/TTS_EVAL_BASELINE_POLICY.md`, `docs/testing/tts_eval_baseline_v1.json`), release checklist (`docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`), and new gate coverage in `tests/ttsEvalGate.test.ts`. Verification passed: gated matrix run (`artifacts/tts-eval/baseline-v1`), targeted TTS eval suites (32 tests), full `npm test` (114 files, 1977 tests), and `npm run build`; existing circular-chunk warning unchanged. v1.55.0. |
 | TTS-EVAL-2 | 2026-04-16 | PASS | Matrix + soak evaluation tooling shipped: scenario manifest (`tests/fixtures/narration/matrix.manifest.json`), deterministic soak profiles (`scripts/tts_eval_profiles.mjs`), runner matrix/soak modes with deterministic artifact naming + checkpoints + interrupt-safe writes (`scripts/tts_eval_runner.mjs`), aggregate metrics reducer (`scripts/tts_eval_metrics.mjs`) with startup p50/p95 and drift summaries, and new coverage in `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with smoke matrix + short soak artifact runs and full `npm test` (113 files, 1972 tests) + `npm run build`; existing circular-chunk warning unchanged. v1.54.0. |
 | TTS-EVAL-1 | 2026-04-16 | PASS | Flow/narration evaluation harness shipped: trace schema (`src/types/eval.ts`), fixture corpus (`tests/fixtures/narration/`), opt-in trace sink wiring in narration/flow hooks, first-audio timing capture, runner + metrics (`scripts/tts_eval_runner.mjs`), lifecycle/trace tests (`tests/ttsEvalTrace.test.ts`, `tests/ttsEvalLifecycle.test.ts`), review artifacts (`TTS_EVAL_REVIEW_TEMPLATE.md`, `TTS_EVAL_RUNBOOK.md`), and baseline outputs (`tests/fixtures/narration/baseline/`). Verification passed: targeted trace suites, baseline fixture run, `npm test` (112 files, 1967 tests), and `npm run build` (existing circular chunk warning unchanged). v1.53.0. |

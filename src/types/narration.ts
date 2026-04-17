@@ -1,3 +1,5 @@
+import type { KokoroStatusSnapshot } from "../types";
+
 // ── Book word array types (moved from bookWordExtractor.ts in HOTFIX-6) ──────
 
 /** Section boundary in the book-wide word array */
@@ -50,6 +52,7 @@ export interface NarrationState {
   kokoroReady: boolean;
   kokoroDownloading: boolean;
   kokoroDownloadProgress: number;
+  kokoroStatus: KokoroStatusSnapshot;
   generationId: number;
   speed: number;
   pageEndWord: number | null;
@@ -68,6 +71,7 @@ export type NarrationAction =
   | { type: "SET_SPEED"; speed: number }
   | { type: "INCREMENT_GENERATION_ID" }
   | { type: "KOKORO_READY" }
+  | { type: "SYNC_KOKORO_STATUS"; snapshot: KokoroStatusSnapshot }
   | { type: "KOKORO_DOWNLOAD_PROGRESS"; progress: number }
   | { type: "SET_PAGE_END"; endIdx: number | null }
   | { type: "ERROR"; message: string }
@@ -83,6 +87,14 @@ export function createInitialNarrationState(): NarrationState {
     kokoroReady: false,
     kokoroDownloading: false,
     kokoroDownloadProgress: 0,
+    kokoroStatus: {
+      status: "idle",
+      detail: null,
+      reason: null,
+      ready: false,
+      loading: false,
+      recoverable: false,
+    },
     generationId: 0,
     speed: 1.0,
     pageEndWord: null,
@@ -116,13 +128,33 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
     case "KOKORO_WARMING":
       return { ...state, status: "warming", cursorWordIndex: action.startIdx, speed: action.speed };
     case "KOKORO_READY":
-      return { ...state, kokoroReady: true, kokoroDownloading: false };
+      return {
+        ...state,
+        kokoroReady: true,
+        kokoroDownloading: false,
+        kokoroStatus: {
+          ...state.kokoroStatus,
+          status: "ready",
+          ready: true,
+          loading: false,
+          detail: null,
+          reason: null,
+          recoverable: false,
+        },
+      };
+    case "SYNC_KOKORO_STATUS":
+      return {
+        ...state,
+        kokoroReady: action.snapshot.ready,
+        kokoroDownloading: false,
+        kokoroStatus: action.snapshot,
+      };
     case "KOKORO_DOWNLOAD_PROGRESS":
       return { ...state, kokoroDownloading: true, kokoroDownloadProgress: action.progress };
     case "SET_PAGE_END":
       return { ...state, pageEndWord: action.endIdx };
     case "ERROR":
-      return { ...state, status: "error" };
+      return { ...state, status: "error", kokoroReady: false, kokoroDownloading: false };
     default:
       return state;
   }

@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-16 — TTS-EVAL-3 complete. Quality gates + release baseline workflow shipped.
+**Last updated**: 2026-04-16 — TTS-HARDEN-1 completed. Queue remains GREEN.
 **Current branch**: `main`
-**Current state**: v1.55.0 stable. Queue depth 2 (YELLOW). Next: TTS-RATE-1 → EPUB-TOKEN-1.
+**Current state**: v1.56.0 stable. Queue depth 3 (GREEN). Next: TTS-HARDEN-2 → TTS-RATE-1 → EPUB-TOKEN-1.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -75,6 +75,10 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     TTS-EVAL-2: TTS Evaluation Matrix & Soak Runner ✅ (v1.54.0)
                    │
     TTS-EVAL-3: TTS Quality Gates & Release Baseline ✅ (v1.55.0)
+                   │
+    TTS-HARDEN-1: Kokoro Bootstrap & Engine Recovery ✅ (v1.56.0)
+                   │
+    TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe
                    │
     TTS-RATE-1: Pitch-Preserving Tempo for Kokoro
                    │
@@ -1724,6 +1728,210 @@ Wave C (verification + release docs):
 
 ---
 
+## TTS-HARDEN-1: Kokoro Bootstrap Truth & Engine Recovery ✅ COMPLETED (v1.56.0, 2026-04-16)
+
+**Goal:** Make Kokoro startup and failure handling truthful, deterministic, and fast-failing so the rest of the narration stack can trust engine state.
+
+**Problem:** The current Kokoro lane has a false-ready seam and a recovery gap. The worker posts `model-ready` before warm-up inference completes, `load-error` still resolves to timeout-driven failure, and in-flight generate requests can remain stranded through worker retry windows. This makes first-play behavior, fallback behavior, and evaluation output less trustworthy than the green test/build surface suggests.
+
+**Outcome:** Kokoro now exposes a single authoritative readiness snapshot from engine to renderer. Worker bootstrap fails closed on load/warm-up errors, sprint and marathon workers reject only requests owned by dead workers, retry/shutdown lifecycles cannot leak stale status back into the UI, and renderer consumers treat structured engine status as the source of truth instead of progress/loading heuristics.
+
+**Verification:** Focused Kokoro slice passed (`7` files / `75` tests), full `npm test` passed (`116` files / `2001` tests), and `npm run build` passed. Existing Vite circular chunk warning (`settings -> tts -> settings`) is unchanged.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A (Main-process runtime core)
+- **Secondary lane:** Lane B (targeted engine tests)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+Do not run in parallel with another sprint editing these engine files:
+
+- `main/tts-worker.js`
+- `main/tts-engine.js`
+- `main/tts-engine-marathon.js`
+- `main/ipc/tts.js`
+
+Parallel-safe work while this sprint is active:
+
+- docs-only evaluation notes
+- fixture additions under `tests/fixtures/narration/`
+- isolated reader-surface audits that do not touch Kokoro runtime files
+
+### Shared-Core Touches
+
+- `main/tts-worker.js`
+- `main/tts-engine.js`
+- `main/tts-engine-marathon.js`
+- `main/ipc/tts.js`
+- targeted engine/worker tests
+
+### Merge Order
+
+1. `TTS-EVAL-3` is already the baseline on `main`
+2. `TTS-HARDEN-1` lands first and becomes the engine-state source of truth
+3. `TTS-HARDEN-2` rebases on the hardened engine behavior
+4. `TTS-RATE-1` follows only after bootstrap/recovery semantics are trustworthy
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — `TTS-EVAL-1/2/3` + this section
+3. `main/tts-worker.js` — bootstrap, import shim, warm-up, result payload path
+4. `main/tts-engine.js` — sprint worker readiness, crash recovery, pending request lifecycle
+5. `main/tts-engine-marathon.js` — marathon worker parity
+6. `main/ipc/tts.js` — renderer-facing error/status surface
+7. `tests/tts-engine.test.js`, `tests/kokoroStartupRecovery.test.ts`, `tests/kokoroStrategy.test.ts`
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define bootstrap truth contract.** Decide and document that Kokoro readiness means “safe to synthesize,” not merely “model object loaded.” | `main/tts-worker.js`, `main/tts-engine.js`, sprint notes in `ROADMAP.md` closeout | Worker bootstrap block around `loadModel()` and engine `ensureReady()` comments. |
+| 2 | Athena | **Make worker readiness truthful.** Delay `model-ready` until warm-up succeeds, or replace the current sequence with explicit `model-loaded` → `model-ready` semantics that the engine honors correctly. | `main/tts-worker.js` | `loadModel()` around current `modelReady = true`, `parentPort.postMessage({ type: "model-ready" })`, and warm-up inference block. |
+| 3 | Hephaestus | **Fail fast on bootstrap errors.** Update sprint and marathon engines so `load-error` and `warm-up-failed` reject readiness immediately instead of waiting for timeout. | `main/tts-engine.js`, `main/tts-engine-marathon.js` | Engine message handlers plus `ensureReady()` listener/race setup. |
+| 4 | Hephaestus | **Tighten packaged import shim.** Restrict stub fallback to explicitly optional modules (for example `sharp`) and restore `Module._resolveFilename` after packaged bootstrap completes. | `main/tts-worker.js`, `main/sharp-stub.js` | Packaged-mode branch in `loadModel()` around `Module._resolveFilename` monkeypatch and catch path. |
+| 5 | Athena | **Reject stranded requests on crash.** Ensure in-flight `generate()` promises are rejected immediately when the owning worker dies; retries should apply only to future requests after recovery, not to orphaned pending ones. | `main/tts-engine.js`, `main/tts-engine-marathon.js` | Worker `error` handlers and pending-request maps near crash retry logic. |
+| 6 | Hermes | **Surface truthful failure status to renderer.** Keep IPC-visible error events aligned with the new bootstrap/recovery contract so UI and tests can distinguish load failure, warm-up failure, and crash recovery. | `main/ipc/tts.js`, `main/tts-engine.js` | Existing Kokoro IPC handlers plus renderer notification events (`tts-kokoro-download-error`, loading/status sends). |
+| 7 | Hippocrates | **Engine recovery tests.** Add tests covering: in-flight request rejected on worker crash, load-error fails before timeout, warm-up failure prevents false-ready, packaged import shim only stubs allowed optional deps, and marathon worker matches sprint worker failure semantics. | `tests/tts-engine.test.js`, `tests/kokoroStartupRecovery.test.ts`, new focused test file if needed | Replace current pattern-only coverage with runtime-shape tests around real failure semantics. |
+| 8 | Hippocrates | **Verification run.** Run targeted engine suites, then `npm test` and `npm run build`. | `tests/`, project scripts | Post-implementation validation. |
+| 9 | Solon | **Spec compliance pass.** Verify readiness is no longer announced before warm-up success and that no known load/crash path waits for timeout unnecessarily. | — | Post-implementation review. |
+| 10 | Plato | **Quality review.** Review bootstrap and recovery changes for regressions in fallback behavior, duplicate status events, and pending-map cleanup. | — | Code review focused on state-truth and cleanup. |
+| 11 | Herodotus | **Governance/docs update.** Update roadmap, sprint queue, lessons learned, and any Kokoro runbook notes to match the new readiness/failure contract. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md`, optional testing docs | Closeout doc pass. |
+
+### Execution Sequence
+
+```
+Wave A (bootstrap contract):
+  Tasks 1-4
+      ↓
+Wave B (recovery behavior):
+  Tasks 5-6
+      ↓
+Wave C (tests + governance):
+  Tasks 7-8
+  Tasks 9-11
+```
+
+### SUCCESS CRITERIA
+
+1. Kokoro readiness is not reported before warm-up success under the chosen contract
+2. `load-error` rejects readiness immediately, without waiting for the model-load timeout
+3. `warm-up-failed` does not leave the engine in a false-ready state
+4. In-flight sprint-worker requests are rejected promptly if the worker crashes
+5. Marathon worker failure semantics match sprint-worker semantics
+6. Packaged import shim stubs only explicitly allowed optional modules
+7. `Module._resolveFilename` override does not leak past worker bootstrap
+8. Targeted engine tests cover crash, load-error, warm-up-failed, and packaged import behavior
+9. `npm test` and `npm run build` pass
+
+**Version:** v1.56.0 | **Branch:** `sprint/tts-harden-1-kokoro-bootstrap-recovery`
+
+---
+
+## TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe
+
+**Goal:** Make section/chapter narration handoffs, global-word promotion, and extraction concurrency behave as a single coherent runtime path.
+
+**Problem:** The current handoff chain is split across multiple owners. `useFlowScrollSync` and `useFoliateSync` both wire `setOnSectionEnd`, section handoff currently swaps words without fully re-arming playback semantics, and active narration bypasses the EPUB extraction dedupe helper used by background pre-extraction. The result is a runtime shape that looks organized in source but can still stall, stop, or duplicate work at the exact boundaries that matter most.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A (Renderer/runtime orchestration)
+- **Secondary lane:** Lane B (integration/regression tests)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+Do not run in parallel with any sprint editing the shared-core narration freeze set:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useFoliateSync.ts`
+- `src/hooks/useNarrationCaching.ts`
+- `src/components/ReaderContainer.tsx`
+
+Parallel-safe work while this sprint is active:
+
+- standalone docs or queue updates
+- evaluation artifacts that do not change runtime behavior
+- EPUB token specs (but not implementation touching these files)
+
+### Shared-Core Touches
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useFoliateSync.ts`
+- `src/hooks/useNarrationCaching.ts`
+- `src/components/ReaderContainer.tsx` (if small glue updates are required)
+- handoff/extraction regression tests
+
+### Merge Order
+
+1. `TTS-HARDEN-1` merges first
+2. `TTS-HARDEN-2` rebases on the hardened engine layer
+3. `TTS-RATE-1` rebases on both hardening sprints
+4. `EPUB-TOKEN-1` follows after rate/path stabilization
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — `NARR-LAYER-1A/1B`, `TTS-EVAL-1/2/3`, `TTS-HARDEN-1`, and this section
+3. `src/hooks/useNarration.ts` — Kokoro end-of-chain, `updateWords`, cursor refs
+4. `src/hooks/useFlowScrollSync.ts` — flow follower mode, section handoff, cross-book transition
+5. `src/hooks/useFoliateSync.ts` — foliate section-sync and fallback section-end wiring
+6. `src/hooks/useNarrationCaching.ts` — background pre-extraction + active narration extraction
+7. `src/components/ReaderContainer.tsx` — top-level narration-selected state and hook ordering
+8. `tests/narrationLayer.test.ts`, `tests/tts7j-foliate-section-sync.test.ts`, `tests/useReaderMode.test.ts`, `tests/readerDecomposition.test.ts`
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Choose a single section-end owner.** Make one hook authoritative for narration section continuation; remove or constrain competing `setOnSectionEnd` wiring so callback ownership is unambiguous. | `src/hooks/useFlowScrollSync.ts`, `src/hooks/useFoliateSync.ts` | Section-end callback effects in both hooks. |
+| 2 | Athena | **Strengthen handoff API in narration core.** Replace or extend `updateWords()` so a section/global-word handoff updates all relevant narration refs (`allWordsRef`, cursor state, confirmed-audio anchor) and can continue playback safely after a drained chunk chain. | `src/hooks/useNarration.ts` | `onEnd` Kokoro branch, `updateWords()`, any new dedicated handoff method and related refs. |
+| 3 | Hephaestus | **Wire flow section handoff through the strengthened API.** Update the flow handoff path to use the new handoff contract after `goToSection()` resolves, not a bare word-array swap. | `src/hooks/useFlowScrollSync.ts` | Current `narration.updateWords(wordsRef.current, nextSection.startWordIdx)` path after `goToSection()`. |
+| 4 | Hephaestus | **Preserve fallback-only behavior in foliate sync.** Ensure `useFoliateSync` only owns true fallback behavior and does not stop or override active flow-layer narration when full-book words are already in play. | `src/hooks/useFoliateSync.ts` | Section-end callback effect and any flow/page-mode guards around foliate fallback. |
+| 5 | Hermes | **Deduplicate active extraction path.** Use the same `dedupeExtractWords()` helper for active narration extraction that background pre-extraction already uses. | `src/hooks/useNarrationCaching.ts` | Active narration effect around direct `api.extractEpubWords(activeDoc.id)` call. |
+| 6 | Hermes | **Tighten state-truth glue.** Remove any remaining stale flow/narration assumptions in top-level runtime glue that are needed to keep page/flow selection state consistent after handoffs and pauses. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts` if required | Only touch if needed to match the new handoff contract; keep scope narrow. |
+| 7 | Hippocrates | **Handoff integration tests.** Add coverage for: section boundary drains current chunk then continues automatically, chapter label updates across handoff, fallback section path does not override flow owner, active extraction dedupes with background extraction, and queue-exhausted vs cross-book stop behavior remain distinct. | `tests/narrationLayer.test.ts`, `tests/tts7j-foliate-section-sync.test.ts`, new dedicated handoff test if needed | Replace source-shape-only checks with actual handoff behavior tests. |
+| 8 | Hippocrates | **Stale-orchestration test cleanup.** Update or replace stale tests that still model standalone `"narration"` mode or outdated section-owner assumptions. | `tests/useReaderMode.test.ts`, `tests/readerDecomposition.test.ts` | Remove outdated narration-mode assumptions and align with flow-layer narration architecture. |
+| 9 | Hippocrates | **Verification run.** Run targeted handoff/extraction suites, then `npm test` and `npm run build`. | `tests/`, project scripts | Post-implementation validation. |
+| 10 | Solon | **Spec compliance pass.** Verify callback ownership is singular, section continuation no longer stalls, and extraction dedupe applies on narration start. | — | Post-implementation review. |
+| 11 | Plato | **Quality review.** Review touchpoint ownership, state truth, and regression risk across section/book boundaries. | — | Code review focused on handoff seams. |
+| 12 | Herodotus | **Governance/docs update.** Update roadmap, sprint queue, and lessons learned to record the new handoff owner and extraction contract. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md` | Closeout doc pass. |
+
+### Execution Sequence
+
+```
+Wave A (ownership + core API):
+  Tasks 1-2
+      ↓
+Wave B (handoff wiring + dedupe):
+  Tasks 3-6
+      ↓
+Wave C (tests + governance):
+  Tasks 7-9
+  Tasks 10-12
+```
+
+### SUCCESS CRITERIA
+
+1. Exactly one runtime owner controls narration section-end continuation in the active flow-layer path
+2. Section handoff continues narration without manual restart after the current chunk chain drains
+3. Handoff updates both visible cursor state and canonical audio anchor consistently
+4. Foliate fallback section-end logic does not override active flow narration ownership
+5. Active narration extraction uses the same dedupe path as background pre-extraction
+6. No duplicate EPUB full-book extraction is launched for the same book while an extraction is already in flight
+7. Handoff tests cover section continuation, chapter-label continuity, and queue-exhausted vs cross-book endings
+8. Stale tests that still model standalone narration mode are removed or rewritten
+9. `npm test` and `npm run build` pass
+
+**Version:** v1.57.0 | **Branch:** `sprint/tts-harden-2-handoff-integrity`
+
+---
+
 ## TTS-RATE-1: Pitch-Preserving Tempo for Kokoro
 
 **Goal:** Deliver speed control that does not chipmunk Kokoro voices by decoupling generation/cache rate buckets from playback tempo shaping.
@@ -1766,11 +1974,12 @@ Allowed concurrent surfaces:
 
 ### Merge Order
 
-1. `TTS-EVAL-3` merges first (quality gate baseline)
-2. `TTS-RATE-1` rebases on latest `main`
-3. Shared-core implementation + tests
-4. Evaluation matrix spot-check rerun for speed scenarios
-5. Merge
+1. `TTS-HARDEN-1` merges first
+2. `TTS-HARDEN-2` merges second
+3. `TTS-RATE-1` rebases on latest `main`
+4. Shared-core implementation + tests
+5. Evaluation matrix spot-check rerun for speed scenarios
+6. Merge
 
 ### WHERE (Read Order)
 
@@ -1827,13 +2036,17 @@ Wave C (verification + governance):
 10. Matrix smoke run passes with multi-rate scenarios
 11. `npm test` and `npm run build` pass
 
-**Depends on:** `TTS-EVAL-3`.
+**Version:** v1.58.0 | **Branch:** `sprint/tts-rate-1-pitch-preserving-tempo`
+
+**Depends on:** `TTS-HARDEN-2`.
 
 ---
 
 ## EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching
 
 **Goal:** Ensure styled split words (drop caps, inline styling splits, mixed-node words) are treated as one logical word for selection, cursoring, and narration.
+
+**Version:** v1.59.0 | **Branch:** `sprint/epub-token-1-dropcap-stitching`
 
 **Problem:** EPUB styling can split a single lexical word into multiple DOM fragments (`T` + `his`). Current interaction surfaces may treat these as separate words, causing cursor jumps and narration mismatch.
 

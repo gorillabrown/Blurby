@@ -3,6 +3,16 @@
 
 const { ipcMain } = require("electron");
 
+function toErrorResponse(err) {
+  const error = err instanceof Error ? err : new Error(String(err || "Kokoro IPC failure"));
+  return {
+    error: error.message,
+    reason: error.reason || null,
+    status: error.status || null,
+    recoverable: typeof error.recoverable === "boolean" ? error.recoverable : false,
+  };
+}
+
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
 
@@ -25,7 +35,7 @@ function register(ctx) {
         wordTimestamps: result.wordTimestamps || null,
       };
     } catch (err) {
-      return { error: err.message };
+      return toErrorResponse(err);
     }
   });
 
@@ -33,11 +43,14 @@ function register(ctx) {
     try {
       return { voices: await ttsEngine.listVoices() };
     } catch (err) {
-      return { error: err.message };
+      return toErrorResponse(err);
     }
   });
 
   ipcMain.handle("tts-kokoro-model-status", () => {
+    if (typeof ttsEngine.getModelStatus === "function") {
+      return ttsEngine.getModelStatus();
+    }
     return { ready: ttsEngine.isModelReady() };
   });
 
@@ -51,7 +64,7 @@ function register(ctx) {
       });
       return { success: true };
     } catch (err) {
-      return { error: err.message };
+      return toErrorResponse(err);
     }
   });
 
@@ -61,7 +74,7 @@ function register(ctx) {
       await ttsEngine.preload();
       return { success: true };
     } catch (err) {
-      return { error: err.message };
+      return toErrorResponse(err);
     }
   });
 
@@ -77,7 +90,7 @@ function register(ctx) {
         durationMs: result.durationMs,
       };
     } catch (err) {
-      return { error: err.message };
+      return toErrorResponse(err);
     }
   });
 
@@ -86,7 +99,7 @@ function register(ctx) {
       await marathonEngine.preload();
       return { success: true };
     } catch (err) {
-      return { error: err.message };
+      return toErrorResponse(err);
     }
   });
 

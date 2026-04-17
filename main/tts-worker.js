@@ -8,105 +8,124 @@ const Module = require("module");
 
 let KokoroTTS = null;
 let ttsInstance = null;
+let modelLoaded = false;
 let modelReady = false;
 
 const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const DTYPE = "q4"; // q4 is ~30-50% faster than q8 on CPU, Kokoro handles it well
 const SAMPLE_RATE = 24000;
+const OPTIONAL_PACKAGED_MODULE_STUBS = new Map([
+  ["sharp", path.join(__dirname, "sharp-stub.js")],
+]);
 
-async function loadModel(cacheDir) {
-  if (ttsInstance && modelReady) return;
-
-  let kokoro, transformersEnv;
-  if (workerData?.modulePath) {
-    // Packaged app: require explicit CJS entry points from the unpacked directory.
-    // Asar/unpacked boundary issues solved here:
-    // 1. ESM "exports" map — require() can't resolve across asar boundary, use .cjs paths
-    // 2. Required deps (phonemizer) — redirect to explicit CJS path in unpacked dir
-    // 3. Optional deps (sharp) — stub with empty module (not needed for TTS)
-    // 4. import() hangs — Electron worker threads can't dynamic-import from unpacked asar
-    const modulePath = workerData.modulePath;
-    const origResolve = Module._resolveFilename;
-    Module._resolveFilename = function(request, parent, isMain, options) {
-      // Redirect phonemizer to its explicit CJS entry (required by kokoro-js for TTS)
-      if (request === "phonemizer") {
-        return path.join(modulePath, "phonemizer", "dist", "phonemizer.cjs");
-      }
-      try {
-        return origResolve.call(this, request, parent, isMain, options);
-      } catch (err) {
-        if (err.code === "MODULE_NOT_FOUND") {
-          // Only truly optional deps (sharp, etc.) get stubbed
-          return path.join(__dirname, "sharp-stub.js");
-        }
-        throw err;
-      }
-    };
-
-    kokoro = require(path.join(modulePath, "kokoro-js", "dist", "kokoro.cjs"));
-    const transformers = require(path.join(modulePath, "@huggingface", "transformers", "dist", "transformers.node.cjs"));
-    transformersEnv = transformers.env;
-  } else {
-    // Dev mode: normal ESM import
-    kokoro = await import("kokoro-js");
-    const transformersMod = await import("@huggingface/transformers");
-    transformersEnv = transformersMod.env;
-  }
-  KokoroTTS = kokoro.KokoroTTS;
-  transformersEnv.cacheDir = cacheDir;
-  // Suppress non-fatal cpuinfo warnings on ARM devices (e.g., Snapdragon X Elite).
-  // onnxruntime's cpuinfo library prints to stderr when it doesn't recognize the SoC,
-  // but inference still works via generic ARM64 kernels.
-  const origStderrWrite = process.stderr.write;
-  let cpuinfoWarning = null;
-  process.stderr.write = function(chunk, ...args) {
-    const str = typeof chunk === "string" ? chunk : chunk.toString();
-    if (str.includes("cpuinfo") || str.includes("arm/windows/init.c")) {
-      cpuinfoWarning = str.trim();
-      return true; // suppress
+async function withPackagedModuleResolution(modulePath, callback) {
+  const origResolve = Module._resolveFilename;
+  Module._resolveFilename = function(request, parent, isMain, options) {
+    // Redirect phonemizer to its explicit CJS entry (required by kokoro-js for TTS)
+    if (request === "phonemizer") {
+      return path.join(modulePath, "phonemizer", "dist", "phonemizer.cjs");
     }
-    return origStderrWrite.call(this, chunk, ...args);
+    try {
+      return origResolve.call(this, request, parent, isMain, options);
+    } catch (err) {
+      const stubPath = OPTIONAL_PACKAGED_MODULE_STUBS.get(request);
+      if (err?.code === "MODULE_NOT_FOUND" && stubPath) {
+        return stubPath;
+      }
+      throw err;
+    }
   };
 
   try {
-    ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
-      dtype: DTYPE,
-      device: "cpu",
-      progress_callback: (progress) => {
-        if (progress.status === "progress") {
-          parentPort.postMessage({ type: "progress", value: Math.round(progress.progress || 0) });
-        }
-      },
-    });
+    return await callback();
   } finally {
-    process.stderr.write = origStderrWrite;
+    Module._resolveFilename = origResolve;
+  }
+}
+
+async function loadModel(cacheDir) {
+  if (modelReady) return;
+
+  if (!modelLoaded) {
+    let kokoro, transformersEnv;
+    if (workerData?.modulePath) {
+      // Packaged app: require explicit CJS entry points from the unpacked directory.
+      // Asar/unpacked boundary issues solved here:
+      // 1. ESM "exports" map — require() can't resolve across asar boundary, use .cjs paths
+      // 2. Required deps (phonemizer) — redirect to explicit CJS path in unpacked dir
+      // 3. Explicitly-allowed optional deps (sharp) — stub with empty module (not needed for TTS)
+      // 4. import() hangs — Electron worker threads can't dynamic-import from unpacked asar
+      const modulePath = workerData.modulePath;
+      ({ kokoro, transformersEnv } = await withPackagedModuleResolution(modulePath, async () => {
+        const packagedKokoro = require(path.join(modulePath, "kokoro-js", "dist", "kokoro.cjs"));
+        const transformers = require(path.join(modulePath, "@huggingface", "transformers", "dist", "transformers.node.cjs"));
+        return { kokoro: packagedKokoro, transformersEnv: transformers.env };
+      }));
+    } else {
+      // Dev mode: normal ESM import
+      kokoro = await import("kokoro-js");
+      const transformersMod = await import("@huggingface/transformers");
+      transformersEnv = transformersMod.env;
+    }
+    KokoroTTS = kokoro.KokoroTTS;
+    transformersEnv.cacheDir = cacheDir;
+    // Suppress non-fatal cpuinfo warnings on ARM devices (e.g., Snapdragon X Elite).
+    // onnxruntime's cpuinfo library prints to stderr when it doesn't recognize the SoC,
+    // but inference still works via generic ARM64 kernels.
+    const origStderrWrite = process.stderr.write;
+    let cpuinfoWarning = null;
+    process.stderr.write = function(chunk, ...args) {
+      const str = typeof chunk === "string" ? chunk : chunk.toString();
+      if (str.includes("cpuinfo") || str.includes("arm/windows/init.c")) {
+        cpuinfoWarning = str.trim();
+        return true; // suppress
+      }
+      return origStderrWrite.call(this, chunk, ...args);
+    };
+
+    try {
+      ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
+        dtype: DTYPE,
+        device: "cpu",
+        progress_callback: (progress) => {
+          if (progress.status === "progress") {
+            parentPort.postMessage({ type: "progress", value: Math.round(progress.progress || 0) });
+          }
+        },
+      });
+    } finally {
+      process.stderr.write = origStderrWrite;
+    }
+
+    if (cpuinfoWarning) {
+      console.log("[kokoro] ARM device detected — cpuinfo chip not in database, using generic ARM64 kernels.");
+      parentPort.postMessage({ type: "arm-cpuinfo-warning", warning: cpuinfoWarning });
+    }
+
+    modelLoaded = true;
+    parentPort.postMessage({ type: "model-loaded" });
   }
 
-  if (cpuinfoWarning) {
-    console.log("[kokoro] ARM device detected — cpuinfo chip not in database, using generic ARM64 kernels.");
-    parentPort.postMessage({ type: "arm-cpuinfo-warning", warning: cpuinfoWarning });
-  }
-
-  modelReady = true;
-  parentPort.postMessage({ type: "model-ready" });
-
-  // Warm-up inference — primes ONNX session
+  modelReady = false;
+  // Warm-up inference is the truth boundary: loaded != ready.
   try {
     await ttsInstance.generate("Hello.", { voice: "af_bella", speed: 1.0 });
+    modelReady = true;
+    parentPort.postMessage({ type: "warm-up-done" });
+    parentPort.postMessage({ type: "model-ready" });
   } catch (warmupErr) {
     console.error("[kokoro] Warm-up inference failed:", warmupErr.message);
     if (warmupErr.stack) console.error("[kokoro] Stack:", warmupErr.stack);
-    // Surface warm-up failure explicitly — inference may not work on this platform
+    // Fail closed: keep the loaded model out of the "ready" state until inference works.
     parentPort.postMessage({ type: "warm-up-failed", error: warmupErr.message });
+    return;
   }
-
-  parentPort.postMessage({ type: "warm-up-done" });
 }
 
 async function generate(id, text, voice, speed, words) {
   try {
     if (!ttsInstance || !modelReady) {
-      parentPort.postMessage({ type: "result", id, error: "Model not loaded" });
+      parentPort.postMessage({ type: "result", id, error: "Model not ready" });
       return;
     }
     const result = await ttsInstance.generate(text, { voice, speed, words: words || null });

@@ -5,8 +5,8 @@ Use this file to record the active live QA session against [TTS_LIVE_BUG_SWEEP_C
 ## 1. Run Metadata
 
 - Date: `2026-04-16`
-- Branch: `sprint/test-cov-1-critical-paths`
-- Commit: `75b4082`
+- Branch: `main`
+- Commit: `f906eb1`
 - App version (`package.json`): `1.5.0`
 - Roadmap state: `v1.55.0 stable`
 - Tester:
@@ -25,11 +25,11 @@ Status:
 - `npm run typecheck`: PASS
 - `npm test`: PASS
 - `npm run build`: PASS
-- `npm run tts:eval:matrix:gated -- --run-id live-check --out artifacts/tts-eval/live-check`: PASS
+- `npm run tts:eval:matrix:gated -- --run-id live-sweep-main --out artifacts/tts-eval/live-sweep-main`: PASS
 
 Artifacts:
 
-- gated artifact directory: `artifacts/tts-eval/live-check`
+- gated artifact directory: `artifacts/tts-eval/live-sweep-main`
 - `gate-report.txt`: `PASS`
 - startup p50: `465ms`
 - startup p95: `502.8ms`
@@ -43,13 +43,13 @@ Artifacts:
 Preflight notes:
 
 - Existing non-blocking warning remains unchanged: circular chunk warning during build.
-- No runtime source changes were made after the latest known gated pass; checklist-only docs changed.
+- This run was executed from the clean `main` baseline at `f906eb1`.
 
 ## 3. Session Setup
 
 Session readiness:
 
-- [ ] Built Electron app launched
+- [x] Built Electron app launched
 - [ ] Kokoro active, not Web Speech fallback
 - [ ] Local model present if offline behavior will be tested
 - [ ] Prose-heavy EPUB selected
@@ -345,7 +345,7 @@ Use one block per finding:
 - Title:
 - Severity: CRIT / HIGH / MED / LOW
 - Area: startup / cache / controls / audio / seam / speed / sync / handoff / persistence / epub-token / rendering / recovery
-- Build / commit: 75b4082
+- Build / commit: f906eb1
 - Book / file:
 - Repro steps:
   1.
@@ -356,7 +356,7 @@ Use one block per finding:
 - Frequency: always / often / intermittent / once
 - First observed at speed:
 - Related artifacts:
-  - gated run dir: artifacts/tts-eval/live-check
+  - gated run dir: artifacts/tts-eval/live-sweep-main
   - screenshot:
   - video or audio note:
 - Candidate sprint:
@@ -371,7 +371,7 @@ Use one block per finding:
 - Title:
 - Severity:
 - Area:
-- Build / commit: `75b4082`
+- Build / commit: `f906eb1`
 - Book / file:
 - Repro steps:
   1.
@@ -382,14 +382,14 @@ Use one block per finding:
 - Frequency:
 - First observed at speed:
 - Related artifacts:
-  - gated run dir: `artifacts/tts-eval/live-check`
+  - gated run dir: `artifacts/tts-eval/live-sweep-main`
   - screenshot:
   - video or audio note:
 - Candidate sprint:
 
 ## 13. Session Closeout Summary
 
-- Build / commit: `75b4082`
+- Build / commit: `f906eb1`
 - Tester:
 - Result: `usable / usable with issues / blocked`
 - Total findings:

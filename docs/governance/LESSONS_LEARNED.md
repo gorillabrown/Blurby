@@ -1247,3 +1247,17 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** Any release gate command must follow this order: compute aggregate → evaluate gates → write structured + human-readable reports atomically → return exit code (`0` pass, non-zero fail). Never short-circuit before artifacts are written; failed runs must remain reviewable.
 
 **Related:** TTS-EVAL-3 sprint, `scripts/tts_eval_gate.mjs`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_BASELINE_POLICY.md`
+
+---
+
+### [2026-04-16] LL-099: Kokoro Readiness Must Come from an Authoritative Status Snapshot
+
+**Area:** TTS, Kokoro, renderer truth, worker lifecycle
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-HARDEN-1 started as an engine bootstrap/recovery fix, but the real failure mode was contract drift between layers. The main process could correctly report "not ready" or "retrying" while renderer consumers still inferred readiness from download progress, loading booleans, or late legacy error events. That created a half-hardened system: engine truth existed, but the UI could still claim Kokoro was ready when it was not.
+
+**Guardrail:** Readiness, loading, retryability, and terminal reason must come from one normalized status snapshot (`status`, `detail`, `reason`, `ready`, `loading`, `recoverable`). Progress events are supplemental only; they must never flip readiness on their own. Legacy error channels may fill missing detail, but they must not overwrite an already-structured terminal snapshot. When worker retries or shutdowns are possible, retry timers and pending/loading promises must be owned by the worker/lifecycle that created them so stale callbacks cannot reintroduce false state later.
+
+**Related:** TTS-HARDEN-1 sprint, `main/tts-engine.js`, `main/tts-engine-marathon.js`, `main/ipc/tts.js`, `src/utils/kokoroStatus.ts`, `src/hooks/useNarration.ts`, `src/components/settings/TTSSettings.tsx`

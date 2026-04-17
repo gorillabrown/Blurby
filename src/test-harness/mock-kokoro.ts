@@ -1,6 +1,8 @@
 // src/test-harness/mock-kokoro.ts — Mock Kokoro TTS: generates synthetic PCM audio
 // Dev-only. Never bundled in production.
 
+import type { KokoroStatusSnapshot } from "../types";
+
 const KOKORO_SAMPLE_RATE = 24000;
 
 /** Available mock Kokoro voices (mirrors real Kokoro voice IDs) */
@@ -39,8 +41,15 @@ export function generateMockAudio(
 }
 
 /** Mock model status — always "ready" in stub mode */
-export function getMockModelStatus(): { ready: boolean } {
-  return { ready: true };
+export function getMockModelStatus(): KokoroStatusSnapshot {
+  return {
+    status: "ready",
+    detail: null,
+    reason: null,
+    ready: true,
+    loading: false,
+    recoverable: false,
+  };
 }
 
 /** Mock voice list */

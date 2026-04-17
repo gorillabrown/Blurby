@@ -1,10 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
-import type { BlurbySettings, PronunciationOverride } from "../../types";
+import { useState, useEffect, useCallback, useRef } from "react";
+import type { BlurbySettings, KokoroStatusSnapshot, PronunciationOverride } from "../../types";
 import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, KOKORO_RATE_BUCKETS, resolveKokoroBucket, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
-import { exportNarrationData, validateNarrationImport, applyNarrationImport, resetNarrationData } from "../../utils/narrationPortability";
 import { KokoroStatusSection } from "./KokoroStatusSection";
+import { NarrationDataSection } from "./NarrationDataSection";
 import { PauseSettingsSection } from "./PauseSettingsSection";
 import { PronunciationOverridesEditor } from "./PronunciationOverridesEditor";
+import {
+  DEFAULT_KOKORO_STATUS_SNAPSHOT,
+  getKokoroStatusError,
+  normalizeKokoroStatusSnapshot,
+  snapshotFromKokoroErrorResponse,
+  snapshotFromLegacyKokoroDownloadError,
+} from "../../utils/kokoroStatus";
 import "../../styles/tts-settings.css";
 
 const api = window.electronAPI;
@@ -32,13 +39,23 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
   const [testPlaying, setTestPlaying] = useState(false);
 
   // Kokoro state
-  const [kokoroReady, setKokoroReady] = useState(false);
+  const [kokoroStatus, setKokoroStatus] = useState<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
   const [kokoroDownloading, setKokoroDownloading] = useState(false);
   const [kokoroProgress, setKokoroProgress] = useState(0);
   const [kokoroVoices, setKokoroVoices] = useState<string[]>([]);
-  const [kokoroWarming, setKokoroWarming] = useState(false);
   const [kokoroError, setKokoroError] = useState<string | null>(null);
   const [kokoroStalled, setKokoroStalled] = useState(false);
+  const kokoroStatusRef = useRef<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
+  const kokoroReady = kokoroStatus.ready;
+  const kokoroWarming = kokoroStatus.status === "warming" || kokoroStatus.status === "retrying";
+  const kokoroBusy = kokoroDownloading || kokoroStatus.loading;
+  const kokoroBusyLabel = kokoroDownloading
+    ? `Downloading voice model... ${kokoroProgress}%`
+    : kokoroStatus.status === "retrying"
+      ? "Retrying Kokoro setup..."
+      : kokoroStatus.status === "warming"
+        ? "Warming up voice model..."
+        : "Preparing voice model...";
 
   // Load Web Speech voices
   useEffect(() => {
@@ -51,16 +68,46 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     return () => window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices);
   }, []);
 
+  const loadKokoroVoices = useCallback(async () => {
+    if (!api?.kokoroVoices) return;
+    const vr = await api.kokoroVoices();
+    if (vr.voices) setKokoroVoices(vr.voices);
+  }, []);
+
+  const applyKokoroStatusSnapshot = useCallback((snapshotLike?: Partial<KokoroStatusSnapshot> | null) => {
+    const snapshot = normalizeKokoroStatusSnapshot(snapshotLike);
+    kokoroStatusRef.current = snapshot;
+    setKokoroStatus(snapshot);
+
+    const error = getKokoroStatusError(snapshot);
+    if (error) {
+      setKokoroError(error);
+      setKokoroDownloading(false);
+      return;
+    }
+
+    if (snapshot.ready) {
+      setKokoroError(null);
+      setKokoroDownloading(false);
+      setKokoroStalled(false);
+      void loadKokoroVoices();
+      return;
+    }
+
+    if (snapshot.loading || snapshot.status === "idle") {
+      setKokoroDownloading(false);
+      setKokoroStalled(false);
+      if (snapshot.loading || snapshot.status === "idle") {
+        setKokoroError(null);
+      }
+    }
+  }, [loadKokoroVoices]);
+
   // Check Kokoro model status
   useEffect(() => {
     if (!api?.kokoroModelStatus) return;
-    api.kokoroModelStatus().then((r: { ready: boolean }) => {
-      setKokoroReady(r.ready);
-      if (r.ready && api.kokoroVoices) {
-        api.kokoroVoices().then((vr: { voices?: string[] }) => {
-          if (vr.voices) setKokoroVoices(vr.voices);
-        });
-      }
+    api.kokoroModelStatus().then((r) => {
+      applyKokoroStatusSnapshot(r);
     }).catch(() => {});
 
     const cleanups: (() => void)[] = [];
@@ -68,26 +115,23 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       cleanups.push(api.onKokoroDownloadProgress((progress: number) => {
         setKokoroProgress(progress);
         setKokoroStalled(false);
-        if (progress >= 100) {
-          setKokoroReady(true);
-          setKokoroDownloading(false);
-        }
+        setKokoroDownloading(true);
       }));
     }
     if (api.onKokoroDownloadError) {
       cleanups.push(api.onKokoroDownloadError((error: string) => {
-        setKokoroError(error);
-        setKokoroDownloading(false);
+        applyKokoroStatusSnapshot(
+          snapshotFromLegacyKokoroDownloadError(kokoroStatusRef.current, error),
+        );
       }));
     }
     if (api.onKokoroEngineStatus) {
-      cleanups.push(api.onKokoroEngineStatus((data: { status: string }) => {
-        setKokoroWarming(data.status === "warming");
-        if (data.status === "ready") { setKokoroReady(true); setKokoroWarming(false); }
+      cleanups.push(api.onKokoroEngineStatus((data) => {
+        applyKokoroStatusSnapshot(data);
       }));
     }
     return () => cleanups.forEach((c) => c());
-  }, []);
+  }, [applyKokoroStatusSnapshot]);
 
   // Stall detection: if downloading and progress stays at 0% for 30s
   useEffect(() => {
@@ -108,16 +152,16 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     try {
       const result = await api.kokoroDownload();
       if (result.error) {
-        setKokoroError(result.error);
-      } else {
-        setKokoroReady(true);
-        if (api.kokoroVoices) {
-          const vr = await api.kokoroVoices();
-          if (vr.voices) setKokoroVoices(vr.voices);
-        }
+        applyKokoroStatusSnapshot(snapshotFromKokoroErrorResponse(result));
+        return;
       }
-    } catch { /* handled by error listener */ }
-    setKokoroDownloading(false);
+      if (api.kokoroModelStatus) {
+        const snapshot = await api.kokoroModelStatus();
+        applyKokoroStatusSnapshot(snapshot);
+      }
+    } catch {
+      applyKokoroStatusSnapshot(snapshotFromKokoroErrorResponse({}, "Download failed"));
+    }
   };
 
   const handleTestVoice = async () => {
@@ -349,7 +393,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           className={`settings-mode-btn${engine === "kokoro" ? " active" : ""}`}
           onClick={() => {
             handleTtsChange({ ttsEngine: "kokoro", ttsVoiceName: kokoroReady ? "af_bella" : null });
-            if (!kokoroReady && !kokoroDownloading) {
+            if (!kokoroReady && !kokoroBusy) {
               handleDownloadKokoro();
             }
           }}
@@ -361,7 +405,8 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       {/* Kokoro download progress */}
       {engine === "kokoro" && !kokoroReady && (
         <KokoroStatusSection
-          kokoroDownloading={kokoroDownloading}
+          kokoroBusy={kokoroBusy}
+          kokoroBusyLabel={kokoroBusyLabel}
           kokoroProgress={kokoroProgress}
           kokoroError={kokoroError}
           kokoroStalled={kokoroStalled}
@@ -478,70 +523,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       <CacheSizeDisplay />
 
-      {/* Export / Import / Reset (TTS-6M) */}
-      <div className="settings-section-label">Narration Data</div>
-      <div className="tts-data-action-row">
-        <button
-          className="settings-btn-secondary tts-data-action-btn"
-          onClick={() => {
-            const payload = exportNarrationData(settings);
-            const json = JSON.stringify(payload, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `blurby-narration-${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }}
-        >Export</button>
-        <button
-          className="settings-btn-secondary tts-data-action-btn"
-          onClick={() => {
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = ".json";
-            input.onchange = async () => {
-              const file = input.files?.[0];
-              if (!file) return;
-              try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-                const validation = validateNarrationImport(data, settings);
-                if (!validation.valid) {
-                  alert("Import failed:\n" + validation.errors.join("\n"));
-                  return;
-                }
-                const msg = `Import ${validation.profileCount} profile(s) and ${validation.overrideCount} override(s)?`
-                  + (validation.warnings.length > 0 ? "\n\n" + validation.warnings.join("\n") : "");
-                if (!confirm(msg)) return;
-                const updates = applyNarrationImport(data, settings, "merge");
-                onSettingsChange(updates);
-              } catch {
-                alert("Import failed: invalid JSON file.");
-              }
-            };
-            input.click();
-          }}
-        >Import</button>
-      </div>
-      <div className="tts-data-hint">
-        Export or import narration profiles and pronunciation overrides as JSON.
-      </div>
-      <div className="tts-data-reset-row">
-        {profiles.length > 0 && (
-          <button
-            onClick={() => { if (confirm("Delete all narration profiles? This cannot be undone.")) onSettingsChange(resetNarrationData("profiles")); }}
-            className="tts-data-reset-btn"
-          >Reset profiles</button>
-        )}
-        {(settings.pronunciationOverrides?.length ?? 0) > 0 && (
-          <button
-            onClick={() => { if (confirm("Clear all global pronunciation overrides? This cannot be undone.")) onSettingsChange(resetNarrationData("overrides")); }}
-            className="tts-data-reset-btn"
-          >Reset overrides</button>
-        )}
-      </div>
+      <NarrationDataSection settings={settings} onSettingsChange={onSettingsChange} />
     </div>
   );
 }
@@ -580,4 +562,3 @@ function CacheSizeDisplay() {
     </div>
   );
 }
-
