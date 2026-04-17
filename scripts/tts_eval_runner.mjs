@@ -112,6 +112,22 @@ export function summarizeTrace(trace) {
     book: transitions.filter((e) => e.transition === "book").length,
     handoff: transitions.filter((e) => e.transition === "handoff").length,
   };
+  const sectionHandoffLatencyMs =
+    transitions.find((e) => e.transition === "section" && typeof e.latencyMs === "number")?.latencyMs ?? null;
+  const crossBookResumeLatencyMs =
+    transitions.find(
+      (e) =>
+        e.transition === "handoff"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("cross-book"),
+    )?.latencyMs
+    ?? transitions.find(
+      (e) =>
+        e.transition === "book"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("cross-book"),
+    )?.latencyMs
+    ?? null;
 
   const failureClasses = [];
   const startLatencyMs =
@@ -144,6 +160,8 @@ export function summarizeTrace(trace) {
     flowEventCount: flow.length,
     pauseResumeIntegrity: { pauses, resumes, balanced: pauses === resumes },
     transitionCounts,
+    sectionHandoffLatencyMs,
+    crossBookResumeLatencyMs,
     failureClasses,
   };
 }
@@ -153,6 +171,8 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
   const now = 1_700_000_000_000 + runOrdinal * 10_000;
   const baseStep = Math.max(40, Math.round(160 / Math.max(0.5, rate)));
   const startLatencyMs = 220 + Math.min(1400, words.length * 7);
+  const sectionHandoffLatencyMs = 90 + Math.min(220, Math.max(1, words.length) * 6);
+  const crossBookResumeLatencyMs = 240 + Math.min(480, Math.max(1, words.length) * 9);
   const events = [];
 
   events.push({
@@ -196,14 +216,37 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
   }
 
   if (fixture.id.includes("section")) {
-    events.push({ ts: now + startLatencyMs + words.length * baseStep + 20, kind: "transition", transition: "section", from: 0, to: 1, context: "fixture-section" });
+    events.push({
+      ts: now + startLatencyMs + words.length * baseStep + 20,
+      kind: "transition",
+      transition: "section",
+      from: 0,
+      to: 1,
+      context: "flow-narration-section-handoff",
+      latencyMs: sectionHandoffLatencyMs,
+    });
   }
   if (fixture.id.includes("chapter")) {
     events.push({ ts: now + startLatencyMs + words.length * baseStep + 20, kind: "transition", transition: "chapter", from: 1, to: 2, context: "fixture-chapter" });
   }
   if (fixture.id.includes("queued-handoff")) {
-    events.push({ ts: now + startLatencyMs + words.length * baseStep + 20, kind: "transition", transition: "book", from: "book-a", to: "book-b", context: "fixture-queue" });
-    events.push({ ts: now + startLatencyMs + words.length * baseStep + 25, kind: "transition", transition: "handoff", from: "book-a", to: "book-b", context: "fixture-queue" });
+    events.push({
+      ts: now + startLatencyMs + words.length * baseStep + 20,
+      kind: "transition",
+      transition: "book",
+      from: "book-a",
+      to: "book-b",
+      context: "cross-book-flow-narration",
+    });
+    events.push({
+      ts: now + startLatencyMs + words.length * baseStep + 25,
+      kind: "transition",
+      transition: "handoff",
+      from: "book-a",
+      to: "book-b",
+      context: "cross-book-flow-narration",
+      latencyMs: crossBookResumeLatencyMs,
+    });
   }
 
   events.push({

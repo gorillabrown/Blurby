@@ -17,7 +17,17 @@ import {
   resolveGlobalWordIndexToRendered,
   resolveRenderedWordIndexToGlobal,
 } from "../utils/foliateWordOffsets";
-import { DEFAULT_WPM, FOLIATE_BASE_FONT_SIZE_PX, FOLIATE_RENDERER_HEIGHT_MARGIN_PX, FOLIATE_MARGIN_PX, FOLIATE_MAX_INLINE_SIZE_PX, FOLIATE_TWO_COLUMN_BREAKPOINT_PX, FLOW_READING_ZONE_POSITION, FLOW_ZONE_LINES_DEFAULT } from "../constants";
+import {
+  DEFAULT_WPM,
+  FOLIATE_BASE_FONT_SIZE_PX,
+  FOLIATE_RENDERER_HEIGHT_MARGIN_PX,
+  FOLIATE_MARGIN_PX,
+  FOLIATE_MAX_INLINE_SIZE_PX,
+  FOLIATE_SECTION_READY_TIMEOUT_MS,
+  FOLIATE_TWO_COLUMN_BREAKPOINT_PX,
+  FLOW_READING_ZONE_POSITION,
+  FLOW_ZONE_LINES_DEFAULT,
+} from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
 import {
@@ -336,6 +346,8 @@ export interface FoliateViewAPI {
   getSectionCount: () => number;
   /** NAR-3: Navigate to a specific section by index. Triggers a load event when ready. */
   goToSection: (sectionIndex: number) => Promise<void>;
+  /** TTS-CONT-1: Resolve once a section is active, stamped, and safe for word queries. */
+  waitForSectionReady: (sectionIndex?: number | null, timeoutMs?: number) => Promise<number | null>;
   /** NAR-3: Extract words from a specific section's DOM (must be currently loaded) */
   extractSectionWords: (sectionIndex: number) => FoliateWord[];
   /** FLOW-3A: Get the scrollable container element for FlowScrollEngine */
@@ -388,6 +400,7 @@ export default function FoliatePageView({
   const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const flowRafRef = useRef<number>(0);
+  const lastLoadedSectionIndexRef = useRef<number | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -428,6 +441,57 @@ export default function FoliatePageView({
       }
     }
   }, []);
+
+  const resolveReadySectionIndex = useCallback((sectionIndex?: number | null): number | null => {
+    const view = viewRef.current;
+    const contents = view?.renderer?.getContents?.() ?? [];
+    const isReadyEntry = (entry: { doc?: Document | null; index?: number }) => {
+      if (!entry?.doc || typeof entry.index !== "number") return false;
+      return entry.doc.querySelector?.("[data-word-index]") != null;
+    };
+
+    if (typeof sectionIndex === "number") {
+      const target = contents.find((entry: { index?: number }) => entry.index === sectionIndex);
+      return target && isReadyEntry(target) ? sectionIndex : null;
+    }
+
+    if (typeof lastLoadedSectionIndexRef.current === "number") {
+      const target = contents.find(
+        (entry: { index?: number }) => entry.index === lastLoadedSectionIndexRef.current,
+      );
+      if (target && isReadyEntry(target)) {
+        return lastLoadedSectionIndexRef.current;
+      }
+    }
+
+    for (const entry of contents) {
+      if (isReadyEntry(entry)) return entry.index ?? null;
+    }
+    return null;
+  }, []);
+
+  const waitForSectionReady = useCallback(
+    (sectionIndex?: number | null, timeoutMs = FOLIATE_SECTION_READY_TIMEOUT_MS) =>
+      new Promise<number | null>((resolve) => {
+        const startedAt = Date.now();
+
+        const check = () => {
+          const readyIndex = resolveReadySectionIndex(sectionIndex);
+          if (readyIndex != null) {
+            resolve(readyIndex);
+            return;
+          }
+          if (Date.now() - startedAt >= timeoutMs) {
+            resolve(resolveReadySectionIndex(sectionIndex));
+            return;
+          }
+          setTimeout(check, 25);
+        };
+
+        check();
+      }),
+    [resolveReadySectionIndex],
+  );
 
   const clearSoftHighlight = useCallback(() => {
     const view = viewRef.current;
@@ -618,6 +682,8 @@ export default function FoliatePageView({
               }
             }
           }
+
+          lastLoadedSectionIndexRef.current = index;
 
           // Delegated click handler — uses injected word spans (same pattern as PageReaderView)
           doc.body.addEventListener("click", (e: MouseEvent) => {
@@ -978,6 +1044,7 @@ export default function FoliatePageView({
                 await view.goToFraction(frac);
               }
             },
+            waitForSectionReady,
             extractSectionWords: (sectionIndex: number) => {
               const contents = view.renderer?.getContents?.() ?? [];
               for (const { doc: d, index } of contents) {

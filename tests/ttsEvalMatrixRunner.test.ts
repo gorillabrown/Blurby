@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { calculateAggregateMetrics } from "../scripts/tts_eval_metrics.mjs";
 import { getSoakProfile } from "../scripts/tts_eval_profiles.mjs";
-import { executeSoak, parseArgs, runHarness } from "../scripts/tts_eval_runner.mjs";
+import { executeSoak, parseArgs, runHarness, simulateTrace, summarizeTrace } from "../scripts/tts_eval_runner.mjs";
 
 const tempDirs: string[] = [];
 
@@ -131,5 +131,75 @@ describe("tts eval matrix/soak runner", () => {
     expect(aggregate.startupLatency.p95).toBe(385);
     expect(aggregate.failureCounts.pauseResumeFailures).toBe(1);
     expect(aggregate.failureCounts.handoffFailures).toBe(1);
+  });
+
+  it("includes section and cross-book latency fields in per-run summaries", () => {
+    const summary = summarizeTrace({
+      runId: "latency-run",
+      scenarioId: "handoff-queue",
+      fixture: { id: "queued-handoff" },
+      events: [
+        { ts: 1, kind: "lifecycle", state: "start" },
+        { ts: 2, kind: "lifecycle", state: "first-audio", latencyMs: 220 },
+        {
+          ts: 3,
+          kind: "transition",
+          transition: "section",
+          from: 0,
+          to: 1,
+          context: "flow-narration-section-handoff",
+          latencyMs: 110,
+        },
+        {
+          ts: 4,
+          kind: "transition",
+          transition: "handoff",
+          from: "book-a",
+          to: "book-b",
+          context: "cross-book-flow-narration",
+          latencyMs: 470,
+        },
+      ],
+    });
+    expect(summary.sectionHandoffLatencyMs).toBe(110);
+    expect(summary.crossBookResumeLatencyMs).toBe(470);
+  });
+
+  it("emits section handoff latency in simulated section-transition traces", () => {
+    const trace = simulateTrace({
+      fixture: {
+        id: "section-transition",
+        title: "Section",
+        sourceType: "transition",
+        expectedCoverage: [],
+        text: "one two three four five six",
+      },
+      mode: "flow",
+      rate: 1.2,
+      runId: "section-run",
+      scenarioId: "section-transition",
+      runOrdinal: 1,
+    });
+    const summary = summarizeTrace(trace);
+    expect(summary.sectionHandoffLatencyMs).toEqual(expect.any(Number));
+  });
+
+  it("emits cross-book resume latency in simulated queued-handoff traces", () => {
+    const trace = simulateTrace({
+      fixture: {
+        id: "queued-handoff",
+        title: "Queued",
+        sourceType: "transition",
+        expectedCoverage: [],
+        text: "one two three four five six",
+      },
+      mode: "flow",
+      rate: 1.4,
+      runId: "handoff-run",
+      scenarioId: "handoff-queue",
+      runOrdinal: 1,
+    });
+    const summary = summarizeTrace(trace);
+    expect(summary.crossBookResumeLatencyMs).toEqual(expect.any(Number));
   });
 });

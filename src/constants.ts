@@ -332,6 +332,8 @@ export const FOLIATE_MIN_ENGAGEMENT_POSITION = 3;
 export const FOCUS_MODE_START_DELAY_MS = 50;
 /** Wait time for an EPUB section to load before retrying narration start (ms) */
 export const FOLIATE_SECTION_LOAD_WAIT_MS = 500;
+/** Maximum wait for a Foliate section to become active and word-queryable (ms). */
+export const FOLIATE_SECTION_READY_TIMEOUT_MS = 3000;
 /** TTS-7E: Max wait for DOM readiness before narration starts (ms). User spec: ~3s settling delay. */
 export const NARRATION_RENDER_WAIT_MS = 3000;
 /** Interval for polling whether user is browsing away during narration mode (ms) */
@@ -439,9 +441,9 @@ export const FLOW_TIMER_GLOW_PX = 2;
 // Note: FLOW_LINE_COMPLETE_FLASH_MS (100ms) is declared above in the FLOW-3A section.
 
 // ── Cross-Book Continuous Reading (FLOW-INF-C) ──────────────────────────────
-/** Duration in ms that the "Finished / Next" transition overlay is displayed */
-export const CROSS_BOOK_TRANSITION_MS = 2500;
-/** Delay in ms after book switch before auto-starting flow (DOM settle time) */
+/** Maximum time in ms the cross-book overlay may stay visible while readiness settles. */
+export const CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS = 2500;
+/** Legacy fixed resume delay removed from the active hot path in TTS-CONT-1. */
 export const CROSS_BOOK_FLOW_RESUME_DELAY_MS = 300;
 
 // ── Default Settings ─────────────────────────────────────────────────────────

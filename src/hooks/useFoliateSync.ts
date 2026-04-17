@@ -215,8 +215,8 @@ export function useFoliateSync({
       const api = foliateApiRef.current;
       if (!api) return;
       api.next();
-      const checkAndRestart = () => {
-        setTimeout(() => {
+      Promise.resolve(api.waitForSectionReady?.())
+        .then(() => {
           try {
             extractFoliateWords();
             const newWords = wordsRef.current;
@@ -226,9 +226,8 @@ export function useFoliateSync({
           } catch (err) {
             console.error("[ReaderContainer] extractFoliateWords failed during section-end fallback:", err);
           }
-        }, 300);
-      };
-      checkAndRestart();
+        })
+        .catch(() => {});
     });
     return () => {
       if (ownsSectionEndCallbackRef.current) {

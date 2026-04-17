@@ -86,6 +86,24 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
     book: transitions.filter((e) => e.transition === "book").length,
     handoff: transitions.filter((e) => e.transition === "handoff").length,
   };
+  const sectionHandoffLatencyMs =
+    transitions.find(
+      (e) => e.transition === "section" && typeof e.latencyMs === "number",
+    )?.latencyMs ?? null;
+  const crossBookResumeLatencyMs =
+    transitions.find(
+      (e) =>
+        e.transition === "handoff"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("cross-book"),
+    )?.latencyMs
+    ?? transitions.find(
+      (e) =>
+        e.transition === "book"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("cross-book"),
+    )?.latencyMs
+    ?? null;
 
   const failureClasses: TtsEvalMetricsSummary["failureClasses"] = [];
   if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
@@ -114,6 +132,8 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
       balanced: pauses === resumes,
     },
     transitionCounts,
+    sectionHandoffLatencyMs,
+    crossBookResumeLatencyMs,
     failureClasses,
   };
 }
