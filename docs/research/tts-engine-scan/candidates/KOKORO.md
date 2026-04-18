@@ -2,7 +2,7 @@
 
 ## Snapshot
 - Track: baseline
-- Current verdict: keep as baseline control
+- Current verdict: full-corpus control captured; still the current leader on this host
 - Last verified: 2026-04-18
 
 ## Official Sources
@@ -42,7 +42,12 @@ Full-corpus synthesis:
 powershell -NoProfile -Command "$root = 'C:\Users\estra\Projects\Blurby'; $fixtures = Get-ChildItem \"$root\\tests\\fixtures\\narration\\engine-scan\" -Filter *.txt; foreach ($fixture in $fixtures) { python -c \"from pathlib import Path; import soundfile as sf; from kokoro import KPipeline; path = Path(r'$($fixture.FullName)'); text = path.read_text(encoding='utf-8'); pipeline = KPipeline(lang_code='a'); audio = next(iter(pipeline(text, voice='af_heart', speed=1, split_pattern=r'\\n+')))[2]; out = Path(r'C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\engine-scan\\kokoro\\audio') / f'{path.stem}.wav'; out.parent.mkdir(parents=True, exist_ok=True); sf.write(out, audio, 24000)\" }"
 ```
 
+Dispatch B empirical run:
+```text
+node worker harness using main/tts-worker.js, node_modules/ as modulePath, and %APPDATA%\Blurby\models as the cacheDir
+```
+
 ## Findings
-- Wins over Kokoro: baseline control only; this file is the anchor for later comparisons.
-- Losses versus Kokoro: none in Dispatch A.
-- Open concerns: the official docs do not advertise long-context generation or timing-truth metadata, so Blurby still bears the seam-management burden.
+- Wins over Kokoro: it still wins the practical bootstrap contest on this Windows host. The worker-thread CPU path that Blurby already ships produced 6/6 engine-scan fixtures without extra environment surgery once the standard model cache was reused.
+- Losses versus Kokoro: the known product issues are still present. Dispatch B did not change the long-form seam burden or the exact-speed limitations already documented in Blurby.
+- Open concerns: the pre-recorded Python command from Dispatch A was not runnable on this host, so the empirical control used Blurby's already-installed `kokoro-js` worker path instead. Manual listening review is still pending even though the capture pass completed.

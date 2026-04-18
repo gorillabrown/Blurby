@@ -2,7 +2,7 @@
 
 ## Snapshot
 - Track: practical
-- Current verdict: active for Dispatch B
+- Current verdict: dropped after smoke on this host; not yet a reliable Windows-local challenger
 - Last verified: 2026-04-18
 
 ## Official Sources
@@ -43,6 +43,6 @@ powershell -NoProfile -Command "$fixtureRoot = 'C:\Users\estra\Projects\Blurby\t
 ```
 
 ## Findings
-- Wins over Kokoro: the official docs make MeloTTS the clearest CPU-friendly practical challenger in this lane.
-- Losses versus Kokoro: the official docs do not claim long-context narration gains or timing metadata.
-- Open concerns: packaging looks favorable, but Dispatch B still needs empirical narration-quality checks before treating MeloTTS as a real replacement candidate.
+- Wins over Kokoro: none were captured empirically in Dispatch B. The on-paper appeal is still its relatively simple CPU-first story.
+- Losses versus Kokoro: the official Windows-preferred Docker path was unavailable because the Docker daemon was not running, and the local fallback stayed fragile even after switching to Python 3.9, pinning `setuptools<81`, and running the documented `python -m unidic download` step.
+- Open concerns: the smoke run still failed before first utterance in the `cached_path` / `botocore` stack, so audio quality remains unmeasured. MeloTTS should not advance until its Windows bootstrap is reproducible without manual dependency triage.

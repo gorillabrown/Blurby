@@ -2,7 +2,7 @@
 
 ## Snapshot
 - Track: context
-- Current verdict: active for Dispatch B
+- Current verdict: dropped after smoke on this host; keep as a paper-only long-form watch item
 - Last verified: 2026-04-18
 
 ## Official Sources
@@ -43,6 +43,6 @@ powershell -NoProfile -Command "$repo = 'C:\Users\estra\Projects\Blurby\tmp\tts-
 ```
 
 ## Findings
-- Wins over Kokoro: the official family docs explicitly target long-form continuity, duration control, and stable narration.
-- Losses versus Kokoro: the runtime burden is substantially higher, and timing/speed integration answers are still missing from official docs.
-- Open concerns: the most practical official CPU-first story is now the llama.cpp backend; Dispatch B will need repo checkout and local weight provisioning before empirical runs start.
+- Wins over Kokoro: on paper only. The official family still advertises the strongest long-form continuity story in the field scan.
+- Losses versus Kokoro: the official CPU lane did not reach a first utterance in Dispatch B. After a successful `.[llama-cpp-onnx]` install, the dossier-aligned smoke command failed immediately because the required GGUF backbone bundle was not provisioned locally.
+- Open concerns: even before any audio quality comparison, the official torch-free path still depends on separately downloading the GGUF backbone, separately downloading the ONNX audio tokenizer, and handling the first-class llama.cpp bridge setup. That practical burden is enough to keep it out of the next prototype lane on this workstation.
