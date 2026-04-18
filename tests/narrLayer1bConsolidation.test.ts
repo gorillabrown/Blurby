@@ -6,16 +6,19 @@ import * as migrations from "../main/migrations.js";
 const read = (rel: string) => fs.readFileSync(path.resolve(__dirname, "..", rel), "utf-8");
 
 describe("NARR-LAYER-1B consolidation", () => {
-  it("removes narration from ReadingMode union", () => {
+  it("promotes narrate into the shared ReaderMode contract", () => {
     const src = read("src/hooks/useReaderMode.ts");
-    expect(src).toContain("type ReadingMode = \"page\" | \"focus\" | \"flow\";");
+    expect(src).toContain("import type { BlurbySettings, ReaderMode } from \"../types\";");
+    expect(src).not.toContain("type ReadingMode = \"page\" | \"focus\" | \"flow\";");
     expect(src).not.toContain("\"narration\"");
   });
 
-  it("removes narration from shared settings readingMode type", () => {
+  it("uses shared four-mode aliases for persisted readingMode types", () => {
     const src = read("src/types.ts");
-    expect(src).toContain("readingMode: \"focus\" | \"flow\" | \"page\";");
-    expect(src).toContain("lastReadingMode: \"focus\" | \"flow\";");
+    expect(src).toContain("export type ReaderMode = \"page\" | \"focus\" | \"flow\" | \"narrate\";");
+    expect(src).toContain("export type ReaderLastMode = \"focus\" | \"flow\" | \"narrate\";");
+    expect(src).toContain("readingMode: ReaderMode;");
+    expect(src).toContain("lastReadingMode: ReaderLastMode;");
   });
 
   it("adds isNarrating flag to settings type", () => {
@@ -74,10 +77,12 @@ describe("NARR-LAYER-1B consolidation", () => {
     expect(src).toContain("highlightWordByIndex: (wordIndex: number, styleHint?: \"flow\") => boolean;");
   });
 
-  it("ReaderContainer computes narration-selected from flow + isNarrating", () => {
+  it("ReaderContainer treats narrate as the narration-selected source of truth", () => {
     const src = read("src/components/ReaderContainer.tsx");
+    expect(src).toContain("readingMode === \"narrate\"");
     expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
-    expect(src).toContain("(readingMode === \"page\" && settings.isNarrating === true)");
+    expect(src).toContain("(readingMode === \"page\" && settings.lastReadingMode === \"narrate\")");
+    expect(src).not.toContain("(readingMode === \"page\" && settings.isNarrating === true)");
   });
 
   it("ReaderBottomBar computes narration-selected from flow + isNarrating", () => {

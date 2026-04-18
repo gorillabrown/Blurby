@@ -127,6 +127,9 @@ export interface LayoutSpacing {
   word: number;
 }
 
+export type ReaderMode = "page" | "focus" | "flow" | "narrate";
+export type ReaderLastMode = "focus" | "flow" | "narrate";
+
 export interface BlurbySettings {
   schemaVersion: number;
   wpm: number;
@@ -139,7 +142,7 @@ export interface BlurbySettings {
   accentColor: string | null;
   fontFamily: string | null;
   compactMode: boolean;
-  readingMode: "focus" | "flow" | "page";
+  readingMode: ReaderMode;
   focusMarks: boolean;
   readingRuler: boolean;
   focusSpan: number;
@@ -172,7 +175,7 @@ export interface BlurbySettings {
   ttsDialogueSentenceThreshold?: number;
   ttsFootnoteMode?: "skip" | "read";
   // Last-used reading mode (Space bar starts this mode from Page view)
-  lastReadingMode: "focus" | "flow";
+  lastReadingMode: ReaderLastMode;
   // Flow-layer narration state (NARR-LAYER-1B)
   isNarrating: boolean;
   // Cloud sync settings

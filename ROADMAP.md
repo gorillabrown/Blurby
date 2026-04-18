@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-17 — Closed out TTS-START-1 and completed the TTS continuity/startup follow-on lane.
+**Last updated**: 2026-04-18 — Completed `READER-4M-1` and advanced the four-mode reader restoration lane to `READER-4M-2`.
 **Current branch**: `main`
-**Current state**: v1.62.0 stable. Queue depth 1 (RED). Next queue item: EINK-6A (parked fallback; reprioritize or backfill before dispatch).
+**Current state**: v1.63.0 stable. Queue depth 3 (GREEN). Next queue item: READER-4M-2 (standalone Narrate mode and four-button controls).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -91,6 +91,12 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     TTS-RATE-2: Segmented Live Rate Response ✅ (v1.61.0)
                    │
     TTS-START-1: Startup Parity & Opening Cache Contract ✅ (v1.62.0)
+                   │
+    READER-4M-1: Infinite-Scroll Surface Recovery & Explicit Mode Foundation
+                   │
+    READER-4M-2: Standalone Narrate Mode & Four-Button Controls
+                   │
+    READER-4M-3: Global Word Anchor & Cross-Mode Continuity
                    │
                    ▼
         Track C: Android APK
@@ -3088,6 +3094,311 @@ Task 12 (Git)
 **Completion note:** Completed on 2026-04-17. Cached and uncached starts now share one opening-ramp planner contract, so entry coverage warms the same `13 -> 26 -> 52 -> 104 -> 148` startup shape that live playback uses before cruise coverage resumes. The renderer cache helper no longer relies on a caller-side tail-sliced array contract: cached replay reconstructs from the full word context plus `startIdx`, and `useNarrationCaching` now re-seeds startup coverage from the current highlighted position with the active rate bucket and pronunciation-override identity.
 
 **Verification:** Startup-parity coverage expanded with `tests/generationPipeline.test.ts`, `tests/tts7a-cacheCorrectness.test.ts`, `tests/useNarrationCaching.test.tsx`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with the focused startup/cache neighborhood (`6` files, `70` tests), a dedicated startup-parity matrix run (`artifacts/tts-eval/start1-startup-parity`) reporting cached/uncached startup latency `370 / 508 ms` with `Opening ramp parity: match`, the gated release matrix (`artifacts/tts-eval/start1-release`) passing across `9` runs, full `npm test` (`125` files, `2005` tests), and `npm run build`; the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+## Phase 6 Follow-On — Four-Mode Reader Restoration
+
+> This lane is sourced from the approved design spec at [docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md](C:/Users/estra/Projects/Blurby/docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md). It restores `Narrate` as a real fourth mode, fixes the still-broken live foliate flow substrate first, and then unifies all reader modes around one canonical global word anchor.
+
+---
+
+### Sprint READER-4M-1: Infinite-Scroll Surface Recovery & Explicit Mode Foundation
+
+**Goal:** Make live foliate `Flow` reliable again and reintroduce `narrate` to the reader’s core type/state contracts so the standalone Narrate restoration can build on a truthful shared substrate instead of the current hidden `flow + isNarrating` composition.
+
+**Version:** v1.63.0 | **Branch:** `sprint/reader-4m-1-surface-foundation` | **Tier:** Full
+
+**Problem:** The approved four-mode design assumes `Flow` and `Narrate` share one healthy infinite-scroll surface, but the live app still logs `[FlowScrollEngine] buildLineMap empty after 5 retries — stopping` and stalls. At the same time, the core reader contracts still only admit `"page" | "focus" | "flow"`, which means the codebase cannot cleanly express Narrate as a real peer mode yet. Shipping the UI before this substrate and contract cleanup would just repackage the current confusion.
+
+**Design decisions:**
+- **Fix the shared surface before restoring Narrate UI.** The first sprint in this lane is explicitly about the substrate: foliate readiness, rendered-word discovery, and reliable flow boot/resync in the live app.
+- **Reintroduce `narrate` to the type surface early.** The union types, persisted mode fields, and reader orchestration contracts should acknowledge `narrate` before the button comes back, so later sprints do not have to smuggle a new mode through compatibility hacks.
+- **Keep current user-visible controls mostly stable in this sprint.** This sprint is foundation work. It should fix broken Flow and lay down the explicit mode model without yet trying to finish the whole four-button experience.
+- **Treat hidden flow+narration as a temporary compatibility bridge only.** It may survive internally for one sprint while the UI still has three mode buttons, but it should stop being the architectural truth.
+
+**Baseline:**
+- [FlowScrollEngine.ts](C:/Users/estra/Projects/Blurby/src/utils/FlowScrollEngine.ts): line-map boot/retry path still stops after 5 empty scans.
+- [FoliatePageView.tsx](C:/Users/estra/Projects/Blurby/src/components/FoliatePageView.tsx): foliate readiness API exists, but the flow boot path still needs a stronger rendered-word contract for the live surface.
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts): flow engine boot/resume logic still assumes the old three-mode model.
+- [useReaderMode.ts](C:/Users/estra/Projects/Blurby/src/hooks/useReaderMode.ts): flow control path is repaired enough to start, but still models narration as a flow-layer toggle.
+- [ReaderContainer.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderContainer.tsx): `readingMode` state is still `"page" | "focus" | "flow"`, and several branches infer narrate behavior from `isNarrating`.
+- [types.ts](C:/Users/estra/Projects/Blurby/src/types.ts): settings and mode unions still exclude `narrate`.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** foliate flow boot truth, rendered-word discovery, explicit four-mode type foundation
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/utils/FlowScrollEngine.ts`
+  - `src/components/FoliatePageView.tsx`
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useReaderMode.ts`
+  - `src/components/ReaderContainer.tsx`
+  - `src/types.ts`
+
+#### Shared-Core Touches
+
+- `src/utils/FlowScrollEngine.ts`
+- `src/components/FoliatePageView.tsx`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useReaderMode.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/types.ts`
+- `src/hooks/useKeyboardShortcuts.ts`
+
+#### Merge Order
+
+- Merge before `READER-4M-2` and `READER-4M-3`. This sprint establishes the shared infinite-scroll substrate and the explicit mode contract those later sprints depend on.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md`
+4. `ROADMAP.md` — this section
+5. `src/utils/FlowScrollEngine.ts`
+6. `src/components/FoliatePageView.tsx`
+7. `src/hooks/useFlowScrollSync.ts`
+8. `src/hooks/useReaderMode.ts`
+9. `src/components/ReaderContainer.tsx`
+10. `src/types.ts`
+11. `src/hooks/useKeyboardShortcuts.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Harden the foliate rendered-word contract for infinite scroll** — Replace the remaining “scan and hope” behavior with a truthful contract for when rendered word spans are actually available to Flow. If needed, extend the foliate imperative API with an explicit helper for active rendered-word roots or a stronger readiness signal for the active section docs. | `src/components/FoliatePageView.tsx`, `src/utils/FlowScrollEngine.ts` | `FoliateViewAPI` around `goToSection` / `waitForSectionReady` (~lines 348-350 and 473-520), imperative API block near `goToSection` / `waitForSectionReady` (~lines 1032-1047), `retryBuild()` / `buildLineMap()` / `getWordElements()` in `FlowScrollEngine` (~lines 108-136 and 353-400). |
+| 2 | worker-sonnet | **Make live Flow boot and rebuild from real foliate readiness** — In the flow sync/orchestration path, ensure engine start/rebuild waits on the strengthened foliate readiness contract instead of blindly retrying against an incomplete DOM. Keep section relocates and resize/rebuild paths aligned to the same truth. | `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx` | Flow boot gate and foliate effect blocks in `useFlowScrollSync` (~lines 152-239 and 286-312), reader-level foliate refs/state plumbing in `ReaderContainer` around mode instance wiring and FoliatePageView props (~lines 381-484 and 951-968). |
+| 3 | Athena | **Restore `narrate` to the core reader contracts** — Expand the reader mode unions and persisted “last mode” fields so the app can truthfully represent four top-level modes before the button/UI sprint lands. Keep compatibility bridges where needed, but stop treating three-mode types as the source of truth. | `src/types.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts` | `BlurbySettings` / persisted mode fields in `src/types.ts` (~lines 130-177), `readingMode` state in `ReaderContainer` (~lines 124-126), active-reading / TTS-selected / mode-specific branches in `ReaderContainer` (~lines 196-200, 646-647, 951-968, 1101-1122), `useReaderMode` public contract and flow/narration bridge around `startFlow` / `toggleNarrationInFlow` (~lines 59-60, 209-290, 452). |
+| 4 | worker-sonnet | **Remove remaining hidden alias blockers in foundation paths** — Clean up any remaining keyboard/container aliases and helper assumptions that still make four-mode work harder than it needs to be, while keeping the visible control surface stable in this sprint. | `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderContainer.tsx` | `readerMode` string assumptions and `KeyN` / flow-specific branches in `useKeyboardShortcuts.ts` (~lines 174-190 and 236-243), container keyboard wiring in `ReaderContainer` around `legacyReaderMode` and `useReaderKeys(...)` (~lines 200 and 713). |
+| 5 | Hippocrates | **Tests** — Add focused tests for: (a) Flow boot waits on rendered-word readiness instead of dying after empty retries, (b) live foliate iframe/section word discovery feeds the line map, (c) `readingMode` / `lastReadingMode` / related contracts now admit `narrate`, (d) current visible three-mode controls still work while the foundation is being laid. Target ≥12 new or expanded tests. | `tests/` | Extend `tests/flow-scroll-engine.test.js`, `tests/readerDecomposition.test.ts`, `tests/useReaderMode.test.ts`, and add any foliate-flow boot regression file needed. |
+| 6 | Hippocrates | **Verification** — Run focused flow/foundation suites, full `npm test`, and `npm run build`. | — | — |
+| 7 | Solon | **Spec compliance** — Verify live Flow no longer relies on empty-scan retries as the primary boot mechanism and confirm four-mode contracts exist in the type surface. | — | — |
+| 8 | Plato | **Quality review** — Review the foliate readiness contract, flow rebuild policy, and compatibility-bridge scope for hidden regressions. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update roadmap, queue, and lessons learned after closeout. | Governing docs | — |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/reader-4m-1-surface-foundation` |
+
+#### SUCCESS CRITERIA
+
+1. Live foliate Flow no longer fails by stopping after an empty line-map retry loop on rendered EPUB content.
+2. Flow boot and rebuild depend on a truthful foliate rendered-word/readiness contract, not on blind timing guesses.
+3. `readingMode` contracts admit `narrate` in the shared type/state surface.
+4. Persisted “last mode” or equivalent reader-mode fields can represent `narrate`.
+5. The current reader still works while the foundation sprint keeps the visible mode controls mostly unchanged.
+6. No remaining `"scroll"`-style alias or three-mode-only helper blocks the later Narrate restoration lane.
+7. ≥12 new or expanded flow/foundation tests land.
+8. `npm test` passes.
+9. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-START-1
+
+**Completion note:** Completed on 2026-04-18. Live Foliate Flow now boots from an explicit rendered-word provider contract between `FoliatePageView` and `FlowScrollEngine`, and Flow start/rebuild waits on `waitForSectionReady()` plus `foliateRenderVersion` instead of blind retry timing. The shared reader contract now truthfully includes `narrate` in `ReaderMode` / persisted last-mode fields, keyboard compatibility is localized to explicit bridges, and the closeout follow-up fixed `ReaderContainer` so Foliate `onLoad` treats `narrate` as a flow-surface mode instead of falling back into passive extraction/restore churn.
+
+**Verification:** Focused reader/foundation suites passed, including the added Foliate `onLoad`/`narrate` regression. Full verification passed with `npm test` (`125` files, `2021` tests) and `npm run build`; the existing non-fatal Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint READER-4M-2: Standalone Narrate Mode & Four-Button Controls
+
+**Goal:** Restore `Narrate` as a real fourth reader mode with its own bottom-bar button and keyboard path, using the shared infinite-scroll surface and entering paused by default.
+
+**Version:** v1.64.0 | **Branch:** `sprint/reader-4m-2-narrate-controls` | **Tier:** Full
+
+**Problem:** Even with the substrate repaired, users still cannot intentionally choose Narrate. The current reader model hides narration behind `readingMode === "flow" && isNarrating`, `N`/`T` keyboard toggles, and ambiguous bottom-bar state. That is exactly the confusion this design was approved to remove.
+
+**Design decisions:**
+- **Four explicit mode buttons.** The bottom bar should expose `Page`, `Focus`, `Flow`, and `Narrate` in that order.
+- **`Narrate` is a true mode, not a toggle.** `readingMode === "narrate"` becomes the primary expression of narrate behavior. The old flow-layer narration toggle should be retired from user-facing control flow.
+- **Narrate enters paused.** Switching into Narrate by button or keyboard should preserve the anchor and scroll surface but never auto-play.
+- **Pause/resume stays in-mode.** Play/pause controls operate inside the current mode rather than throwing the user back to `Page`.
+- **Keyboard model gets simpler.** `N` means “switch to Narrate paused.” `T` should stop acting as a hidden “toggle narration inside Flow” path.
+
+**Baseline:**
+- [ReaderBottomBar.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderBottomBar.tsx): still only exposes Page-adjacent focus/flow semantics and treats narration as a flow sub-state.
+- [ReaderContainer.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderContainer.tsx): several branches still treat `isNarrating` as a mode surrogate.
+- [useReaderMode.ts](C:/Users/estra/Projects/Blurby/src/hooks/useReaderMode.ts): public API still exposes `toggleNarrationInFlow`.
+- [useKeyboardShortcuts.ts](C:/Users/estra/Projects/Blurby/src/hooks/useKeyboardShortcuts.ts): `KeyN` / `KeyT` still route to hidden narration toggles or old chapter behavior.
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts): follower-mode behavior still keys on `readingMode === "flow" && isNarrating`.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** explicit four-mode UI/state machine, standalone Narrate orchestration, in-mode pause/resume semantics
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/components/ReaderBottomBar.tsx`
+  - `src/components/ReaderContainer.tsx`
+  - `src/hooks/useReaderMode.ts`
+  - `src/hooks/useKeyboardShortcuts.ts`
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useNarration.ts`
+
+#### Shared-Core Touches
+
+- `src/components/ReaderBottomBar.tsx`
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useReaderMode.ts`
+- `src/hooks/useKeyboardShortcuts.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useNarration.ts`
+- `src/hooks/useReadingModeInstance.ts`
+
+#### Merge Order
+
+- Merge after `READER-4M-1` and before `READER-4M-3`. This sprint depends on the explicit mode foundation, and the canonical anchor cleanup should build on the restored four-button control model.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md`
+4. `ROADMAP.md` — this section
+5. `src/components/ReaderBottomBar.tsx`
+6. `src/components/ReaderContainer.tsx`
+7. `src/hooks/useReaderMode.ts`
+8. `src/hooks/useKeyboardShortcuts.ts`
+9. `src/hooks/useFlowScrollSync.ts`
+10. `src/hooks/useNarration.ts`
+11. `src/hooks/useReadingModeInstance.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Promote Narrate from hidden flow sub-state to real mode orchestration** — Make `readingMode === "narrate"` the primary runtime discriminator for Narrate, and demote the old `flow + isNarrating` composition to compatibility cleanup. Entering Narrate should preserve the current anchor/surface but remain paused until play is pressed. | `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useFlowScrollSync.ts` | `useReaderMode` public contract and flow/narration bridge around `toggleNarrationInFlow`, `startFlow`, and pause/resume logic (~lines 59-60, 209-290, 452), `ReaderContainer` readingMode state and play/toggle handlers (~lines 124-126, 445-595, 646-647, 951-968, 1101-1145), follower-mode gating in `useFlowScrollSync` (~lines 296-312). |
+| 2 | worker-sonnet | **Restore the four explicit mode buttons** — Update the bottom bar so it shows `Page`, `Focus`, `Flow`, and `Narrate` in that exact order, with truthful active/last-used states and hints. Keep Flow and Narrate visually aligned on the same infinite-scroll family. | `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx` | ReaderBottomBar props/types near `readingMode` / `lastReadingMode` (~lines 22-37), mode button cluster around the existing focus/flow buttons (~lines 354-372), hint/progress display near `HINT_TEXT` and info rows (~lines 135 and 405-481), container prop wiring near `<ReaderBottomBar ...>` (~lines 1095-1122). |
+| 3 | worker-sonnet | **Simplify the keyboard model around explicit modes** — Change `N` to switch to Narrate paused, remove the hidden flow-narration toggle semantics from `T`, and make any cycle-mode helpers include the new fourth mode. Preserve unrelated page/focus/flow shortcuts. | `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderContainer.tsx` | `KeyT` and `KeyN` handling (~lines 182 and 238), old non-flow `KeyN` chapter branch (~line 190), cycle-mode commentary and flow-mode block (~lines 213-243), container keyboard callbacks around `handleToggleNarration`, `handleEnterFlow`, and `useReaderKeys(...)` (~lines 553-557 and 713). |
+| 4 | Athena | **Make pause/resume stay inside the active mode** — Update play/pause handling so Flow pauses to Flow, Narrate pauses to Narrate, and no mode auto-bounces back to Page. Keep Narrate’s play path responsible for starting TTS from the current anchor only when the user explicitly requests it. | `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useNarration.ts` | Flow pause path in `useReaderMode` (~lines 120-129), mode change / finishReading branches in `ReaderContainer` that currently call `setReadingMode("page")` (~lines 413, 519, 531), narration pause/resume API in `useNarration.ts` (~lines 778-860). |
+| 5 | Hippocrates | **Tests** — Add focused tests for: (a) four explicit bottom-bar buttons render in order, (b) selecting Narrate lands paused, (c) `N` switches to Narrate paused, (d) `T` no longer toggles hidden flow narration, (e) pause/resume stays inside Flow and Narrate instead of returning to Page, (f) Flow and Narrate active states are visually truthful. Target ≥14 new or expanded tests. | `tests/` | Extend `tests/narrLayer1bConsolidation.test.ts`, `tests/useReaderMode.test.ts`, `tests/narrationLayer.test.ts`, `tests/readerDecomposition.test.ts`, and add any new bottom-bar/keyboard regression file needed. |
+| 6 | Hippocrates | **Verification** — Run focused mode/keyboard/UI suites, full `npm test`, and `npm run build`. | — | — |
+| 7 | Solon | **Spec compliance** — Verify standalone Narrate is now a real mode, not just a hidden flow toggle in new clothes. | — | — |
+| 8 | Plato | **Quality review** — Review control truthfulness, active-mode clarity, and the in-mode pause/resume model for rough edges. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update roadmap, queue, and lessons learned after closeout. | Governing docs | — |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/reader-4m-2-narrate-controls` |
+
+#### SUCCESS CRITERIA
+
+1. The bottom bar shows four explicit mode buttons: `Page`, `Focus`, `Flow`, `Narrate`.
+2. Selecting `Narrate` switches the reader into Narrate mode and lands paused.
+3. `readingMode === "narrate"` becomes the primary runtime expression of Narrate mode.
+4. `N` switches to Narrate paused.
+5. `T` no longer acts as a hidden “toggle narration inside Flow” shortcut.
+6. Pause/resume stays inside the active Flow or Narrate mode instead of bouncing back to Page.
+7. Flow remains a visual/manual infinite-scroll mode rather than an implicit TTS mode.
+8. Flow and Narrate share the same infinite-scroll surface family and underline indicator.
+9. ≥14 new or expanded mode/UI/keyboard tests land.
+10. `npm test` passes.
+11. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** READER-4M-1
+
+---
+
+### Sprint READER-4M-3: Global Word Anchor & Cross-Mode Continuity
+
+**Goal:** Make one canonical global word anchor the source of truth for entering, pausing, resuming, saving, and switching across `Page`, `Focus`, `Flow`, and `Narrate`, while ensuring Narrate’s underline follows spoken-word truth instead of racing ahead.
+
+**Version:** v1.65.0 | **Branch:** `sprint/reader-4m-3-global-anchor-continuity` | **Tier:** Full
+
+**Problem:** Even after Narrate becomes a real mode again, the current reader still carries mode-local assumptions: document load starts in Page, flow pause/resume has its own pending resume bridge, progress/backtrack logic is only partially mode-aware, and narration has its own cursor/pause anchor semantics. That drift is exactly how cross-mode confusion and “underline outruns speech” regressions come back.
+
+**Design decisions:**
+- **One canonical global word anchor.** Every mode enters and resumes from the same anchor contract.
+- **Flow and Narrate preserve the exact same anchor when switching.** They are two drivers over one surface, not two competing saved positions.
+- **Narrate underline follows TTS truth.** In Narrate, the underline should move from the spoken-word signal, not from an independent visual flow timer.
+- **Progress/save/backtrack stay anchor-based.** The persistence layer should care about the canonical anchor, not which mode happened to own it last.
+- **Pause/resume remains in-mode.** This sprint hardens that behavior across all four modes, not just the control layer.
+
+**Baseline:**
+- [startWordIndex.ts](C:/Users/estra/Projects/Blurby/src/utils/startWordIndex.ts): mode start resolution exists, but is not yet the canonical four-mode anchor contract.
+- [useDocumentLifecycle.ts](C:/Users/estra/Projects/Blurby/src/hooks/useDocumentLifecycle.ts): still forces new documents into Page and maintains separate resume-anchor behavior.
+- [ReaderContainer.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderContainer.tsx): current word resolution, play state, and mode-switch branches still reflect pre-four-mode assumptions.
+- [useProgressTracker.ts](C:/Users/estra/Projects/Blurby/src/hooks/useProgressTracker.ts): progress/backtrack logic is monotonic-friendly, but it needs to be explicitly hardened around four-mode anchor handoffs.
+- [useReadingModeInstance.ts](C:/Users/estra/Projects/Blurby/src/hooks/useReadingModeInstance.ts): pending resume bridge is flow-specific.
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts) and [useNarration.ts](C:/Users/estra/Projects/Blurby/src/hooks/useNarration.ts): current follower/truth paths need explicit separation so Narrate uses spoken-word truth while Flow remains a visual driver.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** canonical anchor contract, cross-mode save/resume, Narrate truth-following continuity
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/utils/startWordIndex.ts`
+  - `src/hooks/useDocumentLifecycle.ts`
+  - `src/components/ReaderContainer.tsx`
+  - `src/hooks/useProgressTracker.ts`
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useNarration.ts`
+  - `src/hooks/useReadingModeInstance.ts`
+
+#### Shared-Core Touches
+
+- `src/utils/startWordIndex.ts`
+- `src/hooks/useDocumentLifecycle.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useProgressTracker.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useNarration.ts`
+- `src/hooks/useReadingModeInstance.ts`
+- `src/components/ReaderBottomBar.tsx`
+
+#### Merge Order
+
+- Merge after `READER-4M-2`. This sprint assumes the explicit four-mode UI/state model already exists and then hardens all transitions around one anchor contract.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md`
+4. `ROADMAP.md` — this section
+5. `src/utils/startWordIndex.ts`
+6. `src/hooks/useDocumentLifecycle.ts`
+7. `src/components/ReaderContainer.tsx`
+8. `src/hooks/useProgressTracker.ts`
+9. `src/hooks/useReadingModeInstance.ts`
+10. `src/hooks/useFlowScrollSync.ts`
+11. `src/hooks/useNarration.ts`
+12. `src/components/ReaderBottomBar.tsx`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Formalize the canonical global word anchor contract** — Make one anchor resolver the source of truth for mode entry and resume across Page, Focus, Flow, and Narrate. Remove remaining assumptions that a document reopen or mode switch should implicitly bounce to Page. | `src/utils/startWordIndex.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/components/ReaderContainer.tsx` | `resolveModeStartWordIndex()` / `getStartWordIndex()` in `startWordIndex.ts` (~lines 17-73), document-open initialization and resume anchor setup in `useDocumentLifecycle.ts` (~lines 131-172), current word resolution and mode-entry plumbing in `ReaderContainer` (~lines 783-788 and surrounding mode handlers). |
+| 2 | worker-sonnet | **Align progress/save/backtrack to the canonical anchor** — Ensure saved progress, furthest position, backtrack detection, and finish-reading bookkeeping all treat the global word anchor as authoritative regardless of mode. | `src/hooks/useProgressTracker.ts`, `src/components/ReaderContainer.tsx` | Progress save/high-water logic in `useProgressTracker.ts` (~lines 101-134), backtrack detection (~lines 173-182), finishReading and current-position reporting (~lines 193-205), any container call sites that still pass mode-local positions. |
+| 3 | Athena | **Make Narrate follow spoken-word truth on the shared surface** — Keep Flow as the visual/manual driver, but make Narrate’s underline and scroll-following come from narration truth so the indicator cannot outrun speech. Update any flow-specific pending-resume bridges that should now serve Narrate too. | `src/hooks/useFlowScrollSync.ts`, `src/hooks/useNarration.ts`, `src/hooks/useReadingModeInstance.ts`, `src/utils/FlowScrollEngine.ts` | Follower-mode gating and `followWord(highlightedWordIndex)` path in `useFlowScrollSync.ts` (~lines 296-312), pause/resume and cursor truth in `useNarration.ts` (~lines 778-860 and 985), `pendingResumeRef` flow-only type/usage in `useReadingModeInstance.ts` (~lines 54-86 and 146-156), any flow-engine state needed to distinguish pure Flow from Narrate truth-following. |
+| 4 | worker-sonnet | **Harden cross-mode switching and last-mode continuity** — Update mode switching, bottom-bar last-used highlighting, and keyboard/command paths so Flow ↔ Narrate preserve the exact anchor and Page/Focus also resolve from the same canonical position. | `src/components/ReaderContainer.tsx`, `src/components/ReaderBottomBar.tsx`, `src/hooks/useKeyboardShortcuts.ts` | ReaderContainer mode-switch handlers and `lastReadingMode` plumbing (~lines 445-595 and 1101-1122), bottom-bar active/last state props around `lastReadingMode` and the mode button cluster (~lines 37, 84, 354-372), any remaining keyboard cycle-mode helpers in `useKeyboardShortcuts.ts` (~lines 213-243). |
+| 5 | Hippocrates | **Tests** — Add focused tests for: (a) one canonical anchor is used across all four modes, (b) Flow ↔ Narrate preserves exact anchor and visible position, (c) Page/Focus resolve from the same anchor, (d) pause/resume stays in-mode across all four modes, (e) Narrate underline follows spoken-word truth rather than visual flow timing, (f) progress/backtrack/chapter labeling remain correct after anchor-based mode switches. Target ≥16 new or expanded tests. | `tests/` | Extend `tests/useReaderMode.test.ts`, `tests/narrationLayer.test.ts`, `tests/readerDecomposition.test.ts`, `tests/useProgressTracker.test.ts` if present or add one, plus any new cross-mode anchor regression file. |
+| 6 | Hippocrates | **Verification** — Run focused anchor/continuity suites, full `npm test`, and `npm run build`. | — | — |
+| 7 | Solon | **Spec compliance** — Verify the single-anchor contract is real end-to-end and confirm Narrate underline truth comes from TTS, not Flow timing. | — | — |
+| 8 | Plato | **Quality review** — Review mode continuity, save/resume behavior, and shared-surface truth for regressions or hidden drift. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update roadmap, queue, and lessons learned after closeout. | Governing docs | — |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/reader-4m-3-global-anchor-continuity` |
+
+#### SUCCESS CRITERIA
+
+1. One canonical global word anchor exists for entering, pausing, resuming, saving, and switching across all four modes.
+2. Page, Focus, Flow, and Narrate all resolve from that same anchor.
+3. Switching Flow ↔ Narrate preserves the exact anchor and visible position.
+4. Pause/resume stays in the active mode across all four modes.
+5. Narrate underline/follow behavior is driven by spoken-word truth rather than an independent Flow timer.
+6. Progress save, furthest-position tracking, and backtrack detection remain correct under anchor-based mode switching.
+7. Chapter/progress display remains coherent after anchor-based transitions.
+8. ≥16 new or expanded continuity/anchor tests land.
+9. `npm test` passes.
+10. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** READER-4M-2
 
 ---
 

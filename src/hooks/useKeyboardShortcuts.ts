@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS } from "../constants";
+import type { ReaderMode } from "../types";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -45,7 +46,7 @@ export interface LibraryKeyboardState {
 
 interface ReaderKeysState {
   view: string;
-  readerMode: string; // "page" | "speed" | "scroll"
+  readerMode: ReaderKeyboardMode;
   togglePlay: () => void;
   seekWords: (delta: number) => void;
   adjustWpm: (delta: number) => void;
@@ -79,6 +80,25 @@ interface ReaderKeysState {
   sentenceNext?: () => void;
 }
 
+export type ReaderKeyboardMode = ReaderMode | "speed" | "scroll";
+type ReaderKeyboardSurface = "page" | "focus" | "flow";
+
+export function getReaderKeyboardModeSurface(mode: ReaderKeyboardMode): ReaderKeyboardSurface {
+  switch (mode) {
+    case "page":
+      return "page";
+    case "focus":
+    case "speed":
+      return "focus";
+    case "flow":
+    case "narrate":
+    case "scroll":
+      return "flow";
+    default:
+      return "focus";
+  }
+}
+
 // ── Library Keyboard Actions ──────────────────────────────────────────────
 
 export interface LibraryKeyboardActions {
@@ -109,7 +129,7 @@ export interface LibraryKeyboardActions {
 
 export function useReaderKeys(
   view: string,
-  readerMode: string,
+  readerMode: ReaderKeyboardMode,
   togglePlay: () => void,
   seekWords: (delta: number) => void,
   adjustWpm: (delta: number) => void,
@@ -171,7 +191,9 @@ export function useReaderKeys(
       const isTyping = target?.closest?.("input, textarea, select, [contenteditable]");
       if (isTyping && e.key !== "Escape") return;
 
-      const isPage = s.readerMode === "page";
+      const keyboardSurface = getReaderKeyboardModeSurface(s.readerMode);
+      const isPage = keyboardSurface === "page";
+      const isFlow = keyboardSurface === "flow";
 
       // ── Universal keys (all modes) ─────────────────────────────────
       // M toggles menu flap
@@ -187,7 +209,7 @@ export function useReaderKeys(
       // [ ] N P chapter navigation (N/P not in page mode — conflict with Shift+N note)
       if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevChapter?.(); return; }
       if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextChapter?.(); return; }
-      if (!isPage && s.readerMode !== "flow" && e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.nextChapter?.(); return; }
+      if (!isPage && !isFlow && e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.nextChapter?.(); return; }
       if (!isPage && e.code === "KeyP" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.prevChapter?.(); return; }
       // Ctrl font size
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }
@@ -203,8 +225,8 @@ export function useReaderKeys(
       if (e.shiftKey && !e.ctrlKey && e.code === "ArrowLeft") { e.preventDefault(); s.paragraphPrev?.(); return; }
       if (e.shiftKey && !e.ctrlKey && e.code === "ArrowRight") { e.preventDefault(); s.paragraphNext?.(); return; }
       // Shift+Up/Down chapter navigation (all modes except flow — flow uses these for paragraph jump)
-      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowUp" && s.readerMode !== "flow") { e.preventDefault(); s.prevChapter?.(); return; }
-      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowDown" && s.readerMode !== "flow") { e.preventDefault(); s.nextChapter?.(); return; }
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowUp" && !isFlow) { e.preventDefault(); s.prevChapter?.(); return; }
+      if (e.shiftKey && !e.ctrlKey && e.code === "ArrowDown" && !isFlow) { e.preventDefault(); s.nextChapter?.(); return; }
       // Escape
       if (e.code === "Escape") { e.preventDefault(); s.exitReader(); return; }
 
@@ -233,7 +255,7 @@ export function useReaderKeys(
       // Space = pause → return to Page
       if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
 
-      if (s.readerMode === "flow") {
+      if (isFlow) {
         // NARR-LAYER-1A: N toggles narration inside flow mode only
         if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
         // FLOW-3A: Flow scroll mode keyboard layout

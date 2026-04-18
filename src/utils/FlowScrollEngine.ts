@@ -53,6 +53,21 @@ export interface FlowScrollEngineCallbacks {
   onProgressUpdate?: (progress: FlowProgress) => void;
 }
 
+export interface FlowRenderedWordRootDescriptor {
+  root: ParentNode;
+  doc?: Document | null;
+  sectionIndex?: number | null;
+  ready?: boolean;
+}
+
+export type FlowRenderedWordRootsProvider = () => FlowRenderedWordRootDescriptor[];
+
+export const FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY = "__blurbyRenderedWordRoots";
+
+type FlowRenderedWordRootHost = HTMLElement & {
+  [FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY]?: FlowRenderedWordRootsProvider;
+};
+
 export class FlowScrollEngine {
   private container: HTMLElement | null = null;
   private cursor: HTMLDivElement | null = null;
@@ -352,7 +367,7 @@ export class FlowScrollEngine {
 
   buildLineMap(): LineInfo[] {
     if (!this.container) return [];
-    const wordEls = this.container.querySelectorAll("[data-word-index]");
+    const wordEls = this.getWordElements();
     if (wordEls.length === 0) return [];
     const cRect = this.container.getBoundingClientRect();
     const lines: LineInfo[] = [];
@@ -377,6 +392,50 @@ export class FlowScrollEngine {
       }
     });
     return lines;
+  }
+
+  private getWordElements(): Element[] {
+    if (!this.container) return [];
+
+    const provider = (this.container as FlowRenderedWordRootHost)[
+      FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY
+    ];
+    if (typeof provider === "function") {
+      const renderedRoots = provider()
+        .filter((entry) => entry?.root && entry.ready !== false)
+        .sort((a, b) => {
+          const sectionA = typeof a.sectionIndex === "number" ? a.sectionIndex : Number.MAX_SAFE_INTEGER;
+          const sectionB = typeof b.sectionIndex === "number" ? b.sectionIndex : Number.MAX_SAFE_INTEGER;
+          return sectionA - sectionB;
+        });
+
+      const providerWordEls: Element[] = [];
+      for (const entry of renderedRoots) {
+        try {
+          providerWordEls.push(...Array.from(entry.root.querySelectorAll("[data-word-index]")));
+        } catch {
+          // Ignore detached roots; Foliate readiness provider is allowed to race section churn.
+        }
+      }
+      return providerWordEls;
+    }
+
+    const directWordEls = Array.from(this.container.querySelectorAll("[data-word-index]"));
+    if (directWordEls.length > 0) return directWordEls;
+
+    const iframeWordEls: Element[] = [];
+    const iframes = Array.from(this.container.querySelectorAll("iframe"));
+    for (const iframe of iframes) {
+      try {
+        const doc = (iframe as HTMLIFrameElement).contentDocument;
+        if (!doc) continue;
+        iframeWordEls.push(...Array.from(doc.querySelectorAll("[data-word-index]")));
+      } catch {
+        // Ignore detached or inaccessible iframe content while building the line map.
+      }
+    }
+
+    return iframeWordEls;
   }
 
   private findLineForWord(wordIndex: number): number {

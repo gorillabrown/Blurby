@@ -23,7 +23,18 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
   let container: HTMLDivElement;
   let root: Root | null = null;
   let useFlowScrollSync: typeof import("../src/hooks/useFlowScrollSync").useFlowScrollSync;
-  let fakeEngineInstances: Array<{ options: { onComplete: () => void } }> = [];
+  let fakeEngineInstances: Array<{
+    options: { onComplete: () => void };
+    start: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+    setTotalWords: ReturnType<typeof vi.fn>;
+    setWpm: ReturnType<typeof vi.fn>;
+    setZonePosition: ReturnType<typeof vi.fn>;
+    rebuildLineMap: ReturnType<typeof vi.fn>;
+    setFollowerMode: ReturnType<typeof vi.fn>;
+    followWord: ReturnType<typeof vi.fn>;
+    jumpToWord: ReturnType<typeof vi.fn>;
+  }> = [];
 
   beforeEach(async () => {
     vi.useFakeTimers();
@@ -40,20 +51,32 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
     vi.doMock("../src/utils/FlowScrollEngine", () => {
       class FakeFlowScrollEngine {
         options: { onComplete: () => void };
+        start = vi.fn();
+        stop = vi.fn();
+        setTotalWords = vi.fn();
+        setWpm = vi.fn();
+        setZonePosition = vi.fn();
+        rebuildLineMap = vi.fn();
+        setFollowerMode = vi.fn();
+        followWord = vi.fn();
+        jumpToWord = vi.fn();
 
         constructor(options: { onComplete: () => void }) {
           this.options = options;
-          fakeEngineInstances.push(this as unknown as { options: { onComplete: () => void } });
+          fakeEngineInstances.push(this as unknown as {
+            options: { onComplete: () => void };
+            start: ReturnType<typeof vi.fn>;
+            stop: ReturnType<typeof vi.fn>;
+            setTotalWords: ReturnType<typeof vi.fn>;
+            setWpm: ReturnType<typeof vi.fn>;
+            setZonePosition: ReturnType<typeof vi.fn>;
+            rebuildLineMap: ReturnType<typeof vi.fn>;
+            setFollowerMode: ReturnType<typeof vi.fn>;
+            followWord: ReturnType<typeof vi.fn>;
+            jumpToWord: ReturnType<typeof vi.fn>;
+          });
         }
 
-        start() {}
-        stop() {}
-        setTotalWords() {}
-        setWpm() {}
-        setZonePosition() {}
-        rebuildLineMap() {}
-        setFollowerMode() {}
-        followWord() {}
         getState() {
           return {
             running: true,
@@ -536,6 +559,415 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
     });
 
     expect(startFlow).toHaveBeenCalledWith({ resumeNarration: false });
+  });
+
+  it("waits for foliate readiness before booting the live flow engine", async () => {
+    const readiness = createDeferred<void>();
+
+    function Harness() {
+      useFlowScrollSync({
+        readingMode: "flow",
+        isNarrating: false,
+        effectiveWpm: 180,
+        settings: { flowZonePosition: "center" } as any,
+        useFoliate: true,
+        activeDoc: { id: "doc-1", title: "Current", wordCount: 10 } as any,
+        library: [{ id: "doc-1", title: "Current", position: 0, wordCount: 10, created: 1 }],
+        startFlowRef: { current: vi.fn() },
+        flowPlaying: true,
+        setFlowPlaying: vi.fn(),
+        setIsNarrating: vi.fn(),
+        setFlowProgress: vi.fn(),
+        setCrossBookTransition: vi.fn(),
+        pendingFlowResumeRef: { current: false },
+        pendingNarrationResumeRef: { current: false },
+        setHighlightedWordIndex: vi.fn(),
+        setReadingMode: vi.fn(),
+        highlightedWordIndexRef: { current: 4 },
+        highlightedWordIndex: 4,
+        narration: {
+          stop: vi.fn(),
+          updateWords: vi.fn(),
+          setOnSectionEnd: vi.fn(),
+        },
+        foliateApiRef: {
+          current: {
+            waitForSectionReady: vi.fn(() => readiness.promise),
+            getScrollContainer: vi.fn(() => document.createElement("div")),
+          },
+        } as any,
+        flowScrollContainerRef: { current: document.createElement("div") },
+        flowScrollCursorRef: { current: document.createElement("div") },
+        wordsRef: { current: ["w0", "w1", "w2"] },
+        bookWordMeta: null,
+        paragraphBreaks: new Set<number>(),
+        isEink: false,
+        focusTextSize: 100,
+        finishReadingWithoutExitRef: { current: vi.fn() },
+        onOpenDocByIdRef: { current: vi.fn() },
+        evalTrace: null,
+        foliateRenderVersion: 0,
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances).toHaveLength(1);
+    expect(fakeEngineInstances[0].start).not.toHaveBeenCalled();
+
+    await act(async () => {
+      readiness.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].start).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for foliate readiness before rebuilding after rendered-surface changes", async () => {
+    const bootReady = createDeferred<void>();
+    const rebuildReady = createDeferred<void>();
+    const waitForSectionReady = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(() => bootReady.promise)
+      .mockImplementationOnce(() => rebuildReady.promise);
+
+    function Harness({ foliateRenderVersion }: { foliateRenderVersion: number }) {
+      useFlowScrollSync({
+        readingMode: "flow",
+        isNarrating: false,
+        effectiveWpm: 180,
+        settings: { flowZonePosition: "center" } as any,
+        useFoliate: true,
+        activeDoc: { id: "doc-1", title: "Current", wordCount: 10 } as any,
+        library: [{ id: "doc-1", title: "Current", position: 0, wordCount: 10, created: 1 }],
+        startFlowRef: { current: vi.fn() },
+        flowPlaying: true,
+        setFlowPlaying: vi.fn(),
+        setIsNarrating: vi.fn(),
+        setFlowProgress: vi.fn(),
+        setCrossBookTransition: vi.fn(),
+        pendingFlowResumeRef: { current: false },
+        pendingNarrationResumeRef: { current: false },
+        setHighlightedWordIndex: vi.fn(),
+        setReadingMode: vi.fn(),
+        highlightedWordIndexRef: { current: 4 },
+        highlightedWordIndex: 4,
+        narration: {
+          stop: vi.fn(),
+          updateWords: vi.fn(),
+          setOnSectionEnd: vi.fn(),
+        },
+        foliateApiRef: {
+          current: {
+            waitForSectionReady,
+            getScrollContainer: vi.fn(() => document.createElement("div")),
+          },
+        } as any,
+        flowScrollContainerRef: { current: document.createElement("div") },
+        flowScrollCursorRef: { current: document.createElement("div") },
+        wordsRef: { current: ["w0", "w1", "w2"] },
+        bookWordMeta: null,
+        paragraphBreaks: new Set<number>(),
+        isEink: false,
+        focusTextSize: 100,
+        finishReadingWithoutExitRef: { current: vi.fn() },
+        onOpenDocByIdRef: { current: vi.fn() },
+        evalTrace: null,
+        foliateRenderVersion,
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness, { foliateRenderVersion: 0 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      bootReady.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances).toHaveLength(1);
+    expect(fakeEngineInstances[0].start).toHaveBeenCalledTimes(1);
+    expect(fakeEngineInstances[0].rebuildLineMap).not.toHaveBeenCalled();
+
+    await act(async () => {
+      root?.render(React.createElement(Harness, { foliateRenderVersion: 1 }));
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].rebuildLineMap).not.toHaveBeenCalled();
+
+    await act(async () => {
+      rebuildReady.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].rebuildLineMap).toHaveBeenCalledTimes(1);
+    expect(fakeEngineInstances[0].jumpToWord).toHaveBeenCalledWith(4);
+  });
+
+  it("re-anchors rendered-surface rebuilds through follower mode when flow narration is active", async () => {
+    const bootReady = createDeferred<void>();
+    const rebuildReady = createDeferred<void>();
+    const waitForSectionReady = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(() => bootReady.promise)
+      .mockImplementationOnce(() => rebuildReady.promise);
+
+    function Harness({ foliateRenderVersion }: { foliateRenderVersion: number }) {
+      useFlowScrollSync({
+        readingMode: "flow",
+        isNarrating: true,
+        effectiveWpm: 180,
+        settings: { flowZonePosition: "center" } as any,
+        useFoliate: true,
+        activeDoc: { id: "doc-1", title: "Current", wordCount: 10 } as any,
+        library: [{ id: "doc-1", title: "Current", position: 0, wordCount: 10, created: 1 }],
+        startFlowRef: { current: vi.fn() },
+        flowPlaying: true,
+        setFlowPlaying: vi.fn(),
+        setIsNarrating: vi.fn(),
+        setFlowProgress: vi.fn(),
+        setCrossBookTransition: vi.fn(),
+        pendingFlowResumeRef: { current: false },
+        pendingNarrationResumeRef: { current: false },
+        setHighlightedWordIndex: vi.fn(),
+        setReadingMode: vi.fn(),
+        highlightedWordIndexRef: { current: 6 },
+        highlightedWordIndex: 6,
+        narration: {
+          stop: vi.fn(),
+          updateWords: vi.fn(),
+          setOnSectionEnd: vi.fn(),
+        },
+        foliateApiRef: {
+          current: {
+            waitForSectionReady,
+            getScrollContainer: vi.fn(() => document.createElement("div")),
+          },
+        } as any,
+        flowScrollContainerRef: { current: document.createElement("div") },
+        flowScrollCursorRef: { current: document.createElement("div") },
+        wordsRef: { current: ["w0", "w1", "w2"] },
+        bookWordMeta: null,
+        paragraphBreaks: new Set<number>(),
+        isEink: false,
+        focusTextSize: 100,
+        finishReadingWithoutExitRef: { current: vi.fn() },
+        onOpenDocByIdRef: { current: vi.fn() },
+        evalTrace: null,
+        foliateRenderVersion,
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness, { foliateRenderVersion: 0 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      bootReady.resolve();
+      await flushPromises();
+    });
+
+    await act(async () => {
+      root?.render(React.createElement(Harness, { foliateRenderVersion: 1 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      rebuildReady.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].rebuildLineMap).toHaveBeenCalledTimes(1);
+    expect(fakeEngineInstances[0].followWord).toHaveBeenCalledWith(6);
+    expect(fakeEngineInstances[0].jumpToWord).not.toHaveBeenCalled();
+  });
+
+  it("waits for foliate readiness before rebuilding on flow font-size changes", async () => {
+    const bootReady = createDeferred<void>();
+    const resizeReady = createDeferred<void>();
+    const waitForSectionReady = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(() => bootReady.promise)
+      .mockImplementationOnce(() => resizeReady.promise);
+
+    function Harness({ focusTextSize }: { focusTextSize: number }) {
+      useFlowScrollSync({
+        readingMode: "flow",
+        isNarrating: false,
+        effectiveWpm: 180,
+        settings: { flowZonePosition: "center" } as any,
+        useFoliate: true,
+        activeDoc: { id: "doc-1", title: "Current", wordCount: 10 } as any,
+        library: [{ id: "doc-1", title: "Current", position: 0, wordCount: 10, created: 1 }],
+        startFlowRef: { current: vi.fn() },
+        flowPlaying: true,
+        setFlowPlaying: vi.fn(),
+        setIsNarrating: vi.fn(),
+        setFlowProgress: vi.fn(),
+        setCrossBookTransition: vi.fn(),
+        pendingFlowResumeRef: { current: false },
+        pendingNarrationResumeRef: { current: false },
+        setHighlightedWordIndex: vi.fn(),
+        setReadingMode: vi.fn(),
+        highlightedWordIndexRef: { current: 4 },
+        highlightedWordIndex: 4,
+        narration: {
+          stop: vi.fn(),
+          updateWords: vi.fn(),
+          setOnSectionEnd: vi.fn(),
+        },
+        foliateApiRef: {
+          current: {
+            waitForSectionReady,
+            getScrollContainer: vi.fn(() => document.createElement("div")),
+          },
+        } as any,
+        flowScrollContainerRef: { current: document.createElement("div") },
+        flowScrollCursorRef: { current: document.createElement("div") },
+        wordsRef: { current: ["w0", "w1", "w2"] },
+        bookWordMeta: null,
+        paragraphBreaks: new Set<number>(),
+        isEink: false,
+        focusTextSize,
+        finishReadingWithoutExitRef: { current: vi.fn() },
+        onOpenDocByIdRef: { current: vi.fn() },
+        evalTrace: null,
+        foliateRenderVersion: 0,
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness, { focusTextSize: 100 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      bootReady.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].start).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      root?.render(React.createElement(Harness, { focusTextSize: 120 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(200);
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].rebuildLineMap).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resizeReady.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].rebuildLineMap).toHaveBeenCalledTimes(1);
+    expect(fakeEngineInstances[0].jumpToWord).toHaveBeenCalledWith(4);
+  });
+
+  it("re-anchors font-size rebuilds through follower mode when flow narration is active", async () => {
+    const bootReady = createDeferred<void>();
+    const resizeReady = createDeferred<void>();
+    const waitForSectionReady = vi
+      .fn<() => Promise<void>>()
+      .mockImplementationOnce(() => bootReady.promise)
+      .mockImplementationOnce(() => resizeReady.promise);
+
+    function Harness({ focusTextSize }: { focusTextSize: number }) {
+      useFlowScrollSync({
+        readingMode: "flow",
+        isNarrating: true,
+        effectiveWpm: 180,
+        settings: { flowZonePosition: "center" } as any,
+        useFoliate: true,
+        activeDoc: { id: "doc-1", title: "Current", wordCount: 10 } as any,
+        library: [{ id: "doc-1", title: "Current", position: 0, wordCount: 10, created: 1 }],
+        startFlowRef: { current: vi.fn() },
+        flowPlaying: true,
+        setFlowPlaying: vi.fn(),
+        setIsNarrating: vi.fn(),
+        setFlowProgress: vi.fn(),
+        setCrossBookTransition: vi.fn(),
+        pendingFlowResumeRef: { current: false },
+        pendingNarrationResumeRef: { current: false },
+        setHighlightedWordIndex: vi.fn(),
+        setReadingMode: vi.fn(),
+        highlightedWordIndexRef: { current: 6 },
+        highlightedWordIndex: 6,
+        narration: {
+          stop: vi.fn(),
+          updateWords: vi.fn(),
+          setOnSectionEnd: vi.fn(),
+        },
+        foliateApiRef: {
+          current: {
+            waitForSectionReady,
+            getScrollContainer: vi.fn(() => document.createElement("div")),
+          },
+        } as any,
+        flowScrollContainerRef: { current: document.createElement("div") },
+        flowScrollCursorRef: { current: document.createElement("div") },
+        wordsRef: { current: ["w0", "w1", "w2"] },
+        bookWordMeta: null,
+        paragraphBreaks: new Set<number>(),
+        isEink: false,
+        focusTextSize,
+        finishReadingWithoutExitRef: { current: vi.fn() },
+        onOpenDocByIdRef: { current: vi.fn() },
+        evalTrace: null,
+        foliateRenderVersion: 0,
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness, { focusTextSize: 100 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      bootReady.resolve();
+      await flushPromises();
+    });
+
+    await act(async () => {
+      root?.render(React.createElement(Harness, { focusTextSize: 130 }));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(200);
+      await flushPromises();
+    });
+
+    await act(async () => {
+      resizeReady.resolve();
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].rebuildLineMap).toHaveBeenCalledTimes(1);
+    expect(fakeEngineInstances[0].followWord).toHaveBeenCalledWith(6);
+    expect(fakeEngineInstances[0].jumpToWord).not.toHaveBeenCalled();
   });
 
   it("opens the next queued book immediately for narrating cross-book handoffs and clears the overlay on fallback timeout", async () => {

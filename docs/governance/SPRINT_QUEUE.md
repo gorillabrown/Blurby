@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED
-Next queue item: EINK-6A (parked fallback)
-Health: RED — TTS-START-1 is complete and only parked `EINK-6A` remains in the queue. Add at least two more fully spec'd sprints, or explicitly reprioritize e-ink, before any further dispatch.
+Queue depth: 3 — GREEN
+Next queue item: READER-4M-2
+Health: GREEN — `READER-4M-1` is complete, and the approved four-mode reader restoration lane now advances to `READER-4M-2` ahead of the parked e-ink fallback.
 ```
 
 ---
@@ -34,9 +34,11 @@ Health: RED — TTS-START-1 is complete and only parked `EINK-6A` remains in the
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | EINK-6A | TBD | TBD | Full | **YES** | Full spec: 10 tasks, 10 success criteria. Parked-but-spec'd fallback pointer; lower priority than the completed TTS continuity lane and should dispatch only after explicit reprioritization or queue backfill. Depends on TTS-7D (already satisfied). |
+| 1 | READER-4M-2 | v1.64.0 | `sprint/reader-4m-2-narrate-controls` | Full | **YES** | Full spec: 10 tasks, 11 success criteria. Restores standalone `Narrate`, adds four explicit mode buttons, remaps `N`, and keeps pause/resume inside the active mode. Depends on `READER-4M-1`. |
+| 2 | READER-4M-3 | v1.65.0 | `sprint/reader-4m-3-global-anchor-continuity` | Full | **YES** | Full spec: 10 tasks, 10 success criteria. Unifies save/resume/mode switching around one canonical global word anchor and makes Narrate follow spoken-word truth on the shared surface. Depends on `READER-4M-2`. |
+| 3 | EINK-6A | TBD | TBD | Full | **YES** | Full spec: 10 tasks, 10 success criteria. Parked-but-spec'd fallback pointer; lower priority than the approved four-mode reader restoration lane and should dispatch only after explicit reprioritization. Depends on TTS-7D (already satisfied). |
 
-**Dispatch status:** Queue depth 1 — RED. Current pointer order is `EINK-6A` only, and it remains parked.
+**Dispatch status:** Queue depth 3 — GREEN. Current pointer order is `READER-4M-2`, `READER-4M-3`, then parked fallback `EINK-6A`.
 
 ### Parallel Dispatch Guardrails
 
@@ -93,7 +95,9 @@ If any guardrail fails, run the sprints sequentially.
 33. ~~Backfill queue to ≥3~~ — COMPLETE. Added `TTS-CONT-1`, `TTS-RATE-2`, and `TTS-START-1`; queue depth restored to 4 (GREEN) with the TTS continuity lane prioritized ahead of parked e-ink work.
 34. ~~Backfill queue to ≥3~~ — EXPIRED. Queue fell to depth 1 after `TTS-START-1` closeout; replace with a stronger stop condition.
 35. ~~Dispatch TTS-START-1 to CLI~~ — COMPLETE (v1.62.0). Cached and uncached starts now share one opening-ramp planner contract, entry coverage warms the same startup shape before cruise coverage, cache replay reconstructs exact nonzero-start word spans from full context, and startup parity is now recorded in eval artifacts. Verification passed with the focused startup/cache neighborhood (`6` files, `70` tests), a dedicated startup-parity matrix (`artifacts/tts-eval/start1-startup-parity`) showing cached/uncached startup `370 / 508 ms` with matching opening ramps, the gated release matrix (`9` runs, PASS), full `npm test` (`125` files, `2005` tests), and `npm run build`; existing circular-chunk warning unchanged.
-36. **Backfill queue to ≥3** — RED, depth 1. Only parked `EINK-6A` remains; add at least two fully spec'd sprints or explicitly reprioritize e-ink before dispatching again.
+36. ~~Backfill queue to ≥3~~ — RED at the time, depth 1 after `TTS-START-1`; superseded by the four-mode reader restoration backfill below.
+37. ~~Backfill queue to ≥3~~ — COMPLETE. Added `READER-4M-1`, `READER-4M-2`, and `READER-4M-3` from the approved four-mode reader/Narrate restoration design; queue depth restored to 4 (GREEN) with `READER-4M-1` as the next dispatch.
+38. ~~Dispatch READER-4M-1 to CLI~~ — COMPLETE (v1.63.0). Live Foliate Flow now boots from an explicit rendered-word provider contract plus readiness-gated rebuilds, `narrate` is back in the shared reader/persisted mode contracts, compatibility aliases are localized, and the closeout fix keeps `narrate` on the flow-surface Foliate `onLoad` path.
 
 ---
 
@@ -115,6 +119,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| READER-4M-1 | 2026-04-18 | PASS | Infinite-scroll surface recovery and explicit mode foundation shipped at v1.63.0: `FoliatePageView` now exposes explicit rendered-word roots to `FlowScrollEngine`, live Flow boot/rebuild waits on `waitForSectionReady()` plus `foliateRenderVersion`, shared `ReaderMode` / persisted last-mode fields now admit `narrate`, keyboard compatibility is localized, and `ReaderContainer` Foliate `onLoad` now treats `narrate` as a flow-surface mode. Verification passed with focused reader/foundation suites, full `npm test` (`125` files, `2021` tests), and `npm run build`; existing circular-chunk warning unchanged. |
 | TTS-START-1 | 2026-04-17 | PASS | Startup parity shipped at v1.62.0: cached and uncached starts now share one opening-ramp planner contract (`13 -> 26 -> 52 -> 104 -> 148`), entry coverage warms that same shape before cruise coverage, `loadCachedChunk()` reconstructs exact nonzero-start spans from full-word context plus `startIdx`, and eval artifacts now record cached-vs-uncached startup parity plus opening-ramp shape. Verification passed with the focused startup/cache neighborhood (`6` files, `70` tests), dedicated startup-parity evidence (`artifacts/tts-eval/start1-startup-parity`) showing cached/uncached startup `370 / 508 ms` with `Opening ramp parity: match`, the gated release matrix (`9` runs, PASS), full `npm test` (`125` files, `2005` tests), and `npm run build`; existing circular-chunk warning unchanged. |
 | TTS-RATE-2 | 2026-04-17 | PASS | Segmented live Kokoro rate response shipped at v1.61.0: generated/cache buckets stay fixed, playback now splits into short scheduler-ready segments so same-bucket edits take effect by the next segment boundary instead of the full parent chunk, scheduler boundary semantics remain parent-chunk aware, and eval artifacts now record trusted `rateResponseLatencyMs` from real segment-start signals. Verification passed with the focused rate slice (`5` files, `42` tests), gated matrix release evidence (`artifacts/tts-eval/rate2-closeout`) showing `Rate response latency p50/p95: 210 / 210 ms`, full `npm test` (`124` files, `1995` tests), and `npm run build`; existing circular-chunk warning unchanged. |
 | TTS-CONT-1 | 2026-04-17 | PASS | Readiness-driven continuity shipped at v1.60.0: same-book and cross-book narration handoffs now resume from actual foliate/read-surface readiness instead of fixed `300ms` and `2500ms + 300ms` sleeps, the cross-book overlay is fallback-only rather than a blocking minimum dwell, and eval artifacts now record `sectionHandoffLatencyMs` and `crossBookResumeLatencyMs`. Verification passed with `npm test` (`123` files, `1976` tests), `npm run build`, a gated handoff matrix with non-null cross-book latency, and a section fixture run with non-null section latency; existing circular-chunk warning unchanged. |

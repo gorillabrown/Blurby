@@ -5,7 +5,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Direct import of the FlowScrollEngine class
 // We test the engine's logic in isolation with mock DOM elements
-import { FlowScrollEngine } from "../src/utils/FlowScrollEngine.ts";
+import {
+  FlowScrollEngine,
+  FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
+} from "../src/utils/FlowScrollEngine.ts";
 
 // Mock constants
 vi.mock("../src/constants.ts", () => ({
@@ -80,6 +83,144 @@ function createMockCursor() {
   return cursor;
 }
 
+function createIframeBackedContainer() {
+  const container = document.createElement("div");
+  Object.defineProperty(container, "clientHeight", { value: 600, configurable: true });
+  Object.defineProperty(container, "clientWidth", { value: 800, configurable: true });
+  container.style.position = "relative";
+  container.style.overflow = "auto";
+  container.getBoundingClientRect = () => ({
+    top: 0, bottom: 600, left: 0, right: 800,
+    width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+  });
+  container.scrollTo = vi.fn();
+  Object.defineProperty(container, "scrollTop", { value: 0, writable: true, configurable: true });
+
+  const positions = [
+    { idx: 10, top: 120, left: 20, right: 80 },
+    { idx: 11, top: 120, left: 90, right: 150 },
+    { idx: 12, top: 156, left: 20, right: 80 },
+  ];
+
+  const iframeDoc = {
+    querySelectorAll: vi.fn((selector) => selector === "[data-word-index]" ? spans : []),
+  };
+  const iframe = { contentDocument: iframeDoc };
+  const spans = [];
+
+  for (const pos of positions) {
+    const span = document.createElement("span");
+    span.className = "page-word";
+    span.setAttribute("data-word-index", String(pos.idx));
+    span.textContent = `word${pos.idx}`;
+    span.getBoundingClientRect = () => ({
+      top: pos.top,
+      bottom: pos.top + 24,
+      left: pos.left,
+      right: pos.right,
+      width: pos.right - pos.left,
+      height: 24,
+      x: pos.left,
+      y: pos.top,
+      toJSON: () => {},
+    });
+    spans.push(span);
+  }
+
+  container.querySelectorAll = vi.fn((selector) => {
+    if (selector === "[data-word-index]") return [];
+    if (selector === "iframe") return [iframe];
+    return [];
+  });
+
+  return container;
+}
+
+function createProviderBackedContainer() {
+  const container = document.createElement("div");
+  Object.defineProperty(container, "clientHeight", { value: 600, configurable: true });
+  Object.defineProperty(container, "clientWidth", { value: 800, configurable: true });
+  container.style.position = "relative";
+  container.style.overflow = "auto";
+  container.getBoundingClientRect = () => ({
+    top: 0, bottom: 600, left: 0, right: 800,
+    width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+  });
+  container.scrollTo = vi.fn();
+  Object.defineProperty(container, "scrollTop", { value: 0, writable: true, configurable: true });
+
+  const doc = document.implementation.createHTMLDocument("foliate-section");
+  const positions = [
+    { idx: 20, top: 140, left: 30, right: 90 },
+    { idx: 21, top: 140, left: 100, right: 160 },
+    { idx: 22, top: 176, left: 30, right: 90 },
+  ];
+
+  for (const pos of positions) {
+    const span = doc.createElement("span");
+    span.className = "page-word";
+    span.setAttribute("data-word-index", String(pos.idx));
+    span.textContent = `word${pos.idx}`;
+    span.getBoundingClientRect = () => ({
+      top: pos.top,
+      bottom: pos.top + 24,
+      left: pos.left,
+      right: pos.right,
+      width: pos.right - pos.left,
+      height: 24,
+      x: pos.left,
+      y: pos.top,
+      toJSON: () => {},
+    });
+    doc.body.appendChild(span);
+  }
+
+  Object.defineProperty(container, FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY, {
+    value: () => [{ sectionIndex: 2, doc, root: doc.body, ready: true }],
+    configurable: true,
+  });
+
+  return container;
+}
+
+function createProviderWithFallbackContainer() {
+  const container = document.createElement("div");
+  Object.defineProperty(container, "clientHeight", { value: 600, configurable: true });
+  Object.defineProperty(container, "clientWidth", { value: 800, configurable: true });
+  container.style.position = "relative";
+  container.style.overflow = "auto";
+  container.getBoundingClientRect = () => ({
+    top: 0, bottom: 600, left: 0, right: 800,
+    width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+  });
+  container.scrollTo = vi.fn();
+  Object.defineProperty(container, "scrollTop", { value: 0, writable: true, configurable: true });
+
+  const directSpan = document.createElement("span");
+  directSpan.className = "page-word";
+  directSpan.setAttribute("data-word-index", "1");
+  directSpan.textContent = "fallback";
+  directSpan.getBoundingClientRect = () => ({
+    top: 40,
+    bottom: 64,
+    left: 10,
+    right: 70,
+    width: 60,
+    height: 24,
+    x: 10,
+    y: 40,
+    toJSON: () => {},
+  });
+  container.appendChild(directSpan);
+
+  Object.defineProperty(container, FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY, {
+    value: () => [],
+    configurable: true,
+  });
+
+  return container;
+}
+
 describe("FlowScrollEngine", () => {
   let engine;
   let container;
@@ -135,6 +276,105 @@ describe("FlowScrollEngine", () => {
     const state = engine.getState();
     // 20 words / 5 per line = 4 lines
     expect(state.totalLines).toBe(4);
+  });
+
+  it("should build line maps from foliate iframe content instead of stopping after empty direct scans", () => {
+    const iframeContainer = createIframeBackedContainer();
+
+    engine.start(iframeContainer, cursor, 10, 300, new Set(), false);
+    expect(engine.getState().totalLines).toBe(2);
+    expect(engine.getState().running).toBe(true);
+  });
+
+  it("should build line maps from explicit rendered-word roots when foliate exposes them", () => {
+    const providerContainer = createProviderBackedContainer();
+
+    engine.start(providerContainer, cursor, 20, 300, new Set(), false);
+    expect(engine.getState().totalLines).toBe(2);
+    expect(engine.getState().running).toBe(true);
+    expect(engine.getState().lineIndex).toBe(0);
+  });
+
+  it("prefers explicit rendered-word roots over direct container scans when foliate provides both", () => {
+    const providerContainer = createProviderBackedContainer();
+    const directSpan = document.createElement("span");
+    directSpan.className = "page-word";
+    directSpan.setAttribute("data-word-index", "0");
+    directSpan.textContent = "stale-direct-word";
+    directSpan.getBoundingClientRect = () => ({
+      top: 20,
+      bottom: 44,
+      left: 10,
+      right: 70,
+      width: 60,
+      height: 24,
+      x: 10,
+      y: 20,
+      toJSON: () => {},
+    });
+    providerContainer.appendChild(directSpan);
+
+    engine.start(providerContainer, cursor, 20, 300, new Set(), false);
+
+    expect(engine.getState().lineIndex).toBe(0);
+    expect(engine.getWordIndex()).toBe(20);
+  });
+
+  it("ignores unready rendered-word roots and uses the ready section roots for the line map", () => {
+    const providerContainer = document.createElement("div");
+    Object.defineProperty(providerContainer, "clientHeight", { value: 600, configurable: true });
+    Object.defineProperty(providerContainer, "clientWidth", { value: 800, configurable: true });
+    providerContainer.style.position = "relative";
+    providerContainer.style.overflow = "auto";
+    providerContainer.getBoundingClientRect = () => ({
+      top: 0, bottom: 600, left: 0, right: 800,
+      width: 800, height: 600, x: 0, y: 0, toJSON: () => {},
+    });
+    providerContainer.scrollTo = vi.fn();
+    Object.defineProperty(providerContainer, "scrollTop", { value: 0, writable: true, configurable: true });
+
+    const staleDoc = document.implementation.createHTMLDocument("stale");
+    const staleSpan = staleDoc.createElement("span");
+    staleSpan.setAttribute("data-word-index", "2");
+    staleSpan.getBoundingClientRect = () => ({
+      top: 20, bottom: 44, left: 10, right: 70,
+      width: 60, height: 24, x: 10, y: 20, toJSON: () => {},
+    });
+    staleDoc.body.appendChild(staleSpan);
+
+    const readyDoc = document.implementation.createHTMLDocument("ready");
+    for (const [idx, top] of [[30, 140], [31, 140], [32, 176]]) {
+      const span = readyDoc.createElement("span");
+      span.setAttribute("data-word-index", String(idx));
+      span.getBoundingClientRect = () => ({
+        top, bottom: top + 24, left: 20, right: 80,
+        width: 60, height: 24, x: 20, y: top, toJSON: () => {},
+      });
+      readyDoc.body.appendChild(span);
+    }
+
+    Object.defineProperty(providerContainer, FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY, {
+      value: () => [
+        { sectionIndex: 0, root: staleDoc.body, doc: staleDoc, ready: false },
+        { sectionIndex: 1, root: readyDoc.body, doc: readyDoc, ready: true },
+      ],
+      configurable: true,
+    });
+
+    engine.start(providerContainer, cursor, 30, 300, new Set(), false);
+
+    expect(engine.getState().totalLines).toBe(2);
+    expect(engine.getWordIndex()).toBe(30);
+  });
+
+  it("treats an explicit rendered-word provider as authoritative even when it currently exposes no ready roots", () => {
+    const providerContainer = createProviderWithFallbackContainer();
+
+    engine.start(providerContainer, cursor, 1, 300, new Set(), false);
+
+    expect(engine.getState().running).toBe(true);
+    expect(engine.getState().totalLines).toBe(0);
+    expect(engine.getWordIndex()).toBe(1);
   });
 
   it("should build correct line boundaries", () => {
