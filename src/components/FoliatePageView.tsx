@@ -31,6 +31,10 @@ import {
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
 import {
+  FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
+  type FlowRenderedWordRootDescriptor,
+} from "../utils/FlowScrollEngine";
+import {
   BLOCK_TAGS,
   hasToken,
   isFootnoteRefElement,
@@ -350,6 +354,8 @@ export interface FoliateViewAPI {
   waitForSectionReady: (sectionIndex?: number | null, timeoutMs?: number) => Promise<number | null>;
   /** NAR-3: Extract words from a specific section's DOM (must be currently loaded) */
   extractSectionWords: (sectionIndex: number) => FoliateWord[];
+  /** READER-4M-1: Truthful rendered-word roots for Flow/infinite scroll consumers. */
+  getRenderedWordRoots: (sectionIndex?: number | null) => FlowRenderedWordRootDescriptor[];
   /** FLOW-3A: Get the scrollable container element for FlowScrollEngine */
   getScrollContainer: () => HTMLElement | null;
   /** TTS-7F: Pure read-only DOM check — is a word span present? No UI mutation. */
@@ -442,33 +448,40 @@ export default function FoliatePageView({
     }
   }, []);
 
-  const resolveReadySectionIndex = useCallback((sectionIndex?: number | null): number | null => {
+  const getRenderedWordRoots = useCallback((sectionIndex?: number | null): FlowRenderedWordRootDescriptor[] => {
     const view = viewRef.current;
     const contents = view?.renderer?.getContents?.() ?? [];
-    const isReadyEntry = (entry: { doc?: Document | null; index?: number }) => {
-      if (!entry?.doc || typeof entry.index !== "number") return false;
-      return entry.doc.querySelector?.("[data-word-index]") != null;
-    };
+    const preferredSectionIndex = typeof sectionIndex === "number"
+      ? sectionIndex
+      : lastLoadedSectionIndexRef.current;
 
-    if (typeof sectionIndex === "number") {
-      const target = contents.find((entry: { index?: number }) => entry.index === sectionIndex);
-      return target && isReadyEntry(target) ? sectionIndex : null;
-    }
-
-    if (typeof lastLoadedSectionIndexRef.current === "number") {
-      const target = contents.find(
-        (entry: { index?: number }) => entry.index === lastLoadedSectionIndexRef.current,
-      );
-      if (target && isReadyEntry(target)) {
-        return lastLoadedSectionIndexRef.current;
-      }
-    }
-
-    for (const entry of contents) {
-      if (isReadyEntry(entry)) return entry.index ?? null;
-    }
-    return null;
+    return contents
+      .filter((entry: { doc?: Document | null; index?: number }) => {
+        if (!entry?.doc || typeof entry.index !== "number") return false;
+        if (typeof sectionIndex === "number" && entry.index !== sectionIndex) return false;
+        return entry.doc.querySelector?.("[data-word-index]") != null;
+      })
+      .map((entry: { doc: Document; index: number }) => ({
+        sectionIndex: entry.index,
+        doc: entry.doc,
+        root: entry.doc.body ?? entry.doc,
+        ready: true,
+      }))
+      .sort((a, b) => {
+        if (preferredSectionIndex != null) {
+          if (a.sectionIndex === preferredSectionIndex && b.sectionIndex !== preferredSectionIndex) return -1;
+          if (b.sectionIndex === preferredSectionIndex && a.sectionIndex !== preferredSectionIndex) return 1;
+        }
+        return (a.sectionIndex ?? 0) - (b.sectionIndex ?? 0);
+      });
   }, []);
+
+  const resolveReadySectionIndex = useCallback((sectionIndex?: number | null): number | null => {
+    const roots = getRenderedWordRoots(sectionIndex);
+    if (roots.length === 0) return null;
+    if (typeof sectionIndex === "number") return sectionIndex;
+    return typeof roots[0]?.sectionIndex === "number" ? roots[0].sectionIndex : null;
+  }, [getRenderedWordRoots]);
 
   const waitForSectionReady = useCallback(
     (sectionIndex?: number | null, timeoutMs = FOLIATE_SECTION_READY_TIMEOUT_MS) =>
@@ -492,6 +505,22 @@ export default function FoliatePageView({
       }),
     [resolveReadySectionIndex],
   );
+
+  const resolveFoliateScrollContainer = useCallback((): HTMLElement | null => {
+    const host = foliateHostRef.current;
+    if (!host) return null;
+    const foliateView = host.querySelector("foliate-view") as any;
+    const scrollEl = (foliateView?.shadowRoot?.querySelector("[part~='body']")
+      ?? foliateView?.shadowRoot?.querySelector("div")
+      ?? host) as HTMLElement | null;
+    if (scrollEl) {
+      const hostWithRoots = scrollEl as HTMLElement & {
+        [FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY]?: () => FlowRenderedWordRootDescriptor[];
+      };
+      hostWithRoots[FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY] = () => getRenderedWordRoots();
+    }
+    return scrollEl;
+  }, [getRenderedWordRoots]);
 
   const clearSoftHighlight = useCallback(() => {
     const view = viewRef.current;
@@ -1054,14 +1083,8 @@ export default function FoliatePageView({
               }
               return [];
             },
-            getScrollContainer: () => {
-              const host = foliateHostRef.current;
-              if (!host) return null;
-              const foliateView = host.querySelector("foliate-view") as any;
-              return foliateView?.shadowRoot?.querySelector("[part~='body']")
-                ?? foliateView?.shadowRoot?.querySelector("div")
-                ?? host;
-            },
+            getRenderedWordRoots,
+            getScrollContainer: () => resolveFoliateScrollContainer(),
             // SELECTION-1: Passive soft-selected highlight (page-mode anchor indicator)
             applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
             clearSoftHighlight: () => clearSoftHighlight(),
@@ -1146,20 +1169,12 @@ export default function FoliatePageView({
       if (flowMode) {
         // foliate-js in scrolled mode: the scrollable element is inside the shadow DOM
         // Find it via the host element's shadow root or fallback to the container
-        const host = foliateHostRef.current;
-        if (host) {
-          // foliate-view's scrollable container is the element with overflow
-          const foliateView = host.querySelector("foliate-view") as any;
-          const scrollEl = foliateView?.shadowRoot?.querySelector("[part~='body']")
-            ?? foliateView?.shadowRoot?.querySelector("div")
-            ?? host;
-          scrollContainerRef.current = scrollEl as HTMLElement;
-        }
+        scrollContainerRef.current = resolveFoliateScrollContainer();
       } else {
         scrollContainerRef.current = null;
       }
     }
-  }, [flowMode]);
+  }, [flowMode, resolveFoliateScrollContainer]);
 
   // FLOW-INF-A: Compute --flow-zone-top and --flow-zone-bottom CSS custom properties
   // when flow mode is active. Uses settings.flowZonePosition and settings.flowZoneLines

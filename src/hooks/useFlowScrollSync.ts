@@ -86,6 +86,8 @@ export interface UseFlowScrollSyncParams {
   onOpenDocByIdRef: React.MutableRefObject<(docId: string) => void>;
   /** Optional eval-trace sink (off by default). */
   evalTrace?: TtsEvalTraceSink | null;
+  /** Monotonic bump when Foliate re-renders/stamps a new live word surface. */
+  foliateRenderVersion?: number;
 }
 
 export interface UseFlowScrollSyncReturn {
@@ -135,9 +137,11 @@ export function useFlowScrollSync({
   finishReadingWithoutExitRef,
   onOpenDocByIdRef,
   evalTrace = null,
+  foliateRenderVersion = 0,
 }: UseFlowScrollSyncParams): UseFlowScrollSyncReturn {
   const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
   const ownsSectionEndCallbackRef = useRef(false);
+  const lastHandledFoliateRenderVersionRef = useRef(foliateRenderVersion);
 
   // Stable refs to avoid stale closures in FlowScrollEngine onComplete
   const activeDocRef = useRef(activeDoc);
@@ -146,6 +150,34 @@ export function useFlowScrollSync({
   libraryRef.current = library;
   const isNarratingRef = useRef(isNarrating);
   isNarratingRef.current = isNarrating;
+
+  const waitForFoliateFlowReady = async (): Promise<boolean> => {
+    if (!useFoliate) return true;
+    await foliateApiRef.current?.waitForSectionReady?.();
+    return true;
+  };
+
+  const resolveFlowSurface = () => {
+    let container: HTMLElement | null = null;
+    let cursor: HTMLDivElement | null = null;
+
+    if (useFoliate) {
+      container = flowScrollContainerRef.current
+        ?? foliateApiRef.current?.getScrollContainer?.() as HTMLElement
+        ?? null;
+      cursor = flowScrollCursorRef.current;
+    }
+
+    return { container, cursor };
+  };
+
+  const syncEngineToCurrentWord = (engine: FlowScrollEngine) => {
+    if (isNarratingRef.current) {
+      engine.followWord(highlightedWordIndexRef.current);
+      return;
+    }
+    engine.jumpToWord(highlightedWordIndexRef.current);
+  };
 
   // ── Effect 1: FlowScrollEngine lifecycle — start/stop/pause ───────────
   useEffect(() => {
@@ -157,20 +189,8 @@ export function useFlowScrollSync({
       return;
     }
 
-    // Get the scrollable container — from foliate in EPUB mode
-    let container: HTMLElement | null = null;
-    let cursor: HTMLDivElement | null = null;
+    let cancelled = false;
 
-    if (useFoliate) {
-      container = flowScrollContainerRef.current
-        ?? foliateApiRef.current?.getScrollContainer?.() as HTMLElement
-        ?? null;
-      cursor = flowScrollCursorRef.current;
-    }
-
-    if (!container || !cursor) return;
-
-    // Create engine if needed
     if (!flowScrollEngineRef.current) {
       flowScrollEngineRef.current = new FlowScrollEngine({
         onWordAdvance: (idx: number) => {
@@ -219,22 +239,32 @@ export function useFlowScrollSync({
       });
     }
 
-    const engine = flowScrollEngineRef.current;
-    // FLOW-INF-B: Provide total word count so progress percentages are accurate
-    const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
-    if (totalWords > 0) engine.setTotalWords(totalWords);
-    engine.start(
-      container,
-      cursor,
-      highlightedWordIndexRef.current,
-      effectiveWpm,
-      paragraphBreaks,
-      isEink,
-      settings.flowZonePosition,
-    );
+    const startWhenReady = async () => {
+      await waitForFoliateFlowReady();
+      if (cancelled) return;
+
+      const { container, cursor } = resolveFlowSurface();
+      if (!container || !cursor) return;
+
+      const engine = flowScrollEngineRef.current;
+      const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
+      if (totalWords > 0) engine.setTotalWords(totalWords);
+      engine.start(
+        container,
+        cursor,
+        highlightedWordIndexRef.current,
+        effectiveWpm,
+        paragraphBreaks,
+        isEink,
+        settings.flowZonePosition,
+      );
+    };
+
+    void startWhenReady();
 
     return () => {
-      engine.stop();
+      cancelled = true;
+      flowScrollEngineRef.current?.stop();
     };
   }, [readingMode, flowPlaying, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -284,10 +314,49 @@ export function useFlowScrollSync({
   // ── Effect 5: Rebuild line map on font size change ────────────────────
   useEffect(() => {
     if (readingMode === "flow" && flowScrollEngineRef.current?.getState().running) {
-      const timer = setTimeout(() => flowScrollEngineRef.current?.rebuildLineMap(), 200);
-      return () => clearTimeout(timer);
+      let cancelled = false;
+      const timer = setTimeout(() => {
+        const rebuildWhenReady = async () => {
+          await waitForFoliateFlowReady();
+          if (cancelled) return;
+          const engine = flowScrollEngineRef.current;
+          if (!engine?.getState().running) return;
+          engine.rebuildLineMap();
+          syncEngineToCurrentWord(engine);
+        };
+        void rebuildWhenReady();
+      }, 200);
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+      };
     }
   }, [focusTextSize, readingMode]);
+
+  // ── Effect 5b: Rebuild after Foliate stamps a new rendered-word surface ─
+  useEffect(() => {
+    if (!useFoliate || readingMode !== "flow" || !flowPlaying) {
+      lastHandledFoliateRenderVersionRef.current = foliateRenderVersion;
+      return;
+    }
+    if (foliateRenderVersion === lastHandledFoliateRenderVersionRef.current) return;
+
+    let cancelled = false;
+    const rebuildWhenReady = async () => {
+      await waitForFoliateFlowReady();
+      if (cancelled) return;
+      const engine = flowScrollEngineRef.current;
+      if (!engine?.getState().running) return;
+      engine.rebuildLineMap();
+      syncEngineToCurrentWord(engine);
+      lastHandledFoliateRenderVersionRef.current = foliateRenderVersion;
+    };
+
+    void rebuildWhenReady();
+    return () => {
+      cancelled = true;
+    };
+  }, [foliateRenderVersion, flowPlaying, readingMode, useFoliate]);
 
   // ── Effect 6: Narration drives FlowScrollEngine follower mode ──────────
   useEffect(() => {

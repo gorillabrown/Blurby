@@ -1321,3 +1321,19 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern:** Verify startup parity at three layers: planner/unit coverage for the ramp sequence, cache tests for exact nonzero-start replay, and eval artifacts that record cached vs uncached start mode plus `openingChunkWordCounts`. Release evidence should show a real cached/uncached startup delta alongside `startupParity.openingRampMatches: true`.
 
 **Related:** TTS-START-1 sprint, `src/utils/generationPipeline.ts`, `src/utils/backgroundCacher.ts`, `src/utils/ttsCache.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/hooks/useNarrationCaching.ts`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+---
+
+### [2026-04-18] LL-104: Flow-Surface Mode Guards Must Treat `narrate` and `flow` as the Same Foliate Load Surface
+
+**Area:** reader modes, Foliate load lifecycle, compatibility boundaries
+**Status:** active
+**Priority:** high
+
+**Context:** READER-4M-1 restored `narrate` to the shared `ReaderMode` / persisted mode contracts and moved the architecture toward a truthful four-mode model. The sprint initially left one stale branch in `ReaderContainer` Foliate `onLoad` handling: `mode !== "flow"` still sent `narrate` through the passive extraction/restore path, which reintroduced the same mid-load word-array/highlight churn the shared flow surface was supposed to avoid.
+
+**Guardrail:** Once `narrate` is promoted into the shared mode contract, any Foliate or Flow lifecycle guard that distinguishes “flow-surface” vs “page/focus” behavior must branch on the surface semantics, not on the legacy literal `mode === "flow"` check. Use an explicit helper/boolean such as `isFlowSurfaceMode = mode === "flow" || mode === "narrate"` at the boundary, and keep old three-mode compatibility only at intentional handoff points.
+
+**Pattern:** Add at least one regression whenever a hidden compatibility alias is removed or narrowed. The regression should lock the architectural seam that changed so future refactors cannot silently reintroduce a literal three-mode guard in a four-mode path.
+
+**Related:** READER-4M-1 sprint, `src/components/ReaderContainer.tsx`, `src/hooks/useFlowScrollSync.ts`, `src/hooks/useReaderMode.ts`, `tests/narrationIntegration.test.ts`

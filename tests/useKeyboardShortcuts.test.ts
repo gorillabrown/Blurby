@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP } from "../src/constants";
+import { getReaderKeyboardModeSurface } from "../src/hooks/useKeyboardShortcuts";
 
 /**
  * useKeyboardShortcuts tests — testing the key binding resolution and
@@ -48,23 +49,35 @@ type Action =
   | "exit"
   | "none";
 
-function resolveReaderKey(e: KeyEvent, readerMode: string): Action {
+function resolveReaderKey(
+  e: KeyEvent,
+  readerMode: "page" | "focus" | "flow" | "narrate" | "speed" | "scroll",
+): Action {
+  const surface = getReaderKeyboardModeSurface(readerMode);
+
   // Tab toggles flap in any reader mode
   if (e.key === "Tab") return "toggleFlap";
   // T toggles narration
   if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "toggleNarration";
-  // B toggles favorite
-  if (e.code === "KeyB" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "toggleFavorite";
-  // Shift+F switches mode
-  if (e.code === "KeyF" && e.shiftKey && !e.ctrlKey && !e.metaKey) return "switchMode";
   // [ / ] chapter navigation
   if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) return "prevChapter";
   if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) return "nextChapter";
-  // Shift+Up/Down for coarse WPM
-  if (e.code === "ArrowUp" && e.shiftKey) return "coarseWpmUp";
-  if (e.code === "ArrowDown" && e.shiftKey) return "coarseWpmDown";
-  // Speed mode only keys
-  if (readerMode !== "speed") return "none";
+  // Page-mode only keys
+  if (surface === "page") {
+    if (e.code === "Space" && !e.shiftKey) return "togglePlay";
+    if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) return "wpmUp";
+    if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) return "wpmDown";
+    return e.code === "Escape" ? "exit" : "none";
+  }
+  // Flow-surface keys, including narrate.
+  if (surface === "flow") {
+    if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "toggleNarration";
+    if (e.code === "Space" && !e.shiftKey) return "togglePlay";
+    if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) return "wpmDown";
+    if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) return "wpmUp";
+    return e.code === "Escape" ? "exit" : "none";
+  }
+  // Focus-mode only keys.
   if (e.code === "Space") return "togglePlay";
   if (e.code === "ArrowLeft") return "seekBack";
   if (e.code === "ArrowRight") return "seekForward";
@@ -77,135 +90,137 @@ function resolveReaderKey(e: KeyEvent, readerMode: string): Action {
 }
 
 describe("useKeyboardShortcuts — key binding resolution (any mode)", () => {
+  it("normalizes four-mode and legacy reader modes to keyboard surfaces", () => {
+    expect(getReaderKeyboardModeSurface("page")).toBe("page");
+    expect(getReaderKeyboardModeSurface("focus")).toBe("focus");
+    expect(getReaderKeyboardModeSurface("flow")).toBe("flow");
+    expect(getReaderKeyboardModeSurface("narrate")).toBe("flow");
+    expect(getReaderKeyboardModeSurface("speed")).toBe("focus");
+    expect(getReaderKeyboardModeSurface("scroll")).toBe("flow");
+  });
+
   it("Tab toggles flap", () => {
-    expect(resolveReaderKey(makeKeyEvent({ key: "Tab" }), "speed")).toBe("toggleFlap");
+    expect(resolveReaderKey(makeKeyEvent({ key: "Tab" }), "focus")).toBe("toggleFlap");
     expect(resolveReaderKey(makeKeyEvent({ key: "Tab" }), "flow")).toBe("toggleFlap");
   });
 
   it("T toggles narration", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "speed")).toBe("toggleNarration");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "focus")).toBe("toggleNarration");
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "flow")).toBe("toggleNarration");
   });
 
-  it("B toggles favorite", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyB" }), "speed")).toBe("toggleFavorite");
-  });
-
-  it("Shift+F switches reading mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyF", shiftKey: true }), "speed")).toBe("switchMode");
-  });
-
   it("[ goes to previous chapter", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "BracketLeft" }), "speed")).toBe("prevChapter");
+    expect(resolveReaderKey(makeKeyEvent({ code: "BracketLeft" }), "focus")).toBe("prevChapter");
   });
 
   it("] goes to next chapter", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "BracketRight" }), "speed")).toBe("nextChapter");
-  });
-
-  it("Shift+Up adjusts WPM coarsely (+100)", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp", shiftKey: true }), "speed")).toBe("coarseWpmUp");
-  });
-
-  it("Shift+Down adjusts WPM coarsely (-100)", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown", shiftKey: true }), "speed")).toBe("coarseWpmDown");
+    expect(resolveReaderKey(makeKeyEvent({ code: "BracketRight" }), "focus")).toBe("nextChapter");
   });
 });
 
-describe("useKeyboardShortcuts — speed mode only keys", () => {
-  it("Space toggles play in speed mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "speed")).toBe("togglePlay");
+describe("useKeyboardShortcuts — focus surface keys", () => {
+  it("Space toggles play in focus mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "focus")).toBe("togglePlay");
   });
 
-  it("Space does nothing in flow mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "flow")).toBe("none");
+  it("ArrowLeft seeks backward in focus mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "focus")).toBe("seekBack");
   });
 
-  it("ArrowLeft seeks backward in speed mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "speed")).toBe("seekBack");
+  it("ArrowRight seeks forward in focus mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "focus")).toBe("seekForward");
   });
 
-  it("ArrowRight seeks forward in speed mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "speed")).toBe("seekForward");
+  it("ArrowUp increases WPM in focus mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "focus")).toBe("wpmUp");
   });
 
-  it("ArrowUp increases WPM in speed mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "speed")).toBe("wpmUp");
-  });
-
-  it("ArrowDown decreases WPM in speed mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "speed")).toBe("wpmDown");
+  it("ArrowDown decreases WPM in focus mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "focus")).toBe("wpmDown");
   });
 
   it("Equal/NumpadAdd increases font size", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "Equal" }), "speed")).toBe("fontUp");
-    expect(resolveReaderKey(makeKeyEvent({ code: "NumpadAdd" }), "speed")).toBe("fontUp");
+    expect(resolveReaderKey(makeKeyEvent({ code: "Equal" }), "focus")).toBe("fontUp");
+    expect(resolveReaderKey(makeKeyEvent({ code: "NumpadAdd" }), "focus")).toBe("fontUp");
   });
 
   it("Minus/NumpadSubtract decreases font size", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "Minus" }), "speed")).toBe("fontDown");
-    expect(resolveReaderKey(makeKeyEvent({ code: "NumpadSubtract" }), "speed")).toBe("fontDown");
+    expect(resolveReaderKey(makeKeyEvent({ code: "Minus" }), "focus")).toBe("fontDown");
+    expect(resolveReaderKey(makeKeyEvent({ code: "NumpadSubtract" }), "focus")).toBe("fontDown");
   });
 
-  it("Escape exits reader in speed mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "Escape" }), "speed")).toBe("exit");
+  it("Escape exits reader in focus mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Escape" }), "focus")).toBe("exit");
   });
 
-  it("Escape does nothing in flow mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "Escape" }), "flow")).toBe("none");
+  it("legacy speed keeps the focus seek and font controls", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "speed")).toBe("seekBack");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "speed")).toBe("seekForward");
+    expect(resolveReaderKey(makeKeyEvent({ code: "Equal" }), "speed")).toBe("fontUp");
+  });
+});
+
+describe("useKeyboardShortcuts — flow surface keys", () => {
+  it("Space toggles play in flow mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "flow")).toBe("togglePlay");
+  });
+
+  it("narrate uses the flow keyboard surface", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "narrate")).toBe("togglePlay");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("toggleNarration");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "narrate")).toBe("wpmDown");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "narrate")).toBe("wpmUp");
+  });
+
+  it("legacy scroll maps to the flow keyboard surface", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "scroll")).toBe("toggleNarration");
+  });
+
+  it("legacy scroll keeps the flow playback and coarse-rate controls", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "scroll")).toBe("togglePlay");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "scroll")).toBe("wpmDown");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "scroll")).toBe("wpmUp");
+  });
+
+  it("Escape exits reader in flow-like surfaces", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Escape" }), "flow")).toBe("exit");
+    expect(resolveReaderKey(makeKeyEvent({ code: "Escape" }), "narrate")).toBe("exit");
+  });
+
+  it("page-only bindings stay isolated from the narrate flow surface", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "narrate")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "narrate")).toBe("none");
   });
 });
 
 describe("useKeyboardShortcuts — modifier key handling", () => {
   it("Ctrl+T does NOT toggle narration", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", ctrlKey: true }), "speed")).not.toBe("toggleNarration");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", ctrlKey: true }), "focus")).not.toBe("toggleNarration");
   });
 
   it("Shift+T does NOT toggle narration", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", shiftKey: true }), "speed")).not.toBe("toggleNarration");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", shiftKey: true }), "focus")).not.toBe("toggleNarration");
   });
 
   it("Meta+T does NOT toggle narration", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", metaKey: true }), "speed")).not.toBe("toggleNarration");
-  });
-
-  it("Ctrl+B does NOT toggle favorite", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyB", ctrlKey: true }), "speed")).not.toBe("toggleFavorite");
-  });
-
-  it("Shift+[ does NOT go to previous chapter", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "BracketLeft", shiftKey: true }), "speed")).not.toBe("prevChapter");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", metaKey: true }), "focus")).not.toBe("toggleNarration");
   });
 
   it("Ctrl+[ does NOT go to previous chapter", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "BracketLeft", ctrlKey: true }), "speed")).not.toBe("prevChapter");
-  });
-
-  it("F without Shift does NOT switch mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyF" }), "speed")).not.toBe("switchMode");
-  });
-
-  it("Ctrl+F does NOT switch mode", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyF", shiftKey: true, ctrlKey: true }), "speed")).not.toBe("switchMode");
+    expect(resolveReaderKey(makeKeyEvent({ code: "BracketLeft", ctrlKey: true }), "focus")).not.toBe("prevChapter");
   });
 });
 
 describe("useKeyboardShortcuts — conflict detection", () => {
-  it("Arrow keys with Shift route to coarse WPM, not regular WPM", () => {
-    // Shift+Up should be coarseWpmUp, not wpmUp
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp", shiftKey: true }), "speed")).toBe("coarseWpmUp");
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp", shiftKey: true }), "speed")).not.toBe("wpmUp");
-  });
-
   it("Tab takes priority over any other binding", () => {
     // Tab should always be toggleFlap regardless of mode
-    expect(resolveReaderKey(makeKeyEvent({ key: "Tab", code: "Tab" }), "speed")).toBe("toggleFlap");
+    expect(resolveReaderKey(makeKeyEvent({ key: "Tab", code: "Tab" }), "focus")).toBe("toggleFlap");
     expect(resolveReaderKey(makeKeyEvent({ key: "Tab", code: "Tab" }), "flow")).toBe("toggleFlap");
   });
 
   it("unbound key returns none", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyZ" }), "speed")).toBe("none");
-    expect(resolveReaderKey(makeKeyEvent({ code: "Digit1" }), "speed")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyZ" }), "focus")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "Digit1" }), "focus")).toBe("none");
   });
 });
 
