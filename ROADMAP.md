@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-17 — Closed out TTS-RATE-2 and advanced the follow-on lane to TTS-START-1.
+**Last updated**: 2026-04-17 — Closed out TTS-START-1 and completed the TTS continuity/startup follow-on lane.
 **Current branch**: `main`
-**Current state**: v1.61.0 stable. Queue depth 2 (YELLOW). Next queue item: TTS-START-1.
+**Current state**: v1.62.0 stable. Queue depth 1 (RED). Next queue item: EINK-6A (parked fallback; reprioritize or backfill before dispatch).
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -88,7 +88,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     TTS-RATE-2: Segmented Live Rate Response ✅ (v1.61.0)
                    │
-    TTS-START-1: Startup Parity & Opening Cache Contract
+    TTS-START-1: Startup Parity & Opening Cache Contract ✅ (v1.62.0)
                    │
                    ▼
         Track C: Android APK
@@ -2789,7 +2789,7 @@ Task 12 (Git)
 
 ## Phase 6 Follow-On — TTS Continuity & Startup Quality
 
-> `TTS-CONT-1` closed out on 2026-04-17 and established readiness-driven continuity as the new handoff baseline. The remaining follow-up lane order is fixed: `TTS-RATE-2` → `TTS-START-1`. These sprints continue closing the remaining wait-time and responsiveness gaps without reopening the already-fixed bootstrap/truth contracts.
+> `TTS-CONT-1`, `TTS-RATE-2`, and `TTS-START-1` all closed out on 2026-04-17, completing the TTS continuity/startup follow-on lane. Readiness-driven handoffs, bounded same-bucket live-rate response, and cached-vs-uncached opening-ramp parity are now the baseline; queue attention should shift to spec backfill or an explicit reprioritization of parked `EINK-6A`.
 
 ---
 
@@ -2993,7 +2993,7 @@ Task 12 (Git)
 
 ---
 
-### Sprint TTS-START-1: Startup Parity & Opening Cache Contract
+### Sprint TTS-START-1: Startup Parity & Opening Cache Contract ✅ COMPLETED (v1.62.0, 2026-04-17)
 
 **Goal:** Make cached and uncached starts behave like the same product by warming and replaying the opening ramp with the same chunk-shape contract, while also hardening the renderer cache helper so exact replay does not depend on caller trivia.
 
@@ -3082,6 +3082,10 @@ Task 12 (Git)
 9. `npm run build` succeeds.
 
 **Tier:** Full | **Depends on:** TTS-RATE-1, TTS-RATE-2
+
+**Completion note:** Completed on 2026-04-17. Cached and uncached starts now share one opening-ramp planner contract, so entry coverage warms the same `13 -> 26 -> 52 -> 104 -> 148` startup shape that live playback uses before cruise coverage resumes. The renderer cache helper no longer relies on a caller-side tail-sliced array contract: cached replay reconstructs from the full word context plus `startIdx`, and `useNarrationCaching` now re-seeds startup coverage from the current highlighted position with the active rate bucket and pronunciation-override identity.
+
+**Verification:** Startup-parity coverage expanded with `tests/generationPipeline.test.ts`, `tests/tts7a-cacheCorrectness.test.ts`, `tests/useNarrationCaching.test.tsx`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with the focused startup/cache neighborhood (`6` files, `70` tests), a dedicated startup-parity matrix run (`artifacts/tts-eval/start1-startup-parity`) reporting cached/uncached startup latency `370 / 508 ms` with `Opening ramp parity: match`, the gated release matrix (`artifacts/tts-eval/start1-release`) passing across `9` runs, full `npm test` (`125` files, `2005` tests), and `npm run build`; the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
 
 ---
 

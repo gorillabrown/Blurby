@@ -1305,3 +1305,19 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** Treat no-whitespace contiguous fragments as one logical token at extraction time. Preserve one stable token id and global word index across node boundaries, emit token-part metadata for rendering, and collapse click/selection/narration starts back to the stitched token's shared index before any consumer reads it. Only real whitespace should create a new word identity.
 
 **Related:** EPUB-TOKEN-1 sprint, `src/utils/segmentWords.ts`, `src/utils/foliateHelpers.ts`, `src/components/FoliatePageView.tsx`, `src/utils/foliateWordOffsets.ts`
+
+---
+
+### [2026-04-17] LL-103: Startup Cache Warmup Must Share the Live Opening-Ramp Contract
+
+**Area:** TTS, cache warmup, startup latency, evaluation
+**Status:** active
+**Priority:** high
+
+**Context:** Cached starts felt different from uncached starts because background entry coverage jumped straight to cruise-sized chunks while live playback still ramped through `13 -> 26 -> 52 -> 104 -> 148`. The renderer cache helper also depended on a hidden caller contract: nonzero-start replay only stayed correct because the caller passed a tail-sliced word array.
+
+**Guardrail:** Treat startup chunk shape as a shared contract, not two heuristics. Live generation and cache warmup must consume the same opening-ramp planner from the real start index, and cache replay helpers must accept full-word context plus explicit `startIdx` so exact nonzero-start reconstruction is self-defending.
+
+**Pattern:** Verify startup parity at three layers: planner/unit coverage for the ramp sequence, cache tests for exact nonzero-start replay, and eval artifacts that record cached vs uncached start mode plus `openingChunkWordCounts`. Release evidence should show a real cached/uncached startup delta alongside `startupParity.openingRampMatches: true`.
+
+**Related:** TTS-START-1 sprint, `src/utils/generationPipeline.ts`, `src/utils/backgroundCacher.ts`, `src/utils/ttsCache.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/hooks/useNarrationCaching.ts`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`

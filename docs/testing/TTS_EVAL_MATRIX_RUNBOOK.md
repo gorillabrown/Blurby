@@ -67,6 +67,41 @@ Reference PASS evidence from `TTS-RATE-1` closeout:
 - Handoff failures: `0`
 - Gate result: `PASS` (`0/5` hard failures, `0/2` warnings)
 
+## TTS-START-1 Startup-Parity Pattern
+
+Use a dedicated startup-parity slice to compare cached and uncached starts directly:
+
+```bash
+npm run tts:eval:matrix -- --run-id start1-startup-parity --tag startup-parity --out artifacts/tts-eval/start1-startup-parity
+```
+
+Expected:
+
+- Two startup scenarios in the output: `startup-parity-uncached` and `startup-parity-cached`
+- Per-run summaries include:
+  - `startupCacheMode`
+  - `openingChunkWordCounts`
+- Aggregate artifacts report:
+  - `startupParity.cachedStartLatencyMs`
+  - `startupParity.uncachedStartLatencyMs`
+  - `startupParity.deltaMs`
+  - `startupParity.openingRampMatches`
+
+Release expectation after `TTS-START-1`:
+
+- The gated release matrix still passes as a single release artifact set
+- The startup-parity pair produces a real cached-vs-uncached startup delta while preserving the same opening ramp shape
+- `summary.txt` reports `Opening ramp parity: match`
+
+Reference PASS evidence from `TTS-START-1` closeout:
+
+- Dedicated startup-parity artifact set: `artifacts/tts-eval/start1-startup-parity`
+- Release artifact set: `artifacts/tts-eval/start1-release`
+- Startup parity cached/uncached: `370 / 508 ms (delta 138 ms)`
+- Opening ramp parity: `match`
+- Gated release runs: `9`
+- Gate result: `PASS`
+
 ## Short Soak Run
 
 ```bash
