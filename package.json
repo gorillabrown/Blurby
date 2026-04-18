@@ -19,6 +19,8 @@
     "tts:eval:matrix:gated": "node scripts/tts_eval_runner.mjs --matrix --gates",
     "tts:eval:soak:short": "node scripts/tts_eval_runner.mjs --soak-profile short",
     "tts:eval:gates": "node scripts/tts_eval_gate.mjs",
+    "tts:scan:index": "node scripts/tts_engine_scan_index.mjs",
+    "tts:scan:validate": "vitest run tests/ttsEngineScanCorpus.test.ts tests/ttsEngineScanIndex.test.ts",
     "postinstall": "patch-package && node scripts/patch-onnxruntime.js"
   },
   "build": {
