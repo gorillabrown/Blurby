@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
-import { mergeOverrides } from "../utils/pronunciationOverrides";
+import { mergeOverrides, overrideHash } from "../utils/pronunciationOverrides";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../utils/kokoroRatePlan";
 import { wrapWordsInSpans, unwrapWordSpans } from "../components/FoliatePageView";
@@ -79,6 +79,9 @@ export function useNarrationCaching({
   narration,
 }: UseNarrationCachingParams): React.MutableRefObject<BackgroundCacher | null> {
   const backgroundCacherRef = useRef<BackgroundCacher | null>(null);
+  const effectiveOverrides = mergeOverrides(settings.pronunciationOverrides || [], activeDoc.pronunciationOverrides || []);
+  const effectiveOverrideKey = overrideHash(effectiveOverrides);
+  const rateBucket = resolveKokoroRatePlan(settings.ttsRate || 1.0).generationBucket;
 
   // NAR-2: Pre-warm Kokoro model + AudioContext on reader mount
   useEffect(() => {
@@ -108,8 +111,8 @@ export function useNarrationCaching({
       },
       getVoiceId: () => settings.ttsVoiceName || "af_bella",
       isCacheEnabled: () => settings.ttsCacheEnabled !== false,
-      getRateBucket: () => resolveKokoroRatePlan(settings.ttsRate || 1.0).generationBucket,
-      getPronunciationOverrides: () => mergeOverrides(settings.pronunciationOverrides || [], activeDoc.pronunciationOverrides || []),
+      getRateBucket: () => rateBucket,
+      getPronunciationOverrides: () => effectiveOverrides,
     });
     backgroundCacherRef.current = cacher;
     cacher.start();
@@ -119,22 +122,23 @@ export function useNarrationCaching({
       backgroundCacherRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [settings.ttsEngine, settings.ttsCacheEnabled, settings.ttsVoiceName, settings.ttsRate]);
+  }, [activeDoc.id, effectiveOverrideKey, rateBucket, settings.ttsCacheEnabled, settings.ttsEngine, settings.ttsVoiceName]);
 
-  // TTS-7F: Queue entry-coverage for the opened book on reader mount (cruise warm)
+  // TTS-START-1: Queue entry coverage using the current opening-ramp start identity.
   useEffect(() => {
     const cacher = backgroundCacherRef.current;
     if (!cacher) return;
     const words = wordsRef.current;
     if (words.length > 0 && settings.ttsEngine === "kokoro" && settings.ttsCacheEnabled !== false) {
+      const startPosition = highlightedWordIndexRef.current ?? activeDoc.position ?? 0;
       cacher.queueEntryCoverage({
         id: activeDoc.id,
         words,
-        position: activeDoc.position || 0,
+        position: startPosition,
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, settings.ttsEngine]);
+  }, [activeDoc.id, effectiveOverrideKey, rateBucket, settings.ttsCacheEnabled, settings.ttsEngine, settings.ttsVoiceName]);
 
   // NAR-5: Set active book on the background cacher when text is available
   useEffect(() => {
@@ -142,14 +146,15 @@ export function useNarrationCaching({
     if (!cacher) return;
     const words = wordsRef.current;
     if (words.length > 0) {
+      const startPosition = highlightedWordIndexRef.current ?? activeDoc.position ?? 0;
       cacher.setActiveBook({
         id: activeDoc.id,
         words,
-        position: activeDoc.position || 0,
+        position: startPosition,
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, wordsRef.current.length]);
+  }, [activeDoc.id, effectiveOverrideKey, rateBucket, settings.ttsVoiceName, wordsRef.current.length]);
 
   // ── TTS-6O: Background pre-extraction — extract full-book words ahead of narration start ──
   useEffect(() => {

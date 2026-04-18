@@ -93,6 +93,14 @@ const RAMP_SEQUENCE = [
   TTS_COLD_START_CHUNK_WORDS * 8, // 104
 ];
 
+export interface OpeningRampChunkPlan {
+  chunkIndex: number;
+  startIdx: number;
+  endIdx: number;
+  targetWordCount: number;
+  wordCount: number;
+}
+
 /**
  * Get chunk size for a given chunk index in the ramp-up sequence.
  * Indices 0-3: doubling from 13 → 26 → 52 → 104
@@ -101,6 +109,55 @@ const RAMP_SEQUENCE = [
 export function getChunkSize(chunkIndex: number): number {
   if (chunkIndex < RAMP_SEQUENCE.length) return RAMP_SEQUENCE[chunkIndex];
   return TTS_CRUISE_CHUNK_WORDS;
+}
+
+function resolveOpeningRampChunkEnd(
+  words: string[],
+  startIdx: number,
+  targetWordCount: number,
+  paragraphBreaks: Set<number>,
+  pauseConfig?: ReturnType<NonNullable<PipelineConfig["getPauseConfig"]>>,
+): number {
+  if (targetWordCount < TTS_CRUISE_CHUNK_WORDS) {
+    const rawEndIdx = Math.min(startIdx + targetWordCount, words.length);
+    return snapToSentenceBoundary(words, startIdx, rawEndIdx);
+  }
+
+  const plan = buildNarrationPlan(
+    words,
+    startIdx,
+    TTS_CRUISE_CHUNK_WORDS,
+    paragraphBreaks,
+    pauseConfig,
+    TTS_PLANNER_WINDOW_WORDS,
+  );
+  return findPlannedChunk(plan, startIdx)?.endIdx
+    ?? snapToSentenceBoundary(words, startIdx, Math.min(startIdx + targetWordCount, words.length));
+}
+
+export function buildOpeningRampPlan(
+  words: string[],
+  startIdx: number,
+  paragraphBreaks: Set<number> = new Set<number>(),
+  pauseConfig?: ReturnType<NonNullable<PipelineConfig["getPauseConfig"]>>,
+): OpeningRampChunkPlan[] {
+  const plan: OpeningRampChunkPlan[] = [];
+  let nextStartIdx = Math.max(0, Math.min(startIdx, words.length));
+
+  for (let chunkIndex = 0; chunkIndex <= RAMP_SEQUENCE.length && nextStartIdx < words.length; chunkIndex += 1) {
+    const targetWordCount = getChunkSize(chunkIndex);
+    const endIdx = resolveOpeningRampChunkEnd(words, nextStartIdx, targetWordCount, paragraphBreaks, pauseConfig);
+    plan.push({
+      chunkIndex,
+      startIdx: nextStartIdx,
+      endIdx,
+      targetWordCount,
+      wordCount: Math.max(0, endIdx - nextStartIdx),
+    });
+    nextStartIdx = endIdx;
+  }
+
+  return plan;
 }
 
 /**
@@ -426,6 +483,9 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     chunkIndex = 0;
 
     const words = config.getWords();
+    const paragraphBreaks = config.getParagraphBreaks?.() ?? new Set<number>();
+    const pauseConfig = config.getPauseConfig?.();
+    const openingRampPlan = buildOpeningRampPlan(words, startIdx, paragraphBreaks, pauseConfig);
     if (nextProduceIdx >= words.length) {
       config.onEnd();
       return;
@@ -434,8 +494,8 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     // ── Ramp-up phase: parallel prefetch for first 2 chunks (TTS-6S backlog fix) ──
     // Fire chunks 0 and 1 in parallel so chunk 1 is generating while chunk 0 plays.
     let rampDone = false;
-    const firstSize = getChunkSize(0);
-    const secondSize = getChunkSize(1);
+    const firstSize = openingRampPlan[0]?.targetWordCount ?? getChunkSize(0);
+    const secondSize = openingRampPlan[1]?.targetWordCount ?? getChunkSize(1);
     if (firstSize < TTS_CRUISE_CHUNK_WORDS && secondSize < TTS_CRUISE_CHUNK_WORDS && nextProduceIdx < words.length) {
       const idx0 = nextProduceIdx;
       const idx1 = Math.min(idx0 + firstSize, words.length);
@@ -454,7 +514,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
 
     // Continue sequential ramp-up for remaining ramp chunks
     while (!rampDone && active && myGenId === generationId && nextProduceIdx < words.length) {
-      const size = getChunkSize(chunkIndex);
+      const size = openingRampPlan[chunkIndex]?.targetWordCount ?? getChunkSize(chunkIndex);
       if (size >= TTS_CRUISE_CHUNK_WORDS) {
         rampDone = true;
         break;

@@ -150,6 +150,79 @@ describe("tts eval matrix/soak runner", () => {
     expect(formatAggregateSummary(aggregate)).toContain("Rate response latency p50/p95: 110 / 123.5 ms");
   });
 
+  it("surfaces startup cache mode and opening ramp shape from trace start events", () => {
+    const summary = summarizeTrace({
+      runId: "startup-parity-run",
+      scenarioId: "startup-parity-cached",
+      fixture: { id: "prose-basic" },
+      events: [
+        {
+          ts: 1,
+          kind: "lifecycle",
+          state: "start",
+          cacheMode: "cached",
+          openingChunkWordCounts: [13, 26, 52, 104, 148],
+        },
+        { ts: 2, kind: "lifecycle", state: "first-audio", latencyMs: 180 },
+      ],
+    } as any);
+
+    expect((summary as any).startupCacheMode).toBe("cached");
+    expect((summary as any).openingChunkWordCounts).toEqual([13, 26, 52, 104, 148]);
+  });
+
+  it("computes cached-vs-uncached startup parity aggregates and reports ramp matches", () => {
+    const aggregate = calculateAggregateMetrics([
+      {
+        startLatencyMs: 280,
+        maxDrift: 2,
+        failureClasses: [],
+        startupCacheMode: "uncached",
+        openingChunkWordCounts: [13, 26, 52, 104, 148],
+      },
+      {
+        startLatencyMs: 180,
+        maxDrift: 1,
+        failureClasses: [],
+        startupCacheMode: "cached",
+        openingChunkWordCounts: [13, 26, 52, 104, 148],
+      },
+    ] as any);
+
+    expect((aggregate as any).startupParity).toEqual({
+      cachedStartLatencyMs: 180,
+      uncachedStartLatencyMs: 280,
+      deltaMs: 100,
+      cachedOpeningChunkWordCounts: [13, 26, 52, 104, 148],
+      uncachedOpeningChunkWordCounts: [13, 26, 52, 104, 148],
+      openingRampMatches: true,
+    });
+    expect(formatAggregateSummary(aggregate)).toContain("Startup parity cached/uncached: 180 / 280 ms (delta 100 ms)");
+    expect(formatAggregateSummary(aggregate)).toContain("Opening ramp parity: match");
+  });
+
+  it("marks opening-ramp parity as a mismatch when cached and uncached shapes diverge", () => {
+    const aggregate = calculateAggregateMetrics([
+      {
+        startLatencyMs: 280,
+        maxDrift: 2,
+        failureClasses: [],
+        startupCacheMode: "uncached",
+        openingChunkWordCounts: [13, 26, 52, 104, 148],
+      },
+      {
+        startLatencyMs: 180,
+        maxDrift: 1,
+        failureClasses: [],
+        startupCacheMode: "cached",
+        openingChunkWordCounts: [13, 26, 52, 148],
+      },
+    ] as any);
+
+    expect((aggregate as any).startupParity.openingRampMatches).toBe(false);
+    expect(formatAggregateSummary(aggregate)).toContain("Opening ramp parity: mismatch");
+  });
+
   it("includes section and cross-book latency fields in per-run summaries", () => {
     const summary = summarizeTrace({
       runId: "latency-run",
@@ -237,5 +310,26 @@ describe("tts eval matrix/soak runner", () => {
     });
     const summary = summarizeTrace(trace);
     expect(summary.rateResponseLatencyMs).toEqual(expect.any(Number));
+  });
+
+  it("emits cached startup metadata in simulated startup-parity traces", () => {
+    const trace = simulateTrace({
+      fixture: {
+        id: "prose-basic",
+        title: "Startup",
+        sourceType: "prose",
+        expectedCoverage: [],
+        text: "one two three four five six",
+      },
+      mode: "flow",
+      rate: 1.0,
+      runId: "startup-run",
+      scenarioId: "startup-parity-cached",
+      runOrdinal: 1,
+    });
+
+    const startEvent = trace.events.find((event) => event.kind === "lifecycle" && event.state === "start");
+    expect((startEvent as any)?.cacheMode).toBe("cached");
+    expect((startEvent as any)?.openingChunkWordCounts).toEqual([13, 26, 52, 104, 148]);
   });
 });

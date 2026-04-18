@@ -27,6 +27,32 @@ export function calculateAggregateMetrics(runSummaries) {
 
   const pauseResumeFailures = summaries.filter((s) => (s.failureClasses || []).includes("pause-resume-error")).length;
   const handoffFailures = summaries.filter((s) => (s.failureClasses || []).includes("handoff-error")).length;
+  const cachedStartupLatencies = summaries
+    .filter((s) => s.startupCacheMode === "cached")
+    .map((s) => s.startLatencyMs)
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b);
+  const uncachedStartupLatencies = summaries
+    .filter((s) => s.startupCacheMode === "uncached")
+    .map((s) => s.startLatencyMs)
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b);
+  const cachedOpeningChunkWordCounts = summaries.find(
+    (s) => s.startupCacheMode === "cached" && Array.isArray(s.openingChunkWordCounts) && s.openingChunkWordCounts.length
+  )?.openingChunkWordCounts ?? [];
+  const uncachedOpeningChunkWordCounts = summaries.find(
+    (s) => s.startupCacheMode === "uncached" && Array.isArray(s.openingChunkWordCounts) && s.openingChunkWordCounts.length
+  )?.openingChunkWordCounts ?? [];
+  const cachedStartLatencyMs = quantile(cachedStartupLatencies, 0.5);
+  const uncachedStartLatencyMs = quantile(uncachedStartupLatencies, 0.5);
+  const startupDeltaMs =
+    cachedStartLatencyMs != null && uncachedStartLatencyMs != null
+      ? uncachedStartLatencyMs - cachedStartLatencyMs
+      : null;
+  const openingRampMatches =
+    cachedOpeningChunkWordCounts.length && uncachedOpeningChunkWordCounts.length
+      ? JSON.stringify(cachedOpeningChunkWordCounts) === JSON.stringify(uncachedOpeningChunkWordCounts)
+      : null;
 
   return {
     runCount: summaries.length,
@@ -51,6 +77,14 @@ export function calculateAggregateMetrics(runSummaries) {
       pauseResumeFailures,
       handoffFailures,
     },
+    startupParity: {
+      cachedStartLatencyMs,
+      uncachedStartLatencyMs,
+      deltaMs: startupDeltaMs,
+      cachedOpeningChunkWordCounts,
+      uncachedOpeningChunkWordCounts,
+      openingRampMatches,
+    },
   };
 }
 
@@ -62,5 +96,13 @@ export function formatAggregateSummary(aggregate) {
     `Drift p50/p95/max: ${aggregate.drift.p50 ?? "n/a"} / ${aggregate.drift.p95 ?? "n/a"} / ${aggregate.drift.max ?? "n/a"}`,
     `Pause/resume failures: ${aggregate.failureCounts.pauseResumeFailures}`,
     `Handoff failures: ${aggregate.failureCounts.handoffFailures}`,
+    `Startup parity cached/uncached: ${aggregate.startupParity.cachedStartLatencyMs ?? "n/a"} / ${aggregate.startupParity.uncachedStartLatencyMs ?? "n/a"} ms (delta ${aggregate.startupParity.deltaMs ?? "n/a"} ms)`,
+    `Opening ramp parity: ${
+      aggregate.startupParity.openingRampMatches == null
+        ? "n/a"
+        : aggregate.startupParity.openingRampMatches
+          ? "match"
+          : "mismatch"
+    }`,
   ].join("\n");
 }

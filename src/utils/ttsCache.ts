@@ -18,8 +18,8 @@ export async function isCached(bookId: string, voiceId: string, startIdx: number
 
 /**
  * Load a cached chunk from disk and return it as a ScheduledChunk.
- * Uses the real word count stored at cache-write time (TTS-7A) to slice
- * the correct number of words instead of guessing.
+ * Uses the full word array plus startIdx to reconstruct the exact nonzero-start
+ * span stored at cache-write time instead of relying on a caller-provided tail slice.
  * Returns null on cache miss or error.
  */
 export async function loadCachedChunk(
@@ -39,9 +39,9 @@ export async function loadCachedChunk(
     : new Float32Array(result.audio);
 
   // TTS-7A: Use real word count from cache entry when available.
-  // Fall back to allWords.length for legacy entries without wordCount.
-  const wordCount = result.wordCount ?? allWords.length;
-  const chunkWords = allWords.slice(0, wordCount);
+  // Fall back to the remaining full-context words for legacy entries without wordCount.
+  const wordCount = result.wordCount ?? Math.max(0, allWords.length - startIdx);
+  const chunkWords = allWords.slice(startIdx, startIdx + wordCount);
 
   return {
     audio,

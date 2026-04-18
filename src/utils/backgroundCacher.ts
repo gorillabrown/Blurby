@@ -14,6 +14,7 @@
 import { TTS_CRUISE_CHUNK_WORDS, KOKORO_DEFAULT_RATE_BUCKET, ENTRY_COVERAGE_TARGET_MS, type KokoroRateBucket } from "../constants";
 import * as ttsCache from "./ttsCache";
 import { overrideHash } from "./pronunciationOverrides";
+import { buildOpeningRampPlan } from "./generationPipeline";
 import type { PronunciationOverride } from "../types";
 
 const api = window.electronAPI;
@@ -87,7 +88,6 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     // TTS-7A: Include pronunciation override hash in cache key (matches kokoroStrategy identity)
     const oh = overrideHash(config.getPronunciationOverrides?.());
     const cacheVoiceId = oh ? `${rawVoiceId}/${bucket}/${oh}` : `${rawVoiceId}/${bucket}`;
-    const chunkSize = TTS_CRUISE_CHUNK_WORDS;
     const totalWords = book.words.length;
     if (totalWords === 0) return;
 
@@ -96,36 +96,53 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
       ? liveCursorPosition
       : book.position;
 
-    // Phase 1: Forward from start position
-    let idx = startPosition;
+    async function cacheRange(startIdx: number, endIdx: number): Promise<number> {
+      const isCached = await ttsCache.isCached(book.id, cacheVoiceId, startIdx);
+      if (isCached) return 0;
+
+      const chunkWords = book.words.slice(startIdx, endIdx);
+      const text = chunkWords.join(" ");
+
+      try {
+        const result = await config.generateFn(text, rawVoiceId, bucket);
+        if (signal.aborted) return 0;
+
+        if (result.audio && result.sampleRate) {
+          const audio = result.audio instanceof Float32Array
+            ? result.audio : new Float32Array(result.audio);
+          const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
+          ttsCache.cacheChunk(book.id, cacheVoiceId, startIdx, audio, result.sampleRate, durationMs, chunkWords.length);
+          return durationMs;
+        }
+      } catch {
+        if (signal.aborted) return 0;
+      }
+
+      return 0;
+    }
+
+    const openingRampPlan = buildOpeningRampPlan(book.words, startPosition);
+
+    // Phase 1: Forward from start position using the shared opening ramp, then cruise.
     let accumulatedDurationMs = 0; // TTS-7F: Track duration for entry-coverage cap
+    for (const chunk of openingRampPlan) {
+      if (signal.aborted) return;
+      if (!config.isCacheEnabled()) return;
+      if (maxDurationMs != null && accumulatedDurationMs >= maxDurationMs) break;
+      accumulatedDurationMs += await cacheRange(chunk.startIdx, chunk.endIdx);
+    }
+
+    let idx = openingRampPlan.length
+      ? openingRampPlan[openingRampPlan.length - 1].endIdx
+      : startPosition;
     while (idx < totalWords && !signal.aborted) {
       if (!config.isCacheEnabled()) return;
       // TTS-7F: Stop entry-coverage jobs once target is reached
       if (maxDurationMs != null && accumulatedDurationMs >= maxDurationMs) break;
 
-      const isCached = await ttsCache.isCached(book.id, cacheVoiceId, idx);
-      if (!isCached) {
-        const endIdx = Math.min(idx + chunkSize, totalWords);
-        const chunkWords = book.words.slice(idx, endIdx);
-        const text = chunkWords.join(" ");
-
-        try {
-          const result = await config.generateFn(text, rawVoiceId, bucket);
-          if (signal.aborted) return;
-
-          if (result.audio && result.sampleRate) {
-            const audio = result.audio instanceof Float32Array
-              ? result.audio : new Float32Array(result.audio);
-            const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
-            ttsCache.cacheChunk(book.id, cacheVoiceId, idx, audio, result.sampleRate, durationMs, chunkWords.length);
-            accumulatedDurationMs += durationMs;
-          }
-        } catch {
-          if (signal.aborted) return;
-        }
-      }
-      idx += chunkSize;
+      const endIdx = Math.min(idx + TTS_CRUISE_CHUNK_WORDS, totalWords);
+      accumulatedDurationMs += await cacheRange(idx, endIdx);
+      idx = endIdx;
     }
     // TTS-7F: Entry-coverage jobs don't backfill — only need opening audio
     if (maxDurationMs != null) return;
@@ -135,27 +152,9 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     while (idx < startPosition && !signal.aborted) {
       if (!config.isCacheEnabled()) return;
 
-      const isCached = await ttsCache.isCached(book.id, cacheVoiceId, idx);
-      if (!isCached) {
-        const endIdx = Math.min(idx + chunkSize, startPosition);
-        const chunkWords = book.words.slice(idx, endIdx);
-        const text = chunkWords.join(" ");
-
-        try {
-          const result = await config.generateFn(text, rawVoiceId, bucket);
-          if (signal.aborted) return;
-
-          if (result.audio && result.sampleRate) {
-            const audio = result.audio instanceof Float32Array
-              ? result.audio : new Float32Array(result.audio);
-            const durationMs = result.durationMs ?? (audio.length / result.sampleRate) * 1000;
-            ttsCache.cacheChunk(book.id, cacheVoiceId, idx, audio, result.sampleRate, durationMs, chunkWords.length);
-          }
-        } catch {
-          if (signal.aborted) return;
-        }
-      }
-      idx += chunkSize;
+      const endIdx = Math.min(idx + TTS_CRUISE_CHUNK_WORDS, startPosition);
+      await cacheRange(idx, endIdx);
+      idx = endIdx;
     }
   }
 

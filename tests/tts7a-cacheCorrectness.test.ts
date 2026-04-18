@@ -24,6 +24,7 @@ vi.hoisted(() => {
 // ── Main-process cache tests (word count in manifest) ──────────────────────
 
 import * as ttsCacheModule from "../main/tts-cache";
+import { loadCachedChunk } from "../src/utils/ttsCache";
 
 let tempDir: string;
 
@@ -78,25 +79,37 @@ describe("TTS-7A: Cache word count storage (main process)", () => {
 // ── Renderer-side cache tests (loadCachedChunk word slicing) ───────────────
 
 describe("TTS-7A: Renderer cache loadCachedChunk word count", () => {
-  it("loadCachedChunk slices correct word count from allWords", async () => {
-    // Mock the IPC API
-    const allWords = Array.from({ length: 200 }, (_, i) => `word${i}`);
-
-    // Simulate what ttsCache.loadCachedChunk does with wordCount
-    const wordCount = 13;
-    const remainingWords = allWords.slice(0); // from startIdx=0
-    const chunkWords = remainingWords.slice(0, wordCount);
-    expect(chunkWords).toHaveLength(13);
-    expect(chunkWords[0]).toBe("word0");
-    expect(chunkWords[12]).toBe("word12");
+  beforeEach(() => {
+    (window as any).electronAPI.ttsCacheRead.mockReset();
   });
 
-  it("loadCachedChunk falls back to allWords.length for legacy (null wordCount)", async () => {
-    const allWords = ["one", "two", "three"];
-    const wordCount: number | null = null;
-    const effectiveCount = wordCount ?? allWords.length;
-    const chunkWords = allWords.slice(0, effectiveCount);
-    expect(chunkWords).toHaveLength(3);
+  it("reconstructs the exact nonzero-start word span from the full word array", async () => {
+    (window as any).electronAPI.ttsCacheRead.mockResolvedValue({
+      audio: new Float32Array(240),
+      sampleRate: 24000,
+      durationMs: 500,
+      wordCount: 3,
+    });
+
+    const allWords = ["zero", "one", "two", "three", "four", "five"];
+    const chunk = await loadCachedChunk("book-1", "voice-1", 2, allWords);
+
+    expect(chunk?.startIdx).toBe(2);
+    expect(chunk?.words).toEqual(["two", "three", "four"]);
+  });
+
+  it("falls back to the remaining full-context words for legacy cache entries", async () => {
+    (window as any).electronAPI.ttsCacheRead.mockResolvedValue({
+      audio: new Float32Array(240),
+      sampleRate: 24000,
+      durationMs: 500,
+      wordCount: null,
+    });
+
+    const allWords = ["zero", "one", "two", "three", "four"];
+    const chunk = await loadCachedChunk("book-1", "voice-1", 2, allWords);
+
+    expect(chunk?.words).toEqual(["two", "three", "four"]);
   });
 });
 
@@ -156,6 +169,37 @@ describe("TTS-7A: Background cacher cursor tracking", () => {
     cacher.setActiveBook(book);
     // No direct way to read liveCursorPosition, but this exercises the code path
     expect(cacher).toBeDefined();
+  });
+});
+
+describe("TTS-START-1: Background entry coverage opening ramp", () => {
+  beforeEach(() => {
+    vi.spyOn(ttsCacheModule as any, "readChunk").mockRestore?.();
+    (window as any).electronAPI.ttsCacheHas.mockResolvedValue(false);
+    (window as any).electronAPI.ttsCacheWrite.mockResolvedValue({ success: true });
+  });
+
+  it("warms the opening ramp sequence before cruise coverage for entry jobs", async () => {
+    const boundaryEnds = new Set([12, 38, 90, 194, 342]);
+    const words = Array.from({ length: 360 }, (_, index) =>
+      boundaryEnds.has(index) ? `word${index}.` : `word${index}`
+    );
+    const generateFn = vi.fn().mockResolvedValue({
+      audio: new Float32Array(100),
+      sampleRate: 24000,
+      durationMs: 60_000,
+    });
+
+    const cacher = createBackgroundCacher(makeConfig({ generateFn }));
+    cacher.queueEntryCoverage({ id: "book-1", words, position: 0 });
+    cacher.start();
+
+    await vi.waitFor(() => expect(generateFn).toHaveBeenCalledTimes(5));
+    cacher.stop();
+
+    const cacheWrites = (window as any).electronAPI.ttsCacheWrite.mock.calls.slice(0, 5);
+    expect(cacheWrites.map((call: any[]) => call[2])).toEqual([0, 13, 39, 91, 195]);
+    expect(cacheWrites.map((call: any[]) => call[6])).toEqual([13, 26, 52, 104, 148]);
   });
 });
 

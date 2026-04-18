@@ -77,6 +77,10 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
       : startEvent && firstAudioEvent
         ? Math.max(0, firstAudioEvent.ts - startEvent.ts)
         : null;
+  const startupCacheMode = startEvent?.cacheMode ?? null;
+  const openingChunkWordCounts = Array.isArray(startEvent?.openingChunkWordCounts)
+    ? [...startEvent.openingChunkWordCounts]
+    : [];
 
   const pauses = lifecycle.filter((e) => e.state === "pause").length;
   const resumes = lifecycle.filter((e) => e.state === "resume").length;
@@ -134,6 +138,8 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
     startLatencyMs,
     wordEventCount: words.length,
     flowEventCount: flow.length,
+    startupCacheMode,
+    openingChunkWordCounts,
     pauseResumeIntegrity: {
       pauses,
       resumes,

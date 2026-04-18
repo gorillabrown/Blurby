@@ -144,6 +144,10 @@ export function summarizeTrace(trace) {
       : start && firstAudio
         ? Math.max(0, firstAudio.ts - start.ts)
         : null;
+  const startupCacheMode = start?.cacheMode ?? null;
+  const openingChunkWordCounts = Array.isArray(start?.openingChunkWordCounts)
+    ? [...start.openingChunkWordCounts]
+    : [];
 
   if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
   if (pauses !== resumes) failureClasses.push("pause-resume-error");
@@ -166,6 +170,8 @@ export function summarizeTrace(trace) {
     maxDrift,
     wordEventCount: words.length,
     flowEventCount: flow.length,
+    startupCacheMode,
+    openingChunkWordCounts,
     pauseResumeIntegrity: { pauses, resumes, balanced: pauses === resumes },
     transitionCounts,
     sectionHandoffLatencyMs,
@@ -179,7 +185,18 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
   const words = fixture.text.split(/\s+/).filter(Boolean);
   const now = 1_700_000_000_000 + runOrdinal * 10_000;
   const baseStep = Math.max(40, Math.round(160 / Math.max(0.5, rate)));
-  const startLatencyMs = 220 + Math.min(1400, words.length * 7);
+  const startupCacheMode =
+    scenarioId?.includes("startup-parity-cached")
+      ? "cached"
+      : scenarioId?.includes("startup-parity-uncached")
+        ? "uncached"
+        : null;
+  const openingChunkWordCounts = startupCacheMode ? [13, 26, 52, 104, 148] : null;
+  const startLatencyMs = startupCacheMode === "cached"
+    ? 180 + Math.min(200, words.length * 5)
+    : startupCacheMode === "uncached"
+      ? 280 + Math.min(240, words.length * 6)
+      : 220 + Math.min(1400, words.length * 7);
   const sectionHandoffLatencyMs = 90 + Math.min(220, Math.max(1, words.length) * 6);
   const crossBookResumeLatencyMs = 240 + Math.min(480, Math.max(1, words.length) * 9);
   const rateResponseLatencyMs = 70 + Math.min(140, Math.max(1, words.length) * 4);
@@ -192,6 +209,7 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
     wordIndex: 0,
     mode,
     isNarrating: true,
+    ...(startupCacheMode ? { cacheMode: startupCacheMode, openingChunkWordCounts } : {}),
   });
   events.push({
     ts: now + startLatencyMs,

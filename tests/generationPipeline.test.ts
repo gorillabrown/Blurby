@@ -12,7 +12,12 @@ vi.hoisted(() => {
   };
 });
 
-import { getChunkSize, createGenerationPipeline, type PipelineConfig } from "../src/utils/generationPipeline";
+import {
+  getChunkSize,
+  buildOpeningRampPlan,
+  createGenerationPipeline,
+  type PipelineConfig,
+} from "../src/utils/generationPipeline";
 import { TTS_COLD_START_CHUNK_WORDS, TTS_CRUISE_CHUNK_WORDS } from "../src/constants";
 
 // ── Chunk Sizing Tests ────────────────────────────────────────────────────────
@@ -37,6 +42,31 @@ describe("getChunkSize", () => {
   it("doubling ramp sequence: 13 → 26 → 52 → 104 → 148", () => {
     const sizes = [0, 1, 2, 3, 4].map(i => getChunkSize(i));
     expect(sizes).toEqual([13, 26, 52, 104, TTS_CRUISE_CHUNK_WORDS]);
+  });
+
+  it("buildOpeningRampPlan preserves the opening ramp targets from the current start", () => {
+    const boundaryEnds = new Set([12, 38, 90, 194, 342]);
+    const words = Array.from({ length: 360 }, (_, index) =>
+      boundaryEnds.has(index) ? `word${index}.` : `word${index}`
+    );
+
+    const plan = buildOpeningRampPlan(words, 0);
+
+    expect(plan.map((chunk) => chunk.startIdx)).toEqual([0, 13, 39, 91, 195]);
+    expect(plan.map((chunk) => chunk.targetWordCount)).toEqual([13, 26, 52, 104, 148]);
+    expect(plan.map((chunk) => chunk.wordCount)).toEqual([13, 26, 52, 104, 148]);
+  });
+
+  it("buildOpeningRampPlan shifts the opening ramp for nonzero starts", () => {
+    const boundaryEnds = new Set([32, 58, 110, 214, 362]);
+    const words = Array.from({ length: 400 }, (_, index) =>
+      boundaryEnds.has(index) ? `word${index}.` : `word${index}`
+    );
+
+    const plan = buildOpeningRampPlan(words, 20);
+
+    expect(plan.map((chunk) => chunk.startIdx)).toEqual([20, 33, 59, 111, 215]);
+    expect(plan.map((chunk) => chunk.wordCount)).toEqual([13, 26, 52, 104, 148]);
   });
 });
 

@@ -21,6 +21,8 @@ export interface TtsEvalLifecycleEvent extends TtsEvalTraceBaseEvent {
   latencyMs?: number;
   mode?: "page" | "focus" | "flow";
   isNarrating?: boolean;
+  cacheMode?: "cached" | "uncached";
+  openingChunkWordCounts?: number[];
 }
 
 export interface TtsEvalWordEvent extends TtsEvalTraceBaseEvent {
@@ -72,6 +74,8 @@ export interface TtsEvalMetricsSummary {
   startLatencyMs: number | null;
   wordEventCount: number;
   flowEventCount: number;
+  startupCacheMode: "cached" | "uncached" | null;
+  openingChunkWordCounts: number[];
   pauseResumeIntegrity: {
     pauses: number;
     resumes: number;

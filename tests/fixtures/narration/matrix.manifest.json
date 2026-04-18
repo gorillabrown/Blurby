@@ -51,6 +51,22 @@
       "tags": ["transition", "chapter"]
     },
     {
+      "id": "startup-parity-uncached",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "short",
+      "tags": ["startup-parity", "uncached", "opening-ramp"]
+    },
+    {
+      "id": "startup-parity-cached",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "short",
+      "tags": ["startup-parity", "cached", "opening-ramp"]
+    },
+    {
       "id": "rate-edit-live-response",
       "fixtureId": "prose-basic",
       "voiceId": "af_bella",

@@ -170,10 +170,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
       const voiceId = getCacheVoice();
       if (!bookId) return null;
       const words = deps.getWords();
-      // TTS-7A: Pass remaining words from startIdx — loadCachedChunk uses
-      // the real wordCount stored at cache-write time to slice correctly.
-      const remainingWords = words.slice(startIdx);
-      return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, remainingWords);
+      return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, words);
     },
     onError: () => deps.onFallbackToWeb(),
     onEnd: () => {
