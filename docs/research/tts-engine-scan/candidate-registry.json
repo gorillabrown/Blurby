@@ -1,0 +1,14 @@
+{
+  "baseline": ["kokoro"],
+  "activeCandidates": [
+    { "id": "moss-tts", "track": "context" },
+    { "id": "qwen3-tts", "track": "context" },
+    { "id": "chatterbox-turbo", "track": "practical" },
+    { "id": "melotts", "track": "practical" }
+  ],
+  "excluded": [
+    { "id": "vibevoice", "reason": "production-posture-and-watermark-risk" },
+    { "id": "voxtral-4b-tts-2603", "reason": "non-commercial-license" },
+    { "id": "irodori-tts-500m-v2", "reason": "language-scope-mismatch" }
+  ]
+}
