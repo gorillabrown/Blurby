@@ -20,3 +20,6 @@ Example App/
 
 # JetBrains project files are intentionally tracked
 !.idea/
+
+artifacts/tts-eval/engine-scan/**
+!artifacts/tts-eval/engine-scan/README.md
