@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-17 — Closed out TTS-CONT-1 and advanced the follow-on lane to TTS-RATE-2.
+**Last updated**: 2026-04-17 — Closed out TTS-RATE-2 and advanced the follow-on lane to TTS-START-1.
 **Current branch**: `main`
-**Current state**: v1.60.0 stable. Queue depth 3 (GREEN). Next queue item: TTS-RATE-2.
+**Current state**: v1.61.0 stable. Queue depth 2 (YELLOW). Next queue item: TTS-START-1.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -86,7 +86,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     TTS-CONT-1: Readiness-Driven Continuity ✅ (v1.60.0)
                    │
-    TTS-RATE-2: Segmented Live Rate Response
+    TTS-RATE-2: Segmented Live Rate Response ✅ (v1.61.0)
                    │
     TTS-START-1: Startup Parity & Opening Cache Contract
                    │
@@ -2892,7 +2892,7 @@ Task 12 (Git)
 
 ---
 
-### Sprint TTS-RATE-2: Segmented Live Kokoro Rate Response
+### Sprint TTS-RATE-2: Segmented Live Kokoro Rate Response ✅ COMPLETED (v1.61.0, 2026-04-17)
 
 **Goal:** Make same-bucket Kokoro speed changes feel materially more live by bounding response lag to a short playback segment instead of the full currently playing chunk, while preserving pitch and avoiding restart behavior.
 
@@ -2986,6 +2986,10 @@ Task 12 (Git)
 11. `npm run build` succeeds.
 
 **Tier:** Full | **Depends on:** TTS-RATE-1, TTS-CONT-1
+
+**Completion note:** Completed on 2026-04-17. Same-bucket Kokoro rate edits now land on short scheduler playback segments instead of waiting for the full parent chunk to finish. Generated/cache buckets remain fixed, pitch-preserving tempo shaping remains the only playback-shaping path, scheduler boundary semantics stay parent-chunk aware, and runtime/eval artifacts now record trusted `rateResponseLatencyMs` from a real segment-start signal instead of piggybacking on generic audio callbacks.
+
+**Verification:** Segmentation and same-bucket live-response coverage expanded with `tests/segmentKokoroChunk.test.ts`, `tests/kokoroStrategyRateContinuity.test.ts`, `tests/audioSchedulerTempo.test.ts`, `tests/useNarrationRateUpdate.test.tsx`, `tests/ttsEvalLifecycle.test.ts`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with the focused rate-response slice (`5` files, `42` tests), the gated matrix (`artifacts/tts-eval/rate2-closeout`) reporting `Rate response latency p50/p95: 210 / 210 ms`, full `npm test` (`124` files, `1995` tests), and `npm run build`; the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
 
 ---
 

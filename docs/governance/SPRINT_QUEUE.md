@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3 — GREEN
-Next queue item: TTS-RATE-2 (Segmented Live Kokoro Rate Response)
-Health: GREEN — TTS-CONT-1 is complete and the queue remains healthy with the two remaining TTS follow-on sprints ahead of the parked e-ink work.
+Queue depth: 2 — YELLOW
+Next queue item: TTS-START-1 (Startup Parity & Opening Cache Contract)
+Health: YELLOW — TTS-RATE-2 is complete and the queue now has two remaining spec'd follow-ons (`TTS-START-1` and parked `EINK-6A`); add one more sprint before dispatching beyond the next item.
 ```
 
 ---
@@ -34,11 +34,10 @@ Health: GREEN — TTS-CONT-1 is complete and the queue remains healthy with the 
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | TTS-RATE-2 | v1.61.0 | `sprint/tts-rate-2-segmented-live-response` | Full | **YES** | Full spec: 12 tasks, 11 success criteria. Bounds same-bucket Kokoro rate-response lag via short playback segments without reintroducing restart behavior. Depends on `TTS-CONT-1`. |
-| 2 | TTS-START-1 | v1.62.0 | `sprint/tts-start-1-startup-parity` | Full | **YES** | Full spec: 11 tasks, 9 success criteria. Aligns cached and uncached starts around one opening-ramp contract and fixes the renderer cache helper contract. Depends on `TTS-RATE-2`. |
-| 3 | EINK-6A | TBD | TBD | Full | **YES** | Full spec: 10 tasks, 10 success criteria. Parked-but-spec'd fallback pointer; lower priority than the active TTS continuity lane and should dispatch only after the higher-priority queue work or an explicit reprioritization. Depends on TTS-7D (already satisfied). |
+| 1 | TTS-START-1 | v1.62.0 | `sprint/tts-start-1-startup-parity` | Full | **YES** | Full spec: 11 tasks, 9 success criteria. Aligns cached and uncached starts around one opening-ramp contract and fixes the renderer cache helper contract. Depends on `TTS-RATE-2`. |
+| 2 | EINK-6A | TBD | TBD | Full | **YES** | Full spec: 10 tasks, 10 success criteria. Parked-but-spec'd fallback pointer; lower priority than the active TTS continuity lane and should dispatch only after the higher-priority queue work or an explicit reprioritization. Depends on TTS-7D (already satisfied). |
 
-**Dispatch status:** Queue depth 3 — GREEN. Current pointer order is `TTS-RATE-2` → `TTS-START-1` → `EINK-6A`.
+**Dispatch status:** Queue depth 2 — YELLOW. Current pointer order is `TTS-START-1` → `EINK-6A`.
 
 ### Parallel Dispatch Guardrails
 
@@ -93,6 +92,7 @@ If any guardrail fails, run the sprints sequentially.
 31. ~~Backfill queue to ≥3~~ — COMPLETE. Re-promoted `EINK-6A` as a parked but fully spec'd fallback pointer so queue depth remains 3 (GREEN) while TTS/token work stays first.
 32. ~~Dispatch TTS-RATE-1 to CLI~~ — COMPLETE (v1.58.0). Kokoro now offers exact `1.0x`–`1.5x` UI speeds in `0.1x` steps over fixed generation buckets (`1.0` / `1.2` / `1.5`), uses pitch-preserving tempo shaping instead of pitch-shifting playbackRate changes, keeps in-bucket speed edits restart-free via live buffered retiming, and passed the gated six-rate matrix release evidence (`artifacts/tts-eval/final-gate-22`). Existing Vite circular chunk warning unchanged.
 33. ~~Backfill queue to ≥3~~ — COMPLETE. Added `TTS-CONT-1`, `TTS-RATE-2`, and `TTS-START-1`; queue depth restored to 4 (GREEN) with the TTS continuity lane prioritized ahead of parked e-ink work.
+34. **Backfill queue to ≥3** — YELLOW, depth 2. Add one more sprint before dispatching beyond `TTS-START-1`.
 
 ---
 
@@ -114,6 +114,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| TTS-RATE-2 | 2026-04-17 | PASS | Segmented live Kokoro rate response shipped at v1.61.0: generated/cache buckets stay fixed, playback now splits into short scheduler-ready segments so same-bucket edits take effect by the next segment boundary instead of the full parent chunk, scheduler boundary semantics remain parent-chunk aware, and eval artifacts now record trusted `rateResponseLatencyMs` from real segment-start signals. Verification passed with the focused rate slice (`5` files, `42` tests), gated matrix release evidence (`artifacts/tts-eval/rate2-closeout`) showing `Rate response latency p50/p95: 210 / 210 ms`, full `npm test` (`124` files, `1995` tests), and `npm run build`; existing circular-chunk warning unchanged. |
 | TTS-CONT-1 | 2026-04-17 | PASS | Readiness-driven continuity shipped at v1.60.0: same-book and cross-book narration handoffs now resume from actual foliate/read-surface readiness instead of fixed `300ms` and `2500ms + 300ms` sleeps, the cross-book overlay is fallback-only rather than a blocking minimum dwell, and eval artifacts now record `sectionHandoffLatencyMs` and `crossBookResumeLatencyMs`. Verification passed with `npm test` (`123` files, `1976` tests), `npm run build`, a gated handoff matrix with non-null cross-book latency, and a section fixture run with non-null section latency; existing circular-chunk warning unchanged. |
 | EPUB-TOKEN-1 | 2026-04-17 | PASS | Dropcap/split-token lexical stitching shipped at v1.59.0: no-whitespace contiguous styled fragments now resolve to one logical word across extraction, rendering, click/selection, and narration start paths; rendered spans carry token metadata; stitched-fragment interactions collapse to one stable global word index. Verification passed: focused slice `5/5` files and `43/43` tests, full suite `122/122` files and `1964/1964` tests, and `npm run build` with the existing non-blocking `settings -> tts -> settings` warning. Solon APPROVED. Plato READY with no findings. |
 | TTS-RATE-1 | 2026-04-17 | PASS | Pitch-preserving Kokoro tempo shipped at v1.58.0: UI speed now moves in exact `0.1x` steps from `1.0x` to `1.5x`, generation/cache buckets stay fixed at `1.0` / `1.2` / `1.5`, exact-speed preview/status stays aligned to the selected speed, and in-bucket edits retime buffered playback live without restarting generation. Final verification passed with targeted tempo/rate suites, full release validation, and the gated six-rate matrix (`artifacts/tts-eval/final-gate-22`) covering `1.0` through `1.5` with PASS gate artifacts, drift max `2`, and zero pause/resume or handoff failures; existing circular-chunk warning unchanged. |
