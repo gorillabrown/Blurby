@@ -247,7 +247,8 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
       Await: All docs updated
 
 7. GIT phase
-   a. DISPATCH: "Hermes (haiku/Messenger)" → stage, commit, merge, push
+   a. DISPATCH: "Hermes (haiku/Messenger)" → stage, commit, merge to `main`, push
+      Default policy: if the sprint passed verification/review/docs, merge automatically unless the sprint spec explicitly says not to
    b. Never git add . or git add -A — stage specific files
 
 8. REPORT phase

@@ -15,7 +15,7 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 2. Open the Roadmap section listed on the `Read:` line — that's the full dispatch spec
 3. Confirm the full spec includes explicit edit-site coordinates for every planned code change: file, function/method, approximate live anchor, and exact modification type. If any code-changing step lacks coordinates, stop and harden the spec before dispatch.
 4. Execute from the Roadmap spec under `gog-lead` orchestration with the named sub-agent roster
-5. After completion: doc-keeper marks the Roadmap section COMPLETED, removes the pointer, logs to completed table
+5. After successful completion: CLI auto-merges by default unless the sprint spec explicitly says not to; doc-keeper marks the Roadmap section COMPLETED, removes the pointer, and logs it to the completed table
 6. Cowork prints the next pointer and checks queue depth
 
 

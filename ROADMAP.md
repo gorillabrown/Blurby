@@ -6,6 +6,8 @@
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
+>
+> **Sprint closeout convention:** Unless a sprint explicitly says otherwise, every successful CLI sprint auto-merges as part of closeout: stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, push, then update governance docs to reflect the landed state.
 
 ---
 
@@ -2868,7 +2870,7 @@ Task 12 (Git)
 | 8 | Solon | **Spec compliance** — Verify all success criteria and confirm no new fixed waits remain on the active handoff path. | — | — |
 | 9 | Plato | **Quality review** — Review continuity behavior, readiness truth, and fallback timeout policy for regressions or hidden deadlocks. | — | — |
 | 10 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` closeout notes when complete. | Governing docs + runbook | — |
-| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/tts-cont-1-readiness-continuity` |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/tts-cont-1-readiness-continuity` |
 
 #### SUCCESS CRITERIA
 
@@ -2969,7 +2971,7 @@ Task 12 (Git)
 | 9 | Solon | **Spec compliance** — Verify the bounded-lag contract and confirm no same-bucket restart path reappears. | — | — |
 | 10 | Plato | **Quality review** — Review audible continuity assumptions, segment sizing, and response-latency tradeoffs. | — | — |
 | 11 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and matrix runbook after closeout. | Governing docs + runbook | — |
-| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/tts-rate-2-segmented-live-response` |
+| 12 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/tts-rate-2-segmented-live-response` |
 
 #### SUCCESS CRITERIA
 
@@ -3067,7 +3069,7 @@ Task 12 (Git)
 | 8 | Solon | **Spec compliance** — Verify opening-ramp parity and exact cached replay on nonzero-start inputs. | — | — |
 | 9 | Plato | **Quality review** — Review startup consistency, cache contract clarity, and any remaining divergence between cached and uncached starts. | — | — |
 | 10 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and matrix runbook after closeout. | Governing docs + runbook | — |
-| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/tts-start-1-startup-parity` |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/tts-start-1-startup-parity` |
 
 #### SUCCESS CRITERIA
 
@@ -3136,7 +3138,7 @@ Task 12 (Git)
 | 7 | Hippocrates | **`npm test` + `npm run build`** | — |
 | 8 | Solon | **Spec compliance** | — |
 | 9 | Herodotus | **Documentation pass** | All 6 governing docs |
-| 10 | Hermes | **Git: commit, merge, push** | — |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — |
 
 #### SUCCESS CRITERIA
 
@@ -3196,7 +3198,7 @@ Task 12 (Git)
 | 5 | Hippocrates | **`npm test` + `npm run build`** | — |
 | 6 | Solon | **Spec compliance** | — |
 | 7 | Herodotus | **Documentation pass** | All 6 governing docs |
-| 8 | Hermes | **Git: commit, merge, push** | — |
+| 8 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — |
 
 #### SUCCESS CRITERIA
 
@@ -3264,7 +3266,7 @@ Task 12 (Git)
 | 8 | Hippocrates | **`npm test` + `npm run build`** | — |
 | 9 | Solon | **Spec compliance** | — |
 | 10 | Herodotus | **Documentation pass** | All 6 governing docs |
-| 11 | Hermes | **Git: commit, merge, push** | — |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — |
 
 #### SUCCESS CRITERIA
 
