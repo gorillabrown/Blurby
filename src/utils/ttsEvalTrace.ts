@@ -104,6 +104,14 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
         && e.context?.includes("cross-book"),
     )?.latencyMs
     ?? null;
+  const rateResponseLatencyMs =
+    transitions.find(
+      (e) =>
+        e.transition === "rate-response"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("same-bucket"),
+    )?.latencyMs
+    ?? null;
 
   const failureClasses: TtsEvalMetricsSummary["failureClasses"] = [];
   if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
@@ -134,6 +142,7 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
     transitionCounts,
     sectionHandoffLatencyMs,
     crossBookResumeLatencyMs,
+    rateResponseLatencyMs,
     failureClasses,
   };
 }

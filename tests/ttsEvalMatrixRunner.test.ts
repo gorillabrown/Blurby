@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { calculateAggregateMetrics } from "../scripts/tts_eval_metrics.mjs";
+import { calculateAggregateMetrics, formatAggregateSummary } from "../scripts/tts_eval_metrics.mjs";
 import { getSoakProfile } from "../scripts/tts_eval_profiles.mjs";
 import { executeSoak, parseArgs, runHarness, simulateTrace, summarizeTrace } from "../scripts/tts_eval_runner.mjs";
 
@@ -41,6 +41,7 @@ async function createRuntimeWithFiles(baseDir: string) {
     scenarios: [
       { id: "smoke-1", fixtureId: "prose-basic", voiceId: "af_bella", requestedRate: 1.0, durationClass: "short", tags: ["smoke"] },
       { id: "smoke-2", fixtureId: "pause-resume", voiceId: "af_bella", requestedRate: 1.1, durationClass: "short", tags: ["smoke", "pause"] },
+      { id: "rate-edit-live-response", fixtureId: "prose-basic", voiceId: "af_bella", requestedRate: 1.3, durationClass: "short", tags: ["rate-response"] },
     ],
   };
   const fixtureLookup = new Map([
@@ -133,6 +134,22 @@ describe("tts eval matrix/soak runner", () => {
     expect(aggregate.failureCounts.handoffFailures).toBe(1);
   });
 
+  it("surfaces rate-response latency in aggregate summaries for release evidence", () => {
+    const aggregate = calculateAggregateMetrics([
+      { startLatencyMs: 100, maxDrift: 2, failureClasses: [], rateResponseLatencyMs: 95 },
+      { startLatencyMs: 200, maxDrift: 5, failureClasses: ["pause-resume-error"], rateResponseLatencyMs: 125 },
+      { startLatencyMs: 300, maxDrift: 8, failureClasses: ["handoff-error"], rateResponseLatencyMs: null },
+    ] as any);
+
+    expect((aggregate as any).rateResponseLatency).toEqual({
+      p50: 110,
+      p95: 123.5,
+      min: 95,
+      max: 125,
+    });
+    expect(formatAggregateSummary(aggregate)).toContain("Rate response latency p50/p95: 110 / 123.5 ms");
+  });
+
   it("includes section and cross-book latency fields in per-run summaries", () => {
     const summary = summarizeTrace({
       runId: "latency-run",
@@ -201,5 +218,24 @@ describe("tts eval matrix/soak runner", () => {
     });
     const summary = summarizeTrace(trace);
     expect(summary.crossBookResumeLatencyMs).toEqual(expect.any(Number));
+  });
+
+  it("emits same-bucket rate-response latency in simulated rate-edit traces", () => {
+    const trace = simulateTrace({
+      fixture: {
+        id: "prose-basic",
+        title: "Rate",
+        sourceType: "prose",
+        expectedCoverage: [],
+        text: "one two three four five six",
+      },
+      mode: "flow",
+      rate: 1.3,
+      runId: "rate-run",
+      scenarioId: "rate-edit-live-response",
+      runOrdinal: 1,
+    });
+    const summary = summarizeTrace(trace);
+    expect(summary.rateResponseLatencyMs).toEqual(expect.any(Number));
   });
 });

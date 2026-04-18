@@ -12,11 +12,13 @@ let startedSources: {
   playbackRate: number;
   bufferLength: number;
 }[] = [];
+let rafCallbacks: FrameRequestCallback[] = [];
 
 beforeEach(() => {
   mockCurrentTime = 0;
   stoppedSources = 0;
   startedSources = [];
+  rafCallbacks = [];
 
   class MockAudioBufferSourceNode {
     buffer: any = null;
@@ -57,11 +59,25 @@ beforeEach(() => {
   }
 
   (globalThis as any).AudioContext = MockAudioContext;
+  (globalThis as any).requestAnimationFrame = (callback: FrameRequestCallback) => {
+    rafCallbacks.push(callback);
+    return rafCallbacks.length;
+  };
+  (globalThis as any).cancelAnimationFrame = vi.fn();
 });
 
 afterEach(() => {
   delete (globalThis as any).AudioContext;
+  delete (globalThis as any).requestAnimationFrame;
+  delete (globalThis as any).cancelAnimationFrame;
 });
+
+function flushAnimationFrame(now: number) {
+  mockCurrentTime = now;
+  const pending = [...rafCallbacks];
+  rafCallbacks = [];
+  for (const callback of pending) callback(now);
+}
 
 function makeChunk(startIdx: number, wordCount: number, durationMs = 1000): ScheduledChunk {
   return {
@@ -70,6 +86,29 @@ function makeChunk(startIdx: number, wordCount: number, durationMs = 1000): Sche
     durationMs,
     words: Array.from({ length: wordCount }, (_, i) => `word${startIdx + i}`),
     startIdx,
+  };
+}
+
+type SegmentedScheduledChunk = ScheduledChunk & {
+  parentChunkStartIdx: number;
+  parentChunkWordCount: number;
+  segmentIndex: number;
+  isFinalSegment: boolean;
+};
+
+function makeSegmentedChunk(
+  startIdx: number,
+  wordCount: number,
+  segmentIndex: number,
+  isFinalSegment: boolean,
+  durationMs = 400,
+): SegmentedScheduledChunk {
+  return {
+    ...makeChunk(startIdx, wordCount, durationMs),
+    parentChunkStartIdx: 0,
+    parentChunkWordCount: 6,
+    segmentIndex,
+    isFinalSegment,
   };
 }
 
@@ -232,6 +271,135 @@ describe("audioScheduler tempo continuity", () => {
       (startedSources[3].bufferLength / KOKORO_SAMPLE_RATE) - crossfadeSec,
       2,
     );
+
+    scheduler.stop();
+  });
+
+  it("preserves the started playback segment during same-bucket refresh but only emits the parent boundary once for segmented chunks", async () => {
+    const onChunkBoundary = vi.fn();
+    const onChunkHandoff = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({
+      onWordAdvance: vi.fn(),
+      onChunkBoundary,
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+      onChunkHandoff,
+    });
+    scheduler.play();
+
+    const bucketPlan = {
+      selectedSpeed: 1.2,
+      generationBucket: 1.2,
+      tempoFactor: 1,
+    } as const;
+
+    scheduler.scheduleChunk({
+      ...makeSegmentedChunk(0, 2, 0, false),
+      kokoroRatePlan: bucketPlan,
+    });
+    scheduler.scheduleChunk({
+      ...makeSegmentedChunk(2, 2, 1, false),
+      kokoroRatePlan: bucketPlan,
+    });
+    scheduler.scheduleChunk({
+      ...makeSegmentedChunk(4, 2, 2, true),
+      kokoroRatePlan: bucketPlan,
+    });
+
+    mockCurrentTime = 0.05;
+
+    scheduler.refreshBufferedTempo({
+      selectedSpeed: 1.3,
+      generationBucket: 1.2,
+      tempoFactor: 1.3 / 1.2,
+    });
+
+    expect(stoppedSources).toBe(2);
+    expect(startedSources).toHaveLength(5);
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+
+    expect(onChunkBoundary).toHaveBeenCalledTimes(1);
+    expect(onChunkBoundary).toHaveBeenCalledWith(6);
+    expect(onChunkHandoff).toHaveBeenCalledTimes(1);
+    expect(onChunkHandoff).toHaveBeenCalledWith(5);
+
+    scheduler.stop();
+  });
+
+  it("keeps unsegmented chunk boundary callbacks unchanged during same-bucket refresh", async () => {
+    const onChunkBoundary = vi.fn();
+    const onChunkHandoff = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({
+      onWordAdvance: vi.fn(),
+      onChunkBoundary,
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+      onChunkHandoff,
+    });
+    scheduler.play();
+
+    const bucketPlan = {
+      selectedSpeed: 1.2,
+      generationBucket: 1.2,
+      tempoFactor: 1,
+    } as const;
+
+    scheduler.scheduleChunk({
+      ...makeChunk(0, 2, 400),
+      kokoroRatePlan: bucketPlan,
+    });
+    scheduler.scheduleChunk({
+      ...makeChunk(2, 2, 400),
+      kokoroRatePlan: bucketPlan,
+    });
+    scheduler.scheduleChunk({
+      ...makeChunk(4, 2, 400),
+      kokoroRatePlan: bucketPlan,
+    });
+
+    mockCurrentTime = 0.05;
+
+    scheduler.refreshBufferedTempo({
+      selectedSpeed: 1.3,
+      generationBucket: 1.2,
+      tempoFactor: 1.3 / 1.2,
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 60));
+
+    expect(onChunkBoundary.mock.calls.map(([endIdx]) => endIdx)).toEqual([2, 4, 6]);
+    expect(onChunkHandoff.mock.calls.map(([wordIdx]) => wordIdx)).toEqual([1, 3, 5]);
+
+    scheduler.stop();
+  });
+
+  it("fires segment-start callbacks from the audio clock when a future segment actually begins", () => {
+    const onSegmentStart = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({
+      onWordAdvance: vi.fn(),
+      onChunkBoundary: vi.fn(),
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+      onSegmentStart,
+    });
+    scheduler.play();
+
+    scheduler.scheduleChunk(makeChunk(0, 4, 1000));
+    scheduler.scheduleChunk(makeChunk(4, 4, 1000));
+
+    expect(onSegmentStart).toHaveBeenCalledTimes(1);
+    expect(onSegmentStart).toHaveBeenLastCalledWith(0);
+
+    flushAnimationFrame(0.95);
+    expect(onSegmentStart).toHaveBeenCalledTimes(1);
+
+    flushAnimationFrame(1.0);
+    expect(onSegmentStart).toHaveBeenCalledTimes(2);
+    expect(onSegmentStart).toHaveBeenLastCalledWith(4);
 
     scheduler.stop();
   });

@@ -185,3 +185,39 @@ export interface TtsStrategy {
 export interface KokoroSchedulerRatePlanMetadata {
   kokoroRatePlan?: KokoroRatePlan;
 }
+
+/**
+ * Shared live-rate segmentation budget for splitting one generated Kokoro chunk
+ * into shorter scheduler-ready playback segments.
+ *
+ * Duration remains the primary authority; optional word bounds are reserved for
+ * conservative fallback paths when real word timestamps are unavailable.
+ */
+export interface KokoroLiveRateSegmentOptions {
+  maxSegmentDurationMs: number;
+  minSegmentWords?: number;
+  maxSegmentWords?: number;
+}
+
+/**
+ * Metadata carried by scheduler-ready Kokoro playback segments when one
+ * generated chunk becomes multiple short playback segments.
+ */
+export interface KokoroPlaybackSegmentMetadata {
+  /** Stable parent generated-chunk identity for regrouping or retiming later. */
+  parentChunkStartIdx: number;
+  /** Parent generated-chunk coverage, paired with parentChunkStartIdx. */
+  parentChunkWordCount: number;
+  /** Zero-based index of this playback segment within its parent generated chunk. */
+  segmentIndex: number;
+  /** True when this playback segment covers the tail of the parent generated chunk. */
+  isFinalSegment: boolean;
+}
+
+/**
+ * Full Kokoro scheduler metadata for segmented live-rate playback.
+ * Future scheduler-ready chunks should carry this alongside the normal
+ * ScheduledChunk fields so rate plan and parent-segment identity travel together.
+ */
+export interface KokoroSchedulerSegmentMetadata
+  extends KokoroSchedulerRatePlanMetadata, KokoroPlaybackSegmentMetadata {}

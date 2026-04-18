@@ -91,6 +91,25 @@ describe("tts eval lifecycle and handoff accounting", () => {
     expect((summary as any).crossBookResumeLatencyMs).toBe(480);
   });
 
+  it("records same-bucket segmented rate-response latency when transition events include live response metrics", () => {
+    const trace = makeLifecycleTrace([
+      { ts: 1, kind: "lifecycle", state: "start" },
+      { ts: 2, kind: "lifecycle", state: "first-audio", latencyMs: 220 },
+      {
+        ts: 3,
+        kind: "transition",
+        transition: "rate-response",
+        from: 1.0,
+        to: 1.1,
+        context: "same-bucket-segmented-live-rate",
+        latencyMs: 95,
+      } as any,
+      { ts: 4, kind: "lifecycle", state: "stop" },
+    ]);
+    const summary = summarizeTtsEvalTrace(trace);
+    expect((summary as any).rateResponseLatencyMs).toBe(95);
+  });
+
   it("flags handoff error when book transition has no handoff", () => {
     const trace = makeLifecycleTrace([
       { ts: 1, kind: "lifecycle", state: "start" },

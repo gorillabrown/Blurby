@@ -9,6 +9,7 @@ import { createGenerationPipeline } from "../../utils/generationPipeline";
 import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler, AudioProgressReport } from "../../utils/audioScheduler";
+import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
 import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
 import type { PronunciationOverride } from "../../types";
@@ -43,6 +44,8 @@ export interface KokoroStrategyDeps {
   getFootnoteCues?: () => Array<{ afterWordIdx: number; text: string }>;
   /** Called when Kokoro fails — caller should fall back to Web Speech */
   onFallbackToWeb: () => void;
+  /** Fires when a scheduler segment actually starts playing on the audio clock. */
+  onSegmentStart?: (wordIndex: number) => void;
   /**
    * TTS-7R: Visual-only truth-sync callback. Called every ~12 words by the scheduler
    * to re-snap the visual overlay to the authoritative audio position.
@@ -106,12 +109,12 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
     getFootnoteMode: deps.getFootnoteMode,
     getFootnoteCues: deps.getFootnoteCues,
     onChunkReady: (chunk) => {
-      const schedulerChunk: typeof chunk & KokoroSchedulerRatePlanMetadata = {
+      const schedulerSegments = segmentKokoroChunk({
         ...chunk,
         // Wave A: keep generation/cache on the snapped bucket and expose
         // exact UI speed recovery via pre-playback pitch-preserving tempo shaping.
         kokoroRatePlan: getRatePlan(),
-      };
+      } satisfies typeof chunk & KokoroSchedulerRatePlanMetadata);
 
       // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
       const isFirst = !firstChunkReceived;
@@ -123,7 +126,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 
         const scheduleMark = perfStart("schedule-chunk");
         scheduleMark.meta = { chunkWordCount: chunk.words.length, startIdx: chunk.startIdx, isFirstChunk: isFirst };
-        scheduler.scheduleChunk(schedulerChunk);
+        for (const schedulerSegment of schedulerSegments) {
+          scheduler.scheduleChunk(schedulerSegment);
+        }
         perfEnd(scheduleMark);
 
         perfEnd(responseMark);
@@ -137,7 +142,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
         }
       } else {
         // TTS-7E: Schedule chunk synchronously (scheduler needs it immediately).
-        scheduler.scheduleChunk(schedulerChunk);
+        for (const schedulerSegment of schedulerSegments) {
+          scheduler.scheduleChunk(schedulerSegment);
+        }
       }
 
       queueMicrotask(() => {
@@ -188,6 +195,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
         onChunkBoundary: () => {},
         onEnd,
         onError: () => deps.onFallbackToWeb(),
+        onSegmentStart: (wordIndex: number) => {
+          deps.onSegmentStart?.(wordIndex);
+        },
         // TTS-7R: Truth-sync is visual-only — re-snap overlay to scheduler's authoritative position
         // without updating narration state. Route through dedicated deps.onTruthSync if provided;
         // fall back to onWordAdvance only when no visual-only handler is wired (legacy path).

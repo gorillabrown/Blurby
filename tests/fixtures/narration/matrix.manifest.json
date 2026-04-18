@@ -49,6 +49,14 @@
       "requestedRate": 1.5,
       "durationClass": "medium",
       "tags": ["transition", "chapter"]
+    },
+    {
+      "id": "rate-edit-live-response",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.3,
+      "durationClass": "short",
+      "tags": ["rate-response", "same-bucket", "segmented"]
     }
   ]
 }

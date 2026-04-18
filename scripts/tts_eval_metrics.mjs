@@ -16,6 +16,10 @@ export function calculateAggregateMetrics(runSummaries) {
     .map((s) => s.startLatencyMs)
     .filter((value) => Number.isFinite(value))
     .sort((a, b) => a - b);
+  const rateResponseLatencies = summaries
+    .map((s) => s.rateResponseLatencyMs)
+    .filter((value) => Number.isFinite(value))
+    .sort((a, b) => a - b);
   const driftMaxima = summaries
     .map((s) => s.maxDrift ?? 0)
     .filter((value) => Number.isFinite(value))
@@ -31,6 +35,12 @@ export function calculateAggregateMetrics(runSummaries) {
       p95: quantile(latencies, 0.95),
       min: latencies.length ? latencies[0] : null,
       max: latencies.length ? latencies[latencies.length - 1] : null,
+    },
+    rateResponseLatency: {
+      p50: quantile(rateResponseLatencies, 0.5),
+      p95: quantile(rateResponseLatencies, 0.95),
+      min: rateResponseLatencies.length ? rateResponseLatencies[0] : null,
+      max: rateResponseLatencies.length ? rateResponseLatencies[rateResponseLatencies.length - 1] : null,
     },
     drift: {
       p50: quantile(driftMaxima, 0.5),
@@ -48,9 +58,9 @@ export function formatAggregateSummary(aggregate) {
   return [
     `Aggregate runs: ${aggregate.runCount}`,
     `Startup latency p50/p95: ${aggregate.startupLatency.p50 ?? "n/a"} / ${aggregate.startupLatency.p95 ?? "n/a"} ms`,
+    `Rate response latency p50/p95: ${aggregate.rateResponseLatency.p50 ?? "n/a"} / ${aggregate.rateResponseLatency.p95 ?? "n/a"} ms`,
     `Drift p50/p95/max: ${aggregate.drift.p50 ?? "n/a"} / ${aggregate.drift.p95 ?? "n/a"} / ${aggregate.drift.max ?? "n/a"}`,
     `Pause/resume failures: ${aggregate.failureCounts.pauseResumeFailures}`,
     `Handoff failures: ${aggregate.failureCounts.handoffFailures}`,
   ].join("\n");
 }
-

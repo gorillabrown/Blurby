@@ -128,6 +128,14 @@ export function summarizeTrace(trace) {
         && e.context?.includes("cross-book"),
     )?.latencyMs
     ?? null;
+  const rateResponseLatencyMs =
+    transitions.find(
+      (e) =>
+        e.transition === "rate-response"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("same-bucket"),
+    )?.latencyMs
+    ?? null;
 
   const failureClasses = [];
   const startLatencyMs =
@@ -162,6 +170,7 @@ export function summarizeTrace(trace) {
     transitionCounts,
     sectionHandoffLatencyMs,
     crossBookResumeLatencyMs,
+    rateResponseLatencyMs,
     failureClasses,
   };
 }
@@ -173,6 +182,7 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
   const startLatencyMs = 220 + Math.min(1400, words.length * 7);
   const sectionHandoffLatencyMs = 90 + Math.min(220, Math.max(1, words.length) * 6);
   const crossBookResumeLatencyMs = 240 + Math.min(480, Math.max(1, words.length) * 9);
+  const rateResponseLatencyMs = 70 + Math.min(140, Math.max(1, words.length) * 4);
   const events = [];
 
   events.push({
@@ -246,6 +256,17 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
       to: "book-b",
       context: "cross-book-flow-narration",
       latencyMs: crossBookResumeLatencyMs,
+    });
+  }
+  if (scenarioId?.includes("rate-edit")) {
+    events.push({
+      ts: now + startLatencyMs + Math.max(baseStep * 2, 120),
+      kind: "transition",
+      transition: "rate-response",
+      from: Math.max(1, Number((rate - 0.1).toFixed(1))),
+      to: rate,
+      context: "same-bucket-segmented-live-rate",
+      latencyMs: rateResponseLatencyMs,
     });
   }
 

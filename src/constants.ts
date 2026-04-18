@@ -201,6 +201,8 @@ export const KOKORO_RATE_BUCKETS = [1.0, 1.2, 1.5] as const;
 export type KokoroRateBucket = (typeof KOKORO_RATE_BUCKETS)[number];
 /** Default Kokoro rate bucket */
 export const KOKORO_DEFAULT_RATE_BUCKET: KokoroRateBucket = 1.0;
+/** TTS-RATE-2: Same-bucket live rate edits must become audible by the next short playback segment. */
+export const KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS = 400;
 
 /**
  * Resolve an arbitrary numeric rate to the nearest supported Kokoro bucket.

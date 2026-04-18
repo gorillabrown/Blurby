@@ -41,7 +41,7 @@ export interface TtsEvalFlowPositionEvent extends TtsEvalTraceBaseEvent {
 
 export interface TtsEvalTransitionEvent extends TtsEvalTraceBaseEvent {
   kind: "transition";
-  transition: "section" | "chapter" | "book" | "handoff";
+  transition: "section" | "chapter" | "book" | "handoff" | "rate-response";
   from?: string | number;
   to?: string | number;
   context?: string;
@@ -85,6 +85,7 @@ export interface TtsEvalMetricsSummary {
   };
   sectionHandoffLatencyMs: number | null;
   crossBookResumeLatencyMs: number | null;
+  rateResponseLatencyMs: number | null;
   failureClasses: Array<"start-latency" | "cursor-highlight-drift" | "handoff-error" | "pause-resume-error">;
 }
 

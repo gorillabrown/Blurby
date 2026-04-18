@@ -143,12 +143,37 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const evalTraceRef = useRef<TtsEvalTraceSink | null>(options.evalTrace ?? null);
   const evalStartTimeRef = useRef<number | null>(null);
   const evalFirstAudioCapturedRef = useRef(false);
+  const pendingRateResponseTraceRef = useRef<{
+    requestedAt: number;
+    fromRate: number;
+    toRate: number;
+    context: string;
+  } | null>(null);
   evalTraceRef.current = options.evalTrace ?? null;
 
   const emitEvalTrace = useCallback((event: Parameters<NonNullable<TtsEvalTraceSink>["record"]>[0]) => {
     if (!evalTraceRef.current?.enabled) return;
     evalTraceRef.current.record(event);
   }, []);
+
+  const clearPendingRateResponseTrace = useCallback(() => {
+    pendingRateResponseTraceRef.current = null;
+  }, []);
+
+  const emitPendingRateResponseTrace = useCallback(() => {
+    const pending = pendingRateResponseTraceRef.current;
+    if (!pending) return;
+
+    pendingRateResponseTraceRef.current = null;
+    emitEvalTrace({
+      kind: "transition",
+      transition: "rate-response",
+      from: pending.fromRate,
+      to: pending.toRate,
+      context: pending.context,
+      latencyMs: Math.max(0, Date.now() - pending.requestedAt),
+    });
+  }, [emitEvalTrace]);
 
   const updateMergedOverrides = useCallback(() => {
     pronunciationOverridesRef.current = mergeOverrides(globalOverridesRef.current, bookOverridesRef.current);
@@ -253,6 +278,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       getParagraphBreaks: () => paragraphBreaksRef.current,
       getFootnoteMode: () => footnoteModeRef.current,
       getFootnoteCues: () => footnoteCuesRef.current,
+      onSegmentStart: () => {
+        emitPendingRateResponseTrace();
+      },
       // TTS-7R: Route truth-sync through dedicated visual-only callback (no state writes)
       onTruthSync: (wordIndex: number) => {
         if (onTruthSyncRef.current) onTruthSyncRef.current(wordIndex);
@@ -546,6 +574,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     webStrategy.stop();
     kokoroStrategy.stop();
     handoffPendingRef.current = false;
+    clearPendingRateResponseTrace();
 
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
@@ -616,6 +645,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     webStrategy.stop();
     kokoroStrategy.stop();
     handoffPendingRef.current = false;
+    clearPendingRateResponseTrace();
     const newSpeed = wpmToRate(wpm);
     syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
     dispatch({ type: "SET_SPEED", speed: newSpeed });
@@ -643,6 +673,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     handoffPendingRef.current = true;
+    clearPendingRateResponseTrace();
     if (s.status === "speaking" || s.status === "paused") {
       webStrategy.stop();
       kokoroStrategy.stop();
@@ -694,6 +725,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       }
 
       if (restartKokoroGeneration) {
+        clearPendingRateResponseTrace();
         kokoroStrategy.stop();
         speakNextChunk();
         return;
@@ -711,10 +743,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           ratePlan.tempoFactor,
         );
       }
+      pendingRateResponseTraceRef.current =
+        updated.status === "speaking"
+          ? {
+              requestedAt: Date.now(),
+              fromRate: current.speed,
+              toRate: nextRate,
+              context: "same-bucket-segmented-live-rate",
+            }
+          : null;
       kokoroStrategy.refreshBufferedTempo();
       return;
     }
 
+    clearPendingRateResponseTrace();
     if (!options.debounceWeb) {
       webStrategy.stop();
       speakNextChunk();
@@ -735,6 +777,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
   const pause = useCallback(() => {
     const s = stateRef.current;
+    clearPendingRateResponseTrace();
     if (s.engine === "kokoro") {
       kokoroStrategy.pause();
     } else {
@@ -750,7 +793,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7A: Diagnostics
     recordDiagEvent("pause", `cursor=${s.cursorWordIndex}`);
     captureDiagSnapshot();
-  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace, clearPendingRateResponseTrace]);
 
   const resume = useCallback((currentWordIndex?: number) => {
     const s = stateRef.current;
@@ -762,6 +805,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       webStrategy.stop();
       kokoroStrategy.stop();
       handoffPendingRef.current = false;
+      clearPendingRateResponseTrace();
       const newSpeed = s.speed;
       dispatch({ type: "START_CURSOR_DRIVEN", startIdx: currentWordIndex, speed: newSpeed });
       stateRef.current = {
@@ -787,6 +831,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (handoffPendingRef.current) {
       webStrategy.stop();
       kokoroStrategy.stop();
+      clearPendingRateResponseTrace();
       lastConfirmedAudioWordRef.current = s.cursorWordIndex;
       dispatch({ type: "RESUME" });
       stateRef.current = { ...stateRef.current, status: "speaking" };
@@ -802,6 +847,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     // Bare resume from pause point
+    clearPendingRateResponseTrace();
     if (s.engine === "kokoro") {
       kokoroStrategy.resume();
     } else {
@@ -817,7 +863,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7A: Diagnostics
     recordDiagEvent("resume", `cursor=${s.cursorWordIndex}`);
     captureDiagSnapshot();
-  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace, clearPendingRateResponseTrace]);
 
   const stop = useCallback(() => {
     // TTS-7A: Diagnostics
@@ -828,11 +874,12 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       state: "stop",
       wordIndex: stateRef.current.cursorWordIndex,
     });
+    clearPendingRateResponseTrace();
     webStrategy.stop();
     kokoroStrategy.stop();
     handoffPendingRef.current = false;
     dispatch({ type: "STOP" });
-  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
+  }, [webStrategy, kokoroStrategy, captureDiagSnapshot, emitEvalTrace, clearPendingRateResponseTrace]);
 
   const hold = useCallback(() => { dispatch({ type: "HOLD" }); }, []);
 

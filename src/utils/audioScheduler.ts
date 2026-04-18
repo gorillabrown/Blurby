@@ -8,6 +8,7 @@
 import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL, NARRATION_CURSOR_LAG_MS } from "../constants";
 import { applyKokoroTempoStretch } from "./audio/tempoStretch";
 import type { KokoroRatePlan } from "./kokoroRatePlan";
+import type { KokoroPlaybackSegmentMetadata } from "../types/narration";
 
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
@@ -101,13 +102,26 @@ export interface ScheduledChunk {
   wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
 }
 
-type KokoroTempoAwareChunk = ScheduledChunk;
+type KokoroTempoAwareChunk = ScheduledChunk & Partial<KokoroPlaybackSegmentMetadata>;
+
+type ActiveSource = {
+  source: AudioBufferSourceNode;
+  startTime: number;
+  endTime: number;
+  boundaryTime: number;
+  startNotified: boolean;
+  boundaryFired: boolean;
+  originalChunk: KokoroTempoAwareChunk;
+  chunk: KokoroTempoAwareChunk;
+  boundaries: { time: number; wordIndex: number }[];
+};
 
 export interface SchedulerCallbacks {
   onWordAdvance: (wordIndex: number) => void;
   onChunkBoundary: (endIdx: number) => void;
   onEnd: () => void;
   onError: () => void;
+  onSegmentStart?: (wordIndex: number) => void;
   /** TTS-7O: Periodic truth-sync — fires every N words and on chunk boundaries */
   onTruthSync?: (wordIndex: number) => void;
   /** TTS-7Q: Chunk handoff carry-over — fires at chunk boundary with the last
@@ -174,16 +188,7 @@ export function createAudioScheduler(): AudioScheduler {
   const crossfadeSamples = Math.round((TTS_CROSSFADE_MS / 1000) * KOKORO_SAMPLE_RATE);
 
   // Active sources for speed changes, boundary callbacks, and cleanup
-  let activeSources: {
-    source: AudioBufferSourceNode;
-    startTime: number;
-    endTime: number;
-    boundaryTime: number;
-    boundaryFired: boolean;
-    originalChunk: KokoroTempoAwareChunk;
-    chunk: ScheduledChunk;
-    boundaries: { time: number; wordIndex: number }[];
-  }[] = [];
+  let activeSources: ActiveSource[] = [];
 
   // Word timer state
   let wordTimerHandle: ReturnType<typeof setTimeout> | null = null;
@@ -212,16 +217,46 @@ export function createAudioScheduler(): AudioScheduler {
     return activeSources.some(s => !s.boundaryFired);
   }
 
-  function deliverChunkBoundary(s: typeof activeSources[number]): void {
-    if (!callbacks || s.boundaryFired) return;
+  function getParentBoundaryInfo(chunk: KokoroTempoAwareChunk): {
+    shouldEmit: boolean;
+    endIdx: number;
+    lastConfirmedWordIdx: number;
+  } {
+    const hasParentMetadata =
+      Number.isInteger(chunk.parentChunkStartIdx) &&
+      Number.isInteger(chunk.parentChunkWordCount) &&
+      Number.isInteger(chunk.segmentIndex) &&
+      typeof chunk.isFinalSegment === "boolean";
 
-    const endIdx = s.chunk.startIdx + s.chunk.words.length;
+    if (!hasParentMetadata) {
+      const endIdx = chunk.startIdx + chunk.words.length;
+      return {
+        shouldEmit: true,
+        endIdx,
+        lastConfirmedWordIdx: endIdx - 1 >= chunk.startIdx ? endIdx - 1 : chunk.startIdx,
+      };
+    }
+
+    const endIdx = chunk.parentChunkStartIdx + chunk.parentChunkWordCount;
+    return {
+      shouldEmit: chunk.isFinalSegment,
+      endIdx,
+      lastConfirmedWordIdx: endIdx - 1 >= chunk.parentChunkStartIdx ? endIdx - 1 : chunk.parentChunkStartIdx,
+    };
+  }
+
+  function deliverChunkBoundary(s: ActiveSource): void {
+    if (s.boundaryFired) return;
+
+    const { shouldEmit, endIdx, lastConfirmedWordIdx } = getParentBoundaryInfo(s.chunk);
+    s.boundaryFired = true;
+
+    if (!callbacks || !shouldEmit) return;
+
     callbacks.onChunkBoundary(endIdx);
     truthSyncCounter = 0;
-    const lastConfirmedWordIdx = endIdx - 1 >= s.chunk.startIdx ? endIdx - 1 : s.chunk.startIdx;
     callbacks.onTruthSync?.(lastConfirmedWordIdx);
     callbacks.onChunkHandoff?.(lastConfirmedWordIdx);
-    s.boundaryFired = true;
   }
 
   /**
@@ -377,6 +412,8 @@ export function createAudioScheduler(): AudioScheduler {
         return;
       }
 
+      flushStartedSegments(now);
+
       // BUG-151: Use lagged time for boundary comparison — cursor must not
       // exceed audioTime - cursorLagSec. This is the hard ceiling.
       const cursorNow = now - cursorLagSec;
@@ -424,6 +461,16 @@ export function createAudioScheduler(): AudioScheduler {
     if (!audioCtx) return;
     const now = audioCtx.currentTime;
     activeSources = activeSources.filter(s => s.endTime > now);
+  }
+
+  function flushStartedSegments(now: number): void {
+    if (!callbacks) return;
+
+    for (const scheduled of activeSources) {
+      if (scheduled.startNotified || now < scheduled.startTime) continue;
+      scheduled.startNotified = true;
+      callbacks.onSegmentStart?.(scheduled.chunk.startIdx);
+    }
   }
 
   /**
@@ -500,6 +547,7 @@ export function createAudioScheduler(): AudioScheduler {
       startTime: chunkStartTime,
       endTime,
       boundaryTime,
+      startNotified: false,
       boundaryFired: false,
       originalChunk,
       chunk: playbackChunk,
@@ -511,6 +559,8 @@ export function createAudioScheduler(): AudioScheduler {
 
     // Compute word boundaries and extend the timeline
     currentWordBoundaries.push(...boundaries);
+
+    flushStartedSegments(ctx.currentTime);
 
     // If the transition point is already due, fire the boundary immediately.
     flushDueChunkBoundaries(ctx.currentTime);
@@ -571,7 +621,7 @@ export function createAudioScheduler(): AudioScheduler {
     }
   }
 
-  function applyTempoStretchIfNeeded(chunk: KokoroTempoAwareChunk): ScheduledChunk {
+  function applyTempoStretchIfNeeded(chunk: KokoroTempoAwareChunk): KokoroTempoAwareChunk {
     const stretched = applyKokoroTempoStretch({
       audio: chunk.audio,
       sampleRate: chunk.sampleRate,

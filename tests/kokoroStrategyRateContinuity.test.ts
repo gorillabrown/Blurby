@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS } from "../src/constants";
 import type { KokoroStrategyDeps } from "../src/hooks/narration/kokoroStrategy";
+import * as ttsCache from "../src/utils/ttsCache";
 
 function createDeferred<T>() {
   let resolve!: (value: T) => void;
@@ -126,6 +128,122 @@ describe("kokoroStrategy live rate continuity", () => {
     expect(thirdChunk.kokoroRatePlan?.tempoFactor).toBeCloseTo(1.3 / 1.2, 12);
 
     strategy.stop();
+  });
+
+  it("enqueues short playback segments from one Kokoro generation chunk so same-bucket edits can land before the parent chunk finishes", async () => {
+    const words = ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot"];
+
+    electronAPI.kokoroGenerate.mockResolvedValue({
+      audio: new Float32Array(26400),
+      sampleRate: 24000,
+      durationMs: 1100,
+      wordTimestamps: [
+        { word: "alpha", startTime: 0.0, endTime: 0.16 },
+        { word: "bravo", startTime: 0.16, endTime: 0.34 },
+        { word: "charlie", startTime: 0.36, endTime: 0.54 },
+        { word: "delta", startTime: 0.54, endTime: 0.72 },
+        { word: "echo", startTime: 0.74, endTime: 0.92 },
+        { word: "foxtrot", startTime: 0.92, endTime: 1.1 },
+      ],
+    });
+
+    const deps: KokoroStrategyDeps = {
+      getVoiceId: () => "af_heart",
+      getSpeed: () => 1.3,
+      getStatus: () => "speaking",
+      getWords: () => words,
+      getBookId: () => "book-1",
+      onFallbackToWeb: vi.fn(),
+    };
+
+    const strategy = createKokoroStrategy(deps);
+    strategy.speakChunk("", [], 0, 1.3, vi.fn(), vi.fn(), vi.fn());
+
+    try {
+      await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalledTimes(1));
+      await vi.waitFor(() => expect(schedulerMock.scheduleChunk).toHaveBeenCalled());
+
+      const scheduledSegments = schedulerMock.scheduleChunk.mock.calls.map(([chunk]) => chunk as any);
+      expect(scheduledSegments.length).toBeGreaterThan(1);
+
+      let nextStartIdx = 0;
+      const flattenedWords: string[] = [];
+
+      for (const [segmentIndex, segment] of scheduledSegments.entries()) {
+        const timestamps = segment.wordTimestamps;
+        expect(segment.parentChunkStartIdx).toBe(0);
+        expect(segment.parentChunkWordCount).toBe(words.length);
+        expect(segment.segmentIndex).toBe(segmentIndex);
+        expect(segment.isFinalSegment).toBe(segmentIndex === scheduledSegments.length - 1);
+        expect(segment.startIdx).toBe(nextStartIdx);
+        expect(segment.words.length).toBeGreaterThan(0);
+        expect(segment.kokoroRatePlan).toMatchObject({
+          selectedSpeed: 1.3,
+          generationBucket: 1.2,
+          tempoFactor: 1.3 / 1.2,
+        });
+        expect(timestamps).not.toBeNull();
+        expect(timestamps?.[0]?.startTime ?? Number.NaN).toBeCloseTo(0, 6);
+        expect((timestamps?.[timestamps.length - 1]?.endTime ?? Number.POSITIVE_INFINITY) * 1000)
+          .toBeLessThanOrEqual(KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS);
+
+        flattenedWords.push(...segment.words);
+        nextStartIdx += segment.words.length;
+      }
+
+      expect(flattenedWords).toEqual(words);
+    } finally {
+      strategy.stop();
+    }
+  });
+
+  it("segments cached same-bucket Kokoro chunks into multiple scheduler enqueues on cache hits", async () => {
+    const words = ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot"];
+    const isCachedSpy = vi.spyOn(ttsCache, "isCached").mockResolvedValue(true);
+    const loadCachedChunkSpy = vi.spyOn(ttsCache, "loadCachedChunk").mockResolvedValue({
+      audio: new Float32Array(26400),
+      sampleRate: 24000,
+      durationMs: 1100,
+      words,
+      startIdx: 0,
+      wordTimestamps: [
+        { word: "alpha", startTime: 0.0, endTime: 0.16 },
+        { word: "bravo", startTime: 0.16, endTime: 0.34 },
+        { word: "charlie", startTime: 0.36, endTime: 0.54 },
+        { word: "delta", startTime: 0.54, endTime: 0.72 },
+        { word: "echo", startTime: 0.74, endTime: 0.92 },
+        { word: "foxtrot", startTime: 0.92, endTime: 1.1 },
+      ],
+    } as any);
+
+    const deps: KokoroStrategyDeps = {
+      getVoiceId: () => "af_heart",
+      getSpeed: () => 1.3,
+      getStatus: () => "speaking",
+      getWords: () => words,
+      getBookId: () => "book-1",
+      onFallbackToWeb: vi.fn(),
+    };
+
+    const strategy = createKokoroStrategy(deps);
+    strategy.speakChunk("", [], 0, 1.3, vi.fn(), vi.fn(), vi.fn());
+
+    try {
+      await vi.waitFor(() => expect(loadCachedChunkSpy).toHaveBeenCalledWith("book-1", "af_heart/1.2", 0, words));
+      await vi.waitFor(() => expect(schedulerMock.scheduleChunk).toHaveBeenCalled());
+
+      const scheduledSegments = schedulerMock.scheduleChunk.mock.calls.map(([chunk]) => chunk as any);
+      expect(isCachedSpy).toHaveBeenCalledWith("book-1", "af_heart/1.2", 0);
+      expect(electronAPI.kokoroGenerate).not.toHaveBeenCalled();
+      expect(scheduledSegments.length).toBeGreaterThan(1);
+      expect(scheduledSegments.every((segment) => segment.parentChunkStartIdx === 0)).toBe(true);
+      expect(scheduledSegments[scheduledSegments.length - 1]?.isFinalSegment).toBe(true);
+      expect(scheduledSegments.flatMap((segment) => segment.words)).toEqual(words);
+    } finally {
+      strategy.stop();
+      isCachedSpy.mockRestore();
+      loadCachedChunkSpy.mockRestore();
+    }
   });
 
   it("forwards live same-bucket tempo changes to already-buffered scheduler chunks", () => {
