@@ -1337,3 +1337,17 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern:** Add at least one regression whenever a hidden compatibility alias is removed or narrowed. The regression should lock the architectural seam that changed so future refactors cannot silently reintroduce a literal three-mode guard in a four-mode path.
 
 **Related:** READER-4M-1 sprint, `src/components/ReaderContainer.tsx`, `src/hooks/useFlowScrollSync.ts`, `src/hooks/useReaderMode.ts`, `tests/narrationIntegration.test.ts`
+
+---
+
+### [2026-04-20] LL-105: Universal Mode Shortcuts Must Bypass Surface-Gated Keyboard Blocks
+
+**Area:** reader modes, keyboard shortcuts, narrate
+**Status:** active
+**Priority:** medium
+
+**Context:** READER-4M-2 remapped `N` to "enter Narrate paused from any mode." The keyboard handler in `useKeyboardShortcuts.ts` has per-surface gates (`if (isPage)`, `if (isFlow)`) that control which shortcuts fire. The universal N handler must be placed *above* these gates (in the unconditional section) so it fires from page, focus, flow, and narrate modes alike. Placing it inside the `if (isFlow)` block would silently drop it in page and focus modes.
+
+**Guardrail:** Shortcuts that apply universally across all modes must live in the unconditional section of the keyboard handler, before any `if (isPage)` or `if (isFlow)` gates. The `isFlow` variable is `keyboardSurface === "flow"`, which is `true` for both "flow" and "narrate" modes — so it's not a reliable gate for "all modes."
+
+**Related:** READER-4M-2 sprint, `src/hooks/useKeyboardShortcuts.ts`, `getReaderKeyboardModeSurface()`

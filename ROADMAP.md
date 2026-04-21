@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-18 — Completed `READER-4M-1` and advanced the four-mode reader restoration lane to `READER-4M-2`.
+**Last updated**: 2026-04-20 — Completed READER-4M-2: standalone Narrate mode, universal N key, T narration toggle removed. 2102 tests. v1.69.0.
 **Current branch**: `main`
-**Current state**: v1.63.0 stable. Queue depth 3 (GREEN). Next queue item: READER-4M-2 (standalone Narrate mode and four-button controls).
+**Current state**: v1.69.0 stable. Queue depth 2 (YELLOW) after `READER-4M-2` closeout. `READER-4M-3` is now the next dispatchable queue item, followed by `QWEN-STREAM-1`. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-1` through `QWEN-STREAM-3`.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -94,7 +94,23 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     READER-4M-1: Infinite-Scroll Surface Recovery & Explicit Mode Foundation
                    │
-    READER-4M-2: Standalone Narrate Mode & Four-Button Controls
+    QWEN-PROT-2: Qwen Sidecar Runtime & Live Prototype Playback
+                   │
+    QWEN-DEFAULT-1: Flip the Product Default to Qwen
+                   │
+    QWEN-HARDEN-1: Startup, Playback, and Decision-Quality Evidence
+                   │
+    QWEN-PROVISION-1: Deterministic Provisioning and Supported-Host Policy
+                   │
+    QWEN-STREAM-1: Streaming Sidecar Foundation (Lane D — parallel-safe)
+                   │
+    QWEN-STREAM-2: Accumulator + Strategy + Live Playback (planned, not yet spec'd)
+                   │
+    QWEN-STREAM-3: Hardening + Evidence + Decision Gate (planned, not yet spec'd)
+      ├── Current full-chunk local Qwen lane: transitional / superseded as successor path
+      └── Kokoro retirement sprints: paused until the streaming lane proves continuous live playback
+                   │
+    READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
     READER-4M-3: Global Word Anchor & Cross-Mode Continuity
                    │
@@ -3203,11 +3219,271 @@ Task 12 (Git)
 
 ---
 
-### Sprint READER-4M-2: Standalone Narrate Mode & Four-Button Controls
+### Sprint QWEN-PROT-1: Qwen Engine Surface & Unavailable-State Foundation
+
+**Goal:** Land the first safe Qwen prototype slice by wiring Qwen into Blurby's types, settings, preload, main-process status plumbing, and test harness as a selectable but explicitly unavailable engine, without changing Kokoro behavior or attempting live Qwen synthesis yet.
+
+**Version:** v1.64.0 | **Branch:** `sprint/qwen-prot-1-engine-surface` | **Tier:** Full
+
+**Problem:** The Qwen/Kokoro audit packet is now finalized and accepted, but the execution system still has no product-facing foothold for Qwen. Without a bounded first sprint, every future Qwen attempt risks either skipping governance or jumping straight into Python generation/runtime complexity before the app can even represent Qwen honestly as a prototype engine.
+
+**Design decisions:**
+- **Qwen enters as an explicit prototype engine, not a hidden experiment.** The app should understand `qwen` as a valid engine value even when the runtime is unavailable.
+- **Unavailable is a first-class state.** The UI must be able to show Qwen as selected-but-unavailable, warming, or errored without silently swapping back to Kokoro.
+- **No live generation in this sprint.** This slice only lands the status/config/settings surface and mock-safe plumbing.
+- **Kokoro remains untouched behaviorally.** Existing Kokoro startup, narration, and settings behavior must not regress.
+- **The sprint remains bounded by the retired audit packet.** No aligner, no instruct modes, no forced runtime provisioning, and no Qwen-native streaming/runtime redesign in this slice.
+
+**Baseline:**
+- [src/types.ts](C:/Users/estra/Projects/Blurby/src/types.ts): `ttsEngine` unions and ElectronAPI types only admit `web` and `kokoro`.
+- [src/constants.ts](C:/Users/estra/Projects/Blurby/src/constants.ts): defaults and normalization still assume a two-engine world.
+- [preload.js](C:/Users/estra/Projects/Blurby/preload.js): only Kokoro TTS IPC methods and listeners are exposed.
+- [main/ipc/tts.js](C:/Users/estra/Projects/Blurby/main/ipc/tts.js): only Kokoro IPC handlers exist.
+- [src/components/settings/TTSSettings.tsx](C:/Users/estra/Projects/Blurby/src/components/settings/TTSSettings.tsx): settings UI can only model Web Speech vs Kokoro, and Kokoro status is special-cased.
+- [src/test-harness/electron-api-stub.ts](C:/Users/estra/Projects/Blurby/src/test-harness/electron-api-stub.ts): browser test stub knows only Kokoro.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** Qwen prototype status/model surface, settings exposure, preload/main unavailable-state wiring, test harness parity
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/types.ts`
+  - `src/constants.ts`
+  - `preload.js`
+  - `main/ipc/tts.js`
+  - `src/components/settings/TTSSettings.tsx`
+  - `src/test-harness/electron-api-stub.ts`
+  - `src/utils/narrationContinuity.ts`
+  - `src/utils/narrationPortability.ts`
+
+#### Shared-Core Touches
+
+- `src/types.ts`
+- `src/constants.ts`
+- `preload.js`
+- `main/ipc/tts.js`
+- `src/components/settings/TTSSettings.tsx`
+- `src/test-harness/electron-api-stub.ts`
+
+#### Merge Order
+
+- Merge before `READER-4M-2`. This sprint does not unblock the reader-restoration lane technically, but it is an explicit governance reprioritization from the retired audit packet and should land as the next bounded prototype slice before returning to reader UI restoration.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/FINAL_STATUS.md`
+4. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/IMPLEMENTATION_READINESS_SPEC.md`
+5. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/AUTHORITATIVE_RECORD.md`
+6. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/3rd Party/AUDITOR_REMEDIATION_RESPONSE.md`
+7. `ROADMAP.md` — this section
+8. `src/types.ts`
+9. `src/constants.ts`
+10. `preload.js`
+11. `main/ipc/tts.js`
+12. `src/components/settings/TTSSettings.tsx`
+13. `src/test-harness/electron-api-stub.ts`
+14. `src/utils/kokoroStatus.ts`
+15. `src/utils/narrationContinuity.ts`
+16. `src/utils/narrationPortability.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Expand the core type surface to admit Qwen** — Add `qwen` to the shared `ttsEngine` unions, introduce `QwenEngineStatus` / `QwenStatusSnapshot` / `QwenErrorResponse` beside the Kokoro types, and extend the ElectronAPI contract with Qwen preload/status/voices methods plus Qwen engine-status/runtime-error listeners. Keep Qwen and Kokoro status shapes parallel. | `src/types.ts` | `NarrationProfile.ttsEngine` near lines 8-20; `KokoroStatusSnapshot` block near lines 37-55; `BlurbySettings.ttsEngine` near lines 160-170; `ElectronAPI` TTS section near lines 367-378. |
+| 2 | worker-sonnet | **Add Qwen defaults and normalization-safe constants** — Extend default settings and any engine-validation helpers so `qwen` is a recognized persisted value while Kokoro remains the default. Do not change the default engine. Preserve current behavior for existing users/settings payloads. | `src/constants.ts`, `src/utils/narrationContinuity.ts`, `src/utils/narrationPortability.ts` | `DEFAULT_SETTINGS` and normalization helpers around lines 454-489 and 139-160 in `src/constants.ts`; engine/voice validation blocks around lines 43-77 in `src/utils/narrationContinuity.ts`; portability engine validation around lines 71-72 in `src/utils/narrationPortability.ts`. |
+| 3 | Athena | **Add a bounded Qwen runtime manager in main** — Introduce a new main-process helper that can resolve Qwen config, return an authoritative unavailable/error/ready snapshot, and list speakers only when a runtime is actually configured. In this sprint, generation should remain unimplemented or explicitly unavailable. | `main/tts-engine-qwen.js` (new) | New file. Include config lookup, snapshot helpers, `preload()`, `getModelStatus()`, `listVoices()`, and a deliberate unavailable-state contract. |
+| 4 | worker-sonnet | **Expose Qwen IPC without live synthesis** — Register `tts-qwen-preload`, `tts-qwen-model-status`, and `tts-qwen-voices` handlers plus `tts-qwen-engine-status` / `tts-qwen-runtime-error` event channels. Extend preload with matching safe methods/listeners. Keep the API shape aligned with the packet while leaving generation for a later sprint. | `main/ipc/tts.js`, `preload.js` | In `main/ipc/tts.js`, add a Qwen section alongside Kokoro near the existing Kokoro handler block (~lines 17-77). In `preload.js`, add Qwen methods near the Kokoro TTS exposure block (~lines 149-182). |
+| 5 | Hercules | **Add Qwen status normalization helpers for the renderer** — Create a Qwen status utility mirroring the Kokoro helper pattern so the renderer can safely display unavailable/warming/error states without embedding ad hoc logic in the settings component. | `src/utils/qwenStatus.ts` (new) | New file modeled after `src/utils/kokoroStatus.ts`: defaults, normalization, and error-detail helpers. |
+| 6 | Athena | **Update the TTS settings surface for a third engine** — Add `Qwen AI` as a selectable engine, show an explicit unavailable/warming/error status block for Qwen, preserve the existing Kokoro behavior, and ensure the settings UI can represent a selected Qwen engine without live synthesis. Qwen should not appear “ready” unless the main-process status says so. | `src/components/settings/TTSSettings.tsx`, `src/components/settings/QwenStatusSection.tsx` (new), `src/styles/tts-settings.css` | In `TTSSettings.tsx`, engine selection/state branches near lines 34-66 and the Kokoro status/test-voice logic through the main render body; create a sibling status section component parallel to `KokoroStatusSection.tsx`; add Qwen status styles in `src/styles/tts-settings.css`. |
+| 7 | worker-sonnet | **Extend the browser test harness stub for Qwen** — Add Qwen methods/listeners to the Electron API stub and return a stable unavailable snapshot by default so browser/UI tests can exercise the new states without a real runtime. | `src/test-harness/electron-api-stub.ts` | Stub state and `defaultSettings` near lines 37-74; TTS method block near Kokoro exposure in the lower `electronAPI` stub surface; event emitter registration for Qwen status/error events. |
+| 8 | Hippocrates | **Tests** — Add focused coverage for: (a) `qwen` is accepted by settings/types/continuity helpers, (b) Qwen unavailable snapshot normalizes correctly, (c) TTS settings can select Qwen and show unavailable or warming UI, (d) the test harness does not crash when Qwen is selected, (e) Kokoro behavior remains unchanged when engine stays Kokoro. Target ≥12 new or expanded tests. | `tests/` | Extend `tests/settingsPersistence.test.ts`, `tests/readerDecomposition.test.ts` or the current settings/UI suite, add `tests/qwenStatus.test.ts`, and extend any Electron API stub tests covering TTS methods. |
+| 9 | Hippocrates | **Verification** — Run targeted Qwen/settings/type/stub suites, then one broader relevant project suite, and report exact commands. | — | — |
+| 10 | Solon | **Spec compliance** — Verify this sprint did not cross the v1 scope boundary: no live generation, no aligner, no instruct modes, no silent fallback, Kokoro still default, and the packet's tightened evidence posture is preserved in comments/docs. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update roadmap, sprint queue, and any lessons learned entries required by the closeout. | Governing docs | — |
+| 12 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/qwen-prot-1-engine-surface` |
+
+#### SUCCESS CRITERIA
+
+1. The shared type/settings surface accepts `ttsEngine: "qwen"` without breaking existing `web` or `kokoro` paths.
+2. Kokoro remains the default engine in app defaults and current-user migration behavior.
+3. Main process can report a truthful Qwen unavailable/error/ready snapshot without requiring live synthesis.
+4. Preload exposes Qwen status/preload/voices methods and Qwen status/error listeners.
+5. The settings UI shows `Qwen AI` as an engine option and can render explicit unavailable/warming/error states.
+6. Selecting Qwen does not silently swap the UI back to Kokoro.
+7. The browser test harness can represent Qwen as unavailable without crashing TTS settings or narration-adjacent UI.
+8. No live Qwen synthesis path is active in this sprint.
+9. No forced aligner, instruct-mode logic, or packaged runtime work lands in this sprint.
+10. ≥12 new or expanded tests land.
+11. Targeted verification passes.
+12. The broader verification command passes.
+
+**Tier:** Full | **Depends on:** READER-4M-1
+
+---
+
+**Completion note:** Completed on 2026-04-18. Blurby now treats `qwen` as a first-class prototype engine across shared types, persistence, preload/main IPC, settings UI, and the browser test harness without altering Kokoro defaults or silently falling back when Qwen is selected. Main-process Qwen support currently stops at config lookup plus truthful unavailable/warming/error status, and live narration explicitly errors rather than routing into Web Speech or Kokoro.
+
+**Verification:** Focused Qwen/settings/persistence coverage passed with `npx vitest run tests/qwenEngine.test.js tests/ttsSettingsQwenPrototype.test.tsx tests/narrationPortability.test.ts tests/narrationContinuity.test.ts tests/narrationReducer.test.ts` and the expanded rerun including `tests/componentStyleCleanup.test.ts`. `npm test` failed initially because it picked up unrelated vendored MeloTTS tests under `tmp/tts-candidates/`; after fixing the local TTS settings line-budget regression, `npx vitest run tests` passed and `npm run build` passed. The existing non-fatal Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint QWEN-PROT-2: Qwen Sidecar Runtime & Live Prototype Playback
+
+**Goal:** Turn the bounded Qwen prototype from a selectable stub into a live local playback lane by adding the Python sidecar contract, `qwenGenerate`, a dedicated Qwen narration strategy, and truthful live-app prototype playback without silently changing Kokoro behavior or over-claiming timing truth.
+
+**Version:** v1.65.0 | **Branch:** `sprint/qwen-prot-2-sidecar-playback` | **Tier:** Full
+
+**Problem:** Dispatch 1 gave Blurby an honest Qwen surface, but Qwen still cannot actually speak. Without a second bounded sprint, the project remains stuck between “Qwen exists in settings” and “Qwen can be judged in the live app,” which means the prototype cannot produce the paired playback evidence the retired audit packet said was necessary.
+
+**Design decisions:**
+- **Qwen becomes a real prototype runtime, not a shipping engine.** This sprint adds live generation and playback only for explicitly configured local runtimes.
+- **Python sidecar first, packaging later.** Dispatch 2 may spawn and manage an external Python sidecar, but it must not bundle Python, CUDA, FlashAttention, or model weights into the app package.
+- **Dedicated Qwen strategy, not Kokoro reuse.** Qwen gets its own narration strategy and generation profile instead of being squeezed through Kokoro segmentation assumptions.
+- **Timing stays heuristic for Qwen in v1.** Dispatch 2 should surface `wordTimestamps: null` unless the real runtime produces them; no forced aligner lands here.
+- **Decision-oriented playback beats infrastructure theater.** The output of this sprint should be a usable live-app prototype lane for paired fixture playback, not a broader runtime redesign.
+
+**Baseline:**
+- [main/qwen-engine.js](C:/Users/estra/Projects/Blurby/main/qwen-engine.js): config lookup and truthful unavailable/warming/error snapshots exist, but there is no sidecar lifecycle, no `generate`, and no runtime-backed speaker enumeration.
+- [main/ipc/tts.js](C:/Users/estra/Projects/Blurby/main/ipc/tts.js): Qwen IPC only exposes `tts-qwen-model-status`, `tts-qwen-preload`, and `tts-qwen-voices`.
+- [preload.js](C:/Users/estra/Projects/Blurby/preload.js): renderer can only query Qwen status/preload/voices; there is no `qwenGenerate`.
+- [src/hooks/useNarration.ts](C:/Users/estra/Projects/Blurby/src/hooks/useNarration.ts): Qwen selection currently exits with an explicit “Dispatch 1 stub” error instead of speaking.
+- [src/hooks/useQwenPrototypeStatus.ts](C:/Users/estra/Projects/Blurby/src/hooks/useQwenPrototypeStatus.ts): Qwen voices are only loaded from the unavailable-state surface and never represent a live runtime.
+- [src/hooks/narration/](C:/Users/estra/Projects/Blurby/src/hooks/narration): only `kokoroStrategy.ts` and `webSpeechStrategy.ts` exist.
+- [src/components/settings/TTSSettings.tsx](C:/Users/estra/Projects/Blurby/src/components/settings/TTSSettings.tsx): Qwen can be selected, but preview remains disabled and the voice picker is still bounded by the Dispatch 1 stub.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** Qwen sidecar lifecycle, generation IPC, live narration strategy, truthful ready voice loading, and prototype playback validation
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/types.ts`
+  - `main/qwen-engine.js`
+  - `main/ipc/tts.js`
+  - `preload.js`
+  - `src/hooks/useNarration.ts`
+  - `src/components/settings/TTSSettings.tsx`
+  - `src/test-harness/electron-api-stub.ts`
+
+#### Shared-Core Touches
+
+- `src/types.ts`
+- `main/qwen-engine.js`
+- `main/ipc/tts.js`
+- `preload.js`
+- `src/hooks/useNarration.ts`
+- `src/components/settings/TTSSettings.tsx`
+- `src/test-harness/electron-api-stub.ts`
+
+#### Merge Order
+
+- Merge before `READER-4M-2`. The Qwen prototype lane remains an explicit governance priority until Blurby can actually perform paired live-app Qwen vs Kokoro playback.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/FINAL_STATUS.md`
+4. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/IMPLEMENTATION_READINESS_SPEC.md`
+5. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/AUTHORITATIVE_RECORD.md`
+6. `docs/research/third-party-audit/2026-04-18-qwen-kokoro-readiness/3rd Party/AUDITOR_REMEDIATION_RESPONSE.md`
+7. `docs/superpowers/plans/2026-04-18-qwen-kokoro-prototype.md`
+8. `ROADMAP.md` — this section
+9. `main/qwen-engine.js`
+10. `main/ipc/tts.js`
+11. `preload.js`
+12. `src/types.ts`
+13. `src/hooks/useNarration.ts`
+14. `src/hooks/useQwenPrototypeStatus.ts`
+15. `src/hooks/narration/kokoroStrategy.ts`
+16. `src/components/settings/TTSSettings.tsx`
+17. `src/test-harness/electron-api-stub.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Extend the shared contract for live Qwen generation** — Add a Qwen generate response shape to the shared types and extend the ElectronAPI contract with `qwenGenerate(text, speaker, rate, words?)` plus any runtime-backed ready voice fields needed by renderer consumers. Keep the contract explicit that Qwen timing may still be `null`. | `src/types.ts` | `ElectronAPI` TTS block near the current Qwen methods around lines 390-410; Qwen snapshot/error types near the existing `QwenStatusSnapshot` block around lines 35-65. |
+| 2 | Athena | **Upgrade `main/qwen-engine.js` from config probe to sidecar manager** — Add bounded sidecar lifecycle management, one in-flight generation at a time, temp-WAV request file handling, runtime-backed `listVoices()`, and `generate(text, speaker, rate, words)` that returns PCM-derived audio buffers plus `wordTimestamps: null` unless the runtime actually provides them. Keep config lookup paths and defaults from Dispatch 1. | `main/qwen-engine.js` | `createQwenEngineManager()` and `resolveConfig()` around lines 83-218; add sidecar helpers after `getModelStatus()` near lines 218-260 and export `generate` beside `getModelStatus` / `preload` / `listVoices` at the module footer. |
+| 3 | worker-sonnet | **Expose live Qwen generation over IPC/preload** — Add `tts-qwen-generate` to the main IPC layer and `qwenGenerate()` to preload. Preserve the existing status/error event channels and keep failures explicit rather than silently routing into another engine. | `main/ipc/tts.js`, `preload.js` | Add the generate handler below the current Qwen status/preload/voices handlers around lines 82-103 in `main/ipc/tts.js`; extend the TTS exposure block in `preload.js` beside `qwenPreload`, `qwenModelStatus`, and `qwenVoices` around lines 143-176. |
+| 4 | Hercules | **Add a dedicated Qwen narration strategy** — Create `createQwenStrategy()` beside `createKokoroStrategy()`, backed by the shared generation pipeline but without Kokoro-specific scheduler segmentation or cache voice bucketing. Use prototype seed values for Qwen opening/cruise planning and keep heuristic timing when timestamps are absent. | `src/hooks/narration/qwenStrategy.ts` (new), `src/hooks/useNarration.ts` | Model the new file after `src/hooks/narration/kokoroStrategy.ts`, especially `createKokoroStrategy()` around lines 63-175; in `useNarration.ts`, replace the current Qwen stub/error branches near lines 578-591 and 646-670 with real strategy selection/warmup and narration start logic. |
+| 5 | worker-sonnet | **Teach the renderer Qwen status hook and settings UI about a live prototype runtime** — Load real Qwen voices when ready, keep the speaker picker truthful, and let `Test voice` drive Qwen preview only when the runtime is actually ready. Preserve explicit unavailable/warming/error states. | `src/hooks/useQwenPrototypeStatus.ts`, `src/components/settings/TTSSettings.tsx`, `src/components/settings/QwenStatusSection.tsx` | In `useQwenPrototypeStatus.ts`, upgrade `loadQwenVoices()` and `handlePreloadQwen()` around lines 21-95 to respect runtime-backed ready states; in `TTSSettings.tsx`, update the Qwen engine button, status section, ready voice picker, and preview button paths around lines 428-560. |
+| 6 | Athena | **Route live Qwen narration through the app without silent fallback** — Make start/pause/resume/rate-change behavior honor a real Qwen engine path, keep rate changes restart-based for Qwen, and continue using the heuristic timing path when `wordTimestamps` are null. No forced aligner or packaged runtime work lands here. | `src/hooks/useNarration.ts`, `src/types/narration.ts`, `src/hooks/useNarrationSync.ts` | `useNarration.ts` state machine and strategy refs around lines 100-225 and 578-725; `src/types/narration.ts` reducer/state action surface around the `SET_ENGINE` and engine/status sync blocks; `useNarrationSync.ts` where engine-specific resume/start assumptions are enforced. |
+| 7 | worker-sonnet | **Keep the browser test harness honest** — Extend the Electron API stub so browser/UI tests can simulate a configured Qwen runtime, ready voices, and generate responses without requiring Python. | `src/test-harness/electron-api-stub.ts` | Existing Qwen stub surface near the TTS methods and event registration blocks added in Dispatch 1; add mock `qwenGenerate`, runtime-backed voice arrays, and status transitions next to the Kokoro stubbed methods. |
+| 8 | Hippocrates | **Tests** — Add focused coverage for: sidecar manager config/runtime transitions, `qwenGenerate` IPC plumbing, `createQwenStrategy()` happy-path/error-path behavior, Qwen preview/settings readiness, and narration start/rate-change behavior when Qwen is selected. Include at least one live-app-shape fixture playback test using mocked Qwen output. | `tests/qwenEngine.test.js`, `tests/ttsSettingsQwenPrototype.test.tsx`, new Qwen strategy tests, narration tests | Extend the existing Dispatch 1 Qwen test files and add a new Qwen narration-strategy suite beside the current Kokoro strategy coverage. |
+| 9 | Hippocrates | **Verification** — Run targeted Qwen runtime/settings/narration suites, then the broader Vitest suite, then build. Report exact commands and whether they passed. | — | — |
+| 10 | Solon | **Spec compliance** — Verify Dispatch 2 stayed within prototype scope: live Qwen playback exists, but no packaged runtime, no aligner, no instruct-mode expansion, and no overstatement of timing proof. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update roadmap, sprint queue, and any Qwen prototype notes required by the closeout. | Governing docs | — |
+| 12 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/qwen-prot-2-sidecar-playback` |
+
+#### SUCCESS CRITERIA
+
+1. The Electron/main/preload surface exposes a real `qwenGenerate` path without changing Kokoro defaults or fallback behavior.
+2. `main/qwen-engine.js` can manage a configured external Qwen sidecar lifecycle and return truthful ready/unavailable/error states.
+3. Qwen can return real voice lists from a configured runtime; no fabricated speaker list is used when the runtime is absent.
+4. `useNarration.ts` no longer hard-stops on the Dispatch 1 stub path when a healthy Qwen runtime is configured.
+5. A dedicated Qwen narration strategy exists and does not reuse Kokoro-only segmentation/cache assumptions.
+6. Qwen preview in settings only works when the runtime is actually ready and fails truthfully otherwise.
+7. Qwen rate changes restart future generation rather than silently mutating active audio in place.
+8. Qwen timing remains explicitly heuristic/null-backed unless the runtime really provides timestamps.
+9. No forced aligner, instruct-mode expansion, or packaged runtime work lands in this sprint.
+10. Focused Qwen runtime/settings/narration tests pass.
+11. The broader Vitest suite passes.
+12. `npm run build` passes.
+
+**Tier:** Full | **Depends on:** QWEN-PROT-1
+
+---
+
+**Completion note:** Completed on 2026-04-18. Blurby now has a bounded live Qwen prototype lane: the main process can spawn and manage a configured Python sidecar, `qwenGenerate` is exposed through IPC/preload, Qwen has a dedicated narration strategy with restart-based rate changes, settings preview uses truthful ready voices, and the app can perform real live playback when the external runtime is present. Kokoro behavior and default selection remained unchanged, Qwen timing stays heuristic/null-backed unless the runtime provides more, and no packaged runtime, aligner, or instruct-mode expansion landed in this sprint.
+
+**Verification:** Focused Qwen runtime/settings/narration verification passed with `npx vitest run tests/qwenEngine.test.js tests/qwenStrategy.test.ts tests/useNarrationQwen.test.tsx tests/ttsSettingsQwenPrototype.test.tsx`, then the wider touched-neighborhood rerun `npx vitest run tests/qwenEngine.test.js tests/qwenStrategy.test.ts tests/useNarrationQwen.test.tsx tests/ttsSettingsQwenPrototype.test.tsx tests/narrationPortability.test.ts tests/narrationContinuity.test.ts tests/narrationReducer.test.ts`, then full `npx vitest run tests`, and finally `npm run build`. An earlier focused Qwen run exposed the sidecar bootstrap deadlock and a stale narration-test expectation before the passing reruns. The existing non-fatal Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Historical Program: Qwen Default / Kokoro Deprecation
+
+**Goal:** This was the approved program that moved Blurby to a Qwen-first product posture, hardened the existing local sidecar lane, and prepared Kokoro deprecation.
+
+**Execution order:**
+1. `QWEN-DEFAULT-1`
+2. `QWEN-HARDEN-1`
+3. `QWEN-PROVISION-1`
+4. `KOKORO-RETIRE-1`
+5. `KOKORO-RETIRE-2`
+
+**Execution-ready plan:** [docs/superpowers/plans/2026-04-19-qwen-default-kokoro-deprecation.md](C:/Users/estra/Projects/Blurby/docs/superpowers/plans/2026-04-19-qwen-default-kokoro-deprecation.md)
+
+**Historical posture delivered:**
+- Qwen is the default narration engine going forward.
+- Kokoro remains present only as a deprecated fallback path until the retirement scorecard is fully green.
+- No new code path may silently fall back from Qwen to Kokoro.
+- Startup latency, runtime provisioning, fallback UX, and retirement gating remain first-class workstreams.
+
+**Retirement gates:**
+- Playback reliability
+- Startup and responsiveness
+- Provisioning and machine realism
+- Narration quality
+- Replacement completeness
+
+**Current governance decision:** The completed parts of this program remain valid (`QWEN-DEFAULT-1`, `QWEN-HARDEN-1`, and `QWEN-PROVISION-1`), but the retirement half is paused. Subsequent live testing showed the current non-streaming local Qwen lane can eventually produce audio on CPU but does not sustain continuous narration, so the active successor direction is now the approved streaming design at [docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md](C:/Users/estra/Projects/Blurby/docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md). Until a streaming implementation plan exists, `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` should not be dispatched.
+
+---
+
+### Sprint READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ COMPLETED
 
 **Goal:** Restore `Narrate` as a real fourth reader mode with its own bottom-bar button and keyboard path, using the shared infinite-scroll surface and entering paused by default.
 
-**Version:** v1.64.0 | **Branch:** `sprint/reader-4m-2-narrate-controls` | **Tier:** Full
+**Version:** v1.69.0 | **Branch:** `sprint/reader-4m-2-narrate-controls` | **Tier:** Full
 
 **Problem:** Even with the substrate repaired, users still cannot intentionally choose Narrate. The current reader model hides narration behind `readingMode === "flow" && isNarrating`, `N`/`T` keyboard toggles, and ambiguous bottom-bar state. That is exactly the confusion this design was approved to remove.
 
@@ -3305,7 +3581,7 @@ Task 12 (Git)
 
 **Goal:** Make one canonical global word anchor the source of truth for entering, pausing, resuming, saving, and switching across `Page`, `Focus`, `Flow`, and `Narrate`, while ensuring Narrate’s underline follows spoken-word truth instead of racing ahead.
 
-**Version:** v1.65.0 | **Branch:** `sprint/reader-4m-3-global-anchor-continuity` | **Tier:** Full
+**Version:** v1.70.0 | **Branch:** `sprint/reader-4m-3-global-anchor-continuity` | **Tier:** Full
 
 **Problem:** Even after Narrate becomes a real mode again, the current reader still carries mode-local assumptions: document load starts in Page, flow pause/resume has its own pending resume bridge, progress/backtrack logic is only partially mode-aware, and narration has its own cursor/pause anchor semantics. That drift is exactly how cross-mode confusion and “underline outruns speech” regressions come back.
 
@@ -3399,6 +3675,120 @@ Task 12 (Git)
 10. `npm run build` succeeds.
 
 **Tier:** Full | **Depends on:** READER-4M-2
+
+---
+
+### Sprint QWEN-STREAM-1: Streaming Sidecar Foundation
+
+**Goal:** Stand up a dedicated persistent Qwen streaming sidecar that can load the model, accept streaming generation commands, and deliver incremental PCM audio frames to the Electron main process — proving the local streaming path works end-to-end from Python to main process without yet wiring playback into the renderer narration pipeline.
+
+**Problem:** The current non-streaming Qwen sidecar (`main/qwen-engine.js`) generates a full WAV per request and returns it over JSON-line IPC. This architecture fundamentally cannot sustain live narration because generation time exceeds audio duration on CPU and even on CUDA the blocking request/response cycle introduces unnecessary first-audio latency. The approved streaming design (`docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md`) specifies a streaming sidecar that yields incremental PCM chunks. This sprint builds that sidecar and proves the streaming data path works.
+
+**Design decisions:**
+
+- **Model variant:** Primary path uses `Qwen3-TTS-12Hz-1.7B-CustomVoice` with the existing 9 named speakers (same model Blurby already provisions). The streaming fork's generator logic (two-phase chunking, crossfade, torch.compile) will be patched to support `stream_generate_custom_voice` using speaker embeddings instead of voice clone prompts. Fallback (if CustomVoice streaming proves incompatible): switch to the Base model with reference audio samples recorded from Kokoro voices.
+- **Sidecar process model:** New persistent Python subprocess (`main/qwen-streaming-engine.js` + `scripts/qwen_streaming_sidecar.py`). Does NOT replace the existing non-streaming `qwen-engine.js` yet — both can coexist but only one is active at a time based on a config flag. The streaming sidecar is promoted as the active Qwen engine in a subsequent sprint.
+- **IPC protocol:** Binary-framed stdout for audio, JSON-line stdin for commands. Header format: `[4-byte LE length][1-byte type][payload]`. Type 0x01 = JSON metadata, Type 0x02 = PCM audio frame (Float32 samples at 24kHz). Commands: `configure`, `warmup`, `status`, `list_speakers`, `start_stream`, `cancel_stream`, `shutdown`.
+- **Warmup phase:** `warmup` command loads model, runs `enable_streaming_optimizations(use_compile=True, use_cuda_graphs=True)`, and pre-creates any needed state. Reports timing.
+- **Stream lifecycle:** `start_stream` → sidecar enters generator loop → emits `stream_started` (JSON), then N `audio_chunk` (binary PCM) events, then `stream_finished` (JSON). `cancel_stream` → breaks generator, emits `stream_cancelled` (JSON). Errors emit `stream_error` (JSON).
+- **No renderer integration in this sprint.** Main process receives PCM frames and logs/validates them. Proof = sustained multi-chunk stream with correct sample rate, no timeouts, successful cancel. Renderer playback wiring is QWEN-STREAM-2.
+- **Preload bridge:** New IPC channels `tts-qwen-stream-start`, `tts-qwen-stream-cancel`, `tts-qwen-stream-status`. Renderer-facing event: `tts-qwen-stream-audio` (emitted via `webContents.send` with binary payload). Not consumed by the strategy yet — just wired.
+
+#### Lane Ownership
+
+- **Lane D: Platform/Main Process** — primary lane (new sidecar, IPC handlers, preload bridge)
+- Touches: `main/`, `preload.js`, `scripts/`, `src/types/`
+
+#### Forbidden During Parallel Run
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- `src/hooks/narration/qwenStrategy.ts` (existing strategy untouched until QWEN-STREAM-2)
+- `src/utils/generationPipeline.ts`
+- `src/utils/audioScheduler.ts`
+
+#### Shared-Core Touches
+
+None. This sprint does not edit shared-core freeze set files.
+
+#### Merge Order
+
+- Merge after `READER-4M-3` (or independently — no dependency, different lane). Can run in parallel with READER-4M-2 / 4M-3 since it's Lane D and they're Lane C/A.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md` — MUST READ — the approved design this sprint implements Phase 1 of
+4. `ROADMAP.md` — this section
+5. `main/qwen-engine.js` — existing non-streaming sidecar (lines 1-204 Python inline, lines 400-1380 JS manager). Reference for process spawn pattern, config resolution, timing recording, and snapshot state shape
+6. `main/ipc/tts.js` — existing Qwen IPC handlers (lines 92-130). Pattern for new streaming handlers
+7. `preload.js` — existing Qwen bridge (lines 144-177). Pattern for new streaming bridge
+8. `src/types/narration.ts` — `TtsStrategy` interface (line 185). Reference only — not edited this sprint
+9. `.runtime/qwen/config.json` — current model config (CustomVoice, device, dtype)
+10. `src/hooks/narration/qwenStrategy.ts` — existing Qwen strategy (lines 1-140). Reference for how the current path works — not edited this sprint
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (electron-scope) | **Create Python streaming sidecar script** — New file `scripts/qwen_streaming_sidecar.py`. Persistent process that: reads JSON-line commands from stdin, loads `Qwen3TTSModel` from configured `modelId` with streaming optimizations enabled, implements `start_stream` (iterates `stream_generate_custom_voice` generator, emits binary-framed PCM chunks on stdout), `cancel_stream` (sets cancel flag, breaks generator loop), `warmup` (loads model + runs `enable_streaming_optimizations`), `status`, `list_speakers`, `configure`, `shutdown`. Binary frame format: 4-byte LE length + 1-byte type (0x01 JSON, 0x02 PCM) + payload. Stream parameters: `emit_every_frames=12`, `decode_window_frames=80`, `first_chunk_emit_every=5`, `first_chunk_decode_window=48`, `first_chunk_frames=48`, `overlap_samples=512`. Uses CustomVoice `speaker` parameter. Includes `stream_generate_custom_voice` wrapper that calls the model's internal AR generation with speaker embedding lookup (same codebook/decoder as voice clone, but conditioned on speaker name). | `scripts/qwen_streaming_sidecar.py` | New file (~200 lines). |
+| 2 | Hephaestus (electron-scope) | **Create main process streaming engine manager** — New file `main/qwen-streaming-engine.js`. Manages persistent subprocess lifecycle. Exports: `createQwenStreamingEngineManager(app)` returning `{ getModelStatus, preload, preflight, listVoices, startStream, cancelStream, shutdown, onStreamAudio }`. Spawns `scripts/qwen_streaming_sidecar.py` using config from `.runtime/qwen/config.json` (same config file, new `streaming: true` flag). Reads binary-framed stdout (parse 4-byte header → dispatch JSON events or buffer PCM frames). Emits PCM frames to registered listener via `onStreamAudio(streamId, chunk: Buffer)`. Timeout handling: 30s for warmup/status, stream-level timeout (configurable, default 120s total stream duration). Records timing metrics (warmup, first-chunk latency, total stream duration). | `main/qwen-streaming-engine.js` | New file (~400 lines). Pattern: mirror `main/qwen-engine.js` structure for config resolution (lines 400-600), subprocess spawn (lines 1020-1057), but replace JSON-line response parsing with binary frame parser. |
+| 3 | Hermes (electron-scope) | **Register streaming IPC handlers** — Add new handlers in `main/ipc/tts.js`: `tts-qwen-stream-start(text, speaker, rate)` → calls `streamingEngine.startStream()`, returns `{ streamId }`. `tts-qwen-stream-cancel(streamId)` → calls `streamingEngine.cancelStream()`. `tts-qwen-stream-status` → calls `streamingEngine.getModelStatus()`. Wire `streamingEngine.onStreamAudio` to emit `webContents.send("tts-qwen-stream-audio", streamId, chunk)` to the focused BrowserWindow. | `main/ipc/tts.js` | After existing Qwen handlers (after line 130). ~30 lines. Import streaming engine at top alongside existing `qwenEngine`. |
+| 4 | Hermes (electron-scope) | **Add streaming preload bridge** — Expose new channels in `preload.js`: `qwenStreamStart: (text, speaker, rate) => ipcRenderer.invoke("tts-qwen-stream-start", text, speaker, rate)`, `qwenStreamCancel: (streamId) => ipcRenderer.invoke("tts-qwen-stream-cancel", streamId)`, `qwenStreamStatus: () => ipcRenderer.invoke("tts-qwen-stream-status")`, `onQwenStreamAudio: (handler) => { ipcRenderer.on("tts-qwen-stream-audio", handler); return () => ipcRenderer.removeListener(...) }`. | `preload.js` | After existing Qwen bridge (after line 177). ~12 lines. |
+| 5 | Hermes (renderer-scope) | **Add streaming types** — New file `src/types/qwenStreaming.ts`. Export: `QwenStreamStartResult`, `QwenStreamAudioEvent`, `QwenStreamingEngineStatus`. Also extend `ElectronAPI` interface in `src/types/electron.d.ts` (or equivalent) with the new preload methods. | `src/types/qwenStreaming.ts`, `src/types/electron.d.ts` or equivalent | New types file (~30 lines). Interface extension (~8 lines). |
+| 6 | Hermes (electron-scope) | **Add streaming config flag** — Extend `.runtime/qwen/config.json` schema recognition in the config resolver within `main/qwen-streaming-engine.js` to accept an optional `"streaming": true` field. When present, the streaming engine activates. The existing non-streaming engine ignores this field. Document in `docs/testing/QWEN_RUNTIME_SETUP.md`. | `main/qwen-streaming-engine.js` (config resolver section), `docs/testing/QWEN_RUNTIME_SETUP.md` | Config parsing in new engine file. Doc update: add "Streaming mode" section after existing setup instructions. |
+| 7 | Hippocrates | **Tests** — ≥18 new tests covering: (a) binary frame parser correctly splits JSON vs PCM payloads, (b) `startStream` sends correct command to subprocess stdin, (c) `cancelStream` sends cancel and receives acknowledgment, (d) timeout fires if no stream_finished within budget, (e) subprocess crash emits error status, (f) PCM frames forwarded to registered listener with correct streamId, (g) warmup records timing, (h) config resolver accepts streaming flag, (i) preload bridge exposes all new methods, (j) IPC handlers return expected shapes. Mock subprocess for unit tests (no real model needed). | `tests/qwenStreaming.test.js` | New test file (~250 lines). |
+| 8 | Hippocrates | **`npm test` + `npm run build`** | — | — |
+| 9 | Solon | **Spec compliance** — Verify all SUCCESS CRITERIA items. Confirm binary protocol works, streaming config recognized, no regression to existing Qwen/Kokoro paths. | — | — |
+| 10 | Plato | **Quality review** — Verify: no shared-core edits, streaming engine is cleanly isolated from existing engine, no accidental coupling to renderer pipeline, IPC naming is consistent. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md (version bump, new file mentions), ROADMAP.md (mark complete), SPRINT_QUEUE.md (remove, log), LESSONS_LEARNED.md (if discovery). Update `docs/testing/QWEN_RUNTIME_SETUP.md` with streaming sidecar setup instructions. | Governing docs + runtime setup doc | — |
+| 12 | Hermes | **Git: auto-merge on successful sprint** | — | Branch: `sprint/qwen-stream-1-sidecar-foundation` |
+
+#### Execution Sequence
+
+```
+Task 1 (Python sidecar script)         — independent, no deps
+Task 2 (main process engine manager)   — can start in parallel with Task 1, but needs Task 1's protocol to be stable
+    ↓
+Tasks 3-4 (IPC + preload)              — need Task 2 exports
+Task 5 (types)                         — parallel with Tasks 3-4
+Task 6 (config + docs)                 — parallel with Tasks 3-4
+    ↓
+Task 7 (tests)                         — after all implementation
+Task 8 (npm test + build)              — after tests
+    ↓
+Tasks 9-10 (Solon + Plato)             — parallel verification
+Task 11 (Herodotus)
+Task 12 (Git)
+```
+
+#### SUCCESS CRITERIA
+
+1. `scripts/qwen_streaming_sidecar.py` exists and implements the binary-framed streaming protocol with `configure`, `warmup`, `status`, `list_speakers`, `start_stream`, `cancel_stream`, `shutdown` commands.
+2. `main/qwen-streaming-engine.js` exists and can spawn, configure, warm, and communicate with the Python sidecar.
+3. Binary frame parser correctly distinguishes JSON metadata (type 0x01) from PCM audio (type 0x02) payloads.
+4. `startStream(text, speaker, rate)` initiates a stream and the sidecar emits `stream_started` + N `audio_chunk` frames + `stream_finished`.
+5. `cancelStream(streamId)` breaks the active generator and the sidecar emits `stream_cancelled`.
+6. PCM frames are forwarded to registered listener with correct `streamId` and valid Float32 audio data at 24kHz.
+7. Warmup records timing and streaming optimizations are applied (torch.compile confirmation in sidecar logs).
+8. Timeout handling fires if stream exceeds configured budget.
+9. Subprocess crash/exit is handled gracefully with error status propagation.
+10. IPC handlers (`tts-qwen-stream-start`, `tts-qwen-stream-cancel`, `tts-qwen-stream-status`) registered and return expected response shapes.
+11. Preload bridge exposes `qwenStreamStart`, `qwenStreamCancel`, `qwenStreamStatus`, `onQwenStreamAudio`.
+12. `src/types/qwenStreaming.ts` exports typed interfaces for all streaming IPC payloads.
+13. Existing Qwen non-streaming path (`qwenGenerate`, `qwenPreload`, etc.) continues to work unchanged.
+14. Existing Kokoro narration path is completely unaffected.
+15. `.runtime/qwen/config.json` recognizes optional `streaming: true` flag.
+16. `docs/testing/QWEN_RUNTIME_SETUP.md` updated with streaming sidecar setup section.
+17. ≥18 new tests in `tests/qwenStreaming.test.js`.
+18. `npm test` passes, `npm run build` succeeds.
+
+**Investigation note — CustomVoice streaming compatibility:** The `rekuenkdr/Qwen3-TTS-streaming` fork only implements `stream_generate_voice_clone` (Base model). The CustomVoice model uses the same AR decoder and codec but conditions on speaker embeddings instead of a voice clone prompt. Task 1 must implement a `stream_generate_custom_voice` wrapper in the sidecar script that uses the streaming generator loop with speaker embedding lookup. If this proves incompatible at the Python level (e.g., the CustomVoice model's forward pass shape doesn't match the streaming generator's expectations), fall back to loading the Base model + pre-recorded Kokoro voice samples as reference audio. Document whichever path works in the sidecar script.
+
+**Tier:** Full | **Depends on:** None (Lane D — parallel-safe with READER-4M-2/3)
 
 ---
 

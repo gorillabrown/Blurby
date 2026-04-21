@@ -58,6 +58,7 @@ interface ReaderKeysState {
   prevChapter?: () => void;
   nextChapter?: () => void;
   toggleNarration?: () => void;
+  enterNarrate?: () => void;
   // Page-mode specific callbacks
   prevPage?: () => void;
   nextPage?: () => void;
@@ -155,12 +156,13 @@ export function useReaderKeys(
   cycleMode?: () => void,
   cycleAndStart?: () => void,
   sentencePrev?: () => void,
-  sentenceNext?: () => void
+  sentenceNext?: () => void,
+  enterNarrate?: () => void
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
     adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
-    prevChapter, nextChapter, toggleNarration,
+    prevChapter, nextChapter, toggleNarration, enterNarrate,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
@@ -171,7 +173,7 @@ export function useReaderKeys(
   stateRef.current = {
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
     adjustFocusTextSize, toggleFlap, toggleFavorite, enterFocus,
-    prevChapter, nextChapter, toggleNarration,
+    prevChapter, nextChapter, toggleNarration, enterNarrate,
     prevPage, nextPage, enterFlow, moveWordSelection, defineWord, makeNote,
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
@@ -200,16 +202,16 @@ export function useReaderKeys(
       if (e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
       // Tab toggles menu flap
       if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
-      // T toggles narration (legacy/standalone path)
-      if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
       // C opens chapter list
       if (e.code === "KeyC" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.openChapterList?.(); return; }
       // S toggles favorite
       if (e.code === "KeyS" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFavorite?.(); return; }
-      // [ ] N P chapter navigation (N/P not in page mode — conflict with Shift+N note)
+      // [ ] chapter navigation (all modes); P prev chapter (non-page modes)
       if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevChapter?.(); return; }
       if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextChapter?.(); return; }
-      if (!isPage && !isFlow && e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.nextChapter?.(); return; }
+      // N (bare) enters Narrate mode paused from any reader surface. Shift+N remains the
+      // page-mode make-note shortcut and is handled below in the page-mode block.
+      if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.enterNarrate?.(); return; }
       if (!isPage && e.code === "KeyP" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.prevChapter?.(); return; }
       // Ctrl font size
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }
@@ -232,9 +234,9 @@ export function useReaderKeys(
 
       // ── Page-mode specific keys ────────────────────────────────────
       if (isPage) {
-        // Space → enter last-used mode (Flow by default)
+        // Space → start the selected mode (Flow by default)
         if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); s.togglePlay(); return; }
-        // Shift+Space → cycle selected mode (flow → narration → focus → flow)
+        // Shift+Space → cycle selected mode without auto-starting it
         if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.cycleMode?.(); return; }
         // ←/→ flip pages
         if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevPage?.(); return; }
@@ -250,14 +252,18 @@ export function useReaderKeys(
       }
 
       // ── Focus/Flow mode keys ───────────────────────────────────────
-      // Shift+Space → cycle to next mode and start it
+      // Shift+Space → cycle to the next mode without auto-starting it
       if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.cycleAndStart?.(); return; }
-      // Space = pause → return to Page
+      // Space = play/pause in the current mode
       if (e.code === "Space") { e.preventDefault(); s.togglePlay(); return; }
 
       if (isFlow) {
-        // NARR-LAYER-1A: N toggles narration inside flow mode only
-        if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleNarration?.(); return; }
+        if (s.readerMode === "narrate") {
+          // Narrate keeps the flow-family surface, but speed stays on vertical arrows.
+          if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(WPM_STEP); return; }
+          if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.adjustWpm(-WPM_STEP); return; }
+          return;
+        }
         // FLOW-3A: Flow scroll mode keyboard layout
         // ↑/↓ = line jump (FlowScrollEngine)
         if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.flowPrevLine?.(); return; }

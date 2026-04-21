@@ -3,15 +3,71 @@
   <component name="ChangeListManager">
     <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="4.4.2026">
       <changelist_data name="Evan Brown" email="estrattbrown@gmail.com" automatic="false" />
-      <change afterPath="$PROJECT_DIR$/tests/narrationProfiles.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ROADMAP.md" beforeDir="false" afterPath="$PROJECT_DIR$/ROADMAP.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/governance/TECHNICAL_REFERENCE.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/governance/TECHNICAL_REFERENCE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/research/tts-engine-scan/SCREENING_SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/research/tts-engine-scan/SCREENING_SUMMARY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/research/tts-engine-scan/SHORTLIST.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/research/tts-engine-scan/SHORTLIST.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/research/tts-engine-scan/candidates/QWEN3-TTS.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/research/tts-engine-scan/candidates/QWEN3-TTS.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/testing/tts_quality_gates.v1.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/testing/tts_quality_gates.v1.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/ipc/tts.js" beforeDir="false" afterPath="$PROJECT_DIR$/main/ipc/tts.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/window-manager.js" beforeDir="false" afterPath="$PROJECT_DIR$/main/window-manager.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preload.js" beforeDir="false" afterPath="$PROJECT_DIR$/preload.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/tts_eval_metrics.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/tts_eval_metrics.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/tts_eval_runner.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/tts_eval_runner.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/CommandPalette.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/CommandPalette.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FoliatePageView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FoliatePageView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/LibraryContainer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/LibraryContainer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/LibraryView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/LibraryView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/OnboardingOverlay.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OnboardingOverlay.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/QuickSettingsPopover.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/QuickSettingsPopover.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ReaderBottomBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ReaderBottomBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ReaderContainer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ReaderContainer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ThemeProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ThemeProvider.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/settings/TTSSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/settings/TTSSettings.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/settings/ThemeSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/settings/ThemeSettings.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useDocumentLifecycle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useDocumentLifecycle.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useKeyboardShortcuts.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useKeyboardShortcuts.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/useNarration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNarration.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useNarrationSync.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNarrationSync.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useReaderMode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useReaderMode.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/base.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/flow.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/flow.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/onboarding.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/onboarding.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/themes.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/themes.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/tts-settings.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/tts-settings.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test-harness/electron-api-stub.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/test-harness/electron-api-stub.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/eval.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/eval.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/narration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/narration.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/FlowScrollEngine.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/FlowScrollEngine.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/audio/tempoStretch.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/audio/tempoStretch.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/foliateStyles.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/foliateStyles.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/generationPipeline.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/generationPipeline.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/narrateDiagnostics.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/narrateDiagnostics.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/narrationContinuity.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/narrationContinuity.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/narrationPortability.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/narrationPortability.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/ttsEvalTrace.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/ttsEvalTrace.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/flow-scroll-engine.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flow-scroll-engine.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/flowReadingZone.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/flowReadingZone.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/foliate-bridge.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/foliate-bridge.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/narrLayer1bConsolidation.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/narrLayer1bConsolidation.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/narrationContinuity.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/narrationContinuity.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/narrationIntegration.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/narrationIntegration.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/narrationPortability.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/narrationPortability.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/narrationProfiles.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/narrationProfiles.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/narrationReducer.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/narrationReducer.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/perf-baseline-results.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/perf-baseline-results.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/tts7b-cursorContract.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tts7b-cursorContract.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/ttsSettingsKokoroTruth.test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ttsSettingsKokoroTruth.test.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/useKeyboardShortcuts.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/useKeyboardShortcuts.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/useLibrary.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/useLibrary.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/useReaderMode.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/useReaderMode.test.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +95,9 @@
     &quot;accountId&quot;: &quot;16b8c511-9493-44da-87b7-fc616c175f96&quot;
   }
 }</component>
+  <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/package.json" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7,
   &quot;fromUser&quot;: false
@@ -52,10 +111,11 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "sprint/tts-6l-narration-profiles-sharing-foundations",
+    "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/estra/Projects/Blurby",
     "nodejs_package_manager_path": "npm",
@@ -71,6 +131,8 @@
       <option name="presentableId" value="Default" />
       <updated>1775317594290</updated>
       <workItem from="1775317596140" duration="184000" />
+      <workItem from="1776447166945" duration="32681000" />
+      <workItem from="1776704943936" duration="7688000" />
     </task>
     <task id="LOCAL-00001" summary="4.4.2026">
       <option name="closed" value="true" />

@@ -33,6 +33,7 @@ function makeKeyEvent(overrides: Partial<KeyEvent> = {}): KeyEvent {
 type Action =
   | "toggleFlap"
   | "toggleNarration"
+  | "enterNarrate"
   | "toggleFavorite"
   | "switchMode"
   | "prevChapter"
@@ -57,11 +58,11 @@ function resolveReaderKey(
 
   // Tab toggles flap in any reader mode
   if (e.key === "Tab") return "toggleFlap";
-  // T toggles narration
-  if (e.code === "KeyT" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "toggleNarration";
-  // [ / ] chapter navigation
+  // [ / ] chapter navigation (all modes)
   if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) return "prevChapter";
   if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) return "nextChapter";
+  // N (bare) enters narrate mode paused from any surface. Shift+N is handled per-surface below.
+  if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "enterNarrate";
   // Page-mode only keys
   if (surface === "page") {
     if (e.code === "Space" && !e.shiftKey) return "togglePlay";
@@ -71,7 +72,12 @@ function resolveReaderKey(
   }
   // Flow-surface keys, including narrate.
   if (surface === "flow") {
-    if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "toggleNarration";
+    if (readerMode === "narrate") {
+      if (e.code === "Space" && !e.shiftKey) return "togglePlay";
+      if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) return "wpmUp";
+      if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) return "wpmDown";
+      return e.code === "Escape" ? "exit" : "none";
+    }
     if (e.code === "Space" && !e.shiftKey) return "togglePlay";
     if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) return "wpmDown";
     if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) return "wpmUp";
@@ -104,9 +110,27 @@ describe("useKeyboardShortcuts — key binding resolution (any mode)", () => {
     expect(resolveReaderKey(makeKeyEvent({ key: "Tab" }), "flow")).toBe("toggleFlap");
   });
 
-  it("T toggles narration", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "focus")).toBe("toggleNarration");
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "flow")).toBe("toggleNarration");
+  it("T is no longer bound to narration toggle (READER-4M-2)", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "focus")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "flow")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "narrate")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "page")).toBe("none");
+  });
+
+  it("N (bare) enters Narrate mode paused from any surface (READER-4M-2)", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "page")).toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "focus")).toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "flow")).toBe("enterNarrate");
+    // N in narrate is idempotent at the hook layer — still resolves to enterNarrate;
+    // handleSelectMode short-circuits the no-op transition.
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("enterNarrate");
+  });
+
+  it("Shift+N is NOT captured by the universal enterNarrate binding", () => {
+    // Page-mode uses Shift+N for make-note; the universal binding must require !shiftKey.
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "page")).not.toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "focus")).not.toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "flow")).not.toBe("enterNarrate");
   });
 
   it("[ goes to previous chapter", () => {
@@ -165,15 +189,17 @@ describe("useKeyboardShortcuts — flow surface keys", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "flow")).toBe("togglePlay");
   });
 
-  it("narrate uses the flow keyboard surface", () => {
+  it("narrate keeps the flow-family keyboard surface but moves speed to Up/Down", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "narrate")).toBe("togglePlay");
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("toggleNarration");
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "narrate")).toBe("wpmDown");
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "narrate")).toBe("wpmUp");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "narrate")).toBe("wpmUp");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "narrate")).toBe("wpmDown");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "narrate")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "narrate")).toBe("none");
   });
 
-  it("legacy scroll maps to the flow keyboard surface", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "scroll")).toBe("toggleNarration");
+  it("legacy scroll maps to the flow keyboard surface and resolves N to enterNarrate", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "scroll")).toBe("enterNarrate");
   });
 
   it("legacy scroll keeps the flow playback and coarse-rate controls", () => {
@@ -187,23 +213,21 @@ describe("useKeyboardShortcuts — flow surface keys", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "Escape" }), "narrate")).toBe("exit");
   });
 
-  it("page-only bindings stay isolated from the narrate flow surface", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "narrate")).toBe("none");
-    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "narrate")).toBe("none");
+  it("page-only bindings stay isolated from narrate while narrate speed stays vertical", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowLeft" }), "narrate")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "narrate")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "narrate")).toBe("wpmUp");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "narrate")).toBe("wpmDown");
   });
 });
 
 describe("useKeyboardShortcuts — modifier key handling", () => {
-  it("Ctrl+T does NOT toggle narration", () => {
+  it("T is unbound — modifier variants must also not toggle narration", () => {
+    // T no longer has a narration toggle binding in any variant.
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", ctrlKey: true }), "focus")).not.toBe("toggleNarration");
-  });
-
-  it("Shift+T does NOT toggle narration", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", shiftKey: true }), "focus")).not.toBe("toggleNarration");
-  });
-
-  it("Meta+T does NOT toggle narration", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT", metaKey: true }), "focus")).not.toBe("toggleNarration");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "focus")).not.toBe("toggleNarration");
   });
 
   it("Ctrl+[ does NOT go to previous chapter", () => {
@@ -262,6 +286,77 @@ describe("useGlobalKeys — settings shortcut", () => {
 
   it("Tab does NOT toggle flap in reader view (handled by useReaderKeys)", () => {
     expect(resolveGlobalKey(makeKeyEvent({ key: "Tab" }), "reader")).toBe("none");
+  });
+});
+
+// READER-4M-2: N key, T key, Space in-mode (Groups B–E)
+describe("READER-4M-2 — N key enters narrate from any mode", () => {
+  // Test 6: N (bare) calls enterNarrate when in page mode
+  it("N (bare) resolves to enterNarrate in page mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "page")).toBe("enterNarrate");
+  });
+
+  // Test 7: N (bare) calls enterNarrate when in focus mode (not nextChapter)
+  it("N (bare) resolves to enterNarrate in focus mode — not nextChapter", () => {
+    const action = resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "focus");
+    expect(action).toBe("enterNarrate");
+    expect(action).not.toBe("nextChapter");
+  });
+
+  // Test 8: N (bare) calls enterNarrate when in flow mode (not toggleNarration)
+  it("N (bare) resolves to enterNarrate in flow mode — not toggleNarration", () => {
+    const action = resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "flow");
+    expect(action).toBe("enterNarrate");
+    expect(action).not.toBe("toggleNarration");
+  });
+
+  // Test 9: N (bare) when already in narrate mode still calls enterNarrate
+  it("N (bare) resolves to enterNarrate when already in narrate mode", () => {
+    // handleSelectMode is idempotent — the hook still calls enterNarrate; the
+    // mode transition guard handles the no-op at the React layer.
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("enterNarrate");
+  });
+});
+
+describe("READER-4M-2 — Shift+N preserved as make-note (not enterNarrate)", () => {
+  // Test 10: Shift+N does NOT call enterNarrate
+  it("Shift+N does NOT resolve to enterNarrate in any mode", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "page")).not.toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "focus")).not.toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "flow")).not.toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "narrate")).not.toBe("enterNarrate");
+  });
+});
+
+describe("READER-4M-2 — T key has no narration binding", () => {
+  // Test 11: T key in page mode does NOT call toggleNarration
+  it("T key in page mode does NOT resolve to toggleNarration", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "page")).not.toBe("toggleNarration");
+  });
+
+  // Test 12: T key in flow mode does NOT call toggleNarration
+  it("T key in flow mode does NOT resolve to toggleNarration", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "flow")).not.toBe("toggleNarration");
+  });
+});
+
+describe("READER-4M-2 — Space stays in-mode (pause does not switch readingMode)", () => {
+  // Test 13: Space in flow mode calls togglePlay but does NOT change readingMode
+  it("Space in flow mode resolves to togglePlay — not a mode switch", () => {
+    const action = resolveReaderKey(makeKeyEvent({ code: "Space" }), "flow");
+    expect(action).toBe("togglePlay");
+    // The action returned is togglePlay — it has no side-effect on readingMode.
+    // A "page" action would be "exit" or "none"; this confirms no mode crossover.
+    expect(action).not.toBe("exit");
+    expect(action).not.toBe("none");
+  });
+
+  // Test 14: Space in narrate mode calls togglePlay but does NOT change readingMode
+  it("Space in narrate mode resolves to togglePlay — not a mode switch", () => {
+    const action = resolveReaderKey(makeKeyEvent({ code: "Space" }), "narrate");
+    expect(action).toBe("togglePlay");
+    expect(action).not.toBe("exit");
+    expect(action).not.toBe("none");
   });
 });
 
