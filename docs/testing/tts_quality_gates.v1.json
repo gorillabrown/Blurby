@@ -1,23 +1,39 @@
 {
   "schemaVersion": "1.0",
   "gateVersion": "v1",
-  "description": "Release quality gates for TTS evaluation aggregates.",
+  "description": "Release quality gates for TTS evaluation aggregates on an already-functioning narration lane. These gates do not by themselves justify engine replacement or Kokoro retirement; continuous multi-chunk playback and the retirement scorecard still govern that decision.",
   "hardFail": [
     {
-      "id": "startup-p50-max",
-      "metric": "startupLatency.p50",
+      "id": "warm-preview-p50-max",
+      "metric": "warmPreviewLatency.p50",
       "op": "<=",
-      "value": 470,
+      "value": 1200,
       "unit": "ms",
-      "reason": "Median startup latency must stay responsive."
+      "reason": "Warm Test voice previews must remain responsive."
     },
     {
-      "id": "startup-p95-max",
-      "metric": "startupLatency.p95",
+      "id": "warm-preview-p95-max",
+      "metric": "warmPreviewLatency.p95",
       "op": "<=",
-      "value": 510,
+      "value": 1800,
       "unit": "ms",
-      "reason": "Tail startup latency must remain within release baseline tolerance."
+      "reason": "Tail warm Test voice preview latency must remain within the approved narration-lane budget."
+    },
+    {
+      "id": "warm-first-audio-p50-max",
+      "metric": "warmFirstAudioLatency.p50",
+      "op": "<=",
+      "value": 1500,
+      "unit": "ms",
+      "reason": "Median warm first-audio latency must stay within the approved narration-lane budget."
+    },
+    {
+      "id": "warm-first-audio-p95-max",
+      "metric": "warmFirstAudioLatency.p95",
+      "op": "<=",
+      "value": 2200,
+      "unit": "ms",
+      "reason": "Tail warm first-audio latency must stay within the approved narration-lane budget."
     },
     {
       "id": "drift-p95-max",
@@ -46,12 +62,20 @@
   ],
   "warnOnly": [
     {
-      "id": "startup-max-warning",
-      "metric": "startupLatency.max",
+      "id": "warm-preview-max-warning",
+      "metric": "warmPreviewLatency.max",
       "op": "<=",
-      "value": 550,
+      "value": 3000,
       "unit": "ms",
-      "reason": "Single-run startup spikes require reviewer acknowledgement."
+      "reason": "Warm preview spikes above the approved threshold require reviewer acknowledgement."
+    },
+    {
+      "id": "warm-first-audio-max-warning",
+      "metric": "warmFirstAudioLatency.max",
+      "op": "<=",
+      "value": 3000,
+      "unit": "ms",
+      "reason": "Warm first-audio spikes above the approved threshold require reviewer acknowledgement."
     },
     {
       "id": "drift-max-warning",

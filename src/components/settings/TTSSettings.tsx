@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { BlurbySettings, KokoroStatusSnapshot, PronunciationOverride } from "../../types";
-import { KOKORO_VOICE_NAMES, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
+import { KOKORO_VOICE_NAMES, QWEN_DEFAULT_SPEAKER, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
 import { KokoroStatusSection } from "./KokoroStatusSection";
+import { QwenStatusSection } from "./QwenStatusSection";
+import { QwenRuntimeSetupSection } from "./QwenRuntimeSetupSection";
+import { getQwenStatusPresentation } from "./qwenStatusPresentation";
 import { NarrationDataSection } from "./NarrationDataSection";
 import { PauseSettingsSection } from "./PauseSettingsSection";
 import { PronunciationOverridesEditor } from "./PronunciationOverridesEditor";
+import { CacheSizeDisplay } from "./CacheSizeDisplay";
 import {
   DEFAULT_KOKORO_STATUS_SNAPSHOT,
   getKokoroStatusError,
@@ -12,8 +16,9 @@ import {
   snapshotFromKokoroErrorResponse,
   snapshotFromLegacyKokoroDownloadError,
 } from "../../utils/kokoroStatus";
-import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed, resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
-import { applyKokoroTempoStretch } from "../../utils/audio/tempoStretch";
+import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../../utils/kokoroRatePlan";
+import { useQwenPrototypeStatus } from "../../hooks/useQwenPrototypeStatus";
+import { previewSelectedTtsVoice } from "./ttsPreview";
 import "../../styles/tts-settings.css";
 
 const api = window.electronAPI;
@@ -34,11 +39,12 @@ interface TTSSettingsProps {
 }
 
 export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange }: TTSSettingsProps) {
-  const engine = settings.ttsEngine || "web";
+  const engine = settings.ttsEngine || "qwen";
 
   // Web Speech API voices
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [testPlaying, setTestPlaying] = useState(false);
+  const [showQwenSetupGuidance, setShowQwenSetupGuidance] = useState(false);
 
   // Kokoro state
   const [kokoroStatus, setKokoroStatus] = useState<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
@@ -58,6 +64,26 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       : kokoroStatus.status === "warming"
         ? "Warming up voice model..."
         : "Preparing voice model...";
+
+  const {
+    qwenStatus,
+    qwenVoices,
+    qwenError,
+    qwenPreflightReport,
+    qwenPreflightBusy,
+    qwenReady,
+    qwenWarming,
+    qwenBusy,
+    handlePreloadQwen,
+    handlePreflightQwen,
+  } = useQwenPrototypeStatus();
+  const preferredQwenVoice =
+    settings.ttsVoiceName && qwenVoices.includes(settings.ttsVoiceName)
+      ? settings.ttsVoiceName
+      : qwenVoices.includes(QWEN_DEFAULT_SPEAKER)
+        ? QWEN_DEFAULT_SPEAKER
+        : qwenVoices[0] || QWEN_DEFAULT_SPEAKER;
+  const qwenStatusPresentation = getQwenStatusPresentation(qwenStatus, qwenError);
 
   // Load Web Speech voices
   useEffect(() => {
@@ -167,51 +193,15 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
   };
 
   const handleTestVoice = async () => {
-    if (engine === "kokoro" && kokoroReady && api?.kokoroGenerate) {
-      setTestPlaying(true);
-      try {
-        const voice = settings.ttsVoiceName || "af_bella";
-        const ratePlan = resolveKokoroRatePlan(settings.ttsRate || 1.0);
-        const result = await api.kokoroGenerate(
-          "The quick brown fox jumps over the lazy dog.",
-          voice,
-          ratePlan.generationBucket
-        );
-        if (!result.error && result.audio) {
-          const { playBuffer } = await import("../../utils/audioPlayer");
-          const playback = applyKokoroTempoStretch({
-            audio: result.audio,
-            sampleRate: result.sampleRate ?? 24000,
-            durationMs: result.durationMs ?? 0,
-            wordTimestamps: result.wordTimestamps,
-            kokoroRatePlan: ratePlan,
-          });
-          playBuffer(
-            playback.audio,
-            result.sampleRate ?? 24000,
-            playback.durationMs,
-            9, // word count of test sentence
-            undefined,
-            () => setTestPlaying(false),
-          );
-        } else {
-          setTestPlaying(false);
-        }
-      } catch {
-        setTestPlaying(false);
-      }
-    } else {
-      if (!window.speechSynthesis) return;
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance("The quick brown fox jumps over the lazy dog.");
-      const voice = voices.find((v) => v.name === settings.ttsVoiceName);
-      if (voice) utterance.voice = voice;
-      utterance.rate = settings.ttsRate || 1.0;
-      utterance.onend = () => setTestPlaying(false);
-      utterance.onerror = () => setTestPlaying(false);
-      setTestPlaying(true);
-      window.speechSynthesis.speak(utterance);
-    }
+    await previewSelectedTtsVoice({
+      engine,
+      settings,
+      voices,
+      kokoroReady,
+      qwenReady,
+      preferredQwenVoice,
+      onPlaybackStateChange: setTestPlaying,
+    });
   };
 
   // ── Profile management ──────────────────────────────────────────────────
@@ -285,7 +275,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         narrationProfiles: profiles.map(p =>
           p.id === activeProfileId ? {
             ...p,
-            ttsEngine: merged.ttsEngine || "web",
+            ttsEngine: merged.ttsEngine || "qwen",
             ttsVoiceName: merged.ttsVoiceName || null,
             ttsRate: merged.ttsRate || 1.0,
             ttsPauseCommaMs: merged.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
@@ -394,6 +384,20 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       {/* Engine selector */}
       <div className="settings-mode-toggle tts-engine-toggle">
         <button
+          className={`settings-mode-btn${engine === "qwen" ? " active" : ""}`}
+          onClick={() => {
+            handleTtsChange({
+              ttsEngine: "qwen",
+              ttsVoiceName: qwenReady ? preferredQwenVoice : null,
+            });
+            if (!qwenReady && !qwenBusy) {
+              void handlePreloadQwen();
+            }
+          }}
+        >
+          Qwen AI
+        </button>
+        <button
           className={`settings-mode-btn${engine === "web" ? " active" : ""}`}
           onClick={() => handleTtsChange({ ttsEngine: "web", ttsVoiceName: null })}
         >
@@ -408,8 +412,12 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
             }
           }}
         >
-          Kokoro AI
+          Kokoro AI (Legacy)
         </button>
+      </div>
+      <div className="tts-test-hint">
+        Qwen is Blurby's default narration engine.
+        Kokoro remains available as a deprecated fallback while retirement gates are still open.
       </div>
 
       {/* Kokoro download progress */}
@@ -421,6 +429,25 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           kokoroError={kokoroError}
           kokoroStalled={kokoroStalled}
           onDownload={handleDownloadKokoro}
+        />
+      )}
+
+      {engine === "qwen" && !qwenReady && (
+        <QwenStatusSection
+          qwenWarming={qwenWarming}
+          qwenPreflightBusy={qwenPreflightBusy}
+          qwenStatusReason={qwenStatus.reason ?? null}
+          qwenStatusTitle={qwenStatusPresentation.title}
+          qwenStatusDetail={qwenStatusPresentation.detail}
+          onValidateRuntime={() => void handlePreflightQwen()}
+          onViewSetupGuidance={() => setShowQwenSetupGuidance(true)}
+        />
+      )}
+
+      {engine === "qwen" && (!qwenReady || showQwenSetupGuidance) && (
+        <QwenRuntimeSetupSection
+          report={qwenPreflightReport}
+          expanded={showQwenSetupGuidance}
         />
       )}
 
@@ -462,6 +489,24 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         </div>
       )}
 
+      {engine === "qwen" && qwenReady && (
+        <div className="settings-toggle-row tts-voice-picker-row">
+          <span className="settings-toggle-label">Voice</span>
+          <select
+            className="settings-select tts-voice-select"
+            value={preferredQwenVoice}
+            onChange={(e) => handleTtsChange({ ttsVoiceName: e.target.value || null })}
+            aria-label="Qwen voice"
+          >
+            {qwenVoices.map((voice) => (
+              <option key={voice} value={voice}>
+                {voice}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Speech rate</span>
         <span className="tts-rate-value">{(settings.ttsRate || 1.0).toFixed(1)}x</span>
@@ -494,14 +539,16 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       <button
         className="settings-btn-secondary tts-test-btn"
         onClick={handleTestVoice}
-        disabled={testPlaying}
+        disabled={testPlaying || (engine === "qwen" && !qwenReady)}
       >
         {testPlaying ? "Playing..." : "Test voice"}
       </button>
       <div className="tts-test-hint">
         Press N in the reader to toggle narration. WPM is capped at 400 when narration is active.
-        {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using Kokoro AI voices."}
-        {engine === "kokoro" && kokoroWarming && " Kokoro is warming up..."}
+        {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using legacy Kokoro voices."}
+        {engine === "kokoro" && kokoroWarming && " Legacy Kokoro is warming up..."}
+        {engine === "qwen" && qwenReady && " Using Qwen for live narration playback."}
+        {engine === "qwen" && !qwenReady && " Qwen becomes playable once the local external runtime is available and warmed."}
       </div>
 
       <PauseSettingsSection settings={settings} onTtsChange={handleTtsChange} />
@@ -534,41 +581,6 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       <CacheSizeDisplay />
 
       <NarrationDataSection settings={settings} onSettingsChange={onSettingsChange} />
-    </div>
-  );
-}
-
-/** Shows current cache size and a clear button */
-function CacheSizeDisplay() {
-  const [info, setInfo] = useState<{ totalMB: number; bookCount: number } | null>(null);
-  const [clearing, setClearing] = useState(false);
-
-  useEffect(() => {
-    if (api?.ttsCacheInfo) {
-      api.ttsCacheInfo().then(setInfo).catch(() => {});
-    }
-  }, [clearing]);
-
-  if (!info || info.totalMB === 0) return null;
-
-  return (
-    <div className="tts-cache-size-row">
-      <span className="tts-cache-size-label">
-        {info.bookCount} {info.bookCount === 1 ? "book" : "books"} cached — {info.totalMB}MB
-      </span>
-      <button
-        className="settings-btn-secondary tts-cache-clear-btn"
-        onClick={async () => {
-          if (!confirm("Clear all cached narration audio?")) return;
-          setClearing(true);
-          // Evict all cached books (would need a "clear all" IPC — use per-book eviction for now)
-          // For now, just refresh the display
-          setClearing(false);
-        }}
-        disabled={clearing}
-      >
-        Clear cache
-      </button>
     </div>
   );
 }

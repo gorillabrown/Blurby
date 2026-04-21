@@ -16,14 +16,14 @@
 //     i) After hard click, userExplicitSelectionRef prevents soft updates
 //     j) On page turn after hard click, userExplicitSelectionRef resets to false
 //   Group D: Resolution chain
-//     k) Mode start: resumeAnchorRef > highlightedWordIndex > softWordIndex > 0
-//     l) When highlightedWordIndex is 0 and softWordIndex is 500, mode start uses 500
+//     k) Canonical anchor is mode-aware and preserves explicit 0 anchors
+//     l) Narrate follows spoken-word truth on the shared surface
 //   Group E: BUG regressions
 //     m) BUG-152: getEffectiveWords returns full-book words when extraction complete
 //     n) BUG-151: Narration band fallback height capped at 40px
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { resolveFoliateStartWord } from "../src/utils/startWordIndex";
+import { resolveCanonicalWordAnchor, resolveFoliateStartWord } from "../src/utils/startWordIndex";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -256,48 +256,93 @@ describe("Group C: Hard/soft interaction", () => {
 // ── Group D: Resolution chain ─────────────────────────────────────────────────
 
 describe("Group D: Mode start resolution chain", () => {
-  /**
-   * The full resolution priority for mode start in useReaderMode.ts:
-   *   resumeAnchorRef > highlightedWordIndex || softWordIndex > findFirstVisible > 0
-   *
-   * resumeAnchorRef is handled at the call site (bypasses resolveFoliateStartWord entirely).
-   * The remaining chain is: highlightedWordIndex || softWordIndex → findFirstVisible → 0
-   */
-
-  it("k) resumeAnchorRef takes top priority over highlightedWordIndex and softWordIndex", () => {
-    // Simulate the full mode-start logic with a ref-based priority
-    const resumeAnchorRef = { current: 42 }; // active resume anchor
-    const highlightedWordIndex = 100;
-    const softWordIndex = 200;
-
-    // In useReaderMode the resume anchor short-circuits before resolveFoliateStartWord
-    const startSource = resumeAnchorRef.current ?? (highlightedWordIndex || softWordIndex);
-    expect(startSource).toBe(42);
+  it("k) page mode resolves from resumeAnchor before visible highlight or soft anchor", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "page",
+      resumeAnchor: 42,
+      highlightedWordIndex: 100,
+      softWordIndex: 200,
+    })).toBe(42);
   });
 
-  it("k) highlightedWordIndex is used when resumeAnchor is null and highlightedWordIndex > 0", () => {
-    const resumeAnchorRef = { current: null };
-    const highlightedWordIndex = 75;
-    const softWordIndex = 500;
-
-    const startSource = resumeAnchorRef.current ?? (highlightedWordIndex || softWordIndex);
-    // resolveFoliateStartWord called with startSource=75, wordsLength=1000
-    const result = resolveFoliateStartWord(startSource as number, 1000, () => 10);
-    expect(result).toBe(75);
+  it("k) flow mode preserves an explicit word index of 0 instead of falling through to softWordIndex", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "flow",
+      resumeAnchor: null,
+      highlightedWordIndex: 0,
+      softWordIndex: 500,
+    })).toBe(0);
   });
 
-  it("l) When highlightedWordIndex is 0 and softWordIndex is 500, mode start uses 500", () => {
-    const resumeAnchorRef = { current: null };
-    const highlightedWordIndex = 0;
-    const softWordIndex = 500;
+  it("k) page mode falls back to the soft anchor when no highlighted word is active", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "page",
+      resumeAnchor: null,
+      highlightedWordIndex: null,
+      softWordIndex: 88,
+    })).toBe(88);
+  });
 
-    // highlightedWordIndex=0 is falsy → falls through to softWordIndex
-    const startSource = resumeAnchorRef.current ?? (highlightedWordIndex || softWordIndex);
-    expect(startSource).toBe(500);
+  it("k) focus mode resolves from its live mode cursor before page highlight and soft anchor", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "focus",
+      resumeAnchor: null,
+      focusWordIndex: 75,
+      highlightedWordIndex: 20,
+      softWordIndex: 10,
+    })).toBe(75);
+  });
 
-    // resolveFoliateStartWord with 500 in a book of 1000 words should return 500
-    const result = resolveFoliateStartWord(startSource as number, 1000, () => 10);
-    expect(result).toBe(500);
+  it("k) focus mode still honors resumeAnchor over the current focus cursor", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "focus",
+      resumeAnchor: 11,
+      focusWordIndex: 75,
+      highlightedWordIndex: 20,
+      softWordIndex: 10,
+    })).toBe(11);
+  });
+
+  it("l) narrate mode resolves from spoken-word truth before page highlight and soft anchor", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "narrate",
+      resumeAnchor: null,
+      narrationWordIndex: 305,
+      highlightedWordIndex: 150,
+      softWordIndex: 10,
+    })).toBe(305);
+  });
+
+  it("l) narrate mode also honors resumeAnchor over the live spoken cursor", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "narrate",
+      resumeAnchor: 90,
+      narrationWordIndex: 305,
+      highlightedWordIndex: 150,
+      softWordIndex: 10,
+    })).toBe(90);
+  });
+
+  it("l) foliate start-word resolution still accepts canonical anchors against the global word count", () => {
+    const canonicalAnchor = resolveCanonicalWordAnchor({
+      readingMode: "narrate",
+      narrationWordIndex: 1603,
+      highlightedWordIndex: 14,
+      softWordIndex: 2,
+    });
+    const result = resolveFoliateStartWord(canonicalAnchor, 14, () => 3, 5000);
+    expect(result).toBe(1603);
+  });
+
+  it("l) canonical anchor resolution returns 0 when every source is absent", () => {
+    expect(resolveCanonicalWordAnchor({
+      readingMode: "narrate",
+      resumeAnchor: null,
+      highlightedWordIndex: null,
+      softWordIndex: null,
+      focusWordIndex: null,
+      narrationWordIndex: null,
+    })).toBe(0);
   });
 });
 

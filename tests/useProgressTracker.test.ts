@@ -106,6 +106,48 @@ describe("useProgressTracker — debounced save logic", () => {
   });
 });
 
+describe("useProgressTracker — canonical anchor persistence", () => {
+  function resolveCurrentPosPure(readingMode: string, wordIndex: number, anchorWordIndex: number): number {
+    return readingMode === "focus" ? wordIndex : anchorWordIndex;
+  }
+
+  function resolveSavePositionPure(finalPos: number, fraction: number, docWordCount: number, resolvedTotalWords: number): number {
+    const normalizedFinalPos = Math.max(0, Math.trunc(finalPos));
+    const fractionPos = Math.floor(fraction * docWordCount);
+    if (resolvedTotalWords > 0) {
+      return Math.min(normalizedFinalPos || fractionPos, resolvedTotalWords - 1);
+    }
+    return Math.max(normalizedFinalPos, fractionPos);
+  }
+
+  it("uses the focus cursor as the current position while focus mode is active", () => {
+    expect(resolveCurrentPosPure("focus", 120, 45)).toBe(120);
+  });
+
+  it("uses the canonical global anchor outside focus mode", () => {
+    expect(resolveCurrentPosPure("page", 120, 45)).toBe(45);
+    expect(resolveCurrentPosPure("flow", 120, 45)).toBe(45);
+    expect(resolveCurrentPosPure("narrate", 120, 45)).toBe(45);
+  });
+
+  it("prefers the canonical anchor over a smaller foliate fraction-derived position", () => {
+    expect(resolveSavePositionPure(412, 0.05, 5000, 5000)).toBe(412);
+  });
+
+  it("still falls back to the foliate fraction when the canonical anchor is zero", () => {
+    expect(resolveSavePositionPure(0, 0.20, 5000, 5000)).toBe(1000);
+  });
+
+  it("clamps canonical anchor saves to the last valid word in the resolved total", () => {
+    expect(resolveSavePositionPure(9999, 0.10, 5000, 5000)).toBe(4999);
+  });
+
+  it("uses the best known position when no resolved total word count exists yet", () => {
+    expect(resolveSavePositionPure(0, 0.20, 5000, 0)).toBe(1000);
+    expect(resolveSavePositionPure(800, 0.20, 5000, 0)).toBe(1000);
+  });
+});
+
 describe("useProgressTracker — page calculation", () => {
   it("calculates page number from word index", () => {
     const wordIdx = 1250;

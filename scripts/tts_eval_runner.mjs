@@ -144,6 +144,20 @@ export function summarizeTrace(trace) {
       : start && firstAudio
         ? Math.max(0, firstAudio.ts - start.ts)
         : null;
+  const warmPreviewLatencyMs =
+    start && typeof start.previewLatencyMs === "number"
+      ? start.previewLatencyMs
+      : null;
+  const warmFirstAudioLatencyMs = startLatencyMs;
+  const startupSpikeThresholdMs =
+    start && typeof start.spikeWarningThresholdMs === "number"
+      ? start.spikeWarningThresholdMs
+      : null;
+  const startupSpikeCount = startupSpikeThresholdMs == null
+    ? 0
+    : [warmPreviewLatencyMs, warmFirstAudioLatencyMs].filter(
+        (latency) => typeof latency === "number" && latency > startupSpikeThresholdMs,
+      ).length;
   const startupCacheMode = start?.cacheMode ?? null;
   const openingChunkWordCounts = Array.isArray(start?.openingChunkWordCounts)
     ? [...start.openingChunkWordCounts]
@@ -167,6 +181,10 @@ export function summarizeTrace(trace) {
     scenarioId: trace.scenarioId || null,
     runId: trace.runId,
     startLatencyMs,
+    warmPreviewLatencyMs,
+    warmFirstAudioLatencyMs,
+    startupSpikeThresholdMs,
+    startupSpikeCount,
     maxDrift,
     wordEventCount: words.length,
     flowEventCount: flow.length,
@@ -192,6 +210,12 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
         ? "uncached"
         : null;
   const openingChunkWordCounts = startupCacheMode ? [13, 26, 52, 104, 148] : null;
+  const spikeWarningThresholdMs = 3000;
+  const warmPreviewLatencyMs = startupCacheMode === "cached"
+    ? 820 + Math.min(180, words.length * 12)
+    : startupCacheMode === "uncached"
+      ? 980 + Math.min(200, words.length * 14)
+      : 900 + Math.min(220, words.length * 13);
   const startLatencyMs = startupCacheMode === "cached"
     ? 180 + Math.min(200, words.length * 5)
     : startupCacheMode === "uncached"
@@ -209,6 +233,9 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
     wordIndex: 0,
     mode,
     isNarrating: true,
+    previewLatencyMs: warmPreviewLatencyMs,
+    spikeWarningThresholdMs,
+    spikeWarning: warmPreviewLatencyMs > spikeWarningThresholdMs,
     ...(startupCacheMode ? { cacheMode: startupCacheMode, openingChunkWordCounts } : {}),
   });
   events.push({
@@ -217,6 +244,8 @@ export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdin
     state: "first-audio",
     wordIndex: 0,
     latencyMs: startLatencyMs,
+    spikeWarningThresholdMs,
+    spikeWarning: startLatencyMs > spikeWarningThresholdMs,
     mode,
     isNarrating: true,
   });

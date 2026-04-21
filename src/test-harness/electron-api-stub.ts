@@ -46,7 +46,7 @@ const defaultSettings: BlurbySettings = {
   sourceFolder: null,
   folderName: "My reading list",
   recentFolders: [],
-  theme: "dark",
+  theme: "blurby",
   launchAtLogin: false,
   focusTextSize: 110,
   accentColor: null,
@@ -75,8 +75,8 @@ const defaultSettings: BlurbySettings = {
   lastReadingMode: "flow",
   isNarrating: false,
   ttsEnabled: false,
-  ttsEngine: "kokoro",
-  ttsVoiceName: null,
+  ttsEngine: "qwen",
+  ttsVoiceName: "Ryan",
   ttsRate: 1.0,
   firstRunCompleted: false,
 };
@@ -641,6 +641,95 @@ export const electronAPIStub: ElectronAPI = {
     return trace("kokoroDownload", [], { ok: true });
   },
 
+  // ── Qwen TTS runtime lane ─────────────────────────────────────────────
+  qwenPreload: async () => {
+    emitEvent("tts-qwen-engine-status", {
+      status: "warming",
+      detail: "Checking external Qwen runtime",
+      reason: "preload-started",
+      ready: false,
+      loading: true,
+      recoverable: true,
+      preloadTimingMs: null,
+      statusTimingMs: null,
+      generateTimingMs: null,
+      voiceListTimingMs: null,
+      spikeWarningThresholdMs: 3000,
+      spikeWarning: false,
+    });
+    setTimeout(() => {
+      emitEvent("tts-qwen-engine-status", {
+        status: "ready",
+        detail: "Qwen runtime ready for live narration playback",
+        reason: null,
+        ready: true,
+        loading: false,
+        recoverable: false,
+        preloadTimingMs: 620,
+        statusTimingMs: 48,
+        generateTimingMs: null,
+        voiceListTimingMs: null,
+        spikeWarningThresholdMs: 3000,
+        spikeWarning: false,
+      });
+    }, 150);
+    return trace("qwenPreload", [], {
+      success: true,
+      timingMs: 620,
+      spikeWarningThresholdMs: 3000,
+      spikeWarning: false,
+    });
+  },
+
+  qwenPreflight: async () => trace("qwenPreflight", [], {
+    status: "ready",
+    reason: null,
+    detail: "Qwen runtime preflight passed for configured device \"cuda:0\".",
+    recoverable: false,
+    supportedHost: true,
+    requestedDevice: "cuda:0",
+    pythonExe: "C:\\runtime\\qwen\\.venv\\Scripts\\python.exe",
+    modelId: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+    attnImplementation: "flash_attention_2",
+    configPath: "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\qwen\\config.json",
+    checkedAt: "2026-04-20T12:00:00.000Z",
+    checks: [
+      { key: "python", label: "Python executable", status: "pass", detail: "Python executable found." },
+      { key: "torch", label: "PyTorch", status: "pass", detail: "PyTorch import succeeded." },
+      { key: "qwen_tts", label: "qwen_tts", status: "pass", detail: "qwen_tts import succeeded." },
+      { key: "cuda", label: "CUDA visibility", status: "pass", detail: "CUDA device \"cuda:0\" is visible to PyTorch." },
+      { key: "model", label: "Model availability", status: "pass", detail: "Model files are reachable locally." },
+    ],
+  }),
+
+  qwenModelStatus: async () => trace("qwenModelStatus", [], {
+    status: "ready",
+    detail: "Qwen runtime ready for live narration playback",
+    reason: null,
+    ready: true,
+    loading: false,
+    recoverable: false,
+    preloadTimingMs: 620,
+    statusTimingMs: 48,
+    generateTimingMs: null,
+    voiceListTimingMs: 36,
+    spikeWarningThresholdMs: 3000,
+    spikeWarning: false,
+  }),
+
+  qwenVoices: async () => trace("qwenVoices", [], { voices: ["Ryan", "Aiden"] }),
+
+  qwenGenerate: async (text: string, speaker: string, rate: number, words?: string[]) => {
+    const result = generateMockAudio(text, speaker || "Ryan", rate);
+    return trace("qwenGenerate", [`[${text.length} chars]`, speaker, rate, words?.length ?? 0], {
+      ...result,
+      wordTimestamps: null,
+      timingMs: 880,
+      spikeWarningThresholdMs: 3000,
+      spikeWarning: false,
+    });
+  },
+
   // ── TTS Cache (NAR-2) — in-memory for browser testing ────────────────
   ttsCacheRead: async (bookId: string, voiceId: string, startIdx: number) => {
     const key = `${bookId}:${voiceId}:${startIdx}`;
@@ -688,6 +777,8 @@ export const electronAPIStub: ElectronAPI = {
   onKokoroLoading: (cb: EventCallback) => addEventListener("tts-kokoro-loading", cb),
   onKokoroEngineStatus: (cb: EventCallback) => addEventListener("tts-kokoro-engine-status", cb),
   onKokoroDownloadError: (cb: EventCallback) => addEventListener("tts-kokoro-download-error", cb),
+  onQwenEngineStatus: (cb: EventCallback) => addEventListener("tts-qwen-engine-status", cb),
+  onQwenRuntimeError: (cb: EventCallback) => addEventListener("tts-qwen-runtime-error", cb),
   onWsConnectionAttempt: (cb: EventCallback) => addEventListener("ws-connection-attempt", cb),
   onWsPairingSuccess: (cb: EventCallback) => addEventListener("ws-pairing-success", cb),
 };
@@ -767,7 +858,7 @@ export function installStub(): void {
 
   console.info(
     "%c[Blurby Stub] %celectronAPI stub installed. Use window.__blurbyStub.emit(event, data) to trigger events.",
-    "color: #D04716; font-weight: bold",
+    "color: #FF5B7F; font-weight: bold",
     "color: inherit",
   );
 }

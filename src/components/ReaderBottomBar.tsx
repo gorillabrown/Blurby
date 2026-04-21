@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
 import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS } from "../constants";
 import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../utils/kokoroRatePlan";
-import { BlurbyDoc } from "../types";
+import type { BlurbyDoc, ReaderMode, TtsEngine } from "../types";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
 
@@ -19,25 +19,27 @@ interface ReaderBottomBarProps {
   wordIndex: number;
   wpm: number;
   focusTextSize: number;
-  readingMode: "page" | "focus" | "flow";
+  readingMode: ReaderMode;
   isNarrating?: boolean;
   playing: boolean;
   isEink: boolean;
   chapters: Array<{ title: string; charOffset: number; depth?: number }>;
   onSetWpm: (wpm: number) => void;
   onAdjustFocusTextSize: (delta: number) => void;
+  onEnterPage?: () => void;
   onEnterFocus: () => void;
   onEnterFlow: () => void;
+  onToggleNarration?: () => void;
   onPrevChapter?: () => void;
   onNextChapter?: () => void;
   onJumpToChapter?: (chapterIndex: number) => void;
   onEinkRefresh?: () => void;
   onTogglePlay?: () => void;
   chapterListRef?: React.MutableRefObject<ChapterListHandle | null>;
-  lastReadingMode?: "focus" | "flow";
+  lastReadingMode?: "focus" | "flow" | "narrate";
   ttsRate?: number;
   onSetTtsRate?: (rate: number) => void;
-  ttsEngine?: "web" | "kokoro";
+  ttsEngine?: TtsEngine;
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
   /** When narration is active, the narration cursor word index — used to track current chapter.
@@ -55,9 +57,9 @@ interface ReaderBottomBarProps {
 }
 
 const HINT_TEXT: Record<string, string> = {
-  page: "← → page  ↑ ↓ speed  space flow  ⇧space focus  tab menu",
-  focus: "← → rewind  ↑ ↓ speed  space pause  M menu",
-  flow: "← → speed  ↑ ↓ line  N narration  space pause  M menu",
+  page: "← → page  ↑ ↓ speed  space play  ⇧space mode  tab menu",
+  focus: "← → rewind  ↑ ↓ speed  space play/pause  M menu",
+  flow: "← → speed  ↑ ↓ line  N narrate  space play/pause  M menu",
 };
 
 export default function ReaderBottomBar({
@@ -73,8 +75,10 @@ export default function ReaderBottomBar({
   chapters,
   onSetWpm,
   onAdjustFocusTextSize,
+  onEnterPage,
   onEnterFocus,
   onEnterFlow,
+  onToggleNarration,
   onPrevChapter,
   onNextChapter,
   onJumpToChapter,
@@ -94,6 +98,7 @@ export default function ReaderBottomBar({
   flowProgress,
   currentChapterName,
 }: ReaderBottomBarProps) {
+  const surfaceMode = readingMode === "narrate" ? "flow" : readingMode;
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
   const [rateStatus, setRateStatus] = useState<"idle" | "confirming" | "set">("idle");
@@ -132,7 +137,7 @@ export default function ReaderBottomBar({
     : words.length > 0 ? (wordIndex / words.length) * 100 : 0;
 
   // Time remaining — use TTS-derived WPM when narration is selected
-  const isNarrationSelected = readingMode === "flow" && isNarrating;
+  const isNarrationSelected = readingMode === "narrate" || isNarrating;
   const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
   // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
   // instead of section words (which only covers the current chapter)
@@ -259,7 +264,10 @@ export default function ReaderBottomBar({
         {/* WPM or TTS Rate — show TTS rate when narration is selected (active or paused) */}
         {isNarrationSelected && onSetTtsRate ? (
           <div className="rbb-wpm-group">
-            <span className="rbb-wpm-label" aria-label={ttsEngine === "kokoro" ? "Kokoro rate" : "Speech rate"}>
+            <span
+              className="rbb-wpm-label"
+              aria-label={ttsEngine === "kokoro" ? "Legacy Kokoro rate" : ttsEngine === "qwen" ? "Narration rate" : "Speech rate"}
+            >
               {ttsRate.toFixed(1)}x
             </span>
             {ttsEngine === "kokoro" ? (
@@ -351,6 +359,14 @@ export default function ReaderBottomBar({
         {/* Mode buttons */}
         <div className="rbb-mode-group" role="group" aria-label="Reading modes">
           <button
+            className={`rbb-mode-btn ${readingMode === "page" ? "rbb-mode-btn--active" : ""}`}
+            onClick={() => onEnterPage?.()}
+            aria-label="Page mode"
+            aria-pressed={readingMode === "page"}
+          >
+            Page
+          </button>
+          <button
             className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "focus" ? " rbb-mode-btn--last" : ""}`}
             onClick={() => { triggerCoachHint("enterFocus"); onEnterFocus(); }}
             aria-label="Focus mode"
@@ -366,10 +382,18 @@ export default function ReaderBottomBar({
           >
             Flow
           </button>
+          <button
+            className={`rbb-mode-btn ${readingMode === "narrate" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narrate" ? " rbb-mode-btn--last" : ""}`}
+            onClick={() => onToggleNarration?.()}
+            aria-label="Narrate mode"
+            aria-pressed={readingMode === "narrate"}
+          >
+            Narrate
+          </button>
         </div>
 
         {/* Flow zone controls and progress — visible in flow mode only */}
-        {readingMode === "flow" && (
+        {surfaceMode === "flow" && (
           <>
             <div className="rbb-flow-zone-controls">
               {isNarrating && (
@@ -478,7 +502,7 @@ export default function ReaderBottomBar({
       {/* Row 3: Info line */}
       <div className="reader-bottom-bar-info">
         <span className="rbb-info-progress">{Math.round(progress)}%</span>
-        <span className="rbb-info-hint" aria-label="Keyboard shortcuts hint">{HINT_TEXT[readingMode] || ""}</span>
+        <span className="rbb-info-hint" aria-label="Keyboard shortcuts hint">{HINT_TEXT[surfaceMode] || ""}</span>
         <span className="rbb-info-time">
           {chapterTimeRemaining ? `Ch: ${chapterTimeRemaining} | Doc: ${timeRemaining}` : timeRemaining}
         </span>

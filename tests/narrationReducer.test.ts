@@ -27,6 +27,15 @@ describe("narrationReducer", () => {
         loading: false,
         recoverable: false,
       },
+      qwenReady: false,
+      qwenStatus: {
+        status: "idle",
+        detail: null,
+        reason: null,
+        ready: false,
+        loading: false,
+        recoverable: false,
+      },
       generationId: 0,
       speed: 1.0,
       pageEndWord: null,
@@ -177,6 +186,12 @@ describe("narrationReducer", () => {
     const state = createInitialNarrationState();
     const next = narrationReducer(state, { type: "SET_ENGINE", engine: "kokoro" });
     expect(next.engine).toBe("kokoro");
+  });
+
+  it("SET_ENGINE accepts qwen without coercing it away", () => {
+    const state = createInitialNarrationState();
+    const next = narrationReducer(state, { type: "SET_ENGINE", engine: "qwen" });
+    expect(next.engine).toBe("qwen");
   });
 
   it("KOKORO_READY sets kokoroReady=true, kokoroDownloading=false", () => {

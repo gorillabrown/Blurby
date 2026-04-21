@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   createDefaultNarrationProfile,
   profileFromSettings,
+  QWEN_DEFAULT_SPEAKER,
   resolveNarrationProfile,
   TTS_PAUSE_COMMA_MS,
   TTS_PAUSE_CLAUSE_MS,
@@ -49,8 +50,8 @@ describe("Narration Profiles — createDefaultNarrationProfile", () => {
     const p = createDefaultNarrationProfile("Test Profile");
     expect(p.name).toBe("Test Profile");
     expect(p.id).toMatch(/^np-/);
-    expect(p.ttsEngine).toBe("kokoro");
-    expect(p.ttsVoiceName).toBe("af_bella");
+    expect(p.ttsEngine).toBe("qwen");
+    expect(p.ttsVoiceName).toBe(QWEN_DEFAULT_SPEAKER);
     expect(p.ttsRate).toBe(1.0);
     expect(p.ttsPauseCommaMs).toBe(TTS_PAUSE_COMMA_MS);
     expect(p.pronunciationOverrides).toEqual([]);

@@ -7,12 +7,13 @@ const api = window.electronAPI;
 interface UseProgressTrackerParams {
   activeDoc: BlurbyDoc & { content?: string; cfi?: string; furthestPosition?: number; wordCount?: number };
   wordIndex: number;            // from useReader (Focus mode position)
-  highlightedWordIndex: number; // Page/Flow/Narration position
+  anchorWordIndex: number;      // Canonical global word anchor across all modes
   readingMode: string;
   useFoliate: boolean;
   foliateFractionRef: React.MutableRefObject<number>;
   wpm: number;
-  wordsLength: number;          // total words in document
+  wordsLength: number;          // fallback word count when full-book total is unavailable
+  totalWords: number;           // resolved global word count for progress / completion
   sessionStartWordRef: React.MutableRefObject<number>;
   activeReadingMsRef: React.MutableRefObject<number>;
   activeReadingStartRef: React.MutableRefObject<number | null>;
@@ -61,12 +62,13 @@ export interface UseProgressTrackerReturn {
 export function useProgressTracker({
   activeDoc,
   wordIndex,
-  highlightedWordIndex,
+  anchorWordIndex,
   readingMode,
   useFoliate,
   foliateFractionRef,
   wpm,
   wordsLength,
+  totalWords,
   sessionStartWordRef,
   activeReadingMsRef,
   activeReadingStartRef,
@@ -80,7 +82,8 @@ export function useProgressTracker({
   const lastSavedPosRef = useRef(activeDoc.position || 0);
 
   // Current position depends on mode
-  const currentPos = readingMode === "focus" ? wordIndex : highlightedWordIndex;
+  const currentPos = readingMode === "focus" ? wordIndex : anchorWordIndex;
+  const resolvedTotalWords = Math.max(totalWords, wordsLength, activeDoc.wordCount || 0);
 
   // Engagement gate: don't persist progress until user has actively read
   const hasEngagedRef = useRef(false);
@@ -128,10 +131,13 @@ export function useProgressTracker({
   // Internal helper: persist progress, log session, archive if complete (shared by both finish variants)
   const _persistAndLog = useCallback((finalPos: number) => {
     if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
-    const savePos = useFoliate
-      ? Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0))
-      : finalPos;
+    const normalizedFinalPos = Math.max(0, Math.trunc(finalPos));
+    const fractionPos = Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0));
+    const savePos = resolvedTotalWords > 0
+      ? Math.min(normalizedFinalPos || fractionPos, resolvedTotalWords - 1)
+      : Math.max(normalizedFinalPos, fractionPos);
     (activeDoc as any).furthestPosition = Math.max(furthestPositionRef.current, savePos);
+    lastSavedPosRef.current = savePos;
     onUpdateProgress(activeDoc.id, savePos);
     api.updateDocProgress(activeDoc.id, savePos, (activeDoc as any).cfi || undefined);
     // Use active reading time, not total elapsed
@@ -140,7 +146,7 @@ export function useProgressTracker({
       activeReadingStartRef.current = null;
     }
     const activeMs = activeReadingMsRef.current;
-    const wordsRead = Math.max(0, finalPos - sessionStartWordRef.current);
+    const wordsRead = Math.max(0, savePos - sessionStartWordRef.current);
     if (wordsRead > 0 && activeMs > MIN_ACTIVE_READING_MS) {
       api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
       api.logReadingSession({
@@ -151,11 +157,19 @@ export function useProgressTracker({
         mode: readingMode,
       }).catch(() => {});
     }
-    if (finalPos >= wordsLength - 1 && wordsLength > 0) {
+    if (savePos >= resolvedTotalWords - 1 && resolvedTotalWords > 0) {
       api.markDocCompleted();
       onArchiveDoc(activeDoc.id);
     }
-  }, [activeDoc, onUpdateProgress, wpm, onArchiveDoc, wordsLength, useFoliate, readingMode]);
+  }, [
+    activeDoc,
+    foliateFractionRef,
+    onArchiveDoc,
+    onUpdateProgress,
+    readingMode,
+    resolvedTotalWords,
+    wpm,
+  ]);
 
   // Finish reading — persist, log, archive, then exit reader
   const finishReading = useCallback((finalPos: number) => {

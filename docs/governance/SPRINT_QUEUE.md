@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED
-Next queue item: READER-4M-3
-Health: RED — depth 1 after `QWEN-STREAM-1` closeout (v1.71.0). Only `READER-4M-3` remains. Backfill queue to ≥3 before dispatching READER-4M-3. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-2` through `QWEN-STREAM-3`.
+Queue depth: 0 — RED
+Next queue item: NONE (backfill required)
+Health: RED — queue is empty after `READER-4M-3` closeout (v1.72.0). Backfill to ≥3 before the next dispatch. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-2` through `QWEN-STREAM-3`.
 ```
 
 ---
@@ -34,9 +34,9 @@ Health: RED — depth 1 after `QWEN-STREAM-1` closeout (v1.71.0). Only `READER-4
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | READER-4M-3 | v1.72.0 | `sprint/reader-4m-3-global-anchor-continuity` | Full | **YES** | Full spec in `ROADMAP.md`. Unifies save/resume/mode switching around one canonical global word anchor and makes Narrate follow spoken-word truth on the shared surface. Depends on `READER-4M-2`. |
+| — | — | — | — | — | — | Queue empty — backfill required before the next dispatch. |
 
-**Dispatch status:** Queue depth 1 — RED after `QWEN-STREAM-1` closeout (v1.71.0). Only `READER-4M-3` remains. Backfill queue to ≥3 before dispatching READER-4M-3. Subsequent streaming sprints (`QWEN-STREAM-2`: accumulator + strategy + live playback, `QWEN-STREAM-3`: hardening + evidence + decision gate) will be spec'd and queued as earlier sprints complete.
+**Dispatch status:** Queue depth 0 — RED after `READER-4M-3` closeout (v1.72.0). Backfill queue to ≥3 before the next dispatch. Subsequent streaming sprints (`QWEN-STREAM-2`: accumulator + strategy + live playback, `QWEN-STREAM-3`: hardening + evidence + decision gate) still need to be fully spec'd and queued.
 
 ### Parallel Dispatch Guardrails
 
@@ -107,9 +107,9 @@ If any guardrail fails, run the sprints sequentially.
 47. ~~Dispatch KOKORO-RETIRE-1 to CLI~~ — PAUSED on 2026-04-20. Subsequent live validation showed the current non-streaming local Qwen lane is not a sufficient successor path for sustained CPU narration, so retirement work is suspended pending the approved streaming-Qwen lane.
 48. ~~Backfill queue to ≥3~~ — COMPLETE. Added `QWEN-STREAM-1` (streaming sidecar foundation) as queue position 3. Queue depth restored to 3 (GREEN). Spec based on approved design at `docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md`. Voice path: CustomVoice model with streaming generator (Option A), Kokoro reference samples as fallback (Option B).
 49. ~~Dispatch READER-4M-2 to CLI~~ — COMPLETE (v1.69.0, 2026-04-20). Standalone Narrate mode landed alongside four-button bottom-bar controls. `N` is now the universal "enter Narrate paused" shortcut from any mode; `T` narration toggle removed. Pause/resume verified to stay in-mode for flow and narrate. 14 new tests (`tests/readerBottomBarControls.test.tsx`, `tests/useKeyboardShortcuts.test.ts`). Full `npm test` (2,102 tests) and `npm run build` passed.
-50. ~~Dispatch READER-4M-3 to CLI~~ — Queue position 1, dispatch-ready. Backfill queue to ≥3 before dispatching so depth returns to GREEN.
+50. ~~Dispatch READER-4M-3 to CLI~~ — COMPLETE (v1.72.0, 2026-04-20). One canonical global word anchor now drives entry/save/resume across page, focus, flow, and narrate; Flow↔Narrate preserve the exact shared-surface anchor; Narrate follow/highlight now uses spoken-word truth; and verification passed with `npm test` (`141` files, `2136` tests) plus `npm run build`.
 51. ~~Dispatch QWEN-STREAM-1 to CLI~~ — COMPLETE (v1.71.0, 2026-04-20). Streaming sidecar foundation: binary-framed PCM protocol, JS engine manager, IPC handlers, preload bridge, streaming types. 18 new tests. Build clean.
-52. **Backfill queue to ≥3 before dispatching READER-4M-3.** Queue is RED at depth 1. Spec two additional sprints before the next dispatch so depth returns to GREEN.
+52. **Backfill queue to ≥3 before the next dispatch.** Queue is RED at depth 0 after `READER-4M-3` closeout. Spec the next three sprints before resuming implementation work.
 
 ---
 
@@ -133,6 +133,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| READER-4M-3 | 2026-04-20 | PASS | Canonical global word anchor + spoken-truth Narrate continuity. Save/resume/mode switching now resolve through one anchor, Flow↔Narrate preserve the same shared-surface position, and Narrate follow/highlight consumes `narration.cursorWordIndex`. 16 new tests plus expanded continuity coverage. v1.72.0. |
 | QWEN-STREAM-1 | 2026-04-20 | PASS | Streaming sidecar foundation. Binary-framed PCM protocol, engine manager, IPC/preload bridge, 18 new tests. v1.71.0. |
 | READER-4M-2 | 2026-04-20 | PASS | Standalone Narrate mode + four-button controls. N key universal narrate entry. T toggle removed. 14 new tests. v1.69.0. |
 | QWEN-PROVISION-1 | 2026-04-20 | PASS | Qwen provisioning/machine-realism hardening shipped at v1.68.0: `main/qwen-engine.js` gained a deterministic `preflight()` probe, IPC/preload/shared types now expose `qwenPreflight`, and settings now surface validation/setup guidance with explicit config-missing, broken-runtime, and supported-host reporting. The standalone `scripts/qwen_preflight.mjs` validator, `docs/testing/QWEN_RUNTIME_SETUP.md`, and `docs/governance/QWEN_SUPPORTED_HOST_POLICY.md` define the setup path and support matrix. Subsequent same-day live testing broadened current non-streaming local Qwen support to CPU-backed hosts but also showed that lane is still too slow for sustained continuous CPU narration, which is why Kokoro-retirement work is now paused behind the approved streaming-Qwen successor design. Verification passed with the focused provisioning suite (`16` tests across `4` files), full `npx vitest run tests`, and `npm run build`; the existing Vite circular-chunk warning remained unchanged. |

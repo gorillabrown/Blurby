@@ -68,7 +68,7 @@ export function validateNarrationImport(
       if (!p || typeof p.id !== "string" || typeof p.name !== "string") {
         errors.push(`Profile at index ${i} is missing id or name`);
       }
-      if (typeof p.ttsEngine !== "string" || !["web", "kokoro"].includes(p.ttsEngine as string)) {
+      if (typeof p.ttsEngine !== "string" || !["web", "kokoro", "qwen"].includes(p.ttsEngine as string)) {
         errors.push(`Profile "${p.name || i}" has invalid ttsEngine`);
       }
     }
@@ -87,7 +87,7 @@ export function validateNarrationImport(
     .map(p => p.name);
 
   if (conflictingNames.length > 0) {
-    warnings.push(`${conflictingNames.length} profile(s) share names with existing profiles and will be added as duplicates`);
+    warnings.push(`${conflictingNames.length} profile(s) share names with existing profiles and will be added as duplicates alongside the current Qwen-first defaults`);
   }
 
   return {
