@@ -1395,3 +1395,30 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Pattern:** On the shared Foliate flow/narrate surface, keep spoken truth and visual fallback as separate channels. Narrate follow/highlight should consume `narration.cursorWordIndex`, while passive page/flow events remain visual-only. When dispatching section jumps from shared-surface truth callbacks, normalize navigation through `Promise.resolve(goToSection?.(...))` so real async Foliate APIs and sync test stubs share one safe path.
 
 **Related:** READER-4M-3 sprint, `src/utils/startWordIndex.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`
+
+---
+
+### [2026-04-20] LL-109: Streaming Strategy Must Guard async IIFE Against stop() Race
+
+**Area:** TTS strategy, streaming, async IPC
+**Status:** active
+**Priority:** moderate
+
+**Context:** QWEN-STREAM-2's `qwenStreamingStrategy.ts` implements `speakChunk()` as a `void` interface method that needs to call an async IPC. The pattern used is a self-invoking async IIFE. The unsubscribe handle returned by the frame-listener subscription is assigned inside the async block, after the IPC round-trip. If `stop()` fires during the IPC await, it executes before the handle is assigned and cannot unsubscribe the listener — creating a brief listener leak window.
+
+**Guardrail:** When a TTS strategy's `speakChunk()` uses an async IIFE (to call async IPC from a void interface method), guard by checking a "stopped" sentinel boolean at the top of the async IIFE, immediately after the await, before assigning any listeners or side-effecting state. This is distinct from double-stop protection (handled by optional-chain guards on the unsubscribe handle itself). The sentinel must be set synchronously in `stop()` before any async cleanup.
+
+**Pattern:**
+```ts
+let stopped = false;
+stop() { stopped = true; unsubscribe?.(); }
+speakChunk() {
+  (async () => {
+    await ipcCall();
+    if (stopped) return; // guard here
+    unsubscribe = subscribe(...);
+  })();
+}
+```
+
+**Related:** QWEN-STREAM-2 sprint, `src/hooks/narration/qwenStreamingStrategy.ts`. Flagged for hardening in QWEN-STREAM-3.

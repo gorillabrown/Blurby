@@ -132,6 +132,14 @@ export const QWEN_WARM_FIRST_AUDIO_P95_BUDGET_MS = 2200;
 /** Any single Qwen startup spike above this threshold requires review (ms). */
 export const QWEN_STARTUP_SPIKE_WARNING_MS = 3000;
 
+// ── Qwen Streaming (QWEN-STREAM-2) ──────────────────────────────────────────
+/** Minimum word count per streaming segment */
+export const TTS_STREAM_MIN_SEGMENT_WORDS = 10;
+/** Maximum word count per streaming segment */
+export const TTS_STREAM_MAX_SEGMENT_WORDS = 50;
+/** Qwen streaming output sample rate (Hz) */
+export const TTS_STREAM_SAMPLE_RATE = 24000;
+
 // ── Narrate Performance Budgets (TTS-6O) ────────────────────────────────────
 /** Max ms from user click to first audio chunk playing */
 export const NARRATE_STARTUP_BUDGET_MS = 3000;

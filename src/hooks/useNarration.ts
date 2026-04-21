@@ -8,6 +8,7 @@ import { NarrationState as ReducerState, NarrationAction, narrationReducer, crea
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { createQwenStrategy } from "./narration/qwenStrategy";
+import { createQwenStreamingStrategy } from "./narration/qwenStreamingStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
 import type { AudioProgressReport } from "../utils/audioScheduler";
@@ -121,6 +122,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const [qwenStatus, setQwenStatus] = useState<QwenStatusSnapshot>(DEFAULT_QWEN_STATUS_SNAPSHOT);
   const [qwenError, setQwenError] = useState<string | null>(null);
   const qwenStatusRef = useRef<QwenStatusSnapshot>(DEFAULT_QWEN_STATUS_SNAPSHOT);
+  /** QWEN-STREAM-2: true when the streaming sidecar reported ready:true on mount. */
+  const qwenStreamingReadyRef = useRef<boolean>(false);
 
   // ── Refs that need synchronous access ──────────────────────────────────
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -277,7 +280,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const speakNextChunkWebRef = useRef<() => void>(() => {});
   // TTS-7B: Ref to kokoroStrategy for fallback teardown (callback needs to call .stop())
   const kokoroStrategyRef = useRef<ReturnType<typeof createKokoroStrategy> | null>(null);
-  const qwenStrategyRef = useRef<ReturnType<typeof createQwenStrategy> | null>(null);
+  const qwenStrategyRef = useRef<ReturnType<typeof createQwenStrategy> | ReturnType<typeof createQwenStreamingStrategy> | null>(null);
 
   const kokoroStrategy = useMemo(
     () => createKokoroStrategy({
@@ -328,42 +331,53 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   kokoroStrategyRef.current = kokoroStrategy;
 
   const qwenStrategy = useMemo(
-    () => createQwenStrategy({
-      getSpeaker: () => qwenSpeakerRef.current,
-      getSpeed: () => stateRef.current.speed,
-      getStatus: () => stateRef.current.status,
-      getWords: () => allWordsRef.current,
-      getBookId: () => bookIdRef.current,
-      getPronunciationOverrides: () => pronunciationOverridesRef.current,
-      getPauseConfig: () => pauseConfigRef.current,
-      getParagraphBreaks: () => paragraphBreaksRef.current,
-      getFootnoteMode: () => footnoteModeRef.current,
-      getFootnoteCues: () => footnoteCuesRef.current,
-      onError: () => {
-        const detail =
-          qwenError ||
-          getQwenStatusError(qwenStatusRef.current) ||
-          qwenStatusRef.current.detail ||
-          "Qwen generation failed";
-        dispatch({ type: "ERROR", message: detail });
-        stateRef.current = { ...stateRef.current, status: "error" };
-      },
-      onSegmentStart: (wordIndex: number) => {
-        if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
-          evalFirstAudioCapturedRef.current = true;
-          emitEvalTrace({
-            kind: "lifecycle",
-            state: "first-audio",
-            wordIndex,
-            latencyMs: Math.max(0, Date.now() - evalStartTimeRef.current),
-          });
-        }
-        emitPendingRateResponseTrace();
-      },
-      onTruthSync: (wordIndex: number) => {
-        if (onTruthSyncRef.current) onTruthSyncRef.current(wordIndex);
-      },
-    }),
+    () => {
+      const sharedDeps = {
+        getSpeaker: () => qwenSpeakerRef.current,
+        getSpeed: () => stateRef.current.speed,
+        getWords: () => allWordsRef.current,
+        getBookId: () => bookIdRef.current,
+        getPronunciationOverrides: () => pronunciationOverridesRef.current,
+        getPauseConfig: () => pauseConfigRef.current,
+        getParagraphBreaks: () => paragraphBreaksRef.current,
+        onError: () => {
+          const detail =
+            qwenError ||
+            getQwenStatusError(qwenStatusRef.current) ||
+            qwenStatusRef.current.detail ||
+            "Qwen generation failed";
+          dispatch({ type: "ERROR", message: detail });
+          stateRef.current = { ...stateRef.current, status: "error" };
+        },
+        onSegmentStart: (wordIndex: number) => {
+          if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
+            evalFirstAudioCapturedRef.current = true;
+            emitEvalTrace({
+              kind: "lifecycle",
+              state: "first-audio",
+              wordIndex,
+              latencyMs: Math.max(0, Date.now() - evalStartTimeRef.current),
+            });
+          }
+          emitPendingRateResponseTrace();
+        },
+        onTruthSync: (wordIndex: number) => {
+          if (onTruthSyncRef.current) onTruthSyncRef.current(wordIndex);
+        },
+      };
+
+      // QWEN-STREAM-2: Use streaming strategy when sidecar is available,
+      // fall back to non-streaming strategy otherwise.
+      if (qwenStreamingReadyRef.current) {
+        return createQwenStreamingStrategy(sharedDeps);
+      }
+      return createQwenStrategy({
+        ...sharedDeps,
+        getStatus: () => stateRef.current.status,
+        getFootnoteMode: () => footnoteModeRef.current,
+        getFootnoteCues: () => footnoteCuesRef.current,
+      });
+    },
     [emitEvalTrace, emitPendingRateResponseTrace, qwenError],
   );
   qwenStrategyRef.current = qwenStrategy;
@@ -421,6 +435,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
     return () => cleanups.forEach((cleanup) => cleanup());
   }, [applyQwenStatusSnapshot]);
+
+  // QWEN-STREAM-2: Probe streaming engine availability once on mount.
+  // Result is stored in a ref (not state) — strategy selection reads it synchronously.
+  useEffect(() => {
+    if (!api?.qwenStreamStatus) return;
+    api.qwenStreamStatus().then((status) => {
+      qwenStreamingReadyRef.current = status?.ready === true;
+    }).catch(() => {
+      qwenStreamingReadyRef.current = false;
+    });
+  }, []);
 
   // Auto-start narration when Kokoro becomes ready while in warming state
   useEffect(() => {
