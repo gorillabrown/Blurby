@@ -61,6 +61,14 @@ export interface PipelineConfig {
   onError: () => void;
   /** Called when all words have been generated/scheduled */
   onEnd: () => void;
+  /** Optional engine-specific opening ramp profile. Defaults to the Kokoro baseline. */
+  openingRampWordCounts?: readonly number[];
+  /** Optional engine-specific cruise chunk size. Defaults to the Kokoro baseline. */
+  cruiseChunkWords?: number;
+  /** Optional engine-specific scheduler backpressure depth. Defaults to the Kokoro baseline. */
+  queueDepth?: number;
+  /** Optional engine-specific planner window. Defaults to the Kokoro baseline. */
+  plannerWindowWords?: number;
 }
 
 export interface GenerationPipeline {
@@ -140,13 +148,36 @@ export function buildOpeningRampPlan(
   startIdx: number,
   paragraphBreaks: Set<number> = new Set<number>(),
   pauseConfig?: ReturnType<NonNullable<PipelineConfig["getPauseConfig"]>>,
+  options: {
+    openingRampWordCounts?: readonly number[];
+    cruiseChunkWords?: number;
+    plannerWindowWords?: number;
+  } = {},
 ): OpeningRampChunkPlan[] {
   const plan: OpeningRampChunkPlan[] = [];
   let nextStartIdx = Math.max(0, Math.min(startIdx, words.length));
+  const openingRampSequence =
+    options.openingRampWordCounts && options.openingRampWordCounts.length > 0
+      ? [...options.openingRampWordCounts]
+      : [...RAMP_SEQUENCE];
+  const cruiseChunkWords = options.cruiseChunkWords ?? TTS_CRUISE_CHUNK_WORDS;
+  const plannerWindowWords = options.plannerWindowWords ?? TTS_PLANNER_WINDOW_WORDS;
+  const getOpeningRampChunkSize = (chunkIndex: number) =>
+    chunkIndex < openingRampSequence.length ? openingRampSequence[chunkIndex] : cruiseChunkWords;
 
-  for (let chunkIndex = 0; chunkIndex <= RAMP_SEQUENCE.length && nextStartIdx < words.length; chunkIndex += 1) {
-    const targetWordCount = getChunkSize(chunkIndex);
-    const endIdx = resolveOpeningRampChunkEnd(words, nextStartIdx, targetWordCount, paragraphBreaks, pauseConfig);
+  for (let chunkIndex = 0; chunkIndex <= openingRampSequence.length && nextStartIdx < words.length; chunkIndex += 1) {
+    const targetWordCount = getOpeningRampChunkSize(chunkIndex);
+    const endIdx = targetWordCount < cruiseChunkWords
+      ? resolveOpeningRampChunkEnd(words, nextStartIdx, targetWordCount, paragraphBreaks, pauseConfig)
+      : (buildNarrationPlan(
+          words,
+          nextStartIdx,
+          cruiseChunkWords,
+          paragraphBreaks,
+          pauseConfig,
+          plannerWindowWords,
+        ).chunks[0]?.endIdx
+          ?? snapToSentenceBoundary(words, nextStartIdx, Math.min(nextStartIdx + targetWordCount, words.length)));
     plan.push({
       chunkIndex,
       startIdx: nextStartIdx,
@@ -211,6 +242,14 @@ export function snapToSentenceBoundary(
 // ── Implementation ───────────────────────────────────────────────────────────
 
 export function createGenerationPipeline(config: PipelineConfig): GenerationPipeline {
+  const openingRampSequence =
+    config.openingRampWordCounts && config.openingRampWordCounts.length > 0
+      ? [...config.openingRampWordCounts]
+      : [...RAMP_SEQUENCE];
+  const cruiseChunkWords = config.cruiseChunkWords ?? TTS_CRUISE_CHUNK_WORDS;
+  const queueDepth = config.queueDepth ?? TTS_QUEUE_DEPTH;
+  const plannerWindowWords = config.plannerWindowWords ?? TTS_PLANNER_WINDOW_WORDS;
+
   let active = false;
   let generationId = 0;
   let nextProduceIdx = 0;
@@ -272,7 +311,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         continue;
       }
 
-      if (pendingChunks >= TTS_QUEUE_DEPTH) {
+      if (pendingChunks >= queueDepth) {
         await new Promise<void>(resolve => { backpressureResolve = resolve; });
         if (!active || myGenId !== generationId) return;
       }
@@ -299,10 +338,10 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     activePlan = buildNarrationPlan(
       words,
       anchorIdx,
-      TTS_CRUISE_CHUNK_WORDS,
+      cruiseChunkWords,
       paragraphBreaks,
       pauseConfig,
-      TTS_PLANNER_WINDOW_WORDS,
+      plannerWindowWords,
     );
     if (import.meta.env.DEV) {
       console.debug(`[pipeline] plan rebuilt at anchor=${anchorIdx}, chunks=${activePlan.chunks.length}, windowEnd=${activePlan.windowEnd}`);
@@ -325,7 +364,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     chunkSize: number,
   ): { endIdx: number; plannedSilenceMs: number; isDialogue: boolean } {
     // Ramp-up chunks: bypass planner, use sentence-snapping as before
-    if (chunkSize < TTS_CRUISE_CHUNK_WORDS) {
+    if (chunkSize < cruiseChunkWords) {
       const rawEndIdx = Math.min(startIdx + chunkSize, words.length);
       const endIdx = snapToSentenceBoundary(words, startIdx, rawEndIdx);
       return { endIdx, plannedSilenceMs: -1, isDialogue: false }; // -1 = derive from classifyChunkBoundary
@@ -358,7 +397,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
 
     // TTS-7P: Refresh the rolling plan for cruise-phase chunks (cheap if already current).
     // Ramp-up chunks (< cruise size) bypass the planner entirely.
-    if (chunkSize >= TTS_CRUISE_CHUNK_WORDS) {
+    if (chunkSize >= cruiseChunkWords) {
       refreshPlanIfNeeded(startIdx, words);
     }
 
@@ -485,7 +524,11 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     const words = config.getWords();
     const paragraphBreaks = config.getParagraphBreaks?.() ?? new Set<number>();
     const pauseConfig = config.getPauseConfig?.();
-    const openingRampPlan = buildOpeningRampPlan(words, startIdx, paragraphBreaks, pauseConfig);
+    const openingRampPlan = buildOpeningRampPlan(words, startIdx, paragraphBreaks, pauseConfig, {
+      openingRampWordCounts: openingRampSequence,
+      cruiseChunkWords,
+      plannerWindowWords,
+    });
     if (nextProduceIdx >= words.length) {
       config.onEnd();
       return;
@@ -494,9 +537,11 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     // ── Ramp-up phase: parallel prefetch for first 2 chunks (TTS-6S backlog fix) ──
     // Fire chunks 0 and 1 in parallel so chunk 1 is generating while chunk 0 plays.
     let rampDone = false;
-    const firstSize = openingRampPlan[0]?.targetWordCount ?? getChunkSize(0);
-    const secondSize = openingRampPlan[1]?.targetWordCount ?? getChunkSize(1);
-    if (firstSize < TTS_CRUISE_CHUNK_WORDS && secondSize < TTS_CRUISE_CHUNK_WORDS && nextProduceIdx < words.length) {
+    const getConfiguredChunkSize = (index: number) =>
+      index < openingRampSequence.length ? openingRampSequence[index] : cruiseChunkWords;
+    const firstSize = openingRampPlan[0]?.targetWordCount ?? getConfiguredChunkSize(0);
+    const secondSize = openingRampPlan[1]?.targetWordCount ?? getConfiguredChunkSize(1);
+    if (firstSize < cruiseChunkWords && secondSize < cruiseChunkWords && nextProduceIdx < words.length) {
       const idx0 = nextProduceIdx;
       const idx1 = Math.min(idx0 + firstSize, words.length);
       // Fire both requests concurrently
@@ -509,13 +554,13 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       const totalConsumed = (consumed0 || firstSize) + (consumed1 || 0);
       nextProduceIdx = Math.min(idx0 + totalConsumed, words.length);
       chunkIndex = 2;
-      if (totalConsumed >= TTS_CRUISE_CHUNK_WORDS) rampDone = true;
+      if (totalConsumed >= cruiseChunkWords) rampDone = true;
     }
 
     // Continue sequential ramp-up for remaining ramp chunks
     while (!rampDone && active && myGenId === generationId && nextProduceIdx < words.length) {
-      const size = openingRampPlan[chunkIndex]?.targetWordCount ?? getChunkSize(chunkIndex);
-      if (size >= TTS_CRUISE_CHUNK_WORDS) {
+      const size = openingRampPlan[chunkIndex]?.targetWordCount ?? getConfiguredChunkSize(chunkIndex);
+      if (size >= cruiseChunkWords) {
         rampDone = true;
         break;
       }
@@ -527,14 +572,14 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
       nextProduceIdx = Math.min(idx + consumed, words.length);
       chunkIndex++;
 
-      if (consumed >= TTS_CRUISE_CHUNK_WORDS) rampDone = true;
+      if (consumed >= cruiseChunkWords) rampDone = true;
     }
 
     if (!active || myGenId !== generationId) return;
 
     // ── Cruise phase: continuous generation ──
     while (active && myGenId === generationId && nextProduceIdx < words.length) {
-      const size = TTS_CRUISE_CHUNK_WORDS;
+      const size = cruiseChunkWords;
       const idx = nextProduceIdx;
 
       const consumed = await produceChunk(idx, size, myGenId);
@@ -599,7 +644,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   /** TTS-7C: Acknowledge a consumed chunk — releases backpressure if needed */
   function acknowledgeChunk(): void {
     if (pendingChunks > 0) pendingChunks--;
-    if (pendingChunks < TTS_QUEUE_DEPTH && backpressureResolve) {
+    if (pendingChunks < queueDepth && backpressureResolve) {
       backpressureResolve();
       backpressureResolve = null;
     }

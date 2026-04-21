@@ -4,7 +4,7 @@ import { getNextQueuedBook } from "../utils/queue";
 import {
   CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS,
 } from "../constants";
-import type { BlurbyDoc, BlurbySettings } from "../types";
+import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
 import type { TtsEvalTraceSink } from "../types/eval";
 
 const api = window.electronAPI;
@@ -12,6 +12,7 @@ const api = window.electronAPI;
 type ReadingMode = "page" | "focus" | "flow";
 
 interface NarrationFlowBridge {
+  cursorWordIndex: number;
   stop: () => void;
   updateWords: (
     words: string[],
@@ -58,7 +59,7 @@ export interface UseFlowScrollSyncParams {
   /** State setter for the highlighted word index (shared with parent). */
   setHighlightedWordIndex: React.Dispatch<React.SetStateAction<number>>;
   /** Reading mode setter (shared with parent). */
-  setReadingMode: React.Dispatch<React.SetStateAction<ReadingMode>>;
+  setReadingMode: React.Dispatch<React.SetStateAction<ReaderMode>>;
   /** Ref to current highlighted word index (avoids stale closures). */
   highlightedWordIndexRef: React.MutableRefObject<number>;
   highlightedWordIndex: number;
@@ -173,7 +174,7 @@ export function useFlowScrollSync({
 
   const syncEngineToCurrentWord = (engine: FlowScrollEngine) => {
     if (isNarratingRef.current) {
-      engine.followWord(highlightedWordIndexRef.current);
+      engine.followWord(narration.cursorWordIndex);
       return;
     }
     engine.jumpToWord(highlightedWordIndexRef.current);
@@ -247,6 +248,7 @@ export function useFlowScrollSync({
       if (!container || !cursor) return;
 
       const engine = flowScrollEngineRef.current;
+      if (!engine) return;
       const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
       if (totalWords > 0) engine.setTotalWords(totalWords);
       engine.start(
@@ -281,7 +283,7 @@ export function useFlowScrollSync({
         await foliateApiRef.current?.waitForSectionReady?.();
       }
       if (cancelled) return;
-      if (resumeNarration && resumeStartTs != null) {
+      if (resumeNarration && resumeStartTs != null && evalTrace) {
         evalTrace.record({
           kind: "transition",
           transition: "handoff",
@@ -374,8 +376,9 @@ export function useFlowScrollSync({
       return;
     }
 
+    if (!engine) return;
     engine.setFollowerMode(true);
-    engine.followWord(highlightedWordIndex);
+    engine.followWord(narration.cursorWordIndex);
 
     ownsSectionEndCallbackRef.current = true;
     narration.setOnSectionEnd(() => {
@@ -398,7 +401,7 @@ export function useFlowScrollSync({
         Promise.resolve(sectionPromise)
           .then(() => foliateApiRef.current?.waitForSectionReady?.(nextSection.sectionIndex))
           .then(() => {
-            if (handoffStartTs != null) {
+            if (handoffStartTs != null && evalTrace) {
               evalTrace.record({
                 kind: "transition",
                 transition: "section",
@@ -462,7 +465,7 @@ export function useFlowScrollSync({
     });
 
     return () => {
-      engine.setFollowerMode(false);
+      engine?.setFollowerMode(false);
       if (ownsSectionEndCallbackRef.current) {
         narration.setOnSectionEnd(null);
         ownsSectionEndCallbackRef.current = false;
@@ -472,7 +475,6 @@ export function useFlowScrollSync({
     readingMode,
     flowPlaying,
     isNarrating,
-    highlightedWordIndex,
     narration,
     setFlowPlaying,
     setIsNarrating,

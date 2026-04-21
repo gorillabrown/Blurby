@@ -106,6 +106,22 @@ describe("resolveNarrationContext", () => {
     expect(ctx.fellBack).toBe(false);
   });
 
+  it("preserves Qwen engine selection and speaker names for prototype persistence", () => {
+    const settings = makeSettings({ ttsEngine: "qwen", ttsVoiceName: "Ryan", ttsRate: 1.1 });
+    const ctx = resolveNarrationContext(settings);
+    expect(ctx.engine).toBe("qwen");
+    expect(ctx.voiceName).toBe("Ryan");
+    expect(ctx.fellBack).toBe(false);
+  });
+
+  it("preserves explicit Kokoro selections even though the product default has moved to Qwen", () => {
+    const settings = makeSettings({ ttsEngine: "kokoro", ttsVoiceName: "af_bella", ttsRate: 1.0 });
+    const ctx = resolveNarrationContext(settings);
+    expect(ctx.engine).toBe("kokoro");
+    expect(ctx.voiceName).toBe("af_bella");
+    expect(ctx.fellBack).toBe(false);
+  });
+
   it("handles null doc gracefully", () => {
     const ctx = resolveNarrationContext(makeSettings(), null);
     expect(ctx.engine).toBe("kokoro");

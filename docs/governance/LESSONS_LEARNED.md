@@ -1379,3 +1379,19 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** When writing a cross-language IPC protocol, define the canonical field names in one place (a comment block or a small schema file) and reference it in both language implementations. For stdin/stdout sidecar protocols: always smoke-test the round-trip with a real subprocess before merging, even if mocked unit tests pass.
 
 **Related:** QWEN-STREAM-1 sprint, `main/qwen-streaming-engine.js` (`dispatchCommand`), `scripts/qwen_streaming_sidecar.py` (`handle_command`).
+
+---
+
+### [2026-04-20] LL-108: Canonical Reader Anchors Must Be Mode-Aware, Preserve Zero, and Keep Spoken Truth Separate From Visual Drift
+
+**Area:** reader modes, progress persistence, Foliate shared surface, narration truth
+**Status:** active
+**Priority:** high
+
+**Context:** READER-4M-3 unified save/resume/mode switching around one canonical global word anchor. Two regressions were waiting behind the old per-mode shortcuts: explicit anchor `0` could be discarded because `highlightedWordIndex || softWordIndex` treated zero as falsy, and shared-surface rebuild/follower paths could re-anchor Narrate from visual state instead of the spoken cursor. That combination quietly breaks “restart at the first word” and lets the visible underline drift away from the audio truth.
+
+**Guardrail:** Resolve anchors through one explicit mode-aware helper. `page` and `flow` may use the visible highlight anchor, `focus` must prefer the active focus cursor, and `narrate` must prefer the authoritative narration cursor. `0` is a valid explicit anchor and must never fall through to soft selection. Progress save, finish-reading, backtrack checks, and shared-surface section jumps should all consume the same canonical resolver instead of re-deriving mode-local positions.
+
+**Pattern:** On the shared Foliate flow/narrate surface, keep spoken truth and visual fallback as separate channels. Narrate follow/highlight should consume `narration.cursorWordIndex`, while passive page/flow events remain visual-only. When dispatching section jumps from shared-surface truth callbacks, normalize navigation through `Promise.resolve(goToSection?.(...))` so real async Foliate APIs and sync test stubs share one safe path.
+
+**Related:** READER-4M-3 sprint, `src/utils/startWordIndex.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`

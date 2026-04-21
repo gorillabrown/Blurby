@@ -21,14 +21,14 @@ describe("cursor contract after narration-mode removal", () => {
     expect(src).not.toContain("NarrateMode");
   });
 
-  it("ReaderBottomBar uses flow+narrating gate for TTS controls", () => {
+  it("ReaderBottomBar keeps narrate controls visible for paused narrate selection", () => {
     const src = read("src/components/ReaderBottomBar.tsx");
-    expect(src).toContain("const isNarrationSelected = readingMode === \"flow\" && isNarrating;");
+    expect(src).toContain("const isNarrationSelected = readingMode === \"narrate\" || isNarrating;");
   });
 
-  it("ReaderContainer drives narration cursor from isNarrating flag", () => {
+  it("ReaderContainer drives narration cursor from spoken-word truth while narration is active", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
-    expect(src).toContain("narrationWordIndex={isNarrating ? highlightedWordIndex : undefined}");
+    expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
   });
 });

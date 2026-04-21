@@ -1,4 +1,4 @@
-import type { KokoroStatusSnapshot } from "../types";
+import type { KokoroStatusSnapshot, QwenStatusSnapshot, TtsEngine } from "../types";
 import type { KokoroRatePlan } from "../utils/kokoroRatePlan";
 
 // ── Book word array types (moved from bookWordExtractor.ts in HOTFIX-6) ──────
@@ -46,7 +46,7 @@ export type NarrationStatus = "idle" | "loading" | "speaking" | "paused" | "hold
 
 export interface NarrationState {
   status: NarrationStatus;
-  engine: "web" | "kokoro";
+  engine: TtsEngine;
   chunkStart: number;
   chunkWords: string[];
   cursorWordIndex: number;
@@ -54,6 +54,8 @@ export interface NarrationState {
   kokoroDownloading: boolean;
   kokoroDownloadProgress: number;
   kokoroStatus: KokoroStatusSnapshot;
+  qwenReady: boolean;
+  qwenStatus: QwenStatusSnapshot;
   generationId: number;
   speed: number;
   pageEndWord: number | null;
@@ -68,15 +70,17 @@ export type NarrationAction =
   | { type: "STOP" }
   | { type: "HOLD" }
   | { type: "RESUME_CHAINING" }
-  | { type: "SET_ENGINE"; engine: "web" | "kokoro" }
+  | { type: "SET_ENGINE"; engine: TtsEngine }
   | { type: "SET_SPEED"; speed: number }
   | { type: "INCREMENT_GENERATION_ID" }
   | { type: "KOKORO_READY" }
   | { type: "SYNC_KOKORO_STATUS"; snapshot: KokoroStatusSnapshot }
+  | { type: "SYNC_QWEN_STATUS"; snapshot: QwenStatusSnapshot }
   | { type: "KOKORO_DOWNLOAD_PROGRESS"; progress: number }
   | { type: "SET_PAGE_END"; endIdx: number | null }
   | { type: "ERROR"; message: string }
-  | { type: "KOKORO_WARMING"; startIdx: number; speed: number };
+  | { type: "KOKORO_WARMING"; startIdx: number; speed: number }
+  | { type: "QWEN_WARMING"; startIdx: number; speed: number };
 
 export function createInitialNarrationState(): NarrationState {
   return {
@@ -89,6 +93,15 @@ export function createInitialNarrationState(): NarrationState {
     kokoroDownloading: false,
     kokoroDownloadProgress: 0,
     kokoroStatus: {
+      status: "idle",
+      detail: null,
+      reason: null,
+      ready: false,
+      loading: false,
+      recoverable: false,
+    },
+    qwenReady: false,
+    qwenStatus: {
       status: "idle",
       detail: null,
       reason: null,
@@ -128,6 +141,8 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
       return { ...state, generationId: state.generationId + 1 };
     case "KOKORO_WARMING":
       return { ...state, status: "warming", cursorWordIndex: action.startIdx, speed: action.speed };
+    case "QWEN_WARMING":
+      return { ...state, status: "warming", cursorWordIndex: action.startIdx, speed: action.speed };
     case "KOKORO_READY":
       return {
         ...state,
@@ -150,12 +165,18 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
         kokoroDownloading: false,
         kokoroStatus: action.snapshot,
       };
+    case "SYNC_QWEN_STATUS":
+      return {
+        ...state,
+        qwenReady: action.snapshot.ready,
+        qwenStatus: action.snapshot,
+      };
     case "KOKORO_DOWNLOAD_PROGRESS":
       return { ...state, kokoroDownloading: true, kokoroDownloadProgress: action.progress };
     case "SET_PAGE_END":
       return { ...state, pageEndWord: action.endIdx };
     case "ERROR":
-      return { ...state, status: "error", kokoroReady: false, kokoroDownloading: false };
+      return { ...state, status: "error", kokoroReady: false, kokoroDownloading: false, qwenReady: false };
     default:
       return state;
   }

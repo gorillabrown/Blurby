@@ -77,6 +77,20 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
       : startEvent && firstAudioEvent
         ? Math.max(0, firstAudioEvent.ts - startEvent.ts)
         : null;
+  const warmPreviewLatencyMs =
+    startEvent && typeof startEvent.previewLatencyMs === "number"
+      ? startEvent.previewLatencyMs
+      : null;
+  const warmFirstAudioLatencyMs = startLatencyMs;
+  const startupSpikeThresholdMs =
+    startEvent && typeof startEvent.spikeWarningThresholdMs === "number"
+      ? startEvent.spikeWarningThresholdMs
+      : null;
+  const startupSpikeCount = startupSpikeThresholdMs == null
+    ? 0
+    : [warmPreviewLatencyMs, warmFirstAudioLatencyMs].filter(
+        (latency) => typeof latency === "number" && latency > startupSpikeThresholdMs,
+      ).length;
   const startupCacheMode = startEvent?.cacheMode ?? null;
   const openingChunkWordCounts = Array.isArray(startEvent?.openingChunkWordCounts)
     ? [...startEvent.openingChunkWordCounts]
@@ -136,6 +150,10 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
 
   return {
     startLatencyMs,
+    warmPreviewLatencyMs,
+    warmFirstAudioLatencyMs,
+    startupSpikeThresholdMs,
+    startupSpikeCount,
     wordEventCount: words.length,
     flowEventCount: flow.length,
     startupCacheMode,

@@ -5,7 +5,7 @@ import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { useReaderMode } from "../hooks/useReaderMode";
 import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
-import { getStartWordIndex, resolveFoliateStartWord } from "../utils/startWordIndex";
+import { resolveCanonicalWordAnchor } from "../utils/startWordIndex";
 import useNarration from "../hooks/useNarration";
 import { type BookWordArray } from "../types/narration";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
@@ -192,6 +192,10 @@ export default function ReaderContainer({
   const reader = useReader(effectiveWpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
   const narration = useNarration({ evalTrace: evalTraceSink });
+  const wordIndexRef = useRef(wordIndex);
+  wordIndexRef.current = wordIndex;
+  const narrationCursorRef = useRef(narration.cursorWordIndex);
+  narrationCursorRef.current = narration.cursorWordIndex;
 
   // Track active reading time when in any active sub-mode
   // Focus: FocusMode class drives timing (not useReader's playing flag)
@@ -278,31 +282,6 @@ export default function ReaderContainer({
     onUpdateProgress,
   });
 
-  // ── Progress tracking (extracted to useProgressTracker hook) ─────────
-  const progress = useProgressTracker({
-    activeDoc,
-    wordIndex,
-    highlightedWordIndex,
-    readingMode,
-    useFoliate,
-    foliateFractionRef,
-    wpm,
-    wordsLength: words.length,
-    sessionStartWordRef,
-    activeReadingMsRef,
-    activeReadingStartRef,
-    onUpdateProgress,
-    onArchiveDoc,
-    onExitReader,
-  });
-  const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef } = progress;
-  const { finishReading, finishReadingWithoutExit, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
-  finishReadingWithoutExitRef.current = finishReadingWithoutExit;
-
-  // Backtrack prompt state — managed by useProgressTracker
-
-  // Progress save effect + finishReading — managed by useProgressTracker hook
-
   // ── TTS (Narration) — flow-layer state ──────────────────────────────────
   const ttsActive = isNarrating;
   // preCapWpmRef managed by useReaderMode hook
@@ -321,6 +300,42 @@ export default function ReaderContainer({
     footnoteCuesRef,
   });
 
+  const totalWordCount = bookWordMeta?.totalWords || activeDoc.wordCount || words.length;
+  const canonicalWordAnchor = resolveCanonicalWordAnchor({
+    readingMode,
+    resumeAnchor: resumeAnchorRef.current,
+    highlightedWordIndex,
+    softWordIndex: softWordIndexRef.current,
+    focusWordIndex: wordIndex,
+    narrationWordIndex: narration.cursorWordIndex,
+  });
+
+  // ── Progress tracking (extracted to useProgressTracker hook) ─────────
+  const progress = useProgressTracker({
+    activeDoc,
+    wordIndex,
+    anchorWordIndex: canonicalWordAnchor,
+    readingMode,
+    useFoliate,
+    foliateFractionRef,
+    wpm,
+    wordsLength: words.length,
+    totalWords: totalWordCount,
+    sessionStartWordRef,
+    activeReadingMsRef,
+    activeReadingStartRef,
+    onUpdateProgress,
+    onArchiveDoc,
+    onExitReader,
+  });
+  const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef } = progress;
+  const { finishReading, finishReadingWithoutExit, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
+  finishReadingWithoutExitRef.current = finishReadingWithoutExit;
+
+  // Backtrack prompt state — managed by useProgressTracker
+
+  // Progress save effect + finishReading — managed by useProgressTracker hook
+
   // NAR-2/NAR-5/TTS-7F: TTS caching — preload, background cacher, entry coverage, active book sync
   // Also owns TTS-6O background pre-extraction and HOTFIX-6 narration-mode extraction.
   const backgroundCacherRef = useNarrationCaching({
@@ -329,7 +344,7 @@ export default function ReaderContainer({
     wordsRef,
     narrationWarmUp: narration.warmUp,
     useFoliate,
-    readingMode,
+    readingMode: compatibilityReadingMode,
     isNarrating,
     bookWordsRef,
     footnoteCuesRef,
@@ -373,7 +388,7 @@ export default function ReaderContainer({
   // (focus/flow), and section-end callback wiring.
   const { isBrowsedAway, setIsBrowsedAway } = useFoliateSync({
     useFoliate,
-    readingMode,
+    readingMode: compatibilityReadingMode,
     isNarrating,
     highlightedWordIndex,
     bookWordMeta,
@@ -391,7 +406,7 @@ export default function ReaderContainer({
 
   // ── Mode class instances (bridge between mode classes and React state) ────
   const modeInstanceHook = useReadingModeInstance({
-    readingMode,
+    readingMode: compatibilityReadingMode,
     wpm: effectiveWpm,
     settings,
     narration,
@@ -516,25 +531,26 @@ export default function ReaderContainer({
 
   // Exit reader — uses both mode hook and progress hook
   const handleExitReader = useCallback(() => {
+    const exitAnchor = canonicalWordAnchor;
     // FLOW-INF-C: Cancel cross-book transition and exit
     if (crossBookTransition) {
       clearTimeout(crossBookTransition.timeoutId);
       setCrossBookTransition(null);
       stopAllModes();
-      finishReading(highlightedWordIndex);
+      finishReading(exitAnchor);
       return;
     }
     if (readingMode === "page") {
-      const totalWords = activeDoc.wordCount || words.length || 1;
-      if (checkBacktrack(highlightedWordIndex, totalWords, useFoliate)) return;
+      const totalWords = totalWordCount || 1;
+      if (checkBacktrack(exitAnchor, totalWords, useFoliate)) return;
       stopAllModes();
-      finishReading(highlightedWordIndex);
+      finishReading(exitAnchor);
     } else {
-      if (readingMode === "focus") setHighlightedWordIndex(wordIndex);
+      setHighlightedWordIndex(exitAnchor);
       stopAllModes();
       setReadingMode("page");
     }
-  }, [crossBookTransition, readingMode, finishReading, stopAllModes, wordIndex, highlightedWordIndex, activeDoc.wordCount, words.length, useFoliate, checkBacktrack, setReadingMode, setHighlightedWordIndex]);
+  }, [canonicalWordAnchor, checkBacktrack, crossBookTransition, finishReading, readingMode, setHighlightedWordIndex, setReadingMode, stopAllModes, totalWordCount, useFoliate]);
 
   const { handleSaveAtCurrent, handleKeepFurthest } = progress;
 
@@ -806,13 +822,7 @@ export default function ReaderContainer({
   }, [effectiveWpm, isNarrating, narration.speaking, narration.warming]);
 
   // Determine current word index for bottom bar
-  const currentWordIndex = useMemo(() => {
-    if (readingMode === "focus") return wordIndex;
-    if (useFoliate && readingMode === "page" && foliateFraction >= 0 && (activeDoc.wordCount || 0) > 0) {
-      return Math.max(0, Math.floor(foliateFraction * (activeDoc.wordCount || 0)));
-    }
-    return highlightedWordIndex;
-  }, [readingMode, wordIndex, useFoliate, foliateFraction, activeDoc.wordCount, highlightedWordIndex]);
+  const currentWordIndex = canonicalWordAnchor;
 
   // Legacy useEffect blocks for foliate word highlighting and Flow word advancement
   // have been removed — mode classes (FlowMode, NarrateMode) now drive these directly.
@@ -873,12 +883,20 @@ export default function ReaderContainer({
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
           // TTS-7M: Also skip progress save when resume anchor is active (passive event noise)
           if (!hasEngagedRef.current || hasResumeAnchor) return;
+          const progressAnchor = resolveCanonicalWordAnchor({
+            readingMode: mode,
+            resumeAnchor: resumeAnchorRef.current,
+            highlightedWordIndex: highlightedWordIndexRef.current,
+            softWordIndex: softWordIndexRef.current,
+            focusWordIndex: wordIndexRef.current,
+            narrationWordIndex: narrationCursorRef.current,
+          });
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
-            api.updateDocProgress(activeDoc.id, approxWordIdx, detail.cfi);
-            onUpdateProgress(activeDoc.id, approxWordIdx);
-            lastSavedPosRef.current = approxWordIdx;
+            api.updateDocProgress(activeDoc.id, progressAnchor, detail.cfi);
+            onUpdateProgress(activeDoc.id, progressAnchor);
+            lastSavedPosRef.current = progressAnchor;
           }, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS);
         }
       }}
@@ -991,7 +1009,7 @@ export default function ReaderContainer({
       flowPlaying={flowPlaying}
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
-      narrationWordIndex={narration.speaking ? highlightedWordIndex : undefined}
+      narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}
       getAudioProgress={narration.speaking ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
       flowMode={isFlowSurfaceMode}
@@ -1026,8 +1044,17 @@ export default function ReaderContainer({
             modeInstanceHook.pendingResumeRef.current = null;
             // Allow DOM to settle after word extraction + span wrapping
             requestAnimationFrame(() => {
-              // Flow: try highlighting the pending word in the new section
+              // Shared flow/narrate surface: restore the pending anchor once the new
+              // section has stamped its spans. Flow resumes the mode timer; Narrate
+              // only restores the spoken-word highlight on the shared surface.
               const instance = modeInstanceHook.modeRef.current;
+              if (pending.mode === "narrate") {
+                const found = foliateApiRef.current?.highlightWordByIndex(pending.wordIndex);
+                if (!found) {
+                  modeInstanceHook.pendingResumeRef.current = pending;
+                }
+                return;
+              }
               if (instance && instance.type === pending.mode) {
                 const found = foliateApiRef.current?.highlightWordByIndex(
                   pending.wordIndex, pending.mode

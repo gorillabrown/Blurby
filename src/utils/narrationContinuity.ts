@@ -3,12 +3,12 @@
  * Resolves the effective narration context for a book, handling stale/missing
  * profiles, voices, and settings gracefully.
  */
-import type { BlurbySettings, NarrationProfile, BlurbyDoc } from "../types";
+import type { BlurbySettings, NarrationProfile, BlurbyDoc, TtsEngine } from "../types";
 import { resolveNarrationProfile, KOKORO_VOICE_NAMES, KOKORO_DEFAULT_RATE_BUCKET } from "../constants";
 
 /** The resolved narration context for a book session. */
 export interface NarrationContext {
-  engine: "web" | "kokoro";
+  engine: TtsEngine;
   voiceName: string | null;
   rate: number;
   profileId: string | null;
@@ -43,7 +43,7 @@ export function resolveNarrationContext(
     const validVoice = validateVoice(profile.ttsVoiceName, profile.ttsEngine);
     const fellBack = validVoice !== profile.ttsVoiceName;
     return {
-      engine: profile.ttsEngine === "web" || profile.ttsEngine === "kokoro" ? profile.ttsEngine : "web",
+      engine: normalizeEngine(profile.ttsEngine),
       voiceName: validVoice,
       rate: clampRate(profile.ttsRate),
       profileId: profile.id,
@@ -54,7 +54,7 @@ export function resolveNarrationContext(
   }
 
   // No profile — use flat settings
-  const engine = settings.ttsEngine === "web" || settings.ttsEngine === "kokoro" ? settings.ttsEngine : "web";
+  const engine = normalizeEngine(settings.ttsEngine);
   const voiceName = validateVoice(settings.ttsVoiceName || null, engine);
   return {
     engine,
@@ -70,15 +70,22 @@ export function resolveNarrationContext(
 }
 
 /** Validate a voice name. Returns null (system default) if the voice is unknown. */
-function validateVoice(voiceName: string | null, engine: "web" | "kokoro"): string | null {
+function validateVoice(voiceName: string | null, engine: TtsEngine): string | null {
   if (!voiceName) return null;
   if (engine === "kokoro") {
     // Check against known Kokoro voices
     return voiceName in KOKORO_VOICE_NAMES ? voiceName : null;
   }
+  if (engine === "qwen") {
+    return voiceName;
+  }
   // Web Speech voices are platform-dependent — accept any non-empty string
   // (actual validation happens at runtime when getVoices() returns)
   return voiceName;
+}
+
+function normalizeEngine(engine: unknown): TtsEngine {
+  return engine === "web" || engine === "kokoro" || engine === "qwen" ? engine : "qwen";
 }
 
 /** Clamp rate to valid TTS range. */

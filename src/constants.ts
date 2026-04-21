@@ -112,6 +112,26 @@ export const NARRATION_BAND_MIN_WIDTH_PX = 8;
  *  effective clock, creating a hard ceiling the cursor cannot exceed. */
 export const NARRATION_CURSOR_LAG_MS = 350;
 
+// ── Qwen Runtime Chunk Profile (QWEN-PROT-2 → QWEN-HARDEN-1) ──────────────
+/** Qwen opening ramp seed values for the live sidecar lane. */
+export const QWEN_OPENING_RAMP_WORD_COUNTS = [32, 96, 192] as const;
+/** Qwen cruise chunk seed value for the live sidecar lane. */
+export const QWEN_CRUISE_CHUNK_WORDS = 320;
+/** Limit concurrent queued Qwen chunks to keep the sidecar bounded. */
+export const QWEN_QUEUE_DEPTH = 2;
+/** Plan farther ahead for Qwen so long-form playback has fewer avoidable seams. */
+export const QWEN_PLANNER_WINDOW_WORDS = 960;
+/** Warm `Test voice` preview must stay within this median budget (ms). */
+export const QWEN_WARM_TEST_VOICE_P50_BUDGET_MS = 1200;
+/** Warm `Test voice` preview must stay within this tail budget (ms). */
+export const QWEN_WARM_TEST_VOICE_P95_BUDGET_MS = 1800;
+/** Warm first live narration audio must stay within this median budget (ms). */
+export const QWEN_WARM_FIRST_AUDIO_P50_BUDGET_MS = 1500;
+/** Warm first live narration audio must stay within this tail budget (ms). */
+export const QWEN_WARM_FIRST_AUDIO_P95_BUDGET_MS = 2200;
+/** Any single Qwen startup spike above this threshold requires review (ms). */
+export const QWEN_STARTUP_SPIKE_WARNING_MS = 3000;
+
 // ── Narrate Performance Budgets (TTS-6O) ────────────────────────────────────
 /** Max ms from user click to first audio chunk playing */
 export const NARRATE_STARTUP_BUDGET_MS = 3000;
@@ -136,8 +156,8 @@ export function createDefaultNarrationProfile(name: string): NarrationProfile {
   return {
     id: `np-${now}-${Math.random().toString(36).slice(2, 6)}`,
     name,
-    ttsEngine: "kokoro",
-    ttsVoiceName: "af_bella",
+    ttsEngine: "qwen",
+    ttsVoiceName: QWEN_DEFAULT_SPEAKER,
     ttsRate: 1.0,
     ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
     ttsPauseClauseMs: TTS_PAUSE_CLAUSE_MS,
@@ -156,8 +176,8 @@ export function profileFromSettings(name: string, settings: BlurbySettings): Nar
   const base = createDefaultNarrationProfile(name);
   return {
     ...base,
-    ttsEngine: settings.ttsEngine || "web",
-    ttsVoiceName: settings.ttsVoiceName || null,
+    ttsEngine: settings.ttsEngine || "qwen",
+    ttsVoiceName: settings.ttsVoiceName || QWEN_DEFAULT_SPEAKER,
     ttsRate: settings.ttsRate || 1.0,
     ttsPauseCommaMs: settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
     ttsPauseClauseMs: settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
@@ -268,6 +288,10 @@ export const KOKORO_VOICE_NAMES: Record<string, string> = {
   bm_george: "George — British",
   bm_lewis: "Lewis — British",
 };
+
+// ── Qwen TTS Defaults ────────────────────────────────────────────────────────
+/** Shared default speaker for the product-default Qwen narration lane. */
+export const QWEN_DEFAULT_SPEAKER = "Ryan";
 
 // ── E-ink ─────────────────────────────────────────────────────────────────────
 /** Approximate lines per e-ink page in ScrollReaderView paginated mode */
@@ -485,8 +509,8 @@ export const DEFAULT_SETTINGS = {
   lastReadingMode: "flow" as const,
   isNarrating: false,
   ttsEnabled: false,
-  ttsEngine: "kokoro" as const,
-  ttsVoiceName: null as string | null,
+  ttsEngine: "qwen" as const,
+  ttsVoiceName: QWEN_DEFAULT_SPEAKER as string | null,
   ttsRate: 1.0,
   ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
   ttsPauseClauseMs: TTS_PAUSE_CLAUSE_MS,

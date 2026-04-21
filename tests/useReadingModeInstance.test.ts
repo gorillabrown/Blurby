@@ -26,8 +26,12 @@ describe("useReadingModeInstance (NARR-LAYER-1B)", () => {
     expect(src).not.toContain("NarrateMode");
   });
 
-  it("pending resume supports flow only", () => {
-    expect(src).toContain("pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: \"flow\" } | null>;");
+  it("pending resume supports the shared flow and narrate surfaces", () => {
+    expect(src).toContain("pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: \"flow\" | \"narrate\" } | null>;");
     expect(src).not.toContain("mode: \"narration\"");
+  });
+
+  it("clears any stale narration truth-sync callback when a visual mode instance is created", () => {
+    expect(src).toContain("narration.setOnTruthSync(null);");
   });
 });

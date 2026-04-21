@@ -14,6 +14,15 @@ function normalizeWordIndex(wordIndex: number | null | undefined): number | null
   return Math.max(0, Math.trunc(wordIndex));
 }
 
+export interface CanonicalWordAnchorParams {
+  readingMode: "page" | "focus" | "flow" | "narrate";
+  resumeAnchor?: number | null;
+  highlightedWordIndex?: number | null;
+  softWordIndex?: number | null;
+  focusWordIndex?: number | null;
+  narrationWordIndex?: number | null;
+}
+
 export function resolveModeStartWordIndex(
   ...candidates: Array<number | null | undefined>
 ): number {
@@ -22,6 +31,39 @@ export function resolveModeStartWordIndex(
     if (normalized != null) return normalized;
   }
   return 0;
+}
+
+export function resolveCanonicalWordAnchor({
+  readingMode,
+  resumeAnchor,
+  highlightedWordIndex,
+  softWordIndex,
+  focusWordIndex,
+  narrationWordIndex,
+}: CanonicalWordAnchorParams): number {
+  if (readingMode === "focus") {
+    return resolveModeStartWordIndex(
+      resumeAnchor,
+      focusWordIndex,
+      highlightedWordIndex,
+      softWordIndex,
+    );
+  }
+
+  if (readingMode === "narrate") {
+    return resolveModeStartWordIndex(
+      resumeAnchor,
+      narrationWordIndex,
+      highlightedWordIndex,
+      softWordIndex,
+    );
+  }
+
+  return resolveModeStartWordIndex(
+    resumeAnchor,
+    highlightedWordIndex,
+    softWordIndex,
+  );
 }
 
 export function getStartWordIndex(

@@ -19,6 +19,21 @@ function createDeferred<T>() {
   return { promise, resolve, reject };
 }
 
+function createNarrationBridge(
+  overrides: Record<string, unknown> = {},
+  onSectionEnd?: { value: null | (() => void) },
+) {
+  return {
+    cursorWordIndex: 4,
+    stop: vi.fn(),
+    updateWords: vi.fn(),
+    setOnSectionEnd: vi.fn((cb: (() => void) | null) => {
+      if (onSectionEnd) onSectionEnd.value = cb;
+    }),
+    ...overrides,
+  };
+}
+
 describe("TTS-CONT-1 readiness-driven continuity", () => {
   let container: HTMLDivElement;
   let root: Root | null = null;
@@ -109,13 +124,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
     const currentCallback = { value: null as null | (() => void) };
     const readiness = createDeferred<void>();
     const evalEvents: any[] = [];
-    const narration = {
-      stop: vi.fn(),
-      updateWords: vi.fn(),
-      setOnSectionEnd: vi.fn((cb: (() => void) | null) => {
-        currentCallback.value = cb;
-      }),
-    };
+    const narration = createNarrationBridge({}, currentCallback);
 
     function Harness() {
       useFlowScrollSync({
@@ -210,13 +219,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
 
   it("continues same-book flow narration immediately when no readiness bridge is available", async () => {
     const currentCallback = { value: null as null | (() => void) };
-    const narration = {
-      stop: vi.fn(),
-      updateWords: vi.fn(),
-      setOnSectionEnd: vi.fn((cb: (() => void) | null) => {
-        currentCallback.value = cb;
-      }),
-    };
+    const narration = createNarrationBridge({}, currentCallback);
 
     function Harness() {
       useFlowScrollSync({
@@ -313,11 +316,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 9 },
         highlightedWordIndex: 9,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 6 }),
         foliateApiRef: { current: {} } as any,
         flowScrollContainerRef: { current: document.createElement("div") },
         flowScrollCursorRef: { current: document.createElement("div") },
@@ -386,11 +385,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 9 },
         highlightedWordIndex: 9,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 6 }),
         foliateApiRef: { current: {} } as any,
         flowScrollContainerRef: { current: document.createElement("div") },
         flowScrollCursorRef: { current: document.createElement("div") },
@@ -456,11 +451,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 0 },
         highlightedWordIndex: 0,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge(),
         foliateApiRef: {
           current: {
             waitForSectionReady: vi.fn(() => readiness.promise),
@@ -532,11 +523,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 0 },
         highlightedWordIndex: 0,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge(),
         foliateApiRef: { current: {} } as any,
         flowScrollContainerRef: { current: null },
         flowScrollCursorRef: { current: null },
@@ -585,11 +572,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 4 },
         highlightedWordIndex: 4,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge(),
         foliateApiRef: {
           current: {
             waitForSectionReady: vi.fn(() => readiness.promise),
@@ -657,11 +640,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 4 },
         highlightedWordIndex: 4,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 6 }),
         foliateApiRef: {
           current: {
             waitForSectionReady,
@@ -743,11 +722,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 6 },
         highlightedWordIndex: 6,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 6 }),
         foliateApiRef: {
           current: {
             waitForSectionReady,
@@ -824,11 +799,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 4 },
         highlightedWordIndex: 4,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 6 }),
         foliateApiRef: {
           current: {
             waitForSectionReady,
@@ -913,11 +884,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 6 },
         highlightedWordIndex: 6,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn(),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 6 }),
         foliateApiRef: {
           current: {
             waitForSectionReady,
@@ -1001,13 +968,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
         setReadingMode: vi.fn(),
         highlightedWordIndexRef: { current: 1 },
         highlightedWordIndex: 1,
-        narration: {
-          stop: vi.fn(),
-          updateWords: vi.fn(),
-          setOnSectionEnd: vi.fn((cb: (() => void) | null) => {
-            currentCallback.value = cb;
-          }),
-        },
+        narration: createNarrationBridge({ cursorWordIndex: 1 }, currentCallback),
         foliateApiRef: { current: {} } as any,
         flowScrollContainerRef: { current: document.createElement("div") },
         flowScrollCursorRef: { current: document.createElement("div") },

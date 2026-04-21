@@ -85,6 +85,15 @@ describe("validateNarrationImport", () => {
     expect(result.valid).toBe(false);
   });
 
+  it("accepts qwen as a valid profile engine", () => {
+    const result = validateNarrationImport(
+      { version: 1, profiles: [{ id: "x", name: "Qwen", ttsEngine: "qwen" }], globalOverrides: [] },
+      makeSettings(),
+    );
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
   it("rejects profile with invalid engine", () => {
     const result = validateNarrationImport(
       { version: 1, profiles: [{ id: "x", name: "X", ttsEngine: "invalid" }], globalOverrides: [] },
@@ -100,6 +109,34 @@ describe("validateNarrationImport", () => {
     expect(result.valid).toBe(true); // conflicts are warnings, not errors
     expect(result.conflictingNames).toContain("Test Profile");
     expect(result.warnings.length).toBeGreaterThan(0);
+  });
+
+  it("exports and validates mixed Qwen and Kokoro profile sets during the deprecation window", () => {
+    const qwenProfile: NarrationProfile = {
+      ...sampleProfile,
+      id: "np-qwen-1",
+      name: "Qwen Default",
+      ttsEngine: "qwen",
+      ttsVoiceName: "Ryan",
+    };
+    const kokoroProfile: NarrationProfile = {
+      ...sampleProfile,
+      id: "np-kokoro-1",
+      name: "Kokoro Legacy",
+      ttsEngine: "kokoro",
+      ttsVoiceName: "af_bella",
+    };
+    const settings = makeSettings({
+      narrationProfiles: [qwenProfile, kokoroProfile],
+      activeNarrationProfileId: "np-qwen-1",
+    });
+
+    const payload = exportNarrationData(settings);
+    const result = validateNarrationImport(payload, makeSettings());
+
+    expect(payload.profiles.map((profile) => profile.ttsEngine)).toEqual(["qwen", "kokoro"]);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
   });
 });
 

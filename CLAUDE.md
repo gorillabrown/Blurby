@@ -335,7 +335,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.50.0 — queue YELLOW depth 2, 3 priority tracks roadmapped, 1 open bug)
+## Current System State (v1.72.0 — queue RED depth 0, backfill required before next dispatch, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -375,14 +375,15 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **NARR-LAYER-1B complete** — narration mode removed from core contracts, settings migration to flow-layer narration, overlay removal and consolidation. v1.52.0.
 - **READER-4M-1 complete** — explicit four-mode reader foundation shipped at v1.63.0. `FoliatePageView` now exposes rendered-word roots directly to `FlowScrollEngine`, Flow boot/rebuild waits on `waitForSectionReady()` plus `foliateRenderVersion`, shared `ReaderMode` / persisted last-mode fields now include `narrate`, keyboard compatibility is localized, and the Foliate `onLoad` path now treats `narrate` as a flow-surface mode. Verification passed with focused reader/foundation suites, full `npm test` (`125` files, `2021` tests), and `npm run build`; existing circular-chunk warning unchanged.
 - **READER-4M-2 complete** — Standalone Narrate mode + four-button bottom-bar controls. N key is now universal Narrate entry from any mode. T narration toggle removed. Pause/resume verified in-mode. 14 new tests. v1.69.0.
+- **READER-4M-3 complete** — Canonical global word anchor + spoken-truth Narrate continuity shipped at v1.72.0. Page/focus/flow/narrate now resolve through one mode-aware anchor contract, Flow↔Narrate preserve the same shared-surface position, progress/backtrack save against the canonical anchor, and Foliate Narrate highlighting follows `narration.cursorWordIndex` instead of visual drift. 16 new tests plus expanded continuity coverage.
 - **QWEN-STREAM-1 complete** — Streaming Qwen sidecar foundation. Binary-framed PCM protocol (`scripts/qwen_streaming_sidecar.py`), JS engine manager (`main/qwen-streaming-engine.js`), IPC handlers, preload bridge, streaming types. 18 new tests. v1.71.0.
 - **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
-- Active queue: depth 1 — RED. READER-4M-3 is next; backfill needed before dispatch.
+- Active queue: depth 0 — RED. Queue backfill is required before the next dispatch.
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 2,120 tests across 141 test files
+- 2,136 tests across 141 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 

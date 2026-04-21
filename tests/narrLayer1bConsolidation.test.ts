@@ -85,9 +85,9 @@ describe("NARR-LAYER-1B consolidation", () => {
     expect(src).not.toContain("(readingMode === \"page\" && settings.isNarrating === true)");
   });
 
-  it("ReaderBottomBar computes narration-selected from flow + isNarrating", () => {
+  it("ReaderBottomBar computes narration-selected from paused or active narrate selection", () => {
     const src = read("src/components/ReaderBottomBar.tsx");
-    expect(src).toContain("const isNarrationSelected = readingMode === \"flow\" && isNarrating;");
+    expect(src).toContain("const isNarrationSelected = readingMode === \"narrate\" || isNarrating;");
   });
 
   it("DocumentLifecycle accepts isNarrating", () => {

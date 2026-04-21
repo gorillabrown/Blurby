@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-20 — Completed QWEN-STREAM-1: streaming Qwen sidecar foundation. Binary-framed PCM protocol, engine manager, IPC/preload bridge, streaming types. 18 new tests. v1.71.0.
+**Last updated**: 2026-04-20 — Completed READER-4M-3: canonical global word anchor + spoken-truth Narrate continuity. 16 new tests plus expanded continuity coverage. v1.72.0.
 **Current branch**: `main`
-**Current state**: v1.71.0 stable. Queue depth 1 (RED — READER-4M-3 only). QWEN-STREAM-1 complete. Next: READER-4M-3.
+**Current state**: v1.72.0 stable. Queue depth 0 (RED — backfill required before next dispatch). READER-4M-3 complete. Next: backfill the queue to ≥3 before the next sprint.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -3577,11 +3577,12 @@ Task 12 (Git)
 
 ---
 
-### Sprint READER-4M-3: Global Word Anchor & Cross-Mode Continuity
+### Sprint READER-4M-3: Global Word Anchor & Cross-Mode Continuity ✅ COMPLETED
 
 **Goal:** Make one canonical global word anchor the source of truth for entering, pausing, resuming, saving, and switching across `Page`, `Focus`, `Flow`, and `Narrate`, while ensuring Narrate’s underline follows spoken-word truth instead of racing ahead.
 
-**Version:** v1.70.0 | **Branch:** `sprint/reader-4m-3-global-anchor-continuity` | **Tier:** Full
+**Version:** v1.72.0 | **Branch:** `sprint/reader-4m-3-global-anchor-continuity` | **Tier:** Full
+**Status:** ✅ COMPLETED — 2026-04-20. Canonical anchor resolution now drives entry/save/resume across all four modes, Flow↔Narrate preserve the same shared-surface anchor, Narrate underline/follow behavior uses `narration.cursorWordIndex`, and verification passed with `npm test` (`141` files, `2136` tests) plus `npm run build`.
 
 **Problem:** Even after Narrate becomes a real mode again, the current reader still carries mode-local assumptions: document load starts in Page, flow pause/resume has its own pending resume bridge, progress/backtrack logic is only partially mode-aware, and narration has its own cursor/pause anchor semantics. That drift is exactly how cross-mode confusion and “underline outruns speech” regressions come back.
 

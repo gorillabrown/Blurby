@@ -19,10 +19,13 @@ export interface TtsEvalLifecycleEvent extends TtsEvalTraceBaseEvent {
   state: "start" | "first-audio" | "pause" | "resume" | "stop";
   wordIndex?: number;
   latencyMs?: number;
+  previewLatencyMs?: number;
   mode?: "page" | "focus" | "flow";
   isNarrating?: boolean;
   cacheMode?: "cached" | "uncached";
   openingChunkWordCounts?: number[];
+  spikeWarningThresholdMs?: number;
+  spikeWarning?: boolean;
 }
 
 export interface TtsEvalWordEvent extends TtsEvalTraceBaseEvent {
@@ -72,6 +75,10 @@ export interface TtsEvalTrace {
 
 export interface TtsEvalMetricsSummary {
   startLatencyMs: number | null;
+  warmPreviewLatencyMs: number | null;
+  warmFirstAudioLatencyMs: number | null;
+  startupSpikeThresholdMs: number | null;
+  startupSpikeCount: number;
   wordEventCount: number;
   flowEventCount: number;
   startupCacheMode: "cached" | "uncached" | null;

@@ -1,10 +1,8 @@
 import { useEffect, useRef } from "react";
 import { RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA } from "../constants";
-import type { BlurbyDoc, BlurbySettings } from "../types";
+import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
 
 const api = window.electronAPI;
-
-type ReadingMode = "page" | "focus" | "flow";
 
 // Chapter shape used in ReaderContainer docChapters state
 interface DocChapter {
@@ -20,7 +18,7 @@ export interface UseDocumentLifecycleParams {
   /** Active document (id, position, wordCount used for initialization) */
   activeDoc: BlurbyDoc & { position?: number; wordCount?: number };
   /** Current reading mode — drives RAF flush guard and session timing */
-  readingMode: ReadingMode;
+  readingMode: ReaderMode;
   /** App settings (ttsEngine for Kokoro preload) */
   settings: BlurbySettings;
   /** Flow-layer narration state */
@@ -31,8 +29,8 @@ export interface UseDocumentLifecycleParams {
   initReader: (startPos: number) => void;
   /** State setter — syncs highlighted word index to initial doc position on open */
   setHighlightedWordIndex: React.Dispatch<React.SetStateAction<number>>;
-  /** State setter — always reset to "page" on doc change */
-  setReadingMode: React.Dispatch<React.SetStateAction<ReadingMode>>;
+  /** State setter — restores the persisted reader surface on doc change */
+  setReadingMode: React.Dispatch<React.SetStateAction<ReaderMode>>;
   /** State setter — loads chapters from IPC on doc change */
   setDocChapters: React.Dispatch<React.SetStateAction<DocChapter[]>>;
   /** Toast callback — fires "Restored to your last position" once per book open */
@@ -126,6 +124,14 @@ export function useDocumentLifecycle({
   wordIndex,
   onUpdateProgress,
 }: UseDocumentLifecycleParams): UseDocumentLifecycleReturn {
+  const resolveRestoredMode = (): ReaderMode => {
+    const savedMode = settings.readingMode;
+    if (savedMode === "page" || savedMode === "focus" || savedMode === "flow" || savedMode === "narrate") {
+      return savedMode;
+    }
+    return "page";
+  };
+
   // ── Refs initialized here, returned to ReaderContainer ──────────────────
 
   // TTS-7M (BUG-135): Persistent resume anchor.
@@ -160,6 +166,7 @@ export function useDocumentLifecycle({
 
   // ── 2. Init reader on mount / doc change ────────────────────────────────
   useEffect(() => {
+    const restoredMode = resolveRestoredMode();
     initReader(activeDoc.position || 0);
     setHighlightedWordIndex(activeDoc.position || 0);
     // TTS-7M (BUG-135): Set resume anchor from saved position on reopen.
@@ -169,7 +176,7 @@ export function useDocumentLifecycle({
     hasShownRestoreToastRef.current = false; // BUG-148: Reset toast gate on doc change
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = activeDoc.position || 0;
-    setReadingMode("page"); // Always start in Page view
+    setReadingMode(restoredMode);
     api.getDocChapters(activeDoc.id).then((ch: any) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
     // BUG-148: Inform the user their reading position was restored. Fire once per book open,
     // only when position > 0 (not a fresh start). Timer is cancelled on doc change so a rapid
@@ -185,15 +192,20 @@ export function useDocumentLifecycle({
     }
     // Delayed prewarm: start Kokoro model load 2s after reader opens (never startup-blocking)
     let prewarmTimer: ReturnType<typeof setTimeout> | undefined;
-    const kokoroPreload = api.kokoroPreload;
-    if (settings.ttsEngine === "kokoro" && kokoroPreload) {
-      prewarmTimer = setTimeout(() => kokoroPreload().catch(() => {}), 2000);
+    const preloadTtsEngine =
+      settings.ttsEngine === "kokoro"
+        ? api.kokoroPreload
+        : settings.ttsEngine === "qwen"
+          ? api.qwenPreload
+          : null;
+    if (preloadTtsEngine) {
+      prewarmTimer = setTimeout(() => preloadTtsEngine().catch(() => {}), 2000);
     }
     return () => {
       clearTimeout(restoreTimer);
       clearTimeout(prewarmTimer);
     };
-  }, [activeDoc.id, initReader, settings.ttsEngine]);
+  }, [activeDoc.id, initReader, settings.readingMode, settings.ttsEngine]);
 
   // ── 3. Persist focusTextSize changes ────────────────────────────────────
   useEffect(() => {

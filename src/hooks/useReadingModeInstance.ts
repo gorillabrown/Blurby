@@ -51,8 +51,8 @@ export interface UseReadingModeInstanceReturn {
   jumpToWordInMode: (wordIdx: number) => void;
   /** Update the active mode's word array (when new EPUB sections load) */
   updateModeWords: (words: string[]) => void;
-  /** Pending resume after section load (Flow pause-on-miss bridge) */
-  pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: "flow" } | null>;
+  /** Pending shared-surface resume/highlight after section load. */
+  pendingResumeRef: React.MutableRefObject<{ wordIndex: number; mode: "flow" | "narrate" } | null>;
 }
 
 /**
@@ -83,7 +83,7 @@ export function useReadingModeInstance({
   bookWordsCompleteRef,
 }: UseReadingModeInstanceParams): UseReadingModeInstanceReturn {
   const modeRef = useRef<ReadingMode | null>(null);
-  const pendingResumeRef = useRef<{ wordIndex: number; mode: "flow" } | null>(null);
+  const pendingResumeRef = useRef<{ wordIndex: number; mode: "flow" | "narrate" } | null>(null);
 
   // Stable callback refs (avoid stale closures in mode instances)
   const onWordAdvanceRef = useRef(onWordAdvance);

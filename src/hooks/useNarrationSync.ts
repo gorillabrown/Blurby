@@ -6,7 +6,7 @@ import {
   TTS_PAUSE_PARAGRAPH_MS,
   TTS_DIALOGUE_SENTENCE_THRESHOLD,
 } from "../constants";
-import type { BlurbySettings, BlurbyDoc } from "../types";
+import type { BlurbySettings, BlurbyDoc, TtsEngine } from "../types";
 import type { BookWordArray } from "../types/narration";
 
 type DocWithContent = BlurbyDoc & { content: string };
@@ -16,9 +16,10 @@ interface NarrationHook {
   setBookId: (id: string) => void;
   setPronunciationOverrides: (overrides: Array<{ id: string; from: string; to: string; enabled: boolean }>) => void;
   setBookPronunciationOverrides: (overrides: Array<{ id: string; from: string; to: string; enabled: boolean }>) => void;
-  setEngine: (engine: "web" | "kokoro") => void;
+  setEngine: (engine: TtsEngine) => void;
   selectVoice: (voice: SpeechSynthesisVoice) => void;
   setKokoroVoice: (name: string) => void;
+  setQwenVoice?: (name: string) => void;
   adjustRate: (rate: number) => void;
   setPauseConfig: (config: {
     commaMs: number;
@@ -76,6 +77,8 @@ export function useNarrationSync({
   narrationSelectVoiceRef.current = narration.selectVoice;
   const narrationSetKokoroVoiceRef = useRef(narration.setKokoroVoice);
   narrationSetKokoroVoiceRef.current = narration.setKokoroVoice;
+  const narrationSetQwenVoiceRef = useRef(narration.setQwenVoice);
+  narrationSetQwenVoiceRef.current = narration.setQwenVoice;
 
   // ── 1. Sync book ID to narration hook for cache keying ──────────────────
   // Footnote mode affects generated audio text, so it must partition cache identity.
@@ -102,6 +105,8 @@ export function useNarrationSync({
   useEffect(() => {
     if (settings.ttsEngine === "kokoro" && settings.ttsVoiceName) {
       narrationSetKokoroVoiceRef.current(settings.ttsVoiceName);
+    } else if (settings.ttsEngine === "qwen" && settings.ttsVoiceName) {
+      narrationSetQwenVoiceRef.current?.(settings.ttsVoiceName);
     } else if (settings.ttsVoiceName && narrationVoicesRef.current.length > 0) {
       const voice = narrationVoicesRef.current.find((v) => v.name === settings.ttsVoiceName);
       if (voice && voice.name !== narrationCurrentVoiceRef.current?.name) {
