@@ -1351,3 +1351,31 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 **Guardrail:** Shortcuts that apply universally across all modes must live in the unconditional section of the keyboard handler, before any `if (isPage)` or `if (isFlow)` gates. The `isFlow` variable is `keyboardSurface === "flow"`, which is `true` for both "flow" and "narrate" modes — so it's not a reliable gate for "all modes."
 
 **Related:** READER-4M-2 sprint, `src/hooks/useKeyboardShortcuts.ts`, `getReaderKeyboardModeSurface()`
+
+---
+
+### [2026-04-20] LL-106: Binary-Framed IPC Protocols Require a Three-Way Contract Between Main, Preload, and Types
+
+**Area:** Platform/Main Process, IPC, preload bridge, TypeScript types
+**Status:** active
+**Priority:** high
+
+**Context:** QWEN-STREAM-1 introduced a binary-framed PCM streaming protocol over `webContents.send("tts-qwen-stream-audio", streamId, chunk)`. The main process sends two positional args after the channel name. The preload wrapper must destructure both: `(_event, streamId, chunk) => callback(streamId, chunk)`. The TypeScript declaration must reflect what the renderer callback receives (not the raw ipcRendererEvent). All three layers were written separately and developed a three-way mismatch: main sent 2 args, preload forwarded 1, types promised 3.
+
+**Guardrail:** When adding a new `ipcRenderer.on` / `webContents.send` channel, verify the contract at all three layers before merging: (1) how many positional args does `webContents.send` emit? (2) does the preload wrapper forward all of them (minus `_event`)? (3) does the TS declaration on `ElectronAPI` match what the renderer callback actually receives? Write this as a three-line check in the PR description.
+
+**Related:** QWEN-STREAM-1 sprint, `main/ipc/tts.js:162`, `preload.js:186–190`, `src/types.ts` `onQwenStreamAudio` declaration.
+
+---
+
+### [2026-04-20] LL-107: Stdin Command Protocol Must Use Consistent Key Name Across Language Boundary
+
+**Area:** Platform/Main Process, Python sidecar, IPC
+**Status:** active
+**Priority:** high
+
+**Context:** QWEN-STREAM-1's JS engine manager sent commands as `{ id, command: "..." }` while the Python sidecar read `msg.get("cmd")`. Commands would silently not dispatch on a live sidecar. The mismatch was invisible in tests because tests mock the subprocess and assert stdin payloads with whatever key the JS code used.
+
+**Guardrail:** When writing a cross-language IPC protocol, define the canonical field names in one place (a comment block or a small schema file) and reference it in both language implementations. For stdin/stdout sidecar protocols: always smoke-test the round-trip with a real subprocess before merging, even if mocked unit tests pass.
+
+**Related:** QWEN-STREAM-1 sprint, `main/qwen-streaming-engine.js` (`dispatchCommand`), `scripts/qwen_streaming_sidecar.py` (`handle_command`).

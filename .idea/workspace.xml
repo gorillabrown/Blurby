@@ -4,8 +4,7 @@
     <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="4.4.2026">
       <changelist_data name="Evan Brown" email="estrattbrown@gmail.com" automatic="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ROADMAP.md" beforeDir="false" afterPath="$PROJECT_DIR$/ROADMAP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/Close-Outs/SpecRetro.Lessons_Learned.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/Close-Outs/SpecRetro.Lessons_Learned.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/governance/TECHNICAL_REFERENCE.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/governance/TECHNICAL_REFERENCE.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/research/tts-engine-scan/SCREENING_SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/research/tts-engine-scan/SCREENING_SUMMARY.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/research/tts-engine-scan/SHORTLIST.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/research/tts-engine-scan/SHORTLIST.md" afterDir="false" />
@@ -25,13 +24,11 @@
       <change beforePath="$PROJECT_DIR$/src/components/OnboardingOverlay.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/OnboardingOverlay.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/QuickSettingsPopover.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/QuickSettingsPopover.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/ReaderBottomBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ReaderBottomBar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ReaderContainer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ReaderContainer.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/ThemeProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ThemeProvider.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/settings/TTSSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/settings/TTSSettings.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/settings/ThemeSettings.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/settings/ThemeSettings.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/constants.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/useDocumentLifecycle.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useDocumentLifecycle.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/useKeyboardShortcuts.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useKeyboardShortcuts.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/useNarration.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNarration.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/useNarrationSync.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useNarrationSync.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/useReaderMode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/useReaderMode.ts" afterDir="false" />
@@ -64,7 +61,6 @@
       <change beforePath="$PROJECT_DIR$/tests/perf-baseline-results.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/perf-baseline-results.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/tts7b-cursorContract.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/tts7b-cursorContract.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/ttsSettingsKokoroTruth.test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/tests/ttsSettingsKokoroTruth.test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/useKeyboardShortcuts.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/useKeyboardShortcuts.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/useLibrary.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/useLibrary.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/useReaderMode.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/tests/useReaderMode.test.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.js" afterDir="false" />
@@ -107,22 +103,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/estra/Projects/Blurby",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\estra\\Projects\\Blurby\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/estra/Projects/Blurby&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\estra\\Projects\\Blurby\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="" />
@@ -132,7 +128,7 @@
       <updated>1775317594290</updated>
       <workItem from="1775317596140" duration="184000" />
       <workItem from="1776447166945" duration="32681000" />
-      <workItem from="1776704943936" duration="7688000" />
+      <workItem from="1776704943936" duration="10050000" />
     </task>
     <task id="LOCAL-00001" summary="4.4.2026">
       <option name="closed" value="true" />

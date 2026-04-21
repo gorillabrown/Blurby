@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-20 — Completed READER-4M-2: standalone Narrate mode, universal N key, T narration toggle removed. 2102 tests. v1.69.0.
+**Last updated**: 2026-04-20 — Completed QWEN-STREAM-1: streaming Qwen sidecar foundation. Binary-framed PCM protocol, engine manager, IPC/preload bridge, streaming types. 18 new tests. v1.71.0.
 **Current branch**: `main`
-**Current state**: v1.69.0 stable. Queue depth 2 (YELLOW) after `READER-4M-2` closeout. `READER-4M-3` is now the next dispatchable queue item, followed by `QWEN-STREAM-1`. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-1` through `QWEN-STREAM-3`.
+**Current state**: v1.71.0 stable. Queue depth 1 (RED — READER-4M-3 only). QWEN-STREAM-1 complete. Next: READER-4M-3.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -102,7 +102,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     QWEN-PROVISION-1: Deterministic Provisioning and Supported-Host Policy
                    │
-    QWEN-STREAM-1: Streaming Sidecar Foundation (Lane D — parallel-safe)
+    QWEN-STREAM-1: Streaming Sidecar Foundation (Lane D — parallel-safe) ✅ (v1.71.0)
                    │
     QWEN-STREAM-2: Accumulator + Strategy + Live Playback (planned, not yet spec'd)
                    │
@@ -3678,7 +3678,7 @@ Task 12 (Git)
 
 ---
 
-### Sprint QWEN-STREAM-1: Streaming Sidecar Foundation
+### Sprint QWEN-STREAM-1: Streaming Sidecar Foundation ✅ COMPLETED
 
 **Goal:** Stand up a dedicated persistent Qwen streaming sidecar that can load the model, accept streaming generation commands, and deliver incremental PCM audio frames to the Electron main process — proving the local streaming path works end-to-end from Python to main process without yet wiring playback into the renderer narration pipeline.
 

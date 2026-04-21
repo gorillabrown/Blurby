@@ -141,6 +141,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   kokoroVoices: () => ipcRenderer.invoke("tts-kokoro-voices"),
   kokoroModelStatus: () => ipcRenderer.invoke("tts-kokoro-model-status"),
   kokoroDownload: () => ipcRenderer.invoke("tts-kokoro-download"),
+  qwenPreload: () => ipcRenderer.invoke("tts-qwen-preload"),
+  qwenPreflight: () => ipcRenderer.invoke("tts-qwen-preflight"),
+  qwenModelStatus: () => ipcRenderer.invoke("tts-qwen-model-status"),
+  qwenVoices: () => ipcRenderer.invoke("tts-qwen-voices"),
+  qwenGenerate: (text, speaker, rate, words) => ipcRenderer.invoke("tts-qwen-generate", text, speaker, rate, words),
   onKokoroDownloadProgress: (callback) => {
     const handler = (_event, progress) => callback(progress);
     ipcRenderer.on("tts-kokoro-download-progress", handler);
@@ -160,6 +165,28 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const handler = (_event, data) => callback(data);
     ipcRenderer.on("tts-kokoro-engine-status", handler);
     return () => ipcRenderer.removeListener("tts-kokoro-engine-status", handler);
+  },
+  onQwenEngineStatus: (callback) => {
+    const handler = (_event, data) => callback(data);
+    ipcRenderer.on("tts-qwen-engine-status", handler);
+    return () => ipcRenderer.removeListener("tts-qwen-engine-status", handler);
+  },
+  onQwenRuntimeError: (callback) => {
+    const handler = (_event, error) => callback(error);
+    ipcRenderer.on("tts-qwen-runtime-error", handler);
+    return () => ipcRenderer.removeListener("tts-qwen-runtime-error", handler);
+  },
+  // Streaming Qwen bridge
+  qwenStreamStart: (text, speaker, rate) =>
+    ipcRenderer.invoke("tts-qwen-stream-start", text, speaker, rate),
+  qwenStreamCancel: (streamId) =>
+    ipcRenderer.invoke("tts-qwen-stream-cancel", streamId),
+  qwenStreamStatus: () =>
+    ipcRenderer.invoke("tts-qwen-stream-status"),
+  onQwenStreamAudio: (callback) => {
+    const handler = (_event, streamId, chunk) => callback(streamId, chunk);
+    ipcRenderer.on("tts-qwen-stream-audio", handler);
+    return () => ipcRenderer.removeListener("tts-qwen-stream-audio", handler);
   },
 
   // TTS Cache (NAR-2)

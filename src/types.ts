@@ -8,10 +8,12 @@ export interface PronunciationOverride {
 
 // ── Narration Profiles (TTS-6L) ─────────────────────────────────���───────────
 /** A named narration preset bundling voice, rate, pause timing, and overrides. */
+export type TtsEngine = "web" | "kokoro" | "qwen";
+
 export interface NarrationProfile {
   id: string;
   name: string;
-  ttsEngine: "web" | "kokoro";
+  ttsEngine: TtsEngine;
   ttsVoiceName: string | null;
   ttsRate: number;
   ttsPauseCommaMs: number;
@@ -35,6 +37,7 @@ export interface LoadDocUserError {
 }
 
 export type KokoroEngineStatus = "idle" | "warming" | "retrying" | "ready" | "error";
+export type QwenEngineStatus = "idle" | "warming" | "ready" | "unavailable" | "error";
 
 export interface KokoroStatusSnapshot {
   status: KokoroEngineStatus;
@@ -50,6 +53,71 @@ export interface KokoroErrorResponse {
   reason?: string | null;
   status?: KokoroEngineStatus | null;
   recoverable?: boolean;
+}
+
+export interface QwenStatusSnapshot {
+  status: QwenEngineStatus;
+  detail?: string | null;
+  reason?: string | null;
+  ready: boolean;
+  loading: boolean;
+  recoverable?: boolean;
+  statusTimingMs?: number | null;
+  preloadTimingMs?: number | null;
+  voiceListTimingMs?: number | null;
+  generateTimingMs?: number | null;
+  spikeWarningThresholdMs?: number | null;
+  spikeWarning?: boolean;
+}
+
+export interface QwenErrorResponse {
+  error: string;
+  reason?: string | null;
+  status?: QwenEngineStatus | null;
+  recoverable?: boolean;
+  timingMs?: number | null;
+  spikeWarningThresholdMs?: number | null;
+  spikeWarning?: boolean;
+}
+
+export type QwenPreflightCheckStatus = "pass" | "fail" | "warn" | "skip";
+
+export interface QwenPreflightCheck {
+  key: string;
+  label: string;
+  status: QwenPreflightCheckStatus;
+  detail: string;
+}
+
+export interface QwenPreflightReport {
+  status: QwenEngineStatus;
+  reason?: string | null;
+  detail?: string | null;
+  recoverable?: boolean;
+  supportedHost: boolean;
+  requestedDevice?: string | null;
+  pythonExe?: string | null;
+  modelId?: string | null;
+  attnImplementation?: string | null;
+  configPath?: string | null;
+  checkedAt: string;
+  checks: QwenPreflightCheck[];
+}
+
+export interface TtsWordTimestamp {
+  word: string;
+  startTime: number;
+  endTime: number;
+}
+
+export interface QwenGenerateResponse {
+  audio?: Float32Array;
+  sampleRate?: number;
+  durationMs?: number;
+  wordTimestamps?: TtsWordTimestamp[] | null;
+  timingMs?: number | null;
+  spikeWarningThresholdMs?: number | null;
+  spikeWarning?: boolean;
 }
 
 export type LoadDocContentResult =
@@ -164,7 +232,7 @@ export interface BlurbySettings {
   einkPhraseGrouping: boolean;
   // TTS settings
   ttsEnabled: boolean;
-  ttsEngine: "web" | "kokoro"; // which TTS backend to use
+  ttsEngine: TtsEngine; // which TTS backend to use
   ttsVoiceName: string | null; // SpeechSynthesisVoice.name (web) or Kokoro voice ID
   ttsRate: number; // 0.5-2.0, default 1.0
   // TTS pause timing (user-adjustable via settings)
@@ -262,6 +330,9 @@ export interface MergePreview {
   lastSync: number;
   error?: string;
 }
+
+// ── Import streaming types ──────────────────────────────────────────────────
+import type { QwenStreamStartResult, QwenStreamingEngineStatus } from "./types/qwenStreaming";
 
 // ── IPC API exposed via preload ─────────────────────────────────────────────
 export interface ElectronAPI {
@@ -370,12 +441,24 @@ export interface ElectronAPI {
   kokoroModelStatus: () => Promise<KokoroStatusSnapshot>;
   kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
   kokoroDownload?: () => Promise<{ ok?: boolean } & Partial<KokoroErrorResponse>>;
-  kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null } & Partial<KokoroErrorResponse>>;
+  kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: TtsWordTimestamp[] | null } & Partial<KokoroErrorResponse>>;
   kokoroGenerateMarathon: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number } & Partial<KokoroErrorResponse>>;
+  qwenPreload?: () => Promise<{ success?: boolean } & Partial<QwenErrorResponse>>;
+  qwenPreflight?: () => Promise<QwenPreflightReport>;
+  qwenModelStatus?: () => Promise<QwenStatusSnapshot>;
+  qwenVoices?: () => Promise<{ voices?: string[]; error?: string }>;
+  qwenGenerate?: (text: string, speaker: string, rate: number, words?: string[]) => Promise<QwenGenerateResponse & Partial<QwenErrorResponse>>;
+  // Streaming Qwen bridge (QWEN-STREAM-1)
+  qwenStreamStart: (text: string, speaker: string, rate: number) => Promise<QwenStreamStartResult>;
+  qwenStreamCancel: (streamId: string) => Promise<{ ok: boolean; error?: string }>;
+  qwenStreamStatus: () => Promise<QwenStreamingEngineStatus>;
+  onQwenStreamAudio: (handler: (event: Electron.IpcRendererEvent, streamId: string, chunk: Buffer) => void) => () => void;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
   onKokoroEngineStatus: (callback: (data: KokoroStatusSnapshot) => void) => () => void;
   onKokoroDownloadError?: (callback: (error: string) => void) => () => void;
+  onQwenEngineStatus?: (callback: (data: QwenStatusSnapshot) => void) => () => void;
+  onQwenRuntimeError?: (callback: (error: string) => void) => () => void;
   // TTS cache APIs
   ttsCacheRead: (bookId: string, voiceId: string, startIdx: number) => Promise<{ audio?: number[]; sampleRate?: number; durationMs?: number; wordCount?: number; miss?: boolean; error?: string }>;
   ttsCacheWrite: (bookId: string, voiceId: string, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => Promise<{ success?: boolean; error?: string }>;
