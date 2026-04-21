@@ -335,7 +335,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.74.0 — queue GREEN depth 3, next dispatch QWEN-STREAM-4, 1 open bug)
+## Current System State (v1.75.0 — queue RED depth 1, STOP SIGNAL per Rule 5a, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -379,9 +379,10 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **QWEN-STREAM-1 complete** — Streaming Qwen sidecar foundation. Binary-framed PCM protocol (`scripts/qwen_streaming_sidecar.py`), JS engine manager (`main/qwen-streaming-engine.js`), IPC handlers, preload bridge, streaming types. 18 new tests. v1.71.0.
 - **QWEN-STREAM-2 complete** — StreamAccumulator + streaming Qwen strategy + live playback wired. PCM frames buffer to sentence boundaries via StreamAccumulator, streaming strategy instantiated when engine is "qwen" and streaming engine ready, fallback to non-streaming preserved. Plato suggestion: async IIFE listener leak window in qwenStreamingStrategy.ts (low-risk, flagged for QWEN-STREAM-3 hardening). 21 new tests (tests/qwenStreamingStrategy.test.ts). v1.73.0.
 - **QWEN-STREAM-3 complete** — Streaming hardening: stall detection (TTS_STREAM_STALL_TIMEOUT_MS=8000ms), crash recovery (2s poll), warmup gate, cancellation guards (LL-109 fix). Stream-finished IPC wire added (tts-qwen-stream-finished: engine→ipc→preload→renderer→acc.flush()→onEnd). 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests. v1.74.0.
+- **QWEN-STREAM-4 complete** — Streaming eval harness executed (5 scenarios, pending_live_data), Kokoro baseline captured (9/9 pass, first-audio p50=465ms/p95=507.6ms), decision gate document populated with ITERATE recommendation. Live CUDA validation required before promotion. eval runner fix: streaming scenarios filtered from --matrix path. v1.75.0.
 - **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
-- Active queue: GREEN depth 3 (QWEN-STREAM-4, GOALS-6B, KOKORO-RETIRE-1 conditional). Next dispatch: QWEN-STREAM-4.
+- Active queue: RED depth 1 (GOALS-6B only). STOP SIGNAL per Rule 5a — must backfill to ≥3 before next dispatch. KOKORO-RETIRE-1 remains conditional (fires only on PROMOTE, which did not occur in QWEN-STREAM-4).
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.

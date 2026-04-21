@@ -1,0 +1,401 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "run-matrix__startup-parity-uncached__it007",
+  "scenarioId": "startup-parity-uncached",
+  "createdAt": "2023-11-14T22:14:30.000Z",
+  "fixture": {
+    "id": "prose-basic",
+    "title": "Prose Baseline",
+    "sourceType": "prose",
+    "expectedCoverage": [
+      "start-latency",
+      "word-progression"
+    ],
+    "notes": ""
+  },
+  "events": [
+    {
+      "ts": 1700000070000,
+      "kind": "lifecycle",
+      "state": "start",
+      "wordIndex": 0,
+      "mode": "flow",
+      "isNarrating": true,
+      "previewLatencyMs": 1180,
+      "spikeWarningThresholdMs": 3000,
+      "spikeWarning": false,
+      "cacheMode": "uncached",
+      "openingChunkWordCounts": [
+        13,
+        26,
+        52,
+        104,
+        148
+      ]
+    },
+    {
+      "ts": 1700000070508,
+      "kind": "lifecycle",
+      "state": "first-audio",
+      "wordIndex": 0,
+      "latencyMs": 508,
+      "spikeWarningThresholdMs": 3000,
+      "spikeWarning": false,
+      "mode": "flow",
+      "isNarrating": true
+    },
+    {
+      "ts": 1700000070508,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 0
+    },
+    {
+      "ts": 1700000070528,
+      "kind": "flow-position",
+      "lineIndex": 0,
+      "totalLines": 5,
+      "wordIndex": 0,
+      "totalWords": 38,
+      "bookPct": 0
+    },
+    {
+      "ts": 1700000070668,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 1
+    },
+    {
+      "ts": 1700000070828,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 2
+    },
+    {
+      "ts": 1700000070988,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 3
+    },
+    {
+      "ts": 1700000071008,
+      "kind": "flow-position",
+      "lineIndex": 0,
+      "totalLines": 5,
+      "wordIndex": 3,
+      "totalWords": 38,
+      "bookPct": 0.08108108108108109
+    },
+    {
+      "ts": 1700000071148,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 4
+    },
+    {
+      "ts": 1700000071308,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 5
+    },
+    {
+      "ts": 1700000071468,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 6
+    },
+    {
+      "ts": 1700000071488,
+      "kind": "flow-position",
+      "lineIndex": 0,
+      "totalLines": 5,
+      "wordIndex": 6,
+      "totalWords": 38,
+      "bookPct": 0.16216216216216217
+    },
+    {
+      "ts": 1700000071628,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 7
+    },
+    {
+      "ts": 1700000071788,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 8
+    },
+    {
+      "ts": 1700000071948,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 9
+    },
+    {
+      "ts": 1700000071968,
+      "kind": "flow-position",
+      "lineIndex": 1,
+      "totalLines": 5,
+      "wordIndex": 9,
+      "totalWords": 38,
+      "bookPct": 0.24324324324324326
+    },
+    {
+      "ts": 1700000072108,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 10
+    },
+    {
+      "ts": 1700000072268,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 11
+    },
+    {
+      "ts": 1700000072428,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 12
+    },
+    {
+      "ts": 1700000072448,
+      "kind": "flow-position",
+      "lineIndex": 1,
+      "totalLines": 5,
+      "wordIndex": 12,
+      "totalWords": 38,
+      "bookPct": 0.32432432432432434
+    },
+    {
+      "ts": 1700000072588,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 13
+    },
+    {
+      "ts": 1700000072748,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 14
+    },
+    {
+      "ts": 1700000072908,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 15
+    },
+    {
+      "ts": 1700000072928,
+      "kind": "flow-position",
+      "lineIndex": 1,
+      "totalLines": 5,
+      "wordIndex": 15,
+      "totalWords": 38,
+      "bookPct": 0.40540540540540543
+    },
+    {
+      "ts": 1700000073068,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 16
+    },
+    {
+      "ts": 1700000073228,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 17
+    },
+    {
+      "ts": 1700000073388,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 18
+    },
+    {
+      "ts": 1700000073408,
+      "kind": "flow-position",
+      "lineIndex": 2,
+      "totalLines": 5,
+      "wordIndex": 18,
+      "totalWords": 38,
+      "bookPct": 0.4864864864864865
+    },
+    {
+      "ts": 1700000073548,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 19
+    },
+    {
+      "ts": 1700000073708,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 20
+    },
+    {
+      "ts": 1700000073868,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 21
+    },
+    {
+      "ts": 1700000073888,
+      "kind": "flow-position",
+      "lineIndex": 2,
+      "totalLines": 5,
+      "wordIndex": 21,
+      "totalWords": 38,
+      "bookPct": 0.5675675675675675
+    },
+    {
+      "ts": 1700000074028,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 22
+    },
+    {
+      "ts": 1700000074188,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 23
+    },
+    {
+      "ts": 1700000074348,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 24
+    },
+    {
+      "ts": 1700000074368,
+      "kind": "flow-position",
+      "lineIndex": 3,
+      "totalLines": 5,
+      "wordIndex": 24,
+      "totalWords": 38,
+      "bookPct": 0.6486486486486487
+    },
+    {
+      "ts": 1700000074508,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 25
+    },
+    {
+      "ts": 1700000074668,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 26
+    },
+    {
+      "ts": 1700000074828,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 27
+    },
+    {
+      "ts": 1700000074848,
+      "kind": "flow-position",
+      "lineIndex": 3,
+      "totalLines": 5,
+      "wordIndex": 27,
+      "totalWords": 38,
+      "bookPct": 0.7297297297297297
+    },
+    {
+      "ts": 1700000074988,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 28
+    },
+    {
+      "ts": 1700000075148,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 29
+    },
+    {
+      "ts": 1700000075308,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 30
+    },
+    {
+      "ts": 1700000075328,
+      "kind": "flow-position",
+      "lineIndex": 3,
+      "totalLines": 5,
+      "wordIndex": 30,
+      "totalWords": 38,
+      "bookPct": 0.8108108108108109
+    },
+    {
+      "ts": 1700000075468,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 31
+    },
+    {
+      "ts": 1700000075628,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 32
+    },
+    {
+      "ts": 1700000075788,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 33
+    },
+    {
+      "ts": 1700000075808,
+      "kind": "flow-position",
+      "lineIndex": 4,
+      "totalLines": 5,
+      "wordIndex": 33,
+      "totalWords": 38,
+      "bookPct": 0.8918918918918919
+    },
+    {
+      "ts": 1700000075948,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 34
+    },
+    {
+      "ts": 1700000076108,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 35
+    },
+    {
+      "ts": 1700000076268,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 36
+    },
+    {
+      "ts": 1700000076288,
+      "kind": "flow-position",
+      "lineIndex": 4,
+      "totalLines": 5,
+      "wordIndex": 36,
+      "totalWords": 38,
+      "bookPct": 0.972972972972973
+    },
+    {
+      "ts": 1700000076428,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 37
+    },
+    {
+      "ts": 1700000076648,
+      "kind": "lifecycle",
+      "state": "stop",
+      "wordIndex": 37,
+      "mode": "flow",
+      "isNarrating": false
+    }
+  ]
+}

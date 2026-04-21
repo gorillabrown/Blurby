@@ -576,7 +576,10 @@ export async function runHarness(args, runtime = null) {
       interrupted = result.interrupted;
     } else if (args.matrix) {
       runMode = "matrix";
-      const scenarios = filterScenariosByTags(matrixManifest.scenarios || [], args.tags);
+      const allScenarios = filterScenariosByTags(matrixManifest.scenarios || [], args.tags);
+      const scenarios = allScenarios.filter(
+        (s) => s.engine !== "qwen-streaming" && s.fixtureId != null
+      );
       const result = await executeMatrix({
         args,
         scenarios,

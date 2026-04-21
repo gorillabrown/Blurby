@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3 — GREEN
-Next queue item: QWEN-STREAM-4
-Health: GREEN — QWEN-STREAM-4 (decision gate), GOALS-6B (independent), KOKORO-RETIRE-1 (conditional on promote). GOALS-6B needs coordinate hardening. KOKORO-RETIRE-1 fires only if QWEN-STREAM-4 promotes streaming.
+Queue depth: 1 — RED ⛔ STOP SIGNAL (Rule 5a)
+Next queue item: GOALS-6B
+Health: RED — queue below minimum depth of 3. QWEN-STREAM-4 completed (ITERATE). KOKORO-RETIRE-1 remains conditional (fires only on PROMOTE, which did not happen). Must backfill queue to ≥3 before dispatching GOALS-6B.
 ```
 
 ---
@@ -34,11 +34,9 @@ Health: GREEN — QWEN-STREAM-4 (decision gate), GOALS-6B (independent), KOKORO-
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | QWEN-STREAM-4 | v1.75.0 | sprint/qwen-stream-4-decision-gate | Quick | YES | — |
-| 2 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
-| 3 | KOKORO-RETIRE-1 | v1.77.0 | sprint/kokoro-retire-1 | Full | NO — blocked on QWEN-STREAM-4 promote decision | Fires only if streaming Qwen promoted |
+| 1 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
 
-**Dispatch status:** Queue depth 3 — GREEN. QWEN-STREAM-4 is next dispatch. GOALS-6B needs coordinate hardening. KOKORO-RETIRE-1 conditionally unblocks after QWEN-STREAM-4 promotes streaming Qwen.
+**Dispatch status:** Queue depth 1 — RED ⛔. QWEN-STREAM-4 completed (ITERATE). KOKORO-RETIRE-1 remains conditional (fires only on PROMOTE, which did not happen this sprint). Must backfill queue to ≥3 before dispatching GOALS-6B.
 
 ### Parallel Dispatch Guardrails
 
@@ -116,7 +114,8 @@ If any guardrail fails, run the sprints sequentially.
 54. ~~Backfill queue to ≥3.~~ — COMPLETE. Added GOALS-6B as position 3 (independent track). Queue GREEN depth 3.
 55. ~~Dispatch QWEN-STREAM-3 to CLI~~ — COMPLETE (v1.74.0). Stall detection, crash recovery, warmup gate, cancellation guards, stream-finished IPC wire, 5 streaming eval scenarios, gate thresholds, decision template. 16 new tests. Build clean.
 56. ~~Backfill queue to ≥3.~~ — COMPLETE. Added KOKORO-RETIRE-1 as conditional position 3. Queue GREEN depth 3.
-57. **Dispatch QWEN-STREAM-4 to CLI.** Queue GREEN — dispatch-ready.
+57. ~~Dispatch QWEN-STREAM-4 to CLI~~ — COMPLETE (v1.75.0, ITERATE). Eval harness executed, Kokoro baseline captured, QWEN_STREAMING_DECISION.md populated. Live CUDA validation deferred to Evan.
+58. **Backfill queue to ≥3.** RED depth 1 — STOP SIGNAL. Must spec at least 2 new sprints before next dispatch.
 
 ---
 
@@ -140,6 +139,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| QWEN-STREAM-4 | 2026-04-21 | ITERATE | Streaming eval harness executed (5 scenarios, pending_live_data). Kokoro baseline captured (9/9 pass, first-audio p50=465ms/p95=507.6ms). Decision gate document populated with ITERATE recommendation — live CUDA validation required before PROMOTE/REJECT. Eval runner fix: streaming scenarios filtered from --matrix path. v1.75.0. |
 | QWEN-STREAM-3 | 2026-04-20 | PASS | Streaming hardening: stall detection (8000ms), crash recovery (2s poll), warmup gate, cancellation guards (LL-109 sentinel fix), stream-finished IPC wire (tts-qwen-stream-finished: engine→ipc→preload→renderer→acc.flush()→onEnd). 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests. v1.74.0. |
 | QWEN-STREAM-2 | 2026-04-20 | PASS | StreamAccumulator + streaming Qwen strategy + live playback. PCM frames buffer to sentence boundaries, streaming strategy instantiated when engine is "qwen" and streaming ready, fallback to non-streaming preserved. Plato flag: async IIFE listener gap (low-risk, QWEN-STREAM-3). 21 new tests. v1.73.0. |
 | READER-4M-3 | 2026-04-20 | PASS | Canonical global word anchor + spoken-truth Narrate continuity. Save/resume/mode switching now resolve through one anchor, Flow↔Narrate preserve the same shared-surface position, and Narrate follow/highlight consumes `narration.cursorWordIndex`. 16 new tests plus expanded continuity coverage. v1.72.0. |

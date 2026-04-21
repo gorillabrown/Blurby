@@ -1438,3 +1438,19 @@ speakChunk() {
 **Pattern:** Main process emits tts-[engine]-stream-finished → preload bridges as onQwenStreamFinished → strategy subscribes alongside onQwenStreamAudio → calls acc.flush() on matching streamId → flush() triggers onStreamEnd → markPipelineDone() → onEnd.
 
 **Fixed in:** QWEN-STREAM-3 (v1.74.0). Found by Plato review.
+
+---
+
+### [2026-04-21] LL-111: Eval Runner Manifest Must Gate Streaming Scenarios from Non-Streaming Paths
+
+**Area:** TTS eval runner, scenario manifest, streaming
+**Status:** active
+**Priority:** medium
+
+**Context:** QWEN-STREAM-4 discovered that streaming scenarios in the eval manifest use inline `text` instead of `fixtureId`. Any code path that calls `executeMatrix()` without pre-filtering streaming scenarios will crash when it tries to look up a fixture file using an undefined `fixtureId`.
+
+**Rule PR-111:** Any call to `executeMatrix()` (or any matrix-mode eval path) MUST pre-filter streaming scenarios before passing the scenario list. Streaming scenarios are identifiable by `engine === "qwen-streaming"` or by the absence of a `fixtureId` field.
+
+**Pattern:** `scenarios.filter(s => s.engine !== "qwen-streaming" && s.fixtureId != null)` — apply this guard at the entry point of any non-streaming matrix execution path.
+
+**Fixed in:** QWEN-STREAM-4 (v1.75.0) — `scripts/tts_eval_runner.mjs` now filters streaming scenarios out of the `--matrix` (non-streaming) path.
