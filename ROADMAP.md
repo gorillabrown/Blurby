@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-20 — Completed QWEN-STREAM-3: Streaming hardening + evidence + decision gate. 16 new tests. v1.74.0.
+**Last updated**: 2026-04-21 — Completed QWEN-STREAM-4: Streaming eval harness executed, ITERATE decision. v1.75.0.
 **Current branch**: `main`
-**Current state**: v1.74.0 stable. Queue GREEN depth 3 (QWEN-STREAM-4, GOALS-6B, KOKORO-RETIRE-1 conditional). Next dispatch: QWEN-STREAM-4.
+**Current state**: v1.75.0 stable. Queue RED depth 1 (GOALS-6B only). STOP SIGNAL per Rule 5a — must backfill to ≥3 before next dispatch.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -108,7 +108,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     QWEN-STREAM-3: Streaming Hardening + Evidence + Decision Gate ✅ (v1.74.0)
                    │
-    QWEN-STREAM-4: Live Validation + Promotion Decision
+    QWEN-STREAM-4: Live Validation + Promotion Decision ✅ (v1.75.0, ITERATE)
       ├── Current full-chunk local Qwen lane: transitional / superseded as successor path
       └── Kokoro retirement sprints: paused until the streaming lane proves continuous live playback
                    │
@@ -4031,7 +4031,9 @@ Task 13 (Git)
 
 ---
 
-### Sprint QWEN-STREAM-4: Live Validation + Promotion Decision
+### Sprint QWEN-STREAM-4: Live Validation + Promotion Decision ✅ COMPLETED (v1.75.0, 2026-04-21)
+
+**Decision:** ITERATE — Streaming architecture complete and hardened. Automated gates pass. Live CUDA validation not yet performed; final PROMOTE/REJECT deferred until Evan runs live testing per runbook in `docs/testing/QWEN_STREAMING_DECISION.md`.
 
 **Goal:** Execute the streaming evaluation suite against a real CUDA host, collect decision-quality evidence, fill in the `QWEN_STREAMING_DECISION.md` gate table, and either promote streaming Qwen as the sole successor lane or record the decision to lean back into Kokoro.
 

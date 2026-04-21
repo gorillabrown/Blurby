@@ -1,0 +1,302 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "run-matrix__handoff-queue__it005",
+  "scenarioId": "handoff-queue",
+  "createdAt": "2023-11-14T22:14:10.000Z",
+  "fixture": {
+    "id": "queued-handoff",
+    "title": "Cross Book Queue Handoff",
+    "sourceType": "transition",
+    "expectedCoverage": [
+      "handoff",
+      "book-transition"
+    ],
+    "notes": ""
+  },
+  "events": [
+    {
+      "ts": 1700000050000,
+      "kind": "lifecycle",
+      "state": "start",
+      "wordIndex": 0,
+      "mode": "flow",
+      "isNarrating": true,
+      "previewLatencyMs": 1120,
+      "spikeWarningThresholdMs": 3000,
+      "spikeWarning": false
+    },
+    {
+      "ts": 1700000050402,
+      "kind": "lifecycle",
+      "state": "first-audio",
+      "wordIndex": 0,
+      "latencyMs": 402,
+      "spikeWarningThresholdMs": 3000,
+      "spikeWarning": false,
+      "mode": "flow",
+      "isNarrating": true
+    },
+    {
+      "ts": 1700000050402,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 0
+    },
+    {
+      "ts": 1700000050422,
+      "kind": "flow-position",
+      "lineIndex": 0,
+      "totalLines": 4,
+      "wordIndex": 0,
+      "totalWords": 26,
+      "bookPct": 0
+    },
+    {
+      "ts": 1700000050516,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 1
+    },
+    {
+      "ts": 1700000050630,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 2
+    },
+    {
+      "ts": 1700000050744,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 3
+    },
+    {
+      "ts": 1700000050764,
+      "kind": "flow-position",
+      "lineIndex": 0,
+      "totalLines": 4,
+      "wordIndex": 3,
+      "totalWords": 26,
+      "bookPct": 0.12
+    },
+    {
+      "ts": 1700000050858,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 4
+    },
+    {
+      "ts": 1700000050972,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 5
+    },
+    {
+      "ts": 1700000051086,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 6
+    },
+    {
+      "ts": 1700000051106,
+      "kind": "flow-position",
+      "lineIndex": 0,
+      "totalLines": 4,
+      "wordIndex": 6,
+      "totalWords": 26,
+      "bookPct": 0.24
+    },
+    {
+      "ts": 1700000051200,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 7
+    },
+    {
+      "ts": 1700000051314,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 8
+    },
+    {
+      "ts": 1700000051428,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 9
+    },
+    {
+      "ts": 1700000051448,
+      "kind": "flow-position",
+      "lineIndex": 1,
+      "totalLines": 4,
+      "wordIndex": 9,
+      "totalWords": 26,
+      "bookPct": 0.36
+    },
+    {
+      "ts": 1700000051542,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 10
+    },
+    {
+      "ts": 1700000051656,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 11
+    },
+    {
+      "ts": 1700000051770,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 12
+    },
+    {
+      "ts": 1700000051790,
+      "kind": "flow-position",
+      "lineIndex": 1,
+      "totalLines": 4,
+      "wordIndex": 12,
+      "totalWords": 26,
+      "bookPct": 0.48
+    },
+    {
+      "ts": 1700000051884,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 13
+    },
+    {
+      "ts": 1700000051998,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 14
+    },
+    {
+      "ts": 1700000052112,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 15
+    },
+    {
+      "ts": 1700000052132,
+      "kind": "flow-position",
+      "lineIndex": 1,
+      "totalLines": 4,
+      "wordIndex": 15,
+      "totalWords": 26,
+      "bookPct": 0.6
+    },
+    {
+      "ts": 1700000052226,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 16
+    },
+    {
+      "ts": 1700000052340,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 17
+    },
+    {
+      "ts": 1700000052454,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 18
+    },
+    {
+      "ts": 1700000052474,
+      "kind": "flow-position",
+      "lineIndex": 2,
+      "totalLines": 4,
+      "wordIndex": 18,
+      "totalWords": 26,
+      "bookPct": 0.72
+    },
+    {
+      "ts": 1700000052568,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 19
+    },
+    {
+      "ts": 1700000052682,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 20
+    },
+    {
+      "ts": 1700000052796,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 21
+    },
+    {
+      "ts": 1700000052816,
+      "kind": "flow-position",
+      "lineIndex": 2,
+      "totalLines": 4,
+      "wordIndex": 21,
+      "totalWords": 26,
+      "bookPct": 0.84
+    },
+    {
+      "ts": 1700000052910,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 22
+    },
+    {
+      "ts": 1700000053024,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 23
+    },
+    {
+      "ts": 1700000053138,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 24
+    },
+    {
+      "ts": 1700000053158,
+      "kind": "flow-position",
+      "lineIndex": 3,
+      "totalLines": 4,
+      "wordIndex": 24,
+      "totalWords": 26,
+      "bookPct": 0.96
+    },
+    {
+      "ts": 1700000053252,
+      "kind": "word",
+      "source": "audio",
+      "wordIndex": 25
+    },
+    {
+      "ts": 1700000053386,
+      "kind": "transition",
+      "transition": "book",
+      "from": "book-a",
+      "to": "book-b",
+      "context": "cross-book-flow-narration"
+    },
+    {
+      "ts": 1700000053391,
+      "kind": "transition",
+      "transition": "handoff",
+      "from": "book-a",
+      "to": "book-b",
+      "context": "cross-book-flow-narration",
+      "latencyMs": 474
+    },
+    {
+      "ts": 1700000053426,
+      "kind": "lifecycle",
+      "state": "stop",
+      "wordIndex": 25,
+      "mode": "flow",
+      "isNarrating": false
+    }
+  ]
+}
