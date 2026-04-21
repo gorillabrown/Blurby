@@ -17,7 +17,7 @@ export function injectStyles(doc: Document, settings: BlurbySettings, focusTextS
   const rootStyles = getComputedStyle(document.documentElement);
   const bg = rootStyles.getPropertyValue("--bg").trim() || "#1a1a1a";
   const fg = rootStyles.getPropertyValue("--text").trim() || "#e0e0e0";
-  const accent = rootStyles.getPropertyValue("--accent").trim() || "#D04716";
+  const accent = rootStyles.getPropertyValue("--accent").trim() || "#FF5B7F";
 
   const style = doc.createElement("style");
   style.id = "blurby-theme";

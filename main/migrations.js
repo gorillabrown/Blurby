@@ -29,7 +29,7 @@ const settingsMigrations = [
   },
   // v1 → v2: Add theme setting
   (data) => {
-    if (!data.theme) data.theme = "dark";
+    if (!data.theme) data.theme = "blurby";
     data.schemaVersion = 2;
     return data;
   },

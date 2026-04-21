@@ -10,7 +10,7 @@ const path = require("path");
 // Real icons should be designed properly and replace these.
 
 function createPlaceholderPng(size) {
-  // Create a simple PNG with the Blurby orange (#D04716) background
+  // Create a simple PNG with the Blurby blue (#2F8FD8) background
   // This is a minimal valid PNG — just a solid color rectangle
   const width = size;
   const height = size;
@@ -33,14 +33,14 @@ function createPlaceholderPng(size) {
   // Each row: filter byte (0) + RGB pixels
   const rowSize = 1 + width * 3;
   const rawData = Buffer.alloc(rowSize * height);
-  // Blurby orange: #D04716 = (208, 71, 22)
+  // Blurby blue: #2F8FD8 = (47, 143, 216)
   for (let y = 0; y < height; y++) {
     rawData[y * rowSize] = 0; // filter: none
     for (let x = 0; x < width; x++) {
       const offset = y * rowSize + 1 + x * 3;
-      rawData[offset] = 208;     // R
-      rawData[offset + 1] = 71;  // G
-      rawData[offset + 2] = 22;  // B
+      rawData[offset] = 47;      // R
+      rawData[offset + 1] = 143;  // G
+      rawData[offset + 2] = 216;  // B
     }
   }
 

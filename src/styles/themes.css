@@ -17,7 +17,7 @@
  */
 
 /* ── Blurby Theme Overrides ──────────────────────────────────────────────── */
-/* Pure white, minimal — accent is orange #D04716 via CSS variables only */
+/* Deep blue dominant, coral accent #FF5B7F — brand palette via CSS variables */
 
 [data-theme="eink"] {
   /* Override all CSS custom properties for pure B&W */

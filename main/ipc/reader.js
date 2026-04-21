@@ -197,7 +197,7 @@ function register(ctx) {
           headingStyleRange: "1-2",
         }),
         new Paragraph({
-          border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "D04716" } },
+          border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: "FF5B7F" } },
           spacing: { before: 200, after: 200 },
         }),
         new Paragraph({

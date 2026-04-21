@@ -354,7 +354,7 @@ body {
 .toast-action {
   background: none;
   border: 1px solid var(--border);
-  color: var(--accent, #D04716);
+  color: var(--accent, #FF5B7F);
   border-radius: var(--radius-sm);
   padding: 2px 10px;
   font-size: 11px;

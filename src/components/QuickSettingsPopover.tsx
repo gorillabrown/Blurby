@@ -8,7 +8,7 @@ interface QuickSettingsPopoverProps {
     wpm?: number;
     focusTextSize?: number;
     flowTextSize?: number;
-    theme?: "dark" | "light" | "eink" | "system";
+    theme?: "blurby" | "dark" | "light" | "eink" | "system";
     readingMode?: "focus" | "flow";
     viewMode?: "grid" | "list";
     [key: string]: unknown;
@@ -21,7 +21,8 @@ const FONT_MIN = 12;
 const FONT_MAX = 48;
 const FONT_STEP = 1;
 
-const THEMES: Array<{ value: "dark" | "light" | "eink" | "system"; label: string }> = [
+const THEMES: Array<{ value: "blurby" | "dark" | "light" | "eink" | "system"; label: string }> = [
+  { value: "blurby", label: "Blurby" },
   { value: "dark", label: "Dark" },
   { value: "light", label: "Light" },
   { value: "system", label: "System" },
@@ -95,7 +96,7 @@ export default function QuickSettingsPopover({
     typeof settings.focusTextSize === "number" ? settings.focusTextSize : 18;
   const flowTextSize =
     typeof settings.flowTextSize === "number" ? settings.flowTextSize : 16;
-  const theme = settings.theme ?? "dark";
+  const theme = settings.theme ?? "blurby";
   const readingMode = settings.readingMode ?? "focus";
   const viewMode = settings.viewMode ?? "list";
 

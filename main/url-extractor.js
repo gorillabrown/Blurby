@@ -137,7 +137,7 @@ async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate
     doc.fontSize(9).fillColor("#666").font("Helvetica").text(sourceUrl, { align: "left", link: sourceUrl, underline: true });
     doc.moveDown(1);
 
-    // Separator: 0.5pt horizontal rule in brand orange #D04716
+    // Separator: 0.5pt horizontal rule in brand coral #FF5B7F
     const pageMargin = 72; // pdfkit default left margin
     const lineY = doc.y;
     doc
@@ -145,7 +145,7 @@ async function generateArticlePdf({ title, author, content, sourceUrl, fetchDate
       .moveTo(pageMargin, lineY)
       .lineTo(doc.page.width - pageMargin, lineY)
       .lineWidth(0.5)
-      .strokeColor("#D04716")
+      .strokeColor("#FF5B7F")
       .stroke()
       .restore();
     doc.moveDown(1);

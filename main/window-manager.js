@@ -11,7 +11,7 @@ function getThemeColors(settings) {
     : settings.theme;
   switch (resolvedTheme) {
     case "blurby":
-      return { bg: "#ffffff", titleBar: "#ffffff", titleText: "#1a1a1a" };
+      return { bg: "#1a2a4a", titleBar: "#152440", titleText: "#ffffff" };
     case "light":
       return { bg: "#f5f3ef", titleBar: "#f5f3ef", titleText: "#1a1a1a" };
     case "eink":

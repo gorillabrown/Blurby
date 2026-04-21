@@ -10,7 +10,7 @@ interface ThemeContextType {
 }
 
 export const ThemeContext = createContext<ThemeContextType>({
-  theme: "dark",
+  theme: "blurby",
   setTheme: () => {},
   accentColor: null,
   setAccentColor: () => {},
@@ -74,30 +74,30 @@ const themes: Record<string, Record<string, string>> = {
     "--badge-on-color": "#fff",
   },
   blurby: {
-    "--bg": "#ffffff",
-    "--bg-raised": "#f5f5f5",
-    "--bg-hover": "#eeeeee",
-    "--bg-secondary": "#fafafa",
-    "--border": "#d4d4d4",
-    "--border-light": "#e5e5e5",
-    "--text": "#050F32",
-    "--text-dim": "#3a3a4a",
-    "--text-dimmer": "#6d6f6d",
-    "--text-muted": "#888",
-    "--accent": "#D04716",
-    "--accent-glow": "rgba(208,71,22,0.3)",
-    "--accent-faded": "rgba(208,71,22,0.10)",
-    "--accent-highlighted": "rgba(208,71,22,0.25)",
-    "--danger-muted": "rgba(208,71,22,0.15)",
-    "--reader-bg": "#ffffff",
-    "--overlay-light": "rgba(0,0,0,0.03)",
-    "--overlay-medium": "rgba(0,0,0,0.05)",
-    "--overlay-heavy": "rgba(0,0,0,0.10)",
-    "--overlay-backdrop": "rgba(255,255,255,0.92)",
-    "--overlay-gradient": "rgba(255,255,255,0.7)",
-    "--placeholder-bg": "#f0f0f0",
-    "--placeholder-banner": "#e0e0e0",
-    "--placeholder-text": "#444",
+    "--bg": "#1a2a4a",
+    "--bg-raised": "#223456",
+    "--bg-hover": "#2a3d62",
+    "--bg-secondary": "#1e3050",
+    "--border": "#2d4a6e",
+    "--border-light": "#264060",
+    "--text": "#ffffff",
+    "--text-dim": "#b8cce0",
+    "--text-dimmer": "#8aa4c0",
+    "--text-muted": "#6d8faa",
+    "--accent": "#FF5B7F",
+    "--accent-glow": "rgba(255,91,127,0.3)",
+    "--accent-faded": "rgba(255,91,127,0.12)",
+    "--accent-highlighted": "rgba(255,91,127,0.28)",
+    "--danger-muted": "rgba(255,91,127,0.18)",
+    "--reader-bg": "#152440",
+    "--overlay-light": "rgba(255,255,255,0.04)",
+    "--overlay-medium": "rgba(255,255,255,0.07)",
+    "--overlay-heavy": "rgba(255,255,255,0.12)",
+    "--overlay-backdrop": "rgba(26,42,74,0.92)",
+    "--overlay-gradient": "rgba(26,42,74,0.7)",
+    "--placeholder-bg": "#223456",
+    "--placeholder-banner": "#2d4a6e",
+    "--placeholder-text": "#b8cce0",
     "--badge-on-color": "#fff",
   },
   eink: {
@@ -150,7 +150,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     : null;
 }
 
-export function ThemeProvider({ children, initialTheme = "dark" }: { children: React.ReactNode; initialTheme?: string }) {
+export function ThemeProvider({ children, initialTheme = "blurby" }: { children: React.ReactNode; initialTheme?: string }) {
   const [theme, setTheme] = useState(initialTheme);
   const [systemTheme, setSystemTheme] = useState<"dark" | "light">("dark");
   const [accentColor, setAccentColor] = useState<string | null>(null);
@@ -179,14 +179,14 @@ export function ThemeProvider({ children, initialTheme = "dark" }: { children: R
   useEffect(() => {
     const root = document.documentElement;
     const resolvedTheme = theme === "system" ? systemTheme : theme;
-    const vars = themes[resolvedTheme] || themes.dark;
+    const vars = themes[resolvedTheme] || themes.blurby;
     for (const [key, value] of Object.entries(vars)) {
       root.style.setProperty(key, value);
     }
     root.setAttribute("data-theme", resolvedTheme);
 
-    // Apply custom accent color override
-    if (accentColor) {
+    // Apply custom accent color override (blocked for blurby — brand palette is static)
+    if (accentColor && resolvedTheme !== "blurby") {
       root.style.setProperty("--accent", accentColor);
       const rgb = hexToRgb(accentColor);
       if (rgb) {

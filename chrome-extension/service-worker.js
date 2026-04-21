@@ -149,7 +149,7 @@ function notifyPopup(msg) {
 function updateBadge() {
   if (_sessionArticleCount > 0) {
     chrome.action.setBadgeText({ text: String(_sessionArticleCount) });
-    chrome.action.setBadgeBackgroundColor({ color: "#D04716" });
+    chrome.action.setBadgeBackgroundColor({ color: "#2F8FD8" });
   } else {
     chrome.action.setBadgeText({ text: "" });
   }

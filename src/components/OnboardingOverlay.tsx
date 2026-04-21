@@ -97,7 +97,7 @@ export default function OnboardingOverlay({ onComplete }: OnboardingOverlayProps
         <div className="onboarding-welcome">
           <div className="onboarding-logo-mark" aria-hidden="true">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="48" height="48" rx="10" fill="#D04716" />
+              <rect width="48" height="48" rx="10" fill="#2F8FD8" />
               <text x="50%" y="58%" dominantBaseline="middle" textAnchor="middle" fill="#fff" fontSize="26" fontWeight="700" fontFamily="Georgia, serif">B</text>
             </svg>
           </div>

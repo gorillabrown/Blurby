@@ -4,9 +4,9 @@ import { ThemeContext } from "../ThemeProvider";
 
 const ACCENT_PRESETS = [
   { label: "gold", value: "#c4a882" },
-  { label: "blurby blue", value: "#2E73FF" },
+  { label: "blurby blue", value: "#2F8FD8" },
   { label: "green", value: "#6b9f6b" },
-  { label: "blurby red", value: "#E63946" },
+  { label: "blurby coral", value: "#FF5B7F" },
   { label: "purple", value: "#9b82c4" },
   { label: "teal", value: "#5ba8a0" },
 ];
