@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — RED
+Queue depth: 3 — GREEN
 Next queue item: QWEN-STREAM-4
-Health: RED — Queue below minimum depth 3. QWEN-STREAM-4 (streaming lane) and GOALS-6B (independent track) remain. Backfill required before next dispatch. GOALS-6B still needs edit-site coordinate hardening before dispatch.
+Health: GREEN — QWEN-STREAM-4 (decision gate), GOALS-6B (independent), KOKORO-RETIRE-1 (conditional on promote). GOALS-6B needs coordinate hardening. KOKORO-RETIRE-1 fires only if QWEN-STREAM-4 promotes streaming.
 ```
 
 ---
@@ -36,8 +36,9 @@ Health: RED — Queue below minimum depth 3. QWEN-STREAM-4 (streaming lane) and 
 |---|-----------|---------|--------|------|-----------|---------|
 | 1 | QWEN-STREAM-4 | v1.75.0 | sprint/qwen-stream-4-decision-gate | Quick | YES | — |
 | 2 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
+| 3 | KOKORO-RETIRE-1 | v1.77.0 | sprint/kokoro-retire-1 | Full | NO — blocked on QWEN-STREAM-4 promote decision | Fires only if streaming Qwen promoted |
 
-**Dispatch status:** Queue depth 2 — RED. Backfill required before next dispatch. QWEN-STREAM-4 is next when depth is restored to ≥3. GOALS-6B spec exists in ROADMAP.md but needs coordinate hardening before dispatch.
+**Dispatch status:** Queue depth 3 — GREEN. QWEN-STREAM-4 is next dispatch. GOALS-6B needs coordinate hardening. KOKORO-RETIRE-1 conditionally unblocks after QWEN-STREAM-4 promotes streaming Qwen.
 
 ### Parallel Dispatch Guardrails
 
@@ -114,7 +115,8 @@ If any guardrail fails, run the sprints sequentially.
 53. ~~Dispatch QWEN-STREAM-2 to CLI~~ — COMPLETE (v1.73.0, 2026-04-20). StreamAccumulator + streaming Qwen strategy wired. PCM buffering to sentence boundaries, streaming strategy instantiated when engine ready, fallback preserved. 21 new tests. Build clean.
 54. ~~Backfill queue to ≥3.~~ — COMPLETE. Added GOALS-6B as position 3 (independent track). Queue GREEN depth 3.
 55. ~~Dispatch QWEN-STREAM-3 to CLI~~ — COMPLETE (v1.74.0). Stall detection, crash recovery, warmup gate, cancellation guards, stream-finished IPC wire, 5 streaming eval scenarios, gate thresholds, decision template. 16 new tests. Build clean.
-56. **Backfill queue to ≥3.** RED depth 2 — spec a third sprint before dispatching QWEN-STREAM-4.
+56. ~~Backfill queue to ≥3.~~ — COMPLETE. Added KOKORO-RETIRE-1 as conditional position 3. Queue GREEN depth 3.
+57. **Dispatch QWEN-STREAM-4 to CLI.** Queue GREEN — dispatch-ready.
 
 ---
 
@@ -171,6 +173,4 @@ If any guardrail fails, run the sprints sequentially.
 | HOTFIX-15 | 2026-04-07 | PASS | Narration cursor polish: colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% cap) + null guard (BUG-159). Proportional band height `lineHeight * 1.08` + dynamic re-measurement on word change >2px threshold (BUG-160). Truth-sync interval halved 12→6 words (BUG-161 partial). 16 new tests (1,699 total across 94 files). v1.43.1. |
 | EXT-ENR-B | 2026-04-07 | PASS | Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` / `ws-pairing-success` events. `PairingBanner` in library screen shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced 5s→15s. 29 new tests (1,683 total across 93 files). v1.43.0. |
 | FLOW-INF-B | 2026-04-06 | PASS | Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash), FlowProgress computation with chapter/book percentage + estimated time remaining, ReaderBottomBar progress display. 18 new tests (1,654 total across 92 files). v1.42.0. |
-| FLOW-INF-A | 2026-04-06 | PASS | CSS mask-image reading zone with configurable position/size, FlowScrollEngine dynamic zone position, ReaderBottomBar zone controls, ResizeObserver recomputation. 27 new tests (1,636 total across 91 files). v1.41.0. |
-| NARR-CURSOR-1 | 2026-04-06 | PASS | Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances with narration, width derived per tick. CSS simplified to 2-stop gradient. NARRATION_BAND_PAD_PX removed. 16 new tests (1,609 total across 90 files). v1.40.0. |
-| EXT-ENR-A | 2026-04-06 | PASS | Resilient extension connection: exponential backoff, pending article persistence, article-ack, EADDRINUSE retry cap, 
+|

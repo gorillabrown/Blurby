@@ -335,7 +335,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.74.0 — queue RED depth 2, next dispatch QWEN-STREAM-4, 1 open bug)
+## Current System State (v1.74.0 — queue GREEN depth 3, next dispatch QWEN-STREAM-4, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -381,7 +381,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **QWEN-STREAM-3 complete** — Streaming hardening: stall detection (TTS_STREAM_STALL_TIMEOUT_MS=8000ms), crash recovery (2s poll), warmup gate, cancellation guards (LL-109 fix). Stream-finished IPC wire added (tts-qwen-stream-finished: engine→ipc→preload→renderer→acc.flush()→onEnd). 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests. v1.74.0.
 - **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
-- Active queue: RED depth 2 (QWEN-STREAM-4, GOALS-6B). Next dispatch: QWEN-STREAM-4.
+- Active queue: GREEN depth 3 (QWEN-STREAM-4, GOALS-6B, KOKORO-RETIRE-1 conditional). Next dispatch: QWEN-STREAM-4.
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
@@ -400,7 +400,3 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 ### Architecture
 
 - **Main process** — modularized with domain-split IPC:
-  - `main.js` — orchestrator, app lifecycle, context object
-  - `main/ipc/` — 8 domain-specific IPC handler files (replaces monolithic ipc-handlers.js)
-  - `main/epub-converter.js` — universal EPUB pipeline (all formats convert to EPUB on import, preserves formatting + images). URL articles and Chrome extension articles also convert to EPUB.
-  - `main/legacy-parsers.js` — deprecated text extraction (w
