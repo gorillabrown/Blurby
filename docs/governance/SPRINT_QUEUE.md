@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 — YELLOW
+Queue depth: 1 — RED
 Next queue item: READER-4M-3
-Health: YELLOW — depth 2 after `READER-4M-2` closeout (v1.69.0). Reader restoration lane continues with `READER-4M-3` as next dispatch; `QWEN-STREAM-1` is Lane D (Platform/Main Process) and parallel-safe with the reader sprints. Backfill to ≥3 before dispatching further code-changing sprints beyond the current two pointers. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-1` through `QWEN-STREAM-3`.
+Health: RED — depth 1 after `QWEN-STREAM-1` closeout (v1.71.0). Only `READER-4M-3` remains. Backfill queue to ≥3 before dispatching READER-4M-3. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-2` through `QWEN-STREAM-3`.
 ```
 
 ---
@@ -34,10 +34,9 @@ Health: YELLOW — depth 2 after `READER-4M-2` closeout (v1.69.0). Reader restor
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | READER-4M-3 | v1.70.0 | `sprint/reader-4m-3-global-anchor-continuity` | Full | **YES** | Full spec in `ROADMAP.md`. Unifies save/resume/mode switching around one canonical global word anchor and makes Narrate follow spoken-word truth on the shared surface. Depends on `READER-4M-2`. |
-| 2 | QWEN-STREAM-1 | v1.71.0 | `sprint/qwen-stream-1-sidecar-foundation` | Full | **YES** | Full spec in `ROADMAP.md`. Streaming Qwen sidecar foundation: persistent Python subprocess with binary-framed PCM streaming protocol, main process engine manager, IPC/preload bridge, streaming types. No renderer playback integration yet. Lane D (Platform/Main Process) — parallel-safe with READER-4M-3. |
+| 1 | READER-4M-3 | v1.72.0 | `sprint/reader-4m-3-global-anchor-continuity` | Full | **YES** | Full spec in `ROADMAP.md`. Unifies save/resume/mode switching around one canonical global word anchor and makes Narrate follow spoken-word truth on the shared surface. Depends on `READER-4M-2`. |
 
-**Dispatch status:** Queue depth 2 — YELLOW after `READER-4M-2` closeout (v1.69.0). Current dispatchable pointer order is `READER-4M-3`, `QWEN-STREAM-1`. `QWEN-STREAM-1` is Lane D and can run in parallel with the Lane C/A `READER-4M-3` sprint. Backfill queue to ≥3 before dispatching beyond the current two pointers. Subsequent streaming sprints (`QWEN-STREAM-2`: accumulator + strategy + live playback, `QWEN-STREAM-3`: hardening + evidence + decision gate) will be spec'd and queued as earlier sprints complete.
+**Dispatch status:** Queue depth 1 — RED after `QWEN-STREAM-1` closeout (v1.71.0). Only `READER-4M-3` remains. Backfill queue to ≥3 before dispatching READER-4M-3. Subsequent streaming sprints (`QWEN-STREAM-2`: accumulator + strategy + live playback, `QWEN-STREAM-3`: hardening + evidence + decision gate) will be spec'd and queued as earlier sprints complete.
 
 ### Parallel Dispatch Guardrails
 
@@ -108,7 +107,9 @@ If any guardrail fails, run the sprints sequentially.
 47. ~~Dispatch KOKORO-RETIRE-1 to CLI~~ — PAUSED on 2026-04-20. Subsequent live validation showed the current non-streaming local Qwen lane is not a sufficient successor path for sustained CPU narration, so retirement work is suspended pending the approved streaming-Qwen lane.
 48. ~~Backfill queue to ≥3~~ — COMPLETE. Added `QWEN-STREAM-1` (streaming sidecar foundation) as queue position 3. Queue depth restored to 3 (GREEN). Spec based on approved design at `docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md`. Voice path: CustomVoice model with streaming generator (Option A), Kokoro reference samples as fallback (Option B).
 49. ~~Dispatch READER-4M-2 to CLI~~ — COMPLETE (v1.69.0, 2026-04-20). Standalone Narrate mode landed alongside four-button bottom-bar controls. `N` is now the universal "enter Narrate paused" shortcut from any mode; `T` narration toggle removed. Pause/resume verified to stay in-mode for flow and narrate. 14 new tests (`tests/readerBottomBarControls.test.tsx`, `tests/useKeyboardShortcuts.test.ts`). Full `npm test` (2,102 tests) and `npm run build` passed.
-50. **Dispatch READER-4M-3 to CLI** — Next action. Queue position 1, dispatch-ready. Backfill queue to ≥3 before dispatching so depth returns to GREEN.
+50. ~~Dispatch READER-4M-3 to CLI~~ — Queue position 1, dispatch-ready. Backfill queue to ≥3 before dispatching so depth returns to GREEN.
+51. ~~Dispatch QWEN-STREAM-1 to CLI~~ — COMPLETE (v1.71.0, 2026-04-20). Streaming sidecar foundation: binary-framed PCM protocol, JS engine manager, IPC handlers, preload bridge, streaming types. 18 new tests. Build clean.
+52. **Backfill queue to ≥3 before dispatching READER-4M-3.** Queue is RED at depth 1. Spec two additional sprints before the next dispatch so depth returns to GREEN.
 
 ---
 
@@ -132,6 +133,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| QWEN-STREAM-1 | 2026-04-20 | PASS | Streaming sidecar foundation. Binary-framed PCM protocol, engine manager, IPC/preload bridge, 18 new tests. v1.71.0. |
 | READER-4M-2 | 2026-04-20 | PASS | Standalone Narrate mode + four-button controls. N key universal narrate entry. T toggle removed. 14 new tests. v1.69.0. |
 | QWEN-PROVISION-1 | 2026-04-20 | PASS | Qwen provisioning/machine-realism hardening shipped at v1.68.0: `main/qwen-engine.js` gained a deterministic `preflight()` probe, IPC/preload/shared types now expose `qwenPreflight`, and settings now surface validation/setup guidance with explicit config-missing, broken-runtime, and supported-host reporting. The standalone `scripts/qwen_preflight.mjs` validator, `docs/testing/QWEN_RUNTIME_SETUP.md`, and `docs/governance/QWEN_SUPPORTED_HOST_POLICY.md` define the setup path and support matrix. Subsequent same-day live testing broadened current non-streaming local Qwen support to CPU-backed hosts but also showed that lane is still too slow for sustained continuous CPU narration, which is why Kokoro-retirement work is now paused behind the approved streaming-Qwen successor design. Verification passed with the focused provisioning suite (`16` tests across `4` files), full `npx vitest run tests`, and `npm run build`; the existing Vite circular-chunk warning remained unchanged. |
 | QWEN-HARDEN-1 | 2026-04-20 | PASS | Qwen startup/playback hardening shipped at v1.67.0: `main/qwen-engine.js` now enforces per-command timeouts, deduplicates warmup/voice-list flights, and records truthful preload/status/generate timing plus spike metadata; renderer playback now stops cleanly on engine switches and authoritative handoffs, Qwen first-audio truth is scheduler-backed, and settings preview surfaces truthful timeout/error metadata instead of swallowing failures. Eval artifacts now capture warm preview and warm first-audio budgets, the gated matrix passes with `Warm preview latency p50/p95 = 1120 / 1156 ms`, `Warm first-audio latency p50/p95 = 465 / 507.6 ms`, and `0` startup spikes above `3000 ms`, and the retirement scorecard/listening-review artifacts are now in place with remaining provisioning and human-review blockers explicitly recorded. Verification passed with the focused Qwen hardening suites, adjacent eval/settings reruns, full `npx vitest run tests` (`138` files, `2083` tests), `npm run build`, and `node scripts/tts_eval_runner.mjs --matrix --gates`; the existing Vite circular-chunk warning remained unchanged. |

@@ -1,20 +1,33 @@
 "use strict";
-// main/ipc/tts.js — Kokoro TTS handlers
+// main/ipc/tts.js — TTS IPC handlers
 
-const { ipcMain } = require("electron");
+const { ipcMain, BrowserWindow, app } = require("electron");
+const { createQwenStreamingEngineManager } = require("../qwen-streaming-engine");
 
 function toErrorResponse(err) {
-  const error = err instanceof Error ? err : new Error(String(err || "Kokoro IPC failure"));
-  return {
+  const error = err instanceof Error ? err : new Error(String(err || "TTS IPC failure"));
+  const response = {
     error: error.message,
     reason: error.reason || null,
     status: error.status || null,
     recoverable: typeof error.recoverable === "boolean" ? error.recoverable : false,
   };
+  if (Number.isFinite(error.timingMs)) {
+    response.timingMs = error.timingMs;
+  }
+  if (Number.isFinite(error.spikeWarningThresholdMs)) {
+    response.spikeWarningThresholdMs = error.spikeWarningThresholdMs;
+  }
+  if (typeof error.spikeWarning === "boolean") {
+    response.spikeWarning = error.spikeWarning;
+  }
+  return response;
 }
 
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
+  const qwenEngine = require("../qwen-engine");
+  const streamingEngine = createQwenStreamingEngineManager(app);
 
   // Set up loading callback to notify renderer
   ttsEngine.setLoadingCallback((loading) => {
@@ -75,6 +88,78 @@ function register(ctx) {
       return { success: true };
     } catch (err) {
       return toErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-qwen-model-status", async () => {
+    try {
+      return await qwenEngine.getModelStatus();
+    } catch (err) {
+      return toErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-qwen-preload", async () => {
+    try {
+      return await qwenEngine.preload();
+    } catch (err) {
+      return toErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-qwen-preflight", async () => {
+    try {
+      return await qwenEngine.preflight();
+    } catch (err) {
+      return toErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-qwen-voices", async () => {
+    try {
+      return { voices: await qwenEngine.listVoices() };
+    } catch (err) {
+      return toErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-qwen-generate", async (_, text, speaker, rate, words) => {
+    try {
+      return await qwenEngine.generate(text, speaker, rate, words);
+    } catch (err) {
+      return toErrorResponse(err);
+    }
+  });
+
+  // --- Streaming Qwen handlers ---
+  ipcMain.handle("tts-qwen-stream-start", async (_event, text, speaker, rate) => {
+    try {
+      const { streamId } = await streamingEngine.startStream(text, speaker, rate ?? 1.0);
+      return { ok: true, streamId };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle("tts-qwen-stream-cancel", async (_event, streamId) => {
+    try {
+      await streamingEngine.cancelStream(streamId);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle("tts-qwen-stream-status", async () => {
+    return streamingEngine.getModelStatus();
+  });
+
+  // Wire PCM forwarding
+  streamingEngine.onStreamAudio((streamId, chunk) => {
+    const win = BrowserWindow.getAllWindows().find(w => w.isFocused())
+      ?? BrowserWindow.getAllWindows()[0];
+    if (win && !win.isDestroyed()) {
+      win.webContents.send("tts-qwen-stream-audio", streamId, chunk);
     }
   });
 
