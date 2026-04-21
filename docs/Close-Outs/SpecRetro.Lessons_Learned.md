@@ -78,3 +78,88 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When a sprint spec targets a dedicated branch but the worktree is already dirty, force an explicit execution-choice checkpoint up front: stay on current branch, stop for cleanup, or confirm safe branch switch.
 **Applies to:** Any sprint executed in a dirty repo state
 **Status:** Observation
+
+## Sizing
+
+### SRL-010 — Sprints exceeding 40 tool calls should be pre-split into waves at spec time (READER-4M-2, 2026-04-20)
+**Verdict:** Tool-count policy violation. The sprint used 152 tool calls against a 40-use ceiling, but completed cleanly because task complexity was individually low.
+**Evidence:** 9 tasks across implement/test/verify/docs/git consumed 152 tool calls total. Wave A (implement + test: tasks 1-5) would have been ~60 calls; Wave B (verify + docs + git: tasks 6-9) ~90 calls.
+**Recommendation:** Add a `Budget` section to sprint specs with estimated tool uses and token budget. When estimated total exceeds 80 (2x the 40-ceiling), pre-split into waves at spec time.
+**Applies to:** All sprints with ≥5 tasks
+**Second occurrence:** QWEN-STREAM-1 (2026-04-20) — 216 tool calls, ~838k tokens, 14 tasks (including 2 unplanned). See SRL-014.
+**Status:** Promoted → CLAUDE.md "Dispatch sizing" standing rule.
+
+### SRL-014 — Cross-language protocol sprints need aggressive wave-splitting and fix-up task budgets (QWEN-STREAM-1, 2026-04-20)
+**Verdict:** Second occurrence of tool-count ceiling violation. Cross-language sprints compound the issue because unplanned fix-up tasks from contract mismatches add 40-60 tool calls beyond the original plan.
+**Evidence:** QWEN-STREAM-1 planned 12 tasks but executed 14 (2 unplanned fix-ups from cross-language defects). 216 total tool calls. A 3-wave split would have stayed within ceiling per wave.
+**Recommendation:** Cross-language protocol sprints should (a) pre-split into 3 waves at spec time, (b) budget one fix-up task slot, and (c) include the Contract Concordance table (SRL-013).
+**Applies to:** All sprints creating new cross-language IPC/protocol channels
+**Status:** Observation (but SRL-010, the parent pattern, is now promoted)
+
+## Effort Calibration
+
+### SRL-011 — Verify/fix tasks with low fix probability should start at sonnet, not opus (READER-4M-2, 2026-04-20)
+**Verdict:** Over-effort. A read-only opus pass confirmed no change was needed — a sonnet check would have produced the same result at ~40% of the token cost.
+**Evidence:** Task 3 (pause/resume verification) used 19 opus-tier Athena tool calls and ~68k tokens to confirm that pause-stays-in-mode already worked from prior sprints.
+**Recommendation:** When a task says "verify X works, fix if not" and prior sprints already implemented X, dispatch a sonnet-tier read-only check first.
+**Applies to:** Any verify/fix task where the fix probability is low based on prior sprint history
+**Status:** Observation
+
+## Agent Routing
+
+### SRL-012 — Parallelize read-only verification tasks (Solon + Plato) in sprint specs (READER-4M-2, 2026-04-20)
+**Verdict:** Missed parallelization opportunity. Spec compliance and quality review are both read-only passes; running them sequentially added ~90s with zero benefit.
+**Evidence:** Tasks 6 (Solon, 13 calls, ~65k) and 7 (Plato, 13 calls, ~79k) ran sequentially. Neither writes files.
+**Recommendation:** In sprint task tables, mark Solon and Plato as parallel-eligible. Default: `Tasks N, N+1 (Solon + Plato) — parallel, both read-only`.
+**Applies to:** All Full-tier sprints with both spec-compliance and quality-review tasks
+**Second occurrence:** QWEN-STREAM-2 (2026-04-20) — spec marked Solon + Plato as parallel, CLI executed them in parallel, saved ~65s. Validates the recommendation.
+**Status:** Promoted → CLAUDE.md "Spec-compliance review before quality review" standing rule. Addition: "For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible in the execution sequence. Both are read-only — sequential execution wastes time with zero benefit."
+
+## Dispatch Precision
+
+### SRL-013 — Cross-language IPC sprints need a Contract Concordance table (QWEN-STREAM-1, 2026-04-20)
+**Verdict:** All three discovered integration bugs were key-name or payload-shape mismatches across the Python↔JS↔TypeScript boundary that a single concordance table would have caught at spec time.
+**Evidence:** Python sidecar used "cmd" but JS expected "command." Preload bridge payload shape disagreed with TypeScript interface. Both caught by quality review post-implementation, costing 59 tool calls and ~179k tokens in discovery+fix.
+**Recommendation:** For sprints creating new IPC channels spanning Python, JS, and TypeScript, add a "Contract Concordance" section to the spec.
+**Applies to:** All cross-language protocol/IPC sprints
+**Status:** Observation
+
+### SRL-015 — Prescribe app-access patterns for IPC handler tasks dispatched to Hermes (QWEN-STREAM-1, 2026-04-20)
+**Verdict:** Hermes spent 2.5x expected tool calls discovering the context-object/app-access pattern at runtime.
+**Evidence:** Task 4 (IPC handlers, haiku) used 25 tool calls vs. expected ~10. Fix required an additional opus-tier unplanned task (9b, 14 calls).
+**Recommendation:** When dispatching Hermes to write new IPC handlers, include the exact module access pattern as a prescribed code snippet.
+**Applies to:** Any Hermes-tier IPC handler task in Electron main process
+**Status:** Observation
+
+### SRL-016 — Sprint specs should use imperative git language to prevent CLI from skipping close-out (READER-4M-3, 2026-04-20)
+**Verdict:** Ambiguous git instructions led CLI to leave the worktree uncommitted/unmerged.
+**Evidence:** READER-4M-3 completed all implementation and verification tasks but left the repo with uncommitted changes.
+**Recommendation:** Git close-out tasks in sprint specs should use imperative language: "Stage these files. Commit with this message. Merge to main with --no-ff. Push."
+**Applies to:** All sprint specs with git close-out tasks
+**Status:** Observation
+
+### SRL-017 — Require detailed utilization reporting in CLI close-out summaries (READER-4M-3, 2026-04-20)
+**Verdict:** Compact summary format made retrospective analysis shallow — no token counts, no per-task tool-call breakdown, no runtime.
+**Evidence:** READER-4M-3 close-out used a compact format that omitted runtime, token usage, and per-agent utilization. Prior close-outs provided full agent utilization tables.
+**Recommendation:** Sprint specs should mandate the full close-out format (runtime, token count, per-task tool calls, agent utilization table) in the reporting task.
+**Applies to:** All sprint close-out / reporting tasks
+**Status:** Observation
+
+## Sizing
+
+### SRL-018 — Tool-call budgets should account for investigative reads, not just file creates (QWEN-STREAM-2, 2026-04-20)
+**Verdict:** Budget underestimate. Spec estimated ~65 tool calls; actual was ~185. Sprint completed cleanly in 20 minutes (operationally harmless), but the budget formula was wrong.
+**Evidence:** The CLAUDE.md formula "1 tool use per file read, 1-2 per file write" doesn't capture that agents read 5-7 context files before each write. Task 6 used 19 tools for ~15 lines of edits (investigating insertion point in useNarration.ts). Task 7 used 32 tools for 21 tests (7 context reads before writing).
+**Recommendation:** Replace the per-file formula with: `(new_files × 8) + (edited_files × 12) + (test_files × 15) + (verification_tasks × 10) + (docs_git × 10)`. For QWEN-STREAM-2: 3×8 + 2×12 + 1×15 + 2×10 + 2×10 = 103 — still under actual but 60% more accurate than the 65 estimate.
+**Applies to:** All sprint Budget sections
+**Status:** Observation
+
+## General Workflow
+
+### SRL-019 — Uncommitted governance edits are at risk during git pull (QWEN-STREAM-2, 2026-04-20)
+**Verdict:** Process gap. Cowork's governance doc edits (ROADMAP specs, SPRINT_QUEUE entries, close-out files) were wiped when CLI ran git pull to sync local checkout before the sprint.
+**Evidence:** All three sprint specs, queue entries, CLAUDE.md state updates, retro entries, and close-out files from the READER-4M-2/QWEN-STREAM-1/READER-4M-3 close-outs had to be re-created. The CLI recovered the QWEN-STREAM-2 spec from git stash, but queue state was lost.
+**Recommendation:** Before any CLI dispatch that will run git pull, either (a) commit governance doc updates as a standalone docs-only commit, or (b) include the spec inline in the dispatch pointer rather than relying on uncommitted file state. Option (a) is preferred — it's one extra commit and makes the spec durable.
+**Applies to:** All dispatch sequences where Cowork writes specs to working-directory files before CLI syncs
+**Status:** Observation
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     

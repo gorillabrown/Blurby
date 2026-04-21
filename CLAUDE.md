@@ -219,7 +219,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the H
 - **Parallel-safe execution beats queue speed theater.** Do not dispatch two sprints in parallel if both touch the shared-core freeze set. Run them sequentially or split one sprint so only non-core scaffolding runs in parallel.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
 - **Verification gate is mandatory.** After completing any code-change task, verify: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
-- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). `Solon` performs this step. Full-tier sprints then spawn `Plato`. Quick-tier sprints use Zeus self-review.
+- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). `Solon` performs this step. Full-tier sprints then spawn `Plato`. Quick-tier sprints use Zeus self-review. **For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible in the execution sequence.** Both are read-only — sequential execution wastes time with zero benefit. (Promoted from SRL-012 after two validated occurrences: READER-4M-2 missed parallelization, QWEN-STREAM-2 executed parallel and saved ~65s.)
 
 ### Pike's 5 Rules of Programming (Engineering Axioms)
 
@@ -335,7 +335,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.73.0 — queue RED depth 0, backfill required, 1 open bug)
+## Current System State (v1.73.0 — queue GREEN depth 3, next dispatch QWEN-STREAM-3, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -380,7 +380,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **QWEN-STREAM-2 complete** — StreamAccumulator + streaming Qwen strategy + live playback wired. PCM frames buffer to sentence boundaries via StreamAccumulator, streaming strategy instantiated when engine is "qwen" and streaming engine ready, fallback to non-streaming preserved. Plato suggestion: async IIFE listener leak window in qwenStreamingStrategy.ts (low-risk, flagged for QWEN-STREAM-3 hardening). 21 new tests (tests/qwenStreamingStrategy.test.ts). v1.73.0.
 - **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
-- Active queue: depth 0 — RED. Queue backfill required before next dispatch. QWEN-STREAM-3 and QWEN-STREAM-4 remain in ROADMAP but queue must be refreshed.
+- Active queue: GREEN depth 3 (QWEN-STREAM-3, QWEN-STREAM-4, GOALS-6B). Next dispatch: QWEN-STREAM-3.
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
@@ -402,8 +402,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `main.js` — orchestrator, app lifecycle, context object
   - `main/ipc/` — 8 domain-specific IPC handler files (replaces monolithic ipc-handlers.js)
   - `main/epub-converter.js` — universal EPUB pipeline (all formats convert to EPUB on import, preserves formatting + images). URL articles and Chrome extension articles also convert to EPUB.
-  - `main/legacy-parsers.js` — deprecated text extraction (word count only, not used for rendering)
-  - `main/sync-engine.js` — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
-  - `main/sync-queue.js` — offline operation queue with compaction and idempotent replay
-  - `main/aut
-                                                                                                                  
+  - `main/legacy-parsers.js` — deprecated text extraction (w

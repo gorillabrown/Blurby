@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 0 — RED
-Next queue item: none — backfill required
-Health: RED — QWEN-STREAM-2 complete. QWEN-STREAM-3 and QWEN-STREAM-4 remain roadmapped but queue must be refreshed. Cowork must spec ≥3 sprints before next dispatch.
+Queue depth: 3 — GREEN
+Next queue item: QWEN-STREAM-3
+Health: GREEN — QWEN-STREAM-3 and QWEN-STREAM-4 (streaming lane) plus GOALS-6B (independent track). GOALS-6B needs edit-site coordinate hardening before dispatch.
 ```
 
 ---
@@ -34,9 +34,11 @@ Health: RED — QWEN-STREAM-2 complete. QWEN-STREAM-3 and QWEN-STREAM-4 remain r
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| — | *(empty — backfill required)* | — | — | — | NO | Queue depth 0 — Cowork must spec ≥3 sprints |
+| 1 | QWEN-STREAM-3 | v1.74.0 | sprint/qwen-stream-3-hardening-decision | Full | YES | — |
+| 2 | QWEN-STREAM-4 | v1.75.0 | sprint/qwen-stream-4-decision-gate | Quick | YES | Depends on QWEN-STREAM-3 |
+| 3 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
 
-**Dispatch status:** Queue depth 0 — RED. QWEN-STREAM-2 completed. QWEN-STREAM-3 and QWEN-STREAM-4 remain roadmapped; Cowork must refresh and backfill the queue to ≥3 before next dispatch.
+**Dispatch status:** Queue depth 3 — GREEN. QWEN-STREAM-3 is next dispatch. GOALS-6B spec exists in ROADMAP.md but needs coordinate hardening before dispatch.
 
 ### Parallel Dispatch Guardrails
 
@@ -111,6 +113,8 @@ If any guardrail fails, run the sprints sequentially.
 51. ~~Dispatch QWEN-STREAM-1 to CLI~~ — COMPLETE (v1.71.0, 2026-04-20). Streaming sidecar foundation: binary-framed PCM protocol, JS engine manager, IPC handlers, preload bridge, streaming types. 18 new tests. Build clean.
 52. ~~Backfill queue to ≥3 before the next dispatch.~~ — COMPLETE. Added QWEN-STREAM-2 (accumulator + strategy + live playback), QWEN-STREAM-3 (hardening + evidence + decision gate), and QWEN-STREAM-4 (live validation + promotion decision). Queue depth restored to 3 (GREEN). Full streaming lane spec'd end-to-end.
 53. ~~Dispatch QWEN-STREAM-2 to CLI~~ — COMPLETE (v1.73.0, 2026-04-20). StreamAccumulator + streaming Qwen strategy wired. PCM buffering to sentence boundaries, streaming strategy instantiated when engine ready, fallback preserved. 21 new tests. Build clean.
+54. ~~Backfill queue to ≥3.~~ — COMPLETE. Added GOALS-6B as position 3 (independent track). Queue GREEN depth 3.
+55. **Dispatch QWEN-STREAM-3 to CLI.** Queue GREEN — dispatch-ready.
 
 ---
 
@@ -168,6 +172,4 @@ If any guardrail fails, run the sprints sequentially.
 | FLOW-INF-B | 2026-04-06 | PASS | Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash), FlowProgress computation with chapter/book percentage + estimated time remaining, ReaderBottomBar progress display. 18 new tests (1,654 total across 92 files). v1.42.0. |
 | FLOW-INF-A | 2026-04-06 | PASS | CSS mask-image reading zone with configurable position/size, FlowScrollEngine dynamic zone position, ReaderBottomBar zone controls, ResizeObserver recomputation. 27 new tests (1,636 total across 91 files). v1.41.0. |
 | NARR-CURSOR-1 | 2026-04-06 | PASS | Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances with narration, width derived per tick. CSS simplified to 2-stop gradient. NARRATION_BAND_PAD_PX removed. 16 new tests (1,609 total across 90 files). v1.40.0. |
-| EXT-ENR-A | 2026-04-06 | PASS | Resilient extension connection: exponential backoff, pending article persistence, article-ack, EADDRINUSE retry cap, auth timeout, three-state UI, lifecycle hooks. 18 new tests (1,593 total across 89 files). v1.39.0. |
-| HOTFIX-14 | 2026-04-06 | PASS | URL extraction fetchWithBrowser fallback (BUG-155), authenticated-only client count + 5s polling + 15s heartbeat (BUG-156). 12 new tests (1,575 total across 88 files). v1.38.2. |
-| SEL
+| EXT-ENR-A | 2026-04-06 | PASS | Resilient extension connection: exponential backoff, pending article persistence, article-ack, EADDRINUSE retry cap, 
