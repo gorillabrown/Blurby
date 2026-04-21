@@ -73,6 +73,58 @@
       "requestedRate": 1.3,
       "durationClass": "short",
       "tags": ["rate-response", "same-bucket", "segmented"]
+    },
+    {
+      "id": "streaming-cold-start",
+      "label": "Streaming — cold start latency",
+      "engine": "qwen-streaming",
+      "text": "The morning light filtered through the tall windows of the library, casting long golden rectangles across the wooden floor.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "latency", "cold-start"],
+      "expectedGates": ["streamingFirstAudioMs"]
+    },
+    {
+      "id": "streaming-warm-start",
+      "label": "Streaming — warm start latency",
+      "engine": "qwen-streaming",
+      "text": "She reached for the worn leather journal on the top shelf, its pages yellowed with age but still holding their secrets.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "latency", "warm-start"],
+      "expectedGates": ["streamingFirstAudioMs"]
+    },
+    {
+      "id": "streaming-long-chapter",
+      "label": "Streaming — sustained long chapter playback",
+      "engine": "qwen-streaming",
+      "text": "It was in that quiet hour before dawn, when the world holds its breath between darkness and light, that she finally understood what he had been trying to tell her all along. The words came back to her now with startling clarity, each syllable weighted with a meaning she had missed in her haste. She set down her coffee cup and walked to the window, watching the first pale threads of morning weave themselves into the horizon. There was no going back now — that much was certain. Whatever path she chose from this moment forward would define not just her own future, but the futures of everyone who depended on her judgment.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "sustained", "long-chapter"],
+      "expectedGates": ["streamingWordsPerMinute", "streamingStallCount"]
+    },
+    {
+      "id": "streaming-rapid-cancel",
+      "label": "Streaming — rapid cancel stress test",
+      "engine": "qwen-streaming",
+      "text": "The old clock on the mantelpiece began to chime.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "cancel", "stress"],
+      "cancelAfterMs": 200,
+      "expectedGates": []
+    },
+    {
+      "id": "streaming-stall-recovery",
+      "label": "Streaming — stall detection and recovery",
+      "engine": "qwen-streaming",
+      "text": "Even in the deepest silence, the river continued its patient journey toward the sea.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "stall", "recovery"],
+      "simulateStall": true,
+      "expectedGates": ["streamingStallCount"]
     }
   ]
 }

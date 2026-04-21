@@ -23,6 +23,7 @@ export function parseArgs(argv) {
     checkpointEvery: null,
     tags: [],
     gates: false,
+    streaming: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -89,6 +90,10 @@ export function parseArgs(argv) {
       } else {
         args.gates = true;
       }
+      continue;
+    }
+    if (token === "--streaming") {
+      args.streaming = true;
       continue;
     }
   }
@@ -666,8 +671,97 @@ export async function runHarness(args, runtime = null) {
   }
 }
 
+export async function runStreamingScenarios(args) {
+  const matrixManifest = await readJson(args.matrixManifestPath);
+  const gatesDoc = await readJson(DEFAULT_GATES_PATH);
+  const gateThresholds = gatesDoc.streaming || {};
+
+  const streamingScenarios = (matrixManifest.scenarios || []).filter(
+    (s) => s.engine === "qwen-streaming",
+  );
+
+  if (!streamingScenarios.length) {
+    throw new Error("No qwen-streaming scenarios found in matrix manifest.");
+  }
+
+  const outDir = path.resolve(args.outDir, "streaming-baseline");
+  await fs.mkdir(outDir, { recursive: true });
+
+  const results = [];
+
+  for (const scenario of streamingScenarios) {
+    const wordsAchieved = (scenario.text || "").split(/\s+/).filter(Boolean).length;
+
+    // Determine which gate keys this scenario expects to validate.
+    const expectedGates = scenario.expectedGates || [];
+
+    // Build gate results — mark pending because actual sidecar metrics are not
+    // available in the eval runner context (no live sidecar process).
+    const gateResults = {};
+    for (const gateKey of expectedGates) {
+      const gateDef = gateThresholds[gateKey];
+      gateResults[gateKey] = {
+        gate: gateDef || null,
+        status: "pending_live_data",
+      };
+    }
+
+    results.push({
+      id: scenario.id,
+      label: scenario.label || scenario.id,
+      metrics: {
+        firstAudioLatencyMs: null,
+        interSegmentGapMs: null,
+        totalStreamDurationMs: null,
+        wordsAchieved,
+        stallCount: 0,
+      },
+      gateResults,
+    });
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const artifactPath = path.join(outDir, `streaming-summary-${timestamp}.json`);
+  const artifact = {
+    generatedAt: new Date().toISOString(),
+    scenarioCount: results.length,
+    scenarios: results,
+    gateThresholds,
+    note: "Metrics are placeholders — populate with live sidecar run data",
+  };
+
+  await writeJsonAtomic(artifactPath, artifact);
+
+  // eslint-disable-next-line no-console
+  console.log("\nStreaming scenario baseline:");
+  // eslint-disable-next-line no-console
+  console.table(
+    results.map((r) => ({
+      id: r.id,
+      wordsAchieved: r.metrics.wordsAchieved,
+      firstAudioLatencyMs: r.metrics.firstAudioLatencyMs,
+      stallCount: r.metrics.stallCount,
+      gateStatuses: Object.values(r.gateResults)
+        .map((g) => g.status)
+        .join(", ") || "none",
+    })),
+  );
+  // eslint-disable-next-line no-console
+  console.log(`Streaming artifact written: ${artifactPath}`);
+
+  return { artifact, artifactPath };
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+
+  if (args.streaming) {
+    const { artifactPath } = await runStreamingScenarios(args);
+    // eslint-disable-next-line no-console
+    console.log(`Streaming baseline complete. Artifact: ${artifactPath}`);
+    return;
+  }
+
   const { lines, gate } = await runHarness(args);
   // eslint-disable-next-line no-console
   console.log(lines.join("\n"));

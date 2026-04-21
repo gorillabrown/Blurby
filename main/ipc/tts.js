@@ -163,6 +163,17 @@ function register(ctx) {
     }
   });
 
+  // QWEN-STREAM-3 BLOCKER-1: Wire end-of-stream forwarding so the renderer
+  // strategy can flush its accumulator and fire onEnd when the sidecar signals
+  // stream_finished. Mirrors the PCM forwarder pattern above.
+  streamingEngine.onStreamFinished((streamId) => {
+    const win = BrowserWindow.getAllWindows().find(w => w.isFocused())
+      ?? BrowserWindow.getAllWindows()[0];
+    if (win && !win.isDestroyed()) {
+      win.webContents.send("tts-qwen-stream-finished", streamId);
+    }
+  });
+
   // ── Marathon Worker (NAR-5: background caching) ─────────────────────────
   const marathonEngine = require("../tts-engine-marathon");
 

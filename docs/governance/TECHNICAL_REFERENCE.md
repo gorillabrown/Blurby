@@ -583,6 +583,25 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 - Opus encoding for cache is lossy — audio fidelity is acceptable for TTS but not bit-exact.
 - `Array.from()` removed from cache IPC (Float32Array passed directly), but Electron structured clone behavior may vary across versions.
 
+### Qwen Streaming Architecture (QWEN-STREAM-1 through QWEN-STREAM-3, v1.74.0)
+
+Blurby supports a streaming Qwen TTS engine as an alternative to the batch Kokoro pipeline. The streaming lane uses a binary-framed PCM protocol over stdin/stdout between the Electron main process and a Python sidecar.
+
+**IPC event chain for streaming audio:**
+
+| Channel | Direction | When | Payload |
+|---------|-----------|------|---------|
+| `tts-qwen-stream-audio` | main → renderer | PCM frame received from sidecar | `{ streamId, pcmChunk, sampleRate }` |
+| `tts-qwen-stream-finished` | main → renderer | Sidecar signals end of audio generation | `{ streamId }` |
+
+**`tts-qwen-stream-finished` is mandatory for narration pipeline completion.** When the sidecar finishes generating audio for a stream, the main process emits this event. The preload bridges it as `onQwenStreamFinished`. The streaming strategy (`qwenStreamingStrategy.ts`) subscribes alongside `onQwenStreamAudio` and calls `acc.flush()` on the matching `streamId`. `flush()` triggers `onStreamEnd()` → `scheduler.markPipelineDone()` → `onEnd` callback — completing the narration chapter. Without this wire, narration hangs at chapter end. (See LL-110.)
+
+**Hardening (QWEN-STREAM-3, v1.74.0):**
+- `TTS_STREAM_STALL_TIMEOUT_MS` (8000ms): watchdog fires if no PCM frame arrives within 8s — recovers by calling `onStreamEnd` and resetting state.
+- Crash recovery: sidecar process is polled every 2s; on unexpected exit, the engine manager resets and re-spawns on next request.
+- Warmup gate: streaming strategy waits for the engine's `ready` signal before accepting `speakChunk()` calls.
+- Cancellation guards: `stopped` sentinel (per LL-109) checked after every `await` in the async IIFE; `cancel-after-finished` case explicitly handled.
+
 ---
 
 ## 8. Universal EPUB Pipeline

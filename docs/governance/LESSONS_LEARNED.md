@@ -1422,3 +1422,19 @@ speakChunk() {
 ```
 
 **Related:** QWEN-STREAM-2 sprint, `src/hooks/narration/qwenStreamingStrategy.ts`. Flagged for hardening in QWEN-STREAM-3.
+
+---
+
+### [2026-04-20] LL-110: Stream-Finished Flush Wire Is Mandatory for Streaming TTS Strategies
+
+**Area:** TTS strategy, streaming, IPC, narration pipeline
+**Status:** active
+**Priority:** high
+
+**Context:** QWEN-STREAM-2 built the StreamAccumulator + streaming strategy but omitted the mechanism to call acc.flush() when the sidecar finishes generating audio. The omission meant onStreamEnd() never fired, scheduler.markPipelineDone() was never called, and narration completion never triggered. Every streaming session hung at chapter end.
+
+**Rule PR-110:** Any TTS strategy using a StreamAccumulator MUST wire a "stream finished" signal from the main process to the renderer and call acc.flush() on receipt. The signal must be engine-specific and stream-ID-guarded.
+
+**Pattern:** Main process emits tts-[engine]-stream-finished → preload bridges as onQwenStreamFinished → strategy subscribes alongside onQwenStreamAudio → calls acc.flush() on matching streamId → flush() triggers onStreamEnd → markPipelineDone() → onEnd.
+
+**Fixed in:** QWEN-STREAM-3 (v1.74.0). Found by Plato review.

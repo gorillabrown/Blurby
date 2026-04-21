@@ -282,6 +282,7 @@ function createQwenStreamingEngineManager(app, options = {}) {
     firstChunkMs: null,
   };
   const audioListeners = new Set();
+  const finishedListeners = new Set();
 
   // -------------------------------------------------------------------------
   // Snapshot + timing helpers
@@ -494,6 +495,20 @@ function createQwenStreamingEngineManager(app, options = {}) {
     }
   }
 
+  function forwardStreamFinished(streamId) {
+    // QWEN-STREAM-3 BLOCKER-1: Notify renderer listeners that a stream has ended
+    // so strategies can flush their accumulators and fire onEnd. The sidecar
+    // signals completion via the `stream_finished` JSON event; this forwarder
+    // is the bridge from that event to renderer-side acc.flush() + onEnd.
+    for (const listener of finishedListeners) {
+      try {
+        listener(streamId);
+      } catch {
+        // Listener faults must never propagate into the parser loop.
+      }
+    }
+  }
+
   function handleJsonEvent(message) {
     if (!sidecarState) return;
 
@@ -579,6 +594,11 @@ function createQwenStreamingEngineManager(app, options = {}) {
           streaming: false,
         });
       }
+      // QWEN-STREAM-3 BLOCKER-1: Notify renderer subscribers that this stream has
+      // ended so the streaming strategy can flush() its accumulator and fire
+      // onEnd(). Without this forward, acc.flush() is never called and every
+      // streaming narration session hangs at the end.
+      if (streamId) forwardStreamFinished(streamId);
       return;
     }
 
@@ -1164,6 +1184,17 @@ function createQwenStreamingEngineManager(app, options = {}) {
     };
   }
 
+  function onStreamFinished(listener) {
+    // QWEN-STREAM-3 BLOCKER-1: Subscribe to end-of-stream notifications. Fires
+    // once per completed stream with the stream's id. Mirrors onStreamAudio's
+    // Set-backed registration + unsubscribe closure.
+    if (typeof listener !== "function") return () => {};
+    finishedListeners.add(listener);
+    return () => {
+      finishedListeners.delete(listener);
+    };
+  }
+
   return {
     getModelStatus,
     preload,
@@ -1173,6 +1204,7 @@ function createQwenStreamingEngineManager(app, options = {}) {
     cancelStream,
     shutdown: shutdownSidecar,
     onStreamAudio,
+    onStreamFinished,
     // Exposed for tests; not part of the documented public contract.
     _internal: {
       parseFrames,

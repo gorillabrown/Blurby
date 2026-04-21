@@ -188,6 +188,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.on("tts-qwen-stream-audio", handler);
     return () => ipcRenderer.removeListener("tts-qwen-stream-audio", handler);
   },
+  onQwenStreamFinished: (callback) => {
+    const handler = (_event, streamId) => callback(streamId);
+    ipcRenderer.on("tts-qwen-stream-finished", handler);
+    return () => ipcRenderer.removeListener("tts-qwen-stream-finished", handler);
+  },
 
   // TTS Cache (NAR-2)
   ttsCacheRead: (bookId, voiceId, startIdx) => ipcRenderer.invoke("tts-cache-read", bookId, voiceId, startIdx),

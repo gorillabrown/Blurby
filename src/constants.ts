@@ -132,7 +132,9 @@ export const QWEN_WARM_FIRST_AUDIO_P95_BUDGET_MS = 2200;
 /** Any single Qwen startup spike above this threshold requires review (ms). */
 export const QWEN_STARTUP_SPIKE_WARNING_MS = 3000;
 
-// ── Qwen Streaming (QWEN-STREAM-2) ──────────────────────────────────────────
+// ── Qwen Streaming (QWEN-STREAM-2 / QWEN-STREAM-3) ──────────────────────────
+/** Stall timeout for streaming Qwen TTS — if no PCM frame arrives within this window, treat as a stall error (ms) */
+export const TTS_STREAM_STALL_TIMEOUT_MS = 8000;
 /** Minimum word count per streaming segment */
 export const TTS_STREAM_MIN_SEGMENT_WORDS = 10;
 /** Maximum word count per streaming segment */
