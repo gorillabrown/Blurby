@@ -24,8 +24,8 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 0 — RED
-Next queue item: NONE (backfill required)
-Health: RED — queue is empty after `READER-4M-3` closeout (v1.72.0). Backfill to ≥3 before the next dispatch. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until the streaming lane proves itself across `QWEN-STREAM-2` through `QWEN-STREAM-3`.
+Next queue item: none — backfill required
+Health: RED — QWEN-STREAM-2 complete. QWEN-STREAM-3 and QWEN-STREAM-4 remain roadmapped but queue must be refreshed. Cowork must spec ≥3 sprints before next dispatch.
 ```
 
 ---
@@ -34,9 +34,9 @@ Health: RED — queue is empty after `READER-4M-3` closeout (v1.72.0). Backfill 
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| — | — | — | — | — | — | Queue empty — backfill required before the next dispatch. |
+| — | *(empty — backfill required)* | — | — | — | NO | Queue depth 0 — Cowork must spec ≥3 sprints |
 
-**Dispatch status:** Queue depth 0 — RED after `READER-4M-3` closeout (v1.72.0). Backfill queue to ≥3 before the next dispatch. Subsequent streaming sprints (`QWEN-STREAM-2`: accumulator + strategy + live playback, `QWEN-STREAM-3`: hardening + evidence + decision gate) still need to be fully spec'd and queued.
+**Dispatch status:** Queue depth 0 — RED. QWEN-STREAM-2 completed. QWEN-STREAM-3 and QWEN-STREAM-4 remain roadmapped; Cowork must refresh and backfill the queue to ≥3 before next dispatch.
 
 ### Parallel Dispatch Guardrails
 
@@ -109,7 +109,8 @@ If any guardrail fails, run the sprints sequentially.
 49. ~~Dispatch READER-4M-2 to CLI~~ — COMPLETE (v1.69.0, 2026-04-20). Standalone Narrate mode landed alongside four-button bottom-bar controls. `N` is now the universal "enter Narrate paused" shortcut from any mode; `T` narration toggle removed. Pause/resume verified to stay in-mode for flow and narrate. 14 new tests (`tests/readerBottomBarControls.test.tsx`, `tests/useKeyboardShortcuts.test.ts`). Full `npm test` (2,102 tests) and `npm run build` passed.
 50. ~~Dispatch READER-4M-3 to CLI~~ — COMPLETE (v1.72.0, 2026-04-20). One canonical global word anchor now drives entry/save/resume across page, focus, flow, and narrate; Flow↔Narrate preserve the exact shared-surface anchor; Narrate follow/highlight now uses spoken-word truth; and verification passed with `npm test` (`141` files, `2136` tests) plus `npm run build`.
 51. ~~Dispatch QWEN-STREAM-1 to CLI~~ — COMPLETE (v1.71.0, 2026-04-20). Streaming sidecar foundation: binary-framed PCM protocol, JS engine manager, IPC handlers, preload bridge, streaming types. 18 new tests. Build clean.
-52. **Backfill queue to ≥3 before the next dispatch.** Queue is RED at depth 0 after `READER-4M-3` closeout. Spec the next three sprints before resuming implementation work.
+52. ~~Backfill queue to ≥3 before the next dispatch.~~ — COMPLETE. Added QWEN-STREAM-2 (accumulator + strategy + live playback), QWEN-STREAM-3 (hardening + evidence + decision gate), and QWEN-STREAM-4 (live validation + promotion decision). Queue depth restored to 3 (GREEN). Full streaming lane spec'd end-to-end.
+53. ~~Dispatch QWEN-STREAM-2 to CLI~~ — COMPLETE (v1.73.0, 2026-04-20). StreamAccumulator + streaming Qwen strategy wired. PCM buffering to sentence boundaries, streaming strategy instantiated when engine ready, fallback preserved. 21 new tests. Build clean.
 
 ---
 
@@ -133,6 +134,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| QWEN-STREAM-2 | 2026-04-20 | PASS | StreamAccumulator + streaming Qwen strategy + live playback. PCM frames buffer to sentence boundaries, streaming strategy instantiated when engine is "qwen" and streaming ready, fallback to non-streaming preserved. Plato flag: async IIFE listener gap (low-risk, QWEN-STREAM-3). 21 new tests. v1.73.0. |
 | READER-4M-3 | 2026-04-20 | PASS | Canonical global word anchor + spoken-truth Narrate continuity. Save/resume/mode switching now resolve through one anchor, Flow↔Narrate preserve the same shared-surface position, and Narrate follow/highlight consumes `narration.cursorWordIndex`. 16 new tests plus expanded continuity coverage. v1.72.0. |
 | QWEN-STREAM-1 | 2026-04-20 | PASS | Streaming sidecar foundation. Binary-framed PCM protocol, engine manager, IPC/preload bridge, 18 new tests. v1.71.0. |
 | READER-4M-2 | 2026-04-20 | PASS | Standalone Narrate mode + four-button controls. N key universal narrate entry. T toggle removed. 14 new tests. v1.69.0. |
@@ -168,4 +170,4 @@ If any guardrail fails, run the sprints sequentially.
 | NARR-CURSOR-1 | 2026-04-06 | PASS | Collapsing narration cursor: overlay right-edge anchored to `<p>` ancestor, left edge advances with narration, width derived per tick. CSS simplified to 2-stop gradient. NARRATION_BAND_PAD_PX removed. 16 new tests (1,609 total across 90 files). v1.40.0. |
 | EXT-ENR-A | 2026-04-06 | PASS | Resilient extension connection: exponential backoff, pending article persistence, article-ack, EADDRINUSE retry cap, auth timeout, three-state UI, lifecycle hooks. 18 new tests (1,593 total across 89 files). v1.39.0. |
 | HOTFIX-14 | 2026-04-06 | PASS | URL extraction fetchWithBrowser fallback (BUG-155), authenticated-only client count + 5s polling + 15s heartbeat (BUG-156). 12 new tests (1,575 total across 88 files). v1.38.2. |
-| SELECTION-1 | 2026-04-06 | PASS | Word anchor contract: soft/hard/resume tiers, mode s
+| SEL

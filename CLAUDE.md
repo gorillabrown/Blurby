@@ -335,7 +335,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.72.0 — queue RED depth 0, backfill required before next dispatch, 1 open bug)
+## Current System State (v1.73.0 — queue RED depth 0, backfill required, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -377,13 +377,14 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **READER-4M-2 complete** — Standalone Narrate mode + four-button bottom-bar controls. N key is now universal Narrate entry from any mode. T narration toggle removed. Pause/resume verified in-mode. 14 new tests. v1.69.0.
 - **READER-4M-3 complete** — Canonical global word anchor + spoken-truth Narrate continuity shipped at v1.72.0. Page/focus/flow/narrate now resolve through one mode-aware anchor contract, Flow↔Narrate preserve the same shared-surface position, progress/backtrack save against the canonical anchor, and Foliate Narrate highlighting follows `narration.cursorWordIndex` instead of visual drift. 16 new tests plus expanded continuity coverage.
 - **QWEN-STREAM-1 complete** — Streaming Qwen sidecar foundation. Binary-framed PCM protocol (`scripts/qwen_streaming_sidecar.py`), JS engine manager (`main/qwen-streaming-engine.js`), IPC handlers, preload bridge, streaming types. 18 new tests. v1.71.0.
+- **QWEN-STREAM-2 complete** — StreamAccumulator + streaming Qwen strategy + live playback wired. PCM frames buffer to sentence boundaries via StreamAccumulator, streaming strategy instantiated when engine is "qwen" and streaming engine ready, fallback to non-streaming preserved. Plato suggestion: async IIFE listener leak window in qwenStreamingStrategy.ts (low-risk, flagged for QWEN-STREAM-3 hardening). 21 new tests (tests/qwenStreamingStrategy.test.ts). v1.73.0.
 - **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
-- Active queue: depth 0 — RED. Queue backfill is required before the next dispatch.
+- Active queue: depth 0 — RED. Queue backfill required before next dispatch. QWEN-STREAM-3 and QWEN-STREAM-4 remain in ROADMAP but queue must be refreshed.
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). EINK/GOALS parked. Three priority tracks roadmapped: Flow Infinite Reader, Chrome Extension Enrichment, Android APK.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 2,136 tests across 141 test files
+- 2,157 tests across 141 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
@@ -405,3 +406,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - `main/sync-engine.js` — offline-first sync: revision counters, operation log, two-phase staging, tombstones, document content sync, checksum verification, conditional writes, full reconciliation
   - `main/sync-queue.js` — offline operation queue with compaction and idempotent replay
   - `main/aut
+                                                                                                                  
