@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-20 — Completed QWEN-STREAM-2: StreamAccumulator + streaming Qwen strategy + live playback. 21 new tests. v1.73.0.
+**Last updated**: 2026-04-20 — Completed QWEN-STREAM-3: Streaming hardening + evidence + decision gate. 16 new tests. v1.74.0.
 **Current branch**: `main`
-**Current state**: v1.73.0 stable. Queue GREEN depth 3 (QWEN-STREAM-3, QWEN-STREAM-4, GOALS-6B). Next dispatch: QWEN-STREAM-3.
+**Current state**: v1.74.0 stable. Queue RED depth 2 (QWEN-STREAM-4, GOALS-6B). Next dispatch: QWEN-STREAM-4.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -106,7 +106,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     QWEN-STREAM-2: Accumulator + Strategy + Live Playback ✅ (v1.73.0)
                    │
-    QWEN-STREAM-3: Streaming Hardening + Evidence + Decision Gate
+    QWEN-STREAM-3: Streaming Hardening + Evidence + Decision Gate ✅ (v1.74.0)
                    │
     QWEN-STREAM-4: Live Validation + Promotion Decision
       ├── Current full-chunk local Qwen lane: transitional / superseded as successor path

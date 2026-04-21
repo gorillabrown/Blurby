@@ -60,6 +60,29 @@
       "reason": "Cross-book handoff failures block release."
     }
   ],
+  "streaming": {
+    "streamingFirstAudioMs": {
+      "metric": "firstAudioLatencyMs",
+      "threshold": 3000,
+      "comparison": "lte",
+      "percentile": "p95",
+      "description": "Streaming first audio must arrive within 3000ms at p95"
+    },
+    "streamingStallCount": {
+      "metric": "stallCount",
+      "threshold": 0,
+      "comparison": "eq",
+      "window": "per5min",
+      "description": "Zero stall events per 5-minute window"
+    },
+    "streamingWordsPerMinute": {
+      "metric": "wordsPerMinute",
+      "threshold": 120,
+      "comparison": "gte",
+      "rateMultiplier": 1.0,
+      "description": "Streaming must sustain ≥120 WPM at 1.0x rate"
+    }
+  },
   "warnOnly": [
     {
       "id": "warm-preview-max-warning",

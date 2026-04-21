@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 3 — GREEN
-Next queue item: QWEN-STREAM-3
-Health: GREEN — QWEN-STREAM-3 and QWEN-STREAM-4 (streaming lane) plus GOALS-6B (independent track). GOALS-6B needs edit-site coordinate hardening before dispatch.
+Queue depth: 2 — RED
+Next queue item: QWEN-STREAM-4
+Health: RED — Queue below minimum depth 3. QWEN-STREAM-4 (streaming lane) and GOALS-6B (independent track) remain. Backfill required before next dispatch. GOALS-6B still needs edit-site coordinate hardening before dispatch.
 ```
 
 ---
@@ -34,11 +34,10 @@ Health: GREEN — QWEN-STREAM-3 and QWEN-STREAM-4 (streaming lane) plus GOALS-6B
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | QWEN-STREAM-3 | v1.74.0 | sprint/qwen-stream-3-hardening-decision | Full | YES | — |
-| 2 | QWEN-STREAM-4 | v1.75.0 | sprint/qwen-stream-4-decision-gate | Quick | YES | Depends on QWEN-STREAM-3 |
-| 3 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
+| 1 | QWEN-STREAM-4 | v1.75.0 | sprint/qwen-stream-4-decision-gate | Quick | YES | — |
+| 2 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
 
-**Dispatch status:** Queue depth 3 — GREEN. QWEN-STREAM-3 is next dispatch. GOALS-6B spec exists in ROADMAP.md but needs coordinate hardening before dispatch.
+**Dispatch status:** Queue depth 2 — RED. Backfill required before next dispatch. QWEN-STREAM-4 is next when depth is restored to ≥3. GOALS-6B spec exists in ROADMAP.md but needs coordinate hardening before dispatch.
 
 ### Parallel Dispatch Guardrails
 
@@ -114,7 +113,8 @@ If any guardrail fails, run the sprints sequentially.
 52. ~~Backfill queue to ≥3 before the next dispatch.~~ — COMPLETE. Added QWEN-STREAM-2 (accumulator + strategy + live playback), QWEN-STREAM-3 (hardening + evidence + decision gate), and QWEN-STREAM-4 (live validation + promotion decision). Queue depth restored to 3 (GREEN). Full streaming lane spec'd end-to-end.
 53. ~~Dispatch QWEN-STREAM-2 to CLI~~ — COMPLETE (v1.73.0, 2026-04-20). StreamAccumulator + streaming Qwen strategy wired. PCM buffering to sentence boundaries, streaming strategy instantiated when engine ready, fallback preserved. 21 new tests. Build clean.
 54. ~~Backfill queue to ≥3.~~ — COMPLETE. Added GOALS-6B as position 3 (independent track). Queue GREEN depth 3.
-55. **Dispatch QWEN-STREAM-3 to CLI.** Queue GREEN — dispatch-ready.
+55. ~~Dispatch QWEN-STREAM-3 to CLI~~ — COMPLETE (v1.74.0). Stall detection, crash recovery, warmup gate, cancellation guards, stream-finished IPC wire, 5 streaming eval scenarios, gate thresholds, decision template. 16 new tests. Build clean.
+56. **Backfill queue to ≥3.** RED depth 2 — spec a third sprint before dispatching QWEN-STREAM-4.
 
 ---
 
@@ -138,6 +138,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| QWEN-STREAM-3 | 2026-04-20 | PASS | Streaming hardening: stall detection (8000ms), crash recovery (2s poll), warmup gate, cancellation guards (LL-109 sentinel fix), stream-finished IPC wire (tts-qwen-stream-finished: engine→ipc→preload→renderer→acc.flush()→onEnd). 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests. v1.74.0. |
 | QWEN-STREAM-2 | 2026-04-20 | PASS | StreamAccumulator + streaming Qwen strategy + live playback. PCM frames buffer to sentence boundaries, streaming strategy instantiated when engine is "qwen" and streaming ready, fallback to non-streaming preserved. Plato flag: async IIFE listener gap (low-risk, QWEN-STREAM-3). 21 new tests. v1.73.0. |
 | READER-4M-3 | 2026-04-20 | PASS | Canonical global word anchor + spoken-truth Narrate continuity. Save/resume/mode switching now resolve through one anchor, Flow↔Narrate preserve the same shared-surface position, and Narrate follow/highlight consumes `narration.cursorWordIndex`. 16 new tests plus expanded continuity coverage. v1.72.0. |
 | QWEN-STREAM-1 | 2026-04-20 | PASS | Streaming sidecar foundation. Binary-framed PCM protocol, engine manager, IPC/preload bridge, 18 new tests. v1.71.0. |

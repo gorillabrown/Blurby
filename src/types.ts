@@ -453,6 +453,9 @@ export interface ElectronAPI {
   qwenStreamCancel: (streamId: string) => Promise<{ ok: boolean; error?: string }>;
   qwenStreamStatus: () => Promise<QwenStreamingEngineStatus>;
   onQwenStreamAudio: (handler: (event: Electron.IpcRendererEvent, streamId: string, chunk: Buffer) => void) => () => void;
+  // QWEN-STREAM-3 BLOCKER-1: Subscribe to end-of-stream notification so strategies
+  // can flush their accumulator and fire onEnd when the sidecar signals stream_finished.
+  onQwenStreamFinished?: (callback: (streamId: string) => void) => () => void;
   onKokoroDownloadProgress?: (callback: (progress: number) => void) => () => void;
   onKokoroLoading?: (callback: (loading: boolean) => void) => () => void;
   onKokoroEngineStatus: (callback: (data: KokoroStatusSnapshot) => void) => () => void;
