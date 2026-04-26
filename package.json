@@ -14,6 +14,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "perf": "vitest run tests/perf-baseline.test.ts",
+    "moss:preflight": "node scripts/moss_preflight.mjs",
     "tts:eval": "node scripts/tts_eval_runner.mjs",
     "tts:eval:matrix": "node scripts/tts_eval_runner.mjs --matrix",
     "tts:eval:matrix:gated": "node scripts/tts_eval_runner.mjs --matrix --gates",

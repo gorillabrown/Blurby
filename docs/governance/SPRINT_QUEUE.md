@@ -23,9 +23,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 1 — RED ⛔ STOP SIGNAL (Rule 5a)
-Next queue item: GOALS-6B
-Health: RED — queue below minimum depth of 3. QWEN-STREAM-4 completed (ITERATE). KOKORO-RETIRE-1 remains conditional (fires only on PROMOTE, which did not happen). Must backfill queue to ≥3 before dispatching GOALS-6B.
+Queue depth: 8 — GREEN
+Next queue item: MOSS-0
+Health: GREEN — flagship-first MOSS operational narration lane is backfilled end-to-end. MOSS-0 is the active sprint. MOSS-1 through MOSS-7 are planned follow-on sprints. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate retirement lane is approved. Nano is conditional only after `DEMOTE_TO_NANO` evidence.
 ```
 
 ---
@@ -34,9 +34,16 @@ Health: RED — queue below minimum depth of 3. QWEN-STREAM-4 completed (ITERATE
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | GOALS-6B | v1.76.0 | sprint/goals-6b-reading-goals | Full | NO — needs edit-site coordinates | Independent of streaming lane |
+| 1 | MOSS-0 | v1.76.0 | sprint/moss-0-flagship-feasibility | Full | YES | Active sprint: flagship feasibility, host truth, preflight, and governance. Read: `ROADMAP.md` -> "Flagship-First MOSS Operational Narration Lane" / `docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md`. |
+| 2 | MOSS-1 | v1.77.0 | sprint/moss-1-runtime-bringup | Full | PLANNED | Depends on MOSS-0. CPU-only flagship runtime bring-up outside Blurby. |
+| 3 | MOSS-2 | v1.78.0 | sprint/moss-2-live-book-feasibility | Full | PLANNED | Depends on MOSS-1. Real-book flagship feasibility and demotion decision evidence. |
+| 4 | MOSS-3 | v1.79.0 | sprint/moss-3-sidecar-contract | Full | PLANNED | Depends on MOSS-2 continuing flagship path. MOSS IPC/sidecar/status contract. |
+| 5 | MOSS-4 | v1.80.0 | sprint/moss-4-live-narration-strategy | Full | PLANNED | Depends on MOSS-3. Renderer narration strategy and selectable engine path. |
+| 6 | MOSS-5 | v1.81.0 | sprint/moss-5-timing-truth | Full | PLANNED | Depends on MOSS-4. Truthful segment-following Narrate and timing policy. |
+| 7 | MOSS-6 | v1.82.0 | sprint/moss-6-cache-continuity | Full | PLANNED | Depends on MOSS-5. Cache, prewarm, and long-form continuity. |
+| 8 | MOSS-7 | v1.83.0 | sprint/moss-7-productization-gate | Full | PLANNED | Depends on MOSS-6. Productization decision; does not authorize Kokoro retirement. |
 
-**Dispatch status:** Queue depth 1 — RED ⛔. QWEN-STREAM-4 completed (ITERATE). KOKORO-RETIRE-1 remains conditional (fires only on PROMOTE, which did not happen this sprint). Must backfill queue to ≥3 before dispatching GOALS-6B.
+**Dispatch status:** Queue depth 8 — GREEN. MOSS-0 is active. Later MOSS sprints are planned only and must not be marked complete before execution. `GOALS-6B` remains parked and independent. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused; do not re-queue them until MOSS proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved. Nano is not the default next step and may enter only after `docs/testing/MOSS_DECISION_LOG.md` records `DEMOTE_TO_NANO` with required evidence.
 
 ### Parallel Dispatch Guardrails
 
@@ -115,7 +122,8 @@ If any guardrail fails, run the sprints sequentially.
 55. ~~Dispatch QWEN-STREAM-3 to CLI~~ — COMPLETE (v1.74.0). Stall detection, crash recovery, warmup gate, cancellation guards, stream-finished IPC wire, 5 streaming eval scenarios, gate thresholds, decision template. 16 new tests. Build clean.
 56. ~~Backfill queue to ≥3.~~ — COMPLETE. Added KOKORO-RETIRE-1 as conditional position 3. Queue GREEN depth 3.
 57. ~~Dispatch QWEN-STREAM-4 to CLI~~ — COMPLETE (v1.75.0, ITERATE). Eval harness executed, Kokoro baseline captured, QWEN_STREAMING_DECISION.md populated. Live CUDA validation deferred to Evan.
-58. **Backfill queue to ≥3.** RED depth 1 — STOP SIGNAL. Must spec at least 2 new sprints before next dispatch.
+58. ~~Backfill queue to ≥3.~~ COMPLETE. Added the flagship-first MOSS operational narration lane (`MOSS-0` through `MOSS-7`) from `docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md`; queue depth restored to 8 (GREEN). MOSS-0 is active. Later MOSS sprints are planned, not complete. Kokoro retirement remains paused behind MOSS continuous-live-playback proof and a separately approved retirement lane. Nano remains conditional only after `DEMOTE_TO_NANO` evidence.
+59. **Dispatch MOSS-0 to CLI.** Active sprint: flagship feasibility and host truth.
 
 ---
 
@@ -124,8 +132,9 @@ If any guardrail fails, run the sprints sequentially.
 | Sprint ID | Disposition |
 |-----------|-------------|
 | HOTFIX-13 | **Dissolved.** BUG-151/152/153 absorbed into SELECTION-1. BUG-154 parked (likely not a bug — needs live verification). |
-| KOKORO-RETIRE-1 | **Paused.** Retirement posture was superseded as the immediate next step after live testing showed the current non-streaming local Qwen lane cannot sustain continuous CPU narration. Resume only after an execution-ready Qwen streaming lane exists and clears successor validation. |
-| KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal remains blocked behind the same streaming-lane proof; do not re-queue until `KOKORO-RETIRE-1` is reactivated and the updated scorecard is green. |
+| KOKORO-RETIRE-1 | **Paused.** Retirement posture was superseded as the immediate next step after live testing showed the current non-streaming local Qwen lane cannot sustain continuous CPU narration. It remains paused during the MOSS lane. Resume only after MOSS proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved. |
+| KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal remains blocked behind the same proof and approval bar; do not re-queue until `KOKORO-RETIRE-1` is reactivated under a separate approved retirement lane and the updated scorecard is green. |
+| MOSS-NANO-1 | **Conditional only.** Not queued by default. May start only if `docs/testing/MOSS_DECISION_LOG.md` records `DEMOTE_TO_NANO` with evidence satisfying the MOSS demotion gate. |
 | EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when e-ink becomes priority. |
 | EINK-6B | Parked. Fully spec'd in ROADMAP.md. Depends on EINK-6A. |
 | GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent — can run anytime. |

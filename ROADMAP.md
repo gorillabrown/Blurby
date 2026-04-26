@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-21 — Completed QWEN-STREAM-4: Streaming eval harness executed, ITERATE decision. v1.75.0.
+**Last updated**: 2026-04-26 — Opened flagship-first MOSS operational narration lane. MOSS-0 active; MOSS-1 through MOSS-7 planned.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. Queue RED depth 1 (GOALS-6B only). STOP SIGNAL per Rule 5a — must backfill to ≥3 before next dispatch.
+**Current state**: v1.75.0 stable. Queue GREEN depth 8 with MOSS-0 active. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate retirement lane is approved. Nano is conditional only after `DEMOTE_TO_NANO` evidence.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -110,7 +110,25 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     QWEN-STREAM-4: Live Validation + Promotion Decision ✅ (v1.75.0, ITERATE)
       ├── Current full-chunk local Qwen lane: transitional / superseded as successor path
-      └── Kokoro retirement sprints: paused until the streaming lane proves continuous live playback
+      └── Kokoro retirement sprints: paused; MOSS must prove continuous live playback before a separate retirement lane can be approved
+                   │
+    MOSS-0: Flagship Feasibility And Host Truth (ACTIVE)
+                   │
+    MOSS-1: CPU-Only Runtime Bring-Up Outside Blurby (planned)
+                   │
+    MOSS-2: Live-Book Flagship Feasibility And Decision Evidence (planned)
+                   │
+    MOSS-3: Sidecar Contract And Streaming IPC (planned)
+                   │
+    MOSS-4: Live Narration Strategy And Engine Selection (planned)
+                   │
+    MOSS-5: Timing Truth And Segment-Following Narrate (planned)
+                   │
+    MOSS-6: Cache, Prewarm, And Long-Form Continuity (planned)
+                   │
+    MOSS-7: Productization Gate And Promotion Decision (planned)
+      ├── Kokoro retirement: paused until MOSS proves continuous live playback and a separate retirement lane is approved
+      └── Nano: conditional only after `DEMOTE_TO_NANO` evidence; not the default next step
                    │
     READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
@@ -3477,7 +3495,7 @@ Task 12 (Git)
 - Narration quality
 - Replacement completeness
 
-**Current governance decision:** The completed parts of this program remain valid (`QWEN-DEFAULT-1`, `QWEN-HARDEN-1`, and `QWEN-PROVISION-1`), but the retirement half is paused. Subsequent live testing showed the current non-streaming local Qwen lane can eventually produce audio on CPU but does not sustain continuous narration, so the active successor direction is now the approved streaming design at [docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md](C:/Users/estra/Projects/Blurby/docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md). Until a streaming implementation plan exists, `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` should not be dispatched.
+**Current governance decision:** The completed parts of this program remain valid (`QWEN-DEFAULT-1`, `QWEN-HARDEN-1`, and `QWEN-PROVISION-1`), but the retirement half is paused. Subsequent live testing showed the current non-streaming local Qwen lane can eventually produce audio on CPU but does not sustain continuous narration, and `QWEN-STREAM-4` closed with ITERATE rather than PROMOTE. The active successor direction is now the flagship-first MOSS operational narration lane. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` should not be dispatched until MOSS proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved.
 
 ---
 
@@ -4049,7 +4067,7 @@ Task 13 (Git)
   3. Narrate start/pause/resume/stop without lockups
   4. Long-form playback doesn't die after first chunk
   5. Subjective quality remains better than Kokoro
-- **Decision outcomes:** (a) PROMOTE — streaming Qwen becomes the active successor, Kokoro retirement resumes, (b) ITERATE — streaming works but needs more hardening sprints before promotion, (c) REJECT — lean back into Kokoro per approved design.
+- **Decision outcomes considered at the time:** (a) PROMOTE — streaming Qwen becomes the active successor, (b) ITERATE — streaming works but needs more hardening sprints before promotion, (c) REJECT — lean back into Kokoro per approved design. Actual closeout was ITERATE, so Kokoro retirement did not resume; current reactivation requires MOSS continuous-live-playback proof and a separately approved retirement lane.
 - **Governance update on promotion:** If promoted, update CLAUDE.md product posture, reactivate KOKORO-RETIRE-1/2 in sprint queue, mark non-streaming Qwen as deprecated.
 - **This sprint is partially manual.** Live testing requires human interaction (Evan runs the app, observes narration, provides subjective quality judgment). Sprint spec directs CLI to prepare artifacts, run automated gates, and produce the decision document — but the final decision is Evan's.
 
@@ -4115,12 +4133,137 @@ Task 6         — after Task 5 (git)
 3. Streaming gate evaluation run and pass/fail reported per threshold.
 4. `QWEN_STREAMING_DECISION.md` populated with actual values, comparison table, and preliminary recommendation.
 5. Decision is one of: PROMOTE, ITERATE, or REJECT — documented with rationale.
-6. If PROMOTE: KOKORO-RETIRE-1/2 reactivated in sprint queue, CLAUDE.md updated.
+6. Historical PROMOTE branch was not taken. `KOKORO-RETIRE-1/2` remain paused until MOSS proves continuous live playback and a separate retirement lane is approved.
 7. If ITERATE: next hardening sprint identified and queued.
 8. If REJECT: Kokoro formally re-promoted as primary lane, streaming lane archived.
 9. Governance docs updated to reflect decision outcome.
 
 **Tier:** Quick (no code changes — evaluation + docs only) | **Depends on:** QWEN-STREAM-3
+
+---
+
+### Flagship-First MOSS Operational Narration Lane
+
+**Program status:** ACTIVE. `MOSS-0` is the active sprint. `MOSS-1` through `MOSS-7` are planned follow-on sprints and must not be marked complete until executed.
+
+**Execution-ready plan:** [docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md](C:/Users/estra/Projects/Blurby/docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md)
+
+**Goal:** Make flagship MOSS-TTS a real CPU-only operational narration lane inside Blurby, starting from the highest-quality flagship path and demoting to Nano only after measured, well-classified feasibility failure.
+
+**Operational posture:**
+- Start with flagship MOSS-TTS, not Nano. The lane exists to test the quality/context hypothesis that could make Blurby narration better than Kokoro.
+- Preserve Kokoro as the operational floor. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate Kokoro-retirement lane is approved.
+- Do not silently fall back from selected MOSS to Kokoro or Web Speech. MOSS unavailable states must be truthful and recoverable.
+- Do not fake word timing. If MOSS lacks trusted word timestamps, Narrate follows natural segments and commits global anchors only at truthful boundaries.
+- Keep Nano conditional only. `MOSS-NANO-1` may start only after `docs/testing/MOSS_DECISION_LOG.md` records `DEMOTE_TO_NANO` with evidence satisfying the program-level demotion gate.
+
+**Program-level demotion gate:** Nano is not the default next step. Demotion requires MOSS-0 through MOSS-2 evidence showing flagship cannot meet live-book feasibility after correct assets, correct backend, native/WSL/emulation comparison where practical, quant/thread tuning, warm runs, real book passages, buffering/prewarm analysis, and quality comparison against Kokoro. The decision artifact must say `DEMOTE_TO_NANO` and cite evidence paths.
+
+#### Sprint MOSS-0: Flagship Feasibility And Host Truth (ACTIVE)
+
+**Goal:** Lock upstream facts, runtime target, asset list, supported host policy, preflight behavior, and fallback criteria before app integration begins.
+
+**Scope:** Create `docs/testing/MOSS_RUNTIME_SETUP.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, `docs/testing/MOSS_DECISION_LOG.md`, `scripts/moss_preflight.mjs`, and `tests/mossProvisioning.test.js`; add the `moss:preflight` package script; update governance docs.
+
+**Acceptance criteria:** MOSS flagship target is documented and not conflated with Nano; preflight truthfully classifies local runtime state; missing runtime config is a clear unsupported state, not a crash; roadmap and queue reflect the full lane; Kokoro remains the default operational baseline.
+
+**Tier:** Full | **Branch:** `sprint/moss-0-flagship-feasibility`
+
+---
+
+#### Sprint MOSS-1: CPU-Only Runtime Bring-Up Outside Blurby (PLANNED)
+
+**Goal:** Provision and probe the flagship `llama.cpp`/GGUF plus ONNX path outside the app, then capture structured first-audio, throughput, memory, and failure evidence.
+
+**Scope:** Add `scripts/moss_flagship_probe.mjs`, `scripts/moss_flagship_probe.py`, `tests/mossFlagshipProbe.test.js`, and the `moss:probe` script; update MOSS setup, feasibility, and decision docs. Generated run artifacts live under `artifacts/moss/probe/`.
+
+**Acceptance criteria:** Flagship MOSS can produce a structured probe summary or a classified failure; probe output includes runtime, quant/thread, first-audio, real-time factor, memory, artifact paths, and failure class; no assets are downloaded automatically.
+
+**Tier:** Full | **Depends on:** MOSS-0
+
+---
+
+#### Sprint MOSS-2: Flagship Quality And Performance Benchmark Against Kokoro (PLANNED)
+
+**Goal:** Judge MOSS against the actual Blurby problem by comparing flagship MOSS and Kokoro on the same book-like passages before app integration.
+
+**Scope:** Add `scripts/moss_kokoro_benchmark.mjs`, `tests/mossBenchmark.test.ts`, `docs/testing/moss-vs-kokoro-listening-review.md`, MOSS benchmark metrics/gates, matrix scenarios, and decision-log updates.
+
+**Acceptance criteria:** MOSS is compared against Kokoro on the same book-like material; benchmark output distinguishes missing live data from pass/fail; listening review exists and is ready to fill; decision log advances only on evidence. `DEMOTE_TO_NANO` is allowed only if the program-level demotion gate is satisfied.
+
+**Tier:** Full | **Depends on:** MOSS-1
+
+---
+
+#### Sprint MOSS-3: MOSS Sidecar Contract And Truthful IPC (PLANNED)
+
+**Goal:** Create the stable main-process boundary to start, stop, stream, cancel, and inspect MOSS without freezing the renderer or creating false-ready states.
+
+**Scope:** Add `main/moss-streaming-engine.js`, `scripts/moss_sidecar.py`, `src/utils/mossStatus.ts`, `src/types/mossStreaming.ts`, `tests/mossStreaming.test.js`, and `tests/mossRuntimeHardening.test.js`; wire MOSS IPC/preload/type surfaces.
+
+**Acceptance criteria:** MOSS sidecar lifecycle is test-covered before renderer integration; status is truthful and never false-ready; stream cancellation, sidecar exit, and stale frames are deterministic; sidecar can emit one full audio frame at first while preserving a future streaming contract.
+
+**Tier:** Full | **Depends on:** MOSS-2 continuing flagship path
+
+---
+
+#### Sprint MOSS-4: Live Book Playback Prototype (PLANNED)
+
+**Goal:** Make MOSS usable inside Blurby on a real book while keeping Kokoro stable and preserving global word-anchor behavior across modes.
+
+**Scope:** Add `src/hooks/narration/mossStreamingStrategy.ts`, `tests/mossStreamingStrategy.test.ts`, and `tests/useNarrationMoss.test.tsx`; extend engine/narration types, `useNarration`, and minimal settings UI.
+
+**Acceptance criteria:** MOSS can be selected as an engine; MOSS can start live playback from a real book word window when the sidecar is available; pause/resume/stop/switch cleanup is deterministic; global word anchor is preserved through truthful segment or scheduler callbacks; Kokoro and Qwen behavior does not regress.
+
+**Tier:** Full | **Depends on:** MOSS-3
+
+---
+
+#### Sprint MOSS-5: Timing Truth And Segment-Following Narrate (PLANNED)
+
+**Goal:** Make segment-following Narrate a first-class truthful mode for MOSS when trusted word timestamps are not available.
+
+**Scope:** Add `src/utils/mossTimingPolicy.ts`, `tests/mossTimingPolicy.test.ts`, and `tests/mossNarrateSegmentTruth.test.tsx`; wire MOSS timing policy into strategy/UI state; update TTS adversarial and iterative audit checklists.
+
+**Acceptance criteria:** MOSS never displays estimated word timing as if it were truth; segment-following Narrate is explicit and test-covered; global word anchor remains accurate across all four modes; existing Kokoro word-level underline behavior remains unchanged.
+
+**Tier:** Full | **Depends on:** MOSS-4
+
+---
+
+#### Sprint MOSS-6: Cache, Prewarm, And Long-Form Continuity (PLANNED)
+
+**Goal:** Add MOSS-specific cache/prewarm behavior and verify long-form listening without drift, stale audio, or memory growth.
+
+**Scope:** Add `src/utils/mossCacheKey.ts`, `tests/mossCacheKey.test.ts`, and `tests/mossContinuity.test.ts`; extend engine-scoped cache behavior, MOSS prewarm, eval matrix/metrics/gates, and long-form evidence artifacts.
+
+**Acceptance criteria:** MOSS has engine-scoped cache identity; prewarm reduces waits without corrupting anchors or playing stale audio; long-form playback has measured stall, drift, and memory behavior; Kokoro cache tests remain green.
+
+**Tier:** Full | **Depends on:** MOSS-5
+
+---
+
+#### Sprint MOSS-7: Productization Gate And Promotion Decision (PLANNED)
+
+**Goal:** Decide whether MOSS becomes a visible product option based on evidence: naturalness, punctuation prosody, long-form continuity, and acceptable wait times.
+
+**Scope:** Harden MOSS settings/status UI, release gates, final matrix/soak evidence, `docs/testing/MOSS_DECISION_LOG.md`, listening review, setup docs, scorecard references, and governance docs.
+
+**Promotion outcomes:** Choose exactly one: `PROMOTE_EXPERIMENTAL`, `PROMOTE_PRIMARY_CANDIDATE`, `ITERATE`, `DEMOTE_TO_NANO`, or `REJECT`.
+
+**Acceptance criteria:** MOSS has a truthful visible UI; final decision artifact is evidence-based; Kokoro remains available and unbroken; full test suite and build pass; no Kokoro retirement decision is made here. Retirement requires a separate lane after MOSS has proven stable over time.
+
+**Tier:** Full | **Depends on:** MOSS-6
+
+---
+
+#### Conditional Sprint MOSS-NANO-1: Fallback Runtime Only If Flagship Fails (CONDITIONAL)
+
+**Entry criteria:** Not active by default. May start only if `docs/testing/MOSS_DECISION_LOG.md` records `DEMOTE_TO_NANO` and cites evidence satisfying the program-level demotion gate.
+
+**Goal:** Bring up MOSS-TTS-Nano as a lower-burden fallback while preserving the MOSS sidecar/status/narration contracts built for flagship.
+
+**Acceptance criteria:** Nano uses the same renderer-facing `moss` engine where possible; UI clearly shows `modelVariant: nano`; Nano is benchmarked against Kokoro and failed flagship evidence; Nano is not promoted unless it improves actual Blurby playback quality or responsiveness.
 
 ---
 
