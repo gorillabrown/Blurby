@@ -184,6 +184,47 @@ Comparison:
 
 Decision: `ITERATE_NANO_RUNTIME`. Do not record `PROMOTE_NANO_TO_APP_PROTOTYPE`, do not reject Nano, and do not change Kokoro behavior. Next work should stay in runtime iteration: Python cold-start/import optimization, streaming first-audio measurement, CPU thread/model options, and packaging shape only after timing improves.
 
+## MOSS-NANO-2 Runtime Latency Rescue
+
+MOSS-NANO-2 was runtime optimization/evidence only. It did not add app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or Kokoro behavior changes.
+
+Harness updates:
+
+- Added stage/profile fields, warm/cold modes, segmentation/window modes, ORT option request metadata, prewarm metadata, and Python interpreter selection with this precedence: explicit `--python`, then `PYTHON` environment variable, then repo-local `.runtime/moss/.venv-nano`, then system `python`.
+- Added aliases `short` -> `short-smoke` and `punctuation` -> `punctuation-heavy-mid`.
+- Added a fail-closed empty passage guard after venv runs exposed shorthand aliases resolving to empty text.
+- Focused tests passed `23/23` after known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
+
+Superseded evidence:
+
+- `moss-nano-2-cold-short`, `warm-short`, `cold-punctuation`, and `warm-punctuation` are superseded and non-canonical because they were blocked by the wrong system Python before the corrected interpreter precedence was documented and enforced.
+- `moss-nano-2-*-venv` artifacts are superseded and non-canonical because they used the venv but still had empty shorthand passage resolution and wordCount `0`; the alias and empty-passage guard fixes supersede them.
+- Non-v2 real-text and segmentation artifacts are superseded by the v2 reruns after the first-audio/output path contract fix.
+
+Canonical evidence:
+
+| Evidence | Result | Artifact |
+|---|---|---|
+| Cold short real text v2 | `short-smoke`, 9 words, first observed `13.9036s`, total `14.4591s`, audio `3.68s`, RTF `3.9291`, WAV `706604`; internal first decoded audio unavailable. | `artifacts/moss/moss-nano-2-cold-short-realtext-v2/summary.json` |
+| Warm short real text v2 | First observed `15.2025s`, total `15.8170s`, RTF `4.2981`; `runtimeReuseActual: false`. | `artifacts/moss/moss-nano-2-warm-short-realtext-v2/summary.json` |
+| Cold punctuation real text v2 | `punctuation-heavy-mid`, 14 words, first observed `20.0393s`, total `20.6641s`, audio `11.76s`, RTF `1.7572`, WAV `2257964`. | `artifacts/moss/moss-nano-2-cold-punctuation-realtext-v2/summary.json` |
+| Warm punctuation real text v2 | First observed `18.6516s`, total `19.2688s`, RTF `1.6385`; `runtimeReuseActual: false`. | `artifacts/moss/moss-nano-2-warm-punctuation-realtext-v2/summary.json` |
+| Segmentation/windowing v2 | Did not help: token-window punctuation total `52.8842s` / RTF `2.7204`; char-window punctuation total `51.2033s` / RTF `3.2002`. Both record `outputWavPath` / `outputPath` as `null` and preserve per-segment paths in `segmentOutputWavPaths`. | `artifacts/moss/moss-nano-2-segment-*-v2/summary.json` |
+| ORT options | Did not help/apply: CPU default short `16.846s` / RTF `4.5777`; CPU threads2 `17.4572s` / RTF `4.7438`; Azure+CPU `20.3399s` / RTF `5.5271`. Options were recorded but not applied through the subprocess boundary. | `artifacts/moss/moss-nano-2-ort-*/summary.json` |
+| Prewarm/cache | Did not help/apply: no-prewarm `16.8044s` / RTF `4.5664`; ORT prewarm `18.6696s` / RTF `5.0733`; synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` stayed `false`. | `artifacts/moss/moss-nano-2-prewarm-*/summary.json` |
+
+Timing caveat: v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, so it is no longer the old reused-output artifact, but it is still not internal first decoded audio. Internal first decoded audio remains unavailable without runtime instrumentation.
+
+Comparison:
+
+| Runtime | Evidence | Feasibility conclusion |
+|---|---|---|
+| Kokoro | `1385ms` / RTF `0.3337` short; `5616ms` / RTF `0.7414` punctuation. | Still far ahead and remains the only integrated engine. |
+| Flagship MOSS WSL | `121.22s` / RTF `42.09` short; `126.19s` / RTF `16.26` punctuation. | Slower than Nano and still product-path paused. |
+| MOSS-TTS-Nano | Best canonical MOSS-NANO-2 v2 real-text RTF is `3.9291` short cold and `1.6385` punctuation warm, without true runtime reuse. | Better than flagship, but not viable for live app prototype. |
+
+Decision: `KEEP_KOKORO_ONLY`. No Nano app prototype now; this is not a permanent Nano rejection. Future Nano work should only reopen with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options. MOSS-3 through MOSS-7 remain paused unless a new explicit promotion decision is recorded.
+
 ## Failure Classification
 
 Every MOSS runtime failure must be classified with one of these classes.

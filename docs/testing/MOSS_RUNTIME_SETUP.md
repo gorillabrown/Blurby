@@ -4,9 +4,9 @@ This document defines the MOSS runtime setup contract for Blurby's flagship-firs
 
 ## Goal
 
-MOSS is being evaluated as a high-quality local narration successor candidate. The first target was flagship MOSS-TTS. After MOSS-HOST-2 confirmed a fresh WSL ARM64 flagship binary was still non-viable, MOSS-NANO-1 measured MOSS-TTS-Nano as a bounded runtime-iteration candidate. Nano is not app-integrated and is not promoted unless the decision log records a later explicit promotion decision.
+MOSS is being evaluated as a high-quality local narration successor candidate. The first target was flagship MOSS-TTS. After MOSS-HOST-2 confirmed a fresh WSL ARM64 flagship binary was still non-viable, MOSS-NANO-1 measured MOSS-TTS-Nano as a bounded runtime-iteration candidate, and MOSS-NANO-2 closed that runtime rescue as `KEEP_KOKORO_ONLY`. Nano is not app-integrated and is not promoted unless the decision log records a later explicit promotion decision.
 
-Kokoro remains the operational baseline while this lane is under investigation.
+Kokoro remains the app default and only integrated engine.
 
 ## Config Path Rules
 
@@ -112,7 +112,7 @@ Current local build evidence:
 
 ### Nano Runtime Setup
 
-MOSS-NANO-1 provisions Nano separately from flagship. Do not reuse flagship config fields as proof that Nano is ready for app integration.
+MOSS-NANO-1 and MOSS-NANO-2 provision and probe Nano separately from flagship. Do not reuse flagship config fields as proof that Nano is ready for app integration.
 
 Current local Nano runtime:
 
@@ -128,6 +128,10 @@ Nano probe contract:
 - Invoke upstream `infer_onnx.py` directly for this probe path rather than the `moss-tts-nano` CLI.
 - Pass `--output-audio-path` and `--cpu-threads`; do not use the incorrect `--output` or `--threads` aliases.
 - Pass prompt audio with `--prompt-audio-path` when prompt audio is used.
+- Select the Nano Python interpreter in this order: explicit `--python` argument wins; otherwise `PYTHON` environment variable wins; otherwise prefer repo-local `.runtime/moss/.venv-nano`; otherwise fall back to system `python`.
+- Treat `short` as alias for `short-smoke` and `punctuation` as alias for `punctuation-heavy-mid`.
+- Fail closed on empty passage text. WordCount `0` artifacts are not valid timing evidence.
+- Record stage/profile fields, cold/warm mode, segmentation/window mode, ORT option request metadata, and prewarm metadata when those modes are used.
 
 MOSS-NANO-1 timing evidence:
 
@@ -135,7 +139,27 @@ MOSS-NANO-1 timing evidence:
 - `artifacts/moss/moss-nano-1-punctuation/summary.json`: `status: ok`, `output.wav` size `2257964`, firstAudioSec `18.7613`, totalSec `19.4349`, audioDurationSec `11.76`, RTF `1.6526`, peakMemoryMb `null`.
 - Provisioning logs are under `artifacts/moss/moss-nano-1-provisioning/`; pre-fix runtime-contract blocker evidence is preserved under `artifacts/moss/moss-nano-1-provisioning-blocked/`. The canonical `artifacts/moss/moss-nano-1-short/summary.json` now holds successful post-fix short-probe evidence.
 
-Current Nano decision: `ITERATE_NANO_RUNTIME`. Nano generates local CPU audio and is much more operational than flagship, but first audio and RTF still miss live promotion thresholds. Keep Kokoro as the app default and only integrated engine.
+MOSS-NANO-2 supersession and canonical timing evidence:
+
+- `moss-nano-2-cold-short`, `warm-short`, `cold-punctuation`, and `warm-punctuation` are superseded and non-canonical because they were blocked by the wrong system Python before the corrected interpreter precedence was documented and enforced.
+- `moss-nano-2-*-venv` artifacts are superseded and non-canonical because shorthand passage aliases still resolved empty, producing wordCount `0`; the alias fix and empty-passage guard supersede them.
+- Non-v2 real-text and segmentation artifacts are superseded by the v2 reruns after the first-audio/output path contract fix.
+- `artifacts/moss/moss-nano-2-cold-short-realtext-v2/summary.json`: `short-smoke`, 9 words, firstAudioObservedSec `13.9036s`, total `14.4591s`, audio `3.68s`, RTF `3.9291`, WAV `706604`; internal first decoded audio unavailable.
+- `artifacts/moss/moss-nano-2-warm-short-realtext-v2/summary.json`: firstAudioObservedSec `15.2025s`, total `15.8170s`, RTF `4.2981`; `runtimeReuseActual: false`.
+- `artifacts/moss/moss-nano-2-cold-punctuation-realtext-v2/summary.json`: `punctuation-heavy-mid`, 14 words, firstAudioObservedSec `20.0393s`, total `20.6641s`, audio `11.76s`, RTF `1.7572`, WAV `2257964`.
+- `artifacts/moss/moss-nano-2-warm-punctuation-realtext-v2/summary.json`: firstAudioObservedSec `18.6516s`, total `19.2688s`, RTF `1.6385`; `runtimeReuseActual: false`.
+- `artifacts/moss/moss-nano-2-segment-token-window-punctuation-v2/summary.json`: total `52.8842s`, RTF `2.7204`, `outputWavPath: null`, `outputPath: null`, and `segmentOutputWavPaths` present.
+- `artifacts/moss/moss-nano-2-segment-char-window-punctuation-v2/summary.json`: total `51.2033s`, RTF `3.2002`, `outputWavPath: null`, `outputPath: null`, and `segmentOutputWavPaths` present.
+
+MOSS-NANO-2 optimization findings:
+
+- v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, but it is still not internal decoded audio. Internal first decoded audio remains unavailable without runtime instrumentation.
+- Segmentation did not help; non-v2 segmented artifacts are superseded by v2 token-window punctuation total `52.8842s` / RTF `2.7204` and v2 char-window punctuation total `51.2033s` / RTF `3.2002`.
+- ORT options did not help/apply: CPU default short `16.846s` / RTF `4.5777`; CPU threads2 `17.4572s` / RTF `4.7438`; Azure+CPU `20.3399s` / RTF `5.5271`. Options were recorded but not applied through the subprocess boundary.
+- Prewarm/cache did not help/apply: no-prewarm `16.8044s` / RTF `4.5664`; ORT prewarm `18.6696s` / RTF `5.0733`; synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` remained `false`.
+- Focused Nano probe tests passed `23/23` after known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
+
+Current Nano decision: `KEEP_KOKORO_ONLY`. Nano generates local CPU audio and remains much more operational than flagship, but MOSS-NANO-2 did not produce viable live timing, true runtime reuse, applied ORT/session options, or internal first-decoded timing. Keep Kokoro as the app default and only integrated engine. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
 
 ### Runtime Command Truth
 
@@ -217,6 +241,16 @@ Nano punctuation-heavy probe:
 
 ```powershell
 node scripts/moss_nano_probe.mjs --run-id moss-nano-1-punctuation --passage punctuation-heavy-mid --json
+```
+
+Nano real-text rescue probes:
+
+```powershell
+node scripts/moss_nano_probe.mjs --run-id moss-nano-2-cold-short-realtext-v2 --passage short --profile cold --json
+```
+
+```powershell
+node scripts/moss_nano_probe.mjs --run-id moss-nano-2-cold-punctuation-realtext-v2 --passage punctuation --profile cold --json
 ```
 
 Expected probe outputs:

@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-2-segment-char-window-punctuation-v2
+Passage: punctuation-heavy-mid
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: none
+Total seconds: 51.2033
+First WAV bytes seconds: 18.084
+Internal first decoded seconds: unsupported
+Audio duration seconds: 16
+RTF: 3.2002
+Peak memory: unknown MB
+Process mode: cold
+Runtime reuse actual: false
+Prewarm: none
+Iterations: 1

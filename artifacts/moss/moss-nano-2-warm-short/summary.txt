@@ -1,0 +1,20 @@
+MOSS Nano Probe
+===============
+Status: blocked
+Failure class: python-env
+Run ID: moss-nano-2-warm-short
+Passage: short
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-2-warm-short\output.wav
+Total seconds: unknown
+First WAV bytes seconds: unknown
+Internal first decoded seconds: unsupported
+Audio duration seconds: unknown
+RTF: unknown
+Peak memory: unknown MB
+Process mode: warm
+Runtime reuse actual: false
+Prewarm: ort-sessions
+Iterations: 0
+Error: Python dependency is missing: onnxruntime.
