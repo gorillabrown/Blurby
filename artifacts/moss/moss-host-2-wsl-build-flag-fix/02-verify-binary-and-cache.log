@@ -1,0 +1,13 @@
+COMMAND: wsl.exe -d Ubuntu-24.04 -u root -- bash -lc "cd /mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp && test -x build-wsl-arm64-host2/bin/llama-moss-tts && stat --printf='path=%n\nsize=%s\nmtime=%y\nmode=%A\n' build-wsl-arm64-host2/bin/llama-moss-tts && grep -E '^(GGML_NATIVE|GGML_CPU_ARM_ARCH|CMAKE_BUILD_TYPE):' build-wsl-arm64-host2/CMakeCache.txt"
+START: 2026-04-28T07:51:26.4197802-05:00
+
+path=build-wsl-arm64-host2/bin/llama-moss-tts
+size=486640
+mtime=2026-04-28 07:50:40.759373400 -0500
+mode=-rwxrwxrwx
+CMAKE_BUILD_TYPE:STRING=Release
+GGML_CPU_ARM_ARCH:STRING=armv8.6-a+dotprod+i8mm+nosve
+GGML_NATIVE:BOOL=OFF
+
+END: 2026-04-28T07:51:28.7263220-05:00
+EXIT: 0

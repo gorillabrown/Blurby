@@ -1,0 +1,15 @@
+MOSS Nano Probe
+===============
+Status: blocked
+Failure class: source-download
+Run ID: moss-nano-1-probe-smoke
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-1-probe-smoke\output.wav
+Total seconds: unknown
+First audio seconds: unknown
+Audio duration seconds: unknown
+RTF: unknown
+Peak memory: unknown MB
+Error: Nano source repo is missing at C:\Users\estra\Projects\Blurby\.runtime\moss\MOSS-TTS-Nano.
