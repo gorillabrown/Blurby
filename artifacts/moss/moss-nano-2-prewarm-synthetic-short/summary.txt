@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-2-prewarm-synthetic-short
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-2-prewarm-synthetic-short\output.wav
+Total seconds: 18.4332
+First WAV bytes seconds: 0.0614
+Internal first decoded seconds: unsupported
+Audio duration seconds: 3.68
+RTF: 5.009
+Peak memory: unknown MB
+Process mode: warm
+Runtime reuse actual: false
+Prewarm: synthetic-synth
+Iterations: 2

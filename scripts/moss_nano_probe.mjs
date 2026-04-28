@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -16,9 +17,30 @@ export const BUILT_IN_PASSAGES = Object.freeze({
   ].join(" "),
 });
 
+export const PASSAGE_ALIASES = Object.freeze({
+  short: "short-smoke",
+  punctuation: "punctuation-heavy-mid",
+});
+
 const DEFAULT_RUN_ID = "moss-nano-1-probe";
 const DEFAULT_PASSAGE_ID = "short-smoke";
 const PYTHON_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_probe.py");
+
+export function resolvePassageId(passageId = DEFAULT_PASSAGE_ID) {
+  return PASSAGE_ALIASES[passageId] ?? passageId;
+}
+
+function resolvePassageText({ passageId, passageText }) {
+  if (passageText != null) return passageText;
+  return BUILT_IN_PASSAGES[resolvePassageId(passageId ?? DEFAULT_PASSAGE_ID)] ?? "";
+}
+
+function repoLocalNanoPython(projectRoot) {
+  const candidate = process.platform === "win32"
+    ? path.join(projectRoot, ".runtime", "moss", ".venv-nano", "Scripts", "python.exe")
+    : path.join(projectRoot, ".runtime", "moss", ".venv-nano", "bin", "python");
+  return fsSync.existsSync(candidate) ? candidate : null;
+}
 
 function requireValue(argv, index, flag) {
   const value = argv[index + 1];
@@ -32,6 +54,14 @@ function positiveInteger(value, flag) {
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
     throw new Error(`${flag} requires a positive integer`);
+  }
+  return parsed;
+}
+
+function nonNegativeInteger(value, flag) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`${flag} requires a non-negative integer`);
   }
   return parsed;
 }
@@ -57,6 +87,8 @@ export function parseArgs(argv = process.argv.slice(2)) {
     } else if (arg === "--passage-text") {
       args.passageText = requireValue(argv, index, arg);
       index += 1;
+    } else if (arg === "--allow-empty-passage") {
+      args.allowEmptyPassage = true;
     } else if (arg === "--out" || arg === "--output-dir") {
       args.outputDir = requireValue(argv, index, arg);
       index += 1;
@@ -84,6 +116,73 @@ export function parseArgs(argv = process.argv.slice(2)) {
     } else if (arg === "--prompt-audio") {
       args.promptAudio = requireValue(argv, index, arg);
       index += 1;
+    } else if (arg === "--process-mode") {
+      args.processMode = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--iterations") {
+      args.iterations = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--warmup-runs") {
+      args.warmupRuns = nonNegativeInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--prewarm") {
+      args.prewarm = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--profile-stages") {
+      args.profileStages = true;
+    } else if (arg === "--profile-events-jsonl") {
+      args.profileEventsJsonl = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--segment-policy") {
+      args.segmentPolicy = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--segment-max-tokens") {
+      args.segmentMaxTokens = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--segment-max-chars") {
+      args.segmentMaxChars = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--segment-min-chars") {
+      args.segmentMinChars = nonNegativeInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--segment-source") {
+      args.segmentSource = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--write-segment-wavs") {
+      args.writeSegmentWavs = true;
+    } else if (arg === "--ort-providers") {
+      args.ortProviders = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--ort-intra-op-threads") {
+      args.ortIntraOpThreads = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--ort-inter-op-threads") {
+      args.ortInterOpThreads = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--ort-execution-mode") {
+      args.ortExecutionMode = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--ort-graph-optimization") {
+      args.ortGraphOptimization = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--ort-enable-cpu-mem-arena") {
+      args.ortEnableCpuMemArena = true;
+    } else if (arg === "--no-ort-enable-cpu-mem-arena") {
+      args.ortEnableCpuMemArena = false;
+    } else if (arg === "--ort-enable-mem-pattern") {
+      args.ortEnableMemPattern = true;
+    } else if (arg === "--no-ort-enable-mem-pattern") {
+      args.ortEnableMemPattern = false;
+    } else if (arg === "--ort-enable-mem-reuse") {
+      args.ortEnableMemReuse = true;
+    } else if (arg === "--no-ort-enable-mem-reuse") {
+      args.ortEnableMemReuse = false;
+    } else if (arg === "--ort-use-per-session-threads") {
+      args.ortUsePerSessionThreads = true;
+    } else if (arg === "--no-ort-use-per-session-threads") {
+      args.ortUsePerSessionThreads = false;
+    } else if (arg === "--precompute-inputs") {
+      args.precomputeInputs = true;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -108,6 +207,12 @@ function defaultOptions(projectRoot = process.cwd()) {
     sampleMode: "fixed",
     streaming: true,
     voice: "Junhao",
+    processMode: "cold",
+    iterations: 1,
+    warmupRuns: 0,
+    prewarm: "none",
+    segmentPolicy: "none",
+    segmentSource: "raw",
   };
 }
 
@@ -147,16 +252,40 @@ export function buildPythonCommand({
   sampleMode,
   voice,
   promptAudio,
+  processMode,
+  iterations,
+  warmupRuns,
+  prewarm,
+  profileStages,
+  profileEventsJsonl,
+  segmentPolicy,
+  segmentMaxTokens,
+  segmentMaxChars,
+  segmentMinChars,
+  segmentSource,
+  writeSegmentWavs,
+  ortProviders,
+  ortIntraOpThreads,
+  ortInterOpThreads,
+  ortExecutionMode,
+  ortGraphOptimization,
+  ortEnableCpuMemArena,
+  ortEnableMemPattern,
+  ortEnableMemReuse,
+  ortUsePerSessionThreads,
+  precomputeInputs,
+  allowEmptyPassage,
 } = {}) {
   const defaults = defaultOptions(projectRoot);
-  const command = python ?? process.env.PYTHON ?? "python";
+  const command = python ?? process.env.PYTHON ?? repoLocalNanoPython(projectRoot) ?? "python";
   const pythonProbePath = path.join(projectRoot, PYTHON_PROBE_RELATIVE_PATH);
+  const effectivePassageId = resolvePassageId(passageId ?? defaults.passageId);
   const args = [
     pythonProbePath,
     "--run-id",
     runId ?? defaults.runId,
     "--passage-id",
-    passageId ?? defaults.passageId,
+    effectivePassageId,
     "--output-dir",
     outputDir,
     "--repo-dir",
@@ -171,14 +300,43 @@ export function buildPythonCommand({
     sampleMode ?? defaults.sampleMode,
     "--voice",
     voice ?? defaults.voice,
+    "--process-mode",
+    processMode ?? defaults.processMode,
+    "--iterations",
+    String(iterations ?? defaults.iterations),
+    "--warmup-runs",
+    String(warmupRuns ?? defaults.warmupRuns),
+    "--prewarm",
+    prewarm ?? defaults.prewarm,
+    "--segment-policy",
+    segmentPolicy ?? defaults.segmentPolicy,
+    "--segment-source",
+    segmentSource ?? defaults.segmentSource,
   ];
 
   if (configPath) args.push("--config", configPath);
-  const effectivePassageText = passageText ?? BUILT_IN_PASSAGES[passageId ?? defaults.passageId] ?? "";
+  const effectivePassageText = resolvePassageText({ passageId: effectivePassageId, passageText });
   if (effectivePassageText) args.push("--passage-text", effectivePassageText);
+  if (allowEmptyPassage) args.push("--allow-empty-passage");
   if (promptAudio) args.push("--prompt-audio", promptAudio);
+  if (profileStages) args.push("--profile-stages");
+  if (profileEventsJsonl) args.push("--profile-events-jsonl", profileEventsJsonl);
+  if (segmentMaxTokens != null) args.push("--segment-max-tokens", String(segmentMaxTokens));
+  if (segmentMaxChars != null) args.push("--segment-max-chars", String(segmentMaxChars));
+  if (segmentMinChars != null) args.push("--segment-min-chars", String(segmentMinChars));
+  if (writeSegmentWavs) args.push("--write-segment-wavs");
+  if (ortProviders) args.push("--ort-providers", ortProviders);
+  if (ortIntraOpThreads != null) args.push("--ort-intra-op-threads", String(ortIntraOpThreads));
+  if (ortInterOpThreads != null) args.push("--ort-inter-op-threads", String(ortInterOpThreads));
+  if (ortExecutionMode) args.push("--ort-execution-mode", ortExecutionMode);
+  if (ortGraphOptimization) args.push("--ort-graph-optimization", ortGraphOptimization);
+  if (ortEnableCpuMemArena != null) args.push(ortEnableCpuMemArena ? "--ort-enable-cpu-mem-arena" : "--no-ort-enable-cpu-mem-arena");
+  if (ortEnableMemPattern != null) args.push(ortEnableMemPattern ? "--ort-enable-mem-pattern" : "--no-ort-enable-mem-pattern");
+  if (ortEnableMemReuse != null) args.push(ortEnableMemReuse ? "--ort-enable-mem-reuse" : "--no-ort-enable-mem-reuse");
+  if (ortUsePerSessionThreads != null) args.push(ortUsePerSessionThreads ? "--ort-use-per-session-threads" : "--no-ort-use-per-session-threads");
+  if (precomputeInputs) args.push("--precompute-inputs");
 
-  return { command, args, pythonProbePath };
+  return { command, args, pythonExecutable: command, pythonProbePath };
 }
 
 export function runSpawn(command, args, options = {}) {
@@ -232,10 +390,15 @@ export function formatSummaryText(result) {
     `Device: ${summary.device ?? "unknown"}`,
     `Output WAV: ${summary.outputWavPath ?? "none"}`,
     `Total seconds: ${summary.totalSec ?? "unknown"}`,
-    `First audio seconds: ${summary.firstAudioSec ?? "unknown"}`,
+    `First WAV bytes seconds: ${summary.firstAudioObservedSec ?? summary.firstAudioSec ?? "unknown"}`,
+    `Internal first decoded seconds: ${summary.firstAudioObservation?.internalFirstDecodedAudioSec ?? "unsupported"}`,
     `Audio duration seconds: ${summary.audioDurationSec ?? "unknown"}`,
     `RTF: ${summary.rtf ?? "unknown"}`,
     `Peak memory: ${summary.peakMemoryMb ?? "unknown"} MB`,
+    `Process mode: ${summary.benchmark?.processMode ?? "unknown"}`,
+    `Runtime reuse actual: ${summary.benchmark?.runtimeReuseActual ?? "unknown"}`,
+    `Prewarm: ${summary.benchmark?.prewarm ?? "unknown"}`,
+    `Iterations: ${summary.aggregate?.iterations ?? summary.iterations?.length ?? "unknown"}`,
   ];
   if (summary.error ?? result.error) lines.push(`Error: ${summary.error ?? result.error}`);
   return `${lines.join("\n")}\n`;
@@ -265,20 +428,56 @@ export async function runMossNanoProbe({
   sampleMode,
   voice,
   promptAudio,
+  processMode,
+  iterations,
+  warmupRuns,
+  prewarm,
+  profileStages,
+  profileEventsJsonl,
+  segmentPolicy,
+  segmentMaxTokens,
+  segmentMaxChars,
+  segmentMinChars,
+  segmentSource,
+  writeSegmentWavs,
+  ortProviders,
+  ortIntraOpThreads,
+  ortInterOpThreads,
+  ortExecutionMode,
+  ortGraphOptimization,
+  ortEnableCpuMemArena,
+  ortEnableMemPattern,
+  ortEnableMemReuse,
+  ortUsePerSessionThreads,
+  precomputeInputs,
+  allowEmptyPassage,
   execFile = runSpawn,
   fsModule = fs,
 } = {}) {
   const defaults = defaultOptions(projectRoot);
   const effectiveRunId = runId ?? defaults.runId;
-  const effectivePassageId = passageId ?? defaults.passageId;
+  const effectivePassageId = resolvePassageId(passageId ?? defaults.passageId);
+  const effectivePassageText = resolvePassageText({ passageId: effectivePassageId, passageText });
   const effectiveOutputDir = resolveRunOutputDir(outputDir ?? defaults.outputRoot, effectiveRunId);
+  if (!allowEmptyPassage && !String(effectivePassageText).trim()) {
+    const result = {
+      ok: false,
+      status: "blocked",
+      runId: effectiveRunId,
+      passageId: effectivePassageId,
+      failureClass: "runtime-contract",
+      error: "Passage text is empty. Provide --passage-text, use a built-in passage ID, or pass --allow-empty-passage for diagnostics.",
+    };
+    const paths = await writeProbeSummary({ result, outputDir: effectiveOutputDir, fsModule });
+    return { ...result, ...paths };
+  }
   const commandInfo = buildPythonCommand({
     projectRoot,
     python,
     configPath,
     runId: effectiveRunId,
     passageId: effectivePassageId,
-    passageText,
+    passageText: effectivePassageText,
     outputDir: effectiveOutputDir,
     repoDir,
     modelDir,
@@ -287,6 +486,29 @@ export async function runMossNanoProbe({
     sampleMode,
     voice,
     promptAudio,
+    processMode,
+    iterations,
+    warmupRuns,
+    prewarm,
+    profileStages,
+    profileEventsJsonl,
+    segmentPolicy,
+    segmentMaxTokens,
+    segmentMaxChars,
+    segmentMinChars,
+    segmentSource,
+    writeSegmentWavs,
+    ortProviders,
+    ortIntraOpThreads,
+    ortInterOpThreads,
+    ortExecutionMode,
+    ortGraphOptimization,
+    ortEnableCpuMemArena,
+    ortEnableMemPattern,
+    ortEnableMemReuse,
+    ortUsePerSessionThreads,
+    precomputeInputs,
+    allowEmptyPassage,
   });
 
   let result;
@@ -303,6 +525,7 @@ export async function runMossNanoProbe({
         error: parsed.error,
         stdoutTail: tail(stdout),
         stderrTail: tail(stderr),
+        pythonExecutable: commandInfo.pythonExecutable,
         pythonProbePath: commandInfo.pythonProbePath,
       };
     } else {
@@ -312,6 +535,7 @@ export async function runMossNanoProbe({
         passageId: parsed.summary.passageId ?? effectivePassageId,
         failureClass: parsed.summary.failureClass ?? null,
         summary: parsed.summary,
+        pythonExecutable: commandInfo.pythonExecutable,
         pythonProbePath: commandInfo.pythonProbePath,
       };
     }
@@ -324,6 +548,7 @@ export async function runMossNanoProbe({
         passageId: parsed.summary.passageId ?? effectivePassageId,
         failureClass: parsed.summary.failureClass ?? "runtime",
         summary: parsed.summary,
+        pythonExecutable: commandInfo.pythonExecutable,
         pythonProbePath: commandInfo.pythonProbePath,
       };
     } else {
@@ -336,6 +561,7 @@ export async function runMossNanoProbe({
         error: tail(error?.stderr) || (error instanceof Error ? error.message : String(error)),
         stdoutTail: tail(error?.stdout),
         stderrTail: tail(error?.stderr),
+        pythonExecutable: commandInfo.pythonExecutable,
         pythonProbePath: commandInfo.pythonProbePath,
       };
     }
@@ -354,6 +580,7 @@ function helpText() {
     "  --run-id <id>",
     "  --passage | --passage-id <id>",
     "  --passage-text <text>",
+    "  --allow-empty-passage",
     "  --out | --output-dir <dir>",
     "  --python <python-exe>",
     "  --repo-dir <dir>",
@@ -364,6 +591,28 @@ function helpText() {
     "  --voice <name>",
     "  --prompt-audio <wav>",
     "  --config <json>",
+    "  --process-mode <cold|warm>",
+    "  --iterations <n>",
+    "  --warmup-runs <n>",
+    "  --prewarm <none|ort-sessions|synthetic-synth>",
+    "  --profile-stages",
+    "  --profile-events-jsonl <path>",
+    "  --segment-policy <none|first-sentence|natural-break|token-window|char-window>",
+    "  --segment-max-tokens <n>",
+    "  --segment-max-chars <n>",
+    "  --segment-min-chars <n>",
+    "  --segment-source <raw|prepared>",
+    "  --write-segment-wavs",
+    "  --ort-providers <csv>",
+    "  --ort-intra-op-threads <n>",
+    "  --ort-inter-op-threads <n>",
+    "  --ort-execution-mode <sequential|parallel>",
+    "  --ort-graph-optimization <disable|basic|extended|all>",
+    "  --ort-enable-cpu-mem-arena | --no-ort-enable-cpu-mem-arena",
+    "  --ort-enable-mem-pattern | --no-ort-enable-mem-pattern",
+    "  --ort-enable-mem-reuse | --no-ort-enable-mem-reuse",
+    "  --ort-use-per-session-threads | --no-ort-use-per-session-threads",
+    "  --precompute-inputs",
   ].join("\n");
 }
 
@@ -380,6 +629,7 @@ export async function main(argv = process.argv.slice(2)) {
     runId: args.runId,
     passageId: args.passageId,
     passageText: args.passageText,
+    allowEmptyPassage: args.allowEmptyPassage,
     outputDir: args.outputDir,
     python: args.python,
     repoDir: args.repoDir,
@@ -389,6 +639,28 @@ export async function main(argv = process.argv.slice(2)) {
     sampleMode: args.sampleMode,
     voice: args.voice,
     promptAudio: args.promptAudio,
+    processMode: args.processMode,
+    iterations: args.iterations,
+    warmupRuns: args.warmupRuns,
+    prewarm: args.prewarm,
+    profileStages: args.profileStages,
+    profileEventsJsonl: args.profileEventsJsonl,
+    segmentPolicy: args.segmentPolicy,
+    segmentMaxTokens: args.segmentMaxTokens,
+    segmentMaxChars: args.segmentMaxChars,
+    segmentMinChars: args.segmentMinChars,
+    segmentSource: args.segmentSource,
+    writeSegmentWavs: args.writeSegmentWavs,
+    ortProviders: args.ortProviders,
+    ortIntraOpThreads: args.ortIntraOpThreads,
+    ortInterOpThreads: args.ortInterOpThreads,
+    ortExecutionMode: args.ortExecutionMode,
+    ortGraphOptimization: args.ortGraphOptimization,
+    ortEnableCpuMemArena: args.ortEnableCpuMemArena,
+    ortEnableMemPattern: args.ortEnableMemPattern,
+    ortEnableMemReuse: args.ortEnableMemReuse,
+    ortUsePerSessionThreads: args.ortUsePerSessionThreads,
+    precomputeInputs: args.precomputeInputs,
   });
 
   process.stdout.write(args.json ? `${JSON.stringify(result, null, 2)}\n` : formatSummaryText(result));

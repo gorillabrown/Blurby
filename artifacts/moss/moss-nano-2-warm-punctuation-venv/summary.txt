@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-2-warm-punctuation-venv
+Passage: punctuation
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-2-warm-punctuation-venv\output.wav
+Total seconds: 12.0926
+First WAV bytes seconds: unknown
+Internal first decoded seconds: unsupported
+Audio duration seconds: unknown
+RTF: unknown
+Peak memory: unknown MB
+Process mode: warm
+Runtime reuse actual: false
+Prewarm: ort-sessions
+Iterations: 3

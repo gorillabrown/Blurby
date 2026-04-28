@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-28 — MOSS app integration remains paused; `MOSS-NANO-1` closed as `ITERATE_NANO_RUNTIME`.
+**Last updated**: 2026-04-28 — MOSS app integration remains paused; `MOSS-NANO-2` closed as `KEEP_KOKORO_ONLY`.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. Nano generated local CPU audio and may continue runtime iteration, but it is not promoted to app prototype and Kokoro behavior is unchanged.
+**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. Nano generated local CPU audio and remains better than flagship, but MOSS-NANO-2 did not produce viable live-app timing, true runtime reuse, applied ORT/session options, or trustworthy internal first-decoded timing. No Nano app prototype is approved now, and Kokoro behavior is unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -130,6 +130,8 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-NANO-1: CPU Realtime Candidate Bring-Up ✅ (ITERATE_NANO_RUNTIME)
                     │
+    MOSS-NANO-2: Runtime Latency Rescue ✅ (KEEP_KOKORO_ONLY)
+                    │
     MOSS-3: Sidecar Contract And Streaming IPC (PAUSED)
                     │
     MOSS-4: Live Narration Strategy And Engine Selection (PAUSED)
@@ -140,7 +142,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-7: Productization Gate And Promotion Decision (PAUSED)
       ├── Kokoro retirement: paused until a successor proves continuous live playback and a separate retirement lane is approved
-      └── Nano: runtime iteration only; no app integration until an explicit promotion decision
+      └── Nano: no app prototype now; reopen only with in-process instrumentation, true reuse, internal first-decoded timing, and applied ORT/session options
                    │
     READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
@@ -4156,7 +4158,7 @@ Task 6         — after Task 5 (git)
 
 ### Flagship-First MOSS Operational Narration Lane
 
-**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, and `MOSS-NANO-1` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE`, or another explicit app-integration promotion decision. The latest MOSS decision is `ITERATE_NANO_RUNTIME`.
+**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, and `MOSS-NANO-2` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE`, or another explicit app-integration promotion decision. The latest MOSS decision is `KEEP_KOKORO_ONLY`.
 
 #### Sprint MOSS-HOST-1: Native/WSL Runtime Escape Hatch (COMPLETED)
 
@@ -4220,6 +4222,26 @@ MOSS-3 remains paused. Do not record `PROMOTE_NANO_TO_APP_PROTOTYPE`, do not rej
 
 ---
 
+#### Sprint MOSS-NANO-2: Runtime Latency Rescue (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `KEEP_KOKORO_ONLY`. This sprint was runtime optimization and evidence only: no app integration, no sidecar IPC, no renderer integration, no selectable engine work, no cache/continuity integration, and no Kokoro behavior change.
+
+**Harness closeout:** The Nano probe harness now records stage/profile fields, cold/warm modes, segmentation/window modes, ORT option request metadata, prewarm metadata, and Python interpreter selection with this precedence: explicit `--python`, then `PYTHON` environment variable, then repo-local `.runtime/moss/.venv-nano`, then system `python`. Passage aliases now map `short` -> `short-smoke` and `punctuation` -> `punctuation-heavy-mid`; empty passage text fails closed. Focused tests passed `23/23` after known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
+
+**Superseded artifacts:** `moss-nano-2-cold-short`, `warm-short`, `cold-punctuation`, and `warm-punctuation` are superseded and non-canonical because they were blocked by wrong system Python before the corrected interpreter precedence was documented and enforced. `moss-nano-2-*-venv` artifacts are superseded and non-canonical because they used the venv but shorthand aliases still resolved empty with wordCount `0`; those are superseded by the alias and empty-passage guard fixes. Non-v2 real-text and segmentation artifacts are superseded by the v2 reruns after the first-audio/output path contract fix.
+
+**Canonical v2 evidence:** `moss-nano-2-cold-short-realtext-v2` recorded `short-smoke`, 9 words, first observed `13.9036s`, total `14.4591s`, audio `3.68s`, RTF `3.9291`, WAV `706604`, with internal first decoded audio unavailable. `moss-nano-2-warm-short-realtext-v2` recorded first observed `15.2025s`, total `15.8170s`, RTF `4.2981`, with `runtimeReuseActual: false`. `moss-nano-2-cold-punctuation-realtext-v2` recorded `punctuation-heavy-mid`, 14 words, first observed `20.0393s`, total `20.6641s`, audio `11.76s`, RTF `1.7572`, WAV `2257964`. `moss-nano-2-warm-punctuation-realtext-v2` recorded first observed `18.6516s`, total `19.2688s`, RTF `1.6385`, with `runtimeReuseActual: false`.
+
+**Optimization evidence:** v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, but it is still not internal first decoded audio; internal first decoded audio remains unavailable without runtime instrumentation. Segmentation did not help: v2 token-window punctuation total `52.8842s` / RTF `2.7204`, and v2 char-window punctuation total `51.2033s` / RTF `3.2002`; both record `outputWavPath` / `outputPath` as `null` and preserve per-segment paths in `segmentOutputWavPaths`. ORT options did not help/apply: CPU default short `16.846s` / RTF `4.5777`, CPU threads2 `17.4572s` / RTF `4.7438`, Azure+CPU `20.3399s` / RTF `5.5271`. Prewarm/cache did not help/apply: no-prewarm `16.8044s` / RTF `4.5664`, ORT prewarm `18.6696s` / RTF `5.0733`, synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` stayed `false`.
+
+**Comparison:** Kokoro remains far ahead: short `1385ms` / RTF `0.3337`, punctuation `5616ms` / RTF `0.7414`. Nano remains better than flagship WSL (`121.22s` / RTF `42.09` short, `126.19s` / RTF `16.26` punctuation), but not viable for live app prototype.
+
+**Decision framing:** `KEEP_KOKORO_ONLY` means no Nano app prototype now; it is not a permanent Nano rejection. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options. Keep MOSS-3 through MOSS-7 paused unless a new explicit promotion decision is recorded.
+
+**Tier:** Runtime rescue | **Branch:** `sprint/moss-nano-2-runtime-latency-rescue` | **Depends on:** MOSS-NANO-1
+
+---
+
 **Execution-ready plan:** [docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md](C:/Users/estra/Projects/Blurby/docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md)
 
 **Goal:** Make flagship MOSS-TTS a real CPU-only operational narration lane inside Blurby, starting from the highest-quality flagship path and demoting to Nano only after measured, well-classified feasibility failure.
@@ -4229,9 +4251,9 @@ MOSS-3 remains paused. Do not record `PROMOTE_NANO_TO_APP_PROTOTYPE`, do not rej
 - Preserve Kokoro as the operational floor. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate Kokoro-retirement lane is approved.
 - Do not silently fall back from selected MOSS to Kokoro or Web Speech. MOSS unavailable states must be truthful and recoverable.
 - Do not fake word timing. If MOSS lacks trusted word timestamps, Narrate follows natural segments and commits global anchors only at truthful boundaries.
-- Keep Nano runtime-only until promoted. `MOSS-NANO-1` closed as `ITERATE_NANO_RUNTIME`; follow-up may optimize and measure Nano, but must not add sidecar, IPC, renderer integration, timing-truth integration, cache, productization, or Kokoro behavior changes without an explicit promotion decision.
+- Keep Nano out of app integration until promoted. `MOSS-NANO-2` closed as `KEEP_KOKORO_ONLY`; future Nano work must not add sidecar, IPC, renderer integration, timing-truth integration, cache, productization, or Kokoro behavior changes without an explicit promotion decision.
 
-**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-1 proves Nano can generate local CPU audio, but app prototype work requires a later explicit promotion decision after timing evidence improves enough to plausibly meet live-book first-audio and realtime behavior. Runtime iteration may continue without changing Kokoro production behavior.
+**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-2 proves the current Nano runtime path remains too slow despite corrected real-text artifacts and bounded rescue attempts. App prototype work requires a later explicit promotion decision after timing evidence improves enough to plausibly meet live-book first-audio and realtime behavior, with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
 
 #### Sprint MOSS-RCA-1: Flagship Runtime Root-Cause Autopsy (COMPLETED)
 
@@ -4487,6 +4509,14 @@ MOSS-3 remains blocked. Kokoro remains unchanged and remains the operational flo
 **Goal:** Bring up MOSS-TTS-Nano as a lower-burden CPU candidate and compare it against Kokoro and failed flagship evidence without changing app behavior.
 
 **Outcome:** Nano ONNX CPU generated local audio for both measured passages, but firstAudioSec `15.5075` / RTF `4.4` for short and firstAudioSec `18.7613` / RTF `1.6526` for punctuation miss live promotion thresholds. Kokoro remains the app default and only integrated engine. No `PROMOTE_NANO_TO_APP_PROTOTYPE`, no Nano rejection, and no Kokoro behavior change.
+
+---
+
+#### Sprint MOSS-NANO-2: Runtime Latency Rescue (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `KEEP_KOKORO_ONLY`. This sprint was runtime evidence only: no app integration, no sidecar IPC, no renderer integration, no Kokoro behavior change.
+
+**Outcome:** Corrected v2 real-text Nano artifacts still missed live-app viability. Python selection precedence is explicit `--python`, then `PYTHON` environment variable, then repo-local `.runtime/moss/.venv-nano`, then system `python`. Short real text v2 recorded first observed `13.9036s`, total `14.4591s`, RTF `3.9291` cold and first observed `15.2025s`, total `15.8170s`, RTF `4.2981` warm with `runtimeReuseActual: false`; punctuation v2 recorded first observed `20.0393s`, total `20.6641s`, RTF `1.7572` cold and first observed `18.6516s`, total `19.2688s`, RTF `1.6385` warm with `runtimeReuseActual: false`. Older wrong-Python blocked artifacts, zero-word venv artifacts, and non-v2 real-text/segmented artifacts are superseded/non-canonical. v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, but still is not internal decoded audio. Segmentation, ORT option requests, and prewarm/cache attempts did not help or did not apply through the subprocess boundary. Kokoro remains far ahead and remains the app default and only integrated engine. MOSS-3 through MOSS-7 remain paused unless a new explicit promotion decision is recorded.
 
 ---
 
