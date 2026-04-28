@@ -1,0 +1,14 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-1-punctuation
+Passage: punctuation-heavy-mid
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-1-punctuation\output.wav
+Total seconds: 19.4349
+First audio seconds: 18.7613
+Audio duration seconds: 11.76
+RTF: 1.6526
+Peak memory: unknown MB

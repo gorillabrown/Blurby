@@ -1,0 +1,109 @@
+{
+  "status": "blocked",
+  "failureClass": "runtime-contract",
+  "failureNote": "Provisioning completed, but the benchmark probe could not run because scripts/moss_nano_probe.py invokes the cloned Nano infer_onnx.py with unsupported arguments.",
+  "expectedSource": {
+    "repoId": "https://github.com/OpenMOSS/MOSS-TTS-Nano.git",
+    "path": ".runtime/moss/MOSS-TTS-Nano",
+    "exists": true
+  },
+  "expectedAssets": [
+    {
+      "repoId": "OpenMOSS-Team/MOSS-TTS-Nano-100M-ONNX",
+      "path": ".runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX",
+      "exists": true
+    },
+    {
+      "repoId": "OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX",
+      "path": ".runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX",
+      "exists": true
+    }
+  ],
+  "commandsAttempted": [
+    {
+      "command": "git clone https://github.com/OpenMOSS/MOSS-TTS-Nano.git .runtime/moss/MOSS-TTS-Nano",
+      "log": "artifacts/moss/moss-nano-1-provisioning/source-clone.log",
+      "result": "failed in sandbox"
+    },
+    {
+      "command": "git clone https://github.com/OpenMOSS/MOSS-TTS-Nano.git .runtime/moss/MOSS-TTS-Nano",
+      "log": "artifacts/moss/moss-nano-1-provisioning/source-clone-escalated.log",
+      "result": "succeeded"
+    },
+    {
+      "command": "git clone https://huggingface.co/OpenMOSS-Team/MOSS-TTS-Nano-100M-ONNX .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX",
+      "log": "artifacts/moss/moss-nano-1-provisioning/asset-tts-clone.log",
+      "result": "failed in sandbox"
+    },
+    {
+      "command": "git clone https://huggingface.co/OpenMOSS-Team/MOSS-TTS-Nano-100M-ONNX .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX",
+      "log": "artifacts/moss/moss-nano-1-provisioning/asset-tts-clone-escalated.log",
+      "result": "succeeded"
+    },
+    {
+      "command": "git clone https://huggingface.co/OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX",
+      "log": "artifacts/moss/moss-nano-1-provisioning/asset-tokenizer-clone.log",
+      "result": "failed in sandbox"
+    },
+    {
+      "command": "git clone https://huggingface.co/OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX",
+      "log": "artifacts/moss/moss-nano-1-provisioning/asset-tokenizer-clone-escalated.log",
+      "result": "succeeded"
+    },
+    {
+      "command": "node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json",
+      "log": "artifacts/moss/moss-nano-1-provisioning/probe-short.log",
+      "result": "failed: spawn EPERM"
+    },
+    {
+      "command": "node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json",
+      "log": "artifacts/moss/moss-nano-1-provisioning/probe-short-escalated.log",
+      "result": "blocked: system Python missing onnxruntime"
+    },
+    {
+      "command": "node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json --python .runtime/moss/.venv/Scripts/python.exe",
+      "log": "artifacts/moss/moss-nano-1-provisioning/probe-short-venv.log",
+      "result": "failed: missing sentencepiece"
+    },
+    {
+      "command": ".runtime/moss/.venv/Scripts/python.exe -m pip install sentencepiece",
+      "log": "artifacts/moss/moss-nano-1-provisioning/pip-install-sentencepiece.log",
+      "result": "failed in sandbox"
+    },
+    {
+      "command": ".runtime/moss/.venv/Scripts/python.exe -m pip install sentencepiece",
+      "log": "artifacts/moss/moss-nano-1-provisioning/pip-install-sentencepiece-escalated.log",
+      "result": "succeeded"
+    },
+    {
+      "command": ".runtime/moss/.venv/Scripts/python.exe -m pip install torch==2.7.0 torchaudio==2.7.0",
+      "log": "artifacts/moss/moss-nano-1-provisioning/pip-install-torch.log",
+      "result": "failed: no torch==2.7.0 wheel for Python 3.14"
+    },
+    {
+      "command": "py -3.13 -m venv .runtime/moss/.venv-nano",
+      "log": "artifacts/moss/moss-nano-1-provisioning/venv-nano-create.log",
+      "result": "failed: access denied"
+    },
+    {
+      "command": "py -3.13 -m venv .runtime/moss/.venv-nano",
+      "log": "artifacts/moss/moss-nano-1-provisioning/venv-nano-create-escalated.log",
+      "result": "succeeded"
+    },
+    {
+      "command": ".runtime/moss/.venv-nano/Scripts/python.exe -m pip install numpy soundfile onnxruntime sentencepiece torch==2.7.0 torchaudio==2.7.0",
+      "log": "artifacts/moss/moss-nano-1-provisioning/venv-nano-pip-install.log",
+      "result": "succeeded"
+    },
+    {
+      "command": "node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json --python .runtime/moss/.venv-nano/Scripts/python.exe",
+      "log": "artifacts/moss/moss-nano-1-provisioning/probe-short-venv-nano.log",
+      "result": "failed: cloned infer_onnx.py rejects --threads"
+    }
+  ],
+  "stdoutTail": "",
+  "stderrTail": "infer_onnx.py: error: unrecognized arguments: --threads 4",
+  "blockerSummaryJsonPath": "artifacts/moss/moss-nano-1-provisioning-blocked/summary.json",
+  "blockerSummaryTxtPath": "artifacts/moss/moss-nano-1-provisioning-blocked/summary.txt",
+  "note": "The canonical artifacts/moss/moss-nano-1-short/summary.json path was later overwritten by successful post-fix short-probe evidence."
+}

@@ -10,9 +10,39 @@ No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and 
 
 Parallel dispatch rule: code-changing sprints may run in parallel only when lane ownership is explicit and shared-core freeze files are not edited by both sprints at the same time.
 
+**Pointer format:** Each queue pointer is an abbreviated dispatch, not the full spec. Print and maintain pointers in this exemplar shape:
+
+```text
+Sprint: <ID> — <short title>
+Status: <why this sprint is queued now; source close-out, blocker, or promotion>
+Type: <diagnostic / implementation / cleanup / docs / verification; major non-goals>
+
+WHAT: <exact change, split, investigation, or product behavior to create>
+
+HYPOTHESIS: <what this sprint is proving/falsifying, including decision branches>
+
+WHERE:
+  - <primary source file/doc/test coordinates and live anchors>
+  - <full Roadmap/spec path and governing evidence docs>
+
+HOW (Phase 0):
+  <agent> [model] {effort}: <enumeration, branch, guardrails, read-order, or diagnostic setup>
+
+HOW (Implementation):
+  <agent> [model] {effort}: <bounded edits or evidence generation responsibilities>
+
+HOW (Verification):
+  <agent> [model] {effort}: <focused tests, full tests/build, artifact checks, expected pass/fail classification>
+
+HOW (Review / Closeout):
+  <agent> [model] {effort}: <spec compliance, quality review, docs, commit/merge/push policy>
+```
+
+`WHERE` is the source of truth for the full spec; the pointer should be specific enough to route work, but not paste the entire task list.
+
 **How to use:**
 1. Pull the top pointer block
-2. Open the Roadmap section listed on the `Read:` line — that's the full dispatch spec
+2. Open the Roadmap/spec section listed in `WHERE` — that's the full dispatch spec
 3. Confirm the full spec includes explicit edit-site coordinates for every planned code change: file, function/method, approximate live anchor, and exact modification type. If any code-changing step lacks coordinates, stop and harden the spec before dispatch.
 4. Execute from the Roadmap spec under `gog-lead` orchestration with the named sub-agent roster
 5. After successful completion: CLI auto-merges by default unless the sprint spec explicitly says not to; doc-keeper marks the Roadmap section COMPLETED, removes the pointer, and logs it to the completed table
@@ -23,9 +53,9 @@ Parallel dispatch rule: code-changing sprints may run in parallel only when lane
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 8 — GREEN
-Next queue item: MOSS-0
-Health: GREEN — flagship-first MOSS operational narration lane is backfilled end-to-end. MOSS-0 is the active sprint. MOSS-1 through MOSS-7 are planned follow-on sprints. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate retirement lane is approved. Nano is conditional only after `DEMOTE_TO_NANO` evidence.
+Queue depth: 0 for MOSS app-integration; 0 for queued Nano runtime-iteration follow-up — APP INTEGRATION PAUSED
+Next queue item: none for MOSS app integration; Nano runtime iteration may be spec'd next, but only for runtime/probe work
+Health: ITERATE RUNTIME ONLY — MOSS-NANO-1 records `ITERATE_NANO_RUNTIME`. Do not dispatch MOSS-3, MOSS-4, or later app-integration/productization sprints unless `docs/testing/MOSS_DECISION_LOG.md` records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE`, or another explicit app-integration promotion decision. Kokoro production behavior is unchanged. Nano generated local CPU audio but is not promoted and is not rejected.
 ```
 
 ---
@@ -34,16 +64,21 @@ Health: GREEN — flagship-first MOSS operational narration lane is backfilled e
 
 | # | Sprint ID | Version | Branch | Tier | CLI Ready? | Blocker |
 |---|-----------|---------|--------|------|-----------|---------|
-| 1 | MOSS-0 | v1.76.0 | sprint/moss-0-flagship-feasibility | Full | YES | Active sprint: flagship feasibility, host truth, preflight, and governance. Read: `ROADMAP.md` -> "Flagship-First MOSS Operational Narration Lane" / `docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md`. |
-| 2 | MOSS-1 | v1.77.0 | sprint/moss-1-runtime-bringup | Full | PLANNED | Depends on MOSS-0. CPU-only flagship runtime bring-up outside Blurby. |
-| 3 | MOSS-2 | v1.78.0 | sprint/moss-2-live-book-feasibility | Full | PLANNED | Depends on MOSS-1. Real-book flagship feasibility and demotion decision evidence. |
-| 4 | MOSS-3 | v1.79.0 | sprint/moss-3-sidecar-contract | Full | PLANNED | Depends on MOSS-2 continuing flagship path. MOSS IPC/sidecar/status contract. |
-| 5 | MOSS-4 | v1.80.0 | sprint/moss-4-live-narration-strategy | Full | PLANNED | Depends on MOSS-3. Renderer narration strategy and selectable engine path. |
-| 6 | MOSS-5 | v1.81.0 | sprint/moss-5-timing-truth | Full | PLANNED | Depends on MOSS-4. Truthful segment-following Narrate and timing policy. |
-| 7 | MOSS-6 | v1.82.0 | sprint/moss-6-cache-continuity | Full | PLANNED | Depends on MOSS-5. Cache, prewarm, and long-form continuity. |
-| 8 | MOSS-7 | v1.83.0 | sprint/moss-7-productization-gate | Full | PLANNED | Depends on MOSS-6. Productization decision; does not authorize Kokoro retirement. |
+| 1 | MOSS-0 | v1.76.0 | sprint/moss-0-flagship-feasibility | Full | CLOSED | Historical feasibility/setup evidence is recorded in `docs/testing/MOSS_DECISION_LOG.md`. No active dispatch. |
+| 2 | MOSS-1 | v1.77.0 | sprint/moss-1-runtime-bringup | Full | CLOSED | Historical x64 first-audio/runtime bring-up evidence is recorded. No active dispatch. |
+| 3 | MOSS-2 | v1.78.0 | sprint/moss-2-live-book-feasibility | Full | CLOSED | Historical live-book/Kokoro pairing evidence led to `PAUSE_FLAGSHIP_MOSS`. No active dispatch. |
+| 4 | MOSS-RCA-1 | v1.78.1 | sprint/moss-rca-1-runtime-root-cause | Diagnostic | CLOSED | Root-cause autopsy recorded `KEEP_PAUSED_ROOT_CAUSE_CONFIRMED`: configured x64 path is batch-only, prior quant/thread/max-token labels were non-assertive under the current command, raw-code generation and ONNX decode are both expensive, and punctuation first-sentence repeats remain intermittently unstable or far too slow. |
+| 5 | MOSS-RUNTIME-1 | v1.78.2 | sprint/moss-runtime-1-make-flagship-real | Runtime rescue | CLOSED | Closed with `KEEP_PAUSED_RUNTIME_CONFIRMED`: truthful Q4/max-token x64 evidence remained non-viable (firstAudioMs `81438`, RTF `20.125`), minimized punctuation reproduced native `0xC0000374`, threads are unsupported by the local native target, Q5/Q6 first-class quants are unavailable locally, and native ARM64 clang/WSL2 shapes remain blocked. No active dispatch. |
+| 6 | MOSS-HOST-1 | v1.78.3 | sprint/moss-host-1-native-wsl-escape-hatch | Host/runtime rescue | CLOSED | Closed with `KEEP_PAUSED_HOST_CONFIRMED`: LLVM/clang install failed on Chocolatey host permissions, native ARM64 build remains blocked before configure, WSL2 is present but only Docker Desktop internal distros exist and no usable repo/toolchain runtime path is available. No active dispatch. |
+| 7 | MOSS-HOST-2 | v1.78.4 | sprint/moss-host-2-closeout | Governance closeout | CLOSED | Closed with `KEEP_PAUSED_HOST_CONFIRMED`: fresh WSL ARM64 host2 binary at `/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts` was built with `GGML_NATIVE=OFF`, `GGML_CPU_ARM_ARCH=armv8.6-a+dotprod+i8mm+nosve`, and `CMAKE_BUILD_TYPE=Release`; shape gate is available on `aarch64` Ubuntu-24.04, but short/punctuation Q4 tokens128 runs remained non-viable at RTF `42.0902777777778` and `16.2615979381443`. No active dispatch. |
+| 8 | MOSS-NANO-1 | v1.78.5 | sprint/moss-nano-1-cpu-realtime-candidate | Runtime probe | CLOSED | Closed with `ITERATE_NANO_RUNTIME`: Nano source and ONNX assets were provisioned locally, direct `infer_onnx.py` probe contract was fixed, focused tests passed `8/8`, and live short/punctuation probes generated audio at firstAudioSec `15.5075` / RTF `4.4` and firstAudioSec `18.7613` / RTF `1.6526`. Better than flagship, but not promoted; Kokoro unchanged. |
+| 9 | MOSS-3 | v1.79.0 | sprint/moss-3-sidecar-contract | Full | PAUSED | Blocked until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE`, or another explicit app-integration promotion decision; MOSS-NANO-1 instead recorded `ITERATE_NANO_RUNTIME`. Do not dispatch sidecar, IPC, status contract, or app integration work. |
+| 10 | MOSS-4 | v1.80.0 | sprint/moss-4-live-narration-strategy | Full | PAUSED | Blocked by MOSS-3 and current runtime-only Nano iteration state; do not add renderer narration strategy or selectable app engine path work. |
+| 11 | MOSS-5 | v1.81.0 | sprint/moss-5-timing-truth | Full | PAUSED | Blocked by current runtime-only Nano iteration state; no MOSS timing-truth integration is queued. |
+| 12 | MOSS-6 | v1.82.0 | sprint/moss-6-cache-continuity | Full | PAUSED | Blocked by current runtime-only Nano iteration state; no cache/prewarm/continuity work is queued. |
+| 13 | MOSS-7 | v1.83.0 | sprint/moss-7-productization-gate | Full | PAUSED | Blocked by current runtime-only Nano iteration state; no productization gate is queued. |
 
-**Dispatch status:** Queue depth 8 — GREEN. MOSS-0 is active. Later MOSS sprints are planned only and must not be marked complete before execution. `GOALS-6B` remains parked and independent. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused; do not re-queue them until MOSS proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved. Nano is not the default next step and may enter only after `docs/testing/MOSS_DECISION_LOG.md` records `DEMOTE_TO_NANO` with required evidence.
+**Dispatch status:** MOSS app-integration remains PAUSED. `MOSS-NANO-1` is closed as `ITERATE_NANO_RUNTIME`: Nano generated local CPU audio and is operationally stronger than flagship, but first-audio and RTF miss live promotion thresholds. `GOALS-6B` remains parked and independent. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused; do not re-queue them until a separate successor lane proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved. The only appropriate next MOSS work is runtime iteration for Nano cold-start/import cost, streaming first-audio measurement, CPU thread/model options, and packaging analysis; do not begin app integration or change Kokoro behavior.
 
 ### Parallel Dispatch Guardrails
 
@@ -122,8 +157,8 @@ If any guardrail fails, run the sprints sequentially.
 55. ~~Dispatch QWEN-STREAM-3 to CLI~~ — COMPLETE (v1.74.0). Stall detection, crash recovery, warmup gate, cancellation guards, stream-finished IPC wire, 5 streaming eval scenarios, gate thresholds, decision template. 16 new tests. Build clean.
 56. ~~Backfill queue to ≥3.~~ — COMPLETE. Added KOKORO-RETIRE-1 as conditional position 3. Queue GREEN depth 3.
 57. ~~Dispatch QWEN-STREAM-4 to CLI~~ — COMPLETE (v1.75.0, ITERATE). Eval harness executed, Kokoro baseline captured, QWEN_STREAMING_DECISION.md populated. Live CUDA validation deferred to Evan.
-58. ~~Backfill queue to ≥3.~~ COMPLETE. Added the flagship-first MOSS operational narration lane (`MOSS-0` through `MOSS-7`) from `docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md`; queue depth restored to 8 (GREEN). MOSS-0 is active. Later MOSS sprints are planned, not complete. Kokoro retirement remains paused behind MOSS continuous-live-playback proof and a separately approved retirement lane. Nano remains conditional only after `DEMOTE_TO_NANO` evidence.
-59. **Dispatch MOSS-0 to CLI.** Active sprint: flagship feasibility and host truth.
+58. ~~Backfill queue to ≥3.~~ COMPLETE. Added the flagship-first MOSS operational narration lane (`MOSS-0` through `MOSS-7`) from `docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md`; queue depth was restored to 8 (GREEN) at that time. Superseded by the task #10g runtime-unstable pause state below. Kokoro retirement remains paused behind continuous-live-playback proof and a separately approved retirement lane. Nano remains conditional only after `DEMOTE_TO_NANO` evidence.
+59. ~~Dispatch MOSS-0 to CLI.~~ Superseded by MOSS evidence through MOSS-SPEED-1 task #10g; flagship MOSS is now paused as runtime-unstable and MOSS app-integration dispatch is blocked.
 
 ---
 
@@ -134,7 +169,7 @@ If any guardrail fails, run the sprints sequentially.
 | HOTFIX-13 | **Dissolved.** BUG-151/152/153 absorbed into SELECTION-1. BUG-154 parked (likely not a bug — needs live verification). |
 | KOKORO-RETIRE-1 | **Paused.** Retirement posture was superseded as the immediate next step after live testing showed the current non-streaming local Qwen lane cannot sustain continuous CPU narration. It remains paused during the MOSS lane. Resume only after MOSS proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved. |
 | KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal remains blocked behind the same proof and approval bar; do not re-queue until `KOKORO-RETIRE-1` is reactivated under a separate approved retirement lane and the updated scorecard is green. |
-| MOSS-NANO-1 | **Conditional only.** Not queued by default. May start only if `docs/testing/MOSS_DECISION_LOG.md` records `DEMOTE_TO_NANO` with evidence satisfying the MOSS demotion gate. |
+| MOSS-NANO-1 follow-up | **Runtime iteration only.** MOSS-NANO-1 closed as `ITERATE_NANO_RUNTIME`; follow-up may optimize/measure Nano runtime behavior but must not add app integration or change Kokoro behavior without an explicit promotion decision. |
 | EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when e-ink becomes priority. |
 | EINK-6B | Parked. Fully spec'd in ROADMAP.md. Depends on EINK-6A. |
 | GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent — can run anytime. |
@@ -148,6 +183,10 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| MOSS-NANO-1 | 2026-04-28 | ITERATE_NANO_RUNTIME | Nano source and ONNX assets were provisioned under `.runtime/moss`, direct `infer_onnx.py` contract was fixed (`--output-audio-path`, `--cpu-threads`, `--prompt-audio-path`), focused tests passed `8/8`, and live probes generated audio for short and punctuation-heavy passages. Metrics: short firstAudioSec `15.5075`, RTF `4.4`, output `706604` bytes; punctuation firstAudioSec `18.7613`, RTF `1.6526`, output `2257964` bytes. Nano is better than flagship but misses realtime/promotion thresholds; Kokoro remains the app default and only integrated engine. |
+| MOSS-HOST-2 | 2026-04-28 | KEEP_PAUSED_HOST_CONFIRMED | Fresh WSL ARM64 host2 evidence confirmed the flagship binary was not stale, but short and punctuation Q4 tokens128 runs remained non-viable at total `121.22s` / RTF `42.0902777777778` and total `126.19s` / RTF `16.2615979381443`. MOSS-3 stayed blocked and Kokoro stayed unchanged. |
+| MOSS-HOST-1 | 2026-04-27 | KEEP_PAUSED_HOST_CONFIRMED | Host escape hatch confirmed no runnable non-x64 MOSS path in the current environment: LLVM/clang install failed on Chocolatey permissions, native ARM64 build remains blocked before CMake configure, and WSL2 is present but only Docker Desktop internal distros are installed with no repo mount or build/runtime toolchain. MOSS-3 remains blocked, Kokoro unchanged, and no Nano demotion was recorded. |
+| MOSS-RUNTIME-1 | 2026-04-27 | KEEP_PAUSED_RUNTIME_CONFIRMED | Runtime rescue made Q4/max-token truth assertive via an in-memory first-class overlay, marked threads unsupported/non-assertive, attempted native ARM64 clang and WSL2/Linux shapes, recorded truthful short Q4 firstAudioMs `81438` with RTF `20.125`, and reproduced minimized punctuation failure `0xC0000374`; MOSS-3 remains blocked, Kokoro unchanged, and no Nano demotion was recorded. |
 | QWEN-STREAM-4 | 2026-04-21 | ITERATE | Streaming eval harness executed (5 scenarios, pending_live_data). Kokoro baseline captured (9/9 pass, first-audio p50=465ms/p95=507.6ms). Decision gate document populated with ITERATE recommendation — live CUDA validation required before PROMOTE/REJECT. Eval runner fix: streaming scenarios filtered from --matrix path. v1.75.0. |
 | QWEN-STREAM-3 | 2026-04-20 | PASS | Streaming hardening: stall detection (8000ms), crash recovery (2s poll), warmup gate, cancellation guards (LL-109 sentinel fix), stream-finished IPC wire (tts-qwen-stream-finished: engine→ipc→preload→renderer→acc.flush()→onEnd). 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests. v1.74.0. |
 | QWEN-STREAM-2 | 2026-04-20 | PASS | StreamAccumulator + streaming Qwen strategy + live playback. PCM frames buffer to sentence boundaries, streaming strategy instantiated when engine is "qwen" and streaming ready, fallback to non-streaming preserved. Plato flag: async IIFE listener gap (low-risk, QWEN-STREAM-3). 21 new tests. v1.73.0. |

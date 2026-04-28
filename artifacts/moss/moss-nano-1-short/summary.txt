@@ -1,0 +1,14 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-1-short
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-1-short\output.wav
+Total seconds: 16.1921
+First audio seconds: 15.5075
+Audio duration seconds: 3.68
+RTF: 4.4
+Peak memory: unknown MB
