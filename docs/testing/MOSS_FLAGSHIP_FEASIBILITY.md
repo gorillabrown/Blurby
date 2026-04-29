@@ -268,6 +268,46 @@ Decision: `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_P
 
 Conclusion: the best short run now meets the short RTF target with true reuse and applied ORT settings, but punctuation remains too slow for promotion and decode-full/bookwarm caveats block app-prototype confidence. Future Nano work, if any, remains resident runtime tuning/soak/perf only. MOSS-3 through MOSS-7 remain paused unless a new explicit app-integration promotion decision is recorded.
 
+## MOSS-NANO-5 Decode/Precompute Continuity Rescue
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_SOAK_CANDIDATE` and not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. MOSS-NANO-5 was runtime-only evidence hardening. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or `.runtime` commits.
+
+Focused verification:
+
+- `python -m py_compile scripts\moss_nano_resident_probe.py` passed.
+- `npm test -- tests/mossNanoProbe.test.js` passed `64/64` after the known sandbox `EPERM` escalated rerun.
+
+| Evidence | Result |
+|---|---|
+| Short resident ORT | `moss-nano-5-short-resident-ort-intra2`: ok; RTF `0.6693`; first audio `0.343s`; memory delta `5.86MB`. |
+| Punctuation resident precompute | `moss-nano-5-punctuation-resident-precompute`: ok; RTF `0.6564`; first audio `0.424s`; memory delta `10.54MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
+| Decode-full | `moss-nano-5-short-resident-decode-full`: runtime ok but `decodeFullEvidence.status=failed`; `acceptedDecodeStrategy.accepted=false`; first audio `2.560s` > `2.5s`; memory delta `5.51MB`. |
+| Short resident actual precompute | `moss-nano-5-short-resident-precompute-actual`: ok; RTF `0.6941`; first audio `0.366s`; memory delta `5.76MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
+| Adjacent segments | `moss-nano-5-adjacent-segments-resident`: blocked; `5/5` fresh, `0` stale, `0` restarts; RTF trend `29.43%` > `15%`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`; memory delta `13.86MB`. |
+| False-evidence hardening | Decode-full threshold truth fixed; requested precompute cannot masquerade as actual; blocker-only precompute cannot promote; soak requires actual precompute plus adjacent evidence plus memory; adjacent min-threshold bug fixed. |
+
+Conclusion: do not promote to soak because decode-full misses the first-audio gate, precompute is blocker-only, and adjacent trend exceeds the gate. Do not reject Nano or record `KEEP_KOKORO_ONLY`, because short and punctuation resident performance are strong enough to continue runtime investigation. MOSS-NANO-6 remains gated unless future runtime work earns a soak/package gate; app integration remains locked.
+
+## MOSS-TTS-Nano Onboarding Gate Sequence
+
+The Nano onboarding path is fully specified in `ROADMAP.md`, but remains gated. The sequence is:
+
+1. `MOSS-NANO-5`: decode/precompute continuity rescue. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
+2. `MOSS-NANO-6`: resident soak plus packaging readiness. Gated until future runtime work earns a soak/package gate; may promote to app-prototype candidate only after passing soak/package evidence.
+3. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
+4. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
+5. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
+6. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
+7. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
+
+Non-negotiable gates:
+
+- No Nano app integration before `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+- No Kokoro behavior change before a separate successor/default decision.
+- No word-timing fabrication; Nano must use truthful segment/anchor semantics unless trusted word timing is proven.
+- No promotion from requested-only metadata. Runtime summaries must distinguish requested vs. actual precompute, ORT settings, reuse, and cache behavior.
+- No productization without live-book matrix evidence, memory soak, packaging/provisioning truth, and adversarial review.
+
 ## Failure Classification
 
 Every MOSS runtime failure must be classified with one of these classes.

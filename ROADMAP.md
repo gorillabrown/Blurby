@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-29 — MOSS app integration remains paused; `MOSS-NANO-4` closed as `ITERATE_NANO_RESIDENT_RUNTIME`.
+**Last updated**: 2026-04-29 — `MOSS-NANO-5` closed as `ITERATE_NANO_RESIDENT_RUNTIME`; Nano app integration remains gated.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-4 was runtime optimization plus promotion retest only: best short resident ORT evidence improved to first decoded `659ms`, final RTF `1.3734`, p50/p95 `1.3734`/`1.4329`, and memory growth about `42.57MB`, but the final valid decision remains `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. No Nano app prototype is approved, no MOSS-3 reopen occurred, and Kokoro behavior is unchanged.
+**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4/MOSS-NANO-5 evidence is recorded. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-5 was runtime-only decode/precompute continuity evidence hardening and closed with final decision `ITERATE_NANO_RESIDENT_RUNTIME`: short and punctuation resident performance are strong enough to continue runtime investigation, but decode-full missed the first-audio gate, precompute remains blocker-only, and adjacent-segment trend exceeded the gate. No Nano app prototype is approved now, no MOSS-3 reopen occurred, no sidecar IPC/renderer/selectable-engine/cache integration was added, no `.runtime` files are committed, and Kokoro behavior is unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -136,7 +136,21 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-NANO-4: Resident Runtime Optimization + Promotion Retest ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
                     │
-    MOSS-3: Sidecar Contract And Streaming IPC (PAUSED)
+    MOSS-NANO-5: Decode/Precompute Continuity Rescue ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
+                    │
+    MOSS-NANO-6: Resident Soak + Packaging Readiness (GATED on future soak/package evidence)
+                    │
+    MOSS-NANO-7: Sidecar Contract + IPC Prototype (CONDITIONAL on promotion)
+                    │
+    MOSS-NANO-8: Narration Strategy + Segment Timing (CONDITIONAL)
+                    │
+    MOSS-NANO-9: Cache/Prefetch + Continuity Handoffs (CONDITIONAL)
+                    │
+    MOSS-NANO-10: Settings UX + Engine Selection (CONDITIONAL)
+                    │
+    MOSS-NANO-11: Productization Gate + Default Decision (CONDITIONAL)
+                    │
+    MOSS-3: Legacy flagship sidecar lane (SUPERSEDED/PAUSED)
                     │
     MOSS-4: Live Narration Strategy And Engine Selection (PAUSED)
                     │
@@ -4162,7 +4176,7 @@ Task 6         — after Task 5 (git)
 
 ### Flagship-First MOSS Operational Narration Lane
 
-**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, `MOSS-NANO-3`, and `MOSS-NANO-4` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, or another explicit app-integration promotion decision. The latest valid MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+**Program status:** NANO RUNTIME ITERATION ACTIVE; APP INTEGRATION GATED. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, `MOSS-NANO-3`, `MOSS-NANO-4`, and `MOSS-NANO-5` are historical evidence sprints. `MOSS-NANO-6` remains queued only if future runtime work earns a soak/package gate; it does not unlock app integration. `MOSS-NANO-7` through `MOSS-NANO-11` are the Nano onboarding path and must not be dispatched until the decision log records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or a stricter equivalent promotion decision. Legacy flagship `MOSS-3` through `MOSS-7` remain superseded/paused unless a separate flagship promotion decision is recorded. The latest valid MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
 
 #### Sprint MOSS-HOST-1: Native/WSL Runtime Escape Hatch (COMPLETED)
 
@@ -4384,6 +4398,316 @@ Hermes [haiku]: Stage only scoped files and artifacts. Exclude `.runtime/**`, mo
 
 ---
 
+#### Sprint MOSS-NANO-5: Decode/Precompute Continuity Rescue (COMPLETED)
+
+**Status:** Completed 2026-04-29 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+**Type:** Runtime optimization + evidence hardening only. No app integration, no sidecar IPC, no renderer integration, no selectable engine behavior, no cache/continuity integration in the app, no MOSS-3 reopen, no `.runtime` commits, and no Kokoro behavior change.
+
+**Closeout evidence:** Focused verification passed: `python -m py_compile scripts\moss_nano_resident_probe.py`; `npm test -- tests/mossNanoProbe.test.js` passed `64/64` after the known sandbox `EPERM` escalated rerun.
+
+Canonical refreshed artifacts:
+
+| Artifact | Result |
+|---|---|
+| `moss-nano-5-short-resident-ort-intra2` | ok; RTF `0.6693`; first audio `0.343s`; memory delta `5.86MB`. |
+| `moss-nano-5-punctuation-resident-precompute` | ok; RTF `0.6564`; first audio `0.424s`; memory delta `10.54MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
+| `moss-nano-5-short-resident-decode-full` | runtime ok but `decodeFullEvidence.status=failed`; `acceptedDecodeStrategy.accepted=false`; first audio `2.560s` > `2.5s`; memory delta `5.51MB`. |
+| `moss-nano-5-short-resident-precompute-actual` | ok; RTF `0.6941`; first audio `0.366s`; memory delta `5.76MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
+| `moss-nano-5-adjacent-segments-resident` | blocked; `5/5` fresh, `0` stale, `0` restarts; RTF trend `29.43%` > `15%`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`; memory delta `13.86MB`. |
+
+**False-evidence hardening:** Decode-full threshold truth is fixed. Requested precompute cannot masquerade as actual precompute. Blocker-only precompute cannot promote. Soak requires actual precompute plus adjacent evidence plus memory. The adjacent min-threshold bug is fixed.
+
+**Decision rationale:** Do not record `PROMOTE_NANO_TO_SOAK_CANDIDATE`: decode-full misses the first-audio gate, precompute is blocker-only, and adjacent trend exceeds the gate. Do not record `KEEP_KOKORO_ONLY` or reject Nano: short and punctuation resident performance are now strong enough to continue runtime investigation. Therefore the only final decision is `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+**Next gate:** `MOSS-NANO-6` remains gated unless future runtime work earns a soak/package gate. This closeout does not unlock app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, or Kokoro retirement work.
+
+**Tier:** Runtime rescue | **Branch:** `sprint/moss-nano-5-decode-precompute-continuity` | **Depends on:** MOSS-NANO-4
+
+---
+
+#### Sprint MOSS-NANO-6: Resident Soak + Packaging Readiness (QUEUED AFTER MOSS-NANO-5)
+
+**Status:** Gated. Dispatch only if future runtime work earns `PROMOTE_NANO_TO_SOAK_CANDIDATE` or an equivalent soak/package gate; MOSS-NANO-5 did not earn that gate.
+
+**Type:** Runtime soak, reliability, memory, and packaging feasibility. No renderer/app integration and no Kokoro behavior change.
+
+**WHAT:** Prove resident Nano can stay alive across long reading sessions, recover truthfully from failures, and fit Blurby's local packaging/provisioning constraints before any app prototype.
+
+**HYPOTHESIS:** Even if per-segment latency is acceptable, Nano can still fail as a product engine through memory growth, zombie processes, model asset size, venv/dependency fragility, or startup/provisioning UX. This sprint either converts Nano from runtime candidate to app-prototype candidate, or keeps it in research.
+
+**Acceptance thresholds:**
+
+- 30-minute simulated resident soak with no crash, no output reuse, no session restart, and memory growth slope <= `1.5MB/min` after warmup.
+- 100 adjacent segment generations with p95 internal first decoded <= `1500ms`, p95 final RTF <= `1.5`, and p95 punctuation RTF <= `1.45`.
+- Cold start/provisioning report records asset sizes, venv footprint, first-run setup time, and whether packaging can ship or must download assets.
+- Shutdown/restart test proves the resident process exits cleanly and rejects in-flight work truthfully.
+- Package feasibility doc records license, asset source, install/update path, and local-only privacy posture.
+
+**WHERE:**
+
+- `scripts/moss_nano_probe.mjs` and `scripts/moss_nano_resident_probe.py`: add soak orchestration, long-run summary fields, graceful shutdown hooks, and restart/failure classification.
+- `scripts/moss_preflight.mjs`: add Nano-specific runtime/package checks if not already covered by existing generic MOSS checks.
+- `tests/mossNanoProbe.test.js` and `tests/mossProvisioning.test.js`: add soak-summary validation, shutdown classification, asset/provisioning checks, and `.runtime/**` exclusion safeguards.
+- `docs/testing/MOSS_RUNTIME_SETUP.md`: document Nano runtime/provisioning requirements.
+- `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md` and `docs/testing/MOSS_DECISION_LOG.md`: record soak/package evidence.
+- `artifacts/moss/moss-nano-6-*`: soak, packaging, shutdown, and restart artifacts.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Map all resident Nano lifecycle risks from MOSS-NANO-5 artifacts and local runtime shape: memory, process lifetime, asset footprint, startup, shutdown, and dependency packaging.
+
+Hermes [haiku]: Create branch `sprint/moss-nano-6-soak-packaging-readiness`; preserve `.runtime/**` as local-only.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add tests for soak summary schema, memory slope, shutdown classification, and packaging report fields.
+
+Athena [opus] {high}: Implement soak/provisioning diagnostics and shutdown/restart evidence generation without adding app IPC.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused Nano/provisioning tests, canonical soak and shutdown commands, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Approve only if `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` thresholds are met and evidence is fresh.
+
+Plato [sonnet]: Review for memory leaks, zombie process risks, packaging false assumptions, and accidental app integration.
+
+Herodotus [sonnet]: Record exactly one decision: `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, `KEEP_KOKORO_ONLY`, or `REJECT_NANO_LOCAL_CPU`.
+
+Hermes [haiku]: Stage scoped files/artifacts, commit, merge, push.
+
+**Tier:** Runtime/package readiness | **Branch:** `sprint/moss-nano-6-soak-packaging-readiness` | **Depends on:** MOSS-NANO-5
+
+---
+
+#### Sprint MOSS-NANO-7: Sidecar Contract + IPC Prototype (CONDITIONAL)
+
+**Status:** Conditional. Dispatch only after `MOSS-NANO-6` records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+**Type:** Main-process sidecar contract and IPC prototype. No renderer engine selection, no narration strategy switch, no Kokoro retirement.
+
+**WHAT:** Turn the resident Nano diagnostic runtime into a managed Electron main-process sidecar contract with truthful readiness/status, request ownership, cancellation, crash cleanup, and generated-audio delivery to the renderer bridge.
+
+**HYPOTHESIS:** The resident runtime can be wrapped as a local sidecar without reintroducing false-ready states, stale in-flight requests, zombie workers, or security holes. If not, Nano cannot be safely onboarded despite runtime speed.
+
+**WHERE:**
+
+- Create `main/moss-nano-engine.js`: sidecar manager, status snapshot, preload/warmup, generate/cancel/shutdown, request ownership, crash cleanup.
+- Create `main/moss-nano-worker.js` or `main/moss-nano-sidecar.js`: process boundary around `scripts/moss_nano_resident_probe.py` or a resident Python service.
+- Modify `main/ipc/tts.js`: add `tts-moss-nano-status`, `tts-moss-nano-preload`, `tts-moss-nano-generate`, `tts-moss-nano-cancel`, and status-event forwarding.
+- Modify `preload.js` and `src/types.ts`: expose typed `window.electronAPI` methods and `MossNanoStatusSnapshot`; add `TtsEngine` value only behind prototype guard.
+- Tests: create `tests/mossNanoEngine.test.js`; extend `tests/tts-integration.test.ts` or IPC-focused tests for status/generate/cancel/crash behavior.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Map existing Kokoro/Qwen IPC contracts and choose the minimal safe Nano contract. Explicitly list what must not be copied from stale Qwen prototype paths.
+
+Hermes [haiku]: Create branch `sprint/moss-nano-7-sidecar-ipc-prototype`.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add failing sidecar/IPC tests first for readiness, generate, cancel, crash rejection, and no stale success.
+
+Athena [opus] {high}: Implement the sidecar manager and IPC/preload/types contract. Keep renderer settings hidden unless a prototype flag is enabled.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused sidecar/IPC tests, resident smoke generation through IPC, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify contract truthfulness and promotion precondition.
+
+Plato [sonnet]: Review process lifecycle, local path/security boundaries, and crash cleanup.
+
+Herodotus [sonnet]: Update docs with sidecar evidence and whether `MOSS-NANO-8` can dispatch.
+
+Hermes [haiku]: Commit, merge, push.
+
+**Tier:** Prototype sidecar | **Branch:** `sprint/moss-nano-7-sidecar-ipc-prototype` | **Depends on:** MOSS-NANO-6 promotion
+
+---
+
+#### Sprint MOSS-NANO-8: Narration Strategy + Segment Timing (CONDITIONAL)
+
+**Status:** Conditional. Dispatch only after `MOSS-NANO-7` sidecar contract is truthful and green.
+
+**Type:** Renderer narration strategy prototype. No default-engine change and no Kokoro retirement.
+
+**WHAT:** Add a `moss-nano` narration strategy that can request resident Nano segments, schedule audio through Blurby's scheduler, and advance global word anchors using truthful segment boundaries rather than fake word timestamps.
+
+**HYPOTHESIS:** Nano can fit Blurby's Narrate/Flow model if it is treated as a segment-following engine with global anchors at truthful segment boundaries. If the underline/cursor must fake word-level timing to feel usable, stop and redesign before productization.
+
+**WHERE:**
+
+- Create `src/hooks/narration/mossNanoStrategy.ts`: `TtsStrategy` implementation, request/cancel/preload plumbing, segment anchor metadata, error handling.
+- Modify `src/hooks/useNarration.ts`: add `moss-nano` branch alongside web/Kokoro/Qwen only after strategy tests exist.
+- Modify `src/types.ts`: extend `TtsEngine`, status snapshots, and API typings.
+- Modify `src/utils/audioScheduler.ts` only if a generic non-Kokoro segment metadata field is needed; avoid Kokoro-specific regressions.
+- Tests: `tests/mossNanoStrategy.test.ts`, `tests/useNarrationMossNano.test.tsx`, and targeted scheduler tests for segment-boundary truth.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {max}: Trace `useNarration` engine branching, strategy contracts, global anchor updates, and scheduler metadata. Produce a minimal integration map that preserves Kokoro behavior.
+
+**HOW (Implementation):**
+
+Hercules [sonnet] {high}: Add failing hook/strategy tests for segment scheduling, cancellation, pause/resume, and no word-timing fabrication.
+
+Athena [opus] {high}: Implement `mossNanoStrategy` and guarded `useNarration` integration.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused strategy/hook/scheduler tests, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify segment-truth criteria and no default-engine change.
+
+Plato [sonnet]: Review timing/anchor coherence and Kokoro regression risk.
+
+Herodotus/Hermes [sonnet/haiku]: Update docs, commit, merge, push.
+
+**Tier:** Renderer strategy prototype | **Branch:** `sprint/moss-nano-8-narration-strategy` | **Depends on:** MOSS-NANO-7
+
+---
+
+#### Sprint MOSS-NANO-9: Cache/Prefetch + Continuity Handoffs (CONDITIONAL)
+
+**Status:** Conditional. Dispatch only after `MOSS-NANO-8` proves segment-truth playback in the renderer.
+
+**Type:** Continuity, prefetch, cache, and handoff prototype. No default-engine change.
+
+**WHAT:** Make Nano usable across real book reading flows: startup warm segment, next-segment prefetch, pause/resume, section handoff, cross-book cleanup, cache invalidation, memory/backpressure, and truthful fallback when the resident runtime cannot keep up.
+
+**HYPOTHESIS:** Nano can feel continuous if resident generation stays ahead by one or more segments and handoffs use readiness rather than sleeps. If prefetch cannot hide punctuation/decode latency without memory growth, Nano stays experimental.
+
+**WHERE:**
+
+- `src/hooks/narration/mossNanoStrategy.ts`: add prefetch queue, request ownership, cancellation, and backpressure hooks.
+- `src/hooks/useNarration.ts`: integrate handoff/pause/resume semantics without changing global word anchor rules.
+- `src/utils/ttsCache.ts` and `main/tts-cache.js`: add Nano cache keys only if audio metadata is stable and invalidation is proven.
+- `src/utils/ttsEvalTrace.ts`, `scripts/tts_eval_runner.mjs`, `tests/ttsEvalMatrixRunner.test.ts`: add Nano continuity metrics.
+- Tests: `tests/narrationContinuity.test.ts`, `tests/useNarrationMossNano.test.tsx`, `tests/ttsContinuityReadiness.test.ts`, and new Nano cache/prefetch tests.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Map all current Kokoro continuity/handoff/cache contracts and identify which can be generalized vs. which must remain Kokoro-only.
+
+**HOW (Implementation):**
+
+Athena [opus] {high}: Implement Nano prefetch/backpressure/handoff logic.
+
+Hercules [sonnet]: Add cache key, continuity trace, and targeted regression tests.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused continuity/cache/eval tests, a Nano live-book matrix if available, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify handoff/startup thresholds and no false fallback.
+
+Plato [sonnet]: Review race conditions, memory pressure, stale cache, and request ownership.
+
+Herodotus/Hermes [sonnet/haiku]: Update docs, commit, merge, push.
+
+**Tier:** Continuity prototype | **Branch:** `sprint/moss-nano-9-cache-prefetch-continuity` | **Depends on:** MOSS-NANO-8
+
+---
+
+#### Sprint MOSS-NANO-10: Settings UX + Engine Selection (CONDITIONAL)
+
+**Status:** Conditional. Dispatch only after `MOSS-NANO-9` proves continuity gates.
+
+**Type:** User-visible experimental engine onboarding. Nano remains opt-in; Kokoro remains default unless a later productization sprint changes it.
+
+**WHAT:** Expose Nano as an experimental/local TTS engine with truthful status, provisioning guidance, preview/test voice, safe enable/disable behavior, and clear fallback messaging.
+
+**HYPOTHESIS:** If Nano is technically viable, the user still needs a simple and honest onboarding surface: local runtime status, model assets, readiness, failure reasons, and a way to opt out without corrupting narration settings.
+
+**WHERE:**
+
+- `src/types.ts`: `TtsEngine` union and `MossNanoStatusSnapshot` already added by earlier sprints; harden settings/profile typing.
+- `src/components/settings/TTSSettings.tsx`: add Nano engine card, status display, voice/variant controls, preview, and provisioning hints without exceeding component-size guard.
+- `src/components/settings/ttsPreview.ts`: add Nano preview path or explicit unsupported preview state.
+- `src/components/ReaderBottomBar.tsx`: engine-aware rate/voice labels for Nano without Kokoro bucket UI leakage.
+- `preload.js`, `main/ipc/tts.js`: expose status/preload/generate/preview methods already created in sidecar sprint.
+- Tests: `tests/ttsSettingsMossNano.test.tsx`, `tests/ttsPreviewTruth.test.ts`, `tests/narrationProfiles.test.ts`, and component-size cleanup tests.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Inspect settings/profile/UI surfaces and identify every place `TtsEngine` assumptions must change.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add failing UI/profile/preview tests first.
+
+Athena [opus] {high}: Implement guarded Nano settings UX and profile persistence while preserving Kokoro/Web/Qwen settings behavior.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused settings/profile/preview tests, component-size guard, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify Nano is opt-in and truthful.
+
+Plato [sonnet]: Review UX false-ready/fallback risks and settings migration.
+
+Herodotus/Hermes [sonnet/haiku]: Update docs, commit, merge, push.
+
+**Tier:** Experimental UX onboarding | **Branch:** `sprint/moss-nano-10-settings-ux` | **Depends on:** MOSS-NANO-9
+
+---
+
+#### Sprint MOSS-NANO-11: Productization Gate + Default Decision (CONDITIONAL)
+
+**Status:** Conditional final gate. Dispatch only after `MOSS-NANO-10` ships a green opt-in experimental engine.
+
+**Type:** Release matrix, quality review, docs/runbook, and default/fallback decision. No automatic Kokoro retirement.
+
+**WHAT:** Decide whether Nano remains experimental, becomes a recommended local engine, or can start a separate Kokoro-retirement lane. This sprint must run live-book matrix evidence, UX QA, memory soak, packaging/provisioning verification, and third-party-style adversarial review before any default decision.
+
+**HYPOTHESIS:** Nano can only be onboarded as a trusted engine if the integrated app path matches or beats Kokoro on perceived continuity/prosody while remaining truthful on status, timing, failure, and resource usage. If quality improves but reliability is weaker, keep Nano opt-in.
+
+**WHERE:**
+
+- `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`, `scripts/tts_eval_runner.mjs`, `tests/fixtures/narration/matrix.manifest.json`: add Nano release scenarios and quality gates.
+- `docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`, `docs/testing/TTS_ADVERSARIAL_REVIEW_CHECKLIST.md`, `docs/testing/TTS_ITERATIVE_AUDIT_TRACE_CHECKLIST.md`: add Nano-specific release/adversarial checks.
+- `src/utils/ttsEvalTrace.ts`: include Nano-specific first decoded, first playable, cache hit, handoff, and memory fields if not already present.
+- `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`: record final product decision and next lane.
+- Tests: matrix/gate tests plus any settings/narration regression slices touched by earlier sprints.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {max}: Build the release-risk map from runtime, sidecar, strategy, cache, settings, and eval artifacts. Identify any unresolved blocker that should prevent a default decision.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add Nano release matrix manifest/gate tests and docs checklist updates.
+
+Athena [opus] {high}: Harden any final trace/gate plumbing needed for honest integrated Nano evidence.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run Nano gated matrix, Kokoro comparison matrix, full `npm test`, `npm run build`, and packaging/provisioning checks.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Decide one final state: `NANO_EXPERIMENTAL_ONLY`, `NANO_RECOMMENDED_OPT_IN`, `NANO_DEFAULT_CANDIDATE`, `KEEP_KOKORO_DEFAULT`, or `OPEN_KOKORO_RETIREMENT_LANE`.
+
+Plato [sonnet]: Perform adversarial product review: false readiness, stale audio, anchor drift, failure recovery, settings migration, and user trust.
+
+Herodotus/Hermes [sonnet/haiku]: Update roadmap/queue/runbooks, commit, merge, push.
+
+**Tier:** Productization gate | **Branch:** `sprint/moss-nano-11-productization-gate` | **Depends on:** MOSS-NANO-10
+
+---
+
 **Execution-ready plan:** [docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md](C:/Users/estra/Projects/Blurby/docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md)
 
 **Goal:** Make flagship MOSS-TTS a real CPU-only operational narration lane inside Blurby, starting from the highest-quality flagship path and demoting to Nano only after measured, well-classified feasibility failure.
@@ -4393,9 +4717,9 @@ Hermes [haiku]: Stage only scoped files and artifacts. Exclude `.runtime/**`, mo
 - Preserve Kokoro as the operational floor. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate Kokoro-retirement lane is approved.
 - Do not silently fall back from selected MOSS to Kokoro or Web Speech. MOSS unavailable states must be truthful and recoverable.
 - Do not fake word timing. If MOSS lacks trusted word timestamps, Narrate follows natural segments and commits global anchors only at truthful boundaries.
-- Keep Nano out of app integration until promoted. `MOSS-NANO-2` closed as `KEEP_KOKORO_ONLY`; future Nano work must not add sidecar, IPC, renderer integration, timing-truth integration, cache, productization, or Kokoro behavior changes without an explicit promotion decision.
+- Keep Nano out of app integration until promoted. `MOSS-NANO-5` closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so `MOSS-NANO-6` remains gated unless future runtime work earns a soak/package gate. Nano app onboarding (`MOSS-NANO-7` through `MOSS-NANO-11`) must not start without an explicit promotion decision.
 
-**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-2 proves the current Nano runtime path remains too slow despite corrected real-text artifacts and bounded rescue attempts. App prototype work requires a later explicit promotion decision after timing evidence improves enough to plausibly meet live-book first-audio and realtime behavior, with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
+**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-5 proves resident Nano short/punctuation performance is strong enough for continued runtime investigation, but decode-full, blocker-only precompute, and adjacent-segment continuity miss soak gates. App prototype work requires a later explicit promotion decision after runtime and soak evidence proves live-book first-audio, realtime behavior, memory stability, packaging feasibility, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
 
 #### Sprint MOSS-RCA-1: Flagship Runtime Root-Cause Autopsy (COMPLETED)
 

@@ -9,7 +9,9 @@ runs. It never downloads source or model assets.
 from __future__ import annotations
 
 import importlib
+import hashlib
 import json
+import math
 import os
 import sys
 import time
@@ -18,6 +20,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 import moss_nano_probe as nano
+
+
+DECODE_FULL_FIRST_AUDIO_SEC_MAX = 2.5
+DECODE_FULL_MEMORY_GROWTH_MB_MAX = 80
 
 
 def now_ms(start: float) -> int:
@@ -35,6 +41,9 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
         "--book-like-warm-runs": "bookLikeWarmRuns",
         "--resident-decode-mode": "residentDecodeMode",
         "--stream-decode-frame-budget": "streamDecodeFrameBudget",
+        "--adjacent-segment-count": "adjacentSegmentCount",
+        "--adjacent-segment-source": "adjacentSegmentSource",
+        "--adjacent-segment-rtf-trend-max": "adjacentSegmentRtfTrendMax",
     }
     boolean_flags = {
         "--reuse-tokenizer": "tokenizerReuseRequested",
@@ -54,8 +63,10 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
             if index + 1 >= len(argv):
                 raise ValueError(f"{arg} requires a value")
             value: Any = argv[index + 1]
-            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget"}:
+            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget", "--adjacent-segment-count"}:
                 value = int(value)
+            elif arg == "--adjacent-segment-rtf-trend-max":
+                value = float(value)
             resident_options[value_flags[arg]] = value
             index += 2
             continue
@@ -90,6 +101,78 @@ class EventRecorder:
             with self.events_path.open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(item, separators=(",", ":")) + "\n")
         return item
+
+
+STAGE_KEYS = (
+    "precomputeInputs",
+    "runtimeStartup",
+    "modelLoad",
+    "tokenize",
+    "prepareInputs",
+    "onnxInference",
+    "decode",
+    "writeWav",
+    "textNormalize",
+    "promptAudioEncode",
+    "textChunk",
+    "buildRequestRows",
+    "semanticAcousticGenerate",
+    "streamDecode",
+    "fullDecode",
+    "internalFirstDecodedAudio",
+)
+
+
+def empty_stage_timings() -> dict[str, float | None]:
+    return {key: None for key in STAGE_KEYS}
+
+
+def finite_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(float(value))
+
+
+def decode_full_threshold_evidence(first_audio_sec: Any, memory_growth_mb: Any) -> dict[str, Any]:
+    first_audio_passed = finite_number(first_audio_sec) and float(first_audio_sec) <= DECODE_FULL_FIRST_AUDIO_SEC_MAX
+    memory_passed = finite_number(memory_growth_mb) and float(memory_growth_mb) <= DECODE_FULL_MEMORY_GROWTH_MB_MAX
+    passed = bool(first_audio_passed and memory_passed)
+    reasons: list[str] = []
+    if not finite_number(first_audio_sec):
+        reasons.append("decode-full first audio is missing")
+    elif not first_audio_passed:
+        reasons.append(
+            f"decode-full first audio {first_audio_sec}s exceeds {DECODE_FULL_FIRST_AUDIO_SEC_MAX}s"
+        )
+    if not finite_number(memory_growth_mb):
+        reasons.append("decode-full memory growth is missing")
+    elif not memory_passed:
+        reasons.append(
+            f"decode-full memory growth {memory_growth_mb}MB exceeds {DECODE_FULL_MEMORY_GROWTH_MB_MAX}MB"
+        )
+    return {
+        "status": "passed" if passed else "failed",
+        "firstAudioSec": first_audio_sec,
+        "memoryGrowthMb": memory_growth_mb,
+        "gates": {
+            "firstAudioSecMax": DECODE_FULL_FIRST_AUDIO_SEC_MAX,
+            "memoryGrowthMbMax": DECODE_FULL_MEMORY_GROWTH_MB_MAX,
+            "firstAudioPassed": bool(first_audio_passed),
+            "memoryGrowthPassed": bool(memory_passed),
+        },
+        "source": "resident-decode-mode-full",
+        "reason": None if passed else "; ".join(reasons),
+    }
+
+
+def resident_stage_profile(enabled: bool, timings: dict[str, float | None] | None = None) -> dict[str, Any]:
+    stages = empty_stage_timings()
+    if timings:
+        stages.update(timings)
+    return {
+        "enabled": bool(enabled),
+        "supported": True,
+        "limitations": "Resident probe reports diagnostic stage timings around exposed runtime boundaries; upstream Nano does not expose every lower-level prepared-input hook separately.",
+        "stagesSec": stages,
+    }
 
 
 def base_resident_summary(options: dict[str, Any], out_dir: Path) -> dict[str, Any]:
@@ -130,22 +213,7 @@ def base_resident_summary(options: dict[str, Any], out_dir: Path) -> dict[str, A
             "ortOptionsApplied": None,
             "ortOptionsUnsupported": {},
             "ortLiveMetadata": None,
-            "stageProfile": {
-                "enabled": bool(options.get("profileStages")),
-                "supported": True,
-                "limitations": "Resident probe emits import/session/inference events when local source and assets are available.",
-                "stagesSec": {
-                    "precomputeInputs": None,
-                    "runtimeStartup": None,
-                    "modelLoad": None,
-                    "tokenize": None,
-                    "prepareInputs": None,
-                    "onnxInference": None,
-                    "decode": None,
-                    "writeWav": None,
-                    "internalFirstDecodedAudio": None,
-                },
-            },
+            "stageProfile": resident_stage_profile(bool(options.get("profileStages"))),
             **optimization_fields,
         }
     )
@@ -198,6 +266,8 @@ def resident_decode_contract(options: dict[str, Any]) -> dict[str, Any]:
 def initial_optimization_fields(options: dict[str, Any]) -> dict[str, Any]:
     short_requested = bool(options.get("shortPassageOverheadReductionRequested"))
     book_like_requested = int(options.get("bookLikeWarmRuns") or 0)
+    precompute_requested = bool(options.get("precomputeInputs"))
+    precompute_blocker = "NO_PRECOMPUTE_REQUEST_ROWS_HOOK" if precompute_requested else None
     fields = {
         "optimizationVariant": options.get("variantId"),
         "optimizationProfile": options.get("optimizationProfile"),
@@ -244,11 +314,46 @@ def initial_optimization_fields(options: dict[str, Any]) -> dict[str, Any]:
         "promotionClass": False,
         "promotionMetrics": None,
         "residentDecode": resident_decode_contract(options),
+        "precomputeInputsRequested": precompute_requested,
         "precomputeInputsActual": False,
+        "precomputeInputsPartial": False,
+        "precomputeInputsBlocker": precompute_blocker,
         "precomputeInputsEvidence": {
-            "requested": bool(options.get("precomputeInputs")),
+            "requested": precompute_requested,
             "actual": False,
-            "reason": "Resident diagnostic has no separate precomputed input cache beyond the single in-process runtime.",
+            "status": "blocked" if precompute_requested else "not-requested",
+            "blocker": precompute_blocker,
+            "components": {
+                "textNormalize": False,
+                "promptAudioCodes": False,
+                "textChunk": False,
+                "tokenize": False,
+                "semanticInputs": False,
+                "acousticInputs": False,
+                "buildRequestRows": False,
+            },
+            "reason": "Upstream resident synthesize() does not expose reusable prepared request rows that can be consumed by the measured run.",
+        },
+        "tokenizerIdentity": None,
+        "promptAudioCodesEvidence": {
+            "status": "not-requested",
+            "hits": 0,
+            "misses": 0,
+            "cacheKey": None,
+            "source": None,
+            "reusedAcrossSegments": False,
+        },
+        "decodeFullEvidence": None,
+        "acceptedDecodeStrategy": None,
+        "crossSegmentStateBlocker": None,
+        "adjacentSegmentStats": None,
+        "segments": [],
+        "promotionTarget": None,
+        "promotionThresholds": None,
+        "promotionDecision": {
+            "promote": False,
+            "target": None,
+            "decision": "ITERATE_NANO_RESIDENT_RUNTIME",
         },
     }
     fields["optimization"] = {
@@ -261,6 +366,13 @@ def initial_optimization_fields(options: dict[str, Any]) -> dict[str, Any]:
         "promptReuseActual": fields["promptReuseActual"],
         "shortPassageOverheadReduction": fields["shortPassageOverheadReduction"],
         "bookLikeRunStats": fields["bookLikeRunStats"],
+        "precomputeInputsRequested": fields["precomputeInputsRequested"],
+        "precomputeInputsActual": fields["precomputeInputsActual"],
+        "precomputeInputsPartial": fields["precomputeInputsPartial"],
+        "precomputeInputsBlocker": fields["precomputeInputsBlocker"],
+        "precomputeInputsEvidence": fields["precomputeInputsEvidence"],
+        "tokenizerIdentity": fields["tokenizerIdentity"],
+        "promptAudioCodesEvidence": fields["promptAudioCodesEvidence"],
         "evidence": fields["optimizationEvidence"],
         "residentDecode": fields["residentDecode"],
     }
@@ -275,6 +387,35 @@ def runtime_attr_identity(runtime: Any, names: tuple[str, ...]) -> str | None:
     return None
 
 
+def runtime_attr_value(runtime: Any, names: tuple[str, ...]) -> tuple[str, Any] | tuple[None, None]:
+    for name in names:
+        value = getattr(runtime, name, None)
+        if value is not None:
+            return name, value
+    return None, None
+
+
+def tokenizer_identity(runtime: Any) -> dict[str, Any] | None:
+    name, value = runtime_attr_value(runtime, ("tokenizer", "sp_model", "sp", "sentencepiece", "text_tokenizer"))
+    if value is None:
+        return None
+    model_path = getattr(value, "model_file", None) or getattr(value, "model_path", None)
+    return {
+        "attribute": name,
+        "objectIdentity": f"{name}:{id(value)}",
+        "modelPath": str(model_path) if model_path else None,
+        "sessionIdentity": runtime_attr_identity(runtime, ("audio_tokenizer_session", "audioTokenizer", "codec_session")),
+        "vocabularyHash": None,
+    }
+
+
+def prompt_audio_cache_key(prompt_audio_path: Path | None) -> str | None:
+    if prompt_audio_path is None:
+        return None
+    digest = hashlib.sha256(str(prompt_audio_path.resolve()).encode("utf-8")).hexdigest()[:16]
+    return f"prompt-audio:{digest}"
+
+
 def finalize_optimization_fields(
     summary: dict[str, Any],
     options: dict[str, Any],
@@ -282,7 +423,7 @@ def finalize_optimization_fields(
     run_records: list[dict[str, Any]],
     reuse_ok: bool,
 ) -> None:
-    tokenizer_identity = runtime_attr_identity(runtime, ("tokenizer", "sp", "sentencepiece", "text_tokenizer"))
+    tokenizer_object_identity = runtime_attr_identity(runtime, ("tokenizer", "sp_model", "sp", "sentencepiece", "text_tokenizer"))
     prompt_identity = runtime_attr_identity(runtime, ("prompt_cache", "prompt_embedding", "prompt_audio"))
     tokenizer_requested = bool(options.get("tokenizerReuseRequested"))
     prompt_requested = bool(options.get("promptReuseRequested"))
@@ -310,8 +451,10 @@ def finalize_optimization_fields(
         "internalFirstDecodedAudioMs": [record.get("internalFirstDecodedAudioMs") for record in book_like_records],
     }
     summary["bookLikeRunStats"] = stats
-    summary["tokenizerReuseActual"] = bool(tokenizer_requested and reuse_ok and tokenizer_identity)
-    summary["promptReuseActual"] = bool(prompt_requested and reuse_ok and prompt_identity and options.get("promptAudio"))
+    summary["tokenizerIdentity"] = tokenizer_identity(runtime)
+    summary["tokenizerReuseActual"] = bool(tokenizer_requested and reuse_ok and tokenizer_object_identity)
+    prompt_codes_reused = bool(summary.get("promptAudioCodesEvidence", {}).get("reusedAcrossSegments"))
+    summary["promptReuseActual"] = bool(prompt_requested and reuse_ok and prompt_codes_reused)
     summary["shortPassageOverheadReduction"] = {
         "requested": short_requested,
         "actual": bool(short_requested and reuse_ok),
@@ -322,7 +465,19 @@ def finalize_optimization_fields(
         "shortRtf": summary.get("rtf"),
         "firstDecodedAudioSec": summary.get("firstAudioSec"),
         "internalFirstDecodedAudioMs": summary.get("internalFirstDecodedAudioMs"),
+        "shortMemoryGrowthMb": summary.get("memoryDeltaMb"),
+        "representativeMemoryGrowthMb": summary.get("memoryDeltaMb"),
+        "memoryGrowthAcrossRunsMb": (summary.get("aggregate") or {}).get("memoryGrowthAcrossRunsMb"),
+        "peakMemoryMb": summary.get("peakMemoryMb"),
     }
+    decode_full_evidence = summary.get("decodeFullEvidence") or {}
+    if decode_full_evidence:
+        summary["promotionMetrics"].update(
+            {
+                "decodeFullFirstAudioSec": decode_full_evidence.get("firstAudioSec"),
+                "decodeFullMemoryGrowthMb": decode_full_evidence.get("memoryGrowthMb"),
+            }
+        )
     actual_flags = [
         bool(precompute_requested and summary.get("precomputeInputsActual")),
         summary["tokenizerReuseActual"],
@@ -356,7 +511,7 @@ def finalize_optimization_fields(
         "stale": False,
         "evidenceGeneratedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "runtimeReuseActual": reuse_ok,
-        "tokenizerIdentity": tokenizer_identity,
+        "tokenizerIdentity": tokenizer_object_identity,
         "promptIdentity": prompt_identity,
         "unsupportedRequestedOptimizations": unsupported_requested,
     }
@@ -368,7 +523,45 @@ def finalize_optimization_fields(
         "bookLikeRunStats": summary["bookLikeRunStats"],
         "precomputeInputsRequested": precompute_requested,
         "precomputeInputsActual": summary.get("precomputeInputsActual"),
+        "precomputeInputsPartial": summary.get("precomputeInputsPartial"),
+        "precomputeInputsBlocker": summary.get("precomputeInputsBlocker"),
+        "precomputeInputsEvidence": summary.get("precomputeInputsEvidence"),
+        "tokenizerIdentity": summary.get("tokenizerIdentity"),
+        "promptAudioCodesEvidence": summary.get("promptAudioCodesEvidence"),
         "evidence": summary["optimizationEvidence"],
+    }
+
+
+def adjacent_segment_texts(options: dict[str, Any]) -> list[str]:
+    count = int(options.get("adjacentSegmentCount") or 0)
+    if count <= 0:
+        return []
+    source = str(options.get("adjacentSegmentSource") or "raw")
+    text = str(options.get("passageText") or "")
+    if source == "book-like":
+        text = nano.BUILT_IN_PASSAGES.get("long-form-3min", text)
+    words = [word for word in text.strip().split() if word]
+    if not words:
+        return []
+    window = max(1, (len(words) + count - 1) // count)
+    segments = [" ".join(words[index : index + window]).strip() for index in range(0, len(words), window)]
+    return [segment for segment in segments if segment][:count]
+
+
+def summarize_adjacent_segments(segments: list[dict[str, Any]], requested_count: int, trend_max: float | None) -> dict[str, Any]:
+    rtfs = [float(segment["rtf"]) for segment in segments if isinstance(segment.get("rtf"), (int, float))]
+    rtf_trend = None
+    if len(rtfs) >= 2 and rtfs[0] > 0:
+        rtf_trend = round((max(rtfs) - rtfs[0]) / rtfs[0], 4)
+    return {
+        "requestedSegments": requested_count,
+        "completedSegments": len(segments),
+        "freshSegments": sum(1 for segment in segments if not segment.get("staleOutputReuse") and not segment.get("empty")),
+        "emptySegments": sum(1 for segment in segments if segment.get("empty")),
+        "staleOutputReuseCount": sum(1 for segment in segments if segment.get("staleOutputReuse")),
+        "sessionRestartCount": sum(1 for segment in segments if segment.get("sessionRestarted")),
+        "rtfTrendRatio": rtf_trend,
+        "rtfTrendMax": trend_max,
     }
 
 
@@ -820,6 +1013,15 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
     repo_dir = Path(str(options.get("repoDir") or nano.DEFAULT_REPO_DIR)).resolve()
     model_dir = Path(str(options.get("modelDir") or nano.DEFAULT_MODEL_DIR)).resolve()
     prompt_audio_path = Path(str(options["promptAudio"])).resolve() if options.get("promptAudio") else None
+    if prompt_audio_path is not None:
+        summary["promptAudioCodesEvidence"] = {
+            "status": "miss",
+            "hits": 0,
+            "misses": 1,
+            "cacheKey": prompt_audio_cache_key(prompt_audio_path),
+            "source": str(prompt_audio_path),
+            "reusedAcrossSegments": False,
+        }
     if str(repo_dir) not in sys.path:
         sys.path.insert(0, str(repo_dir))
 
@@ -909,10 +1111,11 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         effective_streaming = False
     run_records_for_reuse: list[dict[str, Any]] = []
 
-    def run_one(run_index: int, measured: bool, wav_path: Path, phase: str) -> dict[str, Any]:
+    def run_one(run_index: int, measured: bool, wav_path: Path, phase: str, text: str | None = None) -> dict[str, Any]:
         existed_before = wav_path.exists()
         if existed_before:
             wav_path.unlink()
+        passage_text = str(options.get("passageText") if text is None else text or "")
         run_payload = {
             "phase": phase,
             "measured": measured,
@@ -922,11 +1125,16 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         }
         memory_before = memory_sampler.sample()
         recorder.record("inferenceStart", memorySample=memory_before, **run_payload)
+        text_normalize_started = time.perf_counter()
+        normalized_text = passage_text.strip()
+        text_normalize_sec = round(time.perf_counter() - text_normalize_started, 4)
+        text_chunk_started = time.perf_counter()
+        text_chunk_sec = round(time.perf_counter() - text_chunk_started, 4)
         run_start = time.perf_counter()
         restore_probe = install_first_audio_probe(runtime, recorder, run_start, run_payload)
         try:
             result = runtime.synthesize(
-                text=str(options.get("passageText") or ""),
+                text=normalized_text,
                 voice=str(options.get("voice") or nano.DEFAULT_VOICE),
                 prompt_audio_path=None if prompt_audio_path is None else str(prompt_audio_path),
                 output_audio_path=str(wav_path),
@@ -940,16 +1148,31 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         finally:
             first_audio_observation = restore_probe()
         total_sec = round(time.perf_counter() - run_start, 4)
+        write_started = time.perf_counter()
         recorder.record("wavWriteEnd", totalSec=total_sec, **run_payload)
+        write_sec = round(time.perf_counter() - write_started, 4)
         memory_after = memory_sampler.sample()
         memory_fields = run_memory_fields(memory_before, memory_after)
         duration = nano.wav_duration_sec(wav_path)
         identity = runtime_identity(runtime)
         internal_ms = first_audio_observation.get("internalFirstDecodedAudioMs")
+        stage_timings = {
+            "textNormalize": text_normalize_sec,
+            "textChunk": text_chunk_sec,
+            "semanticAcousticGenerate": total_sec,
+            "streamDecode": total_sec if effective_streaming else None,
+            "fullDecode": total_sec if not effective_streaming else None,
+            "decode": total_sec,
+            "writeWav": write_sec,
+            "internalFirstDecodedAudio": first_audio_observation.get("internalFirstDecodedAudioSec"),
+        }
         record = {
             "iterationIndex": run_index,
             "phase": phase,
             "measured": measured,
+            "text": normalized_text,
+            "textHash": hashlib.sha256(normalized_text.encode("utf-8")).hexdigest(),
+            "empty": not bool(normalized_text),
             "processMode": options.get("processMode") or nano.DEFAULT_PROCESS_MODE,
             "runtimeReuseActual": False,
             "runtimeIdentity": identity,
@@ -967,22 +1190,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
             "segmentOutputWavPaths": [str(result.get("audio_path") or wav_path)],
             "segments": [],
             **memory_fields,
-            "stageProfile": {
-                "enabled": bool(options.get("profileStages")),
-                "supported": True,
-                "limitations": "Resident probe reports import/session/inference events and internal first decoded audio; upstream does not expose every ORT substage separately.",
-                "stagesSec": {
-                    "precomputeInputs": None,
-                    "runtimeStartup": None,
-                    "modelLoad": None,
-                    "tokenize": None,
-                    "prepareInputs": None,
-                    "onnxInference": None,
-                    "decode": None,
-                    "writeWav": None,
-                    "internalFirstDecodedAudio": first_audio_observation.get("internalFirstDecodedAudioSec"),
-                },
-            },
+            "stageProfile": resident_stage_profile(bool(options.get("profileStages")), stage_timings),
         }
         recorder.record(
             "runEnd",
@@ -1004,6 +1212,57 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         for iteration_index in range(iterations):
             wav_name = "output.wav" if iterations == 1 else f"output_{iteration_index + 1:03d}.wav"
             summary["iterations"].append(run_one(iteration_index, True, out_dir / wav_name, "iteration"))
+        adjacent_texts = adjacent_segment_texts(options)
+        if adjacent_texts:
+            first_adjacent_identity: dict[str, Any] | None = None
+            requested_adjacent_count = int(options.get("adjacentSegmentCount") or len(adjacent_texts))
+            adjacent_segments: list[dict[str, Any]] = []
+            for segment_index, segment_text in enumerate(adjacent_texts):
+                record = run_one(
+                    segment_index,
+                    True,
+                    out_dir / f"adjacent_segment_{segment_index + 1:03d}.wav",
+                    "adjacent-segment",
+                    segment_text,
+                )
+                identity = record.get("runtimeIdentity")
+                if first_adjacent_identity is None:
+                    first_adjacent_identity = identity
+                output_wav_path = str(record.get("outputWavPath") or "")
+                segment = {
+                    "index": segment_index,
+                    "passageId": f"adjacent-segment-{segment_index + 1}",
+                    "text": segment_text,
+                    "textHash": record.get("textHash"),
+                    "empty": record.get("empty"),
+                    "runtimeReuseActual": record.get("runtimeReuseActual"),
+                    "runtimeIdentity": identity,
+                    "firstAudioObservation": record.get("firstAudioObservation"),
+                    "staleOutputReuse": bool(record.get("firstAudioObservation", {}).get("reusedExistingOutputFile"))
+                    or bool(record.get("firstAudioObservation", {}).get("outputFileExistedBeforeRun")),
+                    "sessionRestarted": bool(first_adjacent_identity is not None and identity != first_adjacent_identity),
+                    "outputWavPath": output_wav_path,
+                    "audioDurationSec": record.get("audioDurationSec"),
+                    "totalSec": record.get("totalSec"),
+                    "rtf": record.get("rtf"),
+                    "memoryBeforeMb": record.get("memoryBeforeMb"),
+                    "memoryAfterMb": record.get("memoryAfterMb"),
+                    "memoryDeltaMb": record.get("memoryDeltaMb"),
+                    "peakMemoryMb": record.get("peakMemoryMb"),
+                    "freshness": {
+                        "outputFileExistedBeforeRun": bool(record.get("firstAudioObservation", {}).get("outputFileExistedBeforeRun")),
+                        "reusedExistingOutputFile": bool(record.get("firstAudioObservation", {}).get("reusedExistingOutputFile")),
+                    },
+                    "stageProfile": record.get("stageProfile"),
+                }
+                adjacent_segments.append(segment)
+            summary["segments"] = adjacent_segments
+            summary["adjacentSegmentStats"] = summarize_adjacent_segments(
+                adjacent_segments,
+                requested_adjacent_count,
+                options.get("adjacentSegmentRtfTrendMax"),
+            )
+            summary["crossSegmentStateBlocker"] = "NO_CROSS_SEGMENT_MODEL_STATE_HOOK"
     except Exception as exc:
         summary["status"] = "failed"
         summary["failureClass"] = classify_exception(exc, "runtime")
@@ -1047,6 +1306,8 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
 
     for record in run_records_for_reuse:
         record["runtimeReuseActual"] = True
+    for segment in summary.get("segments", []):
+        segment["runtimeReuseActual"] = True
     summary["benchmark"]["runtimeReuseActual"] = True
 
     representative = measured_iterations[-1]
@@ -1065,6 +1326,38 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
     summary["peakMemoryMb"] = representative.get("peakMemoryMb") or nano.get_peak_memory_mb()
     summary["memoryEvidence"] = representative.get("memoryEvidence")
     summary["stageProfile"] = representative["stageProfile"]
+    if resident_decode.get("appliedMode") == "full":
+        summary["decodeFullEvidence"] = decode_full_threshold_evidence(
+            representative.get("firstAudioSec"),
+            representative.get("memoryDeltaMb"),
+        )
+        decode_full_passed = summary["decodeFullEvidence"]["status"] == "passed"
+        summary["acceptedDecodeStrategy"] = {
+            "strategy": "decode-full",
+            "accepted": decode_full_passed,
+            "replacementForDecodeFull": False,
+            "reason": None if decode_full_passed else summary["decodeFullEvidence"].get("reason"),
+        }
+    elif resident_decode.get("appliedMode") == "stream":
+        summary["acceptedDecodeStrategy"] = {
+            "strategy": "streaming",
+            "accepted": True,
+            "replacementForDecodeFull": True,
+        }
+    if prompt_audio_path is not None:
+        prompt_identity = runtime_attr_identity(runtime, ("prompt_cache", "prompt_embedding", "prompt_audio"))
+        reused_prompt_codes = bool(prompt_identity and len(summary.get("segments") or []) > 1)
+        summary["promptAudioCodesEvidence"] = {
+            **dict(summary.get("promptAudioCodesEvidence") or {}),
+            "status": "actual" if reused_prompt_codes else "miss",
+            "hits": max(0, len(summary.get("segments") or []) - 1) if reused_prompt_codes else 0,
+            "misses": 1,
+            "cacheKey": prompt_audio_cache_key(prompt_audio_path),
+            "source": str(prompt_audio_path),
+            "promptIdentity": prompt_identity,
+            "reusedAcrossSegments": reused_prompt_codes,
+        }
+        summary["promptReuseActual"] = reused_prompt_codes
     memory_aggregate = aggregate_memory_fields(run_records_for_reuse)
     summary["aggregate"] = {
         "iterations": len(measured_iterations),
