@@ -77,6 +77,114 @@ function successfulNanoSummary(overrides = {}) {
   };
 }
 
+function residentRuntimeIdentity(overrides = {}) {
+  return {
+    pythonProcessIdentity: "python-pid:4242",
+    loadedSessionIdentities: {
+      semantic: "semantic-session:alpha",
+      acoustic: "acoustic-session:alpha",
+      audioTokenizer: "audio-tokenizer-session:alpha",
+    },
+    ...overrides,
+  };
+}
+
+function internalFirstDecodedAudioObservation(overrides = {}) {
+  return {
+    kind: "internal-first-decoded-audio",
+    sourceEvent: "firstDecodedAudio",
+    internalFirstDecodedAudioMs: 120,
+    internalFirstDecodedAudioSec: 0.12,
+    internalFirstDecodedAudioSupported: true,
+    fileObservedAudioSec: null,
+    fileResetBeforeRun: true,
+    reusedExistingOutputFile: false,
+    ...overrides,
+  };
+}
+
+function residentIteration(overrides = {}) {
+  const firstAudioObservation = overrides.firstAudioObservation ?? internalFirstDecodedAudioObservation();
+  return {
+    iterationIndex: 0,
+    processMode: "warm",
+    runtimeReuseActual: true,
+    runtimeIdentity: residentRuntimeIdentity(),
+    totalSec: 0.4,
+    firstAudioSec: 0.12,
+    firstAudioObservedSec: null,
+    internalFirstDecodedAudioMs: 120,
+    firstAudioObservation,
+    audioDurationSec: 1,
+    rtf: 0.4,
+    outputWavPath: "output-001.wav",
+    outputPath: "output-001.wav",
+    segments: [],
+    ...overrides,
+  };
+}
+
+function residentNanoSummary(overrides = {}) {
+  return successfulNanoSummary({
+    runId: "nano-resident-ok",
+    runtimeMode: "resident",
+    processMode: "warm",
+    firstAudioSec: 0.12,
+    firstAudioObservedSec: null,
+    internalFirstDecodedAudioMs: 120,
+    firstAudioObservation: internalFirstDecodedAudioObservation(),
+    benchmark: {
+      processMode: "warm",
+      iterationsRequested: 2,
+      warmupRunsRequested: 1,
+      prewarm: "ort-sessions",
+      runtimeReuseRequested: true,
+      runtimeReuseSupported: true,
+      runtimeReuseActual: true,
+    },
+    runtimeIdentity: residentRuntimeIdentity(),
+    ortOptionsRequested: {
+      providers: ["CPUExecutionProvider"],
+      intraOpThreads: 2,
+      interOpThreads: 1,
+      executionMode: "sequential",
+      graphOptimization: "basic",
+      enableCpuMemArena: false,
+      enableMemPattern: true,
+      enableMemReuse: false,
+      usePerSessionThreads: true,
+    },
+    ortOptionsApplied: {
+      providers: ["CPUExecutionProvider"],
+      intraOpThreads: 2,
+      interOpThreads: 1,
+      executionMode: "sequential",
+      graphOptimization: "basic",
+      enableCpuMemArena: false,
+      enableMemPattern: true,
+      enableMemReuse: false,
+    },
+    ortOptionsUnsupported: {
+      usePerSessionThreads: {
+        requested: true,
+        reason: "The resident runtime shares the process thread pool.",
+      },
+    },
+    warmups: [
+      residentIteration({ iterationIndex: -1, phase: "warmup" }),
+    ],
+    iterations: [
+      residentIteration({ iterationIndex: 0 }),
+      residentIteration({ iterationIndex: 1 }),
+    ],
+    aggregate: {
+      iterations: 2,
+      warmupsExcluded: 1,
+    },
+    ...overrides,
+  });
+}
+
 function fakeInferScript() {
   return [
     "import argparse, wave",
@@ -1094,6 +1202,286 @@ describe("MOSS Nano probe", () => {
     expect(summary.summary.firstAudioSec).toBe(summary.summary.firstAudioObservedSec);
     expect(summary.summary.firstAudioObservation.internalFirstDecodedAudioSec).toBeNull();
     expect(summary.summary.firstAudioObservation.kind).not.toBe("internal-first-decoded-audio");
+  });
+
+  it("routes resident requests through a resident probe and preserves resident timing, reuse, and ORT evidence", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-route";
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(residentNanoSummary({ runId }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 2,
+      warmupRuns: 1,
+      prewarm: "ort-sessions",
+      profileStages: true,
+      ortProviders: "CPUExecutionProvider",
+      ortIntraOpThreads: 2,
+      ortInterOpThreads: 1,
+      ortExecutionMode: "sequential",
+      ortGraphOptimization: "basic",
+      ortEnableCpuMemArena: false,
+      ortEnableMemPattern: true,
+      ortEnableMemReuse: false,
+      ortUsePerSessionThreads: true,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile.mock.calls[0][1][0]).toMatch(/moss_nano_resident_probe\.py$/);
+    expect(execFile.mock.calls[0][1]).toEqual(expect.arrayContaining([
+      "--runtime-mode",
+      "resident",
+    ]));
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.summary).toMatchObject({
+      runtimeMode: "resident",
+      internalFirstDecodedAudioMs: 120,
+      firstAudioObservedSec: null,
+      benchmark: {
+        runtimeReuseSupported: true,
+        runtimeReuseActual: true,
+      },
+      firstAudioObservation: {
+        kind: "internal-first-decoded-audio",
+        sourceEvent: "firstDecodedAudio",
+        reusedExistingOutputFile: false,
+      },
+      ortOptionsRequested: expect.any(Object),
+      ortOptionsApplied: expect.any(Object),
+      ortOptionsUnsupported: expect.any(Object),
+    });
+    expect(summary.summary.ortOptionsApplied).not.toEqual(summary.summary.ortOptionsRequested);
+  });
+
+  it("blocks resident summaries that claim runtime reuse without stable process and session identities", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-false-reuse";
+    const changedSessionIdentity = residentRuntimeIdentity({
+      loadedSessionIdentities: {
+        semantic: "semantic-session:beta",
+        acoustic: "acoustic-session:alpha",
+        audioTokenizer: "audio-tokenizer-session:alpha",
+      },
+    });
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(residentNanoSummary({
+        runId,
+        iterations: [
+          residentIteration({ iterationIndex: 0 }),
+          residentIteration({ iterationIndex: 1, runtimeIdentity: changedSessionIdentity }),
+        ],
+      }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 2,
+      warmupRuns: 1,
+      prewarm: "ort-sessions",
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.benchmark.runtimeReuseActual).toBe(false);
+    expect(summary.summary.error).toMatch(/runtime reuse.*identity/i);
+    expect(summary.summary.checks).toContainEqual(expect.objectContaining({
+      key: "runtimeReuse",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("blocks promotion-class resident summaries that use WAV polling as first-audio evidence", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-file-polling-first-audio";
+    const fileObservedFirstAudio = {
+      kind: "file-observed-wav-bytes",
+      thresholdBytes: 44,
+      fileResetBeforeRun: true,
+      internalFirstDecodedAudioMs: null,
+      internalFirstDecodedAudioSupported: false,
+      reusedExistingOutputFile: false,
+    };
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(residentNanoSummary({
+        runId,
+        promotionClass: true,
+        firstAudioSec: 0.03,
+        firstAudioObservedSec: 0.03,
+        internalFirstDecodedAudioMs: null,
+        firstAudioObservation: fileObservedFirstAudio,
+        iterations: [
+          residentIteration({
+            iterationIndex: 0,
+            firstAudioSec: 0.03,
+            firstAudioObservedSec: 0.03,
+            internalFirstDecodedAudioMs: null,
+            firstAudioObservation: fileObservedFirstAudio,
+          }),
+        ],
+      }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 1,
+      prewarm: "ort-sessions",
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.error).toMatch(/internal first decoded audio/i);
+    expect(summary.summary.firstAudioObservation.kind).not.toBe("file-observed-wav-bytes");
+  });
+
+  it("blocks resident summaries that collapse requested ORT options into unsupported subprocess metadata", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-ort-requested-only";
+    const requestedOnlySummary = residentNanoSummary({ runId });
+    delete requestedOnlySummary.ortOptionsRequested;
+    delete requestedOnlySummary.ortOptionsApplied;
+    delete requestedOnlySummary.ortOptionsUnsupported;
+    requestedOnlySummary.ort = {
+      requested: {
+        providers: ["CPUExecutionProvider"],
+        intraOpThreads: 2,
+        usePerSessionThreads: true,
+      },
+      available: {
+        directSessionConfiguration: false,
+      },
+      appliedToCommand: false,
+      unsupported: true,
+    };
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(requestedOnlySummary)}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 2,
+      prewarm: "ort-sessions",
+      ortProviders: "CPUExecutionProvider",
+      ortIntraOpThreads: 2,
+      ortUsePerSessionThreads: true,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.error).toMatch(/ortOptionsRequested.*ortOptionsApplied/i);
+    expect(summary.summary.ortOptionsRequested).toMatchObject({
+      providers: ["CPUExecutionProvider"],
+      intraOpThreads: 2,
+      usePerSessionThreads: true,
+    });
+    expect(summary.summary.ortOptionsApplied).toEqual(expect.any(Object));
+    expect(summary.summary.ortOptionsUnsupported).toMatchObject({
+      usePerSessionThreads: expect.any(Object),
+    });
+  });
+
+  it("blocks repeated resident warm runs that reuse an existing output file as first-audio evidence", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-stale-output-evidence";
+    const staleOutputObservation = internalFirstDecodedAudioObservation({
+      kind: "file-observed-wav-bytes",
+      outputFileExistedBeforeRun: true,
+      reusedExistingOutputFile: true,
+      internalFirstDecodedAudioMs: null,
+      internalFirstDecodedAudioSec: null,
+      internalFirstDecodedAudioSupported: false,
+    });
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(residentNanoSummary({
+        runId,
+        firstAudioObservation: staleOutputObservation,
+        iterations: [
+          residentIteration({ iterationIndex: 0 }),
+          residentIteration({
+            iterationIndex: 1,
+            firstAudioObservation: staleOutputObservation,
+          }),
+        ],
+      }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 2,
+      warmupRuns: 1,
+      prewarm: "ort-sessions",
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.error).toMatch(/existing output file.*first-audio/i);
+    expect(summary.summary.iterations[1].firstAudioObservation).toMatchObject({
+      outputFileExistedBeforeRun: true,
+      reusedExistingOutputFile: true,
+    });
   });
 
   it("passes custom passage text, run id, and out path into per-run artifacts", async () => {

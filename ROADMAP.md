@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-28 — MOSS app integration remains paused; `MOSS-NANO-2` closed as `KEEP_KOKORO_ONLY`.
+**Last updated**: 2026-04-28 — MOSS app integration remains paused; `MOSS-NANO-3` closed as `ITERATE_NANO_RESIDENT_RUNTIME`.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. Nano generated local CPU audio and remains better than flagship, but MOSS-NANO-2 did not produce viable live-app timing, true runtime reuse, applied ORT/session options, or trustworthy internal first-decoded timing. No Nano app prototype is approved now, and Kokoro behavior is unchanged.
+**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-3 proved true resident Nano runtime reuse and internal first-decoded timing, but short RTF `1.7005` missed the promotion threshold `<=1.5` and memory growth needs soak/tuning. Final decision: `ITERATE_NANO_RESIDENT_RUNTIME`. No Nano app prototype is approved, no MOSS-3 reopen occurred, and Kokoro behavior is unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -131,6 +131,8 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     MOSS-NANO-1: CPU Realtime Candidate Bring-Up ✅ (ITERATE_NANO_RUNTIME)
                     │
     MOSS-NANO-2: Runtime Latency Rescue ✅ (KEEP_KOKORO_ONLY)
+                    │
+    MOSS-NANO-3: In-Process Runtime Reuse And First-Audio Truth ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
                     │
     MOSS-3: Sidecar Contract And Streaming IPC (PAUSED)
                     │
@@ -4158,7 +4160,7 @@ Task 6         — after Task 5 (git)
 
 ### Flagship-First MOSS Operational Narration Lane
 
-**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, and `MOSS-NANO-2` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE`, or another explicit app-integration promotion decision. The latest MOSS decision is `KEEP_KOKORO_ONLY`.
+**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, and `MOSS-NANO-3` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, or another explicit app-integration promotion decision. The latest MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`.
 
 #### Sprint MOSS-HOST-1: Native/WSL Runtime Escape Hatch (COMPLETED)
 
@@ -4239,6 +4241,128 @@ MOSS-3 remains paused. Do not record `PROMOTE_NANO_TO_APP_PROTOTYPE`, do not rej
 **Decision framing:** `KEEP_KOKORO_ONLY` means no Nano app prototype now; it is not a permanent Nano rejection. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options. Keep MOSS-3 through MOSS-7 paused unless a new explicit promotion decision is recorded.
 
 **Tier:** Runtime rescue | **Branch:** `sprint/moss-nano-2-runtime-latency-rescue` | **Depends on:** MOSS-NANO-1
+
+---
+
+#### Sprint MOSS-NANO-3: In-Process Runtime Reuse And First-Audio Truth (COMPLETED)
+
+**Status:** Completed 2026-04-28 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. This was a runtime-only sprint; it did not add app integration, did not change Kokoro behavior, and did not reopen MOSS-3.
+
+**Type:** Runtime instrumentation and latency proof. No app integration, no sidecar IPC, no renderer integration, no selectable engine work, no cache/continuity integration, no timing-truth UI integration, and no Kokoro behavior change.
+
+**Implementation evidence:** New resident runtime path: `scripts/moss_nano_resident_probe.py`. Existing wrapper path: `scripts/moss_nano_probe.mjs --runtime-mode resident`. Package script: `npm run moss:nano:resident`.
+
+**Verification evidence:** Focused tests passed after known sandbox `EPERM` and escalated rerun: `npm test -- tests/mossNanoProbe.test.js` => `28/28` pass. Full tests passed: `npm test` => `150` files, `2268` tests pass. Build passed: `npm run build`, with the existing circular chunk warning unchanged.
+
+**Canonical refreshed artifacts:**
+
+- `artifacts/moss/moss-nano-3-short-resident/summary.json`: `internalFirstDecodedAudioMs` `513`, RTF `1.7005`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `36.59`.
+- `artifacts/moss/moss-nano-3-punctuation-resident/summary.json`: `internalFirstDecodedAudioMs` `541`, RTF `1.2042`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `62.92`.
+- `artifacts/moss/moss-nano-3-ort-session-resident/summary.json`: requested/applied ORT split recorded; CPU provider, `intraOp` `2`, and `interOp` `1` applied; `usePerSessionThreads` truthfully unsupported; `internalFirstDecodedAudioMs` `516`; RTF `1.0962`; `runtimeReuseActual: true`.
+- `artifacts/moss/moss-nano-3-stale-output-guard/summary.json`: clean fresh-output evidence with `outputFileExistedBeforeRun: false`, `reusedExistingOutputFile: false`, and memory evidence present.
+
+**Comparison:** MOSS-NANO-2 v2 had observed first audio `13.9036s` / `15.2025s` short and `20.0393s` / `18.6516s` punctuation with `runtimeReuseActual: false`. Kokoro baseline remains `1385ms` / RTF `0.3337` short and `5616ms` / RTF `0.7414` punctuation.
+
+**Rationale:** Nano now proves true resident reuse and internal first decoded audio, but short RTF `1.7005` misses the promotion threshold `<=1.5`, and memory growth across resident runs needs soak/tuning. Iterate resident runtime rather than promote. Next work, if any, should be resident runtime tuning/soak/perf only.
+
+**Goal:** Determine whether MOSS-TTS-Nano is slow because Blurby is currently launching a subprocess/CLI-style runtime for each probe, or because Nano ONNX itself is still too slow on this CPU even with resident sessions and applied ONNX Runtime options.
+
+**WHAT:** Build a resident/in-process Nano diagnostic path that imports the Nano runtime once, creates and reuses ONNX Runtime sessions once, applies real `SessionOptions`/execution-provider settings, and emits internal timing events from text input to first decoded audio sample. Compare cold start, warm reuse, and repeated same-process runs against the canonical `MOSS-NANO-2` v2 artifacts and the paired Kokoro baseline.
+
+**HYPOTHESIS:** MOSS-NANO-2 may have measured process startup, Python import, asset/session construction, and output-file observation more than model inference itself. If true resident reuse is achieved, warm first decoded audio should drop dramatically. Decision branches:
+
+- `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`: warm resident internal first decoded audio is low enough for live-book buffering, warm total RTF is near realtime, `runtimeReuseActual` is true, ORT/session options are proven applied, and no reliability blockers appear.
+- `ITERATE_NANO_RESIDENT_RUNTIME`: in-process reuse produces a meaningful improvement but still misses promotion thresholds; continue runtime work only, not app integration.
+- `KEEP_KOKORO_ONLY`: resident reuse is false, internal first-decoded timing remains too slow, ORT options still do not apply, or gains are too small to matter.
+- `REJECT_NANO_LOCAL_CPU`: in-process Nano cannot be imported/run reliably on this host, crashes, leaks memory across repeats, or requires unsupported runtime changes.
+
+**Promotion thresholds:** A promotion candidate requires all of these in canonical artifacts:
+
+- `runtimeReuseActual: true` across at least one cold run plus two warm same-process runs.
+- `internalFirstDecodedAudioMs` present and measured inside Python before final WAV file close.
+- Warm `short-smoke` internal first decoded audio <= `3000` ms and total RTF <= `1.5`.
+- Warm `punctuation-heavy-mid` internal first decoded audio <= `3500` ms and total RTF <= `1.25`.
+- Applied ORT/session options are reflected by live session metadata or explicit runtime inspection, not only requested metadata.
+- Three repeated warm punctuation runs complete without crash, stale output reuse, empty passage, or reused-file artifact.
+- Kokoro remains unchanged and still passes as the operational baseline.
+
+**WHERE:**
+
+- `scripts/moss_nano_probe.mjs`: existing Node wrapper; `--runtime-mode resident` delegates to resident runtime reporting while preserving the subprocess comparison baseline.
+- `scripts/moss_nano_probe.py`: existing Python bridge; preserve current CLI/subprocess behavior while factoring shared passage/config validation if useful.
+- `scripts/moss_nano_resident_probe.py`: Python resident runtime that imports Nano once, loads tokenizer/model/session once, applies ORT/session options, runs cold/warm repeats, and emits internal timing events.
+- `.runtime/moss/MOSS-TTS-Nano/infer_onnx.py`: read-only upstream contract source; inspect import boundaries, model/session construction, decoder entry points, prompt-audio handling, and whether streaming/partial decode hooks exist. Do not commit `.runtime/**`.
+- `.runtime/moss/weights/MOSS-TTS-Nano-ONNX/`: local-only model/tokenizer/audio-tokenizer assets. Verify presence, but do not stage or commit.
+- `tests/mossNanoProbe.test.js`: add coverage for resident summary shape, applied-vs-requested ORT options, true reuse fields, repeated-run summaries, empty-passage fail-closed behavior, and artifact normalization.
+- `package.json`: add a diagnostic command only if useful, e.g. `moss:nano:resident`, without changing app runtime scripts.
+- `artifacts/moss/moss-nano-3-*`: canonical output artifacts for cold/warm short, cold/warm punctuation, repeated warm punctuation, ORT/session comparison, and Kokoro comparison reference.
+- `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, and `docs/governance/SPRINT_QUEUE.md`: record evidence, decision, and next queue state.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {max}: Trace upstream Nano `infer_onnx.py` and current Blurby Nano probe end to end. Produce a resident-runtime map: where Python import time occurs, where ONNX sessions are created, where text becomes semantic/acoustic/audio tokens, where WAV bytes first become available, and which ORT options can be applied to actual sessions. Explicitly classify any import-level blocker before implementation.
+
+Hermes [haiku]: Create/use branch `sprint/moss-nano-3-resident-runtime-truth`. Confirm `main` is clean, `.runtime/**` is not staged, and existing canonical `MOSS-NANO-2` artifacts are available for comparison or report the missing artifact paths.
+
+**HOW (Implementation):**
+
+Hercules [sonnet] {high}: Add failing tests first in `tests/mossNanoProbe.test.js` for resident summary fields:
+
+- `runtimeMode: "resident"`
+- `runtimeReuseActual: true` only when the same Python process and loaded session identity are reused
+- `internalFirstDecodedAudioMs` required for promotion-class summaries
+- `ortOptionsRequested` distinct from `ortOptionsApplied`
+- repeated warm runs cannot reuse an existing output file as first-audio evidence
+
+Athena [opus] {high}: Implement the resident Python runtime path. Prefer a new `scripts/moss_nano_resident_probe.py` if preserving the current subprocess probe is cleaner. The resident path must load assets once, reuse sessions, expose per-stage timings, and emit JSONL or structured events for `importStart`, `importEnd`, `assetLoadStart`, `sessionCreateEnd`, `inferenceStart`, `firstDecodedAudio`, `wavWriteEnd`, and `runEnd`.
+
+Hercules [sonnet]: Implement the Node orchestration wrapper, preferably `scripts/moss_nano_resident_probe.mjs`, that validates config/passages, invokes the resident Python path, normalizes summaries, writes artifacts, and fails closed on missing internal timing or false reuse.
+
+Hermes [haiku]: Add package script only if the command becomes stable: `npm run moss:nano:resident -- --run-id <id> --passage short --warm-repeats 2 --json`. Do not alter Electron, renderer, IPC, Kokoro, or production TTS scripts.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused tests first:
+
+- `npm test -- tests/mossNanoProbe.test.js`
+- any Python unit checks added for the resident probe
+
+Hippocrates [haiku]: Run canonical resident evidence commands:
+
+- Cold short and two warm short repeats.
+- Cold punctuation and three warm punctuation repeats.
+- ORT/session comparison proving options are applied or truthfully blocked.
+- A stale-output guard run that deletes/resets output paths and proves first audio is not file reuse.
+
+Hippocrates [haiku]: Run comparison verification:
+
+- Compare resident Nano canonical artifacts to `MOSS-NANO-2` v2 summaries.
+- Compare resident Nano artifacts to Kokoro paired baseline from `moss2c-kokoro-baseline`.
+- Run full `npm test` and `npm run build` after code/doc changes.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify spec compliance against the promotion thresholds and non-goals. Reject if the sprint claims promotion without true reuse, internal first decoded timing, applied ORT/session options, and canonical repeated warm punctuation evidence.
+
+Plato [sonnet]: Review for false evidence risks: stale files, empty passage aliases, requested-vs-applied ORT drift, subprocess reuse masquerading as resident reuse, memory growth across repeats, app integration drift, and accidental `.runtime/**` staging.
+
+Herodotus [sonnet]: Update `MOSS_DECISION_LOG.md`, `MOSS_FLAGSHIP_FEASIBILITY.md`, `SPRINT_QUEUE.md`, and this Roadmap section with the final decision. Do not reopen `MOSS-3` unless the evidence explicitly records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+Hermes [haiku]: Stage only scoped files and artifacts. Exclude `.runtime/**`, model weights, venvs, caches, and unrelated local artifacts. Commit, merge to `main`, and push only after focused tests, full tests, build, Solon, and Plato pass.
+
+**Acceptance criteria:**
+
+- Existing Nano subprocess probe behavior remains available for comparison.
+- Resident runtime emits internal first decoded audio timing or fails closed with a named blocker.
+- Summary JSON distinguishes requested vs applied ORT/session options.
+- Summary JSON proves true reuse with stable process/session identity across warm repeats.
+- Canonical artifacts include cold/warm short, cold/warm punctuation, repeated warm punctuation, and comparison notes.
+- Final decision is exactly one of `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, `KEEP_KOKORO_ONLY`, or `REJECT_NANO_LOCAL_CPU`.
+- No app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity work, timing-truth UI work, Kokoro behavior change, or Kokoro retirement work occurs in this sprint.
+
+**Shared-core touch policy:** No edits to `src/hooks/useNarration.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, or `src/types.ts`. If a worker believes a shared-core edit is necessary, stop and update the spec first.
+
+**Tier:** Runtime instrumentation | **Branch:** `sprint/moss-nano-3-resident-runtime-truth` | **Depends on:** MOSS-NANO-2
 
 ---
 
