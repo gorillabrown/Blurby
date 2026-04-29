@@ -1,0 +1,1016 @@
+{
+  "status": "ok",
+  "runId": "moss-nano-3-stale-output-guard",
+  "passageId": "short-smoke",
+  "failureClass": null,
+  "summary": {
+    "ok": true,
+    "status": "ok",
+    "runId": "moss-nano-3-stale-output-guard",
+    "passageId": "short-smoke",
+    "backend": "moss-nano-onnx",
+    "device": "cpu",
+    "modelVariant": "moss-tts-nano-onnx",
+    "pythonExecutable": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv-nano\\Scripts\\python.exe",
+    "threads": 4,
+    "sampleRate": 48000,
+    "maxNewFrames": 375,
+    "sampleMode": "fixed",
+    "streaming": true,
+    "voice": "Junhao",
+    "repoDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano",
+    "modelDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX",
+    "expectedModelSubdirs": [
+      "MOSS-TTS-Nano-100M-ONNX",
+      "MOSS-Audio-Tokenizer-Nano-ONNX"
+    ],
+    "promptAudio": null,
+    "wordCount": 9,
+    "totalSec": 6.0681,
+    "firstAudioSec": 0.611,
+    "firstAudioObservedSec": null,
+    "firstAudioObservation": {
+      "kind": "internal-first-decoded-audio",
+      "sourceEvent": "firstDecodedAudio",
+      "internalFirstDecodedAudioMs": 611,
+      "internalFirstDecodedAudioSec": 0.611,
+      "internalFirstDecodedAudioSupported": true,
+      "fileObservedAudioSec": null,
+      "fileResetBeforeRun": true,
+      "outputFileExistedBeforeRun": false,
+      "reusedExistingOutputFile": false,
+      "fieldAliases": [
+        "firstAudioSec"
+      ]
+    },
+    "audioDurationSec": 4.72,
+    "rtf": 1.2856,
+    "peakMemoryMb": 1757.26,
+    "outputWavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+    "outputPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+    "segmentOutputWavPaths": [
+      "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+      "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav"
+    ],
+    "stdoutTail": "",
+    "stderrTail": "",
+    "commandMetadata": null,
+    "checks": [
+      {
+        "key": "pythonVersion",
+        "status": "pass",
+        "detail": "Python 3.13.13 is supported.",
+        "failureClass": null
+      },
+      {
+        "key": "sourceRepo",
+        "status": "pass",
+        "detail": "Nano source repo is present at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano.",
+        "failureClass": null
+      },
+      {
+        "key": "modelRoot",
+        "status": "pass",
+        "detail": "Nano ONNX model root is present at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX.",
+        "failureClass": null
+      },
+      {
+        "key": "onnxAssets",
+        "status": "pass",
+        "detail": "Found 5 ONNX file(s) in C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX\\MOSS-TTS-Nano-100M-ONNX.",
+        "failureClass": null
+      },
+      {
+        "key": "onnxAssets",
+        "status": "pass",
+        "detail": "Found 3 ONNX file(s) in C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX\\MOSS-Audio-Tokenizer-Nano-ONNX.",
+        "failureClass": null
+      },
+      {
+        "key": "pythonDependency",
+        "status": "pass",
+        "detail": "Required Python dependencies onnxruntime, numpy, sentencepiece, torch, torchaudio are importable.",
+        "failureClass": null
+      }
+    ],
+    "failureClass": null,
+    "error": null,
+    "benchmark": {
+      "processMode": "warm",
+      "iterationsRequested": 2,
+      "warmupRunsRequested": 1,
+      "prewarm": "none",
+      "runtimeReuseRequested": true,
+      "runtimeReuseSupported": true,
+      "runtimeReuseActual": true,
+      "precomputeInputsRequested": false
+    },
+    "segmentation": {
+      "policy": "none",
+      "source": "raw",
+      "maxTokens": null,
+      "maxChars": null,
+      "minChars": null,
+      "writeSegmentWavs": false,
+      "segments": []
+    },
+    "ort": {
+      "requested": {
+        "providers": [],
+        "intraOpThreads": null,
+        "interOpThreads": null,
+        "executionMode": null,
+        "graphOptimization": null,
+        "enableCpuMemArena": null,
+        "enableMemPattern": null,
+        "enableMemReuse": null,
+        "usePerSessionThreads": null
+      },
+      "applied": {
+        "providers": [
+          "CPUExecutionProvider"
+        ],
+        "availableProviders": [
+          "AzureExecutionProvider",
+          "CPUExecutionProvider"
+        ],
+        "intraOpThreads": 4,
+        "interOpThreads": 1,
+        "executionMode": "sequential",
+        "graphOptimization": "all",
+        "enableCpuMemArena": true,
+        "enableMemPattern": true,
+        "enableMemReuse": true
+      },
+      "unsupported": {},
+      "directSessionConfiguration": true,
+      "status": "configured",
+      "liveMetadata": {
+        "sessionCount": 8,
+        "sessions": {
+          "codec_decode": {
+            "identity": "codec_decode-session:1988727107072",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "codec_decode_step": {
+            "identity": "codec_decode_step-session:1988727107344",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "codec_encode": {
+            "identity": "codec_encode-session:1988727922928",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "decode": {
+            "identity": "decode-session:1988729408400",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "local_cached_step": {
+            "identity": "local_cached_step-session:1988727153952",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "local_decoder": {
+            "identity": "local_decoder-session:1988729408720",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "local_fixed_sampled_frame": {
+            "identity": "local_fixed_sampled_frame-session:1988727153648",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          },
+          "prefill": {
+            "identity": "prefill-session:1988729280160",
+            "providers": [
+              "CPUExecutionProvider"
+            ],
+            "providerOptions": {
+              "CPUExecutionProvider": {}
+            }
+          }
+        }
+      }
+    },
+    "stageProfile": {
+      "enabled": true,
+      "supported": true,
+      "limitations": "Resident probe reports import/session/inference events and internal first decoded audio; upstream does not expose every ORT substage separately.",
+      "stagesSec": {
+        "precomputeInputs": null,
+        "runtimeStartup": null,
+        "modelLoad": null,
+        "tokenize": null,
+        "prepareInputs": null,
+        "onnxInference": null,
+        "decode": null,
+        "writeWav": null,
+        "internalFirstDecodedAudio": 0.611
+      }
+    },
+    "iterations": [
+      {
+        "iterationIndex": 0,
+        "phase": "iteration",
+        "measured": true,
+        "processMode": "warm",
+        "runtimeReuseActual": true,
+        "runtimeIdentity": {
+          "pythonProcessIdentity": "python-pid:43312",
+          "runtimeObjectIdentity": "OnnxTtsRuntime:1988726747696",
+          "loadedSessionIdentities": {
+            "codec_decode": "codec_decode-session:1988727107072",
+            "codec_decode_step": "codec_decode_step-session:1988727107344",
+            "codec_encode": "codec_encode-session:1988727922928",
+            "decode": "decode-session:1988729408400",
+            "local_cached_step": "local_cached_step-session:1988727153952",
+            "local_decoder": "local_decoder-session:1988729408720",
+            "local_fixed_sampled_frame": "local_fixed_sampled_frame-session:1988727153648",
+            "prefill": "prefill-session:1988729280160"
+          }
+        },
+        "totalSec": 6.5317,
+        "firstAudioSec": 0.507,
+        "firstAudioObservedSec": null,
+        "internalFirstDecodedAudioMs": 507,
+        "firstAudioSource": "internal-decoded-audio",
+        "firstAudioObservation": {
+          "kind": "internal-first-decoded-audio",
+          "sourceEvent": "firstDecodedAudio",
+          "internalFirstDecodedAudioMs": 507,
+          "internalFirstDecodedAudioSec": 0.507,
+          "internalFirstDecodedAudioSupported": true,
+          "fileObservedAudioSec": null,
+          "fileResetBeforeRun": true,
+          "outputFileExistedBeforeRun": false,
+          "reusedExistingOutputFile": false,
+          "fieldAliases": [
+            "firstAudioSec"
+          ]
+        },
+        "audioDurationSec": 4.64,
+        "rtf": 1.4077,
+        "outputWavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+        "outputPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+        "segmentCount": 1,
+        "segmentOutputWavPaths": [
+          "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav"
+        ],
+        "segments": [],
+        "memoryBeforeMb": 1704.98,
+        "memoryAfterMb": 1734.36,
+        "memoryDeltaMb": 29.38,
+        "peakMemoryMb": 1748.42,
+        "memoryEvidence": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "currentMemorySupported": true,
+          "peakMemorySupported": true,
+          "reason": null,
+          "before": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1704.98,
+            "peakMemoryMb": 1704.98,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          },
+          "after": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1734.36,
+            "peakMemoryMb": 1748.42,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          }
+        },
+        "stageProfile": {
+          "enabled": true,
+          "supported": true,
+          "limitations": "Resident probe reports import/session/inference events and internal first decoded audio; upstream does not expose every ORT substage separately.",
+          "stagesSec": {
+            "precomputeInputs": null,
+            "runtimeStartup": null,
+            "modelLoad": null,
+            "tokenize": null,
+            "prepareInputs": null,
+            "onnxInference": null,
+            "decode": null,
+            "writeWav": null,
+            "internalFirstDecodedAudio": 0.507
+          }
+        }
+      },
+      {
+        "iterationIndex": 1,
+        "phase": "iteration",
+        "measured": true,
+        "processMode": "warm",
+        "runtimeReuseActual": true,
+        "runtimeIdentity": {
+          "pythonProcessIdentity": "python-pid:43312",
+          "runtimeObjectIdentity": "OnnxTtsRuntime:1988726747696",
+          "loadedSessionIdentities": {
+            "codec_decode": "codec_decode-session:1988727107072",
+            "codec_decode_step": "codec_decode_step-session:1988727107344",
+            "codec_encode": "codec_encode-session:1988727922928",
+            "decode": "decode-session:1988729408400",
+            "local_cached_step": "local_cached_step-session:1988727153952",
+            "local_decoder": "local_decoder-session:1988729408720",
+            "local_fixed_sampled_frame": "local_fixed_sampled_frame-session:1988727153648",
+            "prefill": "prefill-session:1988729280160"
+          }
+        },
+        "totalSec": 6.0681,
+        "firstAudioSec": 0.611,
+        "firstAudioObservedSec": null,
+        "internalFirstDecodedAudioMs": 611,
+        "firstAudioSource": "internal-decoded-audio",
+        "firstAudioObservation": {
+          "kind": "internal-first-decoded-audio",
+          "sourceEvent": "firstDecodedAudio",
+          "internalFirstDecodedAudioMs": 611,
+          "internalFirstDecodedAudioSec": 0.611,
+          "internalFirstDecodedAudioSupported": true,
+          "fileObservedAudioSec": null,
+          "fileResetBeforeRun": true,
+          "outputFileExistedBeforeRun": false,
+          "reusedExistingOutputFile": false,
+          "fieldAliases": [
+            "firstAudioSec"
+          ]
+        },
+        "audioDurationSec": 4.72,
+        "rtf": 1.2856,
+        "outputWavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+        "outputPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+        "segmentCount": 1,
+        "segmentOutputWavPaths": [
+          "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav"
+        ],
+        "segments": [],
+        "memoryBeforeMb": 1734.38,
+        "memoryAfterMb": 1741.79,
+        "memoryDeltaMb": 7.41,
+        "peakMemoryMb": 1757.26,
+        "memoryEvidence": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "currentMemorySupported": true,
+          "peakMemorySupported": true,
+          "reason": null,
+          "before": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1734.38,
+            "peakMemoryMb": 1748.42,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          },
+          "after": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1741.79,
+            "peakMemoryMb": 1757.26,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          }
+        },
+        "stageProfile": {
+          "enabled": true,
+          "supported": true,
+          "limitations": "Resident probe reports import/session/inference events and internal first decoded audio; upstream does not expose every ORT substage separately.",
+          "stagesSec": {
+            "precomputeInputs": null,
+            "runtimeStartup": null,
+            "modelLoad": null,
+            "tokenize": null,
+            "prepareInputs": null,
+            "onnxInference": null,
+            "decode": null,
+            "writeWav": null,
+            "internalFirstDecodedAudio": 0.611
+          }
+        }
+      }
+    ],
+    "warmups": [
+      {
+        "iterationIndex": -1,
+        "phase": "warmup",
+        "measured": false,
+        "processMode": "warm",
+        "runtimeReuseActual": true,
+        "runtimeIdentity": {
+          "pythonProcessIdentity": "python-pid:43312",
+          "runtimeObjectIdentity": "OnnxTtsRuntime:1988726747696",
+          "loadedSessionIdentities": {
+            "codec_decode": "codec_decode-session:1988727107072",
+            "codec_decode_step": "codec_decode_step-session:1988727107344",
+            "codec_encode": "codec_encode-session:1988727922928",
+            "decode": "decode-session:1988729408400",
+            "local_cached_step": "local_cached_step-session:1988727153952",
+            "local_decoder": "local_decoder-session:1988729408720",
+            "local_fixed_sampled_frame": "local_fixed_sampled_frame-session:1988727153648",
+            "prefill": "prefill-session:1988729280160"
+          }
+        },
+        "totalSec": 5.0604,
+        "firstAudioSec": 0.656,
+        "firstAudioObservedSec": null,
+        "internalFirstDecodedAudioMs": 656,
+        "firstAudioSource": "internal-decoded-audio",
+        "firstAudioObservation": {
+          "kind": "internal-first-decoded-audio",
+          "sourceEvent": "firstDecodedAudio",
+          "internalFirstDecodedAudioMs": 656,
+          "internalFirstDecodedAudioSec": 0.656,
+          "internalFirstDecodedAudioSupported": true,
+          "fileObservedAudioSec": null,
+          "fileResetBeforeRun": true,
+          "outputFileExistedBeforeRun": false,
+          "reusedExistingOutputFile": false,
+          "fieldAliases": [
+            "firstAudioSec"
+          ]
+        },
+        "audioDurationSec": 3.68,
+        "rtf": 1.3751,
+        "outputWavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav",
+        "outputPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav",
+        "segmentCount": 1,
+        "segmentOutputWavPaths": [
+          "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav"
+        ],
+        "segments": [],
+        "memoryBeforeMb": 1493.86,
+        "memoryAfterMb": 1704.97,
+        "memoryDeltaMb": 211.11,
+        "peakMemoryMb": 1704.97,
+        "memoryEvidence": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "currentMemorySupported": true,
+          "peakMemorySupported": true,
+          "reason": null,
+          "before": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1493.86,
+            "peakMemoryMb": 1493.86,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          },
+          "after": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1704.97,
+            "peakMemoryMb": 1704.97,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          }
+        },
+        "stageProfile": {
+          "enabled": true,
+          "supported": true,
+          "limitations": "Resident probe reports import/session/inference events and internal first decoded audio; upstream does not expose every ORT substage separately.",
+          "stagesSec": {
+            "precomputeInputs": null,
+            "runtimeStartup": null,
+            "modelLoad": null,
+            "tokenize": null,
+            "prepareInputs": null,
+            "onnxInference": null,
+            "decode": null,
+            "writeWav": null,
+            "internalFirstDecodedAudio": 0.656
+          }
+        }
+      }
+    ],
+    "aggregate": {
+      "iterations": 2,
+      "warmupsExcluded": 1,
+      "totalSec": {
+        "min": 6.0681,
+        "max": 6.5317,
+        "p50": 6.2999,
+        "p95": 6.5085
+      },
+      "internalFirstDecodedAudioMs": {
+        "min": 507,
+        "max": 611,
+        "p50": 559,
+        "p95": 605.8
+      },
+      "audioDurationSec": {
+        "min": 4.64,
+        "max": 4.72,
+        "p50": 4.68,
+        "p95": 4.716
+      },
+      "rtf": {
+        "min": 1.2856,
+        "max": 1.4077,
+        "p50": 1.3466,
+        "p95": 1.4016
+      },
+      "memoryGrowthAcrossRunsMb": 36.82,
+      "memoryEvidence": {
+        "supported": true,
+        "currentMemorySupported": true,
+        "peakMemorySupported": true,
+        "reason": null,
+        "runCount": 3
+      },
+      "memoryAfterMb": {
+        "min": 1704.97,
+        "max": 1741.79,
+        "p50": 1734.36,
+        "p95": 1741.047
+      },
+      "memoryDeltaMb": {
+        "min": 7.41,
+        "max": 211.11,
+        "p50": 29.38,
+        "p95": 192.937
+      },
+      "peakMemoryMb": {
+        "min": 1704.97,
+        "max": 1757.26,
+        "p50": 1748.42,
+        "p95": 1756.376
+      }
+    },
+    "runtimeMode": "resident",
+    "processMode": "warm",
+    "firstAudioSource": "internal-decoded-audio",
+    "internalFirstDecodedAudioMs": 611,
+    "runtimeIdentity": {
+      "pythonProcessIdentity": "python-pid:43312",
+      "runtimeObjectIdentity": "OnnxTtsRuntime:1988726747696",
+      "loadedSessionIdentities": {
+        "codec_decode": "codec_decode-session:1988727107072",
+        "codec_decode_step": "codec_decode_step-session:1988727107344",
+        "codec_encode": "codec_encode-session:1988727922928",
+        "decode": "decode-session:1988729408400",
+        "local_cached_step": "local_cached_step-session:1988727153952",
+        "local_decoder": "local_decoder-session:1988729408720",
+        "local_fixed_sampled_frame": "local_fixed_sampled_frame-session:1988727153648",
+        "prefill": "prefill-session:1988729280160"
+      }
+    },
+    "events": [
+      {
+        "event": "importStart",
+        "ts": 1777422861.097275,
+        "elapsedMs": 17,
+        "repoDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano"
+      },
+      {
+        "event": "importEnd",
+        "ts": 1777422863.200024,
+        "elapsedMs": 2120,
+        "repoDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano"
+      },
+      {
+        "event": "assetLoadStart",
+        "ts": 1777422863.200157,
+        "elapsedMs": 2120,
+        "modelDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX"
+      },
+      {
+        "event": "sessionCreateEnd",
+        "ts": 1777422881.029314,
+        "elapsedMs": 19949,
+        "modelDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX",
+        "sessionCreateMs": 17829,
+        "runtimeIdentity": {
+          "pythonProcessIdentity": "python-pid:43312",
+          "runtimeObjectIdentity": "OnnxTtsRuntime:1988726747696",
+          "loadedSessionIdentities": {
+            "codec_decode": "codec_decode-session:1988727107072",
+            "codec_decode_step": "codec_decode_step-session:1988727107344",
+            "codec_encode": "codec_encode-session:1988727922928",
+            "decode": "decode-session:1988729408400",
+            "local_cached_step": "local_cached_step-session:1988727153952",
+            "local_decoder": "local_decoder-session:1988729408720",
+            "local_fixed_sampled_frame": "local_fixed_sampled_frame-session:1988727153648",
+            "prefill": "prefill-session:1988729280160"
+          }
+        }
+      },
+      {
+        "event": "inferenceStart",
+        "ts": 1777422881.030361,
+        "elapsedMs": 19950,
+        "memorySample": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "rssMb": 1493.86,
+          "peakMemoryMb": 1493.86,
+          "currentMemorySupported": true,
+          "peakMemorySupported": true
+        },
+        "phase": "warmup",
+        "measured": false,
+        "iterationIndex": -1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "firstDecodedAudio",
+        "ts": 1777422881.686365,
+        "elapsedMs": 20606,
+        "source": "codec_streaming_session.run_frames",
+        "internalFirstDecodedAudioMs": 656,
+        "internalFirstDecodedAudioSec": 0.656,
+        "audioLengthSamples": 3840,
+        "phase": "warmup",
+        "measured": false,
+        "iterationIndex": -1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "wavWriteEnd",
+        "ts": 1777422886.090873,
+        "elapsedMs": 25011,
+        "totalSec": 5.0604,
+        "phase": "warmup",
+        "measured": false,
+        "iterationIndex": -1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "runEnd",
+        "ts": 1777422886.09223,
+        "elapsedMs": 25012,
+        "totalSec": 5.0604,
+        "audioDurationSec": 3.68,
+        "memoryBeforeMb": 1493.86,
+        "memoryAfterMb": 1704.97,
+        "memoryDeltaMb": 211.11,
+        "peakMemoryMb": 1704.97,
+        "memoryEvidence": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "currentMemorySupported": true,
+          "peakMemorySupported": true,
+          "reason": null,
+          "before": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1493.86,
+            "peakMemoryMb": 1493.86,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          },
+          "after": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1704.97,
+            "peakMemoryMb": 1704.97,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          }
+        },
+        "phase": "warmup",
+        "measured": false,
+        "iterationIndex": -1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\warmup_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "inferenceStart",
+        "ts": 1777422886.092815,
+        "elapsedMs": 25013,
+        "memorySample": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "rssMb": 1704.98,
+          "peakMemoryMb": 1704.98,
+          "currentMemorySupported": true,
+          "peakMemorySupported": true
+        },
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 0,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "firstDecodedAudio",
+        "ts": 1777422886.60029,
+        "elapsedMs": 25520,
+        "source": "codec_streaming_session.run_frames",
+        "internalFirstDecodedAudioMs": 507,
+        "internalFirstDecodedAudioSec": 0.507,
+        "audioLengthSamples": 3840,
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 0,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "wavWriteEnd",
+        "ts": 1777422892.624529,
+        "elapsedMs": 31544,
+        "totalSec": 6.5317,
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 0,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "runEnd",
+        "ts": 1777422892.625507,
+        "elapsedMs": 31545,
+        "totalSec": 6.5317,
+        "audioDurationSec": 4.64,
+        "memoryBeforeMb": 1704.98,
+        "memoryAfterMb": 1734.36,
+        "memoryDeltaMb": 29.38,
+        "peakMemoryMb": 1748.42,
+        "memoryEvidence": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "currentMemorySupported": true,
+          "peakMemorySupported": true,
+          "reason": null,
+          "before": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1704.98,
+            "peakMemoryMb": 1704.98,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          },
+          "after": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1734.36,
+            "peakMemoryMb": 1748.42,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          }
+        },
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 0,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_001.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "inferenceStart",
+        "ts": 1777422892.625996,
+        "elapsedMs": 31546,
+        "memorySample": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "rssMb": 1734.38,
+          "peakMemoryMb": 1748.42,
+          "currentMemorySupported": true,
+          "peakMemorySupported": true
+        },
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "firstDecodedAudio",
+        "ts": 1777422893.23735,
+        "elapsedMs": 32157,
+        "source": "codec_streaming_session.run_frames",
+        "internalFirstDecodedAudioMs": 611,
+        "internalFirstDecodedAudioSec": 0.611,
+        "audioLengthSamples": 3840,
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "wavWriteEnd",
+        "ts": 1777422898.694153,
+        "elapsedMs": 37614,
+        "totalSec": 6.0681,
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+        "outputFileExistedBeforeRun": false
+      },
+      {
+        "event": "runEnd",
+        "ts": 1777422898.694825,
+        "elapsedMs": 37615,
+        "totalSec": 6.0681,
+        "audioDurationSec": 4.72,
+        "memoryBeforeMb": 1734.38,
+        "memoryAfterMb": 1741.79,
+        "memoryDeltaMb": 7.41,
+        "peakMemoryMb": 1757.26,
+        "memoryEvidence": {
+          "supported": true,
+          "method": "windows-psapi.GetProcessMemoryInfo",
+          "currentMemorySupported": true,
+          "peakMemorySupported": true,
+          "reason": null,
+          "before": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1734.38,
+            "peakMemoryMb": 1748.42,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          },
+          "after": {
+            "supported": true,
+            "method": "windows-psapi.GetProcessMemoryInfo",
+            "rssMb": 1741.79,
+            "peakMemoryMb": 1757.26,
+            "currentMemorySupported": true,
+            "peakMemorySupported": true
+          }
+        },
+        "phase": "iteration",
+        "measured": true,
+        "iterationIndex": 1,
+        "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-3-stale-output-guard\\output_002.wav",
+        "outputFileExistedBeforeRun": false
+      }
+    ],
+    "ortOptionsRequested": {
+      "providers": [],
+      "intraOpThreads": null,
+      "interOpThreads": null,
+      "executionMode": null,
+      "graphOptimization": null,
+      "enableCpuMemArena": null,
+      "enableMemPattern": null,
+      "enableMemReuse": null,
+      "usePerSessionThreads": null
+    },
+    "ortOptionsApplied": {
+      "providers": [
+        "CPUExecutionProvider"
+      ],
+      "availableProviders": [
+        "AzureExecutionProvider",
+        "CPUExecutionProvider"
+      ],
+      "intraOpThreads": 4,
+      "interOpThreads": 1,
+      "executionMode": "sequential",
+      "graphOptimization": "all",
+      "enableCpuMemArena": true,
+      "enableMemPattern": true,
+      "enableMemReuse": true
+    },
+    "ortOptionsUnsupported": {},
+    "ortLiveMetadata": {
+      "sessionCount": 8,
+      "sessions": {
+        "codec_decode": {
+          "identity": "codec_decode-session:1988727107072",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "codec_decode_step": {
+          "identity": "codec_decode_step-session:1988727107344",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "codec_encode": {
+          "identity": "codec_encode-session:1988727922928",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "decode": {
+          "identity": "decode-session:1988729408400",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "local_cached_step": {
+          "identity": "local_cached_step-session:1988727153952",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "local_decoder": {
+          "identity": "local_decoder-session:1988729408720",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "local_fixed_sampled_frame": {
+          "identity": "local_fixed_sampled_frame-session:1988727153648",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        },
+        "prefill": {
+          "identity": "prefill-session:1988729280160",
+          "providers": [
+            "CPUExecutionProvider"
+          ],
+          "providerOptions": {
+            "CPUExecutionProvider": {}
+          }
+        }
+      }
+    },
+    "profileEventsJsonlPath": null,
+    "memoryEvidence": {
+      "supported": true,
+      "method": "windows-psapi.GetProcessMemoryInfo",
+      "currentMemorySupported": true,
+      "peakMemorySupported": true,
+      "reason": null,
+      "before": {
+        "supported": true,
+        "method": "windows-psapi.GetProcessMemoryInfo",
+        "rssMb": 1734.38,
+        "peakMemoryMb": 1748.42,
+        "currentMemorySupported": true,
+        "peakMemorySupported": true
+      },
+      "after": {
+        "supported": true,
+        "method": "windows-psapi.GetProcessMemoryInfo",
+        "rssMb": 1741.79,
+        "peakMemoryMb": 1757.26,
+        "currentMemorySupported": true,
+        "peakMemorySupported": true
+      }
+    },
+    "memoryBeforeMb": 1734.38,
+    "memoryAfterMb": 1741.79,
+    "memoryDeltaMb": 7.41
+  },
+  "pythonExecutable": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv-nano\\Scripts\\python.exe",
+  "pythonProbePath": "C:\\Users\\estra\\Projects\\Blurby\\scripts\\moss_nano_resident_probe.py"
+}

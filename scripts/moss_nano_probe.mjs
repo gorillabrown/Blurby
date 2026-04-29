@@ -25,6 +25,7 @@ export const PASSAGE_ALIASES = Object.freeze({
 const DEFAULT_RUN_ID = "moss-nano-1-probe";
 const DEFAULT_PASSAGE_ID = "short-smoke";
 const PYTHON_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_probe.py");
+const PYTHON_RESIDENT_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_resident_probe.py");
 
 export function resolvePassageId(passageId = DEFAULT_PASSAGE_ID) {
   return PASSAGE_ALIASES[passageId] ?? passageId;
@@ -77,6 +78,9 @@ export function parseArgs(argv = process.argv.slice(2)) {
       args.json = true;
     } else if (arg === "--config") {
       args.configPath = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--runtime-mode") {
+      args.runtimeMode = requireValue(argv, index, arg);
       index += 1;
     } else if (arg === "--run-id") {
       args.runId = requireValue(argv, index, arg);
@@ -237,10 +241,147 @@ function parsePythonSummary(stdout) {
   }
 }
 
+function makeContractCheck(key, detail) {
+  return {
+    key,
+    status: "fail",
+    detail,
+    failureClass: "runtime-contract",
+  };
+}
+
+function sortedJson(value) {
+  if (Array.isArray(value)) return `[${value.map(sortedJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${sortedJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function residentRunRecords(summary) {
+  return [
+    ...(Array.isArray(summary?.warmups) ? summary.warmups : []),
+    ...(Array.isArray(summary?.iterations) ? summary.iterations : []),
+  ];
+}
+
+function hasStableResidentIdentity(identity) {
+  const sessions = identity?.loadedSessionIdentities;
+  return Boolean(
+    identity?.pythonProcessIdentity
+      && sessions
+      && typeof sessions === "object"
+      && Object.keys(sessions).length > 0
+      && Object.values(sessions).every(Boolean),
+  );
+}
+
+function requestedOrtOptionsFromConfig(options = {}) {
+  return {
+    providers: String(options.ortProviders ?? "").split(",").map((item) => item.trim()).filter(Boolean),
+    intraOpThreads: options.ortIntraOpThreads,
+    interOpThreads: options.ortInterOpThreads,
+    executionMode: options.ortExecutionMode,
+    graphOptimization: options.ortGraphOptimization,
+    enableCpuMemArena: options.ortEnableCpuMemArena,
+    enableMemPattern: options.ortEnableMemPattern,
+    enableMemReuse: options.ortEnableMemReuse,
+    usePerSessionThreads: options.ortUsePerSessionThreads,
+  };
+}
+
+function objectOrEmpty(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function blockResidentSummary(summary, message, key) {
+  summary.ok = false;
+  summary.status = "blocked";
+  summary.failureClass = "runtime-contract";
+  summary.error = message;
+  summary.checks = Array.isArray(summary.checks) ? summary.checks : [];
+  summary.checks.push(makeContractCheck(key, message));
+  return summary;
+}
+
+function sanitizeFileFirstAudioObservation(observation = {}) {
+  return {
+    ...observation,
+    kind: "internal-first-decoded-audio",
+    sourceEvent: observation.sourceEvent ?? "firstDecodedAudio",
+    internalFirstDecodedAudioSupported: Boolean(observation.internalFirstDecodedAudioSupported),
+    fileObservedAudioSec: null,
+  };
+}
+
+function normalizeResidentSummary(summary, requested = {}) {
+  if (!summary || typeof summary !== "object") return summary;
+  summary.runtimeMode = "resident";
+  if (summary.firstAudioObservation?.kind === "internal-first-decoded-audio") {
+    summary.firstAudioSource = "internal-decoded-audio";
+    summary.firstAudioObservedSec = null;
+  }
+
+  let contractMessage = null;
+  let contractKey = "residentContract";
+
+  const hasResidentOrtOptions = summary.ortOptionsRequested && summary.ortOptionsApplied && summary.ortOptionsUnsupported;
+  if (!hasResidentOrtOptions) {
+    summary.ortOptionsRequested = objectOrEmpty(summary.ortOptionsRequested ?? summary.ort?.requested ?? requestedOrtOptionsFromConfig(requested));
+    summary.ortOptionsApplied = objectOrEmpty(summary.ortOptionsApplied ?? summary.ort?.applied);
+    summary.ortOptionsUnsupported = objectOrEmpty(summary.ortOptionsUnsupported ?? summary.ort?.unsupported);
+    if (summary.ortOptionsRequested?.usePerSessionThreads != null && !summary.ortOptionsUnsupported.usePerSessionThreads) {
+      summary.ortOptionsUnsupported.usePerSessionThreads = {
+        requested: Boolean(summary.ortOptionsRequested.usePerSessionThreads),
+        reason: "Resident probe must report unsupported per-session thread policy separately from applied ORT session options.",
+      };
+    }
+    contractMessage = "Resident summaries must include ortOptionsRequested and ortOptionsApplied metadata.";
+    contractKey = "ortOptions";
+  }
+
+  const reuseClaimed = Boolean(summary.benchmark?.runtimeReuseActual)
+    || residentRunRecords(summary).some((record) => record?.runtimeReuseActual);
+  if (!contractMessage && reuseClaimed) {
+    const records = residentRunRecords(summary);
+    const identities = records.map((record) => record?.runtimeIdentity ?? summary.runtimeIdentity);
+    const firstIdentity = identities[0];
+    const reuseProven = identities.length > 0
+      && identities.every(hasStableResidentIdentity)
+      && identities.every((identity) => sortedJson(identity) === sortedJson(firstIdentity));
+    if (!reuseProven) {
+      if (summary.benchmark) summary.benchmark.runtimeReuseActual = false;
+      for (const record of records) record.runtimeReuseActual = false;
+      contractMessage = "Resident runtime reuse could not be proven from stable process/session identity.";
+      contractKey = "runtimeReuse";
+    }
+  }
+
+  const fileFirstAudio = summary.firstAudioObservation?.kind === "file-observed-wav-bytes"
+    || residentRunRecords(summary).some((record) => record?.firstAudioObservation?.kind === "file-observed-wav-bytes");
+  if (!contractMessage && summary.promotionClass && fileFirstAudio) {
+    summary.firstAudioObservation = sanitizeFileFirstAudioObservation(summary.firstAudioObservation);
+    contractMessage = "Resident promotion-class summaries require internal first decoded audio evidence.";
+    contractKey = "firstDecodedAudio";
+  }
+
+  const staleOutputEvidence = residentRunRecords(summary).some((record) => (
+    record?.firstAudioObservation?.outputFileExistedBeforeRun
+      || record?.firstAudioObservation?.reusedExistingOutputFile
+  )) || summary.firstAudioObservation?.outputFileExistedBeforeRun || summary.firstAudioObservation?.reusedExistingOutputFile;
+  if (!contractMessage && staleOutputEvidence) {
+    contractMessage = "Resident warm runs must not use an existing output file as first-audio evidence.";
+    contractKey = "firstAudioOutputFreshness";
+  }
+
+  return contractMessage ? blockResidentSummary(summary, contractMessage, contractKey) : summary;
+}
+
 export function buildPythonCommand({
   projectRoot = process.cwd(),
   python,
   configPath,
+  runtimeMode,
   runId,
   passageId,
   passageText,
@@ -278,7 +419,8 @@ export function buildPythonCommand({
 } = {}) {
   const defaults = defaultOptions(projectRoot);
   const command = python ?? process.env.PYTHON ?? repoLocalNanoPython(projectRoot) ?? "python";
-  const pythonProbePath = path.join(projectRoot, PYTHON_PROBE_RELATIVE_PATH);
+  const residentMode = runtimeMode === "resident";
+  const pythonProbePath = path.join(projectRoot, residentMode ? PYTHON_RESIDENT_PROBE_RELATIVE_PATH : PYTHON_PROBE_RELATIVE_PATH);
   const effectivePassageId = resolvePassageId(passageId ?? defaults.passageId);
   const args = [
     pythonProbePath,
@@ -315,6 +457,7 @@ export function buildPythonCommand({
   ];
 
   if (configPath) args.push("--config", configPath);
+  if (residentMode) args.push("--runtime-mode", "resident");
   const effectivePassageText = resolvePassageText({ passageId: effectivePassageId, passageText });
   if (effectivePassageText) args.push("--passage-text", effectivePassageText);
   if (allowEmptyPassage) args.push("--allow-empty-passage");
@@ -416,6 +559,7 @@ export async function writeProbeSummary({ result, outputDir, fsModule = fs } = {
 export async function runMossNanoProbe({
   projectRoot = process.cwd(),
   configPath,
+  runtimeMode,
   runId,
   passageId,
   passageText,
@@ -475,6 +619,7 @@ export async function runMossNanoProbe({
     projectRoot,
     python,
     configPath,
+    runtimeMode,
     runId: effectiveRunId,
     passageId: effectivePassageId,
     passageText: effectivePassageText,
@@ -529,12 +674,25 @@ export async function runMossNanoProbe({
         pythonProbePath: commandInfo.pythonProbePath,
       };
     } else {
+      const summary = runtimeMode === "resident"
+        ? normalizeResidentSummary(parsed.summary, {
+          ortProviders,
+          ortIntraOpThreads,
+          ortInterOpThreads,
+          ortExecutionMode,
+          ortGraphOptimization,
+          ortEnableCpuMemArena,
+          ortEnableMemPattern,
+          ortEnableMemReuse,
+          ortUsePerSessionThreads,
+        })
+        : parsed.summary;
       result = {
-        status: parsed.summary.status ?? "ok",
-        runId: parsed.summary.runId ?? effectiveRunId,
-        passageId: parsed.summary.passageId ?? effectivePassageId,
-        failureClass: parsed.summary.failureClass ?? null,
-        summary: parsed.summary,
+        status: summary.status ?? "ok",
+        runId: summary.runId ?? effectiveRunId,
+        passageId: summary.passageId ?? effectivePassageId,
+        failureClass: summary.failureClass ?? null,
+        summary,
         pythonExecutable: commandInfo.pythonExecutable,
         pythonProbePath: commandInfo.pythonProbePath,
       };
@@ -542,12 +700,25 @@ export async function runMossNanoProbe({
   } catch (error) {
     const parsed = parsePythonSummary(error?.stdout ?? "");
     if (!parsed.error && parsed.summary) {
+      const summary = runtimeMode === "resident"
+        ? normalizeResidentSummary(parsed.summary, {
+          ortProviders,
+          ortIntraOpThreads,
+          ortInterOpThreads,
+          ortExecutionMode,
+          ortGraphOptimization,
+          ortEnableCpuMemArena,
+          ortEnableMemPattern,
+          ortEnableMemReuse,
+          ortUsePerSessionThreads,
+        })
+        : parsed.summary;
       result = {
-        status: parsed.summary.status ?? "failed",
-        runId: parsed.summary.runId ?? effectiveRunId,
-        passageId: parsed.summary.passageId ?? effectivePassageId,
-        failureClass: parsed.summary.failureClass ?? "runtime",
-        summary: parsed.summary,
+        status: summary.status ?? "failed",
+        runId: summary.runId ?? effectiveRunId,
+        passageId: summary.passageId ?? effectivePassageId,
+        failureClass: summary.failureClass ?? "runtime",
+        summary,
         pythonExecutable: commandInfo.pythonExecutable,
         pythonProbePath: commandInfo.pythonProbePath,
       };
@@ -591,6 +762,7 @@ function helpText() {
     "  --voice <name>",
     "  --prompt-audio <wav>",
     "  --config <json>",
+    "  --runtime-mode <subprocess|resident>",
     "  --process-mode <cold|warm>",
     "  --iterations <n>",
     "  --warmup-runs <n>",
@@ -626,6 +798,7 @@ export async function main(argv = process.argv.slice(2)) {
   const result = await runMossNanoProbe({
     projectRoot: process.cwd(),
     configPath: args.configPath,
+    runtimeMode: args.runtimeMode,
     runId: args.runId,
     passageId: args.passageId,
     passageText: args.passageText,

@@ -225,6 +225,32 @@ Comparison:
 
 Decision: `KEEP_KOKORO_ONLY`. No Nano app prototype now; this is not a permanent Nano rejection. Future Nano work should only reopen with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options. MOSS-3 through MOSS-7 remain paused unless a new explicit promotion decision is recorded.
 
+## MOSS-NANO-3 Resident Runtime Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-3 was runtime evidence only, not app integration. It did not change Kokoro behavior and did not reopen MOSS-3.
+
+Resident runtime evidence:
+
+- Runtime path: `scripts/moss_nano_resident_probe.py`.
+- Wrapper: `scripts/moss_nano_probe.mjs --runtime-mode resident`.
+- Package script: `npm run moss:nano:resident`.
+- Focused tests: `npm test -- tests/mossNanoProbe.test.js` => `28/28` pass after known sandbox `EPERM` escalated rerun.
+- Full tests: `npm test` => `150` files, `2268` tests pass.
+- Build: `npm run build` passes with the existing circular chunk warning.
+
+Canonical refreshed artifacts:
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-3-short-resident/summary.json` | `internalFirstDecodedAudioMs` `513`, RTF `1.7005`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `36.59`. |
+| `artifacts/moss/moss-nano-3-punctuation-resident/summary.json` | `internalFirstDecodedAudioMs` `541`, RTF `1.2042`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `62.92`. |
+| `artifacts/moss/moss-nano-3-ort-session-resident/summary.json` | Requested/applied ORT split recorded; CPU provider, `intraOp` `2`, and `interOp` `1` applied; `usePerSessionThreads` truthfully unsupported; `internalFirstDecodedAudioMs` `516`; RTF `1.0962`; `runtimeReuseActual: true`. |
+| `artifacts/moss/moss-nano-3-stale-output-guard/summary.json` | Clean fresh-output evidence: `outputFileExistedBeforeRun: false`, `reusedExistingOutputFile: false`, memory evidence present. |
+
+Comparison: MOSS-NANO-2 v2 had observed first audio `13.9036s` / `15.2025s` short and `20.0393s` / `18.6516s` punctuation with `runtimeReuseActual: false`. Kokoro baseline remains `1385ms` / RTF `0.3337` short and `5616ms` / RTF `0.7414` punctuation.
+
+Conclusion: Nano now proves true resident reuse and internal first decoded audio, but short RTF `1.7005` misses the promotion threshold `<=1.5`, and memory growth needs soak/tuning. Next work, if any, should be resident runtime tuning/soak/perf only. MOSS-3 through MOSS-7 remain paused unless a new explicit app-integration promotion decision is recorded.
+
 ## Failure Classification
 
 Every MOSS runtime failure must be classified with one of these classes.

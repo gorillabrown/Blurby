@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "perf": "vitest run tests/perf-baseline.test.ts",
     "moss:preflight": "node scripts/moss_preflight.mjs",
+    "moss:nano:resident": "node scripts/moss_nano_probe.mjs --runtime-mode resident",
     "tts:eval": "node scripts/tts_eval_runner.mjs",
     "tts:eval:matrix": "node scripts/tts_eval_runner.mjs --matrix",
     "tts:eval:matrix:gated": "node scripts/tts_eval_runner.mjs --matrix --gates",

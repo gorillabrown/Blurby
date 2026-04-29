@@ -1,8 +1,8 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-2
+**Sprint:** MOSS-1 through MOSS-NANO-3
 **Initial status:** `INVESTIGATE`
-**Current status:** `KEEP_KOKORO_ONLY`
+**Current status:** `ITERATE_NANO_RESIDENT_RUNTIME`
 **Last updated:** 2026-04-28
 
 ## Status Values
@@ -23,6 +23,7 @@
 | `KEEP_PAUSED_RUNTIME_CONFIRMED` | Keep flagship MOSS product-path work paused after truthful runtime rescue confirms the best available local path remains too slow or unstable, with exact runtime-shape blockers recorded. |
 | `KEEP_PAUSED_HOST_CONFIRMED` | Keep flagship MOSS product-path work paused after host/runtime evidence confirms that the best available native ARM64 or WSL2/Linux MOSS shape is either unavailable or still non-viable. |
 | `ITERATE_NANO_RUNTIME` | Continue bounded Nano runtime iteration because Nano ONNX CPU can generate local audio, but timing evidence is not yet good enough for app prototype or promotion. |
+| `ITERATE_NANO_RESIDENT_RUNTIME` | Continue resident Nano runtime tuning/soak/perf only because true reuse and internal first-decoded timing are proven, but promotion thresholds and memory-soak confidence are not met. |
 | `KEEP_KOKORO_ONLY` | Keep Kokoro as the only integrated engine after bounded Nano runtime rescue fails to produce viable live-app timing; Nano is not rejected permanently, but app prototype work stays closed until new runtime evidence changes the decision. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
 
@@ -497,6 +498,37 @@ Decision: `KEEP_KOKORO_ONLY`.
 Reason: MOSS-NANO-2 corrected the Nano probe evidence path and tested the plausible bounded rescue levers, but the canonical real-text timings still miss live-app viability by a wide margin, and the attempted optimizations did not produce true runtime reuse, applied ORT/session options, or trustworthy internal first-decoded timing. Kokoro remains far faster on the same short and punctuation passages. Keep Kokoro as the only integrated engine.
 
 Decision framing: `KEEP_KOKORO_ONLY` means no Nano app prototype now. It is not a permanent Nano model rejection. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
+
+## MOSS-NANO-3 Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Reason: MOSS-NANO-3 proved the meaningful part of the reopen hypothesis: Nano can run through a resident in-process runtime with true runtime reuse and internal first decoded audio timing. However, the canonical short resident run still recorded RTF `1.7005`, missing the promotion threshold `<=1.5`, and memory growth across resident runs needs soak/tuning before any app-prototype decision. Iterate resident runtime tuning/soak/perf only rather than promote.
+
+Runtime path:
+
+- Resident runtime: `scripts/moss_nano_resident_probe.py`.
+- Wrapper: `scripts/moss_nano_probe.mjs --runtime-mode resident`.
+- Package script: `npm run moss:nano:resident`.
+
+Verification:
+
+- Focused tests: `npm test -- tests/mossNanoProbe.test.js` => `28/28` pass after known sandbox `EPERM` escalated rerun.
+- Full tests: `npm test` => `150` files, `2268` tests pass.
+- Build: `npm run build` passes with the existing circular chunk warning.
+
+Canonical refreshed artifacts:
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-3-short-resident/summary.json` | `internalFirstDecodedAudioMs` `513`, RTF `1.7005`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `36.59`. |
+| `artifacts/moss/moss-nano-3-punctuation-resident/summary.json` | `internalFirstDecodedAudioMs` `541`, RTF `1.2042`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `62.92`. |
+| `artifacts/moss/moss-nano-3-ort-session-resident/summary.json` | Requested/applied ORT split recorded; CPU provider, `intraOp` `2`, and `interOp` `1` applied; `usePerSessionThreads` truthfully unsupported; `internalFirstDecodedAudioMs` `516`; RTF `1.0962`; `runtimeReuseActual: true`. |
+| `artifacts/moss/moss-nano-3-stale-output-guard/summary.json` | Clean fresh-output evidence: `outputFileExistedBeforeRun: false`, `reusedExistingOutputFile: false`, memory evidence present. |
+
+Comparison: MOSS-NANO-2 v2 had observed first audio `13.9036s` / `15.2025s` short and `20.0393s` / `18.6516s` punctuation with `runtimeReuseActual: false`. Kokoro baseline remains `1385ms` / RTF `0.3337` short and `5616ms` / RTF `0.7414` punctuation.
+
+Non-decision: MOSS-NANO-3 does not reopen MOSS-3 through MOSS-7. Sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, and Kokoro retirement remain forbidden until a separate promotion decision is recorded.
 
 Non-decisions:
 
