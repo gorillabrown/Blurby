@@ -26,6 +26,8 @@ const DEFAULT_RUN_ID = "moss-nano-1-probe";
 const DEFAULT_PASSAGE_ID = "short-smoke";
 const PYTHON_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_probe.py");
 const PYTHON_RESIDENT_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_resident_probe.py");
+const DECODE_FULL_FIRST_AUDIO_SEC_MAX = 2.5;
+const DECODE_FULL_MEMORY_GROWTH_MB_MAX = 80;
 
 export function resolvePassageId(passageId = DEFAULT_PASSAGE_ID) {
   return PASSAGE_ALIASES[passageId] ?? passageId;
@@ -211,6 +213,19 @@ export function parseArgs(argv = process.argv.slice(2)) {
     } else if (arg === "--stream-decode-frame-budget") {
       args.streamDecodeFrameBudget = positiveInteger(requireValue(argv, index, arg), arg);
       index += 1;
+    } else if (arg === "--adjacent-segment-count") {
+      args.adjacentSegmentCount = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--adjacent-segment-source") {
+      args.adjacentSegmentSource = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--adjacent-segment-rtf-trend-max") {
+      const value = Number.parseFloat(requireValue(argv, index, arg));
+      if (!Number.isFinite(value) || value < 0) {
+        throw new Error(`${arg} requires a non-negative number`);
+      }
+      args.adjacentSegmentRtfTrendMax = value;
+      index += 1;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -336,6 +351,11 @@ function blockResidentSummary(summary, message, key, failureClass = "runtime-con
   if (summary.promotionDecision && typeof summary.promotionDecision === "object") {
     summary.promotionDecision.promote = false;
     summary.promotionDecision.blockedReason = message;
+    if (String(summary.promotionDecision.decision ?? "").startsWith("PROMOTE_NANO_TO_")) {
+      summary.promotionDecision.decision = failureClass === "performance"
+        ? "ITERATE_NANO_RESIDENT_RUNTIME"
+        : "BLOCKED_NANO_RESIDENT_RUNTIME";
+    }
   }
   return summary;
 }
@@ -352,6 +372,29 @@ function sanitizeFileFirstAudioObservation(observation = {}) {
 
 function normalizeOptimizationEvidence(summary, requested = {}) {
   const optimization = objectOrEmpty(summary.optimization);
+  for (const key of [
+    "precomputeInputsRequested",
+    "precomputeInputsActual",
+    "precomputeInputsPartial",
+    "precomputeInputsBlocker",
+    "precomputeInputsEvidence",
+    "tokenizerIdentity",
+    "promptAudioCodesEvidence",
+    "decodeFullEvidence",
+    "acceptedDecodeStrategy",
+    "adjacentSegmentStats",
+    "segments",
+    "promotionTarget",
+    "promotionThresholds",
+    "promotionMetrics",
+  ]) {
+    if (summary[key] == null && Object.prototype.hasOwnProperty.call(optimization, key)) {
+      summary[key] = optimization[key];
+    }
+  }
+  if (summary.promotionDecision == null && Object.prototype.hasOwnProperty.call(optimization, "promotionDecision")) {
+    summary.promotionDecision = optimization.promotionDecision;
+  }
   if (summary.optimizationVariant == null) {
     summary.optimizationVariant = optimization.variantId ?? optimization.optimizationVariant ?? requested.variantId ?? null;
   }
@@ -401,6 +444,326 @@ function normalizeOptimizationEvidence(summary, requested = {}) {
     };
   }
   return summary;
+}
+
+function hasNano5SoakShape(summary, requested = {}) {
+  const decision = String(summary.promotionDecision?.decision ?? "");
+  return summary.promotionTarget === "nano5-soak"
+    || summary.promotionDecision?.target === "nano5-soak"
+    || decision === "PROMOTE_NANO_TO_SOAK_CANDIDATE"
+    || decision === "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE"
+    || summary.adjacentSegmentStats != null
+    || summary.decodeFullEvidence != null
+    || summary.acceptedDecodeStrategy != null
+    || requested.adjacentSegmentCount != null;
+}
+
+function requiredNumericGate(thresholds, metrics, thresholdKey, metricKey, label) {
+  if (!(thresholdKey in thresholds)) {
+    return `${label} threshold missing: ${thresholdKey}`;
+  }
+  if (!isFiniteNumber(thresholds[thresholdKey])) {
+    return `${label} threshold ${thresholdKey} must be numeric`;
+  }
+  if (!(metricKey in metrics)) {
+    return `${label} metric missing: ${metricKey}`;
+  }
+  if (!isFiniteNumber(metrics[metricKey])) {
+    return `${label} metric ${metricKey} must be numeric`;
+  }
+  if (metrics[metricKey] > thresholds[thresholdKey]) {
+    return `${label} metric ${metricKey}=${metrics[metricKey]} exceeds threshold ${thresholdKey}=${thresholds[thresholdKey]}`;
+  }
+  return null;
+}
+
+function firstFiniteNumber(...values) {
+  return values.find((value) => isFiniteNumber(value)) ?? null;
+}
+
+function normalizePromotionMemoryMetrics(summary) {
+  if (!summary.promotionMetrics || typeof summary.promotionMetrics !== "object" || Array.isArray(summary.promotionMetrics)) {
+    return;
+  }
+  const metrics = summary.promotionMetrics;
+  const aggregate = objectOrEmpty(summary.aggregate);
+  const decodeFullEvidence = objectOrEmpty(summary.decodeFullEvidence);
+  if (!isFiniteNumber(metrics.shortMemoryGrowthMb)) {
+    const representativeGrowth = firstFiniteNumber(summary.memoryDeltaMb, aggregate.representativeMemoryGrowthMb);
+    if (representativeGrowth != null) metrics.shortMemoryGrowthMb = representativeGrowth;
+  }
+  if (!isFiniteNumber(metrics.representativeMemoryGrowthMb)) {
+    const representativeGrowth = firstFiniteNumber(summary.memoryDeltaMb, metrics.shortMemoryGrowthMb);
+    if (representativeGrowth != null) metrics.representativeMemoryGrowthMb = representativeGrowth;
+  }
+  if (!isFiniteNumber(metrics.memoryGrowthAcrossRunsMb) && isFiniteNumber(aggregate.memoryGrowthAcrossRunsMb)) {
+    metrics.memoryGrowthAcrossRunsMb = aggregate.memoryGrowthAcrossRunsMb;
+  }
+  if (!isFiniteNumber(metrics.decodeFullMemoryGrowthMb) && isFiniteNumber(decodeFullEvidence.memoryGrowthMb)) {
+    metrics.decodeFullMemoryGrowthMb = decodeFullEvidence.memoryGrowthMb;
+  }
+  if (!isFiniteNumber(metrics.decodeFullFirstAudioSec) && isFiniteNumber(decodeFullEvidence.firstAudioSec)) {
+    metrics.decodeFullFirstAudioSec = decodeFullEvidence.firstAudioSec;
+  }
+}
+
+function normalizeDecodeFullEvidence(summary) {
+  if (!summary.decodeFullEvidence || typeof summary.decodeFullEvidence !== "object" || Array.isArray(summary.decodeFullEvidence)) {
+    return null;
+  }
+  const evidence = summary.decodeFullEvidence;
+  const metrics = objectOrEmpty(summary.promotionMetrics);
+  const thresholds = objectOrEmpty(summary.promotionThresholds);
+  const firstAudioSecMax = firstFiniteNumber(
+    evidence.gates?.firstAudioSecMax,
+    thresholds.decodeFullFirstAudioSecMax,
+    DECODE_FULL_FIRST_AUDIO_SEC_MAX,
+  );
+  const memoryGrowthMbMax = firstFiniteNumber(
+    evidence.gates?.memoryGrowthMbMax,
+    thresholds.decodeFullMemoryGrowthMbMax,
+    DECODE_FULL_MEMORY_GROWTH_MB_MAX,
+  );
+  const firstAudioSec = firstFiniteNumber(evidence.firstAudioSec, metrics.decodeFullFirstAudioSec);
+  const memoryGrowthMb = firstFiniteNumber(evidence.memoryGrowthMb, metrics.decodeFullMemoryGrowthMb);
+  const failures = [];
+  if (!isFiniteNumber(firstAudioSec)) {
+    failures.push("decode-full first audio is missing");
+  } else if (firstAudioSec > firstAudioSecMax) {
+    failures.push(`decode-full first audio ${firstAudioSec}s exceeds ${firstAudioSecMax}s`);
+  }
+  if (!isFiniteNumber(memoryGrowthMb)) {
+    failures.push("decode-full memory growth is missing");
+  } else if (memoryGrowthMb > memoryGrowthMbMax) {
+    failures.push(`decode-full memory growth ${memoryGrowthMb}MB exceeds ${memoryGrowthMbMax}MB`);
+  }
+  summary.decodeFullEvidence = {
+    ...evidence,
+    status: failures.length > 0 ? "failed" : "passed",
+    firstAudioSec,
+    memoryGrowthMb,
+    gates: {
+      ...objectOrEmpty(evidence.gates),
+      firstAudioSecMax,
+      memoryGrowthMbMax,
+      firstAudioPassed: isFiniteNumber(firstAudioSec) && firstAudioSec <= firstAudioSecMax,
+      memoryGrowthPassed: isFiniteNumber(memoryGrowthMb) && memoryGrowthMb <= memoryGrowthMbMax,
+    },
+    reason: failures.length > 0 ? failures.join("; ") : (evidence.reason ?? null),
+  };
+  if (failures.length > 0 && summary.acceptedDecodeStrategy?.strategy === "decode-full") {
+    summary.acceptedDecodeStrategy = {
+      ...summary.acceptedDecodeStrategy,
+      accepted: false,
+      reason: summary.decodeFullEvidence.reason,
+    };
+  }
+  return summary.decodeFullEvidence.reason;
+}
+
+function nano5PromotionThresholdFailure(summary) {
+  if (!summary.promotionThresholds || typeof summary.promotionThresholds !== "object" || Array.isArray(summary.promotionThresholds)) {
+    return "MOSS-NANO-5 promotion thresholds missing";
+  }
+  if (!summary.promotionMetrics || typeof summary.promotionMetrics !== "object" || Array.isArray(summary.promotionMetrics)) {
+    return "MOSS-NANO-5 promotion metrics missing";
+  }
+  const thresholds = summary.promotionThresholds;
+  const metrics = summary.promotionMetrics;
+  const gates = [
+    ["shortRtfMax", "shortRtf", "short"],
+    ["shortP95RtfMax", "shortP95Rtf", "short"],
+    ["shortFirstDecodedAudioSecMax", "shortFirstDecodedAudioSec", "short"],
+    ["shortMemoryGrowthMbMax", "shortMemoryGrowthMb", "short memory"],
+    ["punctuationRtfMax", "punctuationRtf", "punctuation"],
+    ["punctuationP95RtfMax", "punctuationP95Rtf", "punctuation"],
+    ["punctuationFirstDecodedAudioSecMax", "punctuationFirstDecodedAudioSec", "punctuation"],
+    ["decodeFullFirstAudioSecMax", "decodeFullFirstAudioSec", "decode first audio"],
+    ["decodeFullMemoryGrowthMbMax", "decodeFullMemoryGrowthMb", "decode memory"],
+    ["adjacentRtfTrendMax", "adjacentRtfTrendRatio", "adjacent"],
+  ];
+  for (const [thresholdKey, metricKey, label] of gates) {
+    const failure = requiredNumericGate(thresholds, metrics, thresholdKey, metricKey, label);
+    if (failure) return failure;
+  }
+  if (!("adjacentMinFreshSegments" in thresholds)) {
+    return "adjacent threshold missing: adjacentMinFreshSegments";
+  }
+  if (!isFiniteNumber(thresholds.adjacentMinFreshSegments)) {
+    return "adjacent threshold adjacentMinFreshSegments must be numeric";
+  }
+  if (!("adjacentFreshSegments" in metrics)) {
+    return "adjacent metric missing: adjacentFreshSegments";
+  }
+  if (!isFiniteNumber(metrics.adjacentFreshSegments)) {
+    return "adjacent metric adjacentFreshSegments must be numeric";
+  }
+  if (metrics.adjacentFreshSegments < thresholds.adjacentMinFreshSegments) {
+    return `adjacent metric adjacentFreshSegments=${metrics.adjacentFreshSegments} is below required ${thresholds.adjacentMinFreshSegments}`;
+  }
+  if (isFiniteNumber(metrics.punctuationStaleOutputReuseCount) && metrics.punctuationStaleOutputReuseCount > 0) {
+    return "punctuation stale output reuse count must be zero";
+  }
+  if (isFiniteNumber(metrics.adjacentEmptySegments) && metrics.adjacentEmptySegments > 0) {
+    return "adjacent empty segment count must be zero";
+  }
+  if (isFiniteNumber(metrics.adjacentStaleOutputReuseCount) && metrics.adjacentStaleOutputReuseCount > 0) {
+    return "adjacent stale output reuse count must be zero";
+  }
+  if (isFiniteNumber(metrics.adjacentSessionRestartCount) && metrics.adjacentSessionRestartCount > 0) {
+    return "adjacent session restart count must be zero";
+  }
+  return null;
+}
+
+function validateDecodeFullGate(summary) {
+  const evidence = objectOrEmpty(summary.decodeFullEvidence);
+  if (!summary.decodeFullEvidence || Object.keys(evidence).length === 0) {
+    return "decode-full evidence is required for MOSS-NANO-5 soak promotion";
+  }
+  const thresholdFailure = normalizeDecodeFullEvidence(summary);
+  const normalizedEvidence = objectOrEmpty(summary.decodeFullEvidence);
+  if (String(normalizedEvidence.status ?? "").toLowerCase() === "passed") return null;
+  const accepted = objectOrEmpty(summary.acceptedDecodeStrategy);
+  const strategy = String(accepted.strategy ?? "").toLowerCase();
+  const replacementAccepted = accepted.accepted === true
+    && (accepted.replacementForDecodeFull === true || ["stream", "streaming", "segmented"].includes(strategy));
+  if (replacementAccepted) {
+    return "accepted replacement evidence cannot bypass failed decode-full gate for MOSS-NANO-5 soak promotion";
+  }
+  return `decode-full failed MOSS-NANO-5 soak gate${thresholdFailure ? `: ${thresholdFailure}` : ""}`;
+}
+
+function validateAdjacentSegments(summary, { required = false } = {}) {
+  const stats = objectOrEmpty(summary.adjacentSegmentStats);
+  const segments = Array.isArray(summary.segments) ? summary.segments : [];
+  if (required && !summary.adjacentSegmentStats) {
+    return "adjacent segment evidence is required for MOSS-NANO-5 soak promotion";
+  }
+  if (!summary.adjacentSegmentStats || segments.length < 5 || Number(stats.completedSegments ?? 0) < 5) {
+    return "adjacent run requires at least five fresh segments";
+  }
+  if (Number(stats.emptySegments ?? 0) > 0 || segments.some((segment) => segment?.empty || !String(segment?.text ?? "").trim())) {
+    return "adjacent run contains an empty segment";
+  }
+  if (Number(stats.staleOutputReuseCount ?? 0) > 0 || segments.some((segment) => (
+    segment?.staleOutputReuse
+      || segment?.firstAudioObservation?.outputFileExistedBeforeRun
+      || segment?.firstAudioObservation?.reusedExistingOutputFile
+  ))) {
+    return "adjacent run has stale output reuse";
+  }
+  if (Number(stats.freshSegments ?? 0) < 5) {
+    return "adjacent run requires at least five fresh segments";
+  }
+  if (Number(stats.sessionRestartCount ?? 0) > 0 || segments.some((segment) => segment?.sessionRestarted)) {
+    return "adjacent run has a session restart";
+  }
+  const trend = Number(stats.rtfTrendRatio);
+  const trendMax = Number(stats.rtfTrendMax ?? summary.promotionThresholds?.adjacentRtfTrendMax ?? 0.15);
+  if (Number.isFinite(trend) && Number.isFinite(trendMax) && trend > trendMax) {
+    return "adjacent RTF trend exceeds 15%";
+  }
+  const firstIdentity = segments[0]?.runtimeIdentity;
+  if (!segments.every((segment) => sortedJson(segment?.runtimeIdentity) === sortedJson(firstIdentity))) {
+    return "adjacent run has a session restart";
+  }
+  const wavs = segments.map((segment) => segment?.outputWavPath).filter(Boolean);
+  if (new Set(wavs).size !== wavs.length) {
+    return "adjacent run requires distinct WAV outputs";
+  }
+  if (segments.some((segment) => segment?.firstAudioObservation?.internalFirstDecodedAudioMs == null)) {
+    return "adjacent run requires internal first decoded audio for every segment";
+  }
+  return null;
+}
+
+function validateNano5SoakPromotion(summary, requested = {}) {
+  if (!hasNano5SoakShape(summary, requested)) return null;
+  const decision = String(summary.promotionDecision?.decision ?? "");
+  const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
+  const isSoakPromotion = decision === "PROMOTE_NANO_TO_SOAK_CANDIDATE" || target === "nano5-soak";
+  if (target === "app-prototype" || decision === "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE") {
+    return {
+      message: "MOSS-NANO-5 may promote to soak, not app prototype.",
+      key: "promotionDecision",
+      failureClass: "runtime-contract",
+    };
+  }
+  normalizePromotionMemoryMetrics(summary);
+  const precomputeRequested = summary.precomputeInputsRequested === true || requested.precomputeInputs === true;
+  const precomputeEvidence = objectOrEmpty(summary.precomputeInputsEvidence);
+  const precomputeEvidenceActual = summary.precomputeInputsActual === true
+    && (String(precomputeEvidence.status ?? "").toLowerCase() === "actual" || precomputeEvidence.actual === true);
+  if (isSoakPromotion && !precomputeEvidenceActual) {
+    if (summary.precomputeInputsBlocker || String(precomputeEvidence.status ?? "").toLowerCase() === "blocked") {
+      return {
+        message: "blocker-only precompute evidence must not promote.",
+        key: "precomputeInputsEvidence",
+        failureClass: "runtime-contract",
+      };
+    }
+    return {
+      message: "precompute actual evidence is required for MOSS-NANO-5 soak promotion.",
+      key: "precomputeInputsEvidence",
+      failureClass: "runtime-contract",
+    };
+  }
+  if (!isSoakPromotion && precomputeRequested && summary.precomputeInputsActual !== true) {
+    if (!summary.precomputeInputsBlocker) {
+      return {
+        message: "precomputeInputsActual=false requires a named blocker.",
+        key: "precomputeInputsEvidence",
+        failureClass: "runtime-contract",
+      };
+    }
+    return {
+      message: "blocker-only precompute evidence must not promote.",
+      key: "precomputeInputsEvidence",
+      failureClass: "runtime-contract",
+    };
+  }
+  if (isSoakPromotion) {
+    const decodeFailure = validateDecodeFullGate(summary);
+    if (decodeFailure) {
+      return {
+        message: decodeFailure,
+        key: "decodeFullEvidence",
+        failureClass: "runtime-contract",
+      };
+    }
+    const adjacentFailure = validateAdjacentSegments(summary, { required: true });
+    if (adjacentFailure) {
+      return {
+        message: adjacentFailure,
+        key: "adjacentSegmentStats",
+        failureClass: "runtime-contract",
+      };
+    }
+  } else {
+    normalizeDecodeFullEvidence(summary);
+    if (summary.adjacentSegmentStats != null) {
+      const adjacentFailure = validateAdjacentSegments(summary);
+      if (adjacentFailure) {
+        return {
+          message: adjacentFailure,
+          key: "adjacentSegmentStats",
+          failureClass: "runtime-contract",
+        };
+      }
+    }
+  }
+  if (isSoakPromotion) {
+    const thresholdFailure = nano5PromotionThresholdFailure(summary);
+    if (thresholdFailure) {
+      return {
+        message: `MOSS-NANO-5 soak promotion blocked: ${thresholdFailure}.`,
+        key: "promotionThresholds",
+        failureClass: "performance",
+      };
+    }
+  }
+  return null;
 }
 
 function promotionThresholdFailure(summary) {
@@ -590,6 +953,10 @@ function normalizeResidentSummary(summary, requested = {}) {
   }
 
   if (contractMessage) return blockResidentSummary(summary, contractMessage, contractKey);
+  const nano5Failure = validateNano5SoakPromotion(summary, requested);
+  if (nano5Failure) {
+    return blockResidentSummary(summary, nano5Failure.message, nano5Failure.key, nano5Failure.failureClass);
+  }
   const promotionFailure = validateOptimizationPromotion(summary);
   if (promotionFailure) {
     return blockResidentSummary(summary, promotionFailure.message, promotionFailure.key, promotionFailure.failureClass);
@@ -644,6 +1011,9 @@ export function buildPythonCommand({
   bookLikeWarmRuns,
   residentDecodeMode,
   streamDecodeFrameBudget,
+  adjacentSegmentCount,
+  adjacentSegmentSource,
+  adjacentSegmentRtfTrendMax,
   allowEmptyPassage,
 } = {}) {
   const defaults = defaultOptions(projectRoot);
@@ -716,6 +1086,9 @@ export function buildPythonCommand({
   if (bookLikeWarmRuns != null) args.push("--book-like-warm-runs", String(bookLikeWarmRuns));
   if (residentDecodeMode) args.push("--resident-decode-mode", residentDecodeMode);
   if (streamDecodeFrameBudget != null) args.push("--stream-decode-frame-budget", String(streamDecodeFrameBudget));
+  if (adjacentSegmentCount != null) args.push("--adjacent-segment-count", String(adjacentSegmentCount));
+  if (adjacentSegmentSource) args.push("--adjacent-segment-source", adjacentSegmentSource);
+  if (adjacentSegmentRtfTrendMax != null) args.push("--adjacent-segment-rtf-trend-max", String(adjacentSegmentRtfTrendMax));
 
   return { command, args, pythonExecutable: command, pythonProbePath };
 }
@@ -841,6 +1214,9 @@ export async function runMossNanoProbe({
   bookLikeWarmRuns,
   residentDecodeMode,
   streamDecodeFrameBudget,
+  adjacentSegmentCount,
+  adjacentSegmentSource,
+  adjacentSegmentRtfTrendMax,
   allowEmptyPassage,
   execFile = runSpawn,
   fsModule = fs,
@@ -909,6 +1285,9 @@ export async function runMossNanoProbe({
     bookLikeWarmRuns,
     residentDecodeMode,
     streamDecodeFrameBudget,
+    adjacentSegmentCount,
+    adjacentSegmentSource,
+    adjacentSegmentRtfTrendMax,
     allowEmptyPassage,
   });
 
@@ -951,6 +1330,9 @@ export async function runMossNanoProbe({
           bookLikeWarmRuns,
           residentDecodeMode,
           streamDecodeFrameBudget,
+          adjacentSegmentCount,
+          adjacentSegmentSource,
+          adjacentSegmentRtfTrendMax,
         })
         : parsed.summary;
       result = {
@@ -987,6 +1369,9 @@ export async function runMossNanoProbe({
           bookLikeWarmRuns,
           residentDecodeMode,
           streamDecodeFrameBudget,
+          adjacentSegmentCount,
+          adjacentSegmentSource,
+          adjacentSegmentRtfTrendMax,
         })
         : parsed.summary;
       result = {
@@ -1070,6 +1455,9 @@ function helpText() {
     "  --book-like-warm-runs <n>",
     "  --resident-decode-mode <full|stream>",
     "  --stream-decode-frame-budget <n>",
+    "  --adjacent-segment-count <n>",
+    "  --adjacent-segment-source <raw|book-like>",
+    "  --adjacent-segment-rtf-trend-max <n>",
   ].join("\n");
 }
 
@@ -1128,6 +1516,9 @@ export async function main(argv = process.argv.slice(2)) {
     bookLikeWarmRuns: args.bookLikeWarmRuns,
     residentDecodeMode: args.residentDecodeMode,
     streamDecodeFrameBudget: args.streamDecodeFrameBudget,
+    adjacentSegmentCount: args.adjacentSegmentCount,
+    adjacentSegmentSource: args.adjacentSegmentSource,
+    adjacentSegmentRtfTrendMax: args.adjacentSegmentRtfTrendMax,
   });
 
   process.stdout.write(args.json ? `${JSON.stringify(result, null, 2)}\n` : formatSummaryText(result));

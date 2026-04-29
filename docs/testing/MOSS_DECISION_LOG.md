@@ -568,13 +568,73 @@ Non-decisions:
 - Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
 - Do not claim precompute reuse when `precomputeInputsActual=false`.
 
+## MOSS-NANO-5 Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decisions: not `PROMOTE_NANO_TO_SOAK_CANDIDATE`, not `KEEP_KOKORO_ONLY`, not `REJECT_NANO_LOCAL_CPU`, and not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+Scope: MOSS-NANO-5 was runtime-only decode/precompute continuity evidence hardening. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or `.runtime` commits.
+
+Focused verification:
+
+- `python -m py_compile scripts\moss_nano_resident_probe.py` passed.
+- `npm test -- tests/mossNanoProbe.test.js` passed `64/64` after the known sandbox `EPERM` escalated rerun.
+
+Canonical refreshed artifacts:
+
+| Evidence item | Result |
+|---|---|
+| Short resident ORT | `moss-nano-5-short-resident-ort-intra2`: ok; RTF `0.6693`; first audio `0.343s`; memory delta `5.86MB`. |
+| Punctuation resident precompute | `moss-nano-5-punctuation-resident-precompute`: ok; RTF `0.6564`; first audio `0.424s`; memory delta `10.54MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
+| Decode full | `moss-nano-5-short-resident-decode-full`: runtime ok but `decodeFullEvidence.status=failed`; `acceptedDecodeStrategy.accepted=false`; first audio `2.560s` > `2.5s`; memory delta `5.51MB`. |
+| Short resident precompute actual | `moss-nano-5-short-resident-precompute-actual`: ok; RTF `0.6941`; first audio `0.366s`; memory delta `5.76MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
+| Adjacent segments | `moss-nano-5-adjacent-segments-resident`: blocked; `5/5` fresh, `0` stale, `0` restarts; RTF trend `29.43%` > `15%`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`; memory delta `13.86MB`. |
+
+False-evidence hardening:
+
+- Decode-full threshold truth is fixed.
+- Requested precompute cannot masquerade as actual precompute.
+- Blocker-only precompute cannot promote.
+- Soak requires actual precompute plus adjacent evidence plus memory.
+- The adjacent min-threshold bug is fixed.
+
+Reason: Do not record `PROMOTE_NANO_TO_SOAK_CANDIDATE` because decode-full misses the first-audio gate, precompute is blocker-only, and adjacent trend exceeds the gate. Do not record `KEEP_KOKORO_ONLY` or reject Nano because short and punctuation resident performance are now strong enough to continue runtime investigation.
+
+Non-decisions:
+
+- Do not unlock MOSS-NANO-6 from this evidence; it remains queued only if future runtime work earns a soak/package gate.
+- Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or productization work from this evidence.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not commit `.runtime/**`.
+
+## Nano Onboarding Roadmap Gate
+
+Roadmap status: `MOSS-NANO-5` through `MOSS-NANO-11` are specified as the Nano onboarding lane.
+
+Allowed next work:
+
+- Future Nano runtime work may continue only as runtime investigation unless it earns a soak/package gate.
+- `MOSS-NANO-6`: runtime/package soak gate, gated until `PROMOTE_NANO_TO_SOAK_CANDIDATE` or an equivalent future runtime decision exists. It may record `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` only if latency, memory, shutdown, packaging, and provisioning evidence all pass.
+- `MOSS-NANO-7` through `MOSS-NANO-11`: conditional app onboarding path. These must not dispatch until `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` is recorded.
+
+Forbidden until promotion:
+
+- Nano sidecar IPC in the app.
+- Renderer engine selection.
+- `TtsEngine` production expansion to make Nano user-selectable.
+- Narration strategy integration.
+- Cache/prefetch/continuity integration.
+- Timing-truth UI integration.
+- Kokoro behavior changes or Kokoro retirement work.
+
 ## Decision Notes
 
 - Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
-- MOSS-TTS-Nano is not promoted after `MOSS-NANO-4`. It must not enter app integration or replace Kokoro without a later explicit promotion decision.
+- MOSS-TTS-Nano is not promoted after `MOSS-NANO-5`. It must not enter app integration or replace Kokoro without a later explicit promotion decision. `MOSS-NANO-6` remains gated unless future runtime work earns a soak/package gate.
 - The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
 - Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
-- MOSS-3 through MOSS-7 stay paused unless a new explicit promotion decision is recorded.
+- Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding now uses MOSS-NANO-7 through MOSS-NANO-11 after promotion.
 - No silent fallback is allowed when MOSS is selected. Unsupported MOSS state must remain visible and actionable.
 
 ## Evidence Links
