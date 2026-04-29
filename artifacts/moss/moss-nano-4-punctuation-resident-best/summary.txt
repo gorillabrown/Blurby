@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-4-punctuation-resident-best
+Passage: punctuation-heavy-mid
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-4-punctuation-resident-best\output_003.wav
+Total seconds: 17.9952
+First WAV bytes seconds: 0.944
+Internal first decoded seconds: 0.944
+Audio duration seconds: 10.88
+RTF: 1.654
+Peak memory: 1813.75 MB
+Process mode: warm
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 3

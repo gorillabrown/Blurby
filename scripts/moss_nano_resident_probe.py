@@ -27,6 +27,20 @@ def now_ms(start: float) -> int:
 def strip_resident_args(argv: list[str]) -> dict[str, Any]:
     filtered: list[str] = []
     runtime_mode = "resident"
+    resident_options: dict[str, Any] = {}
+    value_flags = {
+        "--variant-id": "variantId",
+        "--optimization-profile": "optimizationProfile",
+        "--provider-variant": "providerVariant",
+        "--book-like-warm-runs": "bookLikeWarmRuns",
+        "--resident-decode-mode": "residentDecodeMode",
+        "--stream-decode-frame-budget": "streamDecodeFrameBudget",
+    }
+    boolean_flags = {
+        "--reuse-tokenizer": "tokenizerReuseRequested",
+        "--reuse-prompt": "promptReuseRequested",
+        "--short-passage-overhead-reduction": "shortPassageOverheadReductionRequested",
+    }
     index = 0
     while index < len(argv):
         arg = argv[index]
@@ -36,10 +50,24 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
             runtime_mode = argv[index + 1]
             index += 2
             continue
+        if arg in value_flags:
+            if index + 1 >= len(argv):
+                raise ValueError(f"{arg} requires a value")
+            value: Any = argv[index + 1]
+            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget"}:
+                value = int(value)
+            resident_options[value_flags[arg]] = value
+            index += 2
+            continue
+        if arg in boolean_flags:
+            resident_options[boolean_flags[arg]] = True
+            index += 1
+            continue
         filtered.append(arg)
         index += 1
     command = nano.parse_args(filtered)
     command["runtimeMode"] = runtime_mode
+    command.update(resident_options)
     return command
 
 
@@ -67,6 +95,7 @@ class EventRecorder:
 def base_resident_summary(options: dict[str, Any], out_dir: Path) -> dict[str, Any]:
     summary = nano.base_summary(options)
     requested_ort = requested_ort_options(options)
+    optimization_fields = initial_optimization_fields(options)
     summary.update(
         {
             "runtimeMode": "resident",
@@ -117,6 +146,7 @@ def base_resident_summary(options: dict[str, Any], out_dir: Path) -> dict[str, A
                     "internalFirstDecodedAudio": None,
                 },
             },
+            **optimization_fields,
         }
     )
     summary["benchmark"].update(
@@ -140,6 +170,205 @@ def requested_ort_options(options: dict[str, Any]) -> dict[str, Any]:
         "enableMemPattern": options.get("ortEnableMemPattern"),
         "enableMemReuse": options.get("ortEnableMemReuse"),
         "usePerSessionThreads": options.get("ortUsePerSessionThreads"),
+    }
+
+
+def resident_decode_contract(options: dict[str, Any]) -> dict[str, Any]:
+    requested_mode = options.get("residentDecodeMode")
+    requested_budget = options.get("streamDecodeFrameBudget")
+    applied_mode = None
+    if requested_mode:
+        normalized_mode = str(requested_mode).strip().lower()
+        if normalized_mode in {"stream", "streaming"}:
+            applied_mode = "stream"
+        elif normalized_mode in {"full", "non-streaming", "nonstreaming"}:
+            applied_mode = "full"
+    return {
+        "requestedMode": requested_mode,
+        "appliedMode": applied_mode,
+        "streamDecodeFrameBudgetRequested": requested_budget,
+        "streamDecodeFrameBudgetApplied": None,
+        "streamDecodeFrameBudgetSupported": False if requested_budget is not None else None,
+        "reason": "Upstream resident synthesize() does not expose an independent stream decode frame budget."
+        if requested_budget is not None
+        else None,
+    }
+
+
+def initial_optimization_fields(options: dict[str, Any]) -> dict[str, Any]:
+    short_requested = bool(options.get("shortPassageOverheadReductionRequested"))
+    book_like_requested = int(options.get("bookLikeWarmRuns") or 0)
+    fields = {
+        "optimizationVariant": options.get("variantId"),
+        "optimizationProfile": options.get("optimizationProfile"),
+        "providerVariant": options.get("providerVariant"),
+        "tokenizerReuseActual": False if options.get("tokenizerReuseRequested") else None,
+        "promptReuseActual": False if options.get("promptReuseRequested") else None,
+        "shortPassageOverheadReduction": {
+            "requested": short_requested,
+            "actual": False,
+            "strategy": None,
+            "reason": "Resident runtime reuse has not been proven yet.",
+        },
+        "bookLikeRunStats": {
+            "requestedWarmRuns": book_like_requested,
+            "completedWarmRuns": 0,
+            "internalFirstDecodedAudioFreshRuns": 0,
+            "staleOutputReuseCount": 0,
+            "internalFirstDecodedAudioMs": [],
+        },
+        "optimizationEvidence": {
+            "status": "requested" if any(
+                (
+                    options.get("variantId"),
+                    options.get("optimizationProfile"),
+                    options.get("providerVariant"),
+                    options.get("tokenizerReuseRequested"),
+                    options.get("promptReuseRequested"),
+                    short_requested,
+                    book_like_requested,
+                    options.get("residentDecodeMode"),
+                    options.get("streamDecodeFrameBudget") is not None,
+                    options.get("precomputeInputs"),
+                )
+            )
+            else "not-requested",
+            "variantId": options.get("variantId"),
+            "profile": options.get("optimizationProfile"),
+            "providerVariant": options.get("providerVariant"),
+            "requestedOnly": True,
+            "stale": False,
+            "evidenceRunId": options.get("runId"),
+            "evidenceGeneratedAt": None,
+        },
+        "promotionClass": False,
+        "promotionMetrics": None,
+        "residentDecode": resident_decode_contract(options),
+        "precomputeInputsActual": False,
+        "precomputeInputsEvidence": {
+            "requested": bool(options.get("precomputeInputs")),
+            "actual": False,
+            "reason": "Resident diagnostic has no separate precomputed input cache beyond the single in-process runtime.",
+        },
+    }
+    fields["optimization"] = {
+        "variantId": fields["optimizationVariant"],
+        "profile": fields["optimizationProfile"],
+        "providerVariant": fields["providerVariant"],
+        "tokenizerReuseRequested": bool(options.get("tokenizerReuseRequested")),
+        "promptReuseRequested": bool(options.get("promptReuseRequested")),
+        "tokenizerReuseActual": fields["tokenizerReuseActual"],
+        "promptReuseActual": fields["promptReuseActual"],
+        "shortPassageOverheadReduction": fields["shortPassageOverheadReduction"],
+        "bookLikeRunStats": fields["bookLikeRunStats"],
+        "evidence": fields["optimizationEvidence"],
+        "residentDecode": fields["residentDecode"],
+    }
+    return fields
+
+
+def runtime_attr_identity(runtime: Any, names: tuple[str, ...]) -> str | None:
+    for name in names:
+        value = getattr(runtime, name, None)
+        if value is not None:
+            return f"{name}:{id(value)}"
+    return None
+
+
+def finalize_optimization_fields(
+    summary: dict[str, Any],
+    options: dict[str, Any],
+    runtime: Any,
+    run_records: list[dict[str, Any]],
+    reuse_ok: bool,
+) -> None:
+    tokenizer_identity = runtime_attr_identity(runtime, ("tokenizer", "sp", "sentencepiece", "text_tokenizer"))
+    prompt_identity = runtime_attr_identity(runtime, ("prompt_cache", "prompt_embedding", "prompt_audio"))
+    tokenizer_requested = bool(options.get("tokenizerReuseRequested"))
+    prompt_requested = bool(options.get("promptReuseRequested"))
+    precompute_requested = bool(options.get("precomputeInputs"))
+    short_requested = bool(options.get("shortPassageOverheadReductionRequested"))
+    book_like_requested = int(options.get("bookLikeWarmRuns") or 0)
+    measured = [record for record in summary.get("iterations", []) if record.get("measured")]
+    book_like_records = measured[:book_like_requested] if book_like_requested > 0 else []
+    fresh_internal = [
+        record for record in book_like_records
+        if record.get("internalFirstDecodedAudioMs") is not None
+        and not bool(record.get("firstAudioObservation", {}).get("reusedExistingOutputFile"))
+        and not bool(record.get("firstAudioObservation", {}).get("outputFileExistedBeforeRun"))
+    ]
+    stale_count = sum(
+        1 for record in book_like_records
+        if bool(record.get("firstAudioObservation", {}).get("reusedExistingOutputFile"))
+        or bool(record.get("firstAudioObservation", {}).get("outputFileExistedBeforeRun"))
+    )
+    stats = {
+        "requestedWarmRuns": book_like_requested,
+        "completedWarmRuns": len(book_like_records),
+        "internalFirstDecodedAudioFreshRuns": len(fresh_internal),
+        "staleOutputReuseCount": stale_count,
+        "internalFirstDecodedAudioMs": [record.get("internalFirstDecodedAudioMs") for record in book_like_records],
+    }
+    summary["bookLikeRunStats"] = stats
+    summary["tokenizerReuseActual"] = bool(tokenizer_requested and reuse_ok and tokenizer_identity)
+    summary["promptReuseActual"] = bool(prompt_requested and reuse_ok and prompt_identity and options.get("promptAudio"))
+    summary["shortPassageOverheadReduction"] = {
+        "requested": short_requested,
+        "actual": bool(short_requested and reuse_ok),
+        "strategy": "resident-runtime-reuse" if short_requested and reuse_ok else None,
+        "reason": None if short_requested and reuse_ok else "Requested short-passage overhead reduction was not proven by resident reuse.",
+    }
+    summary["promotionMetrics"] = {
+        "shortRtf": summary.get("rtf"),
+        "firstDecodedAudioSec": summary.get("firstAudioSec"),
+        "internalFirstDecodedAudioMs": summary.get("internalFirstDecodedAudioMs"),
+    }
+    actual_flags = [
+        bool(precompute_requested and summary.get("precomputeInputsActual")),
+        summary["tokenizerReuseActual"],
+        summary["promptReuseActual"],
+        summary["shortPassageOverheadReduction"]["actual"],
+        bool(book_like_requested and stats["completedWarmRuns"] >= book_like_requested and stats["internalFirstDecodedAudioFreshRuns"] >= book_like_requested and stats["staleOutputReuseCount"] == 0),
+    ]
+    unsupported_requested = [
+        label
+        for label, requested, actual in (
+            ("precomputeInputs", precompute_requested, summary.get("precomputeInputsActual")),
+            ("tokenizerReuse", tokenizer_requested, summary["tokenizerReuseActual"]),
+            ("promptReuse", prompt_requested, summary["promptReuseActual"]),
+            ("shortPassageOverheadReduction", short_requested, summary["shortPassageOverheadReduction"]["actual"]),
+            (
+                "bookLikeWarmRuns",
+                book_like_requested > 0,
+                stats["completedWarmRuns"] >= book_like_requested
+                and stats["internalFirstDecodedAudioFreshRuns"] >= book_like_requested
+                and stats["staleOutputReuseCount"] == 0,
+            ),
+        )
+        if requested and not actual
+    ]
+    requested_any = summary.get("optimizationEvidence", {}).get("status") != "not-requested"
+    applied_any = any(actual_flags) or bool(summary.get("providerVariant"))
+    summary["optimizationEvidence"] = {
+        **dict(summary.get("optimizationEvidence") or {}),
+        "status": "partial" if applied_any and unsupported_requested else ("applied" if applied_any else ("requested" if requested_any else "not-requested")),
+        "requestedOnly": bool(requested_any and not applied_any),
+        "stale": False,
+        "evidenceGeneratedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "runtimeReuseActual": reuse_ok,
+        "tokenizerIdentity": tokenizer_identity,
+        "promptIdentity": prompt_identity,
+        "unsupportedRequestedOptimizations": unsupported_requested,
+    }
+    summary["optimization"] = {
+        **dict(summary.get("optimization") or {}),
+        "tokenizerReuseActual": summary["tokenizerReuseActual"],
+        "promptReuseActual": summary["promptReuseActual"],
+        "shortPassageOverheadReduction": summary["shortPassageOverheadReduction"],
+        "bookLikeRunStats": summary["bookLikeRunStats"],
+        "precomputeInputsRequested": precompute_requested,
+        "precomputeInputsActual": summary.get("precomputeInputsActual"),
+        "evidence": summary["optimizationEvidence"],
     }
 
 
@@ -672,6 +901,12 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
 
     enable_wetext = not bool(options.get("disableWetextProcessing", nano.DEFAULT_DISABLE_WETEXT_PROCESSING))
     enable_normalize_tts_text = True
+    resident_decode = summary.get("residentDecode") or {}
+    effective_streaming = bool(options.get("streaming", nano.DEFAULT_STREAMING))
+    if resident_decode.get("appliedMode") == "stream":
+        effective_streaming = True
+    elif resident_decode.get("appliedMode") == "full":
+        effective_streaming = False
     run_records_for_reuse: list[dict[str, Any]] = []
 
     def run_one(run_index: int, measured: bool, wav_path: Path, phase: str) -> dict[str, Any]:
@@ -697,7 +932,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                 output_audio_path=str(wav_path),
                 sample_mode=str(options.get("sampleMode") or nano.DEFAULT_SAMPLE_MODE),
                 do_sample=str(options.get("sampleMode") or nano.DEFAULT_SAMPLE_MODE) != "greedy",
-                streaming=bool(options.get("streaming", nano.DEFAULT_STREAMING)),
+                streaming=effective_streaming,
                 max_new_frames=int(options.get("maxNewFrames") or nano.DEFAULT_MAX_NEW_FRAMES),
                 enable_wetext=enable_wetext,
                 enable_normalize_tts_text=enable_normalize_tts_text,
@@ -844,6 +1079,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         "memoryDeltaMb": memory_aggregate["memoryDeltaMb"],
         "peakMemoryMb": memory_aggregate["peakMemoryMb"],
     }
+    finalize_optimization_fields(summary, options, runtime, run_records_for_reuse, reuse_ok)
     summary["events"] = recorder.events
     summary["ok"] = True
     summary["status"] = "ok"

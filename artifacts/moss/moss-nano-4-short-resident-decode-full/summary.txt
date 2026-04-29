@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-4-short-resident-decode-full
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-4-short-resident-decode-full\output_003.wav
+Total seconds: 6.1145
+First WAV bytes seconds: 6.099
+Internal first decoded seconds: 6.099
+Audio duration seconds: 4.16
+RTF: 1.4698
+Peak memory: 1819.85 MB
+Process mode: warm
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 3

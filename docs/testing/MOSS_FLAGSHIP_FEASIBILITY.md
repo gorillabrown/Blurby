@@ -251,6 +251,23 @@ Comparison: MOSS-NANO-2 v2 had observed first audio `13.9036s` / `15.2025s` shor
 
 Conclusion: Nano now proves true resident reuse and internal first decoded audio, but short RTF `1.7005` misses the promotion threshold `<=1.5`, and memory growth needs soak/tuning. Next work, if any, should be resident runtime tuning/soak/perf only. MOSS-3 through MOSS-7 remain paused unless a new explicit app-integration promotion decision is recorded.
 
+## MOSS-NANO-4 Resident Runtime Optimization + Promotion Retest
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. MOSS-NANO-4 was runtime optimization plus promotion retest only. It did not add app integration, did not reopen MOSS-3, and did not change Kokoro behavior.
+
+| Evidence | Result |
+|---|---|
+| Best short resident ORT | `moss-nano-4-short-resident-ort-intra2`: true reuse; ORT applied CPU `intraOp 2`, `interOp 1`, sequential execution, graph optimization all; first decoded `659ms`; final RTF `1.3734`; p50/p95 `1.3734`/`1.4329`; memory growth about `42.57MB`. |
+| Baseline short | RTF `1.7116`; first decoded `565ms`. |
+| Best punctuation | First decoded `944ms`; final RTF `1.6540`. |
+| Best bookwarm | Long-form built-in substitute; `3/3` fresh internal first decoded warm runs; stale output reuse `0`; first decoded `727ms`; RTF `1.1252`. |
+| Decode-full caveat | Disqualified/caveated: first decoded `6099ms`; memory growth about `103.16MB`. |
+| Precompute truth | Precompute requested, but `precomputeInputsActual=false`; no false reuse/precompute claim. |
+| False-promotion hardening | Promotion-class summaries require numeric thresholds/metrics and block requested-vs-actual contradictions. |
+| Focused verification | Focused tests passed `42/42`; full verification is reserved for Hippocrates. |
+
+Conclusion: the best short run now meets the short RTF target with true reuse and applied ORT settings, but punctuation remains too slow for promotion and decode-full/bookwarm caveats block app-prototype confidence. Future Nano work, if any, remains resident runtime tuning/soak/perf only. MOSS-3 through MOSS-7 remain paused unless a new explicit app-integration promotion decision is recorded.
+
 ## Failure Classification
 
 Every MOSS runtime failure must be classified with one of these classes.

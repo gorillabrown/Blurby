@@ -185,6 +185,61 @@ function residentNanoSummary(overrides = {}) {
   });
 }
 
+function optimizedResidentNanoSummary(overrides = {}) {
+  return residentNanoSummary({
+    runId: "nano-resident-optimized",
+    promotionClass: true,
+    optimizationProfile: "resident-cpu-low-latency",
+    providerVariant: "cpu-threads-2-sequential",
+    tokenizerReuseActual: true,
+    promptReuseActual: true,
+    shortPassageOverheadReduction: {
+      requested: true,
+      actual: true,
+      strategy: "batch-short-passages",
+      savedStartupMs: 80,
+    },
+    bookLikeRunStats: {
+      requestedWarmRuns: 3,
+      completedWarmRuns: 3,
+      internalFirstDecodedAudioFreshRuns: 3,
+      staleOutputReuseCount: 0,
+      internalFirstDecodedAudioMs: [110, 116, 112],
+    },
+    optimizationEvidence: {
+      status: "applied",
+      profile: "resident-cpu-low-latency",
+      providerVariant: "cpu-threads-2-sequential",
+      requestedOnly: false,
+      stale: false,
+      evidenceRunId: "moss-nano-4-resident-optimization",
+      evidenceGeneratedAt: "2026-04-29T00:00:00.000Z",
+    },
+    promotionDecision: {
+      promote: true,
+      target: "moss-nano-4-resident-optimized",
+    },
+    promotionThresholds: {
+      shortRtfMax: 0.6,
+      firstDecodedAudioSecMax: 0.25,
+    },
+    promotionMetrics: {
+      shortRtf: 0.5,
+      firstDecodedAudioSec: 0.12,
+    },
+    iterations: [
+      residentIteration({ iterationIndex: 0, internalFirstDecodedAudioMs: 110, firstAudioSec: 0.11 }),
+      residentIteration({ iterationIndex: 1, internalFirstDecodedAudioMs: 116, firstAudioSec: 0.116 }),
+      residentIteration({ iterationIndex: 2, internalFirstDecodedAudioMs: 112, firstAudioSec: 0.112 }),
+    ],
+    aggregate: {
+      iterations: 3,
+      warmupsExcluded: 1,
+    },
+    ...overrides,
+  });
+}
+
 function fakeInferScript() {
   return [
     "import argparse, wave",
@@ -1482,6 +1537,440 @@ describe("MOSS Nano probe", () => {
       outputFileExistedBeforeRun: true,
       reusedExistingOutputFile: true,
     });
+  });
+
+  it("passes MOSS-NANO-4 resident optimization tuning options through to Python", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { buildPythonCommand } = await importMossNanoProbe();
+
+    const commandInfo = buildPythonCommand({
+      projectRoot,
+      outputDir: path.join(projectRoot, "out"),
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      optimizationProfile: "resident-cpu-low-latency",
+      providerVariant: "cpu-threads-2-sequential",
+      tokenizerReuse: true,
+      promptReuse: true,
+      shortPassageOverheadReduction: true,
+      bookLikeWarmRuns: 3,
+    });
+
+    expect(commandInfo.args).toEqual(expect.arrayContaining([
+      "--runtime-mode",
+      "resident",
+      "--optimization-profile",
+      "resident-cpu-low-latency",
+      "--provider-variant",
+      "cpu-threads-2-sequential",
+      "--reuse-tokenizer",
+      "--reuse-prompt",
+      "--short-passage-overhead-reduction",
+      "--book-like-warm-runs",
+      "3",
+    ]));
+  });
+
+  it("normalizes resident optimization evidence into first-class summary fields", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-optimization-evidence";
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(residentNanoSummary({
+        runId,
+        promotionClass: true,
+        optimization: {
+          profile: "resident-cpu-low-latency",
+          evidence: {
+            status: "applied",
+            evidenceRunId: "moss-nano-4-resident-optimization",
+            requestedOnly: false,
+            stale: false,
+          },
+          providerVariant: "cpu-threads-2-sequential",
+          tokenizerReuseActual: true,
+          promptReuseActual: true,
+          shortPassageOverheadReduction: {
+            requested: true,
+            actual: true,
+            strategy: "batch-short-passages",
+          },
+          bookLikeRunStats: {
+            requestedWarmRuns: 3,
+            completedWarmRuns: 3,
+            internalFirstDecodedAudioFreshRuns: 3,
+            staleOutputReuseCount: 0,
+          },
+        },
+      }))}\n`,
+      stderr: "",
+    }));
+
+    await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      optimizationProfile: "resident-cpu-low-latency",
+      providerVariant: "cpu-threads-2-sequential",
+      tokenizerReuse: true,
+      promptReuse: true,
+      shortPassageOverheadReduction: true,
+      bookLikeWarmRuns: 3,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(summary.summary).toMatchObject({
+      optimizationProfile: "resident-cpu-low-latency",
+      providerVariant: "cpu-threads-2-sequential",
+      tokenizerReuseActual: true,
+      promptReuseActual: true,
+      shortPassageOverheadReduction: {
+        requested: true,
+        actual: true,
+      },
+      bookLikeRunStats: {
+        requestedWarmRuns: 3,
+        completedWarmRuns: 3,
+        internalFirstDecodedAudioFreshRuns: 3,
+        staleOutputReuseCount: 0,
+      },
+      optimizationEvidence: {
+        status: "applied",
+        evidenceRunId: "moss-nano-4-resident-optimization",
+        requestedOnly: false,
+        stale: false,
+      },
+    });
+  });
+
+  it.each([
+    [
+      "missing",
+      (overrides) => {
+        const summary = optimizedResidentNanoSummary(overrides);
+        delete summary.optimizationEvidence;
+        return summary;
+      },
+      /optimization evidence.*missing/i,
+    ],
+    [
+      "requested-only",
+      (overrides) => optimizedResidentNanoSummary({
+        ...overrides,
+        optimizationEvidence: {
+          status: "requested",
+          profile: "resident-cpu-low-latency",
+          providerVariant: "cpu-threads-2-sequential",
+          requestedOnly: true,
+          stale: false,
+        },
+      }),
+      /optimization evidence.*requested-only/i,
+    ],
+    [
+      "stale",
+      (overrides) => optimizedResidentNanoSummary({
+        ...overrides,
+        optimizationEvidence: {
+          status: "applied",
+          profile: "resident-cpu-low-latency",
+          providerVariant: "cpu-threads-2-sequential",
+          requestedOnly: false,
+          stale: true,
+          evidenceGeneratedAt: "2026-04-01T00:00:00.000Z",
+        },
+      }),
+      /optimization evidence.*stale/i,
+    ],
+  ])("blocks promotion-class resident summaries with %s optimization evidence", async (_caseName, makeSummary, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano-resident-optimization-${_caseName}`;
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(makeSummary({ runId }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.error).toMatch(errorPattern);
+    expect(summary.summary.checks).toContainEqual(expect.objectContaining({
+      key: "optimizationEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("blocks promotion-class resident summaries when short RTF or first-decoded thresholds are missed", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-promotion-threshold-miss";
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(optimizedResidentNanoSummary({
+        runId,
+        totalSec: 1.2,
+        audioDurationSec: 1,
+        rtf: 1.2,
+        firstAudioSec: 0.42,
+        internalFirstDecodedAudioMs: 420,
+        firstAudioObservation: internalFirstDecodedAudioObservation({
+          internalFirstDecodedAudioMs: 420,
+          internalFirstDecodedAudioSec: 0.42,
+        }),
+        promotionThresholds: {
+          shortRtfMax: 0.6,
+          firstDecodedAudioSecMax: 0.25,
+        },
+        promotionMetrics: {
+          shortRtf: 1.2,
+          firstDecodedAudioSec: 0.42,
+        },
+        promotionDecision: {
+          promote: true,
+          target: "moss-nano-4-resident-optimized",
+        },
+      }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "performance",
+    });
+    expect(summary.summary.error).toMatch(/promotion.*threshold/i);
+    expect(summary.summary.checks).toContainEqual(expect.objectContaining({
+      key: "promotionThresholds",
+      status: "fail",
+      failureClass: "performance",
+    }));
+  });
+
+  it.each([
+    [
+      "missing thresholds",
+      (overrides) => {
+        const summary = optimizedResidentNanoSummary(overrides);
+        delete summary.promotionThresholds;
+        return summary;
+      },
+      /promotion.*threshold.*missing/i,
+    ],
+    [
+      "missing metrics",
+      (overrides) => {
+        const summary = optimizedResidentNanoSummary(overrides);
+        delete summary.promotionMetrics;
+        return summary;
+      },
+      /promotion.*metric.*missing/i,
+    ],
+    [
+      "non-numeric threshold",
+      (overrides) => optimizedResidentNanoSummary({
+        ...overrides,
+        promotionThresholds: {
+          shortRtfMax: "fast-enough",
+          firstDecodedAudioSecMax: 0.25,
+        },
+      }),
+      /promotion.*threshold.*numeric/i,
+    ],
+    [
+      "NaN metric",
+      (overrides) => optimizedResidentNanoSummary({
+        ...overrides,
+        promotionMetrics: {
+          shortRtf: "NaN",
+          firstDecodedAudioSec: 0.12,
+        },
+      }),
+      /promotion.*metric.*numeric/i,
+    ],
+  ])("blocks promotion-class resident summaries with %s promotion gates", async (_caseName, makeSummary, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano-resident-promotion-gate-${_caseName.replaceAll(" ", "-")}`;
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(makeSummary({ runId }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "performance",
+    });
+    expect(summary.summary.error).toMatch(errorPattern);
+    expect(summary.summary.checks).toContainEqual(expect.objectContaining({
+      key: "promotionThresholds",
+      status: "fail",
+      failureClass: "performance",
+    }));
+  });
+
+  it.each([
+    [
+      "precomputed inputs",
+      {
+        precomputeInputsRequested: true,
+        precomputeInputsActual: false,
+      },
+      /precompute inputs.*requested.*not proven/i,
+    ],
+    [
+      "tokenizer reuse",
+      {
+        tokenizerReuseRequested: true,
+        tokenizerReuseActual: false,
+      },
+      /tokenizer reuse.*requested.*not proven/i,
+    ],
+    [
+      "prompt reuse",
+      {
+        promptReuseRequested: true,
+        promptReuseActual: false,
+      },
+      /prompt reuse.*requested.*not proven/i,
+    ],
+  ])("blocks promotion-class resident summaries when applied evidence contradicts requested %s", async (_caseName, contradiction, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano-resident-contradicted-${_caseName.replaceAll(" ", "-")}`;
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(optimizedResidentNanoSummary({
+        runId,
+        optimizationEvidence: {
+          status: "applied",
+          requestedOnly: false,
+          stale: false,
+        },
+        ...contradiction,
+      }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.error).toMatch(errorPattern);
+    expect(summary.summary.checks).toContainEqual(expect.objectContaining({
+      key: "optimizationEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("blocks book-like warm-run evidence unless repeated fresh internal first decoded audio is proven", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { runMossNanoProbe } = await importMossNanoProbe();
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano-resident-book-like-stale-evidence";
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(optimizedResidentNanoSummary({
+        runId,
+        bookLikeRunStats: {
+          requestedWarmRuns: 3,
+          completedWarmRuns: 3,
+          internalFirstDecodedAudioFreshRuns: 2,
+          staleOutputReuseCount: 1,
+          internalFirstDecodedAudioMs: [110, null, 112],
+        },
+      }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      runId,
+      outputDir: outputRoot,
+      runtimeMode: "resident",
+      processMode: "warm",
+      iterations: 3,
+      warmupRuns: 1,
+      execFile,
+    });
+    const { summary } = await readSummaryJson(outputRoot, runId);
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.summary.error).toMatch(/book-like.*fresh internal first decoded audio/i);
+    expect(summary.summary.checks).toContainEqual(expect.objectContaining({
+      key: "bookLikeWarmRuns",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
   });
 
   it("passes custom passage text, run id, and out path into per-run artifacts", async () => {
