@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-4-bookwarm-resident-best
+Passage: long-form-3min
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-4-bookwarm-resident-best\output_003.wav
+Total seconds: 29.5252
+First WAV bytes seconds: 0.727
+Internal first decoded seconds: 0.727
+Audio duration seconds: 26.24
+RTF: 1.1252
+Peak memory: 1859.83 MB
+Process mode: warm
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 3

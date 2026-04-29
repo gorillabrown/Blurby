@@ -1,9 +1,9 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-3
+**Sprint:** MOSS-1 through MOSS-NANO-4
 **Initial status:** `INVESTIGATE`
 **Current status:** `ITERATE_NANO_RESIDENT_RUNTIME`
-**Last updated:** 2026-04-28
+**Last updated:** 2026-04-29
 
 ## Status Values
 
@@ -538,10 +538,40 @@ Non-decisions:
 - Do not treat superseded wrong-interpreter or empty-passage artifacts as current timing evidence.
 - Do not reject Nano permanently; require better runtime instrumentation and actual reuse before reconsidering.
 
+## MOSS-NANO-4 Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+Scope: MOSS-NANO-4 was runtime optimization plus promotion retest only. It did not add app integration, sidecar IPC, renderer integration, selectable engine behavior, MOSS-3 reopening, or Kokoro behavior changes.
+
+Evidence:
+
+| Evidence item | Result |
+|---|---|
+| Best short resident ORT run | `moss-nano-4-short-resident-ort-intra2` recorded true reuse; ORT applied CPU `intraOp 2`, `interOp 1`, sequential execution, and graph optimization all; first decoded `659ms`; final RTF `1.3734`; p50/p95 `1.3734`/`1.4329`; memory growth about `42.57MB`. |
+| Baseline short | RTF `1.7116`, first decoded `565ms`. |
+| Best punctuation | First decoded `944ms`, final RTF `1.6540`. |
+| Best bookwarm | Long-form built-in substitute; `3/3` fresh internal first decoded warm runs; stale output reuse `0`; first decoded `727ms`; RTF `1.1252`. |
+| Decode-full caveat | Disqualified/caveated for promotion framing: first decoded `6099ms`, memory growth about `103.16MB`. |
+| Precompute truth | Precompute was requested but `precomputeInputsActual=false`; no false reuse/precompute claim is valid. |
+| False-promotion hardening | Promotion-class summaries now require numeric thresholds/metrics and block requested-vs-actual contradictions. |
+| Focused verification | Focused tests passed `42/42`; full verification is reserved for Hippocrates. |
+
+Reason: The best short resident ORT run improved throughput and proves applied ORT settings with true reuse, but punctuation RTF remains above the promotion target and decode-full/bookwarm caveats prevent a safe app-prototype promotion. Continue resident runtime tuning/soak/perf only.
+
+Non-decisions:
+
+- Do not start MOSS-3 through MOSS-7 unless a new explicit promotion decision is recorded.
+- Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, timing-truth UI integration, cache/prewarm/continuity integration, or productization work from this evidence.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not claim precompute reuse when `precomputeInputsActual=false`.
+
 ## Decision Notes
 
 - Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
-- MOSS-TTS-Nano is not promoted after `MOSS-NANO-2`. It must not enter app integration or replace Kokoro without a later explicit promotion decision.
+- MOSS-TTS-Nano is not promoted after `MOSS-NANO-4`. It must not enter app integration or replace Kokoro without a later explicit promotion decision.
 - The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
 - Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
 - MOSS-3 through MOSS-7 stay paused unless a new explicit promotion decision is recorded.

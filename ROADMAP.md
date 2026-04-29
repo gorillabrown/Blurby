@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-04-28 — MOSS app integration remains paused; `MOSS-NANO-3` closed as `ITERATE_NANO_RESIDENT_RUNTIME`.
+**Last updated**: 2026-04-29 — MOSS app integration remains paused; `MOSS-NANO-4` closed as `ITERATE_NANO_RESIDENT_RUNTIME`.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-3 proved true resident Nano runtime reuse and internal first-decoded timing, but short RTF `1.7005` missed the promotion threshold `<=1.5` and memory growth needs soak/tuning. Final decision: `ITERATE_NANO_RESIDENT_RUNTIME`. No Nano app prototype is approved, no MOSS-3 reopen occurred, and Kokoro behavior is unchanged.
+**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4 evidence is recorded; MOSS-3 through MOSS-7 are paused. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-4 was runtime optimization plus promotion retest only: best short resident ORT evidence improved to first decoded `659ms`, final RTF `1.3734`, p50/p95 `1.3734`/`1.4329`, and memory growth about `42.57MB`, but the final valid decision remains `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. No Nano app prototype is approved, no MOSS-3 reopen occurred, and Kokoro behavior is unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -134,6 +134,8 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-NANO-3: In-Process Runtime Reuse And First-Audio Truth ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
                     │
+    MOSS-NANO-4: Resident Runtime Optimization + Promotion Retest ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
+                    │
     MOSS-3: Sidecar Contract And Streaming IPC (PAUSED)
                     │
     MOSS-4: Live Narration Strategy And Engine Selection (PAUSED)
@@ -144,7 +146,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-7: Productization Gate And Promotion Decision (PAUSED)
       ├── Kokoro retirement: paused until a successor proves continuous live playback and a separate retirement lane is approved
-      └── Nano: no app prototype now; reopen only with in-process instrumentation, true reuse, internal first-decoded timing, and applied ORT/session options
+      └── Nano: no app prototype now; further work only as resident runtime tuning/soak/perf with numeric promotion gates and requested-vs-actual truth
                    │
     READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
@@ -4160,7 +4162,7 @@ Task 6         — after Task 5 (git)
 
 ### Flagship-First MOSS Operational Narration Lane
 
-**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, and `MOSS-NANO-3` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, or another explicit app-integration promotion decision. The latest MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`.
+**Program status:** PAUSED FOR APP INTEGRATION. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, `MOSS-NANO-3`, and `MOSS-NANO-4` are historical evidence sprints. `MOSS-3` through `MOSS-7` must not be dispatched until the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, or another explicit app-integration promotion decision. The latest valid MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
 
 #### Sprint MOSS-HOST-1: Native/WSL Runtime Escape Hatch (COMPLETED)
 
@@ -4363,6 +4365,22 @@ Hermes [haiku]: Stage only scoped files and artifacts. Exclude `.runtime/**`, mo
 **Shared-core touch policy:** No edits to `src/hooks/useNarration.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, or `src/types.ts`. If a worker believes a shared-core edit is necessary, stop and update the spec first.
 
 **Tier:** Runtime instrumentation | **Branch:** `sprint/moss-nano-3-resident-runtime-truth` | **Depends on:** MOSS-NANO-2
+
+---
+
+#### Sprint MOSS-NANO-4: Resident Runtime Optimization + Promotion Retest (COMPLETED)
+
+**Status:** Completed 2026-04-29 with final valid decision `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. This sprint was runtime optimization plus promotion retest only: no app integration, no sidecar IPC, no renderer integration, no selectable engine behavior, no MOSS-3 reopen, and no Kokoro behavior change.
+
+**Best short evidence:** `moss-nano-4-short-resident-ort-intra2` recorded true reuse, applied ORT CPU settings (`intraOp 2`, `interOp 1`, sequential execution, graph optimization all), first decoded `659ms`, final RTF `1.3734`, p50/p95 `1.3734`/`1.4329`, and memory growth about `42.57MB`. Baseline short remained RTF `1.7116` with first decoded `565ms`.
+
+**Other evidence:** Best punctuation recorded first decoded `944ms` and final RTF `1.6540`. Best bookwarm evidence used the long-form built-in substitute, produced `3/3` fresh internal first decoded warm runs, stale output reuse `0`, first decoded `727ms`, and RTF `1.1252`. Decode-full is caveated/disqualified for promotion framing: first decoded `6099ms` and memory growth about `103.16MB`.
+
+**Evidence hardening:** Precompute was requested but `precomputeInputsActual=false`, so no false reuse/precompute claim is made. False-promotion hardening now requires promotion-class summaries to include numeric thresholds/metrics and blocks requested-vs-actual contradictions. Focused verification only: `42/42` focused tests passed; full verification is reserved for Hippocrates.
+
+**Rationale:** The best short run clears the short RTF threshold and proves applied ORT/runtime reuse, but punctuation remains above the promotion RTF target and decode-full/bookwarm caveats prevent an app-prototype promotion. Future Nano work, if any, stays resident runtime tuning/soak/perf only.
+
+**Tier:** Runtime optimization + promotion retest | **Depends on:** MOSS-NANO-3
 
 ---
 

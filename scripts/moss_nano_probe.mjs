@@ -187,6 +187,30 @@ export function parseArgs(argv = process.argv.slice(2)) {
       args.ortUsePerSessionThreads = false;
     } else if (arg === "--precompute-inputs") {
       args.precomputeInputs = true;
+    } else if (arg === "--variant-id") {
+      args.variantId = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--optimization-profile") {
+      args.optimizationProfile = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--provider-variant") {
+      args.providerVariant = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--reuse-tokenizer") {
+      args.tokenizerReuse = true;
+    } else if (arg === "--reuse-prompt") {
+      args.promptReuse = true;
+    } else if (arg === "--short-passage-overhead-reduction") {
+      args.shortPassageOverheadReduction = true;
+    } else if (arg === "--book-like-warm-runs") {
+      args.bookLikeWarmRuns = nonNegativeInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--resident-decode-mode") {
+      args.residentDecodeMode = requireValue(argv, index, arg);
+      index += 1;
+    } else if (arg === "--stream-decode-frame-budget") {
+      args.streamDecodeFrameBudget = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -242,11 +266,15 @@ function parsePythonSummary(stdout) {
 }
 
 function makeContractCheck(key, detail) {
+  return makeFailureCheck(key, detail, "runtime-contract");
+}
+
+function makeFailureCheck(key, detail, failureClass) {
   return {
     key,
     status: "fail",
     detail,
-    failureClass: "runtime-contract",
+    failureClass,
   };
 }
 
@@ -294,13 +322,21 @@ function objectOrEmpty(value) {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
-function blockResidentSummary(summary, message, key) {
+function isFiniteNumber(value) {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function blockResidentSummary(summary, message, key, failureClass = "runtime-contract") {
   summary.ok = false;
   summary.status = "blocked";
-  summary.failureClass = "runtime-contract";
+  summary.failureClass = failureClass;
   summary.error = message;
   summary.checks = Array.isArray(summary.checks) ? summary.checks : [];
-  summary.checks.push(makeContractCheck(key, message));
+  summary.checks.push(makeFailureCheck(key, message, failureClass));
+  if (summary.promotionDecision && typeof summary.promotionDecision === "object") {
+    summary.promotionDecision.promote = false;
+    summary.promotionDecision.blockedReason = message;
+  }
   return summary;
 }
 
@@ -314,9 +350,188 @@ function sanitizeFileFirstAudioObservation(observation = {}) {
   };
 }
 
+function normalizeOptimizationEvidence(summary, requested = {}) {
+  const optimization = objectOrEmpty(summary.optimization);
+  if (summary.optimizationVariant == null) {
+    summary.optimizationVariant = optimization.variantId ?? optimization.optimizationVariant ?? requested.variantId ?? null;
+  }
+  if (summary.optimizationProfile == null) {
+    summary.optimizationProfile = optimization.profile ?? optimization.optimizationProfile ?? requested.optimizationProfile ?? null;
+  }
+  if (summary.providerVariant == null) {
+    summary.providerVariant = optimization.providerVariant ?? requested.providerVariant ?? null;
+  }
+  if (summary.precomputeInputsRequested == null && requested.precomputeInputs != null) {
+    summary.precomputeInputsRequested = Boolean(requested.precomputeInputs);
+  }
+  if (summary.tokenizerReuseRequested == null && requested.tokenizerReuse != null) {
+    summary.tokenizerReuseRequested = Boolean(requested.tokenizerReuse);
+  }
+  if (summary.promptReuseRequested == null && requested.promptReuse != null) {
+    summary.promptReuseRequested = Boolean(requested.promptReuse);
+  }
+  if (summary.tokenizerReuseActual == null) {
+    summary.tokenizerReuseActual = optimization.tokenizerReuseActual ?? null;
+  }
+  if (summary.promptReuseActual == null) {
+    summary.promptReuseActual = optimization.promptReuseActual ?? null;
+  }
+  if (summary.shortPassageOverheadReduction == null) {
+    summary.shortPassageOverheadReduction = optimization.shortPassageOverheadReduction ?? (
+      requested.shortPassageOverheadReduction
+        ? { requested: true, actual: false, reason: "Resident probe did not report applied short-passage overhead reduction evidence." }
+        : null
+    );
+  }
+  if (summary.bookLikeRunStats == null) {
+    summary.bookLikeRunStats = optimization.bookLikeRunStats ?? null;
+  }
+  if (summary.optimizationEvidence == null) {
+    summary.optimizationEvidence = optimization.evidence ?? optimization.optimizationEvidence ?? null;
+  }
+  if (summary.promotionMetrics == null && !summary.promotionClass) {
+    const firstDecodedSec = summary.firstAudioObservation?.internalFirstDecodedAudioSec
+      ?? (summary.internalFirstDecodedAudioMs == null ? null : Number(summary.internalFirstDecodedAudioMs) / 1000)
+      ?? summary.firstAudioSec
+      ?? null;
+    summary.promotionMetrics = {
+      shortRtf: summary.rtf ?? null,
+      firstDecodedAudioSec: firstDecodedSec,
+      internalFirstDecodedAudioMs: summary.internalFirstDecodedAudioMs ?? null,
+    };
+  }
+  return summary;
+}
+
+function promotionThresholdFailure(summary) {
+  const thresholds = objectOrEmpty(summary.promotionThresholds);
+  const metrics = objectOrEmpty(summary.promotionMetrics);
+  const requiredGates = [
+    {
+      thresholdKey: "shortRtfMax",
+      metricKey: "shortRtf",
+      label: "short RTF",
+    },
+    {
+      thresholdKey: "firstDecodedAudioSecMax",
+      metricKey: "firstDecodedAudioSec",
+      label: "first decoded audio",
+      unit: "s",
+    },
+  ];
+  if (!summary.promotionThresholds || typeof summary.promotionThresholds !== "object" || Array.isArray(summary.promotionThresholds)) {
+    return "promotion thresholds missing";
+  }
+  if (!summary.promotionMetrics || typeof summary.promotionMetrics !== "object" || Array.isArray(summary.promotionMetrics)) {
+    return "promotion metrics missing";
+  }
+  for (const gate of requiredGates) {
+    const threshold = thresholds[gate.thresholdKey];
+    if (!isFiniteNumber(threshold)) {
+      return `promotion threshold ${gate.thresholdKey} must be numeric`;
+    }
+    const metric = metrics[gate.metricKey];
+    if (!isFiniteNumber(metric)) {
+      return `promotion metric ${gate.metricKey} must be numeric`;
+    }
+    if (metric > threshold) {
+      return `${gate.label} ${metric}${gate.unit ?? ""} > ${threshold}${gate.unit ?? ""}`;
+    }
+  }
+  return null;
+}
+
+function requestedOptimizationContradiction(summary) {
+  const optimization = objectOrEmpty(summary.optimization);
+  const precomputeEvidence = objectOrEmpty(summary.precomputeInputsEvidence ?? optimization.precomputeInputsEvidence);
+  const requestedClaims = [
+    {
+      label: "precompute inputs",
+      requested: summary.precomputeInputsRequested ?? precomputeEvidence.requested ?? optimization.precomputeInputsRequested,
+      actual: summary.precomputeInputsActual ?? precomputeEvidence.actual ?? optimization.precomputeInputsActual,
+    },
+    {
+      label: "tokenizer reuse",
+      requested: summary.tokenizerReuseRequested ?? optimization.tokenizerReuseRequested,
+      actual: summary.tokenizerReuseActual ?? optimization.tokenizerReuseActual,
+    },
+    {
+      label: "prompt reuse",
+      requested: summary.promptReuseRequested ?? optimization.promptReuseRequested,
+      actual: summary.promptReuseActual ?? optimization.promptReuseActual,
+    },
+    {
+      label: "short-passage overhead reduction",
+      requested: summary.shortPassageOverheadReduction?.requested ?? optimization.shortPassageOverheadReduction?.requested,
+      actual: summary.shortPassageOverheadReduction?.actual ?? optimization.shortPassageOverheadReduction?.actual,
+    },
+  ];
+  return requestedClaims.find((claim) => claim.requested === true && claim.actual !== true) ?? null;
+}
+
+function validateOptimizationPromotion(summary) {
+  if (!summary.promotionClass) return null;
+  const evidence = summary.optimizationEvidence;
+  if (!evidence || typeof evidence !== "object") {
+    return {
+      message: "Resident promotion-class summary blocked: optimization evidence is missing.",
+      key: "optimizationEvidence",
+      failureClass: "runtime-contract",
+    };
+  }
+  if (evidence.requestedOnly || String(evidence.status ?? "").toLowerCase() === "requested") {
+    return {
+      message: "Resident promotion-class summary blocked: optimization evidence is requested-only.",
+      key: "optimizationEvidence",
+      failureClass: "runtime-contract",
+    };
+  }
+  if (evidence.stale) {
+    return {
+      message: "Resident promotion-class summary blocked: optimization evidence is stale.",
+      key: "optimizationEvidence",
+      failureClass: "runtime-contract",
+    };
+  }
+  const contradiction = requestedOptimizationContradiction(summary);
+  if (contradiction) {
+    return {
+      message: `Resident promotion-class summary blocked: ${contradiction.label} was requested but not proven actual.`,
+      key: "optimizationEvidence",
+      failureClass: "runtime-contract",
+    };
+  }
+
+  const stats = summary.bookLikeRunStats;
+  if (stats && typeof stats === "object") {
+    const requestedWarmRuns = Number(stats.requestedWarmRuns ?? 0);
+    const completedWarmRuns = Number(stats.completedWarmRuns ?? 0);
+    const freshRuns = Number(stats.internalFirstDecodedAudioFreshRuns ?? 0);
+    const staleOutputReuseCount = Number(stats.staleOutputReuseCount ?? 0);
+    if (requestedWarmRuns > 0 && (completedWarmRuns < requestedWarmRuns || freshRuns < requestedWarmRuns || staleOutputReuseCount > 0)) {
+      return {
+        message: "Resident promotion-class book-like warm-run evidence requires repeated fresh internal first decoded audio.",
+        key: "bookLikeWarmRuns",
+        failureClass: "runtime-contract",
+      };
+    }
+  }
+
+  const thresholdFailure = promotionThresholdFailure(summary);
+  if (thresholdFailure) {
+    return {
+      message: `Resident promotion-class summary blocked: promotion threshold gate failed (${thresholdFailure}).`,
+      key: "promotionThresholds",
+      failureClass: "performance",
+    };
+  }
+  return null;
+}
+
 function normalizeResidentSummary(summary, requested = {}) {
   if (!summary || typeof summary !== "object") return summary;
   summary.runtimeMode = "resident";
+  normalizeOptimizationEvidence(summary, requested);
   if (summary.firstAudioObservation?.kind === "internal-first-decoded-audio") {
     summary.firstAudioSource = "internal-decoded-audio";
     summary.firstAudioObservedSec = null;
@@ -374,7 +589,12 @@ function normalizeResidentSummary(summary, requested = {}) {
     contractKey = "firstAudioOutputFreshness";
   }
 
-  return contractMessage ? blockResidentSummary(summary, contractMessage, contractKey) : summary;
+  if (contractMessage) return blockResidentSummary(summary, contractMessage, contractKey);
+  const promotionFailure = validateOptimizationPromotion(summary);
+  if (promotionFailure) {
+    return blockResidentSummary(summary, promotionFailure.message, promotionFailure.key, promotionFailure.failureClass);
+  }
+  return summary;
 }
 
 export function buildPythonCommand({
@@ -415,6 +635,15 @@ export function buildPythonCommand({
   ortEnableMemReuse,
   ortUsePerSessionThreads,
   precomputeInputs,
+  variantId,
+  optimizationProfile,
+  providerVariant,
+  tokenizerReuse,
+  promptReuse,
+  shortPassageOverheadReduction,
+  bookLikeWarmRuns,
+  residentDecodeMode,
+  streamDecodeFrameBudget,
   allowEmptyPassage,
 } = {}) {
   const defaults = defaultOptions(projectRoot);
@@ -478,6 +707,15 @@ export function buildPythonCommand({
   if (ortEnableMemReuse != null) args.push(ortEnableMemReuse ? "--ort-enable-mem-reuse" : "--no-ort-enable-mem-reuse");
   if (ortUsePerSessionThreads != null) args.push(ortUsePerSessionThreads ? "--ort-use-per-session-threads" : "--no-ort-use-per-session-threads");
   if (precomputeInputs) args.push("--precompute-inputs");
+  if (variantId) args.push("--variant-id", variantId);
+  if (optimizationProfile) args.push("--optimization-profile", optimizationProfile);
+  if (providerVariant) args.push("--provider-variant", providerVariant);
+  if (tokenizerReuse) args.push("--reuse-tokenizer");
+  if (promptReuse) args.push("--reuse-prompt");
+  if (shortPassageOverheadReduction) args.push("--short-passage-overhead-reduction");
+  if (bookLikeWarmRuns != null) args.push("--book-like-warm-runs", String(bookLikeWarmRuns));
+  if (residentDecodeMode) args.push("--resident-decode-mode", residentDecodeMode);
+  if (streamDecodeFrameBudget != null) args.push("--stream-decode-frame-budget", String(streamDecodeFrameBudget));
 
   return { command, args, pythonExecutable: command, pythonProbePath };
 }
@@ -594,6 +832,15 @@ export async function runMossNanoProbe({
   ortEnableMemReuse,
   ortUsePerSessionThreads,
   precomputeInputs,
+  variantId,
+  optimizationProfile,
+  providerVariant,
+  tokenizerReuse,
+  promptReuse,
+  shortPassageOverheadReduction,
+  bookLikeWarmRuns,
+  residentDecodeMode,
+  streamDecodeFrameBudget,
   allowEmptyPassage,
   execFile = runSpawn,
   fsModule = fs,
@@ -653,6 +900,15 @@ export async function runMossNanoProbe({
     ortEnableMemReuse,
     ortUsePerSessionThreads,
     precomputeInputs,
+    variantId,
+    optimizationProfile,
+    providerVariant,
+    tokenizerReuse,
+    promptReuse,
+    shortPassageOverheadReduction,
+    bookLikeWarmRuns,
+    residentDecodeMode,
+    streamDecodeFrameBudget,
     allowEmptyPassage,
   });
 
@@ -685,6 +941,16 @@ export async function runMossNanoProbe({
           ortEnableMemPattern,
           ortEnableMemReuse,
           ortUsePerSessionThreads,
+          precomputeInputs,
+          variantId,
+          optimizationProfile,
+          providerVariant,
+          tokenizerReuse,
+          promptReuse,
+          shortPassageOverheadReduction,
+          bookLikeWarmRuns,
+          residentDecodeMode,
+          streamDecodeFrameBudget,
         })
         : parsed.summary;
       result = {
@@ -711,6 +977,16 @@ export async function runMossNanoProbe({
           ortEnableMemPattern,
           ortEnableMemReuse,
           ortUsePerSessionThreads,
+          precomputeInputs,
+          variantId,
+          optimizationProfile,
+          providerVariant,
+          tokenizerReuse,
+          promptReuse,
+          shortPassageOverheadReduction,
+          bookLikeWarmRuns,
+          residentDecodeMode,
+          streamDecodeFrameBudget,
         })
         : parsed.summary;
       result = {
@@ -785,6 +1061,15 @@ function helpText() {
     "  --ort-enable-mem-reuse | --no-ort-enable-mem-reuse",
     "  --ort-use-per-session-threads | --no-ort-use-per-session-threads",
     "  --precompute-inputs",
+    "  --variant-id <id>",
+    "  --optimization-profile <profile>",
+    "  --provider-variant <id>",
+    "  --reuse-tokenizer",
+    "  --reuse-prompt",
+    "  --short-passage-overhead-reduction",
+    "  --book-like-warm-runs <n>",
+    "  --resident-decode-mode <full|stream>",
+    "  --stream-decode-frame-budget <n>",
   ].join("\n");
 }
 
@@ -834,6 +1119,15 @@ export async function main(argv = process.argv.slice(2)) {
     ortEnableMemReuse: args.ortEnableMemReuse,
     ortUsePerSessionThreads: args.ortUsePerSessionThreads,
     precomputeInputs: args.precomputeInputs,
+    variantId: args.variantId,
+    optimizationProfile: args.optimizationProfile,
+    providerVariant: args.providerVariant,
+    tokenizerReuse: args.tokenizerReuse,
+    promptReuse: args.promptReuse,
+    shortPassageOverheadReduction: args.shortPassageOverheadReduction,
+    bookLikeWarmRuns: args.bookLikeWarmRuns,
+    residentDecodeMode: args.residentDecodeMode,
+    streamDecodeFrameBudget: args.streamDecodeFrameBudget,
   });
 
   process.stdout.write(args.json ? `${JSON.stringify(result, null, 2)}\n` : formatSummaryText(result));
