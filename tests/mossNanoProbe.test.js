@@ -268,9 +268,39 @@ function nano5AdjacentSegments(overridesByIndex = {}) {
   return Array.from({ length: 5 }, (_, index) => nano5AdjacentSegment(index, overridesByIndex[index] ?? {}));
 }
 
-function nano5SoakCandidateSummary(overrides = {}) {
-  const segments = overrides.segments ?? nano5AdjacentSegments();
-  const adjacentSegmentStats = overrides.adjacentSegmentStats ?? {
+function nano5PrecomputeRowEvidence(overrides = {}) {
+  const components = {
+    textNormalization: true,
+    promptCodes: true,
+    tokenization: true,
+    requestRowsBuild: true,
+    semanticInputs: true,
+    acousticInputs: true,
+    promptAudioCodes: true,
+    ...(overrides.components ?? {}),
+  };
+  return {
+    status: "actual",
+    actual: true,
+    preparedBeforeRun: true,
+    consumedByMeasuredRun: true,
+    requestRowCount: 5,
+    textHash: "sha256:nano5-book-text-alpha",
+    chunkHashes: [
+      "sha256:nano5-chunk-1",
+      "sha256:nano5-chunk-2",
+      "sha256:nano5-chunk-3",
+      "sha256:nano5-chunk-4",
+      "sha256:nano5-chunk-5",
+    ],
+    components,
+    ...overrides,
+    components,
+  };
+}
+
+function nano5FairAdjacentStats(overrides = {}) {
+  return {
     requestedSegments: 5,
     completedSegments: 5,
     freshSegments: 5,
@@ -279,7 +309,48 @@ function nano5SoakCandidateSummary(overrides = {}) {
     sessionRestartCount: 0,
     rtfTrendRatio: 0.1,
     rtfTrendMax: 0.15,
+    rtfTrendMethod: "first-two-vs-last-two-median",
+    fairRtfTrendRatio: 0.1,
+    fairRtfTrendMax: 0.15,
+    balancedSegments: true,
+    tokenBudgetedSegments: true,
+    tokenCounts: [112, 111, 113, 112, 111],
+    audioDurationSecBySegment: [1.02, 1.01, 1.03, 1.02, 1.01],
+    stableTrendGate: {
+      method: "first-two-vs-last-two-median",
+      ratio: 0.1,
+      max: 0.15,
+      stable: true,
+    },
+    crossSegmentStateActual: false,
+    ...overrides,
   };
+}
+
+function validDecodeFullRethresholdEvidence(overrides = {}) {
+  return {
+    explicit: true,
+    thresholdField: "decodeFullFirstAudioSecMax",
+    firstAudioSecMax: 2.65,
+    evidenceRunIds: [
+      "nano5-decode-full-rethreshold-a",
+      "nano5-decode-full-rethreshold-b",
+      "nano5-decode-full-rethreshold-c",
+    ],
+    repeatedRuns: 9,
+    p95FirstAudioSec: 2.48,
+    p95UnderThreshold: true,
+    memoryGrowthMbMax: 80,
+    maxMemoryGrowthMb: 76,
+    generatedAt: "2026-04-29T00:00:00.000Z",
+    stale: false,
+    ...overrides,
+  };
+}
+
+function nano5SoakCandidateSummary(overrides = {}) {
+  const segments = overrides.segments ?? nano5AdjacentSegments();
+  const adjacentSegmentStats = overrides.adjacentSegmentStats ?? nano5FairAdjacentStats();
   return optimizedResidentNanoSummary({
     runId: "nano5-soak-candidate",
     promotionTarget: "nano5-soak",
@@ -292,14 +363,7 @@ function nano5SoakCandidateSummary(overrides = {}) {
     precomputeInputsActual: true,
     precomputeInputsPartial: false,
     precomputeInputsBlocker: null,
-    precomputeInputsEvidence: {
-      status: "actual",
-      components: {
-        semanticInputs: true,
-        acousticInputs: true,
-        promptAudioCodes: true,
-      },
-    },
+    precomputeInputsEvidence: nano5PrecomputeRowEvidence(),
     tokenizerIdentity: {
       modelPath: "weights/MOSS-Audio-Tokenizer-Nano-ONNX/model.onnx",
       sessionIdentity: "audio-tokenizer-session:alpha",
@@ -358,6 +422,7 @@ function nano5SoakCandidateSummary(overrides = {}) {
       adjacentStaleOutputReuseCount: 0,
       adjacentSessionRestartCount: 0,
       adjacentRtfTrendRatio: 0.1,
+      adjacentFairRtfTrendRatio: 0.1,
     },
     ...overrides,
   });
@@ -2172,14 +2237,7 @@ describe("MOSS Nano probe", () => {
       precomputeInputsActual: true,
       precomputeInputsPartial: false,
       precomputeInputsBlocker: null,
-      precomputeInputsEvidence: {
-        status: "actual",
-        components: {
-          semanticInputs: true,
-          acousticInputs: true,
-          promptAudioCodes: true,
-        },
-      },
+      precomputeInputsEvidence: nano5PrecomputeRowEvidence(),
       tokenizerIdentity: {
         sessionIdentity: "audio-tokenizer-session:alpha",
         vocabularyHash: "tok-hash-alpha",
@@ -2200,16 +2258,9 @@ describe("MOSS Nano probe", () => {
         replacementForDecodeFull: true,
         evidenceRunId: "moss-nano-5-segmented-replacement",
       },
-      adjacentSegmentStats: {
-        requestedSegments: 5,
-        completedSegments: 5,
-        freshSegments: 5,
-        emptySegments: 0,
-        staleOutputReuseCount: 0,
-        sessionRestartCount: 0,
-        rtfTrendRatio: 0.08,
-      },
+      adjacentSegmentStats: nano5FairAdjacentStats({ rtfTrendRatio: 0.08, fairRtfTrendRatio: 0.08 }),
       segments: nano5AdjacentSegments(),
+      crossSegmentStateActual: false,
     };
     const { summary } = await runMockedResidentSummary({
       projectRoot,
@@ -2228,10 +2279,29 @@ describe("MOSS Nano probe", () => {
 
     expect(summary).toMatchObject(nestedEvidence);
     expect(summary.precomputeInputsEvidence.components).toEqual({
+      textNormalization: true,
+      promptCodes: true,
+      tokenization: true,
+      requestRowsBuild: true,
       semanticInputs: true,
       acousticInputs: true,
       promptAudioCodes: true,
     });
+    expect(summary.precomputeInputsEvidence).toMatchObject({
+      preparedBeforeRun: true,
+      consumedByMeasuredRun: true,
+      requestRowCount: 5,
+      textHash: "sha256:nano5-book-text-alpha",
+      chunkHashes: expect.arrayContaining(["sha256:nano5-chunk-1", "sha256:nano5-chunk-5"]),
+    });
+    expect(summary.adjacentSegmentStats).toMatchObject({
+      rtfTrendMethod: "first-two-vs-last-two-median",
+      fairRtfTrendRatio: 0.08,
+      balancedSegments: true,
+      tokenBudgetedSegments: true,
+      crossSegmentStateActual: false,
+    });
+    expect(summary.crossSegmentStateActual).toBe(false);
     expect(summary.segments).toHaveLength(5);
   });
 
@@ -2280,6 +2350,56 @@ describe("MOSS Nano probe", () => {
       failureClass: "performance",
     });
     expect(missingPunctuation.summary.error).toMatch(/punctuation.*metric.*missing/i);
+  });
+
+  it("promotes with explicit valid decode-full re-threshold evidence when p95 and memory stay inside the new gate", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5-soak-valid-decode-rethreshold";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        decodeFullEvidence: {
+          status: "passed",
+          firstAudioSec: 2.56,
+          memoryGrowthMb: 76,
+          gates: {
+            firstAudioSecMax: 2.5,
+            memoryGrowthMbMax: 80,
+          },
+          rethreshold: validDecodeFullRethresholdEvidence(),
+        },
+        promotionMetrics: {
+          ...nano5SoakCandidateSummary().promotionMetrics,
+          decodeFullFirstAudioSec: 2.56,
+          decodeFullMemoryGrowthMb: 76,
+        },
+      }),
+      options: {
+        precomputeInputs: true,
+        residentDecodeMode: "full",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: true,
+      decision: "PROMOTE_NANO_TO_SOAK_CANDIDATE",
+    });
+    expect(summary.decodeFullEvidence.rethreshold).toMatchObject({
+      explicit: true,
+      p95FirstAudioSec: 2.48,
+      maxMemoryGrowthMb: 76,
+      stale: false,
+    });
   });
 
   it("allows adjacent fresh segments to exceed the MOSS-NANO-5 minimum", async () => {
@@ -2514,6 +2634,79 @@ describe("MOSS Nano probe", () => {
 
   it.each([
     [
+      "without re-threshold evidence",
+      {},
+      /decode-full.*first audio.*2\.56.*2\.5/i,
+    ],
+    [
+      "with missing repeated p95 evidence",
+      {
+        rethreshold: validDecodeFullRethresholdEvidence({
+          repeatedRuns: 1,
+          p95FirstAudioSec: null,
+          p95UnderThreshold: false,
+        }),
+      },
+      /decode-full.*re-threshold.*p95.*repeated/i,
+    ],
+    [
+      "with stale re-threshold evidence",
+      {
+        rethreshold: validDecodeFullRethresholdEvidence({
+          generatedAt: "2026-04-01T00:00:00.000Z",
+          stale: true,
+        }),
+      },
+      /decode-full.*re-threshold.*stale/i,
+    ],
+  ])("rejects decode-full first audio 2.560s %s", async (_caseName, decodeOverrides, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano5-decode-full-2560-${_caseName.replaceAll(" ", "-")}`;
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        decodeFullEvidence: {
+          status: "passed",
+          firstAudioSec: 2.56,
+          memoryGrowthMb: 76,
+          gates: {
+            firstAudioSecMax: 2.5,
+            memoryGrowthMbMax: 80,
+          },
+          ...decodeOverrides,
+        },
+        promotionMetrics: {
+          ...nano5SoakCandidateSummary().promotionMetrics,
+          decodeFullFirstAudioSec: 2.56,
+          decodeFullMemoryGrowthMb: 76,
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(errorPattern);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "decodeFullEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it.each([
+    [
       "missing actual precompute evidence",
       (summary) => {
         delete summary.precomputeInputsRequested;
@@ -2696,6 +2889,96 @@ describe("MOSS Nano probe", () => {
     }));
   });
 
+  it("rejects adjacent evidence that only has max-vs-first diagnostic trend without a fair stable metric", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5-adjacent-diagnostic-only-trend";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        adjacentSegmentStats: {
+          requestedSegments: 5,
+          completedSegments: 5,
+          freshSegments: 5,
+          emptySegments: 0,
+          staleOutputReuseCount: 0,
+          sessionRestartCount: 0,
+          rtfTrendRatio: 0.1,
+          rtfTrendMax: 0.15,
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/adjacent.*fair.*rtf.*trend.*method/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "adjacentSegmentStats",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("accepts noisy max-vs-first adjacent diagnostics when the predeclared fair metric is stable and under fifteen percent", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5-adjacent-noisy-diagnostic-fair-stable";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        adjacentSegmentStats: nano5FairAdjacentStats({
+          rtfTrendRatio: 0.2943,
+          diagnosticRtfTrendMethod: "max-vs-first",
+          fairRtfTrendRatio: 0.12,
+          stableTrendGate: {
+            method: "first-two-vs-last-two-median",
+            ratio: 0.12,
+            max: 0.15,
+            stable: true,
+          },
+        }),
+        promotionMetrics: {
+          ...nano5SoakCandidateSummary().promotionMetrics,
+          adjacentRtfTrendRatio: 0.2943,
+          adjacentFairRtfTrendRatio: 0.12,
+        },
+        segments: nano5AdjacentSegments({
+          0: { rtf: 0.9, audioDurationSec: 1.02 },
+          1: { rtf: 0.91, audioDurationSec: 1.01 },
+          2: { rtf: 1.16, audioDurationSec: 1.03 },
+          3: { rtf: 1.01, audioDurationSec: 1.02 },
+          4: { rtf: 1.02, audioDurationSec: 1.01 },
+        }),
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: true,
+      decision: "PROMOTE_NANO_TO_SOAK_CANDIDATE",
+    });
+    expect(summary.adjacentSegmentStats.crossSegmentStateActual).toBe(false);
+  });
+
   it.each([
     [
       "without blocker",
@@ -2764,6 +3047,103 @@ describe("MOSS Nano probe", () => {
     }));
   });
 
+  it("rejects NO_PRECOMPUTE_REQUEST_ROWS_HOOK as blocker-only classification even when all runtime metrics pass", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5-precompute-request-rows-hook-blocker-only";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        precomputeInputsActual: false,
+        precomputeInputsBlocker: "NO_PRECOMPUTE_REQUEST_ROWS_HOOK",
+        precomputeInputsEvidence: nano5PrecomputeRowEvidence({
+          status: "blocked",
+          actual: false,
+          preparedBeforeRun: false,
+          consumedByMeasuredRun: false,
+          requestRowCount: 0,
+          components: {
+            requestRowsBuild: false,
+          },
+        }),
+      }),
+      options: {
+        precomputeInputs: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/NO_PRECOMPUTE_REQUEST_ROWS_HOOK|blocker-only precompute evidence/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE/),
+    });
+  });
+
+  it.each([
+    [
+      "consumedByMeasuredRun=false",
+      nano5PrecomputeRowEvidence({ consumedByMeasuredRun: false }),
+      /precompute.*consumed.*measured run/i,
+    ],
+    [
+      "missing request row count",
+      (() => {
+        const evidence = nano5PrecomputeRowEvidence();
+        delete evidence.requestRowCount;
+        return evidence;
+      })(),
+      /precompute.*request row count.*positive/i,
+    ],
+    [
+      "non-positive request row count",
+      nano5PrecomputeRowEvidence({ requestRowCount: 0 }),
+      /precompute.*request row count.*positive/i,
+    ],
+  ])("rejects precomputeInputsActual=true when row-consumption evidence has %s", async (_caseName, precomputeInputsEvidence, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano5-precompute-actual-invalid-${_caseName.replaceAll("=", "-").replaceAll(" ", "-")}`;
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        precomputeInputsActual: true,
+        precomputeInputsEvidence,
+      }),
+      options: {
+        precomputeInputs: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(errorPattern);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "precomputeInputsEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
   it("rejects app-prototype promotion attempts from the MOSS-NANO-5 gate", async () => {
     const projectRoot = await makeTempProject();
     tempDirs.push(projectRoot);
@@ -2794,6 +3174,54 @@ describe("MOSS Nano probe", () => {
       promote: false,
       decision: expect.not.stringMatching(/PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE/),
     });
+  });
+
+  it("keeps app-prototype promotion forbidden even with fully valid MOSS-NANO-5 closure evidence", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5-app-prototype-forbidden-valid-closure";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        promotionTarget: "app-prototype",
+        promotionDecision: {
+          promote: true,
+          target: "app-prototype",
+          decision: "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE",
+        },
+        precomputeInputsEvidence: nano5PrecomputeRowEvidence(),
+        adjacentSegmentStats: nano5FairAdjacentStats(),
+        decodeFullEvidence: {
+          status: "passed",
+          firstAudioSec: 2.1,
+          memoryGrowthMb: 70,
+          gates: {
+            firstAudioSecMax: 2.5,
+            memoryGrowthMbMax: 80,
+          },
+        },
+      }),
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/MOSS-NANO-5.*soak.*not.*app prototype/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "promotionDecision",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
   });
 
   it("passes custom passage text, run id, and out path into per-run artifacts", async () => {

@@ -384,6 +384,7 @@ function normalizeOptimizationEvidence(summary, requested = {}) {
     "acceptedDecodeStrategy",
     "adjacentSegmentStats",
     "segments",
+    "crossSegmentStateActual",
     "promotionTarget",
     "promotionThresholds",
     "promotionMetrics",
@@ -488,6 +489,7 @@ function normalizePromotionMemoryMetrics(summary) {
   const metrics = summary.promotionMetrics;
   const aggregate = objectOrEmpty(summary.aggregate);
   const decodeFullEvidence = objectOrEmpty(summary.decodeFullEvidence);
+  const adjacentStats = objectOrEmpty(summary.adjacentSegmentStats);
   if (!isFiniteNumber(metrics.shortMemoryGrowthMb)) {
     const representativeGrowth = firstFiniteNumber(summary.memoryDeltaMb, aggregate.representativeMemoryGrowthMb);
     if (representativeGrowth != null) metrics.shortMemoryGrowthMb = representativeGrowth;
@@ -504,6 +506,15 @@ function normalizePromotionMemoryMetrics(summary) {
   }
   if (!isFiniteNumber(metrics.decodeFullFirstAudioSec) && isFiniteNumber(decodeFullEvidence.firstAudioSec)) {
     metrics.decodeFullFirstAudioSec = decodeFullEvidence.firstAudioSec;
+  }
+  if (!isFiniteNumber(metrics.adjacentRtfTrendRatio) && isFiniteNumber(adjacentStats.rtfTrendRatio)) {
+    metrics.adjacentRtfTrendRatio = adjacentStats.rtfTrendRatio;
+  }
+  if (!isFiniteNumber(metrics.adjacentFairRtfTrendRatio) && isFiniteNumber(adjacentStats.fairRtfTrendRatio)) {
+    metrics.adjacentFairRtfTrendRatio = adjacentStats.fairRtfTrendRatio;
+  }
+  if (summary.crossSegmentStateActual == null && Object.prototype.hasOwnProperty.call(adjacentStats, "crossSegmentStateActual")) {
+    summary.crossSegmentStateActual = adjacentStats.crossSegmentStateActual;
   }
 }
 
@@ -527,15 +538,50 @@ function normalizeDecodeFullEvidence(summary) {
   const firstAudioSec = firstFiniteNumber(evidence.firstAudioSec, metrics.decodeFullFirstAudioSec);
   const memoryGrowthMb = firstFiniteNumber(evidence.memoryGrowthMb, metrics.decodeFullMemoryGrowthMb);
   const failures = [];
+  const rethreshold = objectOrEmpty(evidence.rethreshold);
+  const hasRethresholdEvidence = Object.keys(rethreshold).length > 0;
+  let effectiveFirstAudioSecMax = firstAudioSecMax;
+  let effectiveMemoryGrowthMbMax = memoryGrowthMbMax;
+  let rethresholdFailure = null;
+  if (isFiniteNumber(firstAudioSec) && firstAudioSec > firstAudioSecMax && hasRethresholdEvidence) {
+    const rethresholdFirstAudioSecMax = firstFiniteNumber(rethreshold.firstAudioSecMax, firstAudioSecMax);
+    const rethresholdMemoryGrowthMbMax = firstFiniteNumber(
+      rethreshold.memoryGrowthMbMax,
+      memoryGrowthMbMax,
+    );
+    const repeatedRuns = Number(rethreshold.repeatedRuns);
+    const evidenceRunIds = Array.isArray(rethreshold.evidenceRunIds) ? rethreshold.evidenceRunIds.filter(Boolean) : [];
+    const p95FirstAudioSec = rethreshold.p95FirstAudioSec;
+    const p95UnderThreshold = rethreshold.p95UnderThreshold === true
+      || (isFiniteNumber(p95FirstAudioSec) && isFiniteNumber(rethresholdFirstAudioSecMax) && p95FirstAudioSec <= rethresholdFirstAudioSecMax);
+    const maxMemoryGrowthMb = firstFiniteNumber(rethreshold.maxMemoryGrowthMb, rethreshold.memoryGrowthMb);
+    if (rethreshold.explicit !== true) {
+      rethresholdFailure = "decode-full re-threshold evidence must be explicit";
+    } else if (rethreshold.stale === true) {
+      rethresholdFailure = "decode-full re-threshold evidence is stale";
+    } else if (!Number.isFinite(repeatedRuns) || repeatedRuns < 3 || evidenceRunIds.length < 2 || !isFiniteNumber(p95FirstAudioSec) || p95UnderThreshold !== true) {
+      rethresholdFailure = "decode-full re-threshold evidence requires p95 from repeated fresh runs";
+    } else if (!isFiniteNumber(rethresholdFirstAudioSecMax) || firstAudioSec > rethresholdFirstAudioSecMax || p95FirstAudioSec > rethresholdFirstAudioSecMax) {
+      rethresholdFailure = `decode-full re-threshold p95 ${p95FirstAudioSec}s exceeds ${rethresholdFirstAudioSecMax}s`;
+    } else if (!isFiniteNumber(maxMemoryGrowthMb) || maxMemoryGrowthMb > rethresholdMemoryGrowthMbMax || (isFiniteNumber(memoryGrowthMb) && memoryGrowthMb > rethresholdMemoryGrowthMbMax)) {
+      rethresholdFailure = `decode-full re-threshold memory growth exceeds ${rethresholdMemoryGrowthMbMax}MB`;
+    } else {
+      effectiveFirstAudioSecMax = rethresholdFirstAudioSecMax;
+      effectiveMemoryGrowthMbMax = rethresholdMemoryGrowthMbMax;
+    }
+  }
+  if (rethresholdFailure) {
+    failures.push(rethresholdFailure);
+  }
   if (!isFiniteNumber(firstAudioSec)) {
     failures.push("decode-full first audio is missing");
-  } else if (firstAudioSec > firstAudioSecMax) {
-    failures.push(`decode-full first audio ${firstAudioSec}s exceeds ${firstAudioSecMax}s`);
+  } else if (firstAudioSec > effectiveFirstAudioSecMax && !rethresholdFailure) {
+    failures.push(`decode-full first audio ${firstAudioSec}s exceeds ${effectiveFirstAudioSecMax}s`);
   }
   if (!isFiniteNumber(memoryGrowthMb)) {
     failures.push("decode-full memory growth is missing");
-  } else if (memoryGrowthMb > memoryGrowthMbMax) {
-    failures.push(`decode-full memory growth ${memoryGrowthMb}MB exceeds ${memoryGrowthMbMax}MB`);
+  } else if (memoryGrowthMb > effectiveMemoryGrowthMbMax && !rethresholdFailure) {
+    failures.push(`decode-full memory growth ${memoryGrowthMb}MB exceeds ${effectiveMemoryGrowthMbMax}MB`);
   }
   summary.decodeFullEvidence = {
     ...evidence,
@@ -544,10 +590,12 @@ function normalizeDecodeFullEvidence(summary) {
     memoryGrowthMb,
     gates: {
       ...objectOrEmpty(evidence.gates),
-      firstAudioSecMax,
-      memoryGrowthMbMax,
-      firstAudioPassed: isFiniteNumber(firstAudioSec) && firstAudioSec <= firstAudioSecMax,
-      memoryGrowthPassed: isFiniteNumber(memoryGrowthMb) && memoryGrowthMb <= memoryGrowthMbMax,
+      firstAudioSecMax: effectiveFirstAudioSecMax,
+      memoryGrowthMbMax: effectiveMemoryGrowthMbMax,
+      originalFirstAudioSecMax: firstAudioSecMax,
+      originalMemoryGrowthMbMax: memoryGrowthMbMax,
+      firstAudioPassed: isFiniteNumber(firstAudioSec) && firstAudioSec <= effectiveFirstAudioSecMax,
+      memoryGrowthPassed: isFiniteNumber(memoryGrowthMb) && memoryGrowthMb <= effectiveMemoryGrowthMbMax,
     },
     reason: failures.length > 0 ? failures.join("; ") : (evidence.reason ?? null),
   };
@@ -570,6 +618,12 @@ function nano5PromotionThresholdFailure(summary) {
   }
   const thresholds = summary.promotionThresholds;
   const metrics = summary.promotionMetrics;
+  if (!("decodeFullFirstAudioSecMax" in thresholds)) {
+    return "decode first audio threshold missing: decodeFullFirstAudioSecMax";
+  }
+  if (!isFiniteNumber(thresholds.decodeFullFirstAudioSecMax)) {
+    return "decode first audio threshold decodeFullFirstAudioSecMax must be numeric";
+  }
   const gates = [
     ["shortRtfMax", "shortRtf", "short"],
     ["shortP95RtfMax", "shortP95Rtf", "short"],
@@ -578,9 +632,8 @@ function nano5PromotionThresholdFailure(summary) {
     ["punctuationRtfMax", "punctuationRtf", "punctuation"],
     ["punctuationP95RtfMax", "punctuationP95Rtf", "punctuation"],
     ["punctuationFirstDecodedAudioSecMax", "punctuationFirstDecodedAudioSec", "punctuation"],
-    ["decodeFullFirstAudioSecMax", "decodeFullFirstAudioSec", "decode first audio"],
     ["decodeFullMemoryGrowthMbMax", "decodeFullMemoryGrowthMb", "decode memory"],
-    ["adjacentRtfTrendMax", "adjacentRtfTrendRatio", "adjacent"],
+    ["adjacentRtfTrendMax", "adjacentFairRtfTrendRatio", "adjacent fair"],
   ];
   for (const [thresholdKey, metricKey, label] of gates) {
     const failure = requiredNumericGate(thresholds, metrics, thresholdKey, metricKey, label);
@@ -634,6 +687,50 @@ function validateDecodeFullGate(summary) {
   return `decode-full failed MOSS-NANO-5 soak gate${thresholdFailure ? `: ${thresholdFailure}` : ""}`;
 }
 
+function precomputePromotionFailure(summary) {
+  const evidence = objectOrEmpty(summary.precomputeInputsEvidence);
+  const status = String(evidence.status ?? "").toLowerCase();
+  const evidenceActual = summary.precomputeInputsActual === true
+    && (status === "actual" || evidence.actual === true);
+  if (!evidenceActual) {
+    if (summary.precomputeInputsBlocker || status === "blocked") {
+      return "blocker-only precompute evidence must not promote.";
+    }
+    return "precompute actual evidence is required for MOSS-NANO-5 soak promotion.";
+  }
+  if (evidence.consumedByMeasuredRun !== true) {
+    return "precompute row evidence must be consumed by the measured run.";
+  }
+  if (!isFiniteNumber(evidence.requestRowCount) || evidence.requestRowCount <= 0) {
+    return "precompute request row count must be positive.";
+  }
+  return null;
+}
+
+function adjacentFairTrendFailure(summary, stats) {
+  const fairMethod = stats.rtfTrendMethod ?? stats.stableTrendGate?.method;
+  const fairTrend = firstFiniteNumber(stats.fairRtfTrendRatio, stats.stableTrendGate?.ratio);
+  const fairTrendMax = firstFiniteNumber(
+    stats.fairRtfTrendMax,
+    stats.stableTrendGate?.max,
+    stats.rtfTrendMax,
+    summary.promotionThresholds?.adjacentRtfTrendMax,
+    0.15,
+  );
+  const diagnosticTrend = Number(stats.rtfTrendRatio);
+  const diagnosticTrendMax = Number(stats.rtfTrendMax ?? summary.promotionThresholds?.adjacentRtfTrendMax ?? 0.15);
+  if (!fairMethod || !isFiniteNumber(fairTrend)) {
+    const diagnosticSuffix = Number.isFinite(diagnosticTrend) && Number.isFinite(diagnosticTrendMax) && diagnosticTrend > diagnosticTrendMax
+      ? "; diagnostic adjacent RTF trend exceeds 15%"
+      : "";
+    return `adjacent fair RTF trend method and metric are required${diagnosticSuffix}`;
+  }
+  if (!isFiniteNumber(fairTrendMax) || fairTrend > fairTrendMax || stats.stableTrendGate?.stable === false) {
+    return "adjacent fair RTF trend exceeds 15%";
+  }
+  return null;
+}
+
 function validateAdjacentSegments(summary, { required = false } = {}) {
   const stats = objectOrEmpty(summary.adjacentSegmentStats);
   const segments = Array.isArray(summary.segments) ? summary.segments : [];
@@ -659,10 +756,9 @@ function validateAdjacentSegments(summary, { required = false } = {}) {
   if (Number(stats.sessionRestartCount ?? 0) > 0 || segments.some((segment) => segment?.sessionRestarted)) {
     return "adjacent run has a session restart";
   }
-  const trend = Number(stats.rtfTrendRatio);
-  const trendMax = Number(stats.rtfTrendMax ?? summary.promotionThresholds?.adjacentRtfTrendMax ?? 0.15);
-  if (Number.isFinite(trend) && Number.isFinite(trendMax) && trend > trendMax) {
-    return "adjacent RTF trend exceeds 15%";
+  const fairTrendFailure = adjacentFairTrendFailure(summary, stats);
+  if (fairTrendFailure) {
+    return fairTrendFailure;
   }
   const firstIdentity = segments[0]?.runtimeIdentity;
   if (!segments.every((segment) => sortedJson(segment?.runtimeIdentity) === sortedJson(firstIdentity))) {
@@ -692,22 +788,15 @@ function validateNano5SoakPromotion(summary, requested = {}) {
   }
   normalizePromotionMemoryMetrics(summary);
   const precomputeRequested = summary.precomputeInputsRequested === true || requested.precomputeInputs === true;
-  const precomputeEvidence = objectOrEmpty(summary.precomputeInputsEvidence);
-  const precomputeEvidenceActual = summary.precomputeInputsActual === true
-    && (String(precomputeEvidence.status ?? "").toLowerCase() === "actual" || precomputeEvidence.actual === true);
-  if (isSoakPromotion && !precomputeEvidenceActual) {
-    if (summary.precomputeInputsBlocker || String(precomputeEvidence.status ?? "").toLowerCase() === "blocked") {
+  if (isSoakPromotion) {
+    const precomputeFailure = precomputePromotionFailure(summary);
+    if (precomputeFailure) {
       return {
-        message: "blocker-only precompute evidence must not promote.",
+        message: precomputeFailure,
         key: "precomputeInputsEvidence",
         failureClass: "runtime-contract",
       };
     }
-    return {
-      message: "precompute actual evidence is required for MOSS-NANO-5 soak promotion.",
-      key: "precomputeInputsEvidence",
-      failureClass: "runtime-contract",
-    };
   }
   if (!isSoakPromotion && precomputeRequested && summary.precomputeInputsActual !== true) {
     if (!summary.precomputeInputsBlocker) {
