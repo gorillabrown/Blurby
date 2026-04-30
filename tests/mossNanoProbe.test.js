@@ -428,6 +428,74 @@ function nano5SoakCandidateSummary(overrides = {}) {
   });
 }
 
+function nano5cSegmentFirstSoakSummary(overrides = {}) {
+  const precomputeInputsEvidence = Object.prototype.hasOwnProperty.call(overrides, "precomputeInputsEvidence")
+    ? overrides.precomputeInputsEvidence
+    : null;
+  return {
+    ...nano5SoakCandidateSummary(),
+    runId: "nano5c-segment-first-soak",
+    promotionTarget: "nano5c-segment-first-soak",
+    promotionDecision: {
+      promote: true,
+      target: "nano5c-segment-first-soak",
+      decision: "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE",
+    },
+    precomputeInputsRequested: false,
+    precomputeInputsActual: false,
+    precomputeInputsPartial: false,
+    precomputeInputsBlocker: null,
+    precomputeRequiredForProductPath: false,
+    precomputeInputsEvidence,
+    decodeFullEvidence: {
+      status: "failed",
+      firstAudioSec: 3.2,
+      memoryGrowthMb: 70,
+      diagnosticOnly: true,
+      productPath: false,
+      requiredForProductPath: false,
+      classification: "diagnostic-only-non-product-path",
+      gates: {
+        firstAudioSecMax: 2.5,
+        memoryGrowthMbMax: 80,
+      },
+    },
+    acceptedDecodeStrategy: {
+      strategy: "segment-first",
+      accepted: true,
+      productPath: true,
+      segmentFirst: true,
+      diagnosticReplacementForDecodeFull: false,
+      evidenceRunId: "moss-nano-5c-segment-first-product-path",
+    },
+    segmentFirstProductPathEvidence: {
+      status: "passed",
+      productPath: true,
+      internalFirstAudioFreshSegments: 5,
+      staleOutputReuseCount: 0,
+      sessionRestartCount: 0,
+      stableAdjacentTrend: true,
+    },
+    promotionThresholds: {
+      segmentFirstInternalFirstDecodedAudioSecMax: 0.5,
+      segmentFirstShortRtfMax: 1.5,
+      adjacentFairRtfTrendMax: 0.15,
+      segmentFirstMinFreshSegments: 5,
+      segmentFirstStaleOutputReuseMax: 0,
+      segmentFirstSessionRestartMax: 0,
+    },
+    promotionMetrics: {
+      segmentFirstInternalFirstDecodedAudioSec: 0.2,
+      segmentFirstShortRtf: 1.2,
+      adjacentFairRtfTrendRatio: 0.1,
+      segmentFirstInternalFirstAudioFreshSegments: 5,
+      segmentFirstStaleOutputReuseCount: 0,
+      segmentFirstSessionRestartCount: 0,
+    },
+    ...overrides,
+  };
+}
+
 function fakeInferScript() {
   return [
     "import argparse, wave",
@@ -507,6 +575,7 @@ describe("MOSS Nano probe", () => {
     expect(write.mock.calls[0][0]).toContain("--profile-stages");
     expect(write.mock.calls[0][0]).toContain("--segment-policy <none|first-sentence|natural-break|token-window|char-window>");
     expect(write.mock.calls[0][0]).toContain("--ort-providers <csv>");
+    expect(write.mock.calls[0][0]).toContain("--promotion-target <target>");
   });
 
   it("uses deterministic default run, passage, repo, model, and output arguments", async () => {
@@ -2227,6 +2296,40 @@ describe("MOSS Nano probe", () => {
     ]));
   });
 
+  it("parses the MOSS-NANO-5C segment-first soak target without forwarding wrapper-only classification to Python", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { buildPythonCommand, parseArgs } = await importMossNanoProbe();
+
+    expect(parseArgs(["--nano5c-segment-first-soak"])).toMatchObject({
+      promotionTarget: "nano5c-segment-first-soak",
+    });
+    expect(parseArgs(["--promotion-target", "nano5c-segment-first-soak"])).toMatchObject({
+      promotionTarget: "nano5c-segment-first-soak",
+    });
+
+    const commandInfo = buildPythonCommand({
+      projectRoot,
+      outputDir: path.join(projectRoot, "out"),
+      runtimeMode: "resident",
+      processMode: "warm",
+      residentDecodeMode: "stream",
+      adjacentSegmentCount: 5,
+      promotionTarget: "nano5c-segment-first-soak",
+    });
+
+    expect(commandInfo.args).toEqual(expect.arrayContaining([
+      "--runtime-mode",
+      "resident",
+      "--resident-decode-mode",
+      "stream",
+      "--adjacent-segment-count",
+      "5",
+    ]));
+    expect(commandInfo.args).not.toContain("--promotion-target");
+    expect(commandInfo.args).not.toContain("--nano5c-segment-first-soak");
+  });
+
   it("normalizes MOSS-NANO-5 precompute, decode, tokenizer, prompt-code, adjacent, and segment evidence", async () => {
     const projectRoot = await makeTempProject();
     tempDirs.push(projectRoot);
@@ -3219,6 +3322,568 @@ describe("MOSS Nano probe", () => {
     });
     expect(summary.checks).toContainEqual(expect.objectContaining({
       key: "promotionDecision",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("promotes the MOSS-NANO-5C segment-first soak candidate when decode-full is diagnostic and precompute is explicitly non-product-required", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-segment-first-soak-product-path";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5cSegmentFirstSoakSummary({
+        runId,
+        precomputeInputsEvidence: null,
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.promotionTarget).toBe("nano5c-segment-first-soak");
+    expect(summary.promotionDecision).toMatchObject({
+      promote: true,
+      target: "nano5c-segment-first-soak",
+      decision: "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE",
+    });
+    expect(summary.decodeFullEvidence).toMatchObject({
+      status: "failed",
+      diagnosticOnly: true,
+      productPath: false,
+      requiredForProductPath: false,
+      classification: "diagnostic-only-non-product-path",
+      firstAudioSec: 3.2,
+    });
+    expect(summary.precomputeInputsEvidence).toMatchObject({
+      status: "not-required",
+      actual: false,
+      requested: false,
+      classification: "non-product-required",
+      requiredForProductPath: false,
+    });
+    expect(summary.promotionThresholds).toMatchObject({
+      segmentFirstInternalFirstDecodedAudioSecMax: 0.5,
+      segmentFirstShortRtfMax: 1.5,
+      adjacentFairRtfTrendMax: 0.15,
+      segmentFirstMinFreshSegments: 5,
+      segmentFirstStaleOutputReuseMax: 0,
+      segmentFirstSessionRestartMax: 0,
+    });
+    expect(summary.promotionMetrics).toMatchObject({
+      segmentFirstInternalFirstDecodedAudioSec: 0.2,
+      segmentFirstShortRtf: 1.2,
+      adjacentFairRtfTrendRatio: 0.1,
+      segmentFirstInternalFirstAudioFreshSegments: 5,
+      segmentFirstStaleOutputReuseCount: 0,
+      segmentFirstSessionRestartCount: 0,
+    });
+  });
+
+  it("classifies a real resident segment-first run as a MOSS-NANO-5C soak artifact from the CLI target", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-real-segment-first-cli-target";
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: residentNanoSummary({
+        runId,
+        acceptedDecodeStrategy: {
+          strategy: "streaming",
+          accepted: true,
+          replacementForDecodeFull: true,
+        },
+        adjacentSegmentStats: nano5FairAdjacentStats(),
+        segments: nano5AdjacentSegments(),
+        precomputeInputsRequested: false,
+        precomputeInputsActual: false,
+        precomputeInputsBlocker: null,
+        precomputeInputsEvidence: null,
+        promotionTarget: null,
+        promotionDecision: {
+          promote: false,
+          target: null,
+          decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+        },
+      }),
+      options: {
+        promotionTarget: "nano5c-segment-first-soak",
+        residentDecodeMode: "stream",
+        adjacentSegmentCount: 5,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.promotionTarget).toBe("nano5c-segment-first-soak");
+    expect(summary.promotionDecision).toMatchObject({
+      promote: true,
+      target: "nano5c-segment-first-soak",
+      decision: "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE",
+    });
+    expect(summary.acceptedDecodeStrategy).toMatchObject({
+      strategy: "segment-first",
+      accepted: true,
+      productPath: true,
+      segmentFirst: true,
+    });
+    expect(summary.segmentFirstProductPathEvidence).toMatchObject({
+      status: "passed",
+      productPath: true,
+      internalFirstAudioFreshSegments: 5,
+      staleOutputReuseCount: 0,
+      sessionRestartCount: 0,
+      stableAdjacentTrend: true,
+    });
+    expect(summary.decodeFullEvidence).toMatchObject({
+      diagnosticOnly: true,
+      productPath: false,
+      requiredForProductPath: false,
+      classification: "diagnostic-only-non-product-path",
+    });
+    expect(summary.precomputeInputsEvidence).toMatchObject({
+      status: "not-required",
+      actual: false,
+      requested: false,
+      classification: "non-product-required",
+      requiredForProductPath: false,
+    });
+    expect(summary.promotionThresholds).toMatchObject({
+      segmentFirstInternalFirstDecodedAudioSecMax: 0.5,
+      segmentFirstShortRtfMax: 1.5,
+      adjacentFairRtfTrendMax: 0.15,
+      segmentFirstMinFreshSegments: 5,
+      segmentFirstStaleOutputReuseMax: 0,
+      segmentFirstSessionRestartMax: 0,
+    });
+    expect(summary.promotionMetrics).toMatchObject({
+      segmentFirstInternalFirstDecodedAudioSec: 0.22,
+      segmentFirstShortRtf: 0.98,
+      adjacentFairRtfTrendRatio: 0.1,
+      segmentFirstInternalFirstAudioFreshSegments: 5,
+      segmentFirstStaleOutputReuseCount: 0,
+      segmentFirstSessionRestartCount: 0,
+    });
+  });
+
+  it.each([
+    [
+      "missing thresholds",
+      (summary) => {
+        delete summary.promotionThresholds;
+      },
+      /5C segment-first.*thresholds missing/i,
+    ],
+    [
+      "missing metrics",
+      (summary) => {
+        delete summary.promotionMetrics;
+      },
+      /5C segment-first.*metrics missing/i,
+    ],
+    [
+      "exceeded first decoded audio",
+      (summary) => {
+        summary.promotionMetrics.segmentFirstInternalFirstDecodedAudioSec = 0.51;
+      },
+      /segment-first internal first decoded audio.*exceeds/i,
+    ],
+    [
+      "exceeded short RTF",
+      (summary) => {
+        summary.promotionMetrics.segmentFirstShortRtf = 1.51;
+      },
+      /segment-first short RTF.*exceeds/i,
+    ],
+    [
+      "exceeded adjacent fair trend",
+      (summary) => {
+        summary.promotionMetrics.adjacentFairRtfTrendRatio = 0.16;
+      },
+      /adjacent fair RTF trend.*exceeds/i,
+    ],
+    [
+      "stale output reuse",
+      (summary) => {
+        summary.promotionMetrics.segmentFirstStaleOutputReuseCount = 1;
+      },
+      /stale output reuse.*zero/i,
+    ],
+    [
+      "session restart",
+      (summary) => {
+        summary.promotionMetrics.segmentFirstSessionRestartCount = 1;
+      },
+      /session restart.*zero/i,
+    ],
+  ])("fails closed for MOSS-NANO-5C segment-first soak promotion with %s", async (_caseName, mutate, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano5c-threshold-${_caseName.replaceAll(" ", "-")}`;
+    const summary = nano5cSegmentFirstSoakSummary({ runId });
+    mutate(summary);
+
+    const { result, summary: persistedSummary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary,
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "performance",
+    });
+    expect(persistedSummary.error).toMatch(errorPattern);
+    expect(persistedSummary.checks).toContainEqual(expect.objectContaining({
+      key: "promotionThresholds",
+      status: "fail",
+      failureClass: "performance",
+    }));
+  });
+
+  it("fails the MOSS-NANO-5C segment-first soak candidate when stale promotionMetrics hide bad derived product-path metrics", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-stale-promotion-metrics-hide-bad-real-evidence";
+    const badFirstAudioObservation = internalFirstDecodedAudioObservation({
+      internalFirstDecodedAudioMs: 620,
+      internalFirstDecodedAudioSec: 0.62,
+    });
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5cSegmentFirstSoakSummary({
+        runId,
+        firstAudioSec: 0.62,
+        internalFirstDecodedAudioMs: 620,
+        firstAudioObservation: badFirstAudioObservation,
+        totalSec: 1.7,
+        rtf: 1.7,
+        iterations: [
+          residentIteration({
+            iterationIndex: 0,
+            firstAudioSec: 0.62,
+            internalFirstDecodedAudioMs: 620,
+            firstAudioObservation: badFirstAudioObservation,
+            totalSec: 1.7,
+            rtf: 1.7,
+          }),
+          residentIteration({ iterationIndex: 1 }),
+        ],
+        segments: nano5AdjacentSegments({
+          0: {
+            firstAudioSec: 0.62,
+            internalFirstDecodedAudioMs: 620,
+            firstAudioObservation: badFirstAudioObservation,
+            totalSec: 1.7,
+            rtf: 1.7,
+          },
+        }),
+        promotionMetrics: {
+          segmentFirstInternalFirstDecodedAudioSec: 0.2,
+          segmentFirstShortRtf: 1.2,
+          adjacentFairRtfTrendRatio: 0.1,
+          segmentFirstInternalFirstAudioFreshSegments: 5,
+          segmentFirstStaleOutputReuseCount: 0,
+          segmentFirstSessionRestartCount: 0,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result.status).toBe("blocked");
+    expect(["performance", "runtime-contract"]).toContain(result.failureClass);
+    expect(summary.error).toMatch(/segment-first.*(first decoded audio|short RTF|promotion metrics|derived metrics|mismatch)/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      status: "fail",
+    }));
+  });
+
+  it("fails the MOSS-NANO-5C segment-first soak candidate when passed decode-full evidence lacks diagnostic non-product classification", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-decode-full-passed-without-diagnostic-classification";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5cSegmentFirstSoakSummary({
+        runId,
+        decodeFullEvidence: {
+          status: "passed",
+          firstAudioSec: 2.1,
+          memoryGrowthMb: 70,
+          gates: {
+            firstAudioSecMax: 2.5,
+            memoryGrowthMbMax: 80,
+          },
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/decode-full.*diagnostic-only.*non-product-path/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "decodeFullEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("classifies passed decode-full evidence as diagnostic-only for CLI-targeted MOSS-NANO-5C normalization", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-cli-target-passed-decode-full-normalized-diagnostic";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: residentNanoSummary({
+        runId,
+        decodeFullEvidence: {
+          status: "passed",
+          firstAudioSec: 2.1,
+          memoryGrowthMb: 70,
+        },
+        adjacentSegmentStats: nano5FairAdjacentStats(),
+        segments: nano5AdjacentSegments(),
+        precomputeInputsRequested: false,
+        precomputeInputsActual: false,
+        precomputeInputsBlocker: null,
+        precomputeInputsEvidence: null,
+        promotionTarget: null,
+        promotionDecision: {
+          promote: false,
+          target: null,
+          decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+        },
+      }),
+      options: {
+        promotionTarget: "nano5c-segment-first-soak",
+        residentDecodeMode: "stream",
+        adjacentSegmentCount: 5,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.decodeFullEvidence).toMatchObject({
+      status: "passed",
+      diagnosticOnly: true,
+      productPath: false,
+      requiredForProductPath: false,
+      classification: "diagnostic-only-non-product-path",
+    });
+  });
+
+  it("fails the MOSS-NANO-5C segment-first soak candidate when requested precompute is actual=false without non-product-required classification", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-precompute-requested-without-non-product-classification";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5cSegmentFirstSoakSummary({
+        runId,
+        precomputeInputsRequested: true,
+        precomputeInputsActual: false,
+        precomputeRequiredForProductPath: null,
+        precomputeInputsEvidence: {
+          status: "requested",
+          requested: true,
+          actual: false,
+        },
+      }),
+      options: {
+        precomputeInputs: true,
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/segment-first.*precompute.*requested.*actual=false.*non-product-required/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "precomputeInputsEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("fails the MOSS-NANO-5C segment-first soak candidate when failed decode-full lacks diagnostic-only classification", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-decode-full-failed-without-diagnostic-classification";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5cSegmentFirstSoakSummary({
+        runId,
+        decodeFullEvidence: {
+          status: "failed",
+          firstAudioSec: 3.2,
+          memoryGrowthMb: 70,
+          gates: {
+            firstAudioSecMax: 2.5,
+            memoryGrowthMbMax: 80,
+          },
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/decode-full.*diagnostic-only.*non-product-path/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "decodeFullEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("fails the MOSS-NANO-5C segment-first soak candidate when the accepted decode strategy lacks product-path segment-first evidence", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5c-segment-first-missing-product-path-evidence";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5cSegmentFirstSoakSummary({
+        runId,
+        acceptedDecodeStrategy: {
+          strategy: "segment-first",
+          accepted: true,
+        },
+        segmentFirstProductPathEvidence: null,
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/segment-first.*product-path.*evidence/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "segmentFirstProductPathEvidence",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
+  it("keeps the existing MOSS-NANO-5 soak gate strict when precompute remains blocker-only", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano5-old-soak-blocker-only-precompute-still-strict";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano5SoakCandidateSummary({
+        runId,
+        precomputeInputsActual: false,
+        precomputeInputsBlocker: "NO_PRECOMPUTE_REQUEST_ROWS_HOOK",
+        precomputeInputsEvidence: nano5PrecomputeRowEvidence({
+          status: "blocked",
+          actual: false,
+          preparedBeforeRun: false,
+          consumedByMeasuredRun: false,
+          requestRowCount: 0,
+        }),
+      }),
+      options: {
+        precomputeInputs: true,
+        residentDecodeMode: "full",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/blocker-only precompute evidence.*must not promote/i);
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: expect.not.stringMatching(/^PROMOTE_NANO_TO_SOAK_CANDIDATE$/),
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "precomputeInputsEvidence",
       status: "fail",
       failureClass: "runtime-contract",
     }));

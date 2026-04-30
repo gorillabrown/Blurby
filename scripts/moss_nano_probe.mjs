@@ -28,6 +28,16 @@ const PYTHON_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_probe.py");
 const PYTHON_RESIDENT_PROBE_RELATIVE_PATH = path.join("scripts", "moss_nano_resident_probe.py");
 const DECODE_FULL_FIRST_AUDIO_SEC_MAX = 2.5;
 const DECODE_FULL_MEMORY_GROWTH_MB_MAX = 80;
+const NANO5C_SEGMENT_FIRST_SOAK_TARGET = "nano5c-segment-first-soak";
+const NANO5C_SEGMENT_FIRST_SOAK_DECISION = "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE";
+const NANO5C_SEGMENT_FIRST_DEFAULT_THRESHOLDS = Object.freeze({
+  segmentFirstInternalFirstDecodedAudioSecMax: 0.5,
+  segmentFirstShortRtfMax: 1.5,
+  adjacentFairRtfTrendMax: 0.15,
+  segmentFirstMinFreshSegments: 5,
+  segmentFirstStaleOutputReuseMax: 0,
+  segmentFirstSessionRestartMax: 0,
+});
 
 export function resolvePassageId(passageId = DEFAULT_PASSAGE_ID) {
   return PASSAGE_ALIASES[passageId] ?? passageId;
@@ -67,6 +77,13 @@ function nonNegativeInteger(value, flag) {
     throw new Error(`${flag} requires a non-negative integer`);
   }
   return parsed;
+}
+
+function promotionTarget(value, flag) {
+  if (value !== NANO5C_SEGMENT_FIRST_SOAK_TARGET) {
+    throw new Error(`${flag} only supports ${NANO5C_SEGMENT_FIRST_SOAK_TARGET}`);
+  }
+  return value;
 }
 
 export function parseArgs(argv = process.argv.slice(2)) {
@@ -226,6 +243,11 @@ export function parseArgs(argv = process.argv.slice(2)) {
       }
       args.adjacentSegmentRtfTrendMax = value;
       index += 1;
+    } else if (arg === "--promotion-target") {
+      args.promotionTarget = promotionTarget(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--nano5c-segment-first-soak") {
+      args.promotionTarget = NANO5C_SEGMENT_FIRST_SOAK_TARGET;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -377,11 +399,13 @@ function normalizeOptimizationEvidence(summary, requested = {}) {
     "precomputeInputsActual",
     "precomputeInputsPartial",
     "precomputeInputsBlocker",
+    "precomputeRequiredForProductPath",
     "precomputeInputsEvidence",
     "tokenizerIdentity",
     "promptAudioCodesEvidence",
     "decodeFullEvidence",
     "acceptedDecodeStrategy",
+    "segmentFirstProductPathEvidence",
     "adjacentSegmentStats",
     "segments",
     "crossSegmentStateActual",
@@ -451,7 +475,10 @@ function hasNano5SoakShape(summary, requested = {}) {
   const decision = String(summary.promotionDecision?.decision ?? "");
   return summary.promotionTarget === "nano5-soak"
     || summary.promotionDecision?.target === "nano5-soak"
+    || summary.promotionTarget === "nano5c-segment-first-soak"
+    || summary.promotionDecision?.target === "nano5c-segment-first-soak"
     || decision === "PROMOTE_NANO_TO_SOAK_CANDIDATE"
+    || decision === "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE"
     || decision === "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE"
     || summary.adjacentSegmentStats != null
     || summary.decodeFullEvidence != null
@@ -707,6 +734,442 @@ function precomputePromotionFailure(summary) {
   return null;
 }
 
+function normalizeNano5cPrecomputeEvidence(summary, requested = {}) {
+  const requestedPrecompute = summary.precomputeInputsRequested === true || requested.precomputeInputs === true;
+  const actualPrecompute = summary.precomputeInputsActual === true;
+  const evidence = objectOrEmpty(summary.precomputeInputsEvidence);
+  const requiredForProductPath = summary.precomputeRequiredForProductPath ?? evidence.requiredForProductPath;
+  if (!actualPrecompute && requestedPrecompute !== true && requiredForProductPath === false) {
+    summary.precomputeInputsEvidence = {
+      status: "not-required",
+      requested: false,
+      actual: false,
+      classification: "non-product-required",
+      requiredForProductPath: false,
+      ...evidence,
+    };
+    if (summary.precomputeInputsRequested == null) summary.precomputeInputsRequested = false;
+    if (summary.precomputeInputsActual == null) summary.precomputeInputsActual = false;
+    return;
+  }
+  if (Object.keys(evidence).length > 0) {
+    summary.precomputeInputsEvidence = {
+      ...evidence,
+      requested: requestedPrecompute,
+      actual: actualPrecompute || evidence.actual === true,
+      requiredForProductPath,
+    };
+  }
+}
+
+function nano5cPrecomputeFailure(summary, requested = {}) {
+  normalizeNano5cPrecomputeEvidence(summary, requested);
+  const evidence = objectOrEmpty(summary.precomputeInputsEvidence);
+  if (summary.precomputeInputsActual === true || evidence.actual === true || String(evidence.status ?? "").toLowerCase() === "actual") {
+    return precomputePromotionFailure(summary);
+  }
+  const requestedPrecompute = summary.precomputeInputsRequested === true || requested.precomputeInputs === true || evidence.requested === true;
+  const notRequired = evidence.classification === "non-product-required"
+    && evidence.requiredForProductPath === false
+    && ["not-required", "non-product-required"].includes(String(evidence.status ?? "").toLowerCase());
+  if (notRequired && requestedPrecompute !== true) return null;
+  return "segment-first precompute requested actual=false requires explicit non-product-required product-path classification.";
+}
+
+function isDiagnosticOnlyDecodeFull(evidence) {
+  const classification = String(evidence.classification ?? "").toLowerCase();
+  return evidence.diagnosticOnly === true
+    && evidence.productPath === false
+    && evidence.requiredForProductPath === false
+    && classification.includes("diagnostic-only")
+    && classification.includes("non-product-path");
+}
+
+function validateNano5cDecodeFullGate(summary) {
+  if (!summary.decodeFullEvidence || Object.keys(objectOrEmpty(summary.decodeFullEvidence)).length === 0) {
+    return "decode-full diagnostic-only non-product-path evidence is required for MOSS-NANO-5C segment-first soak promotion";
+  }
+  normalizeDecodeFullEvidence(summary);
+  const evidence = objectOrEmpty(summary.decodeFullEvidence);
+  if (isDiagnosticOnlyDecodeFull(evidence)) return null;
+  return "decode-full evidence for segment-first soak must be diagnostic-only non-product-path.";
+}
+
+function validateSegmentFirstProductPath(summary) {
+  const accepted = objectOrEmpty(summary.acceptedDecodeStrategy);
+  const evidence = objectOrEmpty(summary.segmentFirstProductPathEvidence);
+  const strategy = String(accepted.strategy ?? "").toLowerCase();
+  if (
+    strategy !== "segment-first"
+    || accepted.accepted !== true
+    || accepted.productPath !== true
+    || accepted.segmentFirst !== true
+    || !summary.segmentFirstProductPathEvidence
+    || evidence.productPath !== true
+    || !["passed", "ok"].includes(String(evidence.status ?? "").toLowerCase())
+  ) {
+    return "segment-first product-path evidence is required for MOSS-NANO-5C soak promotion.";
+  }
+  if (summary.runtimeMode !== "resident" || summary.processMode !== "warm") {
+    return "segment-first product-path evidence requires resident warm runtime.";
+  }
+  const reuseActual = summary.benchmark?.runtimeReuseActual === true
+    || residentRunRecords(summary).some((record) => record?.runtimeReuseActual === true);
+  if (!reuseActual) {
+    return "segment-first product-path evidence requires resident runtime reuse.";
+  }
+  const firstAudioObservation = objectOrEmpty(summary.firstAudioObservation);
+  const hasInternalFirstAudio = firstAudioObservation.kind === "internal-first-decoded-audio"
+    || residentRunRecords(summary).some((record) => record?.firstAudioObservation?.kind === "internal-first-decoded-audio");
+  if (!hasInternalFirstAudio) {
+    return "segment-first product-path evidence requires internal first decoded audio.";
+  }
+  if (Number(evidence.staleOutputReuseCount ?? 0) > 0 || Number(evidence.sessionRestartCount ?? 0) > 0) {
+    return "segment-first product-path evidence must have no stale reuse or session restart.";
+  }
+  if (Number(evidence.internalFirstAudioFreshSegments ?? 0) < 5) {
+    return "segment-first product-path evidence requires fresh internal first decoded audio for adjacent segments.";
+  }
+  if (evidence.stableAdjacentTrend !== true) {
+    return "segment-first product-path evidence requires stable adjacent segment trend.";
+  }
+  const adjacentFailure = validateAdjacentSegments(summary, { required: true });
+  if (adjacentFailure) return `segment-first product-path evidence blocked: ${adjacentFailure}`;
+  return null;
+}
+
+function hasNano5cSegmentFirstSoakShape(summary) {
+  const decision = String(summary.promotionDecision?.decision ?? "");
+  const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
+  return target === NANO5C_SEGMENT_FIRST_SOAK_TARGET
+    || decision === NANO5C_SEGMENT_FIRST_SOAK_DECISION;
+}
+
+function countInternalFreshSegments(summary) {
+  const segments = Array.isArray(summary.segments) ? summary.segments : [];
+  return segments.filter((segment) => (
+    segment?.firstAudioObservation?.kind === "internal-first-decoded-audio"
+      && segment?.firstAudioObservation?.internalFirstDecodedAudioMs != null
+      && !segment?.staleOutputReuse
+      && !segment?.firstAudioObservation?.outputFileExistedBeforeRun
+      && !segment?.firstAudioObservation?.reusedExistingOutputFile
+  )).length;
+}
+
+function countStaleOutputReuseSegments(summary) {
+  if (!Array.isArray(summary.segments)) return null;
+  return summary.segments.filter((segment) => (
+    segment?.staleOutputReuse
+      || segment?.firstAudioObservation?.outputFileExistedBeforeRun
+      || segment?.firstAudioObservation?.reusedExistingOutputFile
+  )).length;
+}
+
+function countSessionRestartSegments(summary) {
+  if (!Array.isArray(summary.segments)) return null;
+  return summary.segments.filter((segment) => segment?.sessionRestarted).length;
+}
+
+function maxFiniteNumber(values) {
+  const numbers = values.filter(isFiniteNumber);
+  return numbers.length > 0 ? Math.max(...numbers) : null;
+}
+
+function minFiniteNumber(values) {
+  const numbers = values.filter(isFiniteNumber);
+  return numbers.length > 0 ? Math.min(...numbers) : null;
+}
+
+function internalFirstDecodedAudioSecFromObservation(observation = {}) {
+  if (isFiniteNumber(observation.internalFirstDecodedAudioSec)) return observation.internalFirstDecodedAudioSec;
+  if (isFiniteNumber(observation.internalFirstDecodedAudioMs)) return observation.internalFirstDecodedAudioMs / 1000;
+  return null;
+}
+
+function deriveNano5cSegmentFirstMetrics(summary) {
+  const metrics = objectOrEmpty(summary.promotionMetrics);
+  const stats = objectOrEmpty(summary.adjacentSegmentStats);
+  const evidence = objectOrEmpty(summary.segmentFirstProductPathEvidence);
+  const segments = Array.isArray(summary.segments) ? summary.segments : [];
+  const records = residentRunRecords(summary);
+  const firstDecodedSec = maxFiniteNumber([
+    internalFirstDecodedAudioSecFromObservation(summary.firstAudioObservation),
+    ...records.map((record) => internalFirstDecodedAudioSecFromObservation(record?.firstAudioObservation)),
+    ...segments.map((segment) => internalFirstDecodedAudioSecFromObservation(segment?.firstAudioObservation)),
+  ]);
+  const segmentRtf = maxFiniteNumber([
+    summary.rtf,
+    ...records.map((record) => record?.rtf),
+    ...segments.map((segment) => segment?.rtf),
+  ]);
+  return {
+    segmentFirstInternalFirstDecodedAudioSec: firstFiniteNumber(
+      firstDecodedSec,
+      metrics.shortFirstDecodedAudioSec,
+      metrics.firstDecodedAudioSec,
+      metrics.segmentFirstInternalFirstDecodedAudioSec,
+    ),
+    segmentFirstShortRtf: firstFiniteNumber(
+      segmentRtf,
+      metrics.shortRtf,
+      metrics.segmentFirstShortRtf,
+    ),
+    adjacentFairRtfTrendRatio: firstFiniteNumber(
+      stats.fairRtfTrendRatio,
+      stats.stableTrendGate?.ratio,
+      metrics.adjacentRtfTrendRatio,
+      metrics.adjacentFairRtfTrendRatio,
+    ),
+    segmentFirstInternalFirstAudioFreshSegments: firstFiniteNumber(
+      evidence.internalFirstAudioFreshSegments,
+      countInternalFreshSegments(summary),
+      stats.freshSegments,
+      metrics.adjacentFreshSegments,
+      metrics.segmentFirstInternalFirstAudioFreshSegments,
+    ),
+    segmentFirstStaleOutputReuseCount: firstFiniteNumber(
+      evidence.staleOutputReuseCount,
+      countStaleOutputReuseSegments(summary),
+      stats.staleOutputReuseCount,
+      metrics.adjacentStaleOutputReuseCount,
+      metrics.segmentFirstStaleOutputReuseCount,
+    ),
+    segmentFirstSessionRestartCount: firstFiniteNumber(
+      evidence.sessionRestartCount,
+      countSessionRestartSegments(summary),
+      stats.sessionRestartCount,
+      metrics.adjacentSessionRestartCount,
+      metrics.segmentFirstSessionRestartCount,
+    ),
+  };
+}
+
+function normalizeNano5cSegmentFirstPromotionGates(summary) {
+  summary.promotionThresholds = {
+    ...NANO5C_SEGMENT_FIRST_DEFAULT_THRESHOLDS,
+    ...objectOrEmpty(summary.promotionThresholds),
+  };
+  summary.promotionMetrics = {
+    ...objectOrEmpty(summary.promotionMetrics),
+    ...deriveNano5cSegmentFirstMetrics(summary),
+  };
+}
+
+function maxGateMetric(existing, derived) {
+  return maxFiniteNumber([existing, derived]) ?? firstFiniteNumber(existing, derived);
+}
+
+function minGateMetric(existing, derived) {
+  return minFiniteNumber([existing, derived]) ?? firstFiniteNumber(existing, derived);
+}
+
+function nano5cFailClosedSegmentFirstMetrics(summary) {
+  const metrics = objectOrEmpty(summary.promotionMetrics);
+  const derived = deriveNano5cSegmentFirstMetrics(summary);
+  return {
+    ...metrics,
+    segmentFirstInternalFirstDecodedAudioSec: maxGateMetric(
+      metrics.segmentFirstInternalFirstDecodedAudioSec,
+      derived.segmentFirstInternalFirstDecodedAudioSec,
+    ),
+    segmentFirstShortRtf: maxGateMetric(
+      metrics.segmentFirstShortRtf,
+      derived.segmentFirstShortRtf,
+    ),
+    adjacentFairRtfTrendRatio: maxGateMetric(
+      metrics.adjacentFairRtfTrendRatio,
+      derived.adjacentFairRtfTrendRatio,
+    ),
+    segmentFirstInternalFirstAudioFreshSegments: minGateMetric(
+      metrics.segmentFirstInternalFirstAudioFreshSegments,
+      derived.segmentFirstInternalFirstAudioFreshSegments,
+    ),
+    segmentFirstStaleOutputReuseCount: maxGateMetric(
+      metrics.segmentFirstStaleOutputReuseCount,
+      derived.segmentFirstStaleOutputReuseCount,
+    ),
+    segmentFirstSessionRestartCount: maxGateMetric(
+      metrics.segmentFirstSessionRestartCount,
+      derived.segmentFirstSessionRestartCount,
+    ),
+  };
+}
+
+function stableAdjacentTrend(summary, stats) {
+  if (stats.stableTrendGate?.stable === true) return true;
+  const fairTrend = firstFiniteNumber(stats.fairRtfTrendRatio, stats.stableTrendGate?.ratio);
+  const fairTrendMax = firstFiniteNumber(
+    stats.fairRtfTrendMax,
+    stats.stableTrendGate?.max,
+    stats.rtfTrendMax,
+    summary.promotionThresholds?.adjacentRtfTrendMax,
+    0.15,
+  );
+  return isFiniteNumber(fairTrend) && isFiniteNumber(fairTrendMax) && fairTrend <= fairTrendMax;
+}
+
+function applyNano5cSegmentFirstClassification(summary, requested = {}) {
+  if (requested.promotionTarget !== NANO5C_SEGMENT_FIRST_SOAK_TARGET) return;
+
+  summary.promotionTarget = NANO5C_SEGMENT_FIRST_SOAK_TARGET;
+  summary.promotionDecision = {
+    ...objectOrEmpty(summary.promotionDecision),
+    promote: true,
+    target: NANO5C_SEGMENT_FIRST_SOAK_TARGET,
+    decision: NANO5C_SEGMENT_FIRST_SOAK_DECISION,
+  };
+
+  summary.precomputeRequiredForProductPath = false;
+  if (summary.precomputeInputsActual !== true) {
+    const precomputeEvidence = objectOrEmpty(summary.precomputeInputsEvidence);
+    summary.precomputeInputsRequested = false;
+    summary.precomputeInputsActual = false;
+    summary.precomputeInputsEvidence = {
+      ...precomputeEvidence,
+      status: "not-required",
+      requested: false,
+      actual: false,
+      classification: "non-product-required",
+      requiredForProductPath: false,
+      productPath: false,
+      blocker: summary.precomputeInputsBlocker ?? precomputeEvidence.blocker ?? null,
+    };
+  }
+
+  const decodeEvidence = objectOrEmpty(summary.decodeFullEvidence);
+  summary.decodeFullEvidence = {
+    ...decodeEvidence,
+    status: decodeEvidence.status ?? "not-run",
+    diagnosticOnly: true,
+    productPath: false,
+    requiredForProductPath: false,
+    classification: "diagnostic-only-non-product-path",
+    source: decodeEvidence.source ?? "nano5c-segment-first-classification",
+    reason: decodeEvidence.reason ?? (
+      Object.keys(decodeEvidence).length > 0
+        ? null
+        : "decode-full is diagnostic only and not required for the segment-first product path."
+    ),
+  };
+
+  const stats = objectOrEmpty(summary.adjacentSegmentStats);
+  const metrics = objectOrEmpty(summary.promotionMetrics);
+  const evidence = objectOrEmpty(summary.segmentFirstProductPathEvidence);
+  const internalFreshSegments = firstFiniteNumber(
+    evidence.internalFirstAudioFreshSegments,
+    countInternalFreshSegments(summary),
+    stats.freshSegments,
+    metrics.adjacentFreshSegments,
+  ) ?? 0;
+  const staleOutputReuseCount = firstFiniteNumber(
+    evidence.staleOutputReuseCount,
+    stats.staleOutputReuseCount,
+    metrics.adjacentStaleOutputReuseCount,
+  ) ?? 0;
+  const sessionRestartCount = firstFiniteNumber(
+    evidence.sessionRestartCount,
+    stats.sessionRestartCount,
+    metrics.adjacentSessionRestartCount,
+  ) ?? 0;
+  const trendStable = evidence.stableAdjacentTrend ?? stableAdjacentTrend(summary, stats);
+  const productEvidencePassed = internalFreshSegments >= 5
+    && staleOutputReuseCount === 0
+    && sessionRestartCount === 0
+    && trendStable === true;
+  summary.acceptedDecodeStrategy = {
+    ...objectOrEmpty(summary.acceptedDecodeStrategy),
+    strategy: "segment-first",
+    accepted: true,
+    productPath: true,
+    segmentFirst: true,
+    diagnosticReplacementForDecodeFull: false,
+  };
+  summary.segmentFirstProductPathEvidence = {
+    ...evidence,
+    status: evidence.status ?? (productEvidencePassed ? "passed" : "blocked"),
+    productPath: true,
+    internalFirstAudioFreshSegments: internalFreshSegments,
+    staleOutputReuseCount,
+    sessionRestartCount,
+    stableAdjacentTrend: trendStable,
+  };
+  normalizeNano5cSegmentFirstPromotionGates(summary);
+}
+
+function requiredZeroCountGate(thresholds, metrics, thresholdKey, metricKey, label) {
+  if (!(thresholdKey in thresholds)) {
+    return `${label} threshold missing: ${thresholdKey}`;
+  }
+  if (!isFiniteNumber(thresholds[thresholdKey])) {
+    return `${label} threshold ${thresholdKey} must be numeric`;
+  }
+  if (!(metricKey in metrics)) {
+    return `${label} metric missing: ${metricKey}`;
+  }
+  if (!isFiniteNumber(metrics[metricKey])) {
+    return `${label} metric ${metricKey} must be numeric`;
+  }
+  if (metrics[metricKey] > thresholds[thresholdKey]) {
+    return thresholds[thresholdKey] === 0
+      ? `${label} count must be zero`
+      : `${label} metric ${metricKey}=${metrics[metricKey]} exceeds threshold ${thresholdKey}=${thresholds[thresholdKey]}`;
+  }
+  return null;
+}
+
+function nano5cSegmentFirstThresholdFailure(summary) {
+  if (!summary.promotionThresholds || typeof summary.promotionThresholds !== "object" || Array.isArray(summary.promotionThresholds)) {
+    return "MOSS-NANO-5C segment-first promotion thresholds missing";
+  }
+  if (!summary.promotionMetrics || typeof summary.promotionMetrics !== "object" || Array.isArray(summary.promotionMetrics)) {
+    return "MOSS-NANO-5C segment-first promotion metrics missing";
+  }
+  const thresholds = summary.promotionThresholds;
+  const metrics = nano5cFailClosedSegmentFirstMetrics(summary);
+  const gates = [
+    ["segmentFirstInternalFirstDecodedAudioSecMax", "segmentFirstInternalFirstDecodedAudioSec", "segment-first internal first decoded audio"],
+    ["segmentFirstShortRtfMax", "segmentFirstShortRtf", "segment-first short RTF"],
+    ["adjacentFairRtfTrendMax", "adjacentFairRtfTrendRatio", "adjacent fair RTF trend"],
+  ];
+  for (const [thresholdKey, metricKey, label] of gates) {
+    const failure = requiredNumericGate(thresholds, metrics, thresholdKey, metricKey, label);
+    if (failure) return failure;
+  }
+  if (!("segmentFirstMinFreshSegments" in thresholds)) {
+    return "segment-first fresh threshold missing: segmentFirstMinFreshSegments";
+  }
+  if (!isFiniteNumber(thresholds.segmentFirstMinFreshSegments)) {
+    return "segment-first fresh threshold segmentFirstMinFreshSegments must be numeric";
+  }
+  if (!("segmentFirstInternalFirstAudioFreshSegments" in metrics)) {
+    return "segment-first fresh metric missing: segmentFirstInternalFirstAudioFreshSegments";
+  }
+  if (!isFiniteNumber(metrics.segmentFirstInternalFirstAudioFreshSegments)) {
+    return "segment-first fresh metric segmentFirstInternalFirstAudioFreshSegments must be numeric";
+  }
+  if (metrics.segmentFirstInternalFirstAudioFreshSegments < thresholds.segmentFirstMinFreshSegments) {
+    return `segment-first fresh metric segmentFirstInternalFirstAudioFreshSegments=${metrics.segmentFirstInternalFirstAudioFreshSegments} is below required ${thresholds.segmentFirstMinFreshSegments}`;
+  }
+  for (const [thresholdKey, metricKey, label] of [
+    ["segmentFirstStaleOutputReuseMax", "segmentFirstStaleOutputReuseCount", "segment-first stale output reuse"],
+    ["segmentFirstSessionRestartMax", "segmentFirstSessionRestartCount", "segment-first session restart"],
+  ]) {
+    const failure = requiredZeroCountGate(thresholds, metrics, thresholdKey, metricKey, label);
+    if (failure) return failure;
+  }
+  if ("segmentFirstMemoryGrowthMbMax" in thresholds || "segmentFirstMemoryGrowthMb" in metrics) {
+    const failure = requiredNumericGate(
+      thresholds,
+      metrics,
+      "segmentFirstMemoryGrowthMbMax",
+      "segmentFirstMemoryGrowthMb",
+      "segment-first memory",
+    );
+    if (failure) return failure;
+  }
+  return null;
+}
+
 function adjacentFairTrendFailure(summary, stats) {
   const fairMethod = stats.rtfTrendMethod ?? stats.stableTrendGate?.method;
   const fairTrend = firstFiniteNumber(stats.fairRtfTrendRatio, stats.stableTrendGate?.ratio);
@@ -779,6 +1242,7 @@ function validateNano5SoakPromotion(summary, requested = {}) {
   const decision = String(summary.promotionDecision?.decision ?? "");
   const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
   const isSoakPromotion = decision === "PROMOTE_NANO_TO_SOAK_CANDIDATE" || target === "nano5-soak";
+  const isSegmentFirstSoakPromotion = hasNano5cSegmentFirstSoakShape(summary);
   if (target === "app-prototype" || decision === "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE") {
     return {
       message: "MOSS-NANO-5 may promote to soak, not app prototype.",
@@ -788,6 +1252,41 @@ function validateNano5SoakPromotion(summary, requested = {}) {
   }
   normalizePromotionMemoryMetrics(summary);
   const precomputeRequested = summary.precomputeInputsRequested === true || requested.precomputeInputs === true;
+  if (isSegmentFirstSoakPromotion) {
+    const precomputeFailure = nano5cPrecomputeFailure(summary, requested);
+    if (precomputeFailure) {
+      return {
+        message: precomputeFailure,
+        key: "precomputeInputsEvidence",
+        failureClass: "runtime-contract",
+      };
+    }
+    const decodeFailure = validateNano5cDecodeFullGate(summary);
+    if (decodeFailure) {
+      return {
+        message: decodeFailure,
+        key: "decodeFullEvidence",
+        failureClass: "runtime-contract",
+      };
+    }
+    const segmentFirstFailure = validateSegmentFirstProductPath(summary);
+    if (segmentFirstFailure) {
+      return {
+        message: segmentFirstFailure,
+        key: "segmentFirstProductPathEvidence",
+        failureClass: "runtime-contract",
+      };
+    }
+    const thresholdFailure = nano5cSegmentFirstThresholdFailure(summary);
+    if (thresholdFailure) {
+      return {
+        message: `MOSS-NANO-5C segment-first soak promotion blocked: ${thresholdFailure}.`,
+        key: "promotionThresholds",
+        failureClass: "performance",
+      };
+    }
+    return null;
+  }
   if (isSoakPromotion) {
     const precomputeFailure = precomputePromotionFailure(summary);
     if (precomputeFailure) {
@@ -923,6 +1422,7 @@ function requestedOptimizationContradiction(summary) {
 
 function validateOptimizationPromotion(summary) {
   if (!summary.promotionClass) return null;
+  if (hasNano5cSegmentFirstSoakShape(summary)) return null;
   const evidence = summary.optimizationEvidence;
   if (!evidence || typeof evidence !== "object") {
     return {
@@ -1041,6 +1541,7 @@ function normalizeResidentSummary(summary, requested = {}) {
     contractKey = "firstAudioOutputFreshness";
   }
 
+  applyNano5cSegmentFirstClassification(summary, requested);
   if (contractMessage) return blockResidentSummary(summary, contractMessage, contractKey);
   const nano5Failure = validateNano5SoakPromotion(summary, requested);
   if (nano5Failure) {
@@ -1306,6 +1807,7 @@ export async function runMossNanoProbe({
   adjacentSegmentCount,
   adjacentSegmentSource,
   adjacentSegmentRtfTrendMax,
+  promotionTarget,
   allowEmptyPassage,
   execFile = runSpawn,
   fsModule = fs,
@@ -1422,6 +1924,7 @@ export async function runMossNanoProbe({
           adjacentSegmentCount,
           adjacentSegmentSource,
           adjacentSegmentRtfTrendMax,
+          promotionTarget,
         })
         : parsed.summary;
       result = {
@@ -1461,6 +1964,7 @@ export async function runMossNanoProbe({
           adjacentSegmentCount,
           adjacentSegmentSource,
           adjacentSegmentRtfTrendMax,
+          promotionTarget,
         })
         : parsed.summary;
       result = {
@@ -1547,6 +2051,8 @@ function helpText() {
     "  --adjacent-segment-count <n>",
     "  --adjacent-segment-source <raw|book-like>",
     "  --adjacent-segment-rtf-trend-max <n>",
+    "  --promotion-target <target>",
+    "  --nano5c-segment-first-soak",
   ].join("\n");
 }
 
@@ -1608,6 +2114,7 @@ export async function main(argv = process.argv.slice(2)) {
     adjacentSegmentCount: args.adjacentSegmentCount,
     adjacentSegmentSource: args.adjacentSegmentSource,
     adjacentSegmentRtfTrendMax: args.adjacentSegmentRtfTrendMax,
+    promotionTarget: args.promotionTarget,
   });
 
   process.stdout.write(args.json ? `${JSON.stringify(result, null, 2)}\n` : formatSummaryText(result));

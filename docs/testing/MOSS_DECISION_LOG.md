@@ -1,9 +1,9 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-5B
+**Sprint:** MOSS-1 through MOSS-NANO-5C
 **Initial status:** `INVESTIGATE`
-**Current status:** `ITERATE_NANO_RESIDENT_RUNTIME`
-**Last updated:** 2026-04-29
+**Current status:** `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`
+**Last updated:** 2026-04-30
 
 ## Status Values
 
@@ -24,6 +24,7 @@
 | `KEEP_PAUSED_HOST_CONFIRMED` | Keep flagship MOSS product-path work paused after host/runtime evidence confirms that the best available native ARM64 or WSL2/Linux MOSS shape is either unavailable or still non-viable. |
 | `ITERATE_NANO_RUNTIME` | Continue bounded Nano runtime iteration because Nano ONNX CPU can generate local audio, but timing evidence is not yet good enough for app prototype or promotion. |
 | `ITERATE_NANO_RESIDENT_RUNTIME` | Continue resident Nano runtime tuning/soak/perf only because true reuse and internal first-decoded timing are proven, but promotion thresholds and memory-soak confidence are not met. |
+| `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE` | Promote Nano only to the next runtime soak/package gate because segment-first product-path evidence passed; this is not app prototype promotion and does not unlock app integration. |
 | `KEEP_KOKORO_ONLY` | Keep Kokoro as the only integrated engine after bounded Nano runtime rescue fails to produce viable live-app timing; Nano is not rejected permanently, but app prototype work stays closed until new runtime evidence changes the decision. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
 
@@ -601,19 +602,65 @@ Reason: Do not record `PROMOTE_NANO_TO_SOAK_CANDIDATE` because decode-full misse
 
 Non-decisions:
 
-- Do not dispatch MOSS-NANO-6 from this closeout; it remains gated until soak/package criteria are met by a future sprint.
+- This 5B closeout did not dispatch MOSS-NANO-6; 5C later superseded the soak-gate blocker with a segment-first runtime-only gate.
 - Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or productization work from this evidence.
 - Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
 - Do not commit `.runtime/**`.
 
+## MOSS-NANO-5C Decision
+
+Decision: `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`.
+
+Explicit framing: this is a runtime-only soak-candidate gate, not app prototype promotion. It does not add or approve app integration, renderer integration, sidecar IPC, selectable engine/cache changes, Kokoro behavior changes, MOSS-3 reopening, or `.runtime/**` committed edits.
+
+Final artifact:
+
+- `artifacts/moss/moss-nano-5c-segment-first-soak-gate-final2/summary.json`
+
+Canonical final2 evidence:
+
+| Evidence item | Result |
+|---|---|
+| Status | `ok`. |
+| Promote | `true`. |
+| Decision | `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`. |
+| First decoded metric | `0.449s <= 0.5s`. |
+| Segment-first short RTF | `0.6513 <= 1.5`. |
+| Adjacent fair RTF trend | `0.0105 <= 0.15`. |
+| Fresh segments | `5 >= 5`. |
+| Stale output reuse | `0`. |
+| Session restarts | `0`. |
+| Precompute classification | `non-product-required`, status `not-required`. |
+| Decode-full classification | `diagnostic-only-non-product-path`. |
+
+Supporting diagnostics:
+
+- `moss-nano-5c-short-resident-decode-full-diagnostic`: decode-full diagnostic path measured, but decode-full remains diagnostic-only/non-product for 5C and is not product latency proof.
+- `moss-nano-5c-short-resident-precompute-requestrows-rca`: precompute was requested but actual remained false with blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. RCA: the current high-level path lacks prepared-row consumption, but the lower ONNX path has build/request rows and generate frames, so future runtime work may implement it.
+
+Reason: The segment-first product-path gate passed all final2 numeric thresholds with fresh outputs and no session restarts. Precompute is non-product-required for this gate, so no precompute success is claimed. Decode-full is diagnostic-only/non-product, so it is not a product blocker or product latency proof for 5C.
+
+Next actions:
+
+- `MOSS-NANO-6` may dispatch as resident soak + packaging readiness because 5C earned a runtime-only soak-candidate gate.
+- App integration remains gated until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
+
+Non-decisions:
+
+- Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or productization work from this evidence.
+- Do not reopen MOSS-3.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not commit `.runtime/**`.
+- Do not claim precompute success.
+- Do not use decode-full as product latency proof for 5C.
+
 ## Nano Onboarding Roadmap Gate
 
-Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane.
+Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-5C` earned the runtime-only segment-first soak-candidate gate.
 
 Allowed next work:
 
-- Future Nano runtime work may continue only as runtime investigation unless it earns a soak/package gate.
-- `MOSS-NANO-6`: runtime/package soak gate, gated until `PROMOTE_NANO_TO_SOAK_CANDIDATE` or an equivalent future runtime decision exists. It may record `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` only if latency, memory, shutdown, packaging, and provisioning evidence all pass.
+- `MOSS-NANO-6`: runtime/package soak gate, dispatch-ready after `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`. It may record `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` only if latency, memory, shutdown, packaging, provisioning, and long-session evidence all pass.
 - `MOSS-NANO-7` through `MOSS-NANO-11`: conditional app onboarding path. These must not dispatch until `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` is recorded.
 
 Forbidden until promotion:
@@ -629,7 +676,7 @@ Forbidden until promotion:
 ## Decision Notes
 
 - Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
-- MOSS-TTS-Nano is not promoted after `MOSS-NANO-5B`. It must not enter app integration or replace Kokoro without a later explicit promotion decision. `MOSS-NANO-6` remains gated until soak/package criteria are met by a future sprint.
+- MOSS-TTS-Nano is promoted only to runtime soak candidacy after `MOSS-NANO-5C`. It must not enter app integration or replace Kokoro without a later explicit app-prototype promotion decision. `MOSS-NANO-6` may dispatch as resident soak + packaging readiness.
 - The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
 - Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
 - Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding now uses MOSS-NANO-7 through MOSS-NANO-11 after promotion.

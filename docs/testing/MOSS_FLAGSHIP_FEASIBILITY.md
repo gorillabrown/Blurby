@@ -285,26 +285,51 @@ Focused verification:
 | Adjacent segments stable | `moss-nano-5b-adjacent-segments-resident-stable`: ok; first audio `0.428s`; RTF `0.6003`; p50/p95 `0.5996`/`0.6003`; memory delta `8.14MB`; stale `false`; `5/5` fresh; fair trend ratio `0.0081` <= `0.15`; `crossSegmentStateActual=false`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`. |
 | False-evidence hardening | Preserve top-level `crossSegmentStateActual`; support explicit decode-full re-threshold evidence; keep fair adjacent trend separate from true cross-segment/prosody state; require precompute row-consumption evidence for promotion. |
 
-Conclusion: do not promote to soak because decode-full misses the first-audio gate and precompute request rows are still not consumed. Adjacent fair trend improved and clears the runtime stability metric, but it does not prove true cross-segment model state. Do not dispatch MOSS-NANO-6 from this closeout; it remains gated until soak/package criteria are met by a future sprint, and app integration remains locked.
+Conclusion: do not promote to soak from MOSS-NANO-5B because decode-full misses the first-audio gate and precompute request rows are still not consumed. Adjacent fair trend improved and clears the runtime stability metric, but it does not prove true cross-segment model state. At the 5B closeout, MOSS-NANO-6 remained gated until a future sprint met soak/package criteria; MOSS-NANO-5C later supplied that runtime-only gate. App integration remains locked.
+
+## MOSS-NANO-5C Segment-First Soak Gate
+
+Decision: `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`. This is a runtime-only soak-candidate gate, not app prototype promotion. It did not add app integration, renderer integration, sidecar IPC, selectable engine/cache changes, Kokoro behavior changes, MOSS-3 reopening, or `.runtime/**` commits.
+
+Final artifact: `artifacts/moss/moss-nano-5c-segment-first-soak-gate-final2/summary.json`.
+
+| Evidence | Result |
+|---|---|
+| Final status | `ok`; `promote: true`; decision `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`. |
+| First decoded metric | `0.449s <= 0.5s`. |
+| Segment-first short RTF | `0.6513 <= 1.5`. |
+| Adjacent fair RTF trend | `0.0105 <= 0.15`. |
+| Fresh segments | `5 >= 5`. |
+| Stale/session truth | stale output reuse `0`; session restarts `0`. |
+| Precompute | Classification `non-product-required`, status `not-required`; no precompute success is claimed. |
+| Decode-full | Classification `diagnostic-only-non-product-path`; not product latency proof for 5C. |
+
+Supporting diagnostics:
+
+- `moss-nano-5c-short-resident-decode-full-diagnostic`: decode-full was measured as a diagnostic path but is not a product blocker for the segment-first gate.
+- `moss-nano-5c-short-resident-precompute-requestrows-rca`: precompute was requested but actual remained false with blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. The current high-level path lacks prepared-row consumption, while the lower ONNX path has build/request rows and generate frames, so future runtime work may implement it.
+
+Conclusion: Nano earned only the next runtime soak/package gate. `MOSS-NANO-6` may dispatch as resident soak + packaging readiness. App integration remains locked until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
 
 ## MOSS-TTS-Nano Onboarding Gate Sequence
 
-The Nano onboarding path is fully specified in `ROADMAP.md`, but remains gated. The sequence is:
+The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration remains gated. The sequence is:
 
 1. `MOSS-NANO-5B`: precompute + adjacent continuity closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
-2. `MOSS-NANO-6`: resident soak plus packaging readiness. Gated until future runtime work earns a soak/package gate; may promote to app-prototype candidate only after passing soak/package evidence.
-3. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
-4. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
-5. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
-6. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
-7. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
+2. `MOSS-NANO-5C`: segment-first soak gate. Completed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`; runtime-only, not app prototype promotion.
+3. `MOSS-NANO-6`: resident soak plus packaging readiness. Dispatch-ready after 5C; may promote to app-prototype candidate only after passing soak/package evidence.
+4. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
+5. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
+6. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
+7. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
+8. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
 
 Non-negotiable gates:
 
 - No Nano app integration before `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
 - No Kokoro behavior change before a separate successor/default decision.
 - No word-timing fabrication; Nano must use truthful segment/anchor semantics unless trusted word timing is proven.
-- No promotion from requested-only metadata. Runtime summaries must distinguish requested vs. actual precompute, ORT settings, reuse, and cache behavior.
+- No promotion from requested-only metadata. Runtime summaries must distinguish requested vs. actual precompute, ORT settings, reuse, and cache behavior. The 5C segment-first gate does not require precompute success.
 - No productization without live-book matrix evidence, memory soak, packaging/provisioning truth, and adversarial review.
 
 ## Failure Classification
