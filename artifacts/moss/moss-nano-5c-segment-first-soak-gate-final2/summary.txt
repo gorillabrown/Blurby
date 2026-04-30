@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-5c-segment-first-soak-gate-final2
+Passage: long-form-3min
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-5c-segment-first-soak-gate-final2\output_003.wav
+Total seconds: 15.7597
+First WAV bytes seconds: 0.419
+Internal first decoded seconds: 0.419
+Audio duration seconds: 26.24
+RTF: 0.6006
+Peak memory: 1900.71 MB
+Process mode: warm
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 3
