@@ -1396,6 +1396,38 @@ function markNano6ReadinessFailure(summary, failure) {
   return failure;
 }
 
+function nano6ReadinessFailureDetails(failures) {
+  return failures.map((failure) => ({
+    gate: NANO6_APP_PROTOTYPE_TARGET,
+    key: failure.key,
+    reason: failure.message,
+    failureClass: failure.failureClass,
+  }));
+}
+
+function withNano6ReadinessFailureDetails(readiness, failures) {
+  const failedGates = nano6ReadinessFailureDetails(failures);
+  const firstFailure = failedGates[0] ?? null;
+  return {
+    ...readiness,
+    failedGate: firstFailure?.gate ?? null,
+    failedKey: firstFailure?.key ?? null,
+    failedReason: firstFailure?.reason ?? null,
+    failedGates,
+    failedKeys: [...new Set(failedGates.map((failure) => failure.key))],
+    failedReasons: failedGates.map((failure) => failure.reason),
+  };
+}
+
+function collectNano6ReadinessFailures(summary) {
+  return [
+    validateNano6LifecycleEvidence(summary),
+    validateNano6Soak(summary),
+    validateNano6BookLikeAdjacentRun(summary),
+    validateNano6ShutdownEvidence(summary),
+  ].filter(Boolean);
+}
+
 function validateNano6PromotionDecision(summary) {
   const decision = String(summary.promotionDecision?.decision ?? "");
   const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
@@ -1507,6 +1539,24 @@ function validateNano6LifecycleEvidence(summary) {
   if (evidence.stale === true) {
     return nano6Failure("MOSS-NANO-6 lifecycle evidence is stale.", "lifecycleEvidence");
   }
+  const lifecycleSummary = objectOrEmpty(evidence.shutdownRestartSummary);
+  if (Object.keys(lifecycleSummary).length > 0) {
+    const source = String(lifecycleSummary.evidenceSource ?? lifecycleSummary.source ?? lifecycleSummary.classificationSource ?? "").toLowerCase();
+    const status = String(lifecycleSummary.status ?? "").toLowerCase();
+    const synthetic = lifecycleSummary.synthetic === true
+      || ["synthetic", "planned", "requested", "not-implemented"].some((marker) => source.includes(marker) || status.includes(marker));
+    if (
+      synthetic
+      || lifecycleSummary.shutdownObserved !== true
+      || lifecycleSummary.restartObserved !== true
+      || source !== "measured-lifecycle-check"
+    ) {
+      return nano6Failure(
+        "MOSS-NANO-6 lifecycle shutdown/restart evidence must be observed by measured-lifecycle-check, not synthetic or not implemented.",
+        "lifecycleEvidence",
+      );
+    }
+  }
   return null;
 }
 
@@ -1550,17 +1600,21 @@ function validateNano6Readiness(summary, requested = {}) {
   const decisionFailure = validateNano6PromotionDecision(summary);
   if (decisionFailure) return markNano6ReadinessFailure(summary, decisionFailure);
   if (summary.promotionDecision?.decision !== NANO6_APP_PROTOTYPE_DECISION) {
+    const failures = collectNano6ReadinessFailures(summary);
     summary.nano6Readiness = {
-      ...objectOrEmpty(summary.nano6Readiness),
-      status: "not-promoting",
-      gate: NANO6_APP_PROTOTYPE_TARGET,
+      ...withNano6ReadinessFailureDetails({
+        ...objectOrEmpty(summary.nano6Readiness),
+        status: "not-promoting",
+        gate: NANO6_APP_PROTOTYPE_TARGET,
+      }, failures),
     };
     return null;
   }
-  const failure = validateNano6LifecycleEvidence(summary)
-    ?? validateNano6Soak(summary)
-    ?? validateNano6BookLikeAdjacentRun(summary)
-    ?? validateNano6ShutdownEvidence(summary);
+  const failures = collectNano6ReadinessFailures(summary);
+  const failure = failures[0] ?? null;
+  if (failure) {
+    summary.nano6Readiness = withNano6ReadinessFailureDetails(objectOrEmpty(summary.nano6Readiness), failures);
+  }
   if (failure) return markNano6ReadinessFailure(summary, failure);
   summary.nano6Readiness = {
     ...objectOrEmpty(summary.nano6Readiness),

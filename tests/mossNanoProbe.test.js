@@ -4342,6 +4342,182 @@ describe("MOSS Nano probe", () => {
     expect(summary.promotionDecision.decision).not.toBe("BLOCKED_NANO_RESIDENT_RUNTIME");
   });
 
+  it("blocks MOSS-NANO-6 promotion when lifecycle summaries are synthetic or not implemented", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-synthetic-lifecycle-summary";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        lifecycleEvidence: {
+          status: "actual",
+          requestedOnly: false,
+          stale: false,
+          runId,
+          shutdownRestartSummary: {
+            status: "not-implemented",
+            synthetic: true,
+            shutdownObserved: false,
+            restartObserved: false,
+            evidenceSource: "synthetic-summary",
+          },
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/lifecycle.*shutdown.*restart.*observed|synthetic|not.?implemented/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "lifecycleEvidence",
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
+  it("records failed Nano-6 readiness gates for non-promoting real-soak artifacts", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-iterate-with-failed-readiness-gates";
+    const summary = nano6ReadinessSummary({ runId });
+    summary.promotionDecision = {
+      promote: false,
+      target: "app-prototype",
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    };
+    summary.lifecycleEvidence = {
+      status: "requested",
+      requestedOnly: true,
+      stale: false,
+      runId,
+    };
+    summary.residentSoak = {
+      ...summary.residentSoak,
+      memoryGrowthSlopeMbPerMin: 2.5,
+    };
+    summary.bookLikeAdjacentRun = {
+      ...summary.bookLikeAdjacentRun,
+      completedSegments: 60,
+      freshSegments: 60,
+    };
+    summary.promotionMetrics = {
+      ...summary.promotionMetrics,
+      memoryGrowthSlopeMbPerMin: 2.5,
+      adjacentCompletedSegments: 60,
+      adjacentFreshSegments: 60,
+    };
+
+    const { result, summary: persistedSummary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary,
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result.status).toBe("ok");
+    expect(persistedSummary.nano6Readiness).toMatchObject({
+      status: "not-promoting",
+      gate: "app-prototype",
+      failedGate: "app-prototype",
+      failedKey: "lifecycleEvidence",
+    });
+    expect(persistedSummary.nano6Readiness.failedKeys).toEqual(expect.arrayContaining([
+      "lifecycleEvidence",
+      "residentSoak",
+      "bookLikeAdjacentRun",
+    ]));
+    expect(persistedSummary.nano6Readiness.failedGates).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        gate: "app-prototype",
+        key: "lifecycleEvidence",
+        reason: expect.stringMatching(/lifecycle|requested-only/i),
+      }),
+      expect.objectContaining({
+        gate: "app-prototype",
+        key: "residentSoak",
+        failureClass: "performance",
+        reason: expect.stringMatching(/memory growth/i),
+      }),
+      expect.objectContaining({
+        gate: "app-prototype",
+        key: "bookLikeAdjacentRun",
+        reason: expect.stringMatching(/100 completed|adjacent/i),
+      }),
+    ]));
+    expect(persistedSummary.nano6Readiness.failedReasons).toEqual(expect.arrayContaining([
+      expect.stringMatching(/lifecycle|requested-only/i),
+      expect.stringMatching(/memory growth/i),
+      expect.stringMatching(/100 completed|adjacent/i),
+    ]));
+    expect(persistedSummary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
+  it("requires 100 completed and fresh MOSS-NANO-6 adjacent segments when 100 are requested", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-adjacent-100-requested-60-completed";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        bookLikeAdjacentRun: {
+          ...nano6ReadinessSummary({ runId }).bookLikeAdjacentRun,
+          requestedSegments: 100,
+          completedSegments: 60,
+          freshSegments: 60,
+        },
+        promotionMetrics: {
+          ...nano6ReadinessSummary({ runId }).promotionMetrics,
+          adjacentRequestedSegments: 100,
+          adjacentCompletedSegments: 60,
+          adjacentFreshSegments: 60,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        adjacentSegmentCount: 100,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/100.*completed|100.*fresh|adjacent/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "bookLikeAdjacentRun",
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
   it("uses measured MOSS-NANO-6 soak duration instead of requested CLI duration for promotion", async () => {
     const projectRoot = await makeTempProject();
     tempDirs.push(projectRoot);

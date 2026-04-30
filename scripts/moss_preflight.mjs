@@ -329,23 +329,53 @@ async function buildNano6PackageMetadata(config, configPath, fsModule) {
     numpy: config.packageVersions?.numpy ?? "unknown",
     sentencepiece: config.packageVersions?.sentencepiece ?? "unknown",
   };
+  const source = isPlainObject(config.source) ? config.source : { repository: "unknown", revision: "unknown" };
+  const sourceDir = config.sourceDir ?? config.repoDir ?? null;
+  const tokenizerDir = config.tokenizerDir ?? config.audioTokenizerDir ?? null;
+  const modelBytes = await directorySizeBytes(fsModule, config.modelDir);
+  const tokenizerBytes = await directorySizeBytes(fsModule, tokenizerDir);
+  const sourceEvidenceReady = isPresent(source.repository)
+    && source.repository !== "unknown"
+    && isPresent(source.revision)
+    && source.revision !== "unknown"
+    && await pathHasType(fsModule, sourceDir, "directory");
+  const modelEvidenceReady = isPresent(config.modelDir) && modelBytes > 0;
+  const tokenizerEvidenceReady = isPresent(tokenizerDir) && tokenizerBytes > 0;
+  const nanoEvidenceReady = sourceEvidenceReady && modelEvidenceReady && tokenizerEvidenceReady;
+  const nanoEvidenceFailures = [];
+  if (!sourceEvidenceReady) nanoEvidenceFailures.push("source evidence");
+  if (!modelEvidenceReady) nanoEvidenceFailures.push("model evidence");
+  if (!tokenizerEvidenceReady) nanoEvidenceFailures.push("tokenizer evidence");
+  const nanoPackageEvidenceCheck = makeCheck(
+    "nanoPackageEvidence",
+    nanoEvidenceReady ? "pass" : "fail",
+    nanoEvidenceReady
+      ? "Nano package evidence includes source, model, and tokenizer evidence."
+      : `Nano package evidence is incomplete; missing ${nanoEvidenceFailures.join(", ")}.`,
+  );
   return {
-    sourceDir: config.sourceDir ?? config.repoDir ?? null,
-    tokenizerDir: config.tokenizerDir ?? config.audioTokenizerDir ?? null,
+    sourceDir,
+    tokenizerDir,
     venvDir: config.venvDir ?? null,
     ...pythonVersion,
     packageVersions,
     assetSizes: {
-      modelBytes: await directorySizeBytes(fsModule, config.modelDir),
-      tokenizerBytes: await directorySizeBytes(fsModule, config.tokenizerDir ?? config.audioTokenizerDir),
+      modelBytes,
+      tokenizerBytes,
     },
     venvFootprintBytes: await directorySizeBytes(fsModule, config.venvDir),
     setupTimeSec: Number.isFinite(Number(config.setupTimeSec)) ? Number(config.setupTimeSec) : 0,
     license: isPlainObject(config.license) ? config.license : { model: "unknown", tokenizer: "unknown" },
-    source: isPlainObject(config.source) ? config.source : { repository: "unknown", revision: "unknown" },
+    source,
     updatePolicy: config.updatePolicy ?? "manual-download",
     privacyPolicy: config.privacyPolicy ?? "local-only",
     shipVsDownloadDecision: config.shipVsDownloadDecision ?? "download-at-setup",
+    sourceEvidenceReady,
+    modelEvidenceReady,
+    tokenizerEvidenceReady,
+    nanoEvidenceReady,
+    nanoEvidenceFailures,
+    nanoPackageEvidenceCheck,
     packageSafeguards,
     packageSafeguardsCheck: makeCheck(
       "packageSafeguards",
@@ -410,10 +440,18 @@ export async function buildMossPreflightReport({ configPath, fsModule = fs, now 
   }
 
   const packageMetadata = await buildNano6PackageMetadata(config, configPath, fsModule);
-  const packageReady = packageMetadata.packageSafeguardsCheck.status === "pass";
+  const evidenceReady = packageMetadata.nanoPackageEvidenceCheck.status === "pass";
+  const safeguardsReady = packageMetadata.packageSafeguardsCheck.status === "pass";
+  const packageReady = evidenceReady && safeguardsReady;
+  const packageReason = !ready
+    ? validation.status
+    : (!evidenceReady ? "nano-package-evidence-incomplete" : (!safeguardsReady ? "package-safeguards-failed" : null));
+  const packageBlocker = !evidenceReady
+    ? packageMetadata.nanoPackageEvidenceCheck.detail
+    : (!safeguardsReady ? packageMetadata.packageSafeguardsCheck.detail : null);
   return {
     status: ready && packageReady ? READY : "unsupported",
-    reason: ready ? (packageReady ? null : "package-safeguards-failed") : validation.status,
+    reason: packageReason,
     detail: ready && packageReady ? "MOSS Nano runtime/package preflight passed." : "MOSS Nano runtime/package preflight failed.",
     configPath,
     pythonExe: config.pythonExe,
@@ -445,10 +483,18 @@ export async function buildMossPreflightReport({ configPath, fsModule = fs, now 
     packageSafeguards: packageMetadata.packageSafeguards,
     nanoPackageEvidence: {
       status: ready && packageReady ? "ready" : "not-ready",
-      reason: ready ? (packageReady ? null : "package-safeguards-failed") : validation.status,
-      blocker: packageReady ? null : packageMetadata.packageSafeguardsCheck.detail,
+      reason: packageReason,
+      blocker: packageBlocker,
+      packageEvidenceReady: packageMetadata.nanoEvidenceReady,
+      sourceEvidenceReady: packageMetadata.sourceEvidenceReady,
+      modelEvidenceReady: packageMetadata.modelEvidenceReady,
+      tokenizerEvidenceReady: packageMetadata.tokenizerEvidenceReady,
+      evidenceFailures: packageMetadata.nanoEvidenceFailures,
+      sourceDir: packageMetadata.sourceDir,
+      modelBytes: packageMetadata.assetSizes.modelBytes,
+      tokenizerBytes: packageMetadata.assetSizes.tokenizerBytes,
     },
-    checks: ready ? [...validation.checks, packageMetadata.packageSafeguardsCheck] : validation.checks,
+    checks: ready ? [...validation.checks, packageMetadata.nanoPackageEvidenceCheck, packageMetadata.packageSafeguardsCheck] : validation.checks,
   };
 }
 

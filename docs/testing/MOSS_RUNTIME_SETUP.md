@@ -159,14 +159,18 @@ MOSS-NANO-2 optimization findings:
 - Prewarm/cache did not help/apply: no-prewarm `16.8044s` / RTF `4.5664`; ORT prewarm `18.6696s` / RTF `5.0733`; synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` remained `false`.
 - Focused Nano probe tests passed `23/23` after known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
 
-MOSS-NANO-6 runtime/package readiness evidence:
+MOSS-NANO-6B runtime/package readiness evidence:
 
-- `artifacts/moss/moss-nano-6-package-preflight-20260430-1138/summary.json`: the active non-Nano runtime config preflight is `ready`, but `nanoPackageEvidence.status` is `not-ready` because Nano package evidence requires `backend=moss-nano-onnx` and Nano source/model/tokenizer paths. Do not infer Nano package readiness from flagship config.
-- `artifacts/moss/moss-nano-6-lifecycle-20260430-1138/summary.json`: lifecycle evidence is partial; measured duration `5.0929s` vs requested `1800s`; memory slope `579.9839MB/min`; shutdown classes are `not-observed`/`not-implemented`.
-- `artifacts/moss/moss-nano-6-adjacent-100-20260430-1138/summary.json`: requested `100` adjacent segments, completed/fresh `60/60`; p95 first decoded `326ms`; p95 RTF `1.3172`.
-- `artifacts/moss/moss-nano-6-soak-300s-20260430-1138/summary.json`: requested `300s`, measured `4.1124s`; memory slope `642.8363MB/min`.
+- Canonical long artifact: `artifacts/moss/moss-nano-6b-soak-1800-adjacent-100-escalated/summary.json`.
+- Package readiness remains runtime-only evidence. Nano-specific package readiness must come from explicit Nano source/model/tokenizer/backend evidence and must not be inherited from the development or flagship `.runtime` config.
+- The long resident soak requested `1800s` and measured `1800.0012s` with wall-clock timing. Memory slope is based on wall-clock RSS samples and was `12.8416MB/min`, which fails the `1.5MB/min` gate.
+- Book-like adjacent coverage completed `100/100` deterministic adjacent fresh segments with stale output reuse `0`, session restarts `0`, and crash count `0`.
+- Adjacent p95 internal first decoded audio was `1088ms`, passing the `1500ms` gate.
+- Adjacent p95 final RTF was `2.3007`, failing the `1.5` final RTF gate and the `1.45` punctuation RTF gate.
+- Shutdown classes `clean`, `forced`, `zombie`, `restart`, and `inflight` remain `not-observed`/`not-implemented`; synthetic lifecycle evidence remains fail-closed and cannot promote.
+- Nano-6 readiness is machine-readable as `not-promoting`, with failed gates/reasons preserved for runtime follow-up. Preflight evidence now distinguishes source evidence from package evidence fields.
 
-Current Nano decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6 did not promote Nano to app prototype. Keep Kokoro as the app default and only integrated engine. Future Nano work must remain runtime-only resident iteration/hardening until package evidence, full-duration soak truth, lifecycle shutdown implementation, memory slope, and 100-segment adjacent completion are proven. Do not add app integration, renderer/IPC/selectable-engine work, or Kokoro behavior changes from this evidence.
+Current Nano decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6B did not promote Nano to app prototype and is explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Keep Kokoro as the app default and only integrated engine. Future Nano work must remain runtime-only resident iteration/hardening until Nano package evidence, lifecycle shutdown implementation, memory slope, and adjacent RTF gates are proven. Do not add app integration, renderer/IPC/selectable-engine work, or Kokoro behavior changes from this evidence.
 
 ### Runtime Command Truth
 

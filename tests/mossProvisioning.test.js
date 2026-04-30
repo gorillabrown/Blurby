@@ -366,6 +366,11 @@ describe("MOSS provisioning preflight", () => {
       }),
       nanoPackageEvidence: expect.objectContaining({
         status: "ready",
+        packageEvidenceReady: true,
+        sourceEvidenceReady: true,
+        modelEvidenceReady: true,
+        tokenizerEvidenceReady: true,
+        evidenceFailures: [],
       }),
     });
     expect(report.packageSafeguards.packageResourceAllowlist).not.toContain(".runtime/**");
@@ -397,6 +402,47 @@ describe("MOSS provisioning preflight", () => {
     expect(report.checks).toContainEqual(expect.objectContaining({
       key: "nanoPackageEvidence",
       status: "blocker",
+    }));
+  });
+
+  it("does not infer Nano package readiness from local dev runtime paths without source evidence", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    await writePackageJson(projectRoot, {
+      build: {
+        files: ["dist/**", "package.json"],
+        extraResources: [
+          { from: "assets", to: "assets", filter: ["**/*"] },
+        ],
+      },
+    });
+    const { source, ...config } = await makeNanoConfig(projectRoot, {
+      pythonVersion: "3.11.9",
+      sourceDir: path.join(projectRoot, ".runtime", "moss", "MOSS-TTS-Nano"),
+      modelDir: path.join(projectRoot, ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX"),
+      tokenizerDir: path.join(projectRoot, ".runtime", "moss", "weights", "MOSS-Audio-Tokenizer-Nano-ONNX"),
+    });
+    await writeConfig(projectRoot, config);
+
+    const report = await runPreflight(projectRoot);
+
+    expect(report).toMatchObject({
+      status: "unsupported",
+      reason: "nano-package-evidence-incomplete",
+      nanoPackageEvidence: expect.objectContaining({
+        status: "not-ready",
+        reason: "nano-package-evidence-incomplete",
+        packageEvidenceReady: false,
+        sourceEvidenceReady: false,
+        modelEvidenceReady: true,
+        tokenizerEvidenceReady: true,
+        evidenceFailures: ["source evidence"],
+      }),
+    });
+    expect(report.nanoPackageEvidence.blocker).toMatch(/source.*model.*tokenizer|Nano package evidence/i);
+    expect(report.checks).toContainEqual(expect.objectContaining({
+      key: "nanoPackageEvidence",
+      status: "fail",
     }));
   });
 

@@ -595,7 +595,13 @@ def adjacent_segment_texts(options: dict[str, Any]) -> list[str]:
     source = str(options.get("adjacentSegmentSource") or "raw")
     text = str(options.get("passageText") or "")
     if source == "book-like":
-        text = nano.BUILT_IN_PASSAGES.get("long-form-3min", text)
+        return [
+            (
+                f"Adjacent book-like segment {index + 1} continues a steady chapter with "
+                f"plain punctuation, fresh wording, and enough context for a real synthesis run."
+            )
+            for index in range(count)
+        ]
     words = [word for word in text.strip().split() if word]
     if not words:
         return []
@@ -670,30 +676,45 @@ def percentile(values: list[Any], percentile_value: float) -> float | None:
     return round(numeric[index], 4)
 
 
-def add_nano6_lifecycle_evidence(summary: dict[str, Any], options: dict[str, Any], run_records: list[dict[str, Any]]) -> None:
+def add_nano6_lifecycle_evidence(
+    summary: dict[str, Any],
+    options: dict[str, Any],
+    run_records: list[dict[str, Any]],
+    lifecycle_context: dict[str, Any] | None = None,
+) -> None:
     nano6_requested = bool(options.get("nano6Soak"))
     shutdown_requested = bool(options.get("shutdownRestartEvidence"))
     if not nano6_requested and not shutdown_requested:
         return
 
+    lifecycle_context = lifecycle_context or {}
     requested_duration_sec = int(options.get("soakDurationSec") or 1800)
     sample_interval_sec = int(options.get("soakSampleIntervalSec") or 30)
-    measured_duration_sec = round(
-        sum(
-            float(record.get("totalSec") or 0)
-            for record in run_records
-            if bool(record.get("measured")) and record.get("phase") != "warmup"
-        ),
-        4,
-    )
+    measured_duration_sec = round(float(lifecycle_context.get("measuredDurationSec") or 0), 4)
+    if measured_duration_sec <= 0:
+        measured_duration_sec = round(
+            sum(
+                float(record.get("totalSec") or 0)
+                for record in run_records
+                if bool(record.get("measured")) and record.get("phase") != "warmup"
+            ),
+            4,
+        )
+    rss_sample_records = list(lifecycle_context.get("rssSamples") or [])
     rss_samples = [
-        value
-        for record in run_records
-        for value in (record.get("memoryAfterMb"), record.get("peakMemoryMb"))
-        if isinstance(value, (int, float)) and math.isfinite(float(value))
+        float(sample.get("rssMb"))
+        for sample in rss_sample_records
+        if isinstance(sample, dict) and isinstance(sample.get("rssMb"), (int, float)) and math.isfinite(float(sample.get("rssMb")))
     ]
     if not rss_samples:
-        rss_samples = [nano.get_peak_memory_mb()]
+        rss_samples = [
+            value
+            for record in run_records
+            for value in (record.get("memoryAfterMb"), record.get("peakMemoryMb"))
+            if isinstance(value, (int, float)) and math.isfinite(float(value))
+        ]
+    if not rss_samples:
+        rss_samples = [float(nano.get_peak_memory_mb())]
     first_rss = float(rss_samples[0])
     last_rss = float(rss_samples[-1])
     duration_min = max(measured_duration_sec / 60, 1 / 60)
@@ -717,11 +738,13 @@ def add_nano6_lifecycle_evidence(summary: dict[str, Any], options: dict[str, Any
         "measuredDurationSec": measured_duration_sec,
         "requestedDurationSec": requested_duration_sec,
         "warmupExcluded": True,
-        "warmupEndAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "warmupEndAt": lifecycle_context.get("warmupEndAt") or time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "sampleIntervalSec": sample_interval_sec,
         "rssSamples": rss_samples,
+        "rssSampleDetails": rss_sample_records,
         "currentRssMb": rss_samples[-1],
         "memoryGrowthSlopeMbPerMin": slope,
+        "memoryGrowthMethod": "wall-clock-current-rss-samples",
         "crashCount": 0,
         "staleOutputReuseCount": stale_count,
         "sessionRestartCount": restart_count,
@@ -1419,6 +1442,41 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
     elif resident_decode.get("appliedMode") == "full":
         effective_streaming = False
     run_records_for_reuse: list[dict[str, Any]] = []
+    soak_start_perf: float | None = None
+    soak_warmup_end_at: str | None = None
+    soak_memory_samples: list[dict[str, Any]] = []
+
+    def record_soak_memory_sample(label: str) -> None:
+        if soak_start_perf is None:
+            return
+        sample = memory_sampler.sample()
+        rss_mb = sample.get("rssMb")
+        if not isinstance(rss_mb, (int, float)) or not math.isfinite(float(rss_mb)):
+            rss_mb = sample.get("peakMemoryMb")
+        if isinstance(rss_mb, (int, float)) and math.isfinite(float(rss_mb)):
+            soak_memory_samples.append(
+                {
+                    "label": label,
+                    "elapsedSec": round(time.perf_counter() - soak_start_perf, 4),
+                    "rssMb": round(float(rss_mb), 2),
+                    "sample": sample,
+                }
+            )
+
+    def complete_requested_soak() -> None:
+        if not bool(options.get("nano6Soak")) or soak_start_perf is None:
+            return
+        requested_duration_sec = int(options.get("soakDurationSec") or 1800)
+        sample_interval_sec = int(options.get("soakSampleIntervalSec") or 30)
+        record_soak_memory_sample("pre-soak-hold")
+        while True:
+            elapsed_sec = time.perf_counter() - soak_start_perf
+            remaining_sec = requested_duration_sec - elapsed_sec
+            if remaining_sec <= 0:
+                break
+            time.sleep(min(sample_interval_sec, remaining_sec))
+            record_soak_memory_sample("soak-hold")
+        record_soak_memory_sample("soak-complete")
 
     def run_one(run_index: int, measured: bool, wav_path: Path, phase: str, text: str | None = None) -> dict[str, Any]:
         existed_before = wav_path.exists()
@@ -1518,10 +1576,22 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
     try:
         for warmup_index in range(warmup_runs):
             summary["warmups"].append(run_one(-(warmup_index + 1), False, out_dir / f"warmup_{warmup_index + 1:03d}.wav", "warmup"))
+        soak_start_perf = time.perf_counter()
+        soak_warmup_end_at = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        record_soak_memory_sample("warmup-end")
         for iteration_index in range(iterations):
             wav_name = "output.wav" if iterations == 1 else f"output_{iteration_index + 1:03d}.wav"
             summary["iterations"].append(run_one(iteration_index, True, out_dir / wav_name, "iteration"))
+            record_soak_memory_sample(f"iteration-{iteration_index + 1}")
         adjacent_texts = adjacent_segment_texts(options)
+        requested_adjacent_count = int(options.get("adjacentSegmentCount") or 0)
+        if requested_adjacent_count > 0 and len(adjacent_texts) < requested_adjacent_count:
+            return mark_blocked(
+                summary,
+                out_dir,
+                f"Adjacent segment source generated {len(adjacent_texts)} non-empty segments, fewer than the requested {requested_adjacent_count}.",
+                key="bookLikeAdjacentRun",
+            )
         if adjacent_texts:
             first_adjacent_identity: dict[str, Any] | None = None
             requested_adjacent_count = int(options.get("adjacentSegmentCount") or len(adjacent_texts))
@@ -1566,6 +1636,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                     "stageProfile": record.get("stageProfile"),
                 }
                 adjacent_segments.append(segment)
+                record_soak_memory_sample(f"adjacent-segment-{segment_index + 1}")
             summary["segments"] = adjacent_segments
             summary["adjacentSegmentStats"] = summarize_adjacent_segments(
                 adjacent_segments,
@@ -1573,6 +1644,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                 options.get("adjacentSegmentRtfTrendMax"),
             )
             summary["crossSegmentStateBlocker"] = "NO_CROSS_SEGMENT_MODEL_STATE_HOOK"
+        complete_requested_soak()
     except Exception as exc:
         summary["status"] = "failed"
         summary["failureClass"] = classify_exception(exc, "runtime")
@@ -1683,7 +1755,12 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         "peakMemoryMb": memory_aggregate["peakMemoryMb"],
     }
     finalize_optimization_fields(summary, options, runtime, run_records_for_reuse, reuse_ok)
-    add_nano6_lifecycle_evidence(summary, options, run_records_for_reuse)
+    lifecycle_context = {
+        "measuredDurationSec": round(time.perf_counter() - soak_start_perf, 4) if soak_start_perf is not None else None,
+        "warmupEndAt": soak_warmup_end_at,
+        "rssSamples": soak_memory_samples,
+    }
+    add_nano6_lifecycle_evidence(summary, options, run_records_for_reuse, lifecycle_context)
     summary["events"] = recorder.events
     summary["ok"] = True
     summary["status"] = "ok"

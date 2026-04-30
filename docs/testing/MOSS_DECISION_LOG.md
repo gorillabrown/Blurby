@@ -655,33 +655,41 @@ Non-decisions:
 - Do not claim precompute success.
 - Do not use decode-full as product latency proof for 5C.
 
-## MOSS-NANO-6 Decision
+## MOSS-NANO-6B Decision
 
 Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
 
-Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Nano was not promoted to app prototype.
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Nano was not promoted to app prototype, no app integration was unlocked, and Kokoro remains the default and only integrated engine.
 
-Scope: MOSS-NANO-6 was runtime/package readiness evidence only. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+Scope: MOSS-NANO-6B was resident soak memory/lifecycle closure only. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
 
-Canonical hardened artifacts:
+Canonical long artifact:
 
 | Evidence item | Result |
 |---|---|
-| Package preflight | `artifacts/moss/moss-nano-6-package-preflight-20260430-1138/summary.json`: active runtime preflight status `ready`, but Nano package evidence status `not-ready` because the active config is not Nano package evidence. Nano package readiness cannot be inferred from the flagship config. |
-| Lifecycle | `artifacts/moss/moss-nano-6-lifecycle-20260430-1138/summary.json`: lifecycle evidence `partial`; measured resident soak `5.0929s` vs requested `1800s`; memory slope `579.9839MB/min`; shutdown classes are `not-observed` with evidence source `not-implemented`. Synthetic lifecycle evidence cannot promote. |
-| Adjacent 100 | `artifacts/moss/moss-nano-6-adjacent-100-20260430-1138/summary.json`: requested `100` adjacent segments, completed/fresh `60/60`; p95 first decoded `326ms`; p95 RTF `1.3172`; the required 100-segment gate was not completed. |
-| 300s soak | `artifacts/moss/moss-nano-6-soak-300s-20260430-1138/summary.json`: requested `300s`, measured `4.1124s`; memory slope `642.8363MB/min`; decision `ITERATE_NANO_RESIDENT_RUNTIME`. |
+| Long resident soak + adjacent 100 | `artifacts/moss/moss-nano-6b-soak-1800-adjacent-100-escalated/summary.json`: requested `1800s`; measured `1800.0012s`; `100/100` adjacent fresh; stale output reuse `0`; session restarts `0`; crash count `0`; readiness `not-promoting`. |
+| Memory slope | Wall-clock RSS sample slope was `12.8416MB/min`, failing the `1.5MB/min` promotion gate. |
+| Adjacent first decoded | Adjacent p95 internal first decoded audio was `1088ms`, passing the `1500ms` gate. |
+| Adjacent RTF | Adjacent p95 final RTF was `2.3007`, failing both final RTF `1.5` and punctuation RTF `1.45` gates. |
+| Lifecycle shutdown | Clean, forced, zombie, restart, and in-flight shutdown classes remain `not-observed`/`not-implemented`; synthetic lifecycle evidence remains fail-closed and cannot promote. |
 
 Hardening:
 
-- Promotion thresholds are immutable in the gate.
-- Soak artifacts record measured duration separately from requested duration.
-- Synthetic lifecycle evidence cannot promote.
-- Nano package evidence is not inferred from the active flagship config.
-- Producer-path Nano-6 flag coverage is recorded.
-- The invalid fallback decision was removed; the MOSS-NANO-6 decision set is `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `KEEP_KOKORO_ONLY`.
+- Soak duration now uses real wall-clock evidence rather than requested-only metadata.
+- Memory slope is based on wall-clock RSS samples.
+- Adjacent coverage uses deterministic 100+ book-like adjacent segments.
+- Synthetic lifecycle evidence fails closed.
+- Nano-specific package readiness is not inherited from the development or flagship `.runtime` config.
+- Nano-6 readiness records machine-readable failed gates/reasons.
+- Preflight source evidence and package evidence fields are separated.
 
-Reason: MOSS-NANO-6 did not meet the app-prototype promotion bar. Package readiness is not proven for Nano, lifecycle/shutdown evidence is partial, the long soaks measured only seconds rather than the requested durations, memory slopes are far above the `1.5MB/min` threshold, and adjacent generation stopped at `60/60` fresh completed segments rather than the required `100`. Continue resident Nano runtime iteration only.
+Verification:
+
+- Focused tests: `133/133` passed.
+- Final full `npm test`: `2354/2354` passed.
+- `npm run build` passed with the existing circular chunk warning.
+
+Reason: MOSS-NANO-6B fixed the earlier duration and adjacent-completion evidence gaps, but it still did not meet the app-prototype promotion bar. The long resident process stayed up for the requested wall-clock soak and completed `100/100` fresh adjacent segments, but memory slope failed badly, adjacent final RTF failed, Nano package/app readiness is not unlocked, and lifecycle shutdown classes remain unimplemented. Continue resident Nano runtime iteration only.
 
 Next actions:
 
@@ -691,11 +699,11 @@ Next actions:
 
 ## Nano Onboarding Roadmap Gate
 
-Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-6` closed without app-prototype promotion, so the app onboarding path remains gated.
+Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-6B` closed without app-prototype promotion, so the app onboarding path remains gated.
 
 Allowed next work:
 
-- Runtime-only resident Nano iteration/hardening after MOSS-NANO-6. A new runtime spec may target package evidence, lifecycle shutdown implementation, full-duration soak truth, and 100-segment adjacent completion.
+- Runtime-only resident Nano iteration/hardening after MOSS-NANO-6B. A new runtime spec may target package evidence, lifecycle shutdown implementation, memory slope, and adjacent RTF gates.
 - `MOSS-NANO-7` through `MOSS-NANO-11`: conditional app onboarding path. These must not dispatch until `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` is recorded.
 
 Forbidden until promotion:
@@ -711,7 +719,7 @@ Forbidden until promotion:
 ## Decision Notes
 
 - Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
-- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-6 dispatch; MOSS-NANO-6 closed as `ITERATE_NANO_RESIDENT_RUNTIME`. It must not enter app integration or replace Kokoro without a later explicit app-prototype promotion decision.
+- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-6B closeout; MOSS-NANO-6B closed as `ITERATE_NANO_RESIDENT_RUNTIME`. It must not enter app integration or replace Kokoro without a later explicit app-prototype promotion decision.
 - The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
 - Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
 - Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding now uses MOSS-NANO-7 through MOSS-NANO-11 after promotion.
