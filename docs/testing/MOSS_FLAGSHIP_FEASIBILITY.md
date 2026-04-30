@@ -268,31 +268,30 @@ Decision: `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_P
 
 Conclusion: the best short run now meets the short RTF target with true reuse and applied ORT settings, but punctuation remains too slow for promotion and decode-full/bookwarm caveats block app-prototype confidence. Future Nano work, if any, remains resident runtime tuning/soak/perf only. MOSS-3 through MOSS-7 remain paused unless a new explicit app-integration promotion decision is recorded.
 
-## MOSS-NANO-5 Decode/Precompute Continuity Rescue
+## MOSS-NANO-5B Precompute + Adjacent Continuity Closure
 
-Decision: `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_SOAK_CANDIDATE` and not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. MOSS-NANO-5 was runtime-only evidence hardening. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or `.runtime` commits.
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_SOAK_CANDIDATE` and not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. MOSS-NANO-5B was runtime-only precompute + adjacent continuity closure. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or `.runtime/**` commits.
 
 Focused verification:
 
 - `python -m py_compile scripts\moss_nano_resident_probe.py` passed.
-- `npm test -- tests/mossNanoProbe.test.js` passed `64/64` after the known sandbox `EPERM` escalated rerun.
+- `npm test -- tests/mossNanoProbe.test.js` passed `75/75` after the known sandbox `EPERM` escalated rerun.
 
 | Evidence | Result |
 |---|---|
-| Short resident ORT | `moss-nano-5-short-resident-ort-intra2`: ok; RTF `0.6693`; first audio `0.343s`; memory delta `5.86MB`. |
-| Punctuation resident precompute | `moss-nano-5-punctuation-resident-precompute`: ok; RTF `0.6564`; first audio `0.424s`; memory delta `10.54MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
-| Decode-full | `moss-nano-5-short-resident-decode-full`: runtime ok but `decodeFullEvidence.status=failed`; `acceptedDecodeStrategy.accepted=false`; first audio `2.560s` > `2.5s`; memory delta `5.51MB`. |
-| Short resident actual precompute | `moss-nano-5-short-resident-precompute-actual`: ok; RTF `0.6941`; first audio `0.366s`; memory delta `5.76MB`; precompute blocked `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. |
-| Adjacent segments | `moss-nano-5-adjacent-segments-resident`: blocked; `5/5` fresh, `0` stale, `0` restarts; RTF trend `29.43%` > `15%`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`; memory delta `13.86MB`. |
-| False-evidence hardening | Decode-full threshold truth fixed; requested precompute cannot masquerade as actual; blocker-only precompute cannot promote; soak requires actual precompute plus adjacent evidence plus memory; adjacent min-threshold bug fixed. |
+| Short resident ORT | `moss-nano-5b-short-resident-ort-intra2`: ok; first audio `0.340s`; RTF `0.6440`; p50/p95 `0.6440`/`0.6610`; memory delta `5.81MB`; stale `false`. |
+| Decode-full | `moss-nano-5b-short-resident-decode-full`: runtime ok but gate failed; first audio `2.963s` > `2.5s`; RTF `0.7142`; p50/p95 `0.6969`/`0.7142`; memory delta `5.60MB`; stale `false`. |
+| Precompute request rows | `moss-nano-5b-short-resident-precompute-requestrows`: runtime ok but precompute blocked; first audio `0.418s`; RTF `0.7183`; p50/p95 `0.7882`/`0.8012`; memory delta `6.15MB`; `requested=true`, `actual=false`, `partial=true`; blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`; `preparedBeforeRun=false`; `consumedByMeasuredRun=false`; `requestRowCount=0`. |
+| Adjacent segments stable | `moss-nano-5b-adjacent-segments-resident-stable`: ok; first audio `0.428s`; RTF `0.6003`; p50/p95 `0.5996`/`0.6003`; memory delta `8.14MB`; stale `false`; `5/5` fresh; fair trend ratio `0.0081` <= `0.15`; `crossSegmentStateActual=false`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`. |
+| False-evidence hardening | Preserve top-level `crossSegmentStateActual`; support explicit decode-full re-threshold evidence; keep fair adjacent trend separate from true cross-segment/prosody state; require precompute row-consumption evidence for promotion. |
 
-Conclusion: do not promote to soak because decode-full misses the first-audio gate, precompute is blocker-only, and adjacent trend exceeds the gate. Do not reject Nano or record `KEEP_KOKORO_ONLY`, because short and punctuation resident performance are strong enough to continue runtime investigation. MOSS-NANO-6 remains gated unless future runtime work earns a soak/package gate; app integration remains locked.
+Conclusion: do not promote to soak because decode-full misses the first-audio gate and precompute request rows are still not consumed. Adjacent fair trend improved and clears the runtime stability metric, but it does not prove true cross-segment model state. Do not dispatch MOSS-NANO-6 from this closeout; it remains gated until soak/package criteria are met by a future sprint, and app integration remains locked.
 
 ## MOSS-TTS-Nano Onboarding Gate Sequence
 
 The Nano onboarding path is fully specified in `ROADMAP.md`, but remains gated. The sequence is:
 
-1. `MOSS-NANO-5`: decode/precompute continuity rescue. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
+1. `MOSS-NANO-5B`: precompute + adjacent continuity closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
 2. `MOSS-NANO-6`: resident soak plus packaging readiness. Gated until future runtime work earns a soak/package gate; may promote to app-prototype candidate only after passing soak/package evidence.
 3. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
 4. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.

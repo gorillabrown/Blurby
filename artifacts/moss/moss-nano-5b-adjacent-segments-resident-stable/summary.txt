@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-5b-adjacent-segments-resident-stable
+Passage: long-form-3min
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-5b-adjacent-segments-resident-stable\output_003.wav
+Total seconds: 15.7518
+First WAV bytes seconds: 0.428
+Internal first decoded seconds: 0.428
+Audio duration seconds: 26.24
+RTF: 0.6003
+Peak memory: 1900.52 MB
+Process mode: warm
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 3

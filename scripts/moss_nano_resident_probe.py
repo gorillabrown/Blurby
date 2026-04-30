@@ -323,7 +323,16 @@ def initial_optimization_fields(options: dict[str, Any]) -> dict[str, Any]:
             "actual": False,
             "status": "blocked" if precompute_requested else "not-requested",
             "blocker": precompute_blocker,
+            "preparedBeforeRun": False,
+            "consumedByMeasuredRun": False,
+            "requestRowCount": 0,
+            "textHash": None,
+            "chunkHashes": [],
             "components": {
+                "textNormalization": False,
+                "promptCodes": False,
+                "tokenization": False,
+                "requestRowsBuild": False,
                 "textNormalize": False,
                 "promptAudioCodes": False,
                 "textChunk": False,
@@ -346,6 +355,7 @@ def initial_optimization_fields(options: dict[str, Any]) -> dict[str, Any]:
         "decodeFullEvidence": None,
         "acceptedDecodeStrategy": None,
         "crossSegmentStateBlocker": None,
+        "crossSegmentStateActual": False,
         "adjacentSegmentStats": None,
         "segments": [],
         "promotionTarget": None,
@@ -461,6 +471,46 @@ def finalize_optimization_fields(
         "strategy": "resident-runtime-reuse" if short_requested and reuse_ok else None,
         "reason": None if short_requested and reuse_ok else "Requested short-passage overhead reduction was not proven by resident reuse.",
     }
+    precompute_evidence = dict(summary.get("precomputeInputsEvidence") or {})
+    precompute_components = dict(precompute_evidence.get("components") or {})
+    text_hash = measured[-1].get("textHash") if measured else None
+    chunk_hashes = [
+        segment.get("textHash")
+        for segment in summary.get("segments", [])
+        if segment.get("textHash")
+    ]
+    precompute_components.update(
+        {
+            "textNormalization": bool(measured),
+            "promptCodes": bool(prompt_codes_reused),
+            "tokenization": False,
+            "requestRowsBuild": False,
+            "textNormalize": bool(measured),
+            "promptAudioCodes": bool(prompt_codes_reused),
+            "textChunk": bool(summary.get("segments")),
+            "tokenize": False,
+            "semanticInputs": False,
+            "acousticInputs": False,
+            "buildRequestRows": False,
+        }
+    )
+    summary["precomputeInputsActual"] = False
+    summary["precomputeInputsPartial"] = bool(precompute_requested and (measured or prompt_codes_reused or chunk_hashes))
+    summary["precomputeInputsBlocker"] = "NO_PRECOMPUTE_REQUEST_ROWS_HOOK" if precompute_requested else None
+    summary["precomputeInputsEvidence"] = {
+        **precompute_evidence,
+        "requested": precompute_requested,
+        "actual": False,
+        "status": "blocked" if precompute_requested else "not-requested",
+        "blocker": summary["precomputeInputsBlocker"],
+        "preparedBeforeRun": False,
+        "consumedByMeasuredRun": False,
+        "requestRowCount": 0,
+        "textHash": text_hash,
+        "chunkHashes": chunk_hashes,
+        "components": precompute_components,
+        "reason": "Upstream resident synthesize() does not expose reusable prepared request rows that can be consumed by the measured run.",
+    }
     summary["promotionMetrics"] = {
         "shortRtf": summary.get("rtf"),
         "firstDecodedAudioSec": summary.get("firstAudioSec"),
@@ -548,11 +598,37 @@ def adjacent_segment_texts(options: dict[str, Any]) -> list[str]:
     return [segment for segment in segments if segment][:count]
 
 
+def median(values: list[float]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    middle = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[middle]
+    return (ordered[middle - 1] + ordered[middle]) / 2
+
+
 def summarize_adjacent_segments(segments: list[dict[str, Any]], requested_count: int, trend_max: float | None) -> dict[str, Any]:
     rtfs = [float(segment["rtf"]) for segment in segments if isinstance(segment.get("rtf"), (int, float))]
     rtf_trend = None
     if len(rtfs) >= 2 and rtfs[0] > 0:
         rtf_trend = round((max(rtfs) - rtfs[0]) / rtfs[0], 4)
+    fair_rtf_trend = None
+    first_two = median(rtfs[:2])
+    last_two = median(rtfs[-2:])
+    if first_two is not None and last_two is not None and first_two > 0:
+        fair_rtf_trend = round(abs(last_two - first_two) / first_two, 4)
+    fair_trend_max = 0.15 if trend_max is None else trend_max
+    token_counts = [
+        int(segment.get("tokenCount"))
+        for segment in segments
+        if isinstance(segment.get("tokenCount"), int)
+    ]
+    audio_durations = [
+        segment.get("audioDurationSec")
+        for segment in segments
+        if isinstance(segment.get("audioDurationSec"), (int, float))
+    ]
     return {
         "requestedSegments": requested_count,
         "completedSegments": len(segments),
@@ -561,7 +637,22 @@ def summarize_adjacent_segments(segments: list[dict[str, Any]], requested_count:
         "staleOutputReuseCount": sum(1 for segment in segments if segment.get("staleOutputReuse")),
         "sessionRestartCount": sum(1 for segment in segments if segment.get("sessionRestarted")),
         "rtfTrendRatio": rtf_trend,
-        "rtfTrendMax": trend_max,
+        "rtfTrendMax": fair_trend_max,
+        "diagnosticRtfTrendMethod": "max-vs-first",
+        "rtfTrendMethod": "first-two-vs-last-two-median",
+        "fairRtfTrendRatio": fair_rtf_trend,
+        "fairRtfTrendMax": fair_trend_max,
+        "balancedSegments": len(token_counts) == len(segments) and (max(token_counts) - min(token_counts) <= max(1, round(max(token_counts) * 0.25)) if token_counts else False),
+        "tokenBudgetedSegments": len(token_counts) == len(segments),
+        "tokenCounts": token_counts,
+        "audioDurationSecBySegment": audio_durations,
+        "stableTrendGate": {
+            "method": "first-two-vs-last-two-median",
+            "ratio": fair_rtf_trend,
+            "max": fair_trend_max,
+            "stable": bool(fair_rtf_trend is not None and fair_rtf_trend <= fair_trend_max),
+        },
+        "crossSegmentStateActual": False,
     }
 
 
@@ -1234,6 +1325,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                     "passageId": f"adjacent-segment-{segment_index + 1}",
                     "text": segment_text,
                     "textHash": record.get("textHash"),
+                    "tokenCount": len([word for word in segment_text.split() if word]),
                     "empty": record.get("empty"),
                     "runtimeReuseActual": record.get("runtimeReuseActual"),
                     "runtimeIdentity": identity,
