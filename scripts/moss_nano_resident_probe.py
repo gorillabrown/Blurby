@@ -44,11 +44,17 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
         "--adjacent-segment-count": "adjacentSegmentCount",
         "--adjacent-segment-source": "adjacentSegmentSource",
         "--adjacent-segment-rtf-trend-max": "adjacentSegmentRtfTrendMax",
+        "--soak-duration-sec": "soakDurationSec",
+        "--soak-sample-interval-sec": "soakSampleIntervalSec",
     }
     boolean_flags = {
         "--reuse-tokenizer": "tokenizerReuseRequested",
         "--reuse-prompt": "promptReuseRequested",
         "--short-passage-overhead-reduction": "shortPassageOverheadReductionRequested",
+        "--nano6-soak": "nano6Soak",
+        "--shutdown-restart-evidence": "shutdownRestartEvidence",
+        "--shutdown-evidence": "shutdownRestartEvidence",
+        "--restart-evidence": "shutdownRestartEvidence",
     }
     index = 0
     while index < len(argv):
@@ -63,7 +69,7 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
             if index + 1 >= len(argv):
                 raise ValueError(f"{arg} requires a value")
             value: Any = argv[index + 1]
-            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget", "--adjacent-segment-count"}:
+            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget", "--adjacent-segment-count", "--soak-duration-sec", "--soak-sample-interval-sec"}:
                 value = int(value)
             elif arg == "--adjacent-segment-rtf-trend-max":
                 value = float(value)
@@ -654,6 +660,218 @@ def summarize_adjacent_segments(segments: list[dict[str, Any]], requested_count:
         },
         "crossSegmentStateActual": False,
     }
+
+
+def percentile(values: list[Any], percentile_value: float) -> float | None:
+    numeric = sorted(float(value) for value in values if isinstance(value, (int, float)) and math.isfinite(float(value)))
+    if not numeric:
+        return None
+    index = max(0, min(len(numeric) - 1, math.ceil((percentile_value / 100) * len(numeric)) - 1))
+    return round(numeric[index], 4)
+
+
+def add_nano6_lifecycle_evidence(summary: dict[str, Any], options: dict[str, Any], run_records: list[dict[str, Any]]) -> None:
+    nano6_requested = bool(options.get("nano6Soak"))
+    shutdown_requested = bool(options.get("shutdownRestartEvidence"))
+    if not nano6_requested and not shutdown_requested:
+        return
+
+    requested_duration_sec = int(options.get("soakDurationSec") or 1800)
+    sample_interval_sec = int(options.get("soakSampleIntervalSec") or 30)
+    measured_duration_sec = round(
+        sum(
+            float(record.get("totalSec") or 0)
+            for record in run_records
+            if bool(record.get("measured")) and record.get("phase") != "warmup"
+        ),
+        4,
+    )
+    rss_samples = [
+        value
+        for record in run_records
+        for value in (record.get("memoryAfterMb"), record.get("peakMemoryMb"))
+        if isinstance(value, (int, float)) and math.isfinite(float(value))
+    ]
+    if not rss_samples:
+        rss_samples = [nano.get_peak_memory_mb()]
+    first_rss = float(rss_samples[0])
+    last_rss = float(rss_samples[-1])
+    duration_min = max(measured_duration_sec / 60, 1 / 60)
+    slope = round(max(0.0, last_rss - first_rss) / duration_min, 4)
+    segments = list(summary.get("segments") or [])
+    stale_count = sum(1 for segment in segments if segment.get("staleOutputReuse"))
+    empty_count = sum(1 for segment in segments if segment.get("empty") or not str(segment.get("text") or "").strip())
+    restart_count = sum(1 for segment in segments if segment.get("sessionRestarted"))
+
+    summary["lifecycleEvidence"] = {
+        "status": "partial",
+        "requestedOnly": False,
+        "stale": False,
+        "runId": summary.get("runId"),
+        "generatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "mode": "resident-runtime-diagnostic",
+        "reason": "Resident probe measured runtime/soak process execution, but forced-kill, zombie, restart, and in-flight shutdown lifecycle exercises are not implemented.",
+    }
+    summary["residentSoak"] = {
+        "durationSec": measured_duration_sec,
+        "measuredDurationSec": measured_duration_sec,
+        "requestedDurationSec": requested_duration_sec,
+        "warmupExcluded": True,
+        "warmupEndAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "sampleIntervalSec": sample_interval_sec,
+        "rssSamples": rss_samples,
+        "currentRssMb": rss_samples[-1],
+        "memoryGrowthSlopeMbPerMin": slope,
+        "crashCount": 0,
+        "staleOutputReuseCount": stale_count,
+        "sessionRestartCount": restart_count,
+    }
+
+    if segments:
+        internal_first_ms = [
+            (segment.get("firstAudioObservation") or {}).get("internalFirstDecodedAudioMs")
+            for segment in segments
+        ]
+        rtfs = [segment.get("rtf") for segment in segments]
+        punctuation_rtfs = [segment.get("punctuationRtf", segment.get("rtf")) for segment in segments]
+        summary["bookLikeAdjacentRun"] = {
+            "requestedSegments": int(options.get("adjacentSegmentCount") or len(segments)),
+            "completedSegments": len(segments),
+            "freshSegments": sum(1 for segment in segments if not segment.get("staleOutputReuse") and not segment.get("empty")),
+            "emptySegments": empty_count,
+            "staleOutputReuseCount": stale_count,
+            "sessionRestartCount": restart_count,
+            "p95InternalFirstDecodedAudioMs": percentile(internal_first_ms, 95),
+            "p95FinalRtf": percentile(rtfs, 95),
+            "p95PunctuationRtf": percentile(punctuation_rtfs, 95),
+        }
+
+    if shutdown_requested or nano6_requested:
+        classifications = [
+            "clean-shutdown",
+            "forced-kill",
+            "zombie-process",
+            "restart-clean",
+            "restart-failed",
+            "inflight-rejected",
+        ]
+        summary["shutdownClassifications"] = classifications
+        summary["shutdownEvidence"] = {
+            "cleanShutdown": {
+                "classification": "clean-shutdown",
+                "observed": False,
+                "status": "not-observed",
+                "evidenceSource": "not-implemented",
+                "reason": "Resident probe did not exercise a separate measured clean shutdown check.",
+            },
+            "forcedKill": {
+                "classification": "forced-kill",
+                "observed": False,
+                "status": "not-observed",
+                "evidenceSource": "not-implemented",
+                "reason": "Resident probe did not force-kill the runtime process.",
+            },
+            "zombieProcess": {
+                "classification": "zombie-process",
+                "observed": False,
+                "status": "not-observed",
+                "evidenceSource": "not-implemented",
+                "reason": "Resident probe did not perform zombie-process detection after a forced kill.",
+            },
+            "restartClean": {
+                "classification": "restart-clean",
+                "observed": False,
+                "status": "not-observed",
+                "evidenceSource": "not-implemented",
+                "reason": "Resident probe did not restart a fresh runtime after shutdown.",
+            },
+            "restartFailed": {
+                "classification": "restart-failed",
+                "observed": False,
+                "status": "not-observed",
+                "evidenceSource": "not-implemented",
+                "reason": "Resident probe did not exercise a failed restart path.",
+            },
+            "inflightShutdown": {
+                "classification": "inflight-rejected",
+                "observed": False,
+                "status": "not-observed",
+                "evidenceSource": "not-implemented",
+                "rejected": False,
+                "succeeded": False,
+                "wavReused": False,
+                "reason": "Resident probe did not attempt shutdown while synthesis was in flight.",
+            },
+        }
+
+    if nano6_requested:
+        thresholds = {
+            "soakDurationSecMin": 1800,
+            "memoryGrowthSlopeMbPerMinMax": 1.5,
+            "adjacentRequiredSegments": 100,
+            "adjacentP95InternalFirstDecodedAudioMsMax": 1500,
+            "adjacentP95FinalRtfMax": 1.5,
+            "adjacentP95PunctuationRtfMax": 1.45,
+            "staleOutputReuseMax": 0,
+            "emptySegmentMax": 0,
+            "sessionRestartMax": 0,
+            "crashCountMax": 0,
+        }
+        adjacent = summary.get("bookLikeAdjacentRun") or {}
+        metrics = {
+            "soakDurationSec": measured_duration_sec,
+            "requestedSoakDurationSec": requested_duration_sec,
+            "memoryGrowthSlopeMbPerMin": slope,
+            "crashCount": 0,
+            "staleOutputReuseCount": stale_count,
+            "sessionRestartCount": restart_count,
+            "adjacentRequestedSegments": adjacent.get("requestedSegments"),
+            "adjacentCompletedSegments": adjacent.get("completedSegments"),
+            "adjacentFreshSegments": adjacent.get("freshSegments"),
+            "adjacentEmptySegments": adjacent.get("emptySegments"),
+            "adjacentStaleOutputReuseCount": adjacent.get("staleOutputReuseCount"),
+            "adjacentSessionRestartCount": adjacent.get("sessionRestartCount"),
+            "adjacentP95InternalFirstDecodedAudioMs": adjacent.get("p95InternalFirstDecodedAudioMs"),
+            "adjacentP95FinalRtf": adjacent.get("p95FinalRtf"),
+            "adjacentP95PunctuationRtf": adjacent.get("p95PunctuationRtf"),
+        }
+        shutdown_ready = all(
+            bool((summary.get("shutdownEvidence") or {}).get(key, {}).get("observed"))
+            and (summary.get("shutdownEvidence") or {}).get(key, {}).get("evidenceSource") == "measured-lifecycle-check"
+            for key in (
+                "cleanShutdown",
+                "forcedKill",
+                "zombieProcess",
+                "restartClean",
+                "restartFailed",
+                "inflightShutdown",
+            )
+        )
+        ready = (
+            measured_duration_sec >= 1800
+            and slope <= 1.5
+            and stale_count == 0
+            and empty_count == 0
+            and restart_count == 0
+            and shutdown_ready
+            and adjacent.get("requestedSegments") == 100
+            and adjacent.get("completedSegments") == 100
+            and adjacent.get("freshSegments") == 100
+            and isinstance(adjacent.get("p95InternalFirstDecodedAudioMs"), (int, float))
+            and adjacent.get("p95InternalFirstDecodedAudioMs") <= 1500
+            and isinstance(adjacent.get("p95FinalRtf"), (int, float))
+            and adjacent.get("p95FinalRtf") <= 1.5
+            and isinstance(adjacent.get("p95PunctuationRtf"), (int, float))
+            and adjacent.get("p95PunctuationRtf") <= 1.45
+        )
+        summary["promotionTarget"] = "app-prototype" if ready else None
+        summary["promotionThresholds"] = thresholds
+        summary["promotionMetrics"] = metrics
+        summary["promotionDecision"] = {
+            "promote": bool(ready),
+            "target": "app-prototype" if ready else None,
+            "decision": "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE" if ready else "ITERATE_NANO_RESIDENT_RUNTIME",
+        }
 
 
 def graph_optimization_value(ort: Any, requested: str | None) -> tuple[Any, str]:
@@ -1465,6 +1683,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         "peakMemoryMb": memory_aggregate["peakMemoryMb"],
     }
     finalize_optimization_fields(summary, options, runtime, run_records_for_reuse, reuse_ok)
+    add_nano6_lifecycle_evidence(summary, options, run_records_for_reuse)
     summary["events"] = recorder.events
     summary["ok"] = True
     summary["status"] = "ok"

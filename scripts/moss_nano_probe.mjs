@@ -30,6 +30,35 @@ const DECODE_FULL_FIRST_AUDIO_SEC_MAX = 2.5;
 const DECODE_FULL_MEMORY_GROWTH_MB_MAX = 80;
 const NANO5C_SEGMENT_FIRST_SOAK_TARGET = "nano5c-segment-first-soak";
 const NANO5C_SEGMENT_FIRST_SOAK_DECISION = "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE";
+const NANO6_APP_PROTOTYPE_TARGET = "app-prototype";
+const NANO6_APP_PROTOTYPE_DECISION = "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE";
+const NANO6_ITERATE_DECISION = "ITERATE_NANO_RESIDENT_RUNTIME";
+const NANO6_KEEP_KOKORO_DECISION = "KEEP_KOKORO_ONLY";
+const NANO6_DECISIONS = new Set([
+  NANO6_APP_PROTOTYPE_DECISION,
+  NANO6_ITERATE_DECISION,
+  NANO6_KEEP_KOKORO_DECISION,
+]);
+const NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS = Object.freeze([
+  "clean-shutdown",
+  "forced-kill",
+  "zombie-process",
+  "restart-clean",
+  "restart-failed",
+  "inflight-rejected",
+]);
+const NANO6_DEFAULT_THRESHOLDS = Object.freeze({
+  soakDurationSecMin: 1800,
+  memoryGrowthSlopeMbPerMinMax: 1.5,
+  adjacentRequiredSegments: 100,
+  adjacentP95InternalFirstDecodedAudioMsMax: 1500,
+  adjacentP95FinalRtfMax: 1.5,
+  adjacentP95PunctuationRtfMax: 1.45,
+  staleOutputReuseMax: 0,
+  emptySegmentMax: 0,
+  sessionRestartMax: 0,
+  crashCountMax: 0,
+});
 const NANO5C_SEGMENT_FIRST_DEFAULT_THRESHOLDS = Object.freeze({
   segmentFirstInternalFirstDecodedAudioSecMax: 0.5,
   segmentFirstShortRtfMax: 1.5,
@@ -80,8 +109,9 @@ function nonNegativeInteger(value, flag) {
 }
 
 function promotionTarget(value, flag) {
-  if (value !== NANO5C_SEGMENT_FIRST_SOAK_TARGET) {
-    throw new Error(`${flag} only supports ${NANO5C_SEGMENT_FIRST_SOAK_TARGET}`);
+  const supportedTargets = new Set([NANO5C_SEGMENT_FIRST_SOAK_TARGET, NANO6_APP_PROTOTYPE_TARGET]);
+  if (!supportedTargets.has(value)) {
+    throw new Error(`${flag} only supports ${Array.from(supportedTargets).join(", ")}`);
   }
   return value;
 }
@@ -243,6 +273,17 @@ export function parseArgs(argv = process.argv.slice(2)) {
       }
       args.adjacentSegmentRtfTrendMax = value;
       index += 1;
+    } else if (arg === "--nano6-soak") {
+      args.nano6Soak = true;
+      args.promotionTarget = NANO6_APP_PROTOTYPE_TARGET;
+    } else if (arg === "--soak-duration-sec") {
+      args.soakDurationSec = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--soak-sample-interval-sec") {
+      args.soakSampleIntervalSec = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--shutdown-restart-evidence" || arg === "--shutdown-evidence" || arg === "--restart-evidence") {
+      args.shutdownRestartEvidence = true;
     } else if (arg === "--promotion-target") {
       args.promotionTarget = promotionTarget(requireValue(argv, index, arg), arg);
       index += 1;
@@ -363,6 +404,14 @@ function isFiniteNumber(value) {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function hasNano6PromotionDecisionShape(summary) {
+  const decision = String(summary.promotionDecision?.decision ?? "");
+  const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
+  return target === NANO6_APP_PROTOTYPE_TARGET
+    || summary.nano6Readiness?.gate === NANO6_APP_PROTOTYPE_TARGET
+    || NANO6_DECISIONS.has(decision);
+}
+
 function blockResidentSummary(summary, message, key, failureClass = "runtime-contract") {
   summary.ok = false;
   summary.status = "blocked";
@@ -374,7 +423,7 @@ function blockResidentSummary(summary, message, key, failureClass = "runtime-con
     summary.promotionDecision.promote = false;
     summary.promotionDecision.blockedReason = message;
     if (String(summary.promotionDecision.decision ?? "").startsWith("PROMOTE_NANO_TO_")) {
-      summary.promotionDecision.decision = failureClass === "performance"
+      summary.promotionDecision.decision = hasNano6PromotionDecisionShape(summary) || failureClass === "performance"
         ? "ITERATE_NANO_RESIDENT_RUNTIME"
         : "BLOCKED_NANO_RESIDENT_RUNTIME";
     }
@@ -1237,6 +1286,290 @@ function validateAdjacentSegments(summary, { required = false } = {}) {
   return null;
 }
 
+function percentile(values, percentileValue) {
+  const numeric = values.filter(isFiniteNumber).sort((a, b) => a - b);
+  if (numeric.length === 0) return null;
+  const index = Math.ceil((percentileValue / 100) * numeric.length) - 1;
+  return numeric[Math.min(numeric.length - 1, Math.max(0, index))];
+}
+
+function hasNano6ReadinessShape(summary, requested = {}) {
+  if (requested.nano6Soak === true) return true;
+  return Boolean(
+    summary?.residentSoak
+      || summary?.bookLikeAdjacentRun
+      || summary?.shutdownEvidence
+      || summary?.lifecycleEvidence,
+  );
+}
+
+function normalizeNano6ReadinessEvidence(summary, requested = {}) {
+  const artifactThresholds = objectOrEmpty(summary.promotionThresholds);
+  if (Object.keys(artifactThresholds).length > 0) {
+    summary.artifactPromotionThresholds = artifactThresholds;
+  }
+  const thresholds = { ...NANO6_DEFAULT_THRESHOLDS };
+  summary.promotionThresholds = thresholds;
+  summary.promotionMetrics = objectOrEmpty(summary.promotionMetrics);
+  summary.nano6Readiness = {
+    status: "evaluating",
+    gate: NANO6_APP_PROTOTYPE_TARGET,
+    hardThresholds: thresholds,
+    artifactThresholds: Object.keys(artifactThresholds).length > 0 ? artifactThresholds : null,
+  };
+
+  if (summary.promotionTarget == null && requested.promotionTarget === NANO6_APP_PROTOTYPE_TARGET) {
+    summary.promotionTarget = NANO6_APP_PROTOTYPE_TARGET;
+  }
+
+  if (summary.bookLikeAdjacentRun == null && Array.isArray(summary.segments) && summary.segments.length > 0) {
+    const segments = summary.segments;
+    const internalFirstDecoded = segments.map((segment) => segment?.firstAudioObservation?.internalFirstDecodedAudioMs ?? segment?.internalFirstDecodedAudioMs);
+    const rtfs = segments.map((segment) => segment?.rtf);
+    const punctuationRtfs = segments.map((segment) => segment?.punctuationRtf ?? segment?.rtf);
+    summary.bookLikeAdjacentRun = {
+      requestedSegments: requested.adjacentSegmentCount ?? segments.length,
+      completedSegments: segments.length,
+      freshSegments: segments.filter((segment) => segment?.fresh !== false && !segment?.empty && !segment?.staleOutputReuse).length,
+      emptySegments: segments.filter((segment) => segment?.empty || !String(segment?.text ?? "").trim()).length,
+      staleOutputReuseCount: segments.filter((segment) => (
+        segment?.staleOutputReuse
+          || segment?.firstAudioObservation?.outputFileExistedBeforeRun
+          || segment?.firstAudioObservation?.reusedExistingOutputFile
+      )).length,
+      sessionRestartCount: segments.filter((segment) => segment?.sessionRestarted).length,
+      p95InternalFirstDecodedAudioMs: percentile(internalFirstDecoded, 95),
+      p95FinalRtf: percentile(rtfs, 95),
+      p95PunctuationRtf: percentile(punctuationRtfs, 95),
+    };
+  }
+
+  const soak = objectOrEmpty(summary.residentSoak);
+  const adjacent = objectOrEmpty(summary.bookLikeAdjacentRun);
+  if (summary.residentSoak && typeof summary.residentSoak === "object" && !Array.isArray(summary.residentSoak)) {
+    if (requested.soakDurationSec != null && soak.requestedDurationSec == null) {
+      summary.residentSoak.requestedDurationSec = requested.soakDurationSec;
+    }
+    const measuredDurationSec = firstFiniteNumber(
+      soak.measuredDurationSec,
+      soak.wallClockDurationSec,
+      soak.actualDurationSec,
+    );
+    if (isFiniteNumber(measuredDurationSec)) {
+      summary.residentSoak.measuredDurationSec = measuredDurationSec;
+      summary.residentSoak.durationSec = measuredDurationSec;
+    } else if (soak.requestedDurationSec != null && Number(soak.durationSec) === Number(soak.requestedDurationSec)) {
+      summary.residentSoak.durationSec = null;
+    }
+  }
+  Object.assign(summary.promotionMetrics, {
+    soakDurationSec: firstFiniteNumber(soak.durationSec, summary.promotionMetrics.soakDurationSec),
+    memoryGrowthSlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.memoryGrowthSlopeMbPerMin, soak.memoryGrowthSlopeMbPerMin),
+    crashCount: firstFiniteNumber(summary.promotionMetrics.crashCount, soak.crashCount),
+    staleOutputReuseCount: firstFiniteNumber(summary.promotionMetrics.staleOutputReuseCount, soak.staleOutputReuseCount, adjacent.staleOutputReuseCount),
+    sessionRestartCount: firstFiniteNumber(summary.promotionMetrics.sessionRestartCount, soak.sessionRestartCount, adjacent.sessionRestartCount),
+    adjacentRequestedSegments: firstFiniteNumber(summary.promotionMetrics.adjacentRequestedSegments, adjacent.requestedSegments),
+    adjacentCompletedSegments: firstFiniteNumber(summary.promotionMetrics.adjacentCompletedSegments, adjacent.completedSegments),
+    adjacentFreshSegments: firstFiniteNumber(summary.promotionMetrics.adjacentFreshSegments, adjacent.freshSegments),
+    adjacentEmptySegments: firstFiniteNumber(summary.promotionMetrics.adjacentEmptySegments, adjacent.emptySegments),
+    adjacentStaleOutputReuseCount: firstFiniteNumber(summary.promotionMetrics.adjacentStaleOutputReuseCount, adjacent.staleOutputReuseCount),
+    adjacentSessionRestartCount: firstFiniteNumber(summary.promotionMetrics.adjacentSessionRestartCount, adjacent.sessionRestartCount),
+    adjacentP95InternalFirstDecodedAudioMs: firstFiniteNumber(summary.promotionMetrics.adjacentP95InternalFirstDecodedAudioMs, adjacent.p95InternalFirstDecodedAudioMs),
+    adjacentP95FinalRtf: firstFiniteNumber(summary.promotionMetrics.adjacentP95FinalRtf, adjacent.p95FinalRtf),
+    adjacentP95PunctuationRtf: firstFiniteNumber(summary.promotionMetrics.adjacentP95PunctuationRtf, adjacent.p95PunctuationRtf),
+  });
+}
+
+function nano6Failure(message, key, failureClass = "runtime-contract") {
+  return { message, key, failureClass };
+}
+
+function markNano6ReadinessFailure(summary, failure) {
+  summary.nano6Readiness = {
+    ...objectOrEmpty(summary.nano6Readiness),
+    status: "failed",
+    gate: NANO6_APP_PROTOTYPE_TARGET,
+    key: failure.key,
+    failureClass: failure.failureClass,
+    reason: failure.message,
+  };
+  return failure;
+}
+
+function validateNano6PromotionDecision(summary) {
+  const decision = String(summary.promotionDecision?.decision ?? "");
+  const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
+  const promote = summary.promotionDecision?.promote === true;
+  if (!NANO6_DECISIONS.has(decision)) {
+    return nano6Failure("MOSS-NANO-6 promotion decision must be PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE, ITERATE_NANO_RESIDENT_RUNTIME, or KEEP_KOKORO_ONLY.", "promotionDecision");
+  }
+  if (promote && (decision !== NANO6_APP_PROTOTYPE_DECISION || target !== NANO6_APP_PROTOTYPE_TARGET)) {
+    return nano6Failure("MOSS-NANO-6 app prototype promotion requires target app-prototype and PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE.", "promotionDecision");
+  }
+  if (!promote && decision === NANO6_APP_PROTOTYPE_DECISION) {
+    return nano6Failure("MOSS-NANO-6 app prototype decision cannot be non-promoting.", "promotionDecision");
+  }
+  return null;
+}
+
+function validateNano6Soak(summary) {
+  const soak = objectOrEmpty(summary.residentSoak);
+  const thresholds = objectOrEmpty(summary.promotionThresholds);
+  if (!summary.residentSoak) {
+    return nano6Failure("MOSS-NANO-6 resident soak evidence is required.", "residentSoak");
+  }
+  if (!isFiniteNumber(soak.durationSec) || soak.durationSec < thresholds.soakDurationSecMin) {
+    return nano6Failure("MOSS-NANO-6 resident soak duration must be at least 1800 seconds.", "residentSoak", "performance");
+  }
+  if (soak.warmupExcluded !== true || !String(soak.warmupEndAt ?? "").trim()) {
+    return nano6Failure("MOSS-NANO-6 resident soak must exclude warmup and record warmupEndAt.", "residentSoak");
+  }
+  if (!isFiniteNumber(soak.sampleIntervalSec) || soak.sampleIntervalSec <= 0) {
+    return nano6Failure("MOSS-NANO-6 resident soak sampleIntervalSec must be numeric.", "residentSoak");
+  }
+  if (!Array.isArray(soak.rssSamples) || soak.rssSamples.length === 0 || !soak.rssSamples.every(isFiniteNumber) || !isFiniteNumber(soak.currentRssMb)) {
+    return nano6Failure("MOSS-NANO-6 resident soak RSS memory evidence is required.", "residentSoak");
+  }
+  if (!isFiniteNumber(soak.memoryGrowthSlopeMbPerMin) || soak.memoryGrowthSlopeMbPerMin > thresholds.memoryGrowthSlopeMbPerMinMax) {
+    return nano6Failure("MOSS-NANO-6 resident soak memory growth exceeds 1.5MB/min.", "residentSoak", "performance");
+  }
+  if (Number(soak.crashCount ?? 0) > thresholds.crashCountMax) {
+    return nano6Failure("MOSS-NANO-6 resident soak crash count must be zero.", "residentSoak");
+  }
+  if (Number(soak.staleOutputReuseCount ?? 0) > thresholds.staleOutputReuseMax) {
+    return nano6Failure("MOSS-NANO-6 resident soak has stale output reuse.", "staleOutputReuse");
+  }
+  if (Number(soak.sessionRestartCount ?? 0) > thresholds.sessionRestartMax) {
+    return nano6Failure("MOSS-NANO-6 resident soak has a session/runtime identity restart.", "runtimeIdentity");
+  }
+  return null;
+}
+
+function validateNano6BookLikeAdjacentRun(summary) {
+  const run = objectOrEmpty(summary.bookLikeAdjacentRun);
+  const thresholds = objectOrEmpty(summary.promotionThresholds);
+  const segments = Array.isArray(summary.segments) ? summary.segments : [];
+  if (!summary.bookLikeAdjacentRun) {
+    return nano6Failure("MOSS-NANO-6 book-like adjacent run evidence is required.", "bookLikeAdjacentRun");
+  }
+  if (Number(run.requestedSegments ?? 0) !== thresholds.adjacentRequiredSegments || segments.length !== thresholds.adjacentRequiredSegments) {
+    return nano6Failure("MOSS-NANO-6 requires exactly 100 adjacent book-like segments.", "bookLikeAdjacentRun");
+  }
+  if (Number(run.completedSegments ?? 0) < thresholds.adjacentRequiredSegments) {
+    return nano6Failure("MOSS-NANO-6 requires 100 completed adjacent book-like segments.", "bookLikeAdjacentRun");
+  }
+  if (Number(run.emptySegments ?? 0) > thresholds.emptySegmentMax || segments.some((segment) => segment?.empty || !String(segment?.text ?? "").trim())) {
+    return nano6Failure("MOSS-NANO-6 adjacent run contains an empty segment.", "bookLikeAdjacentRun");
+  }
+  const staleSegment = segments.some((segment) => (
+    segment?.staleOutputReuse
+      || segment?.fresh === false
+      || segment?.firstAudioObservation?.outputFileExistedBeforeRun
+      || segment?.firstAudioObservation?.reusedExistingOutputFile
+  ));
+  if (Number(run.staleOutputReuseCount ?? 0) > thresholds.staleOutputReuseMax || staleSegment) {
+    return nano6Failure("MOSS-NANO-6 adjacent run has stale output reuse.", "staleOutputReuse");
+  }
+  if (Number(run.freshSegments ?? 0) < thresholds.adjacentRequiredSegments) {
+    return nano6Failure("MOSS-NANO-6 requires 100 fresh adjacent book-like segments.", "bookLikeAdjacentRun");
+  }
+  const firstIdentity = segments[0]?.runtimeIdentity;
+  const identityChanged = segments.some((segment) => (
+    segment?.sessionRestarted || sortedJson(segment?.runtimeIdentity) !== sortedJson(firstIdentity)
+  ));
+  if (Number(run.sessionRestartCount ?? 0) > thresholds.sessionRestartMax || identityChanged) {
+    return nano6Failure("MOSS-NANO-6 adjacent run has a session/runtime identity change.", "runtimeIdentity");
+  }
+  const wavs = segments.map((segment) => segment?.outputWavPath).filter(Boolean);
+  if (new Set(wavs).size !== wavs.length) {
+    return nano6Failure("MOSS-NANO-6 adjacent run requires distinct WAV outputs.", "bookLikeAdjacentRun");
+  }
+  if (segments.some((segment) => !isFiniteNumber(segment?.firstAudioObservation?.internalFirstDecodedAudioMs ?? segment?.internalFirstDecodedAudioMs))) {
+    return nano6Failure("MOSS-NANO-6 adjacent run requires internal first decoded audio for every segment.", "bookLikeAdjacentRun");
+  }
+  if (!isFiniteNumber(run.p95InternalFirstDecodedAudioMs) || run.p95InternalFirstDecodedAudioMs > thresholds.adjacentP95InternalFirstDecodedAudioMsMax) {
+    return nano6Failure("MOSS-NANO-6 adjacent p95 internal first decoded audio exceeds 1500ms.", "bookLikeAdjacentRun", "performance");
+  }
+  if (!isFiniteNumber(run.p95FinalRtf) || run.p95FinalRtf > thresholds.adjacentP95FinalRtfMax) {
+    return nano6Failure("MOSS-NANO-6 adjacent p95 final RTF exceeds 1.5.", "bookLikeAdjacentRun", "performance");
+  }
+  if (!isFiniteNumber(run.p95PunctuationRtf) || run.p95PunctuationRtf > thresholds.adjacentP95PunctuationRtfMax) {
+    return nano6Failure("MOSS-NANO-6 adjacent p95 punctuation RTF exceeds 1.45.", "bookLikeAdjacentRun", "performance");
+  }
+  return null;
+}
+
+function validateNano6LifecycleEvidence(summary) {
+  const evidence = objectOrEmpty(summary.lifecycleEvidence);
+  if (!summary.lifecycleEvidence || evidence.requestedOnly === true || String(evidence.status ?? "").toLowerCase() === "requested") {
+    return nano6Failure("MOSS-NANO-6 lifecycle evidence must be actual, not requested-only.", "lifecycleEvidence");
+  }
+  if (evidence.stale === true) {
+    return nano6Failure("MOSS-NANO-6 lifecycle evidence is stale.", "lifecycleEvidence");
+  }
+  return null;
+}
+
+function validateNano6ShutdownEvidence(summary) {
+  const evidence = objectOrEmpty(summary.shutdownEvidence);
+  if (!summary.shutdownEvidence) {
+    return nano6Failure("MOSS-NANO-6 shutdown/restart evidence is required.", "shutdownEvidence");
+  }
+  const classifications = new Set(Array.isArray(summary.shutdownClassifications) ? summary.shutdownClassifications : []);
+  const evidenceByClassification = new Map();
+  for (const item of Object.values(evidence)) {
+    if (item && typeof item === "object" && item.classification) {
+      classifications.add(item.classification);
+      evidenceByClassification.set(item.classification, item);
+    }
+  }
+  const missing = NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS.filter((classification) => !classifications.has(classification));
+  if (missing.length > 0) {
+    return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications are missing: ${missing.join(", ")}.`, "shutdownEvidence");
+  }
+  const notMeasured = NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS.filter((classification) => {
+    const item = objectOrEmpty(evidenceByClassification.get(classification));
+    const source = String(item.evidenceSource ?? item.source ?? item.classificationSource ?? "").toLowerCase();
+    const status = String(item.status ?? "").toLowerCase();
+    const synthetic = ["synthetic", "planned", "requested"].some((marker) => source.includes(marker) || status.includes(marker));
+    return item.observed !== true || synthetic || source !== "measured-lifecycle-check";
+  });
+  if (notMeasured.length > 0) {
+    return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications require measured observed lifecycle checks, not synthetic or planned evidence: ${notMeasured.join(", ")}.`, "shutdownEvidence");
+  }
+  const inflight = objectOrEmpty(evidence.inflightShutdown);
+  if (inflight.classification !== "inflight-rejected" || inflight.rejected !== true || inflight.succeeded === true || inflight.wavReused === true) {
+    return nano6Failure("MOSS-NANO-6 in-flight shutdown must reject work and must not reuse a stale WAV.", "shutdownEvidence");
+  }
+  return null;
+}
+
+function validateNano6Readiness(summary, requested = {}) {
+  if (!hasNano6ReadinessShape(summary, requested)) return null;
+  normalizeNano6ReadinessEvidence(summary, requested);
+  const decisionFailure = validateNano6PromotionDecision(summary);
+  if (decisionFailure) return markNano6ReadinessFailure(summary, decisionFailure);
+  if (summary.promotionDecision?.decision !== NANO6_APP_PROTOTYPE_DECISION) {
+    summary.nano6Readiness = {
+      ...objectOrEmpty(summary.nano6Readiness),
+      status: "not-promoting",
+      gate: NANO6_APP_PROTOTYPE_TARGET,
+    };
+    return null;
+  }
+  const failure = validateNano6LifecycleEvidence(summary)
+    ?? validateNano6Soak(summary)
+    ?? validateNano6BookLikeAdjacentRun(summary)
+    ?? validateNano6ShutdownEvidence(summary);
+  if (failure) return markNano6ReadinessFailure(summary, failure);
+  summary.nano6Readiness = {
+    ...objectOrEmpty(summary.nano6Readiness),
+    status: "passed",
+    gate: NANO6_APP_PROTOTYPE_TARGET,
+  };
+  return null;
+}
+
 function validateNano5SoakPromotion(summary, requested = {}) {
   if (!hasNano5SoakShape(summary, requested)) return null;
   const decision = String(summary.promotionDecision?.decision ?? "");
@@ -1543,6 +1876,13 @@ function normalizeResidentSummary(summary, requested = {}) {
 
   applyNano5cSegmentFirstClassification(summary, requested);
   if (contractMessage) return blockResidentSummary(summary, contractMessage, contractKey);
+  const nano6Failure = validateNano6Readiness(summary, requested);
+  if (nano6Failure) {
+    return blockResidentSummary(summary, nano6Failure.message, nano6Failure.key, nano6Failure.failureClass);
+  }
+  if (hasNano6ReadinessShape(summary, requested)) {
+    return summary;
+  }
   const nano5Failure = validateNano5SoakPromotion(summary, requested);
   if (nano5Failure) {
     return blockResidentSummary(summary, nano5Failure.message, nano5Failure.key, nano5Failure.failureClass);
@@ -1604,6 +1944,10 @@ export function buildPythonCommand({
   adjacentSegmentCount,
   adjacentSegmentSource,
   adjacentSegmentRtfTrendMax,
+  nano6Soak,
+  soakDurationSec,
+  soakSampleIntervalSec,
+  shutdownRestartEvidence,
   allowEmptyPassage,
 } = {}) {
   const defaults = defaultOptions(projectRoot);
@@ -1679,6 +2023,10 @@ export function buildPythonCommand({
   if (adjacentSegmentCount != null) args.push("--adjacent-segment-count", String(adjacentSegmentCount));
   if (adjacentSegmentSource) args.push("--adjacent-segment-source", adjacentSegmentSource);
   if (adjacentSegmentRtfTrendMax != null) args.push("--adjacent-segment-rtf-trend-max", String(adjacentSegmentRtfTrendMax));
+  if (nano6Soak) args.push("--nano6-soak");
+  if (soakDurationSec != null) args.push("--soak-duration-sec", String(soakDurationSec));
+  if (soakSampleIntervalSec != null) args.push("--soak-sample-interval-sec", String(soakSampleIntervalSec));
+  if (shutdownRestartEvidence) args.push("--shutdown-restart-evidence");
 
   return { command, args, pythonExecutable: command, pythonProbePath };
 }
@@ -1808,6 +2156,10 @@ export async function runMossNanoProbe({
   adjacentSegmentSource,
   adjacentSegmentRtfTrendMax,
   promotionTarget,
+  nano6Soak,
+  soakDurationSec,
+  soakSampleIntervalSec,
+  shutdownRestartEvidence,
   allowEmptyPassage,
   execFile = runSpawn,
   fsModule = fs,
@@ -1879,6 +2231,10 @@ export async function runMossNanoProbe({
     adjacentSegmentCount,
     adjacentSegmentSource,
     adjacentSegmentRtfTrendMax,
+    nano6Soak,
+    soakDurationSec,
+    soakSampleIntervalSec,
+    shutdownRestartEvidence,
     allowEmptyPassage,
   });
 
@@ -1925,6 +2281,10 @@ export async function runMossNanoProbe({
           adjacentSegmentSource,
           adjacentSegmentRtfTrendMax,
           promotionTarget,
+          nano6Soak,
+          soakDurationSec,
+          soakSampleIntervalSec,
+          shutdownRestartEvidence,
         })
         : parsed.summary;
       result = {
@@ -1965,6 +2325,10 @@ export async function runMossNanoProbe({
           adjacentSegmentSource,
           adjacentSegmentRtfTrendMax,
           promotionTarget,
+          nano6Soak,
+          soakDurationSec,
+          soakSampleIntervalSec,
+          shutdownRestartEvidence,
         })
         : parsed.summary;
       result = {
@@ -2051,6 +2415,10 @@ function helpText() {
     "  --adjacent-segment-count <n>",
     "  --adjacent-segment-source <raw|book-like>",
     "  --adjacent-segment-rtf-trend-max <n>",
+    "  --nano6-soak",
+    "  --soak-duration-sec <n>",
+    "  --soak-sample-interval-sec <n>",
+    "  --shutdown-restart-evidence",
     "  --promotion-target <target>",
     "  --nano5c-segment-first-soak",
   ].join("\n");
@@ -2115,6 +2483,10 @@ export async function main(argv = process.argv.slice(2)) {
     adjacentSegmentSource: args.adjacentSegmentSource,
     adjacentSegmentRtfTrendMax: args.adjacentSegmentRtfTrendMax,
     promotionTarget: args.promotionTarget,
+    nano6Soak: args.nano6Soak,
+    soakDurationSec: args.soakDurationSec,
+    soakSampleIntervalSec: args.soakSampleIntervalSec,
+    shutdownRestartEvidence: args.shutdownRestartEvidence,
   });
 
   process.stdout.write(args.json ? `${JSON.stringify(result, null, 2)}\n` : formatSummaryText(result));

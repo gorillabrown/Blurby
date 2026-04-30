@@ -309,7 +309,24 @@ Supporting diagnostics:
 - `moss-nano-5c-short-resident-decode-full-diagnostic`: decode-full was measured as a diagnostic path but is not a product blocker for the segment-first gate.
 - `moss-nano-5c-short-resident-precompute-requestrows-rca`: precompute was requested but actual remained false with blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. The current high-level path lacks prepared-row consumption, while the lower ONNX path has build/request rows and generate frames, so future runtime work may implement it.
 
-Conclusion: Nano earned only the next runtime soak/package gate. `MOSS-NANO-6` may dispatch as resident soak + packaging readiness. App integration remains locked until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
+Conclusion: Nano earned only the next runtime soak/package gate. `MOSS-NANO-6` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so app integration remains locked until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
+
+## MOSS-NANO-6 Resident Soak + Packaging Readiness
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6 did not promote Nano to app prototype. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or MOSS-3 reopening.
+
+Canonical hardened artifacts:
+
+| Evidence | Result |
+|---|---|
+| Package readiness | `artifacts/moss/moss-nano-6-package-preflight-20260430-1138/summary.json`: Nano package evidence `not-ready` because active config is not Nano package evidence; Nano package readiness is not inferred from the flagship config. |
+| Lifecycle | `artifacts/moss/moss-nano-6-lifecycle-20260430-1138/summary.json`: measured `5.0929s` vs requested `1800s`; memory slope `579.9839MB/min`; shutdown classes `not-observed`/`not-implemented`; synthetic lifecycle evidence cannot promote. |
+| Adjacent 100 | `artifacts/moss/moss-nano-6-adjacent-100-20260430-1138/summary.json`: requested `100`, completed/fresh `60/60`; p95 first decoded `326ms`; p95 RTF `1.3172`; the required 100-segment completion gate was not met. |
+| 300s soak | `artifacts/moss/moss-nano-6-soak-300s-20260430-1138/summary.json`: measured `4.1124s` vs requested `300s`; memory slope `642.8363MB/min`. |
+
+Hardening: immutable thresholds, measured-vs-requested soak truth, synthetic lifecycle non-promotion, Nano package evidence separation from flagship config, producer-path Nano-6 flag coverage, and invalid fallback decision removal.
+
+Conclusion: Continue resident runtime iteration only. Do not dispatch MOSS-NANO-7 because app-prototype promotion did not happen. No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, or MOSS-3 reopen is unlocked.
 
 ## MOSS-TTS-Nano Onboarding Gate Sequence
 
@@ -317,12 +334,13 @@ The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration
 
 1. `MOSS-NANO-5B`: precompute + adjacent continuity closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
 2. `MOSS-NANO-5C`: segment-first soak gate. Completed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`; runtime-only, not app prototype promotion.
-3. `MOSS-NANO-6`: resident soak plus packaging readiness. Dispatch-ready after 5C; may promote to app-prototype candidate only after passing soak/package evidence.
-4. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
-5. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
-6. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
-7. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
-8. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
+3. `MOSS-NANO-6`: resident soak plus packaging readiness. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no app-prototype promotion.
+4. Runtime-only resident Nano follow-up: must harden package evidence, full-duration soak truth, lifecycle shutdown implementation, and 100-segment adjacent completion before any app-prototype reconsideration.
+5. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
+6. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
+7. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
+8. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
+9. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
 
 Non-negotiable gates:
 

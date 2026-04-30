@@ -36,6 +36,14 @@ async function writeConfig(projectRoot, config) {
   return configPath;
 }
 
+async function writePackageJson(projectRoot, packageJson) {
+  await fs.writeFile(
+    path.join(projectRoot, "package.json"),
+    JSON.stringify(packageJson, null, 2),
+    "utf8",
+  );
+}
+
 async function makeDir(projectRoot, ...segments) {
   const dir = path.join(projectRoot, ...segments);
   await fs.mkdir(dir, { recursive: true });
@@ -63,6 +71,37 @@ async function makeValidConfig(projectRoot, overrides = {}) {
     threads: 4,
     ...overrides,
   };
+}
+
+async function makeNanoConfig(projectRoot, overrides = {}) {
+  const sourceDir = await makeDir(projectRoot, ".runtime", "moss", "MOSS-TTS-Nano");
+  const modelDir = await makeDir(projectRoot, ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX");
+  const tokenizerDir = await makeDir(projectRoot, ".runtime", "moss", "weights", "MOSS-Audio-Tokenizer-Nano-ONNX");
+  const venvDir = await makeDir(projectRoot, ".runtime", "moss", "venv");
+  await fs.writeFile(path.join(modelDir, "model.onnx"), "fake model", "utf8");
+  await fs.writeFile(path.join(tokenizerDir, "model.onnx"), "fake tokenizer", "utf8");
+  return makeValidConfig(projectRoot, {
+    repoDir: sourceDir,
+    modelDir,
+    audioTokenizerDir: tokenizerDir,
+    sourceDir,
+    tokenizerDir,
+    venvDir,
+    backend: "moss-nano-onnx",
+    modelVariant: "moss-tts-nano-onnx",
+    source: {
+      repository: "https://github.com/OpenMOSS/MOSS-TTS",
+      revision: "nano6-package-ready",
+    },
+    license: {
+      model: "Apache-2.0",
+      tokenizer: "Apache-2.0",
+    },
+    updatePolicy: "manual-download",
+    privacyPolicy: "local-only",
+    shipVsDownloadDecision: "download-at-setup",
+    ...overrides,
+  });
 }
 
 async function runPreflight(projectRoot) {
@@ -272,6 +311,135 @@ describe("MOSS provisioning preflight", () => {
       key: expect.any(String),
       status: expect.any(String),
       detail: expect.any(String),
+    }));
+  });
+
+  it("includes MOSS-NANO-6 package readiness metadata and .runtime exclusion safeguards", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    await writePackageJson(projectRoot, {
+      build: {
+        files: ["dist/**", "package.json"],
+        extraResources: [
+          { from: "assets", to: "assets", filter: ["**/*"] },
+        ],
+      },
+    });
+    const config = await makeNanoConfig(projectRoot, { pythonVersion: "3.11.9" });
+    await writeConfig(projectRoot, config);
+
+    const report = await runPreflight(projectRoot);
+
+    expect(report).toMatchObject({
+      status: "ready",
+      sourceDir: config.sourceDir,
+      modelDir: config.modelDir,
+      tokenizerDir: config.tokenizerDir,
+      venvDir: config.venvDir,
+      pythonVersion: expect.stringMatching(/^\d+\.\d+\.\d+/),
+      packageVersions: expect.objectContaining({
+        onnxruntime: expect.any(String),
+        numpy: expect.any(String),
+        sentencepiece: expect.any(String),
+      }),
+      assetSizes: expect.objectContaining({
+        modelBytes: expect.any(Number),
+        tokenizerBytes: expect.any(Number),
+      }),
+      venvFootprintBytes: expect.any(Number),
+      setupTimeSec: expect.any(Number),
+      license: expect.objectContaining({
+        model: expect.any(String),
+        tokenizer: expect.any(String),
+      }),
+      source: expect.objectContaining({
+        repository: expect.any(String),
+        revision: expect.any(String),
+      }),
+      updatePolicy: expect.any(String),
+      privacyPolicy: expect.any(String),
+      shipVsDownloadDecision: expect.stringMatching(/download|ship/i),
+      packageSafeguards: expect.objectContaining({
+        runtimeGlobExcluded: true,
+        runtimeDirPackaged: false,
+        packageResourceAllowlist: expect.any(Array),
+      }),
+      nanoPackageEvidence: expect.objectContaining({
+        status: "ready",
+      }),
+    });
+    expect(report.packageSafeguards.packageResourceAllowlist).not.toContain(".runtime/**");
+    expect(report.checks).toContainEqual(expect.objectContaining({
+      key: "packageSafeguards",
+      status: "pass",
+    }));
+  });
+
+  it("does not report Nano package evidence for a legacy flagship runtime config", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    await writeConfig(projectRoot, await makeValidConfig(projectRoot, {
+      backend: "llama-cpp-onnx",
+      modelVariant: "moss-tts-base",
+    }));
+
+    const report = await runPreflight(projectRoot);
+
+    expect(report).toMatchObject({
+      status: "ready",
+      nanoPackageEvidence: expect.objectContaining({
+        status: "not-ready",
+        reason: "not-nano-package-evidence",
+      }),
+    });
+    expect(report.sourceDir).toBeUndefined();
+    expect(report.packageSafeguards).toBeUndefined();
+    expect(report.checks).toContainEqual(expect.objectContaining({
+      key: "nanoPackageEvidence",
+      status: "blocker",
+    }));
+  });
+
+  it("does not reuse the Node runtime version as Nano pythonVersion", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    await writeConfig(projectRoot, await makeNanoConfig(projectRoot));
+
+    const report = await runPreflight(projectRoot);
+
+    expect(report.pythonVersion).not.toBe(process.version);
+    if (report.pythonVersion === "unknown") {
+      expect(report.pythonVersionReason).toMatch(/python.*version/i);
+    } else {
+      expect(report.pythonVersion).toMatch(/^\d+\.\d+\.\d+/);
+    }
+  });
+
+  it.each([
+    ["build.files broad glob", { build: { files: ["**/*"] } }],
+    ["extraResources broad from scope", { build: { files: ["dist/**"], extraResources: [{ from: ".", to: ".", filter: ["**/*"] }] } }],
+  ])("marks Nano package evidence not-ready when package config can include .runtime via %s", async (_caseName, packageJson) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    await writePackageJson(projectRoot, packageJson);
+    await writeConfig(projectRoot, await makeNanoConfig(projectRoot, { pythonVersion: "3.11.9" }));
+
+    const report = await runPreflight(projectRoot);
+
+    expect(report).toMatchObject({
+      status: "unsupported",
+      reason: "package-safeguards-failed",
+      nanoPackageEvidence: expect.objectContaining({
+        status: "not-ready",
+        reason: "package-safeguards-failed",
+      }),
+      packageSafeguards: expect.objectContaining({
+        runtimeGlobExcluded: false,
+      }),
+    });
+    expect(report.checks).toContainEqual(expect.objectContaining({
+      key: "packageSafeguards",
+      status: "fail",
     }));
   });
 
