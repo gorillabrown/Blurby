@@ -1,0 +1,70 @@
+{
+  "status": "ready",
+  "reason": null,
+  "detail": "MOSS runtime preflight passed. Nano package evidence is not applicable to this non-Nano runtime config.",
+  "configPath": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\config.json",
+  "pythonExe": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv\\Scripts\\python.exe",
+  "repoDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS",
+  "llamaCppDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\llama.cpp",
+  "modelDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-GGUF",
+  "audioTokenizerDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-Audio-Tokenizer-ONNX",
+  "backend": "llama-cpp-onnx",
+  "device": "cpu",
+  "hostProfile": "windows-arm64-snapdragon-x-elite",
+  "modelVariant": "moss-tts-flagship-gguf",
+  "quant": "Q4_K_M",
+  "threads": 12,
+  "checkedAt": "2026-04-30T16:38:02.001Z",
+  "nanoPackageEvidence": {
+    "status": "not-ready",
+    "reason": "not-nano-package-evidence",
+    "blocker": "Nano package evidence requires backend=moss-nano-onnx and Nano source/model/tokenizer paths."
+  },
+  "checks": [
+    {
+      "key": "pythonExe",
+      "status": "pass",
+      "detail": "Python executable found at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv\\Scripts\\python.exe."
+    },
+    {
+      "key": "repoDir",
+      "status": "pass",
+      "detail": "MOSS repository found at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS."
+    },
+    {
+      "key": "llamaCppDir",
+      "status": "pass",
+      "detail": "llama.cpp directory found at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\llama.cpp."
+    },
+    {
+      "key": "modelDir",
+      "status": "pass",
+      "detail": "Model assets found at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-GGUF."
+    },
+    {
+      "key": "audioTokenizerDir",
+      "status": "pass",
+      "detail": "Audio tokenizer assets found at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-Audio-Tokenizer-ONNX."
+    },
+    {
+      "key": "backend",
+      "status": "pass",
+      "detail": "Backend llama-cpp-onnx is supported."
+    },
+    {
+      "key": "device",
+      "status": "pass",
+      "detail": "Device cpu is supported."
+    },
+    {
+      "key": "runtime",
+      "status": "pass",
+      "detail": "MOSS runtime preflight passed."
+    },
+    {
+      "key": "nanoPackageEvidence",
+      "status": "blocker",
+      "detail": "Not Nano package evidence: runtime config is for a non-Nano backend or asset layout."
+    }
+  ]
+}

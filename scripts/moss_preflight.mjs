@@ -1,10 +1,13 @@
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
 const READY = "ready";
-const SUPPORTED_BACKENDS = new Set(["llama-cpp-onnx"]);
+const execFileAsync = promisify(execFile);
+const SUPPORTED_BACKENDS = new Set(["llama-cpp-onnx", "moss-nano-onnx"]);
 const SUPPORTED_DEVICES = new Set(["cpu"]);
 
 function isPresent(value) {
@@ -37,6 +40,22 @@ async function pathHasType(fsModule, targetPath, expectedType) {
     return expectedType === "file" ? stats.isFile() : stats.isDirectory();
   } catch {
     return false;
+  }
+}
+
+async function directorySizeBytes(fsModule, targetPath) {
+  if (!isPresent(targetPath)) return 0;
+  try {
+    const stats = await fsModule.stat(targetPath);
+    if (stats.isFile()) return stats.size;
+    if (!stats.isDirectory()) return 0;
+    const entries = await fsModule.readdir(targetPath, { withFileTypes: true });
+    const sizes = await Promise.all(entries.map((entry) => (
+      directorySizeBytes(fsModule, path.join(targetPath, entry.name))
+    )));
+    return sizes.reduce((total, size) => total + size, 0);
+  } catch {
+    return 0;
   }
 }
 
@@ -165,6 +184,179 @@ export async function validateMossConfig(config, fsModule = fs) {
   };
 }
 
+function configProjectRoot(configPath) {
+  const runtimeMossDir = path.join(".runtime", "moss");
+  const normalized = path.normalize(configPath);
+  const marker = `${path.sep}${runtimeMossDir}${path.sep}`;
+  const index = normalized.lastIndexOf(marker);
+  if (index >= 0) {
+    return normalized.slice(0, index);
+  }
+  return path.dirname(configPath);
+}
+
+async function readJsonIfPresent(fsModule, targetPath) {
+  try {
+    return JSON.parse(await fsModule.readFile(targetPath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function collectPackageResourceAllowlist(packageJson) {
+  const allowlist = [];
+  const build = isPlainObject(packageJson?.build) ? packageJson.build : {};
+  const files = Array.isArray(build.files) ? build.files : [];
+  const extraResources = Array.isArray(build.extraResources) ? build.extraResources : [];
+  for (const item of files) {
+    if (typeof item === "string") allowlist.push(item);
+  }
+  for (const resource of extraResources) {
+    if (typeof resource === "string") {
+      allowlist.push(resource);
+    } else if (isPlainObject(resource)) {
+      if (typeof resource.from === "string") allowlist.push(resource.from);
+      if (Array.isArray(resource.filter)) {
+        allowlist.push(...resource.filter.filter((item) => typeof item === "string"));
+      }
+    }
+  }
+  return allowlist;
+}
+
+function normalizeGlobPattern(value) {
+  return String(value ?? "").replaceAll("\\", "/").replace(/^\.\//, "").trim();
+}
+
+function isRuntimePattern(value) {
+  const normalized = normalizeGlobPattern(value).replace(/^!/, "");
+  return normalized === ".runtime"
+    || normalized === ".runtime/**"
+    || normalized.startsWith(".runtime/")
+    || normalized === "**/.runtime"
+    || normalized === "**/.runtime/**"
+    || normalized.includes("/.runtime/");
+}
+
+function excludesRuntime(patterns) {
+  return patterns.some((pattern) => {
+    const normalized = normalizeGlobPattern(pattern);
+    return normalized.startsWith("!") && isRuntimePattern(normalized);
+  });
+}
+
+function isBroadPackagePattern(value) {
+  const normalized = normalizeGlobPattern(value);
+  return normalized === "."
+    || normalized === "**/*"
+    || normalized === "**"
+    || normalized === "*"
+    || normalized === "./**/*";
+}
+
+function packageSafeguardsFromPackageJson(packageJson) {
+  const build = isPlainObject(packageJson?.build) ? packageJson.build : {};
+  const files = Array.isArray(build.files) ? build.files.filter((item) => typeof item === "string") : [];
+  const extraResources = Array.isArray(build.extraResources) ? build.extraResources : [];
+  const packageResourceAllowlist = collectPackageResourceAllowlist(packageJson);
+  const failures = [];
+  let runtimeDirPackaged = files.some(isRuntimePattern);
+  let broadRuntimeInclude = files.some(isBroadPackagePattern) && !excludesRuntime(files);
+  for (const resource of extraResources) {
+    if (typeof resource === "string") {
+      const from = normalizeGlobPattern(resource);
+      if (isRuntimePattern(from)) runtimeDirPackaged = true;
+      if (isBroadPackagePattern(from)) broadRuntimeInclude = true;
+      continue;
+    }
+    if (!isPlainObject(resource)) continue;
+    const from = normalizeGlobPattern(resource.from ?? "");
+    const filters = Array.isArray(resource.filter) ? resource.filter.filter((item) => typeof item === "string") : [];
+    if (isRuntimePattern(from)) runtimeDirPackaged = true;
+    if ((isBroadPackagePattern(from) || from === "") && (filters.length === 0 || filters.some(isBroadPackagePattern)) && !excludesRuntime(filters)) {
+      broadRuntimeInclude = true;
+    }
+  }
+  if (runtimeDirPackaged) failures.push(".runtime is directly included in packaged resources");
+  if (broadRuntimeInclude) failures.push("package config uses a broad include without proving .runtime is excluded");
+  return {
+    runtimeGlobExcluded: !runtimeDirPackaged && !broadRuntimeInclude,
+    runtimeDirPackaged,
+    broadRuntimeInclude,
+    packageResourceAllowlist,
+    failures,
+  };
+}
+
+function isNanoRuntimeConfig(config) {
+  const backend = String(config?.backend ?? "").toLowerCase();
+  const variant = String(config?.modelVariant ?? "").toLowerCase();
+  const repoDir = String(config?.sourceDir ?? config?.repoDir ?? "").toLowerCase();
+  const modelDir = String(config?.modelDir ?? "").toLowerCase();
+  const tokenizerDir = String(config?.tokenizerDir ?? config?.audioTokenizerDir ?? "").toLowerCase();
+  return backend === "moss-nano-onnx"
+    && variant.includes("nano")
+    && repoDir.includes("moss-tts-nano")
+    && modelDir.includes("moss-tts-nano-onnx")
+    && tokenizerDir.includes("nano");
+}
+
+async function resolvePythonVersion(config, fsModule) {
+  if (isPresent(config?.pythonVersion)) {
+    return { pythonVersion: String(config.pythonVersion).replace(/^Python\s+/i, "").replace(/^v/i, ""), pythonVersionReason: null };
+  }
+  if (!isPresent(config?.pythonExe) || !(await pathHasType(fsModule, config.pythonExe, "file"))) {
+    return { pythonVersion: "unknown", pythonVersionReason: "pythonExe is unavailable for Python version detection." };
+  }
+  try {
+    const { stdout, stderr } = await execFileAsync(config.pythonExe, ["--version"], { windowsHide: true, timeout: 5000 });
+    const text = `${stdout} ${stderr}`.trim();
+    const match = text.match(/\bPython\s+(\d+\.\d+\.\d+(?:[-+\w.]*)?)/i);
+    if (match) return { pythonVersion: match[1], pythonVersionReason: null };
+    return { pythonVersion: "unknown", pythonVersionReason: `pythonExe --version did not report a Python version: ${text || "empty output"}` };
+  } catch (error) {
+    return { pythonVersion: "unknown", pythonVersionReason: `Unable to execute pythonExe --version: ${error instanceof Error ? error.message : String(error)}` };
+  }
+}
+
+async function buildNano6PackageMetadata(config, configPath, fsModule) {
+  const projectRoot = configProjectRoot(configPath);
+  const packageJson = await readJsonIfPresent(fsModule, path.join(projectRoot, "package.json"));
+  const packageSafeguards = packageSafeguardsFromPackageJson(packageJson);
+  const pythonVersion = await resolvePythonVersion(config, fsModule);
+  const packageVersions = {
+    onnxruntime: config.packageVersions?.onnxruntime ?? config.packageVersions?.["onnxruntime-node"] ?? "unknown",
+    numpy: config.packageVersions?.numpy ?? "unknown",
+    sentencepiece: config.packageVersions?.sentencepiece ?? "unknown",
+  };
+  return {
+    sourceDir: config.sourceDir ?? config.repoDir ?? null,
+    tokenizerDir: config.tokenizerDir ?? config.audioTokenizerDir ?? null,
+    venvDir: config.venvDir ?? null,
+    ...pythonVersion,
+    packageVersions,
+    assetSizes: {
+      modelBytes: await directorySizeBytes(fsModule, config.modelDir),
+      tokenizerBytes: await directorySizeBytes(fsModule, config.tokenizerDir ?? config.audioTokenizerDir),
+    },
+    venvFootprintBytes: await directorySizeBytes(fsModule, config.venvDir),
+    setupTimeSec: Number.isFinite(Number(config.setupTimeSec)) ? Number(config.setupTimeSec) : 0,
+    license: isPlainObject(config.license) ? config.license : { model: "unknown", tokenizer: "unknown" },
+    source: isPlainObject(config.source) ? config.source : { repository: "unknown", revision: "unknown" },
+    updatePolicy: config.updatePolicy ?? "manual-download",
+    privacyPolicy: config.privacyPolicy ?? "local-only",
+    shipVsDownloadDecision: config.shipVsDownloadDecision ?? "download-at-setup",
+    packageSafeguards,
+    packageSafeguardsCheck: makeCheck(
+      "packageSafeguards",
+      packageSafeguards.runtimeGlobExcluded && !packageSafeguards.runtimeDirPackaged && !packageSafeguards.broadRuntimeInclude ? "pass" : "fail",
+      packageSafeguards.runtimeGlobExcluded && !packageSafeguards.runtimeDirPackaged && !packageSafeguards.broadRuntimeInclude
+        ? ".runtime/** is excluded from packaged resources."
+        : `.runtime/** must remain local-only and must not be packaged: ${packageSafeguards.failures.join("; ")}.`,
+    ),
+  };
+}
+
 export async function buildMossPreflightReport({ configPath, fsModule = fs, now = () => new Date() } = {}) {
   const checkedAt = toIsoString(now);
   const { config, error, detail } = await readMossConfig(configPath, fsModule);
@@ -184,10 +376,45 @@ export async function buildMossPreflightReport({ configPath, fsModule = fs, now 
 
   const validation = await validateMossConfig(config, fsModule);
   const ready = validation.status === READY;
+  const nanoRuntimeConfig = isNanoRuntimeConfig(config);
+  if (!nanoRuntimeConfig) {
+    return {
+      status: ready ? READY : "unsupported",
+      reason: ready ? null : validation.status,
+      detail: ready ? "MOSS runtime preflight passed. Nano package evidence is not applicable to this non-Nano runtime config." : "MOSS runtime preflight failed.",
+      configPath,
+      pythonExe: config.pythonExe,
+      repoDir: config.repoDir,
+      llamaCppDir: config.llamaCppDir,
+      modelDir: config.modelDir,
+      audioTokenizerDir: config.audioTokenizerDir,
+      backend: config.backend,
+      device: config.device,
+      hostProfile: config.hostProfile ?? null,
+      modelVariant: config.modelVariant ?? null,
+      quant: config.quant ?? null,
+      threads: config.threads ?? null,
+      checkedAt,
+      nanoPackageEvidence: {
+        status: "not-ready",
+        reason: "not-nano-package-evidence",
+        blocker: "Nano package evidence requires backend=moss-nano-onnx and Nano source/model/tokenizer paths.",
+      },
+      checks: ready
+        ? [
+          ...validation.checks,
+          makeCheck("nanoPackageEvidence", "blocker", "Not Nano package evidence: runtime config is for a non-Nano backend or asset layout."),
+        ]
+        : validation.checks,
+    };
+  }
+
+  const packageMetadata = await buildNano6PackageMetadata(config, configPath, fsModule);
+  const packageReady = packageMetadata.packageSafeguardsCheck.status === "pass";
   return {
-    status: ready ? READY : "unsupported",
-    reason: ready ? null : validation.status,
-    detail: ready ? "MOSS runtime preflight passed." : "MOSS runtime preflight failed.",
+    status: ready && packageReady ? READY : "unsupported",
+    reason: ready ? (packageReady ? null : "package-safeguards-failed") : validation.status,
+    detail: ready && packageReady ? "MOSS Nano runtime/package preflight passed." : "MOSS Nano runtime/package preflight failed.",
     configPath,
     pythonExe: config.pythonExe,
     repoDir: config.repoDir,
@@ -201,7 +428,27 @@ export async function buildMossPreflightReport({ configPath, fsModule = fs, now 
     quant: config.quant ?? null,
     threads: config.threads ?? null,
     checkedAt,
-    checks: validation.checks,
+    sourceDir: packageMetadata.sourceDir,
+    tokenizerDir: packageMetadata.tokenizerDir,
+    venvDir: packageMetadata.venvDir,
+    pythonVersion: packageMetadata.pythonVersion,
+    pythonVersionReason: packageMetadata.pythonVersionReason,
+    packageVersions: packageMetadata.packageVersions,
+    assetSizes: packageMetadata.assetSizes,
+    venvFootprintBytes: packageMetadata.venvFootprintBytes,
+    setupTimeSec: packageMetadata.setupTimeSec,
+    license: packageMetadata.license,
+    source: packageMetadata.source,
+    updatePolicy: packageMetadata.updatePolicy,
+    privacyPolicy: packageMetadata.privacyPolicy,
+    shipVsDownloadDecision: packageMetadata.shipVsDownloadDecision,
+    packageSafeguards: packageMetadata.packageSafeguards,
+    nanoPackageEvidence: {
+      status: ready && packageReady ? "ready" : "not-ready",
+      reason: ready ? (packageReady ? null : "package-safeguards-failed") : validation.status,
+      blocker: packageReady ? null : packageMetadata.packageSafeguardsCheck.detail,
+    },
+    checks: ready ? [...validation.checks, packageMetadata.packageSafeguardsCheck] : validation.checks,
   };
 }
 

@@ -159,7 +159,14 @@ MOSS-NANO-2 optimization findings:
 - Prewarm/cache did not help/apply: no-prewarm `16.8044s` / RTF `4.5664`; ORT prewarm `18.6696s` / RTF `5.0733`; synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` remained `false`.
 - Focused Nano probe tests passed `23/23` after known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
 
-Current Nano decision: `KEEP_KOKORO_ONLY`. Nano generates local CPU audio and remains much more operational than flagship, but MOSS-NANO-2 did not produce viable live timing, true runtime reuse, applied ORT/session options, or internal first-decoded timing. Keep Kokoro as the app default and only integrated engine. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
+MOSS-NANO-6 runtime/package readiness evidence:
+
+- `artifacts/moss/moss-nano-6-package-preflight-20260430-1138/summary.json`: the active non-Nano runtime config preflight is `ready`, but `nanoPackageEvidence.status` is `not-ready` because Nano package evidence requires `backend=moss-nano-onnx` and Nano source/model/tokenizer paths. Do not infer Nano package readiness from flagship config.
+- `artifacts/moss/moss-nano-6-lifecycle-20260430-1138/summary.json`: lifecycle evidence is partial; measured duration `5.0929s` vs requested `1800s`; memory slope `579.9839MB/min`; shutdown classes are `not-observed`/`not-implemented`.
+- `artifacts/moss/moss-nano-6-adjacent-100-20260430-1138/summary.json`: requested `100` adjacent segments, completed/fresh `60/60`; p95 first decoded `326ms`; p95 RTF `1.3172`.
+- `artifacts/moss/moss-nano-6-soak-300s-20260430-1138/summary.json`: requested `300s`, measured `4.1124s`; memory slope `642.8363MB/min`.
+
+Current Nano decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6 did not promote Nano to app prototype. Keep Kokoro as the app default and only integrated engine. Future Nano work must remain runtime-only resident iteration/hardening until package evidence, full-duration soak truth, lifecycle shutdown implementation, memory slope, and 100-segment adjacent completion are proven. Do not add app integration, renderer/IPC/selectable-engine work, or Kokoro behavior changes from this evidence.
 
 ### Runtime Command Truth
 
