@@ -527,16 +527,22 @@ function nano6BookLikeSegments(overridesByIndex = {}) {
 }
 
 function nano6LifecycleClassEvidence(overridesByClass = {}) {
+  const base = {
+    observed: true,
+    evidenceSource: "measured-lifecycle-check",
+    measurementKind: "child-process-lifecycle",
+    processLifecycleActual: true,
+    childProcessLifecycle: true,
+  };
   return {
-    cleanShutdown: { classification: "clean-shutdown", observed: true, evidenceSource: "measured-lifecycle-check" },
-    forcedKill: { classification: "forced-kill", observed: true, evidenceSource: "measured-lifecycle-check" },
-    zombieProcess: { classification: "zombie-process", observed: true, evidenceSource: "measured-lifecycle-check" },
-    restartClean: { classification: "restart-clean", observed: true, evidenceSource: "measured-lifecycle-check" },
-    restartFailed: { classification: "restart-failed", observed: true, evidenceSource: "measured-lifecycle-check" },
+    cleanShutdown: { ...base, classification: "clean-shutdown", childPid: 4000, exitCode: 0 },
+    forcedKill: { ...base, classification: "forced-kill", childPid: 4001, signal: "SIGKILL", exitCode: null },
+    zombieProcess: { ...base, classification: "zombie-process", childPid: 4001, zombieProcessDetected: false },
+    restartClean: { ...base, classification: "restart-clean", beforeChildPid: 4000, afterChildPid: 4002, oldProcessExited: true },
+    restartFailed: { ...base, classification: "restart-failed", childPid: 4003, failed: true, exitCode: 1 },
     inflightShutdown: {
+      ...base,
       classification: "inflight-rejected",
-      observed: true,
-      evidenceSource: "measured-lifecycle-check",
       rejected: true,
       succeeded: false,
       wavReused: false,
@@ -569,6 +575,55 @@ function nano6BoundedLifecycleEvidence(overrides = {}) {
       p95PostRecycleFirstAudioMs: 620,
       p95PostRecycleRtf: 1.18,
     },
+    processRestartActual: true,
+    childProcessLifecycle: true,
+    identityChangeClassification: "child-process-lifecycle",
+    restartEvidence: {
+      kind: "child-process-restart",
+      processRestartActual: true,
+      beforeChildPid: 4000,
+      afterChildPid: 5000,
+      oldProcessExited: true,
+      zombieProcessDetected: false,
+      freshOutput: true,
+      staleOutputReuseCount: 0,
+    },
+    staleOutputCleanEvidence: {
+      status: "actual",
+      evidenceSource: "measured-lifecycle-check",
+      shutdownClean: true,
+      restartClean: true,
+      inflightClean: true,
+      staleOutputReuseCount: 0,
+      outputFileExistedBeforeRun: false,
+      reusedExistingOutputFile: false,
+    },
+    lifecycleTransitions: [
+      {
+        segmentIndex: 25,
+        beforeChildPid: 4000,
+        afterChildPid: 5000,
+        classification: "child-process-lifecycle",
+        processRestartActual: true,
+        childProcessLifecycle: true,
+      },
+      {
+        segmentIndex: 50,
+        beforeChildPid: 5000,
+        afterChildPid: 6000,
+        classification: "child-process-lifecycle",
+        processRestartActual: true,
+        childProcessLifecycle: true,
+      },
+      {
+        segmentIndex: 75,
+        beforeChildPid: 6000,
+        afterChildPid: 7000,
+        classification: "child-process-lifecycle",
+        processRestartActual: true,
+        childProcessLifecycle: true,
+      },
+    ],
     staleOutputReuseCount: 0,
     staleOutputClean: true,
     ...overrides,
@@ -4799,6 +4854,192 @@ describe("MOSS Nano probe", () => {
       failureClass: "runtime-contract",
     });
     expect(summary.error).toMatch(/bounded lifecycle.*actual.*measured|synthetic|not.?implemented/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+  });
+
+  it("requires MOSS-NANO-6E promotion to prove an actual child process restart", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6e-requires-actual-process-restart";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6BoundedLifecycleSummary({
+        runId,
+        boundedLifecycle: nano6BoundedLifecycleEvidence({
+          processRestartActual: false,
+          restartEvidence: {
+            kind: "in-process-reset",
+            parentPid: 4242,
+            beforeChildPid: 5000,
+            afterChildPid: 5000,
+          },
+        }),
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+        measureRestartCost: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/processRestartActual|child process restart|in-process reset/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
+  it("rejects MOSS-NANO-6E shutdown evidence measured from in-process reset instead of child process lifecycle", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6e-rejects-in-process-shutdown-evidence";
+    const shutdownEvidence = Object.fromEntries(
+      Object.entries(nano6LifecycleClassEvidence()).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          evidenceSource: "measured-lifecycle-check",
+          measurementKind: "in-process-reset",
+          processLifecycleActual: false,
+          childProcessLifecycle: false,
+        },
+      ]),
+    );
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6BoundedLifecycleSummary({
+        runId,
+        shutdownEvidence,
+        lifecycleEvidence: {
+          status: "actual",
+          requestedOnly: false,
+          stale: false,
+          runId,
+          evidenceSource: "measured-lifecycle-check",
+          measurementKind: "in-process-reset",
+          processLifecycleActual: false,
+          lifecycleClasses: shutdownEvidence,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/shutdown.*child process lifecycle|in-process reset|processLifecycleActual/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "shutdownEvidence",
+    });
+  });
+
+  it("requires explicit stale-output clean evidence across MOSS-NANO-6E shutdown and restart", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6e-requires-stale-clean-shutdown-restart-evidence";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6BoundedLifecycleSummary({
+        runId,
+        boundedLifecycle: nano6BoundedLifecycleEvidence({
+          processRestartActual: true,
+          staleOutputReuseCount: 0,
+          staleOutputClean: true,
+          staleOutputCleanEvidence: undefined,
+        }),
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+        measureRestartCost: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/stale-output clean evidence.*shutdown.*restart|staleOutputCleanEvidence/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+  });
+
+  it("classifies identity changes as MOSS-NANO-6E child-process lifecycle instead of hidden runtime reuse", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6e-identity-change-must-be-child-process-lifecycle";
+    const segments = nano6BookLikeSegments({
+      25: {
+        sessionRestarted: true,
+        runtimeReuseActual: true,
+        runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:5000" }),
+      },
+      50: {
+        sessionRestarted: true,
+        runtimeReuseActual: true,
+        runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:6000" }),
+      },
+    });
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6BoundedLifecycleSummary({
+        runId,
+        segments,
+        boundedLifecycle: nano6BoundedLifecycleEvidence({
+          processRestartActual: true,
+          identityChangeClassification: "hidden-runtime-reuse",
+          childProcessLifecycle: false,
+          lifecycleTransitions: [
+            { segmentIndex: 25, beforeChildPid: 4242, afterChildPid: 5000, classification: "hidden-runtime-reuse" },
+            { segmentIndex: 50, beforeChildPid: 5000, afterChildPid: 6000, classification: "hidden-runtime-reuse" },
+          ],
+        }),
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/identity.*child-process lifecycle|hidden runtime reuse|lifecycleTransitions/i);
     expect(summary.nano6Readiness).toMatchObject({
       status: "failed",
       key: "boundedLifecycle",

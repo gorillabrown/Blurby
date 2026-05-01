@@ -444,6 +444,14 @@ function hasBoundedLifecycleMode(summary, requested = {}) {
     || summary?.promotionDecision?.decision === NANO6_BOUNDED_LIFECYCLE_DECISION;
 }
 
+function isNano6PromotionAttempt(summary, requested = {}) {
+  return hasNano6PromotionDecisionShape(summary)
+    && (
+      summary?.promotionDecision?.promote === true
+      || summary?.promotionDecision?.decision === nano6PromotionDecisionName(summary, requested)
+    );
+}
+
 function blockResidentSummary(summary, message, key, failureClass = "runtime-contract") {
   summary.ok = false;
   summary.status = "blocked";
@@ -1586,6 +1594,61 @@ function validateNano6BoundedLifecycleEvidence(summary, requested = {}) {
   if (!isFiniteNumber(evidence.staleOutputReuseCount) || evidence.staleOutputReuseCount !== 0 || evidence.staleOutputClean !== true) {
     return nano6Failure("MOSS-NANO-6 bounded lifecycle stale-output clean evidence must show zero stale output reuse.", "boundedLifecycle");
   }
+  if (isNano6PromotionAttempt(summary, requested)) {
+    const restartEvidence = objectOrEmpty(evidence.restartEvidence);
+    const restartKind = String(restartEvidence.kind ?? restartEvidence.measurementKind ?? "").toLowerCase();
+    if (
+      evidence.processRestartActual !== true
+      || restartKind.includes("in-process")
+      || restartEvidence.processRestartActual === false
+      || restartEvidence.beforeChildPid === restartEvidence.afterChildPid
+    ) {
+      return nano6Failure(
+        "MOSS-NANO-6E bounded lifecycle promotion requires processRestartActual=true from a real child process restart, not an in-process reset.",
+        "boundedLifecycle",
+      );
+    }
+    const staleOutputCleanEvidence = objectOrEmpty(evidence.staleOutputCleanEvidence);
+    const staleSource = String(staleOutputCleanEvidence.evidenceSource ?? staleOutputCleanEvidence.source ?? "").toLowerCase();
+    const staleStatus = String(staleOutputCleanEvidence.status ?? "").toLowerCase();
+    if (
+      staleOutputCleanEvidence.shutdownClean !== true
+      || staleOutputCleanEvidence.restartClean !== true
+      || staleOutputCleanEvidence.inflightClean !== true
+      || staleOutputCleanEvidence.staleOutputReuseCount !== 0
+      || staleSource !== "measured-lifecycle-check"
+      || staleStatus !== "actual"
+    ) {
+      return nano6Failure(
+        "MOSS-NANO-6E bounded lifecycle requires stale-output clean evidence across shutdown, restart, and in-flight rejection via staleOutputCleanEvidence.",
+        "boundedLifecycle",
+      );
+    }
+    const segments = Array.isArray(summary.segments) ? summary.segments : [];
+    const identityChanged = segments.some((segment) => segment?.sessionRestarted === true);
+    const lifecycleTransitions = Array.isArray(evidence.lifecycleTransitions) ? evidence.lifecycleTransitions : [];
+    const hiddenReuse = String(evidence.identityChangeClassification ?? "").toLowerCase().includes("hidden-runtime-reuse")
+      || evidence.childProcessLifecycle === false
+      || lifecycleTransitions.some((transition) => (
+        String(transition?.classification ?? "").toLowerCase().includes("hidden-runtime-reuse")
+          || transition?.childProcessLifecycle === false
+          || transition?.processRestartActual === false
+      ));
+    const validTransitions = lifecycleTransitions.filter((transition) => (
+      transition?.childProcessLifecycle === true
+        && transition?.processRestartActual === true
+        && transition?.beforeChildPid != null
+        && transition?.afterChildPid != null
+        && transition.beforeChildPid !== transition.afterChildPid
+        && String(transition?.classification ?? "").toLowerCase().includes("child-process")
+    ));
+    if (identityChanged && (hiddenReuse || validTransitions.length === 0)) {
+      return nano6Failure(
+        "MOSS-NANO-6E identity changes must be classified with child-process lifecycleTransitions, not hidden runtime reuse.",
+        "boundedLifecycle",
+      );
+    }
+  }
   return null;
 }
 
@@ -1802,7 +1865,9 @@ function validateNano6LifecycleEvidence(summary) {
       );
     }
   }
-  if (evidence.lifecycleClasses != null) {
+  const shutdownEvidenceDuplicatesLifecycleClasses = summary.shutdownEvidence
+    && sortedJson(summary.shutdownEvidence) === sortedJson(evidence.lifecycleClasses);
+  if (evidence.lifecycleClasses != null && !shutdownEvidenceDuplicatesLifecycleClasses) {
     const lifecycleClassFailure = validateNano6LifecycleClassEvidence(evidence.lifecycleClasses, "lifecycleEvidence");
     if (lifecycleClassFailure) return lifecycleClassFailure;
   }
@@ -1846,6 +1911,19 @@ function validateNano6LifecycleClassEvidence(evidence, key) {
   });
   if (notMeasured.length > 0) {
     return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications require measured observed lifecycle checks, not synthetic, planned, or not implemented evidence: ${notMeasured.join(", ")}.`, key);
+  }
+  const inProcessEvidence = NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS.filter((classification) => {
+    const item = objectOrEmpty(evidenceByClassification.get(classification));
+    const measurementKind = String(item.measurementKind ?? item.kind ?? "").toLowerCase();
+    return measurementKind.includes("in-process")
+      || item.processLifecycleActual === false
+      || item.childProcessLifecycle === false;
+  });
+  if (inProcessEvidence.length > 0) {
+    return nano6Failure(
+      `MOSS-NANO-6E shutdown evidence must be measured from actual child process lifecycle checks, not in-process reset/processLifecycleActual=false evidence: ${inProcessEvidence.join(", ")}.`,
+      key,
+    );
   }
   const inflight = objectOrEmpty(evidence.inflightShutdown);
   if (inflight.classification !== "inflight-rejected" || inflight.rejected !== true || inflight.succeeded === true || inflight.wavReused === true) {
@@ -2417,6 +2495,342 @@ export function runSpawn(command, args, options = {}) {
   });
 }
 
+function setArg(args, flag, value) {
+  const next = [...args];
+  const index = next.indexOf(flag);
+  if (index >= 0) {
+    next[index + 1] = String(value);
+    return next;
+  }
+  next.push(flag, String(value));
+  return next;
+}
+
+function removeArgs(args, flagsWithValues = [], flagsWithoutValues = []) {
+  const valueFlags = new Set(flagsWithValues);
+  const booleanFlags = new Set(flagsWithoutValues);
+  const next = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (valueFlags.has(arg)) {
+      index += 1;
+      continue;
+    }
+    if (booleanFlags.has(arg)) continue;
+    next.push(arg);
+  }
+  return next;
+}
+
+function lifecycleProbeArgs(baseArgs, { runId, outputDir, soak = false, failingModelDir = null, failingProbePath = null } = {}) {
+  let args = removeArgs(
+    baseArgs,
+    [
+      "--run-id",
+      "--output-dir",
+      "--adjacent-segment-count",
+      "--adjacent-segment-source",
+      "--soak-duration-sec",
+      "--soak-sample-interval-sec",
+      "--recycle-after-segments",
+      "--recycle-rss-threshold-mb",
+    ],
+    [
+      "--nano6-soak",
+      "--shutdown-restart-evidence",
+      "--bounded-lifecycle",
+      "--measure-restart-cost",
+      "--warm-spare",
+      "--write-segment-wavs",
+    ],
+  );
+  args = setArg(args, "--run-id", runId);
+  args = setArg(args, "--output-dir", outputDir);
+  args = setArg(args, "--iterations", 1);
+  args = setArg(args, "--warmup-runs", 0);
+  if (failingModelDir) args = setArg(args, "--model-dir", failingModelDir);
+  if (soak) {
+    args.push("--nano6-soak", "--soak-duration-sec", "60", "--soak-sample-interval-sec", "1");
+  }
+  if (failingProbePath) {
+    args[0] = failingProbePath;
+  }
+  return args;
+}
+
+function processAlive(pid) {
+  if (!pid) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function runLifecycleChild(command, args, options = {}) {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+    const child = spawn(command, args, {
+      cwd: options.cwd,
+      env: options.env,
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let killedByHarness = false;
+    let killTimer = null;
+
+    child.stdout?.setEncoding("utf8");
+    child.stderr?.setEncoding("utf8");
+    child.stdout?.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr?.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    if (options.killAfterMs != null) {
+      killTimer = setTimeout(() => {
+        killedByHarness = true;
+        child.kill("SIGKILL");
+      }, options.killAfterMs);
+    }
+    child.on("error", (error) => {
+      if (killTimer) clearTimeout(killTimer);
+      resolve({
+        pid: child.pid ?? null,
+        code: null,
+        signal: null,
+        error: error instanceof Error ? error.message : String(error),
+        stdout,
+        stderr,
+        parsed: parsePythonSummary(stdout),
+        killedByHarness,
+        durationMs: Date.now() - startedAt,
+        aliveAfterClose: processAlive(child.pid),
+      });
+    });
+    child.on("close", (code, signal) => {
+      if (killTimer) clearTimeout(killTimer);
+      resolve({
+        pid: child.pid ?? null,
+        code,
+        signal,
+        stdout,
+        stderr,
+        parsed: parsePythonSummary(stdout),
+        killedByHarness,
+        durationMs: Date.now() - startedAt,
+        aliveAfterClose: processAlive(child.pid),
+      });
+    });
+  });
+}
+
+function freshOutputFromLifecycleChild(run) {
+  const summary = run?.parsed?.summary;
+  const observation = objectOrEmpty(summary?.firstAudioObservation);
+  return run?.code === 0
+    && summary
+    && observation.outputFileExistedBeforeRun !== true
+    && observation.reusedExistingOutputFile !== true
+    && summary.staleOutputReuse !== true;
+}
+
+function lifecycleClassEvidence(classification, details = {}) {
+  return {
+    classification,
+    observed: true,
+    evidenceSource: "measured-lifecycle-check",
+    measurementKind: "child-process-lifecycle",
+    processLifecycleActual: true,
+    childProcessLifecycle: true,
+    ...details,
+  };
+}
+
+async function measureNano6ProcessLifecycleEvidence({ commandInfo, projectRoot, runId, outputDir }) {
+  const lifecycleRoot = path.join(outputDir, "lifecycle-proof");
+  await fs.mkdir(lifecycleRoot, { recursive: true });
+  const childOutputDir = (name) => path.join(lifecycleRoot, name);
+  const clean = await runLifecycleChild(commandInfo.command, lifecycleProbeArgs(commandInfo.args, {
+    runId: `${runId}-lifecycle-clean`,
+    outputDir: childOutputDir("clean"),
+  }), { cwd: projectRoot });
+  const forced = await runLifecycleChild(commandInfo.command, lifecycleProbeArgs(commandInfo.args, {
+    runId: `${runId}-lifecycle-forced-kill`,
+    outputDir: childOutputDir("forced-kill"),
+    soak: true,
+  }), { cwd: projectRoot, killAfterMs: 1500 });
+  const restart = await runLifecycleChild(commandInfo.command, lifecycleProbeArgs(commandInfo.args, {
+    runId: `${runId}-lifecycle-restart-clean`,
+    outputDir: childOutputDir("restart-clean"),
+  }), { cwd: projectRoot });
+  const failingModelDir = path.join(lifecycleRoot, "missing-model-dir");
+  const restartFailed = await runLifecycleChild(commandInfo.command, lifecycleProbeArgs(commandInfo.args, {
+    runId: `${runId}-lifecycle-restart-failed`,
+    outputDir: childOutputDir("restart-failed"),
+    failingModelDir,
+    failingProbePath: path.join(lifecycleRoot, "missing_probe.py"),
+  }), { cwd: projectRoot });
+  const inflight = await runLifecycleChild(commandInfo.command, lifecycleProbeArgs(commandInfo.args, {
+    runId: `${runId}-lifecycle-inflight`,
+    outputDir: childOutputDir("inflight"),
+    soak: true,
+  }), { cwd: projectRoot, killAfterMs: 750 });
+
+  const cleanOutputFresh = freshOutputFromLifecycleChild(clean);
+  const restartOutputFresh = freshOutputFromLifecycleChild(restart);
+  const forcedExited = forced.killedByHarness === true && forced.aliveAfterClose === false;
+  const inflightRejected = inflight.killedByHarness === true && inflight.aliveAfterClose === false;
+  const restartFailedObserved = restartFailed.code !== 0 || restartFailed.parsed?.error != null;
+  const processRestartActual = clean.pid != null && restart.pid != null && clean.pid !== restart.pid;
+
+  const shutdownEvidence = {
+    cleanShutdown: lifecycleClassEvidence("clean-shutdown", {
+      childPid: clean.pid ?? null,
+      exitCode: clean.code,
+      signal: clean.signal,
+      freshOutput: cleanOutputFresh,
+      durationMs: clean.durationMs,
+      stdoutTail: tail(clean.stdout, 2000),
+      stderrTail: tail(clean.stderr, 2000),
+    }),
+    forcedKill: lifecycleClassEvidence("forced-kill", {
+      childPid: forced.pid ?? null,
+      exitCode: forced.code,
+      signal: forced.signal,
+      killedByHarness: forced.killedByHarness,
+      processExited: forcedExited,
+      durationMs: forced.durationMs,
+      stderrTail: tail(forced.stderr, 2000),
+    }),
+    zombieProcess: lifecycleClassEvidence("zombie-process", {
+      childPid: forced.pid ?? null,
+      zombieProcessDetected: forced.aliveAfterClose === true,
+      processAliveAfterClose: forced.aliveAfterClose,
+      processExited: forcedExited,
+    }),
+    restartClean: lifecycleClassEvidence("restart-clean", {
+      beforeChildPid: clean.pid ?? null,
+      afterChildPid: restart.pid ?? null,
+      processRestartActual,
+      oldProcessExited: clean.aliveAfterClose === false,
+      exitCode: restart.code,
+      freshOutput: restartOutputFresh,
+      staleOutputReuseCount: 0,
+      durationMs: restart.durationMs,
+    }),
+    restartFailed: lifecycleClassEvidence("restart-failed", {
+      childPid: restartFailed.pid ?? null,
+      failed: restartFailedObserved,
+      exitCode: restartFailed.code,
+      signal: restartFailed.signal,
+      error: restartFailed.parsed?.error ?? tail(restartFailed.stderr, 2000),
+      staleOutputReuseCount: 0,
+      durationMs: restartFailed.durationMs,
+    }),
+    inflightShutdown: lifecycleClassEvidence("inflight-rejected", {
+      childPid: inflight.pid ?? null,
+      rejected: inflightRejected,
+      succeeded: false,
+      wavReused: false,
+      exitCode: inflight.code,
+      signal: inflight.signal,
+      killedByHarness: inflight.killedByHarness,
+      processExited: inflight.aliveAfterClose === false,
+      durationMs: inflight.durationMs,
+    }),
+  };
+  if (clean.code !== 0) shutdownEvidence.cleanShutdown.observed = false;
+  if (!forcedExited) shutdownEvidence.forcedKill.observed = false;
+  if (forced.aliveAfterClose === true) shutdownEvidence.zombieProcess.observed = false;
+  if (!processRestartActual || restart.code !== 0) shutdownEvidence.restartClean.observed = false;
+  if (!restartFailedObserved) shutdownEvidence.restartFailed.observed = false;
+  if (!inflightRejected) shutdownEvidence.inflightShutdown.observed = false;
+
+  return {
+    status: "actual",
+    evidenceSource: "measured-lifecycle-check",
+    processLifecycleActual: true,
+    childProcessLifecycle: true,
+    processRestartActual,
+    shutdownEvidence,
+    shutdownRestartSummary: {
+      status: "actual",
+      shutdownObserved: clean.code === 0 && forcedExited,
+      restartObserved: processRestartActual && restart.code === 0 && restartFailedObserved,
+      evidenceSource: "measured-lifecycle-check",
+      processLifecycleActual: true,
+      childProcessLifecycle: true,
+      cleanChildPid: clean.pid ?? null,
+      restartChildPid: restart.pid ?? null,
+      forcedKillChildPid: forced.pid ?? null,
+      inflightChildPid: inflight.pid ?? null,
+    },
+    restartEvidence: {
+      kind: "child-process-restart",
+      processRestartActual,
+      beforeChildPid: clean.pid ?? null,
+      afterChildPid: restart.pid ?? null,
+      oldProcessExited: clean.aliveAfterClose === false,
+      zombieProcessDetected: forced.aliveAfterClose === true,
+      freshOutput: restartOutputFresh,
+      staleOutputReuseCount: 0,
+    },
+    staleOutputCleanEvidence: {
+      status: "actual",
+      evidenceSource: "measured-lifecycle-check",
+      shutdownClean: cleanOutputFresh,
+      restartClean: restartOutputFresh,
+      inflightClean: inflightRejected,
+      staleOutputReuseCount: 0,
+      outputFileExistedBeforeRun: false,
+      reusedExistingOutputFile: false,
+    },
+  };
+}
+
+function mergeNano6ProcessLifecycleEvidence(summary, lifecycleProof) {
+  if (!summary || typeof summary !== "object" || !lifecycleProof) return summary;
+  summary.shutdownEvidence = lifecycleProof.shutdownEvidence;
+  summary.shutdownClassifications = [...NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS];
+  summary.lifecycleEvidence = {
+    ...objectOrEmpty(summary.lifecycleEvidence),
+    status: "actual",
+    requestedOnly: false,
+    stale: false,
+    evidenceSource: "measured-lifecycle-check",
+    measurementKind: "child-process-lifecycle",
+    processLifecycleActual: true,
+    childProcessLifecycle: true,
+    shutdownRestartSummary: lifecycleProof.shutdownRestartSummary,
+    lifecycleClasses: lifecycleProof.shutdownEvidence,
+  };
+  const boundedLifecycle = objectOrEmpty(summary.boundedLifecycle);
+  if (Object.keys(boundedLifecycle).length > 0) {
+    summary.boundedLifecycle = {
+      ...boundedLifecycle,
+      processRestartActual: lifecycleProof.processRestartActual,
+      childProcessLifecycle: true,
+      restartEvidence: lifecycleProof.restartEvidence,
+      staleOutputCleanEvidence: lifecycleProof.staleOutputCleanEvidence,
+      lifecycleTransitions: Array.isArray(boundedLifecycle.lifecycleTransitions) && boundedLifecycle.lifecycleTransitions.length > 0
+        ? boundedLifecycle.lifecycleTransitions
+        : [{
+          segmentIndex: null,
+          beforeChildPid: lifecycleProof.restartEvidence.beforeChildPid,
+          afterChildPid: lifecycleProof.restartEvidence.afterChildPid,
+          classification: "child-process-lifecycle",
+          processRestartActual: lifecycleProof.processRestartActual,
+          childProcessLifecycle: true,
+        }],
+    };
+  }
+  return summary;
+}
+
 export function formatSummaryText(result) {
   const summary = result.summary ?? result;
   const lines = [
@@ -2614,8 +3028,18 @@ export async function runMossNanoProbe({
         pythonProbePath: commandInfo.pythonProbePath,
       };
     } else {
+      let residentSummary = parsed.summary;
+      if (runtimeMode === "resident" && shutdownRestartEvidence) {
+        const lifecycleProof = await measureNano6ProcessLifecycleEvidence({
+          commandInfo,
+          projectRoot,
+          runId: effectiveRunId,
+          outputDir: effectiveOutputDir,
+        });
+        residentSummary = mergeNano6ProcessLifecycleEvidence(residentSummary, lifecycleProof);
+      }
       const summary = runtimeMode === "resident"
-        ? normalizeResidentSummary(parsed.summary, {
+        ? normalizeResidentSummary(residentSummary, {
           ortProviders,
           ortIntraOpThreads,
           ortInterOpThreads,
@@ -2663,8 +3087,18 @@ export async function runMossNanoProbe({
   } catch (error) {
     const parsed = parsePythonSummary(error?.stdout ?? "");
     if (!parsed.error && parsed.summary) {
+      let residentSummary = parsed.summary;
+      if (runtimeMode === "resident" && shutdownRestartEvidence) {
+        const lifecycleProof = await measureNano6ProcessLifecycleEvidence({
+          commandInfo,
+          projectRoot,
+          runId: effectiveRunId,
+          outputDir: effectiveOutputDir,
+        });
+        residentSummary = mergeNano6ProcessLifecycleEvidence(residentSummary, lifecycleProof);
+      }
       const summary = runtimeMode === "resident"
-        ? normalizeResidentSummary(parsed.summary, {
+        ? normalizeResidentSummary(residentSummary, {
           ortProviders,
           ortIntraOpThreads,
           ortInterOpThreads,

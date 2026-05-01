@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-01 — `MOSS-NANO-6D` closed as `ITERATE_NANO_RESIDENT_RUNTIME`; bounded in-process reset improved memory/tail metrics, but shutdown/restart lifecycle promotion remains blocked.
+**Last updated**: 2026-05-01 — `MOSS-NANO-6E` closed as `ITERATE_NANO_RESIDENT_RUNTIME`; truthful child-process shutdown/restart lifecycle proof is implemented and observed, but app-prototype promotion remains gated until a full 1800s/100-segment bounded run carries that proof.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4/MOSS-NANO-5/MOSS-NANO-5B/MOSS-NANO-5C/MOSS-NANO-6/MOSS-NANO-6B/MOSS-NANO-6C/MOSS-NANO-6D evidence is recorded. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-6D tested bounded resident lifecycle control with in-process runtime reset after RSS threshold; the full 30-minute bounded soak completed `100/100` fresh adjacent segments with stale output reuse `0`, same-identity `runtimeReuseActual: false`, bounded recycle evidence `boundedRuntimeReuseActual: true`, p95 first decoded `264ms`, p95 final RTF `0.4631`, readiness memory slope `0.3555MB/min`, post-warmup slope `0`, and `99` measured recycles. It did not implement true child-process restart or shutdown lifecycle classes: `processRestartActual: false`, clean/forced/zombie/restart/in-flight classes remain `not-observed`/`not-implemented`, and readiness failed on `shutdownEvidence`. No Nano app integration is approved now, no MOSS-3 reopen occurred, no sidecar IPC/renderer/selectable-engine/cache integration was added, no `.runtime` files are committed, and Kokoro behavior is unchanged.
+**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4/MOSS-NANO-5/MOSS-NANO-5B/MOSS-NANO-5C/MOSS-NANO-6/MOSS-NANO-6B/MOSS-NANO-6C/MOSS-NANO-6D/MOSS-NANO-6E evidence is recorded. Kokoro remains the operational floor and only integrated engine. MOSS-NANO-6D proved bounded in-process reset can make memory/tail metrics plausible in a full 30-minute/100-segment run. MOSS-NANO-6E then implemented real child-process lifecycle proof: `shutdownObserved: true`, `restartObserved: true`, `processRestartActual: true`, forced kill/no-zombie observed, restart-failed observed, in-flight shutdown rejected, and stale output reuse `0` in `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json`. Because 6E was a short proof (`2/2` adjacent, not 1800s/100 segments), it did not promote Nano. No Nano app integration is approved now, no MOSS-3 reopen occurred, no sidecar IPC/renderer/selectable-engine/cache integration was added, no `.runtime` files are committed, and Kokoro behavior is unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -145,6 +145,8 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     MOSS-NANO-6C: Memory / Tail-Latency / Lifecycle Fix ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
                     │
     MOSS-NANO-6D: Bounded Resident Lifecycle / Process Recycling ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
+                    │
+    MOSS-NANO-6E: Shutdown / Restart Lifecycle Proof ✅ (ITERATE_NANO_RESIDENT_RUNTIME)
                     │
     MOSS-NANO-7: Sidecar Contract + IPC Prototype (CONDITIONAL on promotion)
                     │
@@ -4182,7 +4184,7 @@ Task 6         — after Task 5 (git)
 
 ### Flagship-First MOSS Operational Narration Lane
 
-**Program status:** NANO RESIDENT RUNTIME ITERATION ACTIVE; APP INTEGRATION GATED. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, `MOSS-NANO-3`, `MOSS-NANO-4`, `MOSS-NANO-5`, `MOSS-NANO-5B`, `MOSS-NANO-5C`, `MOSS-NANO-6`, `MOSS-NANO-6B`, `MOSS-NANO-6C`, and `MOSS-NANO-6D` are historical evidence sprints. `MOSS-NANO-6D` proved bounded in-process recycle can make memory slope and p95 RTF plausible, but it did not prove shutdown/restart lifecycle or child-process recycling; next Nano work may continue only runtime lifecycle/process-boundary hardening. `MOSS-NANO-7` through `MOSS-NANO-11` remain conditional and must not be dispatched until the decision log records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`, or a stricter equivalent promotion decision. Legacy flagship `MOSS-3` through `MOSS-7` remain superseded/paused unless a separate flagship promotion decision is recorded. The latest valid MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not app-prototype promotion.
+**Program status:** NANO RESIDENT RUNTIME ITERATION ACTIVE; APP INTEGRATION GATED. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, `MOSS-NANO-3`, `MOSS-NANO-4`, `MOSS-NANO-5`, `MOSS-NANO-5B`, `MOSS-NANO-5C`, `MOSS-NANO-6`, `MOSS-NANO-6B`, `MOSS-NANO-6C`, `MOSS-NANO-6D`, and `MOSS-NANO-6E` are historical evidence sprints. `MOSS-NANO-6D` proved bounded in-process recycle can make memory slope and p95 RTF plausible, and `MOSS-NANO-6E` proved truthful child-process shutdown/restart lifecycle in a short confirmation run. Next Nano work may continue only as a runtime-only full bounded gate confirmation that carries `--shutdown-restart-evidence`; app integration remains gated. `MOSS-NANO-7` through `MOSS-NANO-11` remain conditional and must not be dispatched until the decision log records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`, or a stricter equivalent promotion decision. Legacy flagship `MOSS-3` through `MOSS-7` remain superseded/paused unless a separate flagship promotion decision is recorded. The latest valid MOSS decision is `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not app-prototype promotion.
 
 #### Sprint MOSS-HOST-1: Native/WSL Runtime Escape Hatch (COMPLETED)
 
@@ -4456,6 +4458,26 @@ Supporting diagnostics: `moss-nano-5c-short-resident-decode-full-diagnostic` mea
 **Decision rationale:** The segment-first product-path evidence passed the 5C soak-candidate thresholds without requiring decode-full or precompute. Precompute remains non-product-required for this gate, and decode-full remains diagnostic/non-product. `MOSS-NANO-6` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so app integration remains locked behind a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision.
 
 **Tier:** Runtime gate closeout | **Depends on:** MOSS-NANO-5B
+
+---
+
+#### Sprint MOSS-NANO-6E: Shutdown / Restart Lifecycle Proof (COMPLETED)
+
+**Status:** Completed 2026-05-01 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. Nano was not promoted to app prototype; no app integration was unlocked.
+
+**Type:** Runtime lifecycle proof. No renderer/app integration and no Kokoro behavior change.
+
+**Canonical artifact:**
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json` | Child-process lifecycle proof observed `shutdownObserved: true`, `restartObserved: true`, `processRestartActual: true`, clean child PID `24484`, restart child PID `3408`, forced-kill child PID `27340`, no zombie, restart-failed exit `2`, in-flight shutdown rejected, stale output reuse `0`, and bounded short confirmation `2/2` fresh with p95 post-recycle RTF `1.4647`. The artifact is intentionally `not-promoting` because it is not the full 1800-second/100-segment gate. |
+
+**Hardening:** `scripts/moss_nano_probe.mjs --shutdown-restart-evidence` now measures clean shutdown, forced kill, no-zombie, restart-clean, restart-failed, and in-flight rejection around actual child probe processes. Bounded lifecycle promotion requires child-process restart proof, measured lifecycle classes, stale-output clean evidence across shutdown/restart/in-flight, and no hidden runtime reuse classification. In-process bounded reset remains separate from process restart.
+
+**Verification:** Focused Nano probe tests passed `132/132`; the real lifecycle proof command exited `0`.
+
+**Decision rationale:** MOSS-NANO-6E closes the truthful lifecycle proof blocker from 6D, but it does not replace the full promotion artifact. Continue runtime iteration until a full 1800-second/100-segment bounded run carries this child-process lifecycle proof and still clears memory, RTF, stale-output, crash, package, and readiness gates.
 
 ---
 
@@ -4809,9 +4831,9 @@ Herodotus/Hermes [sonnet/haiku]: Update roadmap/queue/runbooks, commit, merge, p
 - Preserve Kokoro as the operational floor. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate Kokoro-retirement lane is approved.
 - Do not silently fall back from selected MOSS to Kokoro or Web Speech. MOSS unavailable states must be truthful and recoverable.
 - Do not fake word timing. If MOSS lacks trusted word timestamps, Narrate follows natural segments and commits global anchors only at truthful boundaries.
-- Keep Nano out of app integration until promoted. `MOSS-NANO-5C` closed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`, but `MOSS-NANO-6B` and `MOSS-NANO-6C` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so Nano app onboarding (`MOSS-NANO-7` through `MOSS-NANO-11`) must not start without an explicit app-prototype promotion decision.
+- Keep Nano out of app integration until promoted. `MOSS-NANO-5C` closed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`, but `MOSS-NANO-6B` through `MOSS-NANO-6E` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so Nano app onboarding (`MOSS-NANO-7` through `MOSS-NANO-11`) must not start without an explicit app-prototype promotion decision.
 
-**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-5C proved the segment-first runtime path earned a soak-candidate gate, but MOSS-NANO-6B and MOSS-NANO-6C did not clear memory, tail-latency/RTF, lifecycle, and package-readiness promotion gates. App prototype work requires a later explicit promotion decision after runtime and soak evidence proves live-book first-audio, realtime behavior, memory stability, packaging feasibility, lifecycle shutdown classes, true session reuse, trustworthy internal first-decoded timing, applied ORT/session options, and truthful segment/anchor behavior without requiring unproven precompute success.
+**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-5C proved the segment-first runtime path earned a soak-candidate gate, MOSS-NANO-6D made bounded runtime memory/tail metrics plausible, and MOSS-NANO-6E proved truthful child-process shutdown/restart lifecycle in a short confirmation run. App prototype work still requires a later explicit promotion decision after a full bounded soak carries lifecycle proof and proves live-book first-audio, realtime behavior, memory stability, packaging feasibility, lifecycle shutdown classes, true session reuse, trustworthy internal first-decoded timing, applied ORT/session options, and truthful segment/anchor behavior without requiring unproven precompute success.
 
 #### Sprint MOSS-RCA-1: Flagship Runtime Root-Cause Autopsy (COMPLETED)
 
