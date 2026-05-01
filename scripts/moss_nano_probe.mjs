@@ -32,12 +32,22 @@ const NANO5C_SEGMENT_FIRST_SOAK_TARGET = "nano5c-segment-first-soak";
 const NANO5C_SEGMENT_FIRST_SOAK_DECISION = "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE";
 const NANO6_APP_PROTOTYPE_TARGET = "app-prototype";
 const NANO6_APP_PROTOTYPE_DECISION = "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE";
+const NANO6_BOUNDED_LIFECYCLE_DECISION = "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE";
 const NANO6_ITERATE_DECISION = "ITERATE_NANO_RESIDENT_RUNTIME";
 const NANO6_PAUSE_DECISION = "PAUSE_NANO_RUNTIME_RELIABILITY";
-const NANO6_DECISIONS = new Set([
+const NANO6_LEGACY_DECISIONS = new Set([
   NANO6_APP_PROTOTYPE_DECISION,
   NANO6_ITERATE_DECISION,
   NANO6_PAUSE_DECISION,
+]);
+const NANO6_BOUNDED_LIFECYCLE_DECISIONS = new Set([
+  NANO6_BOUNDED_LIFECYCLE_DECISION,
+  NANO6_ITERATE_DECISION,
+  NANO6_PAUSE_DECISION,
+]);
+const NANO6_DECISIONS = new Set([
+  ...NANO6_LEGACY_DECISIONS,
+  NANO6_BOUNDED_LIFECYCLE_DECISION,
 ]);
 const NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS = Object.freeze([
   "clean-shutdown",
@@ -284,6 +294,22 @@ export function parseArgs(argv = process.argv.slice(2)) {
       index += 1;
     } else if (arg === "--shutdown-restart-evidence" || arg === "--shutdown-evidence" || arg === "--restart-evidence") {
       args.shutdownRestartEvidence = true;
+    } else if (arg === "--bounded-lifecycle") {
+      args.boundedLifecycle = true;
+    } else if (arg === "--recycle-after-segments") {
+      args.recycleAfterSegments = positiveInteger(requireValue(argv, index, arg), arg);
+      index += 1;
+    } else if (arg === "--recycle-rss-threshold-mb") {
+      const value = Number.parseFloat(requireValue(argv, index, arg));
+      if (!Number.isFinite(value) || value <= 0) {
+        throw new Error(`${arg} requires a positive number`);
+      }
+      args.recycleRssThresholdMb = value;
+      index += 1;
+    } else if (arg === "--measure-restart-cost") {
+      args.measureRestartCost = true;
+    } else if (arg === "--warm-spare") {
+      args.warmSpare = true;
     } else if (arg === "--promotion-target") {
       args.promotionTarget = promotionTarget(requireValue(argv, index, arg), arg);
       index += 1;
@@ -410,6 +436,12 @@ function hasNano6PromotionDecisionShape(summary) {
   return target === NANO6_APP_PROTOTYPE_TARGET
     || summary.nano6Readiness?.gate === NANO6_APP_PROTOTYPE_TARGET
     || NANO6_DECISIONS.has(decision);
+}
+
+function hasBoundedLifecycleMode(summary, requested = {}) {
+  return requested.boundedLifecycle === true
+    || summary?.boundedLifecycle != null
+    || summary?.promotionDecision?.decision === NANO6_BOUNDED_LIFECYCLE_DECISION;
 }
 
 function blockResidentSummary(summary, message, key, failureClass = "runtime-contract") {
@@ -1299,6 +1331,7 @@ function percentile(values, percentileValue) {
 
 function hasNano6ReadinessShape(summary, requested = {}) {
   if (requested.nano6Soak === true) return true;
+  if (requested.boundedLifecycle === true) return true;
   if (requested.promotionTarget === NANO6_APP_PROTOTYPE_TARGET) return true;
   const target = summary?.promotionTarget ?? summary?.promotionDecision?.target ?? null;
   const decision = summary?.promotionDecision?.decision ?? null;
@@ -1332,6 +1365,27 @@ function normalizeNano6ReadinessEvidence(summary, requested = {}) {
 
   if (summary.promotionTarget == null && requested.promotionTarget === NANO6_APP_PROTOTYPE_TARGET) {
     summary.promotionTarget = NANO6_APP_PROTOTYPE_TARGET;
+  }
+  if (summary.promotionTarget == null && hasBoundedLifecycleMode(summary, requested)) {
+    summary.promotionTarget = NANO6_APP_PROTOTYPE_TARGET;
+  }
+  if (summary.boundedLifecycle && typeof summary.boundedLifecycle === "object" && !Array.isArray(summary.boundedLifecycle)) {
+    if (requested.recycleAfterSegments != null && summary.boundedLifecycle.recycleAfterSegments == null) {
+      summary.boundedLifecycle.recycleAfterSegments = requested.recycleAfterSegments;
+    }
+    if (requested.recycleRssThresholdMb != null && summary.boundedLifecycle.recycleRssThresholdMb == null) {
+      summary.boundedLifecycle.recycleRssThresholdMb = requested.recycleRssThresholdMb;
+    }
+    if (requested.measureRestartCost != null && summary.boundedLifecycle.measureRestartCost == null) {
+      summary.boundedLifecycle.measureRestartCost = Boolean(requested.measureRestartCost);
+    }
+    if (requested.warmSpare != null && summary.boundedLifecycle.warmSpare == null) {
+      summary.boundedLifecycle.warmSpare = {
+        actual: false,
+        requested: Boolean(requested.warmSpare),
+        unsupported: true,
+      };
+    }
   }
 
   if (summary.bookLikeAdjacentRun == null && Array.isArray(summary.segments) && summary.segments.length > 0) {
@@ -1445,24 +1499,108 @@ function withNano6ReadinessFailureDetails(readiness, failures) {
 function collectNano6ReadinessFailures(summary) {
   return [
     validateNano6LifecycleEvidence(summary),
+    validateNano6BoundedLifecycleEvidence(summary),
     validateNano6Soak(summary),
     validateNano6BookLikeAdjacentRun(summary),
     validateNano6ShutdownEvidence(summary),
   ].filter(Boolean);
 }
 
-function validateNano6PromotionDecision(summary) {
+function nano6AllowedDecisionSet(summary, requested = {}) {
+  return hasBoundedLifecycleMode(summary, requested)
+    ? NANO6_BOUNDED_LIFECYCLE_DECISIONS
+    : NANO6_LEGACY_DECISIONS;
+}
+
+function nano6PromotionDecisionName(summary, requested = {}) {
+  return hasBoundedLifecycleMode(summary, requested)
+    ? NANO6_BOUNDED_LIFECYCLE_DECISION
+    : NANO6_APP_PROTOTYPE_DECISION;
+}
+
+function nano6DecisionSetMessage(summary, requested = {}) {
+  const decisions = Array.from(nano6AllowedDecisionSet(summary, requested)).join(", ");
+  return `MOSS-NANO-6 promotion decision must be ${decisions}.`;
+}
+
+function isMeasuredBoundedLifecycle(summary) {
+  return validateNano6BoundedLifecycleEvidence(summary) == null
+    && objectOrEmpty(summary.boundedLifecycle).actual === true;
+}
+
+function validateNano6PromotionDecision(summary, requested = {}) {
   const decision = String(summary.promotionDecision?.decision ?? "");
   const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
   const promote = summary.promotionDecision?.promote === true;
-  if (!NANO6_DECISIONS.has(decision)) {
-    return nano6Failure("MOSS-NANO-6 promotion decision must be PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE, ITERATE_NANO_RESIDENT_RUNTIME, or PAUSE_NANO_RUNTIME_RELIABILITY.", "promotionDecision");
+  const allowedDecisions = nano6AllowedDecisionSet(summary, requested);
+  const promotionDecision = nano6PromotionDecisionName(summary, requested);
+  if (!allowedDecisions.has(decision)) {
+    return nano6Failure(nano6DecisionSetMessage(summary, requested), "promotionDecision");
   }
-  if (promote && (decision !== NANO6_APP_PROTOTYPE_DECISION || target !== NANO6_APP_PROTOTYPE_TARGET)) {
-    return nano6Failure("MOSS-NANO-6 app prototype promotion requires target app-prototype and PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE.", "promotionDecision");
+  if (promote && (decision !== promotionDecision || target !== NANO6_APP_PROTOTYPE_TARGET)) {
+    return nano6Failure(`MOSS-NANO-6 app prototype promotion requires target app-prototype and ${promotionDecision}.`, "promotionDecision");
   }
-  if (!promote && decision === NANO6_APP_PROTOTYPE_DECISION) {
+  if (!promote && decision === promotionDecision) {
     return nano6Failure("MOSS-NANO-6 app prototype decision cannot be non-promoting.", "promotionDecision");
+  }
+  return null;
+}
+
+function validateNano6BoundedLifecycleEvidence(summary, requested = {}) {
+  if (!hasBoundedLifecycleMode(summary, requested)) return null;
+  const evidence = objectOrEmpty(summary.boundedLifecycle);
+  if (!summary.boundedLifecycle) {
+    return nano6Failure("MOSS-NANO-6 bounded lifecycle evidence is required when bounded lifecycle is requested.", "boundedLifecycle");
+  }
+  const status = String(evidence.status ?? "").toLowerCase();
+  const source = String(evidence.evidenceSource ?? evidence.source ?? "").toLowerCase();
+  const synthetic = evidence.synthetic === true
+    || ["synthetic", "planned", "requested", "not-implemented", "not-observed"].some((marker) => status.includes(marker) || source.includes(marker));
+  if (evidence.actual !== true || status !== "actual" || source !== "measured-bounded-lifecycle" || synthetic) {
+    return nano6Failure("MOSS-NANO-6 bounded lifecycle evidence must be actual measured-bounded-lifecycle evidence, not synthetic or not implemented.", "boundedLifecycle");
+  }
+  const missingCostStats = [
+    "p50RestartCostMs",
+    "p95RestartCostMs",
+    "p50PrewarmCostMs",
+    "p95PrewarmCostMs",
+  ].filter((key) => !isFiniteNumber(evidence[key]));
+  if (evidence.measureRestartCost !== true || missingCostStats.length > 0) {
+    return nano6Failure(
+      `MOSS-NANO-6 bounded lifecycle requires p50/p95 restart and prewarm cost stats: ${missingCostStats.join(", ") || "measureRestartCost"}.`,
+      "boundedLifecycle",
+    );
+  }
+  if (!isFiniteNumber(evidence.recycleCount) || evidence.recycleCount <= 0 || !Array.isArray(evidence.recycleReasons) || evidence.recycleReasons.length === 0 || !Array.isArray(evidence.segmentsPerRuntime) || evidence.segmentsPerRuntime.length < 2) {
+    return nano6Failure("MOSS-NANO-6 bounded lifecycle requires recycleCount, recycle reasons, and segmentsPerRuntime distribution.", "boundedLifecycle");
+  }
+  const tailEvidence = objectOrEmpty(evidence.tailEvidence);
+  if (
+    !Array.isArray(tailEvidence.postRecycleSegmentIndices)
+    || tailEvidence.postRecycleSegmentIndices.length === 0
+    || !isFiniteNumber(tailEvidence.p95PostRecycleFirstAudioMs)
+    || !isFiniteNumber(tailEvidence.p95PostRecycleRtf)
+  ) {
+    return nano6Failure("MOSS-NANO-6 bounded lifecycle requires post-recycle segment indices and p95 first audio/RTF tail evidence.", "boundedLifecycle");
+  }
+  if (!isFiniteNumber(evidence.staleOutputReuseCount) || evidence.staleOutputReuseCount !== 0 || evidence.staleOutputClean !== true) {
+    return nano6Failure("MOSS-NANO-6 bounded lifecycle stale-output clean evidence must show zero stale output reuse.", "boundedLifecycle");
+  }
+  return null;
+}
+
+function validateNano6StaleOutputEvidence(summary) {
+  const soak = objectOrEmpty(summary.residentSoak);
+  const run = objectOrEmpty(summary.bookLikeAdjacentRun);
+  const segments = Array.isArray(summary.segments) ? summary.segments : [];
+  const staleSegment = segments.some((segment) => (
+    segment?.staleOutputReuse
+      || segment?.fresh === false
+      || segment?.firstAudioObservation?.outputFileExistedBeforeRun
+      || segment?.firstAudioObservation?.reusedExistingOutputFile
+  ));
+  if (Number(soak.staleOutputReuseCount ?? 0) > 0 || Number(run.staleOutputReuseCount ?? 0) > 0 || staleSegment) {
+    return nano6Failure("MOSS-NANO-6 stale output reuse is forbidden across resident and bounded lifecycle recycle runs.", "staleOutputReuse");
   }
   return null;
 }
@@ -1538,7 +1676,7 @@ function validateNano6Soak(summary) {
   if (Number(soak.staleOutputReuseCount ?? 0) > thresholds.staleOutputReuseMax) {
     return nano6Failure("MOSS-NANO-6 resident soak has stale output reuse.", "staleOutputReuse");
   }
-  if (Number(soak.sessionRestartCount ?? 0) > thresholds.sessionRestartMax) {
+  if (!isMeasuredBoundedLifecycle(summary) && Number(soak.sessionRestartCount ?? 0) > thresholds.sessionRestartMax) {
     return nano6Failure("MOSS-NANO-6 resident soak has a session/runtime identity restart.", "runtimeIdentity");
   }
   return null;
@@ -1576,7 +1714,7 @@ function validateNano6BookLikeAdjacentRun(summary) {
   const identityChanged = segments.some((segment) => (
     segment?.sessionRestarted || sortedJson(segment?.runtimeIdentity) !== sortedJson(firstIdentity)
   ));
-  if (Number(run.sessionRestartCount ?? 0) > thresholds.sessionRestartMax || identityChanged) {
+  if (!isMeasuredBoundedLifecycle(summary) && (Number(run.sessionRestartCount ?? 0) > thresholds.sessionRestartMax || identityChanged)) {
     return nano6Failure("MOSS-NANO-6 adjacent run has a session/runtime identity change.", "runtimeIdentity");
   }
   const wavs = segments.map((segment) => segment?.outputWavPath).filter(Boolean);
@@ -1719,9 +1857,13 @@ function validateNano6LifecycleClassEvidence(evidence, key) {
 function validateNano6Readiness(summary, requested = {}) {
   if (!hasNano6ReadinessShape(summary, requested)) return null;
   normalizeNano6ReadinessEvidence(summary, requested);
-  const decisionFailure = validateNano6PromotionDecision(summary);
+  const staleOutputFailure = validateNano6StaleOutputEvidence(summary);
+  if (staleOutputFailure) return markNano6ReadinessFailure(summary, staleOutputFailure);
+  const boundedLifecycleFailure = validateNano6BoundedLifecycleEvidence(summary, requested);
+  if (boundedLifecycleFailure) return markNano6ReadinessFailure(summary, boundedLifecycleFailure);
+  const decisionFailure = validateNano6PromotionDecision(summary, requested);
   if (decisionFailure) return markNano6ReadinessFailure(summary, decisionFailure);
-  if (summary.promotionDecision?.decision !== NANO6_APP_PROTOTYPE_DECISION) {
+  if (summary.promotionDecision?.decision !== nano6PromotionDecisionName(summary, requested)) {
     const failures = collectNano6ReadinessFailures(summary);
     summary.nano6Readiness = {
       ...withNano6ReadinessFailureDetails({
@@ -2022,10 +2164,28 @@ function normalizeResidentSummary(summary, requested = {}) {
     const records = residentRunRecords(summary);
     const identities = records.map((record) => record?.runtimeIdentity ?? summary.runtimeIdentity);
     const firstIdentity = identities[0];
+    const boundedRestartEvidence = hasBoundedLifecycleMode(summary, requested) && (
+      Number(summary.residentSoak?.sessionRestartCount ?? 0) > 0
+        || Number(summary.bookLikeAdjacentRun?.sessionRestartCount ?? 0) > 0
+        || Number(summary.promotionMetrics?.sessionRestartCount ?? 0) > 0
+        || Number(summary.promotionMetrics?.adjacentSessionRestartCount ?? 0) > 0
+        || (Array.isArray(summary.segments) && summary.segments.some((segment) => segment?.sessionRestarted === true))
+    );
     const reuseProven = identities.length > 0
       && identities.every(hasStableResidentIdentity)
       && identities.every((identity) => sortedJson(identity) === sortedJson(firstIdentity));
-    if (!reuseProven) {
+    if ((!reuseProven || boundedRestartEvidence) && hasBoundedLifecycleMode(summary, requested)) {
+      if (summary.benchmark) summary.benchmark.runtimeReuseActual = false;
+      for (const record of records) record.runtimeReuseActual = false;
+      for (const segment of Array.isArray(summary.segments) ? summary.segments : []) {
+        if (segment) segment.runtimeReuseActual = false;
+      }
+      summary.boundedLifecycle = {
+        ...objectOrEmpty(summary.boundedLifecycle),
+        residentIdentityReuseActual: false,
+        boundedRuntimeReuseActual: objectOrEmpty(summary.boundedLifecycle).actual === true,
+      };
+    } else if (!reuseProven) {
       if (summary.benchmark) summary.benchmark.runtimeReuseActual = false;
       for (const record of records) record.runtimeReuseActual = false;
       contractMessage = "Resident runtime reuse could not be proven from stable process/session identity.";
@@ -2124,6 +2284,11 @@ export function buildPythonCommand({
   soakDurationSec,
   soakSampleIntervalSec,
   shutdownRestartEvidence,
+  boundedLifecycle,
+  recycleAfterSegments,
+  recycleRssThresholdMb,
+  measureRestartCost,
+  warmSpare,
   allowEmptyPassage,
 } = {}) {
   const defaults = defaultOptions(projectRoot);
@@ -2131,6 +2296,8 @@ export function buildPythonCommand({
   const residentMode = runtimeMode === "resident";
   const pythonProbePath = path.join(projectRoot, residentMode ? PYTHON_RESIDENT_PROBE_RELATIVE_PATH : PYTHON_PROBE_RELATIVE_PATH);
   const effectivePassageId = resolvePassageId(passageId ?? defaults.passageId);
+  const effectiveAdjacentSegmentSource = adjacentSegmentSource
+    ?? (boundedLifecycle && adjacentSegmentCount != null ? "book-like" : null);
   const args = [
     pythonProbePath,
     "--run-id",
@@ -2197,12 +2364,17 @@ export function buildPythonCommand({
   if (residentDecodeMode) args.push("--resident-decode-mode", residentDecodeMode);
   if (streamDecodeFrameBudget != null) args.push("--stream-decode-frame-budget", String(streamDecodeFrameBudget));
   if (adjacentSegmentCount != null) args.push("--adjacent-segment-count", String(adjacentSegmentCount));
-  if (adjacentSegmentSource) args.push("--adjacent-segment-source", adjacentSegmentSource);
+  if (effectiveAdjacentSegmentSource) args.push("--adjacent-segment-source", effectiveAdjacentSegmentSource);
   if (adjacentSegmentRtfTrendMax != null) args.push("--adjacent-segment-rtf-trend-max", String(adjacentSegmentRtfTrendMax));
   if (nano6Soak) args.push("--nano6-soak");
   if (soakDurationSec != null) args.push("--soak-duration-sec", String(soakDurationSec));
   if (soakSampleIntervalSec != null) args.push("--soak-sample-interval-sec", String(soakSampleIntervalSec));
   if (shutdownRestartEvidence) args.push("--shutdown-restart-evidence");
+  if (boundedLifecycle) args.push("--bounded-lifecycle");
+  if (recycleAfterSegments != null) args.push("--recycle-after-segments", String(recycleAfterSegments));
+  if (recycleRssThresholdMb != null) args.push("--recycle-rss-threshold-mb", String(recycleRssThresholdMb));
+  if (measureRestartCost) args.push("--measure-restart-cost");
+  if (warmSpare) args.push("--warm-spare");
 
   return { command, args, pythonExecutable: command, pythonProbePath };
 }
@@ -2336,6 +2508,11 @@ export async function runMossNanoProbe({
   soakDurationSec,
   soakSampleIntervalSec,
   shutdownRestartEvidence,
+  boundedLifecycle,
+  recycleAfterSegments,
+  recycleRssThresholdMb,
+  measureRestartCost,
+  warmSpare,
   allowEmptyPassage,
   execFile = runSpawn,
   fsModule = fs,
@@ -2411,6 +2588,11 @@ export async function runMossNanoProbe({
     soakDurationSec,
     soakSampleIntervalSec,
     shutdownRestartEvidence,
+    boundedLifecycle,
+    recycleAfterSegments,
+    recycleRssThresholdMb,
+    measureRestartCost,
+    warmSpare,
     allowEmptyPassage,
   });
 
@@ -2461,6 +2643,11 @@ export async function runMossNanoProbe({
           soakDurationSec,
           soakSampleIntervalSec,
           shutdownRestartEvidence,
+          boundedLifecycle,
+          recycleAfterSegments,
+          recycleRssThresholdMb,
+          measureRestartCost,
+          warmSpare,
         })
         : parsed.summary;
       result = {
@@ -2505,6 +2692,11 @@ export async function runMossNanoProbe({
           soakDurationSec,
           soakSampleIntervalSec,
           shutdownRestartEvidence,
+          boundedLifecycle,
+          recycleAfterSegments,
+          recycleRssThresholdMb,
+          measureRestartCost,
+          warmSpare,
         })
         : parsed.summary;
       result = {
@@ -2595,6 +2787,11 @@ function helpText() {
     "  --soak-duration-sec <n>",
     "  --soak-sample-interval-sec <n>",
     "  --shutdown-restart-evidence",
+    "  --bounded-lifecycle",
+    "  --recycle-after-segments <n>",
+    "  --recycle-rss-threshold-mb <mb>",
+    "  --measure-restart-cost",
+    "  --warm-spare",
     "  --promotion-target <target>",
     "  --nano5c-segment-first-soak",
   ].join("\n");
@@ -2663,6 +2860,11 @@ export async function main(argv = process.argv.slice(2)) {
     soakDurationSec: args.soakDurationSec,
     soakSampleIntervalSec: args.soakSampleIntervalSec,
     shutdownRestartEvidence: args.shutdownRestartEvidence,
+    boundedLifecycle: args.boundedLifecycle,
+    recycleAfterSegments: args.recycleAfterSegments,
+    recycleRssThresholdMb: args.recycleRssThresholdMb,
+    measureRestartCost: args.measureRestartCost,
+    warmSpare: args.warmSpare,
   });
 
   process.stdout.write(args.json ? `${JSON.stringify(result, null, 2)}\n` : formatSummaryText(result));

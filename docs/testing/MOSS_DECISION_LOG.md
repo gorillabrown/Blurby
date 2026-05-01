@@ -1,9 +1,9 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-6C
+**Sprint:** MOSS-1 through MOSS-NANO-6D
 **Initial status:** `INVESTIGATE`
 **Current status:** `ITERATE_NANO_RESIDENT_RUNTIME`
-**Last updated:** 2026-04-30
+**Last updated:** 2026-05-01
 
 ## Status Values
 
@@ -26,6 +26,8 @@
 | `ITERATE_NANO_RESIDENT_RUNTIME` | Continue resident Nano runtime tuning/soak/perf only because true reuse and internal first-decoded timing are proven, but promotion thresholds and memory-soak confidence are not met. |
 | `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE` | Promote Nano only to the next runtime soak/package gate because segment-first product-path evidence passed; this is not app prototype promotion and does not unlock app integration. |
 | `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` | Promote Nano from runtime evidence into the gated app-prototype path only after soak, lifecycle, package, provisioning, and adjacent-segment evidence all pass; this unlocks MOSS-NANO-7 but does not retire Kokoro. |
+| `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE` | Promote Nano from runtime evidence into the gated app-prototype path only when bounded lifecycle evidence includes measured recycle/reset, restart/prewarm cost, stale-output safety, memory/tail gates, and truthful shutdown/restart lifecycle coverage; this unlocks MOSS-NANO-7 but does not retire Kokoro. |
+| `PAUSE_NANO_RUNTIME_RELIABILITY` | Pause Nano runtime reliability work when bounded recycle/reset evidence cannot make memory, tail latency, or lifecycle gates plausible enough for more runtime iteration. |
 | `KEEP_KOKORO_ONLY` | Historical Nano runtime-rescue decision from MOSS-NANO-2. It is not exposed as a Nano-6 readiness decision; Nano-6 readiness uses only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
 
@@ -735,14 +737,53 @@ Next actions:
 - Next Nano work must remain runtime iteration/hardening only.
 - No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
 
+## MOSS-NANO-6D Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`. Nano was not promoted to app prototype, no app integration was unlocked, and Kokoro remains the default and only integrated engine.
+
+Scope: MOSS-NANO-6D was a runtime-only bounded lifecycle/process recycling sprint. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+
+Canonical artifacts:
+
+| Evidence item | Result |
+|---|---|
+| Bounded 30-minute soak | `artifacts/moss/moss-nano-6d-bounded-soak-1800-rss-threshold/summary.json`: requested `1800s`; measured `1800.0033s`; `100/100` adjacent fresh; stale output reuse `0`; same-identity `runtimeReuseActual: false`; bounded recycle evidence `boundedRuntimeReuseActual: true`; `99` RSS-threshold recycles; bounded lifecycle actual for measured in-process reset; `processRestartActual: false`; readiness memory slope `0.3555MB/min`; post-warmup slope `0`; p95 first decoded `264ms`; p95 final RTF `0.4631`; readiness failed on `shutdownEvidence`. |
+| Targeted RSS threshold | `artifacts/moss/moss-nano-6d-rss-threshold-b/summary.json`: `20/20` fresh; stale output reuse `0`; recycle count `19`; readiness slope `0`; inference slope `1.4665MB/min`; p95 first decoded `262ms`; p95 RTF `0.4703`. |
+| Targeted segment-limit recycle | `artifacts/moss/moss-nano-6d-recycle-5b/summary.json`: `20/20` fresh; stale output reuse `0`; recycle count `3`; segments per runtime `[5,5,5,5]`; p95 first decoded `281ms`; p95 RTF `0.5026`. |
+| Baseline targeted control | `artifacts/moss/moss-nano-6d-baseline-10b/summary.json`: `10/10` fresh; stale output reuse `0`; restarts `0`; p95 first decoded `268ms`; p95 RTF `0.4772`; readiness slope `4.9803MB/min`; diagnostic RSS endpoint slope `108.9894MB/min`. |
+
+Hardening:
+
+- Bounded lifecycle evidence distinguishes measured in-process runtime reset from same-identity resident reuse and child-process restart.
+- Recycle evidence records count, reasons, segments per runtime, restart/prewarm cost, post-recycle memory slope, and post-recycle p95 tail metrics.
+- Stale-output reuse remains fail-closed across recycle/reset.
+- Warm spare and true process restart are reported as unsupported/not observed instead of implied.
+- Short adjacent sources expand deterministically to satisfy requested book-like segment counts.
+
+Verification:
+
+- Focused final tests: `153/153` passed.
+- Final full `npm test`: `2374/2374` passed.
+- `npm run build` passed with the existing circular chunk warning.
+
+Reason: Bounded in-process runtime recycle makes the cumulative resident pressure hypothesis plausible: the bounded 30-minute soak passed the memory-slope and p95 RTF gates with `100/100` fresh adjacent segments and zero stale reuse. However, this is still not a full lifecycle implementation. Child-process restart was not observed, warm spare is unsupported, and clean shutdown, forced kill, zombie process, restart-clean, restart-failed, and in-flight rejection lifecycle classes remain `not-observed`/`not-implemented`. Continue resident runtime lifecycle/process-boundary iteration only.
+
+Next actions:
+
+- Do not dispatch `MOSS-NANO-7`; app-prototype promotion did not happen.
+- Next Nano work must implement/measure true process-boundary shutdown/restart lifecycle before any app-prototype reconsideration.
+- No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
+
 ## Nano Onboarding Roadmap Gate
 
-Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-6C` closed without app-prototype promotion, so the app onboarding path remains gated.
+Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-6D` closed without app-prototype promotion, so the app onboarding path remains gated.
 
 Allowed next work:
 
-- Runtime-only resident Nano iteration/hardening after MOSS-NANO-6C. A new runtime spec may target package evidence, lifecycle shutdown implementation, memory slope, tail latency, and adjacent RTF gates.
-- `MOSS-NANO-7` through `MOSS-NANO-11`: conditional app onboarding path. These must not dispatch until `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` is recorded.
+- Runtime-only resident Nano lifecycle/process-boundary hardening after MOSS-NANO-6D. A new runtime spec may target true process restart, clean/forced/zombie/in-flight shutdown classes, package evidence, and bounded recycle thresholds.
+- `MOSS-NANO-7` through `MOSS-NANO-11`: conditional app onboarding path. These must not dispatch until `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`, or a stricter equivalent promotion decision is recorded.
 
 Forbidden until promotion:
 
@@ -757,7 +798,7 @@ Forbidden until promotion:
 ## Decision Notes
 
 - Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
-- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-6C closeout; MOSS-NANO-6C closed as `ITERATE_NANO_RESIDENT_RUNTIME`. It must not enter app integration or replace Kokoro without a later explicit app-prototype promotion decision.
+- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-6D closeout; MOSS-NANO-6D closed as `ITERATE_NANO_RESIDENT_RUNTIME`. It must not enter app integration or replace Kokoro without a later explicit app-prototype promotion decision.
 - The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
 - Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
 - Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding now uses MOSS-NANO-7 through MOSS-NANO-11 after promotion.

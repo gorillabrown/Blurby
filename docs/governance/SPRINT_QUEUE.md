@@ -54,11 +54,27 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Queue depth: 5 for the gated Nano onboarding roadmap; 0 dispatch-ready app-integration sprints.
-Next queue item: no app-prototype dispatch. MOSS-NANO-6C closed `ITERATE_NANO_RESIDENT_RUNTIME`; next Nano work must be a runtime-only resident iteration/hardening spec, not MOSS-NANO-7.
-Health: YELLOW/RUNTIME-ITERATION — MOSS-NANO-6C did not promote Nano to app prototype. `MOSS-NANO-7` through `MOSS-NANO-11` define the conditional app onboarding path but must not dispatch until `docs/testing/MOSS_DECISION_LOG.md` records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter. Kokoro production behavior remains unchanged and Kokoro remains the operational floor.
+Next queue item: no app-prototype dispatch. MOSS-NANO-6D closed `ITERATE_NANO_RESIDENT_RUNTIME`; next Nano work must be a runtime-only process-boundary lifecycle hardening spec, not MOSS-NANO-7.
+Health: YELLOW/RUNTIME-ITERATION — MOSS-NANO-6D did not promote Nano to app prototype. `MOSS-NANO-7` through `MOSS-NANO-11` define the conditional app onboarding path but must not dispatch until `docs/testing/MOSS_DECISION_LOG.md` records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`, or stricter. Kokoro production behavior remains unchanged and Kokoro remains the operational floor.
 ```
 
 ---
+
+```text
+Sprint: MOSS-NANO-6D — Bounded Resident Lifecycle / Process Recycling
+Status: COMPLETED 2026-05-01 with final decision ITERATE_NANO_RESIDENT_RUNTIME. This pointer is closed; Nano was not promoted to app prototype and no app integration was unlocked.
+Type: Runtime architecture rescue. No app integration, no renderer work, no Kokoro behavior change.
+
+WHAT: Tested bounded resident lifecycle control instead of assuming one infinite resident Nano process. Implemented and measured in-process runtime reset/recycle controls, restart/prewarm cost, RSS-threshold and segment-limit recycle evidence, stale-output safety, and post-recycle memory/tail metrics.
+
+EVIDENCE: `artifacts/moss/moss-nano-6d-bounded-soak-1800-rss-threshold/summary.json` requested `1800s`, measured `1800.0033s`, completed `100/100` adjacent fresh, stale output reuse `0`, same-identity `runtimeReuseActual: false`, bounded recycle evidence `boundedRuntimeReuseActual: true`, bounded lifecycle actual for measured in-process reset, `processRestartActual: false`, `99` RSS-threshold recycles, restart p50/p95 `8649/8726ms`, prewarm p50/p95 `246/258ms`, readiness memory slope `0.3555MB/min`, post-warmup slope `0`, p95 first decoded `264ms`, p95 final RTF `0.4631`, and readiness failed on `shutdownEvidence`. Targeted evidence: `moss-nano-6d-rss-threshold-b` completed `20/20` fresh with readiness slope `0`, inference slope `1.4665MB/min`, p95 RTF `0.4703`; `moss-nano-6d-recycle-5b` completed `20/20` fresh with recycle count `3`, segments per runtime `[5,5,5,5]`, and p95 RTF `0.5026`.
+
+HARDENING: Bounded lifecycle evidence distinguishes measured in-process reset from same-identity resident reuse and true child-process restart; recycle evidence records count, reasons, segments per runtime, restart/prewarm cost, post-recycle memory slope, and post-recycle tail metrics; warm spare remains unsupported/not observed; stale-output reuse remains fail-closed across recycle/reset.
+
+VERIFICATION: Focused final tests passed 153/153; full npm test passed 2374/2374; npm run build passed with the existing circular chunk warning.
+
+NEXT: Do not dispatch MOSS-NANO-7. Next Nano work must implement/measure true process-boundary shutdown/restart lifecycle before any app-prototype reconsideration. No app integration, renderer/IPC/selectable-engine work, Kokoro behavior change, or MOSS-3 reopen is unlocked.
+```
 
 ```text
 Sprint: MOSS-NANO-3 — In-Process Runtime Reuse And First-Audio Truth

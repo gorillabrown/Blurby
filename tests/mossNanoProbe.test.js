@@ -545,6 +545,71 @@ function nano6LifecycleClassEvidence(overridesByClass = {}) {
   };
 }
 
+function nano6BoundedLifecycleEvidence(overrides = {}) {
+  return {
+    actual: true,
+    status: "actual",
+    evidenceSource: "measured-bounded-lifecycle",
+    recycleAfterSegments: 25,
+    recycleRssThresholdMb: 900,
+    measureRestartCost: true,
+    warmSpare: {
+      actual: true,
+      prewarmedRuntimeCount: 1,
+    },
+    p50RestartCostMs: 820,
+    p95RestartCostMs: 1180,
+    p50PrewarmCostMs: 610,
+    p95PrewarmCostMs: 940,
+    recycleCount: 3,
+    recycleReasons: ["segment-limit", "rss-threshold"],
+    segmentsPerRuntime: [25, 25, 25, 25],
+    tailEvidence: {
+      postRecycleSegmentIndices: [25, 26, 50, 51, 75, 76],
+      p95PostRecycleFirstAudioMs: 620,
+      p95PostRecycleRtf: 1.18,
+    },
+    staleOutputReuseCount: 0,
+    staleOutputClean: true,
+    ...overrides,
+  };
+}
+
+function nano6BoundedLifecycleSummary(overrides = {}) {
+  const segments = overrides.segments ?? nano6BookLikeSegments({
+    25: { sessionRestarted: true, runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:5000" }) },
+    50: { sessionRestarted: true, runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:6000" }) },
+    75: { sessionRestarted: true, runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:7000" }) },
+  });
+  const base = nano6ReadinessSummary({
+    runId: "nano6d-bounded-lifecycle-ready",
+    segments,
+    promotionDecision: {
+      promote: true,
+      target: "app-prototype",
+      decision: "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE",
+    },
+    boundedLifecycle: nano6BoundedLifecycleEvidence(),
+    residentSoak: {
+      ...nano6ReadinessSummary().residentSoak,
+      sessionRestartCount: 3,
+    },
+    bookLikeAdjacentRun: {
+      ...nano6ReadinessSummary().bookLikeAdjacentRun,
+      sessionRestartCount: 3,
+    },
+    promotionMetrics: {
+      ...nano6ReadinessSummary().promotionMetrics,
+      sessionRestartCount: 3,
+      adjacentSessionRestartCount: 3,
+    },
+  });
+  return {
+    ...base,
+    ...overrides,
+  };
+}
+
 function nano6ReadinessSummary(overrides = {}) {
   const segments = overrides.segments ?? nano6BookLikeSegments();
   return residentNanoSummary({
@@ -2529,6 +2594,100 @@ describe("MOSS Nano probe", () => {
     });
   });
 
+  it("forwards MOSS-NANO-6D bounded lifecycle flags and preserves boundedLifecycle summary fields", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-wrapper-bounded-lifecycle";
+    const { parseArgs, runMossNanoProbe } = await importMossNanoProbe();
+    const cliOptions = parseArgs([
+      "--run-id",
+      runId,
+      "--out",
+      outputRoot,
+      "--runtime-mode",
+      "resident",
+      "--process-mode",
+      "warm",
+      "--resident-decode-mode",
+      "stream",
+      "--nano6-soak",
+      "--bounded-lifecycle",
+      "--recycle-after-segments",
+      "25",
+      "--recycle-rss-threshold-mb",
+      "900",
+      "--measure-restart-cost",
+      "--warm-spare",
+    ]);
+    const execFile = vi.fn(async () => ({
+      stdout: `${JSON.stringify(nano6BoundedLifecycleSummary({ runId }))}\n`,
+      stderr: "",
+    }));
+
+    const result = await runMossNanoProbe({
+      projectRoot,
+      ...cliOptions,
+      execFile,
+    });
+
+    expect(cliOptions).toMatchObject({
+      boundedLifecycle: true,
+      recycleAfterSegments: 25,
+      recycleRssThresholdMb: 900,
+      measureRestartCost: true,
+      warmSpare: true,
+    });
+    const [, pythonArgs] = execFile.mock.calls[0];
+    expect(pythonArgs).toEqual(expect.arrayContaining([
+      "--bounded-lifecycle",
+      "--recycle-after-segments",
+      "25",
+      "--recycle-rss-threshold-mb",
+      "900",
+      "--measure-restart-cost",
+      "--warm-spare",
+    ]));
+    expect(result.summary).toMatchObject({
+      boundedLifecycle: {
+        actual: true,
+        recycleAfterSegments: 25,
+        recycleRssThresholdMb: 900,
+        measureRestartCost: true,
+        warmSpare: expect.any(Object),
+      },
+    });
+  });
+
+  it("defaults bounded lifecycle adjacent probes to deterministic book-like source for short passages", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const { buildPythonCommand } = await importMossNanoProbe();
+
+    const commandInfo = buildPythonCommand({
+      projectRoot,
+      outputDir: path.join(projectRoot, "out"),
+      runtimeMode: "resident",
+      passageId: "short",
+      passageText: "The little probe spoke once, paused, and finished cleanly.",
+      processMode: "warm",
+      residentDecodeMode: "stream",
+      adjacentSegmentCount: 20,
+      boundedLifecycle: true,
+      recycleAfterSegments: 5,
+    });
+
+    expect(commandInfo.args).toEqual(expect.arrayContaining([
+      "--adjacent-segment-count",
+      "20",
+      "--adjacent-segment-source",
+      "book-like",
+      "--bounded-lifecycle",
+      "--recycle-after-segments",
+      "5",
+    ]));
+  });
+
   it("parses the MOSS-NANO-5C segment-first soak target without forwarding wrapper-only classification to Python", async () => {
     const projectRoot = await makeTempProject();
     tempDirs.push(projectRoot);
@@ -4343,6 +4502,350 @@ describe("MOSS Nano probe", () => {
       metric: expect.stringMatching(/p95.*rtf/i),
       threshold: 1.5,
       observed: 2.1,
+    });
+  });
+
+  it("promotes MOSS-NANO-6D with bounded lifecycle only when recycle restart evidence is measured", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-promotes-with-restarts";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6BoundedLifecycleSummary({ runId }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+        recycleAfterSegments: 25,
+        recycleRssThresholdMb: 900,
+        measureRestartCost: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: true,
+      target: "app-prototype",
+      decision: "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE",
+    });
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "passed",
+      gate: "app-prototype",
+    });
+    expect(summary.boundedLifecycle).toMatchObject({
+      actual: true,
+      residentIdentityReuseActual: false,
+      boundedRuntimeReuseActual: true,
+      measureRestartCost: true,
+      recycleCount: 3,
+      recycleReasons: expect.arrayContaining(["segment-limit", "rss-threshold"]),
+      segmentsPerRuntime: [25, 25, 25, 25],
+      staleOutputReuseCount: 0,
+      staleOutputClean: true,
+    });
+    expect(summary.benchmark.runtimeReuseActual).toBe(false);
+    expect(summary.segments[25].runtimeReuseActual).toBe(false);
+
+    const noBoundedLifecycleRunId = "nano6d-restarts-without-bounded-lifecycle-still-fail";
+    const noBoundedLifecycle = nano6ReadinessSummary({ runId: noBoundedLifecycleRunId });
+    noBoundedLifecycle.residentSoak.sessionRestartCount = 1;
+    noBoundedLifecycle.bookLikeAdjacentRun.sessionRestartCount = 1;
+    noBoundedLifecycle.promotionMetrics.sessionRestartCount = 1;
+    noBoundedLifecycle.promotionMetrics.adjacentSessionRestartCount = 1;
+    noBoundedLifecycle.segments[25] = nano6BookLikeSegment(25, {
+      sessionRestarted: true,
+      runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:5000" }),
+    });
+
+    const rejected = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId: noBoundedLifecycleRunId,
+      summary: noBoundedLifecycle,
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(rejected.result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(rejected.summary.error).toMatch(/session|runtime identity|restart/i);
+  });
+
+  it("fails MOSS-NANO-6D promotion when bounded lifecycle lacks measured restart and prewarm cost stats", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-missing-cost-stats";
+    const boundedLifecycle = nano6BoundedLifecycleEvidence();
+    delete boundedLifecycle.p50RestartCostMs;
+    delete boundedLifecycle.p95RestartCostMs;
+    delete boundedLifecycle.p50PrewarmCostMs;
+    delete boundedLifecycle.p95PrewarmCostMs;
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({ runId, boundedLifecycle }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+        measureRestartCost: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/bounded lifecycle.*p50.*p95.*restart.*prewarm/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
+  it("fails MOSS-NANO-6D bounded lifecycle when recycle evidence lacks counts, reasons, or segment distribution", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-missing-recycle-accounting";
+    const boundedLifecycle = nano6BoundedLifecycleEvidence({
+      recycleCount: null,
+      recycleReasons: [],
+      segmentsPerRuntime: [],
+    });
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({ runId, boundedLifecycle }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+        recycleAfterSegments: 25,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/bounded lifecycle.*recycleCount.*reasons.*segmentsPerRuntime/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+  });
+
+  it("fails MOSS-NANO-6D bounded lifecycle when stale-output clean evidence is missing", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-missing-stale-clean-evidence";
+    const boundedLifecycle = nano6BoundedLifecycleEvidence();
+    delete boundedLifecycle.staleOutputReuseCount;
+    delete boundedLifecycle.staleOutputClean;
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({ runId, boundedLifecycle }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+        recycleAfterSegments: 25,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/bounded lifecycle.*stale-output clean evidence/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+  });
+
+  it("keeps stale output guard strict across MOSS-NANO-6D recycle boundaries", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-stale-output-after-recycle";
+    const segments = nano6BookLikeSegments({
+      25: {
+        sessionRestarted: true,
+        runtimeIdentity: residentRuntimeIdentity({ pythonProcessIdentity: "python-pid:5000" }),
+        staleOutputReuse: true,
+        firstAudioObservation: internalFirstDecodedAudioObservation({
+          outputFileExistedBeforeRun: true,
+          reusedExistingOutputFile: true,
+        }),
+      },
+    });
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        segments,
+        bookLikeAdjacentRun: {
+          ...nano6ReadinessSummary({ runId }).bookLikeAdjacentRun,
+          staleOutputReuseCount: 1,
+          sessionRestartCount: 1,
+        },
+        promotionMetrics: {
+          ...nano6ReadinessSummary({ runId }).promotionMetrics,
+          adjacentStaleOutputReuseCount: 1,
+          adjacentSessionRestartCount: 1,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/stale output reuse/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "staleOutputReuse",
+    });
+  });
+
+  it("requires MOSS-NANO-6D tail evidence for post-recycle segment indices and post-recycle p95 latency", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-missing-tail-evidence";
+    const boundedLifecycle = nano6BoundedLifecycleEvidence({
+      tailEvidence: {
+        postRecycleSegmentIndices: [],
+      },
+    });
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({ runId, boundedLifecycle }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/post-recycle.*segment.*p95.*first.*audio.*RTF/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+  });
+
+  it("rejects synthetic or not-implemented MOSS-NANO-6D bounded lifecycle classes", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-bounded-lifecycle-synthetic";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        boundedLifecycle: nano6BoundedLifecycleEvidence({
+          status: "not-implemented",
+          actual: false,
+          synthetic: true,
+          evidenceSource: "synthetic-plan",
+        }),
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/bounded lifecycle.*actual.*measured|synthetic|not.?implemented/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "boundedLifecycle",
+    });
+  });
+
+  it("uses the MOSS-NANO-6D bounded lifecycle decision set without leaking legacy app-prototype promotion", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6d-decision-set";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6BoundedLifecycleSummary({
+        runId,
+        promotionDecision: {
+          promote: false,
+          target: "app-prototype",
+          decision: "KEEP_KOKORO_ONLY",
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+        boundedLifecycle: true,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(
+      /PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE.*ITERATE_NANO_RESIDENT_RUNTIME.*PAUSE_NANO_RUNTIME_RELIABILITY/i,
+    );
+    expect(summary.error).not.toContain("PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE,");
+    expect(summary.error).not.toContain("KEEP_KOKORO_ONLY");
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      target: "app-prototype",
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "promotionDecision",
     });
   });
 

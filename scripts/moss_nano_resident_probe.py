@@ -47,6 +47,8 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
         "--adjacent-segment-rtf-trend-max": "adjacentSegmentRtfTrendMax",
         "--soak-duration-sec": "soakDurationSec",
         "--soak-sample-interval-sec": "soakSampleIntervalSec",
+        "--recycle-after-segments": "recycleAfterSegments",
+        "--recycle-rss-threshold-mb": "recycleRssThresholdMb",
     }
     boolean_flags = {
         "--reuse-tokenizer": "tokenizerReuseRequested",
@@ -56,6 +58,9 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
         "--shutdown-restart-evidence": "shutdownRestartEvidence",
         "--shutdown-evidence": "shutdownRestartEvidence",
         "--restart-evidence": "shutdownRestartEvidence",
+        "--bounded-lifecycle": "boundedLifecycle",
+        "--measure-restart-cost": "measureRestartCost",
+        "--warm-spare": "warmSpare",
     }
     index = 0
     while index < len(argv):
@@ -70,9 +75,9 @@ def strip_resident_args(argv: list[str]) -> dict[str, Any]:
             if index + 1 >= len(argv):
                 raise ValueError(f"{arg} requires a value")
             value: Any = argv[index + 1]
-            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget", "--adjacent-segment-count", "--soak-duration-sec", "--soak-sample-interval-sec"}:
+            if arg in {"--book-like-warm-runs", "--stream-decode-frame-budget", "--adjacent-segment-count", "--soak-duration-sec", "--soak-sample-interval-sec", "--recycle-after-segments"}:
                 value = int(value)
-            elif arg == "--adjacent-segment-rtf-trend-max":
+            elif arg in {"--adjacent-segment-rtf-trend-max", "--recycle-rss-threshold-mb"}:
                 value = float(value)
             resident_options[value_flags[arg]] = value
             index += 2
@@ -589,26 +594,35 @@ def finalize_optimization_fields(
     }
 
 
+def book_like_adjacent_segment_texts(count: int, seed_text: str = "") -> list[str]:
+    seed_words = [word.strip(".,;:!?\"'()[]{}") for word in seed_text.split() if word.strip(".,;:!?\"'()[]{}")]
+    seed_hint = " ".join(seed_words[:6]) if seed_words else "the diagnostic passage"
+    return [
+        (
+            f"Adjacent book-like segment {index + 1} follows {seed_hint} with "
+            f"plain punctuation, fresh wording, and enough context for a real synthesis run."
+        )
+        for index in range(count)
+    ]
+
+
 def adjacent_segment_texts(options: dict[str, Any]) -> list[str]:
     count = int(options.get("adjacentSegmentCount") or 0)
     if count <= 0:
         return []
-    source = str(options.get("adjacentSegmentSource") or "raw")
+    source = str(options.get("adjacentSegmentSource") or "raw").strip().lower()
     text = str(options.get("passageText") or "")
-    if source == "book-like":
-        return [
-            (
-                f"Adjacent book-like segment {index + 1} continues a steady chapter with "
-                f"plain punctuation, fresh wording, and enough context for a real synthesis run."
-            )
-            for index in range(count)
-        ]
+    if source in {"book-like", "book_like"}:
+        return book_like_adjacent_segment_texts(count, text)
     words = [word for word in text.strip().split() if word]
     if not words:
-        return []
+        return book_like_adjacent_segment_texts(count, text)
     window = max(1, (len(words) + count - 1) // count)
     segments = [" ".join(words[index : index + window]).strip() for index in range(0, len(words), window)]
-    return [segment for segment in segments if segment][:count]
+    non_empty_segments = [segment for segment in segments if segment][:count]
+    if len(non_empty_segments) < count:
+        return book_like_adjacent_segment_texts(count, text)
+    return non_empty_segments
 
 
 def median(values: list[float]) -> float | None:
@@ -951,13 +965,35 @@ def add_nano6_lifecycle_evidence(
                 "inflightShutdown",
             )
         )
+        bounded = summary.get("boundedLifecycle") or {}
+        bounded_ready = (
+            bool(options.get("boundedLifecycle"))
+            and bounded.get("actual") is True
+            and bounded.get("evidenceSource") == "measured-bounded-lifecycle"
+            and isinstance(bounded.get("recycleCount"), (int, float))
+            and bounded.get("recycleCount") > 0
+            and isinstance(bounded.get("recycleReasons"), list)
+            and len(bounded.get("recycleReasons")) > 0
+            and isinstance(bounded.get("segmentsPerRuntime"), list)
+            and len(bounded.get("segmentsPerRuntime")) > 1
+            and isinstance(bounded.get("p50RestartCostMs"), (int, float))
+            and isinstance(bounded.get("p95RestartCostMs"), (int, float))
+            and isinstance(bounded.get("p50PrewarmCostMs"), (int, float))
+            and isinstance(bounded.get("p95PrewarmCostMs"), (int, float))
+            and isinstance((bounded.get("tailEvidence") or {}).get("postRecycleSegmentIndices"), list)
+            and len((bounded.get("tailEvidence") or {}).get("postRecycleSegmentIndices")) > 0
+            and isinstance((bounded.get("tailEvidence") or {}).get("p95PostRecycleFirstAudioMs"), (int, float))
+            and isinstance((bounded.get("tailEvidence") or {}).get("p95PostRecycleRtf"), (int, float))
+            and bounded.get("staleOutputClean") is True
+        )
+        restart_ok = bounded_ready if bool(options.get("boundedLifecycle")) else restart_count == 0
         ready = (
             measured_duration_sec >= 1800
             and isinstance(phase_memory.get("readinessMemorySlopeMbPerMin"), (int, float))
             and phase_memory.get("readinessMemorySlopeMbPerMin") <= 1.5
             and stale_count == 0
             and empty_count == 0
-            and restart_count == 0
+            and restart_ok
             and shutdown_ready
             and adjacent.get("requestedSegments") == 100
             and adjacent.get("completedSegments") == 100
@@ -975,7 +1011,13 @@ def add_nano6_lifecycle_evidence(
         summary["promotionDecision"] = {
             "promote": bool(ready),
             "target": "app-prototype" if ready else None,
-            "decision": "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE" if ready else "ITERATE_NANO_RESIDENT_RUNTIME",
+            "decision": (
+                "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE"
+                if ready and bounded_ready
+                else "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE"
+                if ready
+                else "ITERATE_NANO_RESIDENT_RUNTIME"
+            ),
         }
 
 
@@ -1458,26 +1500,32 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
             "status": "configured",
         }
 
-        restore_session_factory = patch_ort_session_factory(ort_cpu_runtime, ort, applied)
-        try:
-            recorder.record("assetLoadStart", modelDir=str(model_dir))
-            session_create_started = time.perf_counter()
-            runtime = onnx_tts_runtime.OnnxTtsRuntime(
-                model_dir=str(model_dir),
-                thread_count=int(options.get("threads") or nano.DEFAULT_THREADS),
-                max_new_frames=int(options.get("maxNewFrames") or nano.DEFAULT_MAX_NEW_FRAMES),
-                do_sample=str(options.get("sampleMode") or nano.DEFAULT_SAMPLE_MODE) != "greedy",
-                sample_mode=str(options.get("sampleMode") or nano.DEFAULT_SAMPLE_MODE),
-                output_dir=str(out_dir),
-            )
-            recorder.record(
-                "sessionCreateEnd",
-                modelDir=str(model_dir),
-                sessionCreateMs=now_ms(session_create_started),
-                runtimeIdentity=runtime_identity(runtime),
-            )
-        finally:
-            restore_session_factory()
+        def create_resident_runtime(reason: str) -> tuple[Any, int]:
+            restore_session_factory = patch_ort_session_factory(ort_cpu_runtime, ort, applied)
+            try:
+                recorder.record("assetLoadStart", modelDir=str(model_dir), lifecycleReason=reason)
+                session_create_started = time.perf_counter()
+                runtime_obj = onnx_tts_runtime.OnnxTtsRuntime(
+                    model_dir=str(model_dir),
+                    thread_count=int(options.get("threads") or nano.DEFAULT_THREADS),
+                    max_new_frames=int(options.get("maxNewFrames") or nano.DEFAULT_MAX_NEW_FRAMES),
+                    do_sample=str(options.get("sampleMode") or nano.DEFAULT_SAMPLE_MODE) != "greedy",
+                    sample_mode=str(options.get("sampleMode") or nano.DEFAULT_SAMPLE_MODE),
+                    output_dir=str(out_dir),
+                )
+                session_create_ms = now_ms(session_create_started)
+                recorder.record(
+                    "sessionCreateEnd",
+                    modelDir=str(model_dir),
+                    sessionCreateMs=session_create_ms,
+                    lifecycleReason=reason,
+                    runtimeIdentity=runtime_identity(runtime_obj),
+                )
+                return runtime_obj, session_create_ms
+            finally:
+                restore_session_factory()
+
+        runtime, _initial_session_create_ms = create_resident_runtime("initial")
     except Exception as exc:
         summary["status"] = "blocked" if classify_exception(exc) in {"python-env", "source-download", "asset-download"} else "failed"
         summary["failureClass"] = classify_exception(exc)
@@ -1528,6 +1576,18 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
     soak_warmup_end_at: str | None = None
     soak_memory_samples: list[dict[str, Any]] = []
     cleanup_evidence: list[dict[str, Any]] = []
+    bounded_lifecycle_requested = bool(options.get("boundedLifecycle"))
+    recycle_after_segments = int(options.get("recycleAfterSegments") or 0)
+    recycle_rss_threshold_mb = options.get("recycleRssThresholdMb")
+    measure_restart_cost = bool(options.get("measureRestartCost"))
+    warm_spare_requested = bool(options.get("warmSpare"))
+    recycle_events: list[dict[str, Any]] = []
+    restart_cost_ms: list[int] = []
+    prewarm_cost_ms: list[int] = []
+    segments_per_runtime: list[int] = [0]
+    post_recycle_segment_indices: list[int] = []
+    post_recycle_first_audio_ms: list[float] = []
+    post_recycle_rtfs: list[float] = []
 
     def record_soak_memory_sample(label: str) -> None:
         if soak_start_perf is None:
@@ -1582,6 +1642,110 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                 "after": after,
             }
         )
+
+    def recycle_reasons_for_next_segment() -> list[str]:
+        if not bounded_lifecycle_requested:
+            return []
+        reasons: list[str] = []
+        if recycle_after_segments > 0 and segments_per_runtime[-1] >= recycle_after_segments:
+            reasons.append("segment-limit")
+        if isinstance(recycle_rss_threshold_mb, (int, float)):
+            sample = memory_sampler.sample()
+            rss_mb = sample.get("rssMb")
+            if isinstance(rss_mb, (int, float)) and math.isfinite(float(rss_mb)) and float(rss_mb) >= float(recycle_rss_threshold_mb):
+                reasons.append("rss-threshold")
+        return reasons
+
+    def recycle_runtime(reasons: list[str], next_segment_index: int) -> None:
+        nonlocal runtime
+        if not reasons:
+            return
+        before_sample = memory_sampler.sample()
+        before_identity = runtime_identity(runtime)
+        reset_started = time.perf_counter()
+        runtime = None
+        gc.collect()
+        runtime, _session_create_ms = create_resident_runtime("bounded-lifecycle-recycle")
+        restart_ms = int(round((time.perf_counter() - reset_started) * 1000))
+        after_identity = runtime_identity(runtime)
+        prewarm_ms = None
+        if measure_restart_cost:
+            prewarm_started = time.perf_counter()
+            try:
+                runtime.warmup()
+            finally:
+                prewarm_ms = int(round((time.perf_counter() - prewarm_started) * 1000))
+        after_sample = memory_sampler.sample()
+        restart_cost_ms.append(restart_ms)
+        if prewarm_ms is not None:
+            prewarm_cost_ms.append(prewarm_ms)
+        recycle_events.append(
+            {
+                "index": len(recycle_events),
+                "nextSegmentIndex": next_segment_index,
+                "reason": reasons[0] if len(reasons) == 1 else "+".join(reasons),
+                "reasons": reasons,
+                "mode": "in-process-runtime-reset",
+                "processRestartActual": False,
+                "runtimeIdentityChanged": before_identity != after_identity,
+                "runtimeIdentityBefore": before_identity,
+                "runtimeIdentityAfter": after_identity,
+                "restartCostMs": restart_ms,
+                "prewarmCostMs": prewarm_ms,
+                "rssBeforeMb": before_sample.get("rssMb"),
+                "rssAfterMb": after_sample.get("rssMb"),
+                "rssBefore": before_sample,
+                "rssAfter": after_sample,
+            }
+        )
+        recorder.record(
+            "boundedLifecycleRecycle",
+            nextSegmentIndex=next_segment_index,
+            reasons=reasons,
+            restartCostMs=restart_ms,
+            prewarmCostMs=prewarm_ms,
+            processRestartActual=False,
+            runtimeIdentityChanged=before_identity != after_identity,
+        )
+        segments_per_runtime.append(0)
+        post_recycle_segment_indices.extend([next_segment_index, next_segment_index + 1])
+
+    def record_unmeasured_bounded_lifecycle(reason: str) -> None:
+        if not bounded_lifecycle_requested:
+            return
+        summary["boundedLifecycle"] = {
+            "actual": False,
+            "status": "not-measured",
+            "evidenceSource": "not-measured",
+            "mode": "in-process-runtime-reset",
+            "processRestartActual": False,
+            "processRestartUnsupportedReason": "Resident probe recycles the in-process runtime object; it does not claim child-process restart proof.",
+            "recycleAfterSegments": recycle_after_segments or None,
+            "recycleRssThresholdMb": recycle_rss_threshold_mb,
+            "measureRestartCost": measure_restart_cost,
+            "warmSpare": {
+                "requested": warm_spare_requested,
+                "actual": False,
+                "unsupported": bool(warm_spare_requested),
+                "reason": "Warm spare runtime handoff is not implemented safely in the resident probe.",
+            },
+            "p50RestartCostMs": None,
+            "p95RestartCostMs": None,
+            "p50PrewarmCostMs": None,
+            "p95PrewarmCostMs": None,
+            "recycleCount": len(recycle_events),
+            "recycleReasons": [],
+            "segmentsPerRuntime": segments_per_runtime,
+            "recycleEvents": recycle_events,
+            "tailEvidence": {
+                "postRecycleSegmentIndices": [],
+                "p95PostRecycleFirstAudioMs": None,
+                "p95PostRecycleRtf": None,
+            },
+            "staleOutputReuseCount": None,
+            "staleOutputClean": None,
+            "reason": reason,
+        }
 
     def run_one(run_index: int, measured: bool, wav_path: Path, phase: str, text: str | None = None) -> dict[str, Any]:
         existed_before = wav_path.exists()
@@ -1693,10 +1857,12 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         adjacent_texts = adjacent_segment_texts(options)
         requested_adjacent_count = int(options.get("adjacentSegmentCount") or 0)
         if requested_adjacent_count > 0 and len(adjacent_texts) < requested_adjacent_count:
+            blocked_reason = f"Adjacent segment source generated {len(adjacent_texts)} non-empty segments, fewer than the requested {requested_adjacent_count}."
+            record_unmeasured_bounded_lifecycle(blocked_reason)
             return mark_blocked(
                 summary,
                 out_dir,
-                f"Adjacent segment source generated {len(adjacent_texts)} non-empty segments, fewer than the requested {requested_adjacent_count}.",
+                blocked_reason,
                 key="bookLikeAdjacentRun",
             )
         if adjacent_texts:
@@ -1704,6 +1870,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
             requested_adjacent_count = int(options.get("adjacentSegmentCount") or len(adjacent_texts))
             adjacent_segments: list[dict[str, Any]] = []
             for segment_index, segment_text in enumerate(adjacent_texts):
+                recycle_runtime(recycle_reasons_for_next_segment(), segment_index)
                 record = run_one(
                     segment_index,
                     True,
@@ -1743,6 +1910,15 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                     "stageProfile": record.get("stageProfile"),
                 }
                 adjacent_segments.append(segment)
+                if bounded_lifecycle_requested:
+                    segments_per_runtime[-1] += 1
+                    if segment_index in post_recycle_segment_indices:
+                        internal_ms = segment.get("firstAudioObservation", {}).get("internalFirstDecodedAudioMs")
+                        if isinstance(internal_ms, (int, float)) and math.isfinite(float(internal_ms)):
+                            post_recycle_first_audio_ms.append(float(internal_ms))
+                        rtf = segment.get("rtf")
+                        if isinstance(rtf, (int, float)) and math.isfinite(float(rtf)):
+                            post_recycle_rtfs.append(float(rtf))
                 record_soak_memory_sample(f"adjacent-segment-{segment_index + 1}")
                 record_cleanup_evidence(f"adjacent-segment-{segment_index + 1}")
             summary["segments"] = adjacent_segments
@@ -1786,7 +1962,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
 
     first_identity = run_records_for_reuse[0].get("runtimeIdentity")
     reuse_ok = all(record.get("runtimeIdentity") == first_identity for record in run_records_for_reuse)
-    if not reuse_ok:
+    if not reuse_ok and not bounded_lifecycle_requested:
         return mark_blocked(
             summary,
             out_dir,
@@ -1795,10 +1971,10 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         )
 
     for record in run_records_for_reuse:
-        record["runtimeReuseActual"] = True
+        record["runtimeReuseActual"] = reuse_ok
     for segment in summary.get("segments", []):
-        segment["runtimeReuseActual"] = True
-    summary["benchmark"]["runtimeReuseActual"] = True
+        segment["runtimeReuseActual"] = reuse_ok
+    summary["benchmark"]["runtimeReuseActual"] = reuse_ok
 
     representative = measured_iterations[-1]
     summary["totalSec"] = representative["totalSec"]
@@ -1868,6 +2044,71 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         "memoryDeltaMb": memory_aggregate["memoryDeltaMb"],
         "peakMemoryMb": memory_aggregate["peakMemoryMb"],
     }
+    if bounded_lifecycle_requested:
+        adjacent_stats = summary.get("adjacentSegmentStats") or {}
+        recycle_reasons = sorted({reason for event in recycle_events for reason in event.get("reasons", [])})
+        rss_after_values = [
+            event.get("rssAfterMb")
+            for event in recycle_events
+            if isinstance(event.get("rssAfterMb"), (int, float))
+        ]
+        post_recycle_slope = None
+        if len(rss_after_values) >= 2:
+            post_recycle_slope = round(max(0.0, float(rss_after_values[-1]) - float(rss_after_values[0])), 4)
+        bounded_actual = len(recycle_events) > 0
+        summary["boundedLifecycle"] = {
+            "actual": bounded_actual,
+            "status": "actual" if bounded_actual else "not-measured",
+            "evidenceSource": "measured-bounded-lifecycle" if bounded_actual else "not-measured",
+            "mode": "in-process-runtime-reset",
+            "residentIdentityReuseActual": reuse_ok,
+            "boundedRuntimeReuseActual": bounded_actual,
+            "processRestartActual": False,
+            "processRestartUnsupportedReason": "Resident probe recycles the in-process runtime object; it does not claim child-process restart proof.",
+            "recycleAfterSegments": recycle_after_segments or None,
+            "recycleRssThresholdMb": recycle_rss_threshold_mb,
+            "measureRestartCost": measure_restart_cost,
+            "warmSpare": {
+                "requested": warm_spare_requested,
+                "actual": False,
+                "unsupported": bool(warm_spare_requested),
+                "reason": "Warm spare runtime handoff is not implemented safely in the resident probe.",
+            },
+            "p50RestartCostMs": percentile(restart_cost_ms, 50),
+            "p95RestartCostMs": percentile(restart_cost_ms, 95),
+            "p50PrewarmCostMs": percentile(prewarm_cost_ms, 50),
+            "p95PrewarmCostMs": percentile(prewarm_cost_ms, 95),
+            "recycleCount": len(recycle_events),
+            "recycleReasons": recycle_reasons,
+            "segmentsPerRuntime": segments_per_runtime,
+            "recycleEvents": recycle_events,
+            "rssBeforeAfterRecycle": [
+                {
+                    "rssBeforeMb": event.get("rssBeforeMb"),
+                    "rssAfterMb": event.get("rssAfterMb"),
+                    "reason": event.get("reason"),
+                    "nextSegmentIndex": event.get("nextSegmentIndex"),
+                }
+                for event in recycle_events
+            ],
+            "postRecycleSlopeMb": post_recycle_slope,
+            "tailEvidence": {
+                "postRecycleSegmentIndices": sorted(set(index for index in post_recycle_segment_indices if index < len(summary.get("segments") or []))),
+                "p95PostRecycleFirstAudioMs": percentile(post_recycle_first_audio_ms, 95),
+                "p95PostRecycleRtf": percentile(post_recycle_rtfs, 95),
+            },
+            "staleOutputReuseCount": adjacent_stats.get("staleOutputReuseCount", 0),
+            "staleOutputClean": adjacent_stats.get("staleOutputReuseCount", 0) == 0 if adjacent_stats else None,
+            "reason": None if bounded_actual else "Bounded lifecycle was requested, but no recycle trigger fired before the run completed.",
+            "lifecycleClasses": {
+                "runtimeRecycle": {
+                    "classification": "in-process-runtime-reset",
+                    "observed": bounded_actual,
+                    "evidenceSource": "measured-bounded-lifecycle" if bounded_actual else "not-measured",
+                    "processRestartActual": False,
+                }
+            },
+        }
     finalize_optimization_fields(summary, options, runtime, run_records_for_reuse, reuse_ok)
     lifecycle_context = {
         "measuredDurationSec": round(time.perf_counter() - soak_start_perf, 4) if soak_start_perf is not None else None,

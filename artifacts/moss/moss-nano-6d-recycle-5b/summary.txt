@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-6d-recycle-5b
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-6d-recycle-5b\output.wav
+Total seconds: 1.872
+First WAV bytes seconds: 0.251
+Internal first decoded seconds: 0.251
+Audio duration seconds: 3.68
+RTF: 0.5087
+Peak memory: 1725.18 MB
+Process mode: cold
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 1

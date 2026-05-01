@@ -348,6 +348,22 @@ Verification: focused final tests passed `143/143`; final full `npm test` passed
 
 Conclusion: Continue resident runtime iteration only. The full 30-minute soak was deferred because targeted gates already failed on memory slope, RTF/tail latency, and lifecycle implementation. Do not dispatch MOSS-NANO-7 because app-prototype promotion did not happen.
 
+## MOSS-NANO-6D Bounded Resident Lifecycle / Process Recycling
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6D did not promote Nano to app prototype and is explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or MOSS-3 reopening. Kokoro remains the default and only integrated engine.
+
+Canonical evidence:
+
+| Evidence | Result |
+|---|---|
+| Bounded 30-minute soak | `artifacts/moss/moss-nano-6d-bounded-soak-1800-rss-threshold/summary.json`: requested `1800s`; measured `1800.0033s`; `100/100` adjacent fresh; stale output reuse `0`; same-identity `runtimeReuseActual: false`; bounded recycle evidence `boundedRuntimeReuseActual: true`; bounded lifecycle actual for measured in-process reset; `processRestartActual: false`; `99` RSS-threshold recycles; restart p50/p95 `8649/8726ms`; prewarm p50/p95 `246/258ms`; readiness memory slope `0.3555MB/min`; post-warmup slope `0`; p95 first decoded `264ms`; p95 final RTF `0.4631`; readiness failed on `shutdownEvidence`. |
+| Targeted RSS threshold | `artifacts/moss/moss-nano-6d-rss-threshold-b/summary.json`: `20/20` fresh; stale output reuse `0`; recycle count `19`; readiness slope `0`; inference slope `1.4665MB/min`; p95 first decoded `262ms`; p95 RTF `0.4703`. |
+| Targeted segment-limit recycle | `artifacts/moss/moss-nano-6d-recycle-5b/summary.json`: `20/20` fresh; stale output reuse `0`; recycle count `3`; segments per runtime `[5,5,5,5]`; p95 first decoded `281ms`; p95 RTF `0.5026`. |
+
+Hardening: bounded lifecycle evidence now distinguishes measured in-process runtime reset from same-identity resident reuse and child-process restart, records recycle counts/reasons, restart/prewarm cost, segments per runtime, post-recycle memory and tail metrics, and keeps stale-output reuse fail-closed across recycle/reset. Warm-spare and true process restart remain unsupported/not observed rather than implied.
+
+Conclusion: bounded in-process recycle makes the memory and tail-latency profile plausible, but it does not close the lifecycle promotion gate. Clean shutdown, forced kill, zombie process, restart-clean, restart-failed, and in-flight rejection classes remain `not-observed`/`not-implemented`, so app onboarding remains gated and the next Nano work must stay runtime lifecycle/process-boundary only.
+
 ## MOSS-TTS-Nano Onboarding Gate Sequence
 
 The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration remains gated. The sequence is:
@@ -356,12 +372,13 @@ The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration
 2. `MOSS-NANO-5C`: segment-first soak gate. Completed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`; runtime-only, not app prototype promotion.
 3. `MOSS-NANO-6B`: resident soak memory/lifecycle closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no app-prototype promotion.
 4. `MOSS-NANO-6C`: memory / tail-latency / lifecycle fix. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no app-prototype promotion.
-5. Runtime-only resident Nano follow-up: must harden package evidence, lifecycle shutdown implementation, memory slope, tail latency, and adjacent RTF gates before any app-prototype reconsideration.
-6. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
-7. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
-8. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
-9. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
-10. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
+5. `MOSS-NANO-6D`: bounded resident lifecycle / process recycling. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; memory/tail gates became plausible under in-process reset, but shutdown/restart lifecycle remained unimplemented.
+6. Runtime-only resident Nano follow-up: must harden true process restart, clean/forced/zombie/in-flight lifecycle classes, package evidence, and bounded recycle thresholds before any app-prototype reconsideration.
+7. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
+8. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
+9. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
+10. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
+11. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
 
 Non-negotiable gates:
 
