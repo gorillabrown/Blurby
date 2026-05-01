@@ -526,6 +526,25 @@ function nano6BookLikeSegments(overridesByIndex = {}) {
   return Array.from({ length: 100 }, (_, index) => nano6BookLikeSegment(index, overridesByIndex[index] ?? {}));
 }
 
+function nano6LifecycleClassEvidence(overridesByClass = {}) {
+  return {
+    cleanShutdown: { classification: "clean-shutdown", observed: true, evidenceSource: "measured-lifecycle-check" },
+    forcedKill: { classification: "forced-kill", observed: true, evidenceSource: "measured-lifecycle-check" },
+    zombieProcess: { classification: "zombie-process", observed: true, evidenceSource: "measured-lifecycle-check" },
+    restartClean: { classification: "restart-clean", observed: true, evidenceSource: "measured-lifecycle-check" },
+    restartFailed: { classification: "restart-failed", observed: true, evidenceSource: "measured-lifecycle-check" },
+    inflightShutdown: {
+      classification: "inflight-rejected",
+      observed: true,
+      evidenceSource: "measured-lifecycle-check",
+      rejected: true,
+      succeeded: false,
+      wavReused: false,
+    },
+    ...overridesByClass,
+  };
+}
+
 function nano6ReadinessSummary(overrides = {}) {
   const segments = overrides.segments ?? nano6BookLikeSegments();
   return residentNanoSummary({
@@ -542,6 +561,7 @@ function nano6ReadinessSummary(overrides = {}) {
       stale: false,
       runId: "nano6-runtime-package-ready",
       generatedAt: "2026-04-30T00:00:00.000Z",
+      lifecycleClasses: nano6LifecycleClassEvidence(),
     },
     runtimeIdentity: residentRuntimeIdentity(),
     residentSoak: {
@@ -552,6 +572,16 @@ function nano6ReadinessSummary(overrides = {}) {
       rssSamples: [512, 514, 516, 515],
       currentRssMb: 515,
       memoryGrowthSlopeMbPerMin: 0.2,
+      initialExpansionMb: 2,
+      endpointGrowthMb: 3,
+      endpointGrowthMbPerMin: 0.1,
+      diagnosticEndpointSlopeMbPerMin: 0.1,
+      postWarmupSlopeMbPerMin: 0.2,
+      inferenceSlopeMbPerMin: 0.25,
+      holdSlopeMbPerMin: 0.02,
+      readinessMemorySlopeMbPerMin: 0.2,
+      readinessMemorySlopeMethod: "post-warmup-phase-regression",
+      memoryGrowthSlopeMethod: "endpoint-diagnostic-only",
       crashCount: 0,
       staleOutputReuseCount: 0,
       sessionRestartCount: 0,
@@ -575,21 +605,7 @@ function nano6ReadinessSummary(overrides = {}) {
       "restart-failed",
       "inflight-rejected",
     ],
-    shutdownEvidence: {
-      cleanShutdown: { classification: "clean-shutdown", observed: true, evidenceSource: "measured-lifecycle-check" },
-      forcedKill: { classification: "forced-kill", observed: true, evidenceSource: "measured-lifecycle-check" },
-      zombieProcess: { classification: "zombie-process", observed: true, evidenceSource: "measured-lifecycle-check" },
-      restartClean: { classification: "restart-clean", observed: true, evidenceSource: "measured-lifecycle-check" },
-      restartFailed: { classification: "restart-failed", observed: true, evidenceSource: "measured-lifecycle-check" },
-      inflightShutdown: {
-        classification: "inflight-rejected",
-        observed: true,
-        evidenceSource: "measured-lifecycle-check",
-        rejected: true,
-        succeeded: false,
-        wavReused: false,
-      },
-    },
+    shutdownEvidence: nano6LifecycleClassEvidence(),
     promotionThresholds: {
       soakDurationSecMin: 1800,
       memoryGrowthSlopeMbPerMinMax: 1.5,
@@ -605,6 +621,11 @@ function nano6ReadinessSummary(overrides = {}) {
     promotionMetrics: {
       soakDurationSec: 1800,
       memoryGrowthSlopeMbPerMin: 0.2,
+      diagnosticEndpointSlopeMbPerMin: 0.1,
+      postWarmupSlopeMbPerMin: 0.2,
+      inferenceSlopeMbPerMin: 0.25,
+      holdSlopeMbPerMin: 0.02,
+      readinessMemorySlopeMbPerMin: 0.2,
       crashCount: 0,
       staleOutputReuseCount: 0,
       sessionRestartCount: 0,
@@ -4101,6 +4122,319 @@ describe("MOSS Nano probe", () => {
     }));
   });
 
+  it("gates MOSS-NANO-6 resident soak memory on post-warmup phase regression, not inflated endpoint expansion", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-soak-phase-regression-not-endpoint";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        residentSoak: {
+          ...nano6ReadinessSummary({ runId }).residentSoak,
+          rssSamples: [1503, 1714, 1888],
+          rssSampleTimesSec: [0, 5, 1800],
+          currentRssMb: 1888,
+          initialExpansionMb: 211,
+          inferenceSlopeMbPerMin: 0.0,
+          holdSlopeMbPerMin: 0.0,
+          postWarmupSlopeMbPerMin: 0.0,
+          diagnosticEndpointSlopeMbPerMin: 12.84,
+          memoryGrowthSlopeMbPerMin: 12.84,
+          memoryGrowthSlopeMethod: "endpoint-diagnostic-only",
+          readinessMemorySlopeMbPerMin: 0.0,
+          readinessMemorySlopeMethod: "post-warmup-phase-regression",
+        },
+        promotionMetrics: {
+          ...nano6ReadinessSummary({ runId }).promotionMetrics,
+          memoryGrowthSlopeMbPerMin: 12.84,
+          diagnosticEndpointSlopeMbPerMin: 12.84,
+          postWarmupSlopeMbPerMin: 0.0,
+          readinessMemorySlopeMbPerMin: 0.0,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(summary.residentSoak).toMatchObject({
+      initialExpansionMb: 211,
+      inferenceSlopeMbPerMin: expect.any(Number),
+      holdSlopeMbPerMin: expect.any(Number),
+      postWarmupSlopeMbPerMin: expect.any(Number),
+      diagnosticEndpointSlopeMbPerMin: 12.84,
+      readinessMemorySlopeMethod: "post-warmup-phase-regression",
+    });
+    expect(summary.residentSoak.readinessMemorySlopeMbPerMin).not.toBe(12.84);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "passed",
+      gate: "app-prototype",
+    });
+  });
+
+  it.each([
+    ["post-warmup", { postWarmupSlopeMbPerMin: 2.6 }],
+    ["inference", { inferenceSlopeMbPerMin: 2.6 }],
+  ])("fails closed when MOSS-NANO-6 readiness memory slope underreports unsafe %s phase growth", async (_caseName, slopeOverrides) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano6-underreported-readiness-slope-${_caseName}`;
+    const base = nano6ReadinessSummary({ runId });
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        residentSoak: {
+          ...base.residentSoak,
+          memoryGrowthSlopeMbPerMin: 0.2,
+          readinessMemorySlopeMbPerMin: 0.2,
+          ...slopeOverrides,
+        },
+        promotionMetrics: {
+          ...base.promotionMetrics,
+          memoryGrowthSlopeMbPerMin: 0.2,
+          readinessMemorySlopeMbPerMin: 0.2,
+          ...slopeOverrides,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "performance",
+    });
+    expect(summary.error).toMatch(/post-warmup phase memory growth exceeds 1\.5MB\/min/i);
+    expect(summary.residentSoak.readinessMemorySlopeMbPerMin).toBe(2.6);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "residentSoak",
+      failureClass: "performance",
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
+  it("requires MOSS-NANO-6 resident soak phase memory fields before app-prototype promotion", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-soak-phase-fields-required";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        residentSoak: {
+          ...nano6ReadinessSummary({ runId }).residentSoak,
+          rssSamples: [1503, 1714, 1888],
+          rssSampleTimesSec: [0, 5, 1800],
+          currentRssMb: 1888,
+          memoryGrowthSlopeMbPerMin: 0.0,
+          initialExpansionMb: undefined,
+          endpointGrowthMb: undefined,
+          endpointGrowthMbPerMin: undefined,
+          postWarmupSlopeMbPerMin: undefined,
+          inferenceSlopeMbPerMin: undefined,
+          holdSlopeMbPerMin: undefined,
+          readinessMemorySlopeMbPerMin: undefined,
+          readinessMemorySlopeMethod: undefined,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/initialExpansionMb|inferenceSlopeMbPerMin|holdSlopeMbPerMin|postWarmupSlopeMbPerMin|phase regression/i);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "residentSoak",
+    });
+  });
+
+  it("records machine-readable tail latency evidence for MOSS-NANO-6 100-segment p95 RTF failures", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-tail-latency-p95-rtf-evidence";
+    const slowSegmentIndices = [94, 95, 96, 97, 98, 99];
+    const segments = nano6BookLikeSegments(Object.fromEntries(
+      slowSegmentIndices.map((index) => [index, {
+        totalSec: 4.2,
+        audioDurationSec: 2,
+        rtf: 2.1,
+        punctuationRtf: 2.15,
+      }]),
+    ));
+    const summary = nano6ReadinessSummary({ runId, segments });
+    summary.promotionDecision = {
+      promote: false,
+      target: "app-prototype",
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    };
+    summary.bookLikeAdjacentRun = {
+      ...summary.bookLikeAdjacentRun,
+      p95FinalRtf: 2.1,
+      p95PunctuationRtf: 2.15,
+    };
+    summary.promotionMetrics = {
+      ...summary.promotionMetrics,
+      adjacentP95FinalRtf: 2.1,
+      adjacentP95PunctuationRtf: 2.15,
+    };
+
+    const { result, summary: persistedSummary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary,
+      options: {
+        residentDecodeMode: "stream",
+        adjacentSegmentCount: 100,
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "ok",
+      failureClass: null,
+    });
+    expect(persistedSummary.nano6Readiness).toMatchObject({
+      status: "not-promoting",
+      failedGate: "app-prototype",
+      failedKey: "bookLikeAdjacentRun",
+    });
+    const bookFailure = persistedSummary.nano6Readiness.failedGates.find((failure) => (
+      failure.key === "bookLikeAdjacentRun"
+    ));
+    expect(bookFailure).toMatchObject({
+      gate: "app-prototype",
+      key: "bookLikeAdjacentRun",
+      failureClass: "performance",
+      reason: expect.stringMatching(/p95.*RTF/i),
+    });
+    expect(bookFailure.slowSegmentIndices ?? bookFailure.tailLatencyEvidence?.slowSegmentIndices).toEqual(
+      expect.arrayContaining(slowSegmentIndices),
+    );
+    expect(bookFailure.tailLatencyEvidence ?? bookFailure).toMatchObject({
+      metric: expect.stringMatching(/p95.*rtf/i),
+      threshold: 1.5,
+      observed: 2.1,
+    });
+  });
+
+  it.each([
+    [
+      "missing lifecycle class",
+      (classes) => {
+        delete classes.restartFailed;
+      },
+      /restart-failed|missing/i,
+    ],
+    [
+      "not-implemented lifecycle class",
+      (classes) => {
+        classes.restartFailed = {
+          classification: "restart-failed",
+          observed: false,
+          status: "not-implemented",
+          evidenceSource: "measured-lifecycle-check",
+        };
+      },
+      /not.?implemented|restart-failed/i,
+    ],
+    [
+      "synthetic lifecycle class",
+      (classes) => {
+        classes.forcedKill = {
+          classification: "forced-kill",
+          observed: true,
+          synthetic: true,
+          evidenceSource: "synthetic-plan",
+        };
+      },
+      /synthetic|measured-lifecycle-check/i,
+    ],
+    [
+      "in-flight shutdown succeeds and reuses WAV",
+      (classes) => {
+        classes.inflightShutdown = {
+          classification: "inflight-rejected",
+          observed: true,
+          evidenceSource: "measured-lifecycle-check",
+          rejected: false,
+          succeeded: true,
+          wavReused: true,
+        };
+      },
+      /in-?flight.*shutdown.*reject.*wav/i,
+    ],
+  ])("requires measured lifecycle class evidence for app-prototype readiness: %s", async (_caseName, mutate, errorPattern) => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = `nano6-lifecycle-classes-${_caseName.replaceAll(" ", "-")}`;
+    const lifecycleClasses = nano6LifecycleClassEvidence();
+    mutate(lifecycleClasses);
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        lifecycleEvidence: {
+          status: "actual",
+          requestedOnly: false,
+          stale: false,
+          runId,
+          evidenceSource: "measured-lifecycle-check",
+          lifecycleClasses,
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(errorPattern);
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      key: "lifecycleEvidence",
+    });
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+  });
+
   it("promotes a MOSS-NANO-6 runtime/package-ready artifact only with 30-minute soak and 100 fresh adjacent segments", async () => {
     const projectRoot = await makeTempProject();
     tempDirs.push(projectRoot);
@@ -4263,6 +4597,53 @@ describe("MOSS Nano probe", () => {
     }));
   });
 
+  it("does not expose KEEP_KOKORO_ONLY as a MOSS-NANO-6 readiness decision", async () => {
+    const projectRoot = await makeTempProject();
+    tempDirs.push(projectRoot);
+    const outputRoot = path.join(projectRoot, "artifacts", "nano");
+    const runId = "nano6-keep-kokoro-not-readiness-decision";
+
+    const { result, summary } = await runMockedResidentSummary({
+      projectRoot,
+      outputRoot,
+      runId,
+      summary: nano6ReadinessSummary({
+        runId,
+        promotionDecision: {
+          promote: false,
+          target: "app-prototype",
+          decision: "KEEP_KOKORO_ONLY",
+        },
+      }),
+      options: {
+        residentDecodeMode: "stream",
+      },
+    });
+
+    expect(result).toMatchObject({
+      status: "blocked",
+      failureClass: "runtime-contract",
+    });
+    expect(summary.error).toMatch(/PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE.*ITERATE_NANO_RESIDENT_RUNTIME.*PAUSE_NANO_RUNTIME_RELIABILITY/i);
+    expect(summary.error).not.toContain("KEEP_KOKORO_ONLY");
+    expect(summary.promotionDecision).toMatchObject({
+      promote: false,
+      target: "app-prototype",
+      decision: "ITERATE_NANO_RESIDENT_RUNTIME",
+    });
+    expect(summary.promotionDecision.decision).not.toBe("KEEP_KOKORO_ONLY");
+    expect(summary.nano6Readiness).toMatchObject({
+      status: "failed",
+      gate: "app-prototype",
+      key: "promotionDecision",
+    });
+    expect(summary.checks).toContainEqual(expect.objectContaining({
+      key: "promotionDecision",
+      status: "fail",
+      failureClass: "runtime-contract",
+    }));
+  });
+
   it("records truthful MOSS-NANO-6 shutdown and restart classifications without reusing in-flight WAV output", async () => {
     const projectRoot = await makeTempProject();
     tempDirs.push(projectRoot);
@@ -4408,6 +4789,8 @@ describe("MOSS Nano probe", () => {
     summary.residentSoak = {
       ...summary.residentSoak,
       memoryGrowthSlopeMbPerMin: 2.5,
+      postWarmupSlopeMbPerMin: 2.5,
+      readinessMemorySlopeMbPerMin: 2.5,
     };
     summary.bookLikeAdjacentRun = {
       ...summary.bookLikeAdjacentRun,

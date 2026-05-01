@@ -170,7 +170,19 @@ MOSS-NANO-6B runtime/package readiness evidence:
 - Shutdown classes `clean`, `forced`, `zombie`, `restart`, and `inflight` remain `not-observed`/`not-implemented`; synthetic lifecycle evidence remains fail-closed and cannot promote.
 - Nano-6 readiness is machine-readable as `not-promoting`, with failed gates/reasons preserved for runtime follow-up. Preflight evidence now distinguishes source evidence from package evidence fields.
 
-Current Nano decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6B did not promote Nano to app prototype and is explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Keep Kokoro as the app default and only integrated engine. Future Nano work must remain runtime-only resident iteration/hardening until Nano package evidence, lifecycle shutdown implementation, memory slope, and adjacent RTF gates are proven. Do not add app integration, renderer/IPC/selectable-engine work, or Kokoro behavior changes from this evidence.
+MOSS-NANO-6C memory/tail-latency/lifecycle evidence:
+
+- Targeted adjacent artifact: `artifacts/moss/moss-nano-6c-adjacent-20-escalated/summary.json`.
+- Targeted ORT no-arena artifact: `artifacts/moss/moss-nano-6c-ort-no-arena-20-escalated/summary.json`.
+- Adjacent-20 completed `20/20` fresh with readiness memory slope `9.7639MB/min`, inference slope `10.6414MB/min`, hold slope `0`, p95 first decoded `1240ms`, p95 RTF `3.0416`, and lifecycle not implemented.
+- ORT no-arena completed `20/20` fresh with readiness memory slope `8.563MB/min`, inference slope `8.8964MB/min`, hold slope `0`, p95 first decoded `1768ms`, p95 RTF `3.3251`, and lifecycle not implemented.
+- Memory endpoint slope is diagnostic-only; readiness memory gate uses the authoritative max of readiness, post-warmup, and inference phase slopes.
+- Phase fields are required. Tail-latency failures include machine-readable slow segment evidence.
+- Lifecycle validation accepts `lifecycleEvidence.lifecycleClasses` and requires all six measured classes.
+- Nano-6 readiness decisions are limited to `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, and `PAUSE_NANO_RUNTIME_RELIABILITY`; `KEEP_KOKORO_ONLY` is not exposed as a Nano-6 readiness decision.
+- The full 30-minute soak was skipped/deferred because targeted gates already failed; do not spend 30 minutes proving a non-promotable state.
+
+Current Nano decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6C did not promote Nano to app prototype and is explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Keep Kokoro as the app default and only integrated engine. Future Nano work must remain runtime-only resident iteration/hardening until Nano package evidence, lifecycle shutdown implementation, memory slope, tail latency, and adjacent RTF gates are proven. Do not add app integration, renderer/IPC/selectable-engine work, or Kokoro behavior changes from this evidence.
 
 ### Runtime Command Truth
 

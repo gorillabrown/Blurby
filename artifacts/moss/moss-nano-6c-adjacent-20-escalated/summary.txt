@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-6c-adjacent-20-escalated
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-6c-adjacent-20-escalated\output.wav
+Total seconds: 7.3208
+First WAV bytes seconds: 0.704
+Internal first decoded seconds: 0.704
+Audio duration seconds: 3.68
+RTF: 1.9893
+Peak memory: 1705.92 MB
+Process mode: cold
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 1

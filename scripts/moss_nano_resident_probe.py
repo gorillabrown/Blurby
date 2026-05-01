@@ -9,6 +9,7 @@ runs. It never downloads source or model assets.
 from __future__ import annotations
 
 import importlib
+import gc
 import hashlib
 import json
 import math
@@ -676,6 +677,79 @@ def percentile(values: list[Any], percentile_value: float) -> float | None:
     return round(numeric[index], 4)
 
 
+def linear_regression_slope_mb_per_min(samples: list[dict[str, Any]]) -> float | None:
+    points = [
+        (float(sample.get("elapsedSec")), float(sample.get("rssMb")))
+        for sample in samples
+        if isinstance(sample, dict)
+        and isinstance(sample.get("elapsedSec"), (int, float))
+        and isinstance(sample.get("rssMb"), (int, float))
+        and math.isfinite(float(sample.get("elapsedSec")))
+        and math.isfinite(float(sample.get("rssMb")))
+    ]
+    if len(points) < 2:
+        return None
+    mean_x = sum(point[0] for point in points) / len(points)
+    mean_y = sum(point[1] for point in points) / len(points)
+    denominator = sum((point[0] - mean_x) ** 2 for point in points)
+    if denominator <= 0:
+        return None
+    slope_mb_per_sec = sum((point[0] - mean_x) * (point[1] - mean_y) for point in points) / denominator
+    return round(max(0.0, slope_mb_per_sec * 60), 4)
+
+
+def endpoint_slope_mb_per_min(samples: list[dict[str, Any]], duration_sec: float) -> tuple[float | None, float | None]:
+    if len(samples) < 2:
+        return None, None
+    first_rss = samples[0].get("rssMb")
+    last_rss = samples[-1].get("rssMb")
+    if not isinstance(first_rss, (int, float)) or not isinstance(last_rss, (int, float)):
+        return None, None
+    growth = round(float(last_rss) - float(first_rss), 4)
+    duration_min = max(float(duration_sec) / 60, 1 / 60)
+    return growth, round(max(0.0, growth) / duration_min, 4)
+
+
+def phase_memory_fields(samples: list[dict[str, Any]], measured_duration_sec: float) -> dict[str, Any]:
+    endpoint_growth, endpoint_slope = endpoint_slope_mb_per_min(samples, measured_duration_sec)
+    initial_samples = [
+        sample for sample in samples
+        if str(sample.get("label") or "").startswith(("iteration-", "adjacent-segment-"))
+    ]
+    hold_samples = [
+        sample for sample in samples
+        if str(sample.get("label") or "") in {"pre-soak-hold", "soak-hold", "soak-complete"}
+    ]
+    post_warmup_samples = samples[1:] if len(samples) > 1 else samples
+    initial_expansion = None
+    if len(samples) >= 2:
+        first_rss = samples[0].get("rssMb")
+        second_rss = samples[1].get("rssMb")
+        if isinstance(first_rss, (int, float)) and isinstance(second_rss, (int, float)):
+            initial_expansion = round(max(0.0, float(second_rss) - float(first_rss)), 4)
+    inference_slope = linear_regression_slope_mb_per_min(initial_samples)
+    post_warmup_slope = linear_regression_slope_mb_per_min(post_warmup_samples)
+    hold_slope = linear_regression_slope_mb_per_min(hold_samples)
+    if inference_slope is None:
+        inference_slope = post_warmup_slope
+    if hold_slope is None:
+        hold_slope = 0.0 if len(hold_samples) == 1 else post_warmup_slope
+    readiness_slope = post_warmup_slope
+    return {
+        "initialExpansionMb": initial_expansion,
+        "endpointGrowthMb": endpoint_growth,
+        "endpointGrowthMbPerMin": endpoint_slope,
+        "diagnosticEndpointSlopeMbPerMin": endpoint_slope,
+        "postWarmupSlopeMbPerMin": post_warmup_slope,
+        "inferenceSlopeMbPerMin": inference_slope,
+        "holdSlopeMbPerMin": hold_slope,
+        "readinessMemorySlopeMbPerMin": readiness_slope,
+        "readinessMemorySlopeMethod": "post-warmup-phase-regression",
+        "memoryGrowthSlopeMethod": "endpoint-diagnostic-only",
+        "phaseMemoryMethod": "least-squares-regression-over-post-warmup-phase-windows",
+    }
+
+
 def add_nano6_lifecycle_evidence(
     summary: dict[str, Any],
     options: dict[str, Any],
@@ -719,6 +793,7 @@ def add_nano6_lifecycle_evidence(
     last_rss = float(rss_samples[-1])
     duration_min = max(measured_duration_sec / 60, 1 / 60)
     slope = round(max(0.0, last_rss - first_rss) / duration_min, 4)
+    phase_memory = phase_memory_fields(rss_sample_records, measured_duration_sec)
     segments = list(summary.get("segments") or [])
     stale_count = sum(1 for segment in segments if segment.get("staleOutputReuse"))
     empty_count = sum(1 for segment in segments if segment.get("empty") or not str(segment.get("text") or "").strip())
@@ -745,6 +820,7 @@ def add_nano6_lifecycle_evidence(
         "currentRssMb": rss_samples[-1],
         "memoryGrowthSlopeMbPerMin": slope,
         "memoryGrowthMethod": "wall-clock-current-rss-samples",
+        **phase_memory,
         "crashCount": 0,
         "staleOutputReuseCount": stale_count,
         "sessionRestartCount": restart_count,
@@ -845,6 +921,11 @@ def add_nano6_lifecycle_evidence(
             "soakDurationSec": measured_duration_sec,
             "requestedSoakDurationSec": requested_duration_sec,
             "memoryGrowthSlopeMbPerMin": slope,
+            "diagnosticEndpointSlopeMbPerMin": phase_memory.get("diagnosticEndpointSlopeMbPerMin"),
+            "postWarmupSlopeMbPerMin": phase_memory.get("postWarmupSlopeMbPerMin"),
+            "inferenceSlopeMbPerMin": phase_memory.get("inferenceSlopeMbPerMin"),
+            "holdSlopeMbPerMin": phase_memory.get("holdSlopeMbPerMin"),
+            "readinessMemorySlopeMbPerMin": phase_memory.get("readinessMemorySlopeMbPerMin"),
             "crashCount": 0,
             "staleOutputReuseCount": stale_count,
             "sessionRestartCount": restart_count,
@@ -872,7 +953,8 @@ def add_nano6_lifecycle_evidence(
         )
         ready = (
             measured_duration_sec >= 1800
-            and slope <= 1.5
+            and isinstance(phase_memory.get("readinessMemorySlopeMbPerMin"), (int, float))
+            and phase_memory.get("readinessMemorySlopeMbPerMin") <= 1.5
             and stale_count == 0
             and empty_count == 0
             and restart_count == 0
@@ -1445,6 +1527,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
     soak_start_perf: float | None = None
     soak_warmup_end_at: str | None = None
     soak_memory_samples: list[dict[str, Any]] = []
+    cleanup_evidence: list[dict[str, Any]] = []
 
     def record_soak_memory_sample(label: str) -> None:
         if soak_start_perf is None:
@@ -1477,6 +1560,28 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
             time.sleep(min(sample_interval_sec, remaining_sec))
             record_soak_memory_sample("soak-hold")
         record_soak_memory_sample("soak-complete")
+
+    def record_cleanup_evidence(label: str) -> None:
+        before = memory_sampler.sample()
+        collected = gc.collect()
+        after = memory_sampler.sample()
+        before_rss = before.get("rssMb")
+        after_rss = after.get("rssMb")
+        delta = None
+        if isinstance(before_rss, (int, float)) and isinstance(after_rss, (int, float)):
+            delta = round(float(after_rss) - float(before_rss), 4)
+        cleanup_evidence.append(
+            {
+                "label": label,
+                "method": "gc.collect-after-adjacent-run",
+                "collectedObjects": collected,
+                "rssBeforeMb": before_rss,
+                "rssAfterMb": after_rss,
+                "rssDeltaMb": delta,
+                "before": before,
+                "after": after,
+            }
+        )
 
     def run_one(run_index: int, measured: bool, wav_path: Path, phase: str, text: str | None = None) -> dict[str, Any]:
         existed_before = wav_path.exists()
@@ -1523,6 +1628,8 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
         duration = nano.wav_duration_sec(wav_path)
         identity = runtime_identity(runtime)
         internal_ms = first_audio_observation.get("internalFirstDecodedAudioMs")
+        result_audio_path = str(result.get("audio_path") or wav_path)
+        result = None
         stage_timings = {
             "textNormalize": text_normalize_sec,
             "textChunk": text_chunk_sec,
@@ -1551,10 +1658,10 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
             "firstAudioObservation": first_audio_observation,
             "audioDurationSec": duration,
             "rtf": round(total_sec / duration, 4) if duration else None,
-            "outputWavPath": str(result.get("audio_path") or wav_path),
-            "outputPath": str(result.get("audio_path") or wav_path),
+            "outputWavPath": result_audio_path,
+            "outputPath": result_audio_path,
             "segmentCount": 1,
-            "segmentOutputWavPaths": [str(result.get("audio_path") or wav_path)],
+            "segmentOutputWavPaths": [result_audio_path],
             "segments": [],
             **memory_fields,
             "stageProfile": resident_stage_profile(bool(options.get("profileStages")), stage_timings),
@@ -1637,6 +1744,7 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
                 }
                 adjacent_segments.append(segment)
                 record_soak_memory_sample(f"adjacent-segment-{segment_index + 1}")
+                record_cleanup_evidence(f"adjacent-segment-{segment_index + 1}")
             summary["segments"] = adjacent_segments
             summary["adjacentSegmentStats"] = summarize_adjacent_segments(
                 adjacent_segments,
@@ -1740,6 +1848,12 @@ def run_probe(command: dict[str, Any]) -> dict[str, Any]:
             "reusedAcrossSegments": reused_prompt_codes,
         }
         summary["promptReuseActual"] = reused_prompt_codes
+    summary["cleanupEvidence"] = {
+        "status": "actual" if cleanup_evidence else "not-run",
+        "boundedCleanupAfterAdjacentRuns": bool(cleanup_evidence),
+        "method": "release-local-refs-and-gc-collect",
+        "samples": cleanup_evidence,
+    }
     memory_aggregate = aggregate_memory_fields(run_records_for_reuse)
     summary["aggregate"] = {
         "iterations": len(measured_iterations),

@@ -309,7 +309,7 @@ Supporting diagnostics:
 - `moss-nano-5c-short-resident-decode-full-diagnostic`: decode-full was measured as a diagnostic path but is not a product blocker for the segment-first gate.
 - `moss-nano-5c-short-resident-precompute-requestrows-rca`: precompute was requested but actual remained false with blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. The current high-level path lacks prepared-row consumption, while the lower ONNX path has build/request rows and generate frames, so future runtime work may implement it.
 
-Conclusion: Nano earned only the next runtime soak/package gate. `MOSS-NANO-6B` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so app integration remains locked until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
+Conclusion: Nano earned only the next runtime soak/package gate. `MOSS-NANO-6C` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so app integration remains locked until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
 
 ## MOSS-NANO-6B Resident Soak Memory / Lifecycle Closure
 
@@ -331,6 +331,23 @@ Verification: focused tests passed `133/133`; final full `npm test` passed `2354
 
 Conclusion: Continue resident runtime iteration only. Do not dispatch MOSS-NANO-7 because app-prototype promotion did not happen. No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, or MOSS-3 reopen is unlocked.
 
+## MOSS-NANO-6C Memory / Tail-Latency / Lifecycle Fix
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6C did not promote Nano to app prototype and is explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or MOSS-3 reopening. Kokoro remains the default and only integrated engine.
+
+Targeted evidence:
+
+| Evidence | Result |
+|---|---|
+| Adjacent 20 | `artifacts/moss/moss-nano-6c-adjacent-20-escalated/summary.json`: `20/20` fresh; readiness memory slope `9.7639MB/min`; inference slope `10.6414MB/min`; hold slope `0`; p95 first decoded `1240ms`; p95 RTF `3.0416`; lifecycle not implemented. |
+| ORT no-arena 20 | `artifacts/moss/moss-nano-6c-ort-no-arena-20-escalated/summary.json`: `20/20` fresh; readiness memory slope `8.563MB/min`; inference slope `8.8964MB/min`; hold slope `0`; p95 first decoded `1768ms`; p95 RTF `3.3251`; lifecycle not implemented. |
+
+Hardening: memory endpoint slope is diagnostic-only; readiness memory gate uses the authoritative max of readiness, post-warmup, and inference phase slopes; phase fields are required; tail-latency failures include machine-readable slow segment evidence; lifecycle validation accepts `lifecycleEvidence.lifecycleClasses` and requires all six measured classes; Nano-6 decisions are limited to `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`.
+
+Verification: focused final tests passed `143/143`; final full `npm test` passed `2364/2364`; `npm run build` passed with the existing circular chunk warning.
+
+Conclusion: Continue resident runtime iteration only. The full 30-minute soak was deferred because targeted gates already failed on memory slope, RTF/tail latency, and lifecycle implementation. Do not dispatch MOSS-NANO-7 because app-prototype promotion did not happen.
+
 ## MOSS-TTS-Nano Onboarding Gate Sequence
 
 The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration remains gated. The sequence is:
@@ -338,12 +355,13 @@ The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration
 1. `MOSS-NANO-5B`: precompute + adjacent continuity closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
 2. `MOSS-NANO-5C`: segment-first soak gate. Completed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`; runtime-only, not app prototype promotion.
 3. `MOSS-NANO-6B`: resident soak memory/lifecycle closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no app-prototype promotion.
-4. Runtime-only resident Nano follow-up: must harden package evidence, lifecycle shutdown implementation, memory slope, and adjacent RTF gates before any app-prototype reconsideration.
-5. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
-6. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
-7. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
-8. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
-9. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
+4. `MOSS-NANO-6C`: memory / tail-latency / lifecycle fix. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no app-prototype promotion.
+5. Runtime-only resident Nano follow-up: must harden package evidence, lifecycle shutdown implementation, memory slope, tail latency, and adjacent RTF gates before any app-prototype reconsideration.
+6. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
+7. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
+8. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
+9. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
+10. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
 
 Non-negotiable gates:
 

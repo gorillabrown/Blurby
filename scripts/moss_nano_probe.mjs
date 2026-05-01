@@ -33,11 +33,11 @@ const NANO5C_SEGMENT_FIRST_SOAK_DECISION = "PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_
 const NANO6_APP_PROTOTYPE_TARGET = "app-prototype";
 const NANO6_APP_PROTOTYPE_DECISION = "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE";
 const NANO6_ITERATE_DECISION = "ITERATE_NANO_RESIDENT_RUNTIME";
-const NANO6_KEEP_KOKORO_DECISION = "KEEP_KOKORO_ONLY";
+const NANO6_PAUSE_DECISION = "PAUSE_NANO_RUNTIME_RELIABILITY";
 const NANO6_DECISIONS = new Set([
   NANO6_APP_PROTOTYPE_DECISION,
   NANO6_ITERATE_DECISION,
-  NANO6_KEEP_KOKORO_DECISION,
+  NANO6_PAUSE_DECISION,
 ]);
 const NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS = Object.freeze([
   "clean-shutdown",
@@ -422,8 +422,12 @@ function blockResidentSummary(summary, message, key, failureClass = "runtime-con
   if (summary.promotionDecision && typeof summary.promotionDecision === "object") {
     summary.promotionDecision.promote = false;
     summary.promotionDecision.blockedReason = message;
-    if (String(summary.promotionDecision.decision ?? "").startsWith("PROMOTE_NANO_TO_")) {
-      summary.promotionDecision.decision = hasNano6PromotionDecisionShape(summary) || failureClass === "performance"
+    const decision = String(summary.promotionDecision.decision ?? "");
+    const nano6PromotionDecisionShape = hasNano6PromotionDecisionShape(summary);
+    if (nano6PromotionDecisionShape && !NANO6_DECISIONS.has(decision)) {
+      summary.promotionDecision.decision = NANO6_ITERATE_DECISION;
+    } else if (decision.startsWith("PROMOTE_NANO_TO_")) {
+      summary.promotionDecision.decision = nano6PromotionDecisionShape || failureClass === "performance"
         ? "ITERATE_NANO_RESIDENT_RUNTIME"
         : "BLOCKED_NANO_RESIDENT_RUNTIME";
     }
@@ -1295,11 +1299,19 @@ function percentile(values, percentileValue) {
 
 function hasNano6ReadinessShape(summary, requested = {}) {
   if (requested.nano6Soak === true) return true;
-  return Boolean(
+  if (requested.promotionTarget === NANO6_APP_PROTOTYPE_TARGET) return true;
+  const target = summary?.promotionTarget ?? summary?.promotionDecision?.target ?? null;
+  const decision = summary?.promotionDecision?.decision ?? null;
+  const readinessEvidence = Boolean(
     summary?.residentSoak
       || summary?.bookLikeAdjacentRun
       || summary?.shutdownEvidence
       || summary?.lifecycleEvidence,
+  );
+  if (readinessEvidence && (target === NANO6_APP_PROTOTYPE_TARGET || NANO6_DECISIONS.has(decision))) return true;
+  return Boolean(
+    summary?.nano6Readiness?.gate === NANO6_APP_PROTOTYPE_TARGET
+      || summary?.nano6Readiness?.target === NANO6_APP_PROTOTYPE_TARGET,
   );
 }
 
@@ -1365,6 +1377,11 @@ function normalizeNano6ReadinessEvidence(summary, requested = {}) {
   Object.assign(summary.promotionMetrics, {
     soakDurationSec: firstFiniteNumber(soak.durationSec, summary.promotionMetrics.soakDurationSec),
     memoryGrowthSlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.memoryGrowthSlopeMbPerMin, soak.memoryGrowthSlopeMbPerMin),
+    diagnosticEndpointSlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.diagnosticEndpointSlopeMbPerMin, soak.diagnosticEndpointSlopeMbPerMin, soak.endpointGrowthMbPerMin),
+    postWarmupSlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.postWarmupSlopeMbPerMin, soak.postWarmupSlopeMbPerMin),
+    inferenceSlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.inferenceSlopeMbPerMin, soak.inferenceSlopeMbPerMin),
+    holdSlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.holdSlopeMbPerMin, soak.holdSlopeMbPerMin),
+    readinessMemorySlopeMbPerMin: firstFiniteNumber(summary.promotionMetrics.readinessMemorySlopeMbPerMin, soak.readinessMemorySlopeMbPerMin, soak.postWarmupSlopeMbPerMin),
     crashCount: firstFiniteNumber(summary.promotionMetrics.crashCount, soak.crashCount),
     staleOutputReuseCount: firstFiniteNumber(summary.promotionMetrics.staleOutputReuseCount, soak.staleOutputReuseCount, adjacent.staleOutputReuseCount),
     sessionRestartCount: firstFiniteNumber(summary.promotionMetrics.sessionRestartCount, soak.sessionRestartCount, adjacent.sessionRestartCount),
@@ -1382,6 +1399,10 @@ function normalizeNano6ReadinessEvidence(summary, requested = {}) {
 
 function nano6Failure(message, key, failureClass = "runtime-contract") {
   return { message, key, failureClass };
+}
+
+function nano6FailureWithEvidence(message, key, failureClass, evidence = {}) {
+  return { message, key, failureClass, ...evidence };
 }
 
 function markNano6ReadinessFailure(summary, failure) {
@@ -1402,6 +1423,8 @@ function nano6ReadinessFailureDetails(failures) {
     key: failure.key,
     reason: failure.message,
     failureClass: failure.failureClass,
+    ...(failure.tailLatencyEvidence ? { tailLatencyEvidence: failure.tailLatencyEvidence } : {}),
+    ...(failure.slowSegmentIndices ? { slowSegmentIndices: failure.slowSegmentIndices } : {}),
   }));
 }
 
@@ -1433,7 +1456,7 @@ function validateNano6PromotionDecision(summary) {
   const target = summary.promotionTarget ?? summary.promotionDecision?.target ?? null;
   const promote = summary.promotionDecision?.promote === true;
   if (!NANO6_DECISIONS.has(decision)) {
-    return nano6Failure("MOSS-NANO-6 promotion decision must be PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE, ITERATE_NANO_RESIDENT_RUNTIME, or KEEP_KOKORO_ONLY.", "promotionDecision");
+    return nano6Failure("MOSS-NANO-6 promotion decision must be PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE, ITERATE_NANO_RESIDENT_RUNTIME, or PAUSE_NANO_RUNTIME_RELIABILITY.", "promotionDecision");
   }
   if (promote && (decision !== NANO6_APP_PROTOTYPE_DECISION || target !== NANO6_APP_PROTOTYPE_TARGET)) {
     return nano6Failure("MOSS-NANO-6 app prototype promotion requires target app-prototype and PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE.", "promotionDecision");
@@ -1462,8 +1485,52 @@ function validateNano6Soak(summary) {
   if (!Array.isArray(soak.rssSamples) || soak.rssSamples.length === 0 || !soak.rssSamples.every(isFiniteNumber) || !isFiniteNumber(soak.currentRssMb)) {
     return nano6Failure("MOSS-NANO-6 resident soak RSS memory evidence is required.", "residentSoak");
   }
-  if (!isFiniteNumber(soak.memoryGrowthSlopeMbPerMin) || soak.memoryGrowthSlopeMbPerMin > thresholds.memoryGrowthSlopeMbPerMinMax) {
-    return nano6Failure("MOSS-NANO-6 resident soak memory growth exceeds 1.5MB/min.", "residentSoak", "performance");
+  if (!isFiniteNumber(soak.endpointGrowthMb) && soak.rssSamples.length >= 2) {
+    soak.endpointGrowthMb = Math.round((soak.rssSamples.at(-1) - soak.rssSamples[0]) * 100) / 100;
+  }
+  if (!isFiniteNumber(soak.endpointGrowthMbPerMin)) {
+    soak.endpointGrowthMbPerMin = firstFiniteNumber(soak.diagnosticEndpointSlopeMbPerMin, soak.memoryGrowthSlopeMbPerMin);
+  }
+  const requiredPhaseFields = [
+    "initialExpansionMb",
+    "endpointGrowthMb",
+    "endpointGrowthMbPerMin",
+    "postWarmupSlopeMbPerMin",
+    "inferenceSlopeMbPerMin",
+    "holdSlopeMbPerMin",
+  ];
+  const missingPhaseFields = requiredPhaseFields.filter((key) => !isFiniteNumber(soak[key]));
+  const phaseMethod = String(soak.readinessMemorySlopeMethod ?? soak.memoryGrowthSlopeMethod ?? soak.memoryGrowthMethod ?? "").toLowerCase();
+  const phaseMethodValid = (phaseMethod.includes("regression") || phaseMethod.includes("window"))
+    && (phaseMethod.includes("post-warmup") || phaseMethod.includes("phase"));
+  if (missingPhaseFields.length > 0 || !phaseMethodValid) {
+    return nano6Failure(
+      `MOSS-NANO-6 resident soak requires phase regression memory fields before promotion: ${missingPhaseFields.join(", ") || "method"}.`,
+      "residentSoak",
+    );
+  }
+  const reportedReadinessSlope = firstFiniteNumber(
+    soak.readinessMemorySlopeMbPerMin,
+    summary.promotionMetrics?.readinessMemorySlopeMbPerMin,
+  );
+  const readinessSlope = maxFiniteNumber([
+    reportedReadinessSlope,
+    soak.postWarmupSlopeMbPerMin,
+    soak.inferenceSlopeMbPerMin,
+    summary.promotionMetrics?.postWarmupSlopeMbPerMin,
+    summary.promotionMetrics?.inferenceSlopeMbPerMin,
+  ]);
+  soak.readinessMemorySlopeMbPerMin = readinessSlope;
+  soak.readinessMemorySlopeSource = "max-of-readiness-postWarmup-inference";
+  if (isFiniteNumber(reportedReadinessSlope) && isFiniteNumber(readinessSlope) && readinessSlope !== reportedReadinessSlope) {
+    soak.readinessMemorySlopeBackfilledFrom = "authoritative-phase-max";
+  }
+  summary.promotionMetrics.readinessMemorySlopeMbPerMin = readinessSlope;
+  if (soak.diagnosticEndpointSlopeMbPerMin == null && isFiniteNumber(soak.endpointGrowthMbPerMin)) {
+    soak.diagnosticEndpointSlopeMbPerMin = soak.endpointGrowthMbPerMin;
+  }
+  if (!isFiniteNumber(readinessSlope) || readinessSlope > thresholds.memoryGrowthSlopeMbPerMinMax) {
+    return nano6Failure("MOSS-NANO-6 resident soak post-warmup phase memory growth exceeds 1.5MB/min.", "residentSoak", "performance");
   }
   if (Number(soak.crashCount ?? 0) > thresholds.crashCountMax) {
     return nano6Failure("MOSS-NANO-6 resident soak crash count must be zero.", "residentSoak");
@@ -1523,12 +1590,52 @@ function validateNano6BookLikeAdjacentRun(summary) {
     return nano6Failure("MOSS-NANO-6 adjacent p95 internal first decoded audio exceeds 1500ms.", "bookLikeAdjacentRun", "performance");
   }
   if (!isFiniteNumber(run.p95FinalRtf) || run.p95FinalRtf > thresholds.adjacentP95FinalRtfMax) {
-    return nano6Failure("MOSS-NANO-6 adjacent p95 final RTF exceeds 1.5.", "bookLikeAdjacentRun", "performance");
+    return nano6TailLatencyFailure(
+      "MOSS-NANO-6 adjacent p95 final RTF exceeds 1.5.",
+      "p95 final rtf",
+      "rtf",
+      run.p95FinalRtf,
+      thresholds.adjacentP95FinalRtfMax,
+      segments,
+    );
   }
   if (!isFiniteNumber(run.p95PunctuationRtf) || run.p95PunctuationRtf > thresholds.adjacentP95PunctuationRtfMax) {
-    return nano6Failure("MOSS-NANO-6 adjacent p95 punctuation RTF exceeds 1.45.", "bookLikeAdjacentRun", "performance");
+    return nano6TailLatencyFailure(
+      "MOSS-NANO-6 adjacent p95 punctuation RTF exceeds 1.45.",
+      "p95 punctuation rtf",
+      "punctuationRtf",
+      run.p95PunctuationRtf,
+      thresholds.adjacentP95PunctuationRtfMax,
+      segments,
+    );
   }
   return null;
+}
+
+function nano6TailLatencyFailure(message, metric, segmentMetricKey, observed, threshold, segments) {
+  const slowSegments = segments
+    .map((segment, fallbackIndex) => ({
+      index: Number.isInteger(segment?.index) ? segment.index : fallbackIndex,
+      rtf: segment?.rtf ?? null,
+      punctuationRtf: segment?.punctuationRtf ?? segment?.rtf ?? null,
+      firstDecodedAudioMs: segment?.firstAudioObservation?.internalFirstDecodedAudioMs ?? segment?.internalFirstDecodedAudioMs ?? null,
+      totalSec: segment?.totalSec ?? null,
+      audioDurationSec: segment?.audioDurationSec ?? null,
+      metricValue: segment?.[segmentMetricKey] ?? (segmentMetricKey === "punctuationRtf" ? segment?.rtf : null),
+    }))
+    .filter((segment) => isFiniteNumber(segment.metricValue) && segment.metricValue > threshold);
+  const slowSegmentIndices = slowSegments.map((segment) => segment.index);
+  return nano6FailureWithEvidence(message, "bookLikeAdjacentRun", "performance", {
+    slowSegmentIndices,
+    tailLatencyEvidence: {
+      metric,
+      method: "nearest-rank-p95",
+      threshold,
+      observed,
+      slowSegmentIndices,
+      slowSegments,
+    },
+  });
 }
 
 function validateNano6LifecycleEvidence(summary) {
@@ -1557,15 +1664,29 @@ function validateNano6LifecycleEvidence(summary) {
       );
     }
   }
+  if (evidence.lifecycleClasses != null) {
+    const lifecycleClassFailure = validateNano6LifecycleClassEvidence(evidence.lifecycleClasses, "lifecycleEvidence");
+    if (lifecycleClassFailure) return lifecycleClassFailure;
+  }
   return null;
 }
 
 function validateNano6ShutdownEvidence(summary) {
-  const evidence = objectOrEmpty(summary.shutdownEvidence);
-  if (!summary.shutdownEvidence) {
+  const lifecycleClasses = objectOrEmpty(summary.lifecycleEvidence?.lifecycleClasses);
+  const evidence = objectOrEmpty(summary.shutdownEvidence ?? lifecycleClasses);
+  if (!summary.shutdownEvidence && Object.keys(lifecycleClasses).length === 0) {
     return nano6Failure("MOSS-NANO-6 shutdown/restart evidence is required.", "shutdownEvidence");
   }
-  const classifications = new Set(Array.isArray(summary.shutdownClassifications) ? summary.shutdownClassifications : []);
+  if (!summary.shutdownEvidence && Object.keys(lifecycleClasses).length > 0) {
+    summary.shutdownEvidence = lifecycleClasses;
+  }
+  const classFailure = validateNano6LifecycleClassEvidence(evidence, "shutdownEvidence");
+  if (classFailure) return classFailure;
+  return null;
+}
+
+function validateNano6LifecycleClassEvidence(evidence, key) {
+  const classifications = new Set();
   const evidenceByClassification = new Map();
   for (const item of Object.values(evidence)) {
     if (item && typeof item === "object" && item.classification) {
@@ -1575,21 +1696,22 @@ function validateNano6ShutdownEvidence(summary) {
   }
   const missing = NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS.filter((classification) => !classifications.has(classification));
   if (missing.length > 0) {
-    return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications are missing: ${missing.join(", ")}.`, "shutdownEvidence");
+    return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications are missing: ${missing.join(", ")}.`, key);
   }
   const notMeasured = NANO6_REQUIRED_SHUTDOWN_CLASSIFICATIONS.filter((classification) => {
     const item = objectOrEmpty(evidenceByClassification.get(classification));
     const source = String(item.evidenceSource ?? item.source ?? item.classificationSource ?? "").toLowerCase();
     const status = String(item.status ?? "").toLowerCase();
-    const synthetic = ["synthetic", "planned", "requested"].some((marker) => source.includes(marker) || status.includes(marker));
+    const synthetic = item.synthetic === true
+      || ["synthetic", "planned", "requested", "not-implemented", "not-observed"].some((marker) => source.includes(marker) || status.includes(marker));
     return item.observed !== true || synthetic || source !== "measured-lifecycle-check";
   });
   if (notMeasured.length > 0) {
-    return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications require measured observed lifecycle checks, not synthetic or planned evidence: ${notMeasured.join(", ")}.`, "shutdownEvidence");
+    return nano6Failure(`MOSS-NANO-6 shutdown/restart classifications require measured observed lifecycle checks, not synthetic, planned, or not implemented evidence: ${notMeasured.join(", ")}.`, key);
   }
   const inflight = objectOrEmpty(evidence.inflightShutdown);
   if (inflight.classification !== "inflight-rejected" || inflight.rejected !== true || inflight.succeeded === true || inflight.wavReused === true) {
-    return nano6Failure("MOSS-NANO-6 in-flight shutdown must reject work and must not reuse a stale WAV.", "shutdownEvidence");
+    return nano6Failure("MOSS-NANO-6 in-flight shutdown must reject work and must not reuse a stale WAV.", key);
   }
   return null;
 }
