@@ -8,6 +8,156 @@ import { formatGateReport, runGateEvaluation } from "./tts_eval_gate.mjs";
 const DEFAULT_FIXTURE_MANIFEST = "tests/fixtures/narration/manifest.json";
 const DEFAULT_MATRIX_MANIFEST = "tests/fixtures/narration/matrix.manifest.json";
 const DEFAULT_GATES_PATH = "docs/testing/tts_quality_gates.v1.json";
+const MOSS_NANO_PRODUCT_MODES = Object.freeze(["page", "focus", "flow", "narrate"]);
+const MOSS_NANO_PRODUCT_EVIDENCE_KEYS = Object.freeze([
+  "liveBookMatrix",
+  "settingsPreviewTruth",
+  "sidecarLifecycle",
+  "cachePrefetchContinuity",
+  "segmentFollowingProgress",
+  "fakeWordTimestamps",
+  "explicitFallbackOnly",
+  "packageRuntimeReadiness",
+  "kokoroAvailable",
+]);
+const MOSS_NANO_LIVE_EVIDENCE_KEYS = Object.freeze([
+  "live",
+  "nanoSelected",
+  "startable",
+  "segmentProgressUnderstandable",
+  "noUnderlineRace",
+  "cachePrefetchContinuity",
+  "noStalePlayback",
+  "pauseResumeSameMode",
+  "modeSwitchAnchorPreserved",
+  "explicitFallback",
+  "sidecarLifecycleStable",
+]);
+
+function isMossNanoProductScenario(scenario) {
+  const gate = scenario?.nanoGate ?? {};
+  return scenario?.engine === "nano"
+    && gate.selectedEngine === "nano"
+    && gate.readiness === "required"
+    && gate.settingsPreviewTruth === true
+    && gate.sidecarLifecycle === true
+    && gate.cachePrefetchContinuity === true
+    && gate.segmentTiming === "segment-following"
+    && gate.wordTimestamps === false
+    && gate.fallback === "explicit-only"
+    && gate.runtimeReadiness === "documented"
+    && gate.kokoroAvailable === true;
+}
+
+function evidencePassed(key, value) {
+  if (key === "fakeWordTimestamps") return value === "absent" || value === false;
+  return value === "pass" || value === true;
+}
+
+export function evaluateMossNanoProductGate({ matrixManifest, evidence = {} } = {}) {
+  const scenarios = Array.isArray(matrixManifest?.scenarios) ? matrixManifest.scenarios : [];
+  const nanoProductScenarios = scenarios.filter(isMossNanoProductScenario);
+  const requiredModesPresent = Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode) => [
+      mode,
+      nanoProductScenarios.some((scenario) => scenario.readingMode === mode),
+    ]),
+  );
+
+  const reasons = [];
+  for (const mode of MOSS_NANO_PRODUCT_MODES) {
+    if (!requiredModesPresent[mode]) {
+      reasons.push(`Missing selected-Nano live-book matrix mode: ${mode}`);
+    }
+  }
+
+  for (const key of MOSS_NANO_PRODUCT_EVIDENCE_KEYS) {
+    if (!evidencePassed(key, evidence[key])) {
+      reasons.push(`Missing or failing MOSS-NANO-11 evidence: ${key}`);
+    }
+  }
+
+  const maxDecision = reasons.length ? "NANO_EXPERIMENTAL_ONLY" : "NANO_DEFAULT_CANDIDATE";
+  return {
+    requiredModes: [...MOSS_NANO_PRODUCT_MODES],
+    requiredModesPresent,
+    scenarioCount: nanoProductScenarios.length,
+    evidence,
+    reasons,
+    maxDecision,
+  };
+}
+
+function isMossNanoLiveEvidenceScenario(scenario) {
+  const gate = scenario?.nanoGate ?? {};
+  return scenario?.engine === "nano"
+    && gate.selectedEngine === "nano"
+    && gate.readiness === "required"
+    && (scenario.tags || []).includes("moss-nano-12")
+    && (scenario.tags || []).includes("nano-live-evidence");
+}
+
+export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence = {} } = {}) {
+  const scenarios = Array.isArray(matrixManifest?.scenarios) ? matrixManifest.scenarios : [];
+  const nanoLiveScenarios = scenarios.filter(isMossNanoLiveEvidenceScenario);
+  const modes = liveEvidence?.modes ?? {};
+  const requiredModesPresent = Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode) => [
+      mode,
+      nanoLiveScenarios.some((scenario) => scenario.readingMode === mode),
+    ]),
+  );
+
+  const reasons = [];
+  const pauseReasons = [];
+
+  for (const mode of MOSS_NANO_PRODUCT_MODES) {
+    if (!requiredModesPresent[mode]) {
+      reasons.push(`Missing selected-Nano live evidence mode: ${mode}`);
+      continue;
+    }
+
+    const modeEvidence = modes[mode];
+    if (!modeEvidence || modeEvidence.live !== true) {
+      reasons.push(`Missing live selected-Nano evidence for ${mode}`);
+      continue;
+    }
+
+    if (modeEvidence.segmentProgressUnderstandable !== true) {
+      pauseReasons.push(`Segment-following progress was not understandable in ${mode}`);
+    }
+
+    for (const key of MOSS_NANO_LIVE_EVIDENCE_KEYS) {
+      if (modeEvidence[key] !== true) {
+        const label = key === "segmentProgressUnderstandable"
+          ? `Segment-following progress was not understandable in ${mode}`
+          : `Missing or failing MOSS-NANO-12 ${key} evidence in ${mode}`;
+        if (key === "segmentProgressUnderstandable" && pauseReasons.includes(label)) continue;
+        if (["noUnderlineRace", "noStalePlayback", "explicitFallback", "sidecarLifecycleStable"].includes(key)) {
+          pauseReasons.push(label);
+        } else {
+          reasons.push(label);
+        }
+      }
+    }
+  }
+
+  const allReasons = [...reasons, ...pauseReasons];
+  const decision = pauseReasons.length
+    ? "PAUSE_NANO_PRODUCTIZATION"
+    : reasons.length
+      ? "NANO_EXPERIMENTAL_ONLY"
+      : "NANO_RECOMMENDED_OPT_IN";
+
+  return {
+    requiredModes: [...MOSS_NANO_PRODUCT_MODES],
+    requiredModesPresent,
+    scenarioCount: nanoLiveScenarios.length,
+    liveEvidence,
+    reasons: allReasons,
+    decision,
+  };
+}
 
 export function parseArgs(argv) {
   const args = {
@@ -24,6 +174,7 @@ export function parseArgs(argv) {
     tags: [],
     gates: false,
     streaming: false,
+    nanoLiveEvidencePath: null,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -96,6 +247,11 @@ export function parseArgs(argv) {
       args.streaming = true;
       continue;
     }
+    if (token === "--nano-live-evidence") {
+      args.nanoLiveEvidencePath = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
   }
 
   return args;
@@ -106,6 +262,7 @@ export function summarizeTrace(trace) {
   const words = trace.events.filter((e) => e.kind === "word");
   const flow = trace.events.filter((e) => e.kind === "flow-position");
   const transitions = trace.events.filter((e) => e.kind === "transition");
+  const nanoSegments = trace.events.filter((e) => e.kind === "nano-segment");
   const start = lifecycle.find((e) => e.state === "start");
   const firstAudio = lifecycle.find((e) => e.state === "first-audio");
   const pauses = lifecycle.filter((e) => e.state === "pause").length;
@@ -167,6 +324,24 @@ export function summarizeTrace(trace) {
   const openingChunkWordCounts = Array.isArray(start?.openingChunkWordCounts)
     ? [...start.openingChunkWordCounts]
     : [];
+  const percentile = (sortedValues, percentileValue) => {
+    if (!sortedValues.length) return null;
+    if (sortedValues.length === 1) return sortedValues[0];
+    const position = (sortedValues.length - 1) * percentileValue;
+    const lower = Math.floor(position);
+    const upper = Math.ceil(position);
+    if (lower === upper) return sortedValues[lower];
+    const weight = position - lower;
+    return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+  };
+  const nanoLatencies = nanoSegments
+    .map((event) => event.latencyMs)
+    .filter((latency) => typeof latency === "number" && Number.isFinite(latency))
+    .sort((a, b) => a - b);
+  const nanoCacheHits = nanoSegments.filter((event) => event.cacheHit === true).length;
+  const nanoCacheMisses = nanoSegments.filter((event) => event.cacheHit === false).length;
+  const nanoCacheTotal = nanoCacheHits + nanoCacheMisses;
+  const nanoPrefetchReady = nanoSegments.filter((event) => event.prefetchReady === true).length;
 
   if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
   if (pauses !== resumes) failureClasses.push("pause-resume-error");
@@ -200,6 +375,22 @@ export function summarizeTrace(trace) {
     sectionHandoffLatencyMs,
     crossBookResumeLatencyMs,
     rateResponseLatencyMs,
+    nanoSegmentLatencyMs: {
+      p50: percentile(nanoLatencies, 0.5),
+      p95: percentile(nanoLatencies, 0.95),
+      min: nanoLatencies.length ? nanoLatencies[0] : null,
+      max: nanoLatencies.length ? nanoLatencies[nanoLatencies.length - 1] : null,
+    },
+    nanoCache: {
+      hits: nanoCacheHits,
+      misses: nanoCacheMisses,
+      hitRate: nanoCacheTotal > 0 ? nanoCacheHits / nanoCacheTotal : null,
+    },
+    nanoPrefetch: {
+      ready: nanoPrefetchReady,
+      stale: nanoSegments.filter((event) => event.phase === "prefetch-stale").length,
+      cancelled: nanoSegments.filter((event) => event.phase === "prefetch-cancelled").length,
+    },
     failureClasses,
   };
 }
@@ -387,6 +578,23 @@ async function readFixtureText(fixtureInfo) {
 function filterScenariosByTags(scenarios, tags) {
   if (!tags.length) return scenarios;
   return scenarios.filter((scenario) => tags.every((tag) => (scenario.tags || []).includes(tag)));
+}
+
+function isExplicitNanoProductGateRun(args) {
+  return args.tags.includes("moss-nano-11")
+    || args.tags.includes("moss-nano-12")
+    || args.tags.includes("nano-product-gate")
+    || args.tags.includes("nano-live-evidence");
+}
+
+function isExplicitNanoLiveEvidenceRun(args) {
+  return args.tags.includes("moss-nano-12") || args.tags.includes("nano-live-evidence");
+}
+
+function isRunnableMatrixScenario(scenario, args) {
+  if (scenario.engine === "qwen-streaming" || scenario.fixtureId == null) return false;
+  if (scenario.engine === "nano") return isExplicitNanoProductGateRun(args);
+  return true;
 }
 
 async function writeRunArtifacts({ outDir, runBase, trace, summary }) {
@@ -577,9 +785,7 @@ export async function runHarness(args, runtime = null) {
     } else if (args.matrix) {
       runMode = "matrix";
       const allScenarios = filterScenariosByTags(matrixManifest.scenarios || [], args.tags);
-      const scenarios = allScenarios.filter(
-        (s) => s.engine !== "qwen-streaming" && s.fixtureId != null
-      );
+      const scenarios = allScenarios.filter((s) => isRunnableMatrixScenario(s, args));
       const result = await executeMatrix({
         args,
         scenarios,
@@ -623,6 +829,15 @@ export async function runHarness(args, runtime = null) {
 
     const aggregate = calculateAggregateMetrics(summaries);
     const aggregateText = formatAggregateSummary(aggregate);
+    const mossNanoProductGate = args.matrix && args.tags.includes("moss-nano-11")
+      ? evaluateMossNanoProductGate({ matrixManifest })
+      : null;
+    const nanoLiveEvidence = args.nanoLiveEvidencePath
+      ? await readJson(args.nanoLiveEvidencePath)
+      : {};
+    const mossNanoLiveEvidenceGate = args.matrix && isExplicitNanoLiveEvidenceRun(args)
+      ? evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence: nanoLiveEvidence })
+      : null;
     const rollup = {
       generatedAt: new Date().toISOString(),
       mode: runMode,
@@ -630,6 +845,8 @@ export async function runHarness(args, runtime = null) {
       fixtureCount: summaries.length,
       summaries,
       aggregate,
+      ...(mossNanoProductGate ? { mossNanoProductGate } : {}),
+      ...(mossNanoLiveEvidenceGate ? { mossNanoLiveEvidenceGate } : {}),
     };
 
     await writeJsonAtomic(path.join(outDir, "summary.json"), rollup);
@@ -666,6 +883,20 @@ export async function runHarness(args, runtime = null) {
     ];
     if (gate) {
       lines.push("", formatGateReport(rollup.gateReport).trim(), `Gate artifacts: ${gate.jsonPath} | ${gate.textPath}`);
+    }
+    if (mossNanoProductGate) {
+      lines.push(
+        "",
+        `MOSS-NANO-11 max decision: ${mossNanoProductGate.maxDecision}`,
+        `MOSS-NANO-11 gate reasons: ${mossNanoProductGate.reasons.join("; ") || "none"}`,
+      );
+    }
+    if (mossNanoLiveEvidenceGate) {
+      lines.push(
+        "",
+        `MOSS-NANO-12 decision: ${mossNanoLiveEvidenceGate.decision}`,
+        `MOSS-NANO-12 gate reasons: ${mossNanoLiveEvidenceGate.reasons.join("; ") || "none"}`,
+      );
     }
     await fs.writeFile(path.join(outDir, "summary.txt"), `${lines.join("\n")}\n`, "utf8");
     return { rollup, lines, gate };

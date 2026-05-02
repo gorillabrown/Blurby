@@ -8,7 +8,7 @@ export interface PronunciationOverride {
 
 // ── Narration Profiles (TTS-6L) ─────────────────────────────────���───────────
 /** A named narration preset bundling voice, rate, pause timing, and overrides. */
-export type TtsEngine = "web" | "kokoro" | "qwen";
+export type TtsEngine = "web" | "kokoro" | "qwen" | "nano";
 
 export interface NarrationProfile {
   id: string;
@@ -118,6 +118,65 @@ export interface QwenGenerateResponse {
   timingMs?: number | null;
   spikeWarningThresholdMs?: number | null;
   spikeWarning?: boolean;
+}
+
+export type MossNanoEngineStatus = "unavailable" | "loading" | "ready" | "failed" | "shutdown";
+
+export interface MossNanoLifecycleConfigSnapshot {
+  runtimeDir: string;
+  modelDir: string;
+  tokenizerDir: string;
+  commandTimeoutMs: number;
+  synthesizeTimeoutMs: number;
+  maxInFlight: number;
+  restartBackoffMs: number;
+}
+
+export interface MossNanoStatusSnapshot {
+  ok?: boolean;
+  status: MossNanoEngineStatus;
+  reason?: string | null;
+  detail?: string | null;
+  ready: boolean;
+  loading: boolean;
+  recoverable: boolean;
+  config?: MossNanoLifecycleConfigSnapshot;
+}
+
+export interface MossNanoSynthesizeRequest {
+  text: string;
+  voice?: string;
+  rate?: number;
+}
+
+export interface MossNanoSynthesizeResult {
+  ok: boolean;
+  status?: MossNanoEngineStatus;
+  reason?: string | null;
+  detail?: string | null;
+  requestId?: string | null;
+  ownerToken?: string | null;
+  outputPath?: string;
+  audio?: Float32Array | number[];
+  sampleRate?: number;
+  durationMs?: number;
+  recoverable?: boolean;
+}
+
+export interface MossNanoCancelResult {
+  ok: boolean;
+  cancelled: boolean;
+  reason?: string | null;
+  requestId?: string | null;
+  recoverable?: boolean;
+}
+
+export interface MossNanoErrorResponse {
+  ok: false;
+  error: string;
+  reason?: string | null;
+  status?: MossNanoEngineStatus | null;
+  recoverable?: boolean;
 }
 
 export type LoadDocContentResult =
@@ -443,6 +502,11 @@ export interface ElectronAPI {
   kokoroDownload?: () => Promise<{ ok?: boolean } & Partial<KokoroErrorResponse>>;
   kokoroGenerate?: (text: string, voice: string, speed: number, words?: string[]) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number; wordTimestamps?: TtsWordTimestamp[] | null } & Partial<KokoroErrorResponse>>;
   kokoroGenerateMarathon: (text: string, voice: string, speed: number) => Promise<{ audio?: Float32Array; sampleRate?: number; durationMs?: number } & Partial<KokoroErrorResponse>>;
+  nanoStatus?: () => Promise<MossNanoStatusSnapshot | MossNanoErrorResponse>;
+  nanoSynthesize?: (payload: MossNanoSynthesizeRequest) => Promise<MossNanoSynthesizeResult | MossNanoErrorResponse>;
+  nanoCancel?: (requestId: string) => Promise<MossNanoCancelResult | MossNanoErrorResponse>;
+  nanoShutdown?: () => Promise<MossNanoStatusSnapshot | MossNanoErrorResponse>;
+  nanoRestart?: () => Promise<MossNanoStatusSnapshot | MossNanoErrorResponse>;
   qwenPreload?: () => Promise<{ success?: boolean } & Partial<QwenErrorResponse>>;
   qwenPreflight?: () => Promise<QwenPreflightReport>;
   qwenModelStatus?: () => Promise<QwenStatusSnapshot>;

@@ -148,6 +148,7 @@ describe("TTSSettings Qwen prototype wiring", () => {
       "Qwen AI",
       "System",
       "Kokoro AI (Legacy)",
+      "Nano AI (Experimental)",
     ]);
 
     expect(container.textContent).toContain("Qwen is Blurby's default narration engine.");

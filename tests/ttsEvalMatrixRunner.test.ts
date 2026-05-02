@@ -4,7 +4,15 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { calculateAggregateMetrics, formatAggregateSummary } from "../scripts/tts_eval_metrics.mjs";
 import { getSoakProfile } from "../scripts/tts_eval_profiles.mjs";
-import { executeSoak, parseArgs, runHarness, simulateTrace, summarizeTrace } from "../scripts/tts_eval_runner.mjs";
+import {
+  evaluateMossNanoLiveEvidenceGate,
+  evaluateMossNanoProductGate,
+  executeSoak,
+  parseArgs,
+  runHarness,
+  simulateTrace,
+  summarizeTrace,
+} from "../scripts/tts_eval_runner.mjs";
 
 const tempDirs: string[] = [];
 
@@ -97,6 +105,74 @@ describe("tts eval matrix/soak runner", () => {
     const second = await fs.readdir(path.join(outDir, "summaries"));
     expect(first.sort()).toEqual(second.sort());
     expect(first.some((name) => name.includes("deterministic-matrix__smoke-1__it001"))).toBe(true);
+  });
+
+  it("keeps experimental Nano product-gate scenarios out of untagged matrix runs", async () => {
+    const outDir = await makeTempDir();
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push({
+      id: "moss-nano-11-page-live-book",
+      engine: "nano",
+      readingMode: "page",
+      fixtureId: "prose-basic",
+      voiceId: "af_bella",
+      requestedRate: 1.0,
+      durationClass: "medium",
+      tags: ["moss-nano-11", "nano-product-gate", "live-book", "page"],
+      nanoGate: {
+        selectedEngine: "nano",
+        readiness: "required",
+        settingsPreviewTruth: true,
+        sidecarLifecycle: true,
+        cachePrefetchContinuity: true,
+        segmentTiming: "segment-following",
+        wordTimestamps: false,
+        fallback: "explicit-only",
+        runtimeReadiness: "documented",
+        kokoroAvailable: true,
+      },
+    } as any);
+    const args = parseArgs(["--matrix", "--run-id", "no-nano-drift", "--out", outDir]);
+    const { rollup } = await runHarness(args, runtime as any);
+    expect(rollup.summaries.map((summary: any) => summary.scenario.id)).toEqual([
+      "smoke-1",
+      "smoke-2",
+      "rate-edit-live-response",
+    ]);
+  });
+
+  it("runs experimental Nano product-gate scenarios only when explicitly tagged", async () => {
+    const outDir = await makeTempDir();
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push({
+      id: "moss-nano-11-page-live-book",
+      engine: "nano",
+      readingMode: "page",
+      fixtureId: "prose-basic",
+      voiceId: "af_bella",
+      requestedRate: 1.0,
+      durationClass: "medium",
+      tags: ["moss-nano-11", "nano-product-gate", "live-book", "page"],
+      nanoGate: {
+        selectedEngine: "nano",
+        readiness: "required",
+        settingsPreviewTruth: true,
+        sidecarLifecycle: true,
+        cachePrefetchContinuity: true,
+        segmentTiming: "segment-following",
+        wordTimestamps: false,
+        fallback: "explicit-only",
+        runtimeReadiness: "documented",
+        kokoroAvailable: true,
+      },
+    } as any);
+    const args = parseArgs(["--matrix", "--tag", "moss-nano-11", "--run-id", "nano-gate", "--out", outDir]);
+    const { rollup } = await runHarness(args, runtime as any);
+    expect(rollup.summaries.map((summary: any) => summary.scenario.id)).toEqual([
+      "moss-nano-11-page-live-book",
+    ]);
+    expect((rollup as any).mossNanoProductGate.maxDecision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect((rollup as any).mossNanoProductGate.reasons).toContain("Missing selected-Nano live-book matrix mode: focus");
   });
 
   it("supports interrupted soak runs and returns partial results", async () => {
@@ -331,5 +407,362 @@ describe("tts eval matrix/soak runner", () => {
     const startEvent = trace.events.find((event) => event.kind === "lifecycle" && event.state === "start");
     expect((startEvent as any)?.cacheMode).toBe("cached");
     expect((startEvent as any)?.openingChunkWordCounts).toEqual([13, 26, 52, 104, 148]);
+  });
+
+  it("includes Nano segment latency, cache, and prefetch fields in per-run summaries", () => {
+    const summary = summarizeTrace({
+      runId: "nano-continuity-run",
+      scenarioId: "nano-continuity",
+      fixture: { id: "nano-continuity" },
+      events: [
+        { ts: 1, kind: "lifecycle", state: "start" },
+        { ts: 2, kind: "lifecycle", state: "first-audio", latencyMs: 180 },
+        {
+          ts: 3,
+          kind: "nano-segment",
+          phase: "prefetch-ready",
+          startIdx: 4,
+          endIdx: 8,
+          latencyMs: 70,
+          cacheHit: false,
+          prefetchReady: true,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+        {
+          ts: 4,
+          kind: "nano-segment",
+          phase: "playback",
+          startIdx: 4,
+          endIdx: 8,
+          latencyMs: 10,
+          cacheHit: true,
+          prefetchReady: true,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+      ],
+    } as any);
+
+    expect((summary as any).nanoSegmentLatencyMs).toEqual({
+      p50: 40,
+      p95: 67,
+      min: 10,
+      max: 70,
+    });
+    expect((summary as any).nanoCache.hitRate).toBe(0.5);
+    expect((summary as any).nanoPrefetch.ready).toBe(2);
+  });
+
+  it("recognizes a full MOSS-NANO-11 selected-Nano product matrix across all reading modes", () => {
+    const result = evaluateMossNanoProductGate({
+      matrixManifest: {
+        scenarios: ["page", "focus", "flow", "narrate"].map((mode) => ({
+          id: `moss-nano-11-${mode}`,
+          engine: "nano",
+          readingMode: mode,
+          fixtureId: "prose-basic",
+          voiceId: "af_bella",
+          requestedRate: 1,
+          tags: ["moss-nano-11", "nano-product-gate", mode],
+          nanoGate: {
+            selectedEngine: "nano",
+            readiness: "required",
+            settingsPreviewTruth: true,
+            sidecarLifecycle: true,
+            cachePrefetchContinuity: true,
+            segmentTiming: "segment-following",
+            wordTimestamps: false,
+            fallback: "explicit-only",
+            runtimeReadiness: "documented",
+            kokoroAvailable: true,
+          },
+        })),
+      },
+      evidence: {
+        liveBookMatrix: "pass",
+        settingsPreviewTruth: "pass",
+        sidecarLifecycle: "pass",
+        cachePrefetchContinuity: "pass",
+        segmentFollowingProgress: "pass",
+        fakeWordTimestamps: "absent",
+        explicitFallbackOnly: "pass",
+        packageRuntimeReadiness: "pass",
+        kokoroAvailable: "pass",
+      },
+    } as any);
+
+    expect(result.requiredModesPresent).toEqual({
+      page: true,
+      focus: true,
+      flow: true,
+      narrate: true,
+    });
+    expect(result.maxDecision).toBe("NANO_DEFAULT_CANDIDATE");
+    expect(result.reasons).toEqual([]);
+  });
+
+  it("caps MOSS-NANO-11 at experimental-only when any selected-Nano live-book mode is missing", () => {
+    const result = evaluateMossNanoProductGate({
+      matrixManifest: {
+        scenarios: ["page", "focus", "flow"].map((mode) => ({
+          id: `moss-nano-11-${mode}`,
+          engine: "nano",
+          readingMode: mode,
+          fixtureId: "prose-basic",
+          tags: ["moss-nano-11", "nano-product-gate", mode],
+          nanoGate: {
+            selectedEngine: "nano",
+            readiness: "required",
+            settingsPreviewTruth: true,
+            sidecarLifecycle: true,
+            cachePrefetchContinuity: true,
+            segmentTiming: "segment-following",
+            wordTimestamps: false,
+            fallback: "explicit-only",
+            runtimeReadiness: "documented",
+            kokoroAvailable: true,
+          },
+        })),
+      },
+      evidence: {
+        liveBookMatrix: "pass",
+        settingsPreviewTruth: "pass",
+        sidecarLifecycle: "pass",
+        cachePrefetchContinuity: "pass",
+        segmentFollowingProgress: "pass",
+        fakeWordTimestamps: "absent",
+        explicitFallbackOnly: "pass",
+        packageRuntimeReadiness: "pass",
+        kokoroAvailable: "pass",
+      },
+    } as any);
+
+    expect(result.maxDecision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).toContain("Missing selected-Nano live-book matrix mode: narrate");
+  });
+
+  it("keeps the canonical matrix manifest eligible for the MOSS-NANO-11 four-mode gate", async () => {
+    const matrixManifest = JSON.parse(
+      await fs.readFile(path.resolve("tests/fixtures/narration/matrix.manifest.json"), "utf8"),
+    );
+    const result = evaluateMossNanoProductGate({
+      matrixManifest,
+      evidence: {
+        liveBookMatrix: "pass",
+        settingsPreviewTruth: "pass",
+        sidecarLifecycle: "pass",
+        cachePrefetchContinuity: "pass",
+        segmentFollowingProgress: "pass",
+        fakeWordTimestamps: "absent",
+        explicitFallbackOnly: "pass",
+        packageRuntimeReadiness: "pass",
+        kokoroAvailable: "pass",
+      },
+    } as any);
+
+    expect(result.requiredModesPresent).toEqual({
+      page: true,
+      focus: true,
+      flow: true,
+      narrate: true,
+    });
+    expect(result.scenarioCount).toBe(4);
+  });
+
+  it("keeps the canonical matrix manifest eligible for the MOSS-NANO-12 four-mode live evidence gate", async () => {
+    const matrixManifest = JSON.parse(
+      await fs.readFile(path.resolve("tests/fixtures/narration/matrix.manifest.json"), "utf8"),
+    );
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest,
+      liveEvidence: { modes: {} },
+    } as any);
+
+    expect(result.requiredModesPresent).toEqual({
+      page: true,
+      focus: true,
+      flow: true,
+      narrate: true,
+    });
+    expect(result.scenarioCount).toBe(4);
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+  });
+
+  it("allows MOSS-NANO-12 recommended opt-in only with complete passing live evidence", () => {
+    const evidenceByMode = Object.fromEntries(
+      ["page", "focus", "flow", "narrate"].map((mode) => [
+        mode,
+        {
+          live: true,
+          nanoSelected: true,
+          startable: true,
+          segmentProgressUnderstandable: true,
+          noUnderlineRace: true,
+          cachePrefetchContinuity: true,
+          noStalePlayback: true,
+          pauseResumeSameMode: true,
+          modeSwitchAnchorPreserved: true,
+          explicitFallback: true,
+          sidecarLifecycleStable: true,
+        },
+      ]),
+    );
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: {
+        scenarios: ["page", "focus", "flow", "narrate"].map((mode) => ({
+          id: `moss-nano-12-${mode}`,
+          engine: "nano",
+          readingMode: mode,
+          fixtureId: "prose-basic",
+          tags: ["moss-nano-12", "nano-live-evidence", mode],
+          nanoGate: { selectedEngine: "nano", readiness: "required" },
+        })),
+      },
+      liveEvidence: { modes: evidenceByMode },
+    } as any);
+
+    expect(result.decision).toBe("NANO_RECOMMENDED_OPT_IN");
+    expect(result.reasons).toEqual([]);
+  });
+
+  it("caps MOSS-NANO-12 at experimental-only when a live mode is missing", () => {
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: {
+        scenarios: ["page", "focus", "flow"].map((mode) => ({
+          id: `moss-nano-12-${mode}`,
+          engine: "nano",
+          readingMode: mode,
+          fixtureId: "prose-basic",
+          tags: ["moss-nano-12", "nano-live-evidence", mode],
+          nanoGate: { selectedEngine: "nano", readiness: "required" },
+        })),
+      },
+      liveEvidence: { modes: {} },
+    } as any);
+
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).toContain("Missing selected-Nano live evidence mode: narrate");
+  });
+
+  it("pauses MOSS-NANO-12 productization when segment-following progress is not understandable", () => {
+    const evidenceByMode = Object.fromEntries(
+      ["page", "focus", "flow", "narrate"].map((mode) => [
+        mode,
+        {
+          live: true,
+          nanoSelected: true,
+          startable: true,
+          segmentProgressUnderstandable: mode !== "focus",
+          noUnderlineRace: true,
+          cachePrefetchContinuity: true,
+          noStalePlayback: true,
+          pauseResumeSameMode: true,
+          modeSwitchAnchorPreserved: true,
+          explicitFallback: true,
+          sidecarLifecycleStable: true,
+        },
+      ]),
+    );
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: {
+        scenarios: ["page", "focus", "flow", "narrate"].map((mode) => ({
+          id: `moss-nano-12-${mode}`,
+          engine: "nano",
+          readingMode: mode,
+          fixtureId: "prose-basic",
+          tags: ["moss-nano-12", "nano-live-evidence", mode],
+          nanoGate: { selectedEngine: "nano", readiness: "required" },
+        })),
+      },
+      liveEvidence: { modes: evidenceByMode },
+    } as any);
+
+    expect(result.decision).toBe("PAUSE_NANO_PRODUCTIZATION");
+    expect(result.reasons).toContain("Segment-following progress was not understandable in focus");
+  });
+
+  it("writes MOSS-NANO-12 live evidence gate state into explicitly tagged rollups", async () => {
+    const outDir = await makeTempDir();
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push({
+      id: "moss-nano-12-page-live-evidence",
+      engine: "nano",
+      readingMode: "page",
+      fixtureId: "prose-basic",
+      voiceId: "af_bella",
+      requestedRate: 1.0,
+      durationClass: "medium",
+      tags: ["moss-nano-12", "nano-live-evidence", "page"],
+      nanoGate: { selectedEngine: "nano", readiness: "required" },
+    } as any);
+
+    const args = parseArgs(["--matrix", "--tag", "moss-nano-12", "--run-id", "nano12", "--out", outDir]);
+    const { rollup } = await runHarness(args, runtime as any);
+
+    expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect((rollup as any).mossNanoLiveEvidenceGate.reasons).toContain("Missing selected-Nano live evidence mode: focus");
+  });
+
+  it("loads MOSS-NANO-12 live evidence from an explicit evidence artifact", async () => {
+    const outDir = await makeTempDir();
+    const evidencePath = path.join(outDir, "nano12-live-evidence.json");
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push(
+      ...["page", "focus", "flow", "narrate"].map((mode) => ({
+        id: `moss-nano-12-${mode}-live-evidence`,
+        engine: "nano",
+        readingMode: mode,
+        fixtureId: "prose-basic",
+        voiceId: "af_bella",
+        requestedRate: 1.0,
+        durationClass: "medium",
+        tags: ["moss-nano-12", "nano-live-evidence", mode],
+        nanoGate: { selectedEngine: "nano", readiness: "required" },
+      })),
+    );
+    const passingModeEvidence = {
+      live: true,
+      nanoSelected: true,
+      startable: true,
+      segmentProgressUnderstandable: true,
+      noUnderlineRace: true,
+      cachePrefetchContinuity: true,
+      noStalePlayback: true,
+      pauseResumeSameMode: true,
+      modeSwitchAnchorPreserved: true,
+      explicitFallback: true,
+      sidecarLifecycleStable: true,
+    };
+    await fs.writeFile(
+      evidencePath,
+      JSON.stringify({
+        modes: {
+          page: passingModeEvidence,
+          focus: passingModeEvidence,
+          flow: passingModeEvidence,
+          narrate: passingModeEvidence,
+        },
+      }),
+      "utf8",
+    );
+
+    const args = parseArgs([
+      "--matrix",
+      "--tag",
+      "moss-nano-12",
+      "--nano-live-evidence",
+      evidencePath,
+      "--run-id",
+      "nano12-passing",
+      "--out",
+      outDir,
+    ]);
+    const { rollup } = await runHarness(args, runtime as any);
+
+    expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_RECOMMENDED_OPT_IN");
+    expect((rollup as any).mossNanoLiveEvidenceGate.reasons).toEqual([]);
   });
 });

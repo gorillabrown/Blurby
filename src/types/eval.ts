@@ -53,11 +53,25 @@ export interface TtsEvalTransitionEvent extends TtsEvalTraceBaseEvent {
   latencyMs?: number;
 }
 
+export interface TtsEvalNanoSegmentEvent extends TtsEvalTraceBaseEvent {
+  kind: "nano-segment";
+  phase: "request" | "prefetch-start" | "prefetch-ready" | "prefetch-stale" | "prefetch-cancelled" | "playback";
+  startIdx: number;
+  endIdx: number;
+  latencyMs?: number;
+  cacheHit: boolean;
+  prefetchReady: boolean;
+  timingTruth: "segment-following";
+  wordTimestamps: null;
+  reason?: string;
+}
+
 export type TtsEvalTraceEvent =
   | TtsEvalLifecycleEvent
   | TtsEvalWordEvent
   | TtsEvalFlowPositionEvent
-  | TtsEvalTransitionEvent;
+  | TtsEvalTransitionEvent
+  | TtsEvalNanoSegmentEvent;
 
 export type TtsEvalTraceInputEvent = TtsEvalTraceEvent extends infer E
   ? E extends TtsEvalTraceEvent
@@ -97,6 +111,22 @@ export interface TtsEvalMetricsSummary {
   sectionHandoffLatencyMs: number | null;
   crossBookResumeLatencyMs: number | null;
   rateResponseLatencyMs: number | null;
+  nanoSegmentLatencyMs: {
+    p50: number | null;
+    p95: number | null;
+    min: number | null;
+    max: number | null;
+  };
+  nanoCache: {
+    hits: number;
+    misses: number;
+    hitRate: number | null;
+  };
+  nanoPrefetch: {
+    ready: number;
+    stale: number;
+    cancelled: number;
+  };
   failureClasses: Array<"start-latency" | "cursor-highlight-drift" | "handoff-error" | "pause-resume-error">;
 }
 

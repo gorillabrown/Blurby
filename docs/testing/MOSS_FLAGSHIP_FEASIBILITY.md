@@ -379,9 +379,23 @@ Hardening: `scripts/moss_nano_probe.mjs --shutdown-restart-evidence` now wraps t
 
 Conclusion: the 6D lifecycle blocker is closed at the harness level, but app onboarding remains gated because the proof was not attached to a full 1800-second/100-segment promotion artifact. A future runtime-only confirmation must rerun the full bounded gate with `--shutdown-restart-evidence` before MOSS-NANO-7 can dispatch.
 
+## MOSS-NANO-6F Full Bounded Soak Promotion Confirmation
+
+Decision: `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`. MOSS-NANO-6F is documentation/governance closeout for the final promotion confirmation; it did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration in the app, Kokoro behavior changes, or MOSS-3 reopening. Kokoro remains the default and only integrated engine until later app onboarding/productization gates say otherwise.
+
+Canonical evidence:
+
+| Evidence | Result |
+|---|---|
+| Promotion confirmation | `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/promotion-confirmation.json`: source run status `ok`, failure class `null`, measured resident soak `1800.0015s`, `100/100` book-like adjacent segments fresh, stale output reuse `0`, bounded lifecycle actual/truthful with `99` RSS-threshold in-process runtime resets at `1750MB`, readiness memory slope `0.3261MB/min <= 1.5`, p95 final RTF `0.4826 <= 1.5`, p95 first decoded audio `280ms <= 1500`, crash count `0`, and unclassified restarts `0`. |
+| Lifecycle proof | Shutdown/restart child-process lifecycle evidence is present and passing by reference to `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json`, including clean shutdown, forced kill, zombie-process check, clean restart, restart-failed, and in-flight shutdown rejection. |
+| Raw summary caveat | `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/summary.json` still carries an older persisted `promotionDecision` / `not-promoting` state; use `promotion-confirmation.json` as canonical for 6F. |
+
+Conclusion: Nano is promoted only to the bounded app-prototype candidate lane. The `99` session changes are classified bounded lifecycle recycles, not hidden crashes/restarts, and no app integration drift occurred because scripts/tests/src are unchanged by this confirmation.
+
 ## MOSS-TTS-Nano Onboarding Gate Sequence
 
-The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration remains gated. The sequence is:
+The Nano onboarding path is fully specified in `ROADMAP.md`. After MOSS-NANO-6F, the app-prototype lane may begin, while Kokoro remains the default until a later explicit productization/default decision. The sequence is:
 
 1. `MOSS-NANO-5B`: precompute + adjacent continuity closure. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no soak promotion.
 2. `MOSS-NANO-5C`: segment-first soak gate. Completed as `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`; runtime-only, not app prototype promotion.
@@ -389,16 +403,17 @@ The Nano onboarding path is fully specified in `ROADMAP.md`, but app integration
 4. `MOSS-NANO-6C`: memory / tail-latency / lifecycle fix. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; no app-prototype promotion.
 5. `MOSS-NANO-6D`: bounded resident lifecycle / process recycling. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; memory/tail gates became plausible under in-process reset, but shutdown/restart lifecycle remained unimplemented.
 6. `MOSS-NANO-6E`: shutdown / restart lifecycle proof. Completed as `ITERATE_NANO_RESIDENT_RUNTIME`; child-process lifecycle proof is implemented and observed, but not attached to a full 1800-second/100-segment promotion artifact.
-7. Runtime-only resident Nano follow-up: may rerun the full bounded gate with `--shutdown-restart-evidence`, package evidence, and bounded recycle thresholds before any app-prototype reconsideration.
-8. `MOSS-NANO-7`: sidecar contract and IPC prototype. Conditional on app-prototype promotion.
+7. `MOSS-NANO-6F`: full bounded soak promotion confirmation. Completed as `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`; canonical artifact `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/promotion-confirmation.json`.
+8. `MOSS-NANO-7`: sidecar contract and IPC prototype. Unlocked by 6F promotion.
 9. `MOSS-NANO-8`: narration strategy and segment timing. Conditional on sidecar truth.
 10. `MOSS-NANO-9`: cache, prefetch, and continuity handoffs. Conditional on segment-truth playback.
 11. `MOSS-NANO-10`: settings UX and engine selection. Conditional on continuity gates; Nano remains opt-in.
-12. `MOSS-NANO-11`: productization gate and default decision. No automatic Kokoro retirement.
+12. `MOSS-NANO-11`: productization gate and default decision. Closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`; no recommended opt-in, no default change, and no Kokoro retirement lane because live product evidence was not supplied.
+13. `MOSS-NANO-12`: live four-mode evidence capture. Closed as `NANO_EXPERIMENTAL_ONLY`; Page/Focus/Flow/Narrate selected-Nano evidence slots and `--nano-live-evidence` input exist, but no live observation artifact was supplied.
 
 Non-negotiable gates:
 
-- No Nano app integration before `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+- No Nano default-engine change before a later explicit productization/default decision.
 - No Kokoro behavior change before a separate successor/default decision.
 - No word-timing fabrication; Nano must use truthful segment/anchor semantics unless trusted word timing is proven.
 - No promotion from requested-only metadata. Runtime summaries must distinguish requested vs. actual precompute, ORT settings, reuse, and cache behavior. The 5C segment-first gate does not require precompute success.

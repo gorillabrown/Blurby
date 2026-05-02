@@ -5,6 +5,7 @@ import { KokoroStatusSection } from "./KokoroStatusSection";
 import { QwenStatusSection } from "./QwenStatusSection";
 import { QwenRuntimeSetupSection } from "./QwenRuntimeSetupSection";
 import { getQwenStatusPresentation } from "./qwenStatusPresentation";
+import { MossNanoStatusSection } from "./MossNanoStatusSection";
 import { NarrationDataSection } from "./NarrationDataSection";
 import { PauseSettingsSection } from "./PauseSettingsSection";
 import { PronunciationOverridesEditor } from "./PronunciationOverridesEditor";
@@ -18,11 +19,10 @@ import {
 } from "../../utils/kokoroStatus";
 import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../../utils/kokoroRatePlan";
 import { useQwenPrototypeStatus } from "../../hooks/useQwenPrototypeStatus";
+import { useMossNanoSettingsStatus } from "./useMossNanoSettingsStatus";
 import { previewSelectedTtsVoice } from "./ttsPreview";
 import "../../styles/tts-settings.css";
-
 const api = window.electronAPI;
-
 interface TTSSettingsProps {
   settings: BlurbySettings;
   onSettingsChange: (updates: Partial<BlurbySettings>) => void;
@@ -37,15 +37,12 @@ interface TTSSettingsProps {
   /** Called when user assigns/clears a profile for the active book */
   onBookNarrationProfileChange?: (profileId: string | null) => void;
 }
-
 export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange }: TTSSettingsProps) {
   const engine = settings.ttsEngine || "qwen";
-
   // Web Speech API voices
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [testPlaying, setTestPlaying] = useState(false);
   const [showQwenSetupGuidance, setShowQwenSetupGuidance] = useState(false);
-
   // Kokoro state
   const [kokoroStatus, setKokoroStatus] = useState<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
   const [kokoroDownloading, setKokoroDownloading] = useState(false);
@@ -64,7 +61,6 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       : kokoroStatus.status === "warming"
         ? "Warming up voice model..."
         : "Preparing voice model...";
-
   const {
     qwenStatus,
     qwenVoices,
@@ -77,6 +73,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     handlePreloadQwen,
     handlePreflightQwen,
   } = useQwenPrototypeStatus();
+  const { nanoReady, nanoStatusTitle, nanoStatusDetail } = useMossNanoSettingsStatus();
   const preferredQwenVoice =
     settings.ttsVoiceName && qwenVoices.includes(settings.ttsVoiceName)
       ? settings.ttsVoiceName
@@ -84,7 +81,6 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         ? QWEN_DEFAULT_SPEAKER
         : qwenVoices[0] || QWEN_DEFAULT_SPEAKER;
   const qwenStatusPresentation = getQwenStatusPresentation(qwenStatus, qwenError);
-
   // Load Web Speech voices
   useEffect(() => {
     const loadVoices = () => {
@@ -95,25 +91,21 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
     return () => window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices);
   }, []);
-
   const loadKokoroVoices = useCallback(async () => {
     if (!api?.kokoroVoices) return;
     const vr = await api.kokoroVoices();
     if (vr.voices) setKokoroVoices(vr.voices);
   }, []);
-
   const applyKokoroStatusSnapshot = useCallback((snapshotLike?: Partial<KokoroStatusSnapshot> | null) => {
     const snapshot = normalizeKokoroStatusSnapshot(snapshotLike);
     kokoroStatusRef.current = snapshot;
     setKokoroStatus(snapshot);
-
     const error = getKokoroStatusError(snapshot);
     if (error) {
       setKokoroError(error);
       setKokoroDownloading(false);
       return;
     }
-
     if (snapshot.ready) {
       setKokoroError(null);
       setKokoroDownloading(false);
@@ -121,7 +113,6 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       void loadKokoroVoices();
       return;
     }
-
     if (snapshot.loading || snapshot.status === "idle") {
       setKokoroDownloading(false);
       setKokoroStalled(false);
@@ -130,14 +121,12 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       }
     }
   }, [loadKokoroVoices]);
-
   // Check Kokoro model status
   useEffect(() => {
     if (!api?.kokoroModelStatus) return;
     api.kokoroModelStatus().then((r) => {
       applyKokoroStatusSnapshot(r);
     }).catch(() => {});
-
     const cleanups: (() => void)[] = [];
     if (api.onKokoroDownloadProgress) {
       cleanups.push(api.onKokoroDownloadProgress((progress: number) => {
@@ -160,7 +149,6 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     }
     return () => cleanups.forEach((c) => c());
   }, [applyKokoroStatusSnapshot]);
-
   // Stall detection: if downloading and progress stays at 0% for 30s
   useEffect(() => {
     if (!kokoroDownloading || kokoroProgress > 0) {
@@ -199,6 +187,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       voices,
       kokoroReady,
       qwenReady,
+      nanoReady,
       preferredQwenVoice,
       onPlaybackStateChange: setTestPlaying,
     });
@@ -414,10 +403,23 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         >
           Kokoro AI (Legacy)
         </button>
+        <button
+          className={`settings-mode-btn${engine === "nano" ? " active" : ""}`}
+          onClick={() => {
+            if (!nanoReady) return;
+            handleTtsChange({ ttsEngine: "nano", ttsVoiceName: null });
+          }}
+          disabled={!nanoReady}
+          aria-disabled={!nanoReady}
+        >
+          Nano AI (Experimental)
+        </button>
       </div>
       <div className="tts-test-hint">
         Qwen is Blurby's default narration engine.
         Kokoro remains available as a deprecated fallback while retirement gates are still open.
+        Nano is experimental and requires the local MOSS Nano sidecar.
+        {!nanoReady && ` ${nanoStatusDetail}`}
       </div>
 
       {/* Kokoro download progress */}
@@ -448,6 +450,14 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         <QwenRuntimeSetupSection
           report={qwenPreflightReport}
           expanded={showQwenSetupGuidance}
+        />
+      )}
+
+      {engine === "nano" && (
+        <MossNanoStatusSection
+          ready={nanoReady}
+          title={nanoStatusTitle}
+          detail={nanoStatusDetail}
         />
       )}
 
@@ -539,7 +549,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       <button
         className="settings-btn-secondary tts-test-btn"
         onClick={handleTestVoice}
-        disabled={testPlaying || (engine === "qwen" && !qwenReady)}
+        disabled={testPlaying || (engine === "qwen" && !qwenReady) || (engine === "nano" && !nanoReady)}
       >
         {testPlaying ? "Playing..." : "Test voice"}
       </button>
@@ -549,6 +559,8 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         {engine === "kokoro" && kokoroWarming && " Legacy Kokoro is warming up..."}
         {engine === "qwen" && qwenReady && " Using Qwen for live narration playback."}
         {engine === "qwen" && !qwenReady && " Qwen becomes playable once the local external runtime is available and warmed."}
+        {engine === "nano" && nanoReady && " Using experimental Nano through the local sidecar."}
+        {engine === "nano" && !nanoReady && " Nano remains selected only as a blocked experimental option until the sidecar is ready."}
       </div>
 
       <PauseSettingsSection settings={settings} onTtsChange={handleTtsChange} />

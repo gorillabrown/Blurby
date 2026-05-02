@@ -8,6 +8,7 @@ interface PreviewSelectedTtsVoiceOptions {
   voices: SpeechSynthesisVoice[];
   kokoroReady: boolean;
   qwenReady: boolean;
+  nanoReady: boolean;
   preferredQwenVoice: string;
   onPlaybackStateChange: (playing: boolean) => void;
 }
@@ -28,6 +29,7 @@ export async function previewSelectedTtsVoice({
   voices,
   kokoroReady,
   qwenReady,
+  nanoReady,
   preferredQwenVoice,
   onPlaybackStateChange,
 }: PreviewSelectedTtsVoiceOptions): Promise<TtsVoicePreviewResult> {
@@ -140,6 +142,69 @@ export async function previewSelectedTtsVoice({
         engine: "qwen",
         played: false,
         error: error instanceof Error ? error.message : "Qwen preview failed.",
+      };
+    }
+  }
+
+  if (engine === "nano") {
+    if (!nanoReady || !api?.nanoStatus || !api.nanoSynthesize) {
+      onPlaybackStateChange(false);
+      return {
+        engine: "nano",
+        played: false,
+        error: "Nano runtime is not ready for preview playback.",
+      };
+    }
+
+    onPlaybackStateChange(true);
+    try {
+      const status = await api.nanoStatus();
+      if (!status || !("ready" in status) || !status.ready || status.status !== "ready") {
+        onPlaybackStateChange(false);
+        return {
+          engine: "nano",
+          played: false,
+          error: "Nano runtime is not ready for preview playback.",
+          reason: "nano-not-ready",
+        };
+      }
+
+      const result = await api.nanoSynthesize({
+        text: "The quick brown fox jumps over the lazy dog.",
+        voice: settings.ttsVoiceName || "default",
+        rate: settings.ttsRate || 1.0,
+      });
+      if ("ok" in result && result.ok && result.audio) {
+        const { playBuffer } = await import("../../utils/audioPlayer");
+        const audio = result.audio instanceof Float32Array
+          ? result.audio
+          : Float32Array.from(result.audio);
+        playBuffer(
+          audio,
+          result.sampleRate ?? 24000,
+          result.durationMs ?? ((audio.length / (result.sampleRate ?? 24000)) * 1000),
+          9,
+          undefined,
+          () => onPlaybackStateChange(false),
+        );
+        return {
+          engine: "nano",
+          played: true,
+        };
+      }
+      onPlaybackStateChange(false);
+      return {
+        engine: "nano",
+        played: false,
+        error: "error" in result ? result.error : result.detail || "Nano preview failed.",
+        reason: result.reason ?? null,
+      };
+    } catch (error) {
+      onPlaybackStateChange(false);
+      return {
+        engine: "nano",
+        played: false,
+        error: error instanceof Error ? error.message : "Nano preview failed.",
       };
     }
   }

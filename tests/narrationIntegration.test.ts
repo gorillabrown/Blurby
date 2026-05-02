@@ -24,7 +24,7 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
 
   it("ReaderContainer initializes narration before any derived mode state reads narration.speaking", () => {
     const src = read("src/components/ReaderContainer.tsx");
-    const narrationDecl = src.indexOf("const narration = useNarration({ evalTrace: evalTraceSink });");
+    const narrationDecl = src.indexOf("const narration = useNarration({");
     const modePlayingDecl = src.indexOf("const modePlaying =");
     const activelyReadingDecl = src.indexOf("const isActivelyReading =");
 
