@@ -1,0 +1,4176 @@
+# Blurby — Roadmap Archive (2026-05-02)
+
+Completed sprint specs migrated from ROADMAP.md during roadmap review on 2026-05-02.
+These specs are preserved verbatim for reference. The active roadmap at ROADMAP.md holds only forward-looking work.
+
+---
+
+## SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed) ✅ COMPLETED
+
+**Goal:** Establish a single, unambiguous answer to "where is the user in the book?" that all reading modes, progress tracking, and UI elements can depend on. Add passive word tracking in page mode so there is always a visible anchor, and fix the mode-start resolution chain so every mode inherits position correctly.
+
+**Problem:** Today, `highlightedWordIndex` is the de facto position anchor, but it only updates via fraction-based estimates on page turn (no DOM truth) and is never visually highlighted during page-mode browsing. Reading modes ask "where do I start?" and the answer depends on which code path was hit. There's no "you are here" marker when passively reading. This gap causes BUG-152 (focus mode gets wrong words), BUG-151 (narration band measurement goes stale without a stable anchor), and the broader BUG-153 (no word selection contract).
+
+**Investigation report:** `docs/investigations/SELECTION-1-investigation.md` — full trace of all 4 word lists, per-mode start resolution, navigation events, persistence, and 6 identified gaps.
+
+### Design Decisions
+
+**Three selection tiers, one resolution order:**
+
+| Tier | Variable | Set By | Visual | Persists Across Page Turn |
+|------|----------|--------|--------|---------------------------|
+| **Soft selection** | `softWordIndexRef` (new ref) | `findFirstVisibleWordIndex()` on every `onRelocate` + `onLoad` in page mode | `.page-word--soft-selected`: 2px left-border accent, `var(--accent-faded)` | No — auto-updates to first visible word |
+| **Hard selection** | `highlightedWordIndex` (existing state) | User word click via `onWordClick` handler | `.page-word--highlighted` (existing): accent background | Yes — persists until user clicks another word or starts a mode |
+| **Resume anchor** | `resumeAnchorRef` (existing ref) | Narration pause, book reopen | None (internal ref) | N/A — consumed on mode start |
+
+**Resolution order for mode starts:**
+```
+resumeAnchorRef > highlightedWordIndex > softWordIndexRef > 0
+```
+
+**Key behavioral rules:**
+- Soft selection is **only visible in page mode** (no reading mode active). When any mode starts, soft highlight is removed.
+- Hard selection **replaces** soft selection visually (only one word highlighted at a time). `userExplicitSelectionRef = true` suppresses soft updates until next page turn.
+- Soft selection updates on **every page turn** via `onRelocate`, not just on section load. This is the main new behavior.
+- `onRelocate` calls `findFirstVisibleWordIndex()` only in page mode, only when no resume anchor is active, and only when no user explicit selection exists on the current page.
+
+**BUG-151 absorbed:** Cap narration band fallback heights to 40px in FoliatePageView.tsx (3 edit sites: lines 571, 692, 860). Add `measureNarrationBandDimensions()` call on section change when narration is active.
+
+**BUG-152 absorbed:** Fix `ReaderContainer.tsx:1362` — change `words={foliateWordStrings}` to `words={getEffectiveWords()}` so ReaderView receives the same word source the mode timer uses.
+
+**BUG-154 deferred:** Code analysis shows layout switch already fires on click. Likely a perceived-latency issue during Foliate reflow, not a code bug. Parked for live verification.
+
+### Baseline
+
+Existing infrastructure (from investigation report):
+- `highlightedWordIndex` state + `highlightedWordIndexRef` ref — shared position anchor (ReaderContainer.tsx:135)
+- `resumeAnchorRef` — protected position ref (ReaderContainer.tsx:169)
+- `userExplicitSelectionRef` — click guard (ReaderContainer.tsx:173)
+- `findFirstVisibleWordIndex()` — DOM query for first visible `.page-word` span (FoliatePageView.tsx:1355-1374)
+- `onWordClick` handler — already sets `userExplicitSelectionRef=true`, nulls resume anchor, updates `highlightedWordIndex` (ReaderContainer.tsx:1205-1226)
+- `.page-word--highlighted` CSS class — existing click highlight (global.css:3717-3723)
+- `onRelocate` handler — fraction-based `highlightedWordIndex` update with mode/anchor guards (ReaderContainer.tsx:1158-1189)
+- `onLoad` handler — section-load position restore with `findFirstVisibleWordIndex()` (ReaderContainer.tsx:1227-1274)
+- Mode start functions — all follow `resumeAnchorRef > highlightedWordIndex` pattern (useReaderMode.ts:177-400)
+- `getEffectiveWords()` — word source resolution (ReaderContainer.tsx:236-252)
+- `resolveFoliateStartWord()` — EPUB start word validation (startWordIndex.ts:45-66)
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for word index, selection, anchor entries
+3. `docs/investigations/SELECTION-1-investigation.md` — full investigation report (MUST READ — contains all position flow diagrams and gap analysis)
+4. `ROADMAP.md` — this section
+5. `src/components/ReaderContainer.tsx` — `highlightedWordIndex` (line 135), `resumeAnchorRef` (169), `userExplicitSelectionRef` (173), `getEffectiveWords()` (236-252), book open init (254-288), onRelocate handler (1158-1189), onWordClick (1205-1226), onLoad (1227-1274), ReaderView words prop (1362)
+6. `src/hooks/useReaderMode.ts` — mode start functions: startNarration (177-297), startFocus (300-333), startFlow (336-364), handlePauseToPage (367-400)
+7. `src/components/FoliatePageView.tsx` — `findFirstVisibleWordIndex()` (1355-1374), click handler (1080-1112), narration band fallback heights (571, 692, 860), `highlightWordByIndex()`, `applyVisualHighlightByIndex()`
+8. `src/utils/startWordIndex.ts` — `resolveFoliateStartWord()` (45-66), `getStartWordIndex()` (1-43)
+9. `src/styles/global.css` — `.page-word` classes (3706-3730)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Add `softWordIndexRef`** — New `useRef<number>(0)` in ReaderContainer, alongside existing `highlightedWordIndexRef`. No React state needed (soft selection is visual-only, no re-renders). | `src/components/ReaderContainer.tsx` | After `highlightedWordIndexRef` declaration (~line 136). Single line addition. |
+| 2 | Hephaestus (renderer-scope) | **Add `.page-word--soft-selected` CSS class** — Subtle left-border indicator: `border-left: 2px solid var(--accent-faded); padding-left: 2px; border-radius: 1px;`. Must not conflict with `.page-word--highlighted` (hard selection takes visual priority). | `src/styles/global.css` | After `.page-word--highlighted` block (~line 3723). ~5 lines. |
+| 3 | Hephaestus (renderer-scope) | **Wire soft selection into `onRelocate` handler** — After existing `setHighlightedWordIndex(approxWordIdx)` call, add: when `readingMode === "page"` and `!resumeAnchorRef.current` and `!userExplicitSelectionRef.current`, call `foliateApiRef.current.findFirstVisibleWordIndex()`, store in `softWordIndexRef.current`, and call `foliateApiRef.current.applySoftHighlight(softWordIndexRef.current)`. Clear previous soft highlight. | `src/components/ReaderContainer.tsx` | Inside `onRelocate` handler (lines 1158-1189), after the existing `setHighlightedWordIndex` block (~line 1180). ~12 lines. |
+| 4 | Hephaestus (renderer-scope) | **Wire soft selection into `onLoad` handler** — After existing `findFirstVisibleWordIndex()` + `highlightWordByIndex()` block, also set `softWordIndexRef.current` and apply `.page-word--soft-selected` CSS. Only when `readingMode === "page"` and no explicit selection. | `src/components/ReaderContainer.tsx` | Inside `onLoad` handler (lines 1227-1274), after the `highlightWordByIndex()` call (~line 1267). ~8 lines. |
+| 5 | Hephaestus (renderer-scope) | **Add `applySoftHighlight()` / `clearSoftHighlight()` to FoliatePageView API** — Two functions exposed via `foliateApiRef`: `applySoftHighlight(wordIndex)` adds `.page-word--soft-selected` to the target span (removing from previous), `clearSoftHighlight()` removes from any span. Must query inside Foliate's shadow DOM `doc.body`. Pattern: same as existing `highlightWordByIndex()` but with different CSS class. | `src/components/FoliatePageView.tsx` | Near `highlightWordByIndex()` function. Add two small functions + expose via `useImperativeHandle`. ~15 lines. |
+| 6 | Hephaestus (renderer-scope) | **Clear soft highlight on mode start** — In `useReaderMode.ts`, add `foliateApiRef.current?.clearSoftHighlight()` at the top of `startFocus()`, `startFlow()`, and `startNarration()`, after `stopAllModes()`. Soft highlight is only visible in page mode. | `src/hooks/useReaderMode.ts` | After `stopAllModes()` in each of: `startFocus` (~line 302), `startFlow` (~line 338), `startNarration` (~line 179). Single line each, 3 edit sites. |
+| 7 | Hephaestus (renderer-scope) | **Update mode start resolution to include `softWordIndexRef`** — In `startFocus()`, `startFlow()`, and `startNarration()`, add `softWordIndexRef.current` as final fallback before 0 in start-word resolution: `resumeAnchorRef.current ?? highlightedWordIndexRef.current ?? softWordIndexRef.current ?? 0`. Currently these functions use `highlightedWordIndexRef.current` as the fallback before `resolveFoliateStartWord()`. Add soft as an intermediate. | `src/hooks/useReaderMode.ts` | In `startFocus` (~line 308, `focusStartSource`), `startFlow` (~line 344), `startNarration` (~line 196, `startWordSource`). Modify the fallback expression at each site. |
+| 8 | Hermes (renderer-scope) | **Fix BUG-152 — ReaderView word source** — Change `words={foliateWordStrings}` to `words={getEffectiveWords()}` at ReaderContainer.tsx:1362 so ReaderView receives the same word array that mode timers use. | `src/components/ReaderContainer.tsx` | Line 1362 (the `words=` prop on `<ReaderView>`). Single-line change. |
+| 9 | Hermes (renderer-scope) | **Fix BUG-151 — Narration band height cap** — Cap all three fallback height paths to `Math.min(value, 40)`: (a) Line 571: `Math.max(12, from.height)` → `Math.min(Math.max(12, from.height), 40)`, (b) Line 692: `fromWindow.height` → `Math.min(fromWindow.height, 40)`, (c) Line 860: `currentWindow.height` → `Math.min(currentWindow.height, 40)`. Also: add `measureNarrationBandDimensions()` call in the `onRelocate` handler when `readingMode === "narration"`. | `src/components/FoliatePageView.tsx` | Lines 571, 692, 860 (height expressions). Plus ~2 lines in `onRelocate` handler for re-measurement call. |
+| 10 | Hephaestus (renderer-scope) | **Suppress soft selection on hard click** — In the existing `onWordClick` handler, add `foliateApiRef.current?.clearSoftHighlight()` after the `userExplicitSelectionRef = true` line. When user clicks a word, the soft indicator disappears and only the hard highlight shows. Reset `userExplicitSelectionRef = false` at the top of the `onRelocate` handler when a new page turn occurs (so soft selection resumes on the next page). | `src/components/ReaderContainer.tsx` | In `onWordClick` (~line 1212, after `userExplicitSelectionRef.current = true`). In `onRelocate` (~line 1160, add reset). ~3 lines total. |
+| 11 | Hippocrates | **Tests** — ≥12 new tests covering: (a) `softWordIndexRef` updates on `onRelocate` in page mode, (b) soft selection NOT updated during narration/flow, (c) soft selection cleared on mode start, (d) soft selection cleared on word click (hard selection takes over), (e) mode start resolution order: resume > hard > soft > 0, (f) `getEffectiveWords()` returns full-book words when extraction complete (BUG-152 regression), (g) narration band fallback height capped at 40px (BUG-151 regression), (h) `applySoftHighlight` adds correct CSS class, (i) `clearSoftHighlight` removes CSS class, (j) soft selection resumes after page turn following hard click. | `tests/` | New test file `tests/wordAnchor.test.ts`. |
+| 12 | Hippocrates | **`npm test` + `npm run build`** | — | — |
+| 13 | Solon | **Spec compliance** — Verify all 15 SUCCESS CRITERIA items met. Cross-reference investigation report gaps (6A-6D) to confirm none were worsened. | — | — |
+| 14 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list), ROADMAP.md (mark SELECTION-1 complete), SPRINT_QUEUE.md (remove entry, log to completed), BUG_REPORT.md (mark BUG-151/152/153 resolved), LESSONS_LEARNED.md (if non-trivial discovery). | All 6 governing docs | — |
+| 15 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/selection-1-word-anchor` |
+
+### Execution Sequence
+
+```
+Tasks 1-2 (state + CSS)           — parallel, no dependencies
+    ↓
+Task 5 (FoliatePageView API)      — needs Task 2 CSS class name
+    ↓
+Tasks 3-4 (wire into handlers)    — needs Tasks 1 + 5
+Tasks 8-9 (BUG-151/152 fixes)    — parallel with Tasks 3-4, independent
+Task 6 (clear on mode start)      — needs Task 5
+Task 7 (resolution chain update)  — needs Task 1
+Task 10 (suppress on hard click)  — needs Task 5
+    ↓
+Task 11 (tests)                   — after all implementation
+Task 12 (npm test + build)        — after tests written
+    ↓
+Task 13 (Solon spec compliance)
+Task 14 (Herodotus docs)
+Task 15 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. In page mode, a soft highlight (`.page-word--soft-selected`) is visible on the first visible word after every page turn
+2. Soft highlight auto-updates when the user turns pages (not just on section load)
+3. Soft highlight is NOT visible during any active reading mode (Focus, Flow, Narration)
+4. Soft highlight disappears when user clicks a word (hard selection takes visual priority)
+5. Hard selection (`.page-word--highlighted`) persists across page turns within the same section
+6. After a hard click, soft selection resumes on the NEXT page turn (not the current page)
+7. Mode start resolution order is: `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
+8. Focus mode displays correct word text from `getEffectiveWords()` — no blank screen (BUG-152 resolved)
+9. Narration band fallback height never exceeds 40px (BUG-151 resolved)
+10. Narration band re-measures on section change during active narration
+11. `softWordIndexRef` is not updated during narration or flow mode (mode callbacks own position)
+12. `softWordIndexRef` is not updated when `resumeAnchorRef` is active
+13. Existing word click behavior unchanged — `onWordClick` still sets `userExplicitSelectionRef`, clears `resumeAnchorRef`, updates `highlightedWordIndex`
+14. ≥12 new tests in `tests/wordAnchor.test.ts`
+15. `npm test` passes, `npm run build` succeeds
+
+**BUG-154 disposition:** Parked. Code analysis shows layout switch fires on click. Needs live verification to determine if this is a perceived-latency issue. Not included in this sprint.
+
+**Tier:** Quick | **Depends on:** None — this is the new first sprint in the queue.
+
+---
+
+## HOTFIX-14: Import & Connection Fixes (BUG-155/156/157/158) ✅ COMPLETED
+
+**Goal:** Fix URL extraction fallback, false Chrome extension connection status, add disconnect/reconnect, and simplify library flap.
+
+**Partial shipment (v1.38.1):** BUG-157 (disconnect button) and BUG-158 (library flap) shipped 2026-04-06. Remaining: BUG-155 + BUG-156.
+
+**Investigation report:** `docs/investigations/HOTFIX-14-investigation.md` — URL test results (5/5 pass with Node fetch), full `_clients` Set state diagram, three compounding root causes for false connected status.
+
+**Bugs:**
+
+| ID | Description | Severity | Status |
+|----|-------------|----------|--------|
+| ~~BUG-157~~ | ~~No disconnect/reconnect button~~ | ~~Medium~~ | ✅ Shipped v1.38.1 |
+| ~~BUG-158~~ | ~~Library flap too many categories~~ | ~~Low~~ | ✅ Shipped v1.38.1 |
+| BUG-155 | URL extraction fails on WAF-protected sites — missing `fetchWithBrowser` fallback | High | **CLI-READY** |
+| BUG-156 | False "Connected" status — unauth clients counted + stale detection + infrequent poll | Medium | **CLI-READY** |
+
+### Investigation Gate — CLEARED
+
+Both BUG-155 and BUG-156 root causes confirmed. Full investigation at `docs/investigations/HOTFIX-14-investigation.md`.
+
+**BUG-155 root cause:** Electron's built-in `fetch()` triggers WAF rejection on sites like EBSCO (HTTP 400 — Chromium TLS fingerprint detected as bot). The `fetchWithBrowser` fallback (hidden BrowserWindow with full session) only exists in the `hasLogin` branch of `misc.js:164-173`. The `else` branch at lines 174-177 has no fallback — error propagates directly to user-facing toast.
+
+**BUG-156 root cause (triple):** (1) `getClientCount()` at `ws-server.js:511` counts ALL clients including unauthenticated — a WebSocket that connected but never sent auth registers as "connected." (2) Dead client detection takes up to 60 seconds (two heartbeat cycles at 30s each). (3) ConnectorsSettings only polls on mount and on short-code expiry (5-minute gap) — stale state persists in UI.
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for URL extraction, WebSocket, extension entries
+3. `docs/investigations/HOTFIX-14-investigation.md` — MUST READ — full root cause analysis, state diagrams, fix specs
+4. `ROADMAP.md` — this section
+5. `main/ipc/misc.js` — URL extraction IPC handler (lines 152-282), WS status handler (lines 377-381)
+6. `main/ws-server.js` — `getClientCount()` (line 511), `_clients` lifecycle (add at 144, delete at 152/157/174/465/473)
+7. `src/components/settings/ConnectorsSettings.tsx` — connection status polling (lines 27-57)
+8. `main/constants.js` — `HEARTBEAT_INTERVAL_MS` (line 39)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes (electron-scope) | **Fix BUG-155 — Add `fetchWithBrowser` fallback to no-login branch.** Wrap the `else` block at `misc.js:174-177` in try/catch, add `fetchWithBrowser` fallback after catch, mirroring the `hasLogin` branch at lines 164-173. See investigation report §A Fix Spec for exact before/after code. | `main/ipc/misc.js` | Lines 174-177. Replace 3 lines with ~8 lines (try/catch + fallback). |
+| 2 | Hermes (electron-scope) | **Fix BUG-156a — Filter `getClientCount()` to authenticated clients only.** Replace `return _clients.size` with a loop that counts only `client.authenticated === true`. See investigation report §B Fix 1 for exact code. | `main/ws-server.js` | Lines 511-513. Replace function body (~3 lines → ~5 lines). |
+| 3 | Hermes (renderer-scope) | **Fix BUG-156b — Add periodic status polling in ConnectorsSettings.** Add a `useEffect` with a 5-second `setInterval` that calls `api.getWsShortCode()` and updates `connected` state. Clean up on unmount. See investigation report §B Fix 2 for exact code. | `src/components/settings/ConnectorsSettings.tsx` | Insert after mount useEffect (~line 35). ~8 lines. |
+| 4 | Hermes (electron-scope) | **Fix BUG-156c (optional) — Reduce heartbeat interval.** Change `HEARTBEAT_INTERVAL_MS` from 30000 to 15000. Cuts dead-client detection from 60s to 30s. | `main/constants.js` | Line 39. Single value change. |
+| 5 | Hippocrates | **Tests** — ≥6 new tests: (a) `getClientCount()` returns 0 when only unauthenticated clients connected, (b) `getClientCount()` returns 1 when one authenticated client connected, (c) URL extraction IPC handler falls through to `fetchWithBrowser` when `fetchWithCookies` throws, (d) URL extraction IPC handler returns result from `fetchWithBrowser` fallback, (e) ConnectorsSettings polls connection status on interval, (f) heartbeat removes dead clients. | `tests/` | New or existing test files. |
+| 6 | Hippocrates | **`npm test` + `npm run build`** | — | — |
+| 7 | Solon | **Spec compliance** — Verify all 10 SUCCESS CRITERIA items met. | — | — |
+| 8 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, test count), ROADMAP.md (mark HOTFIX-14 complete), SPRINT_QUEUE.md (remove, log to completed), BUG_REPORT.md (mark BUG-155/156 resolved). | All 6 governing docs | — |
+| 9 | Hermes | **Git: commit, merge, push** | — | Branch: `hotfix/14-import-connection` (reuse existing branch) |
+
+### Execution Sequence
+
+```
+Tasks 1-4 (all fixes)    — parallel, independent edit sites
+    ↓
+Task 5 (tests)            — after all fixes
+Task 6 (npm test + build) — after tests written
+    ↓
+Task 7 (Solon)
+Task 8 (Herodotus)
+Task 9 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. URL extraction succeeds for EBSCO URL (or any WAF-protected site) via `fetchWithBrowser` fallback
+2. URL extraction still succeeds for standard URLs (Wikipedia, Paul Graham, MDN) via primary `fetchWithCookies` path — no regression
+3. `getClientCount()` returns 0 when no authenticated clients are connected
+4. `getClientCount()` returns correct count with mix of authenticated and unauthenticated clients
+5. ConnectorsSettings shows "Disconnected" within 10 seconds of extension disconnect (5s poll + 5s buffer)
+6. ConnectorsSettings shows "Connected" only when an authenticated client is present
+7. Heartbeat interval reduced to 15 seconds (dead-client window ≤30s)
+8. ≥6 new tests
+9. `npm test` passes, `npm run build` succeeds
+10. BUG-157/158 remain working (no regression from partial shipment)
+
+**Tier:** Quick | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
+
+---
+
+## NARR-CURSOR-1: Collapsing Narration Cursor ✅ COMPLETED (v1.40.0)
+
+**Goal:** Replace the fixed-width narration band with a collapsing cursor — a band anchored to the right edge of the current text line whose left edge advances rightward with narration. The band visually communicates "remaining text on this line," shrinking to zero at line end then snapping to full width on the next line.
+
+**Problem:** The current 300px fixed-width band lerps between word positions. Despite the 350ms audio lag ceiling, it feels disconnected — it's a floating rectangle that doesn't visually communicate reading progress within a line. Multiple iterations of per-word tracking (centering, X interpolation, line-scanning) failed to produce a satisfying result.
+
+**Third-party audit:** `docs/reviews/collapsing-cursor-review.zip` + `C:\Users\estra\Downloads\deep-research-report.md`. Audit identified 5 critical issues in the original proposal: singleton measurement fragility, internally inconsistent line-end detection, state model coupling, CSS transition conflicts, and missing clamping policy. All incorporated into this spec.
+
+**Plan file:** `C:\Users\estra\.claude\plans\bright-dazzling-gadget.md` — full corrected architecture.
+
+### Design
+
+**Visual behavior:**
+```
+Line start:  [████████████████████████████████████████] full column width
+Mid-line:                    [██████████████████████████] ~60% remaining
+Near end:                                    [██████████] ~20% remaining
+Line done → snap:  [████████████████████████████████████████] next line, full width
+```
+
+- **Right edge:** Always fixed at the right edge of the current text column (measured per-document from `<p>` ancestor of the current word)
+- **Left edge:** Tracks the currently-spoken word's X position (smooth lerp between words via audio-progress fraction)
+- **Width:** Derived every tick as `max(8, colRight - leftEdge)` — NEVER stored in state
+- **Line completion:** When `width < NARRATION_BAND_MIN_WIDTH_PX` (8px) AND segment type is end-of-line, snap to next line at full width
+- **Height:** One line height (existing `narrationBandLineHeightRef`, measured once at narration start)
+- **Scope:** Foliate renderer only. Legacy renderer falls back to CSS word highlight.
+
+### Architecture (audit-corrected)
+
+**1. Column right edge: per-document, not singleton.**
+Compute `colRight` inside `ensureAudioProgressGlideLoop` at word-change time, using the same `foundDoc` and `frameRect`/`containerRect` already available. Find the `<p>` ancestor of the current word span and use its `.getBoundingClientRect().right`. Store in `narrationColRightRef` (updated per word change, not globally).
+
+**2. Line-end state machine: use `usableNextWindow` gating.**
+The existing loop already computes `usableNextWindow` — when the next word is on a different line, it's null. Two segment types:
+- **Mid-line** (`usableNextWindow` exists): `to.x` = next word's X. Normal lerp. Width = `colRight - leftEdge`.
+- **End-of-line** (`usableNextWindow` is null): `to.x` = `colRight`. Left edge lerps toward right edge. Width collapses toward zero. When width < 8px → snap to next line.
+
+**3. State model: width is derived, never stored.**
+Remove `width` from `stableFrom`, `stableTo`, `narrationGlideFromRef`, `narrationGlideToRef`, `narrationLineRailRef`. Store `colRight` as the invariant. Each tick: `width = max(8, colRight - leftEdge)`. Remove `NARRATION_BAND_PAD_PX` constant entirely.
+
+**4. CSS: remove transform transition, simplify gradient.**
+Remove `transition: transform 80ms ease` (JS RAF handles all motion). Simplify gradient to 2-stop (`accent/30% → transparent`). Add `will-change: width`. When width < 40px, suppress `border-bottom` via JS.
+
+### Baseline
+
+Existing code to preserve:
+- `audioScheduler.ts` — untouched. 350ms lag ceiling (`NARRATION_CURSOR_LAG_MS`) intact
+- `measureNarrationWindow` — untouched. Per-word position measurement
+- `narrationBandLineHeightRef` — measured once for band height
+- `getAudioProgress` — polled by audio glide loop for smooth fraction-based interpolation
+- `onWordAdvance` callback chain — fires per word, drives overlay updates
+- `hideNarrationOverlay` — resets all animation state
+- Justified text injection in `injectStyles`
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration band, cursor sync entries
+3. `C:\Users\estra\.claude\plans\bright-dazzling-gadget.md` — full corrected architecture
+4. `ROADMAP.md` — this section
+5. `src/constants.ts` — `NARRATION_BAND_PAD_PX` (~line 108, to be removed), `NARRATION_CURSOR_LAG_MS` (~line 113, keep), `NARRATION_BAND_MIN_WIDTH_PX` (~line 108, already added)
+6. `src/components/FoliatePageView.tsx` — Read these sections in order:
+   - Refs (~line 457): `narrationBandLineHeightRef`, `narrationBandWidthRef`
+   - `measureNarrationBandDimensions` (~line 490)
+   - `hideNarrationOverlay` (~line 520)
+   - `ensureNarrationOverlayLoop` (~line 552) — fallback estimate loop
+   - `ensureAudioProgressGlideLoop` (~line 622) — **primary target for rewrite**
+   - `measureNarrationWindow` (~line 824) — DO NOT MODIFY
+   - `positionNarrationOverlay` (~line 873)
+   - `applyVisualHighlightByIndex` narration path (~line 808)
+7. `src/styles/global.css` — `.foliate-narration-highlight` (~line 3832)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes | **Remove `NARRATION_BAND_PAD_PX`** from constants. Verify `NARRATION_BAND_MIN_WIDTH_PX = 8` already exists at ~line 108. Fix all imports referencing the removed constant. | `src/constants.ts`, `src/components/FoliatePageView.tsx` (import line ~20) | Remove constant definition. Remove from import statement. |
+| 2 | Hephaestus (renderer-scope) | **Add `narrationColRightRef`** — New `useRef<number>(0)` near the narration refs (~line 458). Add reset in `hideNarrationOverlay` (~line 520). | `src/components/FoliatePageView.tsx` | After `narrationBandWidthRef` (~line 458). Reset in `hideNarrationOverlay` (~line 540). |
+| 3 | Hephaestus (renderer-scope) | **Rewrite `ensureAudioProgressGlideLoop`** (~line 622) — This is the primary change. On word change: (a) compute `colRight` from `<p>` ancestor of current word using `foundDoc`/`frameRect`/`containerRect` already in scope; (b) determine segment type: if `usableNextWindow !== null` → `to.x = usableNextWindow.x` (mid-line), if null → `to.x = colRight` (end-of-line); (c) remove `width` field from `stableFrom`, `stableTo`, `narrationLineRailRef` structs. Per-tick: `leftEdge = lerp(from.x, to.x, fraction)`, `width = max(NARRATION_BAND_MIN_WIDTH_PX, colRight - leftEdge)`. Set `translate3d(leftEdge, y, 0)`, `width = computed`. When width < 40px: `overlay.style.borderBottomColor = 'transparent'`; else restore. When width ≤ 8px AND end-of-line segment: force `narrationGlideWordRef.current = -1` to re-measure (snaps to next line). | `src/components/FoliatePageView.tsx` | Lines ~622-769. Full function body rewrite. |
+| 4 | Hephaestus (renderer-scope) | **Update `ensureNarrationOverlayLoop`** (~line 552) — Same derived-width pattern: `width = max(8, colRight - current.x)` each tick. Remove `width` from segment from/target structs. Apply same border suppression at small widths. | `src/components/FoliatePageView.tsx` | Lines ~552-603. |
+| 5 | Hephaestus (renderer-scope) | **Update `positionNarrationOverlay`** (~line 873) — On seed: compute `colRight` from anchor word's `<p>` ancestor (same pattern as Task 3). Store in `narrationColRightRef`. Set initial `width = colRight - wordX`. Pass to animation state WITHOUT storing width in structs. | `src/components/FoliatePageView.tsx` | Lines ~873-949. |
+| 6 | Hermes (renderer-scope) | **Update CSS `.foliate-narration-highlight`** (~line 3832) — Replace multi-stop gradient with 2-stop: `linear-gradient(90deg, color-mix(in srgb, var(--accent) 30%, transparent) 0%, transparent 100%)`. Remove `transition: transform 80ms ease` (keep `transition: opacity 80ms ease`). Change `will-change` to `transform, width, opacity`. Remove `transform-origin`. | `src/styles/global.css` | Lines ~3832-3851. |
+| 7 | Hippocrates | **Tests** — ≥8 new tests: (a) `colRight` measurement from `<p>` ancestor produces valid container-relative coordinate, (b) end-of-line segment sets `to.x = colRight` when `usableNextWindow` is null, (c) mid-line segment sets `to.x = next word X` when `usableNextWindow` exists, (d) width is derived as `colRight - leftEdge` and never stored in glide refs, (e) width clamped to ≥ NARRATION_BAND_MIN_WIDTH_PX, (f) overlay snaps to next line when width reaches min at end-of-line, (g) border-bottom suppressed when width < 40px, (h) `NARRATION_BAND_PAD_PX` constant fully removed (zero references). | `tests/` | New test file `tests/collapsingCursor.test.ts`. |
+| 8 | Hippocrates | **`npm test`** — all tests pass (Quick tier, no `npm run build` needed). | — | — |
+| 9 | Solon | **Spec compliance** — verify all SUCCESS CRITERIA met. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list), ROADMAP.md (mark complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (LL entry for "width derived not stored" pattern and "per-doc measurement" pattern). | All 6 governing docs | — |
+| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/narr-cursor-1-collapsing` |
+
+### Execution Sequence
+
+```
+Task 1 (constants cleanup)                — first, unblocks compilation
+    ↓
+Task 2 (refs)                             — needs clean compilation
+    ↓
+Tasks 3-5 (loop rewrites + seed)         — sequential: audio loop → fallback loop → seed
+    ↓
+Task 6 (CSS)                              — parallel with tasks 3-5 (independent)
+    ↓
+Task 7-8 (tests)                          — after all implementation
+    ↓
+Task 9 (Solon spec compliance)
+Task 10 (Herodotus docs)
+Task 11 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Overlay right edge aligns to the right edge of the current text column (measured from `<p>` ancestor of the spoken word)
+2. Overlay left edge advances rightward smoothly as narration progresses through a line
+3. Overlay width decreases continuously during narration (derived as `colRight - leftEdge`)
+4. Width is NEVER stored in animation state structs — always derived per tick
+5. At end of line, overlay collapses to ≤8px then snaps to full-width on the next line
+6. Line-end detection uses `usableNextWindow === null` (existing gating), not Y-position comparison
+7. `colRight` is computed per-document from the `<p>` ancestor of the current word, not cached globally
+8. No CSS `transition: transform` on `.foliate-narration-highlight` — JS RAF handles all motion
+9. Gradient is 2-stop (`accent/30% → transparent`) — degrades gracefully at small widths
+10. `border-bottom` suppressed (transparent) when width < 40px
+11. `NARRATION_BAND_PAD_PX` constant fully removed (zero references in codebase)
+12. `audioScheduler.ts` untouched — 350ms lag ceiling preserved
+13. `measureNarrationWindow` untouched
+14. Two-column layout: overlay stays within the correct column
+15. ≥8 new tests in `tests/collapsingCursor.test.ts`
+16. `npm test` passes
+
+**Tier:** Quick | **Depends on:** None — fully spec'd, CLI-ready.
+
+---
+
+## HOTFIX-15: Narration Cursor Polish (BUG-159/160/161) ✅ COMPLETED (v1.43.1, 2026-04-07)
+
+**Goal:** Fix three narration cursor issues discovered during extended listening: cursor stretching to full page width (BUG-159), band height too tall and not dynamically scaling (BUG-160), and cursor drifting ahead of audio between truth-syncs (BUG-161 partial mitigation).
+
+**Problem:** After NARR-CURSOR-1 (v1.40.0) shipped the collapsing cursor, extended listening sessions revealed three issues: (1) the cursor occasionally stretches to the full page width when `closest("p")` falls through to a wide container, (2) the band height uses a fixed `+4px` padding that's visually too generous and never re-measures after narration starts, and (3) the character-count heuristic in `computeWordWeights()` causes cumulative cursor drift that becomes visible within a few sentences.
+
+**Relationship to NARR-TIMING:** BUG-161's full fix is NARR-TIMING (real word timestamps replace the heuristic entirely). This hotfix applies a partial mitigation — halving the truth-sync interval from 12→6 words — to limit visible drift until NARR-TIMING ships.
+
+### Baseline
+
+From NARR-CURSOR-1 (v1.40.0):
+- `narrationColRightRef` — per-word right-edge measurement from `<p>` ancestor (FoliatePageView.tsx:701, 929)
+- `narrationBandLineHeightRef` — measured once at narration start: `lineHeight + 4` (FoliatePageView.tsx:518)
+- `measureNarrationBandDimensions()` — called once at narration start (FoliatePageView.tsx:492-520)
+- `ensureAudioProgressGlideLoop` — primary RAF loop (FoliatePageView.tsx:628-795)
+- `positionNarrationOverlay` — seed function (FoliatePageView.tsx:873-970)
+- `computeWordWeights()` — character-count heuristic (audioScheduler.ts:53-72)
+- `TTS_CURSOR_TRUTH_SYNC_INTERVAL = 12` — re-anchor frequency (constants.ts:100)
+- `.foliate-narration-highlight` — CSS gradient overlay (global.css:3867-3881)
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration band, cursor sync, colRight entries
+3. `ROADMAP.md` — this section
+4. `src/constants.ts` — `NARRATION_BAND_MIN_WIDTH_PX` (~line 108), `TTS_CURSOR_TRUTH_SYNC_INTERVAL` (line 100)
+5. `src/components/FoliatePageView.tsx` — Read in order:
+   - `measureNarrationBandDimensions()` (lines 492-520) — height measurement
+   - `ensureAudioProgressGlideLoop` (lines 628-795) — primary RAF loop, colRight computation at 699-711
+   - `positionNarrationOverlay` (lines 873-970) — seed function, colRight at 927-937
+6. `src/utils/audioScheduler.ts` — `computeWordWeights()` (lines 53-72), truth-sync interval usage (line 170, 277)
+7. `src/styles/global.css` — `.foliate-narration-highlight` (lines 3867-3881)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Fix BUG-159 — Tighten `colRight` ancestor resolution.** In `ensureAudioProgressGlideLoop` (line 701) and `positionNarrationOverlay` (line 929), replace `wordEl?.closest("p") \|\| wordEl?.parentElement` with a safer resolution: `wordEl?.closest("p, blockquote, li, figcaption") \|\| wordEl?.parentElement`. Then add a width guard: if the resolved element's `getBoundingClientRect().width` exceeds the scroll container width × 0.95, fall back to the scroll container's right edge minus a 16px margin. Also add a null guard: if `wordEl` is null (word not in DOM), skip the measurement tick entirely — do not update `narrationColRightRef.current`. | `src/components/FoliatePageView.tsx` | Line 701 (glide loop): replace `closest("p")` expression + add width guard (~6 lines). Line 929 (seed): same pattern (~6 lines). Add null-guard `if (!wordEl) return;` before the pEl line at both sites. |
+| 2 | Hephaestus (renderer-scope) | **Fix BUG-160a — Proportional band height.** In `measureNarrationBandDimensions()` (line 518), replace `narrationBandLineHeightRef.current = lineHeight + 4` with `narrationBandLineHeightRef.current = Math.ceil(lineHeight * 1.08)`. This scales the padding proportionally rather than fixed-pixel. | `src/components/FoliatePageView.tsx` | Line 518. Single expression change. |
+| 3 | Hephaestus (renderer-scope) | **Fix BUG-160b — Dynamic height re-measurement.** In `ensureAudioProgressGlideLoop`, inside the word-change block (after colRight computation, ~line 712), add: measure the current word's computed `lineHeight` via `window.getComputedStyle(wordEl).lineHeight`. If it differs from `narrationBandLineHeightRef.current` by more than 2px, update `narrationBandLineHeightRef.current = Math.ceil(newLineHeight * 1.08)`. This handles mixed font sizes (headings, blockquotes) within the EPUB. | `src/components/FoliatePageView.tsx` | Inside `ensureAudioProgressGlideLoop`, after the colRight block (~line 712). ~6 lines insertion. |
+| 4 | Hermes (renderer-scope) | **Fix BUG-161 partial — Halve truth-sync interval.** In `src/constants.ts` line 100, change `TTS_CURSOR_TRUTH_SYNC_INTERVAL = 12` to `TTS_CURSOR_TRUTH_SYNC_INTERVAL = 6`. This doubles the re-anchor frequency, limiting maximum visible drift to ~6 words instead of ~12. | `src/constants.ts` | Line 100. Single value change: `12` → `6`. |
+| 5 | Hippocrates | **Tests** — ≥10 new tests: (a) colRight ancestor resolution prefers `<p>` when available, (b) colRight falls back to `<blockquote>`, `<li>`, `<figcaption>` when no `<p>` ancestor, (c) colRight width guard caps to container width when resolved element is too wide, (d) null `wordEl` skips measurement tick (colRight unchanged), (e) band height uses proportional `lineHeight * 1.08` not fixed `+4`, (f) band height re-measures on word change when line height differs by >2px, (g) band height does NOT re-measure when line height difference ≤2px (stability), (h) truth-sync interval is 6 (not 12), (i) end-of-line snap still works after colRight fix (regression), (j) seed function (`positionNarrationOverlay`) uses same tightened ancestor resolution. | `tests/` | New test file `tests/narrationCursorPolish.test.ts`. |
+| 6 | Hippocrates | **`npm test`** — all tests pass. | — | — |
+| 7 | Solon | **Spec compliance** — verify all 12 SUCCESS CRITERIA items met. | — | — |
+| 8 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, bug count, sprint list), ROADMAP.md (mark HOTFIX-15 complete), SPRINT_QUEUE.md (remove, log to completed), BUG_REPORT.md (mark BUG-159/160/161 resolved), LESSONS_LEARNED.md (if non-trivial discovery). | All 6 governing docs | — |
+| 9 | Hermes | **Git: commit, merge, push** | — | Branch: `hotfix/15-narration-cursor-polish` |
+
+### Execution Sequence
+
+```
+Tasks 1-4 (all fixes)         — parallel, independent edit sites
+    ↓
+Task 5 (tests)                — after all fixes
+Task 6 (npm test)             — after tests written
+    ↓
+Task 7 (Solon spec compliance)
+Task 8 (Herodotus docs)
+Task 9 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Narration cursor right edge never exceeds the current text column width (no full-page stretch)
+2. `colRight` ancestor resolution checks `p, blockquote, li, figcaption` before falling back to `parentElement`
+3. When resolved ancestor is wider than 95% of scroll container, colRight falls back to container edge minus 16px
+4. Null `wordEl` (word not in DOM) skips measurement tick — no garbage values applied to `narrationColRightRef`
+5. Band height uses proportional padding (`lineHeight * 1.08`) not fixed `+4px`
+6. Band height re-measures on word change when the current word's line height differs by >2px
+7. Band height does NOT jitter on same-size words (≤2px tolerance prevents unnecessary updates)
+8. `TTS_CURSOR_TRUTH_SYNC_INTERVAL` reduced from 12 to 6 (partial BUG-161 mitigation)
+9. Existing collapsing cursor behavior preserved — end-of-line snap, line rail stability, min-width clamp
+10. `positionNarrationOverlay` (seed) uses the same tightened ancestor resolution as the glide loop
+11. ≥10 new tests in `tests/narrationCursorPolish.test.ts`
+12. `npm test` passes
+
+**BUG-161 full fix disposition:** Deferred to NARR-TIMING. Real word-level timestamps eliminate the character-count heuristic entirely. Truth-sync interval reduction is a stopgap.
+
+**Tier:** Quick | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
+
+---
+
+## STAB-1A: Startup & Flow Stabilization (BUG-162/163/164/165) ✅ COMPLETED
+
+**Goal:** Fix four user-facing issues discovered during extended testing: book-open freeze with no loading feedback, TTS cold-start latency, TTS chunk-boundary sentence-snap misses, and flow mode scroll/offset failure. All fixes are targeted (Approach A) — minimal refactoring, well-understood root causes.
+
+**Problem:** (1) Opening a book freezes the UI for ~5s while `extractWordsFromView` + `wrapWordsInSpans` run synchronously on the main thread. A `.foliate-loading` div exists in JSX but has no CSS — invisible loading indicator. (2) TTS model loads lazily on first `generate()` call. An existing `tts-kokoro-preload` IPC handler exists but isn't called on book open. (3) Sentence-snap tolerance is ±15 words — too narrow for some paragraph structures, causing mid-sentence chunk boundaries. (4) Flow mode's `buildLineMap()` silently returns an empty array when DOM word spans aren't rendered yet, causing a zombie engine state where scroll, auto-advance, and initial offset all fail.
+
+**Relationship to STAB-1B (deferred):** Ramp-up chunks bypassing the planner, silence stacking at transitions, and flow cursor unification are deferred to STAB-1B pending further investigation. Issue 5 from the original report (collapsing cursor in flow mode) moved to IDEAS.md — it's a feature, not a bug.
+
+### Baseline
+
+- `onSectionLoad` handler (FoliatePageView.tsx:1111-1277) — synchronous extraction + wrapping
+- `extractWordsFromView` (FoliatePageView.tsx:188-205) — synchronous DOM walk of all sections
+- `wrapWordsInSpans` (FoliatePageView.tsx:236-266) — synchronous DOM mutation, single pass
+- `.foliate-loading` div (FoliatePageView.tsx:1883) — rendered conditionally but no CSS
+- `loading` state (FoliatePageView.tsx:467) — set true on load, false at line 1547
+- `tts-kokoro-preload` IPC handler (main/ipc/tts.js:59-66) — existing preload, not called on book open
+- `ttsEngine.preload()` (main/tts-engine.js:270-272) — fire-and-forget model pre-warm
+- `ttsEngine.ensureReady()` (main/tts-engine.js:189-229) — lazy load on first generate()
+- `snapToSentenceBoundary()` (generationPipeline.ts:117-152) — ±15 word tolerance (line 114)
+- `FlowScrollEngine.start()` (FlowScrollEngine.ts:78-117) — calls `buildLineMap()` synchronously
+- `buildLineMap()` (FlowScrollEngine.ts:259-286) — queries `[data-word-index]`, returns [] if no spans
+- `scrollToLine()` (FlowScrollEngine.ts:364-375) — initial scroll to reading zone position
+- `FLOW_LINE_ADVANCE_BUFFER_MS` (constants.ts:412) — 50ms delay before first `animateLine()`
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for book loading, TTS startup, flow mode entries
+3. `ROADMAP.md` — this section
+4. `src/components/FoliatePageView.tsx` — Read in order:
+   - `loading` state (line 467)
+   - `extractWordsFromView` (lines 188-205)
+   - `wrapWordsInSpans` (lines 236-266)
+   - `onSectionLoad` handler (lines 1111-1277) — both Path A (active mode, line 1134) and Path B (page mode, line 1162)
+   - `.foliate-loading` JSX (line 1883)
+   - `setLoading(false)` (line 1547)
+5. `src/styles/global.css` — verify no `.foliate-loading` CSS exists (~line 3880 area)
+6. `main/tts-engine.js` — `preload()` (line 270-272), `ensureReady()` (lines 189-229), `generate()` (lines 234-246)
+7. `main/ipc/tts.js` — `tts-kokoro-preload` handler (lines 59-66)
+8. `src/utils/generationPipeline.ts` — `snapToSentenceBoundary()` (lines 117-152), tolerance constant (line 114)
+9. `src/utils/FlowScrollEngine.ts` — `start()` (lines 78-117), `buildLineMap()` (lines 259-286), `scrollToLine()` (lines 364-375), `animateLine()` (lines 296-362)
+10. `src/components/ReaderContainer.tsx` — FlowScrollEngine lifecycle effect (lines 1082-1134)
+11. `src/constants.ts` — `TTS_COLD_START_CHUNK_WORDS` (line 94), `FLOW_LINE_ADVANCE_BUFFER_MS` (line 412)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hermes (renderer-scope) | **Fix BUG-162a — Add `.foliate-loading` CSS.** Add styling for `.foliate-loading` in global.css: centered text, semi-transparent backdrop, spinner animation or pulsing opacity, `z-index: 200` above content. Should be visible and informative during the synchronous freeze. | `src/styles/global.css` | After `.foliate-narration-highlight` block (~line 3881). ~15 lines CSS. |
+| 2 | Hephaestus (renderer-scope) | **Fix BUG-162b — Chunk `wrapWordsInSpans` with `setTimeout` yields.** Refactor `wrapWordsInSpans` (FoliatePageView.tsx:236-266) to process block groups in batches, yielding to the event loop between batches via `setTimeout(resolve, 0)`. Each batch wraps N block groups (e.g., 50), then yields. The function signature changes from sync to `async` — callers in `onSectionLoad` (lines 1146, 1174) must `await` it. This breaks the single synchronous freeze into smaller chunks, allowing the loading indicator to render and the UI to remain responsive. | `src/components/FoliatePageView.tsx` | Lines 236-266 (function body rewrite to async + batched). Lines 1146, 1174 (add `await`). Line 1111 (`onSectionLoad` becomes async). |
+| 3 | Hermes (electron-scope) | **Fix BUG-163 — Wire TTS preload into book open.** In the book-open IPC handler (or the renderer's book-open path), call `window.electronAPI.ttsKokoroPreload()` (or equivalent IPC) when a book is opened. This triggers the existing `ttsEngine.preload()` fire-and-forget so the model is warm by the time the user presses play. Verify the IPC channel `tts-kokoro-preload` exists in preload.js; if not, add it. | `src/components/ReaderContainer.tsx` or `src/components/LibraryContainer.tsx` | In the book-open flow — after `activeDoc` is set. Single line: `window.electronAPI.ttsKokoroPreload?.()`. Verify `preload.js` exposes the channel. |
+| 4 | Hermes (renderer-scope) | **Fix BUG-164 — Widen sentence-snap tolerance to ±25 words.** In `generationPipeline.ts` line 114, change the default tolerance from 15 to 25. This gives `snapToSentenceBoundary()` a wider search window for ramp-up chunks, reducing mid-sentence chunk boundaries. | `src/utils/generationPipeline.ts` | Line 114. Single value change: `15` → `25`. |
+| 5 | Hephaestus (renderer-scope) | **Fix BUG-165 — Add retry/wait on `buildLineMap()` in FlowScrollEngine.** In `FlowScrollEngine.start()` (lines 105-117), if `buildLineMap()` returns an empty array, schedule a retry after a short delay (100ms) up to 5 attempts. This handles the race condition where word spans haven't been rendered yet when the engine starts. On final failure, log a warning and remain in stopped state. Also: after successful `buildLineMap()`, ensure `scrollToLine()` uses `behavior: "instant"` for the initial scroll (not smooth) so the reading zone offset is immediate. | `src/utils/FlowScrollEngine.ts` | Lines 78-117 (`start()` method). Wrap `buildLineMap()` call in retry loop. Line 373: change initial scroll behavior to `"instant"`. ~15 lines modified. |
+| 6 | Hippocrates | **Tests** — ≥12 new tests: (a) `.foliate-loading` CSS exists and has `z-index` > content, (b) `wrapWordsInSpans` yields to event loop between batches (verify async behavior), (c) `wrapWordsInSpans` produces identical DOM output to the old sync version (no word-wrapping regression), (d) TTS preload IPC is called during book open, (e) `ttsEngine.preload()` calls `ensureReady()` without blocking, (f) sentence-snap tolerance is 25 (not 15), (g) `snapToSentenceBoundary` finds boundaries within ±25 words, (h) `buildLineMap()` retry succeeds on 2nd attempt when spans appear after delay, (i) `buildLineMap()` retry gives up after 5 attempts, (j) initial scroll uses instant behavior (not smooth), (k) FlowScrollEngine enters running state after successful retry, (l) FlowScrollEngine does not enter zombie state on empty `buildLineMap()`. | `tests/` | New test file `tests/startupStabilization.test.ts`. |
+| 7 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+| 8 | Solon | **Spec compliance** — verify all 14 SUCCESS CRITERIA items met. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, bug count, sprint list), ROADMAP.md (mark STAB-1A complete), SPRINT_QUEUE.md (remove, log to completed), BUG_REPORT.md (mark BUG-162/163/164/165 resolved), LESSONS_LEARNED.md (if non-trivial discovery). Pre-composed diffs preferred. | All 6 governing docs | — |
+| 10 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/stab-1a-startup-flow` |
+
+### Execution Sequence
+
+```
+Task 1 (CSS)                      — independent, no code deps
+Task 2 (wrapWordsInSpans async)   — independent, FoliatePageView only
+Task 3 (TTS preload wiring)      — independent, different files
+Task 4 (sentence-snap tolerance)  — independent, single constant
+Task 5 (buildLineMap retry)       — independent, FlowScrollEngine only
+    ↓ (all 5 parallel — zero dependencies between them)
+Task 6 (tests)                    — after all implementation
+Task 7 (npm test + build)         — after tests written
+    ↓
+Task 8 (Solon spec compliance)
+Task 9 (Herodotus docs)
+Task 10 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. `.foliate-loading` has visible CSS styling (centered, semi-transparent backdrop, animated feedback)
+2. `wrapWordsInSpans` is async and yields to the event loop between batches — UI remains responsive during word wrapping
+3. `wrapWordsInSpans` produces identical DOM output to the previous sync version (no word index regressions)
+4. Book open triggers `tts-kokoro-preload` IPC call (fire-and-forget, non-blocking)
+5. `ttsEngine.preload()` begins model loading without waiting for user to press play
+6. Sentence-snap tolerance widened from ±15 to ±25 words
+7. `snapToSentenceBoundary()` successfully finds boundaries within the wider tolerance
+8. `buildLineMap()` retries up to 5 times with 100ms delay when it returns empty array
+9. FlowScrollEngine does not enter zombie state (running=true, lines=[]) — retries or stops cleanly
+10. Initial flow scroll uses instant behavior (no smooth animation delay on start)
+11. Flow auto-scroll works after retry succeeds (cursor depletes, lines advance, scroll follows)
+12. ≥12 new tests in `tests/startupStabilization.test.ts`
+13. `npm test` passes, `npm run build` succeeds
+14. No regressions in narration mode (word wrapping async change must not break narration startup)
+
+**STAB-1B disposition:** Deferred. Ramp-up planner integration needs investigation (why TTS-7P excluded it). Silence stacking needs live audio analysis. Flow cursor unification moved to IDEAS.md (feature, not bug).
+
+**Tier:** Full | **Depends on:** None — investigation gate cleared, all fix specs CLI-ready.
+
+---
+
+## PERF-1: Full Performance Audit & Remediation ✅ COMPLETED (v1.47.0, 2026-04-07)
+
+**Goal:** Investigate every performance hotspot across the entire application — main process startup, renderer rendering/re-render cycles, and data-layer I/O — then remediate confirmed findings. Two-phase sprint: Phase A establishes baselines and confirms findings via measurement; Phase B remediates prioritized issues.
+
+**Problem:** Extended development across 44+ sprints has accumulated performance debt in three areas:
+1. **Main process startup:** Window creation is blocked by sequential `loadState()` → `initAuth()` → `initSyncEngine()` calls. Folder sync blocks watcher startup (1–60s for new users). Four `require()` calls in `app.whenReady` callback delay module loading.
+2. **Renderer re-render churn:** ReaderContainer.tsx has 30+ useEffect hooks and oversized dependency arrays. FoliatePageView `injectStyles` calls `getComputedStyle` 3× per section load (layout thrashing). LibraryContainer keyboard handler rebuilds on 11-dependency array. Voice sync effect fires on every Web Speech voice change (7-item dependency array). WPM input saves on every keystroke (no debounce). No code splitting — entire app in single Vite bundle.
+3. **Data layer inefficiency:** EPUB chapter cache is unbounded (no LRU eviction). Settings saves have no debounce. Snoozed doc check every 60s iterates entire library. `fileHashes` in sync-engine accumulates forever. Library index rebuilt on every mutation.
+
+**Investigation gate:** Pre-cleared. Cowork investigation identified 35 issues across 3 domains (3 critical/high in main, 10 high in renderer, 5 high in data layer). Remediation specs below are based on confirmed code-level findings.
+
+### Baseline
+
+**Main process:**
+- `main.js` lines 433-455 — `app.whenReady` callback: `loadState()` → `initAuth()` → `initSyncEngine()` all awaited before `createWindow()`
+- `main.js` line 435 — `loadState()` reads 4 JSON files sequentially (library.json, settings.json, readingStats.json, syncState.json)
+- `main.js` lines 440-441 — `auth.initAuth()` + `syncEngine.initSyncEngine()` awaited sequentially
+- `main.js` line 535 — folder sync completes before watcher starts
+- `main.js` lines 438-452 — 4 `require()` calls in `app.whenReady` (url-extractor, ws-server, folder-watcher, cloud-storage)
+
+**Renderer:**
+- `src/components/FoliatePageView.tsx` lines 1894-1933 — `injectStyles`: 3× `getComputedStyle` per section load
+- `src/components/ReaderContainer.tsx` — 1,533 lines, 30+ `useEffect` hooks
+- `src/components/ReaderContainer.tsx` lines 438-447 — voice sync effect, 7-item dependency array
+- `src/components/LibraryContainer.tsx` line 390 — `kbActions` useMemo with 11-item dependency array
+- `src/components/LibraryContainer.tsx` lines 218-221 — WPM persistence on every keystroke, no debounce
+- `vite.config.js` — no `manualChunks` or code splitting configured
+- `src/styles/global.css` — 5,138 lines, single file
+
+**Data layer:**
+- `main/file-parsers.js` — EPUB chapter cache (`chapterCache` Map), no eviction
+- `main/ipc/state.js` lines 20-24 — `save-settings` handler, no debounce
+- `main/ipc/documents.js` line 150 — snoozed doc check every 60s, iterates full library array
+- `main/sync-engine.js` line 39 — `fileHashes` Map, no cleanup/eviction
+- `main.js` line 120 — `rebuildLibraryIndex()` called on every library mutation
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for performance-related entries
+3. `ROADMAP.md` — this section
+4. `main.js` — focus on `app.whenReady` (lines 430-460), `loadState` (line 435), folder sync/watcher (line 535), `rebuildLibraryIndex` (line 120)
+5. `main/ipc/state.js` — `save-settings` handler (lines 20-24)
+6. `main/ipc/documents.js` — snoozed doc timer (line 150)
+7. `main/file-parsers.js` — `chapterCache` (top-level Map declaration + usage)
+8. `main/sync-engine.js` — `fileHashes` (line 39), cleanup patterns
+9. `src/components/FoliatePageView.tsx` — `injectStyles` (lines 1894-1933)
+10. `src/components/ReaderContainer.tsx` — voice sync effect (lines 438-447), all useEffect hooks
+11. `src/components/LibraryContainer.tsx` — `kbActions` (line 390), WPM persistence (lines 218-221)
+12. `vite.config.js` — current build config
+13. `src/constants.ts` — check for existing perf-related constants
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| **Phase A — Measure & Confirm** | | | | |
+| 1 | Hephaestus (electron-scope) | **Baseline main process startup.** Add `performance.now()` markers around each step in `app.whenReady` callback: `loadState`, `initAuth`, `initSyncEngine`, `createWindow`, folder sync, watcher start. Log all timings to console. Run app and record baseline. Capture actual ms per step. | `main.js` | Lines 433-455 (wrap each `await` with timing), line 535 (sync/watcher timing). Temporary instrumentation — removed in Phase B. |
+| 2 | Hephaestus (renderer-scope) | **Baseline renderer performance.** Add `console.time`/`console.timeEnd` instrumentation to: `injectStyles` (FoliatePageView), `kbActions` recomputation (LibraryContainer), voice sync effect (ReaderContainer). Count re-render frequency for ReaderContainer and LibraryContainer using a render-count ref. Log results. | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/LibraryContainer.tsx` | `injectStyles` (lines 1894-1933), voice sync (lines 438-447), `kbActions` (line 390). Temporary instrumentation. |
+| **Phase B — Remediate** | | | | |
+| 3 | Athena (electron-scope) | **CRITICAL: Parallelize startup sequence.** Restructure `app.whenReady` to: (a) call `createWindow()` first (or concurrently with non-blocking init), (b) run `initAuth()` and `initSyncEngine()` in parallel via `Promise.all`, (c) defer folder sync to after window is visible. `loadState()` must still complete before `createWindow()` (window needs settings), but auth and sync can run in background. Target: window visible within 200ms of `app.whenReady`. | `main.js` | Lines 433-455. Reorder: `loadState()` → `createWindow()` → `Promise.all([initAuth(), initSyncEngine()])` → folder sync (non-blocking). |
+| 4 | Hephaestus (electron-scope) | **Start folder watcher before sync.** Move watcher initialization to before `folderSync()` so new files are detected immediately. Sync can run in background — watcher should not wait for it. | `main.js` | Line 535 area. Swap order: `startWatcher()` before `syncFolder()`. |
+| 5 | Hephaestus (renderer-scope) | **Cache root computed styles in `injectStyles`.** Call `getComputedStyle(rootEl)` once at the top of `injectStyles` and read all needed properties from that single snapshot. Eliminates 2 redundant layout thrashes per section load. | `src/components/FoliatePageView.tsx` | Lines 1894-1933. Extract single `const rootStyles = getComputedStyle(document.documentElement)` at top, replace all 3 calls. |
+| 6 | Hephaestus (renderer-scope) | **Debounce settings saves.** Add 500ms debounce to `save-settings` IPC handler so rapid changes (WPM slider, toggles) batch into a single write. Use a simple `setTimeout`/`clearTimeout` pattern — no new dependencies. | `main/ipc/state.js` | Lines 20-24. Wrap handler body in debounced writer. Add `let saveTimeout = null` at module level. |
+| 7 | Hephaestus (renderer-scope) | **Debounce WPM persistence.** Wrap the WPM `onChange` persistence call in LibraryContainer with a 300ms debounce so keystrokes don't trigger individual saves. | `src/components/LibraryContainer.tsx` | Lines 218-221. Add `useRef` for timeout, clear on each keystroke, save after 300ms idle. |
+| 8 | Hephaestus (electron-scope) | **Add LRU eviction to EPUB chapter cache.** Convert `chapterCache` from unbounded Map to LRU with 50-entry cap. On cache set, evict oldest entry if at capacity. Simple implementation — no new dependencies. | `main/file-parsers.js` | `chapterCache` declaration (near top of file) + all `.set()` calls. Replace Map with small LRU class (~15 lines). |
+| 9 | Hephaestus (electron-scope) | **Index snoozed doc check.** Replace the 60s full-library scan with a pre-built snoozed-doc index (a Set of doc IDs with active snooze timers). Update the Set on snooze/unsnooze. Timer callback checks only the Set, not the full library. | `main/ipc/documents.js` | Line 150 area. Add `snoozedDocIds` Set, populate on snooze mutation, check Set in timer callback. |
+| 10 | Hephaestus (renderer-scope) | **Tighten voice sync dependency array.** The voice sync effect (ReaderContainer lines 438-447) should depend only on `selectedVoiceId` and `ttsEnabled`, not all 7 current deps. Extract the stable values into refs. | `src/components/ReaderContainer.tsx` | Lines 438-447. Move non-trigger deps to refs. Reduce dependency array to 2-3 items. |
+| 11 | Hephaestus (renderer-scope) | **Add Vite code splitting.** Configure `manualChunks` in vite.config.js to split: (a) vendor libs (react, foliate-js) into a `vendor` chunk, (b) TTS-related code into a `tts` chunk (lazy-loaded), (c) settings/preferences into a `settings` chunk. | `vite.config.js` | `build.rollupOptions.output.manualChunks` — new config block. |
+| 12 | Hephaestus (electron-scope) | **Debounce `rebuildLibraryIndex`.** Wrap the library index rebuild in a 100ms debounce so batch mutations (import of multiple books) trigger only one rebuild. | `main.js` | Line 120 area. Add debounce wrapper around `rebuildLibraryIndex()` calls. |
+| 13 | Hermes (electron-scope) | **Remove Phase A instrumentation.** Strip all `performance.now()` markers and `console.time` calls added in Tasks 1-2. | `main.js`, `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/LibraryContainer.tsx` | All locations touched in Tasks 1-2. |
+| 14 | Hippocrates | **Tests** — ≥16 new tests: (a) startup sequence calls `createWindow` before or concurrent with auth/sync init, (b) `initAuth` and `initSyncEngine` run in parallel (Promise.all), (c) folder watcher starts before sync completes, (d) `injectStyles` calls `getComputedStyle` exactly once, (e) settings save is debounced (rapid calls produce single write), (f) WPM persistence is debounced, (g) chapter cache evicts oldest entry at capacity (50), (h) chapter cache size never exceeds 50, (i) snoozed doc check uses index (not full library scan), (j) snoozed doc Set updates on snooze/unsnooze, (k) voice sync effect depends on ≤3 items, (l) Vite config has `manualChunks` with vendor/tts/settings chunks, (m) `rebuildLibraryIndex` is debounced (batch mutations = single rebuild), (n) startup window appears before auth completes, (o) LRU cache returns cached value for recent entry, (p) LRU cache misses evicted entry. | `tests/` | New test file `tests/perfAudit.test.ts`. |
+| 15 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. Verify new chunks appear in build output. | — | — |
+| 16 | Solon | **Spec compliance** — verify all 18 SUCCESS CRITERIA items met. | — | — |
+| 17 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, perf baseline notes), ROADMAP.md (mark PERF-1 complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (perf findings as LL entry). Pre-composed diffs preferred. | All governing docs | — |
+| 18 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/perf-1-audit` |
+
+### Execution Sequence
+
+```
+Phase A (measure):
+  Task 1 (main process instrumentation)  ─┐
+  Task 2 (renderer instrumentation)       ─┤ parallel
+                                           ─┘
+    ↓ (review measurements, confirm findings)
+
+Phase B (remediate — main process):
+  Task 3 (parallelize startup)  ─┐
+  Task 4 (watcher before sync)  ─┤ sequential (Task 3 restructures the code Task 4 touches)
+                                 ─┘
+    ↓
+Phase B (remediate — renderer):
+  Task 5 (cache getComputedStyle)  ─┐
+  Task 7 (debounce WPM)           ─┤
+  Task 10 (voice sync deps)       ─┤ parallel (independent files/functions)
+  Task 11 (Vite code splitting)   ─┤
+                                   ─┘
+    ↓
+Phase B (remediate — data layer):
+  Task 6 (debounce settings save)  ─┐
+  Task 8 (LRU chapter cache)      ─┤
+  Task 9 (snoozed doc index)      ─┤ parallel (independent modules)
+  Task 12 (debounce index rebuild) ─┘
+    ↓
+Cleanup + verify:
+  Task 13 (remove instrumentation)
+    ↓
+  Task 14 (tests)
+  Task 15 (npm test + build)
+    ↓
+  Task 16 (Solon spec compliance)
+  Task 17 (Herodotus docs)
+  Task 18 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. Window is visible before `initAuth()` and `initSyncEngine()` complete
+2. `initAuth()` and `initSyncEngine()` run in parallel (not sequential)
+3. Folder watcher starts before folder sync completes
+4. `injectStyles` calls `getComputedStyle` exactly once per invocation (not 3×)
+5. Settings saves are debounced — 10 rapid calls within 500ms produce ≤2 file writes
+6. WPM input persistence is debounced — typing does not trigger per-keystroke saves
+7. EPUB chapter cache has LRU eviction with 50-entry cap
+8. Chapter cache size never exceeds cap (no unbounded growth)
+9. Snoozed doc check uses a pre-built index — does not iterate full library
+10. Voice sync useEffect dependency array has ≤3 items (down from 7)
+11. Vite build produces separate chunks for vendor, TTS, and settings
+12. `rebuildLibraryIndex` is debounced — batch mutations trigger single rebuild
+13. No Phase A instrumentation remains in committed code
+14. ≥16 new tests in `tests/perfAudit.test.ts`
+15. `npm test` passes, `npm run build` succeeds
+16. No regressions in narration, flow mode, or library operations
+17. Build output shows multiple chunks (not single bundle)
+18. Startup-to-window time measurably improved (target: window visible < 500ms after app.whenReady)
+
+**Tier:** Full | **Depends on:** None — investigation gate cleared by Cowork analysis. All remediation targets have confirmed code-level coordinates.
+
+---
+
+## REFACTOR-1A: ReaderContainer Decomposition ✅ COMPLETED (2026-04-07)
+
+**Goal:** Extract 33 useEffect hooks from ReaderContainer.tsx (1,623 lines) into 5 domain-specific custom hooks. This is the single highest-risk maintainability item identified by the post-PERF-1 technical debt audit (finding C-1). Also addresses fileHashes unbounded growth (H-3) and main.js hardcoded constants (M-2) as quick-fix ride-alongs.
+
+**Problem:** ReaderContainer.tsx has 33 useEffect hooks, 11 useState declarations, and 27+ useRef declarations. Effect ordering is impossible to reason about. Re-render cost is high because effects trigger cascading updates. The file is the most complex single component in the codebase and the #1 maintainability risk.
+
+**Approach:** Pure refactoring — no behavior changes. Extract effects into custom hooks by logical domain. Each hook receives props/refs and returns the state it manages. ReaderContainer becomes a thin orchestrator that composes hooks. All existing tests must continue to pass unchanged.
+
+**Investigation gate:** Cleared. Cowork investigation mapped all 33 useEffects to 5 hook groupings with exact line numbers, state variables, and dependency arrays.
+
+### Baseline
+
+- `src/components/ReaderContainer.tsx` — 1,623 lines, 33 useEffects, 11 useState, 27+ useRef
+- `main/sync-engine.js` line 39 — `fileHashes: {}` grows unbounded (entries only removed during weekly reconciliation)
+- `main.js` lines 24-34 — 11 hardcoded constants (LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, etc.)
+- `src/constants.ts` — 488 lines, well-organized by domain, ready to accept new constants
+- No `main/constants.js` exists yet for main-process constants
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for ReaderContainer, useEffect, refactoring entries
+3. `ROADMAP.md` — this section
+4. `src/components/ReaderContainer.tsx` — read ENTIRE file, map all useEffect/useState/useRef declarations
+5. `src/hooks/` — read existing custom hooks to follow project patterns
+6. `main/sync-engine.js` — `fileHashes` (line 39), addition sites (lines 526, 539, 540, 578, 607, 633, 1043), removal sites (lines 707, 722-723)
+7. `main.js` — hardcoded constants (lines 24-34)
+8. `src/constants.ts` — existing structure for reference
+9. `main/ipc/documents.js` — library delete handler (check if fileHashes entries are cleaned up)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (renderer-scope) | **Extract `useNarrationSync` hook.** Move 12 narration-to-settings sync effects (lines 441, 446, 449, 454, 468, 479, 487, 505, 510, 514, 518, 664) into `src/hooks/useNarrationSync.ts`. Hook receives `activeDoc`, `settings`, `narration`, `useFoliate`, and refs. Returns `bookWordMeta`, `setBookWordMeta`, `currentNarrationSectionRef`. Estimated ~150 lines. | `src/hooks/useNarrationSync.ts` (new), `src/components/ReaderContainer.tsx` | Remove 12 useEffects + related state from ReaderContainer. Add hook call at ~line 130 area. |
+| 2 | Athena (renderer-scope) | **Extract `useNarrationCaching` hook.** Move 4 TTS caching effects (lines 368, 381, 410, 425) into `src/hooks/useNarrationCaching.ts`. Hook receives `activeDoc`, `settings`, `wordsRef`. Returns `backgroundCacherRef`. Estimated ~100 lines. | `src/hooks/useNarrationCaching.ts` (new), `src/components/ReaderContainer.tsx` | Remove 4 useEffects + backgroundCacherRef from ReaderContainer. |
+| 3 | Athena (renderer-scope) | **Extract `useFlowScrollSync` hook.** Move 6 flow/cross-book effects (lines 1121, 1194, 1204, 1211, 1216, 1221) into `src/hooks/useFlowScrollSync.ts`. Hook receives `readingMode`, `effectiveWpm`, `settings`, `useFoliate`, `activeDoc`, `library`, `startFlow`. Returns `flowScrollEngineRef`, `flowPlaying`, `setFlowPlaying`, `flowProgress`, `crossBookTransition`, `setCrossBookTransition`, `pendingFlowResumeRef`. Estimated ~180 lines. | `src/hooks/useFlowScrollSync.ts` (new), `src/components/ReaderContainer.tsx` | Remove 6 useEffects + flow state from ReaderContainer. Lines 1121-1230 area. |
+| 4 | Hephaestus (renderer-scope) | **Extract `useFoliateSync` hook.** Move 4 foliate sync effects (lines 347, 518, 636, 664) into `src/hooks/useFoliateSync.ts`. Hook receives `useFoliate`, `readingMode`, `highlightedWordIndex`, `bookWordMeta`, `narration`. Returns `isBrowsedAway`. Estimated ~110 lines. | `src/hooks/useFoliateSync.ts` (new), `src/components/ReaderContainer.tsx` | Remove 4 useEffects + isBrowsedAway state from ReaderContainer. |
+| 5 | Hephaestus (renderer-scope) | **Extract `useDocumentLifecycle` hook.** Move 7 lifecycle/cleanup effects (lines 223, 276, 313, 656, 763, 772, 1204) into `src/hooks/useDocumentLifecycle.ts`. Hook receives `activeDoc`, `readingMode`, `settings`, `focusTextSize`, `initReader`. Returns `resumeAnchorRef`, session tracking refs. Estimated ~90 lines. | `src/hooks/useDocumentLifecycle.ts` (new), `src/components/ReaderContainer.tsx` | Remove 7 useEffects + lifecycle refs from ReaderContainer. |
+| 6 | Hermes (electron-scope) | **Fix H-3: Add fileHashes cleanup on document delete.** In the library delete handler (ipc/documents.js), after removing a document from library.json, also delete its fileHashes entries: `doc:{docId}:contentHash` and `documents/{docId}.json` and its `:cloudHash` suffix. This prevents unbounded growth between weekly reconciliations. | `main/ipc/documents.js`, `main/sync-engine.js` | In delete handler: add `syncEngine.clearDocHashes(docId)`. In sync-engine.js: add exported `clearDocHashes(docId)` function (~10 lines). |
+| 7 | Hermes (electron-scope) | **Fix M-2: Extract main.js constants to `main/constants.js`.** Create `main/constants.js` (CommonJS) with 11 constants from main.js lines 24-34: LIBRARY_SAVE_DEBOUNCE_MS (500), BROADCAST_DEBOUNCE_MS (200), FOLDER_SYNC_DEBOUNCE_MS (1000), FOLDER_SYNC_BATCH_SIZE (4), MAX_RECENT_FOLDERS (5), MAX_HISTORY_SESSIONS (1000), MS_PER_DAY (86400000), AUTO_UPDATE_DELAY_MS (5000), BROWSER_FETCH_TIMEOUT_MS (20000), BROWSER_CONTENT_SETTLE_MS (3000), URL_FETCH_TIMEOUT_MS (15000). Update main.js imports. | `main/constants.js` (new), `main.js` | Lines 24-34: replace inline values with `require('./main/constants')`. |
+| 8 | Hippocrates | **Tests** — ≥20 new tests: (a) Each custom hook renders in isolation and produces expected return values, (b) useNarrationSync syncs all 12 settings → narration properties, (c) useNarrationCaching initializes backgroundCacher on mount, (d) useFlowScrollSync creates/destroys engine on mode change, (e) useFlowScrollSync cancels cross-book transition on Escape, (f) useFoliateSync detects browsed-away state, (g) useDocumentLifecycle initializes reader on doc change, (h) ReaderContainer still composes correctly with all hooks, (i) fileHashes entries are cleaned up on document delete, (j) clearDocHashes removes both plain and :cloudHash entries, (k) main/constants.js exports all 11 values with correct types, (l) main.js uses imported constants (not inline values). | `tests/readerDecomposition.test.ts` (new), `tests/fileHashesCleanup.test.ts` (new) | ≥20 tests across 2 new files. |
+| 9 | Hippocrates | **`npm test` + `npm run build`** — all existing tests pass (no regressions from refactoring), build succeeds. | — | — |
+| 10 | Solon | **Spec compliance** — verify all 16 SUCCESS CRITERIA items met. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, architecture note re: custom hooks), ROADMAP.md (mark REFACTOR-1A complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (if non-trivial discovery), TECHNICAL_REFERENCE.md (update ReaderContainer architecture section). Pre-composed diffs preferred. | All governing docs | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/refactor-1a-reader-decomp` |
+
+### Execution Sequence
+
+```
+Wave A (implement):
+  Task 1 (useNarrationSync)      ─┐
+  Task 2 (useNarrationCaching)   ─┤
+  Task 4 (useFoliateSync)        ─┤ parallel hooks — all extract from different line ranges
+  Task 5 (useDocumentLifecycle)  ─┘
+      ↓
+  Task 3 (useFlowScrollSync)      ← after Tasks 4-5 (shares some state with lifecycle)
+      ↓
+  Task 6 (fileHashes cleanup)    ─┐
+  Task 7 (constants extraction)  ─┘ parallel — independent modules
+      ↓
+  Task 8 (tests)
+  Task 9 (npm test + build)
+
+Wave B (verify + docs):
+  Task 10 (Solon spec compliance)
+  Task 11 (Herodotus docs)
+  Task 12 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. ReaderContainer.tsx reduced to <700 lines (from 1,623)
+2. 5 new custom hooks created in `src/hooks/`: useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle
+3. All 33 useEffect hooks moved from ReaderContainer to custom hooks — zero useEffects remain in ReaderContainer except hook composition
+4. Each custom hook has a clear single-domain responsibility
+5. ReaderContainer composes all 5 hooks and passes their returns to child components
+6. All existing tests pass unchanged (pure refactoring, no behavior change)
+7. fileHashes entries are cleaned up immediately when a document is deleted (not deferred to weekly reconciliation)
+8. `clearDocHashes(docId)` exported from sync-engine.js removes both `doc:{docId}:contentHash` and `documents/{docId}.json` entries (plus `:cloudHash` suffixes)
+9. `main/constants.js` exists with all 11 constants from main.js lines 24-34
+10. main.js imports from `main/constants.js` (no inline magic numbers)
+11. Narration mode works identically before and after refactoring (no regression in word tracking, TTS sync, section navigation)
+12. Flow mode works identically (cross-book transitions, engine lifecycle, WPM sync)
+13. Page mode works identically (foliate sync, progress saving, keyboard navigation)
+14. ≥20 new tests across hook isolation + integration + fileHashes + constants
+15. `npm test` passes, `npm run build` succeeds
+16. No files accidentally truncated (git diff --stat check)
+
+**Tier:** Full | **Depends on:** None — investigation gate cleared. All 33 useEffects mapped to hook groupings with exact line numbers.
+
+---
+
+## REFACTOR-1B: Component & Style Cleanup ✅ COMPLETED
+
+**Goal:** Address three interrelated style/component debt items from the technical debt audit: FoliatePageView helper extraction (H-2, 1,947 lines), inline style → CSS migration starting with TTSSettings (H-1, 179 inline styles across the codebase, 66 in TTSSettings alone), and global.css domain splitting (M-1, 5,220 lines in a single file). Also split TTSSettings.tsx into sub-components (M-4, 874 lines).
+
+**Problem:** (1) FoliatePageView.tsx at 1,947 lines mixes rendering, word extraction, style injection, and event handling — second-biggest complexity risk after ReaderContainer. (2) 179 inline styles violate PR-7 (CSS custom properties for theming), with TTSSettings alone accounting for 66. (3) global.css at 5,220 lines is a single monolithic file with 40+ logical sections — impossible to navigate and prone to conflicts.
+
+**Approach:** Pure refactoring — no behavior changes. Extract pure functions from FoliatePageView to helpers. Move inline styles to CSS classes. Split global.css along domain boundaries. All existing tests must continue to pass unchanged.
+
+**Investigation gate:** Cleared. Cowork investigation mapped FoliatePageView sections (word extraction lines 36-220, style injection lines 1908-1947), all 66 TTSSettings inline style line numbers, and global.css into 10 domain-based sections with line ranges.
+
+### Baseline
+
+- `src/components/FoliatePageView.tsx` — 1,947 lines. Word extraction (lines 36-220, ~185 lines of pure utilities), style injection (lines 1908-1947, ~40 lines). Main component (lines 376-1907).
+- `src/components/settings/TTSSettings.tsx` — 874 lines, 66 inline styles. Sub-component candidates: KokoroStatus (lines 241-390), VoiceSelection (lines 250-340), RateControls (lines 436-469), PauseSettings (lines 471-544), CacheSizeDisplay (lines 675-710), PronunciationOverridesEditor (lines 711-874).
+- `src/styles/global.css` — 5,220 lines. Major domains: CSS variables (1-43), reader (296-742), library (744-1062), doc-grid (1910-2667), themes (1231-1792), keyboard (3062-3600), page-reader (3602-4130), onboarding (4540-4803).
+- Inline style counts by file: TTSSettings (66), LibraryView (17), SpeedReadingSettings (8), LayoutSettings (7), BugReportModal (7), ReaderView (6), HelpSettings (6) = top 7 files account for 117/179.
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture (especially PR-7: CSS custom properties for theming, no inline styles)
+2. `docs/governance/LESSONS_LEARNED.md` — scan for CSS, style, refactoring entries
+3. `ROADMAP.md` — this section
+4. `src/components/FoliatePageView.tsx` — focus on:
+   - Footnote helpers (lines 36-78)
+   - DOM utilities (lines 80-111)
+   - Word extraction (lines 114-220)
+   - `injectStyles()` (lines 1908-1947)
+   - Import statements (line 1-34) — what's used where
+5. `src/components/settings/TTSSettings.tsx` — full read, identify sub-component boundaries
+6. `src/styles/global.css` — scan section headers/comments for domain boundaries
+7. `vite.config.js` — verify CSS import handling (code splitting may affect CSS)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Extract `foliateHelpers.ts`.** Move pure utility functions from FoliatePageView to `src/utils/foliateHelpers.ts`: `hasToken()` (line 36), `isFootnoteRefElement()` (line 42), `isFootnoteBodyElement()` (line 55), `isSuppressedNarrationTextNode()` (line 68), `getBlockParent()` (line 80), `collectBlockTextNodes()` (line 94), `locateTextOffset()` (line 114), `buildWordsFromTextNodes()` (line 131), `buildWrappedFragmentForNode()` (line 163), `extractWordsFromView()` (line 188), `extractWordsFromSection()` (line 206). ~185 lines. Update FoliatePageView imports. | `src/utils/foliateHelpers.ts` (new), `src/components/FoliatePageView.tsx` | Lines 36-220 → new file. Replace with imports. Also move BLOCK_TAGS constant (line 34). |
+| 2 | Hephaestus (renderer-scope) | **Extract `foliateStyles.ts`.** Move `injectStyles()` function from FoliatePageView to `src/utils/foliateStyles.ts`. ~40 lines. Update FoliatePageView imports. | `src/utils/foliateStyles.ts` (new), `src/components/FoliatePageView.tsx` | Lines 1908-1947 → new file. |
+| 3 | Hephaestus (renderer-scope) | **Split TTSSettings into sub-components.** Extract from TTSSettings.tsx: (a) `KokoroStatusSection` (lines 241-390) → `src/components/settings/KokoroStatusSection.tsx`, (b) `PauseSettingsSection` (lines 471-544) → `src/components/settings/PauseSettingsSection.tsx`, (c) `PronunciationOverridesEditor` (lines 711-874) → `src/components/settings/PronunciationOverridesEditor.tsx`. TTSSettings becomes a thin layout wrapper (~300 lines). | `src/components/settings/KokoroStatusSection.tsx` (new), `src/components/settings/PauseSettingsSection.tsx` (new), `src/components/settings/PronunciationOverridesEditor.tsx` (new), `src/components/settings/TTSSettings.tsx` | Extract 3 sub-components, replace inline with imports. |
+| 4 | Hephaestus (renderer-scope) | **Migrate TTSSettings inline styles to CSS.** Convert all 66 inline `style={{}}` blocks in TTSSettings (and its new sub-components) to CSS classes in a new `src/styles/tts-settings.css`. Use semantic class names (`.tts-voice-select`, `.tts-rate-slider`, `.tts-pause-control`, etc.). Import the CSS file in TTSSettings. | `src/styles/tts-settings.css` (new), `src/components/settings/TTSSettings.tsx`, sub-components | All 66 `style={{` locations. Replace each with `className=`. |
+| 5 | Hephaestus (renderer-scope) | **Migrate top-7 component inline styles to CSS.** Convert inline styles in: LibraryView (17), SpeedReadingSettings (8), LayoutSettings (7), BugReportModal (7), ReaderView (6), HelpSettings (6). Add classes to global.css or component-scoped CSS files. Target: reduce remaining inline styles from 179 to <30. | `src/components/LibraryView.tsx`, `src/components/settings/SpeedReadingSettings.tsx`, `src/components/settings/LayoutSettings.tsx`, `src/components/BugReportModal.tsx`, `src/components/ReaderView.tsx`, `src/components/settings/HelpSettings.tsx`, `src/styles/global.css` or new CSS files | All `style={{` locations in these 6 files. |
+| 6 | Athena (renderer-scope) | **Split global.css into domain files.** Break global.css (5,220 lines) into 8 domain files: (a) `base.css` (lines 1-150 — variables, reset, scrollbar, buttons, badges, progress), (b) `reader.css` (lines 296-742 — reader view, highlights, definitions, ruler, pause), (c) `library.css` (lines 744-1062 + 1235-1289 + 1910-2667 — library, cards, grid, tabs), (d) `flow.css` (lines 1486-1506 + 5162-5220 — flow mode, cross-book), (e) `themes.css` (lines 1231-1233 + 1541-1792 + 1794-1847 — light/dark/eink/blurby themes), (f) `keyboard.css` (lines 3062-3600 — keyboard UX focus rings), (g) `page-reader.css` (lines 3602-4130 + 3978-4130 — page reader + bottom bar), (h) `onboarding.css` (lines 4540-4803 + 4880-5220 — onboarding, metadata, extension, pairing, cross-book). Create `src/styles/index.css` that imports all 8 + tts-settings.css in correct order. Update `main.tsx` (or equivalent entry) to import `index.css` instead of `global.css`. | `src/styles/base.css` (new), `src/styles/reader.css` (new), `src/styles/library.css` (new), `src/styles/flow.css` (new), `src/styles/themes.css` (new), `src/styles/keyboard.css` (new), `src/styles/page-reader.css` (new), `src/styles/onboarding.css` (new), `src/styles/index.css` (new), `src/styles/global.css` (deleted or emptied) | Split all 5,220 lines across 8 files. |
+| 7 | Hermes (renderer-scope) | **Fix M-7: Add descriptive comments to 6 empty catch blocks.** In FoliatePageView.tsx, find the 6 `catch { /* */ }` blocks and add brief comments explaining why the error is intentionally swallowed (e.g., "// Foliate may throw on unmounted view — safe to ignore"). | `src/components/FoliatePageView.tsx` | Grep for `catch.*\/\*` — 6 locations. |
+| 8 | Hippocrates | **Tests** — ≥15 new tests: (a) foliateHelpers.ts functions produce identical output to pre-extraction (extractWordsFromView, wrapWordsInSpans, footnote detection), (b) foliateStyles.ts injectStyles applies all expected CSS properties, (c) TTSSettings renders with all sub-components composed, (d) KokoroStatusSection renders model status correctly, (e) PauseSettingsSection renders all pause sliders, (f) PronunciationOverridesEditor renders override table, (g) CSS domain files load without errors (no broken imports), (h) index.css imports all domain files in correct order, (i) inline style count in codebase < 30 (down from 179), (j) FoliatePageView imports from foliateHelpers (not inline), (k) build produces CSS with all domain styles merged. | `tests/componentStyleCleanup.test.ts` (new) | ≥15 tests. |
+| 9 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. Verify CSS is correctly bundled (no missing styles in build output). | — | — |
+| 10 | Solon | **Spec compliance** — verify all 18 SUCCESS CRITERIA items met. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md, ROADMAP.md, SPRINT_QUEUE.md, LESSONS_LEARNED.md, TECHNICAL_REFERENCE.md (update file structure). Pre-composed diffs preferred. | All governing docs | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/refactor-1b-style-cleanup` |
+
+### Execution Sequence
+
+```
+Wave A (implement):
+  Task 1 (foliateHelpers extraction)   ─┐
+  Task 2 (foliateStyles extraction)    ─┤ parallel — different line ranges of same file
+  Task 7 (empty catch comments)        ─┘
+      ↓
+  Task 3 (TTSSettings sub-components)    ← after FoliatePageView done (avoid merge conflicts)
+  Task 4 (TTSSettings inline → CSS)      ← after sub-components extracted
+      ↓
+  Task 5 (other component inline → CSS)  ← after TTSSettings pattern established
+  Task 6 (global.css split)              ← after all CSS migrations done (clean split)
+      ↓
+  Task 8 (tests)
+  Task 9 (npm test + build)
+
+Wave B (verify + docs):
+  Task 10 (Solon spec compliance)
+  Task 11 (Herodotus docs)
+  Task 12 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. FoliatePageView.tsx reduced to <1,750 lines (from 1,947) — helpers and styles extracted
+2. `src/utils/foliateHelpers.ts` exists with all word extraction + footnote detection functions (~185 lines)
+3. `src/utils/foliateStyles.ts` exists with `injectStyles()` function (~40 lines)
+4. TTSSettings.tsx reduced to <350 lines (from 874) — 3 sub-components extracted
+5. `KokoroStatusSection.tsx`, `PauseSettingsSection.tsx`, `PronunciationOverridesEditor.tsx` exist in `src/components/settings/`
+6. Inline style count across entire `src/components/` directory < 30 (from 179)
+7. TTSSettings has 0 inline styles (from 66)
+8. `src/styles/tts-settings.css` exists with all TTSSettings styles as CSS classes
+9. `global.css` is replaced by 8 domain-specific CSS files imported via `src/styles/index.css`
+10. No missing styles in built application — all visual elements render identically to pre-refactoring
+11. CSS specificity order preserved (import order in index.css matches original declaration order in global.css)
+12. All 6 empty catch blocks in FoliatePageView have descriptive comments
+13. ≥15 new tests in `tests/componentStyleCleanup.test.ts`
+14. `npm test` passes, `npm run build` succeeds
+15. No files accidentally truncated (git diff --stat check)
+16. Build output CSS is correctly bundled (single or chunked CSS, no missing imports)
+17. All reading modes render identically (page, focus, flow, narration) — no visual regressions
+18. Theme switching (light/dark/eink/blurby) works correctly with split CSS files
+
+**Tier:** Full | **Depends on:** REFACTOR-1A (ReaderContainer must be decomposed first — avoids merge conflicts in shared files). Investigation gate cleared.
+
+---
+
+## TEST-COV-1: Critical Path Test Coverage + Security Hardening ✅ COMPLETED (v1.50.0, 2026-04-16)
+
+**Goal:** Add test coverage for the most critical untested paths in the codebase (auth, cloud sync, foliateWordOffsets, ErrorBoundary, queue utilities) and harden URL validation against dangerous schemes. Also fix 401 retry paths so Google and Microsoft cloud requests force a token refresh instead of reusing cached tokens. Addresses audit findings H-4, H-5, H-6 (partial), M-5, and M-6.
+
+**Problem:** (1) Auth module (424 lines) and cloud storage modules (478 + 431 lines) have zero tests — these are the most complex untested paths handling token refresh, OAuth flows, retry logic, and conditional writes. (2) foliateWordOffsets.ts (104 lines) has no dedicated tests despite being critical to narration cursor accuracy. (3) ErrorBoundary.tsx and queue.ts have no tests. (4) `addDocFromUrl` IPC handler accepts unvalidated URLs — file://, javascript:, and data: schemes pass through to fetch without rejection. (5) 401 retries in the Google and Microsoft cloud paths can replay a still-cached token unless the refresh path is explicit.
+
+**Investigation gate:** Cleared. Cowork investigation mapped all exported functions, critical paths, edge cases, and the exact security gap (misc.js line 159 — no scheme validation before fetch).
+
+### Baseline
+
+- `main/auth.js` — 424 lines, 6 exports, 0 tests. Token refresh (lines 186-216, 273-297), PKCE (lines 301-349), encryption (lines 75-111).
+- `main/cloud-google.js` — 478 lines. `withRetry()` (line 15), `driveFetch()` (line 42), `getFileId()` (line 72), `readFile()` (line 110), `writeFileConditional()` (line >150).
+- `main/cloud-onedrive.js` — 431 lines. `withRetry()` (line 15), `graphFetch()` (line 45), `readFile()` (line 72), `writeFileConditional()` (line 104, 412 conflict detection at line 127).
+- `src/utils/foliateWordOffsets.ts` — 104 lines, 3 exports: `getSectionGlobalOffset` (line 30), `resolveRenderedWordIndexToGlobal` (line 47), `resolveGlobalWordIndexToRendered` (line 84).
+- `src/components/ErrorBoundary.tsx` — 54 lines. Class component with getDerivedStateFromError + componentDidCatch.
+- `src/utils/queue.ts` — 56 lines, 3 exports: `bubbleCount` (line 10), `sortReadingQueue` (line 14), `getNextQueuedBook` (line 43).
+- `main/ipc/misc.js` — `addDocFromUrl` handler at line 152. First URL use at line 159 (`getSiteKey(url)`) with no scheme validation. `open-url-in-browser` (line 291) correctly validates http/https at line 295-296.
+- Existing sync test coverage: `sync-hardening.test.js` (merge logic), `sync-queue.test.js` (operation queue) — auth/cloud mocked, not tested.
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for auth, cloud, security entries
+3. `ROADMAP.md` — this section
+4. `main/auth.js` — full read (424 lines)
+5. `main/cloud-google.js` — focus on `withRetry()` (line 15), `writeFileConditional()` (line >150)
+6. `main/cloud-onedrive.js` — focus on `withRetry()` (line 15), `writeFileConditional()` (line 104)
+7. `main/cloud-storage.js` — factory pattern (30 lines)
+8. `src/utils/foliateWordOffsets.ts` — full read (104 lines)
+9. `src/components/ErrorBoundary.tsx` — full read (54 lines)
+10. `src/utils/queue.ts` — full read (56 lines)
+11. `main/ipc/misc.js` — `addDocFromUrl` (line 152), `siteLogin` (line 340), `open-url-in-browser` (line 291)
+12. `tests/sync-hardening.test.js` — understand existing mock patterns for auth/cloud
+13. `main/url-extractor.js` — check if siteLogin path validates URLs
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (electron-scope) | **Fix M-6: Add URL scheme validation to `addDocFromUrl`.** Before line 159, validate that the URL scheme is http or https. Reject file://, javascript:, data:, and other non-http schemes with a descriptive error. Apply the same pattern used in `open-url-in-browser` (line 295-296). Also check `siteLogin` handler (line 340) — add validation if missing. | `main/ipc/misc.js` | Line 152-159 area: add scheme check before `getSiteKey(url)`. Line 340 area: add scheme check before `openSiteLogin(url, ...)`. ~10 lines each. |
+| 2 | Hephaestus (electron-scope) | **Write auth.js tests.** Test the 6 exported functions via mocked dependencies. Mock `@azure/msal-node`, `googleapis`, `electron.safeStorage`, `fs.promises`. Cover: (a) `initAuth` restores state from encrypted file, (b) `initAuth` handles missing/corrupted token file, (c) `signIn` routes to correct provider, (d) `signOut` clears tokens and state, (e) `getAccessToken` returns cached token when valid, (f) `getAccessToken` refreshes expired token (Microsoft silent acquire), (g) `getAccessToken` refreshes expired token (Google rotation), (h) `getAccessToken` fires authRequired callback on refresh failure, (i) `getAuthState` returns provider/email/name, (j) token encryption/decryption roundtrip. | `tests/auth.test.js` (new) | ≥10 tests. Mock external deps at module level. |
+| 3 | Hephaestus (electron-scope) | **Write cloud-google.js tests.** Mock `driveFetch` internals. Cover: (a) `withRetry` retries on 429/503/504, (b) `withRetry` refreshes token on 401 then retries, (c) `withRetry` throws immediately on non-retryable 4xx, (d) `withRetry` respects max retry count, (e) `readFile` returns buffer, (f) `writeFile` routes to large upload above threshold, (g) `writeFileConditional` includes generation header, (h) `getFileId` caches result for same filename. | `tests/cloudGoogle.test.js` (new) | ≥8 tests. |
+| 4 | Hephaestus (electron-scope) | **Write cloud-onedrive.js tests.** Mock `graphFetch` internals. Cover: (a) `withRetry` retries on 429/503/504, (b) `withRetry` refreshes token on 401, (c) `readFile` fetches from approot, (d) `writeFile` routes to large upload above threshold, (e) `writeFileConditional` sets If-Match header when etag provided, (f) `writeFileConditional` returns `{ ok: false, conflict: true }` on 412, (g) `writeFileConditional` falls back to unconditional for large files. | `tests/cloudOnedrive.test.js` (new) | ≥7 tests. |
+| 5 | Hephaestus (renderer-scope) | **Write foliateWordOffsets.ts tests.** Cover: (a) `getSectionGlobalOffset` returns correct offset with bookWordSections, (b) `getSectionGlobalOffset` falls back when bookWordSections missing, (c) `resolveRenderedWordIndexToGlobal` maps local→global correctly, (d) `resolveRenderedWordIndexToGlobal` falls back without bookWordSections, (e) `resolveGlobalWordIndexToRendered` maps global→local correctly, (f) boundary: empty loadedWords array, (g) boundary: sectionIndex beyond range, (h) boundary: renderedWordIndex at section boundary, (i) off-by-one: first word of section, (j) off-by-one: last word of section. | `tests/foliateWordOffsets.test.ts` (new) | ≥10 tests. Import functions directly. |
+| 6 | Hephaestus (renderer-scope) | **Write ErrorBoundary.tsx tests.** Cover: (a) renders children when no error, (b) catches child error and shows error UI, (c) calls componentDidCatch with error info, (d) calls window.electronAPI.logError if available, (e) handles missing window.electronAPI gracefully, (f) reset button clears error and re-renders children, (g) fires onReset callback on reset. | `tests/errorBoundary.test.tsx` (new) | ≥7 tests. Render with React Testing Library. |
+| 7 | Hephaestus (renderer-scope) | **Write queue.ts tests.** Cover: (a) `bubbleCount` returns floor(percent/10), (b) `sortReadingQueue` filters completed docs, (c) `sortReadingQueue` sorts queued by queuePosition, (d) `sortReadingQueue` sorts inProgress by lastReadAt desc, (e) `getNextQueuedBook` returns next in queue excluding current, (f) `getNextQueuedBook` returns null when queue empty, (g) `getNextQueuedBook` skips completed books, (h) boundary: empty docs array, (i) boundary: null queuePosition values, (j) boundary: all docs completed. | `tests/queue.test.ts` (new) | ≥10 tests. |
+| 8 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+| 9 | Solon | **Spec compliance** — verify all 16 SUCCESS CRITERIA items met. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, test counts, security note), ROADMAP.md (mark TEST-COV-1 complete), SPRINT_QUEUE.md (remove, log to completed), LESSONS_LEARNED.md (URL validation pattern), BUG_REPORT.md (if M-6 warrants a bug entry). Pre-composed diffs preferred. | All governing docs | — |
+| 11 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/test-cov-1-critical-paths` |
+
+### Execution Sequence
+
+```
+Wave A (implement + test):
+  Task 1 (URL scheme validation)        ← security fix first
+      ↓
+  Task 2 (auth tests)                  ─┐
+  Task 3 (cloud-google tests)          ─┤
+  Task 4 (cloud-onedrive tests)        ─┤ parallel — all independent test files
+  Task 5 (foliateWordOffsets tests)    ─┤
+  Task 6 (ErrorBoundary tests)         ─┤
+  Task 7 (queue tests)                 ─┘
+      ↓
+  Task 8 (npm test + build)
+
+Wave B (verify + docs):
+  Task 9 (Solon spec compliance)
+  Task 10 (Herodotus docs)
+  Task 11 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. `addDocFromUrl` rejects file://, javascript:, data:, and other non-http(s) schemes with descriptive error
+2. `siteLogin` validates URL scheme before processing (http/https only)
+3. ≥10 auth.js tests covering all 6 exported functions + token refresh + encryption
+4. ≥8 cloud-google.js tests covering retry logic + conditional writes + file ID caching
+5. ≥7 cloud-onedrive.js tests covering retry logic + 412 conflict + If-Match header
+6. ≥10 foliateWordOffsets.ts tests covering all 3 exports + boundary conditions + off-by-one
+7. ≥7 ErrorBoundary.tsx tests covering error catching + reset + logging
+8. ≥10 queue.ts tests covering all 3 exports + edge cases
+9. Total new test count ≥52 across 6 new test files
+10. All existing tests pass (no regressions)
+11. `npm test` passes, `npm run build` succeeds
+12. Auth mock patterns are reusable for future cloud/sync tests
+13. URL scheme validation follows same pattern as `open-url-in-browser` (consistency)
+14. No files accidentally truncated (git diff --stat check)
+15. Test files follow existing project test patterns (vitest, describe/it blocks)
+16. Security fix is backward-compatible — valid http/https URLs continue to work
+
+**Completion note:** Completed on 2026-04-16. The new tests landed in `tests/auth.test.js` (13), `tests/cloudGoogle.test.js` (10), `tests/cloudOnedrive.test.js` (9), `tests/foliateWordOffsets.test.ts` (15), `tests/errorBoundary.test.tsx` (7), `tests/queue.test.ts` (15), and `tests/url-scheme-validation.test.ts` (6), for 75 new tests total. The suite now reports 1,967 tests across 108 files. Verification passed with `npm test` and `npm run build`; the existing Vite warning `Circular chunk: settings -> tts -> settings` remains.
+
+**Tier:** Full | **Depends on:** None — all targets are independent modules with no shared state. Can run in parallel with REFACTOR-1A/1B. Investigation gate cleared.
+
+---
+
+## NARR-LAYER-1A: Narration as Flow Layer — Foundation ✅ COMPLETED
+
+**Goal:** Make narration a layer within flow mode rather than a separate reading mode. When the user activates narration while in flow mode, TTS audio drives word advancement and FlowScrollEngine follows — scrolling and animating the flow timer cursor based on audio progress. The narration band overlay is suppressed; only the flow cursor is visible. This is the MVP: narration is available only in flow mode.
+
+**Problem:** Narration and flow are currently separate, mutually exclusive reading modes. The narration word engine and flow word engine are disconnected — switching from flow to narration loses flow's scroll context, and narration's collapsing cursor overlay (NARR-CURSOR-1) has persistent bugs (BUG-159/160/161 mitigated but not eliminated). The user wants narration to feel like an enhancement to flow mode, not a mode switch.
+
+**Design decisions (from user, 2026-04-07):**
+- **MVP scope:** Narration available ONLY in flow mode. Page and focus modes cannot narrate.
+- **Keep flow cursor, drop narration band.** The flow timer bar cursor provides visual pacing; the collapsing narration overlay is removed.
+- **Scale narration to flow WPM.** Narration's implicit WPM (from TTS rate × ~150 base) can inform flow's scroll pacing.
+- **Core insight:** "The issue is the continual disconnect between the word engine and narrate engine, where they're largely disconnected. We have to improve this experience overall."
+
+**Architecture:**
+
+```
+BEFORE (v1.49.0):                    AFTER (NARR-LAYER-1A):
+
+readingMode = "narration"            readingMode = "flow" + isNarrating = true
+  ↓                                    ↓
+NarrateMode.ts owns word timing      useNarration hook owns word timing (audio)
+Narration overlay (collapsing band)      ↓
+  ↓                                  onWordAdvance(idx) → FlowScrollEngine.followWord(idx)
+Separate scroll system                   ↓
+                                     FlowScrollEngine owns scroll + cursor (follower mode)
+                                     Timer bar cursor reflects narration's line position
+```
+
+**Key integration seam:** FlowScrollEngine already has `jumpToWord(wordIndex)` (line 204). Narration already delegates scroll via callbacks. Both systems operate on the same global word index space. The change: when narrating, narration's `onWordAdvance` calls a new `followWord()` method on FlowScrollEngine that scrolls and animates the cursor without restarting the internal timer.
+
+**Investigation gate:** ✅ CLEARED. Three parallel investigations mapped: (1) FlowScrollEngine's complete API and lifecycle (427 lines, pure TypeScript), (2) useNarration's pipeline (audio → scheduler → word boundaries → onWordAdvance), (3) all 50+ readingMode branch points across the codebase. The seam is clean — narration doesn't own scroll, flow doesn't own audio.
+
+### Baseline
+
+- `src/utils/FlowScrollEngine.ts` — 427 lines. `jumpToWord()` (line 204), `pause()` (line 177), `resume()` (line 189), `animateLine()` (line 321), private fields (lines 56-72). No follower mode concept yet.
+- `src/hooks/useFlowScrollSync.ts` — 5 effects. Lifecycle effect creates/destroys engine based on `readingMode === "flow"` and `flowPlaying`. Cross-book transition logic in `onComplete` callback.
+- `src/hooks/useNarration.ts` — Narration hook. `startCursorDriven(words, startIdx, wpm, onWordAdvance)`, `pause()`, `resume()`, `stop()`, `getAudioProgress()`. Fires `onWordAdvance(wordIndex)` per word.
+- `src/hooks/useNarrationSync.ts` — 10 effects syncing settings → narration.
+- `src/hooks/useReaderMode.ts` — `startNarration()` (line 180), `startFlow()` (line 341), `handleSelectMode()` (line 409). Mode cycling at line 465.
+- `src/hooks/useReadingModeInstance.ts` — Factory. `case "narration"` at line 166.
+- `src/components/ReaderContainer.tsx` — `readingMode` state (line 121). `ttsActive` derived (line 286). Word advance batching differs for narration (lines 380-396).
+- `src/components/FoliatePageView.tsx` — Narration overlay: `narrationBandLineHeightRef` (line 294), `narrationColRightRef` (line 296), `hideNarrationOverlay` (line 358), `ensureAudioProgressGlideLoop` (line 464), `positionNarrationOverlay` (line 753).
+- `src/components/ReaderBottomBar.tsx` — `isNarrationSelected` flag (line 137), TTS rate vs WPM controls.
+- `src/types.ts` — `readingMode: "focus" | "flow" | "narration" | "page"` (line 123).
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration, flow, cursor entries
+3. `ROADMAP.md` — this section
+4. `src/utils/FlowScrollEngine.ts` — FULL READ (427 lines). Key: class definition (line 55), private fields (56-72), `start()` (78-146), `pause()` (177), `resume()` (189), `jumpToWord()` (204-213), `animateLine()` (321-387), `findLineForWord()` (313-318), `scrollToLine()` (389-401)
+5. `src/hooks/useFlowScrollSync.ts` — FULL READ. Effect 1 (lifecycle), Effects 3-5 (WPM/zone/lineMap sync)
+6. `src/hooks/useNarration.ts` — FULL READ. Focus on: `startCursorDriven`, `onWordAdvance` callback chain, `getAudioProgress()`, `pause()`/`resume()`/`stop()`
+7. `src/hooks/useReaderMode.ts` — `startNarration()` (line 180-300), `startFlow()` (line 341-370), `handleSelectMode()` (line 409-420), `handleCycleMode()` (line 465-492)
+8. `src/hooks/useReadingModeInstance.ts` — `case "narration"` (line 166-211)
+9. `src/components/ReaderContainer.tsx` — `readingMode` state (line 121), `ttsActive` (line 286), word advance batching (lines 380-396), cross-book transition (lines 480-512)
+10. `src/components/FoliatePageView.tsx` — narration overlay: `hideNarrationOverlay` (line 358), `ensureAudioProgressGlideLoop` (line 464), `positionNarrationOverlay` (line 753)
+11. `src/components/ReaderBottomBar.tsx` — `isNarrationSelected` (line 137), mode-specific controls
+12. `src/constants.ts` — flow constants (FLOW_* prefix), narration constants (TTS_* prefix)
+13. `src/types.ts` — `readingMode` type (line 123), `lastReadingMode` (line 156)
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (renderer-scope) | **Add `followerMode` to FlowScrollEngine.** Add private field `private followerMode = false` (after line 67). Add `setFollowerMode(enabled: boolean)`: when enabled, pause internal timer (`clearTimers()`), set `this.followerMode = true`; when disabled, set `this.followerMode = false`, resume `animateLine()` if running. Add `followWord(wordIndex: number)`: if not running or not followerMode, return. Find line for word, scroll to it. Compute fractional position within line: `fraction = (wordIndex - line.firstWord) / Math.max(1, line.lastWord - line.firstWord)`. Set cursor width = `Math.max(1, lineWidth * (1 - fraction))` with no transition (instant). Fire `onWordAdvance(wordIndex)`. Update `this.wordIndex` and `this.lineIdx`. | `src/utils/FlowScrollEngine.ts` | Add field after line 67. Add `setFollowerMode()` method after `setWpm()` (line 202). Add `followWord()` method after `jumpToWord()` (line 213). ~30 lines total. |
+| 2 | Hephaestus (renderer-scope) | **Export `FlowScrollEngineState.followerMode`.** Add `followerMode: boolean` to `FlowScrollEngineState` interface (line 31-37). Update `getState()` to include it. | `src/utils/FlowScrollEngine.ts` | Line 36 (add field to interface), and inside `getState()` method. 2 single-line additions. |
+| 3 | Hephaestus (renderer-scope) | **Add `isNarrating` state to ReaderContainer.** Add `const [isNarrating, setIsNarrating] = useState(false)` after the `readingMode` state (line 121). Add `const isNarratingRef = useRef(false)` and keep synced. Pass to child hooks and components. | `src/components/ReaderContainer.tsx` | After line 121. ~3 lines. Also pass as prop to useFlowScrollSync, useReaderMode, ReaderBottomBar. |
+| 4 | Athena (renderer-scope) | **Wire narration→flow in useFlowScrollSync.** Add a 6th effect: when `isNarrating && readingMode === "flow" && flowPlaying`, put engine in follower mode (`engine.setFollowerMode(true)`). Register `narration.onWordAdvance` to call `engine.followWord(idx)`. On cleanup or when `!isNarrating`: take engine out of follower mode, unregister narration callback. Also suppress the engine's own `onComplete` callback during narration — narration's `onSectionEnd` handles section transitions. | `src/hooks/useFlowScrollSync.ts` | New Effect 6 after existing effects. Hook must receive `isNarrating`, `narration` as additional params. ~35 lines. |
+| 5 | Hephaestus (renderer-scope) | **Add narration toggle in useReaderMode.** Add `toggleNarrationInFlow()` function: if `readingMode !== "flow"`, ignore. If `!isNarrating`: set `isNarrating(true)`, call `narration.startCursorDriven(words, currentWordIndex, effectiveWpm, onWordAdvance)` using the same word source and start position as flow. If `isNarrating`: set `isNarrating(false)`, call `narration.stop()`. Wire to keyboard handler: `N` key in flow mode triggers `toggleNarrationInFlow()`. Also update `handlePauseToPage()` to stop narration if `isNarrating` before pausing flow. | `src/hooks/useReaderMode.ts` | New function after `startFlow()` (~line 370). Wire into keyboard map. Update `handlePauseToPage()` (~line 373). ~30 lines. |
+| 6 | Hephaestus (renderer-scope) | **Suppress narration band overlay when flow+narrating.** In FoliatePageView, modify `applyVisualHighlightByIndex` (the narration branch, ~line 879): if `readingMode === "flow"`, call `hideNarrationOverlay()` instead of `positionNarrationOverlay()`. The flow cursor handles visual feedback. Also: in `ensureAudioProgressGlideLoop` (line 464) and `ensureNarrationOverlayLoop`, add early return if `readingMode === "flow"` — prevent overlay from activating during flow+narrating. | `src/components/FoliatePageView.tsx` | Line 879 area: add `readingMode === "flow"` guard. Line 464 area: add early return. ~6 lines added across 3 sites. |
+| 7 | Hephaestus (renderer-scope) | **Update ReaderBottomBar for flow+narrating.** When `readingMode === "flow" && isNarrating`, show TTS rate controls (same as current narration mode) instead of WPM slider. Show a combined status: "Narrating · X% · ~Nmin left". Add a small narration indicator icon or label to the flow controls area. | `src/components/ReaderBottomBar.tsx` | Modify `isNarrationSelected` logic (line 137): `readingMode === "narration" || (readingMode === "flow" && isNarrating)`. Update flow controls section (~lines 384-418) to conditionally show TTS rate. ~15 lines. |
+| 8 | Hephaestus (renderer-scope) | **Handle pause/resume for flow+narrating.** In `useReaderMode.handlePauseToPage()` (line 373-405): when `isNarrating`, stop narration AND flow engine. On `handleTogglePlay()` (line 433-444): if `lastReadingMode` restores to flow and narration was active, resume both. Store `wasNarrating` in a ref alongside `lastReadingMode` for resume. | `src/hooks/useReaderMode.ts` | Line 373-405 area (handlePauseToPage). Line 433-444 area (handleTogglePlay). ~15 lines modified. |
+| 9 | Hephaestus (renderer-scope) | **Handle cross-book transition for flow+narrating.** In `useFlowScrollSync`, the `onComplete` callback currently handles cross-book transitions. When `isNarrating`, narration's `onSectionEnd` fires instead of the engine's timer completing. Wire `narration.setOnSectionEnd()` to: advance to next section (existing foliate sync behavior), call `narration.updateWords()` with new section's words, let narration continue driving flow. At book end, delegate to the existing cross-book overlay mechanism but also stop narration, then restart on new book. | `src/hooks/useFlowScrollSync.ts` | Inside Effect 6 (from Task 4), wire `narration.setOnSectionEnd`. In cross-book callback (existing `onComplete`), add narration stop/restart. ~20 lines. |
+| 10 | Hippocrates | **Tests** — ≥18 new tests: (a) `setFollowerMode(true)` pauses internal timer, (b) `setFollowerMode(false)` resumes timer, (c) `followWord(idx)` scrolls to correct line, (d) `followWord(idx)` sets cursor width based on word fraction within line, (e) `followWord` does nothing when not in follower mode, (f) `isNarrating` state toggles with N key in flow mode, (g) N key ignored outside flow mode, (h) narration starts at current flow word index when toggled on, (i) narration stops and flow resumes own timer when toggled off, (j) narration band overlay suppressed during flow+narrating, (k) flow cursor visible during flow+narrating, (l) bottom bar shows TTS rate controls when flow+narrating, (m) pause/resume affects both narration and flow, (n) cross-book transition works with narration active, (o) `FlowScrollEngineState.followerMode` returns correct value, (p) `followWord` calls `onWordAdvance` callback, (q) `followWord` updates `getState().wordIndex`, (r) follower mode cursor width is `(1-fraction) * lineWidth`. | `tests/narrationLayer.test.ts` (new) | ≥18 tests. |
+| 11 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+
+### Execution Sequence
+
+```
+Wave A (implement):
+  Task 1-2 (FlowScrollEngine follower mode)  ← foundation, no deps
+      ↓
+  Task 3 (isNarrating state)                  ← needs Task 1-2 API
+      ↓
+  Task 4 (wire narration→flow)     ─┐
+  Task 5 (toggle + keyboard)       ─┤ parallel — different hooks
+  Task 6 (suppress overlay)        ─┘
+      ↓
+  Task 7 (bottom bar UI)          ─┐
+  Task 8 (pause/resume)           ─┤ parallel — different files
+  Task 9 (cross-book transition)  ─┘
+      ↓
+  Task 10-11 (tests + verify)
+
+Wave B (verify + docs + git):
+  Solon spec compliance
+  Herodotus documentation pass
+  Git: commit, merge, push
+```
+
+### SUCCESS CRITERIA
+
+1. FlowScrollEngine has `setFollowerMode(enabled)` — when true, internal WPM timer pauses
+2. FlowScrollEngine has `followWord(wordIndex)` — scrolls to word's line and sets cursor width to reflect position within line
+3. `followWord` cursor width formula: `(1 - fraction) * lineWidth` where `fraction = (wordIndex - firstWord) / (lastWord - firstWord)`
+4. `isNarrating` boolean state added to ReaderContainer, toggled via N key in flow mode
+5. N key activates narration (TTS) within flow mode — audio plays, flow cursor tracks narration's word position
+6. N key deactivates narration — audio stops, flow resumes its own WPM-driven timer
+7. N key is ignored when not in flow mode
+8. Narration band overlay (collapsing cursor from NARR-CURSOR-1) is NOT visible during flow+narrating
+9. Flow timer bar cursor IS visible and reflects narration's line position during flow+narrating
+10. Bottom bar shows TTS rate controls (not WPM slider) when flow+narrating
+11. Space bar pauses BOTH narration and flow; resuming restores both
+12. Cross-book continuous reading works with narration active (transition → new book → narration restarts)
+13. All existing flow-only behavior unchanged (no isNarrating = same as before)
+14. All existing narration-only behavior unchanged (starting narration from page mode still works — for backward compat, kept until NARR-LAYER-1B removes it)
+15. ≥18 new tests in `tests/narrationLayer.test.ts`
+16. `npm test` passes, `npm run build` succeeds
+17. No regressions in flow mode, narration mode, or page mode
+
+**Tier:** Full | **Depends on:** TEST-COV-1 (test coverage improves confidence for this architectural change). Investigation gate cleared.
+
+**Completion note:** Completed on 2026-04-16. Flow mode now supports narration as a first-class layer via `FlowScrollEngine` follower mode, `isNarrating` state in ReaderContainer, flow-sync wiring from highlighted words into flow cursor updates, flow-specific narration toggling, suppression of the standalone narration band while flow narration is active, and bottom-bar/keyboard control updates. Verification passed with targeted narration-layer tests, full `npm test`, and `npm run build`. The existing Vite circular chunk warning `settings -> tts -> settings` remains deferred follow-up work.
+
+---
+
+## NARR-LAYER-1B: Narration as Flow Layer — Consolidation
+
+**Goal:** Remove "narration" as a standalone reading mode now that NARR-LAYER-1A makes narration a layer within flow mode. Eliminate the mode value, the NarrateMode class, the narration overlay code, and all branch points that check `readingMode === "narration"`. Reduce the reading mode type from 4 values to 3: `"page" | "focus" | "flow"`.
+
+**Problem:** After NARR-LAYER-1A, two parallel narration paths exist: the new flow+narrating path AND the legacy standalone narration mode. This duplication increases maintenance burden, testing surface, and user confusion (two ways to do the same thing). NARR-LAYER-1B removes the legacy path and consolidates all narration into the flow layer.
+
+**Key change:** `readingMode` type goes from `"focus" | "flow" | "narration" | "page"` to `"focus" | "flow" | "page"`. Every location that checks for `"narration"` must be updated. The mode cycling changes from `flow → narration → focus → flow` to `flow → focus → flow` (2-mode cycle, page is always the base state).
+
+**Investigation gate:** ✅ CLEARED. Mode branch map identified 50+ locations across ~15 files that reference `"narration"` as a mode value.
+
+### Baseline
+
+Post-NARR-LAYER-1A state:
+- `src/types.ts` — `readingMode: "focus" | "flow" | "narration" | "page"` (line 123), `lastReadingMode: "focus" | "flow" | "narration"` (line 156)
+- `src/hooks/useReaderMode.ts` — `startNarration()` (line 180-300), `handleSelectMode` takes `"narration"` (line 409), cycle includes narration (line 465-492)
+- `src/hooks/useReadingModeInstance.ts` — `case "narration"` factory (line 166-211)
+- `src/modes/NarrateMode.ts` — Standalone narration mode class
+- `src/components/FoliatePageView.tsx` — Narration overlay code: `narrationBandLineHeightRef` (line 294), `narrationColRightRef` (line 296), `hideNarrationOverlay` (line 358), `ensureAudioProgressGlideLoop` (line 464), `positionNarrationOverlay` (line 753), `ensureNarrationOverlayLoop` (~line 390)
+- 50+ branch points across ReaderContainer, ReaderBottomBar, useFlowScrollSync, useFoliateSync, useDocumentLifecycle, useNarrationCaching, useProgressTracker, keyboard hooks
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for narration mode entries
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — `readingMode` (line 123), `lastReadingMode` (line 156)
+5. `src/hooks/useReaderMode.ts` — `startNarration` (line 180), `handleSelectMode` (line 409), `handleCycleMode` (line 465), `handleToggleTts` (line 422)
+6. `src/hooks/useReadingModeInstance.ts` — `case "narration"` (line 166-211), `pendingResumeRef` type (line 56, 87)
+7. `src/modes/NarrateMode.ts` — FULL READ, then delete
+8. `src/modes/ModeInterface.ts` — `ModeType` includes `"narration"` (line 18)
+9. `src/components/ReaderContainer.tsx` — grep for `"narration"` and `ttsActive` — every hit is a branch to update
+10. `src/components/FoliatePageView.tsx` — grep for `narration` — overlay code to remove, `applyVisualHighlightByIndex` narration branch
+11. `src/components/ReaderBottomBar.tsx` — `isNarrationSelected` (line 137), hotkey hints, mode-specific UI
+12. `src/hooks/useFoliateSync.ts` — `readingMode !== "narration"` guard
+13. `src/hooks/useDocumentLifecycle.ts` — `readingMode === "narration"` guard
+14. `src/hooks/useNarrationCaching.ts` — `readingMode !== "narration"` guard
+15. `src/hooks/useProgressTracker.ts` — mode logging
+16. `src/styles/global.css` (or domain files) — `.foliate-narration-highlight` CSS
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (renderer-scope) | **Remove "narration" from type system.** Change `readingMode` type from `"focus" \| "flow" \| "narration" \| "page"` to `"focus" \| "flow" \| "page"` (types.ts:123). Change `lastReadingMode` to `"focus" \| "flow"` (types.ts:156). Update `ModeType` in ModeInterface.ts (line 18). Update `handleSelectMode` parameter type (useReaderMode.ts:409). Add `isNarrating` to `BlurbySettings` (types.ts) for persistence. | `src/types.ts`, `src/modes/ModeInterface.ts`, `src/hooks/useReaderMode.ts` | types.ts:123, types.ts:156, ModeInterface.ts:18, useReaderMode.ts:409, types.ts (add `isNarrating: boolean` to BlurbySettings). ~8 lines changed. |
+| 2 | Athena (renderer-scope) | **Remove `startNarration()` and narration from mode routing.** Delete `startNarration` function body (useReaderMode.ts:180-300). Remove from `handleSelectMode` (line 417). Remove from `handleTogglePlay` restore (line 437). Update `handleCycleMode` to 2-mode cycle: `flow → focus → flow` (line 465-492). Remove `handleToggleTts` (line 422). Remove from exports and dependency arrays. | `src/hooks/useReaderMode.ts` | Lines 180-300 (delete), 409-420 (remove narration branch), 422 (delete), 436-438 (remove narration branch), 465-492 (simplify cycle). |
+| 3 | Hephaestus (renderer-scope) | **Remove `case "narration"` from mode instance factory.** Delete the narration case block (useReadingModeInstance.ts:166-211). Update `pendingResumeRef` type to remove `"narration"` (lines 56, 87). Remove truth-sync cleanup guard (line 132). | `src/hooks/useReadingModeInstance.ts` | Lines 166-211 (delete case), 56 (update type), 87 (update type), 132 (remove guard). |
+| 4 | Hermes (renderer-scope) | **Delete NarrateMode.ts.** Remove the file entirely. Remove its import from useReadingModeInstance.ts. | `src/modes/NarrateMode.ts` (delete), `src/hooks/useReadingModeInstance.ts` | Delete file. Remove import line. |
+| 5 | Athena (renderer-scope) | **Update all ReaderContainer narration branches.** Grep for `"narration"` and `ttsActive` in ReaderContainer.tsx. For each: (a) `ttsActive` (line 286): change to `isNarrating` (already available from state), (b) word advance batching (line 380): condition on `isNarrating` not `readingMode === "narration"`, (c) `isActivelyReading` (line 188): replace `readingMode === "narration"` with `isNarrating`, (d) legacy mode map (line 192): remove narration entry, (e) all other `"narration"` checks: replace with `isNarrating` or remove. ~15 edit sites. | `src/components/ReaderContainer.tsx` | Lines 188, 192, 286, 380, 396, 499, 623, 751, 800, 823, 883, 979, 1126, 1130. Each: replace `readingMode === "narration"` with `isNarrating` or equivalent. |
+| 6 | Hephaestus (renderer-scope) | **Remove narration overlay code from FoliatePageView.** Delete: `narrationBandLineHeightRef` (line 294), `narrationColRightRef` (line 296), `hideNarrationOverlay` function (line 358+), `ensureNarrationOverlayLoop` (~line 390), `ensureAudioProgressGlideLoop` (line 464+), `positionNarrationOverlay` (line 753+), `measureNarrationBandDimensions` (~line 340). Remove all narration-specific branches in `applyVisualHighlightByIndex`. Remove calls to `hideNarrationOverlay` throughout (lines 1214, 1613, etc.). ~250 lines of overlay code removed. | `src/components/FoliatePageView.tsx` | Lines 294-296 (refs), 340-370 (measure+hide), 390-470 (fallback loop), 464-650 (glide loop), 753-850 (position overlay). Remove all. |
+| 7 | Hephaestus (renderer-scope) | **Update auxiliary hooks.** (a) `useFoliateSync.ts`: change `readingMode !== "narration"` guard to `!isNarrating`. (b) `useDocumentLifecycle.ts`: change `readingMode === "narration"` guard to `isNarrating`. (c) `useNarrationCaching.ts`: change `readingMode !== "narration"` guard to `!isNarrating`. (d) `useProgressTracker.ts`: log `isNarrating` flag instead of mode string. Each hook must receive `isNarrating` as parameter. | `src/hooks/useFoliateSync.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/hooks/useNarrationCaching.ts`, `src/hooks/useProgressTracker.ts` | One guard expression change per file + parameter addition. ~4 lines each. |
+| 8 | Hephaestus (renderer-scope) | **Update ReaderBottomBar.** Remove narration-specific hotkey hints (line 59: `"narration"` case). Update `isNarrationSelected` to use only `isNarrating` (remove `readingMode === "narration"` check). Remove narration-specific UI sections that duplicate flow+narrating UI. Mode selector buttons: remove narration button, keep flow and focus. | `src/components/ReaderBottomBar.tsx` | Lines 57-62 (hotkey hints), 137 (isNarrationSelected), mode buttons section. ~15 lines changed. |
+| 9 | Hermes (renderer-scope) | **Remove `.foliate-narration-highlight` CSS.** Delete the CSS class and all narration overlay styling from the domain CSS files. Also remove any narration-band-specific CSS custom properties. | `src/styles/reader.css` or appropriate domain file | Grep for `narration-highlight` — delete the block (~20 lines). |
+| 10 | Hephaestus (renderer-scope) | **Settings migration.** On app startup, if `settings.readingMode === "narration"`, migrate to `"flow"` with `isNarrating: true`. If `settings.lastReadingMode === "narration"`, migrate to `"flow"`. Add migration in the settings load path. | `main/ipc/state.js` or settings initialization | In settings load handler, after reading JSON. ~10 lines. |
+| 11 | Hippocrates | **Tests** — ≥20 new tests: (a) `readingMode` type no longer accepts `"narration"`, (b) mode cycling is flow→focus→flow (no narration), (c) N key in flow mode toggles narration (preserved from 1A), (d) `startNarration()` no longer exists on useReaderMode, (e) NarrateMode.ts file does not exist, (f) FoliatePageView has no narration overlay refs, (g) `ensureAudioProgressGlideLoop` does not exist, (h) `positionNarrationOverlay` does not exist, (i) `.foliate-narration-highlight` CSS class does not exist, (j) settings with `readingMode: "narration"` migrate to `"flow"` + `isNarrating: true`, (k) `isNarrating` is persisted to settings, (l) `ttsActive` replaced by `isNarrating` in ReaderContainer, (m) useFoliateSync uses `isNarrating` guard, (n) useDocumentLifecycle uses `isNarrating` guard, (o) useNarrationCaching uses `isNarrating` guard, (p) bottom bar mode selector has no narration button, (q) bottom bar shows TTS controls when `isNarrating`, (r) existing flow tests pass unchanged, (s) existing focus tests pass unchanged, (t) keyboard shortcut map has no narration-mode-specific entries. | `tests/narrationLayerConsolidation.test.ts` (new) | ≥20 tests. |
+| 12 | Hippocrates | **`npm test` + `npm run build`** — all tests pass, build succeeds. | — | — |
+
+### Execution Sequence
+
+```
+Wave A (type system + mode routing):
+  Task 1 (remove from type system)          ← must be first, everything depends on types
+      ↓
+  Task 2 (remove startNarration + routing)  ─┐
+  Task 3 (remove mode instance case)        ─┤ parallel — different files
+  Task 4 (delete NarrateMode.ts)            ─┘
+      ↓
+Wave B (branch cleanup):
+  Task 5 (ReaderContainer branches)          ← biggest change, ~15 sites
+  Task 6 (FoliatePageView overlay removal)   ← largest deletion (~250 lines)
+  Task 7 (auxiliary hooks)                   ─┐
+  Task 8 (bottom bar)                        ─┤ parallel — different files
+  Task 9 (CSS removal)                       ─┤
+  Task 10 (settings migration)              ─┘
+      ↓
+Wave C (verify):
+  Task 11-12 (tests + build)
+      ↓
+  Solon spec compliance
+  Herodotus documentation pass
+  Git: commit, merge, push
+```
+
+### SUCCESS CRITERIA
+
+1. `readingMode` type is `"focus" | "flow" | "page"` — no `"narration"` value
+2. `lastReadingMode` type is `"focus" | "flow"` — no `"narration"` value
+3. `NarrateMode.ts` file deleted
+4. `startNarration()` function removed from `useReaderMode`
+5. Mode cycling is `flow → focus → flow` (2-mode cycle)
+6. Zero references to `readingMode === "narration"` in codebase (grep returns 0 hits)
+7. Zero references to `"narration"` as a mode string in `src/` (except comments/docs)
+8. FoliatePageView has no narration overlay code (no `ensureAudioProgressGlideLoop`, `positionNarrationOverlay`, `hideNarrationOverlay`, `narrationColRightRef`, `narrationBandLineHeightRef`)
+9. `.foliate-narration-highlight` CSS class removed
+10. Settings migration: existing users with `readingMode: "narration"` auto-migrate to `"flow"` + `isNarrating: true`
+11. `isNarrating` flag persists in settings and restores on app restart
+12. All reading modes work: page (browse), focus (RSVP), flow (auto-scroll), flow+narrating (TTS-driven scroll)
+13. No narration overlay visible in any mode (flow cursor only)
+14. FoliatePageView reduced by ~250 lines (overlay code removed)
+15. ≥20 new tests in `tests/narrationLayerConsolidation.test.ts`
+16. `npm test` passes, `npm run build` succeeds
+17. No regressions in flow mode, focus mode, or page mode
+
+**Tier:** Full | **Depends on:** NARR-LAYER-1A (foundation must ship first — backward compat path needed for migration).
+
+---
+
+## TTS-EVAL-1: Flow/Narration Sync and Audio Quality Harness ✅ COMPLETED
+
+**Goal:** Create a repeatable evaluation harness for Blurby narration quality so future TTS and flow-layer work can be judged with evidence instead of feel. The harness should measure start latency, flow cursor vs narration alignment, highlighted word vs narration alignment, pause/resume correctness, section/chapter/book handoff correctness, and provide durable review artifacts for subjective audio-quality assessment.
+
+**Problem:** Blurby can currently tell when TTS or flow-sync "feels off," but there is no durable before/after evaluation path. After `NARR-LAYER-1A`, narration and flow are finally coupled in the intended architecture, which makes an eval harness more important: future work now needs a reliable way to distinguish audio drift, cursor drift, handoff bugs, and start-latency regressions instead of collapsing them all into anecdotal discomfort.
+
+**Design decisions:**
+- Build a fixture-driven harness, not a product feature.
+- Measure both objective runtime traces and human-review artifacts.
+- Keep the first version desktop/Electron only.
+- Do not build MOS-style automatic speech scoring in this sprint.
+- Prefer deterministic JSON traces plus optional media capture over brittle full end-to-end UI automation.
+- Center the harness on the current architecture: Flow is the visual layer, narration is the audio layer, and the harness evaluates their relationship.
+
+### Lane Ownership
+
+- **Primary lane:** Lane B (Evaluation Harness)
+- **Secondary lanes:** Lane E (Governance/Planning), limited Lane C (UI Surfaces for review templates only)
+- **Not primary:** Lane A (Runtime Core) during parallel windows
+
+### Forbidden During Parallel Run
+
+When `NARR-LAYER-1B` is active, `TTS-EVAL-1` must NOT change:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- `src/types.ts` (except additive, non-breaking trace types that do not modify existing contracts)
+- Any mode-consolidation surfaces owned by `NARR-LAYER-1B` (`useReaderMode`, `useReadingModeInstance`, `ModeInterface`, `FoliatePageView` narration-mode removal paths)
+
+Parallel-safe work while `NARR-LAYER-1B` is running:
+
+- fixtures under `tests/fixtures/narration/`
+- harness runner scripts under `scripts/`
+- trace schema draft files that do not alter existing runtime behavior
+- reviewer template + runbook docs
+- test scaffolding that does not require runtime hook integration yet
+
+### Shared-Core Touches
+
+`TTS-EVAL-1` includes shared-core trace instrumentation in Tasks 3-4. Those touches are serialized as an **integration window** and must run only after `NARR-LAYER-1B` merges, unless explicitly approved for a coordinated dual-branch integration.
+
+Integration-window tasks:
+
+- Task 3 (internal trace instrumentation hooks)
+- Task 4 (first-audio timing capture)
+
+All other tasks are parallel-safe scaffolding and may proceed earlier.
+
+### Merge Order
+
+1. `NARR-LAYER-1B` merges first (runtime consolidation source of truth)
+2. `TTS-EVAL-1` rebases onto merged `main`
+3. `TTS-EVAL-1` runs integration-window shared-core tasks
+4. `TTS-EVAL-1` completes verification and merges
+
+If `TTS-EVAL-1` runtime hooks are implemented before `NARR-LAYER-1B` lands, they must be treated as provisional and revalidated after rebase.
+
+### Baseline
+
+- `src/hooks/useNarration.ts` — narration lifecycle, word-advance callbacks, pause/resume/stop, and startup timing seam
+- `src/hooks/useFlowScrollSync.ts` — flow/narration coupling and section/book handoff seam
+- `src/utils/FlowScrollEngine.ts` — flow cursor and line/block progression surface
+- `src/components/ReaderContainer.tsx` — top-level reading state and narration/flow control plumbing
+- No existing durable trace schema for flow+narration evaluation
+- No small, reusable fixture corpus for narration review
+- No baseline review template for comparing branches or post-sprint output
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and execution model
+2. `ROADMAP.md` — this section
+3. `docs/governance/SPRINT_QUEUE.md` — queue pointer context
+4. `src/hooks/useNarration.ts` — narration lifecycle, startup, callbacks, pause/resume
+5. `src/hooks/useFlowScrollSync.ts` — flow-follow and handoff behavior
+6. `src/utils/FlowScrollEngine.ts` — flow cursor/line state and follower seam
+7. `src/components/ReaderContainer.tsx` — top-level state routing and mode/narration plumbing
+8. `src/types.ts` — evaluation trace types if added
+9. `tests/` — existing test conventions
+10. `scripts/` — runner location and existing script patterns
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (renderer-scope) | **Define the trace schema.** Add explicit evaluation-trace types for fixture metadata, lifecycle events, word/highlight/flow position events, and transition events. Keep the schema JSON-serializable and deterministic. | `src/types.ts` or `src/types/eval.ts` | Add new trace interfaces near existing narration/reader state types, or create `src/types/eval.ts` and export from the central types barrel. |
+| 2 | Hephaestus (test-scope) | **Add fixture corpus.** Create a small evaluation set under `tests/fixtures/narration/` covering prose, dialogue, long sentences, punctuation-dense text, section transition, chapter transition, queued handoff, and pause/resume. | `tests/fixtures/narration/` | New fixture files + one index/manifest file describing ids, source type, and intended coverage. |
+| 3 | Athena (renderer-scope) | **Add internal trace instrumentation hooks.** Log narration lifecycle events, first-audio timing, highlighted-word changes, flow cursor/block movement, section/chapter/book transitions, and pause/resume/stop. The trace layer must be off by default and enabled only for harness runs. | `src/hooks/useNarration.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts` | Add optional trace sink params near existing lifecycle callbacks; do not inline console logging. Keep instrumentation behind an explicit `evalTrace`/`debugTrace` option. |
+| 4 | Hephaestus (renderer-scope) | **Capture first-audio timing.** Record play request time and first audible output event so start latency can be computed directly from the trace. | `src/hooks/useNarration.ts` | Instrument the narration start path and the earliest audio-ready / playback-start callback boundary used by the scheduler. |
+| 5 | Hephaestus (test-scope) | **Add trace integrity tests.** Cover schema validity, event ordering, and the required minimum event set for a valid run. | `tests/ttsEvalTrace.test.ts` (new) | New test file covering event ordering (`start` before `first-audio`, pause before resume, etc.) and JSON-shape integrity. |
+| 6 | Athena (tooling-scope) | **Add harness runner script.** Create a runner that executes fixture sessions, enables tracing, and writes one JSON trace file plus a short summary per run. | `scripts/tts_eval_runner.*` | New script under `scripts/`; accept fixture id(s), output dir, and basic mode/rate options. |
+| 7 | Hephaestus (tooling-scope) | **Add metrics summarization.** Compute start latency, cursor/highlight drift summary, pause/resume integrity, and transition accounting from the raw trace output. | `scripts/tts_eval_runner.*` or `scripts/tts_eval_metrics.*` | Add summary generation adjacent to runner output; write machine-readable summary JSON and concise human-readable text. |
+| 8 | Hippocrates | **Add lifecycle and handoff tests.** Cover pause/resume, section transition, chapter transition, and cross-book continuation accounting at the trace level. | `tests/ttsEvalLifecycle.test.ts` (new) | New trace-driven tests proving section/chapter/book boundaries are represented and no transition class is silently dropped. |
+| 9 | Hephaestus (docs-scope) | **Add review artifacts.** Create a reviewer score template for subjective audio/visual evaluation and a runbook for how to compare branches using the harness. | `docs/` or `docs/governance/` | Add one review template doc and one harness runbook doc in the existing docs structure. |
+| 10 | Hippocrates | **Run verification.** Execute targeted harness tests, at least one fixture harness run on the current branch, `npm test`, and `npm run build`. | — | Capture command results and artifact paths in the sprint summary. |
+| 11 | Solon | **Spec compliance pass.** Verify all success criteria and confirm the harness distinguishes start latency, drift, handoff, and pause/resume failure classes. | — | Review after implementation and test execution. |
+| 12 | Plato | **Quality review.** Review whether the harness actually measures the intended failure modes rather than only logging noise. | — | Focus on evaluation value, not just code style. |
+| 13 | Herodotus | **Governance/docs update.** Update roadmap and sprint queue if this becomes the standard TTS evaluation path; log baseline harness usage notes. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, related governance docs | Documentation pass after verification and review. |
+
+### Execution Sequence
+
+```
+Wave A (fixtures + schema + trace plumbing):
+  Task 1 (schema)
+      ↓
+  Task 2 (fixtures)
+  Task 3 (trace instrumentation)
+  Task 4 (first-audio timing)
+      ↓
+  Task 5 (trace integrity tests)
+
+Wave B (runner + metrics):
+  Task 6 (runner script)
+      ↓
+  Task 7 (summary metrics)
+  Task 8 (lifecycle/handoff tests)
+
+Wave C (review + docs):
+  Task 9 (review template + runbook)
+  Task 10 (verification runs)
+  Task 11 (spec compliance)
+  Task 12 (quality review)
+  Task 13 (docs/governance)
+```
+
+### SUCCESS CRITERIA
+
+1. A reusable narration evaluation fixture corpus exists under `tests/fixtures/narration/`
+2. Harness runs emit one structured JSON trace per fixture run
+3. Start latency is captured directly from the trace
+4. Flow-position and highlighted-word progression are captured
+5. Pause/resume and stop events are captured
+6. Section/chapter/book transitions are captured
+7. A runner script can execute evaluation sessions reproducibly
+8. The harness can distinguish at least these failure classes:
+   - start latency
+   - cursor/highlight drift
+   - handoff error
+   - pause/resume error
+9. Baseline run outputs are readable without hidden internal context
+10. A human reviewer can score audio/visual coherence using the provided template
+11. Tests cover trace integrity and key lifecycle ordering
+12. At least one fixture harness run is executed successfully on the branch
+13. `npm test` passes and `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** NARR-LAYER-1A (flow-layer narration foundation in place). Recommended after NARR-LAYER-1B unless a TTS quality investigation needs it sooner.
+
+### Completion Notes ✅ COMPLETED
+
+- Added trace schema types at `src/types/eval.ts` ✅ COMPLETED
+- Added fixture corpus and manifest under `tests/fixtures/narration/` ✅ COMPLETED
+- Added opt-in trace instrumentation in `useNarration`, `useFlowScrollSync`, and `ReaderContainer` via `createWindowEvalTraceSink()` ✅ COMPLETED
+- Captured first-audio timing from start request to first audio word event ✅ COMPLETED
+- Added `tests/ttsEvalTrace.test.ts` and `tests/ttsEvalLifecycle.test.ts` (22 tests) ✅ COMPLETED
+- Added harness runner `scripts/tts_eval_runner.mjs` + `npm run tts:eval` with JSON + text summaries ✅ COMPLETED
+- Added baseline fixture run artifacts in `tests/fixtures/narration/baseline/` ✅ COMPLETED
+- Added reviewer template and runbook:
+  - `docs/governance/TTS_EVAL_REVIEW_TEMPLATE.md`
+  - `docs/governance/TTS_EVAL_RUNBOOK.md` ✅ COMPLETED
+- Verification:
+  - `npm test -- --run tests/ttsEvalTrace.test.ts tests/ttsEvalLifecycle.test.ts` ✅
+  - `node scripts/tts_eval_runner.mjs --out tests/fixtures/narration/baseline` ✅
+  - `npm test` (112 files, 1967 tests passed) ✅
+  - `npm run build` ✅ (existing circular chunk warning unchanged)
+
+---
+
+## TTS-EVAL-2: TTS Evaluation Matrix & Soak Runner ✅ COMPLETED
+
+**Goal:** Expand the quality harness into a durable matrix + soak system that can stress narration/flow synchronization across voices, rates, fixture classes, and long-running sessions without manual babysitting.
+
+**Problem:** `TTS-EVAL-1` establishes traces and baseline fixture runs, but regressions can still hide in combinations (voice × rate × punctuation density × session length). We need reproducible matrix runs and soak sessions that detect drift, restart churn, and timing degradation over time.
+
+**Design decisions:**
+- Keep the matrix data-driven (manifest + scenarios), not hardcoded in scripts.
+- Keep runs deterministic and local-first (CLI), with optional CI handoff.
+- Capture both per-scenario metrics and aggregate summaries.
+- Treat this sprint as evaluation tooling, not runtime behavior change.
+- Persist artifacts in a stable folder layout for comparison across branches.
+
+### Lane Ownership
+
+- **Primary lane:** Lane B (Evaluation Harness)
+- **Secondary lane:** Lane E (Governance/Planning)
+- **Restricted:** Lane A runtime core edits allowed only for additive, non-breaking trace hooks
+
+### Forbidden During Parallel Run
+
+When another code-changing sprint is active, `TTS-EVAL-2` must not modify:
+
+- `src/hooks/useNarration.ts` except additive trace hook wiring
+- `src/hooks/useFlowScrollSync.ts` except additive trace hook wiring
+- `src/components/ReaderContainer.tsx` except additive trace hook wiring
+- `src/utils/FlowScrollEngine.ts` behavior logic
+- `src/types.ts` existing contracts (additive eval types only)
+
+Parallel-safe work:
+
+- matrix/manifest files under `tests/fixtures/narration/`
+- runner/profile/metrics scripts under `scripts/`
+- docs/runbooks and test files under `docs/` and `tests/`
+
+### Shared-Core Touches
+
+Potential shared-core touch window:
+
+- Task 3 and Task 4 if additive runtime trace hooks are required for matrix/soak coverage
+
+All other tasks are tooling/docs/test surfaces and can run independently.
+
+### Merge Order
+
+1. `TTS-EVAL-1` merges first
+2. `TTS-EVAL-2` rebases on current `main`
+3. Any shared-core additive hook edits (Tasks 3-4) run in a short serialized window
+4. `TTS-EVAL-2` verification + merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — execution rules and sprint standards
+2. `ROADMAP.md` — this section + `TTS-EVAL-1`
+3. `docs/governance/SPRINT_QUEUE.md` — queue and dispatch order
+4. `scripts/tts_eval_runner.*` — runner entrypoints from `TTS-EVAL-1`
+5. `tests/fixtures/narration/` — fixture corpus and manifest
+6. `src/hooks/useNarration.ts` — instrumentation seam (read-only unless additive hook needed)
+7. `src/hooks/useFlowScrollSync.ts` — transition/handoff trace seam
+8. `src/components/ReaderContainer.tsx` — top-level lifecycle event seam
+9. `tests/` — test patterns for script and trace validation
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (tooling-scope) | **Add matrix manifest format.** Define scenario schema for fixture id, voice id, requested rate, duration class, and run tags. | `tests/fixtures/narration/matrix.manifest.json` (new) + optional schema file | New file under `tests/fixtures/narration/`; include at least smoke, punctuation-heavy, and long-form scenarios. |
+| 2 | Hephaestus (tooling-scope) | **Add soak profiles.** Define canned soak profiles (`short`, `standard`, `overnight`) controlling scenario count and iteration depth. | `scripts/tts_eval_profiles.*` (new) | New profile module consumed by runner; keep defaults deterministic. |
+| 3 | Hephaestus (tooling-scope) | **Extend runner for matrix execution.** Add `--matrix` mode to iterate scenarios and emit per-scenario trace/summary bundles. | `scripts/tts_eval_runner.*` | Add matrix branch near runner argument parser and session loop. |
+| 4 | Hephaestus (tooling-scope) | **Add soak mode.** Add `--soak-profile` execution that repeats scenarios for long duration and writes checkpoint summaries every N runs. | `scripts/tts_eval_runner.*` | Add soak loop with periodic flush + interrupt-safe artifact write. |
+| 5 | Hermes (tooling-scope) | **Add aggregate metrics pass.** Build a reducer that computes p50/p95 startup latency, drift maxima, pause/resume failure count, and handoff failure count across matrix runs. | `scripts/tts_eval_metrics.*` | Add aggregate function and write `aggregate-summary.json` + concise text summary. |
+| 6 | Hippocrates | **Add runner tests.** Validate matrix selection, soak profile behavior, deterministic artifact naming, and aggregate metric calculation on synthetic traces. | `tests/ttsEvalMatrixRunner.test.ts` (new) | New test file; include edge cases for empty matrix and interrupted runs. |
+| 7 | Hephaestus (docs-scope) | **Add matrix/soak runbook.** Document commands, expected artifacts, and interpretation rules. | `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` (new) | New doc with command examples for smoke, standard, and overnight runs. |
+| 8 | Hippocrates | **Verification runs.** Execute one matrix smoke run and one short soak run; capture artifact paths in sprint summary. | — | Run after Tasks 1–7 with local fixture set. |
+| 9 | Solon | **Spec compliance.** Verify criteria and confirm matrix/soak outputs are reproducible from a clean checkout. | — | Post-verification review. |
+| 10 | Plato | **Quality review.** Confirm metrics are decision-useful and not redundant with raw trace noise. | — | Review output usability for dispatch closeout. |
+| 11 | Herodotus | **Governance update.** Wire matrix/soak flow into roadmap/queue and lessons learned if notable constraints appear. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, optional `docs/governance/LESSONS_LEARNED.md` | Documentation pass after verification. |
+
+### Execution Sequence
+
+```
+Wave A (data model + runner expansion):
+  Task 1 (matrix manifest)
+  Task 2 (soak profiles)
+      ↓
+  Task 3 (matrix execution)
+  Task 4 (soak execution)
+      ↓
+Wave B (metrics + tests):
+  Task 5 (aggregate metrics)
+  Task 6 (runner tests)
+      ↓
+Wave C (docs + verification):
+  Task 7 (runbook)
+  Task 8 (verification runs)
+  Task 9 (spec compliance)
+  Task 10 (quality review)
+  Task 11 (governance update)
+```
+
+### SUCCESS CRITERIA
+
+1. Matrix manifest exists and supports scenario-driven execution
+2. Runner supports `--matrix` mode and emits per-scenario artifacts
+3. Runner supports `--soak-profile` mode for repeated long-run evaluation
+4. Aggregate summary emits p50/p95 startup latency and drift stats
+5. Handoff and pause/resume failures are counted in aggregate output
+6. Artifact naming is deterministic and reproducible
+7. A smoke matrix run completes successfully
+8. A short soak run completes successfully
+9. Runner tests cover matrix, soak, and aggregate paths
+10. `npm test` passes and `npm run build` succeeds
+11. Runbook documents commands and interpretation rules
+12. Outputs are usable for cross-branch comparison without manual log digging
+
+**Tier:** Full | **Depends on:** TTS-EVAL-1.
+
+### Completion Notes ✅ COMPLETED
+
+- Added matrix scenario manifest: `tests/fixtures/narration/matrix.manifest.json` ✅ COMPLETED
+- Added soak profiles module: `scripts/tts_eval_profiles.mjs` (`short`, `standard`, `overnight`) ✅ COMPLETED
+- Extended runner with:
+  - `--matrix` scenario execution
+  - `--soak-profile` repeated runs
+  - deterministic artifact naming
+  - checkpoint summaries and interrupt-safe writes ✅ COMPLETED
+- Added aggregate reducer: `scripts/tts_eval_metrics.mjs` (startup p50/p95, drift p50/p95/max, pause-resume and handoff failure counts) ✅ COMPLETED
+- Added runner test suite: `tests/ttsEvalMatrixRunner.test.ts` ✅ COMPLETED
+- Added matrix/soak runbook: `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` ✅ COMPLETED
+- Verification runs:
+  - Smoke matrix: `npm run tts:eval:matrix -- --run-id smoke --tag smoke --out artifacts/tts-eval/matrix-smoke` ✅
+  - Short soak: `npm run tts:eval:soak:short -- --run-id soak-short --out artifacts/tts-eval/soak-short` ✅
+  - `npm test` (113 files, 1972 tests) ✅
+  - `npm run build` ✅ (existing circular chunk warning unchanged)
+
+---
+
+## TTS-EVAL-3: TTS Quality Gates & Release Baseline ✅ COMPLETED
+
+**Goal:** Convert evaluation outputs into explicit quality gates and a maintained baseline so narration/flow quality regressions are blocked early and sprint closeout has objective pass/fail criteria.
+
+**Problem:** Even with harness + matrix runs, teams can still ship regressions if there is no agreed threshold contract. We need release-quality gates tied to measurable values and a documented baseline update process.
+
+**Design decisions:**
+- Keep gates configurable via a versioned threshold file.
+- Fail fast when hard limits are breached; warn-only for exploratory metrics.
+- Separate baseline snapshots from code logic.
+- Keep subjective reviewer scoring in the loop for voice quality decisions.
+
+### Lane Ownership
+
+- **Primary lane:** Lane E (Governance + Release Quality)
+- **Secondary lane:** Lane B (Evaluation Harness)
+- **No runtime refactors:** Runtime core files are out of scope except additive trace field wiring if required
+
+### Forbidden During Parallel Run
+
+`TTS-EVAL-3` must not alter runtime playback logic:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- reading-mode orchestration files
+
+Parallel-safe work:
+
+- gate config/policy/checklist files under `docs/testing/`
+- gate evaluation scripts under `scripts/`
+- gate tests under `tests/`
+
+### Shared-Core Touches
+
+- None expected by default
+- If additive trace fields become necessary, they must be reviewed as a scoped exception after `TTS-EVAL-2` merge
+
+### Merge Order
+
+1. `TTS-EVAL-2` merges first
+2. `TTS-EVAL-3` rebases and runs gate/baseline work
+3. `TTS-EVAL-3` verification + merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — sprint closeout and governance rules
+2. `ROADMAP.md` — `TTS-EVAL-1`, `TTS-EVAL-2`, and this section
+3. `docs/governance/SPRINT_QUEUE.md` — queue ordering and dispatch state
+4. `scripts/tts_eval_runner.*`, `scripts/tts_eval_metrics.*` — existing harness outputs
+5. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` — operational run guidance
+6. `docs/` reviewer template artifacts from `TTS-EVAL-1`
+7. `tests/` — harness and runner test patterns
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (governance-scope) | **Define gate thresholds.** Add versioned threshold config for startup latency, drift limits, pause/resume failures, and handoff failures. | `docs/testing/tts_quality_gates.v1.json` (new) | New versioned threshold file with hard-fail and warn-only sections. |
+| 2 | Hephaestus (tooling-scope) | **Add gate evaluator script.** Consume aggregate output + threshold config and emit pass/fail plus reasons. | `scripts/tts_eval_gate.*` (new) | New script in `scripts/`; CLI input: aggregate summary path + gate file path. |
+| 3 | Hephaestus (tooling-scope) | **Integrate gate check into runner outputs.** Optional `--gates` flag evaluates latest aggregate summary and writes `gate-report.json` + text. | `scripts/tts_eval_runner.*` | Add post-run gate invocation path after aggregate generation. |
+| 4 | Hermes (docs-scope) | **Create baseline policy doc.** Define how/when to refresh baselines, who approves, and how diffs are reviewed. | `docs/testing/TTS_EVAL_BASELINE_POLICY.md` (new) | New doc with baseline ownership and update checklist. |
+| 5 | Hephaestus (docs-scope) | **Add current baseline snapshot.** Check in one baseline summary from mainline matrix run with version stamp and fixture manifest hash. | `docs/testing/tts_eval_baseline_v1.json` (new) | Store baseline summary + metadata (git sha, fixture hash, date). |
+| 6 | Hippocrates | **Add gate tests.** Validate pass/fail behavior, threshold parsing, and deterministic report output. | `tests/ttsEvalGate.test.ts` (new) | New test file covering hard-fail and warn-only scenarios. |
+| 7 | Hephaestus (docs-scope) | **Add release review template.** Standardize how sprint closeout reports gate status and subjective reviewer score. | `docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md` (new) | New checklist used in sprint closeouts touching narration/flow. |
+| 8 | Hippocrates | **Verification runs.** Execute matrix + gate evaluation on branch; capture pass/fail report and artifact paths. | — | Run after Tasks 1–7 and include outputs in sprint summary. |
+| 9 | Solon | **Spec compliance.** Confirm each success criterion and verify gates are enforceable from clean checkout. | — | Post-verification pass. |
+| 10 | Plato | **Quality review.** Confirm gate thresholds are neither too lax nor unrealistically strict for current baseline quality. | — | Review with emphasis on release utility. |
+| 11 | Herodotus | **Governance update.** Update roadmap/queue and lessons learned with the new release-gate workflow. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md` | Documentation pass after implementation and verification. |
+
+### Execution Sequence
+
+```
+Wave A (gate foundations):
+  Task 1 (threshold config)
+  Task 2 (gate evaluator)
+      ↓
+Wave B (integration + policy):
+  Task 3 (runner gate integration)
+  Task 4 (baseline policy)
+  Task 5 (baseline snapshot)
+      ↓
+Wave C (verification + release docs):
+  Task 6 (gate tests)
+  Task 7 (release checklist)
+  Task 8 (verification runs)
+  Task 9 (spec compliance)
+  Task 10 (quality review)
+  Task 11 (governance update)
+```
+
+### SUCCESS CRITERIA
+
+1. Versioned gate threshold config exists in docs/testing
+2. Gate evaluator script consumes aggregate summaries and emits pass/fail
+3. Runner can optionally execute gate evaluation in-line
+4. Gate report includes explicit failure reasons and breached metrics
+5. Baseline policy defines ownership and update protocol
+6. Baseline snapshot is checked in with metadata (sha/date/fixture hash)
+7. Gate tests cover pass, fail, and warn-only cases
+8. Release checklist exists for narration/flow quality closeout
+9. At least one branch run produces a full gate report artifact
+10. `npm test` passes and `npm run build` succeeds
+11. Governance docs reflect gate-driven release evaluation flow
+
+**Tier:** Full | **Depends on:** TTS-EVAL-2.
+
+**Completion notes (2026-04-16):**
+- Shipped versioned gates config (`docs/testing/tts_quality_gates.v1.json`), evaluator (`scripts/tts_eval_gate.mjs`), and runner gate integration (`--gates` in `scripts/tts_eval_runner.mjs`) with enforceable non-zero exit on hard-fail breach.
+- Added baseline governance artifacts: `TTS_EVAL_BASELINE_POLICY.md`, `tts_eval_baseline_v1.json`, and `TTS_EVAL_RELEASE_CHECKLIST.md`.
+- Added gate coverage in `tests/ttsEvalGate.test.ts` (pass/fail/warn-only + deterministic report output + runner integration).
+- Baseline verification run: `npm run tts:eval:matrix:gated -- --run-id baseline-v1 --out artifacts/tts-eval/baseline-v1` → PASS, artifacts include `aggregate-summary.json`, `gate-report.json`, `gate-report.txt`.
+- Validation: `npm test -- --run tests/ttsEvalTrace.test.ts tests/ttsEvalLifecycle.test.ts tests/ttsEvalMatrixRunner.test.ts tests/ttsEvalGate.test.ts` (32 tests, 4 files) ✅; `npm test` (114 files, 1977 tests) ✅; `npm run build` ✅ (existing circular chunk warning unchanged).
+
+---
+
+## TTS-HARDEN-1: Kokoro Bootstrap Truth & Engine Recovery ✅ COMPLETED (v1.56.0, 2026-04-16)
+
+**Goal:** Make Kokoro startup and failure handling truthful, deterministic, and fast-failing so the rest of the narration stack can trust engine state.
+
+**Problem:** The current Kokoro lane has a false-ready seam and a recovery gap. The worker posts `model-ready` before warm-up inference completes, `load-error` still resolves to timeout-driven failure, and in-flight generate requests can remain stranded through worker retry windows. This makes first-play behavior, fallback behavior, and evaluation output less trustworthy than the green test/build surface suggests.
+
+**Outcome:** Kokoro now exposes a single authoritative readiness snapshot from engine to renderer. Worker bootstrap fails closed on load/warm-up errors, sprint and marathon workers reject only requests owned by dead workers, retry/shutdown lifecycles cannot leak stale status back into the UI, and renderer consumers treat structured engine status as the source of truth instead of progress/loading heuristics.
+
+**Verification:** Focused Kokoro slice passed (`7` files / `75` tests), full `npm test` passed (`116` files / `2001` tests), and `npm run build` passed. Existing Vite circular chunk warning (`settings -> tts -> settings`) is unchanged.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A (Main-process runtime core)
+- **Secondary lane:** Lane B (targeted engine tests)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+Do not run in parallel with another sprint editing these engine files:
+
+- `main/tts-worker.js`
+- `main/tts-engine.js`
+- `main/tts-engine-marathon.js`
+- `main/ipc/tts.js`
+
+Parallel-safe work while this sprint is active:
+
+- docs-only evaluation notes
+- fixture additions under `tests/fixtures/narration/`
+- isolated reader-surface audits that do not touch Kokoro runtime files
+
+### Shared-Core Touches
+
+- `main/tts-worker.js`
+- `main/tts-engine.js`
+- `main/tts-engine-marathon.js`
+- `main/ipc/tts.js`
+- targeted engine/worker tests
+
+### Merge Order
+
+1. `TTS-EVAL-3` is already the baseline on `main`
+2. `TTS-HARDEN-1` lands first and becomes the engine-state source of truth
+3. `TTS-HARDEN-2` rebases on the hardened engine behavior
+4. `TTS-RATE-1` follows only after bootstrap/recovery semantics are trustworthy
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — `TTS-EVAL-1/2/3` + this section
+3. `main/tts-worker.js` — bootstrap, import shim, warm-up, result payload path
+4. `main/tts-engine.js` — sprint worker readiness, crash recovery, pending request lifecycle
+5. `main/tts-engine-marathon.js` — marathon worker parity
+6. `main/ipc/tts.js` — renderer-facing error/status surface
+7. `tests/tts-engine.test.js`, `tests/kokoroStartupRecovery.test.ts`, `tests/kokoroStrategy.test.ts`
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define bootstrap truth contract.** Decide and document that Kokoro readiness means “safe to synthesize,” not merely “model object loaded.” | `main/tts-worker.js`, `main/tts-engine.js`, sprint notes in `ROADMAP.md` closeout | Worker bootstrap block around `loadModel()` and engine `ensureReady()` comments. |
+| 2 | Athena | **Make worker readiness truthful.** Delay `model-ready` until warm-up succeeds, or replace the current sequence with explicit `model-loaded` → `model-ready` semantics that the engine honors correctly. | `main/tts-worker.js` | `loadModel()` around current `modelReady = true`, `parentPort.postMessage({ type: "model-ready" })`, and warm-up inference block. |
+| 3 | Hephaestus | **Fail fast on bootstrap errors.** Update sprint and marathon engines so `load-error` and `warm-up-failed` reject readiness immediately instead of waiting for timeout. | `main/tts-engine.js`, `main/tts-engine-marathon.js` | Engine message handlers plus `ensureReady()` listener/race setup. |
+| 4 | Hephaestus | **Tighten packaged import shim.** Restrict stub fallback to explicitly optional modules (for example `sharp`) and restore `Module._resolveFilename` after packaged bootstrap completes. | `main/tts-worker.js`, `main/sharp-stub.js` | Packaged-mode branch in `loadModel()` around `Module._resolveFilename` monkeypatch and catch path. |
+| 5 | Athena | **Reject stranded requests on crash.** Ensure in-flight `generate()` promises are rejected immediately when the owning worker dies; retries should apply only to future requests after recovery, not to orphaned pending ones. | `main/tts-engine.js`, `main/tts-engine-marathon.js` | Worker `error` handlers and pending-request maps near crash retry logic. |
+| 6 | Hermes | **Surface truthful failure status to renderer.** Keep IPC-visible error events aligned with the new bootstrap/recovery contract so UI and tests can distinguish load failure, warm-up failure, and crash recovery. | `main/ipc/tts.js`, `main/tts-engine.js` | Existing Kokoro IPC handlers plus renderer notification events (`tts-kokoro-download-error`, loading/status sends). |
+| 7 | Hippocrates | **Engine recovery tests.** Add tests covering: in-flight request rejected on worker crash, load-error fails before timeout, warm-up failure prevents false-ready, packaged import shim only stubs allowed optional deps, and marathon worker matches sprint worker failure semantics. | `tests/tts-engine.test.js`, `tests/kokoroStartupRecovery.test.ts`, new focused test file if needed | Replace current pattern-only coverage with runtime-shape tests around real failure semantics. |
+| 8 | Hippocrates | **Verification run.** Run targeted engine suites, then `npm test` and `npm run build`. | `tests/`, project scripts | Post-implementation validation. |
+| 9 | Solon | **Spec compliance pass.** Verify readiness is no longer announced before warm-up success and that no known load/crash path waits for timeout unnecessarily. | — | Post-implementation review. |
+| 10 | Plato | **Quality review.** Review bootstrap and recovery changes for regressions in fallback behavior, duplicate status events, and pending-map cleanup. | — | Code review focused on state-truth and cleanup. |
+| 11 | Herodotus | **Governance/docs update.** Update roadmap, sprint queue, lessons learned, and any Kokoro runbook notes to match the new readiness/failure contract. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md`, optional testing docs | Closeout doc pass. |
+
+### Execution Sequence
+
+```
+Wave A (bootstrap contract):
+  Tasks 1-4
+      ↓
+Wave B (recovery behavior):
+  Tasks 5-6
+      ↓
+Wave C (tests + governance):
+  Tasks 7-8
+  Tasks 9-11
+```
+
+### SUCCESS CRITERIA
+
+1. Kokoro readiness is not reported before warm-up success under the chosen contract
+2. `load-error` rejects readiness immediately, without waiting for the model-load timeout
+3. `warm-up-failed` does not leave the engine in a false-ready state
+4. In-flight sprint-worker requests are rejected promptly if the worker crashes
+5. Marathon worker failure semantics match sprint-worker semantics
+6. Packaged import shim stubs only explicitly allowed optional modules
+7. `Module._resolveFilename` override does not leak past worker bootstrap
+8. Targeted engine tests cover crash, load-error, warm-up-failed, and packaged import behavior
+9. `npm test` and `npm run build` pass
+
+**Version:** v1.56.0 | **Branch:** `sprint/tts-harden-1-kokoro-bootstrap-recovery`
+
+---
+
+## TTS-HARDEN-2: Narration Handoff Integrity & Extraction Dedupe ✅ COMPLETED (v1.57.0, 2026-04-17)
+
+**Outcome:** `TTS-HARDEN-2` completed on top of `TTS-HARDEN-1` and tightened the flow-layer narration contract where handoffs had still been split across fallback/runtime paths. Section-end continuation now has one active flow owner, narration handoff promotes the stronger core word/cursor contract instead of a bare array swap, foliate fallback releases ownership once full-book metadata arrives, and active narration extraction now uses the same dedupe path as background pre-extraction.
+
+**Verification:** Targeted post-fix validation passed `4` files / `28` tests. Full `npm test` passed `116` files / `1912` tests, and `npm run build` passed. The existing circular chunk warning `settings -> tts -> settings` remains non-blocking.
+
+**Goal:** Make section/chapter narration handoffs, global-word promotion, and extraction concurrency behave as a single coherent runtime path.
+
+**Problem:** The current handoff chain is split across multiple owners. `useFlowScrollSync` and `useFoliateSync` both wire `setOnSectionEnd`, section handoff currently swaps words without fully re-arming playback semantics, and active narration bypasses the EPUB extraction dedupe helper used by background pre-extraction. The result is a runtime shape that looks organized in source but can still stall, stop, or duplicate work at the exact boundaries that matter most.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A (Renderer/runtime orchestration)
+- **Secondary lane:** Lane B (integration/regression tests)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+Do not run in parallel with any sprint editing the shared-core narration freeze set:
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useFoliateSync.ts`
+- `src/hooks/useNarrationCaching.ts`
+- `src/components/ReaderContainer.tsx`
+
+Parallel-safe work while this sprint is active:
+
+- standalone docs or queue updates
+- evaluation artifacts that do not change runtime behavior
+- EPUB token specs (but not implementation touching these files)
+
+### Shared-Core Touches
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useFoliateSync.ts`
+- `src/hooks/useNarrationCaching.ts`
+- `src/components/ReaderContainer.tsx` (if small glue updates are required)
+- handoff/extraction regression tests
+
+### Merge Order
+
+1. `TTS-HARDEN-1` merges first
+2. `TTS-HARDEN-2` rebases on the hardened engine layer
+3. `TTS-RATE-1` rebases on both hardening sprints
+4. `EPUB-TOKEN-1` follows after rate/path stabilization
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — `NARR-LAYER-1A/1B`, `TTS-EVAL-1/2/3`, `TTS-HARDEN-1`, and this section
+3. `src/hooks/useNarration.ts` — Kokoro end-of-chain, `updateWords`, cursor refs
+4. `src/hooks/useFlowScrollSync.ts` — flow follower mode, section handoff, cross-book transition
+5. `src/hooks/useFoliateSync.ts` — foliate section-sync and fallback section-end wiring
+6. `src/hooks/useNarrationCaching.ts` — background pre-extraction + active narration extraction
+7. `src/components/ReaderContainer.tsx` — top-level narration-selected state and hook ordering
+8. `tests/narrationLayer.test.ts`, `tests/tts7j-foliate-section-sync.test.ts`, `tests/useReaderMode.test.ts`, `tests/readerDecomposition.test.ts`
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Choose a single section-end owner.** Make one hook authoritative for narration section continuation; remove or constrain competing `setOnSectionEnd` wiring so callback ownership is unambiguous. | `src/hooks/useFlowScrollSync.ts`, `src/hooks/useFoliateSync.ts` | Section-end callback effects in both hooks. |
+| 2 | Athena | **Strengthen handoff API in narration core.** Replace or extend `updateWords()` so a section/global-word handoff updates all relevant narration refs (`allWordsRef`, cursor state, confirmed-audio anchor) and can continue playback safely after a drained chunk chain. | `src/hooks/useNarration.ts` | `onEnd` Kokoro branch, `updateWords()`, any new dedicated handoff method and related refs. |
+| 3 | Hephaestus | **Wire flow section handoff through the strengthened API.** Update the flow handoff path to use the new handoff contract after `goToSection()` resolves, not a bare word-array swap. | `src/hooks/useFlowScrollSync.ts` | Current `narration.updateWords(wordsRef.current, nextSection.startWordIdx)` path after `goToSection()`. |
+| 4 | Hephaestus | **Preserve fallback-only behavior in foliate sync.** Ensure `useFoliateSync` only owns true fallback behavior and does not stop or override active flow-layer narration when full-book words are already in play. | `src/hooks/useFoliateSync.ts` | Section-end callback effect and any flow/page-mode guards around foliate fallback. |
+| 5 | Hermes | **Deduplicate active extraction path.** Use the same `dedupeExtractWords()` helper for active narration extraction that background pre-extraction already uses. | `src/hooks/useNarrationCaching.ts` | Active narration effect around direct `api.extractEpubWords(activeDoc.id)` call. |
+| 6 | Hermes | **Tighten state-truth glue.** Remove any remaining stale flow/narration assumptions in top-level runtime glue that are needed to keep page/flow selection state consistent after handoffs and pauses. | `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts` if required | Only touch if needed to match the new handoff contract; keep scope narrow. |
+| 7 | Hippocrates | **Handoff integration tests.** Add coverage for: section boundary drains current chunk then continues automatically, chapter label updates across handoff, fallback section path does not override flow owner, active extraction dedupes with background extraction, and queue-exhausted vs cross-book stop behavior remain distinct. | `tests/narrationLayer.test.ts`, `tests/tts7j-foliate-section-sync.test.ts`, new dedicated handoff test if needed | Replace source-shape-only checks with actual handoff behavior tests. |
+| 8 | Hippocrates | **Stale-orchestration test cleanup.** Update or replace stale tests that still model standalone `"narration"` mode or outdated section-owner assumptions. | `tests/useReaderMode.test.ts`, `tests/readerDecomposition.test.ts` | Remove outdated narration-mode assumptions and align with flow-layer narration architecture. |
+| 9 | Hippocrates | **Verification run.** Run targeted handoff/extraction suites, then `npm test` and `npm run build`. | `tests/`, project scripts | Post-implementation validation. |
+| 10 | Solon | **Spec compliance pass.** Verify callback ownership is singular, section continuation no longer stalls, and extraction dedupe applies on narration start. | — | Post-implementation review. |
+| 11 | Plato | **Quality review.** Review touchpoint ownership, state truth, and regression risk across section/book boundaries. | — | Code review focused on handoff seams. |
+| 12 | Herodotus | **Governance/docs update.** Update roadmap, sprint queue, and lessons learned to record the new handoff owner and extraction contract. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md` | Closeout doc pass. |
+
+### Execution Sequence
+
+```
+Wave A (ownership + core API):
+  Tasks 1-2
+      ↓
+Wave B (handoff wiring + dedupe):
+  Tasks 3-6
+      ↓
+Wave C (tests + governance):
+  Tasks 7-9
+  Tasks 10-12
+```
+
+### SUCCESS CRITERIA
+
+1. Exactly one runtime owner controls narration section-end continuation in the active flow-layer path
+2. Section handoff continues narration without manual restart after the current chunk chain drains
+3. Handoff updates both visible cursor state and canonical audio anchor consistently
+4. Foliate fallback section-end logic does not override active flow narration ownership
+5. Active narration extraction uses the same dedupe path as background pre-extraction
+6. No duplicate EPUB full-book extraction is launched for the same book while an extraction is already in flight
+7. Handoff tests cover section continuation, chapter-label continuity, and queue-exhausted vs cross-book endings
+8. Stale tests that still model standalone narration mode are removed or rewritten
+9. `npm test` and `npm run build` pass
+
+**Version:** v1.57.0 | **Branch:** `sprint/tts-harden-2-handoff-integrity`
+
+---
+
+## TTS-RATE-1: Pitch-Preserving Tempo for Kokoro ✅ COMPLETED (v1.58.0, 2026-04-17)
+
+**Goal:** Deliver speed control that does not chipmunk Kokoro voices by decoupling generation/cache rate buckets from playback tempo shaping.
+
+**Problem:** Current speed changes in Kokoro path force stop/regenerate churn and/or pitch-shifting behavior. Users hear degraded voice quality above/below 1.0x and lose smooth continuity.
+
+**Product decisions (locked):**
+- User speed precision is **0.1 steps**.
+- User range is **1.0 to 1.5** (hard ceiling 1.5).
+- Generation/cache buckets remain **`1.0`, `1.2`, `1.5`**.
+- Runtime chooses nearest generation bucket, then applies **pitch-preserving tempo shaping** to reach exact selected speed.
+- No Bluetooth/device routing work in this sprint.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A (Runtime Core — narration/audio scheduler)
+- **Secondary lane:** Lane B (Evaluation harness checks for rate quality)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+When another shared-core sprint is active, do not edit these files concurrently:
+
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/types.ts` (existing contracts)
+
+Allowed concurrent surfaces:
+
+- `scripts/tts_eval_*` artifacts and docs
+- isolated tests for rate mapping/tempo shaping
+
+### Shared-Core Touches
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/utils/audioScheduler.ts`
+- `src/constants.ts`
+- `src/types/narration.ts` (additive rate metadata only)
+
+### Merge Order
+
+1. `TTS-HARDEN-1` merges first
+2. `TTS-HARDEN-2` merges second
+3. `TTS-RATE-1` rebases on latest `main`
+4. Shared-core implementation + tests
+5. Evaluation matrix spot-check rerun for speed scenarios
+6. Merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — `TTS-EVAL-1/2/3` + this section
+3. `src/constants.ts` — rate limits and Kokoro buckets (`KOKORO_RATE_BUCKETS`, `TTS_MAX_RATE`, `TTS_RATE_STEP`)
+4. `src/hooks/useNarration.ts` — `updateWpm`, `startCursorDriven`, state speed handling
+5. `src/hooks/narration/kokoroStrategy.ts` — bucket resolution and scheduler handoff
+6. `src/utils/audioScheduler.ts` — chunk scheduling and boundary timing
+7. `tests/` + `scripts/tts_eval_runner.mjs` — verification lane
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define rate contract.** Add explicit `KOKORO_UI_RATE_MIN`, `KOKORO_UI_RATE_MAX`, `KOKORO_UI_RATE_STEP` constants and keep generation buckets fixed (`1.0/1.2/1.5`). | `src/constants.ts` | Near existing TTS/Kokoro rate constants (around `KOKORO_RATE_BUCKETS`, `TTS_MAX_RATE`). |
+| 2 | Hephaestus | **Add nearest-bucket + tempo-offset resolver.** Introduce utility returning `{generationBucket, tempoFactor}` for a selected UI speed. | `src/utils/kokoroRatePlan.ts` (new) + exports | New module; consumed by narration + scheduler. |
+| 3 | Athena | **Stop full-restart on in-bucket speed edits.** Update `useNarration.updateWpm` so Kokoro path only restarts generation when bucket changes; otherwise apply tempo update live. | `src/hooks/useNarration.ts` | `updateWpm` callback and Kokoro branch (around existing `kokoroStrategy.stop(); speakNextChunk();`). |
+| 4 | Athena | **Pass rate plan metadata to scheduler path.** Extend Kokoro strategy pipeline handoff to include effective tempo factor for each scheduled chunk. | `src/hooks/narration/kokoroStrategy.ts`, `src/types/narration.ts` | `createKokoroStrategy` `speakChunk`/`scheduleChunk` handoff; add additive metadata type. |
+| 5 | Hephaestus | **Implement pitch-preserving tempo shaping stage.** Add tempo processor path in scheduler (time-stretch, not playbackRate) and apply before buffer scheduling. | `src/utils/audioScheduler.ts`, `src/utils/audio/tempoStretch.ts` (new) | `scheduleChunk` path before `createBuffer`; keep existing crossfade + boundary contracts. |
+| 6 | Hermes | **Keep highlight sync accurate with tempo shaping.** Ensure boundary timings use effective post-tempo speech duration and remain stable on mid-play speed updates. | `src/utils/audioScheduler.ts` | `computeWordBoundaries` and schedule-time boundary append logic. |
+| 7 | Hippocrates | **Rate plan unit tests.** Verify nearest-bucket mapping and tempo factor for all 0.1 steps from 1.0→1.5. | `tests/kokoroRatePlan.test.ts` (new) | New test file for mapping table and edge clamps. |
+| 8 | Hippocrates | **Scheduler tempo tests.** Verify no `playbackRate` mutation for Kokoro path, boundary sync stays monotonic, and no restart when speed changes inside same bucket. | `tests/audioSchedulerTempo.test.ts` (new), `tests/useNarrationRateUpdate.test.ts` (new or existing) | Add focused tests around `scheduleChunk` and `updateWpm`. |
+| 9 | Hippocrates | **Harness verification.** Run matrix smoke including multi-rate scenarios (`1.0`, `1.1`, `1.2`, `1.3`, `1.4`, `1.5`). | `scripts/tts_eval_runner.mjs` artifacts | Use `tts:eval:matrix` with rate-tagged scenario set. |
+| 10 | Solon | **Spec compliance pass.** Verify all success criteria and check no forbidden playbackRate pitch path remains in Kokoro lane. | — | Post-implementation review. |
+| 11 | Plato | **Quality review.** Validate audible quality improvement and continuity during live speed changes. | — | Review against chipmunk/choppiness failure classes. |
+| 12 | Herodotus | **Governance/docs update.** Update roadmap, sprint queue, lessons, and runbook notes for new speed behavior. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Closeout documentation pass. |
+
+### Execution Sequence
+
+```
+Wave A (contract + mapping):
+  Tasks 1-2
+      ↓
+Wave B (runtime implementation):
+  Tasks 3-6
+      ↓
+Wave C (verification + governance):
+  Tasks 7-9
+  Tasks 10-12
+```
+
+### SUCCESS CRITERIA
+
+1. UI speed supports only 1.0–1.5 in 0.1 increments
+2. Generation/cache buckets remain fixed at 1.0/1.2/1.5
+3. Kokoro in-bucket speed changes do not restart generation pipeline
+4. Kokoro path does not rely on pitch-shifting `playbackRate` edits for tempo control
+5. Tempo shaping is applied as a pitch-preserving stage before playback
+6. Word-highlight timing remains synced during rate changes
+7. Boundary timings stay monotonic and gapless
+8. Unit tests cover full rate mapping table
+9. Scheduler/narration tests cover live speed-change continuity
+10. Matrix smoke run passes with multi-rate scenarios
+11. `npm test` and `npm run build` pass
+
+**Version:** v1.58.0 | **Branch:** `sprint/tts-rate-1-pitch-preserving-tempo`
+
+**Depends on:** `TTS-HARDEN-2`.
+
+**Completion note:** Completed on 2026-04-17. Kokoro speed control now exposes exact 0.1-step UI speeds from `1.0x` through `1.5x` while keeping generation/cache on the fixed `1.0` / `1.2` / `1.5` bucket set. The runtime resolves each UI speed to the nearest generation bucket, applies pitch-preserving tempo shaping to reach the exact selected speed, keeps preview/status aligned to the exact user speed rather than the backing bucket, and avoids restart churn for in-bucket speed edits by live-retiming buffered audio instead.
+
+**Verification:** Targeted tempo/rate coverage landed across the rate-plan, scheduler, Kokoro strategy, narration update, settings truth, and timing suites. Final release evidence includes the gated six-rate matrix at `artifacts/tts-eval/final-gate-22`, covering `1.0`, `1.1`, `1.2`, `1.3`, `1.4`, and `1.5` with PASS gate artifacts, startup latency p50/p95 `433.5 / 501.75 ms`, drift p50/p95/max `2 / 2 / 2`, and zero pause/resume or handoff failures. `npm run build` still reports the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`), unchanged from prior releases.
+
+---
+
+## EPUB-TOKEN-1: Dropcap + Split-Token Word Stitching ✅ COMPLETED (v1.59.0, 2026-04-17)
+
+**Goal:** Ensure styled split words (drop caps, inline styling splits, mixed-node words) are treated as one logical word for selection, cursoring, and narration.
+
+**Version:** v1.59.0 | **Branch:** `sprint/epub-token-1-dropcap-stitching`
+
+**Problem:** EPUB styling can split a single lexical word into multiple DOM fragments (`T` + `his`). Current interaction surfaces may treat these as separate words, causing cursor jumps and narration mismatch.
+
+**Verification:** Focused slice passed 5/5 files and 43/43 tests. Full suite passed 122/122 files and 1964/1964 tests. `npm run build` passed with the existing non-blocking warning `settings -> tts -> settings`. Solon APPROVED. Plato READY with no findings, with the noted residual risk that click/selection coherence is still mostly covered by utility-level tests rather than a full DOM-event integration test through `FoliatePageView`.
+
+**Closeout:** No-whitespace contiguous styled fragments now resolve to one logical word across extraction, rendering, click/selection, and narration start paths. Rendered spans carry token metadata, and stitched-fragment interactions collapse to one stable global word index.
+
+### Lane Ownership
+
+- **Primary lane:** Lane A/C (Reader extraction + view interaction)
+- **Secondary lane:** Lane B (regression tests and eval fixture checks)
+- **Tier:** Full
+
+### Forbidden During Parallel Run
+
+Do not run in parallel with any sprint editing the shared-core freeze set:
+
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/utils/FlowScrollEngine.ts`
+- `src/types.ts`
+
+### Shared-Core Touches
+
+- `src/utils/segmentWords.ts`
+- `src/utils/foliateHelpers.ts`
+- `src/components/FoliatePageView.tsx`
+- `src/utils/foliateWordOffsets.ts`
+- targeted reader selection tests
+
+### Merge Order
+
+1. `TTS-RATE-1` merges first
+2. `EPUB-TOKEN-1` rebases on latest `main`
+3. Extraction/token stitching implementation
+4. Selection + narration regression tests
+5. Merge
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `ROADMAP.md` — this section
+3. `src/utils/segmentWords.ts` — segmentation contract
+4. `src/utils/foliateHelpers.ts` — `buildWordsFromTextNodes`, `buildWrappedFragmentForNode`, extraction flow
+5. `src/components/FoliatePageView.tsx` — `wrapWordsInSpans`, click/selection handlers, word-index mapping
+6. `src/utils/foliateWordOffsets.ts` — rendered↔global mapping helpers
+7. `tests/foliateWordOffsets.test.ts`, selection/narration regression suites
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define stitch rules.** Add explicit “no-whitespace contiguous fragments = one lexical token” rules, including dropcap-first-letter cases. | `src/utils/segmentWords.ts` | Near segmentation utilities and exported token/span contracts. |
+| 2 | Hephaestus | **Preserve lexical token identity across node boundaries.** Extend extraction spans so a multi-node word keeps one logical token id and stable global index. | `src/utils/foliateHelpers.ts` | `buildWordsFromTextNodes` and `buildWrappedFragmentForNode`. |
+| 3 | Hermes | **Annotate wrapped spans with token part metadata.** Add `data-token-id` / `data-token-part` attributes for multi-node words while preserving existing `data-word-index`. | `src/components/FoliatePageView.tsx`, `src/utils/foliateHelpers.ts` | `wrapWordsInSpans` path + wrapped fragment builder. |
+| 4 | Athena | **Update click/selection resolution to collapse token parts.** Ensure selecting any part of a stitched token resolves to the same global word index and full word text. | `src/components/FoliatePageView.tsx`, `src/utils/foliateWordOffsets.ts` | delegated click handler and selection overlap resolver around `resolveRenderedWordIndexToGlobal`. |
+| 5 | Hermes | **Guard narration/anchor consumers.** Ensure stitched-token selections propagate as a single word anchor in mode starts and resume paths. | `src/hooks/useReaderMode.ts`, `src/utils/startWordIndex.ts` | start-index resolution + selection-origin mapping touchpoints. |
+| 6 | Hippocrates | **Add extraction/token tests.** Cover dropcap (`T` + `his`), inline-emphasis split words, and punctuation-adjacent split fragments. | `tests/foliateTokenStitching.test.ts` (new), `tests/foliateWordOffsets.test.ts` | Add both positive and regression cases. |
+| 7 | Hippocrates | **Add interaction tests.** Verify click on any fragment maps to same word index; selection + narration start uses stitched token index. | `tests/selectionWordIdentity.test.ts` (new or existing) | Add tests for click/selection entry paths. |
+| 8 | Hippocrates | **Run verification.** Targeted tests + full `npm test` + `npm run build`. | — | Record command outputs and totals in closeout. |
+| 9 | Solon | **Spec compliance pass.** Validate all success criteria, especially one-token behavior across selection/cursor/narration. | — | Post-verification review. |
+| 10 | Plato | **Quality review.** Verify no regressions in normal tokenization and no false stitching across actual spaces. | — | Focus on correctness and false-positive risk. |
+| 11 | Herodotus | **Governance/docs update.** Update roadmap, queue, and lessons with stitch contract and known limits. | `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/governance/LESSONS_LEARNED.md` | Closeout documentation pass. |
+
+### Execution Sequence
+
+```
+Wave A (token contract):
+  Task 1
+      ↓
+Wave B (extraction + interaction):
+  Tasks 2-5
+      ↓
+Wave C (tests + review):
+  Tasks 6-8
+  Tasks 9-11
+```
+
+### SUCCESS CRITERIA
+
+1. Dropcap/split lexical words resolve to one logical token
+2. No-whitespace contiguous fragments share one global word index
+3. Clicking any fragment of a stitched token yields same selected word index
+4. Selection-driven narration start uses stitched token index
+5. Cursor/highlight paths no longer jump between split fragments
+6. `resolveRenderedWordIndexToGlobal` remains correct for stitched tokens
+7. Token stitching does not merge across real whitespace boundaries
+8. Extraction + selection regression tests cover dropcap and inline split cases
+9. `npm test` and `npm run build` pass
+
+**Depends on:** `TTS-RATE-1`.
+
+---
+
+### Sprint FLOW-INF-A: Reading Zone & Visual Pacing ✅ COMPLETED
+
+**Goal:** Add a visually distinct reading zone to flow mode — a 3-5 line band where the active text lives, with de-emphasized content above and below. Users should feel like they're reading through a focused window.
+
+**Version:** v1.41.0 | **Branch:** `sprint/flow-inf-a-reading-zone` | **Tier:** Full
+
+**Baseline (post-NARR-CURSOR-1):** Flow mode uses `FlowScrollEngine.ts` (345 lines) — `LineInfo[]` built from DOM, cursor shrinks per line, reading zone at 25% viewport via `FLOW_READING_ZONE_POSITION`. No visual zone overlay, no de-emphasis, no configurable zone position. Container div at FoliatePageView.tsx:1779 becomes scroll container in flow mode (`overflow: auto`).
+
+**Design:**
+```
+┌──────────────────────────────────┐
+│  De-emphasized (35% visible)     │  ← mask-image alpha = 0.35
+│  ...previous text...             │
+│                                  │
+│══════════════════════════════════│  ← soft edge (2% gradient transition)
+│  READING ZONE (fully visible)    │  ← mask-image alpha = 1.0
+│  Active text — current line      │
+│  here, cursor shrinks below      │
+│══════════════════════════════════│  ← soft edge
+│                                  │
+│  De-emphasized (35% visible)     │  ← mask-image alpha = 0.35
+│  ...upcoming text...             │
+└──────────────────────────────────┘
+```
+
+CSS `mask-image` gradient on `.foliate-page-view--flow` with dynamic CSS custom properties:
+- `--flow-zone-top`: percentage from top of container to zone start (default: 20%)
+- `--flow-zone-bottom`: percentage from top of container to zone end (default: 45%)
+- Computed from: `zonePosition × 100%` for top, `(zonePosition + zoneHeight) × 100%` for bottom
+- `zoneHeight` = (lineHeight × zoneLines) / containerHeight
+
+**WHERE (read order):**
+1. `src/utils/FlowScrollEngine.ts` — full engine (345 lines). Key: `scrollToLine()` at line 307, `LineInfo` interface at line 18, `FLOW_READING_ZONE_POSITION` usage at line 311
+2. `src/components/FoliatePageView.tsx` — flow mode sections: container div at line 1779, flow cursor at line 1812, flow activation effect at line 1552-1584, scroll container ref setup at line 1567-1583
+3. `src/constants.ts` — `FLOW_READING_ZONE_POSITION = 0.25` at line 450, `FLOW_CURSOR_HEIGHT_PX = 3` at line 452
+4. `src/styles/global.css` — `.foliate-flow-cursor` class, `.foliate-page-view--flow` class
+5. `src/components/ReaderBottomBar.tsx` — bottom bar controls, existing mode-specific sections
+6. `src/types/types.ts` — `BlurbySettings` interface, `flowSettings` sub-object (if exists, else add)
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Add flow zone constants** — `FLOW_ZONE_LINES_DEFAULT = 5`, `FLOW_ZONE_LINES_MIN = 3`, `FLOW_ZONE_LINES_MAX = 8`, `FLOW_ZONE_OPACITY = 0.35` (de-emphasis level), `FLOW_ZONE_EDGE_PCT = 2` (soft edge transition width in %). Remove or deprecate `FLOW_READING_ZONE_POSITION` constant (now user-configurable). | Hermes | `src/constants.ts` | After line 458 (after `FLOW_LINE_ADVANCE_BUFFER_MS`). Also update `DEFAULT_SETTINGS` if `flowSettings` sub-object is added. |
+| 2 | **Add flow zone settings to BlurbySettings** — Add `flowZonePosition: number` (0.15 \| 0.35 \| 0.55, default 0.25) and `flowZoneLines: number` (3-8, default 5) to BlurbySettings type. Wire through settings load/save. | Hephaestus | `src/types/types.ts`, `src/constants.ts` | In `BlurbySettings` interface — add fields. In `DEFAULT_SETTINGS` — add defaults. |
+| 3 | **Add CSS mask-image to `.foliate-page-view--flow`** — When flow zone is active, apply `mask-image: linear-gradient(to bottom, rgba(0,0,0,OPACITY) 0%, rgba(0,0,0,OPACITY) calc(var(--flow-zone-top) - EDGE%), rgba(0,0,0,1) var(--flow-zone-top), rgba(0,0,0,1) var(--flow-zone-bottom), rgba(0,0,0,OPACITY) calc(var(--flow-zone-bottom) + EDGE%), rgba(0,0,0,OPACITY) 100%)`. Use both `-webkit-mask-image` and `mask-image` for safety. Add CSS custom properties `--flow-zone-top` and `--flow-zone-bottom` with default values. | Hephaestus | `src/styles/global.css` | Find `.foliate-page-view--flow` class. Add mask-image rule. If class doesn't exist, create it. |
+| 4 | **Compute zone CSS custom properties in FoliatePageView** — In the flow mode activation effect (line 1552-1584), after scroll container is set up: compute `--flow-zone-top` and `--flow-zone-bottom` from `settings.flowZonePosition`, `settings.flowZoneLines`, and measured line height. Set via `containerRef.current.style.setProperty()`. Re-compute on container resize (add ResizeObserver). | Hephaestus | `src/components/FoliatePageView.tsx` | Lines 1552-1584 (flow mode useEffect). Add computation after line 1583 (after scroll container ref is set). Add ResizeObserver for the container to recompute on resize. |
+| 5 | **Update FlowScrollEngine to accept dynamic zone position** — Replace hardcoded `FLOW_READING_ZONE_POSITION` in `scrollToLine()` (line 311) with a `zonePosition` property set via a new `setZonePosition(pos: number)` method. Constructor or `start()` accepts initial value from settings. | Hephaestus | `src/utils/FlowScrollEngine.ts` | Line 311: replace `FLOW_READING_ZONE_POSITION` with `this.zonePosition`. Add property (line ~42) and setter method. Update `start()` (line 62) to accept `zonePosition` param. |
+| 6 | **Add zone controls to ReaderBottomBar** — Flow-mode-only controls: zone position dropdown (Top / Center / Bottom, maps to 0.15/0.35/0.55) and zone lines slider (3-8). Only visible when `readingMode === "flow"`. Update settings on change. | Hephaestus | `src/components/ReaderBottomBar.tsx` | Find the flow-mode section of the bottom bar. Add controls after existing flow-specific UI elements. Wire to settings via `onSettingsChange` prop. |
+| 7 | **Wire zone position to FlowScrollEngine on settings change** — In FoliatePageView, when `settings.flowZonePosition` or `settings.flowZoneLines` changes, call `engine.setZonePosition()` and recompute CSS custom properties. | Hephaestus | `src/components/FoliatePageView.tsx` | In the flow mode useEffect (lines 1552-1584) or a new useEffect that depends on `[settings.flowZonePosition, settings.flowZoneLines]`. |
+| 8 | **Tests** — ≥10 new tests: (a) mask-image CSS applied when flow mode active, (b) mask-image removed when flow mode deactivated, (c) `--flow-zone-top` and `--flow-zone-bottom` computed correctly from settings, (d) zone position values map correctly (0.15/0.35/0.55), (e) zone lines clamped to 3-8 range, (f) FlowScrollEngine.setZonePosition updates scroll target, (g) ResizeObserver triggers zone recomputation, (h) default settings applied on fresh start, (i) settings round-trip (save/load), (j) CSS custom properties update on settings change. | Hippocrates | `tests/` | New test file: `tests/flowReadingZone.test.ts` |
+| 9 | **`npm test` + `npm run build`** — Full tier. | Hippocrates | — | — |
+| 10 | **Solon** — Spec compliance. | Solon | — | — |
+| 11 | **Herodotus** — Doc updates. | Herodotus | All 6 governing docs | — |
+| 12 | **Git** | Hermes | — | Branch: `sprint/flow-inf-a-reading-zone` |
+
+**Execution Sequence:**
+1. Read phase — all WHERE files
+2. Task 1 (constants) + Task 2 (types) — parallel, unblock compilation
+3. Task 3 (CSS mask) — after constants exist
+4. Task 5 (FlowScrollEngine update) — after constants exist
+5. Task 4 (zone computation in FoliatePageView) — after CSS + engine updates
+6. Task 6 (bottom bar controls) — after settings types exist
+7. Task 7 (wiring) — after all above
+8. Tasks 8-9 (tests + build) — after all implementation
+9. Task 10-12 (verify + docs + git)
+
+**SUCCESS CRITERIA:**
+1. Flow mode applies CSS `mask-image` gradient — content outside reading zone visually de-emphasized (35% visible)
+2. Reading zone is a fully-visible band spanning `flowZoneLines` lines (default 5)
+3. Soft gradient edges (2% transition) — no hard cutoff
+4. Zone position configurable: Top (0.15), Center (0.35), Bottom (0.55) via ReaderBottomBar dropdown
+5. Zone lines configurable: 3-8 via ReaderBottomBar slider
+6. `FlowScrollEngine.scrollToLine()` uses dynamic zone position from settings, not hardcoded constant
+7. Zone recomputes on container resize (ResizeObserver)
+8. Mask removed when exiting flow mode (no visual artifacts)
+9. All existing tests pass, `npm run build` succeeds
+10. ≥10 new tests in `tests/flowReadingZone.test.ts`
+
+**Tier:** Full | **Depends on:** NARR-CURSOR-1
+
+---
+
+### Sprint FLOW-INF-B: Timer Cursor & Pacing Feedback ✅ COMPLETED
+
+**Goal:** Replace the barely-visible shrinking underline with a prominent timer bar that depletes left-to-right as each line is read. Add reading progress overlay so users always know where they are.
+
+**Version:** v1.42.0 | **Branch:** `sprint/flow-inf-b-timer-cursor` | **Tier:** Full
+
+**Baseline (post-FLOW-INF-A):** Flow mode has CSS mask reading zone, configurable zone position/size, FlowScrollEngine with dynamic zone position. Cursor is `.flow-shrink-cursor` — a 3px accent underline that shrinks from full line width to 0px via CSS transition (`width {duration}ms linear`). Duration = `(wordCount / wpm) × 60000 ms`. Cursor positioned absolutely at `line.left, line.bottom` in FlowScrollEngine `animateLine()` (line 268-286). Manual scroll pauses animation for 2s.
+
+**Design:**
+```
+Reading Zone:
+  ...previous lines (de-emphasized)...
+
+  The quick brown fox jumps over the      ← active line
+  [████████████░░░░░░░░░░░░░░░░░░░░]      ← timer bar (40% depleted)
+
+  ...upcoming lines (de-emphasized)...
+
+Bottom Bar:
+  ◀ ▶  |  Flow  |  287 WPM  |  Ch 3 · 34% · ~12 min left  |  ⚙
+```
+
+Timer bar: 4-6px accent-colored bar below active line. Depletes left → right (width shrinks). Subtle glow at leading edge. On line completion: brief accent flash (100ms pulse), then snap to next line at full width.
+
+Progress overlay: Persistent display in ReaderBottomBar showing: current chapter name, book percentage, estimated time remaining (from word count and WPM).
+
+**WHERE (read order):**
+1. `src/utils/FlowScrollEngine.ts` — `animateLine()` lines 252-305 (cursor positioning and shrink), `start()` line 62 (initialization), cursor styling lines 81-85
+2. `src/components/FoliatePageView.tsx` — flow cursor JSX at line 1812, flow cursor ref at line 313-316
+3. `src/styles/global.css` — `.flow-shrink-cursor` class, `.foliate-page-view--flow`
+4. `src/components/ReaderBottomBar.tsx` — existing bottom bar structure, mode-specific sections
+5. `src/constants.ts` — `FLOW_CURSOR_HEIGHT_PX = 3` at line 452, `FLOW_CURSOR_EINK_HEIGHT_PX = 4` at line 454
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Add timer bar constants** — `FLOW_TIMER_BAR_HEIGHT_PX = 5`, `FLOW_TIMER_BAR_EINK_HEIGHT_PX = 6`, `FLOW_TIMER_GLOW_PX = 2` (glow spread), `FLOW_LINE_COMPLETE_FLASH_MS = 100` (completion pulse duration). Keep existing `FLOW_CURSOR_HEIGHT_PX` for backward compat but mark deprecated. | Hermes | `src/constants.ts` | After existing flow constants (~line 458). |
+| 2 | **Restyle `.flow-shrink-cursor` as timer bar** — Height from 3px to `FLOW_TIMER_BAR_HEIGHT_PX`. Add `border-radius: 2px`. Background: accent color with subtle left-edge glow via `box-shadow: 0 0 GLOW_PX 0 var(--accent)`. Add `transition: opacity 100ms ease` for completion flash. Remove any `border-bottom` styling. | Hephaestus | `src/styles/global.css`, `src/utils/FlowScrollEngine.ts` | CSS: find `.flow-shrink-cursor` rules. FlowScrollEngine: lines 81-85 (inline cursor styling in `start()`). Update height assignment to use new constant. |
+| 3 | **Add line-completion flash animation** — In FlowScrollEngine `animateLine()`, when line timer expires (line 288-304): (a) set cursor opacity to 0.4 (flash), (b) after `FLOW_LINE_COMPLETE_FLASH_MS` delay, reset opacity to 1.0 and advance to next line with full width. The flash provides visual rhythm feedback. | Hephaestus | `src/utils/FlowScrollEngine.ts` | Lines 288-304 (the setTimeout that fires after line duration completes). Insert flash sequence before the `this.animateLine()` recursive call. |
+| 4 | **Add progress computation to FlowScrollEngine** — New `getProgress()` method returning `{ lineIndex, totalLines, wordIndex, totalWords, chapterPct, bookPct, estimatedMinutesLeft }`. `chapterPct` = wordIndex / totalWordsInChapter. `bookPct` = provided externally via `setBookProgress(pct)`. `estimatedMinutesLeft` = (totalWords - wordIndex) / wpm. Expose via `onLineChange` callback enhancement. | Hephaestus | `src/utils/FlowScrollEngine.ts` | After `getWordIndex()` (line 204). New method + expand `FlowScrollEngineCallbacks` interface (line 29) to include `onProgressUpdate?: (progress) => void`. Fire on every line change in `animateLine()`. |
+| 5 | **Add progress display to ReaderBottomBar** — Flow-mode section shows: current WPM (from settings), chapter name (from reader props), book percentage (from progress), estimated time remaining. Format: `"Ch 3 · 34% · ~12 min left"`. Update on every `onProgressUpdate` callback. | Hephaestus | `src/components/ReaderBottomBar.tsx` | Find flow-mode section (added in FLOW-INF-A Task 6). Add progress display elements. Wire to progress state passed down from ReaderContainer. |
+| 6 | **Wire progress from FlowScrollEngine to ReaderBottomBar** — In FoliatePageView or ReaderContainer, subscribe to `onProgressUpdate` from FlowScrollEngine. Pass progress state up via callback prop or context. Connect to ReaderBottomBar's new progress display. | Hephaestus | `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx` | FoliatePageView: where FlowScrollEngine callbacks are wired (near line 1605). Add `onProgressUpdate` handler that sets state. ReaderContainer: pass progress to ReaderBottomBar props. |
+| 7 | **E-ink mode: instant transitions** — When `isEink`, skip the CSS shrink transition (already handled) and skip the flash animation. Timer bar height uses `FLOW_TIMER_BAR_EINK_HEIGHT_PX`. Ensure no CSS transitions applied in e-ink mode. | Hermes | `src/utils/FlowScrollEngine.ts` | Lines 278-282 (e-ink transition conditional). Update height assignment (line 83). Add conditional around flash in Task 3 code. |
+| 8 | **Tests** — ≥8 new tests: (a) timer bar height matches constant, (b) line completion flash fires (opacity change), (c) flash duration matches constant, (d) `getProgress()` returns correct percentages, (e) estimated time remaining calculation correct, (f) progress callback fires on line change, (g) e-ink mode skips flash, (h) e-ink timer bar uses taller height. | Hippocrates | `tests/` | New test file: `tests/flowTimerCursor.test.ts` |
+| 9 | **`npm test` + `npm run build`** — Full tier. | Hippocrates | — | — |
+| 10 | **Solon** — Spec compliance. | Solon | — | — |
+| 11 | **Herodotus** — Doc updates. | Herodotus | All 6 governing docs | — |
+| 12 | **Git** | Hermes | — | Branch: `sprint/flow-inf-b-timer-cursor` |
+
+**Execution Sequence:**
+1. Read phase — all WHERE files
+2. Task 1 (constants) — unblocks compilation
+3. Task 2 (restyle cursor) — after constants
+4. Task 3 (flash animation) — after restyle
+5. Task 4 (progress computation) — parallel with Tasks 2-3
+6. Task 5 (bottom bar progress) + Task 6 (wiring) — after Task 4
+7. Task 7 (e-ink) — after Tasks 2-3
+8. Tasks 8-9 (tests + build)
+9. Tasks 10-12 (verify + docs + git)
+
+**SUCCESS CRITERIA:**
+1. Timer bar is 5px tall (6px e-ink) with accent color and border-radius — visually prominent, not a thin underline
+2. Timer bar depletes left → right linearly over line duration (wordCount / wpm × 60s)
+3. Line completion triggers a 100ms opacity flash before snapping to next line
+4. `getProgress()` returns accurate chapter percentage and estimated time remaining
+5. ReaderBottomBar shows WPM, chapter progress, and estimated time remaining during flow mode
+6. Progress updates on every line change (not just word advance)
+7. E-ink mode: no CSS transitions, no flash, uses taller bar height
+8. Manual scroll pause (2s) still works — timer bar freezes at current width
+9. All existing tests pass, `npm run build` succeeds
+10. ≥8 new tests in `tests/flowTimerCursor.test.ts`
+
+**Tier:** Full | **Depends on:** FLOW-INF-A
+
+---
+
+### Sprint EXT-ENR-A: Resilient Extension Connection ✅ COMPLETED
+
+**Goal:** The WebSocket connection survives sleep/wake, network changes, and Chrome service worker restarts without re-pairing. Articles sent while disconnected are delivered when connection resumes.
+
+**Version:** v1.39.0 | **Branch:** `sprint/ext-enr-a-resilient` | **Tier:** Quick | **Status:** COMPLETED 2026-04-06
+
+**Baseline (v1.38.2):** HOTFIX-14 shipped auth-filtered `getClientCount()`, 5s UI polling, 15s heartbeat, disconnect button, and fetchWithBrowser fallback. Token persistence already works (safeStorage encrypt on pair, `chrome.storage.local` on extension side). Remaining gaps: flat 5s reconnect (no backoff), no message delivery confirmation, no chrome.storage.local persistence for pending article queue, unbounded EADDRINUSE retry, no auth timeout on server, no three-state connection indicator.
+
+**WHERE (read order):**
+1. `chrome-extension/service-worker.js` (592 lines) — WebSocket client, reconnect logic, pending message queue, article send
+2. `main/ws-server.js` (529 lines) — WebSocket server, client lifecycle, heartbeat, EADDRINUSE retry
+3. `main/constants.js` — WS constants (lines 35-43)
+4. `src/components/settings/ConnectorsSettings.tsx` — Connection status UI, polling
+5. `main/ipc/misc.js` (lines 362-400) — WS IPC handlers (`get-ws-short-code`, `get-ws-status`)
+6. `preload.js` — electronAPI bridge (verify WS-related entries)
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Exponential backoff reconnect** — Replace flat 5s `RECONNECT_DELAY_MS` with exponential backoff: 1s → 2s → 4s → 8s → 16s → cap at 30s. Add jitter (±20%). Reset delay to 1s on successful auth. | Hephaestus | `chrome-extension/service-worker.js` | `scheduleReconnect()` at lines 59-65. Replace `RECONNECT_DELAY_MS` constant (line 5) with `RECONNECT_BASE_MS = 1000` and `RECONNECT_MAX_MS = 30000`. Add `_reconnectDelay` state var near line 11. In `scheduleReconnect()`: use `_reconnectDelay` with jitter, double after each call, cap at MAX. In `handleServerMessage` case `"auth-ok"` (line 70): reset `_reconnectDelay = RECONNECT_BASE_MS`. |
+| 2 | **Pending article persistence** — Persist `_pendingMessages` to `chrome.storage.local` so articles survive service worker termination. On startup, load from storage. On auth-ok flush, clear storage. | Hephaestus | `chrome-extension/service-worker.js` | `_pendingMessages` declared at line 12 (currently `[]`). Three edit sites: (a) Add `loadPendingMessages()` async function that reads from `chrome.storage.local.get("pendingMessages")` and populates `_pendingMessages`. Call it at module top-level (after line 14). (b) In `sendArticle()` at line 137: after pushing to `_pendingMessages`, also write to `chrome.storage.local.set({ pendingMessages: _pendingMessages })`. (c) In `handleServerMessage` case `"auth-ok"` (lines 70-75): after flushing, `chrome.storage.local.remove("pendingMessages")`. |
+| 3 | **Article delivery confirmation (article-ack)** — Server sends `{type: "article-ack", docId}` after successful EPUB conversion + library insert. Extension waits for ack before removing from pending queue. Timeout after 30s → keep in pending for next session. | Hephaestus | `main/ws-server.js` + `chrome-extension/service-worker.js` | Server side: In `handleAddArticle()` (called from `handleMessage` at line 258), after the article is processed and added to library, `sendJson(client.socket, { type: "article-ack", docId: <generated-id> })`. Extension side: In `handleServerMessage()` at line 67, add case `"article-ack"`: remove the matching message from `_pendingMessages` by docId, update `chrome.storage.local`. In `sendArticle()` (line 136): instead of fire-and-forget `_ws.send()`, push to pending first, then send, let ack remove it. |
+| 4 | **Cap EADDRINUSE retries** — Add `WS_MAX_RETRY_COUNT = 10` to constants. Track retry count. After 10 failures, stop retrying and log error. Reset count on successful listen. | Hermes | `main/ws-server.js` + `main/constants.js` | constants.js: Add `WS_MAX_RETRY_COUNT = 10` after line 41. ws-server.js: Add `let _retryCount = 0;` near line 20. In EADDRINUSE handler (lines 451-457): increment `_retryCount`, check `if (_retryCount >= WS_MAX_RETRY_COUNT)` → log and return without retry. In `_server.listen` callback (line 445): reset `_retryCount = 0`. |
+| 5 | **Server-side auth timeout** — If a client connects but doesn't authenticate within 5s, disconnect it. Prevents unauthenticated clients from accumulating in `_clients`. | Hermes | `main/ws-server.js` + `main/constants.js` | constants.js: Add `WS_AUTH_TIMEOUT_MS = 5000` after the new MAX_RETRY_COUNT. ws-server.js: In `handleConnection()` after `_clients.add(client)` (line 144), add `client.authTimer = setTimeout(() => { if (!client.authenticated) { client.socket.destroy(); _clients.delete(client); } }, WS_AUTH_TIMEOUT_MS)`. In `handleMessage()` where `client.authenticated = true` is set (lines 224 and 239): add `if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }`. Also clear in socket close/error handlers (lines 151-158). |
+| 6 | **Three-state connection indicator** — Replace boolean `connected` in ConnectorsSettings with three states: "Connected", "Connecting" (server running, no auth client), "Disconnected" (server not running). Update IPC to return `{ status: "connected" | "connecting" | "disconnected" }`. | Hephaestus | `main/ipc/misc.js` + `src/components/settings/ConnectorsSettings.tsx` | IPC: In `get-ws-short-code` handler (misc.js lines 384-388): replace `connected: hasAuth` with `status: hasAuth ? "connected" : wsServer.getStatus().running ? "connecting" : "disconnected"`. Renderer: ConnectorsSettings.tsx line 22: change `const [connected, setConnected] = useState(false)` → `const [connectionStatus, setConnectionStatus] = useState<"connected" \| "connecting" \| "disconnected">("disconnected")`. Update all `result.connected` references (lines 32, 41, 58) to use `result.status`. Update JSX to show three-state indicator with distinct colors/labels. |
+| 7 | **Service worker lifecycle resilience** — Add `chrome.runtime.onStartup` and `chrome.runtime.onInstalled` listeners to call `connectWebSocket()`. Ensure connection attempt on every service worker wake. | Hermes | `chrome-extension/service-worker.js` | After the existing `connectWebSocket()` call at end of file (find the initial invocation). Add: `chrome.runtime.onStartup.addListener(() => { connectWebSocket(); });` and `chrome.runtime.onInstalled.addListener(() => { connectWebSocket(); });`. These ensure the WebSocket reconnects after Chrome restarts or extension updates. |
+| 8 | **Tests** — Add tests for: exponential backoff logic, article-ack flow, EADDRINUSE retry cap, auth timeout cleanup, three-state status derivation. Target: 10+ new tests. | Hippocrates | `tests/` | New test file: `tests/extensionResilience.test.ts`. Test backoff calculation (1→2→4→8→16→30 cap, jitter bounds, reset on auth). Test EADDRINUSE retry count (stops at 10). Test auth timeout (client removed after 5s without auth). Test three-state derivation logic (connected/connecting/disconnected). Test article-ack removes from pending queue. |
+
+**Execution Sequence:**
+1. **Read phase** — Read all WHERE files in order
+2. **Implement Tasks 4, 5, 7** (Hermes, parallel) — mechanical, prescribed diffs
+3. **Implement Task 1** (Hephaestus) — backoff logic, depends on nothing
+4. **Implement Task 2** (Hephaestus) — pending persistence, depends on nothing
+5. **Implement Task 3** (Hephaestus) — article-ack, touches both server + extension
+6. **Implement Task 6** (Hephaestus) — three-state UI, depends on server changes from Tasks 4/5
+7. **Test (Task 8)** (Hippocrates) — after all implementation
+8. **Solon** — spec compliance (all 10 criteria)
+9. **Herodotus** — doc updates (ROADMAP, SPRINT_QUEUE, CLAUDE.md, LESSONS_LEARNED if needed)
+10. **Git** — commit, merge to main, push
+
+**SUCCESS CRITERIA:**
+1. Extension reconnects with exponential backoff (1s base, 30s cap, ±20% jitter) — no more flat 5s delay
+2. Backoff resets to 1s on successful authentication
+3. Pending articles persist in `chrome.storage.local` and survive service worker termination
+4. Server sends `article-ack` after successful article processing; extension removes from pending only on ack
+5. EADDRINUSE retry stops after 10 attempts with clear error log
+6. Unauthenticated clients are disconnected after 5s
+7. ConnectorsSettings shows three states: Connected (green), Connecting (amber), Disconnected (gray)
+8. `chrome.runtime.onStartup` and `chrome.runtime.onInstalled` both trigger `connectWebSocket()`
+9. All existing tests pass (`npm test`, 1,575+ tests, 0 failures)
+10. 10+ new tests covering backoff, ack, retry cap, auth timeout, and three-state logic
+
+---
+
+### Sprint EXT-ENR-B: Auto-Discovery Pairing ✅ COMPLETED
+
+**Goal:** When the extension tries to connect, Blurby surfaces the pairing code in the library screen — no need to navigate to Settings. The pairing experience should feel like AirDrop: the app notices the extension and invites pairing.
+
+**Version:** v1.43.0 | **Branch:** `sprint/ext-enr-b-auto-discovery` | **Tier:** Full | **Status:** COMPLETED 2026-04-07
+
+**Baseline (post-EXT-ENR-A, v1.39.0):** WebSocket server has auth timeout (5s), three-state connection indicator, exponential backoff reconnect, article-ack delivery confirmation. Server emits no push events to renderer — status is polled every 5s via `get-ws-short-code` IPC. Pairing code is only visible in Settings > Connectors. Established push event pattern exists in `ipc/cloud.js` (lines 91-96: `mainWindow.webContents.send()`) and `preload.js` (lines 178-217: `onXxx` listener pattern with cleanup).
+
+**Design:**
+```
+Library Screen (normal):
+┌────────────────────────────────────────┐
+│  📚 My Library                    ⚙    │
+│  ┌──────┐ ┌──────┐ ┌──────┐           │
+│  │Book 1│ │Book 2│ │Book 3│           │
+│  └──────┘ └──────┘ └──────┘           │
+
+Library Screen (extension detected):
+┌────────────────────────────────────────┐
+│  📚 My Library                    ⚙    │
+│ ┌────────────────────────────────────┐ │
+│ │ 🔗 Chrome Extension wants to      │ │
+│ │    connect. Enter code: 847291     │ │
+│ │    [Expires in 4:32]    [Dismiss]  │ │
+│ └────────────────────────────────────┘ │
+│  ┌──────┐ ┌──────┐ ┌──────┐           │
+│  │Book 1│ │Book 2│ │Book 3│           │
+│  └──────┘ └──────┘ └──────┘           │
+```
+
+**WHERE (read order):**
+1. `main/ws-server.js` — `handleConnection()` lines 105-159 (client connect, pre-auth). `_ctx` at line 18, assigned at line 416. `handleMessage()` for auth/pair flows at lines 201-259.
+2. `main/ipc/cloud.js` — Push event pattern at lines 91-96 (`mainWindow.webContents.send`). Follow this exact pattern.
+3. `preload.js` — WS-related entries at lines 113-120. Push event listener pattern at lines 178-217 (`onSyncProgress`, `onLibraryUpdated`, `onCloudSyncStatusChanged`). New listener goes after line 217.
+4. `src/hooks/useLibrary.ts` — Push event subscription pattern at lines 17-28 (`onLibraryUpdated` with cleanup). Follow this pattern.
+5. `src/components/LibraryContainer.tsx` — Library screen layout, where pairing banner will be injected.
+6. `src/components/settings/ConnectorsSettings.tsx` — Existing pairing UI (lines 106-153), three-state status. Code display at lines 126-137.
+7. `main/constants.js` — WS constants. Add new constants here.
+
+**Tasks:**
+
+| # | Task | Agent | Scope | Edit Site |
+|---|------|-------|-------|-----------|
+| 1 | **Add push event constants** — `WS_CONNECTION_ATTEMPT_CHANNEL = "ws-connection-attempt"`, `WS_PAIRING_SUCCESS_CHANNEL = "ws-pairing-success"`. | Hermes | `main/constants.js` | After existing WS constants (line ~43). |
+| 2 | **Server emits connection-attempt event** — In `handleConnection()`, after `_clients.add(client)` (line 145), emit push event: `const mw = _ctx?.getMainWindow?.(); if (mw && !mw.isDestroyed()) mw.webContents.send("ws-connection-attempt", { timestamp: Date.now() })`. Only emit if client is NOT already authenticated (which it never is at this point — `authenticated: false` is set at line 141). | Hermes | `main/ws-server.js` | After line 145 (`_clients.add(client)`). Import constants if needed. |
+| 3 | **Server emits pairing-success event** — In `handleMessage()`, after successful pairing (line 224-225, where `client.authenticated = true` and `pair-ok` is sent) AND after successful auth (line 239, where `client.authenticated = true` and `auth-ok` is sent): emit `mw.webContents.send("ws-pairing-success", { timestamp: Date.now() })`. | Hermes | `main/ws-server.js` | Lines 224-225 (pair success) and line 239-240 (auth success). Same mainWindow pattern as Task 2. |
+| 4 | **Expose push listeners in preload** — Add `onWsConnectionAttempt` and `onWsPairingSuccess` listeners following the exact pattern at lines 178-217 (ipcRenderer.on with cleanup return). | Hermes | `preload.js` | After line 217 (after last `onXxx` listener). Two new entries in the contextBridge `electronAPI` object. |
+| 5 | **Create PairingBanner component** — New component `src/components/PairingBanner.tsx`. Shows when connection attempt detected, displays pairing code with countdown timer, dismiss button. Auto-dismisses on pairing success or code expiry. Props: `visible: boolean`, `code: string`, `expiresAt: number`, `onDismiss: () => void`. Styled as a floating card with accent border, positioned at top of parent with margin. | Hephaestus | `src/components/PairingBanner.tsx` (new file) | New component. CSS in `src/styles/global.css` — add `.pairing-banner` class with styles. |
+| 6 | **Wire push events in LibraryContainer** — Subscribe to `onWsConnectionAttempt` and `onWsPairingSuccess` via `window.electronAPI`. On connection-attempt: fetch short code via `getWsShortCode()`, show PairingBanner with code + expiry. On pairing-success: hide banner. On dismiss: hide banner, set 60s cooldown (don't show again for the same session within 60s). Follow the useEffect cleanup pattern from `useLibrary.ts` lines 17-28. | Hephaestus | `src/components/LibraryContainer.tsx` | Near existing useEffect hooks. Add state for `showPairingBanner`, `pairingCode`, `pairingExpiresAt`. Render `<PairingBanner>` at top of library content area. |
+| 7 | **Suppress banner when already paired** — Before showing banner on connection-attempt, check current connection status via `getWsShortCode()`. If `status === "connected"`, suppress (this is a re-auth, not a new pairing). Only show banner when status is `"disconnected"` or `"connecting"`. | Hermes | `src/components/LibraryContainer.tsx` | Inside the `onWsConnectionAttempt` handler from Task 6. Add status check before `setShowPairingBanner(true)`. |
+| 8 | **Reduce polling in ConnectorsSettings** — With push events available, the 5s polling in ConnectorsSettings (lines 37-45) can be supplemented: subscribe to `onWsPairingSuccess` to instantly update status on pairing, reducing reliance on polling. Keep polling as fallback but increase interval to 15s. | Hermes | `src/components/settings/ConnectorsSettings.tsx` | Lines 37-45: change `5000` to `15000`. Add `onWsPairingSuccess` subscription that calls `setConnectionStatus("connected")` immediately. |
+| 9 | **CSS for PairingBanner** — `.pairing-banner`: background `var(--surface)`, `border: 2px solid var(--accent)`, `border-radius: 8px`, `padding: 16px`, `margin: 12px`, `display: flex`, `align-items: center`, `gap: 12px`. Code display: `font-family: monospace`, `font-size: 1.4em`, `letter-spacing: 0.15em`, `color: var(--accent)`. Dismiss button: ghost style. Countdown: `color: var(--text-secondary)`. Entrance animation: `translateY(-8px) → 0` with `opacity: 0 → 1`, 200ms ease. | Hermes | `src/styles/global.css` | Add after existing `.connectors-` styles or at end of components section. |
+| 10 | **Tests** — ≥10 new tests: (a) connection-attempt event emitted when unauthenticated client connects, (b) pairing-success event emitted on pair-ok, (c) pairing-success event emitted on auth-ok, (d) banner shows on connection-attempt when status is disconnected, (e) banner suppressed when already connected, (f) banner dismisses on pairing-success, (g) banner dismisses on user click, (h) 60s cooldown suppresses repeat banner, (i) preload listeners return cleanup functions, (j) polling interval is 15s not 5s. | Hippocrates | `tests/` | New test file: `tests/autoDiscoveryPairing.test.ts` |
+| 11 | **`npm test` + `npm run build`** — Full tier. | Hippocrates | — | — |
+| 12 | **Solon** — Spec compliance. | Solon | — | — |
+| 13 | **Herodotus** — Doc updates. | Herodotus | All 6 governing docs | — |
+| 14 | **Git** | Hermes | — | Branch: `sprint/ext-enr-b-auto-discovery` |
+
+**Execution Sequence:**
+1. Read phase — all WHERE files
+2. Tasks 1-4 (constants, server events, preload) — sequential (each builds on prior)
+3. Task 5 (PairingBanner component) + Task 9 (CSS) — parallel with Tasks 2-4
+4. Task 6 (LibraryContainer wiring) — after Tasks 4 + 5
+5. Task 7 (suppress when paired) — after Task 6
+6. Task 8 (reduce polling) — after Task 4
+7. Tasks 10-11 (tests + build)
+8. Tasks 12-14 (verify + docs + git)
+
+**SUCCESS CRITERIA:**
+1. Server emits `"ws-connection-attempt"` event when unauthenticated client connects
+2. Server emits `"ws-pairing-success"` event on successful pair or auth
+3. Preload exposes `onWsConnectionAttempt` and `onWsPairingSuccess` with cleanup returns
+4. PairingBanner appears in library screen when extension connection detected
+5. Banner shows current pairing code with countdown timer
+6. Banner auto-dismisses on successful pairing
+7. Banner suppressed when already connected (no false prompts on re-auth)
+8. 60s cooldown prevents banner re-appearing immediately after dismiss
+9. ConnectorsSettings polling reduced to 15s (push events handle instant updates)
+10. Entrance animation on banner (slide down + fade in, 200ms)
+11. All existing tests pass, `npm run build` succeeds
+12. ≥10 new tests in `tests/autoDiscoveryPairing.test.ts`
+
+**Tier:** Full | **Depends on:** EXT-ENR-A
+
+---
+
+## NARR-TIMING: Real Word-Level Timestamps from Kokoro TTS ✅ COMPLETED
+
+> Full spec archived to `docs/project/ROADMAP_ARCHIVE.md`. **Result:** All 16 success criteria met, 1,717 tests passing (18 new in `tests/narrTiming.test.ts`), build succeeds. v1.44.0. 2026-04-07.
+
+**Goal:** Replace the character-count heuristic (`computeWordWeights`) with real per-word timestamps derived from Kokoro's duration tensor. The narration cursor consistently runs ahead of the audio because the heuristic treats word duration as proportional to character count. Kokoro's ONNX text encoder already computes per-phoneme durations during inference — the kokoro-js wrapper just discards them. A ~60-line fork surfaces this data, aligns it to words, and feeds validated timestamps into the audio scheduler.
+
+**Version:** v1.44.0 | **Branch:** `sprint/narr-timing` | **Tier:** Full (npm test + npm run build — touches scheduler, pipeline, and worker)
+
+**Problem:** `computeWordWeights` distributes chunk duration across words proportionally to character length (clamped 2–20, with 1.12x sentence-end and 1.05x clause-end multipliers). Short function words get over-allocated, long content words get under-allocated, and the error accumulates across every chunk. The heuristic also has zero knowledge of Kokoro's natural inter-word silence — the cursor advances through pauses that should be visible holds.
+
+**Plan document:** `NARR-TIMING-PLAN/NARR-TIMING_Plan.md` — comprehensive technical plan with explicit code for all changes, revised through two independent audit rounds (15 findings, all incorporated). **CLI MUST read this plan before implementation.** The plan contains the exact fork code, validation logic, and edge case handling.
+
+### Design Decisions (from plan + 2 audit rounds)
+
+1. **RawAudio return type preserved** — Fork attaches `_durations` (on `generate_from_ids`) and `wordTimestamps` (on `generate`) as non-enumerable properties via `Object.defineProperty`. No API breakage for `stream()` or existing callers.
+2. **4-layer validation** — Layer 1: token count check (gross phonemization divergence). Layer 2: waveform drift with split accumulator (EOS/tail included). Layer 2b: fail-closed token walk (throws on underrun). Layer 3: scheduler acceptance (monotonicity, bounds, word correspondence, scaled tolerance).
+3. **Split accumulator** — `sampleOffset` tracks word timestamps (stops at last aligned word). `totalPredictedSamples` walks all remaining tokens including EOS for drift validation. Resolves the "endTime excludes trailing pause" vs "predicted duration should match waveform" contradiction.
+4. **Fail-closed token walk** — Token accumulation and separator consumption throw immediately when the tensor can't provide expected tokens, instead of silently clipping.
+5. **Scaled tolerances** — `min(40ms, 5% of speech duration)` instead of fixed 100ms. Short chunks get strict validation.
+6. **Graceful fallback** — Any alignment failure (fork error, validation failure, edge case) falls back to existing `computeWordWeights` heuristic. Narration never breaks.
+7. **patch-package fork** — Targets built `dist/` artifacts (both CJS `dist/kokoro.cjs` and ESM `dist/kokoro.js`). Must cover both packaged-app and dev-mode import paths.
+8. **`endTime` contract** — End of voiced portion, excluding trailing inter-word pause. Gap between `word[i].endTime` and `word[i+1].startTime` is silence. Currently only `startTime` is used for scheduling; `endTime` preserved for future silence-aware cursor hold (IDEAS.md H6).
+
+### Baseline
+
+Existing infrastructure:
+- `computeWordWeights()` in `audioScheduler.ts` (lines 53-72) — the heuristic being replaced (retained as fallback)
+- `computeWordBoundaries()` in `audioScheduler.ts` (lines 211-239) — distributes timing using heuristic weights
+- `ScheduledChunk` interface in `audioScheduler.ts` (lines 76-88) — chunk data structure (gains `wordTimestamps` field)
+- `generate()` in `main/tts-worker.js` (lines 106-124) — TTS worker function
+- Message handler in `main/tts-worker.js` (lines 140-156) — dispatches to `generate()`
+- `PipelineConfig.generateFn` in `generationPipeline.ts` (lines 29-34) — IPC wrapper type
+- `produceChunk()` in `generationPipeline.ts` (line 292) — builds chunks and calls `generateFn`
+- `generateFn` call site in `generationPipeline.ts` (line 330) — `config.generateFn(text, voiceId, speed)`
+- kokoro-js `generate_from_ids()` — discards durations at `const { waveform: o } = await this.model(inputs)`
+- kokoro-js `generate()` — calls `generate_from_ids`, returns `RawAudio` with no timestamps
+- `@huggingface/transformers` `generate_speech()` — already returns `{ waveform, durations }` (no change needed)
+
+### WHERE (Read Order)
+
+1. `CLAUDE.md` — rules and architecture
+2. `docs/governance/LESSONS_LEARNED.md` — scan for TTS, narration, timestamp, scheduler entries
+3. **`NARR-TIMING-PLAN/NARR-TIMING_Plan.md`** — **MUST READ IN FULL** — contains all fork code, alignment logic, validation functions, edge case handling, and audit resolutions. This is the authoritative implementation reference.
+4. `ROADMAP.md` — this section
+5. `main/tts-worker.js` — `generate()` function (lines 106-124), message handler (lines 140-156), `loadModel()` CJS/ESM import paths (lines 21-54)
+6. `src/utils/audioScheduler.ts` — `computeWordWeights()` (lines 53-72), `ScheduledChunk` interface (lines 76-88), `computeWordBoundaries()` (lines 211-239)
+7. `src/utils/generationPipeline.ts` — `PipelineConfig` interface (lines 27-63), `produceChunk()` (lines 292-390), `generateFn` call (line 330)
+8. `node_modules/kokoro-js/dist/kokoro.cjs` — locate `generate_from_ids` and `generate` methods (the discard point)
+9. `node_modules/kokoro-js/dist/kokoro.js` — ESM variant of the same
+10. `NARR-TIMING-PLAN/reference/transformers_generate_speech.js` — shows that `@huggingface/transformers` already returns `{ waveform, durations }`
+11. `NARR-TIMING-PLAN/reference/kokoro_js_discard_point.js` — shows the exact discard: `const { waveform: o } = await this.model(inputs)`
+
+### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena (electron-scope + format-scope) | **Fork kokoro-js: Surface duration tensor.** Apply the fork diff from plan §4.2. Three changes to kokoro-js source: (a) `generate_from_ids` — destructure both `waveform` and `durations` from `this.model()`, attach `_durations` as non-enumerable property on `RawAudio`. (b) `generate` — accept optional `words` param, call `_alignWordsToTimestamps()` when words + durations available, attach `wordTimestamps` as non-enumerable property on `RawAudio`. (c) Add `_alignWordsToTimestamps()` method and `computeWordTimestamps()` function — the full alignment + validation logic from plan §4.2. **Must patch both `dist/kokoro.cjs` AND `dist/kokoro.js`.** Use `patch-package` to create persistent patch. See plan §4.5 for CJS/ESM procedure. | `node_modules/kokoro-js/dist/kokoro.cjs`, `node_modules/kokoro-js/dist/kokoro.js`, `patches/kokoro-js+VERSION.patch` (new) | In both dist files: find `generate_from_ids` method (search for `{ waveform: o }` or `waveform:o`), find `generate` method (search for `async generate(text`). Add `computeWordTimestamps` and `_alignWordsToTimestamps` as new functions/methods. |
+| 2 | Hermes (electron-scope) | **Update tts-worker.js: Pass words, relay timestamps.** (a) Add `words` parameter to `generate()` function signature (line 106). (b) Pass `words` to `ttsInstance.generate()` call (line 112): change to `ttsInstance.generate(text, { voice, speed, words: words \|\| null })`. (c) Add `wordTimestamps: result.wordTimestamps \|\| null` to the result message (line 119). (d) Update message handler case `"generate"` (line 150) to pass `msg.words`. See plan §5.1 for exact code. | `main/tts-worker.js` | Line 106: add `words` param. Line 112: add `words` to options. Line 119: add `wordTimestamps` to msg. Line 150: add `msg.words`. |
+| 3 | Hephaestus (renderer-scope) | **Update generationPipeline.ts: Pass words into TTS call.** (a) Add `words?: string[]` parameter to `PipelineConfig.generateFn` type (line 29). (b) Add `wordTimestamps` to the generateFn return type (line 30-34). (c) In `produceChunk()` at line 330, change `config.generateFn(text, config.getVoiceId(), config.getSpeed())` to also pass `chunkWords`. (d) Add `wordTimestamps: result.wordTimestamps \|\| null` to the `ScheduledChunk` construction (~line 360). See plan §5.2 for exact code. | `src/utils/generationPipeline.ts` | Lines 29-34: update `generateFn` type signature + return type. Line 330: add `chunkWords` argument. ~Line 360: add `wordTimestamps` to chunk object. |
+| 4 | Hephaestus (renderer-scope) | **Update audioScheduler.ts: Accept real timestamps, bypass heuristic.** (a) Add `wordTimestamps?: { word: string; startTime: number; endTime: number }[] \| null` to `ScheduledChunk` interface (after line 87). (b) Add `validateWordTimestamps()` function — exact code in plan §5.3. Checks: length match, finite/non-negative, endTime >= startTime, monotone startTimes, word correspondence, scaled overshoot tolerance, zero-duration count. (c) Rewrite `computeWordBoundaries()` (lines 211-239): check `chunk.wordTimestamps` first → validate → use real timestamps for boundaries if valid → fall through to existing heuristic on failure. Include silenceMs-aware speech duration calculation. Update dev telemetry to record `timestampSource` and `realTimestamps`. See plan §5.3 for exact code. | `src/utils/audioScheduler.ts` | Line 87: add `wordTimestamps` to `ScheduledChunk`. Before line 211: add `validateWordTimestamps()` (~35 lines). Lines 211-239: rewrite `computeWordBoundaries()` body (~75 lines replacing ~28 lines). |
+| 5 | Hephaestus (renderer-scope) | **Wire generateFn caller to pass words.** In `src/hooks/useNarration.ts` (or wherever `generateFn` is constructed as an IPC wrapper), ensure the `words` parameter is forwarded through the IPC `generate` message to the worker. The IPC call site that posts `{ type: "generate", id, text, voice, speed }` must add `words` to the message. Find this by tracing from `PipelineConfig.generateFn` back to the IPC call. | `src/hooks/useNarration.ts` or `src/utils/kokoroStrategy.ts` | Trace from `generateFn` in pipeline config. Find the IPC `postMessage` or `invoke` call. Add `words` field. |
+| 6 | Hermes | **Install patch-package** (if not already present). Add `"postinstall": "patch-package"` to `package.json` scripts. Verify `patches/` directory is tracked by git. | `package.json` | Scripts section. |
+| 7 | Hippocrates | **Tests** — ≥15 new tests covering: (a) `computeWordTimestamps` produces correct timestamps for a known duration tensor, (b) token walk throws on underrun (fail-closed), (c) drift check throws when predicted vs actual exceeds scaled tolerance, (d) monotonicity check throws on non-monotone timestamps, (e) zero-token punctuation words get zero-duration entries, (f) `validateWordTimestamps` accepts valid timestamps, (g) `validateWordTimestamps` rejects length mismatch, (h) `validateWordTimestamps` rejects non-monotone startTimes, (i) `validateWordTimestamps` rejects word string mismatch, (j) `validateWordTimestamps` rejects overshoot beyond scaled tolerance, (k) `computeWordBoundaries` uses real timestamps when valid, (l) `computeWordBoundaries` falls back to heuristic when timestamps null, (m) `computeWordBoundaries` falls back when validation fails, (n) silenceMs correctly excluded from speech duration in validation, (o) existing `computeWordWeights` heuristic unchanged (regression). | `tests/` | New test file: `tests/narrTiming.test.ts` |
+| 8 | Hippocrates | **CJS/ESM parity check** — Verify both import paths resolve to patched code. Create a minimal test script that `require()`s the CJS path and dynamically `import()`s the ESM path, calls `generate()` with `words`, and asserts `wordTimestamps` exists on the result. This can be a test or a standalone verification script. | `tests/` or `scripts/` | New file. |
+| 9 | Hippocrates | **`npm test` + `npm run build`** — Full tier. All 1,609+ tests pass, build succeeds. | — | — |
+| 10 | Solon | **Spec compliance** — Verify all 16 SUCCESS CRITERIA items. Cross-reference plan §11 (audit findings table) to confirm all 15 audit resolutions are implemented. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md (version, sprint list, architecture note re: real timestamps), ROADMAP.md (mark NARR-TIMING complete), SPRINT_QUEUE.md (remove entry, log to completed), LESSONS_LEARNED.md (LL entry for fork maintenance pattern and patch-package workflow). Update TECHNICAL_REFERENCE.md § "Narrate Mode Architecture" to document real-timestamp pipeline. | All 6 governing docs + TECHNICAL_REFERENCE.md | — |
+| 12 | Hermes | **Git: commit, merge, push** | — | Branch: `sprint/narr-timing` |
+
+### Execution Sequence
+
+```
+READ PHASE (mandatory):
+  Read all WHERE files in order. NARR-TIMING_Plan.md is the primary reference.
+    ↓
+Task 6 (patch-package setup)         — prerequisite for fork
+    ↓
+Task 1 (kokoro-js fork)              — Athena (cross-system: fork + patch both CJS/ESM)
+    ↓
+Task 2 (tts-worker.js)               — Hermes (mechanical: add param, relay field)
+    ↓
+Task 5 (wire IPC caller)             — Hephaestus (trace generateFn to IPC call)
+Task 3 (generationPipeline.ts)       — Hephaestus (parallel with Task 5 if different files)
+    ↓
+Task 4 (audioScheduler.ts)           — Hephaestus (depends on Task 3 types)
+    ↓
+Tasks 7-8 (tests + parity check)    — after all implementation
+Task 9 (npm test + build)            — after tests written
+    ↓
+Task 10 (Solon spec compliance)
+Task 11 (Herodotus docs)
+Task 12 (Git)
+```
+
+### SUCCESS CRITERIA
+
+1. kokoro-js fork captures `durations` from `this.model()` return (no longer discarded)
+2. `generate_from_ids` returns `RawAudio` with `_durations` attached as non-enumerable property
+3. `generate` returns `RawAudio` with `wordTimestamps` attached as non-enumerable property (when `words` provided)
+4. `stream()` and all other kokoro-js internal callers continue to work unchanged (RawAudio type preserved)
+5. `tts-worker.js` accepts `words` in generate message and relays `wordTimestamps` in result
+6. `generationPipeline.ts` passes chunk words through to `generateFn` and attaches `wordTimestamps` to `ScheduledChunk`
+7. `audioScheduler.ts` uses real timestamps when present and valid; falls back to `computeWordWeights` heuristic otherwise
+8. `validateWordTimestamps` checks: length, finite/non-negative, endTime >= startTime, monotone startTimes, word correspondence, scaled overshoot tolerance (`min(40ms, 5% of speech duration)`), zero-duration count
+9. Token walk is fail-closed — throws on tensor underrun (not silent clip)
+10. Drift validation uses split accumulator (`totalPredictedSamples` includes EOS/tail; `sampleOffset` does not)
+11. Durations are rounded and clamped per-token before accumulation (mirrors model's `round().clamp_()`)
+12. `silenceMs` correctly excluded from speech duration in scheduler validation (timestamps validated against speech portion only)
+13. `patch-package` patch file exists in `patches/` and is applied on `npm install`
+14. Both CJS and ESM import paths resolve to patched kokoro-js code (parity check passes)
+15. ≥15 new tests in `tests/narrTiming.test.ts`
+16. `npm test` passes (1,609+ tests), `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** None — independent of FLOW-INF and EXT-ENR tracks. Can run in parallel with Track A/B.
+
+---
+
+### Sprint TTS-CONT-1: Readiness-Driven Section & Cross-Book Continuity ✅ COMPLETED (v1.60.0, 2026-04-17)
+
+**Goal:** Remove fixed timer waits from narration handoffs so section transitions and cross-book continuation resume as soon as the next reading surface is actually ready, not when an arbitrary sleep expires.
+
+**Version:** v1.60.0 | **Branch:** `sprint/tts-cont-1-readiness-continuity` | **Tier:** Full
+
+**Problem:** The core TTS stack is now structurally correct, but continuity still carries artificial delay floors. Same-book flow narration still waits a fixed `300ms` after `goToSection()` before calling `narration.updateWords(...)`, and foliate fallback still waits a fixed `300ms` before extraction + `resyncToCursor(0, effectiveWpm)`. Cross-book flow+narration still holds a blocking overlay for `2500ms` plus an additional `300ms` resume delay even when the next book is ready sooner. These waits are now the biggest avoidable contributors to perceived interruption.
+
+**Design decisions:**
+- **Section handoff becomes readiness-driven.** Add an explicit foliate readiness promise instead of sleeping `300ms`. Handoff resumes when the target section has loaded, its spans are stamped, and the view API can resolve the target section as active.
+- **Fallback section ownership stays passive but truthful.** `useFoliateSync` should only restart narration after the next section actually exposes words, not after a guessed delay.
+- **Cross-book overlay becomes non-blocking.** Keep the visual transition affordance, but do not block opening the next book or resuming narration behind a fixed `2500ms + 300ms` wall. Start the next open immediately, resume when the next reader is ready, and cap the overlay with a fallback timeout rather than a minimum dwell.
+- **Handoff latency becomes a measured release metric.** Extend the TTS eval schema and runner so section/book handoff latency is recorded, summarized, and can become a gate later.
+
+**Baseline:**
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts): same-book handoff timer after `goToSection()`; cross-book timeout ownership.
+- [useFoliateSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFoliateSync.ts): fallback `setOnSectionEnd` flow with `api.next()` + `setTimeout(300)`.
+- [FoliatePageView.tsx](C:/Users/estra/Projects/Blurby/src/components/FoliatePageView.tsx): current `goToSection()` API but no explicit readiness resolver for handoff consumers.
+- [constants.ts](C:/Users/estra/Projects/Blurby/src/constants.ts): `CROSS_BOOK_TRANSITION_MS = 2500`, `CROSS_BOOK_FLOW_RESUME_DELAY_MS = 300`.
+- [types/eval.ts](C:/Users/estra/Projects/Blurby/src/types/eval.ts) and [scripts/tts_eval_runner.mjs](C:/Users/estra/Projects/Blurby/scripts/tts_eval_runner.mjs): handoff failure accounting exists, but no explicit section/book handoff latency measurement.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** flow/narration continuity, foliate readiness, transition timing, eval latency accounting
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useFoliateSync.ts`
+  - `src/components/ReaderContainer.tsx`
+  - `src/components/FoliatePageView.tsx`
+  - `src/types/eval.ts`
+
+#### Shared-Core Touches
+
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useFoliateSync.ts`
+- `src/components/FoliatePageView.tsx`
+- `src/constants.ts`
+- `src/types/eval.ts`
+- `scripts/tts_eval_runner.mjs`
+
+#### Merge Order
+
+- Merge before `TTS-RATE-2` and `TTS-START-1`. This sprint establishes the continuity timing baseline those sprints should measure against.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/hooks/useFlowScrollSync.ts` — active same-book and cross-book narration handoffs
+5. `src/hooks/useFoliateSync.ts` — fallback section-end ownership
+6. `src/components/FoliatePageView.tsx` — `FoliateViewAPI`, `goToSection()`, section load flow
+7. `src/components/ReaderContainer.tsx` — reader-level cross-book / foliate integration
+8. `src/constants.ts` — cross-book transition constants
+9. `src/types/eval.ts` — handoff-related lifecycle metrics
+10. `scripts/tts_eval_runner.mjs` and `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Add explicit foliate section-readiness contract** — Extend `FoliateViewAPI` with a readiness method such as `waitForSectionReady(sectionIndex, timeoutMs?)`. Resolve only after the requested section is active, spans are stamped, and the view can safely serve word queries for that section. | `src/components/FoliatePageView.tsx` | `FoliateViewAPI` interface near `goToSection` (~lines 330-350), imperative API block near `goToSection: async (sectionIndex)` (~lines 966-980), section load handler where docs are wrapped/stamped (~lines 560-740). |
+| 2 | worker-sonnet | **Replace same-book flow handoff sleep with readiness-driven continuation** — In `useFlowScrollSync`, await the new foliate readiness contract after `goToSection(nextSection.sectionIndex)` and call `narration.updateWords(..., { mode: "handoff" })` immediately when ready. Remove the fixed `setTimeout(..., 300)` path. | `src/hooks/useFlowScrollSync.ts` | Same-book handoff block around `goToSection` and `setTimeout` (~lines 294-305). |
+| 3 | worker-sonnet | **Replace foliate fallback sleep with readiness-driven extraction/resync** — In `useFoliateSync`, keep fallback ownership only while extraction is incomplete, but remove the fixed `300ms` timer. Restart only after the next section is actually available and `extractFoliateWords()` returns non-empty words. | `src/hooks/useFoliateSync.ts` | Fallback `setOnSectionEnd` block around `api.next()` / `setTimeout` / `narration.resyncToCursor(0, effectiveWpm)` (~lines 214-225). |
+| 4 | Athena | **Make cross-book continuation non-blocking** — Replace the current blocking `CROSS_BOOK_TRANSITION_MS + CROSS_BOOK_FLOW_RESUME_DELAY_MS` chain with immediate next-book open plus readiness-driven resume. Keep the overlay, but convert it from minimum dwell to max fallback timeout. Add new constants for fallback timeout and overlay fade if needed. | `src/hooks/useFlowScrollSync.ts`, `src/constants.ts`, `src/components/ReaderContainer.tsx` | `CROSS_BOOK_TRANSITION_MS` / `CROSS_BOOK_FLOW_RESUME_DELAY_MS` constants (~lines 443-445), cross-book timeout scheduling in `useFlowScrollSync` (~lines 188-199 and 342-353), any reader-level transition state plumbing in `ReaderContainer`. |
+| 5 | worker-sonnet | **Add handoff-latency instrumentation and gate surfaces** — Extend eval trace schema and runner summaries to record section-handoff latency and cross-book resume latency. Update matrix/runbook docs to include acceptable continuity budgets. | `src/types/eval.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Add latency fields near lifecycle summary types in `src/types/eval.ts`; aggregate and report in `scripts/tts_eval_runner.mjs`; update the runbook’s rate/continuity release pattern section. |
+| 6 | Hippocrates | **Tests** — Add focused tests for: (a) same-book flow handoff waits on readiness signal instead of fixed sleep, (b) fallback section-end ownership restarts only after words exist, (c) cross-book resume can occur before the old 2.8s floor when the next reader is ready, (d) overlay fallback timeout still prevents deadlock, (e) eval runner captures section/book handoff latency. Target ≥12 new or expanded tests. | `tests/` | Extend `tests/narrationLayer.test.ts`, `tests/readerDecomposition.test.ts`, `tests/ttsEvalLifecycle.test.ts`, plus add any new continuity-focused file as needed. |
+| 7 | Hippocrates | **Verification** — Run focused continuity suites, gated matrix smoke covering handoff scenarios, full `npm test`, and `npm run build`. | — | — |
+| 8 | Solon | **Spec compliance** — Verify all success criteria and confirm no new fixed waits remain on the active handoff path. | — | — |
+| 9 | Plato | **Quality review** — Review continuity behavior, readiness truth, and fallback timeout policy for regressions or hidden deadlocks. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` closeout notes when complete. | Governing docs + runbook | — |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/tts-cont-1-readiness-continuity` |
+
+#### SUCCESS CRITERIA
+
+1. Same-book flow narration handoff no longer depends on a fixed `300ms` timer.
+2. Foliate fallback section-end restart no longer depends on a fixed `300ms` timer.
+3. Handoff resumes only after the target section is actually ready to serve word data.
+4. Cross-book narration open starts immediately after finish bookkeeping; no fixed `2500ms + 300ms` minimum dwell remains in the hot path.
+5. Cross-book overlay remains visible as UX affordance but never blocks continuation past a configurable fallback timeout.
+6. Section-hand-off latency is recorded in eval artifacts.
+7. Cross-book-resume latency is recorded in eval artifacts.
+8. Existing handoff failure accounting remains correct.
+9. ≥12 new or expanded continuity tests land.
+10. `npm test` passes.
+11. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-HARDEN-2, TTS-RATE-1
+
+**Completion note:** Completed on 2026-04-17. Same-book and cross-book narration handoffs now resume from actual foliate/read-surface readiness instead of sleeping on fixed `300ms` and `2500ms + 300ms` timer floors. `FoliatePageView` exposes an explicit section-readiness wait contract, `useFoliateSync` and `useFlowScrollSync` consume that truth for fallback and active handoff paths, and the cross-book overlay is now fallback-only rather than a blocking minimum dwell.
+
+**Verification:** Continuity coverage expanded with `tests/ttsContinuityReadiness.test.ts` plus updates in `tests/readerDecomposition.test.ts`, `tests/ttsEvalLifecycle.test.ts`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with `npm test` (`123` files, `1976` tests), `npm run build`, a gated handoff matrix with non-null cross-book latency, and a section fixture run that emitted non-null section-handoff latency. The existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint TTS-RATE-2: Segmented Live Kokoro Rate Response ✅ COMPLETED (v1.61.0, 2026-04-17)
+
+**Goal:** Make same-bucket Kokoro speed changes feel materially more live by bounding response lag to a short playback segment instead of the full currently playing chunk, while preserving pitch and avoiding restart behavior.
+
+**Version:** v1.61.0 | **Branch:** `sprint/tts-rate-2-segmented-live-response` | **Tier:** Full
+
+**Problem:** `TTS-RATE-1` fixed pitch-shift and full-restart behavior, but same-bucket edits still only affect future buffered chunks. The currently playing source keeps its old tempo until that chunk ends. On long chunks, that can leave rate response feeling late even though the architecture is technically continuity-safe.
+
+**Design decisions:**
+- **Keep generation/cache buckets unchanged.** This sprint does not redesign `1.0 / 1.2 / 1.5` generation buckets.
+- **Split playback into short scheduler segments.** Generated chunks stay cached/generated as they are, but Kokoro playback is subdivided into short scheduler-ready segments using real word timestamps when available. This bounds live rate-response lag without requiring a full real-time worklet rewrite.
+- **Rate authority remains centralized.** `resolveKokoroRatePlan(...)` stays the only speed authority. Segment sizing must not create a new rate path.
+- **Bounded lag, not impossible zero-lag.** The target is that same-bucket edits take effect by the next short segment boundary, not midway through an already-started source.
+- **Measure response latency explicitly.** Add matrix/test coverage that records how long it takes for a speed edit to become audible.
+
+**Baseline:**
+- [useNarration.ts](C:/Users/estra/Projects/Blurby/src/hooks/useNarration.ts): same-bucket edits call `kokoroStrategy.refreshBufferedTempo()`.
+- [audioScheduler.ts](C:/Users/estra/Projects/Blurby/src/utils/audioScheduler.ts): `refreshBufferedTempo()` preserves already-started sources and only rebuilds future ones.
+- [kokoroStrategy.ts](C:/Users/estra/Projects/Blurby/src/hooks/narration/kokoroStrategy.ts): chunk-level scheduling and rate metadata propagation.
+- [audio/tempoStretch.ts](C:/Users/estra/Projects/Blurby/src/utils/audio/tempoStretch.ts): existing pitch-preserving stretch used before scheduling.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** Kokoro rate continuity, scheduler segmentation, rate-response measurement
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/hooks/useNarration.ts`
+  - `src/hooks/narration/kokoroStrategy.ts`
+  - `src/utils/audioScheduler.ts`
+  - `src/utils/audio/tempoStretch.ts`
+  - `src/constants.ts`
+
+#### Shared-Core Touches
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/utils/audioScheduler.ts`
+- `src/utils/audio/tempoStretch.ts`
+- `src/constants.ts`
+- `src/types/eval.ts`
+
+#### Merge Order
+
+- Merge after `TTS-CONT-1` and before `TTS-START-1`.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/hooks/useNarration.ts`
+5. `src/hooks/narration/kokoroStrategy.ts`
+6. `src/utils/audioScheduler.ts`
+7. `src/utils/audio/tempoStretch.ts`
+8. `src/utils/generationPipeline.ts`
+9. `tests/audioSchedulerTempo.test.ts`
+10. `tests/kokoroStrategyRateContinuity.test.ts`
+11. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define bounded live-rate segment contract** — Add constants and types for maximum live-rate segment duration and any min/max word constraints so the rate-response budget is explicit and shared. | `src/constants.ts`, `src/types/narration.ts` or adjacent rate metadata types | Add new live-rate constants near existing TTS/rate constants; add segment metadata type near Kokoro scheduler metadata definitions. |
+| 2 | worker-sonnet | **Add Kokoro playback-segmentation helper** — Introduce a helper that slices generated chunk audio plus word timestamps into short scheduler-ready segments while preserving parent chunk identity and exact global word indices. Prefer real timestamps; fall back conservatively when unavailable. | `src/utils/audio/segmentKokoroChunk.ts` (new), `src/utils/audio/tempoStretch.ts` if needed | New helper file; call sites wired from Kokoro strategy/scheduler boundary where full chunks currently enter scheduling. |
+| 3 | Athena | **Update Kokoro strategy to schedule segments instead of whole chunks** — Keep generation/cache output unchanged, but expand live playback into short segments with inherited rate-plan metadata and parent-chunk linkage. | `src/hooks/narration/kokoroStrategy.ts` | `onChunkReady` handling near scheduler chunk creation (~lines 108-146), cached-chunk path near `loadCached()` (~lines 161-170), any related strategy types. |
+| 4 | worker-sonnet | **Teach audioScheduler to retime segmented future playback** — Preserve currently started segment, but allow same-bucket rate edits to rebuild the unscheduled remainder of the current parent chunk plus future segments. Ensure response lag is bounded by the current segment, not the whole generated chunk. | `src/utils/audioScheduler.ts` | `ScheduledChunk` type near top, `scheduleChunk()` pipeline (~lines 467-536), `refreshBufferedTempo()` (~lines 540-569), and any source bookkeeping structures. |
+| 5 | Hermes | **Keep cursor/highlight timing aligned to segmented playback** — Ensure truth-sync and chunk-handoff semantics remain correct when one generated chunk becomes multiple scheduler segments. | `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts` | `deliverChunkBoundary()` and truth-sync counters near lines 212-223; `onWordAdvance`/handoff handling in `useNarration.ts` around Kokoro callback wiring (~lines 448-486). |
+| 6 | worker-sonnet | **Add rate-response instrumentation and matrix coverage** — Record same-bucket rate-change response latency and update the matrix/runbook so live rate responsiveness is measured, not inferred. | `src/types/eval.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Add latency field(s) beside existing lifecycle/rate metrics; update runner summary and runbook release criteria. |
+| 7 | Hippocrates | **Tests** — Add focused tests for: (a) segmentation preserves word order and timestamps, (b) same-bucket rate edits affect the current parent chunk’s unscheduled remainder, (c) no full restart occurs, (d) response lag is bounded by the configured max segment duration, (e) cursor/highlight truth remains monotonic. Target ≥14 new or expanded tests. | `tests/` | Extend `tests/audioSchedulerTempo.test.ts`, `tests/kokoroStrategyRateContinuity.test.ts`, `tests/useNarrationRateUpdate.test.tsx`, plus any new segment-helper test file. |
+| 8 | Hippocrates | **Verification** — Run focused rate suites, gated six-rate matrix, full `npm test`, and `npm run build`. | — | — |
+| 9 | Solon | **Spec compliance** — Verify the bounded-lag contract and confirm no same-bucket restart path reappears. | — | — |
+| 10 | Plato | **Quality review** — Review audible continuity assumptions, segment sizing, and response-latency tradeoffs. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and matrix runbook after closeout. | Governing docs + runbook | — |
+| 12 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/tts-rate-2-segmented-live-response` |
+
+#### SUCCESS CRITERIA
+
+1. Same-bucket Kokoro rate edits no longer wait for the full currently playing chunk to finish.
+2. Same-bucket rate edits still avoid full restart behavior.
+3. Pitch-preserving tempo shaping remains the only playback-shaping path for Kokoro.
+4. Response lag is bounded by the configured live-rate segment budget.
+5. Cursor/highlight truth remains monotonic across segmented playback.
+6. Cached and generated Kokoro chunks both enter the same segmented playback path.
+7. Rate-response latency is recorded in eval artifacts.
+8. The six-rate matrix remains PASS-capable with the new live response path.
+9. ≥14 new or expanded rate/continuity tests land.
+10. `npm test` passes.
+11. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-RATE-1, TTS-CONT-1
+
+**Completion note:** Completed on 2026-04-17. Same-bucket Kokoro rate edits now land on short scheduler playback segments instead of waiting for the full parent chunk to finish. Generated/cache buckets remain fixed, pitch-preserving tempo shaping remains the only playback-shaping path, scheduler boundary semantics stay parent-chunk aware, and runtime/eval artifacts now record trusted `rateResponseLatencyMs` from a real segment-start signal instead of piggybacking on generic audio callbacks.
+
+**Verification:** Segmentation and same-bucket live-response coverage expanded with `tests/segmentKokoroChunk.test.ts`, `tests/kokoroStrategyRateContinuity.test.ts`, `tests/audioSchedulerTempo.test.ts`, `tests/useNarrationRateUpdate.test.tsx`, `tests/ttsEvalLifecycle.test.ts`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with the focused rate-response slice (`5` files, `42` tests), the gated matrix (`artifacts/tts-eval/rate2-closeout`) reporting `Rate response latency p50/p95: 210 / 210 ms`, full `npm test` (`124` files, `1995` tests), and `npm run build`; the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint TTS-START-1: Startup Parity & Opening Cache Contract ✅ COMPLETED (v1.62.0, 2026-04-17)
+
+**Goal:** Make cached and uncached starts behave like the same product by warming and replaying the opening ramp with the same chunk-shape contract, while also hardening the renderer cache helper so exact replay does not depend on caller trivia.
+
+**Version:** v1.62.0 | **Branch:** `sprint/tts-start-1-startup-parity` | **Tier:** Full
+
+**Problem:** Live playback ramps `13 -> 26 -> 52 -> 104 -> 148`, but entry-coverage background caching still warms only cruise-sized chunks. Cached starts therefore begin from a different shape than uncached starts, which changes startup feel, pause cadence, and rate-response lag. Separately, `loadCachedChunk()` still has a misleading contract that only stays correct because the live caller passes a tail-sliced word array.
+
+**Design decisions:**
+- **One opening-ramp planner for live and cache paths.** Background entry coverage must warm the same opening ramp that live playback uses before continuing into cruise coverage.
+- **Cached and uncached starts should share the same first-chunk experience.** That includes first few chunk sizes, boundary shaping, and early same-bucket rate responsiveness.
+- **Make the renderer cache helper explicit and exact.** `loadCachedChunk()` should reconstruct from full-word context plus `startIdx`, not by relying on a tail-sliced array contract hidden in the caller.
+- **Measure startup parity directly.** Extend eval artifacts so cached-vs-uncached startup and opening-ramp shape can be compared.
+
+**Baseline:**
+- [generationPipeline.ts](C:/Users/estra/Projects/Blurby/src/utils/generationPipeline.ts): live opening ramp `13 -> 26 -> 52 -> 104 -> 148`.
+- [backgroundCacher.ts](C:/Users/estra/Projects/Blurby/src/utils/backgroundCacher.ts): entry coverage uses `TTS_CRUISE_CHUNK_WORDS` immediately.
+- [ttsCache.ts](C:/Users/estra/Projects/Blurby/src/utils/ttsCache.ts): cached replay slices `allWords.slice(0, wordCount)`.
+- [kokoroStrategy.ts](C:/Users/estra/Projects/Blurby/src/hooks/narration/kokoroStrategy.ts): current cache load path passes `words.slice(startIdx)`.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** startup latency parity, cache replay contract, opening coverage planner
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/utils/generationPipeline.ts`
+  - `src/utils/backgroundCacher.ts`
+  - `src/utils/ttsCache.ts`
+  - `src/hooks/narration/kokoroStrategy.ts`
+  - `src/constants.ts`
+
+#### Shared-Core Touches
+
+- `src/utils/generationPipeline.ts`
+- `src/utils/backgroundCacher.ts`
+- `src/utils/ttsCache.ts`
+- `src/hooks/narration/kokoroStrategy.ts`
+- `src/constants.ts`
+- `src/types/eval.ts`
+
+#### Merge Order
+
+- Merge after `TTS-CONT-1` and `TTS-RATE-2`. This sprint should build on the stabilized continuity and rate-response lane.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/utils/generationPipeline.ts`
+5. `src/utils/backgroundCacher.ts`
+6. `src/utils/ttsCache.ts`
+7. `src/hooks/narration/kokoroStrategy.ts`
+8. `src/hooks/useNarrationCaching.ts`
+9. `tests/tts7a-cacheCorrectness.test.ts`
+10. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Define shared opening-ramp planner contract** — Extract or formalize an opening-ramp plan API so live generation and entry-coverage caching both consume the same chunk-shape sequence from the current start position. | `src/utils/generationPipeline.ts`, `src/constants.ts` | Opening ramp definitions near `RAMP_SEQUENCE` / `getChunkSize()` (~lines 87-103); add any shared planner helpers/constants nearby or in a new helper file. |
+| 2 | worker-sonnet | **Make background entry coverage warm the opening ramp first** — Update `queueEntryCoverage` / `cacheBook()` so opening coverage uses the shared ramp sequence from the active start before switching to cruise chunks for the remaining coverage target. | `src/utils/backgroundCacher.ts` | Entry-coverage path in `cacheBook()` around `chunkSize = TTS_CRUISE_CHUNK_WORDS` and the `maxDurationMs` loop (~lines 90-126); any queueing logic around `queueEntryCoverage()` (~line 223). |
+| 3 | worker-sonnet | **Align useNarrationCaching with the new opening-ramp cache contract** — Ensure the reader’s entry-coverage queueing and active-book sync continue to pass the correct start position and rate bucket under the new opening planner. | `src/hooks/useNarrationCaching.ts`, `src/components/ReaderContainer.tsx` | Entry-coverage queueing in `useNarrationCaching` (~lines 121-136), live cursor updates in `ReaderContainer` around `backgroundCacherRef.current?.updateCursorPosition(idx)` (~line 405). |
+| 4 | Athena | **Fix `loadCachedChunk()` to reconstruct exact words from full context** — Replace the hidden tail-sliced-array contract with an exact signature using full words plus `startIdx`, so nonzero-start replay is self-defending. | `src/utils/ttsCache.ts`, `src/hooks/narration/kokoroStrategy.ts` | `loadCachedChunk()` signature and slice logic (~lines 21-45); cache-load call site in `kokoroStrategy.loadCached()` (~lines 161-170). |
+| 5 | worker-sonnet | **Expand startup-parity evaluation and docs** — Record cached-vs-uncached first-audio latency and opening-ramp shape in eval artifacts/runbook so parity is measured over time. | `src/types/eval.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md` | Add startup-parity metrics beside existing start latency fields; update runner summary and runbook release guidance. |
+| 6 | Hippocrates | **Tests** — Add focused tests for: (a) entry coverage uses the opening ramp before cruise, (b) cached start reconstructs exact nonzero-start word spans from full word arrays, (c) cached and uncached opening shapes match for the first ramp chunks, (d) startup-parity metrics are emitted. Target ≥12 new or expanded tests. | `tests/` | Extend `tests/tts7a-cacheCorrectness.test.ts`, add/extend background cacher and startup-parity suites as needed. |
+| 7 | Hippocrates | **Verification** — Run focused cache/startup suites, startup-parity eval run, full `npm test`, and `npm run build`. | — | — |
+| 8 | Solon | **Spec compliance** — Verify opening-ramp parity and exact cached replay on nonzero-start inputs. | — | — |
+| 9 | Plato | **Quality review** — Review startup consistency, cache contract clarity, and any remaining divergence between cached and uncached starts. | — | — |
+| 10 | Herodotus | **Documentation pass** — Update roadmap, queue, lessons learned, and matrix runbook after closeout. | Governing docs + runbook | — |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/tts-start-1-startup-parity` |
+
+#### SUCCESS CRITERIA
+
+1. Entry coverage warms the same opening ramp shape that live playback uses before cruise coverage continues.
+2. Cached starts and uncached starts share the same opening chunk sequence for the first ramp chunks.
+3. `loadCachedChunk()` reconstructs exact nonzero-start word spans from full-word context.
+4. The live Kokoro caller no longer depends on a hidden tail-sliced-array cache contract.
+5. Cached-vs-uncached startup parity is recorded in eval artifacts.
+6. Opening coverage remains rate-bucket-aware and respects pronunciation-override identity.
+7. ≥12 new or expanded cache/startup tests land.
+8. `npm test` passes.
+9. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** TTS-RATE-1, TTS-RATE-2
+
+**Completion note:** Completed on 2026-04-17. Cached and uncached starts now share one opening-ramp planner contract, so entry coverage warms the same `13 -> 26 -> 52 -> 104 -> 148` startup shape that live playback uses before cruise coverage resumes. The renderer cache helper no longer relies on a caller-side tail-sliced array contract: cached replay reconstructs from the full word context plus `startIdx`, and `useNarrationCaching` now re-seeds startup coverage from the current highlighted position with the active rate bucket and pronunciation-override identity.
+
+**Verification:** Startup-parity coverage expanded with `tests/generationPipeline.test.ts`, `tests/tts7a-cacheCorrectness.test.ts`, `tests/useNarrationCaching.test.tsx`, and `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with the focused startup/cache neighborhood (`6` files, `70` tests), a dedicated startup-parity matrix run (`artifacts/tts-eval/start1-startup-parity`) reporting cached/uncached startup latency `370 / 508 ms` with `Opening ramp parity: match`, the gated release matrix (`artifacts/tts-eval/start1-release`) passing across `9` runs, full `npm test` (`125` files, `2005` tests), and `npm run build`; the existing non-blocking Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ COMPLETED
+
+**Goal:** Restore `Narrate` as a real fourth reader mode with its own bottom-bar button and keyboard path, using the shared infinite-scroll surface and entering paused by default.
+
+**Version:** v1.69.0 | **Branch:** `sprint/reader-4m-2-narrate-controls` | **Tier:** Full
+
+**Problem:** Even with the substrate repaired, users still cannot intentionally choose Narrate. The current reader model hides narration behind `readingMode === "flow" && isNarrating`, `N`/`T` keyboard toggles, and ambiguous bottom-bar state. That is exactly the confusion this design was approved to remove.
+
+**Design decisions:**
+- **Four explicit mode buttons.** The bottom bar should expose `Page`, `Focus`, `Flow`, and `Narrate` in that order.
+- **`Narrate` is a true mode, not a toggle.** `readingMode === "narrate"` becomes the primary expression of narrate behavior. The old flow-layer narration toggle should be retired from user-facing control flow.
+- **Narrate enters paused.** Switching into Narrate by button or keyboard should preserve the anchor and scroll surface but never auto-play.
+- **Pause/resume stays in-mode.** Play/pause controls operate inside the current mode rather than throwing the user back to `Page`.
+- **Keyboard model gets simpler.** `N` means “switch to Narrate paused.” `T` should stop acting as a hidden “toggle narration inside Flow” path.
+
+**Baseline:**
+- [ReaderBottomBar.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderBottomBar.tsx): still only exposes Page-adjacent focus/flow semantics and treats narration as a flow sub-state.
+- [ReaderContainer.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderContainer.tsx): several branches still treat `isNarrating` as a mode surrogate.
+- [useReaderMode.ts](C:/Users/estra/Projects/Blurby/src/hooks/useReaderMode.ts): public API still exposes `toggleNarrationInFlow`.
+- [useKeyboardShortcuts.ts](C:/Users/estra/Projects/Blurby/src/hooks/useKeyboardShortcuts.ts): `KeyN` / `KeyT` still route to hidden narration toggles or old chapter behavior.
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts): follower-mode behavior still keys on `readingMode === "flow" && isNarrating`.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** explicit four-mode UI/state machine, standalone Narrate orchestration, in-mode pause/resume semantics
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/components/ReaderBottomBar.tsx`
+  - `src/components/ReaderContainer.tsx`
+  - `src/hooks/useReaderMode.ts`
+  - `src/hooks/useKeyboardShortcuts.ts`
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useNarration.ts`
+
+#### Shared-Core Touches
+
+- `src/components/ReaderBottomBar.tsx`
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useReaderMode.ts`
+- `src/hooks/useKeyboardShortcuts.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useNarration.ts`
+- `src/hooks/useReadingModeInstance.ts`
+
+#### Merge Order
+
+- Merge after `READER-4M-1` and before `READER-4M-3`. This sprint depends on the explicit mode foundation, and the canonical anchor cleanup should build on the restored four-button control model.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md`
+4. `ROADMAP.md` — this section
+5. `src/components/ReaderBottomBar.tsx`
+6. `src/components/ReaderContainer.tsx`
+7. `src/hooks/useReaderMode.ts`
+8. `src/hooks/useKeyboardShortcuts.ts`
+9. `src/hooks/useFlowScrollSync.ts`
+10. `src/hooks/useNarration.ts`
+11. `src/hooks/useReadingModeInstance.ts`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Promote Narrate from hidden flow sub-state to real mode orchestration** — Make `readingMode === "narrate"` the primary runtime discriminator for Narrate, and demote the old `flow + isNarrating` composition to compatibility cleanup. Entering Narrate should preserve the current anchor/surface but remain paused until play is pressed. | `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useFlowScrollSync.ts` | `useReaderMode` public contract and flow/narration bridge around `toggleNarrationInFlow`, `startFlow`, and pause/resume logic (~lines 59-60, 209-290, 452), `ReaderContainer` readingMode state and play/toggle handlers (~lines 124-126, 445-595, 646-647, 951-968, 1101-1145), follower-mode gating in `useFlowScrollSync` (~lines 296-312). |
+| 2 | worker-sonnet | **Restore the four explicit mode buttons** — Update the bottom bar so it shows `Page`, `Focus`, `Flow`, and `Narrate` in that exact order, with truthful active/last-used states and hints. Keep Flow and Narrate visually aligned on the same infinite-scroll family. | `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx` | ReaderBottomBar props/types near `readingMode` / `lastReadingMode` (~lines 22-37), mode button cluster around the existing focus/flow buttons (~lines 354-372), hint/progress display near `HINT_TEXT` and info rows (~lines 135 and 405-481), container prop wiring near `<ReaderBottomBar ...>` (~lines 1095-1122). |
+| 3 | worker-sonnet | **Simplify the keyboard model around explicit modes** — Change `N` to switch to Narrate paused, remove the hidden flow-narration toggle semantics from `T`, and make any cycle-mode helpers include the new fourth mode. Preserve unrelated page/focus/flow shortcuts. | `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderContainer.tsx` | `KeyT` and `KeyN` handling (~lines 182 and 238), old non-flow `KeyN` chapter branch (~line 190), cycle-mode commentary and flow-mode block (~lines 213-243), container keyboard callbacks around `handleToggleNarration`, `handleEnterFlow`, and `useReaderKeys(...)` (~lines 553-557 and 713). |
+| 4 | Athena | **Make pause/resume stay inside the active mode** — Update play/pause handling so Flow pauses to Flow, Narrate pauses to Narrate, and no mode auto-bounces back to Page. Keep Narrate’s play path responsible for starting TTS from the current anchor only when the user explicitly requests it. | `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useNarration.ts` | Flow pause path in `useReaderMode` (~lines 120-129), mode change / finishReading branches in `ReaderContainer` that currently call `setReadingMode("page")` (~lines 413, 519, 531), narration pause/resume API in `useNarration.ts` (~lines 778-860). |
+| 5 | Hippocrates | **Tests** — Add focused tests for: (a) four explicit bottom-bar buttons render in order, (b) selecting Narrate lands paused, (c) `N` switches to Narrate paused, (d) `T` no longer toggles hidden flow narration, (e) pause/resume stays inside Flow and Narrate instead of returning to Page, (f) Flow and Narrate active states are visually truthful. Target ≥14 new or expanded tests. | `tests/` | Extend `tests/narrLayer1bConsolidation.test.ts`, `tests/useReaderMode.test.ts`, `tests/narrationLayer.test.ts`, `tests/readerDecomposition.test.ts`, and add any new bottom-bar/keyboard regression file needed. |
+| 6 | Hippocrates | **Verification** — Run focused mode/keyboard/UI suites, full `npm test`, and `npm run build`. | — | — |
+| 7 | Solon | **Spec compliance** — Verify standalone Narrate is now a real mode, not just a hidden flow toggle in new clothes. | — | — |
+| 8 | Plato | **Quality review** — Review control truthfulness, active-mode clarity, and the in-mode pause/resume model for rough edges. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update roadmap, queue, and lessons learned after closeout. | Governing docs | — |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/reader-4m-2-narrate-controls` |
+
+#### SUCCESS CRITERIA
+
+1. The bottom bar shows four explicit mode buttons: `Page`, `Focus`, `Flow`, `Narrate`.
+2. Selecting `Narrate` switches the reader into Narrate mode and lands paused.
+3. `readingMode === "narrate"` becomes the primary runtime expression of Narrate mode.
+4. `N` switches to Narrate paused.
+5. `T` no longer acts as a hidden “toggle narration inside Flow” shortcut.
+6. Pause/resume stays inside the active Flow or Narrate mode instead of bouncing back to Page.
+7. Flow remains a visual/manual infinite-scroll mode rather than an implicit TTS mode.
+8. Flow and Narrate share the same infinite-scroll surface family and underline indicator.
+9. ≥14 new or expanded mode/UI/keyboard tests land.
+10. `npm test` passes.
+11. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** READER-4M-1
+
+---
+
+### Sprint READER-4M-3: Global Word Anchor & Cross-Mode Continuity ✅ COMPLETED
+
+**Goal:** Make one canonical global word anchor the source of truth for entering, pausing, resuming, saving, and switching across `Page`, `Focus`, `Flow`, and `Narrate`, while ensuring Narrate’s underline follows spoken-word truth instead of racing ahead.
+
+**Version:** v1.72.0 | **Branch:** `sprint/reader-4m-3-global-anchor-continuity` | **Tier:** Full
+**Status:** ✅ COMPLETED — 2026-04-20. Canonical anchor resolution now drives entry/save/resume across all four modes, Flow↔Narrate preserve the same shared-surface anchor, Narrate underline/follow behavior uses `narration.cursorWordIndex`, and verification passed with `npm test` (`141` files, `2136` tests) plus `npm run build`.
+
+**Problem:** Even after Narrate becomes a real mode again, the current reader still carries mode-local assumptions: document load starts in Page, flow pause/resume has its own pending resume bridge, progress/backtrack logic is only partially mode-aware, and narration has its own cursor/pause anchor semantics. That drift is exactly how cross-mode confusion and “underline outruns speech” regressions come back.
+
+**Design decisions:**
+- **One canonical global word anchor.** Every mode enters and resumes from the same anchor contract.
+- **Flow and Narrate preserve the exact same anchor when switching.** They are two drivers over one surface, not two competing saved positions.
+- **Narrate underline follows TTS truth.** In Narrate, the underline should move from the spoken-word signal, not from an independent visual flow timer.
+- **Progress/save/backtrack stay anchor-based.** The persistence layer should care about the canonical anchor, not which mode happened to own it last.
+- **Pause/resume remains in-mode.** This sprint hardens that behavior across all four modes, not just the control layer.
+
+**Baseline:**
+- [startWordIndex.ts](C:/Users/estra/Projects/Blurby/src/utils/startWordIndex.ts): mode start resolution exists, but is not yet the canonical four-mode anchor contract.
+- [useDocumentLifecycle.ts](C:/Users/estra/Projects/Blurby/src/hooks/useDocumentLifecycle.ts): still forces new documents into Page and maintains separate resume-anchor behavior.
+- [ReaderContainer.tsx](C:/Users/estra/Projects/Blurby/src/components/ReaderContainer.tsx): current word resolution, play state, and mode-switch branches still reflect pre-four-mode assumptions.
+- [useProgressTracker.ts](C:/Users/estra/Projects/Blurby/src/hooks/useProgressTracker.ts): progress/backtrack logic is monotonic-friendly, but it needs to be explicitly hardened around four-mode anchor handoffs.
+- [useReadingModeInstance.ts](C:/Users/estra/Projects/Blurby/src/hooks/useReadingModeInstance.ts): pending resume bridge is flow-specific.
+- [useFlowScrollSync.ts](C:/Users/estra/Projects/Blurby/src/hooks/useFlowScrollSync.ts) and [useNarration.ts](C:/Users/estra/Projects/Blurby/src/hooks/useNarration.ts): current follower/truth paths need explicit separation so Narrate uses spoken-word truth while Flow remains a visual driver.
+
+#### Lane Ownership
+
+- **Primary orchestrator:** `gog-lead`
+- **Implementation lane:** canonical anchor contract, cross-mode save/resume, Narrate truth-following continuity
+
+#### Forbidden During Parallel Run
+
+- Do not run in parallel with any sprint editing:
+  - `src/utils/startWordIndex.ts`
+  - `src/hooks/useDocumentLifecycle.ts`
+  - `src/components/ReaderContainer.tsx`
+  - `src/hooks/useProgressTracker.ts`
+  - `src/hooks/useFlowScrollSync.ts`
+  - `src/hooks/useNarration.ts`
+  - `src/hooks/useReadingModeInstance.ts`
+
+#### Shared-Core Touches
+
+- `src/utils/startWordIndex.ts`
+- `src/hooks/useDocumentLifecycle.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/hooks/useProgressTracker.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/hooks/useNarration.ts`
+- `src/hooks/useReadingModeInstance.ts`
+- `src/components/ReaderBottomBar.tsx`
+
+#### Merge Order
+
+- Merge after `READER-4M-2`. This sprint assumes the explicit four-mode UI/state model already exists and then hardens all transitions around one anchor contract.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md`
+4. `ROADMAP.md` — this section
+5. `src/utils/startWordIndex.ts`
+6. `src/hooks/useDocumentLifecycle.ts`
+7. `src/components/ReaderContainer.tsx`
+8. `src/hooks/useProgressTracker.ts`
+9. `src/hooks/useReadingModeInstance.ts`
+10. `src/hooks/useFlowScrollSync.ts`
+11. `src/hooks/useNarration.ts`
+12. `src/components/ReaderBottomBar.tsx`
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Athena | **Formalize the canonical global word anchor contract** — Make one anchor resolver the source of truth for mode entry and resume across Page, Focus, Flow, and Narrate. Remove remaining assumptions that a document reopen or mode switch should implicitly bounce to Page. | `src/utils/startWordIndex.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/components/ReaderContainer.tsx` | `resolveModeStartWordIndex()` / `getStartWordIndex()` in `startWordIndex.ts` (~lines 17-73), document-open initialization and resume anchor setup in `useDocumentLifecycle.ts` (~lines 131-172), current word resolution and mode-entry plumbing in `ReaderContainer` (~lines 783-788 and surrounding mode handlers). |
+| 2 | worker-sonnet | **Align progress/save/backtrack to the canonical anchor** — Ensure saved progress, furthest position, backtrack detection, and finish-reading bookkeeping all treat the global word anchor as authoritative regardless of mode. | `src/hooks/useProgressTracker.ts`, `src/components/ReaderContainer.tsx` | Progress save/high-water logic in `useProgressTracker.ts` (~lines 101-134), backtrack detection (~lines 173-182), finishReading and current-position reporting (~lines 193-205), any container call sites that still pass mode-local positions. |
+| 3 | Athena | **Make Narrate follow spoken-word truth on the shared surface** — Keep Flow as the visual/manual driver, but make Narrate’s underline and scroll-following come from narration truth so the indicator cannot outrun speech. Update any flow-specific pending-resume bridges that should now serve Narrate too. | `src/hooks/useFlowScrollSync.ts`, `src/hooks/useNarration.ts`, `src/hooks/useReadingModeInstance.ts`, `src/utils/FlowScrollEngine.ts` | Follower-mode gating and `followWord(highlightedWordIndex)` path in `useFlowScrollSync.ts` (~lines 296-312), pause/resume and cursor truth in `useNarration.ts` (~lines 778-860 and 985), `pendingResumeRef` flow-only type/usage in `useReadingModeInstance.ts` (~lines 54-86 and 146-156), any flow-engine state needed to distinguish pure Flow from Narrate truth-following. |
+| 4 | worker-sonnet | **Harden cross-mode switching and last-mode continuity** — Update mode switching, bottom-bar last-used highlighting, and keyboard/command paths so Flow ↔ Narrate preserve the exact anchor and Page/Focus also resolve from the same canonical position. | `src/components/ReaderContainer.tsx`, `src/components/ReaderBottomBar.tsx`, `src/hooks/useKeyboardShortcuts.ts` | ReaderContainer mode-switch handlers and `lastReadingMode` plumbing (~lines 445-595 and 1101-1122), bottom-bar active/last state props around `lastReadingMode` and the mode button cluster (~lines 37, 84, 354-372), any remaining keyboard cycle-mode helpers in `useKeyboardShortcuts.ts` (~lines 213-243). |
+| 5 | Hippocrates | **Tests** — Add focused tests for: (a) one canonical anchor is used across all four modes, (b) Flow ↔ Narrate preserves exact anchor and visible position, (c) Page/Focus resolve from the same anchor, (d) pause/resume stays in-mode across all four modes, (e) Narrate underline follows spoken-word truth rather than visual flow timing, (f) progress/backtrack/chapter labeling remain correct after anchor-based mode switches. Target ≥16 new or expanded tests. | `tests/` | Extend `tests/useReaderMode.test.ts`, `tests/narrationLayer.test.ts`, `tests/readerDecomposition.test.ts`, `tests/useProgressTracker.test.ts` if present or add one, plus any new cross-mode anchor regression file. |
+| 6 | Hippocrates | **Verification** — Run focused anchor/continuity suites, full `npm test`, and `npm run build`. | — | — |
+| 7 | Solon | **Spec compliance** — Verify the single-anchor contract is real end-to-end and confirm Narrate underline truth comes from TTS, not Flow timing. | — | — |
+| 8 | Plato | **Quality review** — Review mode continuity, save/resume behavior, and shared-surface truth for regressions or hidden drift. | — | — |
+| 9 | Herodotus | **Documentation pass** — Update roadmap, queue, and lessons learned after closeout. | Governing docs | — |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — | Branch: `sprint/reader-4m-3-global-anchor-continuity` |
+
+#### SUCCESS CRITERIA
+
+1. One canonical global word anchor exists for entering, pausing, resuming, saving, and switching across all four modes.
+2. Page, Focus, Flow, and Narrate all resolve from that same anchor.
+3. Switching Flow ↔ Narrate preserves the exact anchor and visible position.
+4. Pause/resume stays in the active mode across all four modes.
+5. Narrate underline/follow behavior is driven by spoken-word truth rather than an independent Flow timer.
+6. Progress save, furthest-position tracking, and backtrack detection remain correct under anchor-based mode switching.
+7. Chapter/progress display remains coherent after anchor-based transitions.
+8. ≥16 new or expanded continuity/anchor tests land.
+9. `npm test` passes.
+10. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** READER-4M-2
+
+---
+
+### Sprint QWEN-STREAM-1: Streaming Sidecar Foundation ✅ COMPLETED
+
+**Goal:** Stand up a dedicated persistent Qwen streaming sidecar that can load the model, accept streaming generation commands, and deliver incremental PCM audio frames to the Electron main process — proving the local streaming path works end-to-end from Python to main process without yet wiring playback into the renderer narration pipeline.
+
+**Problem:** The current non-streaming Qwen sidecar (`main/qwen-engine.js`) generates a full WAV per request and returns it over JSON-line IPC. This architecture fundamentally cannot sustain live narration because generation time exceeds audio duration on CPU and even on CUDA the blocking request/response cycle introduces unnecessary first-audio latency. The approved streaming design (`docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md`) specifies a streaming sidecar that yields incremental PCM chunks. This sprint builds that sidecar and proves the streaming data path works.
+
+**Design decisions:**
+
+- **Model variant:** Primary path uses `Qwen3-TTS-12Hz-1.7B-CustomVoice` with the existing 9 named speakers (same model Blurby already provisions). The streaming fork's generator logic (two-phase chunking, crossfade, torch.compile) will be patched to support `stream_generate_custom_voice` using speaker embeddings instead of voice clone prompts. Fallback (if CustomVoice streaming proves incompatible): switch to the Base model with reference audio samples recorded from Kokoro voices.
+- **Sidecar process model:** New persistent Python subprocess (`main/qwen-streaming-engine.js` + `scripts/qwen_streaming_sidecar.py`). Does NOT replace the existing non-streaming `qwen-engine.js` yet — both can coexist but only one is active at a time based on a config flag. The streaming sidecar is promoted as the active Qwen engine in a subsequent sprint.
+- **IPC protocol:** Binary-framed stdout for audio, JSON-line stdin for commands. Header format: `[4-byte LE length][1-byte type][payload]`. Type 0x01 = JSON metadata, Type 0x02 = PCM audio frame (Float32 samples at 24kHz). Commands: `configure`, `warmup`, `status`, `list_speakers`, `start_stream`, `cancel_stream`, `shutdown`.
+- **Warmup phase:** `warmup` command loads model, runs `enable_streaming_optimizations(use_compile=True, use_cuda_graphs=True)`, and pre-creates any needed state. Reports timing.
+- **Stream lifecycle:** `start_stream` → sidecar enters generator loop → emits `stream_started` (JSON), then N `audio_chunk` (binary PCM) events, then `stream_finished` (JSON). `cancel_stream` → breaks generator, emits `stream_cancelled` (JSON). Errors emit `stream_error` (JSON).
+- **No renderer integration in this sprint.** Main process receives PCM frames and logs/validates them. Proof = sustained multi-chunk stream with correct sample rate, no timeouts, successful cancel. Renderer playback wiring is QWEN-STREAM-2.
+- **Preload bridge:** New IPC channels `tts-qwen-stream-start`, `tts-qwen-stream-cancel`, `tts-qwen-stream-status`. Renderer-facing event: `tts-qwen-stream-audio` (emitted via `webContents.send` with binary payload). Not consumed by the strategy yet — just wired.
+
+#### Lane Ownership
+
+- **Lane D: Platform/Main Process** — primary lane (new sidecar, IPC handlers, preload bridge)
+- Touches: `main/`, `preload.js`, `scripts/`, `src/types/`
+
+#### Forbidden During Parallel Run
+
+- `src/hooks/useNarration.ts`
+- `src/hooks/useFlowScrollSync.ts`
+- `src/components/ReaderContainer.tsx`
+- `src/utils/FlowScrollEngine.ts`
+- `src/hooks/narration/qwenStrategy.ts` (existing strategy untouched until QWEN-STREAM-2)
+- `src/utils/generationPipeline.ts`
+- `src/utils/audioScheduler.ts`
+
+#### Shared-Core Touches
+
+None. This sprint does not edit shared-core freeze set files.
+
+#### Merge Order
+
+- Merge after `READER-4M-3` (or independently — no dependency, different lane). Can run in parallel with READER-4M-2 / 4M-3 since it's Lane D and they're Lane C/A.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md` — MUST READ — the approved design this sprint implements Phase 1 of
+4. `ROADMAP.md` — this section
+5. `main/qwen-engine.js` — existing non-streaming sidecar (lines 1-204 Python inline, lines 400-1380 JS manager). Reference for process spawn pattern, config resolution, timing recording, and snapshot state shape
+6. `main/ipc/tts.js` — existing Qwen IPC handlers (lines 92-130). Pattern for new streaming handlers
+7. `preload.js` — existing Qwen bridge (lines 144-177). Pattern for new streaming bridge
+8. `src/types/narration.ts` — `TtsStrategy` interface (line 185). Reference only — not edited this sprint
+9. `.runtime/qwen/config.json` — current model config (CustomVoice, device, dtype)
+10. `src/hooks/narration/qwenStrategy.ts` — existing Qwen strategy (lines 1-140). Reference for how the current path works — not edited this sprint
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hephaestus (electron-scope) | **Create Python streaming sidecar script** — New file `scripts/qwen_streaming_sidecar.py`. Persistent process that: reads JSON-line commands from stdin, loads `Qwen3TTSModel` from configured `modelId` with streaming optimizations enabled, implements `start_stream` (iterates `stream_generate_custom_voice` generator, emits binary-framed PCM chunks on stdout), `cancel_stream` (sets cancel flag, breaks generator loop), `warmup` (loads model + runs `enable_streaming_optimizations`), `status`, `list_speakers`, `configure`, `shutdown`. Binary frame format: 4-byte LE length + 1-byte type (0x01 JSON, 0x02 PCM) + payload. Stream parameters: `emit_every_frames=12`, `decode_window_frames=80`, `first_chunk_emit_every=5`, `first_chunk_decode_window=48`, `first_chunk_frames=48`, `overlap_samples=512`. Uses CustomVoice `speaker` parameter. Includes `stream_generate_custom_voice` wrapper that calls the model's internal AR generation with speaker embedding lookup (same codebook/decoder as voice clone, but conditioned on speaker name). | `scripts/qwen_streaming_sidecar.py` | New file (~200 lines). |
+| 2 | Hephaestus (electron-scope) | **Create main process streaming engine manager** — New file `main/qwen-streaming-engine.js`. Manages persistent subprocess lifecycle. Exports: `createQwenStreamingEngineManager(app)` returning `{ getModelStatus, preload, preflight, listVoices, startStream, cancelStream, shutdown, onStreamAudio }`. Spawns `scripts/qwen_streaming_sidecar.py` using config from `.runtime/qwen/config.json` (same config file, new `streaming: true` flag). Reads binary-framed stdout (parse 4-byte header → dispatch JSON events or buffer PCM frames). Emits PCM frames to registered listener via `onStreamAudio(streamId, chunk: Buffer)`. Timeout handling: 30s for warmup/status, stream-level timeout (configurable, default 120s total stream duration). Records timing metrics (warmup, first-chunk latency, total stream duration). | `main/qwen-streaming-engine.js` | New file (~400 lines). Pattern: mirror `main/qwen-engine.js` structure for config resolution (lines 400-600), subprocess spawn (lines 1020-1057), but replace JSON-line response parsing with binary frame parser. |
+| 3 | Hermes (electron-scope) | **Register streaming IPC handlers** — Add new handlers in `main/ipc/tts.js`: `tts-qwen-stream-start(text, speaker, rate)` → calls `streamingEngine.startStream()`, returns `{ streamId }`. `tts-qwen-stream-cancel(streamId)` → calls `streamingEngine.cancelStream()`. `tts-qwen-stream-status` → calls `streamingEngine.getModelStatus()`. Wire `streamingEngine.onStreamAudio` to emit `webContents.send("tts-qwen-stream-audio", streamId, chunk)` to the focused BrowserWindow. | `main/ipc/tts.js` | After existing Qwen handlers (after line 130). ~30 lines. Import streaming engine at top alongside existing `qwenEngine`. |
+| 4 | Hermes (electron-scope) | **Add streaming preload bridge** — Expose new channels in `preload.js`: `qwenStreamStart: (text, speaker, rate) => ipcRenderer.invoke("tts-qwen-stream-start", text, speaker, rate)`, `qwenStreamCancel: (streamId) => ipcRenderer.invoke("tts-qwen-stream-cancel", streamId)`, `qwenStreamStatus: () => ipcRenderer.invoke("tts-qwen-stream-status")`, `onQwenStreamAudio: (handler) => { ipcRenderer.on("tts-qwen-stream-audio", handler); return () => ipcRenderer.removeListener(...) }`. | `preload.js` | After existing Qwen bridge (after line 177). ~12 lines. |
+| 5 | Hermes (renderer-scope) | **Add streaming types** — New file `src/types/qwenStreaming.ts`. Export: `QwenStreamStartResult`, `QwenStreamAudioEvent`, `QwenStreamingEngineStatus`. Also extend `ElectronAPI` interface in `src/types/electron.d.ts` (or equivalent) with the new preload methods. | `src/types/qwenStreaming.ts`, `src/types/electron.d.ts` or equivalent | New types file (~30 lines). Interface extension (~8 lines). |
+| 6 | Hermes (electron-scope) | **Add streaming config flag** — Extend `.runtime/qwen/config.json` schema recognition in the config resolver within `main/qwen-streaming-engine.js` to accept an optional `"streaming": true` field. When present, the streaming engine activates. The existing non-streaming engine ignores this field. Document in `docs/testing/QWEN_RUNTIME_SETUP.md`. | `main/qwen-streaming-engine.js` (config resolver section), `docs/testing/QWEN_RUNTIME_SETUP.md` | Config parsing in new engine file. Doc update: add "Streaming mode" section after existing setup instructions. |
+| 7 | Hippocrates | **Tests** — ≥18 new tests covering: (a) binary frame parser correctly splits JSON vs PCM payloads, (b) `startStream` sends correct command to subprocess stdin, (c) `cancelStream` sends cancel and receives acknowledgment, (d) timeout fires if no stream_finished within budget, (e) subprocess crash emits error status, (f) PCM frames forwarded to registered listener with correct streamId, (g) warmup records timing, (h) config resolver accepts streaming flag, (i) preload bridge exposes all new methods, (j) IPC handlers return expected shapes. Mock subprocess for unit tests (no real model needed). | `tests/qwenStreaming.test.js` | New test file (~250 lines). |
+| 8 | Hippocrates | **`npm test` + `npm run build`** | — | — |
+| 9 | Solon | **Spec compliance** — Verify all SUCCESS CRITERIA items. Confirm binary protocol works, streaming config recognized, no regression to existing Qwen/Kokoro paths. | — | — |
+| 10 | Plato | **Quality review** — Verify: no shared-core edits, streaming engine is cleanly isolated from existing engine, no accidental coupling to renderer pipeline, IPC naming is consistent. | — | — |
+| 11 | Herodotus | **Documentation pass** — Update CLAUDE.md (version bump, new file mentions), ROADMAP.md (mark complete), SPRINT_QUEUE.md (remove, log), LESSONS_LEARNED.md (if discovery). Update `docs/testing/QWEN_RUNTIME_SETUP.md` with streaming sidecar setup instructions. | Governing docs + runtime setup doc | — |
+| 12 | Hermes | **Git: auto-merge on successful sprint** | — | Branch: `sprint/qwen-stream-1-sidecar-foundation` |
+
+#### Execution Sequence
+
+```
+Task 1 (Python sidecar script)         — independent, no deps
+Task 2 (main process engine manager)   — can start in parallel with Task 1, but needs Task 1's protocol to be stable
+    ↓
+Tasks 3-4 (IPC + preload)              — need Task 2 exports
+Task 5 (types)                         — parallel with Tasks 3-4
+Task 6 (config + docs)                 — parallel with Tasks 3-4
+    ↓
+Task 7 (tests)                         — after all implementation
+Task 8 (npm test + build)              — after tests
+    ↓
+Tasks 9-10 (Solon + Plato)             — parallel verification
+Task 11 (Herodotus)
+Task 12 (Git)
+```
+
+#### SUCCESS CRITERIA
+
+1. `scripts/qwen_streaming_sidecar.py` exists and implements the binary-framed streaming protocol with `configure`, `warmup`, `status`, `list_speakers`, `start_stream`, `cancel_stream`, `shutdown` commands.
+2. `main/qwen-streaming-engine.js` exists and can spawn, configure, warm, and communicate with the Python sidecar.
+3. Binary frame parser correctly distinguishes JSON metadata (type 0x01) from PCM audio (type 0x02) payloads.
+4. `startStream(text, speaker, rate)` initiates a stream and the sidecar emits `stream_started` + N `audio_chunk` frames + `stream_finished`.
+5. `cancelStream(streamId)` breaks the active generator and the sidecar emits `stream_cancelled`.
+6. PCM frames are forwarded to registered listener with correct `streamId` and valid Float32 audio data at 24kHz.
+7. Warmup records timing and streaming optimizations are applied (torch.compile confirmation in sidecar logs).
+8. Timeout handling fires if stream exceeds configured budget.
+9. Subprocess crash/exit is handled gracefully with error status propagation.
+10. IPC handlers (`tts-qwen-stream-start`, `tts-qwen-stream-cancel`, `tts-qwen-stream-status`) registered and return expected response shapes.
+11. Preload bridge exposes `qwenStreamStart`, `qwenStreamCancel`, `qwenStreamStatus`, `onQwenStreamAudio`.
+12. `src/types/qwenStreaming.ts` exports typed interfaces for all streaming IPC payloads.
+13. Existing Qwen non-streaming path (`qwenGenerate`, `qwenPreload`, etc.) continues to work unchanged.
+14. Existing Kokoro narration path is completely unaffected.
+15. `.runtime/qwen/config.json` recognizes optional `streaming: true` flag.
+16. `docs/testing/QWEN_RUNTIME_SETUP.md` updated with streaming sidecar setup section.
+17. ≥18 new tests in `tests/qwenStreaming.test.js`.
+18. `npm test` passes, `npm run build` succeeds.
+
+**Investigation note — CustomVoice streaming compatibility:** The `rekuenkdr/Qwen3-TTS-streaming` fork only implements `stream_generate_voice_clone` (Base model). The CustomVoice model uses the same AR decoder and codec but conditions on speaker embeddings instead of a voice clone prompt. Task 1 must implement a `stream_generate_custom_voice` wrapper in the sidecar script that uses the streaming generator loop with speaker embedding lookup. If this proves incompatible at the Python level (e.g., the CustomVoice model's forward pass shape doesn't match the streaming generator's expectations), fall back to loading the Base model + pre-recorded Kokoro voice samples as reference audio. Document whichever path works in the sidecar script.
+
+**Tier:** Full | **Depends on:** None (Lane D — parallel-safe with READER-4M-2/3)
+
+---
+
+### Sprint QWEN-STREAM-4: Live Validation + Promotion Decision ✅ COMPLETED (v1.75.0, 2026-04-21)
+
+**Decision:** ITERATE — Streaming architecture complete and hardened. Automated gates pass. Live CUDA validation not yet performed; final PROMOTE/REJECT deferred until Evan runs live testing per runbook in `docs/testing/QWEN_STREAMING_DECISION.md`.
+
+**Goal:** Execute the streaming evaluation suite against a real CUDA host, collect decision-quality evidence, fill in the `QWEN_STREAMING_DECISION.md` gate table, and either promote streaming Qwen as the sole successor lane or record the decision to lean back into Kokoro.
+
+**Problem:** QWEN-STREAM-2 and QWEN-STREAM-3 build and harden the streaming path, but the actual promotion decision requires live-app evidence on a real host: sustained multi-chapter narration, first-audio timing under load, stall resilience, and subjective quality comparison to Kokoro. This sprint is the decision gate.
+
+**Design decisions:**
+
+- **Live testing protocol:** Run the streaming eval matrix against the actual Blurby app with a real Qwen model on a CUDA host. Capture artifacts to `artifacts/tts-eval/streaming-live/`.
+- **Comparison protocol:** Run the same text passages through Kokoro for A/B timing comparison. Capture Kokoro baseline artifacts to `artifacts/tts-eval/kokoro-comparison/`.
+- **Decision criteria (from approved design):**
+  1. First-audio latency materially better than current non-streaming Qwen
+  2. Continuation stable across multiple streamed chunks (≥5 minutes sustained)
+  3. Narrate start/pause/resume/stop without lockups
+  4. Long-form playback doesn't die after first chunk
+  5. Subjective quality remains better than Kokoro
+- **Decision outcomes considered at the time:** (a) PROMOTE — streaming Qwen becomes the active successor, (b) ITERATE — streaming works but needs more hardening sprints before promotion, (c) REJECT — lean back into Kokoro per approved design. Actual closeout was ITERATE, so Kokoro retirement did not resume; current reactivation requires MOSS continuous-live-playback proof and a separately approved retirement lane.
+- **Governance update on promotion:** If promoted, update CLAUDE.md product posture, reactivate KOKORO-RETIRE-1/2 in sprint queue, mark non-streaming Qwen as deprecated.
+- **This sprint is partially manual.** Live testing requires human interaction (Evan runs the app, observes narration, provides subjective quality judgment). Sprint spec directs CLI to prepare artifacts, run automated gates, and produce the decision document — but the final decision is Evan's.
+
+#### Lane Ownership
+
+- **Lane B: Evaluation Harness** — evidence collection and gate evaluation
+- **Lane E: Governance/Planning** — decision document and queue updates
+
+#### Forbidden During Parallel Run
+
+- All implementation files (this sprint makes no code changes except docs/artifacts)
+
+#### Shared-Core Touches
+
+None. This sprint is read-only against the codebase (evaluation + documentation only).
+
+#### Merge Order
+
+- Must follow QWEN-STREAM-3. No code conflicts possible (docs/artifacts only).
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md` — decision criteria
+4. `docs/testing/QWEN_STREAMING_DECISION.md` (from QWEN-STREAM-3) — gate template to fill
+5. `docs/testing/tts_quality_gates.v1.json` — streaming gate thresholds
+6. `scripts/tts_eval_runner.mjs` — eval runner to execute
+
+#### Tasks
+
+| # | Owner | Task | Files | Edit-Site Coordinates |
+|---|-------|------|-------|-----------------------|
+| 1 | Hippocrates | **Run streaming eval matrix** — Execute `node scripts/tts_eval_runner.mjs --streaming --matrix`. Capture output to `artifacts/tts-eval/streaming-live/`. | `artifacts/tts-eval/streaming-live/` | New artifact directory. |
+| 2 | Hippocrates | **Run Kokoro comparison baseline** — Execute standard Kokoro matrix (`node scripts/tts_eval_runner.mjs --matrix`) on the same text passages. Capture to `artifacts/tts-eval/kokoro-comparison/`. | `artifacts/tts-eval/kokoro-comparison/` | New artifact directory. |
+| 3 | Hippocrates | **Run streaming gate evaluation** — Execute `node scripts/tts_eval_runner.mjs --streaming --gates`. Report pass/fail per streaming gate threshold. | — | — |
+| 4 | Athena (docs-scope) | **Fill decision document** — Populate `docs/testing/QWEN_STREAMING_DECISION.md` with: actual gate values from Task 3, Kokoro comparison values from Task 2, first-audio timing comparison, stall count, sustained duration achieved, and preliminary recommendation based on automated gates. Leave subjective quality row for user input. | `docs/testing/QWEN_STREAMING_DECISION.md` | Replace placeholder values with actuals. |
+| 5 | Herodotus | **Documentation pass** — Update CLAUDE.md, ROADMAP.md, SPRINT_QUEUE.md per outcome. If PROMOTE: reactivate KOKORO-RETIRE sprints, update product posture. If ITERATE/REJECT: document rationale and next steps. | Governing docs | — |
+| 6 | Hermes | **Git: commit artifacts + decision** | — | Branch: `sprint/qwen-stream-4-decision-gate` |
+
+#### Execution Sequence
+
+```
+Tasks 1, 2     — parallel (streaming eval + Kokoro baseline)
+    ↓
+Task 3         — after Task 1 (gate eval needs streaming artifacts)
+    ↓
+Task 4         — after Tasks 2, 3 (decision doc needs both datasets)
+Task 5         — after Task 4 (governance depends on decision)
+Task 6         — after Task 5 (git)
+```
+
+#### Budget
+
+- **Estimated tool calls:** ~35 (eval runs + doc edits + governance + git)
+- **Estimated tokens:** ~250k
+- **Wave recommendation:** Single wave (well under ceiling).
+
+#### SUCCESS CRITERIA
+
+1. Streaming eval matrix executed and artifacts saved to `artifacts/tts-eval/streaming-live/`.
+2. Kokoro comparison baseline artifacts saved to `artifacts/tts-eval/kokoro-comparison/`.
+3. Streaming gate evaluation run and pass/fail reported per threshold.
+4. `QWEN_STREAMING_DECISION.md` populated with actual values, comparison table, and preliminary recommendation.
+5. Decision is one of: PROMOTE, ITERATE, or REJECT — documented with rationale.
+6. Historical PROMOTE branch was not taken. `KOKORO-RETIRE-1/2` remain paused until MOSS proves continuous live playback and a separate retirement lane is approved.
+7. If ITERATE: next hardening sprint identified and queued.
+8. If REJECT: Kokoro formally re-promoted as primary lane, streaming lane archived.
+9. Governance docs updated to reflect decision outcome.
+
+**Tier:** Quick (no code changes — evaluation + docs only) | **Depends on:** QWEN-STREAM-3
+
+---
+
+### Flagship-First MOSS Operational Narration Lane
+
+**Program status:** NANO STRATEGY PROTOTYPE COMPLETE; CONTINUITY PROTOTYPE READY; KOKORO REMAINS THE OPERATIONAL DEFAULT. `MOSS-0`, `MOSS-1`, `MOSS-2`, `MOSS-SPEED-1`, `MOSS-RCA-1`, `MOSS-RUNTIME-1`, `MOSS-HOST-1`, `MOSS-HOST-2`, `MOSS-NANO-1`, `MOSS-NANO-2`, `MOSS-NANO-3`, `MOSS-NANO-4`, `MOSS-NANO-5`, `MOSS-NANO-5B`, `MOSS-NANO-5C`, `MOSS-NANO-6`, `MOSS-NANO-6B`, `MOSS-NANO-6C`, `MOSS-NANO-6D`, `MOSS-NANO-6E`, `MOSS-NANO-6F`, `MOSS-NANO-7`, and `MOSS-NANO-8` are historical evidence sprints. `MOSS-NANO-8` records the final valid decision `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE`. This unlocks `MOSS-NANO-9` as the next bounded cache/prefetch/continuity prototype, but it does not make Nano user-facing, does not make Nano public settings UI, does not make Nano the default, does not retire Kokoro, and does not reopen legacy flagship `MOSS-3` through `MOSS-7`.
+
+
+#### Sprint MOSS-NANO-6F: Full Bounded Soak Promotion Confirmation (COMPLETED)
+
+**Status:** Completed 2026-05-01 with final decision `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`.
+
+**Type:** Runtime promotion confirmation and governance closeout only. No app integration, renderer integration, sidecar IPC, selectable-engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior change, MOSS-3 reopening, or Kokoro retirement work was added.
+
+**Canonical artifact:**
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/promotion-confirmation.json` | Promotes Nano to app-prototype candidate with bounded lifecycle. Fresh v2 run status `ok`, failure class `null`, measured resident soak `1800.0015s`, `100/100` book-like adjacent segments fresh, empty/stale reuse `0`, readiness memory slope `0.3261MB/min <= 1.5`, p95 final RTF `0.4826 <= 1.5`, p95 first decoded `280ms <= 1500`, crash count `0`, unclassified restarts `0`, and `99` classified RSS-threshold in-process runtime resets at `1750MB`. Shutdown/restart child-process lifecycle evidence is present and passing by reference to `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json`. |
+
+**Raw summary caveat:** `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/summary.json` still contains the older persisted `promotionDecision` / `not-promoting` state. Consumers must use `promotion-confirmation.json` as the canonical 6F decision artifact.
+
+**Decision rationale:** The 6F confirmation combines the full 1800-second/100-segment bounded soak with the 6E child-process lifecycle proof. The `99` session changes are classified bounded lifecycle recycles, not hidden crashes or unclassified restarts. No app integration drift occurred; scripts, tests, and app source are unchanged by this confirmation.
+
+---
+
+#### Sprint MOSS-HOST-1: Native/WSL Runtime Escape Hatch (COMPLETED)
+
+**Status:** Completed 2026-04-27 with decision `KEEP_PAUSED_HOST_CONFIRMED`. This host/runtime rescue did not produce a runnable non-x64 MOSS shape.
+
+**Closeout evidence:** `scripts/moss_runtime_shape_probe.mjs` now normalizes NUL-padded `wsl.exe --status` output, so WSL2 presence is detected truthfully. Native ARM64 remains blocked because LLVM/clang is unavailable and `choco install llvm -y --no-progress` failed on Chocolatey host permissions. WSL2 is present, but only Docker Desktop internal distributions are installed: `docker-desktop-data` has no usable shell, and `docker-desktop` lacks repo mounts plus `git`, `cmake`, `gcc`, `g++`, `make`, `ninja`, and `python3`.
+
+Key artifacts:
+
+- `artifacts/moss/moss-host-1-shapes-attempt-after-wsl-fix/summary.json`: x64 Windows available; native ARM64 clang blocked by `spawn clang ENOENT`; WSL2 detected as present.
+- `artifacts/moss/moss-host-1-llvm-install-attempt/summary.json`: LLVM/clang install blocked by Chocolatey permissions.
+- `artifacts/moss/moss-host-1-wsl-usability/summary.json`: no usable WSL2/Linux MOSS runtime path exists in the current host state.
+
+MOSS-3 remains blocked. Kokoro remains unchanged and remains the operational floor. Nano remains conditional because no Nano timing evidence was collected.
+
+**Tier:** Host/runtime rescue | **Branch:** `sprint/moss-host-1-native-wsl-escape-hatch` | **Depends on:** MOSS-RUNTIME-1
+
+---
+
+#### Sprint MOSS-HOST-2: Evidence Normalization + Governance Closeout (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `KEEP_PAUSED_HOST_CONFIRMED`. This closeout confirms MOSS-HOST-2 used a fresh WSL ARM64 binary, not stale evidence, and still does not reopen MOSS-3.
+
+**Closeout evidence:** Shape gate `artifacts/moss/moss-host-2-wsl-ready/summary.json` records `shapes.wsl2Linux.status=available`, `machine=aarch64`, an Ubuntu-24.04 shell gate, and fresh binary path `/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts`. Build flags were `GGML_NATIVE=OFF`, `GGML_CPU_ARM_ARCH=armv8.6-a+dotprod+i8mm+nosve`, and `CMAKE_BUILD_TYPE=Release`.
+
+Key artifacts:
+
+- `artifacts/moss/moss-host-2-wsl-ready/summary.json`: WSL2/Linux ARM64 shape available with fresh host2 binary path.
+- `artifacts/moss/moss-host-2-wsl-short-q4-tokens128/summary.json`: raw `57.84s`, decode `63.38s`, total `121.22s`, RTF `42.0902777777778`, WAV `180524` bytes.
+- `artifacts/moss/moss-host-2-wsl-punctuation-q4-tokens128/summary.json`: raw `52.93s`, decode `73.26s`, total `126.19s`, RTF `16.2615979381443`, WAV `372524` bytes.
+
+MOSS-3 remains paused. Kokoro remains unchanged and remains the operational floor. Nano remains conditional because no `DEMOTE_TO_NANO` decision or Nano timing evidence was recorded.
+
+**Tier:** Governance closeout | **Branch:** `sprint/moss-host-2-closeout` | **Depends on:** MOSS-HOST-1
+
+---
+
+#### Sprint MOSS-NANO-1: CPU Realtime Candidate Bring-Up (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `ITERATE_NANO_RUNTIME`. Nano generated local CPU audio for short and punctuation-heavy passages and is far better than flagship operationally, but it misses live first-audio and realtime promotion thresholds.
+
+**Closeout evidence:** Nano source was provisioned at `.runtime/moss/MOSS-TTS-Nano`; ONNX assets were provisioned under `.runtime/moss/weights/MOSS-TTS-Nano-ONNX` with `MOSS-TTS-Nano-100M-ONNX` and `MOSS-Audio-Tokenizer-Nano-ONNX`; runtime venv `.runtime/moss/.venv-nano` used Python `3.13` with `numpy`, `soundfile`, `onnxruntime`, `sentencepiece`, `torch==2.7.0`, and `torchaudio==2.7.0`.
+
+Key artifacts:
+
+- `scripts/moss_nano_probe.mjs` and `scripts/moss_nano_probe.py`: Nano probe harness and Python bridge.
+- `tests/mossNanoProbe.test.js`: focused test passed `8/8` after sandbox `EPERM` escalated rerun.
+- `artifacts/moss/moss-nano-1-short/summary.json`: `status: ok`, `output.wav` size `706604`, firstAudioSec `15.5075`, totalSec `16.1921`, audioDurationSec `3.68`, RTF `4.4`, peakMemoryMb `null`.
+- `artifacts/moss/moss-nano-1-punctuation/summary.json`: `status: ok`, `output.wav` size `2257964`, firstAudioSec `18.7613`, totalSec `19.4349`, audioDurationSec `11.76`, RTF `1.6526`, peakMemoryMb `null`.
+- `artifacts/moss/moss-nano-1-provisioning/`: provisioning logs.
+- `artifacts/moss/moss-nano-1-provisioning-blocked/` plus provisioning logs: pre-fix runtime-contract blocker evidence.
+- `artifacts/moss/moss-nano-1-short/`: successful canonical short post-fix run.
+
+Runtime-contract finding: upstream `infer_onnx.py` requires `--output-audio-path` and `--cpu-threads`, not `--output`/`--threads`; prompt audio uses `--prompt-audio-path`; direct `infer_onnx.py` is preferred over `moss-tts-nano` CLI for the current probe.
+
+Comparison: prior Kokoro evidence remains better for app default behavior (`1385` ms / RTF `0.3337` short; `5616` ms / RTF `0.7414` punctuation), while prior flagship evidence remains much worse even after fresh WSL ARM64 proof (`121.22s` / RTF `42.0902777777778` short; `126.19s` / RTF `16.2615979381443` punctuation).
+
+MOSS-3 remains paused. Do not record `PROMOTE_NANO_TO_APP_PROTOTYPE`, do not reject Nano, and do not change Kokoro behavior. Next MOSS work, if queued, should stay limited to Nano runtime iteration: Python cold-start/import optimization, streaming first-audio measurement, CPU thread/model options, and packaging analysis after timing improves.
+
+**Tier:** Runtime probe | **Branch:** `sprint/moss-nano-1-cpu-realtime-candidate` | **Depends on:** MOSS-HOST-2
+
+---
+
+#### Sprint MOSS-NANO-2: Runtime Latency Rescue (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `KEEP_KOKORO_ONLY`. This sprint was runtime optimization and evidence only: no app integration, no sidecar IPC, no renderer integration, no selectable engine work, no cache/continuity integration, and no Kokoro behavior change.
+
+**Harness closeout:** The Nano probe harness now records stage/profile fields, cold/warm modes, segmentation/window modes, ORT option request metadata, prewarm metadata, and Python interpreter selection with this precedence: explicit `--python`, then `PYTHON` environment variable, then repo-local `.runtime/moss/.venv-nano`, then system `python`. Passage aliases now map `short` -> `short-smoke` and `punctuation` -> `punctuation-heavy-mid`; empty passage text fails closed. Focused tests passed `23/23` after known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
+
+**Superseded artifacts:** `moss-nano-2-cold-short`, `warm-short`, `cold-punctuation`, and `warm-punctuation` are superseded and non-canonical because they were blocked by wrong system Python before the corrected interpreter precedence was documented and enforced. `moss-nano-2-*-venv` artifacts are superseded and non-canonical because they used the venv but shorthand aliases still resolved empty with wordCount `0`; those are superseded by the alias and empty-passage guard fixes. Non-v2 real-text and segmentation artifacts are superseded by the v2 reruns after the first-audio/output path contract fix.
+
+**Canonical v2 evidence:** `moss-nano-2-cold-short-realtext-v2` recorded `short-smoke`, 9 words, first observed `13.9036s`, total `14.4591s`, audio `3.68s`, RTF `3.9291`, WAV `706604`, with internal first decoded audio unavailable. `moss-nano-2-warm-short-realtext-v2` recorded first observed `15.2025s`, total `15.8170s`, RTF `4.2981`, with `runtimeReuseActual: false`. `moss-nano-2-cold-punctuation-realtext-v2` recorded `punctuation-heavy-mid`, 14 words, first observed `20.0393s`, total `20.6641s`, audio `11.76s`, RTF `1.7572`, WAV `2257964`. `moss-nano-2-warm-punctuation-realtext-v2` recorded first observed `18.6516s`, total `19.2688s`, RTF `1.6385`, with `runtimeReuseActual: false`.
+
+**Optimization evidence:** v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, but it is still not internal first decoded audio; internal first decoded audio remains unavailable without runtime instrumentation. Segmentation did not help: v2 token-window punctuation total `52.8842s` / RTF `2.7204`, and v2 char-window punctuation total `51.2033s` / RTF `3.2002`; both record `outputWavPath` / `outputPath` as `null` and preserve per-segment paths in `segmentOutputWavPaths`. ORT options did not help/apply: CPU default short `16.846s` / RTF `4.5777`, CPU threads2 `17.4572s` / RTF `4.7438`, Azure+CPU `20.3399s` / RTF `5.5271`. Prewarm/cache did not help/apply: no-prewarm `16.8044s` / RTF `4.5664`, ORT prewarm `18.6696s` / RTF `5.0733`, synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` stayed `false`.
+
+**Comparison:** Kokoro remains far ahead: short `1385ms` / RTF `0.3337`, punctuation `5616ms` / RTF `0.7414`. Nano remains better than flagship WSL (`121.22s` / RTF `42.09` short, `126.19s` / RTF `16.26` punctuation), but not viable for live app prototype.
+
+**Decision framing:** `KEEP_KOKORO_ONLY` means no Nano app prototype now; it is not a permanent Nano rejection. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options. Keep MOSS-3 through MOSS-7 paused unless a new explicit promotion decision is recorded.
+
+**Tier:** Runtime rescue | **Branch:** `sprint/moss-nano-2-runtime-latency-rescue` | **Depends on:** MOSS-NANO-1
+
+---
+
+#### Sprint MOSS-NANO-3: In-Process Runtime Reuse And First-Audio Truth (COMPLETED)
+
+**Status:** Completed 2026-04-28 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. This was a runtime-only sprint; it did not add app integration, did not change Kokoro behavior, and did not reopen MOSS-3.
+
+**Type:** Runtime instrumentation and latency proof. No app integration, no sidecar IPC, no renderer integration, no selectable engine work, no cache/continuity integration, no timing-truth UI integration, and no Kokoro behavior change.
+
+**Implementation evidence:** New resident runtime path: `scripts/moss_nano_resident_probe.py`. Existing wrapper path: `scripts/moss_nano_probe.mjs --runtime-mode resident`. Package script: `npm run moss:nano:resident`.
+
+**Verification evidence:** Focused tests passed after known sandbox `EPERM` and escalated rerun: `npm test -- tests/mossNanoProbe.test.js` => `28/28` pass. Full tests passed: `npm test` => `150` files, `2268` tests pass. Build passed: `npm run build`, with the existing circular chunk warning unchanged.
+
+**Canonical refreshed artifacts:**
+
+- `artifacts/moss/moss-nano-3-short-resident/summary.json`: `internalFirstDecodedAudioMs` `513`, RTF `1.7005`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `36.59`.
+- `artifacts/moss/moss-nano-3-punctuation-resident/summary.json`: `internalFirstDecodedAudioMs` `541`, RTF `1.2042`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `62.92`.
+- `artifacts/moss/moss-nano-3-ort-session-resident/summary.json`: requested/applied ORT split recorded; CPU provider, `intraOp` `2`, and `interOp` `1` applied; `usePerSessionThreads` truthfully unsupported; `internalFirstDecodedAudioMs` `516`; RTF `1.0962`; `runtimeReuseActual: true`.
+- `artifacts/moss/moss-nano-3-stale-output-guard/summary.json`: clean fresh-output evidence with `outputFileExistedBeforeRun: false`, `reusedExistingOutputFile: false`, and memory evidence present.
+
+**Comparison:** MOSS-NANO-2 v2 had observed first audio `13.9036s` / `15.2025s` short and `20.0393s` / `18.6516s` punctuation with `runtimeReuseActual: false`. Kokoro baseline remains `1385ms` / RTF `0.3337` short and `5616ms` / RTF `0.7414` punctuation.
+
+**Rationale:** Nano now proves true resident reuse and internal first decoded audio, but short RTF `1.7005` misses the promotion threshold `<=1.5`, and memory growth across resident runs needs soak/tuning. Iterate resident runtime rather than promote. Next work, if any, should be resident runtime tuning/soak/perf only.
+
+**Goal:** Determine whether MOSS-TTS-Nano is slow because Blurby is currently launching a subprocess/CLI-style runtime for each probe, or because Nano ONNX itself is still too slow on this CPU even with resident sessions and applied ONNX Runtime options.
+
+**WHAT:** Build a resident/in-process Nano diagnostic path that imports the Nano runtime once, creates and reuses ONNX Runtime sessions once, applies real `SessionOptions`/execution-provider settings, and emits internal timing events from text input to first decoded audio sample. Compare cold start, warm reuse, and repeated same-process runs against the canonical `MOSS-NANO-2` v2 artifacts and the paired Kokoro baseline.
+
+**HYPOTHESIS:** MOSS-NANO-2 may have measured process startup, Python import, asset/session construction, and output-file observation more than model inference itself. If true resident reuse is achieved, warm first decoded audio should drop dramatically. Decision branches:
+
+- `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`: warm resident internal first decoded audio is low enough for live-book buffering, warm total RTF is near realtime, `runtimeReuseActual` is true, ORT/session options are proven applied, and no reliability blockers appear.
+- `ITERATE_NANO_RESIDENT_RUNTIME`: in-process reuse produces a meaningful improvement but still misses promotion thresholds; continue runtime work only, not app integration.
+- `KEEP_KOKORO_ONLY`: resident reuse is false, internal first-decoded timing remains too slow, ORT options still do not apply, or gains are too small to matter.
+
+**Promotion thresholds:** A promotion candidate requires all of these in canonical artifacts:
+
+- `runtimeReuseActual: true` across at least one cold run plus two warm same-process runs.
+- `internalFirstDecodedAudioMs` present and measured inside Python before final WAV file close.
+- Warm `short-smoke` internal first decoded audio <= `3000` ms and total RTF <= `1.5`.
+- Warm `punctuation-heavy-mid` internal first decoded audio <= `3500` ms and total RTF <= `1.25`.
+- Applied ORT/session options are reflected by live session metadata or explicit runtime inspection, not only requested metadata.
+- Three repeated warm punctuation runs complete without crash, stale output reuse, empty passage, or reused-file artifact.
+- Kokoro remains unchanged and still passes as the operational baseline.
+
+**WHERE:**
+
+- `scripts/moss_nano_probe.mjs`: existing Node wrapper; `--runtime-mode resident` delegates to resident runtime reporting while preserving the subprocess comparison baseline.
+- `scripts/moss_nano_probe.py`: existing Python bridge; preserve current CLI/subprocess behavior while factoring shared passage/config validation if useful.
+- `scripts/moss_nano_resident_probe.py`: Python resident runtime that imports Nano once, loads tokenizer/model/session once, applies ORT/session options, runs cold/warm repeats, and emits internal timing events.
+- `.runtime/moss/MOSS-TTS-Nano/infer_onnx.py`: read-only upstream contract source; inspect import boundaries, model/session construction, decoder entry points, prompt-audio handling, and whether streaming/partial decode hooks exist. Do not commit `.runtime/**`.
+- `.runtime/moss/weights/MOSS-TTS-Nano-ONNX/`: local-only model/tokenizer/audio-tokenizer assets. Verify presence, but do not stage or commit.
+- `tests/mossNanoProbe.test.js`: add coverage for resident summary shape, applied-vs-requested ORT options, true reuse fields, repeated-run summaries, empty-passage fail-closed behavior, and artifact normalization.
+- `package.json`: add a diagnostic command only if useful, e.g. `moss:nano:resident`, without changing app runtime scripts.
+- `artifacts/moss/moss-nano-3-*`: canonical output artifacts for cold/warm short, cold/warm punctuation, repeated warm punctuation, ORT/session comparison, and Kokoro comparison reference.
+- `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, and `docs/governance/SPRINT_QUEUE.md`: record evidence, decision, and next queue state.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {max}: Trace upstream Nano `infer_onnx.py` and current Blurby Nano probe end to end. Produce a resident-runtime map: where Python import time occurs, where ONNX sessions are created, where text becomes semantic/acoustic/audio tokens, where WAV bytes first become available, and which ORT options can be applied to actual sessions. Explicitly classify any import-level blocker before implementation.
+
+Hermes [haiku]: Create/use branch `sprint/moss-nano-3-resident-runtime-truth`. Confirm `main` is clean, `.runtime/**` is not staged, and existing canonical `MOSS-NANO-2` artifacts are available for comparison or report the missing artifact paths.
+
+**HOW (Implementation):**
+
+Hercules [sonnet] {high}: Add failing tests first in `tests/mossNanoProbe.test.js` for resident summary fields:
+
+- `runtimeMode: "resident"`
+- `runtimeReuseActual: true` only when the same Python process and loaded session identity are reused
+- `internalFirstDecodedAudioMs` required for promotion-class summaries
+- `ortOptionsRequested` distinct from `ortOptionsApplied`
+- repeated warm runs cannot reuse an existing output file as first-audio evidence
+
+Athena [opus] {high}: Implement the resident Python runtime path. Prefer a new `scripts/moss_nano_resident_probe.py` if preserving the current subprocess probe is cleaner. The resident path must load assets once, reuse sessions, expose per-stage timings, and emit JSONL or structured events for `importStart`, `importEnd`, `assetLoadStart`, `sessionCreateEnd`, `inferenceStart`, `firstDecodedAudio`, `wavWriteEnd`, and `runEnd`.
+
+Hercules [sonnet]: Implement the Node orchestration wrapper, preferably `scripts/moss_nano_resident_probe.mjs`, that validates config/passages, invokes the resident Python path, normalizes summaries, writes artifacts, and fails closed on missing internal timing or false reuse.
+
+Hermes [haiku]: Add package script only if the command becomes stable: `npm run moss:nano:resident -- --run-id <id> --passage short --warm-repeats 2 --json`. Do not alter Electron, renderer, IPC, Kokoro, or production TTS scripts.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused tests first:
+
+- `npm test -- tests/mossNanoProbe.test.js`
+- any Python unit checks added for the resident probe
+
+Hippocrates [haiku]: Run canonical resident evidence commands:
+
+- Cold short and two warm short repeats.
+- Cold punctuation and three warm punctuation repeats.
+- ORT/session comparison proving options are applied or truthfully blocked.
+- A stale-output guard run that deletes/resets output paths and proves first audio is not file reuse.
+
+Hippocrates [haiku]: Run comparison verification:
+
+- Compare resident Nano canonical artifacts to `MOSS-NANO-2` v2 summaries.
+- Compare resident Nano artifacts to Kokoro paired baseline from `moss2c-kokoro-baseline`.
+- Run full `npm test` and `npm run build` after code/doc changes.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify spec compliance against the promotion thresholds and non-goals. Reject if the sprint claims promotion without true reuse, internal first decoded timing, applied ORT/session options, and canonical repeated warm punctuation evidence.
+
+Plato [sonnet]: Review for false evidence risks: stale files, empty passage aliases, requested-vs-applied ORT drift, subprocess reuse masquerading as resident reuse, memory growth across repeats, app integration drift, and accidental `.runtime/**` staging.
+
+Herodotus [sonnet]: Update `MOSS_DECISION_LOG.md`, `MOSS_FLAGSHIP_FEASIBILITY.md`, `SPRINT_QUEUE.md`, and this Roadmap section with the final decision. Do not reopen `MOSS-3` unless the evidence explicitly records `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+Hermes [haiku]: Stage only scoped files and artifacts. Exclude `.runtime/**`, model weights, venvs, caches, and unrelated local artifacts. Commit, merge to `main`, and push only after focused tests, full tests, build, Solon, and Plato pass.
+
+**Acceptance criteria:**
+
+- Existing Nano subprocess probe behavior remains available for comparison.
+- Resident runtime emits internal first decoded audio timing or fails closed with a named blocker.
+- Summary JSON distinguishes requested vs applied ORT/session options.
+- Summary JSON proves true reuse with stable process/session identity across warm repeats.
+- Canonical artifacts include cold/warm short, cold/warm punctuation, repeated warm punctuation, and comparison notes.
+- Final decision is exactly one of `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `KEEP_KOKORO_ONLY`.
+- No app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity work, timing-truth UI work, Kokoro behavior change, or Kokoro retirement work occurs in this sprint.
+
+**Shared-core touch policy:** No edits to `src/hooks/useNarration.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, or `src/types.ts`. If a worker believes a shared-core edit is necessary, stop and update the spec first.
+
+**Tier:** Runtime instrumentation | **Branch:** `sprint/moss-nano-3-resident-runtime-truth` | **Depends on:** MOSS-NANO-2
+
+---
+
+#### Sprint MOSS-NANO-4: Resident Runtime Optimization + Promotion Retest (COMPLETED)
+
+**Status:** Completed 2026-04-29 with final valid decision `ITERATE_NANO_RESIDENT_RUNTIME`, explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. This sprint was runtime optimization plus promotion retest only: no app integration, no sidecar IPC, no renderer integration, no selectable engine behavior, no MOSS-3 reopen, and no Kokoro behavior change.
+
+**Best short evidence:** `moss-nano-4-short-resident-ort-intra2` recorded true reuse, applied ORT CPU settings (`intraOp 2`, `interOp 1`, sequential execution, graph optimization all), first decoded `659ms`, final RTF `1.3734`, p50/p95 `1.3734`/`1.4329`, and memory growth about `42.57MB`. Baseline short remained RTF `1.7116` with first decoded `565ms`.
+
+**Other evidence:** Best punctuation recorded first decoded `944ms` and final RTF `1.6540`. Best bookwarm evidence used the long-form built-in substitute, produced `3/3` fresh internal first decoded warm runs, stale output reuse `0`, first decoded `727ms`, and RTF `1.1252`. Decode-full is caveated/disqualified for promotion framing: first decoded `6099ms` and memory growth about `103.16MB`.
+
+**Evidence hardening:** Precompute was requested but `precomputeInputsActual=false`, so no false reuse/precompute claim is made. False-promotion hardening now requires promotion-class summaries to include numeric thresholds/metrics and blocks requested-vs-actual contradictions. Focused verification only: `42/42` focused tests passed; full verification is reserved for Hippocrates.
+
+**Rationale:** The best short run clears the short RTF threshold and proves applied ORT/runtime reuse, but punctuation remains above the promotion RTF target and decode-full/bookwarm caveats prevent an app-prototype promotion. Future Nano work, if any, stays resident runtime tuning/soak/perf only.
+
+**Tier:** Runtime optimization + promotion retest | **Depends on:** MOSS-NANO-3
+
+---
+
+#### Sprint MOSS-NANO-5B: Precompute + Adjacent Continuity Closure (COMPLETED)
+
+**Status:** Completed 2026-04-29 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+**Type:** Runtime-only rescue. No app integration, no renderer/sidecar IPC/selectable engine/cache integration, no MOSS-3 reopen, no `.runtime/**` commits, and no Kokoro behavior change.
+
+**Closeout evidence:** Focused verification passed: `python -m py_compile scripts\moss_nano_resident_probe.py`; `npm test -- tests/mossNanoProbe.test.js` passed `75/75` after the known sandbox `EPERM` escalated rerun.
+
+Canonical refreshed artifacts:
+
+| Artifact | Result |
+|---|---|
+| `moss-nano-5b-short-resident-ort-intra2` | ok; first audio `0.340s`; RTF `0.6440`; p50/p95 `0.6440`/`0.6610`; memory delta `5.81MB`; stale `false`. |
+| `moss-nano-5b-short-resident-decode-full` | runtime ok but gate failed; first audio `2.963s` > `2.5s`; RTF `0.7142`; p50/p95 `0.6969`/`0.7142`; memory delta `5.60MB`; stale `false`. |
+| `moss-nano-5b-short-resident-precompute-requestrows` | runtime ok but precompute blocked; first audio `0.418s`; RTF `0.7183`; p50/p95 `0.7882`/`0.8012`; memory delta `6.15MB`; `requested=true`, `actual=false`, `partial=true`; blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`; `preparedBeforeRun=false`; `consumedByMeasuredRun=false`; `requestRowCount=0`. |
+| `moss-nano-5b-adjacent-segments-resident-stable` | ok; first audio `0.428s`; RTF `0.6003`; p50/p95 `0.5996`/`0.6003`; memory delta `8.14MB`; stale `false`; `5/5` fresh; fair trend ratio `0.0081` <= `0.15`; `crossSegmentStateActual=false`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`. |
+
+**False-evidence hardening:** Preserve top-level `crossSegmentStateActual`. Decode-full re-threshold evidence is explicit. The fair adjacent trend metric is separate from true cross-segment/prosody state. Precompute row-consumption evidence is required for promotion.
+
+**Decision rationale:** Do not record `PROMOTE_NANO_TO_SOAK_CANDIDATE`: decode-full misses the first-audio gate and precompute request rows are still not consumed. Adjacent fair trend improved and clears the runtime stability metric, but it does not prove true cross-segment model state. Therefore the only final decision is `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+**Next gate:** Do not dispatch `MOSS-NANO-6` from this closeout. It remains gated until soak/package criteria are met by a future sprint. This closeout does not unlock app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, or Kokoro retirement work.
+
+**Tier:** Runtime rescue | **Branch:** `sprint/moss-nano-5b-precompute-adjacent-continuity` | **Depends on:** MOSS-NANO-5
+
+---
+
+#### Sprint MOSS-NANO-5C: Segment-First Soak Gate (COMPLETED)
+
+**Status:** Completed 2026-04-30 with final decision `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`.
+
+**Type:** Runtime-only soak-candidate gate. This is not app prototype promotion: no app integration, renderer integration, sidecar IPC, selectable engine/cache changes, MOSS-3 reopen, Kokoro behavior change, or `.runtime/**` committed edit is approved.
+
+**Final artifact:** `artifacts/moss/moss-nano-5c-segment-first-soak-gate-final2/summary.json` recorded `status: ok`, `promote: true`, and decision `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`.
+
+Canonical gate evidence:
+
+| Evidence | Result |
+|---|---|
+| Segment-first first decoded | `0.449s <= 0.5s`. |
+| Segment-first short RTF | `0.6513 <= 1.5`. |
+| Adjacent fair RTF trend | `0.0105 <= 0.15`. |
+| Fresh segments | `5 >= 5`. |
+| Stale output reuse | `0`. |
+| Session restarts | `0`. |
+| Precompute classification | `non-product-required`, status `not-required`; no precompute success is claimed. |
+| Decode-full classification | `diagnostic-only-non-product-path`; not product latency proof for 5C. |
+
+Supporting diagnostics: `moss-nano-5c-short-resident-decode-full-diagnostic` measured the decode-full diagnostic path but it is not a product blocker for the segment-first gate. `moss-nano-5c-short-resident-precompute-requestrows-rca` requested precompute but actual remained false with blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`; RCA records that the current high-level path lacks prepared-row consumption, while the lower ONNX path has build/request rows and generate frames, so future runtime work may implement it.
+
+**Decision rationale:** The segment-first product-path evidence passed the 5C soak-candidate thresholds without requiring decode-full or precompute. Precompute remains non-product-required for this gate, and decode-full remains diagnostic/non-product. `MOSS-NANO-6` later closed as `ITERATE_NANO_RESIDENT_RUNTIME`, so app integration remains locked behind a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision.
+
+**Tier:** Runtime gate closeout | **Depends on:** MOSS-NANO-5B
+
+---
+
+#### Sprint MOSS-NANO-6E: Shutdown / Restart Lifecycle Proof (COMPLETED)
+
+**Status:** Completed 2026-05-01 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. Nano was not promoted to app prototype; no app integration was unlocked.
+
+**Type:** Runtime lifecycle proof. No renderer/app integration and no Kokoro behavior change.
+
+**Canonical artifact:**
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json` | Child-process lifecycle proof observed `shutdownObserved: true`, `restartObserved: true`, `processRestartActual: true`, clean child PID `24484`, restart child PID `3408`, forced-kill child PID `27340`, no zombie, restart-failed exit `2`, in-flight shutdown rejected, stale output reuse `0`, and bounded short confirmation `2/2` fresh with p95 post-recycle RTF `1.4647`. The artifact is intentionally `not-promoting` because it is not the full 1800-second/100-segment gate. |
+
+**Hardening:** `scripts/moss_nano_probe.mjs --shutdown-restart-evidence` now measures clean shutdown, forced kill, no-zombie, restart-clean, restart-failed, and in-flight rejection around actual child probe processes. Bounded lifecycle promotion requires child-process restart proof, measured lifecycle classes, stale-output clean evidence across shutdown/restart/in-flight, and no hidden runtime reuse classification. In-process bounded reset remains separate from process restart.
+
+**Verification:** Focused Nano probe tests passed `132/132`; the real lifecycle proof command exited `0`.
+
+**Decision rationale:** MOSS-NANO-6E closes the truthful lifecycle proof blocker from 6D, but it does not replace the full promotion artifact. Continue runtime iteration until a full 1800-second/100-segment bounded run carries this child-process lifecycle proof and still clears memory, RTF, stale-output, crash, package, and readiness gates.
+
+---
+
+#### Sprint MOSS-NANO-6D: Bounded Resident Lifecycle / Process Recycling (COMPLETED)
+
+**Status:** Completed 2026-05-01 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. Nano was not promoted to app prototype; no app integration was unlocked.
+
+**Type:** Runtime architecture rescue. No renderer/app integration and no Kokoro behavior change.
+
+**Canonical artifacts:**
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-6d-bounded-soak-1800-rss-threshold/summary.json` | Requested `1800s`; measured `1800.0033s`; `100/100` adjacent fresh; stale output reuse `0`; same-identity `runtimeReuseActual: false`; bounded lifecycle actual for measured in-process reset with `boundedRuntimeReuseActual: true`; `processRestartActual: false`; `99` RSS-threshold recycles; restart p50/p95 `8649/8726ms`; prewarm p50/p95 `246/258ms`; readiness memory slope `0.3555MB/min`; post-warmup slope `0`; p95 first decoded `264ms`; p95 final RTF `0.4631`; readiness failed on `shutdownEvidence`. |
+| `artifacts/moss/moss-nano-6d-rss-threshold-b/summary.json` | Targeted 20-segment threshold probe completed `20/20` fresh with stale reuse `0`, recycle count `19`, readiness slope `0`, inference slope `1.4665MB/min`, p95 first decoded `262ms`, and p95 RTF `0.4703`. |
+| `artifacts/moss/moss-nano-6d-recycle-5b/summary.json` | Targeted segment-limit probe completed `20/20` fresh with recycle count `3`, segments per runtime `[5,5,5,5]`, p95 first decoded `281ms`, and p95 RTF `0.5026`. |
+
+**Hardening:** Bounded lifecycle flags now record requested-vs-actual recycle evidence, restart/prewarm cost, recycle reasons, segments per runtime, post-recycle memory and tail metrics, stale-output guard evidence, and truthful warm-spare/process-restart status. Short adjacent passage sources expand deterministically to satisfy requested book-like segment counts.
+
+**Verification:** Focused final tests passed `153/153`; full `npm test` passed `2374/2374`; `npm run build` passed with the existing circular chunk warning.
+
+**Decision rationale:** Bounded in-process recycle fixed the cumulative resident pressure symptoms enough to make memory slope and p95 RTF plausible, but it is not a full lifecycle implementation. Child-process restart was not observed, warm spare is unsupported, and all six shutdown/restart lifecycle classes remain `not-observed`/`not-implemented`. Continue runtime lifecycle/process-boundary work only.
+
+---
+
+#### Sprint MOSS-NANO-6C: Memory / Tail-Latency / Lifecycle Fix (COMPLETED)
+
+**Status:** Completed 2026-04-30 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. Nano was not promoted to app prototype; no app integration was unlocked.
+
+**Type:** Runtime-only memory, tail-latency, and lifecycle hardening. No renderer/app integration and no Kokoro behavior change.
+
+**Targeted artifacts:**
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-6c-adjacent-20-escalated/summary.json` | `20/20` fresh; readiness memory slope `9.7639MB/min`; inference slope `10.6414MB/min`; hold slope `0`; p95 first decoded `1240ms`; p95 RTF `3.0416`; lifecycle not implemented. |
+| `artifacts/moss/moss-nano-6c-ort-no-arena-20-escalated/summary.json` | `20/20` fresh; readiness memory slope `8.563MB/min`; inference slope `8.8964MB/min`; hold slope `0`; p95 first decoded `1768ms`; p95 RTF `3.3251`; lifecycle not implemented. |
+
+**Hardening:** Memory endpoint slope is diagnostic-only. Readiness memory gate uses the authoritative max of readiness, post-warmup, and inference phase slopes. Phase fields are required. Tail-latency failures include machine-readable slow segment evidence. Lifecycle validation accepts `lifecycleEvidence.lifecycleClasses` and requires all six measured classes. Nano-6 readiness decisions are only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`; `KEEP_KOKORO_ONLY` is not exposed as a Nano-6 readiness decision.
+
+**Verification:** Focused final tests passed `143/143`; full `npm test` passed `2364/2364`; `npm run build` passed with the existing circular chunk warning.
+
+**Decision rationale:** Targeted gates already failed on memory slope, tail latency/RTF, and lifecycle implementation, so the full 30-minute soak was deferred rather than spending 30 minutes proving a non-promotable state. Continue resident runtime iteration only.
+
+---
+
+#### Sprint MOSS-NANO-6B: Resident Soak Memory / Lifecycle Closure (COMPLETED)
+
+**Status:** Completed 2026-04-30 with final decision `ITERATE_NANO_RESIDENT_RUNTIME`. Nano was not promoted to app prototype; next work remains resident runtime iteration only.
+
+**Type:** Runtime soak, reliability, memory, and packaging feasibility. No renderer/app integration and no Kokoro behavior change.
+
+**Closeout scope:** No app integration, renderer/IPC/selectable-engine work, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work occurred.
+
+**Canonical long artifact:**
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-6b-soak-1800-adjacent-100-escalated/summary.json` | Requested `1800s`; measured `1800.0012s`; `100/100` adjacent fresh; stale output reuse `0`; session restarts `0`; crash count `0`; memory slope `12.8416MB/min` fails the `1.5MB/min` gate; adjacent p95 internal first decoded `1088ms` passes the `1500ms` gate; adjacent p95 final RTF `2.3007` fails the `1.5`/`1.45` gates; shutdown classes remain `not-observed`/`not-implemented`; readiness `not-promoting`. |
+
+**Hardening:** MOSS-NANO-6B hardened real wall-clock soak duration, memory slope based on wall-clock RSS samples, deterministic 100+ book-like adjacent segments, fail-closed synthetic lifecycle evidence, Nano-specific package readiness not inherited from dev/flagship `.runtime` config, machine-readable failed gates/reasons in Nano-6 readiness, and clearer preflight source-vs-package evidence fields.
+
+**Verification:** Focused tests passed `133/133`; final full `npm test` passed `2354/2354`; `npm run build` passed with the existing circular chunk warning.
+
+**Decision rationale:** The segment-first runtime path remains promising, but the soak/lifecycle/package gate did not pass. The runtime now has a real 30-minute wall-clock soak and `100/100` fresh adjacent segments, but memory slope and adjacent RTF still fail promotion gates, lifecycle shutdown coverage remains not implemented, and Nano-specific package/app readiness is not unlocked. Therefore record `ITERATE_NANO_RESIDENT_RUNTIME`, not app-prototype promotion.
+
+**WHAT:** Prove resident Nano can stay alive across long reading sessions, recover truthfully from failures, and fit Blurby's local packaging/provisioning constraints before any app prototype.
+
+**HYPOTHESIS:** Even if per-segment latency is acceptable, Nano can still fail as a product engine through memory growth, zombie processes, model asset size, venv/dependency fragility, or startup/provisioning UX. This sprint either converts Nano from runtime candidate to app-prototype candidate, or keeps it in research.
+
+**Acceptance thresholds:**
+
+- 30-minute simulated resident soak with no crash, no output reuse, no session restart, and memory growth slope <= `1.5MB/min` after warmup.
+- 100 adjacent segment generations with p95 internal first decoded <= `1500ms`, p95 final RTF <= `1.5`, and p95 punctuation RTF <= `1.45`.
+- Cold start/provisioning report records asset sizes, venv footprint, first-run setup time, and whether packaging can ship or must download assets.
+- Shutdown/restart test proves the resident process exits cleanly and rejects in-flight work truthfully.
+- Package feasibility doc records license, asset source, install/update path, and local-only privacy posture.
+
+**WHERE:**
+
+- `scripts/moss_nano_probe.mjs` and `scripts/moss_nano_resident_probe.py`: add soak orchestration, long-run summary fields, graceful shutdown hooks, and restart/failure classification.
+- `scripts/moss_preflight.mjs`: add Nano-specific runtime/package checks if not already covered by existing generic MOSS checks.
+- `tests/mossNanoProbe.test.js` and `tests/mossProvisioning.test.js`: add soak-summary validation, shutdown classification, asset/provisioning checks, and `.runtime/**` exclusion safeguards.
+- `docs/testing/MOSS_RUNTIME_SETUP.md`: document Nano runtime/provisioning requirements.
+- `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md` and `docs/testing/MOSS_DECISION_LOG.md`: record soak/package evidence.
+- `artifacts/moss/moss-nano-6-*`: soak, packaging, shutdown, and restart artifacts.
+
+**Historical dispatch plan:**
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Map all resident Nano lifecycle risks from MOSS-NANO-5C segment-first soak-gate artifacts, MOSS-NANO-5B diagnostic artifacts, and local runtime shape: memory, process lifetime, asset footprint, startup, shutdown, and dependency packaging.
+
+Hermes [haiku]: Create branch `sprint/moss-nano-6-soak-packaging-readiness`; preserve `.runtime/**` as local-only.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add tests for soak summary schema, memory slope, shutdown classification, and packaging report fields.
+
+Athena [opus] {high}: Implement soak/provisioning diagnostics and shutdown/restart evidence generation without adding app IPC.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused Nano/provisioning tests, canonical soak and shutdown commands, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Approve only if `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` thresholds are met and evidence is fresh.
+
+Plato [sonnet]: Review for memory leaks, zombie process risks, packaging false assumptions, and accidental app integration.
+
+Herodotus [sonnet]: Record exactly one decision: `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `KEEP_KOKORO_ONLY`.
+
+Hermes [haiku]: Stage scoped files/artifacts, commit, merge, push.
+
+**Tier:** Runtime/package readiness | **Branch:** `sprint/moss-nano-6-soak-packaging-readiness` | **Depends on:** MOSS-NANO-5C runtime-only segment-first soak-candidate gate
+
+---
+
+#### Sprint MOSS-NANO-7: Sidecar Contract + IPC Prototype (COMPLETED)
+
+**Status:** Completed 2026-05-01 with final decision `PROMOTE_NANO_TO_STRATEGY_PROTOTYPE`. Nano remains app-boundary prototype only; Kokoro remains default.
+
+**Type:** Main-process sidecar contract and IPC prototype. No renderer engine selection, no normal playback wiring, no user-facing Nano, no narration strategy switch, no Kokoro retirement.
+
+**WHAT:** Turned the resident Nano diagnostic runtime into a managed Electron main-process sidecar contract with truthful readiness/status, request ownership, cancellation, shutdown/restart, crash cleanup, and generated-audio delivery to the experimental preload bridge.
+
+**HYPOTHESIS:** The resident runtime can be wrapped as a local sidecar without reintroducing false-ready states, stale in-flight requests, zombie workers, or security holes. If not, Nano cannot be safely onboarded despite runtime speed.
+
+**Implementation evidence:**
+
+- Added `main/moss-nano-engine.js`: sidecar manager with injectable sidecar adapter, structured readiness/failure semantics, bounded lifecycle config snapshot, request ownership, stale-output guards, startup-before-request, cancel adapter rejection settlement, and cancel/shutdown/restart in-flight settlement.
+- Added `main/moss-nano-sidecar.js`: protocol placeholder/adapter.
+- Registered experimental `tts-nano-status`, `tts-nano-synthesize`, `tts-nano-cancel`, `tts-nano-shutdown`, and `tts-nano-restart` handlers in `main/ipc/tts.js`.
+- Exposed experimental preload methods `nanoStatus`, `nanoSynthesize`, `nanoCancel`, `nanoShutdown`, and `nanoRestart` in `preload.js`.
+- Added Nano status/result/failure/Electron API types in `src/types.ts`.
+- Added `tests/mossNanoEngine.test.js` and `tests/mossNanoIpc.test.js`.
+- Preserved engine-selection boundary: `TtsEngine` remains `web | kokoro | qwen`; Nano is not renderer-selectable, not normal playback, and not user-facing.
+
+**Verification evidence:**
+
+- Focused Nano sidecar/IPC tests: `npm test -- --run tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js` passed `2` files / `14` tests after sandbox `EPERM` escalated rerun.
+- Full `npm test` passed `152` files / `2392` tests.
+- `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
+- Solon approved spec compliance; Plato final quality check was `READY`.
+
+**Next:** `MOSS-NANO-8` may dispatch as a bounded narration-strategy/segment-timing prototype. It must not expose Nano as user-facing or default, and it must not change Kokoro behavior.
+
+**Historical plan:**
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Map existing Kokoro/Qwen IPC contracts and choose the minimal safe Nano contract. Explicitly list what must not be copied from stale Qwen prototype paths.
+
+Hermes [haiku]: Create branch `sprint/moss-nano-7-sidecar-ipc-prototype`.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add failing sidecar/IPC tests first for readiness, generate, cancel, crash rejection, and no stale success.
+
+Athena [opus] {high}: Implement the sidecar manager and IPC/preload/types contract. Keep renderer settings hidden unless a prototype flag is enabled.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused sidecar/IPC tests, resident smoke generation through IPC, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify contract truthfulness and promotion precondition.
+
+Plato [sonnet]: Review process lifecycle, local path/security boundaries, and crash cleanup.
+
+Herodotus [sonnet]: Update docs with sidecar evidence and whether `MOSS-NANO-8` can dispatch.
+
+Hermes [haiku]: Commit, merge, push.
+
+**Tier:** Prototype sidecar | **Branch:** `sprint/moss-nano-7-sidecar-ipc-prototype` | **Depends on:** MOSS-NANO-6 promotion
+
+---
+
+#### Sprint MOSS-NANO-8: Narration Strategy + Segment Timing (COMPLETED)
+
+**Status:** Completed 2026-05-01 with final decision `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE`. Nano remains experimental and test-only; no default-engine change, no user-facing engine selection, and no Kokoro retirement.
+
+**Type:** Renderer narration strategy prototype. No public UI, no default-engine change, and no Kokoro retirement.
+
+**WHAT:** Add a `moss-nano` narration strategy that can request resident Nano segments, schedule audio through Blurby's scheduler, and advance global word anchors using truthful segment boundaries rather than fake word timestamps.
+
+**HYPOTHESIS:** Nano can fit Blurby's Narrate/Flow model if it is treated as a segment-following engine with global anchors at truthful segment boundaries. If the underline/cursor must fake word-level timing to feel usable, stop and redesign before productization.
+
+**Implementation evidence:**
+
+- Added `src/hooks/narration/mossNanoStrategy.ts` as the experimental Nano `TtsStrategy` boundary.
+- Added test-only `useNarration({ experimentalNano: true })` selection plumbing. Kokoro still wins when selected and public `TtsEngine` remains `web | kokoro | qwen`.
+- Nano calls optional `window.electronAPI.nanoStatus`, `nanoSynthesize`, and `nanoCancel`, and reports structured Nano failures through `nanoError`.
+- Nano schedules PCM segment audio through the existing scheduler, calls `markPipelineDone()`, and records truthful `timingTruth: "segment-following"` with `wordTimestamps: null`.
+- Added request/callback ownership guards so late synth results or stale `onWordAdvance`/`onEnd`/`onError` callbacks after stop, handoff, rate restart, engine switch, or unmount cannot mutate narration state.
+- Added segment continuation behavior, section-end ownership cleanup, speed/rate-change propagation, pause/resume/cancel handling, and missing-audio structured failure handling.
+
+**Verification evidence:**
+
+- Focused Nano strategy/useNarration tests: `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx` passed `2` files / `20` tests.
+- Full `npm test` passed `154` files / `2412` tests.
+- `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
+- Solon approved spec compliance; Plato final quality review approved after callback ownership repairs.
+
+**Next:** `MOSS-NANO-9` may dispatch as the bounded cache/prefetch/continuity prototype. Nano must remain hidden from public engine selection until a later explicit settings/UX sprint, and Kokoro remains default.
+
+**Historical plan:**
+
+**WHERE:**
+
+- Create `src/hooks/narration/mossNanoStrategy.ts`: `TtsStrategy` implementation, request/cancel/preload plumbing, segment anchor metadata, error handling.
+- Modify `src/hooks/useNarration.ts`: add `moss-nano` branch alongside web/Kokoro/Qwen only after strategy tests exist.
+- Modify `src/types.ts`: extend `TtsEngine`, status snapshots, and API typings.
+- Modify `src/utils/audioScheduler.ts` only if a generic non-Kokoro segment metadata field is needed; avoid Kokoro-specific regressions.
+- Tests: `tests/mossNanoStrategy.test.ts`, `tests/useNarrationMossNano.test.tsx`, and targeted scheduler tests for segment-boundary truth.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {max}: Trace `useNarration` engine branching, strategy contracts, global anchor updates, and scheduler metadata. Produce a minimal integration map that preserves Kokoro behavior.
+
+**HOW (Implementation):**
+
+Hercules [sonnet] {high}: Add failing hook/strategy tests for segment scheduling, cancellation, pause/resume, and no word-timing fabrication.
+
+Athena [opus] {high}: Implement `mossNanoStrategy` and guarded `useNarration` integration.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused strategy/hook/scheduler tests, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify segment-truth criteria and no default-engine change.
+
+Plato [sonnet]: Review timing/anchor coherence and Kokoro regression risk.
+
+Herodotus/Hermes [sonnet/haiku]: Update docs, commit, merge, push.
+
+**Tier:** Renderer strategy prototype | **Branch:** `sprint/moss-nano-8-narration-strategy` | **Depends on:** MOSS-NANO-7
+
+---
+
+#### Sprint MOSS-NANO-9: Cache/Prefetch + Continuity Handoffs (COMPLETED)
+
+**Status:** Completed 2026-05-02 with decision `PROMOTE_NANO_TO_EXPERIMENTAL_UI_CANDIDATE`. Nano remains experimental, hidden from public engine selection, and non-default.
+
+**Type:** Continuity, prefetch, cache, and handoff prototype. No default-engine change.
+
+**WHAT:** Make Nano usable across real book reading flows: startup warm segment, next-segment prefetch, pause/resume, section handoff, cross-book cleanup, cache invalidation, memory/backpressure, and truthful fallback when the resident runtime cannot keep up.
+
+**HYPOTHESIS:** Nano can feel continuous if resident generation stays ahead by one or more segments and handoffs use readiness rather than sleeps. If prefetch cannot hide punctuation/decode latency without memory growth, Nano stays experimental.
+
+**WHERE:**
+
+- `src/hooks/narration/mossNanoStrategy.ts`: add prefetch queue, request ownership, cancellation, and backpressure hooks.
+- `src/hooks/useNarration.ts`: integrate handoff/pause/resume semantics without changing global word anchor rules.
+- `src/utils/ttsCache.ts` and `main/tts-cache.js`: add Nano cache keys only if audio metadata is stable and invalidation is proven.
+- `src/utils/ttsEvalTrace.ts`, `scripts/tts_eval_runner.mjs`, `tests/ttsEvalMatrixRunner.test.ts`: add Nano continuity metrics.
+- Tests: `tests/narrationContinuity.test.ts`, `tests/useNarrationMossNano.test.tsx`, `tests/ttsContinuityReadiness.test.ts`, and new Nano cache/prefetch tests.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Map all current Kokoro continuity/handoff/cache contracts and identify which can be generalized vs. which must remain Kokoro-only.
+
+**HOW (Implementation):**
+
+Athena [opus] {high}: Implement Nano prefetch/backpressure/handoff logic.
+
+Hercules [sonnet]: Add cache key, continuity trace, and targeted regression tests.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused continuity/cache/eval tests, a Nano live-book matrix if available, full `npm test`, and `npm run build`.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify handoff/startup thresholds and no false fallback.
+
+Plato [sonnet]: Review race conditions, memory pressure, stale cache, and request ownership.
+
+Herodotus/Hermes [sonnet/haiku]: Update docs, commit, merge, push.
+
+**Closeout evidence:** Implemented bounded strategy-owned Nano segment cache and next-segment/next-section prefetch in `src/hooks/narration/mossNanoStrategy.ts`; cache admission requires matching generation, scope, voice, rate, start index, and text hash. `useNarration({ experimentalNano: true })` now owns continuity orchestration, pause/resume preservation, section-handoff prefetch, and cross-book cache cleanup without adding a public UI toggle or changing Kokoro behavior. Eval traces now include Nano segment latency/cache/prefetch fields with `segment-following` truth and `wordTimestamps: null`. Verification passed focused `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx tests/ttsEvalTrace.test.ts tests/ttsEvalMatrixRunner.test.ts` (`4` files / `57` tests), full `npm test` (`154` files / `2423` tests), and `npm run build` with the existing circular chunk warning.
+
+**Tier:** Continuity prototype | **Branch:** `sprint/moss-nano-9-cache-prefetch-continuity` | **Depends on:** MOSS-NANO-8
+
+---
+
+#### Sprint MOSS-NANO-10: Settings UX + Engine Selection (COMPLETED)
+
+**Status:** Completed 2026-05-02 with final decision `PROMOTE_NANO_TO_PRODUCTIZATION_GATE`.
+
+**Type:** Settings-only experimental opt-in. No default-engine change, no Kokoro retirement, no silent fallback while Nano is selected.
+
+**Outcome:** Nano is now visible in TTS settings as `Nano AI (Experimental)` with local sidecar/runtime warning copy. Selection and readiness are truthful separately: the option can be visible while blocked, but it is disabled for use and preview until `nanoStatus` reports ready and the sidecar API exists. Ready Nano preview calls `nanoStatus` and `nanoSynthesize`; blocked Nano preview stays disabled rather than falling back to Web/Qwen/Kokoro. `useNarration` activates Nano only when both the experimental path is enabled and the selected engine is `nano`; timing remains segment-following with no fake word timestamps.
+
+**Implementation evidence:** Added `tests/ttsSettingsMossNano.test.tsx`, `src/components/settings/useMossNanoSettingsStatus.ts`, and `src/components/settings/MossNanoStatusSection.tsx`; extended `src/components/settings/TTSSettings.tsx`, `src/components/settings/ttsPreview.ts`, `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`, and `src/types.ts`. Component-size and narration-initialization guard tests were updated to preserve existing cleanup constraints.
+
+**Verification:** Focused `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx tests/ttsPreviewTruth.test.ts tests/ttsSettingsMossNano.test.tsx` passed `4` files / `35` tests. Adjacent settings/profile/default tests passed `7` files / `60` tests. Full `npm test` passed `155` files / `2427` tests. `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning.
+
+**Decision rationale:** The sprint satisfied the experimental UI guardrails without changing defaults or Kokoro behavior. Nano is now eligible for productization-gate evidence, but it remains experimental, blocked when sidecar readiness is false, and not a default engine.
+
+**Tier:** Experimental UX onboarding | **Branch:** `sprint/moss-nano-10-settings-ux` | **Depends on:** MOSS-NANO-9
+
+---
+
+#### Sprint MOSS-NANO-11: Productization Gate + Default Decision (COMPLETED)
+
+**Status:** Completed 2026-05-02 with final decision `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`.
+
+**Type:** Release matrix, quality review, docs/runbook, and default/fallback decision. No automatic Kokoro retirement.
+
+**WHAT:** Decide whether Nano remains experimental, becomes a recommended local engine, or can start a separate Kokoro-retirement lane. This sprint must run live-book matrix evidence, UX QA, memory soak, packaging/provisioning verification, and third-party-style adversarial review before any default decision.
+
+**HYPOTHESIS:** Nano can only be onboarded as a trusted engine if the integrated app path matches or beats Kokoro on perceived continuity/prosody while remaining truthful on status, timing, failure, and resource usage. If quality improves but reliability is weaker, keep Nano opt-in.
+
+**Outcome:** The gate remains conservative. `tests/fixtures/narration/matrix.manifest.json` now has explicit tagged selected-Nano scenarios for Page, Focus, Flow, and Narrate, and `scripts/tts_eval_runner.mjs` caps productization through `evaluateMossNanoProductGate()`. Untagged release matrix runs exclude the experimental Nano gate scenarios; `--tag moss-nano-11` is required. The generated gate-shape artifact `artifacts/tts-eval/moss-nano-11-product-gate-shape` completed four scenario-shape runs but records `mossNanoProductGate.maxDecision: NANO_EXPERIMENTAL_ONLY` because live product evidence was not supplied.
+
+**Decision rationale:** The approved guardrail says missing any four-mode selected-Nano exercise or required live evidence prevents promotion above `NANO_EXPERIMENTAL_ONLY`. The matrix shape is present, but live settings preview truth, selected-sidecar lifecycle, cache/prefetch continuity, segment-following progress truth, explicit fallback proof, package/runtime readiness, and Kokoro-availability evidence were not recorded as passing. Nano therefore remains experimental, the current default stays unchanged, Kokoro remains available, and no Kokoro retirement lane opens.
+
+**Verification:** Focused `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `20` tests. `npm run tts:eval:matrix -- --run-id moss-nano-11-product-gate-shape --tag moss-nano-11 --out artifacts\tts-eval\moss-nano-11-product-gate-shape` completed four runs and wrote the experimental-only decision cap.
+
+**WHERE:**
+
+- `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`, `scripts/tts_eval_runner.mjs`, `tests/fixtures/narration/matrix.manifest.json`: add Nano release scenarios and quality gates.
+- `docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`, `docs/testing/TTS_ADVERSARIAL_REVIEW_CHECKLIST.md`, `docs/testing/TTS_ITERATIVE_AUDIT_TRACE_CHECKLIST.md`: add Nano-specific release/adversarial checks.
+- `src/utils/ttsEvalTrace.ts`: include Nano-specific first decoded, first playable, cache hit, handoff, and memory fields if not already present.
+- `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`: record final product decision and next lane.
+- Tests: matrix/gate tests plus any settings/narration regression slices touched by earlier sprints.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {max}: Build the release-risk map from runtime, sidecar, strategy, cache, settings, and eval artifacts. Identify any unresolved blocker that should prevent a default decision.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Add Nano release matrix manifest/gate tests and docs checklist updates.
+
+Athena [opus] {high}: Harden any final trace/gate plumbing needed for honest integrated Nano evidence.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run Nano gated matrix, Kokoro comparison matrix, full `npm test`, `npm run build`, and packaging/provisioning checks.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Decide one final state: `NANO_EXPERIMENTAL_ONLY`, `NANO_RECOMMENDED_OPT_IN`, `NANO_DEFAULT_CANDIDATE`, `KEEP_KOKORO_DEFAULT`, or `OPEN_KOKORO_RETIREMENT_LANE`.
+
+Plato [sonnet]: Perform adversarial product review: false readiness, stale audio, anchor drift, failure recovery, settings migration, and user trust.
+
+Herodotus/Hermes [sonnet/haiku]: Update roadmap/queue/runbooks, commit, merge, push.
+
+**Tier:** Productization gate | **Branch:** `sprint/moss-nano-11-productization-gate` | **Depends on:** MOSS-NANO-10
+
+---
+
+#### Sprint MOSS-NANO-12: Live Four-Mode Evidence Capture (COMPLETED)
+
+**Status:** Completed 2026-05-02 with final decision `NANO_EXPERIMENTAL_ONLY`.
+
+**Type:** Evidence capture / recommended opt-in gate. No default change, no Kokoro retirement, no simulated-output promotion.
+
+**WHAT:** Capture or classify real live-book evidence for Nano selected across Page, Focus, Flow, and Narrate. Recommended opt-in requires all four modes with no truth, fallback, stale playback, progress-clarity, or lifecycle blockers.
+
+**Outcome:** The runner and manifest now have a MOSS-NANO-12 live-evidence lane. `scripts/tts_eval_runner.mjs` exports `evaluateMossNanoLiveEvidenceGate()` and accepts `--nano-live-evidence <json>` for future live observation artifacts. `tests/fixtures/narration/matrix.manifest.json` has tagged selected-Nano evidence slots for Page, Focus, Flow, and Narrate. The generated artifact `artifacts/tts-eval/moss-nano-12-live-four-mode-evidence` completed four scenario-shape runs but records `mossNanoLiveEvidenceGate.decision: NANO_EXPERIMENTAL_ONLY` because no live observation artifact was supplied.
+
+**Decision rationale:** The approved gate says simulated runner output cannot promote Nano. Missing live evidence for any mode caps the result at `NANO_EXPERIMENTAL_ONLY`; unclear segment-following progress, stale playback, unsafe fallback, underline race, or sidecar lifecycle instability would pause productization. Since live observations were absent, Nano remains experimental and no recommended opt-in is recorded.
+
+**Verification:** Focused `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `26` tests. `npm run tts:eval:matrix -- --run-id moss-nano-12-live-four-mode-evidence --tag moss-nano-12 --out artifacts\tts-eval\moss-nano-12-live-four-mode-evidence` completed four runs and wrote the experimental-only decision.
+
+**Tier:** Live evidence gate | **Branch:** `sprint/moss-nano-12-live-four-mode-evidence` | **Depends on:** MOSS-NANO-11
+
+---
+
+**Execution-ready plan:** [docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md](C:/Users/estra/Projects/Blurby/docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md)
+
+**Goal:** Make flagship MOSS-TTS a real CPU-only operational narration lane inside Blurby, starting from the highest-quality flagship path and demoting to Nano only after measured, well-classified feasibility failure.
+
+**Operational posture:**
+- Start with flagship MOSS-TTS, not Nano. The lane exists to test the quality/context hypothesis that could make Blurby narration better than Kokoro.
+- Preserve Kokoro as the operational floor. Kokoro retirement remains paused until MOSS proves continuous live playback and a separate Kokoro-retirement lane is approved.
+- Do not silently fall back from selected MOSS to Kokoro or Web Speech. MOSS unavailable states must be truthful and recoverable.
+- Do not fake word timing. If MOSS lacks trusted word timestamps, Narrate follows natural segments and commits global anchors only at truthful boundaries.
+- Keep Nano scoped to its approved prototype stage. `MOSS-NANO-8` closed as `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE`, but that promotion is still experimental/test-only: no public engine selection, no settings UI, no default-engine change, no Kokoro behavior change, and no Kokoro retirement.
+
+**Program-level Nano gate:** Nano is not the app default. MOSS-NANO-6F promoted Nano to app-prototype candidate with bounded lifecycle, MOSS-NANO-7 promoted the sidecar/IPC contract to strategy prototype, and MOSS-NANO-8 promoted the test-only segment-following narration strategy to continuity prototype. `MOSS-NANO-9` may prototype cache/prefetch/continuity, but user-facing selection, normal playback productization, default candidacy, and Kokoro retirement still require later explicit decisions.
+
+
+#### Sprint MOSS-RCA-1: Flagship Runtime Root-Cause Autopsy (COMPLETED)
+
+**Status:** Completed 2026-04-27. Decision: `KEEP_PAUSED_ROOT_CAUSE_CONFIRMED`; MOSS-3 remains blocked.
+
+**Type:** Root-cause investigation only; no app integration, no Kokoro behavior change, no Nano demotion.
+
+**WHAT:** Explain why the local flagship MOSS runtime is too slow and unstable before any further product-path decision. The current evidence proves the configured x64 batch path is not live-viable, but it does not yet fully explain root cause because the current command shape hardcodes the first-class Q4 GGUF and does not pass thread count into `llama-moss-tts`, even while matrix labels vary quant/thread.
+
+**HYPOTHESIS:** The bad result may be a combination of (a) batch-only first-audio semantics, (b) 8.5B flagship raw-code generation on CPU through x64 Windows on ARM64, (c) expensive ONNX decode, (d) fixed `--max-new-tokens 128` causing minimum generation work even for short segments, and (e) native `llama-moss-tts.exe` memory instability on punctuation-heavy inputs. The sprint must distinguish these rather than treating “MOSS is slow” as one undifferentiated failure.
+
+**WHERE:**
+
+- `scripts/moss_firstclass_windows_e2e.py`: split stage timings more finely where practical, preserve failed temp inputs when requested, accept and forward real runtime knobs such as threads/model GGUF/max tokens.
+- `scripts/moss_flagship_probe.py`: classify native return codes in hex/name form, preserve command/runtime metadata, and ensure probe summaries reveal the exact executable, model, threads, max tokens, and stage boundary.
+- `scripts/moss_speed_forensics.mjs`: stop labeling quant/thread cells unless those values reach the executable; add or delegate to a dedicated RCA runner for failed-cell repeats and parameter sweeps.
+- `.runtime/moss/config.json`: local-only runtime config; verify template usage but do not commit secrets or machine-specific runtime assets.
+- `artifacts/moss/moss-speed-1-task-10f-*`: historical evidence baseline; use for comparison only, not as final quant/thread proof.
+- `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, `docs/testing/MOSS_RUNTIME_SETUP.md`, `docs/testing/MOSS_RUNTIME_SHAPE_COMPARISON.md`: record root-cause findings and next decision.
+- `tests/mossFlagshipProbe.test.js`, `tests/mossSpeedForensics.test.js`, `tests/mossRuntimeShapeProbe.test.js`, plus new `tests/mossRuntimeRca.test.js` if a dedicated RCA runner is added.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Trace the current probe/forensics path end to end and produce a root-cause map. Explicitly answer which matrix labels currently reach the native executable, where first audio can physically appear, where crashes occur, and which evidence is valid vs. superseded. No code edits in this phase.
+
+**HOW (Implementation):**
+
+Hermes [haiku]: Create/use branch `sprint/moss-rca-1-runtime-root-cause`; keep `.runtime/**` and generated artifacts out of source control unless explicitly scoped.
+
+Hercules [sonnet]: Add failing tests proving quant/thread/max-token metadata must reach the command or be marked non-assertive. Then harden `scripts/moss_flagship_probe.py`, `scripts/moss_speed_forensics.mjs`, and/or a new RCA runner so reported matrix cells reflect actual runtime inputs.
+
+Hercules [sonnet]: Add native return-code classification for `0xC0000374` heap corruption and `0xC0000005` access violation candidates. Preserve stderr tails and command metadata without leaking tokens or local secrets.
+
+Hercules [sonnet]: Add an RCA sweep runner or mode that can run one variable at a time: `max-new-tokens`, segment length, punctuation-heavy minimization, repeated failed-cell trials, and real thread/model propagation.
+
+Hippocrates [haiku]: Generate a minimal evidence set, not a broad matrix first: one known-good short case, one reproduced punctuation failure, one max-token sweep, and one repeat set after command-propagation fixes.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused RCA/probe/forensics tests, then `npm test` and `npm run build` if code changed. Runtime evidence must be classified as complete, partial, or blocked; do not close on unlabeled partial matrices.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify the sprint answers the root-cause questions without reopening MOSS-3 by implication.
+
+Plato [sonnet]: Review for false certainty, secret leakage, source-control hygiene, and matrix-label truthfulness.
+
+Herodotus [sonnet]: Update the MOSS decision log, feasibility doc, runtime setup notes, and sprint queue with one of: `KEEP_PAUSED_ROOT_CAUSE_CONFIRMED`, `ITERATE_RUNTIME_SHAPE_WITH_EVIDENCE`, `DEMOTE_TO_NANO`, or `REJECT`.
+
+Hermes [haiku]: Stage only scoped scripts/tests/docs/artifacts, commit, merge according to the roadmap closeout convention, and keep `.runtime/**` untracked.
+
+**Acceptance criteria:**
+
+- The sprint explicitly separates batch latency, raw-code generation, ONNX decode, wrapper overhead, and native crash stage.
+- Quant/thread/model labels are truthful: either propagated to the executable or clearly marked as non-assertive.
+- Failed punctuation-heavy cells are reduced to the smallest reproducible input practical for this host, or marked blocked with exact reason.
+- Native return codes are recorded in hex and interpreted as crash-class evidence, not generic runtime failures.
+- `MOSS-3` remains paused unless the decision log records a new non-paused decision with evidence.
+- Nano remains conditional unless the decision log records `DEMOTE_TO_NANO`.
+
+**Pointer for CLI:** Start here. Read this sprint, then `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, `docs/testing/MOSS_RUNTIME_SETUP.md`, and the MOSS-SPEED-1 artifacts named in the decision log. Do not dispatch MOSS-3.
+
+**Tier:** Diagnostic | **Branch:** `sprint/moss-rca-1-runtime-root-cause` | **Depends on:** MOSS-SPEED-1
+
+---
+
+#### Sprint MOSS-RUNTIME-1: Make Flagship Runtime Real (COMPLETED)
+
+**Status:** Completed 2026-04-27 with decision `KEEP_PAUSED_RUNTIME_CONFIRMED`. RCA-1 confirmed the current configured x64 batch path was bad; MOSS-RUNTIME-1 made the rescue evidence fairer and still found no viable local flagship path.
+
+**Type:** Runtime rescue + evidence-truth implementation. This is not app integration and must not touch Kokoro production behavior.
+
+**WHAT:** Convert the MOSS flagship test path from a misleading x64 batch-only audit into a truthful runtime rescue lane. Make runtime knobs real, get a fair non-emulated or best-available execution shape, and determine whether flagship MOSS can be made viable before any sidecar/renderer work resumes.
+
+**HYPOTHESIS:** MOSS may still be salvageable if the runtime becomes fair: real quant/model selection, real thread propagation, smaller max-token/segment work, native ARM64 clang or WSL2/Linux execution where possible, and/or a less batch-bound generation/decode path. If it remains too slow or crash-prone after those corrections, then the pause decision becomes much stronger and may justify `DEMOTE_TO_NANO` or `REJECT`; until then, x64 batch evidence is a bad-shape verdict, not a final flagship verdict.
+
+**WHERE:**
+
+- `.runtime/moss/config.json`: local runtime command truth; ensure `{quant}`, `{threads}`, and `{maxNewTokens}` are either consumed by the command or marked unsupported in artifacts. Do not commit this local runtime file.
+- `scripts/moss_firstclass_windows_e2e.py`: accept/forward real runtime knobs, expose stage timings, and investigate whether partial raw-code/audio output or smaller bounded generation is possible.
+- `scripts/moss_flagship_probe.py`: preserve command metadata, executable inputs, native return-code classification, and stage timings in every summary.
+- `scripts/moss_speed_forensics.mjs`: run only truthful matrices; no label may imply a quant/thread/max-token change unless it reaches the executable.
+- `scripts/moss_runtime_shape_probe.mjs`: turn native ARM64 clang and WSL2/Linux from vague blockers into exact setup/build/run evidence.
+- `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, `docs/testing/MOSS_RUNTIME_SETUP.md`, `docs/testing/MOSS_RUNTIME_SHAPE_COMPARISON.md`: record the rescue decision and setup blockers.
+- `tests/mossFlagshipProbe.test.js`, `tests/mossSpeedForensics.test.js`, `tests/mossRuntimeShapeProbe.test.js`, `tests/moss_flagship_probe_python_test.py`: keep harness truth covered before long runtime sweeps.
+- `artifacts/moss/moss-runtime-1-*`: store rescue artifacts; include only intentional summaries/artifacts in commits, never `.runtime/**`.
+
+**HOW (Phase 0):**
+
+Aristotle [opus] {high}: Enumerate every MOSS runtime input from CLI args to native executable. Confirm which upstream `llama-moss-tts` flags exist for threads, context, max tokens, model file, streaming/raw output, and decode behavior. Produce a no-code root-cause map of what must be made real before any benchmark is trusted.
+
+Hermes [haiku]: Create/use branch `sprint/moss-runtime-1-make-flagship-real`; preserve unrelated dirty work and keep `.runtime/**`, cache folders, and model weights untracked.
+
+**HOW (Implementation):**
+
+Hercules [sonnet]: Make quant/model selection truthful. If the wrapper can receive a model path per quant, wire it; if flagship first-class only supports one model file in this local setup, artifacts must say `quantLabelAssertive: false` rather than pretending Q5/Q6 were tested.
+
+Hercules [sonnet]: Make thread/max-token propagation truthful. Add tests first so `threads` and `maxNewTokens` either appear in the native command or are explicitly recorded as unsupported/non-assertive.
+
+Athena [opus] {high}: Pursue fair runtime shape, not just more x64 evidence. Attempt native ARM64 clang setup/build or WSL2/Linux execution with exact blockers. If neither can run, document what is missing and whether the x64 path is the only available local route.
+
+Hercules [sonnet]: Add a rescue sweep that varies one lever at a time: `max-new-tokens`, segment size, punctuation minimization, model file/quant if real, and thread count if real. The sweep should prefer small, falsifiable cells before large matrices.
+
+Athena [opus] {high}: Investigate first-audio architecture. Determine whether `llama-moss-tts` can emit partial raw codes/audio before full decode, whether a persistent process would avoid repeated load/setup cost, and whether pre-generation/cache is the only plausible path.
+
+**HOW (Verification):**
+
+Hippocrates [haiku]: Run focused harness tests, Python probe tests, and the smallest rescue matrix that proves each corrected runtime input is either assertive or explicitly non-assertive.
+
+Hippocrates [haiku]: Run at least one known-good short case and one punctuation-heavy minimized case under the best available truthful runtime shape. If native ARM64/WSL2 is blocked, produce setup-blocker artifacts rather than silently falling back.
+
+Hippocrates [haiku]: Run `npm test` and `npm run build` for code/doc changes before closeout.
+
+**HOW (Review / Closeout):**
+
+Solon [sonnet]: Verify the sprint did not reopen MOSS-3, did not touch Kokoro production behavior, did not demote to Nano without evidence, and did not overclaim x64 batch results.
+
+Plato [sonnet]: Review for matrix-label truth, secret leakage, source-control hygiene, native crash handling, and whether the rescue evidence actually answers viability.
+
+Herodotus [sonnet]: Update roadmap, queue, MOSS decision log, runtime setup, feasibility, and runtime-shape docs with one explicit decision: `CONTINUE_RUNTIME_RESCUE`, `PROMOTE_TO_MOSS_3_CANDIDATE`, `DEMOTE_TO_NANO`, `KEEP_PAUSED_RUNTIME_CONFIRMED`, or `REJECT`.
+
+Hermes [haiku]: Stage only scoped scripts/tests/docs/selected artifacts, commit, merge according to the roadmap closeout convention, and keep `.runtime/**` untracked.
+
+**Acceptance criteria:**
+
+- Quant, thread, and max-token claims are truthful: every label either reaches the executable or is explicitly non-assertive in the artifact.
+- At least one fairer runtime shape is attempted: native ARM64 clang or WSL2/Linux. If blocked, the blocker is exact and actionable.
+- The sprint determines whether the current first-audio problem is batch architecture, raw-code generation speed, ONNX decode, process startup/model load, or a combination with measured stage data.
+- Punctuation-heavy instability is reduced or classified with native return-code metadata and the smallest practical repro input.
+- No MOSS app integration starts; `MOSS-3` stays paused unless the decision log records `PROMOTE_TO_MOSS_3_CANDIDATE`.
+- Kokoro remains unchanged and remains the operational floor.
+- Nano remains conditional unless the decision log records `DEMOTE_TO_NANO`.
+
+**Closeout evidence:** MOSS-RUNTIME-1 added an in-memory first-class rescue overlay in `scripts/moss_speed_forensics.mjs` so Q4 model selection and `maxNewTokens` can be assertive without committing `.runtime/moss/config.json`. It also records `threads` as non-assertive/unsupported because the local `llama-moss-tts` target rejects `--threads`, prefers the first-class GGUF directory for quant discovery, preserves partial failed-stage timings, and writes `first-audio-architecture.json`.
+
+Key artifacts:
+
+- `artifacts/moss/moss-runtime-1-shapes-attempt-escalated/summary.json`: x64 Windows available; native ARM64 clang blocked by `spawn clang ENOENT`; WSL2 unconfirmed/blocked.
+- `artifacts/moss/moss-runtime-1-truthful-single-q4-tokens128b/summary.json`: truthful Q4/maxNewTokens=128 short smoke succeeded but recorded firstAudioMs `81438`, RTF `20.125`, raw-code generation `53354` ms, and ONNX decode `27291` ms.
+- `artifacts/moss/moss-runtime-1-truthful-single-q4-tokens128b/first-audio-architecture.json`: first audio is batch-bound on raw-code generation plus ONNX decode; no partial raw-code/audio streaming observed.
+- `artifacts/moss/moss-runtime-1-truthful-punctuation-first-q4-tokens128c/summary.json`: minimized punctuation input `Wait...` reproduced native `0xC0000374` (`heap-corruption-candidate`) with partial stage timing before crash.
+
+MOSS-3 remains blocked. Kokoro remains unchanged and remains the operational floor. Nano remains conditional because no Nano timing evidence was collected.
+
+**Pointer for CLI:** Start here. Read `MOSS-RCA-1` closeout first, then this sprint, then `docs/testing/MOSS_DECISION_LOG.md`, `docs/testing/MOSS_RUNTIME_SETUP.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, and `docs/testing/MOSS_RUNTIME_SHAPE_COMPARISON.md`. This sprint is allowed to fix harness/runtime truth and pursue native/WSL runtime shape; it is not allowed to begin MOSS-3 app integration.
+
+**Tier:** Runtime rescue | **Branch:** `sprint/moss-runtime-1-make-flagship-real` | **Depends on:** MOSS-RCA-1
+
+---
+
+#### Sprint MOSS-0: Flagship Feasibility And Host Truth (ACTIVE)
+
+**Goal:** Lock upstream facts, runtime target, asset list, supported host policy, preflight behavior, and fallback criteria before app integration begins.
+
+**Scope:** Create `docs/testing/MOSS_RUNTIME_SETUP.md`, `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`, `docs/testing/MOSS_DECISION_LOG.md`, `scripts/moss_preflight.mjs`, and `tests/mossProvisioning.test.js`; add the `moss:preflight` package script; update governance docs.
+
+**Acceptance criteria:** MOSS flagship target is documented and not conflated with Nano; preflight truthfully classifies local runtime state; missing runtime config is a clear unsupported state, not a crash; roadmap and queue reflect the full lane; Kokoro remains the default operational baseline.
+
+**Tier:** Full | **Branch:** `sprint/moss-0-flagship-feasibility`
+
+---
+
+#### Sprint MOSS-1: CPU-Only Runtime Bring-Up Outside Blurby (PLANNED)
+
+**Goal:** Provision and probe the flagship `llama.cpp`/GGUF plus ONNX path outside the app, then capture structured first-audio, throughput, memory, and failure evidence.
+
+**Scope:** Add `scripts/moss_flagship_probe.mjs`, `scripts/moss_flagship_probe.py`, `tests/mossFlagshipProbe.test.js`, and the `moss:probe` script; update MOSS setup, feasibility, and decision docs. Generated run artifacts live under `artifacts/moss/probe/`.
+
+**Acceptance criteria:** Flagship MOSS can produce a structured probe summary or a classified failure; probe output includes runtime, quant/thread, first-audio, real-time factor, memory, artifact paths, and failure class; no assets are downloaded automatically.
+
+**Tier:** Full | **Depends on:** MOSS-0
+
+---
+
+#### Sprint MOSS-2: Flagship Quality And Performance Benchmark Against Kokoro (PLANNED)
+
+**Goal:** Judge MOSS against the actual Blurby problem by comparing flagship MOSS and Kokoro on the same book-like passages before app integration.
+
+**Scope:** Add `scripts/moss_kokoro_benchmark.mjs`, `tests/mossBenchmark.test.ts`, `docs/testing/moss-vs-kokoro-listening-review.md`, MOSS benchmark metrics/gates, matrix scenarios, and decision-log updates.
+
+**Acceptance criteria:** MOSS is compared against Kokoro on the same book-like material; benchmark output distinguishes missing live data from pass/fail; listening review exists and is ready to fill; decision log advances only on evidence. `DEMOTE_TO_NANO` is allowed only if the program-level demotion gate is satisfied.
+
+**Tier:** Full | **Depends on:** MOSS-1
+
+---
+
+#### Sprint MOSS-3: MOSS Sidecar Contract And Truthful IPC (PLANNED)
+
+**Goal:** Create the stable main-process boundary to start, stop, stream, cancel, and inspect MOSS without freezing the renderer or creating false-ready states.
+
+**Scope:** Add `main/moss-streaming-engine.js`, `scripts/moss_sidecar.py`, `src/utils/mossStatus.ts`, `src/types/mossStreaming.ts`, `tests/mossStreaming.test.js`, and `tests/mossRuntimeHardening.test.js`; wire MOSS IPC/preload/type surfaces.
+
+**Acceptance criteria:** MOSS sidecar lifecycle is test-covered before renderer integration; status is truthful and never false-ready; stream cancellation, sidecar exit, and stale frames are deterministic; sidecar can emit one full audio frame at first while preserving a future streaming contract.
+
+**Tier:** Full | **Depends on:** MOSS-2 continuing flagship path
+
+---
+
+#### Sprint MOSS-4: Live Book Playback Prototype (PLANNED)
+
+**Goal:** Make MOSS usable inside Blurby on a real book while keeping Kokoro stable and preserving global word-anchor behavior across modes.
+
+**Scope:** Add `src/hooks/narration/mossStreamingStrategy.ts`, `tests/mossStreamingStrategy.test.ts`, and `tests/useNarrationMoss.test.tsx`; extend engine/narration types, `useNarration`, and minimal settings UI.
+
+**Acceptance criteria:** MOSS can be selected as an engine; MOSS can start live playback from a real book word window when the sidecar is available; pause/resume/stop/switch cleanup is deterministic; global word anchor is preserved through truthful segment or scheduler callbacks; Kokoro and Qwen behavior does not regress.
+
+**Tier:** Full | **Depends on:** MOSS-3
+
+---
+
+#### Sprint MOSS-5: Timing Truth And Segment-Following Narrate (PLANNED)
+
+**Goal:** Make segment-following Narrate a first-class truthful mode for MOSS when trusted word timestamps are not available.
+
+**Scope:** Add `src/utils/mossTimingPolicy.ts`, `tests/mossTimingPolicy.test.ts`, and `tests/mossNarrateSegmentTruth.test.tsx`; wire MOSS timing policy into strategy/UI state; update TTS adversarial and iterative audit checklists.
+
+**Acceptance criteria:** MOSS never displays estimated word timing as if it were truth; segment-following Narrate is explicit and test-covered; global word anchor remains accurate across all four modes; existing Kokoro word-level underline behavior remains unchanged.
+
+**Tier:** Full | **Depends on:** MOSS-4
+
+---
+
+#### Sprint MOSS-6: Cache, Prewarm, And Long-Form Continuity (PLANNED)
+
+**Goal:** Add MOSS-specific cache/prewarm behavior and verify long-form listening without drift, stale audio, or memory growth.
+
+**Scope:** Add `src/utils/mossCacheKey.ts`, `tests/mossCacheKey.test.ts`, and `tests/mossContinuity.test.ts`; extend engine-scoped cache behavior, MOSS prewarm, eval matrix/metrics/gates, and long-form evidence artifacts.
+
+**Acceptance criteria:** MOSS has engine-scoped cache identity; prewarm reduces waits without corrupting anchors or playing stale audio; long-form playback has measured stall, drift, and memory behavior; Kokoro cache tests remain green.
+
+**Tier:** Full | **Depends on:** MOSS-5
+
+---
+
+#### Sprint MOSS-7: Productization Gate And Promotion Decision (PLANNED)
+
+**Goal:** Decide whether MOSS becomes a visible product option based on evidence: naturalness, punctuation prosody, long-form continuity, and acceptable wait times.
+
+**Scope:** Harden MOSS settings/status UI, release gates, final matrix/soak evidence, `docs/testing/MOSS_DECISION_LOG.md`, listening review, setup docs, scorecard references, and governance docs.
+
+**Promotion outcomes:** Choose exactly one: `PROMOTE_EXPERIMENTAL`, `PROMOTE_PRIMARY_CANDIDATE`, `ITERATE`, `DEMOTE_TO_NANO`, or `REJECT`.
+
+**Acceptance criteria:** MOSS has a truthful visible UI; final decision artifact is evidence-based; Kokoro remains available and unbroken; full test suite and build pass; no Kokoro retirement decision is made here. Retirement requires a separate lane after MOSS has proven stable over time.
+
+**Tier:** Full | **Depends on:** MOSS-6
+
+---
+
+#### Sprint MOSS-NANO-1: CPU Realtime Candidate Bring-Up (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `ITERATE_NANO_RUNTIME`. This sprint is runtime evidence only, not app integration.
+
+**Goal:** Bring up MOSS-TTS-Nano as a lower-burden CPU candidate and compare it against Kokoro and failed flagship evidence without changing app behavior.
+
+**Outcome:** Nano ONNX CPU generated local audio for both measured passages, but firstAudioSec `15.5075` / RTF `4.4` for short and firstAudioSec `18.7613` / RTF `1.6526` for punctuation miss live promotion thresholds. Kokoro remains the app default and only integrated engine. No `PROMOTE_NANO_TO_APP_PROTOTYPE`, no Nano rejection, and no Kokoro behavior change.
+
+---
+
+#### Sprint MOSS-NANO-2: Runtime Latency Rescue (COMPLETED)
+
+**Status:** Completed 2026-04-28 with decision `KEEP_KOKORO_ONLY`. This sprint was runtime evidence only: no app integration, no sidecar IPC, no renderer integration, no Kokoro behavior change.
+
+**Outcome:** Corrected v2 real-text Nano artifacts still missed live-app viability. Python selection precedence is explicit `--python`, then `PYTHON` environment variable, then repo-local `.runtime/moss/.venv-nano`, then system `python`. Short real text v2 recorded first observed `13.9036s`, total `14.4591s`, RTF `3.9291` cold and first observed `15.2025s`, total `15.8170s`, RTF `4.2981` warm with `runtimeReuseActual: false`; punctuation v2 recorded first observed `20.0393s`, total `20.6641s`, RTF `1.7572` cold and first observed `18.6516s`, total `19.2688s`, RTF `1.6385` warm with `runtimeReuseActual: false`. Older wrong-Python blocked artifacts, zero-word venv artifacts, and non-v2 real-text/segmented artifacts are superseded/non-canonical. v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, but still is not internal decoded audio. Segmentation, ORT option requests, and prewarm/cache attempts did not help or did not apply through the subprocess boundary. Kokoro remains far ahead and remains the app default and only integrated engine. MOSS-3 through MOSS-7 remain paused unless a new explicit promotion decision is recorded.
+
+---
+
+## Phase 6 Follow-On — Four-Mode Reader Restoration (ARCHIVED 2026-05-02)
+
+> This lane is sourced from the approved design spec at [docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md](C:/Users/estra/Projects/Blurby/docs/superpowers/specs/2026-04-17-four-mode-reader-and-narrate-restoration-design.md). It restores `Narrate` as a real fourth mode, fixes the still-broken live foliate flow substrate first, and then unifies all reader modes around one canonical global word anchor.
+
+---
+
+### Sprint READER-4M-1: Infinite-Scroll Surface Recovery & Explicit Mode Foundation (COMPLETED 2026-04-18, v1.63.0)
+
+**Goal:** Make live foliate `Flow` reliable again and reintroduce `narrate` to the reader's core type/state contracts so the standalone Narrate restoration can build on a truthful shared substrate instead of the current hidden `flow + isNarrating` composition.
+
+**Version:** v1.63.0 | **Branch:** `sprint/reader-4m-1-surface-foundation` | **Tier:** Full
+
+**Completion note:** Completed on 2026-04-18. Live Foliate Flow now boots from an explicit rendered-word provider contract between `FoliatePageView` and `FlowScrollEngine`, and Flow start/rebuild waits on `waitForSectionReady()` plus `foliateRenderVersion` instead of blind retry timing. The shared reader contract now truthfully includes `narrate` in `ReaderMode` / persisted last-mode fields, keyboard compatibility is localized to explicit bridges, and the closeout follow-up fixed `ReaderContainer` so Foliate `onLoad` treats `narrate` as a flow-surface mode instead of falling back into passive extraction/restore churn.
+
+**Verification:** Focused reader/foundation suites passed, including the added Foliate `onLoad`/`narrate` regression. Full verification passed with `npm test` (`125` files, `2021` tests) and `npm run build`; the existing non-fatal Vite circular chunk warning (`settings -> tts -> settings`) remains unchanged.
+
+---
+
+### Sprint QWEN-PROT-1: Qwen Engine Surface & Unavailable-State Foundation (COMPLETED 2026-04-18, v1.64.0)
+
+**Goal:** Land the first safe Qwen prototype slice by wiring Qwen into Blurby's types, settings, preload, main-process status plumbing, and test harness as a selectable but explicitly unavailable engine, without changing Kokoro behavior or attempting live Qwen synthesis yet.
+
+**Version:** v1.64.0 | **Branch:** `sprint/qwen-prot-1-engine-surface` | **Tier:** Full
+
+**Completion note:** Completed on 2026-04-18. Blurby now treats `qwen` as a first-class prototype engine across shared types, persistence, preload/main IPC, settings UI, and the browser test harness without altering Kokoro defaults or silently falling back when Qwen is selected. Main-process Qwen support currently stops at config lookup plus truthful unavailable/warming/error status, and live narration explicitly errors rather than routing into Web Speech or Kokoro.
+
+**Verification:** Focused Qwen/settings/persistence coverage passed. `npm test` passed and `npm run build` passed.
+
+---
+
+### Sprint QWEN-PROT-2: Qwen Sidecar Runtime & Live Prototype Playback (COMPLETED 2026-04-18, v1.65.0)
+
+**Goal:** Turn the bounded Qwen prototype from a selectable stub into a live local playback lane by adding the Python sidecar contract, `qwenGenerate`, a dedicated Qwen narration strategy, and truthful live-app prototype playback without silently changing Kokoro behavior or over-claiming timing truth.
+
+**Version:** v1.65.0 | **Branch:** `sprint/qwen-prot-2-sidecar-playback` | **Tier:** Full
+
+**Completion note:** Completed on 2026-04-18. Blurby now has a bounded live Qwen prototype lane: the main process can spawn and manage a configured Python sidecar, `qwenGenerate` is exposed through IPC/preload, Qwen has a dedicated narration strategy with restart-based rate changes, settings preview uses truthful ready voices, and the app can perform real live playback when the external runtime is present. Kokoro behavior and default selection remained unchanged, Qwen timing stays heuristic/null-backed unless the runtime provides more, and no packaged runtime, aligner, or instruct-mode expansion landed in this sprint.
+
+**Verification:** Focused Qwen runtime/settings/narration verification passed. Full `npx vitest run tests` passed and `npm run build` passed.
+
+---
+
+### Sprint QWEN-STREAM-2: StreamAccumulator + Streaming Strategy + Live Playback (COMPLETED 2026-04-20, v1.73.0)
+
+**Goal:** Wire the streaming sidecar (from QWEN-STREAM-1) into the renderer narration pipeline so Blurby can perform live streaming Qwen narration — PCM frames arrive incrementally, accumulate to sentence boundaries, and play back through the existing `audioScheduler` with word-advance callbacks, proving continuous live playback end-to-end.
+
+**Version:** v1.73.0 | **Branch:** `sprint/qwen-stream-2-accumulator-strategy` | **Tier:** Full
+
+**Completion note:** StreamAccumulator + streaming Qwen strategy + live playback wired. PCM frames buffer to sentence boundaries via StreamAccumulator, streaming strategy instantiated when engine is "qwen" and streaming engine ready, fallback to non-streaming preserved. 21 new tests.
+
+---
+
+### Sprint QWEN-STREAM-3: Streaming Hardening + Evidence + Decision Gate (COMPLETED 2026-04-20, v1.74.0)
+
+**Goal:** Harden the streaming narration path for real-world use (error recovery, timeout resilience, startup truth) and produce live-app evidence artifacts that let us make the promotion decision: is streaming Qwen good enough to be the sole successor lane, or do we lean back into Kokoro?
+
+**Version:** v1.74.0 | **Branch:** `sprint/qwen-stream-3-hardening-decision` | **Tier:** Full
+
+**Completion note:** Streaming hardening: stall detection (TTS_STREAM_STALL_TIMEOUT_MS=8000ms), crash recovery (2s poll), warmup gate, cancellation guards. Stream-finished IPC wire added. 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests.

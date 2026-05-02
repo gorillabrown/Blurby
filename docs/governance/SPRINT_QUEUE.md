@@ -53,10 +53,60 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 for the Nano onboarding roadmap; no Nano default-change sprint is dispatch-ready.
-Next queue item: none for Nano productization until a new live observation capture sprint is approved.
-Health: GREEN/EXPERIMENTAL-ONLY — MOSS-NANO-12 closed `NANO_EXPERIMENTAL_ONLY`. Four selected-Nano live-evidence slots exist and the runner accepts `--nano-live-evidence`, but no live observation artifact was supplied, so recommended opt-in is not promoted.
+Finish line: Desktop v2.0 Shipping
+Queue depth: 3 (GREEN) — EINK-6A, EINK-6B, GOALS-6B
+Next queue item: BRAND-HYG-1 (brand theme commit — CLI/Hermes, mechanical)
+Health: GREEN — Desktop v2.0 conveyor active. MOSS-NANO deferred. Qwen streaming on ITERATE.
+Roadmap review: 2026-05-02. Verdict: AT RISK (strong velocity, queue was RED, MOSS 44% sideways).
 ```
+
+## Desktop v2.0 Conveyor Belt (Active)
+
+| Seq | Sprint | Stage | LOE | Deps | Status |
+|-----|--------|-------|-----|------|--------|
+| ~~1~~ | ~~SK-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | ✅ complete (2026-05-02) |
+| 1b | BRAND-HYG-1 | Stage 1: Unblock | S | — | **next up (CLI/Hermes)** |
+| 2 | EINK-6A | Stage 2: Features | M | — | next up (CLI) |
+| 3 | EINK-6B | Stage 2: Features | M | EINK-6A | queued |
+| 4 | GOALS-6B | Stage 2: Features | M | — (parallel-safe with EINK-6B) | queued |
+| 5 | POLISH-1 | Stage 3: Ship | M | EINK-6A | stub — spec at Stage 2 close |
+| 6 | RELEASE-1 | Stage 3: Ship | S | POLISH-1 | stub — spec at Stage 2 close |
+
+Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt" and § "Phase 6 Continued — E-Ink & Goals".
+
+---
+
+## Deferred Lanes (Not on Desktop v2.0 Critical Path)
+
+| Lane | Status | Resume Condition |
+|------|--------|-----------------|
+| MOSS-NANO-13 | Blocked on audit rescoping | Provenance-backed evidence gate designed |
+| KOKORO-RETIRE-1/2 | Paused | MOSS proves continuous live playback |
+| Qwen Streaming | ITERATE (QWEN-STREAM-4) | Post-v2.0 |
+| EXT-ENR-C | Optional | Post-v2.0 |
+| APK-0 through APK-4 | Investigation gates not cleared | Post-v2.0 |
+| Phase 7 (Cloud Sync) | Not spec'd | Post-v2.0 |
+| Phase 8 (RSS/News) | Not spec'd | Post-v2.0 |
+
+---
+
+## Completed Sprints (Recent — Desktop v2.0 Review Window)
+
+| Sprint | Date | Decision/Result |
+|--------|------|-----------------|
+| SK-HYG-1 | 2026-05-02 | Roadmap hygiene & queue recovery. Archive-forward, queue GREEN, Desktop v2.0 conveyor. Brand commit pending CLI. |
+| QWEN-STREAM-4 | 2026-04-21 | ITERATE — streaming not promoted |
+| READER-4M-3 | 2026-04-19 | Global word anchor + cross-mode continuity |
+| READER-4M-2 | 2026-04-18 | Standalone narrate mode + four-button controls |
+| QWEN-STREAM-3 | 2026-04-20 | Streaming hardening + evidence + decision gate |
+| QWEN-STREAM-2 | 2026-04-20 | StreamAccumulator + streaming strategy + live playback |
+| QWEN-STREAM-1 | 2026-04-18 | Streaming sidecar foundation |
+| MOSS-NANO-12 | 2026-05-02 | NANO_EXPERIMENTAL_ONLY |
+| MOSS-NANO-11 | 2026-05-01 | NANO_EXPERIMENTAL_ONLY / KEEP_KOKORO_DEFAULT |
+
+---
+
+## Completed Sprints (MOSS-NANO Track — Historical)
 
 ---
 
@@ -517,12 +567,12 @@ If any guardrail fails, run the sprints sequentially.
 | Sprint ID | Disposition |
 |-----------|-------------|
 | HOTFIX-13 | **Dissolved.** BUG-151/152/153 absorbed into SELECTION-1. BUG-154 parked (likely not a bug — needs live verification). |
-| KOKORO-RETIRE-1 | **Paused.** Retirement posture was superseded as the immediate next step after live testing showed the current non-streaming local Qwen lane cannot sustain continuous CPU narration. It remains paused during the MOSS lane. Resume only after MOSS proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved. |
-| KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal remains blocked behind the same proof and approval bar; do not re-queue until `KOKORO-RETIRE-1` is reactivated under a separate approved retirement lane and the updated scorecard is green. |
-| MOSS-NANO follow-up | **Advanced by MOSS-NANO-8.** Narration strategy prototype recorded `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE`; `MOSS-NANO-9` may dispatch as bounded cache/prefetch/continuity work. Nano remains non-user-facing, Kokoro remains default, and no Kokoro retirement is unlocked. |
-| EINK-6A | Parked. Fully spec'd in ROADMAP.md. Re-queue when e-ink becomes priority. |
-| EINK-6B | Parked. Fully spec'd in ROADMAP.md. Depends on EINK-6A. |
-| GOALS-6B | Parked. Fully spec'd in ROADMAP.md. Independent — can run anytime. |
+| KOKORO-RETIRE-1 | **Paused.** Kokoro is available as legacy fallback (Qwen is default). Retirement paused — no successor has proven continuous live playback. Resume only after a successor proves live playback and a separate Kokoro-retirement lane is explicitly approved. |
+| KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal blocked behind same proof + approval bar. Do not re-queue until `KOKORO-RETIRE-1` is reactivated. |
+| MOSS-NANO follow-up | **Deferred.** MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits: "proceed only with scope changes." Nano remains experimental-only; Qwen is default; Kokoro is legacy fallback. Deferred pending provenance-backed product gate. No active MOSS lane during Desktop v2.0. |
+| EINK-6A | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 2). Full spec in ROADMAP.md. |
+| EINK-6B | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 3). Depends on EINK-6A. |
+| GOALS-6B | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 4). Parallel-safe with EINK-6B. |
 | EXT-ENR-C | Documented but deferred. In-browser reader is lower priority than connection fixes. |
 | APK-0 | Roadmapped, not yet execution-ready. Needs detailed WHERE/Tasks/SUCCESS CRITERIA. |
 | APK-1–4 | Roadmapped, not yet execution-ready. Depend on APK-0. |
