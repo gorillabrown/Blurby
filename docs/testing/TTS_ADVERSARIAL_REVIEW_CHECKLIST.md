@@ -12,6 +12,9 @@ This checklist is designed to catch the exact failure classes surfaced in the re
 - destructive rate-change behavior
 - cache contract drift
 - stale tests that still pass while runtime behavior regresses
+- Nano opt-in that looks ready when the sidecar/runtime is blocked
+- silent fallback to Kokoro/Qwen/Web Speech while Nano is selected
+- fake word timestamps masking segment-following-only Nano progress
 
 ## Scope
 
@@ -77,7 +80,10 @@ Read these in order before scoring anything:
 16. [main/tts-engine.js](C:/Users/estra/Projects/Blurby/main/tts-engine.js)
 17. [main/tts-engine-marathon.js](C:/Users/estra/Projects/Blurby/main/tts-engine-marathon.js)
 18. [main/tts-worker.js](C:/Users/estra/Projects/Blurby/main/tts-worker.js)
-19. Targeted test files under [tests](C:/Users/estra/Projects/Blurby/tests)
+19. [src/hooks/narration/mossNanoStrategy.ts](C:/Users/estra/Projects/Blurby/src/hooks/narration/mossNanoStrategy.ts)
+20. [src/components/settings/MossNanoStatusSection.tsx](C:/Users/estra/Projects/Blurby/src/components/settings/MossNanoStatusSection.tsx)
+21. [src/components/settings/useMossNanoSettingsStatus.ts](C:/Users/estra/Projects/Blurby/src/components/settings/useMossNanoSettingsStatus.ts)
+22. Targeted test files under [tests](C:/Users/estra/Projects/Blurby/tests)
 
 ## System Map
 
@@ -111,6 +117,36 @@ Record before starting:
 - Typecheck status:
 - Full test status:
 - Build status:
+
+## Nano Productization Gate
+
+Primary lane: `MOSS-NANO-11`
+
+### Checklist
+
+- [ ] selected-Nano live-book matrix covers Page, Focus, Flow, and Narrate
+- [ ] settings preview reports blocked and ready states truthfully
+- [ ] Nano selected-sidecar lifecycle is evidenced under user-facing selection
+- [ ] cache/prefetch continuity is evidenced under real Nano selection
+- [ ] progress/highlight truth is segment-following only
+- [ ] no fake `wordTimestamps` are emitted for Nano
+- [ ] fallback is explicit and user-visible; no silent Kokoro/Qwen/Web Speech fallback
+- [ ] package/runtime readiness and local-runtime requirements are documented
+- [ ] Kokoro remains available
+- [ ] Kokoro retirement is not opened without a separate approved lane
+
+### Decision Cap
+
+If the selected-Nano matrix cannot exercise all four modes, or any required evidence item is missing, the decision cannot exceed `NANO_EXPERIMENTAL_ONLY`.
+
+### Evidence to Capture
+
+- artifact directory:
+- modes exercised:
+- selected Nano ready/blocked states:
+- fallback path:
+- timing truth:
+- package/runtime notes:
 
 ## 2. Bootstrap Truth and Kokoro Import
 

@@ -1,0 +1,20 @@
+TTS eval matrix run complete (4 runs)
+- moss-nano-11-page-live-book: latency=486ms drift=2 failures=none
+- moss-nano-11-focus-live-book: latency=465ms drift=2 failures=none
+- moss-nano-11-flow-live-book: latency=402ms drift=2 failures=none
+- moss-nano-11-narrate-live-book: latency=395ms drift=2 failures=none
+
+Aggregate runs: 4
+Warm preview latency p50/p95: 1120 / 1120 ms
+Warm first-audio latency p50/p95: 433.5 / 482.85 ms
+Startup latency p50/p95: 433.5 / 482.85 ms
+Rate response latency p50/p95: n/a / n/a ms
+Drift p50/p95/max: 2 / 2 / 2
+Pause/resume failures: 0
+Handoff failures: 0
+Startup spikes above 3000 ms: 0
+Startup parity cached/uncached: n/a / n/a ms (delta n/a ms)
+Opening ramp parity: n/a
+
+MOSS-NANO-11 max decision: NANO_EXPERIMENTAL_ONLY
+MOSS-NANO-11 gate reasons: Missing or failing MOSS-NANO-11 evidence: liveBookMatrix; Missing or failing MOSS-NANO-11 evidence: settingsPreviewTruth; Missing or failing MOSS-NANO-11 evidence: sidecarLifecycle; Missing or failing MOSS-NANO-11 evidence: cachePrefetchContinuity; Missing or failing MOSS-NANO-11 evidence: segmentFollowingProgress; Missing or failing MOSS-NANO-11 evidence: fakeWordTimestamps; Missing or failing MOSS-NANO-11 evidence: explicitFallbackOnly; Missing or failing MOSS-NANO-11 evidence: packageRuntimeReadiness; Missing or failing MOSS-NANO-11 evidence: kokoroAvailable

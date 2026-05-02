@@ -129,5 +129,55 @@ describe("tts eval trace summary", () => {
     const summary = summarizeTtsEvalTrace(trace);
     expect(summary.failureClasses).toContain("cursor-highlight-drift");
   });
-});
 
+  it("summarizes Nano segment cache, latency, and prefetch readiness without word timestamps", () => {
+    const trace = makeBaseTrace();
+    trace.events.push(
+      {
+        ts: trace.events[0].ts + 250,
+        kind: "nano-segment",
+        phase: "prefetch-ready",
+        startIdx: 2,
+        endIdx: 4,
+        latencyMs: 75,
+        cacheHit: false,
+        prefetchReady: true,
+        timingTruth: "segment-following",
+        wordTimestamps: null,
+      } as any,
+      {
+        ts: trace.events[0].ts + 330,
+        kind: "nano-segment",
+        phase: "playback",
+        startIdx: 2,
+        endIdx: 4,
+        latencyMs: 12,
+        cacheHit: true,
+        prefetchReady: true,
+        timingTruth: "segment-following",
+        wordTimestamps: null,
+      } as any,
+    );
+
+    const valid = validateTtsEvalTrace(trace);
+    expect(valid.valid).toBe(true);
+
+    const summary = summarizeTtsEvalTrace(trace);
+    expect((summary as any).nanoSegmentLatencyMs).toEqual({
+      p50: 43.5,
+      p95: 71.85,
+      min: 12,
+      max: 75,
+    });
+    expect((summary as any).nanoCache).toEqual({
+      hits: 1,
+      misses: 1,
+      hitRate: 0.5,
+    });
+    expect((summary as any).nanoPrefetch).toEqual({
+      ready: 2,
+      stale: 0,
+      cancelled: 0,
+    });
+  });
+});

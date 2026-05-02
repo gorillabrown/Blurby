@@ -57,10 +57,39 @@ export function validateTtsEvalTrace(trace: TtsEvalTrace): { valid: boolean; iss
       if (pauseDepth === 0) issues.push("lifecycle:resume without preceding pause");
       else pauseDepth -= 1;
     }
+    if (event.kind === "nano-segment") {
+      if (event.timingTruth !== "segment-following") {
+        issues.push("nano-segment timingTruth must be segment-following");
+      }
+      if (event.wordTimestamps !== null) {
+        issues.push("nano-segment wordTimestamps must be null");
+      }
+    }
   }
   if (pauseDepth !== 0) issues.push("unbalanced pause/resume lifecycle events");
 
   return { valid: issues.length === 0, issues };
+}
+
+function percentile(sortedValues: number[], percentileValue: number): number | null {
+  if (!sortedValues.length) return null;
+  if (sortedValues.length === 1) return sortedValues[0];
+  const position = (sortedValues.length - 1) * percentileValue;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  if (lower === upper) return sortedValues[lower];
+  const weight = position - lower;
+  return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+}
+
+function summarizeLatency(values: number[]) {
+  const sorted = values.slice().sort((a, b) => a - b);
+  return {
+    p50: percentile(sorted, 0.5),
+    p95: percentile(sorted, 0.95),
+    min: sorted.length ? sorted[0] : null,
+    max: sorted.length ? sorted[sorted.length - 1] : null,
+  };
 }
 
 export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummary {
@@ -68,6 +97,7 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
   const words = trace.events.filter((e) => e.kind === "word");
   const flow = trace.events.filter((e) => e.kind === "flow-position");
   const transitions = trace.events.filter((e) => e.kind === "transition");
+  const nanoSegments = trace.events.filter((e) => e.kind === "nano-segment");
 
   const startEvent = lifecycle.find((e) => e.state === "start");
   const firstAudioEvent = lifecycle.find((e) => e.state === "first-audio");
@@ -130,6 +160,13 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
         && e.context?.includes("same-bucket"),
     )?.latencyMs
     ?? null;
+  const nanoLatencies = nanoSegments
+    .map((event) => event.latencyMs)
+    .filter((latency): latency is number => typeof latency === "number" && Number.isFinite(latency));
+  const nanoCacheHits = nanoSegments.filter((event) => event.cacheHit === true).length;
+  const nanoCacheMisses = nanoSegments.filter((event) => event.cacheHit === false).length;
+  const nanoCacheTotal = nanoCacheHits + nanoCacheMisses;
+  const nanoPrefetchReady = nanoSegments.filter((event) => event.prefetchReady === true).length;
 
   const failureClasses: TtsEvalMetricsSummary["failureClasses"] = [];
   if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
@@ -167,6 +204,17 @@ export function summarizeTtsEvalTrace(trace: TtsEvalTrace): TtsEvalMetricsSummar
     sectionHandoffLatencyMs,
     crossBookResumeLatencyMs,
     rateResponseLatencyMs,
+    nanoSegmentLatencyMs: summarizeLatency(nanoLatencies),
+    nanoCache: {
+      hits: nanoCacheHits,
+      misses: nanoCacheMisses,
+      hitRate: nanoCacheTotal > 0 ? nanoCacheHits / nanoCacheTotal : null,
+    },
+    nanoPrefetch: {
+      ready: nanoPrefetchReady,
+      stale: nanoSegments.filter((event) => event.phase === "prefetch-stale").length,
+      cancelled: nanoSegments.filter((event) => event.phase === "prefetch-cancelled").length,
+    },
     failureClasses,
   };
 }

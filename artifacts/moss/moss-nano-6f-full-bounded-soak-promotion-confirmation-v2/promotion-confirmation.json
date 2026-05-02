@@ -1,0 +1,202 @@
+{
+  "artifact": "MOSS-NANO-6F full bounded soak promotion confirmation",
+  "runId": "moss-nano-6f-full-bounded-soak-promotion-confirmation-v2",
+  "sourceArtifacts": {
+    "freshCanonicalV2Summary": "artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/summary.json",
+    "priorLifecycleProofV2Summary": "artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json"
+  },
+  "scope": {
+    "kind": "runtime-promotion-confirmation",
+    "appIntegration": false,
+    "appIntegrationDrift": "No app files or app integration code were changed by this runtime confirmation artifact. Review of unrelated app changes, if any, is left to Plato."
+  },
+  "decision": {
+    "recommended": "PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE",
+    "alternativesConsidered": [
+      "ITERATE_NANO_RESIDENT_RUNTIME",
+      "PAUSE_NANO_RUNTIME_RELIABILITY"
+    ],
+    "rationale": [
+      "The fresh v2 run completed with status ok and measured resident soak of 1800.0015 seconds, meeting the 1800 second gate.",
+      "The book-like adjacent run completed 100 of 100 requested segments, all fresh, with zero empty segments and zero stale output reuse.",
+      "Bounded lifecycle recycling is actual measured lifecycle control: recycleCount is 99, recycleReasons is rss-threshold, recycleRssThresholdMb is 1750, and recycle mode is in-process-runtime-reset.",
+      "The 99 session restart/runtime identity changes are expected bounded lifecycle recycle markers, not hidden or unclassified restart noise. The probe records each recycle as measured-bounded-lifecycle with explicit rss-threshold reason, in-process-runtime-reset mode, runtimeIdentityChanged=true, and per-recycle processRestartActual=false. Separate child-process lifecycle proof is present via measured restartEvidence and lifecycleTransitions.",
+      "Shutdown/restart lifecycle evidence is present and actual, including clean shutdown, forced kill, zombie-process check, clean restart, restart-failed, and inflight shutdown rejection.",
+      "Readiness memory slope is 0.3261 MB/min, below the 1.5 MB/min gate; p95 final RTF is 0.4826, below the 1.5 gate; p95 first decoded audio is 280 ms, below the 1500 ms gate.",
+      "Crash count is 0 and stale output reuse is 0 across resident soak, adjacent run, bounded lifecycle, and shutdown/restart clean evidence."
+    ],
+    "rawSummaryNotPromotingExplanation": {
+      "nano6ReadinessStatus": "not-promoting",
+      "rawPromotionDecision": "ITERATE_NANO_RESIDENT_RUNTIME",
+      "rawPromote": false,
+      "rawFailedGates": [],
+      "interpretation": "The raw summary is non-promoting because the persisted promotionDecision is ITERATE_NANO_RESIDENT_RUNTIME, not because the bounded lifecycle evidence failed. In the relevant gate logic, measured bounded lifecycle evidence suppresses the ordinary zero sessionRestartCount disqualification for classified runtime recycle identity changes while retaining stale-output, crash, latency, memory, shutdown, and bounded-lifecycle evidence gates."
+    }
+  },
+  "gateResults": [
+    {
+      "gate": "1800s measured resident soak",
+      "status": "pass",
+      "observed": 1800.0015,
+      "threshold": ">= 1800 sec",
+      "sourceField": "summary.residentSoak.measuredDurationSec"
+    },
+    {
+      "gate": "100/100 fresh adjacent segments",
+      "status": "pass",
+      "observed": {
+        "requestedSegments": 100,
+        "completedSegments": 100,
+        "freshSegments": 100,
+        "emptySegments": 0
+      },
+      "threshold": "requested=100, completed=100, fresh=100, empty=0",
+      "sourceField": "summary.bookLikeAdjacentRun"
+    },
+    {
+      "gate": "bounded recycle enabled and truthful",
+      "status": "pass",
+      "observed": {
+        "actual": true,
+        "status": "actual",
+        "evidenceSource": "measured-bounded-lifecycle",
+        "mode": "in-process-runtime-reset",
+        "recycleRssThresholdMb": 1750,
+        "recycleCount": 99,
+        "recycleReasons": [
+          "rss-threshold"
+        ],
+        "segmentsPerRuntimeCount": 100,
+        "segmentsPerRuntimeUniqueValues": [
+          1
+        ],
+        "perRecycleProcessRestartActual": false,
+        "runtimeIdentityChanged": true
+      },
+      "threshold": "actual measured bounded lifecycle, recycleCount > 0, reasons present, explicit mode/restart classification",
+      "sourceField": "summary.boundedLifecycle"
+    },
+    {
+      "gate": "shutdown/restart evidence present and passing",
+      "status": "pass",
+      "observed": {
+        "lifecycleEvidenceStatus": "actual",
+        "measurementKind": "child-process-lifecycle",
+        "processLifecycleActual": true,
+        "childProcessLifecycle": true,
+        "shutdownClassifications": [
+          "clean-shutdown",
+          "forced-kill",
+          "zombie-process",
+          "restart-clean",
+          "restart-failed",
+          "inflight-rejected"
+        ],
+        "restartEvidence": {
+          "kind": "child-process-restart",
+          "processRestartActual": true,
+          "oldProcessExited": true,
+          "zombieProcessDetected": false,
+          "freshOutput": true,
+          "staleOutputReuseCount": 0
+        },
+        "staleOutputCleanEvidence": {
+          "status": "actual",
+          "evidenceSource": "measured-lifecycle-check",
+          "shutdownClean": true,
+          "restartClean": true,
+          "inflightClean": true,
+          "staleOutputReuseCount": 0
+        }
+      },
+      "threshold": "all required lifecycle classes observed by measured-lifecycle-check",
+      "sourceField": "summary.lifecycleEvidence, summary.shutdownEvidence, summary.boundedLifecycle.restartEvidence"
+    },
+    {
+      "gate": "stale output reuse",
+      "status": "pass",
+      "observed": {
+        "residentSoak": 0,
+        "bookLikeAdjacentRun": 0,
+        "boundedLifecycle": 0,
+        "shutdownRestartCleanEvidence": 0,
+        "segmentsWithStaleOutputReuse": 0
+      },
+      "threshold": "= 0",
+      "sourceField": "summary.residentSoak.staleOutputReuseCount, summary.bookLikeAdjacentRun.staleOutputReuseCount, summary.boundedLifecycle.staleOutputReuseCount"
+    },
+    {
+      "gate": "readiness memory slope",
+      "status": "pass",
+      "observed": 0.3261,
+      "threshold": "<= 1.5 MB/min",
+      "sourceField": "summary.residentSoak.readinessMemorySlopeMbPerMin"
+    },
+    {
+      "gate": "p95 final RTF",
+      "status": "pass",
+      "observed": 0.4826,
+      "threshold": "<= 1.5",
+      "sourceField": "summary.bookLikeAdjacentRun.p95FinalRtf"
+    },
+    {
+      "gate": "p95 first decoded audio",
+      "status": "pass",
+      "observed": 280,
+      "threshold": "<= 1500 ms",
+      "sourceField": "summary.bookLikeAdjacentRun.p95InternalFirstDecodedAudioMs"
+    },
+    {
+      "gate": "no hidden crashes or unclassified restarts",
+      "status": "pass",
+      "observed": {
+        "crashCount": 0,
+        "residentSoakSessionRestartCount": 99,
+        "adjacentSessionRestartCount": 99,
+        "boundedRecycleCount": 99,
+        "classification": "classified bounded lifecycle runtime recycle",
+        "unclassifiedRestartNoise": 0
+      },
+      "threshold": "crashCount=0 and all runtime identity changes accounted for by measured bounded lifecycle recycle evidence",
+      "sourceField": "summary.residentSoak, summary.bookLikeAdjacentRun, summary.boundedLifecycle"
+    }
+  ],
+  "keyMetrics": {
+    "measuredSoakSec": 1800.0015,
+    "requestedSoakSec": 1800,
+    "adjacentRequestedSegments": 100,
+    "adjacentCompletedSegments": 100,
+    "adjacentFreshSegments": 100,
+    "boundedRecycleCount": 99,
+    "boundedRecycleReason": "rss-threshold",
+    "boundedRecycleRssThresholdMb": 1750,
+    "boundedRecycleMode": "in-process-runtime-reset",
+    "readinessMemorySlopeMbPerMin": 0.3261,
+    "p95FinalRtf": 0.4826,
+    "p95PunctuationRtf": 0.4826,
+    "p95InternalFirstDecodedAudioMs": 280,
+    "p95PostRecycleFirstAudioMs": 287,
+    "p95PostRecycleRtf": 0.4838,
+    "staleOutputReuseCount": 0,
+    "crashCount": 0,
+    "sessionRestartCount": 99,
+    "unclassifiedRestartCount": 0
+  },
+  "codeSemanticsReviewed": {
+    "scripts/moss_nano_resident_probe.py": [
+      "Bounded lifecycle triggers rss-threshold recycle reasons from current RSS samples.",
+      "recycle_runtime records in-process-runtime-reset, runtimeIdentityChanged, per-recycle processRestartActual=false, restart/prewarm costs, and RSS before/after evidence.",
+      "boundedLifecycle summary records actual/status/evidenceSource, recycleCount, recycleReasons, segmentsPerRuntime, tail evidence, stale-output evidence, and lifecycle classes."
+    ],
+    "scripts/moss_nano_probe.mjs": [
+      "validateNano6BoundedLifecycleEvidence requires actual measured-bounded-lifecycle evidence, restart/prewarm costs, recycle accounting, tail evidence, stale-output clean evidence, and child-process lifecycle proof for bounded promotion attempts.",
+      "validateNano6Soak and validateNano6BookLikeAdjacentRun only apply the zero sessionRestartCount/runtime identity gate when measured bounded lifecycle evidence is absent.",
+      "validateNano6ShutdownEvidence requires all measured lifecycle classifications and rejects in-process-only shutdown evidence."
+    ],
+    "tests/mossNanoProbe.test.js": [
+      "Non-bounded session/runtime identity changes still fail promotion.",
+      "Bounded lifecycle promotion passes only with measured recycle evidence and measured restart/shutdown lifecycle evidence.",
+      "Synthetic/not-implemented lifecycle evidence and stale-output reuse remain disqualifying."
+    ]
+  }
+}

@@ -1,0 +1,316 @@
+{
+  "generatedAt": "2026-05-02T05:51:10.243Z",
+  "mode": "matrix",
+  "interrupted": false,
+  "fixtureCount": 4,
+  "summaries": [
+    {
+      "fixtureId": "prose-basic",
+      "scenarioId": "moss-nano-11-page-live-book",
+      "runId": "moss-nano-11-product-gate-shape-matrix__moss-nano-11-page-live-book__it001",
+      "startLatencyMs": 486,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 486,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 38,
+      "flowEventCount": 13,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-11-page-live-book",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-11",
+          "nano-product-gate",
+          "live-book",
+          "page"
+        ]
+      }
+    },
+    {
+      "fixtureId": "dialogue-switches",
+      "scenarioId": "moss-nano-11-focus-live-book",
+      "runId": "moss-nano-11-product-gate-shape-matrix__moss-nano-11-focus-live-book__it002",
+      "startLatencyMs": 465,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 465,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 35,
+      "flowEventCount": 12,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-11-focus-live-book",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-11",
+          "nano-product-gate",
+          "live-book",
+          "focus"
+        ]
+      }
+    },
+    {
+      "fixtureId": "queued-handoff",
+      "scenarioId": "moss-nano-11-flow-live-book",
+      "runId": "moss-nano-11-product-gate-shape-matrix__moss-nano-11-flow-live-book__it003",
+      "startLatencyMs": 402,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 402,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 1,
+        "handoff": 1
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": 474,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-11-flow-live-book",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-11",
+          "nano-product-gate",
+          "live-book",
+          "flow"
+        ]
+      }
+    },
+    {
+      "fixtureId": "chapter-transition",
+      "scenarioId": "moss-nano-11-narrate-live-book",
+      "runId": "moss-nano-11-product-gate-shape-matrix__moss-nano-11-narrate-live-book__it004",
+      "startLatencyMs": 395,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 395,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 25,
+      "flowEventCount": 9,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 1,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-11-narrate-live-book",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-11",
+          "nano-product-gate",
+          "live-book",
+          "narrate"
+        ]
+      }
+    }
+  ],
+  "aggregate": {
+    "runCount": 4,
+    "startupLatency": {
+      "p50": 433.5,
+      "p95": 482.85,
+      "min": 395,
+      "max": 486
+    },
+    "warmPreviewLatency": {
+      "p50": 1120,
+      "p95": 1120,
+      "min": 1120,
+      "max": 1120
+    },
+    "warmFirstAudioLatency": {
+      "p50": 433.5,
+      "p95": 482.85,
+      "min": 395,
+      "max": 486
+    },
+    "rateResponseLatency": {
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "drift": {
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    "failureCounts": {
+      "pauseResumeFailures": 0,
+      "handoffFailures": 0
+    },
+    "startupSpikes": {
+      "thresholdMs": 3000,
+      "count": 0
+    },
+    "startupParity": {
+      "cachedStartLatencyMs": null,
+      "uncachedStartLatencyMs": null,
+      "deltaMs": null,
+      "cachedOpeningChunkWordCounts": [],
+      "uncachedOpeningChunkWordCounts": [],
+      "openingRampMatches": null
+    }
+  },
+  "mossNanoProductGate": {
+    "requiredModes": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "requiredModesPresent": {
+      "page": true,
+      "focus": true,
+      "flow": true,
+      "narrate": true
+    },
+    "scenarioCount": 4,
+    "evidence": {},
+    "reasons": [
+      "Missing or failing MOSS-NANO-11 evidence: liveBookMatrix",
+      "Missing or failing MOSS-NANO-11 evidence: settingsPreviewTruth",
+      "Missing or failing MOSS-NANO-11 evidence: sidecarLifecycle",
+      "Missing or failing MOSS-NANO-11 evidence: cachePrefetchContinuity",
+      "Missing or failing MOSS-NANO-11 evidence: segmentFollowingProgress",
+      "Missing or failing MOSS-NANO-11 evidence: fakeWordTimestamps",
+      "Missing or failing MOSS-NANO-11 evidence: explicitFallbackOnly",
+      "Missing or failing MOSS-NANO-11 evidence: packageRuntimeReadiness",
+      "Missing or failing MOSS-NANO-11 evidence: kokoroAvailable"
+    ],
+    "maxDecision": "NANO_EXPERIMENTAL_ONLY"
+  }
+}

@@ -1,9 +1,9 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-6E
+**Sprint:** MOSS-1 through MOSS-NANO-12
 **Initial status:** `INVESTIGATE`
-**Current status:** `ITERATE_NANO_RESIDENT_RUNTIME`
-**Last updated:** 2026-05-01
+**Current status:** `NANO_EXPERIMENTAL_ONLY`
+**Last updated:** 2026-05-02
 
 ## Status Values
 
@@ -27,6 +27,10 @@
 | `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE` | Promote Nano only to the next runtime soak/package gate because segment-first product-path evidence passed; this is not app prototype promotion and does not unlock app integration. |
 | `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` | Promote Nano from runtime evidence into the gated app-prototype path only after soak, lifecycle, package, provisioning, and adjacent-segment evidence all pass; this unlocks MOSS-NANO-7 but does not retire Kokoro. |
 | `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE` | Promote Nano from runtime evidence into the gated app-prototype path only when bounded lifecycle evidence includes measured recycle/reset, restart/prewarm cost, stale-output safety, memory/tail gates, and truthful shutdown/restart lifecycle coverage; this unlocks MOSS-NANO-7 but does not retire Kokoro. |
+| `PROMOTE_NANO_TO_STRATEGY_PROTOTYPE` | Promote Nano from app-boundary sidecar/IPC prototype into the next bounded narration-strategy prototype path. This does not make Nano user-facing, selectable, normal playback, default, or a Kokoro replacement. |
+| `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE` | Promote Nano from bounded test-only narration strategy into the next continuity/cache/prefetch prototype path. This does not make Nano public `TtsEngine`, settings UI, normal playback productization, default, or a Kokoro replacement. |
+| `PROMOTE_NANO_TO_EXPERIMENTAL_UI_CANDIDATE` | Promote Nano from bounded continuity/cache/prefetch prototype into explicit experimental UI candidate work. This does not make Nano default, broadly user-facing, public without opt-in UX, or a Kokoro replacement. |
+| `PROMOTE_NANO_TO_PRODUCTIZATION_GATE` | Promote Nano from settings-only experimental opt-in into the next productization/default-decision gate. This does not make Nano default, remove sidecar readiness gating, silently fall back to another engine, or retire Kokoro. |
 | `PAUSE_NANO_RUNTIME_RELIABILITY` | Pause Nano runtime reliability work when bounded recycle/reset evidence cannot make memory, tail latency, or lifecycle gates plausible enough for more runtime iteration. |
 | `KEEP_KOKORO_ONLY` | Historical Nano runtime-rescue decision from MOSS-NANO-2. It is not exposed as a Nano-6 readiness decision; Nano-6 readiness uses only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
@@ -812,32 +816,250 @@ Next actions:
 - A future runtime-only confirmation may rerun the full 30-minute/100-segment bounded gate with `--shutdown-restart-evidence`.
 - No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
 
+## MOSS-NANO-6F Decision
+
+Decision: `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`.
+
+Scope: MOSS-NANO-6F is a runtime promotion confirmation and governance closeout only. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+
+Canonical artifact:
+
+| Evidence item | Result |
+|---|---|
+| Promotion confirmation | `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/promotion-confirmation.json`: final recommended decision `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`; source summary `status: ok`, failure class `null`; measured resident soak `1800.0015s`; `100/100` book-like adjacent segments fresh; empty segments `0`; stale output reuse `0`; bounded lifecycle actual/truthful with `99` RSS-threshold in-process runtime resets at `1750MB`; readiness memory slope `0.3261MB/min <= 1.5`; p95 final RTF `0.4826 <= 1.5`; p95 first decoded audio `280ms <= 1500`; crash count `0`; unclassified restarts `0`. |
+| Lifecycle proof by reference | `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json`: shutdown/restart child-process lifecycle evidence is present and passing, including clean shutdown, forced kill, zombie-process check, clean restart, restart-failed, and in-flight shutdown rejection. |
+| Raw summary caveat | `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/summary.json` still has the older persisted `promotionDecision` / `not-promoting` state. Consumers must use `promotion-confirmation.json` as canonical for the 6F decision. |
+
+Reason: The full bounded promotion confirmation attaches the 6E child-process lifecycle proof to a fresh 1800-second/100-segment bounded soak. The `99` session/runtime identity changes are classified bounded lifecycle recycles, not hidden crashes or unclassified restarts, and stale output reuse remains `0`. No app integration drift occurred; scripts, tests, and app source were unchanged by this confirmation.
+
+Next actions:
+
+- `MOSS-NANO-7` may dispatch as the next conditional app-onboarding prototype sprint.
+- Kokoro remains the operational floor and default engine until a later explicit productization/default decision.
+- No Kokoro retirement work is unlocked by 6F.
+
+## MOSS-NANO-7 Decision
+
+Decision: `PROMOTE_NANO_TO_STRATEGY_PROTOTYPE`.
+
+Scope: MOSS-NANO-7 is an app-boundary sidecar/IPC prototype only. It did not add renderer engine selection, normal playback wiring, user-facing Nano behavior, Kokoro behavior changes, or Kokoro retirement work. `TtsEngine` remains `web | kokoro | qwen`, Kokoro remains the default/operational floor, and Nano is not user-facing.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Sidecar manager | Added `main/moss-nano-engine.js` with an injectable sidecar adapter, structured readiness/failure semantics, bounded lifecycle config snapshots, stale-output/request ownership guards, startup-before-request behavior, and cancel adapter rejection settlement. |
+| Protocol placeholder | Added `main/moss-nano-sidecar.js` as the protocol placeholder/adapter. |
+| IPC boundary | Registered experimental `tts-nano-status`, `tts-nano-synthesize`, `tts-nano-cancel`, `tts-nano-shutdown`, and `tts-nano-restart` handlers in `main/ipc/tts.js`. |
+| Preload/API boundary | Exposed experimental preload methods `nanoStatus`, `nanoSynthesize`, `nanoCancel`, `nanoShutdown`, and `nanoRestart` in `preload.js`; added Nano status/result/failure/Electron API types in `src/types.ts`. |
+| Tests | Added `tests/mossNanoEngine.test.js` and `tests/mossNanoIpc.test.js`. |
+| Lifecycle semantics | Cancel, shutdown, and restart settle in-flight requests; stale outputs and wrong request owners are guarded; shutdown/restart/cancel failures fail closed. |
+
+Verification:
+
+- Focused Nano sidecar/IPC tests: `npm test -- --run tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js` passed `2` files / `14` tests after sandbox `EPERM` escalated rerun.
+- Full `npm test` passed `152` files / `2392` tests.
+- `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
+- Solon approved spec compliance; Plato final quality check was `READY`.
+
+Reason: The main-process/preload IPC contract now has enough bounded app-boundary truth to proceed to the next strategy-prototype slice. Promotion is deliberately narrow: Nano is still not selectable, not wired into normal playback, not renderer-visible as an engine choice, and not a Kokoro replacement.
+
+Next actions:
+
+- `MOSS-NANO-8` may dispatch as the next bounded narration-strategy/segment-timing prototype.
+- Keep Nano hidden from user-facing engine selection until a later explicit settings/UX sprint approves it.
+- Keep Kokoro as the operational floor/default; no Kokoro retirement work is unlocked.
+
+## MOSS-NANO-8 Decision
+
+Decision: `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE`.
+
+Scope: MOSS-NANO-8 is an experimental renderer narration strategy prototype only. It did not add public engine selection, settings UI, default-engine behavior, Kokoro behavior changes, or Kokoro retirement work. `TtsEngine` remains `web | kokoro | qwen`, Kokoro remains the default/operational floor, and Nano remains hidden behind test-only `useNarration({ experimentalNano: true })` plumbing.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Nano strategy | Added `src/hooks/narration/mossNanoStrategy.ts` as the experimental Nano `TtsStrategy` boundary. |
+| Optional IPC calls | Strategy uses optional `window.electronAPI.nanoStatus`, `nanoSynthesize`, and `nanoCancel`; missing/unready Nano reports structured failure instead of silent fallback. |
+| Segment timing truth | Scheduled PCM segment audio through the existing scheduler, called `markPipelineDone()`, set `timingTruth: "segment-following"`, and kept `wordTimestamps: null`. |
+| Hook selection | Added test-only `useNarration({ experimentalNano: true })`; no public `TtsEngine` expansion or settings UI. |
+| Failure/cancel/status propagation | Preserved structured `nanoError`, supported cancel/stop, missing-audio failure, speed/rate changes, pause/resume routing, and section-end cleanup. |
+| Ownership guards | Guarded late synth results and stale `onWordAdvance`/`onEnd`/`onError` callbacks after stop, handoff, rate restart, engine switch, new chunk, or unmount. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused Nano strategy/useNarration tests | `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx` passed `2` files / `20` tests. |
+| Full suite | `npm test` passed `154` files / `2412` tests. |
+| Build | `npm run build` passed; Vite emitted the existing `settings -> tts -> settings` circular chunk warning. |
+| Review | Solon approved spec compliance; Plato final quality review approved after callback ownership repairs. |
+
+Next actions:
+
+- `MOSS-NANO-9` may dispatch as the next bounded cache/prefetch/continuity prototype.
+- Keep Nano hidden from public engine selection and settings UI until a later explicit settings/UX sprint approves it.
+- Keep Kokoro as the operational floor/default; no Kokoro retirement work is unlocked.
+
+## MOSS-NANO-10 Decision
+
+Decision: `PROMOTE_NANO_TO_PRODUCTIZATION_GATE`.
+
+Scope: MOSS-NANO-10 is a settings-only experimental opt-in. It adds a visible Nano settings option, but selection-for-use and preview readiness remain blocked unless the sidecar API exists and `nanoStatus` reports ready. It does not change the default engine, retire Kokoro, silently fall back while Nano is selected, or fabricate word timestamps.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Settings option | `src/components/settings/TTSSettings.tsx` exposes `Nano AI (Experimental)` with local runtime and bounded lifecycle warning copy. |
+| Readiness truth | `src/components/settings/useMossNanoSettingsStatus.ts` separates visible experimental option state from ready-for-use state; blocked Nano remains disabled for use and preview. |
+| Preview truth | `src/components/settings/ttsPreview.ts` calls `nanoStatus` and `nanoSynthesize` only when Nano is ready; blocked Nano does not fall back to another engine. |
+| Narration activation | `src/hooks/useNarration.ts` routes Nano only when experimental Nano is enabled and the selected engine is `nano`; `src/components/ReaderContainer.tsx` enables that path only for Nano settings selection. |
+| Timing truth | Existing Nano segment-following semantics remain intact; no fake `wordTimestamps` were introduced. |
+| Default/Kokoro drift | Default settings remain unchanged and Kokoro behavior is untouched. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused Nano/settings tests | `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx tests/ttsPreviewTruth.test.ts tests/ttsSettingsMossNano.test.tsx` passed `4` files / `35` tests. |
+| Adjacent settings/profile/default tests | `npm test -- --run tests/ttsSettingsQwenPrototype.test.tsx tests/ttsSettingsKokoroTruth.test.tsx tests/qwenDefaultSettings.test.ts tests/narrationPortability.test.ts tests/narrationProfiles.test.ts tests/useNarrationMossNano.test.tsx tests/ttsSettingsMossNano.test.tsx` passed `7` files / `60` tests. |
+| Full suite | `npm test` passed `155` files / `2427` tests. |
+| Build | `npm run build` passed; Vite emitted the existing `settings -> tts -> settings` circular chunk warning. |
+
+Next actions:
+
+- MOSS-NANO-11 has now closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`.
+- Keep Nano experimental and sidecar-readiness-gated until later live product evidence says otherwise.
+- Keep Kokoro available; no Kokoro retirement work is unlocked by MOSS-NANO-10.
+
+## MOSS-NANO-12 Decision
+
+Decision: `NANO_EXPERIMENTAL_ONLY`.
+
+Scope: MOSS-NANO-12 is a live four-mode evidence gate for possible recommended opt-in status. It does not change the default engine, open Kokoro retirement, or treat simulated runner output as live evidence. The approved hard line remains: if users cannot tell that Nano progress is segment-following rather than word-following, Nano stays experimental.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Live evidence evaluator | `scripts/tts_eval_runner.mjs` exports `evaluateMossNanoLiveEvidenceGate()` and classifies `NANO_RECOMMENDED_OPT_IN`, `NANO_EXPERIMENTAL_ONLY`, or `PAUSE_NANO_PRODUCTIZATION`. |
+| Evidence input | `--nano-live-evidence <json>` lets a future live observation artifact feed the gate without code edits. |
+| Four-mode matrix shape | `tests/fixtures/narration/matrix.manifest.json` adds explicit `moss-nano-12` selected-Nano scenarios for Page, Focus, Flow, and Narrate. |
+| Promotion blocker | Simulated matrix output alone cannot promote. Missing live evidence for any mode caps the decision at `NANO_EXPERIMENTAL_ONLY`; unclear segment-following progress, stale playback, unsafe fallback, underline race, or lifecycle instability pauses productization. |
+| Gate artifact | `artifacts/tts-eval/moss-nano-12-live-four-mode-evidence/summary.json` recorded four Nano-12 scenario-shape runs and `mossNanoLiveEvidenceGate.decision: NANO_EXPERIMENTAL_ONLY`. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused live-evidence gate tests | `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `26` tests. |
+| Live-evidence shape artifact command | `npm run tts:eval:matrix -- --run-id moss-nano-12-live-four-mode-evidence --tag moss-nano-12 --out artifacts\tts-eval\moss-nano-12-live-four-mode-evidence` completed `4` runs and wrote the experimental-only decision. |
+
+Decision rationale:
+
+- The four-mode selected-Nano evidence slots exist, but no live observation artifact was supplied.
+- Per the approved gate, simulated output cannot promote Nano to recommended opt-in.
+- Nano remains experimental; no default change and no Kokoro retirement lane is opened.
+
+Next actions:
+
+- Capture real app-selected live evidence for all four modes in a future run and pass it via `--nano-live-evidence`.
+- Keep Nano experimental until the user-facing segment-following progress model is proven understandable.
+
+## MOSS-NANO-11 Decision
+
+Decision: `NANO_EXPERIMENTAL_ONLY` and `KEEP_KOKORO_DEFAULT`.
+
+Scope: MOSS-NANO-11 is an evidence-first product gate. It does not change the default engine, recommend Nano as a production opt-in, open Kokoro retirement, or treat lower-level runtime evidence as product readiness. Nano remains experimental and selected-use must stay sidecar-readiness-gated.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Product-gate evaluator | `scripts/tts_eval_runner.mjs` exports `evaluateMossNanoProductGate()` and caps the gate at `NANO_EXPERIMENTAL_ONLY` when any required selected-Nano mode or evidence item is missing. |
+| Four-mode matrix shape | `tests/fixtures/narration/matrix.manifest.json` adds explicit `moss-nano-11` selected-Nano scenarios for Page, Focus, Flow, and Narrate. |
+| No matrix drift | Untagged matrix runs exclude experimental Nano product-gate scenarios; `--tag moss-nano-11` is required to exercise them. |
+| Gate artifact | `artifacts/tts-eval/moss-nano-11-product-gate-shape/summary.json` recorded four Nano-11 scenario-shape runs and `mossNanoProductGate.maxDecision: NANO_EXPERIMENTAL_ONLY`. |
+| Promotion blocker | The artifact intentionally carries no live product evidence for settings preview truth, selected-sidecar lifecycle, cache/prefetch continuity, segment-following progress, explicit fallback, package/runtime readiness, or Kokoro availability. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused product-gate tests | `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `20` tests. |
+| Product-gate artifact command | `npm run tts:eval:matrix -- --run-id moss-nano-11-product-gate-shape --tag moss-nano-11 --out artifacts\tts-eval\moss-nano-11-product-gate-shape` completed `4` runs and wrote the experimental-only decision cap. |
+
+Decision rationale:
+
+- The matrix can now exercise all four required selected-Nano modes by explicit tag, but this sprint did not supply live product evidence for the full gate.
+- Per the approved guardrail, missing live evidence means the decision cannot exceed `NANO_EXPERIMENTAL_ONLY`.
+- Kokoro remains available and no Kokoro retirement lane is opened.
+
+Next actions:
+
+- Keep Nano experimental and readiness-gated.
+- A later sprint may rerun the gate with live app evidence and package/runtime readiness.
+- Do not change defaults or retirement posture from MOSS-NANO-11 alone.
+
+## MOSS-NANO-9 Decision
+
+Decision: `PROMOTE_NANO_TO_EXPERIMENTAL_UI_CANDIDATE`.
+
+Scope: MOSS-NANO-9 is an experimental continuity prototype only. It did not add public engine selection, settings UI, default-engine behavior, public `TtsEngine` expansion, Kokoro behavior changes, or Kokoro retirement work. Nano remains hidden behind test-only `useNarration({ experimentalNano: true })` plumbing until a later explicit UX sprint.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Bounded cache | `src/hooks/narration/mossNanoStrategy.ts` owns a bounded Nano segment cache with cache stats and oldest-entry eviction. |
+| Cache ownership | Cached/prefetched audio is admitted only when generation, continuity scope, voice, rate, start index, and text hash still match; stale prefetches are rejected and counted. |
+| Prefetch | Strategy supports next-segment and next-section prefetch; hook starts prefetch from the current continuity scope without scheduler changes. |
+| Continuity orchestration | `src/hooks/useNarration.ts` routes Nano pause/resume, preserves segment anchors, emits playback trace evidence, and clears Nano cache on handoff/cross-book word replacement. |
+| Timing truth | Nano trace and playback metadata remain `timingTruth: "segment-following"` with `wordTimestamps: null`; no fake word timestamps were introduced. |
+| Eval trace | `src/types/eval.ts`, `src/utils/ttsEvalTrace.ts`, and `scripts/tts_eval_runner.mjs` summarize Nano segment latency, cache hits/misses, hit rate, prefetch ready/stale/cancelled counts. |
+| Kokoro/default drift | Public `TtsEngine`, settings UI, default engine behavior, and Kokoro narration behavior were not changed. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused Nano continuity/eval tests | `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx tests/ttsEvalTrace.test.ts tests/ttsEvalMatrixRunner.test.ts` passed `4` files / `57` tests. |
+| Full suite | `npm test` passed `154` files / `2423` tests. |
+| Build | `npm run build` passed; Vite emitted the existing `settings -> tts -> settings` circular chunk warning. |
+| Review | Local Solon/Plato review found the guardrails satisfied: no public UI toggle, no public `TtsEngine` change, no Kokoro behavior change, no fake word timestamps, and no scheduler changes. |
+
+Next actions:
+
+- `MOSS-NANO-10` may dispatch as explicit experimental UI candidate work.
+- Keep Nano hidden from public engine selection until that sprint deliberately adds an opt-in surface.
+- Keep Kokoro as the operational floor/default; no Kokoro retirement work is unlocked.
+
 ## Nano Onboarding Roadmap Gate
 
-Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-6E` closed without app-prototype promotion, so the app onboarding path remains gated.
+Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-11` closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`, so Nano remains experimental and no default or retirement lane is unlocked.
 
 Allowed next work:
 
-- Runtime-only resident Nano full-gate confirmation after MOSS-NANO-6E. A new runtime spec may attach measured child-process lifecycle proof to a full 1800-second/100-segment bounded run with package evidence and bounded recycle thresholds.
-- `MOSS-NANO-7` through `MOSS-NANO-11`: conditional app onboarding path. These must not dispatch until `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`, or a stricter equivalent promotion decision is recorded.
+- A future live product evidence sprint may rerun the MOSS-NANO-11 gate with real app-selected Nano evidence. It must preserve bounded lifecycle truth, stale-output safety, crash/restart classification, app-side reversibility, and truthful segment timing.
 
-Forbidden until promotion:
+Still forbidden after 7 promotion:
 
-- Nano sidecar IPC in the app.
-- Renderer engine selection.
-- `TtsEngine` production expansion to make Nano user-selectable.
-- Narration strategy integration.
-- Cache/prefetch/continuity integration.
-- Timing-truth UI integration.
 - Kokoro behavior changes or Kokoro retirement work.
+- Making Nano the default engine.
+- Treating Nano visibility as readiness: blocked Nano may be visible, but must not appear ready/selectable-for-use unless `nanoStatus` is ready.
+- Treating NANO-7, NANO-8, NANO-9, or NANO-10 as default playback productization.
+- Treating bounded lifecycle recycles as crashes, or treating unclassified restarts as acceptable.
+- Ignoring the 6F canonical artifact in favor of the raw summary's older persisted `not-promoting` state.
 
 ## Decision Notes
 
 - Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
-- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-6E closeout; MOSS-NANO-6E closed as `ITERATE_NANO_RESIDENT_RUNTIME`. It must not enter app integration or replace Kokoro without a later explicit app-prototype promotion decision.
+- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-11 closeout; MOSS-NANO-11 closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`. It remains experimental, sidecar-readiness-gated, non-default, and must not retire Kokoro without a later explicit decision.
 - The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
 - Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
-- Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding now uses MOSS-NANO-7 through MOSS-NANO-11 after promotion.
+- Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding is capped at experimental-only after the completed NANO-7 through NANO-11 prototypes until new live evidence is approved.
 - No silent fallback is allowed when MOSS is selected. Unsupported MOSS state must remain visible and actionable.
 
 ## Evidence Links

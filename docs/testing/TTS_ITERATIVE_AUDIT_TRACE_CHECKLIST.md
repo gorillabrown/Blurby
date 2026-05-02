@@ -22,6 +22,7 @@ Record before starting:
 - `npm test`:
 - `npm run build`:
 - Latest gated eval artifact:
+- Latest MOSS-NANO-11 product gate artifact:
 
 ## Expected Outputs
 
@@ -51,7 +52,8 @@ Run the audit in this exact order. Do not skip ahead.
 8. Sprint worker engine
 9. Marathon worker engine
 10. Kokoro worker import/bootstrap/warm-up
-11. Tests guarding each seam
+11. Nano selected-engine product gate, if Nano is under review
+12. Tests guarding each seam
 
 ---
 
@@ -83,6 +85,14 @@ Evidence notes:
 - live ownership source:
 - stale mode assumptions:
 - type drift:
+
+Nano product gate addendum:
+
+- [ ] Page mode can exercise selected Nano in the live-book matrix
+- [ ] Focus mode can exercise selected Nano in the live-book matrix
+- [ ] Flow mode can exercise selected Nano in the live-book matrix
+- [ ] Narrate mode can exercise selected Nano in the live-book matrix
+- [ ] missing any one of these caps the decision at `NANO_EXPERIMENTAL_ONLY`
 
 ---
 

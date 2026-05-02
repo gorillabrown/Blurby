@@ -75,6 +75,158 @@
       "tags": ["rate-response", "same-bucket", "segmented"]
     },
     {
+      "id": "moss-nano-11-page-live-book",
+      "label": "MOSS Nano 11 — Page selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "page",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "page"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-11-focus-live-book",
+      "label": "MOSS Nano 11 — Focus selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "focus",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "focus"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-11-flow-live-book",
+      "label": "MOSS Nano 11 — Flow selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "flow",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "flow"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-11-narrate-live-book",
+      "label": "MOSS Nano 11 — Narrate selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "narrate",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "narrate"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-12-page-live-evidence",
+      "label": "MOSS Nano 12 — Page selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "page",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "page"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-12-focus-live-evidence",
+      "label": "MOSS Nano 12 — Focus selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "focus",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "focus"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-12-flow-live-evidence",
+      "label": "MOSS Nano 12 — Flow selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "flow",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "flow"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-12-narrate-live-evidence",
+      "label": "MOSS Nano 12 — Narrate selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "narrate",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "narrate"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
       "id": "streaming-cold-start",
       "label": "Streaming — cold start latency",
       "engine": "qwen-streaming",

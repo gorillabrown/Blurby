@@ -4,9 +4,9 @@ This document defines the MOSS runtime setup contract for Blurby's flagship-firs
 
 ## Goal
 
-MOSS is being evaluated as a high-quality local narration successor candidate. The first target was flagship MOSS-TTS. After MOSS-HOST-2 confirmed a fresh WSL ARM64 flagship binary was still non-viable, MOSS-NANO-1 measured MOSS-TTS-Nano as a bounded runtime-iteration candidate, and MOSS-NANO-2 closed that runtime rescue as `KEEP_KOKORO_ONLY`. Nano is not app-integrated and is not promoted unless the decision log records a later explicit promotion decision.
+MOSS is being evaluated as a high-quality local narration successor candidate. The first target was flagship MOSS-TTS. After MOSS-HOST-2 confirmed a fresh WSL ARM64 flagship binary was still non-viable, MOSS-NANO-1 measured MOSS-TTS-Nano as a bounded runtime-iteration candidate, MOSS-NANO-6F promoted Nano to app-prototype candidate with bounded lifecycle, and MOSS-NANO-7 promoted only the app-boundary sidecar/IPC contract to strategy-prototype readiness.
 
-Kokoro remains the app default and only integrated engine.
+Kokoro remains the app default and only user-facing/operational engine.
 
 ## Config Path Rules
 
@@ -112,7 +112,7 @@ Current local build evidence:
 
 ### Nano Runtime Setup
 
-MOSS-NANO-1 and MOSS-NANO-2 provision and probe Nano separately from flagship. Do not reuse flagship config fields as proof that Nano is ready for app integration.
+MOSS-NANO-1 and MOSS-NANO-2 provision and probe Nano separately from flagship. Do not reuse flagship config fields as proof that Nano is ready for app integration. MOSS-NANO-7 adds only an experimental app-boundary sidecar/IPC contract; it is not renderer selection or normal playback wiring.
 
 Current local Nano runtime:
 
@@ -182,7 +182,24 @@ MOSS-NANO-6C memory/tail-latency/lifecycle evidence:
 - Nano-6 readiness decisions are limited to `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, and `PAUSE_NANO_RUNTIME_RELIABILITY`; `KEEP_KOKORO_ONLY` is not exposed as a Nano-6 readiness decision.
 - The full 30-minute soak was skipped/deferred because targeted gates already failed; do not spend 30 minutes proving a non-promotable state.
 
-Current Nano decision: `ITERATE_NANO_RESIDENT_RUNTIME`. MOSS-NANO-6C did not promote Nano to app prototype and is explicitly not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Keep Kokoro as the app default and only integrated engine. Future Nano work must remain runtime-only resident iteration/hardening until Nano package evidence, lifecycle shutdown implementation, memory slope, tail latency, and adjacent RTF gates are proven. Do not add app integration, renderer/IPC/selectable-engine work, or Kokoro behavior changes from this evidence.
+MOSS-NANO-7 app-boundary prototype evidence:
+
+- Final decision: `PROMOTE_NANO_TO_STRATEGY_PROTOTYPE`.
+- App-boundary scope: Nano has an experimental main-process/preload IPC contract only. It is not renderer-selectable, not wired into normal playback, not user-facing, and does not change Kokoro behavior.
+- Sidecar manager: `main/moss-nano-engine.js` with injectable sidecar adapter, structured readiness/failure semantics, bounded lifecycle config snapshots, stale-output/request ownership guards, startup-before-request, cancel adapter rejection settlement, and cancel/shutdown/restart in-flight settlement.
+- Protocol placeholder/adapter: `main/moss-nano-sidecar.js`.
+- Experimental IPC: `tts-nano-status`, `tts-nano-synthesize`, `tts-nano-cancel`, `tts-nano-shutdown`, and `tts-nano-restart` in `main/ipc/tts.js`.
+- Experimental preload/API surface: `nanoStatus`, `nanoSynthesize`, `nanoCancel`, `nanoShutdown`, and `nanoRestart` in `preload.js`; Nano status/result/failure/Electron API types in `src/types.ts`.
+- Tests: `tests/mossNanoEngine.test.js` and `tests/mossNanoIpc.test.js`.
+
+MOSS-NANO-7 verification:
+
+- Focused Nano sidecar/IPC tests passed: `npm test -- --run tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js` => `2` files / `14` tests, after sandbox `EPERM` escalated rerun.
+- Full `npm test` passed: `152` files / `2392` tests.
+- `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
+- Solon approved spec compliance; Plato final quality check was `READY`.
+
+Current Nano decision: `NANO_EXPERIMENTAL_ONLY` after MOSS-NANO-12. Nano may remain visible as a guarded experimental settings option, but selected use and preview stay blocked unless the sidecar API exists and `nanoStatus` is ready. The current default remains unchanged, Kokoro remains available, and missing live four-mode observation evidence prevents recommended opt-in, default candidacy, or Kokoro retirement.
 
 ### Runtime Command Truth
 
@@ -286,3 +303,15 @@ If `.runtime/moss/config.json` is missing, the probe must classify the result as
 ## No-Silent-Fallback Rule
 
 If MOSS is selected and unavailable, Blurby must show truthful MOSS status and recovery guidance. It must not silently switch to Kokoro, Qwen, or Web Speech. Kokoro remains available as the reliability baseline, but fallback must be user-visible and deliberate.
+
+## MOSS-NANO-11 Package/Runtime Readiness Rule
+
+Nano remains a local sidecar runtime. A productization decision must document:
+
+- the configured Nano runtime path and model/tokenizer assets
+- sidecar API availability and `nanoStatus` readiness
+- selected-Nano preview behavior in both ready and blocked states
+- bounded lifecycle and shutdown/restart behavior under selected Nano
+- explicit fallback behavior when Nano is selected but unavailable
+
+Missing package/runtime readiness evidence caps the MOSS-NANO-11 decision at `NANO_EXPERIMENTAL_ONLY`. It does not justify a default change or Kokoro retirement lane.

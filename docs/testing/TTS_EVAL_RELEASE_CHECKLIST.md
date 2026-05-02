@@ -36,6 +36,22 @@ Use this checklist in sprint closeouts that touch narration or flow quality.
 - Threshold config version used:
 - Baseline refresh required: yes/no
 
+## MOSS Nano Product Gate
+
+- Nano gate applicable: yes/no
+- Explicit Nano gate command used:
+- Artifact directory:
+- Page / Focus / Flow / Narrate selected-Nano scenarios all present: yes/no
+- Settings preview readiness truth proved: yes/no
+- Selected-sidecar lifecycle proved: yes/no
+- Cache/prefetch continuity under selected Nano proved: yes/no
+- Segment-following progress truth proved: yes/no
+- Fake word timestamps absent: yes/no
+- Fallback behavior explicit, never silent: yes/no
+- Package/runtime readiness documented: yes/no
+- Kokoro remains available: yes/no
+- Decision cap if any item is missing: `NANO_EXPERIMENTAL_ONLY`
+
 ## Subjective Quality Review (1-5)
 
 - Voice naturalness:

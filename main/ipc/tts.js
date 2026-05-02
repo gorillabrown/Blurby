@@ -24,10 +24,28 @@ function toErrorResponse(err) {
   return response;
 }
 
+function toNanoErrorResponse(err) {
+  const error = err instanceof Error ? err : new Error(String(err || "MOSS Nano IPC failure"));
+  return {
+    ok: false,
+    error: error.message,
+    reason: error.reason || null,
+    status: error.status || "failed",
+    recoverable: typeof error.recoverable === "boolean" ? error.recoverable : true,
+  };
+}
+
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
   const qwenEngine = require("../qwen-engine");
   const streamingEngine = createQwenStreamingEngineManager(app);
+  const mossNanoModule = require("../moss-nano-engine");
+  const nanoEngine =
+    typeof mossNanoModule.getSharedMossNanoEngine === "function"
+      ? mossNanoModule.getSharedMossNanoEngine({ app })
+      : typeof mossNanoModule.getMossNanoEngine === "function"
+      ? mossNanoModule.getMossNanoEngine({ app })
+      : mossNanoModule.mossNanoEngine || mossNanoModule.default;
 
   // Set up loading callback to notify renderer
   ttsEngine.setLoadingCallback((loading) => {
@@ -88,6 +106,46 @@ function register(ctx) {
       return { success: true };
     } catch (err) {
       return toErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-nano-status", async () => {
+    try {
+      return await nanoEngine.status();
+    } catch (err) {
+      return toNanoErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-nano-synthesize", async (_event, payload) => {
+    try {
+      return await nanoEngine.synthesize(payload);
+    } catch (err) {
+      return toNanoErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-nano-cancel", async (_event, requestId) => {
+    try {
+      return await nanoEngine.cancel(requestId);
+    } catch (err) {
+      return toNanoErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-nano-shutdown", async () => {
+    try {
+      return await nanoEngine.shutdown();
+    } catch (err) {
+      return toNanoErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-nano-restart", async () => {
+    try {
+      return await nanoEngine.restart();
+    } catch (err) {
+      return toNanoErrorResponse(err);
     }
   });
 

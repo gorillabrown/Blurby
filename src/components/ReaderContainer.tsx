@@ -191,7 +191,10 @@ export default function ReaderContainer({
 
   const reader = useReader(effectiveWpm, setWpm, settings?.initialPauseMs, settings?.punctuationPauseMs, settings?.rhythmPauses, tokenized.paragraphBreaks);
   const { wordIndex, playing, escPending, wordsRef, onWordUpdateRef, togglePlay, adjustWpm, seekWords, jumpToWord, requestExit, initReader } = reader;
-  const narration = useNarration({ evalTrace: evalTraceSink });
+  const narration = useNarration({
+    evalTrace: evalTraceSink,
+    experimentalNano: settings.ttsEngine === "nano",
+  });
   const wordIndexRef = useRef(wordIndex);
   wordIndexRef.current = wordIndex;
   const narrationCursorRef = useRef(narration.cursorWordIndex);
