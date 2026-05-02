@@ -479,7 +479,7 @@ All three investigation areas resolved:
 ## Desktop v2.0 — Active Conveyor Belt
 
 > **Finish line:** Desktop v2.0 Shipping. Six sprints, ~14 LOE, estimated 3-4 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → **BRAND-HYG-1** (next, mechanical) → EINK-6A → EINK-6B → GOALS-6B (parallel-safe with 6B) → POLISH-1 → RELEASE-1.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → **EINK-6A** → EINK-6B → GOALS-6B (parallel-safe with 6B) → POLISH-1 → RELEASE-1.
 > **Queue rule:** No new exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused.
 
 ### Standing Rules All Skeletons Inherit
@@ -505,20 +505,19 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint BRAND-HYG-1: Brand Theme Commit
+### Sprint BRAND-HYG-1: Brand Theme Commit — SHELVED / NO-OP 2026-05-02
 
 - **What:** Test and commit the uncommitted brand theme changes (deep blue dominant + coral accent) across 13+ files. This is worktree hygiene, not feature work.
-- **Why:** Brand theme edits have been sitting uncommitted since the pre-review session. They are not part of any feature sprint and should not be folded into EINK-6A's implementation scope.
+- **Why:** Brand theme edits were expected from the pre-review session, but they are not present in this checkout after the governance hygiene commit.
 - **Prerequisites:** None.
-- **Done when:**
-    1. `npm test` passes with brand theme files staged.
-    2. `npm run build` succeeds.
-    3. Brand theme changes committed on `main` with message: `feat(brand): commit deep-blue dominant + coral accent theme`.
+- **Disposition:** SHELVED / no-op for this checkout, not completed as implementation.
+- **Evidence:** Remaining dirty tracked files are local noise only: `.idea/workspace.xml` and `tests/perf-baseline-results.json`. No brand/theme/style/icon/source files are available to stage.
+- **Done when:** Recorded as shelved so EINK-6A is not blocked by absent brand work.
 - **Effort:** S (~0.5). Test + commit only.
 - **Roster:** CLI/Hermes (mechanical commit after test).
 - **Source:** SK-HYG-1 residual, 2026-05-02 roadmap review.
 
-**Tier:** Quick (npm test only — CSS-only cosmetic change)
+**Tier:** Quick | **Result:** No-op / not present in this checkout.
 
 ---
 
