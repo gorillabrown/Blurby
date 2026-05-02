@@ -116,8 +116,9 @@ describe("NARR-LAYER-1B consolidation", () => {
     expect(css).not.toContain(".foliate-narration-highlight");
   });
 
-  it("bumps settings schema to 8", () => {
-    expect(migrations.CURRENT_SETTINGS_SCHEMA).toBe(8);
+  it("keeps the NARR-LAYER-1B migration before the current schema", () => {
+    expect(migrations.CURRENT_SETTINGS_SCHEMA).toBeGreaterThanOrEqual(8);
+    expect(migrations.settingsMigrations[7].toString()).toContain("data.schemaVersion = 8");
   });
 
   it("migration maps readingMode narration -> flow + isNarrating true", () => {

@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 8;
+const CURRENT_SETTINGS_SCHEMA = 9;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -100,6 +100,12 @@ const settingsMigrations = [
     }
     if (data.isNarrating === undefined) data.isNarrating = false;
     data.schemaVersion = 8;
+    return data;
+  },
+  // v8 → v9: EINK-6A independent e-ink display mode flag
+  (data) => {
+    if (data.einkMode === undefined) data.einkMode = false;
+    data.schemaVersion = 9;
     return data;
   },
 ];

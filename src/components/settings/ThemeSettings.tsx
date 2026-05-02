@@ -26,12 +26,14 @@ interface ThemeSettingsProps {
 }
 
 export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps) {
-  const { setAccentColor, setFontFamily } = useContext(ThemeContext);
+  const { setTheme, setEinkMode, setAccentColor, setFontFamily } = useContext(ThemeContext);
   const themes: BlurbySettings["theme"][] = ["blurby", "dark", "light", "eink", "system"];
 
   // Wrap onSettingsChange to also update ThemeContext instantly
   const handleSettingsChange = (updates: Partial<BlurbySettings>) => {
     onSettingsChange(updates);
+    if (updates.theme !== undefined) setTheme(updates.theme);
+    if (updates.einkMode !== undefined) setEinkMode(updates.einkMode === true);
     if (updates.accentColor !== undefined) setAccentColor(updates.accentColor as string | null);
     if (updates.fontFamily !== undefined) setFontFamily(updates.fontFamily as string | null);
   };
@@ -42,13 +44,74 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
 
   return (
     <div>
+      <div className="settings-section-label">E-Ink Display Mode</div>
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">E-Ink Display Mode</span>
+        <div
+          className={`settings-toggle${settings.einkMode ? " active" : ""}`}
+          onClick={() => handleSettingsChange({ einkMode: !settings.einkMode })}
+          role="switch"
+          aria-checked={settings.einkMode === true}
+        >
+          <div className="settings-toggle-thumb" />
+        </div>
+      </div>
+
+      {settings.einkMode && (
+        <>
+          <div className="settings-section-label settings-section-label--mt-lg">E-Ink Display</div>
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">Phrase grouping (2-3 words per tick)</span>
+            <div
+              className={`settings-toggle${settings.einkPhraseGrouping ? " active" : ""}`}
+              onClick={() => handleSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping })}
+              role="switch"
+              aria-checked={settings.einkPhraseGrouping}
+            >
+              <div className="settings-toggle-thumb" />
+            </div>
+          </div>
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">WPM ceiling</span>
+            <span className="settings-eink-value">{settings.einkWpmCeiling ?? 250} wpm</span>
+          </div>
+          <input
+            type="range"
+            className="settings-slider"
+            min={100}
+            max={400}
+            step={10}
+            value={settings.einkWpmCeiling ?? 250}
+            onChange={(e) => handleSettingsChange({ einkWpmCeiling: Number(e.target.value) })}
+            aria-label="E-ink WPM ceiling"
+          />
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">Screen refresh interval (page turns)</span>
+            <span className="settings-eink-value">{settings.einkRefreshInterval ?? 20}</span>
+          </div>
+          <input
+            type="range"
+            className="settings-slider"
+            min={5}
+            max={50}
+            step={5}
+            value={settings.einkRefreshInterval ?? 20}
+            onChange={(e) => handleSettingsChange({ einkRefreshInterval: Number(e.target.value) })}
+            aria-label="E-ink refresh interval"
+          />
+        </>
+      )}
+
       <div className="settings-section-label">Theme</div>
       <div className="settings-mode-toggle">
         {themes.map((t) => (
           <button
             key={t}
             className={`settings-mode-btn${settings.theme === t ? " active" : ""}`}
-            onClick={() => onSettingsChange({ theme: t })}
+            onClick={() => handleSettingsChange({ theme: t })}
           >
             {t}
           </button>
@@ -94,55 +157,6 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
               </button>
             ))}
           </div>
-        </>
-      )}
-
-      {/* E-ink specific settings — only visible when e-ink theme is selected */}
-      {settings.theme === "eink" && (
-        <>
-          <div className="settings-section-label settings-section-label--mt-lg">E-Ink Display</div>
-
-          <div className="settings-toggle-row">
-            <span className="settings-toggle-label">Phrase grouping (2-3 words per tick)</span>
-            <div
-              className={`settings-toggle${settings.einkPhraseGrouping ? " active" : ""}`}
-              onClick={() => onSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping })}
-              role="switch"
-              aria-checked={settings.einkPhraseGrouping}
-            >
-              <div className="settings-toggle-thumb" />
-            </div>
-          </div>
-
-          <div className="settings-toggle-row">
-            <span className="settings-toggle-label">WPM ceiling</span>
-            <span className="settings-eink-value">{settings.einkWpmCeiling ?? 250} wpm</span>
-          </div>
-          <input
-            type="range"
-            className="settings-slider"
-            min={100}
-            max={400}
-            step={10}
-            value={settings.einkWpmCeiling ?? 250}
-            onChange={(e) => onSettingsChange({ einkWpmCeiling: Number(e.target.value) })}
-            aria-label="E-ink WPM ceiling"
-          />
-
-          <div className="settings-toggle-row">
-            <span className="settings-toggle-label">Screen refresh interval (page turns)</span>
-            <span className="settings-eink-value">{settings.einkRefreshInterval ?? 20}</span>
-          </div>
-          <input
-            type="range"
-            className="settings-slider"
-            min={5}
-            max={50}
-            step={5}
-            value={settings.einkRefreshInterval ?? 20}
-            onChange={(e) => onSettingsChange({ einkRefreshInterval: Number(e.target.value) })}
-            aria-label="E-ink refresh interval"
-          />
         </>
       )}
     </div>

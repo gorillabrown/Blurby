@@ -113,7 +113,7 @@ export default function ReaderContainer({
 }: ReaderContainerProps) {
   const { settings, updateSettings } = useSettings();
   const { showToast } = useToast();
-  const isEink = settings.theme === "eink";
+  const isEink = settings.einkMode === true;
 
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE

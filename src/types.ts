@@ -286,6 +286,7 @@ export interface BlurbySettings {
   flowZonePosition: number;  // fraction of viewport for zone top (0.15 | 0.25 | 0.35 | 0.55, default 0.25)
   flowZoneLines: number;     // lines visible in reading zone (3-8, default 5)
   // E-ink display optimization settings
+  einkMode: boolean;
   einkWpmCeiling: number;
   einkRefreshInterval: number;
   einkPhraseGrouping: boolean;

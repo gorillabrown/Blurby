@@ -50,7 +50,7 @@ export default function LibraryView({
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
   focusedDocId, selectedIds, selectionMode, onToggleSelect, onMarkDocsSeen,
 }: LibraryViewProps) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, setEinkMode } = useTheme();
   const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
   const NEW_DAYS = NEW_LIBRARY_DAYS;
   const [showAdd, setShowAdd] = useState(false);
@@ -81,15 +81,15 @@ export default function LibraryView({
   const [sortBy, setSortBy] = useState(settings.defaultSort || "author"); // "alpha" | "author" | "newest" | "oldest"
 
   // E-ink: debounce search to 500ms to reduce repaints
-  const isEinkTheme = settings.theme === "eink";
+  const isEinkDisplay = settings.einkMode === true;
   useEffect(() => {
-    if (!isEinkTheme) {
+    if (!isEinkDisplay) {
       setDebouncedSearchQuery(searchQuery);
       return;
     }
     const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), EINK_SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [searchQuery, isEinkTheme]);
+  }, [searchQuery, isEinkDisplay]);
   const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books" | "pdfs">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
@@ -102,6 +102,10 @@ export default function LibraryView({
   useEffect(() => {
     if (settings.theme && settings.theme !== theme) setTheme(settings.theme);
   }, [settings.theme]);
+
+  useEffect(() => {
+    setEinkMode(settings.einkMode === true);
+  }, [settings.einkMode, setEinkMode]);
 
   useEffect(() => {
     api.getLaunchAtLogin?.().then((v) => setLaunchAtLogin(v));
@@ -133,11 +137,11 @@ export default function LibraryView({
     if (typeFilter === "articles") docs = docs.filter(isArticle);
     else if (typeFilter === "books") docs = docs.filter(isBook);
     else if (typeFilter === "pdfs") docs = docs.filter(isPdf);
-    const effectiveSearch = isEinkTheme ? debouncedSearchQuery : searchQuery;
+    const effectiveSearch = isEinkDisplay ? debouncedSearchQuery : searchQuery;
     if (effectiveSearch) docs = docs.filter((d) => d.title.toLowerCase().includes(effectiveSearch.toLowerCase()));
 
     return [...docs];
-  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkTheme]);
+  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkDisplay]);
 
   // BUG-067 + READINGS-4A: IntersectionObserver to track "new" cards seen in viewport
   // Cards must be visible for >=1 second before marking as seen (debounce via setTimeout + Map)

@@ -335,7 +335,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.0 — queue GREEN depth 3, Desktop v2.0 conveyor active, 1 open bug)
+## Current System State (v1.75.1 — queue YELLOW, Desktop v2.0 conveyor active, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -384,12 +384,13 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
 - **Roadmap review (2026-05-02):** Full 4-phase ceremony completed. Verdict: AT RISK (strong velocity, 44% sideways scope from MOSS). Finish line established: Desktop v2.0 Shipping. ROADMAP.md reduced from 5,347→754 lines. 60 completed sprint specs archived to `docs/project/ROADMAP_ARCHIVE_2026-05-02.md`. 4 review artifacts in `docs/project/roadmap-reviews/`.
 - **SK-HYG-1 complete** — Roadmap hygiene & queue recovery. Archive-forward discipline enforced, queue restructured from RED depth 1 to GREEN depth 3, Standing Rules section added (10 rules), Desktop v2.0 conveyor belt established.
-- **BRAND-HYG-1 pending** — Brand theme commit (13+ files, deep blue + coral accent). Separated from SK-HYG-1. Requires `npm test` + `npm run build` + commit via CLI/Hermes before EINK-6A dispatch.
-- Active queue: GREEN depth 3 (EINK-6A, EINK-6B, GOALS-6B). Desktop v2.0 conveyor active. Next dispatch: EINK-6A. KOKORO-RETIRE-1 conditional (fires only on PROMOTE). MOSS-NANO-13 deferred (both audits: "proceed only with scope changes").
+- **BRAND-HYG-1 shelved/no-op** — Expected dirty brand/theme edits were not present in this checkout after governance hygiene; remaining dirty tracked files were local noise only. Not completed as implementation.
+- **EINK-6A complete** — E-ink display behavior is now independent from theme via `einkMode`; settings schema v9/defaults/migrations added; `[data-eink="true"]` carries runtime behavior while `[data-theme="eink"]` remains optional greyscale palette. Verification passed: focused EINK/NARR slice 36 tests, full `npm test` 150 files / 2397 tests, `npm run build`, `npm audit --audit-level=high`, and `git diff --check`.
+- Active queue: YELLOW — EINK-6B and GOALS-6B are dispatch-ready; POLISH-1 and RELEASE-1 remain ship-stage stubs and need hardening before queue depth is GREEN again. Desktop v2.0 conveyor active. Next dispatch-ready item: EINK-6B. KOKORO-RETIRE-1 conditional (fires only on PROMOTE). MOSS-NANO-13 deferred (both audits: "proceed only with scope changes").
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). Deferred lanes: MOSS-NANO, Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond Desktop v2.0 finish line.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
-- 2,172 tests across 143 test files
+- 2,397 tests across 150 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
