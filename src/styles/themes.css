@@ -38,31 +38,29 @@
 }
 
 /* Kill ALL animations and transitions globally */
-[data-theme="eink"] *,
-[data-theme="eink"] *::before,
-[data-theme="eink"] *::after {
+[data-eink="true"] *,
+[data-eink="true"] *::before,
+[data-eink="true"] *::after {
   animation: none !important;
   animation-duration: 0s !important;
   transition: none !important;
   transition-duration: 0s !important;
 }
 
-[data-theme="eink"] body {
-  background: #ffffff;
-  color: #000000;
+[data-eink="true"] body {
   font-family: Georgia, "Times New Roman", serif;
 }
 
 /* Reader: pure B&W, no colored ORP, use bold instead */
-[data-theme="eink"] .reader-container {
-  background: #ffffff;
+[data-eink="true"] .reader-container {
+  background: var(--reader-bg);
 }
-[data-theme="eink"] .reader-word-before,
-[data-theme="eink"] .reader-word-after {
-  color: #000000;
+[data-eink="true"] .reader-word-before,
+[data-eink="true"] .reader-word-after {
+  color: var(--text-primary);
 }
-[data-theme="eink"] .reader-word-focus {
-  color: #000000;
+[data-eink="true"] .reader-word-focus {
+  color: var(--text-primary);
   font-weight: 900;
   text-shadow: none;
   text-decoration: underline;
@@ -71,65 +69,65 @@
 }
 
 /* Focus marks: use black, no color */
-[data-theme="eink"] .focus-mark {
-  color: #000000;
+[data-eink="true"] .focus-mark {
+  color: var(--text-primary);
 }
 
 /* Flow mode highlight: bold + underline instead of background color */
-[data-theme="eink"] .flow-word-active {
+[data-eink="true"] .flow-word-active {
   background: none;
-  color: #000000;
+  color: var(--text-primary);
   font-weight: 900;
   text-decoration: underline;
   text-decoration-thickness: 2px;
 }
 
 /* Reading ruler: thicker, solid black for e-ink visibility */
-[data-theme="eink"] .reading-ruler {
+[data-eink="true"] .reading-ruler {
   height: 3px;
-  background: #000000;
+  background: var(--border);
   opacity: 0.6;
 }
 
 /* Guide lines: solid black borders */
-[data-theme="eink"] .reader-guide-line {
-  border-color: #000000;
+[data-eink="true"] .reader-guide-line {
+  border-color: var(--border);
 }
 
 /* Progress bar: border-based instead of fill */
-[data-theme="eink"] .progress-bar {
-  border: 1px solid #000000;
-  background: #ffffff;
+[data-eink="true"] .progress-bar {
+  border: 1px solid var(--border);
+  background: var(--bg);
 }
-[data-theme="eink"] .progress-bar-fill {
-  background: #000000;
+[data-eink="true"] .progress-bar-fill {
+  background: var(--border);
 }
 
 /* Buttons: border-based, no fills, no shadows */
-[data-theme="eink"] .btn,
-[data-theme="eink"] .btn-fill,
-[data-theme="eink"] .reader-esc-btn,
-[data-theme="eink"] .reader-font-btn,
-[data-theme="eink"] .reader-mode-btn,
-[data-theme="eink"] .chapter-nav-btn {
-  background: #ffffff;
-  border: 1px solid #000000;
-  color: #000000;
+[data-eink="true"] .btn,
+[data-eink="true"] .btn-fill,
+[data-eink="true"] .reader-esc-btn,
+[data-eink="true"] .reader-font-btn,
+[data-eink="true"] .reader-mode-btn,
+[data-eink="true"] .chapter-nav-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   box-shadow: none;
 }
 
 /* Highlight menu: borders, no shadows */
-[data-theme="eink"] .highlight-menu {
-  background: #ffffff;
-  border: 2px solid #000000;
+[data-eink="true"] .highlight-menu {
+  background: var(--bg);
+  border: 2px solid var(--border);
   box-shadow: none;
   border-radius: 4px;
 }
-[data-theme="eink"] .highlight-menu-btn { color: #000000; border-radius: 2px; }
-[data-theme="eink"] .highlight-menu-caret { border-top-color: #000000; }
-[data-theme="eink"] .definition-popup {
-  background: #ffffff;
-  border: 2px solid #000000;
+[data-eink="true"] .highlight-menu-btn { border-radius: 2px; }
+[data-eink="true"] .highlight-menu-caret { border-top-color: var(--border); }
+[data-eink="true"] .definition-popup {
+  background: var(--bg);
+  border: 2px solid var(--border);
   box-shadow: none;
   border-radius: 4px;
 }
@@ -138,88 +136,87 @@
   background: #000000;
   color: #ffffff;
   border-radius: 4px;
-  animation: none;
   opacity: 1;
 }
 
 /* Scrollbar: simple, high contrast — uses CSS custom properties, auto-updates */
 
 /* No hover effects — e-ink devices are often touch-only */
-[data-theme="eink"] *:hover {
+[data-eink="true"] *:hover {
   background-color: inherit;
 }
 
 /* Menu flap: no slide animation, instant show/hide */
-[data-theme="eink"] .menu-flap {
+[data-eink="true"] .menu-flap {
   transition: none !important;
 }
-[data-theme="eink"] .menu-flap-backdrop {
+[data-eink="true"] .menu-flap-backdrop {
   transition: none !important;
   background: rgba(0, 0, 0, 0.3); /* Simple overlay, no blur */
 }
 
 /* Doc cards: border-based, no hover effects */
-[data-theme="eink"] .doc-grid-card {
-  border: 1px solid #000000;
-  background: #ffffff;
+[data-eink="true"] .doc-grid-card {
+  border: 1px solid var(--border);
+  background: var(--bg);
 }
-[data-theme="eink"] .doc-grid-actions {
-  background: #ffffff;
-  border-top: 1px solid #000;
+[data-eink="true"] .doc-grid-actions {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
   opacity: 1; /* Always visible on e-ink (no hover) */
 }
 
 /* Settings toggles: border-based */
-[data-theme="eink"] .settings-toggle {
-  border: 2px solid #000000;
-  background: #ffffff;
+[data-eink="true"] .settings-toggle {
+  border: 2px solid var(--border);
+  background: var(--bg);
 }
-[data-theme="eink"] .settings-toggle.active {
-  background: #000000;
+[data-eink="true"] .settings-toggle.active {
+  background: var(--border);
 }
-[data-theme="eink"] .settings-toggle.active .settings-toggle-thumb {
-  background: #ffffff;
+[data-eink="true"] .settings-toggle.active .settings-toggle-thumb {
+  background: var(--bg);
 }
 
 /* ── E-ink: Toolbar auto-hide during playback (16C) ─────────────────────── */
-[data-theme="eink"] .eink-toolbar-hidden {
+[data-eink="true"] .eink-toolbar-hidden {
   display: none !important;
 }
 
 /* ── E-ink: Touch-optimized layout (16E) ─────────────────────────────────── */
-[data-theme="eink"] button {
+[data-eink="true"] button {
   min-height: 48px;
   min-width: 48px;
 }
-[data-theme="eink"] .reader-esc-btn,
-[data-theme="eink"] .reader-font-btn,
-[data-theme="eink"] .reader-mode-btn,
-[data-theme="eink"] .reader-mode-switch,
-[data-theme="eink"] .chapter-nav-btn,
-[data-theme="eink"] .chapter-label-btn {
+[data-eink="true"] .reader-esc-btn,
+[data-eink="true"] .reader-font-btn,
+[data-eink="true"] .reader-mode-btn,
+[data-eink="true"] .reader-mode-switch,
+[data-eink="true"] .chapter-nav-btn,
+[data-eink="true"] .chapter-label-btn {
   padding: 12px 16px;
   font-size: 13px;
 }
-[data-theme="eink"] .icon-btn {
+[data-eink="true"] .icon-btn {
   padding: 12px;
 }
-[data-theme="eink"] .hamburger-btn {
+[data-eink="true"] .hamburger-btn {
   padding: 12px;
 }
 
 /* ── E-ink: Static feedback — no animations (16F) ───────────────────────── */
 /* Replace highlight animations with border toggles */
-[data-theme="eink"] .flow-word-active {
-  border: 2px solid #000000;
+[data-eink="true"] .flow-word-active {
+  border: 2px solid var(--border);
   text-decoration: none;
 }
 /* Toast: instant appear/disappear, no slide */
-[data-theme="eink"] .highlight-toast {
+[data-eink="true"] .highlight-toast {
   animation: none !important;
   opacity: 1;
 }
 /* Loading: text-only, no spinner */
-[data-theme="eink"] .loading-screen {
+[data-eink="true"] .loading-screen {
   font-size: 16px;
 }
 
@@ -233,8 +230,8 @@
 .eink-refresh-overlay--black { background: #000000; }
 .eink-refresh-overlay--white { background: #ffffff; }
 /* Refresh screen button */
-[data-theme="eink"] .eink-refresh-btn {
-  border: 2px solid #000000;
+[data-eink="true"] .eink-refresh-btn {
+  border: 2px solid var(--border);
   font-weight: 700;
 }
 
@@ -254,7 +251,7 @@
 }
 
 /* ── E-ink: Progress bar throttled updates (16C) ─────────────────────────── */
-[data-theme="eink"] .progress-bar-fill {
+[data-eink="true"] .progress-bar-fill {
   transition: none !important;
 }
 /* Light theme overrides */
@@ -278,27 +275,27 @@
 }
 
 /* E-ink mode overrides for overlays */
-[data-theme="eink"] .command-palette-container,
-[data-theme="eink"] .shortcuts-container,
-[data-theme="eink"] .highlights-container,
-[data-theme="eink"] .snooze-picker-container,
-[data-theme="eink"] .tag-picker-container,
-[data-theme="eink"] .quick-settings-popover {
+[data-eink="true"] .command-palette-container,
+[data-eink="true"] .shortcuts-container,
+[data-eink="true"] .highlights-container,
+[data-eink="true"] .snooze-picker-container,
+[data-eink="true"] .tag-picker-container,
+[data-eink="true"] .quick-settings-popover {
   border-width: 2px;
   border-style: solid;
   box-shadow: none;
 }
-[data-theme="eink"] .command-palette-overlay,
-[data-theme="eink"] .shortcuts-overlay,
-[data-theme="eink"] .highlights-overlay,
-[data-theme="eink"] .snooze-picker-overlay,
-[data-theme="eink"] .tag-picker-overlay {
+[data-eink="true"] .command-palette-overlay,
+[data-eink="true"] .shortcuts-overlay,
+[data-eink="true"] .highlights-overlay,
+[data-eink="true"] .snooze-picker-overlay,
+[data-eink="true"] .tag-picker-overlay {
   background: rgba(0, 0, 0, 0.3);
 }
 
 
-[data-theme="eink"] .note-popover,
-[data-theme="eink"] .hotkey-coach {
+[data-eink="true"] .note-popover,
+[data-eink="true"] .hotkey-coach {
   box-shadow: none;
   border-width: 2px;
   border-style: solid;
@@ -318,12 +315,12 @@
 
 /* ── E-ink theme adjustments ── */
 
-[data-theme="eink"] .onboarding-welcome,
-[data-theme="eink"] .onboarding-tooltip {
-  background: #fff;
-  color: #000;
+[data-eink="true"] .onboarding-welcome,
+[data-eink="true"] .onboarding-tooltip {
+  background: var(--bg);
+  color: var(--text);
   box-shadow: none;
-  border: 2px solid #000;
+  border: 2px solid var(--border);
 }
 
 [data-theme="eink"] .onboarding-overlay {

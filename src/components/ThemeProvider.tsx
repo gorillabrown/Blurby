@@ -3,6 +3,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 interface ThemeContextType {
   theme: string;
   setTheme: (t: string) => void;
+  einkMode: boolean;
+  setEinkMode: (enabled: boolean) => void;
   accentColor: string | null;
   setAccentColor: (c: string | null) => void;
   fontFamily: string | null;
@@ -12,6 +14,8 @@ interface ThemeContextType {
 export const ThemeContext = createContext<ThemeContextType>({
   theme: "blurby",
   setTheme: () => {},
+  einkMode: false,
+  setEinkMode: () => {},
   accentColor: null,
   setAccentColor: () => {},
   fontFamily: null,
@@ -152,6 +156,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
 
 export function ThemeProvider({ children, initialTheme = "blurby" }: { children: React.ReactNode; initialTheme?: string }) {
   const [theme, setTheme] = useState(initialTheme);
+  const [einkMode, setEinkMode] = useState(false);
   const [systemTheme, setSystemTheme] = useState<"dark" | "light">("dark");
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const [fontFamily, setFontFamily] = useState<string | null>(null);
@@ -162,6 +167,7 @@ export function ThemeProvider({ children, initialTheme = "blurby" }: { children:
     api.getState?.().then((state) => {
       if (state?.settings) {
         if (state.settings.theme) setTheme(state.settings.theme);
+        setEinkMode(Boolean(state.settings.einkMode));
         if (state.settings.accentColor !== undefined) setAccentColor(state.settings.accentColor);
         if (state.settings.fontFamily !== undefined) setFontFamily(state.settings.fontFamily);
       }
@@ -184,6 +190,11 @@ export function ThemeProvider({ children, initialTheme = "blurby" }: { children:
       root.style.setProperty(key, value);
     }
     root.setAttribute("data-theme", resolvedTheme);
+    if (einkMode) {
+      root.setAttribute("data-eink", "true");
+    } else {
+      root.removeAttribute("data-eink");
+    }
 
     // Apply custom accent color override (blocked for blurby — brand palette is static)
     if (accentColor && resolvedTheme !== "blurby") {
@@ -202,10 +213,10 @@ export function ThemeProvider({ children, initialTheme = "blurby" }: { children:
     } else {
       root.style.removeProperty("--reader-font");
     }
-  }, [theme, systemTheme, accentColor, fontFamily]);
+  }, [theme, systemTheme, einkMode, accentColor, fontFamily]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, accentColor, setAccentColor, fontFamily, setFontFamily }}>
+    <ThemeContext.Provider value={{ theme, setTheme, einkMode, setEinkMode, accentColor, setAccentColor, fontFamily, setFontFamily }}>
       {children}
     </ThemeContext.Provider>
   );

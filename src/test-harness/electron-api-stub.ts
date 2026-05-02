@@ -63,6 +63,7 @@ const defaultSettings: BlurbySettings = {
   initialPauseMs: 3000,
   punctuationPauseMs: 1000,
   viewMode: "list",
+  einkMode: false,
   einkWpmCeiling: 250,
   einkRefreshInterval: 20,
   einkPhraseGrouping: true,

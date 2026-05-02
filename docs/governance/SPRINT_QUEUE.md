@@ -54,9 +54,9 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping
-Queue depth: 3 (GREEN) — EINK-6A, EINK-6B, GOALS-6B
-Next queue item: EINK-6A (BRAND-HYG-1 shelved/no-op in this checkout)
-Health: GREEN — Desktop v2.0 conveyor active. MOSS-NANO deferred. Qwen streaming on ITERATE.
+Queue depth: 2 dispatch-ready + 2 ship-stage stubs (YELLOW) — EINK-6B, GOALS-6B; POLISH-1/RELEASE-1 need hardening before dispatch.
+Next queue item: EINK-6B (EINK-6A completed; BRAND-HYG-1 shelved/no-op in this checkout)
+Health: YELLOW — Desktop v2.0 conveyor active; backfill/harden POLISH-1 before queue depth is treated as GREEN. MOSS-NANO deferred. Qwen streaming on ITERATE.
 Roadmap review: 2026-05-02. Verdict: AT RISK (strong velocity, queue was RED, MOSS 44% sideways).
 ```
 
@@ -66,8 +66,8 @@ Roadmap review: 2026-05-02. Verdict: AT RISK (strong velocity, queue was RED, MO
 |-----|--------|-------|-----|------|--------|
 | ~~1~~ | ~~SK-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | ✅ complete (2026-05-02) |
 | ~~1b~~ | ~~BRAND-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | SHELVED / no-op (expected dirty brand edits not present in this checkout) |
-| 2 | EINK-6A | Stage 2: Features | M | — | **next up (CLI)** |
-| 3 | EINK-6B | Stage 2: Features | M | EINK-6A | queued |
+| ~~2~~ | ~~EINK-6A~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
+| 3 | EINK-6B | Stage 2: Features | M | EINK-6A | **next up** |
 | 4 | GOALS-6B | Stage 2: Features | M | — (parallel-safe with EINK-6B) | queued |
 | 5 | POLISH-1 | Stage 3: Ship | M | EINK-6A | stub — spec at Stage 2 close |
 | 6 | RELEASE-1 | Stage 3: Ship | S | POLISH-1 | stub — spec at Stage 2 close |
@@ -94,7 +94,8 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt" and § "Phase 
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
-| SK-HYG-1 | 2026-05-02 | Roadmap hygiene & queue recovery. Archive-forward, queue GREEN, Desktop v2.0 conveyor. Brand commit pending CLI. |
+| EINK-6A | 2026-05-02 | PASS — e-ink display behavior decoupled from theme via independent `einkMode`; v9 settings migration/defaults added; `[data-eink="true"]` carries runtime behavior while `[data-theme="eink"]` remains optional greyscale palette. Verification: focused EINK/NARR 36 tests, full `npm test` 150 files / 2397 tests, build, high audit, diff check. |
+| SK-HYG-1 | 2026-05-02 | Roadmap hygiene & queue recovery. Archive-forward, Desktop v2.0 conveyor restored. BRAND-HYG-1 later shelved/no-op in this checkout because scoped brand edits were absent. |
 | QWEN-STREAM-4 | 2026-04-21 | ITERATE — streaming not promoted |
 | READER-4M-3 | 2026-04-19 | Global word anchor + cross-mode continuity |
 | READER-4M-2 | 2026-04-18 | Standalone narrate mode + four-button controls |

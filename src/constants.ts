@@ -508,6 +508,7 @@ export const DEFAULT_SETTINGS = {
   initialPauseMs: INITIAL_PAUSE_MS,
   punctuationPauseMs: PUNCTUATION_PAUSE_MS,
   viewMode: "list" as const,
+  einkMode: false,
   einkWpmCeiling: DEFAULT_EINK_WPM_CEILING,
   einkRefreshInterval: DEFAULT_EINK_REFRESH_INTERVAL,
   einkPhraseGrouping: true,

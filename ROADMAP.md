@@ -38,8 +38,8 @@ Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
   ├── TTS-7A→7R + EXT-5C + HOTFIX-12 ✅ (v1.29.0–v1.37.1)
   │
   │  Desktop v2.0 Conveyor (active — see § Desktop v2.0)
-  ├── EINK-6A: E-Ink Foundation (next up)
-  ├── EINK-6B: E-Ink Reading Ergonomics (queued)
+  ├── EINK-6A: E-Ink Foundation ✅
+  ├── EINK-6B: E-Ink Reading Ergonomics (next up)
   └── GOALS-6B: Reading Goal Tracking (queued, parallel-safe with 6B)
     │
     ▼
@@ -234,6 +234,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
 
 | Sprint | Version | Date | Result | Archive |
 |--------|---------|------|--------|--------|
+| EINK-6A | v1.75.1 | 2026-05-02 | E-ink display mode decoupled from theme; `einkMode` schema/defaults/migration added; behavioral CSS now keys off `[data-eink="true"]`; greyscale palette remains optional under `[data-theme="eink"]`. Verification: focused EINK/NARR tests 36 pass, full `npm test` 150 files / 2397 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. | Current roadmap closeout |
 | SELECTION-1 | v1.38.0 | 2026-04-06 | Word anchor contract, BUG-151/152/153 resolved | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
 | HOTFIX-14 | v1.38.2 | 2026-04-06 | URL extraction + connection fixes, BUG-155/156/157/158 | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
 | NARR-CURSOR-1 | v1.40.0 | 2026-04-07 | Collapsing narration cursor | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
@@ -479,7 +480,7 @@ All three investigation areas resolved:
 ## Desktop v2.0 — Active Conveyor Belt
 
 > **Finish line:** Desktop v2.0 Shipping. Six sprints, ~14 LOE, estimated 3-4 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → **EINK-6A** → EINK-6B → GOALS-6B (parallel-safe with 6B) → POLISH-1 → RELEASE-1.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → **EINK-6B** → GOALS-6B (parallel-safe with 6B) → POLISH-1 → RELEASE-1.
 > **Queue rule:** No new exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused.
 
 ### Standing Rules All Skeletons Inherit
@@ -523,7 +524,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A, EINK-6B, and GOALS-6B are fully spec'd and now part of the Desktop v2.0 active conveyor. Dispatch order: EINK-6A → EINK-6B → GOALS-6B (parallel-safe with EINK-6B).
+> EINK-6A completed 2026-05-02. EINK-6B and GOALS-6B remain fully spec'd and part of the Desktop v2.0 active conveyor. Dispatch order: EINK-6B → GOALS-6B (parallel-safe with EINK-6B).
 
 ---
 
@@ -557,7 +558,11 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint EINK-6A: E-Ink Foundation & Greyscale Runtime
+### Sprint EINK-6A: E-Ink Foundation & Greyscale Runtime ✅ COMPLETED 2026-05-02
+
+**Closeout:** `einkMode` is now an independent settings/schema flag (`CURRENT_SETTINGS_SCHEMA = 9`) with renderer, main-process, migration, and test-harness defaults. `ThemeProvider` applies `data-eink="true"` independently from `data-theme`; `ThemeSettings` exposes E-Ink Display Mode above the theme picker; reader WPM cap, refresh overlay, controller, and library repaint debounce now consume `settings.einkMode`. E-ink runtime behavior moved under `[data-eink="true"]`; the optional greyscale palette remains under `[data-theme="eink"]`.
+
+**Verification:** `npm test -- --run tests/einkFoundation.test.ts tests/narrLayer1bConsolidation.test.ts` (36 tests), full `npm test` (150 files / 2397 tests), `npm run build` (existing circular chunk warning unchanged), `npm audit --audit-level=high` (passes; known moderate uuid chain remains force/breaking only), and `git diff --check`.
 
 **Goal:** Decouple e-ink display behavior from the theme system so users can pair e-ink optimizations (no animations, large targets, refresh timing) with any color theme. Currently, e-ink is a theme — selecting it forces greyscale colors. After this sprint, e-ink is an independent display mode toggle that layers on top of any theme.
 

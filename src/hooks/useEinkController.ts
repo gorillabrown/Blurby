@@ -15,7 +15,7 @@ interface UseEinkControllerReturn {
  * at configurable intervals to clear e-ink display artifacts.
  */
 export function useEinkController(settings: BlurbySettings): UseEinkControllerReturn {
-  const isEink = settings.theme === "eink";
+  const isEink = settings.einkMode === true;
   const [einkPageTurns, setEinkPageTurns] = useState(0);
   const [showEinkRefresh, setShowEinkRefresh] = useState(false);
 
