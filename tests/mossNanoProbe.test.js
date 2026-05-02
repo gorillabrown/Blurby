@@ -30,6 +30,29 @@ async function readSummaryJson(outputRoot, runId) {
   };
 }
 
+async function realPathForAssert(targetPath) {
+  try {
+    return path.normalize(await fs.realpath(targetPath));
+  } catch {
+    return path.normalize(targetPath);
+  }
+}
+
+async function expectSamePath(actualPath, expectedPath) {
+  expect(await realPathForAssert(actualPath)).toBe(await realPathForAssert(expectedPath));
+}
+
+function argvValueAfter(argv, flag) {
+  const index = argv.indexOf(flag);
+  expect(index).toBeGreaterThanOrEqual(0);
+  expect(argv[index + 1]).toEqual(expect.any(String));
+  return argv[index + 1];
+}
+
+async function expectArgPath(argv, flag, expectedPath) {
+  await expectSamePath(argvValueAfter(argv, flag), expectedPath);
+}
+
 async function makeReadyNanoRuntime(tempRoot, { inferScript, writeInfer = true } = {}) {
   const repoDir = path.join(tempRoot, ".runtime", "moss", "MOSS-TTS-Nano");
   const modelDir = path.join(tempRoot, ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX");
@@ -1332,17 +1355,17 @@ describe("MOSS Nano probe", () => {
       status: "ok",
       failureClass: null,
     });
-    expect(summary.summary.commandMetadata.cwd).toBe(path.resolve(repoDir));
+    await expectSamePath(summary.summary.commandMetadata.cwd, repoDir);
+    await expectSamePath(summary.summary.commandMetadata.argv[0], path.resolve(repoDir, "infer_onnx.py"));
+    await expectArgPath(summary.summary.commandMetadata.argv, "--output-audio-path", summary.summary.outputWavPath);
+    await expectArgPath(summary.summary.commandMetadata.argv, "--model-dir", modelDir);
+    await expectArgPath(summary.summary.commandMetadata.argv, "--prompt-audio-path", promptAudio);
     expect(summary.summary.commandMetadata.argv).toEqual(expect.arrayContaining([
-      path.resolve(repoDir, "infer_onnx.py"),
       "--output-audio-path",
-      summary.summary.outputWavPath,
       "--model-dir",
-      modelDir,
       "--cpu-threads",
       "2",
       "--prompt-audio-path",
-      promptAudio,
       "--realtime-streaming-decode",
       "1",
       "--disable-wetext-processing",
@@ -1417,11 +1440,8 @@ describe("MOSS Nano probe", () => {
       status: "ok",
       failureClass: null,
     });
-    expect(summary.summary.commandMetadata.argv).toEqual(expect.arrayContaining([
-      "--prompt-audio-path",
-      path.resolve(relativePromptAudio),
-    ]));
-    expect(summary.summary.commandMetadata.effective.promptAudio).toBe(path.resolve(relativePromptAudio));
+    await expectArgPath(summary.summary.commandMetadata.argv, "--prompt-audio-path", path.resolve(relativePromptAudio));
+    await expectSamePath(summary.summary.commandMetadata.effective.promptAudio, path.resolve(relativePromptAudio));
   });
 
   it("removes a pre-existing output WAV before observing first audio", async () => {
@@ -1483,8 +1503,8 @@ describe("MOSS Nano probe", () => {
       status: "ok",
       failureClass: null,
     });
-    expect(summary.summary.outputWavPath).toBe(staleOutputWav);
-    expect(summary.summary.outputPath).toBe(staleOutputWav);
+    await expectSamePath(summary.summary.outputWavPath, staleOutputWav);
+    await expectSamePath(summary.summary.outputPath, staleOutputWav);
     expect(summary.summary.firstAudioObservation).toMatchObject({
       kind: "file-observed-wav-bytes",
       fileResetBeforeRun: true,
