@@ -21,10 +21,10 @@ function configPathFor(projectRoot) {
 }
 
 function wslProjectPath(projectRoot) {
-  return path.posix.join(
-    "/mnt",
-    projectRoot.replace(/\\/g, "/").replace(/^([A-Za-z]):/, (_, drive) => drive.toLowerCase()),
-  );
+  const normalized = path.resolve(projectRoot).replace(/\\/g, "/");
+  const driveMatch = normalized.match(/^([A-Za-z]):\/(.*)$/);
+  if (!driveMatch) return normalized;
+  return path.posix.join("/mnt", driveMatch[1].toLowerCase(), driveMatch[2]);
 }
 
 function wslHost2BinaryPath(projectRoot) {
