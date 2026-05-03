@@ -141,7 +141,7 @@ export interface QwenGenerateResponse {
   spikeWarning?: boolean;
 }
 
-export type MossNanoEngineStatus = "unavailable" | "loading" | "ready" | "failed" | "shutdown";
+export type MossNanoEngineStatus = "unavailable" | "loading" | "ready" | "blocked" | "failed" | "shutdown";
 
 export interface MossNanoLifecycleConfigSnapshot {
   runtimeDir: string;
@@ -162,6 +162,9 @@ export interface MossNanoStatusSnapshot {
   loading: boolean;
   recoverable: boolean;
   config?: MossNanoLifecycleConfigSnapshot;
+  runtime?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
+  syntheticAudio?: boolean;
 }
 
 export interface MossNanoSynthesizeRequest {
@@ -181,6 +184,8 @@ export interface MossNanoSynthesizeResult {
   audio?: Float32Array | number[];
   sampleRate?: number;
   durationMs?: number;
+  runtime?: Record<string, unknown> | null;
+  syntheticAudio?: boolean;
   recoverable?: boolean;
 }
 

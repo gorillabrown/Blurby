@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { EventEmitter } from "events";
+import { spawnSync } from "child_process";
+import { describe, expect, it, vi } from "vitest";
 
 import mossNanoEngineModule from "../main/moss-nano-engine.js";
+import mossNanoSidecarModule from "../main/moss-nano-sidecar.js";
 
 const { createMossNanoEngine } = mossNanoEngineModule;
+const { createMossNanoSidecarAdapter } = mossNanoSidecarModule;
 
 function createIdSequence(prefix) {
   let next = 0;
@@ -162,17 +166,62 @@ async function waitForRequestCall(adapter, requestId = "req-1") {
   return undefined;
 }
 
+class FakeSidecarChild extends EventEmitter {
+  constructor() {
+    super();
+    this.stdout = new EventEmitter();
+    this.stderr = new EventEmitter();
+    this.stdin = {
+      writes: [],
+      write: vi.fn((chunk) => {
+        this.stdin.writes.push(String(chunk));
+        return true;
+      }),
+      end: vi.fn(),
+    };
+    this.kill = vi.fn(() => {
+      this.emit("exit", 0, null);
+      return true;
+    });
+  }
+
+  emitStdout(message) {
+    this.stdout.emit("data", Buffer.from(`${JSON.stringify(message)}\n`, "utf8"));
+  }
+
+  emitStderr(text) {
+    this.stderr.emit("data", Buffer.from(text, "utf8"));
+  }
+
+  writtenCommands() {
+    return this.stdin.writes
+      .join("")
+      .trim()
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map((line) => JSON.parse(line));
+  }
+}
+
+function createSpawnHarness() {
+  const children = [];
+  const spawn = vi.fn(() => {
+    const child = new FakeSidecarChild();
+    children.push(child);
+    return child;
+  });
+  return { spawn, children };
+}
+
 describe("MOSS Nano sidecar manager contract", () => {
-  it("reports unavailable structured status before the sidecar is started", async () => {
+  it("starts the sidecar during status and reports the ready snapshot", async () => {
     const { manager } = makeManager();
 
     await expect(manager.status()).resolves.toMatchObject({
-      status: "unavailable",
-      reason: "sidecar-not-started",
-      detail: expect.any(String),
-      ready: false,
+      ok: true,
+      status: "ready",
+      ready: true,
       loading: false,
-      recoverable: true,
     });
   });
 
@@ -521,5 +570,264 @@ describe("MOSS Nano sidecar manager contract", () => {
       ready: true,
     });
     expect(adapter.calls.filter((call) => call.type === "restart")).toHaveLength(2);
+  });
+});
+
+describe("MOSS Nano resident sidecar adapter", () => {
+  it("spawns the Python bridge and resolves start from a ready JSON line", async () => {
+    const { spawn, children } = createSpawnHarness();
+    const adapter = createMossNanoSidecarAdapter({
+      spawn,
+      bridgePath: "C:\\app\\scripts\\moss_nano_app_sidecar.py",
+    });
+
+    const startPromise = adapter.start(createLifecycleConfig({
+      pythonExe: "C:\\Python311\\python.exe",
+      commandTimeoutMs: 250,
+    }));
+
+    expect(spawn).toHaveBeenCalledWith(
+      "C:\\Python311\\python.exe",
+      expect.arrayContaining(["C:\\app\\scripts\\moss_nano_app_sidecar.py"]),
+      expect.objectContaining({ windowsHide: true }),
+    );
+    children[0].emitStdout({
+      type: "ready",
+      ok: true,
+      status: "ready",
+      ready: true,
+      detail: "Nano bridge ready",
+      runtime: {
+        backend: "moss-nano-onnx",
+        modelVariant: "moss-tts-nano-onnx",
+      },
+    });
+
+    await expect(startPromise).resolves.toMatchObject({
+      ok: true,
+      status: "ready",
+      ready: true,
+      detail: "Nano bridge ready",
+    });
+    await expect(adapter.status()).resolves.toMatchObject({
+      status: "ready",
+      ready: true,
+      runtime: {
+        backend: "moss-nano-onnx",
+        modelVariant: "moss-tts-nano-onnx",
+      },
+    });
+  });
+
+  it("round-trips synthesize through stdin/stdout with request ownership intact", async () => {
+    const { spawn, children } = createSpawnHarness();
+    const adapter = createMossNanoSidecarAdapter({
+      spawn,
+      bridgePath: "C:\\app\\scripts\\moss_nano_app_sidecar.py",
+    });
+
+    const startPromise = adapter.start(createLifecycleConfig({ commandTimeoutMs: 250 }));
+    children[0].emitStdout({ type: "ready", ok: true, status: "ready", ready: true });
+    await startPromise;
+
+    const synthesizePromise = adapter.request("synthesize", {
+      requestId: "req-1",
+      ownerToken: "owner-1",
+      text: "hello sidecar",
+      voice: "default",
+      rate: 1.1,
+    });
+
+    expect(children[0].writtenCommands()).toContainEqual(expect.objectContaining({
+      command: "synthesize",
+      requestId: "req-1",
+      ownerToken: "owner-1",
+      text: "hello sidecar",
+      voice: "default",
+      rate: 1.1,
+    }));
+
+    children[0].emitStdout({
+      type: "result",
+      ok: true,
+      requestId: "req-1",
+      ownerToken: "owner-1",
+      audio: [0, 0.25, -0.25],
+      sampleRate: 24000,
+      durationMs: 12,
+      syntheticAudio: false,
+      runtime: {
+        backend: "moss-nano-onnx",
+        modelVariant: "moss-tts-nano-onnx",
+      },
+    });
+
+    await expect(synthesizePromise).resolves.toMatchObject({
+      ok: true,
+      requestId: "req-1",
+      ownerToken: "owner-1",
+      audio: [0, 0.25, -0.25],
+      sampleRate: 24000,
+      durationMs: 12,
+      syntheticAudio: false,
+      runtime: {
+        backend: "moss-nano-onnx",
+      },
+    });
+  });
+
+  it("rejects synthetic bridge audio in real sidecar mode", async () => {
+    const { spawn, children } = createSpawnHarness();
+    const adapter = createMossNanoSidecarAdapter({
+      spawn,
+      bridgePath: "C:\\app\\scripts\\moss_nano_app_sidecar.py",
+    });
+
+    const startPromise = adapter.start(createLifecycleConfig({ commandTimeoutMs: 250 }));
+    children[0].emitStdout({ type: "ready", ok: true, status: "ready", ready: true });
+    await startPromise;
+
+    const synthesizePromise = adapter.request("synthesize", {
+      requestId: "req-synthetic",
+      ownerToken: "owner-synthetic",
+      text: "synthetic must not pass",
+      voice: "default",
+      rate: 1.0,
+    });
+
+    children[0].emitStdout({
+      type: "result",
+      ok: true,
+      requestId: "req-synthetic",
+      ownerToken: "owner-synthetic",
+      audio: [0, 0.1, 0],
+      sampleRate: 24000,
+      durationMs: 12,
+      syntheticAudio: true,
+    });
+
+    await expect(synthesizePromise).resolves.toMatchObject({
+      ok: false,
+      status: "failed",
+      reason: "synthetic-audio-forbidden",
+      requestId: "req-synthetic",
+      ownerToken: "owner-synthetic",
+      recoverable: true,
+    });
+  });
+
+  it("allows synthetic bridge audio only when explicit mock mode is configured", async () => {
+    const { spawn, children } = createSpawnHarness();
+    const adapter = createMossNanoSidecarAdapter({
+      spawn,
+      bridgePath: "C:\\app\\scripts\\moss_nano_app_sidecar.py",
+    });
+
+    const startPromise = adapter.start(createLifecycleConfig({ commandTimeoutMs: 250, mock: true }));
+    children[0].emitStdout({ type: "ready", ok: true, status: "ready", ready: true, syntheticAudio: true });
+    await startPromise;
+
+    const synthesizePromise = adapter.request("synthesize", {
+      requestId: "req-mock",
+      ownerToken: "owner-mock",
+      text: "mock tone is explicit",
+      voice: "default",
+      rate: 1.0,
+    });
+
+    children[0].emitStdout({
+      type: "result",
+      ok: true,
+      requestId: "req-mock",
+      ownerToken: "owner-mock",
+      audio: [0, 0.1, 0],
+      sampleRate: 24000,
+      durationMs: 12,
+      syntheticAudio: true,
+    });
+
+    await expect(synthesizePromise).resolves.toMatchObject({
+      ok: true,
+      requestId: "req-mock",
+      ownerToken: "owner-mock",
+      syntheticAudio: true,
+    });
+  });
+
+  it("sends cancel, shutdown, and restart control messages to the resident child", async () => {
+    const { spawn, children } = createSpawnHarness();
+    const adapter = createMossNanoSidecarAdapter({
+      spawn,
+      bridgePath: "C:\\app\\scripts\\moss_nano_app_sidecar.py",
+    });
+
+    const config = createLifecycleConfig({ commandTimeoutMs: 250 });
+    const startPromise = adapter.start(config);
+    children[0].emitStdout({ type: "ready", ok: true, status: "ready", ready: true });
+    await startPromise;
+
+    const cancelPromise = adapter.cancel({ requestId: "req-1", ownerToken: "owner-1" });
+    const cancel = children[0].writtenCommands().find((command) => command.command === "cancel");
+    expect(cancel).toMatchObject({ requestId: "req-1", ownerToken: "owner-1" });
+    children[0].emitStdout({
+      type: "cancelled",
+      ok: true,
+      cancelled: true,
+      requestId: "req-1",
+      ownerToken: "owner-1",
+    });
+    await expect(cancelPromise).resolves.toMatchObject({
+      ok: true,
+      cancelled: true,
+      requestId: "req-1",
+    });
+
+    await expect(adapter.shutdown()).resolves.toMatchObject({
+      ok: true,
+      status: "shutdown",
+      ready: false,
+    });
+    expect(children[0].writtenCommands()).toContainEqual(expect.objectContaining({
+      command: "shutdown",
+    }));
+
+    const restartPromise = adapter.restart(config);
+    await Promise.resolve();
+    expect(children).toHaveLength(2);
+    children[1].emitStdout({ type: "ready", ok: true, status: "ready", ready: true });
+    await expect(restartPromise).resolves.toMatchObject({
+      ok: true,
+      status: "ready",
+      ready: true,
+    });
+  });
+});
+
+describe("MOSS Nano app sidecar bridge truth", () => {
+  it("reports blocked instead of ready when real Nano runtime paths are missing", () => {
+    const result = spawnSync("python", [
+      "scripts/moss_nano_app_sidecar.py",
+      "--runtime-dir",
+      "C:\\definitely-missing\\MOSS-TTS-Nano",
+      "--model-dir",
+      "C:\\definitely-missing\\MOSS-TTS-Nano-ONNX",
+      "--tokenizer-dir",
+      "C:\\definitely-missing\\MOSS-Audio-Tokenizer-Nano-ONNX",
+    ], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      input: "{\"command\":\"shutdown\"}\n",
+      timeout: 10000,
+    });
+
+    expect(result.status).toBe(0);
+    const firstLine = result.stdout.trim().split(/\r?\n/)[0];
+    expect(JSON.parse(firstLine)).toMatchObject({
+      type: "ready",
+      ok: false,
+      status: "blocked",
+      ready: false,
+      reason: expect.stringMatching(/missing|source|model|asset|runtime/i),
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { BlurbySettings, KokoroStatusSnapshot, PronunciationOverride } from "../../types";
-import { KOKORO_VOICE_NAMES, QWEN_DEFAULT_SPEAKER, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, MAX_NARRATION_PROFILES, profileFromSettings } from "../../constants";
+import { KOKORO_VOICE_NAMES, QWEN_DEFAULT_SPEAKER, QWEN_TTS_DISABLED, TTS_DEFAULT_ENGINE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, MAX_NARRATION_PROFILES, normalizeSelectableTtsEngine, profileFromSettings } from "../../constants";
 import { KokoroStatusSection } from "./KokoroStatusSection";
 import { QwenStatusSection } from "./QwenStatusSection";
 import { QwenRuntimeSetupSection } from "./QwenRuntimeSetupSection";
@@ -38,7 +38,7 @@ interface TTSSettingsProps {
   onBookNarrationProfileChange?: (profileId: string | null) => void;
 }
 export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange }: TTSSettingsProps) {
-  const engine = settings.ttsEngine || "qwen";
+  const engine = normalizeSelectableTtsEngine(settings.ttsEngine || TTS_DEFAULT_ENGINE);
   // Web Speech API voices
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [testPlaying, setTestPlaying] = useState(false);
@@ -73,7 +73,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     handlePreloadQwen,
     handlePreflightQwen,
   } = useQwenPrototypeStatus();
-  const { nanoReady, nanoStatusTitle, nanoStatusDetail } = useMossNanoSettingsStatus();
+  const { nanoSelectable, nanoReady, nanoStatusTitle, nanoStatusDetail } = useMossNanoSettingsStatus();
   const preferredQwenVoice =
     settings.ttsVoiceName && qwenVoices.includes(settings.ttsVoiceName)
       ? settings.ttsVoiceName
@@ -218,8 +218,8 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     // Apply profile settings to flat settings for immediate effect
     onSettingsChange({
       activeNarrationProfileId: id,
-      ttsEngine: profile.ttsEngine,
-      ttsVoiceName: profile.ttsVoiceName,
+      ttsEngine: normalizeSelectableTtsEngine(profile.ttsEngine),
+      ttsVoiceName: normalizeSelectableTtsEngine(profile.ttsEngine) === "nano" ? null : profile.ttsVoiceName,
       ttsRate: profile.ttsRate,
       ttsPauseCommaMs: profile.ttsPauseCommaMs,
       ttsPauseClauseMs: profile.ttsPauseClauseMs,
@@ -264,8 +264,8 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         narrationProfiles: profiles.map(p =>
           p.id === activeProfileId ? {
             ...p,
-            ttsEngine: merged.ttsEngine || "qwen",
-            ttsVoiceName: merged.ttsVoiceName || null,
+            ttsEngine: normalizeSelectableTtsEngine(merged.ttsEngine),
+            ttsVoiceName: normalizeSelectableTtsEngine(merged.ttsEngine) === "nano" ? null : merged.ttsVoiceName || null,
             ttsRate: merged.ttsRate || 1.0,
             ttsPauseCommaMs: merged.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
             ttsPauseClauseMs: merged.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
@@ -374,15 +374,9 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       <div className="settings-mode-toggle tts-engine-toggle">
         <button
           className={`settings-mode-btn${engine === "qwen" ? " active" : ""}`}
-          onClick={() => {
-            handleTtsChange({
-              ttsEngine: "qwen",
-              ttsVoiceName: qwenReady ? preferredQwenVoice : null,
-            });
-            if (!qwenReady && !qwenBusy) {
-              void handlePreloadQwen();
-            }
-          }}
+          onClick={() => {}}
+          disabled={QWEN_TTS_DISABLED}
+          aria-disabled={QWEN_TTS_DISABLED}
         >
           Qwen AI
         </button>
@@ -406,19 +400,18 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         <button
           className={`settings-mode-btn${engine === "nano" ? " active" : ""}`}
           onClick={() => {
-            if (!nanoReady) return;
             handleTtsChange({ ttsEngine: "nano", ttsVoiceName: null });
           }}
-          disabled={!nanoReady}
-          aria-disabled={!nanoReady}
+          disabled={!nanoSelectable}
+          aria-disabled={!nanoSelectable}
         >
           Nano AI (Experimental)
         </button>
       </div>
       <div className="tts-test-hint">
-        Qwen is Blurby's default narration engine.
-        Kokoro remains available as a deprecated fallback while retirement gates are still open.
-        Nano is experimental and requires the local MOSS Nano sidecar.
+        Qwen is currently disabled.
+        Kokoro remains available as a legacy fallback.
+        Nano is selectable as an experimental local runtime and requires the local MOSS Nano sidecar.
         {!nanoReady && ` ${nanoStatusDetail}`}
       </div>
 

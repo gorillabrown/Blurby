@@ -1,8 +1,8 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-12
+**Sprint:** MOSS-1 through MOSS-NANO-13B
 **Initial status:** `INVESTIGATE`
-**Current status:** `NANO_EXPERIMENTAL_ONLY`
+**Current status:** `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`
 **Last updated:** 2026-05-02
 
 ## Status Values
@@ -31,6 +31,7 @@
 | `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE` | Promote Nano from bounded test-only narration strategy into the next continuity/cache/prefetch prototype path. This does not make Nano public `TtsEngine`, settings UI, normal playback productization, default, or a Kokoro replacement. |
 | `PROMOTE_NANO_TO_EXPERIMENTAL_UI_CANDIDATE` | Promote Nano from bounded continuity/cache/prefetch prototype into explicit experimental UI candidate work. This does not make Nano default, broadly user-facing, public without opt-in UX, or a Kokoro replacement. |
 | `PROMOTE_NANO_TO_PRODUCTIZATION_GATE` | Promote Nano from settings-only experimental opt-in into the next productization/default-decision gate. This does not make Nano default, remove sidecar readiness gating, silently fall back to another engine, or retire Kokoro. |
+| `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE` | Promote Nano from synthetic app-sidecar proof to real local ONNX app-audio prototype. This proves Test Voice and selected Nano narration can use real Nano audio through app IPC when ready, but does not make Nano default, recommended opt-in, word-timed, or a Kokoro replacement. |
 | `PAUSE_NANO_RUNTIME_RELIABILITY` | Pause Nano runtime reliability work when bounded recycle/reset evidence cannot make memory, tail latency, or lifecycle gates plausible enough for more runtime iteration. |
 | `KEEP_KOKORO_ONLY` | Historical Nano runtime-rescue decision from MOSS-NANO-2. It is not exposed as a Nano-6 readiness decision; Nano-6 readiness uses only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
@@ -933,6 +934,55 @@ Next actions:
 - MOSS-NANO-11 has now closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`.
 - Keep Nano experimental and sidecar-readiness-gated until later live product evidence says otherwise.
 - Keep Kokoro available; no Kokoro retirement work is unlocked by MOSS-NANO-10.
+
+## MOSS-NANO-13B Decision
+
+Decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`.
+
+Scope: MOSS-NANO-13B replaces the synthetic app-sidecar preview tone with real local MOSS-TTS-Nano ONNX audio through Electron `tts-nano-*` IPC. It does not re-enable Qwen, make Nano default, retire Kokoro, fake word timestamps, silently fall back to Kokoro on Nano failure, or start flagship MOSS work.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Real app bridge | `scripts/moss_nano_app_sidecar.py` validates Python/source/model/tokenizer/imports, constructs the local `OnnxTtsRuntime`, and reports `ready` only after the real runtime is usable. |
+| Synthetic guard | Synthetic tone output exists only behind explicit mock mode. `main/moss-nano-sidecar.js` rejects synthetic or unclassified results in real mode with `synthetic-audio-forbidden`. |
+| Default paths | `main/moss-nano-engine.js` defaults to `.runtime/moss/.venv-nano`, `.runtime/moss/MOSS-TTS-Nano`, and the documented Nano ONNX model/tokenizer directories. |
+| Runtime metadata | Ready/synthesize results include backend/model/runtime metadata and `syntheticAudio: false` for real output. |
+| Timing truth | `src/hooks/narration/mossNanoStrategy.ts` keeps `timingTruth: "segment-following"` and `wordTimestamps: null`, even if a sidecar result includes timestamp-like fields. |
+| UI truth | Nano Test Voice remains readiness-gated through `nanoStatus` and `nanoSynthesize`; blocked Nano surfaces a structured preview failure rather than falling back to another engine. |
+
+Real smoke:
+
+| Check | Result |
+|---|---|
+| Status | Direct Node app-sidecar smoke reached `ready` with `backend: "moss-nano-onnx"`, `modelVariant: "moss-tts-nano-onnx"`, `syntheticAudio: false`, and `sessionCreateMs` about `8439`. |
+| Synthesize | `"MOSS Nano real audio smoke test."` returned `ok: true`, `sampleRate: 48000`, `durationMs: 3360`, `audioLength: 161280`, an `outputPath` under `.tmp/moss-nano-app-sidecar`, and `syntheticAudio: false`. |
+| Blocked path | Missing runtime paths report `status: "blocked"` with a structured missing source/model/asset reason instead of claiming ready. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| RED test slice | Initial Nano engine/strategy RED tests failed on dropped runtime metadata, synthetic output acceptance, and missing-path readiness overclaim. |
+| Focused Nano suite | `npm test -- --run tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js tests/ttsSettingsMossNano.test.tsx tests/mossNanoStrategy.test.ts` passed `4` files / `43` tests. |
+| Python compile | `python -m py_compile scripts\moss_nano_app_sidecar.py` passed. |
+| Full suite | `npm test` passed `163` files / `2489` tests. |
+| Build | `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning. |
+| Audit | `npm audit --audit-level=high` passed with moderate-only `uuid` advisories. |
+| Diff check | `git diff --check` passed. |
+| Solon/Plato | Spec and quality review found no Qwen reactivation, no Kokoro behavior change, no fake word timestamps, no silent fallback, strict stdout JSON protocol, structured stderr diagnostics, Windows process-tree cleanup, and one residual prototype risk: large PCM payloads over IPC must remain bounded until live evidence hardening. |
+
+Decision rationale:
+
+- The integrated app sidecar can now run the same real Nano ONNX runtime family that the diagnostic resident path proved, and it returns real WAV/PCM metadata through app IPC.
+- Readiness is truthfully blocked until the local runtime is present and importable.
+- This is not a productization or default-engine decision; live four-mode provenance still belongs to MOSS-NANO-13c/13e.
+
+Next actions:
+
+- Use MOSS-NANO-13c to build the provenance-backed live evidence schema and producer on top of the real app-audio path.
+- Keep Nano non-default and segment-following; keep Kokoro available.
 
 ## MOSS-NANO-12 Decision
 

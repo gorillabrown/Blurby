@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 10;
+const CURRENT_SETTINGS_SCHEMA = 11;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -112,6 +112,25 @@ const settingsMigrations = [
   (data) => {
     if (!Array.isArray(data.readingGoals)) data.readingGoals = [];
     data.schemaVersion = 10;
+    return data;
+  },
+  // v10 → v11: deactivate Qwen as a selectable/user-default TTS engine
+  (data) => {
+    if (data.ttsEngine === "qwen" || data.ttsEngine === undefined || data.ttsEngine === null) {
+      data.ttsEngine = "kokoro";
+      data.ttsVoiceName = null;
+    }
+    if (Array.isArray(data.narrationProfiles)) {
+      data.narrationProfiles = data.narrationProfiles.map((profile) => {
+        if (!profile || profile.ttsEngine !== "qwen") return profile;
+        return {
+          ...profile,
+          ttsEngine: "kokoro",
+          ttsVoiceName: null,
+        };
+      });
+    }
+    data.schemaVersion = 11;
     return data;
   },
 ];
