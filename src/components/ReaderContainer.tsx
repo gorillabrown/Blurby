@@ -32,6 +32,8 @@ import { useDocumentLifecycle } from "../hooks/useDocumentLifecycle";
 import { useFlowScrollSync } from "../hooks/useFlowScrollSync";
 import { createWindowEvalTraceSink } from "../utils/ttsEvalTrace";
 import { stepKokoroUiSpeed } from "../utils/kokoroRatePlan";
+import { useReadingGoals } from "../hooks/useReadingGoals";
+import { calculateHighWaterPagesReadDelta } from "../utils/readingGoals";
 
 const api = window.electronAPI;
 
@@ -114,6 +116,7 @@ export default function ReaderContainer({
   const { settings, updateSettings } = useSettings();
   const { showToast } = useToast();
   const isEink = settings.einkMode === true;
+  const readingGoals = useReadingGoals({ settings, updateSettings });
 
   const [focusTextSize, setFocusTextSize] = useState(
     settings.focusTextSize || DEFAULT_FOCUS_TEXT_SIZE
@@ -336,8 +339,11 @@ export default function ReaderContainer({
     onUpdateProgress,
     onArchiveDoc,
     onExitReader,
+    onPagesRead: readingGoals.recordPages,
+    onActiveReadingTime: readingGoals.recordActiveReadingMs,
+    onBookCompleted: readingGoals.recordCompletedBook,
   });
-  const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef } = progress;
+  const { hasEngagedRef, furthestPositionRef, pageSaveTimerRef, lastSavedPosRef, markPageActivity } = progress;
   const { finishReading, finishReadingWithoutExit, showBacktrackPrompt, backtrackPages, checkBacktrack } = progress;
   finishReadingWithoutExitRef.current = finishReadingWithoutExit;
 
@@ -630,6 +636,7 @@ export default function ReaderContainer({
 
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
     hasEngagedRef.current = true;
+    markPageActivity();
     // For foliate EPUBs, navigate using the href from the TOC
     if (useFoliate && (docChapters[chapterIndex] as any)?.href) {
       foliateApiRef.current?.goTo?.((docChapters[chapterIndex] as any).href);
@@ -644,15 +651,15 @@ export default function ReaderContainer({
         setHighlightedWordIndex(chs[chapterIndex].wordIndex);
       }
     }
-  }, [activeDoc, docChapters, words, jumpToWord, readingMode]);
+  }, [activeDoc, docChapters, words, jumpToWord, markPageActivity, readingMode]);
 
   // ── Page-mode callbacks for keyboard hook ────────────────────────────
 
   // Page refs for keyboard navigation (updated by PageReaderView via callbacks)
   // pageNavRef moved above useReaderMode hook call
 
-  const handlePrevPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.prevPage(); }, []);
-  const handleNextPage = useCallback(() => { hasEngagedRef.current = true; pageNavRef.current.nextPage(); }, []);
+  const handlePrevPage = useCallback(() => { hasEngagedRef.current = true; markPageActivity(); pageNavRef.current.prevPage(); }, [markPageActivity]);
+  const handleNextPage = useCallback(() => { hasEngagedRef.current = true; markPageActivity(); pageNavRef.current.nextPage(); }, [markPageActivity]);
 
   // Flow line navigation ref (updated by PageReaderView for legacy, FlowScrollEngine for FLOW-3A)
   const flowNavRef = useRef<{ prevLine: () => void; nextLine: () => void }>({
@@ -676,10 +683,11 @@ export default function ReaderContainer({
 
   const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
     hasEngagedRef.current = true;
+    markPageActivity();
     // Move highlight by 1 word (left/right) or ~10 words (up/down, approximate line jump)
     const delta = direction === "left" ? -1 : direction === "right" ? 1 : direction === "up" ? -10 : 10;
     setHighlightedWordIndex((prev) => Math.max(0, Math.min(words.length - 1, prev + delta)));
-  }, [words.length]);
+  }, [markPageActivity, words.length]);
 
   const handleDefineWord = useCallback(() => {
     const word = words[highlightedWordIndex];
@@ -894,6 +902,7 @@ export default function ReaderContainer({
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
           // TTS-7M: Also skip progress save when resume anchor is active (passive event noise)
           if (!hasEngagedRef.current || hasResumeAnchor) return;
+          markPageActivity();
           const progressAnchor = resolveCanonicalWordAnchor({
             readingMode: mode,
             resumeAnchor: resumeAnchorRef.current,
@@ -902,6 +911,9 @@ export default function ReaderContainer({
             focusWordIndex: wordIndexRef.current,
             narrationWordIndex: narrationCursorRef.current,
           });
+          const pageDelta = calculateHighWaterPagesReadDelta(furthestPositionRef.current, progressAnchor);
+          furthestPositionRef.current = pageDelta.highWater;
+          if (pageDelta.pages > 0) readingGoals.recordPages(pageDelta.pages);
           // Debounced save of CFI for resume on reopen
           if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
           pageSaveTimerRef.current = setTimeout(() => {
@@ -928,6 +940,7 @@ export default function ReaderContainer({
       }}
       onWordClick={(cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex) => {
         hasEngagedRef.current = true;
+        markPageActivity();
         userExplicitSelectionRef.current = true; // TTS-7J (BUG-130): Mark explicit user choice
         foliateApiRef.current?.clearSoftHighlight?.(); // SELECTION-1: Hard click clears soft highlight
         resumeAnchorRef.current = null; // TTS-7M: Explicit selection replaces any resume anchor

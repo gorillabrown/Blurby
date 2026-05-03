@@ -27,6 +27,27 @@ export interface NarrationProfile {
   updatedAt: number;   // Date.now() — tracks last edit
 }
 
+export type ReadingGoalType = "daily-pages" | "daily-minutes" | "weekly-books";
+
+export interface ReadingGoalProgress {
+  periodStart: string;
+  current: number;
+  completed: boolean;
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedPeriodStart?: string | null;
+}
+
+export interface ReadingGoal {
+  id: string;
+  type: ReadingGoalType;
+  target: number;
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
+  progress: ReadingGoalProgress;
+}
+
 export interface LoadedDocFilePayload {
   filepath: string;
   ext: string;
@@ -325,6 +346,8 @@ export interface BlurbySettings {
   // TTS-6L: Narration profiles
   narrationProfiles?: NarrationProfile[];
   activeNarrationProfileId?: string | null;  // null = use flat settings (no profile)
+  // GOALS-6B: Local-first reading goals
+  readingGoals?: ReadingGoal[];
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────

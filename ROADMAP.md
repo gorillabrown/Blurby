@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-05-02 — Second-pass roadmap review. Desktop v2.0 expanded to include MOSS-NANO productization track per both 3rd-party audits.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable. EINK-6A and EINK-6B landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13 — those scope changes are now baked into a multi-sprint MOSS-NANO-13a–e track. Qwen remains default engine, Kokoro available/unchanged.
+**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, and GOALS-6B landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13 — those scope changes are now baked into a multi-sprint MOSS-NANO-13a–e track. Qwen remains default engine, Kokoro available/unchanged. Next queue item: MOSS-NANO-13a.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
 **Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity). Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
@@ -40,7 +40,7 @@ Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
   │  Desktop v2.0 Conveyor (active — see § Desktop v2.0)
   ├── EINK-6A: E-Ink Foundation ✅
   ├── EINK-6B: E-Ink Reading Ergonomics ✅
-  └── GOALS-6B: Reading Goal Tracking (next up)
+  └── GOALS-6B: Reading Goal Tracking ✅
     │
     ▼
 SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed) ✅
@@ -480,8 +480,8 @@ All three investigation areas resolved:
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (4 done, 7 remaining), ~37 LOE total / ~29 LOE remaining, estimated 4–6 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → **GOALS-6B** → MOSS-NANO-13a → MOSS-NANO-13b → MOSS-NANO-13c → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
+> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (5 done, 6 remaining), ~37 LOE total / ~25 LOE remaining, estimated 4–6 weeks.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → **MOSS-NANO-13a** → MOSS-NANO-13b → MOSS-NANO-13c → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e, and its deliverable is decision quality (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion. KOKORO-RETIRE remains deferred even if MOSS-NANO-13e records `NANO_RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed.
 
 ### Standing Rules All Skeletons Inherit
@@ -525,7 +525,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A and EINK-6B completed 2026-05-02. GOALS-6B remains fully spec'd and is next in the Desktop v2.0 active conveyor.
+> EINK-6A, EINK-6B, and GOALS-6B completed 2026-05-02. MOSS-NANO-13a is next in the Desktop v2.0 active conveyor; do not start it from this closeout.
 
 ---
 
@@ -637,7 +637,13 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint GOALS-6B: Reading Goal Tracking
+### Sprint GOALS-6B: Reading Goal Tracking ✅ COMPLETED 2026-05-02
+
+**Closeout:** GOALS-6B completed on branch `sprint/goals-6b-reading-goals`. Blurby now has optional, local-first reading goals for daily pages, daily minutes, and weekly books. Users can create, edit, and delete goals in settings; the library widget surfaces progress; page/word advance, active reading minutes, and book completion drive progress; local daily/weekly resets maintain counters; and streaks are displayed for goal continuity.
+
+**Review hardening:** The final implementation prevents adjacent progress overwrites with a latest-goals ref, gates page-mode minute accrual on idle/visibility state, uses page high-water deltas so revisited pages do not double-count, computes weekly reset boundaries with local calendar math for DST safety, and aligns the Electron API stub default with the shipped settings contract.
+
+**Verification:** Full `npm test` passed 156 files / 2429 tests. `npm audit --audit-level=high` passed with only the existing moderate `uuid` advisories. `git diff --check` passed. `npm run build` passed with the existing circular chunk warning (`settings -> tts -> settings`). Solon final spec spot-check: APPROVED. Plato quality re-review: READY.
 
 **Goal:** Add a lightweight reading goal system — set daily/weekly/monthly targets, track progress, and see visual feedback. Goals are optional, local-first, and non-intrusive. They surface progress without blocking reading.
 

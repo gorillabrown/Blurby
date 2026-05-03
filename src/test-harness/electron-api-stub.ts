@@ -79,6 +79,7 @@ const defaultSettings: BlurbySettings = {
   ttsEngine: "qwen",
   ttsVoiceName: "Ryan",
   ttsRate: 1.0,
+  readingGoals: [],
   firstRunCompleted: false,
 };
 

@@ -1,8 +1,11 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { BlurbyDoc } from "../types";
 import { APPROX_WORDS_PER_PAGE, BACKTRACK_THRESHOLD_WORDS, NON_FOLIATE_PROGRESS_SAVE_MS, MIN_ACTIVE_READING_MS } from "../constants";
+import { calculateGoalActiveReadingFlush, calculateHighWaterPagesReadDelta } from "../utils/readingGoals";
 
 const api = window.electronAPI;
+const ACTIVE_READING_GOAL_FLUSH_INTERVAL_MS = 1_000;
+const PAGE_GOAL_ACTIVE_IDLE_TIMEOUT_MS = 60_000;
 
 interface UseProgressTrackerParams {
   activeDoc: BlurbyDoc & { content?: string; cfi?: string; furthestPosition?: number; wordCount?: number };
@@ -20,6 +23,9 @@ interface UseProgressTrackerParams {
   onUpdateProgress: (docId: string, position: number) => void;
   onArchiveDoc: (docId: string) => void;
   onExitReader: (pos: number) => void;
+  onPagesRead?: (pages: number) => void;
+  onActiveReadingTime?: (durationMs: number) => void;
+  onBookCompleted?: () => void;
 }
 
 export interface UseProgressTrackerReturn {
@@ -27,6 +33,8 @@ export interface UseProgressTrackerReturn {
   hasEngaged: boolean;
   /** Mark the user as having engaged — unlocks progress saving */
   markEngaged: () => void;
+  /** Mark recent page-mode activity for reading-goal minute accounting */
+  markPageActivity: () => void;
   /** High-water mark — furthest position reached in this book */
   furthestPosition: number;
   /** Whether the backtrack prompt should show */
@@ -75,11 +83,20 @@ export function useProgressTracker({
   onUpdateProgress,
   onArchiveDoc,
   onExitReader,
+  onPagesRead,
+  onActiveReadingTime,
+  onBookCompleted,
 }: UseProgressTrackerParams): UseProgressTrackerReturn {
 
   // Debounced save timer
   const pageSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedPosRef = useRef(activeDoc.position || 0);
+  const readingModeRef = useRef(readingMode);
+  readingModeRef.current = readingMode;
+  const goalReportedActiveReadingMsRef = useRef(0);
+  const pageGoalActiveMsRef = useRef(0);
+  const pageGoalActiveStartRef = useRef<number | null>(null);
+  const pageGoalLastActivityRef = useRef<number | null>(null);
 
   // Current position depends on mode
   const currentPos = readingMode === "focus" ? wordIndex : anchorWordIndex;
@@ -89,16 +106,33 @@ export function useProgressTracker({
   const hasEngagedRef = useRef(false);
   const [hasEngaged, setHasEngaged] = useState(false);
 
+  const markPageActivity = useCallback(() => {
+    const now = Date.now();
+    if (readingModeRef.current !== "page") return;
+    pageGoalLastActivityRef.current = now;
+    if (pageGoalActiveStartRef.current == null) {
+      pageGoalActiveStartRef.current = now;
+    }
+  }, []);
+
   const markEngaged = useCallback(() => {
     hasEngagedRef.current = true;
     setHasEngaged(true);
-  }, []);
+    markPageActivity();
+  }, [markPageActivity]);
 
   // Reset engagement when activeDoc changes
   useEffect(() => {
     hasEngagedRef.current = false;
     setHasEngaged(false);
   }, [activeDoc?.id]);
+
+  useEffect(() => {
+    goalReportedActiveReadingMsRef.current = Math.floor(activeReadingMsRef.current / 60_000) * 60_000;
+    pageGoalActiveMsRef.current = 0;
+    pageGoalActiveStartRef.current = null;
+    pageGoalLastActivityRef.current = null;
+  }, [activeDoc?.id, activeReadingMsRef]);
 
   // High-water mark for backtrack detection
   const furthestPositionRef = useRef<number>((activeDoc as any)?.furthestPosition ?? activeDoc?.position ?? 0);
@@ -111,22 +145,77 @@ export function useProgressTracker({
   const [showBacktrackPrompt, setShowBacktrackPrompt] = useState(false);
   const [backtrackPages, setBacktrackPages] = useState<{ current: number; furthest: number }>({ current: 0, furthest: 0 });
 
+  const syncPageGoalTimer = useCallback((now: number) => {
+    if (readingModeRef.current === "page" && hasEngagedRef.current && pageGoalLastActivityRef.current == null) {
+      pageGoalLastActivityRef.current = now;
+    }
+    const visible = typeof document === "undefined" || document.visibilityState !== "hidden";
+    const lastActivity = pageGoalLastActivityRef.current;
+    const pageIsActive = readingModeRef.current === "page"
+      && hasEngagedRef.current
+      && visible
+      && lastActivity != null
+      && now - lastActivity <= PAGE_GOAL_ACTIVE_IDLE_TIMEOUT_MS;
+    if (pageIsActive && pageGoalActiveStartRef.current == null) {
+      pageGoalActiveStartRef.current = now;
+      return;
+    }
+    if (!pageIsActive && pageGoalActiveStartRef.current != null) {
+      const stopAt = lastActivity == null || !visible
+        ? now
+        : Math.min(now, lastActivity + PAGE_GOAL_ACTIVE_IDLE_TIMEOUT_MS);
+      pageGoalActiveMsRef.current += Math.max(0, stopAt - pageGoalActiveStartRef.current);
+      pageGoalActiveStartRef.current = null;
+    }
+  }, []);
+
+  const getGoalActiveReadingMs = useCallback((now: number) => {
+    const activeModeMs = activeReadingMsRef.current
+      + (activeReadingStartRef.current != null ? Math.max(0, now - activeReadingStartRef.current) : 0);
+    const pageModeMs = pageGoalActiveMsRef.current
+      + (pageGoalActiveStartRef.current != null ? Math.max(0, now - pageGoalActiveStartRef.current) : 0);
+    return activeModeMs + pageModeMs;
+  }, [activeReadingMsRef, activeReadingStartRef]);
+
+  const flushGoalActiveReading = useCallback(() => {
+    const now = Date.now();
+    syncPageGoalTimer(now);
+    const flush = calculateGoalActiveReadingFlush(
+      getGoalActiveReadingMs(now),
+      goalReportedActiveReadingMsRef.current,
+    );
+    if (flush.durationMs <= 0) return;
+    goalReportedActiveReadingMsRef.current = flush.reportedTotalMs;
+    onActiveReadingTime?.(flush.durationMs);
+  }, [getGoalActiveReadingMs, onActiveReadingTime, syncPageGoalTimer]);
+
+  useEffect(() => {
+    flushGoalActiveReading();
+    const interval = setInterval(flushGoalActiveReading, ACTIVE_READING_GOAL_FLUSH_INTERVAL_MS);
+    return () => {
+      clearInterval(interval);
+      flushGoalActiveReading();
+    };
+  }, [flushGoalActiveReading]);
+
   // Debounced progress save (non-foliate path)
   useEffect(() => {
     if (useFoliate) return;
     if (currentPos === lastSavedPosRef.current) return;
     if (!hasEngagedRef.current) return;
-    if (currentPos > furthestPositionRef.current) {
-      furthestPositionRef.current = currentPos;
-    }
+    if (readingMode === "page") markPageActivity();
+    const previousHighWater = furthestPositionRef.current;
+    const highWaterDelta = calculateHighWaterPagesReadDelta(previousHighWater, currentPos);
+    furthestPositionRef.current = highWaterDelta.highWater;
     if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current);
     pageSaveTimerRef.current = setTimeout(() => {
       lastSavedPosRef.current = currentPos;
       api.updateDocProgress(activeDoc.id, currentPos);
       onUpdateProgress(activeDoc.id, currentPos);
+      if (highWaterDelta.pages > 0) onPagesRead?.(highWaterDelta.pages);
     }, NON_FOLIATE_PROGRESS_SAVE_MS);
     return () => { if (pageSaveTimerRef.current) clearTimeout(pageSaveTimerRef.current); };
-  }, [currentPos, activeDoc.id, onUpdateProgress, readingMode, useFoliate]);
+  }, [currentPos, activeDoc.id, markPageActivity, onPagesRead, onUpdateProgress, readingMode, useFoliate]);
 
   // Internal helper: persist progress, log session, archive if complete (shared by both finish variants)
   const _persistAndLog = useCallback((finalPos: number) => {
@@ -146,6 +235,7 @@ export function useProgressTracker({
       activeReadingStartRef.current = null;
     }
     const activeMs = activeReadingMsRef.current;
+    flushGoalActiveReading();
     const wordsRead = Math.max(0, savePos - sessionStartWordRef.current);
     if (wordsRead > 0 && activeMs > MIN_ACTIVE_READING_MS) {
       api.recordReadingSession(activeDoc.title, wordsRead, activeMs, wpm);
@@ -159,6 +249,7 @@ export function useProgressTracker({
     }
     if (savePos >= resolvedTotalWords - 1 && resolvedTotalWords > 0) {
       api.markDocCompleted();
+      onBookCompleted?.();
       onArchiveDoc(activeDoc.id);
     }
   }, [
@@ -166,8 +257,10 @@ export function useProgressTracker({
     foliateFractionRef,
     onArchiveDoc,
     onUpdateProgress,
+    flushGoalActiveReading,
     readingMode,
     resolvedTotalWords,
+    onBookCompleted,
     wpm,
   ]);
 
@@ -216,6 +309,7 @@ export function useProgressTracker({
   return {
     hasEngaged,
     markEngaged,
+    markPageActivity,
     furthestPosition: furthestPositionRef.current,
     showBacktrackPrompt,
     backtrackPages,

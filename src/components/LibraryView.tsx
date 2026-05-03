@@ -11,6 +11,7 @@ import StatsPanel from "./StatsPanel";
 import RecentFolders from "./RecentFolders";
 import CloudSyncIndicator from "./CloudSyncIndicator";
 import blurbyIcon from "../assets/blurby-icon.png";
+import GoalProgressWidget from "./GoalProgressWidget";
 
 const api = window.electronAPI;
 
@@ -35,6 +36,7 @@ interface LibraryViewProps {
   onArchiveDoc: (id: string) => void;
   onUnarchiveDoc: (id: string) => void;
   onToggleFlap: () => void;
+  onOpenSettings?: (page?: string) => void;
   onSettingsChange: (patch: Partial<BlurbySettings>) => void;
   focusedDocId?: string | null;
   selectedIds?: Set<string>;
@@ -47,7 +49,7 @@ export default function LibraryView({
   library, settings, wpm, isMac, folderName, loadingContent, toast,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
-  onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onSettingsChange,
+  onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onOpenSettings, onSettingsChange,
   focusedDocId, selectedIds, selectionMode, onToggleSelect, onMarkDocsSeen,
 }: LibraryViewProps) {
   const { theme, setTheme, setEinkMode } = useTheme();
@@ -207,6 +209,15 @@ export default function LibraryView({
     flushSeenDocs();
     onToggleFlap();
   }, [onToggleFlap, flushSeenDocs]);
+
+  const handleOpenGoalsSettings = useCallback(() => {
+    flushSeenDocs();
+    if (onOpenSettings) {
+      onOpenSettings("reading-goals");
+      return;
+    }
+    onToggleFlap();
+  }, [flushSeenDocs, onOpenSettings, onToggleFlap]);
 
   const { activeLibrary, totalWords, newCount, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
     const active = library.filter((d) => !d.archived);
@@ -480,6 +491,8 @@ export default function LibraryView({
             <button onClick={() => { setShowAdd(true); setEditingId(null); setNewTitle(""); setNewText(""); }} className="btn-fill" aria-label="Add document">+ add</button>
           </div>
         </div>
+
+        <GoalProgressWidget goals={settings.readingGoals || []} onOpenGoals={handleOpenGoalsSettings} />
 
         {/* Tabs + Sort row */}
         <div className="library-tabs-row">

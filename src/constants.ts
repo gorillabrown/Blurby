@@ -1,6 +1,6 @@
 // src/constants.ts — All tunable behavioral constants for the renderer
 // Grouped by domain. CSS custom properties are exempt (they live in global.css).
-import type { NarrationProfile, BlurbySettings } from "./types";
+import type { NarrationProfile, BlurbySettings, ReadingGoal } from "./types";
 
 // ── Reader / WPM ──────────────────────────────────────────────────────────────
 /** Default reading speed (words per minute) */
@@ -534,4 +534,5 @@ export const DEFAULT_SETTINGS = {
   ttsDialogueSentenceThreshold: TTS_DIALOGUE_SENTENCE_THRESHOLD,
   ttsFootnoteMode: TTS_FOOTNOTE_MODE,
   pronunciationOverrides: [] as import("./types").PronunciationOverride[],
+  readingGoals: [] as ReadingGoal[],
 };
