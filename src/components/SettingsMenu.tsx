@@ -8,6 +8,7 @@ import { LayoutSettings } from "./settings/LayoutSettings";
 import { LibraryLayoutSettings } from "./settings/LibraryLayoutSettings";
 import { CloudSyncSettings } from "./settings/CloudSyncSettings";
 import { TTSSettings } from "./settings/TTSSettings";
+import { ReadingGoalsSettings } from "./settings/ReadingGoalsSettings";
 
 interface SettingsMenuProps {
   settings: BlurbySettings;
@@ -27,6 +28,7 @@ const CATEGORIES = [
   { id: "tts", label: "Narration (TTS)", icon: "🔊" },
   { id: "theme", label: "Theme", icon: "🎨" },
   { id: "library-layout", label: "Library Layout", icon: "📚" },
+  { id: "reading-goals", label: "Reading Goals", icon: "🎯" },
   { id: "connectors", label: "Connectors", icon: "🔌" },
   { id: "cloud-sync", label: "Cloud Sync", icon: "☁️" },
 ];
@@ -71,6 +73,9 @@ export function SettingsMenu({
         )}
         {activeSubPage === "library-layout" && (
           <LibraryLayoutSettings settings={settings} onSettingsChange={onSettingsChange} onOpenMetadataWizard={onOpenMetadataWizard} />
+        )}
+        {activeSubPage === "reading-goals" && (
+          <ReadingGoalsSettings settings={settings} onSettingsChange={onSettingsChange} />
         )}
         {activeSubPage === "cloud-sync" && (
           <CloudSyncSettings settings={settings} onSettingsChange={onSettingsChange} />

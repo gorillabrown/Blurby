@@ -1,4 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+// @vitest-environment jsdom
+
+import React, { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { flushSync } from "react-dom";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock window.electronAPI before importing
 const mockApi = {
@@ -8,7 +13,7 @@ const mockApi = {
   markDocCompleted: vi.fn(),
   saveSettings: vi.fn(),
 };
-(globalThis as any).window = { electronAPI: mockApi };
+(window as any).electronAPI = mockApi;
 
 // We can't use renderHook easily without @testing-library/react-hooks,
 // so we test the pure logic functions extracted alongside the hook.
@@ -16,6 +21,7 @@ const mockApi = {
 
 // Import the constants used by checkBacktrack
 import { APPROX_WORDS_PER_PAGE, BACKTRACK_THRESHOLD_WORDS } from "../src/constants";
+import { calculateGoalActiveReadingFlush, calculatePagesReadDelta } from "../src/utils/readingGoals";
 
 describe("useProgressTracker — engagement gating logic", () => {
   it("engagement ref starts false", () => {
@@ -106,6 +112,141 @@ describe("useProgressTracker — debounced save logic", () => {
   });
 });
 
+describe("useProgressTracker — reading goal accounting", () => {
+  it("reports active reading goal minutes as whole-minute deltas without double-counting", () => {
+    expect(calculateGoalActiveReadingFlush(59_999, 0)).toEqual({
+      durationMs: 0,
+      reportedTotalMs: 0,
+    });
+    expect(calculateGoalActiveReadingFlush(60_000, 0)).toEqual({
+      durationMs: 60_000,
+      reportedTotalMs: 60_000,
+    });
+    expect(calculateGoalActiveReadingFlush(119_000, 60_000)).toEqual({
+      durationMs: 0,
+      reportedTotalMs: 60_000,
+    });
+    expect(calculateGoalActiveReadingFlush(120_000, 60_000)).toEqual({
+      durationMs: 60_000,
+      reportedTotalMs: 120_000,
+    });
+  });
+
+  it("counts forward word progress as pages and ignores backtracking", () => {
+    expect(calculatePagesReadDelta(0, 249)).toBe(0);
+    expect(calculatePagesReadDelta(0, 250)).toBe(1);
+    expect(calculatePagesReadDelta(200, 700)).toBe(2);
+    expect(calculatePagesReadDelta(700, 200)).toBe(0);
+  });
+});
+
+describe("useProgressTracker — page-mode active reading goals", () => {
+  let root: Root | null = null;
+  let container: HTMLDivElement | null = null;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-05T12:00:00"));
+    (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+    (window as any).electronAPI = mockApi;
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    if (root) {
+      flushSync(() => root?.unmount());
+      root = null;
+    }
+    container?.remove();
+    container = null;
+    vi.useRealTimers();
+  });
+
+  it("stops page-mode active minute accrual after page activity goes idle", async () => {
+    const { useProgressTracker } = await import("../src/hooks/useProgressTracker");
+    const onActiveReadingTime = vi.fn();
+    let tracker: ReturnType<typeof useProgressTracker> | null = null;
+
+    function Harness() {
+      tracker = useProgressTracker({
+        activeDoc: { id: "doc", title: "Doc", position: 0, content: "", wordCount: 10_000 } as any,
+        wordIndex: 0,
+        anchorWordIndex: 0,
+        readingMode: "page",
+        useFoliate: false,
+        foliateFractionRef: { current: 0 },
+        wpm: 300,
+        wordsLength: 10_000,
+        totalWords: 10_000,
+        sessionStartWordRef: { current: 0 },
+        activeReadingMsRef: { current: 0 },
+        activeReadingStartRef: { current: null },
+        onUpdateProgress: vi.fn(),
+        onArchiveDoc: vi.fn(),
+        onExitReader: vi.fn(),
+        onActiveReadingTime,
+      });
+      return null;
+    }
+
+    root = createRoot(container!);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+    });
+
+    await act(async () => {
+      tracker?.markEngaged();
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(5 * 60_000);
+    });
+
+    const reportedMs = onActiveReadingTime.mock.calls.reduce((sum, [duration]) => sum + duration, 0);
+    expect(reportedMs).toBe(60_000);
+  });
+
+  it("keeps focus/flow/narration active minute accrual tied to activeReadingStartRef", async () => {
+    const { useProgressTracker } = await import("../src/hooks/useProgressTracker");
+    const onActiveReadingTime = vi.fn();
+    const activeReadingStartRef = { current: Date.now() };
+
+    function Harness() {
+      useProgressTracker({
+        activeDoc: { id: "doc", title: "Doc", position: 0, content: "", wordCount: 10_000 } as any,
+        wordIndex: 0,
+        anchorWordIndex: 0,
+        readingMode: "focus",
+        useFoliate: false,
+        foliateFractionRef: { current: 0 },
+        wpm: 300,
+        wordsLength: 10_000,
+        totalWords: 10_000,
+        sessionStartWordRef: { current: 0 },
+        activeReadingMsRef: { current: 0 },
+        activeReadingStartRef,
+        onUpdateProgress: vi.fn(),
+        onArchiveDoc: vi.fn(),
+        onExitReader: vi.fn(),
+        onActiveReadingTime,
+      });
+      return null;
+    }
+
+    root = createRoot(container!);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(2 * 60_000);
+    });
+
+    const reportedMs = onActiveReadingTime.mock.calls.reduce((sum, [duration]) => sum + duration, 0);
+    expect(reportedMs).toBe(120_000);
+  });
+});
+
 describe("useProgressTracker — canonical anchor persistence", () => {
   function resolveCurrentPosPure(readingMode: string, wordIndex: number, anchorWordIndex: number): number {
     return readingMode === "focus" ? wordIndex : anchorWordIndex;
@@ -128,6 +269,13 @@ describe("useProgressTracker — canonical anchor persistence", () => {
     expect(resolveCurrentPosPure("page", 120, 45)).toBe(45);
     expect(resolveCurrentPosPure("flow", 120, 45)).toBe(45);
     expect(resolveCurrentPosPure("narrate", 120, 45)).toBe(45);
+  });
+
+  it("derives page-goal progress from focus word advance and canonical anchors in other modes", () => {
+    expect(calculatePagesReadDelta(0, resolveCurrentPosPure("focus", 500, 100))).toBe(2);
+    expect(calculatePagesReadDelta(0, resolveCurrentPosPure("page", 500, 250))).toBe(1);
+    expect(calculatePagesReadDelta(0, resolveCurrentPosPure("flow", 500, 750))).toBe(3);
+    expect(calculatePagesReadDelta(0, resolveCurrentPosPure("narrate", 500, 1_000))).toBe(4);
   });
 
   it("prefers the canonical anchor over a smaller foliate fraction-derived position", () => {

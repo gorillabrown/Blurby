@@ -102,6 +102,7 @@ let settings = {
   einkMode: false, einkWpmCeiling: 250, einkRefreshInterval: 20, einkPhraseGrouping: true,
   ttsEnabled: false, ttsVoiceName: null, ttsRate: 1.0,
   syncIntervalMinutes: 5, syncOnMeteredConnection: false,
+  readingGoals: [],
 };
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, streaks: { current: 0, longest: 0, lastReadDate: null } };

@@ -9,6 +9,59 @@
   color: var(--text-dim);
 }
 
+/* ── Reading Goals settings ───────────────────────────────────────────── */
+
+.reading-goals-create,
+.reading-goal-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reading-goals-create select,
+.reading-goals-create input,
+.reading-goal-row input[type="number"] {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.reading-goals-create input,
+.reading-goal-row input[type="number"] {
+  width: 80px;
+}
+
+.reading-goal-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+}
+
+.reading-goal-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  font-size: 12px;
+}
+
+.reading-goal-unit,
+.reading-goal-progress,
+.reading-goal-streak,
+.reading-goals-empty {
+    font-family: var(--mono);
+    font-size: 11px;
+  color: var(--text-dim);
+}
+
+.reading-goal-delete {
+  font-size: 11px;
+}
+
 /* ── Narration Profile section ──────────────────────────────────────────── */
 
 .tts-profile-row {

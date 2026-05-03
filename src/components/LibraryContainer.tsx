@@ -681,6 +681,7 @@ export default function LibraryContainer() {
               onArchiveDoc={archiveDoc}
               onUnarchiveDoc={unarchiveDoc}
               onToggleFlap={toggleMenuFlap}
+              onOpenSettings={handleOpenSettings}
               onSettingsChange={(updates) => settingsValue.updateSettings(updates)}
               onMarkDocsSeen={markDocsSeen}
               focusedDocId={kbState.focusedIndex >= 0 ? kbActions.getDocIdAtIndex(kbState.focusedIndex) : null}

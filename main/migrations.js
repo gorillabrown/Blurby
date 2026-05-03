@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 9;
+const CURRENT_SETTINGS_SCHEMA = 10;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -106,6 +106,12 @@ const settingsMigrations = [
   (data) => {
     if (data.einkMode === undefined) data.einkMode = false;
     data.schemaVersion = 9;
+    return data;
+  },
+  // v9 → v10: GOALS-6B local-first reading goals
+  (data) => {
+    if (!Array.isArray(data.readingGoals)) data.readingGoals = [];
+    data.schemaVersion = 10;
     return data;
   },
 ];
