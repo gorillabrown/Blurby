@@ -8,6 +8,8 @@ BLURBY
 
 No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and no code-changing pointer is dispatch-ready unless its referenced spec names explicit edit-site coordinates.
 
+Desktop v2.0 scope lock: no exploratory TTS/model or non-desktop expansion work may dispatch inside Desktop v2.0. The only approved TTS/model work in this finish line is MOSS-NANO-13a–13e, and its deliverable is a defensible productization decision (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion.
+
 Parallel dispatch rule: code-changing sprints may run in parallel only when lane ownership is explicit and shared-core freeze files are not edited by both sprints at the same time.
 
 **Pointer format:** Each queue pointer is an abbreviated dispatch, not the full spec. Print and maintain pointers in this exemplar shape:
@@ -53,11 +55,11 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Finish line: Desktop v2.0 Shipping
-Queue depth: 2 dispatch-ready + 2 ship-stage stubs (YELLOW) — EINK-6B, GOALS-6B; POLISH-1/RELEASE-1 need hardening before dispatch.
-Next queue item: EINK-6B (EINK-6A completed; BRAND-HYG-1 shelved/no-op in this checkout)
-Health: YELLOW — Desktop v2.0 conveyor active; backfill/harden POLISH-1 before queue depth is treated as GREEN. MOSS-NANO deferred. Qwen streaming on ITERATE.
-Roadmap review: 2026-05-02. Verdict: AT RISK (strong velocity, queue was RED, MOSS 44% sideways).
+Finish line: Desktop v2.0 Shipping (now includes MOSS-NANO productization decision: `PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`)
+Queue depth: 5 dispatch-ready + 4 stage stubs (GREEN dispatch-ready, AMBER on stubs)
+Next queue item: EINK-6B (EINK-6A completed; BRAND-HYG-1 shelved/no-op)
+Health: AMBER → GREEN — Desktop v2.0 conveyor expanded to include MOSS-NANO-13a/b/c/d/e per both 3rd-party audits. No exploratory TTS/model work is approved beyond 13a–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Five eager skeletons; 13d, 13e, POLISH-1, RELEASE-1 remain Stage 3/4 tail specs to be hardened no later than the next phase pause. Qwen streaming on ITERATE.
+Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity).
 ```
 
 ## Desktop v2.0 Conveyor Belt (Active)
@@ -69,10 +71,15 @@ Roadmap review: 2026-05-02. Verdict: AT RISK (strong velocity, queue was RED, MO
 | ~~2~~ | ~~EINK-6A~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
 | 3 | EINK-6B | Stage 2: Features | M | EINK-6A | **next up** |
 | 4 | GOALS-6B | Stage 2: Features | M | — (parallel-safe with EINK-6B) | queued |
-| 5 | POLISH-1 | Stage 3: Ship | M | EINK-6A | stub — spec at Stage 2 close |
-| 6 | RELEASE-1 | Stage 3: Ship | S | POLISH-1 | stub — spec at Stage 2 close |
+| 5 | MOSS-NANO-13a | Stage 3: MOSS-NANO Productization | L | EINK-6B can run in parallel (Lane C vs Lane D) | dispatch-ready |
+| 6 | MOSS-NANO-13b | Stage 3: MOSS-NANO Productization | M | 13a | dispatch-ready |
+| 7 | MOSS-NANO-13c | Stage 3: MOSS-NANO Productization | L | 13a, 13b | dispatch-ready |
+| 8 | MOSS-NANO-13d | Stage 3: MOSS-NANO Productization | S | 13c | stub — spec at Stage 3 mid (after 13c) |
+| 9 | MOSS-NANO-13e | Stage 3: MOSS-NANO Productization | M | 13a–d | stub — spec at Stage 3 mid (after 13d) |
+| 10 | POLISH-1 | Stage 4: Ship | M | 13e | stub — spec at Stage 3 close |
+| 11 | RELEASE-1 | Stage 4: Ship | S | POLISH-1 | stub — spec at Stage 3 close |
 
-Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt" and § "Phase 6 Continued — E-Ink & Goals".
+Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 Continued — E-Ink & Goals", and § "Stage 3 — MOSS-NANO Productization Track".
 
 ---
 
@@ -80,8 +87,7 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt" and § "Phase 
 
 | Lane | Status | Resume Condition |
 |------|--------|-----------------|
-| MOSS-NANO-13 | Blocked on audit rescoping | Provenance-backed evidence gate designed |
-| KOKORO-RETIRE-1/2 | Paused | MOSS proves continuous live playback |
+| KOKORO-RETIRE-1/2 | Paused | Even if MOSS-NANO-13e records `NANO_RECOMMENDED_OPT_IN`, Kokoro retirement gates remain separately governed. |
 | Qwen Streaming | ITERATE (QWEN-STREAM-4) | Post-v2.0 |
 | EXT-ENR-C | Optional | Post-v2.0 |
 | APK-0 through APK-4 | Investigation gates not cleared | Post-v2.0 |
@@ -570,7 +576,7 @@ If any guardrail fails, run the sprints sequentially.
 | HOTFIX-13 | **Dissolved.** BUG-151/152/153 absorbed into SELECTION-1. BUG-154 parked (likely not a bug — needs live verification). |
 | KOKORO-RETIRE-1 | **Paused.** Kokoro is available as legacy fallback (Qwen is default). Retirement paused — no successor has proven continuous live playback. Resume only after a successor proves live playback and a separate Kokoro-retirement lane is explicitly approved. |
 | KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal blocked behind same proof + approval bar. Do not re-queue until `KOKORO-RETIRE-1` is reactivated. |
-| MOSS-NANO follow-up | **Deferred.** MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits: "proceed only with scope changes." Nano remains experimental-only; Qwen is default; Kokoro is legacy fallback. Deferred pending provenance-backed product gate. No active MOSS lane during Desktop v2.0. |
+| MOSS-NANO follow-up | **Active only as MOSS-NANO-13a–13e inside Desktop v2.0.** MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits: "proceed only with scope changes." Nano remains experimental-only unless the 13a–13e provenance-backed productization lane records `PAUSE_NANO_PRODUCTIZATION`, `NANO_EXPERIMENTAL_ONLY`, or `NANO_RECOMMENDED_OPT_IN`. No other exploratory MOSS/TTS/model lane is approved inside Desktop v2.0. |
 | EINK-6A | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 2). Full spec in ROADMAP.md. |
 | EINK-6B | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 3). Depends on EINK-6A. |
 | GOALS-6B | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 4). Parallel-safe with EINK-6B. |

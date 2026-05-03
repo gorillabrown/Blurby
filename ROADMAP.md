@@ -1,11 +1,11 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-02 — Roadmap review ceremony complete. Desktop v2.0 finish line established. Queue recovery in progress.
+**Last updated**: 2026-05-02 — Second-pass roadmap review. Desktop v2.0 expanded to include MOSS-NANO productization track per both 3rd-party audits.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13. Qwen remains default engine, Kokoro available/unchanged, Nano experimental-only.
+**Current state**: v1.75.1 stable. EINK-6A landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13 — those scope changes are now baked into a multi-sprint MOSS-NANO-13a–e track. Qwen remains default engine, Kokoro available/unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
-**Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass). Android, Cloud Sync, RSS/News, and MOSS-NANO are deferred lanes beyond this finish line. No new exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused.
-**Roadmap review**: 2026-05-02. Verdict: AT RISK (strong velocity, 44% sideways scope from MOSS). Queue now GREEN depth 3. Assessment: `docs/project/roadmap-reviews/2026-05-02-assessment.md`. Plan: `docs/project/roadmap-reviews/2026-05-02-plan.md`.
+**Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
+**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity). Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in two files: `docs/project/ROADMAP_ARCHIVE.md` (legacy, Phases 1–6) and `docs/project/ROADMAP_ARCHIVE_2026-05-02.md` (recent migrations from 2026-05-02 roadmap review). Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
 >
@@ -174,7 +174,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-7: Productization Gate And Promotion Decision (PAUSED)
       ├── Kokoro: available as legacy fallback. Retirement paused — no successor has proven continuous live playback.
-      └── Nano: experimental-only. Deferred pending provenance-backed product gate. Qwen is default; Kokoro is legacy fallback.
+      └── Nano: experimental-only unless MOSS-NANO-13a–e prove a stronger productization decision (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Qwen is default; Kokoro is legacy fallback.
                    │
     READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
@@ -234,7 +234,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
 
 | Sprint | Version | Date | Result | Archive |
 |--------|---------|------|--------|--------|
-| EINK-6A | v1.75.1 | 2026-05-02 | E-ink display mode decoupled from theme; `einkMode` schema/defaults/migration added; behavioral CSS now keys off `[data-eink="true"]`; greyscale palette remains optional under `[data-theme="eink"]`. Verification: focused EINK/NARR tests 36 pass, full `npm test` 150 files / 2397 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. | Current roadmap closeout |
+| EINK-6A | v1.75.1 | 2026-05-02 | E-ink display mode decoupled from theme; `einkMode` schema/defaults/migration added; behavioral CSS now keys off `[data-eink="true"]`; greyscale palette remains optional under `[data-theme="eink"]`. Verification: focused EINK/NARR tests 36 pass, full `npm test` 150 files / 2397 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) (full spec migrated 2026-05-02 PM) |
 | SELECTION-1 | v1.38.0 | 2026-04-06 | Word anchor contract, BUG-151/152/153 resolved | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
 | HOTFIX-14 | v1.38.2 | 2026-04-06 | URL extraction + connection fixes, BUG-155/156/157/158 | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
 | NARR-CURSOR-1 | v1.40.0 | 2026-04-07 | Collapsing narration cursor | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
@@ -479,9 +479,9 @@ All three investigation areas resolved:
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Six sprints, ~14 LOE, estimated 3-4 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → **EINK-6B** → GOALS-6B (parallel-safe with 6B) → POLISH-1 → RELEASE-1.
-> **Queue rule:** No new exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused.
+> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (3 done, 8 remaining), ~37 LOE total / ~32 LOE remaining, estimated 4–6 weeks.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → **EINK-6B** → GOALS-6B (parallel-safe with EINK-6B) → MOSS-NANO-13a → MOSS-NANO-13b → MOSS-NANO-13c → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
+> **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e, and its deliverable is decision quality (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion. KOKORO-RETIRE remains deferred even if MOSS-NANO-13e records `NANO_RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed.
 
 ### Standing Rules All Skeletons Inherit
 
@@ -554,7 +554,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 - Narration quality
 - Replacement completeness
 
-**Current governance decision:** The completed parts of this program remain valid (`QWEN-DEFAULT-1`, `QWEN-HARDEN-1`, and `QWEN-PROVISION-1`), but the retirement half is paused. Qwen is the default engine; Kokoro is available as a legacy fallback. `QWEN-STREAM-4` closed with ITERATE rather than PROMOTE — streaming iteration deferred to post-Desktop v2.0. MOSS/Nano is experimental-only (both third-party audits: "proceed only with scope changes") and deferred pending a provenance-backed product gate. There is no active MOSS successor lane during Desktop v2.0. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` should not be dispatched until a successor proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved.
+**Current governance decision:** The completed parts of this program remain valid (`QWEN-DEFAULT-1`, `QWEN-HARDEN-1`, and `QWEN-PROVISION-1`), but the retirement half is paused. Qwen is the default engine; Kokoro is available as a legacy fallback. `QWEN-STREAM-4` closed with ITERATE rather than PROMOTE — streaming iteration deferred to post-Desktop v2.0. MOSS/Nano remains experimental-only unless the approved MOSS-NANO-13a–13e Desktop v2.0 productization lane records a stronger provenance-backed decision. No other exploratory MOSS/TTS/model successor work is active inside Desktop v2.0. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` should not be dispatched until a successor proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved.
 
 ---
 
@@ -562,69 +562,11 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 **Closeout:** `einkMode` is now an independent settings/schema flag (`CURRENT_SETTINGS_SCHEMA = 9`) with renderer, main-process, migration, and test-harness defaults. `ThemeProvider` applies `data-eink="true"` independently from `data-theme`; `ThemeSettings` exposes E-Ink Display Mode above the theme picker; reader WPM cap, refresh overlay, controller, and library repaint debounce now consume `settings.einkMode`. E-ink runtime behavior moved under `[data-eink="true"]`; the optional greyscale palette remains under `[data-theme="eink"]`.
 
-**Verification:** `npm test -- --run tests/einkFoundation.test.ts tests/narrLayer1bConsolidation.test.ts` (36 tests), full `npm test` (150 files / 2397 tests), `npm run build` (existing circular chunk warning unchanged), `npm audit --audit-level=high` (passes; known moderate uuid chain remains force/breaking only), and `git diff --check`.
+**Verification:** `npm test -- --run tests/einkFoundation.test.ts tests/narrLayer1bConsolidation.test.ts` (36 tests), full `npm test` (150 files / 2397 tests), `npm run build` (existing circular chunk warning unchanged), `npm audit --audit-level=high`, and `git diff --check`.
 
-**Goal:** Decouple e-ink display behavior from the theme system so users can pair e-ink optimizations (no animations, large targets, refresh timing) with any color theme. Currently, e-ink is a theme — selecting it forces greyscale colors. After this sprint, e-ink is an independent display mode toggle that layers on top of any theme.
+**Key files touched:** `src/types.ts`, `src/constants.ts`, `src/contexts/SettingsContext.tsx`, `src/components/settings/ThemeSettings.tsx`, `src/styles/global.css`, `src/hooks/useEinkController.ts`, `src/components/ReaderContainer.tsx`, plus EINK-6A foundation tests in `tests/einkFoundation.test.ts`.
 
-**Problem:** E-ink support exists as a `[data-theme="eink"]` CSS block (200+ lines in global.css) with dedicated settings (`einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping`). But it's coupled to the theme selector in ThemeSettings.tsx — you can't use dark theme with e-ink optimizations, or light theme with e-ink refresh overlay. This forces users with e-ink devices to accept the greyscale palette even when their device supports limited color (Kaleido e-ink screens). It also means non-e-ink users can't benefit from e-ink ergonomic features (reduced animation, larger targets) without losing their preferred theme.
-
-**Design decisions:**
-- **New `einkMode: boolean` setting.** Independent of `theme`. When true, applies e-ink behavioral CSS overrides (no transitions, larger targets, no hover) on top of the active theme. The existing `[data-theme="eink"]` color palette becomes an optional "E-Ink Greyscale" theme choice that users can select or skip.
-- **Refactor CSS into two layers.** Split the current `[data-theme="eink"]` block into: (a) `[data-eink="true"]` — behavioral overrides (transition:none, no hover, larger targets), applied when einkMode is on regardless of theme, and (b) `[data-theme="eink"]` — color palette only (pure black/white/grey), optional theme choice. This is a CSS-only refactor with no JS behavior changes.
-- **ThemeSettings restructure.** Move e-ink from theme grid to a separate toggle section: "E-Ink Display Mode" toggle above the theme selector. When on, show the existing e-ink sub-settings (WPM ceiling, refresh interval, phrase grouping). Theme selector remains independent below.
-- **EinkRefreshOverlay remains as-is.** The existing `useEinkController` hook and `EinkRefreshOverlay` component work correctly — they just need to check `einkMode` instead of `theme === 'eink'`.
-
-**Baseline:**
-- `src/types.ts` — settings schema: `einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping` (lines 136–139). No `einkMode` field yet.
-- `src/components/settings/ThemeSettings.tsx` (150 lines) — e-ink as theme option (line 30), e-ink sub-settings panel (lines 100–147)
-- `src/styles/global.css` — `[data-theme="eink"]` block (~200 lines, starts ~line 1543)
-- `src/hooks/useEinkController.ts` (47 lines) — page-turn counter, refresh overlay trigger
-- `src/components/EinkRefreshOverlay.tsx` (24 lines) — black/white flash overlay
-- `src/components/ReaderContainer.tsx` — e-ink integration: WPM cap (line 144), eink controller (line 92), overlay render
-- `src/constants.ts` — `DEFAULT_EINK_WPM_CEILING`, `DEFAULT_EINK_REFRESH_INTERVAL`, `EINK_REFRESH_FLASH_MS`, etc.
-
-#### WHERE (Read Order)
-
-1. `CLAUDE.md`
-2. `docs/governance/LESSONS_LEARNED.md`
-3. `ROADMAP.md` — this section
-4. `src/types.ts` — settings schema, eink fields
-5. `src/components/settings/ThemeSettings.tsx` — current e-ink theme coupling
-6. `src/styles/global.css` — `[data-theme="eink"]` block (find boundaries)
-7. `src/hooks/useEinkController.ts` — refresh controller logic
-8. `src/components/EinkRefreshOverlay.tsx` — overlay component
-9. `src/components/ReaderContainer.tsx` — e-ink integration points
-10. `src/constants.ts` — e-ink constants
-
-#### Tasks
-
-| # | Owner | Task | Files |
-|---|-------|------|-------|
-| 1 | Hephaestus (renderer-scope) | **Add `einkMode` setting** — Add `einkMode: boolean` (default false) to settings schema in types.ts. Add default to constants.ts. Wire through SettingsContext. | `src/types.ts`, `src/constants.ts`, `src/contexts/SettingsContext.tsx` |
-| 2 | Hephaestus (renderer-scope) | **Split CSS into behavioral and color layers** — Extract all non-color properties from `[data-theme="eink"]` into new `[data-eink="true"]` selector. Leave only color properties (`--bg`, `--fg`, `--accent`, etc.) in `[data-theme="eink"]`. Verify no visual regression when both are applied simultaneously. | `src/styles/global.css` |
-| 3 | Hephaestus (renderer-scope) | **Apply `data-eink` attribute** — In the root element (App.tsx or equivalent), set `data-eink="true"` when `settings.einkMode === true`, independent of `data-theme`. | `src/App.tsx` or equivalent root |
-| 4 | Hephaestus (renderer-scope) | **Restructure ThemeSettings** — Move e-ink out of theme grid. Add "E-Ink Display Mode" toggle above themes. When toggled on, show WPM ceiling / refresh interval / phrase grouping sliders. Theme grid remains below, all themes selectable regardless of einkMode. | `src/components/settings/ThemeSettings.tsx` |
-| 5 | Hephaestus (renderer-scope) | **Update eink controller** — Change `useEinkController.ts` to check `settings.einkMode` instead of `theme === 'eink'`. Update ReaderContainer.tsx integration points (WPM cap, overlay render) to use `einkMode`. | `src/hooks/useEinkController.ts`, `src/components/ReaderContainer.tsx` |
-| 6 | Hippocrates | **Tests** — (a) `einkMode` toggle applies `data-eink` attribute. (b) `data-eink="true"` + `data-theme="dark"` doesn't conflict. (c) E-ink behavioral CSS (transition:none) applies independently of theme. (d) WPM cap respects `einkMode`, not theme. (e) Refresh overlay fires when `einkMode` is on regardless of theme. ≥8 new tests. | `tests/` |
-| 7 | Hippocrates | **`npm test` + `npm run build`** | — |
-| 8 | Solon | **Spec compliance** | — |
-| 9 | Herodotus | **Documentation pass** | All 6 governing docs |
-| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — |
-
-#### SUCCESS CRITERIA
-
-1. `einkMode` setting exists, persists, and toggles independently of theme
-2. `data-eink="true"` attribute applied to root when einkMode is on
-3. E-ink behavioral CSS (no transitions, larger targets, no hover) applies on any theme when einkMode is on
-4. E-ink greyscale color palette applies only when `data-theme="eink"` is selected
-5. WPM ceiling enforced by einkMode, not by theme
-6. Refresh overlay fires based on einkMode, not theme
-7. ThemeSettings shows independent einkMode toggle with sub-settings
-8. ≥8 new tests
-9. `npm test` passes
-10. `npm run build` succeeds
-
-**Tier:** Full | **Depends on:** TTS-7D (TTS stabilization complete)
+**Full original spec** (Goal / Problem / Design decisions / Baseline / WHERE / Tasks / SUCCESS CRITERIA): archived in `docs/project/ROADMAP_ARCHIVE_2026-05-02.md` (appended 2026-05-02 PM during second-pass roadmap review).
 
 ---
 
@@ -751,3 +693,272 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 8. Streak tracks consecutive days meeting daily goal
 9. GoalProgressWidget shows in library header when goals exist
 10. Widget shows correct progress bars with labels
+
+---
+
+## Stage 3 — MOSS-NANO Productization Track (NEW — added 2026-05-02 PM)
+
+> Rescoped per the two third-party audits (`docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`). The original AUDIT_MEMO.md sketch of MOSS-NANO-13 (capture booleans across four modes, feed to existing gate) is structurally insufficient: the live evidence schema is hand-authored, the integrated sidecar is a stub, several declared invariants aren't enforced, and the sprint isn't registered in governance. This track decomposes MOSS-NANO-13 into five sequenced sub-sprints that address the audits' blocking changes, required scope additions, and governance hygiene.
+>
+> **Scope lock:** MOSS-NANO-13a–13e are the only approved TTS/model work inside Desktop v2.0. Their required outcome is a defensible productization decision (`PAUSE_NANO_PRODUCTIZATION`, `NANO_EXPERIMENTAL_ONLY`, or `NANO_RECOMMENDED_OPT_IN`), not mandatory Nano promotion. Kokoro retirement remains outside Desktop v2.0 even if Nano reaches recommended opt-in.
+>
+> **Lane assignments:**
+>
+> - 13a: Lane D (Platform/Main Process) — `main/moss-nano-sidecar.js`, `main/moss-nano-engine.js`, `scripts/moss_nano_resident_probe.py` productization
+> - 13b: Lane A (Runtime Core) + Lane C (UI/strategy) — bounded fixes in `main/moss-nano-engine.js` and `src/hooks/narration/mossNanoStrategy.ts`
+> - 13c: Lane B (Eval Harness) — `scripts/tts_eval_runner.mjs` gate refactor + new evidence producer tool
+> - 13d: Lane E (Governance) — audit memo rewrite + manifest field rename
+> - 13e: Lane B (Eval Harness) — live capture run + decision write-up
+
+---
+
+### Sprint MOSS-NANO-13a: Real Sidecar Adapter
+
+**Goal:** Replace the stub adapter at `main/moss-nano-sidecar.js` (currently returns `sidecar-adapter-not-configured` from every method) with a real Python-subprocess adapter that satisfies the contract the engine at `main/moss-nano-engine.js` already expects: `start(config)`, `status()`, `request(command, payload)`, `cancel(payload)`, `shutdown()`, `restart(config)`. The adapter spawns the Nano runtime as a long-lived Python subprocess (using a productized version of `scripts/moss_nano_resident_probe.py` or a new `scripts/moss_nano_sidecar.py` entry point), frames stdin/stdout messages with line-delimited JSON, tracks PID, handles crashes by surfacing `recoverable: true` failures the engine can use to escalate to restart, and reaps zombie processes on shutdown. After this sprint, calling `window.electronAPI.nanoSynthesize(...)` from the integrated app must drive a real ONNX synthesis and return real PCM, not `sidecar-adapter-not-configured`.
+
+**Problem:** Per audit response §3 (Strongest Reasons Not to Proceed) and §10 item 3, the integrated sidecar does not exist. Every method in `main/moss-nano-sidecar.js:17-61` is a placeholder. The 6F bounded-soak evidence (1800s soak, 100/100 segments, p95 first-decoded 280ms) was produced by `scripts/moss_nano_resident_probe.py` running standalone — not by the integrated `main/moss-nano-engine.js` lifecycle wired to a real subprocess. MOSS-NANO-13e cannot capture live evidence in any reading mode until this chain is wired end-to-end.
+
+**Design decisions:**
+
+- **Spawn model:** Long-lived single subprocess (mirrors the resident-runtime model that produced 6F evidence). The adapter holds a reference to the spawned process across `start` → many `request("synthesize", ...)` → `shutdown`. On `restart`, the adapter explicitly kills the old process before spawning a new one and increments no internal counter — `lifecycleGeneration` is owned by `main/moss-nano-engine.js`.
+- **IPC framing:** Line-delimited JSON over stdin/stdout. Each request includes `requestId` and `ownerToken`; each response includes the same so the engine can reject stale-output (this contract already exists in `main/moss-nano-engine.js:220-227`).
+- **Crash recovery:** When stdout closes or the process exits non-zero before a request is settled, the adapter resolves the request with `structuredFailure("sidecar-process-exited", ...)`. The engine's existing `request-not-owned` and `stale-sidecar-output` paths catch the rest. Lifecycle generation is the engine's job, not the adapter's.
+- **Zombie reaping:** On `shutdown`, the adapter sends a graceful exit message, waits up to `commandTimeoutMs` for the process to exit, then SIGKILLs and awaits exit. `unref()` the child handle once spawned so the adapter does not block app exit.
+- **Configuration:** Adapter accepts `runtimeDir`, `modelDir`, `tokenizerDir` from the engine's `DEFAULT_CONFIG` snapshot (already exposed via `VISIBLE_CONFIG_KEYS` at `main/moss-nano-engine.js:18-26`). If any required path is missing or unreadable, `start` returns `unavailableStatus({ reason: "sidecar-runtime-missing" })` so the engine surfaces a clear unavailable state rather than crashing.
+- **Productized Python entry point:** Add `scripts/moss_nano_sidecar.py` that loads the same ONNX runtime path the resident probe uses, but exposes a long-lived stdin/stdout loop instead of a one-shot run. Reuse `moss_nano_probe` import (already imported by `moss_nano_resident_probe.py:23`) for the runtime instantiation; only the I/O loop is new.
+
+**Baseline:**
+
+- `main/moss-nano-sidecar.js` (66 lines, all stub) — replace with real adapter
+- `main/moss-nano-engine.js` (~300 lines) — engine contract; do not modify in this sprint
+- `scripts/moss_nano_resident_probe.py` (~600 lines) — model loading reference
+- `scripts/moss_nano_sidecar.py` — new file; long-lived stdin/stdout loop
+- `tests/mossNanoSidecar.test.js` — new file; mock-process integration tests
+- `tests/mossNanoEngine.test.js` — existing; should still pass with real adapter substituted via `options.sidecarAdapter`
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/moss-nano-13-third-party-audit-review.md` §3, §10 items 3
+5. `main/moss-nano-engine.js` lines 1–90 (DEFAULT_CONFIG, VISIBLE_CONFIG_KEYS, helpers)
+6. `main/moss-nano-engine.js` lines 175–245 (synthesize / request flow, owner-token contract)
+7. `main/moss-nano-sidecar.js` (entire file — 66 lines, will be replaced)
+8. `scripts/moss_nano_resident_probe.py` lines 1–60 (runtime imports, tokenizer/model setup)
+9. `tests/mossNanoEngine.test.js` (entire file — contract tests that must continue to pass with real adapter behind a fixture seam)
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Athena (electron-scope, cross-system) | **Add `scripts/moss_nano_sidecar.py`** — long-lived stdin/stdout loop using `moss_nano_probe` for runtime instantiation. Each request: read line, parse JSON, execute synthesize, write line-delimited JSON response with `requestId` + `ownerToken` echoed. Graceful exit on `command: "shutdown"`. | `scripts/moss_nano_sidecar.py` (new) |
+| 2 | Athena (electron-scope) | **Replace `main/moss-nano-sidecar.js` with real adapter** — `child_process.spawn` Python with `scripts/moss_nano_sidecar.py`. Implement `start`, `status`, `request`, `cancel`, `shutdown`, `restart`. Line-delimited JSON over stdin/stdout. PID tracking. SIGKILL fallback on shutdown timeout. | `main/moss-nano-sidecar.js` |
+| 3 | Hephaestus (electron-scope) | **Crash recovery wiring** — On `child.exit` or `child.error` events, settle pending requests with `structuredFailure("sidecar-process-exited", ...)`. Map `unref()` so app exit isn't blocked. | `main/moss-nano-sidecar.js` |
+| 4 | Hippocrates | **Sidecar adapter tests** — New `tests/mossNanoSidecar.test.js`: (a) start/status returns running; (b) request/synthesize round-trip with a stub Python script that echoes deterministic PCM; (c) request after shutdown returns `sidecar-not-running`; (d) crashed subprocess settles in-flight requests with `sidecar-process-exited`; (e) restart kills old PID before spawning new. ≥10 new tests. | `tests/mossNanoSidecar.test.js` (new), `tests/fixtures/moss-nano-stub-sidecar.py` (new) |
+| 5 | Hippocrates | **Engine integration test with real adapter** — New test in `tests/mossNanoEngine.test.js` that constructs the real adapter (against the stub Python from #4) via `createMossNanoEngine({ sidecarAdapter: createMossNanoSidecarAdapter() })` and runs the existing in-flight settlement / lifecycle / cancel scenarios end-to-end. ≥3 new tests. | `tests/mossNanoEngine.test.js` |
+| 6 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 7 | Solon | **Spec compliance** — every SUCCESS CRITERIA item below verified | — |
+| 8 | Plato | **Quality + known-trap review** — Promise leak audit on adapter (no unresolved deferred), stdin/stdout backpressure handling, child process cleanup on app quit | — |
+| 9 | Herodotus | **Documentation pass** — CLAUDE.md, TECHNICAL_REFERENCE.md (new section: "MOSS-NANO Sidecar Adapter"), LESSONS_LEARNED.md, ROADMAP.md, SPRINT_QUEUE.md, MOSS_DECISION_LOG.md | All 6 governing docs |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — branch `sprint/moss-nano-13a-real-adapter`, stage specific files, commit, merge to `main` with `--no-ff`, push. | — |
+
+> **Wave split note:** This sprint has 5 implementation tasks (1, 2, 3, 4, 5) plus verification + docs + git. **Pre-split into two waves at dispatch time per Standing Rule 10:** Wave A = tasks 1–5 + Hippocrates `npm test`. Wave B = Solon + Plato + Herodotus + Hermes.
+
+#### SUCCESS CRITERIA
+
+1. `main/moss-nano-sidecar.js` no longer returns `sidecar-adapter-not-configured` from any method when given valid `runtimeDir` / `modelDir` / `tokenizerDir`.
+2. `scripts/moss_nano_sidecar.py` exists and runs a long-lived stdin/stdout loop using the same ONNX runtime path as `scripts/moss_nano_resident_probe.py`.
+3. Calling `await window.electronAPI.nanoSynthesize(text, opts)` from the integrated app drives a real subprocess synthesis and returns real PCM (verified manually against a sample EPUB chapter).
+4. Engine + adapter chain passes the existing `tests/mossNanoEngine.test.js` lifecycle scenarios with the real adapter substituted (test #5).
+5. Crashed subprocess settles in-flight requests with `sidecar-process-exited`; subsequent requests return `sidecar-not-running` until the engine calls `restart`.
+6. `restart` kills the old subprocess (verified by PID comparison) before spawning a new one.
+7. App exit is not blocked by the sidecar adapter (`unref` verified).
+8. ≥10 new tests in `tests/mossNanoSidecar.test.js` + ≥3 new tests in `tests/mossNanoEngine.test.js`.
+9. `npm test` passes (target: 2,410+ tests).
+10. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** EINK-6B can run in parallel (Lane C vs Lane D, no shared-core overlap). Sequenced before MOSS-NANO-13b.
+
+---
+
+### Sprint MOSS-NANO-13b: Engine Hardening + Strategy Invariants
+
+**Goal:** Three coupled fixes that turn declared-but-unenforced contracts in the MOSS-NANO engine and strategy into actual code-level invariants. (1) Enforce `synthesizeTimeoutMs` (120s) and `commandTimeoutMs` (5s) in `main/moss-nano-engine.js` via `Promise.race` against `setTimeout`-rejected sentinels. (2) Fix `setContinuityScope` in `src/hooks/narration/mossNanoStrategy.ts:412-415` to bump `generationId` (not just `prefetchGenerationId`), so an in-flight `speakChunk` whose scope changes mid-flight is not scheduled when its result eventually arrives. (3) Upgrade `hashText` (`src/hooks/narration/mossNanoStrategy.ts:87-93`) — include `text.length` in the cache key composition so 32-bit hash collisions across distinct texts at the same scope/voice/rate/startIdx cannot admit stale audio.
+
+**Problem:** Per audit findings NANO13-M2, NANO13-M4, and NANO13-MOD1. As shipped today: a hung sidecar will hang the renderer's `await api.nanoSynthesize(...)` indefinitely because timeouts are decorative; cross-section staleness is renderer-discipline, not a strategy invariant; and 32-bit hash collisions softening the cache soundness claim. None of these will hold up under live observation, and the live evidence gate (post-13c) will require they hold.
+
+**Design decisions:**
+
+- **Timeout enforcement:** Wrap each `sidecarAdapter.request("synthesize", payload)` call inside `synthesize` (`main/moss-nano-engine.js:204`) with `Promise.race([ requestPromise, timeoutPromise ])` where `timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("synthesize-timeout")), config.synthesizeTimeoutMs))`. On timeout, settle the in-flight request with `structuredFailure("synthesize-timeout", ...)` and trigger `restart()` (since a hung sidecar is not safely reusable). Apply the same pattern to non-synthesize requests using `commandTimeoutMs` (e.g., `cancel` adapter calls).
+- **Scope-change in-flight invalidation:** Change `setContinuityScope` from `prefetchGenerationId++` to `generationId++; prefetchGenerationId++`. This makes the existing in-flight guard at line 317 (`if (generation !== generationId || !result) return;`) catch any `speakChunk` whose scope changed between fetch start (line 276) and result delivery. The renderer-level `stop()` call at `useNarration.ts:1193-1194` becomes a defense-in-depth, not the only line.
+- **Cache key hardening:** Change `makeCacheKey` (`src/hooks/narration/mossNanoStrategy.ts:149-155`) from including `hashText(text)` to including both `String(text.length)` and `hashText(text)` as separate join components. This adds a length-fingerprint check that 32-bit collisions cannot replicate without also matching exact length.
+- **No new public API:** All three fixes are internal to the engine and strategy. No type changes. No IPC contract changes. Existing tests continue to compile.
+
+**Baseline:**
+
+- `main/moss-nano-engine.js` lines 8–16 (DEFAULT_CONFIG: timeouts declared)
+- `main/moss-nano-engine.js` lines 175–245 (synthesize / request flow: where timeouts must wrap)
+- `main/moss-nano-engine.js` lines 270–300 (shutdown / restart for timeout-triggered restart)
+- `src/hooks/narration/mossNanoStrategy.ts:87-93` (`hashText`)
+- `src/hooks/narration/mossNanoStrategy.ts:149-155` (`makeCacheKey`)
+- `src/hooks/narration/mossNanoStrategy.ts:276` (`generationId = ++generationId` at speakChunk start)
+- `src/hooks/narration/mossNanoStrategy.ts:317` (in-flight guard)
+- `src/hooks/narration/mossNanoStrategy.ts:412-415` (`setContinuityScope` — to be fixed)
+- `tests/mossNanoEngine.test.js:179-202` (current timeout-config-snapshot test — needs new timeout-behavior test alongside)
+- `tests/mossNanoStrategy.test.ts:324-357` (cross-scope cache-key test — needs sibling for in-flight speakChunk invalidation)
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/moss-nano-13-third-party-audit-review.md` §10 items 4, 5, MOD1
+5. `main/moss-nano-engine.js` (full file)
+6. `src/hooks/narration/mossNanoStrategy.ts` lines 80–160 (hash + cache key)
+7. `src/hooks/narration/mossNanoStrategy.ts` lines 270–330 (speakChunk + in-flight guard)
+8. `src/hooks/narration/mossNanoStrategy.ts` lines 400–450 (setContinuityScope, stop)
+9. `tests/mossNanoEngine.test.js` (existing patterns)
+10. `tests/mossNanoStrategy.test.ts` (existing patterns)
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Hephaestus (electron-scope) | **Enforce `synthesizeTimeoutMs`** — Wrap `sidecarAdapter.request("synthesize", ...)` in `Promise.race` with `setTimeout`-rejected sentinel using `config.synthesizeTimeoutMs`. On timeout: settle in-flight request with `structuredFailure("synthesize-timeout", ...)`, trigger `restart()`. | `main/moss-nano-engine.js` |
+| 2 | Hephaestus (electron-scope) | **Enforce `commandTimeoutMs`** — Apply same pattern to non-synthesize adapter calls (e.g., `cancel`). On timeout: structured failure, no restart (single command failures don't justify subprocess kill). | `main/moss-nano-engine.js` |
+| 3 | Hephaestus (renderer-scope) | **Fix `setContinuityScope`** — Change line 414 from `prefetchGenerationId++` to `generationId++; prefetchGenerationId++`. | `src/hooks/narration/mossNanoStrategy.ts` |
+| 4 | Hephaestus (renderer-scope) | **Harden `makeCacheKey`** — Change line 154 from `hashText(text)` to `String(text.length), hashText(text)` as two separate join components. | `src/hooks/narration/mossNanoStrategy.ts` |
+| 5 | Hippocrates | **Engine timeout tests** — New test in `tests/mossNanoEngine.test.js`: (a) hung adapter → synthesize rejects with `synthesize-timeout` after configured ms; (b) synthesize-timeout triggers restart (lifecycleGeneration increments); (c) commandTimeoutMs applied to cancel; (d) timeout config remains visible in status snapshot (existing assertion preserved). ≥4 new tests. | `tests/mossNanoEngine.test.js` |
+| 6 | Hippocrates | **Strategy in-flight invalidation test** — New test in `tests/mossNanoStrategy.test.ts`: speakChunk in-flight → setContinuityScope → late synthesize result → assert `scheduleSegment` NOT called for the late result. ≥3 new tests covering scope-change-during-flight, scope-change-during-prefetch (existing path), and cache-key length-fingerprint disambiguation. | `tests/mossNanoStrategy.test.ts` |
+| 7 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 8 | Solon | **Spec compliance** | — |
+| 9 | Plato | **Quality + known-trap review** — Promise.race leak check (timeout sentinel must not leak after request settles), restart-cascade check (a timeout shouldn't be able to retrigger itself in the new generation) | — |
+| 10 | Herodotus | **Documentation pass** | All 6 governing docs |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — branch `sprint/moss-nano-13b-engine-hardening`. | — |
+
+#### SUCCESS CRITERIA
+
+1. A hung sidecar (mock that never responds) causes `synthesize` to reject with `synthesize-timeout` within `synthesizeTimeoutMs ± 100ms`.
+2. Synthesize-timeout triggers a `restart()` (verified by `lifecycleGeneration` increment).
+3. `commandTimeoutMs` enforced for non-synthesize adapter calls; structured failure, no restart.
+4. `setContinuityScope` increments `generationId` so an in-flight `speakChunk` is invalidated on scope change.
+5. Cache key includes `text.length` separately from `hashText(text)`; 32-bit hash collisions with different lengths cannot share a cache entry.
+6. `tests/mossNanoEngine.test.js:179-202` (existing timeout-config-snapshot test) still passes.
+7. ≥4 new engine tests + ≥3 new strategy tests.
+8. `npm test` passes (target: 2,420+ tests).
+9. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** MOSS-NANO-13a (timeouts must wrap a real adapter to be meaningfully testable in integration; pure-mock unit tests can land before 13a, but full integration test in #5 needs 13a's mock-process fixture).
+
+---
+
+### Sprint MOSS-NANO-13c: Live Evidence Schema + Producer + Gate Validation
+
+**Goal:** Three coupled deliverables. (1) Redefine the `liveEvidence.modes[mode]` schema as machine-produced, requiring quantitative observations (`nanoSegmentLatencyMs.{p50,p95,min,max}`, `nanoCache.{hits,misses,hitRate}`, `nanoPrefetch.{ready,stale,cancelled}`, `recycleObservations`) plus provenance fields (`runArtifactPath`, `traceEventCount`, `recordedAt`, `appCommit`, `evidenceProducerVersion`, `schemaVersion`). (2) Build the evidence producer — a new tool (`scripts/moss_nano_live_capture.mjs`) that exercises the integrated app in a `--nano-live-capture` mode, records real `nano-segment` events from `mossNanoStrategy.onSegmentTrace`, and emits the sealed live-evidence JSON. (3) Update `evaluateMossNanoLiveEvidenceGate` (`scripts/tts_eval_runner.mjs:100-160`) to validate provenance: assert `runArtifactPath` exists on disk, `traceEventCount` matches the linked artifact's event count, latency and cache numbers are within the artifact's bounds, no key is `true` without a non-null quantitative basis. Update or replace the existing matrix-simulator passing-evidence test (`tests/ttsEvalMatrixRunner.test.ts:709-767`) since the gate now rejects hand-authored boolean JSON.
+
+**Problem:** Per audit finding NANO13-C1 (CRITICAL). The gate as shipped accepts a JSON file of plain booleans — `tests/ttsEvalMatrixRunner.test.ts:709-767` demonstrates a hand-authored all-true JSON yields `NANO_RECOMMENDED_OPT_IN`. Nothing in the file format requires a hash, run ID, artifact path, latency distribution, segment count, or any quantitative observation. This is structurally less verifiable than the simulated matrix output it's supposed to replace, because at least the simulator runs code. Until this is fixed, MOSS-NANO-13e cannot meaningfully change Nano's status.
+
+**Design decisions:**
+
+- **Schema versioning:** New required field `schemaVersion: 2` (1 = legacy boolean schema). Gate accepts only schemaVersion ≥ 2 for productization decisions. Schema is documented in `docs/testing/MOSS_NANO_LIVE_EVIDENCE_SCHEMA.md`.
+- **Producer architecture:** Standalone Node script. Spawns the integrated app via Electron (or attaches to a running instance via a debug port) with a `--nano-live-capture <output-path>` flag wired through `main/main.js`. The renderer side, already exposing `mossNanoStrategy.onSegmentTrace` (per audit annex), forwards trace events through a new IPC channel `tts-nano-live-trace` to main, which appends to `runArtifactPath`. On producer signal (e.g., end of book or N segments), the producer reads back the run artifact, computes per-mode quantitative summaries, and emits the sealed `liveEvidence` JSON.
+- **Provenance validation in gate:** New helper `validateLiveEvidenceProvenance(liveEvidence)` in `scripts/tts_eval_runner.mjs`. Steps: (a) require `schemaVersion ≥ 2`; (b) for each mode entry, `existsSync(runArtifactPath)`; (c) load run artifact, count `nano-segment` events, assert `traceEventCount === actualEventCount`; (d) compute latency p50/p95/min/max from artifact, assert within ±5% tolerance of declared values; (e) assert each boolean key has supporting quantitative basis (e.g., `noStalePlayback === true` requires `nanoCache.hits + nanoCache.misses > 0`).
+- **Test rewrite:** `tests/ttsEvalMatrixRunner.test.ts:709-767` (currently uses `passingModeEvidence` = all-true booleans) becomes a NEGATIVE test ("legacy hand-authored boolean schema is rejected by gate"). New positive test uses a fixture-generated run artifact + producer-output evidence JSON.
+- **No live producer execution in this sprint:** 13c builds the schema + producer + gate. Actually running the producer against a live selected-Nano session is 13e. This split is deliberate: 13c is a code/test sprint; 13e is an evidence-capture sprint.
+
+**Baseline:**
+
+- `scripts/tts_eval_runner.mjs:11` (MOSS_NANO_PRODUCT_MODES)
+- `scripts/tts_eval_runner.mjs:100-160` (`evaluateMossNanoLiveEvidenceGate`)
+- `scripts/tts_eval_runner.mjs:815` (`simulateTrace` — gate path)
+- `scripts/tts_eval_runner.mjs:835-840` (`readJson(args.nanoLiveEvidencePath)`)
+- `tests/ttsEvalMatrixRunner.test.ts:709-767` (existing all-true-booleans test → becomes negative test)
+- `tests/fixtures/narration/matrix.manifest.json:170-228` (MOSS-NANO-12 scenario slots)
+- `src/hooks/narration/mossNanoStrategy.ts` `onSegmentTrace` callback wiring (already emits `MossNanoSegmentTraceEvent`)
+- `main/main.js` argv parsing (where `--nano-live-capture` flag will be wired)
+- `preload.js` (new IPC channel for trace events)
+- `docs/testing/MOSS_NANO_LIVE_EVIDENCE_SCHEMA.md` (new file)
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/moss-nano-13-third-party-audit-review.md` §7, §10 items 1–2
+5. `scripts/tts_eval_runner.mjs` (full file — focus on 1–160 and 800–840)
+6. `tests/ttsEvalMatrixRunner.test.ts` lines 700–800
+7. `tests/fixtures/narration/matrix.manifest.json` lines 90–230
+8. `src/hooks/narration/mossNanoStrategy.ts` (segmentTrace types and emission sites)
+9. `main/main.js` (argv parsing patterns)
+10. `preload.js` (IPC channel patterns)
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Athena (cross-system) | **Schema definition + docs** — Create `docs/testing/MOSS_NANO_LIVE_EVIDENCE_SCHEMA.md` documenting v2 schema. Add TypeScript type `MossNanoLiveEvidenceV2` in a new `src/types/mossNanoLiveEvidence.ts`. | `docs/testing/MOSS_NANO_LIVE_EVIDENCE_SCHEMA.md` (new), `src/types/mossNanoLiveEvidence.ts` (new) |
+| 2 | Athena (electron-scope) | **`--nano-live-capture` flag wiring** — Parse `--nano-live-capture <path>` in `main/main.js`. New IPC channel `tts-nano-live-trace` registered in `main/ipc/tts.js` that appends events to the capture path. Wire `mossNanoStrategy.onSegmentTrace` callback through `useNarration` to `window.electronAPI.nanoLiveTrace(event)` when capture is active. | `main/main.js`, `main/ipc/tts.js`, `preload.js`, `src/hooks/useNarration.ts` |
+| 3 | Athena (cross-system) | **Producer tool** — `scripts/moss_nano_live_capture.mjs`. Spawns Electron with `--nano-live-capture <output-artifact-path>`. Waits for capture-complete signal (or N segments). Reads run artifact, computes per-mode quantitative summaries, emits sealed `liveEvidence` v2 JSON to stdout or `--output <path>`. | `scripts/moss_nano_live_capture.mjs` (new) |
+| 4 | Athena (Lane B) | **Gate provenance validation** — Add `validateLiveEvidenceProvenance(liveEvidence)` helper. Update `evaluateMossNanoLiveEvidenceGate` to call it before existing logic. On failure, decision = `NANO_EXPERIMENTAL_ONLY` with reason naming the failed provenance check. | `scripts/tts_eval_runner.mjs` |
+| 5 | Hippocrates | **Gate test rewrite** — `tests/ttsEvalMatrixRunner.test.ts:709-767` becomes a negative test asserting legacy boolean schema is rejected. New positive test uses a fixture run artifact + producer-output evidence (under `tests/fixtures/moss-nano/live-evidence-v2/`). ≥6 new tests covering: provenance fail (missing artifact), provenance fail (event count mismatch), provenance fail (latency out of tolerance), provenance fail (boolean without quantitative basis), provenance pass (all checks ok), schemaVersion=1 rejected. | `tests/ttsEvalMatrixRunner.test.ts`, `tests/fixtures/moss-nano/live-evidence-v2/` (new) |
+| 6 | Hippocrates | **Producer integration test** — `tests/mossNanoLiveCapture.test.ts`: smoke test producer in --dry-run mode against a fixture trace stream. ≥3 new tests. | `tests/mossNanoLiveCapture.test.ts` (new) |
+| 7 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 8 | Solon | **Spec compliance** | — |
+| 9 | Plato | **Quality + known-trap review** — Schema-version handling, IPC channel security (no untrusted file paths from renderer), producer error handling | — |
+| 10 | Herodotus | **Documentation pass** — TECHNICAL_REFERENCE.md (new section: "MOSS-NANO Live Evidence Schema v2"), CLAUDE.md, LESSONS_LEARNED.md, ROADMAP.md, SPRINT_QUEUE.md, MOSS_DECISION_LOG.md | All 6 governing docs |
+| 11 | Hermes | **Git: auto-merge on successful sprint** — branch `sprint/moss-nano-13c-evidence-schema`. | — |
+
+> **Wave split note:** This sprint has 6 implementation tasks (1–6). **Pre-split into two waves at dispatch time:** Wave A = tasks 1–4 + 5 + Hippocrates `npm test`. Wave B = task 6 + Solon + Plato + Herodotus + Hermes.
+
+#### SUCCESS CRITERIA
+
+1. `MossNanoLiveEvidenceV2` TypeScript type defined and documented in `docs/testing/MOSS_NANO_LIVE_EVIDENCE_SCHEMA.md`.
+2. `--nano-live-capture <path>` flag wired through main → renderer → strategy; trace events captured to disk.
+3. `scripts/moss_nano_live_capture.mjs` produces v2-schema evidence JSON from a captured run artifact.
+4. `evaluateMossNanoLiveEvidenceGate` rejects schemaVersion=1 (legacy boolean schema) and validates provenance for schemaVersion=2.
+5. Provenance failures (missing artifact, event count mismatch, latency out of tolerance, boolean-without-basis) cap decision at `NANO_EXPERIMENTAL_ONLY` with named reason.
+6. `tests/ttsEvalMatrixRunner.test.ts:709-767` legacy test now asserts schemaVersion=1 rejection.
+7. ≥6 new gate tests + ≥3 new producer tests.
+8. `npm test` passes (target: 2,430+ tests).
+9. `npm run build` succeeds.
+
+**Tier:** Full | **Depends on:** MOSS-NANO-13a (real adapter required for the producer to actually capture real Nano events), MOSS-NANO-13b (engine + strategy invariants must hold for captured events to be meaningful).
+
+---
+
+### Sprint MOSS-NANO-13d: Audit Memo Reframing & Default-Engine Posture (STUB — Stage 3 close)
+
+**Goal:** Update audit memo, orientation docs, manifest field naming, and settings UI fallback narrative to align with the actual default engine posture (Qwen as default, Kokoro as deprecated legacy fallback). Currently the audit memo and gate manifest field naming reference Kokoro as the operational floor, which contradicts shipped UI strings, the roadmap header, and the settings test assertions.
+
+**Why:** Audit finding NANO13-M3. The audit memo materially misframes the engine landscape. Any "Nano vs current default" comparison the live evidence supports must be Nano vs Qwen, not Nano vs Kokoro.
+
+**Prerequisites:** MOSS-NANO-13c (so the gate is already trustworthy when the manifest field is renamed and the Qwen-default reframing lands).
+
+**Done when:** TBD — full skeleton to be written at Stage 3 close (after 13c lands).
+
+**Effort:** S (~1). Documentation + manifest field rename + UI string update.
+
+**Roster:** CLI/Hermes (mechanical edits) + Cowork (memo rewrite content).
+
+**Source:** Audit response §10 item 6.
+
+---
+
+### Sprint MOSS-NANO-13e: Live Capture Run + Decision (STUB — Stage 3 close)
+
+**Goal:** Execute the evidence producer (built in 13c) against a real selected-Nano session in all four reader modes (Page, Focus, Flow, Narrate). Capture live evidence with full provenance including recycle-UX observations. Feed evidence through `evaluateMossNanoLiveEvidenceGate`. Record the decision (`PAUSE_NANO_PRODUCTIZATION`, `NANO_EXPERIMENTAL_ONLY`, or `NANO_RECOMMENDED_OPT_IN`) in `docs/testing/MOSS_DECISION_LOG.md`. Update ROADMAP.md finish-line note. If decision is `NANO_RECOMMENDED_OPT_IN`, scope the settings UX to surface that recommendation (may roll into POLISH-1 or need its own sprint).
+
+**Why:** Closes the MOSS-NANO productization gate that was first proposed in MOSS-NANO-13's original AUDIT_MEMO sketch. Audit response §11 final recommendation.
+
+**Prerequisites:** MOSS-NANO-13a, 13b, 13c, 13d.
+
+**Done when:** TBD — full skeleton to be written at Stage 3 close (after 13d lands).
+
+**Effort:** M (~3). Run-and-record, plus decision integration. Possible expansion if PROMOTE branch fires and UX wiring is folded in.
+
+**Roster:** Cowork (run execution + decision write-up) + CLI/Zeus (any UX wiring needed if PROMOTE).
+
+**Source:** Audit response §11.
+
+---

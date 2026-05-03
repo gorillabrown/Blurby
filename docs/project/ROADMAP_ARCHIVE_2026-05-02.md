@@ -4174,3 +4174,77 @@ MOSS-3 remains blocked. Kokoro remains unchanged and remains the operational flo
 **Version:** v1.74.0 | **Branch:** `sprint/qwen-stream-3-hardening-decision` | **Tier:** Full
 
 **Completion note:** Streaming hardening: stall detection (TTS_STREAM_STALL_TIMEOUT_MS=8000ms), crash recovery (2s poll), warmup gate, cancellation guards. Stream-finished IPC wire added. 5 streaming eval scenarios, gate thresholds, eval runner --streaming mode, QWEN_STREAMING_DECISION.md template. 16 new tests.
+
+---
+
+## EINK-6A: E-Ink Foundation & Greyscale Runtime ✅ COMPLETED 2026-05-02
+
+**Version:** v1.75.1 | **Branch:** `sprint/eink-6a-foundation` | **Tier:** Full
+
+> Migrated from active ROADMAP.md during 2026-05-02 PM second-pass roadmap review. The active roadmap retains a short closeout block; this archive holds the full original spec for historical reference.
+
+**Closeout:** `einkMode` is now an independent settings/schema flag (`CURRENT_SETTINGS_SCHEMA = 9`) with renderer, main-process, migration, and test-harness defaults. `ThemeProvider` applies `data-eink="true"` independently from `data-theme`; `ThemeSettings` exposes E-Ink Display Mode above the theme picker; reader WPM cap, refresh overlay, controller, and library repaint debounce now consume `settings.einkMode`. E-ink runtime behavior moved under `[data-eink="true"]`; the optional greyscale palette remains under `[data-theme="eink"]`.
+
+**Verification:** `npm test -- --run tests/einkFoundation.test.ts tests/narrLayer1bConsolidation.test.ts` (36 tests), full `npm test` (150 files / 2397 tests), `npm run build` (existing circular chunk warning unchanged), `npm audit --audit-level=high` (passes; known moderate uuid chain remains force/breaking only), and `git diff --check`.
+
+**Goal:** Decouple e-ink display behavior from the theme system so users can pair e-ink optimizations (no animations, large targets, refresh timing) with any color theme. Currently, e-ink is a theme — selecting it forces greyscale colors. After this sprint, e-ink is an independent display mode toggle that layers on top of any theme.
+
+**Problem:** E-ink support exists as a `[data-theme="eink"]` CSS block (200+ lines in global.css) with dedicated settings (`einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping`). But it's coupled to the theme selector in ThemeSettings.tsx — you can't use dark theme with e-ink optimizations, or light theme with e-ink refresh overlay. This forces users with e-ink devices to accept the greyscale palette even when their device supports limited color (Kaleido e-ink screens). It also means non-e-ink users can't benefit from e-ink ergonomic features (reduced animation, larger targets) without losing their preferred theme.
+
+**Design decisions:**
+- **New `einkMode: boolean` setting.** Independent of `theme`. When true, applies e-ink behavioral CSS overrides (no transitions, larger targets, no hover) on top of the active theme. The existing `[data-theme="eink"]` color palette becomes an optional "E-Ink Greyscale" theme choice that users can select or skip.
+- **Refactor CSS into two layers.** Split the current `[data-theme="eink"]` block into: (a) `[data-eink="true"]` — behavioral overrides (transition:none, no hover, larger targets), applied when einkMode is on regardless of theme, and (b) `[data-theme="eink"]` — color palette only (pure black/white/grey), optional theme choice. This is a CSS-only refactor with no JS behavior changes.
+- **ThemeSettings restructure.** Move e-ink from theme grid to a separate toggle section: "E-Ink Display Mode" toggle above the theme selector. When on, show the existing e-ink sub-settings (WPM ceiling, refresh interval, phrase grouping). Theme selector remains independent below.
+- **EinkRefreshOverlay remains as-is.** The existing `useEinkController` hook and `EinkRefreshOverlay` component work correctly — they just need to check `einkMode` instead of `theme === 'eink'`.
+
+**Baseline:**
+- `src/types.ts` — settings schema: `einkWpmCeiling`, `einkRefreshInterval`, `einkPhraseGrouping` (lines 136–139). No `einkMode` field yet.
+- `src/components/settings/ThemeSettings.tsx` (150 lines) — e-ink as theme option (line 30), e-ink sub-settings panel (lines 100–147)
+- `src/styles/global.css` — `[data-theme="eink"]` block (~200 lines, starts ~line 1543)
+- `src/hooks/useEinkController.ts` (47 lines) — page-turn counter, refresh overlay trigger
+- `src/components/EinkRefreshOverlay.tsx` (24 lines) — black/white flash overlay
+- `src/components/ReaderContainer.tsx` — e-ink integration: WPM cap (line 144), eink controller (line 92), overlay render
+- `src/constants.ts` — `DEFAULT_EINK_WPM_CEILING`, `DEFAULT_EINK_REFRESH_INTERVAL`, `EINK_REFRESH_FLASH_MS`, etc.
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section
+4. `src/types.ts` — settings schema, eink fields
+5. `src/components/settings/ThemeSettings.tsx` — current e-ink theme coupling
+6. `src/styles/global.css` — `[data-theme="eink"]` block (find boundaries)
+7. `src/hooks/useEinkController.ts` — refresh controller logic
+8. `src/components/EinkRefreshOverlay.tsx` — overlay component
+9. `src/components/ReaderContainer.tsx` — e-ink integration points
+10. `src/constants.ts` — e-ink constants
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Hephaestus (renderer-scope) | **Add `einkMode` setting** — Add `einkMode: boolean` (default false) to settings schema in types.ts. Add default to constants.ts. Wire through SettingsContext. | `src/types.ts`, `src/constants.ts`, `src/contexts/SettingsContext.tsx` |
+| 2 | Hephaestus (renderer-scope) | **Split CSS into behavioral and color layers** — Extract all non-color properties from `[data-theme="eink"]` into new `[data-eink="true"]` selector. Leave only color properties (`--bg`, `--fg`, `--accent`, etc.) in `[data-theme="eink"]`. Verify no visual regression when both are applied simultaneously. | `src/styles/global.css` |
+| 3 | Hephaestus (renderer-scope) | **Apply `data-eink` attribute** — In the root element (App.tsx or equivalent), set `data-eink="true"` when `settings.einkMode === true`, independent of `data-theme`. | `src/App.tsx` or equivalent root |
+| 4 | Hephaestus (renderer-scope) | **Restructure ThemeSettings** — Move e-ink out of theme grid. Add "E-Ink Display Mode" toggle above themes. When toggled on, show WPM ceiling / refresh interval / phrase grouping sliders. Theme grid remains below, all themes selectable regardless of einkMode. | `src/components/settings/ThemeSettings.tsx` |
+| 5 | Hephaestus (renderer-scope) | **Update eink controller** — Change `useEinkController.ts` to check `settings.einkMode` instead of `theme === 'eink'`. Update ReaderContainer.tsx integration points (WPM cap, overlay render) to use `einkMode`. | `src/hooks/useEinkController.ts`, `src/components/ReaderContainer.tsx` |
+| 6 | Hippocrates | **Tests** — (a) `einkMode` toggle applies `data-eink` attribute. (b) `data-eink="true"` + `data-theme="dark"` doesn't conflict. (c) E-ink behavioral CSS (transition:none) applies independently of theme. (d) WPM cap respects `einkMode`, not theme. (e) Refresh overlay fires when `einkMode` is on regardless of theme. ≥8 new tests. | `tests/` |
+| 7 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 8 | Solon | **Spec compliance** | — |
+| 9 | Herodotus | **Documentation pass** | All 6 governing docs |
+| 10 | Hermes | **Git: auto-merge on successful sprint** — stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push unless the sprint is explicitly marked no-merge. | — |
+
+#### SUCCESS CRITERIA
+
+1. `einkMode` setting exists, persists, and toggles independently of theme
+2. `data-eink="true"` attribute applied to root when einkMode is on
+3. E-ink behavioral CSS (no transitions, larger targets, no hover) applies on any theme when einkMode is on
+4. E-ink greyscale color palette applies only when `data-theme="eink"` is selected
+5. WPM ceiling enforced by einkMode, not by theme
+6. Refresh overlay fires based on einkMode, not theme
+7. ThemeSettings shows independent einkMode toggle with sub-settings
+8. ≥8 new tests
+9. `npm test` passes
+10. `npm run build` succeeds
+
+**Tier:** Full | **Depends on:** TTS-7D (TTS stabilization complete)
