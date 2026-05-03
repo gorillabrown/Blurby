@@ -16,6 +16,7 @@ import {
   FLOW_SCROLL_RESUME_DELAY_MS,
   FLOW_LINE_ADVANCE_BUFFER_MS,
   FLOW_LINE_COMPLETE_FLASH_MS,
+  EINK_LINES_PER_PAGE,
 } from "../constants";
 
 export interface LineInfo {
@@ -454,6 +455,11 @@ export class FlowScrollEngine {
       return;
     }
 
+    if (this.isEink) {
+      this.animateEinkChunk();
+      return;
+    }
+
     const line = this.lines[this.lineIdx];
     const lineWidth = Math.max(line.right - line.left, 1); // Guard against zero-width lines
     const duration = Math.max((line.wordCount / this.wpm) * 60000, 50); // Minimum 50ms per line
@@ -511,6 +517,60 @@ export class FlowScrollEngine {
           if (this.running && !this.paused) this.animateLine();
         }, FLOW_LINE_ADVANCE_BUFFER_MS);
       }
+    }, duration);
+  }
+
+  private animateEinkChunk(): void {
+    if (!this.running || this.paused || this.followerMode || !this.cursor || !this.container) return;
+    if (this.lineIdx >= this.lines.length) {
+      this.running = false;
+      this.callbacks.onComplete();
+      return;
+    }
+
+    const startLineIdx = this.lineIdx;
+    const endLineIdx = Math.min(this.lines.length - 1, startLineIdx + EINK_LINES_PER_PAGE - 1);
+    const startLine = this.lines[startLineIdx];
+    const endLine = this.lines[endLineIdx];
+    const chunkWordCount = Math.max(1, endLine.lastWord - startLine.firstWord + 1);
+    const duration = Math.max((chunkWordCount / this.wpm) * 60000, 50);
+    const chunkLine: LineInfo = {
+      y: startLine.y,
+      bottom: endLine.bottom,
+      left: Math.min(...this.lines.slice(startLineIdx, endLineIdx + 1).map(line => line.left)),
+      right: Math.max(...this.lines.slice(startLineIdx, endLineIdx + 1).map(line => line.right)),
+      firstWord: startLine.firstWord,
+      lastWord: endLine.lastWord,
+      wordCount: chunkWordCount,
+    };
+
+    this.wordIndex = startLine.firstWord;
+    this.callbacks.onWordAdvance(this.wordIndex);
+    this.callbacks.onLineChange?.(startLineIdx, chunkLine);
+    this.callbacks.onProgressUpdate?.(this.getProgress());
+
+    this.cursor.style.transition = "none";
+    this.cursor.style.left = chunkLine.left + "px";
+    this.cursor.style.top = chunkLine.bottom + "px";
+    this.cursor.style.width = Math.max(chunkLine.right - chunkLine.left, 1) + "px";
+    this.cursor.style.display = "block";
+
+    this.lineTimer = setTimeout(() => {
+      this.wordIndex = endLine.lastWord;
+      this.callbacks.onWordAdvance(this.wordIndex);
+      this.lineIdx = endLineIdx + 1;
+
+      if (this.lineIdx >= this.lines.length) {
+        this.running = false;
+        if (this.cursor) this.cursor.style.display = "none";
+        this.callbacks.onComplete();
+        return;
+      }
+
+      this.scrollToLine(this.lineIdx, true);
+      setTimeout(() => {
+        if (this.running && !this.paused) this.animateLine();
+      }, FLOW_LINE_ADVANCE_BUFFER_MS);
     }, duration);
   }
 

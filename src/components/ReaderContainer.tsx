@@ -152,7 +152,13 @@ export default function ReaderContainer({
   const pendingFlowResumeRef = useRef(false);
 
   // E-ink ghosting prevention (extracted to useEinkController hook)
-  const { einkPageTurns, showEinkRefresh, triggerEinkRefresh, handleEinkPageTurn } = useEinkController(settings);
+  const {
+    einkPageTurns,
+    showEinkRefresh,
+    triggerEinkRefresh,
+    handleEinkPageTurn,
+    handleEinkContentChange,
+  } = useEinkController(settings);
 
   const [docChapters, setDocChapters] = useState<Array<{ title: string; charOffset: number; href?: string; depth?: number; sectionIndex?: number }>>([]);
 
@@ -525,6 +531,7 @@ export default function ReaderContainer({
     bookWordMeta,
     paragraphBreaks: tokenized.paragraphBreaks,
     isEink,
+    onEinkContentChange: handleEinkContentChange,
     focusTextSize,
     finishReadingWithoutExitRef,
     onOpenDocByIdRef,
@@ -852,6 +859,7 @@ export default function ReaderContainer({
       initialCfi={activeDoc.cfi || null}
       onRelocate={(detail) => {
         if (detail.cfi) {
+          handleEinkPageTurn();
           const fraction = detail.fraction || 0;
           foliateFractionRef.current = fraction;
           setFoliateFraction(fraction);

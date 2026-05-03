@@ -326,6 +326,10 @@ export const SNOOZE_NEXT_WEEK_HOUR = 8;
 export const DEFAULT_EINK_WPM_CEILING = 250;
 /** Default e-ink refresh interval (page turns) */
 export const DEFAULT_EINK_REFRESH_INTERVAL = 20;
+/** Adaptive e-ink refresh triggers once cumulative content churn reaches this load. */
+export const EINK_GHOSTING_THRESHOLD = 1;
+/** Keep adaptive refresh enabled by default while preserving manual interval fallback. */
+export const EINK_ADAPTIVE_REFRESH_ENABLED = true;
 
 // ── Sync ─────────────────────────────────────────────────────────────────────
 /** Default auto-sync interval (minutes) */

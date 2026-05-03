@@ -3,6 +3,7 @@ import { focusChar, calculateFocusOpacity, formatTime, formatDisplayTitle, detec
 import { MIN_WPM, MAX_WPM, WPM_STEP, FOCUS_TEXT_SIZE_STEP, ANIMATION_DISABLE_WPM, HIGHLIGHT_TOAST_DISMISS_MS } from "../constants";
 import { BlurbyDoc, LayoutSpacing } from "../types";
 import type { WordUpdateCallback } from "../hooks/useReader";
+import { buildEinkFocusPhrase } from "../utils/einkErgonomics";
 
 /** Sliced settings for RSVP reader — only fields it actually uses */
 interface RsvpSettings {
@@ -68,19 +69,10 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
   const wpmRefLocal = useRef(wpm);
   wpmRefLocal.current = wpm;
 
-  // E-ink phrase grouping: build a phrase of 2-3 words at natural boundaries
-  const buildEinkPhrase = useCallback((index: number): string => {
-    if (!settings?.einkPhraseGrouping || !settings?.isEink) return words[index] || "";
-    const maxWords = 3;
-    const phrase: string[] = [];
-    for (let i = index; i < Math.min(index + maxWords, words.length); i++) {
-      phrase.push(words[i]);
-      // Break at natural boundaries: punctuation at end of word, or conjunctions
-      if (i > index && /[.!?,;:\u2014]$/.test(words[i])) break;
-      if (i + 1 < words.length && /^(and|but|or|the|a|an|in|on|at|to|for|of|is|was|are|were)$/i.test(words[i + 1]) && phrase.length >= 2) break;
-    }
-    return phrase.join(" ");
-  }, [words, settings?.einkPhraseGrouping, settings?.isEink]);
+  const buildEinkPhrase = useCallback((index: number): string => buildEinkFocusPhrase(words, index, {
+    isEink: settings?.isEink,
+    phraseGrouping: settings?.einkPhraseGrouping,
+  }), [words, settings?.einkPhraseGrouping, settings?.isEink]);
 
   // Register direct DOM update callback with useReader's RAF loop
   useEffect(() => {
