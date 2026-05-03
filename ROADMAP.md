@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-05-02 — Second-pass roadmap review. Desktop v2.0 expanded to include MOSS-NANO productization track per both 3rd-party audits.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, and GOALS-6B landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13 — those scope changes are now baked into a multi-sprint MOSS-NANO-13a–e track. Qwen remains default engine, Kokoro available/unchanged. Next queue item: MOSS-NANO-13a.
+**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, and MOSS-NANO-13B landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. Next queue item: MOSS-NANO-13c.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
 **Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity). Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
@@ -480,8 +480,8 @@ All three investigation areas resolved:
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (5 done, 6 remaining), ~37 LOE total / ~25 LOE remaining, estimated 4–6 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → **MOSS-NANO-13a** → MOSS-NANO-13b → MOSS-NANO-13c → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
+> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (7 done, 4 remaining), ~37 LOE total / ~21 LOE remaining, estimated 4–6 weeks.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → **MOSS-NANO-13c** → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e, and its deliverable is decision quality (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion. KOKORO-RETIRE remains deferred even if MOSS-NANO-13e records `NANO_RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed.
 
 ### Standing Rules All Skeletons Inherit
@@ -525,7 +525,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A, EINK-6B, and GOALS-6B completed 2026-05-02. MOSS-NANO-13a is next in the Desktop v2.0 active conveyor; do not start it from this closeout.
+> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, and MOSS-NANO-13B completed 2026-05-02. MOSS-NANO-13c is next in the Desktop v2.0 active conveyor; do not start it from this closeout.
 
 ---
 
@@ -722,6 +722,8 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 > - 13c: Lane B (Eval Harness) — `scripts/tts_eval_runner.mjs` gate refactor + new evidence producer tool
 > - 13d: Lane E (Governance) — audit memo rewrite + manifest field rename
 > - 13e: Lane B (Eval Harness) — live capture run + decision write-up
+
+**Closeout update 2026-05-02:** MOSS-NANO-13a established the resident child-process app sidecar path. MOSS-NANO-13B replaced the synthetic app-sidecar audio with real local MOSS-TTS-Nano ONNX synthesis through `tts-nano-*` IPC. Decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`. Scope remains narrow: Nano is selectable and can preview/synthesize only when readiness is truthful; Nano remains non-default, Qwen remains disabled, Kokoro remains available, and Nano narration remains `timingTruth: "segment-following"` with `wordTimestamps: null`.
 
 ---
 

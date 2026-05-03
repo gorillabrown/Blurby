@@ -199,7 +199,18 @@ MOSS-NANO-7 verification:
 - `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
 - Solon approved spec compliance; Plato final quality check was `READY`.
 
-Current Nano decision: `NANO_EXPERIMENTAL_ONLY` after MOSS-NANO-12. Nano may remain visible as a guarded experimental settings option, but selected use and preview stay blocked unless the sidecar API exists and `nanoStatus` is ready. The current default remains unchanged, Kokoro remains available, and missing live four-mode observation evidence prevents recommended opt-in, default candidacy, or Kokoro retirement.
+Current Nano decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE` after MOSS-NANO-13B. This supersedes the synthetic app-sidecar preview path only. Nano may remain visible as a guarded experimental settings option, and selected use/preview may run real local ONNX audio only when the sidecar API exists and `nanoStatus` is truthfully ready. The current default remains unchanged, Qwen remains disabled, Kokoro remains available, and missing live four-mode observation evidence still prevents recommended opt-in, default candidacy, or Kokoro retirement.
+
+MOSS-NANO-13B app audio bridge evidence:
+
+- App-sidecar entry point: `scripts/moss_nano_app_sidecar.py`.
+- Default app runtime paths: `.runtime/moss/.venv-nano`, `.runtime/moss/MOSS-TTS-Nano`, `.runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX`, and `.runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX`.
+- Readiness truth: the bridge reports `blocked` unless Python, source repo, model dir, tokenizer dir, ONNX files, imports, and ORT session setup are usable. `ready` is emitted only after `OnnxTtsRuntime` is constructed.
+- Real synthesis path: the app bridge reuses the resident diagnostic runtime shape (`OnnxTtsRuntime.synthesize`) and writes WAV files under `.tmp/moss-nano-app-sidecar`.
+- Synthetic output is forbidden by default. It exists only behind explicit `--mock` / test mock config and is rejected by the Node adapter in real mode unless `syntheticAudio === false`.
+- Direct Node smoke on 2026-05-02 reached ready with `backend: "moss-nano-onnx"`, `modelVariant: "moss-tts-nano-onnx"`, `syntheticAudio: false`, and `sessionCreateMs` about `8439`. Synthesis returned `sampleRate: 48000`, `durationMs: 3360`, `audioLength: 161280`, `syntheticAudio: false`, and an `outputPath` under `.tmp/moss-nano-app-sidecar`.
+- WeText processing stays disabled in the app bridge to match the diagnostic resident path and avoid the missing `tn` import blocker in this local runtime.
+- Nano narration still exposes only segment-following timing; no word timestamps are produced or trusted.
 
 ### Runtime Command Truth
 

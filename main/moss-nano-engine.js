@@ -2,14 +2,19 @@
 // main/moss-nano-engine.js - experimental MOSS Nano sidecar manager.
 
 const path = require("path");
+const fs = require("fs");
 const { randomUUID } = require("crypto");
 const { createMossNanoSidecarAdapter } = require("./moss-nano-sidecar");
 
+const DEFAULT_NANO_PYTHON = path.resolve(__dirname, "..", ".runtime", "moss", ".venv-nano", "Scripts", "python.exe");
+
 const DEFAULT_CONFIG = {
-  runtimeDir: path.resolve(__dirname, "..", ".runtime", "moss-nano"),
-  modelDir: path.resolve(__dirname, "..", ".runtime", "moss-nano", "model"),
-  tokenizerDir: path.resolve(__dirname, "..", ".runtime", "moss-nano", "tokenizer"),
-  commandTimeoutMs: 5000,
+  pythonExe: fs.existsSync(DEFAULT_NANO_PYTHON) ? DEFAULT_NANO_PYTHON : undefined,
+  runtimeDir: path.resolve(__dirname, "..", ".runtime", "moss", "MOSS-TTS-Nano"),
+  modelDir: path.resolve(__dirname, "..", ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX", "MOSS-TTS-Nano-100M-ONNX"),
+  tokenizerDir: path.resolve(__dirname, "..", ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX", "MOSS-Audio-Tokenizer-Nano-ONNX"),
+  outputDir: path.resolve(__dirname, "..", ".tmp", "moss-nano-app-sidecar"),
+  commandTimeoutMs: 30000,
   synthesizeTimeoutMs: 120000,
   maxInFlight: 1,
   restartBackoffMs: 250,
@@ -48,6 +53,9 @@ function normalizeStatus(status, config, fallback = {}) {
         ? fallback.recoverable
         : true,
     config: createConfigSnapshot(config),
+    runtime: status?.runtime ?? fallback.runtime ?? null,
+    metadata: status?.metadata ?? fallback.metadata ?? null,
+    syntheticAudio: status?.syntheticAudio,
   };
   return next;
 }
@@ -150,7 +158,10 @@ function createMossNanoEngine(options = {}) {
   }
 
   async function status() {
-    if (!started) return { ...snapshot, config: createConfigSnapshot(config) };
+    if (!started) {
+      await ensureStarted();
+      if (!started) return { ...snapshot, config: createConfigSnapshot(config) };
+    }
 
     const result = await sidecarAdapter.status();
     snapshot = normalizeStatus(result, config, {

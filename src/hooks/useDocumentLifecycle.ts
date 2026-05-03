@@ -195,9 +195,7 @@ export function useDocumentLifecycle({
     const preloadTtsEngine =
       settings.ttsEngine === "kokoro"
         ? api.kokoroPreload
-        : settings.ttsEngine === "qwen"
-          ? api.qwenPreload
-          : null;
+        : null;
     if (preloadTtsEngine) {
       prewarmTimer = setTimeout(() => preloadTtsEngine().catch(() => {}), 2000);
     }

@@ -5,6 +5,7 @@ import {
   TTS_PAUSE_SENTENCE_MS,
   TTS_PAUSE_PARAGRAPH_MS,
   TTS_DIALOGUE_SENTENCE_THRESHOLD,
+  normalizeSelectableTtsEngine,
 } from "../constants";
 import type { BlurbySettings, BlurbyDoc, TtsEngine } from "../types";
 import type { BookWordArray } from "../types/narration";
@@ -98,15 +99,13 @@ export function useNarrationSync({
 
   // ── 4. Sync TTS engine from settings → narration hook ───────────────────
   useEffect(() => {
-    narration.setEngine(settings.ttsEngine || "web");
+    narration.setEngine(normalizeSelectableTtsEngine(settings.ttsEngine));
   }, [settings.ttsEngine, narration.setEngine]);
 
   // ── 5. Sync TTS voice from settings → narration hook ────────────────────
   useEffect(() => {
     if (settings.ttsEngine === "kokoro" && settings.ttsVoiceName) {
       narrationSetKokoroVoiceRef.current(settings.ttsVoiceName);
-    } else if (settings.ttsEngine === "qwen" && settings.ttsVoiceName) {
-      narrationSetQwenVoiceRef.current?.(settings.ttsVoiceName);
     } else if (settings.ttsVoiceName && narrationVoicesRef.current.length > 0) {
       const voice = narrationVoicesRef.current.find((v) => v.name === settings.ttsVoiceName);
       if (voice && voice.name !== narrationCurrentVoiceRef.current?.name) {

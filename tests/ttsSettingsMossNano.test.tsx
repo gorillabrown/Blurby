@@ -123,7 +123,7 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     delete (window as any).electronAPI;
   });
 
-  it("keeps Qwen as the default while showing Nano as experimental and blocked without the sidecar API", async () => {
+  it("deactivates Qwen while keeping Kokoro default and Nano opt-in experimental", async () => {
     await renderSettings(DEFAULT_SETTINGS as BlurbySettings);
 
     const engineButtons = Array.from(container.querySelectorAll(".tts-engine-toggle button"));
@@ -133,12 +133,21 @@ describe("TTSSettings Moss Nano experimental UI", () => {
       "Kokoro AI (Legacy)",
       "Nano AI (Experimental)",
     ]);
-    expect((DEFAULT_SETTINGS as BlurbySettings).ttsEngine).toBe("qwen");
-    expect(container.textContent).toContain("Nano is experimental and requires the local MOSS Nano sidecar.");
+    expect((DEFAULT_SETTINGS as BlurbySettings).ttsEngine).toBe("kokoro");
+    expect((DEFAULT_SETTINGS as BlurbySettings).ttsVoiceName).toBeNull();
+    const qwenButton = engineButtons.find((button) => button.textContent?.includes("Qwen AI"));
+    expect(qwenButton?.hasAttribute("disabled")).toBe(true);
+    expect(qwenButton?.getAttribute("aria-disabled")).toBe("true");
+    expect(qwenButton?.className).not.toContain("active");
+    expect(container.textContent).toContain("Qwen is currently disabled.");
+    expect(container.textContent).toContain("Nano is selectable as an experimental local runtime and requires the local MOSS Nano sidecar.");
     expect(container.textContent).toContain("Nano sidecar API is unavailable.");
 
     const nanoButton = engineButtons.find((button) => button.textContent?.includes("Nano AI"));
     expect(nanoButton?.hasAttribute("disabled")).toBe(true);
+    expect(nanoButton?.className).not.toContain("active");
+    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro AI"));
+    expect(kokoroButton?.className).toContain("active");
   });
 
   it("does not present blocked Nano as ready-for-use or previewable", async () => {
@@ -168,19 +177,19 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     expect((window as any).electronAPI.nanoSynthesize).not.toHaveBeenCalled();
   });
 
-  it("selects Nano only after nanoStatus reports ready", async () => {
+  it("selects Nano when the sidecar API exists even before nanoStatus reports ready", async () => {
     (window as any).electronAPI = createElectronApiMock({
-      status: "ready",
-      detail: "Nano sidecar ready",
-      reason: null,
-      ready: true,
+      status: "unavailable",
+      detail: "Nano sidecar has not been started",
+      reason: "sidecar-not-started",
+      ready: false,
       loading: false,
-      recoverable: false,
+      recoverable: true,
     });
 
     const onSettingsChange = await renderSettings({
       ...(DEFAULT_SETTINGS as BlurbySettings),
-      ttsEngine: "qwen",
+      ttsEngine: "web",
       ttsVoiceName: null,
     });
 
@@ -195,6 +204,74 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     });
 
     expect(onSettingsChange).toHaveBeenCalledWith({ ttsEngine: "nano", ttsVoiceName: null });
+  });
+
+  it("shows Nano ready after the sidecar-backed status check succeeds while selecting Nano", async () => {
+    (window as any).electronAPI = createElectronApiMock({
+      status: "ready",
+      detail: "Nano sidecar ready",
+      reason: null,
+      ready: true,
+      loading: false,
+      recoverable: false,
+    });
+
+    const onSettingsChange = await renderSettings({
+      ...(DEFAULT_SETTINGS as BlurbySettings),
+      ttsEngine: "web",
+      ttsVoiceName: null,
+    });
+
+    const nanoButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
+      (button) => button.textContent?.includes("Nano AI"),
+    );
+    expect(nanoButton?.hasAttribute("disabled")).toBe(false);
+
+    await act(async () => {
+      nanoButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await flushPromises();
+    });
+
+    expect(onSettingsChange).toHaveBeenCalledWith({ ttsEngine: "nano", ttsVoiceName: null });
+
+    await renderSettings({
+      ...(DEFAULT_SETTINGS as BlurbySettings),
+      ttsEngine: "nano",
+      ttsVoiceName: null,
+    }, onSettingsChange);
+
+    expect(container.textContent).toContain("Nano runtime ready");
+    expect(container.textContent).toContain("Nano sidecar ready");
+  });
+
+  it("does not allow Qwen to be re-selected from settings", async () => {
+    (window as any).electronAPI = createElectronApiMock({
+      status: "unavailable",
+      detail: "Nano sidecar has not been started",
+      reason: "sidecar-not-started",
+      ready: false,
+      loading: false,
+      recoverable: true,
+    });
+
+    const onSettingsChange = await renderSettings({
+      ...(DEFAULT_SETTINGS as BlurbySettings),
+      ttsEngine: "web",
+      ttsVoiceName: null,
+    });
+
+    const qwenButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
+      (button) => button.textContent?.includes("Qwen AI"),
+    );
+    expect(qwenButton?.hasAttribute("disabled")).toBe(true);
+
+    await act(async () => {
+      qwenButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      await flushPromises();
+    });
+
+    expect(onSettingsChange).not.toHaveBeenCalledWith(expect.objectContaining({ ttsEngine: "qwen" }));
+    expect((window as any).electronAPI.qwenPreload).not.toHaveBeenCalled();
   });
 
   it("previews ready Nano through nanoStatus and nanoSynthesize without falling back to another engine", async () => {

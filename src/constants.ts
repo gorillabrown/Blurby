@@ -1,6 +1,6 @@
 // src/constants.ts — All tunable behavioral constants for the renderer
 // Grouped by domain. CSS custom properties are exempt (they live in global.css).
-import type { NarrationProfile, BlurbySettings, ReadingGoal } from "./types";
+import type { NarrationProfile, BlurbySettings, ReadingGoal, TtsEngine } from "./types";
 
 // ── Reader / WPM ──────────────────────────────────────────────────────────────
 /** Default reading speed (words per minute) */
@@ -159,6 +159,17 @@ export const MAX_PRONUNCIATION_OVERRIDES = 100;
 // ── Narration Profiles (TTS-6L) ────────────────────────────────────────────
 /** Maximum number of narration profiles a user can create */
 export const MAX_NARRATION_PROFILES = 20;
+/** Qwen is retained as a historical/runtime type, but it is not selectable in product UI. */
+export const QWEN_TTS_DISABLED = true;
+/** Current selectable default while Qwen is deactivated. */
+export const TTS_DEFAULT_ENGINE: TtsEngine = "kokoro";
+export const TTS_DEFAULT_VOICE_NAME: string | null = null;
+
+/** Normalize persisted or imported engine values onto the currently selectable set. */
+export function normalizeSelectableTtsEngine(engine: unknown): TtsEngine {
+  if (engine === "web" || engine === "kokoro" || engine === "nano") return engine;
+  return TTS_DEFAULT_ENGINE;
+}
 
 /** Create a new profile with current TTS defaults. */
 export function createDefaultNarrationProfile(name: string): NarrationProfile {
@@ -166,8 +177,8 @@ export function createDefaultNarrationProfile(name: string): NarrationProfile {
   return {
     id: `np-${now}-${Math.random().toString(36).slice(2, 6)}`,
     name,
-    ttsEngine: "qwen",
-    ttsVoiceName: QWEN_DEFAULT_SPEAKER,
+    ttsEngine: TTS_DEFAULT_ENGINE,
+    ttsVoiceName: TTS_DEFAULT_VOICE_NAME,
     ttsRate: 1.0,
     ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
     ttsPauseClauseMs: TTS_PAUSE_CLAUSE_MS,
@@ -184,10 +195,11 @@ export function createDefaultNarrationProfile(name: string): NarrationProfile {
 /** Create a profile from the user's current flat TTS settings. */
 export function profileFromSettings(name: string, settings: BlurbySettings): NarrationProfile {
   const base = createDefaultNarrationProfile(name);
+  const ttsEngine = normalizeSelectableTtsEngine(settings.ttsEngine);
   return {
     ...base,
-    ttsEngine: settings.ttsEngine || "qwen",
-    ttsVoiceName: settings.ttsVoiceName || QWEN_DEFAULT_SPEAKER,
+    ttsEngine,
+    ttsVoiceName: ttsEngine === "nano" ? null : settings.ttsVoiceName || null,
     ttsRate: settings.ttsRate || 1.0,
     ttsPauseCommaMs: settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
     ttsPauseClauseMs: settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
@@ -300,7 +312,7 @@ export const KOKORO_VOICE_NAMES: Record<string, string> = {
 };
 
 // ── Qwen TTS Defaults ────────────────────────────────────────────────────────
-/** Shared default speaker for the product-default Qwen narration lane. */
+/** Shared historical speaker for the disabled Qwen narration lane. */
 export const QWEN_DEFAULT_SPEAKER = "Ryan";
 
 // ── E-ink ─────────────────────────────────────────────────────────────────────
@@ -524,8 +536,8 @@ export const DEFAULT_SETTINGS = {
   lastReadingMode: "flow" as const,
   isNarrating: false,
   ttsEnabled: false,
-  ttsEngine: "qwen" as const,
-  ttsVoiceName: QWEN_DEFAULT_SPEAKER as string | null,
+  ttsEngine: TTS_DEFAULT_ENGINE,
+  ttsVoiceName: TTS_DEFAULT_VOICE_NAME,
   ttsRate: 1.0,
   ttsPauseCommaMs: TTS_PAUSE_COMMA_MS,
   ttsPauseClauseMs: TTS_PAUSE_CLAUSE_MS,

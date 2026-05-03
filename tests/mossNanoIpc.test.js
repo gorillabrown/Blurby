@@ -243,6 +243,28 @@ describe("experimental MOSS Nano IPC contract", () => {
       });
     }
   });
+
+  it("returns Nano synthesize audio output through the existing IPC channel", async () => {
+    const nanoResult = {
+      ok: true,
+      requestId: "nano-req-1",
+      ownerToken: "owner-1",
+      audio: [0, 0.1, -0.1, 0],
+      sampleRate: 24000,
+      durationMs: 50,
+      outputPath: "C:\\fake\\nano-req-1.wav",
+    };
+    const nanoEngine = createNanoEngineStub({
+      synthesize: vi.fn().mockResolvedValue(nanoResult),
+    });
+    const harness = createIpcHarness({ nanoEngine });
+
+    harness.loadAndRegister();
+
+    const payload = { text: "hello nano", voice: "default", rate: 1.0 };
+    await expect(harness.ipcHandlers.get("tts-nano-synthesize")(null, payload)).resolves.toEqual(nanoResult);
+    expect(nanoEngine.synthesize).toHaveBeenCalledWith(payload);
+  });
 });
 
 describe("experimental MOSS Nano preload contract", () => {

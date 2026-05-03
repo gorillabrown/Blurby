@@ -229,6 +229,28 @@ describe("createMossNanoStrategy", () => {
     expect(chunk.wordTimestamps ?? null).toBeNull();
   });
 
+  it("does not trust or forward wordTimestamps from real Nano sidecar output", async () => {
+    electronAPI.nanoSynthesize.mockResolvedValue(successfulSynthesis({
+      syntheticAudio: false,
+      runtime: {
+        backend: "moss-nano-onnx",
+        modelVariant: "moss-tts-nano-onnx",
+      },
+      wordTimestamps: [
+        { word: "MOSS", start: 0, end: 0.1 },
+      ],
+    }));
+    const strategy = createMossNanoStrategy(makeDeps());
+
+    strategy.speakChunk("MOSS Nano speaks.", words, 12, 1.0, vi.fn(), vi.fn(), vi.fn());
+
+    await vi.waitFor(() => expect(schedulerMock.scheduleChunk).toHaveBeenCalledTimes(1));
+
+    const chunk = schedulerMock.scheduleChunk.mock.calls[0][0] as any;
+    expect(chunk.timingTruth).toBe("segment-following");
+    expect(chunk.wordTimestamps).toBeNull();
+  });
+
   it("routes structured Nano synthesis failures through onError and preserves failure details", async () => {
     const failure = {
       ok: false,

@@ -35,7 +35,7 @@ function normalizeNanoStatusSnapshot(
     reason: snapshot.reason ?? null,
     ready: Boolean(snapshot.ready),
     loading: Boolean(snapshot.loading),
-    recoverable: Boolean(snapshot.recoverable),
+    recoverable: snapshot.recoverable ?? true,
   };
 }
 
@@ -44,6 +44,7 @@ export function useMossNanoSettingsStatus() {
   const [nanoStatus, setNanoStatus] = useState<MossNanoStatusSnapshot>(DEFAULT_NANO_STATUS_SNAPSHOT);
   const nanoApiAvailable = Boolean(api?.nanoStatus && api?.nanoSynthesize);
   const nanoReady = nanoApiAvailable && nanoStatus.ready && nanoStatus.status === "ready";
+  const nanoSelectable = nanoApiAvailable;
   const nanoLoading = nanoStatus.loading || nanoStatus.status === "loading";
   const nanoStatusTitle = nanoReady
     ? "Nano runtime ready"
@@ -71,6 +72,8 @@ export function useMossNanoSettingsStatus() {
   }, [api]);
 
   return {
+    nanoApiAvailable,
+    nanoSelectable,
     nanoReady,
     nanoStatusTitle,
     nanoStatusDetail,
