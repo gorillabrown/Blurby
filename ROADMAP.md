@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-02 — Second-pass roadmap review. Desktop v2.0 expanded to include MOSS-NANO productization track per both 3rd-party audits.
+**Last updated**: 2026-05-03 — MOSS-NANO-13B merged to `main`; MOSS-NANO-13c unblocked.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, and MOSS-NANO-13B landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. Next queue item: MOSS-NANO-13c.
+**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, and MOSS-NANO-13B have landed on `main` (13B merge `c7c133c`; branch tip `45ff48c`). QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. Next queue item: MOSS-NANO-13c.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
 **Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity). Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
@@ -525,7 +525,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, and MOSS-NANO-13B completed 2026-05-02. MOSS-NANO-13c is next in the Desktop v2.0 active conveyor; do not start it from this closeout.
+> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, and MOSS-NANO-13B completed and merged to `main` by 2026-05-03. MOSS-NANO-13c is next in the Desktop v2.0 active conveyor; do not start it from this closeout.
 
 ---
 
@@ -723,7 +723,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 > - 13d: Lane E (Governance) — audit memo rewrite + manifest field rename
 > - 13e: Lane B (Eval Harness) — live capture run + decision write-up
 
-**Closeout update 2026-05-02:** MOSS-NANO-13a established the resident child-process app sidecar path. MOSS-NANO-13B replaced the synthetic app-sidecar audio with real local MOSS-TTS-Nano ONNX synthesis through `tts-nano-*` IPC. Decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`. Scope remains narrow: Nano is selectable and can preview/synthesize only when readiness is truthful; Nano remains non-default, Qwen remains disabled, Kokoro remains available, and Nano narration remains `timingTruth: "segment-following"` with `wordTimestamps: null`.
+**Closeout update 2026-05-03:** MOSS-NANO-13a established the resident child-process app sidecar path. MOSS-NANO-13B replaced the synthetic app-sidecar audio with real local MOSS-TTS-Nano ONNX synthesis through `tts-nano-*` IPC, then merged to `main` as `c7c133c` after residual Qwen-disable cleanup `45ff48c`. Decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`. Scope remains narrow: Nano is selectable and can preview/synthesize only when readiness is truthful; Nano remains non-default, Qwen remains disabled, Kokoro remains available, and Nano narration remains `timingTruth: "segment-following"` with `wordTimestamps: null`.
 
 ---
 

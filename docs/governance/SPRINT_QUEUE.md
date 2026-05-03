@@ -57,8 +57,8 @@ HOW (Review / Closeout):
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping (now includes MOSS-NANO productization decision: `PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`)
 Queue depth: 1 dispatch-ready + 4 stage stubs (AMBER; backfill after MOSS-NANO-13c)
-Next queue item: MOSS-NANO-13c (MOSS-NANO-13B completed)
-Health: GREEN — MOSS-NANO-13B closed with real local ONNX app audio through the Nano sidecar. Desktop v2.0 conveyor continues with MOSS-NANO-13c/d/e per both 3rd-party audits. No exploratory TTS/model work is approved beyond 13c–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Qwen remains disabled; Kokoro remains available.
+Next queue item: MOSS-NANO-13c (MOSS-NANO-13B completed and merged to main)
+Health: GREEN — MOSS-NANO-13B closed with real local ONNX app audio through the Nano sidecar and landed on main at merge c7c133c after residual Qwen-disable cleanup 45ff48c. Desktop v2.0 conveyor continues with MOSS-NANO-13c/d/e per both 3rd-party audits. No exploratory TTS/model work is approved beyond 13c–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Qwen remains disabled; Kokoro remains available.
 Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity).
 ```
 
@@ -72,7 +72,7 @@ Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expan
 | ~~3~~ | ~~EINK-6B~~ | ~~Stage 2: Features~~ | ~~M~~ | ~~EINK-6A~~ | ✅ complete (2026-05-02) |
 | ~~4~~ | ~~GOALS-6B~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
 | ~~5~~ | ~~MOSS-NANO-13a~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~GOALS-6B complete~~ | ✅ complete (2026-05-02) |
-| ~~6~~ | ~~MOSS-NANO-13B~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a~~ | ✅ complete (2026-05-02) |
+| ~~6~~ | ~~MOSS-NANO-13B~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a~~ | ✅ complete and merged to main (2026-05-03) |
 | 7 | MOSS-NANO-13c | Stage 3: MOSS-NANO Productization | L | 13a, 13B | **next up** |
 | 8 | MOSS-NANO-13d | Stage 3: MOSS-NANO Productization | S | 13c | stub — spec at Stage 3 mid (after 13c) |
 | 9 | MOSS-NANO-13e | Stage 3: MOSS-NANO Productization | M | 13a–d | stub — spec at Stage 3 mid (after 13d) |
@@ -121,12 +121,12 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 C
 
 ```text
 Sprint: MOSS-NANO-13B — Real MOSS Nano App Audio Bridge
-Status: COMPLETED 2026-05-02 with decision PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE.
+Status: COMPLETED 2026-05-03 on main with decision PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE.
 Type: Runtime integration + readiness truth hardening. No default-engine change, no Qwen reactivation, no Kokoro retirement, no synthetic promotion.
 
 WHAT: Replaced the app-sidecar synthetic preview tone path with real local MOSS-TTS-Nano ONNX synthesis through the Electron tts-nano-* IPC path. The Python bridge validates repo/model/tokenizer/dependencies before reporting ready, disables WeText text normalization for parity with the diagnostic resident path, writes WAV output under .tmp, returns PCM/sample-rate/duration/runtime metadata, and marks real output syntheticAudio:false. Synthetic audio now requires explicit mock mode.
 
-EVIDENCE: Direct app-sidecar smoke reached status ready with backend moss-nano-onnx and modelVariant moss-tts-nano-onnx, then synthesized "MOSS Nano real audio smoke test." to a 48000 Hz WAV with durationMs 3360, audioLength 161280, outputPath under .tmp/moss-nano-app-sidecar, and syntheticAudio:false. Focused Nano sidecar/settings/strategy verification passed 4 files / 43 tests; Python compile passed. Full `npm test` passed 163 files / 2489 tests; `npm run build` passed with the existing circular chunk warning; `npm audit --audit-level=high` passed with moderate-only `uuid` advisories; `git diff --check` passed.
+EVIDENCE: Direct app-sidecar smoke reached status ready with backend moss-nano-onnx and modelVariant moss-tts-nano-onnx, then synthesized "MOSS Nano real audio smoke test." to a 48000 Hz WAV with durationMs 3360, audioLength 161280, outputPath under .tmp/moss-nano-app-sidecar, and syntheticAudio:false. Focused Nano sidecar/settings/strategy verification passed 4 files / 43 tests; Python compile passed. Integration closeout focused Qwen-disable/Nano verification passed 10 files / 92 tests. Full `npm test` passed 163 files / 2489 tests; `npm run build` passed with the existing circular chunk warning; `npm audit --audit-level=high` passed with moderate-only `uuid` advisories; `git diff --check` passed. Branch `sprint/moss-nano-13b-real-app-audio-bridge` merged to main as c7c133c after cleanup commit 45ff48c.
 
 LIMITS: Nano narration remains segment-following only with wordTimestamps:null. The real sidecar returns PCM over IPC plus outputPath, so long-form usage must remain bounded until live evidence and payload-size hardening are captured. Kokoro remains available; no silent fallback occurs when Nano is selected and blocked.
 
