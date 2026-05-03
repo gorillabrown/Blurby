@@ -1168,11 +1168,9 @@ export default function ReaderContainer({
           {(narration.warming || narration.kokoroLoading) && (
             <div className="kokoro-loading-toast" role="status" aria-live="polite">
               {narration.warming
-                ? settings.ttsEngine === "qwen"
-                  ? "Starting Qwen..."
-                  : settings.ttsEngine === "kokoro"
-                    ? "Starting legacy Kokoro..."
-                    : "Starting narration..."
+                ? settings.ttsEngine === "kokoro"
+                  ? "Starting legacy Kokoro..."
+                  : "Starting narration..."
                 : "Loading voice model..."}
             </div>
           )}
@@ -1214,7 +1212,7 @@ export default function ReaderContainer({
             updateSettings({ ttsRate: rate });
             narration.adjustRate(rate);
           }}
-          ttsEngine={settings.ttsEngine || "qwen"}
+          ttsEngine={settings.ttsEngine || "kokoro"}
           foliateFraction={useFoliate ? foliateFraction : undefined}
           narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
           flowZonePosition={settings.flowZonePosition}

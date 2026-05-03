@@ -4,7 +4,12 @@
  * profiles, voices, and settings gracefully.
  */
 import type { BlurbySettings, NarrationProfile, BlurbyDoc, TtsEngine } from "../types";
-import { resolveNarrationProfile, KOKORO_VOICE_NAMES, KOKORO_DEFAULT_RATE_BUCKET } from "../constants";
+import {
+  resolveNarrationProfile,
+  KOKORO_VOICE_NAMES,
+  KOKORO_DEFAULT_RATE_BUCKET,
+  normalizeSelectableTtsEngine,
+} from "../constants";
 
 /** The resolved narration context for a book session. */
 export interface NarrationContext {
@@ -77,7 +82,10 @@ function validateVoice(voiceName: string | null, engine: TtsEngine): string | nu
     return voiceName in KOKORO_VOICE_NAMES ? voiceName : null;
   }
   if (engine === "qwen") {
-    return voiceName;
+    return null;
+  }
+  if (engine === "nano") {
+    return null;
   }
   // Web Speech voices are platform-dependent — accept any non-empty string
   // (actual validation happens at runtime when getVoices() returns)
@@ -85,7 +93,7 @@ function validateVoice(voiceName: string | null, engine: TtsEngine): string | nu
 }
 
 function normalizeEngine(engine: unknown): TtsEngine {
-  return engine === "web" || engine === "kokoro" || engine === "qwen" ? engine : "qwen";
+  return normalizeSelectableTtsEngine(engine);
 }
 
 /** Clamp rate to valid TTS range. */

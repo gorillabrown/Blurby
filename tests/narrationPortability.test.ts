@@ -94,6 +94,15 @@ describe("validateNarrationImport", () => {
     expect(result.errors).toEqual([]);
   });
 
+  it("accepts nano as a valid profile engine", () => {
+    const result = validateNarrationImport(
+      { version: 1, profiles: [{ id: "x", name: "Nano", ttsEngine: "nano" }], globalOverrides: [] },
+      makeSettings(),
+    );
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
   it("rejects profile with invalid engine", () => {
     const result = validateNarrationImport(
       { version: 1, profiles: [{ id: "x", name: "X", ttsEngine: "invalid" }], globalOverrides: [] },
