@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { calculateAggregateMetrics, formatAggregateSummary } from "../scripts/tts_eval_metrics.mjs";
 import { getSoakProfile } from "../scripts/tts_eval_profiles.mjs";
 import {
+  buildMossNanoLiveEvidenceArtifact,
   evaluateMossNanoLiveEvidenceGate,
   evaluateMossNanoProductGate,
   executeSoak,
@@ -77,6 +78,67 @@ async function createRuntimeWithFiles(baseDir: string) {
     ],
   ]);
   return { fixtureManifest, matrixManifest, fixtureLookup };
+}
+
+function nanoLiveEvidenceScenarios() {
+  return ["page", "focus", "flow", "narrate"].map((mode) => ({
+    id: `moss-nano-13c-${mode}-live-evidence`,
+    engine: "nano",
+    readingMode: mode,
+    fixtureId: "prose-basic",
+    voiceId: "af_bella",
+    requestedRate: 1.0,
+    durationClass: "medium",
+    tags: ["moss-nano-12", "moss-nano-13c", "nano-live-evidence", mode],
+    nanoGate: { selectedEngine: "nano", readiness: "required" },
+  }));
+}
+
+async function writeTraceArtifact(
+  outDir: string,
+  mode: string,
+  overrides: Record<string, unknown> = {},
+) {
+  const traceDir = path.join(outDir, "traces");
+  await fs.mkdir(traceDir, { recursive: true });
+  const tracePath = path.join(traceDir, `${mode}.json`);
+  const trace = {
+    schemaVersion: "1.0",
+    evidenceSource: "real-app-selected-nano",
+    selectedEngine: "nano",
+    runtime: { backend: "moss-nano-onnx", modelVariant: "moss-tts-nano-onnx", syntheticAudio: false },
+    runId: "nano13c-live",
+    scenarioId: `moss-nano-13c-${mode}-live-evidence`,
+    fixture: { id: "prose-basic" },
+    events: [
+      { kind: "lifecycle", state: "start", ts: 1 },
+      { kind: "lifecycle", state: "first-audio", ts: 90, latencyMs: 89 },
+      {
+        kind: "nano-segment",
+        phase: "request",
+        startIdx: 0,
+        endIdx: 4,
+        cacheHit: false,
+        prefetchReady: false,
+        timingTruth: "segment-following",
+        wordTimestamps: null,
+      },
+      {
+        kind: "nano-segment",
+        phase: "playback",
+        startIdx: 0,
+        endIdx: 4,
+        latencyMs: 210,
+        cacheHit: false,
+        prefetchReady: false,
+        timingTruth: "segment-following",
+        wordTimestamps: null,
+      },
+    ],
+    ...overrides,
+  };
+  await fs.writeFile(tracePath, JSON.stringify(trace, null, 2), "utf8");
+  return tracePath;
 }
 
 describe("tts eval matrix/soak runner", () => {
@@ -589,7 +651,7 @@ describe("tts eval matrix/soak runner", () => {
     expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
   });
 
-  it("allows MOSS-NANO-12 recommended opt-in only with complete passing live evidence", () => {
+  it("rejects legacy MOSS-NANO-12 boolean evidence without 13c provenance", () => {
     const evidenceByMode = Object.fromEntries(
       ["page", "focus", "flow", "narrate"].map((mode) => [
         mode,
@@ -623,8 +685,8 @@ describe("tts eval matrix/soak runner", () => {
       liveEvidence: { modes: evidenceByMode },
     } as any);
 
-    expect(result.decision).toBe("NANO_RECOMMENDED_OPT_IN");
-    expect(result.reasons).toEqual([]);
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).toContain("Live evidence artifact is not real app-selected Nano evidence.");
   });
 
   it("caps MOSS-NANO-12 at experimental-only when a live mode is missing", () => {
@@ -646,25 +708,25 @@ describe("tts eval matrix/soak runner", () => {
     expect(result.reasons).toContain("Missing selected-Nano live evidence mode: narrate");
   });
 
-  it("pauses MOSS-NANO-12 productization when segment-following progress is not understandable", () => {
-    const evidenceByMode = Object.fromEntries(
-      ["page", "focus", "flow", "narrate"].map((mode) => [
-        mode,
-        {
-          live: true,
-          nanoSelected: true,
-          startable: true,
-          segmentProgressUnderstandable: mode !== "focus",
-          noUnderlineRace: true,
-          cachePrefetchContinuity: true,
-          noStalePlayback: true,
-          pauseResumeSameMode: true,
-          modeSwitchAnchorPreserved: true,
-          explicitFallback: true,
-          sidecarLifecycleStable: true,
-        },
-      ]),
+  it("pauses MOSS-NANO-12 productization when segment-following progress is not understandable", async () => {
+    const outDir = await makeTempDir();
+    const tracePaths = Object.fromEntries(
+      await Promise.all(["page", "focus", "flow", "narrate"].map(async (mode) => [mode, await writeTraceArtifact(outDir, mode)])),
     );
+    const liveEvidence = await buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: Object.fromEntries(
+        Object.entries(tracePaths).map(([mode, tracePath]) => [
+          mode,
+          {
+            scenarioId: `moss-nano-12-${mode}`,
+            selectedEngine: "nano",
+            runArtifactPath: tracePath,
+            segmentProgressUnderstandable: mode !== "focus",
+          },
+        ]),
+      ),
+    } as any);
 
     const result = evaluateMossNanoLiveEvidenceGate({
       matrixManifest: {
@@ -677,7 +739,7 @@ describe("tts eval matrix/soak runner", () => {
           nanoGate: { selectedEngine: "nano", readiness: "required" },
         })),
       },
-      liveEvidence: { modes: evidenceByMode },
+      liveEvidence,
     } as any);
 
     expect(result.decision).toBe("PAUSE_NANO_PRODUCTIZATION");
@@ -706,7 +768,7 @@ describe("tts eval matrix/soak runner", () => {
     expect((rollup as any).mossNanoLiveEvidenceGate.reasons).toContain("Missing selected-Nano live evidence mode: focus");
   });
 
-  it("loads MOSS-NANO-12 live evidence from an explicit evidence artifact", async () => {
+  it("loads MOSS-NANO-13c live evidence from an explicit provenance artifact", async () => {
     const outDir = await makeTempDir();
     const evidencePath = path.join(outDir, "nano12-live-evidence.json");
     const runtime = await createRuntimeWithFiles(outDir);
@@ -723,29 +785,26 @@ describe("tts eval matrix/soak runner", () => {
         nanoGate: { selectedEngine: "nano", readiness: "required" },
       })),
     );
-    const passingModeEvidence = {
-      live: true,
-      nanoSelected: true,
-      startable: true,
-      segmentProgressUnderstandable: true,
-      noUnderlineRace: true,
-      cachePrefetchContinuity: true,
-      noStalePlayback: true,
-      pauseResumeSameMode: true,
-      modeSwitchAnchorPreserved: true,
-      explicitFallback: true,
-      sidecarLifecycleStable: true,
-    };
+    const tracePaths = Object.fromEntries(
+      await Promise.all(["page", "focus", "flow", "narrate"].map(async (mode) => [mode, await writeTraceArtifact(outDir, mode)])),
+    );
+    const artifact = await buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: Object.fromEntries(
+        Object.entries(tracePaths).map(([mode, tracePath]) => [
+          mode,
+          {
+            scenarioId: `moss-nano-12-${mode}-live-evidence`,
+            selectedEngine: "nano",
+            runArtifactPath: tracePath,
+            segmentProgressUnderstandable: true,
+          },
+        ]),
+      ),
+    } as any);
     await fs.writeFile(
       evidencePath,
-      JSON.stringify({
-        modes: {
-          page: passingModeEvidence,
-          focus: passingModeEvidence,
-          flow: passingModeEvidence,
-          narrate: passingModeEvidence,
-        },
-      }),
+      JSON.stringify(artifact),
       "utf8",
     );
 
@@ -764,5 +823,200 @@ describe("tts eval matrix/soak runner", () => {
 
     expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_RECOMMENDED_OPT_IN");
     expect((rollup as any).mossNanoLiveEvidenceGate.reasons).toEqual([]);
+  });
+
+  it("requires MOSS-NANO-13c live evidence to include machine provenance and linked trace artifacts", async () => {
+    const outDir = await makeTempDir();
+    const tracePath = await writeTraceArtifact(outDir, "page");
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: { scenarios: nanoLiveEvidenceScenarios() },
+      liveEvidence: {
+        schemaVersion: "moss-nano-live-evidence.v2",
+        evidenceKind: "real-app-selected-nano",
+        generatedBy: "scripts/tts_eval_runner.mjs",
+        generatedAt: "2026-05-03T12:00:00.000Z",
+        appCommit: "abc1234",
+        evidenceProducerVersion: "moss-nano-13c",
+        modes: {
+          page: {
+            live: true,
+            nanoSelected: true,
+            startable: true,
+            segmentProgressUnderstandable: true,
+            noUnderlineRace: true,
+            cachePrefetchContinuity: true,
+            noStalePlayback: true,
+            pauseResumeSameMode: true,
+            modeSwitchAnchorPreserved: true,
+            explicitFallback: true,
+            sidecarLifecycleStable: true,
+            source: "real-app-selected-nano",
+            runArtifactPath: tracePath,
+            traceEventCount: 4,
+            recordedAt: "2026-05-03T12:00:00.000Z",
+            scenarioId: "moss-nano-13c-page-live-evidence",
+            selectedEngine: "nano",
+            timingTruth: "segment-following",
+            wordTimestamps: null,
+            runtime: { backend: "moss-nano-onnx", syntheticAudio: false },
+            nanoSegmentLatencyMs: { p50: 210, p95: 210, min: 210, max: 210 },
+            nanoCache: { hits: 0, misses: 2, hitRate: 0 },
+            nanoPrefetch: { ready: 0, stale: 0, cancelled: 0 },
+            recycleObservations: { restarts: 0, cleanShutdowns: 1 },
+          },
+        },
+      },
+    } as any);
+
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).not.toContain("Missing live selected-Nano evidence for page");
+    expect(result.reasons).toContain("Missing live selected-Nano evidence for focus");
+  });
+
+  it("rejects simulated or hand-authored boolean-only evidence even when every legacy flag is true", () => {
+    const booleanOnlyEvidence = Object.fromEntries(
+      ["page", "focus", "flow", "narrate"].map((mode) => [
+        mode,
+        {
+          live: true,
+          nanoSelected: true,
+          startable: true,
+          segmentProgressUnderstandable: true,
+          noUnderlineRace: true,
+          cachePrefetchContinuity: true,
+          noStalePlayback: true,
+          pauseResumeSameMode: true,
+          modeSwitchAnchorPreserved: true,
+          explicitFallback: true,
+          sidecarLifecycleStable: true,
+          source: "simulated-matrix",
+        },
+      ]),
+    );
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: { scenarios: nanoLiveEvidenceScenarios() },
+      liveEvidence: {
+        schemaVersion: "moss-nano-live-evidence.v2",
+        evidenceKind: "simulated-matrix",
+        modes: booleanOnlyEvidence,
+      },
+    } as any);
+
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).toContain("Live evidence artifact is not real app-selected Nano evidence.");
+    expect(result.reasons).toContain("Rejected simulated or hand-authored live evidence for page");
+  });
+
+  it("builds a MOSS-NANO-13c evidence artifact from real nano-segment traces without fake word timestamps", async () => {
+    const outDir = await makeTempDir();
+    const tracePaths = Object.fromEntries(
+      await Promise.all(["page", "focus", "flow", "narrate"].map(async (mode) => [mode, await writeTraceArtifact(outDir, mode)])),
+    );
+
+    const artifact = await buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: Object.fromEntries(
+        Object.entries(tracePaths).map(([mode, tracePath]) => [
+          mode,
+          {
+            scenarioId: `moss-nano-13c-${mode}-live-evidence`,
+            selectedEngine: "nano",
+            runArtifactPath: tracePath,
+            segmentProgressUnderstandable: true,
+          },
+        ]),
+      ),
+    } as any);
+
+    expect(artifact.schemaVersion).toBe("moss-nano-live-evidence.v2");
+    expect(artifact.evidenceKind).toBe("real-app-selected-nano");
+    expect(artifact.modes.page.source).toBe("real-app-selected-nano");
+    expect(artifact.modes.page.traceEventCount).toBe(4);
+    expect(artifact.modes.page.runtime.syntheticAudio).toBe(false);
+    expect(artifact.modes.page.timingTruth).toBe("segment-following");
+    expect(artifact.modes.page.wordTimestamps).toBeNull();
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: { scenarios: nanoLiveEvidenceScenarios() },
+      liveEvidence: artifact,
+    } as any);
+
+    expect(result.decision).toBe("NANO_RECOMMENDED_OPT_IN");
+    expect(result.reasons).toEqual([]);
+  });
+
+  it("refuses to build MOSS-NANO-13c evidence from unmarked simulated traces", async () => {
+    const outDir = await makeTempDir();
+    const tracePath = await writeTraceArtifact(outDir, "page", { evidenceSource: "simulated-matrix" });
+
+    await expect(buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: {
+        page: {
+          selectedEngine: "nano",
+          runArtifactPath: tracePath,
+          segmentProgressUnderstandable: true,
+        },
+      },
+    } as any)).rejects.toThrow("not marked as real app-selected Nano evidence");
+  });
+
+  it("refuses to build MOSS-NANO-13c evidence unless the trace proves selected Nano and real audio", async () => {
+    const outDir = await makeTempDir();
+    const tracePath = await writeTraceArtifact(outDir, "page", {
+      selectedEngine: "kokoro",
+      runtime: { backend: "moss-nano-onnx", syntheticAudio: true },
+    });
+
+    await expect(buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: {
+        page: {
+          selectedEngine: "nano",
+          runArtifactPath: tracePath,
+          segmentProgressUnderstandable: true,
+        },
+      },
+    } as any)).rejects.toThrow("does not prove selected Nano");
+  });
+
+  it("writes MOSS-NANO-13c provenance evidence from explicit per-mode live trace inputs", async () => {
+    const outDir = await makeTempDir();
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push(...nanoLiveEvidenceScenarios() as any);
+    const tracePaths = Object.fromEntries(
+      await Promise.all(["page", "focus", "flow", "narrate"].map(async (mode) => [mode, await writeTraceArtifact(outDir, mode)])),
+    );
+    const evidencePath = path.join(outDir, "nano13c-live-evidence.json");
+
+    const args = parseArgs([
+      "--matrix",
+      "--tag",
+      "moss-nano-12",
+      "--tag",
+      "moss-nano-13c",
+      "--nano-live-evidence-out",
+      evidencePath,
+      "--nano-live-trace",
+      `page=${tracePaths.page}`,
+      "--nano-live-trace",
+      `focus=${tracePaths.focus}`,
+      "--nano-live-trace",
+      `flow=${tracePaths.flow}`,
+      "--nano-live-trace",
+      `narrate=${tracePaths.narrate}`,
+      "--run-id",
+      "nano13c",
+      "--out",
+      outDir,
+    ]);
+    const { rollup } = await runHarness(args, runtime as any);
+    const written = JSON.parse(await fs.readFile(evidencePath, "utf8"));
+
+    expect(written.schemaVersion).toBe("moss-nano-live-evidence.v2");
+    expect(written.modes.narrate.source).toBe("real-app-selected-nano");
+    expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_RECOMMENDED_OPT_IN");
   });
 });

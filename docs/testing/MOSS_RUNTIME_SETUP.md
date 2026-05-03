@@ -311,6 +311,26 @@ Expected probe outputs:
 
 If `.runtime/moss/config.json` is missing, the probe must classify the result as `config-missing`, set `ok: false`, set status to `blocked`, and write `summary.json` plus `summary.txt` under the canonical run output directory (`<out>/<run-id>/summary.*`). This is setup/provisioning evidence only: no MOSS runtime/synthesis has run, no `.wav` should be expected, and runtime-shape comparisons have not begun.
 
+## MOSS-NANO-13c Live Evidence Artifact
+
+MOSS-NANO-13c adds a provenance-backed evidence artifact for Nano recommended-opt-in decisions. This is separate from synthetic matrix output. A passing artifact must link to real selected-Nano trace artifacts for all four modes: Page, Focus, Flow, and Narrate.
+
+The runner can build and gate a v2 artifact from explicit per-mode trace inputs:
+
+```powershell
+npm run tts:eval:matrix -- --tag moss-nano-12 --tag moss-nano-13c --nano-live-evidence-out artifacts\tts-eval\nano-live-evidence.json --nano-live-trace page=artifacts\tts-eval\nano-live\page.trace.json --nano-live-trace focus=artifacts\tts-eval\nano-live\focus.trace.json --nano-live-trace flow=artifacts\tts-eval\nano-live\flow.trace.json --nano-live-trace narrate=artifacts\tts-eval\nano-live\narrate.trace.json --run-id nano13c --out artifacts\tts-eval\nano13c
+```
+
+Each linked trace must prove:
+
+- `evidenceSource: "real-app-selected-nano"` or equivalent provenance source
+- `selectedEngine: "nano"` in the trace itself
+- real Nano runtime metadata with `syntheticAudio: false`
+- `nano-segment` events using `timingTruth: "segment-following"` and `wordTimestamps: null`
+- enough Nano segment events to compute latency, cache, and prefetch observations
+
+The resulting evidence JSON uses `schemaVersion: "moss-nano-live-evidence.v2"` and `evidenceProducerVersion: "moss-nano-13c"`. Legacy all-true boolean JSON, simulated traces, missing modes, trace event-count mismatches, non-Nano-selected traces, and synthetic audio traces cannot promote Nano beyond `NANO_EXPERIMENTAL_ONLY`.
+
 ## No-Silent-Fallback Rule
 
 If MOSS is selected and unavailable, Blurby must show truthful MOSS status and recovery guidance. It must not silently switch to Kokoro, Qwen, or Web Speech. Kokoro remains available as the reliability baseline, but fallback must be user-visible and deliberate.

@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { calculateAggregateMetrics, formatAggregateSummary } from "./tts_eval_metrics.mjs";
@@ -9,6 +10,9 @@ const DEFAULT_FIXTURE_MANIFEST = "tests/fixtures/narration/manifest.json";
 const DEFAULT_MATRIX_MANIFEST = "tests/fixtures/narration/matrix.manifest.json";
 const DEFAULT_GATES_PATH = "docs/testing/tts_quality_gates.v1.json";
 const MOSS_NANO_PRODUCT_MODES = Object.freeze(["page", "focus", "flow", "narrate"]);
+const MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION = "moss-nano-live-evidence.v2";
+const MOSS_NANO_LIVE_EVIDENCE_KIND = "real-app-selected-nano";
+const MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION = "moss-nano-13c";
 const MOSS_NANO_PRODUCT_EVIDENCE_KEYS = Object.freeze([
   "liveBookMatrix",
   "settingsPreviewTruth",
@@ -32,6 +36,22 @@ const MOSS_NANO_LIVE_EVIDENCE_KEYS = Object.freeze([
   "modeSwitchAnchorPreserved",
   "explicitFallback",
   "sidecarLifecycleStable",
+]);
+
+const MOSS_NANO_LIVE_PROVENANCE_KEYS = Object.freeze([
+  "source",
+  "runArtifactPath",
+  "traceEventCount",
+  "recordedAt",
+  "scenarioId",
+  "selectedEngine",
+  "timingTruth",
+  "wordTimestamps",
+  "runtime",
+  "nanoSegmentLatencyMs",
+  "nanoCache",
+  "nanoPrefetch",
+  "recycleObservations",
 ]);
 
 function isMossNanoProductScenario(scenario) {
@@ -97,6 +117,82 @@ function isMossNanoLiveEvidenceScenario(scenario) {
     && (scenario.tags || []).includes("nano-live-evidence");
 }
 
+function isObject(value) {
+  return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+function countTraceEventsAtPath(runArtifactPath) {
+  if (!runArtifactPath || typeof runArtifactPath !== "string") return null;
+  try {
+    const raw = fsSyncReadJson(runArtifactPath);
+    return Array.isArray(raw?.events) ? raw.events.length : null;
+  } catch {
+    return null;
+  }
+}
+
+function fsSyncReadJson(filePath) {
+  return JSON.parse(readFileSync(filePath, "utf8"));
+}
+
+function validateMossNanoLiveEvidenceMode(mode, modeEvidence, reasons) {
+  if (!isObject(modeEvidence) || modeEvidence.live !== true) {
+    reasons.push(`Missing live selected-Nano evidence for ${mode}`);
+    return false;
+  }
+
+  let valid = true;
+  if (modeEvidence.source !== MOSS_NANO_LIVE_EVIDENCE_KIND) {
+    reasons.push(`Rejected simulated or hand-authored live evidence for ${mode}`);
+    valid = false;
+  }
+  for (const key of MOSS_NANO_LIVE_PROVENANCE_KEYS) {
+    if (!(key in modeEvidence)) {
+      reasons.push(`Missing MOSS-NANO-13c provenance field ${key} in ${mode}`);
+      valid = false;
+    }
+  }
+  if (modeEvidence.selectedEngine !== "nano") {
+    reasons.push(`Live evidence did not prove selected Nano in ${mode}`);
+    valid = false;
+  }
+  if (modeEvidence.timingTruth !== "segment-following" || modeEvidence.wordTimestamps !== null) {
+    reasons.push(`Live evidence did not preserve segment-following timing truth in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.runtime) || modeEvidence.runtime.syntheticAudio !== false) {
+    reasons.push(`Live evidence did not prove real non-synthetic Nano audio in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.nanoSegmentLatencyMs) || typeof modeEvidence.nanoSegmentLatencyMs.p50 !== "number") {
+    reasons.push(`Missing quantitative Nano latency provenance in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.nanoCache) || typeof modeEvidence.nanoCache.hits !== "number" || typeof modeEvidence.nanoCache.misses !== "number") {
+    reasons.push(`Missing quantitative Nano cache provenance in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.nanoPrefetch) || typeof modeEvidence.nanoPrefetch.ready !== "number") {
+    reasons.push(`Missing quantitative Nano prefetch provenance in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.recycleObservations)) {
+    reasons.push(`Missing Nano recycle observation provenance in ${mode}`);
+    valid = false;
+  }
+
+  const eventCount = countTraceEventsAtPath(modeEvidence.runArtifactPath);
+  if (eventCount == null) {
+    reasons.push(`Missing linked trace artifact for ${mode}`);
+    valid = false;
+  } else if (eventCount !== modeEvidence.traceEventCount) {
+    reasons.push(`Trace event count mismatch for ${mode}`);
+    valid = false;
+  }
+
+  return valid;
+}
+
 export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence = {} } = {}) {
   const scenarios = Array.isArray(matrixManifest?.scenarios) ? matrixManifest.scenarios : [];
   const nanoLiveScenarios = scenarios.filter(isMossNanoLiveEvidenceScenario);
@@ -111,6 +207,19 @@ export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence 
   const reasons = [];
   const pauseReasons = [];
 
+  if (liveEvidence.schemaVersion !== MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION) {
+    reasons.push(`Live evidence schemaVersion must be ${MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION}.`);
+  }
+  if (liveEvidence.evidenceKind !== MOSS_NANO_LIVE_EVIDENCE_KIND) {
+    reasons.push("Live evidence artifact is not real app-selected Nano evidence.");
+  }
+  if (liveEvidence.evidenceProducerVersion !== MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION) {
+    reasons.push(`Live evidence producer must be ${MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION}.`);
+  }
+  if (!liveEvidence.generatedAt || !liveEvidence.appCommit || !liveEvidence.generatedBy) {
+    reasons.push("Live evidence artifact is missing top-level provenance.");
+  }
+
   for (const mode of MOSS_NANO_PRODUCT_MODES) {
     if (!requiredModesPresent[mode]) {
       reasons.push(`Missing selected-Nano live evidence mode: ${mode}`);
@@ -118,8 +227,7 @@ export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence 
     }
 
     const modeEvidence = modes[mode];
-    if (!modeEvidence || modeEvidence.live !== true) {
-      reasons.push(`Missing live selected-Nano evidence for ${mode}`);
+    if (!validateMossNanoLiveEvidenceMode(mode, modeEvidence, reasons)) {
       continue;
     }
 
@@ -175,6 +283,9 @@ export function parseArgs(argv) {
     gates: false,
     streaming: false,
     nanoLiveEvidencePath: null,
+    nanoLiveEvidenceOutPath: null,
+    nanoLiveTracePaths: {},
+    appCommit: process.env.GITHUB_SHA || process.env.APP_COMMIT || "unknown",
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -229,7 +340,8 @@ export function parseArgs(argv) {
       continue;
     }
     if (token === "--tag" || token === "--tags") {
-      args.tags = argv[i + 1] ? argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+      const tags = argv[i + 1] ? argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+      args.tags = [...args.tags, ...tags];
       i += 1;
       continue;
     }
@@ -249,6 +361,25 @@ export function parseArgs(argv) {
     }
     if (token === "--nano-live-evidence") {
       args.nanoLiveEvidencePath = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
+    if (token === "--nano-live-evidence-out") {
+      args.nanoLiveEvidenceOutPath = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
+    if (token === "--nano-live-trace") {
+      const value = argv[i + 1] || "";
+      const separator = value.indexOf("=");
+      if (separator > 0) {
+        args.nanoLiveTracePaths[value.slice(0, separator)] = value.slice(separator + 1);
+      }
+      i += 1;
+      continue;
+    }
+    if (token === "--app-commit") {
+      args.appCommit = argv[i + 1] || args.appCommit;
       i += 1;
       continue;
     }
@@ -392,6 +523,114 @@ export function summarizeTrace(trace) {
       cancelled: nanoSegments.filter((event) => event.phase === "prefetch-cancelled").length,
     },
     failureClasses,
+  };
+}
+
+function traceHasOnlySegmentFollowingNano(trace) {
+  const nanoSegments = Array.isArray(trace?.events)
+    ? trace.events.filter((event) => event.kind === "nano-segment")
+    : [];
+  return nanoSegments.length > 0
+    && nanoSegments.every(
+      (event) => event.timingTruth === "segment-following" && event.wordTimestamps === null,
+    );
+}
+
+function runtimeFromTrace(trace) {
+  const runtimeEvent = Array.isArray(trace?.events)
+    ? trace.events.find((event) => event.kind === "nano-runtime" || event.kind === "nano-synthesis")
+    : null;
+  return {
+    backend: runtimeEvent?.backend ?? trace?.runtime?.backend ?? null,
+    modelVariant: runtimeEvent?.modelVariant ?? trace?.runtime?.modelVariant ?? null,
+    syntheticAudio: runtimeEvent?.syntheticAudio ?? trace?.runtime?.syntheticAudio ?? null,
+  };
+}
+
+function traceProvesRealAppSelectedNano(trace) {
+  return trace?.evidenceSource === MOSS_NANO_LIVE_EVIDENCE_KIND
+    || trace?.provenance?.source === MOSS_NANO_LIVE_EVIDENCE_KIND;
+}
+
+function selectedEngineFromTrace(trace) {
+  return trace?.selectedEngine ?? trace?.engine ?? trace?.provenance?.selectedEngine ?? null;
+}
+
+export async function buildMossNanoLiveEvidenceArtifact({
+  appCommit,
+  modes,
+  generatedAt = new Date().toISOString(),
+  generatedBy = "scripts/tts_eval_runner.mjs",
+  evidenceProducerVersion = MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION,
+} = {}) {
+  if (!appCommit) throw new Error("appCommit is required for MOSS Nano live evidence.");
+  if (!isObject(modes)) throw new Error("modes are required for MOSS Nano live evidence.");
+
+  const modeEvidenceEntries = [];
+  for (const mode of MOSS_NANO_PRODUCT_MODES) {
+    const config = modes[mode];
+    if (!isObject(config) || typeof config.runArtifactPath !== "string") {
+      throw new Error(`runArtifactPath is required for ${mode} live evidence.`);
+    }
+    const trace = await readJson(config.runArtifactPath);
+    if (!traceProvesRealAppSelectedNano(trace)) {
+      throw new Error(`Trace artifact for ${mode} is not marked as real app-selected Nano evidence.`);
+    }
+    const summary = summarizeTrace(trace);
+    const traceEventCount = Array.isArray(trace.events) ? trace.events.length : 0;
+    const selectedEngine = selectedEngineFromTrace(trace);
+    if (selectedEngine !== "nano") {
+      throw new Error(`Trace artifact for ${mode} does not prove selected Nano.`);
+    }
+    const segmentFollowing = traceHasOnlySegmentFollowingNano(trace);
+    const failureClasses = new Set(summary.failureClasses || []);
+    const runtime = runtimeFromTrace(trace);
+    if (runtime.syntheticAudio !== false) {
+      throw new Error(`Trace artifact for ${mode} does not prove real non-synthetic Nano audio.`);
+    }
+
+    modeEvidenceEntries.push([
+      mode,
+      {
+        live: true,
+        nanoSelected: selectedEngine === "nano",
+        startable: summary.startLatencyMs != null || summary.nanoSegmentLatencyMs.p50 != null,
+        segmentProgressUnderstandable: config.segmentProgressUnderstandable === true,
+        noUnderlineRace: !failureClasses.has("cursor-highlight-drift"),
+        cachePrefetchContinuity: !failureClasses.has("cache-prefetch-continuity"),
+        noStalePlayback: !failureClasses.has("stale-playback"),
+        pauseResumeSameMode: summary.pauseResumeIntegrity.balanced,
+        modeSwitchAnchorPreserved: !failureClasses.has("handoff-error"),
+        explicitFallback: trace.explicitFallback === true || config.explicitFallback !== false,
+        sidecarLifecycleStable: !failureClasses.has("sidecar-lifecycle"),
+        source: MOSS_NANO_LIVE_EVIDENCE_KIND,
+        runArtifactPath: config.runArtifactPath,
+        traceEventCount,
+        recordedAt: config.recordedAt ?? generatedAt,
+        scenarioId: config.scenarioId ?? summary.scenarioId,
+        selectedEngine,
+        timingTruth: segmentFollowing ? "segment-following" : "unknown",
+        wordTimestamps: segmentFollowing ? null : "unknown",
+        runtime,
+        nanoSegmentLatencyMs: summary.nanoSegmentLatencyMs,
+        nanoCache: summary.nanoCache,
+        nanoPrefetch: summary.nanoPrefetch,
+        recycleObservations: {
+          restarts: trace.recycleObservations?.restarts ?? 0,
+          cleanShutdowns: trace.recycleObservations?.cleanShutdowns ?? 0,
+        },
+      },
+    ]);
+  }
+
+  return {
+    schemaVersion: MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION,
+    evidenceKind: MOSS_NANO_LIVE_EVIDENCE_KIND,
+    generatedBy,
+    generatedAt,
+    appCommit,
+    evidenceProducerVersion,
+    modes: Object.fromEntries(modeEvidenceEntries),
   };
 }
 
@@ -588,7 +827,24 @@ function isExplicitNanoProductGateRun(args) {
 }
 
 function isExplicitNanoLiveEvidenceRun(args) {
-  return args.tags.includes("moss-nano-12") || args.tags.includes("nano-live-evidence");
+  return args.tags.includes("moss-nano-12")
+    || args.tags.includes("moss-nano-13c")
+    || args.tags.includes("nano-live-evidence")
+    || Boolean(args.nanoLiveEvidencePath)
+    || Boolean(args.nanoLiveEvidenceOutPath);
+}
+
+function buildNanoLiveEvidenceModeConfigs(tracePaths) {
+  return Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode) => [
+      mode,
+      {
+        selectedEngine: "nano",
+        runArtifactPath: tracePaths[mode],
+        segmentProgressUnderstandable: true,
+      },
+    ]),
+  );
 }
 
 function isRunnableMatrixScenario(scenario, args) {
@@ -832,9 +1088,18 @@ export async function runHarness(args, runtime = null) {
     const mossNanoProductGate = args.matrix && args.tags.includes("moss-nano-11")
       ? evaluateMossNanoProductGate({ matrixManifest })
       : null;
-    const nanoLiveEvidence = args.nanoLiveEvidencePath
-      ? await readJson(args.nanoLiveEvidencePath)
-      : {};
+    let nanoLiveEvidence = {};
+    if (args.nanoLiveEvidenceOutPath) {
+      nanoLiveEvidence = await buildMossNanoLiveEvidenceArtifact({
+        appCommit: args.appCommit,
+        modes: buildNanoLiveEvidenceModeConfigs(args.nanoLiveTracePaths),
+      });
+      const evidencePath = path.resolve(args.nanoLiveEvidenceOutPath);
+      await fs.mkdir(path.dirname(evidencePath), { recursive: true });
+      await writeJsonAtomic(evidencePath, nanoLiveEvidence);
+    } else if (args.nanoLiveEvidencePath) {
+      nanoLiveEvidence = await readJson(args.nanoLiveEvidencePath);
+    }
     const mossNanoLiveEvidenceGate = args.matrix && isExplicitNanoLiveEvidenceRun(args)
       ? evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence: nanoLiveEvidence })
       : null;
@@ -894,8 +1159,8 @@ export async function runHarness(args, runtime = null) {
     if (mossNanoLiveEvidenceGate) {
       lines.push(
         "",
-        `MOSS-NANO-12 decision: ${mossNanoLiveEvidenceGate.decision}`,
-        `MOSS-NANO-12 gate reasons: ${mossNanoLiveEvidenceGate.reasons.join("; ") || "none"}`,
+        `MOSS-NANO-13c live evidence decision: ${mossNanoLiveEvidenceGate.decision}`,
+        `MOSS-NANO-13c live evidence gate reasons: ${mossNanoLiveEvidenceGate.reasons.join("; ") || "none"}`,
       );
     }
     await fs.writeFile(path.join(outDir, "summary.txt"), `${lines.join("\n")}\n`, "utf8");

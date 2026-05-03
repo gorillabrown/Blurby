@@ -56,9 +56,9 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping (now includes MOSS-NANO productization decision: `PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`)
-Queue depth: 1 dispatch-ready + 4 stage stubs (AMBER; backfill after MOSS-NANO-13c)
-Next queue item: MOSS-NANO-13c (MOSS-NANO-13B completed and merged to main)
-Health: GREEN — MOSS-NANO-13B closed with real local ONNX app audio through the Nano sidecar and landed on main at merge c7c133c after residual Qwen-disable cleanup 45ff48c. Desktop v2.0 conveyor continues with MOSS-NANO-13c/d/e per both 3rd-party audits. No exploratory TTS/model work is approved beyond 13c–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Qwen remains disabled; Kokoro remains available.
+Queue depth: 1 dispatch-ready + 3 stage stubs (GREEN; MOSS-NANO-13d is unblocked by 13c closeout)
+Next queue item: MOSS-NANO-13d (MOSS-NANO-13c completed the provenance-backed live-evidence schema/producer/gate)
+Health: GREEN — MOSS-NANO-13c rejects simulated, legacy boolean-only, incomplete, non-Nano-selected, or synthetic evidence and leaves Nano experimental/non-default until a future clean four-mode live capture run. No exploratory TTS/model work is approved beyond 13d–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Qwen remains disabled; Kokoro remains available.
 Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity).
 ```
 
@@ -73,8 +73,8 @@ Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expan
 | ~~4~~ | ~~GOALS-6B~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
 | ~~5~~ | ~~MOSS-NANO-13a~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~GOALS-6B complete~~ | ✅ complete (2026-05-02) |
 | ~~6~~ | ~~MOSS-NANO-13B~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a~~ | ✅ complete and merged to main (2026-05-03) |
-| 7 | MOSS-NANO-13c | Stage 3: MOSS-NANO Productization | L | 13a, 13B | **next up** |
-| 8 | MOSS-NANO-13d | Stage 3: MOSS-NANO Productization | S | 13c | stub — spec at Stage 3 mid (after 13c) |
+| ~~7~~ | ~~MOSS-NANO-13c~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~13a, 13B~~ | ✅ complete (2026-05-03) |
+| 8 | MOSS-NANO-13d | Stage 3: MOSS-NANO Productization | S | 13c | **next up** |
 | 9 | MOSS-NANO-13e | Stage 3: MOSS-NANO Productization | M | 13a–d | stub — spec at Stage 3 mid (after 13d) |
 | 10 | POLISH-1 | Stage 4: Ship | M | 13e | stub — spec at Stage 3 close |
 | 11 | RELEASE-1 | Stage 4: Ship | S | POLISH-1 | stub — spec at Stage 3 close |
@@ -100,6 +100,7 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 C
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| MOSS-NANO-13c | 2026-05-03 | PASS — provenance-backed live evidence schema/producer/gate landed for selected Nano productization decisions. `scripts/tts_eval_runner.mjs` now builds `moss-nano-live-evidence.v2` artifacts from explicit per-mode live trace inputs via `--nano-live-evidence-out` and repeated `--nano-live-trace mode=path`, and `evaluateMossNanoLiveEvidenceGate()` requires top-level provenance, linked trace artifacts, event-count agreement, selected Nano in the trace, segment-following timing, `wordTimestamps: null`, quantitative latency/cache/prefetch/recycle fields, and `runtime.syntheticAudio: false`. Legacy boolean JSON, simulated evidence, missing modes, non-Nano-selected traces, and synthetic audio traces cannot promote. Decision label: `PROVENANCE_GATE_READY_NO_LIVE_CAPTURE`; Nano remains experimental/non-default pending a future clean four-mode live capture run. Verification: focused 6 files / 94 tests; full `npm test` 163 files / 2495 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `npm audit --audit-level=high` passed with moderate-only `uuid` advisories; `git diff --check` passed. |
 | GOALS-6B | 2026-05-02 | PASS — optional local-first reading goals shipped for daily pages, daily minutes, and weekly books with settings create/edit/delete, library widget progress, page/word advance tracking, active reading minutes, book completion progress, local daily/weekly resets, and streak display. Review hardening added latest-goals overwrite protection, idle/visibility-gated page-mode minutes, high-water page deltas, DST-safe local weekly reset math, and aligned Electron API stub defaults. Verification: full `npm test` 156 files / 2429 tests, `npm audit --audit-level=high` with only existing moderate `uuid` advisories, `git diff --check`, `npm run build` with existing circular chunk warning (`settings -> tts -> settings`). Solon final spec spot-check APPROVED; Plato quality re-review READY. Branch: `sprint/goals-6b-reading-goals`. |
 | EINK-6B | 2026-05-02 | PASS — e-ink Flow now uses instant 20-line stepped chunks instead of smooth/per-line scroll; Focus e-ink phrase grouping is shared/tested for 2-3 word bursts; adaptive ghosting refresh accumulates content-change load while preserving manual page-turn interval fallback. Verification: focused EINK/Flow slice 5 files / 93 tests, full `npm test` 151 files / 2407 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. |
 | EINK-6A | 2026-05-02 | PASS — e-ink display behavior decoupled from theme via independent `einkMode`; v9 settings migration/defaults added; `[data-eink="true"]` carries runtime behavior while `[data-theme="eink"]` remains optional greyscale palette. Verification: focused EINK/NARR 36 tests, full `npm test` 150 files / 2397 tests, build, high audit, diff check. |
