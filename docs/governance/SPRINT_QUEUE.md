@@ -56,9 +56,9 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping (now includes MOSS-NANO productization decision: `PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`)
-Queue depth: 5 dispatch-ready + 4 stage stubs (GREEN dispatch-ready, AMBER on stubs)
-Next queue item: EINK-6B (EINK-6A completed; BRAND-HYG-1 shelved/no-op)
-Health: AMBER → GREEN — Desktop v2.0 conveyor expanded to include MOSS-NANO-13a/b/c/d/e per both 3rd-party audits. No exploratory TTS/model work is approved beyond 13a–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Five eager skeletons; 13d, 13e, POLISH-1, RELEASE-1 remain Stage 3/4 tail specs to be hardened no later than the next phase pause. Qwen streaming on ITERATE.
+Queue depth: 4 dispatch-ready + 4 stage stubs (GREEN dispatch-ready, AMBER on stubs)
+Next queue item: GOALS-6B (EINK-6B completed)
+Health: AMBER → GREEN — Desktop v2.0 conveyor expanded to include MOSS-NANO-13a/b/c/d/e per both 3rd-party audits. No exploratory TTS/model work is approved beyond 13a–13e, and KOKORO-RETIRE remains deferred even on recommended opt-in. Four eager skeletons; 13d, 13e, POLISH-1, RELEASE-1 remain Stage 3/4 tail specs to be hardened no later than the next phase pause. Qwen streaming on ITERATE.
 Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity).
 ```
 
@@ -69,9 +69,9 @@ Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (scope expan
 | ~~1~~ | ~~SK-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | ✅ complete (2026-05-02) |
 | ~~1b~~ | ~~BRAND-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | SHELVED / no-op (expected dirty brand edits not present in this checkout) |
 | ~~2~~ | ~~EINK-6A~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
-| 3 | EINK-6B | Stage 2: Features | M | EINK-6A | **next up** |
-| 4 | GOALS-6B | Stage 2: Features | M | — (parallel-safe with EINK-6B) | queued |
-| 5 | MOSS-NANO-13a | Stage 3: MOSS-NANO Productization | L | EINK-6B can run in parallel (Lane C vs Lane D) | dispatch-ready |
+| ~~3~~ | ~~EINK-6B~~ | ~~Stage 2: Features~~ | ~~M~~ | ~~EINK-6A~~ | ✅ complete (2026-05-02) |
+| 4 | GOALS-6B | Stage 2: Features | M | — | **next up** |
+| 5 | MOSS-NANO-13a | Stage 3: MOSS-NANO Productization | L | GOALS-6B can run in parallel only if shared-core freeze files stay disjoint | dispatch-ready |
 | 6 | MOSS-NANO-13b | Stage 3: MOSS-NANO Productization | M | 13a | dispatch-ready |
 | 7 | MOSS-NANO-13c | Stage 3: MOSS-NANO Productization | L | 13a, 13b | dispatch-ready |
 | 8 | MOSS-NANO-13d | Stage 3: MOSS-NANO Productization | S | 13c | stub — spec at Stage 3 mid (after 13c) |
@@ -100,6 +100,7 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 C
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| EINK-6B | 2026-05-02 | PASS — e-ink Flow now uses instant 20-line stepped chunks instead of smooth/per-line scroll; Focus e-ink phrase grouping is shared/tested for 2-3 word bursts; adaptive ghosting refresh accumulates content-change load while preserving manual page-turn interval fallback. Verification: focused EINK/Flow slice 5 files / 93 tests, full `npm test` 151 files / 2407 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. |
 | EINK-6A | 2026-05-02 | PASS — e-ink display behavior decoupled from theme via independent `einkMode`; v9 settings migration/defaults added; `[data-eink="true"]` carries runtime behavior while `[data-theme="eink"]` remains optional greyscale palette. Verification: focused EINK/NARR 36 tests, full `npm test` 150 files / 2397 tests, build, high audit, diff check. |
 | SK-HYG-1 | 2026-05-02 | Roadmap hygiene & queue recovery. Archive-forward, Desktop v2.0 conveyor restored. BRAND-HYG-1 later shelved/no-op in this checkout because scoped brand edits were absent. |
 | QWEN-STREAM-4 | 2026-04-21 | ITERATE — streaming not promoted |

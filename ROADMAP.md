@@ -2,7 +2,7 @@
 
 **Last updated**: 2026-05-02 — Second-pass roadmap review. Desktop v2.0 expanded to include MOSS-NANO productization track per both 3rd-party audits.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable. EINK-6A landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13 — those scope changes are now baked into a multi-sprint MOSS-NANO-13a–e track. Qwen remains default engine, Kokoro available/unchanged.
+**Current state**: v1.75.1 stable. EINK-6A and EINK-6B landed today. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits recommend "proceed only with scope changes" for MOSS-NANO-13 — those scope changes are now baked into a multi-sprint MOSS-NANO-13a–e track. Qwen remains default engine, Kokoro available/unchanged.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
 **Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity). Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
@@ -39,8 +39,8 @@ Phase 6: TTS Hardening & Stabilization ── COMPLETE (v1.37.1)
   │
   │  Desktop v2.0 Conveyor (active — see § Desktop v2.0)
   ├── EINK-6A: E-Ink Foundation ✅
-  ├── EINK-6B: E-Ink Reading Ergonomics (next up)
-  └── GOALS-6B: Reading Goal Tracking (queued, parallel-safe with 6B)
+  ├── EINK-6B: E-Ink Reading Ergonomics ✅
+  └── GOALS-6B: Reading Goal Tracking (next up)
     │
     ▼
 SELECTION-1: Word Anchor Contract (BUG-151/152/153 absorbed) ✅
@@ -234,6 +234,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
 
 | Sprint | Version | Date | Result | Archive |
 |--------|---------|------|--------|--------|
+| EINK-6B | v1.75.2 | 2026-05-02 | E-ink Flow now advances by instant 20-line chunks instead of smooth/per-line scroll; Focus phrase grouping is shared/tested for 2-3 word bursts when `einkMode` + `einkPhraseGrouping` are enabled; adaptive ghosting refresh accumulates content-change load while preserving manual page-turn interval fallback. Verification: focused EINK/Flow slice 5 files / 93 tests, full `npm test` 151 files / 2407 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. | Active sprint closeout; full spec retained below until next archive pass. |
 | EINK-6A | v1.75.1 | 2026-05-02 | E-ink display mode decoupled from theme; `einkMode` schema/defaults/migration added; behavioral CSS now keys off `[data-eink="true"]`; greyscale palette remains optional under `[data-theme="eink"]`. Verification: focused EINK/NARR tests 36 pass, full `npm test` 150 files / 2397 tests, `npm run build`, `npm audit --audit-level=high`, `git diff --check`. | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) (full spec migrated 2026-05-02 PM) |
 | SELECTION-1 | v1.38.0 | 2026-04-06 | Word anchor contract, BUG-151/152/153 resolved | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
 | HOTFIX-14 | v1.38.2 | 2026-04-06 | URL extraction + connection fixes, BUG-155/156/157/158 | [Archive](docs/project/ROADMAP_ARCHIVE_2026-05-02.md) |
@@ -473,14 +474,14 @@ All three investigation areas resolved:
 | **H: Reading Tweaks** | Space bar mode, arrow speed, voice cloning, AI summaries | Backlog (bundleable) |
 | **I: Branding** | Remove [Sample], Blurby icon, brand theme, window controls | Backlog (cosmetic, anytime) |
 | **J: Social** | Reading clubs, shared lists, group discussions | Someday (needs server) |
-| **K: E-Ink** | Display mode decoupling, e-ink reading ergonomics | Active (EINK-6A/6B in Desktop v2.0 conveyor) |
+| **K: E-Ink** | Display mode decoupling, e-ink reading ergonomics | Done for Desktop v2.0 (EINK-6A/6B complete) |
 
 ---
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (3 done, 8 remaining), ~37 LOE total / ~32 LOE remaining, estimated 4–6 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → **EINK-6B** → GOALS-6B (parallel-safe with EINK-6B) → MOSS-NANO-13a → MOSS-NANO-13b → MOSS-NANO-13c → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
+> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (4 done, 7 remaining), ~37 LOE total / ~29 LOE remaining, estimated 4–6 weeks.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → **GOALS-6B** → MOSS-NANO-13a → MOSS-NANO-13b → MOSS-NANO-13c → MOSS-NANO-13d → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e, and its deliverable is decision quality (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion. KOKORO-RETIRE remains deferred even if MOSS-NANO-13e records `NANO_RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed.
 
 ### Standing Rules All Skeletons Inherit
@@ -524,7 +525,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A completed 2026-05-02. EINK-6B and GOALS-6B remain fully spec'd and part of the Desktop v2.0 active conveyor. Dispatch order: EINK-6B → GOALS-6B (parallel-safe with EINK-6B).
+> EINK-6A and EINK-6B completed 2026-05-02. GOALS-6B remains fully spec'd and is next in the Desktop v2.0 active conveyor.
 
 ---
 
@@ -570,7 +571,13 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint EINK-6B: E-Ink Reading Ergonomics & Mode Strategy
+### Sprint EINK-6B: E-Ink Reading Ergonomics & Mode Strategy ✅ COMPLETED 2026-05-02
+
+**Closeout:** `FlowScrollEngine` now treats `einkMode` as a stepped chunk surface: it presents up to `EINK_LINES_PER_PAGE` lines, waits based on chunk word count and WPM, then advances instantly to the next chunk without smooth scrolling or line-completion flash. Focus phrase grouping is centralized in `src/utils/einkErgonomics.ts` and displayed only when both `einkMode` and `einkPhraseGrouping` are enabled; non-eink and grouping-disabled focus remain single-word. `useEinkController` now supports adaptive refresh from cumulative content-change load while retaining the EINK-6A manual page-turn interval fallback.
+
+**Verification:** Focused EINK/Flow slice passed 5 files / 93 tests; full `npm test` passed 151 files / 2407 tests; `npm run build` passed with the existing circular chunk warning; `npm audit --audit-level=high` passed with moderate-only findings; `git diff --check` passed.
+
+**Key files touched:** `src/utils/FlowScrollEngine.ts`, `src/components/ReaderView.tsx`, `src/hooks/useEinkController.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `src/constants.ts`, `src/utils/einkErgonomics.ts`, `tests/einkErgonomics.test.ts`, `tests/flow-scroll-engine.test.js`.
 
 **Goal:** Add e-ink-aware reading mode variants that respect the physical constraints of e-ink displays: slow refresh (120–450ms), coarse pixel density, touch-only input, and ghosting artifacts. Stepped flow (chunk-based page advance) and burst focus (multi-word grouping with tuned timing) give e-ink users reading modes that feel native to their hardware instead of fighting it.
 

@@ -22,6 +22,7 @@ vi.mock("../src/constants.ts", () => ({
   FLOW_TIMER_BAR_EINK_HEIGHT_PX: 6,
   FLOW_TIMER_GLOW_PX: 2,
   FLOW_LINE_COMPLETE_FLASH_MS: 100,
+  EINK_LINES_PER_PAGE: 20,
 }));
 
 /** Create a mock container with word spans for testing */

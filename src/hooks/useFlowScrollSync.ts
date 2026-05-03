@@ -3,6 +3,7 @@ import { FlowScrollEngine, type FlowProgress } from "../utils/FlowScrollEngine";
 import { getNextQueuedBook } from "../utils/queue";
 import {
   CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS,
+  EINK_LINES_PER_PAGE,
 } from "../constants";
 import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
 import type { TtsEvalTraceSink } from "../types/eval";
@@ -79,6 +80,8 @@ export interface UseFlowScrollSyncParams {
   paragraphBreaks: Set<number>;
   /** Is e-ink mode. */
   isEink: boolean;
+  /** Optional e-ink ghosting heuristic hook. */
+  onEinkContentChange?: (changeEstimate?: number) => void;
   /** Focus text size (triggers line map rebuild). */
   focusTextSize: number;
   /** Finish reading without exiting reader (for cross-book). */
@@ -134,6 +137,7 @@ export function useFlowScrollSync({
   bookWordMeta,
   paragraphBreaks,
   isEink,
+  onEinkContentChange,
   focusTextSize,
   finishReadingWithoutExitRef,
   onOpenDocByIdRef,
@@ -143,6 +147,10 @@ export function useFlowScrollSync({
   const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
   const ownsSectionEndCallbackRef = useRef(false);
   const lastHandledFoliateRenderVersionRef = useRef(foliateRenderVersion);
+  const isEinkRef = useRef(isEink);
+  isEinkRef.current = isEink;
+  const onEinkContentChangeRef = useRef(onEinkContentChange);
+  onEinkContentChangeRef.current = onEinkContentChange;
 
   // Stable refs to avoid stale closures in FlowScrollEngine onComplete
   const activeDocRef = useRef(activeDoc);
@@ -226,6 +234,10 @@ export function useFlowScrollSync({
         },
         onProgressUpdate: (progress: FlowProgress) => {
           setFlowProgress(progress);
+          if (isEinkRef.current) {
+            const lineShare = progress.totalLines > 0 ? Math.min(1, EINK_LINES_PER_PAGE / progress.totalLines) : 0.25;
+            onEinkContentChangeRef.current?.(lineShare);
+          }
           if (evalTrace?.enabled) {
             evalTrace.record({
               kind: "flow-position",

@@ -1,12 +1,20 @@
 import { useState, useCallback } from "react";
-import { DEFAULT_EINK_REFRESH_INTERVAL, EINK_REFRESH_FLASH_MS } from "../constants";
+import {
+  DEFAULT_EINK_REFRESH_INTERVAL,
+  EINK_ADAPTIVE_REFRESH_ENABLED,
+  EINK_GHOSTING_THRESHOLD,
+  EINK_REFRESH_FLASH_MS,
+} from "../constants";
 import { BlurbySettings } from "../types";
+import { nextEinkGhostingLoad } from "../utils/einkErgonomics";
 
 interface UseEinkControllerReturn {
   einkPageTurns: number;
+  einkGhostingLoad: number;
   showEinkRefresh: boolean;
   triggerEinkRefresh: () => void;
   handleEinkPageTurn: () => void;
+  handleEinkContentChange: (changeEstimate?: number) => void;
 }
 
 /**
@@ -17,6 +25,7 @@ interface UseEinkControllerReturn {
 export function useEinkController(settings: BlurbySettings): UseEinkControllerReturn {
   const isEink = settings.einkMode === true;
   const [einkPageTurns, setEinkPageTurns] = useState(0);
+  const [einkGhostingLoad, setEinkGhostingLoad] = useState(0);
   const [showEinkRefresh, setShowEinkRefresh] = useState(false);
 
   const triggerEinkRefresh = useCallback(() => {
@@ -37,10 +46,26 @@ export function useEinkController(settings: BlurbySettings): UseEinkControllerRe
     });
   }, [isEink, settings.einkRefreshInterval, triggerEinkRefresh]);
 
+  const handleEinkContentChange = useCallback((changeEstimate = 0.25) => {
+    if (!isEink) return;
+    setEinkGhostingLoad((prev) => {
+      const result = nextEinkGhostingLoad(
+        prev,
+        changeEstimate,
+        EINK_GHOSTING_THRESHOLD,
+        EINK_ADAPTIVE_REFRESH_ENABLED
+      );
+      if (result.shouldRefresh) triggerEinkRefresh();
+      return result.nextLoad;
+    });
+  }, [isEink, triggerEinkRefresh]);
+
   return {
     einkPageTurns,
+    einkGhostingLoad,
     showEinkRefresh,
     triggerEinkRefresh,
     handleEinkPageTurn,
+    handleEinkContentChange,
   };
 }
