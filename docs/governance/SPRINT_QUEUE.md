@@ -55,11 +55,11 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Finish line: Desktop v2.0 Shipping (now includes a COMPARATIVE successor-engine decision: per-engine `PAUSE_PRODUCTIZATION` / `EXPERIMENTAL_ONLY` / `RECOMMENDED_OPT_IN` for both MOSS-Nano AND Pocket TTS, evaluated against the same gate)
-Queue depth: 1 dispatch-ready (MOSS-NANO-13d.5) + 1 stage stub (MOSS-NANO-13e) + 2 ship stubs (POLISH-1, RELEASE-1) (GREEN on dispatch-ready depth)
-Next queue item: MOSS-NANO-13d.5 — Pocket TTS Integration & Comparative Live Capture (newly inserted 2026-05-04 per soft-pivot decision)
-Health: GREEN — MOSS-NANO-13a–13d shipped (13d gate result `NANO_RECOMMENDED_OPT_IN`, 0 hard failures, 0 warnings). Soft pivot 2026-05-04 PM inserted 13d.5 to evaluate Pocket TTS as a second candidate before locking the v2.0 successor opt-in. 13e reframed as comparative decision sprint. No exploratory TTS/model work is approved beyond 13e. KOKORO-RETIRE remains deferred. Qwen remains disabled; Kokoro remains the default engine.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (soft pivot — Pocket TTS comparative). Verdict: AT RISK (~26 LOE remaining, ~6–8 weeks at sustained velocity).
+Finish line: Desktop v2.0 Shipping (now includes the MOSS-NANO-13e recommended opt-in product decision closeout from the canonical 13d live-evidence artifact)
+Queue depth: 1 dispatch-ready (MOSS-NANO-13e) + 2 ship stubs (POLISH-1, RELEASE-1) (GREEN on dispatch-ready depth)
+Next queue item: MOSS-NANO-13e — Recommended Opt-In Product Decision Closeout
+Health: GREEN — MOSS-NANO-13a–13d shipped (13d gate result `NANO_RECOMMENDED_OPT_IN`, 0 hard failures, 0 warnings). 13d already produced the canonical real app-selected Nano live-evidence artifact, so 13e must not rerun live capture. No new model/runtime exploration is approved inside Desktop v2.0. KOKORO-RETIRE remains deferred. Qwen remains disabled; Kokoro remains available.
+Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope). Verdict: AT RISK, but no additional TTS/model exploration is approved for Desktop v2.0.
 ```
 
 ## Desktop v2.0 Conveyor Belt (Active)
@@ -75,10 +75,10 @@ Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO s
 | ~~6~~ | ~~MOSS-NANO-13B~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a~~ | ✅ complete and merged to main (2026-05-03) |
 | ~~7~~ | ~~MOSS-NANO-13c~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~13a, 13B~~ | ✅ complete (2026-05-03) |
 | ~~8~~ | ~~MOSS-NANO-13d~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~S~~ | ~~13c~~ | ✅ complete (2026-05-03) |
-| 9 | **MOSS-NANO-13d.5** | Stage 3: MOSS-NANO Productization | **L** | 13a–d | **next up — Pocket TTS integration & comparative live capture (NEW, 2026-05-04 soft pivot)** |
-| 10 | MOSS-NANO-13e | Stage 3: MOSS-NANO Productization | M | 13a–d.5 | comparative productization decision / opt-in recommendation |
-| 11 | POLISH-1 | Stage 4: Ship | M | 13e | stub — spec at Stage 3 close |
-| 12 | RELEASE-1 | Stage 4: Ship | S | POLISH-1 | stub — spec at Stage 3 close |
+| ~~9~~ | ~~MOSS-NANO-13d.5~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~13a–d~~ | SHELVED / do not dispatch — no new model/runtime exploration inside Desktop v2.0 |
+| 9 | **MOSS-NANO-13e** | Stage 3: MOSS-NANO Productization | **M** | 13a–d | **next up — recommended opt-in product decision closeout from 13d artifact; no live-capture rerun** |
+| 10 | POLISH-1 | Stage 4: Ship | M | 13e | stub — spec at Stage 3 close |
+| 11 | RELEASE-1 | Stage 4: Ship | S | POLISH-1 | stub — spec at Stage 3 close |
 
 Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 Continued — E-Ink & Goals", and § "Stage 3 — MOSS-NANO Productization Track".
 
@@ -504,7 +504,7 @@ WHERE:
 | 28 | MOSS-6 | v1.82.0 | sprint/moss-6-cache-continuity | Legacy flagship full | SUPERSEDED/PAUSED | Superseded by Nano-specific onboarding path. |
 | 29 | MOSS-7 | v1.83.0 | sprint/moss-7-productization-gate | Legacy flagship full | SUPERSEDED/PAUSED | Superseded by Nano-specific onboarding path. |
 
-**Dispatch status:** `MOSS-NANO-12` is CLOSED as `NANO_EXPERIMENTAL_ONLY`. Do not make Nano the default, recommend it as production opt-in, change Kokoro behavior, or start Kokoro retirement from this evidence alone. A new live observation artifact is required before any productization promotion can be reconsidered. `GOALS-6B` remains parked and independent. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused until a separate successor lane proves continuous live playback and a separate Kokoro-retirement lane is explicitly approved.
+**Dispatch status:** `MOSS-NANO-13d` is CLOSED with canonical live evidence and gate decision `NANO_RECOMMENDED_OPT_IN`. Dispatch `MOSS-NANO-13e` next as a product decision closeout: record Nano as recommended opt-in, not default; keep Kokoro available; keep Qwen disabled; update settings/runtime copy for the local sidecar requirement, segment-following progress, and explicit-only fallback policy; produce the productization memo from the 13d artifact. Do not rerun live capture or start new model/runtime exploration. `KOKORO-RETIRE-1` and `KOKORO-RETIRE-2` remain paused unless separately approved.
 
 ### Parallel Dispatch Guardrails
 

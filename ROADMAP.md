@@ -1,11 +1,11 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-04 — Soft pivot inserted MOSS-NANO-13d.5 (Pocket TTS comparative integration) ahead of MOSS-NANO-13e to give the v2.0 successor decision a comparative basis. 13a–13d already shipped; 13d cleared the gate cleanly with `NANO_RECOMMENDED_OPT_IN`.
+**Last updated**: 2026-05-04 — MOSS-NANO-13d evidence is durable on `main` and 13e is rescoped as the Recommended Opt-In Product Decision Closeout. 13d produced the canonical real app-selected Nano live-evidence artifact and cleared the gate cleanly with `NANO_RECOMMENDED_OPT_IN`; 13e must not rerun live capture or open new model/runtime exploration.
 **Current branch**: `main`
 **Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, and MOSS-NANO-13d have landed on `main` or are in merge closeout. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. MOSS-NANO-13c adds a provenance-backed live-evidence schema/producer/gate and rejects simulated or boolean-only evidence. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`; this is evidence for the productization decision, not a default-engine change, Qwen reactivation, or Kokoro retirement. Next queue item: MOSS-NANO-13e.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
-**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO) → 2026-05-04 PM (soft pivot — Pocket TTS as comparative second candidate). Verdict: AT RISK (~26 LOE remaining including new 13d.5, ~6–8 weeks at sustained velocity). Pivot decision: `docs/project/roadmap-reviews/2026-05-02-pm-pivot-decision.md`. Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
+**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope). Verdict: AT RISK, but no new TTS/model exploration is approved inside Desktop v2.0. Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in two files: `docs/project/ROADMAP_ARCHIVE.md` (legacy, Phases 1–6) and `docs/project/ROADMAP_ARCHIVE_2026-05-02.md` (recent migrations from 2026-05-02 roadmap review). Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
 >
@@ -174,7 +174,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-7: Productization Gate And Promotion Decision (PAUSED)
       ├── Kokoro: available as legacy fallback. Retirement paused — no successor has proven continuous live playback.
-      └── Nano: experimental-only unless MOSS-NANO-13a–13e plus 13d.5 (Pocket TTS comparative, 2026-05-04 soft pivot) produce a comparative productization decision (`PAUSE_PRODUCTIZATION` / `EXPERIMENTAL_ONLY` / `RECOMMENDED_OPT_IN`, per engine). Default engine remains Kokoro; Qwen remains disabled; KOKORO-RETIRE remains separately deferred.
+      └── Nano: 13d produced canonical live evidence and `NANO_RECOMMENDED_OPT_IN`; 13e records the recommended opt-in product decision without changing the default engine. Kokoro remains available; Qwen remains disabled; KOKORO-RETIRE remains separately deferred.
                    │
     READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
@@ -480,9 +480,9 @@ All three investigation areas resolved:
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Twelve sprints (8 done, 4 remaining), ~45 LOE total / ~26 LOE remaining, estimated 6–8 weeks. Soft pivot 2026-05-04 PM: MOSS-NANO-13d.5 inserted to evaluate Pocket TTS as a second candidate before locking the v2.0 successor opt-in.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → **MOSS-NANO-13d.5 (Pocket TTS comparative)** → MOSS-NANO-13e (comparative decision) → POLISH-1 → RELEASE-1.
-> **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e plus 13d.5, and its deliverable is decision quality across both candidates (per-engine `PAUSE_PRODUCTIZATION` / `EXPERIMENTAL_ONLY` / `RECOMMENDED_OPT_IN`), not forced promotion of either engine. KOKORO-RETIRE remains deferred even if either engine clears `RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed. Default engine remains Kokoro; Qwen remains disabled.
+> **Finish line:** Desktop v2.0 Shipping. Eleven active conveyor sprints (8 done, 3 remaining) with MOSS-NANO-13e now narrowed to product decision closeout from the canonical 13d evidence.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → **MOSS-NANO-13e (recommended opt-in product decision closeout)** → POLISH-1 → RELEASE-1.
+> **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e, and its deliverable is a productization decision from the 13d live-evidence artifact (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not a default-engine change. Kokoro remains available and no Kokoro retirement lane is opened. Qwen remains disabled.
 
 ### Standing Rules All Skeletons Inherit
 
@@ -968,13 +968,15 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint MOSS-NANO-13d.5: Pocket TTS Integration & Comparative Live Capture (NEW — added 2026-05-04 PM, soft-pivot follow-up)
+### Sprint MOSS-NANO-13d.5: Pocket TTS Integration & Comparative Live Capture (SHELVED — not on Desktop v2.0 conveyor)
+
+> **Shelved 2026-05-04:** Do not dispatch this draft inside Desktop v2.0. MOSS-NANO-13d already produced the canonical real app-selected Nano live-evidence artifact and gate decision `NANO_RECOMMENDED_OPT_IN`. The active next step is MOSS-NANO-13e product decision closeout, not new model/runtime exploration or another live-capture lane.
 
 > Inserted on 2026-05-04 PM after a strategic pivot decision (`docs/project/roadmap-reviews/2026-05-02-pm-pivot-decision.md`). 13d cleared the gate cleanly with `NANO_RECOMMENDED_OPT_IN`, confirming the audit-prescribed infrastructure works. But MOSS-Nano was originally selected by elimination from within the MOSS family, never against alternatives. The 2026 CPU-TTS landscape (per the user's research PDF) has at least three credible candidates stronger than MOSS-Nano on dimensions Blurby would value (voice cloning, top-tier ELO, paralinguistic control). Before locking MOSS-Nano in as the v2.0 recommended opt-in, this sprint integrates Pocket TTS (Kyutai Labs, 100M CALM, MIT, 6 languages, 5-second voice cloning, 200ms TTFA, 1.84 WER on Librispeech, top-tier ELO) as a second candidate evaluated through the same productization gate.
 
-**Goal:** Add Pocket TTS as a second candidate for the Desktop v2.0 successor-engine decision. Specifically: (1) generalize the MOSS-Nano-specific evidence schema, gate evaluator, and live capture producer to be engine-parameterized; (2) add a Pocket TTS sidecar adapter, IPC channels, and renderer strategy mirroring the MOSS-Nano pattern; (3) run the same four-mode live capture for Pocket TTS and produce a v2-schema evidence artifact; (4) record the per-engine gate result so MOSS-NANO-13e can make a comparative product decision. After this sprint lands, both engines have machine-produced evidence with provenance against the same gate, run through the integrated app, on the same hardware.
+**Goal:** Shelved historical draft only. Do not integrate Pocket TTS, generalize the evidence schema, add new sidecars/IPC, run comparative live capture, or make 13e depend on any new model/runtime work inside Desktop v2.0.
 
-**Problem:** The infrastructure shipped in 13a/13c is hardcoded to MOSS-Nano across four layers — the sidecar adapter (`main/moss-nano-sidecar.js`), the IPC channels (`tts-nano-*`), the strategy file (`src/hooks/narration/mossNanoStrategy.ts`), and the gate/producer/schema (`scripts/tts_eval_runner.mjs::evaluateMossNanoLiveEvidenceGate`, `scripts/moss_nano_live_capture.mjs`, `moss-nano-live-evidence.v2` schema). Adding Pocket TTS without this sprint would either require duplicating each layer (creating drift over time) or making the v2.0 decision on single-candidate data (the failure mode this pivot is designed to avoid). 13d.5 is the engineering work that lets 13e be a comparative decision rather than a coronation.
+**Problem:** Superseded by the 2026-05-04 13e rescope. MOSS-NANO-13d already produced canonical real app-selected Nano evidence and a clean `NANO_RECOMMENDED_OPT_IN` gate result, so the remaining work is product decision closeout, settings/runtime copy, and release memo language.
 
 **Design decisions:**
 
@@ -1063,20 +1065,25 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint MOSS-NANO-13e: Comparative Productization Decision / Opt-In Recommendation (STUB — Stage 3 close, post-13d.5)
+### Sprint MOSS-NANO-13e: Recommended Opt-In Product Decision Closeout (READY — Stage 3 close, post-13d)
 
-**Goal:** With per-engine evidence in hand from 13d (MOSS-Nano) and 13d.5 (Pocket TTS), produce the Desktop v2.0 successor-engine productization decision. Comparative — not single-candidate. Output: per-engine decision recorded in `MOSS_DECISION_LOG.md`, plus a v2.0 recommendation (which engine, if any, becomes the recommended opt-in; what UX surface exposes it; what the release notes say). No default-engine change, no Kokoro retirement, no Qwen reactivation.
+**Goal:** Record Nano as the Desktop v2.0 recommended opt-in engine, not the default engine, using the already-produced MOSS-NANO-13d canonical live-evidence artifact and gate decision `NANO_RECOMMENDED_OPT_IN`. Keep Kokoro available, keep Qwen disabled, and do not open a Kokoro retirement lane.
 
-**Why:** The original 13e was scoped as a single-engine decision built on 13d's clean `NANO_RECOMMENDED_OPT_IN` result. The soft-pivot decision (`2026-05-02-pm-pivot-decision.md`) reframes the question as comparative: given two candidates evaluated against the same gate on the same hardware, which (if either) earns the v2.0 opt-in slot? Possible outcomes range from "both `RECOMMENDED_OPT_IN`, pick one" to "both `EXPERIMENTAL_ONLY`, surface neither" to "split decision with one outperforming the other on perceptible dimensions."
+**Why:** 13d answered the "can it work?" question with real app-selected Nano evidence across Page, Focus, Flow, and Narrate. 13e is now product language, opt-in UX, and release-polish closeout: make the recommendation understandable and bounded without rerunning live capture or exploring other models/runtimes.
 
-**Prerequisites:** MOSS-NANO-13a, 13B, 13c, 13d, 13d.5.
+**Prerequisites:** MOSS-NANO-13a, 13B, 13c, and 13d. The canonical 13d evidence is `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`; the final gate output is under `artifacts/tts-eval/moss-nano-13d-live-capture/gate/`.
 
-**Done when:** TBD — full skeleton to be written at 13d.5 close.
+**Done when:**
 
-**Effort:** M (~3). Comparative analysis write-up, opt-in recommendation scoping, and any explicitly approved settings UX surface (folded into POLISH-1 if simple, separate sprint if complex). May expand if the comparative result is split (one engine higher quality, one with capability advantages like voice cloning).
+1. `docs/testing/MOSS_DECISION_LOG.md` records Nano as `NANO_RECOMMENDED_OPT_IN` and explicitly states: not default, Kokoro remains available, no Kokoro retirement lane, Qwen remains disabled.
+2. Settings/runtime docs and any settings copy describe Nano as a recommended opt-in local engine, including the local sidecar requirement, segment-following progress truth (`wordTimestamps: null`), and explicit-only fallback policy.
+3. A final productization memo is produced from the 13d artifact and gate output. The memo names the evidence path, trace counts, gate result, recommendation, non-goals, fallback policy, and release posture.
+4. No new live capture, model comparison, runtime exploration, Pocket TTS work, Qwen reactivation, default-engine change, or Kokoro retirement work is introduced.
 
-**Roster:** Cowork (decision write-up + cross-engine analysis) + CLI/Zeus (any UX wiring needed if PROMOTE).
+**Effort:** M (~3). Product decision writing, settings/runtime copy alignment, and release memo only. Any code/UI copy changes must stay inside the existing Nano opt-in surface and must not alter engine defaults.
 
-**Source:** Audit response §11 + soft pivot decision.
+**Roster:** Cowork (decision memo + governance updates) + CLI/Zeus (settings/runtime copy if needed) + Herodotus (docs closeout) + Solon (scope compliance).
+
+**Source:** MOSS-NANO-13d canonical evidence artifact and gate output; audit response §11 productization decision requirement.
 
 ---
