@@ -1,7 +1,7 @@
 # Blurby Technical Reference
 
-**Version:** 2.3.0
-**Last updated:** 2026-04-01
+**Version:** 2.3.1
+**Last updated:** 2026-05-04
 **Branch:** `main` (v1.5.0)
 
 This document is the governing technical reference for Blurby. It covers architecture, data model, reading modes, rendering, TTS, build/release, and known technical debt. A new developer should be able to understand the entire system by reading this document and following the file path references.
@@ -216,7 +216,7 @@ Defined in `src/types.ts`. Defaults in `src/constants.ts` (`DEFAULT_SETTINGS`). 
 | `theme` | `"dark"` | `"dark" | "light" | "blurby" | "eink" | "system"` |
 | `readingMode` | `"focus"` | Active mode type |
 | `lastReadingMode` | `"flow"` | Space bar starts this mode from Page view |
-| `ttsEngine` | `"web"` | `"web" | "kokoro"` |
+| `ttsEngine` | `"web"` | `"web" | "kokoro" | "qwen" | "nano" | "pocket-tts"`; Desktop v2.0 product posture keeps Kokoro default, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen disabled. |
 | `ttsRate` | 1.0 | TTS speech rate (0.5-2.0) |
 | `rhythmPauses` | object | Comma, sentence, paragraph, number, long-word pauses |
 | `layoutSpacing` | object | Line height, character spacing, word spacing |
@@ -411,9 +411,15 @@ interface FoliateWord {
 
 ---
 
-## 7. TTS Engine (Kokoro)
+## 7. TTS Engine Landscape
 
-Blurby supports two TTS backends. The default is Web Speech API (`ttsEngine: "web"`). The neural option is Kokoro (`ttsEngine: "kokoro"`), an ONNX-based model running locally.
+Blurby's Desktop v2.0 TTS product posture is Kokoro as the default and available operational floor, MOSS-Nano as a recommended opt-in local engine after MOSS-NANO-13e, Pocket TTS as an available opt-in third engine after POCKET-TTS-1, and Qwen disabled. Web Speech remains the platform TTS backend where available, but the v2.0 successor-engine posture is bounded to these explicit engine states and keeps Kokoro available.
+
+MOSS-Nano is recommended opt-in only. It requires the local Nano sidecar/runtime to be ready, reports narration progress as segment-following rather than word-timed (`wordTimestamps: null`), and uses explicit-only fallback policy: if Nano is selected and blocked, Blurby reports the Nano failure instead of silently falling back to another engine. This posture is based on `docs/testing/moss-nano-13e-productization-memo.md` and 13d's canonical evidence; it does not make Nano default, reactivate Qwen, or open Kokoro retirement.
+
+Pocket TTS (`ttsEngine: "pocket-tts"`) is available opt-in only. It uses an isolated Pocket sidecar/engine path (`scripts/pocket_tts_sidecar.py`, `main/pocket-tts-sidecar.js`, `main/pocket-tts-engine.js`), engine-specific IPC/preload channels (`tts-pocket-*`, `electronAPI.pocket*`), and a renderer strategy at `src/hooks/narration/pocketTtsStrategy.ts`. Pocket follows the same explicit-only fallback posture as Nano: if selected and unavailable, Blurby reports the Pocket failure rather than silently substituting another engine. The sidecar has protocol-level reference-WAV scaffolding, but v2.0 exposes no public voice-cloning UX.
+
+Kokoro (`ttsEngine: "kokoro"`) is an ONNX-based model running locally.
 
 ### Kokoro Architecture
 
@@ -506,9 +512,11 @@ If the Kokoro worker thread crashes (uncaught exception, OOM), the `error` event
 
 ### Privacy & Data Flow
 
-Narrate mode has two TTS backends with different privacy characteristics:
+Narrate mode has several TTS backends with different privacy characteristics:
 
 - **Kokoro (local):** All inference runs on-device in a worker thread. After the one-time model download from HuggingFace CDN (~50MB, cached under `userData/models/`), no network requests are made. Text is passed via IPC from renderer to main process to worker thread. No text is logged, cached, or transmitted externally.
+- **MOSS-Nano (local opt-in):** Text is passed through the selected Nano sidecar only when Nano is explicitly chosen and ready. Progress truth is segment-following (`wordTimestamps: null`), and failures do not silently fall back.
+- **Pocket TTS (local opt-in):** Text is passed through the Pocket sidecar only when Pocket TTS is explicitly chosen and ready. v2.0 does not expose voice cloning or custom reference upload UX.
 - **Web Speech API (platform):** Uses the operating system's speech synthesis service. On Windows, this is typically local (SAPI/OneCore voices). Some platforms may route text through cloud services for higher-quality voices — this is OS-dependent and outside Blurby's control. Blurby does not log or cache any text passed to Web Speech.
 - **No telemetry.** Blurby collects no usage data, analytics, or crash reports related to narration or any other feature.
 
@@ -522,7 +530,7 @@ Blurby sends plain text to both TTS engines. SSML is not supported and not plann
 
 ### Safety Posture
 
-Narrate mode reads user-provided text verbatim. No content filtering, generation, recommendation, or content sharing occurs. Voice personas are user-selected from Kokoro's 28-voice inventory. No voice cloning or custom voice upload is supported.
+Narrate mode reads user-provided text verbatim. No content filtering, generation, recommendation, or content sharing occurs. Voice personas are user-selected from Kokoro's 28-voice inventory when Kokoro is active. No public voice-cloning or custom voice upload UX is supported in v2.0.
 
 ### TTS Glossary
 

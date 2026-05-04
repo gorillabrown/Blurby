@@ -1,9 +1,11 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-13d
+**Sprint:** MOSS-1 through MOSS-NANO-13e
 **Initial status:** `INVESTIGATE`
-**Current status:** `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`
-**Last updated:** 2026-05-03
+**Current status:** `NANO_RECOMMENDED_OPT_IN`
+**Last updated:** 2026-05-04
+
+**Adjacent TTS posture after POCKET-TTS-1:** Pocket TTS is available as a separate opt-in third engine. This does not alter the MOSS-Nano decision state: Nano remains `NANO_RECOMMENDED_OPT_IN`, Kokoro remains default/available, Qwen remains disabled, no comparative Pocket-vs-Nano gate was run, and Kokoro retirement remains separately deferred.
 
 ## Status Values
 
@@ -34,6 +36,7 @@
 | `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE` | Promote Nano from synthetic app-sidecar proof to real local ONNX app-audio prototype. This proves Test Voice and selected Nano narration can use real Nano audio through app IPC when ready, but does not make Nano default, recommended opt-in, word-timed, or a Kokoro replacement. |
 | `PROVENANCE_GATE_READY_NO_LIVE_CAPTURE` | MOSS-NANO-13c status: the schema/producer/gate can evaluate provenance-backed selected-Nano observations and reject simulated/incomplete evidence, but no clean real four-mode capture has promoted Nano. Nano remains experimental and non-default. |
 | `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION` | MOSS-NANO-13d status: real app-selected Nano evidence exists for Page, Focus, Flow, and Narrate; the final live gate passed cleanly as `NANO_RECOMMENDED_OPT_IN`; 13e must record the productization/opt-in recommendation decision. This does not change the default engine, retire Kokoro, or reactivate Qwen. |
+| `NANO_RECOMMENDED_OPT_IN` | MOSS-NANO-13e product decision: MOSS-Nano is recommended opt-in for Desktop v2.0 from the existing 13d real app-selected four-mode evidence and clean gate. Kokoro remains the default and available operational floor, Qwen remains disabled, and Kokoro retirement remains a separately deferred lane. |
 | `PAUSE_NANO_RUNTIME_RELIABILITY` | Pause Nano runtime reliability work when bounded recycle/reset evidence cannot make memory, tail latency, or lifecycle gates plausible enough for more runtime iteration. |
 | `KEEP_KOKORO_ONLY` | Historical Nano runtime-rescue decision from MOSS-NANO-2. It is not exposed as a Nano-6 readiness decision; Nano-6 readiness uses only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
@@ -1062,8 +1065,46 @@ Decision rationale:
 
 Next actions:
 
-- Use MOSS-NANO-13e for the productization decision / opt-in recommendation record.
-- Keep Nano non-default; keep Kokoro available; keep Qwen disabled.
+- MOSS-NANO-13e has recorded the productization decision / opt-in recommendation posture.
+- Keep Nano non-default; keep Kokoro available/default; keep Qwen disabled; keep Kokoro retirement separately deferred.
+
+## MOSS-NANO-13e Decision
+
+Decision: `NANO_RECOMMENDED_OPT_IN`.
+
+Scope: MOSS-NANO-13e closes the MOSS-Nano product decision using the existing MOSS-NANO-13d canonical live-evidence artifact and gate output. It records Nano as the recommended opt-in local engine for Desktop v2.0. It does not make Nano default, rerun live capture, start Pocket TTS, reactivate Qwen, open Kokoro retirement, change fallback semantics, or alter runtime behavior.
+
+Product posture:
+
+| Engine | Desktop v2.0 posture |
+|---|---|
+| Kokoro | Default and available operational floor. No retirement lane is opened by this decision. |
+| MOSS-Nano | Recommended opt-in local engine, readiness-gated by the local sidecar/runtime. Segment-following progress remains truthful with `wordTimestamps: null`. |
+| Qwen | Disabled. No reactivation is introduced. |
+
+Evidence:
+
+| Evidence item | Result |
+|---|---|
+| Productization memo | `docs/testing/moss-nano-13e-productization-memo.md`. |
+| Live evidence artifact | `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`. |
+| Final gate output | `artifacts/tts-eval/moss-nano-13d-live-capture/gate/`. |
+| Schema/provenance | `schemaVersion: "moss-nano-live-evidence.v2"`; `evidenceKind/source: "real-app-selected-nano"`. |
+| Trace counts | Page 42 events; Focus 44 events; Flow 43 events; Narrate 39 events. |
+| Runtime truth | Real selected Nano; `runtime.syntheticAudio: false`; `timingTruth: "segment-following"`; `wordTimestamps: null`. |
+| Fallback policy | Observed trace-level `fallback-policy policy:explicit-only`; no silent fallback to another engine while Nano is selected. |
+| Final gate result | PASS; hard failures 0/7; warnings 0/3; decision `NANO_RECOMMENDED_OPT_IN`; reasons none. |
+
+Decision rationale:
+
+- 13d already supplied the real app-selected four-mode evidence required by the provenance-backed gate; 13e does not rerun or expand capture.
+- The clean gate supports a bounded product recommendation, not a default-engine change.
+- Nano's release language must remain "recommended opt-in" and must preserve local sidecar readiness, segment-following progress truth, and explicit-only fallback policy.
+
+Next actions:
+
+- POCKET-TTS-1 has since proceeded as a separate third-engine integration; Pocket TTS is available opt-in and does not alter this Nano decision.
+- Keep Kokoro default and available, Qwen disabled, and KOKORO-RETIRE independently deferred.
 
 ## MOSS-NANO-12 Decision
 

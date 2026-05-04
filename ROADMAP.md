@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-04 PM — MOSS-NANO-13d is durably closed: the real app-selected four-mode evidence pipeline, source changes, tests, docs, and canonical artifacts have been committed through the 13d closeout branch and merged to `main`. 13e is the Recommended Opt-In Product Decision Closeout for MOSS-Nano (single-engine, based on 13d's existing canonical evidence — no rerun of live capture). After 13e: POCKET-TTS-1 adds Pocket TTS as a third available engine (no comparative gate). v2.0 ships with three available engines: Kokoro (default), MOSS-Nano (recommended opt-in), Pocket TTS (available opt-in). The earlier "13d.5 comparative pivot" framing has been superseded by POCKET-TTS-1's lighter scope.
+**Last updated**: 2026-05-04 PM — POCKET-TTS-1 is closed: Pocket TTS is now available as an explicit opt-in third engine path, after Kokoro and MOSS-Nano, without a comparative gate or MOSS-Nano productization changes. v2.0 ships with three available engines: Kokoro (default), MOSS-Nano (recommended opt-in), Pocket TTS (available opt-in). Qwen remains disabled and Kokoro retirement remains separately deferred.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, and MOSS-NANO-13d have landed on `main`. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. MOSS-NANO-13c adds a provenance-backed live-evidence schema/producer/gate and rejects simulated or boolean-only evidence. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`; this is evidence for the productization decision, not a default-engine change, Qwen reactivation, or Kokoro retirement. Next queue item: MOSS-NANO-13e.
+**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, and POCKET-TTS-1 have landed in the Desktop v2.0 conveyor. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`. MOSS-NANO-13e records that as the bounded product decision: Nano is recommended opt-in, Kokoro remains default/available, Qwen remains disabled, and KOKORO-RETIRE remains separately deferred. POCKET-TTS-1 adds Pocket TTS as an available opt-in engine with sidecar, IPC/preload, renderer strategy, settings/preview selection, and no public voice-cloning UX in v2.0. Next queue item: POLISH-1.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND **three TTS engines available**: **Kokoro** as the default and operational floor, **MOSS-Nano** as the recommended opt-in (per 13d's clean `NANO_RECOMMENDED_OPT_IN` provenance-backed gate result and 13e's product decision closeout), and **Pocket TTS** as an available opt-in (per POCKET-TTS-1 integration, scaffolded for voice cloning but UX-deferred to v2.1). Qwen remains disabled. KOKORO-RETIRE remains independently deferred even on `RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed. Android, Cloud Sync, RSS/News remain deferred lanes beyond this finish line.
 **Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope). Verdict: AT RISK, but no new TTS/model exploration is approved inside Desktop v2.0. Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
@@ -112,7 +112,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                    │
     QWEN-STREAM-4: Live Validation + Promotion Decision ✅ (v1.75.0, ITERATE)
       ├── *Historical posture (as of QWEN-STREAM-4 close, v1.75.0):* Qwen was the default narration engine; Kokoro was the deprecated legacy fallback; streaming Qwen lane closed at ITERATE rather than PROMOTE.
-      ├── *Current posture (as of v1.75.1, post MOSS-NANO-13d):* Qwen is **disabled**; Kokoro is the **default and operational floor**; MOSS-Nano is **experimental-only with `NANO_RECOMMENDED_OPT_IN` evidence captured but not yet productized as a default**. KOKORO-RETIRE remains independently deferred.
+      ├── *Current posture (as of v1.75.1, post MOSS-NANO-13e):* Qwen is **disabled**; Kokoro is the **default and operational floor**; MOSS-Nano is **recommended opt-in** from 13d's clean `NANO_RECOMMENDED_OPT_IN` provenance gate and 13e's product decision closeout. This is not a default-engine change. KOKORO-RETIRE remains independently deferred.
       └── See `docs/governance/QWEN_SUPPORTED_HOST_POLICY.md` for current Qwen disable rationale and `docs/testing/MOSS_DECISION_LOG.md` for the latest engine-posture decisions.
                    │
     MOSS-0: Flagship Feasibility And Host Truth ✅
@@ -481,8 +481,8 @@ All three investigation areas resolved:
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Twelve active conveyor sprints (8 done — 4 remaining), ~43 LOE total / ~12 LOE remaining, estimated 3–4 weeks. 2026-05-04 direction: see MOSS-Nano through (13e closes its product decision based on 13d's existing clean evidence), then add Pocket TTS as a third available engine via POCKET-TTS-1 — without rerunning the productization gate.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → **MOSS-NANO-13e (next up — MOSS-Nano recommended opt-in product decision closeout)** → POCKET-TTS-1 (Pocket TTS as third available engine) → POLISH-1 → RELEASE-1.
+> **Finish line:** Desktop v2.0 Shipping. Twelve active conveyor sprints (9 done — 3 remaining), ~43 LOE total / ~6 LOE remaining, estimated 2–3 weeks. 2026-05-04 direction: see MOSS-Nano through (13e closes its product decision based on 13d's existing clean evidence), then add Pocket TTS as a third available engine via POCKET-TTS-1 — without rerunning the productization gate.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → ~~MOSS-NANO-13e~~ ✅ → ~~POCKET-TTS-1~~ ✅ → **POLISH-1 (next up)** → RELEASE-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e (single-engine MOSS-Nano productization, decision based on 13d's existing canonical evidence) plus POCKET-TTS-1 (third-engine integration without comparative gate; voice-cloning UX deferred to v2.1). Default engine remains Kokoro; Qwen remains disabled. KOKORO-RETIRE remains independently deferred.
 
 ### Standing Rules All Skeletons Inherit
@@ -526,7 +526,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, and MOSS-NANO-13d completed by 2026-05-04. **MOSS-NANO-13e is next in the Desktop v2.0 active conveyor**, followed by POCKET-TTS-1 (Pocket TTS integration as third available engine, per 2026-05-04 user direction), then POLISH-1 and RELEASE-1.
+> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, and POCKET-TTS-1 completed by 2026-05-04. **POLISH-1 is next in the Desktop v2.0 active conveyor**, followed by RELEASE-1.
 
 ---
 
@@ -972,7 +972,11 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint POCKET-TTS-1: Pocket TTS Engine Integration (NEW — added 2026-05-04 PM, replaces shelved MOSS-NANO-13d.5)
+### Sprint POCKET-TTS-1: Pocket TTS Engine Integration ✅ COMPLETED 2026-05-04 — available opt-in third engine
+
+**Closeout:** POCKET-TTS-1 added Pocket TTS as a third explicit opt-in engine path without reopening MOSS-Nano productization, running a comparative engine gate, changing Kokoro's default posture, reactivating Qwen, or exposing public voice-cloning UX in v2.0. The landed path includes the Pocket sidecar/engine wrapper, engine-specific IPC/preload/type surface, renderer narration strategy, settings status/preview/selector wiring, and regression coverage that preserves Kokoro default, MOSS-Nano recommended opt-in, and Qwen disabled.
+
+**Verification:** Focused Pocket tests passed 4 files / 30 tests. Full `npm test` passed 169 files / 2548 tests. `npm run build` passed with the existing circular chunk warning `settings -> tts -> settings`. `npm run typecheck` was attempted and still fails on pre-existing repo-wide TypeScript debt outside the Pocket path.
 
 > **Sequencing note:** Although this spec sits between MOSS-NANO-13d and MOSS-NANO-13e in document order (an artifact of an earlier draft when the sprint was numbered "13d.5"), POCKET-TTS-1 dispatches **AFTER** MOSS-NANO-13e per the 2026-05-04 user direction: "Let's see MOSS-Nano through, then also add Pocket TTS, so we'll have Kokoro, MOSS, and Pocket at the first finishline." Active conveyor sequence is: 13d → 13e → POCKET-TTS-1 → POLISH-1 → RELEASE-1. The earlier comparative-gate framing (where Pocket TTS would be evaluated alongside MOSS-Nano through a generalized productization gate) is dropped — 13e closes MOSS-Nano's product decision on its own evidence; POCKET-TTS-1 simply adds Pocket TTS as a third available engine option without putting it through the same provenance-backed gate.
 
@@ -1060,7 +1064,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint MOSS-NANO-13e: Recommended Opt-In Product Decision Closeout (READY — Stage 3 close, post-13d)
+### Sprint MOSS-NANO-13e: Recommended Opt-In Product Decision Closeout (COMPLETED 2026-05-04 — Stage 3 close, post-13d)
 
 **Goal:** Record Nano as the Desktop v2.0 recommended opt-in engine, not the default engine, using the already-produced MOSS-NANO-13d canonical live-evidence artifact and gate decision `NANO_RECOMMENDED_OPT_IN`. Keep Kokoro available, keep Qwen disabled, and do not open a Kokoro retirement lane.
 
@@ -1080,5 +1084,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 **Roster:** Cowork (decision memo + governance updates) + CLI/Zeus (settings/runtime copy if needed) + Herodotus (docs closeout) + Solon (scope compliance).
 
 **Source:** MOSS-NANO-13d canonical evidence artifact and gate output; audit response §11 productization decision requirement.
+
+**Closeout:** Decision recorded as `NANO_RECOMMENDED_OPT_IN` in `docs/testing/MOSS_DECISION_LOG.md` and the final memo `docs/testing/moss-nano-13e-productization-memo.md`. The decision uses only the existing 13d artifact `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json` and gate output under `artifacts/tts-eval/moss-nano-13d-live-capture/gate/`. Trace counts remain Page 42, Focus 44, Flow 43, Narrate 39; final gate remains PASS with hard failures 0/7 and warnings 0/3. Product posture: Nano recommended opt-in, Kokoro default and available, Qwen disabled, no Kokoro retirement lane, no live-capture rerun, no Pocket TTS work.
 
 ---

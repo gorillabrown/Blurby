@@ -1454,3 +1454,17 @@ speakChunk() {
 **Pattern:** `scenarios.filter(s => s.engine !== "qwen-streaming" && s.fixtureId != null)` — apply this guard at the entry point of any non-streaming matrix execution path.
 
 **Fixed in:** QWEN-STREAM-4 (v1.75.0) — `scripts/tts_eval_runner.mjs` now filters streaming scenarios out of the `--matrix` (non-streaming) path.
+
+---
+
+### [2026-05-04] LL-112: Opt-In TTS Engines Need Isolated Surfaces Until a Shared Contract Proves Itself
+
+**Area:** TTS, sidecars, IPC, settings UX, product governance
+**Status:** active
+**Priority:** high
+
+**Context:** POCKET-TTS-1 added Pocket TTS after Kokoro and MOSS-Nano with strict guardrails: no comparative gate, no MOSS-Nano productization changes, no Kokoro default change, no Qwen reactivation, and no public v2.0 voice-cloning UX. The safest path was to mirror Nano's sidecar/engine/strategy shape while keeping Pocket on engine-specific IPC and settings surfaces. Extracting a generalized adapter at the same time would have mixed product posture work with architecture work.
+
+**Guardrail:** When adding a new opt-in TTS engine, isolate the sidecar, engine wrapper, IPC/preload channels, renderer strategy, and settings status component first. Only extract shared abstractions after two real engine paths prove identical behavior and regression tests define the shared boundary. Product-posture regressions must be tested alongside feature tests: default engine, recommended opt-in labels, disabled engines, and no silent fallback.
+
+**Related:** POCKET-TTS-1 sprint, `main/pocket-tts-engine.js`, `main/pocket-tts-sidecar.js`, `scripts/pocket_tts_sidecar.py`, `src/hooks/narration/pocketTtsStrategy.ts`, `src/components/settings/TtsEngineSelector.tsx`, `tests/ttsSettingsPocketTts.test.tsx`.

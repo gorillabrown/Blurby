@@ -68,18 +68,18 @@ export interface TtsEvalNanoSegmentEvent extends TtsEvalTraceBaseEvent {
 
 export interface TtsEvalEngineSelectionEvent extends TtsEvalTraceBaseEvent {
   kind: "engine-selection";
-  selectedEngine: "web" | "kokoro" | "qwen" | "nano";
+  selectedEngine: "web" | "kokoro" | "qwen" | "nano" | "pocket-tts";
   source: "app-settings";
 }
 
 export interface TtsEvalFallbackPolicyEvent extends TtsEvalTraceBaseEvent {
   kind: "fallback-policy";
   policy: "explicit-only";
-  selectedEngine: "nano";
+  selectedEngine: "nano" | "pocket-tts";
 }
 
 export interface TtsEvalNanoRuntimeEvent extends TtsEvalTraceBaseEvent {
-  kind: "nano-runtime" | "nano-synthesis";
+  kind: "nano-runtime" | "nano-synthesis" | "pocket-runtime" | "pocket-synthesis";
   backend?: string | null;
   modelVariant?: string | null;
   syntheticAudio: boolean | null;

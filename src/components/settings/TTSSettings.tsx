@@ -6,6 +6,8 @@ import { QwenStatusSection } from "./QwenStatusSection";
 import { QwenRuntimeSetupSection } from "./QwenRuntimeSetupSection";
 import { getQwenStatusPresentation } from "./qwenStatusPresentation";
 import { MossNanoStatusSection } from "./MossNanoStatusSection";
+import { PocketTtsStatusSection } from "./PocketTtsStatusSection";
+import { TtsEngineSelector } from "./TtsEngineSelector";
 import { NarrationDataSection } from "./NarrationDataSection";
 import { PauseSettingsSection } from "./PauseSettingsSection";
 import { PronunciationOverridesEditor } from "./PronunciationOverridesEditor";
@@ -20,6 +22,7 @@ import {
 import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../../utils/kokoroRatePlan";
 import { useQwenPrototypeStatus } from "../../hooks/useQwenPrototypeStatus";
 import { useMossNanoSettingsStatus } from "./useMossNanoSettingsStatus";
+import { usePocketTtsSettingsStatus } from "./usePocketTtsSettingsStatus";
 import { previewSelectedTtsVoice } from "./ttsPreview";
 import "../../styles/tts-settings.css";
 const api = window.electronAPI;
@@ -74,6 +77,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     handlePreflightQwen,
   } = useQwenPrototypeStatus();
   const { nanoSelectable, nanoReady, nanoStatusTitle, nanoStatusDetail } = useMossNanoSettingsStatus();
+  const { pocketSelectable, pocketReady, pocketStatusTitle, pocketStatusDetail } = usePocketTtsSettingsStatus();
   const preferredQwenVoice =
     settings.ttsVoiceName && qwenVoices.includes(settings.ttsVoiceName)
       ? settings.ttsVoiceName
@@ -188,6 +192,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       kokoroReady,
       qwenReady,
       nanoReady,
+      pocketReady,
       preferredQwenVoice,
       onPlaybackStateChange: setTestPlaying,
     });
@@ -219,7 +224,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     onSettingsChange({
       activeNarrationProfileId: id,
       ttsEngine: normalizeSelectableTtsEngine(profile.ttsEngine),
-      ttsVoiceName: normalizeSelectableTtsEngine(profile.ttsEngine) === "nano" ? null : profile.ttsVoiceName,
+      ttsVoiceName: normalizeSelectableTtsEngine(profile.ttsEngine) === "nano" || normalizeSelectableTtsEngine(profile.ttsEngine) === "pocket-tts" ? null : profile.ttsVoiceName,
       ttsRate: profile.ttsRate,
       ttsPauseCommaMs: profile.ttsPauseCommaMs,
       ttsPauseClauseMs: profile.ttsPauseClauseMs,
@@ -265,7 +270,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           p.id === activeProfileId ? {
             ...p,
             ttsEngine: normalizeSelectableTtsEngine(merged.ttsEngine),
-            ttsVoiceName: normalizeSelectableTtsEngine(merged.ttsEngine) === "nano" ? null : merged.ttsVoiceName || null,
+            ttsVoiceName: normalizeSelectableTtsEngine(merged.ttsEngine) === "nano" || normalizeSelectableTtsEngine(merged.ttsEngine) === "pocket-tts" ? null : merged.ttsVoiceName || null,
             ttsRate: merged.ttsRate || 1.0,
             ttsPauseCommaMs: merged.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
             ttsPauseClauseMs: merged.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,
@@ -370,49 +375,27 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       <div className="settings-section-label">Voice Engine</div>
 
-      {/* Engine selector */}
-      <div className="settings-mode-toggle tts-engine-toggle">
-        <button
-          className={`settings-mode-btn${engine === "qwen" ? " active" : ""}`}
-          onClick={() => {}}
-          disabled={QWEN_TTS_DISABLED}
-          aria-disabled={QWEN_TTS_DISABLED}
-        >
-          Qwen AI
-        </button>
-        <button
-          className={`settings-mode-btn${engine === "web" ? " active" : ""}`}
-          onClick={() => handleTtsChange({ ttsEngine: "web", ttsVoiceName: null })}
-        >
-          System
-        </button>
-        <button
-          className={`settings-mode-btn${engine === "kokoro" ? " active" : ""}`}
-          onClick={() => {
+      <TtsEngineSelector
+        engine={engine}
+        qwenDisabled={QWEN_TTS_DISABLED}
+        nanoSelectable={nanoSelectable}
+        pocketSelectable={pocketSelectable}
+        onSelect={(nextEngine) => {
+          if (nextEngine === "kokoro") {
             handleTtsChange({ ttsEngine: "kokoro", ttsVoiceName: kokoroReady ? "af_bella" : null });
-            if (!kokoroReady && !kokoroBusy) {
-              handleDownloadKokoro();
-            }
-          }}
-        >
-          Kokoro AI (Legacy)
-        </button>
-        <button
-          className={`settings-mode-btn${engine === "nano" ? " active" : ""}`}
-          onClick={() => {
-            handleTtsChange({ ttsEngine: "nano", ttsVoiceName: null });
-          }}
-          disabled={!nanoSelectable}
-          aria-disabled={!nanoSelectable}
-        >
-          Nano AI (Experimental)
-        </button>
-      </div>
+            if (!kokoroReady && !kokoroBusy) handleDownloadKokoro();
+            return;
+          }
+          handleTtsChange({ ttsEngine: nextEngine, ttsVoiceName: null });
+        }}
+      />
       <div className="tts-test-hint">
         Qwen is currently disabled.
         Kokoro remains available as a legacy fallback.
-        Nano is selectable as an experimental local runtime and requires the local MOSS Nano sidecar.
+        Nano is selectable as a recommended opt-in local runtime and requires the local MOSS Nano sidecar.
+        Pocket TTS is available as an explicit opt-in local runtime.
         {!nanoReady && ` ${nanoStatusDetail}`}
+        {!pocketReady && ` ${pocketStatusDetail}`}
       </div>
 
       {/* Kokoro download progress */}
@@ -451,6 +434,14 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           ready={nanoReady}
           title={nanoStatusTitle}
           detail={nanoStatusDetail}
+        />
+      )}
+
+      {engine === "pocket-tts" && (
+        <PocketTtsStatusSection
+          ready={pocketReady}
+          title={pocketStatusTitle}
+          detail={pocketStatusDetail}
         />
       )}
 
@@ -542,7 +533,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       <button
         className="settings-btn-secondary tts-test-btn"
         onClick={handleTestVoice}
-        disabled={testPlaying || (engine === "qwen" && !qwenReady) || (engine === "nano" && !nanoReady)}
+        disabled={testPlaying || (engine === "qwen" && !qwenReady) || (engine === "nano" && !nanoReady) || (engine === "pocket-tts" && !pocketReady)}
       >
         {testPlaying ? "Playing..." : "Test voice"}
       </button>
@@ -554,6 +545,8 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         {engine === "qwen" && !qwenReady && " Qwen becomes playable once the local external runtime is available and warmed."}
         {engine === "nano" && nanoReady && " Using experimental Nano through the local sidecar."}
         {engine === "nano" && !nanoReady && " Nano remains selected only as a blocked experimental option until the sidecar is ready."}
+        {engine === "pocket-tts" && pocketReady && " Using opt-in Pocket TTS through the local sidecar."}
+        {engine === "pocket-tts" && !pocketReady && " Pocket remains selected only as a blocked opt-in option until the sidecar is ready."}
       </div>
 
       <PauseSettingsSection settings={settings} onTtsChange={handleTtsChange} />

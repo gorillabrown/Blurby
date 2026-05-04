@@ -8,7 +8,7 @@ export interface PronunciationOverride {
 
 // ── Narration Profiles (TTS-6L) ─────────────────────────────────���───────────
 /** A named narration preset bundling voice, rate, pause timing, and overrides. */
-export type TtsEngine = "web" | "kokoro" | "qwen" | "nano";
+export type TtsEngine = "web" | "kokoro" | "qwen" | "nano" | "pocket-tts";
 
 export interface NarrationProfile {
   id: string;
@@ -202,6 +202,69 @@ export interface MossNanoErrorResponse {
   error: string;
   reason?: string | null;
   status?: MossNanoEngineStatus | null;
+  recoverable?: boolean;
+}
+
+export type PocketTtsEngineStatus = "unavailable" | "loading" | "ready" | "blocked" | "failed" | "shutdown";
+
+export interface PocketTtsLifecycleConfigSnapshot {
+  runtimeDir: string;
+  modelDir: string;
+  referenceWavPath?: string | null;
+  commandTimeoutMs: number;
+  synthesizeTimeoutMs: number;
+  maxInFlight: number;
+  restartBackoffMs: number;
+}
+
+export interface PocketTtsStatusSnapshot {
+  ok?: boolean;
+  status: PocketTtsEngineStatus;
+  reason?: string | null;
+  detail?: string | null;
+  ready: boolean;
+  loading: boolean;
+  recoverable: boolean;
+  config?: PocketTtsLifecycleConfigSnapshot;
+  runtime?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | null;
+  syntheticAudio?: boolean;
+}
+
+export interface PocketTtsSynthesizeRequest {
+  text: string;
+  voice?: string;
+  rate?: number;
+}
+
+export interface PocketTtsSynthesizeResult {
+  ok: boolean;
+  status?: PocketTtsEngineStatus;
+  reason?: string | null;
+  detail?: string | null;
+  requestId?: string | null;
+  ownerToken?: string | null;
+  audio?: Float32Array | number[];
+  sampleRate?: number;
+  durationMs?: number;
+  outputPath?: string;
+  runtime?: Record<string, unknown> | null;
+  syntheticAudio?: boolean;
+}
+
+export interface PocketTtsCancelResult {
+  ok: boolean;
+  cancelled: boolean;
+  reason?: string | null;
+  requestId?: string | null;
+  ownerToken?: string | null;
+}
+
+export interface PocketTtsErrorResponse {
+  ok: false;
+  error: string;
+  reason?: string | null;
+  status?: PocketTtsEngineStatus | null;
   recoverable?: boolean;
 }
 
@@ -536,6 +599,11 @@ export interface ElectronAPI {
   nanoCancel?: (requestId: string) => Promise<MossNanoCancelResult | MossNanoErrorResponse>;
   nanoShutdown?: () => Promise<MossNanoStatusSnapshot | MossNanoErrorResponse>;
   nanoRestart?: () => Promise<MossNanoStatusSnapshot | MossNanoErrorResponse>;
+  pocketStatus?: () => Promise<PocketTtsStatusSnapshot | PocketTtsErrorResponse>;
+  pocketSynthesize?: (payload: PocketTtsSynthesizeRequest) => Promise<PocketTtsSynthesizeResult | PocketTtsErrorResponse>;
+  pocketCancel?: (requestId: string) => Promise<PocketTtsCancelResult | PocketTtsErrorResponse>;
+  pocketShutdown?: () => Promise<PocketTtsStatusSnapshot | PocketTtsErrorResponse>;
+  pocketRestart?: () => Promise<PocketTtsStatusSnapshot | PocketTtsErrorResponse>;
   qwenPreload?: () => Promise<{ success?: boolean } & Partial<QwenErrorResponse>>;
   qwenPreflight?: () => Promise<QwenPreflightReport>;
   qwenModelStatus?: () => Promise<QwenStatusSnapshot>;
