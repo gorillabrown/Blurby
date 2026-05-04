@@ -218,6 +218,14 @@ describe("useNarration experimental Moss Nano lane", () => {
     expect(kokoroStrategyMock.speakChunk).not.toHaveBeenCalled();
   });
 
+  it("uses the Nano default voice instead of the Kokoro voice ref", async () => {
+    await renderHarness({ experimentalNano: true });
+
+    const deps = createMossNanoStrategyMock.mock.calls[0]?.[0] as { getVoiceId?: () => string };
+
+    expect(deps?.getVoiceId?.()).toBe("Junhao");
+  });
+
   it("does not create or use Nano on the default render/start path", async () => {
     const harness = await renderHarness();
 
@@ -497,7 +505,7 @@ describe("useNarration experimental Moss Nano lane", () => {
     expect((harness.getSnapshot() as any)?.nanoError).toBeNull();
   });
 
-  it("prefetches the next Nano segment after starting the current one", async () => {
+  it("waits for current Nano playback to start before prefetching the next segment", async () => {
     const harness = await renderHarness({ experimentalNano: true });
     const words = ["First.", "Second.", "Third."];
 
@@ -515,6 +523,14 @@ describe("useNarration experimental Moss Nano lane", () => {
       expect.any(Function),
       expect.any(Function),
     );
+    expect(nanoStrategyMock.prefetchChunk).not.toHaveBeenCalled();
+
+    const reportFirstAudioWord = nanoStrategyMock.speakChunk.mock.calls[0][4] as (wordIndex: number) => void;
+    await act(async () => {
+      reportFirstAudioWord(0);
+      await flushPromises();
+    });
+
     expect(nanoStrategyMock.prefetchChunk).toHaveBeenCalledWith(
       "Second.",
       ["Second."],
@@ -524,6 +540,8 @@ describe("useNarration experimental Moss Nano lane", () => {
         reason: "next-segment",
       }),
     );
+    expect(nanoStrategyMock.speakChunk.mock.invocationCallOrder[0])
+      .toBeLessThan(nanoStrategyMock.prefetchChunk.mock.invocationCallOrder[0]);
   });
 
   it("prefetches the first segment of the next section before a section-ending segment completes", async () => {
@@ -533,6 +551,12 @@ describe("useNarration experimental Moss Nano lane", () => {
     await act(async () => {
       harness.getSnapshot()?.setOnSectionEnd(onSectionEnd);
       harness.getSnapshot()?.startCursorDriven(["Final."], 0, 150, vi.fn());
+      await flushPromises();
+    });
+
+    const reportFirstAudioWord = nanoStrategyMock.speakChunk.mock.calls[0][4] as (wordIndex: number) => void;
+    await act(async () => {
+      reportFirstAudioWord(0);
       await flushPromises();
     });
 
@@ -571,6 +595,12 @@ describe("useNarration experimental Moss Nano lane", () => {
 
     await act(async () => {
       harness.getSnapshot()?.startCursorDriven(["First.", "Second."], 0, 150, vi.fn());
+      await flushPromises();
+    });
+
+    const reportFirstAudioWord = nanoStrategyMock.speakChunk.mock.calls[0][4] as (wordIndex: number) => void;
+    await act(async () => {
+      reportFirstAudioWord(0);
       await flushPromises();
     });
 

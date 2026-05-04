@@ -27,6 +27,7 @@ export interface MossNanoStrategyDeps {
   onStatus?: (status: MossNanoStatusSnapshot | MossNanoErrorResponse) => void;
   onError?: (error: unknown) => void;
   onSegmentTrace?: (event: MossNanoSegmentTraceEvent) => void;
+  onRuntimeTrace?: (event: MossNanoRuntimeTraceEvent) => void;
   cacheLimit?: number;
 }
 
@@ -51,6 +52,14 @@ export interface MossNanoSegmentTraceEvent {
   timingTruth: "segment-following";
   wordTimestamps: null;
   reason?: string;
+}
+
+export interface MossNanoRuntimeTraceEvent {
+  kind: "nano-runtime" | "nano-synthesis";
+  backend?: string | null;
+  modelVariant?: string | null;
+  syntheticAudio: boolean | null;
+  status?: string | null;
 }
 
 interface CacheEntry {
@@ -82,6 +91,10 @@ function isFailure(result: unknown): result is NanoFailure {
 function normalizeAudio(audio: Float32Array | number[] | undefined): Float32Array | null {
   if (!audio) return null;
   return audio instanceof Float32Array ? audio : new Float32Array(audio);
+}
+
+function stringField(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
 }
 
 function hashText(value: string): string {
@@ -163,6 +176,10 @@ export function createMossNanoStrategy(deps: MossNanoStrategyDeps): TtsStrategy 
     deps.onSegmentTrace?.(event);
   };
 
+  const emitRuntimeTrace = (event: MossNanoRuntimeTraceEvent) => {
+    deps.onRuntimeTrace?.(event);
+  };
+
   const updateCacheSize = () => {
     stats.size = cache.size;
   };
@@ -182,8 +199,8 @@ export function createMossNanoStrategy(deps: MossNanoStrategyDeps): TtsStrategy 
   const scheduleSegment = (segment: MossNanoSchedulerSegment, trace: MossNanoSegmentTraceEvent) => {
     lastSegment = segment;
     lastPlaybackTrace = trace;
-    scheduler.scheduleChunk(segment);
     scheduler.play();
+    scheduler.scheduleChunk(segment);
     scheduler.markPipelineDone();
     emitSegmentTrace(trace);
   };
@@ -207,6 +224,15 @@ export function createMossNanoStrategy(deps: MossNanoStrategyDeps): TtsStrategy 
       const status = await api.nanoStatus();
       statusSnapshot = status;
       deps.onStatus?.(status);
+      if (!isFailure(status)) {
+        emitRuntimeTrace({
+          kind: "nano-runtime",
+          backend: stringField(status.runtime?.backend),
+          modelVariant: stringField(status.runtime?.modelVariant ?? status.metadata?.modelVariant),
+          syntheticAudio: status.syntheticAudio ?? status.runtime?.syntheticAudio ?? null,
+          status: status.status ?? null,
+        });
+      }
       if (isFailure(status) || status.ready === false) {
         reportError(status, onError);
         return null;
@@ -224,6 +250,14 @@ export function createMossNanoStrategy(deps: MossNanoStrategyDeps): TtsStrategy 
       reportError(result, onError);
       return null;
     }
+
+    emitRuntimeTrace({
+      kind: "nano-synthesis",
+      backend: stringField(result.runtime?.backend),
+      modelVariant: stringField(result.runtime?.modelVariant),
+      syntheticAudio: result.syntheticAudio ?? null,
+      status: result.status ?? "ready",
+    });
 
     const audio = normalizeAudio(result.audio);
     if (!audio || !result.sampleRate) {

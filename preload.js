@@ -1,5 +1,35 @@
 const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
+function parseTtsEvalTraceConfig() {
+  const outDir = process.env.BLURBY_TTS_EVAL_TRACE_DIR;
+  if (!outDir) return null;
+  const raw = process.env.BLURBY_TTS_EVAL_TRACE_CONFIG;
+  if (!raw) return { enabled: true };
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? { ...parsed, enabled: true } : { enabled: true };
+  } catch {
+    return { enabled: true };
+  }
+}
+
+const ttsEvalTraceConfig = parseTtsEvalTraceConfig();
+if (ttsEvalTraceConfig) {
+  const traceEvents = [];
+  contextBridge.exposeInMainWorld("__BLURBY_TTS_EVAL_TRACE__", {
+    enabled: true,
+    captureMode: ttsEvalTraceConfig.mode,
+    events: traceEvents,
+    getEvents: () => traceEvents.slice(),
+    onEvent: (event) => {
+      traceEvents.push(event);
+      ipcRenderer.send("tts-eval-trace-event", event);
+    },
+    flush: () => ipcRenderer.invoke("tts-eval-trace-flush"),
+  });
+  ipcRenderer.send("tts-eval-trace-start", ttsEvalTraceConfig);
+}
+
 contextBridge.exposeInMainWorld("electronAPI", {
   // State
   getState: () => ipcRenderer.invoke("get-state"),

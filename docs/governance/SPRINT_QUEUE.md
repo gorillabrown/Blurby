@@ -55,11 +55,11 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Finish line: Desktop v2.0 Shipping (now includes the MOSS-NANO-13e recommended opt-in product decision closeout from the canonical 13d live-evidence artifact)
-Queue depth: 1 dispatch-ready (MOSS-NANO-13e) + 2 ship stubs (POLISH-1, RELEASE-1) (GREEN on dispatch-ready depth)
-Next queue item: MOSS-NANO-13e — Recommended Opt-In Product Decision Closeout
-Health: GREEN — MOSS-NANO-13a–13d shipped (13d gate result `NANO_RECOMMENDED_OPT_IN`, 0 hard failures, 0 warnings). 13d already produced the canonical real app-selected Nano live-evidence artifact, so 13e must not rerun live capture. No new model/runtime exploration is approved inside Desktop v2.0. KOKORO-RETIRE remains deferred. Qwen remains disabled; Kokoro remains available.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope). Verdict: AT RISK, but no additional TTS/model exploration is approved for Desktop v2.0.
+Finish line: Desktop v2.0 Shipping (three available engines at ship gate: Kokoro default, MOSS-Nano recommended opt-in per 13e, Pocket TTS available opt-in per POCKET-TTS-1)
+Queue depth: 2 dispatch-ready (MOSS-NANO-13e, POCKET-TTS-1) + 2 ship stubs (POLISH-1, RELEASE-1) (GREEN)
+Next queue item: MOSS-NANO-13e — Recommended Opt-In Product Decision Closeout (single-engine, MOSS-Nano-only, based on 13d's existing canonical evidence)
+Health: GREEN — MOSS-NANO-13a–13d shipped and 13d is now durably merged to `main` (13d gate result `NANO_RECOMMENDED_OPT_IN`, 0 hard failures, 0 warnings). 13e closes MOSS-Nano product decision without live-capture rerun. POCKET-TTS-1 (added 2026-05-04 per user direction "Let's see MOSS-Nano through, then also add Pocket TTS, so we'll have Kokoro, MOSS, and Pocket at the first finishline") integrates Pocket TTS as a third available engine without comparative gate work; voice-cloning UX deferred to v2.1. KOKORO-RETIRE remains deferred. Qwen remains disabled; Kokoro remains the default.
+Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 added as third-engine integration). Verdict: GREEN on dispatch-ready depth.
 ```
 
 ## Desktop v2.0 Conveyor Belt (Active)
@@ -74,13 +74,14 @@ Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO s
 | ~~5~~ | ~~MOSS-NANO-13a~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~GOALS-6B complete~~ | ✅ complete (2026-05-02) |
 | ~~6~~ | ~~MOSS-NANO-13B~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a~~ | ✅ complete and merged to main (2026-05-03) |
 | ~~7~~ | ~~MOSS-NANO-13c~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~13a, 13B~~ | ✅ complete (2026-05-03) |
-| ~~8~~ | ~~MOSS-NANO-13d~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~S~~ | ~~13c~~ | ✅ complete (2026-05-03) |
-| ~~9~~ | ~~MOSS-NANO-13d.5~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~13a–d~~ | SHELVED / do not dispatch — no new model/runtime exploration inside Desktop v2.0 |
-| 9 | **MOSS-NANO-13e** | Stage 3: MOSS-NANO Productization | **M** | 13a–d | **next up — recommended opt-in product decision closeout from 13d artifact; no live-capture rerun** |
-| 10 | POLISH-1 | Stage 4: Ship | M | 13e | stub — spec at Stage 3 close |
-| 11 | RELEASE-1 | Stage 4: Ship | S | POLISH-1 | stub — spec at Stage 3 close |
+| ~~8~~ | ~~MOSS-NANO-13d~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~S~~ | ~~13c~~ | ✅ complete and durably merged to `main` (2026-05-04) |
+| ~~—~~ | ~~MOSS-NANO-13d.5~~ | ~~Stage 3 (shelved draft)~~ | — | — | SUPERSEDED by POCKET-TTS-1 (2026-05-04 user direction) |
+| 9 | **MOSS-NANO-13e** | Stage 3: MOSS-NANO Productization | **M** | 13a–d | **next up — single-engine MOSS-Nano product decision closeout from 13d artifact; no live-capture rerun, no Pocket TTS work** |
+| 10 | **POCKET-TTS-1** | Stage 3: Successor Engine Track (Pocket TTS) | **L** | 13a–13e (sequenced after 13e) | dispatch-ready — Pocket TTS as third available engine; no comparative gate; voice-cloning UX deferred to v2.1 |
+| 11 | POLISH-1 | Stage 4: Ship | M | 13e + POCKET-TTS-1 | stub — spec at Stage 3 close |
+| 12 | RELEASE-1 | Stage 4: Ship | S | POLISH-1 | stub — spec at Stage 3 close |
 
-Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 Continued — E-Ink & Goals", and § "Stage 3 — MOSS-NANO Productization Track".
+Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 Continued — E-Ink & Goals", § "Stage 3 — Successor Engine Track" (covering MOSS-NANO-13a–13e + POCKET-TTS-1).
 
 ---
 

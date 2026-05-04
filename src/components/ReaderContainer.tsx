@@ -203,6 +203,7 @@ export default function ReaderContainer({
   const narration = useNarration({
     evalTrace: evalTraceSink,
     experimentalNano: settings.ttsEngine === "nano",
+    getReadingMode: () => evalTraceSink?.captureMode ?? readingModeRef.current,
   });
   const wordIndexRef = useRef(wordIndex);
   wordIndexRef.current = wordIndex;
@@ -495,6 +496,7 @@ export default function ReaderContainer({
     bookWordsTotalWords: bookWordMeta?.totalWords,
     resumeAnchorRef,
     softWordIndexRef,
+    evalTrace: evalTraceSink,
   });
   const {
     stopAllModes, startFocus, startFlow, toggleNarrationInFlow,

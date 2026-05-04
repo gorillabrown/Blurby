@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react";
 import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS, FOCUS_MODE_START_DELAY_MS } from "../constants";
 import { resolveFoliateStartWord, resolveModeStartWordIndex } from "../utils/startWordIndex";
 import type { BlurbySettings, ReaderMode } from "../types";
+import type { TtsEvalTraceSink } from "../types/eval";
 import type { FoliateViewAPI, FoliateWord } from "../components/FoliatePageView";
 import type { UseReadingModeInstanceReturn } from "./useReadingModeInstance";
 
@@ -54,6 +55,7 @@ export interface UseReaderModeParams {
   bookWordsTotalWords?: number;
   resumeAnchorRef: React.MutableRefObject<number | null>;
   softWordIndexRef: React.MutableRefObject<number>;
+  evalTrace?: TtsEvalTraceSink | null;
 }
 
 export interface UseReaderModeReturn {
@@ -109,6 +111,7 @@ export function useReaderMode({
   bookWordsTotalWords,
   resumeAnchorRef,
   softWordIndexRef,
+  evalTrace,
 }: UseReaderModeParams): UseReaderModeReturn {
   const readingModeRef = useRef<ReaderMode>(readingMode);
   readingModeRef.current = readingMode;
@@ -428,6 +431,7 @@ export function useReaderMode({
   ]);
 
   const handlePauseToPage = useCallback(() => {
+    const fromMode = readingModeRef.current;
     captureCurrentAnchor();
     if (isBrowsedAway && compatibilityMode === "flow" && isNarratingRef.current) {
       const pageStart = pageNavRef.current.getCurrentPageStart?.();
@@ -450,9 +454,20 @@ export function useReaderMode({
     stopAllModes();
     setReadingMode("page");
     updateSettings({ readingMode: "page" });
+    if (evalTrace?.enabled && fromMode !== "page") {
+      evalTrace.record({
+        kind: "transition",
+        transition: "handoff",
+        from: fromMode,
+        to: "page",
+        context: "mode-switch-anchor-preserved",
+        latencyMs: 0,
+      });
+    }
   }, [
     captureCurrentAnchor,
     clearNarrateTruthSync,
+    evalTrace,
     isBrowsedAway,
     narration,
     pageNavRef,
@@ -468,7 +483,8 @@ export function useReaderMode({
   ]);
 
   const handleSelectMode = useCallback((mode: "focus" | "flow" | "narrate") => {
-    if (readingModeRef.current === mode) return;
+    const fromMode = readingModeRef.current;
+    if (fromMode === mode) return;
     pendingNarrationResumeRef.current = false;
     captureCurrentAnchor();
     stopAllModes();
@@ -478,7 +494,17 @@ export function useReaderMode({
       lastReadingMode: mode,
       isNarrating: false,
     });
-  }, [captureCurrentAnchor, pendingNarrationResumeRef, setReadingMode, stopAllModes, updateSettings]);
+    if (evalTrace?.enabled) {
+      evalTrace.record({
+        kind: "transition",
+        transition: "handoff",
+        from: fromMode,
+        to: mode,
+        context: "mode-switch-anchor-preserved",
+        latencyMs: 0,
+      });
+    }
+  }, [captureCurrentAnchor, evalTrace, pendingNarrationResumeRef, setReadingMode, stopAllModes, updateSettings]);
 
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
   const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);

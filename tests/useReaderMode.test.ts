@@ -15,7 +15,10 @@ function flushPromises() {
 function createNarration(overrides: Record<string, unknown> = {}): any {
   return {
     cursorWordIndex: 0,
+    status: "idle",
     startCursorDriven: vi.fn(() => "started"),
+    pause: vi.fn(),
+    resume: vi.fn(),
     stop: vi.fn(),
     setOnTruthSync: vi.fn(),
     setPageEndWord: vi.fn(),
@@ -653,6 +656,7 @@ describe("useReaderMode four-mode foundation", () => {
     pendingNarrationResume?: boolean;
     narrationOverrides?: Record<string, unknown>;
     foliateApiCurrent?: Record<string, unknown>;
+    evalTrace?: any;
   }) {
     const modeInstance = {
       modeRef: { current: null },
@@ -752,6 +756,7 @@ describe("useReaderMode four-mode foundation", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef,
         softWordIndexRef: { current: options?.softWordIndex ?? 0 },
+        evalTrace: options?.evalTrace ?? null,
       });
       return null;
     }
@@ -913,7 +918,7 @@ describe("useReaderMode four-mode foundation", () => {
     expect(harness.modeInstance.stopMode).not.toHaveBeenCalled();
   });
 
-  it("pausing active narrate keeps the reader in narrate mode", async () => {
+  it("stopping active narrate keeps the reader in narrate mode but deactivates narration", async () => {
     const harness = await renderReaderModeHarness({
       initialReadingMode: "narrate",
       initialIsNarrating: true,
@@ -946,10 +951,63 @@ describe("useReaderMode four-mode foundation", () => {
     expect(harness.observed.flowPlaying).toBe(false);
     expect(harness.modeInstance.pauseMode).toHaveBeenCalled();
     expect(harness.narration.stop).toHaveBeenCalled();
+    expect(harness.narration.setOnTruthSync).toHaveBeenCalledWith(null);
     expect(harness.updateSettings).toHaveBeenCalledWith({
       readingMode: "narrate",
       lastReadingMode: "narrate",
       isNarrating: false,
+    });
+  });
+
+  it("starts narrate normally when narrate mode is not actively narrating", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialIsNarrating: false,
+      initialFlowPlaying: false,
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+        isNarrating: false,
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.observed.readingMode).toBe("narrate");
+    expect(harness.narration.startCursorDriven).toHaveBeenCalled();
+    expect(harness.updateSettings).toHaveBeenCalledWith({
+      readingMode: "narrate",
+      lastReadingMode: "narrate",
+      isNarrating: true,
+    });
+  });
+
+  it("records mode-switch anchor preservation when selecting another mode", async () => {
+    const events: unknown[] = [];
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "page",
+      initialHighlightedWordIndex: 2,
+      evalTrace: {
+        enabled: true,
+        record: (event: unknown) => events.push(event),
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleSelectMode("flow");
+      await flushPromises();
+    });
+
+    expect(events).toContainEqual({
+      kind: "transition",
+      transition: "handoff",
+      from: "page",
+      to: "flow",
+      context: "mode-switch-anchor-preserved",
+      latencyMs: 0,
     });
   });
 
