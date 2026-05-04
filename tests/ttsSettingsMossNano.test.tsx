@@ -131,7 +131,8 @@ describe("TTSSettings Moss Nano experimental UI", () => {
       "Qwen AI",
       "System",
       "Kokoro AI (Legacy)",
-      "Nano AI (Experimental)",
+      "Nano AI (Recommended opt-in)",
+      "Pocket TTS (Opt-in)",
     ]);
     expect((DEFAULT_SETTINGS as BlurbySettings).ttsEngine).toBe("kokoro");
     expect((DEFAULT_SETTINGS as BlurbySettings).ttsVoiceName).toBeNull();
@@ -140,7 +141,7 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     expect(qwenButton?.getAttribute("aria-disabled")).toBe("true");
     expect(qwenButton?.className).not.toContain("active");
     expect(container.textContent).toContain("Qwen is currently disabled.");
-    expect(container.textContent).toContain("Nano is selectable as an experimental local runtime and requires the local MOSS Nano sidecar.");
+    expect(container.textContent).toContain("Nano is selectable as a recommended opt-in local runtime and requires the local MOSS Nano sidecar.");
     expect(container.textContent).toContain("Nano sidecar API is unavailable.");
 
     const nanoButton = engineButtons.find((button) => button.textContent?.includes("Nano AI"));

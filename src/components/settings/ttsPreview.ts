@@ -9,6 +9,7 @@ interface PreviewSelectedTtsVoiceOptions {
   kokoroReady: boolean;
   qwenReady: boolean;
   nanoReady: boolean;
+  pocketReady?: boolean;
   preferredQwenVoice: string;
   onPlaybackStateChange: (playing: boolean) => void;
 }
@@ -30,6 +31,7 @@ export async function previewSelectedTtsVoice({
   kokoroReady,
   qwenReady,
   nanoReady,
+  pocketReady,
   preferredQwenVoice,
   onPlaybackStateChange,
 }: PreviewSelectedTtsVoiceOptions): Promise<TtsVoicePreviewResult> {
@@ -205,6 +207,69 @@ export async function previewSelectedTtsVoice({
         engine: "nano",
         played: false,
         error: error instanceof Error ? error.message : "Nano preview failed.",
+      };
+    }
+  }
+
+  if (engine === "pocket-tts") {
+    if (!pocketReady || !api?.pocketStatus || !api.pocketSynthesize) {
+      onPlaybackStateChange(false);
+      return {
+        engine: "pocket-tts",
+        played: false,
+        error: "Pocket runtime is not ready for preview playback.",
+      };
+    }
+
+    onPlaybackStateChange(true);
+    try {
+      const status = await api.pocketStatus();
+      if (!status || !("ready" in status) || !status.ready || status.status !== "ready") {
+        onPlaybackStateChange(false);
+        return {
+          engine: "pocket-tts",
+          played: false,
+          error: "Pocket runtime is not ready for preview playback.",
+          reason: "pocket-not-ready",
+        };
+      }
+
+      const result = await api.pocketSynthesize({
+        text: "The quick brown fox jumps over the lazy dog.",
+        voice: settings.ttsVoiceName || "default",
+        rate: settings.ttsRate || 1.0,
+      });
+      if ("ok" in result && result.ok && result.audio) {
+        const { playBuffer } = await import("../../utils/audioPlayer");
+        const audio = result.audio instanceof Float32Array
+          ? result.audio
+          : Float32Array.from(result.audio);
+        playBuffer(
+          audio,
+          result.sampleRate ?? 24000,
+          result.durationMs ?? ((audio.length / (result.sampleRate ?? 24000)) * 1000),
+          9,
+          undefined,
+          () => onPlaybackStateChange(false),
+        );
+        return {
+          engine: "pocket-tts",
+          played: true,
+        };
+      }
+      onPlaybackStateChange(false);
+      return {
+        engine: "pocket-tts",
+        played: false,
+        error: "error" in result ? result.error : result.detail || "Pocket preview failed.",
+        reason: result.reason ?? null,
+      };
+    } catch (error) {
+      onPlaybackStateChange(false);
+      return {
+        engine: "pocket-tts",
+        played: false,
+        error: error instanceof Error ? error.message : "Pocket preview failed.",
       };
     }
   }

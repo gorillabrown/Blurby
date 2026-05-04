@@ -167,7 +167,7 @@ export const TTS_DEFAULT_VOICE_NAME: string | null = null;
 
 /** Normalize persisted or imported engine values onto the currently selectable set. */
 export function normalizeSelectableTtsEngine(engine: unknown): TtsEngine {
-  if (engine === "web" || engine === "kokoro" || engine === "nano") return engine;
+  if (engine === "web" || engine === "kokoro" || engine === "nano" || engine === "pocket-tts") return engine;
   return TTS_DEFAULT_ENGINE;
 }
 
@@ -196,10 +196,11 @@ export function createDefaultNarrationProfile(name: string): NarrationProfile {
 export function profileFromSettings(name: string, settings: BlurbySettings): NarrationProfile {
   const base = createDefaultNarrationProfile(name);
   const ttsEngine = normalizeSelectableTtsEngine(settings.ttsEngine);
+  const voicePinnedToRuntime = ttsEngine === "nano" || ttsEngine === "pocket-tts";
   return {
     ...base,
     ttsEngine,
-    ttsVoiceName: ttsEngine === "nano" ? null : settings.ttsVoiceName || null,
+    ttsVoiceName: voicePinnedToRuntime ? null : settings.ttsVoiceName || null,
     ttsRate: settings.ttsRate || 1.0,
     ttsPauseCommaMs: settings.ttsPauseCommaMs ?? TTS_PAUSE_COMMA_MS,
     ttsPauseClauseMs: settings.ttsPauseClauseMs ?? TTS_PAUSE_CLAUSE_MS,

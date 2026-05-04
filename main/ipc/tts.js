@@ -35,6 +35,17 @@ function toNanoErrorResponse(err) {
   };
 }
 
+function toPocketErrorResponse(err) {
+  const error = err instanceof Error ? err : new Error(String(err || "Pocket TTS IPC failure"));
+  return {
+    ok: false,
+    error: error.message,
+    reason: error.reason || null,
+    status: error.status || "failed",
+    recoverable: typeof error.recoverable === "boolean" ? error.recoverable : true,
+  };
+}
+
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
   const qwenEngine = require("../qwen-engine");
@@ -46,6 +57,13 @@ function register(ctx) {
       : typeof mossNanoModule.getMossNanoEngine === "function"
       ? mossNanoModule.getMossNanoEngine({ app })
       : mossNanoModule.mossNanoEngine || mossNanoModule.default;
+  const pocketTtsModule = require("../pocket-tts-engine");
+  const pocketEngine =
+    typeof pocketTtsModule.getSharedPocketTtsEngine === "function"
+      ? pocketTtsModule.getSharedPocketTtsEngine({ app })
+      : typeof pocketTtsModule.getPocketTtsEngine === "function"
+      ? pocketTtsModule.getPocketTtsEngine({ app })
+      : pocketTtsModule.pocketTtsEngine || pocketTtsModule.default;
 
   // Set up loading callback to notify renderer
   ttsEngine.setLoadingCallback((loading) => {
@@ -146,6 +164,46 @@ function register(ctx) {
       return await nanoEngine.restart();
     } catch (err) {
       return toNanoErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-pocket-status", async () => {
+    try {
+      return await pocketEngine.status();
+    } catch (err) {
+      return toPocketErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-pocket-synthesize", async (_event, payload) => {
+    try {
+      return await pocketEngine.synthesize(payload);
+    } catch (err) {
+      return toPocketErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-pocket-cancel", async (_event, requestId) => {
+    try {
+      return await pocketEngine.cancel(requestId);
+    } catch (err) {
+      return toPocketErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-pocket-shutdown", async () => {
+    try {
+      return await pocketEngine.shutdown();
+    } catch (err) {
+      return toPocketErrorResponse(err);
+    }
+  });
+
+  ipcMain.handle("tts-pocket-restart", async () => {
+    try {
+      return await pocketEngine.restart();
+    } catch (err) {
+      return toPocketErrorResponse(err);
     }
   });
 

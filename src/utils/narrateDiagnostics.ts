@@ -7,7 +7,7 @@
 /** Snapshot of key narration runtime state at a point in time. */
 export interface NarrateDiagSnapshot {
   timestamp: number;
-  engine: "web" | "kokoro" | "qwen" | null;
+  engine: "web" | "kokoro" | "qwen" | "nano" | "pocket-tts" | null;
   status: string;
   cursorWordIndex: number;
   totalWords: number;

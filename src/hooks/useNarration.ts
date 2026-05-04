@@ -8,6 +8,7 @@ import { NarrationState as ReducerState, NarrationAction, narrationReducer, crea
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { createMossNanoStrategy } from "./narration/mossNanoStrategy";
+import { createPocketTtsStrategy } from "./narration/pocketTtsStrategy";
 import { createQwenStrategy } from "./narration/qwenStrategy";
 import { createQwenStreamingStrategy } from "./narration/qwenStreamingStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
@@ -97,6 +98,7 @@ function findSentenceBoundary(words: string[], startIdx: number, chunkSize: numb
 
 const api = window.electronAPI;
 const MOSS_NANO_DEFAULT_VOICE = "Junhao";
+const POCKET_TTS_DEFAULT_VOICE = "default";
 
 interface UseNarrationOptions {
   evalTrace?: TtsEvalTraceSink | null;
@@ -270,7 +272,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const captureDiagSnapshot = useCallback(() => {
     const s = stateRef.current;
     recordSnapshot({
-      engine: s.engine as "web" | "kokoro" | "qwen" | null,
+      engine: s.engine as "web" | "kokoro" | "qwen" | "nano" | "pocket-tts" | null,
       status: s.status,
       cursorWordIndex: s.cursorWordIndex,
       totalWords: allWordsRef.current.length,
@@ -317,8 +319,11 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const kokoroStrategyRef = useRef<ReturnType<typeof createKokoroStrategy> | null>(null);
   const qwenStrategyRef = useRef<ReturnType<typeof createQwenStrategy> | ReturnType<typeof createQwenStreamingStrategy> | null>(null);
   const nanoStrategyRef = useRef<ReturnType<typeof createMossNanoStrategy> | null>(null);
+  const pocketStrategyRef = useRef<ReturnType<typeof createPocketTtsStrategy> | null>(null);
   const nanoActiveRef = useRef(false);
   const nanoCallbackGenerationRef = useRef(0);
+  const pocketActiveRef = useRef(false);
+  const pocketCallbackGenerationRef = useRef(0);
 
   const claimNanoOwnership = useCallback(() => {
     const generation = nanoCallbackGenerationRef.current + 1;
@@ -336,6 +341,22 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     nanoActiveRef.current && nanoCallbackGenerationRef.current === generation
   ), []);
 
+  const claimPocketOwnership = useCallback(() => {
+    const generation = pocketCallbackGenerationRef.current + 1;
+    pocketCallbackGenerationRef.current = generation;
+    pocketActiveRef.current = true;
+    return generation;
+  }, []);
+
+  const clearPocketOwnership = useCallback(() => {
+    pocketCallbackGenerationRef.current += 1;
+    pocketActiveRef.current = false;
+  }, []);
+
+  const ownsPocketCallback = useCallback((generation: number) => (
+    pocketActiveRef.current && pocketCallbackGenerationRef.current === generation
+  ), []);
+
   const reportNanoError = useCallback((error?: unknown) => {
     const detail =
       error && typeof error === "object" && "error" in error
@@ -346,6 +367,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     dispatch({ type: "ERROR", message: detail });
     stateRef.current = { ...stateRef.current, status: "error" };
   }, [clearNanoOwnership]);
+
+  const reportPocketError = useCallback((error?: unknown) => {
+    const detail =
+      error && typeof error === "object" && "error" in error
+        ? String((error as { error?: unknown }).error)
+        : "Pocket TTS synthesis failed";
+    clearPocketOwnership();
+    setNanoError(error ?? detail);
+    dispatch({ type: "ERROR", message: detail });
+    stateRef.current = { ...stateRef.current, status: "error" };
+  }, [clearPocketOwnership]);
 
   const kokoroStrategy = useMemo(
     () => createKokoroStrategy({
@@ -462,6 +494,19 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     [emitEvalTrace, emitNanoSegmentTrace, experimentalNano, reportNanoError],
   );
   nanoStrategyRef.current = nanoStrategy;
+
+  const pocketStrategy = useMemo(
+    () => createPocketTtsStrategy({
+      getVoiceId: () => POCKET_TTS_DEFAULT_VOICE,
+      getWords: () => allWordsRef.current,
+      onRuntimeTrace: (event) => {
+        emitEvalTrace(event as Parameters<NonNullable<TtsEvalTraceSink>["record"]>[0]);
+      },
+      onError: reportPocketError,
+    }),
+    [emitEvalTrace, reportPocketError],
+  );
+  pocketStrategyRef.current = pocketStrategy;
 
   // Check Kokoro model status on mount
   useEffect(() => {
@@ -591,7 +636,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       kokoroStrategy.stop();
       qwenStrategy.stop();
       nanoStrategyRef.current?.stop();
+      pocketStrategyRef.current?.stop();
       clearNanoOwnership();
+      clearPocketOwnership();
       dispatch({ type: "STOP" });
       stateRef.current = {
         ...stateRef.current,
@@ -824,6 +871,79 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     );
   }, [captureDiagSnapshot, claimNanoOwnership, clearNanoOwnership, emitEvalTrace, emitNanoSegmentTrace, ownsNanoCallback, reportNanoError]);
 
+  const speakNextChunkPocket = useCallback(() => {
+    const strategy = pocketStrategyRef.current;
+    const s = stateRef.current;
+    if (!strategy || s.status === "idle") return;
+    const words = allWordsRef.current;
+    const startIdx = s.cursorWordIndex;
+    if (startIdx >= words.length) {
+      clearPocketOwnership();
+      if (onSectionEndRef.current) {
+        onSectionEndRef.current();
+      } else {
+        dispatch({ type: "STOP" });
+      }
+      return;
+    }
+
+    const endIdx = findSentenceBoundary(words, startIdx, TTS_CHUNK_SIZE, null);
+    const chunkWords = words.slice(startIdx, endIdx);
+    const chunkText = applyPronunciationOverrides(chunkWords.join(" "), pronunciationOverridesRef.current);
+    const pocketGeneration = claimPocketOwnership();
+
+    strategy.setContinuityScope({
+      bookId: bookIdRef.current || "active-book",
+      sectionId: stateRef.current.pageEndWord ?? "active-section",
+      generation: stateRef.current.generationId,
+    });
+
+    strategy.speakChunk(
+      chunkText,
+      chunkWords,
+      startIdx,
+      s.speed,
+      (wordIndex) => {
+        if (!ownsPocketCallback(pocketGeneration)) return;
+        if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
+          evalFirstAudioCapturedRef.current = true;
+          emitEvalTrace({
+            kind: "lifecycle",
+            state: "first-audio",
+            wordIndex,
+            latencyMs: Math.max(0, Date.now() - evalStartTimeRef.current),
+          });
+        }
+        emitEvalTrace({ kind: "word", source: "audio", wordIndex });
+        lastConfirmedAudioWordRef.current = wordIndex;
+        dispatch({ type: "WORD_ADVANCE", wordIndex });
+        if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
+      },
+      () => {
+        if (!ownsPocketCallback(pocketGeneration)) return;
+        dispatch({ type: "CHUNK_COMPLETE", endIdx });
+        stateRef.current = { ...stateRef.current, cursorWordIndex: endIdx };
+        lastConfirmedAudioWordRef.current = endIdx;
+        if (onWordAdvanceRef.current) onWordAdvanceRef.current(endIdx);
+        captureDiagSnapshot();
+        const currentState = stateRef.current;
+        if (currentState.status !== "idle" && currentState.status !== "holding" && endIdx < words.length) {
+          speakNextChunkPocket();
+        } else if (onSectionEndRef.current) {
+          clearPocketOwnership();
+          onSectionEndRef.current();
+        } else {
+          dispatch({ type: "STOP" });
+          clearPocketOwnership();
+        }
+      },
+      (error?: unknown) => {
+        if (!ownsPocketCallback(pocketGeneration)) return;
+        reportPocketError(error);
+      },
+    );
+  }, [captureDiagSnapshot, claimPocketOwnership, clearPocketOwnership, emitEvalTrace, ownsPocketCallback, reportPocketError]);
+
   /** Speak using the Kokoro strategy (delegates to NAR-2 pipeline + scheduler). */
   const speakNextChunkKokoro = useCallback(() => {
     const s = stateRef.current;
@@ -950,10 +1070,12 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       const detail = "MOSS Nano is selected but the experimental Nano strategy is not enabled.";
       dispatch({ type: "ERROR", message: detail });
       stateRef.current = { ...stateRef.current, status: "error" };
+    } else if (s.engine === "pocket-tts") {
+      speakNextChunkPocket();
     } else {
       speakNextChunkWeb();
     }
-  }, [experimentalNano, qwenError, speakNextChunkKokoro, speakNextChunkNano, speakNextChunkQwen, speakNextChunkWeb]);
+  }, [experimentalNano, qwenError, speakNextChunkKokoro, speakNextChunkNano, speakNextChunkPocket, speakNextChunkQwen, speakNextChunkWeb]);
 
   // Keep refs in sync for strategy callbacks that need to break circular deps
   speakNextChunkRef.current = speakNextChunk;
@@ -999,7 +1121,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     kokoroStrategy.stop();
     qwenStrategy.stop();
     nanoStrategyRef.current?.stop();
+    pocketStrategyRef.current?.stop();
     clearNanoOwnership();
+    clearPocketOwnership();
     setNanoError(null);
     handoffPendingRef.current = false;
     clearPendingRateResponseTrace();
@@ -1144,6 +1268,10 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       emitEvalTrace({ kind: "engine-selection", selectedEngine: "nano", source: "app-settings" });
       emitEvalTrace({ kind: "fallback-policy", policy: "explicit-only", selectedEngine: "nano" });
     }
+    if (stateRef.current.engine === "pocket-tts") {
+      emitEvalTrace({ kind: "engine-selection", selectedEngine: "pocket-tts", source: "app-settings" });
+      emitEvalTrace({ kind: "fallback-policy", policy: "explicit-only", selectedEngine: "pocket-tts" });
+    }
     emitEvalTrace({
       kind: "lifecycle",
       state: "start",
@@ -1172,7 +1300,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
     speakNextChunk();
     return "started";
-  }, [qwenError, speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearNanoOwnership]);
+  }, [qwenError, speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearNanoOwnership, clearPocketOwnership]);
 
   const resyncToCursor = useCallback((wordIndex: number, wpm: number) => {
     const s = stateRef.current;
@@ -1181,7 +1309,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     kokoroStrategy.stop();
     qwenStrategy.stop();
     nanoStrategyRef.current?.stop();
+    pocketStrategyRef.current?.stop();
     clearNanoOwnership();
+    clearPocketOwnership();
     handoffPendingRef.current = false;
     clearPendingRateResponseTrace();
     const newSpeed = wpmToRate(wpm);
@@ -1190,7 +1320,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // Update stateRef for immediate speakNextChunk
     stateRef.current = { ...stateRef.current, speed: newSpeed, generationId: stateRef.current.generationId + 1 };
     speakNextChunk();
-  }, [speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, syncNarrationCursor, clearPendingRateResponseTrace, clearNanoOwnership]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, syncNarrationCursor, clearPendingRateResponseTrace, clearNanoOwnership, clearPocketOwnership]);
 
   // HOTFIX-6: Replace word array and resync cursor to a global position.
   // Default "passive" mode preserves the existing non-disruptive behavior for cache syncs.
@@ -1224,7 +1354,10 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       qwenStrategy.stop();
       nanoStrategyRef.current?.stop();
       nanoStrategyRef.current?.clearCache({ reason: "handoff" });
+      pocketStrategyRef.current?.stop();
+      pocketStrategyRef.current?.clearCache({ reason: "handoff" });
       clearNanoOwnership();
+      clearPocketOwnership();
     }
     if (s.status === "speaking") {
       queueMicrotask(() => {
@@ -1318,6 +1451,12 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (experimentalNano && nanoStrategyRef.current && !nanoActiveRef.current) {
       return;
     }
+    if (pocketActiveRef.current && pocketStrategyRef.current) {
+      pocketStrategyRef.current.stop();
+      clearPocketOwnership();
+      speakNextChunk();
+      return;
+    }
     if (nanoActiveRef.current && nanoStrategyRef.current) {
       if (rateDebounceRef.current) {
         clearTimeout(rateDebounceRef.current);
@@ -1351,7 +1490,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const s = stateRef.current;
     if (s.status !== "speaking") return;
     clearPendingRateResponseTrace();
-    if (nanoActiveRef.current && nanoStrategyRef.current) {
+    if (pocketActiveRef.current && pocketStrategyRef.current) {
+      pocketStrategyRef.current.pause();
+    } else if (nanoActiveRef.current && nanoStrategyRef.current) {
       nanoStrategyRef.current.pause();
     } else if (s.engine === "kokoro") {
       kokoroStrategy.pause();
@@ -1384,7 +1525,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       kokoroStrategy.stop();
       qwenStrategy.stop();
       nanoStrategyRef.current?.stop();
+      pocketStrategyRef.current?.stop();
       clearNanoOwnership();
+      clearPocketOwnership();
       handoffPendingRef.current = false;
       clearPendingRateResponseTrace();
       const newSpeed = s.speed;
@@ -1415,7 +1558,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       kokoroStrategy.stop();
       qwenStrategy.stop();
       nanoStrategyRef.current?.stop();
+      pocketStrategyRef.current?.stop();
       clearNanoOwnership();
+      clearPocketOwnership();
       clearPendingRateResponseTrace();
       lastConfirmedAudioWordRef.current = s.cursorWordIndex;
       dispatch({ type: "RESUME" });
@@ -1434,7 +1579,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
     // Bare resume from pause point
     clearPendingRateResponseTrace();
-    if (nanoActiveRef.current && nanoStrategyRef.current) {
+    if (pocketActiveRef.current && pocketStrategyRef.current) {
+      pocketStrategyRef.current.resume();
+    } else if (nanoActiveRef.current && nanoStrategyRef.current) {
       nanoStrategyRef.current.resume();
     } else if (s.engine === "kokoro") {
       kokoroStrategy.resume();
@@ -1471,7 +1618,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     kokoroStrategy.stop();
     qwenStrategy.stop();
     nanoStrategyRef.current?.stop();
+    pocketStrategyRef.current?.stop();
     clearNanoOwnership();
+    clearPocketOwnership();
     handoffPendingRef.current = false;
     dispatch({ type: "STOP" });
   }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace, clearNanoOwnership]);
@@ -1502,7 +1651,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       kokoroStrategy.stop();
       qwenStrategy.stop();
       nanoStrategyRef.current?.stop();
+      pocketStrategyRef.current?.stop();
       clearNanoOwnership();
+      clearPocketOwnership();
     };
   }, [webStrategy, kokoroStrategy, qwenStrategy, clearNanoOwnership]);
 
@@ -1596,6 +1747,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       }
       if (s.engine === "qwen") {
         return qwenStrategyRef.current?.getAudioProgress?.() ?? null;
+      }
+      if (pocketActiveRef.current) {
+        return pocketStrategyRef.current?.getAudioProgress?.() ?? null;
       }
       if (nanoActiveRef.current) {
         return nanoStrategyRef.current?.getAudioProgress?.() ?? null;
