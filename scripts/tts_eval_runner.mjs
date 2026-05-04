@@ -52,6 +52,8 @@ const MOSS_NANO_LIVE_PROVENANCE_KEYS = Object.freeze([
   "nanoCache",
   "nanoPrefetch",
   "recycleObservations",
+  "observedEngineSelection",
+  "observedFallbackPolicy",
 ]);
 
 function isMossNanoProductScenario(scenario) {
@@ -154,6 +156,22 @@ function validateMossNanoLiveEvidenceMode(mode, modeEvidence, reasons) {
   }
   if (modeEvidence.selectedEngine !== "nano") {
     reasons.push(`Live evidence did not prove selected Nano in ${mode}`);
+    valid = false;
+  }
+  if (
+    !isObject(modeEvidence.observedEngineSelection)
+    || modeEvidence.observedEngineSelection.kind !== "engine-selection"
+    || modeEvidence.observedEngineSelection.selectedEngine !== "nano"
+  ) {
+    reasons.push(`Missing observed engine-selection provenance in ${mode}`);
+    valid = false;
+  }
+  if (
+    !isObject(modeEvidence.observedFallbackPolicy)
+    || modeEvidence.observedFallbackPolicy.kind !== "fallback-policy"
+    || modeEvidence.observedFallbackPolicy.policy !== "explicit-only"
+  ) {
+    reasons.push(`Missing observed fallback-policy provenance in ${mode}`);
     valid = false;
   }
   if (modeEvidence.timingTruth !== "segment-following" || modeEvidence.wordTimestamps !== null) {
@@ -473,10 +491,14 @@ export function summarizeTrace(trace) {
   const nanoCacheMisses = nanoSegments.filter((event) => event.cacheHit === false).length;
   const nanoCacheTotal = nanoCacheHits + nanoCacheMisses;
   const nanoPrefetchReady = nanoSegments.filter((event) => event.prefetchReady === true).length;
+  const nanoPrefetchStale = nanoSegments.filter((event) => event.phase === "prefetch-stale").length;
+  const nanoPrefetchCancelled = nanoSegments.filter((event) => event.phase === "prefetch-cancelled").length;
 
   if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
   if (pauses !== resumes) failureClasses.push("pause-resume-error");
   if (transitionCounts.book > 0 && transitionCounts.handoff === 0) failureClasses.push("handoff-error");
+  if (nanoSegments.length > 0 && nanoPrefetchReady === 0) failureClasses.push("cache-prefetch-continuity");
+  if (nanoPrefetchStale > 0 || nanoPrefetchCancelled > 0) failureClasses.push("stale-playback");
 
   const maxDrift = flow.reduce((max, f) => {
     const nearby = words
@@ -519,8 +541,8 @@ export function summarizeTrace(trace) {
     },
     nanoPrefetch: {
       ready: nanoPrefetchReady,
-      stale: nanoSegments.filter((event) => event.phase === "prefetch-stale").length,
-      cancelled: nanoSegments.filter((event) => event.phase === "prefetch-cancelled").length,
+      stale: nanoPrefetchStale,
+      cancelled: nanoPrefetchCancelled,
     },
     failureClasses,
   };
@@ -552,8 +574,28 @@ function traceProvesRealAppSelectedNano(trace) {
     || trace?.provenance?.source === MOSS_NANO_LIVE_EVIDENCE_KIND;
 }
 
-function selectedEngineFromTrace(trace) {
-  return trace?.selectedEngine ?? trace?.engine ?? trace?.provenance?.selectedEngine ?? null;
+function eventList(trace) {
+  return Array.isArray(trace?.events) ? trace.events : [];
+}
+
+function observedEngineSelection(trace) {
+  return eventList(trace).find(
+    (event) => event.kind === "engine-selection" && event.selectedEngine === "nano",
+  ) ?? null;
+}
+
+function observedExplicitFallbackPolicy(trace) {
+  return eventList(trace).find(
+    (event) => event.kind === "fallback-policy" && event.policy === "explicit-only",
+  ) ?? null;
+}
+
+function summarizeObservedEvent(event, keys) {
+  return Object.fromEntries(
+    keys
+      .filter((key) => event[key] !== undefined)
+      .map((key) => [key, event[key]]),
+  );
 }
 
 export async function buildMossNanoLiveEvidenceArtifact({
@@ -578,10 +620,15 @@ export async function buildMossNanoLiveEvidenceArtifact({
     }
     const summary = summarizeTrace(trace);
     const traceEventCount = Array.isArray(trace.events) ? trace.events.length : 0;
-    const selectedEngine = selectedEngineFromTrace(trace);
-    if (selectedEngine !== "nano") {
-      throw new Error(`Trace artifact for ${mode} does not prove selected Nano.`);
+    const engineSelection = observedEngineSelection(trace);
+    if (!engineSelection) {
+      throw new Error(`Trace artifact for ${mode} does not prove observed selected Nano.`);
     }
+    const fallbackPolicy = observedExplicitFallbackPolicy(trace);
+    if (!fallbackPolicy) {
+      throw new Error(`Trace artifact for ${mode} does not prove observed explicit fallback policy.`);
+    }
+    const selectedEngine = engineSelection.selectedEngine;
     const segmentFollowing = traceHasOnlySegmentFollowingNano(trace);
     const failureClasses = new Set(summary.failureClasses || []);
     const runtime = runtimeFromTrace(trace);
@@ -601,7 +648,7 @@ export async function buildMossNanoLiveEvidenceArtifact({
         noStalePlayback: !failureClasses.has("stale-playback"),
         pauseResumeSameMode: summary.pauseResumeIntegrity.balanced,
         modeSwitchAnchorPreserved: !failureClasses.has("handoff-error"),
-        explicitFallback: trace.explicitFallback === true || config.explicitFallback !== false,
+        explicitFallback: fallbackPolicy.policy === "explicit-only",
         sidecarLifecycleStable: !failureClasses.has("sidecar-lifecycle"),
         source: MOSS_NANO_LIVE_EVIDENCE_KIND,
         runArtifactPath: config.runArtifactPath,
@@ -619,6 +666,8 @@ export async function buildMossNanoLiveEvidenceArtifact({
           restarts: trace.recycleObservations?.restarts ?? 0,
           cleanShutdowns: trace.recycleObservations?.cleanShutdowns ?? 0,
         },
+        observedEngineSelection: summarizeObservedEvent(engineSelection, ["kind", "selectedEngine", "source", "ts"]),
+        observedFallbackPolicy: summarizeObservedEvent(fallbackPolicy, ["kind", "policy", "selectedEngine", "ts"]),
       },
     ]);
   }

@@ -199,7 +199,7 @@ MOSS-NANO-7 verification:
 - `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
 - Solon approved spec compliance; Plato final quality check was `READY`.
 
-Current Nano decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE` after MOSS-NANO-13B. This supersedes the synthetic app-sidecar preview path only. Nano may remain visible as a guarded experimental settings option, and selected use/preview may run real local ONNX audio only when the sidecar API exists and `nanoStatus` is truthfully ready. The current default remains unchanged, Qwen remains disabled, Kokoro remains available, and missing live four-mode observation evidence still prevents recommended opt-in, default candidacy, or Kokoro retirement.
+Current Nano evidence decision: `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION` after MOSS-NANO-13d. MOSS-NANO-13B first superseded the synthetic app-sidecar preview path with real local ONNX app audio, and 13d then produced clean real app-selected four-mode evidence with a passing `NANO_RECOMMENDED_OPT_IN` live gate. Nano may remain visible as a guarded experimental settings option, and selected use/preview may run real local ONNX audio only when the sidecar API exists and `nanoStatus` is truthfully ready. The current default remains unchanged, Qwen remains disabled, Kokoro remains available, and MOSS-NANO-13e must still record the productization / opt-in recommendation decision before any recommendation posture changes.
 
 MOSS-NANO-13B app audio bridge evidence:
 
@@ -311,9 +311,9 @@ Expected probe outputs:
 
 If `.runtime/moss/config.json` is missing, the probe must classify the result as `config-missing`, set `ok: false`, set status to `blocked`, and write `summary.json` plus `summary.txt` under the canonical run output directory (`<out>/<run-id>/summary.*`). This is setup/provisioning evidence only: no MOSS runtime/synthesis has run, no `.wav` should be expected, and runtime-shape comparisons have not begun.
 
-## MOSS-NANO-13c Live Evidence Artifact
+## MOSS-NANO-13c/13d Live Evidence Artifact
 
-MOSS-NANO-13c adds a provenance-backed evidence artifact for Nano recommended-opt-in decisions. This is separate from synthetic matrix output. A passing artifact must link to real selected-Nano trace artifacts for all four modes: Page, Focus, Flow, and Narrate.
+MOSS-NANO-13c adds a provenance-backed evidence artifact for Nano recommended-opt-in decisions. This is separate from synthetic matrix output. A passing artifact must link to real selected-Nano trace artifacts for all four modes: Page, Focus, Flow, and Narrate. MOSS-NANO-13d then produced the first real app-selected Nano four-mode evidence artifact through the automated Electron live-capture path after manual fallback was paused.
 
 The runner can build and gate a v2 artifact from explicit per-mode trace inputs:
 
@@ -330,6 +330,26 @@ Each linked trace must prove:
 - enough Nano segment events to compute latency, cache, and prefetch observations
 
 The resulting evidence JSON uses `schemaVersion: "moss-nano-live-evidence.v2"` and `evidenceProducerVersion: "moss-nano-13c"`. Legacy all-true boolean JSON, simulated traces, missing modes, trace event-count mismatches, non-Nano-selected traces, and synthetic audio traces cannot promote Nano beyond `NANO_EXPERIMENTAL_ONLY`.
+
+MOSS-NANO-13d canonical evidence:
+
+- Evidence artifact: `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`.
+- Evidence identity: `schemaVersion: "moss-nano-live-evidence.v2"`; `evidenceKind/source: "real-app-selected-nano"`.
+- Runtime truth: real selected Nano, `runtime.syntheticAudio: false`, `timingTruth: "segment-following"`, `wordTimestamps: null`.
+- Trace counts: Page 42 events, Focus 44 events, Flow 43 events, Narrate 39 events.
+- Provenance hardening: the gate requires observed trace-level `engine-selection selectedEngine:nano` and observed `fallback-policy policy:explicit-only`; top-level assertions cannot substitute.
+
+Final 13d gate command:
+
+```powershell
+node scripts/tts_eval_runner.mjs --matrix --tag moss-nano-12 --run-id moss-nano-13d-live-capture-gate --out artifacts/tts-eval/moss-nano-13d-live-capture/gate --nano-live-evidence artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json --gates
+```
+
+Final 13d gate result: PASS, hard failures 0/7, warnings 0/3, decision `NANO_RECOMMENDED_OPT_IN`, reasons none. Sprint decision: `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`.
+
+Verification recorded for 13d: focused tests passed 7 files / 113 tests; full `npm test` passed 165 files / 2518 tests; `npm run build` passed with circular chunk warning `settings -> tts -> settings`; `npm audit --audit-level=high` passed with 3 moderate `uuid` findings; `git diff --check` passed; no Electron process left running.
+
+This evidence does not change the default engine, retire Kokoro, or reactivate Qwen. It is the evidence basis for the MOSS-NANO-13e productization decision / opt-in recommendation record.
 
 ## No-Silent-Fallback Rule
 

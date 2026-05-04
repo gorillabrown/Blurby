@@ -1,11 +1,11 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-03 — MOSS-NANO-13c live-evidence provenance gate completed; MOSS-NANO-13d unblocked.
+**Last updated**: 2026-05-04 — Soft pivot inserted MOSS-NANO-13d.5 (Pocket TTS comparative integration) ahead of MOSS-NANO-13e to give the v2.0 successor decision a comparative basis. 13a–13d already shipped; 13d cleared the gate cleanly with `NANO_RECOMMENDED_OPT_IN`.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, and MOSS-NANO-13c have landed on `main` or are in merge closeout. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. MOSS-NANO-13c adds a provenance-backed live-evidence schema/producer/gate and rejects simulated or boolean-only evidence; no four-mode live capture artifact has promoted Nano yet. Next queue item: MOSS-NANO-13d.
+**Current state**: v1.75.1 stable. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, and MOSS-NANO-13d have landed on `main` or are in merge closeout. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13B promotes Nano only to real app audio prototype readiness: Test Voice and selected Nano narration can use local ONNX audio when the sidecar is ready, while Qwen remains disabled, Nano remains non-default, and Kokoro remains available/unchanged. MOSS-NANO-13c adds a provenance-backed live-evidence schema/producer/gate and rejects simulated or boolean-only evidence. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`; this is evidence for the productization decision, not a default-engine change, Qwen reactivation, or Kokoro retirement. Next queue item: MOSS-NANO-13e.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND a MOSS-NANO productization decision recorded against a provenance-backed live evidence gate (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Android, Cloud Sync, RSS/News, and KOKORO-RETIRE remain deferred lanes beyond this finish line.
-**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO). Verdict: AT RISK (~32 LOE remaining, ~4–6 weeks at sustained velocity). Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
+**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO) → 2026-05-04 PM (soft pivot — Pocket TTS as comparative second candidate). Verdict: AT RISK (~26 LOE remaining including new 13d.5, ~6–8 weeks at sustained velocity). Pivot decision: `docs/project/roadmap-reviews/2026-05-02-pm-pivot-decision.md`. Latest assessment: `docs/project/roadmap-reviews/2026-05-02-pm-assessment-addendum.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-02-pm-plan.md`. Audit basis: `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in two files: `docs/project/ROADMAP_ARCHIVE.md` (legacy, Phases 1–6) and `docs/project/ROADMAP_ARCHIVE_2026-05-02.md` (recent migrations from 2026-05-02 roadmap review). Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
 >
@@ -174,7 +174,7 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
                     │
     MOSS-7: Productization Gate And Promotion Decision (PAUSED)
       ├── Kokoro: available as legacy fallback. Retirement paused — no successor has proven continuous live playback.
-      └── Nano: experimental-only unless MOSS-NANO-13a–e prove a stronger productization decision (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`). Qwen is default; Kokoro is legacy fallback.
+      └── Nano: experimental-only unless MOSS-NANO-13a–13e plus 13d.5 (Pocket TTS comparative, 2026-05-04 soft pivot) produce a comparative productization decision (`PAUSE_PRODUCTIZATION` / `EXPERIMENTAL_ONLY` / `RECOMMENDED_OPT_IN`, per engine). Default engine remains Kokoro; Qwen remains disabled; KOKORO-RETIRE remains separately deferred.
                    │
     READER-4M-2: Standalone Narrate Mode & Four-Button Controls ✅ (v1.69.0)
                    │
@@ -480,9 +480,9 @@ All three investigation areas resolved:
 
 ## Desktop v2.0 — Active Conveyor Belt
 
-> **Finish line:** Desktop v2.0 Shipping. Eleven sprints (7 done, 4 remaining), ~37 LOE total / ~21 LOE remaining, estimated 4–6 weeks.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → **MOSS-NANO-13d** → MOSS-NANO-13e → POLISH-1 → RELEASE-1.
-> **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e, and its deliverable is decision quality (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion. KOKORO-RETIRE remains deferred even if MOSS-NANO-13e records `NANO_RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed.
+> **Finish line:** Desktop v2.0 Shipping. Twelve sprints (8 done, 4 remaining), ~45 LOE total / ~26 LOE remaining, estimated 6–8 weeks. Soft pivot 2026-05-04 PM: MOSS-NANO-13d.5 inserted to evaluate Pocket TTS as a second candidate before locking the v2.0 successor opt-in.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → **MOSS-NANO-13d.5 (Pocket TTS comparative)** → MOSS-NANO-13e (comparative decision) → POLISH-1 → RELEASE-1.
+> **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e plus 13d.5, and its deliverable is decision quality across both candidates (per-engine `PAUSE_PRODUCTIZATION` / `EXPERIMENTAL_ONLY` / `RECOMMENDED_OPT_IN`), not forced promotion of either engine. KOKORO-RETIRE remains deferred even if either engine clears `RECOMMENDED_OPT_IN` — Kokoro retirement gates are separately governed. Default engine remains Kokoro; Qwen remains disabled.
 
 ### Standing Rules All Skeletons Inherit
 
@@ -525,7 +525,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, and MOSS-NANO-13c completed by 2026-05-03. MOSS-NANO-13d is next in the Desktop v2.0 active conveyor.
+> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, and MOSS-NANO-13d completed by 2026-05-03. MOSS-NANO-13e is next in the Desktop v2.0 active conveyor.
 
 ---
 
@@ -720,10 +720,12 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 > - 13a: Lane D (Platform/Main Process) — `main/moss-nano-sidecar.js`, `main/moss-nano-engine.js`, `scripts/moss_nano_resident_probe.py` productization
 > - 13b: Lane A (Runtime Core) + Lane C (UI/strategy) — bounded fixes in `main/moss-nano-engine.js` and `src/hooks/narration/mossNanoStrategy.ts`
 > - 13c: Lane B (Eval Harness) — `scripts/tts_eval_runner.mjs` gate refactor + new evidence producer tool
-> - 13d: Lane E (Governance) — audit memo rewrite + manifest field rename
-> - 13e: Lane B (Eval Harness) — live capture run + decision write-up
+> - 13d: Lane B (Eval Harness) + Lane E (Governance) — automated Electron live-capture evidence production + manual observation fallback record
+> - 13e: Lane E (Governance/Product) — productization decision / opt-in recommendation write-up from 13d evidence
 
 **Closeout update 2026-05-03:** MOSS-NANO-13a established the resident child-process app sidecar path. MOSS-NANO-13B replaced the synthetic app-sidecar audio with real local MOSS-TTS-Nano ONNX synthesis through `tts-nano-*` IPC, then merged to `main` as `c7c133c` after residual Qwen-disable cleanup `45ff48c`. Decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`. Scope remains narrow: Nano is selectable and can preview/synthesize only when readiness is truthful; Nano remains non-default, Qwen remains disabled, Kokoro remains available, and Nano narration remains `timingTruth: "segment-following"` with `wordTimestamps: null`.
+
+**Closeout update 2026-05-03 (13d):** MOSS-NANO-13d reframed from manual observation-first to automated Electron live capture as the primary path after manual fallback was paused. It produced `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json` with `schemaVersion: "moss-nano-live-evidence.v2"`, `evidenceKind/source: "real-app-selected-nano"`, real selected Nano, `runtime.syntheticAudio: false`, `timingTruth: "segment-following"`, and `wordTimestamps: null`. Trace counts were Page 42, Focus 44, Flow 43, Narrate 39. Review tightened provenance so observed trace events must include `engine-selection selectedEngine:nano` and `fallback-policy policy:explicit-only`; top-level assertions cannot substitute. Final gate command `node scripts/tts_eval_runner.mjs --matrix --tag moss-nano-12 --run-id moss-nano-13d-live-capture-gate --out artifacts/tts-eval/moss-nano-13d-live-capture/gate --nano-live-evidence artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json --gates` passed with hard failures 0/7, warnings 0/3, decision `NANO_RECOMMENDED_OPT_IN`, reasons none. Sprint decision: `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`. This does not change the default engine, retire Kokoro, or reactivate Qwen.
 
 ---
 
@@ -874,7 +876,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 **Closeout:** `scripts/tts_eval_runner.mjs` now owns the v2 live-evidence artifact builder and gate. The gate requires `schemaVersion: "moss-nano-live-evidence.v2"`, `evidenceKind: "real-app-selected-nano"`, producer/app provenance, all Page/Focus/Flow/Narrate modes, linked trace artifacts, matching trace event counts, selected Nano in the trace itself, segment-following timing, `wordTimestamps: null`, quantitative Nano latency/cache/prefetch/recycle fields, and `runtime.syntheticAudio: false`. `--nano-live-evidence-out` plus repeated `--nano-live-trace mode=path` writes a provenance artifact from explicit per-mode live trace artifacts and feeds that artifact into the gate. Legacy boolean JSON, simulated evidence, missing modes, stale/mismatched artifacts, non-Nano selected traces, and synthetic audio traces cannot promote. No default-engine change, Qwen reactivation, Kokoro retirement, or fake word timestamp path was introduced.
 
-**Product truth:** 13c proves the evidence infrastructure, not a product promotion. Nano remains experimental/non-default until a later live capture run supplies complete clean four-mode evidence from real selected-Nano app behavior.
+**Product truth:** 13c proved the evidence infrastructure, not a product promotion. MOSS-NANO-13d has since supplied complete clean four-mode evidence from real selected-Nano app behavior; 13e must still record the productization decision before any recommendation posture changes.
 
 **Goal:** Three coupled deliverables. (1) Redefine the `liveEvidence.modes[mode]` schema as machine-produced, requiring quantitative observations (`nanoSegmentLatencyMs.{p50,p95,min,max}`, `nanoCache.{hits,misses,hitRate}`, `nanoPrefetch.{ready,stale,cancelled}`, `recycleObservations`) plus provenance fields (`runArtifactPath`, `traceEventCount`, `recordedAt`, `appCommit`, `evidenceProducerVersion`, `schemaVersion`). (2) Build the evidence producer — a new tool (`scripts/moss_nano_live_capture.mjs`) that exercises the integrated app in a `--nano-live-capture` mode, records real `nano-segment` events from `mossNanoStrategy.onSegmentTrace`, and emits the sealed live-evidence JSON. (3) Update `evaluateMossNanoLiveEvidenceGate` (`scripts/tts_eval_runner.mjs:100-160`) to validate provenance: assert `runArtifactPath` exists on disk, `traceEventCount` matches the linked artifact's event count, latency and cache numbers are within the artifact's bounds, no key is `true` without a non-null quantitative basis. Update or replace the existing matrix-simulator passing-evidence test (`tests/ttsEvalMatrixRunner.test.ts:709-767`) since the gate now rejects hand-authored boolean JSON.
 
@@ -948,38 +950,133 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Sprint MOSS-NANO-13d: Audit Memo Reframing & Default-Engine Posture (STUB — Stage 3 close)
+### Sprint MOSS-NANO-13d: Live Four-Mode Capture Producer / Manual Observation Pass ✅ COMPLETED 2026-05-03
 
-**Goal:** Update audit memo, orientation docs, manifest field naming, and settings UI fallback narrative to align with the actual default engine posture (Qwen as default, Kokoro as deprecated legacy fallback). Currently the audit memo and gate manifest field naming reference Kokoro as the operational floor, which contradicts shipped UI strings, the roadmap header, and the settings test assertions.
+**Decision:** `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`.
 
-**Why:** Audit finding NANO13-M3. The audit memo materially misframes the engine landscape. Any "Nano vs current default" comparison the live evidence supports must be Nano vs Qwen, not Nano vs Kokoro.
+**Goal:** Produce real app-selected Nano evidence across Page, Focus, Flow, and Narrate. The sprint began as manual observation fallback work, but the automated Electron live-capture driver became the primary capture path after the manual fallback was paused.
 
-**Prerequisites:** MOSS-NANO-13c (so the gate is already trustworthy when the manifest field is renamed and the Qwen-default reframing lands).
+**Evidence:** `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json` records `schemaVersion: "moss-nano-live-evidence.v2"`, `evidenceKind/source: "real-app-selected-nano"`, real selected Nano, `runtime.syntheticAudio: false`, `timingTruth: "segment-following"`, and `wordTimestamps: null`. Trace counts: Page 42, Focus 44, Flow 43, Narrate 39.
 
-**Done when:** TBD — full skeleton to be written at Stage 3 close (after 13c lands).
+**Gate:** `node scripts/tts_eval_runner.mjs --matrix --tag moss-nano-12 --run-id moss-nano-13d-live-capture-gate --out artifacts/tts-eval/moss-nano-13d-live-capture/gate --nano-live-evidence artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json --gates` passed with hard failures 0/7, warnings 0/3, decision `NANO_RECOMMENDED_OPT_IN`, reasons none.
 
-**Effort:** S (~1). Documentation + manifest field rename + UI string update.
+**Review tightening:** Observed provenance now requires trace-level `engine-selection selectedEngine:nano` and observed `fallback-policy policy:explicit-only`; top-level evidence assertions cannot substitute.
 
-**Roster:** CLI/Hermes (mechanical edits) + Cowork (memo rewrite content).
+**Verification:** Focused tests passed 7 files / 113 tests. Full `npm test` passed 165 files / 2518 tests. `npm run build` passed with circular chunk warning `settings -> tts -> settings`. `npm audit --audit-level=high` passed with 3 moderate `uuid` findings. `git diff --check` passed. No Electron process was left running.
 
-**Source:** Audit response §10 item 6.
+**Non-decisions:** No default-engine change, no Kokoro retirement, and no Qwen reactivation.
 
 ---
 
-### Sprint MOSS-NANO-13e: Live Capture Run + Decision (STUB — Stage 3 close)
+### Sprint MOSS-NANO-13d.5: Pocket TTS Integration & Comparative Live Capture (NEW — added 2026-05-04 PM, soft-pivot follow-up)
 
-**Goal:** Execute the evidence producer (built in 13c) against a real selected-Nano session in all four reader modes (Page, Focus, Flow, Narrate). Capture live evidence with full provenance including recycle-UX observations. Feed evidence through `evaluateMossNanoLiveEvidenceGate`. Record the decision (`PAUSE_NANO_PRODUCTIZATION`, `NANO_EXPERIMENTAL_ONLY`, or `NANO_RECOMMENDED_OPT_IN`) in `docs/testing/MOSS_DECISION_LOG.md`. Update ROADMAP.md finish-line note. If decision is `NANO_RECOMMENDED_OPT_IN`, scope the settings UX to surface that recommendation (may roll into POLISH-1 or need its own sprint).
+> Inserted on 2026-05-04 PM after a strategic pivot decision (`docs/project/roadmap-reviews/2026-05-02-pm-pivot-decision.md`). 13d cleared the gate cleanly with `NANO_RECOMMENDED_OPT_IN`, confirming the audit-prescribed infrastructure works. But MOSS-Nano was originally selected by elimination from within the MOSS family, never against alternatives. The 2026 CPU-TTS landscape (per the user's research PDF) has at least three credible candidates stronger than MOSS-Nano on dimensions Blurby would value (voice cloning, top-tier ELO, paralinguistic control). Before locking MOSS-Nano in as the v2.0 recommended opt-in, this sprint integrates Pocket TTS (Kyutai Labs, 100M CALM, MIT, 6 languages, 5-second voice cloning, 200ms TTFA, 1.84 WER on Librispeech, top-tier ELO) as a second candidate evaluated through the same productization gate.
 
-**Why:** Closes the MOSS-NANO productization gate that was first proposed in MOSS-NANO-13's original AUDIT_MEMO sketch. Audit response §11 final recommendation.
+**Goal:** Add Pocket TTS as a second candidate for the Desktop v2.0 successor-engine decision. Specifically: (1) generalize the MOSS-Nano-specific evidence schema, gate evaluator, and live capture producer to be engine-parameterized; (2) add a Pocket TTS sidecar adapter, IPC channels, and renderer strategy mirroring the MOSS-Nano pattern; (3) run the same four-mode live capture for Pocket TTS and produce a v2-schema evidence artifact; (4) record the per-engine gate result so MOSS-NANO-13e can make a comparative product decision. After this sprint lands, both engines have machine-produced evidence with provenance against the same gate, run through the integrated app, on the same hardware.
 
-**Prerequisites:** MOSS-NANO-13a, 13b, 13c, 13d.
+**Problem:** The infrastructure shipped in 13a/13c is hardcoded to MOSS-Nano across four layers — the sidecar adapter (`main/moss-nano-sidecar.js`), the IPC channels (`tts-nano-*`), the strategy file (`src/hooks/narration/mossNanoStrategy.ts`), and the gate/producer/schema (`scripts/tts_eval_runner.mjs::evaluateMossNanoLiveEvidenceGate`, `scripts/moss_nano_live_capture.mjs`, `moss-nano-live-evidence.v2` schema). Adding Pocket TTS without this sprint would either require duplicating each layer (creating drift over time) or making the v2.0 decision on single-candidate data (the failure mode this pivot is designed to avoid). 13d.5 is the engineering work that lets 13e be a comparative decision rather than a coronation.
 
-**Done when:** TBD — full skeleton to be written at Stage 3 close (after 13d lands).
+**Design decisions:**
 
-**Effort:** M (~3). Run-and-record, plus decision integration. Possible expansion if PROMOTE branch fires and UX wiring is folded in.
+- **Schema generalization, not duplication.** The schema constant `MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION = "moss-nano-live-evidence.v2"` evolves to `ENGINE_LIVE_EVIDENCE_SCHEMA_VERSION = "engine-live-evidence.v2"` with a required `engine: "moss-nano" | "pocket-tts"` field. The MOSS-Nano-specific fields (`source: "real-app-selected-nano"`, `kind: "nano-segment"`) become engine-tagged variants that the gate dispatches on. Existing 13d evidence files remain valid via a backward-compat path that infers `engine: "moss-nano"` from the legacy schema marker.
+- **Gate parameterization, not duplication.** `evaluateMossNanoLiveEvidenceGate` becomes `evaluateEngineLiveEvidenceGate(engine, ...)`. The decision tree is engine-agnostic — `PAUSE_PRODUCTIZATION` / `EXPERIMENTAL_ONLY` / `RECOMMENDED_OPT_IN` apply equally to any engine. The 7 hard-failure keys and 3 warning keys (cache/prefetch/lifecycle/fallback policy/etc.) are engine-agnostic in their semantics; only the trace event-kind names need to switch (e.g., `nano-segment` → `${engine}-segment`).
+- **Producer parameterization.** `scripts/moss_nano_live_capture.mjs` is renamed `scripts/engine_live_capture.mjs` and takes `--engine moss-nano|pocket-tts`. The producer launches the integrated app in capture mode with the appropriate engine selected, then collects traces emitted by the engine's strategy (now parameterized).
+- **Pocket TTS sidecar adapter.** New `main/pocket-tts-sidecar.js` mirroring the structure of `main/moss-nano-sidecar.js`. Spawns a Python subprocess via new `scripts/pocket_tts_sidecar.py` that loads Pocket TTS through `pocket_tts` package per the upstream README. Same line-delimited JSON protocol; same `start/status/request/cancel/shutdown/restart` shape so a future generic abstraction is trivial. The shape is documented as a contract in `docs/testing/ENGINE_SIDECAR_PROTOCOL.md`.
+- **Pocket TTS IPC channels.** New `tts-pocket-status`, `tts-pocket-synthesize`, `tts-pocket-cancel`, `tts-pocket-shutdown`, `tts-pocket-restart` registered in `main/ipc/tts.js`. Preload bridge exposes `electronAPI.pocketStatus()`, `electronAPI.pocketSynthesize()`, etc. Channels are engine-specific by design — each engine has different capabilities (Pocket TTS supports voice cloning; MOSS-Nano doesn't), so a generic dispatch would obscure that.
+- **Pocket TTS strategy.** New `src/hooks/narration/pocketTtsStrategy.ts` mirroring `mossNanoStrategy.ts`. Bakes in the 13B hardening patterns from the start: `Promise.race` timeout enforcement, `setContinuityScope` increments `generationId` (not just `prefetchGenerationId`), cache key includes `text.length` separately. Pocket TTS's 5-second voice cloning capability is exposed through a strategy-specific extension (`setVoicePrompt(audioBuffer)`) but defaults to no-clone behavior to keep parity with MOSS-Nano.
+- **Settings UX entry, but no default change.** Settings adds Pocket TTS as a third engine option (alongside Kokoro and MOSS-Nano), readiness-gated. Default remains Kokoro; Qwen remains disabled. Selecting Pocket TTS triggers the readiness check and explicit-only fallback, identical to MOSS-Nano's contract per `useNarration.ts:923-926`.
+- **Pocket TTS sources & sizing.** Pocket TTS is MIT-licensed at `github.com/kyutai-labs/pocket-tts`. ~100M parameters across 90M causal transformer + 10M Mimi codec decoder. PyTorch 2.5+ requirement matches the existing Python policy. CPU-only operation explicitly supported per upstream documentation. No bundled weights; `qwen/config.json`-style external runtime expectations apply.
 
-**Roster:** Cowork (run execution + decision write-up) + CLI/Zeus (any UX wiring needed if PROMOTE).
+**Baseline:**
 
-**Source:** Audit response §11.
+- `main/moss-nano-sidecar.js` (current MOSS-Nano-specific real adapter shipped in 13a)
+- `main/moss-nano-engine.js` (engine wrapper; will continue to wrap MOSS-Nano specifically — Pocket TTS gets its own engine wrapper for symmetry)
+- `scripts/tts_eval_runner.mjs` lines 79–280 (gate functions to parameterize)
+- `scripts/moss_nano_live_capture.mjs` (producer to rename and parameterize)
+- `scripts/moss_nano_app_sidecar.py` (Python sidecar reference; do not modify)
+- `src/hooks/narration/mossNanoStrategy.ts` (strategy reference; do not modify)
+- `main/ipc/tts.js` lines 112–150 (IPC registration pattern)
+- `preload.js` lines 174–177 (preload bridge pattern)
+- `tests/mossNanoStrategy.test.ts` (test pattern reference)
+- `tests/ttsEvalMatrixRunner.test.ts` (gate test pattern reference)
+- `docs/testing/MOSS_NANO_LIVE_EVIDENCE_SCHEMA.md` (schema docs to generalize)
+
+#### WHERE (Read Order)
+
+1. `CLAUDE.md`
+2. `docs/governance/LESSONS_LEARNED.md`
+3. `ROADMAP.md` — this section + 13a/13B/13c/13d closeout notes
+4. `docs/project/roadmap-reviews/2026-05-02-pm-pivot-decision.md` — strategic rationale
+5. `docs/audit/2026-05-02-moss-nano-productization-third-party-audit/Response/moss-nano-13-third-party-audit-review.md` §10 (audit prescriptions still apply to Pocket TTS implementation)
+6. `main/moss-nano-sidecar.js` (full file — pattern to mirror)
+7. `main/moss-nano-engine.js` (full file)
+8. `main/ipc/tts.js` (existing IPC registration)
+9. `scripts/moss_nano_app_sidecar.py` (Python sidecar pattern)
+10. `scripts/tts_eval_runner.mjs` (gate code, lines 1–300)
+11. `scripts/moss_nano_live_capture.mjs` (producer)
+12. `src/hooks/narration/mossNanoStrategy.ts` (strategy pattern)
+13. Pocket TTS upstream README at `github.com/kyutai-labs/pocket-tts`
+
+#### Tasks
+
+| # | Owner | Task | Files |
+|---|-------|------|-------|
+| 1 | Athena (cross-system) | **Generalize schema + producer.** Rename `MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION` → `ENGINE_LIVE_EVIDENCE_SCHEMA_VERSION` (`engine-live-evidence.v2`). Add required `engine` field to schema. Update `scripts/moss_nano_live_capture.mjs` → `scripts/engine_live_capture.mjs` with `--engine` flag. Backward-compat: legacy `moss-nano-live-evidence.v2` files infer `engine: "moss-nano"` so 13d's existing artifact remains valid. | `scripts/tts_eval_runner.mjs`, `scripts/engine_live_capture.mjs` (renamed), `src/types/engineLiveEvidence.ts` (new — generalized from `mossNanoLiveEvidence.ts`), `docs/testing/ENGINE_LIVE_EVIDENCE_SCHEMA.md` (renamed from MOSS_NANO version) |
+| 2 | Athena (cross-system) | **Parameterize gate.** `evaluateMossNanoLiveEvidenceGate` → `evaluateEngineLiveEvidenceGate(engine, matrixManifest, liveEvidence)`. Trace event kinds parameterize on engine name (`${engine}-segment`, `${engine}-runtime`, `${engine}-synthesis`). Decision tree (`PAUSE_PRODUCTIZATION`/`EXPERIMENTAL_ONLY`/`RECOMMENDED_OPT_IN`) becomes engine-tagged but logic-identical. Existing 13d test suite continues to pass with `engine: "moss-nano"`. | `scripts/tts_eval_runner.mjs`, `tests/ttsEvalMatrixRunner.test.ts`, `tests/ttsEvalLiveEvidence.test.ts` (or wherever the 13c gate tests live) |
+| 3 | Athena (electron-scope) | **Document sidecar protocol contract.** New `docs/testing/ENGINE_SIDECAR_PROTOCOL.md` formalizing the 6-method shape (`start/status/request/cancel/shutdown/restart`) and JSON-line wire protocol used by `main/moss-nano-sidecar.js`. Pocket TTS adapter implements the same contract; future engines reference this doc. | `docs/testing/ENGINE_SIDECAR_PROTOCOL.md` (new) |
+| 4 | Athena (electron-scope) | **Pocket TTS Python sidecar.** New `scripts/pocket_tts_sidecar.py` mirroring `scripts/moss_nano_app_sidecar.py`. Loads Pocket TTS via the upstream `pocket_tts` Python package. Long-lived stdin/stdout loop. Same JSON-line protocol as MOSS-Nano. Returns segment-following or word-following timing depending on what Pocket TTS surfaces (default segment-following per principle of conservatism). | `scripts/pocket_tts_sidecar.py` (new) |
+| 5 | Athena (electron-scope) | **Pocket TTS adapter + engine wrapper.** New `main/pocket-tts-sidecar.js` (mirrors `main/moss-nano-sidecar.js`) and `main/pocket-tts-engine.js` (mirrors `main/moss-nano-engine.js`). 6-method adapter shape; PID tracking; SIGKILL fallback on shutdown timeout; lifecycle generation per engine. Bake in 13B hardening from the start: enforce `synthesizeTimeoutMs` and `commandTimeoutMs` via `Promise.race`. | `main/pocket-tts-sidecar.js` (new), `main/pocket-tts-engine.js` (new) |
+| 6 | Hephaestus (electron-scope) | **IPC + preload wiring.** New `tts-pocket-status`, `tts-pocket-synthesize`, `tts-pocket-cancel`, `tts-pocket-shutdown`, `tts-pocket-restart` IPC channels in `main/ipc/tts.js`. Preload bridge: `electronAPI.pocketStatus()`, `pocketSynthesize()`, `pocketCancel()`, `pocketShutdown()`, `pocketRestart()`. Type definitions in `src/types.ts` to mirror Nano-side types. | `main/ipc/tts.js`, `preload.js`, `src/types.ts` |
+| 7 | Hephaestus (renderer-scope) | **Pocket TTS strategy.** New `src/hooks/narration/pocketTtsStrategy.ts` mirroring `mossNanoStrategy.ts`. Bake in 13B invariants from construction: `setContinuityScope` increments `generationId` AND `prefetchGenerationId`; cache key composition includes `String(text.length)` separately from `hashText(text)`. Pocket TTS's voice cloning capability exposed via optional `setVoicePrompt(audioBuffer)` extension; default behavior is no-clone parity with MOSS-Nano. | `src/hooks/narration/pocketTtsStrategy.ts` (new) |
+| 8 | Hephaestus (renderer-scope) | **Wire strategy through useNarration + settings.** Mirror MOSS-Nano integration in `src/hooks/useNarration.ts` to support `engine: "pocket-tts"` selection. Add Pocket TTS engine option to settings (`src/components/settings/TTSSettings.tsx`), readiness-gated, default unchanged. Explicit-only fallback semantics identical to MOSS-Nano. | `src/hooks/useNarration.ts`, `src/components/settings/TTSSettings.tsx`, `src/components/settings/ttsPreview.ts` |
+| 9 | Hephaestus (electron-scope) | **Live capture support for Pocket TTS.** Update the `--nano-live-capture` flag wiring (or rename to `--engine-live-capture`) to support `--engine pocket-tts`. Producer can now select either engine and capture its traces. | `main/main.js`, `main/ipc/tts.js`, `preload.js`, `src/hooks/useNarration.ts` |
+| 10 | Cowork (governance) | **Run live capture for Pocket TTS.** Execute `node scripts/engine_live_capture.mjs --engine pocket-tts` against a real selected-Pocket-TTS session in all four reading modes. Produce evidence artifact at `artifacts/tts-eval/moss-nano-13d.5-pocket-tts-live-capture/engine-live-evidence.json`. Run gate. Record decision (per-engine: PAUSE / EXPERIMENTAL_ONLY / RECOMMENDED_OPT_IN). | Run-and-record |
+| 11 | Hippocrates | **Tests.** (a) Pocket TTS adapter contract tests (mirror `tests/mossNanoSidecar.test.js`). (b) Pocket TTS engine lifecycle tests (mirror `tests/mossNanoEngine.test.js`). (c) Pocket TTS strategy cache/prefetch/scope-change tests (mirror `tests/mossNanoStrategy.test.ts`). (d) Generalized gate tests asserting per-engine evaluation. (e) Backward-compat: legacy `moss-nano-live-evidence.v2` files still pass the gate as `engine: "moss-nano"`. ≥40 new tests across all files. | `tests/pocketTtsSidecar.test.js` (new), `tests/pocketTtsEngine.test.js` (new), `tests/pocketTtsStrategy.test.ts` (new), updated `tests/ttsEvalMatrixRunner.test.ts` |
+| 12 | Hippocrates | **`npm test` + `npm run build`** | — |
+| 13 | Solon | **Spec compliance** | — |
+| 14 | Plato | **Quality + known-trap review.** Promise leak audit on Pocket TTS adapter. Cross-engine stale-output protection (an in-flight Pocket TTS request whose engine is changed mid-flight should not be scheduled). Schema backward-compat correctness. | — |
+| 15 | Herodotus | **Documentation pass.** TECHNICAL_REFERENCE.md (new section: "Engine Sidecar Protocol & Multi-Candidate Evaluation"), CLAUDE.md, LESSONS_LEARNED.md (any new lessons from generalizing the gate), ROADMAP.md, SPRINT_QUEUE.md, MOSS_DECISION_LOG.md. | All 6 governing docs |
+| 16 | Hermes | **Git: auto-merge on successful sprint** — branch `sprint/moss-nano-13d.5-pocket-tts-comparative`, stage specific files, commit, merge to `main` with `--no-ff`, push. | — |
+
+> **Wave split note:** This sprint has 10 implementation tasks (1–10). **Pre-split into THREE waves at dispatch time per Standing Rule 10:** Wave A = tasks 1, 2, 3 (generalize schema/gate/protocol — engine-agnostic foundation, no Pocket TTS code yet). Wave B = tasks 4, 5, 6, 7, 8, 9 (Pocket TTS implementation across Python, main, IPC, renderer). Wave C = task 10 (live capture run) + 11 (tests) + 12–16 (verify, docs, git).
+
+#### SUCCESS CRITERIA
+
+1. Schema generalized: `engine-live-evidence.v2` requires `engine` field; legacy `moss-nano-live-evidence.v2` files infer `engine: "moss-nano"` and continue to pass the gate (13d artifact remains valid).
+2. Gate generalized: `evaluateEngineLiveEvidenceGate(engine, ...)` produces per-engine PAUSE/EXPERIMENTAL_ONLY/RECOMMENDED_OPT_IN decisions; existing 13d test suite passes unchanged.
+3. Protocol contract documented: `docs/testing/ENGINE_SIDECAR_PROTOCOL.md` describes the 6-method shape and JSON-line wire format.
+4. Pocket TTS Python sidecar functional: `scripts/pocket_tts_sidecar.py` loads Pocket TTS, processes synthesize requests, returns valid PCM via the documented protocol.
+5. Pocket TTS adapter + engine functional: `main/pocket-tts-sidecar.js` + `main/pocket-tts-engine.js` mirror the MOSS-Nano structure; `electronAPI.pocketSynthesize()` from the integrated app produces real PCM.
+6. Pocket TTS strategy bakes in 13B hardening: timeout enforcement, generationId-on-scope-change, length-fingerprinted cache key — all from construction, not retrofit.
+7. Pocket TTS selectable in settings (readiness-gated); default remains Kokoro; Qwen remains disabled.
+8. Live capture run executed for Pocket TTS in all four reading modes; evidence artifact produced; gate run; per-engine decision recorded.
+9. ≥40 new tests; full `npm test` passes (target: 2,560+ tests).
+10. `npm run build` succeeds; circular chunk warning unchanged.
+
+**Tier:** Full | **Depends on:** MOSS-NANO-13a, 13B, 13c, 13d (already complete). Sequenced before MOSS-NANO-13e.
+
+**Effort:** L (~8). Real systems work. Could expand to L+M if Pocket TTS upstream integration surfaces unexpected runtime issues, or if generalization touches more shipped code than expected.
+
+**Roster:** CLI/Zeus orchestration → Athena (cross-system foundations, tasks 1–5) → Hephaestus (renderer + IPC, tasks 6–9) → Cowork (live capture run) → Hippocrates + Solon + Plato + Herodotus + Hermes (verify + docs + git).
+
+**Source:** Soft pivot decision (`docs/project/roadmap-reviews/2026-05-02-pm-pivot-decision.md`). 2026 CPU-TTS landscape research (uploaded PDF). Audit prescriptions §10 still apply.
+
+---
+
+### Sprint MOSS-NANO-13e: Comparative Productization Decision / Opt-In Recommendation (STUB — Stage 3 close, post-13d.5)
+
+**Goal:** With per-engine evidence in hand from 13d (MOSS-Nano) and 13d.5 (Pocket TTS), produce the Desktop v2.0 successor-engine productization decision. Comparative — not single-candidate. Output: per-engine decision recorded in `MOSS_DECISION_LOG.md`, plus a v2.0 recommendation (which engine, if any, becomes the recommended opt-in; what UX surface exposes it; what the release notes say). No default-engine change, no Kokoro retirement, no Qwen reactivation.
+
+**Why:** The original 13e was scoped as a single-engine decision built on 13d's clean `NANO_RECOMMENDED_OPT_IN` result. The soft-pivot decision (`2026-05-02-pm-pivot-decision.md`) reframes the question as comparative: given two candidates evaluated against the same gate on the same hardware, which (if either) earns the v2.0 opt-in slot? Possible outcomes range from "both `RECOMMENDED_OPT_IN`, pick one" to "both `EXPERIMENTAL_ONLY`, surface neither" to "split decision with one outperforming the other on perceptible dimensions."
+
+**Prerequisites:** MOSS-NANO-13a, 13B, 13c, 13d, 13d.5.
+
+**Done when:** TBD — full skeleton to be written at 13d.5 close.
+
+**Effort:** M (~3). Comparative analysis write-up, opt-in recommendation scoping, and any explicitly approved settings UX surface (folded into POLISH-1 if simple, separate sprint if complex). May expand if the comparative result is split (one engine higher quality, one with capability advantages like voice cloning).
+
+**Roster:** Cowork (decision write-up + cross-engine analysis) + CLI/Zeus (any UX wiring needed if PROMOTE).
+
+**Source:** Audit response §11 + soft pivot decision.
 
 ---

@@ -1,0 +1,58 @@
+{
+  "fixtureId": "queued-handoff",
+  "scenarioId": "moss-nano-12-flow-live-evidence",
+  "runId": "moss-nano-13d-live-capture-matrix__moss-nano-12-flow-live-evidence__it003",
+  "startLatencyMs": 402,
+  "warmPreviewLatencyMs": 1120,
+  "warmFirstAudioLatencyMs": 402,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 26,
+  "flowEventCount": 9,
+  "startupCacheMode": null,
+  "openingChunkWordCounts": [],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 1,
+    "handoff": 1
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": 474,
+  "rateResponseLatencyMs": null,
+  "nanoSegmentLatencyMs": {
+    "p50": null,
+    "p95": null,
+    "min": null,
+    "max": null
+  },
+  "nanoCache": {
+    "hits": 0,
+    "misses": 0,
+    "hitRate": null
+  },
+  "nanoPrefetch": {
+    "ready": 0,
+    "stale": 0,
+    "cancelled": 0
+  },
+  "failureClasses": [],
+  "scenario": {
+    "id": "moss-nano-12-flow-live-evidence",
+    "voiceId": "af_bella",
+    "requestedRate": 1,
+    "durationClass": "medium",
+    "tags": [
+      "moss-nano-12",
+      "nano-live-evidence",
+      "live-book",
+      "flow"
+    ]
+  }
+}

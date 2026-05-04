@@ -1,8 +1,8 @@
 # MOSS Decision Log
 
-**Sprint:** MOSS-1 through MOSS-NANO-13c
+**Sprint:** MOSS-1 through MOSS-NANO-13d
 **Initial status:** `INVESTIGATE`
-**Current status:** `PROVENANCE_GATE_READY_NO_LIVE_CAPTURE`
+**Current status:** `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`
 **Last updated:** 2026-05-03
 
 ## Status Values
@@ -33,6 +33,7 @@
 | `PROMOTE_NANO_TO_PRODUCTIZATION_GATE` | Promote Nano from settings-only experimental opt-in into the next productization/default-decision gate. This does not make Nano default, remove sidecar readiness gating, silently fall back to another engine, or retire Kokoro. |
 | `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE` | Promote Nano from synthetic app-sidecar proof to real local ONNX app-audio prototype. This proves Test Voice and selected Nano narration can use real Nano audio through app IPC when ready, but does not make Nano default, recommended opt-in, word-timed, or a Kokoro replacement. |
 | `PROVENANCE_GATE_READY_NO_LIVE_CAPTURE` | MOSS-NANO-13c status: the schema/producer/gate can evaluate provenance-backed selected-Nano observations and reject simulated/incomplete evidence, but no clean real four-mode capture has promoted Nano. Nano remains experimental and non-default. |
+| `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION` | MOSS-NANO-13d status: real app-selected Nano evidence exists for Page, Focus, Flow, and Narrate; the final live gate passed cleanly as `NANO_RECOMMENDED_OPT_IN`; 13e must record the productization/opt-in recommendation decision. This does not change the default engine, retire Kokoro, or reactivate Qwen. |
 | `PAUSE_NANO_RUNTIME_RELIABILITY` | Pause Nano runtime reliability work when bounded recycle/reset evidence cannot make memory, tail latency, or lifecycle gates plausible enough for more runtime iteration. |
 | `KEEP_KOKORO_ONLY` | Historical Nano runtime-rescue decision from MOSS-NANO-2. It is not exposed as a Nano-6 readiness decision; Nano-6 readiness uses only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`. |
 | `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
@@ -1017,12 +1018,52 @@ Decision rationale:
 
 - 13c closes the provenance gap left by MOSS-NANO-12: a hand-authored boolean file is no longer enough to record `NANO_RECOMMENDED_OPT_IN`.
 - The gate can promote only when complete linked four-mode evidence proves real selected-Nano app observations.
-- No live four-mode capture run was executed in this sprint, so Nano remains experimental/non-default.
+- No live four-mode capture run was executed in 13c; 13d has since supplied that evidence for the 13e decision.
 
 Next actions:
 
-- Use MOSS-NANO-13d for audit/default-posture reframing on top of the now-trustworthy gate.
-- Use MOSS-NANO-13e for the actual live capture run and final productization decision.
+- MOSS-NANO-13d has since supplied real app-selected Nano four-mode live capture on top of the now-trustworthy gate.
+- Use MOSS-NANO-13e for the final productization / opt-in recommendation decision.
+
+## MOSS-NANO-13d Decision
+
+Decision: `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`.
+
+Scope: MOSS-NANO-13d produced real app-selected Nano evidence for all four reader modes. It began as a Live Four-Mode Capture Producer / Manual Observation Pass, but the automated Electron live-capture driver became the primary capture path after manual fallback was paused. This sprint records evidence readiness for the product decision; it does not change the default engine, retire Kokoro, reactivate Qwen, or make Nano word-timed.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Live evidence artifact | `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`. |
+| Schema/provenance | `schemaVersion: "moss-nano-live-evidence.v2"`; `evidenceKind/source: "real-app-selected-nano"`. |
+| Runtime truth | Real selected Nano; `runtime.syntheticAudio: false`; `timingTruth: "segment-following"`; `wordTimestamps: null`. |
+| Trace counts | Page 42 events; Focus 44 events; Flow 43 events; Narrate 39 events. |
+| Review tightening | Observed provenance requires trace-level `engine-selection selectedEngine:nano` and observed `fallback-policy policy:explicit-only`; top-level assertions cannot substitute. |
+| Final gate command | `node scripts/tts_eval_runner.mjs --matrix --tag moss-nano-12 --run-id moss-nano-13d-live-capture-gate --out artifacts/tts-eval/moss-nano-13d-live-capture/gate --nano-live-evidence artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json --gates`. |
+| Final gate result | PASS; hard failures 0/7; warnings 0/3; decision `NANO_RECOMMENDED_OPT_IN`; reasons none. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused suite | Passed 7 files / 113 tests. |
+| Full suite | `npm test` passed 165 files / 2518 tests. |
+| Build | `npm run build` passed with circular chunk warning `settings -> tts -> settings`. |
+| Audit | `npm audit --audit-level=high` passed with 3 moderate `uuid` findings. |
+| Diff check | `git diff --check` passed. |
+| Process cleanup | No Electron process left running. |
+
+Decision rationale:
+
+- All four real traces pass the provenance-backed live evidence gate.
+- The clean gate result supports `NANO_RECOMMENDED_OPT_IN` as evidence for the next productization decision.
+- The decision remains evidence readiness only until 13e records the productization/opt-in recommendation posture.
+
+Next actions:
+
+- Use MOSS-NANO-13e for the productization decision / opt-in recommendation record.
+- Keep Nano non-default; keep Kokoro available; keep Qwen disabled.
 
 ## MOSS-NANO-12 Decision
 

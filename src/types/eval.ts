@@ -20,7 +20,7 @@ export interface TtsEvalLifecycleEvent extends TtsEvalTraceBaseEvent {
   wordIndex?: number;
   latencyMs?: number;
   previewLatencyMs?: number;
-  mode?: "page" | "focus" | "flow";
+  mode?: "page" | "focus" | "flow" | "narrate";
   isNarrating?: boolean;
   cacheMode?: "cached" | "uncached";
   openingChunkWordCounts?: number[];
@@ -66,12 +66,35 @@ export interface TtsEvalNanoSegmentEvent extends TtsEvalTraceBaseEvent {
   reason?: string;
 }
 
+export interface TtsEvalEngineSelectionEvent extends TtsEvalTraceBaseEvent {
+  kind: "engine-selection";
+  selectedEngine: "web" | "kokoro" | "qwen" | "nano";
+  source: "app-settings";
+}
+
+export interface TtsEvalFallbackPolicyEvent extends TtsEvalTraceBaseEvent {
+  kind: "fallback-policy";
+  policy: "explicit-only";
+  selectedEngine: "nano";
+}
+
+export interface TtsEvalNanoRuntimeEvent extends TtsEvalTraceBaseEvent {
+  kind: "nano-runtime" | "nano-synthesis";
+  backend?: string | null;
+  modelVariant?: string | null;
+  syntheticAudio: boolean | null;
+  status?: string | null;
+}
+
 export type TtsEvalTraceEvent =
   | TtsEvalLifecycleEvent
   | TtsEvalWordEvent
   | TtsEvalFlowPositionEvent
   | TtsEvalTransitionEvent
-  | TtsEvalNanoSegmentEvent;
+  | TtsEvalNanoSegmentEvent
+  | TtsEvalEngineSelectionEvent
+  | TtsEvalFallbackPolicyEvent
+  | TtsEvalNanoRuntimeEvent;
 
 export type TtsEvalTraceInputEvent = TtsEvalTraceEvent extends infer E
   ? E extends TtsEvalTraceEvent
@@ -132,5 +155,6 @@ export interface TtsEvalMetricsSummary {
 
 export interface TtsEvalTraceSink {
   enabled: boolean;
+  captureMode?: "page" | "focus" | "flow" | "narrate";
   record: (event: TtsEvalTraceInputEvent) => void;
 }

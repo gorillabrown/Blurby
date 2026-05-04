@@ -9,8 +9,11 @@ declare global {
   interface Window {
     __BLURBY_TTS_EVAL_TRACE__?: {
       enabled?: boolean;
+      captureMode?: "page" | "focus" | "flow" | "narrate";
       events?: TtsEvalTraceEvent[];
+      getEvents?: () => TtsEvalTraceEvent[];
       onEvent?: (event: TtsEvalTraceEvent) => void;
+      flush?: () => Promise<unknown>;
     };
   }
 }
@@ -19,16 +22,25 @@ export function createWindowEvalTraceSink(): TtsEvalTraceSink | null {
   if (typeof window === "undefined") return null;
   const target = window.__BLURBY_TTS_EVAL_TRACE__;
   if (!target?.enabled) return null;
-  if (!Array.isArray(target.events)) target.events = [];
+  try {
+    if (!Array.isArray(target.events)) target.events = [];
+  } catch {
+    // ContextBridge-exposed capture objects can be immutable; onEvent still persists.
+  }
 
   return {
     enabled: true,
+    captureMode: target.captureMode,
     record: (event) => {
       const normalized: TtsEvalTraceEvent = {
         ...event,
         ts: typeof event.ts === "number" ? event.ts : Date.now(),
       } as TtsEvalTraceEvent;
-      target.events!.push(normalized);
+      try {
+        target.events?.push(normalized);
+      } catch {
+        // Persistence happens through onEvent when the in-window buffer is read-only.
+      }
       target.onEvent?.(normalized);
     },
   };

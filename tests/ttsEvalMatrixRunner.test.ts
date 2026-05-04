@@ -111,6 +111,8 @@ async function writeTraceArtifact(
     scenarioId: `moss-nano-13c-${mode}-live-evidence`,
     fixture: { id: "prose-basic" },
     events: [
+      { kind: "engine-selection", selectedEngine: "nano", source: "app-settings", ts: 0 },
+      { kind: "fallback-policy", policy: "explicit-only", selectedEngine: "nano", ts: 0 },
       { kind: "lifecycle", state: "start", ts: 1 },
       { kind: "lifecycle", state: "first-audio", ts: 90, latencyMs: 89 },
       {
@@ -120,6 +122,17 @@ async function writeTraceArtifact(
         endIdx: 4,
         cacheHit: false,
         prefetchReady: false,
+        timingTruth: "segment-following",
+        wordTimestamps: null,
+      },
+      {
+        kind: "nano-segment",
+        phase: "prefetch-ready",
+        startIdx: 0,
+        endIdx: 4,
+        latencyMs: 205,
+        cacheHit: true,
+        prefetchReady: true,
         timingTruth: "segment-following",
         wordTimestamps: null,
       },
@@ -746,6 +759,77 @@ describe("tts eval matrix/soak runner", () => {
     expect(result.reasons).toContain("Segment-following progress was not understandable in focus");
   });
 
+  it("pauses MOSS-NANO-13d evidence when a linked live trace observes stale prefetch playback", async () => {
+    const outDir = await makeTempDir();
+    const cleanTracePaths = Object.fromEntries(
+      await Promise.all(["focus", "flow", "narrate"].map(async (mode) => [mode, await writeTraceArtifact(outDir, mode)])),
+    );
+    const pageTracePath = await writeTraceArtifact(outDir, "page", {
+      events: [
+        { kind: "engine-selection", selectedEngine: "nano", source: "app-settings", ts: 0 },
+        { kind: "fallback-policy", policy: "explicit-only", selectedEngine: "nano", ts: 0 },
+        { kind: "lifecycle", state: "start", ts: 1 },
+        { kind: "lifecycle", state: "first-audio", ts: 90, latencyMs: 89 },
+        {
+          kind: "nano-segment",
+          phase: "prefetch-stale",
+          startIdx: 0,
+          endIdx: 4,
+          latencyMs: 210,
+          cacheHit: false,
+          prefetchReady: false,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+        {
+          kind: "nano-segment",
+          phase: "playback",
+          startIdx: 0,
+          endIdx: 4,
+          latencyMs: 220,
+          cacheHit: false,
+          prefetchReady: false,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+      ],
+    });
+    const tracePaths = { page: pageTracePath, ...cleanTracePaths };
+    const liveEvidence = await buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: Object.fromEntries(
+        Object.entries(tracePaths).map(([mode, tracePath]) => [
+          mode,
+          {
+            scenarioId: `moss-nano-12-${mode}`,
+            selectedEngine: "nano",
+            runArtifactPath: tracePath,
+            segmentProgressUnderstandable: true,
+          },
+        ]),
+      ),
+    } as any);
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: {
+        scenarios: ["page", "focus", "flow", "narrate"].map((mode) => ({
+          id: `moss-nano-12-${mode}`,
+          engine: "nano",
+          readingMode: mode,
+          fixtureId: "prose-basic",
+          tags: ["moss-nano-12", "nano-live-evidence", mode],
+          nanoGate: { selectedEngine: "nano", readiness: "required" },
+        })),
+      },
+      liveEvidence,
+    } as any);
+
+    expect(liveEvidence.modes.page.noStalePlayback).toBe(false);
+    expect(liveEvidence.modes.page.cachePrefetchContinuity).toBe(false);
+    expect(result.decision).toBe("PAUSE_NANO_PRODUCTIZATION");
+    expect(result.reasons).toContain("Missing or failing MOSS-NANO-12 noStalePlayback evidence in page");
+  });
+
   it("writes MOSS-NANO-12 live evidence gate state into explicitly tagged rollups", async () => {
     const outDir = await makeTempDir();
     const runtime = await createRuntimeWithFiles(outDir);
@@ -853,7 +937,7 @@ describe("tts eval matrix/soak runner", () => {
             sidecarLifecycleStable: true,
             source: "real-app-selected-nano",
             runArtifactPath: tracePath,
-            traceEventCount: 4,
+            traceEventCount: 7,
             recordedAt: "2026-05-03T12:00:00.000Z",
             scenarioId: "moss-nano-13c-page-live-evidence",
             selectedEngine: "nano",
@@ -864,6 +948,18 @@ describe("tts eval matrix/soak runner", () => {
             nanoCache: { hits: 0, misses: 2, hitRate: 0 },
             nanoPrefetch: { ready: 0, stale: 0, cancelled: 0 },
             recycleObservations: { restarts: 0, cleanShutdowns: 1 },
+            observedEngineSelection: {
+              kind: "engine-selection",
+              selectedEngine: "nano",
+              source: "app-settings",
+              ts: 0,
+            },
+            observedFallbackPolicy: {
+              kind: "fallback-policy",
+              policy: "explicit-only",
+              selectedEngine: "nano",
+              ts: 0,
+            },
           },
         },
       },
@@ -933,7 +1029,7 @@ describe("tts eval matrix/soak runner", () => {
     expect(artifact.schemaVersion).toBe("moss-nano-live-evidence.v2");
     expect(artifact.evidenceKind).toBe("real-app-selected-nano");
     expect(artifact.modes.page.source).toBe("real-app-selected-nano");
-    expect(artifact.modes.page.traceEventCount).toBe(4);
+    expect(artifact.modes.page.traceEventCount).toBe(7);
     expect(artifact.modes.page.runtime.syntheticAudio).toBe(false);
     expect(artifact.modes.page.timingTruth).toBe("segment-following");
     expect(artifact.modes.page.wordTimestamps).toBeNull();
@@ -968,6 +1064,23 @@ describe("tts eval matrix/soak runner", () => {
     const tracePath = await writeTraceArtifact(outDir, "page", {
       selectedEngine: "kokoro",
       runtime: { backend: "moss-nano-onnx", syntheticAudio: true },
+      events: [
+        { kind: "engine-selection", selectedEngine: "kokoro", source: "app-settings", ts: 0 },
+        { kind: "fallback-policy", policy: "explicit-only", selectedEngine: "nano", ts: 0 },
+        { kind: "lifecycle", state: "start", ts: 1 },
+        { kind: "lifecycle", state: "first-audio", ts: 90, latencyMs: 89 },
+        {
+          kind: "nano-segment",
+          phase: "playback",
+          startIdx: 0,
+          endIdx: 4,
+          latencyMs: 210,
+          cacheHit: false,
+          prefetchReady: false,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+      ],
     });
 
     await expect(buildMossNanoLiveEvidenceArtifact({
@@ -979,7 +1092,130 @@ describe("tts eval matrix/soak runner", () => {
           segmentProgressUnderstandable: true,
         },
       },
-    } as any)).rejects.toThrow("does not prove selected Nano");
+    } as any)).rejects.toThrow("does not prove observed selected Nano");
+  });
+
+  it("refuses to build MOSS-NANO-13d evidence without observed selected-engine provenance", async () => {
+    const outDir = await makeTempDir();
+    const tracePath = await writeTraceArtifact(outDir, "page", {
+      selectedEngine: "nano",
+      explicitFallback: true,
+      events: [
+        { kind: "fallback-policy", policy: "explicit-only", ts: 0 },
+        { kind: "lifecycle", state: "start", ts: 1 },
+        { kind: "lifecycle", state: "first-audio", ts: 90, latencyMs: 89 },
+        {
+          kind: "nano-segment",
+          phase: "playback",
+          startIdx: 0,
+          endIdx: 4,
+          latencyMs: 210,
+          cacheHit: false,
+          prefetchReady: false,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+      ],
+    });
+
+    await expect(buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: Object.fromEntries(
+        ["page", "focus", "flow", "narrate"].map((mode) => [
+          mode,
+          {
+            selectedEngine: "nano",
+            runArtifactPath: tracePath,
+            segmentProgressUnderstandable: true,
+          },
+        ]),
+      ),
+    } as any)).rejects.toThrow("does not prove observed selected Nano");
+  });
+
+  it("refuses to build MOSS-NANO-13d evidence without observed explicit fallback policy", async () => {
+    const outDir = await makeTempDir();
+    const tracePath = await writeTraceArtifact(outDir, "page", {
+      explicitFallback: true,
+      events: [
+        { kind: "engine-selection", selectedEngine: "nano", ts: 0 },
+        { kind: "lifecycle", state: "start", ts: 1 },
+        { kind: "lifecycle", state: "first-audio", ts: 90, latencyMs: 89 },
+        {
+          kind: "nano-segment",
+          phase: "playback",
+          startIdx: 0,
+          endIdx: 4,
+          latencyMs: 210,
+          cacheHit: false,
+          prefetchReady: false,
+          timingTruth: "segment-following",
+          wordTimestamps: null,
+        },
+      ],
+    });
+
+    await expect(buildMossNanoLiveEvidenceArtifact({
+      appCommit: "abc1234",
+      modes: Object.fromEntries(
+        ["page", "focus", "flow", "narrate"].map((mode) => [
+          mode,
+          {
+            selectedEngine: "nano",
+            runArtifactPath: tracePath,
+            segmentProgressUnderstandable: true,
+          },
+        ]),
+      ),
+    } as any)).rejects.toThrow("does not prove observed explicit fallback policy");
+  });
+
+  it("gate rejects live evidence missing observed event provenance markers", async () => {
+    const outDir = await makeTempDir();
+    const tracePath = await writeTraceArtifact(outDir, "page");
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: { scenarios: nanoLiveEvidenceScenarios() },
+      liveEvidence: {
+        schemaVersion: "moss-nano-live-evidence.v2",
+        evidenceKind: "real-app-selected-nano",
+        generatedBy: "scripts/tts_eval_runner.mjs",
+        generatedAt: "2026-05-03T12:00:00.000Z",
+        appCommit: "abc1234",
+        evidenceProducerVersion: "moss-nano-13c",
+        modes: {
+          page: {
+            live: true,
+            nanoSelected: true,
+            startable: true,
+            segmentProgressUnderstandable: true,
+            noUnderlineRace: true,
+            cachePrefetchContinuity: true,
+            noStalePlayback: true,
+            pauseResumeSameMode: true,
+            modeSwitchAnchorPreserved: true,
+            explicitFallback: true,
+            sidecarLifecycleStable: true,
+            source: "real-app-selected-nano",
+            runArtifactPath: tracePath,
+            traceEventCount: 7,
+            recordedAt: "2026-05-03T12:00:00.000Z",
+            scenarioId: "moss-nano-13c-page-live-evidence",
+            selectedEngine: "nano",
+            timingTruth: "segment-following",
+            wordTimestamps: null,
+            runtime: { backend: "moss-nano-onnx", syntheticAudio: false },
+            nanoSegmentLatencyMs: { p50: 210, p95: 210, min: 210, max: 210 },
+            nanoCache: { hits: 0, misses: 2, hitRate: 0 },
+            nanoPrefetch: { ready: 0, stale: 0, cancelled: 0 },
+            recycleObservations: { restarts: 0, cleanShutdowns: 1 },
+          },
+        },
+      },
+    } as any);
+
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).toContain("Missing observed engine-selection provenance in page");
+    expect(result.reasons).toContain("Missing observed fallback-policy provenance in page");
   });
 
   it("writes MOSS-NANO-13c provenance evidence from explicit per-mode live trace inputs", async () => {
