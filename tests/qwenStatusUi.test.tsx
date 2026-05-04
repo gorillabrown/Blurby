@@ -107,10 +107,10 @@ describe("Qwen provisioning UI deactivation", () => {
       ttsVoiceName: null,
     });
 
-    expect(container.textContent).toContain("Qwen is currently disabled.");
+    expect(container.textContent).toContain("Qwen is retired for Desktop v2 and remains disabled.");
     const engineButtons = Array.from(container.querySelectorAll(".tts-engine-toggle button"));
-    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro AI"));
-    const nanoButton = engineButtons.find((button) => button.textContent?.includes("Nano AI"));
+    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro"));
+    const nanoButton = engineButtons.find((button) => button.textContent?.includes("MOSS-Nano"));
     expect(kokoroButton?.className).toContain("active");
     expect(nanoButton?.className).not.toContain("active");
     expect(container.textContent).not.toContain("Nano runtime blocked");

@@ -156,7 +156,7 @@ describe("TTSSettings Kokoro truth wiring", () => {
     });
 
     expect(container.querySelector('[aria-label="Kokoro voice"]')).not.toBeNull();
-    expect(container.textContent).toContain("Using legacy Kokoro voices.");
+    expect(container.textContent).toContain("Using default Kokoro voices.");
   });
 
   it("shows the full Kokoro speed ladder once the engine is ready", async () => {

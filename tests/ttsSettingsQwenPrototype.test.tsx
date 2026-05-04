@@ -110,7 +110,7 @@ describe("TTSSettings Qwen deactivation", () => {
     expect(qwenButton?.hasAttribute("disabled")).toBe(true);
     expect(qwenButton?.getAttribute("aria-disabled")).toBe("true");
     expect(qwenButton?.className).not.toContain("active");
-    expect(container.textContent).toContain("Qwen is currently disabled.");
+    expect(container.textContent).toContain("Qwen is retired for Desktop v2 and remains disabled.");
     expect(container.querySelector('[aria-label="Qwen voice"]')).toBeNull();
   });
 
@@ -123,8 +123,8 @@ describe("TTSSettings Qwen deactivation", () => {
 
     const engineButtons = Array.from(container.querySelectorAll(".tts-engine-toggle button"));
     const qwenButton = engineButtons.find((button) => button.textContent?.includes("Qwen AI"));
-    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro AI"));
-    const nanoButton = engineButtons.find((button) => button.textContent?.includes("Nano AI"));
+    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro"));
+    const nanoButton = engineButtons.find((button) => button.textContent?.includes("MOSS-Nano"));
 
     expect(qwenButton?.className).not.toContain("active");
     expect(kokoroButton?.className).toContain("active");

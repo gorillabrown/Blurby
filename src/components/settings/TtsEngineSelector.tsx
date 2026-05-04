@@ -16,40 +16,45 @@ export function TtsEngineSelector({
   onSelect,
 }: TtsEngineSelectorProps) {
   return (
-    <div className="settings-mode-toggle tts-engine-toggle">
+    <div className="settings-mode-toggle tts-engine-toggle" role="group" aria-label="Narration voice engine">
       <button
         className={`settings-mode-btn${engine === "qwen" ? " active" : ""}`}
         onClick={() => {}}
         disabled={qwenDisabled}
         aria-disabled={qwenDisabled}
+        aria-pressed={engine === "qwen"}
       >
-        Qwen AI
+        Qwen AI (Retired)
       </button>
       <button
         className={`settings-mode-btn${engine === "web" ? " active" : ""}`}
         onClick={() => onSelect("web")}
+        aria-pressed={engine === "web"}
       >
         System
       </button>
       <button
         className={`settings-mode-btn${engine === "kokoro" ? " active" : ""}`}
         onClick={() => onSelect("kokoro")}
+        aria-pressed={engine === "kokoro"}
       >
-        Kokoro AI (Legacy)
+        Kokoro (Default)
       </button>
       <button
         className={`settings-mode-btn${engine === "nano" ? " active" : ""}`}
         onClick={() => onSelect("nano")}
         disabled={!nanoSelectable}
         aria-disabled={!nanoSelectable}
+        aria-pressed={engine === "nano"}
       >
-        Nano AI (Recommended opt-in)
+        MOSS-Nano (Recommended opt-in)
       </button>
       <button
         className={`settings-mode-btn${engine === "pocket-tts" ? " active" : ""}`}
         onClick={() => onSelect("pocket-tts")}
         disabled={!pocketSelectable}
         aria-disabled={!pocketSelectable}
+        aria-pressed={engine === "pocket-tts"}
       >
         Pocket TTS (Opt-in)
       </button>

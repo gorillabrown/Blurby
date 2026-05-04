@@ -390,10 +390,10 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         }}
       />
       <div className="tts-test-hint">
-        Qwen is currently disabled.
-        Kokoro remains available as a legacy fallback.
+        Qwen is retired for Desktop v2 and remains disabled.
+        Kokoro is the default and operational floor.
         Nano is selectable as a recommended opt-in local runtime and requires the local MOSS Nano sidecar.
-        Pocket TTS is available as an explicit opt-in local runtime.
+        Pocket TTS is available as an explicit opt-in local runtime, with upstream synthesis scaffolded until adapter work is approved.
         {!nanoReady && ` ${nanoStatusDetail}`}
         {!pocketReady && ` ${pocketStatusDetail}`}
       </div>
@@ -539,14 +539,14 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       </button>
       <div className="tts-test-hint">
         Press N in the reader to toggle narration. WPM is capped at 400 when narration is active.
-        {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using legacy Kokoro voices."}
-        {engine === "kokoro" && kokoroWarming && " Legacy Kokoro is warming up..."}
+        {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using default Kokoro voices."}
+        {engine === "kokoro" && kokoroWarming && " Kokoro is warming up..."}
         {engine === "qwen" && qwenReady && " Using Qwen for live narration playback."}
         {engine === "qwen" && !qwenReady && " Qwen becomes playable once the local external runtime is available and warmed."}
-        {engine === "nano" && nanoReady && " Using experimental Nano through the local sidecar."}
-        {engine === "nano" && !nanoReady && " Nano remains selected only as a blocked experimental option until the sidecar is ready."}
+        {engine === "nano" && nanoReady && " Using recommended opt-in MOSS-Nano through the local sidecar."}
+        {engine === "nano" && !nanoReady && " MOSS-Nano remains selected only as a blocked recommended opt-in option until the sidecar is ready."}
         {engine === "pocket-tts" && pocketReady && " Using opt-in Pocket TTS through the local sidecar."}
-        {engine === "pocket-tts" && !pocketReady && " Pocket remains selected only as a blocked opt-in option until the sidecar is ready."}
+        {engine === "pocket-tts" && !pocketReady && " Pocket remains selected only as a blocked opt-in option until the sidecar is ready; upstream synthesis remains scaffolded."}
       </div>
 
       <PauseSettingsSection settings={settings} onTtsChange={handleTtsChange} />

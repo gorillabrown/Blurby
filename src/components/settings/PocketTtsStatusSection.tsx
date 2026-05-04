@@ -10,8 +10,10 @@ export function PocketTtsStatusSection({ ready, title, detail }: PocketTtsStatus
       <div className="tts-runtime-status-title">{title}</div>
       <div className="tts-test-hint">
         {detail}
-        {!ready && " Pocket preview becomes available only after the sidecar reports ready."}
-        {ready && " Bounded lifecycle is enabled through the local sidecar contract."}
+        {" Pocket TTS is opt-in and wired at the app boundary."}
+        {!ready && " Preview becomes available only after the sidecar reports ready."}
+        {" Upstream synthesis remains scaffolded until adapter work is approved."}
+        {ready && " Local sidecar lifecycle is available through the app boundary."}
       </div>
     </div>
   );

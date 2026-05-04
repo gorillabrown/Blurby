@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, type KeyboardEvent } from "react";
 import type { BlurbySettings } from "../../types";
 import { ThemeContext } from "../ThemeProvider";
 
@@ -38,6 +38,12 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
     if (updates.fontFamily !== undefined) setFontFamily(updates.fontFamily as string | null);
   };
 
+  const handleSwitchKey = (event: KeyboardEvent, onToggle: () => void) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onToggle();
+  };
+
   const isPresetAccent = ACCENT_PRESETS.some((p) => p.value === settings.accentColor);
   const customColor =
     settings.accentColor && !isPresetAccent ? settings.accentColor : "#888888";
@@ -50,7 +56,10 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
         <div
           className={`settings-toggle${settings.einkMode ? " active" : ""}`}
           onClick={() => handleSettingsChange({ einkMode: !settings.einkMode })}
+          onKeyDown={(event) => handleSwitchKey(event, () => handleSettingsChange({ einkMode: !settings.einkMode }))}
           role="switch"
+          tabIndex={0}
+          aria-label="Toggle E-Ink display mode"
           aria-checked={settings.einkMode === true}
         >
           <div className="settings-toggle-thumb" />
@@ -66,7 +75,10 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
             <div
               className={`settings-toggle${settings.einkPhraseGrouping ? " active" : ""}`}
               onClick={() => handleSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping })}
+              onKeyDown={(event) => handleSwitchKey(event, () => handleSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping }))}
               role="switch"
+              tabIndex={0}
+              aria-label="Toggle E-Ink phrase grouping"
               aria-checked={settings.einkPhraseGrouping}
             >
               <div className="settings-toggle-thumb" />
@@ -112,6 +124,8 @@ export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps
             key={t}
             className={`settings-mode-btn${settings.theme === t ? " active" : ""}`}
             onClick={() => handleSettingsChange({ theme: t })}
+            aria-pressed={settings.theme === t}
+            aria-label={`${t} theme`}
           >
             {t}
           </button>

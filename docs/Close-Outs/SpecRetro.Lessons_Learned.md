@@ -189,3 +189,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Add a mandatory line to the Herodotus task in sprint specs: `Pre-composed diffs: [yes/no]. If yes, include diffs inline.` When "no," note why (e.g., complex multi-section updates). This makes the decision explicit rather than silently defaulting to the expensive path.
 **Applies to:** All sprint Herodotus/documentation tasks
 **Status:** Second occurrence — promotion candidate. First: QWEN-STREAM-3 (close-out mismatch note). Second: QWEN-STREAM-4.
+
+### SRL-023 — Release-polish specs must preserve product posture as an explicit invariant (POLISH-1, 2026-05-04)
+**Verdict:** POLISH-1 succeeded because it treated engine posture as a release invariant, not incidental settings copy.
+**Evidence:** The sprint touched settings labels, ARIA state, empty states, and switch accessibility while preserving Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen disabled.
+**Recommendation:** Late-stage polish specs should list non-negotiable product posture invariants directly in the task and test criteria, especially when copy/status/accessibility edits could accidentally imply a product decision change.
+**Applies to:** Release-polish and settings/product-copy sprints
+**Status:** Observation

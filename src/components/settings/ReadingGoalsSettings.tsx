@@ -24,10 +24,16 @@ export function ReadingGoalsSettings({ settings, onSettingsChange }: ReadingGoal
   });
   const [newType, setNewType] = useState<ReadingGoalType>("daily-pages");
   const [newTarget, setNewTarget] = useState(optionFor("daily-pages").defaultTarget);
+  const canAddGoal = Number.isFinite(newTarget) && newTarget >= 1;
 
   const handleTypeChange = (type: ReadingGoalType) => {
     setNewType(type);
     setNewTarget(optionFor(type).defaultTarget);
+  };
+
+  const handleAddGoal = () => {
+    if (!canAddGoal) return;
+    addGoal(newType, newTarget);
   };
 
   return (
@@ -48,17 +54,25 @@ export function ReadingGoalsSettings({ settings, onSettingsChange }: ReadingGoal
           min={1}
           value={newTarget}
           onChange={(event) => setNewTarget(Number(event.target.value))}
-          aria-label="Goal target"
+          aria-label="New goal target"
         />
-        <button type="button" className="btn-fill" onClick={() => addGoal(newType, newTarget)}>
-          add
+        <button
+          type="button"
+          className="btn-fill"
+          onClick={handleAddGoal}
+          disabled={!canAddGoal}
+          aria-label="Add reading goal"
+        >
+          Add goal
         </button>
       </div>
 
       {goals.length === 0 ? (
-        <p className="reading-goals-empty">No reading goals yet</p>
+        <p className="reading-goals-empty" aria-live="polite">
+          No reading goals yet. Choose a goal type and target to start tracking locally.
+        </p>
       ) : (
-        <div className="reading-goals-list">
+        <div className="reading-goals-list" aria-live="polite">
           {goals.map((goal) => {
             const option = optionFor(goal.type);
             return (
@@ -82,8 +96,13 @@ export function ReadingGoalsSettings({ settings, onSettingsChange }: ReadingGoal
                 <span className="reading-goal-progress">{goal.progress.current}/{goal.target}</span>
                 <span className="reading-goal-streak">current streak {goal.progress.currentStreak}</span>
                 <span className="reading-goal-streak">longest streak {goal.progress.longestStreak}</span>
-                <button type="button" className="btn reading-goal-delete" onClick={() => deleteGoal(goal.id)}>
-                  delete
+                <button
+                  type="button"
+                  className="btn reading-goal-delete"
+                  onClick={() => deleteGoal(goal.id)}
+                  aria-label={`Delete ${option.label} goal`}
+                >
+                  Delete
                 </button>
               </div>
             );

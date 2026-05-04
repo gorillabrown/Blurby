@@ -128,10 +128,10 @@ describe("TTSSettings Moss Nano experimental UI", () => {
 
     const engineButtons = Array.from(container.querySelectorAll(".tts-engine-toggle button"));
     expect(engineButtons.map((button) => button.textContent?.trim())).toEqual([
-      "Qwen AI",
+      "Qwen AI (Retired)",
       "System",
-      "Kokoro AI (Legacy)",
-      "Nano AI (Recommended opt-in)",
+      "Kokoro (Default)",
+      "MOSS-Nano (Recommended opt-in)",
       "Pocket TTS (Opt-in)",
     ]);
     expect((DEFAULT_SETTINGS as BlurbySettings).ttsEngine).toBe("kokoro");
@@ -140,14 +140,14 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     expect(qwenButton?.hasAttribute("disabled")).toBe(true);
     expect(qwenButton?.getAttribute("aria-disabled")).toBe("true");
     expect(qwenButton?.className).not.toContain("active");
-    expect(container.textContent).toContain("Qwen is currently disabled.");
+    expect(container.textContent).toContain("Qwen is retired for Desktop v2 and remains disabled.");
     expect(container.textContent).toContain("Nano is selectable as a recommended opt-in local runtime and requires the local MOSS Nano sidecar.");
     expect(container.textContent).toContain("Nano sidecar API is unavailable.");
 
-    const nanoButton = engineButtons.find((button) => button.textContent?.includes("Nano AI"));
+    const nanoButton = engineButtons.find((button) => button.textContent?.includes("MOSS-Nano"));
     expect(nanoButton?.hasAttribute("disabled")).toBe(true);
     expect(nanoButton?.className).not.toContain("active");
-    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro AI"));
+    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro"));
     expect(kokoroButton?.className).toContain("active");
   });
 
@@ -195,7 +195,7 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     });
 
     const nanoButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
-      (button) => button.textContent?.includes("Nano AI"),
+      (button) => button.textContent?.includes("MOSS-Nano"),
     );
     expect(nanoButton?.hasAttribute("disabled")).toBe(false);
 
@@ -224,7 +224,7 @@ describe("TTSSettings Moss Nano experimental UI", () => {
     });
 
     const nanoButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
-      (button) => button.textContent?.includes("Nano AI"),
+      (button) => button.textContent?.includes("MOSS-Nano"),
     );
     expect(nanoButton?.hasAttribute("disabled")).toBe(false);
 

@@ -135,14 +135,19 @@ describe("TTSSettings Pocket TTS opt-in UI", () => {
   it("keeps Kokoro as default while adding Pocket after Nano", async () => {
     await renderSettings(DEFAULT_SETTINGS as BlurbySettings);
 
+    const engineGroup = container.querySelector(".tts-engine-toggle");
     const engineButtons = Array.from(container.querySelectorAll(".tts-engine-toggle button"));
+    expect(engineGroup?.getAttribute("role")).toBe("group");
+    expect(engineGroup?.getAttribute("aria-label")).toBe("Narration voice engine");
     expect(engineButtons.map((button) => button.textContent?.trim())).toEqual([
-      "Qwen AI",
+      "Qwen AI (Retired)",
       "System",
-      "Kokoro AI (Legacy)",
-      "Nano AI (Recommended opt-in)",
+      "Kokoro (Default)",
+      "MOSS-Nano (Recommended opt-in)",
       "Pocket TTS (Opt-in)",
     ]);
+    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro"));
+    expect(kokoroButton?.getAttribute("aria-pressed")).toBe("true");
     expect(TTS_DEFAULT_ENGINE).toBe("kokoro");
     expect((DEFAULT_SETTINGS as BlurbySettings).ttsEngine).toBe("kokoro");
   });
@@ -156,7 +161,7 @@ describe("TTSSettings Pocket TTS opt-in UI", () => {
     expect(QWEN_TTS_DISABLED).toBe(true);
     expect(qwenButton?.hasAttribute("disabled")).toBe(true);
     expect(qwenButton?.className).not.toContain("active");
-    expect(container.textContent).toContain("Qwen is currently disabled.");
+    expect(container.textContent).toContain("Qwen is retired for Desktop v2 and remains disabled.");
   });
 
   it("selects Pocket only when the Pocket sidecar API exists", async () => {
@@ -222,6 +227,8 @@ describe("TTSSettings Pocket TTS opt-in UI", () => {
     );
     expect(testVoiceButton?.hasAttribute("disabled")).toBe(true);
     expect((window as any).electronAPI.pocketSynthesize).not.toHaveBeenCalled();
+    expect(container.textContent).toContain("Pocket TTS is opt-in and wired at the app boundary.");
+    expect(container.textContent).toContain("Upstream synthesis remains scaffolded until adapter work is approved.");
   });
 
   it("previews ready Pocket through pocketStatus and pocketSynthesize", async () => {
