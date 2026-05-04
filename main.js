@@ -1,7 +1,7 @@
 // main.js — Thin orchestrator for Blurby Electron app
 // CommonJS only — Electron main process
 
-const { app, BrowserWindow, nativeTheme } = require("electron");
+const { app, BrowserWindow, ipcMain, nativeTheme } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
@@ -107,6 +107,7 @@ let settings = {
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, streaks: { current: 0, longest: 0, lastReadDate: null } };
 let siteCookies = {};
+let flushTtsEvalTraceCaptures = async () => {};
 
 // ── Library index (O(1) lookups by id) ─────────────────────────────────────
 let libraryIndex = new Map();
@@ -151,6 +152,119 @@ async function saveLibraryNow() {
 
 function saveHistory() { writeJSON(getHistoryPath(), history); }
 function saveSiteCookies() { writeJSON(getSiteCookiesPath(), siteCookies); }
+
+function safeTraceSlug(value, fallback = "trace") {
+  return String(value || fallback)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || fallback;
+}
+
+function setupTtsEvalTraceCapture() {
+  const captureDir = process.env.BLURBY_TTS_EVAL_TRACE_DIR;
+  if (!captureDir) return;
+
+  const outDir = path.resolve(captureDir);
+  const captures = new Map();
+
+  const ensureCapture = (webContentsId) => {
+    if (!captures.has(webContentsId)) {
+      captures.set(webContentsId, {
+        config: {},
+        createdAt: new Date().toISOString(),
+        events: [],
+        flushedPath: null,
+      });
+    }
+    return captures.get(webContentsId);
+  };
+
+  const writeCapture = async (webContentsId) => {
+    const capture = captures.get(webContentsId);
+    if (!capture || !capture.events.length) return capture?.flushedPath || null;
+
+    const events = capture.events.slice();
+    const config = capture.config || {};
+    const mode =
+      config.mode
+      || events.find((event) => event.kind === "lifecycle" && event.mode)?.mode
+      || "capture";
+    const selectionEvent = events.find((event) => event.kind === "engine-selection");
+    const runtimeEvent = events.find((event) => event.kind === "nano-synthesis")
+      || events.find((event) => event.kind === "nano-runtime");
+    const explicitFallback = events.some((event) => event.kind === "fallback-policy" && event.policy === "explicit-only");
+    const cleanStopObserved = events.some((event) => event.kind === "lifecycle" && event.state === "stop");
+
+    const trace = {
+      schemaVersion: "1.0",
+      evidenceSource: "real-app-selected-nano",
+      provenance: {
+        source: "real-app-selected-nano",
+        producer: "electron-preload-tts-eval-trace",
+      },
+      selectedEngine: selectionEvent?.selectedEngine ?? null,
+      explicitFallback,
+      runId: config.runId || `moss-nano-13d-${safeTraceSlug(mode)}`,
+      scenarioId: config.scenarioId || `moss-nano-13c-${safeTraceSlug(mode)}-live-evidence`,
+      createdAt: capture.createdAt,
+      fixture: config.fixture || {
+        id: `live-${safeTraceSlug(mode)}`,
+        title: `Live ${mode}`,
+        sourceType: "prose",
+        expectedCoverage: [],
+      },
+      runtime: runtimeEvent ? {
+        backend: runtimeEvent.backend ?? null,
+        modelVariant: runtimeEvent.modelVariant ?? null,
+        syntheticAudio: runtimeEvent.syntheticAudio ?? null,
+      } : null,
+      recycleObservations: {
+        restarts: events.filter((event) => event.kind === "nano-runtime" && event.status === "shutdown").length,
+        cleanShutdowns: cleanStopObserved ? 1 : 0,
+      },
+      events,
+    };
+
+    await fsPromises.mkdir(outDir, { recursive: true });
+    const tracePath = path.join(outDir, `${safeTraceSlug(mode)}.trace.json`);
+    await writeJSON(tracePath, trace);
+    capture.flushedPath = tracePath;
+    return tracePath;
+  };
+
+  flushTtsEvalTraceCaptures = async () => {
+    const paths = [];
+    for (const webContentsId of captures.keys()) {
+      const tracePath = await writeCapture(webContentsId);
+      if (tracePath) paths.push(tracePath);
+    }
+    return paths;
+  };
+
+  ipcMain.on("tts-eval-trace-start", (event, config) => {
+    const capture = ensureCapture(event.sender.id);
+    capture.config = config && typeof config === "object" ? { ...config } : {};
+    event.sender.once("destroyed", () => {
+      writeCapture(event.sender.id).catch((err) => {
+        console.error("[tts-eval-trace] flush failed:", err.message);
+      });
+    });
+  });
+
+  ipcMain.on("tts-eval-trace-event", (event, payload) => {
+    if (!payload || typeof payload !== "object") return;
+    const capture = ensureCapture(event.sender.id);
+    capture.events.push({
+      ...payload,
+      ts: typeof payload.ts === "number" ? payload.ts : Date.now(),
+    });
+  });
+
+  ipcMain.handle("tts-eval-trace-flush", async (event) => {
+    const tracePath = await writeCapture(event.sender.id);
+    return { ok: Boolean(tracePath), tracePath };
+  });
+}
 
 // ── Debounced library broadcast ────────────────────────────────────────────
 let _broadcastTimer = null;
@@ -434,6 +548,7 @@ app.whenReady().then(async () => {
 
   // ── Phase 1: Load state (window needs settings) ──────────────────────────
   await loadState();
+  setupTtsEvalTraceCapture();
 
   // Require cloud modules (just require, not init — fast)
   const auth = require("./main/auth");
@@ -573,6 +688,7 @@ app.on("will-quit", async () => {
   if (watcher) watcher.close();
   // Stop WebSocket server
   try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
+  await flushTtsEvalTraceCaptures();
   await saveLibraryNow();
   // Final cloud sync before quit
   try {

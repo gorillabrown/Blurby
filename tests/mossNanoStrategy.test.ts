@@ -117,6 +117,31 @@ describe("createMossNanoStrategy", () => {
       .toBeLessThan(electronAPI.nanoSynthesize.mock.invocationCallOrder[0]);
   });
 
+  it("emits real Nano runtime truth from the status runtime metadata", async () => {
+    const onRuntimeTrace = vi.fn();
+    electronAPI.nanoStatus.mockResolvedValue({
+      ok: true,
+      status: "ready",
+      ready: true,
+      runtime: {
+        backend: "moss-nano-onnx",
+        modelVariant: "moss-tts-nano-onnx",
+        syntheticAudio: false,
+      },
+    });
+    const strategy = createMossNanoStrategy(makeDeps({ onRuntimeTrace }));
+
+    strategy.speakChunk("MOSS Nano speaks.", words, 12, 1.0, vi.fn(), vi.fn(), vi.fn());
+
+    await vi.waitFor(() => expect(onRuntimeTrace).toHaveBeenCalledWith(expect.objectContaining({
+      kind: "nano-runtime",
+      backend: "moss-nano-onnx",
+      modelVariant: "moss-tts-nano-onnx",
+      syntheticAudio: false,
+      status: "ready",
+    })));
+  });
+
   it("sends text, rate, and voice to nanoSynthesize", async () => {
     const deps = makeDeps({ getVoiceId: vi.fn(() => "serena") });
     const strategy = createMossNanoStrategy(deps);
@@ -155,6 +180,16 @@ describe("createMossNanoStrategy", () => {
       timingTruth: "segment-following",
     });
     expect(chunk.wordTimestamps).toBeNull();
+  });
+
+  it("starts playback before scheduling the first Nano segment so audio word progress can tick", async () => {
+    const strategy = createMossNanoStrategy(makeDeps());
+
+    strategy.speakChunk("MOSS Nano speaks.", words, 12, 1.0, vi.fn(), vi.fn(), vi.fn());
+
+    await vi.waitFor(() => expect(schedulerMock.scheduleChunk).toHaveBeenCalledTimes(1));
+    expect(schedulerMock.play.mock.invocationCallOrder[0])
+      .toBeLessThan(schedulerMock.scheduleChunk.mock.invocationCallOrder[0]);
   });
 
   it("marks the scheduler pipeline done after scheduling Nano segment audio so playback end can fire", async () => {
