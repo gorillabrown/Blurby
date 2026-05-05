@@ -199,12 +199,12 @@ function normalizeMaxSegmentWords(maxSegmentWords: number | undefined, totalWord
 
 function resolveTempoFactor(chunk: ScheduledChunk): number {
   const tempoFactor = chunk.kokoroRatePlan?.tempoFactor;
-  if (Number.isFinite(tempoFactor) && tempoFactor > 0) {
+  if (typeof tempoFactor === "number" && Number.isFinite(tempoFactor) && tempoFactor > 0) {
     return tempoFactor;
   }
 
   const selectedSpeed = chunk.kokoroRatePlan?.selectedSpeed;
-  if (Number.isFinite(selectedSpeed) && selectedSpeed > 0) {
+  if (typeof selectedSpeed === "number" && Number.isFinite(selectedSpeed) && selectedSpeed > 0) {
     return resolveKokoroRatePlan(selectedSpeed).tempoFactor;
   }
 

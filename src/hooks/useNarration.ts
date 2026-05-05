@@ -130,6 +130,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const [qwenError, setQwenError] = useState<string | null>(null);
   const qwenStatusRef = useRef<QwenStatusSnapshot>(DEFAULT_QWEN_STATUS_SNAPSHOT);
   const [nanoError, setNanoError] = useState<unknown | null>(null);
+  const [pocketError, setPocketError] = useState<unknown | null>(null);
   /** QWEN-STREAM-2: true when the streaming sidecar reported ready:true on mount. */
   const qwenStreamingReadyRef = useRef<boolean>(false);
 
@@ -374,7 +375,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         ? String((error as { error?: unknown }).error)
         : "Pocket TTS synthesis failed";
     clearPocketOwnership();
-    setNanoError(error ?? detail);
+    setPocketError(error ?? detail);
     dispatch({ type: "ERROR", message: detail });
     stateRef.current = { ...stateRef.current, status: "error" };
   }, [clearPocketOwnership]);
@@ -1125,6 +1126,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearNanoOwnership();
     clearPocketOwnership();
     setNanoError(null);
+    setPocketError(null);
     handoffPendingRef.current = false;
     clearPendingRateResponseTrace();
 
@@ -1675,6 +1677,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     qwenStatus,
     qwenError,
     nanoError,
+    pocketError,
     speak,
     startCursorDriven,
     resyncToCursor,

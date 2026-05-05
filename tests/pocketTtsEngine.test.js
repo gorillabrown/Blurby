@@ -149,6 +149,29 @@ function createSpawnHarness() {
 }
 
 describe("Pocket TTS sidecar manager contract", () => {
+  it("resolves default packaged paths under Electron resources instead of the dev checkout", () => {
+    expect(pocketEngineModule.createPocketTtsDefaultConfig).toEqual(expect.any(Function));
+    const config = pocketEngineModule.createPocketTtsDefaultConfig({
+      packaged: true,
+      resourcesPath: "C:\\Program Files\\Blurby\\resources",
+      tempRoot: "C:\\Users\\reader\\AppData\\Local\\Temp\\Blurby",
+    });
+
+    expect(config.runtimeDir).toBe("C:\\Program Files\\Blurby\\resources\\.runtime\\pocket-tts");
+    expect(config.modelDir).toBe("C:\\Program Files\\Blurby\\resources\\.runtime\\pocket-tts\\model");
+    expect(config.outputDir).toBe("C:\\Users\\reader\\AppData\\Local\\Temp\\Blurby\\pocket-tts-sidecar");
+    expect(config.runtimeDir).not.toContain("postv2-audit-remediation");
+  });
+
+  it("resolves the packaged Pocket Python bridge from app.asar.unpacked resources", () => {
+    expect(pocketSidecarModule.resolvePocketTtsBridgePath).toEqual(expect.any(Function));
+
+    expect(pocketSidecarModule.resolvePocketTtsBridgePath({
+      packaged: true,
+      resourcesPath: "C:\\Program Files\\Blurby\\resources",
+    })).toBe("C:\\Program Files\\Blurby\\resources\\app.asar.unpacked\\scripts\\pocket_tts_sidecar.py");
+  });
+
   it("starts Pocket during status and reports the ready snapshot", async () => {
     const { manager } = makeManager();
 

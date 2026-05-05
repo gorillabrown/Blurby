@@ -65,9 +65,9 @@ function createIpcHarness({ pocketEngine = createPocketEngineStub() } = {}) {
     restart: vi.fn(),
   };
   const streamingEngine = {
-    startStream: vi.fn(),
-    cancelStream: vi.fn(),
-    getModelStatus: vi.fn(),
+    startStream: vi.fn().mockResolvedValue({ streamId: "qwen-stream-1" }),
+    cancelStream: vi.fn().mockResolvedValue(undefined),
+    getModelStatus: vi.fn().mockReturnValue({ status: "ready", ready: true }),
     onStreamAudio: vi.fn(),
     onStreamFinished: vi.fn(),
   };
@@ -258,5 +258,43 @@ describe("Pocket TTS IPC and preload contract", () => {
       { channel: "tts-pocket-shutdown", args: [] },
       { channel: "tts-pocket-restart", args: [] },
     ]);
+  });
+
+  it("keeps Qwen IPC as disabled compatibility stubs", async () => {
+    const harness = createIpcHarness();
+    harness.loadAndRegister();
+
+    await expect(harness.ipcHandlers.get("tts-qwen-model-status")()).resolves.toMatchObject({
+      status: "unavailable",
+      ready: false,
+      loading: false,
+      recoverable: false,
+      reason: "qwen-disabled",
+    });
+    await expect(harness.ipcHandlers.get("tts-qwen-preload")()).resolves.toMatchObject({
+      error: expect.stringContaining("retired"),
+      status: "unavailable",
+      reason: "qwen-disabled",
+    });
+    await expect(harness.ipcHandlers.get("tts-qwen-generate")(null, "hello", "Ryan", 1, ["hello"])).resolves.toMatchObject({
+      error: expect.stringContaining("retired"),
+      status: "unavailable",
+      reason: "qwen-disabled",
+    });
+    await expect(harness.ipcHandlers.get("tts-qwen-stream-start")(null, "hello", "Ryan", 1)).resolves.toMatchObject({
+      ok: false,
+      error: expect.stringContaining("retired"),
+      reason: "qwen-disabled",
+      status: "unavailable",
+      recoverable: false,
+    });
+    expect(harness.ipcHandlers.get("tts-qwen-stream-status")()).toMatchObject({
+      status: "unavailable",
+      ready: false,
+      model_loaded: false,
+      device: "disabled",
+      reason: "qwen-disabled",
+      recoverable: false,
+    });
   });
 });

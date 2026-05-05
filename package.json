@@ -1,6 +1,6 @@
 {
   "name": "blurby",
-  "version": "1.75.0",
+  "version": "1.75.1",
   "description": "RSVP Speed Reading App with local folder sync",
   "author": "Blurby",
   "main": "main.js",
@@ -46,9 +46,13 @@
       "main.js",
       "preload.js",
       "main/**/*",
-      "dist/**/*"
+      "dist/**/*",
+      "scripts/moss_nano_app_sidecar.py",
+      "scripts/pocket_tts_sidecar.py"
     ],
     "asarUnpack": [
+      "scripts/moss_nano_app_sidecar.py",
+      "scripts/pocket_tts_sidecar.py",
       "node_modules/onnxruntime-node/**",
       "node_modules/onnxruntime-common/**",
       "node_modules/kokoro-js/**",

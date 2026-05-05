@@ -30,6 +30,7 @@ import {
 } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
+import { resolveFoliateWordHighlightClass } from "../utils/foliateWordHighlight";
 import {
   FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
   type FlowRenderedWordRootDescriptor,
@@ -328,6 +329,10 @@ interface FoliatePageViewProps {
   flowCursorRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
+export interface FoliateHighlightOptions {
+  allowMotion?: boolean;
+}
+
 export interface FoliateViewAPI {
   getWords: () => FoliateWord[];
   getParagraphBreaks: () => Set<number>;
@@ -337,7 +342,7 @@ export interface FoliateViewAPI {
   prev: () => void;
   highlightWord: (range: Range | null, sectionIndex: number) => void;
   /** Highlight a word by global index. Returns true if found, false if span not in DOM. */
-  highlightWordByIndex: (wordIndex: number, styleHint?: "flow") => boolean;
+  highlightWordByIndex: (wordIndex: number, styleHint?: "flow", options?: FoliateHighlightOptions) => boolean;
   clearHighlight: () => void;
   getView: () => any;
   /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
@@ -467,7 +472,10 @@ export default function FoliatePageView({
         root: entry.doc.body ?? entry.doc,
         ready: true,
       }))
-      .sort((a, b) => {
+      .sort((
+        a: { sectionIndex: number; doc: Document; root: HTMLElement | Document; ready: boolean },
+        b: { sectionIndex: number; doc: Document; root: HTMLElement | Document; ready: boolean },
+      ) => {
         if (preferredSectionIndex != null) {
           if (a.sectionIndex === preferredSectionIndex && b.sectionIndex !== preferredSectionIndex) return -1;
           if (b.sectionIndex === preferredSectionIndex && a.sectionIndex !== preferredSectionIndex) return 1;
@@ -566,8 +574,7 @@ export default function FoliatePageView({
 
     const state = viewApiRef.current.resolveWordState(wordIndex);
     const contents = view.renderer?.getContents?.() ?? [];
-    const isFlowMode = styleHint === "flow" || readingModeRef.current === "flow";
-    const highlightClass = isFlowMode ? "page-word--flow-cursor" : "page-word--highlighted";
+    const highlightClass = resolveFoliateWordHighlightClass(readingModeRef.current, styleHint);
 
     clearVisualWordClasses(contents);
 
@@ -915,14 +922,14 @@ export default function FoliatePageView({
             highlightWord: (_range, _sectionIndex) => {
               // No-op: use highlightWordByIndex instead
             },
-            highlightWordByIndex: (wordIndex: number, styleHint?: "flow"): boolean => {
+            highlightWordByIndex: (wordIndex: number, styleHint?: "flow", options?: FoliateHighlightOptions): boolean => {
               // TTS-7O ANCHOR CONTRACT: The wordIndex parameter is the CANONICAL narration
               // position for start, resume, save, and replay. Context words (N+1, N+2) applied
               // below in the narration 3-word window are VISUAL ONLY and must never be written
               // back as resume anchors or saved progress. See handlePauseToPage() in useReaderMode.ts
               // and resumeAnchorRef usage — both correctly read getCurrentWord() which returns
               // only this first highlighted word.
-              return applyVisualHighlightByIndex(wordIndex, styleHint, true);
+              return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true);
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
@@ -1294,7 +1301,7 @@ export default function FoliatePageView({
   }, [readingMode, flowPlaying, wpm]);
 
   useEffect(() => {
-    if (readingMode !== "flow" || narrationWordIndex == null) return;
+    if ((readingMode !== "flow" && readingMode !== "narrate") || narrationWordIndex == null) return;
     applyVisualHighlightByIndex(narrationWordIndex, "flow", false);
   }, [applyVisualHighlightByIndex, narrationWordIndex, readingMode]);
 

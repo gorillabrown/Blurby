@@ -1171,7 +1171,7 @@ export default function ReaderContainer({
             <div className="kokoro-loading-toast" role="status" aria-live="polite">
               {narration.warming
                 ? settings.ttsEngine === "kokoro"
-                  ? "Starting legacy Kokoro..."
+                  ? "Starting Kokoro..."
                   : "Starting narration..."
                 : "Loading voice model..."}
             </div>

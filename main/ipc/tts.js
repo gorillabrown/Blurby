@@ -1,8 +1,38 @@
 "use strict";
 // main/ipc/tts.js — TTS IPC handlers
 
-const { ipcMain, BrowserWindow, app } = require("electron");
-const { createQwenStreamingEngineManager } = require("../qwen-streaming-engine");
+const { ipcMain, app } = require("electron");
+
+const QWEN_DISABLED_REASON = "qwen-disabled";
+const QWEN_DISABLED_DETAIL = "Qwen is retired for Desktop v2 and remains disabled.";
+
+function qwenDisabledStatus() {
+  return {
+    status: "unavailable",
+    detail: QWEN_DISABLED_DETAIL,
+    reason: QWEN_DISABLED_REASON,
+    ready: false,
+    loading: false,
+    recoverable: false,
+  };
+}
+
+function qwenDisabledStreamStatus() {
+  return {
+    ...qwenDisabledStatus(),
+    model_loaded: false,
+    device: "disabled",
+  };
+}
+
+function qwenDisabledError() {
+  return {
+    error: QWEN_DISABLED_DETAIL,
+    reason: QWEN_DISABLED_REASON,
+    status: "unavailable",
+    recoverable: false,
+  };
+}
 
 function toErrorResponse(err) {
   const error = err instanceof Error ? err : new Error(String(err || "TTS IPC failure"));
@@ -48,8 +78,6 @@ function toPocketErrorResponse(err) {
 
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
-  const qwenEngine = require("../qwen-engine");
-  const streamingEngine = createQwenStreamingEngineManager(app);
   const mossNanoModule = require("../moss-nano-engine");
   const nanoEngine =
     typeof mossNanoModule.getSharedMossNanoEngine === "function"
@@ -207,88 +235,37 @@ function register(ctx) {
     }
   });
 
-  ipcMain.handle("tts-qwen-model-status", async () => {
-    try {
-      return await qwenEngine.getModelStatus();
-    } catch (err) {
-      return toErrorResponse(err);
-    }
-  });
+  ipcMain.handle("tts-qwen-model-status", async () => qwenDisabledStatus());
 
-  ipcMain.handle("tts-qwen-preload", async () => {
-    try {
-      return await qwenEngine.preload();
-    } catch (err) {
-      return toErrorResponse(err);
-    }
-  });
+  ipcMain.handle("tts-qwen-preload", async () => qwenDisabledError());
 
-  ipcMain.handle("tts-qwen-preflight", async () => {
-    try {
-      return await qwenEngine.preflight();
-    } catch (err) {
-      return toErrorResponse(err);
-    }
-  });
+  ipcMain.handle("tts-qwen-preflight", async () => ({
+    ...qwenDisabledStatus(),
+    supportedHost: false,
+    checkedAt: new Date().toISOString(),
+    checks: [
+      {
+        key: QWEN_DISABLED_REASON,
+        label: "Qwen retired",
+        status: "skip",
+        detail: QWEN_DISABLED_DETAIL,
+      },
+    ],
+  }));
 
-  ipcMain.handle("tts-qwen-voices", async () => {
-    try {
-      return { voices: await qwenEngine.listVoices() };
-    } catch (err) {
-      return toErrorResponse(err);
-    }
-  });
+  ipcMain.handle("tts-qwen-voices", async () => ({ voices: [], ...qwenDisabledError() }));
 
-  ipcMain.handle("tts-qwen-generate", async (_, text, speaker, rate, words) => {
-    try {
-      return await qwenEngine.generate(text, speaker, rate, words);
-    } catch (err) {
-      return toErrorResponse(err);
-    }
-  });
+  ipcMain.handle("tts-qwen-generate", async () => qwenDisabledError());
 
   // --- Streaming Qwen handlers ---
-  ipcMain.handle("tts-qwen-stream-start", async (_event, text, speaker, rate) => {
-    try {
-      const { streamId } = await streamingEngine.startStream(text, speaker, rate ?? 1.0);
-      return { ok: true, streamId };
-    } catch (err) {
-      return { ok: false, error: err.message };
-    }
-  });
+  ipcMain.handle("tts-qwen-stream-start", async () => ({
+    ok: false,
+    ...qwenDisabledError(),
+  }));
 
-  ipcMain.handle("tts-qwen-stream-cancel", async (_event, streamId) => {
-    try {
-      await streamingEngine.cancelStream(streamId);
-      return { ok: true };
-    } catch (err) {
-      return { ok: false, error: err.message };
-    }
-  });
+  ipcMain.handle("tts-qwen-stream-cancel", async () => ({ ok: true }));
 
-  ipcMain.handle("tts-qwen-stream-status", async () => {
-    return streamingEngine.getModelStatus();
-  });
-
-  // Wire PCM forwarding
-  streamingEngine.onStreamAudio((streamId, chunk) => {
-    const win = BrowserWindow.getAllWindows().find(w => w.isFocused())
-      ?? BrowserWindow.getAllWindows()[0];
-    if (win && !win.isDestroyed()) {
-      win.webContents.send("tts-qwen-stream-audio", streamId, chunk);
-    }
-  });
-
-  // QWEN-STREAM-3 BLOCKER-1: Wire end-of-stream forwarding so the renderer
-  // strategy can flush its accumulator and fire onEnd when the sidecar signals
-  // stream_finished. Mirrors the PCM forwarder pattern above.
-  streamingEngine.onStreamFinished((streamId) => {
-    const win = BrowserWindow.getAllWindows().find(w => w.isFocused())
-      ?? BrowserWindow.getAllWindows()[0];
-    if (win && !win.isDestroyed()) {
-      win.webContents.send("tts-qwen-stream-finished", streamId);
-    }
-  });
+  ipcMain.handle("tts-qwen-stream-status", () => qwenDisabledStreamStatus());
 
   // ── Marathon Worker (NAR-5: background caching) ─────────────────────────
   const marathonEngine = require("../tts-engine-marathon");

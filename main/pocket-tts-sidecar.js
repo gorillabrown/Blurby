@@ -1,10 +1,10 @@
 "use strict";
 // main/pocket-tts-sidecar.js - resident JSON-lines adapter for the Pocket TTS Python sidecar.
 
-const path = require("path");
 const { spawn: defaultSpawn, spawnSync } = require("child_process");
+const { resolvePocketTtsBridgePath, sidecarCwd } = require("./sidecar-paths");
 
-const DEFAULT_BRIDGE_PATH = path.resolve(__dirname, "..", "scripts", "pocket_tts_sidecar.py");
+const DEFAULT_BRIDGE_PATH = resolvePocketTtsBridgePath();
 
 function createDeferred() {
   let resolve;
@@ -60,6 +60,7 @@ function failureResponse(reason, detail, extra = {}) {
 function createPocketTtsSidecarAdapter(options = {}) {
   const spawn = options.spawn ?? defaultSpawn;
   const bridgePath = options.bridgePath ?? DEFAULT_BRIDGE_PATH;
+  const cwd = options.cwd ?? sidecarCwd();
 
   let child = null;
   let buffer = "";
@@ -216,7 +217,7 @@ function createPocketTtsSidecarAdapter(options = {}) {
   function startProcess(config) {
     const pythonExe = config?.pythonExe || process.env.POCKET_TTS_PYTHON || (process.platform === "win32" ? "python" : "python3");
     child = spawn(pythonExe, spawnArgs(config), {
-      cwd: path.resolve(__dirname, ".."),
+      cwd,
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
     });
@@ -397,4 +398,5 @@ function createPocketTtsSidecarAdapter(options = {}) {
 
 module.exports = {
   createPocketTtsSidecarAdapter,
+  resolvePocketTtsBridgePath,
 };

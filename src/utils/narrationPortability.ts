@@ -3,6 +3,7 @@
  * Handles serialization, validation, and safe application of narration profiles and overrides.
  */
 import type { NarrationProfile, PronunciationOverride, BlurbySettings } from "../types";
+import { normalizeSelectableTtsEngine } from "../constants";
 
 /** Schema version for the export payload — increment on breaking changes. */
 export const NARRATION_EXPORT_VERSION = 1;
@@ -68,7 +69,7 @@ export function validateNarrationImport(
       if (!p || typeof p.id !== "string" || typeof p.name !== "string") {
         errors.push(`Profile at index ${i} is missing id or name`);
       }
-      if (typeof p.ttsEngine !== "string" || !["web", "kokoro", "qwen", "nano"].includes(p.ttsEngine as string)) {
+      if (typeof p.ttsEngine !== "string" || !["web", "kokoro", "qwen", "nano", "pocket-tts"].includes(p.ttsEngine as string)) {
         errors.push(`Profile "${p.name || i}" has invalid ttsEngine`);
       }
     }
@@ -106,9 +107,11 @@ export function applyNarrationImport(
   existingSettings: BlurbySettings,
   mode: "merge" | "replace",
 ): Partial<BlurbySettings> {
+  const importedProfiles = payload.profiles.map(normalizeImportedProfile);
+
   if (mode === "replace") {
     return {
-      narrationProfiles: payload.profiles,
+      narrationProfiles: importedProfiles,
       pronunciationOverrides: payload.globalOverrides,
       activeNarrationProfileId: payload.activeProfileId,
     };
@@ -119,7 +122,7 @@ export function applyNarrationImport(
   const existingIds = new Set(existingProfiles.map(p => p.id));
 
   const mergedProfiles = [...existingProfiles];
-  for (const profile of payload.profiles) {
+  for (const profile of importedProfiles) {
     if (existingIds.has(profile.id)) {
       // Generate new ID to avoid collision
       const newId = `np-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
@@ -137,6 +140,17 @@ export function applyNarrationImport(
     narrationProfiles: mergedProfiles,
     pronunciationOverrides: mergedOverrides,
     // Don't change active profile in merge mode
+  };
+}
+
+function normalizeImportedProfile(profile: NarrationProfile): NarrationProfile {
+  const ttsEngine = normalizeSelectableTtsEngine(profile.ttsEngine);
+  const voicePinnedToRuntime = ttsEngine === "nano" || ttsEngine === "pocket-tts";
+
+  return {
+    ...profile,
+    ttsEngine,
+    ttsVoiceName: voicePinnedToRuntime || profile.ttsEngine === "qwen" ? null : profile.ttsVoiceName,
   };
 }
 

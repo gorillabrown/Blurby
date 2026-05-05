@@ -1,24 +1,11 @@
 "use strict";
 // main/pocket-tts-engine.js - opt-in Pocket TTS sidecar manager.
 
-const path = require("path");
-const fs = require("fs");
 const { randomUUID } = require("crypto");
 const { createPocketTtsSidecarAdapter } = require("./pocket-tts-sidecar");
+const { createPocketTtsDefaultConfig } = require("./sidecar-paths");
 
-const DEFAULT_POCKET_PYTHON = path.resolve(__dirname, "..", ".runtime", "pocket-tts", ".venv", "Scripts", "python.exe");
-
-const DEFAULT_CONFIG = {
-  pythonExe: fs.existsSync(DEFAULT_POCKET_PYTHON) ? DEFAULT_POCKET_PYTHON : undefined,
-  runtimeDir: path.resolve(__dirname, "..", ".runtime", "pocket-tts"),
-  modelDir: path.resolve(__dirname, "..", ".runtime", "pocket-tts", "model"),
-  referenceWavPath: null,
-  outputDir: path.resolve(__dirname, "..", ".tmp", "pocket-tts-sidecar"),
-  commandTimeoutMs: 30000,
-  synthesizeTimeoutMs: 120000,
-  maxInFlight: 1,
-  restartBackoffMs: 250,
-};
+const DEFAULT_CONFIG = createPocketTtsDefaultConfig();
 
 const VISIBLE_CONFIG_KEYS = [
   "runtimeDir",
@@ -315,6 +302,7 @@ function getSharedPocketTtsEngine(options = {}) {
 
 module.exports = {
   createPocketTtsEngine,
+  createPocketTtsDefaultConfig,
   getSharedPocketTtsEngine,
   getPocketTtsEngine: getSharedPocketTtsEngine,
 };

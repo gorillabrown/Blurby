@@ -1,5 +1,4 @@
 import type { KokoroStatusSnapshot, QwenStatusSnapshot, TtsEngine } from "../types";
-import type { KokoroRatePlan } from "../utils/kokoroRatePlan";
 
 // ── Book word array types (moved from bookWordExtractor.ts in HOTFIX-6) ──────
 
@@ -204,7 +203,11 @@ export interface TtsStrategy {
  * Do not treat this as playbackRate guidance.
  */
 export interface KokoroSchedulerRatePlanMetadata {
-  kokoroRatePlan?: KokoroRatePlan;
+  kokoroRatePlan?: {
+    selectedSpeed: number;
+    generationBucket: number;
+    tempoFactor: number;
+  };
 }
 
 /**

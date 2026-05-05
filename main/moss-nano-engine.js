@@ -1,24 +1,11 @@
 "use strict";
 // main/moss-nano-engine.js - experimental MOSS Nano sidecar manager.
 
-const path = require("path");
-const fs = require("fs");
 const { randomUUID } = require("crypto");
 const { createMossNanoSidecarAdapter } = require("./moss-nano-sidecar");
+const { createMossNanoDefaultConfig } = require("./sidecar-paths");
 
-const DEFAULT_NANO_PYTHON = path.resolve(__dirname, "..", ".runtime", "moss", ".venv-nano", "Scripts", "python.exe");
-
-const DEFAULT_CONFIG = {
-  pythonExe: fs.existsSync(DEFAULT_NANO_PYTHON) ? DEFAULT_NANO_PYTHON : undefined,
-  runtimeDir: path.resolve(__dirname, "..", ".runtime", "moss", "MOSS-TTS-Nano"),
-  modelDir: path.resolve(__dirname, "..", ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX", "MOSS-TTS-Nano-100M-ONNX"),
-  tokenizerDir: path.resolve(__dirname, "..", ".runtime", "moss", "weights", "MOSS-TTS-Nano-ONNX", "MOSS-Audio-Tokenizer-Nano-ONNX"),
-  outputDir: path.resolve(__dirname, "..", ".tmp", "moss-nano-app-sidecar"),
-  commandTimeoutMs: 30000,
-  synthesizeTimeoutMs: 120000,
-  maxInFlight: 1,
-  restartBackoffMs: 250,
-};
+const DEFAULT_CONFIG = createMossNanoDefaultConfig();
 
 const VISIBLE_CONFIG_KEYS = [
   "runtimeDir",
@@ -338,6 +325,7 @@ function getSharedMossNanoEngine(options = {}) {
 
 module.exports = {
   createMossNanoEngine,
+  createMossNanoDefaultConfig,
   getSharedMossNanoEngine,
   getMossNanoEngine: getSharedMossNanoEngine,
 };

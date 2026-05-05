@@ -4,12 +4,14 @@
 
 Verify the complete auto-update pipeline works from tag creation through CI build, install, update detection, download, and application. This procedure tests the `electron-updater` integration (`autoUpdater.autoDownload = true`, `autoUpdater.autoInstallOnAppQuit = true`) and the two IPC channels exposed to the renderer: `check-for-updates` and `install-update`.
 
+**Current limitation (POSTV2-REL-1):** this checkout does not contain a GitHub Actions release workflow. The procedure below is retained as the manual end-to-end target for a future release workflow, but it is not evidence that the workflow exists today.
+
 ---
 
 ## Prerequisites
 
 - GitHub repo access with push permissions (to create and push tags)
-- Windows machine for testing (x64 or ARM64 — release.yml builds both)
+- Windows machine for testing (x64 or ARM64)
 - A clean install location; no previously installed Blurby version
 - The draft release must be **published** before the updater will detect it — `electron-updater` does not detect draft releases
 - `GH_TOKEN` / `GITHUB_TOKEN` is handled by GitHub Actions automatically; no local token needed for CI
@@ -47,10 +49,10 @@ User data lives in `%APPDATA%\blurby` (Electron's `app.getPath('userData')`). Da
    git tag v0.9.9-test
    git push origin v0.9.9-test
    ```
-5. Wait for the `Release` workflow to complete in GitHub Actions (single `Build (x64 + arm64)` job that builds both architectures and uploads assets). Expected: approximately 10–15 minutes.
+5. Build the installer manually, or use a future release workflow once one exists. This checkout currently has no `release.yml`.
 6. In GitHub, find the draft release created for `v0.9.9-test`. **Publish it** (remove draft status). The auto-updater checks published releases only.
-7. Download the installer matching your test machine from the release assets (e.g., `Blurby-Setup-0.9.9-test-x64.exe` or `Blurby-Setup-0.9.9-test-arm64.exe` — naming follows the `${productName}-Setup-${version}-${arch}.${ext}` pattern).
-8. Run the installer on the test machine. Accept defaults or choose a custom directory — NSIS allows directory selection (`allowToChangeInstallationDirectory: true`).
+7. Download the installer matching your test machine from the release assets (e.g., `Blurby-Web-Setup-0.9.9-test-x64.exe` or `Blurby-Web-Setup-0.9.9-test-arm64.exe` — naming follows the `${productName}-Web-Setup-${version}-${arch}.${ext}` pattern).
+8. Run the installer on the test machine. The current NSIS configuration uses one-click install, so no custom install directory prompt is expected.
 9. Launch Blurby. Navigate to **Settings > Help**.
 10. Expected: version shown is `0.9.9-test`.
 11. Add a book to the library and record its title — you will verify it survives the update in Step 5.
@@ -67,7 +69,7 @@ User data lives in `%APPDATA%\blurby` (Electron's `app.getPath('userData')`). Da
    git tag v0.9.10-test
    git push origin v0.9.10-test
    ```
-3. Wait for the `Release` workflow to complete.
+3. Build the update installer manually, or use a future release workflow once one exists.
 4. In GitHub, find the draft release for `v0.9.10-test` and **publish it**. This is the step that makes the update detectable.
 
 ---
@@ -141,7 +143,7 @@ Use Add/Remove Programs or the uninstaller created by NSIS (Start Menu > Blurby 
 
 | Step | Check | Expected | Pass/Fail |
 |------|-------|----------|-----------|
-| 1 | CI workflow completes for v0.9.9-test | Both x64 and arm64 builds succeed; release published | |
+| 1 | Release build completes for v0.9.9-test | Required installer assets are produced and release is published | |
 | 1 | Install base version | Installer runs, app launches | |
 | 1 | Version in Settings > Help | Shows `0.9.9-test` | |
 | 3 | Auto-update detection (within 15s of launch) | "Update available" notification for `0.9.10-test` | |
@@ -191,5 +193,5 @@ Use Add/Remove Programs or the uninstaller created by NSIS (Start Menu > Blurby 
 - This is a **manual** test procedure. The two-build requirement (one installed base, one live update) cannot be automated in a single CI run without a dedicated test environment.
 - Run this procedure before each major release (i.e., before tagging `v1.0.0` and before any `v1.x.y` release thereafter).
 - Use version numbers with a `-test` suffix (e.g., `0.9.9-test`, `0.9.10-test`) to avoid polluting the real release history. These will be treated as prerelease by `softprops/action-gh-release` only if they contain `-beta` or `-rc` — `-test` suffixes produce standard releases, so be sure to delete them promptly.
-- The release workflow runs tests (`npm test`) and typechecks (`npm run typecheck`) before building. It is a single job that produces both x64 and ARM64 installers, then uploads all assets and SHA-256 checksums to the GitHub release.
-- Estimated total time for one full run of this procedure: 45–60 minutes (dominated by two CI build cycles of ~15 minutes each).
+- A future release workflow should run tests (`npm test`) and typechecks (`npm run typecheck`) before building, produce installer assets, and upload the updater metadata required by `electron-updater`.
+- Estimated total time for one full manual run depends on local packaging speed plus release publishing and installer/update validation time. If a future release workflow is added, replace this estimate with measured workflow duration.

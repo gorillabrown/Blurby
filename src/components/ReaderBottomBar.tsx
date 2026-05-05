@@ -266,7 +266,7 @@ export default function ReaderBottomBar({
           <div className="rbb-wpm-group">
             <span
               className="rbb-wpm-label"
-              aria-label={ttsEngine === "kokoro" ? "Legacy Kokoro rate" : ttsEngine === "qwen" ? "Narration rate" : "Speech rate"}
+              aria-label={ttsEngine === "kokoro" ? "Kokoro rate" : ttsEngine === "qwen" ? "Narration rate" : "Speech rate"}
             >
               {ttsRate.toFixed(1)}x
             </span>

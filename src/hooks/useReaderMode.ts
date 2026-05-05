@@ -156,7 +156,7 @@ export function useReaderMode({
     }
 
     narration.setOnTruthSync?.((wordIndex: number) => {
-        const found = foliateApiRef.current?.highlightWordByIndex(wordIndex);
+        const found = foliateApiRef.current?.highlightWordByIndex(wordIndex, "flow", { allowMotion: false });
         if (!found) {
           modeInstance.pendingResumeRef.current = { wordIndex, mode: "narrate" };
           const sectionIdx = foliateApiRef.current?.getSectionForWordIndex?.(wordIndex);
@@ -210,8 +210,8 @@ export function useReaderMode({
     if (!useFoliate || !foliateApiRef.current) return;
 
     if (surface === "narrate") {
-      const inDom = foliateApiRef.current.isWordInDom?.(idx) ?? true;
-      if (!inDom) {
+      const found = foliateApiRef.current.highlightWordByIndex(idx, "flow", { allowMotion: false });
+      if (!found) {
         modeInstance.pendingResumeRef.current = { wordIndex: idx, mode: "narrate" };
         const sectionIdx = foliateApiRef.current.getSectionForWordIndex?.(idx);
         if (sectionIdx != null) {

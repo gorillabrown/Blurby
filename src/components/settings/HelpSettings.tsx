@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const api = window.electronAPI;
 const appVersion = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
@@ -12,6 +12,14 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
   const [checking, setChecking] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
 
+  useEffect(() => {
+    const cleanup = api.onUpdateDownloaded?.((version: string) => {
+      setUpdateStatus(`Update downloaded: v${version}`);
+      setCanInstall(true);
+    });
+    return cleanup;
+  }, []);
+
   const handleCheckForUpdates = useCallback(async () => {
     setChecking(true);
     setUpdateStatus(null);
@@ -24,7 +32,6 @@ export function HelpSettings({ isMac }: HelpSettingsProps) {
         setUpdateStatus(result.message || "Could not check for updates");
       } else if (result.version && result.version !== appVersion) {
         setUpdateStatus(`Update available: v${result.version}`);
-        setCanInstall(true);
       } else {
         setUpdateStatus("You're up to date");
       }

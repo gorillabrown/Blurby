@@ -107,4 +107,31 @@ describe("previewSelectedTtsVoice truthfulness", () => {
     expect(playBufferMock).not.toHaveBeenCalled();
     expect(onPlaybackStateChange).toHaveBeenCalledWith(false);
   });
+
+  it("uses neutral Kokoro wording when Kokoro preview is not ready", async () => {
+    (window as any).electronAPI = {};
+
+    const { previewSelectedTtsVoice } = await import("../src/components/settings/ttsPreview");
+
+    const result = await previewSelectedTtsVoice({
+      engine: "kokoro",
+      settings: {
+        ttsEngine: "kokoro",
+        ttsRate: 1.0,
+        ttsVoiceName: "af_bella",
+      } as any,
+      voices: [],
+      kokoroReady: false,
+      qwenReady: false,
+      preferredQwenVoice: "Ryan",
+      onPlaybackStateChange: vi.fn(),
+    });
+
+    expect(result).toMatchObject({
+      played: false,
+      engine: "kokoro",
+      error: "Kokoro is not ready for preview playback.",
+    });
+    expect(result.error).not.toContain("Legacy Kokoro");
+  });
 });

@@ -625,13 +625,18 @@ describe("Group E: Preload bridge type/shape contracts", () => {
     );
     const source = await fs.default.readFile(filePath, "utf8");
 
-    // All three types must be exported from the file
-    expect(source).toMatch(/export interface QwenStreamStartResult/);
+    // Start result is intentionally a type union so disabled metadata can be constrained.
+    expect(source).toMatch(/export type QwenStreamStartResult\s*=/);
+    expect(source).toMatch(/export interface QwenDisabledMetadata/);
+    expect(source).toMatch(/status:\s*QwenDisabledStatus/);
+    expect(source).toMatch(/reason:\s*QwenDisabledReason/);
+    expect(source).toMatch(/recoverable:\s*false/);
+    expect(source).toMatch(/ok:\s*true[\s\S]*streamId:\s*string/);
+    expect(source).toMatch(/ok:\s*false[\s\S]*&\s*QwenDisabledMetadata/);
     expect(source).toMatch(/export interface QwenStreamAudioEvent/);
     expect(source).toMatch(/export interface QwenStreamingEngineStatus/);
 
     // Required fields per the sprint contract
-    expect(source).toMatch(/ok:\s*boolean/);
     expect(source).toMatch(/streamId\??\s*:/);
     expect(source).toMatch(/chunk:\s*Buffer/);
     expect(source).toMatch(/ready:\s*boolean/);

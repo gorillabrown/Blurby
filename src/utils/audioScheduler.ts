@@ -222,13 +222,7 @@ export function createAudioScheduler(): AudioScheduler {
     endIdx: number;
     lastConfirmedWordIdx: number;
   } {
-    const hasParentMetadata =
-      Number.isInteger(chunk.parentChunkStartIdx) &&
-      Number.isInteger(chunk.parentChunkWordCount) &&
-      Number.isInteger(chunk.segmentIndex) &&
-      typeof chunk.isFinalSegment === "boolean";
-
-    if (!hasParentMetadata) {
+    if (!hasKokoroPlaybackSegmentMetadata(chunk)) {
       const endIdx = chunk.startIdx + chunk.words.length;
       return {
         shouldEmit: true,
@@ -243,6 +237,13 @@ export function createAudioScheduler(): AudioScheduler {
       endIdx,
       lastConfirmedWordIdx: endIdx - 1 >= chunk.parentChunkStartIdx ? endIdx - 1 : chunk.parentChunkStartIdx,
     };
+  }
+
+  function hasKokoroPlaybackSegmentMetadata(chunk: KokoroTempoAwareChunk): chunk is ScheduledChunk & KokoroPlaybackSegmentMetadata {
+    return Number.isInteger(chunk.parentChunkStartIdx) &&
+      Number.isInteger(chunk.parentChunkWordCount) &&
+      Number.isInteger(chunk.segmentIndex) &&
+      typeof chunk.isFinalSegment === "boolean";
   }
 
   function deliverChunkBoundary(s: ActiveSource): void {

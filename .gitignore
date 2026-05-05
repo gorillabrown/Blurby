@@ -23,3 +23,15 @@ Example App/
 
 artifacts/tts-eval/engine-scan/**
 !artifacts/tts-eval/engine-scan/README.md
+
+# Generated evidence hygiene: keep bulky outputs local unless explicitly promoted.
+artifacts/**/*.wav
+artifacts/**/*.mp3
+artifacts/**/*.flac
+artifacts/**/*.opus
+artifacts/**/*.bin
+artifacts/**/*.log
+artifacts/**/tmp/**
+artifacts/**/traces/**
+artifacts/**/*profile*.json
+artifacts/**/*profile*.txt
