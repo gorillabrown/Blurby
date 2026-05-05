@@ -214,6 +214,21 @@ function createSpawnHarness() {
 }
 
 describe("MOSS Nano sidecar manager contract", () => {
+  it("resolves default packaged paths under Electron resources instead of the dev checkout", () => {
+    expect(mossNanoEngineModule.createMossNanoDefaultConfig).toEqual(expect.any(Function));
+    const config = mossNanoEngineModule.createMossNanoDefaultConfig({
+      packaged: true,
+      resourcesPath: "C:\\Program Files\\Blurby\\resources",
+      tempRoot: "C:\\Users\\reader\\AppData\\Local\\Temp\\Blurby",
+    });
+
+    expect(config.runtimeDir).toBe("C:\\Program Files\\Blurby\\resources\\.runtime\\moss\\MOSS-TTS-Nano");
+    expect(config.modelDir).toBe("C:\\Program Files\\Blurby\\resources\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX\\MOSS-TTS-Nano-100M-ONNX");
+    expect(config.tokenizerDir).toBe("C:\\Program Files\\Blurby\\resources\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX\\MOSS-Audio-Tokenizer-Nano-ONNX");
+    expect(config.outputDir).toBe("C:\\Users\\reader\\AppData\\Local\\Temp\\Blurby\\moss-nano-app-sidecar");
+    expect(config.runtimeDir).not.toContain("postv2-audit-remediation");
+  });
+
   it("starts the sidecar during status and reports the ready snapshot", async () => {
     const { manager } = makeManager();
 
@@ -574,6 +589,15 @@ describe("MOSS Nano sidecar manager contract", () => {
 });
 
 describe("MOSS Nano resident sidecar adapter", () => {
+  it("resolves the packaged Python bridge from app.asar.unpacked resources", () => {
+    expect(mossNanoSidecarModule.resolveMossNanoBridgePath).toEqual(expect.any(Function));
+
+    expect(mossNanoSidecarModule.resolveMossNanoBridgePath({
+      packaged: true,
+      resourcesPath: "C:\\Program Files\\Blurby\\resources",
+    })).toBe("C:\\Program Files\\Blurby\\resources\\app.asar.unpacked\\scripts\\moss_nano_app_sidecar.py");
+  });
+
   it("spawns the Python bridge and resolves start from a ready JSON line", async () => {
     const { spawn, children } = createSpawnHarness();
     const adapter = createMossNanoSidecarAdapter({

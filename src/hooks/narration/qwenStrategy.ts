@@ -3,7 +3,6 @@ import { createGenerationPipeline } from "../../utils/generationPipeline";
 import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler, AudioProgressReport } from "../../utils/audioScheduler";
-import { applyKokoroTempoStretch } from "../../utils/audio/tempoStretch";
 import { applyPronunciationOverrides } from "../../utils/pronunciationOverrides";
 import type { PronunciationOverride } from "../../types";
 import {
@@ -54,19 +53,11 @@ export function createQwenStrategy(deps: QwenStrategyDeps): TtsStrategy & {
         return { error: result.error || "no audio returned" };
       }
 
-      const stretched = applyKokoroTempoStretch({
+      return {
         audio: result.audio,
         sampleRate: result.sampleRate,
         durationMs: result.durationMs ?? (result.audio.length / result.sampleRate) * 1000,
-        tempoFactor: speed,
         wordTimestamps: result.wordTimestamps || null,
-      });
-
-      return {
-        audio: stretched.audio,
-        sampleRate: result.sampleRate,
-        durationMs: stretched.durationMs,
-        wordTimestamps: stretched.wordTimestamps || null,
       };
     },
     getWords: deps.getWords,

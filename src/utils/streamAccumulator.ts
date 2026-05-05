@@ -68,7 +68,7 @@ function findSentenceBoundary(words: string[], startIdx: number, endIdx: number)
 // ── Audio Utilities ──────────────────────────────────────────────────────────
 
 /** Concatenate two Float32Arrays into a new one */
-function concatFloat32(a: Float32Array, b: Float32Array): Float32Array {
+function concatFloat32(a: Float32Array<ArrayBufferLike>, b: Float32Array<ArrayBufferLike>): Float32Array<ArrayBuffer> {
   const out = new Float32Array(a.length + b.length);
   out.set(a, 0);
   out.set(b, a.length);
@@ -152,8 +152,8 @@ export function createStreamAccumulator(config: StreamAccumulatorConfig): Stream
       : 1.0;
 
     const segmentSamples = Math.min(Math.floor(buffer.length * fraction), buffer.length);
-    const segmentAudio = buffer.slice(0, segmentSamples);
-    buffer = buffer.slice(segmentSamples);
+    const segmentAudio = new Float32Array(buffer.subarray(0, segmentSamples));
+    buffer = new Float32Array(buffer.subarray(segmentSamples));
 
     const durationMs = (segmentAudio.length / sampleRate) * 1_000;
     const segmentWords = words.slice(currentStartIdx, boundaryWordIdx + 1);
@@ -201,7 +201,7 @@ export function createStreamAccumulator(config: StreamAccumulatorConfig): Stream
   return {
     feed(incoming: Float32Array): void {
       if (destroyed) return;
-      buffer = concatFloat32(buffer, incoming);
+      buffer = concatFloat32(buffer, new Float32Array(incoming));
       maybeEmit();
     },
 

@@ -74,7 +74,9 @@ describe("NARR-LAYER-1B consolidation", () => {
 
   it("FoliatePageView highlight API styleHint is flow-only", () => {
     const src = read("src/components/FoliatePageView.tsx");
-    expect(src).toContain("highlightWordByIndex: (wordIndex: number, styleHint?: \"flow\") => boolean;");
+    expect(src).toMatch(/export interface FoliateHighlightOptions\s*{[\s\S]*allowMotion\?:\s*boolean;[\s\S]*}/);
+    expect(src).toMatch(/highlightWordByIndex:\s*\(wordIndex:\s*number,\s*styleHint\?:\s*"flow",\s*options\?:\s*FoliateHighlightOptions\)\s*=>\s*boolean;/);
+    expect(src).not.toMatch(/styleHint\?:\s*(?:string|ReadingMode|"page"|"narrate"|"flow"\s*\|)/);
   });
 
   it("ReaderContainer treats narrate as the narration-selected source of truth", () => {

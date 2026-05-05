@@ -117,6 +117,23 @@ describe("ReaderBottomBar controls", () => {
     expect(narrateButton?.getAttribute("aria-pressed")).toBe("true");
     expect(flowButton?.getAttribute("aria-pressed")).toBe("false");
   });
+
+  it("uses neutral Kokoro wording for the assistive TTS rate label", async () => {
+    await act(async () => {
+      root.render(
+        <ReaderBottomBar
+          {...baseProps}
+          readingMode="narrate"
+          isNarrating={false}
+          ttsEngine="kokoro"
+          onSetTtsRate={vi.fn()}
+        />,
+      );
+    });
+
+    expect(container.querySelector('[aria-label="Kokoro rate"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Legacy Kokoro rate"]')).toBeNull();
+  });
 });
 
 // READER-4M-2: Four mode buttons — Group A tests

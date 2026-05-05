@@ -40,9 +40,25 @@ const webStrategyMock = vi.hoisted(() => ({
 }));
 
 const createMossNanoStrategyMock = vi.hoisted(() => vi.fn(() => nanoStrategyMock));
+const pocketStrategyMock = vi.hoisted(() => ({
+  speakChunk: vi.fn(),
+  prefetchChunk: vi.fn(() => Promise.resolve({ ok: true, cacheHit: false })),
+  setContinuityScope: vi.fn(),
+  clearCache: vi.fn(),
+  stop: vi.fn(),
+  pause: vi.fn(),
+  resume: vi.fn(),
+  getAudioProgress: vi.fn(() => null),
+  getLastPlaybackTrace: vi.fn(() => null),
+}));
+const createPocketTtsStrategyMock = vi.hoisted(() => vi.fn(() => pocketStrategyMock));
 
 vi.mock("../src/hooks/narration/mossNanoStrategy", () => ({
   createMossNanoStrategy: createMossNanoStrategyMock,
+}));
+
+vi.mock("../src/hooks/narration/pocketTtsStrategy", () => ({
+  createPocketTtsStrategy: createPocketTtsStrategyMock,
 }));
 
 vi.mock("../src/hooks/narration/kokoroStrategy", () => ({
@@ -102,6 +118,14 @@ function createElectronApiMock() {
         loading: false,
         recoverable: false,
       }),
+      pocketStatus: vi.fn().mockResolvedValue({
+        ok: true,
+        status: "ready",
+        ready: true,
+        loading: false,
+        recoverable: false,
+      }),
+      pocketSynthesize: vi.fn(),
     },
   };
 }
@@ -161,6 +185,7 @@ describe("useNarration experimental Moss Nano lane", () => {
     });
 
     createMossNanoStrategyMock.mockClear();
+    createPocketTtsStrategyMock.mockClear();
     nanoStrategyMock.speakChunk.mockClear();
     nanoStrategyMock.prefetchChunk.mockClear();
     nanoStrategyMock.setContinuityScope.mockClear();
@@ -169,6 +194,14 @@ describe("useNarration experimental Moss Nano lane", () => {
     nanoStrategyMock.pause.mockClear();
     nanoStrategyMock.resume.mockClear();
     nanoStrategyMock.getAudioProgress.mockClear();
+    pocketStrategyMock.speakChunk.mockClear();
+    pocketStrategyMock.prefetchChunk.mockClear();
+    pocketStrategyMock.setContinuityScope.mockClear();
+    pocketStrategyMock.clearCache.mockClear();
+    pocketStrategyMock.stop.mockClear();
+    pocketStrategyMock.pause.mockClear();
+    pocketStrategyMock.resume.mockClear();
+    pocketStrategyMock.getAudioProgress.mockClear();
     kokoroStrategyMock.speakChunk.mockClear();
     kokoroStrategyMock.stop.mockClear();
     kokoroStrategyMock.pause.mockClear();
@@ -221,7 +254,7 @@ describe("useNarration experimental Moss Nano lane", () => {
   it("uses the Nano default voice instead of the Kokoro voice ref", async () => {
     await renderHarness({ experimentalNano: true });
 
-    const deps = createMossNanoStrategyMock.mock.calls[0]?.[0] as { getVoiceId?: () => string };
+    const deps = (createMossNanoStrategyMock.mock.calls as unknown as Array<[{ getVoiceId?: () => string }]>)[0]?.[0];
 
     expect(deps?.getVoiceId?.()).toBe("Junhao");
   });
@@ -399,6 +432,34 @@ describe("useNarration experimental Moss Nano lane", () => {
     expect(nanoStrategyMock.pause).not.toHaveBeenCalled();
     expect(webStrategyMock.pause).not.toHaveBeenCalled();
     expect(kokoroStrategyMock.pause).not.toHaveBeenCalled();
+  });
+
+  it("keeps Pocket failures in pocketError without overwriting Nano error state", async () => {
+    const harness = await renderHarness();
+    const failure = {
+      ok: false,
+      error: "Pocket sidecar unavailable",
+      reason: "sidecar-not-ready",
+      status: "unavailable",
+      recoverable: true,
+    };
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("pocket-tts");
+      await flushPromises();
+      harness.getSnapshot()?.startCursorDriven(["pocket", "fails"], 0, 150, vi.fn());
+      await flushPromises();
+    });
+
+    const reportFailure = pocketStrategyMock.speakChunk.mock.calls[0][6] as (error?: unknown) => void;
+    await act(async () => {
+      reportFailure(failure);
+      await flushPromises();
+    });
+
+    expect((harness.getSnapshot() as any)?.status).toBe("error");
+    expect((harness.getSnapshot() as any)?.pocketError).toEqual(failure);
+    expect((harness.getSnapshot() as any)?.nanoError).toBeNull();
   });
 
   it("clears Nano ownership when a section-ending segment invokes onSectionEnd", async () => {
@@ -581,7 +642,7 @@ describe("useNarration experimental Moss Nano lane", () => {
       },
     } as any);
 
-    nanoStrategyMock.getLastPlaybackTrace.mockReturnValue({
+    (nanoStrategyMock.getLastPlaybackTrace as any).mockReturnValue({
       kind: "nano-segment",
       phase: "playback",
       startIdx: 0,

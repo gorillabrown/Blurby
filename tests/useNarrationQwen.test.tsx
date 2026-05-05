@@ -42,7 +42,7 @@ vi.mock("../src/hooks/narration/webSpeechStrategy", () => ({
   })),
 }));
 
-function createElectronApiMock(initialQwenStatus = {
+function createElectronApiMock(initialQwenStatus: Record<string, unknown> = {
   status: "ready",
   detail: "Qwen runtime ready",
   reason: null,

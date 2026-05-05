@@ -56,10 +56,10 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping (three available engines at ship gate: Kokoro default, MOSS-Nano recommended opt-in per 13e, Pocket TTS available opt-in per POCKET-TTS-1)
-Queue depth: 1 ship sprint (RELEASE-1) (YELLOW — backfill needed after release spec hardening)
-Next queue item: RELEASE-1 — Desktop v2.0 release closeout
-Health: GREEN on Desktop v2 polish / YELLOW on queue depth — E-Ink, Reading Goals, MOSS-NANO-13a–13e, POCKET-TTS-1, and POLISH-1 are closed. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass). Verdict: GREEN on Desktop v2 polish, YELLOW on queue depth pending RELEASE/backfill.
+Queue depth: 1 post-v2 review sprint (YELLOW — remediation implementation complete; review/commit/merge remains)
+Next queue item: POSTV2-REVIEW-1 — Review, Commit, And Merge Post-v2 Audit Remediation
+Health: GREEN on Desktop v2 release closeout and post-v2 remediation implementation — E-Ink, Reading Goals, MOSS-NANO-13a–13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, and POSTV2-NARR-1 are closed. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2.
+Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation). Verdict: GREEN on implementation; YELLOW only on uncommitted review/merge.
 ```
 
 ## Desktop v2.0 Conveyor Belt (Active)
@@ -79,9 +79,22 @@ Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO s
 | ~~9~~ | ~~MOSS-NANO-13e~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a–d~~ | ✅ complete (2026-05-04) — Nano recommended opt-in; Kokoro default/available; Qwen disabled; no live-capture rerun, no Pocket TTS work |
 | ~~10~~ | ~~POCKET-TTS-1~~ | ~~Stage 3: Successor Engine Track (Pocket TTS)~~ | ~~L~~ | ~~13a–13e (sequenced after 13e)~~ | ✅ complete (2026-05-04) — Pocket TTS available opt-in; Kokoro default; MOSS-Nano recommended opt-in; Qwen disabled |
 | ~~11~~ | ~~POLISH-1~~ | ~~Stage 4: Ship~~ | ~~M~~ | ~~13e + POCKET-TTS-1~~ | ✅ complete (2026-05-04) — settings UX/copy/accessibility polish complete; RELEASE-1 unblocked |
-| 12 | **RELEASE-1** | Stage 4: Ship | S | POLISH-1 | **next up — release closeout** |
+| ~~12~~ | ~~RELEASE-1~~ | ~~Stage 4: Ship~~ | ~~S~~ | ~~POLISH-1~~ | ✅ complete (2026-05-04) — Desktop v2.0 release notes/checklist and final gates recorded |
 
 Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 Continued — E-Ink & Goals", § "Stage 3 — Successor Engine Track" (covering MOSS-NANO-13a–13e + POCKET-TTS-1).
+
+---
+
+## Post-v2 Audit Remediation (Completed, Pending Review/Merge)
+
+| Seq | Sprint | Stage | LOE | Deps | Status |
+|-----|--------|-------|-----|------|--------|
+| ~~1~~ | ~~POSTV2-REL-1~~ | ~~Release truth~~ | ~~M~~ | ~~RELEASE-1~~ | ✅ complete in `postv2-audit-remediation` worktree — package/version truth, sidecar packaged paths, update install gating |
+| ~~2~~ | ~~POSTV2-ENGINE-1~~ | ~~Engine contracts~~ | ~~L~~ | ~~POSTV2-REL-1~~ | ✅ complete in `postv2-audit-remediation` worktree — typecheck green, Qwen fail-closed, Pocket portability/errors, settings/type contracts |
+| ~~3~~ | ~~POSTV2-NARR-1~~ | ~~Narrate/security/hygiene~~ | ~~M~~ | ~~POSTV2-ENGINE-1~~ | ✅ complete in `postv2-audit-remediation` worktree — Narrate highlight, URL validation, artifact policy, debt map |
+| 4 | **POSTV2-REVIEW-1** | Review / commit / merge | S | POSTV2-REL-1 through POSTV2-NARR-1 | **next up — review, commit, merge** |
+
+Closeout: `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
 
 ---
 
@@ -102,6 +115,8 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 C
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| POSTV2-AUDIT-REMEDIATION | 2026-05-04 | PASS — Post-v2 audit remediation implemented in isolated worktree `C:\tmp\Blurby-worktrees\postv2-audit-remediation` on branch `postv2-audit-remediation`. POSTV2-REL-1 fixed package/release truth, version `1.75.1`, packaged sidecar path resolution, update install gating, and release-doc honesty. POSTV2-ENGINE-1 made `npm run typecheck` green, fail-closed Qwen IPC/stream compatibility, stale Qwen profile migration to Kokoro, Pocket profile support, Pocket/Nano error separation, and settings/type contract tightening. POSTV2-NARR-1 fixed EPUB Narrate highlighting, `open-doc-source` URL validation, artifact policy, Kokoro/Qwen copy, and debt mapping. Verification: `npm run typecheck` passed; full `npm test` passed 170 files / 2521 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; focused `tests/mossNanoProbe.test.js` passed 132 tests. No commit made; review/commit/merge is next. |
+| RELEASE-1 | 2026-05-04 | PASS — Desktop v2.0 release closeout completed. Release notes/checklist: `docs/project/desktop-v2.0-release-notes.md`, `docs/project/desktop-v2.0-release-checklist.md`. Engine posture preserved exactly: Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, Qwen retired/disabled. |
 | POLISH-1 | 2026-05-04 | PASS — Desktop v2 polish completed across TTS, E-Ink, and Reading Goals settings surfaces. Copy now consistently states Kokoro default/operational floor, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2. E-Ink switches gained keyboard-operable switch semantics; Reading Goals empty/action states were cleaned up. Focused settings regression suite passed 9 files / 36 tests; full `npm test` passed 170 files / 2550 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; `npm audit --audit-level=high` passed with 3 moderate `uuid` findings and no high-severity findings. RELEASE-1 is unblocked. |
 | POCKET-TTS-1 | 2026-05-04 | PASS — Pocket TTS added as a third explicit opt-in engine path. Engine posture: Kokoro remains default/available, MOSS-Nano remains recommended opt-in from 13e, Pocket TTS is available opt-in, and Qwen remains disabled. Scope guardrails held: no comparative engine gate, no MOSS-Nano productization changes, no Kokoro default change, no Qwen reactivation, and no public voice-cloning UX in v2.0. Verification: focused Pocket tests 4 files / 30 tests; full `npm test` 169 files / 2548 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning. |
 | MOSS-NANO-13e | 2026-05-04 | PASS — product decision closeout recorded Nano as `NANO_RECOMMENDED_OPT_IN` from 13d's existing canonical evidence. Evidence path: `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`; final gate output: `artifacts/tts-eval/moss-nano-13d-live-capture/gate/`; trace counts Page 42, Focus 44, Flow 43, Narrate 39; gate PASS with hard failures 0/7 and warnings 0/3. Product posture: MOSS-Nano recommended opt-in local engine, Kokoro default/available, Qwen disabled, no Kokoro retirement lane. No live-capture rerun, no model comparison, no Pocket TTS work, no default-engine change. Memo: `docs/testing/moss-nano-13e-productization-memo.md`. |
@@ -508,7 +523,7 @@ WHERE:
 | 28 | MOSS-6 | v1.82.0 | sprint/moss-6-cache-continuity | Legacy flagship full | SUPERSEDED/PAUSED | Superseded by Nano-specific onboarding path. |
 | 29 | MOSS-7 | v1.83.0 | sprint/moss-7-productization-gate | Legacy flagship full | SUPERSEDED/PAUSED | Superseded by Nano-specific onboarding path. |
 
-**Dispatch status:** `POLISH-1` is CLOSED. Desktop v2.0 release posture is now polished and ready for `RELEASE-1`: Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled. Do not rerun live capture, start a comparative gate, reopen MOSS-Nano productization, expose voice-cloning UX in v2.0, demote/remove Kokoro, or reactivate Qwen. Dispatch `RELEASE-1` next.
+**Dispatch status:** `POSTV2-AUDIT-REMEDIATION` is CLOSED as an implemented, verified, uncommitted candidate in the `postv2-audit-remediation` worktree. Desktop v2.0 release posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled. Do not rerun live capture, start a comparative gate, reopen MOSS-Nano productization, expose voice-cloning UX in v2.0, demote/remove Kokoro, or reactivate Qwen. Dispatch `POSTV2-REVIEW-1` next for review, commit, and merge.
 
 ### Parallel Dispatch Guardrails
 

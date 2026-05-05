@@ -155,7 +155,7 @@ export default function LibraryContainer() {
   // Update-available notification
   useEffect(() => {
     const cleanup = api.onUpdateAvailable?.((version: string) => {
-      showToast(`Update available: v${version}`, 10000, { label: "Install", onClick: () => api.installUpdate() });
+      showToast(`Update available: v${version}. Downloading...`, 10000);
     });
     return cleanup;
   }, [showToast]);

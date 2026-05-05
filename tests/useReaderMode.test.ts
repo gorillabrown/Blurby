@@ -390,7 +390,7 @@ describe("useReaderMode foliate handoff", () => {
     });
   });
 
-  it("narrate playback updates the cursor without reusing the flow highlight path", async () => {
+  it("narrate playback applies the shared flow-family per-word highlight path", async () => {
     const modeInstance = {
       modeRef: { current: null },
       startMode: vi.fn(),
@@ -501,8 +501,8 @@ describe("useReaderMode foliate handoff", () => {
 
     expect(observed.readingMode).toBe("narrate");
     expect(observed.highlightedWordIndex).toBe(2);
-    expect(foliateApiRef.current.highlightWordByIndex).not.toHaveBeenCalled();
-    expect(foliateApiRef.current.isWordInDom).toHaveBeenCalledWith(2);
+    expect(foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
+    expect(foliateApiRef.current.isWordInDom).not.toHaveBeenCalled();
   });
 
   it("re-enters narrate from page when narrate is the persisted last mode", async () => {
@@ -1032,7 +1032,7 @@ describe("useReaderMode four-mode foundation", () => {
       await flushPromises();
     });
 
-    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2);
+    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
     expect(harness.modeInstance.pendingResumeRef.current).toBeNull();
   });
 
@@ -1060,6 +1060,7 @@ describe("useReaderMode four-mode foundation", () => {
     });
 
     expect(harness.modeInstance.pendingResumeRef.current).toEqual({ wordIndex: 7, mode: "narrate" });
+    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(7, "flow", { allowMotion: false });
     expect(harness.foliateApiRef.current.goToSection).toHaveBeenCalledWith(3);
   });
 

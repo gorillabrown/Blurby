@@ -644,51 +644,19 @@ export const electronAPIStub: ElectronAPI = {
   },
 
   // ── Qwen TTS runtime lane ─────────────────────────────────────────────
-  qwenPreload: async () => {
-    emitEvent("tts-qwen-engine-status", {
-      status: "warming",
-      detail: "Checking external Qwen runtime",
-      reason: "preload-started",
-      ready: false,
-      loading: true,
-      recoverable: true,
-      preloadTimingMs: null,
-      statusTimingMs: null,
-      generateTimingMs: null,
-      voiceListTimingMs: null,
-      spikeWarningThresholdMs: 3000,
-      spikeWarning: false,
-    });
-    setTimeout(() => {
-      emitEvent("tts-qwen-engine-status", {
-        status: "ready",
-        detail: "Qwen runtime ready for live narration playback",
-        reason: null,
-        ready: true,
-        loading: false,
-        recoverable: false,
-        preloadTimingMs: 620,
-        statusTimingMs: 48,
-        generateTimingMs: null,
-        voiceListTimingMs: null,
-        spikeWarningThresholdMs: 3000,
-        spikeWarning: false,
-      });
-    }, 150);
-    return trace("qwenPreload", [], {
-      success: true,
-      timingMs: 620,
-      spikeWarningThresholdMs: 3000,
-      spikeWarning: false,
-    });
-  },
+  qwenPreload: async () => trace("qwenPreload", [], {
+    error: "Qwen is retired for Desktop v2 and remains disabled.",
+    reason: "qwen-disabled",
+    status: "unavailable",
+    recoverable: false,
+  }),
 
   qwenPreflight: async () => trace("qwenPreflight", [], {
-    status: "ready",
-    reason: null,
-    detail: "Qwen runtime preflight passed for configured device \"cuda:0\".",
+    status: "unavailable",
+    reason: "qwen-disabled",
+    detail: "Qwen is retired for Desktop v2 and remains disabled.",
     recoverable: false,
-    supportedHost: true,
+    supportedHost: false,
     requestedDevice: "cuda:0",
     pythonExe: "C:\\runtime\\qwen\\.venv\\Scripts\\python.exe",
     modelId: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
@@ -696,19 +664,15 @@ export const electronAPIStub: ElectronAPI = {
     configPath: "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\qwen\\config.json",
     checkedAt: "2026-04-20T12:00:00.000Z",
     checks: [
-      { key: "python", label: "Python executable", status: "pass", detail: "Python executable found." },
-      { key: "torch", label: "PyTorch", status: "pass", detail: "PyTorch import succeeded." },
-      { key: "qwen_tts", label: "qwen_tts", status: "pass", detail: "qwen_tts import succeeded." },
-      { key: "cuda", label: "CUDA visibility", status: "pass", detail: "CUDA device \"cuda:0\" is visible to PyTorch." },
-      { key: "model", label: "Model availability", status: "pass", detail: "Model files are reachable locally." },
+      { key: "qwen-disabled", label: "Qwen retired", status: "skip", detail: "Qwen is retired for Desktop v2 and remains disabled." },
     ],
   }),
 
   qwenModelStatus: async () => trace("qwenModelStatus", [], {
-    status: "ready",
-    detail: "Qwen runtime ready for live narration playback",
-    reason: null,
-    ready: true,
+    status: "unavailable",
+    detail: "Qwen is retired for Desktop v2 and remains disabled.",
+    reason: "qwen-disabled",
+    ready: false,
     loading: false,
     recoverable: false,
     preloadTimingMs: 620,
@@ -719,18 +683,42 @@ export const electronAPIStub: ElectronAPI = {
     spikeWarning: false,
   }),
 
-  qwenVoices: async () => trace("qwenVoices", [], { voices: ["Ryan", "Aiden"] }),
+  qwenVoices: async () => trace("qwenVoices", [], {
+    voices: [],
+    error: "Qwen is retired for Desktop v2 and remains disabled.",
+    status: "unavailable",
+    reason: "qwen-disabled",
+    recoverable: false,
+  }),
 
   qwenGenerate: async (text: string, speaker: string, rate: number, words?: string[]) => {
-    const result = generateMockAudio(text, speaker || "Ryan", rate);
     return trace("qwenGenerate", [`[${text.length} chars]`, speaker, rate, words?.length ?? 0], {
-      ...result,
-      wordTimestamps: null,
-      timingMs: 880,
-      spikeWarningThresholdMs: 3000,
-      spikeWarning: false,
+      error: "Qwen is retired for Desktop v2 and remains disabled.",
+      reason: "qwen-disabled",
+      status: "unavailable",
+      recoverable: false,
     });
   },
+
+  qwenStreamStart: async () => trace("qwenStreamStart", [], {
+    ok: false,
+    error: "Qwen is retired for Desktop v2 and remains disabled.",
+    status: "unavailable",
+    reason: "qwen-disabled",
+    recoverable: false,
+  }),
+  qwenStreamCancel: async (_streamId: string) => trace("qwenStreamCancel", [_streamId], { ok: true }),
+  qwenStreamStatus: async () => trace("qwenStreamStatus", [], {
+    status: "unavailable",
+    reason: "qwen-disabled",
+    recoverable: false,
+    ready: false,
+    model_loaded: false,
+    device: "disabled",
+    loading: false,
+    error: "Qwen is retired for Desktop v2 and remains disabled.",
+  }),
+  onQwenStreamAudio: (_cb: EventCallback) => addEventListener("tts-qwen-stream-audio", _cb),
 
   // ── TTS Cache (NAR-2) — in-memory for browser testing ────────────────
   ttsCacheRead: async (bookId: string, voiceId: string, startIdx: number) => {

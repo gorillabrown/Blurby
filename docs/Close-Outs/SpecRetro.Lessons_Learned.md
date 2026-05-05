@@ -196,3 +196,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Late-stage polish specs should list non-negotiable product posture invariants directly in the task and test criteria, especially when copy/status/accessibility edits could accidentally imply a product decision change.
 **Applies to:** Release-polish and settings/product-copy sprints
 **Status:** Observation
+
+### SRL-025 — Post-release audit remediation should be sequenced by dependency order, not severity alone (POSTV2-AUDIT-REMEDIATION, 2026-05-04)
+**Verdict:** The remediation worked because release/package truth landed before engine/type cleanup, and engine/type cleanup landed before Narrate/security/artifact hygiene.
+**Evidence:** POSTV2-REL-1 established package/version/update truth first; POSTV2-ENGINE-1 then made typecheck green and enforced engine posture across IPC/preload/persistence; POSTV2-NARR-1 finally tightened Narrate behavior, URL safety, artifact policy, and debt mapping.
+**Recommendation:** For future post-release audits, split remediation into dependency-ordered lanes: release truth first, contract/posture enforcement second, behavior/security/artifact cleanup third.
+**Applies to:** Post-release audits, stabilization bundles, and multi-lane remediation specs
+**Status:** Observation

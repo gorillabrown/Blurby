@@ -1,10 +1,10 @@
 "use strict";
 // main/moss-nano-sidecar.js - resident JSON-lines adapter for the Nano Python sidecar.
 
-const path = require("path");
 const { spawn: defaultSpawn, spawnSync } = require("child_process");
+const { resolveMossNanoBridgePath, sidecarCwd } = require("./sidecar-paths");
 
-const DEFAULT_BRIDGE_PATH = path.resolve(__dirname, "..", "scripts", "moss_nano_app_sidecar.py");
+const DEFAULT_BRIDGE_PATH = resolveMossNanoBridgePath();
 
 function createDeferred() {
   let resolve;
@@ -60,6 +60,7 @@ function failureResponse(reason, detail, extra = {}) {
 function createMossNanoSidecarAdapter(options = {}) {
   const spawn = options.spawn ?? defaultSpawn;
   const bridgePath = options.bridgePath ?? DEFAULT_BRIDGE_PATH;
+  const cwd = options.cwd ?? sidecarCwd();
 
   let child = null;
   let buffer = "";
@@ -216,7 +217,7 @@ function createMossNanoSidecarAdapter(options = {}) {
   function startProcess(config) {
     const pythonExe = config?.pythonExe || process.env.MOSS_NANO_PYTHON || (process.platform === "win32" ? "python" : "python3");
     child = spawn(pythonExe, spawnArgs(config), {
-      cwd: path.resolve(__dirname, ".."),
+      cwd,
       stdio: ["pipe", "pipe", "pipe"],
       windowsHide: true,
     });
@@ -403,4 +404,5 @@ function createMossNanoSidecarAdapter(options = {}) {
 
 module.exports = {
   createMossNanoSidecarAdapter,
+  resolveMossNanoBridgePath,
 };

@@ -9,7 +9,7 @@ function flushPromises() {
   return Promise.resolve().then(() => Promise.resolve()).then(() => Promise.resolve());
 }
 
-function createElectronApiMock(initialStatus = { status: "idle", ready: false, loading: false }) {
+function createElectronApiMock(initialStatus: Record<string, unknown> = { status: "idle", ready: false, loading: false }) {
   const listeners = new Map<string, Set<(value: unknown) => void>>();
 
   const on = (channel: string, callback: (value: unknown) => void) => {

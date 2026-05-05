@@ -13,24 +13,13 @@ const { getSiteKey, fetchWithCookies, fetchWithBrowser, extractArticleFromHtml,
 const { COVER_CACHE_MAX, ARTICLE_IMAGE_TIMEOUT_MS, ARTICLE_IMAGE_MIN_SIZE } = require("../constants");
 const { normalizeAuthor } = require("../author-normalize");
 const { imageMediaType } = require("../epub-converter");
+const { validateHttpHttpsUrl } = require("./url-validation");
 
 async function logToFile(message, errorLogPath) {
   try {
     const timestamp = new Date().toISOString();
     await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
   } catch { /* Intentional: error logging should never crash the app */ }
-}
-
-function validateHttpHttpsUrl(url) {
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-      return { error: "Only http/https URLs are allowed." };
-    }
-    return { parsed };
-  } catch {
-    return { error: "Only http/https URLs are allowed." };
-  }
 }
 
 /**
@@ -455,4 +444,4 @@ function register(ctx) {
   });
 }
 
-module.exports = { register, downloadArticleImages, detectImageExt, isImageTooSmall };
+module.exports = { register, downloadArticleImages, detectImageExt, isImageTooSmall, validateHttpHttpsUrl };

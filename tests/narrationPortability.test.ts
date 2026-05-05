@@ -85,7 +85,7 @@ describe("validateNarrationImport", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("accepts qwen as a valid profile engine", () => {
+  it("accepts stale qwen profile exports so import can migrate them to Kokoro", () => {
     const result = validateNarrationImport(
       { version: 1, profiles: [{ id: "x", name: "Qwen", ttsEngine: "qwen" }], globalOverrides: [] },
       makeSettings(),
@@ -97,6 +97,15 @@ describe("validateNarrationImport", () => {
   it("accepts nano as a valid profile engine", () => {
     const result = validateNarrationImport(
       { version: 1, profiles: [{ id: "x", name: "Nano", ttsEngine: "nano" }], globalOverrides: [] },
+      makeSettings(),
+    );
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it("accepts pocket-tts as a valid opt-in profile engine", () => {
+    const result = validateNarrationImport(
+      { version: 1, profiles: [{ id: "x", name: "Pocket", ttsEngine: "pocket-tts" }], globalOverrides: [] },
       makeSettings(),
     );
     expect(result.valid).toBe(true);
@@ -120,7 +129,7 @@ describe("validateNarrationImport", () => {
     expect(result.warnings.length).toBeGreaterThan(0);
   });
 
-  it("exports and validates mixed Qwen and Kokoro profile sets during the deprecation window", () => {
+  it("exports stale Qwen profiles but import application migrates them to Kokoro", () => {
     const qwenProfile: NarrationProfile = {
       ...sampleProfile,
       id: "np-qwen-1",
@@ -143,9 +152,14 @@ describe("validateNarrationImport", () => {
     const payload = exportNarrationData(settings);
     const result = validateNarrationImport(payload, makeSettings());
 
+    const updates = applyNarrationImport(payload, makeSettings(), "replace");
+
     expect(payload.profiles.map((profile) => profile.ttsEngine)).toEqual(["qwen", "kokoro"]);
     expect(result.valid).toBe(true);
     expect(result.errors).toEqual([]);
+    expect(updates.narrationProfiles?.map((profile) => profile.ttsEngine)).toEqual(["kokoro", "kokoro"]);
+    expect(updates.narrationProfiles?.[0]?.ttsVoiceName).toBeNull();
+    expect(updates.activeNarrationProfileId).toBe("np-qwen-1");
   });
 });
 

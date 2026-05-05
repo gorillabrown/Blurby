@@ -525,6 +525,7 @@ export const DEFAULT_SETTINGS = {
   initialPauseMs: INITIAL_PAUSE_MS,
   punctuationPauseMs: PUNCTUATION_PAUSE_MS,
   viewMode: "list" as const,
+  flowCursorStyle: DEFAULT_FLOW_CURSOR_STYLE,
   einkMode: false,
   einkWpmCeiling: DEFAULT_EINK_WPM_CEILING,
   einkRefreshInterval: DEFAULT_EINK_REFRESH_INTERVAL,
@@ -548,4 +549,4 @@ export const DEFAULT_SETTINGS = {
   ttsFootnoteMode: TTS_FOOTNOTE_MODE,
   pronunciationOverrides: [] as import("./types").PronunciationOverride[],
   readingGoals: [] as ReadingGoal[],
-};
+} satisfies BlurbySettings;

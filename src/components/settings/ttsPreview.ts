@@ -8,7 +8,7 @@ interface PreviewSelectedTtsVoiceOptions {
   voices: SpeechSynthesisVoice[];
   kokoroReady: boolean;
   qwenReady: boolean;
-  nanoReady: boolean;
+  nanoReady?: boolean;
   pocketReady?: boolean;
   preferredQwenVoice: string;
   onPlaybackStateChange: (playing: boolean) => void;
@@ -43,7 +43,7 @@ export async function previewSelectedTtsVoice({
       return {
         engine: "kokoro",
         played: false,
-        error: "Legacy Kokoro is not ready for preview playback.",
+        error: "Kokoro is not ready for preview playback.",
       };
     }
     onPlaybackStateChange(true);
@@ -82,14 +82,14 @@ export async function previewSelectedTtsVoice({
       return {
         engine: "kokoro",
         played: false,
-        error: error instanceof Error ? error.message : "Legacy Kokoro preview failed.",
+        error: error instanceof Error ? error.message : "Kokoro preview failed.",
       };
     }
     onPlaybackStateChange(false);
     return {
       engine: "kokoro",
       played: false,
-      error: "Legacy Kokoro preview failed.",
+      error: "Kokoro preview failed.",
     };
   }
 

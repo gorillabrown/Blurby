@@ -3,6 +3,9 @@ import type { ScheduledChunk } from "../src/utils/audioScheduler";
 
 type SegmentedChunk = ScheduledChunk & {
   parentChunkStartIdx: number;
+  parentChunkWordCount: number;
+  segmentIndex: number;
+  isFinalSegment: boolean;
 };
 
 type SegmentKokoroChunk = (

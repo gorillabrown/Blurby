@@ -18,20 +18,21 @@ export const DEFAULT_QWEN_STATUS_SNAPSHOT: QwenStatusSnapshot = {
 export function normalizeQwenStatusSnapshot(
   snapshot?: Partial<QwenStatusSnapshot> | null,
 ): QwenStatusSnapshot {
+  const candidate = snapshot ?? {};
   return {
     ...DEFAULT_QWEN_STATUS_SNAPSHOT,
-    ...snapshot,
-    detail: snapshot?.detail ?? null,
-    reason: snapshot?.reason ?? null,
-    ready: Boolean(snapshot?.ready),
-    loading: Boolean(snapshot?.loading),
-    recoverable: Boolean(snapshot?.recoverable),
-    statusTimingMs: Number.isFinite(snapshot?.statusTimingMs) ? snapshot.statusTimingMs ?? null : null,
-    preloadTimingMs: Number.isFinite(snapshot?.preloadTimingMs) ? snapshot.preloadTimingMs ?? null : null,
-    voiceListTimingMs: Number.isFinite(snapshot?.voiceListTimingMs) ? snapshot.voiceListTimingMs ?? null : null,
-    generateTimingMs: Number.isFinite(snapshot?.generateTimingMs) ? snapshot.generateTimingMs ?? null : null,
-    spikeWarningThresholdMs: Number.isFinite(snapshot?.spikeWarningThresholdMs) ? snapshot.spikeWarningThresholdMs ?? null : null,
-    spikeWarning: Boolean(snapshot?.spikeWarning),
+    ...candidate,
+    detail: candidate.detail ?? null,
+    reason: candidate.reason ?? null,
+    ready: Boolean(candidate.ready),
+    loading: Boolean(candidate.loading),
+    recoverable: Boolean(candidate.recoverable),
+    statusTimingMs: Number.isFinite(candidate.statusTimingMs) ? candidate.statusTimingMs ?? null : null,
+    preloadTimingMs: Number.isFinite(candidate.preloadTimingMs) ? candidate.preloadTimingMs ?? null : null,
+    voiceListTimingMs: Number.isFinite(candidate.voiceListTimingMs) ? candidate.voiceListTimingMs ?? null : null,
+    generateTimingMs: Number.isFinite(candidate.generateTimingMs) ? candidate.generateTimingMs ?? null : null,
+    spikeWarningThresholdMs: Number.isFinite(candidate.spikeWarningThresholdMs) ? candidate.spikeWarningThresholdMs ?? null : null,
+    spikeWarning: Boolean(candidate.spikeWarning),
   };
 }
 

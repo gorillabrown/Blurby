@@ -229,7 +229,11 @@ export function createMossNanoStrategy(deps: MossNanoStrategyDeps): TtsStrategy 
           kind: "nano-runtime",
           backend: stringField(status.runtime?.backend),
           modelVariant: stringField(status.runtime?.modelVariant ?? status.metadata?.modelVariant),
-          syntheticAudio: status.syntheticAudio ?? status.runtime?.syntheticAudio ?? null,
+          syntheticAudio: typeof status.syntheticAudio === "boolean"
+            ? status.syntheticAudio
+            : typeof status.runtime?.syntheticAudio === "boolean"
+              ? status.runtime.syntheticAudio
+              : null,
           status: status.status ?? null,
         });
       }

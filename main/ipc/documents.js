@@ -4,6 +4,7 @@
 const { ipcMain } = require("electron");
 const { SNOOZE_CHECK_INTERVAL_MS } = require("../constants");
 const { createReaderWindow } = require("../window-manager");
+const { validateHttpHttpsUrl } = require("./url-validation");
 
 // Index of doc IDs that currently have an active snooze. Seeded from persisted
 // library on registration, then kept in sync by snooze/unsnooze handlers and
@@ -103,6 +104,10 @@ function register(ctx) {
     if (!doc) return { error: "Document not found" };
 
     if (doc.sourceUrl) {
+      const validation = validateHttpHttpsUrl(doc.sourceUrl);
+      if (validation.error) {
+        return { error: "Only http/https URLs can be opened." };
+      }
       await shell.openExternal(doc.sourceUrl);
       return { opened: true };
     } else if (doc.filepath) {
