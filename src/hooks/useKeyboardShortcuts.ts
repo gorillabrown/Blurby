@@ -212,6 +212,8 @@ export function useReaderKeys(
       // N (bare) enters Narrate mode paused from any reader surface. Shift+N remains the
       // page-mode make-note shortcut and is handled below in the page-mode block.
       if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.enterNarrate?.(); return; }
+      // H (bare) exits to Library/home from every reader surface.
+      if (e.code === "KeyH" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.exitReader(); return; }
       if (!isPage && e.code === "KeyP" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.prevChapter?.(); return; }
       // Ctrl font size
       if ((e.ctrlKey || e.metaKey) && (e.code === "Equal" || e.code === "NumpadAdd")) { e.preventDefault(); s.adjustFocusTextSize(FOCUS_TEXT_SIZE_STEP); return; }

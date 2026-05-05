@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
 import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
@@ -181,6 +181,11 @@ export default function ReaderContainer({
   // State is synced for UI rendering only. Never read foliateFraction state for logic.
   const foliateFractionRef = useRef(0);
   const [foliateFraction, setFoliateFraction] = useState(0);
+  const latestFreshCfiRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    latestFreshCfiRef.current = null;
+  }, [activeDoc.id]);
 
   // FLOW-INF-C: Refs to avoid stale closures in FlowScrollEngine onComplete
   const finishReadingWithoutExitRef = useRef<(idx: number) => void>(() => {});
@@ -331,6 +336,7 @@ export default function ReaderContainer({
     readingMode,
     useFoliate,
     foliateFractionRef,
+    latestFreshCfiRef,
     wpm,
     wordsLength: words.length,
     totalWords: totalWordCount,
@@ -462,6 +468,8 @@ export default function ReaderContainer({
 
   // narrationStateFlushRaf cleanup and cancel-on-mode-exit handled by useDocumentLifecycle
 
+  const flowAnchorGetterRef = useRef<(() => number | null) | null>(null);
+
   // ── Mode transitions (extracted to useReaderMode hook) ──────────────
   const modeHook = useReaderMode({
     reader: { playing, wordIndex, wordsRef, togglePlay, jumpToWord },
@@ -496,6 +504,10 @@ export default function ReaderContainer({
     bookWordsTotalWords: bookWordMeta?.totalWords,
     resumeAnchorRef,
     softWordIndexRef,
+    getFlowWordIndex: () => {
+      const engine = flowAnchorGetterRef.current?.();
+      return engine;
+    },
     evalTrace: evalTraceSink,
   });
   const {
@@ -546,6 +558,10 @@ export default function ReaderContainer({
     evalTrace: evalTraceSink,
     foliateRenderVersion,
   });
+  flowAnchorGetterRef.current = () => {
+    const engine = flowScrollEngineRef.current;
+    return engine?.getCurrentWordIndex?.() ?? engine?.getWordIndex?.() ?? null;
+  };
 
   // Exit reader — uses both mode hook and progress hook
   const handleExitReader = useCallback(() => {
@@ -558,16 +574,11 @@ export default function ReaderContainer({
       finishReading(exitAnchor);
       return;
     }
-    if (readingMode === "page") {
-      const totalWords = totalWordCount || 1;
-      if (checkBacktrack(exitAnchor, totalWords, useFoliate)) return;
-      stopAllModes();
-      finishReading(exitAnchor);
-    } else {
-      setHighlightedWordIndex(exitAnchor);
-      stopAllModes();
-      setReadingMode("page");
-    }
+    const totalWords = totalWordCount || 1;
+    if (checkBacktrack(exitAnchor, totalWords, useFoliate)) return;
+    setHighlightedWordIndex(exitAnchor);
+    stopAllModes();
+    finishReading(exitAnchor);
   }, [canonicalWordAnchor, checkBacktrack, crossBookTransition, finishReading, readingMode, setHighlightedWordIndex, setReadingMode, stopAllModes, totalWordCount, useFoliate]);
 
   const { handleSaveAtCurrent, handleKeepFurthest } = progress;
@@ -669,19 +680,29 @@ export default function ReaderContainer({
     nextLine: () => {},
   });
   const handleFlowPrevLine = useCallback(() => {
-    if (flowScrollEngineRef.current?.getState().running) {
-      flowScrollEngineRef.current.jumpToLine("prev");
+    const engine = flowScrollEngineRef.current;
+    const state = engine?.getState();
+    if (engine && (state?.running || state?.previewing)) {
+      engine.jumpToLine("prev");
     } else {
       flowNavRef.current.prevLine();
     }
   }, []);
   const handleFlowNextLine = useCallback(() => {
-    if (flowScrollEngineRef.current?.getState().running) {
-      flowScrollEngineRef.current.jumpToLine("next");
+    const engine = flowScrollEngineRef.current;
+    const state = engine?.getState();
+    if (engine && (state?.running || state?.previewing)) {
+      engine.jumpToLine("next");
     } else {
       flowNavRef.current.nextLine();
     }
   }, []);
+
+  useEffect(() => {
+    if (isFlowSurfaceMode) {
+      flowScrollContainerRef.current?.focus?.({ preventScroll: true });
+    }
+  }, [isFlowSurfaceMode]);
 
   const handleMoveWordSelection = useCallback((direction: "left" | "right" | "up" | "down") => {
     hasEngagedRef.current = true;
@@ -875,6 +896,7 @@ export default function ReaderContainer({
           setFoliateFraction(fraction);
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
           // Update CFI for position restoration
+          latestFreshCfiRef.current = detail.cfi;
           activeDoc.cfi = detail.cfi;
           // During narration/flow, the word-advance callback owns highlightedWordIndex —
           // don't overwrite with approximate fraction-based index from onRelocate.
@@ -1020,6 +1042,7 @@ export default function ReaderContainer({
           }
         }, 200); // Slightly longer delay to ensure foliate has finished rendering
       }}
+      onExit={handleExitReader}
       viewApiRef={foliateApiRef}
       isReading={isBrowsedAway && isFlowSurfaceMode}
       onJumpToHighlight={() => {
@@ -1167,13 +1190,10 @@ export default function ReaderContainer({
             {renderView()}
           </ErrorBoundary>
           {/* Narration engine warming/loading indicator */}
-          {(narration.warming || narration.kokoroLoading) && (
+          {(narration.narrationShowSpinner || narration.narrationError) && (
             <div className="kokoro-loading-toast" role="status" aria-live="polite">
-              {narration.warming
-                ? settings.ttsEngine === "kokoro"
-                  ? "Starting Kokoro..."
-                  : "Starting narration..."
-                : "Loading voice model..."}
+              {narration.narrationStatusLabel}
+              {narration.narrationError ? `: ${narration.narrationError}` : ""}
             </div>
           )}
         </div>
@@ -1186,7 +1206,11 @@ export default function ReaderContainer({
           wpm={effectiveWpm}
           focusTextSize={focusTextSize}
           readingMode={readingMode}
-          isNarrating={isNarrating && narration.speaking && !narration.warming}
+          isNarrating={isNarrating && narration.isActuallyNarrating}
+          narrationStatusLabel={narration.narrationStatusLabel}
+          narrationStatusTone={narration.narrationStatusTone}
+          narrationShowSpinner={narration.narrationShowSpinner}
+          narrationError={narration.narrationError}
           playing={modePlaying}
           isEink={isEink}
           chapters={docChapters}

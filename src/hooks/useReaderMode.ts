@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS, FOCUS_MODE_START_DELAY_MS } from "../constants";
+import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS } from "../constants";
 import { resolveFoliateStartWord, resolveModeStartWordIndex } from "../utils/startWordIndex";
 import type { BlurbySettings, ReaderMode } from "../types";
 import type { TtsEvalTraceSink } from "../types/eval";
@@ -55,6 +55,7 @@ export interface UseReaderModeParams {
   bookWordsTotalWords?: number;
   resumeAnchorRef: React.MutableRefObject<number | null>;
   softWordIndexRef: React.MutableRefObject<number>;
+  getFlowWordIndex?: () => number | null | undefined;
   evalTrace?: TtsEvalTraceSink | null;
 }
 
@@ -111,6 +112,7 @@ export function useReaderMode({
   bookWordsTotalWords,
   resumeAnchorRef,
   softWordIndexRef,
+  getFlowWordIndex,
   evalTrace,
 }: UseReaderModeParams): UseReaderModeReturn {
   const readingModeRef = useRef<ReaderMode>(readingMode);
@@ -124,6 +126,12 @@ export function useReaderMode({
   const isNarratingRef = useRef(isNarrating);
   isNarratingRef.current = isNarrating;
   const compatibilityMode = toCompatibilityMode(readingMode);
+  const getLiveFlowWordIndex = useCallback((): number | null => {
+    const value = getFlowWordIndex?.();
+    if (typeof value !== "number" || !Number.isFinite(value)) return null;
+    return Math.max(0, Math.trunc(value));
+  }, [getFlowWordIndex]);
+
   const getNextSelectableMode = useCallback((mode: ReaderMode): "focus" | "flow" | "narrate" => {
     if (mode === "focus") return "flow";
     if (mode === "flow") return "narrate";
@@ -136,14 +144,28 @@ export function useReaderMode({
       const currentWord = narration.cursorWordIndex;
       setHighlightedWordIndex(currentWord);
       highlightedWordIndexRef.current = currentWord;
+      softWordIndexRef.current = currentWord;
+      resumeAnchorRef.current = currentWord;
       return;
+    }
+    if (readingModeRef.current === "flow") {
+      const liveFlowWord = getLiveFlowWordIndex();
+      if (liveFlowWord != null) {
+        setHighlightedWordIndex(liveFlowWord);
+        highlightedWordIndexRef.current = liveFlowWord;
+        softWordIndexRef.current = liveFlowWord;
+        resumeAnchorRef.current = liveFlowWord;
+        return;
+      }
     }
     if (instance && (readingModeRef.current === "focus" || readingModeRef.current === "flow")) {
       const currentWord = instance.getCurrentWord();
       setHighlightedWordIndex(currentWord);
       highlightedWordIndexRef.current = currentWord;
+      softWordIndexRef.current = currentWord;
+      resumeAnchorRef.current = currentWord;
     }
-  }, [modeInstance, narration.cursorWordIndex, setHighlightedWordIndex]);
+  }, [getLiveFlowWordIndex, modeInstance, narration.cursorWordIndex, resumeAnchorRef, setHighlightedWordIndex, softWordIndexRef]);
 
   const clearNarrateTruthSync = useCallback(() => {
     narration.setOnTruthSync?.(null);
@@ -268,12 +290,8 @@ export function useReaderMode({
     setFocusPlaying(true);
     updateSettings({ readingMode: "focus", lastReadingMode: "focus", isNarrating: false });
     const pBreaks = getEffectiveParagraphBreaks();
-    const focusStartId = Symbol();
-    pendingFocusStartRef.current = focusStartId;
-    setTimeout(() => {
-      if (pendingFocusStartRef.current !== focusStartId) return;
-      modeInstance.startMode("focus", startWord, effectiveWords, pBreaks);
-    }, FOCUS_MODE_START_DELAY_MS);
+    pendingFocusStartRef.current = null;
+    modeInstance.startMode("focus", startWord, effectiveWords, pBreaks);
   }, [
     bookWordsTotalWords,
     clearNarrateTruthSync,
@@ -309,7 +327,12 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
+    const flowEngineStartCandidate =
+      readingModeRef.current === "flow" || readingModeRef.current === "narrate"
+        ? getLiveFlowWordIndex()
+        : null;
     const flowStartSource = resolveModeStartWordIndex(
+      flowEngineStartCandidate,
       resumeAnchorRef.current,
       highlightedWordIndexRef.current,
       softWordIndexRef.current,
@@ -333,6 +356,9 @@ export function useReaderMode({
       clearNarrateTruthSync();
     }
     reader.jumpToWord(startWord);
+    highlightedWordIndexRef.current = startWord;
+    softWordIndexRef.current = startWord;
+    setHighlightedWordIndex(startWord);
     setReadingMode(targetMode);
     updateSettings({ readingMode: targetMode, lastReadingMode: targetMode });
     const pBreaks = getEffectiveParagraphBreaks();
@@ -360,6 +386,7 @@ export function useReaderMode({
     effectiveWpm,
     extractFoliateWords,
     foliateApiRef,
+    getLiveFlowWordIndex,
     getEffectiveParagraphBreaks,
     getEffectiveWords,
     hasEngagedRef,
@@ -396,8 +423,15 @@ export function useReaderMode({
       extractFoliateWords();
       effectiveWords = getEffectiveWords();
     }
-    const startWord = highlightedWordIndexRef.current;
+    const startWord = resolveModeStartWordIndex(
+      getLiveFlowWordIndex(),
+      highlightedWordIndexRef.current,
+      softWordIndexRef.current,
+    );
     pendingNarrationResumeRef.current = false;
+    highlightedWordIndexRef.current = startWord;
+    softWordIndexRef.current = startWord;
+    setHighlightedWordIndex(startWord);
     setReadingMode("narrate");
     installNarrateTruthSync();
     if (wpm > TTS_WPM_CAP) {
@@ -416,6 +450,7 @@ export function useReaderMode({
     extractFoliateWords,
     foliateApiRef,
     getEffectiveWords,
+    getLiveFlowWordIndex,
     narration,
     pendingNarrationResumeRef,
     installNarrateTruthSync,

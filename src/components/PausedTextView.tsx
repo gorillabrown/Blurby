@@ -61,6 +61,12 @@ export default function PausedTextView({ paragraphs, paraStartIndices, wordIndex
   useEffect(() => { setExtraRange(0); }, [activePara]);
 
   const estParaHeight = 40; // rough estimate per paragraph
+  const currentWord = useMemo(() => {
+    const paraIdx = activePara;
+    const paraWordStart = paraStartIndices[paraIdx] ?? 0;
+    const localIdx = wordIndex - paraWordStart;
+    return paragraphs[paraIdx]?.split(/\s+/).filter(Boolean)[localIdx] ?? "";
+  }, [activePara, paraStartIndices, paragraphs, wordIndex]);
 
   return (
     <div
@@ -73,6 +79,13 @@ export default function PausedTextView({ paragraphs, paraStartIndices, wordIndex
         wordSpacing: settings?.layoutSpacing?.word ? `${settings.layoutSpacing.word}px` : undefined,
       }}
     >
+      <div className="reader-pause-context" aria-live="polite">
+        <span className="reader-pause-context-label">paused at</span>
+        <span className="reader-pause-context-word">{currentWord}</span>
+        <button className="reader-resume-btn reader-resume-btn--inline" onClick={togglePlay}>
+          resume reading
+        </button>
+      </div>
       {paraStart > 0 && <div style={{ height: paraStart * estParaHeight }} aria-hidden="true" />}
       {paragraphs.slice(paraStart, paraEnd).map((para, pi) => {
         const paraIdx = paraStart + pi;

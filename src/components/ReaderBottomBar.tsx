@@ -3,6 +3,7 @@ import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterInde
 import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS } from "../constants";
 import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../utils/kokoroRatePlan";
 import type { BlurbyDoc, ReaderMode, TtsEngine } from "../types";
+import type { NarrationStartupTone } from "../types/narration";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
 
@@ -21,6 +22,10 @@ interface ReaderBottomBarProps {
   focusTextSize: number;
   readingMode: ReaderMode;
   isNarrating?: boolean;
+  narrationStatusLabel?: string;
+  narrationStatusTone?: NarrationStartupTone;
+  narrationShowSpinner?: boolean;
+  narrationError?: string | null;
   playing: boolean;
   isEink: boolean;
   chapters: Array<{ title: string; charOffset: number; depth?: number }>;
@@ -57,9 +62,10 @@ interface ReaderBottomBarProps {
 }
 
 const HINT_TEXT: Record<string, string> = {
-  page: "← → page  ↑ ↓ speed  space play  ⇧space mode  tab menu",
-  focus: "← → rewind  ↑ ↓ speed  space play/pause  M menu",
-  flow: "← → speed  ↑ ↓ line  N narrate  space play/pause  M menu",
+  page: "← → page  ↑ ↓ speed  space play  ⇧space mode  Esc exit  H home",
+  focus: "← → rewind  ↑ ↓ speed  space play/pause  Esc exit  H home",
+  flow: "← → speed  ↑ ↓ line  N narrate  space play/pause  Esc exit  H home",
+  narrate: "↑ ↓ speed  space play/pause  Esc exit  H home",
 };
 
 export default function ReaderBottomBar({
@@ -70,6 +76,10 @@ export default function ReaderBottomBar({
   focusTextSize,
   readingMode,
   isNarrating = false,
+  narrationStatusLabel = "",
+  narrationStatusTone = "neutral",
+  narrationShowSpinner = false,
+  narrationError = null,
   playing,
   isEink,
   chapters,
@@ -99,6 +109,7 @@ export default function ReaderBottomBar({
   currentChapterName,
 }: ReaderBottomBarProps) {
   const surfaceMode = readingMode === "narrate" ? "flow" : readingMode;
+  const hintMode = readingMode === "narrate" ? "narrate" : surfaceMode;
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
   const [rateStatus, setRateStatus] = useState<"idle" | "confirming" | "set">("idle");
@@ -138,6 +149,7 @@ export default function ReaderBottomBar({
 
   // Time remaining — use TTS-derived WPM when narration is selected
   const isNarrationSelected = readingMode === "narrate" || isNarrating;
+  const showNarrationStatus = readingMode === "narrate" && narrationStatusLabel.length > 0;
   const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
   // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
   // instead of section words (which only covers the current chapter)
@@ -396,8 +408,18 @@ export default function ReaderBottomBar({
         {surfaceMode === "flow" && (
           <>
             <div className="rbb-flow-zone-controls">
-              {isNarrating && (
-                <span className="rbb-flow-progress-text">Narrating</span>
+              {showNarrationStatus && (
+                <span
+                  className={`rbb-narration-status rbb-narration-status--${narrationStatusTone}`}
+                  role="status"
+                  aria-live="polite"
+                  aria-label={narrationStatusLabel}
+                  title={narrationError ?? narrationStatusLabel}
+                >
+                  {narrationShowSpinner && <span className="rbb-narration-spinner" aria-hidden="true" />}
+                  <span>{narrationStatusLabel}</span>
+                  {narrationError && <span className="rbb-narration-error"> {narrationError}</span>}
+                </span>
               )}
               <label className="rbb-flow-zone-label">
                 Zone
@@ -429,7 +451,7 @@ export default function ReaderBottomBar({
             {flowProgress && (
               <div className="rbb-flow-progress">
                 <span className="rbb-flow-progress-text">
-                  {isNarrating ? "Narrating · " : ""}{currentChapterName ? `${currentChapterName} · ` : ""}{Math.round(flowProgress.bookPct * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
+                  {showNarrationStatus ? `${narrationStatusLabel} · ` : ""}{currentChapterName ? `${currentChapterName} · ` : ""}{Math.round(flowProgress.bookPct * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
                 </span>
               </div>
             )}
@@ -502,7 +524,7 @@ export default function ReaderBottomBar({
       {/* Row 3: Info line */}
       <div className="reader-bottom-bar-info">
         <span className="rbb-info-progress">{Math.round(progress)}%</span>
-        <span className="rbb-info-hint" aria-label="Keyboard shortcuts hint">{HINT_TEXT[surfaceMode] || ""}</span>
+        <span className="rbb-info-hint" aria-label="Keyboard shortcuts hint">{HINT_TEXT[hintMode] || ""}</span>
         <span className="rbb-info-time">
           {chapterTimeRemaining ? `Ch: ${chapterTimeRemaining} | Doc: ${timeRemaining}` : timeRemaining}
         </span>

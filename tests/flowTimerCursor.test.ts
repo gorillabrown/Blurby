@@ -141,12 +141,12 @@ describe("FLOW-INF-B: Timer bar cursor", () => {
     expect(FLOW_LINE_COMPLETE_FLASH_MS).toBe(100);
   });
 
-  // (e) CSS .flow-shrink-cursor has border-radius: 2px
-  it("(e) CSS .flow-shrink-cursor has border-radius: 2px", () => {
+  // (e) CSS .flow-shrink-cursor has border-radius: 3px
+  it("(e) CSS .flow-shrink-cursor has border-radius: 3px", () => {
     const css = fs.readFileSync(CSS_PATH, "utf-8");
     const block = extractCssBlock(css, ".flow-shrink-cursor");
     expect(block.length).toBeGreaterThan(0);
-    expect(block).toMatch(/border-radius\s*:\s*2px/);
+    expect(block).toMatch(/border-radius\s*:\s*3px/);
   });
 
   // (f) CSS .flow-shrink-cursor has box-shadow referencing accent
@@ -164,6 +164,14 @@ describe("FLOW-INF-B: Timer bar cursor", () => {
     expect(block).toMatch(/transition/);
     expect(block).toMatch(/opacity/);
     expect(block).toMatch(/100ms/);
+  });
+
+  it("uses a dedicated stronger Flow cursor height variable distinct from the timer bar", () => {
+    const css = fs.readFileSync(CSS_PATH, "utf-8");
+    const block = extractCssBlock(css, ".flow-shrink-cursor");
+    expect(block).toMatch(/height\s*:\s*var\(--flow-cursor-height/);
+    expect(block).toMatch(/filter\s*:\s*drop-shadow/);
+    expect(block).toMatch(/border\s*:/);
   });
 
   // (h) FlowProgress interface: all expected fields present
@@ -243,8 +251,8 @@ describe("FLOW-INF-B: Timer bar cursor", () => {
     expect(progressCalls.length).toBeGreaterThanOrEqual(1);
   });
 
-  // (m) E-ink mode: cursor height set to FLOW_TIMER_BAR_EINK_HEIGHT_PX on start()
-  it("(m) start() sets cursor height to FLOW_TIMER_BAR_EINK_HEIGHT_PX in e-ink mode", () => {
+  // (m) E-ink mode: cursor height is stronger than the timer bar on start()
+  it("(m) start() sets cursor height stronger than FLOW_TIMER_BAR_EINK_HEIGHT_PX in e-ink mode", () => {
     const { callbacks } = createMockCallbacks();
     const engine = new FlowScrollEngine(callbacks);
     const container = createMockContainer(3);
@@ -253,13 +261,13 @@ describe("FLOW-INF-B: Timer bar cursor", () => {
     vi.useFakeTimers();
     engine.start(container, cursor, 0, 300, new Set(), /* isEink */ true);
     // Height is set synchronously in start() before the first timer
-    expect(cursor.style.height).toBe(FLOW_TIMER_BAR_EINK_HEIGHT_PX + "px");
+    expect(parseInt(cursor.style.height, 10)).toBeGreaterThan(FLOW_TIMER_BAR_EINK_HEIGHT_PX);
     engine.stop();
     vi.useRealTimers();
   });
 
-  // (n) Non-eink mode: cursor height set to FLOW_TIMER_BAR_HEIGHT_PX on start()
-  it("(n) start() sets cursor height to FLOW_TIMER_BAR_HEIGHT_PX in normal mode", () => {
+  // (n) Non-eink mode: cursor height is stronger than the timer bar on start()
+  it("(n) start() sets cursor height stronger than FLOW_TIMER_BAR_HEIGHT_PX in normal mode", () => {
     const { callbacks } = createMockCallbacks();
     const engine = new FlowScrollEngine(callbacks);
     const container = createMockContainer(3);
@@ -267,7 +275,7 @@ describe("FLOW-INF-B: Timer bar cursor", () => {
 
     vi.useFakeTimers();
     engine.start(container, cursor, 0, 300, new Set(), /* isEink */ false);
-    expect(cursor.style.height).toBe(FLOW_TIMER_BAR_HEIGHT_PX + "px");
+    expect(parseInt(cursor.style.height, 10)).toBeGreaterThan(FLOW_TIMER_BAR_HEIGHT_PX);
     engine.stop();
     vi.useRealTimers();
   });

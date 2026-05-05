@@ -60,6 +60,10 @@ export const DOUBLE_ESC_WINDOW_MS = 2000;
 // ── TTS (Text-to-Speech) ──────────────────────────────────────────────────────
 /** Number of words per TTS utterance chunk — larger = smoother speech, smaller = tighter cursor sync */
 export const TTS_CHUNK_SIZE = 40;
+/** Maximum time to wait for a selected TTS engine to become ready during Narrate startup. */
+export const TTS_ENGINE_WARMING_TIMEOUT_MS = 30000;
+/** Maximum time to wait for first confirmed audio/word movement after playback starts. */
+export const TTS_FIRST_AUDIO_TIMEOUT_MS = 12000;
 /** Maximum TTS speech rate — capped at 1.5x for narration pipeline (NAR-2) */
 export const TTS_MAX_RATE = 1.5;
 /** Minimum TTS speech rate */

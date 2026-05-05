@@ -41,6 +41,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
   let fakeEngineInstances: Array<{
     options: { onComplete: () => void };
     start: ReturnType<typeof vi.fn>;
+    startPaused: ReturnType<typeof vi.fn>;
     stop: ReturnType<typeof vi.fn>;
     setTotalWords: ReturnType<typeof vi.fn>;
     setWpm: ReturnType<typeof vi.fn>;
@@ -49,6 +50,7 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
     setFollowerMode: ReturnType<typeof vi.fn>;
     followWord: ReturnType<typeof vi.fn>;
     jumpToWord: ReturnType<typeof vi.fn>;
+    getCurrentWordIndex: () => number;
   }> = [];
 
   beforeEach(async () => {
@@ -66,21 +68,42 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
     vi.doMock("../src/utils/FlowScrollEngine", () => {
       class FakeFlowScrollEngine {
         options: { onComplete: () => void };
-        start = vi.fn();
+        private currentWordIndex = 0;
+        private running = false;
+        private previewing = false;
+        private followerMode = false;
+
+        start = vi.fn((...args: any[]) => {
+          this.currentWordIndex = Number(args[2] ?? 0);
+          this.running = true;
+          this.previewing = false;
+        });
+        startPaused = vi.fn((...args: any[]) => {
+          this.currentWordIndex = Number(args[2] ?? 0);
+          this.running = false;
+          this.previewing = true;
+        });
         stop = vi.fn();
         setTotalWords = vi.fn();
         setWpm = vi.fn();
         setZonePosition = vi.fn();
         rebuildLineMap = vi.fn();
-        setFollowerMode = vi.fn();
-        followWord = vi.fn();
-        jumpToWord = vi.fn();
+        setFollowerMode = vi.fn((enabled: boolean) => {
+          this.followerMode = enabled;
+        });
+        followWord = vi.fn((wordIndex: number) => {
+          this.currentWordIndex = wordIndex;
+        });
+        jumpToWord = vi.fn((wordIndex: number) => {
+          this.currentWordIndex = wordIndex;
+        });
 
         constructor(options: { onComplete: () => void }) {
           this.options = options;
           fakeEngineInstances.push(this as unknown as {
             options: { onComplete: () => void };
             start: ReturnType<typeof vi.fn>;
+            startPaused: ReturnType<typeof vi.fn>;
             stop: ReturnType<typeof vi.fn>;
             setTotalWords: ReturnType<typeof vi.fn>;
             setWpm: ReturnType<typeof vi.fn>;
@@ -89,16 +112,23 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
             setFollowerMode: ReturnType<typeof vi.fn>;
             followWord: ReturnType<typeof vi.fn>;
             jumpToWord: ReturnType<typeof vi.fn>;
+            getCurrentWordIndex: () => number;
           });
         }
 
         getState() {
           return {
-            running: true,
-            followerMode: true,
-            wordIndex: 0,
+            running: this.running,
+            paused: this.previewing,
+            previewing: this.previewing,
+            followerMode: this.followerMode,
+            wordIndex: this.currentWordIndex,
             lineIndex: 0,
           };
+        }
+
+        getCurrentWordIndex() {
+          return this.currentWordIndex;
         }
       }
 

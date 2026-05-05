@@ -37,11 +37,14 @@
 /* FLOW-INF-B: Timer bar cursor for flow mode — prominent depleting bar */
 .flow-shrink-cursor {
   position: absolute;
+  height: var(--flow-cursor-height, 7px);
   background: var(--accent);
-  border-radius: 2px;
-  box-shadow: 0 0 2px 0 var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 82%, var(--text) 18%);
+  border-radius: 3px;
+  box-shadow: 0 0 6px 1px var(--accent);
+  filter: drop-shadow(0 0 5px var(--accent));
   pointer-events: none;
-  z-index: 10;
+  z-index: 20;
   transition: opacity 100ms ease;
   display: none; /* shown via JS: cursorRef.current.style.display = "block" */
 }
@@ -163,4 +166,3 @@
   font-size: 0.85rem;
   opacity: 0.6;
 }
-

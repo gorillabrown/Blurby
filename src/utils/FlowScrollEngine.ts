@@ -9,10 +9,6 @@
 
 import {
   FLOW_READING_ZONE_POSITION,
-  FLOW_CURSOR_HEIGHT_PX,
-  FLOW_CURSOR_EINK_HEIGHT_PX,
-  FLOW_TIMER_BAR_HEIGHT_PX,
-  FLOW_TIMER_BAR_EINK_HEIGHT_PX,
   FLOW_SCROLL_RESUME_DELAY_MS,
   FLOW_LINE_ADVANCE_BUFFER_MS,
   FLOW_LINE_COMPLETE_FLASH_MS,
@@ -32,6 +28,7 @@ export interface LineInfo {
 export interface FlowScrollEngineState {
   running: boolean;
   paused: boolean;
+  previewing: boolean;
   followerMode: boolean;
   lineIndex: number;
   wordIndex: number;
@@ -65,6 +62,9 @@ export type FlowRenderedWordRootsProvider = () => FlowRenderedWordRootDescriptor
 
 export const FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY = "__blurbyRenderedWordRoots";
 
+const FLOW_PREVIEW_CURSOR_HEIGHT_PX = 7;
+const FLOW_PREVIEW_CURSOR_EINK_HEIGHT_PX = 8;
+
 type FlowRenderedWordRootHost = HTMLElement & {
   [FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY]?: FlowRenderedWordRootsProvider;
 };
@@ -78,9 +78,11 @@ export class FlowScrollEngine {
   private wpm = 300;
   private running = false;
   private paused = false;
+  private previewing = false;
   private isEink = false;
   private lineTimer: ReturnType<typeof setTimeout> | null = null;
   private scrollResumeTimer: ReturnType<typeof setTimeout> | null = null;
+  private delayedTimers = new Set<ReturnType<typeof setTimeout>>();
   private manualScrollPaused = false;
   private followerMode = false;
   private callbacks: FlowScrollEngineCallbacks;
@@ -102,6 +104,43 @@ export class FlowScrollEngine {
     isEink = false,
     zonePosition?: number
   ): void {
+    this.initialize(container, cursorEl, wordIndex, wpm, paragraphBreaks, isEink, zonePosition, false);
+  }
+
+  startPaused(
+    container: HTMLElement,
+    cursorEl: HTMLDivElement,
+    wordIndex: number,
+    wpm: number,
+    paragraphBreaks: Set<number> = new Set(),
+    isEink = false,
+    zonePosition?: number
+  ): void {
+    this.initialize(container, cursorEl, wordIndex, wpm, paragraphBreaks, isEink, zonePosition, true);
+  }
+
+  preview(
+    container: HTMLElement,
+    cursorEl: HTMLDivElement,
+    wordIndex: number,
+    wpm: number,
+    paragraphBreaks: Set<number> = new Set(),
+    isEink = false,
+    zonePosition?: number
+  ): void {
+    this.startPaused(container, cursorEl, wordIndex, wpm, paragraphBreaks, isEink, zonePosition);
+  }
+
+  private initialize(
+    container: HTMLElement,
+    cursorEl: HTMLDivElement,
+    wordIndex: number,
+    wpm: number,
+    paragraphBreaks: Set<number>,
+    isEink: boolean,
+    zonePosition: number | undefined,
+    previewing: boolean
+  ): void {
     this.stop();
     this.container = container;
     this.cursor = cursorEl;
@@ -110,13 +149,16 @@ export class FlowScrollEngine {
     this.paragraphBreaks = paragraphBreaks;
     this.isEink = isEink;
     if (zonePosition !== undefined) this.zonePosition = zonePosition;
-    this.running = true;
-    this.paused = false;
+    this.running = !previewing;
+    this.paused = previewing;
+    this.previewing = previewing;
     this.manualScrollPaused = false;
     this.followerMode = false;
 
     this.cursor.style.display = "block";
-    this.cursor.style.height = (isEink ? FLOW_TIMER_BAR_EINK_HEIGHT_PX : FLOW_TIMER_BAR_HEIGHT_PX) + "px";
+    const cursorHeight = isEink ? FLOW_PREVIEW_CURSOR_EINK_HEIGHT_PX : FLOW_PREVIEW_CURSOR_HEIGHT_PX;
+    this.cursor.style.setProperty("--flow-cursor-height", cursorHeight + "px");
+    this.cursor.style.height = cursorHeight + "px";
     if (isEink) {
       this.cursor.style.transition = "none";
     }
@@ -132,33 +174,48 @@ export class FlowScrollEngine {
         this.lines = this.buildLineMap();
         if (this.lines.length > 0) {
           this.lineIdx = this.findLineForWord(wordIndex);
-          this.scrollToLine(this.lineIdx, true);
-          setTimeout(() => {
-            if (this.running && !this.paused) this.animateLine();
-          }, FLOW_LINE_ADVANCE_BUFFER_MS);
+          if (previewing) {
+            this.renderPreviewLine(true);
+          } else {
+            this.scrollToLine(this.lineIdx, true);
+          }
+          if (!previewing) {
+            this.scheduleDelay(() => {
+              if (this.running && !this.paused && !this.previewing) this.animateLine();
+            }, FLOW_LINE_ADVANCE_BUFFER_MS);
+          }
           this.container!.addEventListener("wheel", this.handleWheel, { passive: true });
           this.container!.addEventListener("touchmove", this.handleWheel, { passive: true });
           return;
         }
-        if (retries < 5) {
-          setTimeout(retryBuild, 100);
+        if (retries < 5 && !previewing) {
+          this.scheduleDelay(retryBuild, 100);
         } else {
           // Final failure — stop cleanly, do not leave running=true with empty lines
           if (import.meta.env.DEV) console.warn("[FlowScrollEngine] buildLineMap empty after 5 retries — stopping");
           this.running = false;
+          this.previewing = false;
           this.cursor!.style.display = "none";
         }
       };
-      setTimeout(retryBuild, 100);
+      if (!previewing) {
+        this.scheduleDelay(retryBuild, 100);
+      }
       return;
     }
 
     this.lineIdx = this.findLineForWord(wordIndex);
-    this.scrollToLine(this.lineIdx, true);
+    if (previewing) {
+      this.renderPreviewLine(true);
+    } else {
+      this.scrollToLine(this.lineIdx, true);
+    }
 
-    setTimeout(() => {
-      if (this.running && !this.paused) this.animateLine();
-    }, FLOW_LINE_ADVANCE_BUFFER_MS);
+    if (!previewing) {
+      this.scheduleDelay(() => {
+        if (this.running && !this.paused && !this.previewing) this.animateLine();
+      }, FLOW_LINE_ADVANCE_BUFFER_MS);
+    }
 
     this.container.addEventListener("wheel", this.handleWheel, { passive: true });
     this.container.addEventListener("touchmove", this.handleWheel, { passive: true });
@@ -179,6 +236,7 @@ export class FlowScrollEngine {
   stop(): void {
     this.running = false;
     this.paused = false;
+    this.previewing = false;
     this.followerMode = false;
     this.clearTimers();
     if (this.cursor) {
@@ -197,6 +255,7 @@ export class FlowScrollEngine {
   pause(): void {
     if (!this.running || this.paused) return;
     this.paused = true;
+    this.previewing = false;
     this.clearTimers();
     if (this.cursor) {
       const computed = getComputedStyle(this.cursor);
@@ -209,6 +268,7 @@ export class FlowScrollEngine {
   resume(): void {
     if (!this.running || !this.paused) return;
     this.paused = false;
+    this.previewing = false;
     this.manualScrollPaused = false;
     if (this.followerMode) return;
     this.animateLine();
@@ -216,7 +276,7 @@ export class FlowScrollEngine {
 
   setWpm(wpm: number): void {
     this.wpm = wpm;
-    if (this.running && !this.paused && !this.followerMode) {
+    if (this.running && !this.paused && !this.previewing && !this.followerMode) {
       this.clearTimers();
       this.animateLine();
     }
@@ -245,16 +305,20 @@ export class FlowScrollEngine {
 
   jumpToWord(wordIndex: number): void {
     this.wordIndex = wordIndex;
-    if (!this.running) return;
+    if (!this.isActive()) return;
     if (this.followerMode) {
       this.followWord(wordIndex);
       return;
     }
     this.clearTimers();
     this.lineIdx = this.findLineForWord(wordIndex);
+    if (this.previewing) {
+      this.renderPreviewLine();
+      return;
+    }
     this.scrollToLine(this.lineIdx);
-    if (!this.paused) {
-      setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
+    if (!this.paused && !this.previewing) {
+      this.scheduleDelay(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
   }
 
@@ -291,24 +355,28 @@ export class FlowScrollEngine {
   }
 
   jumpToLine(direction: "prev" | "next"): void {
-    if (!this.running) return;
+    if (!this.isActive()) return;
     this.clearTimers();
     if (direction === "prev" && this.lineIdx > 0) this.lineIdx--;
     else if (direction === "next" && this.lineIdx < this.lines.length - 1) this.lineIdx++;
     const line = this.lines[this.lineIdx];
     if (line) {
       this.wordIndex = line.firstWord;
+      if (this.previewing) {
+        this.renderPreviewLine();
+        return;
+      }
       this.callbacks.onWordAdvance(this.wordIndex);
       this.callbacks.onLineChange?.(this.lineIdx, line);
       this.scrollToLine(this.lineIdx);
     }
-    if (!this.paused) {
-      setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
+    if (!this.paused && !this.previewing) {
+      this.scheduleDelay(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
   }
 
   jumpToParagraph(direction: "prev" | "next"): void {
-    if (!this.running || this.paragraphBreaks.size === 0) return;
+    if (!this.isActive() || this.paragraphBreaks.size === 0) return;
     this.clearTimers();
     const breaks = Array.from(this.paragraphBreaks).sort((a, b) => a - b);
     let targetWord: number;
@@ -323,10 +391,14 @@ export class FlowScrollEngine {
     }
     this.wordIndex = targetWord;
     this.lineIdx = this.findLineForWord(targetWord);
+    if (this.previewing) {
+      this.renderPreviewLine();
+      return;
+    }
     this.callbacks.onWordAdvance(this.wordIndex);
     this.scrollToLine(this.lineIdx);
     if (!this.paused) {
-      setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
+      this.scheduleDelay(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
   }
 
@@ -334,6 +406,7 @@ export class FlowScrollEngine {
     return {
       running: this.running,
       paused: this.paused,
+      previewing: this.previewing,
       followerMode: this.followerMode,
       lineIndex: this.lineIdx,
       wordIndex: this.wordIndex,
@@ -342,6 +415,8 @@ export class FlowScrollEngine {
   }
 
   getWordIndex(): number { return this.wordIndex; }
+
+  getCurrentWordIndex(): number { return this.wordIndex; }
 
   getProgress(): FlowProgress {
     const totalWords = this.totalWords || (this.lines.length > 0 ? this.lines[this.lines.length - 1].lastWord + 1 : 0);
@@ -448,7 +523,7 @@ export class FlowScrollEngine {
   }
 
   private animateLine(): void {
-    if (!this.running || this.paused || this.followerMode || !this.cursor || !this.container) return;
+    if (!this.running || this.paused || this.previewing || this.followerMode || !this.cursor || !this.container) return;
     if (this.lineIdx >= this.lines.length) {
       this.running = false;
       this.callbacks.onComplete();
@@ -490,6 +565,7 @@ export class FlowScrollEngine {
     this.cursor.style.width = "0px";
 
     this.lineTimer = setTimeout(() => {
+      this.lineTimer = null;
       this.wordIndex = line.lastWord;
       this.callbacks.onWordAdvance(this.wordIndex);
       this.lineIdx++;
@@ -504,24 +580,24 @@ export class FlowScrollEngine {
       // FLOW-INF-B: Line-completion flash — brief opacity pulse for visual rhythm
       if (!this.isEink && this.cursor) {
         this.cursor.style.opacity = "0.4";
-        setTimeout(() => {
+        this.scheduleDelay(() => {
           if (this.cursor) this.cursor.style.opacity = "1";
           this.scrollToLine(this.lineIdx);
-          setTimeout(() => {
-            if (this.running && !this.paused) this.animateLine();
+          this.scheduleDelay(() => {
+            if (this.running && !this.paused && !this.previewing) this.animateLine();
           }, FLOW_LINE_ADVANCE_BUFFER_MS);
         }, FLOW_LINE_COMPLETE_FLASH_MS);
       } else {
         this.scrollToLine(this.lineIdx);
-        setTimeout(() => {
-          if (this.running && !this.paused) this.animateLine();
+        this.scheduleDelay(() => {
+          if (this.running && !this.paused && !this.previewing) this.animateLine();
         }, FLOW_LINE_ADVANCE_BUFFER_MS);
       }
     }, duration);
   }
 
   private animateEinkChunk(): void {
-    if (!this.running || this.paused || this.followerMode || !this.cursor || !this.container) return;
+    if (!this.running || this.paused || this.previewing || this.followerMode || !this.cursor || !this.container) return;
     if (this.lineIdx >= this.lines.length) {
       this.running = false;
       this.callbacks.onComplete();
@@ -556,6 +632,7 @@ export class FlowScrollEngine {
     this.cursor.style.display = "block";
 
     this.lineTimer = setTimeout(() => {
+      this.lineTimer = null;
       this.wordIndex = endLine.lastWord;
       this.callbacks.onWordAdvance(this.wordIndex);
       this.lineIdx = endLineIdx + 1;
@@ -568,8 +645,8 @@ export class FlowScrollEngine {
       }
 
       this.scrollToLine(this.lineIdx, true);
-      setTimeout(() => {
-        if (this.running && !this.paused) this.animateLine();
+      this.scheduleDelay(() => {
+        if (this.running && !this.paused && !this.previewing) this.animateLine();
       }, FLOW_LINE_ADVANCE_BUFFER_MS);
     }, duration);
   }
@@ -589,7 +666,7 @@ export class FlowScrollEngine {
   }
 
   private handleWheel = (): void => {
-    if (!this.running || this.paused || this.followerMode) return;
+    if (!this.running || this.paused || this.previewing || this.followerMode) return;
     if (!this.manualScrollPaused) {
       this.manualScrollPaused = true;
       this.clearTimers();
@@ -611,5 +688,39 @@ export class FlowScrollEngine {
   private clearTimers(): void {
     if (this.lineTimer) { clearTimeout(this.lineTimer); this.lineTimer = null; }
     if (this.scrollResumeTimer) { clearTimeout(this.scrollResumeTimer); this.scrollResumeTimer = null; }
+    for (const timer of this.delayedTimers) {
+      clearTimeout(timer);
+    }
+    this.delayedTimers.clear();
+  }
+
+  private scheduleDelay(callback: () => void, delayMs: number): ReturnType<typeof setTimeout> {
+    let timer: ReturnType<typeof setTimeout>;
+    timer = setTimeout(() => {
+      this.delayedTimers.delete(timer);
+      callback();
+    }, delayMs);
+    this.delayedTimers.add(timer);
+    return timer;
+  }
+
+  private isActive(): boolean {
+    return this.running || this.previewing;
+  }
+
+  private renderPreviewLine(instant = false): void {
+    if (!this.cursor || !this.container) return;
+    const line = this.lines[this.lineIdx];
+    if (!line) return;
+    const lineWidth = Math.max(line.right - line.left, 1);
+    this.scrollToLine(this.lineIdx, instant);
+    this.cursor.style.transition = "none";
+    this.cursor.style.left = line.left + "px";
+    this.cursor.style.top = line.bottom + "px";
+    this.cursor.style.width = lineWidth + "px";
+    this.cursor.style.display = "block";
+    this.callbacks.onWordAdvance(this.wordIndex);
+    this.callbacks.onLineChange?.(this.lineIdx, line);
+    this.callbacks.onProgressUpdate?.(this.getProgress());
   }
 }

@@ -657,6 +657,7 @@ describe("useReaderMode four-mode foundation", () => {
     narrationOverrides?: Record<string, unknown>;
     foliateApiCurrent?: Record<string, unknown>;
     evalTrace?: any;
+    getFlowWordIndex?: () => number | null;
   }) {
     const modeInstance = {
       modeRef: { current: null },
@@ -757,6 +758,7 @@ describe("useReaderMode four-mode foundation", () => {
         resumeAnchorRef,
         softWordIndexRef: { current: options?.softWordIndex ?? 0 },
         evalTrace: options?.evalTrace ?? null,
+        getFlowWordIndex: options?.getFlowWordIndex,
       });
       return null;
     }
@@ -849,6 +851,7 @@ describe("useReaderMode four-mode foundation", () => {
         lastReadingMode: "flow",
         readingMode: "page",
       },
+      getFlowWordIndex: () => 99,
     });
 
     await act(async () => {
@@ -858,6 +861,7 @@ describe("useReaderMode four-mode foundation", () => {
 
     expect(harness.observed.readingMode).toBe("flow");
     expect(harness.observed.flowPlaying).toBe(true);
+    expect(harness.reader.jumpToWord).toHaveBeenCalledWith(0);
     expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
     expect(harness.updateSettings).toHaveBeenCalledWith({
       readingMode: "flow",
@@ -886,6 +890,28 @@ describe("useReaderMode four-mode foundation", () => {
       lastReadingMode: "flow",
       isNarrating: false,
     });
+  });
+
+  it("starts focus immediately so the first word can paint before any startup delay", async () => {
+    const harness = await renderReaderModeHarness({
+      settings: {
+        lastReadingMode: "focus",
+        readingMode: "page",
+      },
+      initialHighlightedWordIndex: 1,
+    });
+
+    await act(async () => {
+      harness.snapshot()?.startFocus();
+      await flushPromises();
+    });
+
+    expect(harness.modeInstance.startMode).toHaveBeenCalledWith(
+      "focus",
+      1,
+      ["alpha", "beta", "gamma"],
+      new Set<number>(),
+    );
   });
 
   it("pausing active focus keeps the reader in focus mode", async () => {
@@ -1034,6 +1060,29 @@ describe("useReaderMode four-mode foundation", () => {
 
     expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
     expect(harness.modeInstance.pendingResumeRef.current).toBeNull();
+  });
+
+  it("uses the live Flow engine word as the first narrate start anchor", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "flow",
+      initialFlowPlaying: true,
+      initialHighlightedWordIndex: 10,
+      softWordIndex: 2,
+      getFlowWordIndex: () => 47,
+    });
+
+    await act(async () => {
+      harness.snapshot()?.toggleNarrationInFlow();
+      await flushPromises();
+    });
+
+    expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
+      ["alpha", "beta", "gamma"],
+      47,
+      180,
+      expect.any(Function),
+    );
+    expect(harness.observed.highlightedWordIndex).toBe(47);
   });
 
   it("queues a narrate pending resume when spoken-word truth lands outside the current DOM slice", async () => {

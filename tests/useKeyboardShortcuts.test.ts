@@ -1,6 +1,11 @@
-import { describe, it, expect } from "vitest";
+// @vitest-environment jsdom
+
+import React from "react";
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP } from "../src/constants";
-import { getReaderKeyboardModeSurface } from "../src/hooks/useKeyboardShortcuts";
+import { getReaderKeyboardModeSurface, useReaderKeys } from "../src/hooks/useKeyboardShortcuts";
 
 /**
  * useKeyboardShortcuts tests — testing the key binding resolution and
@@ -63,6 +68,8 @@ function resolveReaderKey(
   if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) return "nextChapter";
   // N (bare) enters narrate mode paused from any surface. Shift+N is handled per-surface below.
   if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "enterNarrate";
+  // H (bare) exits to Library/home from every reader mode.
+  if (e.code === "KeyH" && !e.shiftKey && !e.ctrlKey && !e.metaKey) return "exit";
   // Page-mode only keys
   if (surface === "page") {
     if (e.code === "Space" && !e.shiftKey) return "togglePlay";
@@ -79,6 +86,8 @@ function resolveReaderKey(
       return e.code === "Escape" ? "exit" : "none";
     }
     if (e.code === "Space" && !e.shiftKey) return "togglePlay";
+    if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) return "none";
+    if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) return "none";
     if (e.code === "ArrowLeft" && !e.shiftKey && !e.ctrlKey) return "wpmDown";
     if (e.code === "ArrowRight" && !e.shiftKey && !e.ctrlKey) return "wpmUp";
     return e.code === "Escape" ? "exit" : "none";
@@ -124,6 +133,12 @@ describe("useKeyboardShortcuts — key binding resolution (any mode)", () => {
     // N in narrate is idempotent at the hook layer — still resolves to enterNarrate;
     // handleSelectMode short-circuits the no-op transition.
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("enterNarrate");
+  });
+
+  it("H (bare) exits home from all reader modes", () => {
+    for (const mode of ["page", "focus", "flow", "narrate"] as const) {
+      expect(resolveReaderKey(makeKeyEvent({ code: "KeyH" }), mode)).toBe("exit");
+    }
   });
 
   it("Shift+N is NOT captured by the universal enterNarrate binding", () => {
@@ -189,6 +204,11 @@ describe("useKeyboardShortcuts — flow surface keys", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "flow")).toBe("togglePlay");
   });
 
+  it("Flow Up/Down are reserved for line navigation, not speed changes", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "flow")).toBe("none");
+    expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "flow")).toBe("none");
+  });
+
   it("narrate keeps the flow-family keyboard surface but moves speed to Up/Down", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "narrate")).toBe("togglePlay");
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "narrate")).toBe("enterNarrate");
@@ -218,6 +238,120 @@ describe("useKeyboardShortcuts — flow surface keys", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "ArrowRight" }), "narrate")).toBe("none");
     expect(resolveReaderKey(makeKeyEvent({ code: "ArrowUp" }), "narrate")).toBe("wpmUp");
     expect(resolveReaderKey(makeKeyEvent({ code: "ArrowDown" }), "narrate")).toBe("wpmDown");
+  });
+});
+
+describe("useReaderKeys hook dispatch", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  function Harness({ mode, exitReader, flowPrevLine, flowNextLine, adjustWpm = vi.fn() }: {
+    mode: "page" | "focus" | "flow" | "narrate";
+    exitReader: () => void;
+    flowPrevLine?: () => void;
+    flowNextLine?: () => void;
+    adjustWpm?: (delta: number) => void;
+  }) {
+    useReaderKeys(
+      "reader",
+      mode,
+      vi.fn(),
+      vi.fn(),
+      adjustWpm,
+      exitReader,
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      flowPrevLine,
+      flowNextLine,
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+      vi.fn(),
+    );
+    return null;
+  }
+
+  it("plain H calls the reader exit callback from every mode", async () => {
+    for (const mode of ["page", "focus", "flow", "narrate"] as const) {
+      const exitReader = vi.fn();
+      await act(async () => {
+        root.render(React.createElement(Harness, { mode, exitReader }));
+      });
+
+      const event = new KeyboardEvent("keydown", { code: "KeyH", bubbles: true, cancelable: true });
+      window.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(exitReader).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it("Flow ArrowUp and ArrowDown prevent page scroll and route to line navigation", async () => {
+    const flowPrevLine = vi.fn();
+    const flowNextLine = vi.fn();
+    await act(async () => {
+      root.render(React.createElement(Harness, {
+        mode: "flow",
+        exitReader: vi.fn(),
+        flowPrevLine,
+        flowNextLine,
+      }));
+    });
+
+    const up = new KeyboardEvent("keydown", { code: "ArrowUp", bubbles: true, cancelable: true });
+    const down = new KeyboardEvent("keydown", { code: "ArrowDown", bubbles: true, cancelable: true });
+    window.dispatchEvent(up);
+    window.dispatchEvent(down);
+
+    expect(up.defaultPrevented).toBe(true);
+    expect(down.defaultPrevented).toBe(true);
+    expect(flowPrevLine).toHaveBeenCalledTimes(1);
+    expect(flowNextLine).toHaveBeenCalledTimes(1);
+  });
+
+  it("Narrate ArrowUp and ArrowDown keep speed behavior", async () => {
+    const adjustWpm = vi.fn();
+    await act(async () => {
+      root.render(React.createElement(Harness, {
+        mode: "narrate",
+        exitReader: vi.fn(),
+        adjustWpm,
+      }));
+    });
+
+    window.dispatchEvent(new KeyboardEvent("keydown", { code: "ArrowUp", bubbles: true, cancelable: true }));
+    window.dispatchEvent(new KeyboardEvent("keydown", { code: "ArrowDown", bubbles: true, cancelable: true }));
+
+    expect(adjustWpm).toHaveBeenCalledWith(WPM_STEP);
+    expect(adjustWpm).toHaveBeenCalledWith(-WPM_STEP);
   });
 });
 

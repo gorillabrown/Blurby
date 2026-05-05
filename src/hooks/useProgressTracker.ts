@@ -14,6 +14,7 @@ interface UseProgressTrackerParams {
   readingMode: string;
   useFoliate: boolean;
   foliateFractionRef: React.MutableRefObject<number>;
+  latestFreshCfiRef?: React.MutableRefObject<string | null | undefined>;
   wpm: number;
   wordsLength: number;          // fallback word count when full-book total is unavailable
   totalWords: number;           // resolved global word count for progress / completion
@@ -74,6 +75,7 @@ export function useProgressTracker({
   readingMode,
   useFoliate,
   foliateFractionRef,
+  latestFreshCfiRef,
   wpm,
   wordsLength,
   totalWords,
@@ -228,7 +230,12 @@ export function useProgressTracker({
     (activeDoc as any).furthestPosition = Math.max(furthestPositionRef.current, savePos);
     lastSavedPosRef.current = savePos;
     onUpdateProgress(activeDoc.id, savePos);
-    api.updateDocProgress(activeDoc.id, savePos, (activeDoc as any).cfi || undefined);
+    const freshCfi = useFoliate ? latestFreshCfiRef?.current : (activeDoc as any).cfi;
+    if (freshCfi) {
+      api.updateDocProgress(activeDoc.id, savePos, freshCfi);
+    } else {
+      api.updateDocProgress(activeDoc.id, savePos);
+    }
     // Use active reading time, not total elapsed
     if (activeReadingStartRef.current) {
       activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
@@ -255,11 +262,13 @@ export function useProgressTracker({
   }, [
     activeDoc,
     foliateFractionRef,
+    latestFreshCfiRef,
     onArchiveDoc,
     onUpdateProgress,
     flushGoalActiveReading,
     readingMode,
     resolvedTotalWords,
+    useFoliate,
     onBookCompleted,
     wpm,
   ]);

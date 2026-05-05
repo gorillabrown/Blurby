@@ -32,6 +32,10 @@ import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
 import { resolveFoliateWordHighlightClass } from "../utils/foliateWordHighlight";
 import {
+  chooseResumeAnchor,
+  wordIndexFromProgress,
+} from "../utils/foliateResumeAnchor";
+import {
   FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
   type FlowRenderedWordRootDescriptor,
 } from "../utils/FlowScrollEngine";
@@ -297,6 +301,7 @@ interface FoliatePageViewProps {
   onWordClick?: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number) => void;
   onLoad?: () => void;
   onWordsReextracted?: () => void;
+  onExit?: () => void;
   initialCfi?: string | null;
   focusTextSize?: number;
   /** Ref for imperative access (getWords, goTo, next, prev) */
@@ -386,6 +391,7 @@ export default function FoliatePageView({
   onWordClick,
   onLoad,
   onWordsReextracted,
+  onExit,
   initialCfi,
   focusTextSize,
   viewApiRef,
@@ -412,6 +418,7 @@ export default function FoliatePageView({
   const cursorRef = useRef<HTMLDivElement>(null);
   const flowRafRef = useRef<number>(0);
   const lastLoadedSectionIndexRef = useRef<number | null>(null);
+  const resumeCorrectionKeyRef = useRef<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -490,6 +497,148 @@ export default function FoliatePageView({
     if (typeof sectionIndex === "number") return sectionIndex;
     return typeof roots[0]?.sectionIndex === "number" ? roots[0].sectionIndex : null;
   }, [getRenderedWordRoots]);
+
+  const findFirstVisibleWordIndexFromView = useCallback((view: any): number => {
+    const contents = view?.renderer?.getContents?.() ?? [];
+    for (const { doc: d, index } of contents) {
+      try {
+        if (typeof index !== "number") continue;
+        const spans = d.querySelectorAll("[data-word-index]");
+        for (const span of spans) {
+          const rect = (span as HTMLElement).getBoundingClientRect();
+          const iframeWin = d.defaultView;
+          if (!iframeWin) continue;
+          if (
+            rect.width > 0 &&
+            rect.left >= 0 &&
+            rect.left < iframeWin.innerWidth &&
+            rect.top >= 0 &&
+            rect.top < iframeWin.innerHeight
+          ) {
+            const renderedIdx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
+            if (renderedIdx >= 0) {
+              return resolveRenderedWordIndexToGlobal(
+                index,
+                renderedIdx,
+                foliateWordsRef.current,
+                bookWordSectionsRef.current,
+              );
+            }
+          }
+        }
+      } catch {
+        // Section may be unloading; keep scanning loaded content.
+      }
+    }
+    return -1;
+  }, []);
+
+  const getSectionForWordIndexFromRefs = useCallback((wordIndex: number): number | null => {
+    const liveSections = bookWordSectionsRef.current;
+    if (liveSections && liveSections.length > 0) {
+      for (let i = liveSections.length - 1; i >= 0; i--) {
+        if (wordIndex >= liveSections[i].startWordIdx) {
+          return liveSections[i].sectionIndex;
+        }
+      }
+      return liveSections[0]?.sectionIndex ?? null;
+    }
+
+    const words = foliateWordsRef.current;
+    if (wordIndex >= 0 && wordIndex < words.length) {
+      return words[wordIndex].sectionIndex;
+    }
+    return null;
+  }, []);
+
+  const emitRelocateForWord = useCallback((view: any, wordIndex: number): boolean => {
+    const contents = view?.renderer?.getContents?.() ?? [];
+    for (const { doc: d, index } of contents) {
+      try {
+        if (typeof index !== "number") continue;
+        const liveSections = bookWordSectionsRef.current;
+        const renderedWordIndex = resolveGlobalWordIndexToRendered(
+          index,
+          wordIndex,
+          foliateWordsRef.current,
+          liveSections,
+        );
+        const span = d?.querySelector?.(`[data-word-index="${renderedWordIndex}"]`) as HTMLElement | null;
+        if (!span) continue;
+        const range = d.createRange();
+        range.selectNodeContents(span);
+        view.renderer?.scrollToAnchor?.(range);
+        const cfi = view.getCFI?.(index, range);
+        if (cfi) {
+          const wordCount = activeDoc.wordCount || foliateWordsRef.current.length || 1;
+          onRelocate?.({
+            cfi,
+            fraction: Math.min(1, Math.max(0, wordIndex / Math.max(1, wordCount))),
+          });
+        }
+        return true;
+      } catch {
+        // Try another loaded content source.
+      }
+    }
+    return false;
+  }, [activeDoc.wordCount, onRelocate]);
+
+  const navigateToNearestWordAnchor = useCallback(async (view: any, wordIndex: number) => {
+    if (emitRelocateForWord(view, wordIndex)) return;
+
+    const sectionIndex = getSectionForWordIndexFromRefs(wordIndex);
+    const sections = view?.book?.sections;
+    const section = typeof sectionIndex === "number" ? sections?.[sectionIndex] : null;
+    if (section?.id) {
+      await view.goTo(section.id);
+      return;
+    }
+    if (section?.href) {
+      await view.goTo(section.href);
+      return;
+    }
+
+    const wordCount = activeDoc.wordCount || foliateWordsRef.current.length || 1;
+    await view.goToFraction?.(Math.min(1, Math.max(0, wordIndex / Math.max(1, wordCount))));
+  }, [activeDoc.wordCount, emitRelocateForWord, getSectionForWordIndexFromRefs]);
+
+  const reconcileInitialResumeAnchor = useCallback(async (view: any) => {
+    if (!initialCfi) return;
+    const savedWordIndex = wordIndexFromProgress(activeDoc.position || 0, activeDoc.wordCount || 0);
+    if (savedWordIndex <= 0) return;
+
+    const key = `${activeDoc.id}:${initialCfi}`;
+    if (resumeCorrectionKeyRef.current === key) return;
+
+    const restoredWordIndex = findFirstVisibleWordIndexFromView(view);
+    if (restoredWordIndex < 0) return;
+
+    const choice = chooseResumeAnchor({
+      savedWordIndex,
+      restoredWordIndex,
+      wordCount: activeDoc.wordCount || foliateWordsRef.current.length || 0,
+      hasInitialCfi: true,
+    });
+    if (choice.kind !== "reconciled-word" || choice.wordIndex == null) return;
+
+    resumeCorrectionKeyRef.current = key;
+    if (import.meta.env.DEV) {
+      console.warn(
+        "[foliate] resume anchor mismatch; correcting to saved word",
+        choice.wordIndex,
+        choice.metadata,
+      );
+    }
+    await navigateToNearestWordAnchor(view, choice.wordIndex);
+  }, [
+    activeDoc.id,
+    activeDoc.position,
+    activeDoc.wordCount,
+    findFirstVisibleWordIndexFromView,
+    initialCfi,
+    navigateToNearestWordAnchor,
+  ]);
 
   const waitForSectionReady = useCallback(
     (sectionIndex?: number | null, timeoutMs = FOLIATE_SECTION_READY_TIMEOUT_MS) =>
@@ -720,6 +869,7 @@ export default function FoliatePageView({
           }
 
           lastLoadedSectionIndexRef.current = index;
+          void reconcileInitialResumeAnchor(viewRef.current);
 
           // Delegated click handler — uses injected word spans (same pattern as PageReaderView)
           doc.body.addEventListener("click", (e: MouseEvent) => {
@@ -1011,30 +1161,7 @@ export default function FoliatePageView({
               }
               return null;
             },
-            findFirstVisibleWordIndex: () => {
-              // Walk all loaded sections to find the first word span that's visible
-              const contents = view.renderer?.getContents?.() ?? [];
-              for (const { doc: d, index } of contents) {
-                try {
-                  if (typeof index !== "number") continue;
-                  const spans = d.querySelectorAll("[data-word-index]");
-                  for (const span of spans) {
-                    const rect = (span as HTMLElement).getBoundingClientRect();
-                    const iframeWin = d.defaultView;
-                    if (!iframeWin) continue;
-                    // Check if the span is within the visible viewport of the iframe
-                    if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
-                        rect.top >= 0 && rect.top < iframeWin.innerHeight) {
-                      const renderedIdx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
-                      if (renderedIdx >= 0) {
-                        return resolveRenderedWordIndexToGlobal(index, renderedIdx, foliateWordsRef.current, bookWordSectionsRef.current);
-                      }
-                    }
-                  }
-                } catch { /* Section may be unloading — skip to next content source */ }
-              }
-              return -1; // No visible words (e.g., cover page with only images)
-            },
+            findFirstVisibleWordIndex: () => findFirstVisibleWordIndexFromView(view),
             isUserBrowsing: () => userBrowsingRef.current,
             returnToNarration: () => {
               userBrowsingRef.current = false;
@@ -1362,6 +1489,19 @@ export default function FoliatePageView({
 
   return (
     <div className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}`} ref={containerRef} style={{ overflow: flowMode ? "auto" : "hidden" }}>
+      {!flowMode && onExit && (
+        <button
+          className="page-reader-exit-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onExit();
+          }}
+          aria-label="Exit reader"
+          title="Exit reader (Esc, H)"
+        >
+          ESC
+        </button>
+      )}
       {/* Page turn buttons — hidden in Flow Mode (no pagination) */}
       {!flowMode && (
         <>

@@ -188,13 +188,24 @@ export function useFlowScrollSync({
     engine.jumpToWord(highlightedWordIndexRef.current);
   };
 
+  const isEngineActive = (engine: FlowScrollEngine | null | undefined): engine is FlowScrollEngine => {
+    const state = engine?.getState();
+    return Boolean(state?.running || state?.previewing);
+  };
+
   // ── Effect 1: FlowScrollEngine lifecycle — start/stop/pause ───────────
   useEffect(() => {
-    if (readingMode !== "flow" || !flowPlaying) {
-      // Stop the engine when not in flow mode or paused
+    if (readingMode !== "flow") {
+      // Stop the engine when leaving the shared Flow/Narrate surface.
       if (flowScrollEngineRef.current) {
         flowScrollEngineRef.current.stop();
       }
+      setFlowProgress(null);
+      return;
+    }
+
+    if (isNarrating && !flowPlaying) {
+      flowScrollEngineRef.current?.stop();
       return;
     }
 
@@ -203,6 +214,7 @@ export function useFlowScrollSync({
     if (!flowScrollEngineRef.current) {
       flowScrollEngineRef.current = new FlowScrollEngine({
         onWordAdvance: (idx: number) => {
+          highlightedWordIndexRef.current = idx;
           setHighlightedWordIndex(idx);
           if (evalTrace?.enabled) {
             evalTrace.record({ kind: "word", source: "flow", wordIndex: idx });
@@ -263,10 +275,15 @@ export function useFlowScrollSync({
       if (!engine) return;
       const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
       if (totalWords > 0) engine.setTotalWords(totalWords);
-      engine.start(
+      const previewAnchor = engine.getState().previewing || engine.getState().running
+        ? engine.getCurrentWordIndex()
+        : highlightedWordIndexRef.current;
+      const startWord = flowPlaying ? highlightedWordIndexRef.current : previewAnchor;
+      const startMethod = flowPlaying ? engine.start.bind(engine) : engine.startPaused.bind(engine);
+      startMethod(
         container,
         cursor,
-        highlightedWordIndexRef.current,
+        startWord,
         effectiveWpm,
         paragraphBreaks,
         isEink,
@@ -278,9 +295,14 @@ export function useFlowScrollSync({
 
     return () => {
       cancelled = true;
+    };
+  }, [readingMode, flowPlaying, isNarrating, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    return () => {
       flowScrollEngineRef.current?.stop();
     };
-  }, [readingMode, flowPlaying, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Effect 2: Auto-resume flow after cross-book transition ────────────
   useEffect(() => {
@@ -327,14 +349,14 @@ export function useFlowScrollSync({
 
   // ── Effect 5: Rebuild line map on font size change ────────────────────
   useEffect(() => {
-    if (readingMode === "flow" && flowScrollEngineRef.current?.getState().running) {
+    if (readingMode === "flow" && isEngineActive(flowScrollEngineRef.current)) {
       let cancelled = false;
       const timer = setTimeout(() => {
         const rebuildWhenReady = async () => {
           await waitForFoliateFlowReady();
           if (cancelled) return;
           const engine = flowScrollEngineRef.current;
-          if (!engine?.getState().running) return;
+          if (!isEngineActive(engine)) return;
           engine.rebuildLineMap();
           syncEngineToCurrentWord(engine);
         };
@@ -349,7 +371,7 @@ export function useFlowScrollSync({
 
   // ── Effect 5b: Rebuild after Foliate stamps a new rendered-word surface ─
   useEffect(() => {
-    if (!useFoliate || readingMode !== "flow" || !flowPlaying) {
+    if (!useFoliate || readingMode !== "flow" || !isEngineActive(flowScrollEngineRef.current)) {
       lastHandledFoliateRenderVersionRef.current = foliateRenderVersion;
       return;
     }
@@ -360,7 +382,7 @@ export function useFlowScrollSync({
       await waitForFoliateFlowReady();
       if (cancelled) return;
       const engine = flowScrollEngineRef.current;
-      if (!engine?.getState().running) return;
+      if (!isEngineActive(engine)) return;
       engine.rebuildLineMap();
       syncEngineToCurrentWord(engine);
       lastHandledFoliateRenderVersionRef.current = foliateRenderVersion;

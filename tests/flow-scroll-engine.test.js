@@ -13,8 +13,8 @@ import {
 // Mock constants
 vi.mock("../src/constants.ts", () => ({
   FLOW_READING_ZONE_POSITION: 0.25,
-  FLOW_CURSOR_HEIGHT_PX: 3,
-  FLOW_CURSOR_EINK_HEIGHT_PX: 4,
+  FLOW_CURSOR_HEIGHT_PX: 7,
+  FLOW_CURSOR_EINK_HEIGHT_PX: 8,
   FLOW_SCROLL_RESUME_DELAY_MS: 2000,
   FLOW_LINE_ADVANCE_BUFFER_MS: 50,
   // FLOW-INF-B timer bar constants
@@ -419,14 +419,14 @@ describe("FlowScrollEngine", () => {
     expect(cursor.style.display).toBe("block");
   });
 
-  it("should set cursor height to 5px in normal mode (FLOW-INF-B timer bar)", () => {
+  it("should set cursor height stronger than the timer bar in normal mode", () => {
     engine.start(container, cursor, 0, 300, new Set(), false);
-    expect(cursor.style.height).toBe("5px");
+    expect(parseInt(cursor.style.height, 10)).toBeGreaterThan(5);
   });
 
-  it("should set cursor height to 6px in e-ink mode (FLOW-INF-B timer bar)", () => {
+  it("should set cursor height stronger than the timer bar in e-ink mode", () => {
     engine.start(container, cursor, 0, 300, new Set(), true);
-    expect(cursor.style.height).toBe("6px");
+    expect(parseInt(cursor.style.height, 10)).toBeGreaterThan(6);
   });
 
   it("should hide cursor on stop", () => {
@@ -850,5 +850,115 @@ describe("FlowScrollEngine - Edge Cases", () => {
 
     engine.destroy();
     document.body.removeChild(container);
+  });
+
+  it("startPaused previews the current line without starting advancement timers", () => {
+    vi.useFakeTimers();
+    const callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+      onLineChange: vi.fn(),
+      onProgressUpdate: vi.fn(),
+    };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.startPaused(container, cursor, 7, 300, new Set(), false);
+
+    expect(engine.getState()).toMatchObject({
+      running: false,
+      paused: true,
+      previewing: true,
+      lineIndex: 1,
+      wordIndex: 7,
+      totalLines: 4,
+    });
+    expect(cursor.style.display).toBe("block");
+    expect(cursor.style.width).toBe("340px");
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(7);
+    expect(callbacks.onProgressUpdate).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+
+    vi.advanceTimersByTime(1000);
+
+    expect(callbacks.onComplete).not.toHaveBeenCalled();
+    expect(engine.getState().wordIndex).toBe(7);
+
+    engine.destroy();
+    document.body.removeChild(container);
+    vi.useRealTimers();
+  });
+
+  it("starting after a paused preview arms one advancement path", () => {
+    vi.useFakeTimers();
+    const callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+      onLineChange: vi.fn(),
+      onProgressUpdate: vi.fn(),
+    };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.startPaused(container, cursor, 7, 300, new Set(), false);
+    expect(vi.getTimerCount()).toBe(0);
+
+    engine.start(container, cursor, 7, 300, new Set(), false);
+
+    expect(engine.getState()).toMatchObject({
+      running: true,
+      paused: false,
+      previewing: false,
+      lineIndex: 1,
+      wordIndex: 7,
+    });
+    expect(vi.getTimerCount()).toBe(1);
+
+    engine.destroy();
+    document.body.removeChild(container);
+    vi.useRealTimers();
+  });
+
+  it("jumpToLine works while paused previewing and updates the line anchor", () => {
+    vi.useFakeTimers();
+    const callbacks = {
+      onWordAdvance: vi.fn(),
+      onComplete: vi.fn(),
+      onLineChange: vi.fn(),
+      onProgressUpdate: vi.fn(),
+    };
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(20, 5);
+    const cursor = createMockCursor();
+    document.body.appendChild(container);
+
+    engine.startPaused(container, cursor, 7, 300, new Set(), false);
+    callbacks.onWordAdvance.mockClear();
+    callbacks.onLineChange.mockClear();
+    callbacks.onProgressUpdate.mockClear();
+
+    engine.jumpToLine("next");
+
+    expect(engine.getState()).toMatchObject({
+      running: false,
+      paused: true,
+      previewing: true,
+      lineIndex: 2,
+      wordIndex: 10,
+    });
+    expect(callbacks.onWordAdvance).toHaveBeenCalledWith(10);
+    expect(callbacks.onLineChange).toHaveBeenCalledTimes(1);
+    expect(callbacks.onProgressUpdate).toHaveBeenCalledTimes(1);
+
+    vi.advanceTimersByTime(1000);
+    expect(callbacks.onComplete).not.toHaveBeenCalled();
+
+    engine.destroy();
+    document.body.removeChild(container);
+    vi.useRealTimers();
   });
 });

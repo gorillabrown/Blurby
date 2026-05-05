@@ -42,6 +42,8 @@ export function globalToLocal(sections: SectionBoundary[], globalWordIdx: number
 // ── Narration state machine types ────────────────────────────────────────────
 
 export type NarrationStatus = "idle" | "loading" | "speaking" | "paused" | "holding" | "error" | "warming";
+export type NarrationStartupPhase = "idle" | "loading-engine" | "buffering-audio" | "speaking" | "paused" | "error";
+export type NarrationStartupTone = "neutral" | "info" | "success" | "warning" | "error";
 
 export interface NarrationState {
   status: NarrationStatus;

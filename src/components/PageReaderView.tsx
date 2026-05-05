@@ -476,6 +476,17 @@ export default function PageReaderView({
       role="document"
       aria-label={`Reading ${formatDisplayTitle(activeDoc.title)}`}
     >
+      <button
+        className="page-reader-exit-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          onExit(highlightedWordIndex);
+        }}
+        aria-label="Exit reader"
+        title="Exit reader (Esc, H)"
+      >
+        ESC
+      </button>
       {/* Header */}
       <div className="page-reader-header">
         <span className="page-reader-title">{formatDisplayTitle(activeDoc.title)}</span>

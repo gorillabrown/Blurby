@@ -134,6 +134,63 @@ describe("ReaderBottomBar controls", () => {
     expect(container.querySelector('[aria-label="Kokoro rate"]')).not.toBeNull();
     expect(container.querySelector('[aria-label="Legacy Kokoro rate"]')).toBeNull();
   });
+
+  it("shows buffering status without claiming narration before first audio truth", async () => {
+    await act(async () => {
+      root.render(
+        <ReaderBottomBar
+          {...baseProps}
+          readingMode="narrate"
+          isNarrating={false}
+          playing={true}
+          narrationStatusLabel="Buffering audio..."
+          narrationStatusTone="info"
+          narrationShowSpinner={true}
+        />,
+      );
+    });
+
+    expect(container.textContent).toContain("Buffering audio...");
+    expect(container.textContent).not.toContain("Narrating");
+    expect(container.querySelector('[role="status"]')?.getAttribute("aria-label")).toBe("Buffering audio...");
+  });
+
+  it("shows visible TTS unavailable error status", async () => {
+    await act(async () => {
+      root.render(
+        <ReaderBottomBar
+          {...baseProps}
+          readingMode="narrate"
+          isNarrating={false}
+          playing={false}
+          narrationStatusLabel="TTS unavailable"
+          narrationStatusTone="error"
+          narrationError="Kokoro preload failed"
+        />,
+      );
+    });
+
+    expect(container.textContent).toContain("TTS unavailable");
+    expect(container.textContent).toContain("Kokoro preload failed");
+  });
+
+  it("shows Escape exit and H home hints consistently across reader modes", async () => {
+    for (const mode of ["page", "focus", "flow", "narrate"] as const) {
+      await act(async () => {
+        root.render(
+          <ReaderBottomBar
+            {...baseProps}
+            readingMode={mode}
+            isNarrating={mode === "narrate"}
+          />,
+        );
+      });
+
+      const hint = container.querySelector(".rbb-info-hint")?.textContent ?? "";
+      expect(hint).toContain("Esc exit");
+      expect(hint).toContain("H home");
+    }
+  });
 });
 
 // READER-4M-2: Four mode buttons — Group A tests

@@ -4,6 +4,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { TTS_FIRST_AUDIO_TIMEOUT_MS } from "../src/constants";
 
 function flushPromises() {
   return Promise.resolve().then(() => Promise.resolve()).then(() => Promise.resolve());
@@ -303,5 +304,204 @@ describe("useNarration mount", () => {
       recoverable: false,
     });
     expect(harness.getSnapshot()?.kokoroError).toBe("Legacy-only Kokoro failure");
+  });
+
+  it("surfaces Kokoro preload rejection as recoverable startup error instead of indefinite warming", async () => {
+    electronApiMock.api.kokoroPreload.mockRejectedValueOnce(new Error("Preload worker crashed"));
+    const harness = await renderHarness();
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("kokoro");
+      await flushPromises();
+      const result = harness.getSnapshot()?.startCursorDriven(["alpha", "beta"], 0, 250, vi.fn());
+      expect(result).toBe("warming");
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.warming).toBe(false);
+    expect(harness.getSnapshot()?.status).toBe("error");
+    expect(harness.getSnapshot()?.startupError).toBe("Preload worker crashed");
+    expect(harness.getSnapshot()?.narrationStatusLabel).toBe("TTS unavailable");
+    expect(harness.getSnapshot()?.narrationError).toBe("Preload worker crashed");
+  });
+
+  it("first-audio timeout stops active Web Speech playback and ignores stale callbacks", async () => {
+    vi.useFakeTimers();
+    const spokenUtterances: Array<{
+      onboundary?: ((event: { name: string }) => void) | null;
+      onend?: (() => void) | null;
+      onerror?: (() => void) | null;
+    }> = [];
+    const cancel = vi.fn();
+
+    class MockSpeechSynthesisUtterance {
+      text: string;
+      rate = 1;
+      pitch = 1;
+      voice: SpeechSynthesisVoice | null = null;
+      onboundary: ((event: { name: string }) => void) | null = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+
+    (window as any).SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
+    (globalThis as any).SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        getVoices: () => [],
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        speak: vi.fn((utterance) => spokenUtterances.push(utterance)),
+        cancel,
+        pause: () => {},
+        resume: () => {},
+      },
+    });
+
+    try {
+      const harness = await renderHarness();
+      const onWordAdvance = vi.fn();
+
+      await act(async () => {
+        const result = harness.getSnapshot()?.startCursorDriven(
+          Array.from({ length: 45 }, (_, index) => `word${index}`),
+          0,
+          250,
+          onWordAdvance,
+        );
+        expect(result).toBe("started");
+      });
+
+      expect(spokenUtterances).toHaveLength(1);
+
+      await act(async () => {
+        vi.advanceTimersByTime(TTS_FIRST_AUDIO_TIMEOUT_MS + 1);
+        await flushPromises();
+      });
+
+      expect(harness.getSnapshot()?.status).toBe("error");
+      expect(cancel).toHaveBeenCalled();
+
+      await act(async () => {
+        spokenUtterances[0]?.onboundary?.({ name: "word" });
+        spokenUtterances[0]?.onend?.();
+        await flushPromises();
+      });
+
+      expect(onWordAdvance).not.toHaveBeenCalled();
+      expect(harness.getSnapshot()?.cursorWordIndex).toBe(0);
+      expect(spokenUtterances).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps active Web Speech narration running when a background Kokoro error arrives", async () => {
+    const spokenUtterances: Array<{
+      onboundary?: ((event: { name: string }) => void) | null;
+      onend?: (() => void) | null;
+      onerror?: (() => void) | null;
+    }> = [];
+    const cancel = vi.fn();
+
+    class MockSpeechSynthesisUtterance {
+      text: string;
+      rate = 1;
+      pitch = 1;
+      voice: SpeechSynthesisVoice | null = null;
+      onboundary: ((event: { name: string }) => void) | null = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+
+    (window as any).SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
+    (globalThis as any).SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        getVoices: () => [],
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        speak: vi.fn((utterance) => spokenUtterances.push(utterance)),
+        cancel,
+        pause: () => {},
+        resume: () => {},
+      },
+    });
+
+    const harness = await renderHarness();
+
+    await act(async () => {
+      const result = harness.getSnapshot()?.startCursorDriven(["alpha", "beta"], 0, 250, vi.fn());
+      expect(result).toBe("started");
+    });
+
+    expect(spokenUtterances).toHaveLength(1);
+    expect(harness.getSnapshot()?.status).toBe("speaking");
+    const cancelCallsBeforeKokoroError = cancel.mock.calls.length;
+
+    await act(async () => {
+      await electronApiMock.emit("tts-kokoro-engine-status", {
+        status: "error",
+        detail: "Background Kokoro worker crashed",
+        reason: "worker-crash",
+        ready: false,
+        loading: false,
+        recoverable: false,
+      });
+    });
+
+    expect(harness.getSnapshot()?.status).toBe("speaking");
+    expect(harness.getSnapshot()?.speaking).toBe(true);
+    expect(harness.getSnapshot()?.kokoroError).toBe("Background Kokoro worker crashed");
+    expect(harness.getSnapshot()?.startupError).toBeNull();
+    expect(harness.getSnapshot()?.narrationError).toBeNull();
+    expect(cancel).toHaveBeenCalledTimes(cancelCallsBeforeKokoroError);
+  });
+
+  it("does not clear a non-Kokoro startup error when a background Kokoro recovery snapshot arrives", async () => {
+    const harness = await renderHarness();
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("nano");
+      await flushPromises();
+      const result = harness.getSnapshot()?.startCursorDriven(["alpha", "beta"], 0, 250, vi.fn());
+      expect(result).toBe("error");
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.status).toBe("error");
+    expect(harness.getSnapshot()?.startupError).toBe(
+      "MOSS Nano is selected but the experimental Nano strategy is not enabled.",
+    );
+
+    await act(async () => {
+      await electronApiMock.emit("tts-kokoro-engine-status", {
+        status: "ready",
+        detail: null,
+        reason: null,
+        ready: true,
+        loading: false,
+        recoverable: false,
+      });
+    });
+
+    expect(harness.getSnapshot()?.kokoroReady).toBe(true);
+    expect(harness.getSnapshot()?.status).toBe("error");
+    expect(harness.getSnapshot()?.startupError).toBe(
+      "MOSS Nano is selected but the experimental Nano strategy is not enabled.",
+    );
+    expect(harness.getSnapshot()?.narrationError).toBe(
+      "MOSS Nano is selected but the experimental Nano strategy is not enabled.",
+    );
   });
 });

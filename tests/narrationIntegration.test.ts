@@ -17,7 +17,7 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("readingMode={readingMode}");
     expect(src).toContain("flowMode={isFlowSurfaceMode}");
-    expect(src).toContain("isNarrating={isNarrating && narration.speaking && !narration.warming}");
+    expect(src).toContain("isNarrating={isNarrating && narration.isActuallyNarrating}");
     expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
     expect(src).toContain("getAudioProgress={narration.speaking ? narration.getAudioProgress : null}");
   });

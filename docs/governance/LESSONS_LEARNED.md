@@ -1468,3 +1468,17 @@ speakChunk() {
 **Guardrail:** When adding a new opt-in TTS engine, isolate the sidecar, engine wrapper, IPC/preload channels, renderer strategy, and settings status component first. Only extract shared abstractions after two real engine paths prove identical behavior and regression tests define the shared boundary. Product-posture regressions must be tested alongside feature tests: default engine, recommended opt-in labels, disabled engines, and no silent fallback.
 
 **Related:** POCKET-TTS-1 sprint, `main/pocket-tts-engine.js`, `main/pocket-tts-sidecar.js`, `scripts/pocket_tts_sidecar.py`, `src/hooks/narration/pocketTtsStrategy.ts`, `src/components/settings/TtsEngineSelector.tsx`, `tests/ttsSettingsPocketTts.test.tsx`.
+
+---
+
+### [2026-05-05] LL-113: Reader Recovery State Must Be Engine-Scoped and Preview Timers Must Be Owned
+
+**Area:** reader modes, TTS startup, Flow engine, review hardening
+**Status:** active
+**Priority:** high
+
+**Context:** Reading Mode Live Test Remediation added startup truth/watchdogs for Narrate and paused preview support for Flow. Review found two important edge cases: terminal startup failures could be reported without proving they belonged to the selected/current engine, and Flow paused preview could accidentally schedule advancement outside the engine's tracked timer ownership.
+
+**Guardrail:** Engine startup failure and recovery state must be scoped to the selected/current TTS engine before it changes user-facing narration status. Stale engine failures must not poison a newly selected engine. Flow preview/paused setup must initialize cursor and line state without scheduling untracked advancement timers; every timer that can move the cursor must be owned, cleared, and covered by tests.
+
+**Related:** READLIVE-REMEDIATION, `src/hooks/useNarration.ts`, `src/utils/narrationStartupState.ts`, `src/utils/FlowScrollEngine.ts`, `tests/useNarrationMount.test.tsx`, `tests/flowTimerCursor.test.ts`.

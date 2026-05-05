@@ -173,10 +173,10 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
     closeHighlight();
   }, [highlightWord, highlightIdx, wordIndex, words.length, activeDoc.title, closeHighlight]);
 
-  // H key: save current word during RSVP, or open menu when paused with selection
+  // Shift+H saves current word during RSVP. Plain H is reserved for home.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.code !== "KeyH" || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      if (e.code !== "KeyH" || e.ctrlKey || e.metaKey || !e.shiftKey) return;
       if (playing) {
         // Save current word without pausing
         e.preventDefault();

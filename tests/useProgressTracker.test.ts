@@ -296,6 +296,122 @@ describe("useProgressTracker — canonical anchor persistence", () => {
   });
 });
 
+describe("useProgressTracker — fresh CFI persistence", () => {
+  let root: Root | null = null;
+  let container: HTMLDivElement | null = null;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-05T12:00:00"));
+    (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+    (window as any).electronAPI = mockApi;
+    mockApi.updateDocProgress.mockClear();
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    if (root) {
+      flushSync(() => root?.unmount());
+      root = null;
+    }
+    container?.remove();
+    container = null;
+    vi.useRealTimers();
+  });
+
+  it("omits stale activeDoc.cfi on foliate exit when no fresh CFI was supplied", async () => {
+    const { useProgressTracker } = await import("../src/hooks/useProgressTracker");
+    let tracker: ReturnType<typeof useProgressTracker> | null = null;
+
+    function Harness() {
+      tracker = useProgressTracker({
+        activeDoc: {
+          id: "doc",
+          title: "Doc",
+          position: 100,
+          content: "",
+          wordCount: 10_000,
+          cfi: "stale-cfi",
+        } as any,
+        wordIndex: 0,
+        anchorWordIndex: 2_000,
+        readingMode: "page",
+        useFoliate: true,
+        foliateFractionRef: { current: 0.2 },
+        latestFreshCfiRef: { current: null },
+        wpm: 300,
+        wordsLength: 10_000,
+        totalWords: 10_000,
+        sessionStartWordRef: { current: 0 },
+        activeReadingMsRef: { current: 0 },
+        activeReadingStartRef: { current: null },
+        onUpdateProgress: vi.fn(),
+        onArchiveDoc: vi.fn(),
+        onExitReader: vi.fn(),
+      });
+      return null;
+    }
+
+    root = createRoot(container!);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+    });
+
+    await act(async () => {
+      tracker?.finishReading(2_000);
+    });
+
+    expect(mockApi.updateDocProgress).toHaveBeenCalledWith("doc", 2_000);
+    expect(mockApi.updateDocProgress).not.toHaveBeenCalledWith("doc", 2_000, "stale-cfi");
+  });
+
+  it("persists word position and fresh CFI atomically when fresh CFI exists", async () => {
+    const { useProgressTracker } = await import("../src/hooks/useProgressTracker");
+    let tracker: ReturnType<typeof useProgressTracker> | null = null;
+
+    function Harness() {
+      tracker = useProgressTracker({
+        activeDoc: {
+          id: "doc",
+          title: "Doc",
+          position: 100,
+          content: "",
+          wordCount: 10_000,
+          cfi: "stale-cfi",
+        } as any,
+        wordIndex: 0,
+        anchorWordIndex: 2_000,
+        readingMode: "page",
+        useFoliate: true,
+        foliateFractionRef: { current: 0.2 },
+        latestFreshCfiRef: { current: "fresh-cfi" },
+        wpm: 300,
+        wordsLength: 10_000,
+        totalWords: 10_000,
+        sessionStartWordRef: { current: 0 },
+        activeReadingMsRef: { current: 0 },
+        activeReadingStartRef: { current: null },
+        onUpdateProgress: vi.fn(),
+        onArchiveDoc: vi.fn(),
+        onExitReader: vi.fn(),
+      });
+      return null;
+    }
+
+    root = createRoot(container!);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+    });
+
+    await act(async () => {
+      tracker?.finishReading(2_000);
+    });
+
+    expect(mockApi.updateDocProgress).toHaveBeenCalledWith("doc", 2_000, "fresh-cfi");
+  });
+});
+
 describe("useProgressTracker — page calculation", () => {
   it("calculates page number from word index", () => {
     const wordIdx = 1250;
