@@ -4,7 +4,14 @@
 const { Worker } = require("worker_threads");
 const path = require("path");
 const fs = require("fs/promises");
-const { KOKORO_SAMPLE_RATE, TTS_IDLE_TIMEOUT_MS, TTS_MODEL_LOAD_TIMEOUT_MS } = require("./constants");
+const {
+  KOKORO_SAMPLE_RATE,
+  KOKORO_MODEL_ID,
+  KOKORO_MODEL_DTYPE,
+  KOKORO_DEFAULT_VOICE,
+  TTS_IDLE_TIMEOUT_MS,
+  TTS_MODEL_LOAD_TIMEOUT_MS,
+} = require("./constants");
 
 let worker = null;
 let modelReady = false;
@@ -27,6 +34,14 @@ let engineStatusSnapshot = {
   ready: false,
   loading: false,
   recoverable: false,
+};
+let downloadState = {
+  inProgress: false,
+  progress: null,
+  lastAttemptAt: null,
+  lastSuccessAt: null,
+  lastFailureAt: null,
+  lastError: null,
 };
 
 // Progress/status callbacks
@@ -89,6 +104,47 @@ function setLoadingSignal(loading, { notify = true } = {}) {
   if (loadingSignalActive === loading) return;
   loadingSignalActive = loading;
   if (notify && onLoadingCb) onLoadingCb(loading);
+}
+
+function isoNow() {
+  return new Date().toISOString();
+}
+
+function beginDownloadAttempt() {
+  downloadState = {
+    ...downloadState,
+    inProgress: true,
+    progress: null,
+    lastAttemptAt: isoNow(),
+    lastError: null,
+  };
+}
+
+function updateDownloadProgress(progress) {
+  downloadState = {
+    ...downloadState,
+    inProgress: true,
+    progress: Number.isFinite(progress) ? progress : downloadState.progress,
+  };
+}
+
+function finishDownloadAttempt() {
+  downloadState = {
+    ...downloadState,
+    inProgress: false,
+    progress: 100,
+    lastSuccessAt: isoNow(),
+    lastError: null,
+  };
+}
+
+function failDownloadAttempt(err) {
+  downloadState = {
+    ...downloadState,
+    inProgress: false,
+    lastFailureAt: isoNow(),
+    lastError: err?.message || String(err || "Kokoro model load failed"),
+  };
 }
 
 function sendEngineStatus(status, detail, options = {}) {
@@ -309,13 +365,17 @@ async function ensureReady(onProgress) {
   if (modelReady) { resetIdleTimer(); return; }
   if (loadingPromise) return loadingPromise;
 
-  onProgressCb = onProgress || null;
+  onProgressCb = (progress) => {
+    updateDownloadProgress(progress);
+    if (typeof onProgress === "function") onProgress(progress);
+  };
 
   try {
     const { app } = require("electron");
     const cacheDir = path.join(app.getPath("userData"), "models");
     await fs.mkdir(cacheDir, { recursive: true });
 
+    beginDownloadAttempt();
     setLoadingSignal(true);
     sendEngineStatus("warming", "Loading Kokoro model");
     const w = getWorker(cacheDir);
@@ -370,8 +430,10 @@ async function ensureReady(onProgress) {
     });
 
     await loadingPromise;
+    finishDownloadAttempt();
   } catch (err) {
     loadingPromise = null;
+    failDownloadAttempt(err);
     if (err?.reason === "load-timeout") {
       sendEngineStatus("error", err.message, {
         reason: "load-timeout",
@@ -382,6 +444,370 @@ async function ensureReady(onProgress) {
     }
     throw err;
   }
+}
+
+function getCacheDir() {
+  const { app } = require("electron");
+  return path.join(app.getPath("userData"), "models");
+}
+
+function getPackagedModulePath() {
+  try {
+    const { app } = require("electron");
+    if (!app.isPackaged) return null;
+    return path.join(process.resourcesPath, "app.asar.unpacked", "node_modules");
+  } catch {
+    return null;
+  }
+}
+
+function resolveRuntimeModule(request, modulePath = null) {
+  try {
+    const resolved = modulePath
+      ? require.resolve(request, { paths: [modulePath] })
+      : require.resolve(request);
+    return { available: true, path: resolved, error: null };
+  } catch (err) {
+    return { available: false, path: null, error: err?.message || String(err) };
+  }
+}
+
+async function statPath(filePath, kind = "file") {
+  try {
+    const stat = await fs.stat(filePath);
+    const kindMatches = kind === "directory" ? stat.isDirectory() : stat.isFile();
+    return {
+      path: filePath,
+      available: kindMatches,
+      bytes: stat.isFile() ? stat.size : null,
+      kind: stat.isDirectory() ? "directory" : "file",
+      error: kindMatches ? null : `Expected ${kind}`,
+    };
+  } catch (err) {
+    return {
+      path: filePath,
+      available: false,
+      bytes: null,
+      kind,
+      error: err?.code || err?.message || String(err),
+    };
+  }
+}
+
+function getModelCachePaths(cacheDir) {
+  const modelDir = path.join(cacheDir, ...KOKORO_MODEL_ID.split("/"));
+  const modelFile =
+    KOKORO_MODEL_DTYPE === "fp32"
+      ? "model.onnx"
+      : `model_${KOKORO_MODEL_DTYPE}.onnx`;
+  return {
+    modelDir,
+    configPath: path.join(modelDir, "config.json"),
+    tokenizerPath: path.join(modelDir, "tokenizer.json"),
+    modelPath: path.join(modelDir, "onnx", modelFile),
+  };
+}
+
+function getVoicePath(modulePath = null) {
+  if (modulePath) {
+    return path.join(modulePath, "kokoro-js", "voices", `${KOKORO_DEFAULT_VOICE}.bin`);
+  }
+  try {
+    return path.join(path.dirname(require.resolve("kokoro-js")), "..", "voices", `${KOKORO_DEFAULT_VOICE}.bin`);
+  } catch {
+    return path.join(process.cwd(), "node_modules", "kokoro-js", "voices", `${KOKORO_DEFAULT_VOICE}.bin`);
+  }
+}
+
+async function inspectKokoroRuntime() {
+  const modulePath = getPackagedModulePath();
+  let deps;
+  if (modulePath) {
+    const packagedDeps = {
+      kokoroJs: { path: path.join(modulePath, "kokoro-js", "dist", "kokoro.cjs"), kind: "file" },
+      transformers: { path: path.join(modulePath, "@huggingface", "transformers", "dist", "transformers.node.cjs"), kind: "file" },
+      phonemizer: { path: path.join(modulePath, "phonemizer", "dist", "phonemizer.cjs"), kind: "file" },
+      onnxruntimeNode: { path: path.join(modulePath, "onnxruntime-node"), kind: "directory" },
+    };
+    deps = {};
+    for (const [key, dep] of Object.entries(packagedDeps)) {
+      const depStat = await statPath(dep.path, dep.kind);
+      deps[key] = {
+        available: depStat.available,
+        path: dep.path,
+        error: depStat.error,
+      };
+    }
+  } else {
+    deps = {
+      kokoroJs: resolveRuntimeModule("kokoro-js"),
+      transformers: resolveRuntimeModule("@huggingface/transformers"),
+      phonemizer: resolveRuntimeModule("phonemizer"),
+      onnxruntimeNode: resolveRuntimeModule("onnxruntime-node"),
+    };
+  }
+  const voicePath = getVoicePath(modulePath);
+  const voiceAsset = await statPath(voicePath);
+  const dependencyEntries = Object.entries(deps);
+  return {
+    node: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    packaged: Boolean(modulePath),
+    modulePath,
+    dependencies: deps,
+    voiceAsset: {
+      defaultVoice: KOKORO_DEFAULT_VOICE,
+      ...voiceAsset,
+    },
+    ok: dependencyEntries.every(([, dep]) => dep.available) && voiceAsset.available,
+  };
+}
+
+async function inspectKokoroAssets(cacheDir) {
+  const paths = getModelCachePaths(cacheDir);
+  const modelDir = await statPath(paths.modelDir, "directory");
+  const files = {
+    config: {
+      key: "config",
+      label: "Model config",
+      required: true,
+      ...(await statPath(paths.configPath)),
+    },
+    tokenizer: {
+      key: "tokenizer",
+      label: "Tokenizer",
+      required: true,
+      ...(await statPath(paths.tokenizerPath)),
+    },
+    model: {
+      key: "model",
+      label: `${KOKORO_MODEL_DTYPE} ONNX model`,
+      required: true,
+      ...(await statPath(paths.modelPath)),
+    },
+  };
+  const fileValues = Object.values(files);
+  const anyPresent = modelDir.available || fileValues.some((entry) => entry.available);
+  const missing = fileValues.filter((entry) => entry.required && !entry.available).map((entry) => entry.key);
+  return {
+    cacheDir,
+    modelDir: paths.modelDir,
+    configPath: paths.configPath,
+    files,
+    anyPresent,
+    allRequiredPresent: missing.length === 0,
+    missing,
+  };
+}
+
+function checkStatus(pass) {
+  return pass ? "pass" : "fail";
+}
+
+function makePreflightChecks(runtime, assets, workerSnapshot) {
+  const checks = [];
+  for (const [key, dep] of Object.entries(runtime.dependencies)) {
+    checks.push({
+      key: `runtime-${key}`,
+      label: `Runtime dependency: ${key}`,
+      status: checkStatus(dep.available),
+      detail: dep.available ? dep.path : dep.error,
+    });
+  }
+  checks.push({
+    key: "voice-default",
+    label: `Default voice: ${KOKORO_DEFAULT_VOICE}`,
+    status: checkStatus(runtime.voiceAsset.available),
+    detail: runtime.voiceAsset.available ? runtime.voiceAsset.path : runtime.voiceAsset.error,
+  });
+  for (const file of Object.values(assets.files)) {
+    checks.push({
+      key: `asset-${file.key}`,
+      label: file.label,
+      status: checkStatus(file.available),
+      detail: file.available ? file.path : `${file.path} (${file.error})`,
+    });
+  }
+  checks.push({
+    key: "worker-warm-up",
+    label: "Worker warm-up",
+    status: workerSnapshot?.modelReady || modelReady ? "pass" : worker || loadingPromise ? "warn" : "skip",
+    detail:
+      workerSnapshot?.modelReady || modelReady
+        ? "Warm-up inference has completed."
+        : worker || loadingPromise
+        ? "Worker exists but warm-up has not reported ready."
+        : "Worker is not running; preflight did not start it.",
+  });
+  return checks;
+}
+
+async function queryWorkerPreflight() {
+  const currentWorker = worker;
+  if (!currentWorker) return null;
+  const id = ++requestId;
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve({
+        unavailable: true,
+        detail: "Timed out waiting for Kokoro worker preflight status.",
+      });
+    }, 500);
+    const handler = (msg) => {
+      if (msg.type !== "preflight" || msg.id !== id) return;
+      cleanup();
+      resolve(msg.worker || null);
+    };
+    function cleanup() {
+      clearTimeout(timer);
+      currentWorker.off("message", handler);
+    }
+    currentWorker.on("message", handler);
+    try {
+      currentWorker.postMessage({ type: "preflight", id });
+    } catch (err) {
+      cleanup();
+      resolve({
+        unavailable: true,
+        detail: err?.message || "Unable to query Kokoro worker preflight status.",
+      });
+    }
+  });
+}
+
+function classifyPreflight({ runtime, assets, workerSnapshot }) {
+  const reason = engineStatusSnapshot.reason;
+  if (modelReady || workerSnapshot?.modelReady) {
+    return {
+      status: "ready",
+      reason: null,
+      detail: "Kokoro worker is loaded and warm-up inference has completed.",
+      recoverable: false,
+    };
+  }
+  if (loadingPromise || engineStatusSnapshot.loading || retryTimer) {
+    return {
+      status: "loading",
+      reason: reason || "model-loading",
+      detail: engineStatusSnapshot.detail || "Kokoro model is loading.",
+      recoverable: true,
+    };
+  }
+  if (engineStatusSnapshot.status === "error") {
+    const downloadReasons = new Set(["load-error", "load-timeout"]);
+    if (downloadReasons.has(reason) && !assets.allRequiredPresent) {
+      return {
+        status: "download-failed",
+        reason,
+        detail: engineStatusSnapshot.detail || downloadState.lastError || "Kokoro model download failed.",
+        recoverable: true,
+      };
+    }
+    return {
+      status: "runtime-error",
+      reason: reason || "runtime-error",
+      detail: engineStatusSnapshot.detail || "Kokoro runtime failed.",
+      recoverable: Boolean(engineStatusSnapshot.recoverable),
+    };
+  }
+  if (!runtime.ok) {
+    return {
+      status: "runtime-error",
+      reason: "runtime-dependency-missing",
+      detail: "Kokoro runtime dependency or packaged voice asset is missing.",
+      recoverable: false,
+    };
+  }
+  if (!assets.anyPresent) {
+    return {
+      status: "download-needed",
+      reason: "model-cache-empty",
+      detail: "Kokoro model assets are not present in the local cache.",
+      recoverable: true,
+    };
+  }
+  if (!assets.allRequiredPresent) {
+    return {
+      status: "missing-assets",
+      reason: "model-cache-incomplete",
+      detail: `Kokoro cache is missing required assets: ${assets.missing.join(", ")}.`,
+      recoverable: true,
+    };
+  }
+  return {
+    status: "offline-ready",
+    reason: null,
+    detail: "Kokoro model assets and runtime dependencies are available locally; worker is not warm.",
+    recoverable: false,
+  };
+}
+
+async function preflight() {
+  const started = Date.now();
+  const cacheDir = getCacheDir();
+  const [runtime, assets, workerSnapshot] = await Promise.all([
+    inspectKokoroRuntime(),
+    inspectKokoroAssets(cacheDir),
+    queryWorkerPreflight(),
+  ]);
+  const classified = classifyPreflight({ runtime, assets, workerSnapshot });
+  const offlineReady = runtime.ok && assets.allRequiredPresent;
+  const loading = classified.status === "loading";
+  const ready = classified.status === "ready";
+  return {
+    ok: ready || classified.status === "offline-ready",
+    status: classified.status,
+    reason: classified.reason,
+    detail: classified.detail,
+    ready,
+    loading,
+    recoverable: classified.recoverable,
+    offlineReady,
+    checkedAt: isoNow(),
+    timingMs: Date.now() - started,
+    model: {
+      id: KOKORO_MODEL_ID,
+      dtype: KOKORO_MODEL_DTYPE,
+      device: "cpu",
+      cacheDir,
+      cacheLocation: "electron-userData/models",
+      modelDir: assets.modelDir,
+      configPath: assets.configPath,
+      configAvailable: assets.files.config.available,
+      tokenizerAvailable: assets.files.tokenizer.available,
+      modelAvailable: assets.files.model.available,
+      missingAssets: assets.missing,
+    },
+    voice: {
+      defaultVoice: KOKORO_DEFAULT_VOICE,
+      available: runtime.voiceAsset.available || workerSnapshot?.voices?.available || false,
+      assetPath: runtime.voiceAsset.path,
+      workerAvailable: workerSnapshot?.voices?.available ?? null,
+      workerCount: workerSnapshot?.voices?.count ?? null,
+      workerIds: workerSnapshot?.voices?.ids ?? null,
+    },
+    runtime,
+    download: {
+      needed:
+        classified.status === "download-needed" ||
+        classified.status === "missing-assets" ||
+        classified.status === "download-failed",
+      inProgress: downloadState.inProgress || loading,
+      progress: downloadState.progress,
+      lastAttemptAt: downloadState.lastAttemptAt,
+      lastSuccessAt: downloadState.lastSuccessAt,
+      lastFailureAt: downloadState.lastFailureAt,
+      lastError: downloadState.lastError,
+      retrying: engineStatusSnapshot.status === "retrying" || Boolean(retryTimer),
+      retryCount: crashCount,
+      maxRetries: MAX_CRASH_RETRIES,
+    },
+    engine: { ...engineStatusSnapshot },
+    worker: workerSnapshot,
+    checks: makePreflightChecks(runtime, assets, workerSnapshot),
+  };
 }
 
 /**
@@ -431,4 +857,4 @@ async function preload() {
  */
 function setLoadingCallback(cb) { onLoadingCb = cb; }
 
-module.exports = { generate, listVoices, isModelReady, getModelStatus, downloadModel, preload, setLoadingCallback, SAMPLE_RATE };
+module.exports = { generate, listVoices, isModelReady, getModelStatus, preflight, downloadModel, preload, setLoadingCallback, SAMPLE_RATE };

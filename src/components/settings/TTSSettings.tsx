@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import type { BlurbySettings, KokoroStatusSnapshot, PronunciationOverride } from "../../types";
+import { useState, useEffect, useCallback } from "react";
+import type { BlurbySettings, PronunciationOverride } from "../../types";
 import { KOKORO_VOICE_NAMES, QWEN_DEFAULT_SPEAKER, QWEN_TTS_DISABLED, TTS_DEFAULT_ENGINE, TTS_MAX_RATE, TTS_MIN_RATE, TTS_PAUSE_COMMA_MS, TTS_PAUSE_CLAUSE_MS, TTS_PAUSE_SENTENCE_MS, TTS_PAUSE_PARAGRAPH_MS, TTS_DIALOGUE_SENTENCE_THRESHOLD, MAX_NARRATION_PROFILES, normalizeSelectableTtsEngine, profileFromSettings } from "../../constants";
 import { KokoroStatusSection } from "./KokoroStatusSection";
 import { QwenStatusSection } from "./QwenStatusSection";
@@ -12,20 +12,14 @@ import { NarrationDataSection } from "./NarrationDataSection";
 import { PauseSettingsSection } from "./PauseSettingsSection";
 import { PronunciationOverridesEditor } from "./PronunciationOverridesEditor";
 import { CacheSizeDisplay } from "./CacheSizeDisplay";
-import {
-  DEFAULT_KOKORO_STATUS_SNAPSHOT,
-  getKokoroStatusError,
-  normalizeKokoroStatusSnapshot,
-  snapshotFromKokoroErrorResponse,
-  snapshotFromLegacyKokoroDownloadError,
-} from "../../utils/kokoroStatus";
 import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../../utils/kokoroRatePlan";
 import { useQwenPrototypeStatus } from "../../hooks/useQwenPrototypeStatus";
+import { useKokoroSettingsStatus } from "./useKokoroSettingsStatus";
 import { useMossNanoSettingsStatus } from "./useMossNanoSettingsStatus";
 import { usePocketTtsSettingsStatus } from "./usePocketTtsSettingsStatus";
 import { previewSelectedTtsVoice } from "./ttsPreview";
 import "../../styles/tts-settings.css";
-const api = window.electronAPI;
+
 interface TTSSettingsProps {
   settings: BlurbySettings;
   onSettingsChange: (updates: Partial<BlurbySettings>) => void;
@@ -46,24 +40,20 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [testPlaying, setTestPlaying] = useState(false);
   const [showQwenSetupGuidance, setShowQwenSetupGuidance] = useState(false);
-  // Kokoro state
-  const [kokoroStatus, setKokoroStatus] = useState<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
-  const [kokoroDownloading, setKokoroDownloading] = useState(false);
-  const [kokoroProgress, setKokoroProgress] = useState(0);
-  const [kokoroVoices, setKokoroVoices] = useState<string[]>([]);
-  const [kokoroError, setKokoroError] = useState<string | null>(null);
-  const [kokoroStalled, setKokoroStalled] = useState(false);
-  const kokoroStatusRef = useRef<KokoroStatusSnapshot>(DEFAULT_KOKORO_STATUS_SNAPSHOT);
-  const kokoroReady = kokoroStatus.ready;
-  const kokoroWarming = kokoroStatus.status === "warming" || kokoroStatus.status === "retrying";
-  const kokoroBusy = kokoroDownloading || kokoroStatus.loading;
-  const kokoroBusyLabel = kokoroDownloading
-    ? `Downloading voice model... ${kokoroProgress}%`
-    : kokoroStatus.status === "retrying"
-      ? "Retrying Kokoro setup..."
-      : kokoroStatus.status === "warming"
-        ? "Warming up voice model..."
-        : "Preparing voice model...";
+  const {
+    kokoroBusy,
+    kokoroBusyLabel,
+    kokoroError,
+    kokoroPreflightBusy,
+    kokoroPreflightReport,
+    kokoroProgress,
+    kokoroReady,
+    kokoroStalled,
+    kokoroVoices,
+    kokoroWarming,
+    handleDownloadKokoro,
+    handlePreflightKokoro,
+  } = useKokoroSettingsStatus(engine);
   const {
     qwenStatus,
     qwenVoices,
@@ -95,95 +85,6 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
     window.speechSynthesis?.addEventListener("voiceschanged", loadVoices);
     return () => window.speechSynthesis?.removeEventListener("voiceschanged", loadVoices);
   }, []);
-  const loadKokoroVoices = useCallback(async () => {
-    if (!api?.kokoroVoices) return;
-    const vr = await api.kokoroVoices();
-    if (vr.voices) setKokoroVoices(vr.voices);
-  }, []);
-  const applyKokoroStatusSnapshot = useCallback((snapshotLike?: Partial<KokoroStatusSnapshot> | null) => {
-    const snapshot = normalizeKokoroStatusSnapshot(snapshotLike);
-    kokoroStatusRef.current = snapshot;
-    setKokoroStatus(snapshot);
-    const error = getKokoroStatusError(snapshot);
-    if (error) {
-      setKokoroError(error);
-      setKokoroDownloading(false);
-      return;
-    }
-    if (snapshot.ready) {
-      setKokoroError(null);
-      setKokoroDownloading(false);
-      setKokoroStalled(false);
-      void loadKokoroVoices();
-      return;
-    }
-    if (snapshot.loading || snapshot.status === "idle") {
-      setKokoroDownloading(false);
-      setKokoroStalled(false);
-      if (snapshot.loading || snapshot.status === "idle") {
-        setKokoroError(null);
-      }
-    }
-  }, [loadKokoroVoices]);
-  // Check Kokoro model status
-  useEffect(() => {
-    if (!api?.kokoroModelStatus) return;
-    api.kokoroModelStatus().then((r) => {
-      applyKokoroStatusSnapshot(r);
-    }).catch(() => {});
-    const cleanups: (() => void)[] = [];
-    if (api.onKokoroDownloadProgress) {
-      cleanups.push(api.onKokoroDownloadProgress((progress: number) => {
-        setKokoroProgress(progress);
-        setKokoroStalled(false);
-        setKokoroDownloading(true);
-      }));
-    }
-    if (api.onKokoroDownloadError) {
-      cleanups.push(api.onKokoroDownloadError((error: string) => {
-        applyKokoroStatusSnapshot(
-          snapshotFromLegacyKokoroDownloadError(kokoroStatusRef.current, error),
-        );
-      }));
-    }
-    if (api.onKokoroEngineStatus) {
-      cleanups.push(api.onKokoroEngineStatus((data) => {
-        applyKokoroStatusSnapshot(data);
-      }));
-    }
-    return () => cleanups.forEach((c) => c());
-  }, [applyKokoroStatusSnapshot]);
-  // Stall detection: if downloading and progress stays at 0% for 30s
-  useEffect(() => {
-    if (!kokoroDownloading || kokoroProgress > 0) {
-      setKokoroStalled(false);
-      return;
-    }
-    const timer = setTimeout(() => setKokoroStalled(true), 30000);
-    return () => clearTimeout(timer);
-  }, [kokoroDownloading, kokoroProgress]);
-
-  const handleDownloadKokoro = async () => {
-    if (!api?.kokoroDownload) return;
-    setKokoroDownloading(true);
-    setKokoroProgress(0);
-    setKokoroError(null);
-    setKokoroStalled(false);
-    try {
-      const result = await api.kokoroDownload();
-      if (result.error) {
-        applyKokoroStatusSnapshot(snapshotFromKokoroErrorResponse(result));
-        return;
-      }
-      if (api.kokoroModelStatus) {
-        const snapshot = await api.kokoroModelStatus();
-        applyKokoroStatusSnapshot(snapshot);
-      }
-    } catch {
-      applyKokoroStatusSnapshot(snapshotFromKokoroErrorResponse({}, "Download failed"));
-    }
-  };
-
   const handleTestVoice = async () => {
     await previewSelectedTtsVoice({
       engine,
@@ -399,14 +300,18 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       </div>
 
       {/* Kokoro download progress */}
-      {engine === "kokoro" && !kokoroReady && (
+      {engine === "kokoro" && (
         <KokoroStatusSection
+          kokoroReady={kokoroReady}
           kokoroBusy={kokoroBusy}
           kokoroBusyLabel={kokoroBusyLabel}
           kokoroProgress={kokoroProgress}
           kokoroError={kokoroError}
           kokoroStalled={kokoroStalled}
+          preflightReport={kokoroPreflightReport}
+          preflightBusy={kokoroPreflightBusy}
           onDownload={handleDownloadKokoro}
+          onPreflight={() => void handlePreflightKokoro()}
         />
       )}
 

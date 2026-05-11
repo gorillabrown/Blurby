@@ -165,6 +165,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Kokoro TTS
   kokoroPreload: () => ipcRenderer.invoke("tts-kokoro-preload"),
+  kokoroPreflight: () => ipcRenderer.invoke("tts-kokoro-preflight"),
   kokoroGenerate: (text, voice, speed, words) => ipcRenderer.invoke("tts-kokoro-generate", text, voice, speed, words),
   kokoroPreloadMarathon: () => ipcRenderer.invoke("tts-kokoro-preload-marathon"),
   kokoroGenerateMarathon: (text, voice, speed) => ipcRenderer.invoke("tts-kokoro-generate-marathon", text, voice, speed),

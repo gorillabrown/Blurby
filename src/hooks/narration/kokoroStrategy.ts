@@ -12,7 +12,7 @@ import type { AudioScheduler, AudioProgressReport } from "../../utils/audioSched
 import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
 import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
-import type { PronunciationOverride } from "../../types";
+import type { KokoroPreflightReport, KokoroPreflightStatus, PronunciationOverride } from "../../types";
 import { perfStart, perfEnd } from "../../utils/narratePerf";
 import { recordDiagEvent } from "../../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
@@ -55,20 +55,77 @@ export interface KokoroStrategyDeps {
   onTruthSync?: (wordIndex: number) => void;
 }
 
+export interface KokoroStrategyPreflightSnapshot {
+  status: KokoroPreflightStatus;
+  ready: boolean;
+  loading: boolean;
+  offlineReady: boolean;
+  recoverable: boolean;
+  report: KokoroPreflightReport;
+}
+
+export interface KokoroStrategy extends TtsStrategy {
+  getScheduler: () => AudioScheduler;
+  getPipeline: () => GenerationPipeline;
+  refreshBufferedTempo: () => void;
+  warmUp: () => void;
+  /** Preserve the latest renderer-visible Kokoro preflight truth without starting playback. */
+  refreshPreflight: () => Promise<KokoroStrategyPreflightSnapshot | null>;
+  getPreflightSnapshot: () => KokoroStrategyPreflightSnapshot | null;
+  getPreflightStatus: () => KokoroPreflightStatus | null;
+  /** TTS-7Q: Continuous audio-progress report for smooth visual overlay. */
+  getAudioProgress: () => AudioProgressReport | null;
+}
+
+function isKokoroPreflightStatus(status: unknown): status is KokoroPreflightStatus {
+  return (
+    status === "ready" ||
+    status === "loading" ||
+    status === "missing-assets" ||
+    status === "download-needed" ||
+    status === "download-failed" ||
+    status === "runtime-error" ||
+    status === "offline-ready"
+  );
+}
+
+function isKokoroPreflightReport(report: unknown): report is KokoroPreflightReport {
+  if (!report || typeof report !== "object") return false;
+  const candidate = report as Partial<KokoroPreflightReport>;
+  return (
+    isKokoroPreflightStatus(candidate.status) &&
+    typeof candidate.ready === "boolean" &&
+    typeof candidate.loading === "boolean" &&
+    typeof candidate.offlineReady === "boolean" &&
+    typeof candidate.recoverable === "boolean"
+  );
+}
+
+function snapshotFromPreflightReport(report: KokoroPreflightReport): KokoroStrategyPreflightSnapshot {
+  return {
+    status: report.status,
+    ready: report.ready,
+    loading: report.loading,
+    offlineReady: report.offlineReady,
+    recoverable: report.recoverable,
+    report,
+  };
+}
+
 /**
  * Create a TtsStrategy backed by Kokoro via the NAR-2 pipeline + scheduler.
  * The pipeline handles progressive chunk sizing and IPC.
  * The scheduler handles pre-scheduled gapless playback with crossfade.
  */
-export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
-  getScheduler: () => AudioScheduler;
-  getPipeline: () => GenerationPipeline;
-  refreshBufferedTempo: () => void;
-  warmUp: () => void;
-  /** TTS-7Q: Continuous audio-progress report for smooth visual overlay. */
-  getAudioProgress: () => AudioProgressReport | null;
-} {
+export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
   const scheduler = createAudioScheduler();
+  let latestPreflightSnapshot: KokoroStrategyPreflightSnapshot | null = null;
+
+  const preservePreflightReport = (report: unknown) => {
+    if (!isKokoroPreflightReport(report)) return latestPreflightSnapshot;
+    latestPreflightSnapshot = snapshotFromPreflightReport(report);
+    return latestPreflightSnapshot;
+  };
 
   /**
    * Resolve Kokoro rate metadata from the live narration speed.
@@ -253,6 +310,23 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): TtsStrategy & {
 
     warmUp() {
       scheduler.warmUp();
+    },
+
+    async refreshPreflight() {
+      if (!api?.kokoroPreflight) return latestPreflightSnapshot;
+      try {
+        return preservePreflightReport(await api.kokoroPreflight());
+      } catch {
+        return latestPreflightSnapshot;
+      }
+    },
+
+    getPreflightSnapshot() {
+      return latestPreflightSnapshot;
+    },
+
+    getPreflightStatus() {
+      return latestPreflightSnapshot?.status ?? null;
     },
 
     getAudioProgress() {

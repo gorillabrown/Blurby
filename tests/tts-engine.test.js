@@ -5,6 +5,7 @@ import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const Module = require("module");
 const originalLoad = Module._load;
+const originalResourcesPath = process.resourcesPath;
 
 function flushPromises() {
   return Promise.resolve().then(() => Promise.resolve()).then(() => Promise.resolve());
@@ -53,12 +54,23 @@ function createMainProcessHarness() {
   };
   const fsPromises = {
     mkdir: vi.fn().mockResolvedValue(undefined),
+    stat: vi.fn().mockRejectedValue(Object.assign(new Error("ENOENT"), { code: "ENOENT" })),
   };
   const constants = {
     KOKORO_SAMPLE_RATE: 24000,
+    KOKORO_MODEL_ID: "onnx-community/Kokoro-82M-v1.0-ONNX",
+    KOKORO_MODEL_DTYPE: "q4",
+    KOKORO_DEFAULT_VOICE: "af_bella",
     TTS_IDLE_TIMEOUT_MS: 60_000,
     TTS_MODEL_LOAD_TIMEOUT_MS: 30_000,
   };
+
+  const makeStat = (kind, size = 1024) => ({
+    size,
+    isFile: () => kind === "file",
+    isDirectory: () => kind === "directory",
+  });
+  const rejectMissing = () => Promise.reject(Object.assign(new Error("ENOENT"), { code: "ENOENT" }));
 
   class MockWorker extends EventEmitter {
     constructor(filename, options) {
@@ -142,6 +154,30 @@ function createMainProcessHarness() {
         loadingSignals.push(loading);
       });
     },
+    configurePreflightCache({ modelDir = false, config = false, tokenizer = false, model = false } = {}) {
+      electronMock.app.isPackaged = true;
+      process.resourcesPath = "C:\\Program Files\\Blurby\\resources";
+      fsPromises.stat.mockImplementation((filePath) => {
+        const normalized = String(filePath).replace(/\\/g, "/");
+        const runtimeDependency =
+          normalized.includes("/app.asar.unpacked/node_modules/") ||
+          normalized.includes("/node_modules/kokoro-js/voices/af_bella.bin");
+        if (runtimeDependency) return Promise.resolve(makeStat(normalized.endsWith("/onnxruntime-node") ? "directory" : "file"));
+        if (normalized.endsWith("/onnx-community/Kokoro-82M-v1.0-ONNX")) {
+          return modelDir ? Promise.resolve(makeStat("directory")) : rejectMissing();
+        }
+        if (normalized.endsWith("/config.json")) {
+          return config ? Promise.resolve(makeStat("file")) : rejectMissing();
+        }
+        if (normalized.endsWith("/tokenizer.json")) {
+          return tokenizer ? Promise.resolve(makeStat("file")) : rejectMissing();
+        }
+        if (normalized.endsWith("/onnx/model_q4.onnx")) {
+          return model ? Promise.resolve(makeStat("file", 4096)) : rejectMissing();
+        }
+        return rejectMissing();
+      });
+    },
   };
 }
 
@@ -156,10 +192,122 @@ afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
   Module._load = originalLoad;
+  if (originalResourcesPath === undefined) {
+    delete process.resourcesPath;
+  } else {
+    process.resourcesPath = originalResourcesPath;
+  }
   clearMainModules();
 });
 
 describe("tts-engine runtime recovery", () => {
+  it.each([
+    [
+      "empty cache",
+      {},
+      {
+        status: "download-needed",
+        reason: "model-cache-empty",
+        ok: false,
+        offlineReady: false,
+        downloadNeeded: true,
+        missingAssets: ["config", "tokenizer", "model"],
+      },
+    ],
+    [
+      "incomplete cache",
+      { modelDir: true, config: true },
+      {
+        status: "missing-assets",
+        reason: "model-cache-incomplete",
+        ok: false,
+        offlineReady: false,
+        downloadNeeded: true,
+        missingAssets: ["tokenizer", "model"],
+      },
+    ],
+    [
+      "full cache",
+      { modelDir: true, config: true, tokenizer: true, model: true },
+      {
+        status: "offline-ready",
+        reason: null,
+        ok: true,
+        offlineReady: true,
+        downloadNeeded: false,
+        missingAssets: [],
+      },
+    ],
+  ])("preflight classifies %s without starting a worker", async (_label, cacheShape, expected) => {
+    const harness = createMainProcessHarness();
+    harness.configurePreflightCache(cacheShape);
+    const engine = harness.loadEngine();
+
+    const report = await engine.preflight();
+
+    expect(harness.workers).toHaveLength(0);
+    expect(report).toMatchObject({
+      status: expected.status,
+      reason: expected.reason,
+      ok: expected.ok,
+      ready: false,
+      loading: false,
+      offlineReady: expected.offlineReady,
+      download: {
+        needed: expected.downloadNeeded,
+        inProgress: false,
+      },
+      model: {
+        missingAssets: expected.missingAssets,
+      },
+      worker: null,
+    });
+    expect(report.checks).toContainEqual(expect.objectContaining({
+      key: "worker-warm-up",
+      status: "skip",
+      detail: "Worker is not running; preflight did not start it.",
+    }));
+  });
+
+  it("preflight reports download-failed as needing a retry when a load failure leaves assets missing", async () => {
+    const harness = createMainProcessHarness();
+    harness.configurePreflightCache({ modelDir: true, config: true });
+    const engine = harness.loadEngine();
+
+    const readyPromise = engine.downloadModel();
+    await flushPromises();
+
+    const worker = harness.getLastWorker();
+    expect(worker.postedMessages).toContainEqual(expect.objectContaining({ type: "load" }));
+    worker.emit("message", { type: "load-error", error: "Missing Kokoro weights" });
+
+    await expect(readyPromise).rejects.toMatchObject({
+      reason: "load-error",
+      status: "error",
+    });
+
+    const workerCountBeforePreflight = harness.workers.length;
+    const report = await engine.preflight();
+
+    expect(harness.workers).toHaveLength(workerCountBeforePreflight);
+    expect(report).toMatchObject({
+      status: "download-failed",
+      reason: "load-error",
+      ok: false,
+      ready: false,
+      loading: false,
+      offlineReady: false,
+      download: {
+        needed: true,
+        inProgress: false,
+        lastError: "Missing Kokoro weights",
+      },
+      model: {
+        missingAssets: ["tokenizer", "model"],
+      },
+    });
+  });
+
   it("treats model-loaded as informational and waits for model-ready before resolving", async () => {
     const harness = createMainProcessHarness();
     const engine = harness.loadEngine();

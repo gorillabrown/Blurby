@@ -282,9 +282,36 @@
   margin-bottom: 12px;
 }
 
+.tts-status-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card, #222);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.tts-status-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.tts-status-detail {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
 .tts-kokoro-error {
   font-size: 11px;
   color: var(--error, #c44);
+  margin-bottom: 8px;
+}
+
+.tts-kokoro-success {
+  font-size: 11px;
+  color: var(--success, #4a8f5b);
   margin-bottom: 8px;
 }
 
@@ -322,6 +349,74 @@
   color: var(--text);
   cursor: pointer;
   font-size: 12px;
+}
+
+.tts-kokoro-download-btn:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.tts-kokoro-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tts-kokoro-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+
+.tts-kokoro-asset-list,
+.tts-kokoro-check-list {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.tts-kokoro-asset {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.tts-kokoro-asset--pass span:last-child,
+.tts-kokoro-check--pass .tts-kokoro-check-label {
+  color: var(--success, #4a8f5b);
+}
+
+.tts-kokoro-asset--fail span:last-child,
+.tts-kokoro-check--fail .tts-kokoro-check-label {
+  color: var(--error, #c44);
+}
+
+.tts-kokoro-check {
+  padding: 4px 6px;
+  border-left: 2px solid var(--warning, #b80);
+  background: var(--bg-raised);
+}
+
+.tts-kokoro-check--fail {
+  border-left-color: var(--error, #c44);
+}
+
+.tts-kokoro-check-label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tts-kokoro-check-detail {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
 }
 
 /* ── PauseSettingsSection ───────────────────────────────────────────────── */

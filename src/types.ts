@@ -58,6 +58,14 @@ export interface LoadDocUserError {
 }
 
 export type KokoroEngineStatus = "idle" | "warming" | "retrying" | "ready" | "error";
+export type KokoroPreflightStatus =
+  | "ready"
+  | "loading"
+  | "missing-assets"
+  | "download-needed"
+  | "download-failed"
+  | "runtime-error"
+  | "offline-ready";
 export type QwenEngineStatus = "idle" | "warming" | "ready" | "unavailable" | "error";
 
 export interface KokoroStatusSnapshot {
@@ -74,6 +82,85 @@ export interface KokoroErrorResponse {
   reason?: string | null;
   status?: KokoroEngineStatus | null;
   recoverable?: boolean;
+}
+
+export type KokoroPreflightCheckStatus = "pass" | "fail" | "warn" | "skip";
+
+export interface KokoroPreflightCheck {
+  key: string;
+  label: string;
+  status: KokoroPreflightCheckStatus;
+  detail: string | null;
+}
+
+export interface KokoroPreflightAssetFile {
+  key: string;
+  label: string;
+  required: boolean;
+  path: string;
+  available: boolean;
+  bytes?: number | null;
+  kind?: string;
+  error?: string | null;
+}
+
+export interface KokoroPreflightReport {
+  ok: boolean;
+  status: KokoroPreflightStatus;
+  reason?: string | null;
+  detail?: string | null;
+  ready: boolean;
+  loading: boolean;
+  recoverable: boolean;
+  offlineReady: boolean;
+  checkedAt: string;
+  timingMs?: number;
+  model: {
+    id: string;
+    dtype: string;
+    device: "cpu" | string;
+    cacheDir: string;
+    cacheLocation: string;
+    modelDir: string;
+    configPath: string;
+    configAvailable: boolean;
+    tokenizerAvailable: boolean;
+    modelAvailable: boolean;
+    missingAssets: string[];
+  };
+  voice: {
+    defaultVoice: string;
+    available: boolean;
+    assetPath?: string | null;
+    workerAvailable?: boolean | null;
+    workerCount?: number | null;
+    workerIds?: string[] | null;
+  };
+  runtime: {
+    node: string;
+    platform: string;
+    arch: string;
+    packaged: boolean;
+    modulePath?: string | null;
+    dependencies: Record<string, { available: boolean; path?: string | null; error?: string | null }>;
+    voiceAsset: { defaultVoice: string; path: string; available: boolean; bytes?: number | null; kind?: string; error?: string | null };
+    ok: boolean;
+  };
+  download: {
+    needed: boolean;
+    inProgress: boolean;
+    progress?: number | null;
+    lastAttemptAt?: string | null;
+    lastSuccessAt?: string | null;
+    lastFailureAt?: string | null;
+    lastError?: string | null;
+    retrying: boolean;
+    retryCount: number;
+    maxRetries: number;
+  };
+  engine: KokoroStatusSnapshot;
+  worker?: Record<string, unknown> | null;
+  checks: KokoroPreflightCheck[];
 }
 
 export interface QwenStatusSnapshot {
@@ -588,6 +675,7 @@ export interface ElectronAPI {
   }>;
   // Kokoro TTS
   kokoroPreload?: () => Promise<{ success?: boolean } & Partial<KokoroErrorResponse>>;
+  kokoroPreflight?: () => Promise<KokoroPreflightReport | Partial<KokoroErrorResponse>>;
   kokoroPreloadMarathon: () => Promise<{ success?: boolean } & Partial<KokoroErrorResponse>>;
   kokoroModelStatus: () => Promise<KokoroStatusSnapshot>;
   kokoroVoices?: () => Promise<{ voices?: string[]; error?: string }>;
