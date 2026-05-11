@@ -33,6 +33,7 @@ import { injectStyles } from "../utils/foliateStyles";
 import {
   applyChunkReadingVisualStateToRoots,
   clearChunkReadingVisualStateFromRoots,
+  shouldSuppressNarrateFlowCursor,
   resolveFoliateWordHighlightClass,
 } from "../utils/foliateWordHighlight";
 import type { ChunkReadingVisualState } from "../types/chunkReading";
@@ -442,9 +443,11 @@ export default function FoliatePageView({
   const highlightedWordIndexRef = useRef<number>(highlightedWordIndex ?? -1);
   highlightedWordIndexRef.current = highlightedWordIndex ?? -1;
   const readingModeRef = useRef(readingMode);
+  const chunkReadingVisualStateRef = useRef<ChunkReadingVisualState | null>(chunkReadingVisualState);
   // Track when user has manually browsed away during narration — suppresses scrollToAnchor
   const userBrowsingRef = useRef(false);
   readingModeRef.current = readingMode;
+  chunkReadingVisualStateRef.current = chunkReadingVisualState;
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -586,7 +589,13 @@ export default function FoliatePageView({
 
     const state = viewApiRef.current.resolveWordState(wordIndex);
     const contents = view.renderer?.getContents?.() ?? [];
-    const highlightClass = resolveFoliateWordHighlightClass(readingModeRef.current, styleHint);
+    const suppressNarrateFlowCursor = shouldSuppressNarrateFlowCursor(
+      readingModeRef.current,
+      chunkReadingVisualStateRef.current,
+    );
+    const highlightClass = suppressNarrateFlowCursor
+      ? null
+      : resolveFoliateWordHighlightClass(readingModeRef.current, styleHint);
 
     clearVisualWordClasses(contents);
 
@@ -597,9 +606,11 @@ export default function FoliatePageView({
       return false;
     }
 
-    state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
-      el.classList.add(highlightClass);
-    });
+    if (highlightClass) {
+      state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
+        el.classList.add(highlightClass);
+      });
+    }
 
     if (allowMotion && state.doc && !userBrowsingRef.current && !state.visible) {
       try {
@@ -629,10 +640,13 @@ export default function FoliatePageView({
   useEffect(() => {
     if (chunkReadingVisualState) {
       applyChunkReadingVisualState(chunkReadingVisualState);
+      if (shouldSuppressNarrateFlowCursor(readingMode, chunkReadingVisualState)) {
+        clearVisualWordClasses(viewRef.current?.renderer?.getContents?.() ?? []);
+      }
       return;
     }
     clearChunkReadingVisualState();
-  }, [applyChunkReadingVisualState, chunkReadingVisualState, clearChunkReadingVisualState]);
+  }, [applyChunkReadingVisualState, chunkReadingVisualState, clearChunkReadingVisualState, readingMode]);
 
   // Load EPUB via foliate-js
   useEffect(() => {

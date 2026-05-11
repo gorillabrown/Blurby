@@ -321,9 +321,16 @@ describe("audioScheduler tempo continuity", () => {
     await new Promise((resolve) => setTimeout(resolve, 60));
 
     expect(onChunkBoundary).toHaveBeenCalledTimes(1);
-    expect(onChunkBoundary).toHaveBeenCalledWith(6);
+    expect(onChunkBoundary).toHaveBeenCalledWith(6, expect.objectContaining({
+      parentChunkStartIdx: 0,
+      parentChunkWordCount: 6,
+      segmentIndex: 2,
+      isFinalSegment: true,
+      lastConfirmedWordIndex: 5,
+      endIdx: 6,
+    }));
     expect(onChunkHandoff).toHaveBeenCalledTimes(1);
-    expect(onChunkHandoff).toHaveBeenCalledWith(5);
+    expect(onChunkHandoff).toHaveBeenCalledWith(5, false);
 
     scheduler.stop();
   });

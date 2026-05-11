@@ -22,8 +22,15 @@ const DEFAULT_OPTIONS: ResolvedOptions = {
 };
 
 const HEADING_TAG_RE = /^h[1-6]$/i;
-const SENTENCE_END_RE = /[.!?;:]["')\]\u201D\u2019]*$/;
+const SENTENCE_END_RE = /[.!?]["')\]\u201D\u2019]*$/;
+const SEMICOLON_COLON_END_RE = /[;:]["')\]\u201D\u2019]*$/;
 const COMMA_END_RE = /,["')\]\u201D\u2019]*$/;
+
+type BoundaryRule = {
+  regex: RegExp;
+  kind: ReadingChunkKind;
+  reason: string;
+};
 
 function resolveOptions(options: NaturalChunkOptions = {}): ResolvedOptions {
   const hardMaxWords = Math.max(1, options.hardMaxWords ?? DEFAULT_OPTIONS.hardMaxWords);
@@ -87,19 +94,54 @@ function classifyTerminalKind(words: ChunkSourceWord[], endExclusive: number): R
   return "sentence";
 }
 
-function findSentenceEnd(words: ChunkSourceWord[], start: number, end: number, options: ResolvedOptions): number | null {
+function findBoundaryEnd(
+  words: ChunkSourceWord[],
+  start: number,
+  end: number,
+  regex: RegExp,
+  targetMinWords: number,
+  targetMaxWords: number,
+): number | null {
   let first: number | null = null;
+  const targetHardLimit = Math.min(end, start + targetMaxWords);
 
   for (let i = start; i < end; i++) {
-    if (!SENTENCE_END_RE.test(words[i].word)) continue;
+    if (!regex.test(words[i].word)) continue;
     const candidateEnd = i + 1;
     if (first == null) first = candidateEnd;
-    if (candidateEnd - start >= options.targetMinWords && candidateEnd - start <= options.targetMaxWords) {
+    if (candidateEnd >= start + targetMinWords && candidateEnd <= targetHardLimit) {
       return candidateEnd;
     }
   }
 
   return first;
+}
+
+function findPriorityBoundary(words: ChunkSourceWord[], start: number, end: number, options: ResolvedOptions): {
+  end: number;
+  kind: ReadingChunkKind;
+  reason: string;
+} | null {
+  const hardEnd = Math.min(end, start + options.hardMaxWords);
+  const boundaryRules: BoundaryRule[] = [
+    { regex: SENTENCE_END_RE, kind: "sentence", reason: "sentence terminator" },
+    { regex: SEMICOLON_COLON_END_RE, kind: "sentence", reason: "sentence terminator" },
+  ];
+
+  for (const rule of boundaryRules) {
+    const boundary = findBoundaryEnd(
+      words,
+      start,
+      hardEnd,
+      rule.regex,
+      options.targetMinWords,
+      options.targetMaxWords,
+    );
+    if (boundary == null) continue;
+    return { end: boundary, kind: rule.kind, reason: rule.reason };
+  }
+
+  return null;
 }
 
 function findCommaEnd(words: ChunkSourceWord[], start: number, limit: number): number | null {
@@ -130,25 +172,16 @@ function splitSegment(
   let cursor = start;
   while (cursor < end) {
     const remaining = end - cursor;
-    const sentenceEnd = findSentenceEnd(words, cursor, end, options);
+    const boundary = findPriorityBoundary(words, cursor, end, options);
 
-    if (sentenceEnd && sentenceEnd < end) {
-      const sentenceWordCount = sentenceEnd - cursor;
-      if (sentenceWordCount >= options.targetMinWords || remaining > options.targetMaxWords) {
-        pushChunk(chunks, words, cursor, sentenceEnd, "sentence", "sentence terminator");
-        cursor = sentenceEnd;
-        continue;
-      }
-    }
-
-    if (remaining <= options.targetMaxWords || (remaining <= options.hardMaxWords && sentenceEnd === end)) {
+    if (remaining <= options.targetMaxWords || (remaining <= options.hardMaxWords && boundary?.end === end)) {
       pushChunk(chunks, words, cursor, end, terminalKind, terminalReason);
       return;
     }
 
-    if (sentenceEnd && sentenceEnd > cursor && sentenceEnd - cursor <= options.hardMaxWords) {
-      pushChunk(chunks, words, cursor, sentenceEnd, "sentence", "sentence terminator");
-      cursor = sentenceEnd;
+    if (boundary && boundary.end > cursor && boundary.end - cursor <= options.hardMaxWords) {
+      pushChunk(chunks, words, cursor, boundary.end, boundary.kind, boundary.reason);
+      cursor = boundary.end;
       continue;
     }
 

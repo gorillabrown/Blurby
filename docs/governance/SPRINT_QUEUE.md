@@ -159,7 +159,7 @@ HOW (Review / Closeout):
 
 ```text
 Sprint: KOKORO-DEEPEN-2 — Long-Form Chunk/Timing Narration Hardening
-Status: Queued after `KOKORO-DEEPEN-1`; resumes CHUNK-SYNC through Kokoro rather than as engine-agnostic visual churn.
+Status: ✅ COMPLETED 2026-05-11 on `sprint/kokoro-deepen-2-clean-main`; queue advances to `KOKORO-DEEPEN-3` for the Kokoro Deepening lane.
 Type: implementation + UX correctness; no invented word timing, no Flow/Narrate autoplay behavior change unless explicitly required by the chunk model.
 
 WHAT: Connect Kokoro narration to the shared natural chunk visual state: light highlight the active chunk, bold highlight the active word only from truthful Kokoro timestamps, and fall back to chunk-only when timestamps are absent.
@@ -189,7 +189,7 @@ HOW (Review / Closeout):
 
 ```text
 Sprint: KOKORO-DEEPEN-3 — Kokoro Voice Profiles And Voice-Mixing Evidence Spike
-Status: Queued after `KOKORO-DEEPEN-1`; Abogen shows useful Kokoro voice formulas, but Blurby's ONNX stack must prove viability before UX.
+Status: Next in Kokoro Deepening lane after `KOKORO-DEEPEN-2` closeout; Abogen shows useful Kokoro voice formulas, but Blurby's ONNX stack must prove viability before UX.
 Type: investigation + bounded prototype; no public voice-mixing UX unless evidence proves the runtime path.
 
 WHAT: Determine whether weighted Kokoro voice formulas/profiles can work in Blurby's current `kokoro-js` / ONNX runtime, then either create a hidden prototype or document why not.
@@ -237,6 +237,7 @@ HOW (Review / Closeout):
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| KOKORO-DEEPEN-2 | 2026-05-11 | PASS (branch closeout) — Long-form chunk/timing narration hardening implemented on `sprint/kokoro-deepen-2-clean-main`: shared natural chunks remain deterministic, Narrate chunk visuals are driven via Kokoro chunk boundaries, active-word highlight is trusted-timestamp gated, and chunk-only fallback is enforced when timing is missing. Verification: focused chunk/timing lane passed (`96/96`), `npm run typecheck` passed, `npx vite build --configLoader runner` passed, `git diff --check` passed. Full-suite run remains blocked by unrelated pre-existing `tests/mossNanoProbe.test.js` python-env failures and unrelated `.tmp` mirror test imports. |
 | POSTV2-AUDIT-REMEDIATION | 2026-05-04 | PASS — Post-v2 audit remediation implemented in isolated worktree `C:\tmp\Blurby-worktrees\postv2-audit-remediation` on branch `postv2-audit-remediation`. POSTV2-REL-1 fixed package/release truth, version `1.75.1`, packaged sidecar path resolution, update install gating, and release-doc honesty. POSTV2-ENGINE-1 made `npm run typecheck` green, fail-closed Qwen IPC/stream compatibility, stale Qwen profile migration to Kokoro, Pocket profile support, Pocket/Nano error separation, and settings/type contract tightening. POSTV2-NARR-1 fixed EPUB Narrate highlighting, `open-doc-source` URL validation, artifact policy, Kokoro/Qwen copy, and debt mapping. Verification: `npm run typecheck` passed; full `npm test` passed 170 files / 2521 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; focused `tests/mossNanoProbe.test.js` passed 132 tests. No commit made; review/commit/merge is next. |
 | RELEASE-1 | 2026-05-04 | PASS — Desktop v2.0 release closeout completed. Release notes/checklist: `docs/project/desktop-v2.0-release-notes.md`, `docs/project/desktop-v2.0-release-checklist.md`. Engine posture preserved exactly: Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, Qwen retired/disabled. |
 | POLISH-1 | 2026-05-04 | PASS — Desktop v2 polish completed across TTS, E-Ink, and Reading Goals settings surfaces. Copy now consistently states Kokoro default/operational floor, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2. E-Ink switches gained keyboard-operable switch semantics; Reading Goals empty/action states were cleaned up. Focused settings regression suite passed 9 files / 36 tests; full `npm test` passed 170 files / 2550 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; `npm audit --audit-level=high` passed with 3 moderate `uuid` findings and no high-severity findings. RELEASE-1 is unblocked. |

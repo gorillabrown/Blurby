@@ -13,7 +13,7 @@ import { createQwenStrategy } from "./narration/qwenStrategy";
 import { createQwenStreamingStrategy } from "./narration/qwenStreamingStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
-import type { AudioProgressReport } from "../utils/audioScheduler";
+import type { AudioProgressReport, ChunkBoundaryPayload } from "../utils/audioScheduler";
 import type { TtsEvalTraceSink } from "../types/eval";
 import {
   DEFAULT_KOKORO_STATUS_SNAPSHOT,
@@ -143,10 +143,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
    *  authoritative position without updating narration state (no cursorWordIndex write,
    *  no lastConfirmedAudioWordRef update). Set by useReadingModeInstance for Foliate mode. */
   const onTruthSyncRef = useRef<((wordIndex: number) => void) | null>(null);
+  /** TTS-7Q: Visual-only chunk-boundary callback — updates narration chunk visuals only. */
+  const onChunkBoundaryRef = useRef<((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null>(null);
   /** TTS-7R (BUG-145c): Canonical audio word position — updated only by the scheduler's
    *  confirmed boundary crossings. Used as the authoritative start index for chunk generation
    *  so that visual-advance callbacks cannot contaminate the pipeline's read head. */
   const lastConfirmedAudioWordRef = useRef<number>(0);
+  /** TTS-7R Task-5 truth gate: trust only real timing for per-word visual updates. */
+  const isTrustedWordTimingRef = useRef<boolean>(true);
   /** Handoff marker — set when the next chunk chain must start fresh from a new global anchor. */
   const handoffPendingRef = useRef(false);
   const kokoroVoiceRef = useRef("af_bella");
@@ -412,8 +416,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         emitPendingRateResponseTrace();
       },
       // TTS-7R: Route truth-sync through dedicated visual-only callback (no state writes)
-      onTruthSync: (wordIndex: number) => {
+      onTruthSync: (wordIndex: number, isTrustedWordTiming = true) => {
+        isTrustedWordTimingRef.current = isTrustedWordTiming;
+        if (!isTrustedWordTiming) return;
         if (onTruthSyncRef.current) onTruthSyncRef.current(wordIndex);
+      },
+      onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => {
+        onChunkBoundaryRef.current?.(endIdx, metadata);
       },
       onFallbackToWeb: () => {
         // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
@@ -968,7 +977,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       [],
       startIdx,
       s.speed,
-      (wordIndex) => {
+      (wordIndex, isTrustedWordTiming = true) => {
         if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
           evalFirstAudioCapturedRef.current = true;
           emitEvalTrace({
@@ -984,7 +993,10 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         // are always behind or equal to the confirmed audio word.
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
-        if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
+        isTrustedWordTimingRef.current = isTrustedWordTiming;
+        if (isTrustedWordTiming && onWordAdvanceRef.current) {
+          onWordAdvanceRef.current(wordIndex);
+        }
         if (import.meta.env.DEV) {
           const visualIdx = stateRef.current.cursorWordIndex;
           if (Math.abs(wordIndex - visualIdx) > 5) {
@@ -1132,6 +1144,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
+    isTrustedWordTimingRef.current = true;
     const newSpeed = wpmToRate(wpm);
     evalStartTimeRef.current = Date.now();
     evalFirstAudioCapturedRef.current = false;
@@ -1730,6 +1743,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
      */
     setOnTruthSync: (cb: ((wordIndex: number) => void) | null) => {
       onTruthSyncRef.current = cb;
+    },
+    /**
+     * TTS-7Q: Register a visual-only chunk-boundary callback. Called when a Kokoro
+     * generation chunk boundary is reached during playback. The callback is intended
+     * for narration chunk-visual progress UI updates only.
+     */
+    setOnChunkBoundary: (cb: ((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null) => {
+      onChunkBoundaryRef.current = cb;
     },
     warmUp: () => {
       kokoroStrategy.warmUp();

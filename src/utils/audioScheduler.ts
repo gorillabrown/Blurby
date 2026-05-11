@@ -113,20 +113,29 @@ type ActiveSource = {
   boundaryFired: boolean;
   originalChunk: KokoroTempoAwareChunk;
   chunk: KokoroTempoAwareChunk;
-  boundaries: { time: number; wordIndex: number }[];
+  boundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[];
 };
 
+export interface ChunkBoundaryPayload {
+  parentChunkStartIdx: number;
+  parentChunkWordCount: number;
+  segmentIndex: number;
+  isFinalSegment: boolean;
+  lastConfirmedWordIndex: number;
+  endIdx: number;
+}
+
 export interface SchedulerCallbacks {
-  onWordAdvance: (wordIndex: number) => void;
-  onChunkBoundary: (endIdx: number) => void;
+  onWordAdvance: (wordIndex: number, isTrustedWordTiming?: boolean) => void;
+  onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => void;
   onEnd: () => void;
   onError: () => void;
   onSegmentStart?: (wordIndex: number) => void;
   /** TTS-7O: Periodic truth-sync — fires every N words and on chunk boundaries */
-  onTruthSync?: (wordIndex: number) => void;
+  onTruthSync?: (wordIndex: number, isTrustedWordTiming?: boolean) => void;
   /** TTS-7Q: Chunk handoff carry-over — fires at chunk boundary with the last
    *  audio-confirmed word so the visual band can continue from that position. */
-  onChunkHandoff?: (lastConfirmedWordIndex: number) => void;
+  onChunkHandoff?: (lastConfirmedWordIndex: number, isTrustedWordTiming?: boolean) => void;
 }
 
 /** TTS-7Q: Continuous audio-progress report — fractional position within the current word span. */
@@ -193,7 +202,7 @@ export function createAudioScheduler(): AudioScheduler {
   // Word timer state
   let wordTimerHandle: ReturnType<typeof setTimeout> | null = null;
   let wordRafHandle: number | null = null;
-  let currentWordBoundaries: { time: number; wordIndex: number }[] = [];
+  let currentWordBoundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] = [];
   let nextWordBoundaryIdx = 0;
   let playbackStartTime: number | null = null; // Set on first scheduleChunk — gates tick()
 
@@ -221,6 +230,7 @@ export function createAudioScheduler(): AudioScheduler {
     shouldEmit: boolean;
     endIdx: number;
     lastConfirmedWordIdx: number;
+    metadata?: ChunkBoundaryPayload;
   } {
     if (!hasKokoroPlaybackSegmentMetadata(chunk)) {
       const endIdx = chunk.startIdx + chunk.words.length;
@@ -232,10 +242,22 @@ export function createAudioScheduler(): AudioScheduler {
     }
 
     const endIdx = chunk.parentChunkStartIdx + chunk.parentChunkWordCount;
+    const lastConfirmedWordIndex = endIdx - 1 >= chunk.parentChunkStartIdx
+      ? endIdx - 1
+      : chunk.parentChunkStartIdx;
+    const metadata: ChunkBoundaryPayload = {
+      parentChunkStartIdx: chunk.parentChunkStartIdx,
+      parentChunkWordCount: chunk.parentChunkWordCount,
+      segmentIndex: chunk.segmentIndex,
+      isFinalSegment: chunk.isFinalSegment,
+      lastConfirmedWordIndex,
+      endIdx,
+    };
     return {
       shouldEmit: chunk.isFinalSegment,
       endIdx,
-      lastConfirmedWordIdx: endIdx - 1 >= chunk.parentChunkStartIdx ? endIdx - 1 : chunk.parentChunkStartIdx,
+      lastConfirmedWordIdx: lastConfirmedWordIndex,
+      metadata,
     };
   }
 
@@ -249,15 +271,20 @@ export function createAudioScheduler(): AudioScheduler {
   function deliverChunkBoundary(s: ActiveSource): void {
     if (s.boundaryFired) return;
 
-    const { shouldEmit, endIdx, lastConfirmedWordIdx } = getParentBoundaryInfo(s.chunk);
+    const sourceBoundaryTrust = s.boundaries[s.boundaries.length - 1]?.isTrustedWordTiming ?? false;
+    const { shouldEmit, endIdx, lastConfirmedWordIdx, metadata } = getParentBoundaryInfo(s.chunk);
     s.boundaryFired = true;
 
     if (!callbacks || !shouldEmit) return;
 
-    callbacks.onChunkBoundary(endIdx);
+    if (metadata) {
+      callbacks.onChunkBoundary(endIdx, metadata);
+    } else {
+      callbacks.onChunkBoundary(endIdx);
+    }
     truthSyncCounter = 0;
-    callbacks.onTruthSync?.(lastConfirmedWordIdx);
-    callbacks.onChunkHandoff?.(lastConfirmedWordIdx);
+    callbacks.onTruthSync?.(lastConfirmedWordIdx, sourceBoundaryTrust);
+    callbacks.onChunkHandoff?.(lastConfirmedWordIdx, sourceBoundaryTrust);
   }
 
   /**
@@ -321,7 +348,10 @@ export function createAudioScheduler(): AudioScheduler {
    * Pre-compute word boundary times using punctuation-aware/token-length-aware weights (TTS-6F).
    * Words are distributed across the chunk duration proportionally to their timing weight.
    */
-  function computeWordBoundaries(chunk: ScheduledChunk, chunkStartTime: number): { time: number; wordIndex: number }[] {
+  function computeWordBoundaries(
+    chunk: ScheduledChunk,
+    chunkStartTime: number,
+  ): { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] {
     const wordCount = chunk.words.length;
     if (wordCount <= 0) return [];
 
@@ -332,11 +362,12 @@ export function createAudioScheduler(): AudioScheduler {
       const speechDurationSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
 
       if (validateWordTimestamps(chunk.wordTimestamps, chunk.words, speechDurationSec)) {
-        const boundaries: { time: number; wordIndex: number }[] = [];
+        const boundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] = [];
         for (let i = 0; i < wordCount; i++) {
           boundaries.push({
             time: chunkStartTime + chunk.wordTimestamps[i].startTime,
             wordIndex: chunk.startIdx + i,
+            isTrustedWordTiming: true,
           });
         }
 
@@ -366,12 +397,13 @@ export function createAudioScheduler(): AudioScheduler {
     // ── FALLBACK: Existing heuristic (unchanged) ──────────────────────────
     const chunkDurSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
     const weights = computeWordWeights(chunk.words, chunk.weightConfig);
-    const boundaries: { time: number; wordIndex: number }[] = [];
+    const boundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] = [];
     let cumulativeWeight = 0;
     for (let i = 0; i < wordCount; i++) {
       boundaries.push({
         time: chunkStartTime + cumulativeWeight * chunkDurSec,
         wordIndex: chunk.startIdx + i,
+        isTrustedWordTiming: false,
       });
       cumulativeWeight += weights[i];
     }
@@ -423,15 +455,16 @@ export function createAudioScheduler(): AudioScheduler {
       let advancedAny = false;
       while (nextWordBoundaryIdx < currentWordBoundaries.length &&
              currentWordBoundaries[nextWordBoundaryIdx].time <= cursorNow) {
-        const advancedWordIndex = currentWordBoundaries[nextWordBoundaryIdx].wordIndex;
-        callbacks.onWordAdvance(advancedWordIndex);
+        const currentBoundary = currentWordBoundaries[nextWordBoundaryIdx];
+        const advancedWordIndex = currentBoundary.wordIndex;
+        callbacks.onWordAdvance(advancedWordIndex, currentBoundary.isTrustedWordTiming);
         advancedAny = true;
         nextWordBoundaryIdx++;
 
         truthSyncCounter++;
         if (truthSyncCounter >= truthSyncInterval) {
           truthSyncCounter = 0;
-          callbacks.onTruthSync?.(advancedWordIndex);
+          callbacks.onTruthSync?.(advancedWordIndex, currentBoundary.isTrustedWordTiming);
         }
       }
       if (advancedAny) {
@@ -665,7 +698,10 @@ export function createAudioScheduler(): AudioScheduler {
         // TTS-7O: Truth-sync on resume — re-snap cursor position
         if (callbacks?.onTruthSync && nextWordBoundaryIdx > 0 && currentWordBoundaries.length > 0) {
           const lastIdx = Math.min(nextWordBoundaryIdx - 1, currentWordBoundaries.length - 1);
-          if (lastIdx >= 0) callbacks.onTruthSync(currentWordBoundaries[lastIdx].wordIndex);
+          if (lastIdx >= 0) callbacks.onTruthSync(
+            currentWordBoundaries[lastIdx].wordIndex,
+            currentWordBoundaries[lastIdx].isTrustedWordTiming,
+          );
         }
       }
     });

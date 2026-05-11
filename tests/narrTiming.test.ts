@@ -406,6 +406,59 @@ describe("validateWordTimestamps — scheduler fallback behavior (via telemetry)
 
     scheduler.stop();
   });
+
+  it("emits untrusted truth-sync at chunk boundary for heuristic fallback lanes", async () => {
+    const onTruthSync = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({
+      onWordAdvance: vi.fn(),
+      onChunkBoundary: vi.fn(),
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+      onTruthSync,
+    });
+    scheduler.play();
+
+    const words = ["hello", "world", "foo"];
+    const chunk = makeChunkWithTimestamps(0, words, null, { durationMs: 1000 });
+    scheduler.scheduleChunk(chunk);
+
+    await vi.waitFor(() => {
+      expect(onTruthSync).toHaveBeenCalled();
+      const lastCall = onTruthSync.mock.calls[onTruthSync.mock.calls.length - 1];
+      expect(lastCall[0]).toBe(2);
+      expect(lastCall[1]).toBe(false);
+    });
+
+    scheduler.stop();
+  });
+
+  it("emits trusted truth-sync at chunk boundary when real word timestamps are valid", async () => {
+    const onTruthSync = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({
+      onWordAdvance: vi.fn(),
+      onChunkBoundary: vi.fn(),
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+      onTruthSync,
+    });
+    scheduler.play();
+
+    const words = ["hello", "world", "foo"];
+    const timestamps = makeValidTimestamps(words, 1.0);
+    const chunk = makeChunkWithTimestamps(0, words, timestamps, { durationMs: 1000 });
+    scheduler.scheduleChunk(chunk);
+
+    await vi.waitFor(() => {
+      expect(onTruthSync).toHaveBeenCalled();
+      const lastCall = onTruthSync.mock.calls[onTruthSync.mock.calls.length - 1];
+      expect(lastCall[0]).toBe(2);
+      expect(lastCall[1]).toBe(true);
+    });
+
+    scheduler.stop();
+  });
 });
 
 // ── computeWordBoundaries via scheduler ───────────────────────────────────────
