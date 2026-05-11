@@ -6,6 +6,37 @@ Manual tests that **require the built Electron app** with real Kokoro audio. The
 
 **Environment:** Desktop Electron app only. The browser test harness (localhost:5173) uses Web Speech API fallback — it cannot test the Kokoro pipeline, pre-scheduled playback, crossfade, disk cache, or Opus encoding. Browser-testable items are in `tts-browser-test-checklist.md`.
 
+## Kokoro Preflight And Recovery
+
+Kokoro readiness can be checked before narration starts from Settings. The settings UI calls the `kokoroPreflight` preload API, which invokes the `tts-kokoro-preflight` IPC path and returns the renderer-visible setup truth without starting playback.
+
+Preflight statuses:
+
+- `ready`: the Kokoro worker is loaded and warm-up inference has completed.
+- `loading`: model setup or retry is currently in progress.
+- `offline-ready`: required local model assets and runtime dependency checks are present, but the worker may not be warm in the current app lifecycle.
+- `download-needed`: the Kokoro model cache is empty.
+- `missing-assets`: the model cache exists but required files are incomplete.
+- `download-failed`: the last attempted model download or load path failed and local required files are still incomplete.
+- `runtime-error`: a runtime dependency, packaged voice asset, worker query, or setup path failed.
+
+The report includes model/config/tokenizer/voice/runtime/cache/download/retry truth where available. Inspect `model.cacheDir`, `model.modelDir`, `model.configPath`, `model.missingAssets`, `voice`, `runtime.dependencies`, `download.*`, `engine`, `worker`, and `checks[]` before assuming a playback bug.
+
+Asset cache layout targets Electron `userData` under the app models cache. Kokoro assets should appear in a Transformers.js-style path under the preflight-reported cache directory:
+
+```text
+models/onnx-community/Kokoro-82M-v1.0-ONNX/...
+```
+
+Use the exact `model.cacheDir` / `model.modelDir` reported by preflight when checking disk; packaged, dev, and OS-specific app data locations may differ.
+
+Recovery expectations:
+
+- For `download-needed`, `missing-assets`, or `download-failed`, use the Settings Kokoro download/retry control. Re-run preflight after the retry and confirm `download.needed` clears.
+- For `runtime-error`, retry setup from Settings and surface `detail`, `reason`, and failed `checks[]` rows in the bug report.
+- For persistent failures, inspect the reported cache path for missing or partial model/config/tokenizer files, then check app data permissions and antivirus/quarantine behavior around the Electron app data/cache location.
+- `offline-ready` is not the same as warmed playback. It means local assets and runtime prerequisites are present for offline use; pressing Play still follows the existing Kokoro warm/generate path.
+
 ## Format
 
 Each item: `[ID] Action | Expected | Severity`

@@ -5,14 +5,13 @@
 const { parentPort, workerData } = require("worker_threads");
 const path = require("path");
 const Module = require("module");
+const { KOKORO_MODEL_ID, KOKORO_MODEL_DTYPE, KOKORO_DEFAULT_VOICE } = require("./constants");
 
 let KokoroTTS = null;
 let ttsInstance = null;
 let modelLoaded = false;
 let modelReady = false;
 
-const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
-const DTYPE = "q4"; // q4 is ~30-50% faster than q8 on CPU, Kokoro handles it well
 const SAMPLE_RATE = 24000;
 const OPTIONAL_PACKAGED_MODULE_STUBS = new Map([
   ["sharp", path.join(__dirname, "sharp-stub.js")],
@@ -84,8 +83,8 @@ async function loadModel(cacheDir) {
     };
 
     try {
-      ttsInstance = await KokoroTTS.from_pretrained(MODEL_ID, {
-        dtype: DTYPE,
+      ttsInstance = await KokoroTTS.from_pretrained(KOKORO_MODEL_ID, {
+        dtype: KOKORO_MODEL_DTYPE,
         device: "cpu",
         progress_callback: (progress) => {
           if (progress.status === "progress") {
@@ -109,7 +108,7 @@ async function loadModel(cacheDir) {
   modelReady = false;
   // Warm-up inference is the truth boundary: loaded != ready.
   try {
-    await ttsInstance.generate("Hello.", { voice: "af_bella", speed: 1.0 });
+    await ttsInstance.generate("Hello.", { voice: KOKORO_DEFAULT_VOICE, speed: 1.0 });
     modelReady = true;
     parentPort.postMessage({ type: "warm-up-done" });
     parentPort.postMessage({ type: "model-ready" });
@@ -120,6 +119,33 @@ async function loadModel(cacheDir) {
     parentPort.postMessage({ type: "warm-up-failed", error: warmupErr.message });
     return;
   }
+}
+
+function getVoiceSnapshot() {
+  const voiceMap = ttsInstance?.voices || KokoroTTS?.voices || null;
+  const voices = voiceMap ? Object.keys(voiceMap) : null;
+  return {
+    available: Array.isArray(voices) ? voices.includes(KOKORO_DEFAULT_VOICE) : null,
+    count: Array.isArray(voices) ? voices.length : null,
+    ids: Array.isArray(voices) ? voices : null,
+    defaultVoice: KOKORO_DEFAULT_VOICE,
+  };
+}
+
+function getWorkerStatus() {
+  return {
+    modelId: KOKORO_MODEL_ID,
+    dtype: KOKORO_MODEL_DTYPE,
+    modelLoaded,
+    modelReady,
+    runtime: {
+      packagedModulePath: workerData?.modulePath || null,
+      node: process.version,
+      platform: process.platform,
+      arch: process.arch,
+    },
+    voices: getVoiceSnapshot(),
+  };
 }
 
 async function generate(id, text, voice, speed, words) {
@@ -170,6 +196,9 @@ parentPort.on("message", async (msg) => {
       break;
     case "list-voices":
       await listVoices(msg.id);
+      break;
+    case "preflight":
+      parentPort.postMessage({ type: "preflight", id: msg.id, worker: getWorkerStatus() });
       break;
   }
 });

@@ -113,6 +113,12 @@ const AUTH_GOOGLE_REDIRECT_PORT = 44322;
 // ── TTS Engine ──────────────────────────────────────────────────────────
 /** Kokoro TTS output sample rate (Hz) */
 const KOKORO_SAMPLE_RATE = 24000;
+/** HuggingFace model ID for Kokoro ONNX */
+const KOKORO_MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
+/** Kokoro ONNX dtype selected for CPU playback */
+const KOKORO_MODEL_DTYPE = "q4";
+/** Default Kokoro voice used for warm-up and fallback startup checks */
+const KOKORO_DEFAULT_VOICE = "af_bella";
 /** Idle timeout before TTS worker is terminated to free memory (ms, 5 minutes) */
 const TTS_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 /** Timeout for Kokoro model loading before aborting (ms, 2 minutes) */
@@ -229,6 +235,9 @@ module.exports = {
   AUTH_GOOGLE_REDIRECT_PORT,
   // TTS Engine
   KOKORO_SAMPLE_RATE,
+  KOKORO_MODEL_ID,
+  KOKORO_MODEL_DTYPE,
+  KOKORO_DEFAULT_VOICE,
   TTS_IDLE_TIMEOUT_MS,
   TTS_MODEL_LOAD_TIMEOUT_MS,
   // TTS Cache

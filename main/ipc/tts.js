@@ -131,6 +131,25 @@ function register(ctx) {
     return { ready: ttsEngine.isModelReady() };
   });
 
+  ipcMain.handle("tts-kokoro-preflight", async () => {
+    try {
+      if (typeof ttsEngine.preflight === "function") {
+        return await ttsEngine.preflight();
+      }
+      return {
+        ok: Boolean(ttsEngine.isModelReady?.()),
+        status: ttsEngine.isModelReady?.() ? "ready" : "download-needed",
+        ready: Boolean(ttsEngine.isModelReady?.()),
+        loading: false,
+        offlineReady: false,
+        checkedAt: new Date().toISOString(),
+        checks: [],
+      };
+    } catch (err) {
+      return toErrorResponse(err);
+    }
+  });
+
   ipcMain.handle("tts-kokoro-download", async () => {
     try {
       await ttsEngine.downloadModel((progress) => {

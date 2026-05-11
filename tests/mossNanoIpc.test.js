@@ -66,6 +66,14 @@ function createIpcHarness({ nanoEngine = createNanoEngineStub() } = {}) {
     isModelReady: vi.fn(() => false),
     downloadModel: vi.fn(),
     preload: vi.fn(),
+    preflight: vi.fn().mockResolvedValue({
+      ok: true,
+      status: "offline-ready",
+      ready: false,
+      loading: false,
+      recoverable: false,
+      offlineReady: true,
+    }),
   };
   const qwenEngine = {
     getModelStatus: vi.fn(),
@@ -196,6 +204,7 @@ describe("experimental MOSS Nano IPC contract", () => {
       "tts-kokoro-model-status",
       "tts-kokoro-download",
       "tts-kokoro-preload",
+      "tts-kokoro-preflight",
       "tts-kokoro-generate-marathon",
       "tts-kokoro-preload-marathon",
       "tts-nano-status",
@@ -204,6 +213,23 @@ describe("experimental MOSS Nano IPC contract", () => {
       "tts-nano-shutdown",
       "tts-nano-restart",
     ]));
+  });
+
+  it("passes Kokoro preflight through the dedicated IPC channel", async () => {
+    const harness = createIpcHarness();
+
+    harness.loadAndRegister();
+
+    const handler = harness.ipcHandlers.get("tts-kokoro-preflight");
+    expect(handler).toBeTypeOf("function");
+    await expect(handler()).resolves.toMatchObject({
+      ok: true,
+      status: "offline-ready",
+      ready: false,
+      loading: false,
+      recoverable: false,
+      offlineReady: true,
+    });
   });
 
   it("maps thrown Nano engine failures to structured IPC responses", async () => {
@@ -274,6 +300,7 @@ describe("experimental MOSS Nano preload contract", () => {
     expect(exposedApi).toBeTruthy();
     expect(exposedApi).toEqual(expect.objectContaining({
       kokoroPreload: expect.any(Function),
+      kokoroPreflight: expect.any(Function),
       kokoroGenerate: expect.any(Function),
       kokoroPreloadMarathon: expect.any(Function),
       kokoroGenerateMarathon: expect.any(Function),
@@ -292,6 +319,7 @@ describe("experimental MOSS Nano preload contract", () => {
     await exposedApi.nanoCancel("nano-req-1");
     await exposedApi.nanoShutdown();
     await exposedApi.nanoRestart();
+    await exposedApi.kokoroPreflight();
 
     expect(invoked).toEqual([
       { channel: "tts-nano-status", args: [] },
@@ -299,6 +327,7 @@ describe("experimental MOSS Nano preload contract", () => {
       { channel: "tts-nano-cancel", args: ["nano-req-1"] },
       { channel: "tts-nano-shutdown", args: [] },
       { channel: "tts-nano-restart", args: [] },
+      { channel: "tts-kokoro-preflight", args: [] },
     ]);
   });
 });

@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Set up electronAPI before kokoroStrategy module loads
 const electronAPI = vi.hoisted(() => {
-  const api = { kokoroGenerate: vi.fn() as any };
+  const api = { kokoroGenerate: vi.fn() as any, kokoroPreflight: vi.fn() as any };
   (globalThis as any).window = (globalThis as any).window || {};
   (globalThis as any).window.electronAPI = api;
   return api;
@@ -62,6 +62,23 @@ describe("createKokoroStrategy", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     electronAPI.kokoroGenerate = vi.fn().mockResolvedValue(defaultIpcResult);
+    electronAPI.kokoroPreflight = vi.fn().mockResolvedValue({
+      ok: true,
+      status: "ready",
+      reason: null,
+      detail: "Kokoro worker is loaded and warm-up inference has completed.",
+      ready: true,
+      loading: false,
+      recoverable: false,
+      offlineReady: true,
+      checkedAt: "2026-05-11T05:00:00.000Z",
+      model: {},
+      voice: {},
+      download: { needed: false },
+      engine: { status: "ready", ready: true, loading: false, recoverable: false },
+      worker: { modelReady: true },
+      checks: [],
+    });
   });
 
   it("happy path: speakChunk starts pipeline which calls IPC", async () => {
@@ -204,6 +221,63 @@ describe("createKokoroStrategy", () => {
     electronAPI.kokoroGenerate.mockClear();
     strategy.speakChunk("Hello world", ["Hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
     await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+
+    strategy.stop();
+  });
+
+  it("refreshPreflight preserves deterministic readiness before narration without starting playback", async () => {
+    const deps = mockDeps();
+    const strategy = createKokoroStrategy(deps);
+
+    const snapshot = await strategy.refreshPreflight();
+
+    expect(electronAPI.kokoroPreflight).toHaveBeenCalledTimes(1);
+    expect(electronAPI.kokoroGenerate).not.toHaveBeenCalled();
+    expect(snapshot).toMatchObject({
+      status: "ready",
+      ready: true,
+      loading: false,
+      offlineReady: true,
+      recoverable: false,
+    });
+    expect(strategy.getPreflightStatus()).toBe("ready");
+
+    strategy.speakChunk("Hello world", ["Hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalledTimes(1));
+
+    strategy.stop();
+  });
+
+  it("refreshPreflight preserves offline-ready status while leaving existing playback behavior intact", async () => {
+    electronAPI.kokoroPreflight.mockResolvedValueOnce({
+      ok: true,
+      status: "offline-ready",
+      reason: null,
+      detail: "Kokoro model assets and runtime dependencies are available locally; worker is not warm.",
+      ready: false,
+      loading: false,
+      recoverable: false,
+      offlineReady: true,
+      checkedAt: "2026-05-11T05:00:00.000Z",
+      model: {},
+      voice: {},
+      download: { needed: false },
+      engine: { status: "idle", ready: false, loading: false, recoverable: true },
+      worker: null,
+      checks: [],
+    });
+    const deps = mockDeps();
+    const strategy = createKokoroStrategy(deps);
+
+    await expect(strategy.refreshPreflight()).resolves.toMatchObject({
+      status: "offline-ready",
+      ready: false,
+      offlineReady: true,
+    });
+
+    strategy.speakChunk("Hello world", ["Hello", "world"], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+    expect(deps.onFallbackToWeb).not.toHaveBeenCalled();
 
     strategy.stop();
   });

@@ -278,6 +278,10 @@ export function stepKokoroBucket(current: number, delta: number): KokoroRateBuck
 // ── Kokoro TTS ──────────────────────────────────────────────────────────────
 /** HuggingFace model ID for Kokoro ONNX */
 export const KOKORO_MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
+/** Kokoro ONNX dtype selected for CPU playback */
+export const KOKORO_MODEL_DTYPE = "q4";
+/** Default Kokoro voice used for warm-up and fallback startup checks */
+export const KOKORO_DEFAULT_VOICE = "af_bella";
 /** Kokoro output sample rate (Hz) */
 export const KOKORO_SAMPLE_RATE = 24000;
 /** Friendly names for Kokoro voices */
