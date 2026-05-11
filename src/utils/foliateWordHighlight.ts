@@ -3,6 +3,15 @@ import type { FlowRenderedWordRootDescriptor } from "./FlowScrollEngine";
 
 export type FoliateWordHighlightClass = "page-word--flow-cursor" | "page-word--highlighted";
 
+export function shouldSuppressNarrateFlowCursor(
+  readingMode: string | undefined,
+  chunkReadingVisualState: ChunkReadingVisualState | null | undefined,
+): boolean {
+  return readingMode === "narrate"
+    && chunkReadingVisualState?.mode === "narrate"
+    && chunkReadingVisualState?.activeChunkRange != null;
+}
+
 const CHUNK_ACTIVE_CLASS = "page-word--chunk-active";
 const ACTIVE_WORD_CLASS = "page-word--active-word";
 

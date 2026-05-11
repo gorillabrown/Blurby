@@ -1,6 +1,6 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-10 PM — POSTV2 audit remediation remains the next review/commit/merge gate, now including the implemented CHUNK-SYNC-3 Flow chunk-visual work. The post-v2 TTS direction is Kokoro-deepening rather than successor-model churn. Abogen was reviewed as a Kokoro product/reference implementation, CHUNK-SYNC Narrate timing migration remains deferred until it is resumed through Kokoro, and the roadmap now queues a Kokoro Deepening Program after `POSTV2-REVIEW-1`. Desktop v2 posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen retired/disabled.
+**Last updated**: 2026-05-11 PM — `KOKORO-DEEPEN-2` closeout completed on `sprint/kokoro-deepen-2-clean-main`: Narrate chunk/timing hardening now runs through Kokoro timing truth (chunk-first visuals, trusted-word-only bold highlight, chunk-only fallback when timing is missing), with focused verification passing. `POSTV2-REVIEW-1` remains the separate review/commit/merge gate for the post-v2 remediation worktree. Desktop v2 posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen retired/disabled.
 **Current branch**: `main`
 **Current state**: v1.75.1 stable, with package metadata aligned to v1.75.1. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, and POSTV2-NARR-1 have landed in the Desktop v2.0/post-v2 remediation conveyor. QWEN-STREAM-4 closed with ITERATE. MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`. MOSS-NANO-13e records that as the bounded product decision: Nano is recommended opt-in, Kokoro remains default/available, and Qwen is retired for Desktop v2 and remains disabled. POCKET-TTS-1 adds Pocket TTS as an available opt-in engine with sidecar, IPC/preload, renderer strategy, settings/preview selection, and no public voice-cloning UX in v2.0. POLISH-1 completed the release-readiness polish pass, RELEASE-1 recorded the release closeout, and POSTV2 remediation implemented the audit cleanup candidate pending review/commit/merge. After the post-v2 review gate, the approved TTS investment path is Kokoro: deterministic asset/runtime readiness, long-form chunk/timing hardening, and evidence-first voice-profile exploration.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
@@ -569,7 +569,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 **Program order:**
 1. `POSTV2-REVIEW-1` — finish the pending post-v2 audit review/commit/merge gate first.
 2. `KOKORO-DEEPEN-1` — Kokoro asset preflight and offline runtime truth.
-3. `KOKORO-DEEPEN-2` — Kokoro long-form chunk/timing narration hardening.
+3. `KOKORO-DEEPEN-2` — Kokoro long-form chunk/timing narration hardening. ✅ COMPLETED 2026-05-11
 4. `KOKORO-DEEPEN-3` — Kokoro voice profiles and voice-mixing evidence spike.
 5. `KOKORO-EXPORT-1` — optional future audiobook/subtitle export lane after the first three are stable.
 
@@ -622,7 +622,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-#### Sprint KOKORO-DEEPEN-2: Long-Form Chunk/Timing Narration Hardening
+#### Sprint KOKORO-DEEPEN-2: Long-Form Chunk/Timing Narration Hardening ✅ COMPLETED 2026-05-11
 
 **Goal:** Resume the CHUNK-SYNC work through Kokoro: natural chunks are the visible narration unit, Kokoro word timestamps drive bold active-word highlight only when truthful timestamps exist, and the fallback is chunk-only highlighting.
 
@@ -654,6 +654,13 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 3. Kokoro Narrate shows bold word highlight only when truthful word timing exists.
 4. Timestamp-missing lanes never invent word progress; they fall back to chunk-only.
 5. Focused chunk/narration tests, full tests, build, and `git diff --check` pass.
+
+**Closeout (2026-05-11):**
+1. Kokoro chunk-boundary metadata now drives Narrate chunk visual progression through shared `ChunkReadingVisualState`.
+2. Narrate active-word visuals are gated to trusted word timing only; heuristic/null timestamp lanes remain chunk-only.
+3. Narrate legacy duplicate flow-cursor rendering is suppressed when chunk-state narrate visuals are active.
+4. Natural chunk punctuation priority is explicit and deterministic: sentence enders (`.!?`) > semicolon/colon (`;:`) > comma fallback.
+5. Verification in this branch: focused chunk/timing lane passed (`96/96`), `npm run typecheck` passed, `npx vite build --configLoader runner` passed, `git diff --check` passed. Full-suite run is blocked by an unrelated pre-existing `tests/mossNanoProbe.test.js` python-env lane and unrelated `.tmp` mirror tests.
 
 **Tier:** Full | **Depends on:** `KOKORO-DEEPEN-1`, local CHUNK-SYNC Dispatch 1/2 foundations.
 

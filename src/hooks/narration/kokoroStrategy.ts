@@ -8,7 +8,7 @@ import type { KokoroSchedulerRatePlanMetadata, TtsStrategy } from "../../types/n
 import { createGenerationPipeline } from "../../utils/generationPipeline";
 import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
-import type { AudioScheduler, AudioProgressReport } from "../../utils/audioScheduler";
+import type { AudioScheduler, AudioProgressReport, ChunkBoundaryPayload } from "../../utils/audioScheduler";
 import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
 import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
@@ -46,6 +46,11 @@ export interface KokoroStrategyDeps {
   onFallbackToWeb: () => void;
   /** Fires when a scheduler segment actually starts playing on the audio clock. */
   onSegmentStart?: (wordIndex: number) => void;
+  /**
+   * TTS-7Q: Playback chunk boundary callback.
+   * For segmented chunks, metadata includes the parent generated chunk identity.
+   */
+  onChunkBoundary?: (endIdx: number, metadata?: ChunkBoundaryPayload) => void;
   /**
    * TTS-7R: Visual-only truth-sync callback. Called every ~12 words by the scheduler
    * to re-snap the visual overlay to the authoritative audio position.
@@ -246,7 +251,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
       // Set up scheduler callbacks
       scheduler.setCallbacks({
         onWordAdvance,
-        onChunkBoundary: () => {},
+        onChunkBoundary: (endIdx, metadata) => {
+          deps.onChunkBoundary?.(endIdx, metadata);
+        },
         onEnd,
         onError: () => deps.onFallbackToWeb(),
         onSegmentStart: (wordIndex: number) => {

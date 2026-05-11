@@ -235,4 +235,43 @@ describe("createAudioScheduler", () => {
     await vi.waitFor(() => expect(onChunkBoundary).toHaveBeenCalledWith(5), { timeout: 1000 });
     scheduler.stop();
   });
+
+  it("emits parent chunk boundary metadata only for final Kokoro playback segment", async () => {
+    const onChunkBoundary = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary, onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    const firstSegment = {
+      ...makeChunk(0, 3),
+      parentChunkStartIdx: 0,
+      parentChunkWordCount: 6,
+      segmentIndex: 0,
+      isFinalSegment: false,
+    } as ScheduledChunk;
+    const finalSegment = {
+      ...makeChunk(3, 3),
+      parentChunkStartIdx: 0,
+      parentChunkWordCount: 6,
+      segmentIndex: 1,
+      isFinalSegment: true,
+    } as ScheduledChunk;
+
+    scheduler.scheduleChunk(firstSegment);
+    scheduler.scheduleChunk(finalSegment);
+
+    await vi.waitFor(() => {
+      expect(onChunkBoundary).toHaveBeenCalledTimes(1);
+      expect(onChunkBoundary).toHaveBeenCalledWith(6, expect.objectContaining({
+        parentChunkStartIdx: 0,
+        parentChunkWordCount: 6,
+        segmentIndex: 1,
+        isFinalSegment: true,
+        lastConfirmedWordIndex: 5,
+        endIdx: 6,
+      }));
+    }, { timeout: 1000 });
+
+    scheduler.stop();
+  });
 });

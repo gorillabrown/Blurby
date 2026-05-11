@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, countWords, findSentenceBoundary } from "../utils/text";
 import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
@@ -23,6 +23,8 @@ import FoliatePageView from "./FoliatePageView";
 import { type FlowProgress } from "../utils/FlowScrollEngine";
 import { buildNaturalChunks } from "../utils/naturalChunks";
 import type { ChunkReadingVisualState, ChunkSourceWord } from "../types/chunkReading";
+import { createChunkReadingVisualState } from "../utils/chunkReadingVisualState";
+import type { ChunkBoundaryPayload } from "../utils/audioScheduler";
 import type { FoliateWord } from "../utils/foliateHelpers";
 import ReaderBottomBar, { ChapterListHandle } from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
@@ -364,6 +366,55 @@ export default function ReaderContainer({
     () => buildNaturalChunks(chunkSourceWords),
     [chunkSourceWords],
   );
+
+  const applyNarrationChunkBoundary = useCallback((endIdx: number, metadata?: ChunkBoundaryPayload) => {
+    if (naturalReadingChunks.length === 0) {
+      setChunkReadingVisualState(null);
+      return;
+    }
+
+    const targetIdxRaw = metadata
+      ? metadata.lastConfirmedWordIndex
+      : Math.max(endIdx - 1, 0);
+    const totalWords = naturalReadingChunks[naturalReadingChunks.length - 1]?.endWordIndex ?? 0;
+    const targetIdx = Math.max(0, Math.min(targetIdxRaw, Math.max(totalWords - 1, 0)));
+    const parentStart = metadata?.parentChunkStartIdx;
+    const parentWordCount = metadata?.parentChunkWordCount;
+    const parentEnd = parentStart != null && parentWordCount != null
+      ? parentStart + parentWordCount
+      : null;
+
+    const chunkIdByParentRange = parentStart != null && parentEnd != null
+      ? naturalReadingChunks.find((chunk) =>
+        chunk.startWordIndex <= parentStart &&
+        chunk.endWordIndex >= parentEnd
+      )?.id ?? null
+      : null;
+    const chunkIdByTargetWord = naturalReadingChunks.find((chunk) => (
+      chunk.startWordIndex <= targetIdx && chunk.endWordIndex > targetIdx
+    ))?.id ?? null;
+
+    setChunkReadingVisualState(createChunkReadingVisualState({
+      mode: "narrate",
+      chunks: naturalReadingChunks,
+      wordIndex: totalWords > 0 ? targetIdx : null,
+      chunkId: chunkIdByParentRange ?? chunkIdByTargetWord,
+      syncLevel: "chunk-synced",
+    }));
+  }, [naturalReadingChunks, setChunkReadingVisualState]);
+
+  useEffect(() => {
+    if (readingMode !== "narrate") {
+      narration.setOnChunkBoundary?.(null);
+      setChunkReadingVisualState(null);
+      return;
+    }
+
+    narration.setOnChunkBoundary?.(applyNarrationChunkBoundary);
+    return () => {
+      narration.setOnChunkBoundary?.(null);
+    };
+  }, [applyNarrationChunkBoundary, narration, readingMode, setChunkReadingVisualState]);
 
   const totalWordCount = bookWordMeta?.totalWords || activeDoc.wordCount || words.length;
   const canonicalWordAnchor = resolveCanonicalWordAnchor({

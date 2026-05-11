@@ -78,6 +78,28 @@ describe("buildNaturalChunks", () => {
     ]);
   });
 
+  it("prioritizes sentence-end punctuation over semicolons/colons", () => {
+    const words = wordsFromText("Alpha; beta gamma delta epsilon zeta. Eta theta.");
+
+    const chunks = buildNaturalChunks(words, { targetMaxWords: 4, softMaxWords: 8, hardMaxWords: 12 });
+
+    expect(chunks.map((chunk) => [chunk.startWordIndex, chunk.endWordIndex, chunk.kind])).toEqual([
+      [0, 6, "sentence"],
+      [6, 8, "sentence"],
+    ]);
+  });
+
+  it("prefers semicolon/colon boundaries over comma fallback", () => {
+    const words = wordsFromText("Alpha, beta, gamma; delta epsilon zeta");
+
+    const chunks = buildNaturalChunks(words, { targetMaxWords: 4, softMaxWords: 10, hardMaxWords: 12 });
+
+    expect(chunks.map((chunk) => [chunk.startWordIndex, chunk.endWordIndex, chunk.kind])).toEqual([
+      [0, 3, "sentence"],
+      [3, 6, "sentence"],
+    ]);
+  });
+
   it("uses commas only when needed to keep long sentences under the hard max", () => {
     const words = wordsFromText("one two three, four five six, seven eight nine ten eleven.");
 
