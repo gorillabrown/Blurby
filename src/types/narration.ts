@@ -1,4 +1,5 @@
 import type { KokoroStatusSnapshot, QwenStatusSnapshot, TtsEngine } from "../types";
+import type { ChunkSourceWord } from "./chunkReading";
 
 // ── Book word array types (moved from bookWordExtractor.ts in HOTFIX-6) ──────
 
@@ -16,6 +17,7 @@ export interface BookWordArray {
   sections: SectionBoundary[];
   totalWords: number;
   complete: boolean;
+  chunkSourceWords?: ChunkSourceWord[];
 }
 
 /**

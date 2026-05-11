@@ -227,6 +227,24 @@ describe("FlowScrollEngine", () => {
   let container;
   let cursor;
   let callbacks;
+  const naturalChunks = [
+    {
+      id: "sentence:0-5",
+      startWordIndex: 0,
+      endWordIndex: 5,
+      text: "word0 word1 word2 word3 word4",
+      wordCount: 5,
+      source: { type: "sentence" },
+    },
+    {
+      id: "sentence:5-10",
+      startWordIndex: 5,
+      endWordIndex: 10,
+      text: "word5 word6 word7 word8 word9",
+      wordCount: 5,
+      source: { type: "sentence" },
+    },
+  ];
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -234,6 +252,7 @@ describe("FlowScrollEngine", () => {
       onWordAdvance: vi.fn(),
       onComplete: vi.fn(),
       onLineChange: vi.fn(),
+      onChunkChange: vi.fn(),
     };
     engine = new FlowScrollEngine(callbacks);
     container = createMockContainer(20, 5); // 20 words, 5 per line = 4 lines
@@ -417,6 +436,46 @@ describe("FlowScrollEngine", () => {
   it("should set cursor display to block on start", () => {
     engine.start(container, cursor, 0, 300, new Set(), false);
     expect(cursor.style.display).toBe("block");
+  });
+
+  it("uses natural chunks to hide the legacy shrinking cursor", () => {
+    engine.setChunks(naturalChunks);
+    engine.start(container, cursor, 0, 600, new Set(), false);
+
+    expect(cursor.style.display).toBe("none");
+    expect(cursor.style.width).toBe("");
+  });
+
+  it("reports the active natural chunk at Flow start", () => {
+    engine.setChunks(naturalChunks);
+    engine.start(container, cursor, 2, 600, new Set(), false);
+
+    expect(engine.getActiveChunk()?.id).toBe("sentence:0-5");
+    expect(callbacks.onChunkChange).toHaveBeenCalledWith(naturalChunks[0]);
+  });
+
+  it("advances the active WPM word inside a natural chunk", () => {
+    engine.setChunks(naturalChunks);
+    engine.start(container, cursor, 0, 600, new Set(), false);
+
+    vi.advanceTimersByTime(360);
+
+    expect(callbacks.onWordAdvance.mock.calls.map((call) => call[0])).toEqual([
+      0, 1, 2, 3,
+    ]);
+  });
+
+  it("emits chunk changes and scrolls the next chunk into the reading zone", () => {
+    engine.setChunks(naturalChunks);
+    engine.start(container, cursor, 0, 600, new Set(), false);
+    callbacks.onChunkChange.mockClear();
+    container.scrollTo.mockClear();
+
+    vi.advanceTimersByTime(560);
+
+    expect(callbacks.onChunkChange).toHaveBeenCalledWith(naturalChunks[1]);
+    expect(engine.getActiveChunk()?.id).toBe("sentence:5-10");
+    expect(container.scrollTo).toHaveBeenCalled();
   });
 
   it("should set cursor height to 5px in normal mode (FLOW-INF-B timer bar)", () => {

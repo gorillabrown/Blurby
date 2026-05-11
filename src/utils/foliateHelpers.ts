@@ -10,6 +10,11 @@ export interface FoliateWord {
   range: Range | null;
   sectionIndex: number;
   tokenId?: string;
+  blockTag?: string;
+  blockOrdinal?: number;
+  blockId?: string;
+  paragraphBreakAfter?: boolean;
+  sourceLineBreakAfter?: boolean;
 }
 
 export const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
@@ -64,7 +69,7 @@ export function getBlockParent(node: Node): Element | null {
   return el;
 }
 
-export function collectBlockTextNodes(root: ParentNode): Array<{ block: Element; nodes: Text[] }> {
+export function collectBlockTextNodes(root: ParentNode, sectionIndex = 0): Array<{ block: Element; nodes: Text[]; blockTag: string; blockOrdinal: number; blockId: string }> {
   const groups = new Map<Element, Text[]>();
   const order: Element[] = [];
       const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
@@ -89,7 +94,16 @@ export function collectBlockTextNodes(root: ParentNode): Array<{ block: Element;
     groups.get(block)!.push(node);
   }
 
-  return order.map((block) => ({ block, nodes: groups.get(block) || [] }));
+  return order.map((block, blockOrdinal) => {
+    const blockTag = block.tagName.toLowerCase();
+    return {
+      block,
+      nodes: groups.get(block) || [],
+      blockTag,
+      blockOrdinal,
+      blockId: `${sectionIndex}:${blockOrdinal}:${blockTag}`,
+    };
+  });
 }
 
 export function locateTextOffset(nodes: Text[], absoluteOffset: number): { node: Text; offset: number } | null {
@@ -114,7 +128,18 @@ export function makeFoliateTokenId(sectionIndex: number, tokenIndex: number): st
   return `${sectionIndex}:${tokenIndex}`;
 }
 
-export function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number, tokenOffset = 0): FoliateWord[] {
+export function hasPunctuatedSourceLineBreakAfter(text: string, absoluteEndOffset: number): boolean {
+  const before = text.slice(0, absoluteEndOffset);
+  const after = text.slice(absoluteEndOffset);
+  return /[.!?;:,]["')\]]?\s*$/.test(before) && /^\s*\r?\n/.test(after);
+}
+
+export function buildWordsFromTextNodes(
+  nodes: Text[],
+  sectionIndex: number,
+  tokenOffset = 0,
+  metadata: { blockTag?: string; blockOrdinal?: number; blockId?: string } = {},
+): FoliateWord[] {
   if (nodes.length === 0) return [];
   const combined = nodes.map((node) => node.textContent || "").join("");
   const wordSpans = segmentWordSpans(combined);
@@ -128,7 +153,16 @@ export function buildWordsFromTextNodes(nodes: Text[], sectionIndex: number, tok
     const range = doc.createRange();
     range.setStart(startPos.node, startPos.offset);
     range.setEnd(endPos.node, endPos.offset);
-    words.push({ word, range, sectionIndex, tokenId: makeFoliateTokenId(sectionIndex, tokenOffset + words.length) });
+    words.push({
+      word,
+      range,
+      sectionIndex,
+      tokenId: makeFoliateTokenId(sectionIndex, tokenOffset + words.length),
+      blockTag: metadata.blockTag,
+      blockOrdinal: metadata.blockOrdinal,
+      blockId: metadata.blockId,
+      sourceLineBreakAfter: hasPunctuatedSourceLineBreakAfter(combined, end) || undefined,
+    });
   }
 
   return words;
@@ -190,11 +224,12 @@ export function extractWordsFromView(view: any): { words: FoliateWord[]; paragra
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
 
-    const blockGroups = collectBlockTextNodes(doc.body);
-    for (const { nodes } of blockGroups) {
+    const blockGroups = collectBlockTextNodes(doc.body, index);
+    for (const { nodes, blockTag, blockOrdinal, blockId } of blockGroups) {
       const tokenOffset = sectionTokenOffsets.get(index) || 0;
-      const blockWords = buildWordsFromTextNodes(nodes, index, tokenOffset);
+      const blockWords = buildWordsFromTextNodes(nodes, index, tokenOffset, { blockTag, blockOrdinal, blockId });
       if (blockWords.length === 0) continue;
+      blockWords[blockWords.length - 1].paragraphBreakAfter = true;
       words.push(...blockWords);
       sectionTokenOffsets.set(index, tokenOffset + blockWords.length);
       paragraphBreaks.add(words.length - 1);
@@ -207,10 +242,13 @@ export function extractWordsFromView(view: any): { words: FoliateWord[]; paragra
 export function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWord[] {
   const words: FoliateWord[] = [];
   if (!doc?.body) return words;
-  const groups = collectBlockTextNodes(doc.body);
+  const groups = collectBlockTextNodes(doc.body, sectionIndex);
   let tokenOffset = 0;
-  for (const { nodes } of groups) {
-    const blockWords = buildWordsFromTextNodes(nodes, sectionIndex, tokenOffset);
+  for (const { nodes, blockTag, blockOrdinal, blockId } of groups) {
+    const blockWords = buildWordsFromTextNodes(nodes, sectionIndex, tokenOffset, { blockTag, blockOrdinal, blockId });
+    if (blockWords.length > 0) {
+      blockWords[blockWords.length - 1].paragraphBreakAfter = true;
+    }
     words.push(...blockWords);
     tokenOffset += blockWords.length;
   }

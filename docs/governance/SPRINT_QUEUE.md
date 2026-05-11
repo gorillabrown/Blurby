@@ -8,7 +8,7 @@ BLURBY
 
 No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and no code-changing pointer is dispatch-ready unless its referenced spec names explicit edit-site coordinates.
 
-Desktop v2.0 scope lock: no exploratory TTS/model or non-desktop expansion work may dispatch inside Desktop v2.0. The only approved TTS/model work in this finish line is MOSS-NANO-13a–13e, and its deliverable is a defensible productization decision (`PAUSE_NANO_PRODUCTIZATION` / `NANO_EXPERIMENTAL_ONLY` / `NANO_RECOMMENDED_OPT_IN`), not forced Nano promotion.
+Desktop v2.0 scope lock: no exploratory TTS/model or non-desktop expansion work may dispatch inside Desktop v2.0. The only completed TTS/model work in this finish line is MOSS-NANO-13a–13e plus POCKET-TTS-1, and the release posture is Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen retired/disabled. After `POSTV2-REVIEW-1`, the approved TTS direction is Kokoro deepening, not successor-model exploration.
 
 Parallel dispatch rule: code-changing sprints may run in parallel only when lane ownership is explicit and shared-core freeze files are not edited by both sprints at the same time.
 
@@ -56,10 +56,10 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping (three available engines at ship gate: Kokoro default, MOSS-Nano recommended opt-in per 13e, Pocket TTS available opt-in per POCKET-TTS-1)
-Queue depth: 1 post-v2 review sprint (YELLOW — remediation implementation complete; review/commit/merge remains)
+Queue depth: 4 dispatchable pointers (GREEN — POSTV2 review first, including CHUNK-SYNC-3 Flow visual review, then Kokoro Deepening Program)
 Next queue item: POSTV2-REVIEW-1 — Review, Commit, And Merge Post-v2 Audit Remediation
-Health: GREEN on Desktop v2 release closeout and post-v2 remediation implementation — E-Ink, Reading Goals, MOSS-NANO-13a–13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, and POSTV2-NARR-1 are closed. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation). Verdict: GREEN on implementation; YELLOW only on uncommitted review/merge.
+Health: GREEN on Desktop v2 release closeout and post-v2 remediation implementation — E-Ink, Reading Goals, MOSS-NANO-13a–13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, and POSTV2-NARR-1 are closed. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2. 2026-05-10 update: Abogen reviewed; post-review TTS work now doubles down on Kokoro asset readiness, chunk/timing truth, and voice-profile evidence.
+Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation) → 2026-05-10 PM (Abogen Kokoro review; Kokoro Deepening Program queued). Verdict: GREEN on implementation; YELLOW only on uncommitted review/merge.
 ```
 
 ## Desktop v2.0 Conveyor Belt (Active)
@@ -98,11 +98,133 @@ Closeout: `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
 
 ---
 
+## Ready Queue Pointers
+
+```text
+Sprint: POSTV2-REVIEW-1 — Review, Commit, And Merge Post-v2 Audit Remediation
+Status: Next up because POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, and CHUNK-SYNC-3 Flow visual work are implemented but still pending review/commit/merge.
+Type: verification / review / git closeout; no new feature work.
+
+WHAT: Review the post-v2 remediation worktree plus CHUNK-SYNC-3 Flow chunk-visual changes, verify release truth, typecheck, narration/security fixes, artifact hygiene, and Flow chunk rendering behavior, then commit/merge if the review stays green.
+
+HYPOTHESIS: The remediation branch and Flow chunk-visual work are ready to land without opening new TTS/model scope. If review finds drift, fix only review-blocking defects before merge.
+
+WHERE:
+  - `ROADMAP.md` § "Post-v2 Audit Remediation (Completed, Pending Review/Merge)"
+  - `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`
+  - `docs/superpowers/plans/2026-05-04-postv2-audit-remediation.md`
+  - `docs/superpowers/plans/2026-05-10-chunk-synchronized-reading.md`
+
+HOW (Phase 0):
+  CLI [opus]: Inspect dirty tree, branch/worktree provenance, and remediation closeout before staging anything.
+
+HOW (Implementation):
+  CLI [sonnet]: Apply only review-discovered remediation corrections if needed; otherwise make no code changes.
+
+HOW (Verification):
+  CLI [haiku]: Run the remediation verification set recorded in the closeout plus focused CHUNK-SYNC-3 Flow/visual/control tests, build, and diff checks as applicable.
+
+HOW (Review / Closeout):
+  CLI [opus]: Summarize findings, stage only intended files, commit/merge according to roadmap closeout convention, and update queue pointers.
+```
+
+```text
+Sprint: KOKORO-DEEPEN-1 — Kokoro Asset Preflight And Offline Runtime Truth
+Status: Queued after approved 2026-05-10 Abogen review; Kokoro is the post-v2 TTS investment path.
+Type: implementation + docs; no default-engine change, no Qwen reactivation, no successor-model exploration.
+
+WHAT: Add deterministic Kokoro readiness/preflight reporting for model, config, voices, cache path, download/retry state, and offline-ready status before narration starts.
+
+HYPOTHESIS: Blurby's current Kokoro path can become product-grade with Abogen-style asset/runtime truth without replacing the existing `kokoro-js` / ONNX runtime.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint KOKORO-DEEPEN-1: Kokoro Asset Preflight And Offline Runtime Truth"
+  - `main/tts-worker.js`, `main/ipc/tts.js`, `preload.js`
+  - `src/components/settings/KokoroStatusSection.tsx`, `src/components/settings/TTSSettings.tsx`
+  - `src/hooks/narration/kokoroStrategy.ts`, `src/constants.ts`, `main/constants.js`, `src/types.ts`
+  - Abogen reference only: `voice_cache.py`, `predownload_gui.py`, `utils.py`, README
+
+HOW (Phase 0):
+  CLI [opus]: Inspect current Kokoro loading/status/download paths and define the status contract before edits.
+
+HOW (Implementation):
+  CLI [sonnet]: Add preflight IPC/preload/shared types and settings status copy/actions without changing playback semantics.
+
+HOW (Verification):
+  CLI [haiku]: Run focused Kokoro settings/runtime tests, full tests, build, and `git diff --check`.
+
+HOW (Review / Closeout):
+  CLI [opus]: Confirm Kokoro remains default/available, no silent fallback changes were introduced, and roadmap/queue advance to `KOKORO-DEEPEN-2`.
+```
+
+```text
+Sprint: KOKORO-DEEPEN-2 — Long-Form Chunk/Timing Narration Hardening
+Status: Queued after `KOKORO-DEEPEN-1`; resumes CHUNK-SYNC through Kokoro rather than as engine-agnostic visual churn.
+Type: implementation + UX correctness; no invented word timing, no Flow/Narrate autoplay behavior change unless explicitly required by the chunk model.
+
+WHAT: Connect Kokoro narration to the shared natural chunk visual state: light highlight the active chunk, bold highlight the active word only from truthful Kokoro timestamps, and fall back to chunk-only when timestamps are absent.
+
+HYPOTHESIS: Kokoro can support the approved chunk-synchronized reading UX if the renderer consumes declared timing truth and never invents per-word progress.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint KOKORO-DEEPEN-2: Long-Form Chunk/Timing Narration Hardening"
+  - `docs/superpowers/plans/2026-05-10-chunk-synchronized-reading.md`
+  - `docs/superpowers/specs/2026-05-10-chunk-synchronized-reading-design.md`
+  - `src/types/chunkReading.ts`, `src/utils/naturalChunks.ts`, `src/utils/chunkReadingVisualState.ts`, `src/utils/foliateWordHighlight.ts`
+  - `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+  - `src/hooks/narration/kokoroStrategy.ts`, `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`
+
+HOW (Phase 0):
+  CLI [opus]: Audit CHUNK-SYNC Dispatch 1/2 changes and Kokoro timestamp flow before wiring render behavior.
+
+HOW (Implementation):
+  CLI [opus]: Route Kokoro chunk/timestamp truth into the shared visual state while preserving Flow as WPM-clocked and Narrate as spoken-timing-clocked.
+
+HOW (Verification):
+  CLI [haiku]: Run focused chunk, Foliate highlight, Kokoro narration, audio scheduler, full tests, build, and `git diff --check`.
+
+HOW (Review / Closeout):
+  CLI [opus]: Verify one light chunk highlight, no duplicate cursors, no word highlight without trusted timing, and queue advance to `KOKORO-DEEPEN-3`.
+```
+
+```text
+Sprint: KOKORO-DEEPEN-3 — Kokoro Voice Profiles And Voice-Mixing Evidence Spike
+Status: Queued after `KOKORO-DEEPEN-1`; Abogen shows useful Kokoro voice formulas, but Blurby's ONNX stack must prove viability before UX.
+Type: investigation + bounded prototype; no public voice-mixing UX unless evidence proves the runtime path.
+
+WHAT: Determine whether weighted Kokoro voice formulas/profiles can work in Blurby's current `kokoro-js` / ONNX runtime, then either create a hidden prototype or document why not.
+
+HYPOTHESIS: Abogen-style voice mixing may be valuable, but it may depend on PyTorch voice tensors that are not directly available in Blurby's current runtime.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint KOKORO-DEEPEN-3: Kokoro Voice Profiles And Voice-Mixing Evidence Spike"
+  - `main/tts-worker.js`, `main/ipc/tts.js`, `preload.js`
+  - `src/types.ts`, `src/types/narration.ts`, `src/constants.ts`
+  - `src/components/settings/TTSSettings.tsx`, `src/components/settings/KokoroStatusSection.tsx`
+  - `src/utils/narrationPortability.ts`, `src/utils/narrationContinuity.ts`
+  - Abogen reference only: `voice_profiles.py`, `voice_formulas.py`, `voice_cache.py`
+
+HOW (Phase 0):
+  CLI [opus]: Inspect Kokoro voice asset representation in Blurby and decide what can be tested without runtime replacement.
+
+HOW (Implementation):
+  CLI [sonnet]: Build a hidden/dev-only prototype if viable, or produce an evidence memo and tests/artifacts proving non-viability.
+
+HOW (Verification):
+  CLI [haiku]: Run focused profile/voice tests or evidence checks, full tests, build, and `git diff --check`.
+
+HOW (Review / Closeout):
+  CLI [opus]: Decide whether voice mixing becomes product work, remains deferred, or requires a separately approved runtime investigation.
+```
+
 ## Deferred Lanes (Not on Desktop v2.0 Critical Path)
 
 | Lane | Status | Resume Condition |
 |------|--------|-----------------|
-| KOKORO-RETIRE-1/2 | Not active | Kokoro remains default/available for Desktop v2.0. |
+| Kokoro Deepening Program | Approved post-v2 TTS lane | Dispatch after `POSTV2-REVIEW-1`; see `ROADMAP.md` § "Post-v2 Program: Kokoro Deepening (Abogen-informed)". |
+| CHUNK-SYNC Narrate migration | Deferred after Flow visual Dispatch 3 | Resume only through `KOKORO-DEEPEN-2` so Narrate chunk/word visualization is grounded in Kokoro timing truth. |
+| KOKORO-EXPORT-1 | Optional future | Roadmap hook only; do not queue until Kokoro readiness, chunk/timing, and voice-profile evidence stabilize. |
+| KOKORO-RETIRE-1/2 | Not active | Superseded as a posture by Kokoro deepening; do not re-queue without a separate future product decision. |
 | Qwen Streaming | Retired/disabled for Desktop v2 (QWEN-STREAM-4 ITERATE) | Post-v2.0 only by separate approval |
 | EXT-ENR-C | Optional | Post-v2.0 |
 | APK-0 through APK-4 | Investigation gates not cleared | Post-v2.0 |
@@ -612,8 +734,9 @@ If any guardrail fails, run the sprints sequentially.
 | Sprint ID | Disposition |
 |-----------|-------------|
 | HOTFIX-13 | **Dissolved.** BUG-151/152/153 absorbed into SELECTION-1. BUG-154 parked (likely not a bug — needs live verification). |
-| KOKORO-RETIRE-1 | **Paused.** Kokoro is available as legacy fallback (Qwen is default). Retirement paused — no successor has proven continuous live playback. Resume only after a successor proves live playback and a separate Kokoro-retirement lane is explicitly approved. |
-| KOKORO-RETIRE-2 | **Paused.** Final Kokoro removal blocked behind same proof + approval bar. Do not re-queue until `KOKORO-RETIRE-1` is reactivated. |
+| KOKORO-RETIRE-1 | **Superseded / not active.** Kokoro is the default and operational floor again. Retirement is no longer the active posture; the approved post-v2 lane is Kokoro deepening. Reopen only by separate future product decision. |
+| KOKORO-RETIRE-2 | **Superseded / not active.** Final Kokoro removal is blocked indefinitely behind a future decision that does not exist in the current roadmap. |
+| CHUNK-SYNC Narrate migration | **Deferred / rerouted.** Dispatch 1/2 foundations and Dispatch 3 Flow chunk visuals are present locally; Narrate active-word highlighting resumes only through `KOKORO-DEEPEN-2` so it is tied to Kokoro timing truth. |
 | MOSS-NANO follow-up | **Active only as MOSS-NANO-13a–13e inside Desktop v2.0.** MOSS-NANO-12 closed as NANO_EXPERIMENTAL_ONLY. Both third-party audits: "proceed only with scope changes." Nano remains experimental-only unless the 13a–13e provenance-backed productization lane records `PAUSE_NANO_PRODUCTIZATION`, `NANO_EXPERIMENTAL_ONLY`, or `NANO_RECOMMENDED_OPT_IN`. No other exploratory MOSS/TTS/model lane is approved inside Desktop v2.0. |
 | EINK-6A | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 2). Full spec in ROADMAP.md. |
 | EINK-6B | **Active.** Moved to Desktop v2.0 conveyor belt (Seq 3). Depends on EINK-6A. |

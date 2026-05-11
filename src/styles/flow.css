@@ -46,6 +46,11 @@
   display: none; /* shown via JS: cursorRef.current.style.display = "block" */
 }
 
+.foliate-page-view--chunk-visual .flow-shrink-cursor,
+.foliate-page-view--chunk-visual .foliate-flow-cursor {
+  display: none;
+}
+
 /* Overlay cursor for EPUB Flow mode — Range-based, GPU-accelerated */
 .foliate-flow-cursor {
   position: fixed;
@@ -163,4 +168,3 @@
   font-size: 0.85rem;
   opacity: 0.6;
 }
-

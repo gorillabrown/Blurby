@@ -18,6 +18,7 @@ import {
   FLOW_LINE_COMPLETE_FLASH_MS,
   EINK_LINES_PER_PAGE,
 } from "../constants";
+import type { ReadingChunk } from "../types/chunkReading";
 
 export interface LineInfo {
   y: number;
@@ -52,6 +53,7 @@ export interface FlowScrollEngineCallbacks {
   onComplete: () => void;
   onLineChange?: (lineIndex: number, lineInfo: LineInfo) => void;
   onProgressUpdate?: (progress: FlowProgress) => void;
+  onChunkChange?: (chunk: ReadingChunk) => void;
 }
 
 export interface FlowRenderedWordRootDescriptor {
@@ -88,6 +90,8 @@ export class FlowScrollEngine {
   private zonePosition: number = FLOW_READING_ZONE_POSITION;
   private totalWords = 0;
   private bookPct = 0;
+  private chunks: ReadingChunk[] = [];
+  private activeChunkId: string | null = null;
 
   constructor(callbacks: FlowScrollEngineCallbacks) {
     this.callbacks = callbacks;
@@ -114,8 +118,9 @@ export class FlowScrollEngine {
     this.paused = false;
     this.manualScrollPaused = false;
     this.followerMode = false;
+    this.activeChunkId = null;
 
-    this.cursor.style.display = "block";
+    this.cursor.style.display = this.hasChunkVisualState() ? "none" : "block";
     this.cursor.style.height = (isEink ? FLOW_TIMER_BAR_EINK_HEIGHT_PX : FLOW_TIMER_BAR_HEIGHT_PX) + "px";
     if (isEink) {
       this.cursor.style.transition = "none";
@@ -132,7 +137,8 @@ export class FlowScrollEngine {
         this.lines = this.buildLineMap();
         if (this.lines.length > 0) {
           this.lineIdx = this.findLineForWord(wordIndex);
-          this.scrollToLine(this.lineIdx, true);
+          this.scrollActiveChunkOrLine(wordIndex, true);
+          this.emitChunkChangeForWord(wordIndex);
           setTimeout(() => {
             if (this.running && !this.paused) this.animateLine();
           }, FLOW_LINE_ADVANCE_BUFFER_MS);
@@ -154,7 +160,8 @@ export class FlowScrollEngine {
     }
 
     this.lineIdx = this.findLineForWord(wordIndex);
-    this.scrollToLine(this.lineIdx, true);
+    this.scrollActiveChunkOrLine(wordIndex, true);
+    this.emitChunkChangeForWord(wordIndex);
 
     setTimeout(() => {
       if (this.running && !this.paused) this.animateLine();
@@ -176,6 +183,18 @@ export class FlowScrollEngine {
     this.bookPct = pct;
   }
 
+  setChunks(chunks: ReadingChunk[]): void {
+    this.chunks = chunks;
+    this.activeChunkId = null;
+    if (!this.running) return;
+    this.emitChunkChangeForWord(this.wordIndex);
+    if (this.cursor && this.hasChunkVisualState()) {
+      this.cursor.style.display = "none";
+      this.cursor.style.transition = "none";
+      this.cursor.style.width = "";
+    }
+  }
+
   stop(): void {
     this.running = false;
     this.paused = false;
@@ -192,6 +211,7 @@ export class FlowScrollEngine {
     this.container = null;
     this.cursor = null;
     this.lines = [];
+    this.activeChunkId = null;
   }
 
   pause(): void {
@@ -252,7 +272,8 @@ export class FlowScrollEngine {
     }
     this.clearTimers();
     this.lineIdx = this.findLineForWord(wordIndex);
-    this.scrollToLine(this.lineIdx);
+    this.scrollActiveChunkOrLine(wordIndex);
+    this.emitChunkChangeForWord(wordIndex);
     if (!this.paused) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
@@ -268,6 +289,7 @@ export class FlowScrollEngine {
     const lineChanged = lineIdx !== this.lineIdx;
     this.lineIdx = lineIdx;
     this.wordIndex = wordIndex;
+    this.emitChunkChangeForWord(wordIndex);
     this.scrollToLine(lineIdx, true);
 
     const lineWidth = Math.max(line.right - line.left, 1);
@@ -299,8 +321,9 @@ export class FlowScrollEngine {
     if (line) {
       this.wordIndex = line.firstWord;
       this.callbacks.onWordAdvance(this.wordIndex);
+      this.emitChunkChangeForWord(this.wordIndex);
       this.callbacks.onLineChange?.(this.lineIdx, line);
-      this.scrollToLine(this.lineIdx);
+      this.scrollActiveChunkOrLine(this.wordIndex);
     }
     if (!this.paused) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
@@ -324,7 +347,8 @@ export class FlowScrollEngine {
     this.wordIndex = targetWord;
     this.lineIdx = this.findLineForWord(targetWord);
     this.callbacks.onWordAdvance(this.wordIndex);
-    this.scrollToLine(this.lineIdx);
+    this.emitChunkChangeForWord(this.wordIndex);
+    this.scrollActiveChunkOrLine(this.wordIndex);
     if (!this.paused) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
@@ -342,6 +366,10 @@ export class FlowScrollEngine {
   }
 
   getWordIndex(): number { return this.wordIndex; }
+
+  getActiveChunk(): ReadingChunk | null {
+    return this.findChunkForWord(this.wordIndex);
+  }
 
   getProgress(): FlowProgress {
     const totalWords = this.totalWords || (this.lines.length > 0 ? this.lines[this.lines.length - 1].lastWord + 1 : 0);
@@ -455,6 +483,11 @@ export class FlowScrollEngine {
       return;
     }
 
+    if (this.hasChunkVisualState()) {
+      this.animateChunkVisualLine();
+      return;
+    }
+
     if (this.isEink) {
       this.animateEinkChunk();
       return;
@@ -518,6 +551,48 @@ export class FlowScrollEngine {
         }, FLOW_LINE_ADVANCE_BUFFER_MS);
       }
     }, duration);
+  }
+
+  private animateChunkVisualLine(): void {
+    if (!this.running || this.paused || this.followerMode || !this.container) return;
+    if (this.lineIdx >= this.lines.length) {
+      this.running = false;
+      this.callbacks.onComplete();
+      return;
+    }
+
+    const line = this.lines[this.lineIdx];
+    this.callbacks.onLineChange?.(this.lineIdx, line);
+
+    let currentWord = Math.max(this.wordIndex, line.firstWord);
+    if (currentWord > line.lastWord) currentWord = line.firstWord;
+    const msPerWord = Math.max(60000 / Math.max(this.wpm, 1), 50);
+
+    const emitCurrentAndScheduleNext = () => {
+      if (!this.running || this.paused || this.followerMode) return;
+      if (currentWord > line.lastWord) {
+        this.lineIdx++;
+        if (this.lineIdx >= this.lines.length) {
+          this.running = false;
+          if (this.cursor) this.cursor.style.display = "none";
+          this.callbacks.onComplete();
+          return;
+        }
+        this.wordIndex = this.lines[this.lineIdx].firstWord;
+        this.emitChunkChangeForWord(this.wordIndex);
+        this.scrollActiveChunkOrLine(this.wordIndex);
+        this.lineTimer = setTimeout(() => {
+          if (this.running && !this.paused) this.animateLine();
+        }, FLOW_LINE_ADVANCE_BUFFER_MS);
+        return;
+      }
+
+      this.emitWordAdvance(currentWord);
+      currentWord++;
+      this.lineTimer = setTimeout(emitCurrentAndScheduleNext, msPerWord);
+    };
+
+    emitCurrentAndScheduleNext();
   }
 
   private animateEinkChunk(): void {
@@ -586,6 +661,50 @@ export class FlowScrollEngine {
     } else {
       this.container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: "smooth" });
     }
+  }
+
+  private scrollToWord(wordIndex: number, instant = false): void {
+    this.scrollToLine(this.findLineForWord(wordIndex), instant);
+  }
+
+  private scrollActiveChunkOrLine(wordIndex: number, instant = false): void {
+    const chunk = this.findChunkForWord(wordIndex);
+    if (chunk) {
+      this.scrollToWord(chunk.startWordIndex, instant);
+      return;
+    }
+    this.scrollToWord(wordIndex, instant);
+  }
+
+  private hasChunkVisualState(): boolean {
+    return this.chunks.length > 0;
+  }
+
+  private findChunkForWord(wordIndex: number): ReadingChunk | null {
+    return this.chunks.find((chunk) =>
+      wordIndex >= chunk.startWordIndex && wordIndex < chunk.endWordIndex
+    ) ?? null;
+  }
+
+  private emitWordAdvance(wordIndex: number): void {
+    this.wordIndex = wordIndex;
+    const chunkChanged = this.emitChunkChangeForWord(wordIndex);
+    if (chunkChanged) {
+      this.scrollActiveChunkOrLine(wordIndex);
+    }
+    this.callbacks.onWordAdvance(wordIndex);
+    this.callbacks.onProgressUpdate?.(this.getProgress());
+  }
+
+  private emitChunkChangeForWord(wordIndex: number): boolean {
+    const chunk = this.findChunkForWord(wordIndex);
+    const nextChunkId = chunk?.id ?? null;
+    if (nextChunkId === this.activeChunkId) return false;
+    this.activeChunkId = nextChunkId;
+    if (chunk) {
+      this.callbacks.onChunkChange?.(chunk);
+    }
+    return true;
   }
 
   private handleWheel = (): void => {

@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
 import { FlowScrollEngine, type FlowProgress } from "../utils/FlowScrollEngine";
+import { createChunkReadingVisualState } from "../utils/chunkReadingVisualState";
 import { getNextQueuedBook } from "../utils/queue";
 import {
   CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS,
   EINK_LINES_PER_PAGE,
 } from "../constants";
 import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
+import type { ChunkReadingVisualState, ReadingChunk } from "../types/chunkReading";
 import type { TtsEvalTraceSink } from "../types/eval";
 
 const api = window.electronAPI;
@@ -78,6 +80,10 @@ export interface UseFlowScrollSyncParams {
   bookWordMeta: { sections: any[]; totalWords: number } | null;
   /** Tokenized paragraph breaks (for flow engine). */
   paragraphBreaks: Set<number>;
+  /** Natural reading chunks for Flow's declared visual state. */
+  chunks?: ReadingChunk[];
+  /** Declared Flow/Narrate chunk visual state rendered by Foliate. */
+  setChunkReadingVisualState?: React.Dispatch<React.SetStateAction<ChunkReadingVisualState | null>>;
   /** Is e-ink mode. */
   isEink: boolean;
   /** Optional e-ink ghosting heuristic hook. */
@@ -136,6 +142,8 @@ export function useFlowScrollSync({
   wordsRef,
   bookWordMeta,
   paragraphBreaks,
+  chunks = [],
+  setChunkReadingVisualState = () => {},
   isEink,
   onEinkContentChange,
   focusTextSize,
@@ -151,6 +159,8 @@ export function useFlowScrollSync({
   isEinkRef.current = isEink;
   const onEinkContentChangeRef = useRef(onEinkContentChange);
   onEinkContentChangeRef.current = onEinkContentChange;
+  const chunksRef = useRef(chunks);
+  chunksRef.current = chunks;
 
   // Stable refs to avoid stale closures in FlowScrollEngine onComplete
   const activeDocRef = useRef(activeDoc);
@@ -188,12 +198,35 @@ export function useFlowScrollSync({
     engine.jumpToWord(highlightedWordIndexRef.current);
   };
 
+  const publishFlowVisualState = (wordIndex: number) => {
+    if (isNarratingRef.current) return;
+    const currentChunks = chunksRef.current;
+    if (currentChunks.length === 0) {
+      setChunkReadingVisualState(null);
+      return;
+    }
+    setChunkReadingVisualState(createChunkReadingVisualState({
+      mode: "flow",
+      chunks: currentChunks,
+      wordIndex,
+      syncLevel: "wpm",
+    }));
+  };
+
+  const syncEngineChunks = (engine: FlowScrollEngine | null | undefined, nextChunks: ReadingChunk[]) => {
+    const chunkAwareEngine = engine as (FlowScrollEngine & { setChunks?: (chunks: ReadingChunk[]) => void }) | null | undefined;
+    chunkAwareEngine?.setChunks?.(nextChunks);
+  };
+
   // ── Effect 1: FlowScrollEngine lifecycle — start/stop/pause ───────────
   useEffect(() => {
     if (readingMode !== "flow" || !flowPlaying) {
       // Stop the engine when not in flow mode or paused
       if (flowScrollEngineRef.current) {
         flowScrollEngineRef.current.stop();
+      }
+      if (readingMode !== "flow") {
+        setChunkReadingVisualState(null);
       }
       return;
     }
@@ -204,6 +237,7 @@ export function useFlowScrollSync({
       flowScrollEngineRef.current = new FlowScrollEngine({
         onWordAdvance: (idx: number) => {
           setHighlightedWordIndex(idx);
+          publishFlowVisualState(idx);
           if (evalTrace?.enabled) {
             evalTrace.record({ kind: "word", source: "flow", wordIndex: idx });
           }
@@ -263,6 +297,8 @@ export function useFlowScrollSync({
       if (!engine) return;
       const totalWords = bookWordMeta?.totalWords || activeDoc.wordCount || wordsRef.current.length;
       if (totalWords > 0) engine.setTotalWords(totalWords);
+      syncEngineChunks(engine, chunksRef.current);
+      publishFlowVisualState(highlightedWordIndexRef.current);
       engine.start(
         container,
         cursor,
@@ -319,6 +355,15 @@ export function useFlowScrollSync({
   useEffect(() => {
     flowScrollEngineRef.current?.setWpm(effectiveWpm);
   }, [effectiveWpm]);
+
+  // ── Effect 3b: Sync natural chunks to the running FlowScrollEngine ───
+  useEffect(() => {
+    const engine = flowScrollEngineRef.current;
+    syncEngineChunks(engine, chunks);
+    if (readingMode === "flow" && flowPlaying && !isNarrating) {
+      publishFlowVisualState(highlightedWordIndexRef.current);
+    }
+  }, [chunks, readingMode, flowPlaying, isNarrating]);
 
   // ── Effect 4: Sync zone position changes to running FlowScrollEngine ──
   useEffect(() => {

@@ -38,7 +38,18 @@ export function injectStyles(doc: Document, settings: BlurbySettings, focusTextS
     .page-word { cursor: pointer; border-radius: 4px; transition: background-color 120ms linear, box-shadow 120ms linear, color 120ms linear; }
     .page-word:hover { background: ${accent}22; }
     .page-word--highlighted { background: ${accent}4D; box-shadow: inset 0 -0.26em 0 ${accent}55; }
-.page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
+    .page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
+    .page-word--chunk-active {
+      background: color-mix(in srgb, var(--accent, #FF5B7F) 16%, transparent);
+      border-radius: 4px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    .page-word--active-word {
+      font-weight: 800;
+      color: var(--text, currentColor);
+      background: color-mix(in srgb, var(--accent, #FF5B7F) 28%, transparent);
+    }
   `;
   doc.head.appendChild(style);
 }

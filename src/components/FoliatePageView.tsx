@@ -30,7 +30,12 @@ import {
 } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
-import { resolveFoliateWordHighlightClass } from "../utils/foliateWordHighlight";
+import {
+  applyChunkReadingVisualStateToRoots,
+  clearChunkReadingVisualStateFromRoots,
+  resolveFoliateWordHighlightClass,
+} from "../utils/foliateWordHighlight";
+import type { ChunkReadingVisualState } from "../types/chunkReading";
 import {
   FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
   type FlowRenderedWordRootDescriptor,
@@ -321,6 +326,8 @@ interface FoliatePageViewProps {
   getAudioProgress?: FoliateAudioProgressFn | null;
   /** Book-wide section boundaries from main-process extraction (HOTFIX-10: global index stamping) */
   bookWordSections?: import("../types/narration").SectionBoundary[];
+  /** CHUNK-SYNC-3: Declared chunk/word visual state for Flow/Narrate surfaces. */
+  chunkReadingVisualState?: ChunkReadingVisualState | null;
   /** FLOW-3A: When true, foliate uses flow="scrolled" for infinite scroll */
   flowMode?: boolean;
   /** FLOW-3A: Ref to expose the scrollable container element to FlowScrollEngine */
@@ -376,6 +383,10 @@ export interface FoliateViewAPI {
   applySoftHighlight: (wordIndex: number) => boolean;
   /** SELECTION-1: Remove soft-selected highlight from all words */
   clearSoftHighlight: () => void;
+  /** CHUNK-SYNC-2: Render declared active chunk and optional active word state. */
+  applyChunkReadingVisualState: (state: ChunkReadingVisualState | null) => void;
+  /** CHUNK-SYNC-2: Clear chunk/active-word visual state across rendered Foliate roots. */
+  clearChunkReadingVisualState: () => void;
 }
 
 export default function FoliatePageView({
@@ -398,6 +409,7 @@ export default function FoliatePageView({
   onFlowWordAdvance,
   narrationWordIndex,
   bookWordSections,
+  chunkReadingVisualState = null,
   flowMode,
   scrollContainerRef,
   flowCursorRef,
@@ -605,6 +617,22 @@ export default function FoliatePageView({
 
     return true;
   }, [clearVisualWordClasses, viewApiRef]);
+
+  const clearChunkReadingVisualState = useCallback(() => {
+    clearChunkReadingVisualStateFromRoots(getRenderedWordRoots());
+  }, [getRenderedWordRoots]);
+
+  const applyChunkReadingVisualState = useCallback((state: ChunkReadingVisualState | null) => {
+    applyChunkReadingVisualStateToRoots(getRenderedWordRoots(), state);
+  }, [getRenderedWordRoots]);
+
+  useEffect(() => {
+    if (chunkReadingVisualState) {
+      applyChunkReadingVisualState(chunkReadingVisualState);
+      return;
+    }
+    clearChunkReadingVisualState();
+  }, [applyChunkReadingVisualState, chunkReadingVisualState, clearChunkReadingVisualState]);
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -1092,6 +1120,8 @@ export default function FoliatePageView({
             },
             getRenderedWordRoots,
             getScrollContainer: () => resolveFoliateScrollContainer(),
+            applyChunkReadingVisualState,
+            clearChunkReadingVisualState,
             // SELECTION-1: Passive soft-selected highlight (page-mode anchor indicator)
             applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
             clearSoftHighlight: () => clearSoftHighlight(),
@@ -1361,7 +1391,11 @@ export default function FoliatePageView({
   const goToFraction = useCallback((frac: number) => viewRef.current?.goToFraction(frac), []);
 
   return (
-    <div className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}`} ref={containerRef} style={{ overflow: flowMode ? "auto" : "hidden" }}>
+    <div
+      className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}${chunkReadingVisualState ? " foliate-page-view--chunk-visual" : ""}`}
+      ref={containerRef}
+      style={{ overflow: flowMode ? "auto" : "hidden" }}
+    >
       {/* Page turn buttons — hidden in Flow Mode (no pagination) */}
       {!flowMode && (
         <>

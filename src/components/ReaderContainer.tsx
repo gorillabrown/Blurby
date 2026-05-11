@@ -21,6 +21,9 @@ import ScrollReaderView from "./ScrollReaderView";
 import PageReaderView from "./PageReaderView";
 import FoliatePageView from "./FoliatePageView";
 import { type FlowProgress } from "../utils/FlowScrollEngine";
+import { buildNaturalChunks } from "../utils/naturalChunks";
+import type { ChunkReadingVisualState, ChunkSourceWord } from "../types/chunkReading";
+import type { FoliateWord } from "../utils/foliateHelpers";
 import ReaderBottomBar, { ChapterListHandle } from "./ReaderBottomBar";
 import EinkRefreshOverlay from "./EinkRefreshOverlay";
 import BacktrackPrompt from "./BacktrackPrompt";
@@ -93,6 +96,42 @@ function resolveTocWordIndex(
   return Math.floor(sectionFraction * Math.max(totalWords, 1));
 }
 
+function sectionIndexForGlobalWord(
+  sections: BookWordArray["sections"] | undefined,
+  globalWordIndex: number,
+): number | undefined {
+  if (!sections?.length) return undefined;
+  const section = sections.find((candidate) => (
+    globalWordIndex >= candidate.startWordIdx && globalWordIndex < candidate.endWordIdx
+  ));
+  return section?.sectionIndex;
+}
+
+export function createChunkSourceWords(params: {
+  words: string[];
+  foliateWords?: FoliateWord[];
+  paragraphBreaks?: Set<number>;
+  sections?: BookWordArray["sections"];
+}): ChunkSourceWord[] {
+  const { words, foliateWords = [], paragraphBreaks = new Set<number>(), sections } = params;
+  const canUseFoliateMetadata = foliateWords.length === words.length;
+
+  return words.map((word, index) => {
+    const foliateWord = canUseFoliateMetadata ? foliateWords[index] : undefined;
+    return {
+      word,
+      globalWordIndex: index,
+      sectionIndex: foliateWord?.sectionIndex ?? sectionIndexForGlobalWord(sections, index),
+      tokenId: foliateWord?.tokenId,
+      blockId: foliateWord?.blockId,
+      blockTag: foliateWord?.blockTag,
+      blockOrdinal: foliateWord?.blockOrdinal,
+      sourceLineBreakAfter: foliateWord?.sourceLineBreakAfter,
+      paragraphBreakAfter: foliateWord?.paragraphBreakAfter ?? paragraphBreaks.has(index),
+    };
+  });
+}
+
 export default function ReaderContainer({
   activeDoc,
   library,
@@ -144,6 +183,7 @@ export default function ReaderContainer({
   const [focusPlaying, setFocusPlaying] = useState(false);
   const [flowPlaying, setFlowPlaying] = useState(false);
   const [flowProgress, setFlowProgress] = useState<FlowProgress | null>(null);
+  const [chunkReadingVisualState, setChunkReadingVisualState] = useState<ChunkReadingVisualState | null>(null);
 
   // FLOW-INF-C: Cross-book continuous reading state
   const [crossBookTransition, setCrossBookTransition] = useState<{
@@ -173,7 +213,7 @@ export default function ReaderContainer({
   // Detect if this is an EPUB with filepath (use foliate-js for rendering)
   const useFoliate = Boolean(activeDoc?.filepath && activeDoc?.ext === ".epub");
   const foliateApiRef = useRef<import("./FoliatePageView").FoliateViewAPI | null>(null);
-  const foliateWordsRef = useRef<Array<{ word: string; range: Range | null; sectionIndex: number }>>([]);
+  const foliateWordsRef = useRef<FoliateWord[]>([]);
   // State-backed foliate word strings for React rendering (refs don't trigger re-renders)
   const [foliateWordStrings, setFoliateWordStrings] = useState<string[]>([]);
   const [foliateRenderVersion, setFoliateRenderVersion] = useState(0);
@@ -312,6 +352,18 @@ export default function ReaderContainer({
     narration,
     footnoteCuesRef,
   });
+
+  const chunkSourceWords = useMemo(() => createChunkSourceWords({
+    words: getEffectiveWords(),
+    foliateWords: foliateWordsRef.current,
+    paragraphBreaks: tokenized.paragraphBreaks,
+    sections: bookWordMeta?.sections,
+  }), [getEffectiveWords, tokenized.paragraphBreaks, bookWordMeta?.sections, foliateRenderVersion]);
+
+  const naturalReadingChunks = useMemo(
+    () => buildNaturalChunks(chunkSourceWords),
+    [chunkSourceWords],
+  );
 
   const totalWordCount = bookWordMeta?.totalWords || activeDoc.wordCount || words.length;
   const canonicalWordAnchor = resolveCanonicalWordAnchor({
@@ -538,6 +590,8 @@ export default function ReaderContainer({
     wordsRef,
     bookWordMeta,
     paragraphBreaks: tokenized.paragraphBreaks,
+    chunks: naturalReadingChunks,
+    setChunkReadingVisualState,
     isEink,
     onEinkContentChange: handleEinkContentChange,
     focusTextSize,
@@ -1038,6 +1092,7 @@ export default function ReaderContainer({
       narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}
       getAudioProgress={narration.speaking ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
+      chunkReadingVisualState={chunkReadingVisualState}
       flowMode={isFlowSurfaceMode}
       scrollContainerRef={flowScrollContainerRef}
       flowCursorRef={flowScrollCursorRef}
