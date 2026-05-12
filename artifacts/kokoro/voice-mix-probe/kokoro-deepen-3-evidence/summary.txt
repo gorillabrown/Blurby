@@ -1,0 +1,14 @@
+Kokoro Voice Mix Probe
+======================
+Status: non-viable
+Run ID: kokoro-deepen-3-evidence
+Checked At: 2026-05-11T20:31:51.409Z
+Reason: No weighted formula string was accepted by kokoro-js runtime validation.
+
+Cases
+-----
+- base-voice: "af_bella" parse=ok components=1 totalWeight=1 runtime=accepted
+- formula-1: "af_bella:0.7+af_heart:0.3" parse=ok components=2 totalWeight=1 runtime=rejected error=Voice "af_bella:0.7+af_heart:0.3" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable.
+- formula-2: "af_bella:1+af_heart:0" parse=fail reason=Weight for "af_heart" must be > 0 runtime=rejected error=Voice "af_bella:1+af_heart:0" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable.
+- formula-3: "af_bella:1+af_heart:-0.2" parse=fail reason=Weight for "af_heart" must be > 0 runtime=rejected error=Voice "af_bella:1+af_heart:-0.2" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable.
+- formula-4: "af_bella:0.5+zz_missing:0.5" parse=ok components=2 totalWeight=1 runtime=rejected error=Voice "af_bella:0.5+zz_missing:0.5" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable.

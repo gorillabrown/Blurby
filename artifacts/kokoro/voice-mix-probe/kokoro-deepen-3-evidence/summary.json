@@ -1,0 +1,168 @@
+{
+  "runId": "kokoro-deepen-3-evidence",
+  "checkedAt": "2026-05-11T20:31:51.409Z",
+  "outputDir": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\kokoro\\voice-mix-probe\\kokoro-deepen-3-evidence",
+  "runtime": {
+    "type": "loaded",
+    "info": {
+      "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+      "dtype": "q4",
+      "voiceCount": 28
+    },
+    "availableVoiceCount": 28,
+    "sampleVoices": [
+      "af_alloy",
+      "af_aoede",
+      "af_bella",
+      "af_heart",
+      "af_jessica",
+      "af_kore",
+      "af_nicole",
+      "af_nova",
+      "af_river",
+      "af_sarah"
+    ]
+  },
+  "inputs": {
+    "baseVoice": "af_bella",
+    "formulas": [
+      "af_bella:0.7+af_heart:0.3",
+      "af_bella:1+af_heart:0",
+      "af_bella:1+af_heart:-0.2",
+      "af_bella:0.5+zz_missing:0.5"
+    ],
+    "modelId": "onnx-community/Kokoro-82M-v1.0-ONNX",
+    "dtype": "q4",
+    "cacheDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\kokoro\\models"
+  },
+  "verdict": {
+    "status": "non-viable",
+    "reason": "No weighted formula string was accepted by kokoro-js runtime validation."
+  },
+  "results": [
+    {
+      "id": "base-voice",
+      "input": "af_bella",
+      "parse": {
+        "valid": true,
+        "reason": null,
+        "components": [
+          {
+            "voiceId": "af_bella",
+            "weight": 1
+          }
+        ],
+        "totalWeight": 1
+      },
+      "runtime": {
+        "accepted": true,
+        "error": null
+      },
+      "componentChecks": []
+    },
+    {
+      "id": "formula-1",
+      "input": "af_bella:0.7+af_heart:0.3",
+      "parse": {
+        "valid": true,
+        "reason": null,
+        "components": [
+          {
+            "voiceId": "af_bella",
+            "weight": 0.7
+          },
+          {
+            "voiceId": "af_heart",
+            "weight": 0.3
+          }
+        ],
+        "totalWeight": 1
+      },
+      "runtime": {
+        "accepted": false,
+        "error": "Voice \"af_bella:0.7+af_heart:0.3\" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable."
+      },
+      "componentChecks": [
+        {
+          "voiceId": "af_bella",
+          "weight": 0.7,
+          "accepted": true,
+          "error": null
+        },
+        {
+          "voiceId": "af_heart",
+          "weight": 0.3,
+          "accepted": true,
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "formula-2",
+      "input": "af_bella:1+af_heart:0",
+      "parse": {
+        "valid": false,
+        "reason": "Weight for \"af_heart\" must be > 0",
+        "components": [],
+        "totalWeight": null
+      },
+      "runtime": {
+        "accepted": false,
+        "error": "Voice \"af_bella:1+af_heart:0\" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable."
+      },
+      "componentChecks": []
+    },
+    {
+      "id": "formula-3",
+      "input": "af_bella:1+af_heart:-0.2",
+      "parse": {
+        "valid": false,
+        "reason": "Weight for \"af_heart\" must be > 0",
+        "components": [],
+        "totalWeight": null
+      },
+      "runtime": {
+        "accepted": false,
+        "error": "Voice \"af_bella:1+af_heart:-0.2\" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable."
+      },
+      "componentChecks": []
+    },
+    {
+      "id": "formula-4",
+      "input": "af_bella:0.5+zz_missing:0.5",
+      "parse": {
+        "valid": true,
+        "reason": null,
+        "components": [
+          {
+            "voiceId": "af_bella",
+            "weight": 0.5
+          },
+          {
+            "voiceId": "zz_missing",
+            "weight": 0.5
+          }
+        ],
+        "totalWeight": 1
+      },
+      "runtime": {
+        "accepted": false,
+        "error": "Voice \"af_bella:0.5+zz_missing:0.5\" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable."
+      },
+      "componentChecks": [
+        {
+          "voiceId": "af_bella",
+          "weight": 0.5,
+          "accepted": true,
+          "error": null
+        },
+        {
+          "voiceId": "zz_missing",
+          "weight": 0.5,
+          "accepted": false,
+          "error": "Voice \"zz_missing\" not found. Should be one of: af_heart, af_alloy, af_aoede, af_bella, af_jessica, af_kore, af_nicole, af_nova, af_river, af_sarah, af_sky, am_adam, am_echo, am_eric, am_fenrir, am_liam, am_michael, am_onyx, am_puck, am_santa, bf_emma, bf_isabella, bm_george, bm_lewis, bf_alice, bf_lily, bm_daniel, bm_fable."
+        }
+      ]
+    }
+  ]
+}
