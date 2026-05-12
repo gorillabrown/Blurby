@@ -1,11 +1,11 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-11 PM — roadmap review after the Kokoro Deepening closeout sequence. `POSTV2-REVIEW-1`, `KOKORO-DEEPEN-1`, and `KOKORO-DEEPEN-2` are treated as closed; `KOKORO-DEEPEN-3` is evidence-complete with staged closeout files proving weighted Kokoro voice formulas non-viable on the current `kokoro-js` / ONNX runtime. The next approved work is the Kokoro-centered TTS architecture conveyor: provider registry, segment normalization, cache/timing sidecars, highlight sync, and diagnostics. Qwen remains retired/disabled; Kokoro remains default/available.
+**Last updated**: 2026-05-12 — TTS-REGISTRY-1 closeout. `KOKORO-DEEPEN-3` is durably closed, and `TTS-REGISTRY-1` adds the provider capability registry without changing playback behavior, the default engine, Qwen disablement, Kokoro availability, or public voice-mixing UX. The next approved work is `TTS-NORMALIZE-1`: deterministic segment normalization and golden fixtures. Qwen remains retired/disabled; Kokoro remains default/available.
 **Current branch**: `main`
-**Current state**: v1.75.1 stable, with package metadata aligned to v1.75.1. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, POSTV2-REVIEW-1, KOKORO-DEEPEN-1, and KOKORO-DEEPEN-2 have landed in the Desktop v2.0/post-v2 remediation conveyor. `KOKORO-DEEPEN-3` is staged/evidence-complete in the current branch and must be committed/merged before the next code sprint dispatch. QWEN-STREAM-4 closed with ITERATE and Qwen remains disabled. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`. MOSS-NANO-13e records that as the bounded product decision: Nano is recommended opt-in, Kokoro remains default/available, and Qwen is retired for Desktop v2 and remains disabled. POCKET-TTS-1 adds Pocket TTS as an available opt-in engine with sidecar, IPC/preload, renderer strategy, settings/preview selection, and no public voice-cloning UX in v2.0. The approved post-v2 TTS investment path is now Kokoro-centered architecture hardening: make provider capability, text normalization, cache identity, timing metadata, and highlight synchronization explicit without reopening default-engine churn.
+**Current state**: v1.75.1 stable, with package metadata aligned to v1.75.1. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, POSTV2-REVIEW-1, KOKORO-DEEPEN-1, KOKORO-DEEPEN-2, KOKORO-DEEPEN-3, and TTS-REGISTRY-1 have landed in the Desktop v2.0/post-v2 remediation conveyor. QWEN-STREAM-4 closed with ITERATE and Qwen remains disabled. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`. MOSS-NANO-13e records that as the bounded product decision: Nano is recommended opt-in, Kokoro remains default/available, and Qwen is retired for Desktop v2 and remains disabled. POCKET-TTS-1 adds Pocket TTS as an available opt-in engine with sidecar, IPC/preload, renderer strategy, settings/preview selection, and no public voice-cloning UX in v2.0. TTS-REGISTRY-1 now centralizes provider capability and settings copy truth for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS; playback strategy selection remains unchanged. The approved post-v2 TTS investment path remains Kokoro-centered architecture hardening: text normalization, cache identity, timing metadata, and highlight synchronization without reopening default-engine churn.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 **Finish line**: Desktop v2.0 Shipping — Blurby desktop feature-complete and polished (E-Ink independence, reading goals, brand finalized, UX polish pass) AND **three TTS engines available**: **Kokoro** as the default and operational floor, **MOSS-Nano** as the recommended opt-in (per 13d's clean `NANO_RECOMMENDED_OPT_IN` provenance-backed gate result and 13e's product decision closeout), and **Pocket TTS** as an available opt-in (per POCKET-TTS-1 integration, scaffolded for voice cloning but UX-deferred to v2.1). **Qwen is retired for Desktop v2 and remains disabled.** Post-v2 TTS work now doubles down on Kokoro as the primary product baseline rather than reopening default-engine churn. Android, Cloud Sync, RSS/News remain deferred lanes beyond this finish line.
-**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope) → 2026-05-10 PM (Abogen Kokoro review; Kokoro Deepening Program approved after POSTV2 review) → 2026-05-11 PM (TTS synthesis review; Kokoro-centered architecture conveyor promoted). Verdict: GREEN on Kokoro as default/timing baseline; YELLOW until `KOKORO-DEEPEN-3` staged closeout is durably merged; no successor-model exploration is approved. Latest assessment: `docs/project/roadmap-reviews/2026-05-11-assessment.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-11-plan.md`. Audit basis: `docs/audit/TTS_LITERATURE_REVIEW_2026-05-11.md`, `docs/reviews/Blurby_TTS_Literature_Codebase_Review_2026-05-11.md`, and Kokoro voice-mixing evidence under `docs/testing/kokoro-voice-mixing-evidence.md`.
+**Roadmap reviews**: 2026-05-02 AM (initial ceremony, baseline) → 2026-05-02 PM (scope expanded for MOSS-NANO) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope) → 2026-05-10 PM (Abogen Kokoro review; Kokoro Deepening Program approved after POSTV2 review) → 2026-05-11 PM (TTS synthesis review; Kokoro-centered architecture conveyor promoted). Verdict: GREEN on Kokoro as default/timing baseline; GREEN on durable KOKORO-DEEPEN-3 and TTS-REGISTRY-1 closeout; no successor-model exploration is approved. Latest assessment: `docs/project/roadmap-reviews/2026-05-11-assessment.md`. Latest plan: `docs/project/roadmap-reviews/2026-05-11-plan.md`. Audit basis: `docs/audit/TTS_LITERATURE_REVIEW_2026-05-11.md`, `docs/reviews/Blurby_TTS_Literature_Codebase_Review_2026-05-11.md`, and Kokoro voice-mixing evidence under `docs/testing/kokoro-voice-mixing-evidence.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in two files: `docs/project/ROADMAP_ARCHIVE.md` (legacy, Phases 1–6) and `docs/project/ROADMAP_ARCHIVE_2026-05-02.md` (recent migrations from 2026-05-02 roadmap review). Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
 >
@@ -235,7 +235,8 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
 
 | Sprint | Version | Date | Result | Archive |
 |--------|---------|------|--------|--------|
-| KOKORO-DEEPEN-3 | — | 2026-05-11 | Evidence-complete / staged closeout: weighted Kokoro voice formulas are non-viable on Blurby's current `kokoro-js` / ONNX runtime. Valid single voices pass; weighted formula strings are rejected as unknown voice IDs; no public voice-mixing UX or runtime replacement was introduced. | `docs/testing/kokoro-voice-mixing-evidence.md`; staged artifact closeout pending durable merge |
+| TTS-REGISTRY-1 | — | 2026-05-12 | Provider capability truth added for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS. Settings/status surfaces read scoped provider labels, posture, and readiness hints from the registry. Playback behavior and engine posture unchanged. | Active sprint closeout; full spec retained below until next archive pass |
+| KOKORO-DEEPEN-3 | — | 2026-05-11 | Weighted Kokoro voice formulas are non-viable on Blurby's current `kokoro-js` / ONNX runtime. Valid single voices pass; weighted formula strings are rejected as unknown voice IDs; no public voice-mixing UX or runtime replacement was introduced. | `docs/testing/kokoro-voice-mixing-evidence.md`; durable closeout landed |
 | KOKORO-DEEPEN-2 | — | 2026-05-11 | Kokoro-backed Narrate now uses shared natural chunks, light chunk highlight, trusted-timestamp-only bold word highlight, and chunk-only fallback when timing is missing. | Active sprint closeout; full spec retained below until next archive pass |
 | KOKORO-DEEPEN-1 | — | 2026-05-11 | Kokoro readiness/preflight truth added across main process, IPC/preload, renderer settings, shared types, tests, and setup/troubleshooting docs while preserving Kokoro default playback semantics. | Active sprint closeout; full spec retained below until next archive pass |
 | POSTV2-REVIEW-1 | — | 2026-05-11 | Post-v2 remediation and CHUNK-SYNC Flow visual work reviewed, committed, merged, and pushed; governance advanced to the Kokoro Deepening lane. | `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`; active review closeout |
@@ -486,7 +487,7 @@ All three investigation areas resolved:
 ## Desktop v2.0 — Active Conveyor Belt
 
 > **Finish line:** Desktop v2.0 Shipping. Twelve active conveyor sprints and post-v2 remediation/review are complete. 2026-05-04 direction: POLISH-1 completed after MOSS-Nano recommended opt-in and Pocket TTS opt-in closeout; RELEASE-1 recorded release closeout; POSTV2 remediation hardened release truth, type contracts, Qwen disable boundaries, Narrate/security, and artifact hygiene. 2026-05-11 review direction: Kokoro remains the default/timing baseline; the next work makes the implicit TTS architecture explicit before export or provider expansion.
-> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → ~~MOSS-NANO-13e~~ ✅ → ~~POCKET-TTS-1~~ ✅ → ~~POLISH-1~~ ✅ → ~~RELEASE-1~~ ✅ → ~~POSTV2-REL-1~~ ✅ → ~~POSTV2-ENGINE-1~~ ✅ → ~~POSTV2-NARR-1~~ ✅ → ~~POSTV2-REVIEW-1~~ ✅ → ~~KOKORO-DEEPEN-1~~ ✅ → ~~KOKORO-DEEPEN-2~~ ✅ → `KOKORO-DEEPEN-3` evidence-complete / git closeout pending → **TTS-REGISTRY-1 (next after durable closeout)**.
+> **Conveyor sequence:** ~~SK-HYG-1~~ ✅ → ~~BRAND-HYG-1~~ SHELVED / no-op in this checkout → ~~EINK-6A~~ ✅ → ~~EINK-6B~~ ✅ → ~~GOALS-6B~~ ✅ → ~~MOSS-NANO-13a~~ ✅ → ~~MOSS-NANO-13B~~ ✅ → ~~MOSS-NANO-13c~~ ✅ → ~~MOSS-NANO-13d~~ ✅ → ~~MOSS-NANO-13e~~ ✅ → ~~POCKET-TTS-1~~ ✅ → ~~POLISH-1~~ ✅ → ~~RELEASE-1~~ ✅ → ~~POSTV2-REL-1~~ ✅ → ~~POSTV2-ENGINE-1~~ ✅ → ~~POSTV2-NARR-1~~ ✅ → ~~POSTV2-REVIEW-1~~ ✅ → ~~KOKORO-DEEPEN-1~~ ✅ → ~~KOKORO-DEEPEN-2~~ ✅ → ~~KOKORO-DEEPEN-3~~ ✅ → ~~TTS-REGISTRY-1~~ ✅ → **TTS-NORMALIZE-1 (next)**.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor is green or explicitly paused. The only approved TTS/model work inside Desktop v2.0 is MOSS-NANO-13a–13e plus POCKET-TTS-1, and the only approved post-v2 TTS work is Kokoro-centered hardening. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -530,7 +531,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ## Phase 6 Continued — E-Ink & Goals (ACTIVE — Desktop v2.0 Conveyor)
 
-> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, POSTV2-REVIEW-1, KOKORO-DEEPEN-1, and KOKORO-DEEPEN-2 are complete. `KOKORO-DEEPEN-3` is evidence-complete with staged closeout files; land that git closeout before dispatching the new TTS architecture conveyor.
+> EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, POSTV2-REVIEW-1, KOKORO-DEEPEN-1, KOKORO-DEEPEN-2, KOKORO-DEEPEN-3, and TTS-REGISTRY-1 are complete. The next approved TTS architecture sprint is TTS-NORMALIZE-1.
 
 ---
 
@@ -564,7 +565,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-### Post-v2 Program: Kokoro Deepening And TTS Architecture — ACTIVE AFTER KOKORO-DEEPEN-3 GIT CLOSEOUT
+### Post-v2 Program: Kokoro Deepening And TTS Architecture — ACTIVE
 
 **Decision:** On 2026-05-10, the active TTS direction changed from "find/retire Kokoro" to "double down on Kokoro." Abogen was reviewed as a Kokoro product/reference implementation. On 2026-05-11, the broader TTS literature/codebase synthesis confirmed the same direction: preserve Kokoro + the Web Audio scheduler, then make the implicit architecture explicit before export or new-provider work.
 
@@ -574,9 +575,9 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 1. `POSTV2-REVIEW-1` — review/commit/merge post-v2 remediation. ✅ COMPLETE
 2. `KOKORO-DEEPEN-1` — Kokoro asset preflight and offline runtime truth. ✅ COMPLETE
 3. `KOKORO-DEEPEN-2` — Kokoro long-form chunk/timing narration hardening. ✅ COMPLETE
-4. `KOKORO-DEEPEN-3` — Kokoro voice profiles and voice-mixing evidence spike. Evidence-complete; git closeout pending in current branch.
-5. `TTS-REGISTRY-1` — provider/capability registry without playback behavior change.
-6. `TTS-NORMALIZE-1` — deterministic segment normalization and golden fixtures.
+4. `KOKORO-DEEPEN-3` — Kokoro voice profiles and voice-mixing evidence spike. ✅ COMPLETE
+5. `TTS-REGISTRY-1` — provider/capability registry without playback behavior change. ✅ COMPLETE
+6. `TTS-NORMALIZE-1` — deterministic segment normalization and golden fixtures. NEXT
 7. `TTS-CACHE-TIMING-1` — structured cache keys, schema versioning, timing sidecars.
 8. `TTS-SYNC-1` — TimingMetadataStore and HighlightSyncController.
 9. `TTS-DIAG-1` — provider-neutral diagnostics export bundle.
@@ -646,7 +647,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-#### Sprint KOKORO-DEEPEN-3: Kokoro Voice Profiles And Voice-Mixing Evidence Spike — EVIDENCE COMPLETE / GIT CLOSEOUT PENDING
+#### Sprint KOKORO-DEEPEN-3: Kokoro Voice Profiles And Voice-Mixing Evidence Spike ✅ COMPLETED 2026-05-11
 
 **Goal:** Determine whether Abogen-style Kokoro voice profiles and weighted voice mixing can be implemented safely in Blurby's current Kokoro runtime.
 
@@ -684,7 +685,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-#### Sprint TTS-REGISTRY-1: Provider Capability Registry
+#### Sprint TTS-REGISTRY-1: Provider Capability Registry ✅ COMPLETED 2026-05-12
 
 **What:** Add a formal `TTSProvider`, `ProviderCapabilities`, and `TTSProviderRegistry` layer around the existing engine strategy seam without changing default engine behavior or playback scheduling.
 
@@ -704,6 +705,13 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 **Roster:** Athena (registry/types) • Hephaestus (settings/status adoption) • Hercules (tests) • Solon (spec compliance) • Plato (quality review) • Herodotus (governance closeout).
 
 **Source:** 2026-05-11 roadmap review, `docs/audit/TTS_LITERATURE_REVIEW_2026-05-11.md` § provider abstraction, `docs/reviews/Blurby_TTS_Literature_Codebase_Review_2026-05-11.md` § proposed interfaces.
+
+**Closeout (2026-05-12):**
+1. Added typed provider capability truth in `src/types/ttsProvider.ts` and static registry helpers in `src/utils/ttsProviderRegistry.ts` for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS.
+2. Registry metadata covers selectable/default/experimental status, offline and sidecar requirements, streaming, timing truth, voice blending/cloning posture, supported languages, sample rate, license, cacheability, status kind, and settings/status copy.
+3. Settings and status surfaces now read provider labels, posture, and readiness hints from the registry where scoped, while runtime strategy creation and playback scheduling remain unchanged.
+4. Kokoro remains the default engine and word-timing baseline; Qwen remains disabled/unselectable; no Kokoro retirement, default-engine churn, playback behavior change, or public voice-mixing UX was introduced.
+5. Verification passed: focused registry/settings slice 6 files / 32 tests; broader TTS/settings/narration slice 9 files / 52 tests; `npm run typecheck`; full `npm test` 183 files / 2629 tests; `npm run build` with existing circular chunk warning `settings -> tts -> settings`; `git diff --check`.
 
 ##### Implementation detail
 - **Edit sites:** `src/types.ts` near `TtsEngine`; `src/types/narration.ts` near `TtsStrategy`; new `src/types/ttsProvider.ts`; new `src/utils/ttsProviderRegistry.ts`; `src/hooks/useNarration.ts` near strategy creation/status selection; `src/components/settings/TTSSettings.tsx`; `src/components/settings/KokoroStatusSection.tsx`; `src/components/settings/QwenStatusSection.tsx`; Pocket/MOSS status copy components if present.

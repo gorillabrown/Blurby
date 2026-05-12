@@ -7,9 +7,10 @@ export interface PronunciationOverride {
 }
 
 // ── Narration Profiles (TTS-6L) ─────────────────────────────────���───────────
-/** A named narration preset bundling voice, rate, pause timing, and overrides. */
+/** Persisted TTS engine IDs. Keep these stable; provider capabilities live in ttsProviderRegistry. */
 export type TtsEngine = "web" | "kokoro" | "qwen" | "nano" | "pocket-tts";
 
+/** A named narration preset bundling voice, rate, pause timing, and overrides. */
 export interface NarrationProfile {
   id: string;
   name: string;

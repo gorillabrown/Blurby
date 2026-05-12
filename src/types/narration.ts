@@ -184,6 +184,8 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
 }
 
 export interface TtsStrategy {
+  /** Optional provider identity for the capability registry; existing strategies are not required to expose it yet. */
+  providerId?: TtsEngine;
   speakChunk(
     text: string,
     words: string[],

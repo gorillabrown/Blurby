@@ -9,6 +9,7 @@ interface KokoroStatusSectionProps {
   kokoroStalled: boolean;
   preflightReport: Partial<KokoroPreflightReport> | null;
   preflightBusy: boolean;
+  providerLabel?: string;
   onDownload: () => void;
   onPreflight: () => void;
 }
@@ -111,11 +112,12 @@ export function KokoroStatusSection({
   kokoroStalled,
   preflightReport,
   preflightBusy,
+  providerLabel = "Kokoro",
   onDownload,
   onPreflight,
 }: KokoroStatusSectionProps) {
   const status = preflightReport?.status;
-  const title = status ? KOKORO_STATUS_TITLES[status] : kokoroReady ? "Kokoro ready" : "Kokoro readiness unknown";
+  const title = status ? KOKORO_STATUS_TITLES[status] : kokoroReady ? `${providerLabel} ready` : `${providerLabel} readiness unknown`;
   const cachePath = preflightReport?.model?.cacheLocation || preflightReport?.model?.cacheDir || null;
   const missingAssetCopy = getMissingAssetCopy(preflightReport);
   const offlineReady = status === "offline-ready" || Boolean(preflightReport?.offlineReady);

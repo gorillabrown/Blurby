@@ -1468,3 +1468,17 @@ speakChunk() {
 **Guardrail:** When adding a new opt-in TTS engine, isolate the sidecar, engine wrapper, IPC/preload channels, renderer strategy, and settings status component first. Only extract shared abstractions after two real engine paths prove identical behavior and regression tests define the shared boundary. Product-posture regressions must be tested alongside feature tests: default engine, recommended opt-in labels, disabled engines, and no silent fallback.
 
 **Related:** POCKET-TTS-1 sprint, `main/pocket-tts-engine.js`, `main/pocket-tts-sidecar.js`, `scripts/pocket_tts_sidecar.py`, `src/hooks/narration/pocketTtsStrategy.ts`, `src/components/settings/TtsEngineSelector.tsx`, `tests/ttsSettingsPocketTts.test.tsx`.
+
+---
+
+### [2026-05-12] LL-113: Test Discovery Must Ignore Scratch External Source Trees
+
+**Area:** Tests, repository hygiene, external audits
+**Status:** active
+**Priority:** medium
+
+**Context:** During TTS-REGISTRY-1 closeout, plain `npm test` failed before reaching project tests because Vitest discovered copied external review sources under `.tmp/tts-review-sources-20260511/readest-main/`. Those sources had their own TypeScript/Vitest assumptions and missing dependencies, so project verification was polluted by scratch audit material.
+
+**Guardrail:** Scratch and external-source mirrors belong under `.tmp/`, and `.tmp/**` must be excluded from test discovery. Do not place third-party audit sources, cloned candidates, or large review mirrors in paths that Vitest can walk as project tests. If a sprint needs fixture copies from outside the repo, promote only the minimal fixture files into a named `tests/fixtures/` folder.
+
+**Related:** TTS-REGISTRY-1 closeout, `.gitignore`, `vite.config.js`, `.tmp/tts-review-sources-20260511/`.

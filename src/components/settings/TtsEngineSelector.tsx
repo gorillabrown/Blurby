@@ -1,4 +1,5 @@
 import type { TtsEngine } from "../../types";
+import { getTtsProviderOrThrow } from "../../utils/ttsProviderRegistry";
 
 interface TtsEngineSelectorProps {
   engine: TtsEngine;
@@ -15,49 +16,33 @@ export function TtsEngineSelector({
   pocketSelectable,
   onSelect,
 }: TtsEngineSelectorProps) {
+  const providers = (["qwen", "web", "kokoro", "nano", "pocket-tts"] as const).map(getTtsProviderOrThrow);
+  const disabledByEngine = (id: TtsEngine) => {
+    if (id === "qwen") return qwenDisabled;
+    if (id === "nano") return !nanoSelectable;
+    if (id === "pocket-tts") return !pocketSelectable;
+    return false;
+  };
+
   return (
     <div className="settings-mode-toggle tts-engine-toggle" role="group" aria-label="Narration voice engine">
-      <button
-        className={`settings-mode-btn${engine === "qwen" ? " active" : ""}`}
-        onClick={() => {}}
-        disabled={qwenDisabled}
-        aria-disabled={qwenDisabled}
-        aria-pressed={engine === "qwen"}
-      >
-        Qwen AI (Retired)
-      </button>
-      <button
-        className={`settings-mode-btn${engine === "web" ? " active" : ""}`}
-        onClick={() => onSelect("web")}
-        aria-pressed={engine === "web"}
-      >
-        System
-      </button>
-      <button
-        className={`settings-mode-btn${engine === "kokoro" ? " active" : ""}`}
-        onClick={() => onSelect("kokoro")}
-        aria-pressed={engine === "kokoro"}
-      >
-        Kokoro (Default)
-      </button>
-      <button
-        className={`settings-mode-btn${engine === "nano" ? " active" : ""}`}
-        onClick={() => onSelect("nano")}
-        disabled={!nanoSelectable}
-        aria-disabled={!nanoSelectable}
-        aria-pressed={engine === "nano"}
-      >
-        MOSS-Nano (Recommended opt-in)
-      </button>
-      <button
-        className={`settings-mode-btn${engine === "pocket-tts" ? " active" : ""}`}
-        onClick={() => onSelect("pocket-tts")}
-        disabled={!pocketSelectable}
-        aria-disabled={!pocketSelectable}
-        aria-pressed={engine === "pocket-tts"}
-      >
-        Pocket TTS (Opt-in)
-      </button>
+      {providers.map((provider) => {
+        const disabled = disabledByEngine(provider.id) || !provider.capabilities.selectable;
+        return (
+          <button
+            key={provider.id}
+            className={`settings-mode-btn${engine === provider.id ? " active" : ""}`}
+            onClick={() => {
+              if (!disabled) onSelect(provider.id);
+            }}
+            disabled={disabled}
+            aria-disabled={disabled}
+            aria-pressed={engine === provider.id}
+          >
+            {provider.copy.buttonLabel}
+          </button>
+        );
+      })}
     </div>
   );
 }

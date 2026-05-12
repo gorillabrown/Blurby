@@ -18,6 +18,7 @@ import { useKokoroSettingsStatus } from "./useKokoroSettingsStatus";
 import { useMossNanoSettingsStatus } from "./useMossNanoSettingsStatus";
 import { usePocketTtsSettingsStatus } from "./usePocketTtsSettingsStatus";
 import { previewSelectedTtsVoice } from "./ttsPreview";
+import { getTtsProviderOrThrow } from "../../utils/ttsProviderRegistry";
 import "../../styles/tts-settings.css";
 
 interface TTSSettingsProps {
@@ -36,6 +37,10 @@ interface TTSSettingsProps {
 }
 export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange }: TTSSettingsProps) {
   const engine = normalizeSelectableTtsEngine(settings.ttsEngine || TTS_DEFAULT_ENGINE);
+  const kokoroProvider = getTtsProviderOrThrow("kokoro");
+  const qwenProvider = getTtsProviderOrThrow("qwen");
+  const nanoProvider = getTtsProviderOrThrow("nano");
+  const pocketProvider = getTtsProviderOrThrow("pocket-tts");
   // Web Speech API voices
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [testPlaying, setTestPlaying] = useState(false);
@@ -291,10 +296,13 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
         }}
       />
       <div className="tts-test-hint">
-        Qwen is retired for Desktop v2 and remains disabled.
-        Kokoro is the default and operational floor.
-        Nano is selectable as a recommended opt-in local runtime and requires the local MOSS Nano sidecar.
-        Pocket TTS is available as an explicit opt-in local runtime, with upstream synthesis scaffolded until adapter work is approved.
+        {qwenProvider.copy.posture}
+        {" "}
+        {kokoroProvider.copy.posture}
+        {" "}
+        {nanoProvider.copy.posture}
+        {" "}
+        {pocketProvider.copy.posture}
         {!nanoReady && ` ${nanoStatusDetail}`}
         {!pocketReady && ` ${pocketStatusDetail}`}
       </div>
@@ -310,6 +318,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           kokoroStalled={kokoroStalled}
           preflightReport={kokoroPreflightReport}
           preflightBusy={kokoroPreflightBusy}
+          providerLabel={kokoroProvider.capabilities.label}
           onDownload={handleDownloadKokoro}
           onPreflight={() => void handlePreflightKokoro()}
         />
@@ -322,6 +331,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           qwenStatusReason={qwenStatus.reason ?? null}
           qwenStatusTitle={qwenStatusPresentation.title}
           qwenStatusDetail={qwenStatusPresentation.detail}
+          providerLabel={qwenProvider.capabilities.label}
           onValidateRuntime={() => void handlePreflightQwen()}
           onViewSetupGuidance={() => setShowQwenSetupGuidance(true)}
         />
@@ -339,6 +349,9 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           ready={nanoReady}
           title={nanoStatusTitle}
           detail={nanoStatusDetail}
+          providerLabel={nanoProvider.capabilities.label}
+          readyHint={nanoProvider.copy.readyHint}
+          blockedHint={nanoProvider.copy.blockedHint}
         />
       )}
 
@@ -347,6 +360,9 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
           ready={pocketReady}
           title={pocketStatusTitle}
           detail={pocketStatusDetail}
+          providerLabel={pocketProvider.capabilities.label}
+          readyHint={pocketProvider.copy.readyHint}
+          blockedHint={pocketProvider.copy.blockedHint}
         />
       )}
 
@@ -444,14 +460,14 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       </button>
       <div className="tts-test-hint">
         Press N in the reader to toggle narration. WPM is capped at 400 when narration is active.
-        {engine === "kokoro" && kokoroReady && !kokoroWarming && " Using default Kokoro voices."}
+        {engine === "kokoro" && kokoroReady && !kokoroWarming && ` ${kokoroProvider.copy.readyHint}`}
         {engine === "kokoro" && kokoroWarming && " Kokoro is warming up..."}
-        {engine === "qwen" && qwenReady && " Using Qwen for live narration playback."}
-        {engine === "qwen" && !qwenReady && " Qwen becomes playable once the local external runtime is available and warmed."}
-        {engine === "nano" && nanoReady && " Using recommended opt-in MOSS-Nano through the local sidecar."}
-        {engine === "nano" && !nanoReady && " MOSS-Nano remains selected only as a blocked recommended opt-in option until the sidecar is ready."}
-        {engine === "pocket-tts" && pocketReady && " Using opt-in Pocket TTS through the local sidecar."}
-        {engine === "pocket-tts" && !pocketReady && " Pocket remains selected only as a blocked opt-in option until the sidecar is ready; upstream synthesis remains scaffolded."}
+        {engine === "qwen" && qwenReady && ` ${qwenProvider.copy.readyHint}`}
+        {engine === "qwen" && !qwenReady && ` ${qwenProvider.copy.blockedHint}`}
+        {engine === "nano" && nanoReady && ` ${nanoProvider.copy.readyHint}`}
+        {engine === "nano" && !nanoReady && ` ${nanoProvider.copy.blockedHint}`}
+        {engine === "pocket-tts" && pocketReady && ` ${pocketProvider.copy.readyHint}`}
+        {engine === "pocket-tts" && !pocketReady && ` ${pocketProvider.copy.blockedHint}`}
       </div>
 
       <PauseSettingsSection settings={settings} onTtsChange={handleTtsChange} />
