@@ -4,6 +4,7 @@ interface QwenStatusSectionProps {
   qwenStatusReason?: string | null;
   qwenStatusTitle: string;
   qwenStatusDetail: string;
+  providerLabel?: string;
   onValidateRuntime: () => void;
   onViewSetupGuidance: () => void;
 }
@@ -14,15 +15,16 @@ export function QwenStatusSection({
   qwenStatusReason,
   qwenStatusTitle,
   qwenStatusDetail,
+  providerLabel = "Qwen",
   onValidateRuntime,
   onViewSetupGuidance,
 }: QwenStatusSectionProps) {
   const secondaryCopy =
     qwenStatusReason === "python-missing"
-      ? "Qwen runs through a local external runtime on this machine. Finish the local Python and runtime setup before Blurby can use it."
+      ? `${providerLabel} runs through a local external runtime on this machine. Finish the local Python and runtime setup before Blurby can use it.`
       : qwenStatusReason === "device-unsupported" || qwenStatusReason === "cuda-unavailable"
-        ? "Qwen runs through a local external runtime on this machine. Check the configured device and runtime health before Blurby can use it for live narration."
-      : "Qwen runs through a local external runtime on this machine. Preview and live narration become available once that runtime is configured and warmed.";
+        ? `${providerLabel} runs through a local external runtime on this machine. Check the configured device and runtime health before Blurby can use it for live narration.`
+      : `${providerLabel} runs through a local external runtime on this machine. Preview and live narration become available once that runtime is configured and warmed.`;
 
   return (
     <div className="tts-status-card">

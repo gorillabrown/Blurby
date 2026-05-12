@@ -335,10 +335,12 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue YELLOW, Desktop v2.0 conveyor active, 1 open bug)
+## Current System State (v1.75.1 — queue GREEN, Desktop v2.0 conveyor active, 1 open bug)
 
 ### Codebase (branch: `main`)
 
+- **TTS-REGISTRY-1 complete** — Provider capability truth now lives in `src/types/ttsProvider.ts` and `src/utils/ttsProviderRegistry.ts` for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS. Settings/status surfaces read scoped provider labels, posture, and readiness hints from the registry. Kokoro remains default/available, Qwen remains disabled/unselectable, and runtime playback behavior is unchanged. Verification passed: focused 6 files / 32 tests, broader TTS/settings/narration 9 files / 52 tests, full `npm test` 183 files / 2629 tests, `npm run typecheck`, `npm run build`, and `git diff --check`.
+- **Queue pointer** — Next approved sprint is TTS-NORMALIZE-1. Queue depth is 4 prepared pointers after TTS-REGISTRY-1 closeout.
 - TTS-7 stabilization lane COMPLETE: TTS-7A (v1.29.0) + TTS-7B (v1.30.0) + TTS-7C (v1.31.0) + TTS-7D (v1.32.0). All 15 TTS bugs (BUG-101–115) resolved and verified. Closeout doc in TECHNICAL_REFERENCE.md.
 - **TTS-7F hotfix complete** — proactive entry cache coverage + cruise warm, plus clean launch ownership. BUG-116/118/119/120/121 resolved.
 - **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added.
