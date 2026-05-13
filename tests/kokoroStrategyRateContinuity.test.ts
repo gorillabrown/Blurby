@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS } from "../src/constants";
+import { KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS, TTS_NORMALIZER_VERSION } from "../src/constants";
 import type { KokoroStrategyDeps } from "../src/hooks/narration/kokoroStrategy";
 import * as ttsCache from "../src/utils/ttsCache";
 
@@ -229,11 +229,13 @@ describe("kokoroStrategy live rate continuity", () => {
     strategy.speakChunk("", [], 0, 1.3, vi.fn(), vi.fn(), vi.fn());
 
     try {
-      await vi.waitFor(() => expect(loadCachedChunkSpy).toHaveBeenCalledWith("book-1", "af_heart/1.2", 0, words));
+      await vi.waitFor(() => expect(loadCachedChunkSpy).toHaveBeenCalled());
       await vi.waitFor(() => expect(schedulerMock.scheduleChunk).toHaveBeenCalled());
 
       const scheduledSegments = schedulerMock.scheduleChunk.mock.calls.map(([chunk]) => chunk as any);
-      expect(isCachedSpy).toHaveBeenCalledWith("book-1", "af_heart/1.2", 0);
+      const cacheVoice = loadCachedChunkSpy.mock.calls[0][1];
+      expect(cacheVoice).toMatch(new RegExp(`^af_heart/1\\.2/${TTS_NORMALIZER_VERSION}/[a-z0-9]+-[a-z0-9]+`));
+      expect(isCachedSpy).toHaveBeenCalledWith("book-1", cacheVoice, 0);
       expect(electronAPI.kokoroGenerate).not.toHaveBeenCalled();
       expect(scheduledSegments.length).toBeGreaterThan(1);
       expect(scheduledSegments.every((segment) => segment.parentChunkStartIdx === 0)).toBe(true);

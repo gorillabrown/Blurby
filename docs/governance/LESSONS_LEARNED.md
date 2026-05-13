@@ -1482,3 +1482,17 @@ speakChunk() {
 **Guardrail:** Scratch and external-source mirrors belong under `.tmp/`, and `.tmp/**` must be excluded from test discovery. Do not place third-party audit sources, cloned candidates, or large review mirrors in paths that Vitest can walk as project tests. If a sprint needs fixture copies from outside the repo, promote only the minimal fixture files into a named `tests/fixtures/` folder.
 
 **Related:** TTS-REGISTRY-1 closeout, `.gitignore`, `vite.config.js`, `.tmp/tts-review-sources-20260511/`.
+
+---
+
+### [2026-05-13] LL-114: Spoken Normalization Must Not Become Display Truth
+
+**Area:** TTS, segment normalization, cache identity, highlight mapping
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-NORMALIZE-1 made Kokoro consume normalized spoken text (`src/utils/segmentNormalizer.ts`) while the narration scheduler and display/highlight layers still consume original chunk words. The same sprint also made cache identity chunk-local by including normalizer version plus source/normalized text hash pair.
+
+**Guardrail:** Treat normalized text as engine input only. Do not replace scheduler/display word arrays, Foliate word anchors, or highlight mapping with normalized text. When normalization changes spoken text, cache identity must include normalizer version and source/normalized hashes so changed rules miss lazily rather than triggering a destructive global cache wipe.
+
+**Related:** TTS-NORMALIZE-1, `src/utils/segmentNormalizer.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/generationPipeline.ts`, `tests/segmentNormalizer.test.ts`, `tests/kokoroStrategy.test.ts`.
