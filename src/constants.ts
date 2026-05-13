@@ -155,6 +155,8 @@ export const NARRATE_BG_EXTRACT_DELAY_MS = 1000;
 // ── Pronunciation Overrides (TTS-6E) ────────────────────────────────────────
 /** Maximum number of pronunciation overrides a user can create */
 export const MAX_PRONUNCIATION_OVERRIDES = 100;
+/** Segment normalizer schema/version for spoken text identity. */
+export const TTS_NORMALIZER_VERSION = "en-v1";
 
 // ── Narration Profiles (TTS-6L) ────────────────────────────────────────────
 /** Maximum number of narration profiles a user can create */

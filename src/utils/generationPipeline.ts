@@ -51,12 +51,21 @@ export interface PipelineConfig {
   getFootnoteCues?: () => Array<{ afterWordIdx: number; text: string }>;
   /** Called when a chunk is ready for scheduling */
   onChunkReady: (chunk: ScheduledChunk) => void;
+  /** Build a chunk-local cache identity from the exact source text sent to generation. */
+  getCacheIdentity?: (text: string, words: string[], startIdx: number) => string;
   /** Called when a chunk should be cached to disk (TTS-7A: includes wordCount) */
-  onCacheChunk?: (startIdx: number, audio: Float32Array, sampleRate: number, durationMs: number, wordCount: number) => void;
+  onCacheChunk?: (
+    startIdx: number,
+    audio: Float32Array,
+    sampleRate: number,
+    durationMs: number,
+    wordCount: number,
+    cacheIdentity?: string,
+  ) => void;
   /** Check if a chunk is already cached */
-  isCached?: (startIdx: number) => Promise<boolean>;
+  isCached?: (startIdx: number, cacheIdentity?: string) => Promise<boolean>;
   /** Load a cached chunk */
-  loadCached?: (startIdx: number) => Promise<ScheduledChunk | null>;
+  loadCached?: (startIdx: number, cacheIdentity?: string) => Promise<ScheduledChunk | null>;
   /** Called on generation error */
   onError: () => void;
   /** Called when all words have been generated/scheduled */
@@ -406,13 +415,14 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     const { endIdx, plannedSilenceMs, isDialogue } = resolveChunkEnd(words, startIdx, chunkSize);
     const chunkWords = words.slice(startIdx, endIdx);
     const text = buildChunkText(chunkWords, startIdx, chunkWords.length);
+    const cacheIdentity = config.getCacheIdentity?.(text, chunkWords, startIdx);
 
     // Check cache first — cached chunk may be larger than requested (e.g. cruise-sized)
     if (config.isCached && config.loadCached) {
       try {
-        const isCached = await config.isCached(startIdx);
+        const isCached = await config.isCached(startIdx, cacheIdentity);
         if (isCached && myGenId === generationId) {
-          const cached = await config.loadCached(startIdx);
+          const cached = await config.loadCached(startIdx, cacheIdentity);
           if (cached && myGenId === generationId) {
             await queueChunkForEmission(cached, myGenId);
             return cached.words.length; // Actual consumed count (may be > chunkSize)
@@ -499,7 +509,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         // Cache to disk (fire-and-forget) — TTS-7A: store actual word count
         // Always cache regardless of pause state
         if (config.onCacheChunk) {
-          config.onCacheChunk(startIdx, audio, sampleRate, durationMs, chunkWords.length);
+          config.onCacheChunk(startIdx, audio, sampleRate, durationMs, chunkWords.length, cacheIdentity);
         }
       }
       return chunkWords.length;

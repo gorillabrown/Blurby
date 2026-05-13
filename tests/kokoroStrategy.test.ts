@@ -38,6 +38,9 @@ afterEach(() => {
 });
 
 import { createKokoroStrategy, type KokoroStrategyDeps } from "../src/hooks/narration/kokoroStrategy";
+import { TTS_NORMALIZER_VERSION } from "../src/constants";
+import * as ttsCache from "../src/utils/ttsCache";
+import { normalizeSegmentText, stableSegmentTextHash } from "../src/utils/segmentNormalizer";
 
 function mockDeps(overrides?: Partial<KokoroStrategyDeps>): KokoroStrategyDeps {
   const words = ["Hello", "world", "test.", "More", "words", "here."];
@@ -172,6 +175,44 @@ describe("createKokoroStrategy", () => {
     expect(generatedText).toContain("Hello");
 
     strategy.stop();
+  });
+
+  it("sends normalized spoken text to Kokoro while preserving original display words", async () => {
+    const originalWords = ["Dr.", "Qing", "paid", "$12.50."];
+    const deps = mockDeps({ getWords: vi.fn(() => originalWords) });
+    const strategy = createKokoroStrategy(deps);
+
+    strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+
+    await vi.waitFor(() => expect(electronAPI.kokoroGenerate).toHaveBeenCalled());
+
+    expect(electronAPI.kokoroGenerate.mock.calls[0][0]).toBe("Doctor Qing paid twelve dollars and fifty cents.");
+    expect(electronAPI.kokoroGenerate.mock.calls[0][3]).toEqual(originalWords);
+
+    strategy.stop();
+  });
+
+  it("includes normalizer version and segment hashes in Kokoro cache identity", async () => {
+    const originalWords = ["Dr.", "Qing", "paid", "$12.50."];
+    const originalText = originalWords.join(" ");
+    const normalized = normalizeSegmentText(originalText, { locale: "en-US" });
+    const isCachedSpy = vi.spyOn(ttsCache, "isCached").mockResolvedValue(false);
+    const deps = mockDeps({ getWords: vi.fn(() => originalWords) });
+    const strategy = createKokoroStrategy(deps);
+
+    try {
+      strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+
+      await vi.waitFor(() => expect(isCachedSpy).toHaveBeenCalled());
+      const voiceKey = isCachedSpy.mock.calls[0][1];
+
+      expect(voiceKey).toContain(TTS_NORMALIZER_VERSION);
+      expect(voiceKey).toContain(stableSegmentTextHash(originalText));
+      expect(voiceKey).toContain(normalized.normalizedTextHash);
+    } finally {
+      strategy.stop();
+      isCachedSpy.mockRestore();
+    }
   });
 
   it("exposes getScheduler and getPipeline (NAR-2)", () => {

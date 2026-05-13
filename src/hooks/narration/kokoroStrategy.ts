@@ -11,7 +11,8 @@ import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler, AudioProgressReport, ChunkBoundaryPayload } from "../../utils/audioScheduler";
 import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
-import { applyPronunciationOverrides, overrideHash } from "../../utils/pronunciationOverrides";
+import { overrideHash } from "../../utils/pronunciationOverrides";
+import { normalizeSegmentText, type SegmentNormalizationResult } from "../../utils/segmentNormalizer";
 import type { KokoroPreflightReport, KokoroPreflightStatus, PronunciationOverride } from "../../types";
 import { perfStart, perfEnd } from "../../utils/narratePerf";
 import { recordDiagEvent } from "../../utils/narrateDiagnostics";
@@ -139,11 +140,20 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
    */
   const getRatePlan = () => resolveKokoroRatePlan(deps.getSpeed());
 
-  /** Build the cache key voice segment: voiceId/rateBucket[/overrideHash] */
-  const getCacheVoice = () => {
+  const normalizeForSpeech = (text: string): SegmentNormalizationResult =>
+    normalizeSegmentText(text, {
+      locale: "en-US",
+      pronunciationOverrides: deps.getPronunciationOverrides?.(),
+    });
+
+  /** Build the cache key voice segment: voiceId/rateBucket/normalizerVersion/sourceHash-normalizedHash[/overrideHash] */
+  const getCacheVoice = (normalization?: SegmentNormalizationResult) => {
     const base = `${deps.getVoiceId()}/${getRatePlan().generationBucket}`;
-    const oh = overrideHash(deps.getPronunciationOverrides?.());
-    return oh ? `${base}/${oh}` : base;
+    if (!normalization) return base;
+    const hashPair = `${normalization.sourceTextHash}-${normalization.normalizedTextHash}`;
+    return normalization.pronunciationOverrideHash
+      ? `${base}/${normalization.normalizerVersion}/${hashPair}/${normalization.pronunciationOverrideHash}`
+      : `${base}/${normalization.normalizerVersion}/${hashPair}`;
   };
 
   // TTS-7G: Track first-chunk state for cold-start measurement
@@ -152,16 +162,16 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
   const pipeline = createGenerationPipeline({
     generateFn: async (text, voiceId, speed, words) => {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
-      // Apply pronunciation overrides before generation
-      const normalizedText = applyPronunciationOverrides(text, deps.getPronunciationOverrides?.());
+      const normalized = normalizeForSpeech(text);
       const ratePlan = resolveKokoroRatePlan(speed);
-      const result = await api.kokoroGenerate(normalizedText, voiceId, ratePlan.generationBucket, words);
+      const result = await api.kokoroGenerate(normalized.normalizedText, voiceId, ratePlan.generationBucket, words);
       if (result.error || !result.audio || !result.sampleRate) {
         return { error: result.error || "no audio returned" };
       }
       const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
       return { audio: result.audio, sampleRate: result.sampleRate, durationMs, wordTimestamps: result.wordTimestamps || null };
     },
+    getCacheIdentity: (text) => getCacheVoice(normalizeForSpeech(text)),
     getWords: deps.getWords,
     getVoiceId: deps.getVoiceId,
     getSpeed: () => getRatePlan().selectedSpeed,
@@ -214,22 +224,22 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
         pipeline.acknowledgeChunk();
       });
     },
-    onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount) => {
+    onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount, cacheIdentity) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = getCacheVoice();
+      const voiceId = cacheIdentity ?? getCacheVoice();
       if (bookId) {
         ttsCache.cacheChunk(bookId, voiceId, startIdx, audio, sampleRate, durationMs, wordCount);
       }
     },
-    isCached: async (startIdx) => {
+    isCached: async (startIdx, cacheIdentity) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = getCacheVoice();
+      const voiceId = cacheIdentity ?? getCacheVoice();
       if (!bookId) return false;
       return ttsCache.isCached(bookId, voiceId, startIdx);
     },
-    loadCached: async (startIdx) => {
+    loadCached: async (startIdx, cacheIdentity) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = getCacheVoice();
+      const voiceId = cacheIdentity ?? getCacheVoice();
       if (!bookId) return null;
       const words = deps.getWords();
       return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, words);
