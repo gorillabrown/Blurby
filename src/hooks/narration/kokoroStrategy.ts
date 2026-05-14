@@ -11,12 +11,13 @@ import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler, AudioProgressReport, ChunkBoundaryPayload } from "../../utils/audioScheduler";
 import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
-import { overrideHash } from "../../utils/pronunciationOverrides";
 import { normalizeSegmentText, type SegmentNormalizationResult } from "../../utils/segmentNormalizer";
 import type { KokoroPreflightReport, KokoroPreflightStatus, PronunciationOverride } from "../../types";
 import { perfStart, perfEnd } from "../../utils/narratePerf";
 import { recordDiagEvent } from "../../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
+import { KOKORO_MODEL_ID, KOKORO_SAMPLE_RATE, TTS_CACHE_SCHEMA_VERSION } from "../../constants";
+import type { TtsCacheIdentity, TtsCacheIdentityV2, TtsCacheWriteTimingMetadata } from "../../types/ttsCache";
 
 const api = window.electronAPI;
 
@@ -146,14 +147,25 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
       pronunciationOverrides: deps.getPronunciationOverrides?.(),
     });
 
-  /** Build the cache key voice segment: voiceId/rateBucket/normalizerVersion/sourceHash-normalizedHash[/overrideHash] */
-  const getCacheVoice = (normalization?: SegmentNormalizationResult) => {
-    const base = `${deps.getVoiceId()}/${getRatePlan().generationBucket}`;
-    if (!normalization) return base;
-    const hashPair = `${normalization.sourceTextHash}-${normalization.normalizedTextHash}`;
-    return normalization.pronunciationOverrideHash
-      ? `${base}/${normalization.normalizerVersion}/${hashPair}/${normalization.pronunciationOverrideHash}`
-      : `${base}/${normalization.normalizerVersion}/${hashPair}`;
+  /** Build the v2 cache identity from the exact source text that owns this generated chunk. */
+  const getCacheIdentity = (text: string, _words: string[], startIdx: number): TtsCacheIdentityV2 => {
+    const normalization = normalizeForSpeech(text);
+    const bookId = deps.getBookId?.() || "";
+    return {
+      schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+      provider: "kokoro",
+      voiceId: deps.getVoiceId(),
+      rateBucket: getRatePlan().generationBucket,
+      modelVersion: KOKORO_MODEL_ID,
+      sourceTextHash: normalization.sourceTextHash,
+      normalizedTextHash: normalization.normalizedTextHash,
+      normalizerVersion: normalization.normalizerVersion,
+      pronunciationOverrideHash: normalization.pronunciationOverrideHash,
+      documentLocator: { bookId },
+      chunkId: `${bookId}:${startIdx}:${normalization.normalizationHash}`,
+      sampleRate: KOKORO_SAMPLE_RATE,
+      timingTruth: "word-native",
+    };
   };
 
   // TTS-7G: Track first-chunk state for cold-start measurement
@@ -171,7 +183,7 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
       const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
       return { audio: result.audio, sampleRate: result.sampleRate, durationMs, wordTimestamps: result.wordTimestamps || null };
     },
-    getCacheIdentity: (text) => getCacheVoice(normalizeForSpeech(text)),
+    getCacheIdentity,
     getWords: deps.getWords,
     getVoiceId: deps.getVoiceId,
     getSpeed: () => getRatePlan().selectedSpeed,
@@ -224,25 +236,22 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
         pipeline.acknowledgeChunk();
       });
     },
-    onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount, cacheIdentity) => {
+    onCacheChunk: (startIdx, audio, sampleRate, durationMs, wordCount, cacheIdentity?: TtsCacheIdentity, timingMetadata?: TtsCacheWriteTimingMetadata) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = cacheIdentity ?? getCacheVoice();
-      if (bookId) {
-        ttsCache.cacheChunk(bookId, voiceId, startIdx, audio, sampleRate, durationMs, wordCount);
+      if (bookId && cacheIdentity) {
+        ttsCache.cacheChunk(bookId, cacheIdentity, startIdx, audio, sampleRate, durationMs, wordCount, timingMetadata);
       }
     },
     isCached: async (startIdx, cacheIdentity) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = cacheIdentity ?? getCacheVoice();
-      if (!bookId) return false;
-      return ttsCache.isCached(bookId, voiceId, startIdx);
+      if (!bookId || !cacheIdentity) return false;
+      return ttsCache.isCached(bookId, cacheIdentity, startIdx);
     },
     loadCached: async (startIdx, cacheIdentity) => {
       const bookId = deps.getBookId?.() || "";
-      const voiceId = cacheIdentity ?? getCacheVoice();
-      if (!bookId) return null;
+      if (!bookId || !cacheIdentity) return null;
       const words = deps.getWords();
-      return ttsCache.loadCachedChunk(bookId, voiceId, startIdx, words);
+      return ttsCache.loadCachedChunk(bookId, cacheIdentity, startIdx, words);
     },
     onError: () => deps.onFallbackToWeb(),
     onEnd: () => {

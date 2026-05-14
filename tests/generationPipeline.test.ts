@@ -127,6 +127,50 @@ describe("createGenerationPipeline", () => {
     pipeline.stop();
   });
 
+  it("passes timing metadata to cache writes without changing scheduled display words", async () => {
+    const onCacheChunk = vi.fn();
+    const words = ["alpha", "bravo."];
+    const config = makeConfig({
+      getWords: () => words,
+      generateFn: vi.fn().mockResolvedValue({
+        audio: new Float32Array(24000),
+        sampleRate: 24000,
+        durationMs: 1000,
+        wordTimestamps: [{ word: "alpha", startTime: 0, endTime: 0.4 }],
+      }),
+      getCacheIdentity: () => ({
+        schemaVersion: 2,
+        provider: "kokoro",
+        voiceId: "af_heart",
+        rateBucket: 1,
+        sourceTextHash: "src",
+        normalizedTextHash: "norm",
+        normalizerVersion: "en-v1",
+        pronunciationOverrideHash: "",
+        documentLocator: { bookId: "book-1" },
+        chunkId: "book-1:0:src",
+        sampleRate: 24000,
+        timingTruth: "word-native",
+      }),
+      onCacheChunk,
+    });
+    const pipeline = createGenerationPipeline(config);
+
+    pipeline.start(0);
+    await vi.waitFor(() => expect(onCacheChunk).toHaveBeenCalled());
+
+    expect(onCacheChunk.mock.calls[0][5]).toMatchObject({ schemaVersion: 2, timingTruth: "word-native" });
+    expect(onCacheChunk.mock.calls[0][6]).toMatchObject({
+      timingTruth: "word-native",
+      wordTimestamps: [{ word: "alpha", startTime: 0, endTime: 0.4 }],
+      chunkStartIdx: 0,
+      chunkEndIdx: 2,
+    });
+    expect((config.onChunkReady as any).mock.calls[0][0].words).toEqual(words);
+
+    pipeline.stop();
+  });
+
   it("first chunk uses TTS_COLD_START_CHUNK_WORDS words", async () => {
     const onChunkReady = vi.fn();
     const config = makeConfig({ onChunkReady });

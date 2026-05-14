@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS, TTS_NORMALIZER_VERSION } from "../src/constants";
+import { KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS, TTS_CACHE_SCHEMA_VERSION, TTS_NORMALIZER_VERSION } from "../src/constants";
 import type { KokoroStrategyDeps } from "../src/hooks/narration/kokoroStrategy";
 import * as ttsCache from "../src/utils/ttsCache";
 
@@ -233,9 +233,20 @@ describe("kokoroStrategy live rate continuity", () => {
       await vi.waitFor(() => expect(schedulerMock.scheduleChunk).toHaveBeenCalled());
 
       const scheduledSegments = schedulerMock.scheduleChunk.mock.calls.map(([chunk]) => chunk as any);
-      const cacheVoice = loadCachedChunkSpy.mock.calls[0][1];
-      expect(cacheVoice).toMatch(new RegExp(`^af_heart/1\\.2/${TTS_NORMALIZER_VERSION}/[a-z0-9]+-[a-z0-9]+`));
-      expect(isCachedSpy).toHaveBeenCalledWith("book-1", cacheVoice, 0);
+      const cacheIdentity = loadCachedChunkSpy.mock.calls[0][1] as any;
+      expect(cacheIdentity).toMatchObject({
+        schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+        provider: "kokoro",
+        voiceId: "af_heart",
+        rateBucket: 1.2,
+        normalizerVersion: TTS_NORMALIZER_VERSION,
+        documentLocator: { bookId: "book-1" },
+        sampleRate: 24000,
+        timingTruth: "word-native",
+      });
+      expect(cacheIdentity.sourceTextHash).toMatch(/^[a-z0-9]+$/);
+      expect(cacheIdentity.normalizedTextHash).toMatch(/^[a-z0-9]+$/);
+      expect(isCachedSpy).toHaveBeenCalledWith("book-1", cacheIdentity, 0);
       expect(electronAPI.kokoroGenerate).not.toHaveBeenCalled();
       expect(scheduledSegments.length).toBeGreaterThan(1);
       expect(scheduledSegments.every((segment) => segment.parentChunkStartIdx === 0)).toBe(true);

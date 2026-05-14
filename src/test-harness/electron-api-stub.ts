@@ -721,32 +721,34 @@ export const electronAPIStub: ElectronAPI = {
   onQwenStreamAudio: (_cb: EventCallback) => addEventListener("tts-qwen-stream-audio", _cb),
 
   // ── TTS Cache (NAR-2) — in-memory for browser testing ────────────────
-  ttsCacheRead: async (bookId: string, voiceId: string, startIdx: number) => {
-    const key = `${bookId}:${voiceId}:${startIdx}`;
+  ttsCacheRead: async (bookId: string, voiceId: any, startIdx: number) => {
+    const key = `${bookId}:${JSON.stringify(voiceId)}:${startIdx}`;
     const entry = stubTtsCache.get(key);
     if (entry) return trace("ttsCacheRead", [bookId, voiceId, startIdx], entry);
     return trace("ttsCacheRead", [bookId, voiceId, startIdx], { miss: true });
   },
-  ttsCacheWrite: async (bookId: string, voiceId: string, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => {
-    const key = `${bookId}:${voiceId}:${startIdx}`;
+  ttsCacheWrite: async (bookId: string, voiceId: any, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => {
+    const key = `${bookId}:${JSON.stringify(voiceId)}:${startIdx}`;
     stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs, wordCount: wordCount ?? undefined });
     return trace("ttsCacheWrite", [bookId, voiceId, startIdx], { success: true });
   },
-  ttsCacheHas: async (bookId: string, voiceId: string, startIdx: number) => {
-    const key = `${bookId}:${voiceId}:${startIdx}`;
+  ttsCacheHas: async (bookId: string, voiceId: any, startIdx: number) => {
+    const key = `${bookId}:${JSON.stringify(voiceId)}:${startIdx}`;
     return trace("ttsCacheHas", [bookId, voiceId, startIdx], stubTtsCache.has(key));
   },
-  ttsCacheChunks: async (bookId: string, voiceId: string) => {
-    const prefix = `${bookId}:${voiceId}:`;
-    const indices = [...stubTtsCache.keys()].filter(k => k.startsWith(prefix)).map(k => parseInt(k.split(":")[2]));
+  ttsCacheChunks: async (bookId: string, voiceId: any) => {
+    const prefix = `${bookId}:${JSON.stringify(voiceId)}:`;
+    const indices = [...stubTtsCache.keys()]
+      .filter(k => k.startsWith(prefix))
+      .map(k => parseInt(k.slice(prefix.length), 10));
     return trace("ttsCacheChunks", [bookId, voiceId], indices);
   },
   ttsCacheEvictBook: async (bookId: string) => {
     for (const key of [...stubTtsCache.keys()]) { if (key.startsWith(`${bookId}:`)) stubTtsCache.delete(key); }
     return trace("ttsCacheEvictBook", [bookId], { success: true });
   },
-  ttsCacheEvictVoice: async (bookId: string, voiceId: string) => {
-    const prefix = `${bookId}:${voiceId}:`;
+  ttsCacheEvictVoice: async (bookId: string, voiceId: any) => {
+    const prefix = `${bookId}:${JSON.stringify(voiceId)}:`;
     for (const key of [...stubTtsCache.keys()]) { if (key.startsWith(prefix)) stubTtsCache.delete(key); }
     return trace("ttsCacheEvictVoice", [bookId, voiceId], { success: true });
   },

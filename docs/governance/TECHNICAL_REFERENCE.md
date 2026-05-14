@@ -1,7 +1,7 @@
 # Blurby Technical Reference
 
 **Version:** 2.3.1
-**Last updated:** 2026-05-04
+**Last updated:** 2026-05-13
 **Branch:** `main` (v1.5.0)
 
 This document is the governing technical reference for Blurby. It covers architecture, data model, reading modes, rendering, TTS, build/release, and known technical debt. A new developer should be able to understand the entire system by reading this document and following the file path references.
@@ -418,6 +418,8 @@ Blurby's Desktop v2.0 TTS product posture is Kokoro as the default and available
 TTS-REGISTRY-1 makes provider capability truth explicit in `src/types/ttsProvider.ts` and `src/utils/ttsProviderRegistry.ts`. The registry records each provider's selectable/default/experimental state, offline and sidecar requirements, streaming support, timing truth, voice blending/cloning posture, supported languages, sample rate, license, cacheability, status kind, and settings/status copy. This registry is informational and settings-facing today: it does not change playback strategy selection, Kokoro default behavior, explicit-only fallback policy, or Qwen disablement. Current truth: Kokoro is default and word-native; Web Speech is a platform fallback with unreliable boundary timing; MOSS-Nano and Pocket TTS are sidecar-backed segment-following opt-in engines; Qwen is disabled and unselectable.
 
 TTS-NORMALIZE-1 adds `src/utils/segmentNormalizer.ts` as the spoken-text preparation layer before Kokoro generation. The normalizer is pure and English-first: it preserves `originalText`, emits `normalizedText`, records `locale`, ordered transform IDs, `TTS_NORMALIZER_VERSION`, stable source/normalized/normalization hashes, and pronunciation override hash. Kokoro generation now sends normalized spoken text while retaining original chunk words for scheduling/display/highlight mapping. Cache identity includes the normalizer version plus source/normalized hash pair as a lazy invalidation boundary; no destructive cache migration runs.
+
+TTS-CACHE-TIMING-1 hardens disk cache identity and timing persistence. `main/tts-cache.js` still reads legacy v1 `{bookId}/{voiceId}/chunk-{startIdx}.opus` entries, but new cache writes use `TTS_CACHE_SCHEMA_VERSION = 2` structured identities from `src/types/ttsCache.ts`: provider, voice, rate bucket, model/version, source and normalized hashes, normalizer version, pronunciation override hash, document locator, chunk ID, sample rate, and timing truth. V2 disk paths are safe hashed directories under `tts-cache/v2/` and manifest/audio/sidecar writes use temp-file rename. Generated chunks also receive `.timing.json` sidecars with duration, trusted/heuristic classification, chunk boundaries, and word timestamps only when timing truth is trusted. Corrupt sidecars are treated as missing timing metadata without discarding readable audio.
 
 MOSS-Nano is recommended opt-in only. It requires the local Nano sidecar/runtime to be ready, reports narration progress as segment-following rather than word-timed (`wordTimestamps: null`), and uses explicit-only fallback policy: if Nano is selected and blocked, Blurby reports the Nano failure instead of silently falling back to another engine. This posture is based on `docs/testing/moss-nano-13e-productization-memo.md` and 13d's canonical evidence; it does not make Nano default, reactivate Qwen, or open Kokoro retirement.
 

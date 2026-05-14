@@ -129,6 +129,10 @@ const TTS_MODEL_LOAD_TIMEOUT_MS = 120000;
 const TTS_CACHE_SUBDIR = "tts-cache";
 /** Max total cache size before LRU eviction (MB) — Opus compressed, ~60MB per 10hr book */
 const TTS_CACHE_MAX_MB = 2000;
+/** Disk TTS cache identity schema/version for structured cache entries */
+const TTS_CACHE_SCHEMA_VERSION = 2;
+/** Timing metadata sidecar extension written next to generated audio chunks */
+const TTS_TIMING_SIDECAR_EXTENSION = ".timing.json";
 /** Max retries on Kokoro generation failure before falling back to Web Speech */
 const TTS_GENERATION_MAX_RETRIES = 1;
 
@@ -243,6 +247,8 @@ module.exports = {
   // TTS Cache
   TTS_CACHE_SUBDIR,
   TTS_CACHE_MAX_MB,
+  TTS_CACHE_SCHEMA_VERSION,
+  TTS_TIMING_SIDECAR_EXTENSION,
   TTS_GENERATION_MAX_RETRIES,
   // Main Process Lifecycle
   LIBRARY_SAVE_DEBOUNCE_MS,

@@ -1496,3 +1496,17 @@ speakChunk() {
 **Guardrail:** Treat normalized text as engine input only. Do not replace scheduler/display word arrays, Foliate word anchors, or highlight mapping with normalized text. When normalization changes spoken text, cache identity must include normalizer version and source/normalized hashes so changed rules miss lazily rather than triggering a destructive global cache wipe.
 
 **Related:** TTS-NORMALIZE-1, `src/utils/segmentNormalizer.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/utils/generationPipeline.ts`, `tests/segmentNormalizer.test.ts`, `tests/kokoroStrategy.test.ts`.
+
+---
+
+### [2026-05-13] LL-115: Cache Identity Must Be Data, Not a Path
+
+**Area:** TTS, disk cache, timing metadata, storage migration
+**Status:** active
+**Priority:** high
+
+**Context:** TTS-CACHE-TIMING-1 replaced slash-composed Kokoro cache identity strings with schema-versioned v2 identity objects. The old path-shaped identity was easy to extend but unsafe: provider, normalization, rate, and timing truth became implicit directory fragments instead of durable data.
+
+**Guardrail:** TTS cache identity must be structured data first and path material second. Keep all semantic fields in the manifest identity, derive disk directories from safe hashes, and invalidate by schema/normalizer/content fields through lazy misses rather than destructive global cleanup. Timing sidecars must be written atomically and may only return word timestamps when the timing classification is trusted.
+
+**Related:** TTS-CACHE-TIMING-1, `main/tts-cache.js`, `src/types/ttsCache.ts`, `src/utils/ttsCache.ts`, `tests/ttsCacheStructuredKeys.test.js`, `tests/ttsTimingSidecars.test.js`.
