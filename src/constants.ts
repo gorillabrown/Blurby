@@ -157,6 +157,10 @@ export const NARRATE_BG_EXTRACT_DELAY_MS = 1000;
 export const MAX_PRONUNCIATION_OVERRIDES = 100;
 /** Segment normalizer schema/version for spoken text identity. */
 export const TTS_NORMALIZER_VERSION = "en-v1";
+/** Disk TTS cache identity schema/version for structured cache entries. */
+export const TTS_CACHE_SCHEMA_VERSION = 2;
+/** Timing metadata sidecar extension written next to generated audio chunks. */
+export const TTS_TIMING_SIDECAR_EXTENSION = ".timing.json";
 
 // ── Narration Profiles (TTS-6L) ────────────────────────────────────────────
 /** Maximum number of narration profiles a user can create */

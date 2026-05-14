@@ -1,17 +1,26 @@
-// main/tts-cache.js — PCM disk cache for Kokoro TTS audio (NAR-2)
+// main/tts-cache.js — PCM disk cache for TTS audio (NAR-2)
 //
-// Stores raw Float32Array PCM chunks on disk keyed by {bookId}/{voiceId}/chunk-{startIdx}.opus.
+// Legacy v1 chunks remain keyed by {bookId}/{voiceId}/chunk-{startIdx}.opus.
+// v2 chunks use structured identity hashes under v2/{bookIdSafe}/{identityHash}.
 // Manifest tracks cached chunks per book, total size, and last-narrated timestamp for LRU eviction.
 
 "use strict";
 
 const path = require("path");
 const fs = require("fs/promises");
-const { TTS_CACHE_SUBDIR, TTS_CACHE_MAX_MB } = require("./constants");
+const crypto = require("crypto");
+const {
+  TTS_CACHE_SUBDIR,
+  TTS_CACHE_MAX_MB,
+  TTS_CACHE_SCHEMA_VERSION,
+  TTS_TIMING_SIDECAR_EXTENSION,
+} = require("./constants");
 const ttsOpus = require("./tts-opus");
 
+const TTS_TIMING_SIDECAR_SCHEMA_VERSION = 1;
+
 let cacheRoot = null;
-let manifest = { books: {}, totalBytes: 0 };
+let manifest = { schemaVersion: TTS_CACHE_SCHEMA_VERSION, books: {}, totalBytes: 0, contentIndex: {} };
 
 /**
  * Initialize the cache system. Must be called once at startup.
@@ -36,16 +45,240 @@ async function loadManifest() {
     manifest = JSON.parse(data);
     if (!manifest.books) manifest.books = {};
     if (!manifest.totalBytes) manifest.totalBytes = 0;
+    if (!manifest.contentIndex) manifest.contentIndex = {};
+    if (!manifest.schemaVersion) manifest.schemaVersion = 1;
   } catch {
-    manifest = { books: {}, totalBytes: 0 };
+    manifest = { schemaVersion: TTS_CACHE_SCHEMA_VERSION, books: {}, totalBytes: 0, contentIndex: {} };
   }
 }
 
 async function saveManifest() {
   try {
-    await fs.writeFile(manifestPath(), JSON.stringify(manifest), "utf-8");
+    manifest.schemaVersion = TTS_CACHE_SCHEMA_VERSION;
+    if (!manifest.contentIndex) manifest.contentIndex = {};
+    await writeFileAtomic(manifestPath(), JSON.stringify(manifest), "utf-8");
   } catch (err) {
     console.error("[tts-cache] Failed to save manifest:", err.message);
+  }
+}
+
+// ── Identity helpers ─────────────────────────────────────────────────────────
+
+function isStructuredIdentity(value) {
+  return value && typeof value === "object" && value.schemaVersion === TTS_CACHE_SCHEMA_VERSION;
+}
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.keys(value).sort().reduce((acc, key) => {
+      acc[key] = canonicalize(value[key]);
+      return acc;
+    }, {});
+  }
+  return value;
+}
+
+function stableJson(value) {
+  return JSON.stringify(canonicalize(value));
+}
+
+function hashObject(value) {
+  return crypto.createHash("sha256").update(stableJson(value)).digest("hex");
+}
+
+function safePathSegment(value) {
+  const raw = String(value ?? "unknown");
+  const encoded = encodeURIComponent(raw).replace(/[!'()*]/g, (char) =>
+    `%${char.charCodeAt(0).toString(16).toUpperCase()}`
+  );
+  return (encoded || "empty").slice(0, 140);
+}
+
+function normalizeStructuredIdentity(bookId, identity) {
+  return {
+    schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+    ...identity,
+    documentLocator: identity.documentLocator || { bookId },
+  };
+}
+
+function structuredContentKey(identity) {
+  return hashObject({
+    schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+    provider: identity.provider,
+    voiceId: identity.voiceId,
+    rateBucket: identity.rateBucket,
+    modelVersion: identity.modelVersion ?? null,
+    sourceTextHash: identity.sourceTextHash,
+    normalizedTextHash: identity.normalizedTextHash,
+    normalizerVersion: identity.normalizerVersion,
+    pronunciationOverrideHash: identity.pronunciationOverrideHash ?? "",
+    sampleRate: identity.sampleRate ?? null,
+    timingTruth: identity.timingTruth ?? null,
+  });
+}
+
+function structuredEntryKey(bookId, identityHash) {
+  return `v2:${safePathSegment(bookId)}:${identityHash}`;
+}
+
+function chunkAudioFilename(startIdx) {
+  return `chunk-${startIdx}.opus`;
+}
+
+function chunkTimingFilename(startIdx) {
+  return `chunk-${startIdx}${TTS_TIMING_SIDECAR_EXTENSION}`;
+}
+
+function getLegacyTarget(bookId, voiceId, startIdx) {
+  const key = `${bookId}/${voiceId}`;
+  const dir = path.join(cacheRoot, bookId, voiceId);
+  return {
+    schemaVersion: 1,
+    key,
+    dir,
+    audioPath: path.join(dir, chunkAudioFilename(startIdx)),
+    timingPath: null,
+    identity: null,
+    identityHash: null,
+    contentKey: null,
+    startIdx,
+  };
+}
+
+function getStructuredTarget(bookId, identityInput, startIdx) {
+  const identity = normalizeStructuredIdentity(bookId, identityInput);
+  const identityHash = hashObject(identity);
+  const key = structuredEntryKey(bookId, identityHash);
+  const dir = path.join(cacheRoot, "v2", safePathSegment(bookId), identityHash);
+  return {
+    schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+    key,
+    dir,
+    audioPath: path.join(dir, chunkAudioFilename(startIdx)),
+    timingPath: path.join(dir, chunkTimingFilename(startIdx)),
+    identity,
+    identityHash,
+    contentKey: structuredContentKey(identity),
+    startIdx,
+  };
+}
+
+function getCacheTarget(bookId, voiceOrIdentity, startIdx) {
+  return isStructuredIdentity(voiceOrIdentity)
+    ? getStructuredTarget(bookId, voiceOrIdentity, startIdx)
+    : getLegacyTarget(bookId, String(voiceOrIdentity), startIdx);
+}
+
+function getRelativeDir(dir) {
+  return path.relative(cacheRoot, dir).split(path.sep).join("/");
+}
+
+async function writeFileAtomic(filePath, data, encoding) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  await fs.writeFile(tempPath, data, encoding);
+  await fs.rename(tempPath, filePath);
+}
+
+function isValidWordTimestamp(timestamp) {
+  return timestamp &&
+    typeof timestamp.word === "string" &&
+    Number.isFinite(timestamp.startTime) &&
+    Number.isFinite(timestamp.endTime) &&
+    timestamp.endTime >= timestamp.startTime;
+}
+
+function buildTimingSidecar(target, sampleRate, durationMs, wordCount, timingMetadata = {}) {
+  if (target.schemaVersion !== TTS_CACHE_SCHEMA_VERSION) return null;
+
+  const timingTruth = timingMetadata.timingTruth ?? target.identity?.timingTruth ?? "none";
+  const trustedWordTiming =
+    timingTruth === "word-native" &&
+    Array.isArray(timingMetadata.wordTimestamps) &&
+    timingMetadata.wordTimestamps.length > 0 &&
+    timingMetadata.wordTimestamps.every(isValidWordTimestamp);
+
+  const sidecar = {
+    schemaVersion: TTS_TIMING_SIDECAR_SCHEMA_VERSION,
+    cacheSchemaVersion: TTS_CACHE_SCHEMA_VERSION,
+    identityHash: target.identityHash,
+    provider: target.identity?.provider ?? null,
+    voiceId: target.identity?.voiceId ?? null,
+    durationMs,
+    sampleRate,
+    wordCount: wordCount ?? null,
+    timingTruth,
+    timingClassification: trustedWordTiming ? "trusted" : "heuristic",
+    chunkStartIdx: timingMetadata.chunkStartIdx ?? target.startIdx,
+    chunkEndIdx: timingMetadata.chunkEndIdx ?? (wordCount != null ? target.startIdx + wordCount : null),
+    boundaryType: timingMetadata.boundaryType ?? null,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (trustedWordTiming) sidecar.wordTimestamps = timingMetadata.wordTimestamps;
+  return sidecar;
+}
+
+async function readTimingSidecar(timingPath) {
+  if (!timingPath) return null;
+  try {
+    const parsed = JSON.parse(await fs.readFile(timingPath, "utf-8"));
+    if (!parsed || parsed.schemaVersion !== TTS_TIMING_SIDECAR_SCHEMA_VERSION) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function findContentIndexedTarget(bookId, voiceOrIdentity) {
+  if (!isStructuredIdentity(voiceOrIdentity) || !manifest.contentIndex) return null;
+  const identity = normalizeStructuredIdentity(bookId, voiceOrIdentity);
+  const contentKey = structuredContentKey(identity);
+  const pointer = manifest.contentIndex[contentKey];
+  if (!pointer || !pointer.entryKey || pointer.startIdx == null) return null;
+
+  const entry = manifest.books[pointer.entryKey];
+  if (!entry || !entry.chunks?.[pointer.startIdx]) return null;
+  const dir = path.join(cacheRoot, entry.relativeDir || path.join("v2", safePathSegment(entry.bookId), entry.identityHash));
+  return {
+    schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+    key: pointer.entryKey,
+    dir,
+    audioPath: path.join(dir, entry.chunks[pointer.startIdx].audioFile || chunkAudioFilename(pointer.startIdx)),
+    timingPath: path.join(dir, entry.chunks[pointer.startIdx].timingFile || chunkTimingFilename(pointer.startIdx)),
+    identity: entry.identity,
+    identityHash: entry.identityHash,
+    contentKey,
+    startIdx: pointer.startIdx,
+  };
+}
+
+function resolveReadTarget(bookId, voiceOrIdentity, startIdx) {
+  const exact = getCacheTarget(bookId, voiceOrIdentity, startIdx);
+  const exactEntry = manifest.books[exact.key];
+  if (exactEntry?.chunks?.[startIdx]) return exact;
+  return findContentIndexedTarget(bookId, voiceOrIdentity);
+}
+
+function removeContentIndexPointersForEntry(entryKey) {
+  if (!manifest.contentIndex) return;
+  for (const [contentKey, pointer] of Object.entries(manifest.contentIndex)) {
+    if (pointer?.entryKey === entryKey) delete manifest.contentIndex[contentKey];
+  }
+}
+
+async function deleteEntryFiles(entry) {
+  if (entry?.schemaVersion === TTS_CACHE_SCHEMA_VERSION) {
+    await fs.rm(path.join(cacheRoot, entry.relativeDir || path.join("v2", safePathSegment(entry.bookId), entry.identityHash)), {
+      recursive: true,
+      force: true,
+    }).catch(() => {});
+    return;
+  }
+  if (entry?.bookId && entry?.voiceId) {
+    await fs.rm(path.join(cacheRoot, entry.bookId, entry.voiceId), { recursive: true, force: true }).catch(() => {});
   }
 }
 
@@ -54,52 +287,82 @@ async function saveManifest() {
 /**
  * Write a PCM audio chunk to disk cache.
  * @param {string} bookId
- * @param {string} voiceId
+ * @param {string|object} voiceId
  * @param {number} startIdx — word index where this chunk starts
  * @param {Float32Array|number[]} pcmData — raw PCM samples
  * @param {number} sampleRate
  * @param {number} durationMs
  * @param {number} [wordCount] — actual number of words in this chunk (TTS-7A)
+ * @param {object} [timingMetadata] — v2 timing sidecar metadata
  */
-async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durationMs, wordCount) {
+async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durationMs, wordCount, timingMetadata) {
   if (!cacheRoot) return;
 
-  const bookDir = path.join(cacheRoot, bookId, voiceId);
-  await fs.mkdir(bookDir, { recursive: true });
+  const target = getCacheTarget(bookId, voiceId, startIdx);
+  await fs.mkdir(target.dir, { recursive: true });
 
   const f32 = pcmData instanceof Float32Array ? pcmData : new Float32Array(pcmData);
-  const filePath = path.join(bookDir, `chunk-${startIdx}.opus`);
-
-  // Encode PCM to Opus for compact storage (~95% compression)
   const buffer = ttsOpus.encode(f32, sampleRate);
 
-  await fs.writeFile(filePath, buffer);
+  await writeFileAtomic(target.audioPath, buffer);
 
-  // Update manifest
-  const key = `${bookId}/${voiceId}`;
-  if (!manifest.books[key]) {
-    manifest.books[key] = { bookId, voiceId, chunks: {}, totalBytes: 0, lastNarrated: Date.now() };
+  if (!manifest.books[target.key]) {
+    manifest.books[target.key] = target.schemaVersion === TTS_CACHE_SCHEMA_VERSION
+      ? {
+          schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+          bookId,
+          voiceId: target.identity.voiceId,
+          identity: target.identity,
+          identityHash: target.identityHash,
+          relativeDir: getRelativeDir(target.dir),
+          chunks: {},
+          totalBytes: 0,
+          lastNarrated: Date.now(),
+        }
+      : { bookId, voiceId, chunks: {}, totalBytes: 0, lastNarrated: Date.now() };
   }
-  const entry = manifest.books[key];
-  const chunkBytes = buffer.length;
 
-  // If replacing an existing chunk, subtract old size
+  const entry = manifest.books[target.key];
+  const chunkBytes = buffer.length;
   if (entry.chunks[startIdx]) {
     const oldBytes = entry.chunks[startIdx].bytes || 0;
     entry.totalBytes -= oldBytes;
     manifest.totalBytes -= oldBytes;
   }
 
-  entry.chunks[startIdx] = { bytes: chunkBytes, sampleRate, durationMs, ...(wordCount != null ? { wordCount } : {}) };
+  const chunkMeta = {
+    ...(target.schemaVersion === TTS_CACHE_SCHEMA_VERSION ? { schemaVersion: TTS_CACHE_SCHEMA_VERSION } : {}),
+    bytes: chunkBytes,
+    sampleRate,
+    durationMs,
+    ...(wordCount != null ? { wordCount } : {}),
+  };
+
+  if (target.schemaVersion === TTS_CACHE_SCHEMA_VERSION) {
+    const timingSidecar = buildTimingSidecar(target, sampleRate, durationMs, wordCount, timingMetadata);
+    if (timingSidecar) {
+      await writeFileAtomic(target.timingPath, JSON.stringify(timingSidecar), "utf-8");
+    }
+    Object.assign(chunkMeta, {
+      audioFile: path.basename(target.audioPath),
+      timingFile: path.basename(target.timingPath),
+      sourceTextHash: target.identity.sourceTextHash,
+      normalizedTextHash: target.identity.normalizedTextHash,
+      normalizerVersion: target.identity.normalizerVersion,
+      pronunciationOverrideHash: target.identity.pronunciationOverrideHash ?? "",
+      timingTruth: target.identity.timingTruth ?? timingMetadata?.timingTruth ?? null,
+      contentKey: target.contentKey,
+    });
+    manifest.contentIndex[target.contentKey] = { entryKey: target.key, startIdx };
+  }
+
+  entry.chunks[startIdx] = chunkMeta;
   entry.totalBytes += chunkBytes;
   entry.lastNarrated = Date.now();
   manifest.totalBytes += chunkBytes;
 
-  // Async manifest save — don't block caller
-  saveManifest().catch(err => console.error("[tts-cache] saveManifest failed:", err.message));
-
-  // Check disk pressure
-  await enforceMaxSize(key);
+  await saveManifest();
+  await enforceMaxSize(target.key);
 }
 
 // ── Read ─────────────────────────────────────────────────────────────────────
@@ -107,30 +370,39 @@ async function writeChunk(bookId, voiceId, startIdx, pcmData, sampleRate, durati
 /**
  * Read a cached PCM chunk from disk.
  * @param {string} bookId
- * @param {string} voiceId
+ * @param {string|object} voiceId
  * @param {number} startIdx
  * @returns {{ audio: Float32Array, sampleRate: number, durationMs: number } | null}
  */
 async function readChunk(bookId, voiceId, startIdx) {
   if (!cacheRoot) return null;
 
-  const key = `${bookId}/${voiceId}`;
-  const entry = manifest.books[key];
-  if (!entry || !entry.chunks[startIdx]) return null;
+  const target = resolveReadTarget(bookId, voiceId, startIdx);
+  if (!target) return null;
+  const entry = manifest.books[target.key];
+  if (!entry || !entry.chunks[target.startIdx]) return null;
 
-  const filePath = path.join(cacheRoot, bookId, voiceId, `chunk-${startIdx}.opus`);
   try {
-    const buffer = await fs.readFile(filePath);
-    // Decode Opus back to PCM
+    const buffer = await fs.readFile(target.audioPath);
     const decoded = ttsOpus.decode(buffer);
-    const meta = entry.chunks[startIdx];
+    const meta = entry.chunks[target.startIdx];
     entry.lastNarrated = Date.now();
-    return { audio: decoded.audio, sampleRate: decoded.sampleRate, durationMs: meta.durationMs, wordCount: meta.wordCount ?? null };
+    const timing = await readTimingSidecar(target.timingPath);
+    return {
+      audio: decoded.audio,
+      sampleRate: decoded.sampleRate,
+      durationMs: meta.durationMs,
+      wordCount: meta.wordCount ?? null,
+      timing,
+      wordTimestamps: timing?.timingClassification === "trusted" && Array.isArray(timing.wordTimestamps)
+        ? timing.wordTimestamps
+        : null,
+    };
   } catch (err) {
-    // File missing or corrupt — clean up manifest entry
-    console.warn(`[tts-cache] Failed to read/decode chunk ${startIdx}:`, err.message);
-    delete entry.chunks[startIdx];
-    saveManifest().catch(err => console.error("[tts-cache] saveManifest failed:", err.message));
+    console.warn(`[tts-cache] Failed to read/decode chunk ${target.startIdx}:`, err.message);
+    delete entry.chunks[target.startIdx];
+    if (Object.keys(entry.chunks).length === 0) removeContentIndexPointersForEntry(target.key);
+    saveManifest().catch(saveErr => console.error("[tts-cache] saveManifest failed:", saveErr.message));
     return null;
   }
 }
@@ -139,17 +411,18 @@ async function readChunk(bookId, voiceId, startIdx) {
  * Check if a chunk is cached.
  */
 function hasChunk(bookId, voiceId, startIdx) {
-  const key = `${bookId}/${voiceId}`;
-  const entry = manifest.books[key];
-  return !!(entry && entry.chunks[startIdx]);
+  const target = resolveReadTarget(bookId, voiceId, startIdx);
+  if (!target) return false;
+  const entry = manifest.books[target.key];
+  return !!(entry && entry.chunks[target.startIdx]);
 }
 
 /**
  * Get list of cached chunk startIdx values for a book+voice.
  */
 function getCachedChunks(bookId, voiceId) {
-  const key = `${bookId}/${voiceId}`;
-  const entry = manifest.books[key];
+  const target = getCacheTarget(bookId, voiceId, 0);
+  const entry = manifest.books[target.key];
   if (!entry) return [];
   return Object.keys(entry.chunks).map(Number).sort((a, b) => a - b);
 }
@@ -160,10 +433,9 @@ function getCachedChunks(bookId, voiceId) {
  * Manifest-only — no PCM loads.
  */
 function getOpeningCoverageMs(bookId, voiceId) {
-  const key = `${bookId}/${voiceId}`;
-  const entry = manifest.books[key];
+  const target = getCacheTarget(bookId, voiceId, 0);
+  const entry = manifest.books[target.key];
   if (!entry) return 0;
-  // Sum durationMs of all chunks, sorted by startIdx ascending
   const sortedIndices = Object.keys(entry.chunks).map(Number).sort((a, b) => a - b);
   let totalMs = 0;
   for (const idx of sortedIndices) {
@@ -181,15 +453,14 @@ function getOpeningCoverageMs(bookId, voiceId) {
 async function evictBook(bookId) {
   if (!cacheRoot) return;
 
-  const bookDir = path.join(cacheRoot, bookId);
-  try {
-    await fs.rm(bookDir, { recursive: true, force: true });
-  } catch { /* dir may not exist */ }
+  await fs.rm(path.join(cacheRoot, bookId), { recursive: true, force: true }).catch(() => {});
+  await fs.rm(path.join(cacheRoot, "v2", safePathSegment(bookId)), { recursive: true, force: true }).catch(() => {});
 
-  // Remove all entries for this book from manifest
   for (const key of Object.keys(manifest.books)) {
-    if (key.startsWith(bookId + "/")) {
-      manifest.totalBytes -= manifest.books[key].totalBytes || 0;
+    const entry = manifest.books[key];
+    if (key.startsWith(bookId + "/") || entry?.bookId === bookId) {
+      manifest.totalBytes -= entry.totalBytes || 0;
+      removeContentIndexPointersForEntry(key);
       delete manifest.books[key];
     }
   }
@@ -203,16 +474,29 @@ async function evictBook(bookId) {
 async function evictBookVoice(bookId, voiceId) {
   if (!cacheRoot) return;
 
-  const voiceDir = path.join(cacheRoot, bookId, voiceId);
-  try {
-    await fs.rm(voiceDir, { recursive: true, force: true });
-  } catch { /* dir may not exist */ }
-
-  const key = `${bookId}/${voiceId}`;
-  if (manifest.books[key]) {
-    manifest.totalBytes -= manifest.books[key].totalBytes || 0;
-    delete manifest.books[key];
+  const target = getCacheTarget(bookId, voiceId, 0);
+  if (target.schemaVersion === TTS_CACHE_SCHEMA_VERSION) {
+    await fs.rm(target.dir, { recursive: true, force: true }).catch(() => {});
+  } else {
+    await fs.rm(path.join(cacheRoot, bookId, String(voiceId)), { recursive: true, force: true }).catch(() => {});
   }
+
+  for (const key of Object.keys(manifest.books)) {
+    const entry = manifest.books[key];
+    const exactStructured = target.schemaVersion === TTS_CACHE_SCHEMA_VERSION && key === target.key;
+    const exactLegacy = target.schemaVersion !== TTS_CACHE_SCHEMA_VERSION && key === target.key;
+    const v2SameVoice = target.schemaVersion !== TTS_CACHE_SCHEMA_VERSION &&
+      entry?.schemaVersion === TTS_CACHE_SCHEMA_VERSION &&
+      entry.bookId === bookId &&
+      entry.identity?.voiceId === voiceId;
+
+    if (exactStructured || exactLegacy || v2SameVoice) {
+      manifest.totalBytes -= entry.totalBytes || 0;
+      removeContentIndexPointersForEntry(key);
+      delete manifest.books[key];
+    }
+  }
+
   manifest.totalBytes = Math.max(0, manifest.totalBytes);
   await saveManifest();
 }
@@ -225,16 +509,19 @@ async function enforceMaxSize(protectKey) {
   const maxBytes = TTS_CACHE_MAX_MB * 1024 * 1024;
   if (manifest.totalBytes <= maxBytes) return;
 
-  // Sort by lastNarrated ascending (oldest first)
   const entries = Object.entries(manifest.books)
     .filter(([key]) => key !== protectKey)
     .sort((a, b) => (a[1].lastNarrated || 0) - (b[1].lastNarrated || 0));
 
   for (const [key, entry] of entries) {
     if (manifest.totalBytes <= maxBytes) break;
-    const [bookId, voiceId] = key.split("/");
-    await evictBookVoice(bookId, voiceId);
+    await deleteEntryFiles(entry);
+    manifest.totalBytes -= entry.totalBytes || 0;
+    removeContentIndexPointersForEntry(key);
+    delete manifest.books[key];
+    manifest.totalBytes = Math.max(0, manifest.totalBytes);
   }
+  await saveManifest();
 }
 
 /**
@@ -253,15 +540,16 @@ function getCacheInfo() {
 
 /**
  * Clean up orphaned files on startup — files on disk with no manifest entry,
- * or zero-byte files from interrupted writes.
+ * zero-byte files from interrupted writes, or stale atomic temp files.
  */
 async function cleanupOrphans() {
   if (!cacheRoot) return;
 
   try {
+    await cleanupStructuredOrphans();
     const bookDirs = await fs.readdir(cacheRoot).catch(() => []);
     for (const bookId of bookDirs) {
-      if (bookId === "manifest.json") continue;
+      if (bookId === "manifest.json" || bookId === "v2") continue;
       const bookPath = path.join(cacheRoot, bookId);
       const stat = await fs.stat(bookPath).catch(() => null);
       if (!stat || !stat.isDirectory()) continue;
@@ -277,17 +565,19 @@ async function cleanupOrphans() {
 
         const files = await fs.readdir(voicePath).catch(() => []);
         for (const file of files) {
-          if (!file.endsWith(".opus")) continue;
           const filePath = path.join(voicePath, file);
-          const fStat = await fs.stat(filePath).catch(() => null);
+          if (file.endsWith(".tmp")) {
+            await fs.unlink(filePath).catch(() => {});
+            continue;
+          }
+          if (!file.endsWith(".opus")) continue;
 
-          // Remove zero-byte files (interrupted writes)
+          const fStat = await fs.stat(filePath).catch(() => null);
           if (fStat && fStat.size === 0) {
             await fs.unlink(filePath).catch(() => {});
             continue;
           }
 
-          // Remove files not in manifest
           const match = file.match(/^chunk-(\d+)\.opus$/);
           if (match && entry) {
             const startIdx = parseInt(match[1], 10);
@@ -305,6 +595,54 @@ async function cleanupOrphans() {
   }
 }
 
+async function cleanupStructuredOrphans() {
+  const v2Root = path.join(cacheRoot, "v2");
+  const bookDirs = await fs.readdir(v2Root).catch(() => []);
+  for (const bookDir of bookDirs) {
+    const bookPath = path.join(v2Root, bookDir);
+    const bookStat = await fs.stat(bookPath).catch(() => null);
+    if (!bookStat?.isDirectory()) continue;
+
+    const identityDirs = await fs.readdir(bookPath).catch(() => []);
+    for (const identityDir of identityDirs) {
+      const identityPath = path.join(bookPath, identityDir);
+      const identityStat = await fs.stat(identityPath).catch(() => null);
+      if (!identityStat?.isDirectory()) continue;
+
+      const relativeDir = getRelativeDir(identityPath);
+      const entryKey = Object.keys(manifest.books).find(key => manifest.books[key]?.relativeDir === relativeDir);
+      const entry = entryKey ? manifest.books[entryKey] : null;
+      const files = await fs.readdir(identityPath).catch(() => []);
+
+      for (const file of files) {
+        const filePath = path.join(identityPath, file);
+        if (file.endsWith(".tmp")) {
+          await fs.unlink(filePath).catch(() => {});
+          continue;
+        }
+
+        if (file.endsWith(".opus")) {
+          const stat = await fs.stat(filePath).catch(() => null);
+          const match = file.match(/^chunk-(\d+)\.opus$/);
+          const startIdx = match ? parseInt(match[1], 10) : null;
+          const known = startIdx != null && entry?.chunks?.[startIdx];
+          if (stat?.size === 0 || !known) {
+            await fs.unlink(filePath).catch(() => {});
+            if (startIdx != null) await fs.unlink(path.join(identityPath, chunkTimingFilename(startIdx))).catch(() => {});
+          }
+          continue;
+        }
+
+        if (file.endsWith(TTS_TIMING_SIDECAR_EXTENSION)) {
+          const audioFile = file.replace(TTS_TIMING_SIDECAR_EXTENSION, ".opus");
+          const audioExists = await fs.stat(path.join(identityPath, audioFile)).catch(() => null);
+          if (!audioExists) await fs.unlink(filePath).catch(() => {});
+        }
+      }
+    }
+  }
+}
+
 module.exports = {
   init,
   writeChunk,
@@ -315,4 +653,6 @@ module.exports = {
   evictBookVoice,
   getCacheInfo,
   getOpeningCoverageMs,
+  TTS_CACHE_SCHEMA_VERSION,
+  TTS_TIMING_SIDECAR_EXTENSION,
 };

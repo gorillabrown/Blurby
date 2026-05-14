@@ -572,6 +572,11 @@ export interface MergePreview {
 
 // ── Import streaming types ──────────────────────────────────────────────────
 import type { QwenStreamStartResult, QwenStreamingEngineStatus } from "./types/qwenStreaming";
+import type {
+  TtsCacheIdentity,
+  TtsCacheReadResult,
+  TtsCacheWriteTimingMetadata,
+} from "./types/ttsCache";
 
 // ── IPC API exposed via preload ─────────────────────────────────────────────
 export interface ElectronAPI {
@@ -713,12 +718,12 @@ export interface ElectronAPI {
   onQwenEngineStatus?: (callback: (data: QwenStatusSnapshot) => void) => () => void;
   onQwenRuntimeError?: (callback: (error: string) => void) => () => void;
   // TTS cache APIs
-  ttsCacheRead: (bookId: string, voiceId: string, startIdx: number) => Promise<{ audio?: number[]; sampleRate?: number; durationMs?: number; wordCount?: number; miss?: boolean; error?: string }>;
-  ttsCacheWrite: (bookId: string, voiceId: string, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => Promise<{ success?: boolean; error?: string }>;
-  ttsCacheHas: (bookId: string, voiceId: string, startIdx: number) => Promise<boolean>;
-  ttsCacheChunks: (bookId: string, voiceId: string) => Promise<number[]>;
+  ttsCacheRead: (bookId: string, voiceId: TtsCacheIdentity, startIdx: number) => Promise<TtsCacheReadResult>;
+  ttsCacheWrite: (bookId: string, voiceId: TtsCacheIdentity, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null, timingMetadata?: TtsCacheWriteTimingMetadata) => Promise<{ success?: boolean; error?: string }>;
+  ttsCacheHas: (bookId: string, voiceId: TtsCacheIdentity, startIdx: number) => Promise<boolean>;
+  ttsCacheChunks: (bookId: string, voiceId: TtsCacheIdentity) => Promise<number[]>;
   ttsCacheEvictBook: (bookId: string) => Promise<{ success?: boolean; error?: string }>;
-  ttsCacheEvictVoice: (bookId: string, voiceId: string) => Promise<{ success?: boolean; error?: string }>;
+  ttsCacheEvictVoice: (bookId: string, voiceId: TtsCacheIdentity) => Promise<{ success?: boolean; error?: string }>;
   ttsCacheInfo: () => Promise<{ totalBytes: number; totalMB: number; bookCount: number }>;
 }
 

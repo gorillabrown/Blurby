@@ -38,9 +38,9 @@ afterEach(() => {
 });
 
 import { createKokoroStrategy, type KokoroStrategyDeps } from "../src/hooks/narration/kokoroStrategy";
-import { TTS_NORMALIZER_VERSION } from "../src/constants";
+import { TTS_CACHE_SCHEMA_VERSION, TTS_NORMALIZER_VERSION } from "../src/constants";
 import * as ttsCache from "../src/utils/ttsCache";
-import { normalizeSegmentText, stableSegmentTextHash } from "../src/utils/segmentNormalizer";
+import { normalizeSegmentText } from "../src/utils/segmentNormalizer";
 
 function mockDeps(overrides?: Partial<KokoroStrategyDeps>): KokoroStrategyDeps {
   const words = ["Hello", "world", "test.", "More", "words", "here."];
@@ -204,11 +204,21 @@ describe("createKokoroStrategy", () => {
       strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
 
       await vi.waitFor(() => expect(isCachedSpy).toHaveBeenCalled());
-      const voiceKey = isCachedSpy.mock.calls[0][1];
+      const identity = isCachedSpy.mock.calls[0][1] as any;
 
-      expect(voiceKey).toContain(TTS_NORMALIZER_VERSION);
-      expect(voiceKey).toContain(stableSegmentTextHash(originalText));
-      expect(voiceKey).toContain(normalized.normalizedTextHash);
+      expect(identity).toMatchObject({
+        schemaVersion: TTS_CACHE_SCHEMA_VERSION,
+        provider: "kokoro",
+        voiceId: "af_heart",
+        rateBucket: 1,
+        normalizerVersion: TTS_NORMALIZER_VERSION,
+        sourceTextHash: normalized.sourceTextHash,
+        normalizedTextHash: normalized.normalizedTextHash,
+        pronunciationOverrideHash: normalized.pronunciationOverrideHash,
+        documentLocator: { bookId: "test-book" },
+        sampleRate: 24000,
+        timingTruth: "word-native",
+      });
     } finally {
       strategy.stop();
       isCachedSpy.mockRestore();

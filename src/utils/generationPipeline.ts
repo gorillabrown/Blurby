@@ -21,6 +21,7 @@ import {
   planNeedsRebuild,
   type NarrationPlan,
 } from "./narrationPlanner";
+import type { TtsCacheIdentity, TtsCacheWriteTimingMetadata } from "../types/ttsCache";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ export interface PipelineConfig {
   /** Called when a chunk is ready for scheduling */
   onChunkReady: (chunk: ScheduledChunk) => void;
   /** Build a chunk-local cache identity from the exact source text sent to generation. */
-  getCacheIdentity?: (text: string, words: string[], startIdx: number) => string;
+  getCacheIdentity?: (text: string, words: string[], startIdx: number) => TtsCacheIdentity;
   /** Called when a chunk should be cached to disk (TTS-7A: includes wordCount) */
   onCacheChunk?: (
     startIdx: number,
@@ -60,12 +61,13 @@ export interface PipelineConfig {
     sampleRate: number,
     durationMs: number,
     wordCount: number,
-    cacheIdentity?: string,
+    cacheIdentity?: TtsCacheIdentity,
+    timingMetadata?: TtsCacheWriteTimingMetadata,
   ) => void;
   /** Check if a chunk is already cached */
-  isCached?: (startIdx: number, cacheIdentity?: string) => Promise<boolean>;
+  isCached?: (startIdx: number, cacheIdentity?: TtsCacheIdentity) => Promise<boolean>;
   /** Load a cached chunk */
-  loadCached?: (startIdx: number, cacheIdentity?: string) => Promise<ScheduledChunk | null>;
+  loadCached?: (startIdx: number, cacheIdentity?: TtsCacheIdentity) => Promise<ScheduledChunk | null>;
   /** Called on generation error */
   onError: () => void;
   /** Called when all words have been generated/scheduled */
@@ -509,7 +511,16 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         // Cache to disk (fire-and-forget) — TTS-7A: store actual word count
         // Always cache regardless of pause state
         if (config.onCacheChunk) {
-          config.onCacheChunk(startIdx, audio, sampleRate, durationMs, chunkWords.length, cacheIdentity);
+          const timingTruth = cacheIdentity && typeof cacheIdentity === "object"
+            ? cacheIdentity.timingTruth
+            : "none";
+          config.onCacheChunk(startIdx, audio, sampleRate, durationMs, chunkWords.length, cacheIdentity, {
+            timingTruth,
+            wordTimestamps: result.wordTimestamps ?? null,
+            chunkStartIdx: startIdx,
+            chunkEndIdx: endIdx,
+            boundaryType,
+          });
         }
       }
       return chunkWords.length;

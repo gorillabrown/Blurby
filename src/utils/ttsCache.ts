@@ -5,13 +5,14 @@
 // audio scheduler.
 
 import type { ScheduledChunk } from "./audioScheduler";
+import type { TtsCacheIdentity, TtsCacheWriteTimingMetadata } from "../types/ttsCache";
 
 const api = window.electronAPI;
 
 /**
  * Check if a chunk is cached on disk.
  */
-export async function isCached(bookId: string, voiceId: string, startIdx: number): Promise<boolean> {
+export async function isCached(bookId: string, voiceId: TtsCacheIdentity, startIdx: number): Promise<boolean> {
   if (!api?.ttsCacheHas) return false;
   return api.ttsCacheHas(bookId, voiceId, startIdx);
 }
@@ -24,7 +25,7 @@ export async function isCached(bookId: string, voiceId: string, startIdx: number
  */
 export async function loadCachedChunk(
   bookId: string,
-  voiceId: string,
+  voiceId: TtsCacheIdentity,
   startIdx: number,
   allWords: string[],
 ): Promise<ScheduledChunk | null> {
@@ -49,6 +50,7 @@ export async function loadCachedChunk(
     durationMs: result.durationMs,
     words: chunkWords,
     startIdx,
+    wordTimestamps: result.wordTimestamps ?? null,
   };
 }
 
@@ -58,23 +60,24 @@ export async function loadCachedChunk(
  */
 export function cacheChunk(
   bookId: string,
-  voiceId: string,
+  voiceId: TtsCacheIdentity,
   startIdx: number,
   audio: Float32Array,
   sampleRate: number,
   durationMs: number,
   wordCount?: number,
+  timingMetadata?: TtsCacheWriteTimingMetadata,
 ): void {
   if (!api?.ttsCacheWrite) return;
   // TTS-7C: Pass Float32Array directly — Electron structured clone preserves typed arrays.
   // Previous Array.from() added ~2x allocation overhead on every cache write (BUG-113).
-  api.ttsCacheWrite(bookId, voiceId, startIdx, audio, sampleRate, durationMs, wordCount ?? null).catch(() => {});
+  api.ttsCacheWrite(bookId, voiceId, startIdx, audio, sampleRate, durationMs, wordCount ?? null, timingMetadata).catch(() => {});
 }
 
 /**
  * Get list of cached chunk start indices for a book+voice.
  */
-export async function getCachedChunks(bookId: string, voiceId: string): Promise<number[]> {
+export async function getCachedChunks(bookId: string, voiceId: TtsCacheIdentity): Promise<number[]> {
   if (!api?.ttsCacheChunks) return [];
   return api.ttsCacheChunks(bookId, voiceId);
 }
@@ -90,7 +93,7 @@ export async function evictBook(bookId: string): Promise<void> {
 /**
  * Evict cache for a specific book+voice.
  */
-export async function evictBookVoice(bookId: string, voiceId: string): Promise<void> {
+export async function evictBookVoice(bookId: string, voiceId: TtsCacheIdentity): Promise<void> {
   if (!api?.ttsCacheEvictVoice) return;
   await api.ttsCacheEvictVoice(bookId, voiceId);
 }
@@ -107,7 +110,7 @@ export async function getCacheInfo(): Promise<{ totalBytes: number; totalMB: num
  * TTS-7F: Get opening cache coverage in milliseconds for a book+voice context.
  * Manifest-only — no PCM loads. Returns 0 if no cache exists.
  */
-export async function getOpeningCoverageMs(bookId: string, voiceId: string): Promise<number> {
+export async function getOpeningCoverageMs(bookId: string, voiceId: TtsCacheIdentity): Promise<number> {
   if (!(api as any)?.ttsCacheOpeningCoverage) return 0;
   const result = await (api as any).ttsCacheOpeningCoverage(bookId, voiceId);
   return result?.coverageMs ?? 0;

@@ -89,6 +89,7 @@ describe("TTS-7A: Renderer cache loadCachedChunk word count", () => {
       sampleRate: 24000,
       durationMs: 500,
       wordCount: 3,
+      wordTimestamps: [{ word: "two", startTime: 0, endTime: 0.1 }],
     });
 
     const allWords = ["zero", "one", "two", "three", "four", "five"];
@@ -96,6 +97,7 @@ describe("TTS-7A: Renderer cache loadCachedChunk word count", () => {
 
     expect(chunk?.startIdx).toBe(2);
     expect(chunk?.words).toEqual(["two", "three", "four"]);
+    expect(chunk?.wordTimestamps).toEqual([{ word: "two", startTime: 0, endTime: 0.1 }]);
   });
 
   it("falls back to the remaining full-context words for legacy cache entries", async () => {
@@ -200,6 +202,21 @@ describe("TTS-START-1: Background entry coverage opening ramp", () => {
     const cacheWrites = (window as any).electronAPI.ttsCacheWrite.mock.calls.slice(0, 5);
     expect(cacheWrites.map((call: any[]) => call[2])).toEqual([0, 13, 39, 91, 195]);
     expect(cacheWrites.map((call: any[]) => call[6])).toEqual([13, 26, 52, 104, 148]);
+    expect(cacheWrites[0][1]).toMatchObject({
+      schemaVersion: 2,
+      provider: "kokoro",
+      voiceId: "af_bella",
+      rateBucket: 1.0,
+      normalizerVersion: "en-v1",
+      documentLocator: { bookId: "book-1" },
+      sampleRate: 24000,
+      timingTruth: "word-native",
+    });
+    expect(cacheWrites[0][7]).toMatchObject({
+      timingTruth: "word-native",
+      chunkStartIdx: 0,
+      chunkEndIdx: 13,
+    });
   });
 });
 
