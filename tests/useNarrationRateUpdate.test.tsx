@@ -41,7 +41,11 @@ const kokoroStrategyMock = vi.hoisted(() => {
 });
 
 const kokoroStrategyDriver = vi.hoisted(() => {
-  let latestDeps: { onTruthSync?: (wordIndex: number) => void; onSegmentStart?: (wordIndex: number) => void } | null = null;
+  let latestDeps: {
+    onTruthSync?: (wordIndex: number) => void;
+    onSegmentStart?: (wordIndex: number) => void;
+    onTimingMetadata?: (metadata: unknown) => void;
+  } | null = null;
   let latestSpeak:
     | {
         startIdx: number;
@@ -54,7 +58,11 @@ const kokoroStrategyDriver = vi.hoisted(() => {
   let audioProgress: { wordIndex: number; fractionInWord: number } | null = null;
 
   return {
-    captureDeps(deps: { onTruthSync?: (wordIndex: number) => void; onSegmentStart?: (wordIndex: number) => void }) {
+    captureDeps(deps: {
+      onTruthSync?: (wordIndex: number) => void;
+      onSegmentStart?: (wordIndex: number) => void;
+      onTimingMetadata?: (metadata: unknown) => void;
+    }) {
       latestDeps = deps;
     },
     captureSpeak(
@@ -74,6 +82,9 @@ const kokoroStrategyDriver = vi.hoisted(() => {
     },
     emitSegmentStart(wordIndex: number) {
       latestDeps?.onSegmentStart?.(wordIndex);
+    },
+    emitTimingMetadata(metadata: unknown) {
+      latestDeps?.onTimingMetadata?.(metadata);
     },
     setAudioProgress(progress: { wordIndex: number; fractionInWord: number } | null) {
       audioProgress = progress;
@@ -626,5 +637,37 @@ describe("useNarration rate updates", () => {
     );
 
     expect(rateResponseEvents).toHaveLength(0);
+  });
+
+  it("stores Kokoro scheduler timing metadata and exposes highlight sync decisions", async () => {
+    const harness = await renderHarness();
+
+    await act(async () => {
+      kokoroStrategyDriver.emitTimingMetadata({
+        chunkId: "book-sync:0",
+        segmentId: "book-sync:0:segment-0",
+        chunkStartIdx: 0,
+        chunkEndIdx: 2,
+        audioStartMs: 0,
+        durationMs: 800,
+        timingTruth: "word-native",
+        wordTimestamps: [
+          { word: "one", startTime: 0, endTime: 0.4 },
+          { word: "two", startTime: 0.4, endTime: 0.8 },
+        ],
+      });
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.resolveHighlightSync({
+      wordIndex: 1,
+      followingEnabled: true,
+    })).toEqual({
+      mode: "word",
+      syncLevel: "word-synced",
+      activeChunkRange: { startWordIndex: 0, endWordIndex: 2 },
+      activeWordIndex: 1,
+      reason: "trusted-word-timing",
+    });
   });
 });

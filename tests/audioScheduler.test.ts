@@ -84,6 +84,42 @@ describe("createAudioScheduler", () => {
     scheduler.stop();
   });
 
+  it("publishes timing metadata when a chunk is scheduled", () => {
+    const onTimingMetadata = vi.fn();
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({
+      onWordAdvance: vi.fn(),
+      onChunkBoundary: vi.fn(),
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+      onTimingMetadata,
+    } as any);
+    scheduler.play();
+
+    scheduler.scheduleChunk({
+      ...makeChunk(10, 2),
+      chunkId: "book-a:10",
+      segmentId: "book-a:10:0",
+      timingTruth: "word-native",
+      wordTimestamps: [
+        { word: "word10", startTime: 0, endTime: 0.4 },
+        { word: "word11", startTime: 0.4, endTime: 1 },
+      ],
+    } as any);
+
+    expect(onTimingMetadata).toHaveBeenCalledTimes(1);
+    expect(onTimingMetadata).toHaveBeenCalledWith(expect.objectContaining({
+      chunkId: "book-a:10",
+      segmentId: "book-a:10:0",
+      chunkStartIdx: 10,
+      chunkEndIdx: 12,
+      timingTruth: "word-native",
+      timingClassification: "trusted",
+      hasTrustedWordTiming: true,
+    }));
+    scheduler.stop();
+  });
+
   it("multiple chunks are pre-scheduled at sequential times", () => {
     const scheduler = createAudioScheduler();
     scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });

@@ -117,6 +117,13 @@ function createSegment(
     durationMs: samplesToDurationMs(segmentAudio.length, chunk.sampleRate),
     words: segmentWords,
     startIdx: chunk.startIdx + segmentStartWord,
+    chunkId: chunk.chunkId
+      ? `${chunk.chunkId}:segment-${segmentIndex}`
+      : undefined,
+    segmentId: chunk.chunkId
+      ? `${chunk.chunkId}:segment-${segmentIndex}`
+      : undefined,
+    timingTruth: chunk.timingTruth,
     kokoroRatePlan: chunk.kokoroRatePlan,
     weightConfig: chunk.weightConfig,
     boundaryType: isFinalSegment ? chunk.boundaryType : undefined,
