@@ -1,6 +1,6 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-13 — TTS-NORMALIZE-1 closeout. `TTS-NORMALIZE-1` adds deterministic spoken segment normalization with original/normalized metadata, versioned hashes, golden fixtures, and Kokoro cache identity participation without mutating source display text, highlight mapping, playback behavior, default engine posture, Qwen disablement, or Kokoro availability. The next approved work is `TTS-CACHE-TIMING-1`: structured cache keys and timing sidecars. Qwen remains retired/disabled; Kokoro remains default/available.
+**Last updated**: 2026-05-15 — TTS-SYNC-1 closeout. `TTS-SYNC-1` adds a TimingMetadataStore plus HighlightSyncController so trusted timing can drive word-level sync while heuristic/missing timing fails closed to chunk/segment highlighting without invented word progress. The next approved work is `TTS-DIAG-1`: provider-neutral narration diagnostics. Qwen remains retired/disabled; Kokoro remains default/available.
 **Current branch**: `main`
 **Current state**: v1.75.1 stable, with package metadata aligned to v1.75.1. EINK-6A, EINK-6B, GOALS-6B, MOSS-NANO-13a, MOSS-NANO-13B, MOSS-NANO-13c, MOSS-NANO-13d, MOSS-NANO-13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, POSTV2-REVIEW-1, KOKORO-DEEPEN-1, KOKORO-DEEPEN-2, KOKORO-DEEPEN-3, TTS-REGISTRY-1, and TTS-NORMALIZE-1 have landed in the Desktop v2.0/post-v2 remediation conveyor. QWEN-STREAM-4 closed with ITERATE and Qwen remains disabled. MOSS-NANO-13d produced the first real app-selected Nano four-mode evidence artifact and the gate passed cleanly with decision `NANO_RECOMMENDED_OPT_IN`. MOSS-NANO-13e records that as the bounded product decision: Nano is recommended opt-in, Kokoro remains default/available, and Qwen is retired for Desktop v2 and remains disabled. POCKET-TTS-1 adds Pocket TTS as an available opt-in engine with sidecar, IPC/preload, renderer strategy, settings/preview selection, and no public voice-cloning UX in v2.0. TTS-REGISTRY-1 centralizes provider capability and settings copy truth for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS; playback strategy selection remains unchanged. TTS-NORMALIZE-1 adds a pure spoken-text normalization layer and lazy cache invalidation identity while preserving original display/highlight words. The approved post-v2 TTS investment path remains Kokoro-centered architecture hardening: structured cache identity, timing metadata, and highlight synchronization without reopening default-engine churn.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
@@ -579,8 +579,8 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 5. `TTS-REGISTRY-1` — provider/capability registry without playback behavior change. ✅ COMPLETE
 6. `TTS-NORMALIZE-1` — deterministic segment normalization and golden fixtures. NEXT
 7. `TTS-CACHE-TIMING-1` — structured cache keys, schema versioning, timing sidecars.
-8. `TTS-SYNC-1` — TimingMetadataStore and HighlightSyncController.
-9. `TTS-DIAG-1` — provider-neutral diagnostics export bundle.
+8. `TTS-SYNC-1` — TimingMetadataStore and HighlightSyncController. ✅ COMPLETE
+9. `TTS-DIAG-1` — provider-neutral diagnostics export bundle. NEXT
 10. `KOKORO-EXPORT-1` — optional future audiobook/subtitle export lane after timing/cache evidence is durable.
 
 **Program non-goals:**
@@ -786,7 +786,7 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 
 ---
 
-#### Sprint TTS-SYNC-1: Timing Metadata Store And Highlight Sync Controller
+#### Sprint TTS-SYNC-1: Timing Metadata Store And Highlight Sync Controller ✅ COMPLETED 2026-05-15
 
 **What:** Extract visual sync policy from `useNarration`/Foliate helpers into a `TimingMetadataStore` and `HighlightSyncController` that choose word, sentence/chunk, segment, or off modes based on timing truth.
 
@@ -813,6 +813,8 @@ Governance-only sprint completed during the 2026-05-02 roadmap review ceremony. 
 - **Constants:** Keep existing flow/narrate mode keybindings; no autoplay behavior changes.
 - **Branch:** `sprint/tts-sync-1-highlight-controller`.
 - **Commit hygiene:** explicit-stage; do not re-open Qwen or provider defaults.
+
+**Closeout (2026-05-15):** ✅ COMPLETED — `src/utils/timingMetadataStore.ts` now stores chunk timing metadata with explicit trusted/heuristic/missing classification and queries by chunk, segment, word, or time. `src/utils/highlightSyncController.ts` centralizes sync policy: trusted word-native timing may return word-synced decisions, while heuristic/missing timing returns chunk/segment decisions with `activeWordIndex: null` so no fake word progress is invented. Scheduler chunks publish timing metadata, Kokoro strategy/useNarration stores it, cached timing identity is preserved through generation/segmentation, and `ReaderContainer` consumes controller decisions for narration chunk boundaries without changing Flow's WPM clock, Narrate's spoken-timing clock, autoplay behavior, Qwen/provider defaults, or `lastConfirmedAudioWordRef` ownership. Verification: focused pre-change TTS sync baseline 8 files / 85 tests passed; new/patched controller, scheduler, and hook tests passed; focused sync regression 9 files / 93 tests passed; full `npm test` passed 181 files / 2598 tests; `npm run typecheck` passed; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed.
 
 ---
 

@@ -15,6 +15,13 @@ import { selectPreferredVoice } from "../utils/voiceSelection";
 import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
 import type { AudioProgressReport, ChunkBoundaryPayload } from "../utils/audioScheduler";
 import type { TtsEvalTraceSink } from "../types/eval";
+import { createTimingMetadataStore } from "../utils/timingMetadataStore";
+import type { TimingMetadataChunk } from "../utils/timingMetadataStore";
+import {
+  createHighlightSyncController,
+  type HighlightSyncResolveInput,
+  type HighlightSyncDecision,
+} from "../utils/highlightSyncController";
 import {
   DEFAULT_KOKORO_STATUS_SNAPSHOT,
   getKokoroStatusError,
@@ -178,6 +185,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     context: string;
   } | null>(null);
   evalTraceRef.current = options.evalTrace ?? null;
+
+  const timingMetadataStore = useMemo(() => createTimingMetadataStore(), []);
+  const highlightSyncController = useMemo(
+    () => createHighlightSyncController(timingMetadataStore),
+    [timingMetadataStore],
+  );
+  const resolveHighlightSync = useCallback((input: HighlightSyncResolveInput): HighlightSyncDecision => (
+    highlightSyncController.resolve(input)
+  ), [highlightSyncController]);
 
   const emitEvalTrace = useCallback((event: Parameters<NonNullable<TtsEvalTraceSink>["record"]>[0]) => {
     if (!evalTraceRef.current?.enabled) return;
@@ -415,6 +431,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       onSegmentStart: () => {
         emitPendingRateResponseTrace();
       },
+      onTimingMetadata: (metadata: TimingMetadataChunk) => {
+        timingMetadataStore.upsertChunk(metadata);
+      },
       // TTS-7R: Route truth-sync through dedicated visual-only callback (no state writes)
       onTruthSync: (wordIndex: number, isTrustedWordTiming = true) => {
         isTrustedWordTimingRef.current = isTrustedWordTiming;
@@ -433,7 +452,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         setTimeout(() => speakNextChunkWebRef.current(), 0);
       },
     }),
-    [], // stable — all deps accessed via refs/getters
+    [emitPendingRateResponseTrace, timingMetadataStore],
   );
   kokoroStrategyRef.current = kokoroStrategy;
 
@@ -1752,6 +1771,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     setOnChunkBoundary: (cb: ((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null) => {
       onChunkBoundaryRef.current = cb;
     },
+    resolveHighlightSync,
     warmUp: () => {
       kokoroStrategy.warmUp();
     },

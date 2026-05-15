@@ -503,6 +503,12 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         boundaryType,
         silenceMs,
         wordTimestamps: result.wordTimestamps || null,
+        chunkId: cacheIdentity && typeof cacheIdentity === "object"
+          ? cacheIdentity.chunkId
+          : undefined,
+        timingTruth: cacheIdentity && typeof cacheIdentity === "object"
+          ? cacheIdentity.timingTruth
+          : (result.wordTimestamps ? "word-native" : "segment-following"),
       };
 
       if (active && myGenId === generationId) {
