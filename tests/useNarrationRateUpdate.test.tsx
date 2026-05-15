@@ -670,4 +670,86 @@ describe("useNarration rate updates", () => {
       reason: "trusted-word-timing",
     });
   });
+
+  it("exports a redacted diagnostics bundle from live Kokoro timing and highlight sync state", async () => {
+    const harness = await renderHarness();
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("kokoro");
+      await flushPromises();
+    });
+
+    await act(async () => {
+      harness.getSnapshot()?.startCursorDriven(["Dorian", "Gray"], 0, 180, vi.fn());
+      await flushPromises();
+    });
+
+    await act(async () => {
+      kokoroStrategyDriver.emitTimingMetadata({
+        chunkId: "book-sync:0",
+        segmentId: "book-sync:0:segment-0",
+        chunkStartIdx: 0,
+        chunkEndIdx: 2,
+        audioStartMs: 0,
+        durationMs: 800,
+        timingTruth: "word-native",
+        wordTimestamps: [
+          { word: "Dorian", startTime: 0, endTime: 0.4 },
+          { word: "Gray", startTime: 0.4, endTime: 0.8 },
+        ],
+      });
+      await flushPromises();
+    });
+
+    harness.getSnapshot()?.resolveHighlightSync({
+      wordIndex: 1,
+      followingEnabled: true,
+    });
+
+    const bundle = harness.getSnapshot()?.exportNarrationDiagnosticsBundle({
+      session: {
+        bookId: "book-sync",
+        sessionId: "session-sync",
+        selectedEngine: "kokoro",
+        voiceId: "af_bella",
+        rate: 1,
+        segmentIds: ["book-sync:0:segment-0"],
+      },
+      normalizedSegments: [
+        {
+          segmentId: "book-sync:0:segment-0",
+          chunkId: "book-sync:0",
+          originalTextHash: "sha256:original",
+          normalizedTextHash: "sha256:normalized",
+        },
+      ],
+      cacheEntries: [
+        {
+          chunkId: "book-sync:0",
+          cacheKeyComponents: {
+            providerId: "kokoro",
+            voiceId: "af_bella",
+            normalizedTextHash: "sha256:normalized",
+          },
+        },
+      ],
+    });
+
+    expect(bundle?.schemaVersion).toBe("tts-diagnostics-v1");
+    expect(bundle?.session.selectedEngine).toBe("kokoro");
+    expect(bundle?.timingSidecars).toEqual([
+      expect.objectContaining({
+        chunkId: "book-sync:0",
+        timingTruth: "word-native",
+        wordTimestampCount: 2,
+      }),
+    ]);
+    expect(bundle?.highlightSyncDecisions).toEqual([
+      expect.objectContaining({
+        decision: expect.objectContaining({ reason: "trusted-word-timing" }),
+      }),
+    ]);
+    expect(JSON.stringify(bundle)).not.toContain("Dorian");
+    expect(JSON.stringify(bundle)).not.toContain("Gray");
+  });
 });

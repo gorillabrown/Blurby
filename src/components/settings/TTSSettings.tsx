@@ -34,8 +34,10 @@ interface TTSSettingsProps {
   bookNarrationProfileId?: string | null;
   /** Called when user assigns/clears a profile for the active book */
   onBookNarrationProfileChange?: (profileId: string | null) => void;
+  /** Dev-only diagnostics export hook. Hidden unless supplied. */
+  onExportNarrationDiagnostics?: () => void | Promise<void>;
 }
-export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange }: TTSSettingsProps) {
+export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookOverridesChange, activeBookTitle, bookNarrationProfileId, onBookNarrationProfileChange, onExportNarrationDiagnostics }: TTSSettingsProps) {
   const engine = normalizeSelectableTtsEngine(settings.ttsEngine || TTS_DEFAULT_ENGINE);
   const kokoroProvider = getTtsProviderOrThrow("kokoro");
   const qwenProvider = getTtsProviderOrThrow("qwen");
@@ -498,6 +500,18 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
       </div>
 
       <CacheSizeDisplay />
+
+      {onExportNarrationDiagnostics && (
+        <>
+          <div className="settings-section-label">Narration Diagnostics</div>
+          <button
+            className="settings-btn-secondary"
+            onClick={() => void onExportNarrationDiagnostics()}
+          >
+            Export diagnostics
+          </button>
+        </>
+      )}
 
       <NarrationDataSection settings={settings} onSettingsChange={onSettingsChange} />
     </div>

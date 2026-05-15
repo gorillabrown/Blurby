@@ -13,6 +13,9 @@ const MOSS_NANO_PRODUCT_MODES = Object.freeze(["page", "focus", "flow", "narrate
 const MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION = "moss-nano-live-evidence.v2";
 const MOSS_NANO_LIVE_EVIDENCE_KIND = "real-app-selected-nano";
 const MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION = "moss-nano-13c";
+const TTS_DIAGNOSTICS_SCHEMA_VERSION = "tts-diagnostics-v1";
+const TTS_DIAGNOSTICS_RAW_TEXT_KEYS = new Set(["rawText", "originalText", "normalizedText"]);
+const TTS_DIAGNOSTICS_AUDIO_PAYLOAD_KEYS = new Set(["audioPayload", "audioBuffer", "audioBytes", "pcm", "wav", "opus"]);
 const MOSS_NANO_PRODUCT_EVIDENCE_KEYS = Object.freeze([
   "liveBookMatrix",
   "settingsPreviewTruth",
@@ -55,6 +58,62 @@ const MOSS_NANO_LIVE_PROVENANCE_KEYS = Object.freeze([
   "observedEngineSelection",
   "observedFallbackPolicy",
 ]);
+
+function visitDiagnosticsKeys(value, visitors) {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    value.forEach((item) => visitDiagnosticsKeys(item, visitors));
+    return;
+  }
+  for (const [key, nested] of Object.entries(value)) {
+    if (TTS_DIAGNOSTICS_RAW_TEXT_KEYS.has(key)) visitors.rawText();
+    if (TTS_DIAGNOSTICS_AUDIO_PAYLOAD_KEYS.has(key)) visitors.audioPayload();
+    visitDiagnosticsKeys(nested, visitors);
+  }
+}
+
+export function validateTtsDiagnosticsBundleArtifact(bundle) {
+  const issues = [];
+  if (!bundle || typeof bundle !== "object") {
+    return { ok: false, issues: ["diagnostics bundle must be an object"] };
+  }
+  if (bundle.schemaVersion !== TTS_DIAGNOSTICS_SCHEMA_VERSION) {
+    issues.push(`schemaVersion must be ${TTS_DIAGNOSTICS_SCHEMA_VERSION}`);
+  }
+  if (bundle.audioPayloadIncluded !== false) {
+    issues.push("audioPayloadIncluded must be false");
+  }
+  if (bundle.redaction?.includeAudio !== false) {
+    issues.push("redaction.includeAudio must be false");
+  }
+  if (bundle.redaction?.includesRawText !== false) {
+    issues.push("redaction.includesRawText must be false");
+  }
+  for (const key of [
+    "normalizedSegments",
+    "cacheEntries",
+    "timingSidecars",
+    "schedulerTruthEvents",
+    "highlightSyncDecisions",
+  ]) {
+    if (!Array.isArray(bundle[key])) issues.push(`${key} must be an array`);
+  }
+
+  let hasRawText = false;
+  let hasAudioPayload = false;
+  visitDiagnosticsKeys(bundle, {
+    rawText: () => {
+      hasRawText = true;
+    },
+    audioPayload: () => {
+      hasAudioPayload = true;
+    },
+  });
+  if (hasRawText) issues.push("raw text fields are not allowed in diagnostics bundles");
+  if (hasAudioPayload) issues.push("audio payload fields are not allowed in diagnostics bundles");
+
+  return { ok: issues.length === 0, issues };
+}
 
 function isMossNanoProductScenario(scenario) {
   const gate = scenario?.nanoGate ?? {};
