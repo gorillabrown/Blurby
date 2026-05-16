@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-16 — TTS-CACHE-HARDEN-1 completed and merged to canonical `main`; cache-hit timing parity is now landed.
+**Last updated**: 2026-05-16 — TTS-EVENT-SYNC-1 completed and merged to canonical `main`; event-driven word-boundary sync is now landed.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 5 (5 full specs, 0 stubs).
+**Queue**: GREEN depth 4 (4 full specs, 0 stubs).
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
@@ -14,7 +14,7 @@
 ## Active Conveyor
 
 ```
-TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
+NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
     → TTS-PIPELINE-1 → TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
 ```
 
@@ -57,7 +57,7 @@ TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -135,6 +135,8 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ---
 
 #### Sprint TTS-EVENT-SYNC-1: Event-Driven Word Boundary Sync
+
+**Status:** Completed on 2026-05-16. Sprint branch `sprint/tts-event-sync-1-word-boundary-sync` commit `a71df02` merged into canonical `main` via `2c946ad`. Verification passed: focused event-sync slice (8 files / 66 tests), `npm run typecheck`, `npm run build`, and full `npm test` (183 passed, 1 skipped files; 2469 passed, 132 skipped tests).
 
 **What:** Promote `onTruthSync` from a visual-only hint to the primary highlight-advance trigger, demoting the RAF-based polling loop from the word-highlight hot path. RAF is retained for progress bar, time-remaining display, and as fallback for non-word-native timing modes. Add a normalized→original word index alignment table to `segmentNormalizer` so Kokoro-emitted token positions (in normalized text space) correctly resolve to original word positions in the DOM. Elevate word-boundary emission from a strategy implementation detail to a provider-level contract (inspired by RealtimeTTS's `TimingInfo` interface where every engine emits `{word, start_time, end_time}` through a unified callback).
 

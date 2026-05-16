@@ -259,3 +259,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future closeout summaries should explicitly label status as `branch-complete`, `PR-open`, `merged-to-main`, or `pushed-to-main`, and roadmap advancement should require the final state.
 **Applies to:** Sprint closeouts, branch-to-main governance reconciliation, next-pointer readiness checks
 **Status:** Observation; related to SRL-027 and worth promoting if this recurs.
+
+### SRL-034 — Word-boundary sync contracts should carry both source and resolved indexes with trust metadata (TTS-EVENT-SYNC-1, 2026-05-16)
+**Verdict:** Event-driven highlight sync is robust when boundary callbacks carry mapping provenance rather than only a final index.
+**Evidence:** TTS-EVENT-SYNC-1 landed provider-level boundary capability flags plus callback payloads containing `sourceWordIndex`, `resolvedWordIndex`, `isTrustedWordTiming`, `alignmentCorrected`, and `timingTruth`; this preserved LL-079 ownership boundaries while letting diagnostics and fallback logic reason about normalized→original remaps explicitly.
+**Recommendation:** Future timing/event contracts should always include both raw/source coordinates and resolved/display coordinates, plus trust/correction flags, so scheduler fallback and diagnostics remain auditable across normalization and cache-hit paths.
+**Applies to:** Event-driven narration sync, timing sidecar consumers, normalized-text remap logic, and future provider boundary integrations
+**Status:** Observation

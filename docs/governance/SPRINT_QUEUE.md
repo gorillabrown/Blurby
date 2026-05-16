@@ -56,18 +56,18 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: TTS Architecture Complete — Kokoro as sole active local/cacheable model engine (Web Speech remains a platform fallback), every implicit TTS architecture decision made explicit, tested, and debuggable.
-Queue depth: 5 prepared FIFO pointers (GREEN; 5 full specs, 0 stubs)
-Active head: TTS-EVENT-SYNC-1 — dispatch-ready after TTS-CACHE-HARDEN-1 completion.
-Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16, followed by TTS-CACHE-HARDEN-1 landing on 2026-05-16 via merge commit `c54dd0f`. Cache-hit timing parity, timing type harmonization, IPC shape validation, and cache key safety are now present on canonical `main`; TTS-EVENT-SYNC-1 is unblocked.
-Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1, to 6 after TTS-INTEGRATE-1 landed, and to 5 after TTS-CACHE-HARDEN-1 landed).
+Queue depth: 4 prepared FIFO pointers (GREEN; 4 full specs, 0 stubs)
+Active head: NORMALIZER-ENRICH-1 — dispatch-ready after TTS-EVENT-SYNC-1 completion.
+Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16, followed by TTS-CACHE-HARDEN-1 (`c54dd0f`) and TTS-EVENT-SYNC-1 (`2c946ad`) on canonical `main`. Event-driven word-boundary sync, provider-level boundary capability contracts, normalized→original alignment mapping, and adaptive lag bypass for trusted boundaries are now landed; NORMALIZER-ENRICH-1 is unblocked.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1, to 6 after TTS-INTEGRATE-1 landed, to 5 after TTS-CACHE-HARDEN-1 landed, and to 4 after TTS-EVENT-SYNC-1 landed).
 ```
 
 ## TTS Architecture Completion Conveyor Belt (Active — Kokoro-Only)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
-| 1 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 (completed 2026-05-16) | Dispatch-ready (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
-| 2 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
+| ~~1~~ | ~~TTS-EVENT-SYNC-1~~ | ~~Stage 2: Event-Driven Sync~~ | ~~M-L~~ | ~~TTS-CACHE-HARDEN-1 (completed 2026-05-16)~~ | ✅ complete on 2026-05-16 (`a71df02` merged via `2c946ad`) |
+| 2 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 (completed 2026-05-16) | Dispatch-ready (research: abogen) |
 | 3 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
 | 4 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
 | 5 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
@@ -120,47 +120,8 @@ Closeout: `docs/governance/close-outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-
 ## Ready Queue Pointers
 
 ```text
-Sprint: TTS-EVENT-SYNC-1 — Event-Driven Word Boundary Sync
-Status: Dispatch-ready after TTS-CACHE-HARDEN-1 landed on 2026-05-16 via `c54dd0f`. Priority: IMMEDIATE (user directive).
-Type: Architecture change — event-driven word boundary sync (measurement-conditional RAF demotion, not removal). Research-driven (readest, RealtimeTTS, sioyek). Introduces NarrationSegmentAnchor (content-stable segment identity, see AD-1 in ROADMAP_SPECS.md).
-
-WHAT: Promote onTruthSync from visual-only hint to primary highlight-advance trigger. Add normalized→original word alignment table (normalizedToOriginalMap) to segmentNormalizer. Demote RAF getAudioProgress() + queryTime() polling from word-highlight hot path (measurement-conditional — RAF preserved as fallback). Elevate word-boundary emission to provider-level contract (emitsWordBoundaryEvents). Introduce NarrationSegmentAnchor = { bookId, startIdx, endIdx } as content-stable durable identity alongside cache-scoped chunkId.
-
-HYPOTHESIS: Event-driven word boundaries eliminate time→word resolution jitter and reduce highlight latency. The alignment table solves the token-expansion mapping problem (normalized text has more tokens than original). TTS-CACHE-HARDEN-1's timing parity fix ensures cache hits carry timingTruth metadata needed for correct highlight decisions.
-
-A9 NOTE: The TransformFn contract (string→string) is NOT changed. The normalizedToOriginalMap is built during normalization by diffing token lists before/after each transform, not by changing the transform interface. Upgrade deferred unless this approach proves insufficient.
-
-PHASE 0 GATE (hard stop — all must pass before Phase 1 implementation begins):
-  (1) Segment identity validation — confirm NarrationSegmentAnchor = { bookId, startIdx, endIdx } is sufficient for all downstream consumers identified in TTS-PIPELINE-1's domain type assessment (criterion 9). Verify chunkId and NarrationSegmentAnchor coexist without collision (AD-1 contract).
-  (2) Contract consistency check — verify planner→normalizer→cache→timing type contracts before building on them (TTS-CACHE-HARDEN-1 should have resolved any type-contract drift).
-  (3) Alignment map fixture proof — write standalone test covering hard cases (repeated words, punctuation loss, abbreviation/date/currency expansion, ordinals, contractions). If naive diff-based mapping fails ≥2 cases, escalate to tracked-transform or scoped-map approach.
-  (4) Baseline latency measurement — record current RAF p50/p95 word-highlight latency.
-  (5) RAF fallback preservation — event-driven replaces RAF only for word-native timing; removal is measurement-conditional.
-
-WHERE:
-  - `ROADMAP.md` § "Sprint TTS-EVENT-SYNC-1: Event-Driven Word Boundary Sync"
-  - `src/utils/segmentNormalizer.ts` (alignment table)
-  - `src/types/ttsProvider.ts` (provider-level WordBoundaryEvent type)
-  - `src/hooks/narration/kokoroStrategy.ts` (resolve normalizedIdx → originalIdx)
-  - `src/hooks/useNarration.ts` (event-driven trigger, remove RAF polling)
-  - `src/utils/narrateDiagnostics.ts` (word-boundary-event type)
-  - `tests/fixtures/tts-normalization/english-v1.json` (alignment maps)
-
-HOW (Implementation):
-  Hephaestus [sonnet] {medium}: Alignment table in normalizer + fixture updates.
-  Athena [opus] {medium}: Event-driven sync wiring + provider contract + useNarration refactor.
-
-HOW (Verification):
-  Hippocrates [haiku] {medium}: Alignment table tests, event-driven sync tests, full npm test/typecheck/build.
-
-HOW (Review / Closeout):
-  Solon [sonnet] {low}: Verify LL-079 (lastConfirmedAudioWordRef ownership unchanged), LL-077 (RAF glide removed from hot path), alignment map integrity.
-  Plato [sonnet] {low}: Timing ownership review, provider contract cleanliness.
-```
-
-```text
 Sprint: NORMALIZER-ENRICH-1 — Kokoro Text Normalization Gap Fill
-Status: Queued after TTS-EVENT-SYNC-1.
+Status: Dispatch-ready after TTS-EVENT-SYNC-1 landed on 2026-05-16 via `2c946ad`.
 Type: Normalizer enrichment — 9 new transforms + heteronym disambiguation. Research-driven (abogen kokoro_text_normalization.py).
 
 WHAT: Add missing normalization transforms identified by comparing Blurby's 12-transform pipeline against abogen's 20+ transforms. Add context-window heteronym disambiguation. Bump TTS_NORMALIZER_VERSION.
