@@ -155,9 +155,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const onWordRef = useRef<((charIndex: number) => void) | null>(null);
   const allWordsRef = useRef<string[]>([]);
   const onWordAdvanceRef = useRef<((wordIndex: number) => void) | null>(null);
-  /** TTS-7R: Visual-only truth-sync callback — highlights the word at the scheduler's
-   *  authoritative position without updating narration state (no cursorWordIndex write,
-   *  no lastConfirmedAudioWordRef update). Set by useReadingModeInstance for Foliate mode. */
+  /** Visual-only word-boundary callback — highlights the scheduler-authoritative word
+   *  without updating narration anchors (no cursorWordIndex / lastConfirmedAudioWordRef writes). */
   const onTruthSyncRef = useRef<((wordIndex: number) => void) | null>(null);
   /** TTS-7Q: Visual-only chunk-boundary callback — updates narration chunk visuals only. */
   const onChunkBoundaryRef = useRef<((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null>(null);
@@ -194,6 +193,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     context: string;
   } | null>(null);
   const highlightSyncDecisionsRef = useRef<Record<string, unknown>[]>([]);
+  const wordBoundaryEventsRef = useRef<Record<string, unknown>[]>([]);
   evalTraceRef.current = options.evalTrace ?? null;
 
   const timingMetadataStore = useMemo(() => createTimingMetadataStore(), []);
@@ -233,6 +233,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
             : selectedEngine === "pocket-tts"
               ? POCKET_TTS_DEFAULT_VOICE
               : currentVoice?.name ?? null);
+    const defaultSchedulerTruthEvents = wordBoundaryEventsRef.current.length > 0
+      ? [...wordBoundaryEventsRef.current]
+      : timingRecords.map((record) => ({
+          source: selectedEngine,
+          chunkId: record.chunkId,
+          segmentId: record.segmentId,
+          wordStartIndex: record.chunkStartIdx,
+          wordEndIndex: record.chunkEndIdx,
+          timingTruth: record.timingTruth,
+          classification: record.hasTrustedWordTiming ? "trusted-word-timing" : record.timingClassification,
+        }));
 
     return createNarrationDiagnosticsBundle({
       session: {
@@ -255,15 +266,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         wordTimestampCount: record.wordTimestamps?.length ?? 0,
         classification: record.hasTrustedWordTiming ? "trusted-word-timing" : record.timingClassification,
       })),
-      schedulerTruthEvents: input.schedulerTruthEvents ?? timingRecords.map((record) => ({
-        source: selectedEngine,
-        chunkId: record.chunkId,
-        segmentId: record.segmentId,
-        wordStartIndex: record.chunkStartIdx,
-        wordEndIndex: record.chunkEndIdx,
-        timingTruth: record.timingTruth,
-        classification: record.hasTrustedWordTiming ? "trusted-word-timing" : record.timingClassification,
-      })),
+      schedulerTruthEvents: input.schedulerTruthEvents ?? defaultSchedulerTruthEvents,
       highlightSyncDecisions: input.highlightSyncDecisions ?? highlightSyncDecisionsRef.current,
       errors: input.errors ?? [],
     });
@@ -508,11 +511,34 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       onTimingMetadata: (metadata: TimingMetadataChunk) => {
         timingMetadataStore.upsertChunk(metadata);
       },
-      // TTS-7R: Route truth-sync through dedicated visual-only callback (no state writes)
-      onTruthSync: (wordIndex: number, isTrustedWordTiming = true) => {
-        isTrustedWordTimingRef.current = isTrustedWordTiming;
-        if (!isTrustedWordTiming) return;
-        if (onTruthSyncRef.current) onTruthSyncRef.current(wordIndex);
+      // Event-driven word-boundary sync (TTS-EVENT-SYNC-1).
+      onTruthSync: (event) => {
+        isTrustedWordTimingRef.current = event.isTrustedWordTiming;
+        const syncDecision = resolveHighlightSync({
+          wordIndex: event.resolvedWordIndex,
+          followingEnabled: true,
+          fallbackMode: "chunk",
+        });
+        wordBoundaryEventsRef.current.push({
+          timestamp: Date.now(),
+          source: "kokoro",
+          sourceWordIndex: event.sourceWordIndex,
+          resolvedWordIndex: event.resolvedWordIndex,
+          isTrustedWordTiming: event.isTrustedWordTiming,
+          alignmentCorrected: event.alignmentCorrected,
+          timingTruth: event.timingTruth,
+          syncDecision,
+        });
+        if (wordBoundaryEventsRef.current.length > 300) {
+          wordBoundaryEventsRef.current.shift();
+        }
+        recordDiagEvent(
+          "word-boundary-event",
+          `sourceWordIndex=${event.sourceWordIndex ?? "null"} resolvedWordIndex=${event.resolvedWordIndex} alignmentCorrected=${event.alignmentCorrected ? 1 : 0} trusted=${event.isTrustedWordTiming ? 1 : 0}`,
+        );
+        if (!event.isTrustedWordTiming) return;
+        if (onWordAdvanceRef.current) onWordAdvanceRef.current(event.resolvedWordIndex);
+        if (onTruthSyncRef.current) onTruthSyncRef.current(event.resolvedWordIndex);
       },
       onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => {
         onChunkBoundaryRef.current?.(endIdx, metadata);
@@ -526,7 +552,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         setTimeout(() => speakNextChunkWebRef.current(), 0);
       },
     }),
-    [emitPendingRateResponseTrace, timingMetadataStore],
+    [emitPendingRateResponseTrace, resolveHighlightSync, timingMetadataStore],
   );
   kokoroStrategyRef.current = kokoroStrategy;
 
@@ -1087,9 +1113,6 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         isTrustedWordTimingRef.current = isTrustedWordTiming;
-        if (isTrustedWordTiming && onWordAdvanceRef.current) {
-          onWordAdvanceRef.current(wordIndex);
-        }
         if (import.meta.env.DEV) {
           const visualIdx = stateRef.current.cursorWordIndex;
           if (Math.abs(wordIndex - visualIdx) > 5) {
@@ -1829,10 +1852,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       updateMergedOverrides();
     },
     /**
-     * TTS-7R: Register a visual-only truth-sync callback. Called every ~12 words by the
-     * audio scheduler to re-snap the narration overlay to the authoritative audio position.
-     * The callback must ONLY update visual state — it must NOT write to cursorWordIndex
-     * or any narration anchor used by chunk generation.
+     * Register a visual-only word-boundary callback for scheduler-authoritative highlight updates.
+     * The callback must ONLY update visual state — it must NOT write narration anchors.
      */
     setOnTruthSync: (cb: ((wordIndex: number) => void) | null) => {
       onTruthSyncRef.current = cb;

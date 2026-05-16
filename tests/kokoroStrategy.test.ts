@@ -225,6 +225,47 @@ describe("createKokoroStrategy", () => {
     }
   });
 
+  it("maps normalized Kokoro word timestamps back to original words for timing sidecars", async () => {
+    const originalWords = ["Mr.", "Wells", "owes", "$12.50,", "she", "said."];
+    electronAPI.kokoroGenerate = vi.fn().mockResolvedValue({
+      ...defaultIpcResult,
+      wordTimestamps: [
+        { word: "Mister", startTime: 0.0, endTime: 0.1 },
+        { word: "Wells", startTime: 0.1, endTime: 0.2 },
+        { word: "owes", startTime: 0.2, endTime: 0.3 },
+        { word: "twelve", startTime: 0.3, endTime: 0.4 },
+        { word: "dollars", startTime: 0.4, endTime: 0.5 },
+        { word: "and", startTime: 0.5, endTime: 0.6 },
+        { word: "fifty", startTime: 0.6, endTime: 0.7 },
+        { word: "cents,", startTime: 0.7, endTime: 0.8 },
+        { word: "she", startTime: 0.8, endTime: 0.9 },
+        { word: "said.", startTime: 0.9, endTime: 1.0 },
+      ],
+    });
+    const cacheChunkSpy = vi.spyOn(ttsCache, "cacheChunk").mockImplementation(() => {});
+    const deps = mockDeps({ getWords: vi.fn(() => originalWords) });
+    const strategy = createKokoroStrategy(deps);
+
+    try {
+      strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+      await vi.waitFor(() => expect(cacheChunkSpy).toHaveBeenCalled());
+      const timingMetadata = cacheChunkSpy.mock.calls[0][7] as any;
+
+      expect(timingMetadata.timingTruth).toBe("word-native");
+      expect(timingMetadata.wordTimestamps).toEqual([
+        { word: "Mr.", startTime: 0.0, endTime: 0.1 },
+        { word: "Wells", startTime: 0.1, endTime: 0.2 },
+        { word: "owes", startTime: 0.2, endTime: 0.3 },
+        { word: "$12.50,", startTime: 0.3, endTime: 0.8 },
+        { word: "she", startTime: 0.8, endTime: 0.9 },
+        { word: "said.", startTime: 0.9, endTime: 1.0 },
+      ]);
+    } finally {
+      strategy.stop();
+      cacheChunkSpy.mockRestore();
+    }
+  });
+
   it("exposes getScheduler and getPipeline (NAR-2)", () => {
     const deps = mockDeps();
     const strategy = createKokoroStrategy(deps);

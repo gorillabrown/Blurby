@@ -19,6 +19,7 @@ import { recordDiagEvent } from "../../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
 import { KOKORO_MODEL_ID, KOKORO_SAMPLE_RATE, TTS_CACHE_SCHEMA_VERSION } from "../../constants";
 import type { TtsCacheIdentity, TtsCacheIdentityV2, TtsCacheWriteTimingMetadata } from "../../types/ttsCache";
+import type { TtsProviderWordBoundaryCallback } from "../../types/ttsProvider";
 
 const api = window.electronAPI;
 
@@ -57,12 +58,10 @@ export interface KokoroStrategyDeps {
   /** TTS-SYNC-1: Receives scheduler timing metadata for centralized highlight policy. */
   onTimingMetadata?: (metadata: TimingMetadataRecord) => void;
   /**
-   * TTS-7R: Visual-only truth-sync callback. Called every ~12 words by the scheduler
-   * to re-snap the visual overlay to the authoritative audio position.
+   * Provider-level word-boundary callback carrying normalized/source and resolved/original indices.
    * This must NOT update narration state (cursorWordIndex, lastConfirmedAudioWordRef).
-   * If not provided, falls back to onWordAdvance (legacy behavior).
    */
-  onTruthSync?: (wordIndex: number) => void;
+  onTruthSync?: TtsProviderWordBoundaryCallback;
 }
 
 export interface KokoroStrategyPreflightSnapshot {
@@ -86,6 +85,8 @@ export interface KokoroStrategy extends TtsStrategy {
   /** TTS-7Q: Continuous audio-progress report for smooth visual overlay. */
   getAudioProgress: () => AudioProgressReport | null;
 }
+
+type WordTimestamp = { word: string; startTime: number; endTime: number };
 
 function isKokoroPreflightStatus(status: unknown): status is KokoroPreflightStatus {
   return (
@@ -119,6 +120,81 @@ function snapshotFromPreflightReport(report: KokoroPreflightReport): KokoroStrat
     offlineReady: report.offlineReady,
     recoverable: report.recoverable,
     report,
+  };
+}
+
+function remapWordTimestampsToOriginalWords(params: {
+  wordTimestamps: WordTimestamp[] | null | undefined;
+  normalizedToOriginalMap: number[];
+  originalWords: string[];
+}): { wordTimestamps: WordTimestamp[] | null; sourceWordIndexes: number[] | null } {
+  const { wordTimestamps, normalizedToOriginalMap, originalWords } = params;
+  if (!Array.isArray(wordTimestamps) || wordTimestamps.length === 0 || originalWords.length === 0) {
+    return { wordTimestamps: null, sourceWordIndexes: null };
+  }
+
+  // Fast path: provider already returned original-space boundaries.
+  if (
+    wordTimestamps.length === originalWords.length &&
+    wordTimestamps.every((timestamp, index) => timestamp.word === originalWords[index])
+  ) {
+    return {
+      wordTimestamps,
+      sourceWordIndexes: originalWords.map((_, index) => index),
+    };
+  }
+
+  if (normalizedToOriginalMap.length !== wordTimestamps.length) {
+    return { wordTimestamps: null, sourceWordIndexes: null };
+  }
+
+  const buckets: Array<{ startTime: number; endTime: number; sourceWordIndex: number } | null> =
+    originalWords.map(() => null);
+
+  for (let sourceWordIndex = 0; sourceWordIndex < wordTimestamps.length; sourceWordIndex += 1) {
+    const timestamp = wordTimestamps[sourceWordIndex];
+    const mappedOriginalIndex = normalizedToOriginalMap[sourceWordIndex];
+    if (!timestamp || !Number.isInteger(mappedOriginalIndex)) continue;
+    if (!Number.isFinite(timestamp.startTime) || !Number.isFinite(timestamp.endTime)) continue;
+    const originalIndex = Math.max(0, Math.min(originalWords.length - 1, mappedOriginalIndex));
+    const existing = buckets[originalIndex];
+    if (!existing) {
+      buckets[originalIndex] = {
+        startTime: timestamp.startTime,
+        endTime: timestamp.endTime,
+        sourceWordIndex,
+      };
+      continue;
+    }
+    existing.startTime = Math.min(existing.startTime, timestamp.startTime);
+    existing.endTime = Math.max(existing.endTime, timestamp.endTime);
+  }
+
+  if (buckets.some((bucket) => bucket == null)) {
+    return { wordTimestamps: null, sourceWordIndexes: null };
+  }
+
+  const remappedWordTimestamps: WordTimestamp[] = [];
+  const sourceWordIndexes: number[] = [];
+  let previousEndTime = 0;
+
+  for (let originalIndex = 0; originalIndex < originalWords.length; originalIndex += 1) {
+    const bucket = buckets[originalIndex];
+    if (!bucket) return { wordTimestamps: null, sourceWordIndexes: null };
+    const startTime = Math.max(previousEndTime, bucket.startTime);
+    const endTime = Math.max(startTime, bucket.endTime);
+    remappedWordTimestamps.push({
+      word: originalWords[originalIndex],
+      startTime,
+      endTime,
+    });
+    sourceWordIndexes.push(bucket.sourceWordIndex);
+    previousEndTime = endTime;
+  }
+
+  return {
+    wordTimestamps: remappedWordTimestamps,
+    sourceWordIndexes,
   };
 }
 
@@ -184,7 +260,18 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
         return { error: result.error || "no audio returned" };
       }
       const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
-      return { audio: result.audio, sampleRate: result.sampleRate, durationMs, wordTimestamps: result.wordTimestamps || null };
+      const remapped = remapWordTimestampsToOriginalWords({
+        wordTimestamps: result.wordTimestamps || null,
+        normalizedToOriginalMap: normalized.normalizedToOriginalMap,
+        originalWords: words ?? [],
+      });
+      return {
+        audio: result.audio,
+        sampleRate: result.sampleRate,
+        durationMs,
+        wordTimestamps: (remapped.wordTimestamps ?? result.wordTimestamps) || null,
+        sourceWordIndexes: remapped.sourceWordIndexes,
+      };
     },
     getCacheIdentity,
     getWords: deps.getWords,
@@ -284,15 +371,16 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
         onTimingMetadata: (metadata) => {
           deps.onTimingMetadata?.(metadata);
         },
-        // TTS-7R: Truth-sync is visual-only — re-snap overlay to scheduler's authoritative position
-        // without updating narration state. Route through dedicated deps.onTruthSync if provided;
-        // fall back to onWordAdvance only when no visual-only handler is wired (legacy path).
-        onTruthSync: (wordIndex: number) => {
-          if (deps.onTruthSync) {
-            deps.onTruthSync(wordIndex);
-          } else {
-            onWordAdvance(wordIndex);
-          }
+        // Event-driven boundary sync: emit provider-level word-boundary events with both
+        // native/source index and resolved/original index. This is visual-only.
+        onTruthSync: (wordIndex: number, isTrustedWordTiming = true, boundaryEvent) => {
+          deps.onTruthSync?.({
+            sourceWordIndex: boundaryEvent?.sourceWordIndex ?? null,
+            resolvedWordIndex: wordIndex,
+            isTrustedWordTiming,
+            alignmentCorrected: boundaryEvent?.alignmentCorrected ?? false,
+            timingTruth: boundaryEvent?.timingTruth ?? "none",
+          });
         },
         // TTS-7Q: Chunk handoff — forward last audio-confirmed word to the word-advance callback
         // so useNarration updates the canonical cursor position at each chunk boundary.

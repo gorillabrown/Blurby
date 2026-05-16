@@ -122,7 +122,11 @@ describe("chunk handoff carry-over", () => {
     // Chunk with words 0-4 (5 words). lastConfirmedWordIndex should be 4.
     scheduler.scheduleChunk(makeChunk(0, 5));
 
-    await vi.waitFor(() => expect(onChunkHandoff).toHaveBeenCalledWith(4, false), { timeout: 500 });
+    await vi.waitFor(() => expect(onChunkHandoff).toHaveBeenCalledWith(
+      4,
+      false,
+      expect.objectContaining({ resolvedWordIndex: 4 }),
+    ), { timeout: 500 });
     scheduler.stop();
   });
 

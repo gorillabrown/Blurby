@@ -1,6 +1,7 @@
 import { TTS_NORMALIZER_VERSION } from "../constants";
 import type { PronunciationOverride } from "../types";
 import { applyPronunciationOverrides, overrideHash } from "./pronunciationOverrides";
+import { segmentWords } from "./segmentWords";
 
 export type SegmentNormalizationTransformId =
   | "pronunciation-overrides"
@@ -28,6 +29,7 @@ export interface SegmentNormalizationOptions {
 export interface SegmentNormalizationResult {
   originalText: string;
   normalizedText: string;
+  normalizedToOriginalMap: number[];
   locale: string;
   normalizerVersion: string;
   sourceTextHash: string;
@@ -42,6 +44,7 @@ export interface SegmentNormalizationFixture {
   locale: string;
   input: string;
   expected: string;
+  expectedNormalizedToOriginalMap: number[];
   expectedTransforms: SegmentNormalizationTransformId[];
 }
 
@@ -336,6 +339,111 @@ function expandCardinals(text: string): string {
   return text.replace(/\b\d{1,6}\b/g, (match) => numberToWords(Number(match)));
 }
 
+function tokenKey(token: string): string {
+  return token.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+function buildLcsMatches(originalKeys: string[], normalizedKeys: string[]): Array<{ originalIndex: number; normalizedIndex: number }> {
+  const n = originalKeys.length;
+  const m = normalizedKeys.length;
+  const dp: number[][] = Array.from({ length: n + 1 }, () => Array<number>(m + 1).fill(0));
+
+  for (let oi = n - 1; oi >= 0; oi -= 1) {
+    for (let ni = m - 1; ni >= 0; ni -= 1) {
+      if (originalKeys[oi].length > 0 && originalKeys[oi] === normalizedKeys[ni]) {
+        dp[oi][ni] = dp[oi + 1][ni + 1] + 1;
+      } else {
+        dp[oi][ni] = Math.max(dp[oi + 1][ni], dp[oi][ni + 1]);
+      }
+    }
+  }
+
+  const matches: Array<{ originalIndex: number; normalizedIndex: number }> = [];
+  let oi = 0;
+  let ni = 0;
+  while (oi < n && ni < m) {
+    if (originalKeys[oi].length > 0 && originalKeys[oi] === normalizedKeys[ni]) {
+      matches.push({ originalIndex: oi, normalizedIndex: ni });
+      oi += 1;
+      ni += 1;
+      continue;
+    }
+    if (dp[oi + 1][ni] >= dp[oi][ni + 1]) {
+      oi += 1;
+    } else {
+      ni += 1;
+    }
+  }
+  return matches;
+}
+
+function buildNormalizedToOriginalMap(originalText: string, normalizedText: string): number[] {
+  const originalWords = segmentWords(originalText);
+  const normalizedWords = segmentWords(normalizedText);
+  if (normalizedWords.length === 0) return [];
+  if (originalWords.length === 0) return normalizedWords.map(() => 0);
+
+  const originalKeys = originalWords.map(tokenKey);
+  const normalizedKeys = normalizedWords.map(tokenKey);
+  const matches = buildLcsMatches(originalKeys, normalizedKeys);
+  const map = new Array<number>(normalizedWords.length).fill(0);
+
+  const assignInterval = (
+    originalStart: number,
+    originalEnd: number,
+    normalizedStart: number,
+    normalizedEnd: number,
+    fallbackOriginalIndex: number,
+  ) => {
+    if (normalizedStart > normalizedEnd) return;
+    const normalizedCount = normalizedEnd - normalizedStart + 1;
+    const originalCount = originalEnd >= originalStart ? originalEnd - originalStart + 1 : 0;
+
+    if (originalCount <= 0) {
+      const clampedFallback = Math.max(0, Math.min(originalWords.length - 1, fallbackOriginalIndex));
+      for (let ni = normalizedStart; ni <= normalizedEnd; ni += 1) {
+        map[ni] = clampedFallback;
+      }
+      return;
+    }
+
+    for (let ni = normalizedStart; ni <= normalizedEnd; ni += 1) {
+      const intervalOffset = ni - normalizedStart;
+      const targetOffset = Math.min(
+        originalCount - 1,
+        Math.floor(((intervalOffset + 0.5) * originalCount) / normalizedCount),
+      );
+      map[ni] = originalStart + targetOffset;
+    }
+  };
+
+  let previousOriginal = -1;
+  let previousNormalized = -1;
+
+  for (const match of matches) {
+    assignInterval(
+      previousOriginal + 1,
+      match.originalIndex - 1,
+      previousNormalized + 1,
+      match.normalizedIndex - 1,
+      previousOriginal >= 0 ? previousOriginal : 0,
+    );
+    map[match.normalizedIndex] = match.originalIndex;
+    previousOriginal = match.originalIndex;
+    previousNormalized = match.normalizedIndex;
+  }
+
+  assignInterval(
+    previousOriginal + 1,
+    originalWords.length - 1,
+    previousNormalized + 1,
+    normalizedWords.length - 1,
+    previousOriginal >= 0 ? previousOriginal : 0,
+  );
+
+  return map;
+}
+
 export function normalizeSegmentText(
   text: string,
   options: SegmentNormalizationOptions = {},
@@ -361,6 +469,7 @@ export function normalizeSegmentText(
   normalizedText = applyTracked(normalizedText, transforms, "spaced-initials", collapseSpacedInitials);
   normalizedText = applyTracked(normalizedText, transforms, "ordinal-expansion", expandOrdinals);
   normalizedText = applyTracked(normalizedText, transforms, "cardinal-expansion", expandCardinals);
+  const normalizedToOriginalMap = buildNormalizedToOriginalMap(text, normalizedText);
 
   const sourceTextHash = stableSegmentTextHash(text);
   const normalizedTextHash = stableSegmentTextHash(normalizedText);
@@ -376,6 +485,7 @@ export function normalizeSegmentText(
   return {
     originalText: text,
     normalizedText,
+    normalizedToOriginalMap,
     locale,
     normalizerVersion: TTS_NORMALIZER_VERSION,
     sourceTextHash,

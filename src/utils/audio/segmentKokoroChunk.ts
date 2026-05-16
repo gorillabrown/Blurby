@@ -129,6 +129,9 @@ function createSegment(
     boundaryType: isFinalSegment ? chunk.boundaryType : undefined,
     silenceMs: isFinalSegment ? chunk.silenceMs : undefined,
     wordTimestamps: rebasedTimestamps,
+    sourceWordIndexes: chunk.sourceWordIndexes
+      ? chunk.sourceWordIndexes.slice(segmentStartWord, segmentEndWord + 1)
+      : null,
     parentChunkStartIdx: chunk.startIdx,
     parentChunkWordCount,
     segmentIndex,

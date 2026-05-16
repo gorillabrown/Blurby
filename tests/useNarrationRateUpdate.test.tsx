@@ -42,7 +42,13 @@ const kokoroStrategyMock = vi.hoisted(() => {
 
 const kokoroStrategyDriver = vi.hoisted(() => {
   let latestDeps: {
-    onTruthSync?: (wordIndex: number) => void;
+    onTruthSync?: (event: {
+      sourceWordIndex: number | null;
+      resolvedWordIndex: number;
+      isTrustedWordTiming: boolean;
+      alignmentCorrected: boolean;
+      timingTruth: string;
+    }) => void;
     onSegmentStart?: (wordIndex: number) => void;
     onTimingMetadata?: (metadata: unknown) => void;
   } | null = null;
@@ -59,7 +65,13 @@ const kokoroStrategyDriver = vi.hoisted(() => {
 
   return {
     captureDeps(deps: {
-      onTruthSync?: (wordIndex: number) => void;
+      onTruthSync?: (event: {
+        sourceWordIndex: number | null;
+        resolvedWordIndex: number;
+        isTrustedWordTiming: boolean;
+        alignmentCorrected: boolean;
+        timingTruth: string;
+      }) => void;
       onSegmentStart?: (wordIndex: number) => void;
       onTimingMetadata?: (metadata: unknown) => void;
     }) {
@@ -76,9 +88,22 @@ const kokoroStrategyDriver = vi.hoisted(() => {
     },
     emitWord(wordIndex: number) {
       latestSpeak?.onWordAdvance(wordIndex);
+      latestDeps?.onTruthSync?.({
+        sourceWordIndex: wordIndex,
+        resolvedWordIndex: wordIndex,
+        isTrustedWordTiming: true,
+        alignmentCorrected: false,
+        timingTruth: "word-native",
+      });
     },
     emitTruthSync(wordIndex: number) {
-      latestDeps?.onTruthSync?.(wordIndex);
+      latestDeps?.onTruthSync?.({
+        sourceWordIndex: wordIndex,
+        resolvedWordIndex: wordIndex,
+        isTrustedWordTiming: true,
+        alignmentCorrected: false,
+        timingTruth: "word-native",
+      });
     },
     emitSegmentStart(wordIndex: number) {
       latestDeps?.onSegmentStart?.(wordIndex);
@@ -363,8 +388,9 @@ describe("useNarration rate updates", () => {
     expect(kokoroStrategyMock.refreshBufferedTempo).toHaveBeenCalledTimes(1);
 
     await act(async () => {
+      truthSyncWords.length = 0;
       kokoroStrategyDriver.setAudioProgress({ wordIndex: 2, fractionInWord: 0.25 });
-      kokoroStrategyDriver.emitTruthSync(2);
+      kokoroStrategyDriver.emitWord(2);
       await flushPromises();
     });
 
@@ -372,7 +398,6 @@ describe("useNarration rate updates", () => {
     expect(harness.getSnapshot()?.getAudioProgress?.()?.wordIndex).toBe(2);
 
     await act(async () => {
-      kokoroStrategyDriver.emitWord(2);
       kokoroStrategyDriver.emitWord(3);
       await flushPromises();
     });
