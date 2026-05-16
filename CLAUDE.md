@@ -12,7 +12,7 @@
 5b. **Successful CLI sprints auto-merge by default.** When a sprint passes verification, spec compliance, quality review, and docs closeout, the default CLI closeout path is: stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push. A sprint spec must explicitly say otherwise to skip auto-merge.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 6a. **CLI executes, it does not investigate.** Every sprint dispatched to Claude Code CLI must be fully investigated and spec'd beforehand. CLI receives exact directions — file paths, line numbers, what to change, why. All ambiguity is resolved by Cowork before dispatch. If a bug's root cause is unknown, Cowork investigates first (live debug, code tracing, hypothesis testing). If a feature's design is unresolved, Cowork specs it first. CLI never explores or diagnoses — it builds to spec. A sprint is not dispatch-ready until its investigation gate is cleared.
-7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
+7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
 8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt. Dispatches are POINTERS not PAYLOADS — reference the Sprint Queue (which points to ROADMAP.md for the full spec), don't duplicate it. Format: sprint ID, branch, baseline state, link to Sprint Queue.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
@@ -191,7 +191,7 @@ Before committing, verify ALL of these:
 
 After EVERY sprint completion — hotfixes included, no exceptions — run the Herodotus pass:
 
-1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/project/ROADMAP_ARCHIVE.md`. Update Sprint Status table.
+1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/planning/.Archive/ROADMAP_legacy.md`. Update Sprint Status table.
 2. **SPRINT_QUEUE.md** — Remove completed sprint from queue. Add to "Completed Sprints" table. Verify queue depth ≥ 3.
 3. **CLAUDE.md** — Update version, sprint list, dependency chain, test counts.
 4. **LESSONS_LEARNED.md** — Add entry if any non-trivial discovery was made.
@@ -257,9 +257,9 @@ Every session starts with awareness of these 7 documents. They are the single so
 
 ### Other References
 
-- **Project Constitution**: `docs/project/Blurby_Project_Constitution.md`
+- **Project Constitution**: `docs/planning/Blurby_Project_Constitution.md`
 - **Agent Definitions**: `.claude/agents/` (Zeus, Hermes, Hephaestus, Athena, Aristotle, Hippocrates, Solon, Plato, Herodotus, Simonides)
-- **Roadmap Archive**: `docs/project/ROADMAP_ARCHIVE.md` (completed sprint full specs — reference only)
+- **Roadmap Archive**: `docs/planning/.Archive/ROADMAP_legacy.md` (completed sprint full specs — reference only)
 - **Development Sync SOP**: `docs/governance/DEVELOPMENT_SYNC.md` (local-first git workflow)
 
 ---
@@ -272,7 +272,7 @@ When a sprint **completes**:
 
 1. **SPRINT_QUEUE.md** — Remove the sprint's entry row. Update queue depth.
 2. **SPRINT_QUEUE.md** — Add to "Completed Sprints (Recent)" table at top.
-3. **ROADMAP.md** — Move the full spec section to `docs/project/ROADMAP_ARCHIVE.md`. Keep ROADMAP forward-looking only.
+3. **ROADMAP.md** — Move the full spec section to `docs/planning/.Archive/ROADMAP_legacy.md`. Keep ROADMAP forward-looking only.
 4. **ROADMAP.md** — Update Sprint Status table (remove or mark complete).
 5. **ROADMAP.md** — Update Execution Order diagram.
 6. **CLAUDE.md** — Update "What's NOT Done" list, Dependency Chain, and test counts.
@@ -284,13 +284,13 @@ When a sprint **completes**:
 |---------|------|------|
 | Forward-looking sprint specs (full CLI Evergreen) | `ROADMAP.md` | Only upcoming work. Archive on completion. |
 | Sprint dispatch queue (summary pointers) | `docs/governance/SPRINT_QUEUE.md` | FIFO table → ROADMAP for full spec. ≥3 entries. |
-| Completed sprint specs | `docs/project/ROADMAP_ARCHIVE.md` | Append-only. Reference, don't modify. |
-| Completed Cowork plans/specs | `docs/superpowers/{plans,specs}/.Archive/` | Move on completion. |
-| Completed governance sprint files | `docs/project/.Archive/` | Move on completion. |
+| Completed sprint specs | `docs/planning/.Archive/ROADMAP_legacy.md` | Append-only. Reference, don't modify. |
+| Completed Cowork plans/specs | `docs/planning/{plans,specs}/.Archive/` | Move on completion. |
+| Completed governance sprint files | `docs/planning/.Archive/` | Move on completion. |
 | Current system state + agent config | `CLAUDE.md` | Keep under ~20k chars. Archive old sprint details. |
 | Bugs (active) | `docs/governance/BUG_REPORT.md` | Remove when fixed + verified. |
-| Bug reports (raw, unprocessed) | `docs/bug-reports/` | In-app submissions. Triage → file in BUG_REPORT.md → archive to `.Archive/`. |
-| Bug reports (processed) | `docs/bug-reports/.Archive/` | Archived after triage. Reference only. |
+| Bug reports (raw, unprocessed) | `docs/governance/bug-reports/` | In-app submissions. Triage → file in BUG_REPORT.md → archive to `.Archive/`. |
+| Bug reports (processed) | `docs/governance/bug-reports/.Archive/` | Archived after triage. Reference only. |
 | Feature requests (unroadmapped) | `docs/governance/IDEAS.md` | Reviewed at phase pauses. |
 | Engineering discoveries | `docs/governance/LESSONS_LEARNED.md` | Append immediately on discovery. |
 | Architecture + data model | `docs/governance/TECHNICAL_REFERENCE.md` | Update when architecture changes. |
@@ -300,7 +300,7 @@ When a sprint **completes**:
 - **Every sprint completion**: Run steps 1-7 above.
 - **Every 3rd sprint**: Review `docs/` for stale files. Archive anything from completed work.
 - **ROADMAP.md target**: <500 lines. If approaching, check for completed specs that weren't archived.
-- **CLAUDE.md target**: <35k chars. Archive completed sprint details to `docs/project/CLAUDE_md_archive_sessionN.md`.
+- **CLAUDE.md target**: <35k chars. Archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
 
 ---
 
@@ -316,13 +316,13 @@ When a sprint **completes**:
 
 ### Bug Report Triage Workflow
 
-When `docs/bug-reports/` contains unprocessed `.json` + `.png` files:
+When `docs/governance/bug-reports/` contains unprocessed `.json` + `.png` files:
 
 1. **Read** all JSON reports and view all screenshots.
 2. **Group** reports by root cause or feature area — deduplicate related reports.
 3. **File** each unique bug in `docs/governance/BUG_REPORT.md` with next BUG-NNN number. Include: description, severity, location, probable cause, screenshots, fix approach.
 4. **Group into hotfix sprints** — batch related bugs into HOTFIX-NN entries in ROADMAP.md. Add to SPRINT_QUEUE.md.
-5. **Archive** processed reports: move all `.json` + `.png` files to `docs/bug-reports/.Archive/`.
+5. **Archive** processed reports: move all `.json` + `.png` files to `docs/governance/bug-reports/.Archive/`.
 6. **Report** findings to user with grouped summary and proposed hotfix sprint structure.
 
 ### Constants Separation Rule
@@ -331,18 +331,30 @@ All tunable behavioral constants must be extracted into a dedicated constants fi
 
 ### External Audit Cadence
 
-Run a structured codebase audit at regular intervals: after every 3rd sprint completion, or at any major phase boundary (e.g., before Chrome extension launch, before Android launch). Audit scope: code quality, architecture compliance, test coverage, known-trap regression, documentation alignment. See `docs/audit/` for prior audit artifacts and procedure.
+Run a structured codebase audit at regular intervals: after every 3rd sprint completion, or at any major phase boundary (e.g., before Chrome extension launch, before Android launch). Audit scope: code quality, architecture compliance, test coverage, known-trap regression, documentation alignment. See `docs/studies/audit/` for prior audit artifacts and procedure.
+
+### External Audit Outcomes
+
+| # | Date | Scope | Auditor | Verdict | Key Outcome |
+|---|------|-------|---------|---------|-------------|
+| 1 | 2026-05-15 | Full TTS Architecture roadmap | 3rd-party (deep research) | Conditional approval (5/10) | Spec language tightened in 4 sprints; segment identity Phase 0 hard gate added; effort increased on 2 sprints; no new sprints added; governance framing corrected |
+| 2–7 | 2026-05-15 | Targeted re-audits (remediation passes) | 3rd-party (deep research) | Progressive improvement (6→7→8→8→8→8) | Line citations fixed, future constructs labeled, ROADMAP split to SPECS companion, source files added incrementally |
+| 8 | 2026-05-15 | Targeted re-audit (final cited files) | 3rd-party (deep research) | **Approved for dispatch (9/10)** | useNarration.ts + FoliatePageView.tsx added; all cited source files verified present; architecture approved as dispatch-ready |
 
 ---
 
-## Current System State (v1.75.1 — queue GREEN, Desktop v2.0 conveyor active, 1 open bug)
+## Current System State (v1.75.1 — queue GREEN depth 8, Kokoro-only TTS Architecture Completion + research-driven enrichment, 1 open bug)
 
 ### Codebase (branch: `main`)
 
 - **TTS-REGISTRY-1 complete** — Provider capability truth now lives in `src/types/ttsProvider.ts` and `src/utils/ttsProviderRegistry.ts` for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS. Settings/status surfaces read scoped provider labels, posture, and readiness hints from the registry. Kokoro remains default/available, Qwen remains disabled/unselectable, and runtime playback behavior is unchanged. Verification passed: focused 6 files / 32 tests, broader TTS/settings/narration 9 files / 52 tests, full `npm test` 183 files / 2629 tests, `npm run typecheck`, `npm run build`, and `git diff --check`.
 - **TTS-NORMALIZE-1 complete** — `src/utils/segmentNormalizer.ts` adds pure English-first spoken-text normalization with original/normalized text, locale, ordered transforms, `TTS_NORMALIZER_VERSION`, stable hashes, and pronunciation override hash. Golden fixtures cover prose, dialogue, headings/Roman numerals, line breaks, currency, dates/times, abbreviations, ordinals/cardinals, and safe footnote markers. Kokoro receives normalized spoken text while scheduler/display words remain original; cache identity includes normalizer version plus source/normalized hash pair with no destructive migration. Verification passed: focused 4 files / 38 tests, broader TTS/provider/settings 8 files / 56 tests, serialized full `npm test -- --maxWorkers=1` 184 files / 2634 tests, `npm run typecheck`, `npm run build`, and `git diff --check`. Default parallel `npm test` reruns were resource-sensitive in pre-existing MOSS Nano performance-threshold tests, which passed isolated.
 - **TTS-CACHE-TIMING-1 complete** — `main/tts-cache.js` now supports schema-versioned v2 structured cache identities and atomic `.timing.json` sidecars while preserving legacy v1 cache reads. V2 identity records provider, voice, rate bucket, model/version, source/normalized hashes, normalizer version, pronunciation override hash, document locator, chunk ID, sample rate, and timing truth; disk paths use safe hashes under `tts-cache/v2/`. Word timestamps are returned from cache only when sidecar timing is trusted. No default-engine change, Qwen reactivation, Kokoro retirement, destructive cache wipe, or export work shipped. Verification passed for focused cache/timing/Kokoro/background suite 8 files / 75 tests, `npm run typecheck`, `npm run build`, and `git diff --check`; full serialized `npm test -- --maxWorkers=1` only failed the pre-existing MOSS Nano performance probe.
-- **Queue pointer** — Next approved sprint is TTS-SYNC-1. Queue depth is 2 prepared pointers after TTS-CACHE-TIMING-1 closeout; backfill is required before dispatching beyond the currently queued architecture arc.
+- **TTS-SYNC-1 branch complete** — `src/utils/timingMetadataStore.ts` and `src/utils/highlightSyncController.ts` centralize narration highlight sync policy on pushed branch `sprint/tts-sync-1-highlight-controller` at `142dc24`. Trusted word-native timing can drive word-synced decisions; heuristic/missing timing downgrades to chunk/segment decisions with no invented active word. Scheduler/Kokoro/useNarration publish and store timing metadata, and `ReaderContainer` consumes controller decisions without changing Flow's WPM clock, Narrate's spoken-timing clock, autoplay behavior, Qwen/provider defaults, or `lastConfirmedAudioWordRef` ownership. Verification passed: focused sync baseline 8 files / 85 tests, focused sync regression 9 files / 93 tests, full `npm test` 181 files / 2598 tests, `npm run typecheck`, `npm run build`, and `git diff --check`. Canonical `main` merge remains pending because the main worktree contains unrelated dirty work.
+- **TTS-DIAG-1 branch complete** — `src/utils/narrateDiagnostics.ts`, `useNarration`, `TTSSettings`, and `scripts/tts_eval_runner.mjs` add the redacted provider-neutral `tts-diagnostics-v1` bundle on pushed branch `sprint/tts-diag-1-diagnostics-bundle` at `c97e446`, stacked on TTS-SYNC-1. The bundle captures provider, engine/voice/rate, segment/hash, cache key, timing sidecar, scheduler, highlight decision, and relevant error metadata without audio payloads or raw book text by default; validators strip/reject raw text and audio-shaped fields. Verification passed: focused diagnostics slice 4 files / 18 tests, full `npm test` 184 files / 2606 tests, `npm run typecheck`, `npm run build`, and `git diff --check`. Canonical `main` merge remains gated until TTS-SYNC-1 lands.
+- **Diagnostics export guardrail** — Diagnostics exports are evidence artifacts, not user-content artifacts. Do not commit generated local user diagnostics unless an explicit test fixture creates them; raw text and audio-shaped fields must remain redacted/rejected in both producers and validators.
+- **TTS-INTEGRATE-1 blocked** — Clean worktree `C:\tmp\Blurby-tts-integrate-1` on branch `sprint/tts-integrate-1-sync-diag-main` merged `sprint/tts-sync-1-highlight-controller` first, then stacked `sprint/tts-diag-1-diagnostics-bundle`; focused sync verification passed 9 files / 94 tests, focused diagnostics verification passed 4 files / 18 tests, `npm run typecheck` passed, and `npm run build` passed. Full `npm test` failed in `tests/mossNanoProbe.test.js` with 3 performance-class failures (2603 / 2606 passed), so no commit, push, or merge was performed.
+- **Queue pointer** — Next approved sprint is ENGINE-DORMANCY-1, dispatch-ready on `main`. Queue depth is 8 (8 full specs, 0 stubs). ENGINE-DORMANCY-1 unblocks TTS-INTEGRATE-1 by making MOSS Nano probe failures irrelevant. TTS-CACHE-HARDEN-1 added (2026-05-15 PM2) from implementation review findings (cache-hit timing parity, type safety, IPC validation). Three research-driven sprints added (2026-05-15 PM): TTS-EVENT-SYNC-1 (event-driven word sync from readest/RealtimeTTS/sioyek research), NORMALIZER-ENRICH-1 (abogen normalizer gap fill), TTS-RENDER-MAP-1 (sioyek-inspired word position index).
 - TTS-7 stabilization lane COMPLETE: TTS-7A (v1.29.0) + TTS-7B (v1.30.0) + TTS-7C (v1.31.0) + TTS-7D (v1.32.0). All 15 TTS bugs (BUG-101–115) resolved and verified. Closeout doc in TECHNICAL_REFERENCE.md.
 - **TTS-7F hotfix complete** — proactive entry cache coverage + cruise warm, plus clean launch ownership. BUG-116/118/119/120/121 resolved.
 - **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added.
@@ -386,7 +398,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **QWEN-STREAM-4 complete** — Streaming eval harness executed (5 scenarios, pending_live_data), Kokoro baseline captured (9/9 pass, first-audio p50=465ms/p95=507.6ms), decision gate document populated with ITERATE recommendation. Live CUDA validation required before promotion. eval runner fix: streaming scenarios filtered from --matrix path. v1.75.0.
 - **TTS-EVAL-1 complete** — quality harness baseline shipped: trace schema/types, fixture corpus, opt-in trace sink instrumentation, first-audio timing, runner + metrics summaries, lifecycle/handoff tests, reviewer template/runbook, and baseline artifacts. v1.53.0.
 - **TTS-EVAL-2 complete** — matrix + soak harness expansion shipped: scenario manifest, soak profiles, deterministic artifact model, matrix/soak runner modes, p50/p95 startup + drift aggregate summaries, and runner validation suite. v1.54.0.
-- **Roadmap review (2026-05-02):** Full 4-phase ceremony completed. Verdict: AT RISK (strong velocity, 44% sideways scope from MOSS). Finish line established: Desktop v2.0 Shipping. ROADMAP.md reduced from 5,347→754 lines. 60 completed sprint specs archived to `docs/project/ROADMAP_ARCHIVE_2026-05-02.md`. 4 review artifacts in `docs/project/roadmap-reviews/`.
+- **Roadmap review (2026-05-02):** Full 4-phase ceremony completed. Verdict: AT RISK (strong velocity, 44% sideways scope from MOSS). Finish line established: Desktop v2.0 Shipping. ROADMAP.md reduced from 5,347→754 lines. 60 completed sprint specs archived to `docs/planning/.Archive/ROADMAP_2026-05-02.md`. 4 review artifacts in `docs/planning/roadmap-reviews/`.
 - **SK-HYG-1 complete** — Roadmap hygiene & queue recovery. Archive-forward discipline enforced, queue restructured from RED depth 1 to GREEN depth 3, Standing Rules section added (10 rules), Desktop v2.0 conveyor belt established.
 - **BRAND-HYG-1 shelved/no-op** — Expected dirty brand/theme edits were not present in this checkout after governance hygiene; remaining dirty tracked files were local noise only. Not completed as implementation.
 - **EINK-6A complete** — E-ink display behavior is now independent from theme via `einkMode`; settings schema v9/defaults/migrations added; `[data-eink="true"]` carries runtime behavior while `[data-theme="eink"]` remains optional greyscale palette. Verification passed: focused EINK/NARR slice 36 tests, full `npm test` 150 files / 2397 tests, `npm run build`, `npm audit --audit-level=high`, and `git diff --check`.
@@ -395,8 +407,8 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **MOSS-NANO-13B complete** — Real MOSS Nano app audio bridge landed on `sprint/moss-nano-13b-real-app-audio-bridge`: the app-sidecar path now validates the local Nano repo/model/tokenizer/runtime, starts the real ONNX runtime, and returns real WAV/PCM metadata through `tts-nano-*` IPC with `syntheticAudio:false`. Synthetic tone output is mock-only and rejected in real mode. Test Voice can use real Nano audio when `nanoStatus` is ready; selected Nano narration remains segment-following only with `wordTimestamps:null`. No Qwen reactivation, no Nano default, no Kokoro retirement, and no silent fallback.
 - **POCKET-TTS-1 complete** — Pocket TTS is now an isolated third opt-in engine path (`pocket-tts`) with sidecar/engine wrapper, `tts-pocket-*` IPC, preload bridge, renderer strategy, settings status/preview/selectable-engine wiring, and 30 focused tests. Product posture is unchanged around the other engines: Kokoro remains default/available, MOSS-Nano remains recommended opt-in from 13e, Qwen remains disabled, no comparative gate ran, and no public voice-cloning UX ships in v2.0.
 - **POSTV2-ENGINE-1 update** — Qwen is disabled at the selectable settings/profile boundary and at IPC runtime entry points. Historical/preload compatibility methods may remain, but Qwen status/generate/stream calls return unavailable with `reason: "qwen-disabled"` and must not start a Qwen runtime for Desktop v2.
-- Active queue: YELLOW on depth, GREEN on TTS posture — POLISH-1 is next. Desktop v2.0 conveyor active; MOSS-NANO-13a–13e and POCKET-TTS-1 are complete, while POLISH-1 and RELEASE-1 remain. KOKORO-RETIRE remains deferred even though MOSS-NANO records `NANO_RECOMMENDED_OPT_IN`.
-- 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). Deferred lanes: Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News, and Kokoro retirement — all beyond Desktop v2.0 finish line.
+- Active queue: GREEN depth 8 (8 full specs, 0 stubs). Finish line: **TTS Architecture Complete** (Kokoro-only + research-driven enrichment). Conveyor: ENGINE-DORMANCY-1 (dispatch-ready) → TTS-INTEGRATE-1 (unblocked by dormancy) → TTS-CACHE-HARDEN-1 (cache/pipeline hardening from implementation review) → TTS-EVENT-SYNC-1 (event-driven word sync, research: readest/RealtimeTTS/sioyek) → NORMALIZER-ENRICH-1 (abogen gap fill) → TTS-RENDER-MAP-1 (sioyek word position index) → TTS-PIPELINE-1 → TTS-ARCH-DOC-1. Dissolved (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1, TTS-CANARY-1, TTS-REGISTRY-DISPATCH-1. Engine posture: Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are currently live/selectable but scheduled for dormancy in ENGINE-DORMANCY-1; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 deferred until TTS architecture conveyor completes. TTS-CACHE-HARDEN-1 added (2026-05-15 PM2) from Kokoro implementation review findings. Three research-driven sprints added (2026-05-15 PM): TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, TTS-RENDER-MAP-1 from cross-codebase analysis (readest, RealtimeTTS, abogen, sioyek). Roadmap review 2026-05-15 PM2: 62.8% complete, GREEN, eager-spec buffer FULL (8/8).
+- 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). Deferred lanes: MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.
 - 2,397 tests across 150 test files
@@ -408,7 +420,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - Electron 41 + React 19 + Vite 6 + TypeScript 5.9
 - Vitest 4.1 for testing, electron-builder 26 for packaging
 - foliate-js for EPUB rendering (primary reader for EPUBs)
-- Kokoro TTS engine (28 voices, worker thread, q4 quantization); MOSS-Nano recommended opt-in; Pocket TTS available opt-in; Qwen disabled.
+- Kokoro TTS engine (28 voices, worker thread, q4 quantization) — sole active engine. MOSS-Nano dormant/disabled; Pocket TTS dormant/disabled; Qwen retired/disabled.
 - Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log), opusscript (Opus audio encoding/decoding), mammoth (DOCX→HTML, lazy-loaded)
 
 ### Architecture

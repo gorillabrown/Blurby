@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-const DEFAULT_REGISTRY_PATH = "docs/research/tts-engine-scan/candidate-registry.json";
+const DEFAULT_REGISTRY_PATH = "docs/studies/research/tts-engine-scan/candidate-registry.json";
 const DEFAULT_FIXTURE_MANIFEST_PATH = "tests/fixtures/narration/engine-scan/manifest.json";
 const DEFAULT_ARTIFACTS_ROOT = "artifacts/tts-eval/engine-scan";
 
