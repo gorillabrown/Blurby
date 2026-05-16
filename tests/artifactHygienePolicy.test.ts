@@ -5,7 +5,7 @@ import * as path from "path";
 const repoRoot = path.resolve(__dirname, "..");
 const gitignore = fs.readFileSync(path.join(repoRoot, ".gitignore"), "utf-8");
 const releaseChecklist = fs.readFileSync(
-  path.join(repoRoot, "docs/project/desktop-v2.0-release-checklist.md"),
+  path.join(repoRoot, "docs/planning/desktop-v2.0-release-checklist.md"),
   "utf-8",
 );
 

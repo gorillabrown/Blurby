@@ -221,12 +221,12 @@ function register(ctx) {
     } catch {
       // Copy from template — preserves all formatting, formulas, charts, and layout
       try {
-        const templatePath = path.join(__dirname, "..", "..", "docs", "project", "Reading_Log_Blurby_Template.xlsx");
+        const templatePath = path.join(__dirname, "..", "..", "docs", "planning", "Reading_Log_Blurby_Template.xlsx");
         try {
           await fsPromises.copyFile(templatePath, xlsxPath);
         } catch {
           const { app } = require("electron");
-          const bundledTemplate = path.join(app.getAppPath(), "docs", "project", "Reading_Log_Blurby_Template.xlsx");
+          const bundledTemplate = path.join(app.getAppPath(), "docs", "planning", "Reading_Log_Blurby_Template.xlsx");
           await fsPromises.copyFile(bundledTemplate, xlsxPath);
         }
         // Clear sample data rows from template, keeping header + formulas

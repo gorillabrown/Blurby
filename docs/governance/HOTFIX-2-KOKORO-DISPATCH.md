@@ -26,7 +26,7 @@ v1.0.5 released. Four issues found that work in dev but fail in the packaged .ex
 
 ### Issue 3: Reading Log template missing from build (MEDIUM)
 - **File:** `main/ipc/stats.js` lines 121, 127
-- **Root cause:** Template is at `docs/project/Reading_Log_Blurby_Template.xlsx`. The `files` array in package.json only includes `main.js`, `preload.js`, `main/**/*`, `dist/**/*`. The `docs/` folder is NOT in the build. Both path resolutions fail:
+- **Root cause:** Template is at `docs/planning/Reading_Log_Blurby_Template.xlsx`. The `files` array in package.json only includes `main.js`, `preload.js`, `main/**/*`, `dist/**/*`. The `docs/` folder is NOT in the build. Both path resolutions fail:
   - Line 121: `path.join(__dirname, "..", "..", "docs", ...)` → points outside asar
   - Line 127: `path.join(app.getAppPath(), "docs", ...)` → `docs/` not in asar
 - **Fix:** Move template to `resources/` folder (already configured as `extraResources`). Update path in stats.js to use `process.resourcesPath`.
@@ -44,7 +44,7 @@ v1.0.5 released. Four issues found that work in dev but fail in the packaged .ex
 | 2 | Fix error propagation: forward `load-error` from worker → renderer IPC in `main/tts-engine.js` | electron-fixer | sonnet |
 | 3 | Add download error handling in `src/components/settings/SpeedReadingSettings.tsx`: listen for `tts-kokoro-download-error`, show toast, add retry | renderer-fixer | sonnet |
 | 4 | Add 30s stall detection: if progress stays at 0% for 30s, show "Download may be blocked" with retry | renderer-fixer | sonnet |
-| 5 | Move Reading Log template: copy `docs/project/Reading_Log_Blurby_Template.xlsx` to `resources/Reading_Log_Blurby_Template.xlsx` | electron-fixer | sonnet |
+| 5 | Move Reading Log template: copy `docs/planning/Reading_Log_Blurby_Template.xlsx` to `resources/Reading_Log_Blurby_Template.xlsx` | electron-fixer | sonnet |
 | 6 | Fix template path in `main/ipc/stats.js`: use `process.resourcesPath` for packaged, `__dirname` fallback for dev | electron-fixer | sonnet |
 | 7 | Add `"node_modules/@napi-rs/**"` to `asarUnpack` in `package.json` | electron-fixer | sonnet |
 | 8 | Add `tts-kokoro-download-error` to preload.js electronAPI if not already exposed | electron-fixer | sonnet |

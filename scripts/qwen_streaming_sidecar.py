@@ -11,7 +11,7 @@ emits binary-framed messages on stdout:
 Commands: configure | warmup | status | list_speakers |
           start_stream | cancel_stream | shutdown
 
-See docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md
+See docs/planning/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md
 """
 
 import json

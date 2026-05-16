@@ -26,6 +26,15 @@ artifacts/tts-eval/engine-scan/**
 !artifacts/tts-eval/engine-scan/README.md
 
 # Generated evidence hygiene: keep bulky outputs local unless explicitly promoted.
+#
+# SK-HYG-2 Option B: bulk experiment artifacts stay local/ignored. Curated
+# canonical evidence is copied into tracked docs/evidence/ instead.
+artifacts/
+tmp/
+tmp_brandcheck*
+!docs/evidence/
+!docs/evidence/**
+
 artifacts/**/*.wav
 artifacts/**/*.mp3
 artifacts/**/*.flac

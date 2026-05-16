@@ -1,4 +1,0 @@
-Gate status: PASS
-Gate version: v1
-Hard failures: 0/7
-Warnings: 0/3
