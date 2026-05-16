@@ -1,0 +1,40 @@
+{
+  "fixtureId": "punctuation-dense",
+  "scenarioId": "punctuation-heavy-mid",
+  "runId": "run-matrix__punctuation-heavy-mid__it003",
+  "startLatencyMs": 402,
+  "warmPreviewLatencyMs": 1120,
+  "warmFirstAudioLatencyMs": 402,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 26,
+  "flowEventCount": 9,
+  "startupCacheMode": null,
+  "openingChunkWordCounts": [],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 0,
+    "handoff": 0
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": null,
+  "rateResponseLatencyMs": null,
+  "failureClasses": [],
+  "scenario": {
+    "id": "punctuation-heavy-mid",
+    "voiceId": "af_bella",
+    "requestedRate": 1.2,
+    "durationClass": "medium",
+    "tags": [
+      "punctuation",
+      "drift"
+    ]
+  }
+}

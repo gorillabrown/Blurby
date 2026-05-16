@@ -1,0 +1,40 @@
+{
+  "fixtureId": "chapter-transition",
+  "scenarioId": "chapter-transition",
+  "runId": "run-matrix__chapter-transition__it006",
+  "startLatencyMs": 395,
+  "warmPreviewLatencyMs": 1120,
+  "warmFirstAudioLatencyMs": 395,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 25,
+  "flowEventCount": 9,
+  "startupCacheMode": null,
+  "openingChunkWordCounts": [],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 1,
+    "book": 0,
+    "handoff": 0
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": null,
+  "rateResponseLatencyMs": null,
+  "failureClasses": [],
+  "scenario": {
+    "id": "chapter-transition",
+    "voiceId": "af_bella",
+    "requestedRate": 1.5,
+    "durationClass": "medium",
+    "tags": [
+      "transition",
+      "chapter"
+    ]
+  }
+}

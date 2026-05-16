@@ -1,0 +1,47 @@
+{
+  "fixtureId": "prose-basic",
+  "scenarioId": "startup-parity-cached",
+  "runId": "run-matrix__startup-parity-cached__it008",
+  "startLatencyMs": 370,
+  "warmPreviewLatencyMs": 1000,
+  "warmFirstAudioLatencyMs": 370,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 38,
+  "flowEventCount": 13,
+  "startupCacheMode": "cached",
+  "openingChunkWordCounts": [
+    13,
+    26,
+    52,
+    104,
+    148
+  ],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 0,
+    "handoff": 0
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": null,
+  "rateResponseLatencyMs": null,
+  "failureClasses": [],
+  "scenario": {
+    "id": "startup-parity-cached",
+    "voiceId": "af_bella",
+    "requestedRate": 1,
+    "durationClass": "short",
+    "tags": [
+      "startup-parity",
+      "cached",
+      "opening-ramp"
+    ]
+  }
+}
