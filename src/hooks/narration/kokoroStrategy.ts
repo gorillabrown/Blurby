@@ -9,6 +9,7 @@ import { createGenerationPipeline } from "../../utils/generationPipeline";
 import type { GenerationPipeline } from "../../utils/generationPipeline";
 import { createAudioScheduler } from "../../utils/audioScheduler";
 import type { AudioScheduler, AudioProgressReport, ChunkBoundaryPayload } from "../../utils/audioScheduler";
+import type { TimingMetadataRecord } from "../../utils/timingMetadataStore";
 import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
 import { normalizeSegmentText, type SegmentNormalizationResult } from "../../utils/segmentNormalizer";
@@ -53,6 +54,8 @@ export interface KokoroStrategyDeps {
    * For segmented chunks, metadata includes the parent generated chunk identity.
    */
   onChunkBoundary?: (endIdx: number, metadata?: ChunkBoundaryPayload) => void;
+  /** TTS-SYNC-1: Receives scheduler timing metadata for centralized highlight policy. */
+  onTimingMetadata?: (metadata: TimingMetadataRecord) => void;
   /**
    * TTS-7R: Visual-only truth-sync callback. Called every ~12 words by the scheduler
    * to re-snap the visual overlay to the authoritative audio position.
@@ -277,6 +280,9 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
         onError: () => deps.onFallbackToWeb(),
         onSegmentStart: (wordIndex: number) => {
           deps.onSegmentStart?.(wordIndex);
+        },
+        onTimingMetadata: (metadata) => {
+          deps.onTimingMetadata?.(metadata);
         },
         // TTS-7R: Truth-sync is visual-only — re-snap overlay to scheduler's authoritative position
         // without updating narration state. Route through dedicated deps.onTruthSync if provided;
