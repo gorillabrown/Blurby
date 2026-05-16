@@ -8,9 +8,7 @@ const originalLoad = Module._load;
 function clearModule(modulePath) {
   try {
     delete require.cache[require.resolve(modulePath)];
-  } catch {
-    // The module may not exist or may not have been loaded yet.
-  }
+  } catch {}
 }
 
 function clearContractModules() {
@@ -18,20 +16,13 @@ function clearContractModules() {
   clearModule("../preload.js");
 }
 
-function createNanoEngineStub(overrides = {}) {
+function createNanoEngineStub() {
   return {
-    status: vi.fn().mockResolvedValue({ ok: true, status: "ready", ready: true }),
-    synthesize: vi.fn().mockResolvedValue({
-      ok: true,
-      requestId: "nano-req-1",
-      outputPath: "C:\\fake\\nano-req-1.wav",
-      sampleRate: 24000,
-      durationMs: 25,
-    }),
-    cancel: vi.fn().mockResolvedValue({ ok: true, cancelled: true, requestId: "nano-req-1" }),
-    shutdown: vi.fn().mockResolvedValue({ ok: true, status: "shutdown", ready: false }),
-    restart: vi.fn().mockResolvedValue({ ok: true, status: "ready", ready: true }),
-    ...overrides,
+    status: vi.fn().mockResolvedValue({ ok: true }),
+    synthesize: vi.fn().mockResolvedValue({ ok: true }),
+    cancel: vi.fn().mockResolvedValue({ ok: true }),
+    shutdown: vi.fn().mockResolvedValue({ ok: true }),
+    restart: vi.fn().mockResolvedValue({ ok: true }),
   };
 }
 
@@ -40,92 +31,60 @@ function createIpcHarness({ nanoEngine = createNanoEngineStub() } = {}) {
   const browserWindow = {
     isDestroyed: () => false,
     isFocused: () => true,
-    webContents: {
-      send: vi.fn(),
-    },
+    webContents: { send: vi.fn() },
   };
   const electronMock = {
-    app: {
-      isPackaged: false,
-      getPath: vi.fn(() => "C:\\Users\\estra\\AppData\\Roaming\\Blurby"),
-    },
-    BrowserWindow: {
-      getAllWindows: vi.fn(() => [browserWindow]),
-    },
+    app: { isPackaged: false, getPath: vi.fn(() => "C:\\Users\\estra\\AppData\\Roaming\\Blurby") },
+    BrowserWindow: { getAllWindows: vi.fn(() => [browserWindow]) },
     ipcMain: {
       handle: vi.fn((channel, handler) => {
         ipcHandlers.set(channel, handler);
       }),
     },
   };
-  const kokoroEngine = {
-    setLoadingCallback: vi.fn(),
-    generate: vi.fn(),
-    listVoices: vi.fn(),
-    getModelStatus: vi.fn(() => ({ ready: false })),
-    isModelReady: vi.fn(() => false),
-    downloadModel: vi.fn(),
-    preload: vi.fn(),
-    preflight: vi.fn().mockResolvedValue({
-      ok: true,
-      status: "offline-ready",
-      ready: false,
-      loading: false,
-      recoverable: false,
-      offlineReady: true,
-    }),
-  };
-  const qwenEngine = {
-    getModelStatus: vi.fn(),
-    preload: vi.fn(),
-    preflight: vi.fn(),
-    listVoices: vi.fn(),
-    generate: vi.fn(),
-  };
-  const streamingEngine = {
-    startStream: vi.fn(),
-    cancelStream: vi.fn(),
-    getModelStatus: vi.fn(),
-    onStreamAudio: vi.fn(),
-    onStreamFinished: vi.fn(),
-  };
-  const marathonEngine = {
-    generate: vi.fn(),
-    preload: vi.fn(),
-  };
-  const epubWordExtractor = {
-    extractWords: vi.fn(),
-  };
-  const ttsCache = {
-    readChunk: vi.fn(),
-    writeChunk: vi.fn(),
-    hasChunk: vi.fn(),
-    getCachedChunks: vi.fn(),
-    evictBook: vi.fn(),
-    evictBookVoice: vi.fn(),
-    getCacheInfo: vi.fn(),
-    getOpeningCoverageMs: vi.fn(),
-  };
-  const nanoEngineModule = {
-    createMossNanoEngine: vi.fn(() => nanoEngine),
-    getMossNanoEngine: vi.fn(() => nanoEngine),
-    getSharedMossNanoEngine: vi.fn(() => nanoEngine),
-    mossNanoEngine: nanoEngine,
-    default: nanoEngine,
-  };
 
   Module._load = function patchedLoad(request, parent, isMain) {
     if (request === "electron") return electronMock;
-    if (request === "../tts-engine") return kokoroEngine;
-    if (request === "../qwen-engine") return qwenEngine;
-    if (request === "../qwen-streaming-engine") {
-      return { createQwenStreamingEngineManager: vi.fn(() => streamingEngine) };
+    if (request === "../tts-engine") {
+      return {
+        setLoadingCallback: vi.fn(),
+        generate: vi.fn(),
+        listVoices: vi.fn(),
+        getModelStatus: vi.fn(() => ({ ready: false })),
+        isModelReady: vi.fn(() => false),
+        downloadModel: vi.fn(),
+        preload: vi.fn(),
+        preflight: vi.fn().mockResolvedValue({
+          ok: true,
+          status: "offline-ready",
+          ready: false,
+          loading: false,
+          recoverable: false,
+          offlineReady: true,
+        }),
+      };
     }
-    if (request === "../tts-engine-marathon") return marathonEngine;
-    if (request === "../epub-word-extractor") return epubWordExtractor;
-    if (request === "../tts-cache") return ttsCache;
+    if (request === "../qwen-engine") return { getModelStatus: vi.fn(), preload: vi.fn(), preflight: vi.fn(), listVoices: vi.fn(), generate: vi.fn() };
+    if (request === "../qwen-streaming-engine") return { createQwenStreamingEngineManager: vi.fn(() => ({ startStream: vi.fn(), cancelStream: vi.fn(), getModelStatus: vi.fn(), onStreamAudio: vi.fn(), onStreamFinished: vi.fn() })) };
+    if (request === "../tts-engine-marathon") return { generate: vi.fn(), preload: vi.fn() };
+    if (request === "../epub-word-extractor") return { extractWords: vi.fn() };
+    if (request === "../tts-cache") {
+      return {
+        readChunk: vi.fn(),
+        writeChunk: vi.fn(),
+        hasChunk: vi.fn(),
+        getCachedChunks: vi.fn(),
+        evictBook: vi.fn(),
+        evictBookVoice: vi.fn(),
+        getCacheInfo: vi.fn(),
+        getOpeningCoverageMs: vi.fn(),
+      };
+    }
     if (request === "../moss-nano-engine" || request === "../moss-nano-engine.js") {
-      return nanoEngineModule;
+      return {
+        getSharedMossNanoEngine: vi.fn(() => nanoEngine),
+        getMossNanoEngine: vi.fn(() => nanoEngine),
+      };
     }
     return originalLoad.call(this, request, parent, isMain);
   };
@@ -136,10 +95,7 @@ function createIpcHarness({ nanoEngine = createNanoEngineStub() } = {}) {
     loadAndRegister() {
       clearContractModules();
       const { register } = require("../main/ipc/tts.js");
-      register({
-        getMainWindow: () => browserWindow,
-        getLibrary: () => [],
-      });
+      register({ getMainWindow: () => browserWindow, getLibrary: () => [] });
     },
   };
 }
@@ -161,9 +117,7 @@ function createPreloadHarness() {
       on: vi.fn(),
       removeListener: vi.fn(),
     },
-    webUtils: {
-      getPathForFile: vi.fn((file) => file.path),
-    },
+    webUtils: { getPathForFile: vi.fn((file) => file.path) },
   };
 
   Module._load = function patchedLoad(request, parent, isMain) {
@@ -174,10 +128,7 @@ function createPreloadHarness() {
   clearContractModules();
   require("../preload.js");
 
-  return {
-    exposedApi,
-    invoked,
-  };
+  return { exposedApi, invoked };
 }
 
 beforeEach(() => {
@@ -192,10 +143,9 @@ afterEach(() => {
   clearContractModules();
 });
 
-describe("experimental MOSS Nano IPC contract", () => {
-  it("registers the experimental Nano IPC handlers without renaming existing Kokoro handlers", () => {
+describe("MOSS Nano IPC dormancy contract", () => {
+  it("registers Nano IPC channels without renaming Kokoro channels", () => {
     const harness = createIpcHarness();
-
     harness.loadAndRegister();
 
     expect([...harness.ipcHandlers.keys()]).toEqual(expect.arrayContaining([
@@ -205,8 +155,6 @@ describe("experimental MOSS Nano IPC contract", () => {
       "tts-kokoro-download",
       "tts-kokoro-preload",
       "tts-kokoro-preflight",
-      "tts-kokoro-generate-marathon",
-      "tts-kokoro-preload-marathon",
       "tts-nano-status",
       "tts-nano-synthesize",
       "tts-nano-cancel",
@@ -215,98 +163,47 @@ describe("experimental MOSS Nano IPC contract", () => {
     ]));
   });
 
-  it("passes Kokoro preflight through the dedicated IPC channel", async () => {
+  it("fails closed for all Nano runtime entry points with engine-dormant", async () => {
     const harness = createIpcHarness();
-
     harness.loadAndRegister();
 
-    const handler = harness.ipcHandlers.get("tts-kokoro-preflight");
-    expect(handler).toBeTypeOf("function");
-    await expect(handler()).resolves.toMatchObject({
-      ok: true,
-      status: "offline-ready",
+    await expect(harness.ipcHandlers.get("tts-nano-status")()).resolves.toMatchObject({
+      ok: false,
+      status: "unavailable",
+      reason: "engine-dormant",
       ready: false,
       loading: false,
       recoverable: false,
-      offlineReady: true,
     });
-  });
 
-  it("maps thrown Nano engine failures to structured IPC responses", async () => {
-    const engineError = Object.assign(new Error("Nano sidecar unavailable"), {
-      reason: "sidecar-not-ready",
-      status: "unavailable",
-      recoverable: true,
-    });
-    const nanoEngine = createNanoEngineStub({
-      status: vi.fn().mockRejectedValue(engineError),
-      synthesize: vi.fn().mockRejectedValue(engineError),
-      cancel: vi.fn().mockRejectedValue(engineError),
-      shutdown: vi.fn().mockRejectedValue(engineError),
-      restart: vi.fn().mockRejectedValue(engineError),
-    });
-    const harness = createIpcHarness({ nanoEngine });
-
-    harness.loadAndRegister();
-
-    const cases = [
-      ["tts-nano-status", []],
+    for (const [channel, args] of [
       ["tts-nano-synthesize", [{ text: "hello nano", voice: "default", rate: 1.0 }]],
       ["tts-nano-cancel", ["nano-req-1"]],
       ["tts-nano-shutdown", []],
       ["tts-nano-restart", []],
-    ];
-
-    for (const [channel, args] of cases) {
-      const handler = harness.ipcHandlers.get(channel);
-      expect(handler, `${channel} handler`).toBeTypeOf("function");
-      await expect(handler(null, ...args)).resolves.toEqual({
+    ]) {
+      await expect(harness.ipcHandlers.get(channel)(null, ...args)).resolves.toMatchObject({
         ok: false,
-        error: "Nano sidecar unavailable",
-        reason: "sidecar-not-ready",
         status: "unavailable",
-        recoverable: true,
+        reason: "engine-dormant",
+        recoverable: false,
       });
     }
-  });
 
-  it("returns Nano synthesize audio output through the existing IPC channel", async () => {
-    const nanoResult = {
-      ok: true,
-      requestId: "nano-req-1",
-      ownerToken: "owner-1",
-      audio: [0, 0.1, -0.1, 0],
-      sampleRate: 24000,
-      durationMs: 50,
-      outputPath: "C:\\fake\\nano-req-1.wav",
-    };
-    const nanoEngine = createNanoEngineStub({
-      synthesize: vi.fn().mockResolvedValue(nanoResult),
-    });
-    const harness = createIpcHarness({ nanoEngine });
-
-    harness.loadAndRegister();
-
-    const payload = { text: "hello nano", voice: "default", rate: 1.0 };
-    await expect(harness.ipcHandlers.get("tts-nano-synthesize")(null, payload)).resolves.toEqual(nanoResult);
-    expect(nanoEngine.synthesize).toHaveBeenCalledWith(payload);
+    expect(harness.nanoEngine.status).not.toHaveBeenCalled();
+    expect(harness.nanoEngine.synthesize).not.toHaveBeenCalled();
+    expect(harness.nanoEngine.cancel).not.toHaveBeenCalled();
+    expect(harness.nanoEngine.shutdown).not.toHaveBeenCalled();
+    expect(harness.nanoEngine.restart).not.toHaveBeenCalled();
   });
 });
 
-describe("experimental MOSS Nano preload contract", () => {
-  it("exposes Nano preload methods without renaming existing Kokoro methods", async () => {
+describe("MOSS Nano preload contract", () => {
+  it("keeps preload bridge channels stable", async () => {
     const { exposedApi, invoked } = createPreloadHarness();
 
-    expect(exposedApi).toBeTruthy();
     expect(exposedApi).toEqual(expect.objectContaining({
-      kokoroPreload: expect.any(Function),
       kokoroPreflight: expect.any(Function),
-      kokoroGenerate: expect.any(Function),
-      kokoroPreloadMarathon: expect.any(Function),
-      kokoroGenerateMarathon: expect.any(Function),
-      kokoroVoices: expect.any(Function),
-      kokoroModelStatus: expect.any(Function),
-      kokoroDownload: expect.any(Function),
       nanoStatus: expect.any(Function),
       nanoSynthesize: expect.any(Function),
       nanoCancel: expect.any(Function),

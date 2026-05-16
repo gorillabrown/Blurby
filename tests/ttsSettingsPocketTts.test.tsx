@@ -5,24 +5,16 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_SETTINGS,
-  QWEN_TTS_DISABLED,
-  TTS_DEFAULT_ENGINE,
   normalizeSelectableTtsEngine,
   profileFromSettings,
 } from "../src/constants";
-import type { BlurbySettings, PocketTtsStatusSnapshot } from "../src/types";
-
-const playBufferMock = vi.hoisted(() => vi.fn());
-
-vi.mock("../src/utils/audioPlayer", () => ({
-  playBuffer: playBufferMock,
-}));
+import type { BlurbySettings } from "../src/types";
 
 function flushPromises() {
   return Promise.resolve().then(() => Promise.resolve()).then(() => Promise.resolve());
 }
 
-function createElectronApiMock(initialPocketStatus?: Partial<PocketTtsStatusSnapshot> | null) {
+function createElectronApiMock() {
   return {
     kokoroModelStatus: vi.fn().mockResolvedValue({
       status: "idle",
@@ -38,56 +30,45 @@ function createElectronApiMock(initialPocketStatus?: Partial<PocketTtsStatusSnap
     onKokoroDownloadError: vi.fn(() => () => {}),
     qwenModelStatus: vi.fn().mockResolvedValue({
       status: "unavailable",
-      detail: "Qwen runtime config was not found",
-      reason: "config-missing",
+      detail: "Qwen is retired for Desktop v2 and remains disabled.",
+      reason: "qwen-disabled",
       ready: false,
       loading: false,
-      recoverable: true,
+      recoverable: false,
     }),
     qwenPreload: vi.fn().mockResolvedValue({
-      error: "Qwen runtime config was not found",
+      error: "Qwen is retired for Desktop v2 and remains disabled.",
       status: "unavailable",
-      reason: "config-missing",
-      recoverable: true,
+      reason: "qwen-disabled",
+      recoverable: false,
     }),
     qwenVoices: vi.fn().mockResolvedValue({ voices: [] }),
     onQwenEngineStatus: vi.fn(() => () => {}),
     onQwenRuntimeError: vi.fn(() => () => {}),
     nanoStatus: vi.fn().mockResolvedValue({
-      ok: true,
+      ok: false,
       status: "unavailable",
-      detail: "Nano sidecar is not running",
-      reason: "sidecar-not-started",
+      detail: "MOSS-Nano is dormant for this Kokoro-focused architecture phase and is unavailable.",
+      reason: "engine-dormant",
       ready: false,
       loading: false,
-      recoverable: true,
+      recoverable: false,
     }),
     nanoSynthesize: vi.fn(),
-    pocketStatus: initialPocketStatus === null
-      ? undefined
-      : vi.fn().mockResolvedValue({
-          ok: true,
-          status: "unavailable",
-          detail: "Pocket sidecar is not running",
-          reason: "sidecar-missing",
-          ready: false,
-          loading: false,
-          recoverable: true,
-          ...initialPocketStatus,
-        }),
-    pocketSynthesize: vi.fn().mockResolvedValue({
-      ok: true,
-      status: "ready",
-      audio: new Float32Array([0, 0.2, -0.2, 0]),
-      sampleRate: 24000,
-      durationMs: 60,
-      requestId: "preview-1",
-      ownerToken: "owner-1",
+    pocketStatus: vi.fn().mockResolvedValue({
+      ok: false,
+      status: "unavailable",
+      detail: "Pocket TTS is dormant for this Kokoro-focused architecture phase and is unavailable.",
+      reason: "engine-dormant",
+      ready: false,
+      loading: false,
+      recoverable: false,
     }),
+    pocketSynthesize: vi.fn(),
   };
 }
 
-describe("TTSSettings Pocket TTS opt-in UI", () => {
+describe("TTSSettings Pocket TTS dormancy UI", () => {
   let container: HTMLDivElement;
   let root: Root;
 
@@ -110,8 +91,8 @@ describe("TTSSettings Pocket TTS opt-in UI", () => {
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
-    playBufferMock.mockClear();
-    (window as any).electronAPI = createElectronApiMock(null);
+    (window as any).electronAPI = createElectronApiMock();
+
     Object.defineProperty(window, "speechSynthesis", {
       configurable: true,
       value: {
@@ -132,47 +113,18 @@ describe("TTSSettings Pocket TTS opt-in UI", () => {
     delete (window as any).electronAPI;
   });
 
-  it("keeps Kokoro as default while adding Pocket after Nano", async () => {
+  it("shows Pocket as dormant and non-selectable", async () => {
     await renderSettings(DEFAULT_SETTINGS as BlurbySettings);
 
-    const engineGroup = container.querySelector(".tts-engine-toggle");
-    const engineButtons = Array.from(container.querySelectorAll(".tts-engine-toggle button"));
-    expect(engineGroup?.getAttribute("role")).toBe("group");
-    expect(engineGroup?.getAttribute("aria-label")).toBe("Narration voice engine");
-    expect(engineButtons.map((button) => button.textContent?.trim())).toEqual([
-      "Qwen AI (Retired)",
-      "System",
-      "Kokoro (Default)",
-      "MOSS-Nano (Recommended opt-in)",
-      "Pocket TTS (Opt-in)",
-    ]);
-    const kokoroButton = engineButtons.find((button) => button.textContent?.includes("Kokoro"));
-    expect(kokoroButton?.getAttribute("aria-pressed")).toBe("true");
-    expect(TTS_DEFAULT_ENGINE).toBe("kokoro");
-    expect((DEFAULT_SETTINGS as BlurbySettings).ttsEngine).toBe("kokoro");
-  });
-
-  it("keeps Qwen disabled when Pocket is introduced", async () => {
-    await renderSettings(DEFAULT_SETTINGS as BlurbySettings);
-
-    const qwenButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
-      (button) => button.textContent?.includes("Qwen AI"),
+    const pocketButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
+      (button) => button.textContent?.includes("Pocket TTS"),
     );
-    expect(QWEN_TTS_DISABLED).toBe(true);
-    expect(qwenButton?.hasAttribute("disabled")).toBe(true);
-    expect(qwenButton?.className).not.toContain("active");
-    expect(container.textContent).toContain("Qwen is retired for Desktop v2 and remains disabled.");
+    expect(pocketButton?.textContent).toContain("Dormant");
+    expect(pocketButton?.hasAttribute("disabled")).toBe(true);
+    expect(container.textContent).toContain("Pocket TTS is dormant for this Kokoro-focused architecture phase");
   });
 
-  it("selects Pocket only when the Pocket sidecar API exists", async () => {
-    (window as any).electronAPI = createElectronApiMock({
-      status: "unavailable",
-      detail: "Pocket sidecar has not been started",
-      reason: "sidecar-not-started",
-      ready: false,
-      loading: false,
-      recoverable: true,
-    });
+  it("does not allow selecting dormant Pocket", async () => {
     const onSettingsChange = await renderSettings({
       ...(DEFAULT_SETTINGS as BlurbySettings),
       ttsEngine: "web",
@@ -182,112 +134,35 @@ describe("TTSSettings Pocket TTS opt-in UI", () => {
     const pocketButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
       (button) => button.textContent?.includes("Pocket TTS"),
     );
-    expect(pocketButton?.hasAttribute("disabled")).toBe(false);
+    expect(pocketButton?.hasAttribute("disabled")).toBe(true);
 
     await act(async () => {
       pocketButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       await flushPromises();
     });
 
-    expect(onSettingsChange).toHaveBeenCalledWith({ ttsEngine: "pocket-tts", ttsVoiceName: null });
+    expect(onSettingsChange).not.toHaveBeenCalledWith(expect.objectContaining({ ttsEngine: "pocket-tts" }));
   });
+});
 
-  it("disables Pocket selection when the sidecar API is unavailable", async () => {
-    (window as any).electronAPI = createElectronApiMock(null);
-
-    await renderSettings(DEFAULT_SETTINGS as BlurbySettings);
-
-    const pocketButton = Array.from(container.querySelectorAll(".tts-engine-toggle button")).find(
-      (button) => button.textContent?.includes("Pocket TTS"),
-    );
-    expect(pocketButton?.hasAttribute("disabled")).toBe(true);
-    expect(container.textContent).toContain("Pocket sidecar API is unavailable.");
-  });
-
-  it("shows Pocket blocked status without enabling preview", async () => {
-    (window as any).electronAPI = createElectronApiMock({
-      status: "unavailable",
-      detail: "Pocket runtime directory is missing",
-      reason: "runtime-missing",
-      ready: false,
-      loading: false,
-      recoverable: true,
-    });
-
-    await renderSettings({
-      ...(DEFAULT_SETTINGS as BlurbySettings),
-      ttsEngine: "pocket-tts",
-      ttsVoiceName: null,
-    });
-
-    expect(container.textContent).toContain("Pocket runtime blocked");
-    expect(container.textContent).toContain("Pocket runtime directory is missing");
-    const testVoiceButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.includes("Test voice"),
-    );
-    expect(testVoiceButton?.hasAttribute("disabled")).toBe(true);
-    expect((window as any).electronAPI.pocketSynthesize).not.toHaveBeenCalled();
-    expect(container.textContent).toContain("Pocket TTS is opt-in and wired at the app boundary.");
-    expect(container.textContent).toContain("Upstream synthesis remains scaffolded until adapter work is approved.");
-  });
-
-  it("previews ready Pocket through pocketStatus and pocketSynthesize", async () => {
-    (window as any).electronAPI = createElectronApiMock({
-      status: "ready",
-      detail: "Pocket sidecar ready",
-      reason: null,
-      ready: true,
-      loading: false,
-      recoverable: false,
-    });
-
-    await renderSettings({
-      ...(DEFAULT_SETTINGS as BlurbySettings),
-      ttsEngine: "pocket-tts",
-      ttsVoiceName: null,
-      ttsRate: 1.1,
-    });
-
-    const testVoiceButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.includes("Test voice"),
-    );
-    expect(testVoiceButton?.hasAttribute("disabled")).toBe(false);
-
-    await act(async () => {
-      testVoiceButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      await flushPromises();
-    });
-
-    expect((window as any).electronAPI.pocketStatus).toHaveBeenCalled();
-    expect((window as any).electronAPI.pocketSynthesize).toHaveBeenCalledWith({
-      text: "The quick brown fox jumps over the lazy dog.",
-      voice: "default",
-      rate: 1.1,
-    });
-    expect(playBufferMock).toHaveBeenCalledWith(
-      expect.any(Float32Array),
-      24000,
-      60,
-      9,
-      undefined,
-      expect.any(Function),
-    );
-  });
-
-  it("normalizes Pocket as selectable while unknown engines fall back to Kokoro", () => {
-    expect(normalizeSelectableTtsEngine("pocket-tts")).toBe("pocket-tts");
+describe("Selectable engine normalization", () => {
+  it("falls back to Kokoro for dormant and unknown engines", () => {
+    expect(normalizeSelectableTtsEngine("web")).toBe("web");
+    expect(normalizeSelectableTtsEngine("kokoro")).toBe("kokoro");
     expect(normalizeSelectableTtsEngine("qwen")).toBe("kokoro");
+    expect(normalizeSelectableTtsEngine("nano")).toBe("kokoro");
+    expect(normalizeSelectableTtsEngine("pocket-tts")).toBe("kokoro");
     expect(normalizeSelectableTtsEngine("surprise")).toBe("kokoro");
   });
 
-  it("keeps Pocket profile voice internal-only like Nano", () => {
+  it("normalizes imported pocket profile settings to Kokoro", () => {
     const profile = profileFromSettings("Pocket", {
       ...(DEFAULT_SETTINGS as BlurbySettings),
       ttsEngine: "pocket-tts",
-      ttsVoiceName: "should-not-persist",
+      ttsVoiceName: null,
     });
 
-    expect(profile.ttsEngine).toBe("pocket-tts");
+    expect(profile.ttsEngine).toBe("kokoro");
     expect(profile.ttsVoiceName).toBeNull();
   });
 });

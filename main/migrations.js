@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 11;
+const CURRENT_SETTINGS_SCHEMA = 12;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -131,6 +131,34 @@ const settingsMigrations = [
       });
     }
     data.schemaVersion = 11;
+    return data;
+  },
+  // v11 → v12: mark Nano and Pocket TTS dormant at settings boundary
+  (data) => {
+    if (
+      data.ttsEngine === "qwen" ||
+      data.ttsEngine === "nano" ||
+      data.ttsEngine === "pocket-tts" ||
+      data.ttsEngine === undefined ||
+      data.ttsEngine === null
+    ) {
+      data.ttsEngine = "kokoro";
+      data.ttsVoiceName = null;
+    }
+    if (Array.isArray(data.narrationProfiles)) {
+      data.narrationProfiles = data.narrationProfiles.map((profile) => {
+        if (!profile) return profile;
+        if (profile.ttsEngine !== "qwen" && profile.ttsEngine !== "nano" && profile.ttsEngine !== "pocket-tts") {
+          return profile;
+        }
+        return {
+          ...profile,
+          ttsEngine: "kokoro",
+          ttsVoiceName: null,
+        };
+      });
+    }
+    data.schemaVersion = 12;
     return data;
   },
 ];

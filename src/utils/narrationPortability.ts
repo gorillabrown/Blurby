@@ -145,12 +145,15 @@ export function applyNarrationImport(
 
 function normalizeImportedProfile(profile: NarrationProfile): NarrationProfile {
   const ttsEngine = normalizeSelectableTtsEngine(profile.ttsEngine);
-  const voicePinnedToRuntime = ttsEngine === "nano" || ttsEngine === "pocket-tts";
+  const migratedFromDormantEngine =
+    profile.ttsEngine === "qwen" ||
+    profile.ttsEngine === "nano" ||
+    profile.ttsEngine === "pocket-tts";
 
   return {
     ...profile,
     ttsEngine,
-    ttsVoiceName: voicePinnedToRuntime || profile.ttsEngine === "qwen" ? null : profile.ttsVoiceName,
+    ttsVoiceName: migratedFromDormantEngine ? null : profile.ttsVoiceName,
   };
 }
 

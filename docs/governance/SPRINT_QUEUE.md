@@ -56,24 +56,23 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: TTS Architecture Complete — Kokoro as sole active local/cacheable model engine (Web Speech remains a platform fallback), every implicit TTS architecture decision made explicit, tested, and debuggable.
-Queue depth: 8 prepared FIFO pointers (GREEN; 8 full specs, 0 stubs)
-Active head: ENGINE-DORMANCY-1 — dispatch-ready. SK-HYG-2 completed without displacing this head.
-Health: GREEN. Findings integration (2026-05-15 PM2): TTS-CACHE-HARDEN-1 added between TTS-INTEGRATE-1 and TTS-EVENT-SYNC-1 — addresses cache-hit timing parity (impl review A8), timing type harmonization, IPC shape validation, and cache key safety. Source: Kokoro TTS Implementation Review (2026-05-15) + Cross-Codebase TTS Literature Review (2026-05-11). Existing sprints updated with findings-derived criteria: TTS-EVENT-SYNC-1 (A9 note), TTS-PIPELINE-1 (cache parity test + stress fixtures), TTS-ARCH-DOC-1 (error taxonomy + findings provenance + cache evolution). Parallel Lane E hygiene work completed as SK-HYG-2 and did not alter the TTS FIFO conveyor.
-Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; 8-sprint conveyor; eager-spec buffer 8/8).
+Queue depth: 7 prepared FIFO pointers (GREEN; 7 full specs, 0 stubs)
+Active head: TTS-INTEGRATE-1 — dispatch-ready after ENGINE-DORMANCY-1.
+Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. Findings integration (2026-05-15 PM2): TTS-CACHE-HARDEN-1 added between TTS-INTEGRATE-1 and TTS-EVENT-SYNC-1 — addresses cache-hit timing parity (impl review A8), timing type harmonization, IPC shape validation, and cache key safety. Source: Kokoro TTS Implementation Review (2026-05-15) + Cross-Codebase TTS Literature Review (2026-05-11). Existing sprints updated with findings-derived criteria: TTS-EVENT-SYNC-1 (A9 note), TTS-PIPELINE-1 (cache parity test + stress fixtures), TTS-ARCH-DOC-1 (error taxonomy + findings provenance + cache evolution). Parallel Lane E hygiene work completed as SK-HYG-2 and did not alter the TTS FIFO conveyor.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor now advanced to 7 after ENGINE-DORMANCY-1).
 ```
 
 ## TTS Architecture Completion Conveyor Belt (Active — Kokoro-Only)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
-| 1 | ENGINE-DORMANCY-1 | Stage 0: Kokoro Focus | S | None | Full spec — dispatch-ready |
-| 2 | TTS-INTEGRATE-1 | Stage 1: Sync & Diagnostics | S-M | ENGINE-DORMANCY-1 | UNBLOCKED by dormancy (Nano probes irrelevant) |
-| 3 | TTS-CACHE-HARDEN-1 | Stage 1: Cache Hardening | S-M | TTS-INTEGRATE-1 | Full spec (findings: impl review A8 + lit review §4.6) |
-| 4 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 | Full spec (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
-| 5 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
-| 6 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
-| 7 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
-| 8 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
+| 1 | TTS-INTEGRATE-1 | Stage 1: Sync & Diagnostics | S-M | ENGINE-DORMANCY-1 | Dispatch-ready; dormancy gate complete |
+| 2 | TTS-CACHE-HARDEN-1 | Stage 1: Cache Hardening | S-M | TTS-INTEGRATE-1 | Full spec (findings: impl review A8 + lit review §4.6) |
+| 3 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 | Full spec (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
+| 4 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
+| 5 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
+| 6 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
+| 7 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
 
 Dissolved sprints (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1 (Nano probes irrelevant), TTS-CANARY-1 (sidecar engines dormant), TTS-REGISTRY-DISPATCH-1 (single active engine).
 
@@ -123,41 +122,13 @@ Closeout: `docs/governance/close-outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-
 ## Ready Queue Pointers
 
 ```text
-Sprint: ENGINE-DORMANCY-1 — Disable MOSS-Nano And Pocket TTS At Settings Boundary
-Status: Dispatch-ready. First sprint in Kokoro-only pivot.
-Type: Posture change; disables non-Kokoro engines at settings/selection boundary and IPC entry points. No code deletion.
-
-WHAT: Disable MOSS-Nano and Pocket TTS at the settings boundary and IPC runtime entry points, following the same pattern as Qwen. Profile migration to Kokoro. MOSS Nano probe tests skipped or gated. Unblocks TTS-INTEGRATE-1.
-
-HYPOTHESIS: Disabling sidecar engines at the settings boundary removes test instability, unblocks the integration merge, and lets all TTS energy focus on Kokoro optimization.
-
-WHERE:
-  - `ROADMAP.md` § "Sprint ENGINE-DORMANCY-1: Disable MOSS-Nano And Pocket TTS At Settings Boundary"
-  - `src/utils/ttsProviderRegistry.ts` (posture update)
-  - `src/components/settings/TTSSettings.tsx` (dormancy UX)
-  - `main/ipc/tts.js` (IPC guards for nano/pocket handlers)
-  - `src/hooks/useNarration.ts` (profile migration)
-  - `tests/mossNanoProbe.test.js` (skip or opt-in gate)
-  - Reference: POSTV2-ENGINE-1 Qwen-disable pattern
-
-HOW (Implementation):
-  Hermes [haiku] {medium}: Apply Qwen-disable pattern to MOSS-Nano and Pocket TTS entries. Profile migration, IPC guards, test skip.
-
-HOW (Verification):
-  Hippocrates [haiku] {medium}: Full `npm test`, `npm run typecheck`, `npm run build`, `git diff --check`.
-
-HOW (Review / Closeout):
-  Solon [sonnet] {low}: Confirm no Nano/Pocket code deleted, engines unselectable, profiles migrate, probes gated.
-```
-
-```text
 Sprint: TTS-INTEGRATE-1 — Integrate TTS Sync And Diagnostics Stack
-Status: UNBLOCKED by ENGINE-DORMANCY-1 (Nano probes irrelevant after dormancy).
+Status: Dispatch-ready. ENGINE-DORMANCY-1 has gated the Nano/Pocket sidecar lanes and removed the broad-suite Nano probe blocker.
 Type: Git integration + verification; no new product behavior beyond landing already-reviewed work.
 
-WHAT: Merge `origin/sprint/tts-sync-1-highlight-controller` first, then merge stacked `origin/sprint/tts-diag-1-diagnostics-bundle` onto canonical main after ENGINE-DORMANCY-1 lands.
+WHAT: Merge `origin/sprint/tts-sync-1-highlight-controller` first, then merge stacked `origin/sprint/tts-diag-1-diagnostics-bundle` onto canonical main.
 
-HYPOTHESIS: With Nano probes gated by dormancy, the integration merge should pass full `npm test` cleanly.
+HYPOTHESIS: With Nano probes gated by dormancy, the integration merge should pass full `npm test` cleanly and land the sync/diagnostics architecture onto canonical main.
 
 WHERE:
   - Branch `sprint/tts-integrate-1-sync-diag-main` (or fresh from updated main)
@@ -360,6 +331,7 @@ Effort: S (~1).
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| ENGINE-DORMANCY-1 | 2026-05-16 | PASS — MOSS-Nano and Pocket TTS are dormant at settings selection and IPC runtime entry. Registry/settings posture now presents Kokoro as the sole active local/cacheable model engine while preserving Nano/Pocket code; stale Nano, Pocket, and Qwen settings profiles migrate to Kokoro; direct `tts-nano-*` and `tts-pocket-*` calls fail closed with `reason: "engine-dormant"`; and MOSS Nano performance probes are explicit opt-in rather than default-suite blockers. Verification: targeted suite 8 files / 47 tests passed; full suite 185 files passed with 1 skipped, 2499 tests passed and 132 skipped tests; `npm run typecheck` passed; `npm run build` passed with the existing circular chunk warning. Closeout: `docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md`. |
 | TTS-INTEGRATE-1 | 2026-05-15 | BLOCKED — Clean integration worktree `C:\tmp\Blurby-tts-integrate-1` on branch `sprint/tts-integrate-1-sync-diag-main` merged TTS-SYNC-1 first and stacked TTS-DIAG-1 second. Focused sync verification passed 9 files / 94 tests; focused diagnostics verification passed 4 files / 18 tests; `npm run typecheck` and `npm run build` passed. Full `npm test` failed in `tests/mossNanoProbe.test.js` with 3 performance-class failures, so no commit, push, or merge was performed. |
 | TTS-DIAG-1 | 2026-05-15 | PASS — Provider-neutral `tts-diagnostics-v1` narration diagnostics bundle is implemented on stacked branch `sprint/tts-diag-1-diagnostics-bundle` at `c97e446`; canonical `main` merge remains gated until TTS-INTEGRATE-1 is unblocked. Bundle captures provider capabilities, selected engine/voice/rate, segment IDs, original/normalized hashes, cache key components, timing sidecar summaries, scheduler truth events, highlight sync decisions, and relevant errors without exporting audio payloads or raw book text by default. Redaction guardrails recursively strip/reject `rawText`, `originalText`, `normalizedText`, and audio-shaped fields; diagnostics observe `HighlightSyncController` decisions without changing cursor ownership. Verification: focused diagnostics slice 4 files / 18 tests, full `npm test` 184 files / 2606 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
 | TTS-SYNC-1 | 2026-05-15 | PASS — Timing metadata and highlight sync policy are centralized on pushed branch `sprint/tts-sync-1-highlight-controller` at `142dc24`; canonical `main` merge is pending because the main worktree contains unrelated dirty work. `TimingMetadataStore` stores chunk timing metadata with trusted/heuristic/missing classification and queries by chunk, segment, word, or time; `HighlightSyncController` allows word-synced decisions only for trusted word-native timing and downgrades heuristic/missing timing to chunk/segment decisions with no active word. Scheduler/Kokoro/useNarration wiring publishes and stores timing metadata; `ReaderContainer` consumes controller decisions without changing Flow WPM timing, Narrate spoken timing, autoplay behavior, provider defaults, Qwen disablement, or `lastConfirmedAudioWordRef` ownership. Verification: focused pre-change sync baseline 8 files / 85 tests, focused sync regression 9 files / 93 tests, full `npm test` 181 files / 2598 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |

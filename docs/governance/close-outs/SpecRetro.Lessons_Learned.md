@@ -238,3 +238,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future probe specs should split deterministic contract checks from host-sensitive live performance checks, and document the opt-in environment variable or command that runs the live lane.
 **Applies to:** Performance probes, hardware/runtime-sensitive tests, broad verification gates, and integration unblockers
 **Status:** Observation
+
+### SRL-031 — Engine dormancy should be dual-gated at settings load and IPC entry (ENGINE-DORMANCY-1, 2026-05-16)
+**Verdict:** The dormancy posture is safer when stale persisted settings and direct runtime channels are both handled explicitly.
+**Evidence:** ENGINE-DORMANCY-1 migrated stale Nano, Pocket, and Qwen profile selections to Kokoro on settings load, while `tts-nano-*` and `tts-pocket-*` IPC entry points fail closed with `reason: "engine-dormant"`. This prevents dormant engines from re-entering through either user settings or direct channel calls.
+**Recommendation:** Future engine-disable or engine-dormancy specs should require both gates: persisted-selection normalization and IPC/runtime fail-closed guards. Tests should cover both paths.
+**Applies to:** Engine posture changes, provider retirement/dormancy work, settings migrations, and IPC runtime gating
+**Status:** Observation

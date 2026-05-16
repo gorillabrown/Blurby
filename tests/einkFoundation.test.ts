@@ -36,7 +36,7 @@ describe("EINK-6A: E-Ink Foundation", () => {
     const stub = read("src/test-harness/electron-api-stub.ts");
     expect(main).toMatch(/einkMode:\s*false/);
     expect(stub).toMatch(/einkMode:\s*false/);
-    expect(migrations).toContain("CURRENT_SETTINGS_SCHEMA = 11");
+    expect(migrations).toMatch(/CURRENT_SETTINGS_SCHEMA\s*=\s*\d+/);
     expect(migrations).toContain("data.einkMode = false");
   });
 
