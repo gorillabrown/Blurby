@@ -245,3 +245,17 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future engine-disable or engine-dormancy specs should require both gates: persisted-selection normalization and IPC/runtime fail-closed guards. Tests should cover both paths.
 **Applies to:** Engine posture changes, provider retirement/dormancy work, settings migrations, and IPC runtime gating
 **Status:** Observation
+
+### SRL-032 — Stacked integration sprints should preserve merge order and rerun focused plus broad gates (TTS-INTEGRATE-1, 2026-05-16)
+**Verdict:** The integration succeeded because it treated branch order as part of the contract, not incidental git mechanics.
+**Evidence:** TTS-INTEGRATE-1 merged `TTS-SYNC-1` before `TTS-DIAG-1`, then ran focused sync tests, focused diagnostics tests, typecheck, build, full test, and diff-check before the final `main` merge.
+**Recommendation:** Future stacked integration specs should name the required merge order, run focused suites for each source branch, then run the broad gate before governance advances.
+**Applies to:** Multi-branch integration sprints, stacked feature branches, architecture fold-ins, and branch-to-main governance reconciliation
+**Status:** Observation
+
+### SRL-033 — Branch-complete closeouts must not imply main-landed queue advancement (TTS-CACHE-HARDEN-1, 2026-05-16)
+**Verdict:** The implementation was successful, but the handoff summary mixed completion language with a still-unmerged branch state.
+**Evidence:** At the first closeout pass, TTS-CACHE-HARDEN-1 was pushed at `53c7862` on `origin/sprint/tts-cache-harden-1-cache-pipeline-parity`, while canonical `main` still remained at `f1d5b4f`; the supplied PR link was a PR creation URL, not a landed merge. The branch later landed via merge commit `c54dd0f`.
+**Recommendation:** Future closeout summaries should explicitly label status as `branch-complete`, `PR-open`, `merged-to-main`, or `pushed-to-main`, and roadmap advancement should require the final state.
+**Applies to:** Sprint closeouts, branch-to-main governance reconciliation, next-pointer readiness checks
+**Status:** Observation; related to SRL-027 and worth promoting if this recurs.

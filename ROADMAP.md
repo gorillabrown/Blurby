@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-16 — TTS-INTEGRATE-1 completed; TTS-SYNC-1 and TTS-DIAG-1 are now landed on canonical `main` via ordered integration merges.
+**Last updated**: 2026-05-16 — TTS-CACHE-HARDEN-1 completed and merged to canonical `main`; cache-hit timing parity is now landed.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 6 (6 full specs, 0 stubs).
+**Queue**: GREEN depth 5 (5 full specs, 0 stubs).
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
@@ -14,7 +14,7 @@
 ## Active Conveyor
 
 ```
-TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
+TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
     → TTS-PIPELINE-1 → TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
 ```
 
@@ -57,7 +57,7 @@ TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-M
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → TTS-CACHE-HARDEN-1 (findings-driven) → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -107,6 +107,8 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ---
 
 #### Sprint TTS-CACHE-HARDEN-1: Cache/Pipeline Type Safety And Timing Identity Parity
+
+**Status:** Completed on 2026-05-16. Sprint branch `sprint/tts-cache-harden-1-cache-pipeline-parity` commit `53c7862` merged into canonical `main` via `c54dd0f`. Reported verification passed: focused sprint tests (5 files / 48 tests), `npm run typecheck`, `npm run build`, full `npm test` (183 passed, 1 skipped files; 2467 passed, 132 skipped tests), and `git diff --check`.
 
 **What:** Fix cache-hit/miss observational asymmetry, harmonize timing classification types, add runtime shape validation at the main↔renderer IPC boundary, and harden pipeline edge cases (dangling promises, backpressure on resume, cache key safety). This sprint makes the cache layer honest — downstream consumers (highlight sync controller, diagnostics bundle, event-driven sync) can trust that a cached chunk carries the same metadata as a freshly generated one.
 

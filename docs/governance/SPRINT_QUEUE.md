@@ -56,22 +56,21 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: TTS Architecture Complete — Kokoro as sole active local/cacheable model engine (Web Speech remains a platform fallback), every implicit TTS architecture decision made explicit, tested, and debuggable.
-Queue depth: 6 prepared FIFO pointers (GREEN; 6 full specs, 0 stubs)
-Active head: TTS-CACHE-HARDEN-1 — dispatch-ready after TTS-INTEGRATE-1 completion.
-Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16: `origin/sprint/tts-sync-1-highlight-controller` merged first and `origin/sprint/tts-diag-1-diagnostics-bundle` merged second on `sprint/tts-integrate-1-sync-diag-main`, followed by focused sync + focused diagnostics + full-suite verification (`npm run typecheck`, `npm run build`, `npm test`, `git diff --check` all passed). Findings integration (2026-05-15 PM2) remains active in queue ordering: TTS-CACHE-HARDEN-1 addresses cache-hit timing parity (impl review A8), timing type harmonization, IPC shape validation, and cache key safety.
-Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1 and to 6 after TTS-INTEGRATE-1 landed).
+Queue depth: 5 prepared FIFO pointers (GREEN; 5 full specs, 0 stubs)
+Active head: TTS-EVENT-SYNC-1 — dispatch-ready after TTS-CACHE-HARDEN-1 completion.
+Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16, followed by TTS-CACHE-HARDEN-1 landing on 2026-05-16 via merge commit `c54dd0f`. Cache-hit timing parity, timing type harmonization, IPC shape validation, and cache key safety are now present on canonical `main`; TTS-EVENT-SYNC-1 is unblocked.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1, to 6 after TTS-INTEGRATE-1 landed, and to 5 after TTS-CACHE-HARDEN-1 landed).
 ```
 
 ## TTS Architecture Completion Conveyor Belt (Active — Kokoro-Only)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
-| 1 | TTS-CACHE-HARDEN-1 | Stage 1: Cache Hardening | S-M | TTS-INTEGRATE-1 (completed 2026-05-16) | Dispatch-ready (findings: impl review A8 + lit review §4.6) |
-| 2 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 | Full spec (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
-| 3 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
-| 4 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
-| 5 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
-| 6 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
+| 1 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 (completed 2026-05-16) | Dispatch-ready (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
+| 2 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
+| 3 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
+| 4 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
+| 5 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
 
 Dissolved sprints (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1 (Nano probes irrelevant), TTS-CANARY-1 (sidecar engines dormant), TTS-REGISTRY-DISPATCH-1 (single active engine).
 
@@ -121,38 +120,8 @@ Closeout: `docs/governance/close-outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-
 ## Ready Queue Pointers
 
 ```text
-Sprint: TTS-CACHE-HARDEN-1 — Cache/Pipeline Type Safety And Timing Identity Parity
-Status: Dispatch-ready; TTS-INTEGRATE-1 is complete and landed. Findings-driven: impl review A8 + lit review §4.6.
-Type: Implementation — cache-hit timing parity, type harmonization, IPC shape validation, cache key safety. No architectural changes.
-
-WHAT: Fix cache-hit/miss observational asymmetry (ScheduledChunk from cache lacks timingTruth/boundaryType that fresh chunks carry). Harmonize timing classification types (3 overlapping concepts → single canonical enum with full-record validation: truth + timestamps + count). Add IPC shape validation. Fix v1 cache key slash encoding. Core gate: 7 criteria. Opportunistic (if touched): dangling promise audit, resume backpressure.
-
-HYPOTHESIS: Cache-hit timing parity is required before TTS-EVENT-SYNC-1 — the highlight sync controller needs timingTruth metadata to make correct decisions, and cache hits currently don't carry it.
-
-WHERE:
-  - `ROADMAP.md` § "Sprint TTS-CACHE-HARDEN-1: Cache/Pipeline Type Safety And Timing Identity Parity"
-  - `src/utils/audioScheduler.ts:79-103` (ScheduledChunk interface — add timingTruth?, chunkId?)
-  - `src/utils/ttsCache.ts:26-55` (loadCachedChunk — rehydrate from sidecar)
-  - `src/types/ttsCache.ts:36-52` (classifyTiming helper taking full timing record, timingClassification derivation)
-  - `src/types/ttsProvider.ts:4-8` (canonical TtsProviderTimingTruth — no change)
-  - `main/tts-cache.js:135` (v1 key slash encoding)
-  - `main/ipc/tts.js` (IPC shape guard)
-  - `src/utils/generationPipeline.ts` (opportunistic: dangling promise audit, resume flush backpressure — only if touched during core work)
-
-HOW (Implementation):
-  Hephaestus [sonnet] {medium}: Core gate — ScheduledChunk field additions, sidecar rehydration, timing harmonization (full-record classifyTiming), IPC guard, v1 key encoding. Opportunistic — promise/backpressure audit if generationPipeline.ts is already open.
-
-HOW (Verification):
-  Hippocrates [haiku] {medium}: Cache-hit parity tests, timing derivation tests, v1 slash encoding tests, IPC shape rejection tests, full npm test/typecheck/build.
-
-HOW (Review / Closeout):
-  Solon [sonnet] {low}: Verify cache-hit/miss metadata parity, no cache eviction changes, no v1 legacy read path deletion, no engine posture changes.
-  Plato [sonnet] {low}: Timing ownership review, IPC boundary cleanliness.
-```
-
-```text
 Sprint: TTS-EVENT-SYNC-1 — Event-Driven Word Boundary Sync
-Status: Queued after TTS-CACHE-HARDEN-1. Priority: IMMEDIATE (user directive).
+Status: Dispatch-ready after TTS-CACHE-HARDEN-1 landed on 2026-05-16 via `c54dd0f`. Priority: IMMEDIATE (user directive).
 Type: Architecture change — event-driven word boundary sync (measurement-conditional RAF demotion, not removal). Research-driven (readest, RealtimeTTS, sioyek). Introduces NarrationSegmentAnchor (content-stable segment identity, see AD-1 in ROADMAP_SPECS.md).
 
 WHAT: Promote onTruthSync from visual-only hint to primary highlight-advance trigger. Add normalized→original word alignment table (normalizedToOriginalMap) to segmentNormalizer. Demote RAF getAudioProgress() + queryTime() polling from word-highlight hot path (measurement-conditional — RAF preserved as fallback). Elevate word-boundary emission to provider-level contract (emitsWordBoundaryEvents). Introduce NarrationSegmentAnchor = { bookId, startIdx, endIdx } as content-stable durable identity alongside cache-scoped chunkId.
