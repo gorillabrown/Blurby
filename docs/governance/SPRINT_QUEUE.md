@@ -4,7 +4,7 @@ BLURBY
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top pointer, read the referenced Roadmap section, then execute from the full spec. After completion, remove it, log it, backfill to ≥3.
 
-**Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained at all times. If depth drops below 3 after completion: Cluade Code investigates bottlenecks and issues; Cowork brainstorms and drafts specs (if next work is known) or stops to discuss (if not); Claude CLI performs work/receives dispatches. 
+**Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained at all times. If depth drops below 3 after completion: Cluade Code investigates bottlenecks and issues; Cowork brainstorms and drafts specs (if next work is known) or stops to discuss (if not); Claude CLI performs work/receives dispatches.
 
 No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and no code-changing pointer is dispatch-ready unless its referenced spec names explicit edit-site coordinates.
 
@@ -55,34 +55,55 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Finish line: Desktop v2.0 Shipping (three available engines at ship gate: Kokoro default, MOSS-Nano recommended opt-in per 13e, Pocket TTS available opt-in per POCKET-TTS-1)
-Queue depth: 2 prepared pointers (YELLOW; backfill required before dispatching beyond the currently queued architecture arc)
-Next queue item: TTS-SYNC-1 — Timing Metadata Store And Highlight Sync Controller
-Pre-dispatch gate: TTS-CACHE-TIMING-1 must be committed, merged to `main`, and pushed before starting TTS-SYNC-1.
-Health: GREEN on Desktop v2 release closeout, post-v2 remediation, Kokoro preflight truth, Kokoro chunk/timing hardening, KOKORO-DEEPEN-3 evidence closeout, TTS-REGISTRY-1 provider capability truth, TTS-NORMALIZE-1 spoken segment normalization/cache identity truth, and TTS-CACHE-TIMING-1 structured cache/timing sidecar truth. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen retired/disabled for Desktop v2. 2026-05-11 roadmap review promotes the Kokoro-centered architecture conveyor: provider registry → segment normalization → structured cache/timing sidecars → highlight sync → diagnostics.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation) → 2026-05-10 PM (Abogen Kokoro review; Kokoro Deepening Program queued) → 2026-05-11 PM (TTS synthesis review; architecture conveyor promoted).
+Finish line: TTS Architecture Complete — Kokoro as sole active local/cacheable model engine (Web Speech remains a platform fallback), every implicit TTS architecture decision made explicit, tested, and debuggable.
+Queue depth: 8 prepared FIFO pointers (GREEN; 8 full specs, 0 stubs)
+Active head: ENGINE-DORMANCY-1 — dispatch-ready. SK-HYG-2 completed without displacing this head.
+Health: GREEN. Findings integration (2026-05-15 PM2): TTS-CACHE-HARDEN-1 added between TTS-INTEGRATE-1 and TTS-EVENT-SYNC-1 — addresses cache-hit timing parity (impl review A8), timing type harmonization, IPC shape validation, and cache key safety. Source: Kokoro TTS Implementation Review (2026-05-15) + Cross-Codebase TTS Literature Review (2026-05-11). Existing sprints updated with findings-derived criteria: TTS-EVENT-SYNC-1 (A9 note), TTS-PIPELINE-1 (cache parity test + stress fixtures), TTS-ARCH-DOC-1 (error taxonomy + findings provenance + cache evolution). Parallel Lane E hygiene work completed as SK-HYG-2 and did not alter the TTS FIFO conveyor.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; 8-sprint conveyor; eager-spec buffer 8/8).
 ```
 
-## Desktop v2.0 Conveyor Belt (Active)
+## TTS Architecture Completion Conveyor Belt (Active — Kokoro-Only)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
-| ~~1~~ | ~~SK-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | ✅ complete (2026-05-02) |
-| ~~1b~~ | ~~BRAND-HYG-1~~ | ~~Stage 1: Unblock~~ | ~~S~~ | — | SHELVED / no-op (expected dirty brand edits not present in this checkout) |
-| ~~2~~ | ~~EINK-6A~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
-| ~~3~~ | ~~EINK-6B~~ | ~~Stage 2: Features~~ | ~~M~~ | ~~EINK-6A~~ | ✅ complete (2026-05-02) |
-| ~~4~~ | ~~GOALS-6B~~ | ~~Stage 2: Features~~ | ~~M~~ | — | ✅ complete (2026-05-02) |
-| ~~5~~ | ~~MOSS-NANO-13a~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~GOALS-6B complete~~ | ✅ complete (2026-05-02) |
-| ~~6~~ | ~~MOSS-NANO-13B~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a~~ | ✅ complete and merged to main (2026-05-03) |
-| ~~7~~ | ~~MOSS-NANO-13c~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~L~~ | ~~13a, 13B~~ | ✅ complete (2026-05-03) |
-| ~~8~~ | ~~MOSS-NANO-13d~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~S~~ | ~~13c~~ | ✅ complete and durably merged to `main` (2026-05-04) |
-| ~~—~~ | ~~MOSS-NANO-13d.5~~ | ~~Stage 3 (shelved draft)~~ | — | — | SUPERSEDED by POCKET-TTS-1 (2026-05-04 user direction) |
-| ~~9~~ | ~~MOSS-NANO-13e~~ | ~~Stage 3: MOSS-NANO Productization~~ | ~~M~~ | ~~13a–d~~ | ✅ complete (2026-05-04) — Nano recommended opt-in; Kokoro default/available; Qwen disabled; no live-capture rerun, no Pocket TTS work |
-| ~~10~~ | ~~POCKET-TTS-1~~ | ~~Stage 3: Successor Engine Track (Pocket TTS)~~ | ~~L~~ | ~~13a–13e (sequenced after 13e)~~ | ✅ complete (2026-05-04) — Pocket TTS available opt-in; Kokoro default; MOSS-Nano recommended opt-in; Qwen disabled |
-| ~~11~~ | ~~POLISH-1~~ | ~~Stage 4: Ship~~ | ~~M~~ | ~~13e + POCKET-TTS-1~~ | ✅ complete (2026-05-04) — settings UX/copy/accessibility polish complete; RELEASE-1 unblocked |
-| ~~12~~ | ~~RELEASE-1~~ | ~~Stage 4: Ship~~ | ~~S~~ | ~~POLISH-1~~ | ✅ complete (2026-05-04) — Desktop v2.0 release notes/checklist and final gates recorded |
+| 1 | ENGINE-DORMANCY-1 | Stage 0: Kokoro Focus | S | None | Full spec — dispatch-ready |
+| 2 | TTS-INTEGRATE-1 | Stage 1: Sync & Diagnostics | S-M | ENGINE-DORMANCY-1 | UNBLOCKED by dormancy (Nano probes irrelevant) |
+| 3 | TTS-CACHE-HARDEN-1 | Stage 1: Cache Hardening | S-M | TTS-INTEGRATE-1 | Full spec (findings: impl review A8 + lit review §4.6) |
+| 4 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 | Full spec (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
+| 5 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
+| 6 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
+| 7 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
+| 8 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
 
-Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 Continued — E-Ink & Goals", § "Stage 3 — Successor Engine Track" (covering MOSS-NANO-13a–13e + POCKET-TTS-1).
+Dissolved sprints (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1 (Nano probes irrelevant), TTS-CANARY-1 (sidecar engines dormant), TTS-REGISTRY-DISPATCH-1 (single active engine).
+
+TTS-SYNC-1 and TTS-DIAG-1 are PASS/pushed on branches; they land via TTS-INTEGRATE-1.
+
+Full specs: ROADMAP.md § "TTS Architecture Completion — Active Conveyor Belt" (dispatch fields) + ROADMAP_SPECS.md (architecture decisions, grounding evidence, implementation detail).
+
+## Parallel Governance Hotfix Lane (Standalone)
+
+No standalone parallel governance hotfix is currently queued. SK-HYG-2 completed on 2026-05-16 as a Lane E hotfix after a mid-dispatch Type 3 pivot scope amendment for exact stale path-string repairs.
+
+### Desktop v2.0 Conveyor Belt (Completed)
+
+> All 12 Desktop v2.0 sprints plus 4 post-v2 remediation sprints are complete. Full specs archived to `docs/planning/.Archive/ROADMAP_2026-05-14.md`.
+
+| Sprint | Date | Result |
+|--------|------|--------|
+| SK-HYG-1 | 2026-05-02 | Roadmap hygiene & queue recovery |
+| EINK-6A | 2026-05-02 | E-Ink foundation & greyscale runtime |
+| EINK-6B | 2026-05-02 | E-Ink reading ergonomics |
+| GOALS-6B | 2026-05-02 | Reading goal tracking |
+| MOSS-NANO-13a–13e | 2026-05-02–04 | MOSS-Nano productization → NANO_RECOMMENDED_OPT_IN |
+| POCKET-TTS-1 | 2026-05-04 | Pocket TTS available opt-in |
+| POLISH-1 | 2026-05-04 | Desktop v2 polish |
+| RELEASE-1 | 2026-05-04 | Desktop v2.0 release closeout |
+| POSTV2-REL-1 through POSTV2-REVIEW-1 | 2026-05-04–11 | Post-v2 audit remediation |
+| KOKORO-DEEPEN-1/2/3 | 2026-05-11 | Kokoro deepening arc |
+| TTS-REGISTRY-1 | 2026-05-12 | Provider capability registry |
+| TTS-NORMALIZE-1 | 2026-05-13 | Segment normalizer & golden fixtures |
+| TTS-CACHE-TIMING-1 | 2026-05-13 | Structured cache keys & timing sidecars |
 
 ---
 
@@ -95,84 +116,243 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 C
 | ~~3~~ | ~~POSTV2-NARR-1~~ | ~~Narrate/security/hygiene~~ | ~~M~~ | ~~POSTV2-ENGINE-1~~ | ✅ complete in `postv2-audit-remediation` worktree — Narrate highlight, URL validation, artifact policy, debt map |
 | ~~4~~ | ~~POSTV2-REVIEW-1~~ | ~~Review / commit / merge~~ | ~~S~~ | ~~POSTV2-REL-1 through POSTV2-NARR-1~~ | ✅ complete — reviewed, committed, merged, and pushed; Kokoro Deepening lane advanced |
 
-Closeout: `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
+Closeout: `docs/governance/close-outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
 
 ---
 
 ## Ready Queue Pointers
 
 ```text
-Sprint: TTS-SYNC-1 — Timing Metadata Store And Highlight Sync Controller
-Status: Queued after TTS-CACHE-TIMING-1; visual sync policy should consume durable timing metadata rather than scattered scheduler refs.
-Type: UX correctness + timing truth; no fake word timing, no autoplay behavior change.
+Sprint: ENGINE-DORMANCY-1 — Disable MOSS-Nano And Pocket TTS At Settings Boundary
+Status: Dispatch-ready. First sprint in Kokoro-only pivot.
+Type: Posture change; disables non-Kokoro engines at settings/selection boundary and IPC entry points. No code deletion.
 
-WHAT: Extract `TimingMetadataStore` and `HighlightSyncController` so word/chunk/segment visual behavior is centralized and fail-closed.
+WHAT: Disable MOSS-Nano and Pocket TTS at the settings boundary and IPC runtime entry points, following the same pattern as Qwen. Profile migration to Kokoro. MOSS Nano probe tests skipped or gated. Unblocks TTS-INTEGRATE-1.
 
-HYPOTHESIS: A dedicated sync controller can preserve Kokoro word-level truth while keeping Nano/Pocket/heuristic lanes chunk-only or segment-followed without regressions.
+HYPOTHESIS: Disabling sidecar engines at the settings boundary removes test instability, unblocks the integration merge, and lets all TTS energy focus on Kokoro optimization.
 
 WHERE:
-  - `ROADMAP.md` § "Sprint TTS-SYNC-1: Timing Metadata Store And Highlight Sync Controller"
-  - new `src/utils/timingMetadataStore.ts`, new `src/utils/highlightSyncController.ts`
-  - `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`
-  - `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
-  - `src/utils/foliateWordHighlight.ts`, `src/styles/flow.css`
-
-HOW (Phase 0):
-  CLI [opus] {high}: Trace current scheduler → narration → Foliate highlight paths and identify duplicate-cursor traps.
+  - `ROADMAP.md` § "Sprint ENGINE-DORMANCY-1: Disable MOSS-Nano And Pocket TTS At Settings Boundary"
+  - `src/utils/ttsProviderRegistry.ts` (posture update)
+  - `src/components/settings/TTSSettings.tsx` (dormancy UX)
+  - `main/ipc/tts.js` (IPC guards for nano/pocket handlers)
+  - `src/hooks/useNarration.ts` (profile migration)
+  - `tests/mossNanoProbe.test.js` (skip or opt-in gate)
+  - Reference: POSTV2-ENGINE-1 Qwen-disable pattern
 
 HOW (Implementation):
-  Athena [opus] {high}: Add store/controller contracts and wire trusted/untrusted timing policy.
-  Hercules [sonnet] {medium}: Move Foliate chunk/word decisions behind controller while preserving Flow WPM clock.
+  Hermes [haiku] {medium}: Apply Qwen-disable pattern to MOSS-Nano and Pocket TTS entries. Profile migration, IPC guards, test skip.
 
 HOW (Verification):
-  Hippocrates [haiku] {medium}: Run scheduler/highlight/Foliate/narration tests, full tests, build, and diff checks.
+  Hippocrates [haiku] {medium}: Full `npm test`, `npm run typecheck`, `npm run build`, `git diff --check`.
 
 HOW (Review / Closeout):
-  Solon + Plato [sonnet] {high}: Confirm one highlight path, no invented word progress, and queue advance to TTS-DIAG-1.
+  Solon [sonnet] {low}: Confirm no Nano/Pocket code deleted, engines unselectable, profiles migrate, probes gated.
 ```
 
 ```text
-Sprint: TTS-DIAG-1 — Provider-Neutral Narration Diagnostics Bundle
-Status: Queued after TTS-SYNC-1; diagnostics should consolidate the explicit provider/normalizer/cache/timing/sync metadata.
-Type: tooling + docs; no audio payload export by default.
+Sprint: TTS-INTEGRATE-1 — Integrate TTS Sync And Diagnostics Stack
+Status: UNBLOCKED by ENGINE-DORMANCY-1 (Nano probes irrelevant after dormancy).
+Type: Git integration + verification; no new product behavior beyond landing already-reviewed work.
 
-WHAT: Add a provider-neutral diagnostics bundle for an active narration session, capturing provider capabilities, normalized segment identity, cache/timing metadata, scheduler truth events, and highlight sync decisions.
+WHAT: Merge `origin/sprint/tts-sync-1-highlight-controller` first, then merge stacked `origin/sprint/tts-diag-1-diagnostics-bundle` onto canonical main after ENGINE-DORMANCY-1 lands.
 
-HYPOTHESIS: A single redacted diagnostic artifact will make future narration regressions debuggable without model churn or console-log archaeology.
+HYPOTHESIS: With Nano probes gated by dormancy, the integration merge should pass full `npm test` cleanly.
 
 WHERE:
-  - `ROADMAP.md` § "Sprint TTS-DIAG-1: Provider-Neutral Narration Diagnostics Bundle"
-  - `src/utils/narrateDiagnostics.ts`, `src/utils/ttsEvalTrace.ts`
-  - `src/hooks/useNarration.ts`, `src/components/settings/TTSSettings.tsx` or dev-only diagnostics UI
-  - `scripts/tts_eval_runner.mjs`, `docs/testing/`
-
-HOW (Phase 0):
-  CLI [opus] {medium}: Inventory current eval/diagnostic traces and define redacted bundle schema.
+  - Branch `sprint/tts-integrate-1-sync-diag-main` (or fresh from updated main)
+  - Merge source branches:
+    - `origin/sprint/tts-sync-1-highlight-controller`
+    - `origin/sprint/tts-diag-1-diagnostics-bundle`
+  - Governance targets: `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md`
 
 HOW (Implementation):
-  Hephaestus [sonnet] {medium}: Add bundle producer/export action and eval-runner schema validation.
-  Hippocrates [haiku] {medium}: Add schema/redaction/Kokoro happy-path tests.
+  Zeus/Codex [opus] {medium}: Merge both branches, resolve conflicts preserving canonical governance freshness plus branch implementation.
 
 HOW (Verification):
-  Hippocrates [haiku] {low}: Run diagnostic/eval tests, focused narration tests, full tests, build, and diff checks.
+  Hippocrates [haiku] {medium}: Run focused sync tests, focused diagnostics tests, `npm run typecheck`, `npm run build`, full `npm test`, and `git diff --check`.
 
 HOW (Review / Closeout):
-  Herodotus + Plato [sonnet] {medium}: Document runbook, verify no audio/user text overexposure beyond intentional metadata, and reassess KOKORO-EXPORT-1 readiness.
+  Solon + Herodotus [sonnet] {medium}: Confirm both sprints landed on main, update governance to reflect landed state.
 ```
 
-## Deferred Lanes (Not on Desktop v2.0 Critical Path)
+```text
+Sprint: TTS-CACHE-HARDEN-1 — Cache/Pipeline Type Safety And Timing Identity Parity
+Status: Queued after TTS-INTEGRATE-1. Findings-driven: impl review A8 + lit review §4.6.
+Type: Implementation — cache-hit timing parity, type harmonization, IPC shape validation, cache key safety. No architectural changes.
+
+WHAT: Fix cache-hit/miss observational asymmetry (ScheduledChunk from cache lacks timingTruth/boundaryType that fresh chunks carry). Harmonize timing classification types (3 overlapping concepts → single canonical enum with full-record validation: truth + timestamps + count). Add IPC shape validation. Fix v1 cache key slash encoding. Core gate: 7 criteria. Opportunistic (if touched): dangling promise audit, resume backpressure.
+
+HYPOTHESIS: Cache-hit timing parity is required before TTS-EVENT-SYNC-1 — the highlight sync controller needs timingTruth metadata to make correct decisions, and cache hits currently don't carry it.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint TTS-CACHE-HARDEN-1: Cache/Pipeline Type Safety And Timing Identity Parity"
+  - `src/utils/audioScheduler.ts:79-103` (ScheduledChunk interface — add timingTruth?, chunkId?)
+  - `src/utils/ttsCache.ts:26-55` (loadCachedChunk — rehydrate from sidecar)
+  - `src/types/ttsCache.ts:36-52` (classifyTiming helper taking full timing record, timingClassification derivation)
+  - `src/types/ttsProvider.ts:4-8` (canonical TtsProviderTimingTruth — no change)
+  - `main/tts-cache.js:135` (v1 key slash encoding)
+  - `main/ipc/tts.js` (IPC shape guard)
+  - `src/utils/generationPipeline.ts` (opportunistic: dangling promise audit, resume flush backpressure — only if touched during core work)
+
+HOW (Implementation):
+  Hephaestus [sonnet] {medium}: Core gate — ScheduledChunk field additions, sidecar rehydration, timing harmonization (full-record classifyTiming), IPC guard, v1 key encoding. Opportunistic — promise/backpressure audit if generationPipeline.ts is already open.
+
+HOW (Verification):
+  Hippocrates [haiku] {medium}: Cache-hit parity tests, timing derivation tests, v1 slash encoding tests, IPC shape rejection tests, full npm test/typecheck/build.
+
+HOW (Review / Closeout):
+  Solon [sonnet] {low}: Verify cache-hit/miss metadata parity, no cache eviction changes, no v1 legacy read path deletion, no engine posture changes.
+  Plato [sonnet] {low}: Timing ownership review, IPC boundary cleanliness.
+```
+
+```text
+Sprint: TTS-EVENT-SYNC-1 — Event-Driven Word Boundary Sync
+Status: Queued after TTS-CACHE-HARDEN-1. Priority: IMMEDIATE (user directive).
+Type: Architecture change — event-driven word boundary sync (measurement-conditional RAF demotion, not removal). Research-driven (readest, RealtimeTTS, sioyek). Introduces NarrationSegmentAnchor (content-stable segment identity, see AD-1 in ROADMAP_SPECS.md).
+
+WHAT: Promote onTruthSync from visual-only hint to primary highlight-advance trigger. Add normalized→original word alignment table (normalizedToOriginalMap) to segmentNormalizer. Demote RAF getAudioProgress() + queryTime() polling from word-highlight hot path (measurement-conditional — RAF preserved as fallback). Elevate word-boundary emission to provider-level contract (emitsWordBoundaryEvents). Introduce NarrationSegmentAnchor = { bookId, startIdx, endIdx } as content-stable durable identity alongside cache-scoped chunkId.
+
+HYPOTHESIS: Event-driven word boundaries eliminate time→word resolution jitter and reduce highlight latency. The alignment table solves the token-expansion mapping problem (normalized text has more tokens than original). TTS-CACHE-HARDEN-1's timing parity fix ensures cache hits carry timingTruth metadata needed for correct highlight decisions.
+
+A9 NOTE: The TransformFn contract (string→string) is NOT changed. The normalizedToOriginalMap is built during normalization by diffing token lists before/after each transform, not by changing the transform interface. Upgrade deferred unless this approach proves insufficient.
+
+PHASE 0 GATE (hard stop — all must pass before Phase 1 implementation begins):
+  (1) Segment identity validation — confirm NarrationSegmentAnchor = { bookId, startIdx, endIdx } is sufficient for all downstream consumers identified in TTS-PIPELINE-1's domain type assessment (criterion 9). Verify chunkId and NarrationSegmentAnchor coexist without collision (AD-1 contract).
+  (2) Contract consistency check — verify planner→normalizer→cache→timing type contracts before building on them (TTS-CACHE-HARDEN-1 should have resolved any type-contract drift).
+  (3) Alignment map fixture proof — write standalone test covering hard cases (repeated words, punctuation loss, abbreviation/date/currency expansion, ordinals, contractions). If naive diff-based mapping fails ≥2 cases, escalate to tracked-transform or scoped-map approach.
+  (4) Baseline latency measurement — record current RAF p50/p95 word-highlight latency.
+  (5) RAF fallback preservation — event-driven replaces RAF only for word-native timing; removal is measurement-conditional.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint TTS-EVENT-SYNC-1: Event-Driven Word Boundary Sync"
+  - `src/utils/segmentNormalizer.ts` (alignment table)
+  - `src/types/ttsProvider.ts` (provider-level WordBoundaryEvent type)
+  - `src/hooks/narration/kokoroStrategy.ts` (resolve normalizedIdx → originalIdx)
+  - `src/hooks/useNarration.ts` (event-driven trigger, remove RAF polling)
+  - `src/utils/narrateDiagnostics.ts` (word-boundary-event type)
+  - `tests/fixtures/tts-normalization/english-v1.json` (alignment maps)
+
+HOW (Implementation):
+  Hephaestus [sonnet] {medium}: Alignment table in normalizer + fixture updates.
+  Athena [opus] {medium}: Event-driven sync wiring + provider contract + useNarration refactor.
+
+HOW (Verification):
+  Hippocrates [haiku] {medium}: Alignment table tests, event-driven sync tests, full npm test/typecheck/build.
+
+HOW (Review / Closeout):
+  Solon [sonnet] {low}: Verify LL-079 (lastConfirmedAudioWordRef ownership unchanged), LL-077 (RAF glide removed from hot path), alignment map integrity.
+  Plato [sonnet] {low}: Timing ownership review, provider contract cleanliness.
+```
+
+```text
+Sprint: NORMALIZER-ENRICH-1 — Kokoro Text Normalization Gap Fill
+Status: Queued after TTS-EVENT-SYNC-1.
+Type: Normalizer enrichment — 9 new transforms + heteronym disambiguation. Research-driven (abogen kokoro_text_normalization.py).
+
+WHAT: Add missing normalization transforms identified by comparing Blurby's 12-transform pipeline against abogen's 20+ transforms. Add context-window heteronym disambiguation. Bump TTS_NORMALIZER_VERSION.
+
+HYPOTHESIS: Richer normalization produces better Kokoro phonemization for fractions, decimals, URLs, address abbreviations, number ranges, and heteronyms currently sent raw to the model.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint NORMALIZER-ENRICH-1: Kokoro Text Normalization Gap Fill"
+  - `src/utils/segmentNormalizer.ts` (9 new transform functions + heteronym table)
+  - `tests/fixtures/tts-normalization/english-v1.json` (≥18 new fixture entries)
+
+HOW (Implementation):
+  Hephaestus [sonnet] {medium}: Add transforms, heteronym table, fixtures. Validate ordering.
+
+HOW (Verification):
+  Hippocrates [haiku] {medium}: Golden fixture validation, alignment map integrity, full npm test/typecheck.
+
+HOW (Review / Closeout):
+  Solon [sonnet] {low}: Confirm existing fixtures unchanged, version bumped, transform ordering validated.
+```
+
+```text
+Sprint: TTS-RENDER-MAP-1 — Pre-Built Word Position Index
+Status: Queued after NORMALIZER-ENRICH-1.
+Type: Performance optimization — O(1) word→DOM position lookup at narration rate. Research-driven (sioyek parallel-array architecture).
+
+WHAT: Build a WordPositionIndex once at render time (when foliate-js renders word spans). Event-driven word-boundary events resolve position via index lookup instead of live DOM querySelector + getBoundingClientRect.
+
+HYPOTHESIS: Pre-built index reduces word-advance latency from ~5-8ms to ≤2ms at p95, eliminating the DOM query bottleneck in the event-driven sync path.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint TTS-RENDER-MAP-1: Pre-Built Word Position Index"
+  - new `src/utils/wordPositionIndex.ts`
+  - `src/components/FoliatePageView.tsx` (build/invalidate/consume index)
+  - `src/utils/narrateDiagnostics.ts` (build/miss event types)
+
+HOW (Implementation):
+  Hephaestus [sonnet] {medium}: WordPositionIndex class, FoliatePageView integration, invalidation wiring.
+
+HOW (Verification):
+  Hippocrates [haiku] {medium}: Performance benchmarks, regression suite, full npm test/typecheck/build.
+
+HOW (Review / Closeout):
+  Solon [sonnet] {low}: Verify graceful degradation, invalidation triggers, no narration state machine changes.
+```
+
+```text
+Sprint: TTS-PIPELINE-1 — Narration Pipeline Integration Test And Normalization Fixture Expansion
+Status: Queued after TTS-RENDER-MAP-1.
+Type: Test-only (Kokoro pipeline); production edits allowed only for pure-helper extraction that preserves behavior.
+
+WHAT: Cross-module integration test tracing one Kokoro chunk through planner → normalizer (with alignment map) → production cache identity → timing sidecar → word-boundary event → word position index lookup. Cache-hit parity verification (TTS-CACHE-HARDEN-1 end-to-end). Stress fixtures (mixed-length, boundary-edge, rapid pause/resume, all-cache-hit). Expand golden normalization fixtures from 8 to 15+. NarrationSegment domain type assessment: audit the 4 overlapping segment-related types (ScheduledChunk, NarrationSegmentAnchor, NarrationEvent, CacheIdentity) and verify NarrationSegmentAnchor sufficiency for all downstream consumers (export, subtitle, bookmark).
+
+WHERE:
+  - `ROADMAP.md` § "Sprint TTS-PIPELINE-1"
+  - new `tests/narrationPipelineIntegration.test.ts`
+  - `tests/fixtures/tts-normalization/english-v1.json`
+  - imports from `src/utils/narrationPlanner.ts`, `src/utils/segmentNormalizer.ts`, `src/types/ttsCache.ts`
+
+HOW (Implementation):
+  Hippocrates [haiku] {medium}: Build integration test(s), expand fixture array to 15+.
+
+HOW (Verification):
+  Hippocrates [haiku] {low}: Run new integration tests, existing normalizer tests, full tests, build, and diff checks.
+
+HOW (Review / Closeout):
+  Solon [sonnet] {low}: Confirm fixture count ≥ 15, integration test covers full Kokoro pipeline chain including event-driven sync and alignment.
+```
+
+```text
+Sprint: TTS-ARCH-DOC-1 — TTS Architecture Decisions Document
+Status: Full spec. Last in conveyor. Documentation-only — no code changes.
+Type: Documentation-only; extracts adopt/reject/defer framework + dormancy rationale into standing governance doc.
+
+WHAT: Create docs/governance/TTS_ARCHITECTURE_DECISIONS.md with engine posture decisions, architecture layer inventory, adopt/reject/defer register, key invariants, dormancy contract, research provenance, error taxonomy, findings provenance (both research documents), cache evolution roadmap, and future work sections (11 sections total).
+
+HYPOTHESIS: A single durable governance document for TTS decisions prevents re-litigation and provides onboarding context for future engine evaluation.
+
+WHERE:
+  - `ROADMAP.md` § "Sprint TTS-ARCH-DOC-1: TTS Architecture Decisions Document"
+  - new `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`
+  - Source docs: TECHNICAL_REFERENCE §Narrate, MOSS_DECISION_LOG, QWEN_SUPPORTED_HOST_POLICY, literature review, adversarial review, all sprint closeouts
+
+HOW (Implementation):
+  Herodotus [sonnet] {medium}: Read source documents (including both research findings documents), synthesize into 11-section governance doc.
+
+HOW (Verification):
+  Solon [sonnet] {low}: Verify every engine has posture entry, every TTS subsystem has layer entry, error taxonomy ≥4 classes, findings provenance covers all P1/P2 items, TECHNICAL_REFERENCE links to new doc.
+
+Effort: S (~1).
+```
+
+## Deferred Lanes (Beyond TTS Architecture Completion)
 
 | Lane | Status | Resume Condition |
 |------|--------|-----------------|
-| Kokoro Deepening Program | Completed first arc; architecture arc active | `KOKORO-DEEPEN-1`, `KOKORO-DEEPEN-2`, `KOKORO-DEEPEN-3`, `TTS-REGISTRY-1`, `TTS-NORMALIZE-1`, and `TTS-CACHE-TIMING-1` landed. Next arc continues with `TTS-SYNC-1` through `TTS-DIAG-1`; queue backfill needed before further dispatch. |
-| CHUNK-SYNC Narrate migration | Completed through Kokoro path | Flow visual Dispatch 3 and `KOKORO-DEEPEN-2` grounded Narrate chunk/word visualization in Kokoro timing truth. Future changes go through `TTS-SYNC-1`. |
-| KOKORO-EXPORT-1 | Optional future | Roadmap hook only; do not queue until provider registry, normalization, cache/timing sidecars, highlight sync, and diagnostics stabilize. |
-| KOKORO-RETIRE-1/2 | Not active | Superseded as a posture by Kokoro deepening; do not re-queue without a separate future product decision. |
-| Qwen Streaming | Retired/disabled for Desktop v2 (QWEN-STREAM-4 ITERATE) | Post-v2.0 only by separate approval |
-| EXT-ENR-C | Optional | Post-v2.0 |
-| APK-0 through APK-4 | Investigation gates not cleared | Post-v2.0 |
-| Phase 7 (Cloud Sync) | Not spec'd | Post-v2.0 |
-| Phase 8 (RSS/News) | Not spec'd | Post-v2.0 |
+| MOSS-Nano | Dormant/disabled (ENGINE-DORMANCY-1) | Disabled at settings boundary. Code preserved. Reactivate by changing registry posture + separate product decision. |
+| Pocket TTS | Dormant/disabled (ENGINE-DORMANCY-1) | Disabled at settings boundary. Code preserved. Reactivate by changing registry posture + separate product decision. |
+| KOKORO-EXPORT-1 | Deferred | Do not queue until TTS Architecture Completion conveyor finishes. Export depends on durable segment identity, cache, timing, and highlight truth. |
+| KOKORO-RETIRE-1/2 | Not active | N/A — Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. |
+| Qwen Streaming | Retired/disabled (QWEN-STREAM-4 ITERATE) | Post-v2.0 only by separate approval. |
+| EXT-ENR-C | Optional | Post-v2.0. |
+| APK-0 through APK-4 | Investigation gates not cleared | Post-v2.0. |
+| Phase 7 (Cloud Sync) | Not spec'd | Post-v2.0. |
+| Phase 8 (RSS/News) | Not spec'd | Post-v2.0. |
 
 ---
 
@@ -180,6 +360,9 @@ HOW (Review / Closeout):
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| TTS-INTEGRATE-1 | 2026-05-15 | BLOCKED — Clean integration worktree `C:\tmp\Blurby-tts-integrate-1` on branch `sprint/tts-integrate-1-sync-diag-main` merged TTS-SYNC-1 first and stacked TTS-DIAG-1 second. Focused sync verification passed 9 files / 94 tests; focused diagnostics verification passed 4 files / 18 tests; `npm run typecheck` and `npm run build` passed. Full `npm test` failed in `tests/mossNanoProbe.test.js` with 3 performance-class failures, so no commit, push, or merge was performed. |
+| TTS-DIAG-1 | 2026-05-15 | PASS — Provider-neutral `tts-diagnostics-v1` narration diagnostics bundle is implemented on stacked branch `sprint/tts-diag-1-diagnostics-bundle` at `c97e446`; canonical `main` merge remains gated until TTS-INTEGRATE-1 is unblocked. Bundle captures provider capabilities, selected engine/voice/rate, segment IDs, original/normalized hashes, cache key components, timing sidecar summaries, scheduler truth events, highlight sync decisions, and relevant errors without exporting audio payloads or raw book text by default. Redaction guardrails recursively strip/reject `rawText`, `originalText`, `normalizedText`, and audio-shaped fields; diagnostics observe `HighlightSyncController` decisions without changing cursor ownership. Verification: focused diagnostics slice 4 files / 18 tests, full `npm test` 184 files / 2606 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
+| TTS-SYNC-1 | 2026-05-15 | PASS — Timing metadata and highlight sync policy are centralized on pushed branch `sprint/tts-sync-1-highlight-controller` at `142dc24`; canonical `main` merge is pending because the main worktree contains unrelated dirty work. `TimingMetadataStore` stores chunk timing metadata with trusted/heuristic/missing classification and queries by chunk, segment, word, or time; `HighlightSyncController` allows word-synced decisions only for trusted word-native timing and downgrades heuristic/missing timing to chunk/segment decisions with no active word. Scheduler/Kokoro/useNarration wiring publishes and stores timing metadata; `ReaderContainer` consumes controller decisions without changing Flow WPM timing, Narrate spoken timing, autoplay behavior, provider defaults, Qwen disablement, or `lastConfirmedAudioWordRef` ownership. Verification: focused pre-change sync baseline 8 files / 85 tests, focused sync regression 9 files / 93 tests, full `npm test` 181 files / 2598 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
 | TTS-CACHE-TIMING-1 | 2026-05-13 | PASS — Structured v2 TTS cache identity landed alongside legacy v1 compatibility. New entries carry schema/versioned provider, voice, rate bucket, model, source/normalized hashes, normalizer version, pronunciation override hash, document locator, chunk ID, sample rate, and timing truth; v2 disk paths are safe hashed directories under `tts-cache/v2/`. Manifest/audio/sidecar writes are atomic; `.timing.json` sidecars persist duration, trusted/heuristic classification, chunk boundaries, and trusted word timestamps only; corrupt sidecars do not discard readable audio. Verification: focused cache/timing/Kokoro/background suite 8 files / 75 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. Full serialized `npm test -- --maxWorkers=1` reached 186 files / 2642 tests and failed only the pre-existing resource-sensitive MOSS Nano performance probe (`2641` passed / `1` failed); isolated rerun of that file remained unrelated with timeout/performance-threshold failures. |
 | TTS-NORMALIZE-1 | 2026-05-13 | PASS — Segment normalizer truth added via `src/utils/segmentNormalizer.ts` and `TTS_NORMALIZER_VERSION = "en-v1"`. Golden fixtures cover conservative English normalization, pronunciation overrides remain first transform and hash-visible, Kokoro receives normalized spoken text while scheduler/display words stay original, and cache identity now includes normalizer version plus source/normalized text hash pair without destructive migration. Verification: focused normalizer/Kokoro/pipeline slice 4 files / 38 tests; broader TTS/provider/settings slice 8 files / 56 tests; `npm run typecheck`; serialized full `npm test -- --maxWorkers=1` 184 files / 2634 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed. Default parallel `npm test` reruns were resource-sensitive in pre-existing MOSS Nano performance-threshold tests, which passed isolated. |
 | TTS-REGISTRY-1 | 2026-05-12 | PASS — Provider capability truth added for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS via `src/types/ttsProvider.ts` and `src/utils/ttsProviderRegistry.ts`. Settings/status surfaces now read scoped provider labels, posture, and readiness hints from registry metadata. Runtime playback behavior, Kokoro default selection, explicit-only fallback semantics, Qwen disablement, Kokoro availability, and public voice-mixing UX were unchanged. Verification: focused registry/settings slice 6 files / 32 tests; broader TTS/settings/narration slice 9 files / 52 tests; `npm run typecheck`; full `npm test` 183 files / 2629 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed. |
@@ -188,7 +371,7 @@ HOW (Review / Closeout):
 | KOKORO-DEEPEN-1 | 2026-05-11 | PASS — Kokoro preflight/status truth implemented across main process, worker, IPC/preload, renderer settings, shared types, tests, and setup/troubleshooting docs. Existing Kokoro playback semantics preserved. Verification: focused affected tests passed 5 files / 78 tests; full `npm test` passed 181 files / 2617 tests; `npm run build` passed with existing circular chunk warning. |
 | POSTV2-REVIEW-1 | 2026-05-11 | PASS — Post-v2 remediation and CHUNK-SYNC Flow visual work reviewed, committed, merged, and pushed. Queue advanced into Kokoro Deepening. |
 | POSTV2-AUDIT-REMEDIATION | 2026-05-04 | PASS — Post-v2 audit remediation implemented in isolated worktree `C:\tmp\Blurby-worktrees\postv2-audit-remediation` on branch `postv2-audit-remediation`. POSTV2-REL-1 fixed package/release truth, version `1.75.1`, packaged sidecar path resolution, update install gating, and release-doc honesty. POSTV2-ENGINE-1 made `npm run typecheck` green, fail-closed Qwen IPC/stream compatibility, stale Qwen profile migration to Kokoro, Pocket profile support, Pocket/Nano error separation, and settings/type contract tightening. POSTV2-NARR-1 fixed EPUB Narrate highlighting, `open-doc-source` URL validation, artifact policy, Kokoro/Qwen copy, and debt mapping. Verification: `npm run typecheck` passed; full `npm test` passed 170 files / 2521 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; focused `tests/mossNanoProbe.test.js` passed 132 tests. Subsequently landed by `POSTV2-REVIEW-1`. |
-| RELEASE-1 | 2026-05-04 | PASS — Desktop v2.0 release closeout completed. Release notes/checklist: `docs/project/desktop-v2.0-release-notes.md`, `docs/project/desktop-v2.0-release-checklist.md`. Engine posture preserved exactly: Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, Qwen retired/disabled. |
+| RELEASE-1 | 2026-05-04 | PASS — Desktop v2.0 release closeout completed. Release notes/checklist: `docs/planning/desktop-v2.0-release-notes.md`, `docs/planning/desktop-v2.0-release-checklist.md`. Engine posture preserved exactly: Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, Qwen retired/disabled. |
 | POLISH-1 | 2026-05-04 | PASS — Desktop v2 polish completed across TTS, E-Ink, and Reading Goals settings surfaces. Copy now consistently states Kokoro default/operational floor, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2. E-Ink switches gained keyboard-operable switch semantics; Reading Goals empty/action states were cleaned up. Focused settings regression suite passed 9 files / 36 tests; full `npm test` passed 170 files / 2550 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; `npm audit --audit-level=high` passed with 3 moderate `uuid` findings and no high-severity findings. RELEASE-1 is unblocked. |
 | POCKET-TTS-1 | 2026-05-04 | PASS — Pocket TTS added as a third explicit opt-in engine path. Engine posture: Kokoro remains default/available, MOSS-Nano remains recommended opt-in from 13e, Pocket TTS is available opt-in, and Qwen remains disabled. Scope guardrails held: no comparative engine gate, no MOSS-Nano productization changes, no Kokoro default change, no Qwen reactivation, and no public voice-cloning UX in v2.0. Verification: focused Pocket tests 4 files / 30 tests; full `npm test` 169 files / 2548 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning. |
 | MOSS-NANO-13e | 2026-05-04 | PASS — product decision closeout recorded Nano as `NANO_RECOMMENDED_OPT_IN` from 13d's existing canonical evidence. Evidence path: `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`; final gate output: `artifacts/tts-eval/moss-nano-13d-live-capture/gate/`; trace counts Page 42, Focus 44, Flow 43, Narrate 39; gate PASS with hard failures 0/7 and warnings 0/3. Product posture: MOSS-Nano recommended opt-in local engine, Kokoro default/available, Qwen disabled, no Kokoro retirement lane. No live-capture rerun, no model comparison, no Pocket TTS work, no default-engine change. Memo: `docs/testing/moss-nano-13e-productization-memo.md`. |
@@ -664,7 +847,7 @@ If any guardrail fails, run the sprints sequentially.
 45. ~~Dispatch QWEN-HARDEN-1 to CLI~~ — COMPLETE (v1.67.0). Qwen startup/playback hardening landed with timing budgets, playback reliability coverage, gate artifacts, and the retirement scorecard/listening-review evidence scaffold.
 46. ~~Dispatch QWEN-PROVISION-1 to CLI~~ — COMPLETE (v1.68.0). Qwen now has an explicit CUDA-first supported-host policy, a deterministic one-shot preflight probe, typed `qwenPreflight` bridge coverage, and settings/runtime setup guidance that distinguishes not configured, broken, unsupported, and healthy host states without putting provisioning work on the narration hot path.
 47. ~~Dispatch KOKORO-RETIRE-1 to CLI~~ — PAUSED on 2026-04-20. Subsequent live validation showed the current non-streaming local Qwen lane is not a sufficient successor path for sustained CPU narration, so retirement work is suspended pending the approved streaming-Qwen lane.
-48. ~~Backfill queue to ≥3~~ — COMPLETE. Added `QWEN-STREAM-1` (streaming sidecar foundation) as queue position 3. Queue depth restored to 3 (GREEN). Spec based on approved design at `docs/superpowers/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md`. Voice path: CustomVoice model with streaming generator (Option A), Kokoro reference samples as fallback (Option B).
+48. ~~Backfill queue to ≥3~~ — COMPLETE. Added `QWEN-STREAM-1` (streaming sidecar foundation) as queue position 3. Queue depth restored to 3 (GREEN). Spec based on approved design at `docs/planning/specs/2026-04-20-qwen-streaming-kokoro-backup-design.md`. Voice path: CustomVoice model with streaming generator (Option A), Kokoro reference samples as fallback (Option B).
 49. ~~Dispatch READER-4M-2 to CLI~~ — COMPLETE (v1.69.0, 2026-04-20). Standalone Narrate mode landed alongside four-button bottom-bar controls. `N` is now the universal "enter Narrate paused" shortcut from any mode; `T` narration toggle removed. Pause/resume verified to stay in-mode for flow and narrate. 14 new tests (`tests/readerBottomBarControls.test.tsx`, `tests/useKeyboardShortcuts.test.ts`). Full `npm test` (2,102 tests) and `npm run build` passed.
 50. ~~Dispatch READER-4M-3 to CLI~~ — COMPLETE (v1.72.0, 2026-04-20). One canonical global word anchor now drives entry/save/resume across page, focus, flow, and narrate; Flow↔Narrate preserve the exact shared-surface anchor; Narrate follow/highlight now uses spoken-word truth; and verification passed with `npm test` (`141` files, `2136` tests) plus `npm run build`.
 51. ~~Dispatch QWEN-STREAM-1 to CLI~~ — COMPLETE (v1.71.0, 2026-04-20). Streaming sidecar foundation: binary-framed PCM protocol, JS engine manager, IPC handlers, preload bridge, streaming types. 18 new tests. Build clean.
@@ -674,7 +857,7 @@ If any guardrail fails, run the sprints sequentially.
 55. ~~Dispatch QWEN-STREAM-3 to CLI~~ — COMPLETE (v1.74.0). Stall detection, crash recovery, warmup gate, cancellation guards, stream-finished IPC wire, 5 streaming eval scenarios, gate thresholds, decision template. 16 new tests. Build clean.
 56. ~~Backfill queue to ≥3.~~ — COMPLETE. Added KOKORO-RETIRE-1 as conditional position 3. Queue GREEN depth 3.
 57. ~~Dispatch QWEN-STREAM-4 to CLI~~ — COMPLETE (v1.75.0, ITERATE). Eval harness executed, Kokoro baseline captured, QWEN_STREAMING_DECISION.md populated. Live CUDA validation deferred to Evan.
-58. ~~Backfill queue to ≥3.~~ COMPLETE. Added the flagship-first MOSS operational narration lane (`MOSS-0` through `MOSS-7`) from `docs/superpowers/plans/2026-04-26-moss-flagship-operational-lane.md`; queue depth was restored to 8 (GREEN) at that time. Superseded by the task #10g runtime-unstable pause state below. Kokoro retirement remains paused behind continuous-live-playback proof and a separately approved retirement lane. Nano remains conditional only after `DEMOTE_TO_NANO` evidence.
+58. ~~Backfill queue to ≥3.~~ COMPLETE. Added the flagship-first MOSS operational narration lane (`MOSS-0` through `MOSS-7`) from `docs/planning/plans/2026-04-26-moss-flagship-operational-lane.md`; queue depth was restored to 8 (GREEN) at that time. Superseded by the task #10g runtime-unstable pause state below. Kokoro retirement remains paused behind continuous-live-playback proof and a separately approved retirement lane. Nano remains conditional only after `DEMOTE_TO_NANO` evidence.
 59. ~~Dispatch MOSS-0 to CLI.~~ Superseded by MOSS evidence through MOSS-SPEED-1 task #10g; flagship MOSS is now paused as runtime-unstable and MOSS app-integration dispatch is blocked.
 
 ---
@@ -701,6 +884,7 @@ If any guardrail fails, run the sprints sequentially.
 
 | Sprint ID | Completed | Outcome | Key Result |
 |-----------|-----------|---------|------------|
+| SK-HYG-2 | 2026-05-16 | PASS | Directory reorganization Option B completed: `docs/` collapsed into 7 top-level folders, archive filenames standardized under `.Archive/`, bulk `artifacts/` and `tmp/` ignored/untracked, 40 canonical evidence artifacts preserved in `docs/evidence/`, `tmp_brandcheck*` collapsed to one folder, and old path references normalized across the tracked text surface. Mid-dispatch Type 3 pivot allowed four exact path-string repairs in `tests/`, `scripts/`, and `main/` to restore correctness after moved docs. Verification passed full `npm test` (`186` files / `2642` tests) and `npm run build` with the existing circular chunk warning; binary audit ZIP contents and IDE metadata old-path strings intentionally deferred. |
 | MOSS-NANO-8 | 2026-05-01 | PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE | Experimental test-only Nano narration strategy with optional IPC calls, scheduler-compatible segment audio, segment-following timing truth, no fake word timestamps, structured failure/cancel/status propagation, speed/rate handling, and stale request/callback ownership guards. Verification passed focused `2` files / `20` tests, full `npm test` `154` files / `2412` tests, and `npm run build` with existing circular chunk warning. No public `TtsEngine`, no settings UI, no default-engine change, and no Kokoro behavior change. |
 | MOSS-NANO-7 | 2026-05-01 | PROMOTE_NANO_TO_STRATEGY_PROTOTYPE | App-boundary sidecar/IPC prototype only. Added `main/moss-nano-engine.js` with injectable sidecar adapter, readiness/failure semantics, bounded lifecycle config snapshot, stale-output/request ownership guards, startup-before-request, cancel adapter rejection settlement, and cancel/shutdown/restart in-flight settlement; added `main/moss-nano-sidecar.js`; registered experimental `tts-nano-status`, `tts-nano-synthesize`, `tts-nano-cancel`, `tts-nano-shutdown`, and `tts-nano-restart`; exposed `nanoStatus`, `nanoSynthesize`, `nanoCancel`, `nanoShutdown`, and `nanoRestart`; added Nano status/result/failure/Electron API types plus `tests/mossNanoEngine.test.js` and `tests/mossNanoIpc.test.js`. Verification passed focused `2` files / `14` tests after sandbox `EPERM` escalated rerun, full `npm test` `152` files / `2392` tests, and `npm run build` with existing circular chunk warning. No renderer engine selection, no normal playback wiring, no user-facing Nano, no `TtsEngine` expansion beyond `web | kokoro | qwen`, and no Kokoro behavior change. |
 | MOSS-NANO-6F | 2026-05-01 | PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE | Full bounded soak promotion confirmation. Canonical artifact `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/promotion-confirmation.json` records status `ok`, failure class `null`, measured resident soak `1800.0015s`, `100/100` book-like adjacent segments fresh, stale output reuse `0`, bounded lifecycle actual/truthful with `99` RSS-threshold in-process runtime resets at `1750MB`, shutdown/restart child-process lifecycle proof present by 6E reference, readiness memory slope `0.3261MB/min`, p95 final RTF `0.4826`, p95 first decoded `280ms`, crash count `0`, and unclassified restarts `0`. Raw `summary.json` still carries older persisted `promotionDecision` / `not-promoting`; use `promotion-confirmation.json` as canonical. No app integration drift, no Kokoro behavior change, and no Kokoro retirement. |
@@ -732,23 +916,4 @@ If any guardrail fails, run the sprints sequentially.
 | TTS-START-1 | 2026-04-17 | PASS | Startup parity shipped at v1.62.0: cached and uncached starts now share one opening-ramp planner contract (`13 -> 26 -> 52 -> 104 -> 148`), entry coverage warms that same shape before cruise coverage, `loadCachedChunk()` reconstructs exact nonzero-start spans from full-word context plus `startIdx`, and eval artifacts now record cached-vs-uncached startup parity plus opening-ramp shape. Verification passed with the focused startup/cache neighborhood (`6` files, `70` tests), dedicated startup-parity evidence (`artifacts/tts-eval/start1-startup-parity`) showing cached/uncached startup `370 / 508 ms` with `Opening ramp parity: match`, the gated release matrix (`9` runs, PASS), full `npm test` (`125` files, `2005` tests), and `npm run build`; existing circular-chunk warning unchanged. |
 | TTS-RATE-2 | 2026-04-17 | PASS | Segmented live Kokoro rate response shipped at v1.61.0: generated/cache buckets stay fixed, playback now splits into short scheduler-ready segments so same-bucket edits take effect by the next segment boundary instead of the full parent chunk, scheduler boundary semantics remain parent-chunk aware, and eval artifacts now record trusted `rateResponseLatencyMs` from real segment-start signals. Verification passed with the focused rate slice (`5` files, `42` tests), gated matrix release evidence (`artifacts/tts-eval/rate2-closeout`) showing `Rate response latency p50/p95: 210 / 210 ms`, full `npm test` (`124` files, `1995` tests), and `npm run build`; existing circular-chunk warning unchanged. |
 | TTS-CONT-1 | 2026-04-17 | PASS | Readiness-driven continuity shipped at v1.60.0: same-book and cross-book narration handoffs now resume from actual foliate/read-surface readiness instead of fixed `300ms` and `2500ms + 300ms` sleeps, the cross-book overlay is fallback-only rather than a blocking minimum dwell, and eval artifacts now record `sectionHandoffLatencyMs` and `crossBookResumeLatencyMs`. Verification passed with `npm test` (`123` files, `1976` tests), `npm run build`, a gated handoff matrix with non-null cross-book latency, and a section fixture run with non-null section latency; existing circular-chunk warning unchanged. |
-| EPUB-TOKEN-1 | 2026-04-17 | PASS | Dropcap/split-token lexical stitching shipped at v1.59.0: no-whitespace contiguous styled fragments now resolve to one logical word across extraction, rendering, click/selection, and narration start paths; rendered spans carry token metadata; stitched-fragment interactions collapse to one stable global word index. Verification passed: focused slice `5/5` files and `43/43` tests, full suite `122/122` files and `1964/1964` tests, and `npm run build` with the existing non-blocking `settings -> tts -> settings` warning. Solon APPROVED. Plato READY with no findings. |
-| TTS-RATE-1 | 2026-04-17 | PASS | Pitch-preserving Kokoro tempo shipped at v1.58.0: UI speed now moves in exact `0.1x` steps from `1.0x` to `1.5x`, generation/cache buckets stay fixed at `1.0` / `1.2` / `1.5`, exact-speed preview/status stays aligned to the selected speed, and in-bucket edits retime buffered playback live without restarting generation. Final verification passed with targeted tempo/rate suites, full release validation, and the gated six-rate matrix (`artifacts/tts-eval/final-gate-22`) covering `1.0` through `1.5` with PASS gate artifacts, drift max `2`, and zero pause/resume or handoff failures; existing circular-chunk warning unchanged. |
-| TTS-HARDEN-2 | 2026-04-17 | PASS | Narration handoff and extraction integrity hardened: single active flow owner for section-end continuation, stronger narration core handoff contract for section/global-word swaps, foliate fallback ownership released once full-book metadata arrives, and active narration extraction moved onto the same dedupe path as background pre-extraction. Verification passed: targeted post-fix slice (`4` files, `28` tests), full `npm test` (`116` files, `1912` tests), and `npm run build`; existing circular-chunk warning unchanged. v1.57.0. |
-| TTS-HARDEN-1 | 2026-04-16 | PASS | Kokoro bootstrap and recovery hardened end-to-end: authoritative readiness/status snapshot (`status/reason/recoverable`) from engine to renderer, fail-fast load/warm-up errors, packaged import shim allowlist + resolver restoration, sprint/marathon worker crash recovery with future-only retries, shutdown cleanup for retry timers/pending work, renderer truth wiring via normalized status helpers, and regression coverage across engine/worker/settings/hooks. Verification passed: focused Kokoro slice (`7` files, `75` tests), full `npm test` (`116` files, `2001` tests), and `npm run build`; existing circular-chunk warning unchanged. v1.56.0. |
-| TTS-EVAL-3 | 2026-04-16 | PASS | Quality gate release workflow shipped: versioned threshold config (`docs/testing/tts_quality_gates.v1.json`), gate evaluator (`scripts/tts_eval_gate.mjs`), in-runner gate enforcement via `--gates` (`scripts/tts_eval_runner.mjs`), baseline policy + snapshot (`docs/testing/TTS_EVAL_BASELINE_POLICY.md`, `docs/testing/tts_eval_baseline_v1.json`), release checklist (`docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`), and new gate coverage in `tests/ttsEvalGate.test.ts`. Verification passed: gated matrix run (`artifacts/tts-eval/baseline-v1`), targeted TTS eval suites (32 tests), full `npm test` (114 files, 1977 tests), and `npm run build`; existing circular-chunk warning unchanged. v1.55.0. |
-| TTS-EVAL-2 | 2026-04-16 | PASS | Matrix + soak evaluation tooling shipped: scenario manifest (`tests/fixtures/narration/matrix.manifest.json`), deterministic soak profiles (`scripts/tts_eval_profiles.mjs`), runner matrix/soak modes with deterministic artifact naming + checkpoints + interrupt-safe writes (`scripts/tts_eval_runner.mjs`), aggregate metrics reducer (`scripts/tts_eval_metrics.mjs`) with startup p50/p95 and drift summaries, and new coverage in `tests/ttsEvalMatrixRunner.test.ts`. Verification passed with smoke matrix + short soak artifact runs and full `npm test` (113 files, 1972 tests) + `npm run build`; existing circular-chunk warning unchanged. v1.54.0. |
-| TTS-EVAL-1 | 2026-04-16 | PASS | Flow/narration evaluation harness shipped: trace schema (`src/types/eval.ts`), fixture corpus (`tests/fixtures/narration/`), opt-in trace sink wiring in narration/flow hooks, first-audio timing capture, runner + metrics (`scripts/tts_eval_runner.mjs`), lifecycle/trace tests (`tests/ttsEvalTrace.test.ts`, `tests/ttsEvalLifecycle.test.ts`), review artifacts (`TTS_EVAL_REVIEW_TEMPLATE.md`, `TTS_EVAL_RUNBOOK.md`), and baseline outputs (`tests/fixtures/narration/baseline/`). Verification passed: targeted trace suites, baseline fixture run, `npm test` (112 files, 1967 tests), and `npm run build` (existing circular chunk warning unchanged). v1.53.0. |
-| NARR-LAYER-1B | 2026-04-16 | PASS | Narration-layer consolidation complete: removed standalone narration mode from core contracts and orchestration, deleted `src/modes/NarrateMode.ts`, migrated settings (`schema 7 -> 8`) from narration-mode state to flow + `isNarrating`, removed Foliate narration overlay machinery and associated CSS, and consolidated runtime behavior to flow-layer narration. Added `tests/narrLayer1bConsolidation.test.ts` with 25 targeted checks. Verification passed: `npm test` (110 files, 1945 tests) and `npm run build` green; existing Vite circular chunk warning remains. v1.52.0. |
-| TEST-COV-1 | 2026-04-16 | PASS | Critical path coverage + security hardening: URL scheme validation for `addDocFromUrl`, `site-login`, and `open-url-in-browser`; explicit force-refresh on 401 for Google and Microsoft cloud retries; 75 new tests across auth/cloud/queue/ErrorBoundary/foliateWordOffsets + URL regression. 1,967 tests across 108 files. `npm test` and `npm run build` passed; existing Vite circular-chunk warning remains. v1.50.0. |
-| NARR-LAYER-1A | 2026-04-16 | PASS | Narration-as-flow foundation: FlowScrollEngine follower mode, `isNarrating` state, narration→flow sync wiring, flow-specific `N` toggle, narration band suppression during flow narration, bottom-bar flow+narration state, section/cross-book handoff support. 18 new tests in `tests/narrationLayer.test.ts`. Full suite green at 1,985 tests; `npm run build` passed; existing Vite circular-chunk warning remains. v1.51.0. |
-| REFACTOR-1B | 2026-04-07 | PASS (17/18 — criterion 4 aspirational) | FoliatePageView helpers extracted to `foliateHelpers.ts` + `foliateStyles.ts` (1,947→1,724 lines), TTSSettings split into 3 sub-components (874→583 lines), 179→27 inline styles, global.css (5,406 lines) split into 8 domain files + `src/styles/index.css`, new `src/styles/tts-settings.css` (418 lines), 6 empty catch blocks annotated, 3 build warnings fixed. 32 new tests (1,892 total across 101 files). v1.49.0. |
-| REFACTOR-1A | 2026-04-07 | PASS | ReaderContainer decomposition: 33 useEffects → 5 custom hooks (useNarrationSync, useNarrationCaching, useFlowScrollSync, useFoliateSync, useDocumentLifecycle), fileHashes cleanup on document delete, main.js constants extracted to main/constants.js. 74 new tests (1,860 total across 100 files). v1.48.0. |
-| PERF-1 | 2026-04-07 | PASS | Full performance audit & remediation: startup parallelized (`loadState`→`createWindow`→`Promise.all([initAuth,initSyncEngine])`), folder watcher before sync, `getComputedStyle` cached (3→1 call), settings saves debounced 500ms, WPM persistence debounced 300ms, EPUB chapter cache LRU 50-cap, snoozed doc Set index, voice sync deps 7→2, Vite code splitting (vendor/tts/settings, 16 chunks), `rebuildLibraryIndex` debounced 100ms. 32 new tests (1,786 total across 98 files). v1.47.0. |
-| FLOW-INF-C | 2026-04-07 | PASS | Cross-book continuous reading: transition overlay (2.5s countdown), auto-open next queued book + resume flow, `getNextQueuedBook()` utility, `finishReadingWithoutExit()` for seamless book switching, Escape/click-to-cancel. 21 new tests (1,754 total across 97 files). v1.46.0. |
-| STAB-1A | 2026-04-07 | PASS | Startup & flow stabilization: `.foliate-loading` CSS (pulsing backdrop), async `wrapWordsInSpans` (batched setTimeout yields), TTS preload verified wired, sentence-snap tolerance ±15→±25, FlowScrollEngine `buildLineMap()` retry (5×100ms) + instant initial scroll. BUG-162/163/164/165 resolved. 19 new tests (1,736 total across 96 files). v1.45.0. |
-| NARR-TIMING | 2026-04-07 | PASS | Real word-level timestamps from Kokoro duration tensor. kokoro-js fork (patch-package), 4-layer validation, scheduler integration with heuristic fallback. BUG-161 fully resolved. 18 new tests (1,717 total across 95 files). v1.44.0. |
-| HOTFIX-15 | 2026-04-07 | PASS | Narration cursor polish: colRight ancestor tightened to `p, blockquote, li, figcaption` + width guard (95% cap) + null guard (BUG-159). Proportional band height `lineHeight * 1.08` + dynamic re-measurement on word change >2px threshold (BUG-160). Truth-sync interval halved 12→6 words (BUG-161 partial). 16 new tests (1,699 total across 94 files). v1.43.1. |
-| EXT-ENR-B | 2026-04-07 | PASS | Push event system for Chrome extension auto-discovery. Server emits `ws-connection-attempt` / `ws-pairing-success` events. `PairingBanner` in library screen shows pairing code with countdown, auto-dismisses on success, suppresses when already connected, 60s cooldown on dismiss. `ConnectorsSettings` polling reduced 5s→15s. 29 new tests (1,683 total across 93 files). v1.43.0. |
-| FLOW-INF-B | 2026-04-06 | PASS | Timer bar cursor (5px/6px e-ink, accent glow, line-completion flash), FlowProgress computation with chapter/book percentage + estimated time remaining, ReaderBottomBar progress display. 18 new tests (1,654 total across 92 files). v1.42.0. |
-|
+| EPUB-TOKEN-1 | 2026-04-17 | PASS | Dropcap/split-token lexical stitching shipped at v1.59.0: no-whitespace contiguous styled fragments now resolve to one logical word across extraction, rendering, click/selection, and narration start paths; rendered spans carry token metadata; stitched-fragment interactions collapse to one stable global word index. Verification passed: focused sli

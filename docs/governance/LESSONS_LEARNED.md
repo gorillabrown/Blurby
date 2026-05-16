@@ -1510,3 +1510,29 @@ speakChunk() {
 **Guardrail:** TTS cache identity must be structured data first and path material second. Keep all semantic fields in the manifest identity, derive disk directories from safe hashes, and invalidate by schema/normalizer/content fields through lazy misses rather than destructive global cleanup. Timing sidecars must be written atomically and may only return word timestamps when the timing classification is trusted.
 
 **Related:** TTS-CACHE-TIMING-1, `main/tts-cache.js`, `src/types/ttsCache.ts`, `src/utils/ttsCache.ts`, `tests/ttsCacheStructuredKeys.test.js`, `tests/ttsTimingSidecars.test.js`.
+
+### [2026-05-15] LL-116: Audit Packaging Must Include Complete Canonical Files
+
+**Area:** governance, audit process, documentation
+**Status:** active
+**Priority:** medium
+
+**Context:** OutsideAudit.1 (2026-05-15) — the full TTS Architecture roadmap audit. `ROADMAP.md` at 60KB exceeded the auditor's ingestion limit and was truncated mid-sprint in the delivered zip. The auditor had to reconstruct later sprint specs from secondary documents (close-outs, sprint queue), which introduced reconstruction artifacts and reduced audit precision for sprints 5-8.
+
+**Guardrail:** When assembling audit packages, verify that every file claimed as "full spec" in the orientation document is actually complete in the delivered zip. For files >50KB: either split across batches with continuation markers, or use the GitHub repo / single-directory ingestion path. This is a governance discipline issue, not a technical one — the file was complete on disk; the packaging step failed to verify delivery integrity.
+
+**Related:** OutsideAudit.1.2026-05-15, `docs/studies/audit/OutsideAudit.1.2026-05-15/`, 3rd-party-audit skill §Upload & File Constraints.
+
+---
+
+### [2026-05-16] LL-117: Directory Reorgs Need a Forbidden-Scope Reference Decision Up Front
+
+**Area:** governance, repository hygiene, verification
+**Status:** active
+**Priority:** medium
+
+**Context:** SK-HYG-2 reorganized documentation paths without runtime/test/script edits. The docs surface could be normalized cleanly, but final verification exposed stale old-path references in forbidden-scope files (`tests/artifactHygienePolicy.test.ts`, `scripts/qwen_streaming_sidecar.py`, `scripts/tts_engine_scan_index.mjs`, and IDE metadata) plus binary audit packages. The test suite reached 2,640 passing tests but failed one suite because a test fixture still opened the old release-checklist path.
+
+**Guardrail:** Any future directory-reorganization sprint must decide before dispatch whether references in tests, scripts, IDE metadata, and binary packages are in scope. If they are out of scope, the success criteria must explicitly exempt them and define a follow-up. If they are in scope, include those file families in the allowed edit surface and verification plan.
+
+**Related:** SK-HYG-2, `docs/planning/SK-HYG-2-DISPATCH.md`, `tests/artifactHygienePolicy.test.ts`, `scripts/qwen_streaming_sidecar.py`, `scripts/tts_engine_scan_index.mjs`.

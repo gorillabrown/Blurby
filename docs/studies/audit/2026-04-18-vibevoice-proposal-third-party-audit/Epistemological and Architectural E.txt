@@ -1,0 +1,301 @@
+Epistemological and Architectural Evaluation of VibeVoice versus Kokoro for the Blurby Application
+
+
+Introduction and Scope of the Evaluation
+The internal engineering document under review presents a highly specific, comparative analysis between the currently integrated Kokoro Text-to-Speech (TTS) engine and Microsoft’s recently released VibeVoice model family. The central premise of the developer's report asserts that while VibeVoice represents a theoretical advancement in long-form speech coherence and real-time generation, it is fundamentally incompatible with the current architectural constraints, deployment realities, and user experience requirements of the Blurby reading application.
+
+An exhaustive epistemological review of the claims made in the document—verified against public GitHub repositories, Hugging Face model cards, developer community discussions, and official Microsoft technical documentation—confirms that the document is overwhelmingly factually accurate. The developer has correctly identified critical blockades involving Microsoft's repository instability, the presence of forced audible disclaimers, the lack of native word-level temporal alignment, and the deployment challenges of embedding Python-based backends within an Electron environment. Furthermore, a rigorous architectural audit of the Blurby application's internal technical stack—which currently utilizes an Electron 41 and Node.js 22 LTS framework alongside React 19 and Vite 6—validates the author's conclusion. Transitioning from the highly optimized, ONNX-based Kokoro implementation to a computationally heavy VibeVoice stack would necessitate a complete rewrite of the application's runtime boundaries, timing mechanisms, and caching layers, while simultaneously introducing catastrophic user experience regressions.   
+
+This report will systematically dissect the epistemological truth of the developer's claims regarding the open-source TTS ecosystem as of early 2026, followed by a granular architectural review of how these technologies intersect with Blurby's specific internal requirements, focusing extensively on state management, process orchestration, and word-level cursor synchronization.
+
+Epistemological Verification of the VibeVoice Ecosystem
+The initial phase of this review seeks to validate the factual accuracy of the claims made in the internal engineering document regarding the historical timeline, availability, and structural properties of the VibeVoice models. The developer asserts that the VibeVoice ecosystem is fragmented, legally restricted, and plagued by repository instability. The empirical evidence heavily corroborates these assertions.
+
+Repository Instability and the Takedown Timeline
+The internal document claims that Microsoft's main repository for the long-form VibeVoice-TTS code was removed on September 5, 2025, and that the code repository linked in the 1.5B model card currently returns a 404 error. The document further states that a lightweight, real-time streaming variant, VibeVoice-Realtime-0.5B, was released months later on December 3, 2025.
+
+Verification of the open-source ecosystem confirms this timeline precisely. Microsoft initially announced the VibeVoice-TTS long-form multi-speaker model on August 25, 2025, promoting it as a frontier model accepted as an Oral at the ICLR 2026 conference. The model boasted an unprecedented 64K token context window capable of synthesizing up to 90 minutes of continuous audio with up to four distinct speakers. However, on September 5, 2025, Microsoft abruptly purged the VibeVoice-TTS inference and training code from the official GitHub repository. The stated rationale from Microsoft was that the tool had been used in ways "inconsistent with the stated intent," prompting a takedown governed by the company's responsible AI principles to mitigate severe deepfake and disinformation risks.   
+
+As a direct consequence of this removal, the links to the primary code repository (microsoft/VibeVoice-Code) embedded within the official Hugging Face model cards became dead links, returning 404 errors. Community discussions on Hugging Face and GitHub confirm the widespread confusion and frustration among developers who suddenly found their pipelines broken by the corporate takedown. While community forks and model weight backups were subsequently established on platforms like Modelscope and independent GitHub repositories, relying on a "ghost" repository that the parent company actively wishes to suppress introduces an unacceptable supply-chain risk for any commercial or production-grade application.   
+
+The developer's document is also accurate regarding the bifurcation of the VibeVoice product line. Recognizing the demand for lower-latency applications, Microsoft open-sourced VibeVoice-Realtime-0.5B on December 3, 2025. This model is architecturally distinct from the long-form variant. It relies solely on a continuous acoustic tokenizer operating at an ultra-low frame rate of 7.5 Hz, completely omitting the semantic tokenizer utilized in the larger 1.5B and 7B models. This establishes that the "90-minute narrative" surrounding VibeVoice is exclusively tied to the 1.5B model, which currently lacks official code support, whereas the officially supported real-time path is a much smaller, single-speaker model limited to an 8K context window (approximately 10 minutes of audio).   
+
+Comparative Architectural Topologies
+The engineering document draws a direct contrast between the structural capabilities of VibeVoice and Kokoro. To understand the implications for the Blurby application, it is necessary to examine the raw specifications of these models.
+
+Specification Metric	Kokoro (Current Integration)	VibeVoice-Realtime-0.5B	VibeVoice-1.5B (Long-Form)
+Parameter Count	82 Million	~0.5 Billion	~1.5 Billion
+Context Window	512 Tokens	8,000 Tokens	64,000 Tokens
+Maximum Generation	~30 Seconds	~10 Minutes	~90 Minutes
+Storage Footprint	~86 MB - 305 MB (Quantized)	~2.04 GB (Safetensors)	~5.41 GB (Safetensors)
+First-Audible Latency	Model/Hardware Dependent	~200 - 300 ms	Offline / Batch Processing
+Speaker Capacity	Multi-Speaker (11+ Personas)	Single Speaker	Up to 4 Speakers
+Code Availability	Apache 2.0 (Fully Available)	MIT (Available as of Dec 2025)	404 (Removed Sept 2025)
+Deployment Format	ONNX Runtime	Python / PyTorch / FastAPI	Python / PyTorch
+Table 1: Comparative specifications of Kokoro and VibeVoice models based on official repository data and model cards.   
+
+The data confirms the developer's assertion that VibeVoice and Kokoro operate on entirely different scales. Kokoro is a highly optimized, frontier model for its size, achieving natural prosody with merely 82 million parameters. Its deployment footprint is exceptionally small; the mixed-precision ONNX quantizations reduce the model size to as little as 86 MB. In contrast, the VibeVoice-Realtime-0.5B model requires a 2.04 GB storage footprint for its base safetensors, while the 1.5B variant demands 5.41 GB.   
+
+Furthermore, Kokoro's context length is limited to 512 tokens, which equates to roughly 30 seconds of audio generation per inference pass. The developer correctly points out that this limitation forces the Blurby application to perform extensive chunking and stitching to facilitate continuous reading. VibeVoice-1.5B's 64K context window circumvents this by modeling the dialogue flow over tens of thousands of tokens, yielding superior phrase-to-phrase consistency and eliminating "stitched chunk" seams. However, as the subsequent architectural review will demonstrate, this raw capability does not directly translate into application utility for a speed-reading interface.   
+
+The Catastrophic Implication of the Audible Disclaimer Policy
+The internal document categorizes Microsoft's audible disclaimer policy as an "important risk" and specifically notes that it would be "catastrophic" for Blurby's chunked generation pipeline. This assessment represents a profound, third-order insight into system design that perfectly bridges policy analysis with runtime architecture.
+
+Microsoft’s official model cards and technical reports explicitly mandate that an audible disclaimer—specifically the phrase "This segment was generated by AI"—is automatically embedded into every synthesized audio file generated by the VibeVoice pipeline. In addition to this audible intrusion, an imperceptible digital watermark is embedded into the audio stream for provenance tracking, intended to allow third parties to verify the AI origins of the media.   
+
+The developer correctly infers that this responsible AI policy is fundamentally incompatible with the orchestration mechanics of the Blurby application. Because Blurby relies on a continuous reading experience, it chunks text at sentence or paragraph boundaries and streams these chunks sequentially to maintain low memory overhead and permit rapid user navigation. If the VibeVoice engine were integrated into this pipeline, passing each sentence to the generation layer would result in the creation of isolated audio inferences. Consequently, the Microsoft safety protocol would automatically prepend or append the phrase "This segment was generated by AI" to every single sentence the user attempts to read.   
+
+Subjecting a user to an unskippable compliance disclaimer every ten to fifteen seconds destroys the utility of the speed-reading application. While commentators in the broader tech ecosystem have noted that these watermarks are largely "compliance theater" that can be circumvented by malicious actors via simple audio cropping, legitimate developers attempting to stream audio dynamically do not have the luxury of performing real-time waveform cropping without introducing severe latency. Therefore, the developer's conclusion that the audible disclaimer represents a hard blocker for immediate production integration is epistemologically unassailable.   
+
+The Absence of Word-Level Timing Truth
+The internal engineering document asserts that VibeVoice does not expose a native word-timestamp or alignment output, stating that the engine "streams audio chunks, not spoken-word alignment." For the Blurby application, which relies entirely on sub-second synchronization between the audio playback and the visual text cursor, this is identified as a critical failure point.
+
+Validation of the VibeVoice architecture confirms this deficiency. The VibeVoice model relies on a continuous acoustic tokenizer and a next-token diffusion framework operating in a highly compressed latent space at 7.5 Hz. This continuous representation fundamentally obscures the hard boundaries between individual phonemes and words. Official developer discussions and GitHub issue logs confirm that the word-level timestamps showcased in Microsoft's own promotional materials were not generated natively by the TTS API during inference.   
+
+Instead, Microsoft achieved timestamping through a secondary, computationally expensive pipeline: running an Automatic Speech Recognition (ASR) model (such as Whisper-large-v3-turbo) over the generated audio output to obtain transcriptions, and subsequently aligning those transcriptions with the ground-truth input text using dynamic programming algorithms to assign sentence-level and word-level timestamps.   
+
+For a local, offline-first application like Blurby, requiring a secondary neural ASR pass simply to calculate word boundaries is computationally prohibitive. It would require bundling an entirely separate transcription model alongside the multi-gigabyte VibeVoice model, completely negating the ~300ms first-audible latency advantage that the VibeVoice-Realtime-0.5B model purports to offer. Therefore, the claim that VibeVoice lacks native timing truth is verified, and the developer's hesitation to adopt the model without a new alignment layer is entirely justified.   
+
+Speed Control and Latent Feature Constraints
+The internal document notes that while VibeVoice exposes diffusion-specific parameters like cfg_scale, steps, temperature, and top_p, it lacks a native, reader-facing speech-rate parameter.
+
+Epistemological validation of the VibeVoice-Realtime-0.5B inference guides confirms that speed control is absent from the standard generation parameters. If a user utilizing the Blurby application wishes to increase their reading speed to 1.5x, the application would have to intercept the generated audio chunks and process them through a post-playback time-stretching algorithm, such as a Phase Vocoder or the Waveform Similarity Overlap-Add (WSOLA) protocol. Implementing algorithmic time-stretching post-generation introduces unacceptable acoustic artifacts, phase smearing, and computational latency. This strongly validates the document's claim that Kokoro's native, pitch-preserving exact-speed support is superior for a dedicated speed-reading application.   
+
+Architectural Review Against the Blurby Application
+Having validated the epistemological truth of the claims surrounding the VibeVoice ecosystem, the analysis must now pivot to evaluate these external realities against the highly specific internal architecture of the Blurby application. Based on the provided TECHNICAL_REFERENCE.md, TTS-AUDIT-ORIENTATION.md, TTS-AUDIT-2026-03-28.md, and SPRINT_QUEUE.md artifacts, Blurby is a deeply optimized, local-first reading environment.
+
+The Node.js and Electron Runtime Boundaries
+Blurby operates on a mature, three-layer Electron architecture comprising a Main Process, a Preload security boundary, and a Renderer Process. The runtime environment utilizes Node.js 22 LTS for backend orchestration and a Chromium-based renderer driven by React 19 and Vite 6. To maintain a fluid 60 frames-per-second user interface during heavy reading tasks, Blurby strictly isolates expensive computations.   
+
+The current Kokoro TTS implementation reflects this mature isolation strategy. The Kokoro model is integrated via the kokoro-js package, running its 82-million parameter architecture strictly through an ONNX (Open Neural Network Exchange) inference session. The Node.js main process orchestrates this execution via main/tts-engine.js, offloading the actual neural array processing to a dedicated background thread located at main/tts-worker.js.   
+
+The internal document correctly identifies that migrating to VibeVoice would require "substantial new runtime infrastructure," explicitly pointing to the necessity of a "Python + torch + FastAPI/WebSocket stack." This is a profound architectural blockade. VibeVoice-Realtime-0.5B is not available as a lightweight ONNX binary suitable for execution within a standard Node.js worker thread. To achieve its advertised 300ms latency, it requires a full Python environment, PyTorch tensors, and hardware-specific CUDA integrations.   
+
+Attempting to bundle a Python runtime and a FastAPI sidecar server within an Electron application using packaging tools like PyInstaller introduces severe architectural friction. It exponentially bloats the distribution size, complicates cross-platform compilation (requiring distinct native binaries for Windows, macOS, and Linux), and introduces unpredictable cold-start delays as the local server initializes. The technical reference documents reveal that Blurby currently takes immense pride in its lazy-loading optimizations, explicitly deferring the loading of heavy packages like chokidar, jsdom, and pdf-parse to save a mere 13MB of memory during initial startup. Forcing the application to initialize a Python sidecar, load gigabytes of PyTorch dependencies, and mount a 2.0GB (0.5B) or 5.4GB (1.5B) VibeVoice model into VRAM would completely destroy Blurby's lightweight deployment profile and its offline-first ethos.   
+
+The Criticality of Word-Level Cursor Synchronization
+The most sensitive architectural dependency in Blurby's Narrate mode is the synchronization of the visual cursor. The user interface relies on tracking the current reading position down to the exact word to provide visual highlights, execute "audio glides," and manage seamless mode transitions between Flow, RSVP, and Narrate formats.   
+
+Currently, the renderer process orchestrates the TTS pipeline through highly specialized hooks, primarily src/hooks/useNarration.ts and src/hooks/useNarrationSync.ts. Audio playback is handled by the src/utils/audioPlayer.ts module, which utilizes the Web Audio API and a JavaScript setInterval loop to calculate the currentMsPerWord and advance the visual cursor accordingly.   
+
+However, as meticulously detailed in the internal TTS-AUDIT-2026-03-28.md file, Blurby's setInterval approach suffers from an inherent timing drift. A fractional millisecond interval (for example, 83.3ms per word) causes the timer to drift away from the actual audio playback by approximately 60ms over the course of a standard 12-word sentence chunk. To prevent catastrophic visual desynchronization over long reading sessions, Blurby relies heavily on the CHUNK_COMPLETE action and onWordAdvance callbacks to explicitly resynchronize the cursor at the boundary of every sentence.   
+
+The ongoing engineering sprint designated READER-4M-3 (v1.65.0) is entirely dedicated to ensuring that the Narrate mode follows "spoken-word truth" on the shared reading surface. The Kokoro engine facilitates this requirement because its architecture (specifically the kokoro-js fork referenced in the sprint history) permits the extraction of internal duration tensors, granting the application access to real, algorithmically determined word-level timestamps.   
+
+Because VibeVoice cannot natively report when a word begins or ends in its 7.5 Hz acoustic latent stream, integrating it would break this entire architectural foundation. The audioPlayer.ts timing logic would completely detach from the actual audio output. The visual cursor would wander aimlessly across the text, shattering the "canonical global word anchor" continuity that the engineering team has prioritized as a critical success criterion in the READER-4M-3 sprint.   
+
+Pre-Buffer Orchestration vs. Streaming Latency
+Blurby achieves the illusion of gapless audio playback through an aggressive pre-buffering pipeline managed by the state machine. While chunk N is actively being played through the Web Audio API, useNarration.ts commands the kokoroStrategy.ts module to background-generate chunk N+1, storing the resulting Float32Array in a preBufferRef cache.   
+
+The internal document notes that the primary selling point of the VibeVoice-Realtime-0.5B model is its ~300ms first-audible latency, achieved via an interleaved, windowed design that streams text internally while generating acoustic latents in parallel. However, a third-order architectural analysis reveals that in Blurby's design, generation latency is almost entirely hidden from the user by the pre-buffer. Because the Kokoro worker thread is generating the next sentence in the background while the current sentence is being read aloud, the actual generation time of the TTS engine is irrelevant, provided it is faster than the human listening speed.   
+
+Therefore, VibeVoice's primary advantage—its 300ms streaming generation capability—provides absolutely zero functional benefit to Blurby's user experience. The application does not need the engine to speak the first syllable of the next sentence in 300ms; it just needs the entire sentence ready by the time the current audio buffer finishes playing. Furthermore, Blurby's recent TTS-RATE-2 sprint successfully implemented segmented live Kokoro rate responses, allowing user speed edits to take effect at segment boundaries in just 210ms. VibeVoice cannot match this responsiveness without relying on the aforementioned external, artifact-heavy temporal stretching techniques.   
+
+Fragility in State Management and Race Conditions
+The provided TTS Audit documents reveal a sophisticated but highly fragile state management ecosystem within Blurby. The architecture utilizes a dual-state tracking pattern: a React useReducer manages the UI state for rendering, while a mutable stateRef (via useRef) allows for synchronous reads of the current cursor position and playback status within asynchronous Web Audio callbacks.   
+
+The internal audits highlight numerous existing race conditions within this architecture. For example, if a user clicks stop() immediately after clicking resume() before the AudioContext.resume() promise resolves, the system spawns "ghost timers" that advance the visual cursor while no audio is playing. Similarly, the kokoroStrategy.ts module uses an inFlight guard to prevent overlapping IPC requests; however, if a worker request fails or the flag gets stuck as true, the system silently drops subsequent chunks, causing narration to stall permanently. WPM updates and rate adjustments also fail to clear the preBufferRef.current correctly, resulting in the playback of stale audio generated at the previous speed.   
+
+Introducing a completely new engine architecture—especially an asynchronous WebSocket/FastAPI Python stream—would exponentially multiply the complexity of these race conditions. The internal document correctly notes that integrating VibeVoice would require building a new "streaming adapter" to consume chunk outputs and translate them into Blurby's rigid scheduler model. It would also necessitate a massive "cache redesign" to accommodate new configuration parameters like Classifier-Free Guidance (CFG) scales, diffusion steps, and temperature. Given the existing fragility of useNarration.ts and the strict "Parallel Dispatch Guardrails" currently protecting these shared-core files from concurrent modification , injecting a streaming WebSocket bridge into this state machine is a high-risk endeavor that threatens to destabilize the entire application.   
+
+Serialization Bottlenecks and Data Transfer
+An additional architectural constraint identified in the audit involves the Inter-Process Communication (IPC) bridge between the Electron main process and the Chromium renderer. Currently, the tts-worker.js module performs Kokoro ONNX inference and generates raw PCM audio as a Float32Array. However, to serialize this data across the IPC boundary, the worker executes Array.from(pcm) to convert the typed array into a standard JavaScript array.   
+
+The audit notes that this serialization technique introduces an overhead of approximately 1-2ms per generated chunk. While this is a minor inefficiency for Kokoro's discrete sentence chunks, a streaming model like VibeVoice-Realtime-0.5B, which continuously pushes tiny frames of audio via WebSockets to maintain its 300ms latency, would exacerbate this serialization bottleneck. The renderer process would be bombarded with continuous IPC array conversions, leading to potential garbage collection spikes and UI stuttering—a critical failure for an application designed to render 60 frames-per-second scrolling text.   
+
+Evaluation of the Proposed Integration Path
+The internal engineering document concludes with a section titled "What We’d Have To Build To Bring It In," proposing seven distinct engineering tasks required to integrate VibeVoice. An architectural review confirms that this list is not only accurate but realistically scoped, highlighting the severe technical debt required to execute the migration.
+
+Generic Local-Engine Abstraction: The assertion is correct. Blurby's TtsStrategy interface, located in src/types/narration.ts, currently assumes standard, synchronous audio buffer returns from either the kokoroStrategy or the webSpeechStrategy. Expanding this interface to handle persistent WebSocket streaming connections, heartbeat monitoring, and asynchronous byte-stream aggregation for VibeVoice would require rewriting the foundational strategy contract.   
+
+New Runtime Boundary: The assertion is correct. As previously established, transitioning from an encapsulated Node-native ONNX environment to a Python/PyTorch sidecar requires a massive expansion of the Electron build pipeline. The engineering team would be responsible for building native OS detection scripts, managing multi-gigabyte Hugging Face model downloads, verifying CUDA driver compatibility, and maintaining inter-process health checks between the Node main process and the Python server.   
+
+Streaming Adapter: The assertion is correct. Blurby's orchestration model (useNarration.ts) is built around discrete sentence boundaries. Translating VibeVoice's continuous acoustic latent stream into manageable, UI-syncable events would require a highly complex intermediary buffer manager capable of detecting silence gaps or syntactic boundaries on the fly.
+
+Timing/Alignment Layer: The assertion is correct. This is the most significant hurdle. Without native word timestamps from the VibeVoice diffusion head, Blurby would have to bundle an entirely separate ASR model (such as a quantized version of Whisper) solely to transcribe the audio VibeVoice generates and align it back to the text. This doubles the computational load, negates any latency advantages, and destroys the offline-first lightweight footprint of the application.   
+
+Rate-Control Redesign: The assertion is correct. The recent TTS-RATE-1 and TTS-RATE-2 sprints successfully implemented exact speed controls. Reverting to post-generation audio stretching (e.g., Phase Vocoders) to manipulate VibeVoice's output would severely degrade audio quality, particularly for speed-readers pushing playback to 1.5x or 2.0x speeds.   
+
+Cache Redesign: The assertion is correct. The preBufferRef and the useNarrationCaching hooks currently key off simple text hashes. A diffusion model governed by CFG scales, diffusion steps, and top-p sampling requires a much more complex, multidimensional cache invalidation strategy to prevent stale audio playback when parameters change.   
+
+UI/Settings Work: The assertion is correct. The user interface would need to be overhauled to surface the new engine options, handle the massive asynchronous model downloads (ranging from 2.0 GB to 5.4 GB), and display appropriate loading indicators—which, as the audit notes, are currently absent even for the much smaller, 5-to-15 second Kokoro reloads.   
+
+Final Synthesis and Conclusion
+The internal engineering document evaluating VibeVoice against Kokoro is a triumph of pragmatic software architecture analysis. It accurately acknowledges the theoretical superiority of VibeVoice's long-form neural architecture while ruthlessly grounding its conclusions in the practical constraints of the Blurby application.
+
+From an epistemological standpoint, every major claim made in the document is verifiable and true. The timeline of Microsoft's repository deletions, the existence of the draconian audible disclaimer policy, the absence of word-level timing outputs in the continuous diffusion head, and the massive parameter footprints are all empirically documented realities of the open-source landscape in early 2026.
+
+From an architectural standpoint, the document perfectly anticipates the severe friction associated with integrating a Python-dependent, continuous-diffusion model into an Electron/React application built entirely around discrete text chunking and tight UI cursor synchronization. The Blurby application currently thrives on the lightweight, deterministic, and highly controllable nature of the 82-million parameter Kokoro ONNX model.
+
+VibeVoice, burdened by its massive VRAM requirements, lack of timing alignment, reliance on external Python dependencies, and compliance-driven user experience restrictions (the forced AI watermarks), is fundamentally unsuited for an interactive speed-reading application.
+
+The developer's final recommendation—to avoid immediate production integration while permitting a contained benchmark lane (VIBE-1 through VIBE-3) to investigate future alignment solutions—represents exemplary technical leadership. It acknowledges the rapid pace of open-source generative AI development without sacrificing immediate product stability or user experience. VibeVoice offers a fascinating glimpse into the future of large-language-model-driven acoustic tokenization, but for the highly specific, low-latency, cursor-synchronized needs of the Blurby application, Kokoro remains the undisputed optimal engine.
+
+
+
+TECHNICAL_REFERENCE.md
+
+github.com
+microsoft/VibeVoice: Open-Source Frontier Voice AI - GitHub
+Opens in a new window
+
+microsoft.github.io
+VibeVoice: A Frontier Open-Source Text-to-Speech Model
+Opens in a new window
+
+huggingface.co
+microsoft/VibeVoice-1.5B - Hugging Face
+Opens in a new window
+
+huggingface.co
+bezzam/VibeVoice-1.5B - Hugging Face
+Opens in a new window
+
+huggingface.co
+microsoft/VibeVoice-1.5B · The GitHub repository link is broken
+Opens in a new window
+
+reddit.com
+VibeVoice RIP? What do you think? : r/StableDiffusion - Reddit
+Opens in a new window
+
+huggingface.co
+microsoft/VibeVoice-1.5B · The github repo is deleted - Hugging Face
+Opens in a new window
+
+reddit.com
+VibeVoice RIP? What do you think? : r/LocalLLaMA - Reddit
+Opens in a new window
+
+reddit.com
+VibeVoice Gone? : r/LocalLLaMA - Reddit
+Opens in a new window
+
+github.com
+shijincai/VibeVoice: Archive of the official Microsoft VibeVoice repository (7B & 1.5B). Backup of the deleted source code for the open-source TTS models, including the removed 7B version. Try the VibeVoice online service · GitHub
+Opens in a new window
+
+github.com
+VibeVoice: Expressive, longform conversational speech synthesis. (Community fork) - GitHub
+Opens in a new window
+
+markets.chroniclejournal.com
+Microsoft's VibeVoice-Realtime-0.5B: A Game-Changer for Instant AI Conversations
+Opens in a new window
+
+byteiota.com
+Microsoft VibeVoice: 300ms Realtime Voice AI Goes Open-Source | byteiota
+Opens in a new window
+
+github.com
+vibevoice-realtime-0.5b.md - GitHub
+Opens in a new window
+
+medium.com
+Inside Microsoft VibeVoice-Realtime-0.5B: How a 0.5B-Parameter Next-Token Diffusion TTS Model Hits 300 ms Latency - Medium
+Opens in a new window
+
+huggingface.co
+microsoft/VibeVoice-Realtime-0.5B - Hugging Face
+Opens in a new window
+
+huggingface.co
+microsoft/VibeVoice-Realtime-0.5B at ecd323b073b32b0ad82e9b78806a90f82cce556e - Hugging Face
+Opens in a new window
+
+huggingface.co
+microsoft/VibeVoice-1.5B at main - Hugging Face
+Opens in a new window
+
+promptlayer.com
+Kokoro-82M-ONNX | PromptLayer Models
+Opens in a new window
+
+huggingface.co
+onnx-community/Kokoro-82M-ONNX - Hugging Face
+Opens in a new window
+
+huggingface.co
+onnx-community/Kokoro-82M-v1.0-ONNX - Hugging Face
+Opens in a new window
+
+github.com
+kokoro-tts-kotlin/README.md at main - GitHub
+Opens in a new window
+
+replicate.com
+kjjk10/kokoro-82m | Run with an API on Replicate
+Opens in a new window
+
+bentoml.com
+The Best Open-Source Text-to-Speech Models in 2026 - BentoML
+Opens in a new window
+
+github.com
+GitHub - Enemyx-net/VibeVoice-ComfyUI: A comprehensive ComfyUI integration for Microsoft's VibeVoice text-to-speech model, enabling high-quality single and multi-speaker voice synthesis directly within your ComfyUI workflows.
+Opens in a new window
+
+pypi.org
+kokoro - PyPI
+Opens in a new window
+
+medium.com
+Kokoro-82M: A Cutting-Edge TTS Model 350 mb | by Ritshidze Nemudzivhadi | Medium
+Opens in a new window
+
+wilsonwu.me
+Getting Started with Microsoft's Latest Open-Source Long-Form Speech Model VibeVoice
+Opens in a new window
+
+github.com
+VibeVoice/docs/vibevoice-tts.md at main · microsoft/VibeVoice - GitHub
+Opens in a new window
+
+pymnts.com
+Microsoft Unveils VibeVoice for Longer Conversational AI Audio | PYMNTS.com
+Opens in a new window
+
+reddit.com
+Did you notice the VibeVoice model card privacy policy? : r/LocalLLaMA - Reddit
+Opens in a new window
+
+byteiota.com
+Microsoft VibeVoice: The Voice AI Microsoft Pulled Back | byteiota
+Opens in a new window
+
+windowsforum.com
+VibeVoice-1.5B: Open-Source Long-Form Multi-Speaker TTS for Research
+Opens in a new window
+
+github.com
+Timestamps in output · Issue #92 · microsoft/VibeVoice - GitHub
+Opens in a new window
+
+arxiv.org
+VIBEVOICE-ASR Technical Report - arXiv
+Opens in a new window
+
+youtube.com
+VibeVoice Realtime 0.5B TTS Model | Realtime Audio From LLM Output - YouTube
+Opens in a new window
+
+mintlify.com
+Running Inference - VibeVoice - Mintlify
+Opens in a new window
+
+reddit.com
+Issue Bundling Python Executable with ElectronJS - Reddit
+Opens in a new window
+
+medium.com
+Electron + React + FastAPI Template for Cross-Platform Desktop Apps | by Shakeef Ahmed Rakin | Medium
+Opens in a new window
+
+
+TTS-AUDIT-ORIENTATION.md
+
+
+TTS-AUDIT-2026-03-28.md
+
+medium.com
+Microsoft VibeVoice Realtime 0.5B : Smallest realtime TTS AI | by Mehul Gupta - Medium

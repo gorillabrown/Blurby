@@ -1,0 +1,4 @@
+# Bug report files are generated locally by the app (Ctrl+Shift+B).
+# They contain large PNGs and verbose JSON snapshots — keep out of git.
+*.png
+*.json

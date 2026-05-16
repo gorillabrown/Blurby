@@ -32,7 +32,7 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 **Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
 **Location:** `src/components/ReaderContainer.tsx` (line 1362)
 **Description:** Clicking Focus shows a blank white screen with only tiny up/down arrow icons (▼/▲) in the center — no word text visible. The RSVP display renders but shows empty text.
-**Screenshot:** `docs/bug-reports/.Archive/bug-2026-04-06T13-48-57Z.png` — blank white screen with centered arrows.
+**Screenshot:** `docs/governance/bug-reports/.Archive/bug-2026-04-06T13-48-57Z.png` — blank white screen with centered arrows.
 **Root cause (confirmed by code analysis 2026-04-06):** Data-flow split between the mode timer and the display component.
 - `ReaderContainer.tsx:1362` passes `words={foliateWordStrings}` to ReaderView — this is a DOM-section slice (~1000 words from the currently visible Foliate section).
 - The FocusMode timer uses `getEffectiveWords()` which returns `bookWordsRef.current.words` (173,727 words from full-book extraction) when available.
@@ -52,8 +52,8 @@ When the user navigates away from the narrated section, `measureNarrationBandDim
 **Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
 **Location:** `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
 **Description:** When navigating to any page, no word is highlighted. Reading modes (Focus, Flow, Narrate) don't know where to start because there's no persistent "current word" anchor. Users reported: "If no word is selected, where does each reading mode start?" and "there must always be a word selected."
-**Screenshots:** `docs/bug-reports/bug-2026-04-06T13-49-14Z.png`, `bug-2026-04-06T13-50-16Z.png`, `bug-2026-04-06T13-50-34Z.png`
-**Investigation:** Full investigation report at `docs/investigations/SELECTION-1-investigation.md`. 4 word lists mapped, per-mode start resolution traced, 6 gaps identified, position data flow diagrammed.
+**Screenshots:** `docs/governance/bug-reports/bug-2026-04-06T13-49-14Z.png`, `bug-2026-04-06T13-50-16Z.png`, `bug-2026-04-06T13-50-34Z.png`
+**Investigation:** Full investigation report at `docs/studies/investigations/SELECTION-1-investigation.md`. 4 word lists mapped, per-mode start resolution traced, 6 gaps identified, position data flow diagrammed.
 **Design (Cowork 2026-04-06):** Three-tier word anchor contract:
 - **Soft selection** (`softWordIndexRef`) — First visible word on every page, auto-updated via `findFirstVisibleWordIndex()` on `onRelocate`/`onLoad`. Visual: `.page-word--soft-selected` (2px left-border accent). Only visible in page mode.
 - **Hard selection** (`highlightedWordIndex`, existing) — User clicks a word → distinct highlight, persists across page turns. Takes visual priority over soft.
@@ -131,7 +131,7 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Status:** PARKED — code already switches on click. Needs live verification. Not included in SELECTION-1.
 **Location:** `src/components/FoliatePageView.tsx` (line 1527), `src/components/ReaderContainer.tsx` (line 1293)
 **Description:** User reports clicking "Flow" doesn't switch to scrolled layout until play starts.
-**Screenshot:** `docs/bug-reports/.Archive/bug-2026-04-06T13-47-33Z.png`
+**Screenshot:** `docs/governance/bug-reports/.Archive/bug-2026-04-06T13-47-33Z.png`
 **Code analysis (2026-04-06):** The code already handles this correctly:
 - `ReaderContainer.tsx:1293` sets `flowMode={readingMode === "flow"}` — updates immediately on button click.
 - `FoliatePageView.tsx:1527` applies `view.renderer.setAttribute("flow", flowMode ? "scrolled" : "paginated")` via a useEffect with `[flowMode]` dependency — fires when prop changes.
@@ -144,7 +144,7 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Severity:** High
 **Location:** `main/url-extractor.js`, `main/ipc/library.js`
 **Description:** URL extraction fails with "Could not extract article from this URL. Try opening it in your browser instead." Tested with `https://www.ebsco.com/research-starters/history/simonides`. May be site-specific (EBSCO may require auth/cookies) or a broader Readability regression.
-**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-51-56Z.png` — library view showing error message.
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-51-56Z.png` — library view showing error message.
 **Fix:** Added `fetchWithBrowser` fallback to the no-login branch of `main/ipc/misc.js`. Electron's built-in `fetch()` triggers WAF rejection on EBSCO and Cloudflare-protected sites (HTTP 400 — Chromium TLS fingerprint detected as bot). The fallback uses a hidden BrowserWindow with full session cookies, bypassing WAF detection.
 
 ### ~~BUG-156~~ ✅ Fixed — HOTFIX-14 (v1.38.2, 2026-04-06)
@@ -152,7 +152,7 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Severity:** Medium
 **Location:** `main/ws-server.js`, `src/components/settings/ConnectorsSettings.tsx`
 **Description:** Connectors settings page shows "Extension is paired and connected" with green indicator when no Chrome extension is actually connected. The WebSocket server was reporting "listening" (server running) as "connected" (client attached).
-**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-52-39Z.png`
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-52-39Z.png`
 **Fix:** `getClientCount()` now filters to authenticated clients only. `ConnectorsSettings.tsx` polls status every 5 seconds. WebSocket heartbeat interval reduced from 30s to 15s for faster stale-connection detection.
 
 ### ~~BUG-157~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
@@ -160,7 +160,7 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Severity:** Medium (enhancement)
 **Location:** `src/components/settings/ConnectorsSettings.tsx`
 **Description:** No way to disconnect or reset the Chrome extension connection from within Blurby. Users need a button to force-disconnect and regenerate pairing token.
-**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-53-06Z.png`
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-53-06Z.png`
 **Fix:** Added "Disconnect" button that clears pairing token and drops any active WebSocket connection. Added "Reconnect" button that generates a new pairing code.
 
 ### ~~BUG-158~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
@@ -168,7 +168,7 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Severity:** Low (UX simplification)
 **Location:** `src/components/ReadingQueueFlap.tsx` or equivalent flap component
 **Description:** Reading queue flap showed many categories. User requested simplification: only show "Now Reading" and "Queue" in that order.
-**Screenshot:** `docs/bug-reports/bug-2026-04-06T13-53-40Z.png`
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-53-40Z.png`
 **Fix:** Filtered flap sections to only "Now Reading" and "Queue". Removed other categories.
 
 ### ~~BUG-145~~ ✅ Fixed — TTS-7R (v1.37.0)
