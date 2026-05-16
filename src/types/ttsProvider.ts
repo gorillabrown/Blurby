@@ -24,6 +24,7 @@ export interface ProviderCapabilities {
   requiresSidecar: boolean;
   canStream: boolean;
   providesWordTimings: boolean;
+  emitsWordBoundaryEvents: boolean;
   timingTruth: TtsProviderTimingTruth;
   canBlendVoices: boolean;
   supportsVoiceCloning: boolean;
@@ -33,6 +34,21 @@ export interface ProviderCapabilities {
   cacheable: boolean;
   statusKind: TtsProviderStatusKind;
 }
+
+/**
+ * Provider-level word-boundary timing event.
+ * `sourceWordIndex` is the provider/native timing index (normalized token space);
+ * `resolvedWordIndex` is the original global word index used by reader surfaces.
+ */
+export interface TtsProviderWordBoundaryEvent {
+  sourceWordIndex: number | null;
+  resolvedWordIndex: number;
+  isTrustedWordTiming: boolean;
+  alignmentCorrected: boolean;
+  timingTruth: TtsProviderTimingTruth;
+}
+
+export type TtsProviderWordBoundaryCallback = (event: TtsProviderWordBoundaryEvent) => void;
 
 export interface TTSProviderCopy {
   buttonLabel: string;

@@ -21,6 +21,7 @@ describe("SegmentNormalizer", () => {
       expect(result.normalizerVersion).toBe(TTS_NORMALIZER_VERSION);
       expect(result.sourceTextHash).toBe(stableSegmentTextHash(fixture.input));
       expect(result.normalizedTextHash).toBe(stableSegmentTextHash(fixture.expected));
+      expect(result.normalizedToOriginalMap).toEqual(fixture.expectedNormalizedToOriginalMap);
       expect(result.transforms.map((transform) => transform.id)).toEqual(fixture.expectedTransforms);
     }
   });
@@ -53,5 +54,11 @@ describe("SegmentNormalizer", () => {
     expect(first.originalText).toBe(sourceText);
     expect(first.normalizedText).toBe("Doctor Qing paid twelve dollars and fifty cents.");
     expect(first.sourceTextHash).not.toBe(first.normalizedTextHash);
+  });
+
+  it("maps expanded normalized tokens back to original word indices", () => {
+    const result = normalizeSegmentText('"Mr. Wells owes $12.50," she said.', { locale: "en-US" });
+    expect(result.normalizedText).toBe('"Mister Wells owes twelve dollars and fifty cents," she said.');
+    expect(result.normalizedToOriginalMap).toEqual([0, 1, 2, 3, 3, 3, 3, 3, 4, 5]);
   });
 });

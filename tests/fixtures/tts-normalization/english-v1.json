@@ -2,57 +2,176 @@
   {
     "id": "ordinary-prose-nfkc-time-date",
     "locale": "en-US",
-    "input": "The \ufb01rst office opened at 3:45 p.m. on May 13, 2026.",
+    "input": "The ﬁrst office opened at 3:45 p.m. on May 13, 2026.",
     "expected": "The first office opened at three forty five P M on May thirteenth, twenty twenty six.",
-    "expectedTransforms": ["unicode-nfkc", "date-expansion", "time-expansion"]
+    "expectedTransforms": [
+      "unicode-nfkc",
+      "date-expansion",
+      "time-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      5,
+      6,
+      6,
+      6,
+      7,
+      8,
+      9,
+      9,
+      10,
+      10
+    ]
   },
   {
     "id": "dialogue-currency-abbreviation",
     "locale": "en-US",
     "input": "\"Mr. Wells owes $12.50,\" she said.",
     "expected": "\"Mister Wells owes twelve dollars and fifty cents,\" she said.",
-    "expectedTransforms": ["currency-expansion", "abbreviation-expansion"]
+    "expectedTransforms": [
+      "currency-expansion",
+      "abbreviation-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      4,
+      5
+    ]
   },
   {
     "id": "heading-roman-spaced-initials",
     "locale": "en-US",
     "input": "CHAPTER IV THE U. S. NAVY",
     "expected": "CHAPTER four THE U S NAVY",
-    "expectedTransforms": ["roman-numeral-expansion", "spaced-initials"]
+    "expectedTransforms": [
+      "roman-numeral-expansion",
+      "spaced-initials"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
   },
   {
     "id": "line-break-delimiters",
     "locale": "en-US",
     "input": "First line\nSecond line\r\nThird line",
     "expected": "First line Second line Third line",
-    "expectedTransforms": ["whitespace-normalization"]
+    "expectedTransforms": [
+      "whitespace-normalization"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
   },
   {
     "id": "number-ordinals-cardinals",
     "locale": "en-US",
     "input": "She finished 21st and read 105 pages.",
     "expected": "She finished twenty first and read one hundred five pages.",
-    "expectedTransforms": ["ordinal-expansion", "cardinal-expansion"]
+    "expectedTransforms": [
+      "ordinal-expansion",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      2,
+      3,
+      4,
+      5,
+      5,
+      5,
+      6
+    ]
   },
   {
     "id": "safe-footnote-marker",
     "locale": "en-US",
     "input": "The result[12] changed in 2026.",
     "expected": "The result changed in twenty twenty six.",
-    "expectedTransforms": ["citation-marker-removal", "cardinal-expansion"]
+    "expectedTransforms": [
+      "citation-marker-removal",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      3,
+      4,
+      5,
+      5,
+      5
+    ]
   },
   {
     "id": "numeric-us-date",
     "locale": "en-US",
     "input": "The appointment is 05/13/2026 at 9:05 AM.",
     "expected": "The appointment is May thirteenth, twenty twenty six at nine oh five A M.",
-    "expectedTransforms": ["date-expansion", "time-expansion"]
+    "expectedTransforms": [
+      "date-expansion",
+      "time-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      6,
+      7,
+      7,
+      8,
+      8,
+      8
+    ]
   },
   {
     "id": "abbreviations",
     "locale": "en-US",
     "input": "Dr. Ada met Prof. Turing, e.g. at No. 5.",
     "expected": "Doctor Ada met Professor Turing, for example at number five.",
-    "expectedTransforms": ["abbreviation-expansion", "cardinal-expansion"]
+    "expectedTransforms": [
+      "abbreviation-expansion",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      5,
+      6,
+      7,
+      8
+    ]
   }
 ]

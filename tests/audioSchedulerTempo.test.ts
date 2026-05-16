@@ -330,7 +330,11 @@ describe("audioScheduler tempo continuity", () => {
       endIdx: 6,
     }));
     expect(onChunkHandoff).toHaveBeenCalledTimes(1);
-    expect(onChunkHandoff).toHaveBeenCalledWith(5, false);
+    expect(onChunkHandoff).toHaveBeenCalledWith(
+      5,
+      false,
+      expect.objectContaining({ resolvedWordIndex: 5 }),
+    );
 
     scheduler.stop();
   });

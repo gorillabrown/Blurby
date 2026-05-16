@@ -32,6 +32,7 @@ export interface PipelineConfig {
     sampleRate?: number;
     durationMs?: number;
     wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
+    sourceWordIndexes?: number[] | null;
     error?: string;
   }>;
   /** Get all words for narration */
@@ -503,6 +504,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
         boundaryType,
         silenceMs,
         wordTimestamps: result.wordTimestamps || null,
+        sourceWordIndexes: result.sourceWordIndexes || null,
         chunkId: cacheIdentity && typeof cacheIdentity === "object"
           ? cacheIdentity.chunkId
           : undefined,

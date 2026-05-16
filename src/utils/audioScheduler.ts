@@ -5,7 +5,7 @@
 // eliminating the 5-20ms gap from the onended→consumeNext handover.
 // Crossfade at chunk boundaries prevents splice artifacts.
 
-import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL, NARRATION_CURSOR_LAG_MS } from "../constants";
+import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, NARRATION_CURSOR_LAG_MS } from "../constants";
 import { applyKokoroTempoStretch } from "./audio/tempoStretch";
 import type { KokoroRatePlan } from "./kokoroRatePlan";
 import type { KokoroPlaybackSegmentMetadata } from "../types/narration";
@@ -102,6 +102,8 @@ export interface ScheduledChunk {
    *  is silence. Currently only startTime is used for scheduling; endTime preserved for future
    *  silence-aware cursor hold (IDEAS.md H6). */
   wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
+  /** Optional provider-native word index (normalized/token space) for each resolved chunk word. */
+  sourceWordIndexes?: number[] | null;
   /** Stable timing metadata identity for sync policy and diagnostics. */
   chunkId?: string;
   /** Optional parent/segment identity for segmented or cached timing lookups. */
@@ -121,7 +123,7 @@ type ActiveSource = {
   boundaryFired: boolean;
   originalChunk: KokoroTempoAwareChunk;
   chunk: KokoroTempoAwareChunk;
-  boundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[];
+  boundaries: SchedulerWordBoundary[];
 };
 
 export interface ChunkBoundaryPayload {
@@ -134,18 +136,46 @@ export interface ChunkBoundaryPayload {
 }
 
 export interface SchedulerCallbacks {
-  onWordAdvance: (wordIndex: number, isTrustedWordTiming?: boolean) => void;
+  onWordAdvance: (
+    wordIndex: number,
+    isTrustedWordTiming?: boolean,
+    boundaryEvent?: SchedulerWordBoundaryEvent,
+  ) => void;
   onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => void;
   onEnd: () => void;
   onError: () => void;
   onSegmentStart?: (wordIndex: number) => void;
-  /** TTS-7O: Periodic truth-sync — fires every N words and on chunk boundaries */
-  onTruthSync?: (wordIndex: number, isTrustedWordTiming?: boolean) => void;
+  /** Word-boundary truth-sync — fires on every resolved boundary and chunk boundary handoff. */
+  onTruthSync?: (
+    wordIndex: number,
+    isTrustedWordTiming?: boolean,
+    boundaryEvent?: SchedulerWordBoundaryEvent,
+  ) => void;
   /** TTS-7Q: Chunk handoff carry-over — fires at chunk boundary with the last
    *  audio-confirmed word so the visual band can continue from that position. */
-  onChunkHandoff?: (lastConfirmedWordIndex: number, isTrustedWordTiming?: boolean) => void;
+  onChunkHandoff?: (
+    lastConfirmedWordIndex: number,
+    isTrustedWordTiming?: boolean,
+    boundaryEvent?: SchedulerWordBoundaryEvent,
+  ) => void;
   /** TTS-SYNC-1: Emits explicit timing metadata when a chunk enters the scheduler. */
   onTimingMetadata?: (metadata: TimingMetadataRecord) => void;
+}
+
+interface SchedulerWordBoundary {
+  time: number;
+  wordIndex: number;
+  isTrustedWordTiming: boolean;
+  sourceWordIndex: number | null;
+  alignmentCorrected: boolean;
+  timingTruth: TtsProviderTimingTruth;
+}
+
+export interface SchedulerWordBoundaryEvent {
+  sourceWordIndex: number | null;
+  resolvedWordIndex: number;
+  alignmentCorrected: boolean;
+  timingTruth: TtsProviderTimingTruth;
 }
 
 /** TTS-7Q: Continuous audio-progress report — fractional position within the current word span. */
@@ -212,13 +242,9 @@ export function createAudioScheduler(): AudioScheduler {
   // Word timer state
   let wordTimerHandle: ReturnType<typeof setTimeout> | null = null;
   let wordRafHandle: number | null = null;
-  let currentWordBoundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] = [];
+  let currentWordBoundaries: SchedulerWordBoundary[] = [];
   let nextWordBoundaryIdx = 0;
   let playbackStartTime: number | null = null; // Set on first scheduleChunk — gates tick()
-
-  // TTS-7O: Truth-sync state — fires onTruthSync every N words
-  let truthSyncCounter = 0;
-  const truthSyncInterval = TTS_CURSOR_TRUTH_SYNC_INTERVAL;
 
   function getAudioContext(): AudioContext {
     if (!audioCtx) {
@@ -278,10 +304,21 @@ export function createAudioScheduler(): AudioScheduler {
       typeof chunk.isFinalSegment === "boolean";
   }
 
+  function toBoundaryEvent(boundary: SchedulerWordBoundary | null | undefined, resolvedWordIndex: number): SchedulerWordBoundaryEvent | undefined {
+    if (!boundary) return undefined;
+    return {
+      sourceWordIndex: boundary.sourceWordIndex,
+      resolvedWordIndex,
+      alignmentCorrected: boundary.alignmentCorrected,
+      timingTruth: boundary.timingTruth,
+    };
+  }
+
   function deliverChunkBoundary(s: ActiveSource): void {
     if (s.boundaryFired) return;
 
-    const sourceBoundaryTrust = s.boundaries[s.boundaries.length - 1]?.isTrustedWordTiming ?? false;
+    const lastBoundary = s.boundaries[s.boundaries.length - 1];
+    const sourceBoundaryTrust = lastBoundary?.isTrustedWordTiming ?? false;
     const { shouldEmit, endIdx, lastConfirmedWordIdx, metadata } = getParentBoundaryInfo(s.chunk);
     s.boundaryFired = true;
 
@@ -292,9 +329,9 @@ export function createAudioScheduler(): AudioScheduler {
     } else {
       callbacks.onChunkBoundary(endIdx);
     }
-    truthSyncCounter = 0;
-    callbacks.onTruthSync?.(lastConfirmedWordIdx, sourceBoundaryTrust);
-    callbacks.onChunkHandoff?.(lastConfirmedWordIdx, sourceBoundaryTrust);
+    const boundaryEvent = toBoundaryEvent(lastBoundary, lastConfirmedWordIdx);
+    callbacks.onTruthSync?.(lastConfirmedWordIdx, sourceBoundaryTrust, boundaryEvent);
+    callbacks.onChunkHandoff?.(lastConfirmedWordIdx, sourceBoundaryTrust, boundaryEvent);
   }
 
   /**
@@ -361,7 +398,7 @@ export function createAudioScheduler(): AudioScheduler {
   function computeWordBoundaries(
     chunk: ScheduledChunk,
     chunkStartTime: number,
-  ): { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] {
+  ): SchedulerWordBoundary[] {
     const wordCount = chunk.words.length;
     if (wordCount <= 0) return [];
 
@@ -372,12 +409,17 @@ export function createAudioScheduler(): AudioScheduler {
       const speechDurationSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
 
       if (validateWordTimestamps(chunk.wordTimestamps, chunk.words, speechDurationSec)) {
-        const boundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] = [];
+        const boundaries: SchedulerWordBoundary[] = [];
         for (let i = 0; i < wordCount; i++) {
+          const sourceWordIndexRaw = chunk.sourceWordIndexes?.[i];
+          const sourceWordIndex = Number.isInteger(sourceWordIndexRaw) ? Number(sourceWordIndexRaw) : null;
           boundaries.push({
             time: chunkStartTime + chunk.wordTimestamps[i].startTime,
             wordIndex: chunk.startIdx + i,
             isTrustedWordTiming: true,
+            sourceWordIndex,
+            alignmentCorrected: sourceWordIndex != null && sourceWordIndex !== i,
+            timingTruth: chunk.timingTruth ?? "word-native",
           });
         }
 
@@ -407,13 +449,16 @@ export function createAudioScheduler(): AudioScheduler {
     // ── FALLBACK: Existing heuristic (unchanged) ──────────────────────────
     const chunkDurSec = (chunk.durationMs - (chunk.silenceMs ?? 0)) / 1000;
     const weights = computeWordWeights(chunk.words, chunk.weightConfig);
-    const boundaries: { time: number; wordIndex: number; isTrustedWordTiming: boolean }[] = [];
+    const boundaries: SchedulerWordBoundary[] = [];
     let cumulativeWeight = 0;
     for (let i = 0; i < wordCount; i++) {
       boundaries.push({
         time: chunkStartTime + cumulativeWeight * chunkDurSec,
         wordIndex: chunk.startIdx + i,
         isTrustedWordTiming: false,
+        sourceWordIndex: null,
+        alignmentCorrected: false,
+        timingTruth: chunk.timingTruth ?? "segment-following",
       });
       cumulativeWeight += weights[i];
     }
@@ -441,8 +486,8 @@ export function createAudioScheduler(): AudioScheduler {
     if (!callbacks || !audioCtx) return;
     if (currentWordBoundaries.length === 0 && !hasPendingBoundaryDelivery()) return;
 
-    // BUG-151: Lag offset — the cursor clock runs behind the audio clock by this
-    // amount so the visual cursor never outpaces the actual spoken word.
+    // BUG-151 fallback lag offset. Trusted word-native boundaries bypass this;
+    // heuristic fallback paths continue to use it to avoid visual lead.
     const cursorLagSec = NARRATION_CURSOR_LAG_MS / 1000;
 
     function tick(): void {
@@ -457,25 +502,24 @@ export function createAudioScheduler(): AudioScheduler {
 
       flushStartedSegments(now);
 
-      // BUG-151: Use lagged time for boundary comparison — cursor must not
-      // exceed audioTime - cursorLagSec. This is the hard ceiling.
+      // BUG-151 fallback path: untrusted/heuristic timing stays lagged so the
+      // visual cursor cannot outpace speech on non-word-native engines.
       const cursorNow = now - cursorLagSec;
 
       // Advance past ALL boundaries we've crossed in this tick.
       let advancedAny = false;
-      while (nextWordBoundaryIdx < currentWordBoundaries.length &&
-             currentWordBoundaries[nextWordBoundaryIdx].time <= cursorNow) {
+      while (nextWordBoundaryIdx < currentWordBoundaries.length) {
         const currentBoundary = currentWordBoundaries[nextWordBoundaryIdx];
+        // Event-driven word-native boundaries bypass fixed cursor lag. The lagged
+        // comparator remains only for fallback/non-word-native timing.
+        const boundaryComparatorTime = currentBoundary.isTrustedWordTiming ? now : cursorNow;
+        if (currentBoundary.time > boundaryComparatorTime) break;
         const advancedWordIndex = currentBoundary.wordIndex;
-        callbacks.onWordAdvance(advancedWordIndex, currentBoundary.isTrustedWordTiming);
+        const boundaryEvent = toBoundaryEvent(currentBoundary, advancedWordIndex);
+        callbacks.onWordAdvance(advancedWordIndex, currentBoundary.isTrustedWordTiming, boundaryEvent);
+        callbacks.onTruthSync?.(advancedWordIndex, currentBoundary.isTrustedWordTiming, boundaryEvent);
         advancedAny = true;
         nextWordBoundaryIdx++;
-
-        truthSyncCounter++;
-        if (truthSyncCounter >= truthSyncInterval) {
-          truthSyncCounter = 0;
-          callbacks.onTruthSync?.(advancedWordIndex, currentBoundary.isTrustedWordTiming);
-        }
       }
       if (advancedAny) {
         // Sliding window: prune consumed boundaries to prevent unbounded growth
@@ -720,9 +764,12 @@ export function createAudioScheduler(): AudioScheduler {
         // TTS-7O: Truth-sync on resume — re-snap cursor position
         if (callbacks?.onTruthSync && nextWordBoundaryIdx > 0 && currentWordBoundaries.length > 0) {
           const lastIdx = Math.min(nextWordBoundaryIdx - 1, currentWordBoundaries.length - 1);
+          const lastBoundary = currentWordBoundaries[lastIdx];
+          const boundaryEvent = toBoundaryEvent(lastBoundary, lastBoundary.wordIndex);
           if (lastIdx >= 0) callbacks.onTruthSync(
             currentWordBoundaries[lastIdx].wordIndex,
             currentWordBoundaries[lastIdx].isTrustedWordTiming,
+            boundaryEvent,
           );
         }
       }
@@ -744,7 +791,6 @@ export function createAudioScheduler(): AudioScheduler {
     nextWordBoundaryIdx = 0;
     nextStartTime = 0;
     playbackStartTime = null;
-    truthSyncCounter = 0;
     callbacks = null;
   }
 
