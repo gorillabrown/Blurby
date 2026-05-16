@@ -68,6 +68,25 @@ describe("TimingMetadataStore", () => {
     expect(store.getChunk("missing")?.timingClassification).toBe("missing");
     expect(store.queryTime(1_050, { chunkId: "segment-only" })?.wordIndex).toBeNull();
   });
+
+  it("requires non-empty, full-span word-native timestamps before classifying as trusted", () => {
+    const store = createTimingMetadataStore();
+    store.upsertChunk(trustedChunk({
+      chunkId: "empty-native",
+      timingTruth: "word-native",
+      wordTimestamps: [],
+    }));
+    store.upsertChunk(trustedChunk({
+      chunkId: "mismatch-native",
+      timingTruth: "word-native",
+      wordTimestamps: [{ word: "one", startTime: 0, endTime: 0.2 }],
+    }));
+
+    expect(store.getChunk("empty-native")?.timingClassification).toBe("heuristic");
+    expect(store.getChunk("empty-native")?.hasTrustedWordTiming).toBe(false);
+    expect(store.getChunk("mismatch-native")?.timingClassification).toBe("heuristic");
+    expect(store.getChunk("mismatch-native")?.hasTrustedWordTiming).toBe(false);
+  });
 });
 
 describe("HighlightSyncController", () => {

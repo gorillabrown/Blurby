@@ -5,9 +5,35 @@
 // audio scheduler.
 
 import type { ScheduledChunk } from "./audioScheduler";
-import type { TtsCacheIdentity, TtsCacheWriteTimingMetadata } from "../types/ttsCache";
+import {
+  classifyTiming,
+  type TtsCacheIdentity,
+  type TtsCacheIdentityV2,
+  type TtsCacheWriteTimingMetadata,
+} from "../types/ttsCache";
 
 const api = window.electronAPI;
+
+const BOUNDARY_TYPES = new Set<NonNullable<ScheduledChunk["boundaryType"]>>([
+  "comma",
+  "clause",
+  "sentence",
+  "paragraph",
+  "none",
+]);
+
+function asBoundaryType(value: unknown): ScheduledChunk["boundaryType"] | undefined {
+  if (typeof value !== "string") return undefined;
+  return BOUNDARY_TYPES.has(value as NonNullable<ScheduledChunk["boundaryType"]>)
+    ? (value as NonNullable<ScheduledChunk["boundaryType"]>)
+    : undefined;
+}
+
+function isStructuredIdentity(identity: TtsCacheIdentity): identity is TtsCacheIdentityV2 {
+  return typeof identity === "object"
+    && identity !== null
+    && (identity as TtsCacheIdentityV2).schemaVersion === 2;
+}
 
 /**
  * Check if a chunk is cached on disk.
@@ -43,6 +69,27 @@ export async function loadCachedChunk(
   // Fall back to the remaining full-context words for legacy entries without wordCount.
   const wordCount = result.wordCount ?? Math.max(0, allWords.length - startIdx);
   const chunkWords = allWords.slice(startIdx, startIdx + wordCount);
+  const sidecarTiming = result.timing ?? null;
+  const fallbackWordTimestamps = Array.isArray(result.wordTimestamps) ? result.wordTimestamps : null;
+  const timingClassification = sidecarTiming
+    ? classifyTiming({
+      timingTruth: sidecarTiming.timingTruth,
+      wordTimestamps: sidecarTiming.wordTimestamps ?? null,
+      chunkStartIdx: sidecarTiming.chunkStartIdx,
+      chunkEndIdx: sidecarTiming.chunkEndIdx,
+    })
+    : null;
+  const trustedWordTimestamps = sidecarTiming
+    ? (timingClassification === "trusted"
+      ? (sidecarTiming.wordTimestamps ?? fallbackWordTimestamps)
+      : null)
+    : fallbackWordTimestamps;
+  const cacheChunkId = isStructuredIdentity(voiceId)
+    ? voiceId.chunkId
+    : (sidecarTiming?.identityHash
+      ? `cache:${sidecarTiming.identityHash}:${sidecarTiming.chunkStartIdx ?? startIdx}`
+      : undefined);
+  const timingTruth = sidecarTiming?.timingTruth ?? (trustedWordTimestamps ? "word-native" : undefined);
 
   return {
     audio,
@@ -50,7 +97,10 @@ export async function loadCachedChunk(
     durationMs: result.durationMs,
     words: chunkWords,
     startIdx,
-    wordTimestamps: result.wordTimestamps ?? null,
+    wordTimestamps: trustedWordTimestamps ?? null,
+    boundaryType: asBoundaryType(sidecarTiming?.boundaryType ?? undefined),
+    timingTruth,
+    chunkId: cacheChunkId,
   };
 }
 

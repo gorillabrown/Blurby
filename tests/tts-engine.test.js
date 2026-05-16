@@ -131,6 +131,7 @@ function createMainProcessHarness() {
     fsPromises,
     constants,
     marathonStub,
+    ttsCacheStub,
     loadEngine() {
       clearMainModules();
       return require("../main/tts-engine.js");
@@ -771,6 +772,42 @@ describe("tts-engine marathon parity", () => {
 });
 
 describe("tts IPC contract", () => {
+  it("rejects malformed tts-cache read payloads at the IPC boundary", async () => {
+    const harness = createMainProcessHarness();
+    const { register } = harness.loadIpcRegister();
+    register({
+      getMainWindow: () => harness.browserWindow,
+      getLibrary: () => [],
+    });
+
+    const readHandler = harness.ipcHandlers.get("tts-cache-read");
+    expect(readHandler).toBeTypeOf("function");
+
+    harness.ttsCacheStub.readChunk.mockResolvedValueOnce({
+      audio: new Float32Array([0.1, 0.2]),
+      sampleRate: 24000,
+      durationMs: "500",
+      wordCount: 2,
+      timing: null,
+      wordTimestamps: null,
+    });
+    await expect(readHandler(null, "book-1", "voice-1", 0)).resolves.toMatchObject({
+      error: "Malformed cache payload: durationMs must be a finite number.",
+    });
+
+    harness.ttsCacheStub.readChunk.mockResolvedValueOnce({
+      audio: new Float32Array([0.1, 0.2]),
+      sampleRate: 24000,
+      durationMs: 500,
+      wordCount: 2,
+      timing: null,
+      wordTimestamps: [{ word: "bad", startTime: 0, endTime: "nope" }],
+    });
+    await expect(readHandler(null, "book-1", "voice-1", 0)).resolves.toMatchObject({
+      error: "Malformed cache payload: wordTimestamps must be an array of {word,startTime,endTime} objects.",
+    });
+  });
+
   it("returns structured warm-up failure metadata, truthful status snapshots, and no false loading=false signal", async () => {
     vi.useFakeTimers();
     const harness = createMainProcessHarness();
