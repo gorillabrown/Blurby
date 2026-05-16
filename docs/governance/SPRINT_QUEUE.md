@@ -56,27 +56,26 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: TTS Architecture Complete — Kokoro as sole active local/cacheable model engine (Web Speech remains a platform fallback), every implicit TTS architecture decision made explicit, tested, and debuggable.
-Queue depth: 7 prepared FIFO pointers (GREEN; 7 full specs, 0 stubs)
-Active head: TTS-INTEGRATE-1 — dispatch-ready after ENGINE-DORMANCY-1.
-Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. Findings integration (2026-05-15 PM2): TTS-CACHE-HARDEN-1 added between TTS-INTEGRATE-1 and TTS-EVENT-SYNC-1 — addresses cache-hit timing parity (impl review A8), timing type harmonization, IPC shape validation, and cache key safety. Source: Kokoro TTS Implementation Review (2026-05-15) + Cross-Codebase TTS Literature Review (2026-05-11). Existing sprints updated with findings-derived criteria: TTS-EVENT-SYNC-1 (A9 note), TTS-PIPELINE-1 (cache parity test + stress fixtures), TTS-ARCH-DOC-1 (error taxonomy + findings provenance + cache evolution). Parallel Lane E hygiene work completed as SK-HYG-2 and did not alter the TTS FIFO conveyor.
-Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor now advanced to 7 after ENGINE-DORMANCY-1).
+Queue depth: 6 prepared FIFO pointers (GREEN; 6 full specs, 0 stubs)
+Active head: TTS-CACHE-HARDEN-1 — dispatch-ready after TTS-INTEGRATE-1 completion.
+Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16: `origin/sprint/tts-sync-1-highlight-controller` merged first and `origin/sprint/tts-diag-1-diagnostics-bundle` merged second on `sprint/tts-integrate-1-sync-diag-main`, followed by focused sync + focused diagnostics + full-suite verification (`npm run typecheck`, `npm run build`, `npm test`, `git diff --check` all passed). Findings integration (2026-05-15 PM2) remains active in queue ordering: TTS-CACHE-HARDEN-1 addresses cache-hit timing parity (impl review A8), timing type harmonization, IPC shape validation, and cache key safety.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1 and to 6 after TTS-INTEGRATE-1 landed).
 ```
 
 ## TTS Architecture Completion Conveyor Belt (Active — Kokoro-Only)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
-| 1 | TTS-INTEGRATE-1 | Stage 1: Sync & Diagnostics | S-M | ENGINE-DORMANCY-1 | Dispatch-ready; dormancy gate complete |
-| 2 | TTS-CACHE-HARDEN-1 | Stage 1: Cache Hardening | S-M | TTS-INTEGRATE-1 | Full spec (findings: impl review A8 + lit review §4.6) |
-| 3 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 | Full spec (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
-| 4 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
-| 5 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
-| 6 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
-| 7 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
+| 1 | TTS-CACHE-HARDEN-1 | Stage 1: Cache Hardening | S-M | TTS-INTEGRATE-1 (completed 2026-05-16) | Dispatch-ready (findings: impl review A8 + lit review §4.6) |
+| 2 | TTS-EVENT-SYNC-1 | Stage 2: Event-Driven Sync | M-L | TTS-CACHE-HARDEN-1 | Full spec (research: readest + RealtimeTTS + sioyek; audit F3/F7: segment identity Phase 0 hard gate) |
+| 3 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 | Full spec (research: abogen) |
+| 4 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
+| 5 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
+| 6 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
 
 Dissolved sprints (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1 (Nano probes irrelevant), TTS-CANARY-1 (sidecar engines dormant), TTS-REGISTRY-DISPATCH-1 (single active engine).
 
-TTS-SYNC-1 and TTS-DIAG-1 are PASS/pushed on branches; they land via TTS-INTEGRATE-1.
+TTS-SYNC-1 and TTS-DIAG-1 are now landed on canonical `main` through TTS-INTEGRATE-1.
 
 Full specs: ROADMAP.md § "TTS Architecture Completion — Active Conveyor Belt" (dispatch fields) + ROADMAP_SPECS.md (architecture decisions, grounding evidence, implementation detail).
 
@@ -122,34 +121,8 @@ Closeout: `docs/governance/close-outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-
 ## Ready Queue Pointers
 
 ```text
-Sprint: TTS-INTEGRATE-1 — Integrate TTS Sync And Diagnostics Stack
-Status: Dispatch-ready. ENGINE-DORMANCY-1 has gated the Nano/Pocket sidecar lanes and removed the broad-suite Nano probe blocker.
-Type: Git integration + verification; no new product behavior beyond landing already-reviewed work.
-
-WHAT: Merge `origin/sprint/tts-sync-1-highlight-controller` first, then merge stacked `origin/sprint/tts-diag-1-diagnostics-bundle` onto canonical main.
-
-HYPOTHESIS: With Nano probes gated by dormancy, the integration merge should pass full `npm test` cleanly and land the sync/diagnostics architecture onto canonical main.
-
-WHERE:
-  - Branch `sprint/tts-integrate-1-sync-diag-main` (or fresh from updated main)
-  - Merge source branches:
-    - `origin/sprint/tts-sync-1-highlight-controller`
-    - `origin/sprint/tts-diag-1-diagnostics-bundle`
-  - Governance targets: `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md`
-
-HOW (Implementation):
-  Zeus/Codex [opus] {medium}: Merge both branches, resolve conflicts preserving canonical governance freshness plus branch implementation.
-
-HOW (Verification):
-  Hippocrates [haiku] {medium}: Run focused sync tests, focused diagnostics tests, `npm run typecheck`, `npm run build`, full `npm test`, and `git diff --check`.
-
-HOW (Review / Closeout):
-  Solon + Herodotus [sonnet] {medium}: Confirm both sprints landed on main, update governance to reflect landed state.
-```
-
-```text
 Sprint: TTS-CACHE-HARDEN-1 — Cache/Pipeline Type Safety And Timing Identity Parity
-Status: Queued after TTS-INTEGRATE-1. Findings-driven: impl review A8 + lit review §4.6.
+Status: Dispatch-ready; TTS-INTEGRATE-1 is complete and landed. Findings-driven: impl review A8 + lit review §4.6.
 Type: Implementation — cache-hit timing parity, type harmonization, IPC shape validation, cache key safety. No architectural changes.
 
 WHAT: Fix cache-hit/miss observational asymmetry (ScheduledChunk from cache lacks timingTruth/boundaryType that fresh chunks carry). Harmonize timing classification types (3 overlapping concepts → single canonical enum with full-record validation: truth + timestamps + count). Add IPC shape validation. Fix v1 cache key slash encoding. Core gate: 7 criteria. Opportunistic (if touched): dangling promise audit, resume backpressure.
@@ -332,9 +305,9 @@ Effort: S (~1).
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
 | ENGINE-DORMANCY-1 | 2026-05-16 | PASS — MOSS-Nano and Pocket TTS are dormant at settings selection and IPC runtime entry. Registry/settings posture now presents Kokoro as the sole active local/cacheable model engine while preserving Nano/Pocket code; stale Nano, Pocket, and Qwen settings profiles migrate to Kokoro; direct `tts-nano-*` and `tts-pocket-*` calls fail closed with `reason: "engine-dormant"`; and MOSS Nano performance probes are explicit opt-in rather than default-suite blockers. Verification: targeted suite 8 files / 47 tests passed; full suite 185 files passed with 1 skipped, 2499 tests passed and 132 skipped tests; `npm run typecheck` passed; `npm run build` passed with the existing circular chunk warning. Closeout: `docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md`. |
-| TTS-INTEGRATE-1 | 2026-05-15 | BLOCKED — Clean integration worktree `C:\tmp\Blurby-tts-integrate-1` on branch `sprint/tts-integrate-1-sync-diag-main` merged TTS-SYNC-1 first and stacked TTS-DIAG-1 second. Focused sync verification passed 9 files / 94 tests; focused diagnostics verification passed 4 files / 18 tests; `npm run typecheck` and `npm run build` passed. Full `npm test` failed in `tests/mossNanoProbe.test.js` with 3 performance-class failures, so no commit, push, or merge was performed. |
-| TTS-DIAG-1 | 2026-05-15 | PASS — Provider-neutral `tts-diagnostics-v1` narration diagnostics bundle is implemented on stacked branch `sprint/tts-diag-1-diagnostics-bundle` at `c97e446`; canonical `main` merge remains gated until TTS-INTEGRATE-1 is unblocked. Bundle captures provider capabilities, selected engine/voice/rate, segment IDs, original/normalized hashes, cache key components, timing sidecar summaries, scheduler truth events, highlight sync decisions, and relevant errors without exporting audio payloads or raw book text by default. Redaction guardrails recursively strip/reject `rawText`, `originalText`, `normalizedText`, and audio-shaped fields; diagnostics observe `HighlightSyncController` decisions without changing cursor ownership. Verification: focused diagnostics slice 4 files / 18 tests, full `npm test` 184 files / 2606 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
-| TTS-SYNC-1 | 2026-05-15 | PASS — Timing metadata and highlight sync policy are centralized on pushed branch `sprint/tts-sync-1-highlight-controller` at `142dc24`; canonical `main` merge is pending because the main worktree contains unrelated dirty work. `TimingMetadataStore` stores chunk timing metadata with trusted/heuristic/missing classification and queries by chunk, segment, word, or time; `HighlightSyncController` allows word-synced decisions only for trusted word-native timing and downgrades heuristic/missing timing to chunk/segment decisions with no active word. Scheduler/Kokoro/useNarration wiring publishes and stores timing metadata; `ReaderContainer` consumes controller decisions without changing Flow WPM timing, Narrate spoken timing, autoplay behavior, provider defaults, Qwen disablement, or `lastConfirmedAudioWordRef` ownership. Verification: focused pre-change sync baseline 8 files / 85 tests, focused sync regression 9 files / 93 tests, full `npm test` 181 files / 2598 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
+| TTS-INTEGRATE-1 | 2026-05-16 | PASS — Clean integration branch `sprint/tts-integrate-1-sync-diag-main` merged `origin/sprint/tts-sync-1-highlight-controller` first (`82aa76d`) and `origin/sprint/tts-diag-1-diagnostics-bundle` second (`04c033a`), preserving canonical governance freshness plus branch implementation facts. Verification passed: focused sync slice 4 files / 37 tests, focused diagnostics slice 4 files / 18 tests, `npm run typecheck`, `npm run build`, full `npm test` (183 files passed, 1 skipped; 2463 passed, 132 skipped), and `git diff --check`. |
+| TTS-DIAG-1 | 2026-05-15 | PASS — Provider-neutral `tts-diagnostics-v1` narration diagnostics bundle implemented on stacked branch `sprint/tts-diag-1-diagnostics-bundle` at `c97e446`, now landed on canonical `main` via TTS-INTEGRATE-1 merge commit `04c033a`. Bundle captures provider capabilities, selected engine/voice/rate, segment IDs, original/normalized hashes, cache key components, timing sidecar summaries, scheduler truth events, highlight sync decisions, and relevant errors without exporting audio payloads or raw book text by default. Redaction guardrails recursively strip/reject `rawText`, `originalText`, `normalizedText`, and audio-shaped fields; diagnostics observe `HighlightSyncController` decisions without changing cursor ownership. Verification: focused diagnostics slice 4 files / 18 tests, full `npm test` 184 files / 2606 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
+| TTS-SYNC-1 | 2026-05-15 | PASS — Timing metadata and highlight sync policy centralized on branch `sprint/tts-sync-1-highlight-controller` at `142dc24`, now landed on canonical `main` via TTS-INTEGRATE-1 merge commit `82aa76d`. `TimingMetadataStore` stores chunk timing metadata with trusted/heuristic/missing classification and queries by chunk, segment, word, or time; `HighlightSyncController` allows word-synced decisions only for trusted word-native timing and downgrades heuristic/missing timing to chunk/segment decisions with no active word. Scheduler/Kokoro/useNarration wiring publishes and stores timing metadata; `ReaderContainer` consumes controller decisions without changing Flow WPM timing, Narrate spoken timing, autoplay behavior, provider defaults, Qwen disablement, or `lastConfirmedAudioWordRef` ownership. Verification: focused pre-change sync baseline 8 files / 85 tests, focused sync regression 9 files / 93 tests, full `npm test` 181 files / 2598 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
 | TTS-CACHE-TIMING-1 | 2026-05-13 | PASS — Structured v2 TTS cache identity landed alongside legacy v1 compatibility. New entries carry schema/versioned provider, voice, rate bucket, model, source/normalized hashes, normalizer version, pronunciation override hash, document locator, chunk ID, sample rate, and timing truth; v2 disk paths are safe hashed directories under `tts-cache/v2/`. Manifest/audio/sidecar writes are atomic; `.timing.json` sidecars persist duration, trusted/heuristic classification, chunk boundaries, and trusted word timestamps only; corrupt sidecars do not discard readable audio. Verification: focused cache/timing/Kokoro/background suite 8 files / 75 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. Full serialized `npm test -- --maxWorkers=1` reached 186 files / 2642 tests and failed only the pre-existing resource-sensitive MOSS Nano performance probe (`2641` passed / `1` failed); isolated rerun of that file remained unrelated with timeout/performance-threshold failures. |
 | TTS-NORMALIZE-1 | 2026-05-13 | PASS — Segment normalizer truth added via `src/utils/segmentNormalizer.ts` and `TTS_NORMALIZER_VERSION = "en-v1"`. Golden fixtures cover conservative English normalization, pronunciation overrides remain first transform and hash-visible, Kokoro receives normalized spoken text while scheduler/display words stay original, and cache identity now includes normalizer version plus source/normalized text hash pair without destructive migration. Verification: focused normalizer/Kokoro/pipeline slice 4 files / 38 tests; broader TTS/provider/settings slice 8 files / 56 tests; `npm run typecheck`; serialized full `npm test -- --maxWorkers=1` 184 files / 2634 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed. Default parallel `npm test` reruns were resource-sensitive in pre-existing MOSS Nano performance-threshold tests, which passed isolated. |
 | TTS-REGISTRY-1 | 2026-05-12 | PASS — Provider capability truth added for Web Speech, Kokoro, disabled Qwen, MOSS-Nano, and Pocket TTS via `src/types/ttsProvider.ts` and `src/utils/ttsProviderRegistry.ts`. Settings/status surfaces now read scoped provider labels, posture, and readiness hints from registry metadata. Runtime playback behavior, Kokoro default selection, explicit-only fallback semantics, Qwen disablement, Kokoro availability, and public voice-mixing UX were unchanged. Verification: focused registry/settings slice 6 files / 32 tests; broader TTS/settings/narration slice 9 files / 52 tests; `npm run typecheck`; full `npm test` 183 files / 2629 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed. |

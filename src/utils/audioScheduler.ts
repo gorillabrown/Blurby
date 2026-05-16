@@ -9,6 +9,8 @@ import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, TTS_CURSOR_TRUTH_SYNC_INTERVAL, N
 import { applyKokoroTempoStretch } from "./audio/tempoStretch";
 import type { KokoroRatePlan } from "./kokoroRatePlan";
 import type { KokoroPlaybackSegmentMetadata } from "../types/narration";
+import type { TtsProviderTimingTruth } from "../types/ttsProvider";
+import { createTimingMetadataRecord, type TimingMetadataRecord } from "./timingMetadataStore";
 
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
@@ -100,6 +102,12 @@ export interface ScheduledChunk {
    *  is silence. Currently only startTime is used for scheduling; endTime preserved for future
    *  silence-aware cursor hold (IDEAS.md H6). */
   wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
+  /** Stable timing metadata identity for sync policy and diagnostics. */
+  chunkId?: string;
+  /** Optional parent/segment identity for segmented or cached timing lookups. */
+  segmentId?: string | null;
+  /** Provider-declared timing truth for this scheduled audio. */
+  timingTruth?: TtsProviderTimingTruth;
 }
 
 type KokoroTempoAwareChunk = ScheduledChunk & Partial<KokoroPlaybackSegmentMetadata>;
@@ -136,6 +144,8 @@ export interface SchedulerCallbacks {
   /** TTS-7Q: Chunk handoff carry-over — fires at chunk boundary with the last
    *  audio-confirmed word so the visual band can continue from that position. */
   onChunkHandoff?: (lastConfirmedWordIndex: number, isTrustedWordTiming?: boolean) => void;
+  /** TTS-SYNC-1: Emits explicit timing metadata when a chunk enters the scheduler. */
+  onTimingMetadata?: (metadata: TimingMetadataRecord) => void;
 }
 
 /** TTS-7Q: Continuous audio-progress report — fractional position within the current word span. */
@@ -565,6 +575,18 @@ export function createAudioScheduler(): AudioScheduler {
     const chunkStartTime = nextStartTime;
     const chunkDurationSec = playbackChunk.durationMs / 1000;
     const boundaries = computeWordBoundaries(playbackChunk, chunkStartTime);
+    const chunkEndIdx = playbackChunk.startIdx + playbackChunk.words.length;
+
+    callbacks?.onTimingMetadata?.(createTimingMetadataRecord({
+      chunkId: playbackChunk.chunkId ?? `words:${playbackChunk.startIdx}-${chunkEndIdx}`,
+      segmentId: playbackChunk.segmentId ?? null,
+      chunkStartIdx: playbackChunk.startIdx,
+      chunkEndIdx,
+      audioStartMs: chunkStartTime * 1000,
+      durationMs: playbackChunk.durationMs,
+      timingTruth: playbackChunk.timingTruth ?? (playbackChunk.wordTimestamps ? "word-native" : "segment-following"),
+      wordTimestamps: playbackChunk.wordTimestamps ?? null,
+    }));
 
     // Track when audio actually starts (gates word timer)
     if (playbackStartTime === null) {

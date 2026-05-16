@@ -12,9 +12,21 @@ import { createPocketTtsStrategy } from "./narration/pocketTtsStrategy";
 import { createQwenStrategy } from "./narration/qwenStrategy";
 import { createQwenStreamingStrategy } from "./narration/qwenStreamingStrategy";
 import { selectPreferredVoice } from "../utils/voiceSelection";
-import { recordSnapshot, recordDiagEvent } from "../utils/narrateDiagnostics";
+import {
+  createNarrationDiagnosticsBundle,
+  recordSnapshot,
+  recordDiagEvent,
+  type NarrationDiagnosticsBundleInput,
+} from "../utils/narrateDiagnostics";
 import type { AudioProgressReport, ChunkBoundaryPayload } from "../utils/audioScheduler";
 import type { TtsEvalTraceSink } from "../types/eval";
+import { createTimingMetadataStore } from "../utils/timingMetadataStore";
+import type { TimingMetadataChunk } from "../utils/timingMetadataStore";
+import {
+  createHighlightSyncController,
+  type HighlightSyncResolveInput,
+  type HighlightSyncDecision,
+} from "../utils/highlightSyncController";
 import {
   DEFAULT_KOKORO_STATUS_SNAPSHOT,
   getKokoroStatusError,
@@ -110,6 +122,10 @@ export interface NarrationWordUpdateOptions {
   mode?: "passive" | "handoff";
 }
 
+type ExportNarrationDiagnosticsInput = Partial<Omit<NarrationDiagnosticsBundleInput, "session">> & {
+  session?: Partial<NarrationDiagnosticsBundleInput["session"]>;
+};
+
 export default function useNarration(options: UseNarrationOptions = {}) {
   const experimentalNano = options.experimentalNano === true;
   // ── Reducer state machine ──────────────────────────────────────────────
@@ -177,7 +193,81 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     toRate: number;
     context: string;
   } | null>(null);
+  const highlightSyncDecisionsRef = useRef<Record<string, unknown>[]>([]);
   evalTraceRef.current = options.evalTrace ?? null;
+
+  const timingMetadataStore = useMemo(() => createTimingMetadataStore(), []);
+  const highlightSyncController = useMemo(
+    () => createHighlightSyncController(timingMetadataStore),
+    [timingMetadataStore],
+  );
+  const resolveHighlightSync = useCallback((input: HighlightSyncResolveInput): HighlightSyncDecision => {
+    const decision = highlightSyncController.resolve(input);
+    highlightSyncDecisionsRef.current.push({
+      timestamp: Date.now(),
+      input: { ...input },
+      decision,
+    });
+    if (highlightSyncDecisionsRef.current.length > 50) {
+      highlightSyncDecisionsRef.current.shift();
+    }
+    return decision;
+  }, [highlightSyncController]);
+
+  const exportNarrationDiagnosticsBundle = useCallback((input: ExportNarrationDiagnosticsInput = {}) => {
+    const s = stateRef.current;
+    const timingRecords = timingMetadataStore.listChunks();
+    const timingSegmentIds = timingRecords
+      .map((record) => record.segmentId)
+      .filter((segmentId): segmentId is string => Boolean(segmentId));
+    const selectedEngine = (input.session?.selectedEngine ?? s.engine) as TtsEngine;
+    const segmentIds = input.session?.segmentIds ?? Array.from(new Set(timingSegmentIds));
+    const voiceId =
+      input.session?.voiceId
+      ?? (selectedEngine === "kokoro"
+        ? kokoroVoiceRef.current
+        : selectedEngine === "qwen"
+          ? qwenSpeakerRef.current
+          : selectedEngine === "nano"
+            ? MOSS_NANO_DEFAULT_VOICE
+            : selectedEngine === "pocket-tts"
+              ? POCKET_TTS_DEFAULT_VOICE
+              : currentVoice?.name ?? null);
+
+    return createNarrationDiagnosticsBundle({
+      session: {
+        bookId: bookIdRef.current || null,
+        sessionId: null,
+        profileId: null,
+        rate: s.speed,
+        ...input.session,
+        selectedEngine,
+        voiceId,
+        segmentIds,
+      },
+      normalizedSegments: input.normalizedSegments ?? [],
+      cacheEntries: input.cacheEntries ?? [],
+      timingSidecars: input.timingSidecars ?? timingRecords.map((record) => ({
+        chunkId: record.chunkId,
+        segmentId: record.segmentId,
+        timingTruth: record.timingTruth,
+        durationMs: record.durationMs,
+        wordTimestampCount: record.wordTimestamps?.length ?? 0,
+        classification: record.hasTrustedWordTiming ? "trusted-word-timing" : record.timingClassification,
+      })),
+      schedulerTruthEvents: input.schedulerTruthEvents ?? timingRecords.map((record) => ({
+        source: selectedEngine,
+        chunkId: record.chunkId,
+        segmentId: record.segmentId,
+        wordStartIndex: record.chunkStartIdx,
+        wordEndIndex: record.chunkEndIdx,
+        timingTruth: record.timingTruth,
+        classification: record.hasTrustedWordTiming ? "trusted-word-timing" : record.timingClassification,
+      })),
+      highlightSyncDecisions: input.highlightSyncDecisions ?? highlightSyncDecisionsRef.current,
+      errors: input.errors ?? [],
+    });
+  }, [currentVoice, timingMetadataStore]);
 
   const emitEvalTrace = useCallback((event: Parameters<NonNullable<TtsEvalTraceSink>["record"]>[0]) => {
     if (!evalTraceRef.current?.enabled) return;
@@ -415,6 +505,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       onSegmentStart: () => {
         emitPendingRateResponseTrace();
       },
+      onTimingMetadata: (metadata: TimingMetadataChunk) => {
+        timingMetadataStore.upsertChunk(metadata);
+      },
       // TTS-7R: Route truth-sync through dedicated visual-only callback (no state writes)
       onTruthSync: (wordIndex: number, isTrustedWordTiming = true) => {
         isTrustedWordTimingRef.current = isTrustedWordTiming;
@@ -433,7 +526,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         setTimeout(() => speakNextChunkWebRef.current(), 0);
       },
     }),
-    [], // stable — all deps accessed via refs/getters
+    [emitPendingRateResponseTrace, timingMetadataStore],
   );
   kokoroStrategyRef.current = kokoroStrategy;
 
@@ -1752,6 +1845,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     setOnChunkBoundary: (cb: ((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null) => {
       onChunkBoundaryRef.current = cb;
     },
+    resolveHighlightSync,
+    exportNarrationDiagnosticsBundle,
     warmUp: () => {
       kokoroStrategy.warmUp();
     },

@@ -393,15 +393,23 @@ export default function ReaderContainer({
     const chunkIdByTargetWord = naturalReadingChunks.find((chunk) => (
       chunk.startWordIndex <= targetIdx && chunk.endWordIndex > targetIdx
     ))?.id ?? null;
+    const syncDecision = narration.resolveHighlightSync?.({
+      wordIndex: totalWords > 0 ? targetIdx : null,
+      followingEnabled: true,
+      fallbackMode: "chunk",
+    });
+    const policySyncLevel = syncDecision && syncDecision.syncLevel !== "off"
+      ? syncDecision.syncLevel
+      : "chunk-synced";
 
     setChunkReadingVisualState(createChunkReadingVisualState({
       mode: "narrate",
       chunks: naturalReadingChunks,
       wordIndex: totalWords > 0 ? targetIdx : null,
       chunkId: chunkIdByParentRange ?? chunkIdByTargetWord,
-      syncLevel: "chunk-synced",
+      syncLevel: policySyncLevel,
     }));
-  }, [naturalReadingChunks, setChunkReadingVisualState]);
+  }, [naturalReadingChunks, narration, setChunkReadingVisualState]);
 
   useEffect(() => {
     if (readingMode !== "narrate") {
