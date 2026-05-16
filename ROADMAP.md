@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-16 — ENGINE-DORMANCY-1 executed and verified; TTS-INTEGRATE-1 is now the FIFO head.
+**Last updated**: 2026-05-16 — TTS-INTEGRATE-1 completed; TTS-SYNC-1 and TTS-DIAG-1 are now landed on canonical `main` via ordered integration merges.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 7 (7 full specs, 0 stubs).
+**Queue**: GREEN depth 6 (6 full specs, 0 stubs).
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
@@ -14,9 +14,8 @@
 ## Active Conveyor
 
 ```
-TTS-INTEGRATE-1 → TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1
-    → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1
-        → KOKORO-EXPORT-1 (optional future)
+TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
+    → TTS-PIPELINE-1 → TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
 ```
 
 **Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
@@ -58,7 +57,7 @@ TTS-INTEGRATE-1 → TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1 → NORMALIZER-ENRIC
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/pushed → ~~TTS-DIAG-1~~ PASS/pushed → ~~ENGINE-DORMANCY-1~~ PASS → TTS-INTEGRATE-1 (dispatch-ready) → TTS-CACHE-HARDEN-1 (findings-driven) → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → TTS-CACHE-HARDEN-1 (findings-driven) → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -82,7 +81,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 #### Sprint TTS-INTEGRATE-1: Integrate TTS Sync And Diagnostics Stack
 
-**Status:** Dispatch-ready after `ENGINE-DORMANCY-1`. Previous broad verification was blocked by MOSS Nano probe failures; those probes are now gated behind explicit opt-in.
+**Status:** Completed on 2026-05-16. `origin/sprint/tts-sync-1-highlight-controller` merged first (`82aa76d`), then `origin/sprint/tts-diag-1-diagnostics-bundle` (`04c033a`) in clean integration branch `sprint/tts-integrate-1-sync-diag-main`. Verification passed: focused sync slice (4 files / 37 tests), focused diagnostics slice (4 files / 18 tests), `npm run typecheck`, `npm run build`, full `npm test` (183 files passed, 1 skipped; 2463 passed, 132 skipped), and `git diff --check`.
 
 **What:** Land the already-complete `TTS-SYNC-1` and stacked `TTS-DIAG-1` branches into canonical `main` from a clean integration context.
 
