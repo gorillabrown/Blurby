@@ -29,6 +29,7 @@ export interface TimingWordLookup {
 export interface TimingMetadataStore {
   upsertChunk: (chunk: TimingMetadataChunk) => TimingMetadataRecord;
   getChunk: (chunkId: string) => TimingMetadataRecord | null;
+  listChunks: () => TimingMetadataRecord[];
   querySegment: (segmentId: string) => TimingMetadataRecord[];
   queryWord: (wordIndex: number) => TimingMetadataRecord | null;
   queryTime: (timeMs: number, options?: { chunkId?: string }) => TimingWordLookup | null;
@@ -94,6 +95,9 @@ export function createTimingMetadataStore(): TimingMetadataStore {
     },
     getChunk(chunkId) {
       return chunks.get(chunkId) ?? null;
+    },
+    listChunks() {
+      return records();
     },
     querySegment(segmentId) {
       return records().filter((record) => record.segmentId === segmentId);
