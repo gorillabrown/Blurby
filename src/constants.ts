@@ -173,7 +173,7 @@ export const TTS_DEFAULT_VOICE_NAME: string | null = null;
 
 /** Normalize persisted or imported engine values onto the currently selectable set. */
 export function normalizeSelectableTtsEngine(engine: unknown): TtsEngine {
-  if (engine === "web" || engine === "kokoro" || engine === "nano" || engine === "pocket-tts") return engine;
+  if (engine === "web" || engine === "kokoro") return engine;
   return TTS_DEFAULT_ENGINE;
 }
 

@@ -9,6 +9,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const mossNanoProbeUrl = new URL("../scripts/moss_nano_probe.mjs", import.meta.url);
 const pythonProbePath = path.resolve("scripts", "moss_nano_probe.py");
 const execFileAsync = promisify(execFile);
+const RUN_MOSS_NANO_PROBE_TESTS = process.env.BLURBY_ENABLE_MOSS_NANO_PROBE_TESTS === "1";
+const describeMossNanoProbe = RUN_MOSS_NANO_PROBE_TESTS ? describe : describe.skip;
 
 async function importMossNanoProbe() {
   const module = await import(`${mossNanoProbeUrl.href}?case=${Date.now()}-${Math.random()}`);
@@ -839,7 +841,7 @@ async function runMockedResidentSummary({
   return { result, summary: persisted.summary, persisted, execFile };
 }
 
-describe("MOSS Nano probe", () => {
+describeMossNanoProbe("MOSS Nano probe", () => {
   const tempDirs = [];
 
   afterEach(async () => {

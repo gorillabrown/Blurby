@@ -16,21 +16,13 @@ function clearContractModules() {
   clearModule("../preload.js");
 }
 
-function createPocketEngineStub(overrides = {}) {
+function createPocketEngineStub() {
   return {
-    status: vi.fn().mockResolvedValue({ ok: true, status: "ready", ready: true }),
-    synthesize: vi.fn().mockResolvedValue({
-      ok: true,
-      requestId: "pocket-req-1",
-      ownerToken: "owner-1",
-      audio: [0, 0.1],
-      sampleRate: 24000,
-      durationMs: 25,
-    }),
-    cancel: vi.fn().mockResolvedValue({ ok: true, cancelled: true, requestId: "pocket-req-1" }),
-    shutdown: vi.fn().mockResolvedValue({ ok: true, status: "shutdown", ready: false }),
-    restart: vi.fn().mockResolvedValue({ ok: true, status: "ready", ready: true }),
-    ...overrides,
+    status: vi.fn().mockResolvedValue({ ok: true }),
+    synthesize: vi.fn().mockResolvedValue({ ok: true }),
+    cancel: vi.fn().mockResolvedValue({ ok: true }),
+    shutdown: vi.fn().mockResolvedValue({ ok: true }),
+    restart: vi.fn().mockResolvedValue({ ok: true }),
   };
 }
 
@@ -50,34 +42,9 @@ function createIpcHarness({ pocketEngine = createPocketEngineStub() } = {}) {
       }),
     },
   };
-  const pocketEngineModule = {
-    getSharedPocketTtsEngine: vi.fn(() => pocketEngine),
-    getPocketTtsEngine: vi.fn(() => pocketEngine),
-    createPocketTtsEngine: vi.fn(() => pocketEngine),
-    pocketTtsEngine: pocketEngine,
-    default: pocketEngine,
-  };
-  const nanoEngine = {
-    status: vi.fn(),
-    synthesize: vi.fn(),
-    cancel: vi.fn(),
-    shutdown: vi.fn(),
-    restart: vi.fn(),
-  };
-  const streamingEngine = {
-    startStream: vi.fn().mockResolvedValue({ streamId: "qwen-stream-1" }),
-    cancelStream: vi.fn().mockResolvedValue(undefined),
-    getModelStatus: vi.fn().mockReturnValue({ status: "ready", ready: true }),
-    onStreamAudio: vi.fn(),
-    onStreamFinished: vi.fn(),
-  };
 
   Module._load = function patchedLoad(request, parent, isMain) {
     if (request === "electron") return electronMock;
-    if (request === "../pocket-tts-engine" || request === "../pocket-tts-engine.js") return pocketEngineModule;
-    if (request === "../moss-nano-engine" || request === "../moss-nano-engine.js") {
-      return { getSharedMossNanoEngine: vi.fn(() => nanoEngine), getMossNanoEngine: vi.fn(() => nanoEngine) };
-    }
     if (request === "../tts-engine") {
       return {
         setLoadingCallback: vi.fn(),
@@ -89,11 +56,24 @@ function createIpcHarness({ pocketEngine = createPocketEngineStub() } = {}) {
         preload: vi.fn(),
       };
     }
-    if (request === "../qwen-engine") {
-      return { getModelStatus: vi.fn(), preload: vi.fn(), preflight: vi.fn(), listVoices: vi.fn(), generate: vi.fn() };
+    if (request === "../qwen-engine") return { getModelStatus: vi.fn(), preload: vi.fn(), preflight: vi.fn(), listVoices: vi.fn(), generate: vi.fn() };
+    if (request === "../qwen-streaming-engine") return { createQwenStreamingEngineManager: vi.fn(() => ({ startStream: vi.fn(), cancelStream: vi.fn(), getModelStatus: vi.fn(), onStreamAudio: vi.fn(), onStreamFinished: vi.fn() })) };
+    if (request === "../moss-nano-engine" || request === "../moss-nano-engine.js") {
+      return {
+        getSharedMossNanoEngine: vi.fn(() => ({
+          status: vi.fn(),
+          synthesize: vi.fn(),
+          cancel: vi.fn(),
+          shutdown: vi.fn(),
+          restart: vi.fn(),
+        })),
+      };
     }
-    if (request === "../qwen-streaming-engine") {
-      return { createQwenStreamingEngineManager: vi.fn(() => streamingEngine) };
+    if (request === "../pocket-tts-engine" || request === "../pocket-tts-engine.js") {
+      return {
+        getSharedPocketTtsEngine: vi.fn(() => pocketEngine),
+        getPocketTtsEngine: vi.fn(() => pocketEngine),
+      };
     }
     if (request === "../tts-engine-marathon") return { generate: vi.fn(), preload: vi.fn() };
     if (request === "../epub-word-extractor") return { extractWords: vi.fn() };
@@ -150,7 +130,6 @@ function createPreloadHarness() {
 
   clearContractModules();
   require("../preload.js");
-
   return { exposedApi, invoked };
 }
 
@@ -166,10 +145,9 @@ afterEach(() => {
   clearContractModules();
 });
 
-describe("Pocket TTS IPC and preload contract", () => {
-  it("registers Pocket handlers without renaming Kokoro or Nano handlers", () => {
+describe("Pocket TTS IPC dormancy contract", () => {
+  it("registers Pocket IPC channels without renaming Nano/Kokoro channels", () => {
     const harness = createIpcHarness();
-
     harness.loadAndRegister();
 
     expect([...harness.ipcHandlers.keys()]).toEqual(expect.arrayContaining([
@@ -183,57 +161,57 @@ describe("Pocket TTS IPC and preload contract", () => {
     ]));
   });
 
-  it("maps thrown Pocket failures to structured IPC responses", async () => {
-    const error = Object.assign(new Error("Pocket sidecar unavailable"), {
-      reason: "sidecar-not-ready",
-      status: "unavailable",
-      recoverable: true,
-    });
-    const pocketEngine = createPocketEngineStub({
-      status: vi.fn().mockRejectedValue(error),
-      synthesize: vi.fn().mockRejectedValue(error),
-      cancel: vi.fn().mockRejectedValue(error),
-      shutdown: vi.fn().mockRejectedValue(error),
-      restart: vi.fn().mockRejectedValue(error),
-    });
-    const harness = createIpcHarness({ pocketEngine });
+  it("fails closed for all Pocket runtime entry points with engine-dormant", async () => {
+    const harness = createIpcHarness();
     harness.loadAndRegister();
 
+    await expect(harness.ipcHandlers.get("tts-pocket-status")()).resolves.toMatchObject({
+      ok: false,
+      status: "unavailable",
+      reason: "engine-dormant",
+      ready: false,
+      loading: false,
+      recoverable: false,
+    });
+
     for (const [channel, args] of [
-      ["tts-pocket-status", []],
-      ["tts-pocket-synthesize", [{ text: "hello", voice: "default", rate: 1 }]],
+      ["tts-pocket-synthesize", [{ text: "hello pocket", voice: "default", rate: 1 }]],
       ["tts-pocket-cancel", ["pocket-req-1"]],
       ["tts-pocket-shutdown", []],
       ["tts-pocket-restart", []],
     ]) {
-      await expect(harness.ipcHandlers.get(channel)(null, ...args)).resolves.toEqual({
+      await expect(harness.ipcHandlers.get(channel)(null, ...args)).resolves.toMatchObject({
         ok: false,
-        error: "Pocket sidecar unavailable",
-        reason: "sidecar-not-ready",
         status: "unavailable",
-        recoverable: true,
+        reason: "engine-dormant",
+        recoverable: false,
       });
     }
+
+    expect(harness.pocketEngine.status).not.toHaveBeenCalled();
+    expect(harness.pocketEngine.synthesize).not.toHaveBeenCalled();
+    expect(harness.pocketEngine.cancel).not.toHaveBeenCalled();
+    expect(harness.pocketEngine.shutdown).not.toHaveBeenCalled();
+    expect(harness.pocketEngine.restart).not.toHaveBeenCalled();
   });
 
-  it("returns Pocket synthesize output through the Pocket IPC channel", async () => {
-    const result = {
-      ok: true,
-      requestId: "pocket-req-1",
-      ownerToken: "owner-1",
-      audio: [0, 0.1],
-      sampleRate: 24000,
-      durationMs: 40,
-    };
-    const pocketEngine = createPocketEngineStub({ synthesize: vi.fn().mockResolvedValue(result) });
-    const harness = createIpcHarness({ pocketEngine });
+  it("keeps Qwen IPC as disabled compatibility stubs", async () => {
+    const harness = createIpcHarness();
     harness.loadAndRegister();
 
-    const payload = { text: "hello pocket", voice: "default", rate: 1 };
-    await expect(harness.ipcHandlers.get("tts-pocket-synthesize")(null, payload)).resolves.toEqual(result);
-    expect(pocketEngine.synthesize).toHaveBeenCalledWith(payload);
+    await expect(harness.ipcHandlers.get("tts-qwen-model-status")()).resolves.toMatchObject({
+      status: "unavailable",
+      ready: false,
+      reason: "qwen-disabled",
+    });
+    await expect(harness.ipcHandlers.get("tts-qwen-preload")()).resolves.toMatchObject({
+      status: "unavailable",
+      reason: "qwen-disabled",
+    });
   });
+});
 
+describe("Pocket preload contract", () => {
   it("exposes Pocket preload methods and channels", async () => {
     const { exposedApi, invoked } = createPreloadHarness();
 
@@ -258,43 +236,5 @@ describe("Pocket TTS IPC and preload contract", () => {
       { channel: "tts-pocket-shutdown", args: [] },
       { channel: "tts-pocket-restart", args: [] },
     ]);
-  });
-
-  it("keeps Qwen IPC as disabled compatibility stubs", async () => {
-    const harness = createIpcHarness();
-    harness.loadAndRegister();
-
-    await expect(harness.ipcHandlers.get("tts-qwen-model-status")()).resolves.toMatchObject({
-      status: "unavailable",
-      ready: false,
-      loading: false,
-      recoverable: false,
-      reason: "qwen-disabled",
-    });
-    await expect(harness.ipcHandlers.get("tts-qwen-preload")()).resolves.toMatchObject({
-      error: expect.stringContaining("retired"),
-      status: "unavailable",
-      reason: "qwen-disabled",
-    });
-    await expect(harness.ipcHandlers.get("tts-qwen-generate")(null, "hello", "Ryan", 1, ["hello"])).resolves.toMatchObject({
-      error: expect.stringContaining("retired"),
-      status: "unavailable",
-      reason: "qwen-disabled",
-    });
-    await expect(harness.ipcHandlers.get("tts-qwen-stream-start")(null, "hello", "Ryan", 1)).resolves.toMatchObject({
-      ok: false,
-      error: expect.stringContaining("retired"),
-      reason: "qwen-disabled",
-      status: "unavailable",
-      recoverable: false,
-    });
-    expect(harness.ipcHandlers.get("tts-qwen-stream-status")()).toMatchObject({
-      status: "unavailable",
-      ready: false,
-      model_loaded: false,
-      device: "disabled",
-      reason: "qwen-disabled",
-      recoverable: false,
-    });
   });
 });

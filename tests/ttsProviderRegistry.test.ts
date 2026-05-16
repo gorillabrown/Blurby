@@ -92,9 +92,10 @@ describe("TTS provider capability registry", () => {
     });
 
     expect(nano).toMatchObject({
-      selectable: true,
+      selectable: false,
       defaultEngine: false,
       experimental: true,
+      disabledReason: "engine-dormant",
       offline: true,
       requiresSidecar: true,
       providesWordTimings: false,
@@ -102,13 +103,14 @@ describe("TTS provider capability registry", () => {
       canBlendVoices: false,
       supportsVoiceCloning: false,
       sampleRate: 24000,
-      statusKind: "sidecar",
+      statusKind: "disabled",
     });
 
     expect(pocket).toMatchObject({
-      selectable: true,
+      selectable: false,
       defaultEngine: false,
       experimental: true,
+      disabledReason: "engine-dormant",
       offline: true,
       requiresSidecar: true,
       providesWordTimings: false,
@@ -116,7 +118,7 @@ describe("TTS provider capability registry", () => {
       canBlendVoices: false,
       supportsVoiceCloning: true,
       sampleRate: 24000,
-      statusKind: "sidecar",
+      statusKind: "disabled",
     });
   });
 
@@ -124,8 +126,6 @@ describe("TTS provider capability registry", () => {
     expect(listSelectableTtsProviders().map((provider) => provider.id)).toEqual([
       "web",
       "kokoro",
-      "nano",
-      "pocket-tts",
     ]);
 
     const snapshot = getTtsProviderRegistrySnapshot();

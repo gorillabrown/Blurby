@@ -1,10 +1,13 @@
 "use strict";
 // main/ipc/tts.js — TTS IPC handlers
 
-const { ipcMain, app } = require("electron");
+const { ipcMain } = require("electron");
 
 const QWEN_DISABLED_REASON = "qwen-disabled";
 const QWEN_DISABLED_DETAIL = "Qwen is retired for Desktop v2 and remains disabled.";
+const ENGINE_DORMANT_REASON = "engine-dormant";
+const NANO_DORMANT_DETAIL = "MOSS-Nano is dormant for this Kokoro-focused architecture phase and is unavailable.";
+const POCKET_DORMANT_DETAIL = "Pocket TTS is dormant for this Kokoro-focused architecture phase and is unavailable.";
 
 function qwenDisabledStatus() {
   return {
@@ -29,6 +32,28 @@ function qwenDisabledError() {
   return {
     error: QWEN_DISABLED_DETAIL,
     reason: QWEN_DISABLED_REASON,
+    status: "unavailable",
+    recoverable: false,
+  };
+}
+
+function dormantStatus(detail) {
+  return {
+    ok: false,
+    status: "unavailable",
+    detail,
+    reason: ENGINE_DORMANT_REASON,
+    ready: false,
+    loading: false,
+    recoverable: false,
+  };
+}
+
+function dormantError(detail) {
+  return {
+    ok: false,
+    error: detail,
+    reason: ENGINE_DORMANT_REASON,
     status: "unavailable",
     recoverable: false,
   };
@@ -78,20 +103,6 @@ function toPocketErrorResponse(err) {
 
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
-  const mossNanoModule = require("../moss-nano-engine");
-  const nanoEngine =
-    typeof mossNanoModule.getSharedMossNanoEngine === "function"
-      ? mossNanoModule.getSharedMossNanoEngine({ app })
-      : typeof mossNanoModule.getMossNanoEngine === "function"
-      ? mossNanoModule.getMossNanoEngine({ app })
-      : mossNanoModule.mossNanoEngine || mossNanoModule.default;
-  const pocketTtsModule = require("../pocket-tts-engine");
-  const pocketEngine =
-    typeof pocketTtsModule.getSharedPocketTtsEngine === "function"
-      ? pocketTtsModule.getSharedPocketTtsEngine({ app })
-      : typeof pocketTtsModule.getPocketTtsEngine === "function"
-      ? pocketTtsModule.getPocketTtsEngine({ app })
-      : pocketTtsModule.pocketTtsEngine || pocketTtsModule.default;
 
   // Set up loading callback to notify renderer
   ttsEngine.setLoadingCallback((loading) => {
@@ -175,83 +186,43 @@ function register(ctx) {
   });
 
   ipcMain.handle("tts-nano-status", async () => {
-    try {
-      return await nanoEngine.status();
-    } catch (err) {
-      return toNanoErrorResponse(err);
-    }
+    return dormantStatus(NANO_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-nano-synthesize", async (_event, payload) => {
-    try {
-      return await nanoEngine.synthesize(payload);
-    } catch (err) {
-      return toNanoErrorResponse(err);
-    }
+    return dormantError(NANO_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-nano-cancel", async (_event, requestId) => {
-    try {
-      return await nanoEngine.cancel(requestId);
-    } catch (err) {
-      return toNanoErrorResponse(err);
-    }
+    return dormantError(NANO_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-nano-shutdown", async () => {
-    try {
-      return await nanoEngine.shutdown();
-    } catch (err) {
-      return toNanoErrorResponse(err);
-    }
+    return dormantError(NANO_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-nano-restart", async () => {
-    try {
-      return await nanoEngine.restart();
-    } catch (err) {
-      return toNanoErrorResponse(err);
-    }
+    return dormantError(NANO_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-pocket-status", async () => {
-    try {
-      return await pocketEngine.status();
-    } catch (err) {
-      return toPocketErrorResponse(err);
-    }
+    return dormantStatus(POCKET_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-pocket-synthesize", async (_event, payload) => {
-    try {
-      return await pocketEngine.synthesize(payload);
-    } catch (err) {
-      return toPocketErrorResponse(err);
-    }
+    return dormantError(POCKET_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-pocket-cancel", async (_event, requestId) => {
-    try {
-      return await pocketEngine.cancel(requestId);
-    } catch (err) {
-      return toPocketErrorResponse(err);
-    }
+    return dormantError(POCKET_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-pocket-shutdown", async () => {
-    try {
-      return await pocketEngine.shutdown();
-    } catch (err) {
-      return toPocketErrorResponse(err);
-    }
+    return dormantError(POCKET_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-pocket-restart", async () => {
-    try {
-      return await pocketEngine.restart();
-    } catch (err) {
-      return toPocketErrorResponse(err);
-    }
+    return dormantError(POCKET_DORMANT_DETAIL);
   });
 
   ipcMain.handle("tts-qwen-model-status", async () => qwenDisabledStatus());

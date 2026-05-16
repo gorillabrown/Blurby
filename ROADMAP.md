@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-16 — SK-HYG-2 executed and verified after a Type 3 pivot scope amendment; ENGINE-DORMANCY-1 remains the FIFO head.
-**Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS scheduled for dormancy; Qwen retired/disabled. Desktop v2.0 shipped.
+**Last updated**: 2026-05-16 — ENGINE-DORMANCY-1 executed and verified; TTS-INTEGRATE-1 is now the FIFO head.
+**Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 8 (8 full specs, 0 stubs).
+**Queue**: GREEN depth 7 (7 full specs, 0 stubs).
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
@@ -14,12 +14,12 @@
 ## Active Conveyor
 
 ```
-ENGINE-DORMANCY-1 → TTS-INTEGRATE-1 → TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1
-    → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1
+TTS-INTEGRATE-1 → TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1
+    → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1
         → KOKORO-EXPORT-1 (optional future)
 ```
 
-**Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace `ENGINE-DORMANCY-1` as the FIFO head.
+**Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
 
 **Deferred lanes:** Track B (Chrome Extension EXT-ENR-C), Track C (Android APK-0 through APK-4), Phase 7 (Cloud Sync), Phase 8 (RSS/News), Idea Themes A-K. See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` and `docs/governance/IDEAS.md`.
 
@@ -58,7 +58,7 @@ ENGINE-DORMANCY-1 → TTS-INTEGRATE-1 → TTS-CACHE-HARDEN-1 → TTS-EVENT-SYNC-
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/pushed → ~~TTS-DIAG-1~~ PASS/pushed → ENGINE-DORMANCY-1 (dispatch-ready) → TTS-INTEGRATE-1 (unblocked by dormancy) → TTS-CACHE-HARDEN-1 (findings-driven) → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/pushed → ~~TTS-DIAG-1~~ PASS/pushed → ~~ENGINE-DORMANCY-1~~ PASS → TTS-INTEGRATE-1 (dispatch-ready) → TTS-CACHE-HARDEN-1 (findings-driven) → TTS-EVENT-SYNC-1 → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -80,34 +80,9 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 ---
 
-#### Sprint ENGINE-DORMANCY-1: Disable MOSS-Nano And Pocket TTS At Settings Boundary
-
-**What:** Disable MOSS-Nano and Pocket TTS at the settings/selection boundary and IPC runtime entry points, following the same pattern already established for Qwen. All TTS energy is redirected to making Kokoro optimal.
-
-**Why:** MOSS-Nano and Pocket TTS are currently live and selectable (`selectable: true`). Disabling them removes maintenance surface, test instability (MOSS Nano probe failures blocking TTS-INTEGRATE-1), and redirects all TTS energy to Kokoro.
-
-**Prerequisites:** None — can run immediately on `main`.
-
-**Done when:**
-1. MOSS-Nano and Pocket TTS registry entries have `selectable: false`, `disabledReason` set to a dormancy explanation, and `statusKind` reflecting unavailable state — matching the Qwen disable pattern.
-2. MOSS-Nano and Pocket TTS are unselectable in TTSSettings — same UX pattern as Qwen (greyed out with status text explaining dormancy).
-3. IPC runtime entry points for `tts-nano-*` and `tts-pocket-*` return unavailable with `reason: "engine-dormant"` and do not start sidecar runtimes.
-4. Existing Nano/Pocket profiles in user settings gracefully migrate to Kokoro on next settings load (same migration pattern as Qwen profiles in POSTV2-ENGINE-1).
-5. `tests/mossNanoProbe.test.js` performance thresholds are either skipped when engine is dormant or moved behind an explicit opt-in flag — they must not block default `npm test`.
-6. No Nano/Pocket production code is deleted — dormancy is a settings/selection gate, not a code removal. The engines can be reactivated by changing registry posture.
-7. `npm test` passes (full suite), `npm run typecheck` passes, `npm run build` passes.
-
-**Effort:** S (~1). Settings boundary + IPC guards + test skip — no architectural changes.
-
-**Roster:** Hermes (registry/settings/IPC guards) • Hippocrates (test verification) • Solon (spec compliance).
-
-**Source:** 2026-05-15 strategic pivot to Kokoro-only focus; POSTV2-ENGINE-1 Qwen-disable pattern as reference implementation.
-
----
-
 #### Sprint TTS-INTEGRATE-1: Integrate TTS Sync And Diagnostics Stack
 
-**Status:** BLOCKED at broad verification in `C:\tmp\Blurby-tts-integrate-1` on branch `sprint/tts-integrate-1-sync-diag-main`; no commit, push, or merge to `main` performed. Closeout: `docs/governance/close-outs/CloseOut.TTS-INTEGRATE-1.2026-05-15.md`.
+**Status:** Dispatch-ready after `ENGINE-DORMANCY-1`. Previous broad verification was blocked by MOSS Nano probe failures; those probes are now gated behind explicit opt-in.
 
 **What:** Land the already-complete `TTS-SYNC-1` and stacked `TTS-DIAG-1` branches into canonical `main` from a clean integration context.
 
@@ -288,7 +263,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 4. `docs/planning/roadmap-reviews/2026-05-11-literature-review.md` — TTS literature review
 5. `docs/planning/roadmap-reviews/2026-05-14-adversarial-review.md` — adversarial review of literature gaps
 6. `docs/planning/roadmap-reviews/2026-05-15-plan.md` — final conveyor plan
-7. Sprint closeouts in `docs/governance/close-outs/` for: TTS-SYNC-1, TTS-DIAG-1, TTS-INTEGRATE-1, TTS-CACHE-HARDEN-1, TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, TTS-RENDER-MAP-1, TTS-PIPELINE-1
+7. Sprint closeouts in `docs/governance/close-outs/` for: TTS-SYNC-1, TTS-DIAG-1, ENGINE-DORMANCY-1, TTS-INTEGRATE-1, TTS-CACHE-HARDEN-1, TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, TTS-RENDER-MAP-1, TTS-PIPELINE-1
 7a. `Blurby.Research/.Findings/Blurby_TTS_Literature_Codebase_Review_2026-05-11.md` — cross-codebase analysis (findings provenance source)
 7b. `Blurby.Research/.Findings/Blurby_Kokoro_TTS_Implementation_Review_2026-05-15.md` — implementation review (findings provenance source)
 8. `src/types/ttsProvider.ts` + `src/utils/ttsProviderRegistry.ts` — registry implementation
