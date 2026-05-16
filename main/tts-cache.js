@@ -1,6 +1,7 @@
 // main/tts-cache.js — PCM disk cache for TTS audio (NAR-2)
 //
-// Legacy v1 chunks remain keyed by {bookId}/{voiceId}/chunk-{startIdx}.opus.
+// Legacy v1 chunks remain keyed by {bookId}/{safeVoiceId}/chunk-{startIdx}.opus
+// where slash separators in voice IDs are encoded as "__".
 // v2 chunks use structured identity hashes under v2/{bookIdSafe}/{identityHash}.
 // Manifest tracks cached chunks per book, total size, and last-narrated timestamp for LRU eviction.
 
@@ -95,6 +96,10 @@ function safePathSegment(value) {
   return (encoded || "empty").slice(0, 140);
 }
 
+function encodeLegacyVoiceId(voiceId) {
+  return String(voiceId ?? "unknown").replace(/[\/\\]/g, "__");
+}
+
 function normalizeStructuredIdentity(bookId, identity) {
   return {
     schemaVersion: TTS_CACHE_SCHEMA_VERSION,
@@ -131,9 +136,12 @@ function chunkTimingFilename(startIdx) {
   return `chunk-${startIdx}${TTS_TIMING_SIDECAR_EXTENSION}`;
 }
 
-function getLegacyTarget(bookId, voiceId, startIdx) {
-  const key = `${bookId}/${voiceId}`;
-  const dir = path.join(cacheRoot, bookId, voiceId);
+function getLegacyTarget(bookId, voiceId, startIdx, options = {}) {
+  const safeVoiceId = options.allowRawVoiceId
+    ? String(voiceId ?? "unknown")
+    : encodeLegacyVoiceId(voiceId);
+  const key = `${bookId}/${safeVoiceId}`;
+  const dir = path.join(cacheRoot, bookId, safeVoiceId);
   return {
     schemaVersion: 1,
     key,
@@ -193,11 +201,21 @@ function isValidWordTimestamp(timestamp) {
 function buildTimingSidecar(target, sampleRate, durationMs, wordCount, timingMetadata = {}) {
   if (target.schemaVersion !== TTS_CACHE_SCHEMA_VERSION) return null;
 
+  const chunkStartIdx = Number.isFinite(timingMetadata.chunkStartIdx)
+    ? timingMetadata.chunkStartIdx
+    : target.startIdx;
+  const chunkEndIdx = Number.isFinite(timingMetadata.chunkEndIdx)
+    ? timingMetadata.chunkEndIdx
+    : (wordCount != null ? chunkStartIdx + wordCount : null);
   const timingTruth = timingMetadata.timingTruth ?? target.identity?.timingTruth ?? "none";
+  const expectedTimestampCount = Number.isFinite(chunkStartIdx) && Number.isFinite(chunkEndIdx)
+    ? Math.max(0, chunkEndIdx - chunkStartIdx)
+    : null;
   const trustedWordTiming =
     timingTruth === "word-native" &&
     Array.isArray(timingMetadata.wordTimestamps) &&
     timingMetadata.wordTimestamps.length > 0 &&
+    (expectedTimestampCount == null || timingMetadata.wordTimestamps.length === expectedTimestampCount) &&
     timingMetadata.wordTimestamps.every(isValidWordTimestamp);
 
   const sidecar = {
@@ -211,8 +229,8 @@ function buildTimingSidecar(target, sampleRate, durationMs, wordCount, timingMet
     wordCount: wordCount ?? null,
     timingTruth,
     timingClassification: trustedWordTiming ? "trusted" : "heuristic",
-    chunkStartIdx: timingMetadata.chunkStartIdx ?? target.startIdx,
-    chunkEndIdx: timingMetadata.chunkEndIdx ?? (wordCount != null ? target.startIdx + wordCount : null),
+    chunkStartIdx,
+    chunkEndIdx,
     boundaryType: timingMetadata.boundaryType ?? null,
     createdAt: new Date().toISOString(),
   };
@@ -259,6 +277,11 @@ function resolveReadTarget(bookId, voiceOrIdentity, startIdx) {
   const exact = getCacheTarget(bookId, voiceOrIdentity, startIdx);
   const exactEntry = manifest.books[exact.key];
   if (exactEntry?.chunks?.[startIdx]) return exact;
+  if (!isStructuredIdentity(voiceOrIdentity)) {
+    const rawLegacy = getLegacyTarget(bookId, String(voiceOrIdentity), startIdx, { allowRawVoiceId: true });
+    const rawEntry = manifest.books[rawLegacy.key];
+    if (rawEntry?.chunks?.[startIdx]) return rawLegacy;
+  }
   return findContentIndexedTarget(bookId, voiceOrIdentity);
 }
 

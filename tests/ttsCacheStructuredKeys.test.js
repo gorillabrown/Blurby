@@ -88,7 +88,7 @@ describe("tts-cache structured v2 identity", () => {
     expect(original.wordCount).toBe(4);
   });
 
-  it("keeps legacy v1 entries readable by legacy identity and misses safely for v2 identity", async () => {
+  it("keeps legacy v1 entries readable with slash-safe voice encoding and misses safely for v2 identity", async () => {
     await ttsCache.writeChunk("legacy-book", "voice/legacy", 0, makePcm(), 24000, 1000, 3);
 
     const legacy = await ttsCache.readChunk("legacy-book", "voice/legacy", 0);
@@ -98,7 +98,7 @@ describe("tts-cache structured v2 identity", () => {
     const structuredMiss = await ttsCache.readChunk("legacy-book", makeIdentity(), 0);
     expect(structuredMiss).toBeNull();
 
-    const legacyAudioPath = path.join(tempDir, "tts-cache", "legacy-book", "voice", "legacy", "chunk-0.opus");
+    const legacyAudioPath = path.join(tempDir, "tts-cache", "legacy-book", "voice__legacy", "chunk-0.opus");
     await expect(fs.stat(legacyAudioPath)).resolves.toBeTruthy();
   });
 

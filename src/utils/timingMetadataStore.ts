@@ -1,7 +1,6 @@
 import type { TtsWordTimestamp } from "../types";
 import type { TtsProviderTimingTruth } from "../types/ttsProvider";
-
-export type TimingClassification = "trusted" | "heuristic" | "missing";
+import { classifyTiming, type TimingClassification } from "../types/ttsCache";
 
 export interface TimingMetadataChunk {
   chunkId: string;
@@ -36,16 +35,13 @@ export interface TimingMetadataStore {
   clear: () => void;
 }
 
-function classifyTiming(chunk: TimingMetadataChunk): TimingClassification {
-  if (chunk.timingTruth === "none") return "missing";
-  const hasWordTiming = chunk.timingTruth === "word-native"
-    && Array.isArray(chunk.wordTimestamps)
-    && chunk.wordTimestamps.length === Math.max(0, chunk.chunkEndIdx - chunk.chunkStartIdx);
-  return hasWordTiming ? "trusted" : "heuristic";
-}
-
 function toRecord(chunk: TimingMetadataChunk): TimingMetadataRecord {
-  const timingClassification = classifyTiming(chunk);
+  const timingClassification = classifyTiming({
+    timingTruth: chunk.timingTruth,
+    wordTimestamps: chunk.wordTimestamps,
+    chunkStartIdx: chunk.chunkStartIdx,
+    chunkEndIdx: chunk.chunkEndIdx,
+  });
   return {
     ...chunk,
     segmentId: chunk.segmentId ?? null,

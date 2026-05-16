@@ -61,3 +61,37 @@ export interface TtsCacheReadResult {
   miss?: boolean;
   error?: string;
 }
+
+export type TimingClassification = "trusted" | "heuristic" | "missing";
+
+export interface TimingClassificationInput {
+  timingTruth: TtsProviderTimingTruth;
+  wordTimestamps?: TtsWordTimestamp[] | null;
+  chunkStartIdx?: number | null;
+  chunkEndIdx?: number | null;
+}
+
+function isValidWordTimestampEntry(timestamp: TtsWordTimestamp): boolean {
+  return typeof timestamp.word === "string"
+    && Number.isFinite(timestamp.startTime)
+    && Number.isFinite(timestamp.endTime)
+    && timestamp.endTime >= timestamp.startTime;
+}
+
+export function hasTrustedWordTiming(input: TimingClassificationInput): boolean {
+  if (input.timingTruth !== "word-native") return false;
+  if (!Array.isArray(input.wordTimestamps) || input.wordTimestamps.length === 0) return false;
+  if (!input.wordTimestamps.every(isValidWordTimestampEntry)) return false;
+
+  if (Number.isFinite(input.chunkStartIdx) && Number.isFinite(input.chunkEndIdx)) {
+    const expectedCount = Math.max(0, Number(input.chunkEndIdx) - Number(input.chunkStartIdx));
+    if (input.wordTimestamps.length !== expectedCount) return false;
+  }
+
+  return true;
+}
+
+export function classifyTiming(input: TimingClassificationInput): TimingClassification {
+  if (input.timingTruth === "none") return "missing";
+  return hasTrustedWordTiming(input) ? "trusted" : "heuristic";
+}

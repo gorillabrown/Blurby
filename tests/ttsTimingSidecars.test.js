@@ -114,6 +114,22 @@ describe("tts-cache timing sidecars", () => {
     expect(sidecar.wordTimestamps).toBeUndefined();
   });
 
+  it("downgrades word-native timing to heuristic when timestamp count mismatches chunk span", async () => {
+    const identity = makeIdentity();
+    await ttsCache.writeChunk("book-sidecar", identity, 0, makePcm(), 24000, 900, 3, {
+      timingTruth: "word-native",
+      wordTimestamps: [{ word: "one", startTime: 0, endTime: 0.3 }],
+      chunkStartIdx: 0,
+      chunkEndIdx: 3,
+    });
+
+    const [sidecarPath] = await findFiles(path.join(tempDir, "tts-cache"), filePath => filePath.endsWith(".timing.json"));
+    const sidecar = JSON.parse(await fs.readFile(sidecarPath, "utf-8"));
+
+    expect(sidecar.timingClassification).toBe("heuristic");
+    expect(sidecar.wordTimestamps).toBeUndefined();
+  });
+
   it("treats corrupt sidecars as missing timing metadata without discarding audio", async () => {
     const identity = makeIdentity();
     await ttsCache.writeChunk("book-sidecar", identity, 0, makePcm(), 24000, 900, 2, {

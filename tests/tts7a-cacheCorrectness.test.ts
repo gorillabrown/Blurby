@@ -83,13 +83,24 @@ describe("TTS-7A: Renderer cache loadCachedChunk word count", () => {
     (window as any).electronAPI.ttsCacheRead.mockReset();
   });
 
-  it("reconstructs the exact nonzero-start word span from the full word array", async () => {
+  it("rehydrates cache-hit timing metadata parity from timing sidecar data", async () => {
     (window as any).electronAPI.ttsCacheRead.mockResolvedValue({
       audio: new Float32Array(240),
       sampleRate: 24000,
       durationMs: 500,
       wordCount: 3,
-      wordTimestamps: [{ word: "two", startTime: 0, endTime: 0.1 }],
+      timing: {
+        timingTruth: "word-native",
+        chunkStartIdx: 2,
+        chunkEndIdx: 5,
+        boundaryType: "sentence",
+        identityHash: "identity-abc",
+        wordTimestamps: [
+          { word: "two", startTime: 0, endTime: 0.1 },
+          { word: "three", startTime: 0.1, endTime: 0.2 },
+          { word: "four", startTime: 0.2, endTime: 0.3 },
+        ],
+      },
     });
 
     const allWords = ["zero", "one", "two", "three", "four", "five"];
@@ -97,7 +108,14 @@ describe("TTS-7A: Renderer cache loadCachedChunk word count", () => {
 
     expect(chunk?.startIdx).toBe(2);
     expect(chunk?.words).toEqual(["two", "three", "four"]);
-    expect(chunk?.wordTimestamps).toEqual([{ word: "two", startTime: 0, endTime: 0.1 }]);
+    expect(chunk?.timingTruth).toBe("word-native");
+    expect(chunk?.boundaryType).toBe("sentence");
+    expect(chunk?.chunkId).toBe("cache:identity-abc:2");
+    expect(chunk?.wordTimestamps).toEqual([
+      { word: "two", startTime: 0, endTime: 0.1 },
+      { word: "three", startTime: 0.1, endTime: 0.2 },
+      { word: "four", startTime: 0.2, endTime: 0.3 },
+    ]);
   });
 
   it("falls back to the remaining full-context words for legacy cache entries", async () => {
@@ -106,12 +124,37 @@ describe("TTS-7A: Renderer cache loadCachedChunk word count", () => {
       sampleRate: 24000,
       durationMs: 500,
       wordCount: null,
+      wordTimestamps: [{ word: "two", startTime: 0, endTime: 0.1 }],
     });
 
     const allWords = ["zero", "one", "two", "three", "four"];
     const chunk = await loadCachedChunk("book-1", "voice-1", 2, allWords);
 
     expect(chunk?.words).toEqual(["two", "three", "four"]);
+    expect(chunk?.wordTimestamps).toEqual([{ word: "two", startTime: 0, endTime: 0.1 }]);
+  });
+
+  it("downgrades word-native timing to heuristic when timestamp count mismatches chunk span", async () => {
+    (window as any).electronAPI.ttsCacheRead.mockResolvedValue({
+      audio: new Float32Array(240),
+      sampleRate: 24000,
+      durationMs: 500,
+      wordCount: 3,
+      timing: {
+        timingTruth: "word-native",
+        chunkStartIdx: 2,
+        chunkEndIdx: 5,
+        boundaryType: "clause",
+        wordTimestamps: [{ word: "two", startTime: 0, endTime: 0.1 }],
+      },
+    });
+
+    const allWords = ["zero", "one", "two", "three", "four"];
+    const chunk = await loadCachedChunk("book-1", "voice-1", 2, allWords);
+
+    expect(chunk?.timingTruth).toBe("word-native");
+    expect(chunk?.boundaryType).toBe("clause");
+    expect(chunk?.wordTimestamps).toBeNull();
   });
 });
 

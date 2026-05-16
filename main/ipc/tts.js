@@ -101,6 +101,30 @@ function toPocketErrorResponse(err) {
   };
 }
 
+function isFiniteNumber(value) {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isValidCacheWordTimestamp(timestamp) {
+  return timestamp
+    && typeof timestamp.word === "string"
+    && isFiniteNumber(timestamp.startTime)
+    && isFiniteNumber(timestamp.endTime)
+    && timestamp.endTime >= timestamp.startTime;
+}
+
+function validateTtsCacheReadPayload(payload) {
+  if (!isFiniteNumber(payload.durationMs) || payload.durationMs < 0) {
+    return { ok: false, reason: "Malformed cache payload: durationMs must be a finite number." };
+  }
+  if (payload.wordTimestamps != null) {
+    if (!Array.isArray(payload.wordTimestamps) || !payload.wordTimestamps.every(isValidCacheWordTimestamp)) {
+      return { ok: false, reason: "Malformed cache payload: wordTimestamps must be an array of {word,startTime,endTime} objects." };
+    }
+  }
+  return { ok: true };
+}
+
 function register(ctx) {
   const ttsEngine = require("../tts-engine");
 
@@ -309,7 +333,7 @@ function register(ctx) {
       if (!result) return { miss: true };
       // TTS-7C: Return Float32Array directly — structured clone preserves typed arrays (BUG-113)
       const arr = result.audio instanceof Float32Array ? result.audio : new Float32Array(result.audio);
-      return {
+      const payload = {
         audio: arr,
         sampleRate: result.sampleRate,
         durationMs: result.durationMs,
@@ -317,6 +341,16 @@ function register(ctx) {
         timing: result.timing ?? null,
         wordTimestamps: result.wordTimestamps ?? null,
       };
+      const validation = validateTtsCacheReadPayload(payload);
+      if (!validation.ok) {
+        console.warn("[tts-cache] Rejecting malformed read payload:", validation.reason, {
+          bookId,
+          startIdx,
+          hasTiming: Boolean(payload.timing),
+        });
+        return { error: validation.reason };
+      }
+      return payload;
     } catch (err) {
       return { error: err.message };
     }
