@@ -1,14 +1,14 @@
 ---
 name: virtuoso
 description: >
-  Structural execution discipline for multi-step agent tasks. Use this skill whenever
-  dispatching a multi-step implementation plan, running a sprint, executing a checklist,
-  or performing any work that involves 3+ sequential tool calls. This skill enforces
-  task planning, narration, and progress tracking so that behavioral discipline persists
-  throughout long execution runs — not just at session start. Trigger on: "execute this plan",
-  "run this sprint", "implement these changes", any dispatch prompt with multiple steps,
-  or any task where completion quality depends on maintaining focus across many tool calls.
-  When in doubt, use this skill — the overhead is minimal and the discipline prevents regressions.
+  Structural execution discipline for multi-step tasks in one parent conversation. Use this
+  skill whenever running a sprint, executing a checklist, or performing any work that involves
+  3+ sequential tool calls. This skill enforces task planning, narration, progress tracking, and
+  optional child-agent swarms while preserving each sprint as a clearly named dispatch record.
+  Trigger on: "execute this plan", "run this sprint", "implement these changes", any dispatch
+  prompt with multiple steps, or any task where completion quality depends on maintaining focus
+  across many tool calls. When in doubt, use this skill — the overhead is minimal and the
+  discipline prevents regressions.
 ---
 
 # Virtuoso
@@ -20,32 +20,61 @@ This skill stays in active context because you reference it at every step bounda
 
 **Announce at start:** "Using the Virtuoso skill to maintain execution discipline."
 
-## Architecture: CLI Is the Orchestrator
+## Sprint Record Naming
 
-CLI (the top-level process in the terminal) is the orchestrator for all Virtuoso sprints.
-CLI reads the dispatch spec, builds the task plan, discovers agents, and delegates each
-task to sub-agents via `Agent()`. CLI does not implement — it coordinates.
+When Virtuoso starts a sprint, the visible record must be named for the work, not for
+the trigger token. If Codex CLI/Desktop creates a new chat/thread/record for the run,
+the desired title is:
 
-**Why CLI, not a spawned lead agent:** Sub-agents cannot spawn further sub-agents via
-`Agent()`. A spawned "Zeus" would have to do all implementation work directly in its
-own tool budget (~40 calls), hitting the ceiling at ~55% on any non-trivial sprint.
-CLI has the `Agent()` tool, the largest tool budget, and full filesystem access. Each
-sub-agent CLI spawns gets its own tool budget. This is the only architecture where
-delegation actually works.
+`[SPRINT-ID] — [short dispatch name]`
 
-**The boundary that matters is not CLI vs Zeus — it's coordination vs implementation.**
-CLI coordinates: reads specs, builds plans, routes tasks, spawns agents, receives results,
-tracks progress. Sub-agents implement: read source files, edit code, run tests, update docs.
-CLI never crosses into implementation. Sub-agents never cross into coordination.
+Examples:
+- `KOKORO-DEEPEN-2 — Chunk Timing Narration`
+- `POSTV2-REVIEW-1 — Review Closeout`
+- `SPRINT-QUEUE-MIGRATE — Workbook Queue Transition`
 
----
+If an explicit title-setting mechanism is available, set the sprint record title to
+that value before implementation begins. If no title-setting mechanism is available,
+make the first substantive visible line after the short Virtuoso announcement:
+
+`[SPRINT-ID] — [short dispatch name]`
+
+Do not let the record remain titled `$virtuoso`, `/virtuoso`, "Virtuoso", or any
+other skill-trigger-only name when the sprint or dispatch name is knowable. If the
+sprint ID is unknown at intake, use a temporary descriptive title and update the
+first plan heading once the ID is discovered.
+
+## Architecture: Parent Chat + Optional Swarm
+
+Virtuoso runs inside the active parent conversation or the CLI-created parent sprint
+record. It is acceptable for CLI to preserve a separate record per sprint run, but
+that record must be named for the sprint, not for the skill invocation. Do not create,
+request, or suggest an additional top-level chat just to re-run Virtuoso inside a
+sprint record that already exists.
+
+Agent swarms are allowed when the user or dispatch spec authorizes parallel
+implementation. Child agents are workers attached to the current sprint plan, not
+new `$virtuoso` parent chats. The parent thread reads the dispatch spec, builds the
+task plan, launches child agents only for concrete independent tasks, integrates
+their results, runs verification, and keeps the human oriented.
+
+**No orphan-chat rule:** Virtuoso may use `Agent()` / `spawn_agent` for bounded
+worker tasks, but never as a way to start a new parent chat, restart the sprint in
+another conversation, or invoke `$virtuoso` recursively. If a legacy workflow says
+"open a new Virtuoso chat," ignore that instruction and continue in the current
+parent conversation.
+
+**The boundary that matters is parent vs worker.** The parent owns the plan,
+scope, narration, integration, and close-out. Workers own bounded task execution.
+All worker output returns to the one visible sprint plan in the parent chat.
 
 ## Effort Levels
 
-Every dispatch declares a **default effort level** that controls how deeply sub-agents
-reason. Effort is set by Cowork when authoring the spec — CLI and sub-agents respect it,
-they don't choose it. The full decision framework, cost implications, and task-type
-reference live in `WORKFLOW_REFERENCE.md` §4. This section covers only what CLI needs
+Every dispatch may declare a **default effort level** that controls how deeply the
+parent thread and child workers should reason. Effort is set when authoring the
+spec; Virtuoso respects it and records mismatches during close-out. The full
+decision framework, cost implications, and task-type reference live in
+`WORKFLOW_REFERENCE.md` §4. This section covers only what the parent thread needs
 to know during execution.
 
 ### The Four Levels
@@ -57,13 +86,12 @@ to know during execution.
 | **high** | Substantial | Traces complex logic, considers multiple approaches, backtracks when needed. |
 | **max** | Full available | Reasons as extensively as context allows. Slowest, most expensive, highest quality. |
 
-### How CLI Uses Effort Levels
+### How Virtuoso Uses Effort Levels
 
 1. **Read the sprint's declared effort** from the dispatch header (e.g., `Effort: Medium`).
 2. **Check for task-level overrides** — individual tasks may annotate `{high}` or `{max}`
    to override the sprint default.
-3. **Pass effort through to sub-agents** — include the effort level in the Agent() dispatch
-   prompt so the sub-agent knows how deeply to reason.
+3. **Record effort on the task plan** and pass it through to any child worker prompt.
 4. **Effort ↔ model tier defaults** — when effort is not explicitly annotated on a task,
    it inherits from the model tier: haiku→low, sonnet→medium, opus→high.
 5. **Only annotate effort when it differs from the default.** A `[sonnet]` task is implicitly
@@ -109,21 +137,23 @@ Use these markers consistently throughout:
 
 ### Task format
 
-Every task line follows this format: `□ N. agent-name: Task description [model] {effort}`
+Every task line follows this format: `□ N. owner-label: Task description [model] {effort}`
 
 - **Model tier** in square brackets: `[haiku]`, `[sonnet]`, or `[opus]`.
 - **Effort level** in curly braces: `{low}`, `{medium}`, `{high}`, or `{max}`.
   Effort is optional when it matches the model-tier default (haiku→low, sonnet→medium,
   opus→high). Only annotate effort when overriding the default.
-- **Task #1 is always `cli: Load spec, build plan, assign agents [opus]`.** Non-negotiable.
+- **Task #1 is always `codex-parent: Load spec, build plan, assign owners [opus]`.** Non-negotiable.
   This represents Phases 1–3 combined. Task #1 is marked ✓ only after CLI has:
   1. Read and understood the full dispatch spec (Phase 1)
   2. Built the numbered task plan (Phase 2)
-  3. Discovered all available agents and assigned them to tasks (Phase 3)
-  4. Printed the final assignment table
-  Task #1 is CLI's own coordination work. Everything after Task #1 is delegated.
+  3. Assigned parent-owned tasks and child-worker candidates (Phase 3)
+  4. Recorded the repository starting point when the spec requires one
+  5. Printed the final assignment table
+  Task #1 is the parent thread's setup work. Everything after Task #1 is either
+  executed by the parent or delegated to child workers under this same sprint plan.
 - Every subsequent task starts with `unassigned:` as a placeholder — Phase 3 replaces
-  these with real agent names.
+  these with owner labels.
 - The sprint's declared effort level is the default. Task-level annotations override it.
 
 ### Model tiers
@@ -147,7 +177,7 @@ files, calibration interpretation, resolving conflicting requirements.
 
 ```
 ## Task Plan — Effort: Medium | Override: tasks #6, #8 → High
-□ 1. cli: Load spec, build plan, assign agents                         [opus]
+□ 1. codex-parent: Load spec, build plan, assign owners                [opus]
 □ 2. unassigned: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
 □ 3. unassigned: Update constants.toml default                          [haiku]
 □ 4. unassigned: Run fast test suite — all shards pass                  [haiku]
@@ -164,84 +194,75 @@ and analyzing profiler output across subsystems are genuinely hard analytical pr
 where getting it wrong has real downstream consequences. All other tasks use their
 model-tier defaults (haiku→low, sonnet→medium, opus→high).
 
+**Governance task rewrite (worktree-resident sprints):** Task #9 targets CLAUDE.md,
+which is a protected governance document. In a worktree-resident sprint, CLI rewrites
+this task at plan time:
+```
+□ 9. unassigned: Write staging fold-ins for CLAUDE.md (constants + cal results) [sonnet]
+```
+Codex writes fold-in entries to the staging file instead of editing CLAUDE.md
+directly. See §Worktree Governance Staging for the full pattern.
+
 Also create a TodoWrite to track the same tasks programmatically. The printed plan is for
 human readability; TodoWrite is for persistent tracking.
 
 ### Rules
 
-- Task #1 is always CLI's coordination work (Phases 1–3). No exceptions.
+- Task #1 is always parent-thread setup work (Phases 1–3). No exceptions.
 - One task per logical deliverable. Don't bundle "edit file AND run tests" into one line.
 - **No collapsing tasks into batches or waves.** Every task from Phase 1 stays its own
   numbered line item in the plan. If you need to batch dispatches for practical reasons
   (e.g., tool-count ceilings), that is a dispatch optimization inside Phase 4 — but the
   task plan still tracks each deliverable individually. Never merge tasks like
-  "implement tasks 1-6 + write tests" into a single line. Each task is dispatched,
-  tracked, and reported on independently.
+  "implement tasks 1-6 + write tests" into a single line. Each task is executed or
+  delegated, tracked, and reported on independently.
 - If the spec says to do it, it gets a line. Don't silently absorb steps.
 - If you discover a new required step during execution, ADD it to the plan and reprint.
 
 ---
 
-## Phase 3: Discover and Assign Agents
+## Phase 3: Assign Parent And Worker Owners
 
-With the task plan built, CLI now determines who executes each task.
-This phase exists because agent discovery should be deliberate — not a checkbox
-buried inside planning. CLI needs a complete picture of its workforce
-before any work begins.
+With the task plan built, the parent thread decides which tasks it should do locally
+and which tasks are good child-worker candidates. This gives the human a clear
+execution map without creating a fresh parent chat for the sprint.
 
-### The Agent Hierarchy
+### The Owner Hierarchy
 
 ```
-CLI (orchestrate only — zero implementation)
-  ├── Hermes  — mechanical execution, known-correct changes       [haiku]
-  ├── Hercules — single-domain implementation, bounded judgment [sonnet]
-  ├── Athena   — cross-system implementation, architectural       [opus]
-  └── Specialists — bounded job descriptions
+codex-parent — owns plan, scope, integration, verification, close-out [opus]
+  ├── hermes-worker  — mechanical execution, known-correct changes   [haiku]
+  ├── hercules-worker — single-domain implementation, bounded judgment [sonnet]
+  ├── aristotle-worker — cross-system implementation, architectural  [opus]
+  └── specialist workers — bounded job descriptions
         ├── Hippocrates — test execution                          [haiku]
-        ├── Solon — spec compliance verification                  [sonnet]
+        ├── MarcusAurelius — spec compliance, chronicles, docs    [sonnet]
         ├── Plato — code quality review                           [sonnet]
-        ├── Herodotus — documentation updates                     [sonnet]
-        ├── Aristotle — read-only root-cause diagnosis            [opus]
         └── [Project specialists as available]
 ```
 
-CLI NEVER does implementation work — not even trivial config edits.
-Every implementation task goes to a sub-agent via `Agent()`. CLI's reasoning
-tokens are spent on coordination, not on writing code.
+Workers are child agents under the current sprint run when delegation is authorized.
+They are not standalone `$virtuoso` chats and they do not own the parent plan.
 
-### Step 1: Scan for available agents and build name lookup
+### Step 1: Scan for available workers
 
-Search the project directory for agent definitions. Look in:
+Search the project directory for role/agent definitions if they help preserve local
+language. Look in:
 - `.claude/agents/` — project agent definitions
-- The dispatch spec or task description for named agents
+- The dispatch spec or task description for named roles
 - The behavioral reference (`zeus.md`) for the routing decision tree
 
-Build a complete inventory. Don't just check what the spec mentions — discover
-everything that's available.
+Build a compact inventory. Do not spawn yet; spawning only happens during Phase 4
+after the plan identifies a concrete worker task.
 
-**CRITICAL — Agent Name Resolution:** For every agent file discovered, read its YAML
-frontmatter `name:` field. This is the EXACT string you must pass to `Agent()`.
-Agent names include a parenthetical suffix — e.g., `Hermes (haiku/Messenger)`,
-`Socrates (sonnet/Calibration)`. Passing just `Hermes` or `Socrates` will FAIL.
+**Worker Name Resolution:** For every worker/agent file discovered, read its YAML
+frontmatter `name:` field and use that label in the plan when helpful. The `name:`
+field is authoritative for worker naming.
 
-Build a name lookup table during this step:
-```
-Name Lookup:
-  Hermes      → "Hermes (haiku/Messenger)"
-  Hercules    → "Hercules (sonnet/Hero)"
-  Athena      → "Athena (opus/Strategist)"
-  Hippocrates → "Hippocrates (haiku/Tester)"
-  [... all discovered agents]
-```
+### Step 2: Analyze each worker's intent and model
 
-Throughout Phases 2–4, the task plan uses short names for readability. At dispatch
-time (Phase 4), ALWAYS resolve the short name through this lookup before calling
-`Agent()`. The plan says `hercules` — the `Agent()` call says `"Hercules (sonnet/Hero)"`.
-
-### Step 2: Analyze each agent's intent and model
-
-For every discovered agent, read its definition and extract:
-- **Intent**: what is this agent designed to do?
+For every discovered worker role, read its definition and extract:
+- **Intent**: what is this worker designed to do?
 - **Model**: what model does it run on (haiku / sonnet / opus)?
 - **Type**: doer (general implementation) or specialist (bounded job)?
 - **Constraints**: any specializations, limitations, or scoping rules?
@@ -249,174 +270,176 @@ For every discovered agent, read its definition and extract:
 Print the roster:
 
 ```
-## Agent Roster
+## Worker Roster
 Doers:
 - hermes [haiku] — mechanical execution, prescribed changes
 - hercules [sonnet] — single-domain implementation with judgment
-- athena [opus] — cross-system implementation, architectural
+- aristotle [opus] — cross-system implementation, architectural decisions, root-cause analysis
 
 Specialists:
 - hippocrates [haiku] — runs test suites, reports pass/fail
-- herodotus [sonnet] — updates documentation to match code changes
-- aristotle [opus] — read-only root-cause analysis
-- solon [sonnet] — spec compliance verification
+- marcusaurelius [sonnet] — spec compliance, documentation, governance updates
 - plato [sonnet] — code quality review
 ```
 
-If doer agents are not defined in the project, CLI can use the Agent tool
-with model annotations to dispatch at the appropriate tier. The three doer definitions
-exist as templates — the concept (cheap/mid/expensive implementation tiers) applies
-regardless of whether the formal agent files are present.
+If doer roles are not defined in the project, use the generic labels above. The
+concept (cheap/mid/expensive work tiers) applies regardless of whether formal role
+files are present.
 
-### Step 3: Pair agents to tasks — the routing decision tree
+### Step 3: Pair owners to tasks — the routing decision tree
 
 For every task in the plan, walk this tree top-to-bottom. Take the FIRST match.
 
+**0. Parent-owned?**
+Is this task on the critical path, tightly coupled to current integration work,
+mostly orchestration, or unsafe to hand off because the parent needs the result
+immediately?
+→ **codex-parent**
+
 **1. Specialist match?**
-Does a specialist's job description match this task exactly?
+Does a specialist label match this task exactly?
 - Running tests → **hippocrates**
-- Verifying spec compliance → **solon**
+- Verifying spec compliance → **marcusaurelius**
 - Reviewing code quality → **plato**
-- Updating governing docs → **herodotus**
+- Updating governing docs → **marcusaurelius**
 - Diagnosing unknown bug → **aristotle**
 - Project specialist exists and matches → **that specialist**
 
-If yes → assign to the specialist. Stop.
+If yes and the task is independent enough to hand off → assign to the specialist
+worker. Stop.
 
 **2. Exact diff known?**
 Can you write the precise file + old text + new text right now, with zero judgment?
 (Config value changes, renames, version bumps, git stage/commit/push, file copies)
-→ **hermes**
+→ **hermes-worker**
 
 **3. Single module / single domain?**
-Does the doer only need to understand ONE area of the codebase?
+Does the work only need to understand ONE area of the codebase?
 (Write a function, fix a known bug, implement a scoped feature, apply a fix spec,
 write tests for one module)
-→ **hercules**
+→ **hercules-worker**
 
 **4. Cross-system / architectural?**
-Does the doer need to hold multiple subsystems in mind? Could a change in file A
+Does the work need to hold multiple subsystems in mind? Could a change in file A
 break file B? (Multi-module refactors, interface changes, pipeline integration,
 data flow redesigns)
-→ **athena**
+→ **aristotle-worker**
 
-**5. When in doubt:** Default to **hercules** — it can self-escalate to opus
-or report that the task only needed haiku.
+**5. When in doubt:** Default to **codex-parent** for urgent/blocking work, or
+**hercules-worker** for independent implementation work with bounded scope.
 
-**CLI does NOT take implementation tasks as a fallback.** If no doer agent
-file exists, dispatch an ad-hoc Agent call at the appropriate model tier.
+The parent may execute any task directly when that keeps the critical path moving.
+Use workers for bounded sidecar tasks that materially advance the sprint.
 
 ### Step 4: Print the assignment table
 
-Reprint the task plan with real agent names replacing `unassigned:`. This is the
+Reprint the task plan with owner labels replacing `unassigned:`. This is the
 final plan that governs execution.
 
 ```
-## Task Plan (delegating — 7 agents available)
-✓ 1. cli: Load spec, build plan, assign agents                         [opus]
-□ 2. hercules: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
-□ 3. hermes: Update constants.toml default                              [haiku]
-□ 4. hippocrates: Run fast test suite — all shards pass                 [haiku]
-□ 5. hippocrates: Run calibration N=1,200×3 seeds                      [haiku]
-□ 6. athena: Interpret cal results + decide if tuning needed            [opus]
-□ 7. hippocrates: Generate profiler snapshot with pathway metrics       [haiku]
-□ 8. athena: Analyze profiler — does freed space flow to both?          [opus]
-□ 9. herodotus: Update CLAUDE.md with constants and cal results         [sonnet]
-□ 10. hermes: Commit, merge to main, push                              [haiku]
+## Task Plan (single parent chat — child workers allowed)
+✓ 1. codex-parent: Load spec, build plan, assign owners                [opus]
+□ 2. hercules-worker: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0 [sonnet]
+□ 3. hermes-worker: Update constants.toml default                      [haiku]
+□ 4. hippocrates-worker: Run fast test suite — all shards pass         [haiku]
+□ 5. hippocrates-worker: Run calibration N=1,200×3 seeds               [haiku]
+□ 6. codex-parent: Interpret cal results + decide if tuning needed     [opus]
+□ 7. hippocrates-worker: Generate profiler snapshot with pathway metrics [haiku]
+□ 8. aristotle-worker: Analyze profiler — does freed space flow to both? [opus]
+□ 9. marcusaurelius-worker: Update CLAUDE.md with constants and cal results [sonnet]
+□ 10. codex-parent: Commit, merge to main, push                        [haiku]
 ```
 
-The header states the execution mode (delegating) and agent count so the human knows
-upfront how work will be distributed. Note: Task #1 (cli) is already ✓ because
-printing this table IS the completion of Task #1. All subsequent tasks are delegated
-to sub-agents — CLI never appears again as a task executor.
+The header states that the parent chat remains singular even when child workers are
+used. Note: Task #1 is already ✓ because printing this table IS the completion of
+Task #1.
 
 ---
 
-## Phase 4: Execute (CLI Delegates — Never Implements)
+## Phase 4: Execute With Parent-Owned Swarm Control
 
-CLI walks through the task plan in order. For every task after Task #1, CLI
-**spawns a sub-agent** via `Agent()` to do the work. CLI does not read source files
-to understand implementations. CLI does not edit code. CLI does not run tests.
-CLI dispatches, receives results, and coordinates.
+The parent thread walks through the task plan in order. For every task after Task
+#1, the parent either executes locally or launches a child worker, then integrates
+the result back into the one parent plan.
 
-### Why delegation works
+### Execution model
 
-Each sub-agent spawned via `Agent()` runs in its own tool-use budget with full
-filesystem access. When CLI delegates Task #2 to Hercules, Hercules gets a
-fresh context with its own budget for reading files, editing code, and running
-commands. CLI's tool budget is spent only on coordination: spawning agents,
-receiving results, reprinting the plan, and narrating progress.
-
-Sub-agents spawned via `Agent()` can read any file, run any command, and use any
-tool in their definition. The dispatch prompt does NOT need to inline source code
-or pre-read context — the sub-agent reads what it needs in its own context. This
-is why CLI should never read source files "to prepare a good prompt." Point the
-sub-agent at the files; it reads them itself.
-
-### Dispatch model
-
-Tasks are dispatched individually via `Agent()`. CLI:
+For each task, the parent:
 1. Takes the next task from the plan
 2. **Set effort level** — if this task has an effort override (e.g., `{max}`),
-   run `/effort-levels [level]` BEFORE spawning the agent. After the task
-   completes, revert: `/effort-levels [sprint default]`
-3. **Resolve agent name** — look up the full registered name from the Phase 1 lookup table
-4. **Spawn the assigned agent** via `Agent("<full registered name>", prompt=<task spec>)`
-5. The sub-agent executes in its own context with its own tool budget and returns a result
-6. CLI receives the result and verifies it meets the task spec
-7. If the result includes information needed by downstream tasks, CLI extracts
-   and holds it for inclusion in those tasks' dispatch prompts
-8. Marks the task ✓ or ✗
-9. Reprints the plan
-10. Moves to the next task
+   note the override before starting and pass it through to any worker prompt.
+3. Decides whether to execute locally or launch a child worker.
+4. If launching a worker, gives it a bounded task, explicit file/module ownership,
+   success criteria, and instructions not to revert others' edits.
+5. Verifies the result meets the task spec.
+6. If the result includes information needed by downstream tasks, records the relevant
+   summary for later steps.
+7. Marks the task ✓ or ✗.
+8. Reprints the plan.
+9. Moves to the next task.
 
-**Effort level management:** The `/effort-levels` command controls how deeply sub-agents
-reason. CLI must set the sprint's default effort at the start of Phase 4 (read from the
-dispatch header's `Effort:` field), then switch before/after any task with a `{curly brace}`
+**Effort level management:** Effort controls how deeply the parent and child workers
+reason. Set the sprint's default effort at the start of Phase 4 (read from the dispatch
+header's `Effort:` field), then note before/after any task with a `{curly brace}`
 override. The four levels are: `low`, `medium`, `high`, `max`.
 ```
 /effort-levels medium          ← set sprint default at start of Phase 4
 /effort-levels max             ← before a {max} override task
-  [spawn agent, await result]
+  [execute locally or launch bounded child worker]
 /effort-levels medium          ← revert after override task completes
 ```
 
-**Dispatch prompts should be concise, not exhaustive.** Because sub-agents have full
-filesystem access, the prompt specifies WHAT to do and WHERE — not HOW. Example:
+**Worker prompts should be concise, not exhaustive.** Specify WHAT to do, WHERE, the
+owned files/modules, and the success criteria. Avoid copying large source blocks into
+the prompt. Example:
 
 ```
 Good: "Modify calc_defense_effectiveness() in engine/fro.py — change WEIGHT from
 3.0 to 2.0. Run tests after to confirm no regression."
 
 Bad: [200 lines of inlined source code, data structure definitions, and API docs
-that the sub-agent could read from the filesystem itself]
+that the worker can read from the filesystem when needed]
 ```
 
-The sub-agent reads the source files in its own context. CLI doesn't need to read
-them first. Pre-reading source files is the first step toward implementing directly.
+**Governance-task dispatch gate (worktree-resident sprints only).** Before dispatching
+any task that updates a document listed in CLAUDE.md §Main Governance Documents:
+
+1. CLI rewrites the task description to target the staging file instead of the
+   governance document. Example: "Update CLAUDE.md with constants and cal results"
+   becomes "Write fold-in entries to the staging file for CLAUDE.md updates (constants,
+   cal results, phase status)."
+2. The parent includes the staging file path in the task note or worker prompt:
+   `"Write fold-ins to 2 operational/Memo.<sprint-id>.GovernanceStaging.<date>.md"`
+3. The parent records the constraint:
+   `"Do NOT edit CLAUDE.md directly — this sprint runs in a worktree. All governance
+   updates go to the staging file as fold-in entries."`
+
+If the task plan includes a governance-update task and CLI is in a worktree, the task
+MUST include these three elements.
 
 **Downstream dependency handling:** When Task #8 depends on Task #4's output
-(e.g., test results inform which files to fix), CLI extracts the relevant
-information from Task #4's return and includes it in Task #8's dispatch prompt.
-CLI is the information bridge between sequential tasks.
+(e.g., test results inform which files to fix), the parent extracts the relevant
+information from Task #4's result and carries it into Task #8. The parent is the
+information bridge between sequential tasks.
 
-Independent tasks assigned to different agents may be parallelized — but each task
-is still its own dispatch with its own result. Never bundle multiple tasks into a
-single mega-dispatch like "implement tasks 1-6." If a sub-agent is unavailable at
-execution time, mark the task ✗ (blocked) and report it — don't silently take over.
+Independent tasks should be parallelized when the user or dispatch spec authorizes
+agent swarms and the write scopes do not conflict. Never bundle multiple tasks into
+a single mega-task like "implement tasks 1-6." Each worker gets one bounded task and
+returns to the parent plan.
 
 ### Before each action
 
 Print what you're about to do. Use a consistent prefix so the human can scan the log:
 
 ```
-> Delegating: "Hercules (sonnet/Hero)" — task #2, modify calc_defense_effectiveness()
-> Delegating: "Hermes (haiku/Messenger)" — task #3, update constants.toml default
-> Delegating: "Hippocrates (haiku/Tester)" — task #4, run fast test suite
-> Delegating: "Athena (opus/Strategist)" — task #6, interpret calibration results
+> Launching worker: hercules — task #2, modify calc_defense_effectiveness()
+> Executing locally: codex-parent — task #6, interpret calibration results
+> Launching worker: hippocrates — task #4, run fast test suite
+> Integrating worker result: aristotle — task #8, profiler analysis
 ```
 
-The prefix tells the human three things: what agent, what task number, and what it does.
+The prefix tells the human whether work is local or delegated, which task number is
+active, and what it does.
 
 ### Respect the model annotations
 
@@ -454,15 +477,15 @@ of them is wrong.
 
 ```
 ## Task Plan — [30% complete] Fast tests running, code changes landed.
-✓ 1. cli: Load spec, build plan, assign agents                         [opus]
+✓ 1. codex-parent: Load spec, build plan, assign owners                [opus]
 ✓ 2. hercules: Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0  [sonnet]
 ✓ 3. hermes: Update constants.toml default                              [haiku]
 ■ 4. hippocrates: Run fast test suite — all shards pass                 [haiku]
 □ 5. hippocrates: Run calibration N=1,200×3 seeds                      [haiku]
-□ 6. athena: Interpret cal results + decide if tuning needed            [opus]
+□ 6. aristotle: Interpret cal results + decide if tuning needed          [opus]
 □ 7. hippocrates: Generate profiler snapshot with pathway metrics       [haiku]
-□ 8. athena: Analyze profiler — does freed space flow to both?          [opus]
-□ 9. herodotus: Update CLAUDE.md with constants and cal results         [sonnet]
+□ 8. aristotle: Analyze profiler — does freed space flow to both?       [opus]
+□ 9. marcusaurelius: Update CLAUDE.md with constants and cal results    [sonnet]
 □ 10. hermes: Commit, merge to main, push                              [haiku]
 ```
 
@@ -485,7 +508,7 @@ When you hit something unexpected:
 - The results of a step contradict the plan's assumptions
 - You've been working on a single task for significantly longer than expected
 - An external dependency is missing or broken
-- A sub-agent is unavailable or fails to produce expected output
+- A required tool, file, dependency, or instruction is unavailable
 
 **What to do when stopped:**
 1. Mark the current task ✗ (blocked)
@@ -499,85 +522,81 @@ When you hit something unexpected:
 - Try a different approach without saying so
 - Skip the blocked task and come back later (unless explicitly told to)
 - Retry the same thing more than twice
-- Silently absorb a sub-agent's failed task into CLI
+- Silently change scope or absorb a failed task without updating the plan
 
 ---
 
 ## Phase 6: Close Out
 
-After all tasks show ✓, print the close-out in this exact order:
+After all tasks show ✓ (or the sprint reaches a defined stop condition), print the
+close-out. The close-out begins with the sprint ID and follows this exact structure:
 
-1. **Problem / Opportunity / Goal** — 1-2 sentences: what was broken, missing, or
-   inadequate before this work started — or what opportunity or goal motivated it.
-   Restate from the dispatch spec in plain language.
-2. **Solution** — 1-2 sentences: what was done. Name the specific changes (constants
-   tuned, functions added, architecture decisions made).
-3. **Task Plan — Final Status** — the full task plan with every line ✓ and the status
-   bar showing `[100% complete]`. If any line is ✗, explain why.
-4. **Agent Utilization Report** — two tables: a summary by agent (quick scan) and
-   a detail by task (for tracing specific issues).
+```
+[SPRINT-ID]   Phase 6: Close-Out — SPRINT-NAME (Outcome Type)
 
-   **Table 1 — Agent Summary.** One row per agent. Shows aggregate metrics across
-   all tasks that agent handled.
+Problem: 1-2 sentences — what was broken, missing, or inadequate before this work
+started, or what opportunity/goal motivated it. Restate from the dispatch spec in
+plain language.
 
-   ```
-   ## Agent Utilization — Summary
+Result: 1-2 sentences — what was done and what happened. Name the specific changes
+(constants tuned, functions added, architecture decisions made) and whether the
+outcome was success, partial, or pivot stop. If the work was empirically falsified
+or a gate triggered early stop, say so directly.
+---
+Task Plan — SPRINT-NAME | [X% of authorized scope] Outcome summary.
+✓ 1.   codex-parent:   Load spec, build plan, assign owners                  [opus]
+✓ 2.   hercules:       Modify calc_defense_effectiveness() — WEIGHT 3.0→2.0 [sonnet]
+...
+✗ 9.   socrates:       Full-cal N=1,200×3 — CANCELLED (pivot stop)          [sonnet]
+---
+Worker Utilization Summary
+┌─────────────┬────────────────┬──────────────────────────────────────────────┐
+│    Owner    │     Tasks      │                  Key output                   │
+├─────────────┼────────────────┼──────────────────────────────────────────────┤
+│ codex-parent │ #1, #6, #10   │ Coordination, integration, decisions          │
+│ hermes      │ #3, #10        │ 2 commits; repository updates                │
+│ hercules    │ #2             │ Single-line constant edit                     │
+│ aristotle   │ #6, #8         │ Cal interpretation; profiler analysis         │
+│ hippocrates │ #4, #5, #7     │ 1,990 tests; 1 stale-bound catch             │
+│ marcusaurelius │ #9          │ CLAUDE.md + cal results documented            │
+└─────────────┴────────────────┴──────────────────────────────────────────────┘
+Effort mismatch to flag: [specific mismatch if any — model annotation vs actual
+complexity, disproportionate token consumption, or task that needed a different
+role/effort level than planned, etc.]
+---
+Repository state: [commit hash, merge/push status, notable remaining changes]
+Key engineering finding for Cowork: [the single most important technical insight
+from this sprint that affects future work — not a summary of what was done, but
+what was learned]
+```
 
-   | Agent                     | Tasks            | Duration  | Tool Calls | Tokens  |
-   |---------------------------|------------------|-----------|------------|---------|
-   | cli (coordination)        | #1               | 0m 45s    | 8          | 3,200   |
-   | hermes                    | #3, #10          | 1m 27s    | 9          | 4,400   |
-   | hercules                | #2               | 1m 05s    | 6          | 12,800  |
-   | athena                    | #6, #8           | 4m 10s    | 12         | 46,600  |
-   | hippocrates               | #4, #5, #7       | 2m 40s    | 9          | 8,200   |
-   | herodotus                 | #9               | 0m 45s    | 3          | 5,100   |
-   |                           | **Total**        | **10m 12s** | **40**   | **77,900** |
-   ```
+**Outcome types** (use in the header after the sprint name):
+- **(Complete)** — all tasks ✓, tests pass, merged to main
+- **(Partial)** — some tasks complete, changes preserved for later integration
+- **(Pivot Stop)** — work empirically falsified or gate triggered early stop
+- **(Blocked)** — escalated to user, awaiting direction
 
-   **Table 2 — Task Detail.** One row per task. Shows which agent ran it and that
-   task's individual metrics. This is where bloat becomes traceable — if one task
-   consumed 72 of 132 tool calls, it shows up immediately.
+**Close-out rules:**
+- The sprint ID appears first, before "Phase 6" — it anchors the entire block
+- Task Plan uses the sprint name (not generic), with the percentage reflecting
+  authorized scope completed (100% is valid even with cancelled tasks if the
+  cancellation was the authorized response to a gate trigger)
+- Worker Utilization uses a compact summary table (owner → tasks → key output),
+  not the verbose duration/tokens/tool-calls breakdown. The detail matters for
+  performance analysis but not for the close-out record. If performance
+  recommendations are warranted, append them after the close-out block.
+- Git state and Key engineering finding close the block — these are what Cowork
+  reads first when processing a close-out into a Phase Close-Out Report
 
-   ```
-   ## Agent Utilization — Task Detail
+**Performance Recommendations** (append after the close-out block when warranted):
+Focus on three dimensions with concrete task references:
+- **Tool efficiency**: redundant or collapsible tool-call sequences
+- **Token efficiency**: tasks consuming disproportionate tokens relative to
+  task complexity; model annotation changes needed
+- **Speed**: critical-path bottlenecks; parallelizable tasks that ran sequentially
 
-   | #  | Agent               | Task                                    | Duration | Tools | Tokens |
-   |----|---------------------|-----------------------------------------|----------|-------|--------|
-   | 1  | cli                 | Load spec, plan, assign agents          | 0m 45s   | 8     | 3,200  |
-   | 2  | hercules          | Modify calc_defense_effectiveness()     | 1m 05s   | 6     | 12,800 |
-   | 3  | hermes              | Update constants.toml default           | 0m 15s   | 2     | 1,200  |
-   | 4  | hippocrates         | Run fast test suite                     | 0m 50s   | 3     | 2,800  |
-   | 5  | hippocrates         | Run calibration N=1,200×3 seeds         | 1m 20s   | 4     | 3,600  |
-   | 6  | athena              | Interpret cal results + tuning decision  | 1m 30s   | 4     | 18,500 |
-   | 7  | hippocrates         | Generate profiler snapshot               | 0m 30s   | 2     | 1,800  |
-   | 8  | athena              | Analyze profiler — freed space flow     | 2m 40s   | 8     | 28,100 |
-   | 9  | herodotus           | Update CLAUDE.md                        | 0m 45s   | 3     | 5,100  |
-   | 10 | hermes              | Commit, merge to main, push             | 1m 12s   | 7     | 3,200  |
-   ```
-
-   **Mismatches** — flag after both tables. Note any model annotation that didn't
-   match actual complexity, any sub-agent that was unavailable and had to be replaced,
-   or any task whose metrics are disproportionate to its tier (e.g., a haiku task
-   that consumed more tokens than an opus task).
-
-5. **Performance Recommendations** — based on the utilization data above, recommend
-   specific improvements for future runs. Focus on three dimensions:
-   - **Tool efficiency**: were there redundant or unnecessary tool calls? Could any
-     sequence be collapsed (e.g., multiple reads that could be one, repeated searches)?
-   - **Token efficiency**: did any agent consume disproportionate tokens relative to
-     its task complexity? Should a model annotation be changed (e.g., a sonnet task
-     that only needed haiku, or a haiku task that burned tokens retrying)?
-   - **Speed**: which tasks were on the critical path? Could any be parallelized that
-     weren't? Were there idle gaps between sequential tasks that could be eliminated?
-
-   Be concrete — name the specific task numbers, agents, and changes. Vague advice
-   like "consider parallelizing more" is not useful. Instead: "Tasks #4 and #7 were
-   both assigned to hippocrates and ran sequentially, but have no dependency — run
-   them in parallel to save ~1m 20s."
-
-6. **Summary** — one paragraph: key results, metrics, anything surprising. Verify
-   clean state — whatever "clean" means for the project (tests pass, no uncommitted
-   files, documentation updated, etc.)
+Be concrete — "Tasks #4 and #7 were both labeled hippocrates and ran
+sequentially, but have no dependency — run them in parallel to save ~1m 20s."
 
 ---
 
@@ -593,12 +612,12 @@ Before skipping narration, skipping a reprint, or taking a shortcut, check this 
 | "I'll fix this unrelated thing while I'm here" | Scope creep. Note it, finish the plan, then address it. |
 | "This blocker is minor, I can work around it" | Minor blockers become major regressions. Stop and report. |
 | "The human can see what I'm doing from the tool calls" | Tool calls show WHAT. Narration shows WHY. Both matter. |
-| "I'll just do this quick task myself, not worth spawning an agent" | If it's implementation, delegate it — even trivial config edits go to Hermes via Agent("Hermes (haiku/Messenger)", ...). Your tokens are for coordination. |
-| "This task needs my full attention to be safe" | Does it? Or does it just need correct inputs and a known procedure? Match agent to actual complexity, not anxiety. |
-| "The sub-agent failed, I'll just do it myself" | Mark it blocked, report it, get direction. Don't silently absorb work. |
-| "There's no doer agent defined, so I'll do the code work" | Dispatch an ad-hoc Agent call at the appropriate model tier. CLI never writes code, even as a fallback. |
-| "I need to read the source files to write a good dispatch prompt" | Sub-agents have full filesystem access. Point them at the files — they read them in their own context. Pre-reading source is the first step toward implementing directly. |
-| "I'm running low on tool budget, I'll do the rest directly" | That's how you HIT the ceiling. Direct implementation burns YOUR budget. Delegation uses the SUB-AGENT's budget. Delegate more, not less. |
+| "I'll just skip the role label; this one's obvious" | The role label tells the human what kind of work is happening. Keep the label, even for small tasks. |
+| "This task needs my full attention, so I'll ignore the checklist" | Serious tasks need more structure, not less. Keep the plan visible while doing the hard part. |
+| "This step failed, but I can quietly work around it" | Mark it blocked or revise the plan explicitly. Silent workarounds create false confidence. |
+| "There's no doer role defined, so I'll invent a new process" | Use the generic role labels: hermes, hercules, aristotle, hippocrates, marcusaurelius, plato. |
+| "I need to preload everything before I can start" | Read enough context to act safely, then proceed. Planning should reduce drift, not become the work. |
+| "I'm running low on tool budget, I'll stop tracking the plan" | The plan becomes more important under pressure. Trim scope only by explicitly updating the task list. |
 | "I need to keep a second copy of the plan for tracking" | One plan, one location. The reprinted plan IS the tracking mechanism. A second plan drifts from the first and confuses both you and the human. |
 
 ---
@@ -617,8 +636,194 @@ this skill and adds project-specific constraints. Example:
 - All rules from Virtuoso skill apply
 - Additional: clear __pycache__ after every engine edit
 - Additional: run segmented 4-shard test suite, not single pytest command
-- Additional: include agent utilization in summary (which sub-agents were used)
+- Additional: include worker utilization in summary (which child workers were used)
 ```
 
 The overlay inherits everything from this skill and adds to it. The skill handles the
 universal execution discipline; the overlay handles project-specific requirements.
+
+---
+
+## Worktree Governance Staging
+
+Worktree-resident sprints (any virtuoso-executed work running in a `git worktree`-
+isolated directory) have a structural conflict surface: if the sprint edits main
+governance documents directly, those edits conflict with any concurrent Cowork-side
+governance work on canonical main. The conflict either surfaces at pre-merge rebase
+(friction) or produces silent-revert behavior (governance content lost undetected).
+
+This section eliminates that conflict surface by making worktree-resident sprints
+structurally incapable of editing main governance documents.
+
+### Rule 1 — Worktree-Resident Sprints MUST NOT Edit Main Governance Documents
+
+During worktree-resident execution, virtuoso's task plan must not include direct
+edits to documents classified as "main governance." The classification is project-
+specific and lives in the project's CLAUDE.md (or equivalent) under a section
+titled **"Main Governance Documents — Worktree Edit Prohibition."**
+
+Virtuoso reads that list at sprint start (Phase 1). If no such section exists in
+CLAUDE.md, the prohibition still applies to any document that:
+- Spans multiple sprints (roadmaps, sprint queues, constitutions)
+- Is edited by Cowork between sprints (SRL catalogs, debt logs, technical references)
+- Contains the dispatch spec for the currently-running sprint (the inline full spec)
+
+If a task in the task plan would edit a main governance document, virtuoso rewrites
+that task to write to the staging file instead (see Rule 2).
+
+### Rule 2 — All Governance-Change Intent Goes to a Staging File
+
+For every governance change the sprint would otherwise make to a main governance
+document, virtuoso writes the change-intent to a staging file in the worktree:
+
+```
+<close-out-directory>/Memo.<sprint-id>.GovernanceStaging.<YYYY-MM-DD>.md
+```
+
+(Where `<close-out-directory>` is wherever the project's close-out memos live —
+typically `2 operational/` or equivalent.)
+
+The staging file is created on first governance-change-intent and appended to
+throughout the sprint. It contains all the changes that would normally land in
+main governance docs — formatted as **fold-in instructions**, not as raw edits.
+
+### Rule 3 — Staging File Structure
+
+The staging file is organized so phase-closeout can mechanically apply each entry.
+Section headers name the target document; entries within name the target section
+and the fold-in action.
+
+```markdown
+# Sprint Close-Out Governance Staging — <sprint-id>
+
+This file enumerates every governance change the sprint would have made to
+main governance documents during execution, but staged here per virtuoso's
+worktree-edit prohibition. phase-closeout processes this file at sprint
+close to apply the fold-ins to canonical main.
+
+## Target: <document-name>
+
+### Fold-in N — <short description>
+Section: §<target section heading>
+Action: <Append row | Replace | Insert after | Remove>
+Content:
+<exact content to fold in — verbatim, ready to paste>
+```
+
+**Fold-in action types:**
+
+| Action | Meaning |
+|--------|---------|
+| **Append row** | Add content at the end of a table or section |
+| **Replace** | Overwrite existing content with new content (include `Old:` and `New:` blocks) |
+| **Insert after** | Add content after a named anchor (line, heading, or entry) |
+| **Remove** | Delete specified content (include the exact content to remove) |
+| **Migrate** | Move content from one location to another (include source and destination) |
+
+**Ordering rule:** Within a single target document, fold-ins are numbered
+sequentially and processed in order. Dependencies between fold-ins within the
+same target are implicit in the numbering. Cross-target fold-ins have no ordering
+constraint unless explicitly noted.
+
+**Mid-Dispatch Amendment fold-ins:** When the mid-dispatch-decision skill adds
+amendment entries, they use the `Migrate` action type with source = inline spec
+subsection and destination = close-out memo §Mid-Dispatch Decisions. These must
+be processed BEFORE inline spec collapse fold-ins (so amendment content is
+preserved before the spec containing it gets collapsed).
+
+### Rule 4 — phase-closeout Processes the Staging File as Wave 2 Step 0
+
+phase-closeout's existing Wave 2 procedure gains a new first step:
+
+**Step 0 (NEW): Read and process the sprint's staging file.**
+
+If `Memo.<sprint-id>.GovernanceStaging.<date>.md` exists in the worktree (or has
+already merged from the worktree), phase-closeout:
+
+1. Parses all fold-in instructions
+2. Applies them to canonical main as Edit calls against the named target documents
+3. Processes Mid-Dispatch Amendment migrations BEFORE inline spec collapses
+4. After applying all fold-ins, deletes the staging file (it has served its purpose)
+
+The close-out memo is the durable record. The staging file is transient infrastructure.
+
+**Discrepancy handling:** If a fold-in instruction conflicts with current canonical
+main state (e.g., the target section no longer exists, or content has changed since
+the fold-in was staged), phase-closeout surfaces the discrepancy as a reconciliation
+prompt to the user rather than silently overwriting or failing.
+
+### Rule 5 — Mid-Dispatch Amendments Use the Staging File
+
+The mid-dispatch-decision skill currently writes amendment blocks directly to the
+dispatch spec (which is in a main governance document). Per Rule 1, this is the
+exact write virtuoso forbids.
+
+**Integration:** mid-dispatch-decision writes the amendment to the staging file
+under a fold-in entry, NOT to the inline spec. Specifically:
+
+```markdown
+## Target: <roadmap-document>
+
+### Fold-in N — Mid-Dispatch Amendment (<amendment title>)
+Section: §<sprint-id> (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+##### Mid-Dispatch Amendment — <date> — <title>
+Decision Type: <type>
+Context: <what CLI reported>
+Decision: <what was decided>
+Rationale: <why>
+```
+
+The mid-dispatch-decision skill's Step 6b becomes: "Append amendment to the sprint's
+staging file under the appropriate target document section." The Close-Out Preservation
+field becomes implicit — the staging file IS the preservation contract. The conflict-
+surface check becomes unnecessary because the conflict surface no longer exists.
+
+### Rule 6 — Cowork-Side Sprints Follow the Same Pattern by Default
+
+Cowork-side governance work that runs in a single session (e.g., /phase-closeout,
+/roadmap-review, /governance-sweep) doesn't have a worktree boundary, so the conflict
+surface doesn't apply in the same way. But the staging-file pattern still has value:
+
+- Cowork's mid-session governance edits become recoverable if the session crashes
+- The staging file documents WHAT changed and WHY for the change summary
+- It provides an audit trail of governance mutations within the session
+
+**Enforcement level:**
+- **Worktree-resident CLI dispatches:** staging file is **mandatory**. Virtuoso
+  rejects any task plan that edits main governance documents directly.
+- **Cowork-side sessions:** staging file is **optional** (best practice, not enforced).
+  Cowork may edit main governance documents directly since there's no worktree
+  boundary to create conflicts.
+
+### Migration — Sprints Already in Flight
+
+Sprints dispatched before this pattern was introduced continue under the old pattern
+(mid-dispatch-decision writes amendments inline to the roadmap). The new staging-file
+pattern starts with the next sprint dispatched after this skill update.
+
+When processing a close-out for a grandfathered sprint, phase-closeout checks for
+BOTH: a staging file (new pattern) and inline Mid-Dispatch Amendment blocks with
+Close-Out Preservation instructions (old pattern). If both exist, surface as a
+reconciliation prompt. The transition point should be noted in CLAUDE.md so it's
+clear which sprints used which pattern.
+
+### What This Prevents
+
+The pattern of:
+1. Cowork edits canonical main governance doc
+2. Worktree edits same file from a stale base
+3. Pre-merge rebase produces conflict (visible) OR silent revert (invisible)
+4. Governance content potentially lost or scrambled
+
+Under the new pattern: the worktree NEVER edits canonical main governance documents.
+Conflicts on those files between worktree and Cowork are structurally impossible.
+The staging file consolidates intent; phase-closeout applies it once at close-out,
+with full visibility of any concurrent Cowork edits at that moment.
+
+**Trade-off:** phase-closeout becomes mechanically heavier (more fold-ins to process)
+and the staging file is one more artifact per sprint. Both are small costs for the
+structural elimination of a recurring failure mode.

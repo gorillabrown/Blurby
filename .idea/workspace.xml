@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="4.4.2026">
       <changelist_data name="Evan Brown" email="estrattbrown@gmail.com" automatic="false" />
+      <change afterPath="$PROJECT_DIR$/docs/governance/sprint-queue.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.claude/skills/virtuoso/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/skills/virtuoso/SKILL.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ROADMAP.md" beforeDir="false" afterPath="$PROJECT_DIR$/ROADMAP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/Close-Outs/SpecRetro.Lessons_Learned.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/Close-Outs/SpecRetro.Lessons_Learned.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/governance/SPRINT_QUEUE.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/perf-baseline-results.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/perf-baseline-results.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,6 +35,7 @@
   }
 }</component>
   <component name="PackageJsonUpdateNotifier">
+    <dismissed value="$PROJECT_DIR$/.claude/worktrees/musing-meninsky-b32220/package.json" />
     <dismissed value="$PROJECT_DIR$/package.json" />
   </component>
   <component name="ProjectColorInfo">{
@@ -48,22 +47,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/estra/Projects/Blurby&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\estra\\Projects\\Blurby\\node_modules\\typescript\\lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/estra/Projects/Blurby",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\estra\\Projects\\Blurby\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="" />
