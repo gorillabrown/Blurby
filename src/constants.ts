@@ -156,7 +156,7 @@ export const NARRATE_BG_EXTRACT_DELAY_MS = 1000;
 /** Maximum number of pronunciation overrides a user can create */
 export const MAX_PRONUNCIATION_OVERRIDES = 100;
 /** Segment normalizer schema/version for spoken text identity. */
-export const TTS_NORMALIZER_VERSION = "en-v1";
+export const TTS_NORMALIZER_VERSION = "en-v2";
 /** Disk TTS cache identity schema/version for structured cache entries. */
 export const TTS_CACHE_SCHEMA_VERSION = 2;
 /** Timing metadata sidecar extension written next to generated audio chunks. */

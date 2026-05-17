@@ -173,5 +173,425 @@
       7,
       8
     ]
+  },
+  {
+    "id": "dotted-acronym-usa",
+    "locale": "en-US",
+    "input": "The U.S.A. team won.",
+    "expected": "The USA team won.",
+    "expectedTransforms": [
+      "dotted-acronym-normalization"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "dotted-acronym-fbi",
+    "locale": "en-US",
+    "input": "U.K. and F.B.I. agents met.",
+    "expected": "UK and FBI agents met.",
+    "expectedTransforms": [
+      "dotted-acronym-normalization"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "address-abbreviation-prefix-number",
+    "locale": "en-US",
+    "input": "Meet me at St. 42 tonight.",
+    "expected": "Meet me at Street forty two tonight.",
+    "expectedTransforms": [
+      "address-abbreviation-expansion",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "address-abbreviation-suffix-number",
+    "locale": "en-US",
+    "input": "He moved to 15 Rd. yesterday.",
+    "expected": "He moved to fifteen Road yesterday.",
+    "expectedTransforms": [
+      "address-abbreviation-expansion",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "address-abbreviation-st-louis-guard",
+    "locale": "en-US",
+    "input": "She flew to St. Louis last year.",
+    "expected": "She flew to St. Louis last year.",
+    "expectedTransforms": [],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "id": "url-normalization-www",
+    "locale": "en-US",
+    "input": "Visit www.example.com now.",
+    "expected": "Visit example dot com now.",
+    "expectedTransforms": [
+      "url-normalization"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      1,
+      1,
+      2
+    ]
+  },
+  {
+    "id": "url-normalization-https-path",
+    "locale": "en-US",
+    "input": "Docs are at https://blurby.app/help-center.",
+    "expected": "Docs are at blurby dot app slash help center.",
+    "expectedTransforms": [
+      "url-normalization"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      3,
+      4,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "id": "fraction-expansion-three-quarters",
+    "locale": "en-US",
+    "input": "Add 3/4 cup of milk.",
+    "expected": "Add three quarters cup of milk.",
+    "expectedTransforms": [
+      "fraction-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "fraction-expansion-one-half",
+    "locale": "en-US",
+    "input": "Use 1/2 teaspoon of salt.",
+    "expected": "Use one half teaspoon of salt.",
+    "expectedTransforms": [
+      "fraction-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "decimal-expansion-pi",
+    "locale": "en-US",
+    "input": "Pi is 3.14 in math.",
+    "expected": "Pi is three point one four in math.",
+    "expectedTransforms": [
+      "decimal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      2,
+      2,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "decimal-expansion-leading-zero",
+    "locale": "en-US",
+    "input": "Temperature dropped to 0.05 overnight.",
+    "expected": "Temperature dropped to zero point zero five overnight.",
+    "expectedTransforms": [
+      "decimal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      3,
+      3,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "number-range-expansion-hyphen",
+    "locale": "en-US",
+    "input": "Read pages 10-20 before class.",
+    "expected": "Read pages ten to twenty before class.",
+    "expectedTransforms": [
+      "number-range-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "number-range-expansion-en-dash",
+    "locale": "en-US",
+    "input": "Ages 6–8 can join.",
+    "expected": "Ages six to eight can join.",
+    "expectedTransforms": [
+      "number-range-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "terminal-punctuation-enforcement-basic",
+    "locale": "en-US",
+    "input": "we should leave now",
+    "expected": "we should leave now.",
+    "expectedTransforms": [
+      "terminal-punctuation-enforcement"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "terminal-punctuation-enforcement-quoted",
+    "locale": "en-US",
+    "input": "\"they can start today\"",
+    "expected": "\"they can start today.\"",
+    "expectedTransforms": [
+      "terminal-punctuation-enforcement"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "id": "all-caps-quote-downcasing-shouted",
+    "locale": "en-US",
+    "input": "She shouted \"THE STORM IS HERE.\"",
+    "expected": "She shouted \"the storm is here.\"",
+    "expectedTransforms": [
+      "all-caps-quote-downcasing"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "all-caps-quote-downcasing-dialogue",
+    "locale": "en-US",
+    "input": "\"WE MUST GO\" he whispered.",
+    "expected": "\"we must go\" he whispered.",
+    "expectedTransforms": [
+      "all-caps-quote-downcasing"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "heteronym-read-past",
+    "locale": "en-US",
+    "input": "I had read the report yesterday.",
+    "expected": "I had red the report yesterday.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "heteronym-wind-verb",
+    "locale": "en-US",
+    "input": "Please wind the clock up.",
+    "expected": "Please wined the clock up.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "heteronym-tear-noun",
+    "locale": "en-US",
+    "input": "A tear rolled down her cheek.",
+    "expected": "A tier rolled down her cheek.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "id": "heteronym-close-adjective",
+    "locale": "en-US",
+    "input": "Stay close to your team.",
+    "expected": "Stay klohs to your team.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "heteronym-lead-noun",
+    "locale": "en-US",
+    "input": "The lead pipe was heavy.",
+    "expected": "The led pipe was heavy.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "heteronym-live-adjective",
+    "locale": "en-US",
+    "input": "The live show starts soon.",
+    "expected": "The lyve show starts soon.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "heteronym-bow-verb",
+    "locale": "en-US",
+    "input": "You must bow down now.",
+    "expected": "You must bau down now.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  {
+    "id": "heteronym-minute-adjective",
+    "locale": "en-US",
+    "input": "A minute detail was missed.",
+    "expected": "A mynewt detail was missed.",
+    "expectedTransforms": [
+      "heteronym-disambiguation"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
   }
 ]
