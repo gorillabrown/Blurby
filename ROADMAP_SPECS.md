@@ -6,6 +6,8 @@
 
 ### Architecture Decisions (Resolved)
 
+> Canonical home (post `TTS-ARCH-DOC-1`): `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`.
+
 #### AD-1: Segment Identity vs Cache Identity
 
 Two distinct identity concepts exist in the TTS pipeline:

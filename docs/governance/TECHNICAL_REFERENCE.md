@@ -558,6 +558,8 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 
 ### Narrate Mode Architecture (Post-Stabilization) — TTS-7G Final Closeout
 
+Standing architecture-decision reference: `docs/governance/TTS_ARCHITECTURE_DECISIONS.md` (engine posture, invariants, adopt/reject/defer register, and cache-evolution roadmap).
+
 **Stabilization scope:** TTS-7A through TTS-7G (7 sprints + hotfixes, 21 bugs resolved: BUG-101 through BUG-121). TTS-7G was the final verification sprint — confirmed BUG-117 (910ms first-chunk IPC handler) was resolved by TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), and TTS-7E (deferred ack). Response path measured at < 2ms. DEV instrumentation added to `kokoroStrategy.ts` (`first-chunk-response` and `schedule-chunk` perf events via `narratePerf.ts`).
 
 **Narration state machine:** `useNarration.ts` uses a `useReducer` state machine with states: `idle`, `warming`, `speaking`, `paused`, `holding`. `stateRef` mirrors reducer state for synchronous reads inside async callbacks (dual-write rule: every `dispatch()` also updates `stateRef.current`).
