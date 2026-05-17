@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-17 — TTS-RENDER-MAP-1 completed and merged to canonical `main`; Foliate now uses a pre-built word position index for O(1) highlight lookup on the event-driven sync path.
+**Last updated**: 2026-05-17 — TTS-PIPELINE-1 completed and merged to canonical `main`; narration pipeline integration coverage now chains planner, normalizer, cache identity, timing sidecar, word-boundary sync, and word-position lookup.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 3 (3 full specs, 0 stubs).
+**Queue**: YELLOW depth 2 (2 full specs, 0 stubs). TTS Architecture finish-line sprint is next; backfill before any post-finish-line dispatch.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout; the legacy Markdown queue was retired on 2026-05-17.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -15,8 +15,7 @@
 ## Active Conveyor
 
 ```
-TTS-PIPELINE-1 → TTS-ARCH-DOC-1
-    → KOKORO-EXPORT-1 (optional future)
+TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
 ```
 
 **Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
@@ -58,7 +57,7 @@ TTS-PIPELINE-1 → TTS-ARCH-DOC-1
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → ~~NORMALIZER-ENRICH-1~~ PASS/landed → ~~TTS-RENDER-MAP-1~~ PASS/landed → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → ~~NORMALIZER-ENRICH-1~~ PASS/landed → ~~TTS-RENDER-MAP-1~~ PASS/landed → ~~TTS-PIPELINE-1~~ PASS/landed → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -225,6 +224,8 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 #### Sprint TTS-PIPELINE-1: Narration Pipeline Integration Test And Normalization Fixture Expansion
 
+**Status:** Completed on 2026-05-17. Implementation commit `022d161` merged to canonical `main` via `994f218`; closeout saved at `docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md`.
+
 **What:** Add a cross-module integration test that traces one narration chunk through planner → normalizer → cache identity → timing sidecar, and expand the golden normalization fixtures from 8 to 15+.
 
 **Why:** Each pipeline stage (narrationPlanner, segmentNormalizer, TtsCacheIdentityV2, timing sidecar) is individually tested, but no test currently verifies the end-to-end chain. The adversarial review (2026-05-14) identified this as the highest-leverage, lowest-cost residual gap. Additional fixture coverage for OCR text, poetry, tables, and footnote-heavy documents improves normalizer confidence before export work.
@@ -290,4 +291,4 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 **WHERE:** Future spec should start from `scripts/kokoro_pair_baseline.mjs`, `scripts/moss_kokoro_benchmark.mjs`, Kokoro generation IPC, chunk metadata from `KOKORO-DEEPEN-2`, and Abogen's export/subtitle code.
 
-**Status:** Deferred. Do not dispatch until TTS Architecture Completion conveyor completes (TTS-SYNC-1 through TTS-ARCH-DOC-1). Export depends on durable segment identity, cache identity, timing sidecars, and highlight/timing truth; it is not the next sprint.
+**Status:** Queued optional future pointer. Do not dispatch until TTS Architecture Completion conveyor completes (TTS-SYNC-1 through TTS-ARCH-DOC-1). Export depends on durable segment identity, cache identity, timing sidecars, and highlight/timing truth; it is not the next sprint.

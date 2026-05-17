@@ -287,3 +287,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future render-map or precomputed-layout sprints should require three things together: explicit invalidation triggers, miss-reason diagnostics, and a continuity-preserving fallback path instead of hard-failing on stale/missing cache entries.
 **Applies to:** Event-driven highlight sync, DOM pre-index caches, resize/reflow-sensitive UI mapping, and diagnostics-driven performance hardening
 **Status:** Observation
+
+### SRL-038 — Integration tests should call production identity helpers, not duplicate private construction logic (TTS-PIPELINE-1, 2026-05-17)
+**Verdict:** Cross-module pipeline tests are more trustworthy when the identity-building seam is a small production helper shared by runtime code and tests.
+**Evidence:** TTS-PIPELINE-1 extracted `buildKokoroCacheIdentity()` from the Kokoro strategy/background cache paths, then used that helper in the integration test that chains planner, normalizer, cache identity, timing sidecar, word-boundary sync, and word-position lookup.
+**Recommendation:** When a sprint needs to test a private production contract end-to-end, prefer extracting a pure helper that production also consumes over reconstructing the same object shape in test-only code.
+**Applies to:** Cache identity, normalized segment identity, timing sidecar construction, diagnostics bundle construction, and future export pipeline tests
+**Status:** Observation
