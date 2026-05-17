@@ -1,6 +1,6 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-17 — NORMALIZER-ENRICH-1 completed and merged to canonical `main`; Kokoro text normalization coverage is now expanded with alignment-safe enrichment transforms.
+**Last updated**: 2026-05-17 — TTS-RENDER-MAP-1 completed and merged to canonical `main`; Foliate now uses a pre-built word position index for O(1) highlight lookup on the event-driven sync path.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
 **Queue**: GREEN depth 3 (3 full specs, 0 stubs).
@@ -15,8 +15,8 @@
 ## Active Conveyor
 
 ```
-TTS-RENDER-MAP-1 → TTS-PIPELINE-1
-    → TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
+TTS-PIPELINE-1 → TTS-ARCH-DOC-1
+    → KOKORO-EXPORT-1 (optional future)
 ```
 
 **Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
@@ -58,7 +58,7 @@ TTS-RENDER-MAP-1 → TTS-PIPELINE-1
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → ~~NORMALIZER-ENRICH-1~~ PASS/landed → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → ~~NORMALIZER-ENRICH-1~~ PASS/landed → ~~TTS-RENDER-MAP-1~~ PASS/landed → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -195,6 +195,8 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ---
 
 #### Sprint TTS-RENDER-MAP-1: Pre-Built Word Position Index
+
+**Status:** ✅ COMPLETED on 2026-05-17. Sprint branch `sprint/tts-render-map-1-word-position-index` commit `2eabf36` merged into canonical `main` via `8545895`. Verification passed: targeted render-map coverage (`tests/wordPositionIndex.test.ts`, `tests/calmNarrationBand.test.ts`, `tests/narrateDiagnostics.test.ts`), full `npm test` (185 passed, 1 skipped files; 2478 passed, 132 skipped tests), `npm run typecheck`, and `npm run build` (existing `settings -> tts -> settings` circular chunk warning unchanged).
 
 **What:** Build a word-index→DOM-position lookup table once at render time (when foliate-js renders word spans), replacing the live DOM querying that currently happens during narration highlight updates. Complement the event-driven sync from `TTS-EVENT-SYNC-1` with O(1) position resolution.
 

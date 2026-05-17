@@ -280,3 +280,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future governance updates should change `ROADMAP.md` for full specs and `docs/governance/sprint-queue.xlsx` for queue order/status. Do not recreate a Markdown queue mirror; if a human-readable queue view is needed, generate it from the workbook.
 **Applies to:** Sprint closeout, next-pointer generation, roadmap review, phase closeout, and queue backfill
 **Status:** Observation
+
+### SRL-037 — Render-time position indexes should be fail-open with explicit miss telemetry (TTS-RENDER-MAP-1, 2026-05-17)
+**Verdict:** The O(1) lookup win is safest when index misses degrade transparently to live DOM lookup during transient reflow/reload windows.
+**Evidence:** TTS-RENDER-MAP-1 introduced a pre-built `WordPositionIndex` plus rebuild triggers across section load, render-version changes, and resize/layout events; highlight resolution now tries indexed entries first and logs structured miss reasons (`stale-index-entry`, `direct-fallback-hit`, `section-fallback-hit`, `not-found`) before using fallback lookup paths.
+**Recommendation:** Future render-map or precomputed-layout sprints should require three things together: explicit invalidation triggers, miss-reason diagnostics, and a continuity-preserving fallback path instead of hard-failing on stale/missing cache entries.
+**Applies to:** Event-driven highlight sync, DOM pre-index caches, resize/reflow-sensitive UI mapping, and diagnostics-driven performance hardening
+**Status:** Observation
