@@ -468,6 +468,102 @@ function getOpeningCoverageMs(bookId, voiceId) {
   return totalMs;
 }
 
+/**
+ * List structured v2 chunk records for a book + voice (optionally provider-filtered).
+ * Duplicates across multiple identities are de-duplicated by startIdx, preferring the
+ * most recently narrated entry.
+ */
+function listStructuredBookVoiceChunks(bookId, voiceId, options = {}) {
+  if (!cacheRoot) return [];
+  const provider = typeof options.provider === "string" ? options.provider : null;
+  const selectedByStart = new Map();
+
+  for (const [entryKey, entry] of Object.entries(manifest.books)) {
+    if (!entry || entry.schemaVersion !== TTS_CACHE_SCHEMA_VERSION) continue;
+    if (entry.bookId !== bookId) continue;
+    if (String(entry.voiceId) !== String(voiceId)) continue;
+    if (provider && entry.identity?.provider !== provider) continue;
+
+    const relativeDir = entry.relativeDir || path.join("v2", safePathSegment(entry.bookId), entry.identityHash || "");
+    const lastNarrated = Number.isFinite(entry.lastNarrated) ? entry.lastNarrated : 0;
+    const chunks = entry.chunks || {};
+
+    for (const [startIdxKey, chunkMeta] of Object.entries(chunks)) {
+      if (!chunkMeta || typeof chunkMeta !== "object") continue;
+      const startIdx = Number.parseInt(startIdxKey, 10);
+      if (!Number.isFinite(startIdx) || startIdx < 0) continue;
+      const candidate = {
+        entryKey,
+        startIdx,
+        wordCount: Number.isFinite(chunkMeta.wordCount) ? chunkMeta.wordCount : null,
+        durationMs: Number.isFinite(chunkMeta.durationMs) ? chunkMeta.durationMs : null,
+        sampleRate: Number.isFinite(chunkMeta.sampleRate) ? chunkMeta.sampleRate : null,
+        timingTruth: chunkMeta.timingTruth ?? entry.identity?.timingTruth ?? null,
+        sourceTextHash: chunkMeta.sourceTextHash ?? entry.identity?.sourceTextHash ?? null,
+        normalizedTextHash: chunkMeta.normalizedTextHash ?? entry.identity?.normalizedTextHash ?? null,
+        normalizerVersion: chunkMeta.normalizerVersion ?? entry.identity?.normalizerVersion ?? null,
+        pronunciationOverrideHash: chunkMeta.pronunciationOverrideHash ?? entry.identity?.pronunciationOverrideHash ?? null,
+        contentKey: chunkMeta.contentKey ?? null,
+        identity: entry.identity || null,
+        identityHash: entry.identityHash || null,
+        audioPath: path.join(cacheRoot, relativeDir, chunkMeta.audioFile || chunkAudioFilename(startIdx)),
+        timingPath: path.join(cacheRoot, relativeDir, chunkMeta.timingFile || chunkTimingFilename(startIdx)),
+        lastNarrated,
+      };
+
+      const existing = selectedByStart.get(startIdx);
+      if (!existing || candidate.lastNarrated >= existing.lastNarrated) {
+        selectedByStart.set(startIdx, candidate);
+      }
+    }
+  }
+
+  return Array.from(selectedByStart.values()).sort((a, b) => a.startIdx - b.startIdx);
+}
+
+/**
+ * Read structured v2 chunks for a book + voice, decoding PCM audio and loading timing sidecars.
+ * Returns a sorted sequence suitable for long-form export assembly.
+ */
+async function readStructuredBookVoiceChunks(bookId, voiceId, options = {}) {
+  const listedChunks = listStructuredBookVoiceChunks(bookId, voiceId, options);
+  const decodedChunks = [];
+
+  for (const listed of listedChunks) {
+    try {
+      const buffer = await fs.readFile(listed.audioPath);
+      const decoded = ttsOpus.decode(buffer);
+      const timing = await readTimingSidecar(listed.timingPath);
+      const chunkStartIdx = Number.isFinite(timing?.chunkStartIdx) ? timing.chunkStartIdx : listed.startIdx;
+      const inferredWordCount = Number.isFinite(listed.wordCount)
+        ? listed.wordCount
+        : (Number.isFinite(timing?.chunkEndIdx) && Number.isFinite(chunkStartIdx)
+          ? Math.max(0, timing.chunkEndIdx - chunkStartIdx)
+          : null);
+      const chunkEndIdx = Number.isFinite(timing?.chunkEndIdx)
+        ? timing.chunkEndIdx
+        : (Number.isFinite(chunkStartIdx) && Number.isFinite(inferredWordCount)
+          ? chunkStartIdx + inferredWordCount
+          : null);
+
+      decodedChunks.push({
+        ...listed,
+        audio: decoded.audio,
+        sampleRate: decoded.sampleRate,
+        durationMs: Number.isFinite(listed.durationMs) ? listed.durationMs : null,
+        wordCount: inferredWordCount,
+        timing,
+        chunkStartIdx,
+        chunkEndIdx,
+      });
+    } catch (err) {
+      console.warn(`[tts-cache] Failed to decode structured chunk ${listed.startIdx}:`, err.message);
+    }
+  }
+
+  return decodedChunks;
+}
+
 // ── Eviction ─────────────────────────────────────────────────────────────────
 
 /**
@@ -672,6 +768,8 @@ module.exports = {
   readChunk,
   hasChunk,
   getCachedChunks,
+  listStructuredBookVoiceChunks,
+  readStructuredBookVoiceChunks,
   evictBook,
   evictBookVoice,
   getCacheInfo,

@@ -578,6 +578,32 @@ import type {
   TtsCacheWriteTimingMetadata,
 } from "./types/ttsCache";
 
+export interface KokoroLongFormExportRequest {
+  bookId: string;
+  voiceId: string;
+  outputDir?: string;
+  fileStem?: string;
+  subtitleFormat?: "none" | "srt" | "vtt" | "both";
+}
+
+export interface KokoroLongFormExportResult {
+  ok?: boolean;
+  error?: string;
+  reason?: string | null;
+  status?: string | null;
+  recoverable?: boolean;
+  audioPath?: string;
+  chaptersPath?: string;
+  manifestPath?: string;
+  subtitlePaths?: {
+    srt?: string;
+    vtt?: string;
+  };
+  chunkCount?: number;
+  wordCount?: number;
+  durationMs?: number;
+}
+
 // ── IPC API exposed via preload ─────────────────────────────────────────────
 export interface ElectronAPI {
   getState: () => Promise<{ settings: BlurbySettings; library: BlurbyDoc[] }>;
@@ -725,6 +751,7 @@ export interface ElectronAPI {
   ttsCacheEvictBook: (bookId: string) => Promise<{ success?: boolean; error?: string }>;
   ttsCacheEvictVoice: (bookId: string, voiceId: TtsCacheIdentity) => Promise<{ success?: boolean; error?: string }>;
   ttsCacheInfo: () => Promise<{ totalBytes: number; totalMB: number; bookCount: number }>;
+  kokoroExportLongForm?: (payload: KokoroLongFormExportRequest) => Promise<KokoroLongFormExportResult>;
 }
 
 declare global {

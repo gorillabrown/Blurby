@@ -2,6 +2,7 @@
 // main/ipc/tts.js — TTS IPC handlers
 
 const { ipcMain } = require("electron");
+const path = require("path");
 
 const QWEN_DISABLED_REASON = "qwen-disabled";
 const QWEN_DISABLED_DETAIL = "Qwen is retired for Desktop v2 and remains disabled.";
@@ -392,6 +393,40 @@ function register(ctx) {
   // TTS-7F: Opening coverage inspection (manifest-only, no PCM loads)
   ipcMain.handle("tts-cache-opening-coverage", (_, bookId, voiceId) => {
     return { coverageMs: ttsCache.getOpeningCoverageMs(bookId, voiceId) };
+  });
+
+  // KOKORO-EXPORT-1: Long-form audio export (WAV + chapter markers + optional subtitles)
+  ipcMain.handle("tts-kokoro-export-long-form", async (_, payload) => {
+    try {
+      const request = payload && typeof payload === "object" ? payload : {};
+      const bookId = typeof request.bookId === "string" ? request.bookId : "";
+      const voiceId = typeof request.voiceId === "string" ? request.voiceId : "";
+      if (!bookId || !voiceId) {
+        return { error: "bookId and voiceId are required." };
+      }
+
+      const doc = ctx.getLibrary().find((entry) => entry.id === bookId);
+      if (!doc) return { error: `Document not found: ${bookId}` };
+
+      const kokoroExport = require("../kokoro-export");
+      const defaultOutputDir = path.join(
+        typeof ctx.getDataPath === "function" ? ctx.getDataPath() : process.cwd(),
+        "exports",
+        "kokoro",
+      );
+      return await kokoroExport.exportLongFormAudio({
+        doc,
+        bookId,
+        voiceId,
+        subtitleFormat: request.subtitleFormat,
+        outputDir: typeof request.outputDir === "string" && request.outputDir.trim()
+          ? request.outputDir
+          : defaultOutputDir,
+        fileStem: typeof request.fileStem === "string" ? request.fileStem : null,
+      });
+    } catch (err) {
+      return toErrorResponse(err);
+    }
   });
 }
 

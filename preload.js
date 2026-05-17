@@ -246,6 +246,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   ttsCacheInfo: () => ipcRenderer.invoke("tts-cache-info"),
   // TTS-7F: Opening coverage inspection
   ttsCacheOpeningCoverage: (bookId, voiceId) => ipcRenderer.invoke("tts-cache-opening-coverage", bookId, voiceId),
+  // KOKORO-EXPORT-1: Long-form export
+  kokoroExportLongForm: (payload) => ipcRenderer.invoke("tts-kokoro-export-long-form", payload),
 
   // Events from main
   onSyncProgress: (callback) => {
