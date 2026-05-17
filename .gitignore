@@ -13,6 +13,7 @@ Example book/
 # Superpowers working files
 .superpowers/
 .tmp/
+.worktrees/
 
 # Claude Code working files
 .Backup/
