@@ -593,5 +593,136 @@
       3,
       4
     ]
+  },
+  {
+    "id": "ocr-artifact-rn-cardinal",
+    "locale": "en-US",
+    "input": "The modem was rnade in 2026.",
+    "expected": "The modem was rnade in twenty twenty six.",
+    "expectedTransforms": [
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      5,
+      5
+    ]
+  },
+  {
+    "id": "poetry-verse-line-breaks",
+    "locale": "en-US",
+    "input": "Roses are red,\nViolets are blue,\nRead 2 lines true.",
+    "expected": "Roses are red, Violets are blue, Read two lines true.",
+    "expectedTransforms": [
+      "whitespace-normalization",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  },
+  {
+    "id": "table-alignment-currency",
+    "locale": "en-US",
+    "input": "Item    Qty   Price\nBook    2     $12.50",
+    "expected": "Item Qty Price Book two twelve dollars and fifty cents.",
+    "expectedTransforms": [
+      "whitespace-normalization",
+      "currency-expansion",
+      "cardinal-expansion",
+      "terminal-punctuation-enforcement"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5
+    ]
+  },
+  {
+    "id": "footnote-heavy-citation-removal",
+    "locale": "en-US",
+    "input": "Alpha[1] beta[2] gamma[3] in 2026.",
+    "expected": "Alpha beta gamma in twenty twenty six.",
+    "expectedTransforms": [
+      "citation-marker-removal",
+      "cardinal-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      2,
+      4,
+      6,
+      7,
+      7,
+      7
+    ]
+  },
+  {
+    "id": "mixed-language-embedded-words",
+    "locale": "en-US",
+    "input": "Bonjour, the meeting is on 05/13/2026.",
+    "expected": "Bonjour, the meeting is on May thirteenth, twenty twenty six.",
+    "expectedTransforms": [
+      "date-expansion"
+    ],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      5,
+      6,
+      7,
+      7
+    ]
+  },
+  {
+    "id": "ellipsis-emdash-preservation",
+    "locale": "en-US",
+    "input": "Wait... \u2014 then go.",
+    "expected": "Wait... \u2014 then go.",
+    "expectedTransforms": [],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2
+    ]
+  },
+  {
+    "id": "nested-quotation-marks",
+    "locale": "en-US",
+    "input": "\"She said, 'ready?'\" and left.",
+    "expected": "\"She said, 'ready?'\" and left.",
+    "expectedTransforms": [],
+    "expectedNormalizedToOriginalMap": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ]
   }
 ]

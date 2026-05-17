@@ -13,11 +13,12 @@ import type { TimingMetadataRecord } from "../../utils/timingMetadataStore";
 import { segmentKokoroChunk } from "../../utils/audio/segmentKokoroChunk";
 import * as ttsCache from "../../utils/ttsCache";
 import { normalizeSegmentText, type SegmentNormalizationResult } from "../../utils/segmentNormalizer";
+import { buildKokoroCacheIdentity } from "../../utils/ttsCacheIdentity";
 import type { KokoroPreflightReport, KokoroPreflightStatus, PronunciationOverride } from "../../types";
 import { perfStart, perfEnd } from "../../utils/narratePerf";
 import { recordDiagEvent } from "../../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
-import { KOKORO_MODEL_ID, KOKORO_SAMPLE_RATE, TTS_CACHE_SCHEMA_VERSION } from "../../constants";
+import { KOKORO_MODEL_ID, KOKORO_SAMPLE_RATE } from "../../constants";
 import type { TtsCacheIdentity, TtsCacheIdentityV2, TtsCacheWriteTimingMetadata } from "../../types/ttsCache";
 import type { TtsProviderWordBoundaryCallback } from "../../types/ttsProvider";
 
@@ -228,23 +229,17 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
 
   /** Build the v2 cache identity from the exact source text that owns this generated chunk. */
   const getCacheIdentity = (text: string, _words: string[], startIdx: number): TtsCacheIdentityV2 => {
-    const normalization = normalizeForSpeech(text);
-    const bookId = deps.getBookId?.() || "";
-    return {
-      schemaVersion: TTS_CACHE_SCHEMA_VERSION,
-      provider: "kokoro",
+    return buildKokoroCacheIdentity({
+      text,
+      startIdx,
+      bookId: deps.getBookId?.() || "",
       voiceId: deps.getVoiceId(),
       rateBucket: getRatePlan().generationBucket,
+      pronunciationOverrides: deps.getPronunciationOverrides?.(),
       modelVersion: KOKORO_MODEL_ID,
-      sourceTextHash: normalization.sourceTextHash,
-      normalizedTextHash: normalization.normalizedTextHash,
-      normalizerVersion: normalization.normalizerVersion,
-      pronunciationOverrideHash: normalization.pronunciationOverrideHash,
-      documentLocator: { bookId },
-      chunkId: `${bookId}:${startIdx}:${normalization.normalizationHash}`,
       sampleRate: KOKORO_SAMPLE_RATE,
       timingTruth: "word-native",
-    };
+    }).identity;
   };
 
   // TTS-7G: Track first-chunk state for cold-start measurement
