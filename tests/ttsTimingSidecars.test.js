@@ -22,7 +22,7 @@ function makeIdentity(overrides = {}) {
     modelVersion: "kokoro-82m-v1.0",
     sourceTextHash: "src-sidecar",
     normalizedTextHash: "norm-sidecar",
-    normalizerVersion: "en-v1",
+    normalizerVersion: "en-v2",
     pronunciationOverrideHash: "",
     documentLocator: { bookId: "book-sidecar" },
     chunkId: "book-sidecar:0",

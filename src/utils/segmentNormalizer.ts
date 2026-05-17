@@ -9,13 +9,22 @@ export type SegmentNormalizationTransformId =
   | "citation-marker-removal"
   | "whitespace-normalization"
   | "roman-numeral-expansion"
+  | "dotted-acronym-normalization"
+  | "address-abbreviation-expansion"
+  | "url-normalization"
   | "date-expansion"
   | "time-expansion"
   | "currency-expansion"
+  | "fraction-expansion"
+  | "decimal-expansion"
+  | "number-range-expansion"
   | "abbreviation-expansion"
   | "spaced-initials"
   | "ordinal-expansion"
-  | "cardinal-expansion";
+  | "cardinal-expansion"
+  | "terminal-punctuation-enforcement"
+  | "all-caps-quote-downcasing"
+  | "heteronym-disambiguation";
 
 export interface SegmentNormalizationTransform {
   id: SegmentNormalizationTransformId;
@@ -171,6 +180,136 @@ const ABBREVIATIONS: Array<[RegExp, string]> = [
   [/\bvs\./gi, "versus"],
 ];
 
+const DOTTED_ACRONYM_PATTERN = /\b(?:[A-Z]\.){2,}(?=[\s,;:!?)]|$)/g;
+
+const URL_PATTERN = /\b(?:https?:\/\/)?(?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s]*)?/gi;
+
+const ADDRESS_ABBREVIATIONS: Array<{ abbreviation: string; expansion: string }> = [
+  { abbreviation: "St", expansion: "Street" },
+  { abbreviation: "Ave", expansion: "Avenue" },
+  { abbreviation: "Blvd", expansion: "Boulevard" },
+  { abbreviation: "Rd", expansion: "Road" },
+  { abbreviation: "Ln", expansion: "Lane" },
+  { abbreviation: "Ct", expansion: "Court" },
+  { abbreviation: "Dr", expansion: "Drive" },
+];
+
+const FRACTION_DENOMINATORS: Record<number, { singular: string; plural: string }> = {
+  2: { singular: "half", plural: "halves" },
+  3: { singular: "third", plural: "thirds" },
+  4: { singular: "quarter", plural: "quarters" },
+  5: { singular: "fifth", plural: "fifths" },
+  6: { singular: "sixth", plural: "sixths" },
+  7: { singular: "seventh", plural: "sevenths" },
+  8: { singular: "eighth", plural: "eighths" },
+  9: { singular: "ninth", plural: "ninths" },
+  10: { singular: "tenth", plural: "tenths" },
+  11: { singular: "eleventh", plural: "elevenths" },
+  12: { singular: "twelfth", plural: "twelfths" },
+  20: { singular: "twentieth", plural: "twentieths" },
+};
+
+const TERMINAL_PUNCTUATION_CUES = new Set([
+  "a",
+  "an",
+  "and",
+  "are",
+  "at",
+  "been",
+  "by",
+  "for",
+  "from",
+  "had",
+  "has",
+  "have",
+  "he",
+  "her",
+  "his",
+  "i",
+  "in",
+  "is",
+  "it",
+  "its",
+  "me",
+  "my",
+  "of",
+  "on",
+  "our",
+  "she",
+  "that",
+  "the",
+  "their",
+  "them",
+  "they",
+  "to",
+  "was",
+  "we",
+  "were",
+  "with",
+  "you",
+  "your",
+]);
+
+type HeteronymContextTest = (before: string[], after: string[]) => boolean;
+
+interface HeteronymRule {
+  alternateSpelling: string;
+  contextTest: HeteronymContextTest;
+}
+
+function contextIncludesAny(context: string[], candidates: string[]): boolean {
+  return context.some((value) => candidates.includes(value));
+}
+
+const HETERONYM_TABLE: Record<string, HeteronymRule> = {
+  read: {
+    alternateSpelling: "red",
+    contextTest: (before, after) =>
+      contextIncludesAny(before, ["had", "has", "have", "already", "just"]) ||
+      contextIncludesAny(after, ["already", "before", "earlier", "last", "then", "yesterday", "ago"]),
+  },
+  wind: {
+    alternateSpelling: "wined",
+    contextTest: (before, after) =>
+      contextIncludesAny(before, ["can", "could", "must", "please", "should", "to", "will", "would"]) ||
+      contextIncludesAny(after, ["around", "down", "through", "up"]),
+  },
+  tear: {
+    alternateSpelling: "tier",
+    contextTest: (before, after) =>
+      contextIncludesAny(before, ["a", "her", "his", "my", "one", "the", "their", "your"]) ||
+      contextIncludesAny(after, ["cheek", "down", "drop", "drops", "eyes", "fell", "from", "rolled"]),
+  },
+  close: {
+    alternateSpelling: "klohs",
+    contextTest: (before, after) =>
+      contextIncludesAny(before, ["draw", "keep", "stay", "too", "very"]) ||
+      contextIncludesAny(after, ["by", "enough", "to"]),
+  },
+  lead: {
+    alternateSpelling: "led",
+    contextTest: (_before, after) =>
+      contextIncludesAny(after, ["bullet", "bullets", "paint", "pipe", "pipes", "poisoning", "shot", "weight", "weights"]),
+  },
+  live: {
+    alternateSpelling: "lyve",
+    contextTest: (_before, after) =>
+      contextIncludesAny(after, ["audience", "band", "broadcast", "event", "music", "performance", "show", "stream"]),
+  },
+  bow: {
+    alternateSpelling: "bau",
+    contextTest: (before, after) =>
+      contextIncludesAny(before, ["must", "please", "to", "will", "would"]) ||
+      contextIncludesAny(after, ["before", "down", "gracefully", "out"]),
+  },
+  minute: {
+    alternateSpelling: "mynewt",
+    contextTest: (before, after) =>
+      contextIncludesAny(before, ["a", "an", "so", "that", "this"]) &&
+      contextIncludesAny(after, ["amount", "change", "changes", "detail", "details", "difference", "differences"]),
+  },
+};
+
 export function stableSegmentTextHash(text: string): string {
   let h = 2166136261;
   for (let i = 0; i < text.length; i += 1) {
@@ -280,6 +419,48 @@ function expandRomanNumerals(text: string): string {
   });
 }
 
+function normalizeDottedAcronyms(text: string): string {
+  return text.replace(DOTTED_ACRONYM_PATTERN, (match) => match.replace(/\./g, ""));
+}
+
+function expandAddressAbbreviations(text: string): string {
+  let result = text;
+  for (const { abbreviation, expansion } of ADDRESS_ABBREVIATIONS) {
+    const beforeNumber = new RegExp(`\\b${abbreviation}\\.(?=\\s+\\d{1,6}\\b)`, "gi");
+    const afterNumber = new RegExp(`\\b(\\d{1,6})\\s+${abbreviation}\\.(?=\\s|$|[.,;:!?])`, "gi");
+    result = result.replace(beforeNumber, expansion);
+    result = result.replace(afterNumber, `$1 ${expansion}`);
+  }
+  return result;
+}
+
+function normalizeUrls(text: string): string {
+  return text.replace(URL_PATTERN, (match) => {
+    const trailingPunctuationMatch = match.match(/[),.!?;:]+$/);
+    const trailingPunctuation = trailingPunctuationMatch ? trailingPunctuationMatch[0] : "";
+    const core = trailingPunctuation.length > 0 ? match.slice(0, -trailingPunctuation.length) : match;
+    if (!/[A-Za-z]/.test(core)) return match;
+
+    const withoutProtocol = core.replace(/^https?:\/\//i, "");
+    const withoutWww = withoutProtocol.replace(/^www\./i, "");
+    const withoutQuery = withoutWww.replace(/[?#].*$/, "");
+    const [domainPart, ...pathParts] = withoutQuery.split("/");
+    if (!domainPart || !domainPart.includes(".")) return match;
+
+    const domainTokens = domainPart.split(".").filter(Boolean);
+    const topLevel = domainTokens[domainTokens.length - 1] ?? "";
+    if (!/^[A-Za-z]{2,}$/.test(topLevel)) return match;
+
+    const spokenDomain = domainTokens.map((piece) => piece.replace(/-/g, " ")).join(" dot ");
+    const spokenPath = pathParts
+      .map((segment) => segment.replace(/[-_.]+/g, " ").trim())
+      .filter((segment) => segment.length > 0)
+      .join(" slash ");
+
+    return `${spokenDomain}${spokenPath.length > 0 ? ` slash ${spokenPath}` : ""}${trailingPunctuation}`;
+  });
+}
+
 function expandDates(text: string): string {
   let result = text.replace(
     /\b(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])\/(\d{4})\b/g,
@@ -317,6 +498,40 @@ function expandCurrency(text: string): string {
   });
 }
 
+function expandFractions(text: string): string {
+  return text.replace(/\b(\d{1,3})\/(\d{1,3})\b(?!\/\d)/g, (_match, numeratorRaw: string, denominatorRaw: string) => {
+    const numerator = Number(numeratorRaw);
+    const denominator = Number(denominatorRaw);
+    if (denominator === 0) return _match;
+
+    const denominatorWords =
+      FRACTION_DENOMINATORS[denominator] ??
+      {
+        singular: ordinalToWords(denominator),
+        plural: `${ordinalToWords(denominator)}s`,
+      };
+    const resolvedDenominator = numerator === 1 ? denominatorWords.singular : denominatorWords.plural;
+    return `${numberToWords(numerator)} ${resolvedDenominator}`;
+  });
+}
+
+function expandDecimals(text: string): string {
+  return text.replace(/\b(\d{1,6})\.(\d+)\b(?!\.)/g, (_match, whole: string, fractional: string) => {
+    const wholeWords = numberToWords(Number(whole));
+    const fractionalWords = fractional
+      .split("")
+      .map((digit) => numberToWords(Number(digit)))
+      .join(" ");
+    return `${wholeWords} point ${fractionalWords}`;
+  });
+}
+
+function expandNumberRanges(text: string): string {
+  return text.replace(/\b(\d{1,6})\s*[-–—]\s*(\d{1,6})\b/g, (_match, start: string, end: string) => {
+    return `${numberToWords(Number(start))} to ${numberToWords(Number(end))}`;
+  });
+}
+
 function expandAbbreviations(text: string): string {
   let result = text;
   for (const [pattern, replacement] of ABBREVIATIONS) {
@@ -337,6 +552,70 @@ function expandOrdinals(text: string): string {
 
 function expandCardinals(text: string): string {
   return text.replace(/\b\d{1,6}\b/g, (match) => numberToWords(Number(match)));
+}
+
+function enforceTerminalPunctuation(text: string): string {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return text;
+  if (/[\.\!\?](["')\]]+)?$/.test(trimmed)) return trimmed;
+
+  const wordsOriginal = trimmed.match(/[A-Za-z']+/g) ?? [];
+  const words = wordsOriginal.map((word) => word.toLowerCase());
+  if (words.length < 4) return text;
+  const uppercaseWordCount = wordsOriginal.filter((word) => /^[A-Z]{2,}$/.test(word)).length;
+  if (uppercaseWordCount >= 3 && uppercaseWordCount / words.length >= 0.5) return text;
+  if (!words.some((word) => TERMINAL_PUNCTUATION_CUES.has(word))) return text;
+
+  if (/["')\]]+$/.test(trimmed)) {
+    return trimmed.replace(/(["')\]]+)$/, ".$1");
+  }
+  return `${trimmed}.`;
+}
+
+function downcaseAllCapsQuotes(text: string): string {
+  return text.replace(/"([^"\n]+)"/g, (match, inner: string) => {
+    const letters = inner.match(/[A-Za-z]/g);
+    if (!letters || letters.length < 2) return match;
+    const isAllCaps = letters.every((letter) => letter === letter.toUpperCase());
+    return isAllCaps ? `"${inner.toLowerCase()}"` : match;
+  });
+}
+
+function applyAlternateWordCasing(source: string, replacement: string): string {
+  if (source === source.toUpperCase()) return replacement.toUpperCase();
+  if (/^[A-Z]/.test(source)) return `${replacement.charAt(0).toUpperCase()}${replacement.slice(1)}`;
+  return replacement;
+}
+
+function disambiguateHeteronyms(text: string): string {
+  const segments = text.split(/([A-Za-z]+)/);
+  const wordIndexes: number[] = [];
+  const words: string[] = [];
+
+  for (let i = 0; i < segments.length; i += 1) {
+    if (/^[A-Za-z]+$/.test(segments[i])) {
+      wordIndexes.push(i);
+      words.push(segments[i].toLowerCase());
+    }
+  }
+
+  let changed = false;
+  for (let wordPosition = 0; wordPosition < words.length; wordPosition += 1) {
+    const lemma = words[wordPosition];
+    const rule = HETERONYM_TABLE[lemma];
+    if (!rule) continue;
+
+    const before = words.slice(Math.max(0, wordPosition - 3), wordPosition);
+    const after = words.slice(wordPosition + 1, wordPosition + 4);
+    if (!rule.contextTest(before, after)) continue;
+
+    const segmentIndex = wordIndexes[wordPosition];
+    const originalWord = segments[segmentIndex];
+    segments[segmentIndex] = applyAlternateWordCasing(originalWord, rule.alternateSpelling);
+    changed = true;
+  }
+
+  return changed ? segments.join("") : text;
 }
 
 function tokenKey(token: string): string {
@@ -462,13 +741,27 @@ export function normalizeSegmentText(
   normalizedText = applyTracked(normalizedText, transforms, "citation-marker-removal", removeCitationMarkers);
   normalizedText = applyTracked(normalizedText, transforms, "whitespace-normalization", normalizeWhitespace);
   normalizedText = applyTracked(normalizedText, transforms, "roman-numeral-expansion", expandRomanNumerals);
+  normalizedText = applyTracked(normalizedText, transforms, "dotted-acronym-normalization", normalizeDottedAcronyms);
+  normalizedText = applyTracked(normalizedText, transforms, "address-abbreviation-expansion", expandAddressAbbreviations);
+  normalizedText = applyTracked(normalizedText, transforms, "url-normalization", normalizeUrls);
   normalizedText = applyTracked(normalizedText, transforms, "date-expansion", expandDates);
   normalizedText = applyTracked(normalizedText, transforms, "time-expansion", expandTimes);
   normalizedText = applyTracked(normalizedText, transforms, "currency-expansion", expandCurrency);
+  normalizedText = applyTracked(normalizedText, transforms, "fraction-expansion", expandFractions);
+  normalizedText = applyTracked(normalizedText, transforms, "decimal-expansion", expandDecimals);
+  normalizedText = applyTracked(normalizedText, transforms, "number-range-expansion", expandNumberRanges);
   normalizedText = applyTracked(normalizedText, transforms, "abbreviation-expansion", expandAbbreviations);
   normalizedText = applyTracked(normalizedText, transforms, "spaced-initials", collapseSpacedInitials);
   normalizedText = applyTracked(normalizedText, transforms, "ordinal-expansion", expandOrdinals);
   normalizedText = applyTracked(normalizedText, transforms, "cardinal-expansion", expandCardinals);
+  normalizedText = applyTracked(
+    normalizedText,
+    transforms,
+    "terminal-punctuation-enforcement",
+    enforceTerminalPunctuation,
+  );
+  normalizedText = applyTracked(normalizedText, transforms, "all-caps-quote-downcasing", downcaseAllCapsQuotes);
+  normalizedText = applyTracked(normalizedText, transforms, "heteronym-disambiguation", disambiguateHeteronyms);
   const normalizedToOriginalMap = buildNormalizedToOriginalMap(text, normalizedText);
 
   const sourceTextHash = stableSegmentTextHash(text);

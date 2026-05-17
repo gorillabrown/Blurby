@@ -61,4 +61,30 @@ describe("SegmentNormalizer", () => {
     expect(result.normalizedText).toBe('"Mister Wells owes twelve dollars and fifty cents," she said.');
     expect(result.normalizedToOriginalMap).toEqual([0, 1, 2, 3, 3, 3, 3, 3, 4, 5]);
   });
+
+  it("keeps required transform ordering constraints for enrichment transforms", () => {
+    const dottedBeforeAbbreviation = normalizeSegmentText("Dr. U.S.A. arrived.", { locale: "en-US" });
+    expect(dottedBeforeAbbreviation.transforms.map((transform) => transform.id)).toEqual([
+      "dotted-acronym-normalization",
+      "abbreviation-expansion",
+    ]);
+
+    const addressBeforeNumberConversion = normalizeSegmentText("Meet at St. 42 tonight.", { locale: "en-US" });
+    expect(addressBeforeNumberConversion.transforms.map((transform) => transform.id)).toEqual([
+      "address-abbreviation-expansion",
+      "cardinal-expansion",
+    ]);
+
+    const urlBeforeNumberConversion = normalizeSegmentText("See https://blurby.app/2026 updates.", { locale: "en-US" });
+    expect(urlBeforeNumberConversion.transforms.map((transform) => transform.id)).toEqual([
+      "url-normalization",
+      "cardinal-expansion",
+    ]);
+
+    const heteronymAfterTextTransforms = normalizeSegmentText("She had read 3/4 of the notes.", { locale: "en-US" });
+    expect(heteronymAfterTextTransforms.transforms.map((transform) => transform.id)).toEqual([
+      "fraction-expansion",
+      "heteronym-disambiguation",
+    ]);
+  });
 });

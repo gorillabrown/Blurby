@@ -145,7 +145,7 @@ describe("createGenerationPipeline", () => {
         rateBucket: 1,
         sourceTextHash: "src",
         normalizedTextHash: "norm",
-        normalizerVersion: "en-v1",
+      normalizerVersion: "en-v2",
         pronunciationOverrideHash: "",
         documentLocator: { bookId: "book-1" },
         chunkId: "book-1:0:src",

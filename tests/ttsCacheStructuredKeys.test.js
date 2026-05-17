@@ -22,7 +22,7 @@ function makeIdentity(overrides = {}) {
     modelVersion: "kokoro-82m-v1.0",
     sourceTextHash: "src-a1",
     normalizedTextHash: "norm-b2",
-    normalizerVersion: "en-v1",
+    normalizerVersion: "en-v2",
     pronunciationOverrideHash: "",
     documentLocator: { bookId: "book/with:unsafe\\chars" },
     chunkId: "book/with:unsafe\\chars:0",
@@ -67,7 +67,7 @@ describe("tts-cache structured v2 identity", () => {
       wordCount: 4,
       sourceTextHash: "src-a1",
       normalizedTextHash: "norm-b2",
-      normalizerVersion: "en-v1",
+      normalizerVersion: "en-v2",
       timingTruth: "word-native",
     });
 
@@ -79,7 +79,7 @@ describe("tts-cache structured v2 identity", () => {
     const identity = makeIdentity();
     await ttsCache.writeChunk("book-1", identity, 0, makePcm(), 24000, 1000, 4);
 
-    const changedNormalizer = makeIdentity({ normalizerVersion: "en-v2" });
+    const changedNormalizer = makeIdentity({ normalizerVersion: "en-v3" });
     const miss = await ttsCache.readChunk("book-1", changedNormalizer, 0);
     expect(miss).toBeNull();
 
