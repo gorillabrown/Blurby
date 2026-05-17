@@ -16,7 +16,7 @@
 |---|---|
 | Branch order was preserved: sync first, diagnostics second. | Accept. This protected the stacked diagnostics dependency on the sync layer. |
 | Full verification passed after dormancy removed the Nano probe blocker. | Accept. The prior blocked integration attempt is superseded by the 2026-05-16 landed run. |
-| Governance already reflects landed state in `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, and `CLAUDE.md`. | Accept. No extra roadmap edit was required during this closeout pass. |
+| Governance already reflects landed state in `ROADMAP.md`, `docs/governance/sprint-queue.xlsx`, and `CLAUDE.md`. | Accept. No extra roadmap edit was required during this closeout pass. |
 | The old `CloseOut.TTS-INTEGRATE-1.2026-05-15.md` records the blocked attempt. | Preserve. It remains historical evidence for the pre-dormancy blocker. |
 | Local dirt remains: `.idea/workspace.xml`, `tests/perf-baseline-results.json`, and untracked roadmap check-in. | Exclude. Those files are unrelated local residue. |
 
@@ -40,7 +40,7 @@
 ## Governance Updates
 
 - `ROADMAP.md` marks `TTS-INTEGRATE-1` complete and sets `TTS-CACHE-HARDEN-1` as next.
-- `docs/governance/SPRINT_QUEUE.md` marks the active head as `TTS-CACHE-HARDEN-1`.
+- `docs/governance/sprint-queue.xlsx` marks the then-active head as `TTS-CACHE-HARDEN-1`; the legacy Markdown queue was retired on 2026-05-17.
 - `CLAUDE.md` records the landed integration and queue pointer.
 - `docs/governance/close-outs/SpecRetro.Lessons_Learned.md` gained `SRL-032` for stacked integration merge-order discipline.
 

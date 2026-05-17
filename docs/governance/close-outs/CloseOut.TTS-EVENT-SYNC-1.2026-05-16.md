@@ -44,7 +44,7 @@
 ## Governance Updates
 
 - Marked `TTS-EVENT-SYNC-1` complete in `ROADMAP.md`.
-- Advanced queue head to `NORMALIZER-ENRICH-1` in `docs/governance/SPRINT_QUEUE.md`.
+- Advanced queue head to the then-active `NORMALIZER-ENRICH-1` pointer in `docs/governance/sprint-queue.xlsx`; the legacy Markdown queue was retired on 2026-05-17.
 - Added `SRL-034` to `docs/governance/close-outs/SpecRetro.Lessons_Learned.md`.
 - Saved this closeout as `Main Landed`.
 

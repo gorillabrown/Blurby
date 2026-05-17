@@ -19,7 +19,7 @@
 | Persisted Nano, Pocket, and Qwen settings profiles migrate to Kokoro on settings load. | Accept. This protects users from stale saved selections after the product posture change. |
 | `tests/mossNanoProbe.test.js` is gated behind explicit opt-in. | Accept. Host-sensitive Nano probe checks no longer block default Kokoro-only verification. |
 | Nano/Pocket production code remains present. | Accept. Dormancy is a reversible posture change, not a deletion sprint. |
-| `docs/governance/sprint-queue.xlsx` was locked by a LibreOffice session during closeout persistence. | Defer. Markdown roadmap and queue were advanced; spreadsheet reconciliation remains a follow-up once the workbook is closed. |
+| `docs/governance/sprint-queue.xlsx` was locked by a LibreOffice session during closeout persistence. | Resolved by 2026-05-17 parity pass. The workbook is now the authoritative queue source, and the legacy Markdown queue is retired. |
 
 ## Verification
 
@@ -48,7 +48,7 @@
 ## Governance Updates
 
 - `ROADMAP.md` advanced the active conveyor head from `ENGINE-DORMANCY-1` to `TTS-INTEGRATE-1`.
-- `docs/governance/SPRINT_QUEUE.md` removed the `ENGINE-DORMANCY-1` ready pointer and made `TTS-INTEGRATE-1` the active head.
+- `docs/governance/sprint-queue.xlsx` now records the queue state. Historical closeout originally advanced the legacy Markdown queue, which was retired on 2026-05-17.
 - `docs/governance/close-outs/SpecRetro.Lessons_Learned.md` gained SRL-031 for the dual-gated engine dormancy pattern.
 
 ## Next Work

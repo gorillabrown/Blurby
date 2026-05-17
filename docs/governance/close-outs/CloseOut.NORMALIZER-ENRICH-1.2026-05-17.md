@@ -43,7 +43,7 @@
 ## Governance Updates
 
 - Marked `NORMALIZER-ENRICH-1` complete in `ROADMAP.md`.
-- Advanced queue head to `TTS-RENDER-MAP-1` in `docs/governance/SPRINT_QUEUE.md`.
+- Advanced queue head to `TTS-RENDER-MAP-1` in `docs/governance/sprint-queue.xlsx`, now the authoritative queue source.
 - Added `SRL-035` to `docs/governance/close-outs/SpecRetro.Lessons_Learned.md`.
 - Saved this closeout as `Main Landed`.
 

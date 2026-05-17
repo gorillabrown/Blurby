@@ -45,7 +45,7 @@ The one non-pass result is not a cache regression. `tests/mossNanoProbe.test.js`
 ## Governance Updates
 
 - `ROADMAP.md` now treats `TTS-CACHE-TIMING-1` as complete and names `TTS-SYNC-1` as the next architecture sprint.
-- `docs/governance/SPRINT_QUEUE.md` now has a green buffer after adding `TEST-HARNESS-1` as the third prepared pointer.
+- Queue buffer was restored after adding `TEST-HARNESS-1` as the third prepared pointer; the authoritative queue now lives in `docs/governance/sprint-queue.xlsx`.
 - `CLAUDE.md` queue pointer text now reflects the backfilled state.
 - `docs/governance/close-outs/SpecRetro.Lessons_Learned.md` receives an observation about cache migrations and timing sidecars.
 

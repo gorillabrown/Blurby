@@ -273,3 +273,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** For future normalizer enrichment sprints, require one positive case plus one guard/no-op case per transform family, and validate transform ordering with explicit tests before broad-suite runs.
 **Applies to:** Normalizer enrichments, transform ordering work, fixture expansion sprints, and alignment-map stability checks
 **Status:** Observation
+
+### SRL-036 — Keep one authoritative sprint queue, not mirrored queue files (SPRINT-QUEUE-PARITY, 2026-05-17)
+**Verdict:** The queue drift risk dropped once the legacy Markdown sprint queue was retired and `docs/governance/sprint-queue.xlsx` became the only operational FIFO queue source.
+**Evidence:** Recent closeouts had to reconcile roadmap text, a Markdown queue, and the workbook independently. The 2026-05-17 parity pass deleted the legacy Markdown queue, updated CLAUDE/ROADMAP/DEVELOPMENT_SYNC guidance, and repaired current TTS Architecture closeout references so future dispatches read the workbook Catalog/Dashboard.
+**Recommendation:** Future governance updates should change `ROADMAP.md` for full specs and `docs/governance/sprint-queue.xlsx` for queue order/status. Do not recreate a Markdown queue mirror; if a human-readable queue view is needed, generate it from the workbook.
+**Applies to:** Sprint closeout, next-pointer generation, roadmap review, phase closeout, and queue backfill
+**Status:** Observation

@@ -8,12 +8,12 @@
 3. After completion of codebase work by Claude Code, tag each completed item with inline `✅ COMPLETED` markers in ROADMAP.md.
 4. **Use plain language with codebase terms parenthetical** — e.g., focus reading (ReaderView), flow reading (ScrollReaderView), page reading (PageReaderView), bottom bar (ReaderBottomBar), word index (wordIndex), etc.
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
-5a. **Queue depth below 3 is a stop signal.** If `docs/governance/SPRINT_QUEUE.md` has fewer than three queued sprints, pause implementation work and switch to brainstorming/spec development until the queue is back to at least three.
+5a. **Queue depth below 3 is a stop signal.** If `docs/governance/sprint-queue.xlsx` has fewer than three queued sprints in the Catalog tab, pause implementation work and switch to brainstorming/spec development until the queue is back to at least three.
 5b. **Successful CLI sprints auto-merge by default.** When a sprint passes verification, spec compliance, quality review, and docs closeout, the default CLI closeout path is: stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push. A sprint spec must explicitly say otherwise to skip auto-merge.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 6a. **CLI executes, it does not investigate.** Every sprint dispatched to Claude Code CLI must be fully investigated and spec'd beforehand. CLI receives exact directions — file paths, line numbers, what to change, why. All ambiguity is resolved by Cowork before dispatch. If a bug's root cause is unknown, Cowork investigates first (live debug, code tracing, hypothesis testing). If a feature's design is unresolved, Cowork specs it first. CLI never explores or diagnoses — it builds to spec. A sprint is not dispatch-ready until its investigation gate is cleared.
 7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
-8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt. Dispatches are POINTERS not PAYLOADS — reference the Sprint Queue (which points to ROADMAP.md for the full spec), don't duplicate it. Format: sprint ID, branch, baseline state, link to Sprint Queue.
+8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt. Dispatches are POINTERS not PAYLOADS — reference `docs/governance/sprint-queue.xlsx` (which points to ROADMAP.md for the full spec), don't duplicate it. Format: sprint ID, branch, baseline state, queue row, and ROADMAP spec pointer.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
 
@@ -43,13 +43,13 @@ This repo uses a strict two-layer planning system:
    - Tasks
    - Execution Sequence
    - SUCCESS CRITERIA
-2. **`docs/governance/SPRINT_QUEUE.md` holds the abbreviated dispatch pointers** only. Queue entries are short FIFO summaries that point Claude Code CLI to the full spec in `ROADMAP.md`; they are not the full payload.
+2. **`docs/governance/sprint-queue.xlsx` is the authoritative sprint queue.** The Catalog tab holds abbreviated FIFO dispatch pointers that point Claude Code CLI to the full spec in `ROADMAP.md`; the Dashboard tab summarizes queue health. This workbook is the only sprint queue source of truth.
 3. **Cowork's primary job is plan quality.** Pressure-test scope, sequencing, edge cases, cache/UX implications, spec clarity, and documentation drift so Claude Code can execute with minimal ambiguity.
 4. **Execution is selective.** Cowork only performs direct coding or file edits when:
    - the user explicitly asks for implementation, or
    - the work is especially delicate/complex and the user wants Cowork to handle it directly.
-5. **Default output for implementation planning work:** update the full `ROADMAP.md` spec first, then update the abbreviated `SPRINT_QUEUE.md` pointer second.
-6. **Minimum queue depth is mandatory.** `docs/governance/SPRINT_QUEUE.md` must always keep at least three queued sprints so we can see what is immediately next and what follows after that. If the queue drops below three, stop building and backfill the roadmap/queue before resuming execution work.
+5. **Default output for implementation planning work:** update the full `ROADMAP.md` spec first, then update the matching `docs/governance/sprint-queue.xlsx` Catalog pointer second.
+6. **Minimum queue depth is mandatory.** `docs/governance/sprint-queue.xlsx` must always keep at least three queued sprints in the Catalog tab so we can see what is immediately next and what follows after that. If the queue drops below three, stop building and backfill the roadmap/workbook queue before resuming execution work.
 7. **Parallel sprinting requires lane ownership + shared-core freeze.** We only run code-changing sprints in parallel when each sprint declares an owned lane and avoids the shared-core freeze set unless explicitly scheduled for an integration window.
 
 #### Parallel Sprint Policy (Lane Ownership)
@@ -60,7 +60,7 @@ When proposing parallel execution, classify each sprint into one or more lanes:
 - **Lane B: Evaluation Harness** — fixtures, trace schema, runners, scoring artifacts
 - **Lane C: UI Surfaces** — controls, settings UI, display-only reader chrome
 - **Lane D: Platform/Main Process** — `main/`, preload, IPC contracts, auth/cloud/import
-- **Lane E: Governance/Planning** — roadmap, sprint queue, close-out/reporting docs
+- **Lane E: Governance/Planning** — roadmap, `sprint-queue.xlsx`, close-out/reporting docs
 
 #### Shared-Core Freeze Set
 
@@ -192,7 +192,7 @@ Before committing, verify ALL of these:
 After EVERY sprint completion — hotfixes included, no exceptions — run the Herodotus pass:
 
 1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/planning/.Archive/ROADMAP_legacy.md`. Update Sprint Status table.
-2. **SPRINT_QUEUE.md** — Remove completed sprint from queue. Add to "Completed Sprints" table. Verify queue depth ≥ 3.
+2. **sprint-queue.xlsx** — In `docs/governance/sprint-queue.xlsx`, mark the completed sprint complete, clear its active `Seq`, renumber queued rows, and verify queue depth ≥ 3.
 3. **CLAUDE.md** — Update version, sprint list, dependency chain, test counts.
 4. **LESSONS_LEARNED.md** — Add entry if any non-trivial discovery was made.
 5. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
@@ -253,7 +253,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 | 4 | **Lessons Learned** | `docs/governance/LESSONS_LEARNED.md` | Engineering discoveries, persistent rules, anti-patterns |
 | 5 | **Ideas** | `docs/governance/IDEAS.md` | Unroadmapped concepts — reviewed at phase pauses |
 | 6 | **CLAUDE.md** | `CLAUDE.md` | Agent operational config — rules, agents, workflow |
-| 7 | **Sprint Queue** | `docs/governance/SPRINT_QUEUE.md` | Upcoming sprint dispatch queue (FIFO pointers to ROADMAP specs) |
+| 7 | **Sprint Queue Workbook** | `docs/governance/sprint-queue.xlsx` | Authoritative upcoming sprint dispatch queue (Catalog FIFO pointers to ROADMAP specs; Dashboard queue health) |
 
 ### Other References
 
@@ -270,8 +270,8 @@ Every session starts with awareness of these 7 documents. They are the single so
 
 When a sprint **completes**:
 
-1. **SPRINT_QUEUE.md** — Remove the sprint's entry row. Update queue depth.
-2. **SPRINT_QUEUE.md** — Add to "Completed Sprints (Recent)" table at top.
+1. **sprint-queue.xlsx** — Mark the sprint complete in the Catalog tab, clear its active `Seq`, and update queue depth.
+2. **sprint-queue.xlsx** — Renumber the remaining queued rows so the next dispatch is `Seq = 1`; keep the Dashboard accurate.
 3. **ROADMAP.md** — Move the full spec section to `docs/planning/.Archive/ROADMAP_legacy.md`. Keep ROADMAP forward-looking only.
 4. **ROADMAP.md** — Update Sprint Status table (remove or mark complete).
 5. **ROADMAP.md** — Update Execution Order diagram.
@@ -283,7 +283,7 @@ When a sprint **completes**:
 | Content | File | Rule |
 |---------|------|------|
 | Forward-looking sprint specs (full CLI Evergreen) | `ROADMAP.md` | Only upcoming work. Archive on completion. |
-| Sprint dispatch queue (summary pointers) | `docs/governance/SPRINT_QUEUE.md` | FIFO table → ROADMAP for full spec. ≥3 entries. |
+| Sprint dispatch queue (summary pointers) | `docs/governance/sprint-queue.xlsx` | Catalog FIFO table → ROADMAP for full spec; Dashboard shows health. ≥3 queued entries. |
 | Completed sprint specs | `docs/planning/.Archive/ROADMAP_legacy.md` | Append-only. Reference, don't modify. |
 | Completed Cowork plans/specs | `docs/planning/{plans,specs}/.Archive/` | Move on completion. |
 | Completed governance sprint files | `docs/planning/.Archive/` | Move on completion. |
@@ -312,7 +312,7 @@ When a sprint **completes**:
 2. Read `docs/governance/LESSONS_LEARNED.md` (if session may change codebase)
 3. Read `ROADMAP.md` (full active sprint specs)
 4. Read `docs/governance/BUG_REPORT.md` (if session involves bug fixes)
-5. Read `docs/governance/SPRINT_QUEUE.md` (abbreviated dispatch pointers to ROADMAP specs)
+5. Read `docs/governance/sprint-queue.xlsx` (Catalog FIFO dispatch pointers and Dashboard queue health)
 
 ### Bug Report Triage Workflow
 
@@ -321,7 +321,7 @@ When `docs/governance/bug-reports/` contains unprocessed `.json` + `.png` files:
 1. **Read** all JSON reports and view all screenshots.
 2. **Group** reports by root cause or feature area — deduplicate related reports.
 3. **File** each unique bug in `docs/governance/BUG_REPORT.md` with next BUG-NNN number. Include: description, severity, location, probable cause, screenshots, fix approach.
-4. **Group into hotfix sprints** — batch related bugs into HOTFIX-NN entries in ROADMAP.md. Add to SPRINT_QUEUE.md.
+4. **Group into hotfix sprints** — batch related bugs into HOTFIX-NN entries in ROADMAP.md. Add matching rows to `docs/governance/sprint-queue.xlsx`.
 5. **Archive** processed reports: move all `.json` + `.png` files to `docs/governance/bug-reports/.Archive/`.
 6. **Report** findings to user with grouped summary and proposed hotfix sprint structure.
 
@@ -354,7 +354,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **TTS-DIAG-1 landed on main** — `src/utils/narrateDiagnostics.ts`, `useNarration`, `TTSSettings`, and `scripts/tts_eval_runner.mjs` add the redacted provider-neutral `tts-diagnostics-v1` bundle from source branch `sprint/tts-diag-1-diagnostics-bundle` (`c97e446`), now landed via ordered integration merge `04c033a`. The bundle captures provider, engine/voice/rate, segment/hash, cache key, timing sidecar, scheduler, highlight decision, and relevant error metadata without audio payloads or raw book text by default; validators strip/reject raw text and audio-shaped fields.
 - **Diagnostics export guardrail** — Diagnostics exports are evidence artifacts, not user-content artifacts. Do not commit generated local user diagnostics unless an explicit test fixture creates them; raw text and audio-shaped fields must remain redacted/rejected in both producers and validators.
 - **TTS-INTEGRATE-1 complete** — Clean integration branch `sprint/tts-integrate-1-sync-diag-main` merged `origin/sprint/tts-sync-1-highlight-controller` first (`82aa76d`) and `origin/sprint/tts-diag-1-diagnostics-bundle` second (`04c033a`). Verification passed: focused sync slice 4 files / 37 tests, focused diagnostics slice 4 files / 18 tests, `npm run typecheck`, `npm run build`, full `npm test` (183 files passed, 1 skipped; 2463 passed, 132 skipped), and `git diff --check`.
-- **Queue pointer** — Next approved sprint is TTS-CACHE-HARDEN-1, dispatch-ready on `main`. Queue depth is 6 (6 full specs, 0 stubs). TTS-CACHE-HARDEN-1 remains findings-driven from implementation review A8 and literature review §4.6 (cache-hit timing parity, type safety harmonization, IPC validation, cache key safety). Three research-driven sprints remain queued behind it: TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, and TTS-RENDER-MAP-1.
+- **Queue pointer** — `docs/governance/sprint-queue.xlsx` is the authoritative queue source. Next approved sprint is TTS-RENDER-MAP-1, dispatch-ready on `main`. Queue depth is 3 (3 full specs, 0 stubs): TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1. NORMALIZER-ENRICH-1 is complete and landed.
 - TTS-7 stabilization lane COMPLETE: TTS-7A (v1.29.0) + TTS-7B (v1.30.0) + TTS-7C (v1.31.0) + TTS-7D (v1.32.0). All 15 TTS bugs (BUG-101–115) resolved and verified. Closeout doc in TECHNICAL_REFERENCE.md.
 - **TTS-7F hotfix complete** — proactive entry cache coverage + cruise warm, plus clean launch ownership. BUG-116/118/119/120/121 resolved.
 - **TTS-7G complete** — BUG-117 verified resolved (response path < 2ms). DEV instrumentation added.
@@ -407,7 +407,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **MOSS-NANO-13B complete** — Real MOSS Nano app audio bridge landed on `sprint/moss-nano-13b-real-app-audio-bridge`: the app-sidecar path now validates the local Nano repo/model/tokenizer/runtime, starts the real ONNX runtime, and returns real WAV/PCM metadata through `tts-nano-*` IPC with `syntheticAudio:false`. Synthetic tone output is mock-only and rejected in real mode. Test Voice can use real Nano audio when `nanoStatus` is ready; selected Nano narration remains segment-following only with `wordTimestamps:null`. No Qwen reactivation, no Nano default, no Kokoro retirement, and no silent fallback.
 - **POCKET-TTS-1 complete** — Pocket TTS is now an isolated third opt-in engine path (`pocket-tts`) with sidecar/engine wrapper, `tts-pocket-*` IPC, preload bridge, renderer strategy, settings status/preview/selectable-engine wiring, and 30 focused tests. Product posture is unchanged around the other engines: Kokoro remains default/available, MOSS-Nano remains recommended opt-in from 13e, Qwen remains disabled, no comparative gate ran, and no public voice-cloning UX ships in v2.0.
 - **POSTV2-ENGINE-1 update** — Qwen is disabled at the selectable settings/profile boundary and at IPC runtime entry points. Historical/preload compatibility methods may remain, but Qwen status/generate/stream calls return unavailable with `reason: "qwen-disabled"` and must not start a Qwen runtime for Desktop v2.
-- Active queue: GREEN depth 6 (6 full specs, 0 stubs). Finish line: **TTS Architecture Complete** (Kokoro-only + research-driven enrichment). Conveyor: TTS-CACHE-HARDEN-1 (dispatch-ready) → TTS-EVENT-SYNC-1 (event-driven word sync, research: readest/RealtimeTTS/sioyek) → NORMALIZER-ENRICH-1 (abogen gap fill) → TTS-RENDER-MAP-1 (sioyek word position index) → TTS-PIPELINE-1 → TTS-ARCH-DOC-1. TTS-INTEGRATE-1 is complete (2026-05-16) and landed both TTS-SYNC-1 and TTS-DIAG-1 on canonical `main`. Dissolved (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1, TTS-CANARY-1, TTS-REGISTRY-DISPATCH-1. Engine posture: Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred until TTS architecture conveyor completes.
+- Active queue: GREEN depth 3 (3 full specs, 0 stubs) in `docs/governance/sprint-queue.xlsx`. Finish line: **TTS Architecture Complete** (Kokoro-only + research-driven enrichment). Conveyor: TTS-RENDER-MAP-1 (sioyek word position index) → TTS-PIPELINE-1 → TTS-ARCH-DOC-1. TTS-INTEGRATE-1, TTS-CACHE-HARDEN-1, TTS-EVENT-SYNC-1, and NORMALIZER-ENRICH-1 are complete and landed on canonical `main`. Dissolved (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1, TTS-CANARY-1, TTS-REGISTRY-DISPATCH-1. Engine posture: Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred until TTS architecture conveyor completes.
 - 1 open bug: BUG-154 (parked — likely not a bug, needs live verification). Deferred lanes: MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
 - ROADMAP_V2.md archived (2026-04-06). Single source of truth: ROADMAP.md.
 - IDEAS.md reorganized into 11 themed groups (A through K) with roadmap alignment.

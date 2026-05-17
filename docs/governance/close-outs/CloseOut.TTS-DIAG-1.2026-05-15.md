@@ -46,7 +46,6 @@ TTS-DIAG-1 adds a redacted provider-neutral diagnostics bundle for active narrat
 
 ## Governance Disposition
 
-- Canonical `ROADMAP.md` and `docs/governance/SPRINT_QUEUE.md` should mark TTS-DIAG-1 as PASS/pushed, merge pending.
+- Canonical `ROADMAP.md` and `docs/governance/sprint-queue.xlsx` should mark TTS-DIAG-1 as PASS/pushed, merge pending. The legacy Markdown queue was retired on 2026-05-17.
 - Downstream dispatch from canonical `main` remains gated until both `sprint/tts-sync-1-highlight-controller` and `sprint/tts-diag-1-diagnostics-bundle` are integrated, or a future sprint intentionally branches from the stacked base.
 - `KOKORO-EXPORT-1` remains deferred until the TTS Architecture Completion conveyor finishes.
-

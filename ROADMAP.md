@@ -4,10 +4,11 @@
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
 **Queue**: GREEN depth 3 (3 full specs, 0 stubs).
+**Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout; the legacy Markdown queue was retired on 2026-05-17.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
-> **Sprint closeout convention:** Unless a sprint explicitly says otherwise, every successful CLI sprint auto-merges: stage specific files, commit on sprint branch, merge to `main` with `--no-ff`, push, update governance docs.
+> **Sprint closeout convention:** Unless a sprint explicitly says otherwise, every successful CLI sprint auto-merges: stage specific files, commit on sprint branch, merge to `main` with `--no-ff`, push, update governance docs and `docs/governance/sprint-queue.xlsx`.
 
 ---
 
@@ -44,7 +45,7 @@ TTS-RENDER-MAP-1 → TTS-PIPELINE-1
 1. `docs/` has `governance/`, `planning/`, `studies/`, `testing/`, `extension/`, `evidence/`, and optionally `brand/`.
 2. Filename-suffix archives are replaced by `.Archive/` subfolders.
 3. `artifacts/`, `tmp/`, and `tmp_brandcheck*` are ignored or removed per the dispatch, while curated evidence is preserved under `docs/evidence/`.
-4. `ROADMAP.md`, `docs/governance/SPRINT_QUEUE.md`, `CLAUDE.md`, `README.md`, and `ROADMAP_SPECS.md` point to the new paths.
+4. `ROADMAP.md`, `docs/governance/sprint-queue.xlsx`, `CLAUDE.md`, `README.md`, and `ROADMAP_SPECS.md` point to the new paths.
 5. Verification proves no forbidden code/test/build paths were modified or staged, and dirty 13d implementation files remain unstaged.
 6. Mid-dispatch amendment is recorded; binary audit packages and IDE metadata old-path strings are deferred.
 

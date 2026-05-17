@@ -163,7 +163,7 @@ The doc-keeper pass already handles most of this. The addition is the **mandator
 2. ✅ Branch merged to main (--no-ff)
 3. ✅ Branch deleted
 4. ✅ ROADMAP.md updated
-5. ✅ SPRINT_QUEUE.md updated
+5. ✅ `docs/governance/sprint-queue.xlsx` Catalog/Dashboard updated
 6. ✅ CLAUDE.md updated
 7. ✅ LESSONS_LEARNED.md updated (if applicable)
 8. ✅ git push origin main        ← NEW: MANDATORY
