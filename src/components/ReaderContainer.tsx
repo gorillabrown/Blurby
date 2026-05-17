@@ -1155,6 +1155,7 @@ export default function ReaderContainer({
       flowMode={isFlowSurfaceMode}
       scrollContainerRef={flowScrollContainerRef}
       flowCursorRef={flowScrollCursorRef}
+      foliateRenderVersion={foliateRenderVersion}
       onFlowWordAdvance={setHighlightedWordIndex}
       onWordsReextracted={() => {
         // New EPUB section loaded — may need to update DOM highlight state.

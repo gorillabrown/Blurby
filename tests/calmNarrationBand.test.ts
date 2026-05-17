@@ -201,6 +201,16 @@ describe("BUG-145c: canonical audio cursor (lastConfirmedAudioWordRef)", () => {
     expect(getDiagEvents().length).toBe(0);
   });
 
+  it("tracks word-position-index build/miss diagnostics for the render-map path", () => {
+    clearDiagnostics();
+    recordDiagEvent("word-position-index-build", "reason=section-load:2 words=1200 buildMs=11.20");
+    recordDiagEvent("word-position-index-miss", "word=901 reason=direct-fallback-hit");
+
+    const events = getDiagEvents();
+    expect(events.some((e) => e.event === "word-position-index-build")).toBe(true);
+    expect(events.some((e) => e.event === "word-position-index-miss")).toBe(true);
+  });
+
   it("chunk handoff fires onChunkHandoff with the last word index of each chunk", async () => {
     // The onChunkHandoff fires when a source.onended — the audio-confirmed index.
     // In useNarration, this feeds lastConfirmedAudioWordRef via onWordAdvance.

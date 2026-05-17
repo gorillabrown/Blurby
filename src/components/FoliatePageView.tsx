@@ -55,8 +55,11 @@ import {
   buildWrappedFragmentForNode,
   extractWordsFromView,
   extractWordsFromSection,
+  queryWordSpans,
+  parseWordIndexAttribute,
   type FoliateWord,
 } from "../utils/foliateHelpers";
+import { WordPositionIndex, type WordPositionEntry } from "../utils/wordPositionIndex";
 export type { FoliateWord } from "../utils/foliateHelpers";
 
 const api = window.electronAPI;
@@ -335,6 +338,8 @@ interface FoliatePageViewProps {
   scrollContainerRef?: React.MutableRefObject<HTMLElement | null>;
   /** FLOW-3A: Ref to expose the cursor element to FlowScrollEngine */
   flowCursorRef?: React.MutableRefObject<HTMLDivElement | null>;
+  /** Reader-driven render revision marker for invalidation/rebuild hooks. */
+  foliateRenderVersion?: number;
 }
 
 export interface FoliateHighlightOptions {
@@ -379,7 +384,14 @@ export interface FoliateViewAPI {
   getSectionForWordIndex: (wordIndex: number) => number | null;
   /** TTS-7I: Shared render-state resolver — single source of truth for gate + highlight.
    *  Returns whether the word span exists, is visible on the active page, and the DOM refs. */
-  resolveWordState: (wordIndex: number) => { found: boolean; visible: boolean; span: HTMLElement | null; doc: Document | null };
+  resolveWordState: (wordIndex: number) => {
+    found: boolean;
+    visible: boolean;
+    span: HTMLElement | null;
+    spans: HTMLElement[];
+    doc: Document | null;
+    position: WordPositionEntry | null;
+  };
   /** SELECTION-1: Apply soft-selected highlight to a word (passive page-mode indicator) */
   applySoftHighlight: (wordIndex: number) => boolean;
   /** SELECTION-1: Remove soft-selected highlight from all words */
@@ -415,6 +427,7 @@ export default function FoliatePageView({
   scrollContainerRef,
   flowCursorRef,
   getAudioProgress,
+  foliateRenderVersion = 0,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -424,6 +437,9 @@ export default function FoliatePageView({
   const foliateIframeRef = useRef<HTMLIFrameElement | null>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const flowRafRef = useRef<number>(0);
+  const wordPositionIndexRef = useRef<WordPositionIndex>(new WordPositionIndex());
+  const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastHandledFoliateRenderVersionRef = useRef(foliateRenderVersion);
   const lastLoadedSectionIndexRef = useRef<number | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -545,6 +561,35 @@ export default function FoliatePageView({
     return scrollEl;
   }, [getRenderedWordRoots]);
 
+  const clearWordPositionRebuildTimer = useCallback(() => {
+    if (wordPositionRebuildTimerRef.current) {
+      clearTimeout(wordPositionRebuildTimerRef.current);
+      wordPositionRebuildTimerRef.current = null;
+    }
+  }, []);
+
+  const rebuildWordPositionIndex = useCallback((reason: string) => {
+    const view = viewRef.current;
+    const contents = view?.renderer?.getContents?.() ?? [];
+    const build = wordPositionIndexRef.current.build(contents);
+    recordDiagEvent(
+      "word-position-index-build",
+      `reason=${reason} words=${build.wordCount} duplicates=${build.duplicateSpanCount} buildMs=${build.buildTimeMs.toFixed(2)}`,
+    );
+  }, []);
+
+  const scheduleWordPositionIndexRebuild = useCallback((reason: string, delayMs = 100) => {
+    clearWordPositionRebuildTimer();
+    wordPositionRebuildTimerRef.current = setTimeout(() => {
+      wordPositionRebuildTimerRef.current = null;
+      rebuildWordPositionIndex(reason);
+    }, Math.max(0, delayMs));
+  }, [clearWordPositionRebuildTimer, rebuildWordPositionIndex]);
+
+  const invalidateWordPositionIndex = useCallback(() => {
+    wordPositionIndexRef.current.invalidate();
+  }, []);
+
   const clearSoftHighlight = useCallback(() => {
     const view = viewRef.current;
     if (!view?.renderer) return;
@@ -607,7 +652,10 @@ export default function FoliatePageView({
     }
 
     if (highlightClass) {
-      state.doc?.querySelectorAll?.(`[data-word-index="${wordIndex}"]`)?.forEach((el: Element) => {
+      const highlightTargets = state.spans.length > 0
+        ? state.spans
+        : (state.span ? [state.span] : []);
+      highlightTargets.forEach((el: Element) => {
         el.classList.add(highlightClass);
       });
     }
@@ -696,6 +744,7 @@ export default function FoliatePageView({
           const { doc, index } = e.detail;
           // Inject Blurby theme styles into the EPUB document
           injectStyles(doc, settings, focusTextSize);
+          invalidateWordPositionIndex();
 
           // Cache iframe ref for this section's document
           if (doc !== document) {
@@ -762,6 +811,7 @@ export default function FoliatePageView({
           }
 
           lastLoadedSectionIndexRef.current = index;
+          scheduleWordPositionIndexRebuild(`section-load:${index}`, 0);
 
           // Delegated click handler — uses injected word spans (same pattern as PageReaderView)
           doc.body.addEventListener("click", (e: MouseEvent) => {
@@ -885,6 +935,7 @@ export default function FoliatePageView({
           const { cfi, tocItem, pageItem } = e.detail;
           const fraction = e.detail.fraction ?? 0;
           onRelocate?.({ cfi, fraction, tocItem, pageItem });
+          scheduleWordPositionIndexRebuild("relocate");
         });
 
         // Open the book
@@ -982,7 +1033,33 @@ export default function FoliatePageView({
             // TTS-7I: Shared render-state resolver — single source of truth for gate + highlight + recovery.
             // Both startup gate (useReaderMode) and live narration follow (useReadingModeInstance)
             // consume this same function, eliminating the gate/highlight disagreement (BUG-124).
-            resolveWordState: (wordIndex: number): { found: boolean; visible: boolean; span: HTMLElement | null; doc: Document | null } => {
+            resolveWordState: (wordIndex: number): {
+              found: boolean;
+              visible: boolean;
+              span: HTMLElement | null;
+              spans: HTMLElement[];
+              doc: Document | null;
+              position: WordPositionEntry | null;
+            } => {
+              const indexedEntry = wordPositionIndexRef.current.get(wordIndex);
+              if (indexedEntry && indexedEntry.primarySpan.isConnected) {
+                const iframeWin = indexedEntry.doc.defaultView;
+                const visible = !!(iframeWin && indexedEntry.width > 0 &&
+                  indexedEntry.left >= 0 && indexedEntry.left < iframeWin.innerWidth &&
+                  indexedEntry.top >= 0 && indexedEntry.top < iframeWin.innerHeight);
+                return {
+                  found: true,
+                  visible,
+                  span: indexedEntry.primarySpan,
+                  spans: indexedEntry.spans,
+                  doc: indexedEntry.doc,
+                  position: indexedEntry,
+                };
+              }
+              if (indexedEntry) {
+                recordDiagEvent("word-position-index-miss", `word=${wordIndex} reason=stale-index-entry`);
+              }
+
               const contents = view.renderer?.getContents?.() ?? [];
               for (const { doc: d } of contents) {
                 try {
@@ -993,7 +1070,8 @@ export default function FoliatePageView({
                   const visible = !!(iframeWin && rect.width > 0 &&
                     rect.left >= 0 && rect.left < iframeWin.innerWidth &&
                     rect.top >= 0 && rect.top < iframeWin.innerHeight);
-                  return { found: true, visible, span, doc: d };
+                  recordDiagEvent("word-position-index-miss", `word=${wordIndex} reason=direct-fallback-hit`);
+                  return { found: true, visible, span, spans: [span], doc: d, position: null };
                 } catch { /* Word may be in detached section — try next content source */ }
               }
               const liveSections = bookWordSectionsRef.current;
@@ -1006,6 +1084,21 @@ export default function FoliatePageView({
                     foliateWordsRef.current,
                     liveSections,
                   );
+                  const renderedEntry = wordPositionIndexRef.current.get(renderedWordIndex);
+                  if (renderedEntry && renderedEntry.primarySpan.isConnected && renderedEntry.sectionIndex === sectionIdx) {
+                    const iframeWin = renderedEntry.doc.defaultView;
+                    const visible = !!(iframeWin && renderedEntry.width > 0 &&
+                      renderedEntry.left >= 0 && renderedEntry.left < iframeWin.innerWidth &&
+                      renderedEntry.top >= 0 && renderedEntry.top < iframeWin.innerHeight);
+                    return {
+                      found: true,
+                      visible,
+                      span: renderedEntry.primarySpan,
+                      spans: renderedEntry.spans,
+                      doc: renderedEntry.doc,
+                      position: renderedEntry,
+                    };
+                  }
                   for (const { doc: d, index } of contents) {
                     if (index !== sectionIdx) continue;
                     try {
@@ -1016,12 +1109,14 @@ export default function FoliatePageView({
                       const visible = !!(iframeWin && rect.width > 0 &&
                         rect.left >= 0 && rect.left < iframeWin.innerWidth &&
                         rect.top >= 0 && rect.top < iframeWin.innerHeight);
-                      return { found: true, visible, span, doc: d };
+                      recordDiagEvent("word-position-index-miss", `word=${wordIndex} reason=section-fallback-hit`);
+                      return { found: true, visible, span, spans: [span], doc: d, position: null };
                     } catch { /* Rendered word index may not exist in this section — try next */ }
                   }
                 }
               }
-              return { found: false, visible: false, span: null, doc: null };
+              recordDiagEvent("word-position-index-miss", `word=${wordIndex} reason=not-found`);
+              return { found: false, visible: false, span: null, spans: [], doc: null, position: null };
             },
             // TTS-7F: Pure read-only DOM check — delegates to resolveWordState
             isWordInDom: (wordIndex: number): boolean => {
@@ -1054,12 +1149,16 @@ export default function FoliatePageView({
               return null;
             },
             findFirstVisibleWordIndex: () => {
-              // Walk all loaded sections to find the first word span that's visible
+              const indexedFirstVisible = wordPositionIndexRef.current.findFirstVisibleWordIndex();
+              if (indexedFirstVisible >= 0) return indexedFirstVisible;
+
+              // Fallback path: walk all loaded sections and find the first visible word span.
+              recordDiagEvent("word-position-index-miss", "word=-1 reason=first-visible-fallback");
               const contents = view.renderer?.getContents?.() ?? [];
               for (const { doc: d, index } of contents) {
                 try {
                   if (typeof index !== "number") continue;
-                  const spans = d.querySelectorAll("[data-word-index]");
+                  const spans = queryWordSpans(d);
                   for (const span of spans) {
                     const rect = (span as HTMLElement).getBoundingClientRect();
                     const iframeWin = d.defaultView;
@@ -1067,8 +1166,8 @@ export default function FoliatePageView({
                     // Check if the span is within the visible viewport of the iframe
                     if (rect.width > 0 && rect.left >= 0 && rect.left < iframeWin.innerWidth &&
                         rect.top >= 0 && rect.top < iframeWin.innerHeight) {
-                      const renderedIdx = parseInt((span as HTMLElement).getAttribute("data-word-index") || "-1", 10);
-                      if (renderedIdx >= 0) {
+                      const renderedIdx = parseWordIndexAttribute((span as HTMLElement).getAttribute("data-word-index"));
+                      if (renderedIdx != null && renderedIdx >= 0) {
                         return resolveRenderedWordIndexToGlobal(index, renderedIdx, foliateWordsRef.current, bookWordSectionsRef.current);
                       }
                     }
@@ -1161,6 +1260,8 @@ export default function FoliatePageView({
 
     return () => {
       cancelled = true;
+      clearWordPositionRebuildTimer();
+      invalidateWordPositionIndex();
       if (viewRef.current) {
         viewRef.current.close?.();
         viewRef.current = null;
@@ -1170,18 +1271,36 @@ export default function FoliatePageView({
   }, [activeDoc.filepath, activeDoc.id]);
 
   useEffect(() => {
+    if (foliateRenderVersion === lastHandledFoliateRenderVersionRef.current) return;
+    lastHandledFoliateRenderVersionRef.current = foliateRenderVersion;
+    invalidateWordPositionIndex();
+    scheduleWordPositionIndexRebuild(`render-version:${foliateRenderVersion}`);
+  }, [foliateRenderVersion, invalidateWordPositionIndex, scheduleWordPositionIndexRebuild]);
+
+  useEffect(() => {
     if (!bookWordSections || bookWordSections.length === 0) return;
-    const view = viewRef.current;
-    const contents = view?.renderer?.getContents?.() ?? [];
-    for (const { doc, index } of contents) {
-      if (!doc?.body) continue;
-      const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections);
-      if (sectionStart < 0) continue;
-      unwrapWordSpans(doc);
-      const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
-      wrapWordsInSpans(doc, index, sectionStart, sectionWords);
-    }
-  }, [bookWordSections]);
+    let cancelled = false;
+    const restampVisibleSections = async () => {
+      invalidateWordPositionIndex();
+      const view = viewRef.current;
+      const contents = view?.renderer?.getContents?.() ?? [];
+      for (const { doc, index } of contents) {
+        if (!doc?.body) continue;
+        const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections);
+        if (sectionStart < 0) continue;
+        unwrapWordSpans(doc);
+        const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
+        await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+      }
+      if (!cancelled) {
+        scheduleWordPositionIndexRebuild("section-restamp", 0);
+      }
+    };
+    restampVisibleSections();
+    return () => {
+      cancelled = true;
+    };
+  }, [bookWordSections, invalidateWordPositionIndex, scheduleWordPositionIndexRebuild]);
 
   // Update renderer on settings changes
   useEffect(() => {
@@ -1199,7 +1318,16 @@ export default function FoliatePageView({
     for (const { doc } of view.renderer.getContents?.() ?? []) {
       injectStyles(doc, settings, focusTextSize);
     }
-  }, [settings.theme, settings.fontFamily, focusTextSize, settings.layoutSpacing]);
+    invalidateWordPositionIndex();
+    scheduleWordPositionIndexRebuild("font-or-layout-change");
+  }, [
+    settings.theme,
+    settings.fontFamily,
+    focusTextSize,
+    settings.layoutSpacing,
+    invalidateWordPositionIndex,
+    scheduleWordPositionIndexRebuild,
+  ]);
 
   // FLOW-3A: Toggle flow="scrolled" vs "paginated" when flowMode changes
   useEffect(() => {
@@ -1225,7 +1353,15 @@ export default function FoliatePageView({
         scrollContainerRef.current = null;
       }
     }
-  }, [flowMode, resolveFoliateScrollContainer]);
+    invalidateWordPositionIndex();
+    scheduleWordPositionIndexRebuild("flow-mode-change");
+  }, [
+    flowMode,
+    resolveFoliateScrollContainer,
+    invalidateWordPositionIndex,
+    scheduleWordPositionIndexRebuild,
+    scrollContainerRef,
+  ]);
 
   // FLOW-INF-A: Compute --flow-zone-top and --flow-zone-bottom CSS custom properties
   // when flow mode is active. Uses settings.flowZonePosition and settings.flowZoneLines
@@ -1253,14 +1389,24 @@ export default function FoliatePageView({
 
     applyZoneProperties();
 
-    const observer = new ResizeObserver(applyZoneProperties);
+    const observer = new ResizeObserver(() => {
+      applyZoneProperties();
+      invalidateWordPositionIndex();
+      scheduleWordPositionIndexRebuild("flow-zone-resize");
+    });
     observer.observe(container);
     return () => {
       observer.disconnect();
       container.style.removeProperty("--flow-zone-top");
       container.style.removeProperty("--flow-zone-bottom");
     };
-  }, [flowMode, settings.flowZonePosition, settings.flowZoneLines]);
+  }, [
+    flowMode,
+    settings.flowZonePosition,
+    settings.flowZoneLines,
+    invalidateWordPositionIndex,
+    scheduleWordPositionIndexRebuild,
+  ]);
 
   // Reflow text when container resizes (window maximize/restore/drag)
   useEffect(() => {
@@ -1273,6 +1419,8 @@ export default function FoliatePageView({
       const w = container.clientWidth;
       view.renderer.setAttribute("max-block-size", `${h - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
       view.renderer.setAttribute("max-column-count", w >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+      invalidateWordPositionIndex();
+      scheduleWordPositionIndexRebuild("container-resize");
     });
     observer.observe(container);
     return () => observer.disconnect();
@@ -1301,15 +1449,13 @@ export default function FoliatePageView({
         lastAdvance = now;
         onFlowWordAdvanceRef.current?.(currentIdx);
       }
-      // Find word span via view.renderer.getContents() (pierces shadow DOM)
-      const v = viewRef.current;
-      const contents = v?.renderer?.getContents?.() ?? [];
       let found = false;
-      for (const { doc: d } of contents) {
-        try {
-          const span = d?.querySelector?.(`[data-word-index="${currentIdx}"]`) as HTMLElement;
-          if (span) {
-            const spanRect = span.getBoundingClientRect();
+      try {
+        const wordState = viewApiRef?.current?.resolveWordState(currentIdx);
+        if (wordState?.found) {
+          const indexedPosition = wordState.position;
+          const spanRect = indexedPosition ?? wordState.span?.getBoundingClientRect();
+          if (spanRect) {
             // getContents docs are inside iframes — find the iframe for coordinate transform
             const iframe = foliateIframeRef.current;
             const iframeRect = iframe?.getBoundingClientRect();
@@ -1333,10 +1479,9 @@ export default function FoliatePageView({
               }
               cursor.style.display = "none";
             }
-            break;
           }
-        } catch { /* Content may have been unloaded during flow — skip iteration */ }
-      }
+        }
+      } catch { /* Content may have been unloaded during flow — skip iteration */ }
       if (!found) cursor.style.display = "none";
       flowRafRef.current = requestAnimationFrame(tick);
     };
