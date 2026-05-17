@@ -56,21 +56,20 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: TTS Architecture Complete — Kokoro as sole active local/cacheable model engine (Web Speech remains a platform fallback), every implicit TTS architecture decision made explicit, tested, and debuggable.
-Queue depth: 4 prepared FIFO pointers (GREEN; 4 full specs, 0 stubs)
-Active head: NORMALIZER-ENRICH-1 — dispatch-ready after TTS-EVENT-SYNC-1 completion.
-Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16, followed by TTS-CACHE-HARDEN-1 (`c54dd0f`) and TTS-EVENT-SYNC-1 (`2c946ad`) on canonical `main`. Event-driven word-boundary sync, provider-level boundary capability contracts, normalized→original alignment mapping, and adaptive lag bypass for trusted boundaries are now landed; NORMALIZER-ENRICH-1 is unblocked.
-Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1, to 6 after TTS-INTEGRATE-1 landed, to 5 after TTS-CACHE-HARDEN-1 landed, and to 4 after TTS-EVENT-SYNC-1 landed).
+Queue depth: 3 prepared FIFO pointers (GREEN; 3 full specs, 0 stubs)
+Active head: TTS-RENDER-MAP-1 — dispatch-ready after NORMALIZER-ENRICH-1 completion.
+Health: GREEN. ENGINE-DORMANCY-1 completed on 2026-05-16, disabling MOSS-Nano and Pocket TTS at settings and IPC boundaries while preserving code. TTS-INTEGRATE-1 then landed on 2026-05-16, followed by TTS-CACHE-HARDEN-1 (`c54dd0f`), TTS-EVENT-SYNC-1 (`2c946ad`), and NORMALIZER-ENRICH-1 (`dcf8a7d`) on canonical `main`. Event-driven boundary sync and normalizer enrichment are now both landed; TTS-RENDER-MAP-1 is the next conveyor head.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM → 2026-05-15 PM → **2026-05-15 PM2** (findings integration; TTS-CACHE-HARDEN-1 added; original 8-sprint conveyor advanced to 7 after ENGINE-DORMANCY-1, to 6 after TTS-INTEGRATE-1 landed, to 5 after TTS-CACHE-HARDEN-1 landed, to 4 after TTS-EVENT-SYNC-1 landed, and to 3 after NORMALIZER-ENRICH-1 landed).
 ```
 
 ## TTS Architecture Completion Conveyor Belt (Active — Kokoro-Only)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
-| ~~1~~ | ~~TTS-EVENT-SYNC-1~~ | ~~Stage 2: Event-Driven Sync~~ | ~~M-L~~ | ~~TTS-CACHE-HARDEN-1 (completed 2026-05-16)~~ | ✅ complete on 2026-05-16 (`a71df02` merged via `2c946ad`) |
-| 2 | NORMALIZER-ENRICH-1 | Stage 2: Normalizer Enrichment | M | TTS-EVENT-SYNC-1 (completed 2026-05-16) | Dispatch-ready (research: abogen) |
-| 3 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 | Full spec (research: sioyek) |
-| 4 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
-| 5 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
+| ~~1~~ | ~~NORMALIZER-ENRICH-1~~ | ~~Stage 2: Normalizer Enrichment~~ | ~~M~~ | ~~TTS-EVENT-SYNC-1~~ | ✅ Completed 2026-05-17 (`dcf8a7d`) |
+| 2 | TTS-RENDER-MAP-1 | Stage 2: Word Position Index | M | NORMALIZER-ENRICH-1 (completed 2026-05-17) | Dispatch-ready (research: sioyek) |
+| 3 | TTS-PIPELINE-1 | Stage 3: Pipeline Truth | M | TTS-RENDER-MAP-1 | Full spec (updated: cache parity + stress fixtures + NarrationSegment domain type assessment) |
+| 4 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Full spec (updated: error taxonomy + provenance + cache evolution) |
 
 Dissolved sprints (2026-05-15 Kokoro-only pivot): TEST-HARNESS-1 (Nano probes irrelevant), TTS-CANARY-1 (sidecar engines dormant), TTS-REGISTRY-DISPATCH-1 (single active engine).
 
@@ -120,32 +119,8 @@ Closeout: `docs/governance/close-outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-
 ## Ready Queue Pointers
 
 ```text
-Sprint: NORMALIZER-ENRICH-1 — Kokoro Text Normalization Gap Fill
-Status: Dispatch-ready after TTS-EVENT-SYNC-1 landed on 2026-05-16 via `2c946ad`.
-Type: Normalizer enrichment — 9 new transforms + heteronym disambiguation. Research-driven (abogen kokoro_text_normalization.py).
-
-WHAT: Add missing normalization transforms identified by comparing Blurby's 12-transform pipeline against abogen's 20+ transforms. Add context-window heteronym disambiguation. Bump TTS_NORMALIZER_VERSION.
-
-HYPOTHESIS: Richer normalization produces better Kokoro phonemization for fractions, decimals, URLs, address abbreviations, number ranges, and heteronyms currently sent raw to the model.
-
-WHERE:
-  - `ROADMAP.md` § "Sprint NORMALIZER-ENRICH-1: Kokoro Text Normalization Gap Fill"
-  - `src/utils/segmentNormalizer.ts` (9 new transform functions + heteronym table)
-  - `tests/fixtures/tts-normalization/english-v1.json` (≥18 new fixture entries)
-
-HOW (Implementation):
-  Hephaestus [sonnet] {medium}: Add transforms, heteronym table, fixtures. Validate ordering.
-
-HOW (Verification):
-  Hippocrates [haiku] {medium}: Golden fixture validation, alignment map integrity, full npm test/typecheck.
-
-HOW (Review / Closeout):
-  Solon [sonnet] {low}: Confirm existing fixtures unchanged, version bumped, transform ordering validated.
-```
-
-```text
 Sprint: TTS-RENDER-MAP-1 — Pre-Built Word Position Index
-Status: Queued after NORMALIZER-ENRICH-1.
+Status: Active queue head after NORMALIZER-ENRICH-1 landed on 2026-05-17 via `dcf8a7d`.
 Type: Performance optimization — O(1) word→DOM position lookup at narration rate. Research-driven (sioyek parallel-array architecture).
 
 WHAT: Build a WordPositionIndex once at render time (when foliate-js renders word spans). Event-driven word-boundary events resolve position via index lookup instead of live DOM querySelector + getBoundingClientRect.
@@ -234,6 +209,7 @@ Effort: S (~1).
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| NORMALIZER-ENRICH-1 | 2026-05-17 | PASS — Kokoro normalizer enrichment landed on canonical `main` via merge commit `dcf8a7d` from sprint branch commit `de5b441`. Added nine transforms (`dotted-acronym`, `address-abbreviation`, `url`, `fraction`, `decimal`, `number-range`, `terminal-punctuation`, `all-caps-quote`, `heteronym`), expanded fixtures from 8 to 33 including `St. Louis` guard coverage, added context-window heteronym tests, preserved existing fixture outputs, and bumped `TTS_NORMALIZER_VERSION` to `en-v2`. Verification passed: full `npm test` (184 passed, 1 skipped files; 2472 passed, 132 skipped tests), `npm run typecheck`, and `npm run build` (existing circular chunk warning unchanged). |
 | ENGINE-DORMANCY-1 | 2026-05-16 | PASS — MOSS-Nano and Pocket TTS are dormant at settings selection and IPC runtime entry. Registry/settings posture now presents Kokoro as the sole active local/cacheable model engine while preserving Nano/Pocket code; stale Nano, Pocket, and Qwen settings profiles migrate to Kokoro; direct `tts-nano-*` and `tts-pocket-*` calls fail closed with `reason: "engine-dormant"`; and MOSS Nano performance probes are explicit opt-in rather than default-suite blockers. Verification: targeted suite 8 files / 47 tests passed; full suite 185 files passed with 1 skipped, 2499 tests passed and 132 skipped tests; `npm run typecheck` passed; `npm run build` passed with the existing circular chunk warning. Closeout: `docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md`. |
 | TTS-INTEGRATE-1 | 2026-05-16 | PASS — Clean integration branch `sprint/tts-integrate-1-sync-diag-main` merged `origin/sprint/tts-sync-1-highlight-controller` first (`82aa76d`) and `origin/sprint/tts-diag-1-diagnostics-bundle` second (`04c033a`), preserving canonical governance freshness plus branch implementation facts. Verification passed: focused sync slice 4 files / 37 tests, focused diagnostics slice 4 files / 18 tests, `npm run typecheck`, `npm run build`, full `npm test` (183 files passed, 1 skipped; 2463 passed, 132 skipped), and `git diff --check`. |
 | TTS-DIAG-1 | 2026-05-15 | PASS — Provider-neutral `tts-diagnostics-v1` narration diagnostics bundle implemented on stacked branch `sprint/tts-diag-1-diagnostics-bundle` at `c97e446`, now landed on canonical `main` via TTS-INTEGRATE-1 merge commit `04c033a`. Bundle captures provider capabilities, selected engine/voice/rate, segment IDs, original/normalized hashes, cache key components, timing sidecar summaries, scheduler truth events, highlight sync decisions, and relevant errors without exporting audio payloads or raw book text by default. Redaction guardrails recursively strip/reject `rawText`, `originalText`, `normalizedText`, and audio-shaped fields; diagnostics observe `HighlightSyncController` decisions without changing cursor ownership. Verification: focused diagnostics slice 4 files / 18 tests, full `npm test` 184 files / 2606 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |

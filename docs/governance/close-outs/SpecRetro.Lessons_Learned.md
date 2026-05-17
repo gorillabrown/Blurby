@@ -266,3 +266,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future timing/event contracts should always include both raw/source coordinates and resolved/display coordinates, plus trust/correction flags, so scheduler fallback and diagnostics remain auditable across normalization and cache-hit paths.
 **Applies to:** Event-driven narration sync, timing sidecar consumers, normalized-text remap logic, and future provider boundary integrations
 **Status:** Observation
+
+### SRL-035 — Enrichment transforms need conservative guards to preserve legacy normalization behavior (NORMALIZER-ENRICH-1, 2026-05-17)
+**Verdict:** Gap-filling transforms can regress stable paths unless each new rule explicitly excludes known legacy patterns.
+**Evidence:** NORMALIZER-ENRICH-1 required tightening dotted-acronym and terminal-punctuation behavior so existing fixtures remained unchanged (for example preserving `p.m.` time parsing and heading-style strings without forced terminal periods), while still adding nine new transforms and 25 new fixtures.
+**Recommendation:** For future normalizer enrichment sprints, require one positive case plus one guard/no-op case per transform family, and validate transform ordering with explicit tests before broad-suite runs.
+**Applies to:** Normalizer enrichments, transform ordering work, fixture expansion sprints, and alignment-map stability checks
+**Status:** Observation

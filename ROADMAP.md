@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-16 — TTS-EVENT-SYNC-1 completed and merged to canonical `main`; event-driven word-boundary sync is now landed.
+**Last updated**: 2026-05-17 — NORMALIZER-ENRICH-1 completed and merged to canonical `main`; Kokoro text normalization coverage is now expanded with alignment-safe enrichment transforms.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 4 (4 full specs, 0 stubs).
+**Queue**: GREEN depth 3 (3 full specs, 0 stubs).
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
@@ -14,8 +14,8 @@
 ## Active Conveyor
 
 ```
-NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
-    → TTS-PIPELINE-1 → TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
+TTS-RENDER-MAP-1 → TTS-PIPELINE-1
+    → TTS-ARCH-DOC-1 → KOKORO-EXPORT-1 (optional future)
 ```
 
 **Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
@@ -57,7 +57,7 @@ NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1
 ## TTS Architecture Completion — Active Conveyor Belt
 
 > **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → NORMALIZER-ENRICH-1 → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
+> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → ~~NORMALIZER-ENRICH-1~~ PASS/landed → TTS-RENDER-MAP-1 → TTS-PIPELINE-1 → TTS-ARCH-DOC-1.
 > **Queue rule:** No exploratory TTS/model or non-desktop expansion work until this conveyor completes. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled.
 
 ### Standing Rules All Skeletons Inherit
@@ -166,6 +166,8 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ---
 
 #### Sprint NORMALIZER-ENRICH-1: Kokoro Text Normalization Gap Fill
+
+**Status:** ✅ COMPLETED on 2026-05-17. Sprint branch `sprint/normalizer-enrich-1-kokoro-text-normalization` commit `de5b441` merged into canonical `main` via `dcf8a7d`. Verification passed: targeted normalizer coverage (`tests/segmentNormalizer.test.ts` + `tests/heteronymDisambiguation.test.ts`), full `npm test` (184 passed, 1 skipped files; 2472 passed, 132 skipped tests), `npm run typecheck`, and `npm run build` (existing `settings -> tts -> settings` circular chunk warning unchanged).
 
 **What:** Fill normalization gaps identified by comparing Blurby's `segmentNormalizer.ts` (12 transforms) against abogen's `kokoro_text_normalization.py` (20+ transforms). Add missing transforms that improve Kokoro speech quality for English text. Add a heteronym disambiguation layer using context heuristics.
 
