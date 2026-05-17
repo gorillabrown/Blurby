@@ -256,7 +256,7 @@ export interface NarrateDiagSnapshot {
 /** Event log for handoff/recovery diagnostics. */
 export interface NarrateDiagEvent {
   timestamp: number;
-  event: "start" | "stop" | "pause" | "resume" | "extraction-handoff" | "context-restore" | "fallback" | "rate-clamp" | "coverage-check" | "cruise-warm" | "section-sync" | "word-source-refresh" | "word-source-growth-warning" | "source-promoted" | "selection-validated" | "page-mode-isolated" | "chunk-handoff" | "audio-visual-drift" | "truth-sync-correction" | "word-boundary-event";
+  event: "start" | "stop" | "pause" | "resume" | "extraction-handoff" | "context-restore" | "fallback" | "rate-clamp" | "coverage-check" | "cruise-warm" | "section-sync" | "word-source-refresh" | "word-source-growth-warning" | "source-promoted" | "selection-validated" | "page-mode-isolated" | "chunk-handoff" | "audio-visual-drift" | "truth-sync-correction" | "word-boundary-event" | "word-position-index-build" | "word-position-index-miss";
   detail: string;
 }
 

@@ -19,6 +19,16 @@ export interface FoliateWord {
 
 export const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
 
+export function parseWordIndexAttribute(value: string | null | undefined): number | null {
+  const parsed = Number.parseInt(value || "", 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+export function queryWordSpans(root: ParentNode | null | undefined): HTMLElement[] {
+  if (!root) return [];
+  return Array.from(root.querySelectorAll<HTMLElement>("[data-word-index]"));
+}
+
 export function hasToken(value: string | null | undefined, token: string): boolean {
   return String(value || "").toLowerCase().split(/\s+/).includes(token.toLowerCase());
 }
