@@ -3,7 +3,7 @@
 **Last updated**: 2026-05-17 — TTS-ARCH-DOC-1 completed and merged to canonical `main`; TTS Architecture Complete is now reached with a standing architecture decision record at `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Architecture Complete — reached on 2026-05-17. Every implicit TTS architecture decision is now explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: CRITICAL depth 1 (1 full spec, 0 stubs). Only the optional future `KOKORO-EXPORT-1` pointer remains; run roadmap review/backfill before any additional dispatch.
+**Queue**: GREEN depth 3 (3 full specs, 0 stubs). Roadmap review/backfill completed; queue head remains `KOKORO-EXPORT-1` with two queued follow-on specs.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout; the legacy Markdown queue was retired on 2026-05-17.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -15,7 +15,7 @@
 ## Active Conveyor
 
 ```
-KOKORO-EXPORT-1 (optional future)
+KOKORO-EXPORT-1 (optional future) -> NARR-MEDIA-1 -> NARR-PAUSE-STATE-1
 ```
 
 **Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
@@ -291,4 +291,52 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 **WHERE:** Future spec should start from `scripts/kokoro_pair_baseline.mjs`, `scripts/moss_kokoro_benchmark.mjs`, Kokoro generation IPC, chunk metadata from `KOKORO-DEEPEN-2`, and Abogen's export/subtitle code.
 
-**Status:** Queued optional future pointer. Do not dispatch until TTS Architecture Completion conveyor completes (TTS-SYNC-1 through TTS-ARCH-DOC-1). Export depends on durable segment identity, cache identity, timing sidecars, and highlight/timing truth; it is not the next sprint.
+**Status:** Queued optional future pointer. TTS Architecture Completion dependency is now satisfied (`TTS-ARCH-DOC-1` landed 2026-05-17), but this sprint still requires explicit dispatch authorization because it opens a new exploratory lane.
+
+---
+
+#### Sprint NARR-MEDIA-1: MediaSession Narration Transport Controls
+
+**Status:** Queued full spec.
+
+**What:** Add Electron MediaSession transport integration for Narrate Mode so OS-level media controls (lock screen, headset, keyboard transport keys) can control active narration sessions. Scope includes play/pause, next/previous logical jump, and metadata updates (title/chapter/position state) without changing TTS generation behavior.
+
+**Why:** Narration is currently app-local only. MediaSession support gives high-value UX continuity for long-form listening with low architectural risk and no engine-posture changes.
+
+**Prerequisites:** `TTS-ARCH-DOC-1` complete; no engine reactivation required.
+
+**Done when:**
+1. Narration registers MediaSession action handlers for play/pause/next/previous in supported desktop environments.
+2. Media metadata updates with current book/chapter context while narration is active.
+3. Unsupported hosts fail gracefully with no narration regression.
+4. Verification passes: focused narration control tests, `npm run typecheck`, and full `npm test`.
+
+**Effort:** S (~1).
+
+**Roster:** Hercules (implementation) • Hippocrates (verification) • Solon (spec compliance).
+
+**Source:** `docs/governance/IDEAS.md` Theme H idea H7; Blurby.Research readest control-surface pattern notes.
+
+---
+
+#### Sprint NARR-PAUSE-STATE-1: Named Pause State Machine
+
+**Status:** Queued full spec.
+
+**What:** Introduce explicit pause-reason states for narration (`stop-paused`, `rate-change-paused`, `voice-change-paused`, `forward-paused`, `backward-paused`) and wire resume behavior to reason-specific policies.
+
+**Why:** Current pause handling is binary and loses intent, which creates avoidable resume ambiguity after control actions. Named pause states improve correctness and debuggability without touching engine posture.
+
+**Prerequisites:** `NARR-MEDIA-1` recommended (shared transport semantics), `TTS-ARCH-DOC-1` complete.
+
+**Done when:**
+1. Pause reason enum/state is introduced and exercised by narration controls.
+2. Resume behavior is reason-aware and deterministic in tests.
+3. Diagnostics include pause reason transitions for troubleshooting.
+4. Verification passes: focused narration state tests, `npm run typecheck`, and full `npm test`.
+
+**Effort:** S/M (~2).
+
+**Roster:** Hercules (state-machine implementation) • Hippocrates (verification) • Solon (spec compliance) • Plato (quality review).
+
+**Source:** `docs/governance/IDEAS.md` Theme H idea H8; Blurby.Research readest controller state-pattern findings.
