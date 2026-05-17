@@ -294,3 +294,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When a sprint needs to test a private production contract end-to-end, prefer extracting a pure helper that production also consumes over reconstructing the same object shape in test-only code.
 **Applies to:** Cache identity, normalized segment identity, timing sidecar construction, diagnostics bundle construction, and future export pipeline tests
 **Status:** Observation
+
+### SRL-039 — Canonical architecture decision records prevent stale review artifacts from driving sprint routing (TTS-ARCH-DOC-1, 2026-05-17)
+**Verdict:** The TTS architecture became easier to audit once engine posture, invariants, research dispositions, and P1/P2 finding outcomes moved into one standing governance document.
+**Evidence:** TTS-ARCH-DOC-1 created `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`, linked it from `TECHNICAL_REFERENCE.md`, and marked it as the canonical home in `ROADMAP_SPECS.md` so future sessions no longer need to infer current decisions from scattered roadmap specs, review artifacts, and closeouts.
+**Recommendation:** Future architecture completion phases should end with one canonical decision record that distinguishes adopted, rejected, deferred, and reactivation conditions before new optional lanes are dispatched.
+**Applies to:** Architecture finish-line sprints, roadmap reviews, engine posture decisions, future export planning, and audit handoffs
+**Status:** Observation
