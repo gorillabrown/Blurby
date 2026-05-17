@@ -11,6 +11,24 @@ import {
 const fixtureCases = fixtures as SegmentNormalizationFixture[];
 
 describe("SegmentNormalizer", () => {
+  it("maintains the expanded fixture corpus for pipeline-truth coverage", () => {
+    expect(fixtureCases.length).toBeGreaterThanOrEqual(15);
+
+    const requiredFixtureIds = [
+      "ocr-artifact-rn-cardinal",
+      "poetry-verse-line-breaks",
+      "table-alignment-currency",
+      "footnote-heavy-citation-removal",
+      "mixed-language-embedded-words",
+      "ellipsis-emdash-preservation",
+      "nested-quotation-marks",
+    ];
+
+    for (const fixtureId of requiredFixtureIds) {
+      expect(fixtureCases.some((fixture) => fixture.id === fixtureId)).toBe(true);
+    }
+  });
+
   it("normalizes conservative English golden fixtures with explicit transform metadata", () => {
     for (const fixture of fixtureCases) {
       const result = normalizeSegmentText(fixture.input, { locale: fixture.locale });

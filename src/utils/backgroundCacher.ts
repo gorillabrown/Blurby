@@ -12,7 +12,6 @@
 // Respects the ttsCacheEnabled setting. When disabled, no background work runs.
 
 import {
-  TTS_CACHE_SCHEMA_VERSION,
   TTS_CRUISE_CHUNK_WORDS,
   KOKORO_DEFAULT_RATE_BUCKET,
   ENTRY_COVERAGE_TARGET_MS,
@@ -23,8 +22,7 @@ import {
 import * as ttsCache from "./ttsCache";
 import { buildOpeningRampPlan } from "./generationPipeline";
 import type { PronunciationOverride } from "../types";
-import type { TtsCacheIdentityV2 } from "../types/ttsCache";
-import { normalizeSegmentText } from "./segmentNormalizer";
+import { buildKokoroCacheIdentity } from "./ttsCacheIdentity";
 
 const api = window.electronAPI;
 
@@ -105,25 +103,17 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     async function cacheRange(startIdx: number, endIdx: number): Promise<number> {
       const chunkWords = book.words.slice(startIdx, endIdx);
       const text = chunkWords.join(" ");
-      const normalization = normalizeSegmentText(text, {
-        locale: "en-US",
-        pronunciationOverrides: config.getPronunciationOverrides?.(),
-      });
-      const cacheIdentity: TtsCacheIdentityV2 = {
-        schemaVersion: TTS_CACHE_SCHEMA_VERSION,
-        provider: "kokoro",
+      const { identity: cacheIdentity, normalization } = buildKokoroCacheIdentity({
+        text,
+        startIdx,
+        bookId: book.id,
         voiceId: rawVoiceId,
         rateBucket: bucket,
+        pronunciationOverrides: config.getPronunciationOverrides?.(),
         modelVersion: KOKORO_MODEL_ID,
-        sourceTextHash: normalization.sourceTextHash,
-        normalizedTextHash: normalization.normalizedTextHash,
-        normalizerVersion: normalization.normalizerVersion,
-        pronunciationOverrideHash: normalization.pronunciationOverrideHash,
-        documentLocator: { bookId: book.id },
-        chunkId: `${book.id}:${startIdx}:${normalization.normalizationHash}`,
         sampleRate: KOKORO_SAMPLE_RATE,
         timingTruth: "word-native",
-      };
+      });
 
       const isCached = await ttsCache.isCached(book.id, cacheIdentity, startIdx);
       if (isCached) return 0;
@@ -281,25 +271,17 @@ export function createBackgroundCacher(config: BackgroundCacherConfig): Backgrou
     for (let idx = 0; idx < book.words.length; idx += TTS_CRUISE_CHUNK_WORDS) {
       const chunkWords = book.words.slice(idx, Math.min(idx + TTS_CRUISE_CHUNK_WORDS, book.words.length));
       const text = chunkWords.join(" ");
-      const normalization = normalizeSegmentText(text, {
-        locale: "en-US",
-        pronunciationOverrides: config.getPronunciationOverrides?.(),
-      });
-      const cacheIdentity: TtsCacheIdentityV2 = {
-        schemaVersion: TTS_CACHE_SCHEMA_VERSION,
-        provider: "kokoro",
+      const { identity: cacheIdentity } = buildKokoroCacheIdentity({
+        text,
+        startIdx: idx,
+        bookId,
         voiceId: config.getVoiceId(),
         rateBucket: bucket,
+        pronunciationOverrides: config.getPronunciationOverrides?.(),
         modelVersion: KOKORO_MODEL_ID,
-        sourceTextHash: normalization.sourceTextHash,
-        normalizedTextHash: normalization.normalizedTextHash,
-        normalizerVersion: normalization.normalizerVersion,
-        pronunciationOverrideHash: normalization.pronunciationOverrideHash,
-        documentLocator: { bookId },
-        chunkId: `${bookId}:${idx}:${normalization.normalizationHash}`,
         sampleRate: KOKORO_SAMPLE_RATE,
         timingTruth: "word-native",
-      };
+      });
       if (!(await ttsCache.isCached(bookId, cacheIdentity, idx))) return false;
     }
     return true;
