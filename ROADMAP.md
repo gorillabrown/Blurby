@@ -1,64 +1,47 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-17 — TTS-ARCH-DOC-1 completed and merged to canonical `main`; TTS Architecture Complete is now reached with a standing architecture decision record at `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`.
+**Last updated**: 2026-05-17 — Roadmap review: TTS Architecture Complete finish line reached. All 10 conveyor sprints landed. Full phase archived. New finish line TBD.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
-**Finish line**: TTS Architecture Complete — reached on 2026-05-17. Every implicit TTS architecture decision is now explicit, tested, and debuggable with Kokoro as the sole active local/cacheable model engine (Web Speech remains a platform fallback).
-**Queue**: GREEN depth 3 (3 full specs, 0 stubs). Roadmap review/backfill completed; queue head remains `KOKORO-EXPORT-1` with two queued follow-on specs.
-**Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout; the legacy Markdown queue was retired on 2026-05-17.
+**Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
+**Queue**: GREEN (depth 7). 5 full specs + 2 stubs. Next dispatch: NARR-MEDIA-1.
+**Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
-> **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
+> **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
 >
 > **Sprint closeout convention:** Unless a sprint explicitly says otherwise, every successful CLI sprint auto-merges: stage specific files, commit on sprint branch, merge to `main` with `--no-ff`, push, update governance docs and `docs/governance/sprint-queue.xlsx`.
 
 ---
 
-## Active Conveyor
+## Completed Work Summary
 
-```
-KOKORO-EXPORT-1 (optional future) -> NARR-MEDIA-1 -> NARR-PAUSE-STATE-1
-```
+| Sprint | Date | Result | Close-Out |
+|--------|------|--------|-----------|
+| KOKORO-DEEPEN-1 | 2026-05-11 | Kokoro readiness and preflight checks | — |
+| KOKORO-DEEPEN-2 | 2026-05-11 | Natural chunk highlighting for Kokoro TTS | — |
+| KOKORO-DEEPEN-3 | 2026-05-11 | Voice mixing feasibility study | — |
+| TTS-REGISTRY-1 | 2026-05-12 | Provider capability truth in ttsProviderRegistry | `ROADMAP_ARCHIVE_2026-05-14.md` |
+| TTS-NORMALIZE-1 | 2026-05-13 | English-first spoken-text normalization | `ROADMAP_ARCHIVE_2026-05-14.md` |
+| TTS-CACHE-TIMING-1 | 2026-05-13 | Schema-versioned v2 cache identities and atomic timing sidecars | `CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md` |
+| TTS-SYNC-1 | 2026-05-15 | Centralized narration highlight sync policy | `CloseOut.TTS-SYNC-1.2026-05-15.md` |
+| TTS-DIAG-1 | 2026-05-15 | Provider-neutral diagnostics bundle | `CloseOut.TTS-DIAG-1.2026-05-15.md` |
+| ENGINE-DORMANCY-1 | 2026-05-16 | Disabled dormant sidecar engines at settings/IPC | `CloseOut.ENGINE-DORMANCY-1.2026-05-16.md` |
+| TTS-INTEGRATE-1 | 2026-05-16 | Merged sync and diagnostics branches to main | `CloseOut.TTS-INTEGRATE-1.2026-05-16.md` |
+| TTS-CACHE-HARDEN-1 | 2026-05-16 | Cache-hit timing parity, type harmonization, IPC validation | `CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md` |
+| TTS-EVENT-SYNC-1 | 2026-05-16 | Event-driven word sync from research | `CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md` |
+| NORMALIZER-ENRICH-1 | 2026-05-17 | Normalizer gap fill from abogen research | `CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md` |
+| TTS-RENDER-MAP-1 | 2026-05-17 | Sioyek-inspired word position index | `CloseOut.TTS-RENDER-MAP-1.2026-05-17.md` |
+| TTS-PIPELINE-1 | 2026-05-17 | End-to-end pipeline integration tests | `CloseOut.TTS-PIPELINE-1.2026-05-17.md` |
+| TTS-ARCH-DOC-1 | 2026-05-17 | Architecture decision records for TTS | `CloseOut.TTS-ARCH-DOC-1.2026-05-17.md` |
+| SK-HYG-2 | 2026-05-16 | Directory reorganization (Lane E governance) | `CloseOut.SK-HYG-2.2026-05-16.md` |
 
-**Parallel hotfix lane:** `SK-HYG-2` completed as a Lane E governance/docs reorganization. It did not displace the TTS FIFO conveyor.
-
-**Deferred lanes:** Track B (Chrome Extension EXT-ENR-C), Track C (Android APK-0 through APK-4), Phase 7 (Cloud Sync), Phase 8 (RSS/News), Idea Themes A-K. See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` and `docs/governance/IDEAS.md`.
-
----
-
-## Parallel Governance Hotfix Lane
-
-#### Sprint SK-HYG-2: Directory Reorganization (Option B)
-
-**Status:** Completed on branch `sprint/sk-hyg-2-directory-reorg` after mid-dispatch Type 3 pivot scope amendment. Exact path-string repairs were allowed in four files (`tests/artifactHygienePolicy.test.ts`, `scripts/tts_engine_scan_index.mjs`, `scripts/qwen_streaming_sidecar.py`, `main/ipc/stats.js`) to restore correctness after the documented moves. IDE metadata and binary audit-package contents are intentionally deferred. This remained a standalone Lane E hotfix and did not change FIFO ordering.
-
-**Decision lock:** Conveyor positioning is the standalone parallel hotfix lane. Artifacts policy is curated Option B: ignore most of `artifacts/` and `tmp/`, then preserve canonical decision evidence in tracked `docs/evidence/`.
-
-**What:** Reorganize `docs/` from 11 top-level folders into 6-7 purpose-specific folders, standardize archives under `.Archive/`, curate canonical evidence out of `artifacts/`, collapse duplicate `tmp_brandcheck*` folders, and update path references.
-
-**Why:** The current docs/archive/artifact layout creates governance drag and clone bloat. This cleanup gives upcoming TTS and release work a clearer tree without touching runtime code.
-
-**Prerequisites:** None. Parallel-safe because it owns Lane E only and has no shared-core touches. Original runtime/test/script edits were forbidden; mid-dispatch amendment allowed only the exact stale path-string repairs required by verification.
-
-**Full spec:** `docs/planning/SK-HYG-2-DISPATCH.md`
-
-**Done when:**
-1. `docs/` has `governance/`, `planning/`, `studies/`, `testing/`, `extension/`, `evidence/`, and optionally `brand/`.
-2. Filename-suffix archives are replaced by `.Archive/` subfolders.
-3. `artifacts/`, `tmp/`, and `tmp_brandcheck*` are ignored or removed per the dispatch, while curated evidence is preserved under `docs/evidence/`.
-4. `ROADMAP.md`, `docs/governance/sprint-queue.xlsx`, `CLAUDE.md`, `README.md`, and `ROADMAP_SPECS.md` point to the new paths.
-5. Verification proves no forbidden code/test/build paths were modified or staged, and dirty 13d implementation files remain unstaged.
-6. Mid-dispatch amendment is recorded; binary audit packages and IDE metadata old-path strings are deferred.
-
-**Effort:** M (~3 LOE). Two waves: Wave A folder/archive/evidence cleanup; Wave B cross-reference sweep, verification, docs, and git.
-
-**Roster:** Hermes (mechanical moves/gitignore/git) • Hephaestus (archive/evidence/path judgment) • Hippocrates (test/build sanity if required by final diff) • Solon (spec compliance) • Plato (quality/path-trap review) • Herodotus (governance closeout).
+**Dissolved sprints:**
+- `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
+- `TTS-CANARY-1` — Sidecar engines dormant, canary probes unnecessary (2026-05-15)
+- `TTS-REGISTRY-DISPATCH-1` — Single active engine, registry dispatch unnecessary (2026-05-15)
 
 ---
 
-## TTS Architecture Completion — Complete
-
-> **Finish line:** TTS Architecture Complete — make every implicit TTS architecture decision explicit, tested, and debuggable. Desktop v2.0 was achieved; this phase makes the TTS system export-ready.
-> **Conveyor sequence:** ~~TTS-SYNC-1~~ PASS/landed → ~~TTS-DIAG-1~~ PASS/landed → ~~ENGINE-DORMANCY-1~~ PASS/landed → ~~TTS-INTEGRATE-1~~ PASS/landed → ~~TTS-CACHE-HARDEN-1~~ PASS/landed → ~~TTS-EVENT-SYNC-1~~ PASS/landed → ~~NORMALIZER-ENRICH-1~~ PASS/landed → ~~TTS-RENDER-MAP-1~~ PASS/landed → ~~TTS-PIPELINE-1~~ PASS/landed → ~~TTS-ARCH-DOC-1~~ PASS/landed.
-> **Queue rule:** The TTS Architecture Completion conveyor is complete. Default engine remains Kokoro; Qwen is retired for Desktop v2 and remains disabled. New exploratory TTS/model or non-desktop expansion work should enter through roadmap review/backfill unless explicitly authorized.
+## Active & Remaining Sprint Skeletons
 
 ### Standing Rules All Skeletons Inherit
 
@@ -69,7 +52,7 @@ KOKORO-EXPORT-1 (optional future) -> NARR-MEDIA-1 -> NARR-PAUSE-STATE-1
 5. **PR-17:** Never drive imperative DOM animations from React useEffect — use a plain class.
 6. **PR-26:** Settings that control a runtime engine must have explicit sync bridges.
 7. **SRL-012:** For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible.
-8. **Queue depth ≥3:** If queue drops below 3 after completion, stop and backfill before next dispatch.
+8. **Queue depth >=3:** If queue drops below 3 after completion, stop and backfill before next dispatch.
 9. **Spec-compliance before quality:** Each task gets Solon check (does it match spec?) before Plato check (is it well-built?).
 10. **Dispatch sizing:** 40 tool-use ceiling per wave. Sprints with 5+ implementation tasks must be pre-split into waves.
 
@@ -79,264 +62,189 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 ---
 
-#### Sprint TTS-INTEGRATE-1: Integrate TTS Sync And Diagnostics Stack
+### Phase: Reading Experience v2
 
-**Status:** Completed on 2026-05-16. `origin/sprint/tts-sync-1-highlight-controller` merged first (`82aa76d`), then `origin/sprint/tts-diag-1-diagnostics-bundle` (`04c033a`) in clean integration branch `sprint/tts-integrate-1-sync-diag-main`. Verification passed: focused sync slice (4 files / 37 tests), focused diagnostics slice (4 files / 18 tests), `npm run typecheck`, `npm run build`, full `npm test` (183 files passed, 1 skipped; 2463 passed, 132 skipped), and `git diff --check`.
+#### Stage 1a — Narration UX (serial)
 
-**What:** Land the already-complete `TTS-SYNC-1` and stacked `TTS-DIAG-1` branches into canonical `main` from a clean integration context.
+#### NARR-MEDIA-1 — MediaSession Integration
 
-**Why:** `TTS-SYNC-1` and `TTS-DIAG-1` are complete, verified, pushed, and governance-recorded, but downstream sprints should not start from canonical `main` until their sync/diagnostics architecture is actually present there. The original main worktree had unrelated dirty files, so integration must be handled deliberately rather than hidden as a prerequisite on `TEST-HARNESS-1`.
+- **What:** Register Electron's MediaSession API so narration responds to OS-level media controls (play/pause/next-track/previous-track from lock screen, Bluetooth headphones, media keyboards). Map next-track to skip-sentence and previous-track to back-sentence.
+- **Why:** High daily-use value for headphone listeners. The TTS architecture is complete but invisible to the OS — users can't control narration without the app in focus. Readest implements this via Tauri; Electron has equivalent API. Research finding H7.
+- **Prerequisites:** None. useNarration already exposes pause/resume/stop. audioScheduler has getAudioProgress.
+- **Done when:**
+    1. `navigator.mediaSession.metadata` populated with book title, author, and cover art on narration start
+    2. `navigator.mediaSession.setActionHandler` wired for play, pause, stop, nexttrack, previoustrack
+    3. play/pause toggles narration state via existing dispatch
+    4. nexttrack advances to next sentence boundary (uses narrationPlanner sentence breaks)
+    5. previoustrack retreats to previous sentence start
+    6. MediaSession playback state updates on every narration state change (playing/paused/none)
+    7. Metadata clears on narration stop or book close
+    8. 12+ focused tests covering all action handlers, state transitions, and metadata lifecycle
+- **Effort:** S (1 day). Single file addition + hook integration.
+- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
+- **Source:** IDEAS.md H7, Blurby.Research findings (readest pattern)
 
-**Prerequisites:** `TTS-SYNC-1` PASS/pushed at `142dc24`; `TTS-DIAG-1` PASS/pushed at `c97e446`; both branches available from origin.
-
-**Done when:**
-1. A clean integration context exists, preferably a temporary worktree if canonical `main` remains dirty.
-2. `sprint/tts-sync-1-highlight-controller` is merged first, preserving the centralized `TimingMetadataStore` and `HighlightSyncController` behavior and closeout docs.
-3. `sprint/tts-diag-1-diagnostics-bundle` is merged second, preserving the redacted `tts-diagnostics-v1` bundle, settings export, eval-runner validation, runbook docs, and redaction guardrails.
-4. Any conflicts are resolved by preserving canonical governance freshness plus the branch implementation facts; do not resurrect stale Desktop v2.0 queue state from either branch.
-5. Verification passes after the combined merge: focused sync tests, focused diagnostics tests, `npm run typecheck`, `npm run build`, `npm test`, and `git diff --check`.
-6. Canonical governance is updated from "PASS/pushed, merge pending" to "landed on main" for both sprints only after the broad verification gate is resolved and the integration branch is committed/pushed/merged or PR-approved.
-7. The final integration branch is committed, pushed, and either merged to `main` or prepared for PR according to the repository's current dirty-worktree constraints.
-
-**Effort:** S/M (~2). Git integration plus verification; no intentional product behavior change beyond landing already-reviewed work.
-
-**Roster:** Zeus/Codex parent (merge orchestration) • Hippocrates (focused/full verification) • Solon (governance freshness check) • Herodotus (closeout/governance staging if merge cannot land directly).
-
-**Source:** TTS-SYNC-1 closeout, TTS-DIAG-1 closeout, and 2026-05-15 queue correction that integration is the true prerequisite before `TEST-HARNESS-1`.
-
----
-
-#### Sprint TTS-CACHE-HARDEN-1: Cache/Pipeline Type Safety And Timing Identity Parity
-
-**Status:** Completed on 2026-05-16. Sprint branch `sprint/tts-cache-harden-1-cache-pipeline-parity` commit `53c7862` merged into canonical `main` via `c54dd0f`. Reported verification passed: focused sprint tests (5 files / 48 tests), `npm run typecheck`, `npm run build`, full `npm test` (183 passed, 1 skipped files; 2467 passed, 132 skipped tests), and `git diff --check`.
-
-**What:** Fix cache-hit/miss observational asymmetry, harmonize timing classification types, add runtime shape validation at the main↔renderer IPC boundary, and harden pipeline edge cases (dangling promises, backpressure on resume, cache key safety). This sprint makes the cache layer honest — downstream consumers (highlight sync controller, diagnostics bundle, event-driven sync) can trust that a cached chunk carries the same metadata as a freshly generated one.
-
-**Why:** `loadCachedChunk` returns fewer metadata fields than fresh chunks — cache hits and misses are observably different to the scheduler and HighlightSyncController. Composite voice IDs with `/` can break v1 cache keys. Timing classification has three overlapping concepts that need harmonization. See [`ROADMAP_SPECS.md`](ROADMAP_SPECS.md) for full grounding.
-
-**Prerequisites:** `TTS-INTEGRATE-1` (needs `HighlightSyncController` and `TimingMetadataStore` on `main` to verify parity fixes).
-
-**Done when (core gate — required for sprint completion):**
-1. `ScheduledChunk` interface (`src/utils/audioScheduler.ts:79-103`) gains optional fields: `timingTruth?: TtsProviderTimingTruth`, `chunkId?: string`. `boundaryType` and `wordTimestamps` already exist as optional fields.
-2. `loadCachedChunk` (`src/utils/ttsCache.ts:26-55`) reads the timing sidecar via the `TtsCacheReadResult.timing` field and populates `timingTruth` and `boundaryType` on the returned `ScheduledChunk` from sidecar data. Cache hits now carry the same timing/boundary metadata as fresh chunks.
-3. Timing classification harmonized: `TtsProviderTimingTruth` is the single canonical enum. `classifyTiming()` derives `"trusted"` only when truth is `"word-native"` AND timestamps non-empty AND count matches chunk span. `classifyTiming` is the single decision point — no parallel classification logic.
-4. Legacy v1 cache key (`main/tts-cache.js:135`) encodes `/` in voice IDs to prevent path traversal (e.g., `voiceId.replace(/\//g, '__')` or equivalent safe encoding). V2 keys already use hashed identity and are safe.
-5. `main/tts-cache.js` IPC responses (the `TtsCacheReadResult` shape returned to renderer) include a lightweight runtime shape check at the IPC boundary — verify that `durationMs` is a number (not a string) and that `wordTimestamps`, when present, is an array of `{word, startTime, endTime}` objects. Log and reject malformed responses rather than propagating garbage downstream. This is a guard, not a schema validator — keep it cheap.
-6. All existing cache tests pass. New tests cover: cache-hit metadata parity (a cached chunk has the same `timingTruth`/`boundaryType` as the originally generated chunk), timing classification derivation (including the full-record validation — truth + timestamps + count), v1 slash encoding, IPC shape validation rejection.
-7. `npm test` passes, `npm run typecheck` passes, `npm run build` passes.
-
-
-**Effort:** S-M (~2). Type additions, sidecar reading in cache path, IPC guard, and edge-case fixes. No architectural changes.
-
-**Roster:** Hephaestus (cache/pipeline fixes) • Hippocrates (parity tests + regression suite) • Solon (spec compliance) • Plato (timing ownership review).
-
-**Source:** Implementation Review (2026-05-15) P1 #2-3, P2 #7-11; Literature Review (2026-05-11) §4.6.
+##### Implementation detail
+- **Edit sites:** New file `src/utils/mediaSessionBridge.ts` (~120 lines); `src/hooks/useNarration.ts` (add effect calling bridge on state change, ~15 lines at narration start/stop/pause/resume paths); `src/types.ts` (no change — existing NarrationState sufficient)
+- **Tests:** New `tests/mediaSessionBridge.test.ts`; mock `navigator.mediaSession` with jest spy
+- **Constants:** None new
+- **Branch:** `sprint/narr-media-1` from clean main
+- **Commit hygiene:** explicit-stage; no destructive flags
 
 ---
 
-#### Sprint TTS-EVENT-SYNC-1: Event-Driven Word Boundary Sync
+#### NARR-PAUSE-1 — Named-Pause State Machine
 
-**Status:** Completed on 2026-05-16. Sprint branch `sprint/tts-event-sync-1-word-boundary-sync` commit `a71df02` merged into canonical `main` via `2c946ad`. Verification passed: focused event-sync slice (8 files / 66 tests), `npm run typecheck`, `npm run build`, and full `npm test` (183 passed, 1 skipped files; 2469 passed, 132 skipped tests).
+- **What:** Discriminate WHY playback paused by adding a `pauseReason` field to NarrationState. Reasons: `"user-stop"`, `"rate-change"`, `"voice-change"`, `"forward-seek"`, `"backward-seek"`, `"mode-switch"`, `"book-end"`. Resume behavior differs by reason: rate/voice changes auto-resume after config applies; user-stop requires explicit resume; forward/backward seek resume at new position.
+- **Why:** Currently all pauses are identical — the UI can't distinguish "user pressed pause" from "system paused briefly for rate change." This causes jarring UX: rate changes require manual resume, and the cursor behavior during system-initiated pauses is indistinguishable from user-initiated stops. Named-pause enables NARR-CURSOR-2 to make smarter hold decisions. Research finding H8 (readest 7-state machine).
+- **Prerequisites:** None.
+- **Done when:**
+    1. `NarrationState` has `pauseReason: PauseReason | null` field
+    2. `PauseReason` is a union type with the 7 discriminants listed above
+    3. Every dispatch of `{ type: "PAUSE" }` in useNarration.ts includes the reason
+    4. Rate-change pause auto-resumes after debounce completes (existing behavior preserved, now explicit)
+    5. Voice-change pause auto-resumes after voice swap completes
+    6. Forward/backward seek pauses resume at new cursor position
+    7. User-stop requires explicit resume (play button or keyboard)
+    8. MediaSession bridge (from NARR-MEDIA-1) reports correct playback state during auto-resume pauses
+    9. 15+ focused tests covering each pause reason and its resume behavior
+- **Effort:** S (1 day). Type addition + dispatch-site updates.
+- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
+- **Source:** IDEAS.md H8, Blurby.Research findings (readest TTSController pattern)
 
-**What:** Promote `onTruthSync` from a visual-only hint to the primary highlight-advance trigger, demoting the RAF-based polling loop from the word-highlight hot path. RAF is retained for progress bar, time-remaining display, and as fallback for non-word-native timing modes. Add a normalized→original word index alignment table to `segmentNormalizer` so Kokoro-emitted token positions (in normalized text space) correctly resolve to original word positions in the DOM. Elevate word-boundary emission from a strategy implementation detail to a provider-level contract (inspired by RealtimeTTS's `TimingInfo` interface where every engine emits `{word, start_time, end_time}` through a unified callback).
-
-**Why:** Research codebases achieve word-level highlighting via explicit word-boundary events, not duration estimation. Blurby has the pieces (`onTruthSync`, `highlightSyncController`) but the hot path still polls via RAF. Event-driven sync is simpler and eliminates the time-to-word resolution layer. Word-boundary emission should be a provider-level contract.
-
-**Prerequisites:** `TTS-INTEGRATE-1` (needs `HighlightSyncController` and `TimingMetadataStore` on `main`), `TTS-CACHE-HARDEN-1` (cache-hit timing parity — event-driven sync needs `timingTruth` on cached chunks to make correct highlight decisions).
-
-**Done when:**
-1. `segmentNormalizer.ts` produces a `normalizedToOriginalMap: number[]` in the `SegmentNormalizationResult` — a parallel array where `map[normalizedTokenIndex] = originalWordIndex`, accounting for token expansions (e.g., "$5" → ["five", "dollars"] both map back to the original "$5" word's index). Golden fixtures updated with expected maps.
-2. Kokoro strategy emits word-boundary events (via `onTruthSync` or equivalent callback) on each word advance during playback, carrying the resolved **original** wordIndex (using the alignment map from criterion 1).
-3. `useNarration` consumes word-boundary events as the primary highlight-advance trigger, calling `resolveHighlightSync` from the event handler instead of RAF.
-4. RAF polling demoted from word-highlight hot path only after measurement confirms event-driven achieves equal or better p95 latency. RAF retained for progress bar, time-remaining, and non-word-native fallback.
-5. `highlightSyncController.resolve()` interface is unchanged — called from the event handler instead of RAF, receiving the already-resolved original wordIndex.
-6. `narrateDiagnostics` adds a `"word-boundary-event"` event type tracking event timing, source wordIndex (normalized), resolved wordIndex (original), and any alignment corrections.
-7. `lastConfirmedAudioWordRef` ownership unchanged (LL-079) — events feed into the existing write path, not a new one.
-8. Provider-level timing contract: `ttsProvider.ts` `ProviderCapabilities` gains an `emitsWordBoundaryEvents: boolean` field. Kokoro sets `true`; dormant engines set `false`. The word-boundary callback type is defined at the provider level, not per-strategy.
-9. Fallback preserved: when `timingTruth !== "word-native"`, the controller downgrades to chunk/segment mode — no change to fallback behavior.
-10. Adaptive cursor lag: event-driven sync bypasses fixed `NARRATION_CURSOR_LAG_MS`; constant retained as non-event-driven fallback.
-11. `npm test` passes, `npm run typecheck` passes, `npm run build` passes.
-
-**Effort:** M-L (~4-5). Changes span normalizer, strategy, useNarration, provider types, and diagnostics; Phase 0 hard gate adds segment identity assessment overhead; core highlight controller interface unchanged.
-
-**Roster:** Hephaestus (alignment table + normalizer) • Athena (event-driven sync wiring + provider contract + segment identity assessment) • Hippocrates (regression suite + alignment fixtures) • Solon (spec compliance) • Plato (timing ownership review).
-
-**Source:** Cross-codebase research (2026-05-15): readest, RealtimeTTS, sioyek. OutsideAudit.1 F3/F7.
+##### Implementation detail
+- **Edit sites:** `src/types/narration.ts` (add PauseReason type, extend NarrationState and PAUSE action); `src/hooks/useNarration.ts` (update ~8 dispatch sites that emit PAUSE to include reason; update rate-change handler ~line 1422, voice-change ~line 1500, forward/backward seek paths, stop path); `src/utils/mediaSessionBridge.ts` (respect pauseReason for playback state reporting)
+- **Tests:** New `tests/namedPause.test.ts`
+- **Constants:** None new
+- **Branch:** `sprint/narr-pause-1` from clean main
+- **Commit hygiene:** explicit-stage; no destructive flags
 
 ---
 
-#### Sprint NORMALIZER-ENRICH-1: Kokoro Text Normalization Gap Fill
+#### NARR-CURSOR-2 — Silence-Aware Cursor Hold
 
-**Status:** ✅ COMPLETED on 2026-05-17. Sprint branch `sprint/normalizer-enrich-1-kokoro-text-normalization` commit `de5b441` merged into canonical `main` via `dcf8a7d`. Verification passed: targeted normalizer coverage (`tests/segmentNormalizer.test.ts` + `tests/heteronymDisambiguation.test.ts`), full `npm test` (184 passed, 1 skipped files; 2472 passed, 132 skipped tests), `npm run typecheck`, and `npm run build` (existing `settings -> tts -> settings` circular chunk warning unchanged).
+- **What:** Use word-level `endTime` from Kokoro timestamps to detect inter-word silence gaps. Hold the narration cursor visually still during gaps (between `word[i].endTime` and `word[i+1].startTime`) instead of interpolating through silence. During `pauseReason: "rate-change"` or `"voice-change"`, cursor freezes at last confirmed position rather than drifting.
+- **Why:** The current glide interpolation smoothly advances through silence, creating a visual disconnect — the cursor moves but no audio plays. With real word timestamps (NARR-TIMING shipped), we have precise silence gap data. Research finding H6. Depends on NARR-PAUSE-1 for pause-reason awareness.
+- **Prerequisites:** NARR-PAUSE-1 (pause-reason field). NARR-TIMING complete (word endTime available).
+- **Done when:**
+    1. Glide loop in FoliatePageView detects when audio progress falls within a silence gap (between word[i].endTime and word[i+1].startTime)
+    2. During detected silence gaps, cursor position holds at word[i]'s right edge rather than interpolating toward word[i+1]
+    3. During system-initiated pauses (rate-change, voice-change), cursor freezes at lastConfirmedAudioWordRef position
+    4. During user-stop pauses, cursor remains at last confirmed position (existing behavior, now explicit)
+    5. Silence threshold: gaps < 30ms are ignored (interpolation continues); gaps >= 30ms trigger hold
+    6. No regression in smooth cursor motion during voiced segments
+    7. 16+ focused tests covering silence detection, hold behavior, pause-reason branching
+- **Effort:** M (2-3 days). Modifies glide interpolation logic + adds silence-gap detection.
+- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
+- **Source:** IDEAS.md H6, audioScheduler.ts line 101-103 comment (designed for this), NARR-TIMING close-out
 
-**What:** Fill normalization gaps identified by comparing Blurby's `segmentNormalizer.ts` (12 transforms) against abogen's `kokoro_text_normalization.py` (20+ transforms). Add missing transforms that improve Kokoro speech quality for English text. Add a heteronym disambiguation layer using context heuristics.
-
-**Why:** abogen's normalizer handles cases Blurby currently sends raw to Kokoro: fractions ("3/4" → "three quarters"), decimal numbers ("3.14" → "three point one four"), number ranges ("10–20" → "ten to twenty"), URLs ("www.example.com" → "example dot com"), address abbreviations ("St." → "Street" before number conversion), dotted acronyms ("U.S.A." → "USA"), terminal punctuation enforcement, and all-caps quote downcasing ("THE STORM" → "the storm" inside quotes). Each of these produces better Kokoro phonemization than letting the model guess. abogen also disambiguates heteronyms ("read" past-tense → /rɛd/, "wind" verb → /waɪnd/) via POS-tag heuristics — Blurby can approximate this with simpler context-window rules since full POS tagging is heavy.
-
-**Prerequisites:** `TTS-EVENT-SYNC-1` (word alignment table must exist before adding transforms that change token count).
-
-**Done when:**
-1. `segmentNormalizer.ts` adds at minimum these new transforms (in correct pipeline order): `dotted-acronym-normalization`, `address-abbreviation-expansion`, `url-normalization`, `fraction-expansion`, `decimal-expansion`, `number-range-expansion`, `terminal-punctuation-enforcement`, `all-caps-quote-downcasing`, `heteronym-disambiguation`.
-2. Transform ordering validated: address abbreviations before number conversion (avoids "St." → "Saint" false positives); dotted acronyms before abbreviation expansion; URL normalization before number conversion; heteronym disambiguation after all text transforms.
-3. Each new transform has ≥2 golden fixture entries in `english-v1.json` with input/expected-output pairs, including edge cases (e.g., "St. Louis" should NOT expand "St." to "Street").
-4. `normalizedToOriginalMap` correctly tracks token expansions from new transforms (verified against TTS-EVENT-SYNC-1's alignment table contract).
-5. Heteronym disambiguation uses context-window heuristics (not full POS tagging): check surrounding words for tense/usage indicators. Initial heteronym list: `read` (past vs. present), `wind` (noun vs. verb), `tear` (noun vs. verb), `close` (adjective vs. verb), `lead` (noun vs. verb), `live` (adjective vs. verb), `bow` (noun vs. verb), `minute` (noun vs. adjective). Disambiguation replaces the word with an alternate spelling that Kokoro phonemizes correctly (same approach as abogen's `heteronym_overrides.py`).
-6. All existing golden fixtures continue to pass unchanged — new transforms must not alter text that existing transforms already handle.
-7. `TTS_NORMALIZER_VERSION` is bumped (triggers cache invalidation for affected segments).
-8. `npm test` passes, `npm run typecheck` passes.
-
-**Effort:** M (~3). Normalizer additions with fixtures; no architectural changes.
-
-**Roster:** Hephaestus (transforms + fixtures) • Hippocrates (golden fixture validation) • Solon (spec compliance).
-
-**Source:** 2026-05-15 cross-codebase research — abogen `kokoro_text_normalization.py` (20+ transforms, heteronym overrides), abogen `pronunciation_store.py` (per-book pronunciation overrides).
+##### Implementation detail
+- **Edit sites:** `src/components/reader/FoliatePageView.tsx` (glide loop — detect silence window from scheduled chunk's wordTimestamps, hold cursor.x during gap); `src/utils/audioScheduler.ts` (expose `getWordTimestampsForProgress(audioTime): {startTime, endTime, wordIndex}[]` helper or equivalent lookup); `src/hooks/useNarration.ts` (pass pauseReason to glide context so cursor knows to freeze during system pauses)
+- **Tests:** New `tests/silenceAwareCursor.test.ts`; extend `tests/calmNarrationBand.test.ts`
+- **Constants:** `TTS_SILENCE_HOLD_THRESHOLD_MS = 30` in `src/constants.ts`
+- **Branch:** `sprint/narr-cursor-2` from clean main
+- **Commit hygiene:** explicit-stage; no destructive flags
 
 ---
 
-#### Sprint TTS-RENDER-MAP-1: Pre-Built Word Position Index
+#### Stage 1b — Quality Track (parallel-safe with Stage 1a)
 
-**Status:** ✅ COMPLETED on 2026-05-17. Sprint branch `sprint/tts-render-map-1-word-position-index` commit `2eabf36` merged into canonical `main` via `8545895`. Verification passed: targeted render-map coverage (`tests/wordPositionIndex.test.ts`, `tests/calmNarrationBand.test.ts`, `tests/narrateDiagnostics.test.ts`), full `npm test` (185 passed, 1 skipped files; 2478 passed, 132 skipped tests), `npm run typecheck`, and `npm run build` (existing `settings -> tts -> settings` circular chunk warning unchanged).
+#### TTS-EVAL-3 — Quality Evaluation + CI Gate
 
-**What:** Build a word-index→DOM-position lookup table once at render time (when foliate-js renders word spans), replacing the live DOM querying that currently happens during narration highlight updates. Complement the event-driven sync from `TTS-EVENT-SYNC-1` with O(1) position resolution.
+- **What:** Execute the existing TTS evaluation harness (TTS-EVAL-1/2) against the full fixture corpus with Kokoro on current main, capture production-grade baseline metrics, update quality gate thresholds to reflect actual performance, and wire the gate runner into `npm run test:quality` so it can be invoked pre-merge.
+- **Why:** The harness infrastructure exists (runner, metrics, profiles, gates, baseline) but has only been exercised in a controlled evaluation run (QWEN-STREAM-4). The Kokoro baseline from that run (p50=465ms, p95=503ms first-audio) needs validation against current main after 10 TTS architecture sprints shipped. Quality gates need to reflect Kokoro-only reality (remove MOSS Nano gates, tighten Kokoro thresholds). Research-recommended backpressure evaluation happens here too — if buffer pressure is observed during soak runs, flag for a future sprint.
+- **Prerequisites:** None. Harness exists on main.
+- **Done when:**
+    1. Full matrix run (all fixture scenarios) executed against current main with Kokoro
+    2. Soak run (5-minute continuous narration) executed and metrics captured
+    3. `docs/testing/tts_eval_baseline_v2.json` written with updated aggregate metrics
+    4. `docs/testing/tts_quality_gates.v2.json` written — Kokoro-only gates, MOSS Nano gates removed, thresholds based on observed v2 baseline + 20% headroom
+    5. `npm run test:quality` script added to package.json running `node scripts/tts_eval_runner.mjs --mode=gate --baseline=docs/testing/tts_eval_baseline_v2.json --gates=docs/testing/tts_quality_gates.v2.json`
+    6. Gate runner exits non-zero on threshold breach (already implemented in tts_eval_gate.mjs)
+    7. Backpressure observation: if soak run shows >5s of buffered-but-unplayed audio, flag in close-out as future work
+    8. 8+ focused tests validating gate evaluation logic with mock baselines
+- **Effort:** M (2-3 days). Execution + threshold calibration + script wiring.
+- **Roster:** Zeus • Athena (cross-system: scripts + docs + package.json) • Hippocrates • Solon • Plato
+- **Source:** TTS-EVAL-1/2 close-outs, existing `scripts/tts_eval_runner.mjs`, `docs/testing/tts_quality_gates.v1.json`
 
-**Why:** sioyek's architecture pre-builds parallel arrays (`text[i] → rect[i]`) during PDF rendering via `get_page_text_and_line_rects_after_rect()`, giving O(1) word-position lookup during TTS playback — no search needed. Blurby already has `data-word-index` attributes on word spans in the foliate-js DOM, but highlight updates currently query the DOM live (finding the span by attribute selector, getting its bounding rect, computing overlay position). With event-driven sync (`TTS-EVENT-SYNC-1`), word-boundary events fire at audio rate — the DOM query on each event is the remaining bottleneck. A pre-built index eliminates it and makes the event→visual path purely computational.
-
-**Prerequisites:** `TTS-EVENT-SYNC-1` (event-driven sync is the consumer), `NORMALIZER-ENRICH-1` (alignment table covers enriched transforms).
-
-**Done when:**
-1. A `WordPositionIndex` class/utility is built once when foliate-js renders or re-renders a section's word spans — captures each word's bounding rect (`{top, left, width, height}`) relative to the content container, keyed by `data-word-index`.
-2. The index is invalidated and rebuilt on: section change, container resize (via existing `ResizeObserver`), foliate re-render (`foliateRenderVersion` change), and zoom/font-size change.
-3. Event-driven word-boundary events in `FoliatePageView` resolve word position via O(1) index lookup (`wordPositionIndex.get(wordIndex)`) instead of live `querySelector('[data-word-index="N"]')` + `getBoundingClientRect()`.
-4. The narration highlight overlay (collapsing cursor band) uses indexed positions directly for both initial placement and per-word advance.
-5. Performance: word-advance latency (event → visual update) is ≤2ms at p95, measured via the existing `narrateDiagnostics` infrastructure. Current estimated latency with live DOM queries is ~5-8ms.
-6. Index build time is ≤50ms for sections with ≤5,000 word spans (typical chapter). Measured and logged via diagnostics.
-7. Diagnostic event tracks index builds (word count, build time), cache hits/misses per word advance, and rebuild triggers.
-8. Graceful degradation: if the index is stale or missing (e.g., mid-rebuild during resize), falls back to live DOM query transparently — no narration interruption.
-9. `npm test` passes, `npm run typecheck` passes, `npm run build` passes.
-
-**Effort:** M (~3). New utility + integration with FoliatePageView event-driven sync path.
-
-**Roster:** Hephaestus (WordPositionIndex utility + FoliatePageView integration) • Hippocrates (performance benchmarks + regression suite) • Solon (spec compliance).
-
-**Source:** 2026-05-15 cross-codebase research — sioyek `get_page_text_and_line_rects_after_rect()` (parallel arrays built at render time, O(1) playback lookup via positional identity), cross-cutting insight from readest/RealtimeTTS/sioyek corpus.
-
----
-
-#### Sprint TTS-PIPELINE-1: Narration Pipeline Integration Test And Normalization Fixture Expansion
-
-**Status:** Completed on 2026-05-17. Implementation commit `022d161` merged to canonical `main` via `994f218`; closeout saved at `docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md`.
-
-**What:** Add a cross-module integration test that traces one narration chunk through planner → normalizer → cache identity → timing sidecar, and expand the golden normalization fixtures from 8 to 15+.
-
-**Why:** Each pipeline stage (narrationPlanner, segmentNormalizer, TtsCacheIdentityV2, timing sidecar) is individually tested, but no test currently verifies the end-to-end chain. The adversarial review (2026-05-14) identified this as the highest-leverage, lowest-cost residual gap. Additional fixture coverage for OCR text, poetry, tables, and footnote-heavy documents improves normalizer confidence before export work.
-
-**Prerequisites:** `TTS-NORMALIZE-1`, `TTS-CACHE-TIMING-1` (both landed), `TTS-EVENT-SYNC-1` (event-driven sync + alignment table), `NORMALIZER-ENRICH-1` (enriched transforms), `TTS-RENDER-MAP-1` (word position index).
-
-**Done when:**
-1. At least one integration test constructs a realistic text segment, runs it through `buildNarrationPlan()` → `normalizeSegmentText()` (including `normalizedToOriginalMap` verification) → the production cache identity construction path (or a newly extracted pure helper used by production) → timing sidecar shape → word-boundary event emission → word position index lookup — end-to-end in a single test.
-2. The integration test asserts: planner output (`PlannedChunk` with `startIdx`, `endIdx`, `boundaryType`, `silenceMs`) feeds correctly into the normalizer; normalizer output (`SegmentNormalizationResult` with `originalText`, `normalizedText`, `sourceTextHash`, `normalizedTextHash`, `normalizerVersion`) feeds into production cache identity; cache identity `schemaVersion` is 2 with correct provider/voice/hash fields.
-3. Golden fixture count in `tests/fixtures/tts-normalization/english-v1.json` is ≥15 (currently 8: ordinary-prose-nfkc-time-date, dialogue-currency-abbreviation, heading-roman-spaced-initials, line-break-delimiters, number-ordinals-cardinals, safe-footnote-marker, numeric-us-date, abbreviations).
-4. New fixtures cover: OCR artifacts (misrecognized characters), poetry/verse (line breaks as semantic units), tabular data (numbers with alignment spaces), footnote-heavy academic text, mixed-language segments (English with embedded foreign words), ellipsis and em-dash normalization, and nested quotation marks.
-5. All existing normalizer tests continue to pass. Production code changes are allowed only if needed to extract an existing cache-identity builder into a pure helper for testable production-path coverage; no normalization behavior changes.
-6. **Cache-hit parity verification:** Generate → cache → read-back → assert cached `ScheduledChunk` matches original metadata end-to-end.
-7. **Stress fixtures:** Mixed-length segments, boundary-edge chunks, rapid pause/resume (≥5 cycles), all-cache-hit playback.
-8. **Content-addressed cache assessment:** Assess whether V2 identity could support content-addressed lookup. Document as test comment; no production change unless trivially clean.
-9. **Unified NarrationSegment domain type assessment:** Assess whether `PlannedChunk`, `SegmentNormalizationResult`, `TtsCacheIdentityV2`, `TimingMetadataChunk` should consolidate into `NarrationSegment`. Document; extract only if clean.
-
-**Effort:** M (~2-3). Test and fixture work plus NarrationSegment domain type assessment (criterion 9); optional pure-helper extraction only if needed to avoid duplicating cache identity logic in tests.
-
-**Roster:** Hippocrates (integration test + fixtures) • Athena (NarrationSegment assessment) • Solon (spec compliance).
-
-**Source:** 2026-05-14 adversarial review of TTS literature; `docs/planning/roadmap-reviews/2026-05-14-plan.md`. OutsideAudit.1.2026-05-15 F3 (NarrationSegment domain type assessment elevated from optional to expected deliverable).
+##### Implementation detail
+- **Edit sites:** `docs/testing/tts_eval_baseline_v2.json` (new — captured from run); `docs/testing/tts_quality_gates.v2.json` (new — Kokoro-only thresholds); `package.json` (add `test:quality` script); `scripts/tts_eval_runner.mjs` (verify --mode=gate path works end-to-end, fix any regressions from TTS architecture changes)
+- **Tests:** Extend `tests/ttsEvalHarness.test.ts` with gate-mode integration tests
+- **Constants:** Gate thresholds in `tts_quality_gates.v2.json` (derived from baseline + 20% headroom)
+- **Branch:** `sprint/tts-eval-3-quality-gate` from clean main
+- **Commit hygiene:** explicit-stage; no destructive flags
 
 ---
 
-#### Sprint TTS-ARCH-DOC-1: TTS Architecture Decisions Document
+#### Stage 2 — Pipeline Polish
 
-**Status:** Completed on 2026-05-17. Implementation commit `66a73b1` merged to canonical `main` via `65629bc`; closeout saved at `docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md`.
+#### NARR-SPOKEN-1 — Spoken/Display Word Separation
 
-**What:** Create `docs/governance/TTS_ARCHITECTURE_DECISIONS.md` — a standing governance document that captures every explicit TTS architecture decision made during the TTS Architecture Completion phase. This document becomes the authoritative reference for why the TTS system is built the way it is.
+- **What:** Separate `spokenWords` (phoneme-alignment input for Kokoro) from `displayWords` (what's rendered in the reader). Punctuation-only display tokens (em-dashes, ellipses, standalone quotes) are excluded from the spoken array but preserved in display. A mapping layer (`spokenToDisplayMap`) reconstructs cursor positions from spoken-word indices back to display-word indices.
+- **Why:** The current pipeline sends all display words (including punctuation-only tokens) to Kokoro for alignment. Kokoro produces zero-duration timestamps for these tokens, triggering heuristic fallback in the 4-layer validation. Separating spoken from display eliminates the most common source of heuristic fallback and produces cleaner word-level timing. Research finding H5 (NARR-TIMING audit finding #5).
+- **Prerequisites:** None hard. Benefits from NARR-CURSOR-2 being stable (fewer moving parts in the hot path).
+- **Done when:**
+    1. New `src/utils/spokenWordFilter.ts` exports `filterSpokenWords(words: string[]): { spokenWords: string[]; spokenToDisplayMap: number[]; displayToSpokenMap: (number | null)[] }`
+    2. `spokenWords` excludes tokens matching punctuation-only regex (`/^[\p{P}\p{S}]+$/u`)
+    3. `spokenToDisplayMap[spokenIdx]` returns the display-word index
+    4. `displayToSpokenMap[displayIdx]` returns spoken-word index or null for punctuation-only tokens
+    5. kokoroStrategy.ts passes `spokenWords` (not all display words) to Kokoro generate
+    6. Timestamp results are mapped back to display indices via `spokenToDisplayMap` before emission to scheduler
+    7. Cursor highlight resolves against display indices (no change to downstream consumers)
+    8. Heuristic fallback rate measurably decreases (log comparison in close-out)
+    9. 18+ focused tests covering filter, mapping, round-trip cursor resolution, edge cases (leading punctuation, trailing quotes, em-dash sequences)
+- **Effort:** M (2-3 days). New utility + kokoroStrategy integration + test coverage.
+- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
+- **Source:** IDEAS.md H5, NARR-TIMING close-out audit finding #5, Blurby.Research (abogen pattern)
 
-**Why:** The TTS literature review (2026-05-11), adversarial review (2026-05-14), Kokoro-only pivot (2026-05-15), and each sprint's closeout contain valuable architectural decisions, engine evaluation criteria, and the dormancy/retirement rationale. These currently live scattered across review artifacts, roadmap entries, close-out files, and LESSONS_LEARNED. A single governance document makes them discoverable and durable.
-
-**Prerequisites:** All preceding sprints in the TTS Architecture Completion conveyor (ENGINE-DORMANCY-1 through TTS-PIPELINE-1).
-
-**Effort:** S (~1). Documentation-only sprint — no code changes, no tests, Tier: None.
-
-**Roster:** Herodotus (sonnet) — documentation specialist.
-
-**Source files (read order):**
-1. `docs/governance/TECHNICAL_REFERENCE.md` § "Narrate Mode Architecture" — current architecture description
-2. `docs/testing/MOSS_DECISION_LOG.md` — engine posture decisions
-3. `docs/governance/QWEN_SUPPORTED_HOST_POLICY.md` — Qwen disable rationale
-4. `docs/planning/roadmap-reviews/2026-05-11-literature-review.md` — TTS literature review
-5. `docs/planning/roadmap-reviews/2026-05-14-adversarial-review.md` — adversarial review of literature gaps
-6. `docs/planning/roadmap-reviews/2026-05-15-plan.md` — final conveyor plan
-7. Sprint closeouts in `docs/governance/close-outs/` for: TTS-SYNC-1, TTS-DIAG-1, ENGINE-DORMANCY-1, TTS-INTEGRATE-1, TTS-CACHE-HARDEN-1, TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, TTS-RENDER-MAP-1, TTS-PIPELINE-1
-7a. `Blurby.Research/.Findings/Blurby_TTS_Literature_Codebase_Review_2026-05-11.md` — cross-codebase analysis (findings provenance source)
-7b. `Blurby.Research/.Findings/Blurby_Kokoro_TTS_Implementation_Review_2026-05-15.md` — implementation review (findings provenance source)
-8. `src/types/ttsProvider.ts` + `src/utils/ttsProviderRegistry.ts` — registry implementation
-9. `src/utils/segmentNormalizer.ts` — normalization layer
-10. `main/tts-cache.js` — cache identity and timing sidecars
-
-**Done when:** See `ROADMAP_SPECS.md` § TTS-ARCH-DOC-1 for full 9-item acceptance criteria. Summary: `docs/governance/TTS_ARCHITECTURE_DECISIONS.md` exists with all 11 sections (engine posture, architecture layers, adopt/reject/defer register, invariants, dormancy contract, research provenance, future work, error taxonomy, findings provenance, cache evolution roadmap, AD-1–AD-4 migration), TECHNICAL_REFERENCE.md links to it, and ROADMAP_SPECS.md is updated to reference the governance document.
+##### Implementation detail
+- **Edit sites:** New `src/utils/spokenWordFilter.ts` (~80 lines); `src/hooks/narration/kokoroStrategy.ts` (~lines 175-195 — apply filter before generate, map timestamps after); `src/utils/audioScheduler.ts` (verify wordTimestamps validation handles mapped indices correctly)
+- **Tests:** New `tests/spokenWordFilter.test.ts`; extend `tests/narrTiming.test.ts` with punctuation-heavy fixtures
+- **Constants:** None new
+- **Branch:** `sprint/narr-spoken-1` from clean main
+- **Commit hygiene:** explicit-stage; no destructive flags
 
 ---
 
-#### Sprint KOKORO-EXPORT-1: Long-Form Audio And Subtitle Export (Optional Future)
+#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(stub)*
 
-**Goal:** Explore Abogen-style offline audiobook export for Blurby after Kokoro runtime and chunk/timing truth are stable: audio file export, chapter markers, and optional subtitle/timestamp artifacts.
-
-**Why:** This is valuable, but it is not on the immediate Kokoro reliability path. It should stay optional until live reading playback, offline readiness, and timing truth are solid.
-
-**WHERE:** Future spec should start from `scripts/kokoro_pair_baseline.mjs`, `scripts/moss_kokoro_benchmark.mjs`, Kokoro generation IPC, chunk metadata from `KOKORO-DEEPEN-2`, and Abogen's export/subtitle code.
-
-**Status:** Queued optional future pointer. TTS Architecture Completion dependency is now satisfied (`TTS-ARCH-DOC-1` landed 2026-05-17), but this sprint still requires explicit dispatch authorization because it opens a new exploratory lane.
+Library card 3-line format (title/author/data), "New" dot auto-clear via IntersectionObserver, Ctrl+K command palette entries for all settings pages, Space bar starts last-used reading mode. Bundle of small high-touch UX wins.
 
 ---
 
-#### Sprint NARR-MEDIA-1: MediaSession Narration Transport Controls
+#### TTS-QUAL-CI-1 — CI Regression Gate Wiring *(stub)*
 
-**Status:** Queued full spec.
-
-**What:** Add Electron MediaSession transport integration for Narrate Mode so OS-level media controls (lock screen, headset, keyboard transport keys) can control active narration sessions. Scope includes play/pause, next/previous logical jump, and metadata updates (title/chapter/position state) without changing TTS generation behavior.
-
-**Why:** Narration is currently app-local only. MediaSession support gives high-value UX continuity for long-form listening with low architectural risk and no engine-posture changes.
-
-**Prerequisites:** `TTS-ARCH-DOC-1` complete; no engine reactivation required.
-
-**Done when:**
-1. Narration registers MediaSession action handlers for play/pause/next/previous in supported desktop environments.
-2. Media metadata updates with current book/chapter context while narration is active.
-3. Unsupported hosts fail gracefully with no narration regression.
-4. Verification passes: focused narration control tests, `npm run typecheck`, and full `npm test`.
-
-**Effort:** S (~1).
-
-**Roster:** Hercules (implementation) • Hippocrates (verification) • Solon (spec compliance).
-
-**Source:** `docs/governance/IDEAS.md` Theme H idea H7; Blurby.Research readest control-surface pattern notes.
+Wire `npm run test:quality` into GitHub Actions CI matrix. PRs touching TTS files (`src/hooks/narration/`, `src/utils/audio*`, `src/utils/narrat*`, `src/utils/tts*`) auto-run quality gates. Failure blocks merge. Depends on TTS-EVAL-3 baseline.
 
 ---
 
-#### Sprint NARR-PAUSE-STATE-1: Named Pause State Machine
+## Deferred Lanes
 
-**Status:** Queued full spec.
+- **KOKORO-EXPORT-1** — Long-form audio export (M4B/SRT/ASS). Optional future after Reading Experience v2.
+- **Normalizer alignment map** — `normalizedToOriginalMap` transform contract. Revisit when word-position rendering needs original-text cross-reference.
+- **Registry-driven strategy dispatch** — Wire `createStrategy?` seam in `ttsProviderRegistry.ts`. Premature while non-Kokoro engines are dormant.
+- **Playback-buffered-seconds backpressure** — `scheduler.getBufferedSeconds()` throttle. Revisit if TTS-EVAL-3 soak run reveals buffer pressure.
+- **Track B** — Chrome Extension (EXT-ENR-C and beyond)
+- **Track C** — Android APK (APK-0 through APK-4)
+- **Phase 7** — Cloud Sync
+- **Phase 8** — RSS/News
+- **Idea Themes A-K** — See `docs/governance/IDEAS.md`
 
-**What:** Introduce explicit pause-reason states for narration (`stop-paused`, `rate-change-paused`, `voice-change-paused`, `forward-paused`, `backward-paused`) and wire resume behavior to reason-specific policies.
+See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred specs.
 
-**Why:** Current pause handling is binary and loses intent, which creates avoidable resume ambiguity after control actions. Named pause states improve correctness and debuggability without touching engine posture.
+---
 
-**Prerequisites:** `NARR-MEDIA-1` recommended (shared transport semantics), `TTS-ARCH-DOC-1` complete.
+## Notes
 
-**Done when:**
-1. Pause reason enum/state is introduced and exercised by narration controls.
-2. Resume behavior is reason-aware and deterministic in tests.
-3. Diagnostics include pause reason transitions for troubleshooting.
-4. Verification passes: focused narration state tests, `npm run typecheck`, and full `npm test`.
+- TTS Architecture Complete finish line reached 2026-05-17. All decisions documented in `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`.
+- Desktop v2.0 shipped.
+- New finish line established: TTS Quality Confidence + Reading Experience v2 (2026-05-17).
+- SSML as internal format explicitly **rejected** per research consensus — structured text + normalizer trace is cleaner than SSML payload. (2026-05-17)
 
-**Effort:** S/M (~2).
-
-**Roster:** Hercules (state-machine implementation) • Hippocrates (verification) • Solon (spec compliance) • Plato (quality review).
-
-**Source:** `docs/governance/IDEAS.md` Theme H idea H8; Blurby.Research readest controller state-pattern findings.
+<!-- Frontmatter:
+loe_unit: t-shirt
+last_review: 2026-05-17
+finish_line: "TTS Quality Confidence + Reading Experience v2"
+roadmap_doc: ROADMAP.md
+sprint_queue_doc: docs/governance/sprint-queue.xlsx
+-->

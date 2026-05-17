@@ -301,3 +301,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future architecture completion phases should end with one canonical decision record that distinguishes adopted, rejected, deferred, and reactivation conditions before new optional lanes are dispatched.
 **Applies to:** Architecture finish-line sprints, roadmap reviews, engine posture decisions, future export planning, and audit handoffs
 **Status:** Observation
+
+### SRL-040 — Worktree-isolated deferred sprints should include a rebase-readiness checklist in the spec (KOKORO-EXPORT-1, 2026-05-17)
+**Verdict:** The worktree pattern worked well for building ahead without blocking the active conveyor, but the spec didn't anticipate how many files on main would diverge during the deferral window.
+**Evidence:** KOKORO-EXPORT-1 touches `main/tts-cache.js`, `src/types.ts`, and `preload.js`. All three were edited by 5+ subsequent sprints (TTS-CACHE-HARDEN-1, TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, TTS-RENDER-MAP-1, TTS-PIPELINE-1) after the worktree branched. A rebase will require conflict resolution in at minimum those three files.
+**Recommendation:** When a sprint is spec'd as "implement now, merge later," include a `## Rebase Readiness` section listing the files touched and a threshold: if >3 subsequent sprints edit the same files, schedule a dedicated rebase-and-verify mini-sprint rather than attempting a cold rebase at merge time.
+**Applies to:** Any sprint using worktree isolation with a planned deferral window of >2 sprints.
+**Status:** Observation
