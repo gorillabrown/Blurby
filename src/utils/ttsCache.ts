@@ -90,11 +90,15 @@ export async function loadCachedChunk(
       ? `cache:${sidecarTiming.identityHash}:${sidecarTiming.chunkStartIdx ?? startIdx}`
       : undefined);
   const timingTruth = sidecarTiming?.timingTruth ?? (trustedWordTimestamps ? "word-native" : undefined);
+  const silenceMs = Number.isFinite(sidecarTiming?.silenceMs) && (sidecarTiming?.silenceMs ?? 0) >= 0
+    ? Number(sidecarTiming?.silenceMs)
+    : 0;
 
   return {
     audio,
     sampleRate: result.sampleRate,
     durationMs: result.durationMs,
+    silenceMs,
     words: chunkWords,
     startIdx,
     wordTimestamps: trustedWordTimestamps ?? null,
