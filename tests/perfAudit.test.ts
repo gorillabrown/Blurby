@@ -693,6 +693,10 @@ describe("Vite config manualChunks code splitting", () => {
     expect(viteConfigSrc).not.toMatch(/"LibraryContainer"/);
   });
 
+  it("l: Vitest excludes local worktree sandboxes from test discovery", () => {
+    expect(viteConfigSrc).toContain('".worktrees/**"');
+  });
+
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

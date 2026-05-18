@@ -3,7 +3,7 @@
 **Last updated**: 2026-05-17 — Roadmap review: TTS Architecture Complete finish line reached. All 10 conveyor sprints landed. Full phase archived. New finish line TBD.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 3). 1 full spec + 2 stubs. Next dispatch: TTS-EVAL-3.
+**Queue**: RED (depth 2). 0 full specs + 2 stubs. Next dispatch: requires /roadmap-review.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -38,6 +38,7 @@
 | TTS-PARITY-1 | 2026-05-18 | Cache/progress/resume parity hardening — 3 OutsideAudit.9 defects | `CloseOut.TTS-PARITY-1.2026-05-18.md` |
 | NARR-SPOKEN-1 | 2026-05-18 | Spoken/display word separation — punctuation-only token filtering | `CloseOut.NARR-SPOKEN-1.2026-05-18.md` |
 | NARR-CURSOR-2 | 2026-05-18 | Silence-aware cursor hold — gaps and pause-reason freeze | `CloseOut.NARR-CURSOR-2.2026-05-18.md` |
+| TTS-EVAL-3 | 2026-05-18 | Quality evaluation + CI gate — Kokoro v2 baseline + `npm run test:quality` | `CloseOut.TTS-EVAL-3.2026-05-18.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -68,35 +69,6 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ---
 
 ### Phase: Reading Experience v2
-
-#### Stage 1b — Quality Track (parallel-safe with Stage 1a)
-
-#### TTS-EVAL-3 — Quality Evaluation + CI Gate
-
-- **What:** Execute the existing TTS evaluation harness (TTS-EVAL-1/2) against the full fixture corpus with Kokoro on current main, capture production-grade baseline metrics, update quality gate thresholds to reflect actual performance, and wire the gate runner into `npm run test:quality` so it can be invoked pre-merge.
-- **Why:** The harness infrastructure exists (runner, metrics, profiles, gates, baseline) but has only been exercised in a controlled evaluation run (QWEN-STREAM-4). The Kokoro baseline from that run (p50=465ms, p95=503ms first-audio) needs validation against current main after 10 TTS architecture sprints shipped. Quality gates need to reflect Kokoro-only reality (remove MOSS Nano gates, tighten Kokoro thresholds). Research-recommended backpressure evaluation happens here too — if buffer pressure is observed during soak runs, flag for a future sprint.
-- **Prerequisites:** None. Harness exists on main.
-- **Done when:**
-    1. Full matrix run (all fixture scenarios) executed against current main with Kokoro
-    2. Soak run (5-minute continuous narration) executed and metrics captured
-    3. `docs/testing/tts_eval_baseline_v2.json` written with updated aggregate metrics
-    4. `docs/testing/tts_quality_gates.v2.json` written — Kokoro-only gates, MOSS Nano gates removed, thresholds based on observed v2 baseline + 20% headroom
-    5. `npm run test:quality` script added to package.json running `node scripts/tts_eval_runner.mjs --mode=gate --baseline=docs/testing/tts_eval_baseline_v2.json --gates=docs/testing/tts_quality_gates.v2.json`
-    6. Gate runner exits non-zero on threshold breach (already implemented in tts_eval_gate.mjs)
-    7. Backpressure observation: if soak run shows >5s of buffered-but-unplayed audio, flag in close-out as future work
-    8. 8+ focused tests validating gate evaluation logic with mock baselines
-- **Effort:** M (2-3 days). Execution + threshold calibration + script wiring.
-- **Roster:** Zeus • Athena (cross-system: scripts + docs + package.json) • Hippocrates • Solon • Plato
-- **Source:** TTS-EVAL-1/2 close-outs, existing `scripts/tts_eval_runner.mjs`, `docs/testing/tts_quality_gates.v1.json`
-
-##### Implementation detail
-- **Edit sites:** `docs/testing/tts_eval_baseline_v2.json` (new — captured from run); `docs/testing/tts_quality_gates.v2.json` (new — Kokoro-only thresholds); `package.json` (add `test:quality` script); `scripts/tts_eval_runner.mjs` (verify --mode=gate path works end-to-end, fix any regressions from TTS architecture changes)
-- **Tests:** Extend `tests/ttsEvalHarness.test.ts` with gate-mode integration tests
-- **Constants:** Gate thresholds in `tts_quality_gates.v2.json` (derived from baseline + 20% headroom)
-- **Branch:** `sprint/tts-eval-3-quality-gate` from clean main
-- **Commit hygiene:** explicit-stage; no destructive flags
-
----
 
 #### Stage 2 — UX Polish
 

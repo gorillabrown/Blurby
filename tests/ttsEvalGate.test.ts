@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { evaluateQualityGates, formatGateReport, runGateEvaluation } from "../scripts/tts_eval_gate.mjs";
-import { parseArgs, runHarness } from "../scripts/tts_eval_runner.mjs";
+import { parseArgs, runGateMode, runHarness } from "../scripts/tts_eval_runner.mjs";
 
 const tempDirs: string[] = [];
 
@@ -138,6 +138,104 @@ describe("tts eval quality gates", () => {
     expect(byPath.gates).toBe("docs/testing/custom-gates.json");
   });
 
+  it("parses --mode=gate, --baseline=..., and --gates=... using equals syntax", () => {
+    const args = parseArgs([
+      "--mode=gate",
+      "--baseline=docs/testing/tts_eval_baseline_v2.json",
+      "--gates=docs/testing/tts_quality_gates.v2.json",
+    ]);
+    expect(args.mode).toBe("gate");
+    expect(args.baselinePath).toBe("docs/testing/tts_eval_baseline_v2.json");
+    expect(args.gates).toBe("docs/testing/tts_quality_gates.v2.json");
+  });
+
+  it("marks hard-fail rule as failed when aggregate metric path is missing", () => {
+    const report = evaluateQualityGates({
+      aggregate: {
+        startupLatency: { p50: 100 },
+      },
+      gateConfig: {
+        gateVersion: "vtest",
+        hardFail: [{ id: "missing", metric: "startupLatency.p95", op: "<=", value: 120 }],
+        warnOnly: [],
+      },
+    });
+    expect(report.pass).toBe(false);
+    expect(report.counts.hardFailures).toBe(1);
+    expect(report.failures[0].actual).toBeNull();
+  });
+
+  it("supports >= operator in gate rules", () => {
+    const report = evaluateQualityGates({
+      aggregate: {
+        startupLatency: { p50: 450 },
+      },
+      gateConfig: {
+        gateVersion: "vtest",
+        hardFail: [{ id: "gte-pass", metric: "startupLatency.p50", op: ">=", value: 400 }],
+        warnOnly: [],
+      },
+    });
+    expect(report.pass).toBe(true);
+    expect(report.counts.hardFailures).toBe(0);
+  });
+
+  it("throws when rule operator is unsupported", () => {
+    expect(() =>
+      evaluateQualityGates({
+        aggregate: { startupLatency: { p50: 450 } },
+        gateConfig: {
+          gateVersion: "vtest",
+          hardFail: [{ id: "bad-op", metric: "startupLatency.p50", op: "!=", value: 400 }],
+          warnOnly: [],
+        },
+      })
+    ).toThrow('Unsupported gate operator "!="');
+  });
+
+  it("formats warning breaches with reasons", () => {
+    const report = evaluateQualityGates({
+      aggregate: {
+        startupLatency: { p50: 200, p95: 300, max: 900 },
+        drift: { p95: 1, max: 5 },
+        failureCounts: { pauseResumeFailures: 0, handoffFailures: 0 },
+      },
+      gateConfig: {
+        gateVersion: "vtest",
+        hardFail: [{ id: "hard-pass", metric: "startupLatency.p95", op: "<=", value: 400 }],
+        warnOnly: [{ id: "warn-drift", metric: "drift.max", op: "<=", value: 2, reason: "drift review" }],
+      },
+    });
+    const text = formatGateReport(report);
+    expect(text).toContain("Warning breaches:");
+    expect(text).toContain("[warn-drift]");
+    expect(text).toContain("drift review");
+  });
+
+  it("runGateEvaluation respects explicit evaluatedAt timestamp", async () => {
+    const outDir = await makeTempDir();
+    const aggregatePath = path.join(outDir, "aggregate-summary.json");
+    const gatePath = path.join(outDir, "gates.json");
+    await writeJson(aggregatePath, {
+      startupLatency: { p50: 200, p95: 300, max: 350 },
+      drift: { p95: 0, max: 1 },
+      failureCounts: { pauseResumeFailures: 0, handoffFailures: 0 },
+    });
+    await writeJson(gatePath, {
+      gateVersion: "vtest",
+      hardFail: [{ id: "pass", metric: "startupLatency.p50", op: "<=", value: 300 }],
+      warnOnly: [],
+    });
+
+    const { report } = await runGateEvaluation({
+      aggregatePath,
+      gatePath,
+      outDir,
+      evaluatedAt: "2026-05-18T00:00:00.000Z",
+    } as any);
+    expect(report.evaluatedAt).toBe("2026-05-18T00:00:00.000Z");
+  });
+
   it("runner emits gate-report artifacts when --gates is enabled", async () => {
     const outDir = await makeTempDir();
     const runtime = await createRuntimeWithFiles(outDir);
@@ -155,5 +253,76 @@ describe("tts eval quality gates", () => {
     expect(result.gate?.pass).toBe(true);
     await expect(fs.stat(path.join(outDir, "gate-report.json"))).resolves.toBeDefined();
     await expect(fs.stat(path.join(outDir, "gate-report.txt"))).resolves.toBeDefined();
+  });
+
+  it("runGateMode reads baseline wrappers with aggregate field and emits gate artifacts", async () => {
+    const outDir = await makeTempDir();
+    const baselinePath = path.join(outDir, "baseline.json");
+    const gatePath = path.join(outDir, "gates.json");
+    await writeJson(baselinePath, {
+      baselineVersion: "vtest",
+      aggregate: {
+        startupLatency: { p50: 220, p95: 300, max: 350 },
+        warmPreviewLatency: { p50: 800, p95: 950, max: 1000 },
+        warmFirstAudioLatency: { p50: 220, p95: 300, max: 350 },
+        drift: { p95: 1, max: 2 },
+        failureCounts: { pauseResumeFailures: 0, handoffFailures: 0 },
+      },
+    });
+    await writeJson(gatePath, {
+      gateVersion: "vtest",
+      hardFail: [{ id: "latency", metric: "startupLatency.p95", op: "<=", value: 500 }],
+      warnOnly: [],
+    });
+
+    const result = await runGateMode({
+      mode: "gate",
+      baselinePath,
+      gates: gatePath,
+      outDir,
+    } as any);
+    expect(result.gate.pass).toBe(true);
+    await expect(fs.stat(path.join(outDir, "gate-report.json"))).resolves.toBeDefined();
+    await expect(fs.stat(path.join(outDir, "gate-report.txt"))).resolves.toBeDefined();
+    await expect(fs.stat(path.join(outDir, "aggregate-summary.json"))).resolves.toBeDefined();
+  });
+
+  it("runGateMode supports raw aggregate baseline docs and returns failure counts", async () => {
+    const outDir = await makeTempDir();
+    const baselinePath = path.join(outDir, "aggregate-only.json");
+    const gatePath = path.join(outDir, "gates.json");
+    await writeJson(baselinePath, {
+      startupLatency: { p50: 800, p95: 1200, max: 1400 },
+      warmPreviewLatency: { p50: 800, p95: 1200, max: 1400 },
+      warmFirstAudioLatency: { p50: 800, p95: 1200, max: 1400 },
+      drift: { p95: 3, max: 4 },
+      failureCounts: { pauseResumeFailures: 1, handoffFailures: 1 },
+    });
+    await writeJson(gatePath, {
+      gateVersion: "vtest",
+      hardFail: [
+        { id: "latency", metric: "startupLatency.p95", op: "<=", value: 500 },
+        { id: "drift", metric: "drift.p95", op: "<=", value: 2 },
+      ],
+      warnOnly: [],
+    });
+
+    const result = await runGateMode({
+      mode: "gate",
+      baselinePath,
+      gates: gatePath,
+      outDir,
+    } as any);
+    expect(result.gate.pass).toBe(false);
+    expect(result.gate.hardFailures).toBe(2);
+  });
+
+  it("runGateMode requires --baseline", async () => {
+    await expect(
+      runGateMode({
+        mode: "gate",
+        gates: "docs/testing/tts_quality_gates.v1.json",
+      } as any)
+    ).rejects.toThrow("Missing required --baseline <path> argument for --mode=gate.");
   });
 });
