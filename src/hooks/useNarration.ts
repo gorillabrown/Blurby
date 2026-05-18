@@ -4,7 +4,13 @@ import { applyPronunciationOverrides, mergeOverrides } from "../utils/pronunciat
 import type { KokoroStatusSnapshot, PronunciationOverride, QwenStatusSnapshot, ReaderMode, TtsEngine } from "../types";
 import type { RhythmPauses } from "../types";
 import { isSentenceEnd, type PauseConfig, DEFAULT_PAUSE_CONFIG } from "../utils/pauseDetection";
-import { NarrationState as ReducerState, NarrationAction, narrationReducer, createInitialNarrationState } from "../types/narration";
+import {
+  NarrationState as ReducerState,
+  NarrationAction,
+  narrationReducer,
+  createInitialNarrationState,
+  type PauseReason,
+} from "../types/narration";
 import { createWebSpeechStrategy } from "./narration/webSpeechStrategy";
 import { createKokoroStrategy } from "./narration/kokoroStrategy";
 import { createMossNanoStrategy } from "./narration/mossNanoStrategy";
@@ -470,7 +476,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearNanoOwnership();
     setNanoError(error ?? detail);
     dispatch({ type: "ERROR", message: detail });
-    stateRef.current = { ...stateRef.current, status: "error" };
+    stateRef.current = { ...stateRef.current, status: "error", pauseReason: null };
   }, [clearNanoOwnership]);
 
   const reportPocketError = useCallback((error?: unknown) => {
@@ -481,7 +487,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearPocketOwnership();
     setPocketError(error ?? detail);
     dispatch({ type: "ERROR", message: detail });
-    stateRef.current = { ...stateRef.current, status: "error" };
+    stateRef.current = { ...stateRef.current, status: "error", pauseReason: null };
   }, [clearPocketOwnership]);
 
   const kokoroStrategy = useMemo(
@@ -580,7 +586,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
             qwenStatusRef.current.detail ||
             "Qwen generation failed";
           dispatch({ type: "ERROR", message: detail });
-          stateRef.current = { ...stateRef.current, status: "error" };
+          stateRef.current = { ...stateRef.current, status: "error", pauseReason: null };
         },
         onSegmentStart: (wordIndex: number) => {
           if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
@@ -716,7 +722,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (s.status === "warming" && s.engine === "kokoro") {
       if (import.meta.env.DEV) console.debug("[narrate] Kokoro ready — auto-starting from word:", s.cursorWordIndex);
       dispatch({ type: "START_CURSOR_DRIVEN", startIdx: s.cursorWordIndex, speed: s.speed });
-      stateRef.current = { ...stateRef.current, status: "speaking" };
+      stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       speakNextChunkRef.current();
     }
   }, [state.kokoroReady]);
@@ -726,7 +732,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const s = stateRef.current;
     if (s.status === "warming" && s.engine === "qwen") {
       dispatch({ type: "START_CURSOR_DRIVEN", startIdx: s.cursorWordIndex, speed: s.speed });
-      stateRef.current = { ...stateRef.current, status: "speaking" };
+      stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       speakNextChunkRef.current();
     }
   }, [state.qwenReady]);
@@ -779,6 +785,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       stateRef.current = {
         ...stateRef.current,
         status: "idle",
+        pauseReason: null,
         chunkStart: 0,
         chunkWords: [],
       };
@@ -789,7 +796,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       ...stateRef.current,
       engine,
     };
-  }, [clearPendingRateResponseTrace, clearNanoOwnership, kokoroStrategy, qwenStrategy, webStrategy]);
+  }, [clearPendingRateResponseTrace, clearNanoOwnership, clearPocketOwnership, kokoroStrategy, qwenStrategy, webStrategy]);
 
   /** Set the max word index for the current page — chunks won't cross this boundary */
   const setPageEndWord = useCallback((endIdx: number | null) => {
@@ -798,13 +805,35 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
   /** Set Kokoro voice ID */
   const setKokoroVoice = useCallback((voiceId: string) => {
-    kokoroVoiceRef.current = voiceId;
-  }, []);
+    const normalizedVoiceId = voiceId || "af_bella";
+    if (kokoroVoiceRef.current === normalizedVoiceId) return;
+    kokoroVoiceRef.current = normalizedVoiceId;
+    const current = stateRef.current;
+    if (current.engine !== "kokoro" || current.status !== "speaking") return;
+    dispatch({ type: "PAUSE", reason: "voice-change" });
+    stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "voice-change" };
+    clearPendingRateResponseTrace();
+    kokoroStrategy.stop();
+    dispatch({ type: "RESUME" });
+    stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+    speakNextChunkRef.current();
+  }, [clearPendingRateResponseTrace, kokoroStrategy]);
 
   /** Set Qwen speaker ID */
   const setQwenVoice = useCallback((speakerId: string) => {
-    qwenSpeakerRef.current = speakerId || QWEN_DEFAULT_SPEAKER;
-  }, []);
+    const nextSpeaker = speakerId || QWEN_DEFAULT_SPEAKER;
+    if (qwenSpeakerRef.current === nextSpeaker) return;
+    qwenSpeakerRef.current = nextSpeaker;
+    const current = stateRef.current;
+    if (current.engine !== "qwen" || current.status !== "speaking") return;
+    dispatch({ type: "PAUSE", reason: "voice-change" });
+    stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "voice-change" };
+    clearPendingRateResponseTrace();
+    qwenStrategy.stop();
+    dispatch({ type: "RESUME" });
+    stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+    speakNextChunkRef.current();
+  }, [clearPendingRateResponseTrace, qwenStrategy]);
 
   /** Download Kokoro model */
   const downloadKokoroModel = useCallback(async () => {
@@ -1199,13 +1228,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         qwenStatusRef.current.detail ||
         "Qwen runtime is not ready";
       dispatch({ type: "ERROR", message: detail });
-      stateRef.current = { ...stateRef.current, status: "error" };
+      stateRef.current = { ...stateRef.current, status: "error", pauseReason: null };
     } else if (s.engine === "nano" && experimentalNano && nanoStrategyRef.current) {
       speakNextChunkNano();
     } else if (s.engine === "nano") {
       const detail = "MOSS Nano is selected but the experimental Nano strategy is not enabled.";
       dispatch({ type: "ERROR", message: detail });
-      stateRef.current = { ...stateRef.current, status: "error" };
+      stateRef.current = { ...stateRef.current, status: "error", pauseReason: null };
     } else if (s.engine === "pocket-tts") {
       speakNextChunkPocket();
     } else {
@@ -1294,6 +1323,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         stateRef.current = {
           ...stateRef.current,
           status: "error",
+          pauseReason: null,
           cursorWordIndex: startWordIndex,
           speed: newSpeed,
           chunkStart: startWordIndex,
@@ -1314,6 +1344,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         stateRef.current = {
           ...stateRef.current,
           status: "warming",
+          pauseReason: null,
           cursorWordIndex: startWordIndex,
           speed: newSpeed,
           chunkStart: startWordIndex,
@@ -1329,6 +1360,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
             stateRef.current = {
               ...stateRef.current,
               status: "error",
+              pauseReason: null,
               cursorWordIndex: startWordIndex,
               speed: newSpeed,
               chunkStart: startWordIndex,
@@ -1346,6 +1378,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
             stateRef.current = {
               ...stateRef.current,
               status: "error",
+              pauseReason: null,
               cursorWordIndex: startWordIndex,
               speed: newSpeed,
               chunkStart: startWordIndex,
@@ -1366,6 +1399,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       stateRef.current = {
         ...stateRef.current,
         status: "warming",
+        pauseReason: null,
         cursorWordIndex: startWordIndex,
         speed: newSpeed,
         chunkStart: startWordIndex,
@@ -1390,6 +1424,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       stateRef.current = {
         ...stateRef.current,
         status: "error",
+        pauseReason: null,
         cursorWordIndex: startWordIndex,
         speed: newSpeed,
         chunkStart: startWordIndex,
@@ -1421,6 +1456,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     stateRef.current = {
       ...stateRef.current,
       status: "speaking",
+      pauseReason: null,
       cursorWordIndex: startWordIndex,
       speed: newSpeed,
       chunkStart: startWordIndex,
@@ -1440,9 +1476,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     return "started";
   }, [qwenError, speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearNanoOwnership, clearPocketOwnership]);
 
-  const resyncToCursor = useCallback((wordIndex: number, wpm: number) => {
+  const resyncToCursor = useCallback((wordIndex: number, wpm: number, pauseReason: PauseReason | null = null) => {
     const s = stateRef.current;
     if (s.status === "idle") return;
+    if (pauseReason && s.status === "speaking") {
+      dispatch({ type: "PAUSE", reason: pauseReason });
+      stateRef.current = { ...stateRef.current, status: "paused", pauseReason };
+    }
     webStrategy.stop();
     kokoroStrategy.stop();
     qwenStrategy.stop();
@@ -1454,9 +1494,18 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearPendingRateResponseTrace();
     const newSpeed = wpmToRate(wpm);
     syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
+    if (pauseReason && stateRef.current.status === "paused" && stateRef.current.pauseReason === pauseReason) {
+      dispatch({ type: "RESUME" });
+    }
     dispatch({ type: "SET_SPEED", speed: newSpeed });
     // Update stateRef for immediate speakNextChunk
-    stateRef.current = { ...stateRef.current, speed: newSpeed, generationId: stateRef.current.generationId + 1 };
+    stateRef.current = {
+      ...stateRef.current,
+      status: "speaking",
+      pauseReason: null,
+      speed: newSpeed,
+      generationId: stateRef.current.generationId + 1,
+    };
     speakNextChunk();
   }, [speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, syncNarrationCursor, clearPendingRateResponseTrace, clearNanoOwnership, clearPocketOwnership]);
 
@@ -1516,7 +1565,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         `(restart=${s.status === "speaking"})`,
       );
     }
-  }, [syncNarrationCursor, webStrategy, kokoroStrategy, qwenStrategy, clearPendingRateResponseTrace, clearNanoOwnership]);
+  }, [syncNarrationCursor, webStrategy, kokoroStrategy, qwenStrategy, clearPendingRateResponseTrace, clearNanoOwnership, clearPocketOwnership]);
 
   const applyRateChange = useCallback((requestedRate: number, options: { debounceWeb: boolean }) => {
     const current = stateRef.current;
@@ -1536,6 +1585,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
     const updated = stateRef.current;
     if (updated.status === "idle") return;
+    const canAutoPause = updated.status === "speaking";
 
     if (updated.engine === "kokoro") {
       if (rateDebounceRef.current) {
@@ -1545,7 +1595,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
       if (restartKokoroGeneration) {
         clearPendingRateResponseTrace();
+        if (canAutoPause) {
+          dispatch({ type: "PAUSE", reason: "rate-change" });
+          stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
+        }
         kokoroStrategy.stop();
+        if (canAutoPause && stateRef.current.status === "paused" && stateRef.current.pauseReason === "rate-change") {
+          dispatch({ type: "RESUME" });
+          stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+        }
         speakNextChunk();
         return;
       }
@@ -1580,7 +1638,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         clearTimeout(rateDebounceRef.current);
         rateDebounceRef.current = null;
       }
+      if (canAutoPause) {
+        dispatch({ type: "PAUSE", reason: "rate-change" });
+        stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
+      }
       qwenStrategy.stop();
+      if (canAutoPause && stateRef.current.status === "paused" && stateRef.current.pauseReason === "rate-change") {
+        dispatch({ type: "RESUME" });
+        stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+      }
       speakNextChunk();
       return;
     }
@@ -1590,8 +1656,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       return;
     }
     if (pocketActiveRef.current && pocketStrategyRef.current) {
+      if (canAutoPause) {
+        dispatch({ type: "PAUSE", reason: "rate-change" });
+        stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
+      }
       pocketStrategyRef.current.stop();
       clearPocketOwnership();
+      if (canAutoPause && stateRef.current.status === "paused" && stateRef.current.pauseReason === "rate-change") {
+        dispatch({ type: "RESUME" });
+        stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+      }
       speakNextChunk();
       return;
     }
@@ -1600,31 +1674,55 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         clearTimeout(rateDebounceRef.current);
         rateDebounceRef.current = null;
       }
+      if (canAutoPause) {
+        dispatch({ type: "PAUSE", reason: "rate-change" });
+        stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
+      }
       nanoStrategyRef.current.stop();
       clearNanoOwnership();
+      if (canAutoPause && stateRef.current.status === "paused" && stateRef.current.pauseReason === "rate-change") {
+        dispatch({ type: "RESUME" });
+        stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+      }
       speakNextChunk();
       return;
     }
 
     if (!options.debounceWeb) {
+      if (canAutoPause) {
+        dispatch({ type: "PAUSE", reason: "rate-change" });
+        stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
+      }
       webStrategy.stop();
+      if (canAutoPause && stateRef.current.status === "paused" && stateRef.current.pauseReason === "rate-change") {
+        dispatch({ type: "RESUME" });
+        stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+      }
       speakNextChunk();
       return;
     }
 
+    if (canAutoPause) {
+      dispatch({ type: "PAUSE", reason: "rate-change" });
+      stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
+    }
     if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
     rateDebounceRef.current = setTimeout(() => {
       rateDebounceRef.current = null;
       webStrategy.stop();
+      if (stateRef.current.status === "paused" && stateRef.current.pauseReason === "rate-change") {
+        dispatch({ type: "RESUME" });
+        stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+      }
       speakNextChunk();
     }, TTS_RATE_RESTART_DEBOUNCE_MS);
-  }, [speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, clearPendingRateResponseTrace, experimentalNano, clearNanoOwnership]);
+  }, [speakNextChunk, webStrategy, kokoroStrategy, qwenStrategy, clearPendingRateResponseTrace, experimentalNano, clearNanoOwnership, clearPocketOwnership]);
 
   const updateWpm = useCallback((wpm: number) => {
     applyRateChange(wpmToRate(wpm), { debounceWeb: false });
   }, [applyRateChange]);
 
-  const pause = useCallback(() => {
+  const pause = useCallback((reason: PauseReason = "user-stop") => {
     const s = stateRef.current;
     if (s.status !== "speaking") return;
     clearPendingRateResponseTrace();
@@ -1639,8 +1737,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     } else {
       webStrategy.pause();
     }
-    dispatch({ type: "PAUSE" });
-    stateRef.current = { ...stateRef.current, status: "paused" };
+    dispatch({ type: "PAUSE", reason });
+    stateRef.current = { ...stateRef.current, status: "paused", pauseReason: reason };
     emitEvalTrace({
       kind: "lifecycle",
       state: "pause",
@@ -1673,6 +1771,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       stateRef.current = {
         ...stateRef.current,
         status: "speaking",
+        pauseReason: null,
         cursorWordIndex: currentWordIndex,
         speed: newSpeed,
         chunkStart: currentWordIndex,
@@ -1702,7 +1801,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       clearPendingRateResponseTrace();
       lastConfirmedAudioWordRef.current = s.cursorWordIndex;
       dispatch({ type: "RESUME" });
-      stateRef.current = { ...stateRef.current, status: "speaking" };
+      stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       emitEvalTrace({
         kind: "lifecycle",
         state: "resume",
@@ -1729,7 +1828,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       webStrategy.resume();
     }
     dispatch({ type: "RESUME" });
-    stateRef.current = { ...stateRef.current, status: "speaking" };
+    stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
     emitEvalTrace({
       kind: "lifecycle",
       state: "resume",
@@ -1739,9 +1838,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7A: Diagnostics
     recordDiagEvent("resume", `cursor=${s.cursorWordIndex}`);
     captureDiagSnapshot();
-  }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace, clearNanoOwnership]);
+  }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace, clearNanoOwnership, clearPocketOwnership]);
 
-  const stop = useCallback(() => {
+  const stop = useCallback((reason: PauseReason = "user-stop") => {
+    if (stateRef.current.status === "speaking" || stateRef.current.status === "holding" || stateRef.current.status === "warming") {
+      dispatch({ type: "PAUSE", reason });
+      stateRef.current = { ...stateRef.current, status: "paused", pauseReason: reason };
+    }
     // TTS-7A: Diagnostics
     recordDiagEvent("stop", `cursor=${stateRef.current.cursorWordIndex}`);
     captureDiagSnapshot();
@@ -1761,16 +1864,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearPocketOwnership();
     handoffPendingRef.current = false;
     dispatch({ type: "STOP" });
-  }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace, clearNanoOwnership]);
+    stateRef.current = { ...stateRef.current, status: "idle", pauseReason: null, chunkStart: 0, chunkWords: [] };
+  }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace, clearNanoOwnership, clearPocketOwnership]);
 
-  const seekToWordIndex = useCallback((targetWordIndex: number) => {
+  const seekToWordIndex = useCallback((targetWordIndex: number, reason?: "forward-seek" | "backward-seek") => {
     const words = allWordsRef.current;
     if (words.length === 0) return;
     const clampedTarget = Math.max(0, Math.min(targetWordIndex, words.length - 1));
     const current = stateRef.current;
     if (clampedTarget === current.cursorWordIndex) return;
     const currentWpm = current.speed * TTS_RATE_BASELINE_WPM;
-    resyncToCursor(clampedTarget, currentWpm);
+    const resolvedReason =
+      reason
+      ?? (clampedTarget >= current.cursorWordIndex ? "forward-seek" : "backward-seek");
+    resyncToCursor(clampedTarget, currentWpm, resolvedReason);
   }, [resyncToCursor]);
 
   const handleMediaPlay = useCallback(() => {
@@ -1782,7 +1889,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
 
   const handleMediaPause = useCallback(() => {
     if (stateRef.current.status === "speaking") {
-      pause();
+      pause("user-stop");
     }
   }, [pause]);
 
@@ -1797,20 +1904,21 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const words = allWordsRef.current;
     if (words.length === 0) return;
     const target = findNextSentenceStart(words, stateRef.current.cursorWordIndex);
-    seekToWordIndex(target);
+    seekToWordIndex(target, "forward-seek");
   }, [seekToWordIndex]);
 
   const handleMediaPreviousTrack = useCallback(() => {
     const words = allWordsRef.current;
     if (words.length === 0) return;
     const target = findPreviousSentenceStart(words, stateRef.current.cursorWordIndex);
-    seekToWordIndex(target);
+    seekToWordIndex(target, "backward-seek");
   }, [seekToWordIndex]);
 
   useEffect(() => {
     syncMediaSession({
       book: mediaSessionBook,
       status: state.status,
+      pauseReason: state.pauseReason,
       handlers: {
         onPlay: handleMediaPlay,
         onPause: handleMediaPause,
@@ -1822,6 +1930,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   }, [
     mediaSessionBook,
     state.status,
+    state.pauseReason,
     handleMediaPlay,
     handleMediaPause,
     handleMediaStop,
@@ -1835,14 +1944,26 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     dispatch({ type: "RESUME_CHAINING" });
     const s = stateRef.current;
     if (s.status === "holding") {
-      stateRef.current = { ...stateRef.current, status: "speaking" };
+      stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       speakNextChunk();
     }
   }, [speakNextChunk]);
 
   const selectVoice = useCallback((voice: SpeechSynthesisVoice) => {
+    const current = stateRef.current;
+    const shouldRestart = current.engine === "web"
+      && current.status === "speaking"
+      && currentVoice?.name !== voice.name;
     setCurrentVoice(voice);
-  }, []);
+    if (!shouldRestart) return;
+    dispatch({ type: "PAUSE", reason: "voice-change" });
+    stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "voice-change" };
+    clearPendingRateResponseTrace();
+    webStrategy.stop();
+    dispatch({ type: "RESUME" });
+    stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
+    speakNextChunkRef.current();
+  }, [clearPendingRateResponseTrace, currentVoice, webStrategy]);
 
   const adjustRate = useCallback((newRate: number) => {
     applyRateChange(newRate, { debounceWeb: true });
@@ -1859,7 +1980,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       clearNanoOwnership();
       clearPocketOwnership();
     };
-  }, [webStrategy, kokoroStrategy, qwenStrategy, clearNanoOwnership]);
+  }, [webStrategy, kokoroStrategy, qwenStrategy, clearNanoOwnership, clearPocketOwnership]);
 
   return {
     speaking: state.status === "speaking" || state.status === "holding",

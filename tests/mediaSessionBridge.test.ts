@@ -70,8 +70,18 @@ describe("resolveMediaSessionPlaybackState", () => {
     expect(resolveMediaSessionPlaybackState("speaking")).toBe("playing");
   });
 
-  it("maps paused-like states to paused", () => {
-    expect(resolveMediaSessionPlaybackState("paused")).toBe("paused");
+  it("maps user-stop pause to paused", () => {
+    expect(resolveMediaSessionPlaybackState("paused", "user-stop")).toBe("paused");
+  });
+
+  it("keeps auto-resume pauses as playing for MediaSession transport continuity", () => {
+    expect(resolveMediaSessionPlaybackState("paused", "rate-change")).toBe("playing");
+    expect(resolveMediaSessionPlaybackState("paused", "voice-change")).toBe("playing");
+    expect(resolveMediaSessionPlaybackState("paused", "forward-seek")).toBe("playing");
+    expect(resolveMediaSessionPlaybackState("paused", "backward-seek")).toBe("playing");
+  });
+
+  it("maps holding/warming to paused", () => {
     expect(resolveMediaSessionPlaybackState("holding")).toBe("paused");
     expect(resolveMediaSessionPlaybackState("warming")).toBe("paused");
   });

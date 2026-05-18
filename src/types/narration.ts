@@ -45,8 +45,18 @@ export function globalToLocal(sections: SectionBoundary[], globalWordIdx: number
 
 export type NarrationStatus = "idle" | "loading" | "speaking" | "paused" | "holding" | "error" | "warming";
 
+export type PauseReason =
+  | "user-stop"
+  | "rate-change"
+  | "voice-change"
+  | "forward-seek"
+  | "backward-seek"
+  | "mode-switch"
+  | "book-end";
+
 export interface NarrationState {
   status: NarrationStatus;
+  pauseReason: PauseReason | null;
   engine: TtsEngine;
   chunkStart: number;
   chunkWords: string[];
@@ -66,7 +76,7 @@ export type NarrationAction =
   | { type: "START_CURSOR_DRIVEN"; startIdx: number; speed: number }
   | { type: "WORD_ADVANCE"; wordIndex: number }
   | { type: "CHUNK_COMPLETE"; endIdx: number }
-  | { type: "PAUSE" }
+  | { type: "PAUSE"; reason: PauseReason }
   | { type: "RESUME" }
   | { type: "STOP" }
   | { type: "HOLD" }
@@ -86,6 +96,7 @@ export type NarrationAction =
 export function createInitialNarrationState(): NarrationState {
   return {
     status: "idle",
+    pauseReason: null,
     engine: "web",
     chunkStart: 0,
     chunkWords: [],
@@ -119,21 +130,33 @@ export function createInitialNarrationState(): NarrationState {
 export function narrationReducer(state: NarrationState, action: NarrationAction): NarrationState {
   switch (action.type) {
     case "START_CURSOR_DRIVEN":
-      return { ...state, status: "speaking", cursorWordIndex: action.startIdx, speed: action.speed, chunkStart: action.startIdx, chunkWords: [] };
+      return {
+        ...state,
+        status: "speaking",
+        pauseReason: null,
+        cursorWordIndex: action.startIdx,
+        speed: action.speed,
+        chunkStart: action.startIdx,
+        chunkWords: [],
+      };
     case "WORD_ADVANCE":
       return { ...state, cursorWordIndex: action.wordIndex };
     case "CHUNK_COMPLETE":
       return { ...state, cursorWordIndex: action.endIdx };
     case "PAUSE":
-      return state.status === "speaking" ? { ...state, status: "paused" } : state;
+      return (state.status === "speaking" || state.status === "holding" || state.status === "warming")
+        ? { ...state, status: "paused", pauseReason: action.reason }
+        : state;
     case "RESUME":
-      return (state.status === "paused" || state.status === "holding") ? { ...state, status: "speaking" } : state;
+      return (state.status === "paused" || state.status === "holding")
+        ? { ...state, status: "speaking", pauseReason: null }
+        : state;
     case "STOP":
-      return { ...state, status: "idle", chunkStart: 0, chunkWords: [] };
+      return { ...state, status: "idle", pauseReason: null, chunkStart: 0, chunkWords: [] };
     case "HOLD":
-      return state.status === "speaking" ? { ...state, status: "holding" } : state;
+      return state.status === "speaking" ? { ...state, status: "holding", pauseReason: null } : state;
     case "RESUME_CHAINING":
-      return state.status === "holding" ? { ...state, status: "speaking" } : state;
+      return state.status === "holding" ? { ...state, status: "speaking", pauseReason: null } : state;
     case "SET_ENGINE":
       return { ...state, engine: action.engine };
     case "SET_SPEED":
@@ -141,9 +164,9 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
     case "INCREMENT_GENERATION_ID":
       return { ...state, generationId: state.generationId + 1 };
     case "KOKORO_WARMING":
-      return { ...state, status: "warming", cursorWordIndex: action.startIdx, speed: action.speed };
+      return { ...state, status: "warming", pauseReason: null, cursorWordIndex: action.startIdx, speed: action.speed };
     case "QWEN_WARMING":
-      return { ...state, status: "warming", cursorWordIndex: action.startIdx, speed: action.speed };
+      return { ...state, status: "warming", pauseReason: null, cursorWordIndex: action.startIdx, speed: action.speed };
     case "KOKORO_READY":
       return {
         ...state,
@@ -177,7 +200,14 @@ export function narrationReducer(state: NarrationState, action: NarrationAction)
     case "SET_PAGE_END":
       return { ...state, pageEndWord: action.endIdx };
     case "ERROR":
-      return { ...state, status: "error", kokoroReady: false, kokoroDownloading: false, qwenReady: false };
+      return {
+        ...state,
+        status: "error",
+        pauseReason: null,
+        kokoroReady: false,
+        kokoroDownloading: false,
+        qwenReady: false,
+      };
     default:
       return state;
   }
