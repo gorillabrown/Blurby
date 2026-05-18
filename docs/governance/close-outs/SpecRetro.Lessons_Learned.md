@@ -336,3 +336,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When an animation loop needs branching logic based on external state (silence gaps, pause reasons, playback mode), extract the decision into a pure function that the loop calls. Test the decision exhaustively; test the animation integration lightly.
 **Applies to:** Any sprint adding conditional behavior to RAF-based animation loops.
 **Status:** Observation
+
+### SRL-045 — Evaluation/infrastructure sprints are naturally well-bounded when the harness pre-exists (TTS-EVAL-3, 2026-05-18)
+**Verdict:** The spec's 8 done-when criteria mapped 1:1 to implementation tasks with no scope expansion, no surprise edit sites, and no mid-sprint amendments. When a sprint's job is to run an existing tool, capture its output, and wire a script, the spec can be precise because the moving parts are already built.
+**Evidence:** 91 tests passed on first attempt. No additional files beyond what the spec predicted were needed. Matrix run, soak run, and gate run all produced artifacts cleanly. Contrast with runtime-code sprints (NARR-CURSOR-2, NARR-PAUSE-1) where edit-site discovery is common.
+**Recommendation:** For sprints that exercise existing infrastructure rather than building new runtime code, the spec can be tighter and the effort estimate more reliable. Flag these as "infrastructure execution" in the spec so reviewers calibrate expectations correctly.
+**Applies to:** Any sprint whose primary work is running tooling, capturing baselines, or wiring existing scripts into CI.
+**Status:** Observation
