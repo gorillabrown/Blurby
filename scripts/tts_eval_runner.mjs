@@ -345,6 +345,17 @@ export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence 
 }
 
 export function parseArgs(argv) {
+  const normalizedArgv = [];
+  for (const token of argv) {
+    if (token.startsWith("--") && token.includes("=")) {
+      const separator = token.indexOf("=");
+      normalizedArgv.push(token.slice(0, separator));
+      normalizedArgv.push(token.slice(separator + 1));
+      continue;
+    }
+    normalizedArgv.push(token);
+  }
+
   const args = {
     fixtures: [],
     fixtureManifestPath: DEFAULT_FIXTURE_MANIFEST,
@@ -359,46 +370,47 @@ export function parseArgs(argv) {
     tags: [],
     gates: false,
     streaming: false,
+    baselinePath: null,
     nanoLiveEvidencePath: null,
     nanoLiveEvidenceOutPath: null,
     nanoLiveTracePaths: {},
     appCommit: process.env.GITHUB_SHA || process.env.APP_COMMIT || "unknown",
   };
 
-  for (let i = 0; i < argv.length; i += 1) {
-    const token = argv[i];
+  for (let i = 0; i < normalizedArgv.length; i += 1) {
+    const token = normalizedArgv[i];
     if (token === "--fixture" || token === "--fixtures") {
-      args.fixtures = argv[i + 1] ? argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+      args.fixtures = normalizedArgv[i + 1] ? normalizedArgv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
       i += 1;
       continue;
     }
     if (token === "--fixture-manifest") {
-      args.fixtureManifestPath = argv[i + 1] || args.fixtureManifestPath;
+      args.fixtureManifestPath = normalizedArgv[i + 1] || args.fixtureManifestPath;
       i += 1;
       continue;
     }
     if (token === "--matrix-manifest") {
-      args.matrixManifestPath = argv[i + 1] || args.matrixManifestPath;
+      args.matrixManifestPath = normalizedArgv[i + 1] || args.matrixManifestPath;
       i += 1;
       continue;
     }
     if (token === "--out") {
-      args.outDir = argv[i + 1] || args.outDir;
+      args.outDir = normalizedArgv[i + 1] || args.outDir;
       i += 1;
       continue;
     }
     if (token === "--mode") {
-      args.mode = argv[i + 1] || args.mode;
+      args.mode = normalizedArgv[i + 1] || args.mode;
       i += 1;
       continue;
     }
     if (token === "--rate") {
-      args.rate = Number(argv[i + 1] || "1");
+      args.rate = Number(normalizedArgv[i + 1] || "1");
       i += 1;
       continue;
     }
     if (token === "--run-id") {
-      args.runId = argv[i + 1] || args.runId;
+      args.runId = normalizedArgv[i + 1] || args.runId;
       i += 1;
       continue;
     }
@@ -407,23 +419,28 @@ export function parseArgs(argv) {
       continue;
     }
     if (token === "--soak-profile") {
-      args.soakProfile = argv[i + 1] || "short";
+      args.soakProfile = normalizedArgv[i + 1] || "short";
       i += 1;
       continue;
     }
     if (token === "--checkpoint-every") {
-      args.checkpointEvery = Number(argv[i + 1] || "0") || null;
+      args.checkpointEvery = Number(normalizedArgv[i + 1] || "0") || null;
       i += 1;
       continue;
     }
     if (token === "--tag" || token === "--tags") {
-      const tags = argv[i + 1] ? argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+      const tags = normalizedArgv[i + 1] ? normalizedArgv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
       args.tags = [...args.tags, ...tags];
       i += 1;
       continue;
     }
+    if (token === "--baseline") {
+      args.baselinePath = normalizedArgv[i + 1] || null;
+      i += 1;
+      continue;
+    }
     if (token === "--gates") {
-      const next = argv[i + 1];
+      const next = normalizedArgv[i + 1];
       if (next && !next.startsWith("--")) {
         args.gates = next;
         i += 1;
@@ -437,17 +454,17 @@ export function parseArgs(argv) {
       continue;
     }
     if (token === "--nano-live-evidence") {
-      args.nanoLiveEvidencePath = argv[i + 1] || null;
+      args.nanoLiveEvidencePath = normalizedArgv[i + 1] || null;
       i += 1;
       continue;
     }
     if (token === "--nano-live-evidence-out") {
-      args.nanoLiveEvidenceOutPath = argv[i + 1] || null;
+      args.nanoLiveEvidenceOutPath = normalizedArgv[i + 1] || null;
       i += 1;
       continue;
     }
     if (token === "--nano-live-trace") {
-      const value = argv[i + 1] || "";
+      const value = normalizedArgv[i + 1] || "";
       const separator = value.indexOf("=");
       if (separator > 0) {
         args.nanoLiveTracePaths[value.slice(0, separator)] = value.slice(separator + 1);
@@ -456,13 +473,59 @@ export function parseArgs(argv) {
       continue;
     }
     if (token === "--app-commit") {
-      args.appCommit = argv[i + 1] || args.appCommit;
+      args.appCommit = normalizedArgv[i + 1] || args.appCommit;
       i += 1;
       continue;
     }
   }
 
   return args;
+}
+
+export async function runGateMode(args) {
+  if (!args?.baselinePath) {
+    throw new Error("Missing required --baseline <path> argument for --mode=gate.");
+  }
+
+  const baselinePath = path.resolve(args.baselinePath);
+  const baselineDoc = await readJson(baselinePath);
+  const aggregate = baselineDoc?.aggregate ?? baselineDoc;
+  if (!aggregate || typeof aggregate !== "object") {
+    throw new Error("Baseline artifact must be an aggregate summary object or include an aggregate field.");
+  }
+
+  const outDir = path.resolve(args.outDir || path.dirname(baselinePath));
+  await fs.mkdir(outDir, { recursive: true });
+  const aggregatePath = path.join(outDir, "aggregate-summary.json");
+  await writeJsonAtomic(aggregatePath, aggregate);
+
+  const gatePath = typeof args.gates === "string" ? args.gates : DEFAULT_GATES_PATH;
+  const { report, jsonPath, textPath } = await runGateEvaluation({
+    aggregatePath,
+    gatePath,
+    outDir,
+    reportBaseName: "gate-report",
+  });
+
+  const lines = [
+    `TTS eval gate mode complete (${report.pass ? "PASS" : "FAIL"})`,
+    `Baseline: ${baselinePath}`,
+    formatGateReport(report).trim(),
+    `Gate artifacts: ${jsonPath} | ${textPath}`,
+  ];
+
+  await fs.writeFile(path.join(outDir, "summary.txt"), `${lines.join("\n")}\n`, "utf8");
+  return {
+    gate: {
+      pass: report.pass,
+      hardFailures: report.counts.hardFailures,
+      warnings: report.counts.warnings,
+      jsonPath,
+      textPath,
+    },
+    report,
+    lines,
+  };
 }
 
 export function summarizeTrace(trace) {
@@ -1366,6 +1429,16 @@ async function main() {
     const { artifactPath } = await runStreamingScenarios(args);
     // eslint-disable-next-line no-console
     console.log(`Streaming baseline complete. Artifact: ${artifactPath}`);
+    return;
+  }
+
+  if (String(args.mode).toLowerCase() === "gate") {
+    const { lines, gate } = await runGateMode(args);
+    // eslint-disable-next-line no-console
+    console.log(lines.join("\n"));
+    if (gate && !gate.pass) {
+      process.exitCode = 2;
+    }
     return;
   }
 

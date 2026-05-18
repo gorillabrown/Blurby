@@ -19,6 +19,7 @@
     "tts:eval": "node scripts/tts_eval_runner.mjs",
     "tts:eval:matrix": "node scripts/tts_eval_runner.mjs --matrix",
     "tts:eval:matrix:gated": "node scripts/tts_eval_runner.mjs --matrix --gates",
+    "test:quality": "node scripts/tts_eval_runner.mjs --mode=gate --baseline=docs/testing/tts_eval_baseline_v2.json --gates=docs/testing/tts_quality_gates.v2.json",
     "tts:eval:soak:short": "node scripts/tts_eval_runner.mjs --soak-profile short",
     "tts:eval:gates": "node scripts/tts_eval_gate.mjs",
     "tts:scan:index": "node scripts/tts_engine_scan_index.mjs",
