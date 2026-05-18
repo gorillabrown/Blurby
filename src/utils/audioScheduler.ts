@@ -834,11 +834,7 @@ export function createAudioScheduler(): AudioScheduler {
     if (stopped || !audioCtx || currentWordBoundaries.length === 0) return null;
     if (playbackStartTime !== null && audioCtx.currentTime < playbackStartTime) return null;
 
-    // BUG-151: Use lagged time — cursor must not exceed audioTime - lag.
     const cursorLagSec = NARRATION_CURSOR_LAG_MS / 1000;
-    const now = Math.max(0, audioCtx.currentTime - cursorLagSec);
-    // If lag pushes us before the first boundary, no progress to report yet
-    if (currentWordBoundaries.length > 0 && now < currentWordBoundaries[0].time) return null;
     const boundaries = currentWordBoundaries;
     const total = boundaries.length;
     if (total === 0) return null;
@@ -848,6 +844,11 @@ export function createAudioScheduler(): AudioScheduler {
     // is at index (nextWordBoundaryIdx - 1), clamped to [0, total-1].
     const currentIdx = Math.max(0, Math.min(nextWordBoundaryIdx - 1, total - 1));
     const current = boundaries[currentIdx];
+    // Match boundary delivery semantics: trusted word timing uses raw audio time,
+    // fallback/heuristic timing keeps cursor lag to prevent visual lead.
+    const lagSec = current.isTrustedWordTiming ? 0 : cursorLagSec;
+    const now = Math.max(0, audioCtx.currentTime - lagSec);
+    if (now < boundaries[0].time) return null;
 
     // Compute fraction from current boundary start to next boundary start.
     const nextBoundary = currentIdx + 1 < total ? boundaries[currentIdx + 1] : null;

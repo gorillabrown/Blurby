@@ -522,12 +522,13 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
           const timingTruth = cacheIdentity && typeof cacheIdentity === "object"
             ? cacheIdentity.timingTruth
             : "none";
-          config.onCacheChunk(startIdx, audio, sampleRate, durationMs, chunkWords.length, cacheIdentity, {
+          config.onCacheChunk(startIdx, finalAudio, sampleRate, finalDurationMs, chunkWords.length, cacheIdentity, {
             timingTruth,
             wordTimestamps: result.wordTimestamps ?? null,
             chunkStartIdx: startIdx,
             chunkEndIdx: endIdx,
             boundaryType,
+            silenceMs: resolvedSilenceMs,
           });
         }
       }
@@ -661,18 +662,29 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
   /** TTS-7B: Resume chunk emission — flush buffered chunks, then continue */
   function pipelineResume(): void {
     paused = false;
-    // Flush buffered chunks in order
-    const buffered = pauseBuffer.splice(0);
-    for (const chunk of buffered) {
+    // Respect scheduler backpressure: only emit up to available capacity.
+    const capacity = Math.max(0, queueDepth - pendingChunks);
+    const immediate = pauseBuffer.splice(0, capacity);
+    for (const chunk of immediate) {
       if (!active) break;
       pendingChunks++;
       config.onChunkReady(chunk);
     }
   }
 
+  function drainPauseBufferToCapacity(): void {
+    while (!paused && active && pauseBuffer.length > 0 && pendingChunks < queueDepth) {
+      const next = pauseBuffer.shift();
+      if (!next) break;
+      pendingChunks++;
+      config.onChunkReady(next);
+    }
+  }
+
   /** TTS-7C: Acknowledge a consumed chunk — releases backpressure if needed */
   function acknowledgeChunk(): void {
     if (pendingChunks > 0) pendingChunks--;
+    drainPauseBufferToCapacity();
     if (pendingChunks < queueDepth && backpressureResolve) {
       backpressureResolve();
       backpressureResolve = null;

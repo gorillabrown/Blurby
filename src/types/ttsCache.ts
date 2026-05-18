@@ -31,6 +31,7 @@ export interface TtsCacheWriteTimingMetadata {
   chunkStartIdx: number;
   chunkEndIdx: number;
   boundaryType?: string | null;
+  silenceMs?: number | null;
 }
 
 export interface TtsTimingSidecar {
@@ -47,6 +48,7 @@ export interface TtsTimingSidecar {
   chunkStartIdx: number;
   chunkEndIdx: number | null;
   boundaryType: string | null;
+  silenceMs?: number | null;
   createdAt: string;
   wordTimestamps?: TtsWordTimestamp[];
 }

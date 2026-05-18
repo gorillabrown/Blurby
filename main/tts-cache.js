@@ -208,6 +208,9 @@ function buildTimingSidecar(target, sampleRate, durationMs, wordCount, timingMet
     ? timingMetadata.chunkEndIdx
     : (wordCount != null ? chunkStartIdx + wordCount : null);
   const timingTruth = timingMetadata.timingTruth ?? target.identity?.timingTruth ?? "none";
+  const silenceMs = Number.isFinite(timingMetadata.silenceMs) && timingMetadata.silenceMs >= 0
+    ? timingMetadata.silenceMs
+    : 0;
   const expectedTimestampCount = Number.isFinite(chunkStartIdx) && Number.isFinite(chunkEndIdx)
     ? Math.max(0, chunkEndIdx - chunkStartIdx)
     : null;
@@ -232,6 +235,7 @@ function buildTimingSidecar(target, sampleRate, durationMs, wordCount, timingMet
     chunkStartIdx,
     chunkEndIdx,
     boundaryType: timingMetadata.boundaryType ?? null,
+    silenceMs,
     createdAt: new Date().toISOString(),
   };
 
