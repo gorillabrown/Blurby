@@ -1536,3 +1536,17 @@ speakChunk() {
 **Guardrail:** Any future directory-reorganization sprint must decide before dispatch whether references in tests, scripts, IDE metadata, and binary packages are in scope. If they are out of scope, the success criteria must explicitly exempt them and define a follow-up. If they are in scope, include those file families in the allowed edit surface and verification plan.
 
 **Related:** SK-HYG-2, `docs/planning/SK-HYG-2-DISPATCH.md`, `tests/artifactHygienePolicy.test.ts`, `scripts/qwen_streaming_sidecar.py`, `scripts/tts_engine_scan_index.mjs`.
+
+---
+
+### [2026-05-17] LL-118: Audit Packages Must Trace Imports Bottom-Up, Not Just Features Top-Down
+
+**Area:** governance, audit process, TTS pipeline
+**Status:** active
+**Priority:** medium
+
+**Context:** OutsideAudit.9 (2026-05-17) scored 7/10 partly because `wordPositionIndex.ts` and `main/constants.js` were omitted from the audit package. The inventory was built top-down from feature areas ("narration hooks," "pipeline utilities") rather than bottom-up from import graphs. Files that are imported by included source but don't live in the obvious feature directory get missed.
+
+**Guardrail:** Before finalizing any audit package, run an import-trace pass: for every included `.ts`/`.js` source file, verify that its direct imports (excluding node_modules) are also included in the package. Missing imports are packaging errors that cost free audit points. This takes ~5 minutes and should be a checklist item in the 3rd-party-audit skill's Step 1.
+
+**Related:** OutsideAudit.9, `AuditDecisions.9.2026-05-17.md`, `src/utils/wordPositionIndex.ts`, `main/constants.js`.

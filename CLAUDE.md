@@ -340,6 +340,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 | 1 | 2026-05-15 | Full TTS Architecture roadmap | 3rd-party (deep research) | Conditional approval (5/10) | Spec language tightened in 4 sprints; segment identity Phase 0 hard gate added; effort increased on 2 sprints; no new sprints added; governance framing corrected |
 | 2–7 | 2026-05-15 | Targeted re-audits (remediation passes) | 3rd-party (deep research) | Progressive improvement (6→7→8→8→8→8) | Line citations fixed, future constructs labeled, ROADMAP split to SPECS companion, source files added incrementally |
 | 8 | 2026-05-15 | Targeted re-audit (final cited files) | 3rd-party (deep research) | **Approved for dispatch (9/10)** | useNarration.ts + FoliatePageView.tsx added; all cited source files verified present; architecture approved as dispatch-ready |
+| 9 | 2026-05-17 | Full TTS post-implementation audit | 3rd-party (deep research) | Conditional approval (7/10) | Three code defects found (cache silence parity, trusted progress lag, resume backpressure); TTS-PARITY-1 sprint added; NARR-SPOKEN-1 moved earlier; two packaging gaps fixed; re-audit planned as OutsideAudit.10 |
 
 ---
 
