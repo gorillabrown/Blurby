@@ -41,6 +41,12 @@ import {
   snapshotFromQwenErrorResponse,
 } from "../utils/qwenStatus";
 import { resolveKokoroRatePlan } from "../utils/kokoroRatePlan";
+import {
+  findNextSentenceStart,
+  findPreviousSentenceStart,
+  syncMediaSession,
+  type MediaSessionBookMetadata,
+} from "../utils/mediaSessionBridge";
 
 export interface FootnoteCue {
   afterWordIdx: number;
@@ -147,6 +153,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const qwenStatusRef = useRef<QwenStatusSnapshot>(DEFAULT_QWEN_STATUS_SNAPSHOT);
   const [nanoError, setNanoError] = useState<unknown | null>(null);
   const [pocketError, setPocketError] = useState<unknown | null>(null);
+  const [mediaSessionBook, setMediaSessionBookState] = useState<MediaSessionBookMetadata | null>(null);
   /** QWEN-STREAM-2: true when the streaming sidecar reported ready:true on mount. */
   const qwenStreamingReadyRef = useRef<boolean>(false);
 
@@ -1756,6 +1763,72 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     dispatch({ type: "STOP" });
   }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace, clearNanoOwnership]);
 
+  const seekToWordIndex = useCallback((targetWordIndex: number) => {
+    const words = allWordsRef.current;
+    if (words.length === 0) return;
+    const clampedTarget = Math.max(0, Math.min(targetWordIndex, words.length - 1));
+    const current = stateRef.current;
+    if (clampedTarget === current.cursorWordIndex) return;
+    const currentWpm = current.speed * TTS_RATE_BASELINE_WPM;
+    resyncToCursor(clampedTarget, currentWpm);
+  }, [resyncToCursor]);
+
+  const handleMediaPlay = useCallback(() => {
+    const status = stateRef.current.status;
+    if (status === "paused" || status === "holding") {
+      resume();
+    }
+  }, [resume]);
+
+  const handleMediaPause = useCallback(() => {
+    if (stateRef.current.status === "speaking") {
+      pause();
+    }
+  }, [pause]);
+
+  const handleMediaStop = useCallback(() => {
+    const status = stateRef.current.status;
+    if (status !== "idle" && status !== "error") {
+      stop();
+    }
+  }, [stop]);
+
+  const handleMediaNextTrack = useCallback(() => {
+    const words = allWordsRef.current;
+    if (words.length === 0) return;
+    const target = findNextSentenceStart(words, stateRef.current.cursorWordIndex);
+    seekToWordIndex(target);
+  }, [seekToWordIndex]);
+
+  const handleMediaPreviousTrack = useCallback(() => {
+    const words = allWordsRef.current;
+    if (words.length === 0) return;
+    const target = findPreviousSentenceStart(words, stateRef.current.cursorWordIndex);
+    seekToWordIndex(target);
+  }, [seekToWordIndex]);
+
+  useEffect(() => {
+    syncMediaSession({
+      book: mediaSessionBook,
+      status: state.status,
+      handlers: {
+        onPlay: handleMediaPlay,
+        onPause: handleMediaPause,
+        onStop: handleMediaStop,
+        onNextTrack: handleMediaNextTrack,
+        onPreviousTrack: handleMediaPreviousTrack,
+      },
+    });
+  }, [
+    mediaSessionBook,
+    state.status,
+    handleMediaPlay,
+    handleMediaPause,
+    handleMediaStop,
+    handleMediaNextTrack,
+    handleMediaPreviousTrack,
+  ]);
+
   const hold = useCallback(() => { dispatch({ type: "HOLD" }); }, []);
 
   const resumeChaining = useCallback(() => {
@@ -1842,6 +1915,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     },
     setBookId: (id: string) => {
       bookIdRef.current = id;
+    },
+    setMediaSessionBook: (book: MediaSessionBookMetadata | null) => {
+      if (!book || !book.title.trim()) {
+        setMediaSessionBookState(null);
+        return;
+      }
+      setMediaSessionBookState({
+        title: book.title,
+        author: book.author ?? null,
+        coverArtUrl: book.coverArtUrl ?? null,
+      });
     },
     setPronunciationOverrides: (overrides: PronunciationOverride[]) => {
       globalOverridesRef.current = overrides;

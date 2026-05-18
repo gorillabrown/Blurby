@@ -308,3 +308,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When a sprint is spec'd as "implement now, merge later," include a `## Rebase Readiness` section listing the files touched and a threshold: if >3 subsequent sprints edit the same files, schedule a dedicated rebase-and-verify mini-sprint rather than attempting a cold rebase at merge time.
 **Applies to:** Any sprint using worktree isolation with a planned deferral window of >2 sprints.
 **Status:** Observation
+
+### SRL-041 — Pre-validated branch pattern needs explicit dispatch guidance (NARR-MEDIA-1, 2026-05-17)
+**Verdict:** Effort calibration was accurate (S-tier, 1 day), but the dispatch didn't anticipate that the implementation was already complete on-branch. CLI spent its time validating rather than building, which was the right outcome but wasn't signaled in the spec.
+**Evidence:** All 8 done-when criteria were already met before CLI started. CLI's 5-task plan was entirely validation and close-out — no implementation tasks. 52 tests already passing.
+**Recommendation:** When a sprint's implementation is known to already exist on a branch (e.g., from a prior session or parallel work), add a `## Pre-existing Implementation` note to the spec stating: "Implementation exists on `branch-name` at `commit`. Dispatch scope is validation-only: spec compliance, test verification, and merge." This sets correct CLI expectations and avoids wasted planning overhead.
+**Applies to:** Any sprint where the code predates the dispatch.
+**Status:** Observation
