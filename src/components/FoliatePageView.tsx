@@ -27,6 +27,7 @@ import {
   FOLIATE_TWO_COLUMN_BREAKPOINT_PX,
   FLOW_READING_ZONE_POSITION,
   FLOW_ZONE_LINES_DEFAULT,
+  TTS_SILENCE_HOLD_THRESHOLD_MS,
 } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
@@ -60,6 +61,9 @@ import {
   type FoliateWord,
 } from "../utils/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "../utils/wordPositionIndex";
+import type { AudioProgressReport } from "../utils/audioScheduler";
+import type { PauseReason } from "../types/narration";
+import { resolveCursorHoldDecision } from "../utils/silenceAwareCursor";
 export type { FoliateWord } from "../utils/foliateHelpers";
 
 const api = window.electronAPI;
@@ -295,7 +299,7 @@ function buildResolvedTokenRange(
 
 /** TTS-7Q: Audio progress callback type — mirrors AudioProgressReport from audioScheduler */
 export interface FoliateAudioProgressFn {
-  (): { wordIndex: number; fraction: number; audioTime: number } | null;
+  (): AudioProgressReport | null;
 }
 
 interface FoliatePageViewProps {
@@ -326,6 +330,8 @@ interface FoliatePageViewProps {
   onFlowWordAdvance?: (idx: number) => void;
   /** Current word index being narrated (overlay highlight) */
   narrationWordIndex?: number;
+  /** Optional named pause reason from narration state. */
+  narrationPauseReason?: PauseReason | null;
   /** Optional audio progress sampler (kept for compatibility with reader plumbing). */
   getAudioProgress?: FoliateAudioProgressFn | null;
   /** Book-wide section boundaries from main-process extraction (HOTFIX-10: global index stamping) */
@@ -421,6 +427,7 @@ export default function FoliatePageView({
   wpm,
   onFlowWordAdvance,
   narrationWordIndex,
+  narrationPauseReason = null,
   bookWordSections,
   chunkReadingVisualState = null,
   flowMode,
@@ -454,16 +461,20 @@ export default function FoliatePageView({
   onLoadRef.current = onLoad;
   const onWordsReextractedRef = useRef(onWordsReextracted);
   onWordsReextractedRef.current = onWordsReextracted;
+  const getAudioProgressRef = useRef(getAudioProgress);
+  getAudioProgressRef.current = getAudioProgress;
   const bookWordSectionsRef = useRef(bookWordSections);
   bookWordSectionsRef.current = bookWordSections;
   const highlightedWordIndexRef = useRef<number>(highlightedWordIndex ?? -1);
   highlightedWordIndexRef.current = highlightedWordIndex ?? -1;
   const readingModeRef = useRef(readingMode);
   const chunkReadingVisualStateRef = useRef<ChunkReadingVisualState | null>(chunkReadingVisualState);
+  const narrationPauseReasonRef = useRef<PauseReason | null>(narrationPauseReason);
   // Track when user has manually browsed away during narration — suppresses scrollToAnchor
   const userBrowsingRef = useRef(false);
   readingModeRef.current = readingMode;
   chunkReadingVisualStateRef.current = chunkReadingVisualState;
+  narrationPauseReasonRef.current = narrationPauseReason;
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -1440,14 +1451,34 @@ export default function FoliatePageView({
     cursor.style.display = "block";
 
     let currentIdx = highlightedWordIndexRef.current ?? 0;
+    let lastPublishedIdx = currentIdx;
     const msPerWord = 60000 / (wpm || DEFAULT_WPM);
     let lastAdvance = performance.now();
 
     const tick = (now: number) => {
-      if (now - lastAdvance >= msPerWord) {
-        currentIdx++;
-        lastAdvance = now;
-        onFlowWordAdvanceRef.current?.(currentIdx);
+      const progress = getAudioProgressRef.current?.() ?? null;
+      const holdDecision = resolveCursorHoldDecision({
+        pauseReason: narrationPauseReasonRef.current,
+        progress,
+        thresholdMs: TTS_SILENCE_HOLD_THRESHOLD_MS,
+      });
+
+      if (!holdDecision.freezeForPause) {
+        if (progress && Number.isFinite(progress.wordIndex)) {
+          currentIdx = Math.max(0, Math.floor(progress.wordIndex));
+          if (currentIdx !== lastPublishedIdx) {
+            lastPublishedIdx = currentIdx;
+            onFlowWordAdvanceRef.current?.(currentIdx);
+          }
+          lastAdvance = now;
+        } else if (now - lastAdvance >= msPerWord) {
+          currentIdx++;
+          lastAdvance = now;
+          if (currentIdx !== lastPublishedIdx) {
+            lastPublishedIdx = currentIdx;
+            onFlowWordAdvanceRef.current?.(currentIdx);
+          }
+        }
       }
       let found = false;
       try {
@@ -1460,9 +1491,13 @@ export default function FoliatePageView({
             const iframe = foliateIframeRef.current;
             const iframeRect = iframe?.getBoundingClientRect();
             // Compute position in page viewport
-            const x = (iframeRect ? iframeRect.left : 0) + spanRect.left;
+            let x = (iframeRect ? iframeRect.left : 0) + spanRect.left;
             const y = (iframeRect ? iframeRect.top : 0) + spanRect.top + spanRect.height;
-            const w = spanRect.width;
+            let w = spanRect.width;
+            if (holdDecision.holdForSilence) {
+              x += w;
+              w = 1;
+            }
             // Only show if the word is within the visible viewport
             const viewportWidth = container.clientWidth;
             const viewportHeight = container.clientHeight;
@@ -1487,7 +1522,7 @@ export default function FoliatePageView({
     };
     flowRafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(flowRafRef.current);
-  }, [readingMode, flowPlaying, wpm]);
+  }, [flowMode, readingMode, flowPlaying, wpm, viewApiRef]);
 
   useEffect(() => {
     if ((readingMode !== "flow" && readingMode !== "narrate") || narrationWordIndex == null) return;

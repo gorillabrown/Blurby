@@ -351,6 +351,48 @@ describe("BUG-145b: getAudioProgress() contract", () => {
     }
     scheduler.stop();
   });
+
+  it("exposes silence-gap metadata when trusted word timestamps contain inter-word pause", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks(makeCallbacks());
+    scheduler.play();
+    scheduler.scheduleChunk({
+      audio: new Float32Array(KOKORO_SAMPLE_RATE),
+      sampleRate: KOKORO_SAMPLE_RATE,
+      durationMs: 600,
+      words: ["alpha", "bravo", "charlie"],
+      startIdx: 0,
+      wordTimestamps: [
+        { word: "alpha", startTime: 0.0, endTime: 0.15 },
+        { word: "bravo", startTime: 0.21, endTime: 0.40 },
+        { word: "charlie", startTime: 0.40, endTime: 0.58 },
+      ],
+    });
+
+    setAudioTime(0.18);
+    const report = scheduler.getAudioProgress();
+    expect(report).not.toBeNull();
+    expect(report?.silenceGapMs).toBeCloseTo(60, 6);
+    expect(report?.isInSilenceGap).toBe(true);
+    scheduler.stop();
+  });
+
+  it("keeps silence-gap metadata null for heuristic timing chunks", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks(makeCallbacks());
+    scheduler.play();
+    scheduler.scheduleChunk(makeChunk(0, 5, 800));
+
+    setAudioTime(0.25);
+    const report = scheduler.getAudioProgress();
+    if (report !== null) {
+      expect(report.currentWordEndTime ?? null).toBeNull();
+      expect(report.nextWordStartTime ?? null).toBeNull();
+      expect(report.silenceGapMs ?? null).toBeNull();
+      expect(report.isInSilenceGap).toBe(false);
+    }
+    scheduler.stop();
+  });
 });
 
 // ── Group 3: Truth-sync visual-only (separate from onWordAdvance) ────────────

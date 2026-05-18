@@ -1149,6 +1149,7 @@ export default function ReaderContainer({
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
       narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}
+      narrationPauseReason={narration.pauseReason}
       getAudioProgress={narration.speaking ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
       chunkReadingVisualState={chunkReadingVisualState}
