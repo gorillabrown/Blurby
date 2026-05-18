@@ -100,8 +100,8 @@ export interface ScheduledChunk {
   /** NARR-TIMING: Real word timestamps from Kokoro duration tensor (null = use heuristic).
    *  startTime/endTime in seconds from chunk audio start. endTime = end of voiced portion
    *  (excludes trailing inter-word pause). Gap between word[i].endTime and word[i+1].startTime
-   *  is silence. Currently only startTime is used for scheduling; endTime preserved for future
-   *  silence-aware cursor hold (IDEAS.md H6). */
+   *  is silence. startTime drives word boundary scheduling and endTime powers silence-aware
+   *  cursor hold decisions in AudioProgressReport. */
   wordTimestamps?: { word: string; startTime: number; endTime: number }[] | null;
   /** Optional provider-native word index (normalized/token space) for each resolved chunk word. */
   sourceWordIndexes?: number[] | null;
@@ -166,6 +166,8 @@ export interface SchedulerCallbacks {
 interface SchedulerWordBoundary {
   time: number;
   wordIndex: number;
+  startTime: number;
+  endTime: number | null;
   isTrustedWordTiming: boolean;
   sourceWordIndex: number | null;
   alignmentCorrected: boolean;
@@ -189,6 +191,14 @@ export interface AudioProgressReport {
   fraction: number;
   /** AudioContext.currentTime at the time of this report. Monotonic, audio-clock-only. */
   audioTime: number;
+  /** Absolute audio-clock timestamp for the current word's voiced end, if known. */
+  currentWordEndTime?: number | null;
+  /** Absolute audio-clock timestamp for the next word's start boundary, if known. */
+  nextWordStartTime?: number | null;
+  /** Duration of the current inter-word silence gap in milliseconds, if known. */
+  silenceGapMs?: number | null;
+  /** True when audio time is currently inside a real inter-word silence gap. */
+  isInSilenceGap?: boolean;
 }
 
 export interface AudioScheduler {
@@ -421,6 +431,8 @@ export function createAudioScheduler(): AudioScheduler {
           boundaries.push({
             time: chunkStartTime + chunk.wordTimestamps[i].startTime,
             wordIndex: chunk.startIdx + i,
+            startTime: chunkStartTime + chunk.wordTimestamps[i].startTime,
+            endTime: chunkStartTime + chunk.wordTimestamps[i].endTime,
             isTrustedWordTiming: true,
             sourceWordIndex,
             alignmentCorrected: sourceWordIndex != null && sourceWordIndex !== i,
@@ -460,6 +472,8 @@ export function createAudioScheduler(): AudioScheduler {
       boundaries.push({
         time: chunkStartTime + cumulativeWeight * chunkDurSec,
         wordIndex: chunk.startIdx + i,
+        startTime: chunkStartTime + cumulativeWeight * chunkDurSec,
+        endTime: null,
         isTrustedWordTiming: false,
         sourceWordIndex: null,
         alignmentCorrected: false,
@@ -868,10 +882,29 @@ export function createAudioScheduler(): AudioScheduler {
       fraction = 0;
     }
 
+    const currentWordEndTime = current.endTime ?? null;
+    const nextWordStartTime = currentWordEndTime != null
+      ? (nextBoundary?.startTime ?? null)
+      : null;
+    let silenceGapMs: number | null = null;
+    let isInSilenceGap = false;
+    if (
+      currentWordEndTime != null &&
+      nextWordStartTime != null &&
+      nextWordStartTime >= currentWordEndTime
+    ) {
+      silenceGapMs = (nextWordStartTime - currentWordEndTime) * 1000;
+      isInSilenceGap = now >= currentWordEndTime && now < nextWordStartTime;
+    }
+
     return {
       wordIndex: current.wordIndex,
       fraction,
       audioTime: now,
+      currentWordEndTime,
+      nextWordStartTime,
+      silenceGapMs,
+      isInSilenceGap,
     };
   }
 

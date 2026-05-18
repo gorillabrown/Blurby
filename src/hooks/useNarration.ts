@@ -61,6 +61,7 @@ export interface FootnoteCue {
 
 export interface NarrationState {
   speaking: boolean;
+  pauseReason: PauseReason | null;
   voices: SpeechSynthesisVoice[];
   currentVoice: SpeechSynthesisVoice | null;
   rate: number; // 0.5-3.0
@@ -1986,6 +1987,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     speaking: state.status === "speaking" || state.status === "holding",
     warming: state.status === "warming",
     status: state.status,
+    pauseReason: state.pauseReason,
     cursorWordIndex: state.cursorWordIndex,
     voices,
     currentVoice,

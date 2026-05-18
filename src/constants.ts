@@ -111,6 +111,8 @@ export const NARRATION_BAND_MIN_WIDTH_PX = 8;
  *  The word timer and getAudioProgress both use (audioTime - lag) as the
  *  effective clock, creating a hard ceiling the cursor cannot exceed. */
 export const NARRATION_CURSOR_LAG_MS = 350;
+/** NARR-CURSOR-2: Ignore tiny inter-word timing gaps; hold cursor only for meaningful silence. */
+export const TTS_SILENCE_HOLD_THRESHOLD_MS = 30;
 
 // ── Qwen Runtime Chunk Profile (QWEN-PROT-2 → QWEN-HARDEN-1) ──────────────
 /** Qwen opening ramp seed values for the live sidecar lane. */
