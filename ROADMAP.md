@@ -3,7 +3,7 @@
 **Last updated**: 2026-05-17 — Roadmap review: TTS Architecture Complete finish line reached. All 10 conveyor sprints landed. Full phase archived. New finish line TBD.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 8). 6 full specs + 2 stubs. Next dispatch: NARR-MEDIA-1.
+**Queue**: GREEN (depth 7). 5 full specs + 2 stubs. Next dispatch: NARR-PAUSE-1.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -33,6 +33,7 @@
 | TTS-PIPELINE-1 | 2026-05-17 | End-to-end pipeline integration tests | `CloseOut.TTS-PIPELINE-1.2026-05-17.md` |
 | TTS-ARCH-DOC-1 | 2026-05-17 | Architecture decision records for TTS | `CloseOut.TTS-ARCH-DOC-1.2026-05-17.md` |
 | SK-HYG-2 | 2026-05-16 | Directory reorganization (Lane E governance) | `CloseOut.SK-HYG-2.2026-05-16.md` |
+| NARR-MEDIA-1 | 2026-05-17 | MediaSession integration — OS media controls for narration | `CloseOut.NARR-MEDIA-1.2026-05-17.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -65,33 +66,6 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ### Phase: Reading Experience v2
 
 #### Stage 1a — Narration UX (serial)
-
-#### NARR-MEDIA-1 — MediaSession Integration
-
-- **What:** Register Electron's MediaSession API so narration responds to OS-level media controls (play/pause/next-track/previous-track from lock screen, Bluetooth headphones, media keyboards). Map next-track to skip-sentence and previous-track to back-sentence.
-- **Why:** High daily-use value for headphone listeners. The TTS architecture is complete but invisible to the OS — users can't control narration without the app in focus. Readest implements this via Tauri; Electron has equivalent API. Research finding H7.
-- **Prerequisites:** None. useNarration already exposes pause/resume/stop. audioScheduler has getAudioProgress.
-- **Done when:**
-    1. `navigator.mediaSession.metadata` populated with book title, author, and cover art on narration start
-    2. `navigator.mediaSession.setActionHandler` wired for play, pause, stop, nexttrack, previoustrack
-    3. play/pause toggles narration state via existing dispatch
-    4. nexttrack advances to next sentence boundary (uses narrationPlanner sentence breaks)
-    5. previoustrack retreats to previous sentence start
-    6. MediaSession playback state updates on every narration state change (playing/paused/none)
-    7. Metadata clears on narration stop or book close
-    8. 12+ focused tests covering all action handlers, state transitions, and metadata lifecycle
-- **Effort:** S (1 day). Single file addition + hook integration.
-- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
-- **Source:** IDEAS.md H7, Blurby.Research findings (readest pattern)
-
-##### Implementation detail
-- **Edit sites:** New file `src/utils/mediaSessionBridge.ts` (~120 lines); `src/hooks/useNarration.ts` (add effect calling bridge on state change, ~15 lines at narration start/stop/pause/resume paths); `src/types.ts` (no change — existing NarrationState sufficient)
-- **Tests:** New `tests/mediaSessionBridge.test.ts`; mock `navigator.mediaSession` with jest spy
-- **Constants:** None new
-- **Branch:** `sprint/narr-media-1` from clean main
-- **Commit hygiene:** explicit-stage; no destructive flags
-
----
 
 #### NARR-PAUSE-1 — Named-Pause State Machine
 
