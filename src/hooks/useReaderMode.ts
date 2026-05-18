@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react";
 import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS, FOCUS_MODE_START_DELAY_MS } from "../constants";
 import { resolveFoliateStartWord, resolveModeStartWordIndex } from "../utils/startWordIndex";
 import type { BlurbySettings, ReaderMode } from "../types";
+import type { PauseReason } from "../types/narration";
 import type { TtsEvalTraceSink } from "../types/eval";
 import type { FoliateViewAPI, FoliateWord } from "../components/FoliatePageView";
 import type { UseReadingModeInstanceReturn } from "./useReadingModeInstance";
@@ -21,7 +22,7 @@ export interface UseReaderModeParams {
   narration: {
     cursorWordIndex: number;
     startCursorDriven: (words: string[], startWordIndex: number, wpm: number, onWordAdvance: (wordIndex: number) => void) => "started" | "warming" | "error";
-    stop: () => void;
+    stop: (reason?: PauseReason) => void;
     setOnTruthSync?: (cb: ((wordIndex: number) => void) | null) => void;
     setPageEndWord: (idx: number | null) => void;
   };
@@ -173,7 +174,7 @@ export function useReaderMode({
     if (reader.playing) reader.togglePlay();
     if (focusPlaying) setFocusPlaying(false);
     if (flowPlaying) setFlowPlaying(false);
-    narration.stop();
+    narration.stop("mode-switch");
     clearNarrateTruthSync();
     setIsNarrating(false);
     narration.setPageEndWord(null);
@@ -186,7 +187,7 @@ export function useReaderMode({
 
   const handleStopTts = useCallback(() => {
     modeInstance.stopMode();
-    narration.stop();
+    narration.stop("user-stop");
     clearNarrateTruthSync();
     setIsNarrating(false);
     updateSettings({ isNarrating: false });
@@ -387,7 +388,7 @@ export function useReaderMode({
       clearNarrateTruthSync();
       setIsNarrating(false);
       updateSettings({ readingMode: "flow", lastReadingMode: "flow", isNarrating: false });
-      narration.stop();
+      narration.stop("mode-switch");
       return;
     }
 
@@ -446,7 +447,7 @@ export function useReaderMode({
       pendingNarrationResumeRef.current = true;
     }
     if (isNarratingRef.current) {
-      narration.stop();
+      narration.stop("mode-switch");
       clearNarrateTruthSync();
       setIsNarrating(false);
       updateSettings({ isNarrating: false });
@@ -559,7 +560,7 @@ export function useReaderMode({
       if (isNarratingRef.current) {
         modeInstance.pauseMode();
         setFlowPlaying(false);
-        narration.stop();
+        narration.stop("mode-switch");
         clearNarrateTruthSync();
         setIsNarrating(false);
         updateSettings({

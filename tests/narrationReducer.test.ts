@@ -12,6 +12,7 @@ describe("narrationReducer", () => {
     const state = createInitialNarrationState();
     expect(state).toEqual({
       status: "idle",
+      pauseReason: null,
       engine: "web",
       chunkStart: 0,
       chunkWords: [],
@@ -75,34 +76,37 @@ describe("narrationReducer", () => {
 
   it("PAUSE from speaking transitions to paused", () => {
     const state: NarrationState = { ...createInitialNarrationState(), status: "speaking" };
-    const next = narrationReducer(state, { type: "PAUSE" });
+    const next = narrationReducer(state, { type: "PAUSE", reason: "user-stop" });
     expect(next.status).toBe("paused");
+    expect(next.pauseReason).toBe("user-stop");
   });
 
   it("PAUSE from idle is a no-op", () => {
     const state = createInitialNarrationState();
-    const next = narrationReducer(state, { type: "PAUSE" });
+    const next = narrationReducer(state, { type: "PAUSE", reason: "user-stop" });
     expect(next).toBe(state); // same reference — guard returned state unchanged
   });
 
   it("PAUSE from paused is a no-op", () => {
     const state: NarrationState = { ...createInitialNarrationState(), status: "paused" };
-    const next = narrationReducer(state, { type: "PAUSE" });
+    const next = narrationReducer(state, { type: "PAUSE", reason: "user-stop" });
     expect(next).toBe(state);
   });
 
-  it("PAUSE from holding is a no-op", () => {
+  it("PAUSE from holding transitions to paused with reason", () => {
     const state: NarrationState = { ...createInitialNarrationState(), status: "holding" };
-    const next = narrationReducer(state, { type: "PAUSE" });
-    expect(next).toBe(state);
+    const next = narrationReducer(state, { type: "PAUSE", reason: "mode-switch" });
+    expect(next.status).toBe("paused");
+    expect(next.pauseReason).toBe("mode-switch");
   });
 
   // --- RESUME guards ---
 
   it("RESUME from paused transitions to speaking", () => {
-    const state: NarrationState = { ...createInitialNarrationState(), status: "paused" };
+    const state: NarrationState = { ...createInitialNarrationState(), status: "paused", pauseReason: "user-stop" };
     const next = narrationReducer(state, { type: "RESUME" });
     expect(next.status).toBe("speaking");
+    expect(next.pauseReason).toBeNull();
   });
 
   it("RESUME from holding transitions to speaking", () => {
@@ -135,6 +139,7 @@ describe("narrationReducer", () => {
     };
     const next = narrationReducer(state, { type: "STOP" });
     expect(next.status).toBe("idle");
+    expect(next.pauseReason).toBeNull();
     expect(next.chunkStart).toBe(0);
     expect(next.chunkWords).toEqual([]);
     // cursorWordIndex is NOT reset by STOP

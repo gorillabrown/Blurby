@@ -3,6 +3,7 @@ dist/
 release/
 .DS_Store
 *.log
+~$*.xlsx
 
 # Large binary assets (keep on disk, not in repo)
 Blurby Brand/

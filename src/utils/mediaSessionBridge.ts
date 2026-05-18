@@ -1,4 +1,5 @@
 import { isSentenceEnd } from "./pauseDetection";
+import type { PauseReason } from "../types/narration";
 
 export type NarrationPlaybackStatus =
   | "idle"
@@ -28,6 +29,7 @@ export interface MediaSessionBridgeHandlers {
 export interface MediaSessionBridgeSyncInput {
   book: MediaSessionBookMetadata | null;
   status: NarrationPlaybackStatus;
+  pauseReason?: PauseReason | null;
   handlers: MediaSessionBridgeHandlers;
 }
 
@@ -74,9 +76,21 @@ function clearActionHandlers(mediaSession: MediaSession): void {
 
 export function resolveMediaSessionPlaybackState(
   status: NarrationPlaybackStatus,
+  pauseReason: PauseReason | null = null,
 ): MediaSessionPlaybackState {
   if (status === "speaking") return "playing";
-  if (status === "paused" || status === "holding" || status === "warming") {
+  if (status === "paused") {
+    if (
+      pauseReason === "rate-change"
+      || pauseReason === "voice-change"
+      || pauseReason === "forward-seek"
+      || pauseReason === "backward-seek"
+    ) {
+      return "playing";
+    }
+    return "paused";
+  }
+  if (status === "holding" || status === "warming") {
     return "paused";
   }
   return "none";
@@ -119,7 +133,7 @@ export function syncMediaSession(input: MediaSessionBridgeSyncInput): void {
   const mediaSession = getMediaSession();
   if (!mediaSession) return;
 
-  const playbackState = resolveMediaSessionPlaybackState(input.status);
+  const playbackState = resolveMediaSessionPlaybackState(input.status, input.pauseReason ?? null);
   const isActive = playbackState !== "none";
 
   if (!isActive || !input.book) {

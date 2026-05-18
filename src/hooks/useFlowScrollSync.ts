@@ -7,6 +7,7 @@ import {
   EINK_LINES_PER_PAGE,
 } from "../constants";
 import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
+import type { PauseReason } from "../types/narration";
 import type { ChunkReadingVisualState, ReadingChunk } from "../types/chunkReading";
 import type { TtsEvalTraceSink } from "../types/eval";
 
@@ -16,7 +17,7 @@ type ReadingMode = "page" | "focus" | "flow";
 
 interface NarrationFlowBridge {
   cursorWordIndex: number;
-  stop: () => void;
+  stop: (reason?: PauseReason) => void;
   updateWords: (
     words: string[],
     globalStartIdx: number,
@@ -476,7 +477,7 @@ export function useFlowScrollSync({
 
       const doc = activeDocRef.current;
       const nextDoc = getNextQueuedBook(doc.id, libraryRef.current);
-      narration.stop();
+      narration.stop("book-end");
       setIsNarrating(false);
 
       if (!nextDoc) {
