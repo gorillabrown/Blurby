@@ -3,7 +3,7 @@
 **Last updated**: 2026-05-17 — Roadmap review: TTS Architecture Complete finish line reached. All 10 conveyor sprints landed. Full phase archived. New finish line TBD.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 7). 5 full specs + 2 stubs. Next dispatch: NARR-PAUSE-1.
+**Queue**: GREEN (depth 6). 4 full specs + 2 stubs. Next dispatch: TTS-PARITY-1.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -34,6 +34,7 @@
 | TTS-ARCH-DOC-1 | 2026-05-17 | Architecture decision records for TTS | `CloseOut.TTS-ARCH-DOC-1.2026-05-17.md` |
 | SK-HYG-2 | 2026-05-16 | Directory reorganization (Lane E governance) | `CloseOut.SK-HYG-2.2026-05-16.md` |
 | NARR-MEDIA-1 | 2026-05-17 | MediaSession integration — OS media controls for narration | `CloseOut.NARR-MEDIA-1.2026-05-17.md` |
+| NARR-PAUSE-1 | 2026-05-18 | Named-pause state machine — 7 pause reasons with auto-resume | `CloseOut.NARR-PAUSE-1.2026-05-18.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -66,34 +67,6 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ### Phase: Reading Experience v2
 
 #### Stage 1a — Narration UX (serial)
-
-#### NARR-PAUSE-1 — Named-Pause State Machine
-
-- **What:** Discriminate WHY playback paused by adding a `pauseReason` field to NarrationState. Reasons: `"user-stop"`, `"rate-change"`, `"voice-change"`, `"forward-seek"`, `"backward-seek"`, `"mode-switch"`, `"book-end"`. Resume behavior differs by reason: rate/voice changes auto-resume after config applies; user-stop requires explicit resume; forward/backward seek resume at new position.
-- **Why:** Currently all pauses are identical — the UI can't distinguish "user pressed pause" from "system paused briefly for rate change." This causes jarring UX: rate changes require manual resume, and the cursor behavior during system-initiated pauses is indistinguishable from user-initiated stops. Named-pause enables NARR-CURSOR-2 to make smarter hold decisions. Research finding H8 (readest 7-state machine).
-- **Prerequisites:** None.
-- **Done when:**
-    1. `NarrationState` has `pauseReason: PauseReason | null` field
-    2. `PauseReason` is a union type with the 7 discriminants listed above
-    3. Every dispatch of `{ type: "PAUSE" }` in useNarration.ts includes the reason
-    4. Rate-change pause auto-resumes after debounce completes (existing behavior preserved, now explicit)
-    5. Voice-change pause auto-resumes after voice swap completes
-    6. Forward/backward seek pauses resume at new cursor position
-    7. User-stop requires explicit resume (play button or keyboard)
-    8. MediaSession bridge (from NARR-MEDIA-1) reports correct playback state during auto-resume pauses
-    9. 15+ focused tests covering each pause reason and its resume behavior
-- **Effort:** S (1 day). Type addition + dispatch-site updates.
-- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
-- **Source:** IDEAS.md H8, Blurby.Research findings (readest TTSController pattern)
-
-##### Implementation detail
-- **Edit sites:** `src/types/narration.ts` (add PauseReason type, extend NarrationState and PAUSE action); `src/hooks/useNarration.ts` (update ~8 dispatch sites that emit PAUSE to include reason; update rate-change handler ~line 1422, voice-change ~line 1500, forward/backward seek paths, stop path); `src/utils/mediaSessionBridge.ts` (respect pauseReason for playback state reporting)
-- **Tests:** New `tests/namedPause.test.ts`
-- **Constants:** None new
-- **Branch:** `sprint/narr-pause-1` from clean main
-- **Commit hygiene:** explicit-stage; no destructive flags
-
----
 
 #### TTS-PARITY-1 — Cache/Progress/Resume Parity Hardening
 

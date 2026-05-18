@@ -315,3 +315,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When a sprint's implementation is known to already exist on a branch (e.g., from a prior session or parallel work), add a `## Pre-existing Implementation` note to the spec stating: "Implementation exists on `branch-name` at `commit`. Dispatch scope is validation-only: spec compliance, test verification, and merge." This sets correct CLI expectations and avoids wasted planning overhead.
 **Applies to:** Any sprint where the code predates the dispatch.
 **Status:** Observation
+
+### SRL-042 — Edit-site lists should include stop/teardown paths, not just happy-path wiring (NARR-PAUSE-1, 2026-05-18)
+**Verdict:** Effort calibration was accurate (M-tier, delivered in spec window), but the edit-site list missed two files that needed changes — `useReaderMode.ts` and `useFlowScrollSync.ts` — because the spec focused on narration start/pause/resume paths and didn't trace stop-reason threading through mode-switch and book-end teardown.
+**Evidence:** The spec listed 3 edit sites (`narration.ts`, `useNarration.ts`, `mediaSessionBridge.ts`). CLI touched 5 files total, adding `useReaderMode.ts` and `useFlowScrollSync.ts` for stop-reason wiring. Both were necessary for `mode-switch` and `book-end` pause reasons to actually fire.
+**Recommendation:** When speccing a new state discriminant (like `pauseReason`), trace not just where the value is produced and consumed but also where the absence of it would leave a code path using the old undiscriminated behavior. Stop/teardown/cleanup paths are the most common miss.
+**Applies to:** Any sprint adding a new state field that replaces implicit behavior with explicit discrimination.
+**Status:** Observation
