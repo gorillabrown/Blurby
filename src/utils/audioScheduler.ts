@@ -11,6 +11,7 @@ import type { KokoroRatePlan } from "./kokoroRatePlan";
 import type { KokoroPlaybackSegmentMetadata } from "../types/narration";
 import type { TtsProviderTimingTruth } from "../types/ttsProvider";
 import { createTimingMetadataRecord, type TimingMetadataRecord } from "./timingMetadataStore";
+import { isPunctuationOnlyWord } from "./spokenWordFilter";
 
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
@@ -384,9 +385,13 @@ export function createAudioScheduler(): AudioScheduler {
     const overshootToleranceSec = Math.min(0.040, chunkDurationSec * 0.05);
     if (lastEnd > chunkDurationSec + overshootToleranceSec) return false;
 
-    // Too many zero-duration words suggests bad alignment
-    const zeroDur = timestamps.filter(t => t.endTime === t.startTime).length;
-    if (zeroDur > 2 && zeroDur > timestamps.length * 0.2) return false;
+    // Too many zero-duration spoken words suggests bad alignment.
+    // Punctuation-only display tokens may legitimately map to zero-width intervals.
+    const spokenWordCount = words.filter((word) => !isPunctuationOnlyWord(word)).length;
+    const zeroDurSpoken = timestamps.filter((timestamp, index) =>
+      timestamp.endTime === timestamp.startTime && !isPunctuationOnlyWord(words[index])
+    ).length;
+    if (spokenWordCount > 0 && zeroDurSpoken > 2 && zeroDurSpoken > spokenWordCount * 0.2) return false;
 
     return true;
   }

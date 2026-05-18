@@ -407,6 +407,58 @@ describe("validateWordTimestamps — scheduler fallback behavior (via telemetry)
     scheduler.stop();
   });
 
+  it("accepts punctuation-heavy zero-width display tokens without falling back to heuristic timing", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    // This fixture has 5 punctuation-only zero-width tokens. Under the old
+    // global zero-duration threshold, this would have triggered heuristic
+    // fallback despite spoken words being validly timed.
+    const words = ["Hello", "—", "...", "\"", "world", ";", "?", "again"];
+    const mappedTimestamps = [
+      { word: "Hello", startTime: 0.0, endTime: 0.2 },
+      { word: "—", startTime: 0.2, endTime: 0.2 },
+      { word: "...", startTime: 0.2, endTime: 0.2 },
+      { word: "\"", startTime: 0.2, endTime: 0.2 },
+      { word: "world", startTime: 0.2, endTime: 0.5 },
+      { word: ";", startTime: 0.5, endTime: 0.5 },
+      { word: "?", startTime: 0.5, endTime: 0.5 },
+      { word: "again", startTime: 0.5, endTime: 0.9 },
+    ];
+    const chunk = makeChunkWithTimestamps(0, words, mappedTimestamps, { durationMs: 1000 });
+    scheduler.scheduleChunk(chunk);
+
+    const telemetry = getTimingTelemetry();
+    expect(telemetry.length).toBe(1);
+    expect((telemetry[0] as any).timestampSource).toBe("kokoro-duration-tensor");
+
+    scheduler.stop();
+  });
+
+  it("still rejects heavy zero-duration spoken-word timing as invalid", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    const words = ["alpha", "beta", "gamma", "delta", "epsilon"];
+    const badTimestamps = [
+      { word: "alpha", startTime: 0.0, endTime: 0.0 },
+      { word: "beta", startTime: 0.0, endTime: 0.0 },
+      { word: "gamma", startTime: 0.0, endTime: 0.0 },
+      { word: "delta", startTime: 0.0, endTime: 0.4 },
+      { word: "epsilon", startTime: 0.4, endTime: 0.9 },
+    ];
+    const chunk = makeChunkWithTimestamps(0, words, badTimestamps, { durationMs: 1000 });
+    scheduler.scheduleChunk(chunk);
+
+    const telemetry = getTimingTelemetry();
+    expect(telemetry.length).toBe(1);
+    expect((telemetry[0] as any).timestampSource).toBe("heuristic");
+
+    scheduler.stop();
+  });
+
   it("emits untrusted truth-sync at chunk boundary for heuristic fallback lanes", async () => {
     const onTruthSync = vi.fn();
     const scheduler = createAudioScheduler();
