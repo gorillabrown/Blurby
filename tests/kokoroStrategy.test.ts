@@ -266,6 +266,75 @@ describe("createKokoroStrategy", () => {
     }
   });
 
+  it("filters punctuation-only display tokens before Kokoro generation and remaps timestamps to display space", async () => {
+    const displayWords = ["Hello", "—", "world", "...", "again"];
+    electronAPI.kokoroGenerate = vi.fn().mockResolvedValue({
+      ...defaultIpcResult,
+      wordTimestamps: [
+        { word: "Hello", startTime: 0.0, endTime: 0.2 },
+        { word: "world", startTime: 0.2, endTime: 0.5 },
+        { word: "again", startTime: 0.5, endTime: 0.9 },
+      ],
+    });
+    const cacheChunkSpy = vi.spyOn(ttsCache, "cacheChunk").mockImplementation(() => {});
+    const deps = mockDeps({ getWords: vi.fn(() => displayWords) });
+    const strategy = createKokoroStrategy(deps);
+
+    try {
+      strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+      await vi.waitFor(() => expect(cacheChunkSpy).toHaveBeenCalled());
+
+      expect(electronAPI.kokoroGenerate).toHaveBeenCalledWith(
+        expect.any(String),
+        "af_heart",
+        1.0,
+        ["Hello", "world", "again"],
+      );
+
+      const timingMetadata = cacheChunkSpy.mock.calls[0][7] as any;
+      expect(timingMetadata.wordTimestamps).toEqual([
+        { word: "Hello", startTime: 0.0, endTime: 0.2 },
+        { word: "—", startTime: 0.2, endTime: 0.2 },
+        { word: "world", startTime: 0.2, endTime: 0.5 },
+        { word: "...", startTime: 0.5, endTime: 0.5 },
+        { word: "again", startTime: 0.5, endTime: 0.9 },
+      ]);
+    } finally {
+      strategy.stop();
+      cacheChunkSpy.mockRestore();
+    }
+  });
+
+  it("anchors leading and trailing punctuation-only display tokens to nearest spoken boundaries", async () => {
+    const displayWords = ["...", "Hello", "world", "—"];
+    electronAPI.kokoroGenerate = vi.fn().mockResolvedValue({
+      ...defaultIpcResult,
+      wordTimestamps: [
+        { word: "Hello", startTime: 0.1, endTime: 0.3 },
+        { word: "world", startTime: 0.35, endTime: 0.8 },
+      ],
+    });
+    const cacheChunkSpy = vi.spyOn(ttsCache, "cacheChunk").mockImplementation(() => {});
+    const deps = mockDeps({ getWords: vi.fn(() => displayWords) });
+    const strategy = createKokoroStrategy(deps);
+
+    try {
+      strategy.speakChunk("", [], 0, 1.0, vi.fn(), vi.fn(), vi.fn());
+      await vi.waitFor(() => expect(cacheChunkSpy).toHaveBeenCalled());
+      const timingMetadata = cacheChunkSpy.mock.calls[0][7] as any;
+
+      expect(timingMetadata.wordTimestamps).toEqual([
+        { word: "...", startTime: 0.1, endTime: 0.1 },
+        { word: "Hello", startTime: 0.1, endTime: 0.3 },
+        { word: "world", startTime: 0.35, endTime: 0.8 },
+        { word: "—", startTime: 0.8, endTime: 0.8 },
+      ]);
+    } finally {
+      strategy.stop();
+      cacheChunkSpy.mockRestore();
+    }
+  });
+
   it("exposes getScheduler and getPipeline (NAR-2)", () => {
     const deps = mockDeps();
     const strategy = createKokoroStrategy(deps);

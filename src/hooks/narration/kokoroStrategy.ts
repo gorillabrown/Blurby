@@ -21,6 +21,7 @@ import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
 import { KOKORO_MODEL_ID, KOKORO_SAMPLE_RATE } from "../../constants";
 import type { TtsCacheIdentity, TtsCacheIdentityV2, TtsCacheWriteTimingMetadata } from "../../types/ttsCache";
 import type { TtsProviderWordBoundaryCallback } from "../../types/ttsProvider";
+import { filterSpokenWords, isPunctuationOnlyWord } from "../../utils/spokenWordFilter";
 
 const api = window.electronAPI;
 
@@ -199,6 +200,117 @@ function remapWordTimestampsToOriginalWords(params: {
   };
 }
 
+function mapSpokenTimestampsToDisplayWords(params: {
+  displayWords: string[];
+  spokenToDisplayMap: number[];
+  spokenWordTimestamps: WordTimestamp[] | null;
+  spokenSourceWordIndexes: number[] | null;
+}): { wordTimestamps: WordTimestamp[] | null; sourceWordIndexes: number[] | null } {
+  const { displayWords, spokenToDisplayMap, spokenWordTimestamps, spokenSourceWordIndexes } = params;
+  if (!Array.isArray(spokenWordTimestamps) || spokenWordTimestamps.length === 0) {
+    return { wordTimestamps: null, sourceWordIndexes: null };
+  }
+  if (spokenWordTimestamps.length !== spokenToDisplayMap.length) {
+    return { wordTimestamps: null, sourceWordIndexes: null };
+  }
+
+  const mapped: Array<WordTimestamp | null> = displayWords.map(() => null);
+  const sourceWordIndexes: number[] = [];
+
+  for (let spokenIdx = 0; spokenIdx < spokenWordTimestamps.length; spokenIdx += 1) {
+    const displayIdx = spokenToDisplayMap[spokenIdx];
+    const ts = spokenWordTimestamps[spokenIdx];
+    if (!Number.isInteger(displayIdx) || displayIdx < 0 || displayIdx >= displayWords.length) {
+      return { wordTimestamps: null, sourceWordIndexes: null };
+    }
+    if (!Number.isFinite(ts.startTime) || !Number.isFinite(ts.endTime)) {
+      return { wordTimestamps: null, sourceWordIndexes: null };
+    }
+    mapped[displayIdx] = {
+      word: displayWords[displayIdx],
+      startTime: ts.startTime,
+      endTime: ts.endTime,
+    };
+    const sourceWordIndex = spokenSourceWordIndexes?.[spokenIdx];
+    if (Number.isInteger(sourceWordIndex)) {
+      sourceWordIndexes[displayIdx] = Number(sourceWordIndex);
+    }
+  }
+
+  let idx = 0;
+  while (idx < mapped.length) {
+    if (mapped[idx]) {
+      idx += 1;
+      continue;
+    }
+
+    const runStart = idx;
+    while (idx < mapped.length && !mapped[idx]) idx += 1;
+    const runEnd = idx - 1;
+
+    for (let displayIdx = runStart; displayIdx <= runEnd; displayIdx += 1) {
+      if (!isPunctuationOnlyWord(displayWords[displayIdx])) {
+        return { wordTimestamps: null, sourceWordIndexes: null };
+      }
+    }
+
+    let prevSpoken = runStart - 1;
+    while (prevSpoken >= 0 && !mapped[prevSpoken]) prevSpoken -= 1;
+    let nextSpoken = runEnd + 1;
+    while (nextSpoken < mapped.length && !mapped[nextSpoken]) nextSpoken += 1;
+
+    const prevAnchor = prevSpoken >= 0 && mapped[prevSpoken] ? mapped[prevSpoken]!.endTime : null;
+    const nextAnchor = nextSpoken < mapped.length && mapped[nextSpoken] ? mapped[nextSpoken]!.startTime : null;
+    const runLength = runEnd - runStart + 1;
+
+    if (prevAnchor == null && nextAnchor == null) {
+      for (let displayIdx = runStart; displayIdx <= runEnd; displayIdx += 1) {
+        mapped[displayIdx] = { word: displayWords[displayIdx], startTime: 0, endTime: 0 };
+      }
+      continue;
+    }
+
+    if (prevAnchor != null && nextAnchor != null) {
+      const rangeStart = prevAnchor;
+      const rangeEnd = Math.max(rangeStart, nextAnchor);
+      const span = rangeEnd - rangeStart;
+      for (let offset = 0; offset < runLength; offset += 1) {
+        const displayIdx = runStart + offset;
+        const startTime = rangeStart + (span * offset) / runLength;
+        const endTime = rangeStart + (span * (offset + 1)) / runLength;
+        mapped[displayIdx] = { word: displayWords[displayIdx], startTime, endTime };
+      }
+      continue;
+    }
+
+    const anchor = prevAnchor ?? nextAnchor ?? 0;
+    for (let displayIdx = runStart; displayIdx <= runEnd; displayIdx += 1) {
+      mapped[displayIdx] = { word: displayWords[displayIdx], startTime: anchor, endTime: anchor };
+    }
+  }
+
+  if (mapped.some((entry) => entry == null)) {
+    return { wordTimestamps: null, sourceWordIndexes: null };
+  }
+
+  let previousStartTime = 0;
+  for (let displayIdx = 0; displayIdx < mapped.length; displayIdx += 1) {
+    const entry = mapped[displayIdx]!;
+    if (entry.startTime < previousStartTime) {
+      entry.startTime = previousStartTime;
+    }
+    if (entry.endTime < entry.startTime) {
+      entry.endTime = entry.startTime;
+    }
+    previousStartTime = entry.startTime;
+  }
+
+  return {
+    wordTimestamps: mapped as WordTimestamp[],
+    sourceWordIndexes,
+  };
+}
+
 /**
  * Create a TtsStrategy backed by Kokoro via the NAR-2 pipeline + scheduler.
  * The pipeline handles progressive chunk sizing and IPC.
@@ -246,26 +358,42 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
   let firstChunkReceived = false;
 
   const pipeline = createGenerationPipeline({
-    generateFn: async (text, voiceId, speed, words) => {
+    generateFn: async (_text, voiceId, speed, words) => {
       if (!api?.kokoroGenerate) return { error: "kokoroGenerate not available" };
-      const normalized = normalizeForSpeech(text);
+      const displayWords = words ?? [];
+      const { spokenWords, spokenToDisplayMap } = filterSpokenWords(displayWords);
+      const wordsForGeneration = spokenWords.length > 0 ? spokenWords : displayWords;
+      const normalized = normalizeForSpeech(wordsForGeneration.join(" "));
       const ratePlan = resolveKokoroRatePlan(speed);
-      const result = await api.kokoroGenerate(normalized.normalizedText, voiceId, ratePlan.generationBucket, words);
+      const result = await api.kokoroGenerate(
+        normalized.normalizedText,
+        voiceId,
+        ratePlan.generationBucket,
+        wordsForGeneration,
+      );
       if (result.error || !result.audio || !result.sampleRate) {
         return { error: result.error || "no audio returned" };
       }
       const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
-      const remapped = remapWordTimestampsToOriginalWords({
+      const remappedToSpokenWords = remapWordTimestampsToOriginalWords({
         wordTimestamps: result.wordTimestamps || null,
         normalizedToOriginalMap: normalized.normalizedToOriginalMap,
-        originalWords: words ?? [],
+        originalWords: wordsForGeneration,
       });
+      const remappedToDisplayWords = spokenWords.length > 0
+        ? mapSpokenTimestampsToDisplayWords({
+          displayWords,
+          spokenToDisplayMap,
+          spokenWordTimestamps: remappedToSpokenWords.wordTimestamps ?? result.wordTimestamps ?? null,
+          spokenSourceWordIndexes: remappedToSpokenWords.sourceWordIndexes,
+        })
+        : remappedToSpokenWords;
       return {
         audio: result.audio,
         sampleRate: result.sampleRate,
         durationMs,
-        wordTimestamps: (remapped.wordTimestamps ?? result.wordTimestamps) || null,
-        sourceWordIndexes: remapped.sourceWordIndexes,
+        wordTimestamps: (remappedToDisplayWords.wordTimestamps ?? result.wordTimestamps) || null,
+        sourceWordIndexes: remappedToDisplayWords.sourceWordIndexes,
       };
     },
     getCacheIdentity,
