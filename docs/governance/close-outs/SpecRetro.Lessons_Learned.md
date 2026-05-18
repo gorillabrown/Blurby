@@ -322,3 +322,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When speccing a new state discriminant (like `pauseReason`), trace not just where the value is produced and consumed but also where the absence of it would leave a code path using the old undiscriminated behavior. Stop/teardown/cleanup paths are the most common miss.
 **Applies to:** Any sprint adding a new state field that replaces implicit behavior with explicit discrimination.
 **Status:** Observation
+
+### SRL-043 — Pipeline backpressure requires both resume-cap AND demand-driven drain (TTS-PARITY-1, 2026-05-18)
+**Verdict:** The spec correctly identified that `pipelineResume()` needed backpressure gating (emit at most `queueDepth - pendingChunks` chunks). But the implementation discovered that capping the initial flush is only half the contract — the remaining buffered chunks must drain on-demand via `acknowledgeChunk()`, not sit in the pause buffer indefinitely. Without the drain hook, paused chunks beyond the initial cap are never delivered.
+**Evidence:** The resume-cap gating alone left buffered chunks stranded. Adding a follow-on drain path in `acknowledgeChunk()` — pull one buffered chunk per acknowledgment — completed the demand-driven pipeline contract.
+**Recommendation:** When speccing backpressure or flow-control changes, trace the full lifecycle: initial flush (cap), ongoing delivery (demand pull), and buffer exhaustion (cleanup). A cap without a drain is a deadlock waiting to happen.
+**Applies to:** Any sprint modifying pipeline buffer/queue/backpressure behavior.
+**Status:** Observation

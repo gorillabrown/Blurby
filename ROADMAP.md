@@ -3,7 +3,7 @@
 **Last updated**: 2026-05-17 — Roadmap review: TTS Architecture Complete finish line reached. All 10 conveyor sprints landed. Full phase archived. New finish line TBD.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 6). 4 full specs + 2 stubs. Next dispatch: TTS-PARITY-1.
+**Queue**: GREEN (depth 4). 2 full specs + 2 stubs. Next dispatch: NARR-CURSOR-2.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -35,6 +35,8 @@
 | SK-HYG-2 | 2026-05-16 | Directory reorganization (Lane E governance) | `CloseOut.SK-HYG-2.2026-05-16.md` |
 | NARR-MEDIA-1 | 2026-05-17 | MediaSession integration — OS media controls for narration | `CloseOut.NARR-MEDIA-1.2026-05-17.md` |
 | NARR-PAUSE-1 | 2026-05-18 | Named-pause state machine — 7 pause reasons with auto-resume | `CloseOut.NARR-PAUSE-1.2026-05-18.md` |
+| TTS-PARITY-1 | 2026-05-18 | Cache/progress/resume parity hardening — 3 OutsideAudit.9 defects | `CloseOut.TTS-PARITY-1.2026-05-18.md` |
+| NARR-SPOKEN-1 | 2026-05-18 | Spoken/display word separation — punctuation-only token filtering | `CloseOut.NARR-SPOKEN-1.2026-05-18.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -67,65 +69,6 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ### Phase: Reading Experience v2
 
 #### Stage 1a — Narration UX (serial)
-
-#### TTS-PARITY-1 — Cache/Progress/Resume Parity Hardening
-
-- **What:** Fix three verified code defects that undermine TTS architecture confidence: (1) cache-hit silence parity — cached chunks lose appended silence and `silenceMs` metadata; (2) trusted `getAudioProgress()` lag — word-native trusted timing is artificially lagged even though boundary delivery correctly bypasses lag; (3) resume backpressure bypass — `pipelineResume()` flushes the entire pause buffer synchronously without respecting the pipeline's own backpressure gate.
-- **Why:** OutsideAudit.9 (2026-05-17) identified these as material blockers preventing a 9/10 confidence rating. Each defect is individually small (~30-50 lines) but collectively they undermine cache consistency, cursor accuracy, and pipeline robustness. All three must land before NARR-CURSOR-2 (silence-aware cursor hold) and TTS-EVAL-3 (quality baselines) can be meaningful.
-- **Prerequisites:** None. All fixes are in existing files on current main.
-- **Done when:**
-    1. Cache write path in `generationPipeline.ts` persists post-silence `finalAudio` and `finalDurationMs` (not pre-silence `audio`/`durationMs`); `silenceMs` written to timing sidecar
-    2. Cache read path in `ttsCache.ts` reconstructs `silenceMs` from the timing sidecar into the returned `ScheduledChunk`
-    3. Fresh-vs-cache parity assertion test: generate a chunk fresh, write to cache, read from cache, assert `audio.length`, `durationMs`, `silenceMs`, and `timingTruth` all match
-    4. `getAudioProgress()` in `audioScheduler.ts` checks `isTrustedWordTiming` on the current chunk; if trusted, returns raw `audioCtx.currentTime` without `cursorLagSec` subtraction; if heuristic/fallback, applies lag as before
-    5. Trusted-progress-no-lag unit test: with trusted word-native timing, assert `getAudioProgress()` returns un-lagged time matching boundary delivery
-    6. `pipelineResume()` in `generationPipeline.ts` gates resume flush: emits at most `queueDepth - pendingChunks` chunks synchronously, buffers remainder for demand-driven pull
-    7. Resume-backpressure test: pause with >queueDepth chunks buffered, resume, assert scheduler receives ≤ queueDepth chunks synchronously
-    8. All existing TTS tests pass (`npm test`), `npm run typecheck`, `npm run build`
-- **Effort:** S-M (~2 days). Three targeted fixes + three focused tests.
-- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
-- **Source:** OutsideAudit.9 findings 1, 2, 4; `AuditDecisions.9.2026-05-17.md`
-
-##### Implementation detail
-- **Edit sites:**
-  - `src/utils/generationPipeline.ts:525` — change `onCacheChunk(startIdx, audio, ...)` to `onCacheChunk(startIdx, finalAudio, ...)` and pass `finalDurationMs`; include `silenceMs: resolvedSilenceMs` in the sidecar write payload
-  - `src/utils/generationPipeline.ts:662-670` — replace tight `for...of` flush with backpressure-gated loop: `const capacity = queueDepth - pendingChunks; const immediate = pauseBuffer.splice(0, capacity);` emit immediate, leave remainder in pauseBuffer for demand pull
-  - `src/types/ttsCache.ts:94-104` — add `silenceMs: sidecar?.silenceMs ?? 0` to reconstructed ScheduledChunk
-  - `src/utils/audioScheduler.ts:839` — replace unconditional `cursorLagSec` with: `const lag = currentChunk?.isTrustedWordTiming ? 0 : cursorLagSec; const now = Math.max(0, audioCtx.currentTime - lag);`
-- **Tests:** New `tests/ttsParity.test.ts` with three test groups (cache silence parity, trusted progress lag, resume backpressure)
-- **Constants:** None new
-- **Branch:** `sprint/tts-parity-1` from clean main
-- **Commit hygiene:** explicit-stage; no destructive flags
-
----
-
-#### NARR-SPOKEN-1 — Spoken/Display Word Separation
-
-- **What:** Separate `spokenWords` (phoneme-alignment input for Kokoro) from `displayWords` (what's rendered in the reader). Punctuation-only display tokens (em-dashes, ellipses, standalone quotes) are excluded from the spoken array but preserved in display. A mapping layer (`spokenToDisplayMap`) reconstructs cursor positions from spoken-word indices back to display-word indices.
-- **Why:** The current pipeline sends all display words (including punctuation-only tokens) to Kokoro for alignment. Kokoro produces zero-duration timestamps for these tokens, triggering heuristic fallback in the 4-layer validation. Separating spoken from display eliminates the most common source of heuristic fallback and produces cleaner word-level timing. Research finding H5 (NARR-TIMING audit finding #5). Moved earlier per OutsideAudit.9: spoken/display separation benefits downstream eval baselines (TTS-EVAL-3) and cursor hold (NARR-CURSOR-2).
-- **Prerequisites:** TTS-PARITY-1 (cache parity must be correct before changing what words enter the pipeline).
-- **Done when:**
-    1. New `src/utils/spokenWordFilter.ts` exports `filterSpokenWords(words: string[]): { spokenWords: string[]; spokenToDisplayMap: number[]; displayToSpokenMap: (number | null)[] }`
-    2. `spokenWords` excludes tokens matching punctuation-only regex (`/^[\p{P}\p{S}]+$/u`)
-    3. `spokenToDisplayMap[spokenIdx]` returns the display-word index
-    4. `displayToSpokenMap[displayIdx]` returns spoken-word index or null for punctuation-only tokens
-    5. kokoroStrategy.ts passes `spokenWords` (not all display words) to Kokoro generate
-    6. Timestamp results are mapped back to display indices via `spokenToDisplayMap` before emission to scheduler
-    7. Cursor highlight resolves against display indices (no change to downstream consumers)
-    8. Heuristic fallback rate measurably decreases (log comparison in close-out)
-    9. 18+ focused tests covering filter, mapping, round-trip cursor resolution, edge cases (leading punctuation, trailing quotes, em-dash sequences)
-- **Effort:** M (2-3 days). New utility + kokoroStrategy integration + test coverage.
-- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
-- **Source:** IDEAS.md H5, NARR-TIMING close-out audit finding #5, Blurby.Research (abogen pattern)
-
-##### Implementation detail
-- **Edit sites:** New `src/utils/spokenWordFilter.ts` (~80 lines); `src/hooks/narration/kokoroStrategy.ts` (~lines 175-195 — apply filter before generate, map timestamps after); `src/utils/audioScheduler.ts` (verify wordTimestamps validation handles mapped indices correctly)
-- **Tests:** New `tests/spokenWordFilter.test.ts`; extend `tests/narrTiming.test.ts` with punctuation-heavy fixtures
-- **Constants:** None new
-- **Branch:** `sprint/narr-spoken-1` from clean main
-- **Commit hygiene:** explicit-stage; no destructive flags
-
----
 
 #### NARR-CURSOR-2 — Silence-Aware Cursor Hold
 
