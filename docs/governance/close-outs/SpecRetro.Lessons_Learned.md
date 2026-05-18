@@ -329,3 +329,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When speccing backpressure or flow-control changes, trace the full lifecycle: initial flush (cap), ongoing delivery (demand pull), and buffer exhaustion (cleanup). A cap without a drain is a deadlock waiting to happen.
 **Applies to:** Any sprint modifying pipeline buffer/queue/backpressure behavior.
 **Status:** Observation
+
+### SRL-044 — Pure-function decision modules for animation logic (NARR-CURSOR-2, 2026-05-18)
+**Verdict:** Extracting cursor-hold decisions into a shared pure-function module (`silenceAwareCursor.ts`) rather than inlining them in the FoliatePageView glide loop produced cleaner separation of concerns and significantly better testability — 20 focused tests on the decision logic alone, independent of RAF timing or DOM state.
+**Evidence:** The spec predicted 3 edit sites; CLI touched 8 files but the core decision logic was cleanly isolated in one new module. The glide loop calls the decision function and acts on the result, keeping animation mechanics and hold/resume policy separate.
+**Recommendation:** When an animation loop needs branching logic based on external state (silence gaps, pause reasons, playback mode), extract the decision into a pure function that the loop calls. Test the decision exhaustively; test the animation integration lightly.
+**Applies to:** Any sprint adding conditional behavior to RAF-based animation loops.
+**Status:** Observation

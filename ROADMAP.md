@@ -3,7 +3,7 @@
 **Last updated**: 2026-05-17 — Roadmap review: TTS Architecture Complete finish line reached. All 10 conveyor sprints landed. Full phase archived. New finish line TBD.
 **Current state**: v1.75.1 stable. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled. Desktop v2.0 shipped.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 4). 2 full specs + 2 stubs. Next dispatch: NARR-CURSOR-2.
+**Queue**: GREEN (depth 3). 1 full spec + 2 stubs. Next dispatch: TTS-EVAL-3.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -37,6 +37,7 @@
 | NARR-PAUSE-1 | 2026-05-18 | Named-pause state machine — 7 pause reasons with auto-resume | `CloseOut.NARR-PAUSE-1.2026-05-18.md` |
 | TTS-PARITY-1 | 2026-05-18 | Cache/progress/resume parity hardening — 3 OutsideAudit.9 defects | `CloseOut.TTS-PARITY-1.2026-05-18.md` |
 | NARR-SPOKEN-1 | 2026-05-18 | Spoken/display word separation — punctuation-only token filtering | `CloseOut.NARR-SPOKEN-1.2026-05-18.md` |
+| NARR-CURSOR-2 | 2026-05-18 | Silence-aware cursor hold — gaps and pause-reason freeze | `CloseOut.NARR-CURSOR-2.2026-05-18.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -67,34 +68,6 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 ---
 
 ### Phase: Reading Experience v2
-
-#### Stage 1a — Narration UX (serial)
-
-#### NARR-CURSOR-2 — Silence-Aware Cursor Hold
-
-- **What:** Use word-level `endTime` from Kokoro timestamps to detect inter-word silence gaps. Hold the narration cursor visually still during gaps (between `word[i].endTime` and `word[i+1].startTime`) instead of interpolating through silence. During `pauseReason: "rate-change"` or `"voice-change"`, cursor freezes at last confirmed position rather than drifting.
-- **Why:** The current glide interpolation smoothly advances through silence, creating a visual disconnect — the cursor moves but no audio plays. With real word timestamps (NARR-TIMING shipped), we have precise silence gap data. Research finding H6. Depends on NARR-PAUSE-1 for pause-reason awareness.
-- **Prerequisites:** NARR-PAUSE-1 (pause-reason field). TTS-PARITY-1 (cache silence parity + trusted progress fix). NARR-SPOKEN-1 (clean word timing from spoken/display separation). NARR-TIMING complete (word endTime available).
-- **Done when:**
-    1. Glide loop in FoliatePageView detects when audio progress falls within a silence gap (between word[i].endTime and word[i+1].startTime)
-    2. During detected silence gaps, cursor position holds at word[i]'s right edge rather than interpolating toward word[i+1]
-    3. During system-initiated pauses (rate-change, voice-change), cursor freezes at lastConfirmedAudioWordRef position
-    4. During user-stop pauses, cursor remains at last confirmed position (existing behavior, now explicit)
-    5. Silence threshold: gaps < 30ms are ignored (interpolation continues); gaps >= 30ms trigger hold
-    6. No regression in smooth cursor motion during voiced segments
-    7. 16+ focused tests covering silence detection, hold behavior, pause-reason branching
-- **Effort:** M (2-3 days). Modifies glide interpolation logic + adds silence-gap detection.
-- **Roster:** Zeus • Hephaestus (renderer-scope) • Hippocrates • Solon • Plato
-- **Source:** IDEAS.md H6, audioScheduler.ts line 101-103 comment (designed for this), NARR-TIMING close-out
-
-##### Implementation detail
-- **Edit sites:** `src/components/reader/FoliatePageView.tsx` (glide loop — detect silence window from scheduled chunk's wordTimestamps, hold cursor.x during gap); `src/utils/audioScheduler.ts` (expose `getWordTimestampsForProgress(audioTime): {startTime, endTime, wordIndex}[]` helper or equivalent lookup); `src/hooks/useNarration.ts` (pass pauseReason to glide context so cursor knows to freeze during system pauses)
-- **Tests:** New `tests/silenceAwareCursor.test.ts`; extend `tests/calmNarrationBand.test.ts`
-- **Constants:** `TTS_SILENCE_HOLD_THRESHOLD_MS = 30` in `src/constants.ts`
-- **Branch:** `sprint/narr-cursor-2` from clean main
-- **Commit hygiene:** explicit-stage; no destructive flags
-
----
 
 #### Stage 1b — Quality Track (parallel-safe with Stage 1a)
 
