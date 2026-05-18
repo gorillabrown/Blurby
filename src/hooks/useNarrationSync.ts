@@ -15,6 +15,7 @@ type DocWithContent = BlurbyDoc & { content: string };
 /** Return type of the useNarration hook (duck-typed to avoid circular import). */
 interface NarrationHook {
   setBookId: (id: string) => void;
+  setMediaSessionBook: (book: { title: string; author?: string | null; coverArtUrl?: string | null } | null) => void;
   setPronunciationOverrides: (overrides: Array<{ id: string; from: string; to: string; enabled: boolean }>) => void;
   setBookPronunciationOverrides: (overrides: Array<{ id: string; from: string; to: string; enabled: boolean }>) => void;
   setEngine: (engine: TtsEngine) => void;
@@ -86,6 +87,51 @@ export function useNarrationSync({
   useEffect(() => {
     narration.setBookId(`${activeDoc.id}::fn:${settings.ttsFootnoteMode || "skip"}`);
   }, [activeDoc.id, settings.ttsFootnoteMode, narration.setBookId]);
+
+  // ── 1a. Sync book metadata for MediaSession (title/author/cover) ────────
+  useEffect(() => {
+    let cancelled = false;
+    const author = activeDoc.authorFull || activeDoc.author || null;
+    const base = {
+      title: activeDoc.title,
+      author,
+      coverArtUrl: null as string | null,
+    };
+    const commit = (coverArtUrl: string | null) => {
+      if (cancelled) return;
+      narration.setMediaSessionBook({
+        ...base,
+        coverArtUrl,
+      });
+    };
+
+    if (!activeDoc.coverPath || !window.electronAPI?.getCoverImage) {
+      commit(null);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    window.electronAPI
+      .getCoverImage(activeDoc.coverPath)
+      .then((src) => {
+        commit(src || null);
+      })
+      .catch(() => {
+        commit(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeDoc.id,
+    activeDoc.title,
+    activeDoc.author,
+    activeDoc.authorFull,
+    activeDoc.coverPath,
+    narration.setMediaSessionBook,
+  ]);
 
   // ── 2. Sync pronunciation overrides (global) → narration hook ───────────
   useEffect(() => {
