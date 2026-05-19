@@ -12,13 +12,10 @@
 //   h) Zone computation formula: zoneTop = position, zoneBottom = position + (lineHeight * lines / containerHeight)
 //   i) Zone computation clamps zoneBottom to max 0.95
 //   j) Zone computation with different container sizes produces correct percentages
-//   k) FlowScrollEngine.setZonePosition updates internal zonePosition property
-//   l) FlowScrollEngine scrollToLine uses zonePosition in targetScrollTop calculation
-//   m) FlowScrollEngine.start() accepts optional zonePosition parameter
 //   n) FLOW_ZONE_LINES_MIN and FLOW_ZONE_LINES_MAX define valid clamp range (3–8)
-//   o) Zone position dropdown values are in valid 0–1 range
+//   o) Zone position values are in valid 0–1 range
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 import {
@@ -30,7 +27,6 @@ import {
   FLOW_ZONE_EDGE_PCT,
   DEFAULT_SETTINGS,
 } from "../src/constants";
-import { FlowScrollEngine } from "../src/utils/FlowScrollEngine";
 
 // ── CSS helpers ───────────────────────────────────────────────────────────────
 
@@ -67,17 +63,6 @@ function computeZoneProperties(
   const zoneTop = zonePosition;
   const zoneBottom = Math.min(zonePosition + zoneHeightFrac, 0.95);
   return { zoneTop, zoneBottom };
-}
-
-// ── Mock container factory ────────────────────────────────────────────────────
-
-function createMockContainer(clientHeight = 800): HTMLElement {
-  const el = document.createElement("div");
-  Object.defineProperty(el, "clientHeight", { value: clientHeight, configurable: true });
-  Object.defineProperty(el, "clientWidth", { value: 600, configurable: true });
-  // scrollTo stub — jsdom doesn't implement it
-  el.scrollTo = vi.fn() as unknown as typeof el.scrollTo;
-  return el;
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -190,110 +175,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     }
   });
 
-  // (k) FlowScrollEngine.setZonePosition updates internal property
-  it("FlowScrollEngine.setZonePosition() updates the zone position", () => {
-    const engine = new FlowScrollEngine({
-      onWordAdvance: vi.fn(),
-      onComplete: vi.fn(),
-    });
-
-    // Default should be FLOW_READING_ZONE_POSITION (0.25)
-    // After setZonePosition, internal value should change (we verify via scroll behavior)
-    engine.setZonePosition(0.35);
-
-    // To verify the value was stored, we start and check scrollToLine uses it.
-    // We do this by observing the scrollTo call arguments on a container.
-    const container = createMockContainer(800);
-    const cursor = document.createElement("div");
-    Object.defineProperty(cursor, "offsetWidth", { value: 0 });
-
-    // Add a word element so buildLineMap returns a line
-    const wordSpan = document.createElement("span");
-    wordSpan.setAttribute("data-word-index", "0");
-    wordSpan.textContent = "Hello";
-    container.appendChild(wordSpan);
-
-    Object.defineProperty(container, "getBoundingClientRect", {
-      value: () => ({ top: 0, bottom: 800, left: 0, right: 600 }),
-    });
-    Object.defineProperty(wordSpan, "getBoundingClientRect", {
-      value: () => ({ top: 100, bottom: 120, left: 20, right: 80 }),
-    });
-
-    engine.start(container, cursor as HTMLDivElement, 0, 200, new Set(), false, 0.35);
-    engine.stop();
-
-    // STAB-1A: initial scroll uses instant behavior (scrollTop assignment, not scrollTo)
-    // targetScrollTop = line.y - (containerHeight * 0.35) = 100 - (800 * 0.35) = 100 - 280 = -180 → clamped to 0
-    expect(container.scrollTop).toBe(0);
-  });
-
-  // (l) FlowScrollEngine scrollToLine uses zonePosition in targetScrollTop calculation
-  it("FlowScrollEngine scrollToLine: targetScrollTop = line.y - (containerHeight * zonePosition)", () => {
-    const engine = new FlowScrollEngine({
-      onWordAdvance: vi.fn(),
-      onComplete: vi.fn(),
-    });
-
-    const container = createMockContainer(800);
-    const cursor = document.createElement("div");
-    Object.defineProperty(cursor, "offsetWidth", { value: 0 });
-
-    // Position word element lower so targetScrollTop is positive
-    const wordSpan = document.createElement("span");
-    wordSpan.setAttribute("data-word-index", "0");
-    wordSpan.textContent = "Hello";
-    container.appendChild(wordSpan);
-
-    Object.defineProperty(container, "getBoundingClientRect", {
-      value: () => ({ top: 0, bottom: 800, left: 0, right: 600 }),
-    });
-    // Word at y=400 (relative to container): line.y = 400
-    Object.defineProperty(wordSpan, "getBoundingClientRect", {
-      value: () => ({ top: 400, bottom: 420, left: 20, right: 80 }),
-    });
-
-    // zonePosition = 0.25, containerHeight = 800
-    // targetScrollTop = 400 - (800 * 0.25) = 400 - 200 = 200
-    engine.start(container, cursor as HTMLDivElement, 0, 200, new Set(), false, 0.25);
-    engine.stop();
-
-    // STAB-1A: initial scroll uses instant behavior (scrollTop assignment, not scrollTo)
-    expect(container.scrollTop).toBe(200);
-  });
-
-  // (m) FlowScrollEngine.start() accepts optional zonePosition parameter
-  it("FlowScrollEngine.start() uses provided zonePosition over default", () => {
-    const engine = new FlowScrollEngine({
-      onWordAdvance: vi.fn(),
-      onComplete: vi.fn(),
-    });
-
-    const container = createMockContainer(800);
-    const cursor = document.createElement("div");
-    Object.defineProperty(cursor, "offsetWidth", { value: 0 });
-
-    const wordSpan = document.createElement("span");
-    wordSpan.setAttribute("data-word-index", "0");
-    wordSpan.textContent = "Test";
-    container.appendChild(wordSpan);
-
-    Object.defineProperty(container, "getBoundingClientRect", {
-      value: () => ({ top: 0, bottom: 800, left: 0, right: 600 }),
-    });
-    // Word at y=500 relative to container
-    Object.defineProperty(wordSpan, "getBoundingClientRect", {
-      value: () => ({ top: 500, bottom: 520, left: 20, right: 80 }),
-    });
-
-    // Use a custom zone position: 0.15
-    // targetScrollTop = 500 - (800 * 0.15) = 500 - 120 = 380
-    engine.start(container, cursor as HTMLDivElement, 0, 200, new Set(), false, 0.15);
-    engine.stop();
-
-    // STAB-1A: initial scroll uses instant behavior (scrollTop assignment, not scrollTo)
-    expect(container.scrollTop).toBe(380);
-  });
+  // FLOW-ZONE-AUTO: descending-zone engine behavior (setZonePosition removed,
+  // scrollToLine replaced by advanceZone) is covered in tests/flowZoneAuto.test.ts.
 
   // (n) FLOW_ZONE_LINES_MIN and FLOW_ZONE_LINES_MAX define valid clamp range
   it("FLOW_ZONE_LINES_MIN equals 3", () => {

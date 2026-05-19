@@ -25,7 +25,7 @@ import {
   FOLIATE_MAX_INLINE_SIZE_PX,
   FOLIATE_SECTION_READY_TIMEOUT_MS,
   FOLIATE_TWO_COLUMN_BREAKPOINT_PX,
-  FLOW_READING_ZONE_POSITION,
+  FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_LINES_DEFAULT,
   TTS_SILENCE_HOLD_THRESHOLD_MS,
 } from "../constants";
@@ -386,6 +386,8 @@ export interface FoliateViewAPI {
   getRenderedWordRoots: (sectionIndex?: number | null) => FlowRenderedWordRootDescriptor[];
   /** FLOW-3A: Get the scrollable container element for FlowScrollEngine */
   getScrollContainer: () => HTMLElement | null;
+  /** FLOW-ZONE-AUTO: Get the masked outer element that carries the --flow-zone-* vars */
+  getFlowZoneHost: () => HTMLElement | null;
   /** TTS-7F: Pure read-only DOM check — is a word span present? No UI mutation. */
   isWordInDom: (wordIndex: number) => boolean;
   /** TTS-7H: Visible-word readiness — word is in DOM AND visible on the active page viewport. */
@@ -610,17 +612,15 @@ export default function FoliatePageView({
     if (!flowMode) return 0;
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
-    const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
-    return Math.max(0, Math.round(viewportHeight * zonePosition));
-  }, [flowMode, getFlowViewportHeightPx, settings.flowZonePosition]);
+    return Math.max(0, Math.round(viewportHeight * FLOW_ZONE_INITIAL_TOP));
+  }, [flowMode, getFlowViewportHeightPx]);
 
   const getFlowTrailingInsetPx = useCallback((): number => {
     if (!flowMode) return 0;
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
-    const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
-    return Math.max(0, Math.round(viewportHeight * (1 - zonePosition)));
-  }, [flowMode, getFlowViewportHeightPx, settings.flowZonePosition]);
+    return Math.max(0, Math.round(viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP)));
+  }, [flowMode, getFlowViewportHeightPx]);
 
   const getFlowFollowOffsetPx = useCallback((): number => {
     if (!flowMode) return 0;
@@ -628,14 +628,12 @@ export default function FoliatePageView({
     if (viewportHeight <= 0) return 0;
     const container = containerRef.current;
     const lineHeight = container ? parseFloat(getComputedStyle(container).lineHeight) || 24 : 24;
-    const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
     const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
-    return Math.max(0, Math.round((viewportHeight * zonePosition) + ((lineHeight * zoneLines) / 2)));
+    return Math.max(0, Math.round((viewportHeight * FLOW_ZONE_INITIAL_TOP) + ((lineHeight * zoneLines) / 2)));
   }, [
     flowMode,
     getFlowViewportHeightPx,
     settings.flowZoneLines,
-    settings.flowZonePosition,
   ]);
 
   const setFlowInsetsForRenderedDocs = useCallback((leadingInsetPx: number, trailingInsetPx: number) => {
@@ -1447,6 +1445,7 @@ export default function FoliatePageView({
             },
             getRenderedWordRoots,
             getScrollContainer: () => resolveFoliateScrollContainer(),
+            getFlowZoneHost: () => containerRef.current,
             applyChunkReadingVisualState,
             clearChunkReadingVisualState,
             recenterChunkReadingBox,
@@ -1600,9 +1599,10 @@ export default function FoliatePageView({
     getRenderedWordRoots,
   ]);
 
-  // FLOW-INF-A: Compute --flow-zone-top and --flow-zone-bottom CSS custom properties
-  // when flow mode is active. Uses settings.flowZonePosition and settings.flowZoneLines
-  // to express the reading zone as fractional viewport positions on the container.
+  // FLOW-ZONE-AUTO: Seed --flow-zone-top / --flow-zone-bottom CSS custom properties
+  // to the initial (upper) zone position when flow mode activates. During reading
+  // FlowScrollEngine's onZoneTopChange callback drives these vars as the zone
+  // descends; this effect only sets the initial values and handles resize.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -1615,13 +1615,12 @@ export default function FoliatePageView({
         return;
       }
       const lineHeight = parseFloat(getComputedStyle(container).lineHeight) || 24;
-      const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
       const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
       const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
       if (viewportHeight <= 0) return;
       const zoneHeightFrac = (lineHeight * zoneLines) / viewportHeight;
-      const zoneTop = zonePosition;
-      const zoneBottom = Math.min(zonePosition + zoneHeightFrac, 0.95);
+      const zoneTop = FLOW_ZONE_INITIAL_TOP;
+      const zoneBottom = Math.min(zoneTop + zoneHeightFrac, 0.95);
       container.style.setProperty("--flow-zone-top", `${zoneTop * 100}%`);
       container.style.setProperty("--flow-zone-bottom", `${zoneBottom * 100}%`);
       setFlowInsetsForRenderedDocs(
@@ -1647,7 +1646,6 @@ export default function FoliatePageView({
   }, [
     flowMode,
     getFlowViewportHeightPx,
-    settings.flowZonePosition,
     settings.flowZoneLines,
     setFlowInsetsForRenderedDocs,
     invalidateWordPositionIndex,

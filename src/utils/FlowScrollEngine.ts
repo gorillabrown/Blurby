@@ -8,7 +8,9 @@
  */
 
 import {
-  FLOW_READING_ZONE_POSITION,
+  FLOW_ZONE_INITIAL_TOP,
+  FLOW_ZONE_RESET_THRESHOLD,
+  FLOW_ZONE_LINES_DEFAULT,
   FLOW_CURSOR_HEIGHT_PX,
   FLOW_CURSOR_EINK_HEIGHT_PX,
   FLOW_TIMER_BAR_HEIGHT_PX,
@@ -87,7 +89,14 @@ export class FlowScrollEngine {
   private followerMode = false;
   private callbacks: FlowScrollEngineCallbacks;
   private paragraphBreaks: Set<number> = new Set();
-  private zonePosition: number = FLOW_READING_ZONE_POSITION;
+  // FLOW-ZONE-AUTO: descending reading zone — the zone walks down the page as
+  // words advance, then a page-jump resets it to the top.
+  private initialZoneTop: number = FLOW_ZONE_INITIAL_TOP;
+  private zoneResetThreshold: number = FLOW_ZONE_RESET_THRESHOLD;
+  private currentZoneTopFrac: number = FLOW_ZONE_INITIAL_TOP;
+  private zoneHeightFrac = 0;
+  private zoneLines: number = FLOW_ZONE_LINES_DEFAULT;
+  private onZoneTopChange: ((topFrac: number) => void) | null = null;
   private totalWords = 0;
   private bookPct = 0;
   private chunks: ReadingChunk[] = [];
@@ -104,7 +113,8 @@ export class FlowScrollEngine {
     wpm: number,
     paragraphBreaks: Set<number> = new Set(),
     isEink = false,
-    zonePosition?: number
+    zoneLines?: number,
+    onZoneTopChange?: (topFrac: number) => void
   ): void {
     this.stop();
     this.container = container;
@@ -113,7 +123,10 @@ export class FlowScrollEngine {
     this.wpm = wpm;
     this.paragraphBreaks = paragraphBreaks;
     this.isEink = isEink;
-    if (zonePosition !== undefined) this.zonePosition = zonePosition;
+    this.zoneLines = zoneLines !== undefined && zoneLines > 0 ? zoneLines : FLOW_ZONE_LINES_DEFAULT;
+    this.onZoneTopChange = onZoneTopChange ?? null;
+    this.currentZoneTopFrac = this.initialZoneTop;
+    this.computeZoneHeightFrac();
     this.running = true;
     this.paused = false;
     this.manualScrollPaused = false;
@@ -171,8 +184,9 @@ export class FlowScrollEngine {
     this.container.addEventListener("touchmove", this.handleWheel, { passive: true });
   }
 
-  setZonePosition(pos: number): void {
-    this.zonePosition = pos;
+  /** FLOW-ZONE-AUTO: current zone height as a fraction of viewport height. */
+  getZoneHeightFrac(): number {
+    return this.zoneHeightFrac;
   }
 
   setTotalWords(total: number): void {
@@ -290,7 +304,7 @@ export class FlowScrollEngine {
     this.lineIdx = lineIdx;
     this.wordIndex = wordIndex;
     this.emitChunkChangeForWord(wordIndex);
-    this.scrollToLine(lineIdx, true);
+    this.advanceZone(lineIdx);
 
     const lineWidth = Math.max(line.right - line.left, 1);
     const fraction = Math.max(
@@ -387,6 +401,7 @@ export class FlowScrollEngine {
 
   rebuildLineMap(): void {
     this.lines = this.buildLineMap();
+    this.computeZoneHeightFrac();
     if (this.lines.length > 0) this.lineIdx = this.findLineForWord(this.wordIndex);
   }
 
@@ -572,13 +587,13 @@ export class FlowScrollEngine {
         this.cursor.style.opacity = "0.4";
         setTimeout(() => {
           if (this.cursor) this.cursor.style.opacity = "1";
-          this.scrollToLine(this.lineIdx);
+          this.advanceZone(this.lineIdx);
           setTimeout(() => {
             if (this.running && !this.paused) this.animateLine();
           }, FLOW_LINE_ADVANCE_BUFFER_MS);
         }, FLOW_LINE_COMPLETE_FLASH_MS);
       } else {
-        this.scrollToLine(this.lineIdx);
+        this.advanceZone(this.lineIdx);
         setTimeout(() => {
           if (this.running && !this.paused) this.animateLine();
         }, FLOW_LINE_ADVANCE_BUFFER_MS);
@@ -613,7 +628,7 @@ export class FlowScrollEngine {
         }
         this.wordIndex = this.lines[this.lineIdx].firstWord;
         this.emitChunkChangeForWord(this.wordIndex);
-        this.scrollToLine(this.lineIdx);
+        this.advanceZone(this.lineIdx);
         this.lineTimer = setTimeout(() => {
           if (this.running && !this.paused) this.animateLine();
         }, FLOW_LINE_ADVANCE_BUFFER_MS);
@@ -675,47 +690,77 @@ export class FlowScrollEngine {
         return;
       }
 
-      this.scrollToLine(this.lineIdx, true);
+      this.advanceZone(this.lineIdx);
       setTimeout(() => {
         if (this.running && !this.paused) this.animateLine();
       }, FLOW_LINE_ADVANCE_BUFFER_MS);
     }, duration);
   }
 
-  private scrollToLine(lineIdx: number, instant = false): void {
-    if (!this.container || lineIdx >= this.lines.length) return;
+  /**
+   * FLOW-ZONE-AUTO: position the reading zone for the given line.
+   *
+   * The zone descends as words advance — the page stays still and only the
+   * mask highlight walks downward. When the zone bottom would cross the lower-
+   * third threshold (or the line scrolled above the viewport), the container
+   * jump-scrolls so the line lands back at the initial zone top.
+   *
+   * `forceReset` always performs the jump (used on start/resume so the active
+   * line lands cleanly at the top of the zone).
+   */
+  private advanceZone(lineIdx: number, forceReset = false): void {
+    if (!this.container || lineIdx < 0 || lineIdx >= this.lines.length) return;
     const line = this.lines[lineIdx];
-    const containerHeight = this.container.clientHeight;
-    const isContainerScrollable = this.container.scrollHeight > containerHeight + 1
-      || this.container.scrollHeight === 0;
+    const ch = this.container.clientHeight;
+    if (ch <= 0) return;
 
-    if (isContainerScrollable) {
-      const targetScrollTop = line.y - (containerHeight * this.zonePosition);
-      if (this.isEink || instant) {
-        this.container.scrollTop = Math.max(0, targetScrollTop);
+    const lineViewportFrac = (line.y - this.container.scrollTop) / ch;
+    const zoneBotFrac = lineViewportFrac + this.zoneHeightFrac;
+    const shouldJump = forceReset
+      || zoneBotFrac > this.zoneResetThreshold
+      || lineViewportFrac < 0;
+
+    if (shouldJump) {
+      const isContainerScrollable = this.container.scrollHeight > ch + 1
+        || this.container.scrollHeight === 0;
+      if (isContainerScrollable) {
+        // Instant page-jump: place the line at the initial zone top.
+        const newScrollTop = Math.max(0, line.y - ch * this.initialZoneTop);
+        this.container.scrollTop = newScrollTop;
+        this.currentZoneTopFrac = Math.min(this.initialZoneTop, (line.y - newScrollTop) / ch);
       } else {
-        this.container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: "smooth" });
+        // Non-scrollable container (short Foliate section): scrollIntoView fallback.
+        const wordEl = this.getWordElementByIndex(line.firstWord) as HTMLElement | null;
+        wordEl?.scrollIntoView?.({ block: "start", behavior: "auto" });
+        this.currentZoneTopFrac = this.initialZoneTop;
       }
     } else {
-      const wordEl = this.getWordElementByIndex(line.firstWord);
-      if (wordEl && (wordEl as HTMLElement).scrollIntoView) {
-        const block: ScrollLogicalPosition = this.zonePosition <= 0.3 ? "start" : this.zonePosition >= 0.7 ? "end" : "center";
-        (wordEl as HTMLElement).scrollIntoView({ block, behavior: instant || this.isEink ? "auto" : "smooth" });
-      }
+      // Zone descends — no scroll, just move the mask down to the line.
+      this.currentZoneTopFrac = Math.max(0, lineViewportFrac);
     }
+    this.onZoneTopChange?.(this.currentZoneTopFrac);
   }
 
-  private scrollToWord(wordIndex: number, instant = false): void {
-    this.scrollToLine(this.findLineForWord(wordIndex), instant);
+  /** Recompute the zone height (in viewport fractions) from line height × zone lines. */
+  private computeZoneHeightFrac(): void {
+    if (!this.container) { this.zoneHeightFrac = 0; return; }
+    const ch = this.container.clientHeight;
+    if (ch <= 0) { this.zoneHeightFrac = 0; return; }
+    const lineHeight = parseFloat(getComputedStyle(this.container).lineHeight) || 24;
+    this.zoneHeightFrac = (lineHeight * this.zoneLines) / ch;
   }
 
-  private scrollActiveChunkOrLine(wordIndex: number, instant = false): void {
+  private scrollToWord(wordIndex: number, forceReset = false): void {
+    this.advanceZone(this.findLineForWord(wordIndex), forceReset);
+  }
+
+  private scrollActiveChunkOrLine(wordIndex: number, forceReset = false): void {
     const chunk = this.findChunkForWord(wordIndex);
     if (chunk) {
-      this.scrollToWord(chunk.startWordIndex, instant);
+      this.scrollToWord(chunk.startWordIndex, forceReset);
       return;
     }
-    this.scrollToWord(wordIndex, instant);
+    this.scrollToWord(wordIndex, forceReset);
   }
 
   private hasChunkVisualState(): boolean {

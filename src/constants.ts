@@ -500,6 +500,12 @@ export const FLOW_ZONE_OPACITY = 0.35;
 /** Soft edge transition width as percentage of container */
 export const FLOW_ZONE_EDGE_PCT = 2;
 
+// ── Flow Auto-Advancing Zone (FLOW-ZONE-AUTO) ──────────────────────────────
+/** Initial zone top position as fraction of viewport (upper region) */
+export const FLOW_ZONE_INITIAL_TOP = 0.15;
+/** Zone bottom threshold that triggers a page-jump reset (lower third) */
+export const FLOW_ZONE_RESET_THRESHOLD = 0.67;
+
 // ── Flow Timer Bar (FLOW-INF-B) ──────────────────────────────────────────────
 /** Timer bar height in pixels (replaces thin underline) */
 export const FLOW_TIMER_BAR_HEIGHT_PX = 5;

@@ -12,7 +12,10 @@ import {
 
 // Mock constants
 vi.mock("../src/constants.ts", () => ({
-  FLOW_READING_ZONE_POSITION: 0.25,
+  // FLOW-ZONE-AUTO descending-zone constants
+  FLOW_ZONE_INITIAL_TOP: 0.15,
+  FLOW_ZONE_RESET_THRESHOLD: 0.67,
+  FLOW_ZONE_LINES_DEFAULT: 5,
   FLOW_CURSOR_HEIGHT_PX: 3,
   FLOW_CURSOR_EINK_HEIGHT_PX: 4,
   FLOW_SCROLL_RESUME_DELAY_MS: 2000,
@@ -465,20 +468,18 @@ describe("FlowScrollEngine", () => {
     ]);
   });
 
-  it("emits chunk changes and scrolls the next chunk into the reading zone", () => {
+  it("emits chunk changes as the reading cursor crosses chunk boundaries", () => {
     engine.setChunks(naturalChunks);
     engine.start(container, cursor, 0, 600, new Set(), false);
     callbacks.onChunkChange.mockClear();
-    container.scrollTo.mockClear();
 
     vi.advanceTimersByTime(560);
 
     expect(callbacks.onChunkChange).toHaveBeenCalledWith(naturalChunks[1]);
     expect(engine.getActiveChunk()?.id).toBe("sentence:5-10");
-    expect(container.scrollTo).toHaveBeenCalled();
   });
 
-  it("aligns the active natural chunk start to the selected reading zone", () => {
+  it("FLOW-ZONE-AUTO: aligns the active natural chunk start to the initial zone top", () => {
     const longContainer = createMockContainer(100, 5);
     document.body.appendChild(longContainer);
     const chunkEngine = new FlowScrollEngine(callbacks);
@@ -494,9 +495,12 @@ describe("FlowScrollEngine", () => {
 
     try {
       chunkEngine.setChunks([chunk]);
-      chunkEngine.start(longContainer, chunkCursor, 52, 600, new Set(), false, 0.25);
+      chunkEngine.start(longContainer, chunkCursor, 52, 600, new Set(), false);
 
-      expect(longContainer.scrollTop).toBe(110);
+      // Word 50 sits on line 10 (y = 20 + 10×24 = 260). On start the engine
+      // page-jumps so that line lands at FLOW_ZONE_INITIAL_TOP (0.15):
+      // scrollTop = 260 − 600×0.15 = 170.
+      expect(longContainer.scrollTop).toBe(170);
     } finally {
       chunkEngine.destroy();
       document.body.removeChild(longContainer);
@@ -628,11 +632,15 @@ describe("FlowScrollEngine", () => {
 
   // ── Scroll Position ────────────────────────────────────────────────
 
-  it("should scroll container to keep active line in reading zone", () => {
-    engine.start(container, cursor, 0, 300, new Set(), false);
+  it("FLOW-ZONE-AUTO: reports a descending zone position as lines advance", () => {
+    const zoneSpy = vi.fn();
+    engine.start(container, cursor, 0, 300, new Set(), false, 5, zoneSpy);
+    engine.pause();
+    zoneSpy.mockClear();
     engine.jumpToLine("next");
-    // scrollTo should have been called
-    expect(container.scrollTo).toHaveBeenCalled();
+    // The next line sits lower in the viewport — the zone top descends with it.
+    expect(zoneSpy).toHaveBeenCalled();
+    expect(zoneSpy.mock.calls[0][0]).toBeGreaterThan(0);
   });
 
   it("should use jump scroll (no smooth) in e-ink mode", () => {
