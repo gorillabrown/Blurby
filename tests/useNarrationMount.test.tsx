@@ -304,4 +304,31 @@ describe("useNarration mount", () => {
     });
     expect(harness.getSnapshot()?.kokoroError).toBe("Legacy-only Kokoro failure");
   });
+
+  // Regression: NARR-MEDIA-1 render loop. useNarrationSync's MediaSession effect
+  // lists narration.setMediaSessionBook in its dependency array. If that function
+  // identity changes on every render, the effect re-runs every render and its
+  // setState (setMediaSessionBookState) triggers an infinite render loop
+  // ("Maximum update depth exceeded"). The setter must be referentially stable.
+  it("returns a referentially stable setMediaSessionBook across re-renders", async () => {
+    const harness = await renderHarness();
+    const first = harness.getSnapshot()?.setMediaSessionBook;
+    expect(first).toBeTypeOf("function");
+
+    // Force the hook to re-render via an authoritative engine-status event.
+    await act(async () => {
+      await electronApiMock.emit("tts-kokoro-engine-status", {
+        status: "ready",
+        detail: null,
+        reason: null,
+        ready: true,
+        loading: false,
+        recoverable: false,
+      });
+    });
+    expect(harness.getSnapshot()?.kokoroReady).toBe(true); // confirms a re-render occurred
+
+    const second = harness.getSnapshot()?.setMediaSessionBook;
+    expect(second).toBe(first);
+  });
 });
