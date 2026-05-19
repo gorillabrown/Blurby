@@ -1550,3 +1550,21 @@ speakChunk() {
 **Guardrail:** Before finalizing any audit package, run an import-trace pass: for every included `.ts`/`.js` source file, verify that its direct imports (excluding node_modules) are also included in the package. Missing imports are packaging errors that cost free audit points. This takes ~5 minutes and should be a checklist item in the 3rd-party-audit skill's Step 1.
 
 **Related:** OutsideAudit.9, `AuditDecisions.9.2026-05-17.md`, `src/utils/wordPositionIndex.ts`, `main/constants.js`.
+
+---
+
+### [2026-05-19] LL-119: Non-Memoized Hook Return Objects Create Unstable Function Identities That Cause Render Loops
+
+**Area:** React hooks, performance, narration
+**Status:** active
+**Priority:** high
+
+**Context:** `useNarration` returns a plain object literal (`return { ... }`) with inline function definitions. Every render produces new function identities. When `useNarrationSync`'s MediaSession effect listed `narration.setMediaSessionBook` as a dependency, the unstable identity caused the effect to re-run every render, its `setMediaSessionBookState(newObject)` triggered another render, and an infinite loop ensued (300+/sec "Maximum update depth exceeded"). The bug was latent until NARR-MEDIA-1 added the MediaSession effect.
+
+**Root Cause:** Inline functions in non-memoized return objects have unstable identity. Any downstream `useEffect` or `useCallback` that depends on them will re-fire every render. If that re-fire triggers state, infinite loop.
+
+**Fix:** Wrap `setMediaSessionBook` in `useCallback([], [])` before the return statement. The function identity is now stable across re-renders.
+
+**Guardrail:** When adding a function to a hook's return object that will be consumed by a `useEffect` dependency array, wrap it in `useCallback`. If the hook returns a non-memoized object literal (like `useNarration`), every function inside it is unstable unless individually memoized. Prefer `useCallback` over `useMemo` for function-shaped values.
+
+**Related:** `src/hooks/useNarration.ts`, `src/hooks/useNarrationSync.ts`, NARR-MEDIA-1, FLOW-ZONE-AUTO, `tests/useNarrationMount.test.tsx`.
