@@ -124,10 +124,10 @@ export function useFoliateSync({
   const hasFullBookWordMeta = Boolean(bookWordMeta?.sections?.length);
 
   // ── 1. Browse-away detection ─────────────────────────────────────────────
-  // Polls foliateApiRef.isUserBrowsing on an interval while active reading is
-  // in progress (either flow playing or narrating). When neither is active (or
-  // useFoliate is false), the flag is reset to false immediately.
-  const isActivelyReading = isNarrating || !!flowPlaying;
+  // Polls foliateApiRef.isUserBrowsing on an interval while in flow surface
+  // mode (flow or narrate), regardless of play/pause state. The "recenter"
+  // button should remain visible if the user scrolls away while paused.
+  const isActivelyReading = isNarrating || !!flowPlaying || readingMode === "flow";
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
 
   useEffect(() => {

@@ -218,7 +218,9 @@ describe("scheduler silence metadata for cursor hold", () => {
       durationMs: 600,
     }));
 
-    setAudioTime(0.18);
+    // NARR-FIX-1: Trusted timing now applies output-latency lag (TTS_TRUSTED_CURSOR_LAG_MS = 120ms).
+    // Set audio clock to 0.30 so effective cursor time is 0.30 - 0.12 = 0.18, mid-gap (0.15–0.21).
+    setAudioTime(0.30);
     const report = scheduler.getAudioProgress();
     expect(report).not.toBeNull();
     expect(report?.currentWordEndTime).toBeCloseTo(0.15, 6);

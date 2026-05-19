@@ -239,7 +239,7 @@ export default function ReaderView({ activeDoc, words, wordIndex, wpm, focusText
 
   // Build content paragraphs from the raw content for the pause view
   const paragraphs = useMemo(() => {
-    if (!activeDoc.content) return [];
+    if (!activeDoc.content || typeof activeDoc.content !== 'string') return [];
     return activeDoc.content.split(/\n\s*\n/).filter((p) => p.trim());
   }, [activeDoc.content]);
 

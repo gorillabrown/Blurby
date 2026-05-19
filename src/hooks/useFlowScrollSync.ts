@@ -292,7 +292,10 @@ export function useFlowScrollSync({
       if (cancelled) return;
 
       const { container, cursor } = resolveFlowSurface();
-      if (!container || !cursor) return;
+      if (!container || !cursor) {
+        if (import.meta.env.DEV) console.warn("[FlowScrollSync] startWhenReady — flow surface not found, container:", !!container, "cursor:", !!cursor);
+        return;
+      }
 
       const engine = flowScrollEngineRef.current;
       if (!engine) return;

@@ -2,11 +2,119 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-04-07
+**Last updated:** 2026-05-18
 
 ---
 
 ## Incomplete
+
+### BUG-175 - Manual Recenter Box needs measurable chunk-start alignment
+**Reported:** 2026-05-18
+**Severity:** Medium/High (live Flow/Narrate recovery and QA gap)
+**Status:** RESOLVED - 2026-05-18, explicit recenter API/button with pixel-tolerance accuracy test
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** Flow/Narrate automatic following is still being tuned, but users also need a manual lower-right control to recenter the reading box on the current text after scrolling. The recenter behavior must be testable: it should align the active sentence/chunk start to the top of the selected reading box, not merely jump somewhere near the active word.
+**Root cause (confirmed 2026-05-18):** The chunk scroll helper had a single target policy: follow trusted `activeWordIndex` when available, otherwise use the chunk start. That was correct for live automatic following, but it made a manual "recenter the box" action impossible to specify because recenter needs chunk-start alignment even when an active word exists.
+**Fix:** Added an explicit `ChunkReadingScrollTarget` policy with `"follow-word"` as the default and `"chunk-start"` for manual recenter. `FoliatePageView` now exposes `recenterChunkReadingBox()`, the lower-right button is available whenever Flow/Narrate chunk visuals exist, and `ReaderContainer` routes the button through the recenter API before falling back to legacy narration return.
+**Accuracy test:** `tests/foliateChunkHighlight.test.ts` now measures the expected scroll position as `currentScrollTop + chunkStartTop - containerTop - readingBoxTopOffset` and asserts the result is within `0.5px`, while also proving the lower active-word position was not used.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts tests/useNarrationRateUpdate.test.tsx tests/useReaderMode.test.ts tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowTimerCursor.test.ts tests/chunkReadingVisualState.test.ts --configLoader runner`.
+
+### BUG-174 - Flow/Narrate chunk highlight does not follow active word inside the selected zone
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode sync regression)
+**Status:** RESOLVED - 2026-05-18, active-word follow scroll and zone-center alignment
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Flow/Narrate could briefly settle into the right infinite-scroll layout, but once playback started the highlighted chunk/text block did not stay centered inside the selected reading zone. The active word could advance visually while the scroll surface stayed anchored to the first word of the same natural chunk.
+**Root cause (confirmed 2026-05-18):** `FoliatePageView` only re-scrolled when the active chunk range changed, and `scrollChunkReadingVisualStateToTopOfRoots(...)` always targeted `activeChunkRange.startWordIndex`. Word-boundary updates inside the same chunk updated `.page-word--active-word`, but they did not create a new scroll key or target the active word. The offset also aligned to the zone top rather than the zone center.
+**Fix:** Chunk visual scrolling now resolves an explicit follow word: trusted `activeWordIndex` when available, otherwise the chunk start for chunk-only fallback. The scroll key includes active-word progress, so Flow/Narrate can keep following within a single chunk. `FoliatePageView` now passes the selected zone center as the follow offset, keeping the active spoken/read word centered in the highlighted reading zone while preserving chunk-only fallback behavior.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts tests/useNarrationRateUpdate.test.tsx tests/useReaderMode.test.ts tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowTimerCursor.test.ts tests/chunkReadingVisualState.test.ts --configLoader runner`.
+
+### BUG-173 - Flow/Narrate chunk zone alignment drifts with Foliate iframe offsets and Narrate segment starts
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode sync regression)
+**Status:** RESOLVED - 2026-05-18, Foliate iframe-aware scroll math and audio segment-start chunk sync
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Flow/Narrate appeared closer to correct when the window was truncated, but fullscreen placement drifted and Narrate's light chunk highlight did not keep pace with spoken progress. The active chunk must sit in the selected zone regardless of viewport size, and Narrate's chunk-only fallback must advance from real audio playback starts.
+**Root cause (confirmed 2026-05-18):** `scrollChunkReadingVisualStateToTopOfRoots(...)` compared iframe-local word-span coordinates directly to the outer Foliate scroll container, ignoring the iframe's own offset. This made the computed scroll target viewport-size dependent. Separately, Kokoro scheduler segment-start events were only used for tracing, so when trusted word timing was unavailable the chunk visual path could wait until a later handoff/boundary instead of moving when the audible segment actually started.
+**Fix:** Foliate chunk scroll now resolves both target and scroll-container positions through frame-aware viewport coordinates before applying the selected-zone offset. `FoliatePageView` computes synthetic leading/trailing zone space from the actual Foliate scroll viewport when available. `useNarration` exposes a visual-only segment-start callback, and `ReaderContainer` converts segment starts into chunk-synced Narrate visual state while preserving trusted word-boundary updates for bold active-word highlighting.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/useNarrationRateUpdate.test.tsx --configLoader runner`; `npx vitest run tests/useReaderMode.test.ts tests/flow-scroll-engine.test.js --configLoader runner`.
+
+### BUG-172 - Flow/Narrate cannot place first or final book content inside the selected zone
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode positioning regression)
+**Status:** RESOLVED - 2026-05-18, Flow/Narrate chunk alignment now targets the selected zone with synthetic start/end scroll space
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/utils/foliateStyles.ts`, `src/components/FoliatePageView.tsx`, `src/utils/FlowScrollEngine.ts`
+**Description:** At the start of a book, the first heading or paragraph could not be selected into the active Flow/Narrate zone because there was no content above it. The same geometry applies at the end of a book: without content below the final paragraph, the final chunk cannot scroll into the selected zone. Flow and Narrate need an infinite-scroll surface with enough synthetic blank space at both ends for the active chunk to sit inside the chosen zone.
+**Root cause (confirmed 2026-05-18):** The Foliate chunk visual path initially aligned chunk starts against the scroll container top and relied on native scroll clamping. At `scrollTop = 0` or max scroll, the browser could not move the first/final content into the selected zone because the EPUB iframe body had no leading/trailing spacer. FlowScrollEngine also preserved a chunk-top alignment path that bypassed its normal zone-position math.
+**Fix:** Foliate iframe styles now expose `--blurby-flow-leading-inset` and `--blurby-flow-trailing-inset`, with `FoliatePageView` setting them from the selected zone and viewport height. `scrollChunkReadingVisualStateToTopOfRoots(...)` subtracts the zone top offset when controlling the real Foliate scroll container, and `FlowScrollEngine` routes active chunk starts through its normal zone-aligned word scroll path instead of pinning them to the container top.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js tests/useReaderMode.test.ts tests/foliate-bridge.test.ts tests/flowReadingZone.test.ts tests/flowTimerCursor.test.ts tests/chunkReadingVisualState.test.ts --configLoader runner`.
+
+### BUG-171 - Narrate trusted word boundaries do not update chunk active-word highlight
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode visual sync regression)
+**Status:** RESOLVED - 2026-05-18, trusted Narrate word sync now updates chunk visual active word
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Flow and Narrate show the active chunk band, but the current spoken/advanced word does not visibly track as the cursor progresses. In Narrate, this leaves the chunk highlighted without the required bold active word.
+**Root cause (confirmed 2026-05-18):** Narrate's trusted scheduler word-boundary callback still routed through the legacy `highlightWordByIndex(...)` Foliate path. Chunk visual mode suppresses that old flow-cursor/highlight path, so trusted spoken-word events reached the app but did not update the `ChunkReadingVisualState.activeWordIndex` owner that paints `.page-word--active-word`.
+**Fix:** `useReaderMode` now exposes trusted Narrate word sync to the chunk visual owner. `ReaderContainer` converts that trusted boundary into a `word-synced` Narrate `ChunkReadingVisualState`, while missing/untrusted timing remains chunk-only because `setOnTruthSync` is not invoked for untrusted fallback word timing.
+**Verification:** `npx vitest run tests/useReaderMode.test.ts --configLoader runner`; `npx vitest run tests/useReaderMode.test.ts tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js --configLoader runner`.
+
+### BUG-170 - Flow cursor persists when switching from Flow to Narrate
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode visual duplication)
+**Status:** RESOLVED - 2026-05-18, Flow cursor unmounted outside real Flow mode
+**Location:** `src/components/FoliatePageView.tsx`, `src/styles/flow.css`
+**Description:** Switching from Flow to Narrate can leave the old shrinking Flow cursor visible while Narrate's chunk/word highlight is also active, producing duplicate cursors on the shared infinite-scroll surface.
+**Root cause (confirmed 2026-05-18):** The Foliate surface renders the FlowScrollEngine cursor whenever `flowMode` is true. Narrate also uses `flowMode` for infinite scroll, so the Flow cursor remained mounted in Narrate and could preserve stale inline styles written by FlowScrollEngine.
+**Fix:** The shrinking Flow cursor now renders only when `readingMode === "flow"`. Chunk visual CSS also uses `display: none !important` for cursor suppression so stale inline `display: block` cannot override chunk/Narrate ownership.
+**Verification:** `npx vitest run tests/foliate-bridge.test.ts --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js --configLoader runner`.
+
+### BUG-166 - Narrate/Flow start anchor does not pin to the active view top
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode positioning regression)
+**Status:** RESOLVED - 2026-05-18, chunk-top infinite-scroll positioning
+**Location:** `src/utils/FlowScrollEngine.ts`, `src/components/FoliatePageView.tsx`, `src/utils/foliateWordHighlight.ts`
+**Description:** Flow/Narrate can start from the selected word but leave the visual page anchored to an older top-of-page/resume position instead of placing the active chunk/word at the top of the active reading view. The bug report says "FLow and narrate doesn't start at the top of the page" while the app is in `readingMode: narrate`.
+**Evidence:** The report shows `position: 375`, `cursorWordIndex: 0`, `totalWords: 0`, and `extractionComplete: false` at capture, followed by full-book extraction. Console logs repeatedly report `[TTS-7M] onRelocate: resume anchor active at 375 - skipping approx ...`, then exact selection at `globalWordIndex: 187 word: INTRODUCTION`, plus repeated `word-position-index-miss` diagnostics and direct fallback hits. This suggests the resume-anchor relocation guard is fighting the newly selected visual anchor during Foliate relocation/index fallback.
+**Root cause (confirmed 2026-05-18):** Flow chunk jumps still used the selected reading-zone math (`line.y - containerHeight * zonePosition`), so a center/lower zone deliberately placed the active chunk below the top. Narrate's declared chunk visual path applied chunk/word classes but did not move the Foliate rendered root at all.
+**Fix:** Natural chunk mode now treats the active chunk start as the scroll owner. `FlowScrollEngine` top-aligns the active chunk start line when chunks are present, while non-chunk fallback still uses the selected reading-zone behavior. Foliate chunk rendering now scrolls the active chunk start span with `block: "start"` when a new Flow/Narrate chunk becomes active, so Narrate and Flow both behave as infinite-scroll chunk readers.
+**Verification:** `npx vitest run tests/flow-scroll-engine.test.js --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts --configLoader runner`.
+
+### BUG-167 - Narrate start speed is derived from WPM instead of the TTS speed setting
+**Reported:** 2026-05-18
+**Severity:** Critical (current narration pacing can become unusably fast)
+**Status:** RESOLVED - 2026-05-18, direct fix in `src/hooks/useNarration.ts`
+**Location:** `src/hooks/useNarration.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useNarrationSync.ts`
+**Description:** Narration can start at 1.5x even when the side panel and report say TTS speed is 1.0x. The bug report says "Too fast narration at 1.0x speed." The diagnostic snapshot confirms `ttsSpeed: 1`, `wpm: 375`, but active runtime `rate: 1.5` / `rateBucket: 1.5`.
+**Root cause candidate (confirmed by code inspection 2026-05-18):** `useNarration.ts` computes mode-start speed with `wpmToRate(wpm)`, and `useReaderMode.ts` passes `effectiveWpm` into `narration.startCursorDriven(...)`. At 375 WPM, `375 / 150 = 2.5`, clamped to `TTS_MAX_RATE = 1.5`. `useNarrationSync.ts` only adjusts rate when `settings.ttsRate` changes, so it does not reliably correct the start-derived 1.5x rate.
+**Fix:** `startCursorDriven(...)` and `resyncToCursor(...)` now use the current selected narration/TTS rate instead of converting visual WPM into audio speed. Regression coverage proves `ttsRate: 1.0` plus `wpm: 375` starts Kokoro Narrate at 1.0x, while existing same-bucket live-rate behavior remains explicit via TTS rate setup in tests.
+**Verification:** `npx vitest run tests/useNarrationRateUpdate.test.tsx --configLoader runner`; `npx vitest run tests/useNarrationRateUpdate.test.tsx tests/useReaderMode.test.ts tests/kokoroRateBuckets.test.ts tests/useNarrationQwen.test.tsx tests/qwenPlaybackReliability.test.tsx --configLoader runner`; `npm run typecheck`.
+
+### BUG-168 - Opening narration chunks can ignore natural/header boundaries
+**Reported:** 2026-05-18
+**Severity:** High (current audiobook pacing/chunking regression)
+**Status:** OPEN - elevated from `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/narrationPlanner.ts`, `src/utils/naturalChunks.ts`
+**Description:** Narrate can begin with a chunk boundary in the wrong location and provide no break after a header. The report says "no break after header" and "Chunk are happening in the wrong location." The console shows narration starts at `globalWordIndex: 187 word: INTRODUCTION`, then emits a first chunk of 13 words.
+**Root cause candidate (confirmed by code inspection 2026-05-18):** The opening ramp path uses small chunks before cruise generation. `snapToSentenceBoundary(...)` returns the raw end when the chunk is `<= 20` words, so the first 13-word ramp chunk bypasses sentence/header/line-break snapping. Separately, `narrationPlanner.ts` documents clause-boundary fallback but currently searches sentence boundaries and then falls back to raw target, so clause/header breaks are underused.
+**Fix spec (CLI-ready):**
+1. Route opening ramp chunks through the same natural chunk/source-boundary model used for chunk visuals, or add an opening-ramp guard that honors headings, source line breaks, and terminal punctuation before raw word count.
+2. Add a regression fixture where a heading without punctuation is followed by prose; the heading must be its own chunk or receive a deliberate post-heading break.
+3. Restore/implement clause-boundary fallback in the planner in the documented priority order before raw target fallback.
+4. Preserve latency goals by allowing small first chunks only when they end on a natural boundary.
+
+### BUG-169 - React maximum update depth loop during Narrate/Flow relocation
+**Reported:** 2026-05-18
+**Severity:** High (can destabilize live reading modes)
+**Status:** OPEN - elevated from `docs/bug-reports/bug-2026-05-18T21-10-16Z.json` and `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
+**Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`, `src/hooks/useDocumentLifecycle.ts`
+**Description:** Both fresh bug captures include React `Maximum update depth exceeded` console errors while Foliate relocation, resume-anchor skipping, and selection/highlight diagnostics are active. This is likely related to BUG-166, but it should remain separately tracked because it can freeze or destabilize the app even if anchoring is fixed.
+**Evidence:** The 21:10 report records two maximum-depth errors; the 21:27 report records four. Both include repeated `[TTS-7M] onRelocate: resume anchor active ... skipping approx ...` logs around the same session window.
+**Fix spec (CLI-ready):**
+1. Reproduce with console open by selecting a word, entering Narrate/Flow, and forcing a Foliate relocate while background extraction is still settling.
+2. Identify effects that write state in response to relocation/highlight changes without a stable dependency or equality guard.
+3. Add equality guards or ref-based suppression where relocation attempts to write the same anchor/highlight state repeatedly.
+4. Add a regression test or harness guard that repeated relocate events do not trigger repeated React state writes for an unchanged anchor.
 
 ### BUG-151 — Narration band spans full page height instead of single line
 **Reported:** 2026-04-06
@@ -1081,4 +1189,3 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Location:** `src/components/ReaderBottomBar.tsx`
 **Problem:** Bottom bar had `opacity: 0.08` during Focus/Flow/Narration, making controls nearly invisible.
 **Solution:** Remov
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       

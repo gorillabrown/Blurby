@@ -785,22 +785,86 @@ export default function FoliatePageView({
 
   const recenterChunkReadingBox = useCallback((): boolean => {
     const state = chunkReadingVisualStateRef.current;
-    if (!state?.activeChunkRange) return false;
-    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), state, {
-      behavior: "smooth",
-      scrollContainer: resolveFoliateScrollContainer(),
-      target: "chunk-start",
-      topOffsetPx: getFlowLeadingInsetPx(),
-    });
-    if (didScroll) {
-      userBrowsingRef.current = false;
-      lastChunkTopScrollKeyRef.current = null;
-      // Reset displacement baseline so the scroll-follow effect doesn't
-      // re-trigger browse-away on the next narration word advance.
-      lastScrollFollowPosRef.current = null;
+
+    // NARR-FIX-1 Fix 9: Resolve target word from chunk state OR current reading position.
+    // chunkReadingVisualState is null during flow mode (engine publishes only while advancing)
+    // and during flow+narration (publishFlowVisualState skips when isNarrating, and the
+    // narrate-mode publishers only activate when readingMode === "narrate"). Use the
+    // narration cursor or highlighted word index as a fallback so the recenter button
+    // always has a valid scroll target regardless of mode.
+    const targetWordIndex = state?.activeChunkRange
+      ? state.activeChunkRange.startWordIndex
+      : (narrationWordIndexRef.current ?? highlightedWordIndexRef.current);
+
+    if (targetWordIndex < 0) return false;
+
+    const view = viewRef.current;
+
+    // NARR-FIX-1 Fix 8: Prefer Foliate-native scrollToAnchor over raw DOM scrollTo.
+    // Raw scrollTo() on the scroll container is immediately overridden by Foliate's
+    // renderer on the next frame (it maintains its own containerPosition). Using
+    // scrollToAnchor properly syncs Foliate's internal state so the scroll persists.
+    //
+    // Critical: scrollToAnchor is ASYNC — must be awaited before adjusting
+    // containerPosition. Fire in an async IIFE (same pattern as narrate scroll-follow).
+    // Do NOT null lastChunkTopScrollKeyRef — that would cause the flow scroll-follow
+    // effect (line ~834) to fire on the next render with raw DOM scrollTo, fighting
+    // this async scroll. Leave the key so scroll-follow stays quiet; it resumes
+    // naturally on the next chunk change.
+    const hasScrollToAnchor = !!view?.renderer?.scrollToAnchor;
+    const hasViewApi = !!viewApiRef?.current;
+    if (hasScrollToAnchor && hasViewApi) {
+      const wordState = viewApiRef.current!.resolveWordState(targetWordIndex);
+      if (wordState.found && wordState.span && wordState.doc) {
+        // Clear browsing state synchronously so the button disappears immediately
+        userBrowsingRef.current = false;
+        lastScrollFollowPosRef.current = null;
+
+        const { doc: stateDoc, span: stateSpan } = wordState;
+        const zoneOffset = getFlowFollowOffsetPx();
+        (async () => {
+          try {
+            // Pre-flight: user may have scrolled again during micro-task gap
+            if (userBrowsingRef.current) return;
+            const range = stateDoc.createRange();
+            range.selectNodeContents(stateSpan);
+            await view!.renderer.scrollToAnchor(range);
+            // Post-flight: user may have scrolled while scrollToAnchor resolved
+            if (userBrowsingRef.current) return;
+            // Apply zone offset — scrollToAnchor positions the word at the top;
+            // subtract offset from containerPosition to push the word into the
+            // configured zone (Top/Upper/Center/Bottom).
+            if (zoneOffset > 0) {
+              const renderer = viewRef.current?.renderer;
+              if (renderer && typeof renderer.containerPosition === "number") {
+                renderer.containerPosition = Math.max(0, renderer.containerPosition - zoneOffset);
+              }
+            }
+            // Record final position for displacement detection on next tick
+            const finalPos = viewRef.current?.renderer?.containerPosition;
+            if (typeof finalPos === "number") lastScrollFollowPosRef.current = finalPos;
+          } catch (e) { /* Section may be unloading */ }
+        })();
+        return true;
+      }
     }
-    return didScroll;
-  }, [getFlowLeadingInsetPx, getRenderedWordRoots, resolveFoliateScrollContainer]);
+
+    // Fallback: DOM-level scroll (non-Foliate renderers or word not found via scrollToAnchor)
+    if (state?.activeChunkRange) {
+      const didScroll = scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), state, {
+        behavior: "smooth",
+        scrollContainer: resolveFoliateScrollContainer(),
+        target: "chunk-start",
+        topOffsetPx: getFlowLeadingInsetPx(),
+      });
+      if (didScroll) {
+        userBrowsingRef.current = false;
+        lastScrollFollowPosRef.current = null;
+      }
+      return didScroll;
+    }
+    return false;
+  }, [getFlowFollowOffsetPx, getFlowLeadingInsetPx, getRenderedWordRoots, resolveFoliateScrollContainer]);
 
   useEffect(() => {
     if (chunkReadingVisualState) {
@@ -1325,7 +1389,8 @@ export default function FoliatePageView({
               userBrowsingRef.current = false;
               // Reset displacement baseline so scroll-follow doesn't re-trigger browse-away
               lastScrollFollowPosRef.current = null;
-              if (viewApiRef!.current!.recenterChunkReadingBox()) {
+              const rcResult = viewApiRef!.current!.recenterChunkReadingBox?.();
+              if (rcResult) {
                 return;
               }
               const currentIdx = narrationWordIndexRef.current ?? highlightedWordIndexRef.current;
@@ -1510,12 +1575,29 @@ export default function FoliatePageView({
     }
     invalidateWordPositionIndex();
     scheduleWordPositionIndexRebuild("flow-mode-change");
+    if (flowMode) {
+      const targetIdx = highlightedWordIndexRef.current;
+      if (targetIdx > 0) {
+        const scrollAfterLayout = () => {
+          const roots = getRenderedWordRoots();
+          for (const { root } of roots) {
+            const el = root.querySelector?.(`[data-word-index="${targetIdx}"]`) as HTMLElement | null;
+            if (el?.scrollIntoView) {
+              el.scrollIntoView({ block: "center", behavior: "auto" });
+              return;
+            }
+          }
+        };
+        setTimeout(scrollAfterLayout, 150);
+      }
+    }
   }, [
     flowMode,
     resolveFoliateScrollContainer,
     invalidateWordPositionIndex,
     scheduleWordPositionIndexRebuild,
     scrollContainerRef,
+    getRenderedWordRoots,
   ]);
 
   // FLOW-INF-A: Compute --flow-zone-top and --flow-zone-bottom CSS custom properties

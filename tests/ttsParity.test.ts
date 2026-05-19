@@ -177,7 +177,7 @@ describe("TTS-PARITY-1: trusted progress should not lag", () => {
     (globalThis as any).AudioContext = MockAudioContext;
   });
 
-  it("getAudioProgress() returns raw audioCtx.currentTime for trusted word timing", () => {
+  it("getAudioProgress() applies output-latency lag for trusted word timing", () => {
     const scheduler = createAudioScheduler();
     scheduler.setCallbacks(makeCallbacks());
     scheduler.play();
@@ -194,10 +194,12 @@ describe("TTS-PARITY-1: trusted progress should not lag", () => {
       ],
     });
 
+    // NARR-FIX-1: Trusted timing now applies TTS_TRUSTED_CURSOR_LAG_MS (120ms)
+    // to compensate for audio output latency. audioTime reflects the lagged clock.
     mockCurrentTime = 1.0;
     const report = scheduler.getAudioProgress();
     expect(report).not.toBeNull();
-    expect(report?.audioTime).toBeCloseTo(1.0, 5);
+    expect(report?.audioTime).toBeCloseTo(0.88, 2);
 
     scheduler.stop();
   });

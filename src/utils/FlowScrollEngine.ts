@@ -381,7 +381,7 @@ export class FlowScrollEngine {
       wordIndex: this.wordIndex,
       totalWords,
       estimatedMinutesLeft,
-      bookPct: this.bookPct,
+      bookPct: totalWords > 0 ? this.wordIndex / totalWords : this.bookPct,
     };
   }
 
@@ -402,13 +402,31 @@ export class FlowScrollEngine {
     const lines: LineInfo[] = [];
     let cur: LineInfo | null = null;
 
+    const iframeOffsetCache = new Map<Document, { top: number; left: number }>();
+    const getIframeOffset = (el: Element): { top: number; left: number } => {
+      const elDoc = el.ownerDocument;
+      if (!elDoc || elDoc === this.container!.ownerDocument) return { top: 0, left: 0 };
+      const cached = iframeOffsetCache.get(elDoc);
+      if (cached) return cached;
+      const iframe = elDoc.defaultView?.frameElement as HTMLElement | null;
+      if (!iframe) {
+        iframeOffsetCache.set(elDoc, { top: 0, left: 0 });
+        return { top: 0, left: 0 };
+      }
+      const iRect = iframe.getBoundingClientRect();
+      const offset = { top: iRect.top, left: iRect.left };
+      iframeOffsetCache.set(elDoc, offset);
+      return offset;
+    };
+
     wordEls.forEach((el) => {
       const rect = el.getBoundingClientRect();
       const idx = parseInt(el.getAttribute("data-word-index") || "0", 10);
-      const top = rect.top - cRect.top + this.container!.scrollTop;
-      const bottom = rect.bottom - cRect.top + this.container!.scrollTop;
-      const left = rect.left - cRect.left + this.container!.scrollLeft;
-      const right = rect.right - cRect.left + this.container!.scrollLeft;
+      const ifOff = getIframeOffset(el);
+      const top = rect.top + ifOff.top - cRect.top + this.container!.scrollTop;
+      const bottom = rect.bottom + ifOff.top - cRect.top + this.container!.scrollTop;
+      const left = rect.left + ifOff.left - cRect.left + this.container!.scrollLeft;
+      const right = rect.right + ifOff.left - cRect.left + this.container!.scrollLeft;
 
       if (!cur || Math.abs(top - cur.y) > rect.height * 0.5) {
         cur = { y: top, bottom, left, right, firstWord: idx, lastWord: idx, wordCount: 1 };
@@ -465,6 +483,21 @@ export class FlowScrollEngine {
     }
 
     return iframeWordEls;
+  }
+
+  private getWordElementByIndex(wordIndex: number): Element | null {
+    if (!this.container) return null;
+    const provider = (this.container as FlowRenderedWordRootHost)[FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY];
+    if (typeof provider === "function") {
+      for (const entry of provider().filter(e => e?.root && e.ready !== false)) {
+        try {
+          const el = entry.root.querySelector(`[data-word-index="${wordIndex}"]`);
+          if (el) return el;
+        } catch { /* ignore detached roots */ }
+      }
+      return null;
+    }
+    return this.container.querySelector(`[data-word-index="${wordIndex}"]`);
   }
 
   private findLineForWord(wordIndex: number): number {
@@ -580,7 +613,7 @@ export class FlowScrollEngine {
         }
         this.wordIndex = this.lines[this.lineIdx].firstWord;
         this.emitChunkChangeForWord(this.wordIndex);
-        this.scrollActiveChunkOrLine(this.wordIndex);
+        this.scrollToLine(this.lineIdx);
         this.lineTimer = setTimeout(() => {
           if (this.running && !this.paused) this.animateLine();
         }, FLOW_LINE_ADVANCE_BUFFER_MS);
@@ -653,13 +686,22 @@ export class FlowScrollEngine {
     if (!this.container || lineIdx >= this.lines.length) return;
     const line = this.lines[lineIdx];
     const containerHeight = this.container.clientHeight;
-    const targetScrollTop = line.y - (containerHeight * this.zonePosition);
+    const isContainerScrollable = this.container.scrollHeight > containerHeight + 1
+      || this.container.scrollHeight === 0;
 
-    if (this.isEink || instant) {
-      // STAB-1A (BUG-165): Initial scroll uses instant behavior — no smooth animation delay
-      this.container.scrollTop = Math.max(0, targetScrollTop);
+    if (isContainerScrollable) {
+      const targetScrollTop = line.y - (containerHeight * this.zonePosition);
+      if (this.isEink || instant) {
+        this.container.scrollTop = Math.max(0, targetScrollTop);
+      } else {
+        this.container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: "smooth" });
+      }
     } else {
-      this.container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: "smooth" });
+      const wordEl = this.getWordElementByIndex(line.firstWord);
+      if (wordEl && (wordEl as HTMLElement).scrollIntoView) {
+        const block: ScrollLogicalPosition = this.zonePosition <= 0.3 ? "start" : this.zonePosition >= 0.7 ? "end" : "center";
+        (wordEl as HTMLElement).scrollIntoView({ block, behavior: instant || this.isEink ? "auto" : "smooth" });
+      }
     }
   }
 

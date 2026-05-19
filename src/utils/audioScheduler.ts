@@ -5,7 +5,7 @@
 // eliminating the 5-20ms gap from the onended→consumeNext handover.
 // Crossfade at chunk boundaries prevents splice artifacts.
 
-import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, NARRATION_CURSOR_LAG_MS } from "../constants";
+import { KOKORO_SAMPLE_RATE, TTS_CROSSFADE_MS, NARRATION_CURSOR_LAG_MS, TTS_TRUSTED_CURSOR_LAG_MS } from "../constants";
 import { applyKokoroTempoStretch } from "./audio/tempoStretch";
 import type { KokoroRatePlan } from "./kokoroRatePlan";
 import type { KokoroPlaybackSegmentMetadata } from "../types/narration";
@@ -505,9 +505,16 @@ export function createAudioScheduler(): AudioScheduler {
     if (!callbacks || !audioCtx) return;
     if (currentWordBoundaries.length === 0 && !hasPendingBoundaryDelivery()) return;
 
-    // BUG-151 fallback lag offset. Trusted word-native boundaries bypass this;
-    // heuristic fallback paths continue to use it to avoid visual lead.
+    // BUG-151 fallback lag offset. Trusted word-native boundaries use a smaller
+    // lag that accounts for audio output latency (DAC buffer, OS audio pipeline);
+    // heuristic fallback paths use the larger fixed lag to avoid visual lead.
     const cursorLagSec = NARRATION_CURSOR_LAG_MS / 1000;
+    // NARR-FIX-1: Trusted timing still needs output-latency compensation.
+    // Use audioCtx.outputLatency when the browser exposes it; floor at constant.
+    const trustedLagSec = Math.max(
+      TTS_TRUSTED_CURSOR_LAG_MS / 1000,
+      (audioCtx as any).outputLatency ?? 0,
+    );
 
     function tick(): void {
       if (stopped || !callbacks || !audioCtx) return;
@@ -524,14 +531,16 @@ export function createAudioScheduler(): AudioScheduler {
       // BUG-151 fallback path: untrusted/heuristic timing stays lagged so the
       // visual cursor cannot outpace speech on non-word-native engines.
       const cursorNow = now - cursorLagSec;
+      // NARR-FIX-1: Trusted word-native timing uses smaller output-latency lag.
+      const trustedCursorNow = now - trustedLagSec;
 
       // Advance past ALL boundaries we've crossed in this tick.
       let advancedAny = false;
       while (nextWordBoundaryIdx < currentWordBoundaries.length) {
         const currentBoundary = currentWordBoundaries[nextWordBoundaryIdx];
-        // Event-driven word-native boundaries bypass fixed cursor lag. The lagged
-        // comparator remains only for fallback/non-word-native timing.
-        const boundaryComparatorTime = currentBoundary.isTrustedWordTiming ? now : cursorNow;
+        // Trusted timing uses output-latency-compensated clock; fallback uses
+        // the larger fixed cursor lag.
+        const boundaryComparatorTime = currentBoundary.isTrustedWordTiming ? trustedCursorNow : cursorNow;
         if (currentBoundary.time > boundaryComparatorTime) break;
         const advancedWordIndex = currentBoundary.wordIndex;
         const boundaryEvent = toBoundaryEvent(currentBoundary, advancedWordIndex);
@@ -863,9 +872,13 @@ export function createAudioScheduler(): AudioScheduler {
     // is at index (nextWordBoundaryIdx - 1), clamped to [0, total-1].
     const currentIdx = Math.max(0, Math.min(nextWordBoundaryIdx - 1, total - 1));
     const current = boundaries[currentIdx];
-    // Match boundary delivery semantics: trusted word timing uses raw audio time,
-    // fallback/heuristic timing keeps cursor lag to prevent visual lead.
-    const lagSec = current.isTrustedWordTiming ? 0 : cursorLagSec;
+    // Match boundary delivery semantics: trusted word timing uses output-latency
+    // lag; fallback/heuristic timing keeps the larger cursor lag to prevent visual lead.
+    const trustedLag = Math.max(
+      TTS_TRUSTED_CURSOR_LAG_MS / 1000,
+      (audioCtx as any).outputLatency ?? 0,
+    );
+    const lagSec = current.isTrustedWordTiming ? trustedLag : cursorLagSec;
     const now = Math.max(0, audioCtx.currentTime - lagSec);
     if (now < boundaries[0].time) return null;
 

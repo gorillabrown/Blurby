@@ -14,6 +14,7 @@ export function shouldSuppressNarrateFlowCursor(
 
 const CHUNK_ACTIVE_CLASS = "page-word--chunk-active";
 const ACTIVE_WORD_CLASS = "page-word--active-word";
+const GLIDE_ADJ_CLASS = "page-word--glide-adj";
 
 export type ChunkReadingScrollTarget = "follow-word" | "chunk-start";
 
@@ -60,13 +61,17 @@ export function clearChunkReadingVisualStateFromRoots(
 ): void {
   for (const { root } of roots) {
     try {
-      root.querySelectorAll?.(`.${CHUNK_ACTIVE_CLASS}, .${ACTIVE_WORD_CLASS}`).forEach((el) => {
-        el.classList.remove(CHUNK_ACTIVE_CLASS, ACTIVE_WORD_CLASS);
+      root.querySelectorAll?.(`.${CHUNK_ACTIVE_CLASS}, .${ACTIVE_WORD_CLASS}, .${GLIDE_ADJ_CLASS}`).forEach((el) => {
+        el.classList.remove(CHUNK_ACTIVE_CLASS, ACTIVE_WORD_CLASS, GLIDE_ADJ_CLASS);
       });
     } catch {
       // Render roots can be detached while Foliate is paging; stale roots are harmless.
     }
   }
+}
+
+function nearestBlockAncestor(el: Element): Element | null {
+  return el.closest("p, li, blockquote, figcaption, h1, h2, h3, h4, h5, h6, td, th, dt, dd");
 }
 
 export function applyChunkReadingVisualStateToRoots(
@@ -79,16 +84,42 @@ export function applyChunkReadingVisualStateToRoots(
 
   for (const { root } of roots) {
     try {
-      root.querySelectorAll?.<HTMLElement>("[data-word-index]").forEach((el) => {
-        const wordIndex = parseWordIndex(el);
-        if (wordIndex == null) return;
-        if (wordIndex >= range.startWordIndex && wordIndex < range.endWordIndex) {
-          el.classList.add(CHUNK_ACTIVE_CLASS);
-        }
-        if (state.activeWordIndex != null && wordIndex === state.activeWordIndex) {
-          el.classList.add(ACTIVE_WORD_CLASS);
+      const wordEls = root.querySelectorAll?.<HTMLElement>("[data-word-index]");
+      if (!wordEls) continue;
+
+      const wordMap = new Map<number, HTMLElement[]>();
+      wordEls.forEach((el) => {
+        const idx = parseWordIndex(el);
+        if (idx != null) {
+          const arr = wordMap.get(idx);
+          if (arr) arr.push(el);
+          else wordMap.set(idx, [el]);
         }
       });
+
+      wordMap.forEach((els, wordIndex) => {
+        if (wordIndex >= range.startWordIndex && wordIndex < range.endWordIndex) {
+          els.forEach(el => el.classList.add(CHUNK_ACTIVE_CLASS));
+        }
+      });
+
+      if (state.activeWordIndex != null) {
+        const activeEls = wordMap.get(state.activeWordIndex);
+        if (activeEls?.length) {
+          activeEls.forEach(el => el.classList.add(ACTIVE_WORD_CLASS));
+          const activeBlock = nearestBlockAncestor(activeEls[0]);
+
+          const prevEls = wordMap.get(state.activeWordIndex - 1);
+          if (prevEls?.length && activeBlock && nearestBlockAncestor(prevEls[0]) === activeBlock) {
+            prevEls.forEach(el => el.classList.add(GLIDE_ADJ_CLASS));
+          }
+
+          const nextEls = wordMap.get(state.activeWordIndex + 1);
+          if (nextEls?.length && activeBlock && nearestBlockAncestor(nextEls[0]) === activeBlock) {
+            nextEls.forEach(el => el.classList.add(GLIDE_ADJ_CLASS));
+          }
+        }
+      }
     } catch {
       // Render roots can be detached while Foliate is paging; stale roots are harmless.
     }

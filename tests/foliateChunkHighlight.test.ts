@@ -357,12 +357,85 @@ describe("Foliate chunk visual state rendering", () => {
 
   it("clear helper removes chunk visual state from every rendered root", () => {
     const { doc, roots } = makeRoot(`
-      <span class="page-word page-word--chunk-active page-word--active-word" data-word-index="1">One</span>
+      <span class="page-word page-word--chunk-active page-word--active-word page-word--glide-adj" data-word-index="1">One</span>
     `);
 
     clearChunkReadingVisualStateFromRoots(roots);
 
     expect(doc.querySelector(".page-word")?.className).toBe("page-word");
+  });
+
+  it("applies glide-adj class to prev and next words within same paragraph", () => {
+    const { doc, roots } = makeRoot(`
+      <p>
+        <span class="page-word" data-word-index="1">One</span>
+        <span class="page-word" data-word-index="2">Two</span>
+        <span class="page-word" data-word-index="3">Three</span>
+        <span class="page-word" data-word-index="4">Four</span>
+      </p>
+    `);
+
+    applyChunkReadingVisualStateToRoots(roots, state({ activeWordIndex: 2 }));
+
+    expect(doc.querySelector('[data-word-index="1"]')?.classList.contains("page-word--glide-adj")).toBe(true);
+    expect(doc.querySelector('[data-word-index="2"]')?.classList.contains("page-word--active-word")).toBe(true);
+    expect(doc.querySelector('[data-word-index="3"]')?.classList.contains("page-word--glide-adj")).toBe(true);
+    expect(doc.querySelector('[data-word-index="4"]')?.classList.contains("page-word--glide-adj")).toBe(false);
+  });
+
+  it("truncates glide at paragraph boundaries", () => {
+    const { doc, roots } = makeRoot(`
+      <p>
+        <span class="page-word" data-word-index="1">One</span>
+        <span class="page-word" data-word-index="2">Two</span>
+      </p>
+      <p>
+        <span class="page-word" data-word-index="3">Three</span>
+        <span class="page-word" data-word-index="4">Four</span>
+      </p>
+    `);
+
+    applyChunkReadingVisualStateToRoots(roots, state({
+      activeChunkRange: { startWordIndex: 1, endWordIndex: 5 },
+      activeWordIndex: 2,
+    }));
+
+    expect(doc.querySelector('[data-word-index="1"]')?.classList.contains("page-word--glide-adj")).toBe(true);
+    expect(doc.querySelector('[data-word-index="3"]')?.classList.contains("page-word--glide-adj")).toBe(false);
+  });
+
+  it("truncates glide when active word is at start of paragraph", () => {
+    const { doc, roots } = makeRoot(`
+      <p>
+        <span class="page-word" data-word-index="1">One</span>
+      </p>
+      <p>
+        <span class="page-word" data-word-index="2">Two</span>
+        <span class="page-word" data-word-index="3">Three</span>
+      </p>
+    `);
+
+    applyChunkReadingVisualStateToRoots(roots, state({
+      activeChunkRange: { startWordIndex: 1, endWordIndex: 4 },
+      activeWordIndex: 2,
+    }));
+
+    expect(doc.querySelector('[data-word-index="1"]')?.classList.contains("page-word--glide-adj")).toBe(false);
+    expect(doc.querySelector('[data-word-index="3"]')?.classList.contains("page-word--glide-adj")).toBe(true);
+  });
+
+  it("does not apply glide when words have no block ancestor", () => {
+    const { doc, roots } = makeRoot(`
+      <span class="page-word" data-word-index="1">One</span>
+      <span class="page-word" data-word-index="2">Two</span>
+      <span class="page-word" data-word-index="3">Three</span>
+    `);
+
+    applyChunkReadingVisualStateToRoots(roots, state({ activeWordIndex: 2 }));
+
+    expect(doc.querySelector('[data-word-index="1"]')?.classList.contains("page-word--glide-adj")).toBe(false);
+    expect(doc.querySelector('[data-word-index="3"]')?.classList.contains("page-word--glide-adj")).toBe(false);
+    expect(doc.querySelector('[data-word-index="2"]')?.classList.contains("page-word--active-word")).toBe(true);
   });
 
   it("injects iframe CSS for chunk and active word classes", () => {
@@ -376,8 +449,9 @@ describe("Foliate chunk visual state rendering", () => {
     const css = doc.getElementById("blurby-theme")?.textContent ?? "";
     expect(css).toContain(".page-word--chunk-active");
     expect(css).toContain(".page-word--active-word");
-    expect(css).toContain("color-mix(in srgb, var(--accent, #FF5B7F) 16%, transparent)");
-    expect(css).toContain("color-mix(in srgb, var(--accent, #FF5B7F) 28%, transparent)");
+    expect(css).toContain(".page-word--glide-adj");
+    expect(css).toContain("color: #ffffff");
+    expect(css).toContain("border-radius: 3px");
   });
 
   it("injects spacer hooks so first and final page content can sit inside the Flow zone", () => {

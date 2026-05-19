@@ -1028,12 +1028,18 @@ export default function ReaderContainer({
           foliateFractionRef.current = fraction;
           setFoliateFraction(fraction);
           const approxWordIdx = Math.floor(fraction * (activeDoc.wordCount || 0));
-          // Update CFI for position restoration
-          activeDoc.cfi = detail.cfi;
+          // Update CFI for position restoration — but NOT when the user has browsed
+          // away from the active reading position in flow/narrate mode. NARR-FIX-1 lets
+          // users page ahead/behind freely; if we saved those browsed-to CFIs, the book
+          // would reopen at the wrong section instead of the real reading position.
+          const mode = readingModeRef.current;
+          const isBrowsingAway = foliateApiRef.current?.isUserBrowsing?.() ?? false;
+          if (!(isBrowsingAway && (mode === "flow" || mode === "narrate"))) {
+            activeDoc.cfi = detail.cfi;
+          }
           // During narration/flow, the word-advance callback owns highlightedWordIndex —
           // don't overwrite with approximate fraction-based index from onRelocate.
           // Uses ref (not closure state) to avoid stale value bug.
-          const mode = readingModeRef.current;
           // TTS-7M (BUG-135): When a resume anchor is active, passive onRelocate
           // must not lower highlightedWordIndex. The anchor is the authority.
           const hasResumeAnchor = resumeAnchorRef.current != null;

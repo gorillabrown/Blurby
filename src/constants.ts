@@ -111,6 +111,10 @@ export const NARRATION_BAND_MIN_WIDTH_PX = 8;
  *  The word timer and getAudioProgress both use (audioTime - lag) as the
  *  effective clock, creating a hard ceiling the cursor cannot exceed. */
 export const NARRATION_CURSOR_LAG_MS = 350;
+/** NARR-FIX-1: Trusted word-native timing still has audio output latency (DAC buffer, OS audio
+ *  pipeline). This smaller lag prevents the visual cursor from outpacing heard speech when
+ *  Kokoro provides real word timestamps. Falls back to audioCtx.outputLatency when available. */
+export const TTS_TRUSTED_CURSOR_LAG_MS = 120;
 /** NARR-CURSOR-2: Ignore tiny inter-word timing gaps; hold cursor only for meaningful silence. */
 export const TTS_SILENCE_HOLD_THRESHOLD_MS = 30;
 
