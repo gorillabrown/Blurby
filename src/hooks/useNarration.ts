@@ -174,6 +174,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const onTruthSyncRef = useRef<((wordIndex: number) => void) | null>(null);
   /** TTS-7Q: Visual-only chunk-boundary callback — updates narration chunk visuals only. */
   const onChunkBoundaryRef = useRef<((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null>(null);
+  /** Visual-only audio-segment callback — lets Narrate chunk-only UI follow real audio starts. */
+  const onSegmentStartRef = useRef<((wordIndex: number) => void) | null>(null);
   /** TTS-7R (BUG-145c): Canonical audio word position — updated only by the scheduler's
    *  confirmed boundary crossings. Used as the authoritative start index for chunk generation
    *  so that visual-advance callbacks cannot contaminate the pipeline's read head. */
@@ -519,8 +521,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       getParagraphBreaks: () => paragraphBreaksRef.current,
       getFootnoteMode: () => footnoteModeRef.current,
       getFootnoteCues: () => footnoteCuesRef.current,
-      onSegmentStart: () => {
+      onSegmentStart: (wordIndex: number) => {
         emitPendingRateResponseTrace();
+        onSegmentStartRef.current?.(wordIndex);
       },
       onTimingMetadata: (metadata: TimingMetadataChunk) => {
         timingMetadataStore.upsertChunk(metadata);
@@ -1298,7 +1301,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     allWordsRef.current = words;
     onWordAdvanceRef.current = onWordAdvance;
     isTrustedWordTimingRef.current = true;
-    const newSpeed = wpmToRate(wpm);
+    const newSpeed = normalizeNarrationRate(stateRef.current.speed, stateRef.current.engine);
     evalStartTimeRef.current = Date.now();
     evalFirstAudioCapturedRef.current = false;
 
@@ -1493,7 +1496,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearPocketOwnership();
     handoffPendingRef.current = false;
     clearPendingRateResponseTrace();
-    const newSpeed = wpmToRate(wpm);
+    const newSpeed = normalizeNarrationRate(stateRef.current.speed, stateRef.current.engine);
     syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
     if (pauseReason && stateRef.current.status === "paused" && stateRef.current.pauseReason === pauseReason) {
       dispatch({ type: "RESUME" });
@@ -2072,6 +2075,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
      */
     setOnChunkBoundary: (cb: ((endIdx: number, metadata?: ChunkBoundaryPayload) => void) | null) => {
       onChunkBoundaryRef.current = cb;
+    },
+    /**
+     * Register a visual-only audio segment-start callback. This is chunk-level
+     * playback truth and must not mutate narration read-head anchors.
+     */
+    setOnSegmentStart: (cb: ((wordIndex: number) => void) | null) => {
+      onSegmentStartRef.current = cb;
     },
     resolveHighlightSync,
     exportNarrationDiagnosticsBundle,

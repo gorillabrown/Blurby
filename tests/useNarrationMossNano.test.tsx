@@ -242,7 +242,7 @@ describe("useNarration experimental Moss Nano lane", () => {
       "speaks segments",
       ["speaks", "segments"],
       1,
-      1.2,
+      1,
       expect.any(Function),
       expect.any(Function),
       expect.any(Function),

@@ -33,7 +33,9 @@ import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
 import {
   applyChunkReadingVisualStateToRoots,
+  buildChunkReadingScrollKey,
   clearChunkReadingVisualStateFromRoots,
+  scrollChunkReadingVisualStateToTopOfRoots,
   shouldSuppressNarrateFlowCursor,
   resolveFoliateWordHighlightClass,
 } from "../utils/foliateWordHighlight";
@@ -370,6 +372,8 @@ export interface FoliateViewAPI {
   isUserBrowsing: () => boolean;
   /** Clear the user browsing flag and scroll to current narration word */
   returnToNarration: () => void;
+  /** Recenter the active Flow/Narrate chunk so its start sits at the top of the reading box. */
+  recenterChunkReadingBox: () => boolean;
   /** NAR-3: Get total number of sections in the EPUB */
   getSectionCount: () => number;
   /** NAR-3: Navigate to a specific section by index. Triggers a load event when ready. */
@@ -467,8 +471,11 @@ export default function FoliatePageView({
   bookWordSectionsRef.current = bookWordSections;
   const highlightedWordIndexRef = useRef<number>(highlightedWordIndex ?? -1);
   highlightedWordIndexRef.current = highlightedWordIndex ?? -1;
+  const narrationWordIndexRef = useRef<number | null>(narrationWordIndex ?? null);
+  narrationWordIndexRef.current = narrationWordIndex ?? null;
   const readingModeRef = useRef(readingMode);
   const chunkReadingVisualStateRef = useRef<ChunkReadingVisualState | null>(chunkReadingVisualState);
+  const lastChunkTopScrollKeyRef = useRef<string | null>(null);
   const narrationPauseReasonRef = useRef<PauseReason | null>(narrationPauseReason);
   // Track when user has manually browsed away during narration — suppresses scrollToAnchor
   const userBrowsingRef = useRef(false);
@@ -560,9 +567,30 @@ export default function FoliatePageView({
     const host = foliateHostRef.current;
     if (!host) return null;
     const foliateView = host.querySelector("foliate-view") as any;
-    const scrollEl = (foliateView?.shadowRoot?.querySelector("[part~='body']")
-      ?? foliateView?.shadowRoot?.querySelector("div")
-      ?? host) as HTMLElement | null;
+    const shadowRoot = (foliateView?.shadowRoot ?? null) as ShadowRoot | null;
+    const pickScrollableElement = (scrollCandidates: Array<HTMLElement | null | undefined>): HTMLElement | null => {
+      for (const candidate of scrollCandidates) {
+        if (!candidate) continue;
+        if (candidate.scrollHeight > candidate.clientHeight + 1) return candidate;
+        const overflowY = window.getComputedStyle(candidate).overflowY;
+        if ((overflowY === "auto" || overflowY === "scroll") && candidate.scrollHeight >= candidate.clientHeight) {
+          return candidate;
+        }
+      }
+      return scrollCandidates.find((candidate): candidate is HTMLElement => Boolean(candidate)) ?? null;
+    };
+    const shadowDivs = Array.from(shadowRoot?.querySelectorAll<HTMLElement>("div") ?? []);
+    const scrollCandidates = [
+      shadowRoot?.querySelector<HTMLElement>("[part~='body']"),
+      shadowRoot?.querySelector<HTMLElement>("[part~='scroller']"),
+      shadowRoot?.querySelector<HTMLElement>("[part~='content']"),
+      shadowRoot?.querySelector<HTMLElement>("main"),
+      ...shadowDivs,
+      foliateView as HTMLElement,
+      host,
+      containerRef.current,
+    ];
+    const scrollEl = pickScrollableElement(scrollCandidates);
     if (scrollEl) {
       const hostWithRoots = scrollEl as HTMLElement & {
         [FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY]?: () => FlowRenderedWordRootDescriptor[];
@@ -571,6 +599,58 @@ export default function FoliatePageView({
     }
     return scrollEl;
   }, [getRenderedWordRoots]);
+
+  const getFlowViewportHeightPx = useCallback((): number => {
+    const scrollContainerHeight = resolveFoliateScrollContainer()?.clientHeight ?? 0;
+    if (scrollContainerHeight > 0) return scrollContainerHeight;
+    return containerRef.current?.clientHeight ?? 0;
+  }, [resolveFoliateScrollContainer]);
+
+  const getFlowLeadingInsetPx = useCallback((): number => {
+    if (!flowMode) return 0;
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
+    return Math.max(0, Math.round(viewportHeight * zonePosition));
+  }, [flowMode, getFlowViewportHeightPx, settings.flowZonePosition]);
+
+  const getFlowTrailingInsetPx = useCallback((): number => {
+    if (!flowMode) return 0;
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
+    return Math.max(0, Math.round(viewportHeight * (1 - zonePosition)));
+  }, [flowMode, getFlowViewportHeightPx, settings.flowZonePosition]);
+
+  const getFlowFollowOffsetPx = useCallback((): number => {
+    if (!flowMode) return 0;
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const container = containerRef.current;
+    const lineHeight = container ? parseFloat(getComputedStyle(container).lineHeight) || 24 : 24;
+    const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
+    const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+    return Math.max(0, Math.round((viewportHeight * zonePosition) + ((lineHeight * zoneLines) / 2)));
+  }, [
+    flowMode,
+    getFlowViewportHeightPx,
+    settings.flowZoneLines,
+    settings.flowZonePosition,
+  ]);
+
+  const setFlowInsetsForRenderedDocs = useCallback((leadingInsetPx: number, trailingInsetPx: number) => {
+    const view = viewRef.current;
+    const leadingValue = `${Math.max(0, Math.round(leadingInsetPx))}px`;
+    const trailingValue = `${Math.max(0, Math.round(trailingInsetPx))}px`;
+    for (const { doc } of view?.renderer?.getContents?.() ?? []) {
+      try {
+        doc?.documentElement?.style.setProperty("--blurby-flow-leading-inset", leadingValue);
+        doc?.documentElement?.style.setProperty("--blurby-flow-trailing-inset", trailingValue);
+      } catch {
+        // Detached Foliate iframe documents can disappear during section changes.
+      }
+    }
+  }, []);
 
   const clearWordPositionRebuildTimer = useCallback(() => {
     if (wordPositionRebuildTimerRef.current) {
@@ -681,7 +761,14 @@ export default function FoliatePageView({
       }
     }
 
-    if (userBrowsingRef.current && state.visible) {
+    // Auto-clear browsed-away flag when the highlighted word becomes visible again,
+    // BUT only in page/focus modes where visibility detection is real. In flow/narrate
+    // modes, the Foliate iframe reports ALL words as visible (see narrate scroll-follow
+    // comment at line ~1673), so this auto-clear would fire on every word advance and
+    // immediately cancel any user scroll-away. Flow/narrate rely on returnToNarration()
+    // (recenter button) to clear the flag instead.
+    const mode = readingModeRef.current;
+    if (userBrowsingRef.current && state.visible && mode !== "flow" && mode !== "narrate") {
       userBrowsingRef.current = false;
     }
 
@@ -696,16 +783,58 @@ export default function FoliatePageView({
     applyChunkReadingVisualStateToRoots(getRenderedWordRoots(), state);
   }, [getRenderedWordRoots]);
 
+  const recenterChunkReadingBox = useCallback((): boolean => {
+    const state = chunkReadingVisualStateRef.current;
+    if (!state?.activeChunkRange) return false;
+    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), state, {
+      behavior: "smooth",
+      scrollContainer: resolveFoliateScrollContainer(),
+      target: "chunk-start",
+      topOffsetPx: getFlowLeadingInsetPx(),
+    });
+    if (didScroll) {
+      userBrowsingRef.current = false;
+      lastChunkTopScrollKeyRef.current = null;
+      // Reset displacement baseline so the scroll-follow effect doesn't
+      // re-trigger browse-away on the next narration word advance.
+      lastScrollFollowPosRef.current = null;
+    }
+    return didScroll;
+  }, [getFlowLeadingInsetPx, getRenderedWordRoots, resolveFoliateScrollContainer]);
+
   useEffect(() => {
     if (chunkReadingVisualState) {
       applyChunkReadingVisualState(chunkReadingVisualState);
+      const scrollKey = buildChunkReadingScrollKey(chunkReadingVisualState);
+      // NARR-FIX-1: Don't auto-scroll to the active chunk when the user has browsed
+      // away. This lets them preview ahead/behind freely; the recenter button returns.
+      if ((readingMode === "flow" || readingMode === "narrate")
+        && scrollKey
+        && scrollKey !== lastChunkTopScrollKeyRef.current
+        && !userBrowsingRef.current
+        && scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), chunkReadingVisualState, {
+          scrollContainer: resolveFoliateScrollContainer(),
+          topOffsetPx: getFlowFollowOffsetPx(),
+        })
+      ) {
+        lastChunkTopScrollKeyRef.current = scrollKey;
+      }
       if (shouldSuppressNarrateFlowCursor(readingMode, chunkReadingVisualState)) {
         clearVisualWordClasses(viewRef.current?.renderer?.getContents?.() ?? []);
       }
       return;
     }
+    lastChunkTopScrollKeyRef.current = null;
     clearChunkReadingVisualState();
-  }, [applyChunkReadingVisualState, chunkReadingVisualState, clearChunkReadingVisualState, readingMode]);
+  }, [
+    applyChunkReadingVisualState,
+    chunkReadingVisualState,
+    clearChunkReadingVisualState,
+    getFlowFollowOffsetPx,
+    getRenderedWordRoots,
+    readingMode,
+    resolveFoliateScrollContainer,
+  ]);
 
   // Load EPUB via foliate-js
   useEffect(() => {
@@ -717,9 +846,10 @@ export default function FoliatePageView({
     // Create a host div that React doesn't manage — prevents removeChild conflicts
     if (!foliateHostRef.current) {
       foliateHostRef.current = document.createElement("div");
-      foliateHostRef.current.style.cssText = "width:100%;height:100%;position:absolute;inset:0;";
       container.appendChild(foliateHostRef.current);
     }
+    foliateHostRef.current.className = "foliate-host";
+    foliateHostRef.current.style.cssText = "width:100%;height:100%;position:absolute;inset:0;z-index:0;";
     const host = foliateHostRef.current;
 
     const loadBook = async () => {
@@ -754,7 +884,10 @@ export default function FoliatePageView({
         const onSectionLoad = async (e: any) => {
           const { doc, index } = e.detail;
           // Inject Blurby theme styles into the EPUB document
-          injectStyles(doc, settings, focusTextSize);
+          injectStyles(doc, settings, focusTextSize, {
+            flowLeadingInsetPx: getFlowLeadingInsetPx(),
+            flowTrailingInsetPx: getFlowTrailingInsetPx(),
+          });
           invalidateWordPositionIndex();
 
           // Cache iframe ref for this section's document
@@ -1190,7 +1323,12 @@ export default function FoliatePageView({
             isUserBrowsing: () => userBrowsingRef.current,
             returnToNarration: () => {
               userBrowsingRef.current = false;
-              const currentIdx = highlightedWordIndexRef.current;
+              // Reset displacement baseline so scroll-follow doesn't re-trigger browse-away
+              lastScrollFollowPosRef.current = null;
+              if (viewApiRef!.current!.recenterChunkReadingBox()) {
+                return;
+              }
+              const currentIdx = narrationWordIndexRef.current ?? highlightedWordIndexRef.current;
               // TTS-7I (BUG-127): Restore both position AND visible cursor through
               // the same unified path that live narration uses.
               const state = viewApiRef!.current!.resolveWordState(currentIdx);
@@ -1246,6 +1384,7 @@ export default function FoliatePageView({
             getScrollContainer: () => resolveFoliateScrollContainer(),
             applyChunkReadingVisualState,
             clearChunkReadingVisualState,
+            recenterChunkReadingBox,
             // SELECTION-1: Passive soft-selected highlight (page-mode anchor indicator)
             applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
             clearSoftHighlight: () => clearSoftHighlight(),
@@ -1327,7 +1466,10 @@ export default function FoliatePageView({
 
     // Re-inject styles on settings change
     for (const { doc } of view.renderer.getContents?.() ?? []) {
-      injectStyles(doc, settings, focusTextSize);
+      injectStyles(doc, settings, focusTextSize, {
+        flowLeadingInsetPx: getFlowLeadingInsetPx(),
+        flowTrailingInsetPx: getFlowTrailingInsetPx(),
+      });
     }
     invalidateWordPositionIndex();
     scheduleWordPositionIndexRebuild("font-or-layout-change");
@@ -1336,6 +1478,8 @@ export default function FoliatePageView({
     settings.fontFamily,
     focusTextSize,
     settings.layoutSpacing,
+    getFlowLeadingInsetPx,
+    getFlowTrailingInsetPx,
     invalidateWordPositionIndex,
     scheduleWordPositionIndexRebuild,
   ]);
@@ -1385,17 +1529,23 @@ export default function FoliatePageView({
       if (!flowMode) {
         container.style.removeProperty("--flow-zone-top");
         container.style.removeProperty("--flow-zone-bottom");
+        setFlowInsetsForRenderedDocs(0, 0);
         return;
       }
       const lineHeight = parseFloat(getComputedStyle(container).lineHeight) || 24;
       const zonePosition = settings.flowZonePosition ?? FLOW_READING_ZONE_POSITION;
       const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
-      const containerHeight = container.clientHeight;
-      const zoneHeightFrac = (lineHeight * zoneLines) / containerHeight;
+      const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
+      if (viewportHeight <= 0) return;
+      const zoneHeightFrac = (lineHeight * zoneLines) / viewportHeight;
       const zoneTop = zonePosition;
       const zoneBottom = Math.min(zonePosition + zoneHeightFrac, 0.95);
       container.style.setProperty("--flow-zone-top", `${zoneTop * 100}%`);
       container.style.setProperty("--flow-zone-bottom", `${zoneBottom * 100}%`);
+      setFlowInsetsForRenderedDocs(
+        viewportHeight * zoneTop,
+        viewportHeight * (1 - zoneTop),
+      );
     };
 
     applyZoneProperties();
@@ -1410,11 +1560,14 @@ export default function FoliatePageView({
       observer.disconnect();
       container.style.removeProperty("--flow-zone-top");
       container.style.removeProperty("--flow-zone-bottom");
+      setFlowInsetsForRenderedDocs(0, 0);
     };
   }, [
     flowMode,
+    getFlowViewportHeightPx,
     settings.flowZonePosition,
     settings.flowZoneLines,
+    setFlowInsetsForRenderedDocs,
     invalidateWordPositionIndex,
     scheduleWordPositionIndexRebuild,
   ]);
@@ -1529,6 +1682,90 @@ export default function FoliatePageView({
     applyVisualHighlightByIndex(narrationWordIndex, "flow", false);
   }, [applyVisualHighlightByIndex, narrationWordIndex, readingMode]);
 
+  // Narrate-mode scroll follow — keep the narrated word in view as narration advances.
+  // In flow-surface mode, the Foliate iframe encompasses all section content and its
+  // innerHeight matches the full document height. This makes both cached and live
+  // getBoundingClientRect() checks unreliable for visibility — all words report as
+  // "visible" from the iframe's perspective. Instead, unconditionally call
+  // scrollToAnchor (throttled) to let the paginator keep the narrated word in view.
+  const narrateScrollThrottleRef = useRef(0);
+  // Track where scroll-follow last positioned the view. If the actual position
+  // drifts beyond a threshold, the user must have scrolled away manually —
+  // regardless of input method (wheel, keyboard, touch, etc.).
+  const lastScrollFollowPosRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (readingMode !== "narrate" || narrationWordIndex == null) return;
+    const view = viewRef.current;
+    if (!view?.renderer || !viewApiRef?.current) return;
+
+    // If user has manually browsed away, don't snap back — let the recenter button handle it.
+    if (userBrowsingRef.current) {
+      if (import.meta.env.DEV) console.debug("[foliate] scroll-follow BLOCKED — userBrowsingRef is true, word:", narrationWordIndex);
+      return;
+    }
+
+    // Displacement detection: compare where we are NOW with where scroll-follow
+    // LAST placed the view. A drift beyond half the viewport means the user scrolled
+    // away (works for any input method: wheel, keyboard, touch, CDP scroll tools).
+    const currentPos = view.renderer.containerPosition;
+    if (lastScrollFollowPosRef.current != null && typeof currentPos === "number") {
+      const displacement = Math.abs(currentPos - lastScrollFollowPosRef.current);
+      const viewportHeight = containerRef.current?.clientHeight ?? 400;
+      if (displacement > viewportHeight * 0.3) {
+        userBrowsingRef.current = true;
+        if (import.meta.env.DEV) console.debug("[foliate] displacement detection — user browsed away, displacement:", displacement, "threshold:", viewportHeight * 0.3);
+        return;
+      }
+    }
+
+    const state = viewApiRef.current.resolveWordState(narrationWordIndex);
+    if (!state.found && !narratePageTurnCooldownRef.current) {
+      // Word is not in the current section's DOM — advance to next section
+      narratePageTurnCooldownRef.current = true;
+      if (import.meta.env.DEV) console.debug("[foliate] narrate page advance — word", narrationWordIndex, "not found, calling renderer.next()");
+      view.renderer.next();
+      setTimeout(() => {
+        narratePageTurnCooldownRef.current = false;
+      }, 300);
+    } else if (state.found && state.span && state.doc) {
+      // Throttle scrollToAnchor calls to max once per 500ms to avoid jitter
+      const now = Date.now();
+      if (now - narrateScrollThrottleRef.current < 500) return;
+      narrateScrollThrottleRef.current = now;
+      // scrollToAnchor is async — await it before applying zone offset
+      const zoneOffset = getFlowFollowOffsetPx();
+      const { doc: stateDoc, span: stateSpan } = state;
+      if (!stateDoc || !stateSpan) return;
+      (async () => {
+        try {
+          // Pre-flight check — user may have scrolled between the sync guard (above)
+          // and the start of this async IIFE (micro-task gap).
+          if (userBrowsingRef.current) return;
+          const range = stateDoc.createRange();
+          range.selectNodeContents(stateSpan);
+          await view.renderer.scrollToAnchor?.(range);
+          // Post-flight check — user may have scrolled while scrollToAnchor was resolving.
+          // scrollToAnchor already moved the view, but we skip zone offset and log to
+          // minimize further disruption. The next word advance will also be guarded.
+          if (userBrowsingRef.current) return;
+          // Apply zone offset — scrollToAnchor positions the word at the
+          // paginator's top; subtract offset from containerPosition to push
+          // the word down to the selected zone center (Top/Upper/Center/Bottom).
+          if (zoneOffset > 0) {
+            const renderer = viewRef.current?.renderer;
+            if (renderer && typeof renderer.containerPosition === "number") {
+              renderer.containerPosition = Math.max(0, renderer.containerPosition - zoneOffset);
+            }
+          }
+          // Record final position for displacement detection on next tick
+          const finalPos = viewRef.current?.renderer?.containerPosition;
+          if (typeof finalPos === "number") lastScrollFollowPosRef.current = finalPos;
+          if (import.meta.env.DEV) console.debug("[foliate] narrate scroll-follow — word", narrationWordIndex, "zoneOffset", zoneOffset, "containerPos", finalPos);
+        } catch { /* Document may be closing during navigation — non-critical */ }
+      })();
+    }
+  }, [narrationWordIndex, readingMode, viewApiRef, getFlowFollowOffsetPx]);
+
   useEffect(() => {
     if (readingMode !== "page" || highlightedWordIndex == null) return;
     applyVisualHighlightByIndex(highlightedWordIndex, undefined, false);
@@ -1538,6 +1775,7 @@ export default function FoliatePageView({
   // Tracks foliate's reported fraction vs narration's progress fraction
   const foliateCurrentFractionRef = useRef(0);
   const pageTurnCooldownRef = useRef(false);
+  const narratePageTurnCooldownRef = useRef(false);
   // Updated by onRelocate prop callback — store fraction on every relocate
   const origOnRelocate = onRelocate;
   const wrappedOnRelocate = useCallback((detail: any) => {
@@ -1559,17 +1797,34 @@ export default function FoliatePageView({
     const handleKey = (e: KeyboardEvent) => {
       const view = viewRef.current;
       if (!view?.renderer) return;
-      // FLOW-3A: In flow mode, don't page-turn — FlowScrollEngine handles scrolling
-      if (flowModeRef.current) return;
+      // FLOW-3A / NARR-FIX-1: In flow/narrate modes, FlowScrollEngine drives pacing
+      // but the user can still browse away manually. Page navigation keys set the
+      // browse-away flag AND navigate the renderer so the user can peek ahead/behind.
+      // The recenter button lets them return to the active reading position.
+      if (flowModeRef.current) {
+        const mode = readingModeRef.current;
+        if ((mode === "flow" || mode === "narrate") &&
+            (e.key === "ArrowRight" || e.key === "PageDown" || e.key === "ArrowLeft" || e.key === "PageUp")) {
+          userBrowsingRef.current = true;
+          // Navigate the Foliate renderer so the user sees different content.
+          // The iframe's native handler won't see this window-level event.
+          if (e.key === "ArrowRight" || e.key === "PageDown") {
+            view.renderer.next();
+          } else {
+            view.renderer.prev();
+          }
+        }
+        return;
+      }
 
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
         // During active flow reading, flag that user is browsing away — don't yank back
-        if (readingModeRef.current === "flow") userBrowsingRef.current = true;
+        if (readingModeRef.current === "flow" || readingModeRef.current === "narrate") userBrowsingRef.current = true;
         view.renderer.next();
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
-        if (readingModeRef.current === "flow") userBrowsingRef.current = true;
+        if (readingModeRef.current === "flow" || readingModeRef.current === "narrate") userBrowsingRef.current = true;
         view.renderer.prev();
       }
     };
@@ -1577,6 +1832,25 @@ export default function FoliatePageView({
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
+
+  // Manual scroll detection — mark user as browsing away when they scroll in a flow surface mode.
+  // The Foliate paginator inside shadow DOM may stopPropagation() on wheel events before they
+  // reach the React container, so we listen on window (capture phase) to reliably detect user
+  // scrolling regardless of shadow DOM event handling.
+  useEffect(() => {
+    if (!flowMode) return;
+
+    const handleWheel = () => {
+      const mode = readingModeRef.current;
+      if (mode === "flow" || mode === "narrate") {
+        userBrowsingRef.current = true;
+        if (import.meta.env.DEV) console.debug("[foliate] wheel → userBrowsingRef=true (mode:", mode, ")");
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true, capture: true });
+    return () => window.removeEventListener("wheel", handleWheel, { capture: true });
+  }, [flowMode]);
 
   // Expose navigation methods via ref
   const goNext = useCallback(() => viewRef.current?.renderer?.next(), []);
@@ -1608,17 +1882,19 @@ export default function FoliatePageView({
       {/* Jump to reading position button — shown when reading mode is active */}
       {isReading && onJumpToHighlight && (
         <button
-          className="return-to-narration-btn"
+          className="recenter-reading-box-btn"
           onClick={onJumpToHighlight}
+          aria-label="Recenter reading box on current sentence"
+          title="Recenter reading box on current sentence"
         >
-          ↩ Jump to reading position
+          ↩ Recenter box
         </button>
       )}
       {loading && <div className="foliate-loading">Loading book...</div>}
       {error && <div className="foliate-error">{error}</div>}
       <div ref={cursorRef} className="foliate-flow-cursor" />
       {/* FLOW-3A: Shrinking underline cursor for FlowScrollEngine (rendered in JSX per LL-014 known trap) */}
-      {flowMode && <div ref={flowCursorRef} className="flow-shrink-cursor" />}
+      {flowMode && readingMode === "flow" && <div ref={flowCursorRef} className="flow-shrink-cursor" />}
     </div>
   );
 }

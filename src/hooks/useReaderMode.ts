@@ -56,6 +56,7 @@ export interface UseReaderModeParams {
   bookWordsTotalWords?: number;
   resumeAnchorRef: React.MutableRefObject<number | null>;
   softWordIndexRef: React.MutableRefObject<number>;
+  onNarrateTruthSync?: (wordIndex: number) => void;
   evalTrace?: TtsEvalTraceSink | null;
 }
 
@@ -112,6 +113,7 @@ export function useReaderMode({
   bookWordsTotalWords,
   resumeAnchorRef,
   softWordIndexRef,
+  onNarrateTruthSync,
   evalTrace,
 }: UseReaderModeParams): UseReaderModeReturn {
   const readingModeRef = useRef<ReaderMode>(readingMode);
@@ -157,16 +159,17 @@ export function useReaderMode({
     }
 
     narration.setOnTruthSync?.((wordIndex: number) => {
-        const found = foliateApiRef.current?.highlightWordByIndex(wordIndex, "flow", { allowMotion: false });
-        if (!found) {
-          modeInstance.pendingResumeRef.current = { wordIndex, mode: "narrate" };
-          const sectionIdx = foliateApiRef.current?.getSectionForWordIndex?.(wordIndex);
-          if (sectionIdx != null) {
-            Promise.resolve(foliateApiRef.current?.goToSection?.(sectionIdx)).catch(() => {});
-          }
+      onNarrateTruthSync?.(wordIndex);
+      const found = foliateApiRef.current?.highlightWordByIndex(wordIndex, "flow", { allowMotion: false });
+      if (!found) {
+        modeInstance.pendingResumeRef.current = { wordIndex, mode: "narrate" };
+        const sectionIdx = foliateApiRef.current?.getSectionForWordIndex?.(wordIndex);
+        if (sectionIdx != null) {
+          Promise.resolve(foliateApiRef.current?.goToSection?.(sectionIdx)).catch(() => {});
         }
-      });
-  }, [clearNarrateTruthSync, foliateApiRef, modeInstance.pendingResumeRef, narration, useFoliate]);
+      }
+    });
+  }, [clearNarrateTruthSync, foliateApiRef, modeInstance.pendingResumeRef, narration, onNarrateTruthSync, useFoliate]);
 
   const stopAllModes = useCallback(() => {
     pendingFocusStartRef.current = null;

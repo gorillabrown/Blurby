@@ -246,11 +246,34 @@ describe("useNarration rate updates", () => {
     delete (window as any).electronAPI;
   });
 
+  it("starts Kokoro Narrate at the selected TTS rate instead of deriving speed from visual WPM", async () => {
+    const harness = await renderHarness();
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("kokoro");
+      await flushPromises();
+    });
+
+    await act(async () => {
+      harness.getSnapshot()?.adjustRate(1.0);
+      await flushPromises();
+    });
+
+    await act(async () => {
+      harness.getSnapshot()?.startCursorDriven(["too", "fast", "before"], 0, 375, vi.fn());
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.rate).toBe(1.0);
+    expect(kokoroStrategyDriver.getLatestSpeak()?.speed).toBe(1.0);
+  });
+
   it("keeps same-bucket Kokoro rate changes live without a restart", async () => {
     const harness = await renderHarness();
 
     await act(async () => {
       harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.adjustRate(1.2);
       await flushPromises();
     });
 
@@ -278,6 +301,7 @@ describe("useNarration rate updates", () => {
 
     await act(async () => {
       harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.adjustRate(1.2);
       await flushPromises();
     });
 
@@ -305,6 +329,7 @@ describe("useNarration rate updates", () => {
 
     await act(async () => {
       harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.adjustRate(1.3);
       await flushPromises();
     });
 
@@ -345,6 +370,7 @@ describe("useNarration rate updates", () => {
 
     await act(async () => {
       harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.adjustRate(1.2);
       await flushPromises();
     });
 
@@ -417,6 +443,7 @@ describe("useNarration rate updates", () => {
 
     await act(async () => {
       harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.adjustRate(1.2);
       await flushPromises();
     });
 
@@ -474,6 +501,7 @@ describe("useNarration rate updates", () => {
 
     await act(async () => {
       harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.adjustRate(1.3);
       await flushPromises();
     });
 
@@ -694,6 +722,25 @@ describe("useNarration rate updates", () => {
       activeWordIndex: 1,
       reason: "trusted-word-timing",
     });
+  });
+
+  it("exposes Kokoro audio segment starts for chunk-only Narrate pacing", async () => {
+    const harness = await renderHarness();
+    const onSegmentStart = vi.fn();
+
+    (harness.getSnapshot() as any)?.setOnSegmentStart?.(onSegmentStart);
+
+    await act(async () => {
+      harness.getSnapshot()?.startCursorDriven(["first", "second", "third"], 0, 180, vi.fn());
+      await flushPromises();
+    });
+
+    await act(async () => {
+      kokoroStrategyDriver.emitSegmentStart(2);
+      await flushPromises();
+    });
+
+    expect(onSegmentStart).toHaveBeenCalledWith(2);
   });
 
   it("exports a redacted diagnostics bundle from live Kokoro timing and highlight sync state", async () => {

@@ -1,6 +1,11 @@
 // @vitest-environment jsdom
-import { describe, expect, it } from "vitest";
-import { applyChunkReadingVisualStateToRoots, clearChunkReadingVisualStateFromRoots } from "../src/utils/foliateWordHighlight";
+import { describe, expect, it, vi } from "vitest";
+import {
+  applyChunkReadingVisualStateToRoots,
+  buildChunkReadingScrollKey,
+  clearChunkReadingVisualStateFromRoots,
+  scrollChunkReadingVisualStateToTopOfRoots,
+} from "../src/utils/foliateWordHighlight";
 import { injectStyles } from "../src/utils/foliateStyles";
 import type { ChunkReadingVisualState } from "../src/types/chunkReading";
 import type { FlowRenderedWordRootDescriptor } from "../src/utils/FlowScrollEngine";
@@ -103,6 +108,253 @@ describe("Foliate chunk visual state rendering", () => {
     expect(doc.querySelectorAll(".page-word--active-word")).toHaveLength(0);
   });
 
+  it("scrolls the active word when trusted word progress is available", () => {
+    const { doc, roots } = makeRoot(`
+      <span class="page-word" data-word-index="1">One</span>
+      <span class="page-word" data-word-index="2">Two</span>
+      <span class="page-word" data-word-index="3">Three</span>
+    `);
+    const startWord = doc.querySelector('[data-word-index="1"]') as HTMLElement;
+    const activeWord = doc.querySelector('[data-word-index="2"]') as HTMLElement;
+    startWord.scrollIntoView = vi.fn();
+    activeWord.scrollIntoView = vi.fn();
+
+    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(roots, state());
+
+    expect(didScroll).toBe(true);
+    expect(activeWord.scrollIntoView).toHaveBeenCalledWith({
+      block: "start",
+      inline: "nearest",
+      behavior: "auto",
+    });
+    expect(startWord.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("falls back to chunk start when word timing is not available", () => {
+    const { doc, roots } = makeRoot(`
+      <span class="page-word" data-word-index="1">One</span>
+      <span class="page-word" data-word-index="2">Two</span>
+    `);
+    const startWord = doc.querySelector('[data-word-index="1"]') as HTMLElement;
+    const activeWord = doc.querySelector('[data-word-index="2"]') as HTMLElement;
+    startWord.scrollIntoView = vi.fn();
+    activeWord.scrollIntoView = vi.fn();
+
+    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(roots, state({
+      activeWordIndex: null,
+      syncLevel: "chunk-synced",
+    }));
+
+    expect(didScroll).toBe(true);
+    expect(startWord.scrollIntoView).toHaveBeenCalledWith({
+      block: "start",
+      inline: "nearest",
+      behavior: "auto",
+    });
+    expect(activeWord.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("aligns the active word against the selected Flow zone when a scroll container is provided", () => {
+    const { doc, roots } = makeRoot(`
+      <span class="page-word" data-word-index="1">One</span>
+      <span class="page-word" data-word-index="2">Two</span>
+    `);
+    const startWord = doc.querySelector('[data-word-index="1"]') as HTMLElement;
+    const activeWord = doc.querySelector('[data-word-index="2"]') as HTMLElement;
+    const scrollContainer = document.createElement("div");
+    Object.defineProperty(scrollContainer, "scrollTop", { value: 25, writable: true, configurable: true });
+    scrollContainer.getBoundingClientRect = () => ({
+      top: 40,
+      bottom: 640,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 600,
+      x: 0,
+      y: 40,
+      toJSON: () => {},
+    });
+    scrollContainer.scrollTo = vi.fn((optionsOrX?: ScrollToOptions | number) => {
+      scrollContainer.scrollTop = typeof optionsOrX === "number"
+        ? optionsOrX
+        : Number(optionsOrX?.top ?? 0);
+    }) as typeof scrollContainer.scrollTo;
+    startWord.scrollIntoView = vi.fn();
+    activeWord.scrollIntoView = vi.fn();
+    startWord.getBoundingClientRect = () => ({
+      top: 280,
+      bottom: 304,
+      left: 0,
+      right: 80,
+      width: 80,
+      height: 24,
+      x: 0,
+      y: 280,
+      toJSON: () => {},
+    });
+    activeWord.getBoundingClientRect = () => ({
+      top: 360,
+      bottom: 384,
+      left: 0,
+      right: 80,
+      width: 80,
+      height: 24,
+      x: 0,
+      y: 360,
+      toJSON: () => {},
+    });
+
+    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(roots, state(), {
+      behavior: "auto",
+      scrollContainer,
+      topOffsetPx: 210,
+    });
+
+    expect(didScroll).toBe(true);
+    expect(scrollContainer.scrollTop).toBe(135);
+    expect(startWord.scrollIntoView).not.toHaveBeenCalled();
+    expect(activeWord.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("measures recenter accuracy by aligning chunk start to the reading box top", () => {
+    const { doc, roots } = makeRoot(`
+      <span class="page-word" data-word-index="1">One</span>
+      <span class="page-word" data-word-index="2">Two</span>
+      <span class="page-word" data-word-index="3">Three</span>
+    `);
+    const startWord = doc.querySelector('[data-word-index="1"]') as HTMLElement;
+    const activeWord = doc.querySelector('[data-word-index="3"]') as HTMLElement;
+    const scrollContainer = document.createElement("div");
+    Object.defineProperty(scrollContainer, "scrollTop", { value: 125, writable: true, configurable: true });
+    scrollContainer.getBoundingClientRect = () => ({
+      top: 40,
+      bottom: 640,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 600,
+      x: 0,
+      y: 40,
+      toJSON: () => {},
+    });
+    scrollContainer.scrollTo = vi.fn((optionsOrX?: ScrollToOptions | number) => {
+      scrollContainer.scrollTop = typeof optionsOrX === "number"
+        ? optionsOrX
+        : Number(optionsOrX?.top ?? 0);
+    }) as typeof scrollContainer.scrollTo;
+    startWord.scrollIntoView = vi.fn();
+    activeWord.scrollIntoView = vi.fn();
+    startWord.getBoundingClientRect = () => ({
+      top: 330,
+      bottom: 354,
+      left: 0,
+      right: 80,
+      width: 80,
+      height: 24,
+      x: 0,
+      y: 330,
+      toJSON: () => {},
+    });
+    activeWord.getBoundingClientRect = () => ({
+      top: 470,
+      bottom: 494,
+      left: 0,
+      right: 80,
+      width: 80,
+      height: 24,
+      x: 0,
+      y: 470,
+      toJSON: () => {},
+    });
+
+    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(
+      roots,
+      state({ activeWordIndex: 3 }),
+      {
+        behavior: "auto",
+        scrollContainer,
+        target: "chunk-start",
+        topOffsetPx: 210,
+      },
+    );
+
+    expect(didScroll).toBe(true);
+    expect(Math.abs(scrollContainer.scrollTop - 205)).toBeLessThanOrEqual(0.5);
+    expect(scrollContainer.scrollTop).not.toBe(345);
+    expect(startWord.scrollIntoView).not.toHaveBeenCalled();
+    expect(activeWord.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("uses the active word in the scroll key so follow-up words in one chunk keep scrolling", () => {
+    expect(buildChunkReadingScrollKey(state({ activeWordIndex: 2 }))).not.toBe(
+      buildChunkReadingScrollKey(state({ activeWordIndex: 3 })),
+    );
+    expect(buildChunkReadingScrollKey(state({ activeWordIndex: null }))).toBe(
+      "flow:sentence:1-4:1:4:chunk",
+    );
+  });
+
+  it("includes the iframe offset when aligning chunk starts from Foliate iframe documents", () => {
+    const iframe = document.createElement("iframe");
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument as Document;
+    doc.body.innerHTML = `
+      <span class="page-word" data-word-index="1">One</span>
+      <span class="page-word" data-word-index="2">Two</span>
+    `;
+    const roots: FlowRenderedWordRootDescriptor[] = [{ doc, root: doc.body, sectionIndex: 0, ready: true }];
+    const startWord = doc.querySelector('[data-word-index="1"]') as HTMLElement;
+    const scrollContainer = document.createElement("div");
+    Object.defineProperty(scrollContainer, "scrollTop", { value: 25, writable: true, configurable: true });
+    scrollContainer.getBoundingClientRect = () => ({
+      top: 40,
+      bottom: 640,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 600,
+      x: 0,
+      y: 40,
+      toJSON: () => {},
+    });
+    scrollContainer.scrollTo = vi.fn((optionsOrX?: ScrollToOptions | number) => {
+      scrollContainer.scrollTop = typeof optionsOrX === "number"
+        ? optionsOrX
+        : Number(optionsOrX?.top ?? 0);
+    }) as typeof scrollContainer.scrollTo;
+    iframe.getBoundingClientRect = () => ({
+      top: 100,
+      bottom: 700,
+      left: 0,
+      right: 800,
+      width: 800,
+      height: 600,
+      x: 0,
+      y: 100,
+      toJSON: () => {},
+    });
+    startWord.getBoundingClientRect = () => ({
+      top: 280,
+      bottom: 304,
+      left: 0,
+      right: 80,
+      width: 80,
+      height: 24,
+      x: 0,
+      y: 280,
+      toJSON: () => {},
+    });
+
+    const didScroll = scrollChunkReadingVisualStateToTopOfRoots(roots, state({ activeWordIndex: null }), {
+      behavior: "auto",
+      scrollContainer,
+      topOffsetPx: 210,
+    });
+
+    expect(didScroll).toBe(true);
+    expect(scrollContainer.scrollTop).toBe(155);
+  });
+
   it("clear helper removes chunk visual state from every rendered root", () => {
     const { doc, roots } = makeRoot(`
       <span class="page-word page-word--chunk-active page-word--active-word" data-word-index="1">One</span>
@@ -126,5 +378,23 @@ describe("Foliate chunk visual state rendering", () => {
     expect(css).toContain(".page-word--active-word");
     expect(css).toContain("color-mix(in srgb, var(--accent, #FF5B7F) 16%, transparent)");
     expect(css).toContain("color-mix(in srgb, var(--accent, #FF5B7F) 28%, transparent)");
+  });
+
+  it("injects spacer hooks so first and final page content can sit inside the Flow zone", () => {
+    const { doc } = makeRoot("");
+
+    injectStyles(doc, {
+      fontFamily: "Georgia, serif",
+      layoutSpacing: { line: 1.8, paragraph: 1 },
+    } as unknown as BlurbySettings, 100, {
+      flowLeadingInsetPx: 210,
+      flowTrailingInsetPx: 390,
+    });
+
+    const css = doc.getElementById("blurby-theme")?.textContent ?? "";
+    expect(doc.documentElement.style.getPropertyValue("--blurby-flow-leading-inset")).toBe("210px");
+    expect(doc.documentElement.style.getPropertyValue("--blurby-flow-trailing-inset")).toBe("390px");
+    expect(css).toContain("padding-block-start: var(--blurby-flow-leading-inset, 0px) !important");
+    expect(css).toContain("padding-block-end: var(--blurby-flow-trailing-inset, 0px) !important");
   });
 });

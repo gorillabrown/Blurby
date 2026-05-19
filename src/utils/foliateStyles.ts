@@ -1,8 +1,18 @@
 import { FOLIATE_BASE_FONT_SIZE_PX } from "../constants";
 import type { BlurbySettings } from "../types";
 
+export interface FoliateStyleOptions {
+  flowLeadingInsetPx?: number;
+  flowTrailingInsetPx?: number;
+}
+
 /** Inject Blurby theme CSS into an EPUB document (inside the foliate iframe). */
-export function injectStyles(doc: Document, settings: BlurbySettings, focusTextSize?: number) {
+export function injectStyles(
+  doc: Document,
+  settings: BlurbySettings,
+  focusTextSize?: number,
+  options: FoliateStyleOptions = {},
+) {
   if (!doc?.head) return;
 
   const existing = doc.getElementById("blurby-theme");
@@ -18,6 +28,10 @@ export function injectStyles(doc: Document, settings: BlurbySettings, focusTextS
   const bg = rootStyles.getPropertyValue("--bg").trim() || "#1a1a1a";
   const fg = rootStyles.getPropertyValue("--text").trim() || "#e0e0e0";
   const accent = rootStyles.getPropertyValue("--accent").trim() || "#FF5B7F";
+  const leadingInsetPx = Math.max(0, Math.round(options.flowLeadingInsetPx ?? 0));
+  const trailingInsetPx = Math.max(0, Math.round(options.flowTrailingInsetPx ?? 0));
+  doc.documentElement.style.setProperty("--blurby-flow-leading-inset", `${leadingInsetPx}px`);
+  doc.documentElement.style.setProperty("--blurby-flow-trailing-inset", `${trailingInsetPx}px`);
 
   const style = doc.createElement("style");
   style.id = "blurby-theme";
@@ -30,6 +44,11 @@ export function injectStyles(doc: Document, settings: BlurbySettings, focusTextS
       line-height: ${lineHeight} !important;
       margin: 0 !important;
       padding: 0 !important;
+    }
+    body {
+      padding-block-start: var(--blurby-flow-leading-inset, 0px) !important;
+      padding-block-end: var(--blurby-flow-trailing-inset, 0px) !important;
+      box-sizing: border-box !important;
     }
     ${settings.justifiedText !== false ? "p, div, li, blockquote, dd, dt, figcaption { text-align: justify !important; }" : ""}
     a { color: ${accent} !important; }

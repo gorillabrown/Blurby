@@ -478,6 +478,31 @@ describe("FlowScrollEngine", () => {
     expect(container.scrollTo).toHaveBeenCalled();
   });
 
+  it("aligns the active natural chunk start to the selected reading zone", () => {
+    const longContainer = createMockContainer(100, 5);
+    document.body.appendChild(longContainer);
+    const chunkEngine = new FlowScrollEngine(callbacks);
+    const chunkCursor = createMockCursor();
+    const chunk = {
+      id: "sentence:50-55",
+      startWordIndex: 50,
+      endWordIndex: 55,
+      kind: "sentence",
+      reason: "test",
+      wordCount: 5,
+    };
+
+    try {
+      chunkEngine.setChunks([chunk]);
+      chunkEngine.start(longContainer, chunkCursor, 52, 600, new Set(), false, 0.25);
+
+      expect(longContainer.scrollTop).toBe(110);
+    } finally {
+      chunkEngine.destroy();
+      document.body.removeChild(longContainer);
+    }
+  });
+
   it("should set cursor height to 5px in normal mode (FLOW-INF-B timer bar)", () => {
     engine.start(container, cursor, 0, 300, new Set(), false);
     expect(cursor.style.height).toBe("5px");

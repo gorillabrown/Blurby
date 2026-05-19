@@ -411,18 +411,57 @@ export default function ReaderContainer({
     }));
   }, [naturalReadingChunks, narration, setChunkReadingVisualState]);
 
+  const applyNarrationActiveWord = useCallback((wordIndex: number) => {
+    if (naturalReadingChunks.length === 0) {
+      setChunkReadingVisualState(null);
+      return;
+    }
+
+    // This callback is installed through narration.setOnTruthSync, which is only
+    // invoked for trusted spoken-word boundaries. Missing timing stays chunk-only.
+    setChunkReadingVisualState(createChunkReadingVisualState({
+      mode: "narrate",
+      chunks: naturalReadingChunks,
+      wordIndex,
+      syncLevel: "word-synced",
+    }));
+  }, [naturalReadingChunks, setChunkReadingVisualState]);
+
+  const applyNarrationSegmentStart = useCallback((wordIndex: number) => {
+    if (naturalReadingChunks.length === 0) {
+      setChunkReadingVisualState(null);
+      return;
+    }
+
+    setChunkReadingVisualState(createChunkReadingVisualState({
+      mode: "narrate",
+      chunks: naturalReadingChunks,
+      wordIndex,
+      syncLevel: "chunk-synced",
+    }));
+  }, [naturalReadingChunks, setChunkReadingVisualState]);
+
   useEffect(() => {
     if (readingMode !== "narrate") {
       narration.setOnChunkBoundary?.(null);
+      narration.setOnSegmentStart?.(null);
       setChunkReadingVisualState(null);
       return;
     }
 
     narration.setOnChunkBoundary?.(applyNarrationChunkBoundary);
+    narration.setOnSegmentStart?.(applyNarrationSegmentStart);
     return () => {
       narration.setOnChunkBoundary?.(null);
+      narration.setOnSegmentStart?.(null);
     };
-  }, [applyNarrationChunkBoundary, narration, readingMode, setChunkReadingVisualState]);
+  }, [
+    applyNarrationChunkBoundary,
+    applyNarrationSegmentStart,
+    narration,
+    readingMode,
+    setChunkReadingVisualState,
+  ]);
 
   const totalWordCount = bookWordMeta?.totalWords || activeDoc.wordCount || words.length;
   const canonicalWordAnchor = resolveCanonicalWordAnchor({
@@ -517,6 +556,7 @@ export default function ReaderContainer({
     useFoliate,
     readingMode: compatibilityReadingMode,
     isNarrating,
+    flowPlaying,
     highlightedWordIndex,
     bookWordMeta,
     narration,
@@ -607,6 +647,7 @@ export default function ReaderContainer({
     bookWordsTotalWords: bookWordMeta?.totalWords,
     resumeAnchorRef,
     softWordIndexRef,
+    onNarrateTruthSync: applyNarrationActiveWord,
     evalTrace: evalTraceSink,
   });
   const {
@@ -1136,8 +1177,10 @@ export default function ReaderContainer({
       viewApiRef={foliateApiRef}
       isReading={isBrowsedAway && isFlowSurfaceMode}
       onJumpToHighlight={() => {
-        // Use the foliate API's returnToNarration which clears browsing flag + scrolls
-        if (foliateApiRef.current?.returnToNarration) {
+        // Recenter the current chunk first; fall back to the legacy narration return path.
+        if (foliateApiRef.current?.recenterChunkReadingBox?.()) {
+          setIsBrowsedAway(false);
+        } else if (foliateApiRef.current?.returnToNarration) {
           foliateApiRef.current.returnToNarration();
           setIsBrowsedAway(false);
         } else if (activeDoc.cfi) {
@@ -1347,7 +1390,7 @@ export default function ReaderContainer({
         onReturn={handleReturnToReading}
       />
       {/* BUG-147: Return to narration position when actively speaking but user has paged away */}
-      {isBrowsedAway && isFlowSurfaceMode && isNarrating && narration.speaking && (
+      {!useFoliate && isBrowsedAway && isFlowSurfaceMode && isNarrating && narration.speaking && (
         <button
           className="return-to-narration-btn"
           onClick={handleReturnToReading}

@@ -1036,6 +1036,116 @@ describe("useReaderMode four-mode foundation", () => {
     expect(harness.modeInstance.pendingResumeRef.current).toBeNull();
   });
 
+  it("routes trusted narrate word sync into the chunk visual active-word owner", async () => {
+    const onNarrateTruthSync = vi.fn();
+    const modeInstance = {
+      modeRef: { current: null },
+      startMode: vi.fn(),
+      stopMode: vi.fn(),
+      pauseMode: vi.fn(),
+      resumeMode: vi.fn(),
+      setSpeed: vi.fn(),
+      jumpToWordInMode: vi.fn(),
+      updateModeWords: vi.fn(),
+      pendingResumeRef: { current: null },
+    };
+
+    const foliateApiRef = {
+      current: {
+        clearSoftHighlight: vi.fn(),
+        findFirstVisibleWordIndex: vi.fn(() => 0),
+        highlightWordByIndex: vi.fn(() => true),
+        getSectionForWordIndex: vi.fn(() => 0),
+        goToSection: vi.fn(),
+      },
+    };
+
+    const narration = createNarration();
+    const reader = {
+      playing: false,
+      wordIndex: 0,
+      wordsRef: { current: ["alpha", "beta", "gamma"] as string[] },
+      togglePlay: vi.fn(),
+      jumpToWord: vi.fn(),
+    };
+
+    const settings = {
+      lastReadingMode: "flow",
+      readingMode: "flow",
+      ttsEngine: "web",
+      isNarrating: false,
+    } as any;
+
+    let snapshot: UseReaderModeReturn | null = null;
+
+    function Harness() {
+      const [readingMode, setReadingMode] = useState<ReaderMode>("flow");
+      const [isNarrating, setIsNarrating] = useState(false);
+      const [focusPlaying, setFocusPlaying] = useState(false);
+      const [flowPlaying, setFlowPlaying] = useState(true);
+      const [highlightedWordIndex, setHighlightedWordIndex] = useState(1);
+
+      snapshot = useReaderMode({
+        reader,
+        narration,
+        modeInstance: modeInstance as any,
+        foliateApiRef: foliateApiRef as any,
+        foliateWordsRef: { current: [] },
+        useFoliate: true,
+        settings,
+        updateSettings: vi.fn(),
+        wpm: 180,
+        setWpm: vi.fn(),
+        effectiveWpm: 180,
+        getEffectiveWords: () => ["alpha", "beta", "gamma"],
+        extractFoliateWords: vi.fn(),
+        paragraphBreaks: new Set<number>(),
+        highlightedWordIndex,
+        setHighlightedWordIndex,
+        hasEngagedRef: { current: false },
+        focusPlaying,
+        setFocusPlaying,
+        flowPlaying,
+        setFlowPlaying,
+        isBrowsedAway: false,
+        setIsBrowsedAway: vi.fn(),
+        pageNavRef: { current: { returnToHighlight: vi.fn(), getCurrentPageStart: vi.fn(() => 0) } },
+        readingMode,
+        setReadingMode,
+        isNarrating,
+        setIsNarrating,
+        pendingNarrationResumeRef: { current: false },
+        bookWordsTotalWords: 3,
+        resumeAnchorRef: { current: null },
+        softWordIndexRef: { current: 0 },
+        onNarrateTruthSync,
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      snapshot?.toggleNarrationInFlow();
+      await flushPromises();
+    });
+
+    const installCall = narration.setOnTruthSync.mock.calls.find(([value]: [unknown]) => typeof value === "function");
+    const truthSync = installCall?.[0] as (wordIndex: number) => void;
+
+    await act(async () => {
+      truthSync(2);
+      await flushPromises();
+    });
+
+    expect(onNarrateTruthSync).toHaveBeenCalledWith(2);
+    expect(foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
+  });
+
   it("queues a narrate pending resume when spoken-word truth lands outside the current DOM slice", async () => {
     const harness = await renderReaderModeHarness({
       initialReadingMode: "flow",

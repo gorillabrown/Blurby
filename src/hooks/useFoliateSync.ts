@@ -27,6 +27,8 @@ export interface UseFoliateSyncParams {
   readingMode: "page" | "focus" | "flow";
   /** Flow-layer narration state */
   isNarrating: boolean;
+  /** Whether flow mode is actively advancing words (for browse-away detection in flow mode) */
+  flowPlaying?: boolean;
   /** Currently highlighted word index (Page/Flow/Narration position) */
   highlightedWordIndex: number;
   /** Full-book word metadata (sections + totalWords), null until extraction completes */
@@ -104,6 +106,7 @@ export function useFoliateSync({
   useFoliate,
   readingMode,
   isNarrating,
+  flowPlaying,
   highlightedWordIndex,
   bookWordMeta,
   narration,
@@ -121,13 +124,14 @@ export function useFoliateSync({
   const hasFullBookWordMeta = Boolean(bookWordMeta?.sections?.length);
 
   // ── 1. Browse-away detection ─────────────────────────────────────────────
-  // Polls foliateApiRef.isUserBrowsing on an interval while narration is active.
-  // When narration is inactive (or useFoliate is false) the flag
-  // is reset to false immediately.
+  // Polls foliateApiRef.isUserBrowsing on an interval while active reading is
+  // in progress (either flow playing or narrating). When neither is active (or
+  // useFoliate is false), the flag is reset to false immediately.
+  const isActivelyReading = isNarrating || !!flowPlaying;
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
 
   useEffect(() => {
-    if (!useFoliate || !isNarrating) {
+    if (!useFoliate || !isActivelyReading) {
       if (isBrowsedAway) setIsBrowsedAway(false);
       return;
     }
@@ -137,7 +141,7 @@ export function useFoliateSync({
     };
     const timer = setInterval(checkBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [useFoliate, isNarrating]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [useFoliate, isActivelyReading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── 2. Chapter charOffset sync ───────────────────────────────────────────
   // Once bookWordMeta arrives, replace each chapter's charOffset with the

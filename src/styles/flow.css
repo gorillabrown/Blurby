@@ -48,7 +48,7 @@
 
 .foliate-page-view--chunk-visual .flow-shrink-cursor,
 .foliate-page-view--chunk-visual .foliate-flow-cursor {
-  display: none;
+  display: none !important;
 }
 
 /* Overlay cursor for EPUB Flow mode — Range-based, GPU-accelerated */
