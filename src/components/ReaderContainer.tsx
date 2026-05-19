@@ -1382,9 +1382,7 @@ export default function ReaderContainer({
           ttsEngine={settings.ttsEngine || "kokoro"}
           foliateFraction={useFoliate ? foliateFraction : undefined}
           narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
-          flowZonePosition={settings.flowZonePosition}
           flowZoneLines={settings.flowZoneLines}
-          onSetFlowZonePosition={(pos) => updateSettings({ flowZonePosition: pos })}
           onSetFlowZoneLines={(lines) => updateSettings({ flowZoneLines: lines })}
         />
       </div>

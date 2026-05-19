@@ -1986,6 +1986,21 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     };
   }, [webStrategy, kokoroStrategy, qwenStrategy, clearNanoOwnership, clearPocketOwnership]);
 
+  // Referentially stable: useNarrationSync's MediaSession effect lists this in its
+  // dependency array. An inline identity here re-runs that effect every render,
+  // and its setMediaSessionBookState call then loops ("Maximum update depth").
+  const setMediaSessionBook = useCallback((book: MediaSessionBookMetadata | null) => {
+    if (!book || !book.title.trim()) {
+      setMediaSessionBookState(null);
+      return;
+    }
+    setMediaSessionBookState({
+      title: book.title,
+      author: book.author ?? null,
+      coverArtUrl: book.coverArtUrl ?? null,
+    });
+  }, []);
+
   return {
     speaking: state.status === "speaking" || state.status === "holding",
     warming: state.status === "warming",
@@ -2042,17 +2057,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     setBookId: (id: string) => {
       bookIdRef.current = id;
     },
-    setMediaSessionBook: (book: MediaSessionBookMetadata | null) => {
-      if (!book || !book.title.trim()) {
-        setMediaSessionBookState(null);
-        return;
-      }
-      setMediaSessionBookState({
-        title: book.title,
-        author: book.author ?? null,
-        coverArtUrl: book.coverArtUrl ?? null,
-      });
-    },
+    setMediaSessionBook,
     setPronunciationOverrides: (overrides: PronunciationOverride[]) => {
       globalOverridesRef.current = overrides;
       updateMergedOverrides();

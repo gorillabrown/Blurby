@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { FlowScrollEngine, type FlowProgress } from "../utils/FlowScrollEngine";
 import { createChunkReadingVisualState } from "../utils/chunkReadingVisualState";
 import { getNextQueuedBook } from "../utils/queue";
 import {
   CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS,
   EINK_LINES_PER_PAGE,
+  FLOW_ZONE_LINES_DEFAULT,
 } from "../constants";
 import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
 import type { PauseReason } from "../types/narration";
@@ -219,6 +220,22 @@ export function useFlowScrollSync({
     chunkAwareEngine?.setChunks?.(nextChunks);
   };
 
+  // FLOW-ZONE-AUTO: the engine reports the descending zone's top fraction per
+  // line advance. Write it straight to the masked element's CSS vars — this
+  // fires at line-advance rate, too fast for React state, so DOM mutation only.
+  const onZoneTopChange = useCallback((topFrac: number) => {
+    const host = foliateApiRef.current?.getFlowZoneHost?.() ?? null;
+    if (!host) return;
+    const ch = host.clientHeight;
+    if (ch <= 0) return;
+    const lineHeight = parseFloat(getComputedStyle(host).lineHeight) || 24;
+    const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+    const zoneHeightFrac = (lineHeight * zoneLines) / ch;
+    const botFrac = Math.min(topFrac + zoneHeightFrac, 0.95);
+    host.style.setProperty("--flow-zone-top", `${topFrac * 100}%`);
+    host.style.setProperty("--flow-zone-bottom", `${botFrac * 100}%`);
+  }, [foliateApiRef, settings.flowZoneLines]);
+
   // ── Effect 1: FlowScrollEngine lifecycle — start/stop/pause ───────────
   useEffect(() => {
     if (readingMode !== "flow" || !flowPlaying) {
@@ -310,7 +327,8 @@ export function useFlowScrollSync({
         effectiveWpm,
         paragraphBreaks,
         isEink,
-        settings.flowZonePosition,
+        settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT,
+        onZoneTopChange,
       );
     };
 
@@ -368,11 +386,6 @@ export function useFlowScrollSync({
       publishFlowVisualState(highlightedWordIndexRef.current);
     }
   }, [chunks, readingMode, flowPlaying, isNarrating]);
-
-  // ── Effect 4: Sync zone position changes to running FlowScrollEngine ──
-  useEffect(() => {
-    flowScrollEngineRef.current?.setZonePosition(settings.flowZonePosition);
-  }, [settings.flowZonePosition]);
 
   // ── Effect 5: Rebuild line map on font size change ────────────────────
   useEffect(() => {
