@@ -100,7 +100,7 @@ describe("buildNaturalChunks", () => {
     ]);
   });
 
-  it("uses commas only when needed to keep long sentences under the hard max", () => {
+  it("does not split a sentence at commas even when it exceeds the hard max", () => {
     const words = wordsFromText("one two three, four five six, seven eight nine ten eleven.");
 
     const relaxed = buildNaturalChunks(words, { softMaxWords: 20, hardMaxWords: 20 });
@@ -108,19 +108,21 @@ describe("buildNaturalChunks", () => {
 
     expect(relaxed).toHaveLength(1);
     expect(constrained.map((chunk) => [chunk.startWordIndex, chunk.endWordIndex, chunk.kind])).toEqual([
-      [0, 3, "clause"],
-      [3, 6, "clause"],
-      [6, 11, "sentence"],
+      [0, 11, "sentence"],
     ]);
   });
 
-  it("splits long sentences into clause chunks under hardMaxWords", () => {
+  it("keeps punctuation-free long sentences intact instead of inventing mid-sentence chunks", () => {
     const words = wordsFromText("one two three four five six seven eight nine ten eleven twelve.");
 
     const chunks = buildNaturalChunks(words, { softMaxWords: 5, hardMaxWords: 6 });
 
-    expect(chunks.every((chunk) => chunk.wordCount <= 6)).toBe(true);
-    expect(chunks.map((chunk) => chunk.kind)).toEqual(["clause", "clause", "sentence"]);
+    expect(chunks).toHaveLength(1);
+    expect(chunks[0]).toEqual(expect.objectContaining({
+      startWordIndex: 0,
+      endWordIndex: 12,
+      kind: "sentence",
+    }));
   });
 });
 

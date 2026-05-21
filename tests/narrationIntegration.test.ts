@@ -43,6 +43,12 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
     expect(src).not.toContain("onLoad={() => {\n        // Extract words from DOM after each section loads\n        // BUT NOT during active narration/flow — rebuilding the word array mid-mode\n        // shifts all data-word-index attributes, causing highlight/page jumps.\n        // Uses ref (not state) because this callback is captured in a closure at render time.\n        setTimeout(() => {\n          setFoliateRenderVersion((prev) => prev + 1);\n          const mode = readingModeRef.current;\n          if (mode !== \"flow\") {");
   });
 
+  it("FoliatePageView preserves global word indexing during active narrate section loads", () => {
+    const src = read("src/components/FoliatePageView.tsx");
+    expect(src).toContain("const isActiveMode = readingModeRef.current === \"flow\" || readingModeRef.current === \"narrate\";");
+    expect(src).not.toContain("const isActiveMode = readingModeRef.current === \"flow\";");
+  });
+
   it("ReaderContainer blocks passive relocate downgrades during narrate", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("if (mode !== \"flow\" && mode !== \"narrate\" && !hasResumeAnchor) {");

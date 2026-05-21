@@ -412,7 +412,7 @@ export default function ReaderBottomBar({
             {flowProgress && (
               <div className="rbb-flow-progress">
                 <span className="rbb-flow-progress-text">
-                  {isNarrating ? "Narrating · " : ""}{currentChapterName ? `${currentChapterName} · ` : ""}{Math.round(flowProgress.bookPct * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
+                  {isNarrating ? "Narrating · " : ""}{currentChapterName ? `${currentChapterName} · ` : ""}{Math.round((foliateFraction != null ? foliateFraction : flowProgress.bookPct) * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
                 </span>
               </div>
             )}

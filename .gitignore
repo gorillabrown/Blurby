@@ -47,3 +47,6 @@ artifacts/**/tmp/**
 artifacts/**/traces/**
 artifacts/**/*profile*.json
 artifacts/**/*profile*.txt
+
+# Local bug-capture artifacts (raw dumps/screenshots)
+docs/bug-reports/

@@ -24,7 +24,6 @@ const DEFAULT_OPTIONS: ResolvedOptions = {
 const HEADING_TAG_RE = /^h[1-6]$/i;
 const SENTENCE_END_RE = /[.!?]["')\]\u201D\u2019]*$/;
 const SEMICOLON_COLON_END_RE = /[;:]["')\]\u201D\u2019]*$/;
-const COMMA_END_RE = /,["')\]\u201D\u2019]*$/;
 
 type BoundaryRule = {
   regex: RegExp;
@@ -122,7 +121,6 @@ function findPriorityBoundary(words: ChunkSourceWord[], start: number, end: numb
   kind: ReadingChunkKind;
   reason: string;
 } | null {
-  const hardEnd = Math.min(end, start + options.hardMaxWords);
   const boundaryRules: BoundaryRule[] = [
     { regex: SENTENCE_END_RE, kind: "sentence", reason: "sentence terminator" },
     { regex: SEMICOLON_COLON_END_RE, kind: "sentence", reason: "sentence terminator" },
@@ -132,7 +130,7 @@ function findPriorityBoundary(words: ChunkSourceWord[], start: number, end: numb
     const boundary = findBoundaryEnd(
       words,
       start,
-      hardEnd,
+      end,
       rule.regex,
       options.targetMinWords,
       options.targetMaxWords,
@@ -142,22 +140,6 @@ function findPriorityBoundary(words: ChunkSourceWord[], start: number, end: numb
   }
 
   return null;
-}
-
-function findCommaEnd(words: ChunkSourceWord[], start: number, limit: number): number | null {
-  let best: number | null = null;
-  for (let i = start; i < limit; i++) {
-    if (COMMA_END_RE.test(words[i].word)) best = i + 1;
-  }
-  return best;
-}
-
-function findClauseEnd(start: number, end: number, options: ResolvedOptions): number {
-  const softEnd = Math.min(end, start + options.softMaxWords);
-  const hardEnd = Math.min(end, start + options.hardMaxWords);
-  if (hardEnd <= start + 1) return hardEnd;
-  if (softEnd > start) return softEnd;
-  return hardEnd;
 }
 
 function splitSegment(
@@ -174,37 +156,19 @@ function splitSegment(
     const remaining = end - cursor;
     const boundary = findPriorityBoundary(words, cursor, end, options);
 
-    if (remaining <= options.targetMaxWords || (remaining <= options.hardMaxWords && boundary?.end === end)) {
+    if (remaining <= options.targetMaxWords || boundary?.end === end) {
       pushChunk(chunks, words, cursor, end, terminalKind, terminalReason);
       return;
     }
 
-    if (boundary && boundary.end > cursor && boundary.end - cursor <= options.hardMaxWords) {
+    if (boundary && boundary.end > cursor) {
       pushChunk(chunks, words, cursor, boundary.end, boundary.kind, boundary.reason);
       cursor = boundary.end;
       continue;
     }
 
-    const softLimit = Math.min(end, cursor + options.softMaxWords);
-    const hardLimit = Math.min(end, cursor + options.hardMaxWords);
-    const commaEnd = findCommaEnd(words, cursor, softLimit) ?? findCommaEnd(words, cursor, hardLimit);
-    if (commaEnd && commaEnd > cursor) {
-      pushChunk(chunks, words, cursor, commaEnd, "clause", "comma before hard max");
-      cursor = commaEnd;
-      continue;
-    }
-
-    const clauseEnd = findClauseEnd(cursor, end, options);
-    const isFinal = clauseEnd >= end;
-    pushChunk(
-      chunks,
-      words,
-      cursor,
-      clauseEnd,
-      isFinal ? terminalKind : "clause",
-      isFinal ? terminalReason : "soft max fallback",
-    );
-    cursor = clauseEnd;
+    pushChunk(chunks, words, cursor, end, terminalKind, terminalReason);
+    return;
   }
 }
 

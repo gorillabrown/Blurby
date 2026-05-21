@@ -2,11 +2,71 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-05-18
+**Last updated:** 2026-05-20
 
 ---
 
 ## Incomplete
+
+### BUG-176 - Flow mode drops to Page mode at EPUB section/chapter boundary
+**Reported:** 2026-05-20
+**Severity:** CRIT (reproduced 2x — blocks Flow reading of any multi-section EPUB)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/hooks/useFlowScrollSync.ts` lines 265-284
+**Description:** When Flow mode's reading zone reaches the end of a chapter/section in an EPUB, the app spontaneously switches from Flow to Page mode. Play stops, the bottom bar shows Page highlighted, text reflows to narrow Page column, and the user loses reading position and mode context. Reproduced twice on Meditations EPUB at 325 wpm — zone descends through ~3 paragraphs, consumes all words in the section, then mode drops.
+**Root cause:** `useFlowScrollSync.ts` `onComplete` callback fires when `FlowScrollEngine.animateLine()` exhausts all lines. The handler checked for a next queued *book* (`getNextQueuedBook`), but if none existed it unconditionally called `setReadingMode("page")`. It never checked whether more *sections* remained in the current EPUB. In a multi-section EPUB, "section done" ≠ "book done."
+**Fix applied:** Added `bookWordMetaRef` (lines 174-175) and section-advance logic in `onComplete` (lines 267-284). Before falling through to the book-end path, the handler now checks `bookWordMeta.sections` for a section whose `startWordIdx` exceeds the current word. If found, it calls `goToSection()` → `waitForSectionReady()` → `rebuildLineMap()` to advance Flow into the next section. Mirrors the proven narration section-advance pattern at lines 458-491 in the same file.
+**Verification:** TypeScript compilation clean (`npx tsc --noEmit`). Live verification blocked by stale production build — requires `npm run build` + app restart.
+**SOW reference:** `docs/testing/flow-narrate-sow-closeout-2026-05-20.md`
+
+### BUG-180 - Narration band active chunk is white-on-white in light mode (invisible text)
+**Reported:** 2026-05-20
+**Severity:** HIGH (narrated text is completely invisible in light theme)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix)
+**Location:** `src/utils/foliateStyles.ts` line 62
+**Description:** In light mode (white/cream background), the narration band's active chunk renders white text on a white background. The dimmed surrounding text (above and below the active chunk) is visible as grayed-out text, but the currently-spoken words inside the highlight band are completely invisible — white on white.
+**Root cause:** `.page-word--chunk-active` in `foliateStyles.ts` hardcoded `color: #ffffff`. This worked in dark themes (white text pops against dark bg) but created zero contrast in light mode where the background is also white/cream.
+**Fix applied:** Changed `color: #ffffff` to `color: ${fg}` where `fg` is resolved from `--text` CSS custom property (dark in light mode, light in dark mode). Active chunk words now use the theme-appropriate foreground color. The `--active-word` background glow and `--glide-adj` highlights continue to provide visual emphasis for the narration position.
+**Verified:** Live-tested in Narrate mode with light theme — active chunk text is fully readable with good contrast.
+
+### BUG-179 - Focus mode renders empty reading zone (no text visible)
+**Reported:** 2026-05-20
+**Severity:** HIGH (Focus mode is completely unusable)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/hooks/useReaderMode.ts` lines 489-513 (`handleSelectMode`)
+**Description:** After entering Focus mode from any other mode and pressing "resume reading" or Play, the reading zone band appears (beige horizontal strip across the screen with blue boundary markers at top and bottom) but no text/words are visible inside it. The zone is completely empty. Focus mode is actively "playing" (pause button shows) but rendering zero content. Tested on Meditations EPUB.
+**Root cause:** `handleSelectMode` only set the mode label (`setReadingMode`) without actually starting the Focus engine. It never called `startFocus()`, so the RSVP word pipeline was never initialized — the visual zone appeared (CSS-driven) but had no word source.
+**Fix applied:** `handleSelectMode` now calls `startFocus()` for Focus mode, `startFlow({ resumeNarration: true, targetMode: "narrate" })` for Narrate, and `startFlow()` for Flow. These functions handle `stopAllModes()`, word extraction, anchor resolution, and engine creation internally. Same root cause as BUG-178.
+**Verification:** TypeScript compilation clean. Live verification blocked by stale production build.
+
+### BUG-178 - Mode switching causes catastrophic position loss (Flow↔Narrate)
+**Reported:** 2026-05-20
+**Severity:** HIGH (position jumps backward on every mode switch, compounding)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/hooks/useReaderMode.ts` lines 489-513 (`handleSelectMode`)
+**Description:** Switching between Flow and Narrate modes causes the reading position to jump backward. Observed sequence: (1) Page mode at "THE SECOND BOOK" (~12% progress), (2) Switch to Flow → position correct at 12%, (3) Switch Flow→Narrate → position jumps backward from 12% to 6%, (4) Switch Narrate→Flow → position jumps further backward from 6% to 0%. Each mode switch resets position further backward — catastrophic compounding position loss.
+**Root cause:** `handleSelectMode` called `stopAllModes()` then `setReadingMode(mode)` then `updateSettings()` — but never actually started the target mode's engine. The mode label changed, the old mode stopped, but the new mode's word pipeline/anchor resolution never ran. The global word anchor contract from READER-4M-3 was intact but never consumed because the engine startup (which reads the anchor) was skipped.
+**Fix applied:** `handleSelectMode` now calls `startFocus()`/`startFlow()` directly instead of the label-only approach. These functions internally handle `stopAllModes()`, `captureCurrentAnchor()`, word extraction, anchor resolution, and engine creation. The anchor is captured before stopping and consumed during the new engine's startup. Same root cause as BUG-179.
+**Verification:** TypeScript compilation clean. Live verification blocked by stale production build.
+
+### BUG-177 - Progress indicator inconsistency in Narrate mode (6% bar vs 12% label)
+**Reported:** 2026-05-20
+**Severity:** LOW (cosmetic — two different progress readings shown simultaneously)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/components/ReaderBottomBar.tsx` line 415
+**Description:** In Narrate mode, the thin progress bar at the bottom-left shows "6%" while the text label at the bottom-right shows "12% · ~219 min left". Two different progress values displayed simultaneously.
+**Root cause:** The progress bar and Row 3 info line both used `foliateFraction` (Foliate's authoritative CFI-based book progress, 0.0-1.0), but the percentage text label at line 415 used `flowProgress.bookPct` (a word-ratio-based estimate). The two metrics diverge because word-ratio doesn't account for EPUB structural content (TOC, front matter, etc.).
+**Fix applied:** Changed the text label from `Math.round(flowProgress.bookPct * 100)` to `Math.round((foliateFraction != null ? foliateFraction : flowProgress.bookPct) * 100)`. Now all three display elements (bar, label, Row 3) use `foliateFraction` when available.
+**Verification:** TypeScript compilation clean. Live verification blocked by stale production build.
+
+### BUG-181 - Production build crashes on book open (stale tokenizeWithMeta guard)
+**Reported:** 2026-05-20
+**Severity:** CRIT (installed app cannot open any book)
+**Status:** RESOLVED in source — production build needs rebuild
+**Location:** `src/utils/text.ts` line 138 (`tokenizeWithMeta`)
+**Description:** The installed production build (`AppData/Local/Programs/blurby/resources/app.asar/dist/`) crashes with `Uncaught TypeError: r.split is not a function` when opening any book. White screen with no reader content rendered. Stack trace: `Nn` (minified `tokenizeWithMeta`) → `useMemo` → React render tree.
+**Root cause:** The production build was compiled from an older version of `text.ts` that had `if (!r)` as the guard (catches null/undefined/empty-string but not non-string types like numbers or objects). The current source code at line 138 has the correct guard: `if (typeof text !== "string" || !text)`. The build is simply stale.
+**Fix:** Rebuild the app with `npm run build` and restart. The source code already has the correct type guard. No code change needed.
 
 ### BUG-175 - Manual Recenter Box needs measurable chunk-start alignment
 **Reported:** 2026-05-18

@@ -164,12 +164,23 @@ Goal: verify the current product model where narration follows the Flow layer.
 | LIVE-FLOW-05 | Resume during Flow narration | Flow resumes from the same visual or word position | HIGH |
 | LIVE-FLOW-06 | Navigate away from the book and back while narration state is active if supported | Active position is preserved; no blank or invalid surface | HIGH |
 | LIVE-FLOW-07 | Open narrated content from the library after it was recently active | Reader surface loads cleanly; no blank-screen regression | CRIT |
+| LIVE-FLOW-08 | Open a book in Flow mode, press Play, and observe the reading zone from the first active chunk | The active zone begins around 15% down the page, not pinned to the absolute top of the rendered book | CRIT |
+| LIVE-FLOW-09 | Let Flow continue until the active zone bottom crosses roughly 67% of the visible page | The reader performs an instant page/viewport jump at the threshold, with no long drift or stuck lower-zone state | CRIT |
+| LIVE-FLOW-10 | Observe the first visible state immediately after the Flow jump | The active zone resets to the top reading position after the jump and continues descending from there | CRIT |
+| LIVE-FLOW-11 | Switch `Flow -> Narrate -> Flow` during the same active reading session | Continuity is preserved: same active chunk/word neighborhood, no duplicate cursor, no stale Flow highlight left behind | CRIT |
+| LIVE-FLOW-12 | If Kokoro is downloaded, switch to Narrate, press Play, and listen while watching the active box | TTS plays and the Narrate box tracks the spoken chunk/word; if trusted word timing exists, the active word visibly advances | CRIT |
 
 Capture:
 
 - sync quality:
 - any cursor jump:
 - any mismatch between spoken and indicated position:
+- zone start position:
+- zone bottom-crossing threshold behavior:
+- page/viewport jump behavior:
+- post-jump reset behavior:
+- Flow -> Narrate -> Flow continuity:
+- Narrate-with-TTS tracking quality:
 - any blank-screen or stuck-surface event:
 - when it happens: `chunk boundary / speed change / section handoff / chapter handoff / unknown`
 - notes:
@@ -456,4 +467,5 @@ Use these alongside this checklist:
 - `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
 - `docs/testing/TTS_EVAL_RELEASE_CHECKLIST.md`
 - `docs/testing/tts-electron-test-checklist.md`
+- `docs/testing/flow-narrate-live-iterative-sow.md`
 - `docs/governance/TTS_EVAL_RUNBOOK.md`
