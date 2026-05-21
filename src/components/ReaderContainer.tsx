@@ -178,6 +178,10 @@ export default function ReaderContainer({
   const highlightedWordIndexRef = useRef(highlightedWordIndex);
   highlightedWordIndexRef.current = highlightedWordIndex;
   const softWordIndexRef = useRef(0);
+  const explicitSelectionAnchorRef = useRef<number | null>(null);
+  useEffect(() => {
+    explicitSelectionAnchorRef.current = null;
+  }, [activeDoc.id]);
   // narrationStateFlushRafRef and narrationStatePendingIdxRef are initialized
   // in useDocumentLifecycle and returned to the component — see below.
 
@@ -412,6 +416,7 @@ export default function ReaderContainer({
   }, [naturalReadingChunks, narration, setChunkReadingVisualState]);
 
   const applyNarrationActiveWord = useCallback((wordIndex: number) => {
+    explicitSelectionAnchorRef.current = null;
     if (naturalReadingChunks.length === 0) {
       setChunkReadingVisualState(null);
       return;
@@ -472,6 +477,53 @@ export default function ReaderContainer({
     focusWordIndex: wordIndex,
     narrationWordIndex: narration.cursorWordIndex,
   });
+
+  const clampToEffectiveWordRange = useCallback((index: number): number => {
+    const effectiveWords = getEffectiveWords();
+    const maxIdx = Math.max((effectiveWords.length || totalWordCount || 1) - 1, 0);
+    return Math.max(0, Math.min(index, maxIdx));
+  }, [getEffectiveWords, totalWordCount]);
+
+  const commitSharedWordAnchor = useCallback((wordIndex: number) => {
+    const clamped = clampToEffectiveWordRange(wordIndex);
+    explicitSelectionAnchorRef.current = clamped;
+    highlightedWordIndexRef.current = clamped;
+    softWordIndexRef.current = clamped;
+    setHighlightedWordIndex(clamped);
+    jumpToWord(clamped);
+
+    if (isNarratingRef.current && narration.speaking && !narration.warming) {
+      narration.resyncToCursor(clamped, effectiveWpm);
+    }
+  }, [clampToEffectiveWordRange, jumpToWord, narration, effectiveWpm]);
+
+  const resolveClickedGlobalWordIndex = useCallback((
+    sectionIndex?: number,
+    wordOffsetInSection?: number,
+    globalWordIndex?: number,
+  ): number | null => {
+    if (typeof globalWordIndex === "number" && globalWordIndex >= 0) {
+      return clampToEffectiveWordRange(globalWordIndex);
+    }
+
+    if (
+      typeof sectionIndex === "number" &&
+      sectionIndex >= 0 &&
+      typeof wordOffsetInSection === "number" &&
+      wordOffsetInSection >= 0
+    ) {
+      const section = bookWordMeta?.sections?.find((entry) => entry.sectionIndex === sectionIndex);
+      if (section) {
+        return clampToEffectiveWordRange(section.startWordIdx + wordOffsetInSection);
+      }
+      // Early in a fresh book/session, section word metadata may not be hydrated yet.
+      // Use section-local offset as a stable fallback anchor instead of preserving
+      // a stale prior-book cursor (which can cause play to jump unexpectedly).
+      return clampToEffectiveWordRange(wordOffsetInSection);
+    }
+
+    return null;
+  }, [bookWordMeta?.sections, clampToEffectiveWordRange]);
 
   // ── Progress tracking (extracted to useProgressTracker hook) ─────────
   const progress = useProgressTracker({
@@ -581,6 +633,7 @@ export default function ReaderContainer({
     jumpToWord,
     foliateApiRef,
     onWordAdvance: (idx: number) => {
+      explicitSelectionAnchorRef.current = null;
       highlightedWordIndexRef.current = idx;
       if (isNarratingRef.current) {
         narrationStatePendingIdxRef.current = idx;
@@ -646,6 +699,7 @@ export default function ReaderContainer({
     pendingNarrationResumeRef,
     bookWordsTotalWords: bookWordMeta?.totalWords,
     resumeAnchorRef,
+    explicitSelectionAnchorRef,
     softWordIndexRef,
     onNarrateTruthSync: applyNarrationActiveWord,
     evalTrace: evalTraceSink,
@@ -776,23 +830,29 @@ export default function ReaderContainer({
       ? chaptersFromCharOffsets(activeDoc.content, docChapters)
       : detectChapters(activeDoc.content, words);
     if (chs.length < 2) return;
-    const curIdx = getCurChIdx(chs, wordIndex);
-    if (curIdx > 0) jumpToWord(chs[curIdx - 1].wordIndex);
-    else jumpToWord(chs[0].wordIndex);
-  }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
+    const curIdx = getCurChIdx(chs, canonicalWordAnchor);
+    const targetIdx = curIdx > 0 ? chs[curIdx - 1].wordIndex : chs[0].wordIndex;
+    commitSharedWordAnchor(targetIdx);
+  }, [activeDoc, docChapters, words, canonicalWordAnchor, commitSharedWordAnchor]);
 
   const handleNextChapter = useCallback(() => {
     const chs = docChapters.length > 0
       ? chaptersFromCharOffsets(activeDoc.content, docChapters)
       : detectChapters(activeDoc.content, words);
     if (chs.length < 2) return;
-    const curIdx = getCurChIdx(chs, wordIndex);
-    if (curIdx < chs.length - 1) jumpToWord(chs[curIdx + 1].wordIndex);
-  }, [activeDoc, docChapters, words, wordIndex, jumpToWord]);
+    const curIdx = getCurChIdx(chs, canonicalWordAnchor);
+    if (curIdx < chs.length - 1) {
+      commitSharedWordAnchor(chs[curIdx + 1].wordIndex);
+    }
+  }, [activeDoc, docChapters, words, canonicalWordAnchor, commitSharedWordAnchor]);
 
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
     hasEngagedRef.current = true;
     markPageActivity();
+    const chapterWordIdx = docChapters[chapterIndex]?.charOffset;
+    if (typeof chapterWordIdx === "number" && chapterWordIdx >= 0) {
+      commitSharedWordAnchor(chapterWordIdx);
+    }
     // For foliate EPUBs, navigate using the href from the TOC
     if (useFoliate && (docChapters[chapterIndex] as any)?.href) {
       foliateApiRef.current?.goTo?.((docChapters[chapterIndex] as any).href);
@@ -802,12 +862,9 @@ export default function ReaderContainer({
       ? chaptersFromCharOffsets(activeDoc.content, docChapters)
       : detectChapters(activeDoc.content, words);
     if (chs[chapterIndex]) {
-      jumpToWord(chs[chapterIndex].wordIndex);
-      if (readingMode === "page") {
-        setHighlightedWordIndex(chs[chapterIndex].wordIndex);
-      }
+      commitSharedWordAnchor(chs[chapterIndex].wordIndex);
     }
-  }, [activeDoc, docChapters, words, jumpToWord, markPageActivity, readingMode]);
+  }, [activeDoc, docChapters, words, useFoliate, markPageActivity, commitSharedWordAnchor]);
 
   // ── Page-mode callbacks for keyboard hook ────────────────────────────
 
@@ -988,12 +1045,16 @@ export default function ReaderContainer({
     // have re-rendered yet. Update the ref synchronously so the next launch uses the
     // newly selected word even within the same event loop.
     highlightedWordIndexRef.current = index;
+    // Keep the shared soft anchor in lockstep with explicit hard selections so
+    // immediate mode starts always honor the newest clicked word.
+    softWordIndexRef.current = index;
+    explicitSelectionAnchorRef.current = index;
     setHighlightedWordIndex(index);
     if (isNarrating && narration.speaking && !narration.warming) {
       // Resync TTS to new position (active playback)
       resyncToCursorRef.current(index, effectiveWpm);
     }
-  }, [effectiveWpm, isNarrating, narration.speaking, narration.warming]);
+  }, [effectiveWpm, isNarrating, narration.speaking, narration.warming, softWordIndexRef]);
 
   // Determine current word index for bottom bar
   const currentWordIndex = canonicalWordAnchor;
@@ -1105,24 +1166,48 @@ export default function ReaderContainer({
         markPageActivity();
         userExplicitSelectionRef.current = true; // TTS-7J (BUG-130): Mark explicit user choice
         foliateApiRef.current?.clearSoftHighlight?.(); // SELECTION-1: Hard click clears soft highlight
-        resumeAnchorRef.current = null; // TTS-7M: Explicit selection replaces any resume anchor
         activeDoc.cfi = cfi;
         // TTS-7B: Route through handleHighlightedWordChange so narration
         // resyncToCursor fires during active playback (BUG-107 fix).
         // During pause, this silently sets the restart position.
         // During non-narration modes, handleHighlightedWordChange just sets state.
-        if (globalWordIndex !== undefined && globalWordIndex >= 0) {
-          if (import.meta.env.DEV) console.debug("[TTS-7L] onWordClick: exact globalWordIndex:", globalWordIndex, "word:", word);
-          handleHighlightedWordChange(globalWordIndex);
+        const resolvedClickWordIndex = resolveClickedGlobalWordIndex(
+          sectionIndex,
+          wordOffsetInSection,
+          globalWordIndex,
+        );
+        if (resolvedClickWordIndex != null) {
+          if (import.meta.env.DEV) {
+            console.debug(
+              "[TTS-7L] onWordClick: resolved globalWordIndex:",
+              resolvedClickWordIndex,
+              "word:",
+              word,
+            );
+          }
+          // Keep an authoritative, immediate anchor so mode start/play in the next
+          // event tick cannot fall back to stale saved-position state. During active
+          // narration we do not persist this as a resume anchor because resync is immediate.
+          resumeAnchorRef.current = (isNarratingRef.current && narration.speaking && !narration.warming)
+            ? null
+            : resolvedClickWordIndex;
+          explicitSelectionAnchorRef.current = resolvedClickWordIndex;
+          handleHighlightedWordChange(resolvedClickWordIndex);
           return;
         }
-        // TTS-7L (BUG-134): Demoted first-text-match fallback. The old path scanned
-        // foliateWordsRef for the first normalized text match, which picked the wrong
-        // occurrence for common/repeated words. Now both click and selection provide
-        // exact globalWordIndex, so this path should rarely fire. Log and skip instead
-        // of silently starting narration from a different word.
-        if (import.meta.env.DEV) console.warn("[TTS-7L] onWordClick: no globalWordIndex for word:", word, "— skipping (no guessy text-match fallback)");
-        recordDiagEvent("selection-validated", `no exact index for "${word}" — fallback refused`);
+        resumeAnchorRef.current = null; // TTS-7M: explicit selection with no index clears stale anchors
+        // Preserve the current anchor rather than resetting to zero when exact
+        // mapping is temporarily unavailable on a freshly loaded section.
+        const preservedAnchor = highlightedWordIndexRef.current;
+        if (import.meta.env.DEV) {
+          console.warn(
+            "[TTS-7L] onWordClick: no resolvable global index for word:",
+            word,
+            "— preserving current anchor",
+            preservedAnchor,
+          );
+        }
+        recordDiagEvent("selection-validated", `no exact index for "${word}" — preserved anchor ${preservedAnchor}`);
       }}
       onLoad={() => {
         // Extract words from DOM after each section loads

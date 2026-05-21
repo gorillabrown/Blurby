@@ -390,7 +390,7 @@ describe("useReaderMode foliate handoff", () => {
     });
   });
 
-  it("narrate playback applies the shared flow-family per-word highlight path", async () => {
+  it("narrate playback ignores the parallel per-word callback when truth-sync is installed", async () => {
     const modeInstance = {
       modeRef: { current: null },
       startMode: vi.fn(),
@@ -500,8 +500,8 @@ describe("useReaderMode foliate handoff", () => {
     });
 
     expect(observed.readingMode).toBe("narrate");
-    expect(observed.highlightedWordIndex).toBe(2);
-    expect(foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
+    expect(observed.highlightedWordIndex).toBe(1);
+    expect(foliateApiRef.current.highlightWordByIndex).not.toHaveBeenCalled();
     expect(foliateApiRef.current.isWordInDom).not.toHaveBeenCalled();
   });
 
@@ -653,6 +653,7 @@ describe("useReaderMode four-mode foundation", () => {
     initialHighlightedWordIndex?: number;
     softWordIndex?: number;
     resumeAnchor?: number | null;
+    explicitSelectionAnchor?: number | null;
     pendingNarrationResume?: boolean;
     narrationOverrides?: Record<string, unknown>;
     foliateApiCurrent?: Record<string, unknown>;
@@ -695,6 +696,7 @@ describe("useReaderMode four-mode foundation", () => {
     const updateSettings = vi.fn();
     const pendingNarrationResumeRef = { current: options?.pendingNarrationResume ?? false };
     const resumeAnchorRef = { current: options?.resumeAnchor ?? null };
+    const explicitSelectionAnchorRef = { current: options?.explicitSelectionAnchor ?? null };
     const settings = {
       lastReadingMode: "flow",
       readingMode: options?.initialReadingMode ?? "page",
@@ -755,6 +757,7 @@ describe("useReaderMode four-mode foundation", () => {
         pendingNarrationResumeRef,
         bookWordsTotalWords: 3,
         resumeAnchorRef,
+        explicitSelectionAnchorRef,
         softWordIndexRef: { current: options?.softWordIndex ?? 0 },
         evalTrace: options?.evalTrace ?? null,
       });
@@ -777,6 +780,7 @@ describe("useReaderMode four-mode foundation", () => {
       observed,
       pendingNarrationResumeRef,
       resumeAnchorRef,
+      explicitSelectionAnchorRef,
     };
   }
 
@@ -814,6 +818,34 @@ describe("useReaderMode four-mode foundation", () => {
 
     expect(harness.reader.jumpToWord).toHaveBeenCalledWith(2);
     expect(harness.resumeAnchorRef.current).toBeNull();
+  });
+
+  it("starts narrate from an explicit selection even when an older resume anchor is still active", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialHighlightedWordIndex: 2,
+      softWordIndex: 2,
+      resumeAnchor: 0,
+      explicitSelectionAnchor: 2,
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
+      ["alpha", "beta", "gamma"],
+      2,
+      180,
+      expect.any(Function),
+    );
+    expect(harness.resumeAnchorRef.current).toBeNull();
+    expect(harness.explicitSelectionAnchorRef.current).toBeNull();
   });
 
   it("demotes active narrate mode back to flow when flow narration is toggled off", async () => {
@@ -884,6 +916,52 @@ describe("useReaderMode four-mode foundation", () => {
     expect(harness.updateSettings).toHaveBeenCalledWith({
       readingMode: "flow",
       lastReadingMode: "flow",
+      isNarrating: false,
+    });
+  });
+
+  it("selecting focus from page mode does not auto-start focus playback", async () => {
+    const harness = await renderReaderModeHarness({
+      settings: {
+        lastReadingMode: "flow",
+        readingMode: "page",
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleSelectMode("focus");
+      await flushPromises();
+    });
+
+    expect(harness.observed.readingMode).toBe("focus");
+    expect(harness.modeInstance.startMode).not.toHaveBeenCalled();
+    expect(harness.updateSettings).toHaveBeenCalledWith({
+      readingMode: "focus",
+      lastReadingMode: "focus",
+      isNarrating: false,
+    });
+  });
+
+  it("selecting narrate from page mode sets narrate paused without auto-starting TTS", async () => {
+    const harness = await renderReaderModeHarness({
+      settings: {
+        lastReadingMode: "flow",
+        readingMode: "page",
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleSelectMode("narrate");
+      await flushPromises();
+    });
+
+    expect(harness.observed.readingMode).toBe("narrate");
+    expect(harness.observed.flowPlaying).toBe(false);
+    expect(harness.observed.isNarrating).toBe(false);
+    expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
+    expect(harness.updateSettings).toHaveBeenCalledWith({
+      readingMode: "narrate",
+      lastReadingMode: "narrate",
       isNarrating: false,
     });
   });
@@ -1029,10 +1107,12 @@ describe("useReaderMode four-mode foundation", () => {
     const truthSync = installCall?.[0] as (wordIndex: number) => void;
     await act(async () => {
       truthSync(2);
+      vi.advanceTimersByTime(20);
       await flushPromises();
     });
 
-    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
+    expect(harness.observed.highlightedWordIndex).toBe(2);
+    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "narrate", { allowMotion: false });
     expect(harness.modeInstance.pendingResumeRef.current).toBeNull();
   });
 
@@ -1139,11 +1219,12 @@ describe("useReaderMode four-mode foundation", () => {
 
     await act(async () => {
       truthSync(2);
+      vi.advanceTimersByTime(20);
       await flushPromises();
     });
 
     expect(onNarrateTruthSync).toHaveBeenCalledWith(2);
-    expect(foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "flow", { allowMotion: false });
+    expect(foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "narrate", { allowMotion: false });
   });
 
   it("queues a narrate pending resume when spoken-word truth lands outside the current DOM slice", async () => {
@@ -1166,11 +1247,13 @@ describe("useReaderMode four-mode foundation", () => {
 
     await act(async () => {
       truthSync(7);
+      vi.advanceTimersByTime(20);
       await flushPromises();
     });
 
     expect(harness.modeInstance.pendingResumeRef.current).toEqual({ wordIndex: 7, mode: "narrate" });
-    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(7, "flow", { allowMotion: false });
+    expect(harness.observed.highlightedWordIndex).toBe(7);
+    expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(7, "narrate", { allowMotion: false });
     expect(harness.foliateApiRef.current.goToSection).toHaveBeenCalledWith(3);
   });
 

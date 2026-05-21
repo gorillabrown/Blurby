@@ -202,8 +202,17 @@ export function useReaderKeys(
       if (e.code === "KeyM" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
       // Tab toggles menu flap
       if (e.key === "Tab" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFlap?.(); return; }
-      // C opens chapter list
-      if (e.code === "KeyC" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.openChapterList?.(); return; }
+      // C opens chapter list (accept key fallback for iframe-forwarded events where code may be empty)
+      if (
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        (e.code === "KeyC" || e.key === "c" || e.key === "C")
+      ) {
+        e.preventDefault();
+        s.openChapterList?.();
+        return;
+      }
       // S toggles favorite
       if (e.code === "KeyS" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFavorite?.(); return; }
       // [ ] chapter navigation (all modes); P prev chapter (non-page modes)

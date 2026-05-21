@@ -7,6 +7,21 @@ function chunkRange(chunk: ReadingChunk): { startWordIndex: number; endWordIndex
   };
 }
 
+function visibleChunkRange(
+  chunk: ReadingChunk,
+  mode: "flow" | "narrate",
+  wordIndex: number | null,
+): { startWordIndex: number; endWordIndex: number } {
+  if (mode !== "narrate" || !containsWord(chunk, wordIndex)) {
+    return chunkRange(chunk);
+  }
+
+  return {
+    startWordIndex: Math.max(chunk.startWordIndex, wordIndex ?? chunk.startWordIndex),
+    endWordIndex: chunk.endWordIndex,
+  };
+}
+
 function containsWord(chunk: ReadingChunk, wordIndex: number | null): boolean {
   return wordIndex != null && wordIndex >= chunk.startWordIndex && wordIndex < chunk.endWordIndex;
 }
@@ -32,7 +47,7 @@ export function createChunkReadingVisualState(params: {
   return {
     mode: params.mode,
     activeChunkId: activeChunk?.id ?? null,
-    activeChunkRange: activeChunk ? chunkRange(activeChunk) : null,
+    activeChunkRange: activeChunk ? visibleChunkRange(activeChunk, params.mode, params.wordIndex) : null,
     activeWordIndex,
     syncLevel: params.syncLevel,
   };

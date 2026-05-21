@@ -60,7 +60,21 @@ describe("createChunkReadingVisualState", () => {
     });
 
     expect(state.activeChunkId).toBe("sentence:3-6");
+    expect(state.activeChunkRange).toEqual({ startWordIndex: 4, endWordIndex: 6 });
     expect(state.activeWordIndex).toBeNull();
+  });
+
+  it("clamps Narrate word-synced chunk visuals to the exact selected word", () => {
+    const state = createChunkReadingVisualState({
+      mode: "narrate",
+      chunks,
+      wordIndex: 4,
+      syncLevel: "word-synced",
+    });
+
+    expect(state.activeChunkId).toBe("sentence:3-6");
+    expect(state.activeChunkRange).toEqual({ startWordIndex: 4, endWordIndex: 6 });
+    expect(state.activeWordIndex).toBe(4);
   });
 
   it("does not return a word outside the active chunk", () => {

@@ -698,6 +698,39 @@ export default function FoliatePageView({
     return true;
   }, [clearVisualWordClasses, viewApiRef]);
 
+  const centerResolvedTokenInReadingWindow = useCallback((
+    doc: Document,
+    resolution: RenderedTokenResolution,
+  ): boolean => {
+    const view = viewRef.current;
+    const range = buildResolvedTokenRange(doc, resolution);
+    if (!view?.renderer?.scrollToAnchor || !range) return false;
+
+    userBrowsingRef.current = false;
+    lastScrollFollowPosRef.current = null;
+    const zoneOffset = getFlowFollowOffsetPx();
+
+    (async () => {
+      try {
+        await view.renderer.scrollToAnchor(range);
+        if (zoneOffset > 0) {
+          const renderer = viewRef.current?.renderer;
+          if (renderer && typeof renderer.containerPosition === "number") {
+            renderer.containerPosition = Math.max(0, renderer.containerPosition - zoneOffset);
+          }
+        }
+        const finalPos = viewRef.current?.renderer?.containerPosition;
+        if (typeof finalPos === "number") lastScrollFollowPosRef.current = finalPos;
+      } catch {
+        // The section can unload while a click/selection scroll is in flight.
+      }
+    })();
+
+    return true;
+  }, [getFlowFollowOffsetPx]);
+  const centerResolvedTokenInReadingWindowRef = useRef(centerResolvedTokenInReadingWindow);
+  centerResolvedTokenInReadingWindowRef.current = centerResolvedTokenInReadingWindow;
+
   const clearChunkReadingVisualState = useCallback(() => {
     clearChunkReadingVisualStateFromRoots(getRenderedWordRoots());
   }, [getRenderedWordRoots]);
@@ -959,6 +992,7 @@ export default function FoliatePageView({
             getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
               el.classList.add("page-word--highlighted")
             );
+            centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);
 
             const v = viewRef.current;
             if (v) {
@@ -978,7 +1012,9 @@ export default function FoliatePageView({
                   resolvedToken.renderedWordIndexes,
                 );
                 const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
-                const wordOffsetInSection = exactIdx != null && sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                const wordOffsetInSection = exactIdx != null && sectionBase >= 0
+                  ? exactIdx - sectionBase
+                  : Math.max(0, resolvedToken.renderedWordIndex);
                 onWordClickRef.current?.(
                   cfi,
                   resolvedToken.canonicalWord,
@@ -1012,6 +1048,7 @@ export default function FoliatePageView({
                   getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
                     el.classList.add("page-word--highlighted")
                   );
+                  centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);
 
                   const tokenRange = buildResolvedTokenRange(doc, resolvedToken);
                   const cfi = v.getCFI(match.index, tokenRange ?? range);
@@ -1024,7 +1061,9 @@ export default function FoliatePageView({
                     resolvedToken.renderedWordIndexes,
                   );
                   const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
-                  const wordOffsetInSection = exactIdx != null && sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                  const wordOffsetInSection = exactIdx != null && sectionBase >= 0
+                    ? exactIdx - sectionBase
+                    : Math.max(0, resolvedToken.renderedWordIndex);
                   const canonicalWord = resolvedToken.canonicalWord || word;
                   if (import.meta.env.DEV) {
                     console.debug(

@@ -187,6 +187,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const lastConfirmedAudioWordRef = useRef<number>(0);
   /** TTS-7R Task-5 truth gate: trust only real timing for per-word visual updates. */
   const isTrustedWordTimingRef = useRef<boolean>(true);
+  const kokoroBoundaryGateRef = useRef<{
+    generationId: number;
+    startIdx: number;
+    requireExactFirstBoundary: boolean;
+    firstBoundaryAccepted: boolean;
+    lastAcceptedWordIndex: number;
+  } | null>(null);
+  const kokoroPlaybackGenerationRef = useRef(0);
+  const nextKokoroExactStartRef = useRef<number | null>(null);
   /** Handoff marker — set when the next chunk chain must start fresh from a new global anchor. */
   const handoffPendingRef = useRef(false);
   const kokoroVoiceRef = useRef("af_bella");
@@ -239,6 +248,36 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
     return decision;
   }, [highlightSyncController]);
+
+  const shouldAcceptKokoroBoundary = useCallback((wordIndex: number): boolean => {
+    const gate = kokoroBoundaryGateRef.current;
+    if (!gate) return true;
+    if (kokoroPlaybackGenerationRef.current !== gate.generationId) return false;
+
+    if (!gate.firstBoundaryAccepted) {
+      const boundaryIsTooEarly = gate.requireExactFirstBoundary
+        ? wordIndex !== gate.startIdx
+        : wordIndex < gate.startIdx;
+      if (boundaryIsTooEarly) {
+        if (import.meta.env.DEV) {
+          console.debug(
+            "[narrate] ignoring stale Kokoro boundary before selected start:",
+            wordIndex,
+            "expected:",
+            gate.startIdx,
+          );
+        }
+        return false;
+      }
+      gate.firstBoundaryAccepted = true;
+      gate.lastAcceptedWordIndex = wordIndex;
+      return true;
+    }
+
+    if (wordIndex < gate.lastAcceptedWordIndex) return false;
+    gate.lastAcceptedWordIndex = wordIndex;
+    return true;
+  }, []);
 
   const exportNarrationDiagnosticsBundle = useCallback((input: ExportNarrationDiagnosticsInput = {}) => {
     const s = stateRef.current;
@@ -540,6 +579,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       },
       // Event-driven word-boundary sync (TTS-EVENT-SYNC-1).
       onTruthSync: (event) => {
+        if (stateRef.current.status === "idle") return;
+        if (!shouldAcceptKokoroBoundary(event.resolvedWordIndex)) return;
         isTrustedWordTimingRef.current = event.isTrustedWordTiming;
         const syncDecision = resolveHighlightSync({
           wordIndex: event.resolvedWordIndex,
@@ -564,15 +605,22 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           `sourceWordIndex=${event.sourceWordIndex ?? "null"} resolvedWordIndex=${event.resolvedWordIndex} alignmentCorrected=${event.alignmentCorrected ? 1 : 0} trusted=${event.isTrustedWordTiming ? 1 : 0}`,
         );
         if (!event.isTrustedWordTiming) return;
-        try {
-          onWordAdvanceRef.current?.(event.resolvedWordIndex);
-        } catch (error) {
-          if (import.meta.env.DEV) console.warn("[narrate] onWordAdvance callback failed:", error);
-        }
-        try {
-          onTruthSyncRef.current?.(event.resolvedWordIndex);
-        } catch (error) {
-          if (import.meta.env.DEV) console.warn("[narrate] onTruthSync callback failed:", error);
+        // Narrate/Foliate installs a dedicated truth-sync callback that owns visual
+        // cursor updates. In that mode we must avoid also firing onWordAdvance,
+        // or dual callback paths can race and produce ahead-then-jump behavior.
+        const hasTruthSyncCallback = Boolean(onTruthSyncRef.current);
+        if (hasTruthSyncCallback) {
+          try {
+            onTruthSyncRef.current?.(event.resolvedWordIndex);
+          } catch (error) {
+            if (import.meta.env.DEV) console.warn("[narrate] onTruthSync callback failed:", error);
+          }
+        } else {
+          try {
+            onWordAdvanceRef.current?.(event.resolvedWordIndex);
+          } catch (error) {
+            if (import.meta.env.DEV) console.warn("[narrate] onWordAdvance callback failed:", error);
+          }
         }
       },
       onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => {
@@ -587,7 +635,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         setTimeout(() => speakNextChunkWebRef.current(), 0);
       },
     }),
-    [emitPendingRateResponseTrace, resolveHighlightSync, timingMetadataStore],
+    [emitPendingRateResponseTrace, resolveHighlightSync, shouldAcceptKokoroBoundary, timingMetadataStore],
   );
   kokoroStrategyRef.current = kokoroStrategy;
 
@@ -1140,6 +1188,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // cursorWordIndex can be advanced by wall-clock visual callbacks; using it here
     // would cause the pipeline to restart from the wrong word after a stall.
     const startIdx = lastConfirmedAudioWordRef.current;
+    const callbackGeneration = kokoroPlaybackGenerationRef.current + 1;
+    kokoroPlaybackGenerationRef.current = callbackGeneration;
+    const requireExactFirstBoundary = nextKokoroExactStartRef.current === startIdx;
+    nextKokoroExactStartRef.current = null;
+    kokoroBoundaryGateRef.current = {
+      generationId: callbackGeneration,
+      startIdx,
+      requireExactFirstBoundary,
+      firstBoundaryAccepted: false,
+      lastAcceptedWordIndex: startIdx - 1,
+    };
     if (startIdx >= words.length) {
       if (onSectionEndRef.current) {
         onSectionEndRef.current();
@@ -1155,6 +1214,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       startIdx,
       s.speed,
       (wordIndex, isTrustedWordTiming = true) => {
+        if (kokoroPlaybackGenerationRef.current !== callbackGeneration) return;
+        if (stateRef.current.status === "idle") return;
+        if (!shouldAcceptKokoroBoundary(wordIndex)) return;
         if (!evalFirstAudioCapturedRef.current && evalStartTimeRef.current != null) {
           evalFirstAudioCapturedRef.current = true;
           emitEvalTrace({
@@ -1187,6 +1249,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         }
       },
       () => {
+        if (kokoroPlaybackGenerationRef.current !== callbackGeneration) return;
+        kokoroBoundaryGateRef.current = null;
         // TTS-7A: Snapshot on Kokoro narration end (all chunks delivered)
         captureDiagSnapshot();
         // All words exhausted — if section-end callback is set (foliate mode),
@@ -1198,10 +1262,12 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         }
       },
       () => {
+        if (kokoroPlaybackGenerationRef.current !== callbackGeneration) return;
+        kokoroBoundaryGateRef.current = null;
         dispatch({ type: "STOP" });
       },
     );
-  }, [kokoroStrategy, captureDiagSnapshot, emitEvalTrace]);
+  }, [kokoroStrategy, captureDiagSnapshot, emitEvalTrace, shouldAcceptKokoroBoundary]);
 
   const speakNextChunkQwen = useCallback(() => {
     const s = stateRef.current;
@@ -1551,6 +1617,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     handoffPendingRef.current = false;
     clearPendingRateResponseTrace();
     const newSpeed = normalizeNarrationRate(stateRef.current.speed, stateRef.current.engine);
+    nextKokoroExactStartRef.current = wordIndex;
     syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
     if (pauseReason && stateRef.current.status === "paused" && stateRef.current.pauseReason === pauseReason) {
       dispatch({ type: "RESUME" });

@@ -203,7 +203,7 @@ export function useDocumentLifecycle({
       clearTimeout(restoreTimer);
       clearTimeout(prewarmTimer);
     };
-  }, [activeDoc.id, initReader, settings.readingMode, settings.ttsEngine]);
+  }, [activeDoc.id, initReader]);
 
   // ── 3. Persist focusTextSize changes ────────────────────────────────────
   useEffect(() => {

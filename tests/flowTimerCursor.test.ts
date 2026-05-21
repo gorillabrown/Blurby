@@ -351,4 +351,102 @@ describe("FLOW-INF-B: Timer bar cursor", () => {
     }
   });
 
+  // (q) Flow mode keeps timer cursor visible even when chunk metadata is present.
+  // This guards a regression where chunk presence hid the cursor outside Narrate mode.
+  it("(q) start() keeps cursor visible in normal flow when chunks are set", () => {
+    const { callbacks } = createMockCallbacks();
+    const engine = new FlowScrollEngine(callbacks);
+    const container = createMockContainer(3);
+    const cursor = createMockCursor();
+
+    engine.setChunks([
+      {
+        id: "chunk-0",
+        startWordIndex: 0,
+        endWordIndex: 3,
+        text: "one two three",
+        sourceWordIndices: [0, 1, 2],
+      } as any,
+    ]);
+
+    vi.useFakeTimers();
+    engine.start(container, cursor, 0, 300, new Set(), false);
+    expect(cursor.style.display).toBe("block");
+    engine.stop();
+    vi.useRealTimers();
+  });
+
+  it("(r) maps Flow cursor position from scroller-space to cursor parent-space", () => {
+    const runWithOffsetParent = (parentTop: number, parentLeft: number) => {
+      const { callbacks } = createMockCallbacks();
+      const engine = new FlowScrollEngine(callbacks);
+
+      const offsetParent = document.createElement("div");
+      offsetParent.getBoundingClientRect = vi.fn(() => ({
+        top: parentTop,
+        bottom: parentTop + 800,
+        left: parentLeft,
+        right: parentLeft + 900,
+        width: 900,
+        height: 800,
+        x: parentLeft,
+        y: parentTop,
+        toJSON: () => ({}),
+      }));
+
+      const container = document.createElement("div");
+      Object.defineProperty(container, "clientHeight", { value: 600, configurable: true });
+      Object.defineProperty(container, "clientWidth", { value: 400, configurable: true });
+      Object.defineProperty(container, "scrollTop", { value: 200, writable: true, configurable: true });
+      Object.defineProperty(container, "scrollLeft", { value: 0, writable: true, configurable: true });
+      container.getBoundingClientRect = vi.fn(() => ({
+        top: 300,
+        bottom: 900,
+        left: 120,
+        right: 520,
+        width: 400,
+        height: 600,
+        x: 120,
+        y: 300,
+        toJSON: () => ({}),
+      }));
+
+      const span = document.createElement("span");
+      span.setAttribute("data-word-index", "0");
+      span.getBoundingClientRect = vi.fn(() => ({
+        top: 420,
+        bottom: 440,
+        left: 200,
+        right: 260,
+        width: 60,
+        height: 20,
+        x: 200,
+        y: 420,
+        toJSON: () => ({}),
+      }));
+      container.appendChild(span);
+
+      const cursor = createMockCursor();
+      Object.defineProperty(cursor, "offsetParent", { value: offsetParent, configurable: true });
+
+      engine.start(container, cursor, 0, 300, new Set(), false);
+      vi.advanceTimersByTime(60);
+
+      const top = Number.parseFloat(cursor.style.top);
+      const left = Number.parseFloat(cursor.style.left);
+      engine.stop();
+      return { top, left };
+    };
+
+    vi.useFakeTimers();
+    const withParentOffset = runWithOffsetParent(100, 80);
+    const withOriginParent = runWithOffsetParent(0, 0);
+    vi.useRealTimers();
+
+    // If mapping is applied, moving offsetParent up/left by (100,80)
+    // moves cursor down/right by the same amount.
+    expect(withOriginParent.top - withParentOffset.top).toBeCloseTo(100, 1);
+    expect(withOriginParent.left - withParentOffset.left).toBeCloseTo(80, 1);
+  });
+
 });

@@ -55,6 +55,7 @@ export interface UseReaderModeParams {
   pendingNarrationResumeRef: React.MutableRefObject<boolean>;
   bookWordsTotalWords?: number;
   resumeAnchorRef: React.MutableRefObject<number | null>;
+  explicitSelectionAnchorRef?: React.MutableRefObject<number | null>;
   softWordIndexRef: React.MutableRefObject<number>;
   onNarrateTruthSync?: (wordIndex: number) => void;
   evalTrace?: TtsEvalTraceSink | null;
@@ -112,6 +113,7 @@ export function useReaderMode({
   pendingNarrationResumeRef,
   bookWordsTotalWords,
   resumeAnchorRef,
+  explicitSelectionAnchorRef,
   softWordIndexRef,
   onNarrateTruthSync,
   evalTrace,
@@ -175,6 +177,9 @@ export function useReaderMode({
         const latestWord = narrateTruthPendingWordRef.current;
         narrateTruthPendingWordRef.current = null;
         if (latestWord == null) return;
+        // In Foliate Narrate mode, truth-sync is the single source of word-following.
+        highlightedWordIndexRef.current = latestWord;
+        setHighlightedWordIndex(latestWord);
         onNarrateTruthSync?.(latestWord);
         const found = foliateApiRef.current?.highlightWordByIndex(latestWord, "narrate", { allowMotion: false });
         if (!found) {
@@ -234,7 +239,32 @@ export function useReaderMode({
     return paragraphBreaks;
   }, [foliateApiRef, paragraphBreaks, useFoliate]);
 
+  const consumeModeStartAnchor = useCallback((): number => {
+    const explicitAnchor = explicitSelectionAnchorRef?.current ?? null;
+    const startAnchor = resolveModeStartWordIndex(
+      explicitAnchor,
+      resumeAnchorRef.current,
+      highlightedWordIndexRef.current,
+      softWordIndexRef.current,
+    );
+
+    if (explicitSelectionAnchorRef) {
+      explicitSelectionAnchorRef.current = null;
+    }
+    if (resumeAnchorRef.current != null) {
+      resumeAnchorRef.current = null;
+    }
+
+    return startAnchor;
+  }, [explicitSelectionAnchorRef, resumeAnchorRef, softWordIndexRef]);
+
   const syncFoliateNarrationCursor = useCallback((idx: number, surface: "flow" | "narrate") => {
+    // Narrate-on-Foliate uses installNarrateTruthSync as the single source of truth.
+    // Do not run this parallel path there, or callbacks can race and drift.
+    if (surface === "narrate" && useFoliate) {
+      return;
+    }
+
     highlightedWordIndexRef.current = idx;
     narrationCursorPendingWordRef.current = idx;
     if (narrationCursorRafRef.current == null) {
@@ -280,14 +310,7 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    const focusStartSource = resolveModeStartWordIndex(
-      resumeAnchorRef.current,
-      highlightedWordIndexRef.current,
-      softWordIndexRef.current,
-    );
-    if (resumeAnchorRef.current != null) {
-      resumeAnchorRef.current = null;
-    }
+    const focusStartSource = consumeModeStartAnchor();
     const startWord = useFoliate
       ? resolveFoliateStartWord(
         focusStartSource,
@@ -311,6 +334,7 @@ export function useReaderMode({
   }, [
     bookWordsTotalWords,
     clearNarrateTruthSync,
+    consumeModeStartAnchor,
     extractFoliateWords,
     foliateApiRef,
     getEffectiveParagraphBreaks,
@@ -318,10 +342,8 @@ export function useReaderMode({
     hasEngagedRef,
     modeInstance,
     reader,
-    resumeAnchorRef,
     setHighlightedWordIndex,
     setReadingMode,
-    softWordIndexRef,
     stopAllModes,
     setFocusPlaying,
     updateSettings,
@@ -343,14 +365,7 @@ export function useReaderMode({
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }
-    const flowStartSource = resolveModeStartWordIndex(
-      resumeAnchorRef.current,
-      highlightedWordIndexRef.current,
-      softWordIndexRef.current,
-    );
-    if (resumeAnchorRef.current != null) {
-      resumeAnchorRef.current = null;
-    }
+    const flowStartSource = consumeModeStartAnchor();
     const startWord = useFoliate
       ? resolveFoliateStartWord(
         flowStartSource,
@@ -391,6 +406,7 @@ export function useReaderMode({
   }, [
     bookWordsTotalWords,
     clearNarrateTruthSync,
+    consumeModeStartAnchor,
     effectiveWpm,
     extractFoliateWords,
     foliateApiRef,
@@ -401,11 +417,9 @@ export function useReaderMode({
     narration,
     pendingNarrationResumeRef,
     reader,
-    resumeAnchorRef,
     setHighlightedWordIndex,
     setIsNarrating,
     setReadingMode,
-    softWordIndexRef,
     syncFoliateNarrationCursor,
     installNarrateTruthSync,
     stopAllModes,
@@ -521,15 +535,15 @@ export function useReaderMode({
     if (fromMode === mode) return;
     pendingNarrationResumeRef.current = false;
     captureCurrentAnchor();
-    // BUG-178/179: Actually boot the target mode's engine instead of just setting the label.
-    // startFocus/startFlow handle stopAllModes, setReadingMode, and engine startup internally.
-    if (mode === "focus") {
-      startFocus();
-    } else if (mode === "narrate") {
-      startFlow({ resumeNarration: true, targetMode: "narrate" });
-    } else {
-      startFlow();
-    }
+    // Mode selection is intentionally non-playing: selecting a mode should
+    // never auto-start it. Space/Play is the only start trigger.
+    stopAllModes();
+    setReadingMode(mode);
+    updateSettings({
+      readingMode: mode,
+      lastReadingMode: mode,
+      isNarrating: false,
+    });
     if (evalTrace?.enabled) {
       evalTrace.record({
         kind: "transition",
@@ -540,7 +554,7 @@ export function useReaderMode({
         latencyMs: 0,
       });
     }
-  }, [captureCurrentAnchor, evalTrace, pendingNarrationResumeRef, startFocus, startFlow]);
+  }, [captureCurrentAnchor, evalTrace, pendingNarrationResumeRef, setReadingMode, stopAllModes, updateSettings]);
 
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
   const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);

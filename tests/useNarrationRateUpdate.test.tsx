@@ -170,6 +170,9 @@ function createElectronApiMock() {
       onKokoroEngineStatus: vi.fn((callback) => on("tts-kokoro-engine-status", callback)),
       onKokoroDownloadError: vi.fn((callback) => on("tts-kokoro-download-error", callback)),
     },
+    emit(channel: string, value: unknown) {
+      listeners.get(channel)?.forEach((callback) => callback(value));
+    },
   };
 }
 
@@ -363,6 +366,107 @@ describe("useNarration rate updates", () => {
     expect(kokoroStrategyMock.resume).not.toHaveBeenCalled();
   });
 
+  it("starts an active Kokoro resync exactly at the selected word and ignores older boundaries", async () => {
+    const harness = await renderHarness();
+    const heardWords: number[] = [];
+    const truthSyncWords: number[] = [];
+    const words = Array.from({ length: 80 }, (_, index) => `word-${index}`);
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("kokoro");
+      harness.getSnapshot()?.setOnTruthSync?.((wordIndex) => {
+        truthSyncWords.push(wordIndex);
+      });
+      await flushPromises();
+    });
+
+    await act(async () => {
+      harness.getSnapshot()?.startCursorDriven(words, 0, 180, (wordIndex) => {
+        heardWords.push(wordIndex);
+      });
+      await flushPromises();
+    });
+
+    await act(async () => {
+      kokoroStrategyDriver.emitWord(12);
+      await flushPromises();
+    });
+
+    await act(async () => {
+      harness.getSnapshot()?.resyncToCursor(50, 180);
+      await flushPromises();
+    });
+
+    expect(kokoroStrategyDriver.getLatestSpeak()?.startIdx).toBe(50);
+    expect(harness.getSnapshot()?.cursorWordIndex).toBe(50);
+
+    await act(async () => {
+      kokoroStrategyDriver.emitWord(10);
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.cursorWordIndex).toBe(50);
+    expect(heardWords).not.toContain(10);
+    expect(truthSyncWords).not.toContain(10);
+
+    await act(async () => {
+      kokoroStrategyDriver.emitWord(50);
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.cursorWordIndex).toBe(50);
+    expect(truthSyncWords).toContain(50);
+  });
+
+  it("replaces a warming Kokoro start anchor with the newly selected word before audio begins", async () => {
+    electronApiMock.api.kokoroModelStatus.mockResolvedValueOnce({
+      status: "warming",
+      ready: false,
+      loading: true,
+      detail: null,
+      reason: null,
+      recoverable: true,
+    });
+    const harness = await renderHarness();
+    const words = Array.from({ length: 80 }, (_, index) => `word-${index}`);
+
+    await act(async () => {
+      harness.getSnapshot()?.setEngine("kokoro");
+      await flushPromises();
+    });
+
+    await act(async () => {
+      harness.getSnapshot()?.startCursorDriven(words, 10, 180, vi.fn());
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.status).toBe("warming");
+    expect(kokoroStrategyDriver.getLatestSpeak()).toBeNull();
+
+    await act(async () => {
+      harness.getSnapshot()?.resyncToCursor(50, 180);
+      await flushPromises();
+    });
+
+    expect(harness.getSnapshot()?.status).toBe("warming");
+    expect(harness.getSnapshot()?.cursorWordIndex).toBe(50);
+    expect(kokoroStrategyDriver.getLatestSpeak()).toBeNull();
+
+    await act(async () => {
+      electronApiMock.emit("tts-kokoro-engine-status", {
+        status: "ready",
+        ready: true,
+        loading: false,
+        detail: null,
+        reason: null,
+        recoverable: false,
+      });
+      await flushPromises();
+    });
+
+    expect(kokoroStrategyDriver.getLatestSpeak()?.startIdx).toBe(50);
+  });
+
   it("keeps segmented Kokoro continuity live across a non-final seam during same-bucket rate changes", async () => {
     const harness = await renderHarness();
     const heardWords: number[] = [];
@@ -428,7 +532,7 @@ describe("useNarration rate updates", () => {
       await flushPromises();
     });
 
-    expect(heardWords).toEqual([1, 2, 3]);
+    expect(heardWords).toEqual([]);
     expect(harness.getSnapshot()?.cursorWordIndex).toBe(3);
   });
 

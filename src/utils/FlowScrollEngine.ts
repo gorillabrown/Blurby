@@ -97,6 +97,7 @@ export class FlowScrollEngine {
   private zoneHeightFrac = 0;
   private zoneLines: number = FLOW_ZONE_LINES_DEFAULT;
   private onZoneTopChange: ((topFrac: number) => void) | null = null;
+  private stableWindowScroll = false;
   private totalWords = 0;
   private bookPct = 0;
   private chunks: ReadingChunk[] = [];
@@ -104,6 +105,24 @@ export class FlowScrollEngine {
 
   constructor(callbacks: FlowScrollEngineCallbacks) {
     this.callbacks = callbacks;
+  }
+
+  /**
+   * Convert a line position measured in the scroll container's content-space
+   * into the cursor element's absolute positioning space.
+   */
+  private mapContainerPointToCursorSpace(left: number, top: number): { left: number; top: number } {
+    if (!this.container || !this.cursor) return { left, top };
+    const offsetParent = this.cursor.offsetParent as HTMLElement | null;
+    if (!offsetParent) return { left, top };
+
+    const containerRect = this.container.getBoundingClientRect();
+    const parentRect = offsetParent.getBoundingClientRect();
+
+    return {
+      left: (left - this.container.scrollLeft) + (containerRect.left - parentRect.left),
+      top: (top - this.container.scrollTop) + (containerRect.top - parentRect.top),
+    };
   }
 
   start(
@@ -114,7 +133,8 @@ export class FlowScrollEngine {
     paragraphBreaks: Set<number> = new Set(),
     isEink = false,
     zoneLines?: number,
-    onZoneTopChange?: (topFrac: number) => void
+    onZoneTopChange?: (topFrac: number) => void,
+    stableWindowScroll = false,
   ): void {
     this.stop();
     this.container = container;
@@ -125,6 +145,7 @@ export class FlowScrollEngine {
     this.isEink = isEink;
     this.zoneLines = zoneLines !== undefined && zoneLines > 0 ? zoneLines : FLOW_ZONE_LINES_DEFAULT;
     this.onZoneTopChange = onZoneTopChange ?? null;
+    this.stableWindowScroll = stableWindowScroll;
     this.currentZoneTopFrac = this.initialZoneTop;
     this.computeZoneHeightFrac();
     this.running = true;
@@ -133,7 +154,9 @@ export class FlowScrollEngine {
     this.followerMode = false;
     this.activeChunkId = null;
 
-    this.cursor.style.display = this.hasChunkVisualState() ? "none" : "block";
+    // Flow mode always shows the timer cursor. Narrate follower mode can choose
+    // chunk-only visuals, but that path is gated by followerMode below.
+    this.cursor.style.display = "block";
     this.cursor.style.height = (isEink ? FLOW_TIMER_BAR_EINK_HEIGHT_PX : FLOW_TIMER_BAR_HEIGHT_PX) + "px";
     if (isEink) {
       this.cursor.style.transition = "none";
@@ -202,7 +225,7 @@ export class FlowScrollEngine {
     this.activeChunkId = null;
     if (!this.running) return;
     this.emitChunkChangeForWord(this.wordIndex);
-    if (this.cursor && this.hasChunkVisualState()) {
+    if (this.cursor && this.followerMode && this.hasChunkVisualState()) {
       this.cursor.style.display = "none";
       this.cursor.style.transition = "none";
       this.cursor.style.width = "";
@@ -313,9 +336,10 @@ export class FlowScrollEngine {
     );
     const width = Math.max(1, lineWidth * (1 - fraction));
 
+    const mapped = this.mapContainerPointToCursorSpace(line.left, line.bottom);
     this.cursor.style.transition = "none";
-    this.cursor.style.left = line.left + "px";
-    this.cursor.style.top = line.bottom + "px";
+    this.cursor.style.left = mapped.left + "px";
+    this.cursor.style.top = mapped.top + "px";
     this.cursor.style.width = width + "px";
     this.cursor.style.display = "block";
 
@@ -531,7 +555,7 @@ export class FlowScrollEngine {
       return;
     }
 
-    if (this.hasChunkVisualState()) {
+    if (this.followerMode && this.hasChunkVisualState()) {
       this.animateChunkVisualLine();
       return;
     }
@@ -551,9 +575,10 @@ export class FlowScrollEngine {
     this.callbacks.onProgressUpdate?.(this.getProgress());
 
     // Position cursor at full width under the line, instantly
+    const mapped = this.mapContainerPointToCursorSpace(line.left, line.bottom);
     this.cursor.style.transition = "none";
-    this.cursor.style.left = line.left + "px";
-    this.cursor.style.top = line.bottom + "px";
+    this.cursor.style.left = mapped.left + "px";
+    this.cursor.style.top = mapped.top + "px";
     this.cursor.style.width = lineWidth + "px";
     this.cursor.style.display = "block";
 
@@ -713,6 +738,19 @@ export class FlowScrollEngine {
     const line = this.lines[lineIdx];
     const ch = this.container.clientHeight;
     if (ch <= 0) return;
+
+    // Flow-only "wheel" mode: keep the reading window stationary and roll text
+    // through it by continuously aligning the active line to the fixed zone top.
+    // Narration follower mode keeps legacy behavior unchanged.
+    if (this.stableWindowScroll && !this.followerMode) {
+      const targetScrollTop = Math.max(0, line.y - (ch * this.initialZoneTop));
+      if (Math.abs(this.container.scrollTop - targetScrollTop) > 0.5) {
+        this.container.scrollTop = targetScrollTop;
+      }
+      this.currentZoneTopFrac = this.initialZoneTop;
+      this.onZoneTopChange?.(this.currentZoneTopFrac);
+      return;
+    }
 
     const lineViewportFrac = (line.y - this.container.scrollTop) / ch;
     const zoneBotFrac = lineViewportFrac + this.zoneHeightFrac;

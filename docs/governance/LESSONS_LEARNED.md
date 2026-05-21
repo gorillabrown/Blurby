@@ -1568,3 +1568,83 @@ speakChunk() {
 **Guardrail:** When adding a function to a hook's return object that will be consumed by a `useEffect` dependency array, wrap it in `useCallback`. If the hook returns a non-memoized object literal (like `useNarration`), every function inside it is unstable unless individually memoized. Prefer `useCallback` over `useMemo` for function-shaped values.
 
 **Related:** `src/hooks/useNarration.ts`, `src/hooks/useNarrationSync.ts`, NARR-MEDIA-1, FLOW-ZONE-AUTO, `tests/useNarrationMount.test.tsx`.
+
+---
+
+### [2026-05-21] LL-120: Shared Foliate Surfaces Need Explicit Visual Ownership per Mode
+
+**Area:** reader modes, shared surface, visual sync
+**Status:** active
+**Priority:** high
+
+**Context:** Flow and Narrate run on the same Foliate-rendered surface. Reusing one cursor class and one chunk-visual gate caused cross-mode bleed: hidden/ghost cursors, stale highlights, and mode switching regressions where fixing one mode broke the other.
+
+**Guardrail:** On shared surfaces, every mode gets explicit visual ownership contracts: separate cursor classes, separate visual-state gates, and mode-specific highlight policy. Do not treat "shared surface" as "shared style classes."
+
+**Pattern:** Keep explicit style lanes (example: `page-word--flow-cursor` vs `page-word--narrate-cursor`) and gate expensive mode visuals (`chunk-visual`) by mode, not by "any visual state present."
+
+**Related:** `src/components/FoliatePageView.tsx`, `src/utils/foliateWordHighlight.ts`, `src/utils/foliateStyles.ts`, `tests/foliateWordHighlight.test.ts`, `tests/foliate-bridge.test.ts`.
+
+---
+
+### [2026-05-21] LL-121: Compatibility Mode Aliases Are Hazardous in Runtime Hooks
+
+**Area:** reader modes, hook contracts, regressions
+**Status:** active
+**Priority:** high
+
+**Context:** A compatibility mapping (`narrate -> flow`) in runtime hooks masked mode boundaries and created accidental coupling. Flow-only control loops ran during Narrate and vice versa, making regressions hard to isolate.
+
+**Guardrail:** Use true runtime mode (`readingMode`) for behavior hooks. Restrict compatibility aliases to intentionally narrow integration points (legacy UI state, migration layers), never control loops.
+
+**Pattern:** If a hook drives mode-specific behavior (scroll engine, cursor motion, auto-follow), pass canonical mode values and branch explicitly.
+
+**Related:** `src/components/ReaderContainer.tsx`, `src/hooks/useFlowScrollSync.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts`.
+
+---
+
+### [2026-05-21] LL-122: "No Mid-Sentence Breaks" Must Be Enforced in Chunk Planner, Not UI Settings
+
+**Area:** prosody, chunk planning, narration pipeline
+**Status:** active
+**Priority:** high
+
+**Context:** Prosody quality degraded when planner fallback paths still split on comma/soft-max/hard-max boundaries mid-sentence. UI toggles cannot reliably enforce semantic sentence boundaries because break decisions are made in planner internals.
+
+**Guardrail:** Sentence-end policy must live in chunk planning logic. If no sentence boundary exists inside the target window, extend search (within safety limits) before falling back; never silently reintroduce comma-first or soft-max split heuristics for narration mode.
+
+**Pattern:** Preserve "hard break at sentence end" as a pipeline invariant and lock it with tests that fail on comma-only splits.
+
+**Related:** `src/hooks/useNarration.ts`, `src/utils/naturalChunks.ts`, `tests/naturalChunks.test.ts`.
+
+---
+
+### [2026-05-21] LL-123: Prosody Normalization Rules Must Respect Semantic Domains
+
+**Area:** TTS normalization, text semantics, cache identity
+**Status:** active
+**Priority:** high
+
+**Context:** Adding vernacular year reading improved narration ("1989" -> "nineteen eighty nine"), but applying year-like expansion uniformly produced domain errors in currency (`$1,250` read as "twelve fifty"). Similar risk exists across dates, times, ranges, and finance tokens.
+
+**Guardrail:** Normalization transforms must be domain-aware and ordered deliberately. Year-style cardinal behavior should not leak into currency expansion. Every new transform needs a negative test for adjacent semantic domains.
+
+**Pattern:** Add focused fixtures for grouped numbers, decades, compact times, and grouped currency in the same suite to catch cross-domain regressions early.
+
+**Related:** `src/utils/segmentNormalizer.ts`, `tests/segmentNormalizer.test.ts`, `src/constants.ts` (`TTS_NORMALIZER_VERSION`).
+
+---
+
+### [2026-05-21] LL-124: Audio/Visual Sync Calibration Must Use End-to-End Output Reality, Not API Partials
+
+**Area:** narration timing, scheduler, audio output latency
+**Status:** active
+**Priority:** high
+
+**Context:** `getOutputTimestamp().contextTime` underreported practical output delay on Windows/Electron relative to what users actually hear. Cursor timing looked mathematically "on time" but perceptually ran ahead over long playback because Chromium/WASAPI/DAC buffering exceeded reported values.
+
+**Guardrail:** Treat sync lag as an end-to-end calibration problem. Instrument boundary drift and validate against audible output over long passages before trusting low-level timing APIs as complete truth.
+
+**Pattern:** Use conservative trusted lag defaults plus diagnostics, then tune via real playback evidence. Optimize with equal-power crossfades and segment-duration tuning to reduce seam artifacts without sacrificing correction responsiveness.
+
+**Related:** `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/constants.ts`, `tests/kokoroStrategyRateContinuity.test.ts`.

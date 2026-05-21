@@ -252,6 +252,7 @@ export function useFlowScrollSync({
     }
 
     let cancelled = false;
+    let startRetryTimer: ReturnType<typeof setTimeout> | null = null;
 
     if (!flowScrollEngineRef.current) {
       flowScrollEngineRef.current = new FlowScrollEngine({
@@ -324,13 +325,28 @@ export function useFlowScrollSync({
       });
     }
 
-    const startWhenReady = async () => {
+    const startWhenReady = async (attempt = 0) => {
       await waitForFoliateFlowReady();
       if (cancelled) return;
 
       const { container, cursor } = resolveFlowSurface();
       if (!container || !cursor) {
-        if (import.meta.env.DEV) console.warn("[FlowScrollSync] startWhenReady — flow surface not found, container:", !!container, "cursor:", !!cursor);
+        // Flow surface refs can attach a tick after mode/play flips. Retry briefly
+        // so Flow start doesn't get stuck on a one-frame mount race.
+        if (attempt < 8) {
+          startRetryTimer = setTimeout(() => {
+            void startWhenReady(attempt + 1);
+          }, 80);
+          return;
+        }
+        if (import.meta.env.DEV) {
+          console.warn(
+            "[FlowScrollSync] startWhenReady — flow surface not found after retries, container:",
+            !!container,
+            "cursor:",
+            !!cursor,
+          );
+        }
         return;
       }
 
@@ -349,6 +365,7 @@ export function useFlowScrollSync({
         isEink,
         settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT,
         onZoneTopChange,
+        true,
       );
     };
 
@@ -356,6 +373,9 @@ export function useFlowScrollSync({
 
     return () => {
       cancelled = true;
+      if (startRetryTimer) {
+        clearTimeout(startRetryTimer);
+      }
       flowScrollEngineRef.current?.stop();
     };
   }, [readingMode, flowPlaying, useFoliate]); // eslint-disable-line react-hooks/exhaustive-deps

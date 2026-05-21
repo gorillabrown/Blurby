@@ -130,6 +130,17 @@ describe("BUG-163: TTS preload IPC", () => {
     // Verify it's called in a useEffect associated with book open
     expect(readerSrc).toMatch(/api\.kokoroPreload/);
   });
+
+  it("book-open lifecycle does not reinitialize on mode/engine setting toggles", () => {
+    const readerSrc = fs.readFileSync(
+      path.resolve(__dirname, "../src/hooks/useDocumentLifecycle.ts"),
+      "utf-8"
+    );
+    // Re-initializing on settings.readingMode/ttsEngine changes can overwrite
+    // explicit word selection with stale saved-position resume anchors.
+    expect(readerSrc).toContain("}, [activeDoc.id, initReader]);");
+    expect(readerSrc).not.toContain("}, [activeDoc.id, initReader, settings.readingMode, settings.ttsEngine]);");
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

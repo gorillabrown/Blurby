@@ -32,6 +32,7 @@ function makeKeyEvent(overrides: Partial<KeyEvent> = {}): KeyEvent {
 
 type Action =
   | "toggleFlap"
+  | "openChapterList"
   | "toggleNarration"
   | "enterNarrate"
   | "toggleFavorite"
@@ -58,6 +59,15 @@ function resolveReaderKey(
 
   // Tab toggles flap in any reader mode
   if (e.key === "Tab") return "toggleFlap";
+  // C opens chapter list in any reader mode (code or key fallback)
+  if (
+    !e.shiftKey &&
+    !e.ctrlKey &&
+    !e.metaKey &&
+    (e.code === "KeyC" || e.key === "c" || e.key === "C")
+  ) {
+    return "openChapterList";
+  }
   // [ / ] chapter navigation (all modes)
   if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) return "prevChapter";
   if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) return "nextChapter";
@@ -108,6 +118,17 @@ describe("useKeyboardShortcuts — key binding resolution (any mode)", () => {
   it("Tab toggles flap", () => {
     expect(resolveReaderKey(makeKeyEvent({ key: "Tab" }), "focus")).toBe("toggleFlap");
     expect(resolveReaderKey(makeKeyEvent({ key: "Tab" }), "flow")).toBe("toggleFlap");
+  });
+
+  it("C opens chapter list across all modes", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyC" }), "page")).toBe("openChapterList");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyC" }), "focus")).toBe("openChapterList");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyC" }), "flow")).toBe("openChapterList");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyC" }), "narrate")).toBe("openChapterList");
+  });
+
+  it("C key fallback opens chapter list when code is missing (iframe-forwarded event)", () => {
+    expect(resolveReaderKey(makeKeyEvent({ key: "c", code: "" }), "narrate")).toBe("openChapterList");
   });
 
   it("T is no longer bound to narration toggle (READER-4M-2)", () => {

@@ -49,6 +49,13 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
     expect(pageReaderCss).toContain("z-index: 450;");
   });
 
+  it("recenters hard word selections in the reading window immediately", () => {
+    expect(src).toContain("const centerResolvedTokenInReadingWindow = useCallback(");
+    expect(src).toContain("centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);");
+    expect(src).toContain("const zoneOffset = getFlowFollowOffsetPx();");
+    expect(src).toContain("lastScrollFollowPosRef.current = finalPos;");
+  });
+
   it("keeps the unmanaged Foliate host below the recenter button so clicks reach React", () => {
     expect(src).toContain('foliateHostRef.current.className = "foliate-host";');
     expect(pageReaderCss).toContain("isolation: isolate;");
